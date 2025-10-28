@@ -1,0 +1,928 @@
+<!DOCTYPE html>
+<html lang='en'>
+<head>
+    <meta charset='UTF-8'>
+    <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+    <title>Risk Parity - Raphael NARDONE</title>
+    <script src='https://code.highcharts.com/highcharts.js'></script>
+    <script src='https://code.highcharts.com/highcharts-more.js'></script>
+    <script src='https://code.highcharts.com/modules/exporting.js'></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', sans-serif; background: linear-gradient(135deg, #5B2C6F 0%, #2649B2 50%, #4A74F3 100%); padding: 20px; color: #333; }
+        .container { max-width: 1800px; margin: 0 auto; background: white; border-radius: 20px; box-shadow: 0 20px 60px rgba(91,44,111,0.4); overflow: hidden; }
+        header { background: linear-gradient(135deg, #2649B2 0%, #6C3483 50%, #8E44AD 100%); color: white; padding: 30px; text-align: center; }
+        header h1 { font-size: 2.5em; margin-bottom: 10px; text-shadow: 2px 2px 8px rgba(0,0,0,0.3); }
+        header p { font-size: 1.1em; opacity: 0.95; }
+        .content { padding: 30px; background: linear-gradient(to bottom, #f8f9fa 0%, #E8DAEF 100%); }
+        .section { background: white; padding: 30px; border-radius: 15px; margin-bottom: 30px; box-shadow: 0 4px 12px rgba(108,52,131,0.12); border-top: 3px solid #8E44AD; }
+        .section-title { font-size: 1.8em; color: #2649B2; margin-bottom: 20px; padding-bottom: 10px; border-bottom: 3px solid #E8DAEF; }
+        .asset-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 20px; margin-bottom: 20px; }
+        .asset-card { background: linear-gradient(135deg, #E8DAEF 0%, #D4D9F0 100%); padding: 20px; border-radius: 10px; border-left: 4px solid #8E44AD; transition: all 0.3s; }
+        .asset-card:hover { transform: translateY(-3px); box-shadow: 0 6px 15px rgba(108,52,131,0.2); }
+        .asset-card h4 { color: #2649B2; margin-bottom: 15px; font-size: 1.2em; }
+        .asset-input-group { margin-bottom: 12px; }
+        .asset-input-group label { display: block; color: #5B2C6F; font-weight: 600; margin-bottom: 5px; font-size: 0.85em; }
+        .asset-input-group input { width: 100%; padding: 10px; border: 2px solid #9D5CE6; border-radius: 8px; font-size: 0.95em; transition: all 0.3s; }
+        .asset-input-group input:focus { outline: none; border-color: #2649B2; box-shadow: 0 0 0 3px rgba(38,73,178,0.2); }
+        .btn-container { display: flex; gap: 15px; flex-wrap: wrap; }
+        .btn-primary { background: linear-gradient(135deg, #2649B2 0%, #8E44AD 100%); color: white; padding: 15px 40px; border: none; border-radius: 10px; font-size: 1.1em; font-weight: bold; cursor: pointer; box-shadow: 0 4px 12px rgba(38,73,178,0.3); transition: all 0.3s; flex: 1; min-width: 200px; }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(38,73,178,0.4); }
+        .btn-secondary { background: linear-gradient(135deg, #6C3483 0%, #9D5CE6 100%); color: white; padding: 15px 40px; border: none; border-radius: 10px; font-size: 1.1em; font-weight: bold; cursor: pointer; box-shadow: 0 4px 12px rgba(108,52,131,0.3); transition: all 0.3s; flex: 1; min-width: 200px; }
+        .btn-secondary:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(108,52,131,0.4); }
+        .btn-add { background: linear-gradient(135deg, #4A74F3 0%, #6C8BE0 100%); color: white; padding: 10px 25px; border: none; border-radius: 8px; font-size: 0.95em; font-weight: bold; cursor: pointer; box-shadow: 0 3px 10px rgba(74,116,243,0.3); transition: all 0.3s; }
+        .btn-add:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(74,116,243,0.4); }
+        .chart { min-height: 500px; }
+        .stats-box { background: linear-gradient(135deg, #E8DAEF 0%, #D4D9F0 100%); padding: 20px; border-radius: 10px; margin-bottom: 20px; }
+        .stats-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 15px; }
+        .stat-item { text-align: center; padding: 15px; background: white; border-radius: 8px; }
+        .stat-item .label { font-size: 0.85em; color: #5B2C6F; font-weight: bold; margin-bottom: 5px; }
+        .stat-item .value { font-size: 1.5em; font-weight: bold; color: #2649B2; }
+        .comparison-table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        .comparison-table th { background: linear-gradient(135deg, #2649B2 0%, #8E44AD 100%); color: white; padding: 12px; text-align: left; font-weight: bold; }
+        .comparison-table td { padding: 12px; border-bottom: 1px solid #E8DAEF; }
+        .comparison-table tr:hover { background: #F8F9FA; }
+        footer { background: linear-gradient(135deg, #2649B2 0%, #6C3483 100%); color: white; text-align: center; padding: 20px; }
+        .hidden { display: none; }
+        .info-box { background: linear-gradient(135deg, #4A74F3 0%, #6C8BE0 100%); color: white; padding: 15px; border-radius: 10px; margin-bottom: 20px; }
+        .info-box h4 { margin-bottom: 10px; font-size: 1.1em; }
+        .info-box p { font-size: 0.9em; opacity: 0.95; }
+        .highlight { background: linear-gradient(135deg, #4A74F3 0%, #6C8BE0 100%); color: white; padding: 3px 8px; border-radius: 4px; font-weight: bold; }
+        
+        /* INFO-BULLES & MODALS */
+        .help-icon { display: inline-block; width: 24px; height: 24px; background: linear-gradient(135deg, #4A74F3 0%, #6C8BE0 100%); color: white; border-radius: 50%; text-align: center; line-height: 24px; font-weight: bold; font-size: 14px; cursor: pointer; margin-left: 10px; transition: all 0.3s; box-shadow: 0 2px 6px rgba(74,116,243,0.3); }
+        .help-icon:hover { transform: scale(1.15); box-shadow: 0 4px 12px rgba(74,116,243,0.5); background: linear-gradient(135deg, #2649B2 0%, #4A74F3 100%); }
+        .modal { display: none; position: fixed; z-index: 9999; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(91,44,111,0.8); backdrop-filter: blur(5px); animation: fadeIn 0.3s; }
+        .modal-content { background: white; margin: 3% auto; padding: 0; border-radius: 20px; width: 85%; max-width: 900px; box-shadow: 0 20px 60px rgba(38,73,178,0.4); animation: slideDown 0.4s; max-height: 85vh; overflow-y: auto; }
+        .modal-header { background: linear-gradient(135deg, #2649B2 0%, #8E44AD 100%); color: white; padding: 25px 30px; border-radius: 20px 20px 0 0; display: flex; justify-content: space-between; align-items: center; }
+        .modal-header h2 { margin: 0; font-size: 1.8em; text-shadow: 2px 2px 8px rgba(0,0,0,0.3); }
+        .modal-body { padding: 30px; line-height: 1.8; color: #333; }
+        .modal-body h3 { color: #2649B2; margin-top: 25px; margin-bottom: 15px; padding-bottom: 8px; border-bottom: 2px solid #E8DAEF; font-size: 1.4em; }
+        .modal-body h4 { color: #6C3483; margin-top: 20px; margin-bottom: 10px; font-size: 1.1em; }
+        .modal-body p { margin-bottom: 15px; }
+        .modal-body ul, .modal-body ol { margin-left: 25px; margin-bottom: 15px; }
+        .modal-body li { margin-bottom: 8px; }
+        .formula-box { background: linear-gradient(135deg, #E8DAEF 0%, #D4D9F0 100%); padding: 20px; border-radius: 12px; margin: 20px 0; border-left: 5px solid #8E44AD; font-family: 'Courier New', monospace; font-size: 1.1em; color: #2649B2; }
+        .example-box { background: linear-gradient(135deg, #D4D9F0 0%, #E8DAEF 100%); padding: 20px; border-radius: 12px; margin: 20px 0; border-left: 5px solid #4A74F3; }
+        .tip-box { background: linear-gradient(135deg, #4A74F3 0%, #6C8BE0 100%); color: white; padding: 15px 20px; border-radius: 10px; margin: 20px 0; font-weight: 500; }
+        .warning-box { background: linear-gradient(135deg, #9D5CE6 0%, #C39BD3 100%); color: white; padding: 15px 20px; border-radius: 10px; margin: 20px 0; font-weight: 500; }
+        .close-modal { color: white; font-size: 32px; font-weight: bold; cursor: pointer; background: rgba(255,255,255,0.2); width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; transition: all 0.3s; }
+        .close-modal:hover { background: rgba(255,255,255,0.4); transform: rotate(90deg); }
+        .diagram { text-align: center; margin: 25px 0; padding: 20px; background: #f8f9fa; border-radius: 12px; }
+        .diagram svg { max-width: 100%; height: auto; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideDown { from { transform: translateY(-50px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        .key-term { background: linear-gradient(135deg, #2649B2 0%, #4A74F3 100%); color: white; padding: 2px 8px; border-radius: 4px; font-weight: bold; white-space: nowrap; }
+        @media (max-width: 768px) { .modal-content { width: 95%; margin: 10% auto; } .modal-body { padding: 20px; } }
+    </style>
+</head>
+<body>
+    <div class='container'>
+        <header>
+            <h1>Risk Parity Portfolio</h1>
+            <p>Equal Risk Contribution Model | Raphael NARDONE</p>
+        </header>
+        <nav style='background: linear-gradient(135deg, #2649B2 0%, #8E44AD 100%); padding: 0; box-shadow: 0 2px 10px rgba(0,0,0,0.2);'>
+            <div style='max-width: 1800px; margin: 0 auto; display: flex; gap: 0;'>
+                <a href='dashboard-financier.html' style='flex: 1; padding: 20px; text-align: center; color: white; text-decoration: none; transition: all 0.3s;' onmouseover='this.style.background="rgba(255,255,255,0.1)"' onmouseout='this.style.background="transparent"'>Budget</a>
+                <a href='monte-carlo.html' style='flex: 1; padding: 20px; text-align: center; color: white; text-decoration: none; transition: all 0.3s;' onmouseover='this.style.background="rgba(255,255,255,0.1)"' onmouseout='this.style.background="transparent"'>Monte Carlo</a>
+                <a href='portfolio-optimizer.html' style='flex: 1; padding: 20px; text-align: center; color: white; text-decoration: none; transition: all 0.3s;' onmouseover='this.style.background="rgba(255,255,255,0.1)"' onmouseout='this.style.background="transparent"'>Markowitz</a>
+                <a href='risk-parity.html' style='flex: 1; padding: 20px; text-align: center; color: white; text-decoration: none; background: rgba(255,255,255,0.2); font-weight: bold; border-bottom: 4px solid white;'>Risk Parity</a>
+                <a href='scenario-analysis.html' style='flex: 1; padding: 20px; text-align: center; color: white; text-decoration: none; transition: all 0.3s;' onmouseover='this.style.background="rgba(255,255,255,0.1)"' onmouseout='this.style.background="transparent"'>Scenarios</a>
+            </div>
+        </nav>
+        <div class='content'>
+            <div class='section'>
+                <h2 class='section-title'>What is Risk Parity? <span class='help-icon' onclick='openModal("modalRPIntro")'>?</span></h2>
+                <div class='info-box'>
+                    <h4>Risk Parity vs Markowitz</h4>
+                    <p><strong>Markowitz:</strong> Maximizes return for a given risk level (focuses on capital allocation)</p>
+                    <p><strong>Risk Parity:</strong> Equalizes risk contribution from each asset (focuses on risk balance)</p>
+                    <p><strong>Key Difference:</strong> Markowitz might allocate 80% to low-risk bonds, while Risk Parity ensures each asset contributes equally to portfolio risk.</p>
+                    <p><strong>Use Case:</strong> Risk Parity is more stable during market stress and avoids over-concentration.</p>
+                </div>
+            </div>
+            
+            <div class='section'>
+                <h2 class='section-title'>Step 1: Define Your Assets <span class='help-icon' onclick='openModal("modalRPAssets")'>?</span></h2>
+                <div class='info-box'>
+                    <h4>How to use</h4>
+                    <p>Enter the annual volatility (%) and correlation for each asset. Risk Parity will calculate weights so each asset contributes equally to total portfolio risk.</p>
+                </div>
+                <div id='assetsContainer' class='asset-grid'></div>
+                <button class='btn-add' onclick='addAsset()'>Add Asset</button>
+            </div>
+            
+            <div class='section'>
+                <h2 class='section-title'>Step 2: Calculate Risk Parity Allocation</h2>
+                <div class='btn-container' style='margin-top: 25px;'>
+                    <button class='btn-primary' onclick='calculateRiskParity()'>Calculate Risk Parity</button>
+                    <button class='btn-secondary' onclick='resetAssets()'>Reset All</button>
+                </div>
+            </div>
+            
+            <div id='resultsSection' class='section hidden'>
+                <h2 class='section-title'>Risk Parity Results <span class='help-icon' onclick='openModal("modalRPResults")'>?</span></h2>
+                <div id='globalStats' class='stats-box'></div>
+                
+                <h3 style='color: #2649B2; margin: 30px 0 15px 0;'>Allocation Comparison</h3>
+                <div style='display: grid; grid-template-columns: repeat(auto-fit, minmax(500px, 1fr)); gap: 30px;'>
+                    <div>
+                        <h4 style='color: #2649B2; text-align: center; margin-bottom: 15px;'>Risk Parity Allocation</h4>
+                        <div id='chartRiskParity' class='chart' style='min-height: 400px;'></div>
+                    </div>
+                    <div>
+                        <h4 style='color: #2649B2; text-align: center; margin-bottom: 15px;'>Equal Weight Allocation (Naive)</h4>
+                        <div id='chartEqualWeight' class='chart' style='min-height: 400px;'></div>
+                    </div>
+                </div>
+                
+                <h3 style='color: #2649B2; margin: 30px 0 15px 0;'>Risk Contribution Analysis <span class='help-icon' onclick='openModal("modalRPContribution")'>?</span></h3>
+                <div id='chartRiskContribution' class='chart'></div>
+                
+                <h3 style='color: #2649B2; margin: 30px 0 15px 0;'>Detailed Comparison</h3>
+                <div id='comparisonTable'></div>
+            </div>
+        </div>
+        <!-- MODAL: Introduction Risk Parity -->
+        <div id='modalRPIntro' class='modal'>
+            <div class='modal-content'>
+                <div class='modal-header'>
+                    <h2>?? What is Risk Parity?</h2>
+                    <span class='close-modal' onclick='closeModal("modalRPIntro")'>&times;</span>
+                </div>
+                <div class='modal-body'>
+                    <h3>?? Core Philosophy</h3>
+                    <p><span class='key-term'>Risk Parity</span> is a portfolio allocation strategy that focuses on allocating risk, rather than capital. The goal: <strong>each asset contributes equally to total portfolio risk</strong>.</p>
+                    
+                    <h3>?? The Problem with Traditional Portfolios</h3>
+                    <div class='example-box'>
+                        <h4>?? Classic 60/40 Portfolio</h4>
+                        <ul>
+                            <li><strong>60% Stocks</strong> (volatility: 18%)</li>
+                            <li><strong>40% Bonds</strong> (volatility: 6%)</li>
+                        </ul>
+                        <hr style='margin: 10px 0;'>
+                        <p><strong>Risk Contribution:</strong></p>
+                        <ul>
+                            <li>Stocks contribute: <span style='color: #C39BD3; font-weight: bold;'>~90% of portfolio risk</span></li>
+                            <li>Bonds contribute: <span style='color: #4A74F3; font-weight: bold;'>~10% of portfolio risk</span></li>
+                        </ul>
+                        <p style='margin-top: 10px; color: #9D5CE6; font-weight: bold;'>? Portfolio is heavily exposed to stock market crashes!</p>
+                    </div>
+                    
+                    <h3>? Risk Parity Solution</h3>
+                    <p>Instead of allocating <strong>60/40 by capital</strong>, Risk Parity would allocate:</p>
+                    <ul>
+                        <li><strong>~25% Stocks</strong></li>
+                        <li><strong>~75% Bonds</strong></li>
+                    </ul>
+                    <p>Now <strong>each contributes 50% of portfolio risk</strong> ? balanced exposure!</p>
+                    
+                    <div class='formula-box'>
+                        <strong>Risk Contribution Formula:</strong><br>
+                        RC<sub>i</sub> = w<sub>i</sub> × (?s<sub>p</sub> / ?w<sub>i</sub>)<br><br>
+                        <strong>Goal:</strong> RC<sub>1</sub> = RC<sub>2</sub> = RC<sub>3</sub> = ... = 1/N<br><br>
+                        <em>Each asset's risk contribution equals 1/N (N = number of assets)</em>
+                    </div>
+                    
+                    <h3>?? Key Advantages</h3>
+                    <ul>
+                        <li><strong>Balanced Risk:</strong> No single asset dominates portfolio risk</li>
+                        <li><strong>Crisis Resilience:</strong> Better performance during market crashes</li>
+                        <li><strong>Diversification:</strong> True diversification of risk, not just capital</li>
+                        <li><strong>Stability:</strong> Lower drawdowns and smoother returns over time</li>
+                    </ul>
+                    
+                    <h3>?? Risk Parity vs. Markowitz</h3>
+                    <table style='width: 100%; border-collapse: collapse; margin: 15px 0;'>
+                        <tr style='background: #E8DAEF;'>
+                            <th style='padding: 10px; border: 1px solid #ccc;'>Aspect</th>
+                            <th style='padding: 10px; border: 1px solid #ccc;'>Markowitz</th>
+                            <th style='padding: 10px; border: 1px solid #ccc;'>Risk Parity</th>
+                        </tr>
+                        <tr>
+                            <td style='padding: 10px; border: 1px solid #ccc;'><strong>Focus</strong></td>
+                            <td style='padding: 10px; border: 1px solid #ccc;'>Maximize return/risk ratio</td>
+                            <td style='padding: 10px; border: 1px solid #ccc;'>Equalize risk contributions</td>
+                        </tr>
+                        <tr>
+                            <td style='padding: 10px; border: 1px solid #ccc;'><strong>Inputs</strong></td>
+                            <td style='padding: 10px; border: 1px solid #ccc;'>Returns, volatility, correlation</td>
+                            <td style='padding: 10px; border: 1px solid #ccc;'>Volatility, correlation only</td>
+                        </tr>
+                        <tr>
+                            <td style='padding: 10px; border: 1px solid #ccc;'><strong>Stability</strong></td>
+                            <td style='padding: 10px; border: 1px solid #ccc;'>Sensitive to return estimates</td>
+                            <td style='padding: 10px; border: 1px solid #ccc;'>More robust, less sensitive</td>
+                        </tr>
+                        <tr>
+                            <td style='padding: 10px; border: 1px solid #ccc;'><strong>Best For</strong></td>
+                            <td style='padding: 10px; border: 1px solid #ccc;'>Growth-focused investors</td>
+                            <td style='padding: 10px; border: 1px solid #ccc;'>Risk-conscious, balanced approach</td>
+                        </tr>
+                    </table>
+                    
+                    <div class='tip-box'>
+                        ?? <strong>When to Use Risk Parity:</strong><br>
+                        • You want consistent, stable returns<br>
+                        • You fear market crashes<br>
+                        • You don't trust return forecasts<br>
+                        • You value risk control over maximizing returns
+                    </div>
+                    
+                    <h3>?? Real-World Usage</h3>
+                    <p>Risk Parity is used by major institutions:</p>
+                    <ul>
+                        <li><strong>Bridgewater's All Weather Fund</strong> (~$70B AUM) - Pure Risk Parity</li>
+                        <li><strong>AQR Capital</strong> - Risk Parity strategies</li>
+                        <li><strong>Pension Funds</strong> - For stable long-term growth</li>
+                    </ul>
+                    
+                    <div class='warning-box'>
+                        ?? <strong>Note:</strong> Risk Parity often requires <strong>leverage</strong> to achieve target returns, since it allocates heavily to low-return assets (bonds). For individual investors, use it as a <strong>framework</strong> rather than strict rule.
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- MODAL: Asset Input Guide -->
+        <div id='modalRPAssets' class='modal'>
+            <div class='modal-content'>
+                <div class='modal-header'>
+                    <h2>?? Defining Your Assets</h2>
+                    <span class='close-modal' onclick='closeModal("modalRPAssets")'>&times;</span>
+                </div>
+                <div class='modal-body'>
+                    <h3>?? Required Inputs</h3>
+                    <p>For Risk Parity, you only need <strong>2 pieces of data</strong> per asset:</p>
+                    
+                    <h4>1?? Annual Volatility (%)</h4>
+                    <p>The <span class='key-term'>standard deviation</span> of annual returns. This measures how much the asset's price fluctuates.</p>
+                    
+                    <div class='example-box'>
+                        <h4>?? Typical Volatility Values</h4>
+                        <ul>
+                            <li><strong>US Stocks (S&P 500):</strong> 15-20%</li>
+                            <li><strong>International Stocks:</strong> 18-22%</li>
+                            <li><strong>Government Bonds:</strong> 4-8%</li>
+                            <li><strong>Corporate Bonds:</strong> 6-10%</li>
+                            <li><strong>Real Estate (REITs):</strong> 18-25%</li>
+                            <li><strong>Commodities (Gold):</strong> 15-20%</li>
+                            <li><strong>Commodities (Oil):</strong> 30-40%</li>
+                        </ul>
+                    </div>
+                    
+                    <h4>2?? Correlation with Other Assets</h4>
+                    <p><span class='key-term'>Correlation</span> measures how two assets move together. Range: -1 to +1.</p>
+                    <ul>
+                        <li><strong>+1:</strong> Perfect positive correlation (always move together)</li>
+                        <li><strong>0:</strong> No correlation (independent movements)</li>
+                        <li><strong>-1:</strong> Perfect negative correlation (move in opposite directions)</li>
+                    </ul>
+                    
+                    <div class='example-box'>
+                        <h4>?? Typical Correlations</h4>
+                        <table style='width: 100%; border-collapse: collapse; margin: 10px 0;'>
+                            <tr style='background: #E8DAEF;'>
+                                <th style='padding: 8px; border: 1px solid #ccc;'>Asset Pair</th>
+                                <th style='padding: 8px; border: 1px solid #ccc;'>Correlation</th>
+                            </tr>
+                            <tr>
+                                <td style='padding: 8px; border: 1px solid #ccc;'>Stocks ? Stocks (same country)</td>
+                                <td style='padding: 8px; border: 1px solid #ccc;'>0.7 - 0.9</td>
+                            </tr>
+                            <tr>
+                                <td style='padding: 8px; border: 1px solid #ccc;'>Stocks ? Bonds</td>
+                                <td style='padding: 8px; border: 1px solid #ccc;'>0.0 - 0.3</td>
+                            </tr>
+                            <tr>
+                                <td style='padding: 8px; border: 1px solid #ccc;'>Stocks ? Gold</td>
+                                <td style='padding: 8px; border: 1px solid #ccc;'>-0.1 - 0.1</td>
+                            </tr>
+                            <tr>
+                                <td style='padding: 8px; border: 1px solid #ccc;'>Stocks ? Real Estate</td>
+                                <td style='padding: 8px; border: 1px solid #ccc;'>0.4 - 0.6</td>
+                            </tr>
+                            <tr>
+                                <td style='padding: 8px; border: 1px solid #ccc;'>Bonds ? Gold</td>
+                                <td style='padding: 8px; border: 1px solid #ccc;'>0.1 - 0.3</td>
+                            </tr>
+                        </table>
+                    </div>
+                    
+                    <div class='tip-box'>
+                        ?? <strong>How to Find This Data:</strong><br>
+                        • <strong>Volatility:</strong> Yahoo Finance, Bloomberg, PortfolioVisualizer<br>
+                        • <strong>Correlation:</strong> PortfolioVisualizer, Morningstar, Excel (CORREL function)<br>
+                        • <strong>Quick estimate:</strong> Use typical values above as starting point
+                    </div>
+                    
+                    <h3>?? The Math Behind Risk Parity</h3>
+                    <p>Risk Parity uses <span class='key-term'>Inverse Volatility Weighting</span> as a simplified approach:</p>
+                    
+                    <div class='formula-box'>
+                        <strong>Weight Calculation:</strong><br>
+                        w<sub>i</sub> = (1/s<sub>i</sub>) / S(1/s<sub>j</sub>)<br><br>
+                        <strong>Example with 3 assets:</strong><br>
+                        • Asset A: s = 20% ? 1/s = 5<br>
+                        • Asset B: s = 10% ? 1/s = 10<br>
+                        • Asset C: s = 5% ? 1/s = 20<br><br>
+                        Sum = 5 + 10 + 20 = 35<br><br>
+                        Weights:<br>
+                        • Asset A: 5/35 = 14%<br>
+                        • Asset B: 10/35 = 29%<br>
+                        • Asset C: 20/35 = 57%
+                    </div>
+                    
+                    <div class='warning-box'>
+                        ?? <strong>Important:</strong> This is a <strong>simplified</strong> Risk Parity. Full Risk Parity also considers correlations using advanced optimization. The simplified version works well when correlations are relatively stable.
+                    </div>
+                    
+                    <h3>?? Best Practices</h3>
+                    <ol>
+                        <li><strong>Use long-term data:</strong> Calculate volatility/correlation over 5-10 years</li>
+                        <li><strong>Update regularly:</strong> Recalculate every 6-12 months as market conditions change</li>
+                        <li><strong>Include diverse assets:</strong> Mix stocks, bonds, commodities, real estate for true diversification</li>
+                        <li><strong>Don't over-optimize:</strong> Round weights to 5% increments for practicality</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+        <!-- MODAL: Risk Contribution -->
+        <div id='modalRPContribution' class='modal'>
+            <div class='modal-content'>
+                <div class='modal-header'>
+                    <h2>?? Understanding Risk Contribution</h2>
+                    <span class='close-modal' onclick='closeModal("modalRPContribution")'>&times;</span>
+                </div>
+                <div class='modal-body'>
+                    <h3>?? What is Risk Contribution?</h3>
+                    <p><span class='key-term'>Risk Contribution</span> (RC) measures how much each asset contributes to the <strong>total portfolio risk</strong>. It's different from the asset's standalone risk!</p>
+                    
+                    <div class='formula-box'>
+                        <strong>Risk Contribution Formula:</strong><br>
+                        RC<sub>i</sub> = (w<sub>i</sub> × Cov<sub>i,p</sub>) / s<sub>p</sub><br><br>
+                        w<sub>i</sub> = Weight of asset i<br>
+                        Cov<sub>i,p</sub> = Covariance of asset i with the portfolio<br>
+                        s<sub>p</sub> = Portfolio volatility<br><br>
+                        <em>Risk contributions always sum to 100%</em>
+                    </div>
+                    
+                    <h3>?? Why It Matters</h3>
+                    <p>Two portfolios can have the <strong>same capital allocation</strong> but wildly different risk profiles!</p>
+                    
+                    <div class='example-box'>
+                        <h4>?? Example: 50/50 Portfolio</h4>
+                        <p><strong>Portfolio:</strong> 50% Stocks + 50% Bonds</p>
+                        <ul>
+                            <li>Stocks: 18% volatility</li>
+                            <li>Bonds: 6% volatility</li>
+                            <li>Correlation: 0.2</li>
+                        </ul>
+                        <hr style='margin: 10px 0;'>
+                        <p><strong>Risk Contribution:</strong></p>
+                        <ul>
+                            <li>Stocks: <span style='color: #C39BD3; font-weight: bold;'>~85%</span> of portfolio risk</li>
+                            <li>Bonds: <span style='color: #4A74F3; font-weight: bold;'>~15%</span> of portfolio risk</li>
+                        </ul>
+                        <p style='margin-top: 10px; color: #9D5CE6; font-weight: bold;'>? Despite equal weights, stocks dominate risk!</p>
+                    </div>
+                    
+                    <h3>?? Reading the Chart</h3>
+                    <p>The <strong>Risk Contribution Chart</strong> shows two bars for each asset:</p>
+                    <ul>
+                        <li><strong>Blue bars (Risk Parity):</strong> Should be roughly equal (~20% each for 5 assets)</li>
+                        <li><strong>Purple bars (Equal Weight):</strong> Often highly imbalanced</li>
+                    </ul>
+                    
+                    <div class='tip-box'>
+                        ?? <strong>Target Line:</strong> The dashed purple line shows the ideal risk contribution (100% / number of assets). In Risk Parity, all bars should cluster near this line.
+                    </div>
+                    
+                    <h3>?? Ideal Risk Balance</h3>
+                    <p>The tool calculates a <span class='key-term'>Risk Balance Quality</span> score:</p>
+                    <ul>
+                        <li><strong>90-100%:</strong> Excellent balance ??</li>
+                        <li><strong>75-90%:</strong> Good balance ?</li>
+                        <li><strong>50-75%:</strong> Moderate balance ??</li>
+                        <li><strong>< 50%:</strong> Poor balance (some assets dominate) ??</li>
+                    </ul>
+                    
+                    <div class='example-box'>
+                        <h4>?? Interpreting Your Results</h4>
+                        <p><strong>Scenario 1: High Risk Balance (95%)</strong></p>
+                        <p>? All assets contribute nearly equally to risk ? well-diversified portfolio</p>
+                        <hr style='margin: 10px 0;'>
+                        <p><strong>Scenario 2: Low Risk Balance (40%)</strong></p>
+                        <p>?? One or two assets dominate risk ? concentrated portfolio, vulnerable to sector-specific shocks</p>
+                    </div>
+                    
+                    <h3>?? Risk Parity vs. Equal Weight</h3>
+                    <p>The comparison table shows:</p>
+                    <ul>
+                        <li><strong>RP Weight:</strong> Capital allocation in Risk Parity portfolio</li>
+                        <li><strong>EW Weight:</strong> Capital allocation in Equal Weight portfolio (1/N each)</li>
+                        <li><strong>RP Risk Contribution:</strong> Should be close to target (e.g., 20% for 5 assets)</li>
+                        <li><strong>EW Risk Contribution:</strong> Often very unbalanced</li>
+                    </ul>
+                    
+                    <div class='warning-box'>
+                        ?? <strong>Key Insight:</strong> An asset with <strong>low capital weight</strong> can still have <strong>high risk contribution</strong> if it's volatile or highly correlated with the portfolio.
+                    </div>
+                    
+                    <h3>?? Practical Implications</h3>
+                    <ol>
+                        <li><strong>Reduce concentration risk:</strong> If one asset contributes > 40% of risk, consider reducing its weight</li>
+                        <li><strong>Monitor during crises:</strong> Risk contributions can shift dramatically in market stress</li>
+                        <li><strong>Rebalance regularly:</strong> As volatilities change, risk contributions drift</li>
+                        <li><strong>Use as diagnostic:</strong> Even if you don't use Risk Parity, checking risk contributions reveals hidden concentrations</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+        <!-- MODAL: Results Interpretation -->
+        <div id='modalRPResults' class='modal'>
+            <div class='modal-content'>
+                <div class='modal-header'>
+                    <h2>?? Interpreting Your Risk Parity Results</h2>
+                    <span class='close-modal' onclick='closeModal("modalRPResults")'>&times;</span>
+                </div>
+                <div class='modal-body'>
+                    <h3>?? Understanding the Output</h3>
+                    
+                    <h4>1?? Portfolio Volatility Comparison</h4>
+                    <p>The tool shows <strong>two portfolio volatilities</strong>:</p>
+                    <ul>
+                        <li><strong>Risk Parity Volatility:</strong> Usually LOWER than Equal Weight</li>
+                        <li><strong>Equal Weight Volatility:</strong> Baseline for comparison</li>
+                    </ul>
+                    
+                    <div class='example-box'>
+                        <h4>?? Example Output</h4>
+                        <ul>
+                            <li><strong>Risk Parity Volatility:</strong> 9.2%</li>
+                            <li><strong>Equal Weight Volatility:</strong> 12.8%</li>
+                            <li><strong>Volatility Reduction:</strong> 28%</li>
+                        </ul>
+                        <p style='margin-top: 10px;'><strong>Interpretation:</strong> Risk Parity achieves <span class='key-term'>28% lower volatility</span> through better risk balancing!</p>
+                    </div>
+                    
+                    <div class='tip-box'>
+                        ?? <strong>Why Lower Volatility?</strong> Risk Parity overweights low-volatility assets (bonds) and underweights high-volatility assets (stocks), creating a smoother ride.
+                    </div>
+                    
+                    <h4>2?? Risk Balance Quality</h4>
+                    <p>A score showing how close you are to <strong>perfect risk balance</strong>:</p>
+                    <table style='width: 100%; border-collapse: collapse; margin: 15px 0;'>
+                        <tr style='background: #E8DAEF;'>
+                            <th style='padding: 10px; border: 1px solid #ccc;'>Score</th>
+                            <th style='padding: 10px; border: 1px solid #ccc;'>Interpretation</th>
+                        </tr>
+                        <tr>
+                            <td style='padding: 10px; border: 1px solid #ccc;'><strong style='color: #4A74F3;'>90-100%</strong></td>
+                            <td style='padding: 10px; border: 1px solid #ccc;'>?? Excellent - Near-perfect balance</td>
+                        </tr>
+                        <tr>
+                            <td style='padding: 10px; border: 1px solid #ccc;'><strong style='color: #6C8BE0;'>75-90%</strong></td>
+                            <td style='padding: 10px; border: 1px solid #ccc;'>? Good - Well-balanced</td>
+                        </tr>
+                        <tr>
+                            <td style='padding: 10px; border: 1px solid #ccc;'><strong style='color: #9D5CE6;'>50-75%</strong></td>
+                            <td style='padding: 10px; border: 1px solid #ccc;'>?? Moderate - Some imbalance</td>
+                        </tr>
+                        <tr>
+                            <td style='padding: 10px; border: 1px solid #ccc;'><strong style='color: #C39BD3;'>< 50%</strong></td>
+                            <td style='padding: 10px; border: 1px solid #ccc;'>?? Poor - Highly concentrated risk</td>
+                        </tr>
+                    </table>
+                    
+                    <h4>3?? Diversification Benefit</h4>
+                    <p>Measures how much <strong>better</strong> Risk Parity is than naive equal weighting:</p>
+                    <div class='formula-box'>
+                        Diversification Benefit = 1 - (Max Weight / Equal Weight)<br><br>
+                        <strong>Example:</strong><br>
+                        • 5 assets ? Equal Weight = 20% each<br>
+                        • Risk Parity max weight = 15%<br>
+                        • Benefit = 1 - (15% / 20%) = 25%
+                    </div>
+                    
+                    <h3>?? Allocation Pie Charts</h3>
+                    <p>The two pie charts show <strong>capital allocation</strong> (not risk):</p>
+                    
+                    <h4>?? Risk Parity Chart (Left)</h4>
+                    <p>This is your <strong>recommended allocation</strong>. Key patterns:</p>
+                    <ul>
+                        <li>Low-volatility assets (bonds) get <strong>higher weights</strong></li>
+                        <li>High-volatility assets (stocks) get <strong>lower weights</strong></li>
+                        <li>Allocation is <strong>inversely proportional</strong> to volatility</li>
+                    </ul>
+                    
+                    <h4>?? Equal Weight Chart (Right)</h4>
+                    <p>Naive approach: each asset gets <strong>1/N allocation</strong>. This is the baseline for comparison.</p>
+                    
+                    <div class='warning-box'>
+                        ?? <strong>Common Surprise:</strong> Risk Parity often allocates 60-80% to bonds! This seems conservative, but remember: we're balancing <strong>risk</strong>, not capital. The bond allocation has similar risk to the stock allocation.
+                    </div>
+                    
+                    <h3>?? Decision Framework</h3>
+                    
+                    <h4>When to Use Risk Parity Allocation:</h4>
+                    <ul>
+                        <li>? You value <strong>stability</strong> over maximum returns</li>
+                        <li>? You're near retirement and need to <strong>preserve capital</strong></li>
+                        <li>? You expect <strong>market turbulence</strong></li>
+                        <li>? You have a <strong>long-term horizon</strong> (10+ years)</li>
+                    </ul>
+                    
+                    <h4>When to Modify Risk Parity:</h4>
+                    <ul>
+                        <li>?? You need <strong>higher returns</strong> ? increase stock allocation by 10-20%</li>
+                        <li>?? You have <strong>strong return views</strong> ? blend with Markowitz Max Sharpe</li>
+                        <li>?? Interest rates are extremely low ? reduce bond allocation</li>
+                        <li>?? You can't access leverage ? accept lower returns or increase risk assets</li>
+                    </ul>
+                    
+                    <h3>?? Implementation Guide</h3>
+                    <ol>
+                        <li><strong>Review suggested weights</strong> in the detailed table</li>
+                        <li><strong>Round to practical increments</strong> (e.g., 5% chunks)</li>
+                        <li><strong>Check rebalancing impact:</strong> How much do you need to buy/sell?</li>
+                        <li><strong>Consider taxes:</strong> Minimize taxable events if possible</li>
+                        <li><strong>Execute trades</strong> to reach target allocation</li>
+                        <li><strong>Set calendar reminder</strong> to rebalance every 6-12 months</li>
+                    </ol>
+                    
+                    <div class='tip-box'>
+                        ?? <strong>Hybrid Approach:</strong> Many investors use a <strong>50/50 blend</strong> of Risk Parity and Max Sharpe portfolios to balance risk control with return optimization.
+                    </div>
+                    
+                    <h3>?? Expected Performance Characteristics</h3>
+                    <div class='example-box'>
+                        <strong>Risk Parity Portfolio (Typical):</strong>
+                        <ul>
+                            <li><strong>Annual Return:</strong> 6-8% (moderate)</li>
+                            <li><strong>Volatility:</strong> 8-12% (low to moderate)</li>
+                            <li><strong>Sharpe Ratio:</strong> 0.5-0.8 (good)</li>
+                            <li><strong>Max Drawdown:</strong> 15-25% (much lower than 100% stocks)</li>
+                            <li><strong>Recovery Time:</strong> 1-3 years (faster than aggressive portfolios)</li>
+                        </ul>
+                    </div>
+                    
+                    <div class='warning-box'>
+                        ?? <strong>Remember:</strong> Risk Parity trades <strong>lower returns</strong> for <strong>lower volatility</strong>. If you need high returns and can tolerate risk, a more aggressive allocation (Markowitz) may be better.
+                    </div>
+                </div>
+            </div>
+        </div>
+        <footer><p>Risk Parity Portfolio | 10/27/2025 21:57</p></footer>
+    </div>
+    <script>
+        let assets = [
+            { name: 'Stocks', volatility: 18, correlation: {} },
+            { name: 'Bonds', volatility: 6, correlation: {} },
+            { name: 'Real Estate', volatility: 12, correlation: {} }
+        ];
+        
+        function addAsset() {
+            const newAsset = { name: 'Asset ' + (assets.length + 1), volatility: 10, correlation: {} };
+            assets.push(newAsset);
+            renderAssets();
+        }
+        
+        function removeAsset(index) {
+            if (assets.length <= 2) {
+                alert('You must have at least 2 assets!');
+                return;
+            }
+            assets.splice(index, 1);
+            renderAssets();
+        }
+        
+        function renderAssets() {
+            const container = document.getElementById('assetsContainer');
+            container.innerHTML = '';
+            
+            assets.forEach((asset, index) => {
+                let correlationHTML = '';
+                
+                assets.forEach((otherAsset, otherIndex) => {
+                    if (index !== otherIndex) {
+                        const corrValue = asset.correlation[otherIndex] || 0;
+                        correlationHTML += `
+                            <div class='asset-input-group'>
+                                <label>Correlation with ${otherAsset.name}</label>
+                                <input type='number' step='0.1' min='-1' max='1' value='${corrValue}' 
+                                       onchange='updateCorrelation(${index}, ${otherIndex}, this.value)'>
+                            </div>
+                        `;
+                    }
+                });
+                
+                const removeBtn = assets.length > 2 ? 
+                    `<button onclick='removeAsset(${index})' 
+                             style='float: right; background: #9D5CE6; color: white; border: none; 
+                                    padding: 5px 10px; border-radius: 5px; cursor: pointer;'>X</button>` : '';
+                
+                const card = `
+                    <div class='asset-card'>
+                        <h4>
+                            <input type='text' value='${asset.name}' 
+                                   onchange='updateAssetName(${index}, this.value)' 
+                                   style='background: transparent; border: none; color: #2649B2; 
+                                          font-weight: bold; font-size: 1em; width: 200px;'>
+                            ${removeBtn}
+                        </h4>
+                        <div class='asset-input-group'>
+                            <label>Annual Volatility (%)</label>
+                            <input type='number' step='0.5' value='${asset.volatility}' 
+                                   onchange='updateAsset(${index}, "volatility", this.value)'>
+                        </div>
+                        ${correlationHTML}
+                    </div>
+                `;
+                
+                container.innerHTML += card;
+            });
+        }
+        
+        function updateAssetName(index, value) { 
+            assets[index].name = value; 
+            renderAssets(); 
+        }
+        
+        function updateAsset(index, field, value) { 
+            assets[index][field] = parseFloat(value); 
+        }
+        
+        function updateCorrelation(i, j, value) { 
+            const val = parseFloat(value); 
+            assets[i].correlation[j] = val; 
+            assets[j].correlation[i] = val; 
+        }
+        
+        function resetAssets() {
+            if (confirm('Reset all assets to default values?')) {
+                assets = [
+                    { name: 'Stocks', volatility: 18, correlation: {} },
+                    { name: 'Bonds', volatility: 6, correlation: {} },
+                    { name: 'Real Estate', volatility: 12, correlation: {} }
+                ];
+                renderAssets();
+                document.getElementById('resultsSection').classList.add('hidden');
+            }
+        }
+        
+        function buildCovarianceMatrix() {
+            const n = assets.length;
+            const cov = [];
+            
+            for (let i = 0; i < n; i++) {
+                cov[i] = [];
+                for (let j = 0; j < n; j++) {
+                    if (i === j) {
+                        cov[i][j] = Math.pow(assets[i].volatility / 100, 2);
+                    } else {
+                        const corr = assets[i].correlation[j] || 0;
+                        cov[i][j] = corr * (assets[i].volatility / 100) * (assets[j].volatility / 100);
+                    }
+                }
+            }
+            return cov;
+        }
+        
+        function calculatePortfolioVolatility(weights, covMatrix) {
+            let variance = 0;
+            for (let i = 0; i < weights.length; i++) {
+                for (let j = 0; j < weights.length; j++) {
+                    variance += weights[i] * weights[j] * covMatrix[i][j];
+                }
+            }
+            return Math.sqrt(variance) * 100;
+        }
+        
+        function calculateRiskContributions(weights, covMatrix) {
+            const n = weights.length;
+            const portfolioVar = calculatePortfolioVolatility(weights, covMatrix) / 100;
+            const contributions = [];
+            
+            for (let i = 0; i < n; i++) {
+                let marginalContribution = 0;
+                for (let j = 0; j < n; j++) {
+                    marginalContribution += weights[j] * covMatrix[i][j];
+                }
+                const riskContribution = weights[i] * marginalContribution / portfolioVar;
+                contributions.push(riskContribution * 100);
+            }
+            return contributions;
+        }
+        
+        function calculateRiskParity() {
+            const covMatrix = buildCovarianceMatrix();
+            const n = assets.length;
+            
+            // Simplified Risk Parity: Inverse volatility weighting
+            const inverseVols = assets.map(a => 1 / a.volatility);
+            const sumInverseVols = inverseVols.reduce((a, b) => a + b, 0);
+            const rpWeights = inverseVols.map(iv => iv / sumInverseVols);
+            
+            // Equal weight for comparison
+            const ewWeights = assets.map(() => 1 / n);
+            
+            // Calculate statistics
+            const rpVol = calculatePortfolioVolatility(rpWeights, covMatrix);
+            const ewVol = calculatePortfolioVolatility(ewWeights, covMatrix);
+            
+            const rpRiskContrib = calculateRiskContributions(rpWeights, covMatrix);
+            const ewRiskContrib = calculateRiskContributions(ewWeights, covMatrix);
+            
+            displayResults(rpWeights, ewWeights, rpVol, ewVol, rpRiskContrib, ewRiskContrib);
+        }
+        
+        function displayResults(rpWeights, ewWeights, rpVol, ewVol, rpRiskContrib, ewRiskContrib) {
+            document.getElementById('resultsSection').classList.remove('hidden');
+            document.getElementById('resultsSection').scrollIntoView({ behavior: 'smooth' });
+            
+            // Global statistics
+            const statsHTML = `
+                <div class='stats-row'>
+                    <div class='stat-item'>
+                        <div class='label'>Risk Parity Volatility</div>
+                        <div class='value'>${rpVol.toFixed(2)}%</div>
+                    </div>
+                    <div class='stat-item'>
+                        <div class='label'>Equal Weight Volatility</div>
+                        <div class='value'>${ewVol.toFixed(2)}%</div>
+                    </div>
+                    <div class='stat-item'>
+                        <div class='label'>Volatility Reduction</div>
+                        <div class='value'>${((ewVol - rpVol) / ewVol * 100).toFixed(1)}%</div>
+                    </div>
+                </div>
+                <div class='stats-row' style='margin-top: 10px;'>
+                    <div class='stat-item'>
+                        <div class='label'>Number of Assets</div>
+                        <div class='value'>${assets.length}</div>
+                    </div>
+                    <div class='stat-item'>
+                        <div class='label'>Risk Balance Quality</div>
+                        <div class='value'>${calculateRiskBalance(rpRiskContrib).toFixed(1)}%</div>
+                    </div>
+                    <div class='stat-item'>
+                        <div class='label'>Diversification Benefit</div>
+                        <div class='value'>${calculateDiversificationBenefit(rpWeights).toFixed(1)}%</div>
+                    </div>
+                </div>
+            `;
+            document.getElementById('globalStats').innerHTML = statsHTML;
+            
+            createRiskParityChart(rpWeights);
+            createEqualWeightChart(ewWeights);
+            createRiskContributionChart(rpRiskContrib, ewRiskContrib);
+            createComparisonTable(rpWeights, ewWeights, rpRiskContrib, ewRiskContrib);
+        }
+        
+        function calculateRiskBalance(riskContrib) {
+            const target = 100 / riskContrib.length;
+            const deviations = riskContrib.map(rc => Math.abs(rc - target));
+            const avgDeviation = deviations.reduce((a, b) => a + b, 0) / riskContrib.length;
+            return 100 - (avgDeviation / target * 100);
+        }
+        
+        function calculateDiversificationBenefit(weights) {
+            const maxWeight = Math.max(...weights);
+            const equalWeight = 1 / weights.length;
+            return (1 - maxWeight / equalWeight) * 100;
+        }
+        
+        function createRiskParityChart(weights) {
+            const data = assets.map((asset, i) => ({ name: asset.name, y: weights[i] * 100 }));
+            const colors = ['#2649B2', '#4A74F3', '#8E7DE3', '#9D5CE6', '#D4D9F0', '#6C8BE0', '#B55CE6'];
+            
+            Highcharts.chart('chartRiskParity', {
+                chart: { type: 'pie', backgroundColor: 'transparent' },
+                title: { text: null },
+                tooltip: { pointFormat: '<b>{point.name}</b>: {point.y:.1f}%' },
+                series: [{ name: 'Allocation', data: data, colors: colors }],
+                plotOptions: { 
+                    pie: { 
+                        innerSize: '50%', 
+                        dataLabels: { 
+                            format: '<b>{point.name}</b>: {point.y:.1f}%', 
+                            style: { color: '#2649B2', fontSize: '11px' } 
+                        }, 
+                        borderWidth: 2, 
+                        borderColor: '#E8DAEF' 
+                    } 
+                },
+                credits: { enabled: false }
+            });
+        }
+        
+        function createEqualWeightChart(weights) {
+            const data = assets.map((asset, i) => ({ name: asset.name, y: weights[i] * 100 }));
+            const colors = ['#6C3483', '#8E44AD', '#9D5CE6', '#C39BD3', '#E8DAEF', '#B55CE6', '#D4D9F0'];
+            
+            Highcharts.chart('chartEqualWeight', {
+                chart: { type: 'pie', backgroundColor: 'transparent' },
+                title: { text: null },
+                tooltip: { pointFormat: '<b>{point.name}</b>: {point.y:.1f}%' },
+                series: [{ name: 'Allocation', data: data, colors: colors }],
+                plotOptions: { 
+                    pie: { 
+                        innerSize: '50%', 
+                        dataLabels: { 
+                            format: '<b>{point.name}</b>: {point.y:.1f}%', 
+                            style: { color: '#6C3483', fontSize: '11px' } 
+                        }, 
+                        borderWidth: 2, 
+                        borderColor: '#E8DAEF' 
+                    } 
+                },
+                credits: { enabled: false }
+            });
+        }
+        
+        function createRiskContributionChart(rpRiskContrib, ewRiskContrib) {
+            const categories = assets.map(a => a.name);
+            
+            Highcharts.chart('chartRiskContribution', {
+                chart: { type: 'column', backgroundColor: 'transparent' },
+                title: { text: 'Risk Contribution Comparison', style: { color: '#2649B2', fontSize: '1.2em' } },
+                xAxis: { categories: categories, title: { text: 'Assets', style: { color: '#2649B2' } }, labels: { style: { color: '#5B2C6F' } } },
+                yAxis: { 
+                    title: { text: 'Risk Contribution (%)', style: { color: '#2649B2' } }, 
+                    labels: { style: { color: '#6C3483' } },
+                    plotLines: [{ value: 100 / assets.length, color: '#9D5CE6', width: 2, dashStyle: 'Dash', label: { text: 'Target (Equal Risk)', style: { color: '#9D5CE6' } } }]
+                },
+                tooltip: { valueSuffix: '%', valueDecimals: 1 },
+                series: [
+                    { name: 'Risk Parity', data: rpRiskContrib, color: '#2649B2', borderRadius: '25%' },
+                    { name: 'Equal Weight', data: ewRiskContrib, color: '#9D5CE6', borderRadius: '25%' }
+                ],
+                plotOptions: { column: { dataLabels: { enabled: true, format: '{point.y:.1f}%', style: { fontSize: '10px' } } } },
+                legend: { itemStyle: { color: '#5B2C6F' } },
+                credits: { enabled: false }
+            });
+        }
+        
+        function createComparisonTable(rpWeights, ewWeights, rpRiskContrib, ewRiskContrib) {
+            let tableHTML = `
+                <table class='comparison-table'>
+                    <thead>
+                        <tr>
+                            <th>Asset</th>
+                            <th>Volatility (%)</th>
+                            <th>Risk Parity Weight (%)</th>
+                            <th>Equal Weight (%)</th>
+                            <th>RP Risk Contribution (%)</th>
+                            <th>EW Risk Contribution (%)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+            
+            assets.forEach((asset, i) => {
+                tableHTML += `
+                    <tr>
+                        <td><b>${asset.name}</b></td>
+                        <td>${asset.volatility.toFixed(1)}%</td>
+                        <td><span class='highlight'>${(rpWeights[i] * 100).toFixed(2)}%</span></td>
+                        <td>${(ewWeights[i] * 100).toFixed(2)}%</td>
+                        <td><span class='highlight'>${rpRiskContrib[i].toFixed(1)}%</span></td>
+                        <td>${ewRiskContrib[i].toFixed(1)}%</td>
+                    </tr>
+                `;
+            });
+            
+            tableHTML += `
+                    </tbody>
+                </table>
+            `;
+            
+            document.getElementById('comparisonTable').innerHTML = tableHTML;
+        }
+        
+        window.addEventListener('DOMContentLoaded', function() {
+            renderAssets();
+        });
+        
+        // GESTION DES MODALS
+        function openModal(modalId) {
+            document.getElementById(modalId).style.display = 'block';
+            document.body.style.overflow = 'hidden';
+        }
+        
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+            document.body.style.overflow = 'auto';
+        }
+        
+        window.onclick = function(event) {
+            if (event.target.classList.contains('modal')) {
+                event.target.style.display = 'none';
+                document.body.style.overflow = 'auto';
+            }
+        };
+    </script>
+</body>
+</html>

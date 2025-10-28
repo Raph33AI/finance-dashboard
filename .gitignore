@@ -1,0 +1,9 @@
+*.json
+   financial_data_*.json
+   ~$*.xlsx
+   .DS_Store
+   Thumbs.db
+   *.log
+   .env
+   *~
+   *.bak
