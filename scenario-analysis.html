@@ -1,96 +1,46 @@
 <!DOCTYPE html>
-<html lang='en'>
+<html lang='fr'>
 <head>
     <meta charset='UTF-8'>
     <meta name='viewport' content='width=device-width, initial-scale=1.0'>
     <title>Scenario Analysis - Raphael NARDONE</title>
+    
+    <!-- Highcharts -->
     <script src='https://code.highcharts.com/highcharts.js'></script>
     <script src='https://code.highcharts.com/modules/heatmap.js'></script>
     <script src='https://code.highcharts.com/modules/exporting.js'></script>
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Segoe UI', sans-serif; background: linear-gradient(135deg, #5B2C6F 0%, #2649B2 50%, #4A74F3 100%); padding: 20px; color: #333; }
-        .container { max-width: 1800px; margin: 0 auto; background: white; border-radius: 20px; box-shadow: 0 20px 60px rgba(91,44,111,0.4); overflow: hidden; }
-        header { background: linear-gradient(135deg, #2649B2 0%, #6C3483 50%, #8E44AD 100%); color: white; padding: 30px; text-align: center; }
-        header h1 { font-size: 2.5em; margin-bottom: 10px; text-shadow: 2px 2px 8px rgba(0,0,0,0.3); }
-        header p { font-size: 1.1em; opacity: 0.95; }
-        .content { padding: 30px; }
-        .section { background: white; padding: 30px; border-radius: 15px; margin-bottom: 30px; box-shadow: 0 4px 12px rgba(108,52,131,0.12); border-top: 3px solid #8E44AD; }
-        .section-title { font-size: 1.8em; color: #2649B2; margin-bottom: 20px; padding-bottom: 10px; border-bottom: 3px solid #E8DAEF; }
-        .portfolio-input { background: linear-gradient(135deg, #E8DAEF 0%, #D4D9F0 100%); padding: 25px; border-radius: 15px; margin-bottom: 25px; }
-        .portfolio-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 20px; }
-        .portfolio-item { background: white; padding: 15px; border-radius: 10px; border-left: 4px solid #8E44AD; }
-        .portfolio-item label { display: block; color: #5B2C6F; font-weight: bold; margin-bottom: 8px; font-size: 0.9em; }
-        .portfolio-item input { width: 100%; padding: 10px; border: 2px solid #9D5CE6; border-radius: 8px; font-size: 0.95em; }
-        .portfolio-item input:focus { outline: none; border-color: #2649B2; box-shadow: 0 0 0 3px rgba(38,73,178,0.2); }
-        .btn-analyze { background: linear-gradient(135deg, #2649B2 0%, #8E44AD 100%); color: white; padding: 15px 40px; border: none; border-radius: 10px; font-size: 1.1em; font-weight: bold; cursor: pointer; box-shadow: 0 4px 12px rgba(38,73,178,0.3); transition: all 0.3s; width: 100%; }
-        .btn-analyze:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(38,73,178,0.4); }
-        .scenario-card { background: linear-gradient(135deg, #E8DAEF 0%, #D4D9F0 100%); padding: 20px; border-radius: 12px; margin-bottom: 20px; border-left: 5px solid #8E44AD; transition: all 0.3s; }
-        .scenario-card:hover { transform: translateX(5px); box-shadow: 0 4px 15px rgba(108,52,131,0.2); }
-        .scenario-card h3 { color: #2649B2; margin-bottom: 10px; }
-        .scenario-card p { color: #5B2C6F; font-size: 0.9em; line-height: 1.6; }
-        .scenario-impacts { display: flex; gap: 10px; margin-top: 10px; flex-wrap: wrap; }
-        .impact-badge { padding: 5px 12px; border-radius: 20px; font-size: 0.85em; font-weight: bold; }
-        .impact-positive { background: linear-gradient(135deg, #4A74F3 0%, #6C8BE0 100%); color: white; }
-        .impact-negative { background: linear-gradient(135deg, #C39BD3 0%, #9D5CE6 100%); color: white; }
-        .chart { min-height: 500px; }
-        .results-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-bottom: 30px; }
-        .result-card { background: white; padding: 20px; border-radius: 12px; text-align: center; box-shadow: 0 2px 8px rgba(108,52,131,0.1); }
-        .result-card h4 { color: #5B2C6F; margin-bottom: 10px; font-size: 0.9em; }
-        .result-card .value { font-size: 2em; font-weight: bold; color: #2649B2; }
-        .result-card.positive .value { color: #4A74F3; }
-        .result-card.negative .value { color: #9D5CE6; }
-        footer { background: linear-gradient(135deg, #2649B2 0%, #6C3483 100%); color: white; text-align: center; padding: 20px; }
-        .hidden { display: none; }
-        .info-box { background: linear-gradient(135deg, #4A74F3 0%, #6C8BE0 100%); color: white; padding: 15px; border-radius: 10px; margin-bottom: 20px; }
-        .info-box h4 { margin-bottom: 10px; font-size: 1.1em; }
-        .info-box p { font-size: 0.9em; opacity: 0.95; line-height: 1.6; }
-        
-        /* INFO-BULLES & MODALS */
-        .help-icon { display: inline-block; width: 24px; height: 24px; background: linear-gradient(135deg, #4A74F3 0%, #6C8BE0 100%); color: white; border-radius: 50%; text-align: center; line-height: 24px; font-weight: bold; font-size: 14px; cursor: pointer; margin-left: 10px; transition: all 0.3s; box-shadow: 0 2px 6px rgba(74,116,243,0.3); }
-        .help-icon:hover { transform: scale(1.15); box-shadow: 0 4px 12px rgba(74,116,243,0.5); background: linear-gradient(135deg, #2649B2 0%, #4A74F3 100%); }
-        .modal { display: none; position: fixed; z-index: 9999; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(91,44,111,0.8); backdrop-filter: blur(5px); animation: fadeIn 0.3s; }
-        .modal-content { background: white; margin: 3% auto; padding: 0; border-radius: 20px; width: 85%; max-width: 900px; box-shadow: 0 20px 60px rgba(38,73,178,0.4); animation: slideDown 0.4s; max-height: 85vh; overflow-y: auto; }
-        .modal-header { background: linear-gradient(135deg, #2649B2 0%, #8E44AD 100%); color: white; padding: 25px 30px; border-radius: 20px 20px 0 0; display: flex; justify-content: space-between; align-items: center; }
-        .modal-header h2 { margin: 0; font-size: 1.8em; text-shadow: 2px 2px 8px rgba(0,0,0,0.3); }
-        .modal-body { padding: 30px; line-height: 1.8; color: #333; }
-        .modal-body h3 { color: #2649B2; margin-top: 25px; margin-bottom: 15px; padding-bottom: 8px; border-bottom: 2px solid #E8DAEF; font-size: 1.4em; }
-        .modal-body h4 { color: #6C3483; margin-top: 20px; margin-bottom: 10px; font-size: 1.1em; }
-        .modal-body p { margin-bottom: 15px; }
-        .modal-body ul, .modal-body ol { margin-left: 25px; margin-bottom: 15px; }
-        .modal-body li { margin-bottom: 8px; }
-        .formula-box { background: linear-gradient(135deg, #E8DAEF 0%, #D4D9F0 100%); padding: 20px; border-radius: 12px; margin: 20px 0; border-left: 5px solid #8E44AD; font-family: 'Courier New', monospace; font-size: 1.1em; color: #2649B2; }
-        .example-box { background: linear-gradient(135deg, #D4D9F0 0%, #E8DAEF 100%); padding: 20px; border-radius: 12px; margin: 20px 0; border-left: 5px solid #4A74F3; }
-        .tip-box { background: linear-gradient(135deg, #4A74F3 0%, #6C8BE0 100%); color: white; padding: 15px 20px; border-radius: 10px; margin: 20px 0; font-weight: 500; }
-        .warning-box { background: linear-gradient(135deg, #9D5CE6 0%, #C39BD3 100%); color: white; padding: 15px 20px; border-radius: 10px; margin: 20px 0; font-weight: 500; }
-        .close-modal { color: white; font-size: 32px; font-weight: bold; cursor: pointer; background: rgba(255,255,255,0.2); width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; transition: all 0.3s; }
-        .close-modal:hover { background: rgba(255,255,255,0.4); transform: rotate(90deg); }
-        .diagram { text-align: center; margin: 25px 0; padding: 20px; background: #f8f9fa; border-radius: 12px; }
-        .diagram svg { max-width: 100%; height: auto; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-        @keyframes slideDown { from { transform: translateY(-50px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-        .key-term { background: linear-gradient(135deg, #2649B2 0%, #4A74F3 100%); color: white; padding: 2px 8px; border-radius: 4px; font-weight: bold; white-space: nowrap; }
-        @media (max-width: 768px) { .modal-content { width: 95%; margin: 10% auto; } .modal-body { padding: 20px; } }
-    </style>
+    
+    <!-- Styles -->
+    <link rel='stylesheet' href='assets/css/common.css'>
+    <link rel='stylesheet' href='assets/css/scenario-analysis.css'>
 </head>
 <body>
     <div class='container'>
+        <!-- Header -->
         <header>
             <h1>Scenario Analysis</h1>
             <p>Stress Testing Your Portfolio | Raphael NARDONE</p>
         </header>
-        <nav style='background: linear-gradient(135deg, #2649B2 0%, #8E44AD 100%); padding: 0; box-shadow: 0 2px 10px rgba(0,0,0,0.2);'>
-            <div style='max-width: 1800px; margin: 0 auto; display: flex; gap: 0;'>
-                <a href='dashboard-financier.html' style='flex: 1; padding: 20px; text-align: center; color: white; text-decoration: none; transition: all 0.3s;' onmouseover='this.style.background="rgba(255,255,255,0.1)"' onmouseout='this.style.background="transparent"'>Budget</a>
-                <a href='monte-carlo.html' style='flex: 1; padding: 20px; text-align: center; color: white; text-decoration: none; transition: all 0.3s;' onmouseover='this.style.background="rgba(255,255,255,0.1)"' onmouseout='this.style.background="transparent"'>Monte Carlo</a>
-                <a href='portfolio-optimizer.html' style='flex: 1; padding: 20px; text-align: center; color: white; text-decoration: none; transition: all 0.3s;' onmouseover='this.style.background="rgba(255,255,255,0.1)"' onmouseout='this.style.background="transparent"'>Markowitz</a>
-                <a href='risk-parity.html' style='flex: 1; padding: 20px; text-align: center; color: white; text-decoration: none; transition: all 0.3s;' onmouseover='this.style.background="rgba(255,255,255,0.1)"' onmouseout='this.style.background="transparent"'>Risk Parity</a>
-                <a href='scenario-analysis.html' style='flex: 1; padding: 20px; text-align: center; color: white; text-decoration: none; background: rgba(255,255,255,0.2); font-weight: bold; border-bottom: 4px solid white;'>Scenarios</a>
+        
+        <!-- Navigation -->
+        <nav>
+            <div class='nav-container'>
+                <a href='index.html' class='nav-link'>Budget</a>
+                <a href='monte-carlo.html' class='nav-link'>Monte Carlo</a>
+                <a href='portfolio-optimizer.html' class='nav-link'>Markowitz</a>
+                <a href='risk-parity.html' class='nav-link'>Risk Parity</a>
+                <a href='scenario-analysis.html' class='nav-link'>Scenarios</a>
             </div>
         </nav>
+        
+        <!-- Main Content -->
         <div class='content'>
+            <!-- Introduction -->
             <div class='section'>
-                <h2 class='section-title'>What is Scenario Analysis? <span class='help-icon' onclick='openModal("modalSAIntro")'>?</span></h2>
+                <h2 class='section-title'>
+                    What is Scenario Analysis? 
+                    <span class='help-icon' onclick='openModal("modalSAIntro")'>?</span>
+                </h2>
                 <div class='info-box'>
                     <h4>Stress Testing Your Portfolio</h4>
                     <p>Scenario Analysis tests how your portfolio would perform during specific historical or hypothetical market events.</p>
@@ -99,44 +49,57 @@
                 </div>
             </div>
             
+            <!-- Step 1: Define Portfolio -->
             <div class='section'>
-                <h2 class='section-title'>Step 1: Define Your Current Portfolio <span class='help-icon' onclick='openModal("modalSAPortfolio")'>?</span></h2>
+                <h2 class='section-title'>
+                    Step 1: Define Your Current Portfolio 
+                    <span class='help-icon' onclick='openModal("modalSAPortfolio")'>?</span>
+                </h2>
                 <div class='portfolio-input'>
-                    <h3 style='color: #2649B2; margin-bottom: 20px;'>Current Allocation</h3>
+                    <h3 class='input-title'>Current Allocation</h3>
                     <div class='portfolio-grid'>
                         <div class='portfolio-item'>
                             <label>Stocks (%)</label>
-                            <input type='number' id='allocStocks' value='60' min='0' max='100' step='1'>
+                            <input type='number' id='allocStocks' value='60' min='0' max='100' step='1' 
+                                   onchange='ScenarioAnalysis.updateTotalAllocation()'>
                         </div>
                         <div class='portfolio-item'>
                             <label>Bonds (%)</label>
-                            <input type='number' id='allocBonds' value='30' min='0' max='100' step='1'>
+                            <input type='number' id='allocBonds' value='30' min='0' max='100' step='1' 
+                                   onchange='ScenarioAnalysis.updateTotalAllocation()'>
                         </div>
                         <div class='portfolio-item'>
                             <label>Real Estate (%)</label>
-                            <input type='number' id='allocRealEstate' value='5' min='0' max='100' step='1'>
+                            <input type='number' id='allocRealEstate' value='5' min='0' max='100' step='1' 
+                                   onchange='ScenarioAnalysis.updateTotalAllocation()'>
                         </div>
                         <div class='portfolio-item'>
                             <label>Commodities (%)</label>
-                            <input type='number' id='allocCommodities' value='3' min='0' max='100' step='1'>
+                            <input type='number' id='allocCommodities' value='3' min='0' max='100' step='1' 
+                                   onchange='ScenarioAnalysis.updateTotalAllocation()'>
                         </div>
                         <div class='portfolio-item'>
                             <label>Cash (%)</label>
-                            <input type='number' id='allocCash' value='2' min='0' max='100' step='1'>
+                            <input type='number' id='allocCash' value='2' min='0' max='100' step='1' 
+                                   onchange='ScenarioAnalysis.updateTotalAllocation()'>
                         </div>
                     </div>
-                    <div style='margin-top: 15px; padding: 15px; background: white; border-radius: 8px; text-align: center;'>
-                        <strong style='color: #5B2C6F;'>Total Allocation: <span id='totalAllocation' style='color: #2649B2; font-size: 1.2em;'>100%</span></strong>
+                    <div class='total-allocation-display'>
+                        <strong>Total Allocation: <span id='totalAllocation'>100%</span></strong>
                     </div>
                 </div>
-                <button class='btn-analyze' onclick='runScenarioAnalysis()'>Analyze Portfolio in All Scenarios</button>
+                <button class='btn-analyze' onclick='ScenarioAnalysis.runAnalysis()'>Analyze Portfolio in All Scenarios</button>
             </div>
             
+            <!-- Step 2: Historical Scenarios -->
             <div class='section'>
-                <h2 class='section-title'>Step 2: Historical Scenarios <span class='help-icon' onclick='openModal("modalSAScenarios")'>?</span></h2>
+                <h2 class='section-title'>
+                    Step 2: Historical Scenarios 
+                    <span class='help-icon' onclick='openModal("modalSAScenarios")'>?</span>
+                </h2>
                 <div id='scenariosDescription'>
                     <div class='scenario-card'>
-                        <h3>?? Financial Crisis 2008</h3>
+                        <h3>🔴 Financial Crisis 2008</h3>
                         <p>Global banking collapse, housing market crash, massive deleveraging</p>
                         <div class='scenario-impacts'>
                             <span class='impact-badge impact-negative'>Stocks: -40%</span>
@@ -148,7 +111,7 @@
                     </div>
                     
                     <div class='scenario-card'>
-                        <h3>?? High Inflation 1970s</h3>
+                        <h3>📈 High Inflation 1970s</h3>
                         <p>Oil shocks, stagflation, rising interest rates, purchasing power erosion</p>
                         <div class='scenario-impacts'>
                             <span class='impact-badge impact-negative'>Stocks: -10%</span>
@@ -160,7 +123,7 @@
                     </div>
                     
                     <div class='scenario-card'>
-                        <h3>?? Tech Boom 1999</h3>
+                        <h3>🚀 Tech Boom 1999</h3>
                         <p>Dot-com bubble, irrational exuberance, technology revolution</p>
                         <div class='scenario-impacts'>
                             <span class='impact-badge impact-positive'>Stocks: +60%</span>
@@ -172,7 +135,7 @@
                     </div>
                     
                     <div class='scenario-card'>
-                        <h3>?? COVID-19 Pandemic 2020</h3>
+                        <h3>🦠 COVID-19 Pandemic 2020</h3>
                         <p>Global lockdowns, unprecedented monetary stimulus, V-shaped recovery</p>
                         <div class='scenario-impacts'>
                             <span class='impact-badge impact-positive'>Stocks: +35% (full year)</span>
@@ -184,7 +147,7 @@
                     </div>
                     
                     <div class='scenario-card'>
-                        <h3>?? Mild Recession</h3>
+                        <h3>📉 Mild Recession</h3>
                         <p>Economic slowdown, moderate unemployment, temporary contraction</p>
                         <div class='scenario-impacts'>
                             <span class='impact-badge impact-negative'>Stocks: -20%</span>
@@ -196,7 +159,7 @@
                     </div>
                     
                     <div class='scenario-card'>
-                        <h3>?? Strong Bull Market</h3>
+                        <h3>🟢 Strong Bull Market</h3>
                         <p>Economic expansion, low unemployment, investor confidence</p>
                         <div class='scenario-impacts'>
                             <span class='impact-badge impact-positive'>Stocks: +25%</span>
@@ -209,900 +172,144 @@
                 </div>
             </div>
             
+            <!-- Results Section -->
             <div id='resultsSection' class='section hidden'>
-                <h2 class='section-title'>Analysis Results <span class='help-icon' onclick='openModal("modalSAResults")'>?</span></h2>
+                <h2 class='section-title'>
+                    Analysis Results 
+                    <span class='help-icon' onclick='openModal("modalSAResults")'>?</span>
+                </h2>
                 <div id='summaryStats' class='results-grid'></div>
                 
-                <h3 style='color: #2649B2; margin: 30px 0 15px 0;'>Portfolio Performance by Scenario</h3>
+                <h3 class='subsection-title'>Portfolio Performance by Scenario</h3>
                 <div id='chartScenarios' class='chart'></div>
                 
-                <h3 style='color: #2649B2; margin: 30px 0 15px 0;'>Risk/Return Profile</h3>
+                <h3 class='subsection-title'>Risk/Return Profile</h3>
                 <div id='chartRiskReturn' class='chart'></div>
                 
-                <h3 style='color: #2649B2; margin: 30px 0 15px 0;'>Detailed Results</h3>
+                <h3 class='subsection-title'>Detailed Results</h3>
                 <div id='detailedTable'></div>
                 
-                <h3 style='color: #2649B2; margin: 30px 0 15px 0;'>Recommendations <span class='help-icon' onclick='openModal("modalSARecommendations")'>?</span></h3>
+                <h3 class='subsection-title'>
+                    Recommendations 
+                    <span class='help-icon' onclick='openModal("modalSARecommendations")'>?</span>
+                </h3>
                 <div id='recommendations' class='info-box'></div>
             </div>
         </div>
-        <!-- MODAL: Introduction Scenario Analysis -->
-        <div id='modalSAIntro' class='modal'>
-            <div class='modal-content'>
-                <div class='modal-header'>
-                    <h2>?? What is Scenario Analysis?</h2>
-                    <span class='close-modal' onclick='closeModal("modalSAIntro")'>&times;</span>
-                </div>
-                <div class='modal-body'>
-                    <h3>?? Purpose</h3>
-                    <p><span class='key-term'>Scenario Analysis</span> is a stress-testing technique that evaluates how your portfolio would perform under <strong>specific historical or hypothetical events</strong>.</p>
-                    
-                    <h3>?? Monte Carlo vs. Scenario Analysis</h3>
-                    <table style='width: 100%; border-collapse: collapse; margin: 15px 0;'>
-                        <tr style='background: #E8DAEF;'>
-                            <th style='padding: 10px; border: 1px solid #ccc;'>Aspect</th>
-                            <th style='padding: 10px; border: 1px solid #ccc;'>Monte Carlo</th>
-                            <th style='padding: 10px; border: 1px solid #ccc;'>Scenario Analysis</th>
-                        </tr>
-                        <tr>
-                            <td style='padding: 10px; border: 1px solid #ccc;'><strong>Approach</strong></td>
-                            <td style='padding: 10px; border: 1px solid #ccc;'>Random simulations</td>
-                            <td style='padding: 10px; border: 1px solid #ccc;'>Specific historical events</td>
-                        </tr>
-                        <tr>
-                            <td style='padding: 10px; border: 1px solid #ccc;'><strong>Assumptions</strong></td>
-                            <td style='padding: 10px; border: 1px solid #ccc;'>Normal distribution</td>
-                            <td style='padding: 10px; border: 1px solid #ccc;'>Real-world patterns</td>
-                        </tr>
-                        <tr>
-                            <td style='padding: 10px; border: 1px solid #ccc;'><strong>Output</strong></td>
-                            <td style='padding: 10px; border: 1px solid #ccc;'>Probability distribution</td>
-                            <td style='padding: 10px; border: 1px solid #ccc;'>Exact portfolio impact</td>
-                        </tr>
-                        <tr>
-                            <td style='padding: 10px; border: 1px solid #ccc;'><strong>Best For</strong></td>
-                            <td style='padding: 10px; border: 1px solid #ccc;'>Long-term planning</td>
-                            <td style='padding: 10px; border: 1px solid #ccc;'>Crisis preparedness</td>
-                        </tr>
-                    </table>
-                    
-                    <div class='tip-box'>
-                        ?? <strong>Complementary Tools:</strong> Use Monte Carlo for long-term projections and Scenario Analysis to test resilience against specific shocks.
-                    </div>
-                    
-                    <h3>? Key Advantages</h3>
-                    <ul>
-                        <li><strong>Realistic:</strong> Based on actual historical events, not statistical assumptions</li>
-                        <li><strong>Actionable:</strong> Shows exactly how much you'd lose in a 2008-style crisis</li>
-                        <li><strong>Educational:</strong> Helps you understand asset class behavior during stress</li>
-                        <li><strong>Behavioral:</strong> Prepares you emotionally for market volatility</li>
-                    </ul>
-                    
-                    <div class='example-box'>
-                        <h4>?? Example: 60/40 Portfolio in 2008 Crisis</h4>
-                        <p><strong>Allocation:</strong> 60% Stocks, 40% Bonds</p>
-                        <p><strong>2008 Returns:</strong> Stocks -40%, Bonds +5%</p>
-                        <hr style='margin: 10px 0;'>
-                        <p><strong>Portfolio Impact:</strong></p>
-                        <p>60% � (-40%) + 40% � (+5%) = -24% + 2% = <span style='color: #C39BD3; font-weight: bold;'>-22%</span></p>
-                        <p style='margin-top: 10px;'><strong>Interpretation:</strong> Your $100,000 portfolio would have dropped to $78,000. Can you handle this psychologically?</p>
-                    </div>
-                    
-                    <h3>?? What This Tool Does</h3>
-                    <ol>
-                        <li><strong>Tests</strong> your portfolio against 6 historical scenarios</li>
-                        <li><strong>Calculates</strong> exact returns for each scenario</li>
-                        <li><strong>Identifies</strong> vulnerabilities (which scenarios hurt most)</li>
-                        <li><strong>Provides</strong> actionable recommendations to improve resilience</li>
-                    </ol>
-                    
-                    <h3>?? The 6 Scenarios Explained</h3>
-                    <ul>
-                        <li><strong>?? Financial Crisis 2008:</strong> Worst-case stress test</li>
-                        <li><strong>?? High Inflation 1970s:</strong> Tests inflation hedge effectiveness</li>
-                        <li><strong>?? Tech Boom 1999:</strong> Tests behavior in euphoria</li>
-                        <li><strong>?? COVID-19 2020:</strong> Recent crisis with V-shaped recovery</li>
-                        <li><strong>?? Mild Recession:</strong> Typical economic slowdown</li>
-                        <li><strong>?? Strong Bull Market:</strong> Best-case growth scenario</li>
-                    </ul>
-                    
-                    <div class='warning-box'>
-                        ?? <strong>Important:</strong> Scenarios are <strong>simplified</strong> and show approximate returns. Real events vary by specific assets, timing, and geography. Use this as a <strong>directional guide</strong>, not exact forecast.
-                    </div>
-                    
-                    <h3>?? How to Use Results</h3>
-                    <ol>
-                        <li><strong>Identify weak spots:</strong> Which scenarios cause unacceptable losses?</li>
-                        <li><strong>Adjust allocation:</strong> Add defensive assets if crisis scenarios are too painful</li>
-                        <li><strong>Set expectations:</strong> Know what to expect so you don't panic-sell</li>
-                        <li><strong>Build confidence:</strong> If worst-case is acceptable, you can stay the course</li>
-                    </ol>
-                    
-                    <div class='tip-box'>
-                        ?? <strong>Pro Tip:</strong> If your worst-case scenario (2008 Crisis) loss is <strong>more than 30%</strong>, consider increasing bonds/cash allocation. Most investors panic-sell when losses exceed 30%.
-                    </div>
-                </div>
-            </div>
-        </div>
-        <!-- MODAL: Portfolio Definition -->
-        <div id='modalSAPortfolio' class='modal'>
-            <div class='modal-content'>
-                <div class='modal-header'>
-                    <h2>?? Defining Your Portfolio</h2>
-                    <span class='close-modal' onclick='closeModal("modalSAPortfolio")'>&times;</span>
-                </div>
-                <div class='modal-body'>
-                    <h3>?? The 5 Asset Classes</h3>
-                    <p>Enter your <strong>current allocation percentages</strong>. They must sum to 100%.</p>
-                    
-                    <h4>1?? Stocks (Equities)</h4>
-                    <p>Ownership in companies. <strong>High growth potential, high volatility.</strong></p>
-                    <ul>
-                        <li><strong>Includes:</strong> S&P 500, international stocks, growth stocks, value stocks</li>
-                        <li><strong>Typical allocation:</strong> 40-80% depending on age and risk tolerance</li>
-                        <li><strong>Behaves well in:</strong> Economic expansions, bull markets</li>
-                        <li><strong>Struggles in:</strong> Recessions, financial crises</li>
-                    </ul>
-                    
-                    <h4>2?? Bonds (Fixed Income)</h4>
-                    <p>Loans to governments or corporations. <strong>Stability, income, low volatility.</strong></p>
-                    <ul>
-                        <li><strong>Includes:</strong> Treasury bonds, corporate bonds, municipal bonds</li>
-                        <li><strong>Typical allocation:</strong> 20-50% for balanced portfolios</li>
-                        <li><strong>Behaves well in:</strong> Recessions, market crashes (flight to safety)</li>
-                        <li><strong>Struggles in:</strong> High inflation, rising interest rates</li>
-                    </ul>
-                    
-                    <h4>3?? Real Estate (REITs)</h4>
-                    <p>Property investments via REITs. <strong>Inflation hedge, income generation.</strong></p>
-                    <ul>
-                        <li><strong>Includes:</strong> Residential REITs, commercial REITs, infrastructure</li>
-                        <li><strong>Typical allocation:</strong> 5-15% for diversification</li>
-                        <li><strong>Behaves well in:</strong> Inflation, economic expansion</li>
-                        <li><strong>Struggles in:</strong> Financial crises, rising interest rates</li>
-                    </ul>
-                    
-                    <h4>4?? Commodities</h4>
-                    <p>Physical assets like gold, oil, agricultural products. <strong>Inflation protection, crisis hedge.</strong></p>
-                    <ul>
-                        <li><strong>Includes:</strong> Gold, silver, oil, agricultural futures</li>
-                        <li><strong>Typical allocation:</strong> 0-10% as portfolio insurance</li>
-                        <li><strong>Behaves well in:</strong> High inflation, geopolitical crises</li>
-                        <li><strong>Struggles in:</strong> Deflation, strong economic growth</li>
-                    </ul>
-                    
-                    <h4>5?? Cash (Money Market)</h4>
-                    <p>Cash, savings accounts, money market funds. <strong>Safety, liquidity, no volatility.</strong></p>
-                    <ul>
-                        <li><strong>Includes:</strong> Savings accounts, money market funds, short-term treasuries</li>
-                        <li><strong>Typical allocation:</strong> 2-10% for emergencies and opportunities</li>
-                        <li><strong>Behaves well in:</strong> Market crashes (preserves capital)</li>
-                        <li><strong>Struggles in:</strong> High inflation (loses purchasing power)</li>
-                    </ul>
-                    
-                    <div class='tip-box'>
-                        ?? <strong>Don't know your allocation?</strong><br>
-                        1. Log into your brokerage account<br>
-                        2. Look for "Portfolio Analysis" or "Asset Allocation"<br>
-                        3. Sum up all stocks, bonds, etc. across all accounts<br>
-                        4. Calculate percentages of total portfolio value
-                    </div>
-                    
-                    <h3>?? Common Portfolio Archetypes</h3>
-                    <div class='example-box'>
-                        <strong>Conservative (Low Risk):</strong>
-                        <ul>
-                            <li>Stocks: 30% | Bonds: 50% | Real Estate: 10% | Commodities: 5% | Cash: 5%</li>
-                            <li><em>Good for: Retirees, risk-averse investors</em></li>
-                        </ul>
-                        <hr style='margin: 10px 0;'>
-                        <strong>Balanced (Moderate Risk):</strong>
-                        <ul>
-                            <li>Stocks: 60% | Bonds: 30% | Real Estate: 5% | Commodities: 3% | Cash: 2%</li>
-                            <li><em>Good for: Long-term investors, 401(k) default</em></li>
-                        </ul>
-                        <hr style='margin: 10px 0;'>
-                        <strong>Aggressive (High Risk):</strong>
-                        <ul>
-                            <li>Stocks: 85% | Bonds: 5% | Real Estate: 5% | Commodities: 3% | Cash: 2%</li>
-                            <li><em>Good for: Young investors, high risk tolerance</em></li>
-                        </ul>
-                        <hr style='margin: 10px 0;'>
-                        <strong>All-Weather (Risk Parity Style):</strong>
-                        <ul>
-                            <li>Stocks: 30% | Bonds: 40% | Real Estate: 15% | Commodities: 10% | Cash: 5%</li>
-                            <li><em>Good for: Crisis resilience, stable returns</em></li>
-                        </ul>
-                    </div>
-                    
-                    <div class='warning-box'>
-                        ?? <strong>Total Must Equal 100%:</strong> The tool will alert you if your allocation doesn't sum to exactly 100%. Adjust your inputs until the green "Total Allocation" shows 100.0%.
-                    </div>
-                    
-                    <h3>?? Tips for Accurate Input</h3>
-                    <ol>
-                        <li><strong>Include all accounts:</strong> 401(k), IRA, taxable brokerage, etc.</li>
-                        <li><strong>Classify accurately:</strong> Target-date funds contain stocks AND bonds�break them down</li>
-                        <li><strong>Round to whole numbers:</strong> 60.3% ? 60% is fine for this analysis</li>
-                        <li><strong>Exclude cash reserves:</strong> Only include investable assets, not emergency fund</li>
-                    </ol>
-                </div>
-            </div>
-        </div>
-        <!-- MODAL: Understanding Scenarios -->
-        <div id='modalSAScenarios' class='modal'>
-            <div class='modal-content'>
-                <div class='modal-header'>
-                    <h2>?? Historical Scenarios Explained</h2>
-                    <span class='close-modal' onclick='closeModal("modalSAScenarios")'>&times;</span>
-                </div>
-                <div class='modal-body'>
-                    <h3>?? Financial Crisis 2008 (The Great Recession)</h3>
-                    <p><strong>What Happened:</strong> Housing bubble burst, Lehman Brothers collapsed, global banking crisis</p>
-                    <p><strong>Duration:</strong> Peak-to-trough 18 months (Oct 2007 - Mar 2009)</p>
-                    <p><strong>Key Characteristics:</strong></p>
-                    <ul>
-                        <li>Stock market crashed 40-50% globally</li>
-                        <li>Flight to quality ? bonds rallied</li>
-                        <li>Real estate collapsed (epicenter of crisis)</li>
-                        <li>Commodities crashed as demand dried up</li>
-                    </ul>
-                    <div class='tip-box'>?? <strong>Lesson:</strong> Diversification matters! Portfolios with bonds survived much better than 100% stock portfolios.</div>
-                    
-                    <h3>?? High Inflation 1970s (Stagflation Era)</h3>
-                    <p><strong>What Happened:</strong> Oil shocks (1973, 1979), inflation peaked at 14%, high unemployment</p>
-                    <p><strong>Duration:</strong> Entire decade (1970-1982)</p>
-                    <p><strong>Key Characteristics:</strong></p>
-                    <ul>
-                        <li>Stocks struggled (high inflation hurts valuations)</li>
-                        <li>Bonds got crushed (rising rates = falling bond prices)</li>
-                        <li>Real estate held value (tangible asset)</li>
-                        <li>Commodities soared (oil, gold)</li>
-                        <li>Cash lost purchasing power massively</li>
-                    </ul>
-                    <div class='warning-box'>?? <strong>Lesson:</strong> Traditional 60/40 portfolios fail in high inflation. You NEED real assets (commodities, real estate).</div>
-                    
-                    <h3>?? Tech Boom 1999 (Dot-Com Bubble)</h3>
-                    <p><strong>What Happened:</strong> Internet revolution, irrational exuberance, sky-high valuations</p>
-                    <p><strong>Duration:</strong> Peak in March 2000, then 2-year crash</p>
-                    <p><strong>Key Characteristics:</strong></p>
-                    <ul>
-                        <li>Stocks (especially tech) gained 60-100%+ in 1999</li>
-                        <li>Bonds declined (rising rates, investors chasing stocks)</li>
-                        <li>Real estate stable</li>
-                        <li>Commodities weak (no inflation fears)</li>
-                    </ul>
-                    <div class='tip-box'>?? <strong>Lesson:</strong> Extreme euphoria creates bubbles. Rebalancing in 1999 (selling stocks, buying bonds) would have saved fortunes.</div>
-                    
-                    <h3>?? COVID-19 Pandemic 2020 (Black Swan)</h3>
-                    <p><strong>What Happened:</strong> Global lockdowns, unprecedented fiscal/monetary stimulus, V-shaped recovery</p>
-                    <p><strong>Duration:</strong> 1-month crash (Feb-Mar), then rapid recovery</p>
-                    <p><strong>Key Characteristics:</strong></p>
-                    <ul>
-                        <li>Stocks crashed 35% in March, then rallied 65% for the full year</li>
-                        <li>Bonds rallied (flight to safety)</li>
-                        <li>Real estate strong (low rates, remote work)</li>
-                        <li>Commodities crashed initially (oil negative!), then recovered</li>
-                    </ul>
-                    <div class='tip-box'>?? <strong>Lesson:</strong> Don't panic-sell during crashes! Investors who held through March 2020 recovered quickly.</div>
-                    
-                    <h3>?? Mild Recession (Generic Slowdown)</h3>
-                    <p><strong>What This Represents:</strong> Typical economic contraction (happens every 7-10 years)</p>
-                    <p><strong>Examples:</strong> Early 1990s, Early 2000s (post dot-com)</p>
-                    <p><strong>Key Characteristics:</strong></p>
-                    <ul>
-                        <li>Stocks decline 15-25%</li>
-                        <li>Bonds rally slightly (rate cuts)</li>
-                        <li>Real estate weakens</li>
-                        <li>Commodities decline</li>
-                        <li>Cash is king (preserves value)</li>
-                    </ul>
-                    <div class='tip-box'>?? <strong>Lesson:</strong> Recessions are normal! If you can't handle a -20% drop, you're too aggressive.</div>
-                    
-                    <h3>?? Strong Bull Market (Economic Expansion)</h3>
-                    <p><strong>What This Represents:</strong> Sustained growth period (2010-2019, 2023-2024)</p>
-                    <p><strong>Key Characteristics:</strong></p>
-                    <ul>
-                        <li>Stocks gain 20-30% annually</li>
-                        <li>Bonds slightly negative (rising rates)</li>
-                        <li>Real estate strong</li>
-                        <li>Commodities moderate gains</li>
-                        <li>Cash earns minimal returns</li>
-                    </ul>
-                    <div class='tip-box'>?? <strong>Lesson:</strong> Bull markets reward risk-takers. But don't get greedy�they always end eventually.</div>
-                    
-                    <h3>?? Why These Specific Scenarios?</h3>
-                    <p>These 6 scenarios cover the <strong>major stress types</strong> your portfolio might face:</p>
-                    <ul>
-                        <li><strong>Financial Crisis:</strong> Systemic collapse (worst-case)</li>
-                        <li><strong>High Inflation:</strong> Purchasing power erosion</li>
-                        <li><strong>Tech Boom:</strong> Euphoria and bubble risk</li>
-                        <li><strong>COVID:</strong> Black swan event with rapid recovery</li>
-                        <li><strong>Mild Recession:</strong> Normal cyclical downturn</li>
-                        <li><strong>Bull Market:</strong> Strong growth period</li>
-                    </ul>
-                    
-                    <div class='warning-box'>
-                        ?? <strong>Important:</strong> Returns shown are <strong>approximations</strong> and vary by specific assets, timing, and geography. Use as directional guidance, not exact forecasts.
-                    </div>
-                </div>
-            </div>
-        </div>
-        <!-- MODAL: Results Interpretation -->
-        <div id='modalSAResults' class='modal'>
-            <div class='modal-content'>
-                <div class='modal-header'>
-                    <h2>?? Interpreting Your Results</h2>
-                    <span class='close-modal' onclick='closeModal("modalSAResults")'>&times;</span>
-                </div>
-                <div class='modal-body'>
-                    <h3>?? Summary Statistics Explained</h3>
-                    
-                    <h4>1?? Best Case</h4>
-                    <p>The <strong>highest return</strong> your portfolio would achieve across all scenarios.</p>
-                    <ul>
-                        <li>Typically occurs in <strong>Tech Boom</strong> or <strong>Bull Market</strong> scenarios</li>
-                        <li>Shows your portfolio's <strong>upside potential</strong></li>
-                        <li>If < 15%: Your portfolio may be too conservative</li>
-                    </ul>
-                    
-                    <h4>2?? Worst Case</h4>
-                    <p>The <strong>lowest return</strong> (biggest loss) across all scenarios.</p>
-                    <ul>
-                        <li>Usually occurs in <strong>2008 Financial Crisis</strong></li>
-                        <li>Shows your portfolio's <strong>downside risk</strong></li>
-                        <li><strong>Critical question:</strong> Can you emotionally handle this loss?</li>
-                    </ul>
-                    
-                    <div class='warning-box'>
-                        ?? <strong>Rule of Thumb:</strong> If worst-case loss exceeds <strong>30%</strong>, most investors panic-sell. Consider reducing risk if you're in this range.
-                    </div>
-                    
-                    <h4>3?? Average Return</h4>
-                    <p>The <strong>mean of all 6 scenario returns</strong>. Gives a sense of "typical" performance.</p>
-                    <ul>
-                        <li>Positive average = portfolio is resilient</li>
-                        <li>Negative average = portfolio is fragile</li>
-                        <li>Target: +3% to +8% for balanced portfolios</li>
-                    </ul>
-                    
-                    <h4>4?? Positive Scenarios</h4>
-                    <p>How many of the 6 scenarios result in <strong>positive returns</strong>.</p>
-                    <table style='width: 100%; border-collapse: collapse; margin: 10px 0;'>
-                        <tr style='background: #E8DAEF;'>
-                            <th style='padding: 8px; border: 1px solid #ccc;'>Score</th>
-                            <th style='padding: 8px; border: 1px solid #ccc;'>Interpretation</th>
-                        </tr>
-                        <tr>
-                            <td style='padding: 8px; border: 1px solid #ccc;'><strong>5-6 / 6</strong></td>
-                            <td style='padding: 8px; border: 1px solid #ccc;'>? Excellent resilience</td>
-                        </tr>
-                        <tr>
-                            <td style='padding: 8px; border: 1px solid #ccc;'><strong>3-4 / 6</strong></td>
-                            <td style='padding: 8px; border: 1px solid #ccc;'>?? Moderate - vulnerable to specific crises</td>
-                        </tr>
-                        <tr>
-                            <td style='padding: 8px; border: 1px solid #ccc;'><strong>0-2 / 6</strong></td>
-                            <td style='padding: 8px; border: 1px solid #ccc;'>?? High risk - needs rebalancing</td>
-                        </tr>
-                    </table>
-                    
-                    <h4>5?? Negative Scenarios</h4>
-                    <p>How many scenarios result in <strong>losses</strong>. Inverse of positive scenarios.</p>
-                    
-                    <h3>?? Charts Explained</h3>
-                    
-                    <h4>Portfolio Performance by Scenario (Bar Chart)</h4>
-                    <p>Shows your exact return in each scenario. Look for:</p>
-                    <ul>
-                        <li><strong>Blue bars:</strong> Positive returns (good!)</li>
-                        <li><strong>Purple bars:</strong> Negative returns (losses)</li>
-                        <li><strong>Balance:</strong> Ideally more blue than purple</li>
-                    </ul>
-                    
-                    <div class='example-box'>
-                        <h4>?? Example Interpretation</h4>
-                        <p><strong>Your Results:</strong></p>
-                        <ul>
-                            <li>2008 Crisis: -22% ??</li>
-                            <li>1970s Inflation: -5% ??</li>
-                            <li>Tech Boom: +35% ??</li>
-                            <li>COVID: +15% ??</li>
-                            <li>Mild Recession: -10% ??</li>
-                            <li>Bull Market: +18% ??</li>
-                        </ul>
-                        <p><strong>Analysis:</strong> 3 positive, 3 negative. Worst-case is -22% (manageable). Vulnerable to inflation. Consider adding commodities.</p>
-                    </div>
-                    
-                    <h4>Risk/Return Profile (Scatter Plot)</h4>
-                    <p>Each dot represents a scenario, plotted by:</p>
-                    <ul>
-                        <li><strong>X-axis:</strong> Impact magnitude (absolute value of return)</li>
-                        <li><strong>Y-axis:</strong> Actual return (positive or negative)</li>
-                        <li><strong>Interpretation:</strong> Dots in the upper-left (low magnitude, positive return) are ideal</li>
-                    </ul>
-                    
-                    <h3>?? Detailed Results Table</h3>
-                    <p>Shows the <strong>breakdown</strong> of how each asset class contributed to the total return.</p>
-                    
-                    <div class='tip-box'>
-                        ?? <strong>How to Read:</strong><br>
-                        � <strong>Portfolio Return:</strong> Your total return for that scenario<br>
-                        � <strong>Asset Impacts:</strong> How much each asset class contributed<br>
-                        � Example: Stocks Impact = +3.6% means stocks added 3.6% to your total return
-                    </div>
-                    
-                    <h3>?? Decision Framework</h3>
-                    <div class='example-box'>
-                        <strong>IF worst-case loss > 30%:</strong> ?? Too aggressive<br>
-                        ? Increase bonds to 40%+, add 5-10% cash<br><br>
-                        <strong>IF worst-case loss 20-30%:</strong> ?? Moderate risk<br>
-                        ? Acceptable for most long-term investors<br><br>
-                        <strong>IF worst-case loss < 20%:</strong> ? Conservative<br>
-                        ? Well-protected, but may sacrifice returns<br><br>
-                        <strong>IF negative in 4+ scenarios:</strong> ?? Fragile portfolio<br>
-                        ? Add defensive assets (bonds, commodities, cash)<br><br>
-                        <strong>IF positive in all scenarios:</strong> ?? Unrealistic<br>
-                        ? Double-check your allocation (100% bonds?)
-                    </div>
-                    
-                    <div class='warning-box'>
-                        ?? <strong>Remember:</strong> These are <strong>simplified scenarios</strong>. Real crises are more complex and unpredictable. Use this as a <strong>stress test</strong>, not a crystal ball.
-                    </div>
-                </div>
-            </div>
-        </div>
-        <!-- MODAL: Recommendations -->
-        <div id='modalSARecommendations' class='modal'>
-            <div class='modal-content'>
-                <div class='modal-header'>
-                    <h2>?? Understanding Recommendations</h2>
-                    <span class='close-modal' onclick='closeModal("modalSARecommendations")'>&times;</span>
-                </div>
-                <div class='modal-body'>
-                    <h3>?? How Recommendations Are Generated</h3>
-                    <p>The tool analyzes your results and provides <strong>actionable suggestions</strong> based on:</p>
-                    <ul>
-                        <li>Your worst-case scenario loss</li>
-                        <li>Number of negative scenarios</li>
-                        <li>Average return across all scenarios</li>
-                        <li>Current asset allocation concentrations</li>
-                    </ul>
-                    
-                    <h3>?? Common Recommendations Explained</h3>
-                    
-                    <h4>?? "High Stock Exposure" Warning</h4>
-                    <p><strong>Triggered when:</strong> Stocks > 70%</p>
-                    <p><strong>Why it matters:</strong> Concentrated stock portfolios are extremely volatile and vulnerable to market crashes.</p>
-                    <p><strong>Suggested action:</strong> Reduce stocks to 50-65%, increase bonds to 25-35%</p>
-                    
-                    <div class='example-box'>
-                        <strong>Example:</strong><br>
-                        Current: 80% stocks, 20% bonds<br>
-                        2008 Crisis impact: -32% loss<br><br>
-                        <strong>After adjustment:</strong><br>
-                        New: 60% stocks, 35% bonds, 5% commodities<br>
-                        2008 Crisis impact: -22% loss (10% improvement!)
-                    </div>
-                    
-                    <h4>?? "Low Defensive Assets" Warning</h4>
-                    <p><strong>Triggered when:</strong> Bonds < 10% AND Cash < 5%</p>
-                    <p><strong>Why it matters:</strong> You have no safety cushion during crashes.</p>
-                    <p><strong>Suggested action:</strong> Add 20-30% bonds or 5-10% cash</p>
-                    
-                    <h4>?? "Inflation Protection" Suggestion</h4>
-                    <p><strong>Triggered when:</strong> Commodities < 5% AND Real Estate < 10%</p>
-                    <p><strong>Why it matters:</strong> Traditional stocks/bonds struggle in high inflation (1970s scenario).</p>
-                    <p><strong>Suggested action:</strong> Add 5-10% commodities (gold, TIPS) or 10-20% real estate (REITs)</p>
-                    
-                    <h4>?? "High Downside Risk" Alert</h4>
-                    <p><strong>Triggered when:</strong> Worst-case loss < -30%</p>
-                    <p><strong>Why it matters:</strong> Most investors panic-sell when losses exceed 30%, locking in losses.</p>
-                    <p><strong>Suggested action:</strong> Major rebalancing needed�increase bonds to 35%+, add 10% cash</p>
-                    
-                    <div class='warning-box'>
-                        ?? <strong>Behavioral Finance:</strong> Studies show investors who experience >30% losses are 5x more likely to panic-sell, converting temporary losses into permanent ones.
-                    </div>
-                    
-                    <h4>?? "Moderate Downside Risk" Warning</h4>
-                    <p><strong>Triggered when:</strong> Worst-case loss between -15% and -30%</p>
-                    <p><strong>Why it matters:</strong> You're in the acceptable range, but should monitor your emotional tolerance.</p>
-                    <p><strong>Suggested action:</strong> No immediate changes, but ask yourself: "Could I hold through a -25% drop?"</p>
-                    
-                    <h4>? "Resilient Portfolio" Confirmation</h4>
-                    <p><strong>Triggered when:</strong> Worst-case loss > -15%</p>
-                    <p><strong>Why it matters:</strong> Your portfolio has strong downside protection.</p>
-                    <p><strong>Caution:</strong> You might be TOO conservative if best-case return < 15%. Consider adding growth assets.</p>
-                    
-                    <h4>?? "High Failure Rate" Alert</h4>
-                    <p><strong>Triggered when:</strong> 4+ negative scenarios out of 6</p>
-                    <p><strong>Why it matters:</strong> Your portfolio loses money in most economic environments�not sustainable.</p>
-                    <p><strong>Suggested action:</strong> Fundamental rebalancing needed. Likely too concentrated in one or two asset classes.</p>
-                    
-                    <h4>? "Strong Performance" Confirmation</h4>
-                    <p><strong>Triggered when:</strong> 4+ positive scenarios out of 6</p>
-                    <p><strong>Why it matters:</strong> Your portfolio is resilient across most environments.</p>
-                    <p><strong>Action:</strong> Maintain current strategy, rebalance annually to maintain allocation.</p>
-                    
-                    <h3>?? Specific Allocation Adjustments</h3>
-                    <p>The tool suggests specific actions based on your allocation:</p>
-                    
-                    <div class='example-box'>
-                        <strong>Common Suggestions:</strong><br><br>
-                        <strong>?? Reduce stocks to 50-60%</strong><br>
-                        When: Stocks > 60% AND worst-case < -25%<br>
-                        Sell: High-risk growth stocks first<br><br>
-                        <strong>?? Increase bonds to 20-30%</strong><br>
-                        When: Bonds < 20% AND high volatility<br>
-                        Buy: Intermediate-term treasuries or bond index funds<br><br>
-                        <strong>?? Add 5-10% commodities</strong><br>
-                        When: Commodities = 0% AND negative in inflation scenario<br>
-                        Buy: Gold ETF (GLD), commodity index (DBC)<br><br>
-                        <strong>?? Consider 5-15% real estate</strong><br>
-                        When: Real Estate = 0% AND need diversification<br>
-                        Buy: REIT index funds (VNQ, SCHH)<br><br>
-                        <strong>?? Maintain 2-5% cash</strong><br>
-                        When: Cash < 2%<br>
-                        Hold: Money market funds, high-yield savings
-                    </div>
-                    
-                    <h3>?? Implementation Strategy</h3>
-                    <ol>
-                        <li><strong>Don't rush:</strong> Make changes gradually over 3-6 months</li>
-                        <li><strong>Consider taxes:</strong> Prioritize tax-advantaged accounts for rebalancing</li>
-                        <li><strong>Use new contributions:</strong> Direct new money to underweighted assets</li>
-                        <li><strong>Rebalance systematically:</strong> Set annual rebalancing dates (e.g., January 1st)</li>
-                        <li><strong>Monitor:</strong> Re-run this analysis every 6-12 months</li>
-                    </ol>
-                    
-                    <div class='tip-box'>
-                        ?? <strong>Pro Tip:</strong> If you're overwhelmed, start with <strong>one adjustment</strong>. For example: "This month, I'll increase bonds from 20% to 30%." Small steps compound over time.
-                    </div>
-                    
-                    <h3>?? When to Ignore Recommendations</h3>
-                    <p>Recommendations are guidelines, not rules. You can ignore them if:</p>
-                    <ul>
-                        <li>You're young (< 35) with 30+ year horizon ? can tolerate high volatility</li>
-                        <li>You have strong conviction in your strategy ? behavioral consistency matters more</li>
-                        <li>You're deliberately taking concentrated bets ? understand and accept the risks</li>
-                        <li>You have other income sources ? portfolio is only part of your wealth</li>
-                    </ul>
-                    
-                    <div class='warning-box'>
-                        ?? <strong>The Golden Rule:</strong> The best portfolio is one you can <strong>stick with</strong> through volatility. A "perfect" allocation you abandon during a crash is worthless.
-                    </div>
-                </div>
-            </div>
-        </div>
-        <footer><p>Scenario Analysis | 10/27/2025 21:57</p></footer>
+        
+        <!-- Footer -->
+        <footer>
+            <p>Scenario Analysis | Stress Testing Tool</p>
+        </footer>
     </div>
-    <script>
-        // Scenarios definition
-        const scenarios = [
-            {
-                name: 'Financial Crisis 2008',
-                description: 'Global banking collapse, housing market crash',
-                impacts: { stocks: -40, bonds: 5, realEstate: -35, commodities: -30, cash: 0 }
-            },
-            {
-                name: 'High Inflation 1970s',
-                description: 'Oil shocks, stagflation, rising rates',
-                impacts: { stocks: -10, bonds: -15, realEstate: 8, commodities: 25, cash: -15 }
-            },
-            {
-                name: 'Tech Boom 1999',
-                description: 'Dot-com bubble, irrational exuberance',
-                impacts: { stocks: 60, bonds: -3, realEstate: 5, commodities: -5, cash: 2 }
-            },
-            {
-                name: 'COVID-19 Pandemic 2020',
-                description: 'Global lockdowns, unprecedented stimulus',
-                impacts: { stocks: 35, bonds: 8, realEstate: 10, commodities: -20, cash: 0 }
-            },
-            {
-                name: 'Mild Recession',
-                description: 'Economic slowdown, moderate unemployment',
-                impacts: { stocks: -20, bonds: 3, realEstate: -10, commodities: -15, cash: 1 }
-            },
-            {
-                name: 'Strong Bull Market',
-                description: 'Economic expansion, low unemployment',
-                impacts: { stocks: 25, bonds: -2, realEstate: 12, commodities: 8, cash: 1 }
-            }
-        ];
-        
-        // Update total allocation display
-        function updateTotalAllocation() {
-            const stocks = parseFloat(document.getElementById('allocStocks').value) || 0;
-            const bonds = parseFloat(document.getElementById('allocBonds').value) || 0;
-            const realEstate = parseFloat(document.getElementById('allocRealEstate').value) || 0;
-            const commodities = parseFloat(document.getElementById('allocCommodities').value) || 0;
-            const cash = parseFloat(document.getElementById('allocCash').value) || 0;
-            
-            const total = stocks + bonds + realEstate + commodities + cash;
-            const display = document.getElementById('totalAllocation');
-            display.textContent = total.toFixed(1) + '%';
-            
-            if (Math.abs(total - 100) > 0.1) {
-                display.style.color = '#9D5CE6';
-            } else {
-                display.style.color = '#2649B2';
-            }
-        }
-        
-        // Add event listeners to inputs
-        window.addEventListener('DOMContentLoaded', function() {
-            ['allocStocks', 'allocBonds', 'allocRealEstate', 'allocCommodities', 'allocCash'].forEach(id => {
-                document.getElementById(id).addEventListener('input', updateTotalAllocation);
-            });
-            updateTotalAllocation();
-        });
-        
-        function runScenarioAnalysis() {
-            // Get portfolio allocation
-            const portfolio = {
-                stocks: parseFloat(document.getElementById('allocStocks').value) || 0,
-                bonds: parseFloat(document.getElementById('allocBonds').value) || 0,
-                realEstate: parseFloat(document.getElementById('allocRealEstate').value) || 0,
-                commodities: parseFloat(document.getElementById('allocCommodities').value) || 0,
-                cash: parseFloat(document.getElementById('allocCash').value) || 0
-            };
-            
-            // Validate total = 100%
-            const total = portfolio.stocks + portfolio.bonds + portfolio.realEstate + portfolio.commodities + portfolio.cash;
-            if (Math.abs(total - 100) > 0.1) {
-                alert('Total allocation must equal 100%. Current total: ' + total.toFixed(1) + '%');
-                return;
-            }
-            
-            // Calculate results for each scenario
-            const results = scenarios.map(scenario => {
-                const returns = calculateScenarioReturn(portfolio, scenario.impacts);
-                return {
-                    name: scenario.name,
-                    description: scenario.description,
-                    portfolioReturn: returns.total,
-                    breakdown: returns.breakdown
-                };
-            });
-            
-            displayScenarioResults(results, portfolio);
-        }
-        
-        function calculateScenarioReturn(portfolio, impacts) {
-            const breakdown = {
-                stocks: (portfolio.stocks / 100) * impacts.stocks,
-                bonds: (portfolio.bonds / 100) * impacts.bonds,
-                realEstate: (portfolio.realEstate / 100) * impacts.realEstate,
-                commodities: (portfolio.commodities / 100) * impacts.commodities,
-                cash: (portfolio.cash / 100) * impacts.cash
-            };
-            
-            const total = breakdown.stocks + breakdown.bonds + breakdown.realEstate + breakdown.commodities + breakdown.cash;
-            
-            return { total, breakdown };
-        }
-        
-        function displayScenarioResults(results, portfolio) {
-            document.getElementById('resultsSection').classList.remove('hidden');
-            document.getElementById('resultsSection').scrollIntoView({ behavior: 'smooth' });
-            
-            // Summary statistics
-            const returns = results.map(r => r.portfolioReturn);
-            const avgReturn = returns.reduce((a, b) => a + b, 0) / returns.length;
-            const maxReturn = Math.max(...returns);
-            const minReturn = Math.min(...returns);
-            const positiveScenarios = returns.filter(r => r > 0).length;
-            const negativeScenarios = returns.filter(r => r < 0).length;
-            
-            let summaryHTML = '<div class="result-card positive">';
-            summaryHTML += '<h4>Best Case</h4>';
-            summaryHTML += '<div class="value">' + (maxReturn > 0 ? '+' : '') + maxReturn.toFixed(1) + '%</div>';
-            summaryHTML += '</div>';
-            
-            summaryHTML += '<div class="result-card negative">';
-            summaryHTML += '<h4>Worst Case</h4>';
-            summaryHTML += '<div class="value">' + (minReturn > 0 ? '+' : '') + minReturn.toFixed(1) + '%</div>';
-            summaryHTML += '</div>';
-            
-            summaryHTML += '<div class="result-card">';
-            summaryHTML += '<h4>Average Return</h4>';
-            summaryHTML += '<div class="value">' + (avgReturn > 0 ? '+' : '') + avgReturn.toFixed(1) + '%</div>';
-            summaryHTML += '</div>';
-            
-            summaryHTML += '<div class="result-card positive">';
-            summaryHTML += '<h4>Positive Scenarios</h4>';
-            summaryHTML += '<div class="value">' + positiveScenarios + '/' + results.length + '</div>';
-            summaryHTML += '</div>';
-            
-            summaryHTML += '<div class="result-card negative">';
-            summaryHTML += '<h4>Negative Scenarios</h4>';
-            summaryHTML += '<div class="value">' + negativeScenarios + '/' + results.length + '</div>';
-            summaryHTML += '</div>';
-            
-            document.getElementById('summaryStats').innerHTML = summaryHTML;
-            
-            createScenariosChart(results);
-            createRiskReturnChart(results);
-            createDetailedTable(results, portfolio);
-            generateRecommendations(results, portfolio);
-        }
-        
-        function createScenariosChart(results) {
-            const categories = results.map(r => r.name);
-            const data = results.map(r => ({
-                y: r.portfolioReturn,
-                color: r.portfolioReturn >= 0 ? '#4A74F3' : '#9D5CE6'
-            }));
-            
-            Highcharts.chart('chartScenarios', {
-                chart: { type: 'column', backgroundColor: 'transparent' },
-                title: { text: 'Portfolio Performance by Scenario', style: { color: '#2649B2', fontSize: '1.3em' } },
-                xAxis: { categories: categories, labels: { rotation: -45, style: { color: '#5B2C6F', fontSize: '11px' } } },
-                yAxis: { 
-                    title: { text: 'Portfolio Return (%)', style: { color: '#2649B2' } },
-                    labels: { style: { color: '#6C3483' } },
-                    plotLines: [{ value: 0, color: '#2649B2', width: 2 }]
-                },
-                tooltip: { valueSuffix: '%', valueDecimals: 1 },
-                series: [{ name: 'Portfolio Return', data: data, borderRadius: '25%' }],
-                plotOptions: { 
-                    column: { 
-                        dataLabels: { 
-                            enabled: true, 
-                            format: '{point.y:.1f}%', 
-                            style: { fontSize: '11px', fontWeight: 'bold' } 
-                        } 
-                    } 
-                },
-                legend: { enabled: false },
-                credits: { enabled: false }
-            });
-        }
-        
-        function createRiskReturnChart(results) {
-            const data = results.map(r => ({
-                name: r.name,
-                x: Math.abs(r.portfolioReturn),
-                y: r.portfolioReturn,
-                color: r.portfolioReturn >= 0 ? '#4A74F3' : '#9D5CE6'
-            }));
-            
-            Highcharts.chart('chartRiskReturn', {
-                chart: { type: 'scatter', backgroundColor: 'transparent', zoomType: 'xy' },
-                title: { text: 'Scenario Risk/Return Profile', style: { color: '#2649B2', fontSize: '1.3em' } },
-                xAxis: { 
-                    title: { text: 'Impact Magnitude (%)', style: { color: '#2649B2' } },
-                    labels: { style: { color: '#5B2C6F' } },
-                    crosshair: true
-                },
-                yAxis: { 
-                    title: { text: 'Portfolio Return (%)', style: { color: '#2649B2' } },
-                    labels: { style: { color: '#6C3483' } },
-                    plotLines: [{ value: 0, color: '#2649B2', width: 2, dashStyle: 'Dash' }],
-                    crosshair: true
-                },
-                tooltip: { pointFormat: '<b>{point.name}</b><br/>Return: {point.y:.1f}%<br/>Magnitude: {point.x:.1f}%' },
-                series: [{ name: 'Scenarios', data: data, marker: { radius: 8 } }],
-                legend: { enabled: false },
-                credits: { enabled: false }
-            });
-        }
-        
-        function createDetailedTable(results, portfolio) {
-            let tableHTML = '<table class="comparison-table">';
-            tableHTML += '<thead><tr>';
-            tableHTML += '<th>Scenario</th>';
-            tableHTML += '<th>Portfolio Return (%)</th>';
-            tableHTML += '<th>Stocks Impact</th>';
-            tableHTML += '<th>Bonds Impact</th>';
-            tableHTML += '<th>Real Estate Impact</th>';
-            tableHTML += '<th>Commodities Impact</th>';
-            tableHTML += '<th>Cash Impact</th>';
-            tableHTML += '</tr></thead>';
-            tableHTML += '<tbody>';
-            
-            results.forEach(result => {
-                const returnClass = result.portfolioReturn >= 0 ? 'positive' : 'negative';
-                tableHTML += '<tr>';
-                tableHTML += '<td><b>' + result.name + '</b><br/><small style="color: #6C3483;">' + result.description + '</small></td>';
-                tableHTML += '<td><span class="highlight" style="font-size: 1.2em;">' + (result.portfolioReturn > 0 ? '+' : '') + result.portfolioReturn.toFixed(2) + '%</span></td>';
-                tableHTML += '<td>' + result.breakdown.stocks.toFixed(2) + '%</td>';
-                tableHTML += '<td>' + result.breakdown.bonds.toFixed(2) + '%</td>';
-                tableHTML += '<td>' + result.breakdown.realEstate.toFixed(2) + '%</td>';
-                tableHTML += '<td>' + result.breakdown.commodities.toFixed(2) + '%</td>';
-                tableHTML += '<td>' + result.breakdown.cash.toFixed(2) + '%</td>';
-                tableHTML += '</tr>';
-            });
-            
-            tableHTML += '</tbody></table>';
-            document.getElementById('detailedTable').innerHTML = tableHTML;
-        }
-        
-        function generateRecommendations(results, portfolio) {
-            const returns = results.map(r => r.portfolioReturn);
-            const avgReturn = returns.reduce((a, b) => a + b, 0) / returns.length;
-            const worstCase = Math.min(...returns);
-            const negativeCount = returns.filter(r => r < 0).length;
-            
-            let recommendations = '<h4>Key Insights</h4>';
-            
-            // Portfolio exposure analysis
-            if (portfolio.stocks > 70) {
-                recommendations += '<p>\u26A0\uFE0F <strong>High Stock Exposure:</strong> Your portfolio is heavily weighted towards stocks (' + portfolio.stocks + '%). Consider diversifying to reduce volatility during market downturns.</p>';
-            }
-            
-            if (portfolio.bonds < 10 && portfolio.cash < 5) {
-                recommendations += '<p>\u26A0\uFE0F <strong>Low Defensive Assets:</strong> Consider increasing bonds or cash to provide stability during crises.</p>';
-            }
-            
-            if (portfolio.commodities < 5 && portfolio.realEstate < 10) {
-                recommendations += '<p>\uD83D\uDCA1 <strong>Inflation Protection:</strong> Consider adding commodities or real estate as inflation hedges.</p>';
-            }
-            
-            // Performance analysis
-            if (worstCase < -30) {
-                recommendations += '<p>\uD83D\uDEA8 <strong>High Downside Risk:</strong> Your worst-case scenario shows a ' + worstCase.toFixed(1) + '% loss. Consider rebalancing to reduce risk.</p>';
-            } else if (worstCase < -15) {
-                recommendations += '<p>\u26A0\uFE0F <strong>Moderate Downside Risk:</strong> Your worst-case loss is ' + worstCase.toFixed(1) + '%. Ensure you can tolerate this volatility.</p>';
-            } else {
-                recommendations += '<p>\u2705 <strong>Resilient Portfolio:</strong> Your worst-case scenario is ' + worstCase.toFixed(1) + '%, showing good downside protection.</p>';
-            }
-            
-            if (negativeCount >= 4) {
-                recommendations += '<p>\uD83D\uDEA8 <strong>High Failure Rate:</strong> Your portfolio performs negatively in ' + negativeCount + ' out of ' + results.length + ' scenarios. Consider increasing diversification.</p>';
-            } else if (negativeCount <= 2) {
-                recommendations += '<p>\u2705 <strong>Strong Performance:</strong> Your portfolio is positive in most scenarios (' + (results.length - negativeCount) + '/' + results.length + ').</p>';
-            }
-            
-            // Average return feedback
-            if (avgReturn > 5) {
-                recommendations += '<p>\uD83D\uDCC8 <strong>Solid Average Return:</strong> Your average return across scenarios is +' + avgReturn.toFixed(1) + '%.</p>';
-            } else if (avgReturn > 0) {
-                recommendations += '<p>\uD83D\uDCA1 <strong>Positive but Modest:</strong> Average return is +' + avgReturn.toFixed(1) + '%. Consider adding growth-oriented assets.</p>';
-            } else {
-                recommendations += '<p>\uD83D\uDEA8 <strong>Negative Average:</strong> Your average return is ' + avgReturn.toFixed(1) + '%. Major rebalancing recommended.</p>';
-            }
-            
-            // Specific asset recommendations
-            recommendations += '<h4 style="margin-top: 20px;">Suggested Adjustments</h4>';
-            
-            if (portfolio.stocks > 60 && worstCase < -25) {
-                recommendations += '<p>\uD83D\uDCC9 Reduce stocks to 50-60% and increase bonds to 20-30%</p>';
-            }
-            
-            if (portfolio.commodities === 0) {
-                recommendations += '<p>\uD83E\uDD47 Add 5-10% commodities for inflation protection</p>';
-            }
-            
-            if (portfolio.realEstate === 0) {
-                recommendations += '<p>\uD83C\uDFE0 Consider 5-15% real estate for diversification</p>';
-            }
-            
-            if (portfolio.cash < 2) {
-                recommendations += '<p>\uD83D\uDCB5 Maintain 2-5% cash for opportunities and emergencies</p>';
-            }
-            
-            document.getElementById('recommendations').innerHTML = recommendations;
-        }
-        
-        // GESTION DES MODALS
-        function openModal(modalId) {
-            document.getElementById(modalId).style.display = 'block';
-            document.body.style.overflow = 'hidden';
-        }
-        
-        function closeModal(modalId) {
-            document.getElementById(modalId).style.display = 'none';
-            document.body.style.overflow = 'auto';
-        }
-        
-        window.onclick = function(event) {
-            if (event.target.classList.contains('modal')) {
-                event.target.style.display = 'none';
-                document.body.style.overflow = 'auto';
-            }
-        };
-    </script>
+    
+    <!-- MODALS -->
+    <div id='modalSAIntro' class='modal'>
+        <div class='modal-content'>
+            <div class='modal-header'>
+                <h2>📊 What is Scenario Analysis?</h2>
+                <span class='close-modal' onclick='closeModal("modalSAIntro")'>&times;</span>
+            </div>
+            <div class='modal-body'>
+                <h3>🎯 Purpose</h3>
+                <p><span class='key-term'>Scenario Analysis</span> is a stress-testing technique that evaluates how your portfolio would perform under <strong>specific historical or hypothetical events</strong>.</p>
+                
+                <h3>📊 Monte Carlo vs. Scenario Analysis</h3>
+                <div class='tip-box'>
+                    💡 <strong>Complementary Tools:</strong> Use Monte Carlo for long-term projections and Scenario Analysis to test resilience against specific shocks.
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div id='modalSAPortfolio' class='modal'>
+        <div class='modal-content'>
+            <div class='modal-header'>
+                <h2>📋 Defining Your Portfolio</h2>
+                <span class='close-modal' onclick='closeModal("modalSAPortfolio")'>&times;</span>
+            </div>
+            <div class='modal-body'>
+                <h3>📊 The 5 Asset Classes</h3>
+                <p>Enter your <strong>current allocation percentages</strong>. They must sum to 100%.</p>
+                
+                <h4>1️⃣ Stocks (Equities)</h4>
+                <p>Ownership in companies. <strong>High growth potential, high volatility.</strong></p>
+                
+                <h4>2️⃣ Bonds (Fixed Income)</h4>
+                <p>Loans to governments or corporations. <strong>Stability, income, low volatility.</strong></p>
+                
+                <h4>3️⃣ Real Estate (REITs)</h4>
+                <p>Property investments via REITs. <strong>Inflation hedge, income generation.</strong></p>
+                
+                <h4>4️⃣ Commodities</h4>
+                <p>Physical assets like gold, oil. <strong>Inflation protection, crisis hedge.</strong></p>
+                
+                <h4>5️⃣ Cash (Money Market)</h4>
+                <p>Cash, savings accounts. <strong>Safety, liquidity, no volatility.</strong></p>
+            </div>
+        </div>
+    </div>
+    
+    <div id='modalSAScenarios' class='modal'>
+        <div class='modal-content'>
+            <div class='modal-header'>
+                <h2>📈 Historical Scenarios Explained</h2>
+                <span class='close-modal' onclick='closeModal("modalSAScenarios")'>&times;</span>
+            </div>
+            <div class='modal-body'>
+                <h3>🔴 Financial Crisis 2008 (The Great Recession)</h3>
+                <p><strong>What Happened:</strong> Housing bubble burst, Lehman Brothers collapsed, global banking crisis</p>
+                <div class='tip-box'>💡 <strong>Lesson:</strong> Diversification matters! Portfolios with bonds survived much better than 100% stock portfolios.</div>
+                
+                <h3>📈 High Inflation 1970s (Stagflation Era)</h3>
+                <p><strong>What Happened:</strong> Oil shocks (1973, 1979), inflation peaked at 14%, high unemployment</p>
+                <div class='warning-box'>⚠️ <strong>Lesson:</strong> Traditional 60/40 portfolios fail in high inflation. You NEED real assets (commodities, real estate).</div>
+            </div>
+        </div>
+    </div>
+    
+    <div id='modalSAResults' class='modal'>
+        <div class='modal-content'>
+            <div class='modal-header'>
+                <h2>📊 Interpreting Your Results</h2>
+                <span class='close-modal' onclick='closeModal("modalSAResults")'>&times;</span>
+            </div>
+            <div class='modal-body'>
+                <h3>📈 Summary Statistics Explained</h3>
+                
+                <h4>1️⃣ Best Case</h4>
+                <p>The <strong>highest return</strong> your portfolio would achieve across all scenarios.</p>
+                
+                <h4>2️⃣ Worst Case</h4>
+                <p>The <strong>lowest return</strong> (biggest loss) across all scenarios.</p>
+                <div class='warning-box'>
+                    ⚠️ <strong>Rule of Thumb:</strong> If worst-case loss exceeds <strong>30%</strong>, most investors panic-sell. Consider reducing risk if you're in this range.
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div id='modalSARecommendations' class='modal'>
+        <div class='modal-content'>
+            <div class='modal-header'>
+                <h2>💡 Understanding Recommendations</h2>
+                <span class='close-modal' onclick='closeModal("modalSARecommendations")'>&times;</span>
+            </div>
+            <div class='modal-body'>
+                <h3>📊 How Recommendations Are Generated</h3>
+                <p>The tool analyzes your results and provides <strong>actionable suggestions</strong> based on:</p>
+                <ul>
+                    <li>Your worst-case scenario loss</li>
+                    <li>Number of negative scenarios</li>
+                    <li>Average return across all scenarios</li>
+                    <li>Current asset allocation concentrations</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Scripts -->
+    <script src='assets/js/common.js'></script>
+    <script src='assets/js/scenario-analysis.js'></script>
 </body>
 </html>

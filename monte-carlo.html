@@ -1,768 +1,321 @@
 <!DOCTYPE html>
-<html lang='en'>
+<html lang='fr'>
 <head>
     <meta charset='UTF-8'>
     <meta name='viewport' content='width=device-width, initial-scale=1.0'>
     <title>Monte Carlo Simulation - Raphael NARDONE</title>
+    
+    <!-- Highcharts -->
     <script src='https://code.highcharts.com/highcharts.js'></script>
     <script src='https://code.highcharts.com/modules/exporting.js'></script>
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Segoe UI', sans-serif; background: linear-gradient(135deg, #5B2C6F 0%, #2649B2 50%, #4A74F3 100%); padding: 20px; color: #333; }
-        .container { max-width: 1600px; margin: 0 auto; background: white; border-radius: 20px; box-shadow: 0 20px 60px rgba(91,44,111,0.4); overflow: hidden; }
-        header { background: linear-gradient(135deg, #2649B2 0%, #6C3483 50%, #8E44AD 100%); color: white; padding: 30px; text-align: center; }
-        header h1 { font-size: 2.5em; margin-bottom: 10px; text-shadow: 2px 2px 8px rgba(0,0,0,0.3); }
-        header p { font-size: 1.1em; opacity: 0.95; }
-        .content { padding: 30px; }
-        .params-panel { background: linear-gradient(135deg, #E8DAEF 0%, #D4D9F0 100%); padding: 30px; border-radius: 15px; margin-bottom: 30px; box-shadow: 0 4px 12px rgba(108,52,131,0.15); }
-        .params-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-bottom: 20px; }
-        .param-group { background: white; padding: 20px; border-radius: 10px; border-left: 4px solid #8E44AD; }
-        .param-group label { display: block; color: #5B2C6F; font-weight: bold; margin-bottom: 8px; font-size: 0.9em; }
-        .param-group input { width: 100%; padding: 12px; border: 2px solid #9D5CE6; border-radius: 8px; font-size: 1em; transition: all 0.3s; }
-        .param-group input:focus { outline: none; border-color: #2649B2; box-shadow: 0 0 0 3px rgba(38,73,178,0.2); }
-        .param-group .hint { font-size: 0.8em; color: #6C3483; margin-top: 5px; }
-        .btn-simulate { background: linear-gradient(135deg, #2649B2 0%, #8E44AD 100%); color: white; padding: 15px 40px; border: none; border-radius: 10px; font-size: 1.1em; font-weight: bold; cursor: pointer; box-shadow: 0 4px 12px rgba(38,73,178,0.3); transition: all 0.3s; width: 100%; }
-        .btn-simulate:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(38,73,178,0.4); }
-        .btn-simulate:active { transform: translateY(0); }
-        .results-panel { background: white; padding: 30px; border-radius: 15px; box-shadow: 0 4px 12px rgba(108,52,131,0.12); margin-bottom: 30px; border-top: 3px solid #8E44AD; }
-        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 20px; }
-        .stat-box { background: linear-gradient(135deg, #E8DAEF 0%, #D4D9F0 100%); padding: 15px; border-radius: 10px; text-align: center; }
-        .stat-box .label { font-size: 0.85em; color: #5B2C6F; font-weight: bold; margin-bottom: 8px; }
-        .stat-box .value { font-size: 1.5em; font-weight: bold; color: #2649B2; }
-        .chart { min-height: 500px; }
-        footer { background: linear-gradient(135deg, #2649B2 0%, #6C3483 100%); color: white; text-align: center; padding: 20px; }
-        .hidden { display: none; }
-        .inflation-toggle { background: linear-gradient(135deg, #E8DAEF 0%, #D4D9F0 100%); padding: 15px; border-radius: 10px; margin-bottom: 20px; text-align: center; border-left: 4px solid #9D5CE6; }
-        .inflation-toggle label { color: #2649B2; font-weight: bold; font-size: 1em; cursor: pointer; }
-        .inflation-toggle input[type='checkbox'] { margin-right: 10px; transform: scale(1.3); cursor: pointer; }
-        
-        /* INFO-BULLES & MODALS */
-        .help-icon { display: inline-block; width: 24px; height: 24px; background: linear-gradient(135deg, #4A74F3 0%, #6C8BE0 100%); color: white; border-radius: 50%; text-align: center; line-height: 24px; font-weight: bold; font-size: 14px; cursor: pointer; margin-left: 10px; transition: all 0.3s; box-shadow: 0 2px 6px rgba(74,116,243,0.3); }
-        .help-icon:hover { transform: scale(1.15); box-shadow: 0 4px 12px rgba(74,116,243,0.5); background: linear-gradient(135deg, #2649B2 0%, #4A74F3 100%); }
-        .modal { display: none; position: fixed; z-index: 9999; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(91,44,111,0.8); backdrop-filter: blur(5px); animation: fadeIn 0.3s; }
-        .modal-content { background: white; margin: 3% auto; padding: 0; border-radius: 20px; width: 85%; max-width: 900px; box-shadow: 0 20px 60px rgba(38,73,178,0.4); animation: slideDown 0.4s; max-height: 85vh; overflow-y: auto; }
-        .modal-header { background: linear-gradient(135deg, #2649B2 0%, #8E44AD 100%); color: white; padding: 25px 30px; border-radius: 20px 20px 0 0; display: flex; justify-content: space-between; align-items: center; }
-        .modal-header h2 { margin: 0; font-size: 1.8em; text-shadow: 2px 2px 8px rgba(0,0,0,0.3); }
-        .modal-body { padding: 30px; line-height: 1.8; color: #333; }
-        .modal-body h3 { color: #2649B2; margin-top: 25px; margin-bottom: 15px; padding-bottom: 8px; border-bottom: 2px solid #E8DAEF; font-size: 1.4em; }
-        .modal-body h4 { color: #6C3483; margin-top: 20px; margin-bottom: 10px; font-size: 1.1em; }
-        .modal-body p { margin-bottom: 15px; }
-        .modal-body ul, .modal-body ol { margin-left: 25px; margin-bottom: 15px; }
-        .modal-body li { margin-bottom: 8px; }
-        .formula-box { background: linear-gradient(135deg, #E8DAEF 0%, #D4D9F0 100%); padding: 20px; border-radius: 12px; margin: 20px 0; border-left: 5px solid #8E44AD; font-family: 'Courier New', monospace; font-size: 1.1em; color: #2649B2; }
-        .example-box { background: linear-gradient(135deg, #D4D9F0 0%, #E8DAEF 100%); padding: 20px; border-radius: 12px; margin: 20px 0; border-left: 5px solid #4A74F3; }
-        .tip-box { background: linear-gradient(135deg, #4A74F3 0%, #6C8BE0 100%); color: white; padding: 15px 20px; border-radius: 10px; margin: 20px 0; font-weight: 500; }
-        .warning-box { background: linear-gradient(135deg, #9D5CE6 0%, #C39BD3 100%); color: white; padding: 15px 20px; border-radius: 10px; margin: 20px 0; font-weight: 500; }
-        .close-modal { color: white; font-size: 32px; font-weight: bold; cursor: pointer; background: rgba(255,255,255,0.2); width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; transition: all 0.3s; }
-        .close-modal:hover { background: rgba(255,255,255,0.4); transform: rotate(90deg); }
-        .diagram { text-align: center; margin: 25px 0; padding: 20px; background: #f8f9fa; border-radius: 12px; }
-        .diagram svg { max-width: 100%; height: auto; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-        @keyframes slideDown { from { transform: translateY(-50px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-        .key-term { background: linear-gradient(135deg, #2649B2 0%, #4A74F3 100%); color: white; padding: 2px 8px; border-radius: 4px; font-weight: bold; white-space: nowrap; }
-        @media (max-width: 768px) { .modal-content { width: 95%; margin: 10% auto; } .modal-body { padding: 20px; } }
-    </style>
+    
+    <!-- Styles -->
+    <link rel='stylesheet' href='assets/css/common.css'>
+    <link rel='stylesheet' href='assets/css/monte-carlo.css'>
 </head>
 <body>
     <div class='container'>
+        <!-- Header -->
         <header>
             <h1>Monte Carlo Simulation</h1>
             <p>Investment Portfolio Projection | Raphael NARDONE</p>
         </header>
-        <nav style='background: linear-gradient(135deg, #2649B2 0%, #8E44AD 100%); padding: 0; box-shadow: 0 2px 10px rgba(0,0,0,0.2);'>
-            <div style='max-width: 1800px; margin: 0 auto; display: flex; gap: 0;'>
-                <a href='dashboard-financier.html' style='flex: 1; padding: 20px; text-align: center; color: white; text-decoration: none; transition: all 0.3s;' onmouseover='this.style.background="rgba(255,255,255,0.1)"' onmouseout='this.style.background="transparent"'>Budget</a>
-                <a href='monte-carlo.html' style='flex: 1; padding: 20px; text-align: center; color: white; text-decoration: none; background: rgba(255,255,255,0.2); font-weight: bold; border-bottom: 4px solid white;'>Monte Carlo</a>
-                <a href='portfolio-optimizer.html' style='flex: 1; padding: 20px; text-align: center; color: white; text-decoration: none; transition: all 0.3s;' onmouseover='this.style.background="rgba(255,255,255,0.1)"' onmouseout='this.style.background="transparent"'>Markowitz</a>
-                <a href='risk-parity.html' style='flex: 1; padding: 20px; text-align: center; color: white; text-decoration: none; transition: all 0.3s;' onmouseover='this.style.background="rgba(255,255,255,0.1)"' onmouseout='this.style.background="transparent"'>Risk Parity</a>
-                <a href='scenario-analysis.html' style='flex: 1; padding: 20px; text-align: center; color: white; text-decoration: none; transition: all 0.3s;' onmouseover='this.style.background="rgba(255,255,255,0.1)"' onmouseout='this.style.background="transparent"'>Scenarios</a>
+        
+        <!-- Navigation -->
+        <nav>
+            <div class='nav-container'>
+                <a href='index.html' class='nav-link'>Budget</a>
+                <a href='monte-carlo.html' class='nav-link'>Monte Carlo</a>
+                <a href='portfolio-optimizer.html' class='nav-link'>Markowitz</a>
+                <a href='risk-parity.html' class='nav-link'>Risk Parity</a>
+                <a href='scenario-analysis.html' class='nav-link'>Scenarios</a>
             </div>
         </nav>
+        
+        <!-- Main Content -->
         <div class='content'>
+            <!-- Parameters Panel -->
             <div class='params-panel'>
-                <h2 style='color: #2649B2; margin-bottom: 25px;'>Simulation Parameters <span class='help-icon' onclick='openModal("modalMCIntro")'>?</span></h2>
+                <h2 class='panel-title'>
+                    Simulation Parameters 
+                    <span class='help-icon' onclick='openModal("modalMCIntro")'>?</span>
+                </h2>
+                
                 <div class='params-grid'>
                     <div class='param-group'>
-                        <label for='monthlyInvestment'>Monthly Investment (EUR) <span class='help-icon' onclick='openModal("modalMCInvest")' style='width: 20px; height: 20px; line-height: 20px; font-size: 12px;'>?</span></label>
+                        <label for='monthlyInvestment'>
+                            Monthly Investment (EUR) 
+                            <span class='help-icon help-icon-small' onclick='openModal("modalMCInvest")'>?</span>
+                        </label>
                         <input type='number' id='monthlyInvestment' value='200' step='10'>
                         <div class='hint'>Amount invested each month</div>
                     </div>
+                    
                     <div class='param-group'>
-                        <label for='monthlyYield'>Est. Monthly Yield (%) <span class='help-icon' onclick='openModal("modalMCYield")' style='width: 20px; height: 20px; line-height: 20px; font-size: 12px;'>?</span></label>
+                        <label for='monthlyYield'>
+                            Est. Monthly Yield (%) 
+                            <span class='help-icon help-icon-small' onclick='openModal("modalMCYield")'>?</span>
+                        </label>
                         <input type='number' id='monthlyYield' value='0.67' step='0.01'>
                         <div class='hint'>Expected monthly return (e.g., 0.67 = 0.67%)</div>
                     </div>
+                    
                     <div class='param-group'>
-                        <label for='volatility'>Volatility (%) <span class='help-icon' onclick='openModal("modalMCVol")' style='width: 20px; height: 20px; line-height: 20px; font-size: 12px;'>?</span></label>
+                        <label for='volatility'>
+                            Volatility (%) 
+                            <span class='help-icon help-icon-small' onclick='openModal("modalMCVol")'>?</span>
+                        </label>
                         <input type='number' id='volatility' value='15' step='0.5'>
                         <div class='hint'>Market volatility (e.g., 15 = 15%)</div>
                     </div>
+                    
                     <div class='param-group'>
                         <label for='years'>Projection Horizon (Years)</label>
                         <input type='number' id='years' value='25' step='1' min='1'>
                         <div class='hint'>Number of years to simulate</div>
                     </div>
+                    
                     <div class='param-group'>
-                        <label for='simulations'>Number of Simulations <span class='help-icon' onclick='openModal("modalMCSim")' style='width: 20px; height: 20px; line-height: 20px; font-size: 12px;'>?</span></label>
+                        <label for='simulations'>
+                            Number of Simulations 
+                            <span class='help-icon help-icon-small' onclick='openModal("modalMCSim")'>?</span>
+                        </label>
                         <input type='number' id='simulations' value='1000' step='100' min='100'>
                         <div class='hint'>More = more accurate (slower)</div>
                     </div>
+                    
                     <div class='param-group'>
                         <label for='targetValue'>Target Portfolio Value (EUR)</label>
                         <input type='number' id='targetValue' value='100000' step='1000'>
                         <div class='hint'>Goal to reach (for time analysis)</div>
                     </div>
+                    
                     <div class='param-group'>
                         <label for='inflationRateMC'>Annual Inflation Rate (%)</label>
                         <input type='number' id='inflationRateMC' value='2.5' step='0.1'>
                         <div class='hint'>Expected annual inflation (e.g., 2.5%)</div>
                     </div>
                 </div>
+                
                 <div class='inflation-toggle'>
                     <label>
                         <input type='checkbox' id='showInflationMC'>
                         Show Inflation-Adjusted Values (Real Returns)
                     </label>
                 </div>
-                <button class='btn-simulate' onclick='runMonteCarlo()'>Run Simulation</button>
+                
+                <button class='btn-simulate' onclick='MonteCarlo.runSimulation()'>Run Simulation</button>
             </div>
+            
+            <!-- Results Panel -->
             <div id='resultsPanel' class='results-panel hidden'>
-                <h2 style='color: #2649B2; margin-bottom: 20px;'>Simulation Results <span class='help-icon' onclick='openModal("modalMCResults")'>?</span></h2>
-                <h3 style='color: #6C3483; margin-bottom: 15px; margin-top: 20px;'>Final Portfolio Value</h3>
+                <h2 class='section-title'>
+                    Simulation Results 
+                    <span class='help-icon' onclick='openModal("modalMCResults")'>?</span>
+                </h2>
+                
+                <h3 class='subsection-title'>Final Portfolio Value</h3>
                 <div id='statsContainer' class='stats-grid'></div>
-                <h3 style='color: #6C3483; margin-bottom: 15px; margin-top: 30px;'>Portfolio Evolution Over Time</h3>
+                
+                <h3 class='subsection-title'>Portfolio Evolution Over Time</h3>
                 <div id='chart1' class='chart'></div>
-                <div style='display: grid; grid-template-columns: repeat(auto-fit, minmax(500px, 1fr)); gap: 30px; margin-top: 30px;'>
+                
+                <div class='charts-grid-2'>
                     <div>
-                        <h3 style='color: #6C3483; margin-bottom: 15px;'>Distribution of Final Returns</h3>
-                        <div id='chart2' class='chart' style='min-height: 400px;'></div>
+                        <h3 class='subsection-title'>Distribution of Final Returns</h3>
+                        <div id='chart2' class='chart chart-medium'></div>
                     </div>
                     <div>
-                        <h3 style='color: #6C3483; margin-bottom: 15px;'>Probability Analysis</h3>
-                        <div id='chart3' class='chart' style='min-height: 400px;'></div>
+                        <h3 class='subsection-title'>Probability Analysis</h3>
+                        <div id='chart3' class='chart chart-medium'></div>
                     </div>
                 </div>
-                <h3 style='color: #6C3483; margin-bottom: 15px; margin-top: 30px;'>Risk Analysis <span class='help-icon' onclick='openModal("modalMCRisk")'>?</span></h3>
+                
+                <h3 class='subsection-title'>
+                    Risk Analysis 
+                    <span class='help-icon' onclick='openModal("modalMCRisk")'>?</span>
+                </h3>
                 <div id='riskAnalysis' class='stats-grid'></div>
-                <h3 style='color: #6C3483; margin-bottom: 15px; margin-top: 30px;'>Stress Testing Scenarios</h3>
+                
+                <h3 class='subsection-title'>Stress Testing Scenarios</h3>
                 <div id='chart4' class='chart'></div>
-                <h3 style='color: #6C3483; margin-bottom: 15px; margin-top: 30px;'>Time to Target</h3>
+                
+                <h3 class='subsection-title'>Time to Target</h3>
                 <div id='chart5' class='chart'></div>
             </div>
         </div>
-        <!-- MODAL: Introduction Monte Carlo -->
-        <div id='modalMCIntro' class='modal'>
-            <div class='modal-content'>
-                <div class='modal-header'>
-                    <h2>?? What is Monte Carlo Simulation?</h2>
-                    <span class='close-modal' onclick='closeModal("modalMCIntro")'>&times;</span>
-                </div>
-                <div class='modal-body'>
-                    <h3>?? Purpose</h3>
-                    <p>Monte Carlo simulation uses <strong>random sampling</strong> to model the uncertainty in investment returns. Instead of a single projection, it generates <strong>thousands of possible scenarios</strong> to show the range of potential outcomes.</p>
-                    
-                    <h3>?? How It Works</h3>
-                    <ol>
-                        <li><strong>Random Returns:</strong> Each month, the simulation generates a random return based on your expected yield and volatility</li>
-                        <li><strong>Compounding:</strong> Returns accumulate over time with monthly investments added</li>
-                        <li><strong>Repetition:</strong> This process repeats 1,000+ times to create a distribution of outcomes</li>
-                        <li><strong>Analysis:</strong> Statistical analysis reveals probabilities (e.g., 90% chance of reaching X amount)</li>
-                    </ol>
-                    
-                    <div class='formula-box'>
-                        <strong>Formula (each month):</strong><br>
-                        Portfolio<sub>month</sub> = Portfolio<sub>previous</sub> � (1 + Return<sub>random</sub>) + MonthlyInvestment<br><br>
-                        Return<sub>random</sub> ~ Normal(�, s)
-                    </div>
-                    
-                    <h3>? Key Advantages</h3>
-                    <ul>
-                        <li><strong>Realistic:</strong> Captures market volatility and uncertainty</li>
-                        <li><strong>Probabilistic:</strong> Shows likelihood of outcomes (not just one forecast)</li>
-                        <li><strong>Risk-aware:</strong> Identifies worst-case and best-case scenarios</li>
-                        <li><strong>Actionable:</strong> Helps adjust strategy based on confidence levels</li>
-                    </ul>
-                    
-                    <div class='tip-box'>
-                        ?? <strong>Pro Tip:</strong> The median (50th percentile) is more reliable than the average for long-term projections, as it's less affected by extreme outliers.
-                    </div>
-                </div>
-            </div>
-        </div>
-        <!-- MODAL: Monthly Investment -->
-        <div id='modalMCInvest' class='modal'>
-            <div class='modal-content'>
-                <div class='modal-header'>
-                    <h2>?? Monthly Investment Strategy</h2>
-                    <span class='close-modal' onclick='closeModal("modalMCInvest")'>&times;</span>
-                </div>
-                <div class='modal-body'>
-                    <h3>?? What Is Dollar-Cost Averaging (DCA)?</h3>
-                    <p>Investing a <strong>fixed amount regularly</strong> (e.g., 200 EUR/month) regardless of market conditions.</p>
-                    
-                    <h3>? Advantages</h3>
-                    <ul>
-                        <li><strong>Reduces timing risk:</strong> You buy more when prices are low, less when high</li>
-                        <li><strong>Discipline:</strong> Automates investing, removes emotions</li>
-                        <li><strong>Accessible:</strong> No need for large lump sum</li>
-                        <li><strong>Compound growth:</strong> Early investments grow the longest</li>
-                    </ul>
-                    
-                    <div class='example-box'>
-                        <h4>?? Power of Consistency</h4>
-                        <p><strong>Scenario:</strong> 200 EUR/month for 25 years at 8% annual return</p>
-                        <ul>
-                            <li>Total invested: 60,000 EUR</li>
-                            <li>Expected value: ~190,000 EUR</li>
-                            <li>Gains: ~130,000 EUR (217% return!)</li>
-                        </ul>
-                    </div>
-                    
-                    <h3>?? How Much Should You Invest?</h3>
-                    <div class='tip-box'>
-                        ?? <strong>50/30/20 Rule:</strong><br>
-                        � 50% Needs (rent, food, bills)<br>
-                        � 30% Wants (entertainment, shopping)<br>
-                        � 20% Savings/Investments ? Start here!
-                    </div>
-                    
-                    <div class='warning-box'>
-                        ?? <strong>Important:</strong> Only invest money you won't need for 5+ years. Keep 3-6 months of expenses in an emergency fund first!
-                    </div>
-                </div>
-            </div>
-        </div>
-        <!-- MODAL: Monthly Yield -->
-        <div id='modalMCYield' class='modal'>
-            <div class='modal-content'>
-                <div class='modal-header'>
-                    <h2>?? Expected Monthly Yield</h2>
-                    <span class='close-modal' onclick='closeModal("modalMCYield")'>&times;</span>
-                </div>
-                <div class='modal-body'>
-                    <h3>?? Definition</h3>
-                    <p>The <span class='key-term'>Expected Yield</span> is the average return you anticipate <strong>per month</strong>. It's the central tendency around which random returns fluctuate.</p>
-                    
-                    <div class='formula-box'>
-                        <strong>Conversion Formula:</strong><br>
-                        Monthly Yield = (1 + Annual Return)<sup>1/12</sup> - 1<br><br>
-                        <strong>Approximation:</strong><br>
-                        Monthly Yield � Annual Return / 12
-                    </div>
-                    
-                    <div class='example-box'>
-                        <h4>?? Example: 8% Annual Return</h4>
-                        <p><strong>Exact:</strong> (1.08)<sup>1/12</sup> - 1 = 0.643% per month</p>
-                        <p><strong>Approximation:</strong> 8% / 12 = 0.667% per month</p>
-                        <p style='color: #6C3483;'><em>The tool uses the approximation for simplicity.</em></p>
-                    </div>
-                    
-                    <h3>?? Historical Averages (Annual)</h3>
-                    <ul>
-                        <li><strong>S&P 500 (1926-2023):</strong> 10-11%</li>
-                        <li><strong>MSCI World:</strong> 8-9%</li>
-                        <li><strong>Bonds (US Treasury):</strong> 4-5%</li>
-                        <li><strong>60/40 Portfolio:</strong> 7-8%</li>
-                        <li><strong>Real Estate (REITs):</strong> 9-10%</li>
-                    </ul>
-                    
-                    <div class='tip-box'>
-                        ?? <strong>Recommendation:</strong> Use <strong>6-8% annual</strong> (0.5-0.67% monthly) for conservative long-term projections. Past performance doesn't guarantee future results!
-                    </div>
-                </div>
-            </div>
-        </div>
-        <!-- MODAL: Volatility -->
-        <div id='modalMCVol' class='modal'>
-            <div class='modal-content'>
-                <div class='modal-header'>
-                    <h2>?? Understanding Volatility</h2>
-                    <span class='close-modal' onclick='closeModal("modalMCVol")'>&times;</span>
-                </div>
-                <div class='modal-body'>
-                    <h3>?? Definition</h3>
-                    <p><span class='key-term'>Volatility</span> measures how much returns fluctuate around the average. High volatility = big swings up and down. Low volatility = stable returns.</p>
-                    
-                    <div class='formula-box'>
-                        <strong>Calculation:</strong><br>
-                        s = Standard Deviation of Returns<br>
-                        s<sub>monthly</sub> = s<sub>annual</sub> / v12
-                    </div>
-                    
-                    <h3>?? Typical Values (Annual)</h3>
-                    <ul>
-                        <li><strong>Cash/Bonds:</strong> 2-6%</li>
-                        <li><strong>Balanced Portfolio (60/40):</strong> 10-12%</li>
-                        <li><strong>Global Stocks (S&P 500):</strong> 15-20%</li>
-                        <li><strong>Cryptocurrencies:</strong> 60-100%+</li>
-                    </ul>
-                    
-                    <div class='example-box'>
-                        <h4>?? Example</h4>
-                        <p>If you invest in the S&P 500 with 18% volatility and 10% average return:</p>
-                        <ul>
-                            <li><strong>68% of years</strong> will have returns between -8% and +28% (�1s)</li>
-                            <li><strong>95% of years</strong> will have returns between -26% and +46% (�2s)</li>
-                        </ul>
-                    </div>
-                    
-                    <div class='warning-box'>
-                        ?? <strong>Warning:</strong> Don't confuse volatility with risk. Volatility is temporary fluctuation. Risk is permanent loss of capital. Long-term investors can ride out volatility.
-                    </div>
-                    
-                    <h3>?? How to Choose Your Volatility</h3>
-                    <ol>
-                        <li>Check historical data for your asset class (e.g., Yahoo Finance, PortfolioVisualizer)</li>
-                        <li>Use 15-18% for stock-heavy portfolios</li>
-                        <li>Use 8-12% for balanced portfolios</li>
-                        <li>Add 2-3% if investing in emerging markets</li>
-                    </ol>
-                </div>
-            </div>
-        </div>
-        <!-- MODAL: Number of Simulations -->
-        <div id='modalMCSim' class='modal'>
-            <div class='modal-content'>
-                <div class='modal-header'>
-                    <h2>?? Number of Simulations</h2>
-                    <span class='close-modal' onclick='closeModal("modalMCSim")'>&times;</span>
-                </div>
-                <div class='modal-body'>
-                    <h3>?? Why Multiple Simulations?</h3>
-                    <p>Each simulation is one possible future. Running many simulations creates a <strong>probability distribution</strong> of outcomes, giving you confidence intervals.</p>
-                    
-                    <h3>?? How Many Do You Need?</h3>
-                    <ul>
-                        <li><strong>100-500:</strong> Quick test, rough estimate (�5% accuracy)</li>
-                        <li><strong>1,000:</strong> Standard (�2% accuracy) ? Recommended</li>
-                        <li><strong>5,000:</strong> High precision (�1% accuracy)</li>
-                        <li><strong>10,000+:</strong> Academic/professional use (�0.5% accuracy)</li>
-                    </ul>
-                    
-                    <div class='example-box'>
-                        <h4>?? Example</h4>
-                        <p>With 1,000 simulations showing a median of 180,000 EUR:</p>
-                        <ul>
-                            <li>True median is likely between 176,000 - 184,000 EUR (95% confidence)</li>
-                            <li>Running it again will give nearly identical results</li>
-                        </ul>
-                    </div>
-                    
-                    <div class='tip-box'>
-                        ?? <strong>Performance:</strong> 1,000 simulations run in ~1-2 seconds. 10,000 may take 10-15 seconds. For most users, <strong>1,000 is perfect</strong>.
-                    </div>
-                </div>
-            </div>
-        </div>
-        <!-- MODAL: Results Interpretation -->
-        <div id='modalMCResults' class='modal'>
-            <div class='modal-content'>
-                <div class='modal-header'>
-                    <h2>?? How to Read Your Results</h2>
-                    <span class='close-modal' onclick='closeModal("modalMCResults")'>&times;</span>
-                </div>
-                <div class='modal-body'>
-                    <h3>?? Key Metrics Explained</h3>
-                    
-                    <h4>1?? Median (50th Percentile)</h4>
-                    <p>The <span class='key-term'>middle value</span> when all outcomes are sorted. <strong>50% of simulations are above</strong> this, 50% below.</p>
-                    <div class='tip-box'>?? <strong>Use this</strong> as your most likely outcome.</div>
-                    
-                    <h4>2?? 10th Percentile (Pessimistic)</h4>
-                    <p>Only <strong>10% of scenarios are worse</strong> than this. Think of it as a "bad luck" scenario.</p>
-                    <div class='warning-box'>?? If this value is unacceptable, reduce risk (lower stocks, increase bonds).</div>
-                    
-                    <h4>3?? 90th Percentile (Optimistic)</h4>
-                    <p>Only <strong>10% of scenarios are better</strong> than this. Think of it as a "good luck" scenario.</p>
-                    <div class='tip-box'>?? Don't plan your retirement based on this! It's unlikely.</div>
-                    
-                    <h4>4?? Best/Worst Case</h4>
-                    <p>The absolute extremes. <strong>Ignore these</strong> for planning�they're statistical outliers.</p>
-                    
-                    <h3>?? Decision Framework</h3>
-                    <div class='example-box'>
-                        <strong>If your goal is 100,000 EUR:</strong>
-                        <ul>
-                            <li><strong>Median > 100k:</strong> On track ?</li>
-                            <li><strong>P10 > 100k:</strong> Very safe (90% success) ??</li>
-                            <li><strong>P10 < 100k but Median > 100k:</strong> Moderate risk ??</li>
-                            <li><strong>Median < 100k:</strong> Increase savings or reduce goal ??</li>
-                        </ul>
-                    </div>
-                    
-                    <h3>?? Charts Explained</h3>
-                    <h4>Portfolio Evolution (Fan Chart)</h4>
-                    <p>Shows how your portfolio grows over time. The <strong>spreading fan</strong> represents increasing uncertainty over longer periods.</p>
-                    
-                    <h4>Distribution Histogram</h4>
-                    <p>Shows how frequently each outcome occurs. A <strong>bell curve</strong> is normal. A skewed distribution means asymmetric risk.</p>
-                    
-                    <h4>Probability Pie Chart</h4>
-                    <p>% chance of reaching your target. <strong>Above 70% = good</strong>. Below 50% = rethink strategy.</p>
-                </div>
-            </div>
-        </div>
-        <!-- MODAL: Risk Analysis -->
-        <div id='modalMCRisk' class='modal'>
-            <div class='modal-content'>
-                <div class='modal-header'>
-                    <h2>?? Risk Metrics Explained</h2>
-                    <span class='close-modal' onclick='closeModal("modalMCRisk")'>&times;</span>
-                </div>
-                <div class='modal-body'>
-                    <h3>?? Key Risk Indicators</h3>
-                    
-                    <h4>1?? Value at Risk (VaR) 5%</h4>
-                    <p><span class='key-term'>VaR 5%</span> = The 5th percentile outcome. <strong>95% of scenarios are better</strong> than this.</p>
-                    <div class='formula-box'>
-                        <strong>Interpretation:</strong><br>
-                        "There's a 5% chance my portfolio will be worth less than X EUR."
-                    </div>
-                    <div class='example-box'>
-                        <h4>?? Example</h4>
-                        <p>VaR 5% = 120,000 EUR after 25 years</p>
-                        <p>? You have a <strong>95% confidence</strong> your portfolio will exceed 120k EUR</p>
-                        <p>? Only a <strong>5% chance</strong> it could be below 120k</p>
-                    </div>
-                    
-                    <h4>2?? Loss Probability</h4>
-                    <p>% of simulations where you <strong>end up with less than you invested</strong> (no gains, or losses).</p>
-                    <ul>
-                        <li><strong>0-5%:</strong> Very low risk ?</li>
-                        <li><strong>5-15%:</strong> Moderate risk ??</li>
-                        <li><strong>15%+:</strong> High risk ??</li>
-                    </ul>
-                    
-                    <h4>3?? Average Return vs. Median Return</h4>
-                    <p><strong>Average:</strong> Sum of all outcomes / number of simulations</p>
-                    <p><strong>Median:</strong> The middle value (50th percentile)</p>
-                    <div class='warning-box'>
-                        ?? If Average > Median by a lot ? distribution is skewed (extreme winners pull up the average). Use <strong>median</strong> for planning!
-                    </div>
-                    
-                    <h3>?? How to Use Risk Metrics</h3>
-                    <div class='example-box'>
-                        <strong>Decision Matrix:</strong>
-                        <table style='width: 100%; margin-top: 10px; border-collapse: collapse;'>
-                            <tr style='background: #E8DAEF;'><th style='padding: 8px; border: 1px solid #ccc;'>Risk Level</th><th style='padding: 8px; border: 1px solid #ccc;'>VaR 5%</th><th style='padding: 8px; border: 1px solid #ccc;'>Loss Prob</th><th style='padding: 8px; border: 1px solid #ccc;'>Action</th></tr>
-                            <tr><td style='padding: 8px; border: 1px solid #ccc;'><strong style='color: #4A74F3;'>Conservative</strong></td><td style='padding: 8px; border: 1px solid #ccc;'>> 80% invested</td><td style='padding: 8px; border: 1px solid #ccc;'>< 5%</td><td style='padding: 8px; border: 1px solid #ccc;'>? Safe</td></tr>
-                            <tr><td style='padding: 8px; border: 1px solid #ccc;'><strong style='color: #9D5CE6;'>Moderate</strong></td><td style='padding: 8px; border: 1px solid #ccc;'>60-80%</td><td style='padding: 8px; border: 1px solid #ccc;'>5-15%</td><td style='padding: 8px; border: 1px solid #ccc;'>?? Monitor</td></tr>
-                            <tr><td style='padding: 8px; border: 1px solid #ccc;'><strong style='color: #C39BD3;'>Aggressive</strong></td><td style='padding: 8px; border: 1px solid #ccc;'>< 60%</td><td style='padding: 8px; border: 1px solid #ccc;'>> 15%</td><td style='padding: 8px; border: 1px solid #ccc;'>?? Risky</td></tr>
-                        </table>
-                    </div>
-                    
-                    <div class='tip-box'>
-                        ?? <strong>Rule of Thumb:</strong> Your VaR 5% should cover at least your total contributions. If you invested 60k over 25 years, VaR 5% should be > 60k EUR.
-                    </div>
-                </div>
-            </div>
-        </div>
-        <footer><p>Monte Carlo Simulation | Generated 10/27/2025 21:57</p></footer>
+        
+        <!-- Footer -->
+        <footer>
+            <p>Monte Carlo Simulation | Generated with advanced stochastic modeling</p>
+        </footer>
     </div>
-    <script>
-        function randomNormal(mean = 0, stdDev = 1) {
-            let u1 = Math.random();
-            let u2 = Math.random();
-            let z0 = Math.sqrt(-2.0 * Math.log(u1)) * Math.cos(2.0 * Math.PI * u2);
-            return z0 * stdDev + mean;
-        }
-        
-        function percentile(arr, p) {
-            const sorted = arr.slice().sort((a, b) => a - b);
-            const index = (p / 100) * (sorted.length - 1);
-            const lower = Math.floor(index);
-            const upper = Math.ceil(index);
-            const weight = index - lower;
-            return sorted[lower] * (1 - weight) + sorted[upper] * weight;
-        }
-        
-        function adjustForInflationMC(value, monthIndex, inflationRate) {
-            const monthlyInflation = Math.pow(1 + inflationRate / 100, 1/12) - 1;
-            return value / Math.pow(1 + monthlyInflation, monthIndex);
-        }
-        
-        function runMonteCarlo() {
-            const monthlyInvestment = parseFloat(document.getElementById('monthlyInvestment').value);
-            const monthlyYield = parseFloat(document.getElementById('monthlyYield').value) / 100;
-            const annualVolatility = parseFloat(document.getElementById('volatility').value) / 100;
-            const monthlyVolatility = annualVolatility / Math.sqrt(12);
-            const years = parseInt(document.getElementById('years').value);
-            const nbSimulations = parseInt(document.getElementById('simulations').value);
-            const targetValue = parseFloat(document.getElementById('targetValue').value);
-            const inflationRate = parseFloat(document.getElementById('inflationRateMC').value);
-            const showInflation = document.getElementById('showInflationMC').checked;
-            const totalMonths = years * 12;
-            
-            const allSimulations = [];
-            const finalValues = [];
-            const monthsToTarget = [];
-            
-            for (let sim = 0; sim < nbSimulations; sim++) {
-                let portfolio = 0;
-                const path = [0];
+    
+    <!-- MODALS -->
+    <div id='modalMCIntro' class='modal'>
+        <div class='modal-content'>
+            <div class='modal-header'>
+                <h2>🎲 What is Monte Carlo Simulation?</h2>
+                <span class='close-modal' onclick='closeModal("modalMCIntro")'>&times;</span>
+            </div>
+            <div class='modal-body'>
+                <h3>📊 Purpose</h3>
+                <p>Monte Carlo simulation uses <strong>random sampling</strong> to model the uncertainty in investment returns. Instead of a single projection, it generates <strong>thousands of possible scenarios</strong> to show the range of potential outcomes.</p>
                 
-                for (let month = 0; month < totalMonths; month++) {
-                    const randomReturn = randomNormal(monthlyYield, monthlyVolatility);
-                    portfolio = portfolio * (1 + randomReturn) + monthlyInvestment;
-                    path.push(portfolio);
-                    
-                    if (portfolio >= targetValue && monthsToTarget.length === sim) {
-                        monthsToTarget.push(month + 1);
-                    }
-                }
+                <h3>⚙️ How It Works</h3>
+                <ol>
+                    <li><strong>Random Returns:</strong> Each month, the simulation generates a random return based on your expected yield and volatility</li>
+                    <li><strong>Compounding:</strong> Returns accumulate over time with monthly investments added</li>
+                    <li><strong>Repetition:</strong> This process repeats 1,000+ times to create a distribution of outcomes</li>
+                    <li><strong>Analysis:</strong> Statistical analysis reveals probabilities (e.g., 90% chance of reaching X amount)</li>
+                </ol>
                 
-                if (monthsToTarget.length === sim) {
-                    monthsToTarget.push(totalMonths + 1);
-                }
+                <div class='formula-box'>
+                    <strong>Formula (each month):</strong><br>
+                    Portfolio<sub>month</sub> = Portfolio<sub>previous</sub> × (1 + Return<sub>random</sub>) + MonthlyInvestment<br><br>
+                    Return<sub>random</sub> ~ Normal(µ, σ)
+                </div>
                 
-                allSimulations.push(path);
-                finalValues.push(portfolio);
-            }
-            
-            displayResults(allSimulations, finalValues, monthsToTarget, totalMonths, monthlyInvestment, targetValue, inflationRate, showInflation);
-        }
-        
-        function displayResults(allSimulations, finalValues, monthsToTarget, totalMonths, monthlyInvestment, targetValue, inflationRate, showInflation) {
-            document.getElementById('resultsPanel').classList.remove('hidden');
-            document.getElementById('resultsPanel').scrollIntoView({ behavior: 'smooth' });
-            
-            const median = percentile(finalValues, 50);
-            const p10 = percentile(finalValues, 10);
-            const p90 = percentile(finalValues, 90);
-            const best = Math.max(...finalValues);
-            const worst = Math.min(...finalValues);
-            const avgFinal = finalValues.reduce((a, b) => a + b, 0) / finalValues.length;
-            
-            const medianReal = showInflation ? adjustForInflationMC(median, totalMonths, inflationRate) : median;
-            const avgFinalReal = showInflation ? adjustForInflationMC(avgFinal, totalMonths, inflationRate) : avgFinal;
-            
-            let statsHTML = '<div class="stat-box"><div class="label">Median (50th percentile)</div>';
-            statsHTML += '<div class="value">' + median.toLocaleString("en-US", {maximumFractionDigits: 0}) + ' EUR</div>';
-            if (showInflation) {
-                statsHTML += '<div style="font-size: 0.9em; color: #9D5CE6; margin-top: 5px;">Real: ' + medianReal.toLocaleString("en-US", {maximumFractionDigits: 0}) + ' EUR</div>';
-            }
-            statsHTML += '</div>';
-            
-            statsHTML += '<div class="stat-box"><div class="label">Average Final Value</div>';
-            statsHTML += '<div class="value">' + avgFinal.toLocaleString("en-US", {maximumFractionDigits: 0}) + ' EUR</div>';
-            if (showInflation) {
-                statsHTML += '<div style="font-size: 0.9em; color: #9D5CE6; margin-top: 5px;">Real: ' + avgFinalReal.toLocaleString("en-US", {maximumFractionDigits: 0}) + ' EUR</div>';
-            }
-            statsHTML += '</div>';
-            
-            statsHTML += '<div class="stat-box"><div class="label">10th Percentile (Pessimistic)</div>';
-            statsHTML += '<div class="value">' + p10.toLocaleString("en-US", {maximumFractionDigits: 0}) + ' EUR</div></div>';
-            
-            statsHTML += '<div class="stat-box"><div class="label">90th Percentile (Optimistic)</div>';
-            statsHTML += '<div class="value">' + p90.toLocaleString("en-US", {maximumFractionDigits: 0}) + ' EUR</div></div>';
-            
-            statsHTML += '<div class="stat-box"><div class="label">Best Case</div>';
-            statsHTML += '<div class="value">' + best.toLocaleString("en-US", {maximumFractionDigits: 0}) + ' EUR</div></div>';
-            
-            statsHTML += '<div class="stat-box"><div class="label">Worst Case</div>';
-            statsHTML += '<div class="value">' + worst.toLocaleString("en-US", {maximumFractionDigits: 0}) + ' EUR</div></div>';
-            
-            document.getElementById('statsContainer').innerHTML = statsHTML;
-            
-            createChart1(allSimulations, totalMonths, median, p10, p90, inflationRate, showInflation);
-            createChart2(finalValues, inflationRate, showInflation, totalMonths);
-            createChart3(finalValues, targetValue);
-            createRiskAnalysis(finalValues, totalMonths, monthlyInvestment);
-            createChart4(allSimulations, totalMonths, monthlyInvestment);
-            createChart5(monthsToTarget, targetValue);
-        }
-        
-        function createChart1(allSimulations, totalMonths, median, p10, p90, inflationRate, showInflation) {
-            const months = Array.from({length: totalMonths + 1}, (_, i) => i);
-            
-            const medianPath = months.map(m => {
-                const values = allSimulations.map(sim => sim[m]);
-                return percentile(values, 50);
-            });
-            
-            const p10Path = months.map(m => {
-                const values = allSimulations.map(sim => sim[m]);
-                return percentile(values, 10);
-            });
-            
-            const p90Path = months.map(m => {
-                const values = allSimulations.map(sim => sim[m]);
-                return percentile(values, 90);
-            });
-            
-            const series = [
-                { name: 'P90 (Optimistic)', data: p90Path, color: '#4A74F3', lineWidth: 2, dashStyle: 'Dash' },
-                { name: 'Median', data: medianPath, color: '#2649B2', lineWidth: 3 },
-                { name: 'P10 (Pessimistic)', data: p10Path, color: '#8E44AD', lineWidth: 2, dashStyle: 'Dash' }
-            ];
-            
-            if (showInflation) {
-                const medianPathReal = months.map(m => {
-                    const values = allSimulations.map(sim => sim[m]);
-                    const nominalValue = percentile(values, 50);
-                    return adjustForInflationMC(nominalValue, m, inflationRate);
-                });
-                series.push({ name: 'Median (Real)', data: medianPathReal, color: '#9D5CE6', lineWidth: 3, dashStyle: 'ShortDot' });
-            }
-            
-            const samplePaths = [];
-            for (let i = 0; i < Math.min(50, allSimulations.length); i += Math.floor(allSimulations.length / 50)) {
-                samplePaths.push({ name: 'Simulation', data: allSimulations[i], color: 'rgba(212,217,240,0.3)', lineWidth: 1, enableMouseTracking: false, showInLegend: false });
-            }
-            
-            Highcharts.chart('chart1', {
-                chart: { type: 'line', backgroundColor: 'transparent', zoomType: 'xy' },
-                title: { text: showInflation ? 'Inflation Rate: ' + inflationRate + '% annual' : null, style: { color: '#9D5CE6', fontSize: '1em' } },
-                xAxis: { title: { text: 'Months', style: { color: '#2649B2' } }, crosshair: true },
-                yAxis: { title: { text: 'Portfolio Value (EUR)', style: { color: '#2649B2' } } },
-                tooltip: { shared: true, valueDecimals: 0, valueSuffix: ' EUR' },
-                series: [...samplePaths, ...series],
-                plotOptions: { line: { marker: { enabled: false } } },
-                credits: { enabled: false }
-            });
-        }
-        
-        function createChart2(finalValues, inflationRate, showInflation, totalMonths) {
-            const finalValuesReal = showInflation ? finalValues.map(v => adjustForInflationMC(v, totalMonths, inflationRate)) : finalValues;
-            const dataToDisplay = showInflation ? finalValuesReal : finalValues;
-            
-            const min = Math.min(...dataToDisplay);
-            const max = Math.max(...dataToDisplay);
-            const binWidth = (max - min) / 30;
-            const bins = Array.from({length: 30}, (_, i) => ({ x: min + i * binWidth, y: 0 }));
-            
-            dataToDisplay.forEach(val => {
-                const binIndex = Math.min(Math.floor((val - min) / binWidth), 29);
-                bins[binIndex].y++;
-            });
-            
-            Highcharts.chart('chart2', {
-                chart: { type: 'column', backgroundColor: 'transparent' },
-                title: { text: showInflation ? 'Real Returns (Inflation-Adjusted)' : 'Nominal Returns', style: { color: showInflation ? '#9D5CE6' : '#2649B2', fontSize: '1em' } },
-                xAxis: { title: { text: 'Final Portfolio Value (EUR)', style: { color: '#2649B2' } }, labels: { formatter: function() { return this.value.toLocaleString(); } } },
-                yAxis: { title: { text: 'Frequency', style: { color: '#2649B2' } } },
-                tooltip: { pointFormat: 'Value: <b>{point.x:,.0f} EUR</b><br/>Frequency: <b>{point.y}</b>' },
-                series: [{ name: 'Distribution', data: bins, color: showInflation ? '#9D5CE6' : '#4A74F3', borderRadius: '25%' }],
-                legend: { enabled: false },
-                credits: { enabled: false }
-            });
-        }
-        
-        function createChart3(finalValues, targetValue) {
-            const aboveTarget = finalValues.filter(v => v >= targetValue).length;
-            const successRate = (aboveTarget / finalValues.length * 100).toFixed(1);
-            
-            Highcharts.chart('chart3', {
-                chart: { type: 'pie', backgroundColor: 'transparent' },
-                title: { text: 'Success Rate: ' + successRate + '%', style: { color: '#2649B2', fontWeight: 'bold', fontSize: '1.3em' } },
-                tooltip: { pointFormat: '<b>{point.name}</b>: {point.percentage:.1f}% ({point.y} simulations)' },
-                plotOptions: { pie: { innerSize: '60%', dataLabels: { format: '<b>{point.name}</b><br/>{point.percentage:.1f}%', style: { color: '#2649B2', fontSize: '12px' } }, borderWidth: 3, borderColor: '#E8DAEF' } },
-                series: [{ name: 'Probability', data: [
-                    { name: 'Above Target', y: aboveTarget, color: '#4A74F3' },
-                    { name: 'Below Target', y: finalValues.length - aboveTarget, color: '#9D5CE6' }
-                ] }],
-                credits: { enabled: false }
-            });
-        }
-        
-        function createRiskAnalysis(finalValues, totalMonths, monthlyInvestment) {
-            const totalInvested = monthlyInvestment * totalMonths;
-            const losses = finalValues.filter(v => v < totalInvested).length;
-            const lossRate = (losses / finalValues.length * 100).toFixed(1);
-            const avgReturn = ((finalValues.reduce((a, b) => a + b, 0) / finalValues.length - totalInvested) / totalInvested * 100).toFixed(1);
-            const medianReturn = ((percentile(finalValues, 50) - totalInvested) / totalInvested * 100).toFixed(1);
-            const valueAtRisk5 = percentile(finalValues, 5);
-            const var5Return = ((valueAtRisk5 - totalInvested) / totalInvested * 100).toFixed(1);
-            
-            const riskHTML = `
-                <div class='stat-box'><div class='label'>Total Invested</div><div class='value'>${totalInvested.toLocaleString()} EUR</div></div>
-                <div class='stat-box'><div class='label'>Average Return</div><div class='value'>${avgReturn}%</div></div>
-                <div class='stat-box'><div class='label'>Median Return</div><div class='value'>${medianReturn}%</div></div>
-                <div class='stat-box'><div class='label'>Loss Probability</div><div class='value'>${lossRate}%</div></div>
-                <div class='stat-box'><div class='label'>VaR (5%)</div><div class='value'>${valueAtRisk5.toLocaleString('en-US', {maximumFractionDigits: 0})} EUR</div></div>
-                <div class='stat-box'><div class='label'>VaR Return (5%)</div><div class='value'>${var5Return}%</div></div>
-            `;
-            document.getElementById('riskAnalysis').innerHTML = riskHTML;
-        }
-        
-        function createChart4(allSimulations, totalMonths, monthlyInvestment) {
-            const scenarios = [
-                { name: 'Financial Crisis (-40%)', shock: -0.40 },
-                { name: 'Moderate Recession (-20%)', shock: -0.20 },
-                { name: 'Market Correction (-10%)', shock: -0.10 },
-                { name: 'Normal Conditions (0%)', shock: 0 },
-                { name: 'Bull Market (+20%)', shock: 0.20 }
-            ];
-            
-            const categories = scenarios.map(s => s.name);
-            const data = scenarios.map(scenario => {
-                const stressedValues = allSimulations.map(sim => sim[totalMonths] * (1 + scenario.shock));
-                return percentile(stressedValues, 50);
-            });
-            
-            Highcharts.chart('chart4', {
-                chart: { type: 'column', backgroundColor: 'transparent' },
-                title: { text: 'Portfolio Value Under Different Scenarios', style: { color: '#2649B2', fontSize: '1.1em' } },
-                xAxis: { categories: categories, labels: { rotation: -15, style: { fontSize: '10px' } } },
-                yAxis: { title: { text: 'Median Portfolio Value (EUR)', style: { color: '#2649B2' } } },
-                tooltip: { valueDecimals: 0, valueSuffix: ' EUR' },
-                series: [{ name: 'Median Value', data: data, colorByPoint: true, colors: ['#8E44AD', '#9D5CE6', '#6C8BE0', '#2649B2', '#4A74F3'], borderRadius: '25%' }],
-                plotOptions: { column: { dataLabels: { enabled: true, format: '{point.y:,.0f}', style: { fontSize: '10px' } } } },
-                legend: { enabled: false },
-                credits: { enabled: false }
-            });
-        }
-        
-        function createChart5(monthsToTarget, targetValue) {
-            const min = Math.min(...monthsToTarget);
-            const max = Math.max(...monthsToTarget);
-            const binWidth = Math.max(1, Math.ceil((max - min) / 20));
-            const bins = [];
-            
-            for (let i = min; i <= max; i += binWidth) {
-                bins.push({ x: i, y: 0 });
-            }
-            
-            monthsToTarget.forEach(m => {
-                const binIndex = Math.min(Math.floor((m - min) / binWidth), bins.length - 1);
-                bins[binIndex].y++;
-            });
-            
-            const medianTime = percentile(monthsToTarget, 50);
-            const p10Time = percentile(monthsToTarget, 10);
-            const p90Time = percentile(monthsToTarget, 90);
-            
-            Highcharts.chart('chart5', {
-                chart: { type: 'column', backgroundColor: 'transparent' },
-                title: { text: 'Time to Reach ' + targetValue.toLocaleString() + ' EUR', style: { color: '#2649B2', fontSize: '1.2em' } },
-                subtitle: { text: 'Median: ' + medianTime.toFixed(0) + ' months (' + (medianTime/12).toFixed(1) + ' years) | P10: ' + p10Time.toFixed(0) + ' | P90: ' + p90Time.toFixed(0), style: { color: '#6C3483' } },
-                xAxis: { title: { text: 'Months', style: { color: '#2649B2' } } },
-                yAxis: { title: { text: 'Frequency', style: { color: '#2649B2' } } },
-                tooltip: { pointFormat: 'Months: <b>{point.x}</b><br/>Frequency: <b>{point.y}</b>' },
-                series: [{ name: 'Distribution', data: bins, color: '#6C8BE0', borderRadius: '25%' }],
-                plotOptions: { column: { pointPlacement: 'on' } },
-                legend: { enabled: false },
-                credits: { enabled: false }
-            });
-        }
-        
-        // GESTION DES MODALS
-        function openModal(modalId) {
-            document.getElementById(modalId).style.display = 'block';
-            document.body.style.overflow = 'hidden';
-        }
-        
-        function closeModal(modalId) {
-            document.getElementById(modalId).style.display = 'none';
-            document.body.style.overflow = 'auto';
-        }
-        
-        window.onclick = function(event) {
-            if (event.target.classList.contains('modal')) {
-                event.target.style.display = 'none';
-                document.body.style.overflow = 'auto';
-            }
-        };
-    </script>
+                <h3>✅ Key Advantages</h3>
+                <ul>
+                    <li><strong>Realistic:</strong> Captures market volatility and uncertainty</li>
+                    <li><strong>Probabilistic:</strong> Shows likelihood of outcomes (not just one forecast)</li>
+                    <li><strong>Risk-aware:</strong> Identifies worst-case and best-case scenarios</li>
+                    <li><strong>Actionable:</strong> Helps adjust strategy based on confidence levels</li>
+                </ul>
+                
+                <div class='tip-box'>
+                    💡 <strong>Pro Tip:</strong> The median (50th percentile) is more reliable than the average for long-term projections, as it's less affected by extreme outliers.
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div id='modalMCInvest' class='modal'>
+        <div class='modal-content'>
+            <div class='modal-header'>
+                <h2>💰 Monthly Investment Strategy</h2>
+                <span class='close-modal' onclick='closeModal("modalMCInvest")'>&times;</span>
+            </div>
+            <div class='modal-body'>
+                <h3>📈 What Is Dollar-Cost Averaging (DCA)?</h3>
+                <p>Investing a <strong>fixed amount regularly</strong> (e.g., 200 EUR/month) regardless of market conditions.</p>
+                
+                <h3>✅ Advantages</h3>
+                <ul>
+                    <li><strong>Reduces timing risk:</strong> You buy more when prices are low, less when high</li>
+                    <li><strong>Discipline:</strong> Automates investing, removes emotions</li>
+                    <li><strong>Accessible:</strong> No need for large lump sum</li>
+                    <li><strong>Compound growth:</strong> Early investments grow the longest</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    
+    <div id='modalMCYield' class='modal'>
+        <div class='modal-content'>
+            <div class='modal-header'>
+                <h2>📊 Expected Monthly Yield</h2>
+                <span class='close-modal' onclick='closeModal("modalMCYield")'>&times;</span>
+            </div>
+            <div class='modal-body'>
+                <h3>📐 Definition</h3>
+                <p>The <span class='key-term'>Expected Yield</span> is the average return you anticipate <strong>per month</strong>. It's the central tendency around which random returns fluctuate.</p>
+                
+                <div class='formula-box'>
+                    <strong>Conversion Formula:</strong><br>
+                    Monthly Yield = (1 + Annual Return)<sup>1/12</sup> - 1<br><br>
+                    <strong>Approximation:</strong><br>
+                    Monthly Yield ≈ Annual Return / 12
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div id='modalMCVol' class='modal'>
+        <div class='modal-content'>
+            <div class='modal-header'>
+                <h2>📉 Understanding Volatility</h2>
+                <span class='close-modal' onclick='closeModal("modalMCVol")'>&times;</span>
+            </div>
+            <div class='modal-body'>
+                <h3>📊 Definition</h3>
+                <p><span class='key-term'>Volatility</span> measures how much returns fluctuate around the average. High volatility = big swings up and down. Low volatility = stable returns.</p>
+                
+                <h3>📈 Typical Values (Annual)</h3>
+                <ul>
+                    <li><strong>Cash/Bonds:</strong> 2-6%</li>
+                    <li><strong>Balanced Portfolio (60/40):</strong> 10-12%</li>
+                    <li><strong>Global Stocks (S&P 500):</strong> 15-20%</li>
+                    <li><strong>Cryptocurrencies:</strong> 60-100%+</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    
+    <div id='modalMCSim' class='modal'>
+        <div class='modal-content'>
+            <div class='modal-header'>
+                <h2>🔢 Number of Simulations</h2>
+                <span class='close-modal' onclick='closeModal("modalMCSim")'>&times;</span>
+            </div>
+            <div class='modal-body'>
+                <h3>🎯 Why Multiple Simulations?</h3>
+                <p>Each simulation is one possible future. Running many simulations creates a <strong>probability distribution</strong> of outcomes, giving you confidence intervals.</p>
+                
+                <h3>📊 How Many Do You Need?</h3>
+                <ul>
+                    <li><strong>100-500:</strong> Quick test, rough estimate (±5% accuracy)</li>
+                    <li><strong>1,000:</strong> Standard (±2% accuracy) → Recommended</li>
+                    <li><strong>5,000:</strong> High precision (±1% accuracy)</li>
+                    <li><strong>10,000+:</strong> Academic/professional use (±0.5% accuracy)</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    
+    <div id='modalMCResults' class='modal'>
+        <div class='modal-content'>
+            <div class='modal-header'>
+                <h2>📊 How to Read Your Results</h2>
+                <span class='close-modal' onclick='closeModal("modalMCResults")'>&times;</span>
+            </div>
+            <div class='modal-body'>
+                <h3>📈 Key Metrics Explained</h3>
+                
+                <h4>1️⃣ Median (50th Percentile)</h4>
+                <p>The <span class='key-term'>middle value</span> when all outcomes are sorted. <strong>50% of simulations are above</strong> this, 50% below.</p>
+                <div class='tip-box'>💡 <strong>Use this</strong> as your most likely outcome.</div>
+                
+                <h4>2️⃣ 10th Percentile (Pessimistic)</h4>
+                <p>Only <strong>10% of scenarios are worse</strong> than this. Think of it as a "bad luck" scenario.</p>
+                
+                <h4>3️⃣ 90th Percentile (Optimistic)</h4>
+                <p>Only <strong>10% of scenarios are better</strong> than this. Think of it as a "good luck" scenario.</p>
+            </div>
+        </div>
+    </div>
+    
+    <div id='modalMCRisk' class='modal'>
+        <div class='modal-content'>
+            <div class='modal-header'>
+                <h2>⚠️ Risk Metrics Explained</h2>
+                <span class='close-modal' onclick='closeModal("modalMCRisk")'>&times;</span>
+            </div>
+            <div class='modal-body'>
+                <h3>📊 Key Risk Indicators</h3>
+                
+                <h4>1️⃣ Value at Risk (VaR) 5%</h4>
+                <p><span class='key-term'>VaR 5%</span> = The 5th percentile outcome. <strong>95% of scenarios are better</strong> than this.</p>
+                
+                <h4>2️⃣ Loss Probability</h4>
+                <p>% of simulations where you <strong>end up with less than you invested</strong> (no gains, or losses).</p>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Scripts -->
+    <script src='assets/js/common.js'></script>
+    <script src='assets/js/monte-carlo.js'></script>
 </body>
 </html>

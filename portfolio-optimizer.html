@@ -1,110 +1,63 @@
 <!DOCTYPE html>
-<html lang='en'>
+<html lang='fr'>
 <head>
     <meta charset='UTF-8'>
     <meta name='viewport' content='width=device-width, initial-scale=1.0'>
     <title>Portfolio Optimizer - Raphael NARDONE</title>
+    
+    <!-- Highcharts -->
     <script src='https://code.highcharts.com/highcharts.js'></script>
     <script src='https://code.highcharts.com/highcharts-more.js'></script>
     <script src='https://code.highcharts.com/modules/exporting.js'></script>
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Segoe UI', sans-serif; background: linear-gradient(135deg, #5B2C6F 0%, #2649B2 50%, #4A74F3 100%); padding: 20px; color: #333; }
-        .container { max-width: 1800px; margin: 0 auto; background: white; border-radius: 20px; box-shadow: 0 20px 60px rgba(91,44,111,0.4); overflow: hidden; }
-        header { background: linear-gradient(135deg, #2649B2 0%, #6C3483 50%, #8E44AD 100%); color: white; padding: 30px; text-align: center; }
-        header h1 { font-size: 2.5em; margin-bottom: 10px; text-shadow: 2px 2px 8px rgba(0,0,0,0.3); }
-        header p { font-size: 1.1em; opacity: 0.95; }
-        .content { padding: 30px; background: linear-gradient(to bottom, #f8f9fa 0%, #E8DAEF 100%); }
-        .section { background: white; padding: 30px; border-radius: 15px; margin-bottom: 30px; box-shadow: 0 4px 12px rgba(108,52,131,0.12); border-top: 3px solid #8E44AD; }
-        .section-title { font-size: 1.8em; color: #2649B2; margin-bottom: 20px; padding-bottom: 10px; border-bottom: 3px solid #E8DAEF; }
-        .asset-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 20px; margin-bottom: 20px; }
-        .asset-card { background: linear-gradient(135deg, #E8DAEF 0%, #D4D9F0 100%); padding: 20px; border-radius: 10px; border-left: 4px solid #8E44AD; transition: all 0.3s; }
-        .asset-card:hover { transform: translateY(-3px); box-shadow: 0 6px 15px rgba(108,52,131,0.2); }
-        .asset-card h4 { color: #2649B2; margin-bottom: 15px; font-size: 1.2em; }
-        .asset-input-group { margin-bottom: 12px; }
-        .asset-input-group label { display: block; color: #5B2C6F; font-weight: 600; margin-bottom: 5px; font-size: 0.85em; }
-        .asset-input-group input { width: 100%; padding: 10px; border: 2px solid #9D5CE6; border-radius: 8px; font-size: 0.95em; transition: all 0.3s; }
-        .asset-input-group input:focus { outline: none; border-color: #2649B2; box-shadow: 0 0 0 3px rgba(38,73,178,0.2); }
-        .btn-container { display: flex; gap: 15px; flex-wrap: wrap; }
-        .btn-primary { background: linear-gradient(135deg, #2649B2 0%, #8E44AD 100%); color: white; padding: 15px 40px; border: none; border-radius: 10px; font-size: 1.1em; font-weight: bold; cursor: pointer; box-shadow: 0 4px 12px rgba(38,73,178,0.3); transition: all 0.3s; flex: 1; min-width: 200px; }
-        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(38,73,178,0.4); }
-        .btn-secondary { background: linear-gradient(135deg, #6C3483 0%, #9D5CE6 100%); color: white; padding: 15px 40px; border: none; border-radius: 10px; font-size: 1.1em; font-weight: bold; cursor: pointer; box-shadow: 0 4px 12px rgba(108,52,131,0.3); transition: all 0.3s; flex: 1; min-width: 200px; }
-        .btn-secondary:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(108,52,131,0.4); }
-        .btn-add { background: linear-gradient(135deg, #4A74F3 0%, #6C8BE0 100%); color: white; padding: 10px 25px; border: none; border-radius: 8px; font-size: 0.95em; font-weight: bold; cursor: pointer; box-shadow: 0 3px 10px rgba(74,116,243,0.3); transition: all 0.3s; }
-        .btn-add:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(74,116,243,0.4); }
-        .chart { min-height: 500px; }
-        .stats-box { background: linear-gradient(135deg, #E8DAEF 0%, #D4D9F0 100%); padding: 20px; border-radius: 10px; margin-bottom: 20px; }
-        .stats-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 15px; }
-        .stat-item { text-align: center; padding: 15px; background: white; border-radius: 8px; }
-        .stat-item .label { font-size: 0.85em; color: #5B2C6F; font-weight: bold; margin-bottom: 5px; }
-        .stat-item .value { font-size: 1.5em; font-weight: bold; color: #2649B2; }
-        .allocation-table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        .allocation-table th { background: linear-gradient(135deg, #2649B2 0%, #8E44AD 100%); color: white; padding: 12px; text-align: left; font-weight: bold; }
-        .allocation-table td { padding: 12px; border-bottom: 1px solid #E8DAEF; }
-        .allocation-table tr:hover { background: #F8F9FA; }
-        footer { background: linear-gradient(135deg, #2649B2 0%, #6C3483 100%); color: white; text-align: center; padding: 20px; }
-        .hidden { display: none; }
-        .info-box { background: linear-gradient(135deg, #4A74F3 0%, #6C8BE0 100%); color: white; padding: 15px; border-radius: 10px; margin-bottom: 20px; }
-        .info-box h4 { margin-bottom: 10px; font-size: 1.1em; }
-        .info-box p { font-size: 0.9em; opacity: 0.95; }
-        
-        /* INFO-BULLES & MODALS */
-        .help-icon { display: inline-block; width: 24px; height: 24px; background: linear-gradient(135deg, #4A74F3 0%, #6C8BE0 100%); color: white; border-radius: 50%; text-align: center; line-height: 24px; font-weight: bold; font-size: 14px; cursor: pointer; margin-left: 10px; transition: all 0.3s; box-shadow: 0 2px 6px rgba(74,116,243,0.3); }
-        .help-icon:hover { transform: scale(1.15); box-shadow: 0 4px 12px rgba(74,116,243,0.5); background: linear-gradient(135deg, #2649B2 0%, #4A74F3 100%); }
-        .modal { display: none; position: fixed; z-index: 9999; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(91,44,111,0.8); backdrop-filter: blur(5px); animation: fadeIn 0.3s; }
-        .modal-content { background: white; margin: 3% auto; padding: 0; border-radius: 20px; width: 85%; max-width: 900px; box-shadow: 0 20px 60px rgba(38,73,178,0.4); animation: slideDown 0.4s; max-height: 85vh; overflow-y: auto; }
-        .modal-header { background: linear-gradient(135deg, #2649B2 0%, #8E44AD 100%); color: white; padding: 25px 30px; border-radius: 20px 20px 0 0; display: flex; justify-content: space-between; align-items: center; }
-        .modal-header h2 { margin: 0; font-size: 1.8em; text-shadow: 2px 2px 8px rgba(0,0,0,0.3); }
-        .modal-body { padding: 30px; line-height: 1.8; color: #333; }
-        .modal-body h3 { color: #2649B2; margin-top: 25px; margin-bottom: 15px; padding-bottom: 8px; border-bottom: 2px solid #E8DAEF; font-size: 1.4em; }
-        .modal-body h4 { color: #6C3483; margin-top: 20px; margin-bottom: 10px; font-size: 1.1em; }
-        .modal-body p { margin-bottom: 15px; }
-        .modal-body ul, .modal-body ol { margin-left: 25px; margin-bottom: 15px; }
-        .modal-body li { margin-bottom: 8px; }
-        .formula-box { background: linear-gradient(135deg, #E8DAEF 0%, #D4D9F0 100%); padding: 20px; border-radius: 12px; margin: 20px 0; border-left: 5px solid #8E44AD; font-family: 'Courier New', monospace; font-size: 1.1em; color: #2649B2; }
-        .example-box { background: linear-gradient(135deg, #D4D9F0 0%, #E8DAEF 100%); padding: 20px; border-radius: 12px; margin: 20px 0; border-left: 5px solid #4A74F3; }
-        .tip-box { background: linear-gradient(135deg, #4A74F3 0%, #6C8BE0 100%); color: white; padding: 15px 20px; border-radius: 10px; margin: 20px 0; font-weight: 500; }
-        .warning-box { background: linear-gradient(135deg, #9D5CE6 0%, #C39BD3 100%); color: white; padding: 15px 20px; border-radius: 10px; margin: 20px 0; font-weight: 500; }
-        .close-modal { color: white; font-size: 32px; font-weight: bold; cursor: pointer; background: rgba(255,255,255,0.2); width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; transition: all 0.3s; }
-        .close-modal:hover { background: rgba(255,255,255,0.4); transform: rotate(90deg); }
-        .diagram { text-align: center; margin: 25px 0; padding: 20px; background: #f8f9fa; border-radius: 12px; }
-        .diagram svg { max-width: 100%; height: auto; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-        @keyframes slideDown { from { transform: translateY(-50px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-        .key-term { background: linear-gradient(135deg, #2649B2 0%, #4A74F3 100%); color: white; padding: 2px 8px; border-radius: 4px; font-weight: bold; white-space: nowrap; }
-        @media (max-width: 768px) { .modal-content { width: 95%; margin: 10% auto; } .modal-body { padding: 20px; } }
-    </style>
+    
+    <!-- Styles -->
+    <link rel='stylesheet' href='assets/css/common.css'>
+    <link rel='stylesheet' href='assets/css/portfolio-optimizer.css'>
 </head>
 <body>
     <div class='container'>
+        <!-- Header -->
         <header>
             <h1>Portfolio Optimizer</h1>
             <p>Markowitz Mean-Variance Model | Raphael NARDONE</p>
         </header>
-        <nav style='background: linear-gradient(135deg, #2649B2 0%, #8E44AD 100%); padding: 0; box-shadow: 0 2px 10px rgba(0,0,0,0.2);'>
-            <div style='max-width: 1800px; margin: 0 auto; display: flex; gap: 0;'>
-                <a href='dashboard-financier.html' style='flex: 1; padding: 20px; text-align: center; color: white; text-decoration: none; transition: all 0.3s;' onmouseover='this.style.background="rgba(255,255,255,0.1)"' onmouseout='this.style.background="transparent"'>Budget</a>
-                <a href='monte-carlo.html' style='flex: 1; padding: 20px; text-align: center; color: white; text-decoration: none; transition: all 0.3s;' onmouseover='this.style.background="rgba(255,255,255,0.1)"' onmouseout='this.style.background="transparent"'>Monte Carlo</a>
-                <a href='portfolio-optimizer.html' style='flex: 1; padding: 20px; text-align: center; color: white; text-decoration: none; background: rgba(255,255,255,0.2); font-weight: bold; border-bottom: 4px solid white;'>Markowitz</a>
-                <a href='risk-parity.html' style='flex: 1; padding: 20px; text-align: center; color: white; text-decoration: none; transition: all 0.3s;' onmouseover='this.style.background="rgba(255,255,255,0.1)"' onmouseout='this.style.background="transparent"'>Risk Parity</a>
-                <a href='scenario-analysis.html' style='flex: 1; padding: 20px; text-align: center; color: white; text-decoration: none; transition: all 0.3s;' onmouseover='this.style.background="rgba(255,255,255,0.1)"' onmouseout='this.style.background="transparent"'>Scenarios</a>
+        
+        <!-- Navigation -->
+        <nav>
+            <div class='nav-container'>
+                <a href='index.html' class='nav-link'>Budget</a>
+                <a href='monte-carlo.html' class='nav-link'>Monte Carlo</a>
+                <a href='portfolio-optimizer.html' class='nav-link'>Markowitz</a>
+                <a href='risk-parity.html' class='nav-link'>Risk Parity</a>
+                <a href='scenario-analysis.html' class='nav-link'>Scenarios</a>
             </div>
         </nav>
+        
+        <!-- Main Content -->
         <div class='content'>
+            <!-- Step 1: Define Assets -->
             <div class='section'>
-                <h2 class='section-title'>Step 1: Define Your Assets <span class='help-icon' onclick='openModal("modalPOIntro")'>?</span></h2>
+                <h2 class='section-title'>
+                    Step 1: Define Your Assets 
+                    <span class='help-icon' onclick='openModal("modalPOIntro")'>?</span>
+                </h2>
                 <div class='info-box'>
                     <h4>How to use</h4>
                     <p>Enter the expected annual return (%), annual volatility (%), and correlation with other assets for each investment.</p>
                 </div>
                 <div id='assetsContainer' class='asset-grid'></div>
-                <button class='btn-add' onclick='addAsset()'>Add Asset</button>
+                <button class='btn-add' onclick='PortfolioOptimizer.addAsset()'>Add Asset</button>
             </div>
+            
+            <!-- Step 2: Optimization Settings -->
             <div class='section'>
                 <h2 class='section-title'>Step 2: Optimization Settings</h2>
-                <div class='asset-grid' style='margin-top: 20px;'>
+                <div class='asset-grid'>
                     <div class='asset-card'>
-                        <h4>Risk-Free Rate <span class='help-icon' onclick='openModal("modalPORisk")' style='width: 20px; height: 20px; line-height: 20px; font-size: 12px;'>?</span></h4>
+                        <h4>
+                            Risk-Free Rate 
+                            <span class='help-icon help-icon-small' onclick='openModal("modalPORisk")'>?</span>
+                        </h4>
                         <div class='asset-input-group'>
                             <label>Annual Risk-Free Rate (%)</label>
                             <input type='number' id='riskFreeRate' value='3.5' step='0.1'>
@@ -117,767 +70,170 @@
                             <input type='number' id='inflationRatePO' value='2.5' step='0.1'>
                         </div>
                         <div class='asset-input-group'>
-                            <label style='font-weight: bold; color: #2649B2;'>
-                                <input type='checkbox' id='showInflationPO' style='margin-right: 8px;'>
+                            <label class='checkbox-label'>
+                                <input type='checkbox' id='showInflationPO'>
                                 Show Real (Inflation-Adjusted) Returns
                             </label>
                         </div>
                     </div>
                 </div>
-                <div class='btn-container' style='margin-top: 25px;'>
-                    <button class='btn-primary' onclick='optimizePortfolio()'>Optimize Portfolio</button>
-                    <button class='btn-secondary' onclick='resetAssets()'>Reset All</button>
+                <div class='btn-container'>
+                    <button class='btn-primary' onclick='PortfolioOptimizer.optimizePortfolio()'>Optimize Portfolio</button>
+                    <button class='btn-secondary' onclick='PortfolioOptimizer.resetAssets()'>Reset All</button>
                 </div>
             </div>
+            
+            <!-- Results Section -->
             <div id='resultsSection' class='section hidden'>
-                <h2 class='section-title'>Optimization Results <span class='help-icon' onclick='openModal("modalPOResults")'>?</span></h2>
+                <h2 class='section-title'>
+                    Optimization Results 
+                    <span class='help-icon' onclick='openModal("modalPOResults")'>?</span>
+                </h2>
                 <div id='globalStats' class='stats-box'></div>
-                <h3 style='color: #2649B2; margin: 30px 0 15px 0;'>Efficient Frontier <span class='help-icon' onclick='openModal("modalPOFrontier")' style='width: 20px; height: 20px; line-height: 20px; font-size: 12px;'>?</span></h3>
+                
+                <h3 class='subsection-title'>
+                    Efficient Frontier 
+                    <span class='help-icon help-icon-small' onclick='openModal("modalPOFrontier")'>?</span>
+                </h3>
                 <div id='chartFrontier' class='chart'></div>
-                <div style='display: grid; grid-template-columns: repeat(auto-fit, minmax(500px, 1fr)); gap: 30px; margin-top: 30px;'>
+                
+                <div class='charts-grid-2'>
                     <div>
-                        <h3 style='color: #2649B2; margin-bottom: 15px;'>Optimal Allocation (Max Sharpe) <span class='help-icon' onclick='openModal("modalPOSharpe")' style='width: 20px; height: 20px; line-height: 20px; font-size: 12px;'>?</span></h3>
-                        <div id='chartAllocation1' class='chart' style='min-height: 400px;'></div>
+                        <h3 class='subsection-title'>
+                            Optimal Allocation (Max Sharpe) 
+                            <span class='help-icon help-icon-small' onclick='openModal("modalPOSharpe")'>?</span>
+                        </h3>
+                        <div id='chartAllocation1' class='chart chart-medium'></div>
                     </div>
                     <div>
-                        <h3 style='color: #2649B2; margin-bottom: 15px;'>Minimum Variance</h3>
-                        <div id='chartAllocation2' class='chart' style='min-height: 400px;'></div>
+                        <h3 class='subsection-title'>Minimum Variance</h3>
+                        <div id='chartAllocation2' class='chart chart-medium'></div>
                     </div>
                 </div>
-                <h3 style='color: #2649B2; margin: 30px 0 15px 0;'>Detailed Allocations</h3>
+                
+                <h3 class='subsection-title'>Detailed Allocations</h3>
                 <div id='allocationTable'></div>
             </div>
         </div>
-        <!-- MODAL: Introduction Markowitz -->
-        <div id='modalPOIntro' class='modal'>
-            <div class='modal-content'>
-                <div class='modal-header'>
-                    <h2>?? Markowitz Mean-Variance Model</h2>
-                    <span class='close-modal' onclick='closeModal("modalPOIntro")'>&times;</span>
-                </div>
-                <div class='modal-body'>
-                    <h3>?? Purpose</h3>
-                    <p>The <span class='key-term'>Markowitz Model</span> (Nobel Prize 1990) finds the optimal portfolio allocation that <strong>maximizes return for a given level of risk</strong>, or minimizes risk for a given return.</p>
-                    
-                    <h3>?? Core Concepts</h3>
-                    <h4>1?? Risk vs. Return Trade-off</h4>
-                    <p>Higher returns usually come with higher risk. The model finds the <strong>best balance</strong> for your preferences.</p>
-                    
-                    <h4>2?? Diversification Power</h4>
-                    <p>Combining assets with <strong>low correlation</strong> reduces portfolio risk <em>without</em> sacrificing return. This is the "free lunch" of investing!</p>
-                    
-                    <div class='formula-box'>
-                        <strong>Portfolio Return:</strong><br>
-                        R<sub>p</sub> = S (w<sub>i</sub> � R<sub>i</sub>)<br><br>
-                        <strong>Portfolio Risk (Variance):</strong><br>
-                        s�<sub>p</sub> = S S (w<sub>i</sub> � w<sub>j</sub> � Cov<sub>ij</sub>)<br><br>
-                        <em>w = weight, R = return, Cov = covariance</em>
-                    </div>
-                    
-                    <h3>?? What The Optimizer Does</h3>
-                    <ol>
-                        <li><strong>Generates thousands</strong> of random portfolio combinations</li>
-                        <li><strong>Calculates</strong> expected return and volatility for each</li>
-                        <li><strong>Identifies</strong> the "Efficient Frontier" (best portfolios)</li>
-                        <li><strong>Highlights</strong> the portfolio with maximum Sharpe ratio (best risk-adjusted return)</li>
-                    </ol>
-                    
-                    <div class='example-box'>
-                        <h4>?? Classic Example</h4>
-                        <p><strong>60/40 Portfolio:</strong></p>
-                        <ul>
-                            <li>60% Stocks (return: 10%, volatility: 18%)</li>
-                            <li>40% Bonds (return: 4%, volatility: 6%)</li>
-                            <li>Correlation: 0.2 (low)</li>
-                        </ul>
-                        <p><strong>Result:</strong> Portfolio return = 7.6%, but volatility is only 11.2% (not 13.2%!) thanks to diversification.</p>
-                    </div>
-                    
-                    <div class='tip-box'>
-                        ?? <strong>Key Insight:</strong> The goal is NOT to pick the asset with the highest return, but to find the <strong>combination</strong> that gives the best risk-adjusted performance.
-                    </div>
-                    
-                    <h3>?? Limitations</h3>
-                    <ul>
-                        <li>Assumes returns follow a normal distribution (not always true)</li>
-                        <li>Based on historical data (past ? future)</li>
-                        <li>Ignores transaction costs and taxes</li>
-                        <li>Requires accurate correlation estimates</li>
-                    </ul>
-                    
-                    <div class='warning-box'>
-                        ?? <strong>Important:</strong> Use this as a <strong>guideline</strong>, not a crystal ball. Rebalance regularly and adjust for changing market conditions.
-                    </div>
-                </div>
-            </div>
-        </div>
-        <!-- MODAL: Risk-Free Rate -->
-        <div id='modalPORisk' class='modal'>
-            <div class='modal-content'>
-                <div class='modal-header'>
-                    <h2>?? Risk-Free Rate Explained</h2>
-                    <span class='close-modal' onclick='closeModal("modalPORisk")'>&times;</span>
-                </div>
-                <div class='modal-body'>
-                    <h3>?? Definition</h3>
-                    <p>The <span class='key-term'>Risk-Free Rate</span> is the theoretical return on an investment with <strong>zero risk</strong>. It's your baseline: any risky investment should offer a return <em>above</em> this rate to be worth it.</p>
-                    
-                    <h3>?? Common Proxies</h3>
-                    <ul>
-                        <li><strong>US 10-Year Treasury Bond:</strong> ~4.0-4.5% (as of 2024)</li>
-                        <li><strong>German Bund (10Y):</strong> ~2.5-3.0%</li>
-                        <li><strong>French OAT (10Y):</strong> ~3.0-3.5%</li>
-                        <li><strong>ECB Deposit Rate:</strong> ~3.5-4.0%</li>
-                    </ul>
-                    
-                    <div class='tip-box'>
-                        ?? <strong>Rule of Thumb:</strong> Use the yield on a <strong>10-year government bond</strong> from a stable country (US, Germany, France) as your risk-free rate.
-                    </div>
-                    
-                    <h3>?? Why It Matters</h3>
-                    <p>The risk-free rate is used to calculate the <span class='key-term'>Sharpe Ratio</span>:</p>
-                    
-                    <div class='formula-box'>
-                        <strong>Sharpe Ratio:</strong><br>
-                        Sharpe = (Portfolio Return - Risk-Free Rate) / Portfolio Volatility<br><br>
-                        <em>Higher Sharpe = Better risk-adjusted performance</em>
-                    </div>
-                    
-                    <div class='example-box'>
-                        <h4>?? Example</h4>
-                        <p><strong>Portfolio A:</strong> 10% return, 15% volatility</p>
-                        <p><strong>Portfolio B:</strong> 8% return, 8% volatility</p>
-                        <p><strong>Risk-Free Rate:</strong> 3.5%</p>
-                        <hr style='margin: 10px 0;'>
-                        <p><strong>Sharpe A:</strong> (10 - 3.5) / 15 = 0.43</p>
-                        <p><strong>Sharpe B:</strong> (8 - 3.5) / 8 = 0.56 ? Better!</p>
-                        <p style='color: #2649B2; font-weight: bold;'>? Portfolio B is more efficient despite lower return</p>
-                    </div>
-                    
-                    <h3>?? Impact of Inflation</h3>
-                    <p>If inflation is 2.5% and the risk-free rate is 3.5%, your <strong>real risk-free rate</strong> is only ~1% (3.5% - 2.5%).</p>
-                    
-                    <div class='warning-box'>
-                        ?? <strong>Check the "Show Real Returns" box</strong> to see inflation-adjusted results. This gives a more realistic picture of your purchasing power growth.
-                    </div>
-                    
-                    <h3>?? How to Find Current Rates</h3>
-                    <ol>
-                        <li>Google: "US 10 year treasury yield" or "German bund yield"</li>
-                        <li>Check Bloomberg, Yahoo Finance, or TradingView</li>
-                        <li>Use central bank websites (Fed, ECB)</li>
-                    </ol>
-                </div>
-            </div>
-        </div>
-        <!-- MODAL: Sharpe Ratio -->
-        <div id='modalPOSharpe' class='modal'>
-            <div class='modal-content'>
-                <div class='modal-header'>
-                    <h2>? Sharpe Ratio - Risk-Adjusted Performance</h2>
-                    <span class='close-modal' onclick='closeModal("modalPOSharpe")'>&times;</span>
-                </div>
-                <div class='modal-body'>
-                    <h3>?? Definition</h3>
-                    <p>The <span class='key-term'>Sharpe Ratio</span> measures how much <strong>excess return</strong> you receive for each unit of risk you take. It's the gold standard for comparing investments.</p>
-                    
-                    <div class='formula-box'>
-                        <strong>Formula:</strong><br>
-                        Sharpe Ratio = (R<sub>p</sub> - R<sub>f</sub>) / s<sub>p</sub><br><br>
-                        R<sub>p</sub> = Portfolio Return<br>
-                        R<sub>f</sub> = Risk-Free Rate<br>
-                        s<sub>p</sub> = Portfolio Volatility (Standard Deviation)
-                    </div>
-                    
-                    <h3>?? Interpretation Guide</h3>
-                    <table style='width: 100%; border-collapse: collapse; margin: 15px 0;'>
-                        <tr style='background: #E8DAEF;'>
-                            <th style='padding: 10px; border: 1px solid #ccc; text-align: left;'>Sharpe Ratio</th>
-                            <th style='padding: 10px; border: 1px solid #ccc; text-align: left;'>Interpretation</th>
-                        </tr>
-                        <tr>
-                            <td style='padding: 10px; border: 1px solid #ccc;'><strong style='color: #C39BD3;'>< 0</strong></td>
-                            <td style='padding: 10px; border: 1px solid #ccc;'>? Losing money vs. risk-free rate</td>
-                        </tr>
-                        <tr>
-                            <td style='padding: 10px; border: 1px solid #ccc;'><strong style='color: #9D5CE6;'>0 - 1</strong></td>
-                            <td style='padding: 10px; border: 1px solid #ccc;'>?? Sub-optimal (not enough return for the risk)</td>
-                        </tr>
-                        <tr>
-                            <td style='padding: 10px; border: 1px solid #ccc;'><strong style='color: #6C8BE0;'>1 - 2</strong></td>
-                            <td style='padding: 10px; border: 1px solid #ccc;'>? Good (acceptable risk-adjusted return)</td>
-                        </tr>
-                        <tr>
-                            <td style='padding: 10px; border: 1px solid #ccc;'><strong style='color: #4A74F3;'>2 - 3</strong></td>
-                            <td style='padding: 10px; border: 1px solid #ccc;'>?? Very Good (strong performance)</td>
-                        </tr>
-                        <tr>
-                            <td style='padding: 10px; border: 1px solid #ccc;'><strong style='color: #2649B2;'>> 3</strong></td>
-                            <td style='padding: 10px; border: 1px solid #ccc;'>?? Excellent (rare, institutional-grade)</td>
-                        </tr>
-                    </table>
-                    
-                    <div class='example-box'>
-                        <h4>?? Real-World Examples (Long-Term Averages)</h4>
-                        <ul>
-                            <li><strong>S&P 500:</strong> Sharpe � 0.4-0.6 (historical)</li>
-                            <li><strong>60/40 Portfolio:</strong> Sharpe � 0.5-0.7</li>
-                            <li><strong>Hedge Funds:</strong> Sharpe � 0.7-1.2 (net of fees)</li>
-                            <li><strong>Warren Buffett (Berkshire):</strong> Sharpe � 0.8 (1965-2023)</li>
-                        </ul>
-                    </div>
-                    
-                    <h3>?? Why Maximize Sharpe?</h3>
-                    <p>The <span class='key-term'>Max Sharpe Portfolio</span> gives you the <strong>best bang for your buck</strong>. It's the most efficient way to grow wealth without taking unnecessary risk.</p>
-                    
-                    <div class='formula-box'>
-                        <strong>Example Comparison:</strong><br>
-                        Portfolio A: 12% return, 20% vol ? Sharpe = (12-3.5)/20 = 0.43<br>
-                        Portfolio B: 9% return, 10% vol ? Sharpe = (9-3.5)/10 = 0.55 ?<br><br>
-                        <em>B is better despite lower return!</em>
-                    </div>
-                    
-                    <div class='tip-box'>
-                        ?? <strong>Pro Tip:</strong> In the optimizer, the <strong>diamond marker</strong> on the Efficient Frontier shows the Max Sharpe portfolio. This is usually your best starting point.
-                    </div>
-                    
-                    <h3>?? Limitations</h3>
-                    <ul>
-                        <li>Assumes normal distribution (ignores tail risks)</li>
-                        <li>Doesn't account for downside-only volatility</li>
-                        <li>Sensitive to time period (can vary widely)</li>
-                        <li>Doesn't consider liquidity or transaction costs</li>
-                    </ul>
-                    
-                    <div class='warning-box'>
-                        ?? <strong>Remember:</strong> A high historical Sharpe doesn't guarantee future performance. Use it as <strong>one tool</strong> among many in your decision process.
-                    </div>
-                </div>
-            </div>
-        </div>
-        <!-- MODAL: Efficient Frontier -->
-        <div id='modalPOFrontier' class='modal'>
-            <div class='modal-content'>
-                <div class='modal-header'>
-                    <h2>?? Understanding the Efficient Frontier</h2>
-                    <span class='close-modal' onclick='closeModal("modalPOFrontier")'>&times;</span>
-                </div>
-                <div class='modal-body'>
-                    <h3>?? What Is It?</h3>
-                    <p>The <span class='key-term'>Efficient Frontier</span> is the curved line on the chart representing <strong>optimal portfolios</strong>�those offering the highest return for each level of risk.</p>
-                    
-                    <div class='diagram'>
-                        <svg width='100%' height='300' viewBox='0 0 600 300' style='max-width: 600px;'>
-                            <!-- Axes -->
-                            <line x1='50' y1='250' x2='550' y2='250' stroke='#2649B2' stroke-width='2'/>
-                            <line x1='50' y1='250' x2='50' y2='30' stroke='#2649B2' stroke-width='2'/>
-                            <text x='300' y='280' text-anchor='middle' fill='#2649B2' font-weight='bold'>Risk (Volatility) ?</text>
-                            <text x='20' y='150' text-anchor='middle' fill='#2649B2' font-weight='bold' transform='rotate(-90 20 150)'>Return ?</text>
-                            
-                            <!-- Inefficient portfolios (scattered dots) -->
-                            <circle cx='150' cy='200' r='4' fill='#D4D9F0'/>
-                            <circle cx='200' cy='180' r='4' fill='#D4D9F0'/>
-                            <circle cx='250' cy='160' r='4' fill='#D4D9F0'/>
-                            <circle cx='180' cy='210' r='4' fill='#D4D9F0'/>
-                            <circle cx='220' cy='190' r='4' fill='#D4D9F0'/>
-                            <circle cx='280' cy='170' r='4' fill='#D4D9F0'/>
-                            
-                            <!-- Efficient Frontier (curved line) -->
-                            <path d='M 80 230 Q 200 120, 500 80' stroke='#4A74F3' stroke-width='4' fill='none'/>
-                            
-                            <!-- Min Variance Portfolio -->
-                            <circle cx='140' cy='185' r='8' fill='#4A74F3'/>
-                            <text x='140' y='170' text-anchor='middle' fill='#4A74F3' font-size='12' font-weight='bold'>Min Var</text>
-                            
-                            <!-- Max Sharpe Portfolio -->
-                            <polygon points='300,110 310,130 290,130' fill='#2649B2'/>
-                            <text x='300' y='100' text-anchor='middle' fill='#2649B2' font-size='12' font-weight='bold'>Max Sharpe</text>
-                            
-                            <!-- Risk-Free Rate line -->
-                            <line x1='50' y1='220' x2='550' y2='220' stroke='#9D5CE6' stroke-width='2' stroke-dasharray='5,5'/>
-                            <text x='520' y='215' text-anchor='end' fill='#9D5CE6' font-size='12'>Risk-Free Rate</text>
-                            
-                            <!-- Labels -->
-                            <text x='150' y='225' text-anchor='middle' fill='#6C3483' font-size='11' font-style='italic'>Inefficient</text>
-                        </svg>
-                    </div>
-                    
-                    <h3>?? Key Points on the Frontier</h3>
-                    
-                    <h4>1?? Minimum Variance Portfolio (Blue Circle)</h4>
-                    <p>The <strong>lowest risk</strong> portfolio possible. Conservative investors start here.</p>
-                    <ul>
-                        <li>Lowest volatility</li>
-                        <li>Moderate return</li>
-                        <li>Good for: Risk-averse investors, retirees</li>
-                    </ul>
-                    
-                    <h4>2?? Maximum Sharpe Portfolio (Blue Diamond)</h4>
-                    <p>The <strong>best risk-adjusted return</strong>. This is the "sweet spot" for most investors.</p>
-                    <ul>
-                        <li>Optimal balance of risk and return</li>
-                        <li>Highest Sharpe ratio</li>
-                        <li>Good for: Long-term growth, balanced approach</li>
-                    </ul>
-                    
-                    <h4>3?? Points Below the Frontier (Light Purple)</h4>
-                    <p><strong>Inefficient portfolios</strong>�you can get better return for the same risk, or lower risk for the same return.</p>
-                    
-                    <div class='tip-box'>
-                        ?? <strong>The Magic:</strong> Portfolios on the frontier achieve <strong>higher returns</strong> than individual assets at the same risk level, thanks to diversification.
-                    </div>
-                    
-                    <h3>?? How to Read the Chart</h3>
-                    <div class='example-box'>
-                        <strong>X-Axis (Volatility):</strong>
-                        <ul>
-                            <li>Left = Low risk (bonds, conservative)</li>
-                            <li>Right = High risk (stocks, aggressive)</li>
-                        </ul>
-                        <strong>Y-Axis (Return):</strong>
-                        <ul>
-                            <li>Bottom = Low return</li>
-                            <li>Top = High return</li>
-                        </ul>
-                        <strong>Purple Dashed Line:</strong> Risk-free rate (your baseline)
-                    </div>
-                    
-                    <h3>?? How to Choose Your Portfolio</h3>
-                    <ol>
-                        <li><strong>Conservative?</strong> Pick near the Min Variance point (left side)</li>
-                        <li><strong>Balanced?</strong> Use the Max Sharpe portfolio (middle)</li>
-                        <li><strong>Aggressive?</strong> Move right on the frontier (higher return, higher risk)</li>
-                    </ol>
-                    
-                    <div class='warning-box'>
-                        ?? <strong>Never choose a portfolio below the frontier!</strong> You can always find a better one with the same risk and higher return.
-                    </div>
-                    
-                    <h3>?? Practical Application</h3>
-                    <p>The frontier <strong>shifts over time</strong> as market conditions change. Best practices:</p>
-                    <ul>
-                        <li>Recalculate quarterly or annually</li>
-                        <li>Use 5-10 year historical data for estimates</li>
-                        <li>Don't over-optimize (adds complexity without much benefit)</li>
-                        <li>Rebalance your portfolio 1-2 times per year</li>
-                    </ul>
-                </div>
-            </div>
-        </div>
-        <!-- MODAL: Results Interpretation -->
-        <div id='modalPOResults' class='modal'>
-            <div class='modal-content'>
-                <div class='modal-header'>
-                    <h2>?? Interpreting Your Results</h2>
-                    <span class='close-modal' onclick='closeModal("modalPOResults")'>&times;</span>
-                </div>
-                <div class='modal-body'>
-                    <h3>?? Understanding the Output</h3>
-                    
-                    <h4>1?? Max Sharpe Portfolio</h4>
-                    <p>This is your <strong>recommended portfolio</strong> for long-term growth with optimal risk-adjusted returns.</p>
-                    
-                    <div class='example-box'>
-                        <strong>Example Output:</strong>
-                        <ul>
-                            <li><strong>Expected Return:</strong> 8.5% per year</li>
-                            <li><strong>Volatility:</strong> 12.3% per year</li>
-                            <li><strong>Sharpe Ratio:</strong> 0.73</li>
-                        </ul>
-                        <p style='margin-top: 10px;'><strong>Interpretation:</strong> For every 1% of risk, you get 0.73% of excess return above the risk-free rate. This is a <span class='key-term'>good</span> risk-adjusted performance.</p>
-                    </div>
-                    
-                    <h4>2?? Asset Allocation (Pie Charts)</h4>
-                    <p>Shows <strong>how much to invest</strong> in each asset. These percentages tell you exactly how to split your capital.</p>
-                    
-                    <div class='tip-box'>
-                        ?? <strong>Action Step:</strong> If your current portfolio differs significantly from the optimal allocation, consider <strong>rebalancing</strong>. Sell overweighted assets, buy underweighted ones.
-                    </div>
-                    
-                    <h4>3?? Minimum Variance Portfolio</h4>
-                    <p>The <strong>safest</strong> portfolio with lowest volatility. Use this if:</p>
-                    <ul>
-                        <li>You're close to retirement (need stability)</li>
-                        <li>You have a low risk tolerance</li>
-                        <li>You expect market turbulence</li>
-                    </ul>
-                    
-                    <div class='warning-box'>
-                        ?? <strong>Trade-off:</strong> Lower volatility = lower expected return. You're sacrificing growth for stability.
-                    </div>
-                    
-                    <h3>?? Decision Framework</h3>
-                    <table style='width: 100%; border-collapse: collapse; margin: 15px 0;'>
-                        <tr style='background: #E8DAEF;'>
-                            <th style='padding: 10px; border: 1px solid #ccc;'>Your Profile</th>
-                            <th style='padding: 10px; border: 1px solid #ccc;'>Recommended Portfolio</th>
-                        </tr>
-                        <tr>
-                            <td style='padding: 10px; border: 1px solid #ccc;'><strong>Young investor (20-40)</strong><br>Long time horizon</td>
-                            <td style='padding: 10px; border: 1px solid #ccc;'>? Max Sharpe or slightly more aggressive<br>Can tolerate volatility</td>
-                        </tr>
-                        <tr>
-                            <td style='padding: 10px; border: 1px solid #ccc;'><strong>Mid-career (40-55)</strong><br>Balanced goals</td>
-                            <td style='padding: 10px; border: 1px solid #ccc;'>? Max Sharpe<br>Optimal risk-return balance</td>
-                        </tr>
-                        <tr>
-                            <td style='padding: 10px; border: 1px solid #ccc;'><strong>Pre-retirement (55-65)</strong><br>Capital preservation</td>
-                            <td style='padding: 10px; border: 1px solid #ccc;'>? Between Min Variance and Max Sharpe<br>Gradual risk reduction</td>
-                        </tr>
-                        <tr>
-                            <td style='padding: 10px; border: 1px solid #ccc;'><strong>Retired (65+)</strong><br>Income + stability</td>
-                            <td style='padding: 10px; border: 1px solid #ccc;'>? Min Variance<br>Protect against losses</td>
-                        </tr>
-                    </table>
-                    
-                    <h3>?? Real Returns vs. Nominal Returns</h3>
-                    <p>If you checked <span class='key-term'>"Show Real Returns"</span>:</p>
-                    <ul>
-                        <li><strong>Nominal:</strong> What you see in your account (ignores inflation)</li>
-                        <li><strong>Real:</strong> Actual purchasing power growth (inflation-adjusted)</li>
-                    </ul>
-                    
-                    <div class='example-box'>
-                        <h4>?? Example</h4>
-                        <p><strong>Nominal Return:</strong> 8% per year</p>
-                        <p><strong>Inflation:</strong> 2.5% per year</p>
-                        <p><strong>Real Return:</strong> ~5.5% per year (8% - 2.5%)</p>
-                        <hr style='margin: 10px 0;'>
-                        <p>Your money <strong>grows nominally by 8%</strong>, but your <strong>purchasing power only increases by 5.5%</strong>.</p>
-                    </div>
-                    
-                    <div class='tip-box'>
-                        ?? <strong>Pro Tip:</strong> Always think in <strong>real terms</strong> for long-term planning. Nominal returns can be misleading during high inflation periods.
-                    </div>
-                    
-                    <h3>?? Implementation Steps</h3>
-                    <ol>
-                        <li><strong>Review allocation:</strong> Compare recommended weights to your current portfolio</li>
-                        <li><strong>Calculate amounts:</strong> Multiply percentages by your total capital</li>
-                        <li><strong>Execute trades:</strong> Buy/sell to match target allocation (consider taxes!)</li>
-                        <li><strong>Set calendar reminder:</strong> Rebalance every 6-12 months</li>
-                        <li><strong>Monitor:</strong> Track actual performance vs. expectations</li>
-                    </ol>
-                    
-                    <div class='warning-box'>
-                        ?? <strong>Important:</strong> Don't chase perfect optimization. A "good enough" allocation that you stick with is better than a "perfect" one you abandon during volatility.
-                    </div>
-                </div>
-            </div>
-        </div>
-        <footer><p>Portfolio Optimizer | 10/27/2025 21:57</p></footer>
+        
+        <!-- Footer -->
+        <footer>
+            <p>Portfolio Optimizer | Markowitz Mean-Variance Model</p>
+        </footer>
     </div>
-    <script>
-        let assets = [
-            { name: 'Stocks', expectedReturn: 10, volatility: 18, correlation: {} },
-            { name: 'Bonds', expectedReturn: 4, volatility: 6, correlation: {} },
-            { name: 'Real Estate', expectedReturn: 8, volatility: 12, correlation: {} }
-        ];
-        
-        function addAsset() {
-            const newAsset = { name: 'Asset ' + (assets.length + 1), expectedReturn: 6, volatility: 10, correlation: {} };
-            assets.push(newAsset);
-            renderAssets();
-        }
-        
-        function removeAsset(index) {
-            if (assets.length <= 2) {
-                alert('You must have at least 2 assets!');
-                return;
-            }
-            assets.splice(index, 1);
-            renderAssets();
-        }
-        
-        function renderAssets() {
-            const container = document.getElementById('assetsContainer');
-            container.innerHTML = '';
-            
-            assets.forEach((asset, index) => {
-                let correlationHTML = '';
+    
+    <!-- MODALS -->
+    <div id='modalPOIntro' class='modal'>
+        <div class='modal-content'>
+            <div class='modal-header'>
+                <h2>📊 Markowitz Mean-Variance Model</h2>
+                <span class='close-modal' onclick='closeModal("modalPOIntro")'>&times;</span>
+            </div>
+            <div class='modal-body'>
+                <h3>🎯 Purpose</h3>
+                <p>The <span class='key-term'>Markowitz Model</span> (Nobel Prize 1990) finds the optimal portfolio allocation that <strong>maximizes return for a given level of risk</strong>, or minimizes risk for a given return.</p>
                 
-                assets.forEach((otherAsset, otherIndex) => {
-                    if (index !== otherIndex) {
-                        const corrValue = asset.correlation[otherIndex] || 0;
-                        correlationHTML += `
-                            <div class='asset-input-group'>
-                                <label>Correlation with ${otherAsset.name}</label>
-                                <input type='number' step='0.1' min='-1' max='1' value='${corrValue}' 
-                                       onchange='updateCorrelation(${index}, ${otherIndex}, this.value)'>
-                            </div>
-                        `;
-                    }
-                });
+                <h3>📊 Core Concepts</h3>
+                <h4>1️⃣ Risk vs. Return Trade-off</h4>
+                <p>Higher returns usually come with higher risk. The model finds the <strong>best balance</strong> for your preferences.</p>
                 
-                const removeBtn = assets.length > 2 ? 
-                    `<button onclick='removeAsset(${index})' 
-                             style='float: right; background: #9D5CE6; color: white; border: none; 
-                                    padding: 5px 10px; border-radius: 5px; cursor: pointer;'>X</button>` : '';
+                <h4>2️⃣ Diversification Power</h4>
+                <p>Combining assets with <strong>low correlation</strong> reduces portfolio risk <em>without</em> sacrificing return. This is the "free lunch" of investing!</p>
                 
-                const card = `
-                    <div class='asset-card'>
-                        <h4>
-                            <input type='text' value='${asset.name}' 
-                                   onchange='updateAssetName(${index}, this.value)' 
-                                   style='background: transparent; border: none; color: #2649B2; 
-                                          font-weight: bold; font-size: 1em; width: 200px;'>
-                            ${removeBtn}
-                        </h4>
-                        <div class='asset-input-group'>
-                            <label>Expected Annual Return (%)</label>
-                            <input type='number' step='0.5' value='${asset.expectedReturn}' 
-                                   onchange='updateAsset(${index}, "expectedReturn", this.value)'>
-                        </div>
-                        <div class='asset-input-group'>
-                            <label>Annual Volatility (%)</label>
-                            <input type='number' step='0.5' value='${asset.volatility}' 
-                                   onchange='updateAsset(${index}, "volatility", this.value)'>
-                        </div>
-                        ${correlationHTML}
-                    </div>
-                `;
-                
-                container.innerHTML += card;
-            });
-        }
-        
-        function updateAssetName(index, value) { 
-            assets[index].name = value; 
-            renderAssets(); 
-        }
-        
-        function updateAsset(index, field, value) { 
-            assets[index][field] = parseFloat(value); 
-        }
-        
-        function updateCorrelation(i, j, value) { 
-            const val = parseFloat(value); 
-            assets[i].correlation[j] = val; 
-            assets[j].correlation[i] = val; 
-        }
-        
-        function resetAssets() {
-            if (confirm('Reset all assets to default values?')) {
-                assets = [
-                    { name: 'Stocks', expectedReturn: 10, volatility: 18, correlation: {} },
-                    { name: 'Bonds', expectedReturn: 4, volatility: 6, correlation: {} },
-                    { name: 'Real Estate', expectedReturn: 8, volatility: 12, correlation: {} }
-                ];
-                renderAssets();
-                document.getElementById('resultsSection').classList.add('hidden');
-            }
-        }
-        
-        function buildCovarianceMatrix() {
-            const n = assets.length;
-            const cov = [];
-            
-            for (let i = 0; i < n; i++) {
-                cov[i] = [];
-                for (let j = 0; j < n; j++) {
-                    if (i === j) {
-                        cov[i][j] = Math.pow(assets[i].volatility / 100, 2);
-                    } else {
-                        const corr = assets[i].correlation[j] || 0;
-                        cov[i][j] = corr * (assets[i].volatility / 100) * (assets[j].volatility / 100);
-                    }
-                }
-            }
-            return cov;
-        }
-        
-        function calculatePortfolioMetrics(weights, covMatrix, returns, riskFreeRate) {
-            let portfolioReturn = 0;
-            for (let i = 0; i < weights.length; i++) {
-                portfolioReturn += weights[i] * returns[i];
-            }
-            
-            let portfolioVariance = 0;
-            for (let i = 0; i < weights.length; i++) {
-                for (let j = 0; j < weights.length; j++) {
-                    portfolioVariance += weights[i] * weights[j] * covMatrix[i][j];
-                }
-            }
-            
-            const portfolioVol = Math.sqrt(portfolioVariance) * 100;
-            const sharpe = (portfolioReturn - riskFreeRate) / portfolioVol;
-            
-            return { return: portfolioReturn, volatility: portfolioVol, sharpe: sharpe };
-        }
-        
-        function optimizePortfolio() {
-            const riskFreeRate = parseFloat(document.getElementById('riskFreeRate').value);
-            const inflationRate = parseFloat(document.getElementById('inflationRatePO').value);
-            const showInflation = document.getElementById('showInflationPO').checked;
-            
-            const covMatrix = buildCovarianceMatrix();
-            const returns = assets.map(a => a.expectedReturn);
-            const returnsAdjusted = showInflation ? returns.map(r => r - inflationRate) : returns;
-            const riskFreeAdjusted = showInflation ? riskFreeRate - inflationRate : riskFreeRate;
-            const n = assets.length;
-            
-            const efficientFrontier = [];
-            let maxSharpe = { sharpe: -Infinity };
-            let minVar = { volatility: Infinity };
-            
-            for (let iter = 0; iter < 5000; iter++) {
-                let weights = [];
-                let sum = 0;
-                for (let i = 0; i < n; i++) {
-                    weights[i] = Math.random();
-                    sum += weights[i];
-                }
-                weights = weights.map(w => w / sum);
-                
-                const metrics = calculatePortfolioMetrics(weights, covMatrix, returnsAdjusted, riskFreeAdjusted);
-                efficientFrontier.push({ ...metrics, weights: weights });
-                
-                if (metrics.sharpe > maxSharpe.sharpe) {
-                    maxSharpe = { ...metrics, weights: weights };
-                }
-                
-                if (metrics.volatility < minVar.volatility) {
-                    minVar = { ...metrics, weights: weights };
-                }
-            }
-            
-            displayResults(maxSharpe, minVar, efficientFrontier, riskFreeAdjusted, showInflation, inflationRate);
-        }
-        
-        function displayResults(maxSharpe, minVar, frontier, riskFreeRate, showInflation, inflationRate) {
-            document.getElementById('resultsSection').classList.remove('hidden');
-            document.getElementById('resultsSection').scrollIntoView({ behavior: 'smooth' });
-            
-            const returnLabel = showInflation ? ' (Real)' : ' (Nominal)';
-            
-            const statsHTML = `
-                <div class='stats-row'>
-                    <div class='stat-item'>
-                        <div class='label'>Max Sharpe Ratio</div>
-                        <div class='value'>${maxSharpe.sharpe.toFixed(2)}</div>
-                    </div>
-                    <div class='stat-item'>
-                        <div class='label'>Expected Return${returnLabel}</div>
-                        <div class='value'>${maxSharpe.return.toFixed(2)}%</div>
-                    </div>
-                    <div class='stat-item'>
-                        <div class='label'>Volatility</div>
-                        <div class='value'>${maxSharpe.volatility.toFixed(2)}%</div>
-                    </div>
+                <div class='formula-box'>
+                    <strong>Portfolio Return:</strong><br>
+                    R<sub>p</sub> = Σ (w<sub>i</sub> × R<sub>i</sub>)<br><br>
+                    <strong>Portfolio Risk (Variance):</strong><br>
+                    σ²<sub>p</sub> = Σ Σ (w<sub>i</sub> × w<sub>j</sub> × Cov<sub>ij</sub>)<br><br>
+                    <em>w = weight, R = return, Cov = covariance</em>
                 </div>
-                <div class='stats-row' style='margin-top: 10px;'>
-                    <div class='stat-item'>
-                        <div class='label'>Min Variance Return${returnLabel}</div>
-                        <div class='value'>${minVar.return.toFixed(2)}%</div>
-                    </div>
-                    <div class='stat-item'>
-                        <div class='label'>Min Variance Vol</div>
-                        <div class='value'>${minVar.volatility.toFixed(2)}%</div>
-                    </div>
-                    <div class='stat-item'>
-                        <div class='label'>Risk-Free Rate${returnLabel}</div>
-                        <div class='value'>${riskFreeRate.toFixed(2)}%</div>
-                    </div>
+            </div>
+        </div>
+    </div>
+    
+    <div id='modalPORisk' class='modal'>
+        <div class='modal-content'>
+            <div class='modal-header'>
+                <h2>💰 Risk-Free Rate Explained</h2>
+                <span class='close-modal' onclick='closeModal("modalPORisk")'>&times;</span>
+            </div>
+            <div class='modal-body'>
+                <h3>📊 Definition</h3>
+                <p>The <span class='key-term'>Risk-Free Rate</span> is the theoretical return on an investment with <strong>zero risk</strong>. It's your baseline: any risky investment should offer a return <em>above</em> this rate to be worth it.</p>
+                
+                <h3>📈 Common Proxies</h3>
+                <ul>
+                    <li><strong>US 10-Year Treasury Bond:</strong> ~4.0-4.5% (as of 2024)</li>
+                    <li><strong>German Bund (10Y):</strong> ~2.5-3.0%</li>
+                    <li><strong>French OAT (10Y):</strong> ~3.0-3.5%</li>
+                    <li><strong>ECB Deposit Rate:</strong> ~3.5-4.0%</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    
+    <div id='modalPOSharpe' class='modal'>
+        <div class='modal-content'>
+            <div class='modal-header'>
+                <h2>⚡ Sharpe Ratio - Risk-Adjusted Performance</h2>
+                <span class='close-modal' onclick='closeModal("modalPOSharpe")'>&times;</span>
+            </div>
+            <div class='modal-body'>
+                <h3>📊 Definition</h3>
+                <p>The <span class='key-term'>Sharpe Ratio</span> measures how much <strong>excess return</strong> you receive for each unit of risk you take. It's the gold standard for comparing investments.</p>
+                
+                <div class='formula-box'>
+                    <strong>Formula:</strong><br>
+                    Sharpe Ratio = (R<sub>p</sub> - R<sub>f</sub>) / σ<sub>p</sub><br><br>
+                    R<sub>p</sub> = Portfolio Return<br>
+                    R<sub>f</sub> = Risk-Free Rate<br>
+                    σ<sub>p</sub> = Portfolio Volatility (Standard Deviation)
                 </div>
-            `;
-            document.getElementById('globalStats').innerHTML = statsHTML;
-            
-            createFrontierChart(frontier, maxSharpe, minVar, riskFreeRate, showInflation, inflationRate);
-            createAllocationChart('chartAllocation1', maxSharpe.weights);
-            createAllocationChart('chartAllocation2', minVar.weights);
-            createAllocationTable(maxSharpe.weights, minVar.weights);
-        }
-        
-        function createFrontierChart(frontier, maxSharpe, minVar, riskFreeRate, showInflation, inflationRate) {
-            const data = frontier.map(p => ({ x: p.volatility, y: p.return, sharpe: p.sharpe }));
-            const titleText = showInflation ? 'Efficient Frontier (Real Returns - Inflation: ' + inflationRate.toFixed(1) + '%)' : 'Efficient Frontier (Nominal Returns)';
-            
-            Highcharts.chart('chartFrontier', {
-                chart: { type: 'scatter', backgroundColor: 'transparent', zoomType: 'xy' },
-                title: { text: titleText, style: { color: '#2649B2', fontSize: '1.1em' } },
-                xAxis: { title: { text: 'Volatility (%)', style: { color: '#2649B2' } }, crosshair: true },
-                yAxis: { 
-                    title: { text: 'Expected Return (%)', style: { color: '#2649B2' } }, 
-                    plotLines: [{ value: riskFreeRate, color: '#9D5CE6', width: 2, dashStyle: 'Dash', label: { text: 'Risk-Free Rate', style: { color: '#9D5CE6' } } }], 
-                    crosshair: true 
-                },
-                tooltip: { pointFormat: 'Return: <b>{point.y:.2f}%</b><br/>Vol: <b>{point.x:.2f}%</b><br/>Sharpe: <b>{point.sharpe:.2f}</b>' },
-                series: [
-                    { name: 'Portfolios', data: data, color: 'rgba(142,125,227,0.4)', marker: { radius: 3 } }, 
-                    { name: 'Max Sharpe', data: [{ x: maxSharpe.volatility, y: maxSharpe.return }], color: '#2649B2', marker: { radius: 10, symbol: 'diamond' } }, 
-                    { name: 'Min Variance', data: [{ x: minVar.volatility, y: minVar.return }], color: '#4A74F3', marker: { radius: 10, symbol: 'triangle' } }
-                ],
-                legend: { enabled: true, itemStyle: { color: '#5B2C6F' } },
-                credits: { enabled: false }
-            });
-        }
-        
-        function createAllocationChart(containerId, weights) {
-            const data = assets.map((asset, i) => ({ name: asset.name, y: weights[i] * 100 }));
-            const colors = ['#2649B2', '#4A74F3', '#8E7DE3', '#9D5CE6', '#D4D9F0', '#6C8BE0', '#B55CE6'];
-            
-            Highcharts.chart(containerId, {
-                chart: { type: 'pie', backgroundColor: 'transparent' },
-                title: { text: null },
-                tooltip: { pointFormat: '<b>{point.name}</b>: {point.y:.1f}%' },
-                series: [{ name: 'Allocation', data: data, colors: colors }],
-                plotOptions: { pie: { innerSize: '50%', dataLabels: { format: '<b>{point.name}</b>: {point.y:.1f}%', style: { color: '#2649B2' } }, borderWidth: 2, borderColor: '#E8DAEF' } },
-                credits: { enabled: false }
-            });
-        }
-        
-        function createAllocationTable(maxSharpeWeights, minVarWeights) {
-            let tableHTML = `
-                <table class='allocation-table'>
-                    <thead>
-                        <tr>
-                            <th>Asset</th>
-                            <th>Expected Return</th>
-                            <th>Volatility</th>
-                            <th>Max Sharpe Weight</th>
-                            <th>Min Vol Weight</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-            `;
-            
-            assets.forEach((asset, i) => {
-                tableHTML += `
-                    <tr>
-                        <td><b>${asset.name}</b></td>
-                        <td>${asset.expectedReturn.toFixed(2)}%</td>
-                        <td>${asset.volatility.toFixed(2)}%</td>
-                        <td><span style='background: linear-gradient(135deg, #2649B2 0%, #4A74F3 100%); color: white; padding: 3px 8px; border-radius: 4px; font-weight: bold;'>${(maxSharpeWeights[i] * 100).toFixed(2)}%</span></td>
-                        <td><span style='background: linear-gradient(135deg, #6C3483 0%, #9D5CE6 100%); color: white; padding: 3px 8px; border-radius: 4px; font-weight: bold;'>${(minVarWeights[i] * 100).toFixed(2)}%</span></td>
-                    </tr>
-                `;
-            });
-            
-            tableHTML += `</tbody></table>`;
-            document.getElementById('allocationTable').innerHTML = tableHTML;
-        }
-        
-        window.addEventListener('DOMContentLoaded', function() {
-            renderAssets();
-        });
-        
-        // GESTION DES MODALS
-        function openModal(modalId) {
-            document.getElementById(modalId).style.display = 'block';
-            document.body.style.overflow = 'hidden';
-        }
-        
-        function closeModal(modalId) {
-            document.getElementById(modalId).style.display = 'none';
-            document.body.style.overflow = 'auto';
-        }
-        
-        window.onclick = function(event) {
-            if (event.target.classList.contains('modal')) {
-                event.target.style.display = 'none';
-                document.body.style.overflow = 'auto';
-            }
-        };
-    </script>
+            </div>
+        </div>
+    </div>
+    
+    <div id='modalPOFrontier' class='modal'>
+        <div class='modal-content'>
+            <div class='modal-header'>
+                <h2>📈 Understanding the Efficient Frontier</h2>
+                <span class='close-modal' onclick='closeModal("modalPOFrontier")'>&times;</span>
+            </div>
+            <div class='modal-body'>
+                <h3>📊 What Is It?</h3>
+                <p>The <span class='key-term'>Efficient Frontier</span> is the curved line on the chart representing <strong>optimal portfolios</strong>—those offering the highest return for each level of risk.</p>
+                
+                <div class='tip-box'>
+                    💡 <strong>The Magic:</strong> Portfolios on the frontier achieve <strong>higher returns</strong> than individual assets at the same risk level, thanks to diversification.
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div id='modalPOResults' class='modal'>
+        <div class='modal-content'>
+            <div class='modal-header'>
+                <h2>📊 Interpreting Your Results</h2>
+                <span class='close-modal' onclick='closeModal("modalPOResults")'>&times;</span>
+            </div>
+            <div class='modal-body'>
+                <h3>📈 Understanding the Output</h3>
+                
+                <h4>1️⃣ Max Sharpe Portfolio</h4>
+                <p>This is your <strong>recommended portfolio</strong> for long-term growth with optimal risk-adjusted returns.</p>
+                
+                <h4>2️⃣ Asset Allocation (Pie Charts)</h4>
+                <p>Shows <strong>how much to invest</strong> in each asset. These percentages tell you exactly how to split your capital.</p>
+                
+                <div class='tip-box'>
+                    💡 <strong>Action Step:</strong> If your current portfolio differs significantly from the optimal allocation, consider <strong>rebalancing</strong>. Sell overweighted assets, buy underweighted ones.
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Scripts -->
+    <script src='assets/js/common.js'></script>
+    <script src='assets/js/portfolio-optimizer.js'></script>
 </body>
 </html>

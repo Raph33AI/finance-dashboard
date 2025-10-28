@@ -1,0 +1,251 @@
+/* ==============================================
+   SCENARIO-ANALYSIS.CSS - Styles spécifiques
+   ============================================== */
+
+/* Portfolio Input */
+.portfolio-input {
+    background: linear-gradient(135deg, #E8DAEF 0%, #D4D9F0 100%);
+    padding: 25px;
+    border-radius: 15px;
+    margin-bottom: 25px;
+}
+
+.input-title {
+    color: #2649B2;
+    margin-bottom: 20px;
+    font-size: 1.2em;
+}
+
+.portfolio-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.portfolio-item {
+    background: white;
+    padding: 15px;
+    border-radius: 10px;
+    border-left: 4px solid #8E44AD;
+}
+
+.portfolio-item label {
+    display: block;
+    color: #5B2C6F;
+    font-weight: bold;
+    margin-bottom: 8px;
+    font-size: 0.9em;
+}
+
+.portfolio-item input {
+    width: 100%;
+    padding: 10px;
+    border: 2px solid #9D5CE6;
+    border-radius: 8px;
+    font-size: 1em;
+    transition: all 0.3s;
+}
+
+.portfolio-item input:focus {
+    outline: none;
+    border-color: #2649B2;
+    box-shadow: 0 0 0 3px rgba(38,73,178,0.2);
+}
+
+.total-allocation-display {
+    margin-top: 15px;
+    padding: 15px;
+    background: white;
+    border-radius: 8px;
+    text-align: center;
+}
+
+.total-allocation-display strong {
+    color: #5B2C6F;
+    font-size: 1.1em;
+}
+
+.total-allocation-display span {
+    color: #2649B2;
+    font-size: 1.3em;
+    margin-left: 10px;
+}
+
+.total-allocation-display span.error {
+    color: #9D5CE6;
+}
+
+/* Analyze Button */
+.btn-analyze {
+    background: linear-gradient(135deg, #2649B2 0%, #8E44AD 100%);
+    color: white;
+    padding: 15px 40px;
+    border: none;
+    border-radius: 10px;
+    font-size: 1.1em;
+    font-weight: bold;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(38,73,178,0.3);
+    transition: all 0.3s;
+    width: 100%;
+}
+
+.btn-analyze:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(38,73,178,0.4);
+}
+
+.btn-analyze:active {
+    transform: translateY(0);
+}
+
+/* Scenario Cards */
+.scenario-card {
+    background: linear-gradient(135deg, #E8DAEF 0%, #D4D9F0 100%);
+    padding: 20px;
+    border-radius: 12px;
+    margin-bottom: 20px;
+    border-left: 5px solid #8E44AD;
+    transition: all 0.3s;
+}
+
+.scenario-card:hover {
+    transform: translateX(5px);
+    box-shadow: 0 4px 15px rgba(108,52,131,0.2);
+}
+
+.scenario-card h3 {
+    color: #2649B2;
+    margin-bottom: 10px;
+}
+
+.scenario-card p {
+    color: #5B2C6F;
+    font-size: 0.9em;
+    line-height: 1.6;
+}
+
+.scenario-impacts {
+    display: flex;
+    gap: 10px;
+    margin-top: 10px;
+    flex-wrap: wrap;
+}
+
+.impact-badge {
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 0.85em;
+    font-weight: bold;
+}
+
+.impact-positive {
+    background: linear-gradient(135deg, #4A74F3 0%, #6C8BE0 100%);
+    color: white;
+}
+
+.impact-negative {
+    background: linear-gradient(135deg, #C39BD3 0%, #9D5CE6 100%);
+    color: white;
+}
+
+/* Results Grid */
+.results-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+.result-card {
+    background: white;
+    padding: 20px;
+    border-radius: 12px;
+    text-align: center;
+    box-shadow: 0 2px 8px rgba(108,52,131,0.1);
+}
+
+.result-card h4 {
+    color: #5B2C6F;
+    margin-bottom: 10px;
+    font-size: 0.9em;
+}
+
+.result-card .value {
+    font-size: 2em;
+    font-weight: bold;
+    color: #2649B2;
+}
+
+.result-card.positive .value {
+    color: #4A74F3;
+}
+
+.result-card.negative .value {
+    color: #9D5CE6;
+}
+
+/* Subsection Title */
+.subsection-title {
+    color: #2649B2;
+    margin-bottom: 15px;
+    margin-top: 30px;
+    font-size: 1.2em;
+}
+
+.subsection-title:first-of-type {
+    margin-top: 0;
+}
+
+/* Detailed Table */
+.detailed-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+.detailed-table th {
+    background: linear-gradient(135deg, #2649B2 0%, #8E44AD 100%);
+    color: white;
+    padding: 12px;
+    text-align: left;
+    font-weight: bold;
+    font-size: 0.9em;
+}
+
+.detailed-table td {
+    padding: 12px;
+    border-bottom: 1px solid #E8DAEF;
+    font-size: 0.9em;
+}
+
+.detailed-table tr:hover {
+    background: #F8F9FA;
+}
+
+.detailed-table .scenario-name {
+    font-weight: bold;
+    color: #2649B2;
+}
+
+.detailed-table .return-positive {
+    color: #4A74F3;
+    font-weight: bold;
+}
+
+.detailed-table .return-negative {
+    color: #9D5CE6;
+    font-weight: bold;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .portfolio-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .results-grid {
+        grid-template-columns: 1fr;
+    }
+}
