@@ -12,10 +12,10 @@
     --sidebar-text-secondary: #b0b3b8;
     --transition-speed: 0.3s;
 
-    /* ✅ MODIFIÉ : Largeur maximale du contenu pour un meilleur équilibre */
+    /* ✅ MODIFIÉ : Largeur maximale du contenu pour un meilleur équilibre sur desktop */
     --content-max-width: 1400px; /* Augmenté de 1200px à 1400px pour plus d'espace */
-    --content-padding-desktop: 40px; /* Augmenté de 30px pour plus d'air sur desktop */
-    --content-padding-mobile: 20px;
+    --content-padding-desktop: 40px; /* Plus d'air autour du contenu principal */
+    --content-padding-mobile: 20px; /* Moins d'air sur mobile */
 }
 
 * {
@@ -288,11 +288,15 @@ body {
     min-height: 100vh;
     display: flex;
     flex-direction: column;
+    /* ✅ NOUVEAU : Permet au main-content d'utiliser tout l'espace disponible */
+    padding: var(--content-padding-desktop); /* Ajoute un padding directement au main-content */
 }
 
 .sidebar.collapsed ~ .main-content {
     margin-left: var(--sidebar-collapsed-width);
+    padding: var(--content-padding-desktop); /* Conserver le padding même quand collapsé */
 }
+
 
 /* Top Header */
 .top-header {
@@ -304,10 +308,11 @@ body {
     position: sticky;
     top: 0;
     z-index: 100;
-    padding: 20px var(--content-padding-desktop); /* Utilise la nouvelle variable */
+    /* ✅ MODIFIÉ : Supprimé le padding latéral ici, il sera géré par .main-content */
+    padding: 20px 0; 
 }
 
-/* ✅ NOUVEAU : Wrapper pour le contenu du header pour aligner avec le container */
+/* ✅ Wrapper pour le contenu du header pour aligner avec le container */
 .header-content-wrapper {
     max-width: var(--content-max-width);
     margin: 0 auto;
@@ -360,10 +365,17 @@ body {
 /* Container */
 .container {
     flex: 1;
-    /* ✅ MODIFIÉ : Utilise les nouvelles variables pour les paddings et max-width */
-    max-width: var(--content-max-width); 
-    padding: var(--content-padding-desktop); 
-    margin: 0 auto;
+    /* ✅ MODIFIÉ : Le container n'a plus de padding latéral ni de max-width */
+    /* Il doit remplir l'espace donné par le padding du main-content */
+    max-width: 100%; /* S'étend sur toute la largeur disponible */
+    padding: 0; /* Pas de padding interne, car déjà géré par main-content */
+    margin: 0; /* Pas de margin auto, car déjà géré par main-content */
+}
+
+/* ✅ NOUVEAU : Assurez-vous que le .content à l'intérieur du container prend toute la largeur */
+.main-content .content {
+    width: 100%;
+    /* Ajoutez d'autres styles si nécessaire, comme des flexbox ou grid pour les éléments enfants */
 }
 
 /* ===================================
@@ -381,6 +393,7 @@ body {
     
     .main-content {
         margin-left: 0 !important;
+        padding: var(--content-padding-mobile) !important; /* Ajuste le padding sur mobile */
     }
     
     .mobile-toggle {
@@ -391,26 +404,19 @@ body {
         display: none;
     }
 
-    /* ✅ MODIFIÉ : Ajuster le padding pour le header et le container sur écrans intermédiaires */
+    /* Ajuster le padding du header pour les écrans intermédiaires */
     .top-header {
-        padding: 20px var(--content-padding-mobile);
-    }
-    .container {
-        padding: var(--content-padding-mobile);
+        padding: 20px 0; /* Le padding est sur .main-content */
     }
 }
 
 @media (max-width: 768px) {
     .top-header {
-        padding: 15px var(--content-padding-mobile); /* ✅ Ajustement pour très petits écrans */
+        padding: 15px 0; /* Le padding est sur .main-content */
     }
     
     .header-left h1 {
         font-size: 18px;
-    }
-    
-    .container {
-        padding: var(--content-padding-mobile); /* ✅ Ajustement pour très petits écrans */
     }
     
     .last-update {
