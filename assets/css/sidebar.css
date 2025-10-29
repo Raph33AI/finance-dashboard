@@ -4,7 +4,7 @@
 
 :root {
     --sidebar-width: 280px;
-    --sidebar-collapsed-width: 70px;
+    --sidebar-collapsed-width: 60px;
     --sidebar-bg: #1a1d29;
     --sidebar-hover: #252937;
     --sidebar-active: #2649B2;
@@ -48,6 +48,7 @@ body {
     transition: width var(--transition-speed) ease;
     z-index: 1000;
     box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
 }
 
 .sidebar.collapsed {
@@ -72,11 +73,18 @@ body {
     gap: 12px;
     white-space: nowrap;
     overflow: hidden;
+    transition: opacity var(--transition-speed);
 }
 
 .sidebar-header h2 i {
     color: #4A74F3;
     font-size: 24px;
+    flex-shrink: 0;
+}
+
+.sidebar.collapsed .sidebar-header h2 span {
+    opacity: 0;
+    width: 0;
 }
 
 .sidebar-toggle {
@@ -88,14 +96,11 @@ body {
     padding: 8px;
     border-radius: 4px;
     transition: background var(--transition-speed);
+    flex-shrink: 0;
 }
 
 .sidebar-toggle:hover {
     background: var(--sidebar-hover);
-}
-
-.sidebar.collapsed .sidebar-header h2 span {
-    display: none;
 }
 
 /* Sidebar Navigation */
@@ -134,14 +139,14 @@ body {
     background: none;
     border: none;
     color: var(--sidebar-text);
-    padding: 14px 20px;
+    padding: 16px 20px;
     display: flex;
     align-items: center;
     gap: 12px;
     cursor: pointer;
     transition: all var(--transition-speed);
     font-size: 15px;
-    font-weight: 500;
+    font-weight: 600;
     position: relative;
 }
 
@@ -155,9 +160,10 @@ body {
 }
 
 .nav-folder i:first-child {
-    font-size: 18px;
+    font-size: 20px;
     width: 20px;
     text-align: center;
+    flex-shrink: 0;
 }
 
 .nav-folder span {
@@ -165,11 +171,13 @@ body {
     text-align: left;
     white-space: nowrap;
     overflow: hidden;
+    transition: opacity var(--transition-speed);
 }
 
 .nav-folder .arrow {
     font-size: 12px;
-    transition: transform var(--transition-speed);
+    transition: transform var(--transition-speed), opacity var(--transition-speed);
+    flex-shrink: 0;
 }
 
 .nav-folder.active .arrow {
@@ -178,7 +186,8 @@ body {
 
 .sidebar.collapsed .nav-folder span,
 .sidebar.collapsed .nav-folder .arrow {
-    display: none;
+    opacity: 0;
+    width: 0;
 }
 
 /* Navigation Submenu */
@@ -197,11 +206,12 @@ body {
     display: flex;
     align-items: center;
     gap: 12px;
-    padding: 12px 20px 12px 52px;
+    padding: 14px 20px 14px 52px;
     color: var(--sidebar-text-secondary);
     text-decoration: none;
     transition: all var(--transition-speed);
-    font-size: 14px;
+    font-size: 15px;
+    font-weight: 500;
 }
 
 .nav-link:hover {
@@ -218,9 +228,10 @@ body {
 }
 
 .nav-link i {
-    font-size: 16px;
+    font-size: 18px;
     width: 18px;
     text-align: center;
+    flex-shrink: 0;
 }
 
 .nav-link span {
@@ -249,10 +260,12 @@ body {
 .user-info i {
     font-size: 32px;
     color: #4A74F3;
+    flex-shrink: 0;
 }
 
 .sidebar.collapsed .user-info span {
-    display: none;
+    opacity: 0;
+    width: 0;
 }
 
 /* ===================================
