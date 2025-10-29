@@ -56,7 +56,7 @@
 #### 🔹 Gestion Budgétaire Dynamique
 - **Timeline flexible** : Ajoutez des mois avant/après (1 ou 12 mois à la fois)
 - **Suivi complet** : Revenus (Salaire, Divers) | Dépenses (Loyer, Nourriture, Fixes, Autres, Prêts)
-- **Investissements** : Investissement mensuel + PEE L'Oréal
+- **Investissements** : Investissement mensuel + PEE
 - **Calculs automatiques** : Épargne cumulée, gains d'investissement, ROI
 
 #### 🔹 Outils Avancés
@@ -229,7 +229,7 @@ Testez votre portefeuille sur **6 événements majeurs** :
 
 ### 📊 Statistiques du Projet
 - **5 pages HTML** : Interface utilisateur complète
-- **6 fichiers CSS** : ~1,500 lignes (design L'Oréal)
+- **6 fichiers CSS** : ~1,500 lignes
 - **6 fichiers JavaScript** : ~3,500 lignes (logique métier)
 - **Taille totale** : ~2 MB (avec Highcharts CDN)
 
@@ -280,24 +280,6 @@ Testez votre portefeuille sur **6 événements majeurs** :
 - [ ] Drawdown analysis (maximum drawdown, underwater charts)
 - [ ] Tax optimization (calcul fiscal)
 - [ ] Rebalancing automatique (notifications)
-
----
-
-## 🤝 Contribution
-
-Les contributions sont les bienvenues ! Pour contribuer :
-
-1. **Fork** le projet
-2. Créez une **branche feature** (`git checkout -b feature/AmazingFeature`)
-3. **Committez** vos changements (`git commit -m 'Add AmazingFeature'`)
-4. **Push** vers la branche (`git push origin feature/AmazingFeature`)
-5. Ouvrez une **Pull Request**
-
-### Guidelines
-- Code propre et commenté
-- Suivre l'architecture existante (IIFE modules)
-- Tester sur Chrome, Firefox, Safari
-- Respecter la palette de couleurs L'Oréal
 
 ---
 
