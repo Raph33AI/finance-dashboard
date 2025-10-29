@@ -226,3 +226,92 @@ Testez votre portefeuille sur **6 événements majeurs** :
 ### Étapes
 
 #### **Option 1 : Clone Git**
+
+### 📊 Statistiques du Projet
+- **5 pages HTML** : Interface utilisateur complète
+- **6 fichiers CSS** : ~1,500 lignes (design L'Oréal)
+- **6 fichiers JavaScript** : ~3,500 lignes (logique métier)
+- **Taille totale** : ~2 MB (avec Highcharts CDN)
+
+---
+
+## 📸 Captures d'Écran
+
+### Dashboard Budget
+![Dashboard Budget](https://via.placeholder.com/800x400?text=Dashboard+Budget+Screenshot)
+*Timeline dynamique avec 300+ mois, calculs automatiques, graphiques interactifs*
+
+### Monte Carlo Simulation
+![Monte Carlo](https://via.placeholder.com/800x400?text=Monte+Carlo+Simulation)
+*1000+ simulations, frontière de confiance P10/P50/P90, ajustement inflation*
+
+### Portfolio Optimizer (Markowitz)
+![Markowitz](https://via.placeholder.com/800x400?text=Portfolio+Optimizer)
+*Frontière efficiente, Max Sharpe, Minimum Variance*
+
+### Risk Parity
+![Risk Parity](https://via.placeholder.com/800x400?text=Risk+Parity)
+*Equal Risk Contribution, comparaison avec Equal Weight*
+
+### Scenario Analysis
+![Scenarios](https://via.placeholder.com/800x400?text=Scenario+Analysis)
+*6 scénarios historiques, stress testing, recommandations personnalisées*
+
+---
+
+## 🗺️ Roadmap
+
+### Version 1.1 (À Venir)
+- [ ] **Export PDF** : Générer des rapports PDF avec charts
+- [ ] **Mode Sombre** : Thème sombre/clair toggle
+- [ ] **Multi-devises** : Support EUR/USD/GBP
+- [ ] **Comparaison portefeuilles** : Comparer 2+ allocations côte à côte
+
+### Version 2.0 (Futur)
+- [ ] **Backend Cloud** : Sauvegarde Firebase/Supabase
+- [ ] **Partage de portefeuille** : Liens partageables
+- [ ] **API de marché** : Données temps réel (Yahoo Finance, Alpha Vantage)
+- [ ] **Backtest historique** : Simuler performance passée réelle
+- [ ] **Alertes** : Notifications objectifs atteints
+
+### Améliorations Possibles
+- [ ] Black-Litterman Model (optimisation avec vues)
+- [ ] Value at Risk (VaR) conditionnel
+- [ ] Drawdown analysis (maximum drawdown, underwater charts)
+- [ ] Tax optimization (calcul fiscal)
+- [ ] Rebalancing automatique (notifications)
+
+---
+
+## 🤝 Contribution
+
+Les contributions sont les bienvenues ! Pour contribuer :
+
+1. **Fork** le projet
+2. Créez une **branche feature** (`git checkout -b feature/AmazingFeature`)
+3. **Committez** vos changements (`git commit -m 'Add AmazingFeature'`)
+4. **Push** vers la branche (`git push origin feature/AmazingFeature`)
+5. Ouvrez une **Pull Request**
+
+### Guidelines
+- Code propre et commenté
+- Suivre l'architecture existante (IIFE modules)
+- Tester sur Chrome, Firefox, Safari
+- Respecter la palette de couleurs L'Oréal
+
+---
+
+## 👨‍💻 Auteur
+
+**Raphael NARDONE**
+
+- 🌐 Portfolio : [Votre site web](#)
+- 💼 LinkedIn : [Votre profil](#)
+- 📧 Email : votre.email@example.com
+- 🐙 GitHub : [@VOTRE-USERNAME](https://github.com/VOTRE-USERNAME)
+
+---
+
+## 📄 License
+
+Ce projet est sous licence **MIT** - voir le fichier [LICENSE](LICENSE) pour plus de détails.
