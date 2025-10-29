@@ -135,24 +135,26 @@
                 <div class='content'>
                     
                     <!-- ============================================
-                         SEARCH PANEL - Identical to ML Predictions
-                         ============================================ -->
+                        SEARCH PANEL - Identical to ML Predictions
+                        ============================================ -->
                     <div class='search-panel'>
                         <h2 class='panel-title'>
                             <i class='fas fa-search'></i> Select Stock for Advanced Analysis
                         </h2>
                         
                         <div class='search-container'>
+                            <!-- Search Input + Button -->
                             <div class='search-input-wrapper'>
                                 <input type='text' 
-                                       id='symbolInput' 
-                                       placeholder='Search by symbol or company name (e.g., AAPL, Apple, Tesla)...'
-                                       autocomplete='off'>
+                                    id='symbolInput' 
+                                    placeholder='Search by symbol or company name (e.g., AAPL, Apple, Tesla)...'
+                                    autocomplete='off'
+                                    value='AAPL'>
                                 <button class='btn-analyze' onclick='AdvancedAnalysis.analyzeStock()'>
                                     <i class='fas fa-chart-area'></i> Analyze Stock
                                 </button>
                                 
-                                <!-- Suggestions dropdown -->
+                                <!-- Suggestions dropdown (hidden by default) -->
                                 <div class='search-suggestions' id='searchSuggestions'></div>
                             </div>
                             
