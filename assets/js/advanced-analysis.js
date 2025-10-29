@@ -6,6 +6,7 @@ const AdvancedAnalysis = {
     currentSymbol: 'AAPL',
     currentPeriod: '6M',
     stockData: null,
+    quickAccessSymbols: [],
     
     charts: {
         ichimoku: null,
@@ -36,9 +37,21 @@ const AdvancedAnalysis = {
         warning: '#ffc107'
     },
     
+    // Secteur mapping (comme ML Predictions)
+    sectorMapping: {
+        'AAPL': 'tech', 'MSFT': 'tech', 'GOOGL': 'tech', 'AMZN': 'tech', 'META': 'tech', 
+        'NVDA': 'tech', 'TSLA': 'tech', 'AMD': 'tech', 'NFLX': 'tech', 'INTC': 'tech',
+        'SPY': 'etf', 'QQQ': 'etf', 'VOO': 'etf', 'VTI': 'etf', 'IWM': 'etf',
+        'BTC-USD': 'crypto', 'ETH-USD': 'crypto', 'BNB-USD': 'crypto', 'DOGE-USD': 'crypto',
+        '^GSPC': 'finance', '^DJI': 'finance', '^IXIC': 'finance', '^VIX': 'finance',
+        'JPM': 'finance', 'BAC': 'finance', 'WFC': 'finance', 'GS': 'finance',
+        'XOM': 'industrial', 'CVX': 'industrial', 'BA': 'industrial', 'CAT': 'industrial'
+    },
+    
     init() {
         console.log('🚀 Advanced Analysis - Initializing...');
         this.updateLastUpdate();
+        this.loadQuickAccess();
         this.setupEventListeners();
         this.loadSymbol(this.currentSymbol);
     },
@@ -52,6 +65,120 @@ const AdvancedAnalysis = {
                 }
             });
         }
+    },
+    
+    // ============================================
+    // QUICK ACCESS - NOUVEAU ! 🎨
+    // ============================================
+    
+    loadQuickAccess() {
+        const stored = localStorage.getItem('advancedAnalysisQuickAccess');
+        if (stored) {
+            try {
+                this.quickAccessSymbols = JSON.parse(stored);
+            } catch (e) {
+                console.warn('Failed to load quick access:', e);
+                this.quickAccessSymbols = this.getDefaultQuickAccess();
+            }
+        } else {
+            this.quickAccessSymbols = this.getDefaultQuickAccess();
+        }
+        
+        this.updateQuickAccessDisplay();
+    },
+    
+    getDefaultQuickAccess() {
+        return [
+            { symbol: 'AAPL', name: 'Apple Inc.', sector: 'tech' },
+            { symbol: 'MSFT', name: 'Microsoft', sector: 'tech' },
+            { symbol: 'GOOGL', name: 'Alphabet', sector: 'tech' },
+            { symbol: 'AMZN', name: 'Amazon', sector: 'tech' },
+            { symbol: 'TSLA', name: 'Tesla', sector: 'tech' },
+            { symbol: 'SPY', name: 'S&P 500 ETF', sector: 'etf' },
+            { symbol: 'BTC-USD', name: 'Bitcoin', sector: 'crypto' },
+            { symbol: '^GSPC', name: 'S&P 500', sector: 'finance' }
+        ];
+    },
+    
+    updateQuickAccessDisplay() {
+        const container = document.getElementById('quickAccessList');
+        if (!container) {
+            console.warn('Quick Access container not found');
+            return;
+        }
+        
+        const html = this.quickAccessSymbols.map(item => `
+            <div class="quick-access-item" onclick="AdvancedAnalysis.loadSymbol('${item.symbol}')">
+                <div class="suggestion-icon ${item.sector || this.getSectorClass(item.symbol)}">
+                    ${item.symbol.substring(0, 2)}
+                </div>
+                <div class="quick-access-info">
+                    <div class="quick-access-symbol">${item.symbol}</div>
+                    <div class="quick-access-name">${item.name || item.symbol}</div>
+                </div>
+            </div>
+        `).join('');
+        
+        container.innerHTML = html;
+    },
+    
+    addToQuickAccess(symbol, name, sector) {
+        // Éviter les doublons
+        const exists = this.quickAccessSymbols.find(item => item.symbol === symbol);
+        if (exists) {
+            // Mettre à jour l'item existant
+            exists.name = name || exists.name;
+            exists.sector = sector || exists.sector;
+        } else {
+            // Ajouter en début de liste
+            this.quickAccessSymbols.unshift({
+                symbol: symbol,
+                name: name || symbol,
+                sector: sector || this.getSectorClass(symbol)
+            });
+            
+            // Limiter à 12 symboles
+            if (this.quickAccessSymbols.length > 12) {
+                this.quickAccessSymbols.pop();
+            }
+        }
+        
+        // Sauvegarder dans localStorage
+        localStorage.setItem('advancedAnalysisQuickAccess', JSON.stringify(this.quickAccessSymbols));
+        
+        // Mettre à jour l'affichage
+        this.updateQuickAccessDisplay();
+    },
+    
+    getSectorClass(symbol) {
+        // Essayer de trouver dans le mapping
+        if (this.sectorMapping[symbol]) {
+            return this.sectorMapping[symbol];
+        }
+        
+        // Détection par pattern
+        if (symbol.includes('-USD') || symbol.startsWith('BTC') || symbol.startsWith('ETH')) {
+            return 'crypto';
+        }
+        
+        if (symbol.startsWith('^')) {
+            return 'finance';
+        }
+        
+        // ETFs communs
+        const etfPatterns = ['SPY', 'QQQ', 'VOO', 'VTI', 'IWM', 'EFA', 'EEM'];
+        if (etfPatterns.some(pattern => symbol.includes(pattern))) {
+            return 'etf';
+        }
+        
+        // Secteurs financiers
+        const financePatterns = ['JPM', 'BAC', 'WFC', 'C', 'GS', 'MS'];
+        if (financePatterns.some(pattern => symbol.includes(pattern))) {
+            return 'finance';
+        }
+        
+        // Par défaut : tech
+        return 'tech';
     },
     
     analyzeStock() {
@@ -75,6 +202,14 @@ const AdvancedAnalysis = {
             
             this.displayStockHeader();
             this.updateAllIndicators();
+            
+            // ✅ AJOUTER AU QUICK ACCESS
+            this.addToQuickAccess(
+                symbol, 
+                this.stockData.quote.name || symbol,
+                this.getSectorClass(symbol)
+            );
+            
             this.showLoading(false);
             
         } catch (error) {
@@ -89,6 +224,14 @@ const AdvancedAnalysis = {
             
             this.displayStockHeader();
             this.updateAllIndicators();
+            
+            // ✅ AJOUTER AU QUICK ACCESS (même en demo)
+            this.addToQuickAccess(
+                symbol, 
+                this.stockData.quote.name || symbol,
+                this.getSectorClass(symbol)
+            );
+            
             this.showLoading(false);
         }
     },
@@ -167,7 +310,6 @@ const AdvancedAnalysis = {
             console.error('❌ Quote fetch failed:', error);
             console.log('🔄 Using fallback data from prices...');
             
-            // ✅ CORRECTION : Vérifier que prices existe et a des données
             if (!this.stockData || !this.stockData.prices || this.stockData.prices.length === 0) {
                 console.error('❌ No price data available for fallback!');
                 this.stockData.quote = {
@@ -266,11 +408,9 @@ const AdvancedAnalysis = {
         
         const quote = this.stockData.quote;
         
-        // ✅ CORRECTION : Vérifier que quote n'est pas vide
         if (!quote || Object.keys(quote).length === 0) {
             console.error('❌ Quote object is empty! Using emergency fallback...');
             
-            // Fallback d'urgence depuis les prices
             if (this.stockData.prices && this.stockData.prices.length > 0) {
                 const lastPrice = this.stockData.prices[this.stockData.prices.length - 1];
                 const prevPrice = this.stockData.prices[this.stockData.prices.length - 2] || lastPrice;
@@ -296,7 +436,6 @@ const AdvancedAnalysis = {
             }
         }
         
-        // Re-get quote après potentiel fallback
         const displayQuote = this.stockData.quote;
         
         document.getElementById('stockSymbol').textContent = displayQuote.symbol || this.currentSymbol;
@@ -319,6 +458,28 @@ const AdvancedAnalysis = {
         document.getElementById('stockHeader').classList.remove('hidden');
         
         console.log('✅ Stock header displayed');
+    },
+
+    // ============================================
+    // UPDATE ALL INDICATORS
+    // ============================================
+    
+    updateAllIndicators() {
+        console.log('📊 Updating all indicators...');
+        
+        this.updateIchimokuChart();
+        this.updateStochasticChart();
+        this.updateWilliamsChart();
+        this.updateADXChart();
+        this.updateSARChart();
+        this.updateOBVChart();
+        this.updateATRChart();
+        this.updateFibonacciChart();
+        this.createPivotPoints();
+        this.updateVWAPChart();
+        this.generateConsolidatedSignals();
+        
+        console.log('✅ All indicators updated');
     },
     
     // ============================================

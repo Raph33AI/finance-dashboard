@@ -841,3 +841,88 @@ input:focus {
         border: 1px solid #ccc;
     }
 }
+
+/* ==============================================
+   QUICK ACCESS STYLES
+   ============================================== */
+
+#quickAccessList {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 15px;
+    padding: 20px;
+}
+
+.quick-access-item {
+    display: flex;
+    align-items: center;
+    padding: 12px 15px;
+    background: white;
+    border: 2px solid #e0e0e0;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.quick-access-item:hover {
+    border-color: #2649B2;
+    box-shadow: 0 4px 12px rgba(38, 73, 178, 0.15);
+    transform: translateY(-2px);
+}
+
+/* Icônes comme ML Predictions */
+.suggestion-icon {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 16px;
+    color: white;
+    margin-right: 12px;
+    flex-shrink: 0;
+    text-transform: uppercase;
+}
+
+/* Couleurs par secteur */
+.suggestion-icon.tech {
+    background: linear-gradient(135deg, #2649B2, #4A74F3);
+}
+
+.suggestion-icon.etf {
+    background: linear-gradient(135deg, #8E7DE3, #9D5CE6);
+}
+
+.suggestion-icon.crypto {
+    background: linear-gradient(135deg, #FF9800, #FFC107);
+}
+
+.suggestion-icon.finance {
+    background: linear-gradient(135deg, #28a745, #20c997);
+}
+
+.suggestion-icon.industrial {
+    background: linear-gradient(135deg, #6c757d, #495057);
+}
+
+.quick-access-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.quick-access-symbol {
+    font-weight: 700;
+    font-size: 15px;
+    color: #2649B2;
+    margin-bottom: 2px;
+}
+
+.quick-access-name {
+    font-size: 12px;
+    color: #6c757d;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
