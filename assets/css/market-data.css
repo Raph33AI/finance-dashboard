@@ -930,3 +930,297 @@
         gap: 10px;
     }
 }
+
+/* ==============================================
+   COMPARISON SECTION
+   ============================================== */
+
+.comparison-section {
+    background: white;
+    padding: 25px;
+    border-radius: 15px;
+    margin-bottom: 30px;
+    box-shadow: 0 4px 12px rgba(108,52,131,0.12);
+    border-top: 3px solid #4A74F3;
+}
+
+.comparison-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+    gap: 15px;
+}
+
+.comparison-actions {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.btn-compare,
+.btn-clear-comparison {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 8px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s;
+    font-size: 0.9em;
+}
+
+.btn-compare {
+    background: linear-gradient(135deg, #4A74F3 0%, #6C8BE0 100%);
+    color: white;
+}
+
+.btn-compare:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(74,116,243,0.3);
+}
+
+.btn-clear-comparison {
+    background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+    color: white;
+}
+
+.btn-clear-comparison:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(220,53,69,0.3);
+}
+
+.comparison-container {
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+}
+
+.comparison-empty {
+    text-align: center;
+    padding: 60px 20px;
+    color: #6C3483;
+}
+
+.comparison-empty i {
+    font-size: 4em;
+    opacity: 0.3;
+    margin-bottom: 20px;
+}
+
+.comparison-empty p {
+    margin: 10px 0;
+    font-size: 1.1em;
+}
+
+.comparison-empty .hint {
+    font-size: 0.9em;
+    opacity: 0.7;
+}
+
+/* Comparison Stocks Chips */
+.comparison-stocks {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    padding: 15px;
+    background: linear-gradient(135deg, #E8DAEF 0%, #D4D9F0 100%);
+    border-radius: 10px;
+}
+
+.comparison-stock-chip {
+    background: white;
+    color: #2649B2;
+    padding: 10px 15px;
+    border-radius: 20px;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    transition: all 0.3s;
+    border: 2px solid #4A74F3;
+}
+
+.comparison-stock-chip:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(74,116,243,0.3);
+}
+
+.comparison-stock-chip .symbol {
+    font-size: 1.1em;
+}
+
+.comparison-stock-chip .performance {
+    font-size: 0.9em;
+    padding: 3px 8px;
+    border-radius: 10px;
+}
+
+.comparison-stock-chip .performance.positive {
+    background: #d4edda;
+    color: #28a745;
+}
+
+.comparison-stock-chip .performance.negative {
+    background: #f8d7da;
+    color: #dc3545;
+}
+
+.comparison-stock-chip .remove {
+    background: rgba(220,53,69,0.1);
+    color: #dc3545;
+    border: none;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: all 0.3s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8em;
+}
+
+.comparison-stock-chip .remove:hover {
+    background: #dc3545;
+    color: white;
+    transform: rotate(90deg);
+}
+
+/* Comparison Chart */
+.comparison-chart-wrapper {
+    margin-top: 20px;
+}
+
+/* Comparison Table */
+.comparison-table-wrapper {
+    margin-top: 30px;
+}
+
+.comparison-table {
+    overflow-x: auto;
+}
+
+.comparison-table table {
+    width: 100%;
+    border-collapse: collapse;
+    background: white;
+}
+
+.comparison-table th,
+.comparison-table td {
+    padding: 15px;
+    text-align: left;
+    border-bottom: 1px solid #E8DAEF;
+}
+
+.comparison-table th {
+    background: linear-gradient(135deg, #2649B2 0%, #4A74F3 100%);
+    color: white;
+    font-weight: bold;
+    text-transform: uppercase;
+    font-size: 0.9em;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+.comparison-table td {
+    font-size: 1em;
+}
+
+.comparison-table tr:hover {
+    background: linear-gradient(135deg, #E8DAEF 0%, #D4D9F0 100%);
+}
+
+.comparison-table .metric-label {
+    font-weight: bold;
+    color: #2649B2;
+}
+
+.comparison-table .value-positive {
+    color: #28a745;
+    font-weight: bold;
+}
+
+.comparison-table .value-negative {
+    color: #dc3545;
+    font-weight: bold;
+}
+
+.comparison-table .value-neutral {
+    color: #6C3483;
+}
+
+.comparison-table .best-value {
+    background: linear-gradient(135deg, #D4EDDA 0%, #C3E6CB 100%);
+    font-weight: bold;
+}
+
+.comparison-table .worst-value {
+    background: linear-gradient(135deg, #F8D7DA 0%, #F5C6CB 100%);
+    font-weight: bold;
+}
+
+/* Comparison Form (Modal) */
+.comparison-form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.comparison-quick-presets {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.comparison-quick-presets label {
+    color: #5B2C6F;
+    font-weight: bold;
+    font-size: 0.95em;
+    margin-bottom: 5px;
+}
+
+.preset-btn {
+    background: linear-gradient(135deg, #E8DAEF 0%, #D4D9F0 100%);
+    color: #2649B2;
+    padding: 10px 15px;
+    border: 2px solid #9D5CE6;
+    border-radius: 8px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s;
+    text-align: left;
+}
+
+.preset-btn:hover {
+    background: linear-gradient(135deg, #9D5CE6 0%, #8E7DE3 100%);
+    color: white;
+    transform: translateX(5px);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .comparison-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .comparison-actions {
+        width: 100%;
+    }
+    
+    .comparison-actions button {
+        flex: 1;
+    }
+    
+    .comparison-table {
+        font-size: 0.85em;
+    }
+    
+    .comparison-table th,
+    .comparison-table td {
+        padding: 10px;
+    }
+}

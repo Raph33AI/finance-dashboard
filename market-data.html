@@ -173,6 +173,49 @@
                     </div>
                     
                     <!-- ============================================
+                         STOCK COMPARISON SECTION (NOUVEAU)
+                         ============================================ -->
+                    <div class='comparison-section'>
+                        <div class='comparison-header'>
+                            <h2 class='panel-title'>
+                                <i class='fas fa-chart-bar'></i> Stock Comparison
+                                <span class='help-icon' onclick='openModal("modalComparison")'>?</span>
+                            </h2>
+                            <div class='comparison-actions'>
+                                <button class='btn-compare' onclick='MarketData.openComparisonModal()'>
+                                    <i class='fas fa-plus'></i> Add Stocks to Compare
+                                </button>
+                                <button class='btn-clear-comparison' onclick='MarketData.clearComparison()'>
+                                    <i class='fas fa-trash'></i> Clear All
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div id='comparisonContainer' class='comparison-container hidden'>
+                            <!-- Selected stocks chips -->
+                            <div class='comparison-stocks' id='comparisonStocks'></div>
+                            
+                            <!-- Comparison Chart -->
+                            <div class='comparison-chart-wrapper'>
+                                <h3 class='subsection-title'>Performance Comparison (Normalized to 100)</h3>
+                                <div id='comparisonChart' class='chart'></div>
+                            </div>
+                            
+                            <!-- Comparison Table -->
+                            <div class='comparison-table-wrapper'>
+                                <h3 class='subsection-title'>Key Metrics Comparison</h3>
+                                <div id='comparisonTable' class='comparison-table'></div>
+                            </div>
+                        </div>
+                        
+                        <div id='comparisonEmpty' class='comparison-empty'>
+                            <i class='fas fa-chart-line'></i>
+                            <p>No stocks to compare</p>
+                            <p class='hint'>Click "Add Stocks to Compare" to get started</p>
+                        </div>
+                    </div>
+                    
+                    <!-- ============================================
                          WATCHLIST SECTION
                          ============================================ -->
                     <div class='watchlist-section'>
@@ -367,6 +410,86 @@
                 
                 <div class='tip-box'>
                     💡 <strong>Pro Tip:</strong> Use the time period buttons to analyze different timeframes and spot trends!
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div id='modalComparison' class='modal'>
+        <div class='modal-content'>
+            <div class='modal-header'>
+                <h2>📊 Stock Comparison Tool</h2>
+                <span class='close-modal' onclick='closeModal("modalComparison")'>&times;</span>
+            </div>
+            <div class='modal-body'>
+                <h3>🎯 What is Stock Comparison?</h3>
+                <p><span class='key-term'>Stock Comparison</span> allows you to visualize and analyze multiple stocks side-by-side to identify the best performers.</p>
+                
+                <h3>✨ Features</h3>
+                <ul>
+                    <li><strong>Normalized Performance:</strong> All stocks start at 100 for easy comparison</li>
+                    <li><strong>Visual Charts:</strong> See relative performance over time</li>
+                    <li><strong>Metrics Table:</strong> Compare key statistics (returns, volatility, etc.)</li>
+                    <li><strong>Up to 5 Stocks:</strong> Compare multiple stocks simultaneously</li>
+                </ul>
+                
+                <h3>📈 How to Use</h3>
+                <ol>
+                    <li>Click "Add Stocks to Compare"</li>
+                    <li>Enter stock symbols (e.g., AAPL, MSFT, GOOGL)</li>
+                    <li>View the normalized performance chart</li>
+                    <li>Analyze the comparison table</li>
+                    <li>Identify winners and losers!</li>
+                </ol>
+                
+                <div class='tip-box'>
+                    💡 <strong>Pro Tip:</strong> Compare stocks in the same sector for better insights (e.g., AAPL vs MSFT vs GOOGL).
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div id='modalAddComparison' class='modal'>
+        <div class='modal-content'>
+            <div class='modal-header'>
+                <h2>📊 Add Stocks to Compare</h2>
+                <span class='close-modal' onclick='MarketData.closeComparisonModal()'>&times;</span>
+            </div>
+            <div class='modal-body'>
+                <div class='comparison-form'>
+                    <div class='form-group'>
+                        <label for='comparisonSymbols'>Stock Symbols (separated by commas)</label>
+                        <input type='text' 
+                               id='comparisonSymbols' 
+                               placeholder='e.g., AAPL, MSFT, GOOGL, TSLA'
+                               style='text-transform: uppercase;'>
+                        <div class='hint'>Enter 2-5 stock symbols to compare</div>
+                    </div>
+                    
+                    <div class='comparison-quick-presets'>
+                        <label>Quick Presets:</label>
+                        <button class='preset-btn' onclick='document.getElementById("comparisonSymbols").value = "AAPL, MSFT, GOOGL, AMZN"'>
+                            Big Tech
+                        </button>
+                        <button class='preset-btn' onclick='document.getElementById("comparisonSymbols").value = "TSLA, F, GM, TM"'>
+                            Auto Industry
+                        </button>
+                        <button class='preset-btn' onclick='document.getElementById("comparisonSymbols").value = "JPM, BAC, WFC, C"'>
+                            Banks
+                        </button>
+                        <button class='preset-btn' onclick='document.getElementById("comparisonSymbols").value = "^GSPC, ^DJI, ^IXIC"'>
+                            Market Indices
+                        </button>
+                    </div>
+                    
+                    <div class='form-actions'>
+                        <button class='btn-create' onclick='MarketData.loadComparison()'>
+                            <i class='fas fa-chart-line'></i> Compare Stocks
+                        </button>
+                        <button class='btn-cancel' onclick='MarketData.closeComparisonModal()'>
+                            Cancel
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>

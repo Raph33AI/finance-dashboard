@@ -21,6 +21,11 @@ const MarketData = {
     watchlistRefreshInterval: null,
     notificationPermission: false,
     
+    // Comparison
+    comparisonSymbols: [],
+    comparisonData: {},
+    comparisonColors: ['#2649B2', '#4A74F3', '#8E7DE3', '#9D5CE6', '#6C8BE0'],
+    
     // Initialize
     init() {
         this.updateLastUpdate();
@@ -222,6 +227,11 @@ const MarketData = {
         if (this.currentSymbol) {
             this.loadSymbol(this.currentSymbol);
         }
+        
+        // Reload comparison if active
+        if (this.comparisonSymbols.length > 0) {
+            this.loadComparison();
+        }
     },
     
     // Update Chart (when toggles change)
@@ -232,6 +242,421 @@ const MarketData = {
     },
     
     // ============================================
+    // COMPARISON FUNCTIONS
+    // ============================================
+    
+    // Open comparison modal
+    openComparisonModal() {
+        document.getElementById('modalAddComparison').style.display = 'block';
+    },
+    
+    // Close comparison modal
+    closeComparisonModal() {
+        document.getElementById('modalAddComparison').style.display = 'none';
+        document.getElementById('comparisonSymbols').value = '';
+    },
+    
+    // Load comparison
+    async loadComparison() {
+        const input = document.getElementById('comparisonSymbols').value;
+        const symbols = input.split(',')
+            .map(s => s.trim().toUpperCase())
+            .filter(s => s.length > 0);
+        
+        if (symbols.length < 2) {
+            alert('Please enter at least 2 symbols to compare');
+            return;
+        }
+        
+        if (symbols.length > 5) {
+            alert('Maximum 5 symbols allowed');
+            return;
+        }
+        
+        this.closeComparisonModal();
+        this.comparisonSymbols = symbols;
+        this.comparisonData = {};
+        
+        // Show loading
+        this.showNotification(`Loading ${symbols.length} stocks for comparison...`, 'info');
+        
+        // Fetch data for all symbols
+        let successCount = 0;
+        for (const symbol of symbols) {
+            try {
+                await this.fetchComparisonData(symbol);
+                successCount++;
+            } catch (error) {
+                console.error(`Failed to load ${symbol}:`, error);
+            }
+            await this.sleep(500);
+        }
+        
+        if (successCount < 2) {
+            alert('Failed to load enough stocks for comparison. Please try again.');
+            return;
+        }
+        
+        // Display comparison
+        this.displayComparison();
+        this.showNotification(`✅ Comparison loaded for ${successCount} stocks`, 'success');
+    },
+    
+    // Fetch comparison data for a symbol
+    async fetchComparisonData(symbol) {
+        const period = this.getPeriodParams(this.currentPeriod);
+        const targetUrl = `https://query1.finance.yahoo.com/v8/finance/chart/${symbol}?interval=${period.interval}&range=${period.range}`;
+        const proxyUrl = this.CORS_PROXIES[0];
+        const url = proxyUrl + encodeURIComponent(targetUrl);
+        
+        const response = await fetch(url);
+        const data = await response.json();
+        
+        if (data.chart && data.chart.error) {
+            throw new Error(data.chart.error.description);
+        }
+        
+        const result = data.chart.result[0];
+        const timestamps = result.timestamp;
+        const quotes = result.indicators.quote[0];
+        
+        const prices = timestamps.map((time, i) => ({
+            timestamp: time * 1000,
+            close: quotes.close[i]
+        })).filter(p => p.close !== null);
+        
+        // Fetch quote for additional info
+        const quoteUrl = proxyUrl + encodeURIComponent(`https://query1.finance.yahoo.com/v7/finance/quote?symbols=${symbol}`);
+        let quote = { symbol: symbol, name: symbol };
+        
+        try {
+            const quoteResponse = await fetch(quoteUrl);
+            const quoteData = await quoteResponse.json();
+            if (quoteData.quoteResponse && quoteData.quoteResponse.result.length > 0) {
+                const q = quoteData.quoteResponse.result[0];
+                quote = {
+                    symbol: q.symbol,
+                    name: q.longName || q.shortName || symbol,
+                    price: q.regularMarketPrice,
+                    change: q.regularMarketChange,
+                    changePercent: q.regularMarketChangePercent,
+                    marketCap: q.marketCap,
+                    pe: q.trailingPE,
+                    volume: q.regularMarketVolume
+                };
+            }
+        } catch (error) {
+            console.warn('Quote fetch failed for', symbol);
+        }
+        
+        this.comparisonData[symbol] = {
+            prices: prices,
+            quote: quote
+        };
+    },
+    
+    // Display comparison
+    displayComparison() {
+        // Hide empty state, show comparison
+        document.getElementById('comparisonEmpty').classList.add('hidden');
+        document.getElementById('comparisonContainer').classList.remove('hidden');
+        
+        // Render stock chips
+        this.renderComparisonChips();
+        
+        // Create comparison chart
+        this.createComparisonChart();
+        
+        // Create comparison table
+        this.createComparisonTable();
+    },
+    
+    // Render comparison chips
+    renderComparisonChips() {
+        const container = document.getElementById('comparisonStocks');
+        
+        container.innerHTML = this.comparisonSymbols.map((symbol, index) => {
+            const data = this.comparisonData[symbol];
+            if (!data) return '';
+            
+            const firstPrice = data.prices[0].close;
+            const lastPrice = data.prices[data.prices.length - 1].close;
+            const performance = ((lastPrice - firstPrice) / firstPrice) * 100;
+            const perfClass = performance >= 0 ? 'positive' : 'negative';
+            const perfSign = performance >= 0 ? '+' : '';
+            
+            return `
+                <div class='comparison-stock-chip' style='border-color: ${this.comparisonColors[index]}'>
+                    <span class='symbol'>${symbol}</span>
+                    <span class='performance ${perfClass}'>${perfSign}${performance.toFixed(2)}%</span>
+                    <button class='remove' onclick='MarketData.removeFromComparison("${symbol}")'>
+                        <i class='fas fa-times'></i>
+                    </button>
+                </div>
+            `;
+        }).join('');
+    },
+    
+    // Remove from comparison
+    removeFromComparison(symbol) {
+        this.comparisonSymbols = this.comparisonSymbols.filter(s => s !== symbol);
+        delete this.comparisonData[symbol];
+        
+        if (this.comparisonSymbols.length < 2) {
+            this.clearComparison();
+        } else {
+            this.displayComparison();
+        }
+    },
+    
+    // Clear comparison
+    clearComparison() {
+        if (this.comparisonSymbols.length > 0 && !confirm('Clear comparison?')) {
+            return;
+        }
+        
+        this.comparisonSymbols = [];
+        this.comparisonData = {};
+        
+        document.getElementById('comparisonEmpty').classList.remove('hidden');
+        document.getElementById('comparisonContainer').classList.add('hidden');
+    },
+    
+    // Create comparison chart
+    createComparisonChart() {
+        const series = [];
+        
+        this.comparisonSymbols.forEach((symbol, index) => {
+            const data = this.comparisonData[symbol];
+            if (!data) return;
+            
+            // Normalize to 100 (first price = 100)
+            const firstPrice = data.prices[0].close;
+            const normalizedData = data.prices.map(p => [
+                p.timestamp,
+                (p.close / firstPrice) * 100
+            ]);
+            
+            series.push({
+                name: symbol,
+                data: normalizedData,
+                color: this.comparisonColors[index],
+                lineWidth: 3,
+                marker: {
+                    enabled: false
+                }
+            });
+        });
+        
+        Highcharts.stockChart('comparisonChart', {
+            chart: {
+                height: 500,
+                borderRadius: 15
+            },
+            title: {
+                text: 'Stock Performance Comparison (Normalized)',
+                style: { color: '#2649B2', fontWeight: 'bold' }
+            },
+            subtitle: {
+                text: 'All stocks start at 100 for easy comparison',
+                style: { color: '#6C3483' }
+            },
+            rangeSelector: {
+                selected: 1,
+                buttons: [{
+                    type: 'month',
+                    count: 1,
+                    text: '1m'
+                }, {
+                    type: 'month',
+                    count: 3,
+                    text: '3m'
+                }, {
+                    type: 'month',
+                    count: 6,
+                    text: '6m'
+                }, {
+                    type: 'ytd',
+                    text: 'YTD'
+                }, {
+                    type: 'year',
+                    count: 1,
+                    text: '1y'
+                }, {
+                    type: 'all',
+                    text: 'All'
+                }]
+            },
+            yAxis: {
+                title: {
+                    text: 'Performance (Base 100)',
+                    style: { color: '#2649B2' }
+                },
+                plotLines: [{
+                    value: 100,
+                    color: '#6C8BE0',
+                    dashStyle: 'Dash',
+                    width: 2,
+                    label: {
+                        text: 'Start (100)',
+                        align: 'right',
+                        style: { color: '#6C8BE0' }
+                    }
+                }],
+                labels: {
+                    formatter: function() {
+                        return this.value.toFixed(0);
+                    }
+                }
+            },
+            tooltip: {
+                shared: true,
+                crosshairs: true,
+                borderRadius: 10,
+                valueDecimals: 2,
+                pointFormatter: function() {
+                    const change = this.y - 100;
+                    const changeSign = change >= 0 ? '+' : '';
+                    const color = change >= 0 ? '#28a745' : '#dc3545';
+                    return `<span style="color:${this.color}">●</span> ${this.series.name}: <b>${this.y.toFixed(2)}</b> (<span style="color:${color}">${changeSign}${change.toFixed(2)}%</span>)<br/>`;
+                }
+            },
+            legend: {
+                enabled: true,
+                align: 'center',
+                verticalAlign: 'bottom',
+                itemStyle: {
+                    fontWeight: 'bold'
+                }
+            },
+            series: series,
+            credits: { enabled: false }
+        });
+    },
+    
+    // Create comparison table
+    createComparisonTable() {
+        const metrics = [];
+        
+        // Calculate metrics for each stock
+        this.comparisonSymbols.forEach(symbol => {
+            const data = this.comparisonData[symbol];
+            if (!data) return;
+            
+            const prices = data.prices.map(p => p.close);
+            const firstPrice = prices[0];
+            const lastPrice = prices[prices.length - 1];
+            
+            const totalReturn = ((lastPrice - firstPrice) / firstPrice) * 100;
+            const volatility = this.calculateVolatilityFromPrices(prices);
+            const maxPrice = Math.max(...prices);
+            const minPrice = Math.min(...prices);
+            const maxDrawdown = this.calculateMaxDrawdown(prices);
+            const sharpeRatio = totalReturn / volatility; // Simplified
+            
+            metrics.push({
+                symbol: symbol,
+                name: data.quote.name,
+                currentPrice: data.quote.price || lastPrice,
+                totalReturn: totalReturn,
+                volatility: volatility,
+                maxPrice: maxPrice,
+                minPrice: minPrice,
+                maxDrawdown: maxDrawdown,
+                sharpeRatio: sharpeRatio,
+                marketCap: data.quote.marketCap,
+                pe: data.quote.pe,
+                volume: data.quote.volume
+            });
+        });
+        
+        // Find best/worst for highlighting
+        const bestReturn = Math.max(...metrics.map(m => m.totalReturn));
+        const worstReturn = Math.min(...metrics.map(m => m.totalReturn));
+        const lowestVol = Math.min(...metrics.map(m => m.volatility));
+        const bestSharpe = Math.max(...metrics.map(m => m.sharpeRatio));
+        
+        // Create table HTML
+        const tableHTML = `
+            <table>
+                <thead>
+                    <tr>
+                        <th>Symbol</th>
+                        <th>Current Price</th>
+                        <th>Total Return</th>
+                        <th>Volatility</th>
+                        <th>Max Drawdown</th>
+                        <th>Sharpe Ratio</th>
+                        <th>Market Cap</th>
+                        <th>P/E Ratio</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${metrics.map(m => `
+                        <tr>
+                            <td class='metric-label'>${m.symbol}</td>
+                            <td>${this.formatCurrency(m.currentPrice)}</td>
+                            <td class='${m.totalReturn === bestReturn ? 'best-value' : m.totalReturn === worstReturn ? 'worst-value' : ''} ${m.totalReturn >= 0 ? 'value-positive' : 'value-negative'}'>
+                                ${m.totalReturn >= 0 ? '+' : ''}${m.totalReturn.toFixed(2)}%
+                            </td>
+                            <td class='${m.volatility === lowestVol ? 'best-value' : ''} value-neutral'>
+                                ${m.volatility.toFixed(2)}%
+                            </td>
+                            <td class='value-negative'>
+                                ${m.maxDrawdown.toFixed(2)}%
+                            </td>
+                            <td class='${m.sharpeRatio === bestSharpe ? 'best-value' : ''} value-neutral'>
+                                ${m.sharpeRatio.toFixed(2)}
+                            </td>
+                            <td class='value-neutral'>
+                                ${m.marketCap ? this.formatLargeNumber(m.marketCap) : 'N/A'}
+                            </td>
+                            <td class='value-neutral'>
+                                ${m.pe ? m.pe.toFixed(2) : 'N/A'}
+                            </td>
+                        </tr>
+                    `).join('')}
+                </tbody>
+            </table>
+        `;
+        
+        document.getElementById('comparisonTable').innerHTML = tableHTML;
+    },
+    
+    // Calculate max drawdown
+    calculateMaxDrawdown(prices) {
+        let maxDrawdown = 0;
+        let peak = prices[0];
+        
+        for (let i = 1; i < prices.length; i++) {
+            if (prices[i] > peak) {
+                peak = prices[i];
+            }
+            const drawdown = ((peak - prices[i]) / peak) * 100;
+            if (drawdown > maxDrawdown) {
+                maxDrawdown = drawdown;
+            }
+        }
+        
+        return maxDrawdown;
+    },
+    
+    // Calculate volatility from prices
+    calculateVolatilityFromPrices(prices) {
+        const returns = [];
+        for (let i = 1; i < prices.length; i++) {
+            const ret = (prices[i] - prices[i - 1]) / prices[i - 1];
+            returns.push(ret);
+        }
+        
+        const mean = returns.reduce((sum, r) => sum + r, 0) / returns.length;
+        const variance = returns.reduce((sum, r) => sum + Math.pow(r - mean, 2), 0) / returns.length;
+        const stdDev = Math.sqrt(variance);
+        
+        return stdDev * Math.sqrt(252) * 100; // Annualized
+    },
+
+// ============================================
     // WATCHLIST FUNCTIONS
     // ============================================
     
@@ -453,8 +878,8 @@ const MarketData = {
             btn.innerHTML = `<i class='fas fa-plus'></i> Add Current Stock`;
         }
     },
-
-// ============================================
+    
+    // ============================================
     // ALERTS FUNCTIONS
     // ============================================
     
@@ -670,6 +1095,10 @@ const MarketData = {
             setTimeout(() => toast.remove(), 300);
         }, 5000);
     },
+
+// ============================================
+    // DISPLAY FUNCTIONS
+    // ============================================
     
     // Display Stock Overview
     displayStockOverview() {
@@ -868,7 +1297,7 @@ const MarketData = {
         });
     },
     
-    // Create RSI Chart - VERSION MANUELLE CORRIGÉE
+    // Create RSI Chart - VERSION MANUELLE
     createRSIChart() {
         const prices = this.stockData.prices;
         
@@ -970,7 +1399,7 @@ const MarketData = {
             credits: { enabled: false }
         });
     },
-
+    
     // Calculer RSI pour tous les points
     calculateRSIArray(prices, period = 14) {
         const rsiData = [];
@@ -1015,8 +1444,8 @@ const MarketData = {
         
         return rsiData;
     },
-
-    // Create MACD Chart - VERSION MANUELLE CORRIGÉE
+    
+    // Create MACD Chart - VERSION MANUELLE
     createMACDChart() {
         const prices = this.stockData.prices;
         
@@ -1093,7 +1522,7 @@ const MarketData = {
             credits: { enabled: false }
         });
     },
-
+    
     // Calculer MACD pour tous les points
     calculateMACDArray(prices, shortPeriod = 12, longPeriod = 26, signalPeriod = 9) {
         const closePrices = prices.map(p => p.close);
@@ -1141,7 +1570,7 @@ const MarketData = {
             histogram: histogramData
         };
     },
-
+    
     // Calculer EMA array
     calculateEMAArray(data, period) {
         const k = 2 / (period + 1);
@@ -1168,7 +1597,7 @@ const MarketData = {
         return emaArray;
     },
     
-    // Calculate RSI
+    // Calculate RSI (single value)
     calculateRSI(prices, period = 14) {
         if (prices.length < period + 1) return null;
         
@@ -1332,7 +1761,7 @@ const MarketData = {
         const variance = returns.reduce((sum, r) => sum + Math.pow(r - mean, 2), 0) / returns.length;
         const stdDev = Math.sqrt(variance);
         
-        return stdDev * Math.sqrt(252) * 100;
+        return stdDev * Math.sqrt(252) * 100; // Annualized
     },
     
     // Generate Demo Data (fallback)
@@ -1376,7 +1805,11 @@ const MarketData = {
         };
     },
     
-    // Utility Functions
+    // ============================================
+    // UTILITY FUNCTIONS
+    // ============================================
+    
+    // Format Currency
     formatCurrency(value) {
         if (!value && value !== 0) return 'N/A';
         return new Intl.NumberFormat('en-US', {
@@ -1387,6 +1820,7 @@ const MarketData = {
         }).format(value);
     },
     
+    // Format Volume
     formatVolume(value) {
         if (!value) return 'N/A';
         if (value >= 1e9) return (value / 1e9).toFixed(2) + 'B';
@@ -1395,6 +1829,7 @@ const MarketData = {
         return value.toFixed(0);
     },
     
+    // Format Large Number
     formatLargeNumber(value) {
         if (!value) return 'N/A';
         if (value >= 1e12) return '$' + (value / 1e12).toFixed(2) + 'T';
@@ -1403,6 +1838,7 @@ const MarketData = {
         return '$' + value.toFixed(0);
     },
     
+    // Show Loading
     showLoading(show) {
         const loader = document.getElementById('loadingIndicator');
         if (show) {
@@ -1412,11 +1848,13 @@ const MarketData = {
         }
     },
     
+    // Hide Results
     hideResults() {
         document.getElementById('stockOverview').classList.add('hidden');
         document.getElementById('resultsPanel').classList.add('hidden');
     },
     
+    // Update Last Update
     updateLastUpdate() {
         const now = new Date();
         const formatted = now.toLocaleString('fr-FR', {
