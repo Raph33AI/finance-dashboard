@@ -3,15 +3,11 @@
 <head>
     <meta charset='UTF-8'>
     <meta name='viewport' content='width=device-width, initial-scale=1.0'>
-    <title>Advanced Technical Analysis - Raphael NARDONE</title>
+    <title>Advanced Analysis - Raphael NARDONE</title>
     
-    <!-- Highcharts - ORDRE IMPORTANT -->
+    <!-- Highcharts -->
     <script src='https://code.highcharts.com/stock/highstock.js'></script>
     <script src='https://code.highcharts.com/highcharts-more.js'></script>
-    <script src='https://code.highcharts.com/stock/indicators/indicators-all.js'></script>
-    <script src='https://code.highcharts.com/stock/modules/drag-panes.js'></script>
-    <script src='https://code.highcharts.com/modules/annotations-advanced.js'></script>
-    <script src='https://code.highcharts.com/modules/price-indicator.js'></script>
     <script src='https://code.highcharts.com/modules/exporting.js'></script>
     
     <!-- Font Awesome -->
@@ -96,7 +92,7 @@
                             <span>Advanced Analysis</span>
                         </a>
                         <a href='trend-prediction.html' class='nav-link'>
-                            <i class='fas fa-globe'></i>
+                            <i class='fas fa-brain'></i>
                             <span>ML Predictions</span>
                         </a>
                     </div>
@@ -122,7 +118,7 @@
                         <button class='mobile-toggle' id='mobileToggle'>
                             <i class='fas fa-bars'></i>
                         </button>
-                        <h1>Advanced Technical Analysis</h1>
+                        <h1><i class='fas fa-chart-area'></i> Advanced Technical Analysis</h1>
                     </div>
                     <div class='header-right'>
                         <span class='last-update'>
@@ -138,41 +134,67 @@
                 <!-- Main Content -->
                 <div class='content'>
                     
-                    <!-- Search Panel -->
+                    <!-- ============================================
+                         SEARCH PANEL - Identical to ML Predictions
+                         ============================================ -->
                     <div class='search-panel'>
                         <h2 class='panel-title'>
                             <i class='fas fa-search'></i> Select Stock for Advanced Analysis
-                            <span class='help-icon' onclick='openModal("modalIntro")'>?</span>
                         </h2>
                         
                         <div class='search-container'>
                             <div class='search-input-wrapper'>
                                 <input type='text' 
                                        id='symbolInput' 
-                                       placeholder='Enter symbol (e.g., AAPL, TSLA, BTC-USD)...'
+                                       placeholder='Search by symbol or company name (e.g., AAPL, Apple, Tesla)...'
                                        autocomplete='off'>
                                 <button class='btn-analyze' onclick='AdvancedAnalysis.analyzeStock()'>
-                                    <i class='fas fa-microscope'></i> Analyze
+                                    <i class='fas fa-chart-area'></i> Analyze Stock
+                                </button>
+                                
+                                <!-- Suggestions dropdown -->
+                                <div class='search-suggestions' id='searchSuggestions'></div>
+                            </div>
+                            
+                            <!-- Popular Stocks -->
+                            <div class='popular-stocks'>
+                                <span class='quick-label'>Popular Stocks:</span>
+                                <button class='symbol-chip' onclick='AdvancedAnalysis.loadSymbol("AAPL")'>
+                                    <i class='fab fa-apple'></i> AAPL
+                                </button>
+                                <button class='symbol-chip' onclick='AdvancedAnalysis.loadSymbol("MSFT")'>
+                                    <i class='fab fa-microsoft'></i> MSFT
+                                </button>
+                                <button class='symbol-chip' onclick='AdvancedAnalysis.loadSymbol("GOOGL")'>
+                                    <i class='fab fa-google'></i> GOOGL
+                                </button>
+                                <button class='symbol-chip' onclick='AdvancedAnalysis.loadSymbol("AMZN")'>
+                                    <i class='fab fa-amazon'></i> AMZN
+                                </button>
+                                <button class='symbol-chip' onclick='AdvancedAnalysis.loadSymbol("TSLA")'>
+                                    <i class='fas fa-car'></i> TSLA
+                                </button>
+                                <button class='symbol-chip' onclick='AdvancedAnalysis.loadSymbol("NVDA")'>
+                                    <i class='fas fa-microchip'></i> NVDA
+                                </button>
+                                <button class='symbol-chip' onclick='AdvancedAnalysis.loadSymbol("META")'>
+                                    <i class='fab fa-meta'></i> META
+                                </button>
+                                <button class='symbol-chip' onclick='AdvancedAnalysis.loadSymbol("NFLX")'>
+                                    <i class='fas fa-film'></i> NFLX
                                 </button>
                             </div>
                             
-                            <div class='quick-symbols'>
-                                <span class='quick-label'>Quick Access:</span>
-                                <button class='symbol-chip' onclick='AdvancedAnalysis.loadSymbol("AAPL")'>AAPL</button>
-                                <button class='symbol-chip' onclick='AdvancedAnalysis.loadSymbol("TSLA")'>TSLA</button>
-                                <button class='symbol-chip' onclick='AdvancedAnalysis.loadSymbol("NVDA")'>NVDA</button>
-                                <button class='symbol-chip' onclick='AdvancedAnalysis.loadSymbol("MSFT")'>MSFT</button>
-                                <button class='symbol-chip' onclick='AdvancedAnalysis.loadSymbol("BTC-USD")'>BTC-USD</button>
-                                <button class='symbol-chip' onclick='AdvancedAnalysis.loadSymbol("ETH-USD")'>ETH-USD</button>
-                            </div>
-                            
-                            <div class='time-period-selector'>
-                                <label>Time Period:</label>
-                                <button class='period-btn' data-period='1M' onclick='AdvancedAnalysis.changePeriod("1M")'>1M</button>
-                                <button class='period-btn' data-period='3M' onclick='AdvancedAnalysis.changePeriod("3M")'>3M</button>
-                                <button class='period-btn active' data-period='6M' onclick='AdvancedAnalysis.changePeriod("6M")'>6M</button>
-                                <button class='period-btn' data-period='1Y' onclick='AdvancedAnalysis.changePeriod("1Y")'>1Y</button>
-                                <button class='period-btn' data-period='5Y' onclick='AdvancedAnalysis.changePeriod("5Y")'>5Y</button>
+                            <!-- Period Selection -->
+                            <div class='prediction-settings'>
+                                <div class='setting-group'>
+                                    <label>Analysis Period:</label>
+                                    <button class='horizon-btn' data-period='1M' onclick='AdvancedAnalysis.changePeriod("1M")'>1M</button>
+                                    <button class='horizon-btn' data-period='3M' onclick='AdvancedAnalysis.changePeriod("3M")'>3M</button>
+                                    <button class='horizon-btn active' data-period='6M' onclick='AdvancedAnalysis.changePeriod("6M")'>6M</button>
+                                    <button class='horizon-btn' data-period='1Y' onclick='AdvancedAnalysis.changePeriod("1Y")'>1Y</button>
+                                    <button class='horizon-btn' data-period='5Y' onclick='AdvancedAnalysis.changePeriod("5Y")'>5Y</button>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -243,7 +265,8 @@
                     
                     <!-- Loading Indicator -->
                     <div id='loadingIndicator' class='loading-indicator hidden'>
-                        <i class='fas fa-spinner fa-spin'></i> Loading advanced analysis...
+                        <i class='fas fa-spinner fa-spin'></i> 
+                        <span id='loadingText'>Loading data and calculating indicators...</span>
                     </div>
                     
                     <!-- Stock Header -->
@@ -259,165 +282,123 @@
                             </div>
                         </div>
                     </div>
-
-                    <!-- Quick Access Section -->
-                    <div class="quick-access-section" style="margin-bottom: 30px;">
-                        <div class="card">
-                            <div class="card-header">
-                                <div class="card-icon tech">
-                                    <i class="fas fa-star"></i>
-                                </div>
-                                <div class="card-title">
-                                    <h3>Quick Access</h3>
-                                    <p>Recently analyzed stocks</p>
-                                </div>
-                            </div>
-                            <div id="quickAccessList"></div>
-                        </div>
-                    </div>
                     
                     <!-- Results Panel -->
                     <div id='resultsPanel' class='results-panel hidden'>
                         
-                        <!-- ============================================
-                             ICHIMOKU CLOUD
-                             ============================================ -->
-                        <div class='indicator-section'>
+                        <!-- Consolidated Signals -->
+                        <div class='signals-section'>
+                            <h3 class='section-title'>
+                                <i class='fas fa-signal'></i> Consolidated Trading Signals
+                            </h3>
+                            
+                            <div class='signal-gauge'>
+                                <div class='gauge-header'>
+                                    <h4>Overall Market Signal</h4>
+                                </div>
+                                <div class='gauge-container'>
+                                    <div class='gauge-bar'>
+                                        <div class='gauge-fill' id='gaugeFill' style='width: 50%'></div>
+                                    </div>
+                                    <div class='gauge-value' id='gaugeValue'>NEUTRAL</div>
+                                </div>
+                            </div>
+                            
+                            <div class='signals-breakdown' id='signalsBreakdown'>
+                                <!-- Sera rempli dynamiquement -->
+                            </div>
+                        </div>
+                        
+                        <!-- Ichimoku Cloud -->
+                        <div class='chart-section'>
                             <h3 class='section-title'>
                                 <i class='fas fa-cloud'></i> Ichimoku Cloud
-                                <span class='help-icon' onclick='openModal("modalIchimoku")'>?</span>
                             </h3>
-                            <div class='indicator-description'>
-                                Comprehensive indicator showing support/resistance, momentum, and trend direction
-                            </div>
-                            <div id='ichimokuChart' class='chart chart-large'></div>
+                            <div id='ichimokuChart' class='chart'></div>
                         </div>
                         
-                        <!-- ============================================
-                             OSCILLATORS GRID
-                             ============================================ -->
-                        <div class='oscillators-section'>
-                            <h3 class='section-title'>
-                                <i class='fas fa-wave-square'></i> Momentum Oscillators
-                                <span class='help-icon' onclick='openModal("modalOscillators")'>?</span>
-                            </h3>
+                        <!-- Oscillators Grid -->
+                        <div class='oscillators-grid'>
                             
-                            <div class='charts-grid-2'>
-                                <!-- Stochastic -->
-                                <div class='indicator-card'>
-                                    <h4 class='indicator-title'>
-                                        Stochastic Oscillator
-                                        <span class='help-icon help-icon-small' onclick='openModal("modalStochastic")'>?</span>
-                                    </h4>
-                                    <div id='stochasticChart' class='chart chart-medium'></div>
-                                    <div id='stochasticSignal' class='signal-box'></div>
-                                </div>
-                                
-                                <!-- Williams %R -->
-                                <div class='indicator-card'>
-                                    <h4 class='indicator-title'>
-                                        Williams %R
-                                        <span class='help-icon help-icon-small' onclick='openModal("modalWilliams")'>?</span>
-                                    </h4>
-                                    <div id='williamsChart' class='chart chart-medium'></div>
-                                    <div id='williamsSignal' class='signal-box'></div>
-                                </div>
+                            <!-- Stochastic -->
+                            <div class='oscillator-card'>
+                                <h3 class='section-title'>
+                                    <i class='fas fa-wave-square'></i> Stochastic Oscillator
+                                </h3>
+                                <div id='stochasticChart' class='chart'></div>
+                                <div class='signal-box' id='stochasticSignal'>Calculating...</div>
                             </div>
-                        </div>
-                        
-                        <!-- ============================================
-                             TREND STRENGTH
-                             ============================================ -->
-                        <div class='trend-section'>
-                            <h3 class='section-title'>
-                                <i class='fas fa-chart-line'></i> Trend Analysis
-                                <span class='help-icon' onclick='openModal("modalTrend")'>?</span>
-                            </h3>
                             
-                            <div class='charts-grid-2'>
-                                <!-- ADX -->
-                                <div class='indicator-card'>
-                                    <h4 class='indicator-title'>
-                                        ADX - Trend Strength
-                                        <span class='help-icon help-icon-small' onclick='openModal("modalADX")'>?</span>
-                                    </h4>
-                                    <div id='adxChart' class='chart chart-medium'></div>
-                                    <div id='adxSignal' class='signal-box'></div>
-                                </div>
-                                
-                                <!-- Parabolic SAR -->
-                                <div class='indicator-card'>
-                                    <h4 class='indicator-title'>
-                                        Parabolic SAR
-                                        <span class='help-icon help-icon-small' onclick='openModal("modalSAR")'>?</span>
-                                    </h4>
-                                    <div id='sarChart' class='chart chart-medium'></div>
-                                    <div id='sarSignal' class='signal-box'></div>
-                                </div>
+                            <!-- Williams %R -->
+                            <div class='oscillator-card'>
+                                <h3 class='section-title'>
+                                    <i class='fas fa-chart-line'></i> Williams %R
+                                </h3>
+                                <div id='williamsChart' class='chart'></div>
+                                <div class='signal-box' id='williamsSignal'>Calculating...</div>
                             </div>
-                        </div>
-                        
-                        <!-- ============================================
-                             VOLUME & VOLATILITY
-                             ============================================ -->
-                        <div class='volume-section'>
-                            <h3 class='section-title'>
-                                <i class='fas fa-chart-bar'></i> Volume & Volatility Analysis
-                                <span class='help-icon' onclick='openModal("modalVolume")'>?</span>
-                            </h3>
                             
-                            <div class='charts-grid-2'>
-                                <!-- OBV -->
-                                <div class='indicator-card'>
-                                    <h4 class='indicator-title'>
-                                        OBV - On-Balance Volume
-                                        <span class='help-icon help-icon-small' onclick='openModal("modalOBV")'>?</span>
-                                    </h4>
-                                    <div id='obvChart' class='chart chart-medium'></div>
-                                    <div id='obvSignal' class='signal-box'></div>
-                                </div>
-                                
-                                <!-- ATR -->
-                                <div class='indicator-card'>
-                                    <h4 class='indicator-title'>
-                                        ATR - Average True Range
-                                        <span class='help-icon help-icon-small' onclick='openModal("modalATR")'>?</span>
-                                    </h4>
-                                    <div id='atrChart' class='chart chart-medium'></div>
-                                    <div id='atrSignal' class='signal-box'></div>
-                                </div>
-                            </div>
                         </div>
                         
-                        <!-- ============================================
-                             FIBONACCI & SUPPORT/RESISTANCE
-                             ============================================ -->
-                        <div class='fibonacci-section'>
-                            <h3 class='section-title'>
-                                <i class='fas fa-layer-group'></i> Support & Resistance Analysis
-                                <span class='help-icon' onclick='openModal("modalFibonacci")'>?</span>
-                            </h3>
+                        <!-- Trend Indicators Grid -->
+                        <div class='oscillators-grid'>
                             
-                            <div class='charts-grid-1'>
-                                <!-- Fibonacci Retracements -->
-                                <div class='indicator-card'>
-                                    <h4 class='indicator-title'>
-                                        Fibonacci Retracements & Extensions
-                                        <span class='help-icon help-icon-small' onclick='openModal("modalFibDetails")'>?</span>
-                                    </h4>
-                                    <div id='fibonacciChart' class='chart chart-large'></div>
-                                    <div id='fibonacciLevels' class='levels-table'></div>
-                                </div>
+                            <!-- ADX -->
+                            <div class='oscillator-card'>
+                                <h3 class='section-title'>
+                                    <i class='fas fa-chart-area'></i> ADX - Trend Strength
+                                </h3>
+                                <div id='adxChart' class='chart'></div>
+                                <div class='signal-box' id='adxSignal'>Calculating...</div>
                             </div>
+                            
+                            <!-- Parabolic SAR -->
+                            <div class='oscillator-card'>
+                                <h3 class='section-title'>
+                                    <i class='fas fa-dot-circle'></i> Parabolic SAR
+                                </h3>
+                                <div id='sarChart' class='chart'></div>
+                                <div class='signal-box' id='sarSignal'>Calculating...</div>
+                            </div>
+                            
                         </div>
                         
-                        <!-- ============================================
-                             PIVOT POINTS
-                             ============================================ -->
+                        <!-- Volume & Volatility Grid -->
+                        <div class='oscillators-grid'>
+                            
+                            <!-- OBV -->
+                            <div class='oscillator-card'>
+                                <h3 class='section-title'>
+                                    <i class='fas fa-chart-bar'></i> On-Balance Volume
+                                </h3>
+                                <div id='obvChart' class='chart'></div>
+                                <div class='signal-box' id='obvSignal'>Calculating...</div>
+                            </div>
+                            
+                            <!-- ATR -->
+                            <div class='oscillator-card'>
+                                <h3 class='section-title'>
+                                    <i class='fas fa-arrows-alt-v'></i> Average True Range
+                                </h3>
+                                <div id='atrChart' class='chart'></div>
+                                <div class='signal-box' id='atrSignal'>Calculating...</div>
+                            </div>
+                            
+                        </div>
+                        
+                        <!-- Fibonacci Retracements -->
+                        <div class='chart-section'>
+                            <h3 class='section-title'>
+                                <i class='fas fa-ruler-combined'></i> Fibonacci Retracements
+                            </h3>
+                            <div id='fibonacciChart' class='chart'></div>
+                            <div id='fibonacciLevels' class='fibonacci-table'></div>
+                        </div>
+                        
+                        <!-- Pivot Points -->
                         <div class='pivot-section'>
                             <h3 class='section-title'>
                                 <i class='fas fa-crosshairs'></i> Pivot Points
-                                <span class='help-icon' onclick='openModal("modalPivot")'>?</span>
                             </h3>
                             
                             <div class='pivot-grid'>
@@ -425,10 +406,12 @@
                                     <h4>Standard Pivots</h4>
                                     <div class='pivot-values'></div>
                                 </div>
+                                
                                 <div class='pivot-card' id='pivotFibonacci'>
                                     <h4>Fibonacci Pivots</h4>
                                     <div class='pivot-values'></div>
                                 </div>
+                                
                                 <div class='pivot-card' id='pivotCamarilla'>
                                     <h4>Camarilla Pivots</h4>
                                     <div class='pivot-values'></div>
@@ -436,49 +419,13 @@
                             </div>
                         </div>
                         
-                        <!-- ============================================
-                             VWAP & ANCHORED VWAP
-                             ============================================ -->
-                        <div class='vwap-section'>
+                        <!-- VWAP -->
+                        <div class='chart-section'>
                             <h3 class='section-title'>
-                                <i class='fas fa-balance-scale-right'></i> VWAP Analysis
-                                <span class='help-icon' onclick='openModal("modalVWAP")'>?</span>
+                                <i class='fas fa-balance-scale-right'></i> VWAP with Standard Deviation Bands
                             </h3>
-                            
-                            <div class='indicator-card'>
-                                <h4 class='indicator-title'>Volume-Weighted Average Price</h4>
-                                <div id='vwapChart' class='chart chart-large'></div>
-                                <div id='vwapSignal' class='signal-box'></div>
-                            </div>
-                        </div>
-                        
-                        <!-- ============================================
-                             综合 TRADING SIGNALS
-                             ============================================ -->
-                        <div class='signals-summary-section'>
-                            <h3 class='section-title'>
-                                <i class='fas fa-traffic-light'></i> Consolidated Trading Signals
-                                <span class='help-icon' onclick='openModal("modalSignals")'>?</span>
-                            </h3>
-                            
-                            <div class='signals-overview'>
-                                <div class='signal-gauge' id='signalGauge'>
-                                    <div class='gauge-container'>
-                                        <div class='gauge-label'>Overall Signal</div>
-                                        <div class='gauge-value' id='gaugeValue'>NEUTRAL</div>
-                                        <div class='gauge-bar'>
-                                            <div class='gauge-fill' id='gaugeFill'></div>
-                                        </div>
-                                        <div class='gauge-legend'>
-                                            <span class='legend-sell'>SELL</span>
-                                            <span class='legend-neutral'>NEUTRAL</span>
-                                            <span class='legend-buy'>BUY</span>
-                                        </div>
-                                    </div>
-                                </div>
-                                
-                                <div class='signals-breakdown' id='signalsBreakdown'></div>
-                            </div>
+                            <div id='vwapChart' class='chart'></div>
+                            <div class='signal-box' id='vwapSignal'>Calculating...</div>
                         </div>
                         
                     </div>
@@ -486,521 +433,12 @@
                 
                 <!-- Footer -->
                 <footer>
-                    <p>Advanced Technical Analysis | Professional-grade indicators and signals</p>
-                    <p class='data-source'>Data provided by Yahoo Finance</p>
+                    <p>Advanced Technical Analysis | Professional Trading Indicators</p>
+                    <p class='data-source'>Historical data provided by Yahoo Finance</p>
                 </footer>
             </div>
         </div>
         
-    </div>
-    
-    <!-- ============================================
-         MODALS
-         ============================================ -->
-    
-    <!-- Modal Intro -->
-    <div id='modalIntro' class='modal'>
-        <div class='modal-content'>
-            <div class='modal-header'>
-                <h2>🎯 Advanced Technical Analysis</h2>
-                <span class='close-modal' onclick='closeModal("modalIntro")'>&times;</span>
-            </div>
-            <div class='modal-body'>
-                <h3>📊 What is this page?</h3>
-                <p>This page provides <span class='key-term'>professional-grade technical analysis</span> using advanced indicators favored by institutional traders and hedge funds.</p>
-                
-                <h3>🔬 Included Indicators</h3>
-                <ul>
-                    <li><strong>Ichimoku Cloud:</strong> Comprehensive trend analysis</li>
-                    <li><strong>Stochastic & Williams %R:</strong> Momentum oscillators</li>
-                    <li><strong>ADX:</strong> Trend strength measurement</li>
-                    <li><strong>Parabolic SAR:</strong> Stop-and-reverse system</li>
-                    <li><strong>OBV:</strong> Volume momentum</li>
-                    <li><strong>ATR:</strong> Volatility measurement</li>
-                    <li><strong>Fibonacci:</strong> Key support/resistance levels</li>
-                    <li><strong>Pivot Points:</strong> Intraday trading levels</li>
-                    <li><strong>VWAP:</strong> Institutional benchmark</li>
-                </ul>
-                
-                <h3>🎯 Who is this for?</h3>
-                <ul>
-                    <li>Day traders and swing traders</li>
-                    <li>Technical analysis enthusiasts</li>
-                    <li>Investors seeking confirmation signals</li>
-                    <li>Anyone wanting deeper market insights</li>
-                </ul>
-                
-                <div class='tip-box'>
-                    💡 <strong>Pro Tip:</strong> Use multiple indicators together for confirmation. No single indicator is perfect!
-                </div>
-            </div>
-        </div>
-    </div>
-    
-    <!-- Modal Ichimoku -->
-    <div id='modalIchimoku' class='modal'>
-        <div class='modal-content'>
-            <div class='modal-header'>
-                <h2>☁️ Ichimoku Cloud</h2>
-                <span class='close-modal' onclick='closeModal("modalIchimoku")'>&times;</span>
-            </div>
-            <div class='modal-body'>
-                <h3>📐 What is Ichimoku?</h3>
-                <p>The <span class='key-term'>Ichimoku Kinko Hyo</span> (Equilibrium Chart) is a comprehensive indicator that shows support/resistance, momentum, and trend direction in one view.</p>
-                
-                <h3>📊 Components</h3>
-                <ul>
-                    <li><strong>Tenkan-sen (Conversion Line):</strong> (9-period high + low) / 2</li>
-                    <li><strong>Kijun-sen (Base Line):</strong> (26-period high + low) / 2</li>
-                    <li><strong>Senkou Span A (Leading Span A):</strong> (Tenkan + Kijun) / 2, plotted 26 periods ahead</li>
-                    <li><strong>Senkou Span B (Leading Span B):</strong> (52-period high + low) / 2, plotted 26 periods ahead</li>
-                    <li><strong>Chikou Span (Lagging Span):</strong> Close plotted 26 periods back</li>
-                    <li><strong>Kumo (Cloud):</strong> Area between Senkou Span A and B</li>
-                </ul>
-                
-                <h3>🎯 Interpretation</h3>
-                <ul>
-                    <li><strong>Price above Cloud:</strong> Bullish trend 📈</li>
-                    <li><strong>Price below Cloud:</strong> Bearish trend 📉</li>
-                    <li><strong>Price in Cloud:</strong> Neutral / Ranging</li>
-                    <li><strong>Tenkan crosses above Kijun:</strong> Buy signal 🟢</li>
-                    <li><strong>Tenkan crosses below Kijun:</strong> Sell signal 🔴</li>
-                    <li><strong>Green Cloud:</strong> Support zone</li>
-                    <li><strong>Red Cloud:</strong> Resistance zone</li>
-                </ul>
-                
-                <div class='tip-box'>
-                    💡 <strong>Trading Strategy:</strong> Only trade in the direction of the cloud. Use Tenkan/Kijun crossovers for entry/exit.
-                </div>
-            </div>
-        </div>
-    </div>
-    
-    <!-- Modal Stochastic -->
-    <div id='modalStochastic' class='modal'>
-        <div class='modal-content'>
-            <div class='modal-header'>
-                <h2>📊 Stochastic Oscillator</h2>
-                <span class='close-modal' onclick='closeModal("modalStochastic")'>&times;</span>
-            </div>
-            <div class='modal-body'>
-                <h3>📐 What is Stochastic?</h3>
-                <p>The <span class='key-term'>Stochastic Oscillator</span> compares a closing price to its price range over a period. Identifies overbought/oversold conditions.</p>
-                
-                <h3>📈 Components</h3>
-                <ul>
-                    <li><strong>%K (Fast Line):</strong> Current close position in range</li>
-                    <li><strong>%D (Slow Line):</strong> 3-period MA of %K</li>
-                </ul>
-                
-                <h3>🎯 Signals</h3>
-                <ul>
-                    <li><strong>> 80:</strong> Overbought ⚠️</li>
-                    <li><strong>< 20:</strong> Oversold 🚀</li>
-                    <li><strong>%K crosses above %D:</strong> Buy 🟢</li>
-                    <li><strong>%K crosses below %D:</strong> Sell 🔴</li>
-                </ul>
-                
-                <div class='formula-box'>
-                    <strong>Formula:</strong><br>
-                    %K = 100 × [(C - L14) / (H14 - L14)]<br>
-                    %D = SMA(%K, 3)
-                </div>
-            </div>
-        </div>
-    </div>
-    
-    <!-- Modal Williams %R -->
-    <div id='modalWilliams' class='modal'>
-        <div class='modal-content'>
-            <div class='modal-header'>
-                <h2>📊 Williams %R</h2>
-                <span class='close-modal' onclick='closeModal("modalWilliams")'>&times;</span>
-            </div>
-            <div class='modal-body'>
-                <h3>📐 What is Williams %R?</h3>
-                <p><span class='key-term'>Williams %R</span> is a momentum indicator that measures overbought/oversold levels. Similar to Stochastic but inverted.</p>
-                
-                <h3>🎯 Interpretation</h3>
-                <ul>
-                    <li><strong>Range:</strong> -100 to 0</li>
-                    <li><strong>-20 to 0:</strong> Overbought ⚠️</li>
-                    <li><strong>-100 to -80:</strong> Oversold 🚀</li>
-                </ul>
-                
-                <div class='formula-box'>
-                    <strong>Formula:</strong><br>
-                    %R = -100 × [(H14 - C) / (H14 - L14)]
-                </div>
-                
-                <div class='tip-box'>
-                    💡 <strong>Pro Tip:</strong> Use with trend indicators. In uptrends, buy on oversold readings. In downtrends, sell on overbought readings.
-                </div>
-            </div>
-        </div>
-    </div>
-    
-    <!-- Modal ADX -->
-    <div id='modalADX' class='modal'>
-        <div class='modal-content'>
-            <div class='modal-header'>
-                <h2>📊 ADX - Average Directional Index</h2>
-                <span class='close-modal' onclick='closeModal("modalADX")'>&times;</span>
-            </div>
-            <div class='modal-body'>
-                <h3>📐 What is ADX?</h3>
-                <p><span class='key-term'>ADX</span> measures trend strength (not direction). Values range from 0-100.</p>
-                
-                <h3>🎯 Interpretation</h3>
-                <ul>
-                    <li><strong>ADX > 25:</strong> Strong trend</li>
-                    <li><strong>ADX 20-25:</strong> Developing trend</li>
-                    <li><strong>ADX < 20:</strong> Weak/No trend</li>
-                    <li><strong>+DI > -DI:</strong> Uptrend</li>
-                    <li><strong>-DI > +DI:</strong> Downtrend</li>
-                </ul>
-                
-                <div class='warning-box'>
-                    ⚠️ <strong>Important:</strong> ADX tells you IF there's a trend, not WHICH direction!
-                </div>
-            </div>
-        </div>
-    </div>
-    
-    <!-- Modal SAR -->
-    <div id='modalSAR' class='modal'>
-        <div class='modal-content'>
-            <div class='modal-header'>
-                <h2>📊 Parabolic SAR</h2>
-                <span class='close-modal' onclick='closeModal("modalSAR")'>&times;</span>
-            </div>
-            <div class='modal-body'>
-                <h3>📐 What is Parabolic SAR?</h3>
-                <p><span class='key-term'>SAR (Stop And Reverse)</span> provides entry/exit points and trailing stop levels.</p>
-                
-                <h3>🎯 How to Use</h3>
-                <ul>
-                    <li><strong>Dots below price:</strong> Uptrend - Hold long 📈</li>
-                    <li><strong>Dots above price:</strong> Downtrend - Hold short 📉</li>
-                    <li><strong>Dots flip:</strong> Reverse position 🔄</li>
-                </ul>
-                
-                <div class='tip-box'>
-                    💡 <strong>Best Use:</strong> Trending markets. Performs poorly in ranging/choppy markets.
-                </div>
-            </div>
-        </div>
-    </div>
-    
-    <!-- Modal OBV -->
-    <div id='modalOBV' class='modal'>
-        <div class='modal-content'>
-            <div class='modal-header'>
-                <h2>📊 On-Balance Volume (OBV)</h2>
-                <span class='close-modal' onclick='closeModal("modalOBV")'>&times;</span>
-            </div>
-            <div class='modal-body'>
-                <h3>📐 What is OBV?</h3>
-                <p><span class='key-term'>OBV</span> uses volume flow to predict price changes. Cumulative indicator.</p>
-                
-                <h3>🎯 Interpretation</h3>
-                <ul>
-                    <li><strong>OBV rising + Price rising:</strong> Strong uptrend ✅</li>
-                    <li><strong>OBV falling + Price falling:</strong> Strong downtrend ✅</li>
-                    <li><strong>OBV diverges from price:</strong> Potential reversal ⚠️</li>
-                </ul>
-                
-                <div class='formula-box'>
-                    <strong>Formula:</strong><br>
-                    If Close > Close[yesterday]: OBV = OBV[yesterday] + Volume<br>
-                    If Close < Close[yesterday]: OBV = OBV[yesterday] - Volume<br>
-                    If Close = Close[yesterday]: OBV = OBV[yesterday]
-                </div>
-            </div>
-        </div>
-    </div>
-    
-    <!-- Modal ATR -->
-    <div id='modalATR' class='modal'>
-        <div class='modal-content'>
-            <div class='modal-header'>
-                <h2>📊 Average True Range (ATR)</h2>
-                <span class='close-modal' onclick='closeModal("modalATR")'>&times;</span>
-            </div>
-            <div class='modal-body'>
-                <h3>📐 What is ATR?</h3>
-                <p><span class='key-term'>ATR</span> measures market volatility. Higher ATR = higher volatility.</p>
-                
-                <h3>🎯 How to Use</h3>
-                <ul>
-                    <li><strong>Set Stop-Loss:</strong> Use 2-3× ATR from entry</li>
-                    <li><strong>Position Sizing:</strong> Reduce size in high ATR</li>
-                    <li><strong>Breakout Confirmation:</strong> High ATR confirms strong moves</li>
-                </ul>
-                
-                <div class='tip-box'>
-                    💡 <strong>Pro Tip:</strong> ATR is NOT a directional indicator. It only measures volatility magnitude.
-                </div>
-            </div>
-        </div>
-    </div>
-    
-    <!-- Modal Fibonacci -->
-    <div id='modalFibDetails' class='modal'>
-        <div class='modal-content'>
-            <div class='modal-header'>
-                <h2>📊 Fibonacci Retracements</h2>
-                <span class='close-modal' onclick='closeModal("modalFibDetails")'>&times;</span>
-            </div>
-            <div class='modal-body'>
-                <h3>📐 What are Fibonacci Levels?</h3>
-                <p><span class='key-term'>Fibonacci retracements</span> identify potential support/resistance levels based on the Golden Ratio.</p>
-                
-                <h3>📊 Key Levels</h3>
-                <ul>
-                    <li><strong>0%:</strong> Start of move (high/low)</li>
-                    <li><strong>23.6%:</strong> Shallow retracement</li>
-                    <li><strong>38.2%:</strong> Moderate retracement</li>
-                    <li><strong>50%:</strong> Mid-point (psychological level)</li>
-                    <li><strong>61.8%:</strong> Golden Ratio - strongest level</li>
-                    <li><strong>78.6%:</strong> Deep retracement</li>
-                    <li><strong>100%:</strong> Full retracement</li>
-                </ul>
-                
-                <h3>🎯 How to Trade</h3>
-                <ol>
-                    <li>Identify significant swing high/low</li>
-                    <li>Draw Fibonacci from low to high (uptrend) or high to low (downtrend)</li>
-                    <li>Watch for price reactions at key levels</li>
-                    <li>Enter on bounces at 38.2%, 50%, or 61.8%</li>
-                </ol>
-                
-                <div class='tip-box'>
-                    💡 <strong>Pro Tip:</strong> 61.8% is the most reliable level. If broken, trend may be reversing.
-                </div>
-            </div>
-        </div>
-    </div>
-    
-    <!-- Modal Pivot -->
-    <div id='modalPivot' class='modal'>
-        <div class='modal-content'>
-            <div class='modal-header'>
-                <h2>📊 Pivot Points</h2>
-                <span class='close-modal' onclick='closeModal("modalPivot")'>&times;</span>
-            </div>
-            <div class='modal-body'>
-                <h3>📐 What are Pivot Points?</h3>
-                <p><span class='key-term'>Pivot Points</span> are used by floor traders to identify potential support/resistance levels for the day.</p>
-                
-                <h3>📊 Types of Pivots</h3>
-                
-                <h4>1️⃣ Standard Pivots</h4>
-                <p>Most common. Based on previous period's high, low, close.</p>
-                <ul>
-                    <li><strong>Pivot (P):</strong> (High + Low + Close) / 3</li>
-                    <li><strong>R1, R2, R3:</strong> Resistance levels</li>
-                    <li><strong>S1, S2, S3:</strong> Support levels</li>
-                </ul>
-                
-                <h4>2️⃣ Fibonacci Pivots</h4>
-                <p>Uses Fibonacci ratios for support/resistance calculation.</p>
-                
-                <h4>3️⃣ Camarilla Pivots</h4>
-                <p>Emphasizes levels close to current price. Popular for intraday trading.</p>
-                
-                <h3>🎯 How to Trade</h3>
-                <ul>
-                    <li>Price above Pivot → Bias bullish</li>
-                    <li>Price below Pivot → Bias bearish</li>
-                    <li>Use R/S levels for entries/exits</li>
-                    <li>Break of R3 or S3 = strong trend</li>
-                </ul>
-            </div>
-        </div>
-    </div>
-    
-    <!-- Modal VWAP -->
-    <div id='modalVWAP' class='modal'>
-        <div class='modal-content'>
-            <div class='modal-header'>
-                <h2>📊 VWAP - Volume-Weighted Average Price</h2>
-                <span class='close-modal' onclick='closeModal("modalVWAP")'>&times;</span>
-            </div>
-            <div class='modal-body'>
-                <h3>📐 What is VWAP?</h3>
-                <p><span class='key-term'>VWAP</span> is the average price weighted by volume. Used by institutions as a benchmark for execution quality.</p>
-                
-                <h3>🎯 How to Use</h3>
-                <ul>
-                    <li><strong>Price above VWAP:</strong> Bullish - buyers in control 📈</li>
-                    <li><strong>Price below VWAP:</strong> Bearish - sellers in control 📉</li>
-                    <li><strong>Price at VWAP:</strong> Fair value / equilibrium</li>
-                    <li><strong>VWAP + Std Dev Bands:</strong> Dynamic support/resistance</li>
-                </ul>
-                
-                <h3>💼 Institutional Use</h3>
-                <p>Institutions try to execute trades near VWAP to avoid moving the market. Traders can use this knowledge:</p>
-                <ul>
-                    <li>Buy when price dips below VWAP (institutional support)</li>
-                    <li>Sell when price rises above VWAP (institutional resistance)</li>
-                </ul>
-                
-                <div class='tip-box'>
-                    💡 <strong>Best Timeframe:</strong> Intraday trading (resets daily). Most effective on high volume stocks.
-                </div>
-            </div>
-        </div>
-    </div>
-    
-    <!-- Modal Signals -->
-    <div id='modalSignals' class='modal'>
-        <div class='modal-content'>
-            <div class='modal-header'>
-                <h2>🎯 Consolidated Trading Signals</h2>
-                <span class='close-modal' onclick='closeModal("modalSignals")'>&times;</span>
-            </div>
-            <div class='modal-body'>
-                <h3>📊 How Signals are Calculated</h3>
-                <p>The <span class='key-term'>Overall Signal</span> aggregates all indicators into a single recommendation.</p>
-                
-                <h3>⚖️ Signal Weighting</h3>
-                <ul>
-                    <li><strong>Trend Indicators (40%):</strong> Ichimoku, ADX, Parabolic SAR</li>
-                    <li><strong>Momentum Indicators (30%):</strong> Stochastic, Williams %R</li>
-                    <li><strong>Volume Indicators (20%):</strong> OBV, VWAP</li>
-                    <li><strong>Support/Resistance (10%):</strong> Fibonacci, Pivots</li>
-                </ul>
-                
-                <h3>🚦 Signal Levels</h3>
-                <ul>
-                    <li><strong>Strong Buy:</strong> 80-100% bullish indicators</li>
-                    <li><strong>Buy:</strong> 60-80% bullish</li>
-                    <li><strong>Neutral:</strong> 40-60%</li>
-                    <li><strong>Sell:</strong> 20-40% bullish (60-80% bearish)</li>
-                    <li><strong>Strong Sell:</strong> 0-20% bullish (80-100% bearish)</li>
-                </ul>
-                
-                <div class='warning-box'>
-                    ⚠️ <strong>Disclaimer:</strong> These signals are for educational purposes only. Always do your own research and manage risk appropriately!
-                </div>
-            </div>
-        </div>
-    </div>
-    
-    <!-- Autres modals (Oscillators, Trend, Volume, Fibonacci) -->
-    <div id='modalOscillators' class='modal'>
-        <div class='modal-content'>
-            <div class='modal-header'>
-                <h2>📊 Momentum Oscillators</h2>
-                <span class='close-modal' onclick='closeModal("modalOscillators")'>&times;</span>
-            </div>
-            <div class='modal-body'>
-                <h3>🎯 What are Oscillators?</h3>
-                <p><span class='key-term'>Oscillators</span> measure momentum and help identify overbought/oversold conditions.</p>
-                
-                <h3>✅ When to Use</h3>
-                <ul>
-                    <li>Ranging/sideways markets</li>
-                    <li>Identify reversal points</li>
-                    <li>Confirm trend weakness</li>
-                    <li>Spot divergences</li>
-                </ul>
-                
-                <h3>⚠️ Limitations</h3>
-                <ul>
-                    <li>Can stay overbought/oversold for extended periods in strong trends</li>
-                    <li>Prone to false signals in trending markets</li>
-                    <li>Best used with trend indicators for confirmation</li>
-                </ul>
-            </div>
-        </div>
-    </div>
-    
-    <div id='modalTrend' class='modal'>
-        <div class='modal-content'>
-            <div class='modal-header'>
-                <h2>📈 Trend Analysis</h2>
-                <span class='close-modal' onclick='closeModal("modalTrend")'>&times;</span>
-            </div>
-            <div class='modal-body'>
-                <h3>🎯 Why Trend Analysis?</h3>
-                <p><span class='key-term'>"The trend is your friend"</span> - Most successful trades follow the primary trend.</p>
-                
-                <h3>📊 Trend Types</h3>
-                <ul>
-                    <li><strong>Uptrend:</strong> Higher highs and higher lows</li>
-                    <li><strong>Downtrend:</strong> Lower highs and lower lows</li>
-                    <li><strong>Sideways:</strong> No clear direction</li>
-                </ul>
-                
-                <h3>✅ Best Practices</h3>
-                <ul>
-                    <li>Trade with the trend, not against it</li>
-                    <li>Use multiple timeframes to confirm</li>
-                    <li>Wait for pullbacks in strong trends</li>
-                    <li>Exit when trend shows signs of weakness</li>
-                </ul>
-            </div>
-        </div>
-    </div>
-    
-    <div id='modalVolume' class='modal'>
-        <div class='modal-content'>
-            <div class='modal-header'>
-                <h2>📊 Volume & Volatility Analysis</h2>
-                <span class='close-modal' onclick='closeModal("modalVolume")'>&times;</span>
-            </div>
-            <div class='modal-body'>
-                <h3>🎯 Why Volume Matters</h3>
-                <p><span class='key-term'>Volume confirms price action.</span> High volume = strong conviction, low volume = weak moves.</p>
-                
-                <h3>📈 Volume Principles</h3>
-                <ul>
-                    <li><strong>Volume precedes price:</strong> Volume often leads price movements</li>
-                    <li><strong>Confirmation:</strong> Breakouts need high volume to be valid</li>
-                    <li><strong>Divergence:</strong> Price up + volume down = weakness</li>
-                </ul>
-                
-                <h3>📊 Volatility Insights</h3>
-                <ul>
-                    <li>High volatility = higher risk/reward</li>
-                    <li>Low volatility often precedes breakouts</li>
-                    <li>Use ATR for position sizing and stop-loss placement</li>
-                </ul>
-            </div>
-        </div>
-    </div>
-    
-    <div id='modalFibonacci' class='modal'>
-        <div class='modal-content'>
-            <div class='modal-header'>
-                <h2>📐 Support & Resistance Analysis</h2>
-                <span class='close-modal' onclick='closeModal("modalFibonacci")'>&times;</span>
-            </div>
-            <div class='modal-body'>
-                <h3>🎯 What is Support & Resistance?</h3>
-                <p><span class='key-term'>Support:</span> Price level where buying interest prevents further decline.<br>
-                <span class='key-term'>Resistance:</span> Price level where selling interest prevents further rise.</p>
-                
-                <h3>📊 Types of S/R</h3>
-                <ul>
-                    <li><strong>Horizontal S/R:</strong> Previous highs/lows</li>
-                    <li><strong>Trendlines:</strong> Dynamic support/resistance</li>
-                    <li><strong>Moving Averages:</strong> Dynamic levels</li>
-                    <li><strong>Fibonacci Levels:</strong> Mathematical retracements</li>
-                    <li><strong>Pivot Points:</strong> Calculated daily levels</li>
-                    <li><strong>Psychological Levels:</strong> Round numbers (e.g., 100, 150, 200)</li>
-                </ul>
-                
-                <h3>✅ Trading Strategy</h3>
-                <ul>
-                    <li>Buy at support, sell at resistance</li>
-                    <li>Wait for confirmation (candlestick patterns, volume)</li>
-                    <li>When support breaks, it becomes resistance (and vice versa)</li>
-                </ul>
-            </div>
-        </div>
     </div>
     
     <!-- Scripts -->
