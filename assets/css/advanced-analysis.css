@@ -1010,7 +1010,7 @@
 }
 
 /* ============================================
-   HELP ICON
+   HELP ICON - VERSION CORRIGÉE
    ============================================ */
 
 .help-icon {
@@ -1028,6 +1028,8 @@
     transition: all 0.3s ease;
     margin-left: auto;
     flex-shrink: 0;
+    position: relative;  /* ✅ AJOUTEZ CECI */
+    z-index: 100;        /* ✅ AJOUTEZ CECI */
 }
 
 .help-icon:hover {
