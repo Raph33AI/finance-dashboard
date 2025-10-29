@@ -135,21 +135,22 @@
                 <div class='content'>
                     
                     <!-- ============================================
-                        SEARCH PANEL - Identical to ML Predictions
-                        ============================================ -->
+                         SEARCH PANEL - Identical to ML Predictions
+                         ============================================ -->
                     <div class='search-panel'>
                         <h2 class='panel-title'>
                             <i class='fas fa-search'></i> Select Stock for Advanced Analysis
+                            <span class='help-icon' onclick='openModal("modalIntro")'>?</span>
                         </h2>
                         
                         <div class='search-container'>
                             <!-- Search Input + Button -->
                             <div class='search-input-wrapper'>
                                 <input type='text' 
-                                    id='symbolInput' 
-                                    placeholder='Search by symbol or company name (e.g., AAPL, Apple, Tesla)...'
-                                    autocomplete='off'
-                                    value='AAPL'>
+                                       id='symbolInput' 
+                                       placeholder='Search by symbol or company name (e.g., AAPL, Apple, Tesla)...'
+                                       autocomplete='off'
+                                       value='AAPL'>
                                 <button class='btn-analyze' onclick='AdvancedAnalysis.analyzeStock()'>
                                     <i class='fas fa-chart-area'></i> Analyze Stock
                                 </button>
@@ -228,6 +229,7 @@
                         <div class='signals-section'>
                             <h3 class='section-title'>
                                 <i class='fas fa-signal'></i> Consolidated Trading Signals
+                                <span class='help-icon' onclick='openModal("modalSignals")'>?</span>
                             </h3>
                             
                             <div class='signal-gauge'>
@@ -379,9 +381,131 @@
         
     </div>
     
+    <!-- ============================================
+         MODALS
+         ============================================ -->
+    
+    <!-- Modal Introduction -->
+    <div id='modalIntro' class='modal'>
+        <div class='modal-content'>
+            <div class='modal-header'>
+                <h2>📊 Advanced Technical Analysis</h2>
+                <span class='close-modal' onclick='closeModal("modalIntro")'>&times;</span>
+            </div>
+            <div class='modal-body'>
+                <h3>What is Advanced Technical Analysis?</h3>
+                <p>This page provides <span class='key-term'>professional-grade technical indicators</span> used by institutional traders to analyze price movements, trends, and market momentum.</p>
+                
+                <h3>🔍 Available Indicators</h3>
+                <ul>
+                    <li><strong>Ichimoku Cloud:</strong> Multi-dimensional support/resistance with trend direction</li>
+                    <li><strong>Stochastic Oscillator:</strong> Momentum indicator comparing closing price to price range</li>
+                    <li><strong>Williams %R:</strong> Overbought/oversold momentum oscillator</li>
+                    <li><strong>ADX:</strong> Measures trend strength regardless of direction</li>
+                    <li><strong>Parabolic SAR:</strong> Stop and Reverse points for trend following</li>
+                    <li><strong>OBV:</strong> Volume-based momentum indicator</li>
+                    <li><strong>ATR:</strong> Volatility measurement for risk management</li>
+                    <li><strong>Fibonacci Retracements:</strong> Key support/resistance levels</li>
+                    <li><strong>Pivot Points:</strong> Intraday support/resistance calculations</li>
+                    <li><strong>VWAP:</strong> Volume-weighted average price for institutional levels</li>
+                </ul>
+                
+                <h3>📈 How to Use</h3>
+                <ol>
+                    <li>Search for a stock by symbol or name</li>
+                    <li>Select analysis period (1M to 5Y)</li>
+                    <li>Click "Analyze Stock"</li>
+                    <li>Review consolidated signals and individual indicators</li>
+                    <li>Make informed trading decisions based on multiple confirmations</li>
+                </ol>
+                
+                <div class='warning-box'>
+                    ⚠️ <strong>Important:</strong> Technical analysis should be used in conjunction with fundamental analysis and risk management. No indicator is 100% accurate.
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal Signals -->
+    <div id='modalSignals' class='modal'>
+        <div class='modal-content'>
+            <div class='modal-header'>
+                <h2>🎯 Consolidated Trading Signals</h2>
+                <span class='close-modal' onclick='closeModal("modalSignals")'>&times;</span>
+            </div>
+            <div class='modal-body'>
+                <h3>How Signals Are Calculated</h3>
+                <p>The <span class='key-term'>Consolidated Signal</span> aggregates multiple technical indicators to provide an overall market sentiment.</p>
+                
+                <h3>Signal Categories</h3>
+                <ul>
+                    <li><strong>STRONG BUY (80-100%):</strong> Majority of indicators show bullish signals</li>
+                    <li><strong>BUY (60-80%):</strong> More bullish than bearish indicators</li>
+                    <li><strong>NEUTRAL (40-60%):</strong> Mixed signals, no clear direction</li>
+                    <li><strong>SELL (20-40%):</strong> More bearish than bullish indicators</li>
+                    <li><strong>STRONG SELL (0-20%):</strong> Majority of indicators show bearish signals</li>
+                </ul>
+                
+                <h3>Indicators Analyzed</h3>
+                <p>Each indicator contributes +1 (bullish), 0 (neutral), or -1 (bearish) to the final score:</p>
+                <ul>
+                    <li>Stochastic Oscillator (overbought/oversold levels)</li>
+                    <li>Williams %R (momentum direction)</li>
+                    <li>ADX (trend strength and direction)</li>
+                    <li>Parabolic SAR (price vs SAR position)</li>
+                    <li>OBV (volume trend)</li>
+                    <li>VWAP (price vs institutional levels)</li>
+                    <li>Ichimoku Cloud (price vs cloud position)</li>
+                </ul>
+                
+                <div class='tip-box'>
+                    💡 <strong>Pro Tip:</strong> Wait for multiple confirmations across different indicator types before making trading decisions.
+                </div>
+            </div>
+        </div>
+    </div>
+    
     <!-- Scripts -->
     <script src='assets/js/common.js'></script>
     <script src='assets/js/sidebar.js'></script>
     <script src='assets/js/advanced-analysis.js'></script>
+    
+    <!-- Modal Functions -->
+    <script>
+    function openModal(modalId) {
+        const modal = document.getElementById(modalId);
+        if (modal) {
+            modal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+    }
+    
+    function closeModal(modalId) {
+        const modal = document.getElementById(modalId);
+        if (modal) {
+            modal.classList.remove('active');
+            document.body.style.overflow = 'auto';
+        }
+    }
+    
+    // Close modal on outside click
+    window.addEventListener('click', (event) => {
+        if (event.target.classList.contains('modal')) {
+            event.target.classList.remove('active');
+            document.body.style.overflow = 'auto';
+        }
+    });
+    
+    // Close modal on ESC key
+    document.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape') {
+            document.querySelectorAll('.modal.active').forEach(modal => {
+                modal.classList.remove('active');
+            });
+            document.body.style.overflow = 'auto';
+        }
+    });
+    </script>
+    
 </body>
 </html>
