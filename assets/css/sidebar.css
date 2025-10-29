@@ -4,7 +4,7 @@
 
 :root {
     --sidebar-width: 280px;
-    --sidebar-collapsed-width: 70px;
+    --sidebar-collapsed-width: 70px;  /* ✅ Taille réduite */
     --sidebar-bg: #1a1d29;
     --sidebar-hover: #252937;
     --sidebar-active: #2649B2;
@@ -48,6 +48,7 @@ body {
     transition: width var(--transition-speed) ease;
     z-index: 1000;
     box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+    overflow: hidden;  /* ✅ Ajouté pour éviter le débordement */
 }
 
 .sidebar.collapsed {
@@ -72,11 +73,20 @@ body {
     gap: 12px;
     white-space: nowrap;
     overflow: hidden;
+    transition: opacity var(--transition-speed);  /* ✅ Ajouté transition */
 }
 
 .sidebar-header h2 i {
     color: #4A74F3;
     font-size: 24px;
+    flex-shrink: 0;  /* ✅ Empêche l'icône de rétrécir */
+}
+
+.sidebar.collapsed .sidebar-header h2 span {
+    opacity: 0;  /* ✅ Cache le texte en fondu */
+    width: 0;
+    display: inline-block;
+    transition: opacity var(--transition-speed), width var(--transition-speed);
 }
 
 .sidebar-toggle {
@@ -88,14 +98,11 @@ body {
     padding: 8px;
     border-radius: 4px;
     transition: background var(--transition-speed);
+    flex-shrink: 0;  /* ✅ Empêche le bouton de rétrécir */
 }
 
 .sidebar-toggle:hover {
     background: var(--sidebar-hover);
-}
-
-.sidebar.collapsed .sidebar-header h2 span {
-    display: none;
 }
 
 /* Sidebar Navigation */
@@ -158,6 +165,7 @@ body {
     font-size: 18px;
     width: 20px;
     text-align: center;
+    flex-shrink: 0;  /* ✅ Empêche l'icône de rétrécir */
 }
 
 .nav-folder span {
@@ -165,11 +173,13 @@ body {
     text-align: left;
     white-space: nowrap;
     overflow: hidden;
+    transition: opacity var(--transition-speed);  /* ✅ Ajouté transition */
 }
 
 .nav-folder .arrow {
     font-size: 12px;
-    transition: transform var(--transition-speed);
+    transition: transform var(--transition-speed), opacity var(--transition-speed);  /* ✅ Ajouté transition opacity */
+    flex-shrink: 0;  /* ✅ Empêche la flèche de rétrécir */
 }
 
 .nav-folder.active .arrow {
@@ -178,7 +188,8 @@ body {
 
 .sidebar.collapsed .nav-folder span,
 .sidebar.collapsed .nav-folder .arrow {
-    display: none;
+    opacity: 0;  /* ✅ Cache en fondu au lieu de display: none */
+    width: 0;
 }
 
 /* Navigation Submenu */
@@ -221,6 +232,7 @@ body {
     font-size: 16px;
     width: 18px;
     text-align: center;
+    flex-shrink: 0;  /* ✅ Empêche l'icône de rétrécir */
 }
 
 .nav-link span {
@@ -249,10 +261,14 @@ body {
 .user-info i {
     font-size: 32px;
     color: #4A74F3;
+    flex-shrink: 0;  /* ✅ Empêche l'icône de rétrécir */
 }
 
 .sidebar.collapsed .user-info span {
-    display: none;
+    opacity: 0;  /* ✅ Cache en fondu */
+    width: 0;
+    display: inline-block;
+    transition: opacity var(--transition-speed), width var(--transition-speed);
 }
 
 /* ===================================

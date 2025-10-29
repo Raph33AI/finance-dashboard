@@ -52,7 +52,7 @@ function initializeSidebar() {
     // Set active page
     setActivePage();
     
-    // Restore sidebar state
+    // ✅ MODIFICATION : Restore sidebar state OU collapse par défaut
     restoreSidebarState();
     
     // Auto-open section containing active page
@@ -82,9 +82,18 @@ function setActivePage() {
 
 function restoreSidebarState() {
     const sidebar = document.getElementById('sidebar');
-    const isCollapsed = localStorage.getItem('sidebarCollapsed') === 'true';
     
-    if (isCollapsed) {
+    // ✅ OPTION 1 : TOUJOURS COLLAPSÉE PAR DÉFAUT (décommentez celle-ci pour forcer le collapse)
+    // sidebar.classList.add('collapsed');
+    
+    // ✅ OPTION 2 : Se souvenir du dernier état (actuel)
+    const isCollapsed = localStorage.getItem('sidebarCollapsed');
+    
+    // Si aucune préférence sauvegardée, collapse par défaut
+    if (isCollapsed === null) {
+        sidebar.classList.add('collapsed');
+        localStorage.setItem('sidebarCollapsed', 'true');
+    } else if (isCollapsed === 'true') {
         sidebar.classList.add('collapsed');
     }
 }
