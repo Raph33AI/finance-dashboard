@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang='fr'>
+<head>
+    <meta charset='UTF-8'>
+    <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+    <title>ML Trend Prediction - Raphael NARDONE</title>
+    
+    <!-- Highcharts -->
+    <script src='https://code.highcharts.com/stock/highstock.js'></script>
+    <script src='https://code.highcharts.com/highcharts-more.js'></script>
+    <script src='https://code.highcharts.com/modules/exporting.js'></script>
+    
+    <!-- Font Awesome -->
+    <link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css'>
+    
+    <!-- Styles -->
+    <link rel='stylesheet' href='assets/css/common.css'>
+    <link rel='stylesheet' href='assets/css/sidebar.css'>
+    <link rel='stylesheet' href='assets/css/trend-prediction.css'>
+</head>
+<body>
+    <div class='layout-wrapper'>
+        
+        <!-- ============================================
+             SIDEBAR NAVIGATION
+             ============================================ -->
+        <aside class='sidebar' id='sidebar'>
+            <div class='sidebar-header'>
+                <h2><i class='fas fa-chart-line'></i> Finance Hub</h2>
+                <button class='sidebar-toggle' id='sidebarToggle'>
+                    <i class='fas fa-bars'></i>
+                </button>
+            </div>
+            
+            <nav class='sidebar-nav'>
+                <!-- Budget Section -->
+                <div class='nav-section'>
+                    <button class='nav-folder'>
+                        <i class='fas fa-wallet'></i>
+                        <span>Budget</span>
+                        <i class='fas fa-chevron-down arrow'></i>
+                    </button>
+                    <div class='nav-submenu'>
+                        <a href='index.html' class='nav-link'>
+                            <i class='fas fa-home'></i>
+                            <span>Dashboard Budget</span>
+                        </a>
+                    </div>
+                </div>
+                
+                <!-- Simulation Section -->
+                <div class='nav-section'>
+                    <button class='nav-folder'>
+                        <i class='fas fa-calculator'></i>
+                        <span>Simulation</span>
+                        <i class='fas fa-chevron-down arrow'></i>
+                    </button>
+                    <div class='nav-submenu'>
+                        <a href='monte-carlo.html' class='nav-link'>
+                            <i class='fas fa-dice'></i>
+                            <span>Monte Carlo</span>
+                        </a>
+                        <a href='portfolio-optimizer.html' class='nav-link'>
+                            <i class='fas fa-chart-pie'></i>
+                            <span>Markowitz</span>
+                        </a>
+                        <a href='risk-parity.html' class='nav-link'>
+                            <i class='fas fa-balance-scale'></i>
+                            <span>Risk Parity</span>
+                        </a>
+                        <a href='scenario-analysis.html' class='nav-link'>
+                            <i class='fas fa-flask'></i>
+                            <span>Scénarios</span>
+                        </a>
+                    </div>
+                </div>
+                
+                <!-- Stocks Section -->
+                <div class='nav-section active'>
+                    <button class='nav-folder active'>
+                        <i class='fas fa-chart-line'></i>
+                        <span>Stocks</span>
+                        <i class='fas fa-chevron-down arrow'></i>
+                    </button>
+                    <div class='nav-submenu' style='display: block;'>
+                        <a href='market-data.html' class='nav-link'>
+                            <i class='fas fa-globe'></i>
+                            <span>Market Data</span>
+                        </a>
+                        <a href='advanced-analysis.html' class='nav-link'>
+                            <i class='fas fa-chart-area'></i>
+                            <span>Advanced Analysis</span>
+                        </a>
+                        <a href='trend-prediction.html' class='nav-link active'>
+                            <i class='fas fa-brain'></i>
+                            <span>ML Predictions</span>
+                        </a>
+                    </div>
+                </div>
+            </nav>
+            
+            <div class='sidebar-footer'>
+                <div class='user-info'>
+                    <i class='fas fa-user-circle'></i>
+                    <span>Raphael NARDONE</span>
+                </div>
+            </div>
+        </aside>
+        
+        <!-- ============================================
+             MAIN CONTENT AREA
+             ============================================ -->
+        <div class='main-content'>
+            <!-- Top Header -->
+            <header class='top-header'>
+                <div class="header-content-wrapper">
+                    <div class='header-left'>
+                        <button class='mobile-toggle' id='mobileToggle'>
+                            <i class='fas fa-bars'></i>
+                        </button>
+                        <h1><i class='fas fa-brain'></i> Machine Learning Trend Prediction</h1>
+                    </div>
+                    <div class='header-right'>
+                        <span class='last-update'>
+                            <i class='fas fa-clock'></i>
+                            <span id='lastUpdate'></span>
+                        </span>
+                    </div>
+                </div>
+            </header>
+            
+            <!-- Container -->
+            <div class='container'>
+                <!-- Main Content -->
+                <div class='content'>
+                    
+                    <!-- Search Panel -->
+                    <div class='search-panel'>
+                        <h2 class='panel-title'>
+                            <i class='fas fa-search'></i> Select Stock for ML Analysis
+                            <span class='help-icon' onclick='openModal("modalIntro")'>?</span>
+                        </h2>
+                        
+                        <div class='search-container'>
+                            <div class='search-input-wrapper'>
+                                <input type='text' 
+                                       id='symbolInput' 
+                                       placeholder='Enter symbol (e.g., AAPL, TSLA, NVDA)...'
+                                       autocomplete='off'>
+                                <button class='btn-analyze' onclick='TrendPrediction.analyzeStock()'>
+                                    <i class='fas fa-robot'></i> Run ML Models
+                                </button>
+                            </div>
+                            
+                            <div class='quick-symbols'>
+                                <span class='quick-label'>Quick Access:</span>
+                                <button class='symbol-chip' onclick='TrendPrediction.loadSymbol("AAPL")'>AAPL</button>
+                                <button class='symbol-chip' onclick='TrendPrediction.loadSymbol("TSLA")'>TSLA</button>
+                                <button class='symbol-chip' onclick='TrendPrediction.loadSymbol("NVDA")'>NVDA</button>
+                                <button class='symbol-chip' onclick='TrendPrediction.loadSymbol("MSFT")'>MSFT</button>
+                                <button class='symbol-chip' onclick='TrendPrediction.loadSymbol("GOOGL")'>GOOGL</button>
+                                <button class='symbol-chip' onclick='TrendPrediction.loadSymbol("AMZN")'>AMZN</button>
+                            </div>
+                            
+                            <div class='prediction-settings'>
+                                <div class='setting-group'>
+                                    <label>Prediction Horizon:</label>
+                                    <button class='horizon-btn active' data-days='7' onclick='TrendPrediction.changeHorizon(7)'>7 days</button>
+                                    <button class='horizon-btn' data-days='15' onclick='TrendPrediction.changeHorizon(15)'>15 days</button>
+                                    <button class='horizon-btn' data-days='30' onclick='TrendPrediction.changeHorizon(30)'>30 days</button>
+                                    <button class='horizon-btn' data-days='60' onclick='TrendPrediction.changeHorizon(60)'>60 days</button>
+                                </div>
+                                
+                                <div class='setting-group'>
+                                    <label>Training Period:</label>
+                                    <select id='trainingPeriod' onchange='TrendPrediction.changeTrainingPeriod(this.value)'>
+                                        <option value='3M'>3 Months</option>
+                                        <option value='6M' selected>6 Months</option>
+                                        <option value='1Y'>1 Year</option>
+                                        <option value='2Y'>2 Years</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Loading Indicator -->
+                    <div id='loadingIndicator' class='loading-indicator hidden'>
+                        <i class='fas fa-spinner fa-spin'></i> 
+                        <span id='loadingText'>Loading data and training models...</span>
+                    </div>
+                    
+                    <!-- Stock Header -->
+                    <div id='stockHeader' class='stock-header hidden'>
+                        <div class='header-content'>
+                            <div class='stock-info'>
+                                <h2 id='stockSymbol'>-</h2>
+                                <span id='stockName' class='stock-name'>-</span>
+                            </div>
+                            <div class='stock-price'>
+                                <div id='currentPrice' class='price'>-</div>
+                                <div id='priceChange' class='change'>-</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Results Panel -->
+                    <div id='resultsPanel' class='results-panel hidden'>
+                        
+                        <!-- ============================================
+                             ENSEMBLE PREDICTION OVERVIEW
+                             ============================================ -->
+                        <div class='prediction-overview'>
+                            <h3 class='section-title'>
+                                <i class='fas fa-chart-line'></i> Ensemble Prediction
+                                <span class='help-icon' onclick='openModal("modalEnsemble")'>?</span>
+                            </h3>
+                            
+                            <div class='ensemble-cards'>
+                                <div class='ensemble-card'>
+                                    <div class='card-icon bullish'>
+                                        <i class='fas fa-chart-line'></i>
+                                    </div>
+                                    <div class='card-content'>
+                                        <div class='card-label'>Predicted Price</div>
+                                        <div class='card-value' id='ensemblePrice'>-</div>
+                                        <div class='card-sublabel' id='ensembleChange'>-</div>
+                                    </div>
+                                </div>
+                                
+                                <div class='ensemble-card'>
+                                    <div class='card-icon neutral'>
+                                        <i class='fas fa-crosshairs'></i>
+                                    </div>
+                                    <div class='card-content'>
+                                        <div class='card-label'>Confidence Range</div>
+                                        <div class='card-value' id='ensembleRange'>-</div>
+                                        <div class='card-sublabel'>95% Confidence</div>
+                                    </div>
+                                </div>
+                                
+                                <div class='ensemble-card'>
+                                    <div class='card-icon' id='signalIcon'>
+                                        <i class='fas fa-balance-scale'></i>
+                                    </div>
+                                    <div class='card-content'>
+                                        <div class='card-label'>Trading Signal</div>
+                                        <div class='card-value' id='ensembleSignal'>-</div>
+                                        <div class='card-sublabel' id='ensembleStrength'>-</div>
+                                    </div>
+                                </div>
+                                
+                                <div class='ensemble-card'>
+                                    <div class='card-icon accuracy'>
+                                        <i class='fas fa-bullseye'></i>
+                                    </div>
+                                    <div class='card-content'>
+                                        <div class='card-label'>Model Accuracy</div>
+                                        <div class='card-value' id='ensembleAccuracy'>-</div>
+                                        <div class='card-sublabel'>Average R² Score</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- ============================================
+                             COMPARISON CHART
+                             ============================================ -->
+                        <div class='chart-section'>
+                            <h3 class='section-title'>
+                                <i class='fas fa-layer-group'></i> Model Comparison Chart
+                            </h3>
+                            <div id='comparisonChart' class='chart chart-large'></div>
+                        </div>
+                        
+                        <!-- ============================================
+                             INDIVIDUAL MODELS
+                             ============================================ -->
+                        <div class='models-section'>
+                            <h3 class='section-title'>
+                                <i class='fas fa-robot'></i> Individual Model Results
+                            </h3>
+                            
+                            <div class='models-grid'>
+                                
+                                <!-- Linear Regression -->
+                                <div class='model-card'>
+                                    <div class='model-header'>
+                                        <h4><i class='fas fa-chart-line'></i> Linear Regression</h4>
+                                        <span class='model-badge' id='badge-linear'>Training...</span>
+                                    </div>
+                                    <div class='model-chart' id='chart-linear'></div>
+                                    <div class='model-metrics' id='metrics-linear'>
+                                        <div class='metric'><span>Predicted:</span> <strong>-</strong></div>
+                                        <div class='metric'><span>R²:</span> <strong>-</strong></div>
+                                        <div class='metric'><span>RMSE:</span> <strong>-</strong></div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Polynomial Regression -->
+                                <div class='model-card'>
+                                    <div class='model-header'>
+                                        <h4><i class='fas fa-bezier-curve'></i> Polynomial Regression</h4>
+                                        <span class='model-badge' id='badge-polynomial'>Training...</span>
+                                    </div>
+                                    <div class='model-chart' id='chart-polynomial'></div>
+                                    <div class='model-metrics' id='metrics-polynomial'>
+                                        <div class='metric'><span>Predicted:</span> <strong>-</strong></div>
+                                        <div class='metric'><span>R²:</span> <strong>-</strong></div>
+                                        <div class='metric'><span>RMSE:</span> <strong>-</strong></div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Exponential Smoothing -->
+                                <div class='model-card'>
+                                    <div class='model-header'>
+                                        <h4><i class='fas fa-wave-square'></i> Exponential Smoothing</h4>
+                                        <span class='model-badge' id='badge-exponential'>Training...</span>
+                                    </div>
+                                    <div class='model-chart' id='chart-exponential'></div>
+                                    <div class='model-metrics' id='metrics-exponential'>
+                                        <div class='metric'><span>Predicted:</span> <strong>-</strong></div>
+                                        <div class='metric'><span>R²:</span> <strong>-</strong></div>
+                                        <div class='metric'><span>RMSE:</span> <strong>-</strong></div>
+                                    </div>
+                                </div>
+                                
+                                <!-- K-Nearest Neighbors -->
+                                <div class='model-card'>
+                                    <div class='model-header'>
+                                        <h4><i class='fas fa-project-diagram'></i> K-Nearest Neighbors</h4>
+                                        <span class='model-badge' id='badge-knn'>Training...</span>
+                                    </div>
+                                    <div class='model-chart' id='chart-knn'></div>
+                                    <div class='model-metrics' id='metrics-knn'>
+                                        <div class='metric'><span>Predicted:</span> <strong>-</strong></div>
+                                        <div class='metric'><span>R²:</span> <strong>-</strong></div>
+                                        <div class='metric'><span>RMSE:</span> <strong>-</strong></div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Neural Network -->
+                                <div class='model-card'>
+                                    <div class='model-header'>
+                                        <h4><i class='fas fa-brain'></i> Neural Network</h4>
+                                        <span class='model-badge' id='badge-neural'>Training...</span>
+                                    </div>
+                                    <div class='model-chart' id='chart-neural'></div>
+                                    <div class='model-metrics' id='metrics-neural'>
+                                        <div class='metric'><span>Predicted:</span> <strong>-</strong></div>
+                                        <div class='metric'><span>R²:</span> <strong>-</strong></div>
+                                        <div class='metric'><span>RMSE:</span> <strong>-</strong></div>
+                                    </div>
+                                </div>
+                                
+                                <!-- ARIMA -->
+                                <div class='model-card'>
+                                    <div class='model-header'>
+                                        <h4><i class='fas fa-chart-area'></i> ARIMA</h4>
+                                        <span class='model-badge' id='badge-arima'>Training...</span>
+                                    </div>
+                                    <div class='model-chart' id='chart-arima'></div>
+                                    <div class='model-metrics' id='metrics-arima'>
+                                        <div class='metric'><span>Predicted:</span> <strong>-</strong></div>
+                                        <div class='metric'><span>R²:</span> <strong>-</strong></div>
+                                        <div class='metric'><span>RMSE:</span> <strong>-</strong></div>
+                                    </div>
+                                </div>
+                                
+                            </div>
+                        </div>
+                        
+                        <!-- ============================================
+                             PERFORMANCE COMPARISON
+                             ============================================ -->
+                        <div class='performance-section'>
+                            <h3 class='section-title'>
+                                <i class='fas fa-medal'></i> Model Performance Comparison
+                            </h3>
+                            
+                            <div class='performance-grid'>
+                                <div class='performance-chart' id='accuracyChart'></div>
+                                <div class='performance-chart' id='errorChart'></div>
+                            </div>
+                            
+                            <div class='performance-table' id='performanceTable'></div>
+                        </div>
+                        
+                        <!-- ============================================
+                             RECOMMENDATION
+                             ============================================ -->
+                        <div class='recommendation-section'>
+                            <h3 class='section-title'>
+                                <i class='fas fa-lightbulb'></i> AI-Powered Recommendation
+                            </h3>
+                            
+                            <div class='recommendation-card' id='recommendationCard'>
+                                <div class='recommendation-header'>
+                                    <div class='recommendation-icon' id='recommendationIcon'>
+                                        <i class='fas fa-robot'></i>
+                                    </div>
+                                    <div>
+                                        <h4 id='recommendationTitle'>Analyzing...</h4>
+                                        <p id='recommendationSubtitle'>Machine learning models are processing...</p>
+                                    </div>
+                                </div>
+                                
+                                <div class='recommendation-body' id='recommendationBody'>
+                                    <!-- Sera rempli dynamiquement -->
+                                </div>
+                                
+                                <div class='recommendation-footer'>
+                                    <div class='disclaimer'>
+                                        <i class='fas fa-exclamation-triangle'></i>
+                                        <strong>Disclaimer:</strong> These predictions are generated by machine learning models for educational purposes only. 
+                                        Always conduct your own research and consult with financial advisors before making investment decisions.
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                    </div>
+                </div>
+                
+                <!-- Footer -->
+                <footer>
+                    <p>Machine Learning Trend Prediction | Powered by Advanced AI Algorithms</p>
+                    <p class='data-source'>Historical data provided by Yahoo Finance</p>
+                </footer>
+            </div>
+        </div>
+        
+    </div>
+    
+    <!-- ============================================
+         MODALS
+         ============================================ -->
+    
+    <!-- Modal Intro -->
+    <div id='modalIntro' class='modal'>
+        <div class='modal-content'>
+            <div class='modal-header'>
+                <h2>🤖 Machine Learning Trend Prediction</h2>
+                <span class='close-modal' onclick='closeModal("modalIntro")'>&times;</span>
+            </div>
+            <div class='modal-body'>
+                <h3>🧠 What is this page?</h3>
+                <p>This page uses <span class='key-term'>advanced machine learning algorithms</span> to predict future stock price movements based on historical data patterns.</p>
+                
+                <h3>📊 Models Used</h3>
+                <ul>
+                    <li><strong>Linear Regression:</strong> Trend-based prediction using least squares method</li>
+                    <li><strong>Polynomial Regression:</strong> Captures non-linear patterns and curves</li>
+                    <li><strong>Exponential Smoothing:</strong> Time-series forecasting with trend damping</li>
+                    <li><strong>K-Nearest Neighbors:</strong> Pattern matching based on historical similarities</li>
+                    <li><strong>Neural Network:</strong> Deep learning model with backpropagation</li>
+                    <li><strong>ARIMA:</strong> Statistical model for time-series prediction</li>
+                </ul>
+                
+                <h3>🎯 Ensemble Method</h3>
+                <p>The final prediction combines all models using weighted averaging based on their historical accuracy, providing more robust forecasts than any single model.</p>
+                
+                <h3>⚙️ How to Use</h3>
+                <ol>
+                    <li>Enter a stock symbol (e.g., AAPL, TSLA)</li>
+                    <li>Select prediction horizon (7-60 days)</li>
+                    <li>Click "Run ML Models"</li>
+                    <li>Compare model predictions and view the ensemble forecast</li>
+                </ol>
+                
+                <div class='warning-box'>
+                    ⚠️ <strong>Important:</strong> ML predictions are based on historical patterns and do not account for future events, news, or market changes. Use as one tool among many in your investment research.
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal Ensemble -->
+    <div id='modalEnsemble' class='modal'>
+        <div class='modal-content'>
+            <div class='modal-header'>
+                <h2>🎯 Ensemble Prediction</h2>
+                <span class='close-modal' onclick='closeModal("modalEnsemble")'>&times;</span>
+            </div>
+            <div class='modal-body'>
+                <h3>What is Ensemble Learning?</h3>
+                <p><span class='key-term'>Ensemble methods</span> combine multiple machine learning models to produce better predictions than any individual model.</p>
+                
+                <h3>How We Calculate It</h3>
+                <p>The ensemble prediction is a <strong>weighted average</strong> of all models, where weights are determined by each model's historical accuracy (R² score).</p>
+                
+                <div class='formula-box'>
+                    <strong>Formula:</strong><br>
+                    Ensemble = Σ (Prediction<sub>i</sub> × Weight<sub>i</sub>) / Σ Weight<sub>i</sub><br>
+                    Where Weight<sub>i</sub> = R²<sub>i</sub> (model accuracy)
+                </div>
+                
+                <h3>Confidence Range</h3>
+                <p>The 95% confidence range shows where we expect the actual price to fall with 95% probability, calculated from the standard deviation of all model predictions.</p>
+                
+                <div class='tip-box'>
+                    💡 <strong>Pro Tip:</strong> Higher accuracy and tighter confidence ranges indicate more reliable predictions.
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Scripts -->
+    <script src='assets/js/common.js'></script>
+    <script src='assets/js/sidebar.js'></script>
+    <script src='assets/js/trend-prediction.js'></script>
+</body>
+</html>

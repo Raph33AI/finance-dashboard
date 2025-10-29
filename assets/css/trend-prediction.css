@@ -1,0 +1,516 @@
+/* ==============================================
+   TREND-PREDICTION.CSS
+   ============================================== */
+
+/* ============================================
+   PREDICTION OVERVIEW
+   ============================================ */
+
+.prediction-overview {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 20px;
+    padding: 40px;
+    margin-bottom: 30px;
+    box-shadow: 0 10px 40px rgba(102, 126, 234, 0.3);
+}
+
+.prediction-overview .section-title {
+    color: white;
+    margin-bottom: 30px;
+    font-size: 1.8rem;
+}
+
+.ensemble-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+}
+
+.ensemble-card {
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 15px;
+    padding: 25px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.ensemble-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+.card-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.8rem;
+    flex-shrink: 0;
+}
+
+.card-icon.bullish {
+    background: linear-gradient(135deg, #28a745, #20c997);
+    color: white;
+}
+
+.card-icon.bearish {
+    background: linear-gradient(135deg, #dc3545, #fd7e14);
+    color: white;
+}
+
+.card-icon.neutral {
+    background: linear-gradient(135deg, #6c757d, #adb5bd);
+    color: white;
+}
+
+.card-icon.accuracy {
+    background: linear-gradient(135deg, #2649B2, #4A74F3);
+    color: white;
+}
+
+.card-content {
+    flex: 1;
+}
+
+.card-label {
+    font-size: 0.85rem;
+    color: #6c757d;
+    margin-bottom: 5px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.card-value {
+    font-size: 1.8rem;
+    font-weight: bold;
+    color: #2649B2;
+    margin-bottom: 5px;
+}
+
+.card-sublabel {
+    font-size: 0.9rem;
+    color: #28a745;
+    font-weight: 600;
+}
+
+/* ============================================
+   PREDICTION SETTINGS
+   ============================================ */
+
+.prediction-settings {
+    display: flex;
+    gap: 30px;
+    margin-top: 20px;
+    flex-wrap: wrap;
+}
+
+.setting-group {
+    flex: 1;
+    min-width: 250px;
+}
+
+.setting-group label {
+    display: block;
+    margin-bottom: 10px;
+    font-weight: 600;
+    color: #2649B2;
+}
+
+.horizon-btn {
+    background: white;
+    border: 2px solid #D4D9F0;
+    padding: 10px 20px;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-weight: 600;
+    margin-right: 10px;
+    margin-bottom: 10px;
+}
+
+.horizon-btn:hover {
+    border-color: #4A74F3;
+    color: #4A74F3;
+}
+
+.horizon-btn.active {
+    background: linear-gradient(135deg, #2649B2, #4A74F3);
+    border-color: #2649B2;
+    color: white;
+}
+
+.setting-group select {
+    width: 100%;
+    padding: 12px;
+    border: 2px solid #D4D9F0;
+    border-radius: 10px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: border-color 0.3s ease;
+}
+
+.setting-group select:focus {
+    outline: none;
+    border-color: #4A74F3;
+}
+
+/* ============================================
+   CHART SECTION
+   ============================================ */
+
+.chart-section {
+    background: white;
+    border-radius: 20px;
+    padding: 30px;
+    margin-bottom: 30px;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
+}
+
+.chart-large {
+    min-height: 600px;
+}
+
+/* ============================================
+   MODELS GRID
+   ============================================ */
+
+.models-section {
+    margin-bottom: 30px;
+}
+
+.models-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+    gap: 25px;
+}
+
+.model-card {
+    background: white;
+    border-radius: 15px;
+    padding: 20px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.model-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12);
+}
+
+.model-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+    padding-bottom: 15px;
+    border-bottom: 2px solid #f0f0f0;
+}
+
+.model-header h4 {
+    margin: 0;
+    color: #2649B2;
+    font-size: 1.1rem;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.model-badge {
+    padding: 5px 15px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.model-badge.training {
+    background: #ffc107;
+    color: #333;
+}
+
+.model-badge.completed {
+    background: #28a745;
+    color: white;
+}
+
+.model-badge.error {
+    background: #dc3545;
+    color: white;
+}
+
+.model-chart {
+    min-height: 250px;
+    margin-bottom: 15px;
+}
+
+.model-metrics {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 15px;
+}
+
+.metric {
+    text-align: center;
+    padding: 12px;
+    background: #f8f9fa;
+    border-radius: 10px;
+}
+
+.metric span {
+    display: block;
+    font-size: 0.85rem;
+    color: #6c757d;
+    margin-bottom: 5px;
+}
+
+.metric strong {
+    font-size: 1.2rem;
+    color: #2649B2;
+}
+
+/* ============================================
+   PERFORMANCE SECTION
+   ============================================ */
+
+.performance-section {
+    background: white;
+    border-radius: 20px;
+    padding: 30px;
+    margin-bottom: 30px;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
+}
+
+.performance-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+    gap: 25px;
+    margin-bottom: 30px;
+}
+
+.performance-chart {
+    min-height: 400px;
+}
+
+.performance-table {
+    overflow-x: auto;
+}
+
+.performance-table table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.performance-table th,
+.performance-table td {
+    padding: 15px;
+    text-align: left;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.performance-table th {
+    background: linear-gradient(135deg, #2649B2, #4A74F3);
+    color: white;
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.85rem;
+    letter-spacing: 0.5px;
+}
+
+.performance-table tr:hover {
+    background: #f8f9fa;
+}
+
+.performance-table .rank {
+    font-weight: bold;
+    color: #2649B2;
+}
+
+.performance-table .best {
+    background: #d4edda;
+}
+
+.performance-table .worst {
+    background: #f8d7da;
+}
+
+/* ============================================
+   RECOMMENDATION SECTION
+   ============================================ */
+
+.recommendation-section {
+    margin-bottom: 30px;
+}
+
+.recommendation-card {
+    background: white;
+    border-radius: 20px;
+    padding: 40px;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
+}
+
+.recommendation-header {
+    display: flex;
+    align-items: center;
+    gap: 25px;
+    margin-bottom: 30px;
+    padding-bottom: 25px;
+    border-bottom: 3px solid #f0f0f0;
+}
+
+.recommendation-icon {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2.5rem;
+    flex-shrink: 0;
+    animation: pulse 2s infinite;
+}
+
+.recommendation-icon.strong-buy {
+    background: linear-gradient(135deg, #28a745, #20c997);
+    color: white;
+}
+
+.recommendation-icon.buy {
+    background: linear-gradient(135deg, #28a745, #6c757d);
+    color: white;
+}
+
+.recommendation-icon.hold {
+    background: linear-gradient(135deg, #ffc107, #fd7e14);
+    color: white;
+}
+
+.recommendation-icon.sell {
+    background: linear-gradient(135deg, #dc3545, #fd7e14);
+    color: white;
+}
+
+.recommendation-icon.strong-sell {
+    background: linear-gradient(135deg, #dc3545, #6c1e4d);
+    color: white;
+}
+
+@keyframes pulse {
+    0%, 100% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.05);
+    }
+}
+
+.recommendation-header h4 {
+    margin: 0;
+    font-size: 2rem;
+    color: #2649B2;
+}
+
+.recommendation-header p {
+    margin: 5px 0 0 0;
+    color: #6c757d;
+    font-size: 1.1rem;
+}
+
+.recommendation-body {
+    margin-bottom: 25px;
+}
+
+.recommendation-body ul {
+    list-style: none;
+    padding: 0;
+}
+
+.recommendation-body li {
+    padding: 15px;
+    margin-bottom: 10px;
+    background: #f8f9fa;
+    border-left: 4px solid #2649B2;
+    border-radius: 5px;
+}
+
+.recommendation-body li i {
+    margin-right: 10px;
+    color: #2649B2;
+}
+
+.recommendation-footer {
+    padding-top: 25px;
+    border-top: 2px solid #f0f0f0;
+}
+
+.disclaimer {
+    background: #fff3cd;
+    border-left: 4px solid #ffc107;
+    padding: 15px 20px;
+    border-radius: 5px;
+    display: flex;
+    align-items: start;
+    gap: 15px;
+}
+
+.disclaimer i {
+    color: #ffc107;
+    font-size: 1.5rem;
+    flex-shrink: 0;
+    margin-top: 2px;
+}
+
+/* ============================================
+   RESPONSIVE
+   ============================================ */
+
+@media (max-width: 768px) {
+    .ensemble-cards {
+        grid-template-columns: 1fr;
+    }
+    
+    .models-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .performance-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .prediction-settings {
+        flex-direction: column;
+    }
+    
+    .recommendation-header {
+        flex-direction: column;
+        text-align: center;
+    }
+}
+
+/* ============================================
+   LOADING INDICATOR
+   ============================================ */
+
+.loading-indicator {
+    text-align: center;
+    padding: 60px 20px;
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
+    margin-bottom: 30px;
+}
+
+.loading-indicator i {
+    font-size: 3rem;
+    color: #2649B2;
+    margin-bottom: 20px;
+}
+
+#loadingText {
+    display: block;
+    font-size: 1.2rem;
+    color: #6c757d;
+    font-weight: 600;
+}
