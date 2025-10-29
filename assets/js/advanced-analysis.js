@@ -684,6 +684,21 @@ const AdvancedAnalysis = {
         const prices = this.stockData.prices;
         const adx = this.calculateADX(prices);
         
+        // Vérifier que nous avons des données
+        if (!adx.adx.length || !adx.plusDI.length || !adx.minusDI.length) {
+            console.warn('ADX calculation returned empty data');
+            
+            // Afficher un message dans le signal box
+            const signalBox = document.getElementById('adxSignal');
+            if (signalBox) {
+                signalBox.className = 'signal-box neutral';
+                signalBox.textContent = 'Not enough data for ADX (need 6+ months)';
+            }
+            
+            // Ne pas créer/mettre à jour le graphique si pas de données
+            return;
+        }
+        
         if (this.charts.adx) {
             this.charts.adx.series[0].setData(adx.adx, false);
             this.charts.adx.series[1].setData(adx.plusDI, false);
@@ -759,15 +774,23 @@ const AdvancedAnalysis = {
     },
     
     calculateADX(prices, period = 14) {
+        // Besoin d'au moins period + 2 prix pour calculer ADX
+        if (prices.length < period + 2) {
+            console.warn('Not enough data for ADX calculation');
+            return { adx: [], plusDI: [], minusDI: [] };
+        }
+        
         const tr = [];
         const plusDM = [];
         const minusDM = [];
         
+        // Calculate True Range and Directional Movements
         for (let i = 1; i < prices.length; i++) {
             const high = prices[i].high;
             const low = prices[i].low;
             const prevClose = prices[i - 1].close;
             
+            // True Range
             const trValue = Math.max(
                 high - low,
                 Math.abs(high - prevClose),
@@ -775,6 +798,7 @@ const AdvancedAnalysis = {
             );
             tr.push(trValue);
             
+            // Directional Movements
             const highDiff = high - prices[i - 1].high;
             const lowDiff = prices[i - 1].low - low;
             
@@ -782,39 +806,71 @@ const AdvancedAnalysis = {
             minusDM.push(lowDiff > highDiff && lowDiff > 0 ? lowDiff : 0);
         }
         
+        // Smooth the values
         const smoothTR = this.smoothArray(tr, period);
         const smoothPlusDM = this.smoothArray(plusDM, period);
         const smoothMinusDM = this.smoothArray(minusDM, period);
         
+        // Calculate +DI and -DI
         const plusDI = [];
         const minusDI = [];
         const dx = [];
         
-        for (let i = 0; i < smoothTR.length; i++) {
+        // Calculer seulement pour les indices valides
+        const maxIndex = Math.min(smoothTR.length, prices.length - period - 1);
+        
+        for (let i = 0; i < maxIndex; i++) {
+            if (smoothTR[i] === 0) continue; // Éviter division par zéro
+            
             const plusDIValue = (smoothPlusDM[i] / smoothTR[i]) * 100;
             const minusDIValue = (smoothMinusDM[i] / smoothTR[i]) * 100;
             
-            plusDI.push([prices[i + period].timestamp, plusDIValue]);
-            minusDI.push([prices[i + period].timestamp, minusDIValue]);
+            const timestamp = prices[i + period + 1].timestamp;
+            plusDI.push([timestamp, plusDIValue]);
+            minusDI.push([timestamp, minusDIValue]);
             
-            const dxValue = (Math.abs(plusDIValue - minusDIValue) / (plusDIValue + minusDIValue)) * 100;
-            dx.push(dxValue);
+            // Calculate DX
+            const sum = plusDIValue + minusDIValue;
+            if (sum > 0) {
+                const dxValue = (Math.abs(plusDIValue - minusDIValue) / sum) * 100;
+                dx.push(dxValue);
+            }
+        }
+        
+        // Calculate ADX (smoothed DX)
+        if (dx.length < period) {
+            console.warn('Not enough DX values for ADX calculation');
+            return { adx: [], plusDI, minusDI };
         }
         
         const adxValues = this.smoothArray(dx, period);
-        const adx = adxValues.map((value, i) => [prices[i + period * 2].timestamp, value]);
+        const adx = [];
+        
+        const adxMaxIndex = Math.min(adxValues.length, prices.length - period * 2 - 1);
+        
+        for (let i = 0; i < adxMaxIndex; i++) {
+            const timestamp = prices[i + period * 2 + 1].timestamp;
+            adx.push([timestamp, adxValues[i]]);
+        }
         
         return { adx, plusDI, minusDI };
     },
     
     smoothArray(arr, period) {
+        if (arr.length < period) {
+            return [];
+        }
+        
         const result = [];
+        
+        // First value is simple average
         let sum = 0;
-        for (let i = 0; i < period && i < arr.length; i++) {
+        for (let i = 0; i < period; i++) {
             sum += arr[i];
         }
         result.push(sum / period);
         
+        // Smoothed values
         for (let i = period; i < arr.length; i++) {
             const smoothed = (result[result.length - 1] * (period - 1) + arr[i]) / period;
             result.push(smoothed);
@@ -1710,7 +1766,7 @@ const AdvancedAnalysis = {
     // Generate Demo Data (fallback)
     generateDemoData(symbol) {
         console.log('📊 Generating demo data for', symbol);
-        const days = 180;
+        const days = 365; // ← AUGMENTÉ de 180 à 365
         const prices = [];
         let price = 100;
         
