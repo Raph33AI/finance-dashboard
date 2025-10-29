@@ -4,13 +4,17 @@
 
 :root {
     --sidebar-width: 280px;
-    --sidebar-collapsed-width: 70px;  /* ✅ Taille réduite */
+    --sidebar-collapsed-width: 70px;
     --sidebar-bg: #1a1d29;
     --sidebar-hover: #252937;
     --sidebar-active: #2649B2;
     --sidebar-text: #e4e6eb;
     --sidebar-text-secondary: #b0b3b8;
     --transition-speed: 0.3s;
+
+    /* ✅ NOUVELLE VARIABLE : Largeur maximale du contenu */
+    --content-max-width: 1200px; 
+    --content-padding: 30px;
 }
 
 * {
@@ -48,7 +52,7 @@ body {
     transition: width var(--transition-speed) ease;
     z-index: 1000;
     box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
-    overflow: hidden;  /* ✅ Ajouté pour éviter le débordement */
+    overflow: hidden; /* Assure que le contenu masqué ne déborde pas */
 }
 
 .sidebar.collapsed {
@@ -73,20 +77,13 @@ body {
     gap: 12px;
     white-space: nowrap;
     overflow: hidden;
-    transition: opacity var(--transition-speed);  /* ✅ Ajouté transition */
+    transition: opacity var(--transition-speed);
 }
 
 .sidebar-header h2 i {
     color: #4A74F3;
     font-size: 24px;
-    flex-shrink: 0;  /* ✅ Empêche l'icône de rétrécir */
-}
-
-.sidebar.collapsed .sidebar-header h2 span {
-    opacity: 0;  /* ✅ Cache le texte en fondu */
-    width: 0;
-    display: inline-block;
-    transition: opacity var(--transition-speed), width var(--transition-speed);
+    flex-shrink: 0; /* Empêche l'icône de rétrécir */
 }
 
 .sidebar-toggle {
@@ -98,12 +95,20 @@ body {
     padding: 8px;
     border-radius: 4px;
     transition: background var(--transition-speed);
-    flex-shrink: 0;  /* ✅ Empêche le bouton de rétrécir */
+    flex-shrink: 0; /* Empêche le bouton de rétrécir */
 }
 
 .sidebar-toggle:hover {
     background: var(--sidebar-hover);
 }
+
+.sidebar.collapsed .sidebar-header h2 span {
+    opacity: 0;
+    width: 0;
+    display: inline-block; /* Pour que la transition de width fonctionne */
+    transition: opacity var(--transition-speed), width var(--transition-speed);
+}
+
 
 /* Sidebar Navigation */
 .sidebar-nav {
@@ -165,7 +170,7 @@ body {
     font-size: 18px;
     width: 20px;
     text-align: center;
-    flex-shrink: 0;  /* ✅ Empêche l'icône de rétrécir */
+    flex-shrink: 0;
 }
 
 .nav-folder span {
@@ -173,13 +178,13 @@ body {
     text-align: left;
     white-space: nowrap;
     overflow: hidden;
-    transition: opacity var(--transition-speed);  /* ✅ Ajouté transition */
+    transition: opacity var(--transition-speed);
 }
 
 .nav-folder .arrow {
     font-size: 12px;
-    transition: transform var(--transition-speed), opacity var(--transition-speed);  /* ✅ Ajouté transition opacity */
-    flex-shrink: 0;  /* ✅ Empêche la flèche de rétrécir */
+    transition: transform var(--transition-speed), opacity var(--transition-speed);
+    flex-shrink: 0;
 }
 
 .nav-folder.active .arrow {
@@ -188,8 +193,8 @@ body {
 
 .sidebar.collapsed .nav-folder span,
 .sidebar.collapsed .nav-folder .arrow {
-    opacity: 0;  /* ✅ Cache en fondu au lieu de display: none */
-    width: 0;
+    opacity: 0;
+    width: 0; /* Important pour que la disparition soit complète et non juste transparente */
 }
 
 /* Navigation Submenu */
@@ -232,7 +237,7 @@ body {
     font-size: 16px;
     width: 18px;
     text-align: center;
-    flex-shrink: 0;  /* ✅ Empêche l'icône de rétrécir */
+    flex-shrink: 0;
 }
 
 .nav-link span {
@@ -261,13 +266,13 @@ body {
 .user-info i {
     font-size: 32px;
     color: #4A74F3;
-    flex-shrink: 0;  /* ✅ Empêche l'icône de rétrécir */
+    flex-shrink: 0;
 }
 
 .sidebar.collapsed .user-info span {
-    opacity: 0;  /* ✅ Cache en fondu */
+    opacity: 0;
     width: 0;
-    display: inline-block;
+    display: inline-block; /* Pour que la transition de width fonctionne */
     transition: opacity var(--transition-speed), width var(--transition-speed);
 }
 
@@ -291,7 +296,6 @@ body {
 /* Top Header */
 .top-header {
     background: white;
-    padding: 20px 30px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
     display: flex;
     align-items: center;
@@ -299,6 +303,8 @@ body {
     position: sticky;
     top: 0;
     z-index: 100;
+    /* ✅ NOUVEAU : Centrer et limiter la largeur du contenu du header */
+    padding: 20px var(--content-padding); /* Utilisez la variable */
 }
 
 .header-left {
@@ -344,8 +350,10 @@ body {
 /* Container */
 .container {
     flex: 1;
-    padding: 30px;
-    max-width: 100%;
+    /* ✅ NOUVEAU : Centrer et limiter la largeur du contenu principal */
+    max-width: var(--content-max-width); /* Utiliser la variable */
+    padding: var(--content-padding); /* Utiliser la variable */
+    margin: 0 auto; /* Centrer le container */
 }
 
 /* ===================================
@@ -371,6 +379,12 @@ body {
     
     .sidebar-toggle {
         display: none;
+    }
+
+    /* ✅ NOUVEAU : Ajuster le padding pour le header et le container sur mobile */
+    .top-header, .container {
+        padding-left: 15px;
+        padding-right: 15px;
     }
 }
 
