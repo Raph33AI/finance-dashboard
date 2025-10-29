@@ -12,9 +12,10 @@
     --sidebar-text-secondary: #b0b3b8;
     --transition-speed: 0.3s;
 
-    /* ✅ NOUVELLE VARIABLE : Largeur maximale du contenu */
-    --content-max-width: 1200px; 
-    --content-padding: 30px;
+    /* ✅ MODIFIÉ : Largeur maximale du contenu pour un meilleur équilibre */
+    --content-max-width: 1400px; /* Augmenté de 1200px à 1400px pour plus d'espace */
+    --content-padding-desktop: 40px; /* Augmenté de 30px pour plus d'air sur desktop */
+    --content-padding-mobile: 20px;
 }
 
 * {
@@ -52,7 +53,7 @@ body {
     transition: width var(--transition-speed) ease;
     z-index: 1000;
     box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
-    overflow: hidden; /* Assure que le contenu masqué ne déborde pas */
+    overflow: hidden;
 }
 
 .sidebar.collapsed {
@@ -83,7 +84,7 @@ body {
 .sidebar-header h2 i {
     color: #4A74F3;
     font-size: 24px;
-    flex-shrink: 0; /* Empêche l'icône de rétrécir */
+    flex-shrink: 0;
 }
 
 .sidebar-toggle {
@@ -95,7 +96,7 @@ body {
     padding: 8px;
     border-radius: 4px;
     transition: background var(--transition-speed);
-    flex-shrink: 0; /* Empêche le bouton de rétrécir */
+    flex-shrink: 0;
 }
 
 .sidebar-toggle:hover {
@@ -105,7 +106,7 @@ body {
 .sidebar.collapsed .sidebar-header h2 span {
     opacity: 0;
     width: 0;
-    display: inline-block; /* Pour que la transition de width fonctionne */
+    display: inline-block;
     transition: opacity var(--transition-speed), width var(--transition-speed);
 }
 
@@ -194,7 +195,7 @@ body {
 .sidebar.collapsed .nav-folder span,
 .sidebar.collapsed .nav-folder .arrow {
     opacity: 0;
-    width: 0; /* Important pour que la disparition soit complète et non juste transparente */
+    width: 0;
 }
 
 /* Navigation Submenu */
@@ -272,7 +273,7 @@ body {
 .sidebar.collapsed .user-info span {
     opacity: 0;
     width: 0;
-    display: inline-block; /* Pour que la transition de width fonctionne */
+    display: inline-block;
     transition: opacity var(--transition-speed), width var(--transition-speed);
 }
 
@@ -303,8 +304,17 @@ body {
     position: sticky;
     top: 0;
     z-index: 100;
-    /* ✅ NOUVEAU : Centrer et limiter la largeur du contenu du header */
-    padding: 20px var(--content-padding); /* Utilisez la variable */
+    padding: 20px var(--content-padding-desktop); /* Utilise la nouvelle variable */
+}
+
+/* ✅ NOUVEAU : Wrapper pour le contenu du header pour aligner avec le container */
+.header-content-wrapper {
+    max-width: var(--content-max-width);
+    margin: 0 auto;
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 }
 
 .header-left {
@@ -350,10 +360,10 @@ body {
 /* Container */
 .container {
     flex: 1;
-    /* ✅ NOUVEAU : Centrer et limiter la largeur du contenu principal */
-    max-width: var(--content-max-width); /* Utiliser la variable */
-    padding: var(--content-padding); /* Utiliser la variable */
-    margin: 0 auto; /* Centrer le container */
+    /* ✅ MODIFIÉ : Utilise les nouvelles variables pour les paddings et max-width */
+    max-width: var(--content-max-width); 
+    padding: var(--content-padding-desktop); 
+    margin: 0 auto;
 }
 
 /* ===================================
@@ -381,16 +391,18 @@ body {
         display: none;
     }
 
-    /* ✅ NOUVEAU : Ajuster le padding pour le header et le container sur mobile */
-    .top-header, .container {
-        padding-left: 15px;
-        padding-right: 15px;
+    /* ✅ MODIFIÉ : Ajuster le padding pour le header et le container sur écrans intermédiaires */
+    .top-header {
+        padding: 20px var(--content-padding-mobile);
+    }
+    .container {
+        padding: var(--content-padding-mobile);
     }
 }
 
 @media (max-width: 768px) {
     .top-header {
-        padding: 15px 20px;
+        padding: 15px var(--content-padding-mobile); /* ✅ Ajustement pour très petits écrans */
     }
     
     .header-left h1 {
@@ -398,7 +410,7 @@ body {
     }
     
     .container {
-        padding: 20px 15px;
+        padding: var(--content-padding-mobile); /* ✅ Ajustement pour très petits écrans */
     }
     
     .last-update {
