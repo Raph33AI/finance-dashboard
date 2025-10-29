@@ -1,18 +1,56 @@
 /* ==============================================
-   MARKET-DATA.JS - VERSION CORRIGÉE
+   MARKET-DATA.JS - VERSION AVEC FALLBACK PROXY
    ============================================== */
 
 const MarketData = (function() {
     'use strict';
     
-    // ========== CONFIGURATION API ==========
-    const CORS_PROXY = 'https://api.allorigins.win/raw?url=';
+    // ========== CONFIGURATION PROXIES CORS (avec fallback) ==========
+    const CORS_PROXIES = [
+        'https://corsproxy.io/?',
+        'https://api.codetabs.com/v1/proxy?quest=',
+        'https://api.allorigins.win/raw?url='
+    ];
+    
+    let currentProxyIndex = 0;
+    
     const YAHOO_FINANCE_BASE = 'https://query1.finance.yahoo.com/v8/finance/chart/';
     const YAHOO_QUOTE_BASE = 'https://query1.finance.yahoo.com/v10/finance/quoteSummary/';
     
-    // ========== VARIABLES PRIVÉES ==========
     let currentStockData = null;
     let technicalIndicators = null;
+    
+    // ========== FONCTION FETCH AVEC RETRY ==========
+    async function fetchWithProxy(url, retries = CORS_PROXIES.length) {
+        for (let i = 0; i < retries; i++) {
+            const proxyIndex = (currentProxyIndex + i) % CORS_PROXIES.length;
+            const proxy = CORS_PROXIES[proxyIndex];
+            const proxyUrl = proxy + encodeURIComponent(url);
+            
+            console.log(`🔄 Tentative ${i + 1}/${retries} avec proxy:`, proxy);
+            
+            try {
+                const response = await fetch(proxyUrl, {
+                    method: 'GET',
+                    headers: {
+                        'Accept': 'application/json',
+                    }
+                });
+                
+                if (response.ok) {
+                    console.log('✅ Succès avec proxy:', proxy);
+                    currentProxyIndex = proxyIndex; // Mémoriser le proxy fonctionnel
+                    return response;
+                }
+                
+                console.warn(`⚠️ Échec ${response.status} avec proxy:`, proxy);
+            } catch (error) {
+                console.warn(`❌ Erreur avec proxy ${proxy}:`, error.message);
+            }
+        }
+        
+        throw new Error('Tous les proxies CORS ont échoué. Veuillez réessayer plus tard.');
+    }
     
     // ========== FONCTION PRINCIPALE ==========
     async function fetchStockData() {
@@ -31,29 +69,23 @@ const MarketData = (function() {
         try {
             console.log('🔍 Récupération des données pour:', symbol);
             
-            // Récupération des données de prix
             const priceData = await fetchFromYahooFinance(symbol, period);
             
-            // Tentative de récupération des données détaillées (peut échouer)
             let detailedInfo = {};
             try {
                 detailedInfo = await fetchDetailedInfo(symbol);
             } catch (crumbError) {
-                console.warn("⚠️ Données fondamentales limitées (Invalid Crumb)", crumbError.message);
+                console.warn("⚠️ Données fondamentales limitées", crumbError.message);
             }
             
-            // Fusion des données
             currentStockData = { ...priceData, ...detailedInfo };
-            
-            // Calcul des indicateurs techniques
             technicalIndicators = calculateTechnicalIndicators(priceData);
             
-            // Affichage des résultats
             displayResults(currentStockData, symbol);
             showNotification('Données chargées avec succès !', 'success');
             
         } catch (error) {
-            console.error('❌ Erreur lors de la récupération des données:', error);
+            console.error('❌ Erreur:', error);
             showError('Échec de récupération pour ' + symbol + '. ' + error.message);
         } finally {
             showLoading(false);
@@ -74,15 +106,11 @@ const MarketData = (function() {
         
         const { range, interval } = periods[period] || periods['1M'];
         const yahooUrl = `${YAHOO_FINANCE_BASE}${symbol}?range=${range}&interval=${interval}`;
-        const proxyUrl = CORS_PROXY + encodeURIComponent(yahooUrl);
         
-        console.log('📡 Requête:', yahooUrl);
+        console.log('📡 Requête Yahoo Finance:', yahooUrl);
         
-        const response = await fetch(proxyUrl);
-        
-        if (!response.ok) {
-            throw new Error('Erreur réseau (Status: ' + response.status + ')');
-        }
+        // Utiliser la fonction avec retry
+        const response = await fetchWithProxy(yahooUrl);
         
         const json = await response.json();
         console.log('📊 Réponse brute:', json);
@@ -162,15 +190,10 @@ const MarketData = (function() {
         ].join(',');
         
         const yahooUrl = `${YAHOO_QUOTE_BASE}${symbol}?modules=${modules}`;
-        const proxyUrl = CORS_PROXY + encodeURIComponent(yahooUrl);
         
         console.log('📡 Récupération infos détaillées:', symbol);
         
-        const response = await fetch(proxyUrl);
-        
-        if (!response.ok) {
-            throw new Error(`Erreur réseau pour infos détaillées (Status: ${response.status})`);
-        }
+        const response = await fetchWithProxy(yahooUrl);
         
         const json = await response.json();
         console.log('📋 Infos détaillées brutes:', json);
@@ -186,7 +209,6 @@ const MarketData = (function() {
         
         const result = json.quoteSummary.result[0];
         
-        // ✅ CORRECTION : Définir les variables manquantes
         const profile = result.assetProfile || {};
         const summaryDetail = result.summaryDetail || {};
         const keyStats = result.defaultKeyStatistics || {};
