@@ -1,20 +1,26 @@
 /* ==============================================
-   MARKET-DATA.CSS - Styles for Market Data page
+   SEARCH PANEL - Identical to Advanced Analytics
    ============================================== */
 
-/* Search Panel */
 .search-panel {
-    background: linear-gradient(135deg, #E8DAEF 0%, #D4D9F0 100%);
+    background: white;
+    border-radius: 20px;
     padding: 30px;
-    border-radius: 15px;
     margin-bottom: 30px;
-    box-shadow: 0 4px 12px rgba(108,52,131,0.15);
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
 }
 
 .panel-title {
+    margin: 0 0 25px 0;
     color: #2649B2;
-    margin-bottom: 25px;
-    font-size: 1.5em;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 1.5rem;
+}
+
+.panel-title i {
+    color: #4A74F3;
 }
 
 .search-container {
@@ -23,110 +29,372 @@
     gap: 20px;
 }
 
+/* ============================================
+   SMART SEARCH BAR WITH AUTOCOMPLETE
+   ============================================ */
+
 .search-input-wrapper {
+    position: relative;
     display: flex;
-    gap: 10px;
+    gap: 15px;
 }
 
 #symbolInput {
     flex: 1;
     padding: 15px 20px;
-    border: 2px solid #9D5CE6;
-    border-radius: 10px;
-    font-size: 1.1em;
-    transition: all 0.3s;
+    border: 2px solid #D4D9F0;
+    border-radius: 15px;
+    font-size: 1rem;
+    transition: all 0.3s ease;
 }
 
 #symbolInput:focus {
     outline: none;
-    border-color: #2649B2;
-    box-shadow: 0 0 0 3px rgba(38,73,178,0.2);
+    border-color: #4A74F3;
+    box-shadow: 0 0 0 3px rgba(74, 116, 243, 0.1);
 }
 
 .btn-search {
-    background: linear-gradient(135deg, #2649B2 0%, #4A74F3 100%);
+    background: linear-gradient(135deg, #2649B2, #4A74F3);
     color: white;
-    padding: 15px 30px;
     border: none;
-    border-radius: 10px;
-    font-size: 1.1em;
-    font-weight: bold;
+    padding: 15px 30px;
+    border-radius: 15px;
+    font-weight: 600;
     cursor: pointer;
-    box-shadow: 0 4px 12px rgba(38,73,178,0.3);
-    transition: all 0.3s;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 10px;
     white-space: nowrap;
+    font-size: 1rem;
 }
 
 .btn-search:hover {
     transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(38,73,178,0.4);
+    box-shadow: 0 8px 20px rgba(38, 73, 178, 0.3);
 }
 
-/* Quick Symbols */
-.quick-symbols {
+.btn-search:active {
+    transform: translateY(0);
+}
+
+.search-suggestions {
+    position: absolute;
+    top: calc(100% + 5px);
+    left: 0;
+    right: 200px;
+    background: white;
+    border: 2px solid #4A74F3;
+    border-radius: 15px;
+    max-height: 500px;
+    overflow-y: auto;
+    z-index: 1000;
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.25);
+    display: none;
+}
+
+.search-suggestions.active {
+    display: block;
+    animation: slideDown 0.3s ease;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.suggestion-category {
+    padding: 12px 20px;
+    background: linear-gradient(135deg, #2649B2, #4A74F3);
+    color: white;
+    font-weight: bold;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+.suggestion-item {
+    padding: 15px 20px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    border-bottom: 1px solid #f0f0f0;
+    transition: all 0.2s ease;
+}
+
+.suggestion-item:hover,
+.suggestion-item.selected {
+    background: linear-gradient(90deg, #f8f9fa, #e9ecef);
+    border-left: 4px solid #4A74F3;
+    padding-left: 16px;
+}
+
+.suggestion-item:last-child {
+    border-bottom: none;
+}
+
+.suggestion-icon {
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+    flex-shrink: 0;
+    font-weight: bold;
+    color: white;
+    text-transform: uppercase;
+}
+
+.suggestion-icon.tech {
+    background: linear-gradient(135deg, #2649B2, #4A74F3);
+}
+
+.suggestion-icon.finance {
+    background: linear-gradient(135deg, #28a745, #20c997);
+}
+
+.suggestion-icon.crypto {
+    background: linear-gradient(135deg, #FF9800, #FFC107);
+}
+
+.suggestion-icon.etf {
+    background: linear-gradient(135deg, #8E7DE3, #9D5CE6);
+}
+
+.suggestion-icon.industrial {
+    background: linear-gradient(135deg, #6c757d, #495057);
+}
+
+.suggestion-info {
+    flex: 1;
+}
+
+.suggestion-symbol {
+    font-weight: bold;
+    font-size: 1.1rem;
+    color: #2649B2;
+    margin-bottom: 3px;
+}
+
+.suggestion-name {
+    font-size: 0.9rem;
+    color: #6c757d;
+}
+
+.suggestion-match {
+    background: #ffc107;
+    color: #333;
+    padding: 0 3px;
+    border-radius: 3px;
+}
+
+.suggestion-exchange {
+    font-size: 0.85rem;
+    color: #6c757d;
+    background: #f0f0f0;
+    padding: 4px 10px;
+    border-radius: 12px;
+}
+
+.no-results {
+    padding: 30px 20px;
+    text-align: center;
+    color: #6c757d;
+}
+
+.no-results i {
+    font-size: 3rem;
+    margin-bottom: 15px;
+    color: #d0d0d0;
+}
+
+.suggestion-loading {
+    padding: 30px 20px;
+    text-align: center;
+    color: #6c757d;
+    font-size: 1.1rem;
+}
+
+.suggestion-loading i {
+    font-size: 2rem;
+    margin-bottom: 10px;
+    color: #2649B2;
+}
+
+/* ============================================
+   POPULAR STOCKS
+   ============================================ */
+
+.popular-stocks {
     display: flex;
     flex-wrap: wrap;
     gap: 10px;
     align-items: center;
+    padding-top: 20px;
+    border-top: 2px solid #f0f0f0;
 }
 
 .quick-label {
-    color: #5B2C6F;
-    font-weight: bold;
+    font-weight: 600;
+    color: #2649B2;
     margin-right: 10px;
+    font-size: 15px;
 }
 
 .symbol-chip {
     background: white;
-    color: #2649B2;
+    border: 2px solid #D4D9F0;
     padding: 8px 16px;
-    border: 2px solid #9D5CE6;
-    border-radius: 20px;
-    font-weight: bold;
+    border-radius: 25px;
     cursor: pointer;
-    transition: all 0.3s;
+    transition: all 0.3s ease;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    color: #333;
 }
 
 .symbol-chip:hover {
-    background: linear-gradient(135deg, #8E7DE3 0%, #9D5CE6 100%);
+    background: linear-gradient(135deg, #2649B2, #4A74F3);
+    border-color: #2649B2;
     color: white;
     transform: translateY(-2px);
-    box-shadow: 0 4px 10px rgba(157,92,230,0.3);
+    box-shadow: 0 5px 15px rgba(38, 73, 178, 0.3);
 }
 
-/* Time Period Selector */
+.symbol-chip i {
+    font-size: 1.1rem;
+    color: #2649B2;
+    transition: color 0.3s ease;
+}
+
+.symbol-chip:hover i {
+    color: white;
+}
+
+/* Icons spécifiques par marque */
+.symbol-chip .fa-apple { color: #000; }
+.symbol-chip:hover .fa-apple { color: white; }
+
+.symbol-chip .fa-microsoft { color: #00A4EF; }
+.symbol-chip:hover .fa-microsoft { color: white; }
+
+.symbol-chip .fa-google { color: #4285F4; }
+.symbol-chip:hover .fa-google { color: white; }
+
+.symbol-chip .fa-car { color: #E82127; }
+.symbol-chip:hover .fa-car { color: white; }
+
+.symbol-chip .fa-bitcoin { color: #F7931A; }
+.symbol-chip:hover .fa-bitcoin { color: white; }
+
+.symbol-chip .fa-chart-line { color: #2649B2; }
+.symbol-chip:hover .fa-chart-line { color: white; }
+
+/* ============================================
+   TIME PERIOD SELECTOR
+   ============================================ */
+
 .time-period-selector {
     display: flex;
-    align-items: center;
-    gap: 10px;
+    gap: 30px;
     flex-wrap: wrap;
+    padding-top: 20px;
+    border-top: 2px solid #f0f0f0;
+    align-items: center;
 }
 
 .time-period-selector label {
-    color: #5B2C6F;
-    font-weight: bold;
+    font-weight: 600;
+    color: #2649B2;
+    font-size: 15px;
 }
 
 .period-btn {
     background: white;
-    color: #2649B2;
-    padding: 8px 16px;
     border: 2px solid #D4D9F0;
-    border-radius: 8px;
-    font-weight: bold;
+    padding: 10px 20px;
+    border-radius: 10px;
     cursor: pointer;
-    transition: all 0.3s;
+    transition: all 0.3s ease;
+    font-weight: 600;
+    color: #333;
 }
 
 .period-btn:hover {
-    border-color: #9D5CE6;
-    transform: translateY(-2px);
+    border-color: #4A74F3;
+    color: #4A74F3;
 }
 
 .period-btn.active {
-    background: linear-gradient(135deg, #2649B2 0%, #4A74F3 100%);
-    color: white;
+    background: linear-gradient(135deg, #2649B2, #4A74F3);
     border-color: #2649B2;
+    color: white;
+}
+
+/* ============================================
+   HELP ICON
+   ============================================ */
+
+.help-icon {
+    width: 28px;
+    height: 28px;
+    background: linear-gradient(135deg, #2649B2, #4A74F3);
+    color: white;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: bold;
+    transition: all 0.3s ease;
+    margin-left: auto;
+    flex-shrink: 0;
+    position: relative;
+    z-index: 100;
+}
+
+.help-icon:hover {
+    transform: scale(1.1);
+    box-shadow: 0 4px 12px rgba(38, 73, 178, 0.3);
+}
+
+/* ============================================
+   SCROLLBAR CUSTOM
+   ============================================ */
+
+.search-suggestions::-webkit-scrollbar {
+    width: 8px;
+}
+
+.search-suggestions::-webkit-scrollbar-track {
+    background: #f0f0f0;
+    border-radius: 10px;
+}
+
+.search-suggestions::-webkit-scrollbar-thumb {
+    background: linear-gradient(135deg, #2649B2, #4A74F3);
+    border-radius: 10px;
+}
+
+.search-suggestions::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(135deg, #1a3a8a, #2649B2);
 }
 
 /* ==============================================

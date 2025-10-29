@@ -7,6 +7,10 @@ const MarketData = {
     currentPeriod: '1M',
     stockData: null,
     
+    // Search functionality
+    selectedSuggestionIndex: -1,
+    searchTimeout: null,
+    
     // Proxy CORS
     CORS_PROXIES: [
         'https://api.allorigins.win/raw?url=',
@@ -30,6 +34,7 @@ const MarketData = {
     init() {
         this.updateLastUpdate();
         this.setupEventListeners();
+        this.setupSearchListeners(); // ✅ AJOUTÉ
         this.loadWatchlistFromStorage();
         this.loadAlertsFromStorage();
         this.requestNotificationPermission();
@@ -57,6 +62,273 @@ const MarketData = {
         document.getElementById('toggleVolume')?.addEventListener('change', () => this.updateChart());
     },
     
+    // ========== NOUVELLE FONCTIONNALITÉ DE RECHERCHE ==========
+    
+    // Setup search listeners with autocomplete
+    setupSearchListeners() {
+        const input = document.getElementById('symbolInput');
+        if (input) {
+            input.addEventListener('input', (e) => {
+                this.handleSearch(e.target.value);
+            });
+            
+            input.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    if (this.selectedSuggestionIndex >= 0) {
+                        const suggestions = document.querySelectorAll('.suggestion-item');
+                        if (suggestions[this.selectedSuggestionIndex]) {
+                            const symbol = suggestions[this.selectedSuggestionIndex].dataset.symbol;
+                            this.selectSuggestion(symbol);
+                        }
+                    } else {
+                        this.searchStock();
+                    }
+                } else if (e.key === 'ArrowDown') {
+                    e.preventDefault();
+                    this.navigateSuggestions('down');
+                } else if (e.key === 'ArrowUp') {
+                    e.preventDefault();
+                    this.navigateSuggestions('up');
+                } else if (e.key === 'Escape') {
+                    this.hideSuggestions();
+                }
+            });
+            
+            input.addEventListener('focus', (e) => {
+                if (e.target.value.trim().length > 0) {
+                    this.handleSearch(e.target.value);
+                }
+            });
+        }
+        
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.search-input-wrapper')) {
+                this.hideSuggestions();
+            }
+        });
+    },
+    
+    handleSearch(query) {
+        const trimmedQuery = query.trim();
+        
+        if (trimmedQuery.length === 0) {
+            this.hideSuggestions();
+            return;
+        }
+        
+        clearTimeout(this.searchTimeout);
+        this.searchTimeout = setTimeout(() => {
+            this.searchYahooFinance(trimmedQuery);
+        }, 300);
+    },
+    
+    async searchYahooFinance(query) {
+        console.log('🔍 Searching Yahoo Finance for:', query);
+        
+        const container = document.getElementById('searchSuggestions');
+        if (!container) return;
+        
+        container.innerHTML = '<div class="suggestion-loading"><i class="fas fa-spinner fa-spin"></i> Searching...</div>';
+        container.classList.add('active');
+        
+        try {
+            const searchUrl = `https://query1.finance.yahoo.com/v1/finance/search?q=${encodeURIComponent(query)}&quotesCount=20&newsCount=0&enableFuzzyQuery=false`;
+            
+            for (let i = 0; i < this.CORS_PROXIES.length; i++) {
+                try {
+                    const proxyUrl = this.CORS_PROXIES[i];
+                    const url = proxyUrl + encodeURIComponent(searchUrl);
+                    
+                    const response = await fetch(url);
+                    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                    
+                    const data = await response.json();
+                    
+                    if (data.quotes && data.quotes.length > 0) {
+                        this.displaySearchResults(data.quotes, query);
+                    } else {
+                        this.displayNoResults();
+                    }
+                    
+                    return;
+                    
+                } catch (error) {
+                    console.warn(`Search proxy ${i + 1} failed:`, error.message);
+                    if (i === this.CORS_PROXIES.length - 1) {
+                        throw error;
+                    }
+                }
+            }
+            
+        } catch (error) {
+            console.error('Search failed:', error);
+            this.displaySearchError();
+        }
+    },
+    
+    displaySearchResults(quotes, query) {
+        const container = document.getElementById('searchSuggestions');
+        if (!container) return;
+        
+        const stocks = [];
+        const etfs = [];
+        const crypto = [];
+        const indices = [];
+        const other = [];
+        
+        quotes.forEach(quote => {
+            const item = {
+                symbol: quote.symbol,
+                name: quote.shortname || quote.longname || quote.symbol,
+                type: quote.quoteType || 'EQUITY',
+                exchange: quote.exchange || '',
+                score: quote.score || 0
+            };
+            
+            switch (item.type) {
+                case 'EQUITY': stocks.push(item); break;
+                case 'ETF': etfs.push(item); break;
+                case 'CRYPTOCURRENCY': crypto.push(item); break;
+                case 'INDEX': indices.push(item); break;
+                default: other.push(item);
+            }
+        });
+        
+        let html = '';
+        if (stocks.length > 0) html += this.buildCategoryHTML('Stocks', stocks, query);
+        if (etfs.length > 0) html += this.buildCategoryHTML('ETFs', etfs, query);
+        if (crypto.length > 0) html += this.buildCategoryHTML('Cryptocurrencies', crypto, query);
+        if (indices.length > 0) html += this.buildCategoryHTML('Indices', indices, query);
+        if (other.length > 0) html += this.buildCategoryHTML('Other', other, query);
+        
+        if (html === '') {
+            this.displayNoResults();
+        } else {
+            container.innerHTML = html;
+            container.classList.add('active');
+            this.selectedSuggestionIndex = -1;
+            
+            container.querySelectorAll('.suggestion-item').forEach((item) => {
+                item.addEventListener('click', () => {
+                    this.selectSuggestion(item.dataset.symbol);
+                });
+            });
+        }
+    },
+    
+    buildCategoryHTML(categoryName, items, query) {
+        const iconMap = {
+            'Stocks': 'chart-line',
+            'ETFs': 'layer-group',
+            'Cryptocurrencies': 'coins',
+            'Indices': 'chart-bar',
+            'Other': 'folder'
+        };
+        
+        const sectorMap = {
+            'Stocks': 'tech',
+            'ETFs': 'etf',
+            'Cryptocurrencies': 'crypto',
+            'Indices': 'finance',
+            'Other': 'industrial'
+        };
+        
+        let html = `<div class="suggestion-category">
+            <i class="fas fa-${iconMap[categoryName] || 'folder'}"></i> ${categoryName}
+        </div>`;
+        
+        items.slice(0, 10).forEach(item => {
+            const highlightedSymbol = this.highlightMatch(item.symbol, query);
+            const highlightedName = this.highlightMatch(item.name, query);
+            
+            html += `
+                <div class="suggestion-item" data-symbol="${item.symbol}">
+                    <div class="suggestion-icon ${sectorMap[categoryName] || 'tech'}">
+                        ${item.symbol.substring(0, 2)}
+                    </div>
+                    <div class="suggestion-info">
+                        <div class="suggestion-symbol">${highlightedSymbol}</div>
+                        <div class="suggestion-name">${highlightedName}</div>
+                    </div>
+                    ${item.exchange ? `<div class="suggestion-exchange">${item.exchange}</div>` : ''}
+                </div>
+            `;
+        });
+        
+        return html;
+    },
+    
+    highlightMatch(text, query) {
+        if (!text || !query) return text;
+        const regex = new RegExp(`(${query})`, 'gi');
+        return text.replace(regex, '<span class="suggestion-match">$1</span>');
+    },
+    
+    displayNoResults() {
+        const container = document.getElementById('searchSuggestions');
+        if (!container) return;
+        
+        container.innerHTML = `
+            <div class="no-results">
+                <i class="fas fa-search"></i>
+                <p><strong>No results found</strong></p>
+                <p>Try searching by ticker symbol or company name</p>
+            </div>
+        `;
+        container.classList.add('active');
+    },
+    
+    displaySearchError() {
+        const container = document.getElementById('searchSuggestions');
+        if (!container) return;
+        
+        container.innerHTML = `
+            <div class="no-results">
+                <i class="fas fa-exclamation-triangle"></i>
+                <p><strong>Search temporarily unavailable</strong></p>
+                <p>Please enter a ticker symbol directly</p>
+            </div>
+        `;
+        container.classList.add('active');
+    },
+    
+    selectSuggestion(symbol) {
+        document.getElementById('symbolInput').value = symbol;
+        this.hideSuggestions();
+        this.loadSymbol(symbol);
+    },
+    
+    hideSuggestions() {
+        const container = document.getElementById('searchSuggestions');
+        if (!container) return;
+        
+        container.classList.remove('active');
+        this.selectedSuggestionIndex = -1;
+    },
+    
+    navigateSuggestions(direction) {
+        const suggestions = document.querySelectorAll('.suggestion-item');
+        if (suggestions.length === 0) return;
+        
+        if (this.selectedSuggestionIndex >= 0) {
+            suggestions[this.selectedSuggestionIndex].classList.remove('selected');
+        }
+        
+        if (direction === 'down') {
+            this.selectedSuggestionIndex = (this.selectedSuggestionIndex + 1) % suggestions.length;
+        } else {
+            this.selectedSuggestionIndex = this.selectedSuggestionIndex <= 0 
+                ? suggestions.length - 1 
+                : this.selectedSuggestionIndex - 1;
+        }
+        
+        suggestions[this.selectedSuggestionIndex].classList.add('selected');
+        suggestions[this.selectedSuggestionIndex].scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+    },
+    
+    // ========== FIN NOUVELLE FONCTIONNALITÉ ==========
+    
     // Search Stock
     searchStock() {
         const symbol = document.getElementById('symbolInput').value.trim().toUpperCase();
@@ -72,6 +344,7 @@ const MarketData = {
         
         this.showLoading(true);
         this.hideResults();
+        this.hideSuggestions(); // ✅ AJOUTÉ - Cache les suggestions lors du chargement
         
         try {
             await this.fetchYahooFinanceData(symbol);

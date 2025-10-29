@@ -143,31 +143,50 @@
                     <!-- Search Panel -->
                     <div class='search-panel'>
                         <h2 class='panel-title'>
-                            Search Stock Data 
+                            <i class='fas fa-search'></i> Search Stock for Market Data
                             <span class='help-icon' onclick='openModal("modalSearchHelp")'>?</span>
                         </h2>
                         
                         <div class='search-container'>
+                            <!-- Search Input + Button -->
                             <div class='search-input-wrapper'>
                                 <input type='text' 
-                                       id='symbolInput' 
-                                       placeholder='Enter symbol (e.g., AAPL, MSFT, BTC-USD)...'
-                                       autocomplete='off'>
+                                    id='symbolInput' 
+                                    placeholder='Search by symbol or company name (e.g., AAPL, Apple, Tesla)...'
+                                    autocomplete='off'
+                                    value='AAPL'>
                                 <button class='btn-search' onclick='MarketData.searchStock()'>
-                                    <i class='fas fa-search'></i> Search
+                                    <i class='fas fa-chart-area'></i> Analyze Stock
+                                </button>
+                                
+                                <!-- Suggestions dropdown (hidden by default) -->
+                                <div class='search-suggestions' id='searchSuggestions'></div>
+                            </div>
+                            
+                            <!-- Popular Stocks -->
+                            <div class='popular-stocks'>
+                                <span class='quick-label'>Popular Stocks:</span>
+                                <button class='symbol-chip' onclick='MarketData.loadSymbol("AAPL")'>
+                                    <i class='fab fa-apple'></i> AAPL
+                                </button>
+                                <button class='symbol-chip' onclick='MarketData.loadSymbol("MSFT")'>
+                                    <i class='fab fa-microsoft'></i> MSFT
+                                </button>
+                                <button class='symbol-chip' onclick='MarketData.loadSymbol("GOOGL")'>
+                                    <i class='fab fa-google'></i> GOOGL
+                                </button>
+                                <button class='symbol-chip' onclick='MarketData.loadSymbol("TSLA")'>
+                                    <i class='fas fa-car'></i> TSLA
+                                </button>
+                                <button class='symbol-chip' onclick='MarketData.loadSymbol("BTC-USD")'>
+                                    <i class='fab fa-bitcoin'></i> BTC-USD
+                                </button>
+                                <button class='symbol-chip' onclick='MarketData.loadSymbol("^GSPC")'>
+                                    <i class='fas fa-chart-line'></i> S&P 500
                                 </button>
                             </div>
                             
-                            <div class='quick-symbols'>
-                                <span class='quick-label'>Quick Access:</span>
-                                <button class='symbol-chip' onclick='MarketData.loadSymbol("AAPL")'>AAPL</button>
-                                <button class='symbol-chip' onclick='MarketData.loadSymbol("MSFT")'>MSFT</button>
-                                <button class='symbol-chip' onclick='MarketData.loadSymbol("GOOGL")'>GOOGL</button>
-                                <button class='symbol-chip' onclick='MarketData.loadSymbol("TSLA")'>TSLA</button>
-                                <button class='symbol-chip' onclick='MarketData.loadSymbol("BTC-USD")'>BTC-USD</button>
-                                <button class='symbol-chip' onclick='MarketData.loadSymbol("^GSPC")'>S&P 500</button>
-                            </div>
-                            
+                            <!-- Period Selection -->
                             <div class='time-period-selector'>
                                 <label>Time Period:</label>
                                 <button class='period-btn active' data-period='1M' onclick='MarketData.changePeriod("1M")'>1M</button>
