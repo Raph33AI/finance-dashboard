@@ -1,13 +1,16 @@
 /* ==============================================
-   MARKET-DATA.JS - Version Simplifiée
+   MARKET-DATA.JS - VERSION CORRIGÉE
    ============================================== */
 
 const MarketData = (function() {
     'use strict';
     
+    // ========== CONFIGURATION API ==========
     const CORS_PROXY = 'https://api.allorigins.win/raw?url=';
     const YAHOO_FINANCE_BASE = 'https://query1.finance.yahoo.com/v8/finance/chart/';
+    const YAHOO_QUOTE_BASE = 'https://query1.finance.yahoo.com/v10/finance/quoteSummary/';
     
+    // ========== VARIABLES PRIVÉES ==========
     let currentStockData = null;
     let technicalIndicators = null;
     
@@ -26,24 +29,38 @@ const MarketData = (function() {
         hideResults();
         
         try {
-            console.log('🔍 Recherche des données pour:', symbol);
+            console.log('🔍 Récupération des données pour:', symbol);
+            
+            // Récupération des données de prix
             const priceData = await fetchFromYahooFinance(symbol, period);
             
-            currentStockData = priceData;
+            // Tentative de récupération des données détaillées (peut échouer)
+            let detailedInfo = {};
+            try {
+                detailedInfo = await fetchDetailedInfo(symbol);
+            } catch (crumbError) {
+                console.warn("⚠️ Données fondamentales limitées (Invalid Crumb)", crumbError.message);
+            }
+            
+            // Fusion des données
+            currentStockData = { ...priceData, ...detailedInfo };
+            
+            // Calcul des indicateurs techniques
             technicalIndicators = calculateTechnicalIndicators(priceData);
             
+            // Affichage des résultats
             displayResults(currentStockData, symbol);
             showNotification('Données chargées avec succès !', 'success');
             
         } catch (error) {
-            console.error('❌ Erreur:', error);
-            showError(`Impossible de récupérer les données pour ${symbol}. ${error.message}`);
+            console.error('❌ Erreur lors de la récupération des données:', error);
+            showError('Échec de récupération pour ' + symbol + '. ' + error.message);
         } finally {
             showLoading(false);
         }
     }
     
-    // ========== RÉCUPÉRATION DES DONNÉES ==========
+    // ========== RÉCUPÉRATION DES DONNÉES DE PRIX ==========
     async function fetchFromYahooFinance(symbol, period) {
         const periods = {
             '1D': { range: '1d', interval: '5m' },
@@ -59,18 +76,18 @@ const MarketData = (function() {
         const yahooUrl = `${YAHOO_FINANCE_BASE}${symbol}?range=${range}&interval=${interval}`;
         const proxyUrl = CORS_PROXY + encodeURIComponent(yahooUrl);
         
-        console.log('📡 URL:', proxyUrl);
+        console.log('📡 Requête:', yahooUrl);
         
         const response = await fetch(proxyUrl);
         
         if (!response.ok) {
-            throw new Error(`Erreur réseau (${response.status})`);
+            throw new Error('Erreur réseau (Status: ' + response.status + ')');
         }
         
         const json = await response.json();
-        console.log('📊 Réponse API:', json);
+        console.log('📊 Réponse brute:', json);
         
-        if (!json.chart?.result?.[0]) {
+        if (!json.chart || !json.chart.result || json.chart.result.length === 0) {
             throw new Error('Symbole invalide ou données indisponibles');
         }
         
@@ -83,9 +100,12 @@ const MarketData = (function() {
         const quote = result.indicators.quote[0];
         const timestamps = result.timestamp;
         
+        if (!timestamps || timestamps.length === 0) {
+            throw new Error('Aucune donnée historique disponible');
+        }
+        
         // Nettoyage des données
         const cleanData = {
-            timestamps: [],
             open: [],
             high: [],
             low: [],
@@ -93,9 +113,11 @@ const MarketData = (function() {
             volume: []
         };
         
+        const cleanTimestamps = [];
+        
         for (let i = 0; i < timestamps.length; i++) {
-            if (timestamps[i] && quote.close[i] != null) {
-                cleanData.timestamps.push(timestamps[i]);
+            if (timestamps[i] !== null && quote.close[i] !== null && quote.close[i] !== undefined) {
+                cleanTimestamps.push(timestamps[i]);
                 cleanData.open.push(quote.open[i] || quote.close[i]);
                 cleanData.high.push(quote.high[i] || quote.close[i]);
                 cleanData.low.push(quote.low[i] || quote.close[i]);
@@ -105,7 +127,7 @@ const MarketData = (function() {
         }
         
         if (cleanData.close.length === 0) {
-            throw new Error('Aucune donnée valide trouvée');
+            throw new Error('Aucune donnée valide après nettoyage');
         }
         
         const currentPrice = meta.regularMarketPrice || cleanData.close[cleanData.close.length - 1];
@@ -121,14 +143,8 @@ const MarketData = (function() {
             dayHigh: meta.regularMarketDayHigh || Math.max(...cleanData.high),
             dayLow: meta.regularMarketDayLow || Math.min(...cleanData.low),
             volume: cleanData.volume[cleanData.volume.length - 1] || 0,
-            timestamps: cleanData.timestamps,
-            prices: {
-                open: cleanData.open,
-                high: cleanData.high,
-                low: cleanData.low,
-                close: cleanData.close,
-                volume: cleanData.volume
-            },
+            timestamps: cleanTimestamps,
+            prices: cleanData,
             exchangeName: meta.exchangeName || 'N/A',
             marketState: meta.marketState || 'REGULAR',
             fiftyTwoWeekHigh: meta.fiftyTwoWeekHigh || 'N/A',
@@ -136,29 +152,121 @@ const MarketData = (function() {
         };
     }
     
+    // ========== RÉCUPÉRATION DES DONNÉES DÉTAILLÉES ==========
+    async function fetchDetailedInfo(symbol) {
+        const modules = [
+            'summaryDetail',
+            'financialData',
+            'defaultKeyStatistics',
+            'assetProfile'
+        ].join(',');
+        
+        const yahooUrl = `${YAHOO_QUOTE_BASE}${symbol}?modules=${modules}`;
+        const proxyUrl = CORS_PROXY + encodeURIComponent(yahooUrl);
+        
+        console.log('📡 Récupération infos détaillées:', symbol);
+        
+        const response = await fetch(proxyUrl);
+        
+        if (!response.ok) {
+            throw new Error(`Erreur réseau pour infos détaillées (Status: ${response.status})`);
+        }
+        
+        const json = await response.json();
+        console.log('📋 Infos détaillées brutes:', json);
+        
+        if (json.quoteSummary?.error?.description === 'Invalid Crumb') {
+            throw new Error('Erreur de sécurité Yahoo Finance: Invalid Crumb');
+        }
+        
+        if (!json.quoteSummary || !json.quoteSummary.result || json.quoteSummary.result.length === 0) {
+            console.warn('⚠️ Aucune info détaillée disponible');
+            return {};
+        }
+        
+        const result = json.quoteSummary.result[0];
+        
+        // ✅ CORRECTION : Définir les variables manquantes
+        const profile = result.assetProfile || {};
+        const summaryDetail = result.summaryDetail || {};
+        const keyStats = result.defaultKeyStatistics || {};
+        const financialData = result.financialData || {};
+        
+        const getValue = (obj, prop, fallback = 'N/A') => {
+            if (obj && obj[prop]) {
+                if (obj[prop].raw !== undefined) return obj[prop].raw;
+                if (obj[prop].fmt !== undefined && obj[prop].fmt !== null) {
+                    const parsed = parseFloat(obj[prop].fmt.replace(/,/g, ''));
+                    return isNaN(parsed) ? fallback : parsed;
+                }
+            }
+            return fallback;
+        };
+
+        const getStringValue = (obj, prop, fallback = 'N/A') => {
+            return (obj && obj[prop] !== null) ? obj[prop] : fallback;
+        };
+        
+        return {
+            companyName: getStringValue(profile, 'longName') || getStringValue(profile, 'shortName') || symbol,
+            sector: getStringValue(profile, 'sector'),
+            industry: getStringValue(profile, 'industry'),
+            website: getStringValue(profile, 'website'),
+            country: getStringValue(profile, 'country'),
+            employees: getValue(profile, 'fullTimeEmployees'),
+            description: getStringValue(profile, 'longBusinessSummary') || 'Pas de description disponible',
+            
+            marketCap: getValue(summaryDetail, 'marketCap') || getValue(keyStats, 'enterpriseValue'),
+            peRatio: getValue(summaryDetail, 'trailingPE') || getValue(keyStats, 'trailingPE'),
+            forwardPE: getValue(summaryDetail, 'forwardPE'),
+            eps: getValue(keyStats, 'trailingEps'),
+            beta: getValue(keyStats, 'beta') || getValue(summaryDetail, 'beta'),
+            
+            dividendRate: getValue(summaryDetail, 'dividendRate'),
+            dividendYield: getValue(summaryDetail, 'dividendYield'),
+            
+            profitMargins: getValue(financialData, 'profitMargins'),
+            returnOnEquity: getValue(financialData, 'returnOnEquity'),
+            
+            debtToEquity: getValue(financialData, 'debtToEquity'),
+            currentRatio: getValue(financialData, 'currentRatio')
+        };
+    }
+    
     // ========== INDICATEURS TECHNIQUES ==========
     function calculateTechnicalIndicators(data) {
         const prices = data.prices.close;
+        const volumes = data.prices.volume;
+        const highs = data.prices.high;
+        const lows = data.prices.low;
         
+        // ✅ CORRECTION : Condition moins stricte (20 au lieu de 200)
         if (prices.length < 20) {
-            return { rsi: null, sma20: null, sma50: null };
+            console.warn('⚠️ Pas assez de données pour les indicateurs techniques (minimum 20 points)');
+            return {
+                sma20: null,
+                sma50: null,
+                rsi: null
+            };
         }
-        
+
         return {
             sma20: calculateSMA(prices, 20),
             sma50: prices.length >= 50 ? calculateSMA(prices, 50) : null,
+            sma200: prices.length >= 200 ? calculateSMA(prices, 200) : null,
             rsi: prices.length >= 15 ? calculateRSI(prices, 14) : null
         };
     }
     
     function calculateSMA(data, period) {
-        if (data.length < period) return null;
+        if (!data || data.length < period) return null;
         const slice = data.slice(-period);
-        return slice.reduce((a, b) => a + b, 0) / period;
+        const sum = slice.reduce((a, b) => a + b, 0);
+        return sum / period;
     }
     
     function calculateRSI(prices, period = 14) {
-        if (prices.length < period + 1) return null;
+        if (!prices || prices.length < period + 1) return null;
         
         let avgGain = 0;
         let avgLoss = 0;
@@ -168,14 +276,18 @@ const MarketData = (function() {
             if (change > 0) avgGain += change;
             else avgLoss -= change;
         }
-        
         avgGain /= period;
         avgLoss /= period;
-        
+
         for (let i = period + 1; i < prices.length; i++) {
             const change = prices[i] - prices[i - 1];
-            avgGain = (avgGain * (period - 1) + (change > 0 ? change : 0)) / period;
-            avgLoss = (avgLoss * (period - 1) + (change < 0 ? -change : 0)) / period;
+            let currentGain = 0;
+            let currentLoss = 0;
+            if (change > 0) currentGain = change;
+            else currentLoss = -change;
+
+            avgGain = (avgGain * (period - 1) + currentGain) / period;
+            avgLoss = (avgLoss * (period - 1) + currentLoss) / period;
         }
         
         if (avgLoss === 0) return 100;
@@ -183,23 +295,27 @@ const MarketData = (function() {
         return 100 - (100 / (1 + rs));
     }
     
-    // ========== AFFICHAGE ==========
+    // ========== AFFICHAGE DES RÉSULTATS ==========
     function displayResults(data, symbol) {
         const resultsSection = document.getElementById('resultsSection');
         resultsSection.classList.remove('hidden');
         resultsSection.scrollIntoView({ behavior: 'smooth' });
         
         displayStockInfo(data);
+        displayCompanyInfo(data);
+        displayFinancialMetrics(data);
         displayTechnicalIndicators();
+        
         createPriceChart(data);
         createVolumeChart(data);
     }
     
+    // ========== AFFICHAGE INFO BOURSIÈRE ==========
     function displayStockInfo(data) {
         const container = document.getElementById('stockInfo');
         const isPositive = data.change >= 0;
         
-        container.innerHTML = `
+        const html = `
             <div class='info-card'>
                 <div class='label'>Symbole</div>
                 <div class='value'>${data.symbol}</div>
@@ -213,11 +329,11 @@ const MarketData = (function() {
                 <div class='value'>${isPositive ? '+' : ''}${formatNumber(data.change, 2)} (${formatNumber(data.changePercent, 2)}%)</div>
             </div>
             <div class='info-card'>
-                <div class='label'>Plus Haut du Jour</div>
+                <div class='label'>Plus Haut</div>
                 <div class='value'>${formatNumber(data.dayHigh, 2)}</div>
             </div>
             <div class='info-card'>
-                <div class='label'>Plus Bas du Jour</div>
+                <div class='label'>Plus Bas</div>
                 <div class='value'>${formatNumber(data.dayLow, 2)}</div>
             </div>
             <div class='info-card'>
@@ -225,49 +341,168 @@ const MarketData = (function() {
                 <div class='value'>${formatNumber(data.volume)}</div>
             </div>
         `;
+        
+        container.innerHTML = html;
     }
     
+    // ========== AFFICHAGE INFO ENTREPRISE ==========
+    function displayCompanyInfo(data) {
+        let container = document.getElementById('companyInfo');
+        const resultsSection = document.getElementById('resultsSection');
+        const stockInfoDiv = document.getElementById('stockInfo');
+        
+        if (!container) {
+            container = document.createElement('div');
+            container.id = 'companyInfo';
+            container.className = 'section';
+            resultsSection.insertBefore(container, stockInfoDiv.nextSibling);
+        }
+
+        const hasCompanyData = (data.companyName && data.companyName !== data.symbol && data.companyName !== 'N/A') || 
+                                (data.sector && data.sector !== 'N/A');
+
+        if (!hasCompanyData) {
+            container.innerHTML = '';
+            container.classList.add('hidden');
+            return;
+        } else {
+            container.classList.remove('hidden');
+        }
+        
+        const html = `
+            <h2 class='section-title'>🏢 Informations sur l'Entreprise</h2>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
+                <div class='info-item'>
+                    <strong>Entreprise:</strong> ${data.companyName}
+                </div>
+                <div class='info-item'>
+                    <strong>Secteur:</strong> ${data.sector}
+                </div>
+                <div class='info-item'>
+                    <strong>Industrie:</strong> ${data.industry}
+                </div>
+                <div class='info-item'>
+                    <strong>Pays:</strong> ${data.country}
+                </div>
+            </div>
+        `;
+        
+        container.innerHTML = html;
+    }
+    
+    // ========== AFFICHAGE MÉTRIQUES FINANCIÈRES ==========
+    function displayFinancialMetrics(data) {
+        let container = document.getElementById('financialMetrics');
+        const resultsSection = document.getElementById('resultsSection');
+        const companyInfoDiv = document.getElementById('companyInfo');
+        const stockInfoDiv = document.getElementById('stockInfo'); // ✅ CORRECTION : Variable définie
+        
+        if (!container) {
+            container = document.createElement('div');
+            container.id = 'financialMetrics';
+            container.className = 'section';
+            if (companyInfoDiv && !companyInfoDiv.classList.contains('hidden')) {
+                resultsSection.insertBefore(container, companyInfoDiv.nextSibling);
+            } else {
+                resultsSection.insertBefore(container, stockInfoDiv.nextSibling);
+            }
+        }
+
+        const allMetricsAreNA = [
+            data.marketCap, data.peRatio, data.forwardPE, data.eps,
+            data.beta, data.dividendYield
+        ].every(val => val === 'N/A' || val === null || val === undefined || isNaN(val));
+
+        if (allMetricsAreNA) {
+            container.innerHTML = '<p class="info-message">Métriques financières non disponibles (limitation API).</p>';
+            container.classList.remove('hidden');
+            return;
+        } else {
+            container.classList.remove('hidden');
+        }
+        
+        const html = `
+            <h2 class='section-title'>💰 Métriques Financières</h2>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px;">
+                <div class='metric-card'>
+                    <div class='metric-label'>Capitalisation</div>
+                    <div class='metric-value'>${formatLargeNumber(data.marketCap)}</div>
+                </div>
+                <div class='metric-card'>
+                    <div class='metric-label'>P/E Ratio</div>
+                    <div class='metric-value'>${formatNumber(data.peRatio, 2)}</div>
+                </div>
+                <div class='metric-card'>
+                    <div class='metric-label'>Forward P/E</div>
+                    <div class='metric-value'>${formatNumber(data.forwardPE, 2)}</div>
+                </div>
+                <div class='metric-card'>
+                    <div class='metric-label'>EPS</div>
+                    <div class='metric-value'>${formatNumber(data.eps, 2)}</div>
+                </div>
+                <div class='metric-card'>
+                    <div class='metric-label'>Beta</div>
+                    <div class='metric-value'>${formatNumber(data.beta, 2)}</div>
+                </div>
+                <div class='metric-card'>
+                    <div class='metric-label'>Rendement Dividende</div>
+                    <div class='metric-value'>${formatPercent(data.dividendYield)}</div>
+                </div>
+            </div>
+        `;
+        
+        container.innerHTML = html;
+    }
+    
+    // ========== AFFICHAGE INDICATEURS TECHNIQUES ==========
     function displayTechnicalIndicators() {
         let container = document.getElementById('technicalIndicatorsSection');
+        const resultsSection = document.getElementById('resultsSection');
+        const financialMetricsDiv = document.getElementById('financialMetrics');
         
         if (!container) {
             container = document.createElement('div');
             container.id = 'technicalIndicatorsSection';
             container.className = 'section';
-            document.getElementById('resultsSection').appendChild(container);
+            if (financialMetricsDiv) {
+                resultsSection.insertBefore(container, financialMetricsDiv.nextSibling);
+            } else {
+                resultsSection.appendChild(container);
+            }
         }
-        
+
         if (!technicalIndicators || !currentStockData) {
-            container.innerHTML = '<p class="info-message">Indicateurs techniques non disponibles.</p>';
+            container.innerHTML = '<p class="info-message">Indicateurs techniques non calculés (données insuffisantes).</p>';
+            container.classList.remove('hidden');
             return;
         }
         
         const rsi = technicalIndicators.rsi;
         const rsiSignal = rsi !== null ? (rsi < 30 ? '🟢 Survendu' : rsi > 70 ? '🔴 Suracheté' : '🟡 Neutre') : 'N/A';
         
-        container.innerHTML = `
+        const html = `
             <h2 class='section-title'>📈 Indicateurs Techniques</h2>
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
-                ${technicalIndicators.rsi !== null ? `
-                <div class='metric-card'>
+                ${technicalIndicators.rsi !== null ? `<div class='metric-card'>
                     <div class='metric-label'>RSI (14)</div>
                     <div class='metric-value'>${formatNumber(rsi, 2)}</div>
                     <div class='metric-signal'>${rsiSignal}</div>
                 </div>` : ''}
-                ${technicalIndicators.sma20 !== null ? `
-                <div class='metric-card'>
+                ${technicalIndicators.sma20 !== null ? `<div class='metric-card'>
                     <div class='metric-label'>SMA 20</div>
                     <div class='metric-value'>${formatNumber(technicalIndicators.sma20, 2)}</div>
                 </div>` : ''}
-                ${technicalIndicators.sma50 !== null ? `
-                <div class='metric-card'>
+                ${technicalIndicators.sma50 !== null ? `<div class='metric-card'>
                     <div class='metric-label'>SMA 50</div>
                     <div class='metric-value'>${formatNumber(technicalIndicators.sma50, 2)}</div>
                 </div>` : ''}
             </div>
         `;
+        
+        container.innerHTML = html;
     }
     
+    // ========== GRAPHIQUE DES PRIX ==========
     function createPriceChart(data) {
         const prices = data.timestamps.map((timestamp, i) => [
             timestamp * 1000,
@@ -297,7 +532,8 @@ const MarketData = (function() {
             tooltip: {
                 shared: true,
                 valueDecimals: 2,
-                valueSuffix: ' ' + data.currency
+                valueSuffix: ' ' + data.currency,
+                xDateFormat: '%Y-%m-%d %H:%M'
             },
             series: [{
                 name: data.symbol,
@@ -309,12 +545,19 @@ const MarketData = (function() {
                         [0, 'rgba(38,73,178,0.5)'],
                         [1, 'rgba(38,73,178,0.05)']
                     ]
-                }
+                },
+                lineWidth: 2
             }],
+            plotOptions: {
+                area: {
+                    marker: { enabled: false }
+                }
+            },
             credits: { enabled: false }
         });
     }
     
+    // ========== GRAPHIQUE DES VOLUMES ==========
     function createVolumeChart(data) {
         const volumes = data.timestamps.map((timestamp, i) => [
             timestamp * 1000,
@@ -331,12 +574,18 @@ const MarketData = (function() {
                 style: { color: '#9D5CE6', fontSize: '1.2em', fontWeight: 'bold' }
             },
             xAxis: {
-                type: 'datetime'
+                type: 'datetime',
+                crosshair: true
             },
             yAxis: {
                 title: {
-                    text: 'Volume'
+                    text: 'Volume',
+                    style: { color: '#9D5CE6', fontWeight: 'bold' }
                 }
+            },
+            tooltip: {
+                valueDecimals: 0,
+                xDateFormat: '%Y-%m-%d'
             },
             series: [{
                 name: 'Volume',
@@ -348,19 +597,40 @@ const MarketData = (function() {
         });
     }
     
-    // ========== UTILITAIRES ==========
+    // ========== UTILITAIRES DE FORMATAGE ==========
     function formatNumber(num, decimals = 0) {
-        if (num === 'N/A' || num == null || isNaN(num)) return 'N/A';
+        if (num === 'N/A' || num === null || num === undefined || isNaN(num)) return 'N/A';
         return Number(num).toLocaleString('fr-FR', {
             minimumFractionDigits: decimals,
             maximumFractionDigits: decimals
         });
     }
     
+    function formatLargeNumber(num) {
+        if (num === 'N/A' || num === null || num === undefined || isNaN(num)) return 'N/A';
+        
+        const absNum = Math.abs(num);
+        let formatted = '';
+        
+        if (absNum >= 1e12) formatted = (num / 1e12).toFixed(2) + 'T';
+        else if (absNum >= 1e9) formatted = (num / 1e9).toFixed(2) + 'B';
+        else if (absNum >= 1e6) formatted = (num / 1e6).toFixed(2) + 'M';
+        else if (absNum >= 1e3) formatted = (num / 1e3).toFixed(2) + 'K';
+        else formatted = num.toFixed(2);
+        
+        return formatted.replace('.', ',');
+    }
+    
+    function formatPercent(num) {
+        if (num === 'N/A' || num === null || num === undefined || isNaN(num)) return 'N/A';
+        return (num * 100).toFixed(2).replace('.', ',') + '%';
+    }
+
     function showNotification(message, type = 'info') {
         console.log(`✅ ${message}`);
     }
     
+    // ========== GESTION DE L'AFFICHAGE ==========
     function loadQuickStock(symbol) {
         document.getElementById('stockSymbol').value = symbol;
         fetchStockData();
@@ -376,6 +646,16 @@ const MarketData = (function() {
     function hideResults() {
         const results = document.getElementById('resultsSection');
         if (results) results.classList.add('hidden');
+        
+        // Détruire les graphiques existants
+        Highcharts.charts.forEach(chart => {
+            if (chart && chart.renderTo) {
+                const chartId = chart.renderTo.id;
+                if (['chartPrice', 'chartVolume'].includes(chartId)) {
+                    chart.destroy();
+                }
+            }
+        });
     }
     
     function showError(message) {
@@ -384,6 +664,7 @@ const MarketData = (function() {
         if (errorSection && errorMessage) {
             errorMessage.textContent = message;
             errorSection.classList.remove('hidden');
+            errorSection.scrollIntoView({ behavior: 'smooth' });
         }
     }
     
@@ -392,6 +673,7 @@ const MarketData = (function() {
         if (errorSection) errorSection.classList.add('hidden');
     }
     
+    // ========== EXPORTS ==========
     return {
         fetchStockData,
         loadQuickStock
