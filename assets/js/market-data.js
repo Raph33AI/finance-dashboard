@@ -75,18 +75,22 @@ const MarketData = {
         }
     },
     
-    // Fetch from Yahoo Finance (via free API proxy)
+    // Fetch from Yahoo Finance (via CORS proxy)
     async fetchYahooFinanceData(symbol) {
         const period = this.getPeriodParams(this.currentPeriod);
         
-        // Using Yahoo Finance API via rapidapi or yfinance proxy
-        // Alternative gratuite: https://query1.finance.yahoo.com/v8/finance/chart/
-        
-        const baseUrl = 'https://query1.finance.yahoo.com/v8/finance/chart/';
-        const url = `${baseUrl}${symbol}?interval=${period.interval}&range=${period.range}`;
+        // Utiliser un proxy CORS gratuit
+        const proxyUrl = 'https://api.allorigins.win/raw?url=';
+        const targetUrl = `https://query1.finance.yahoo.com/v8/finance/chart/${symbol}?interval=${period.interval}&range=${period.range}`;
+        const url = proxyUrl + encodeURIComponent(targetUrl);
         
         try {
             const response = await fetch(url);
+            
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            
             const data = await response.json();
             
             if (data.chart.error) {
@@ -105,11 +109,14 @@ const MarketData = {
             this.stockData = this.generateDemoData(symbol);
         }
     },
-    
-    // Fetch Quote Data
+
+    // Fetch Quote Data (avec proxy)
     async fetchQuoteData(symbol) {
         try {
-            const url = `https://query1.finance.yahoo.com/v7/finance/quote?symbols=${symbol}`;
+            const proxyUrl = 'https://api.allorigins.win/raw?url=';
+            const targetUrl = `https://query1.finance.yahoo.com/v7/finance/quote?symbols=${symbol}`;
+            const url = proxyUrl + encodeURIComponent(targetUrl);
+            
             const response = await fetch(url);
             const data = await response.json();
             
@@ -131,6 +138,21 @@ const MarketData = {
             }
         } catch (error) {
             console.error('Quote fetch error:', error);
+            // Use fallback data from price data
+            const lastPrice = this.stockData.prices[this.stockData.prices.length - 1];
+            this.stockData.quote = {
+                name: symbol,
+                symbol: symbol,
+                price: lastPrice.close,
+                change: 0,
+                changePercent: 0,
+                open: lastPrice.open,
+                high: lastPrice.high,
+                low: lastPrice.low,
+                volume: lastPrice.volume,
+                marketCap: null,
+                pe: null
+            };
         }
     },
     
