@@ -9,7 +9,7 @@ const MarketData = (function() {
     // ========== CONFIGURATION API ==========
     
     // Proxy CORS pour contourner les restrictions Yahoo Finance
-    const CORS_PROXY = 'https://api.codetabs.com/v1/proxy?quest=';
+    const CORS_PROXY = 'https://api.allorigins.win/raw?url=';
     const YAHOO_FINANCE_BASE = 'https://query1.finance.yahoo.com/v8/finance/chart/';
     
     // ========== VARIABLES PRIVÉES ==========
