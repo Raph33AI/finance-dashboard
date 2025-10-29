@@ -234,6 +234,10 @@ const AdvancedAnalysis = {
         document.getElementById('stockSymbol').textContent = quote.symbol || this.currentSymbol;
         document.getElementById('stockName').textContent = quote.name || this.currentSymbol;
         
+        console.log('=== STOCK DATA ===');
+        console.log('stockData:', this.stockData);
+        console.log('quote:', this.stockData.quote);
+        console.log('prices:', this.stockData.prices);
         // ✅ CORRECTION : Vérifier que price existe
         const price = quote.price !== undefined ? quote.price : 0;
         const change = quote.change !== undefined ? quote.change : 0;
