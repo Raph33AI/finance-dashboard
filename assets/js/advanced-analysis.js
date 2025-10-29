@@ -1625,94 +1625,119 @@ const AdvancedAnalysis = {
     // CONSOLIDATED TRADING SIGNALS
     // ============================================
     
-generateConsolidatedSignals() {
-    const prices = this.stockData.prices;
-    const signals = [];
-    
-    // Calculate all indicators for signals
-    const stochastic = this.calculateStochastic(prices);
-    const williams = this.calculateWilliams(prices);
-    const adx = this.calculateADX(prices); // ← GARDÉ ICI
-    const sar = this.calculateSAR(prices);
-    const obv = this.calculateOBV(prices);
-    const vwap = this.calculateVWAP(prices);
-    
-    // Stochastic Signal
-    const lastK = stochastic.k[stochastic.k.length - 1][1];
-    let stochasticSignal = 0;
-    if (lastK < 20) stochasticSignal = 1;
-    else if (lastK > 80) stochasticSignal = -1;
-    signals.push({ name: 'Stochastic', value: lastK.toFixed(2), signal: stochasticSignal });
-    
-    // Williams %R Signal
-    const lastWilliams = williams[williams.length - 1][1];
-    let williamsSignal = 0;
-    if (lastWilliams < -80) williamsSignal = 1;
-    else if (lastWilliams > -20) williamsSignal = -1;
-    signals.push({ name: 'Williams %R', value: lastWilliams.toFixed(2), signal: williamsSignal });
-    
-    // ADX Signal (SÉCURISÉ) - ❌ SUPPRIMÉ "const adx = this.calculateADX(prices);"
-    let adxSignal = 0;
-    let adxValue = 'N/A';
-
-    if (adx.adx.length > 0 && adx.plusDI.length > 0 && adx.minusDI.length > 0) {
-        const lastADX = adx.adx[adx.adx.length - 1][1];
-        const lastPlusDI = adx.plusDI[adx.plusDI.length - 1][1];
-        const lastMinusDI = adx.minusDI[adx.minusDI.length - 1][1];
+    generateConsolidatedSignals() {
+        const prices = this.stockData.prices;
+        const signals = [];
         
-        adxValue = lastADX.toFixed(2);
+        // Calculate all indicators for signals
+        const stochastic = this.calculateStochastic(prices);
+        const williams = this.calculateWilliams(prices);
+        const adx = this.calculateADX(prices);
+        const sar = this.calculateSAR(prices);
+        const obv = this.calculateOBV(prices);
+        const vwap = this.calculateVWAP(prices);
+        const ichimoku = this.calculateIchimoku(prices);
         
-        if (lastADX > 25) {
-            if (lastPlusDI > lastMinusDI) adxSignal = 1;
-            else adxSignal = -1;
+        // Stochastic Signal
+        if (stochastic.k.length > 0) {
+            const lastK = stochastic.k[stochastic.k.length - 1][1];
+            let stochasticSignal = 0;
+            if (lastK < 20) stochasticSignal = 1;
+            else if (lastK > 80) stochasticSignal = -1;
+            signals.push({ name: 'Stochastic', value: lastK.toFixed(2), signal: stochasticSignal });
         }
-    }
-
-    signals.push({ name: 'ADX', value: adxValue, signal: adxSignal });
-    
-    // Parabolic SAR Signal
-    const lastPrice = prices[prices.length - 1].close;
-    const lastSAR = sar[sar.length - 1][1];
-    const sarSignal = lastPrice > lastSAR ? 1 : -1;
-    signals.push({ name: 'Parabolic SAR', value: this.formatCurrency(lastSAR), signal: sarSignal });
-    
-    // OBV Signal
-    const recentOBV = obv.slice(-20);
-    const obvTrend = recentOBV[recentOBV.length - 1][1] - recentOBV[0][1];
-    const obvSignal = obvTrend > 0 ? 1 : obvTrend < 0 ? -1 : 0;
-    signals.push({ name: 'OBV', value: obvTrend > 0 ? 'Rising' : obvTrend < 0 ? 'Falling' : 'Flat', signal: obvSignal });
-    
-    // VWAP Signal
-    const lastVWAP = vwap.vwap[vwap.vwap.length - 1][1];
-    const vwapSignal = lastPrice > lastVWAP ? 1 : lastPrice < lastVWAP ? -1 : 0;
-    signals.push({ name: 'VWAP', value: this.formatCurrency(lastVWAP), signal: vwapSignal });
-    
-    // Ichimoku Signal
-    const ichimoku = this.calculateIchimoku(prices);
-    const lastCloudTop = Math.max(
-        ichimoku.spanA[ichimoku.spanA.length - 1]?.[1] || 0,
-        ichimoku.spanB[ichimoku.spanB.length - 1]?.[1] || 0
-    );
-    const lastCloudBottom = Math.min(
-        ichimoku.spanA[ichimoku.spanA.length - 1]?.[1] || Infinity,
-        ichimoku.spanB[ichimoku.spanB.length - 1]?.[1] || Infinity
-    );
-    let ichimokuSignal = 0;
-    if (lastPrice > lastCloudTop) ichimokuSignal = 1;
-    else if (lastPrice < lastCloudBottom) ichimokuSignal = -1;
-    signals.push({ 
-        name: 'Ichimoku Cloud', 
-        value: lastPrice > lastCloudTop ? 'Above Cloud' : lastPrice < lastCloudBottom ? 'Below Cloud' : 'In Cloud', 
-        signal: ichimokuSignal 
-    });
-    
-    // Calculate overall signal
-    const totalSignal = signals.reduce((sum, s) => sum + s.signal, 0);
-    const maxSignal = signals.length;
-    const signalPercentage = ((totalSignal + maxSignal) / (2 * maxSignal)) * 100;
-    
-    this.displayConsolidatedSignals(signals, signalPercentage);
-},
+        
+        // Williams %R Signal
+        if (williams.length > 0) {
+            const lastWilliams = williams[williams.length - 1][1];
+            let williamsSignal = 0;
+            if (lastWilliams < -80) williamsSignal = 1;
+            else if (lastWilliams > -20) williamsSignal = -1;
+            signals.push({ name: 'Williams %R', value: lastWilliams.toFixed(2), signal: williamsSignal });
+        }
+        
+        // ADX Signal
+        let adxSignal = 0;
+        let adxValue = 'N/A';
+        if (adx.adx.length > 0 && adx.plusDI.length > 0 && adx.minusDI.length > 0) {
+            const lastADX = adx.adx[adx.adx.length - 1][1];
+            const lastPlusDI = adx.plusDI[adx.plusDI.length - 1][1];
+            const lastMinusDI = adx.minusDI[adx.minusDI.length - 1][1];
+            
+            adxValue = lastADX.toFixed(2);
+            
+            if (lastADX > 25) {
+                if (lastPlusDI > lastMinusDI) adxSignal = 1;
+                else adxSignal = -1;
+            }
+        }
+        signals.push({ name: 'ADX', value: adxValue, signal: adxSignal });
+        
+        // Parabolic SAR Signal
+        if (sar.length > 0) {
+            const lastPrice = prices[prices.length - 1].close;
+            const lastSAR = sar[sar.length - 1][1];
+            const sarSignal = lastPrice > lastSAR ? 1 : -1;
+            signals.push({ name: 'Parabolic SAR', value: this.formatCurrency(lastSAR), signal: sarSignal });
+        }
+        
+        // OBV Signal
+        if (obv.length >= 20) {
+            const recentOBV = obv.slice(-20);
+            const obvTrend = recentOBV[recentOBV.length - 1][1] - recentOBV[0][1];
+            const obvSignal = obvTrend > 0 ? 1 : obvTrend < 0 ? -1 : 0;
+            signals.push({ name: 'OBV', value: obvTrend > 0 ? 'Rising' : obvTrend < 0 ? 'Falling' : 'Flat', signal: obvSignal });
+        }
+        
+        // VWAP Signal
+        if (vwap.vwap.length > 0) {
+            const lastPrice = prices[prices.length - 1].close;
+            const lastVWAP = vwap.vwap[vwap.vwap.length - 1][1];
+            const vwapSignal = lastPrice > lastVWAP ? 1 : lastPrice < lastVWAP ? -1 : 0;
+            signals.push({ name: 'VWAP', value: this.formatCurrency(lastVWAP), signal: vwapSignal });
+        }
+        
+        // Ichimoku Signal
+        if (ichimoku.spanA.length > 0 && ichimoku.spanB.length > 0) {
+            const lastPrice = prices[prices.length - 1].close;
+            const lastCloudTop = Math.max(
+                ichimoku.spanA[ichimoku.spanA.length - 1]?.[1] || 0,
+                ichimoku.spanB[ichimoku.spanB.length - 1]?.[1] || 0
+            );
+            const lastCloudBottom = Math.min(
+                ichimoku.spanA[ichimoku.spanA.length - 1]?.[1] || Infinity,
+                ichimoku.spanB[ichimoku.spanB.length - 1]?.[1] || Infinity
+            );
+            
+            let ichimokuSignal = 0;
+            let ichimokuValue = 'In Cloud';
+            
+            if (lastPrice > lastCloudTop) {
+                ichimokuSignal = 1;
+                ichimokuValue = 'Above Cloud';
+            } else if (lastPrice < lastCloudBottom) {
+                ichimokuSignal = -1;
+                ichimokuValue = 'Below Cloud';
+            }
+            
+            signals.push({ 
+                name: 'Ichimoku Cloud', 
+                value: ichimokuValue, 
+                signal: ichimokuSignal 
+            });
+        }
+        
+        // Calculate overall signal
+        if (signals.length > 0) {
+            const totalSignal = signals.reduce((sum, s) => sum + s.signal, 0);
+            const maxSignal = signals.length;
+            const signalPercentage = ((totalSignal + maxSignal) / (2 * maxSignal)) * 100;
+            
+            this.displayConsolidatedSignals(signals, signalPercentage);
+        } else {
+            console.warn('No signals calculated');
+        }
+    },
     
     displayConsolidatedSignals(signals, signalPercentage) {
         // Update gauge
