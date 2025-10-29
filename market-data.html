@@ -172,6 +172,60 @@
                         </div>
                     </div>
                     
+                    <!-- ============================================
+                         WATCHLIST SECTION
+                         ============================================ -->
+                    <div class='watchlist-section'>
+                        <div class='watchlist-header'>
+                            <h2 class='panel-title'>
+                                <i class='fas fa-star'></i> My Watchlist
+                                <span class='help-icon' onclick='openModal("modalWatchlist")'>?</span>
+                            </h2>
+                            <div class='watchlist-actions'>
+                                <button class='btn-add-current' onclick='MarketData.addCurrentToWatchlist()' id='btnAddCurrent' disabled>
+                                    <i class='fas fa-plus'></i> Add Current Stock
+                                </button>
+                                <button class='btn-refresh-watchlist' onclick='MarketData.refreshWatchlist()'>
+                                    <i class='fas fa-sync-alt'></i> Refresh All
+                                </button>
+                                <button class='btn-clear-watchlist' onclick='MarketData.clearWatchlist()'>
+                                    <i class='fas fa-trash'></i> Clear All
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div id='watchlistContainer' class='watchlist-container'>
+                            <div class='watchlist-empty'>
+                                <i class='fas fa-star-half-alt'></i>
+                                <p>Your watchlist is empty</p>
+                                <p class='hint'>Search for a stock and click "Add to Watchlist" to start tracking</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- ============================================
+                         PRICE ALERTS SECTION
+                         ============================================ -->
+                    <div class='alerts-section'>
+                        <div class='alerts-header'>
+                            <h2 class='panel-title'>
+                                <i class='fas fa-bell'></i> Price Alerts
+                                <span class='help-icon' onclick='openModal("modalAlerts")'>?</span>
+                            </h2>
+                            <button class='btn-create-alert' onclick='MarketData.openAlertModal()'>
+                                <i class='fas fa-plus'></i> Create Alert
+                            </button>
+                        </div>
+                        
+                        <div id='alertsContainer' class='alerts-container'>
+                            <div class='alerts-empty'>
+                                <i class='fas fa-bell-slash'></i>
+                                <p>No active alerts</p>
+                                <p class='hint'>Create price alerts to get notified when a stock reaches your target</p>
+                            </div>
+                        </div>
+                    </div>
+                    
                     <!-- Loading Indicator -->
                     <div id='loadingIndicator' class='loading-indicator hidden'>
                         <i class='fas fa-spinner fa-spin'></i> Loading market data...
@@ -276,7 +330,7 @@
                 <!-- Footer -->
                 <footer>
                     <p>Market Data | Real-time financial data and technical analysis</p>
-                    <p class='data-source'>Data provided by Yahoo Finance & Alpha Vantage</p>
+                    <p class='data-source'>Data provided by Yahoo Finance</p>
                 </footer>
             </div>
         </div>
@@ -313,6 +367,115 @@
                 
                 <div class='tip-box'>
                     💡 <strong>Pro Tip:</strong> Use the time period buttons to analyze different timeframes and spot trends!
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div id='modalWatchlist' class='modal'>
+        <div class='modal-content'>
+            <div class='modal-header'>
+                <h2>⭐ Watchlist Feature</h2>
+                <span class='close-modal' onclick='closeModal("modalWatchlist")'>&times;</span>
+            </div>
+            <div class='modal-body'>
+                <h3>📊 What is a Watchlist?</h3>
+                <p>A <span class='key-term'>watchlist</span> lets you track multiple stocks simultaneously without having to search for them repeatedly.</p>
+                
+                <h3>✨ Features</h3>
+                <ul>
+                    <li><strong>Real-time Updates:</strong> Prices refresh automatically every 60 seconds</li>
+                    <li><strong>Persistent Storage:</strong> Your watchlist is saved in your browser</li>
+                    <li><strong>Quick Access:</strong> Click any stock to view detailed charts</li>
+                    <li><strong>Performance Tracking:</strong> See daily changes at a glance</li>
+                </ul>
+                
+                <h3>🎯 How to Use</h3>
+                <ol>
+                    <li>Search for a stock using the search bar</li>
+                    <li>Click "Add to Watchlist" button</li>
+                    <li>Your stock appears in the watchlist with live data</li>
+                    <li>Click "Refresh All" to update all prices manually</li>
+                </ol>
+                
+                <div class='tip-box'>
+                    💡 <strong>Pro Tip:</strong> Combine watchlist with price alerts to never miss important price movements!
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div id='modalAlerts' class='modal'>
+        <div class='modal-content'>
+            <div class='modal-header'>
+                <h2>🔔 Price Alerts</h2>
+                <span class='close-modal' onclick='closeModal("modalAlerts")'>&times;</span>
+            </div>
+            <div class='modal-body'>
+                <h3>📢 What are Price Alerts?</h3>
+                <p><span class='key-term'>Price alerts</span> notify you when a stock reaches your specified target price.</p>
+                
+                <h3>📊 Alert Types</h3>
+                <ul>
+                    <li><strong>Above:</strong> Triggers when price goes above your target</li>
+                    <li><strong>Below:</strong> Triggers when price goes below your target</li>
+                </ul>
+                
+                <h3>🎯 How to Create an Alert</h3>
+                <ol>
+                    <li>Click "Create Alert" button</li>
+                    <li>Enter the stock symbol</li>
+                    <li>Set your target price</li>
+                    <li>Choose alert type (above/below)</li>
+                    <li>Click "Create" - you'll be notified when triggered!</li>
+                </ol>
+                
+                <div class='tip-box'>
+                    💡 <strong>Note:</strong> Alerts are checked during watchlist refresh. Enable browser notifications for best results!
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div id='modalCreateAlert' class='modal'>
+        <div class='modal-content'>
+            <div class='modal-header'>
+                <h2>🔔 Create Price Alert</h2>
+                <span class='close-modal' onclick='MarketData.closeAlertModal()'>&times;</span>
+            </div>
+            <div class='modal-body'>
+                <div class='alert-form'>
+                    <div class='form-group'>
+                        <label for='alertSymbol'>Stock Symbol</label>
+                        <input type='text' id='alertSymbol' placeholder='e.g., AAPL' style='text-transform: uppercase;'>
+                    </div>
+                    
+                    <div class='form-group'>
+                        <label for='alertPrice'>Target Price</label>
+                        <input type='number' id='alertPrice' placeholder='e.g., 150.00' step='0.01'>
+                    </div>
+                    
+                    <div class='form-group'>
+                        <label for='alertType'>Alert Condition</label>
+                        <select id='alertType'>
+                            <option value='above'>Price goes ABOVE target</option>
+                            <option value='below'>Price goes BELOW target</option>
+                        </select>
+                    </div>
+                    
+                    <div class='form-group'>
+                        <label for='alertNote'>Note (Optional)</label>
+                        <input type='text' id='alertNote' placeholder='e.g., Buy signal, Take profit...'>
+                    </div>
+                    
+                    <div class='form-actions'>
+                        <button class='btn-create' onclick='MarketData.createAlert()'>
+                            <i class='fas fa-check'></i> Create Alert
+                        </button>
+                        <button class='btn-cancel' onclick='MarketData.closeAlertModal()'>
+                            Cancel
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
