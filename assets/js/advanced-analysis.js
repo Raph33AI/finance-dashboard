@@ -126,6 +126,7 @@ const AdvancedAnalysis = {
         }
     },
     
+    // Fetch Quote Data
     async fetchQuoteData(symbol) {
         try {
             const targetUrl = `https://query1.finance.yahoo.com/v7/finance/quote?symbols=${symbol}`;
@@ -142,21 +143,36 @@ const AdvancedAnalysis = {
                     symbol: quote.symbol,
                     price: quote.regularMarketPrice,
                     change: quote.regularMarketChange,
-                    changePercent: quote.regularMarketChangePercent
+                    changePercent: quote.regularMarketChangePercent,
+                    open: quote.regularMarketOpen,           // ← AJOUTÉ
+                    high: quote.regularMarketDayHigh,        // ← AJOUTÉ
+                    low: quote.regularMarketDayLow,          // ← AJOUTÉ
+                    volume: quote.regularMarketVolume,       // ← AJOUTÉ
+                    marketCap: quote.marketCap,              // ← AJOUTÉ
+                    pe: quote.trailingPE                     // ← AJOUTÉ
                 };
+                console.log('✅ Quote data fetched:', this.stockData.quote);
             }
         } catch (error) {
             console.warn('Quote fetch failed, using fallback data');
             const lastPrice = this.stockData.prices[this.stockData.prices.length - 1];
             const prevPrice = this.stockData.prices[this.stockData.prices.length - 2] || lastPrice;
             
+            // ✅ CORRECTION : S'assurer que tous les champs sont présents
             this.stockData.quote = {
                 name: symbol,
                 symbol: symbol,
                 price: lastPrice.close,
                 change: lastPrice.close - prevPrice.close,
-                changePercent: ((lastPrice.close - prevPrice.close) / prevPrice.close) * 100
+                changePercent: ((lastPrice.close - prevPrice.close) / prevPrice.close) * 100,
+                open: lastPrice.open,           // ← AJOUTÉ
+                high: lastPrice.high,           // ← AJOUTÉ
+                low: lastPrice.low,             // ← AJOUTÉ
+                volume: lastPrice.volume,       // ← AJOUTÉ
+                marketCap: null,
+                pe: null
             };
+            console.log('⚠️ Using fallback quote data:', this.stockData.quote);
         }
     },
     
@@ -212,13 +228,20 @@ const AdvancedAnalysis = {
     displayStockHeader() {
         const quote = this.stockData.quote;
         
+        // ✅ DEBUG : Afficher les données dans la console
+        console.log('📊 Display Stock Header:', quote);
+        
         document.getElementById('stockSymbol').textContent = quote.symbol || this.currentSymbol;
         document.getElementById('stockName').textContent = quote.name || this.currentSymbol;
-        document.getElementById('currentPrice').textContent = this.formatCurrency(quote.price);
+        
+        // ✅ CORRECTION : Vérifier que price existe
+        const price = quote.price !== undefined ? quote.price : 0;
+        const change = quote.change !== undefined ? quote.change : 0;
+        const changePercent = quote.changePercent !== undefined ? quote.changePercent : 0;
+        
+        document.getElementById('currentPrice').textContent = this.formatCurrency(price);
         
         const changeEl = document.getElementById('priceChange');
-        const change = quote.change || 0;
-        const changePercent = quote.changePercent || 0;
         const changeText = `${change >= 0 ? '+' : ''}${this.formatCurrency(change)} (${change >= 0 ? '+' : ''}${changePercent.toFixed(2)}%)`;
         changeEl.textContent = changeText;
         changeEl.className = change >= 0 ? 'change positive' : 'change negative';
