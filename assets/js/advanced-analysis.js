@@ -127,24 +127,16 @@ const AdvancedAnalysis = {
     },
     
     async fetchQuoteData(symbol) {
-        console.log('🔍 Fetching quote data for', symbol);
-        
         try {
             const targetUrl = `https://query1.finance.yahoo.com/v7/finance/quote?symbols=${symbol}`;
             const proxyUrl = this.CORS_PROXIES[0];
             const url = proxyUrl + encodeURIComponent(targetUrl);
             
-            console.log('📡 Request URL:', url);
             const response = await fetch(url);
-            console.log('📥 Response status:', response.status);
-            
             const data = await response.json();
-            console.log('📊 Raw quote data:', data);
             
             if (data.quoteResponse && data.quoteResponse.result.length > 0) {
                 const quote = data.quoteResponse.result[0];
-                console.log('✅ Yahoo quote found:', quote);
-                
                 this.stockData.quote = {
                     name: quote.longName || quote.shortName || symbol,
                     symbol: quote.symbol,
@@ -158,39 +150,28 @@ const AdvancedAnalysis = {
                     marketCap: quote.marketCap,
                     pe: quote.trailingPE
                 };
-                
-                console.log('✅ Quote data set:', this.stockData.quote);
             } else {
+                // ✅ CORRECTION : Lever une exception pour déclencher le fallback
                 throw new Error('No quote data in response');
             }
         } catch (error) {
-            console.error('❌ Quote fetch failed:', error);
-            console.log('🔄 Using fallback data from prices...');
+            console.warn('Quote fetch failed, using fallback data');
             
-            // ✅ CORRECTION : Vérifier que prices existe et a des données
-            if (!this.stockData || !this.stockData.prices || this.stockData.prices.length === 0) {
-                console.error('❌ No price data available for fallback!');
+            // ✅ CORRECTION : Vérifier que prices existe
+            if (!this.stockData.prices || this.stockData.prices.length === 0) {
+                console.error('No price data available for fallback!');
                 this.stockData.quote = {
                     name: symbol,
                     symbol: symbol,
                     price: 0,
                     change: 0,
-                    changePercent: 0,
-                    open: 0,
-                    high: 0,
-                    low: 0,
-                    volume: 0,
-                    marketCap: null,
-                    pe: null
+                    changePercent: 0
                 };
                 return;
             }
             
             const lastPrice = this.stockData.prices[this.stockData.prices.length - 1];
             const prevPrice = this.stockData.prices[this.stockData.prices.length - 2] || lastPrice;
-            
-            console.log('📊 Last price:', lastPrice);
-            console.log('📊 Prev price:', prevPrice);
             
             this.stockData.quote = {
                 name: symbol,
@@ -205,8 +186,6 @@ const AdvancedAnalysis = {
                 marketCap: null,
                 pe: null
             };
-            
-            console.log('✅ Fallback quote data set:', this.stockData.quote);
         }
     },
     
