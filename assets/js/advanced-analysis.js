@@ -1651,16 +1651,25 @@ const AdvancedAnalysis = {
         else if (lastWilliams > -20) williamsSignal = -1;
         signals.push({ name: 'Williams %R', value: lastWilliams.toFixed(2), signal: williamsSignal });
         
-        // ADX Signal
-        const lastADX = adx.adx.length > 0 ? adx.adx[adx.adx.length - 1][1] : 0;
-        const lastPlusDI = adx.plusDI.length > 0 ? adx.plusDI[adx.plusDI.length - 1][1] : 0;
-        const lastMinusDI = adx.minusDI.length > 0 ? adx.minusDI[adx.minusDI.length - 1][1] : 0;
+        // ADX Signal (SÉCURISÉ)
+        const adx = this.calculateADX(prices);
         let adxSignal = 0;
-        if (lastADX > 25 && adx.adx.length > 0) {
-            if (lastPlusDI > lastMinusDI) adxSignal = 1;
-            else adxSignal = -1;
+        let adxValue = 'N/A';
+
+        if (adx.adx.length > 0 && adx.plusDI.length > 0 && adx.minusDI.length > 0) {
+            const lastADX = adx.adx[adx.adx.length - 1][1];
+            const lastPlusDI = adx.plusDI[adx.plusDI.length - 1][1];
+            const lastMinusDI = adx.minusDI[adx.minusDI.length - 1][1];
+            
+            adxValue = lastADX.toFixed(2);
+            
+            if (lastADX > 25) {
+                if (lastPlusDI > lastMinusDI) adxSignal = 1;
+                else adxSignal = -1;
+            }
         }
-        signals.push({ name: 'ADX', value: lastADX > 0 ? lastADX.toFixed(2) : 'N/A', signal: adxSignal });
+
+        signals.push({ name: 'ADX', value: adxValue, signal: adxSignal });
         
         // Parabolic SAR Signal
         const lastPrice = prices[prices.length - 1].close;
