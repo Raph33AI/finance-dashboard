@@ -824,6 +824,14 @@ const AdvancedAnalysis = {
     },
     
     displayADXSignal(adx) {
+        // CORRECTION : Vérifier que les données existent
+        if (!adx.adx.length || !adx.plusDI.length || !adx.minusDI.length) {
+            const signalBox = document.getElementById('adxSignal');
+            signalBox.className = 'signal-box neutral';
+            signalBox.textContent = 'Not enough data for ADX calculation';
+            return;
+        }
+        
         const lastADX = adx.adx[adx.adx.length - 1][1];
         const lastPlusDI = adx.plusDI[adx.plusDI.length - 1][1];
         const lastMinusDI = adx.minusDI[adx.minusDI.length - 1][1];
@@ -1090,6 +1098,7 @@ const AdvancedAnalysis = {
     calculateATR(prices, period = 14) {
         const tr = [];
         
+        // Calculate True Range
         for (let i = 1; i < prices.length; i++) {
             const high = prices[i].high;
             const low = prices[i].low;
@@ -1104,22 +1113,43 @@ const AdvancedAnalysis = {
             tr.push(trValue);
         }
         
+        // Calculate ATR (smoothed TR)
         const atr = [];
+        
+        // First ATR is simple average
         let sum = 0;
         for (let i = 0; i < period && i < tr.length; i++) {
             sum += tr[i];
         }
-        atr.push([prices[period].timestamp, sum / period]);
         
+        // CORRECTION : Vérifier que l'index existe
+        if (period < prices.length) {
+            atr.push([prices[period].timestamp, sum / period]);
+        }
+        
+        // Smoothed ATR
         for (let i = period; i < tr.length; i++) {
             const smoothed = (atr[atr.length - 1][1] * (period - 1) + tr[i]) / period;
-            atr.push([prices[i + 1].timestamp, smoothed]);
+            
+            // CORRECTION : Vérifier que l'index existe
+            const priceIndex = i + 1;
+            if (priceIndex < prices.length) {
+                atr.push([prices[priceIndex].timestamp, smoothed]);
+            }
         }
         
         return atr;
     },
-    
+
     displayATRSignal(atr) {
+        // CORRECTION : Vérifier que les données existent
+        if (!atr.length || atr.length < 20) {
+            const signalBox = document.getElementById('atrSignal');
+            signalBox.className = 'signal-box neutral';
+            signalBox.textContent = 'Not enough data for ATR calculation';
+            return;
+        }
+        
         const lastATR = atr[atr.length - 1][1];
         const avgATR = atr.slice(-20).reduce((sum, item) => sum + item[1], 0) / 20;
         
@@ -1566,15 +1596,15 @@ const AdvancedAnalysis = {
         signals.push({ name: 'Williams %R', value: lastWilliams.toFixed(2), signal: williamsSignal });
         
         // ADX Signal
-        const lastADX = adx.adx[adx.adx.length - 1][1];
-        const lastPlusDI = adx.plusDI[adx.plusDI.length - 1][1];
-        const lastMinusDI = adx.minusDI[adx.minusDI.length - 1][1];
+        const lastADX = adx.adx.length > 0 ? adx.adx[adx.adx.length - 1][1] : 0;
+        const lastPlusDI = adx.plusDI.length > 0 ? adx.plusDI[adx.plusDI.length - 1][1] : 0;
+        const lastMinusDI = adx.minusDI.length > 0 ? adx.minusDI[adx.minusDI.length - 1][1] : 0;
         let adxSignal = 0;
-        if (lastADX > 25) {
+        if (lastADX > 25 && adx.adx.length > 0) {
             if (lastPlusDI > lastMinusDI) adxSignal = 1;
             else adxSignal = -1;
         }
-        signals.push({ name: 'ADX', value: lastADX.toFixed(2), signal: adxSignal });
+        signals.push({ name: 'ADX', value: lastADX > 0 ? lastADX.toFixed(2) : 'N/A', signal: adxSignal });
         
         // Parabolic SAR Signal
         const lastPrice = prices[prices.length - 1].close;
