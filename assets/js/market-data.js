@@ -1,6 +1,6 @@
 /* ==============================================
    MARKET-DATA.JS - Récupération données de marché
-   VERSION ENRICHIE AVEC DONNÉES COMPLÈTES
+   VERSION ENRICHIE AVEC DIAGNOSTIC ET ROBUSTESSE AMÉLIORÉE
    ============================================== */
 
 const MarketData = (function() {
@@ -47,7 +47,12 @@ const MarketData = (function() {
             technicalIndicators = calculateTechnicalIndicators(priceData);
             
             displayResults(currentStockData, symbol);
-            window.FinanceDashboard.showNotification('Stock data loaded successfully!', 'success');
+            // ✅ S'assurer que FinanceDashboard est bien initialisé, sinon le commenter
+            // if (window.FinanceDashboard && typeof window.FinanceDashboard.showNotification === 'function') {
+            //     window.FinanceDashboard.showNotification('Stock data loaded successfully!', 'success');
+            // } else {
+            //     console.warn('FinanceDashboard.showNotification is not available.');
+            // }
         } catch (error) {
             console.error('Error fetching stock data:', error);
             showError('Failed to fetch data for ' + symbol + '. ' + error.message);
@@ -75,22 +80,27 @@ const MarketData = (function() {
         const proxyUrl = CORS_PROXY + encodeURIComponent(yahooUrl);
         
         console.log('Fetching price data:', symbol, 'Period:', period);
+        console.log('Yahoo Price URL:', yahooUrl); // ✅ Log d'URL
+        console.log('Proxy Price URL:', proxyUrl); // ✅ Log d'URL Proxy
         
         try {
             const response = await fetch(proxyUrl);
             
             if (!response.ok) {
+                console.warn('Network response for price data was not ok. Status:', response.status); // ✅ Log d'erreur détaillé
                 throw new Error('Network response was not ok (Status: ' + response.status + ')');
             }
             
             const json = await response.json();
             
+            console.log('Raw JSON price data response:', json); // ✅ Log de la réponse brute
+            
             if (!json.chart || !json.chart.result || json.chart.result.length === 0) {
-                throw new Error('Invalid symbol or no data available');
+                throw new Error('Invalid symbol or no data available for price chart');
             }
             
             if (json.chart.error) {
-                throw new Error(json.chart.error.description || 'Yahoo Finance API error');
+                throw new Error(json.chart.error.description || 'Yahoo Finance API price chart error');
             }
             
             const result = json.chart.result[0];
@@ -114,8 +124,10 @@ const MarketData = (function() {
             const cleanTimestamps = [];
             
             for (let i = 0; i < timestamps.length; i++) {
-                if (quote.close[i] !== null && quote.close[i] !== undefined) {
+                // S'assurer que le timestamp et la clôture existent pour inclure la donnée
+                if (timestamps[i] !== null && quote.close[i] !== null && quote.close[i] !== undefined) {
                     cleanTimestamps.push(timestamps[i]);
+                    // Utiliser le close si open/high/low est null pour éviter des NaN
                     cleanData.open.push(quote.open[i] || quote.close[i]);
                     cleanData.high.push(quote.high[i] || quote.close[i]);
                     cleanData.low.push(quote.low[i] || quote.close[i]);
@@ -125,11 +137,11 @@ const MarketData = (function() {
             }
             
             if (cleanData.close.length === 0) {
-                throw new Error('No valid price data found');
+                throw new Error('No valid price data found after cleaning');
             }
             
             const currentPrice = meta.regularMarketPrice || cleanData.close[cleanData.close.length - 1];
-            const previousClose = meta.previousClose || cleanData.close[cleanData.close.length - 2] || currentPrice;
+            const previousClose = meta.chartPreviousClose || cleanData.close[cleanData.close.length - 2] || currentPrice; // ✅ meta.chartPreviousClose est souvent plus fiable
             
             const formattedData = {
                 symbol: meta.symbol,
@@ -152,7 +164,7 @@ const MarketData = (function() {
             return formattedData;
             
         } catch (error) {
-            console.error('Fetch error:', error);
+            console.error('Fetch error in price data:', error); // ✅ Log d'erreur détaillé
             
             if (error.message.includes('Invalid symbol')) {
                 throw new Error('Stock symbol not found. Please verify the ticker symbol.');
@@ -181,23 +193,29 @@ const MarketData = (function() {
         const proxyUrl = CORS_PROXY + encodeURIComponent(yahooUrl);
         
         console.log('Fetching detailed info for:', symbol);
+        console.log('Yahoo Quote URL:', yahooUrl); // ✅ Log d'URL
+        console.log('Proxy Quote URL:', proxyUrl); // ✅ Log d'URL Proxy
         
         try {
             const response = await fetch(proxyUrl);
             
             if (!response.ok) {
-                console.warn('Could not fetch detailed info');
-                return {}; // Retourner un objet vide si ça échoue
+                console.warn('Could not fetch detailed info. Status:', response.status); // ✅ Log d'erreur détaillé
+                return {};
             }
             
             const json = await response.json();
             
+            console.log('Raw JSON detailed info response for ' + symbol + ':', json); // ✅ Log TRÈS IMPORTANT
+            
             if (!json.quoteSummary || !json.quoteSummary.result || json.quoteSummary.result.length === 0) {
-                console.warn('No detailed info available');
+                console.warn('No detailed info available in JSON response for', symbol);
                 return {};
             }
             
             const result = json.quoteSummary.result[0];
+            
+            console.log('Parsed detailed result object for ' + symbol + ':', result); // ✅ Log l'objet 'result'
             
             // Extraire les données importantes
             const summaryDetail = result.summaryDetail || {};
@@ -206,75 +224,90 @@ const MarketData = (function() {
             const profile = result.assetProfile || {};
             const recommendation = result.recommendationTrend || {};
             
+            // Fonction utilitaire pour extraire la valeur ou retourner N/A
+            const getValue = (obj, prop, fallback = 'N/A') => {
+                if (obj && obj[prop] && (obj[prop].raw !== undefined || obj[prop].fmt !== undefined)) {
+                    return obj[prop].raw !== undefined ? obj[prop].raw : (parseFloat(obj[prop].fmt.replace(/,/g, '')) || fallback); // Tente de parser .fmt si .raw est absent
+                }
+                return fallback;
+            };
+
+            const getStringValue = (obj, prop, fallback = 'N/A') => {
+                if (obj && obj[prop]) {
+                    return obj[prop];
+                }
+                return fallback;
+            };
+            
             return {
                 // Informations de la société
-                companyName: profile.longName || profile.shortName || symbol,
-                sector: profile.sector || 'N/A',
-                industry: profile.industry || 'N/A',
-                website: profile.website || 'N/A',
-                country: profile.country || 'N/A',
-                employees: profile.fullTimeEmployees || 'N/A',
-                description: profile.longBusinessSummary || 'No description available',
+                companyName: getStringValue(profile, 'longName') || getStringValue(profile, 'shortName') || symbol,
+                sector: getStringValue(profile, 'sector'),
+                industry: getStringValue(profile, 'industry'),
+                website: getStringValue(profile, 'website'),
+                country: getStringValue(profile, 'country'),
+                employees: getValue(profile, 'fullTimeEmployees'),
+                description: getStringValue(profile, 'longBusinessSummary') || 'No description available',
                 
                 // Données financières clés
-                marketCap: summaryDetail.marketCap?.raw || keyStats.enterpriseValue?.raw || 'N/A',
-                peRatio: summaryDetail.trailingPE?.raw || keyStats.trailingPE?.raw || 'N/A',
-                forwardPE: summaryDetail.forwardPE?.raw || 'N/A',
-                eps: keyStats.trailingEps?.raw || 'N/A',
-                beta: keyStats.beta?.raw || summaryDetail.beta?.raw || 'N/A',
+                marketCap: getValue(summaryDetail, 'marketCap') || getValue(keyStats, 'enterpriseValue'), // Peut varier entre summaryDetail et keyStats
+                peRatio: getValue(summaryDetail, 'trailingPE') || getValue(keyStats, 'trailingPE'),
+                forwardPE: getValue(summaryDetail, 'forwardPE'),
+                eps: getValue(keyStats, 'trailingEps'),
+                beta: getValue(keyStats, 'beta') || getValue(summaryDetail, 'beta'),
                 
                 // Dividendes
-                dividendRate: summaryDetail.dividendRate?.raw || 'N/A',
-                dividendYield: summaryDetail.dividendYield?.raw || 'N/A',
-                exDividendDate: summaryDetail.exDividendDate?.raw || 'N/A',
-                payoutRatio: keyStats.payoutRatio?.raw || 'N/A',
+                dividendRate: getValue(summaryDetail, 'dividendRate'),
+                dividendYield: getValue(summaryDetail, 'dividendYield'),
+                exDividendDate: getValue(summaryDetail, 'exDividendDate'),
+                payoutRatio: getValue(keyStats, 'payoutRatio'),
                 
                 // Rentabilité
-                profitMargins: financialData.profitMargins?.raw || 'N/A',
-                operatingMargins: financialData.operatingMargins?.raw || 'N/A',
-                grossMargins: financialData.grossMargins?.raw || 'N/A',
-                returnOnAssets: financialData.returnOnAssets?.raw || 'N/A',
-                returnOnEquity: financialData.returnOnEquity?.raw || 'N/A',
+                profitMargins: getValue(financialData, 'profitMargins'),
+                operatingMargins: getValue(financialData, 'operatingMargins'),
+                grossMargins: getValue(financialData, 'grossMargins'),
+                returnOnAssets: getValue(financialData, 'returnOnAssets'),
+                returnOnEquity: getValue(financialData, 'returnOnEquity'),
                 
                 // Revenus et croissance
-                totalRevenue: financialData.totalRevenue?.raw || 'N/A',
-                revenuePerShare: financialData.revenuePerShare?.raw || 'N/A',
-                revenueGrowth: financialData.revenueGrowth?.raw || 'N/A',
-                earningsGrowth: financialData.earningsGrowth?.raw || 'N/A',
+                totalRevenue: getValue(financialData, 'totalRevenue'),
+                revenuePerShare: getValue(financialData, 'revenuePerShare'),
+                revenueGrowth: getValue(financialData, 'revenueGrowth'),
+                earningsGrowth: getValue(financialData, 'earningsGrowth'),
                 
                 // Liquidité et dette
-                currentRatio: financialData.currentRatio?.raw || 'N/A',
-                debtToEquity: financialData.debtToEquity?.raw || 'N/A',
-                totalCash: financialData.totalCash?.raw || 'N/A',
-                totalDebt: financialData.totalDebt?.raw || 'N/A',
-                quickRatio: financialData.quickRatio?.raw || 'N/A',
+                currentRatio: getValue(financialData, 'currentRatio'),
+                debtToEquity: getValue(financialData, 'debtToEquity'),
+                totalCash: getValue(financialData, 'totalCash'),
+                totalDebt: getValue(financialData, 'totalDebt'),
+                quickRatio: getValue(financialData, 'quickRatio'),
                 
                 // Valorisation
-                priceToBook: keyStats.priceToBook?.raw || 'N/A',
-                priceToSales: keyStats.priceToSalesTrailing12Months?.raw || 'N/A',
-                enterpriseValue: keyStats.enterpriseValue?.raw || 'N/A',
-                enterpriseToRevenue: keyStats.enterpriseToRevenue?.raw || 'N/A',
-                enterpriseToEbitda: keyStats.enterpriseToEbitda?.raw || 'N/A',
+                priceToBook: getValue(keyStats, 'priceToBook'),
+                priceToSales: getValue(keyStats, 'priceToSalesTrailing12Months'),
+                enterpriseValue: getValue(keyStats, 'enterpriseValue'),
+                enterpriseToRevenue: getValue(keyStats, 'enterpriseToRevenue'),
+                enterpriseToEbitda: getValue(keyStats, 'enterpriseToEbitda'),
                 
                 // Statistiques de trading
-                sharesOutstanding: keyStats.sharesOutstanding?.raw || 'N/A',
-                floatShares: keyStats.floatShares?.raw || 'N/A',
-                sharesShort: keyStats.sharesShort?.raw || 'N/A',
-                shortRatio: keyStats.shortRatio?.raw || 'N/A',
-                heldPercentInsiders: keyStats.heldPercentInsiders?.raw || 'N/A',
-                heldPercentInstitutions: keyStats.heldPercentInstitutions?.raw || 'N/A',
+                sharesOutstanding: getValue(keyStats, 'sharesOutstanding'),
+                floatShares: getValue(keyStats, 'floatShares'),
+                sharesShort: getValue(keyStats, 'sharesShort'),
+                shortRatio: getValue(keyStats, 'shortRatio'),
+                heldPercentInsiders: getValue(keyStats, 'heldPercentInsiders'),
+                heldPercentInstitutions: getValue(keyStats, 'heldPercentInstitutions'),
                 
                 // Recommandations
-                recommendationKey: financialData.recommendationKey || 'N/A',
-                targetHighPrice: financialData.targetHighPrice?.raw || 'N/A',
-                targetLowPrice: financialData.targetLowPrice?.raw || 'N/A',
-                targetMeanPrice: financialData.targetMeanPrice?.raw || 'N/A',
-                numberOfAnalystOpinions: financialData.numberOfAnalystOpinions?.raw || 'N/A'
+                recommendationKey: getStringValue(financialData, 'recommendationKey') || getStringValue(recommendation, 'trend') && getStringValue(recommendation.trend[0], 'strongBuy'), // Exemple d'extraction plus complexe pour reco
+                targetHighPrice: getValue(financialData, 'targetHighPrice'),
+                targetLowPrice: getValue(financialData, 'targetLowPrice'),
+                targetMeanPrice: getValue(financialData, 'targetMeanPrice'),
+                numberOfAnalystOpinions: getValue(financialData, 'numberOfAnalystOpinions')
             };
             
         } catch (error) {
             console.error('Error fetching detailed info:', error);
-            return {}; // Retourner un objet vide en cas d'erreur
+            return {};
         }
     }
     
@@ -287,6 +320,17 @@ const MarketData = (function() {
         const highs = data.prices.high;
         const lows = data.prices.low;
         
+        // S'assurer qu'il y a assez de données pour les calculs
+        if (prices.length < 200) { // La plus longue SMA/EMA est 200
+            console.warn('Not enough price data points for all technical indicators.');
+            return {
+                sma20: null, sma50: null, sma200: null,
+                ema12: null, ema26: null, rsi: null,
+                macd: null, bollingerBands: null, atr: null,
+                obv: null, stochastic: null, adx: null
+            };
+        }
+
         return {
             sma20: calculateSMA(prices, 20),
             sma50: calculateSMA(prices, 50),
@@ -307,7 +351,8 @@ const MarketData = (function() {
     
     function calculateSMA(data, period) {
         if (data.length < period) return null;
-        const slice = data.slice(-period);
+        // La slice doit contenir les dernières 'period' données
+        const slice = data.slice(-period); 
         return slice.reduce((a, b) => a + b, 0) / period;
     }
     
@@ -325,17 +370,29 @@ const MarketData = (function() {
     function calculateRSI(prices, period = 14) {
         if (prices.length < period + 1) return null;
         
-        let gains = 0;
-        let losses = 0;
+        let avgGain = 0;
+        let avgLoss = 0;
         
-        for (let i = prices.length - period; i < prices.length; i++) {
+        // Calcul initial pour la première période
+        for (let i = 1; i <= period; i++) {
             const change = prices[i] - prices[i - 1];
-            if (change > 0) gains += change;
-            else losses -= change;
+            if (change > 0) avgGain += change;
+            else avgLoss -= change;
         }
-        
-        const avgGain = gains / period;
-        const avgLoss = losses / period;
+        avgGain /= period;
+        avgLoss /= period;
+
+        // Calcul lissé pour le reste
+        for (let i = period + 1; i < prices.length; i++) {
+            const change = prices[i] - prices[i - 1];
+            let currentGain = 0;
+            let currentLoss = 0;
+            if (change > 0) currentGain = change;
+            else currentLoss = -change;
+
+            avgGain = (avgGain * (period - 1) + currentGain) / period;
+            avgLoss = (avgLoss * (period - 1) + currentLoss) / period;
+        }
         
         if (avgLoss === 0) return 100;
         const rs = avgGain / avgLoss;
@@ -343,24 +400,60 @@ const MarketData = (function() {
     }
     
     function calculateMACD(prices) {
-        const ema12 = calculateEMA(prices, 12);
-        const ema26 = calculateEMA(prices, 26);
+        // Pour un calcul correct, nous avons besoin des EMAs pour toute la série, pas seulement le dernier point
+        // Cela nécessiterait de calculer une série d'EMAs, puis une série de MACD.
+        // Pour une version simplifiée, nous allons calculer le MACD final point.
         
-        if (!ema12 || !ema26) return null;
+        if (prices.length < 26) return null; // Nécessite au moins 26 jours pour l'EMA la plus longue
+
+        // Calcul des séries d'EMA pour tous les points
+        const calculateEmaSeries = (data, period) => {
+            if (data.length < period) return [];
+            const emaSeries = new Array(data.length).fill(null);
+            emaSeries[period - 1] = data.slice(0, period).reduce((a, b) => a + b, 0) / period;
+            const multiplier = 2 / (period + 1);
+            for (let i = period; i < data.length; i++) {
+                emaSeries[i] = (data[i] - emaSeries[i - 1]) * multiplier + emaSeries[i - 1];
+            }
+            return emaSeries;
+        };
+
+        const ema12Series = calculateEmaSeries(prices, 12);
+        const ema26Series = calculateEmaSeries(prices, 26);
+
+        if (ema12Series.length === 0 || ema26Series.length === 0) return null;
+
+        const macdLineSeries = [];
+        for (let i = 0; i < prices.length; i++) {
+            if (ema12Series[i] !== null && ema26Series[i] !== null) {
+                macdLineSeries.push(ema12Series[i] - ema26Series[i]);
+            } else {
+                macdLineSeries.push(null);
+            }
+        }
         
-        const macdLine = ema12 - ema26;
+        // Calcul de la ligne de signal (EMA 9 de la ligne MACD)
+        const signalLineSeries = calculateEmaSeries(macdLineSeries.filter(val => val !== null), 9);
+
+        // Récupérer les dernières valeurs
+        const lastMacdLine = macdLineSeries[macdLineSeries.length - 1];
+        const lastSignalLine = signalLineSeries[signalLineSeries.length - 1];
+
+        if (lastMacdLine === null || lastSignalLine === null) return null;
+        
         return {
-            macd: macdLine,
-            signal: macdLine, // Simplifié
-            histogram: 0
+            macd: lastMacdLine,
+            signal: lastSignalLine,
+            histogram: lastMacdLine - lastSignalLine
         };
     }
     
     function calculateBollingerBands(prices, period = 20) {
         if (prices.length < period) return null;
         
-        const sma = calculateSMA(prices, period);
         const slice = prices.slice(-period);
+        const sma = slice.reduce((a, b) => a + b, 0) / period;
+        
         const variance = slice.reduce((sum, price) => sum + Math.pow(price - sma, 2), 0) / period;
         const stdDev = Math.sqrt(variance);
         
@@ -374,28 +467,36 @@ const MarketData = (function() {
     function calculateATR(highs, lows, closes, period = 14) {
         if (highs.length < period + 1) return null;
         
-        let atr = 0;
-        for (let i = highs.length - period; i < highs.length; i++) {
+        let trueRanges = [];
+        for (let i = 1; i < closes.length; i++) {
             const tr = Math.max(
                 highs[i] - lows[i],
                 Math.abs(highs[i] - closes[i - 1]),
                 Math.abs(lows[i] - closes[i - 1])
             );
-            atr += tr;
+            trueRanges.push(tr);
         }
-        return atr / period;
+
+        if (trueRanges.length < period) return null;
+
+        let atr = trueRanges.slice(0, period).reduce((a, b) => a + b, 0) / period;
+        for (let i = period; i < trueRanges.length; i++) {
+            atr = (atr * (period - 1) + trueRanges[i]) / period;
+        }
+        return atr;
     }
     
     function calculateOBV(prices, volumes) {
         if (prices.length < 2) return null;
         
-        let obv = 0;
+        let obv = volumes[0] || 0; // Initialiser l'OBV avec le volume du premier jour
         for (let i = 1; i < prices.length; i++) {
             if (prices[i] > prices[i - 1]) {
                 obv += volumes[i];
             } else if (prices[i] < prices[i - 1]) {
                 obv -= volumes[i];
             }
+            // Si le prix est inchangé, l'OBV reste le même
         }
         return obv;
     }
@@ -403,56 +504,85 @@ const MarketData = (function() {
     function calculateStochastic(highs, lows, closes, period = 14) {
         if (closes.length < period) return null;
         
-        const recentHighs = highs.slice(-period);
-        const recentLows = lows.slice(-period);
+        const currentHighs = highs.slice(closes.length - period);
+        const currentLows = lows.slice(closes.length - period);
         const currentClose = closes[closes.length - 1];
         
-        const highestHigh = Math.max(...recentHighs);
-        const lowestLow = Math.min(...recentLows);
+        const highestHigh = Math.max(...currentHighs);
+        const lowestLow = Math.min(...currentLows);
+        
+        if (highestHigh === lowestLow) return { k: 0, d: 0 }; // Éviter la division par zéro
         
         const k = ((currentClose - lowestLow) / (highestHigh - lowestLow)) * 100;
         return {
             k: k,
-            d: k // Simplifié
+            d: k // Simplifié pour le moment, le %D est une SMA de %K
         };
     }
     
     function calculateADX(highs, lows, closes, period = 14) {
         if (highs.length < period + 1) return null;
         
-        // Version simplifiée de l'ADX
-        let dmPlus = 0;
-        let dmMinus = 0;
+        // C'est une simplification, le calcul complet de l'ADX est complexe
+        // Il nécessite de calculer +DM, -DM, TR, puis les lisser, puis calculer DX et enfin ADX
+        // La version actuelle pourrait manquer de précision.
         
-        for (let i = highs.length - period; i < highs.length; i++) {
-            const highDiff = highs[i] - highs[i - 1];
-            const lowDiff = lows[i - 1] - lows[i];
+        let dmPlusSeries = [];
+        let dmMinusSeries = [];
+        let trSeries = [];
+
+        for (let i = 1; i < highs.length; i++) {
+            const highDiff = highs[i] - highs[i-1];
+            const lowDiff = lows[i-1] - lows[i];
             
-            if (highDiff > lowDiff && highDiff > 0) dmPlus += highDiff;
-            if (lowDiff > highDiff && lowDiff > 0) dmMinus += lowDiff;
+            const tr = Math.max(
+                highs[i] - lows[i],
+                Math.abs(highs[i] - closes[i - 1]),
+                Math.abs(lows[i] - closes[i - 1])
+            );
+            trSeries.push(tr);
+
+            if (highDiff > lowDiff && highDiff > 0) {
+                dmPlusSeries.push(highDiff);
+                dmMinusSeries.push(0);
+            } else if (lowDiff > highDiff && lowDiff > 0) {
+                dmMinusSeries.push(lowDiff);
+                dmPlusSeries.push(0);
+            } else {
+                dmPlusSeries.push(0);
+                dmMinusSeries.push(0);
+            }
         }
         
-        const atr = calculateATR(highs, lows, closes, period);
-        if (!atr || atr === 0) return null;
-        
-        const diPlus = (dmPlus / period) / atr * 100;
-        const diMinus = (dmMinus / period) / atr * 100;
-        
-        const dx = Math.abs(diPlus - diMinus) / (diPlus + diMinus) * 100;
+        // Nécessiterait une fonction de lissage EMA ou Wilder pour +DM, -DM et TR
+        // Pour l'instant, on utilise des moyennes simples sur la période
+        if (dmPlusSeries.length < period || dmMinusSeries.length < period || trSeries.length < period) return null;
+
+        const avgDmPlus = dmPlusSeries.slice(-period).reduce((a, b) => a + b, 0) / period;
+        const avgDmMinus = dmMinusSeries.slice(-period).reduce((a, b) => a + b, 0) / period;
+        const avgTr = trSeries.slice(-period).reduce((a, b) => a + b, 0) / period;
+
+        if (avgTr === 0) return null;
+
+        const diPlus = (avgDmPlus / avgTr) * 100;
+        const diMinus = (avgDmMinus / avgTr) * 100;
+
+        const dx = (Math.abs(diPlus - diMinus) / (diPlus + diMinus || 1)) * 100; // Éviter division par zéro
         return dx;
     }
     
     /**
-     * Calcule la volatilité
+     * Calcule la volatilité (écart-type des retours journaliers)
      */
     function calculateVolatility(prices) {
+        if (prices.length < 2) return 0;
         const returns = [];
         for (let i = 1; i < prices.length; i++) {
             returns.push((prices[i] - prices[i-1]) / prices[i-1]);
         }
         const mean = returns.reduce((a, b) => a + b, 0) / returns.length;
         const variance = returns.reduce((sum, r) => sum + Math.pow(r - mean, 2), 0) / returns.length;
-        return Math.sqrt(variance) * 100;
+        return Math.sqrt(variance) * Math.sqrt(252) * 100; // Annualiser la volatilité (252 jours de trading par an)
     }
     
     // ========== AFFICHAGE DES RÉSULTATS ==========
@@ -469,9 +599,20 @@ const MarketData = (function() {
         displayCompanyInfo(data);
         displayFinancialMetrics(data);
         displayTechnicalIndicators();
+        
+        // ✅ Gérer la création du graphique technique pour le RSI
+        let chartTechnicalDiv = document.getElementById('chartTechnical');
+        if (!chartTechnicalDiv && document.getElementById('chartVolume')) {
+            chartTechnicalDiv = document.createElement('div');
+            chartTechnicalDiv.id = 'chartTechnical';
+            chartTechnicalDiv.className = 'chart chart-medium'; // Ajoutez les classes CSS pour le styling
+            document.getElementById('chartVolume').parentElement.appendChild(chartTechnicalDiv);
+        }
+
         createPriceChart(data);
         createVolumeChart(data);
-        createTechnicalChart(data);
+        createTechnicalChart(data); // Ce graphique sera pour le RSI
+        
         createStatsTable(data);
         createValuationTable(data);
         displayTradingSignals(data);
@@ -491,19 +632,19 @@ const MarketData = (function() {
             </div>
             <div class='info-card ${isPositive ? 'positive' : 'negative'}'>
                 <div class='label'>Current Price</div>
-                <div class='value'>${data.currentPrice.toFixed(2)} ${data.currency}</div>
+                <div class='value'>${formatNumber(data.currentPrice, 2)} ${data.currency}</div>
             </div>
             <div class='info-card ${isPositive ? 'positive' : 'negative'}'>
                 <div class='label'>Change</div>
-                <div class='value'>${isPositive ? '+' : ''}${data.change.toFixed(2)} (${data.changePercent.toFixed(2)}%)</div>
+                <div class='value'>${isPositive ? '+' : ''}${formatNumber(data.change, 2)} (${formatNumber(data.changePercent, 2)}%)</div>
             </div>
             <div class='info-card'>
                 <div class='label'>Day High</div>
-                <div class='value'>${data.dayHigh.toFixed(2)}</div>
+                <div class='value'>${formatNumber(data.dayHigh, 2)}</div>
             </div>
             <div class='info-card'>
                 <div class='label'>Day Low</div>
-                <div class='value'>${data.dayLow.toFixed(2)}</div>
+                <div class='value'>${formatNumber(data.dayLow, 2)}</div>
             </div>
             <div class='info-card'>
                 <div class='label'>Volume</div>
@@ -511,11 +652,11 @@ const MarketData = (function() {
             </div>
             <div class='info-card'>
                 <div class='label'>52W High</div>
-                <div class='value'>${typeof data.fiftyTwoWeekHigh === 'number' ? data.fiftyTwoWeekHigh.toFixed(2) : 'N/A'}</div>
+                <div class='value'>${typeof data.fiftyTwoWeekHigh === 'number' ? formatNumber(data.fiftyTwoWeekHigh, 2) : 'N/A'}</div>
             </div>
             <div class='info-card'>
                 <div class='label'>52W Low</div>
-                <div class='value'>${typeof data.fiftyTwoWeekLow === 'number' ? data.fiftyTwoWeekLow.toFixed(2) : 'N/A'}</div>
+                <div class='value'>${typeof data.fiftyTwoWeekLow === 'number' ? formatNumber(data.fiftyTwoWeekLow, 2) : 'N/A'}</div>
             </div>
         `;
         
@@ -526,21 +667,36 @@ const MarketData = (function() {
      * Affiche les informations de la société
      */
     function displayCompanyInfo(data) {
-        if (!data.companyName) return;
-        
+        // ✅ Modification pour s'assurer que companyInfo est toujours après stockInfo
         let container = document.getElementById('companyInfo');
+        const resultsSection = document.getElementById('resultsSection');
+        const stockInfoDiv = document.getElementById('stockInfo');
+        
         if (!container) {
             container = document.createElement('div');
             container.id = 'companyInfo';
-            container.className = 'section-card';
-            document.getElementById('resultsSection').insertBefore(
-                container,
-                document.getElementById('chartPrice').parentElement
-            );
+            container.className = 'section'; // Utilisez la classe 'section' pour la cohérence
+            resultsSection.insertBefore(container, stockInfoDiv.nextSibling); // Insérer après stockInfo
         }
+
+        // Si companyName ou description sont N/A, on ne crée pas le panneau
+        if (data.companyName === 'N/A' && data.description === 'No description available') {
+            container.innerHTML = ''; // Vider si pas de données
+            container.classList.add('hidden'); // Cacher le panneau
+            return;
+        } else {
+            container.classList.remove('hidden');
+        }
+
+        const descriptionHtml = (data.description && data.description !== 'No description available') ? `
+            <div style="margin-top: 20px; padding: 15px; background: #f8f9fa; border-radius: 8px;">
+                <strong>About:</strong>
+                <p style="margin-top: 10px; line-height: 1.6;">${data.description.substring(0, 500)}${data.description.length > 500 ? '...' : ''}</p>
+            </div>
+        ` : '';
         
         const html = `
-            <h3 style="color: #2649B2; margin-bottom: 20px;">📊 Company Information</h3>
+            <h2 class='section-title'>📊 Company Information</h2>
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
                 <div class='info-item'>
                     <strong>Company:</strong> ${data.companyName}
@@ -561,12 +717,7 @@ const MarketData = (function() {
                     <strong>Exchange:</strong> ${data.exchangeName}
                 </div>
             </div>
-            ${data.description !== 'No description available' ? `
-                <div style="margin-top: 20px; padding: 15px; background: #f8f9fa; border-radius: 8px;">
-                    <strong>About:</strong>
-                    <p style="margin-top: 10px; line-height: 1.6;">${data.description.substring(0, 500)}${data.description.length > 500 ? '...' : ''}</p>
-                </div>
-            ` : ''}
+            ${descriptionHtml}
         `;
         
         container.innerHTML = html;
@@ -577,15 +728,38 @@ const MarketData = (function() {
      */
     function displayFinancialMetrics(data) {
         let container = document.getElementById('financialMetrics');
+        const resultsSection = document.getElementById('resultsSection');
+        const companyInfoDiv = document.getElementById('companyInfo'); // Peut être null si non affiché
+        
         if (!container) {
             container = document.createElement('div');
             container.id = 'financialMetrics';
-            container.className = 'section-card';
-            document.getElementById('resultsSection').appendChild(container);
+            container.className = 'section'; // Utilisez la classe 'section'
+            // Insérer après companyInfo s'il existe, sinon après stockInfo (qui est après companyInfo)
+            if (companyInfoDiv && !companyInfoDiv.classList.contains('hidden')) {
+                resultsSection.insertBefore(container, companyInfoDiv.nextSibling);
+            } else {
+                resultsSection.insertBefore(container, stockInfoDiv.nextSibling);
+            }
+        }
+
+        // Vérifier si toutes les métriques sont N/A
+        const allMetricsAreNA = [
+            data.marketCap, data.peRatio, data.forwardPE, data.eps,
+            data.beta, data.dividendYield, data.profitMargins, data.returnOnEquity,
+            data.revenueGrowth, data.debtToEquity, data.currentRatio, data.priceToBook
+        ].every(val => val === 'N/A' || val === null || val === undefined);
+
+        if (allMetricsAreNA) {
+            container.innerHTML = '';
+            container.classList.add('hidden');
+            return;
+        } else {
+            container.classList.remove('hidden');
         }
         
         const html = `
-            <h3 style="color: #4A74F3; margin-bottom: 20px;">💰 Financial Metrics</h3>
+            <h2 class='section-title'>💰 Financial Metrics</h2>
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px;">
                 <div class='metric-card'>
                     <div class='metric-label'>Market Cap</div>
@@ -648,52 +822,78 @@ const MarketData = (function() {
         if (!technicalIndicators) return;
         
         let container = document.getElementById('technicalIndicatorsSection');
+        const resultsSection = document.getElementById('resultsSection');
+        const financialMetricsDiv = document.getElementById('financialMetrics');
+        
         if (!container) {
             container = document.createElement('div');
             container.id = 'technicalIndicatorsSection';
-            container.className = 'section-card';
-            document.getElementById('resultsSection').appendChild(container);
+            container.className = 'section'; // Utilisez la classe 'section'
+            // Insérer après financialMetrics
+            if (financialMetricsDiv && !financialMetricsDiv.classList.contains('hidden')) {
+                resultsSection.insertBefore(container, financialMetricsDiv.nextSibling);
+            } else if (document.getElementById('companyInfo') && !document.getElementById('companyInfo').classList.contains('hidden')) {
+                 resultsSection.insertBefore(container, document.getElementById('companyInfo').nextSibling);
+            } else {
+                resultsSection.insertBefore(container, document.getElementById('stockInfo').nextSibling);
+            }
         }
         
+        // Vérifier si tous les indicateurs techniques sont nuls
+        const allIndicatorsAreNull = [
+            technicalIndicators.rsi, technicalIndicators.sma20, technicalIndicators.sma50,
+            technicalIndicators.sma200, technicalIndicators.bollingerBands?.upper,
+            technicalIndicators.bollingerBands?.lower, technicalIndicators.atr,
+            technicalIndicators.stochastic?.k
+        ].every(val => val === null || val === undefined);
+
+        if (allIndicatorsAreNull) {
+            container.innerHTML = '';
+            container.classList.add('hidden');
+            return;
+        } else {
+            container.classList.remove('hidden');
+        }
+
         const rsi = technicalIndicators.rsi;
         const rsiSignal = rsi < 30 ? '🟢 Oversold' : rsi > 70 ? '🔴 Overbought' : '🟡 Neutral';
         
         const html = `
-            <h3 style="color: #8E7DE3; margin-bottom: 20px;">📈 Technical Indicators</h3>
+            <h2 class='section-title'>📈 Technical Indicators</h2>
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
-                <div class='metric-card'>
+                ${technicalIndicators.rsi !== null ? `<div class='metric-card'>
                     <div class='metric-label'>RSI (14)</div>
                     <div class='metric-value'>${formatNumber(rsi, 2)}</div>
                     <div class='metric-signal'>${rsiSignal}</div>
-                </div>
-                <div class='metric-card'>
+                </div>` : ''}
+                ${technicalIndicators.sma20 !== null ? `<div class='metric-card'>
                     <div class='metric-label'>SMA 20</div>
                     <div class='metric-value'>${formatNumber(technicalIndicators.sma20, 2)}</div>
-                </div>
-                <div class='metric-card'>
+                </div>` : ''}
+                ${technicalIndicators.sma50 !== null ? `<div class='metric-card'>
                     <div class='metric-label'>SMA 50</div>
                     <div class='metric-value'>${formatNumber(technicalIndicators.sma50, 2)}</div>
-                </div>
-                <div class='metric-card'>
+                </div>` : ''}
+                ${technicalIndicators.sma200 !== null ? `<div class='metric-card'>
                     <div class='metric-label'>SMA 200</div>
                     <div class='metric-value'>${formatNumber(technicalIndicators.sma200, 2)}</div>
-                </div>
-                <div class='metric-card'>
+                </div>` : ''}
+                ${technicalIndicators.bollingerBands?.upper !== null ? `<div class='metric-card'>
                     <div class='metric-label'>Bollinger Upper</div>
                     <div class='metric-value'>${formatNumber(technicalIndicators.bollingerBands?.upper, 2)}</div>
-                </div>
-                <div class='metric-card'>
+                </div>` : ''}
+                ${technicalIndicators.bollingerBands?.lower !== null ? `<div class='metric-card'>
                     <div class='metric-label'>Bollinger Lower</div>
                     <div class='metric-value'>${formatNumber(technicalIndicators.bollingerBands?.lower, 2)}</div>
-                </div>
-                <div class='metric-card'>
+                </div>` : ''}
+                ${technicalIndicators.atr !== null ? `<div class='metric-card'>
                     <div class='metric-label'>ATR (14)</div>
                     <div class='metric-value'>${formatNumber(technicalIndicators.atr, 2)}</div>
-                </div>
-                <div class='metric-card'>
+                </div>` : ''}
+                ${technicalIndicators.stochastic?.k !== null ? `<div class='metric-card'>
                     <div class='metric-label'>Stochastic %K</div>
                     <div class='metric-value'>${formatNumber(technicalIndicators.stochastic?.k, 2)}</div>
-                </div>
+                </div>` : ''}
             </div>
         `;
         
@@ -704,54 +904,72 @@ const MarketData = (function() {
      * Affiche les signaux de trading
      */
     function displayTradingSignals(data) {
-        if (!technicalIndicators) return;
-        
+        // ✅ Modification pour s'assurer que tradingSignals est toujours après technicalIndicatorsSection
         let container = document.getElementById('tradingSignals');
+        const resultsSection = document.getElementById('resultsSection');
+        const technicalIndicatorsDiv = document.getElementById('technicalIndicatorsSection');
+        
         if (!container) {
             container = document.createElement('div');
             container.id = 'tradingSignals';
-            container.className = 'section-card';
-            document.getElementById('resultsSection').appendChild(container);
+            container.className = 'section'; // Utilisez la classe 'section'
+            if (technicalIndicatorsDiv && !technicalIndicatorsDiv.classList.contains('hidden')) {
+                resultsSection.insertBefore(container, technicalIndicatorsDiv.nextSibling);
+            } else { // Fallback si technicalIndicators n'est pas affiché
+                resultsSection.appendChild(container); // Ou insérer après le dernier élément visible
+            }
         }
         
+        if (!technicalIndicators || !currentStockData) {
+            container.innerHTML = '';
+            container.classList.add('hidden');
+            return;
+        }
+
         const signals = [];
         const currentPrice = data.currentPrice;
         
         // Signaux basés sur RSI
-        if (technicalIndicators.rsi < 30) {
-            signals.push({ type: 'buy', indicator: 'RSI', message: 'RSI indicates oversold conditions (potential buy signal)' });
-        } else if (technicalIndicators.rsi > 70) {
-            signals.push({ type: 'sell', indicator: 'RSI', message: 'RSI indicates overbought conditions (potential sell signal)' });
+        if (technicalIndicators.rsi !== null) {
+            if (technicalIndicators.rsi < 30) {
+                signals.push({ type: 'buy', indicator: 'RSI', message: 'RSI indicates oversold conditions (potential buy signal)' });
+            } else if (technicalIndicators.rsi > 70) {
+                signals.push({ type: 'sell', indicator: 'RSI', message: 'RSI indicates overbought conditions (potential sell signal)' });
+            }
         }
         
-        // Signaux basés sur SMA
+        // Signaux basés sur SMA (Golden/Death Cross sur SMA50 et SMA200)
         if (technicalIndicators.sma50 && technicalIndicators.sma200) {
-            if (technicalIndicators.sma50 > technicalIndicators.sma200) {
+            if (technicalIndicators.sma50 > technicalIndicators.sma200 && currentStockData.previousClose < currentStockData.currentPrice) { // Ajout d'une condition pour le prix
                 signals.push({ type: 'buy', indicator: 'SMA', message: 'Golden Cross: SMA 50 above SMA 200 (bullish trend)' });
-            } else {
+            } else if (technicalIndicators.sma50 < technicalIndicators.sma200 && currentStockData.previousClose > currentStockData.currentPrice) { // Ajout d'une condition pour le prix
                 signals.push({ type: 'sell', indicator: 'SMA', message: 'Death Cross: SMA 50 below SMA 200 (bearish trend)' });
             }
         }
         
         // Signaux basés sur Bollinger Bands
         if (technicalIndicators.bollingerBands) {
-            if (currentPrice < technicalIndicators.bollingerBands.lower) {
+            if (currentPrice < technicalIndicators.bollingerBands.lower && currentStockData.change > 0) { // Prix remonte après avoir touché la bande basse
                 signals.push({ type: 'buy', indicator: 'Bollinger', message: 'Price below lower Bollinger Band (potential reversal up)' });
-            } else if (currentPrice > technicalIndicators.bollingerBands.upper) {
+            } else if (currentPrice > technicalIndicators.bollingerBands.upper && currentStockData.change < 0) { // Prix redescend après avoir touché la bande haute
                 signals.push({ type: 'sell', indicator: 'Bollinger', message: 'Price above upper Bollinger Band (potential reversal down)' });
             }
         }
         
-        // Signal basé sur la tendance
-        if (data.changePercent > 3) {
-            signals.push({ type: 'neutral', indicator: 'Momentum', message: `Strong upward momentum (+${data.changePercent.toFixed(2)}%)` });
+        // Signal basé sur la tendance (ajusté pour être plus conservateur)
+        if (data.changePercent > 1 && data.changePercent <= 3) {
+            signals.push({ type: 'neutral', indicator: 'Momentum', message: `Moderate upward momentum (+${data.changePercent.toFixed(2)}%)` });
+        } else if (data.changePercent > 3) {
+            signals.push({ type: 'buy', indicator: 'Momentum', message: `Strong upward momentum (+${data.changePercent.toFixed(2)}%)` });
+        } else if (data.changePercent < -1 && data.changePercent >= -3) {
+            signals.push({ type: 'neutral', indicator: 'Momentum', message: `Moderate downward momentum (${data.changePercent.toFixed(2)}%)` });
         } else if (data.changePercent < -3) {
-            signals.push({ type: 'neutral', indicator: 'Momentum', message: `Strong downward momentum (${data.changePercent.toFixed(2)}%)` });
+            signals.push({ type: 'sell', indicator: 'Momentum', message: `Strong downward momentum (${data.changePercent.toFixed(2)}%)` });
         }
         
         let signalsHtml = signals.map(signal => {
             const color = signal.type === 'buy' ? '#28a745' : signal.type === 'sell' ? '#dc3545' : '#6c757d';
-            const icon = signal.type === 'buy' ? '📈' : signal.type === 'sell' ? '📉' : '📊';
+            const icon = signal.type === 'buy' ? '⬆️' : signal.type === 'sell' ? '⬇️' : '↔️'; // Icônes plus parlantes
             return `
                 <div style="padding: 12px; margin: 8px 0; background: ${color}15; border-left: 4px solid ${color}; border-radius: 4px;">
                     <strong style="color: ${color};">${icon} ${signal.indicator}:</strong> ${signal.message}
@@ -760,11 +978,11 @@ const MarketData = (function() {
         }).join('');
         
         if (signals.length === 0) {
-            signalsHtml = '<div style="padding: 12px; background: #f8f9fa; border-radius: 4px; text-align: center;">No strong signals detected</div>';
+            signalsHtml = '<div style="padding: 12px; background: #f8f9fa; border-radius: 4px; text-align: center;">No strong signals or specific patterns detected.</div>';
         }
         
         const html = `
-            <h3 style="color: #9D5CE6; margin-bottom: 20px;">🎯 Trading Signals</h3>
+            <h2 class='section-title'>🎯 Trading Signals</h2>
             ${signalsHtml}
             <div style="margin-top: 20px; padding: 15px; background: #fff3cd; border-radius: 8px; border-left: 4px solid #ffc107;">
                 <strong>⚠️ Disclaimer:</strong> These signals are for informational purposes only and should not be considered as financial advice. Always do your own research and consult with a financial advisor before making investment decisions.
@@ -772,6 +990,7 @@ const MarketData = (function() {
         `;
         
         container.innerHTML = html;
+        container.classList.remove('hidden'); // S'assurer que le conteneur est visible
     }
     
     /**
@@ -795,32 +1014,47 @@ const MarketData = (function() {
                 ]
             },
             lineWidth: 2,
-            zIndex: 2
+            zIndex: 2,
+            tooltip: {
+                valueDecimals: 2
+            }
         }];
         
-        // Ajouter les moyennes mobiles si disponibles
+        // Ajouter les moyennes mobiles si disponibles et qu'elles ne sont pas null
         if (technicalIndicators) {
-            if (technicalIndicators.sma20) {
-                const sma20Data = data.timestamps.map(ts => [ts * 1000, technicalIndicators.sma20]);
+            if (technicalIndicators.sma20 && prices.length >= 20) { // Ne pas ajouter si pas assez de données
+                const sma20Data = [];
+                for (let i = 19; i < prices.length; i++) {
+                    const slice = prices.slice(i - 19, i + 1).map(p => p[1]);
+                    sma20Data.push([prices[i][0], calculateSMA(slice, 20)]);
+                }
                 series.push({
                     name: 'SMA 20',
-                    data: sma20Data.slice(-20),
+                    data: sma20Data,
+                    type: 'line', // S'assurer que c'est une ligne
                     color: '#4A74F3',
                     lineWidth: 1,
                     dashStyle: 'Dash',
-                    zIndex: 1
+                    zIndex: 1,
+                    marker: { enabled: false }
                 });
             }
             
-            if (technicalIndicators.sma50) {
-                const sma50Data = data.timestamps.map(ts => [ts * 1000, technicalIndicators.sma50]);
+            if (technicalIndicators.sma50 && prices.length >= 50) {
+                const sma50Data = [];
+                for (let i = 49; i < prices.length; i++) {
+                    const slice = prices.slice(i - 49, i + 1).map(p => p[1]);
+                    sma50Data.push([prices[i][0], calculateSMA(slice, 50)]);
+                }
                 series.push({
                     name: 'SMA 50',
-                    data: sma50Data.slice(-50),
+                    data: sma50Data,
+                    type: 'line',
                     color: '#8E7DE3',
                     lineWidth: 1,
                     dashStyle: 'Dash',
-                    zIndex: 1
+                    zIndex: 1,
+                    marker: { enabled: false }
                 });
             }
         }
@@ -856,7 +1090,7 @@ const MarketData = (function() {
                 area: {
                     marker: { enabled: false }
                 },
-                line: {
+                line: { // Assurez-vous que les lignes n'ont pas de marqueurs par défaut
                     marker: { enabled: false }
                 }
             },
@@ -916,41 +1150,57 @@ const MarketData = (function() {
      * Crée le graphique des indicateurs techniques (RSI)
      */
     function createTechnicalChart(data) {
-        if (!technicalIndicators || !technicalIndicators.rsi) return;
-        
-        // Créer un conteneur pour le graphique RSI s'il n'existe pas
-        let container = document.getElementById('chartTechnical');
-        if (!container) {
-            const volumeChart = document.getElementById('chartVolume');
-            container = document.createElement('div');
-            container.id = 'chartTechnical';
-            container.style.cssText = 'width: 100%; height: 300px; margin-top: 20px;';
-            volumeChart.parentElement.appendChild(container);
+        if (!technicalIndicators || !technicalIndicators.rsi || data.prices.close.length < 15) {
+            document.getElementById('chartTechnical').classList.add('hidden'); // Cacher le graphique si pas de données
+            return;
+        } else {
+            document.getElementById('chartTechnical').classList.remove('hidden');
         }
         
-        // Calculer le RSI pour chaque point
         const rsiData = [];
         const prices = data.prices.close;
-        
-        for (let i = 14; i < prices.length; i++) {
-            const slice = prices.slice(i - 14, i + 1);
-            let gains = 0;
-            let losses = 0;
-            
-            for (let j = 1; j < slice.length; j++) {
-                const change = slice[j] - slice[j - 1];
-                if (change > 0) gains += change;
-                else losses -= change;
-            }
-            
-            const avgGain = gains / 14;
-            const avgLoss = losses / 14;
-            const rs = avgLoss === 0 ? 100 : avgGain / avgLoss;
-            const rsi = 100 - (100 / (1 + rs));
-            
-            rsiData.push([data.timestamps[i] * 1000, rsi]);
+        const timestamps = data.timestamps;
+        const period = 14;
+
+        if (prices.length < period + 1) return;
+
+        // Calcul initial pour la première période
+        let avgGain = 0;
+        let avgLoss = 0;
+        for (let i = 1; i <= period; i++) {
+            const change = prices[i] - prices[i - 1];
+            if (change > 0) avgGain += change;
+            else avgLoss -= change;
         }
+        avgGain /= period;
+        avgLoss /= period;
         
+        // Calcul pour les points suivants
+        if (avgLoss === 0) { // Si pas de pertes, RSI est 100 pour cette période
+            rsiData.push([timestamps[period] * 1000, 100]);
+        } else {
+            const rs = avgGain / avgLoss;
+            rsiData.push([timestamps[period] * 1000, 100 - (100 / (1 + rs))]);
+        }
+
+        for (let i = period + 1; i < prices.length; i++) {
+            const change = prices[i] - prices[i - 1];
+            let currentGain = 0;
+            let currentLoss = 0;
+            if (change > 0) currentGain = change;
+            else currentLoss = -change;
+
+            avgGain = (avgGain * (period - 1) + currentGain) / period;
+            avgLoss = (avgLoss * (period - 1) + currentLoss) / period;
+            
+            if (avgLoss === 0) {
+                rsiData.push([timestamps[i] * 1000, 100]);
+            } else {
+                const rs = avgGain / avgLoss;
+                rsiData.push([timestamps[i] * 1000, 100 - (100 / (1 + rs))]);
+            }
+        }
+
         Highcharts.chart('chartTechnical', {
             chart: {
                 backgroundColor: 'transparent'
@@ -1011,13 +1261,20 @@ const MarketData = (function() {
      */
     function createStatsTable(data) {
         const prices = data.prices.close;
+        
+        // S'assurer qu'il y a assez de données
+        if (prices.length < 2) { // Au moins 2 points pour calculer le retour
+            document.getElementById('statsTable').innerHTML = '<p>Not enough data for statistics.</p>';
+            return;
+        }
+
         const min = Math.min(...prices);
         const max = Math.max(...prices);
         const avg = prices.reduce((a, b) => a + b, 0) / prices.length;
         const volatility = calculateVolatility(prices);
         
         const html = `
-            <h3 style="color: #2649B2; margin-bottom: 15px;">📊 Period Statistics</h3>
+            <h2 class='section-title'>📊 Period Statistics</h2>
             <table>
                 <thead>
                     <tr>
@@ -1028,23 +1285,23 @@ const MarketData = (function() {
                 <tbody>
                     <tr>
                         <td><strong>Period Min</strong></td>
-                        <td>${min.toFixed(2)} ${data.currency}</td>
+                        <td>${formatNumber(min, 2)} ${data.currency}</td>
                     </tr>
                     <tr>
                         <td><strong>Period Max</strong></td>
-                        <td>${max.toFixed(2)} ${data.currency}</td>
+                        <td>${formatNumber(max, 2)} ${data.currency}</td>
                     </tr>
                     <tr>
                         <td><strong>Period Average</strong></td>
-                        <td>${avg.toFixed(2)} ${data.currency}</td>
+                        <td>${formatNumber(avg, 2)} ${data.currency}</td>
                     </tr>
                     <tr>
-                        <td><strong>Volatility (Std Dev)</strong></td>
-                        <td>${volatility.toFixed(2)}%</td>
+                        <td><strong>Volatility (Annualized Std Dev)</strong></td>
+                        <td>${formatNumber(volatility, 2)}%</td>
                     </tr>
                     <tr>
                         <td><strong>Total Return</strong></td>
-                        <td>${((prices[prices.length - 1] - prices[0]) / prices[0] * 100).toFixed(2)}%</td>
+                        <td>${formatNumber(((prices[prices.length - 1] - prices[0]) / prices[0] * 100), 2)}%</td>
                     </tr>
                     <tr>
                         <td><strong>Data Points</strong></td>
@@ -1069,18 +1326,38 @@ const MarketData = (function() {
      * Crée le tableau de valorisation
      */
     function createValuationTable(data) {
-        if (!data.marketCap) return;
-        
+        // ✅ Modification pour s'assurer que valuationTable est toujours après statsTable
         let container = document.getElementById('valuationTable');
+        const resultsSection = document.getElementById('resultsSection');
+        const statsTableDiv = document.getElementById('statsTable');
+        
         if (!container) {
             container = document.createElement('div');
             container.id = 'valuationTable';
-            container.className = 'section-card';
-            document.getElementById('resultsSection').appendChild(container);
+            container.className = 'section'; // Utilisez la classe 'section'
+            resultsSection.insertBefore(container, statsTableDiv.nextSibling);
+        }
+
+        // Vérifier si la plupart des métriques sont N/A
+        const allMetricsAreNA = [
+            data.totalRevenue, data.revenuePerShare, data.operatingMargins,
+            data.grossMargins, data.returnOnAssets, data.totalCash,
+            data.totalDebt, data.quickRatio, data.enterpriseValue,
+            data.enterpriseToRevenue, data.enterpriseToEbitda,
+            data.sharesOutstanding, data.heldPercentInsiders, data.heldPercentInstitutions,
+            data.recommendationKey, data.numberOfAnalystOpinions
+        ].every(val => val === 'N/A' || val === null || val === undefined);
+
+        if (allMetricsAreNA) {
+            container.innerHTML = '';
+            container.classList.add('hidden');
+            return;
+        } else {
+            container.classList.remove('hidden');
         }
         
         const html = `
-            <h3 style="color: #4A74F3; margin-bottom: 15px;">💎 Valuation & Fundamentals</h3>
+            <h2 class='section-title'>💎 Valuation & Fundamentals</h2>
             <table>
                 <thead>
                     <tr>
@@ -1164,7 +1441,7 @@ const MarketData = (function() {
     
     function formatNumber(num, decimals = 0) {
         if (num === 'N/A' || num === null || num === undefined || isNaN(num)) return 'N/A';
-        return Number(num).toLocaleString('en-US', { 
+        return Number(num).toLocaleString('fr-FR', { // ✅ Utiliser 'fr-FR' pour la France
             minimumFractionDigits: decimals, 
             maximumFractionDigits: decimals 
         });
@@ -1175,17 +1452,17 @@ const MarketData = (function() {
         
         const absNum = Math.abs(num);
         
-        if (absNum >= 1e12) return (num / 1e12).toFixed(2) + 'T';
-        if (absNum >= 1e9) return (num / 1e9).toFixed(2) + 'B';
-        if (absNum >= 1e6) return (num / 1e6).toFixed(2) + 'M';
-        if (absNum >= 1e3) return (num / 1e3).toFixed(2) + 'K';
+        if (absNum >= 1e12) return (num / 1e12).toFixed(2).replace('.', ',') + ' T'; // ✅ Formatage FR
+        if (absNum >= 1e9) return (num / 1e9).toFixed(2).replace('.', ',') + ' Md'; // ✅ Formatage FR
+        if (absNum >= 1e6) return (num / 1e6).toFixed(2).replace('.', ',') + ' M'; // ✅ Formatage FR
+        if (absNum >= 1e3) return (num / 1e3).toFixed(2).replace('.', ',') + ' K'; // ✅ Formatage FR
         
-        return num.toFixed(2);
+        return num.toFixed(2).replace('.', ','); // ✅ Formatage FR
     }
     
     function formatPercent(num) {
         if (num === 'N/A' || num === null || num === undefined || isNaN(num)) return 'N/A';
-        return (num * 100).toFixed(2) + '%';
+        return (num * 100).toFixed(2).replace('.', ',') + '%'; // ✅ Formatage FR
     }
     
     // ========== GESTION DE L'AFFICHAGE ==========
@@ -1209,6 +1486,18 @@ const MarketData = (function() {
     function hideResults() {
         const results = document.getElementById('resultsSection');
         if (results) results.classList.add('hidden');
+        // ✅ Cacher toutes les sections qui pourraient avoir été affichées
+        document.getElementById('stockInfo').innerHTML = '';
+        const companyInfo = document.getElementById('companyInfo'); if(companyInfo) companyInfo.innerHTML = '';
+        const financialMetrics = document.getElementById('financialMetrics'); if(financialMetrics) financialMetrics.innerHTML = '';
+        const technicalIndicatorsSection = document.getElementById('technicalIndicatorsSection'); if(technicalIndicatorsSection) technicalIndicatorsSection.innerHTML = '';
+        const tradingSignals = document.getElementById('tradingSignals'); if(tradingSignals) tradingSignals.innerHTML = '';
+        document.getElementById('statsTable').innerHTML = '';
+        const valuationTable = document.getElementById('valuationTable'); if(valuationTable) valuationTable.innerHTML = '';
+
+        // Cacher aussi le graphique technique
+        const chartTechnicalDiv = document.getElementById('chartTechnical');
+        if (chartTechnicalDiv) chartTechnicalDiv.classList.add('hidden');
     }
     
     function showError(message) {
