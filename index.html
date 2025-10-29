@@ -9,227 +9,311 @@
     <script src='https://code.highcharts.com/highcharts.js'></script>
     <script src='https://code.highcharts.com/modules/exporting.js'></script>
     
+    <!-- Font Awesome pour les icônes -->
+    <link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css'>
+    
     <!-- Styles -->
     <link rel='stylesheet' href='assets/css/common.css'>
+    <link rel='stylesheet' href='assets/css/sidebar.css'>
     <link rel='stylesheet' href='assets/css/dashboard.css'>
 </head>
 <body>
-    <div class='container'>
-        <!-- Header -->
-        <header>
-            <h1>Personal Finance Dashboard</h1>
-            <p>Raphael NARDONE | Dynamic Timeline | Auto-saved | <span id='lastUpdate'></span></p>
-        </header>
-        
-        <!-- Navigation -->
-        <nav>
-            <div class='nav-container'>
-                <a href='index.html' class='nav-link'>Budget</a>
-                <a href='monte-carlo.html' class='nav-link'>Monte Carlo</a>
-                <a href='portfolio-optimizer.html' class='nav-link'>Markowitz</a>
-                <a href='risk-parity.html' class='nav-link'>Risk Parity</a>
-                <a href='scenario-analysis.html' class='nav-link'>Scenarios</a>
-                <a href='market-data.html' class='nav-link'>Market Data</a>
+    <div class='layout-wrapper'>
+        <!-- Sidebar Navigation -->
+        <aside class='sidebar' id='sidebar'>
+            <div class='sidebar-header'>
+                <h2><i class='fas fa-chart-line'></i> Finance Hub</h2>
+                <button class='sidebar-toggle' id='sidebarToggle'>
+                    <i class='fas fa-bars'></i>
+                </button>
             </div>
-        </nav>
-        
-        <!-- Stats Cards -->
-        <div id='statsContainer' class='stats-grid'></div>
-        
-        <!-- Main Content -->
-        <div class='content'>
-            <div class='section'>
-                <h2 class='section-title'>Financial Data - Dynamic Timeline</h2>
-                
-                <div class='info-box'>
-                    <h4>How to use</h4>
-                    <p>Edit values directly in the table | Use Bulk Edit to apply values to date ranges | Add past/future months with the buttons below | Adjust Monthly Est Yield to calculate gains automatically | All changes are auto-saved in your browser</p>
-                </div>
-                
-                <!-- Timeline Management -->
-                <div class='toolbar'>
-                    <h3>Timeline Management</h3>
-                    <div class='toolbar-row'>
-                        <button class='btn-add' onclick='Dashboard.addMonthsBefore(12)'>+ 12 Months Before</button>
-                        <button class='btn-add' onclick='Dashboard.addMonthsBefore(1)'>+ 1 Month Before</button>
-                        <button class='btn-add' onclick='Dashboard.addMonthsAfter(1)'>+ 1 Month After</button>
-                        <button class='btn-add' onclick='Dashboard.addMonthsAfter(12)'>+ 12 Months After</button>
-                        <span class='total-months'>Total Months: <span id='totalMonthsDisplay'>300</span></span>
+            
+            <nav class='sidebar-nav'>
+                <!-- Budget Section -->
+                <div class='nav-section'>
+                    <button class='nav-folder active'>
+                        <i class='fas fa-wallet'></i>
+                        <span>Budget</span>
+                        <i class='fas fa-chevron-down arrow'></i>
+                    </button>
+                    <div class='nav-submenu' style='display: block;'>
+                        <a href='index.html' class='nav-link active'>
+                            <i class='fas fa-home'></i>
+                            <span>Dashboard Budget</span>
+                        </a>
                     </div>
                 </div>
                 
-                <!-- Parameters Grid -->
-                <div class='parameters-grid'>
-                    <!-- Investment Parameters -->
-                    <div class='toolbar'>
-                        <h3>Investment Parameters</h3>
-                        <div class='toolbar-row'>
-                            <label>Monthly Est Yield (% annual):</label>
-                            <input type='number' id='monthlyEstYield' step='0.1' value='8' 
-                                   onchange='Dashboard.updateEstYield()'>
-                            <span class='yield-display'>
-                                = <span id='monthlyEstYieldDisplay'>0.67</span>% monthly
-                            </span>
+                <!-- Simulation Section -->
+                <div class='nav-section'>
+                    <button class='nav-folder'>
+                        <i class='fas fa-calculator'></i>
+                        <span>Simulation</span>
+                        <i class='fas fa-chevron-down arrow'></i>
+                    </button>
+                    <div class='nav-submenu'>
+                        <a href='monte-carlo.html' class='nav-link'>
+                            <i class='fas fa-dice'></i>
+                            <span>Monte Carlo</span>
+                        </a>
+                        <a href='portfolio-optimizer.html' class='nav-link'>
+                            <i class='fas fa-chart-pie'></i>
+                            <span>Markowitz</span>
+                        </a>
+                        <a href='risk-parity.html' class='nav-link'>
+                            <i class='fas fa-balance-scale'></i>
+                            <span>Risk Parity</span>
+                        </a>
+                        <a href='scenario-analysis.html' class='nav-link'>
+                            <i class='fas fa-flask'></i>
+                            <span>Scénarios</span>
+                        </a>
+                    </div>
+                </div>
+                
+                <!-- Stocks Section -->
+                <div class='nav-section'>
+                    <button class='nav-folder'>
+                        <i class='fas fa-chart-candlestick'></i>
+                        <span>Stocks</span>
+                        <i class='fas fa-chevron-down arrow'></i>
+                    </button>
+                    <div class='nav-submenu'>
+                        <a href='market-data.html' class='nav-link'>
+                            <i class='fas fa-globe'></i>
+                            <span>Market Data</span>
+                        </a>
+                    </div>
+                </div>
+            </nav>
+            
+            <div class='sidebar-footer'>
+                <div class='user-info'>
+                    <i class='fas fa-user-circle'></i>
+                    <span>Raphael NARDONE</span>
+                </div>
+            </div>
+        </aside>
+        
+        <!-- Main Content Area -->
+        <div class='main-content'>
+            <!-- Header -->
+            <header class='top-header'>
+                <div class='header-left'>
+                    <button class='mobile-toggle' id='mobileToggle'>
+                        <i class='fas fa-bars'></i>
+                    </button>
+                    <h1>Personal Finance Dashboard</h1>
+                </div>
+                <div class='header-right'>
+                    <span class='last-update'>
+                        <i class='fas fa-clock'></i>
+                        <span id='lastUpdate'></span>
+                    </span>
+                </div>
+            </header>
+            
+            <div class='container'>
+                <!-- Stats Cards -->
+                <div id='statsContainer' class='stats-grid'></div>
+                
+                <!-- Main Content -->
+                <div class='content'>
+                    <div class='section'>
+                        <h2 class='section-title'>Financial Data - Dynamic Timeline</h2>
+                        
+                        <div class='info-box'>
+                            <h4>How to use</h4>
+                            <p>Edit values directly in the table | Use Bulk Edit to apply values to date ranges | Add past/future months with the buttons below | Adjust Monthly Est Yield to calculate gains automatically | All changes are auto-saved in your browser</p>
                         </div>
-                        <div class='toolbar-row'>
-                            <button class='btn-primary' onclick='Dashboard.recalculateGains()'>Recalculate All Gains</button>
+                        
+                        <!-- Timeline Management -->
+                        <div class='toolbar'>
+                            <h3>Timeline Management</h3>
+                            <div class='toolbar-row'>
+                                <button class='btn-add' onclick='Dashboard.addMonthsBefore(12)'>+ 12 Months Before</button>
+                                <button class='btn-add' onclick='Dashboard.addMonthsBefore(1)'>+ 1 Month Before</button>
+                                <button class='btn-add' onclick='Dashboard.addMonthsAfter(1)'>+ 1 Month After</button>
+                                <button class='btn-add' onclick='Dashboard.addMonthsAfter(12)'>+ 12 Months After</button>
+                                <span class='total-months'>Total Months: <span id='totalMonthsDisplay'>300</span></span>
+                            </div>
+                        </div>
+                        
+                        <!-- Parameters Grid -->
+                        <div class='parameters-grid'>
+                            <!-- Investment Parameters -->
+                            <div class='toolbar'>
+                                <h3>Investment Parameters</h3>
+                                <div class='toolbar-row'>
+                                    <label>Monthly Est Yield (% annual):</label>
+                                    <input type='number' id='monthlyEstYield' step='0.1' value='8' 
+                                           onchange='Dashboard.updateEstYield()'>
+                                    <span class='yield-display'>
+                                        = <span id='monthlyEstYieldDisplay'>0.67</span>% monthly
+                                    </span>
+                                </div>
+                                <div class='toolbar-row'>
+                                    <button class='btn-primary' onclick='Dashboard.recalculateGains()'>Recalculate All Gains</button>
+                                </div>
+                            </div>
+                            
+                            <!-- Inflation Adjustment -->
+                            <div class='toolbar'>
+                                <h3>Inflation Adjustment</h3>
+                                <div class='toolbar-row'>
+                                    <label>Annual Inflation Rate (%):</label>
+                                    <input type='number' id='inflationRate' step='0.1' value='2.5' 
+                                           onchange='Dashboard.updateInflationRate()'>
+                                    <button class='btn-success' onclick='Dashboard.toggleInflationCharts()' id='btnToggleInflation'>
+                                        Show Inflation-Adjusted Charts
+                                    </button>
+                                    <span id='inflationStatus' class='inflation-status'>OFF</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Bulk Edit Tool -->
+                        <div class='toolbar'>
+                            <h3>Bulk Edit Tool</h3>
+                            <div class='toolbar-row'>
+                                <label>Category:</label>
+                                <select id='bulkCategory'>
+                                    <option value='Salary'>Income - Salary</option>
+                                    <option value='Misc.'>Income - Misc.</option>
+                                    <option value='Rent'>Expenses - Rent</option>
+                                    <option value='Food'>Expenses - Food</option>
+                                    <option value='Fix Costs'>Expenses - Fix Costs</option>
+                                    <option value='Others (Shopping; Restaurant)'>Expenses - Others</option>
+                                    <option value='Investment'>Investment - Monthly Investment</option>
+                                    <option value='Loan (Studies; rental investment)'>Expenses - Loan</option>
+                                    <option value="PEE L'OREAL">Investment - PEE L'Oreal</option>
+                                </select>
+                            </div>
+                            <div class='toolbar-row'>
+                                <label>From:</label>
+                                <input type='month' id='bulkStartMonth'>
+                                <label>To:</label>
+                                <input type='month' id='bulkEndMonth'>
+                            </div>
+                            <div class='toolbar-row'>
+                                <label>Value:</label>
+                                <input type='number' id='bulkValue' step='0.01' placeholder='0.00'>
+                                <button class='btn-success' onclick='Dashboard.applyBulkEdit()'>Apply</button>
+                            </div>
+                        </div>
+                        
+                        <!-- Data Management -->
+                        <div class='toolbar'>
+                            <h3>Data Management</h3>
+                            <div class='toolbar-row'>
+                                <button class='btn-primary' onclick='Dashboard.saveData()'>Save All</button>
+                                <button class='btn-secondary' onclick='Dashboard.exportToJSON()'>Export JSON</button>
+                                <button class='btn-secondary' onclick='Dashboard.importFromJSON()'>Import JSON</button>
+                                <button class='btn-secondary' onclick='Dashboard.resetToDefault()'>Reset</button>
+                                <button class='btn-primary' onclick='Dashboard.updateAllCharts()'>Update Charts</button>
+                            </div>
+                        </div>
+                        
+                        <!-- Data Table -->
+                        <div class='table-container'>
+                            <table class='data-table'>
+                                <thead>
+                                    <tr>
+                                        <th rowspan='2'>Month</th>
+                                        <th colspan='3' style='background: #4A74F3; text-align: center;'>INCOME</th>
+                                        <th colspan='7' style='background: #8E44AD; text-align: center;'>EXPENSES</th>
+                                        <th colspan='7' style='background: #6C3483; text-align: center;'>INVESTMENT</th>
+                                        <th rowspan='2' style='background: #9D5CE6;'>Actions</th>
+                                    </tr>
+                                    <tr>
+                                        <th style='background: #4A74F3;'>Salary</th>
+                                        <th style='background: #4A74F3;'>Misc.</th>
+                                        <th style='background: #6C8BE0;'>Total</th>
+                                        <th style='background: #8E44AD;'>Rent</th>
+                                        <th style='background: #8E44AD;'>Food</th>
+                                        <th style='background: #8E44AD;'>Fix</th>
+                                        <th style='background: #8E44AD;'>Others</th>
+                                        <th style='background: #8E44AD;'>Loan</th>
+                                        <th style='background: #9D5CE6;'>Total</th>
+                                        <th style='background: #9D5CE6;'>Save</th>
+                                        <th style='background: #6C3483;'>Monthly Invest</th>
+                                        <th style='background: #6C3483;'>Monthly Gain</th>
+                                        <th style='background: #6C3483;'>Cum. Gains</th>
+                                        <th style='background: #6C3483;'>PEE</th>
+                                        <th style='background: #9D5CE6;'>Cum.Inv</th>
+                                        <th style='background: #9D5CE6;'>Portfolio</th>
+                                        <th style='background: #9D5CE6;'>ROI%</th>
+                                    </tr>
+                                </thead>
+                                <tbody id='dataTableBody'></tbody>
+                            </table>
                         </div>
                     </div>
                     
-                    <!-- Inflation Adjustment -->
-                    <div class='toolbar'>
-                        <h3>Inflation Adjustment</h3>
-                        <div class='toolbar-row'>
-                            <label>Annual Inflation Rate (%):</label>
-                            <input type='number' id='inflationRate' step='0.1' value='2.5' 
-                                   onchange='Dashboard.updateInflationRate()'>
-                            <button class='btn-success' onclick='Dashboard.toggleInflationCharts()' id='btnToggleInflation'>
-                                Show Inflation-Adjusted Charts
-                            </button>
-                            <span id='inflationStatus' class='inflation-status'>OFF</span>
+                    <!-- Charts Section -->
+                    <div class='charts-container'>
+                        <div class='chart-wrapper'>
+                            <h2 class='section-title'>Income vs Expenses Evolution</h2>
+                            <div id='chart1' class='chart'></div>
+                        </div>
+                        
+                        <div class='grid-2'>
+                            <div class='chart-wrapper'>
+                                <h2 class='section-title'>Income Breakdown</h2>
+                                <div class='local-filter'>
+                                    <label>Select Month:</label>
+                                    <select id='incomeMonthFilter' onchange='Dashboard.updateChart2()'></select>
+                                </div>
+                                <div id='chart2' class='chart'></div>
+                            </div>
+                            <div class='chart-wrapper'>
+                                <h2 class='section-title'>Expenses Breakdown</h2>
+                                <div class='local-filter'>
+                                    <label>Select Month:</label>
+                                    <select id='expenseMonthFilter' onchange='Dashboard.updateChart3()'></select>
+                                </div>
+                                <div id='chart3' class='chart'></div>
+                            </div>
+                        </div>
+                        
+                        <div class='chart-wrapper'>
+                            <h2 class='section-title'>Budget Allocation</h2>
+                            <div class='local-filter'>
+                                <label>Select Month:</label>
+                                <select id='budgetMonthFilter' onchange='Dashboard.updateChart7()'></select>
+                            </div>
+                            <div id='chart7' class='chart'></div>
+                        </div>
+                        
+                        <div class='chart-wrapper'>
+                            <h2 class='section-title'>Savings Evolution</h2>
+                            <div id='chart4' class='chart'></div>
+                        </div>
+                        
+                        <div class='grid-2'>
+                            <div class='chart-wrapper'>
+                                <h2 class='section-title'>Investment Portfolio</h2>
+                                <div id='chart5' class='chart'></div>
+                            </div>
+                            <div class='chart-wrapper'>
+                                <h2 class='section-title'>ROI Evolution</h2>
+                                <div id='chart6' class='chart'></div>
+                            </div>
                         </div>
                     </div>
                 </div>
                 
-                <!-- Bulk Edit Tool -->
-                <div class='toolbar'>
-                    <h3>Bulk Edit Tool</h3>
-                    <div class='toolbar-row'>
-                        <label>Category:</label>
-                        <select id='bulkCategory'>
-                            <option value='Salary'>Income - Salary</option>
-                            <option value='Misc.'>Income - Misc.</option>
-                            <option value='Rent'>Expenses - Rent</option>
-                            <option value='Food'>Expenses - Food</option>
-                            <option value='Fix Costs'>Expenses - Fix Costs</option>
-                            <option value='Others (Shopping; Restaurant)'>Expenses - Others</option>
-                            <option value='Investment'>Investment - Monthly Investment</option>
-                            <option value='Loan (Studies; rental investment)'>Expenses - Loan</option>
-                            <option value="PEE L'OREAL">Investment - PEE L'Oreal</option>
-                        </select>
-                    </div>
-                    <div class='toolbar-row'>
-                        <label>From:</label>
-                        <input type='month' id='bulkStartMonth'>
-                        <label>To:</label>
-                        <input type='month' id='bulkEndMonth'>
-                    </div>
-                    <div class='toolbar-row'>
-                        <label>Value:</label>
-                        <input type='number' id='bulkValue' step='0.01' placeholder='0.00'>
-                        <button class='btn-success' onclick='Dashboard.applyBulkEdit()'>Apply</button>
-                    </div>
-                </div>
-                
-                <!-- Data Management -->
-                <div class='toolbar'>
-                    <h3>Data Management</h3>
-                    <div class='toolbar-row'>
-                        <button class='btn-primary' onclick='Dashboard.saveData()'>Save All</button>
-                        <button class='btn-secondary' onclick='Dashboard.exportToJSON()'>Export JSON</button>
-                        <button class='btn-secondary' onclick='Dashboard.importFromJSON()'>Import JSON</button>
-                        <button class='btn-secondary' onclick='Dashboard.resetToDefault()'>Reset</button>
-                        <button class='btn-primary' onclick='Dashboard.updateAllCharts()'>Update Charts</button>
-                    </div>
-                </div>
-                
-                <!-- Data Table -->
-                <div class='table-container'>
-                    <table class='data-table'>
-                        <thead>
-                            <tr>
-                                <th rowspan='2'>Month</th>
-                                <th colspan='3' style='background: #4A74F3; text-align: center;'>INCOME</th>
-                                <th colspan='7' style='background: #8E44AD; text-align: center;'>EXPENSES</th>
-                                <th colspan='7' style='background: #6C3483; text-align: center;'>INVESTMENT</th>
-                                <th rowspan='2' style='background: #9D5CE6;'>Actions</th>
-                            </tr>
-                            <tr>
-                                <th style='background: #4A74F3;'>Salary</th>
-                                <th style='background: #4A74F3;'>Misc.</th>
-                                <th style='background: #6C8BE0;'>Total</th>
-                                <th style='background: #8E44AD;'>Rent</th>
-                                <th style='background: #8E44AD;'>Food</th>
-                                <th style='background: #8E44AD;'>Fix</th>
-                                <th style='background: #8E44AD;'>Others</th>
-                                <th style='background: #8E44AD;'>Loan</th>
-                                <th style='background: #9D5CE6;'>Total</th>
-                                <th style='background: #9D5CE6;'>Save</th>
-                                <th style='background: #6C3483;'>Monthly Invest</th>
-                                <th style='background: #6C3483;'>Monthly Gain</th>
-                                <th style='background: #6C3483;'>Cum. Gains</th>
-                                <th style='background: #6C3483;'>PEE</th>
-                                <th style='background: #9D5CE6;'>Cum.Inv</th>
-                                <th style='background: #9D5CE6;'>Portfolio</th>
-                                <th style='background: #9D5CE6;'>ROI%</th>
-                            </tr>
-                        </thead>
-                        <tbody id='dataTableBody'></tbody>
-                    </table>
-                </div>
-            </div>
-            
-            <!-- Charts Section -->
-            <div class='charts-container'>
-                <div class='chart-wrapper'>
-                    <h2 class='section-title'>Income vs Expenses Evolution</h2>
-                    <div id='chart1' class='chart'></div>
-                </div>
-                
-                <div class='grid-2'>
-                    <div class='chart-wrapper'>
-                        <h2 class='section-title'>Income Breakdown</h2>
-                        <div class='local-filter'>
-                            <label>Select Month:</label>
-                            <select id='incomeMonthFilter' onchange='Dashboard.updateChart2()'></select>
-                        </div>
-                        <div id='chart2' class='chart'></div>
-                    </div>
-                    <div class='chart-wrapper'>
-                        <h2 class='section-title'>Expenses Breakdown</h2>
-                        <div class='local-filter'>
-                            <label>Select Month:</label>
-                            <select id='expenseMonthFilter' onchange='Dashboard.updateChart3()'></select>
-                        </div>
-                        <div id='chart3' class='chart'></div>
-                    </div>
-                </div>
-                
-                <div class='chart-wrapper'>
-                    <h2 class='section-title'>Budget Allocation</h2>
-                    <div class='local-filter'>
-                        <label>Select Month:</label>
-                        <select id='budgetMonthFilter' onchange='Dashboard.updateChart7()'></select>
-                    </div>
-                    <div id='chart7' class='chart'></div>
-                </div>
-                
-                <div class='chart-wrapper'>
-                    <h2 class='section-title'>Savings Evolution</h2>
-                    <div id='chart4' class='chart'></div>
-                </div>
-                
-                <div class='grid-2'>
-                    <div class='chart-wrapper'>
-                        <h2 class='section-title'>Investment Portfolio</h2>
-                        <div id='chart5' class='chart'></div>
-                    </div>
-                    <div class='chart-wrapper'>
-                        <h2 class='section-title'>ROI Evolution</h2>
-                        <div id='chart6' class='chart'></div>
-                    </div>
-                </div>
+                <!-- Footer -->
+                <footer>
+                    <p>Financial Dashboard | Auto-saved in browser localStorage</p>
+                </footer>
             </div>
         </div>
-        
-        <!-- Footer -->
-        <footer>
-            <p>Financial Dashboard | Auto-saved in browser localStorage</p>
-        </footer>
     </div>
     
     <!-- Scripts -->
     <script src='assets/js/common.js'></script>
+    <script src='assets/js/sidebar.js'></script>
     <script src='assets/js/dashboard.js'></script>
 </body>
 </html>

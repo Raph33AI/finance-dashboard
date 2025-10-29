@@ -9,150 +9,242 @@
     <script src='https://code.highcharts.com/highcharts.js'></script>
     <script src='https://code.highcharts.com/modules/exporting.js'></script>
     
+    <!-- Font Awesome -->
+    <link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css'>
+    
     <!-- Styles -->
     <link rel='stylesheet' href='assets/css/common.css'>
+    <link rel='stylesheet' href='assets/css/sidebar.css'>
     <link rel='stylesheet' href='assets/css/monte-carlo.css'>
 </head>
 <body>
-    <div class='container'>
-        <!-- Header -->
-        <header>
-            <h1>Monte Carlo Simulation</h1>
-            <p>Investment Portfolio Projection | Raphael NARDONE</p>
-        </header>
+    <div class='layout-wrapper'>
         
-        <!-- Navigation -->
-        <nav>
-            <div class='nav-container'>
-                <a href='index.html' class='nav-link'>Budget</a>
-                <a href='monte-carlo.html' class='nav-link'>Monte Carlo</a>
-                <a href='portfolio-optimizer.html' class='nav-link'>Markowitz</a>
-                <a href='risk-parity.html' class='nav-link'>Risk Parity</a>
-                <a href='scenario-analysis.html' class='nav-link'>Scenarios</a>
-                <a href='market-data.html' class='nav-link'>Market Data</a>
-            </div>
-        </nav>
-        
-        <!-- Main Content -->
-        <div class='content'>
-            <!-- Parameters Panel -->
-            <div class='params-panel'>
-                <h2 class='panel-title'>
-                    Simulation Parameters 
-                    <span class='help-icon' onclick='openModal("modalMCIntro")'>?</span>
-                </h2>
-                
-                <div class='params-grid'>
-                    <div class='param-group'>
-                        <label for='monthlyInvestment'>
-                            Monthly Investment (EUR) 
-                            <span class='help-icon help-icon-small' onclick='openModal("modalMCInvest")'>?</span>
-                        </label>
-                        <input type='number' id='monthlyInvestment' value='200' step='10'>
-                        <div class='hint'>Amount invested each month</div>
-                    </div>
-                    
-                    <div class='param-group'>
-                        <label for='monthlyYield'>
-                            Est. Monthly Yield (%) 
-                            <span class='help-icon help-icon-small' onclick='openModal("modalMCYield")'>?</span>
-                        </label>
-                        <input type='number' id='monthlyYield' value='0.67' step='0.01'>
-                        <div class='hint'>Expected monthly return (e.g., 0.67 = 0.67%)</div>
-                    </div>
-                    
-                    <div class='param-group'>
-                        <label for='volatility'>
-                            Volatility (%) 
-                            <span class='help-icon help-icon-small' onclick='openModal("modalMCVol")'>?</span>
-                        </label>
-                        <input type='number' id='volatility' value='15' step='0.5'>
-                        <div class='hint'>Market volatility (e.g., 15 = 15%)</div>
-                    </div>
-                    
-                    <div class='param-group'>
-                        <label for='years'>Projection Horizon (Years)</label>
-                        <input type='number' id='years' value='25' step='1' min='1'>
-                        <div class='hint'>Number of years to simulate</div>
-                    </div>
-                    
-                    <div class='param-group'>
-                        <label for='simulations'>
-                            Number of Simulations 
-                            <span class='help-icon help-icon-small' onclick='openModal("modalMCSim")'>?</span>
-                        </label>
-                        <input type='number' id='simulations' value='1000' step='100' min='100'>
-                        <div class='hint'>More = more accurate (slower)</div>
-                    </div>
-                    
-                    <div class='param-group'>
-                        <label for='targetValue'>Target Portfolio Value (EUR)</label>
-                        <input type='number' id='targetValue' value='100000' step='1000'>
-                        <div class='hint'>Goal to reach (for time analysis)</div>
-                    </div>
-                    
-                    <div class='param-group'>
-                        <label for='inflationRateMC'>Annual Inflation Rate (%)</label>
-                        <input type='number' id='inflationRateMC' value='2.5' step='0.1'>
-                        <div class='hint'>Expected annual inflation (e.g., 2.5%)</div>
-                    </div>
-                </div>
-                
-                <div class='inflation-toggle'>
-                    <label>
-                        <input type='checkbox' id='showInflationMC'>
-                        Show Inflation-Adjusted Values (Real Returns)
-                    </label>
-                </div>
-                
-                <button class='btn-simulate' onclick='MonteCarlo.runSimulation()'>Run Simulation</button>
+        <!-- ============================================
+             SIDEBAR NAVIGATION
+             ============================================ -->
+        <aside class='sidebar' id='sidebar'>
+            <div class='sidebar-header'>
+                <h2><i class='fas fa-chart-line'></i> Finance Hub</h2>
+                <button class='sidebar-toggle' id='sidebarToggle'>
+                    <i class='fas fa-bars'></i>
+                </button>
             </div>
             
-            <!-- Results Panel -->
-            <div id='resultsPanel' class='results-panel hidden'>
-                <h2 class='section-title'>
-                    Simulation Results 
-                    <span class='help-icon' onclick='openModal("modalMCResults")'>?</span>
-                </h2>
-                
-                <h3 class='subsection-title'>Final Portfolio Value</h3>
-                <div id='statsContainer' class='stats-grid'></div>
-                
-                <h3 class='subsection-title'>Portfolio Evolution Over Time</h3>
-                <div id='chart1' class='chart'></div>
-                
-                <div class='charts-grid-2'>
-                    <div>
-                        <h3 class='subsection-title'>Distribution of Final Returns</h3>
-                        <div id='chart2' class='chart chart-medium'></div>
-                    </div>
-                    <div>
-                        <h3 class='subsection-title'>Probability Analysis</h3>
-                        <div id='chart3' class='chart chart-medium'></div>
+            <nav class='sidebar-nav'>
+                <!-- Budget Section -->
+                <div class='nav-section'>
+                    <button class='nav-folder'>
+                        <i class='fas fa-wallet'></i>
+                        <span>Budget</span>
+                        <i class='fas fa-chevron-down arrow'></i>
+                    </button>
+                    <div class='nav-submenu'>
+                        <a href='index.html' class='nav-link'>
+                            <i class='fas fa-home'></i>
+                            <span>Dashboard Budget</span>
+                        </a>
                     </div>
                 </div>
                 
-                <h3 class='subsection-title'>
-                    Risk Analysis 
-                    <span class='help-icon' onclick='openModal("modalMCRisk")'>?</span>
-                </h3>
-                <div id='riskAnalysis' class='stats-grid'></div>
+                <!-- Simulation Section -->
+                <div class='nav-section active'>
+                    <button class='nav-folder active'>
+                        <i class='fas fa-calculator'></i>
+                        <span>Simulation</span>
+                        <i class='fas fa-chevron-down arrow'></i>
+                    </button>
+                    <div class='nav-submenu' style='display: block;'>
+                        <a href='monte-carlo.html' class='nav-link active'>
+                            <i class='fas fa-dice'></i>
+                            <span>Monte Carlo</span>
+                        </a>
+                        <a href='portfolio-optimizer.html' class='nav-link'>
+                            <i class='fas fa-chart-pie'></i>
+                            <span>Markowitz</span>
+                        </a>
+                        <a href='risk-parity.html' class='nav-link'>
+                            <i class='fas fa-balance-scale'></i>
+                            <span>Risk Parity</span>
+                        </a>
+                        <a href='scenario-analysis.html' class='nav-link'>
+                            <i class='fas fa-flask'></i>
+                            <span>Scénarios</span>
+                        </a>
+                    </div>
+                </div>
                 
-                <h3 class='subsection-title'>Stress Testing Scenarios</h3>
-                <div id='chart4' class='chart'></div>
+                <!-- Stocks Section -->
+                <div class='nav-section'>
+                    <button class='nav-folder'>
+                        <i class='fas fa-chart-candlestick'></i>
+                        <span>Stocks</span>
+                        <i class='fas fa-chevron-down arrow'></i>
+                    </button>
+                    <div class='nav-submenu'>
+                        <a href='market-data.html' class='nav-link'>
+                            <i class='fas fa-globe'></i>
+                            <span>Market Data</span>
+                        </a>
+                    </div>
+                </div>
+            </nav>
+            
+            <div class='sidebar-footer'>
+                <div class='user-info'>
+                    <i class='fas fa-user-circle'></i>
+                    <span>Raphael NARDONE</span>
+                </div>
+            </div>
+        </aside>
+        
+        <!-- ============================================
+             MAIN CONTENT AREA
+             ============================================ -->
+        <div class='main-content'>
+            <!-- Top Header -->
+            <header class='top-header'>
+                <div class='header-left'>
+                    <button class='mobile-toggle' id='mobileToggle'>
+                        <i class='fas fa-bars'></i>
+                    </button>
+                    <h1>Monte Carlo Simulation</h1>
+                </div>
+                <div class='header-right'>
+                    <span class='last-update'>
+                        <i class='fas fa-clock'></i>
+                        <span id='lastUpdate'></span>
+                    </span>
+                </div>
+            </header>
+            
+            <!-- Container -->
+            <div class='container'>
+                <!-- Main Content -->
+                <div class='content'>
+                    <!-- Parameters Panel -->
+                    <div class='params-panel'>
+                        <h2 class='panel-title'>
+                            Simulation Parameters 
+                            <span class='help-icon' onclick='openModal("modalMCIntro")'>?</span>
+                        </h2>
+                        
+                        <div class='params-grid'>
+                            <div class='param-group'>
+                                <label for='monthlyInvestment'>
+                                    Monthly Investment (EUR) 
+                                    <span class='help-icon help-icon-small' onclick='openModal("modalMCInvest")'>?</span>
+                                </label>
+                                <input type='number' id='monthlyInvestment' value='200' step='10'>
+                                <div class='hint'>Amount invested each month</div>
+                            </div>
+                            
+                            <div class='param-group'>
+                                <label for='monthlyYield'>
+                                    Est. Monthly Yield (%) 
+                                    <span class='help-icon help-icon-small' onclick='openModal("modalMCYield")'>?</span>
+                                </label>
+                                <input type='number' id='monthlyYield' value='0.67' step='0.01'>
+                                <div class='hint'>Expected monthly return (e.g., 0.67 = 0.67%)</div>
+                            </div>
+                            
+                            <div class='param-group'>
+                                <label for='volatility'>
+                                    Volatility (%) 
+                                    <span class='help-icon help-icon-small' onclick='openModal("modalMCVol")'>?</span>
+                                </label>
+                                <input type='number' id='volatility' value='15' step='0.5'>
+                                <div class='hint'>Market volatility (e.g., 15 = 15%)</div>
+                            </div>
+                            
+                            <div class='param-group'>
+                                <label for='years'>Projection Horizon (Years)</label>
+                                <input type='number' id='years' value='25' step='1' min='1'>
+                                <div class='hint'>Number of years to simulate</div>
+                            </div>
+                            
+                            <div class='param-group'>
+                                <label for='simulations'>
+                                    Number of Simulations 
+                                    <span class='help-icon help-icon-small' onclick='openModal("modalMCSim")'>?</span>
+                                </label>
+                                <input type='number' id='simulations' value='1000' step='100' min='100'>
+                                <div class='hint'>More = more accurate (slower)</div>
+                            </div>
+                            
+                            <div class='param-group'>
+                                <label for='targetValue'>Target Portfolio Value (EUR)</label>
+                                <input type='number' id='targetValue' value='100000' step='1000'>
+                                <div class='hint'>Goal to reach (for time analysis)</div>
+                            </div>
+                            
+                            <div class='param-group'>
+                                <label for='inflationRateMC'>Annual Inflation Rate (%)</label>
+                                <input type='number' id='inflationRateMC' value='2.5' step='0.1'>
+                                <div class='hint'>Expected annual inflation (e.g., 2.5%)</div>
+                            </div>
+                        </div>
+                        
+                        <div class='inflation-toggle'>
+                            <label>
+                                <input type='checkbox' id='showInflationMC'>
+                                Show Inflation-Adjusted Values (Real Returns)
+                            </label>
+                        </div>
+                        
+                        <button class='btn-simulate' onclick='MonteCarlo.runSimulation()'>Run Simulation</button>
+                    </div>
+                    
+                    <!-- Results Panel -->
+                    <div id='resultsPanel' class='results-panel hidden'>
+                        <h2 class='section-title'>
+                            Simulation Results 
+                            <span class='help-icon' onclick='openModal("modalMCResults")'>?</span>
+                        </h2>
+                        
+                        <h3 class='subsection-title'>Final Portfolio Value</h3>
+                        <div id='statsContainer' class='stats-grid'></div>
+                        
+                        <h3 class='subsection-title'>Portfolio Evolution Over Time</h3>
+                        <div id='chart1' class='chart'></div>
+                        
+                        <div class='charts-grid-2'>
+                            <div>
+                                <h3 class='subsection-title'>Distribution of Final Returns</h3>
+                                <div id='chart2' class='chart chart-medium'></div>
+                            </div>
+                            <div>
+                                <h3 class='subsection-title'>Probability Analysis</h3>
+                                <div id='chart3' class='chart chart-medium'></div>
+                            </div>
+                        </div>
+                        
+                        <h3 class='subsection-title'>
+                            Risk Analysis 
+                            <span class='help-icon' onclick='openModal("modalMCRisk")'>?</span>
+                        </h3>
+                        <div id='riskAnalysis' class='stats-grid'></div>
+                        
+                        <h3 class='subsection-title'>Stress Testing Scenarios</h3>
+                        <div id='chart4' class='chart'></div>
+                        
+                        <h3 class='subsection-title'>Time to Target</h3>
+                        <div id='chart5' class='chart'></div>
+                    </div>
+                </div>
                 
-                <h3 class='subsection-title'>Time to Target</h3>
-                <div id='chart5' class='chart'></div>
+                <!-- Footer -->
+                <footer>
+                    <p>Monte Carlo Simulation | Generated with advanced stochastic modeling</p>
+                </footer>
             </div>
         </div>
         
-        <!-- Footer -->
-        <footer>
-            <p>Monte Carlo Simulation | Generated with advanced stochastic modeling</p>
-        </footer>
     </div>
     
-    <!-- MODALS -->
+    <!-- ============================================
+         MODALS
+         ============================================ -->
     <div id='modalMCIntro' class='modal'>
         <div class='modal-content'>
             <div class='modal-header'>
@@ -317,6 +409,7 @@
     
     <!-- Scripts -->
     <script src='assets/js/common.js'></script>
+    <script src='assets/js/sidebar.js'></script>
     <script src='assets/js/monte-carlo.js'></script>
 </body>
 </html>

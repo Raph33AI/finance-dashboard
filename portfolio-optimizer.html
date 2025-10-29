@@ -10,120 +10,212 @@
     <script src='https://code.highcharts.com/highcharts-more.js'></script>
     <script src='https://code.highcharts.com/modules/exporting.js'></script>
     
+    <!-- Font Awesome -->
+    <link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css'>
+    
     <!-- Styles -->
     <link rel='stylesheet' href='assets/css/common.css'>
+    <link rel='stylesheet' href='assets/css/sidebar.css'>
     <link rel='stylesheet' href='assets/css/portfolio-optimizer.css'>
 </head>
 <body>
-    <div class='container'>
-        <!-- Header -->
-        <header>
-            <h1>Portfolio Optimizer</h1>
-            <p>Markowitz Mean-Variance Model | Raphael NARDONE</p>
-        </header>
+    <div class='layout-wrapper'>
         
-        <!-- Navigation -->
-        <nav>
-            <div class='nav-container'>
-                <a href='index.html' class='nav-link'>Budget</a>
-                <a href='monte-carlo.html' class='nav-link'>Monte Carlo</a>
-                <a href='portfolio-optimizer.html' class='nav-link'>Markowitz</a>
-                <a href='risk-parity.html' class='nav-link'>Risk Parity</a>
-                <a href='scenario-analysis.html' class='nav-link'>Scenarios</a>
-                <a href='market-data.html' class='nav-link'>Market Data</a>
-            </div>
-        </nav>
-        
-        <!-- Main Content -->
-        <div class='content'>
-            <!-- Step 1: Define Assets -->
-            <div class='section'>
-                <h2 class='section-title'>
-                    Step 1: Define Your Assets 
-                    <span class='help-icon' onclick='openModal("modalPOIntro")'>?</span>
-                </h2>
-                <div class='info-box'>
-                    <h4>How to use</h4>
-                    <p>Enter the expected annual return (%), annual volatility (%), and correlation with other assets for each investment.</p>
-                </div>
-                <div id='assetsContainer' class='asset-grid'></div>
-                <button class='btn-add' onclick='PortfolioOptimizer.addAsset()'>Add Asset</button>
+        <!-- ============================================
+             SIDEBAR NAVIGATION
+             ============================================ -->
+        <aside class='sidebar' id='sidebar'>
+            <div class='sidebar-header'>
+                <h2><i class='fas fa-chart-line'></i> Finance Hub</h2>
+                <button class='sidebar-toggle' id='sidebarToggle'>
+                    <i class='fas fa-bars'></i>
+                </button>
             </div>
             
-            <!-- Step 2: Optimization Settings -->
-            <div class='section'>
-                <h2 class='section-title'>Step 2: Optimization Settings</h2>
-                <div class='asset-grid'>
-                    <div class='asset-card'>
-                        <h4>
-                            Risk-Free Rate 
-                            <span class='help-icon help-icon-small' onclick='openModal("modalPORisk")'>?</span>
-                        </h4>
-                        <div class='asset-input-group'>
-                            <label>Annual Risk-Free Rate (%)</label>
-                            <input type='number' id='riskFreeRate' value='3.5' step='0.1'>
-                        </div>
-                    </div>
-                    <div class='asset-card'>
-                        <h4>Inflation Settings</h4>
-                        <div class='asset-input-group'>
-                            <label>Annual Inflation Rate (%)</label>
-                            <input type='number' id='inflationRatePO' value='2.5' step='0.1'>
-                        </div>
-                        <div class='asset-input-group'>
-                            <label class='checkbox-label'>
-                                <input type='checkbox' id='showInflationPO'>
-                                Show Real (Inflation-Adjusted) Returns
-                            </label>
-                        </div>
+            <nav class='sidebar-nav'>
+                <!-- Budget Section -->
+                <div class='nav-section'>
+                    <button class='nav-folder'>
+                        <i class='fas fa-wallet'></i>
+                        <span>Budget</span>
+                        <i class='fas fa-chevron-down arrow'></i>
+                    </button>
+                    <div class='nav-submenu'>
+                        <a href='index.html' class='nav-link'>
+                            <i class='fas fa-home'></i>
+                            <span>Dashboard Budget</span>
+                        </a>
                     </div>
                 </div>
-                <div class='btn-container'>
-                    <button class='btn-primary' onclick='PortfolioOptimizer.optimizePortfolio()'>Optimize Portfolio</button>
-                    <button class='btn-secondary' onclick='PortfolioOptimizer.resetAssets()'>Reset All</button>
+                
+                <!-- Simulation Section -->
+                <div class='nav-section active'>
+                    <button class='nav-folder active'>
+                        <i class='fas fa-calculator'></i>
+                        <span>Simulation</span>
+                        <i class='fas fa-chevron-down arrow'></i>
+                    </button>
+                    <div class='nav-submenu' style='display: block;'>
+                        <a href='monte-carlo.html' class='nav-link'>
+                            <i class='fas fa-dice'></i>
+                            <span>Monte Carlo</span>
+                        </a>
+                        <a href='portfolio-optimizer.html' class='nav-link active'>
+                            <i class='fas fa-chart-pie'></i>
+                            <span>Markowitz</span>
+                        </a>
+                        <a href='risk-parity.html' class='nav-link'>
+                            <i class='fas fa-balance-scale'></i>
+                            <span>Risk Parity</span>
+                        </a>
+                        <a href='scenario-analysis.html' class='nav-link'>
+                            <i class='fas fa-flask'></i>
+                            <span>Scénarios</span>
+                        </a>
+                    </div>
+                </div>
+                
+                <!-- Stocks Section -->
+                <div class='nav-section'>
+                    <button class='nav-folder'>
+                        <i class='fas fa-chart-candlestick'></i>
+                        <span>Stocks</span>
+                        <i class='fas fa-chevron-down arrow'></i>
+                    </button>
+                    <div class='nav-submenu'>
+                        <a href='market-data.html' class='nav-link'>
+                            <i class='fas fa-globe'></i>
+                            <span>Market Data</span>
+                        </a>
+                    </div>
+                </div>
+            </nav>
+            
+            <div class='sidebar-footer'>
+                <div class='user-info'>
+                    <i class='fas fa-user-circle'></i>
+                    <span>Raphael NARDONE</span>
                 </div>
             </div>
+        </aside>
+        
+        <!-- ============================================
+             MAIN CONTENT AREA
+             ============================================ -->
+        <div class='main-content'>
+            <!-- Top Header -->
+            <header class='top-header'>
+                <div class='header-left'>
+                    <button class='mobile-toggle' id='mobileToggle'>
+                        <i class='fas fa-bars'></i>
+                    </button>
+                    <h1>Portfolio Optimizer - Markowitz</h1>
+                </div>
+                <div class='header-right'>
+                    <span class='last-update'>
+                        <i class='fas fa-clock'></i>
+                        <span id='lastUpdate'></span>
+                    </span>
+                </div>
+            </header>
             
-            <!-- Results Section -->
-            <div id='resultsSection' class='section hidden'>
-                <h2 class='section-title'>
-                    Optimization Results 
-                    <span class='help-icon' onclick='openModal("modalPOResults")'>?</span>
-                </h2>
-                <div id='globalStats' class='stats-box'></div>
-                
-                <h3 class='subsection-title'>
-                    Efficient Frontier 
-                    <span class='help-icon help-icon-small' onclick='openModal("modalPOFrontier")'>?</span>
-                </h3>
-                <div id='chartFrontier' class='chart'></div>
-                
-                <div class='charts-grid-2'>
-                    <div>
+            <!-- Container -->
+            <div class='container'>
+                <!-- Main Content -->
+                <div class='content'>
+                    <!-- Step 1: Define Assets -->
+                    <div class='section'>
+                        <h2 class='section-title'>
+                            Step 1: Define Your Assets 
+                            <span class='help-icon' onclick='openModal("modalPOIntro")'>?</span>
+                        </h2>
+                        <div class='info-box'>
+                            <h4>How to use</h4>
+                            <p>Enter the expected annual return (%), annual volatility (%), and correlation with other assets for each investment.</p>
+                        </div>
+                        <div id='assetsContainer' class='asset-grid'></div>
+                        <button class='btn-add' onclick='PortfolioOptimizer.addAsset()'>Add Asset</button>
+                    </div>
+                    
+                    <!-- Step 2: Optimization Settings -->
+                    <div class='section'>
+                        <h2 class='section-title'>Step 2: Optimization Settings</h2>
+                        <div class='asset-grid'>
+                            <div class='asset-card'>
+                                <h4>
+                                    Risk-Free Rate 
+                                    <span class='help-icon help-icon-small' onclick='openModal("modalPORisk")'>?</span>
+                                </h4>
+                                <div class='asset-input-group'>
+                                    <label>Annual Risk-Free Rate (%)</label>
+                                    <input type='number' id='riskFreeRate' value='3.5' step='0.1'>
+                                </div>
+                            </div>
+                            <div class='asset-card'>
+                                <h4>Inflation Settings</h4>
+                                <div class='asset-input-group'>
+                                    <label>Annual Inflation Rate (%)</label>
+                                    <input type='number' id='inflationRatePO' value='2.5' step='0.1'>
+                                </div>
+                                <div class='asset-input-group'>
+                                    <label class='checkbox-label'>
+                                        <input type='checkbox' id='showInflationPO'>
+                                        Show Real (Inflation-Adjusted) Returns
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class='btn-container'>
+                            <button class='btn-primary' onclick='PortfolioOptimizer.optimizePortfolio()'>Optimize Portfolio</button>
+                            <button class='btn-secondary' onclick='PortfolioOptimizer.resetAssets()'>Reset All</button>
+                        </div>
+                    </div>
+                    
+                    <!-- Results Section -->
+                    <div id='resultsSection' class='section hidden'>
+                        <h2 class='section-title'>
+                            Optimization Results 
+                            <span class='help-icon' onclick='openModal("modalPOResults")'>?</span>
+                        </h2>
+                        <div id='globalStats' class='stats-box'></div>
+                        
                         <h3 class='subsection-title'>
-                            Optimal Allocation (Max Sharpe) 
-                            <span class='help-icon help-icon-small' onclick='openModal("modalPOSharpe")'>?</span>
+                            Efficient Frontier 
+                            <span class='help-icon help-icon-small' onclick='openModal("modalPOFrontier")'>?</span>
                         </h3>
-                        <div id='chartAllocation1' class='chart chart-medium'></div>
-                    </div>
-                    <div>
-                        <h3 class='subsection-title'>Minimum Variance</h3>
-                        <div id='chartAllocation2' class='chart chart-medium'></div>
+                        <div id='chartFrontier' class='chart'></div>
+                        
+                        <div class='charts-grid-2'>
+                            <div>
+                                <h3 class='subsection-title'>
+                                    Optimal Allocation (Max Sharpe) 
+                                    <span class='help-icon help-icon-small' onclick='openModal("modalPOSharpe")'>?</span>
+                                </h3>
+                                <div id='chartAllocation1' class='chart chart-medium'></div>
+                            </div>
+                            <div>
+                                <h3 class='subsection-title'>Minimum Variance</h3>
+                                <div id='chartAllocation2' class='chart chart-medium'></div>
+                            </div>
+                        </div>
+                        
+                        <h3 class='subsection-title'>Detailed Allocations</h3>
+                        <div id='allocationTable'></div>
                     </div>
                 </div>
                 
-                <h3 class='subsection-title'>Detailed Allocations</h3>
-                <div id='allocationTable'></div>
+                <!-- Footer -->
+                <footer>
+                    <p>Portfolio Optimizer | Markowitz Mean-Variance Model</p>
+                </footer>
             </div>
         </div>
         
-        <!-- Footer -->
-        <footer>
-            <p>Portfolio Optimizer | Markowitz Mean-Variance Model</p>
-        </footer>
     </div>
     
-    <!-- MODALS -->
+    <!-- ============================================
+         MODALS
+         ============================================ -->
     <div id='modalPOIntro' class='modal'>
         <div class='modal-content'>
             <div class='modal-header'>
@@ -235,6 +327,7 @@
     
     <!-- Scripts -->
     <script src='assets/js/common.js'></script>
+    <script src='assets/js/sidebar.js'></script>
     <script src='assets/js/portfolio-optimizer.js'></script>
 </body>
 </html>

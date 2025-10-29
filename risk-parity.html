@@ -10,108 +10,200 @@
     <script src='https://code.highcharts.com/highcharts-more.js'></script>
     <script src='https://code.highcharts.com/modules/exporting.js'></script>
     
+    <!-- Font Awesome -->
+    <link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css'>
+    
     <!-- Styles -->
     <link rel='stylesheet' href='assets/css/common.css'>
+    <link rel='stylesheet' href='assets/css/sidebar.css'>
     <link rel='stylesheet' href='assets/css/risk-parity.css'>
 </head>
 <body>
-    <div class='container'>
-        <!-- Header -->
-        <header>
-            <h1>Risk Parity Portfolio</h1>
-            <p>Equal Risk Contribution Model | Raphael NARDONE</p>
-        </header>
+    <div class='layout-wrapper'>
         
-        <!-- Navigation -->
-        <nav>
-            <div class='nav-container'>
-                <a href='index.html' class='nav-link'>Budget</a>
-                <a href='monte-carlo.html' class='nav-link'>Monte Carlo</a>
-                <a href='portfolio-optimizer.html' class='nav-link'>Markowitz</a>
-                <a href='risk-parity.html' class='nav-link'>Risk Parity</a>
-                <a href='scenario-analysis.html' class='nav-link'>Scenarios</a>
-                <a href='market-data.html' class='nav-link'>Market Data</a>
-            </div>
-        </nav>
-        
-        <!-- Main Content -->
-        <div class='content'>
-            <!-- Introduction -->
-            <div class='section'>
-                <h2 class='section-title'>
-                    What is Risk Parity? 
-                    <span class='help-icon' onclick='openModal("modalRPIntro")'>?</span>
-                </h2>
-                <div class='info-box'>
-                    <h4>Risk Parity vs Markowitz</h4>
-                    <p><strong>Markowitz:</strong> Maximizes return for a given risk level (focuses on capital allocation)</p>
-                    <p><strong>Risk Parity:</strong> Equalizes risk contribution from each asset (focuses on risk balance)</p>
-                    <p><strong>Key Difference:</strong> Markowitz might allocate 80% to low-risk bonds, while Risk Parity ensures each asset contributes equally to portfolio risk.</p>
-                    <p><strong>Use Case:</strong> Risk Parity is more stable during market stress and avoids over-concentration.</p>
-                </div>
+        <!-- ============================================
+             SIDEBAR NAVIGATION
+             ============================================ -->
+        <aside class='sidebar' id='sidebar'>
+            <div class='sidebar-header'>
+                <h2><i class='fas fa-chart-line'></i> Finance Hub</h2>
+                <button class='sidebar-toggle' id='sidebarToggle'>
+                    <i class='fas fa-bars'></i>
+                </button>
             </div>
             
-            <!-- Step 1: Define Assets -->
-            <div class='section'>
-                <h2 class='section-title'>
-                    Step 1: Define Your Assets 
-                    <span class='help-icon' onclick='openModal("modalRPAssets")'>?</span>
-                </h2>
-                <div class='info-box'>
-                    <h4>How to use</h4>
-                    <p>Enter the annual volatility (%) and correlation for each asset. Risk Parity will calculate weights so each asset contributes equally to total portfolio risk.</p>
-                </div>
-                <div id='assetsContainer' class='asset-grid'></div>
-                <button class='btn-add' onclick='RiskParity.addAsset()'>Add Asset</button>
-            </div>
-            
-            <!-- Step 2: Calculate -->
-            <div class='section'>
-                <h2 class='section-title'>Step 2: Calculate Risk Parity Allocation</h2>
-                <div class='btn-container'>
-                    <button class='btn-primary' onclick='RiskParity.calculateRiskParity()'>Calculate Risk Parity</button>
-                    <button class='btn-secondary' onclick='RiskParity.resetAssets()'>Reset All</button>
-                </div>
-            </div>
-            
-            <!-- Results Section -->
-            <div id='resultsSection' class='section hidden'>
-                <h2 class='section-title'>
-                    Risk Parity Results 
-                    <span class='help-icon' onclick='openModal("modalRPResults")'>?</span>
-                </h2>
-                <div id='globalStats' class='stats-box'></div>
-                
-                <h3 class='subsection-title'>Allocation Comparison</h3>
-                <div class='charts-grid-2'>
-                    <div>
-                        <h4 class='chart-subtitle'>Risk Parity Allocation</h4>
-                        <div id='chartRiskParity' class='chart chart-medium'></div>
-                    </div>
-                    <div>
-                        <h4 class='chart-subtitle'>Equal Weight Allocation (Naive)</h4>
-                        <div id='chartEqualWeight' class='chart chart-medium'></div>
+            <nav class='sidebar-nav'>
+                <!-- Budget Section -->
+                <div class='nav-section'>
+                    <button class='nav-folder'>
+                        <i class='fas fa-wallet'></i>
+                        <span>Budget</span>
+                        <i class='fas fa-chevron-down arrow'></i>
+                    </button>
+                    <div class='nav-submenu'>
+                        <a href='index.html' class='nav-link'>
+                            <i class='fas fa-home'></i>
+                            <span>Dashboard Budget</span>
+                        </a>
                     </div>
                 </div>
                 
-                <h3 class='subsection-title'>
-                    Risk Contribution Analysis 
-                    <span class='help-icon' onclick='openModal("modalRPContribution")'>?</span>
-                </h3>
-                <div id='chartRiskContribution' class='chart'></div>
+                <!-- Simulation Section -->
+                <div class='nav-section active'>
+                    <button class='nav-folder active'>
+                        <i class='fas fa-calculator'></i>
+                        <span>Simulation</span>
+                        <i class='fas fa-chevron-down arrow'></i>
+                    </button>
+                    <div class='nav-submenu' style='display: block;'>
+                        <a href='monte-carlo.html' class='nav-link'>
+                            <i class='fas fa-dice'></i>
+                            <span>Monte Carlo</span>
+                        </a>
+                        <a href='portfolio-optimizer.html' class='nav-link'>
+                            <i class='fas fa-chart-pie'></i>
+                            <span>Markowitz</span>
+                        </a>
+                        <a href='risk-parity.html' class='nav-link active'>
+                            <i class='fas fa-balance-scale'></i>
+                            <span>Risk Parity</span>
+                        </a>
+                        <a href='scenario-analysis.html' class='nav-link'>
+                            <i class='fas fa-flask'></i>
+                            <span>Scénarios</span>
+                        </a>
+                    </div>
+                </div>
                 
-                <h3 class='subsection-title'>Detailed Comparison</h3>
-                <div id='comparisonTable'></div>
+                <!-- Stocks Section -->
+                <div class='nav-section'>
+                    <button class='nav-folder'>
+                        <i class='fas fa-chart-candlestick'></i>
+                        <span>Stocks</span>
+                        <i class='fas fa-chevron-down arrow'></i>
+                    </button>
+                    <div class='nav-submenu'>
+                        <a href='market-data.html' class='nav-link'>
+                            <i class='fas fa-globe'></i>
+                            <span>Market Data</span>
+                        </a>
+                    </div>
+                </div>
+            </nav>
+            
+            <div class='sidebar-footer'>
+                <div class='user-info'>
+                    <i class='fas fa-user-circle'></i>
+                    <span>Raphael NARDONE</span>
+                </div>
+            </div>
+        </aside>
+        
+        <!-- ============================================
+             MAIN CONTENT AREA
+             ============================================ -->
+        <div class='main-content'>
+            <!-- Top Header -->
+            <header class='top-header'>
+                <div class='header-left'>
+                    <button class='mobile-toggle' id='mobileToggle'>
+                        <i class='fas fa-bars'></i>
+                    </button>
+                    <h1>Risk Parity Portfolio</h1>
+                </div>
+                <div class='header-right'>
+                    <span class='last-update'>
+                        <i class='fas fa-clock'></i>
+                        <span id='lastUpdate'></span>
+                    </span>
+                </div>
+            </header>
+            
+            <!-- Container -->
+            <div class='container'>
+                <!-- Main Content -->
+                <div class='content'>
+                    <!-- Introduction -->
+                    <div class='section'>
+                        <h2 class='section-title'>
+                            What is Risk Parity? 
+                            <span class='help-icon' onclick='openModal("modalRPIntro")'>?</span>
+                        </h2>
+                        <div class='info-box'>
+                            <h4>Risk Parity vs Markowitz</h4>
+                            <p><strong>Markowitz:</strong> Maximizes return for a given risk level (focuses on capital allocation)</p>
+                            <p><strong>Risk Parity:</strong> Equalizes risk contribution from each asset (focuses on risk balance)</p>
+                            <p><strong>Key Difference:</strong> Markowitz might allocate 80% to low-risk bonds, while Risk Parity ensures each asset contributes equally to portfolio risk.</p>
+                            <p><strong>Use Case:</strong> Risk Parity is more stable during market stress and avoids over-concentration.</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Step 1: Define Assets -->
+                    <div class='section'>
+                        <h2 class='section-title'>
+                            Step 1: Define Your Assets 
+                            <span class='help-icon' onclick='openModal("modalRPAssets")'>?</span>
+                        </h2>
+                        <div class='info-box'>
+                            <h4>How to use</h4>
+                            <p>Enter the annual volatility (%) and correlation for each asset. Risk Parity will calculate weights so each asset contributes equally to total portfolio risk.</p>
+                        </div>
+                        <div id='assetsContainer' class='asset-grid'></div>
+                        <button class='btn-add' onclick='RiskParity.addAsset()'>Add Asset</button>
+                    </div>
+                    
+                    <!-- Step 2: Calculate -->
+                    <div class='section'>
+                        <h2 class='section-title'>Step 2: Calculate Risk Parity Allocation</h2>
+                        <div class='btn-container'>
+                            <button class='btn-primary' onclick='RiskParity.calculateRiskParity()'>Calculate Risk Parity</button>
+                            <button class='btn-secondary' onclick='RiskParity.resetAssets()'>Reset All</button>
+                        </div>
+                    </div>
+                    
+                    <!-- Results Section -->
+                    <div id='resultsSection' class='section hidden'>
+                        <h2 class='section-title'>
+                            Risk Parity Results 
+                            <span class='help-icon' onclick='openModal("modalRPResults")'>?</span>
+                        </h2>
+                        <div id='globalStats' class='stats-box'></div>
+                        
+                        <h3 class='subsection-title'>Allocation Comparison</h3>
+                        <div class='charts-grid-2'>
+                            <div>
+                                <h4 class='chart-subtitle'>Risk Parity Allocation</h4>
+                                <div id='chartRiskParity' class='chart chart-medium'></div>
+                            </div>
+                            <div>
+                                <h4 class='chart-subtitle'>Equal Weight Allocation (Naive)</h4>
+                                <div id='chartEqualWeight' class='chart chart-medium'></div>
+                            </div>
+                        </div>
+                        
+                        <h3 class='subsection-title'>
+                            Risk Contribution Analysis 
+                            <span class='help-icon' onclick='openModal("modalRPContribution")'>?</span>
+                        </h3>
+                        <div id='chartRiskContribution' class='chart'></div>
+                        
+                        <h3 class='subsection-title'>Detailed Comparison</h3>
+                        <div id='comparisonTable'></div>
+                    </div>
+                </div>
+                
+                <!-- Footer -->
+                <footer>
+                    <p>Risk Parity Portfolio | Equal Risk Contribution Model</p>
+                </footer>
             </div>
         </div>
         
-        <!-- Footer -->
-        <footer>
-            <p>Risk Parity Portfolio | Equal Risk Contribution Model</p>
-        </footer>
     </div>
     
-    <!-- MODALS -->
+    <!-- ============================================
+         MODALS
+         ============================================ -->
     <div id='modalRPIntro' class='modal'>
         <div class='modal-content'>
             <div class='modal-header'>
@@ -202,6 +294,7 @@
     
     <!-- Scripts -->
     <script src='assets/js/common.js'></script>
+    <script src='assets/js/sidebar.js'></script>
     <script src='assets/js/risk-parity.js'></script>
 </body>
 </html>

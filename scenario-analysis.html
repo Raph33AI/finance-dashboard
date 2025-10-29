@@ -10,201 +10,293 @@
     <script src='https://code.highcharts.com/modules/heatmap.js'></script>
     <script src='https://code.highcharts.com/modules/exporting.js'></script>
     
+    <!-- Font Awesome -->
+    <link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css'>
+    
     <!-- Styles -->
     <link rel='stylesheet' href='assets/css/common.css'>
+    <link rel='stylesheet' href='assets/css/sidebar.css'>
     <link rel='stylesheet' href='assets/css/scenario-analysis.css'>
 </head>
 <body>
-    <div class='container'>
-        <!-- Header -->
-        <header>
-            <h1>Scenario Analysis</h1>
-            <p>Stress Testing Your Portfolio | Raphael NARDONE</p>
-        </header>
+    <div class='layout-wrapper'>
         
-        <!-- Navigation -->
-        <nav>
-            <div class='nav-container'>
-                <a href='index.html' class='nav-link'>Budget</a>
-                <a href='monte-carlo.html' class='nav-link'>Monte Carlo</a>
-                <a href='portfolio-optimizer.html' class='nav-link'>Markowitz</a>
-                <a href='risk-parity.html' class='nav-link'>Risk Parity</a>
-                <a href='scenario-analysis.html' class='nav-link'>Scenarios</a>
-                <a href='market-data.html' class='nav-link'>Market Data</a>
+        <!-- ============================================
+             SIDEBAR NAVIGATION
+             ============================================ -->
+        <aside class='sidebar' id='sidebar'>
+            <div class='sidebar-header'>
+                <h2><i class='fas fa-chart-line'></i> Finance Hub</h2>
+                <button class='sidebar-toggle' id='sidebarToggle'>
+                    <i class='fas fa-bars'></i>
+                </button>
             </div>
-        </nav>
+            
+            <nav class='sidebar-nav'>
+                <!-- Budget Section -->
+                <div class='nav-section'>
+                    <button class='nav-folder'>
+                        <i class='fas fa-wallet'></i>
+                        <span>Budget</span>
+                        <i class='fas fa-chevron-down arrow'></i>
+                    </button>
+                    <div class='nav-submenu'>
+                        <a href='index.html' class='nav-link'>
+                            <i class='fas fa-home'></i>
+                            <span>Dashboard Budget</span>
+                        </a>
+                    </div>
+                </div>
+                
+                <!-- Simulation Section -->
+                <div class='nav-section active'>
+                    <button class='nav-folder active'>
+                        <i class='fas fa-calculator'></i>
+                        <span>Simulation</span>
+                        <i class='fas fa-chevron-down arrow'></i>
+                    </button>
+                    <div class='nav-submenu' style='display: block;'>
+                        <a href='monte-carlo.html' class='nav-link'>
+                            <i class='fas fa-dice'></i>
+                            <span>Monte Carlo</span>
+                        </a>
+                        <a href='portfolio-optimizer.html' class='nav-link'>
+                            <i class='fas fa-chart-pie'></i>
+                            <span>Markowitz</span>
+                        </a>
+                        <a href='risk-parity.html' class='nav-link'>
+                            <i class='fas fa-balance-scale'></i>
+                            <span>Risk Parity</span>
+                        </a>
+                        <a href='scenario-analysis.html' class='nav-link active'>
+                            <i class='fas fa-flask'></i>
+                            <span>Scénarios</span>
+                        </a>
+                    </div>
+                </div>
+                
+                <!-- Stocks Section -->
+                <div class='nav-section'>
+                    <button class='nav-folder'>
+                        <i class='fas fa-chart-candlestick'></i>
+                        <span>Stocks</span>
+                        <i class='fas fa-chevron-down arrow'></i>
+                    </button>
+                    <div class='nav-submenu'>
+                        <a href='market-data.html' class='nav-link'>
+                            <i class='fas fa-globe'></i>
+                            <span>Market Data</span>
+                        </a>
+                    </div>
+                </div>
+            </nav>
+            
+            <div class='sidebar-footer'>
+                <div class='user-info'>
+                    <i class='fas fa-user-circle'></i>
+                    <span>Raphael NARDONE</span>
+                </div>
+            </div>
+        </aside>
         
-        <!-- Main Content -->
-        <div class='content'>
-            <!-- Introduction -->
-            <div class='section'>
-                <h2 class='section-title'>
-                    What is Scenario Analysis? 
-                    <span class='help-icon' onclick='openModal("modalSAIntro")'>?</span>
-                </h2>
-                <div class='info-box'>
-                    <h4>Stress Testing Your Portfolio</h4>
-                    <p>Scenario Analysis tests how your portfolio would perform during specific historical or hypothetical market events.</p>
-                    <p><strong>Why it matters:</strong> Monte Carlo simulations are random, but real crises follow patterns. This tool shows you exactly what would happen to your portfolio during known events.</p>
-                    <p><strong>Use it to:</strong> Identify vulnerabilities, adjust allocations, and build confidence in your strategy.</p>
+        <!-- ============================================
+             MAIN CONTENT AREA
+             ============================================ -->
+        <div class='main-content'>
+            <!-- Top Header -->
+            <header class='top-header'>
+                <div class='header-left'>
+                    <button class='mobile-toggle' id='mobileToggle'>
+                        <i class='fas fa-bars'></i>
+                    </button>
+                    <h1>Scenario Analysis</h1>
                 </div>
-            </div>
+                <div class='header-right'>
+                    <span class='last-update'>
+                        <i class='fas fa-clock'></i>
+                        <span id='lastUpdate'></span>
+                    </span>
+                </div>
+            </header>
             
-            <!-- Step 1: Define Portfolio -->
-            <div class='section'>
-                <h2 class='section-title'>
-                    Step 1: Define Your Current Portfolio 
-                    <span class='help-icon' onclick='openModal("modalSAPortfolio")'>?</span>
-                </h2>
-                <div class='portfolio-input'>
-                    <h3 class='input-title'>Current Allocation</h3>
-                    <div class='portfolio-grid'>
-                        <div class='portfolio-item'>
-                            <label>Stocks (%)</label>
-                            <input type='number' id='allocStocks' value='60' min='0' max='100' step='1' 
-                                   onchange='ScenarioAnalysis.updateTotalAllocation()'>
-                        </div>
-                        <div class='portfolio-item'>
-                            <label>Bonds (%)</label>
-                            <input type='number' id='allocBonds' value='30' min='0' max='100' step='1' 
-                                   onchange='ScenarioAnalysis.updateTotalAllocation()'>
-                        </div>
-                        <div class='portfolio-item'>
-                            <label>Real Estate (%)</label>
-                            <input type='number' id='allocRealEstate' value='5' min='0' max='100' step='1' 
-                                   onchange='ScenarioAnalysis.updateTotalAllocation()'>
-                        </div>
-                        <div class='portfolio-item'>
-                            <label>Commodities (%)</label>
-                            <input type='number' id='allocCommodities' value='3' min='0' max='100' step='1' 
-                                   onchange='ScenarioAnalysis.updateTotalAllocation()'>
-                        </div>
-                        <div class='portfolio-item'>
-                            <label>Cash (%)</label>
-                            <input type='number' id='allocCash' value='2' min='0' max='100' step='1' 
-                                   onchange='ScenarioAnalysis.updateTotalAllocation()'>
+            <!-- Container -->
+            <div class='container'>
+                <!-- Main Content -->
+                <div class='content'>
+                    <!-- Introduction -->
+                    <div class='section'>
+                        <h2 class='section-title'>
+                            What is Scenario Analysis? 
+                            <span class='help-icon' onclick='openModal("modalSAIntro")'>?</span>
+                        </h2>
+                        <div class='info-box'>
+                            <h4>Stress Testing Your Portfolio</h4>
+                            <p>Scenario Analysis tests how your portfolio would perform during specific historical or hypothetical market events.</p>
+                            <p><strong>Why it matters:</strong> Monte Carlo simulations are random, but real crises follow patterns. This tool shows you exactly what would happen to your portfolio during known events.</p>
+                            <p><strong>Use it to:</strong> Identify vulnerabilities, adjust allocations, and build confidence in your strategy.</p>
                         </div>
                     </div>
-                    <div class='total-allocation-display'>
-                        <strong>Total Allocation: <span id='totalAllocation'>100%</span></strong>
+                    
+                    <!-- Step 1: Define Portfolio -->
+                    <div class='section'>
+                        <h2 class='section-title'>
+                            Step 1: Define Your Current Portfolio 
+                            <span class='help-icon' onclick='openModal("modalSAPortfolio")'>?</span>
+                        </h2>
+                        <div class='portfolio-input'>
+                            <h3 class='input-title'>Current Allocation</h3>
+                            <div class='portfolio-grid'>
+                                <div class='portfolio-item'>
+                                    <label>Stocks (%)</label>
+                                    <input type='number' id='allocStocks' value='60' min='0' max='100' step='1' 
+                                           onchange='ScenarioAnalysis.updateTotalAllocation()'>
+                                </div>
+                                <div class='portfolio-item'>
+                                    <label>Bonds (%)</label>
+                                    <input type='number' id='allocBonds' value='30' min='0' max='100' step='1' 
+                                           onchange='ScenarioAnalysis.updateTotalAllocation()'>
+                                </div>
+                                <div class='portfolio-item'>
+                                    <label>Real Estate (%)</label>
+                                    <input type='number' id='allocRealEstate' value='5' min='0' max='100' step='1' 
+                                           onchange='ScenarioAnalysis.updateTotalAllocation()'>
+                                </div>
+                                <div class='portfolio-item'>
+                                    <label>Commodities (%)</label>
+                                    <input type='number' id='allocCommodities' value='3' min='0' max='100' step='1' 
+                                           onchange='ScenarioAnalysis.updateTotalAllocation()'>
+                                </div>
+                                <div class='portfolio-item'>
+                                    <label>Cash (%)</label>
+                                    <input type='number' id='allocCash' value='2' min='0' max='100' step='1' 
+                                           onchange='ScenarioAnalysis.updateTotalAllocation()'>
+                                </div>
+                            </div>
+                            <div class='total-allocation-display'>
+                                <strong>Total Allocation: <span id='totalAllocation'>100%</span></strong>
+                            </div>
+                        </div>
+                        <button class='btn-analyze' onclick='ScenarioAnalysis.runAnalysis()'>Analyze Portfolio in All Scenarios</button>
+                    </div>
+                    
+                    <!-- Step 2: Historical Scenarios -->
+                    <div class='section'>
+                        <h2 class='section-title'>
+                            Step 2: Historical Scenarios 
+                            <span class='help-icon' onclick='openModal("modalSAScenarios")'>?</span>
+                        </h2>
+                        <div id='scenariosDescription'>
+                            <div class='scenario-card'>
+                                <h3>🔴 Financial Crisis 2008</h3>
+                                <p>Global banking collapse, housing market crash, massive deleveraging</p>
+                                <div class='scenario-impacts'>
+                                    <span class='impact-badge impact-negative'>Stocks: -40%</span>
+                                    <span class='impact-badge impact-positive'>Bonds: +5%</span>
+                                    <span class='impact-badge impact-negative'>Real Estate: -35%</span>
+                                    <span class='impact-badge impact-negative'>Commodities: -30%</span>
+                                    <span class='impact-badge impact-positive'>Cash: 0%</span>
+                                </div>
+                            </div>
+                            
+                            <div class='scenario-card'>
+                                <h3>📈 High Inflation 1970s</h3>
+                                <p>Oil shocks, stagflation, rising interest rates, purchasing power erosion</p>
+                                <div class='scenario-impacts'>
+                                    <span class='impact-badge impact-negative'>Stocks: -10%</span>
+                                    <span class='impact-badge impact-negative'>Bonds: -15%</span>
+                                    <span class='impact-badge impact-positive'>Real Estate: +8%</span>
+                                    <span class='impact-badge impact-positive'>Commodities: +25%</span>
+                                    <span class='impact-badge impact-negative'>Cash: -15%</span>
+                                </div>
+                            </div>
+                            
+                            <div class='scenario-card'>
+                                <h3>🚀 Tech Boom 1999</h3>
+                                <p>Dot-com bubble, irrational exuberance, technology revolution</p>
+                                <div class='scenario-impacts'>
+                                    <span class='impact-badge impact-positive'>Stocks: +60%</span>
+                                    <span class='impact-badge impact-negative'>Bonds: -3%</span>
+                                    <span class='impact-badge impact-positive'>Real Estate: +5%</span>
+                                    <span class='impact-badge impact-negative'>Commodities: -5%</span>
+                                    <span class='impact-badge impact-positive'>Cash: +2%</span>
+                                </div>
+                            </div>
+                            
+                            <div class='scenario-card'>
+                                <h3>🦠 COVID-19 Pandemic 2020</h3>
+                                <p>Global lockdowns, unprecedented monetary stimulus, V-shaped recovery</p>
+                                <div class='scenario-impacts'>
+                                    <span class='impact-badge impact-positive'>Stocks: +35% (full year)</span>
+                                    <span class='impact-badge impact-positive'>Bonds: +8%</span>
+                                    <span class='impact-badge impact-positive'>Real Estate: +10%</span>
+                                    <span class='impact-badge impact-negative'>Commodities: -20%</span>
+                                    <span class='impact-badge impact-positive'>Cash: 0%</span>
+                                </div>
+                            </div>
+                            
+                            <div class='scenario-card'>
+                                <h3>📉 Mild Recession</h3>
+                                <p>Economic slowdown, moderate unemployment, temporary contraction</p>
+                                <div class='scenario-impacts'>
+                                    <span class='impact-badge impact-negative'>Stocks: -20%</span>
+                                    <span class='impact-badge impact-positive'>Bonds: +3%</span>
+                                    <span class='impact-badge impact-negative'>Real Estate: -10%</span>
+                                    <span class='impact-badge impact-negative'>Commodities: -15%</span>
+                                    <span class='impact-badge impact-positive'>Cash: +1%</span>
+                                </div>
+                            </div>
+                            
+                            <div class='scenario-card'>
+                                <h3>🟢 Strong Bull Market</h3>
+                                <p>Economic expansion, low unemployment, investor confidence</p>
+                                <div class='scenario-impacts'>
+                                    <span class='impact-badge impact-positive'>Stocks: +25%</span>
+                                    <span class='impact-badge impact-negative'>Bonds: -2%</span>
+                                    <span class='impact-badge impact-positive'>Real Estate: +12%</span>
+                                    <span class='impact-badge impact-positive'>Commodities: +8%</span>
+                                    <span class='impact-badge impact-positive'>Cash: +1%</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Results Section -->
+                    <div id='resultsSection' class='section hidden'>
+                        <h2 class='section-title'>
+                            Analysis Results 
+                            <span class='help-icon' onclick='openModal("modalSAResults")'>?</span>
+                        </h2>
+                        <div id='summaryStats' class='results-grid'></div>
+                        
+                        <h3 class='subsection-title'>Portfolio Performance by Scenario</h3>
+                        <div id='chartScenarios' class='chart'></div>
+                        
+                        <h3 class='subsection-title'>Risk/Return Profile</h3>
+                        <div id='chartRiskReturn' class='chart'></div>
+                        
+                        <h3 class='subsection-title'>Detailed Results</h3>
+                        <div id='detailedTable'></div>
+                        
+                        <h3 class='subsection-title'>
+                            Recommendations 
+                            <span class='help-icon' onclick='openModal("modalSARecommendations")'>?</span>
+                        </h3>
+                        <div id='recommendations' class='info-box'></div>
                     </div>
                 </div>
-                <button class='btn-analyze' onclick='ScenarioAnalysis.runAnalysis()'>Analyze Portfolio in All Scenarios</button>
-            </div>
-            
-            <!-- Step 2: Historical Scenarios -->
-            <div class='section'>
-                <h2 class='section-title'>
-                    Step 2: Historical Scenarios 
-                    <span class='help-icon' onclick='openModal("modalSAScenarios")'>?</span>
-                </h2>
-                <div id='scenariosDescription'>
-                    <div class='scenario-card'>
-                        <h3>🔴 Financial Crisis 2008</h3>
-                        <p>Global banking collapse, housing market crash, massive deleveraging</p>
-                        <div class='scenario-impacts'>
-                            <span class='impact-badge impact-negative'>Stocks: -40%</span>
-                            <span class='impact-badge impact-positive'>Bonds: +5%</span>
-                            <span class='impact-badge impact-negative'>Real Estate: -35%</span>
-                            <span class='impact-badge impact-negative'>Commodities: -30%</span>
-                            <span class='impact-badge impact-positive'>Cash: 0%</span>
-                        </div>
-                    </div>
-                    
-                    <div class='scenario-card'>
-                        <h3>📈 High Inflation 1970s</h3>
-                        <p>Oil shocks, stagflation, rising interest rates, purchasing power erosion</p>
-                        <div class='scenario-impacts'>
-                            <span class='impact-badge impact-negative'>Stocks: -10%</span>
-                            <span class='impact-badge impact-negative'>Bonds: -15%</span>
-                            <span class='impact-badge impact-positive'>Real Estate: +8%</span>
-                            <span class='impact-badge impact-positive'>Commodities: +25%</span>
-                            <span class='impact-badge impact-negative'>Cash: -15%</span>
-                        </div>
-                    </div>
-                    
-                    <div class='scenario-card'>
-                        <h3>🚀 Tech Boom 1999</h3>
-                        <p>Dot-com bubble, irrational exuberance, technology revolution</p>
-                        <div class='scenario-impacts'>
-                            <span class='impact-badge impact-positive'>Stocks: +60%</span>
-                            <span class='impact-badge impact-negative'>Bonds: -3%</span>
-                            <span class='impact-badge impact-positive'>Real Estate: +5%</span>
-                            <span class='impact-badge impact-negative'>Commodities: -5%</span>
-                            <span class='impact-badge impact-positive'>Cash: +2%</span>
-                        </div>
-                    </div>
-                    
-                    <div class='scenario-card'>
-                        <h3>🦠 COVID-19 Pandemic 2020</h3>
-                        <p>Global lockdowns, unprecedented monetary stimulus, V-shaped recovery</p>
-                        <div class='scenario-impacts'>
-                            <span class='impact-badge impact-positive'>Stocks: +35% (full year)</span>
-                            <span class='impact-badge impact-positive'>Bonds: +8%</span>
-                            <span class='impact-badge impact-positive'>Real Estate: +10%</span>
-                            <span class='impact-badge impact-negative'>Commodities: -20%</span>
-                            <span class='impact-badge impact-positive'>Cash: 0%</span>
-                        </div>
-                    </div>
-                    
-                    <div class='scenario-card'>
-                        <h3>📉 Mild Recession</h3>
-                        <p>Economic slowdown, moderate unemployment, temporary contraction</p>
-                        <div class='scenario-impacts'>
-                            <span class='impact-badge impact-negative'>Stocks: -20%</span>
-                            <span class='impact-badge impact-positive'>Bonds: +3%</span>
-                            <span class='impact-badge impact-negative'>Real Estate: -10%</span>
-                            <span class='impact-badge impact-negative'>Commodities: -15%</span>
-                            <span class='impact-badge impact-positive'>Cash: +1%</span>
-                        </div>
-                    </div>
-                    
-                    <div class='scenario-card'>
-                        <h3>🟢 Strong Bull Market</h3>
-                        <p>Economic expansion, low unemployment, investor confidence</p>
-                        <div class='scenario-impacts'>
-                            <span class='impact-badge impact-positive'>Stocks: +25%</span>
-                            <span class='impact-badge impact-negative'>Bonds: -2%</span>
-                            <span class='impact-badge impact-positive'>Real Estate: +12%</span>
-                            <span class='impact-badge impact-positive'>Commodities: +8%</span>
-                            <span class='impact-badge impact-positive'>Cash: +1%</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Results Section -->
-            <div id='resultsSection' class='section hidden'>
-                <h2 class='section-title'>
-                    Analysis Results 
-                    <span class='help-icon' onclick='openModal("modalSAResults")'>?</span>
-                </h2>
-                <div id='summaryStats' class='results-grid'></div>
                 
-                <h3 class='subsection-title'>Portfolio Performance by Scenario</h3>
-                <div id='chartScenarios' class='chart'></div>
-                
-                <h3 class='subsection-title'>Risk/Return Profile</h3>
-                <div id='chartRiskReturn' class='chart'></div>
-                
-                <h3 class='subsection-title'>Detailed Results</h3>
-                <div id='detailedTable'></div>
-                
-                <h3 class='subsection-title'>
-                    Recommendations 
-                    <span class='help-icon' onclick='openModal("modalSARecommendations")'>?</span>
-                </h3>
-                <div id='recommendations' class='info-box'></div>
+                <!-- Footer -->
+                <footer>
+                    <p>Scenario Analysis | Stress Testing Tool</p>
+                </footer>
             </div>
         </div>
         
-        <!-- Footer -->
-        <footer>
-            <p>Scenario Analysis | Stress Testing Tool</p>
-        </footer>
     </div>
     
-    <!-- MODALS -->
+    <!-- ============================================
+         MODALS
+         ============================================ -->
     <div id='modalSAIntro' class='modal'>
         <div class='modal-content'>
             <div class='modal-header'>
@@ -311,6 +403,7 @@
     
     <!-- Scripts -->
     <script src='assets/js/common.js'></script>
+    <script src='assets/js/sidebar.js'></script>
     <script src='assets/js/scenario-analysis.js'></script>
 </body>
 </html>
