@@ -1,11 +1,24 @@
 /* ==============================================
-   ADVANCED-ANALYSIS.JS - Advanced Technical Analysis
+   ADVANCED-ANALYSIS.JS - Optimized Version
    ============================================== */
 
 const AdvancedAnalysis = {
-    currentSymbol: '',
+    currentSymbol: 'AAPL', // Default symbol
     currentPeriod: '6M',
     stockData: null,
+    
+    // Charts instances (pour mise à jour rapide)
+    charts: {
+        ichimoku: null,
+        stochastic: null,
+        williams: null,
+        adx: null,
+        sar: null,
+        obv: null,
+        atr: null,
+        fibonacci: null,
+        vwap: null
+    },
     
     // Proxy CORS
     CORS_PROXIES: [
@@ -30,6 +43,10 @@ const AdvancedAnalysis = {
     init() {
         this.updateLastUpdate();
         this.setupEventListeners();
+        
+        // Auto-load default symbol immediately
+        console.log('🚀 Auto-loading default symbol:', this.currentSymbol);
+        this.loadSymbol(this.currentSymbol);
     },
     
     // Setup Event Listeners
@@ -50,26 +67,38 @@ const AdvancedAnalysis = {
         }
     },
     
-    // Load Symbol
+    // Load Symbol (optimized)
     async loadSymbol(symbol) {
         this.currentSymbol = symbol;
         document.getElementById('symbolInput').value = symbol;
         
         this.showLoading(true);
-        this.hideResults();
         
         try {
             await this.fetchStockData(symbol);
+            
+            // Show results panel immediately if first load
+            const resultsPanel = document.getElementById('resultsPanel');
+            if (resultsPanel.classList.contains('hidden')) {
+                resultsPanel.classList.remove('hidden');
+            }
+            
             this.displayStockHeader();
-            this.displayAllIndicators();
+            this.updateAllIndicators(); // Update instead of recreate
             this.showLoading(false);
             
         } catch (error) {
             console.error('Error loading stock data:', error);
             console.log('Using demo data as fallback...');
             this.stockData = this.generateDemoData(symbol);
+            
+            const resultsPanel = document.getElementById('resultsPanel');
+            if (resultsPanel.classList.contains('hidden')) {
+                resultsPanel.classList.remove('hidden');
+            }
+            
             this.displayStockHeader();
-            this.displayAllIndicators();
+            this.updateAllIndicators();
             this.showLoading(false);
         }
     },
@@ -79,13 +108,11 @@ const AdvancedAnalysis = {
         const period = this.getPeriodParams(this.currentPeriod);
         const targetUrl = `https://query1.finance.yahoo.com/v8/finance/chart/${symbol}?interval=${period.interval}&range=${period.range}`;
         
-        // Try with CORS proxy
         for (let i = 0; i < this.CORS_PROXIES.length; i++) {
             try {
                 const proxyUrl = this.CORS_PROXIES[i];
                 const url = proxyUrl + encodeURIComponent(targetUrl);
                 
-                console.log(`Attempting fetch with proxy ${i + 1}...`);
                 const response = await fetch(url);
                 
                 if (!response.ok) {
@@ -100,8 +127,6 @@ const AdvancedAnalysis = {
                 
                 const result = data.chart.result[0];
                 this.stockData = this.parseYahooData(result);
-                
-                // Fetch quote data
                 await this.fetchQuoteData(symbol);
                 
                 console.log('✅ Data fetched successfully');
@@ -217,134 +242,133 @@ const AdvancedAnalysis = {
         document.getElementById('stockHeader').classList.remove('hidden');
     },
     
-    // Display All Indicators
-    displayAllIndicators() {
-        // Create all charts
-        this.createIchimokuChart();
-        this.createStochasticChart();
-        this.createWilliamsChart();
-        this.createADXChart();
-        this.createSARChart();
-        this.createOBVChart();
-        this.createATRChart();
-        this.createFibonacciChart();
-        this.createPivotPoints();
-        this.createVWAPChart();
+    // Update All Indicators (optimized - update instead of recreate)
+    updateAllIndicators() {
+        console.log('🔄 Updating all indicators...');
+        const startTime = performance.now();
+        
+        // Update charts (or create if first time)
+        this.updateIchimokuChart();
+        this.updateStochasticChart();
+        this.updateWilliamsChart();
+        this.updateADXChart();
+        this.updateSARChart();
+        this.updateOBVChart();
+        this.updateATRChart();
+        this.updateFibonacciChart();
+        this.createPivotPoints(); // Pivot points sont HTML, pas de chart
+        this.updateVWAPChart();
         
         // Generate consolidated signals
         this.generateConsolidatedSignals();
         
-        document.getElementById('resultsPanel').classList.remove('hidden');
+        const endTime = performance.now();
+        console.log(`✅ All indicators updated in ${(endTime - startTime).toFixed(2)}ms`);
     },
     
     // ============================================
-    // ICHIMOKU CLOUD
+    // ICHIMOKU CLOUD (Optimized)
     // ============================================
     
-    createIchimokuChart() {
+    updateIchimokuChart() {
         const prices = this.stockData.prices;
         const ichimoku = this.calculateIchimoku(prices);
-        
         const ohlc = prices.map(p => [p.timestamp, p.open, p.high, p.low, p.close]);
         
-        Highcharts.stockChart('ichimokuChart', {
-            chart: {
-                height: 600,
-                borderRadius: 15
-            },
-            title: {
-                text: `${this.currentSymbol} - Ichimoku Cloud`,
-                style: { color: this.colors.primary, fontWeight: 'bold' }
-            },
-            rangeSelector: {
-                enabled: false
-            },
-            navigator: {
-                enabled: true
-            },
-            xAxis: {
-                type: 'datetime',
-                crosshair: true
-            },
-            yAxis: {
-                title: { text: 'Price' },
-                opposite: true
-            },
-            tooltip: {
-                split: false,
-                shared: true,
-                borderRadius: 10
-            },
-            plotOptions: {
-                series: {
-                    marker: {
-                        enabled: false
+        if (this.charts.ichimoku) {
+            // Update existing chart
+            this.charts.ichimoku.series[0].setData(ohlc, false);
+            this.charts.ichimoku.series[1].setData(ichimoku.tenkan, false);
+            this.charts.ichimoku.series[2].setData(ichimoku.kijun, false);
+            this.charts.ichimoku.series[3].setData(ichimoku.spanA, false);
+            this.charts.ichimoku.series[4].setData(ichimoku.spanB, false);
+            this.charts.ichimoku.series[5].setData(ichimoku.cloud, false);
+            this.charts.ichimoku.series[6].setData(ichimoku.chikou, false);
+            this.charts.ichimoku.setTitle({ text: `${this.currentSymbol} - Ichimoku Cloud` });
+            this.charts.ichimoku.redraw();
+        } else {
+            // Create chart for first time
+            this.charts.ichimoku = Highcharts.stockChart('ichimokuChart', {
+                chart: {
+                    height: 600,
+                    borderRadius: 15
+                },
+                title: {
+                    text: `${this.currentSymbol} - Ichimoku Cloud`,
+                    style: { color: this.colors.primary, fontWeight: 'bold' }
+                },
+                rangeSelector: { enabled: false },
+                navigator: { enabled: true },
+                xAxis: { type: 'datetime', crosshair: true },
+                yAxis: { title: { text: 'Price' }, opposite: true },
+                tooltip: { split: false, shared: true, borderRadius: 10 },
+                plotOptions: {
+                    series: { marker: { enabled: false } }
+                },
+                series: [
+                    {
+                        type: 'candlestick',
+                        name: this.currentSymbol,
+                        data: ohlc,
+                        color: this.colors.danger,
+                        upColor: this.colors.success,
+                        zIndex: 3
+                    },
+                    {
+                        type: 'line',
+                        name: 'Tenkan-sen',
+                        data: ichimoku.tenkan,
+                        color: this.colors.danger,
+                        lineWidth: 2,
+                        zIndex: 2
+                    },
+                    {
+                        type: 'line',
+                        name: 'Kijun-sen',
+                        data: ichimoku.kijun,
+                        color: this.colors.primary,
+                        lineWidth: 2,
+                        zIndex: 2
+                    },
+                    {
+                        type: 'line',
+                        name: 'Senkou Span A',
+                        data: ichimoku.spanA,
+                        color: this.colors.success,
+                        lineWidth: 1,
+                        zIndex: 1
+                    },
+                    {
+                        type: 'line',
+                        name: 'Senkou Span B',
+                        data: ichimoku.spanB,
+                        color: this.colors.danger,
+                        lineWidth: 1,
+                        zIndex: 1
+                    },
+                    {
+                        type: 'arearange',
+                        name: 'Kumo (Cloud)',
+                        data: ichimoku.cloud,
+                        fillOpacity: 0.3,
+                        lineWidth: 0,
+                        color: this.colors.success,
+                        negativeColor: this.colors.danger,
+                        zIndex: 0
+                    },
+                    {
+                        type: 'line',
+                        name: 'Chikou Span',
+                        data: ichimoku.chikou,
+                        color: this.colors.purple,
+                        lineWidth: 1,
+                        dashStyle: 'Dot',
+                        zIndex: 2
                     }
-                }
-            },
-            series: [
-                {
-                    type: 'candlestick',
-                    name: this.currentSymbol,
-                    data: ohlc,
-                    color: this.colors.danger,
-                    upColor: this.colors.success,
-                    zIndex: 3
-                },
-                {
-                    type: 'line',
-                    name: 'Tenkan-sen (Conversion)',
-                    data: ichimoku.tenkan,
-                    color: this.colors.danger,
-                    lineWidth: 2,
-                    zIndex: 2
-                },
-                {
-                    type: 'line',
-                    name: 'Kijun-sen (Base)',
-                    data: ichimoku.kijun,
-                    color: this.colors.primary,
-                    lineWidth: 2,
-                    zIndex: 2
-                },
-                {
-                    type: 'line',
-                    name: 'Senkou Span A',
-                    data: ichimoku.spanA,
-                    color: this.colors.success,
-                    lineWidth: 1,
-                    zIndex: 1
-                },
-                {
-                    type: 'line',
-                    name: 'Senkou Span B',
-                    data: ichimoku.spanB,
-                    color: this.colors.danger,
-                    lineWidth: 1,
-                    zIndex: 1
-                },
-                {
-                    type: 'arearange',
-                    name: 'Kumo (Cloud)',
-                    data: ichimoku.cloud,
-                    fillOpacity: 0.3,
-                    lineWidth: 0,
-                    color: this.colors.success,
-                    negativeColor: this.colors.danger,
-                    zIndex: 0
-                },
-                {
-                    type: 'line',
-                    name: 'Chikou Span (Lagging)',
-                    data: ichimoku.chikou,
-                    color: this.colors.purple,
-                    lineWidth: 1,
-                    dashStyle: 'Dot',
-                    zIndex: 2
-                }
-            ],
-            credits: { enabled: false }
-        });
+                ],
+                credits: { enabled: false }
+            });
+        }
     },
     
     calculateIchimoku(prices) {
@@ -360,7 +384,7 @@ const AdvancedAnalysis = {
         const chikou = [];
         const cloud = [];
         
-        // Calculate Tenkan-sen (Conversion Line)
+        // Calculate Tenkan-sen
         for (let i = tenkanPeriod - 1; i < prices.length; i++) {
             const slice = prices.slice(i - tenkanPeriod + 1, i + 1);
             const high = Math.max(...slice.map(p => p.high));
@@ -368,7 +392,7 @@ const AdvancedAnalysis = {
             tenkan.push([prices[i].timestamp, (high + low) / 2]);
         }
         
-        // Calculate Kijun-sen (Base Line)
+        // Calculate Kijun-sen
         for (let i = kijunPeriod - 1; i < prices.length; i++) {
             const slice = prices.slice(i - kijunPeriod + 1, i + 1);
             const high = Math.max(...slice.map(p => p.high));
@@ -376,7 +400,7 @@ const AdvancedAnalysis = {
             kijun.push([prices[i].timestamp, (high + low) / 2]);
         }
         
-        // Calculate Senkou Span A (Leading Span A)
+        // Calculate Senkou Span A
         for (let i = 0; i < prices.length; i++) {
             if (i < tenkanPeriod - 1 || i < kijunPeriod - 1) continue;
             
@@ -391,7 +415,7 @@ const AdvancedAnalysis = {
             }
         }
         
-        // Calculate Senkou Span B (Leading Span B)
+        // Calculate Senkou Span B
         for (let i = senkouPeriod - 1; i < prices.length; i++) {
             const slice = prices.slice(i - senkouPeriod + 1, i + 1);
             const high = Math.max(...slice.map(p => p.high));
@@ -403,12 +427,12 @@ const AdvancedAnalysis = {
             }
         }
         
-        // Calculate Chikou Span (Lagging Span)
+        // Calculate Chikou Span
         for (let i = displacement; i < prices.length; i++) {
             chikou.push([prices[i - displacement].timestamp, prices[i].close]);
         }
         
-        // Create cloud data (arearange)
+        // Create cloud data
         const minLength = Math.min(spanA.length, spanB.length);
         for (let i = 0; i < minLength; i++) {
             cloud.push([
@@ -422,71 +446,78 @@ const AdvancedAnalysis = {
     },
     
     // ============================================
-    // STOCHASTIC OSCILLATOR
+    // STOCHASTIC OSCILLATOR (Optimized)
     // ============================================
     
-    createStochasticChart() {
+    updateStochasticChart() {
         const prices = this.stockData.prices;
         const stochastic = this.calculateStochastic(prices);
         
-        Highcharts.chart('stochasticChart', {
-            chart: {
-                borderRadius: 15,
-                height: 400
-            },
-            title: {
-                text: 'Stochastic Oscillator',
-                style: { color: this.colors.primary, fontWeight: 'bold' }
-            },
-            xAxis: {
-                type: 'datetime',
-                crosshair: true
-            },
-            yAxis: {
-                title: { text: 'Stochastic' },
-                plotLines: [
+        if (this.charts.stochastic) {
+            // Update existing chart
+            this.charts.stochastic.series[0].setData(stochastic.k, false);
+            this.charts.stochastic.series[1].setData(stochastic.d, false);
+            this.charts.stochastic.redraw();
+        } else {
+            // Create chart for first time
+            this.charts.stochastic = Highcharts.chart('stochasticChart', {
+                chart: {
+                    borderRadius: 15,
+                    height: 400
+                },
+                title: {
+                    text: 'Stochastic Oscillator',
+                    style: { color: this.colors.primary, fontWeight: 'bold' }
+                },
+                xAxis: {
+                    type: 'datetime',
+                    crosshair: true
+                },
+                yAxis: {
+                    title: { text: 'Stochastic' },
+                    plotLines: [
+                        {
+                            value: 80,
+                            color: this.colors.danger,
+                            dashStyle: 'ShortDash',
+                            width: 2,
+                            label: { text: 'Overbought (80)', align: 'right', style: { color: this.colors.danger } }
+                        },
+                        {
+                            value: 20,
+                            color: this.colors.success,
+                            dashStyle: 'ShortDash',
+                            width: 2,
+                            label: { text: 'Oversold (20)', align: 'right', style: { color: this.colors.success } }
+                        }
+                    ],
+                    min: 0,
+                    max: 100
+                },
+                tooltip: {
+                    borderRadius: 10,
+                    shared: true
+                },
+                series: [
                     {
-                        value: 80,
-                        color: this.colors.danger,
-                        dashStyle: 'ShortDash',
-                        width: 2,
-                        label: { text: 'Overbought (80)', align: 'right', style: { color: this.colors.danger } }
+                        type: 'line',
+                        name: '%K (Fast)',
+                        data: stochastic.k,
+                        color: this.colors.primary,
+                        lineWidth: 2
                     },
                     {
-                        value: 20,
-                        color: this.colors.success,
-                        dashStyle: 'ShortDash',
-                        width: 2,
-                        label: { text: 'Oversold (20)', align: 'right', style: { color: this.colors.success } }
+                        type: 'line',
+                        name: '%D (Slow)',
+                        data: stochastic.d,
+                        color: this.colors.danger,
+                        lineWidth: 2
                     }
                 ],
-                min: 0,
-                max: 100
-            },
-            tooltip: {
-                borderRadius: 10,
-                shared: true
-            },
-            series: [
-                {
-                    type: 'line',
-                    name: '%K (Fast)',
-                    data: stochastic.k,
-                    color: this.colors.primary,
-                    lineWidth: 2
-                },
-                {
-                    type: 'line',
-                    name: '%D (Slow)',
-                    data: stochastic.d,
-                    color: this.colors.danger,
-                    lineWidth: 2
-                }
-            ],
-            credits: { enabled: false }
-        });
+                credits: { enabled: false }
+            });
+        }
         
-        // Display signal
         this.displayStochasticSignal(stochastic);
     },
     
@@ -505,7 +536,7 @@ const AdvancedAnalysis = {
             k.push([prices[i].timestamp, kValue]);
         }
         
-        // Calculate %D (SMA of %K)
+        // Calculate %D
         for (let i = dPeriod - 1; i < k.length; i++) {
             const slice = k.slice(i - dPeriod + 1, i + 1);
             const avg = slice.reduce((sum, item) => sum + item[1], 0) / dPeriod;
@@ -544,64 +575,67 @@ const AdvancedAnalysis = {
     },
     
     // ============================================
-    // WILLIAMS %R
+    // WILLIAMS %R (Optimized)
     // ============================================
     
-    createWilliamsChart() {
+    updateWilliamsChart() {
         const prices = this.stockData.prices;
         const williams = this.calculateWilliams(prices);
         
-        Highcharts.chart('williamsChart', {
-            chart: {
-                borderRadius: 15,
-                height: 400
-            },
-            title: {
-                text: 'Williams %R',
-                style: { color: this.colors.primary, fontWeight: 'bold' }
-            },
-            xAxis: {
-                type: 'datetime',
-                crosshair: true
-            },
-            yAxis: {
-                title: { text: 'Williams %R' },
-                plotLines: [
+        if (this.charts.williams) {
+            this.charts.williams.series[0].setData(williams, true);
+        } else {
+            this.charts.williams = Highcharts.chart('williamsChart', {
+                chart: {
+                    borderRadius: 15,
+                    height: 400
+                },
+                title: {
+                    text: 'Williams %R',
+                    style: { color: this.colors.primary, fontWeight: 'bold' }
+                },
+                xAxis: {
+                    type: 'datetime',
+                    crosshair: true
+                },
+                yAxis: {
+                    title: { text: 'Williams %R' },
+                    plotLines: [
+                        {
+                            value: -20,
+                            color: this.colors.danger,
+                            dashStyle: 'ShortDash',
+                            width: 2,
+                            label: { text: 'Overbought (-20)', align: 'right', style: { color: this.colors.danger } }
+                        },
+                        {
+                            value: -80,
+                            color: this.colors.success,
+                            dashStyle: 'ShortDash',
+                            width: 2,
+                            label: { text: 'Oversold (-80)', align: 'right', style: { color: this.colors.success } }
+                        }
+                    ],
+                    min: -100,
+                    max: 0
+                },
+                tooltip: {
+                    borderRadius: 10
+                },
+                series: [
                     {
-                        value: -20,
-                        color: this.colors.danger,
-                        dashStyle: 'ShortDash',
-                        width: 2,
-                        label: { text: 'Overbought (-20)', align: 'right', style: { color: this.colors.danger } }
-                    },
-                    {
-                        value: -80,
-                        color: this.colors.success,
-                        dashStyle: 'ShortDash',
-                        width: 2,
-                        label: { text: 'Oversold (-80)', align: 'right', style: { color: this.colors.success } }
+                        type: 'area',
+                        name: 'Williams %R',
+                        data: williams,
+                        color: this.colors.secondary,
+                        fillOpacity: 0.3,
+                        lineWidth: 2
                     }
                 ],
-                min: -100,
-                max: 0
-            },
-            tooltip: {
-                borderRadius: 10
-            },
-            series: [
-                {
-                    type: 'area',
-                    name: 'Williams %R',
-                    data: williams,
-                    color: this.colors.secondary,
-                    fillOpacity: 0.3,
-                    lineWidth: 2
-                }
-            ],
-            credits: { enabled: false }
-        });
+                credits: { enabled: false }
+            });
+        }
         
-        // Display signal
         this.displayWilliamsSignal(williams);
     },
     
@@ -641,80 +675,86 @@ const AdvancedAnalysis = {
         signalBox.className = `signal-box ${signal}`;
         signalBox.textContent = text;
     },
-    
+
     // ============================================
-    // ADX (Average Directional Index)
+    // ADX (Optimized)
     // ============================================
     
-    createADXChart() {
+    updateADXChart() {
         const prices = this.stockData.prices;
         const adx = this.calculateADX(prices);
         
-        Highcharts.chart('adxChart', {
-            chart: {
-                borderRadius: 15,
-                height: 400
-            },
-            title: {
-                text: 'ADX - Trend Strength',
-                style: { color: this.colors.primary, fontWeight: 'bold' }
-            },
-            xAxis: {
-                type: 'datetime',
-                crosshair: true
-            },
-            yAxis: {
-                title: { text: 'ADX Value' },
-                plotLines: [
+        if (this.charts.adx) {
+            this.charts.adx.series[0].setData(adx.adx, false);
+            this.charts.adx.series[1].setData(adx.plusDI, false);
+            this.charts.adx.series[2].setData(adx.minusDI, false);
+            this.charts.adx.redraw();
+        } else {
+            this.charts.adx = Highcharts.chart('adxChart', {
+                chart: {
+                    borderRadius: 15,
+                    height: 400
+                },
+                title: {
+                    text: 'ADX - Trend Strength',
+                    style: { color: this.colors.primary, fontWeight: 'bold' }
+                },
+                xAxis: {
+                    type: 'datetime',
+                    crosshair: true
+                },
+                yAxis: {
+                    title: { text: 'ADX Value' },
+                    plotLines: [
+                        {
+                            value: 25,
+                            color: this.colors.success,
+                            dashStyle: 'ShortDash',
+                            width: 2,
+                            label: { text: 'Strong Trend (25)', align: 'right', style: { color: this.colors.success } }
+                        },
+                        {
+                            value: 20,
+                            color: this.colors.warning,
+                            dashStyle: 'Dot',
+                            width: 1,
+                            label: { text: 'Weak Trend (20)', align: 'right' }
+                        }
+                    ],
+                    min: 0,
+                    max: 100
+                },
+                tooltip: {
+                    borderRadius: 10,
+                    shared: true
+                },
+                series: [
                     {
-                        value: 25,
-                        color: this.colors.success,
-                        dashStyle: 'ShortDash',
-                        width: 2,
-                        label: { text: 'Strong Trend (25)', align: 'right', style: { color: this.colors.success } }
+                        type: 'line',
+                        name: 'ADX',
+                        data: adx.adx,
+                        color: this.colors.primary,
+                        lineWidth: 3
                     },
                     {
-                        value: 20,
-                        color: this.colors.warning,
-                        dashStyle: 'Dot',
-                        width: 1,
-                        label: { text: 'Weak Trend (20)', align: 'right' }
+                        type: 'line',
+                        name: '+DI',
+                        data: adx.plusDI,
+                        color: this.colors.success,
+                        lineWidth: 2
+                    },
+                    {
+                        type: 'line',
+                        name: '-DI',
+                        data: adx.minusDI,
+                        color: this.colors.danger,
+                        lineWidth: 2
                     }
                 ],
-                min: 0,
-                max: 100
-            },
-            tooltip: {
-                borderRadius: 10,
-                shared: true
-            },
-            series: [
-                {
-                    type: 'line',
-                    name: 'ADX',
-                    data: adx.adx,
-                    color: this.colors.primary,
-                    lineWidth: 3
-                },
-                {
-                    type: 'line',
-                    name: '+DI',
-                    data: adx.plusDI,
-                    color: this.colors.success,
-                    lineWidth: 2
-                },
-                {
-                    type: 'line',
-                    name: '-DI',
-                    data: adx.minusDI,
-                    color: this.colors.danger,
-                    lineWidth: 2
-                }
-            ],
-            credits: { enabled: false }
-        });
+                credits: { enabled: false }
+            });
+        }
         
-        // Display signal
         this.displayADXSignal(adx);
     },
     
@@ -723,13 +763,11 @@ const AdvancedAnalysis = {
         const plusDM = [];
         const minusDM = [];
         
-        // Calculate True Range and Directional Movements
         for (let i = 1; i < prices.length; i++) {
             const high = prices[i].high;
             const low = prices[i].low;
             const prevClose = prices[i - 1].close;
             
-            // True Range
             const trValue = Math.max(
                 high - low,
                 Math.abs(high - prevClose),
@@ -737,7 +775,6 @@ const AdvancedAnalysis = {
             );
             tr.push(trValue);
             
-            // Directional Movements
             const highDiff = high - prices[i - 1].high;
             const lowDiff = prices[i - 1].low - low;
             
@@ -745,12 +782,10 @@ const AdvancedAnalysis = {
             minusDM.push(lowDiff > highDiff && lowDiff > 0 ? lowDiff : 0);
         }
         
-        // Smooth the values
         const smoothTR = this.smoothArray(tr, period);
         const smoothPlusDM = this.smoothArray(plusDM, period);
         const smoothMinusDM = this.smoothArray(minusDM, period);
         
-        // Calculate +DI and -DI
         const plusDI = [];
         const minusDI = [];
         const dx = [];
@@ -762,12 +797,10 @@ const AdvancedAnalysis = {
             plusDI.push([prices[i + period].timestamp, plusDIValue]);
             minusDI.push([prices[i + period].timestamp, minusDIValue]);
             
-            // Calculate DX
             const dxValue = (Math.abs(plusDIValue - minusDIValue) / (plusDIValue + minusDIValue)) * 100;
             dx.push(dxValue);
         }
         
-        // Calculate ADX (smoothed DX)
         const adxValues = this.smoothArray(dx, period);
         const adx = adxValues.map((value, i) => [prices[i + period * 2].timestamp, value]);
         
@@ -776,15 +809,12 @@ const AdvancedAnalysis = {
     
     smoothArray(arr, period) {
         const result = [];
-        
-        // First value is simple average
         let sum = 0;
         for (let i = 0; i < period && i < arr.length; i++) {
             sum += arr[i];
         }
         result.push(sum / period);
         
-        // Smoothed values
         for (let i = period; i < arr.length; i++) {
             const smoothed = (result[result.length - 1] * (period - 1) + arr[i]) / period;
             result.push(smoothed);
@@ -819,65 +849,55 @@ const AdvancedAnalysis = {
         signalBox.className = `signal-box ${signal}`;
         signalBox.textContent = text;
     },
-
-// ============================================
-    // PARABOLIC SAR
+    
+    // ============================================
+    // PARABOLIC SAR (Optimized)
     // ============================================
     
-    createSARChart() {
+    updateSARChart() {
         const prices = this.stockData.prices;
         const sar = this.calculateSAR(prices);
         const ohlc = prices.map(p => [p.timestamp, p.open, p.high, p.low, p.close]);
         
-        Highcharts.stockChart('sarChart', {
-            chart: {
-                borderRadius: 15,
-                height: 400
-            },
-            title: {
-                text: 'Parabolic SAR',
-                style: { color: this.colors.primary, fontWeight: 'bold' }
-            },
-            rangeSelector: {
-                enabled: false
-            },
-            navigator: {
-                enabled: false
-            },
-            xAxis: {
-                type: 'datetime',
-                crosshair: true
-            },
-            yAxis: {
-                title: { text: 'Price' }
-            },
-            tooltip: {
-                borderRadius: 10,
-                shared: true
-            },
-            series: [
-                {
-                    type: 'candlestick',
-                    name: this.currentSymbol,
-                    data: ohlc,
-                    color: this.colors.danger,
-                    upColor: this.colors.success
+        if (this.charts.sar) {
+            this.charts.sar.series[0].setData(ohlc, false);
+            this.charts.sar.series[1].setData(sar, false);
+            this.charts.sar.redraw();
+        } else {
+            this.charts.sar = Highcharts.stockChart('sarChart', {
+                chart: {
+                    borderRadius: 15,
+                    height: 400
                 },
-                {
-                    type: 'scatter',
-                    name: 'Parabolic SAR',
-                    data: sar,
-                    color: this.colors.purple,
-                    marker: {
-                        radius: 3,
-                        symbol: 'circle'
+                title: {
+                    text: 'Parabolic SAR',
+                    style: { color: this.colors.primary, fontWeight: 'bold' }
+                },
+                rangeSelector: { enabled: false },
+                navigator: { enabled: false },
+                xAxis: { type: 'datetime', crosshair: true },
+                yAxis: { title: { text: 'Price' } },
+                tooltip: { borderRadius: 10, shared: true },
+                series: [
+                    {
+                        type: 'candlestick',
+                        name: this.currentSymbol,
+                        data: ohlc,
+                        color: this.colors.danger,
+                        upColor: this.colors.success
+                    },
+                    {
+                        type: 'scatter',
+                        name: 'Parabolic SAR',
+                        data: sar,
+                        color: this.colors.purple,
+                        marker: { radius: 3, symbol: 'circle' }
                     }
-                }
-            ],
-            credits: { enabled: false }
-        });
+                ],
+                credits: { enabled: false }
+            });
+        }
         
-        // Display signal
         this.displaySARSignal(sar, prices);
     },
     
@@ -890,35 +910,27 @@ const AdvancedAnalysis = {
         
         for (let i = 1; i < prices.length; i++) {
             const price = prices[i];
-            
-            // Calculate new SAR
             currentSAR = currentSAR + currentAF * (ep - currentSAR);
             
             if (isUptrend) {
-                // Uptrend
                 if (price.low < currentSAR) {
-                    // Trend reversal
                     isUptrend = false;
                     currentSAR = ep;
                     ep = price.low;
                     currentAF = af;
                 } else {
-                    // Continue uptrend
                     if (price.high > ep) {
                         ep = price.high;
                         currentAF = Math.min(currentAF + af, maxAF);
                     }
                 }
             } else {
-                // Downtrend
                 if (price.high > currentSAR) {
-                    // Trend reversal
                     isUptrend = true;
                     currentSAR = ep;
                     ep = price.high;
                     currentAF = af;
                 } else {
-                    // Continue downtrend
                     if (price.low < ep) {
                         ep = price.low;
                         currentAF = Math.min(currentAF + af, maxAF);
@@ -947,47 +959,42 @@ const AdvancedAnalysis = {
     },
     
     // ============================================
-    // OBV (On-Balance Volume)
+    // OBV (Optimized)
     // ============================================
     
-    createOBVChart() {
+    updateOBVChart() {
         const prices = this.stockData.prices;
         const obv = this.calculateOBV(prices);
         
-        Highcharts.chart('obvChart', {
-            chart: {
-                borderRadius: 15,
-                height: 400
-            },
-            title: {
-                text: 'On-Balance Volume (OBV)',
-                style: { color: this.colors.primary, fontWeight: 'bold' }
-            },
-            xAxis: {
-                type: 'datetime',
-                crosshair: true
-            },
-            yAxis: {
-                title: { text: 'OBV' }
-            },
-            tooltip: {
-                borderRadius: 10,
-                valueDecimals: 0
-            },
-            series: [
-                {
-                    type: 'area',
-                    name: 'OBV',
-                    data: obv,
-                    color: this.colors.secondary,
-                    fillOpacity: 0.3,
-                    lineWidth: 2
-                }
-            ],
-            credits: { enabled: false }
-        });
+        if (this.charts.obv) {
+            this.charts.obv.series[0].setData(obv, true);
+        } else {
+            this.charts.obv = Highcharts.chart('obvChart', {
+                chart: {
+                    borderRadius: 15,
+                    height: 400
+                },
+                title: {
+                    text: 'On-Balance Volume (OBV)',
+                    style: { color: this.colors.primary, fontWeight: 'bold' }
+                },
+                xAxis: { type: 'datetime', crosshair: true },
+                yAxis: { title: { text: 'OBV' } },
+                tooltip: { borderRadius: 10, valueDecimals: 0 },
+                series: [
+                    {
+                        type: 'area',
+                        name: 'OBV',
+                        data: obv,
+                        color: this.colors.secondary,
+                        fillOpacity: 0.3,
+                        lineWidth: 2
+                    }
+                ],
+                credits: { enabled: false }
+            });
+        }
         
-        // Display signal
         this.displayOBVSignal(obv, prices);
     },
     
@@ -1011,7 +1018,6 @@ const AdvancedAnalysis = {
     },
     
     displayOBVSignal(obv, prices) {
-        // Check for divergence
         const recentPrices = prices.slice(-20);
         const recentOBV = obv.slice(-20);
         
@@ -1043,53 +1049,47 @@ const AdvancedAnalysis = {
     },
     
     // ============================================
-    // ATR (Average True Range)
+    // ATR (Optimized)
     // ============================================
     
-    createATRChart() {
+    updateATRChart() {
         const prices = this.stockData.prices;
         const atr = this.calculateATR(prices);
         
-        Highcharts.chart('atrChart', {
-            chart: {
-                borderRadius: 15,
-                height: 400
-            },
-            title: {
-                text: 'Average True Range (ATR)',
-                style: { color: this.colors.primary, fontWeight: 'bold' }
-            },
-            xAxis: {
-                type: 'datetime',
-                crosshair: true
-            },
-            yAxis: {
-                title: { text: 'ATR Value' }
-            },
-            tooltip: {
-                borderRadius: 10,
-                valueDecimals: 2
-            },
-            series: [
-                {
-                    type: 'line',
-                    name: 'ATR',
-                    data: atr,
-                    color: this.colors.tertiary,
-                    lineWidth: 2
-                }
-            ],
-            credits: { enabled: false }
-        });
+        if (this.charts.atr) {
+            this.charts.atr.series[0].setData(atr, true);
+        } else {
+            this.charts.atr = Highcharts.chart('atrChart', {
+                chart: {
+                    borderRadius: 15,
+                    height: 400
+                },
+                title: {
+                    text: 'Average True Range (ATR)',
+                    style: { color: this.colors.primary, fontWeight: 'bold' }
+                },
+                xAxis: { type: 'datetime', crosshair: true },
+                yAxis: { title: { text: 'ATR Value' } },
+                tooltip: { borderRadius: 10, valueDecimals: 2 },
+                series: [
+                    {
+                        type: 'line',
+                        name: 'ATR',
+                        data: atr,
+                        color: this.colors.tertiary,
+                        lineWidth: 2
+                    }
+                ],
+                credits: { enabled: false }
+            });
+        }
         
-        // Display signal
         this.displayATRSignal(atr);
     },
     
     calculateATR(prices, period = 14) {
         const tr = [];
         
-        // Calculate True Range
         for (let i = 1; i < prices.length; i++) {
             const high = prices[i].high;
             const low = prices[i].low;
@@ -1104,17 +1104,13 @@ const AdvancedAnalysis = {
             tr.push(trValue);
         }
         
-        // Calculate ATR (smoothed TR)
         const atr = [];
-        
-        // First ATR is simple average
         let sum = 0;
         for (let i = 0; i < period && i < tr.length; i++) {
             sum += tr[i];
         }
         atr.push([prices[period].timestamp, sum / period]);
         
-        // Smoothed ATR
         for (let i = period; i < tr.length; i++) {
             const smoothed = (atr[atr.length - 1][1] * (period - 1) + tr[i]) / period;
             atr.push([prices[i + 1].timestamp, smoothed]);
@@ -1146,35 +1142,18 @@ const AdvancedAnalysis = {
     },
     
     // ============================================
-    // FIBONACCI RETRACEMENTS
+    // FIBONACCI (Optimized)
     // ============================================
     
-    createFibonacciChart() {
+    updateFibonacciChart() {
         const prices = this.stockData.prices;
         const fibonacci = this.calculateFibonacci(prices);
         const ohlc = prices.map(p => [p.timestamp, p.open, p.high, p.low, p.close]);
         
-        Highcharts.stockChart('fibonacciChart', {
-            chart: {
-                borderRadius: 15,
-                height: 600
-            },
-            title: {
-                text: 'Fibonacci Retracements',
-                style: { color: this.colors.primary, fontWeight: 'bold' }
-            },
-            rangeSelector: {
-                enabled: false
-            },
-            navigator: {
-                enabled: false
-            },
-            xAxis: {
-                type: 'datetime',
-                crosshair: true
-            },
-            yAxis: {
-                title: { text: 'Price' },
+        if (this.charts.fibonacci) {
+            this.charts.fibonacci.series[0].setData(ohlc, false);
+            // Update plot lines
+            this.charts.fibonacci.yAxis[0].update({
                 plotLines: fibonacci.levels.map((level, index) => ({
                     value: level.price,
                     color: this.getColorForFibLevel(level.ratio),
@@ -1190,30 +1169,58 @@ const AdvancedAnalysis = {
                     },
                     zIndex: 5
                 }))
-            },
-            tooltip: {
-                borderRadius: 10,
-                shared: true
-            },
-            series: [
-                {
-                    type: 'candlestick',
-                    name: this.currentSymbol,
-                    data: ohlc,
-                    color: this.colors.danger,
-                    upColor: this.colors.success,
-                    zIndex: 2
-                }
-            ],
-            credits: { enabled: false }
-        });
+            }, false);
+            this.charts.fibonacci.redraw();
+        } else {
+            this.charts.fibonacci = Highcharts.stockChart('fibonacciChart', {
+                chart: {
+                    borderRadius: 15,
+                    height: 600
+                },
+                title: {
+                    text: 'Fibonacci Retracements',
+                    style: { color: this.colors.primary, fontWeight: 'bold' }
+                },
+                rangeSelector: { enabled: false },
+                navigator: { enabled: false },
+                xAxis: { type: 'datetime', crosshair: true },
+                yAxis: {
+                    title: { text: 'Price' },
+                    plotLines: fibonacci.levels.map((level, index) => ({
+                        value: level.price,
+                        color: this.getColorForFibLevel(level.ratio),
+                        dashStyle: 'Dash',
+                        width: 2,
+                        label: {
+                            text: `${level.name} (${this.formatCurrency(level.price)})`,
+                            align: 'right',
+                            style: {
+                                color: this.getColorForFibLevel(level.ratio),
+                                fontWeight: level.ratio === 0.618 ? 'bold' : 'normal'
+                            }
+                        },
+                        zIndex: 5
+                    }))
+                },
+                tooltip: { borderRadius: 10, shared: true },
+                series: [
+                    {
+                        type: 'candlestick',
+                        name: this.currentSymbol,
+                        data: ohlc,
+                        color: this.colors.danger,
+                        upColor: this.colors.success,
+                        zIndex: 2
+                    }
+                ],
+                credits: { enabled: false }
+            });
+        }
         
-        // Display levels table
         this.displayFibonacciLevels(fibonacci);
     },
     
     calculateFibonacci(prices) {
-        // Find significant high and low in the period
         const high = Math.max(...prices.map(p => p.high));
         const low = Math.min(...prices.map(p => p.low));
         const diff = high - low;
@@ -1238,7 +1245,7 @@ const AdvancedAnalysis = {
     },
     
     getColorForFibLevel(ratio) {
-        if (ratio === 0.618) return this.colors.danger; // Golden ratio
+        if (ratio === 0.618) return this.colors.danger;
         if (ratio === 0 || ratio === 1) return this.colors.primary;
         return this.colors.lightBlue;
     },
@@ -1291,15 +1298,12 @@ const AdvancedAnalysis = {
         const low = prevPrice.low;
         const close = prevPrice.close;
         
-        // Standard Pivots
         const standard = this.calculateStandardPivots(high, low, close);
         this.displayPivotCard('pivotStandard', standard, lastPrice.close);
         
-        // Fibonacci Pivots
         const fibonacci = this.calculateFibonacciPivots(high, low, close);
         this.displayPivotCard('pivotFibonacci', fibonacci, lastPrice.close);
         
-        // Camarilla Pivots
         const camarilla = this.calculateCamarillaPivots(high, low, close);
         this.displayPivotCard('pivotCamarilla', camarilla, lastPrice.close);
     },
@@ -1373,100 +1377,97 @@ const AdvancedAnalysis = {
         
         container.innerHTML = html;
     },
-
-// ============================================
-    // VWAP (Volume-Weighted Average Price)
+    
+    // ============================================
+    // VWAP (Optimized)
     // ============================================
     
-    createVWAPChart() {
+    updateVWAPChart() {
         const prices = this.stockData.prices;
         const vwap = this.calculateVWAP(prices);
         const ohlc = prices.map(p => [p.timestamp, p.open, p.high, p.low, p.close]);
         
-        Highcharts.stockChart('vwapChart', {
-            chart: {
-                borderRadius: 15,
-                height: 600
-            },
-            title: {
-                text: 'VWAP with Standard Deviation Bands',
-                style: { color: this.colors.primary, fontWeight: 'bold' }
-            },
-            rangeSelector: {
-                enabled: false
-            },
-            navigator: {
-                enabled: true
-            },
-            xAxis: {
-                type: 'datetime',
-                crosshair: true
-            },
-            yAxis: {
-                title: { text: 'Price' }
-            },
-            tooltip: {
-                borderRadius: 10,
-                shared: true
-            },
-            series: [
-                {
-                    type: 'candlestick',
-                    name: this.currentSymbol,
-                    data: ohlc,
-                    color: this.colors.danger,
-                    upColor: this.colors.success,
-                    zIndex: 2
+        if (this.charts.vwap) {
+            this.charts.vwap.series[0].setData(ohlc, false);
+            this.charts.vwap.series[1].setData(vwap.vwap, false);
+            this.charts.vwap.series[2].setData(vwap.upperBand1, false);
+            this.charts.vwap.series[3].setData(vwap.upperBand2, false);
+            this.charts.vwap.series[4].setData(vwap.lowerBand1, false);
+            this.charts.vwap.series[5].setData(vwap.lowerBand2, false);
+            this.charts.vwap.redraw();
+        } else {
+            this.charts.vwap = Highcharts.stockChart('vwapChart', {
+                chart: {
+                    borderRadius: 15,
+                    height: 600
                 },
-                {
-                    type: 'line',
-                    name: 'VWAP',
-                    data: vwap.vwap,
-                    color: this.colors.primary,
-                    lineWidth: 3,
-                    zIndex: 3
+                title: {
+                    text: 'VWAP with Standard Deviation Bands',
+                    style: { color: this.colors.primary, fontWeight: 'bold' }
                 },
-                {
-                    type: 'line',
-                    name: 'Upper Band (+1 SD)',
-                    data: vwap.upperBand1,
-                    color: this.colors.danger,
-                    lineWidth: 1,
-                    dashStyle: 'Dash',
-                    zIndex: 1
-                },
-                {
-                    type: 'line',
-                    name: 'Upper Band (+2 SD)',
-                    data: vwap.upperBand2,
-                    color: this.colors.danger,
-                    lineWidth: 1,
-                    dashStyle: 'Dot',
-                    zIndex: 1
-                },
-                {
-                    type: 'line',
-                    name: 'Lower Band (-1 SD)',
-                    data: vwap.lowerBand1,
-                    color: this.colors.success,
-                    lineWidth: 1,
-                    dashStyle: 'Dash',
-                    zIndex: 1
-                },
-                {
-                    type: 'line',
-                    name: 'Lower Band (-2 SD)',
-                    data: vwap.lowerBand2,
-                    color: this.colors.success,
-                    lineWidth: 1,
-                    dashStyle: 'Dot',
-                    zIndex: 1
-                }
-            ],
-            credits: { enabled: false }
-        });
+                rangeSelector: { enabled: false },
+                navigator: { enabled: true },
+                xAxis: { type: 'datetime', crosshair: true },
+                yAxis: { title: { text: 'Price' } },
+                tooltip: { borderRadius: 10, shared: true },
+                series: [
+                    {
+                        type: 'candlestick',
+                        name: this.currentSymbol,
+                        data: ohlc,
+                        color: this.colors.danger,
+                        upColor: this.colors.success,
+                        zIndex: 2
+                    },
+                    {
+                        type: 'line',
+                        name: 'VWAP',
+                        data: vwap.vwap,
+                        color: this.colors.primary,
+                        lineWidth: 3,
+                        zIndex: 3
+                    },
+                    {
+                        type: 'line',
+                        name: 'Upper Band (+1 SD)',
+                        data: vwap.upperBand1,
+                        color: this.colors.danger,
+                        lineWidth: 1,
+                        dashStyle: 'Dash',
+                        zIndex: 1
+                    },
+                    {
+                        type: 'line',
+                        name: 'Upper Band (+2 SD)',
+                        data: vwap.upperBand2,
+                        color: this.colors.danger,
+                        lineWidth: 1,
+                        dashStyle: 'Dot',
+                        zIndex: 1
+                    },
+                    {
+                        type: 'line',
+                        name: 'Lower Band (-1 SD)',
+                        data: vwap.lowerBand1,
+                        color: this.colors.success,
+                        lineWidth: 1,
+                        dashStyle: 'Dash',
+                        zIndex: 1
+                    },
+                    {
+                        type: 'line',
+                        name: 'Lower Band (-2 SD)',
+                        data: vwap.lowerBand2,
+                        color: this.colors.success,
+                        lineWidth: 1,
+                        dashStyle: 'Dot',
+                        zIndex: 1
+                    }
+                ],
+                credits: { enabled: false }
+            });
+        }
         
-        // Display signal
         this.displayVWAPSignal(vwap, prices);
     },
     
@@ -1477,7 +1478,7 @@ const AdvancedAnalysis = {
         const lowerBand1 = [];
         const lowerBand2 = [];
         
-        let cumulativeTPV = 0; // Typical Price × Volume
+        let cumulativeTPV = 0;
         let cumulativeVolume = 0;
         const squaredDiffs = [];
         
@@ -1491,7 +1492,6 @@ const AdvancedAnalysis = {
             const vwapValue = cumulativeTPV / cumulativeVolume;
             vwap.push([prices[i].timestamp, vwapValue]);
             
-            // Calculate standard deviation
             squaredDiffs.push(Math.pow(typical - vwapValue, 2) * prices[i].volume);
             const variance = squaredDiffs.reduce((a, b) => a + b, 0) / cumulativeVolume;
             const stdDev = Math.sqrt(variance);
@@ -1534,8 +1534,8 @@ const AdvancedAnalysis = {
         signalBox.className = `signal-box ${signal}`;
         signalBox.textContent = text;
     },
-    
-    // ============================================
+
+// ============================================
     // CONSOLIDATED TRADING SIGNALS
     // ============================================
     
@@ -1554,25 +1554,25 @@ const AdvancedAnalysis = {
         // Stochastic Signal
         const lastK = stochastic.k[stochastic.k.length - 1][1];
         let stochasticSignal = 0;
-        if (lastK < 20) stochasticSignal = 1; // Buy
-        else if (lastK > 80) stochasticSignal = -1; // Sell
+        if (lastK < 20) stochasticSignal = 1;
+        else if (lastK > 80) stochasticSignal = -1;
         signals.push({ name: 'Stochastic', value: lastK.toFixed(2), signal: stochasticSignal });
         
         // Williams %R Signal
         const lastWilliams = williams[williams.length - 1][1];
         let williamsSignal = 0;
-        if (lastWilliams < -80) williamsSignal = 1; // Buy
-        else if (lastWilliams > -20) williamsSignal = -1; // Sell
+        if (lastWilliams < -80) williamsSignal = 1;
+        else if (lastWilliams > -20) williamsSignal = -1;
         signals.push({ name: 'Williams %R', value: lastWilliams.toFixed(2), signal: williamsSignal });
         
-        // ADX Signal (trend strength + direction)
+        // ADX Signal
         const lastADX = adx.adx[adx.adx.length - 1][1];
         const lastPlusDI = adx.plusDI[adx.plusDI.length - 1][1];
         const lastMinusDI = adx.minusDI[adx.minusDI.length - 1][1];
         let adxSignal = 0;
         if (lastADX > 25) {
-            if (lastPlusDI > lastMinusDI) adxSignal = 1; // Strong uptrend
-            else adxSignal = -1; // Strong downtrend
+            if (lastPlusDI > lastMinusDI) adxSignal = 1;
+            else adxSignal = -1;
         }
         signals.push({ name: 'ADX', value: lastADX.toFixed(2), signal: adxSignal });
         
@@ -1582,7 +1582,7 @@ const AdvancedAnalysis = {
         const sarSignal = lastPrice > lastSAR ? 1 : -1;
         signals.push({ name: 'Parabolic SAR', value: this.formatCurrency(lastSAR), signal: sarSignal });
         
-        // OBV Signal (trend confirmation)
+        // OBV Signal
         const recentOBV = obv.slice(-20);
         const obvTrend = recentOBV[recentOBV.length - 1][1] - recentOBV[0][1];
         const obvSignal = obvTrend > 0 ? 1 : obvTrend < 0 ? -1 : 0;
@@ -1593,7 +1593,7 @@ const AdvancedAnalysis = {
         const vwapSignal = lastPrice > lastVWAP ? 1 : lastPrice < lastVWAP ? -1 : 0;
         signals.push({ name: 'VWAP', value: this.formatCurrency(lastVWAP), signal: vwapSignal });
         
-        // Ichimoku Signal (simplified)
+        // Ichimoku Signal
         const ichimoku = this.calculateIchimoku(prices);
         const lastCloudTop = Math.max(
             ichimoku.spanA[ichimoku.spanA.length - 1]?.[1] || 0,
@@ -1606,12 +1606,16 @@ const AdvancedAnalysis = {
         let ichimokuSignal = 0;
         if (lastPrice > lastCloudTop) ichimokuSignal = 1;
         else if (lastPrice < lastCloudBottom) ichimokuSignal = -1;
-        signals.push({ name: 'Ichimoku Cloud', value: lastPrice > lastCloudTop ? 'Above Cloud' : lastPrice < lastCloudBottom ? 'Below Cloud' : 'In Cloud', signal: ichimokuSignal });
+        signals.push({ 
+            name: 'Ichimoku Cloud', 
+            value: lastPrice > lastCloudTop ? 'Above Cloud' : lastPrice < lastCloudBottom ? 'Below Cloud' : 'In Cloud', 
+            signal: ichimokuSignal 
+        });
         
         // Calculate overall signal
         const totalSignal = signals.reduce((sum, s) => sum + s.signal, 0);
         const maxSignal = signals.length;
-        const signalPercentage = ((totalSignal + maxSignal) / (2 * maxSignal)) * 100; // Convert to 0-100 scale
+        const signalPercentage = ((totalSignal + maxSignal) / (2 * maxSignal)) * 100;
         
         this.displayConsolidatedSignals(signals, signalPercentage);
     },
@@ -1675,6 +1679,7 @@ const AdvancedAnalysis = {
     
     // Generate Demo Data (fallback)
     generateDemoData(symbol) {
+        console.log('📊 Generating demo data for', symbol);
         const days = 180;
         const prices = [];
         let price = 100;
@@ -1751,5 +1756,6 @@ const AdvancedAnalysis = {
 
 // Initialize when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
+    console.log('🚀 Advanced Analysis - Initializing...');
     AdvancedAnalysis.init();
 });
