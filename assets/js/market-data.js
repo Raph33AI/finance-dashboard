@@ -1,5 +1,6 @@
 /* ==============================================
    MARKET-DATA.JS - Récupération données de marché
+   VERSION CORRIGÉE AVEC PROXY CORS
    ============================================== */
 
 const MarketData = (function() {
@@ -7,14 +8,9 @@ const MarketData = (function() {
     
     // ========== CONFIGURATION API ==========
     
-    // Option 1 : Alpha Vantage (Officiel - Limité à 25 requêtes/jour)
-    const ALPHA_VANTAGE_API_KEY = 'VOTRE_CLE_ICI'; // Gratuit sur alphavantage.co
-    
-    // Option 2 : Yahoo Finance via Proxy (Illimité - Non officiel)
-    const YAHOO_FINANCE_PROXY = 'https://query1.finance.yahoo.com/v8/finance/chart/';
-    
-    // Sélectionnez votre méthode préférée
-    const USE_ALPHA_VANTAGE = false; // false = Yahoo Finance
+    // Proxy CORS pour contourner les restrictions Yahoo Finance
+    const CORS_PROXY = 'https://api.codetabs.com/v1/proxy?quest=';
+    const YAHOO_FINANCE_BASE = 'https://query1.finance.yahoo.com/v8/finance/chart/';
     
     // ========== VARIABLES PRIVÉES ==========
     let currentStockData = null;
@@ -38,30 +34,23 @@ const MarketData = (function() {
         hideResults();
         
         try {
-            let data;
-            
-            if (USE_ALPHA_VANTAGE) {
-                data = await fetchFromAlphaVantage(symbol, period);
-            } else {
-                data = await fetchFromYahooFinance(symbol, period);
-            }
-            
+            const data = await fetchFromYahooFinance(symbol, period);
             currentStockData = data;
             displayResults(data, symbol);
-            
+            window.FinanceDashboard.showNotification('Stock data loaded successfully!', 'success');
         } catch (error) {
             console.error('Error fetching stock data:', error);
-            showError('Failed to fetch data: ' + error.message);
+            showError('Failed to fetch data for ' + symbol + '. ' + error.message);
         } finally {
             showLoading(false);
         }
     }
     
     /**
-     * Récupération depuis Yahoo Finance
+     * Récupération depuis Yahoo Finance (avec proxy CORS)
      */
     async function fetchFromYahooFinance(symbol, period) {
-        // Calculer les timestamps
+        // Calculer les périodes
         const periods = {
             '1D': { range: '1d', interval: '5m' },
             '5D': { range: '5d', interval: '15m' },
@@ -74,100 +63,106 @@ const MarketData = (function() {
         
         const { range, interval } = periods[period] || periods['1M'];
         
-        const url = `${YAHOO_FINANCE_PROXY}${symbol}?range=${range}&interval=${interval}`;
+        // Construire l'URL Yahoo Finance
+        const yahooUrl = `${YAHOO_FINANCE_BASE}${symbol}?range=${range}&interval=${interval}`;
         
-        const response = await fetch(url);
+        // Utiliser le proxy CORS
+        const proxyUrl = CORS_PROXY + encodeURIComponent(yahooUrl);
         
-        if (!response.ok) {
-            throw new Error('Stock symbol not found or API error');
-        }
+        console.log('Fetching:', symbol, 'Period:', period);
+        console.log('Proxy URL:', proxyUrl);
         
-        const json = await response.json();
-        
-        if (!json.chart || !json.chart.result || json.chart.result.length === 0) {
-            throw new Error('No data available for this symbol');
-        }
-        
-        const result = json.chart.result[0];
-        const quote = result.indicators.quote[0];
-        const timestamps = result.timestamp;
-        
-        // Formater les données
-        const formattedData = {
-            symbol: result.meta.symbol,
-            currency: result.meta.currency,
-            currentPrice: result.meta.regularMarketPrice,
-            previousClose: result.meta.previousClose,
-            change: result.meta.regularMarketPrice - result.meta.previousClose,
-            changePercent: ((result.meta.regularMarketPrice - result.meta.previousClose) / result.meta.previousClose * 100),
-            dayHigh: result.meta.regularMarketDayHigh,
-            dayLow: result.meta.regularMarketDayLow,
-            volume: quote.volume[quote.volume.length - 1],
-            timestamps: timestamps,
-            prices: {
-                open: quote.open,
-                high: quote.high,
-                low: quote.low,
-                close: quote.close,
-                volume: quote.volume
+        try {
+            const response = await fetch(proxyUrl);
+            
+            if (!response.ok) {
+                throw new Error('Network response was not ok (Status: ' + response.status + ')');
             }
-        };
-        
-        return formattedData;
-    }
-    
-    /**
-     * Récupération depuis Alpha Vantage
-     */
-    async function fetchFromAlphaVantage(symbol, period) {
-        if (!ALPHA_VANTAGE_API_KEY || ALPHA_VANTAGE_API_KEY === 'VOTRE_CLE_ICI') {
-            throw new Error('Please set your Alpha Vantage API key in market-data.js');
-        }
-        
-        // Déterminer la fonction API selon la période
-        let func = 'TIME_SERIES_DAILY';
-        if (period === '1D') func = 'TIME_SERIES_INTRADAY&interval=5min';
-        
-        const url = `https://www.alphavantage.co/query?function=${func}&symbol=${symbol}&apikey=${ALPHA_VANTAGE_API_KEY}&outputsize=full`;
-        
-        const response = await fetch(url);
-        const json = await response.json();
-        
-        if (json['Error Message']) {
-            throw new Error('Invalid stock symbol');
-        }
-        
-        if (json['Note']) {
-            throw new Error('API call limit reached (25 calls/day). Try Yahoo Finance instead.');
-        }
-        
-        // Parser les données (simplifié - à adapter selon vos besoins)
-        const timeSeriesKey = Object.keys(json).find(key => key.includes('Time Series'));
-        const timeSeries = json[timeSeriesKey];
-        
-        const dates = Object.keys(timeSeries).reverse();
-        const prices = dates.map(date => parseFloat(timeSeries[date]['4. close']));
-        const volumes = dates.map(date => parseInt(timeSeries[date]['5. volume']));
-        
-        const currentPrice = prices[prices.length - 1];
-        const previousClose = prices[prices.length - 2];
-        
-        return {
-            symbol: symbol,
-            currency: 'USD',
-            currentPrice: currentPrice,
-            previousClose: previousClose,
-            change: currentPrice - previousClose,
-            changePercent: ((currentPrice - previousClose) / previousClose * 100),
-            dayHigh: Math.max(...prices.slice(-1)),
-            dayLow: Math.min(...prices.slice(-1)),
-            volume: volumes[volumes.length - 1],
-            timestamps: dates.map(d => new Date(d).getTime() / 1000),
-            prices: {
-                close: prices,
-                volume: volumes
+            
+            const json = await response.json();
+            
+            console.log('Raw response:', json);
+            
+            // Vérifier la structure des données
+            if (!json.chart || !json.chart.result || json.chart.result.length === 0) {
+                throw new Error('Invalid symbol or no data available');
             }
-        };
+            
+            if (json.chart.error) {
+                throw new Error(json.chart.error.description || 'Yahoo Finance API error');
+            }
+            
+            const result = json.chart.result[0];
+            const meta = result.meta;
+            const quote = result.indicators.quote[0];
+            const timestamps = result.timestamp;
+            
+            // Vérifier que nous avons des données
+            if (!timestamps || timestamps.length === 0) {
+                throw new Error('No historical data available for this symbol');
+            }
+            
+            // Nettoyer les données (enlever les valeurs null)
+            const cleanData = {
+                open: [],
+                high: [],
+                low: [],
+                close: [],
+                volume: []
+            };
+            
+            const cleanTimestamps = [];
+            
+            for (let i = 0; i < timestamps.length; i++) {
+                if (quote.close[i] !== null && quote.close[i] !== undefined) {
+                    cleanTimestamps.push(timestamps[i]);
+                    cleanData.open.push(quote.open[i] || quote.close[i]);
+                    cleanData.high.push(quote.high[i] || quote.close[i]);
+                    cleanData.low.push(quote.low[i] || quote.close[i]);
+                    cleanData.close.push(quote.close[i]);
+                    cleanData.volume.push(quote.volume[i] || 0);
+                }
+            }
+            
+            if (cleanData.close.length === 0) {
+                throw new Error('No valid price data found');
+            }
+            
+            // Prix actuel et précédent
+            const currentPrice = meta.regularMarketPrice || cleanData.close[cleanData.close.length - 1];
+            const previousClose = meta.previousClose || cleanData.close[cleanData.close.length - 2] || currentPrice;
+            
+            // Formater les données
+            const formattedData = {
+                symbol: meta.symbol,
+                currency: meta.currency || 'USD',
+                currentPrice: currentPrice,
+                previousClose: previousClose,
+                change: currentPrice - previousClose,
+                changePercent: ((currentPrice - previousClose) / previousClose * 100),
+                dayHigh: meta.regularMarketDayHigh || Math.max(...cleanData.high),
+                dayLow: meta.regularMarketDayLow || Math.min(...cleanData.low),
+                volume: cleanData.volume[cleanData.volume.length - 1] || 0,
+                timestamps: cleanTimestamps,
+                prices: cleanData
+            };
+            
+            console.log('Formatted data:', formattedData);
+            
+            return formattedData;
+            
+        } catch (error) {
+            console.error('Fetch error:', error);
+            
+            // Messages d'erreur plus clairs
+            if (error.message.includes('Invalid symbol')) {
+                throw new Error('Stock symbol not found. Please verify the ticker symbol.');
+            } else if (error.message.includes('Network')) {
+                throw new Error('Network error. Please check your internet connection.');
+            } else {
+                throw new Error(error.message || 'Unable to fetch stock data');
+            }
+        }
     }
     
     /**
@@ -178,10 +173,7 @@ const MarketData = (function() {
         resultsSection.classList.remove('hidden');
         resultsSection.scrollIntoView({ behavior: 'smooth' });
         
-        // Afficher les cartes d'info
         displayStockInfo(data);
-        
-        // Créer les graphiques
         createPriceChart(data);
         createVolumeChart(data);
         createStatsTable(data);
@@ -209,15 +201,15 @@ const MarketData = (function() {
             </div>
             <div class='info-card'>
                 <div class='label'>Day High</div>
-                <div class='value'>${data.dayHigh ? data.dayHigh.toFixed(2) : 'N/A'}</div>
+                <div class='value'>${data.dayHigh.toFixed(2)}</div>
             </div>
             <div class='info-card'>
                 <div class='label'>Day Low</div>
-                <div class='value'>${data.dayLow ? data.dayLow.toFixed(2) : 'N/A'}</div>
+                <div class='value'>${data.dayLow.toFixed(2)}</div>
             </div>
             <div class='info-card'>
                 <div class='label'>Volume</div>
-                <div class='value'>${data.volume ? data.volume.toLocaleString() : 'N/A'}</div>
+                <div class='value'>${data.volume.toLocaleString()}</div>
             </div>
         `;
         
@@ -228,9 +220,9 @@ const MarketData = (function() {
      * Crée le graphique de prix
      */
     function createPriceChart(data) {
-        const prices = data.prices.close.map((price, i) => [
-            data.timestamps[i] * 1000,
-            price
+        const prices = data.timestamps.map((timestamp, i) => [
+            timestamp * 1000,
+            data.prices.close[i]
         ]);
         
         Highcharts.chart('chartPrice', {
@@ -240,8 +232,8 @@ const MarketData = (function() {
                 zoomType: 'x'
             },
             title: {
-                text: data.symbol + ' Price Evolution',
-                style: { color: '#2649B2', fontSize: '1.3em' }
+                text: data.symbol + ' - Price Evolution',
+                style: { color: '#2649B2', fontSize: '1.3em', fontWeight: 'bold' }
             },
             xAxis: {
                 type: 'datetime',
@@ -250,7 +242,7 @@ const MarketData = (function() {
             yAxis: {
                 title: {
                     text: 'Price (' + data.currency + ')',
-                    style: { color: '#2649B2' }
+                    style: { color: '#2649B2', fontWeight: 'bold' }
                 }
             },
             tooltip: {
@@ -284,9 +276,9 @@ const MarketData = (function() {
      * Crée le graphique de volume
      */
     function createVolumeChart(data) {
-        const volumes = data.prices.volume.map((vol, i) => [
-            data.timestamps[i] * 1000,
-            vol || 0
+        const volumes = data.timestamps.map((timestamp, i) => [
+            timestamp * 1000,
+            data.prices.volume[i] || 0
         ]);
         
         Highcharts.chart('chartVolume', {
@@ -296,7 +288,7 @@ const MarketData = (function() {
             },
             title: {
                 text: 'Trading Volume',
-                style: { color: '#6C3483', fontSize: '1.2em' }
+                style: { color: '#6C3483', fontSize: '1.2em', fontWeight: 'bold' }
             },
             xAxis: {
                 type: 'datetime'
@@ -304,7 +296,7 @@ const MarketData = (function() {
             yAxis: {
                 title: {
                     text: 'Volume',
-                    style: { color: '#6C3483' }
+                    style: { color: '#6C3483', fontWeight: 'bold' }
                 }
             },
             tooltip: {
@@ -361,6 +353,10 @@ const MarketData = (function() {
                         <td><strong>Total Return</strong></td>
                         <td>${((prices[prices.length - 1] - prices[0]) / prices[0] * 100).toFixed(2)}%</td>
                     </tr>
+                    <tr>
+                        <td><strong>Data Points</strong></td>
+                        <td>${prices.length} days</td>
+                    </tr>
                 </tbody>
             </table>
         `;
@@ -414,6 +410,7 @@ const MarketData = (function() {
         if (errorSection && errorMessage) {
             errorMessage.textContent = message;
             errorSection.classList.remove('hidden');
+            errorSection.scrollIntoView({ behavior: 'smooth' });
         }
     }
     
@@ -429,7 +426,7 @@ const MarketData = (function() {
     };
 })();
 
-// Auto-charger Apple au démarrage (optionnel)
-window.addEventListener('DOMContentLoaded', function() {
-    // MarketData.loadQuickStock('AAPL');
-});
+// Optionnel : Charger une action au démarrage
+// window.addEventListener('DOMContentLoaded', function() {
+//     MarketData.loadQuickStock('AAPL');
+// });
