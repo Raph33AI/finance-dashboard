@@ -868,12 +868,14 @@ const MarketData = {
         });
     },
     
-    // Create RSI Chart
+    // Create RSI Chart - VERSION MANUELLE CORRIGÉE
     createRSIChart() {
         const prices = this.stockData.prices;
-        const closeData = prices.map(p => [p.timestamp, p.close]);
         
-        Highcharts.stockChart('rsiChart', {
+        // Calculer RSI manuellement
+        const rsiData = this.calculateRSIArray(prices, 14);
+        
+        Highcharts.chart('rsiChart', {
             chart: {
                 borderRadius: 15,
                 height: 400
@@ -882,30 +884,15 @@ const MarketData = {
                 text: 'RSI Indicator',
                 style: { color: '#2649B2', fontWeight: 'bold' }
             },
-            rangeSelector: {
-                enabled: false
-            },
-            navigator: {
-                enabled: false
-            },
-            scrollbar: {
-                enabled: false
-            },
             xAxis: {
                 type: 'datetime',
                 crosshair: true
             },
-            yAxis: [{
-                title: { text: 'Price' },
-                height: '0%',
-                visible: false
-            }, {
+            yAxis: {
                 title: { 
                     text: 'RSI',
                     style: { color: '#2649B2' }
                 },
-                top: '0%',
-                height: '100%',
                 plotLines: [{
                     value: 70,
                     color: '#dc3545',
@@ -941,34 +928,35 @@ const MarketData = {
                     zIndex: 5
                 }],
                 min: 0,
-                max: 100,
-                opposite: true
-            }],
+                max: 100
+            },
             tooltip: {
                 borderRadius: 10,
+                crosshairs: true,
                 shared: true,
-                split: false
+                valueDecimals: 2
+            },
+            plotOptions: {
+                area: {
+                    fillColor: {
+                        linearGradient: { x1: 0, y1: 0, x2: 0, y2: 1 },
+                        stops: [
+                            [0, 'rgba(74, 116, 243, 0.3)'],
+                            [1, 'rgba(74, 116, 243, 0.05)']
+                        ]
+                    },
+                    lineWidth: 3,
+                    marker: {
+                        enabled: false
+                    },
+                    threshold: null
+                }
             },
             series: [{
-                type: 'line',
-                name: 'Close Price',
-                data: closeData,
-                id: 'price',
-                yAxis: 0,
-                visible: false
-            }, {
-                type: 'rsi',
-                linkedTo: 'price',
-                yAxis: 1,
-                color: '#4A74F3',
-                lineWidth: 3,
+                type: 'area',
                 name: 'RSI (14)',
-                params: {
-                    period: 14
-                },
-                marker: {
-                    enabled: false
-                },
+                data: rsiData,
+                color: '#4A74F3',
                 zones: [{
                     value: 30,
                     color: '#28a745'
@@ -982,13 +970,60 @@ const MarketData = {
             credits: { enabled: false }
         });
     },
-    
-    // Create MACD Chart
+
+    // Calculer RSI pour tous les points
+    calculateRSIArray(prices, period = 14) {
+        const rsiData = [];
+        
+        if (prices.length < period + 1) {
+            return rsiData;
+        }
+        
+        // Premier RSI
+        let gains = 0;
+        let losses = 0;
+        
+        for (let i = 1; i <= period; i++) {
+            const change = prices[i].close - prices[i - 1].close;
+            if (change > 0) gains += change;
+            else losses += Math.abs(change);
+        }
+        
+        let avgGain = gains / period;
+        let avgLoss = losses / period;
+        
+        const rs = avgGain / avgLoss;
+        const rsi = 100 - (100 / (1 + rs));
+        rsiData.push([prices[period].timestamp, rsi]);
+        
+        // RSI suivants
+        for (let i = period + 1; i < prices.length; i++) {
+            const change = prices[i].close - prices[i - 1].close;
+            
+            if (change > 0) {
+                avgGain = ((avgGain * (period - 1)) + change) / period;
+                avgLoss = (avgLoss * (period - 1)) / period;
+            } else {
+                avgGain = (avgGain * (period - 1)) / period;
+                avgLoss = ((avgLoss * (period - 1)) + Math.abs(change)) / period;
+            }
+            
+            const currentRS = avgGain / avgLoss;
+            const currentRSI = 100 - (100 / (1 + currentRS));
+            rsiData.push([prices[i].timestamp, currentRSI]);
+        }
+        
+        return rsiData;
+    },
+
+    // Create MACD Chart - VERSION MANUELLE CORRIGÉE
     createMACDChart() {
         const prices = this.stockData.prices;
-        const closeData = prices.map(p => [p.timestamp, p.close]);
         
-        Highcharts.stockChart('macdChart', {
+        // Calculer MACD manuellement
+        const macdData = this.calculateMACDArray(prices);
+        
+        Highcharts.chart('macdChart', {
             chart: {
                 borderRadius: 15,
                 height: 400
@@ -997,30 +1032,15 @@ const MarketData = {
                 text: 'MACD Indicator',
                 style: { color: '#2649B2', fontWeight: 'bold' }
             },
-            rangeSelector: {
-                enabled: false
-            },
-            navigator: {
-                enabled: false
-            },
-            scrollbar: {
-                enabled: false
-            },
             xAxis: {
                 type: 'datetime',
                 crosshair: true
             },
-            yAxis: [{
-                title: { text: 'Price' },
-                height: '0%',
-                visible: false
-            }, {
+            yAxis: {
                 title: { 
                     text: 'MACD',
                     style: { color: '#2649B2' }
                 },
-                top: '0%',
-                height: '100%',
                 plotLines: [{
                     value: 0,
                     color: '#6C8BE0',
@@ -1032,50 +1052,120 @@ const MarketData = {
                         style: { color: '#6C8BE0' }
                     },
                     zIndex: 5
-                }],
-                opposite: true
-            }],
+                }]
+            },
             tooltip: {
                 borderRadius: 10,
+                crosshairs: true,
                 shared: true,
-                split: false
+                valueDecimals: 2
+            },
+            plotOptions: {
+                column: {
+                    borderRadius: '25%'
+                }
             },
             series: [{
                 type: 'line',
-                name: 'Close Price',
-                data: closeData,
-                id: 'price',
-                yAxis: 0,
-                visible: false
-            }, {
-                type: 'macd',
-                linkedTo: 'price',
-                yAxis: 1,
-                name: 'MACD',
-                params: {
-                    shortPeriod: 12,
-                    longPeriod: 26,
-                    signalPeriod: 9,
-                    period: 26
-                },
-                macdLine: {
-                    styles: {
-                        lineColor: '#2649B2',
-                        lineWidth: 2
-                    }
-                },
-                signalLine: {
-                    styles: {
-                        lineColor: '#9D5CE6',
-                        lineWidth: 2
-                    }
-                },
+                name: 'MACD Line',
+                data: macdData.macd,
+                color: '#2649B2',
+                lineWidth: 2,
                 marker: {
                     enabled: false
                 }
+            }, {
+                type: 'line',
+                name: 'Signal Line',
+                data: macdData.signal,
+                color: '#9D5CE6',
+                lineWidth: 2,
+                marker: {
+                    enabled: false
+                }
+            }, {
+                type: 'column',
+                name: 'Histogram',
+                data: macdData.histogram,
+                color: '#6C8BE0',
+                pointWidth: 3
             }],
             credits: { enabled: false }
         });
+    },
+
+    // Calculer MACD pour tous les points
+    calculateMACDArray(prices, shortPeriod = 12, longPeriod = 26, signalPeriod = 9) {
+        const closePrices = prices.map(p => p.close);
+        
+        // Calculer EMA
+        const emaShort = this.calculateEMAArray(closePrices, shortPeriod);
+        const emaLong = this.calculateEMAArray(closePrices, longPeriod);
+        
+        // MACD Line = EMA(12) - EMA(26)
+        const macdLine = [];
+        for (let i = longPeriod - 1; i < prices.length; i++) {
+            const macdValue = emaShort[i] - emaLong[i];
+            macdLine.push(macdValue);
+        }
+        
+        // Signal Line = EMA(9) of MACD
+        const signalLine = this.calculateEMAArray(macdLine, signalPeriod);
+        
+        // Préparer les données pour Highcharts
+        const macdData = [];
+        const signalData = [];
+        const histogramData = [];
+        
+        const startIndex = longPeriod - 1 + signalPeriod - 1;
+        
+        for (let i = startIndex; i < prices.length; i++) {
+            const timestamp = prices[i].timestamp;
+            const macdIndex = i - (longPeriod - 1);
+            const signalIndex = macdIndex - (signalPeriod - 1);
+            
+            if (signalIndex >= 0 && signalIndex < signalLine.length) {
+                const macdVal = macdLine[macdIndex];
+                const signalVal = signalLine[signalIndex];
+                const histogramVal = macdVal - signalVal;
+                
+                macdData.push([timestamp, macdVal]);
+                signalData.push([timestamp, signalVal]);
+                histogramData.push([timestamp, histogramVal]);
+            }
+        }
+        
+        return {
+            macd: macdData,
+            signal: signalData,
+            histogram: histogramData
+        };
+    },
+
+    // Calculer EMA array
+    calculateEMAArray(data, period) {
+        const k = 2 / (period + 1);
+        const emaArray = [];
+        
+        // Remplir les premiers éléments avec undefined
+        for (let i = 0; i < period - 1; i++) {
+            emaArray[i] = undefined;
+        }
+        
+        // Premier EMA = SMA
+        let sum = 0;
+        for (let i = 0; i < period; i++) {
+            sum += data[i];
+        }
+        emaArray[period - 1] = sum / period;
+        
+        // EMA suivants
+        for (let i = period; i < data.length; i++) {
+            const ema = data[i] * k + emaArray[i - 1] * (1 - k);
+            emaArray[i] = ema;
+        }
+        
+        return emaArray;
     },
     
     // Calculate RSI
