@@ -459,7 +459,13 @@
    ============================================ */
 
 .results-panel {
-    /* Container pour tous les résultats */
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+}
+
+.results-panel.hidden {
+    display: none;
 }
 
 .section-title {
@@ -833,160 +839,6 @@
 
 @media (max-width: 480px) {
     .symbol-chip {
-        flex: 1 1 100%;
-    }
-}
-
-/* ==============================================
-   POPULAR STOCKS SECTION
-   ============================================== */
-
-.popular-stocks-section {
-    margin-top: 20px;
-    padding-top: 20px;
-    border-top: 2px solid #f0f0f0;
-    display: flex;
-    align-items: center;
-    gap: 15px;
-    flex-wrap: wrap;
-}
-
-.popular-stocks-label {
-    font-weight: 600;
-    color: #2649B2;
-    font-size: 15px;
-    white-space: nowrap;
-}
-
-.popular-stocks-grid {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
-    flex: 1;
-}
-
-.stock-chip {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    padding: 8px 16px;
-    background: white;
-    border: 2px solid #e0e0e0;
-    border-radius: 25px;
-    font-weight: 600;
-    font-size: 14px;
-    color: #333;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    white-space: nowrap;
-}
-
-.stock-chip i {
-    font-size: 16px;
-    color: #2649B2;
-}
-
-.stock-chip:hover {
-    background: linear-gradient(135deg, #2649B2, #4A74F3);
-    border-color: #2649B2;
-    color: white;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(38, 73, 178, 0.3);
-}
-
-.stock-chip:hover i {
-    color: white;
-}
-
-.stock-chip:active {
-    transform: translateY(0);
-}
-
-/* Icons spécifiques */
-.stock-chip .fa-apple {
-    color: #000;
-}
-
-.stock-chip:hover .fa-apple {
-    color: white;
-}
-
-.stock-chip .fa-microsoft {
-    color: #00A4EF;
-}
-
-.stock-chip:hover .fa-microsoft {
-    color: white;
-}
-
-.stock-chip .fa-google {
-    color: #4285F4;
-}
-
-.stock-chip:hover .fa-google {
-    color: white;
-}
-
-.stock-chip .fa-amazon {
-    color: #FF9900;
-}
-
-.stock-chip:hover .fa-amazon {
-    color: white;
-}
-
-.stock-chip .fa-car {
-    color: #E82127;
-}
-
-.stock-chip:hover .fa-car {
-    color: white;
-}
-
-.stock-chip .fa-microchip {
-    color: #76B900;
-}
-
-.stock-chip:hover .fa-microchip {
-    color: white;
-}
-
-.stock-chip .fa-meta {
-    color: #0668E1;
-}
-
-.stock-chip:hover .fa-meta {
-    color: white;
-}
-
-.stock-chip .fa-film {
-    color: #E50914;
-}
-
-.stock-chip:hover .fa-film {
-    color: white;
-}
-
-/* Responsive */
-@media (max-width: 768px) {
-    .popular-stocks-section {
-        flex-direction: column;
-        align-items: flex-start;
-    }
-    
-    .popular-stocks-grid {
-        width: 100%;
-    }
-    
-    .stock-chip {
-        flex: 1 1 calc(50% - 5px);
-        justify-content: center;
-        min-width: 120px;
-    }
-}
-
-@media (max-width: 480px) {
-    .stock-chip {
         flex: 1 1 100%;
     }
 }
