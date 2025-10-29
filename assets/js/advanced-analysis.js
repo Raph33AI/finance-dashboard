@@ -1629,10 +1629,10 @@ const AdvancedAnalysis = {
         const prices = this.stockData.prices;
         const signals = [];
         
-        // Calculate all indicators for signals
+        // Calculate all indicators for signals (UNE SEULE FOIS)
         const stochastic = this.calculateStochastic(prices);
         const williams = this.calculateWilliams(prices);
-        const adx = this.calculateADX(prices);
+        const adxData = this.calculateADX(prices);
         const sar = this.calculateSAR(prices);
         const obv = this.calculateOBV(prices);
         const vwap = this.calculateVWAP(prices);
@@ -1659,10 +1659,10 @@ const AdvancedAnalysis = {
         // ADX Signal
         let adxSignal = 0;
         let adxValue = 'N/A';
-        if (adx.adx.length > 0 && adx.plusDI.length > 0 && adx.minusDI.length > 0) {
-            const lastADX = adx.adx[adx.adx.length - 1][1];
-            const lastPlusDI = adx.plusDI[adx.plusDI.length - 1][1];
-            const lastMinusDI = adx.minusDI[adx.minusDI.length - 1][1];
+        if (adxData.adx.length > 0 && adxData.plusDI.length > 0 && adxData.minusDI.length > 0) {
+            const lastADX = adxData.adx[adxData.adx.length - 1][1];
+            const lastPlusDI = adxData.plusDI[adxData.plusDI.length - 1][1];
+            const lastMinusDI = adxData.minusDI[adxData.minusDI.length - 1][1];
             
             adxValue = lastADX.toFixed(2);
             
