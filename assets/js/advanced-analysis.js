@@ -126,53 +126,87 @@ const AdvancedAnalysis = {
         }
     },
     
-    // Fetch Quote Data
     async fetchQuoteData(symbol) {
+        console.log('🔍 Fetching quote data for', symbol);
+        
         try {
             const targetUrl = `https://query1.finance.yahoo.com/v7/finance/quote?symbols=${symbol}`;
             const proxyUrl = this.CORS_PROXIES[0];
             const url = proxyUrl + encodeURIComponent(targetUrl);
             
+            console.log('📡 Request URL:', url);
             const response = await fetch(url);
+            console.log('📥 Response status:', response.status);
+            
             const data = await response.json();
+            console.log('📊 Raw quote data:', data);
             
             if (data.quoteResponse && data.quoteResponse.result.length > 0) {
                 const quote = data.quoteResponse.result[0];
+                console.log('✅ Yahoo quote found:', quote);
+                
                 this.stockData.quote = {
                     name: quote.longName || quote.shortName || symbol,
                     symbol: quote.symbol,
                     price: quote.regularMarketPrice,
                     change: quote.regularMarketChange,
                     changePercent: quote.regularMarketChangePercent,
-                    open: quote.regularMarketOpen,           // ← AJOUTÉ
-                    high: quote.regularMarketDayHigh,        // ← AJOUTÉ
-                    low: quote.regularMarketDayLow,          // ← AJOUTÉ
-                    volume: quote.regularMarketVolume,       // ← AJOUTÉ
-                    marketCap: quote.marketCap,              // ← AJOUTÉ
-                    pe: quote.trailingPE                     // ← AJOUTÉ
+                    open: quote.regularMarketOpen,
+                    high: quote.regularMarketDayHigh,
+                    low: quote.regularMarketDayLow,
+                    volume: quote.regularMarketVolume,
+                    marketCap: quote.marketCap,
+                    pe: quote.trailingPE
                 };
-                console.log('✅ Quote data fetched:', this.stockData.quote);
+                
+                console.log('✅ Quote data set:', this.stockData.quote);
+            } else {
+                throw new Error('No quote data in response');
             }
         } catch (error) {
-            console.warn('Quote fetch failed, using fallback data');
+            console.error('❌ Quote fetch failed:', error);
+            console.log('🔄 Using fallback data from prices...');
+            
+            // ✅ CORRECTION : Vérifier que prices existe et a des données
+            if (!this.stockData || !this.stockData.prices || this.stockData.prices.length === 0) {
+                console.error('❌ No price data available for fallback!');
+                this.stockData.quote = {
+                    name: symbol,
+                    symbol: symbol,
+                    price: 0,
+                    change: 0,
+                    changePercent: 0,
+                    open: 0,
+                    high: 0,
+                    low: 0,
+                    volume: 0,
+                    marketCap: null,
+                    pe: null
+                };
+                return;
+            }
+            
             const lastPrice = this.stockData.prices[this.stockData.prices.length - 1];
             const prevPrice = this.stockData.prices[this.stockData.prices.length - 2] || lastPrice;
             
-            // ✅ CORRECTION : S'assurer que tous les champs sont présents
+            console.log('📊 Last price:', lastPrice);
+            console.log('📊 Prev price:', prevPrice);
+            
             this.stockData.quote = {
                 name: symbol,
                 symbol: symbol,
                 price: lastPrice.close,
                 change: lastPrice.close - prevPrice.close,
                 changePercent: ((lastPrice.close - prevPrice.close) / prevPrice.close) * 100,
-                open: lastPrice.open,           // ← AJOUTÉ
-                high: lastPrice.high,           // ← AJOUTÉ
-                low: lastPrice.low,             // ← AJOUTÉ
-                volume: lastPrice.volume,       // ← AJOUTÉ
+                open: lastPrice.open,
+                high: lastPrice.high,
+                low: lastPrice.low,
+                volume: lastPrice.volume,
                 marketCap: null,
                 pe: null
             };
-            console.log('⚠️ Using fallback quote data:', this.stockData.quote);
+            
+            console.log('✅ Fallback quote data set:', this.stockData.quote);
         }
     },
     
@@ -226,22 +260,54 @@ const AdvancedAnalysis = {
     },
     
     displayStockHeader() {
-        const quote = this.stockData.quote;
-        
-        // ✅ DEBUG : Afficher les données dans la console
-        console.log('📊 Display Stock Header:', quote);
-        
-        document.getElementById('stockSymbol').textContent = quote.symbol || this.currentSymbol;
-        document.getElementById('stockName').textContent = quote.name || this.currentSymbol;
-        
-        console.log('=== STOCK DATA ===');
+        console.log('=== DISPLAY STOCK HEADER ===');
         console.log('stockData:', this.stockData);
         console.log('quote:', this.stockData.quote);
-        console.log('prices:', this.stockData.prices);
-        // ✅ CORRECTION : Vérifier que price existe
-        const price = quote.price !== undefined ? quote.price : 0;
-        const change = quote.change !== undefined ? quote.change : 0;
-        const changePercent = quote.changePercent !== undefined ? quote.changePercent : 0;
+        
+        const quote = this.stockData.quote;
+        
+        // ✅ CORRECTION : Vérifier que quote n'est pas vide
+        if (!quote || Object.keys(quote).length === 0) {
+            console.error('❌ Quote object is empty! Using emergency fallback...');
+            
+            // Fallback d'urgence depuis les prices
+            if (this.stockData.prices && this.stockData.prices.length > 0) {
+                const lastPrice = this.stockData.prices[this.stockData.prices.length - 1];
+                const prevPrice = this.stockData.prices[this.stockData.prices.length - 2] || lastPrice;
+                
+                this.stockData.quote = {
+                    name: this.currentSymbol,
+                    symbol: this.currentSymbol,
+                    price: lastPrice.close,
+                    change: lastPrice.close - prevPrice.close,
+                    changePercent: ((lastPrice.close - prevPrice.close) / prevPrice.close) * 100,
+                    open: lastPrice.open,
+                    high: lastPrice.high,
+                    low: lastPrice.low,
+                    volume: lastPrice.volume,
+                    marketCap: null,
+                    pe: null
+                };
+                
+                console.log('✅ Emergency fallback quote:', this.stockData.quote);
+            } else {
+                console.error('❌ No price data available!');
+                return;
+            }
+        }
+        
+        // Re-get quote après potentiel fallback
+        const displayQuote = this.stockData.quote;
+        
+        document.getElementById('stockSymbol').textContent = displayQuote.symbol || this.currentSymbol;
+        document.getElementById('stockName').textContent = displayQuote.name || this.currentSymbol;
+        
+        const price = displayQuote.price !== undefined && displayQuote.price !== null ? displayQuote.price : 0;
+        const change = displayQuote.change !== undefined && displayQuote.change !== null ? displayQuote.change : 0;
+        const changePercent = displayQuote.changePercent !== undefined && displayQuote.changePercent !== null ? displayQuote.changePercent : 0;
+        
+        console.log('💰 Price to display:', price);
+        console.log('📈 Change to display:', change, changePercent);
         
         document.getElementById('currentPrice').textContent = this.formatCurrency(price);
         
@@ -251,26 +317,8 @@ const AdvancedAnalysis = {
         changeEl.className = change >= 0 ? 'change positive' : 'change negative';
         
         document.getElementById('stockHeader').classList.remove('hidden');
-    },
-    
-    updateAllIndicators() {
-        console.log('🔄 Updating all indicators...');
-        const startTime = performance.now();
         
-        this.updateIchimokuChart();
-        this.updateStochasticChart();
-        this.updateWilliamsChart();
-        this.updateADXChart();
-        this.updateSARChart();
-        this.updateOBVChart();
-        this.updateATRChart();
-        this.updateFibonacciChart();
-        this.createPivotPoints();
-        this.updateVWAPChart();
-        this.generateConsolidatedSignals();
-        
-        const endTime = performance.now();
-        console.log(`✅ All indicators updated in ${(endTime - startTime).toFixed(2)}ms`);
+        console.log('✅ Stock header displayed');
     },
     
     // ============================================
