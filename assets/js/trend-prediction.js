@@ -1,12 +1,14 @@
 /* ==============================================
-   TREND-PREDICTION.JS - Machine Learning Models
+   TREND-PREDICTION.JS - YAHOO FINANCE API SEARCH
    ============================================== */
 
 const TrendPrediction = {
     currentSymbol: 'AAPL',
-    predictionHorizon: 7, // days
+    predictionHorizon: 7,
     trainingPeriod: '6M',
     stockData: null,
+    selectedSuggestionIndex: -1,
+    searchTimeout: null,
     
     // Model results
     models: {
@@ -18,7 +20,7 @@ const TrendPrediction = {
         arima: null
     },
     
-    // Proxy CORS
+    // CORS Proxies
     CORS_PROXIES: [
         'https://api.allorigins.win/raw?url=',
         'https://corsproxy.io/?',
@@ -37,30 +39,320 @@ const TrendPrediction = {
         warning: '#ffc107'
     },
     
-    // Initialize
+    // ============================================
+    // INITIALIZATION
+    // ============================================
+    
     init() {
+        console.log('🤖 ML Trend Prediction - Initializing...');
         this.updateLastUpdate();
         this.setupEventListeners();
         
-        // Auto-load default symbol
         setTimeout(() => {
             this.loadSymbol(this.currentSymbol);
         }, 500);
     },
     
-    // Setup Event Listeners
     setupEventListeners() {
         const input = document.getElementById('symbolInput');
         if (input) {
-            input.addEventListener('keypress', (e) => {
+            // Input change for search
+            input.addEventListener('input', (e) => {
+                this.handleSearch(e.target.value);
+            });
+            
+            // Enter key
+            input.addEventListener('keydown', (e) => {
                 if (e.key === 'Enter') {
-                    this.analyzeStock();
+                    e.preventDefault();
+                    if (this.selectedSuggestionIndex >= 0) {
+                        const suggestions = document.querySelectorAll('.suggestion-item');
+                        if (suggestions[this.selectedSuggestionIndex]) {
+                            const symbol = suggestions[this.selectedSuggestionIndex].dataset.symbol;
+                            this.selectSuggestion(symbol);
+                        }
+                    } else {
+                        this.analyzeStock();
+                    }
+                } else if (e.key === 'ArrowDown') {
+                    e.preventDefault();
+                    this.navigateSuggestions('down');
+                } else if (e.key === 'ArrowUp') {
+                    e.preventDefault();
+                    this.navigateSuggestions('up');
+                } else if (e.key === 'Escape') {
+                    this.hideSuggestions();
                 }
+            });
+            
+            // Focus shows suggestions if there's a value
+            input.addEventListener('focus', (e) => {
+                if (e.target.value.trim().length > 0) {
+                    this.handleSearch(e.target.value);
+                }
+            });
+        }
+        
+        // Click outside to close
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.search-input-wrapper')) {
+                this.hideSuggestions();
+            }
+        });
+    },
+    
+    // ============================================
+    // YAHOO FINANCE SEARCH API
+    // ============================================
+    
+    handleSearch(query) {
+        const trimmedQuery = query.trim();
+        
+        if (trimmedQuery.length === 0) {
+            this.hideSuggestions();
+            return;
+        }
+        
+        // Debounce search
+        clearTimeout(this.searchTimeout);
+        this.searchTimeout = setTimeout(() => {
+            this.searchYahooFinance(trimmedQuery);
+        }, 300);
+    },
+    
+    async searchYahooFinance(query) {
+        console.log('🔍 Searching Yahoo Finance for:', query);
+        
+        const container = document.getElementById('searchSuggestions');
+        container.innerHTML = '<div class="suggestion-loading"><i class="fas fa-spinner fa-spin"></i> Searching...</div>';
+        container.classList.add('active');
+        
+        try {
+            // Yahoo Finance Autosuggest API
+            const searchUrl = `https://query1.finance.yahoo.com/v1/finance/search?q=${encodeURIComponent(query)}&quotesCount=20&newsCount=0&enableFuzzyQuery=false`;
+            
+            // Try with CORS proxy
+            for (let i = 0; i < this.CORS_PROXIES.length; i++) {
+                try {
+                    const proxyUrl = this.CORS_PROXIES[i];
+                    const url = proxyUrl + encodeURIComponent(searchUrl);
+                    
+                    const response = await fetch(url);
+                    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                    
+                    const data = await response.json();
+                    console.log('✅ Search results:', data);
+                    
+                    if (data.quotes && data.quotes.length > 0) {
+                        this.displaySearchResults(data.quotes, query);
+                    } else {
+                        this.displayNoResults();
+                    }
+                    
+                    return;
+                    
+                } catch (error) {
+                    console.warn(`Search proxy ${i + 1} failed:`, error.message);
+                    if (i === this.CORS_PROXIES.length - 1) {
+                        throw error;
+                    }
+                }
+            }
+            
+        } catch (error) {
+            console.error('Search failed:', error);
+            this.displaySearchError();
+        }
+    },
+    
+    displaySearchResults(quotes, query) {
+        const container = document.getElementById('searchSuggestions');
+        
+        // Filter and group by type
+        const stocks = [];
+        const etfs = [];
+        const crypto = [];
+        const indices = [];
+        const other = [];
+        
+        quotes.forEach(quote => {
+            const item = {
+                symbol: quote.symbol,
+                name: quote.shortname || quote.longname || quote.symbol,
+                type: quote.quoteType || 'EQUITY',
+                exchange: quote.exchange || '',
+                score: quote.score || 0
+            };
+            
+            switch (item.type) {
+                case 'EQUITY':
+                    stocks.push(item);
+                    break;
+                case 'ETF':
+                    etfs.push(item);
+                    break;
+                case 'CRYPTOCURRENCY':
+                    crypto.push(item);
+                    break;
+                case 'INDEX':
+                    indices.push(item);
+                    break;
+                default:
+                    other.push(item);
+            }
+        });
+        
+        // Build HTML
+        let html = '';
+        
+        if (stocks.length > 0) {
+            html += this.buildCategoryHTML('Stocks', stocks, query);
+        }
+        
+        if (etfs.length > 0) {
+            html += this.buildCategoryHTML('ETFs', etfs, query);
+        }
+        
+        if (crypto.length > 0) {
+            html += this.buildCategoryHTML('Cryptocurrencies', crypto, query);
+        }
+        
+        if (indices.length > 0) {
+            html += this.buildCategoryHTML('Indices', indices, query);
+        }
+        
+        if (other.length > 0) {
+            html += this.buildCategoryHTML('Other', other, query);
+        }
+        
+        if (html === '') {
+            this.displayNoResults();
+        } else {
+            container.innerHTML = html;
+            container.classList.add('active');
+            this.selectedSuggestionIndex = -1;
+            
+            // Add click listeners
+            container.querySelectorAll('.suggestion-item').forEach((item, index) => {
+                item.addEventListener('click', () => {
+                    this.selectSuggestion(item.dataset.symbol);
+                });
             });
         }
     },
     
-    // Analyze Stock
+    buildCategoryHTML(categoryName, items, query) {
+        const iconMap = {
+            'Stocks': 'chart-line',
+            'ETFs': 'layer-group',
+            'Cryptocurrencies': 'coins',
+            'Indices': 'chart-bar',
+            'Other': 'folder'
+        };
+        
+        const sectorMap = {
+            'Stocks': 'tech',
+            'ETFs': 'etf',
+            'Cryptocurrencies': 'crypto',
+            'Indices': 'finance',
+            'Other': 'industrial'
+        };
+        
+        let html = `<div class="suggestion-category">
+            <i class="fas fa-${iconMap[categoryName] || 'folder'}"></i> ${categoryName}
+        </div>`;
+        
+        items.slice(0, 10).forEach(item => {
+            const highlightedSymbol = this.highlightMatch(item.symbol, query);
+            const highlightedName = this.highlightMatch(item.name, query);
+            
+            html += `
+                <div class="suggestion-item" data-symbol="${item.symbol}">
+                    <div class="suggestion-icon ${sectorMap[categoryName] || 'tech'}">
+                        ${item.symbol.substring(0, 2)}
+                    </div>
+                    <div class="suggestion-info">
+                        <div class="suggestion-symbol">${highlightedSymbol}</div>
+                        <div class="suggestion-name">${highlightedName}</div>
+                    </div>
+                    ${item.exchange ? `<div class="suggestion-exchange">${item.exchange}</div>` : ''}
+                </div>
+            `;
+        });
+        
+        return html;
+    },
+    
+    highlightMatch(text, query) {
+        if (!text || !query) return text;
+        
+        const regex = new RegExp(`(${query})`, 'gi');
+        return text.replace(regex, '<span class="suggestion-match">$1</span>');
+    },
+    
+    displayNoResults() {
+        const container = document.getElementById('searchSuggestions');
+        container.innerHTML = `
+            <div class="no-results">
+                <i class="fas fa-search"></i>
+                <p><strong>No results found</strong></p>
+                <p>Try searching by ticker symbol or company name</p>
+            </div>
+        `;
+        container.classList.add('active');
+    },
+    
+    displaySearchError() {
+        const container = document.getElementById('searchSuggestions');
+        container.innerHTML = `
+            <div class="no-results">
+                <i class="fas fa-exclamation-triangle"></i>
+                <p><strong>Search temporarily unavailable</strong></p>
+                <p>Please enter a ticker symbol directly</p>
+            </div>
+        `;
+        container.classList.add('active');
+    },
+    
+    selectSuggestion(symbol) {
+        document.getElementById('symbolInput').value = symbol;
+        this.hideSuggestions();
+        this.loadSymbol(symbol);
+    },
+    
+    hideSuggestions() {
+        const container = document.getElementById('searchSuggestions');
+        container.classList.remove('active');
+        this.selectedSuggestionIndex = -1;
+    },
+    
+    navigateSuggestions(direction) {
+        const suggestions = document.querySelectorAll('.suggestion-item');
+        if (suggestions.length === 0) return;
+        
+        // Remove previous selection
+        if (this.selectedSuggestionIndex >= 0) {
+            suggestions[this.selectedSuggestionIndex].classList.remove('selected');
+        }
+        
+        // Update index
+        if (direction === 'down') {
+            this.selectedSuggestionIndex = (this.selectedSuggestionIndex + 1) % suggestions.length;
+        } else {
+            this.selectedSuggestionIndex = this.selectedSuggestionIndex <= 0 
+                ? suggestions.length - 1 
+                : this.selectedSuggestionIndex - 1;
+        }
+        
+        // Add new selection
+        suggestions[this.selectedSuggestionIndex].classList.add('selected');
+        suggestions[this.selectedSuggestionIndex].scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+    },
+    
+    // ============================================
+    // STOCK ANALYSIS
+    // ============================================
+    
     analyzeStock() {
         const symbol = document.getElementById('symbolInput').value.trim().toUpperCase();
         if (symbol) {
@@ -68,10 +360,10 @@ const TrendPrediction = {
         }
     },
     
-    // Load Symbol
     async loadSymbol(symbol) {
         this.currentSymbol = symbol;
         document.getElementById('symbolInput').value = symbol;
+        this.hideSuggestions();
         
         this.showLoading(true, 'Fetching historical data...');
         this.hideResults();
@@ -80,10 +372,7 @@ const TrendPrediction = {
             await this.fetchStockData(symbol);
             this.displayStockHeader();
             
-            // Train all models
             await this.trainAllModels();
-            
-            // Display results
             this.displayResults();
             
             this.showLoading(false);
@@ -101,7 +390,6 @@ const TrendPrediction = {
         }
     },
     
-    // Fetch Stock Data
     async fetchStockData(symbol) {
         const period = this.getPeriodParams(this.trainingPeriod);
         const targetUrl = `https://query1.finance.yahoo.com/v8/finance/chart/${symbol}?interval=${period.interval}&range=${period.range}`;
@@ -135,7 +423,6 @@ const TrendPrediction = {
         }
     },
     
-    // Fetch Quote Data
     async fetchQuoteData(symbol) {
         try {
             const targetUrl = `https://query1.finance.yahoo.com/v7/finance/quote?symbols=${symbol}`;
@@ -172,7 +459,6 @@ const TrendPrediction = {
         }
     },
     
-    // Parse Yahoo Data
     parseYahooData(result) {
         const timestamps = result.timestamp;
         const quotes = result.indicators.quote[0];
@@ -194,7 +480,6 @@ const TrendPrediction = {
         };
     },
     
-    // Get Period Parameters
     getPeriodParams(period) {
         const params = {
             '3M': { range: '3mo', interval: '1d' },
@@ -205,7 +490,6 @@ const TrendPrediction = {
         return params[period] || params['6M'];
     },
     
-    // Change Horizon
     changeHorizon(days) {
         this.predictionHorizon = days;
         
@@ -219,7 +503,6 @@ const TrendPrediction = {
         }
     },
     
-    // Change Training Period
     changeTrainingPeriod(period) {
         this.trainingPeriod = period;
         
@@ -237,7 +520,6 @@ const TrendPrediction = {
         
         const prices = this.stockData.prices.map(p => p.close);
         
-        // Update badges to training
         ['linear', 'polynomial', 'exponential', 'knn', 'neural', 'arima'].forEach(model => {
             const badge = document.getElementById(`badge-${model}`);
             if (badge) {
@@ -246,7 +528,6 @@ const TrendPrediction = {
             }
         });
         
-        // Train each model with delay for UI feedback
         this.showLoading(true, 'Training Linear Regression...');
         this.models.linear = await this.trainLinearRegression(prices);
         this.updateModelCard('linear', this.models.linear);
@@ -288,7 +569,6 @@ const TrendPrediction = {
         const x = Array.from({ length: n }, (_, i) => i);
         const y = prices;
         
-        // Calculate slope and intercept
         const sumX = x.reduce((a, b) => a + b, 0);
         const sumY = y.reduce((a, b) => a + b, 0);
         const sumXY = x.reduce((sum, xi, i) => sum + xi * y[i], 0);
@@ -297,17 +577,14 @@ const TrendPrediction = {
         const slope = (n * sumXY - sumX * sumY) / (n * sumX2 - sumX * sumX);
         const intercept = (sumY - slope * sumX) / n;
         
-        // Make predictions
         const fitted = x.map(xi => slope * xi + intercept);
         
-        // Predict future
         const predictions = [];
         for (let i = 0; i < this.predictionHorizon; i++) {
             const futureX = n + i;
             predictions.push(slope * futureX + intercept);
         }
         
-        // Calculate metrics
         const r2 = this.calculateR2(y, fitted);
         const rmse = this.calculateRMSE(y, fitted);
         
@@ -331,7 +608,6 @@ const TrendPrediction = {
         const x = Array.from({ length: n }, (_, i) => i);
         const y = prices;
         
-        // Build design matrix
         const X = x.map(xi => {
             const row = [];
             for (let d = 0; d <= degree; d++) {
@@ -340,10 +616,8 @@ const TrendPrediction = {
             return row;
         });
         
-        // Solve using normal equation: (X^T X)^-1 X^T y
         const coefficients = this.solveLinearSystem(X, y);
         
-        // Make predictions
         const fitted = x.map(xi => {
             let sum = 0;
             for (let d = 0; d <= degree; d++) {
@@ -352,7 +626,6 @@ const TrendPrediction = {
             return sum;
         });
         
-        // Predict future
         const predictions = [];
         for (let i = 0; i < this.predictionHorizon; i++) {
             const futureX = n + i;
@@ -363,7 +636,6 @@ const TrendPrediction = {
             predictions.push(sum);
         }
         
-        // Calculate metrics
         const r2 = this.calculateR2(y, fitted);
         const rmse = this.calculateRMSE(y, fitted);
         
@@ -379,18 +651,16 @@ const TrendPrediction = {
     },
     
     // ============================================
-    // EXPONENTIAL SMOOTHING (Holt's Method)
+    // EXPONENTIAL SMOOTHING
     // ============================================
     
     async trainExponentialSmoothing(prices, alpha = 0.3, beta = 0.1) {
         const n = prices.length;
         
-        // Initialize
         let level = prices[0];
         let trend = prices[1] - prices[0];
         const fitted = [prices[0]];
         
-        // Fit the model
         for (let i = 1; i < n; i++) {
             const prevLevel = level;
             const prevTrend = trend;
@@ -401,13 +671,11 @@ const TrendPrediction = {
             fitted.push(prevLevel + prevTrend);
         }
         
-        // Predict future
         const predictions = [];
         for (let i = 1; i <= this.predictionHorizon; i++) {
             predictions.push(level + i * trend);
         }
         
-        // Calculate metrics
         const r2 = this.calculateR2(prices, fitted);
         const rmse = this.calculateRMSE(prices, fitted);
         
@@ -430,7 +698,6 @@ const TrendPrediction = {
         const n = prices.length;
         const fitted = [];
         
-        // Create training data
         const trainingData = [];
         for (let i = lookback; i < n - 1; i++) {
             const features = prices.slice(i - lookback, i);
@@ -438,19 +705,16 @@ const TrendPrediction = {
             trainingData.push({ features, target });
         }
         
-        // Fit (for each point, find k nearest neighbors)
         for (let i = lookback; i < n; i++) {
             const query = prices.slice(i - lookback, i);
             const prediction = this.knnPredict(query, trainingData, k);
             fitted.push(prediction);
         }
         
-        // Pad fitted values
         for (let i = 0; i < lookback; i++) {
             fitted.unshift(prices[i]);
         }
         
-        // Predict future
         const predictions = [];
         let currentWindow = prices.slice(-lookback);
         
@@ -460,7 +724,6 @@ const TrendPrediction = {
             currentWindow = [...currentWindow.slice(1), prediction];
         }
         
-        // Calculate metrics
         const r2 = this.calculateR2(prices, fitted);
         const rmse = this.calculateRMSE(prices, fitted);
         
@@ -476,19 +739,13 @@ const TrendPrediction = {
     },
     
     knnPredict(query, trainingData, k) {
-        // Calculate distances
         const distances = trainingData.map(item => ({
             distance: this.euclideanDistance(query, item.features),
             target: item.target
         }));
         
-        // Sort by distance
         distances.sort((a, b) => a.distance - b.distance);
-        
-        // Take k nearest
         const nearest = distances.slice(0, k);
-        
-        // Average their targets
         const prediction = nearest.reduce((sum, item) => sum + item.target, 0) / k;
         
         return prediction;
@@ -503,7 +760,7 @@ const TrendPrediction = {
     },
     
     // ============================================
-    // NEURAL NETWORK (Simple Feedforward)
+    // NEURAL NETWORK
     // ============================================
     
     async trainNeuralNetwork(prices, lookback = 10) {
@@ -511,12 +768,10 @@ const TrendPrediction = {
         const epochs = 100;
         const hiddenSize = 10;
         
-        // Normalize prices
         const minPrice = Math.min(...prices);
         const maxPrice = Math.max(...prices);
         const normalized = prices.map(p => (p - minPrice) / (maxPrice - minPrice));
         
-        // Create training data
         const trainingData = [];
         for (let i = lookback; i < normalized.length; i++) {
             const input = normalized.slice(i - lookback, i);
@@ -524,26 +779,20 @@ const TrendPrediction = {
             trainingData.push({ input, target });
         }
         
-        // Initialize weights
         let weightsInputHidden = this.randomMatrix(lookback, hiddenSize);
         let weightsHiddenOutput = this.randomArray(hiddenSize);
         let biasHidden = this.randomArray(hiddenSize);
         let biasOutput = Math.random() - 0.5;
         
-        // Train
         for (let epoch = 0; epoch < epochs; epoch++) {
             for (const { input, target } of trainingData) {
-                // Forward pass
                 const hidden = this.matrixVectorMultiply(weightsInputHidden, input).map((h, i) => 
                     this.relu(h + biasHidden[i])
                 );
                 
                 const output = hidden.reduce((sum, h, i) => sum + h * weightsHiddenOutput[i], biasOutput);
-                
-                // Backward pass (simplified)
                 const outputError = output - target;
                 
-                // Update weights
                 for (let i = 0; i < hiddenSize; i++) {
                     weightsHiddenOutput[i] -= learningRate * outputError * hidden[i];
                 }
@@ -551,7 +800,6 @@ const TrendPrediction = {
             }
         }
         
-        // Make fitted predictions
         const fitted = [];
         for (let i = 0; i < lookback; i++) {
             fitted.push(prices[i]);
@@ -567,7 +815,6 @@ const TrendPrediction = {
             fitted.push(denormalized);
         }
         
-        // Predict future
         const predictions = [];
         let currentWindow = normalized.slice(-lookback);
         
@@ -582,7 +829,6 @@ const TrendPrediction = {
             currentWindow = [...currentWindow.slice(1), output];
         }
         
-        // Calculate metrics
         const r2 = this.calculateR2(prices, fitted);
         const rmse = this.calculateRMSE(prices, fitted);
         
@@ -624,11 +870,10 @@ const TrendPrediction = {
     },
     
     // ============================================
-    // ARIMA (Simplified)
+    // ARIMA
     // ============================================
     
     async trainARIMA(prices, p = 5, d = 1, q = 2) {
-        // Differencing
         let diffPrices = prices;
         for (let i = 0; i < d; i++) {
             const temp = [];
@@ -639,9 +884,8 @@ const TrendPrediction = {
         }
         
         const n = diffPrices.length;
-        
-        // Simple AR model
         const arCoeffs = [];
+        
         for (let lag = 1; lag <= p; lag++) {
             let sumXY = 0;
             let sumX2 = 0;
@@ -652,7 +896,6 @@ const TrendPrediction = {
             arCoeffs.push(sumX2 !== 0 ? sumXY / sumX2 : 0);
         }
         
-        // Fitted values
         const fitted = [];
         for (let i = 0; i < p; i++) {
             fitted.push(prices[i]);
@@ -668,7 +911,6 @@ const TrendPrediction = {
             fitted.push(fitted[i - 1] + prediction);
         }
         
-        // Predict future
         const predictions = [];
         let lastValue = prices[prices.length - 1];
         let recentDiffs = [];
@@ -693,7 +935,6 @@ const TrendPrediction = {
             }
         }
         
-        // Calculate metrics
         const r2 = this.calculateR2(prices, fitted);
         const rmse = this.calculateRMSE(prices, fitted);
         
@@ -713,18 +954,14 @@ const TrendPrediction = {
     // ============================================
     
     solveLinearSystem(X, y) {
-        // Solve using normal equation: (X^T X)^-1 X^T y
         const XT = this.transpose(X);
         const XTX = this.matrixMultiply(XT, X);
         const XTy = this.matrixVectorMultiply2(XT, y);
         
-        // Solve using Gaussian elimination
         const n = XTX.length;
         const augmented = XTX.map((row, i) => [...row, XTy[i]]);
         
-        // Forward elimination
         for (let i = 0; i < n; i++) {
-            // Partial pivoting
             let maxRow = i;
             for (let k = i + 1; k < n; k++) {
                 if (Math.abs(augmented[k][i]) > Math.abs(augmented[maxRow][i])) {
@@ -733,7 +970,6 @@ const TrendPrediction = {
             }
             [augmented[i], augmented[maxRow]] = [augmented[maxRow], augmented[i]];
             
-            // Eliminate column
             for (let k = i + 1; k < n; k++) {
                 const factor = augmented[k][i] / augmented[i][i];
                 for (let j = i; j <= n; j++) {
@@ -742,7 +978,6 @@ const TrendPrediction = {
             }
         }
         
-        // Back substitution
         const solution = new Array(n);
         for (let i = n - 1; i >= 0; i--) {
             solution[i] = augmented[i][n];
@@ -831,14 +1066,12 @@ const TrendPrediction = {
     },
     
     updateModelCard(modelName, modelResult) {
-        // Update badge
         const badge = document.getElementById(`badge-${modelName}`);
         if (badge) {
             badge.className = 'model-badge completed';
             badge.textContent = 'Completed ✓';
         }
         
-        // Update metrics
         const metricsContainer = document.getElementById(`metrics-${modelName}`);
         if (metricsContainer) {
             const metrics = metricsContainer.querySelectorAll('.metric strong');
@@ -847,7 +1080,6 @@ const TrendPrediction = {
             metrics[2].textContent = modelResult.rmse.toFixed(2);
         }
         
-        // Create mini chart
         this.createModelChart(modelName, modelResult);
     },
     
@@ -855,7 +1087,6 @@ const TrendPrediction = {
         const prices = this.stockData.prices;
         const historical = prices.map((p, i) => [p.timestamp, p.close]);
         
-        // Create prediction points
         const lastTimestamp = prices[prices.length - 1].timestamp;
         const dayMs = 24 * 60 * 60 * 1000;
         
@@ -1006,7 +1237,6 @@ const TrendPrediction = {
     createPerformanceCharts() {
         const models = Object.entries(this.models).filter(([_, m]) => m !== null);
         
-        // Accuracy chart
         const accuracyData = models.map(([name, model]) => ({
             name: model.name,
             y: model.r2 * 100,
@@ -1050,7 +1280,6 @@ const TrendPrediction = {
             credits: { enabled: false }
         });
         
-        // Error chart
         const errorData = models.map(([name, model]) => ({
             name: model.name,
             y: model.rmse,
@@ -1096,8 +1325,6 @@ const TrendPrediction = {
     
     createPerformanceTable() {
         const models = Object.entries(this.models).filter(([_, m]) => m !== null);
-        
-        // Sort by R²
         models.sort((a, b) => b[1].r2 - a[1].r2);
         
         const tableHTML = `
@@ -1141,19 +1368,17 @@ const TrendPrediction = {
     displayEnsemblePrediction() {
         const models = Object.values(this.models).filter(m => m !== null);
         
-        // Weighted average by R²
         let sumWeightedPrediction = 0;
         let sumWeights = 0;
         
         models.forEach(model => {
-            const weight = Math.max(0, model.r2); // Negative R² = 0 weight
+            const weight = Math.max(0, model.r2);
             sumWeightedPrediction += model.finalPrediction * weight;
             sumWeights += weight;
         });
         
         const ensemblePrediction = sumWeightedPrediction / sumWeights;
         
-        // Calculate confidence range (95%)
         const predictions = models.map(m => m.finalPrediction);
         const mean = predictions.reduce((a, b) => a + b) / predictions.length;
         const variance = predictions.reduce((sum, p) => sum + Math.pow(p - mean, 2), 0) / predictions.length;
@@ -1162,10 +1387,8 @@ const TrendPrediction = {
         const lower = ensemblePrediction - 1.96 * stdDev;
         const upper = ensemblePrediction + 1.96 * stdDev;
         
-        // Average accuracy
         const avgAccuracy = models.reduce((sum, m) => sum + m.r2, 0) / models.length;
         
-        // Update UI
         const currentPrice = this.stockData.quote.price;
         const change = ensemblePrediction - currentPrice;
         const changePercent = (change / currentPrice) * 100;
@@ -1176,7 +1399,6 @@ const TrendPrediction = {
         
         document.getElementById('ensembleRange').textContent = `${this.formatCurrency(lower)} - ${this.formatCurrency(upper)}`;
         
-        // Signal
         let signal = 'HOLD';
         let signalClass = 'neutral';
         let strength = 'Moderate';
@@ -1211,7 +1433,6 @@ const TrendPrediction = {
     displayRecommendation() {
         const models = Object.values(this.models).filter(m => m !== null);
         
-        // Calculate ensemble
         let sumWeightedPrediction = 0;
         let sumWeights = 0;
         
@@ -1226,7 +1447,6 @@ const TrendPrediction = {
         const change = ensemblePrediction - currentPrice;
         const changePercent = (change / currentPrice) * 100;
         
-        // Determine recommendation
         let recommendation = 'HOLD';
         let iconClass = 'hold';
         let title = 'Hold Position';
@@ -1254,14 +1474,12 @@ const TrendPrediction = {
             subtitle = 'Models indicate negative momentum';
         }
         
-        // Update UI
         const icon = document.getElementById('recommendationIcon');
         icon.className = `recommendation-icon ${iconClass}`;
         
         document.getElementById('recommendationTitle').textContent = title;
         document.getElementById('recommendationSubtitle').textContent = subtitle;
         
-        // Build recommendation body
         const bodyHTML = `
             <h4>Key Insights</h4>
             <ul>
@@ -1350,7 +1568,7 @@ const TrendPrediction = {
         let price = 150;
         
         for (let i = 0; i < days; i++) {
-            const change = (Math.random() - 0.48) * 3; // Slight upward bias
+            const change = (Math.random() - 0.48) * 3;
             price = price * (1 + change / 100);
             
             const timestamp = Date.now() - (days - i) * 24 * 60 * 60 * 1000;

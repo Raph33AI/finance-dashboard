@@ -1,6 +1,224 @@
 /* ==============================================
-   TREND-PREDICTION.CSS
+   TREND-PREDICTION.CSS - COMPLETE VERSION
    ============================================== */
+
+/* ============================================
+   SMART SEARCH BAR WITH AUTOCOMPLETE
+   ============================================ */
+
+.search-input-wrapper {
+    position: relative;
+}
+
+#symbolInput {
+    width: 100%;
+    padding: 15px 20px;
+    border: 2px solid #D4D9F0;
+    border-radius: 15px;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+}
+
+#symbolInput:focus {
+    outline: none;
+    border-color: #4A74F3;
+    box-shadow: 0 0 0 3px rgba(74, 116, 243, 0.1);
+}
+
+.search-suggestions {
+    position: absolute;
+    top: calc(100% + 5px);
+    left: 0;
+    right: 0;
+    background: white;
+    border: 2px solid #4A74F3;
+    border-radius: 15px;
+    max-height: 500px;
+    overflow-y: auto;
+    z-index: 1000;
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.25);
+    display: none;
+}
+
+.search-suggestions.active {
+    display: block;
+    animation: slideDown 0.3s ease;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.suggestion-category {
+    padding: 12px 20px;
+    background: linear-gradient(135deg, #2649B2, #4A74F3);
+    color: white;
+    font-weight: bold;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+.suggestion-item {
+    padding: 15px 20px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    border-bottom: 1px solid #f0f0f0;
+    transition: all 0.2s ease;
+}
+
+.suggestion-item:hover,
+.suggestion-item.selected {
+    background: linear-gradient(90deg, #f8f9fa, #e9ecef);
+    border-left: 4px solid #4A74F3;
+    padding-left: 16px;
+}
+
+.suggestion-item:last-child {
+    border-bottom: none;
+}
+
+.suggestion-icon {
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+    flex-shrink: 0;
+    font-weight: bold;
+}
+
+.suggestion-icon.tech {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+}
+
+.suggestion-icon.finance {
+    background: linear-gradient(135deg, #f093fb, #f5576c);
+    color: white;
+}
+
+.suggestion-icon.energy {
+    background: linear-gradient(135deg, #4facfe, #00f2fe);
+    color: white;
+}
+
+.suggestion-icon.healthcare {
+    background: linear-gradient(135deg, #43e97b, #38f9d7);
+    color: white;
+}
+
+.suggestion-icon.consumer {
+    background: linear-gradient(135deg, #fa709a, #fee140);
+    color: white;
+}
+
+.suggestion-icon.industrial {
+    background: linear-gradient(135deg, #30cfd0, #330867);
+    color: white;
+}
+
+.suggestion-icon.crypto {
+    background: linear-gradient(135deg, #f093fb, #f5576c);
+    color: white;
+}
+
+.suggestion-icon.etf {
+    background: linear-gradient(135deg, #a8edea, #fed6e3);
+    color: #333;
+}
+
+.suggestion-info {
+    flex: 1;
+}
+
+.suggestion-symbol {
+    font-weight: bold;
+    font-size: 1.1rem;
+    color: #2649B2;
+    margin-bottom: 3px;
+}
+
+.suggestion-name {
+    font-size: 0.9rem;
+    color: #6c757d;
+}
+
+.suggestion-match {
+    background: #ffc107;
+    color: #333;
+    padding: 0 3px;
+    border-radius: 3px;
+}
+
+.no-results {
+    padding: 30px 20px;
+    text-align: center;
+    color: #6c757d;
+}
+
+.no-results i {
+    font-size: 3rem;
+    margin-bottom: 15px;
+    color: #d0d0d0;
+}
+
+/* ============================================
+   POPULAR STOCKS
+   ============================================ */
+
+.popular-stocks {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: center;
+    margin-top: 20px;
+}
+
+.quick-label {
+    font-weight: 600;
+    color: #2649B2;
+    margin-right: 10px;
+}
+
+.symbol-chip {
+    background: white;
+    border: 2px solid #D4D9F0;
+    padding: 8px 16px;
+    border-radius: 25px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.symbol-chip:hover {
+    background: linear-gradient(135deg, #2649B2, #4A74F3);
+    border-color: #2649B2;
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(38, 73, 178, 0.3);
+}
+
+.symbol-chip i {
+    font-size: 1.1rem;
+}
 
 /* ============================================
    PREDICTION OVERVIEW
@@ -463,6 +681,32 @@
 }
 
 /* ============================================
+   LOADING INDICATOR
+   ============================================ */
+
+.loading-indicator {
+    text-align: center;
+    padding: 60px 20px;
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
+    margin-bottom: 30px;
+}
+
+.loading-indicator i {
+    font-size: 3rem;
+    color: #2649B2;
+    margin-bottom: 20px;
+}
+
+#loadingText {
+    display: block;
+    font-size: 1.2rem;
+    color: #6c757d;
+    font-weight: 600;
+}
+
+/* ============================================
    RESPONSIVE
    ============================================ */
 
@@ -487,30 +731,59 @@
         flex-direction: column;
         text-align: center;
     }
+    
+    .popular-stocks {
+        justify-content: center;
+    }
+    
+    .search-suggestions {
+        max-height: 300px;
+    }
 }
 
 /* ============================================
-   LOADING INDICATOR
+   SCROLLBAR CUSTOM
    ============================================ */
 
-.loading-indicator {
+.search-suggestions::-webkit-scrollbar {
+    width: 8px;
+}
+
+.search-suggestions::-webkit-scrollbar-track {
+    background: #f0f0f0;
+    border-radius: 10px;
+}
+
+.search-suggestions::-webkit-scrollbar-thumb {
+    background: linear-gradient(135deg, #2649B2, #4A74F3);
+    border-radius: 10px;
+}
+
+.search-suggestions::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(135deg, #1a3a8a, #2649B2);
+}
+
+/* ============================================
+   ADDITIONAL SEARCH STYLES
+   ============================================ */
+
+.suggestion-loading {
+    padding: 30px 20px;
     text-align: center;
-    padding: 60px 20px;
-    background: white;
-    border-radius: 20px;
-    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
-    margin-bottom: 30px;
-}
-
-.loading-indicator i {
-    font-size: 3rem;
-    color: #2649B2;
-    margin-bottom: 20px;
-}
-
-#loadingText {
-    display: block;
-    font-size: 1.2rem;
     color: #6c757d;
-    font-weight: 600;
+    font-size: 1.1rem;
+}
+
+.suggestion-loading i {
+    font-size: 2rem;
+    margin-bottom: 10px;
+    color: #2649B2;
+}
+
+.suggestion-exchange {
+    font-size: 0.85rem;
+    color: #6c757d;
+    background: #f0f0f0;
+    padding: 4px 10px;
+    border-radius: 12px;
 }
