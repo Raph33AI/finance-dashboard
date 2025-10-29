@@ -10,7 +10,7 @@
 
 **Un dashboard financier interactif complet pour gérer, analyser et optimiser votre portefeuille d'investissement**
 
-[🚀 Démo Live](#) | [📖 Documentation](#features) | [🐛 Report Bug](https://github.com/VOTRE-USERNAME/financial-dashboard/issues)
+[🚀 Démo Live](https://raph33ai.github.io/finance-dashboard/) | [📖 Documentation](#features) | [🐛 Report Bug](https://github.com/Raph33AI/financial-dashboard/issues)
 
 </div>
 
@@ -305,10 +305,9 @@ Les contributions sont les bienvenues ! Pour contribuer :
 
 **Raphael NARDONE**
 
-- 🌐 Portfolio : [Votre site web](#)
-- 💼 LinkedIn : [Votre profil](#)
-- 📧 Email : votre.email@example.com
-- 🐙 GitHub : [@VOTRE-USERNAME](https://github.com/VOTRE-USERNAME)
+- 💼 LinkedIn : https://www.linkedin.com/in/rapha%C3%ABl-nardone-227818172/
+- 📧 Email : raphnardone@gmail.com
+- 🐙 GitHub : [@Raph33AI](https://github.com/Raph33AI)
 
 ---
 
