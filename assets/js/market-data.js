@@ -1,6 +1,6 @@
 /* ==============================================
    MARKET-DATA.JS - Market Data & Technical Analysis
-   Version optimisée ES6+ 2024 avec async/await
+   Version optimisée ES6+ 2024 - PARTIE 1/4
    ============================================== */
 
 const MarketData = {
@@ -38,7 +38,8 @@ const MarketData = {
         comparison: null
     },
     
-    // Initialize
+    // ========== INITIALIZATION ==========
+    
     init() {
         try {
             // Initialiser le client API
@@ -73,7 +74,8 @@ const MarketData = {
         }
     },
     
-    // Setup Event Listeners
+    // ========== EVENT LISTENERS ==========
+    
     setupEventListeners() {
         const input = document.getElementById('symbolInput');
         if (input) {
@@ -85,8 +87,8 @@ const MarketData = {
             });
         }
         
-        // Indicator toggles avec debounce
-        const updateChart = this.debounce(() => this.updateChart(), 300);
+        // Indicator toggles
+        const updateChart = () => this.updateChart();
         
         document.getElementById('toggleSMA')?.addEventListener('change', updateChart);
         document.getElementById('toggleEMA')?.addEventListener('change', updateChart);
@@ -94,7 +96,7 @@ const MarketData = {
         document.getElementById('toggleVolume')?.addEventListener('change', updateChart);
     },
     
-    // ========== RECHERCHE AVEC TWELVE DATA ==========
+    // ========== SEARCH FUNCTIONALITY ==========
     
     setupSearchListeners() {
         const input = document.getElementById('symbolInput');
@@ -133,7 +135,6 @@ const MarketData = {
             }
         });
         
-        // Close suggestions when clicking outside
         document.addEventListener('click', (e) => {
             if (!e.target.closest('.search-input-wrapper')) {
                 this.hideSuggestions();
@@ -222,20 +223,9 @@ const MarketData = {
             container.classList.add('active');
             this.selectedSuggestionIndex = -1;
             
-            // Add click listeners
-            container.querySelectorAll('.suggestion-item').forEach((item, index) => {
-                item.setAttribute('tabindex', '0');
-                item.dataset.index = index;
-                
+            container.querySelectorAll('.suggestion-item').forEach((item) => {
                 item.addEventListener('click', () => {
                     this.selectSuggestion(item.dataset.symbol);
-                });
-                
-                item.addEventListener('keydown', (e) => {
-                    if (e.key === 'Enter' || e.key === ' ') {
-                        e.preventDefault();
-                        this.selectSuggestion(item.dataset.symbol);
-                    }
                 });
             });
         }
@@ -292,6 +282,7 @@ const MarketData = {
     },
     
     escapeHtml(text) {
+        if (!text) return '';
         const div = document.createElement('div');
         div.textContent = text;
         return div.innerHTML;
@@ -360,10 +351,16 @@ const MarketData = {
         
         suggestions[this.selectedSuggestionIndex].classList.add('selected');
         suggestions[this.selectedSuggestionIndex].scrollIntoView({ block: 'nearest', behavior: 'smooth' });
-        suggestions[this.selectedSuggestionIndex].focus();
-    },
+    }
+};
+
+// ========== FIN PARTIE 1/4 ==========
+
+// ========== PARTIE 2/4 - LOADING DATA & DISPLAY ==========
+
+Object.assign(MarketData, {
     
-    // ========== CHARGEMENT DES DONNÉES ==========
+    // ========== LOADING STOCK DATA ==========
     
     searchStock() {
         const input = document.getElementById('symbolInput');
@@ -388,7 +385,6 @@ const MarketData = {
         this.hideSuggestions();
         
         try {
-            // Récupérer toutes les données en parallèle
             const [quote, timeSeries, profile, statistics, logo] = await Promise.allSettled([
                 this.apiClient.getQuote(symbol),
                 this.getTimeSeriesForPeriod(symbol, this.currentPeriod),
@@ -397,12 +393,10 @@ const MarketData = {
                 this.apiClient.getLogo(symbol)
             ]);
             
-            // Vérifier que quote et timeSeries sont OK
             if (quote.status !== 'fulfilled' || timeSeries.status !== 'fulfilled') {
                 throw new Error('Failed to load stock data');
             }
             
-            // Construire stockData
             this.stockData = {
                 symbol: quote.value.symbol,
                 prices: timeSeries.value.data,
@@ -445,11 +439,13 @@ const MarketData = {
         
         document.querySelectorAll('.period-btn').forEach(btn => {
             btn.classList.remove('active');
+            btn.setAttribute('aria-pressed', 'false');
         });
         
         const activeBtn = document.querySelector(`[data-period="${period}"]`);
         if (activeBtn) {
             activeBtn.classList.add('active');
+            activeBtn.setAttribute('aria-pressed', 'true');
         }
         
         if (this.currentSymbol) {
@@ -467,7 +463,42 @@ const MarketData = {
         }
     },
     
-    // ========== AFFICHAGE DU PROFIL ENTREPRISE ==========
+    // ========== DISPLAY STOCK OVERVIEW ==========
+    
+    displayStockOverview() {
+        const quote = this.stockData.quote;
+        
+        document.getElementById('stockName').textContent = quote.name || this.currentSymbol;
+        document.getElementById('stockSymbol').textContent = quote.symbol || this.currentSymbol;
+        
+        const price = quote.price;
+        const change = quote.change;
+        const changePercent = quote.percentChange;
+        
+        document.getElementById('currentPrice').textContent = this.formatCurrency(price);
+        
+        const priceChangeEl = document.getElementById('priceChange');
+        const changeText = `${change >= 0 ? '+' : ''}${this.formatCurrency(change)} (${change >= 0 ? '+' : ''}${changePercent.toFixed(2)}%)`;
+        priceChangeEl.textContent = changeText;
+        priceChangeEl.className = change >= 0 ? 'price-change positive' : 'price-change negative';
+        
+        document.getElementById('statOpen').textContent = this.formatCurrency(quote.open);
+        document.getElementById('statHigh').textContent = this.formatCurrency(quote.high);
+        document.getElementById('statLow').textContent = this.formatCurrency(quote.low);
+        document.getElementById('statVolume').textContent = this.formatVolume(quote.volume);
+        
+        if (this.statisticsData) {
+            document.getElementById('statMarketCap').textContent = this.formatLargeNumber(this.statisticsData.marketCap);
+            document.getElementById('statPE').textContent = this.formatRatio(this.statisticsData.trailingPE);
+        } else {
+            document.getElementById('statMarketCap').textContent = 'N/A';
+            document.getElementById('statPE').textContent = 'N/A';
+        }
+        
+        document.getElementById('stockOverview').classList.remove('hidden');
+    },
+    
+    // ========== DISPLAY COMPANY PROFILE ==========
     
     displayCompanyProfile() {
         let profileSection = document.getElementById('companyProfileSection');
@@ -476,7 +507,7 @@ const MarketData = {
             const stockOverview = document.getElementById('stockOverview');
             if (!stockOverview) return;
             
-            profileSection = document.createElement('div');
+            profileSection = document.createElement('section');
             profileSection.id = 'companyProfileSection';
             profileSection.className = 'company-profile-section card hidden';
             stockOverview.insertAdjacentElement('afterend', profileSection);
@@ -496,7 +527,6 @@ const MarketData = {
             <div class='card-body'>
         `;
         
-        // Logo et profil
         if (this.profileData || this.logoUrl) {
             html += `<div class='company-header-section'>`;
             
@@ -509,40 +539,57 @@ const MarketData = {
             }
             
             if (this.profileData) {
-                html += `
-                    <div class='company-info-grid'>
-                        ${this.profileData.sector ? `
+                html += `<div class='company-info-grid'>`;
+                
+                if (this.profileData.sector) {
+                    html += `
                         <div class='info-item'>
                             <span class='info-label'><i class='fas fa-industry'></i> Sector</span>
                             <span class='info-value'>${this.escapeHtml(this.profileData.sector)}</span>
-                        </div>` : ''}
-                        ${this.profileData.industry ? `
+                        </div>`;
+                }
+                
+                if (this.profileData.industry) {
+                    html += `
                         <div class='info-item'>
                             <span class='info-label'><i class='fas fa-cogs'></i> Industry</span>
                             <span class='info-value'>${this.escapeHtml(this.profileData.industry)}</span>
-                        </div>` : ''}
-                        ${this.profileData.country ? `
+                        </div>`;
+                }
+                
+                if (this.profileData.country) {
+                    html += `
                         <div class='info-item'>
                             <span class='info-label'><i class='fas fa-globe'></i> Country</span>
                             <span class='info-value'>${this.escapeHtml(this.profileData.country)}</span>
-                        </div>` : ''}
-                        ${this.profileData.employees ? `
+                        </div>`;
+                }
+                
+                if (this.profileData.employees) {
+                    html += `
                         <div class='info-item'>
                             <span class='info-label'><i class='fas fa-users'></i> Employees</span>
                             <span class='info-value'>${this.formatNumber(this.profileData.employees)}</span>
-                        </div>` : ''}
-                        ${this.profileData.founded ? `
+                        </div>`;
+                }
+                
+                if (this.profileData.founded) {
+                    html += `
                         <div class='info-item'>
                             <span class='info-label'><i class='fas fa-calendar'></i> Founded</span>
                             <span class='info-value'>${this.escapeHtml(this.profileData.founded)}</span>
-                        </div>` : ''}
-                        ${this.profileData.ceo ? `
+                        </div>`;
+                }
+                
+                if (this.profileData.ceo) {
+                    html += `
                         <div class='info-item'>
                             <span class='info-label'><i class='fas fa-user-tie'></i> CEO</span>
                             <span class='info-value'>${this.escapeHtml(this.profileData.ceo)}</span>
-                        </div>` : ''}
-                    </div>
-                `;
+                        </div>`;
+                }
+                
+                html += `</div>`;
                 
                 if (this.profileData.description && this.profileData.description !== 'No description available') {
                     html += `
@@ -567,7 +614,6 @@ const MarketData = {
             html += `</div>`;
         }
         
-        // Statistiques fondamentales
         if (this.statisticsData) {
             html += `
                 <div class='fundamental-stats'>
@@ -647,23 +693,1077 @@ const MarketData = {
         `;
     },
     
-    // ========== SUITE DANS LE PROCHAIN MESSAGE (fichier trop long) ==========
+    displayResults() {
+        this.createPriceChart();
+        this.createRSIChart();
+        this.createMACDChart();
+        this.displayTradingSignals();
+        this.displayKeyStatistics();
+        
+        document.getElementById('resultsPanel').classList.remove('hidden');
+    }
     
-    // ... (je continue dans le prochain message avec le reste des fonctions)
-};
-
-// Initialize when DOM is loaded
-document.addEventListener('DOMContentLoaded', () => {
-    MarketData.init();
 });
 
-// Ajouter ces méthodes à l'objet MarketData :
+// ========== FIN PARTIE 2/4 ==========
+
+// ========== PARTIE 3/4 - CHARTS & TECHNICAL ANALYSIS ==========
 
 Object.assign(MarketData, {
     
-    // ============================================
-    // COMPARISON FUNCTIONS
-    // ============================================
+    // ========== PRICE CHART ==========
+    
+    createPriceChart() {
+        const prices = this.stockData.prices;
+        const ohlc = prices.map(p => [p.timestamp, p.open, p.high, p.low, p.close]);
+        const volume = prices.map(p => [p.timestamp, p.volume]);
+        
+        const showSMA = document.getElementById('toggleSMA')?.checked !== false;
+        const showEMA = document.getElementById('toggleEMA')?.checked || false;
+        const showBB = document.getElementById('toggleBB')?.checked !== false;
+        const showVolume = document.getElementById('toggleVolume')?.checked !== false;
+        
+        const series = [
+            {
+                type: 'candlestick',
+                name: this.currentSymbol,
+                data: ohlc,
+                id: 'price',
+                color: '#ef4444',
+                upColor: '#10b981'
+            }
+        ];
+        
+        if (showSMA) {
+            series.push({
+                type: 'sma',
+                linkedTo: 'price',
+                params: { period: 20 },
+                color: '#2563eb',
+                lineWidth: 2,
+                name: 'SMA 20'
+            });
+            series.push({
+                type: 'sma',
+                linkedTo: 'price',
+                params: { period: 50 },
+                color: '#8b5cf6',
+                lineWidth: 2,
+                name: 'SMA 50'
+            });
+        }
+        
+        if (showEMA) {
+            series.push({
+                type: 'ema',
+                linkedTo: 'price',
+                params: { period: 12 },
+                color: '#06b6d4',
+                lineWidth: 2,
+                name: 'EMA 12'
+            });
+            series.push({
+                type: 'ema',
+                linkedTo: 'price',
+                params: { period: 26 },
+                color: '#14b8a6',
+                lineWidth: 2,
+                name: 'EMA 26'
+            });
+        }
+        
+        if (showBB) {
+            series.push({
+                type: 'bb',
+                linkedTo: 'price',
+                color: '#64748b',
+                fillOpacity: 0.05,
+                lineWidth: 1,
+                name: 'Bollinger Bands'
+            });
+        }
+        
+        if (showVolume) {
+            series.push({
+                type: 'column',
+                name: 'Volume',
+                data: volume,
+                yAxis: 1,
+                color: '#cbd5e1'
+            });
+        }
+        
+        if (this.charts.price) {
+            this.charts.price.destroy();
+        }
+        
+        this.charts.price = Highcharts.stockChart('priceChart', {
+            chart: {
+                height: 600,
+                borderRadius: 12,
+                style: {
+                    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif'
+                }
+            },
+            title: {
+                text: `${this.currentSymbol} Price Chart`,
+                style: { 
+                    color: '#0f172a',
+                    fontWeight: '600',
+                    fontSize: '1.25rem'
+                }
+            },
+            rangeSelector: {
+                selected: 1,
+                buttonTheme: {
+                    fill: 'white',
+                    stroke: '#e2e8f0',
+                    'stroke-width': 1,
+                    r: 6,
+                    style: {
+                        color: '#475569',
+                        fontWeight: '500'
+                    },
+                    states: {
+                        hover: {
+                            fill: '#f1f5f9'
+                        },
+                        select: {
+                            fill: '#2563eb',
+                            style: {
+                                color: 'white'
+                            }
+                        }
+                    }
+                }
+            },
+            yAxis: [{
+                labels: {
+                    align: 'right',
+                    x: -3,
+                    style: {
+                        color: '#475569'
+                    }
+                },
+                title: {
+                    text: 'Price',
+                    style: {
+                        color: '#475569'
+                    }
+                },
+                height: '75%',
+                lineWidth: 1,
+                gridLineColor: '#f1f5f9'
+            }, {
+                labels: {
+                    align: 'right',
+                    x: -3,
+                    style: {
+                        color: '#475569'
+                    }
+                },
+                title: {
+                    text: 'Volume',
+                    style: {
+                        color: '#475569'
+                    }
+                },
+                top: '80%',
+                height: '20%',
+                offset: 0,
+                lineWidth: 1,
+                gridLineColor: '#f1f5f9'
+            }],
+            xAxis: {
+                gridLineColor: '#f1f5f9'
+            },
+            tooltip: {
+                split: true,
+                borderRadius: 8,
+                borderWidth: 1,
+                borderColor: '#e2e8f0',
+                backgroundColor: 'white',
+                shadow: {
+                    color: 'rgba(0, 0, 0, 0.1)',
+                    offsetX: 0,
+                    offsetY: 2,
+                    width: 4
+                }
+            },
+            series: series,
+            credits: { enabled: false }
+        });
+    },
+    
+    // ========== RSI CHART ==========
+    
+    createRSIChart() {
+        const prices = this.stockData.prices;
+        const rsiData = this.calculateRSIArray(prices, 14);
+        
+        if (this.charts.rsi) {
+            this.charts.rsi.destroy();
+        }
+        
+        this.charts.rsi = Highcharts.chart('rsiChart', {
+            chart: {
+                borderRadius: 12,
+                height: 400,
+                style: {
+                    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif'
+                }
+            },
+            title: {
+                text: 'RSI Indicator',
+                style: { 
+                    color: '#0f172a',
+                    fontWeight: '600',
+                    fontSize: '1.125rem'
+                }
+            },
+            xAxis: {
+                type: 'datetime',
+                crosshair: true,
+                gridLineColor: '#f1f5f9'
+            },
+            yAxis: {
+                title: { 
+                    text: 'RSI',
+                    style: { color: '#475569' }
+                },
+                plotLines: [{
+                    value: 70,
+                    color: '#ef4444',
+                    dashStyle: 'Dash',
+                    width: 2,
+                    label: {
+                        text: 'Overbought (70)',
+                        align: 'right',
+                        style: { color: '#ef4444', fontWeight: '600' }
+                    }
+                }, {
+                    value: 30,
+                    color: '#10b981',
+                    dashStyle: 'Dash',
+                    width: 2,
+                    label: {
+                        text: 'Oversold (30)',
+                        align: 'right',
+                        style: { color: '#10b981', fontWeight: '600' }
+                    }
+                }, {
+                    value: 50,
+                    color: '#94a3b8',
+                    dashStyle: 'Dot',
+                    width: 1,
+                    label: {
+                        text: 'Neutral (50)',
+                        align: 'right',
+                        style: { color: '#94a3b8' }
+                    }
+                }],
+                min: 0,
+                max: 100,
+                gridLineColor: '#f1f5f9'
+            },
+            tooltip: {
+                borderRadius: 8,
+                crosshairs: true,
+                shared: true,
+                valueDecimals: 2
+            },
+            plotOptions: {
+                area: {
+                    fillColor: {
+                        linearGradient: { x1: 0, y1: 0, x2: 0, y2: 1 },
+                        stops: [
+                            [0, 'rgba(37, 99, 235, 0.3)'],
+                            [1, 'rgba(37, 99, 235, 0.05)']
+                        ]
+                    },
+                    lineWidth: 2,
+                    marker: {
+                        enabled: false
+                    },
+                    threshold: null
+                }
+            },
+            series: [{
+                type: 'area',
+                name: 'RSI (14)',
+                data: rsiData,
+                color: '#2563eb',
+                zones: [{
+                    value: 30,
+                    color: '#10b981'
+                }, {
+                    value: 70,
+                    color: '#f59e0b'
+                }, {
+                    color: '#ef4444'
+                }]
+            }],
+            credits: { enabled: false }
+        });
+    },
+    
+    calculateRSIArray(prices, period = 14) {
+        const rsiData = [];
+        
+        if (prices.length < period + 1) {
+            return rsiData;
+        }
+        
+        let gains = 0;
+        let losses = 0;
+        
+        for (let i = 1; i <= period; i++) {
+            const change = prices[i].close - prices[i - 1].close;
+            if (change > 0) gains += change;
+            else losses += Math.abs(change);
+        }
+        
+        let avgGain = gains / period;
+        let avgLoss = losses / period;
+        
+        const rs = avgGain / avgLoss;
+        const rsi = 100 - (100 / (1 + rs));
+        rsiData.push([prices[period].timestamp, rsi]);
+        
+        for (let i = period + 1; i < prices.length; i++) {
+            const change = prices[i].close - prices[i - 1].close;
+            
+            if (change > 0) {
+                avgGain = ((avgGain * (period - 1)) + change) / period;
+                avgLoss = (avgLoss * (period - 1)) / period;
+            } else {
+                avgGain = (avgGain * (period - 1)) / period;
+                avgLoss = ((avgLoss * (period - 1)) + Math.abs(change)) / period;
+            }
+            
+            const currentRS = avgGain / avgLoss;
+            const currentRSI = 100 - (100 / (1 + currentRS));
+            rsiData.push([prices[i].timestamp, currentRSI]);
+        }
+        
+        return rsiData;
+    },
+    
+    calculateRSI(prices, period = 14) {
+        if (prices.length < period + 1) return null;
+        
+        let gains = 0;
+        let losses = 0;
+        
+        for (let i = 1; i <= period; i++) {
+            const change = prices[i].close - prices[i - 1].close;
+            if (change > 0) gains += change;
+            else losses += Math.abs(change);
+        }
+        
+        let avgGain = gains / period;
+        let avgLoss = losses / period;
+        
+        for (let i = period + 1; i < prices.length; i++) {
+            const change = prices[i].close - prices[i - 1].close;
+            if (change > 0) {
+                avgGain = ((avgGain * (period - 1)) + change) / period;
+                avgLoss = (avgLoss * (period - 1)) / period;
+            } else {
+                avgGain = (avgGain * (period - 1)) / period;
+                avgLoss = ((avgLoss * (period - 1)) + Math.abs(change)) / period;
+            }
+        }
+        
+        const rs = avgGain / avgLoss;
+        const rsi = 100 - (100 / (1 + rs));
+        
+        return rsi;
+    },
+    
+    // ========== MACD CHART ==========
+    
+    createMACDChart() {
+        const prices = this.stockData.prices;
+        const macdData = this.calculateMACDArray(prices);
+        
+        if (this.charts.macd) {
+            this.charts.macd.destroy();
+        }
+        
+        this.charts.macd = Highcharts.chart('macdChart', {
+            chart: {
+                borderRadius: 12,
+                height: 400,
+                style: {
+                    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif'
+                }
+            },
+            title: {
+                text: 'MACD Indicator',
+                style: { 
+                    color: '#0f172a',
+                    fontWeight: '600',
+                    fontSize: '1.125rem'
+                }
+            },
+            xAxis: {
+                type: 'datetime',
+                crosshair: true,
+                gridLineColor: '#f1f5f9'
+            },
+            yAxis: {
+                title: { 
+                    text: 'MACD',
+                    style: { color: '#475569' }
+                },
+                plotLines: [{
+                    value: 0,
+                    color: '#94a3b8',
+                    dashStyle: 'Dash',
+                    width: 2,
+                    label: {
+                        text: 'Zero Line',
+                        align: 'right',
+                        style: { color: '#94a3b8' }
+                    }
+                }],
+                gridLineColor: '#f1f5f9'
+            },
+            tooltip: {
+                borderRadius: 8,
+                crosshairs: true,
+                shared: true,
+                valueDecimals: 2
+            },
+            plotOptions: {
+                column: {
+                    borderRadius: '25%'
+                }
+            },
+            series: [{
+                type: 'line',
+                name: 'MACD Line',
+                data: macdData.macd,
+                color: '#2563eb',
+                lineWidth: 2,
+                marker: {
+                    enabled: false
+                }
+            }, {
+                type: 'line',
+                name: 'Signal Line',
+                data: macdData.signal,
+                color: '#8b5cf6',
+                lineWidth: 2,
+                marker: {
+                    enabled: false
+                }
+            }, {
+                type: 'column',
+                name: 'Histogram',
+                data: macdData.histogram,
+                color: '#64748b',
+                pointWidth: 3
+            }],
+            credits: { enabled: false }
+        });
+    },
+    
+    calculateMACDArray(prices, shortPeriod = 12, longPeriod = 26, signalPeriod = 9) {
+        const closePrices = prices.map(p => p.close);
+        
+        const emaShort = this.calculateEMAArray(closePrices, shortPeriod);
+        const emaLong = this.calculateEMAArray(closePrices, longPeriod);
+        
+        const macdLine = [];
+        for (let i = longPeriod - 1; i < prices.length; i++) {
+            const macdValue = emaShort[i] - emaLong[i];
+            macdLine.push(macdValue);
+        }
+        
+        const signalLine = this.calculateEMAArray(macdLine, signalPeriod);
+        
+        const macdData = [];
+        const signalData = [];
+        const histogramData = [];
+        
+        const startIndex = longPeriod - 1 + signalPeriod - 1;
+        
+        for (let i = startIndex; i < prices.length; i++) {
+            const timestamp = prices[i].timestamp;
+            const macdIndex = i - (longPeriod - 1);
+            const signalIndex = macdIndex - (signalPeriod - 1);
+            
+            if (signalIndex >= 0 && signalIndex < signalLine.length) {
+                const macdVal = macdLine[macdIndex];
+                const signalVal = signalLine[signalIndex];
+                const histogramVal = macdVal - signalVal;
+                
+                macdData.push([timestamp, macdVal]);
+                signalData.push([timestamp, signalVal]);
+                histogramData.push([timestamp, histogramVal]);
+            }
+        }
+        
+        return {
+            macd: macdData,
+            signal: signalData,
+            histogram: histogramData
+        };
+    },
+    
+    calculateEMAArray(data, period) {
+        const k = 2 / (period + 1);
+        const emaArray = [];
+        
+        for (let i = 0; i < period - 1; i++) {
+            emaArray[i] = undefined;
+        }
+        
+        let sum = 0;
+        for (let i = 0; i < period; i++) {
+            sum += data[i];
+        }
+        emaArray[period - 1] = sum / period;
+        
+        for (let i = period; i < data.length; i++) {
+            const ema = data[i] * k + emaArray[i - 1] * (1 - k);
+            emaArray[i] = ema;
+        }
+        
+        return emaArray;
+    },
+    
+    // ========== TRADING SIGNALS ==========
+    
+    displayTradingSignals() {
+        const prices = this.stockData.prices;
+        const currentPrice = prices[prices.length - 1].close;
+        const rsi = this.calculateRSI(prices);
+        
+        const sma20 = this.calculateSMA(prices, 20);
+        const sma50 = this.calculateSMA(prices, 50);
+        
+        const signals = [];
+        
+        let rsiSignal = 'neutral';
+        let rsiStatus = 'Neutral';
+        if (rsi < 30) {
+            rsiSignal = 'bullish';
+            rsiStatus = 'Oversold - Buy Signal';
+        } else if (rsi > 70) {
+            rsiSignal = 'bearish';
+            rsiStatus = 'Overbought - Sell Signal';
+        }
+        
+        signals.push({
+            title: 'RSI Signal',
+            value: rsi.toFixed(2),
+            status: rsiStatus,
+            type: rsiSignal
+        });
+        
+        let maSignal = 'neutral';
+        let maStatus = 'Neutral';
+        if (currentPrice > sma20 && sma20 > sma50) {
+            maSignal = 'bullish';
+            maStatus = 'Bullish Trend';
+        } else if (currentPrice < sma20 && sma20 < sma50) {
+            maSignal = 'bearish';
+            maStatus = 'Bearish Trend';
+        }
+        
+        signals.push({
+            title: 'Moving Average',
+            value: currentPrice > sma20 ? 'Above SMA' : 'Below SMA',
+            status: maStatus,
+            type: maSignal
+        });
+        
+        const priceChange = ((currentPrice - prices[0].close) / prices[0].close) * 100;
+        signals.push({
+            title: 'Overall Trend',
+            value: `${priceChange > 0 ? '+' : ''}${priceChange.toFixed(2)}%`,
+            status: priceChange > 5 ? 'Strong Uptrend' : priceChange < -5 ? 'Strong Downtrend' : 'Sideways',
+            type: priceChange > 0 ? 'bullish' : priceChange < 0 ? 'bearish' : 'neutral'
+        });
+        
+        const volatility = this.calculateVolatility(prices);
+        signals.push({
+            title: 'Volatility',
+            value: `${volatility.toFixed(2)}%`,
+            status: volatility > 3 ? 'High' : volatility > 1.5 ? 'Moderate' : 'Low',
+            type: 'neutral'
+        });
+        
+        const container = document.getElementById('tradingSignals');
+        container.innerHTML = signals.map(signal => `
+            <div class='signal-card ${signal.type}'>
+                <div class='signal-title'>${this.escapeHtml(signal.title)}</div>
+                <div class='signal-value'>${this.escapeHtml(signal.value)}</div>
+                <div class='signal-status'>${this.escapeHtml(signal.status)}</div>
+            </div>
+        `).join('');
+    },
+    
+    // ========== KEY STATISTICS ==========
+    
+    displayKeyStatistics() {
+        const prices = this.stockData.prices;
+        const quote = this.stockData.quote;
+        
+        const stats = [];
+        
+        const high52w = quote.fiftyTwoWeekHigh || Math.max(...prices.map(p => p.high));
+        const low52w = quote.fiftyTwoWeekLow || Math.min(...prices.map(p => p.low));
+        
+        stats.push({ label: '52W High', value: this.formatCurrency(high52w) });
+        stats.push({ label: '52W Low', value: this.formatCurrency(low52w) });
+        
+        const avgVolume = quote.averageVolume || (prices.reduce((sum, p) => sum + p.volume, 0) / prices.length);
+        stats.push({ label: 'Avg Volume', value: this.formatVolume(avgVolume) });
+        
+        const volatility = this.calculateVolatility(prices);
+        stats.push({ label: 'Volatility', value: `${volatility.toFixed(2)}%` });
+        
+        if (this.statisticsData && this.statisticsData.beta) {
+            stats.push({ label: 'Beta', value: this.formatRatio(this.statisticsData.beta) });
+        } else {
+            stats.push({ label: 'Beta', value: 'N/A' });
+        }
+        
+        const returns = [];
+        for (let i = 1; i < prices.length; i++) {
+            returns.push((prices[i].close - prices[i-1].close) / prices[i-1].close);
+        }
+        const avgReturn = returns.reduce((sum, r) => sum + r, 0) / returns.length;
+        const annualizedReturn = avgReturn * 252 * 100;
+        const sharpeRatio = volatility > 0 ? (annualizedReturn / volatility) : 0;
+        
+        stats.push({ label: 'Sharpe Ratio', value: sharpeRatio.toFixed(2) });
+        
+        const container = document.getElementById('keyStats');
+        container.innerHTML = stats.map(stat => `
+            <div class='stat-box'>
+                <div class='label'>${this.escapeHtml(stat.label)}</div>
+                <div class='value'>${this.escapeHtml(stat.value)}</div>
+            </div>
+        `).join('');
+    },
+    
+    calculateSMA(prices, period) {
+        if (prices.length < period) return 0;
+        const sum = prices.slice(-period).reduce((acc, p) => acc + p.close, 0);
+        return sum / period;
+    },
+    
+    calculateVolatility(prices) {
+        const returns = [];
+        for (let i = 1; i < prices.length; i++) {
+            const ret = (prices[i].close - prices[i - 1].close) / prices[i - 1].close;
+            returns.push(ret);
+        }
+        
+        const mean = returns.reduce((sum, r) => sum + r, 0) / returns.length;
+        const variance = returns.reduce((sum, r) => sum + Math.pow(r - mean, 2), 0) / returns.length;
+        const stdDev = Math.sqrt(variance);
+        
+        return stdDev * Math.sqrt(252) * 100;
+    }
+    
+});
+
+// ========== FIN PARTIE 3/4 ==========
+
+// ========== PARTIE 4/4 - WATCHLIST, ALERTS, COMPARISON & UTILITIES ==========
+
+Object.assign(MarketData, {
+    
+    // ========== WATCHLIST FUNCTIONS ==========
+    
+    loadWatchlistFromStorage() {
+        const saved = localStorage.getItem('market_watchlist');
+        if (saved) {
+            try {
+                this.watchlist = JSON.parse(saved);
+                this.renderWatchlist();
+                this.refreshWatchlist();
+            } catch (error) {
+                console.error('Error loading watchlist:', error);
+                this.watchlist = [];
+            }
+        }
+    },
+    
+    saveWatchlistToStorage() {
+        try {
+            localStorage.setItem('market_watchlist', JSON.stringify(this.watchlist));
+        } catch (error) {
+            console.error('Error saving watchlist:', error);
+        }
+    },
+    
+    addCurrentToWatchlist() {
+        if (!this.currentSymbol) {
+            alert('Please search for a stock first');
+            return;
+        }
+        
+        if (this.watchlist.some(item => item.symbol === this.currentSymbol)) {
+            alert(`${this.currentSymbol} is already in your watchlist`);
+            return;
+        }
+        
+        const watchlistItem = {
+            symbol: this.currentSymbol,
+            name: this.stockData.quote.name || this.currentSymbol,
+            addedAt: Date.now()
+        };
+        
+        this.watchlist.push(watchlistItem);
+        this.saveWatchlistToStorage();
+        this.renderWatchlist();
+        this.refreshSingleWatchlistItem(this.currentSymbol);
+        this.updateAddToWatchlistButton();
+        
+        this.showNotification(`✅ ${this.currentSymbol} added to watchlist`, 'success');
+    },
+    
+    removeFromWatchlist(symbol) {
+        if (confirm(`Remove ${symbol} from watchlist?`)) {
+            this.watchlist = this.watchlist.filter(item => item.symbol !== symbol);
+            this.saveWatchlistToStorage();
+            this.renderWatchlist();
+            this.updateAddToWatchlistButton();
+            this.showNotification(`${symbol} removed from watchlist`, 'info');
+        }
+    },
+    
+    clearWatchlist() {
+        if (this.watchlist.length === 0) {
+            alert('Watchlist is already empty');
+            return;
+        }
+        
+        if (confirm(`Clear all ${this.watchlist.length} stocks from watchlist?`)) {
+            this.watchlist = [];
+            this.saveWatchlistToStorage();
+            this.renderWatchlist();
+            this.updateAddToWatchlistButton();
+            this.showNotification('Watchlist cleared', 'info');
+        }
+    },
+    
+    renderWatchlist() {
+        const container = document.getElementById('watchlistContainer');
+        if (!container) return;
+        
+        if (this.watchlist.length === 0) {
+            container.innerHTML = `
+                <div class='watchlist-empty'>
+                    <i class='fas fa-star-half-alt'></i>
+                    <p>Your watchlist is empty</p>
+                    <p class='hint'>Search for a stock and click "Add to Watchlist" to start tracking</p>
+                </div>
+            `;
+            return;
+        }
+        
+        container.innerHTML = this.watchlist.map(item => `
+            <div class='watchlist-card' id='watchlist-${item.symbol}' onclick='MarketData.loadSymbol("${item.symbol}")'>
+                <div class='watchlist-card-header'>
+                    <div>
+                        <div class='watchlist-symbol'>${this.escapeHtml(item.symbol)}</div>
+                        <div class='watchlist-name'>${this.escapeHtml(item.name)}</div>
+                    </div>
+                    <button class='watchlist-remove' onclick='event.stopPropagation(); MarketData.removeFromWatchlist("${item.symbol}")' aria-label='Remove ${item.symbol} from watchlist'>
+                        <i class='fas fa-times'></i>
+                    </button>
+                </div>
+                <div class='watchlist-price'>--</div>
+                <div class='watchlist-change'>
+                    <i class='fas fa-minus'></i>
+                    <span>--</span>
+                </div>
+                <div class='watchlist-stats'>
+                    <div class='watchlist-stat'>
+                        <span class='watchlist-stat-label'>Open</span>
+                        <span class='watchlist-stat-value'>--</span>
+                    </div>
+                    <div class='watchlist-stat'>
+                        <span class='watchlist-stat-label'>Volume</span>
+                        <span class='watchlist-stat-value'>--</span>
+                    </div>
+                </div>
+            </div>
+        `).join('');
+    },
+    
+    async refreshWatchlist() {
+        if (this.watchlist.length === 0) {
+            return;
+        }
+        
+        this.showNotification('Refreshing watchlist...', 'info');
+        
+        for (const item of this.watchlist) {
+            await this.refreshSingleWatchlistItem(item.symbol);
+        }
+        
+        this.updateLastUpdate();
+        this.checkAlerts();
+    },
+    
+    async refreshSingleWatchlistItem(symbol) {
+        const card = document.getElementById(`watchlist-${symbol}`);
+        if (!card) return;
+        
+        card.classList.add('watchlist-loading');
+        
+        try {
+            const quote = await this.apiClient.getQuote(symbol);
+            
+            const price = quote.price;
+            const change = quote.change;
+            const changePercent = quote.percentChange;
+            const open = quote.open;
+            const volume = quote.volume;
+            
+            card.querySelector('.watchlist-price').textContent = this.formatCurrency(price);
+            
+            const changeEl = card.querySelector('.watchlist-change');
+            const icon = change >= 0 ? 'fa-arrow-up' : 'fa-arrow-down';
+            const changeClass = change >= 0 ? 'positive' : 'negative';
+            changeEl.className = `watchlist-change ${changeClass}`;
+            changeEl.innerHTML = `
+                <i class='fas ${icon}'></i>
+                <span>${change >= 0 ? '+' : ''}${this.formatCurrency(change)} (${change >= 0 ? '+' : ''}${changePercent.toFixed(2)}%)</span>
+            `;
+            
+            const stats = card.querySelectorAll('.watchlist-stat-value');
+            stats[0].textContent = this.formatCurrency(open);
+            stats[1].textContent = this.formatVolume(volume);
+            
+            const watchlistItem = this.watchlist.find(w => w.symbol === symbol);
+            if (watchlistItem) {
+                watchlistItem.currentPrice = price;
+                watchlistItem.change = change;
+                watchlistItem.changePercent = changePercent;
+            }
+        } catch (error) {
+            console.error(`Error refreshing ${symbol}:`, error);
+        } finally {
+            card.classList.remove('watchlist-loading');
+        }
+    },
+    
+    startWatchlistAutoRefresh() {
+        this.watchlistRefreshInterval = setInterval(() => {
+            if (this.watchlist.length > 0) {
+                this.refreshWatchlist();
+            }
+        }, 3600000); // 1 heure
+    },
+    
+    updateAddToWatchlistButton() {
+        const btn = document.getElementById('btnAddCurrent');
+        if (!btn) return;
+        
+        if (this.currentSymbol && !this.watchlist.some(w => w.symbol === this.currentSymbol)) {
+            btn.disabled = false;
+            btn.innerHTML = `<i class='fas fa-plus'></i> Add ${this.currentSymbol} to Watchlist`;
+        } else if (this.currentSymbol) {
+            btn.disabled = true;
+            btn.innerHTML = `<i class='fas fa-check'></i> Already in Watchlist`;
+        } else {
+            btn.disabled = true;
+            btn.innerHTML = `<i class='fas fa-plus'></i> Add Current Stock`;
+        }
+    },
+    
+    // ========== ALERTS FUNCTIONS ==========
+    
+    loadAlertsFromStorage() {
+        const saved = localStorage.getItem('market_alerts');
+        if (saved) {
+            try {
+                this.alerts = JSON.parse(saved);
+                this.renderAlerts();
+            } catch (error) {
+                console.error('Error loading alerts:', error);
+                this.alerts = [];
+            }
+        }
+    },
+    
+    saveAlertsToStorage() {
+        try {
+            localStorage.setItem('market_alerts', JSON.stringify(this.alerts));
+        } catch (error) {
+            console.error('Error saving alerts:', error);
+        }
+    },
+    
+    openAlertModal() {
+        if (window.FinanceDashboard && window.FinanceDashboard.openModal) {
+            window.FinanceDashboard.openModal('modalCreateAlert');
+        }
+        if (this.currentSymbol) {
+            const input = document.getElementById('alertSymbol');
+            if (input) {
+                input.value = this.currentSymbol;
+            }
+        }
+    },
+    
+    closeAlertModal() {
+        if (window.FinanceDashboard && window.FinanceDashboard.closeModal) {
+            window.FinanceDashboard.closeModal('modalCreateAlert');
+        }
+        document.getElementById('alertSymbol').value = '';
+        document.getElementById('alertPrice').value = '';
+        document.getElementById('alertType').value = 'above';
+        document.getElementById('alertNote').value = '';
+    },
+    
+    createAlert() {
+        const symbol = document.getElementById('alertSymbol').value.trim().toUpperCase();
+        const price = parseFloat(document.getElementById('alertPrice').value);
+        const type = document.getElementById('alertType').value;
+        const note = document.getElementById('alertNote').value.trim();
+        
+        if (!symbol) {
+            alert('Please enter a stock symbol');
+            return;
+        }
+        
+        if (!price || price <= 0) {
+            alert('Please enter a valid target price');
+            return;
+        }
+        
+        const alert = {
+            id: Date.now(),
+            symbol: symbol,
+            targetPrice: price,
+            type: type,
+            note: note,
+            triggered: false,
+            createdAt: Date.now()
+        };
+        
+        this.alerts.push(alert);
+        this.saveAlertsToStorage();
+        this.renderAlerts();
+        this.closeAlertModal();
+        
+        this.showNotification(`✅ Alert created for ${symbol}`, 'success');
+        
+        if (!this.watchlist.some(w => w.symbol === symbol)) {
+            this.watchlist.push({
+                symbol: symbol,
+                name: symbol,
+                addedAt: Date.now()
+            });
+            this.saveWatchlistToStorage();
+            this.renderWatchlist();
+            this.refreshSingleWatchlistItem(symbol);
+        }
+    },
+    
+    deleteAlert(alertId) {
+        if (confirm('Delete this alert?')) {
+            this.alerts = this.alerts.filter(a => a.id !== alertId);
+            this.saveAlertsToStorage();
+            this.renderAlerts();
+            this.showNotification('Alert deleted', 'info');
+        }
+    },
+    
+    renderAlerts() {
+        const container = document.getElementById('alertsContainer');
+        if (!container) return;
+        
+        if (this.alerts.length === 0) {
+            container.innerHTML = `
+                <div class='alerts-empty'>
+                    <i class='fas fa-bell-slash'></i>
+                    <p>No active alerts</p>
+                    <p class='hint'>Create price alerts to get notified when a stock reaches your target</p>
+                </div>
+            `;
+            return;
+        }
+        
+        container.innerHTML = this.alerts.map(alert => {
+            const statusClass = alert.triggered ? 'triggered' : 'active';
+            const statusText = alert.triggered ? 'Triggered ✓' : 'Active';
+            const conditionText = alert.type === 'above' ? 'above' : 'below';
+            
+            return `
+                <div class='alert-card ${statusClass}'>
+                    <div class='alert-info'>
+                        <div class='alert-symbol'>${this.escapeHtml(alert.symbol)}</div>
+                        <div class='alert-condition'>
+                            Alert when price goes <strong>${conditionText}</strong> 
+                            <span class='price'>${this.formatCurrency(alert.targetPrice)}</span>
+                        </div>
+                        ${alert.note ? `<div class='alert-note'>${this.escapeHtml(alert.note)}</div>` : ''}
+                    </div>
+                    <span class='alert-status ${statusClass}'>${statusText}</span>
+                    <button class='alert-delete' onclick='MarketData.deleteAlert(${alert.id})' aria-label='Delete alert'>
+                        <i class='fas fa-trash'></i>
+                    </button>
+                </div>
+            `;
+        }).join('');
+    },
+    
+    checkAlerts() {
+        let triggeredCount = 0;
+        
+        this.alerts.forEach(alert => {
+            if (alert.triggered) return;
+            
+            const watchlistItem = this.watchlist.find(w => w.symbol === alert.symbol);
+            if (!watchlistItem || !watchlistItem.currentPrice) return;
+            
+            const currentPrice = watchlistItem.currentPrice;
+            let shouldTrigger = false;
+            
+            if (alert.type === 'above' && currentPrice >= alert.targetPrice) {
+                shouldTrigger = true;
+            } else if (alert.type === 'below' && currentPrice <= alert.targetPrice) {
+                shouldTrigger = true;
+            }
+            
+            if (shouldTrigger) {
+                alert.triggered = true;
+                triggeredCount++;
+                
+                const message = `🔔 ${alert.symbol} is now ${alert.type} ${this.formatCurrency(alert.targetPrice)}! Current: ${this.formatCurrency(currentPrice)}`;
+                this.showNotification(message, 'warning', true);
+            }
+        });
+        
+        if (triggeredCount > 0) {
+            this.saveAlertsToStorage();
+            this.renderAlerts();
+        }
+    },
+    
+    requestNotificationPermission() {
+        if ('Notification' in window && Notification.permission === 'default') {
+            Notification.requestPermission().then(permission => {
+                this.notificationPermission = permission === 'granted';
+            });
+        } else if ('Notification' in window && Notification.permission === 'granted') {
+            this.notificationPermission = true;
+        }
+    },
+    
+    // ========== COMPARISON FUNCTIONS ==========
     
     openComparisonModal() {
         if (window.FinanceDashboard && window.FinanceDashboard.openModal) {
@@ -794,7 +1894,6 @@ Object.assign(MarketData, {
         if (emptyEl) emptyEl.classList.remove('hidden');
         if (containerEl) containerEl.classList.add('hidden');
         
-        // Destroy chart
         if (this.charts.comparison) {
             this.charts.comparison.destroy();
             this.charts.comparison = null;
@@ -852,10 +1951,6 @@ Object.assign(MarketData, {
                     color: '#64748b',
                     fontSize: '0.875rem'
                 }
-            },
-            accessibility: {
-                enabled: true,
-                description: 'Stock performance comparison chart showing normalized prices'
             },
             rangeSelector: {
                 selected: 1,
@@ -1045,9 +2140,7 @@ Object.assign(MarketData, {
         return stdDev * Math.sqrt(252) * 100;
     },
     
-    // ============================================
-    // UTILITY FUNCTIONS
-    // ============================================
+    // ========== UTILITY FUNCTIONS ==========
     
     formatCurrency(value) {
         if (!value && value !== 0) return 'N/A';
@@ -1134,668 +2227,14 @@ Object.assign(MarketData, {
         } else {
             console.log(`[${type.toUpperCase()}]`, message);
         }
-    },
-    
-    debounce(func, wait = 300) {
-        let timeout;
-        return function executedFunction(...args) {
-            clearTimeout(timeout);
-            timeout = setTimeout(() => func.apply(this, args), wait);
-        };
-    },
-
-    // ============================================
-    // DISPLAY FUNCTIONS
-    // ============================================
-    
-    displayStockOverview() {
-        const quote = this.stockData.quote;
-        
-        document.getElementById('stockName').textContent = quote.name || this.currentSymbol;
-        document.getElementById('stockSymbol').textContent = quote.symbol || this.currentSymbol;
-        
-        const price = quote.price;
-        const change = quote.change || 0;
-        const changePercent = quote.percentChange || 0;
-        
-        document.getElementById('currentPrice').textContent = this.formatCurrency(price);
-        
-        const priceChangeEl = document.getElementById('priceChange');
-        const changeText = `${change >= 0 ? '+' : ''}${this.formatCurrency(change)} (${change >= 0 ? '+' : ''}${changePercent.toFixed(2)}%)`;
-        priceChangeEl.textContent = changeText;
-        priceChangeEl.className = change >= 0 ? 'price-change positive' : 'price-change negative';
-        
-        document.getElementById('statOpen').textContent = this.formatCurrency(quote.open);
-        document.getElementById('statHigh').textContent = this.formatCurrency(quote.high);
-        document.getElementById('statLow').textContent = this.formatCurrency(quote.low);
-        document.getElementById('statVolume').textContent = this.formatVolume(quote.volume);
-        document.getElementById('statMarketCap').textContent = 'N/A';
-        document.getElementById('statPE').textContent = 'N/A';
-        
-        document.getElementById('stockOverview').classList.remove('hidden');
-    },
-    
-    displayResults() {
-        this.createPriceChart();
-        this.createRSIChart();
-        this.createMACDChart();
-        this.displayTradingSignals();
-        this.displayKeyStatistics();
-        
-        document.getElementById('resultsPanel').classList.remove('hidden');
-    },
-    
-    createPriceChart() {
-        const prices = this.stockData.prices;
-        const ohlc = prices.map(p => [p.timestamp, p.open, p.high, p.low, p.close]);
-        const volume = prices.map(p => [p.timestamp, p.volume]);
-        
-        const showSMA = document.getElementById('toggleSMA')?.checked !== false;
-        const showEMA = document.getElementById('toggleEMA')?.checked || false;
-        const showBB = document.getElementById('toggleBB')?.checked !== false;
-        const showVolume = document.getElementById('toggleVolume')?.checked !== false;
-        
-        const series = [
-            {
-                type: 'candlestick',
-                name: this.currentSymbol,
-                data: ohlc,
-                id: 'price',
-                color: '#dc3545',
-                upColor: '#28a745'
-            }
-        ];
-        
-        if (showSMA) {
-            series.push({
-                type: 'sma',
-                linkedTo: 'price',
-                params: { period: 20 },
-                color: '#2649B2',
-                lineWidth: 2,
-                name: 'SMA 20'
-            });
-            series.push({
-                type: 'sma',
-                linkedTo: 'price',
-                params: { period: 50 },
-                color: '#9D5CE6',
-                lineWidth: 2,
-                name: 'SMA 50'
-            });
-        }
-        
-        if (showEMA) {
-            series.push({
-                type: 'ema',
-                linkedTo: 'price',
-                params: { period: 12 },
-                color: '#4A74F3',
-                lineWidth: 2,
-                name: 'EMA 12'
-            });
-            series.push({
-                type: 'ema',
-                linkedTo: 'price',
-                params: { period: 26 },
-                color: '#8E7DE3',
-                lineWidth: 2,
-                name: 'EMA 26'
-            });
-        }
-        
-        if (showBB) {
-            series.push({
-                type: 'bb',
-                linkedTo: 'price',
-                color: '#6C8BE0',
-                fillOpacity: 0.1,
-                lineWidth: 1,
-                name: 'Bollinger Bands'
-            });
-        }
-        
-        if (showVolume) {
-            series.push({
-                type: 'column',
-                name: 'Volume',
-                data: volume,
-                yAxis: 1,
-                color: '#D4D9F0'
-            });
-        }
-        
-        Highcharts.stockChart('priceChart', {
-            chart: {
-                height: 600,
-                borderRadius: 15
-            },
-            title: {
-                text: `${this.currentSymbol} Price Chart`,
-                style: { color: '#2649B2', fontWeight: 'bold' }
-            },
-            rangeSelector: {
-                selected: 1
-            },
-            yAxis: [{
-                labels: {
-                    align: 'right',
-                    x: -3
-                },
-                title: {
-                    text: 'Price'
-                },
-                height: '75%',
-                lineWidth: 2
-            }, {
-                labels: {
-                    align: 'right',
-                    x: -3
-                },
-                title: {
-                    text: 'Volume'
-                },
-                top: '80%',
-                height: '20%',
-                offset: 0,
-                lineWidth: 2
-            }],
-            tooltip: {
-                split: true,
-                borderRadius: 10
-            },
-            series: series,
-            credits: { enabled: false }
-        });
-    },
-    
-    createRSIChart() {
-        const prices = this.stockData.prices;
-        const rsiData = this.calculateRSIArray(prices, 14);
-        
-        Highcharts.chart('rsiChart', {
-            chart: {
-                borderRadius: 15,
-                height: 400
-            },
-            title: {
-                text: 'RSI Indicator',
-                style: { color: '#2649B2', fontWeight: 'bold' }
-            },
-            xAxis: {
-                type: 'datetime',
-                crosshair: true
-            },
-            yAxis: {
-                title: { 
-                    text: 'RSI',
-                    style: { color: '#2649B2' }
-                },
-                plotLines: [{
-                    value: 70,
-                    color: '#dc3545',
-                    dashStyle: 'ShortDash',
-                    width: 2,
-                    label: {
-                        text: 'Overbought (70)',
-                        align: 'right',
-                        style: { color: '#dc3545', fontWeight: 'bold' }
-                    }
-                }, {
-                    value: 30,
-                    color: '#28a745',
-                    dashStyle: 'ShortDash',
-                    width: 2,
-                    label: {
-                        text: 'Oversold (30)',
-                        align: 'right',
-                        style: { color: '#28a745', fontWeight: 'bold' }
-                    }
-                }, {
-                    value: 50,
-                    color: '#6C8BE0',
-                    dashStyle: 'Dot',
-                    width: 1,
-                    label: {
-                        text: 'Neutral (50)',
-                        align: 'right',
-                        style: { color: '#6C8BE0' }
-                    }
-                }],
-                min: 0,
-                max: 100
-            },
-            tooltip: {
-                borderRadius: 10,
-                crosshairs: true,
-                shared: true,
-                valueDecimals: 2
-            },
-            plotOptions: {
-                area: {
-                    fillColor: {
-                        linearGradient: { x1: 0, y1: 0, x2: 0, y2: 1 },
-                        stops: [
-                            [0, 'rgba(74, 116, 243, 0.3)'],
-                            [1, 'rgba(74, 116, 243, 0.05)']
-                        ]
-                    },
-                    lineWidth: 3,
-                    marker: {
-                        enabled: false
-                    },
-                    threshold: null
-                }
-            },
-            series: [{
-                type: 'area',
-                name: 'RSI (14)',
-                data: rsiData,
-                color: '#4A74F3',
-                zones: [{
-                    value: 30,
-                    color: '#28a745'
-                }, {
-                    value: 70,
-                    color: '#ffc107'
-                }, {
-                    color: '#dc3545'
-                }]
-            }],
-            credits: { enabled: false }
-        });
-    },
-    
-    calculateRSIArray(prices, period = 14) {
-        const rsiData = [];
-        
-        if (prices.length < period + 1) {
-            return rsiData;
-        }
-        
-        let gains = 0;
-        let losses = 0;
-        
-        for (let i = 1; i <= period; i++) {
-            const change = prices[i].close - prices[i - 1].close;
-            if (change > 0) gains += change;
-            else losses += Math.abs(change);
-        }
-        
-        let avgGain = gains / period;
-        let avgLoss = losses / period;
-        
-        const rs = avgGain / avgLoss;
-        const rsi = 100 - (100 / (1 + rs));
-        rsiData.push([prices[period].timestamp, rsi]);
-        
-        for (let i = period + 1; i < prices.length; i++) {
-            const change = prices[i].close - prices[i - 1].close;
-            
-            if (change > 0) {
-                avgGain = ((avgGain * (period - 1)) + change) / period;
-                avgLoss = (avgLoss * (period - 1)) / period;
-            } else {
-                avgGain = (avgGain * (period - 1)) / period;
-                avgLoss = ((avgLoss * (period - 1)) + Math.abs(change)) / period;
-            }
-            
-            const currentRS = avgGain / avgLoss;
-            const currentRSI = 100 - (100 / (1 + currentRS));
-            rsiData.push([prices[i].timestamp, currentRSI]);
-        }
-        
-        return rsiData;
-    },
-    
-    createMACDChart() {
-        const prices = this.stockData.prices;
-        const macdData = this.calculateMACDArray(prices);
-        
-        Highcharts.chart('macdChart', {
-            chart: {
-                borderRadius: 15,
-                height: 400
-            },
-            title: {
-                text: 'MACD Indicator',
-                style: { color: '#2649B2', fontWeight: 'bold' }
-            },
-            xAxis: {
-                type: 'datetime',
-                crosshair: true
-            },
-            yAxis: {
-                title: { 
-                    text: 'MACD',
-                    style: { color: '#2649B2' }
-                },
-                plotLines: [{
-                    value: 0,
-                    color: '#6C8BE0',
-                    dashStyle: 'Dash',
-                    width: 2,
-                    label: {
-                        text: 'Zero Line',
-                        align: 'right',
-                        style: { color: '#6C8BE0' }
-                    }
-                }]
-            },
-            tooltip: {
-                borderRadius: 10,
-                crosshairs: true,
-                shared: true,
-                valueDecimals: 2
-            },
-            plotOptions: {
-                column: {
-                    borderRadius: '25%'
-                }
-            },
-            series: [{
-                type: 'line',
-                name: 'MACD Line',
-                data: macdData.macd,
-                color: '#2649B2',
-                lineWidth: 2,
-                marker: {
-                    enabled: false
-                }
-            }, {
-                type: 'line',
-                name: 'Signal Line',
-                data: macdData.signal,
-                color: '#9D5CE6',
-                lineWidth: 2,
-                marker: {
-                    enabled: false
-                }
-            }, {
-                type: 'column',
-                name: 'Histogram',
-                data: macdData.histogram,
-                color: '#6C8BE0',
-                pointWidth: 3
-            }],
-            credits: { enabled: false }
-        });
-    },
-    
-    calculateMACDArray(prices, shortPeriod = 12, longPeriod = 26, signalPeriod = 9) {
-        const closePrices = prices.map(p => p.close);
-        
-        const emaShort = this.calculateEMAArray(closePrices, shortPeriod);
-        const emaLong = this.calculateEMAArray(closePrices, longPeriod);
-        
-        const macdLine = [];
-        for (let i = longPeriod - 1; i < prices.length; i++) {
-            const macdValue = emaShort[i] - emaLong[i];
-            macdLine.push(macdValue);
-        }
-        
-        const signalLine = this.calculateEMAArray(macdLine, signalPeriod);
-        
-        const macdData = [];
-        const signalData = [];
-        const histogramData = [];
-        
-        const startIndex = longPeriod - 1 + signalPeriod - 1;
-        
-        for (let i = startIndex; i < prices.length; i++) {
-            const timestamp = prices[i].timestamp;
-            const macdIndex = i - (longPeriod - 1);
-            const signalIndex = macdIndex - (signalPeriod - 1);
-            
-            if (signalIndex >= 0 && signalIndex < signalLine.length) {
-                const macdVal = macdLine[macdIndex];
-                const signalVal = signalLine[signalIndex];
-                const histogramVal = macdVal - signalVal;
-                
-                macdData.push([timestamp, macdVal]);
-                signalData.push([timestamp, signalVal]);
-                histogramData.push([timestamp, histogramVal]);
-            }
-        }
-        
-        return {
-            macd: macdData,
-            signal: signalData,
-            histogram: histogramData
-        };
-    },
-    
-    calculateEMAArray(data, period) {
-        const k = 2 / (period + 1);
-        const emaArray = [];
-        
-        for (let i = 0; i < period - 1; i++) {
-            emaArray[i] = undefined;
-        }
-        
-        let sum = 0;
-        for (let i = 0; i < period; i++) {
-            sum += data[i];
-        }
-        emaArray[period - 1] = sum / period;
-        
-        for (let i = period; i < data.length; i++) {
-            const ema = data[i] * k + emaArray[i - 1] * (1 - k);
-            emaArray[i] = ema;
-        }
-        
-        return emaArray;
-    },
-    
-    calculateRSI(prices, period = 14) {
-        if (prices.length < period + 1) return null;
-        
-        let gains = 0;
-        let losses = 0;
-        
-        for (let i = 1; i <= period; i++) {
-            const change = prices[i].close - prices[i - 1].close;
-            if (change > 0) gains += change;
-            else losses += Math.abs(change);
-        }
-        
-        let avgGain = gains / period;
-        let avgLoss = losses / period;
-        
-        for (let i = period + 1; i < prices.length; i++) {
-            const change = prices[i].close - prices[i - 1].close;
-            if (change > 0) {
-                avgGain = ((avgGain * (period - 1)) + change) / period;
-                avgLoss = (avgLoss * (period - 1)) / period;
-            } else {
-                avgGain = (avgGain * (period - 1)) / period;
-                avgLoss = ((avgLoss * (period - 1)) + Math.abs(change)) / period;
-            }
-        }
-        
-        const rs = avgGain / avgLoss;
-        const rsi = 100 - (100 / (1 + rs));
-        
-        return rsi;
-    },
-    
-    displayTradingSignals() {
-        const prices = this.stockData.prices;
-        const currentPrice = prices[prices.length - 1].close;
-        const rsi = this.calculateRSI(prices);
-        
-        const sma20 = this.calculateSMA(prices, 20);
-        const sma50 = this.calculateSMA(prices, 50);
-        
-        const signals = [];
-        
-        let rsiSignal = 'neutral';
-        let rsiStatus = 'Neutral';
-        if (rsi < 30) {
-            rsiSignal = 'bullish';
-            rsiStatus = 'Oversold - Buy Signal';
-        } else if (rsi > 70) {
-            rsiSignal = 'bearish';
-            rsiStatus = 'Overbought - Sell Signal';
-        }
-        
-        signals.push({
-            title: 'RSI Signal',
-            value: rsi.toFixed(2),
-            status: rsiStatus,
-            type: rsiSignal
-        });
-        
-        let maSignal = 'neutral';
-        let maStatus = 'Neutral';
-        if (currentPrice > sma20 && sma20 > sma50) {
-            maSignal = 'bullish';
-            maStatus = 'Bullish Trend';
-        } else if (currentPrice < sma20 && sma20 < sma50) {
-            maSignal = 'bearish';
-            maStatus = 'Bearish Trend';
-        }
-        
-        signals.push({
-            title: 'Moving Average',
-            value: currentPrice > sma20 ? 'Above SMA' : 'Below SMA',
-            status: maStatus,
-            type: maSignal
-        });
-        
-        const priceChange = ((currentPrice - prices[0].close) / prices[0].close) * 100;
-        signals.push({
-            title: 'Overall Trend',
-            value: `${priceChange > 0 ? '+' : ''}${priceChange.toFixed(2)}%`,
-            status: priceChange > 5 ? 'Strong Uptrend' : priceChange < -5 ? 'Strong Downtrend' : 'Sideways',
-            type: priceChange > 0 ? 'bullish' : priceChange < 0 ? 'bearish' : 'neutral'
-        });
-        
-        const volatility = this.calculateVolatility(prices);
-        signals.push({
-            title: 'Volatility',
-            value: `${volatility.toFixed(2)}%`,
-            status: volatility > 3 ? 'High' : volatility > 1.5 ? 'Moderate' : 'Low',
-            type: 'neutral'
-        });
-        
-        const container = document.getElementById('tradingSignals');
-        container.innerHTML = signals.map(signal => `
-            <div class='signal-card ${signal.type}'>
-                <div class='signal-title'>${signal.title}</div>
-                <div class='signal-value'>${signal.value}</div>
-                <div class='signal-status'>${signal.status}</div>
-            </div>
-        `).join('');
-    },
-    
-    displayKeyStatistics() {
-        const prices = this.stockData.prices;
-        
-        const stats = [];
-        
-        const high52w = Math.max(...prices.map(p => p.high));
-        const low52w = Math.min(...prices.map(p => p.low));
-        
-        stats.push({ label: '52W High', value: this.formatCurrency(high52w) });
-        stats.push({ label: '52W Low', value: this.formatCurrency(low52w) });
-        
-        const avgVolume = prices.reduce((sum, p) => sum + p.volume, 0) / prices.length;
-        stats.push({ label: 'Avg Volume', value: this.formatVolume(avgVolume) });
-        
-        const volatility = this.calculateVolatility(prices);
-        stats.push({ label: 'Volatility', value: `${volatility.toFixed(2)}%` });
-        
-        stats.push({ label: 'Beta', value: 'N/A' });
-        stats.push({ label: 'Sharpe Ratio', value: 'N/A' });
-        
-        const container = document.getElementById('keyStats');
-        container.innerHTML = stats.map(stat => `
-            <div class='stat-box'>
-                <div class='label'>${stat.label}</div>
-                <div class='value'>${stat.value}</div>
-            </div>
-        `).join('');
-    },
-    
-    calculateSMA(prices, period) {
-        if (prices.length < period) return 0;
-        const sum = prices.slice(-period).reduce((acc, p) => acc + p.close, 0);
-        return sum / period;
-    },
-    
-    calculateVolatility(prices) {
-        const returns = [];
-        for (let i = 1; i < prices.length; i++) {
-            const ret = (prices[i].close - prices[i - 1].close) / prices[i - 1].close;
-            returns.push(ret);
-        }
-        
-        const mean = returns.reduce((sum, r) => sum + r, 0) / returns.length;
-        const variance = returns.reduce((sum, r) => sum + Math.pow(r - mean, 2), 0) / returns.length;
-        const stdDev = Math.sqrt(variance);
-        
-        return stdDev * Math.sqrt(252) * 100;
-    },
-    
-    // ============================================
-    // UTILITY FUNCTIONS
-    // ============================================
-    
-    formatCurrency(value) {
-        if (!value && value !== 0) return 'N/A';
-        return new Intl.NumberFormat('en-US', {
-            style: 'currency',
-            currency: 'USD',
-            minimumFractionDigits: 2,
-            maximumFractionDigits: 2
-        }).format(value);
-    },
-    
-    formatVolume(value) {
-        if (!value) return 'N/A';
-        if (value >= 1e9) return (value / 1e9).toFixed(2) + 'B';
-        if (value >= 1e6) return (value / 1e6).toFixed(2) + 'M';
-        if (value >= 1e3) return (value / 1e3).toFixed(2) + 'K';
-        return value.toFixed(0);
-    },
-    
-    formatLargeNumber(value) {
-        if (!value) return 'N/A';
-        if (value >= 1e12) return '$' + (value / 1e12).toFixed(2) + 'T';
-        if (value >= 1e9) return '$' + (value / 1e9).toFixed(2) + 'B';
-        if (value >= 1e6) return '$' + (value / 1e6).toFixed(2) + 'M';
-        return '$' + value.toFixed(0);
-    },
-    
-    showLoading(show) {
-        const loader = document.getElementById('loadingIndicator');
-        if (show) {
-            loader.classList.remove('hidden');
-        } else {
-            loader.classList.add('hidden');
-        }
-    },
-    
-    hideResults() {
-        document.getElementById('stockOverview').classList.add('hidden');
-        document.getElementById('resultsPanel').classList.add('hidden');
-    },
-    
-    updateLastUpdate() {
-        const now = new Date();
-        const formatted = now.toLocaleString('fr-FR', {
-            day: '2-digit',
-            month: '2-digit',
-            year: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit'
-        });
-        document.getElementById('lastUpdate').textContent = `Last update: ${formatted}`;
     }
+    
 });
 
-// Initialize when DOM is loaded
+// ========== INITIALIZE WHEN DOM IS LOADED ==========
+
 document.addEventListener('DOMContentLoaded', () => {
     MarketData.init();
 });
+
+// ========== FIN PARTIE 4/4 - FICHIER COMPLET ==========
