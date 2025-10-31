@@ -767,8 +767,8 @@
     </div>
     
     <!-- ============================================
-         CACHE MONITORING WIDGET
-         ============================================ -->
+        CACHE MONITORING WIDGET
+        ============================================ -->
     <div id='cacheWidget' class='cache-widget'>
         <button class='cache-toggle-btn' onclick='toggleCachePanel()' title='Cache Statistics'>
             <i class='fas fa-database'></i>
@@ -859,6 +859,7 @@
         if (isHidden) {
             panel.classList.remove('hidden');
             refreshCacheStats();
+            // Auto-refresh every 5 seconds when open
             cacheStatsInterval = setInterval(refreshCacheStats, 5000);
         } else {
             panel.classList.add('hidden');
@@ -871,6 +872,7 @@
         
         const stats = window.apiClient.getCacheStats();
         
+        // Update quota
         const quotaUsed = stats.requestsToday;
         const quotaTotal = 800;
         const quotaPercent = (quotaUsed / quotaTotal) * 100;
@@ -881,24 +883,29 @@
         document.getElementById('quotaRemaining').textContent = `(${quotaRemaining} left)`;
         document.getElementById('quotaBar').style.width = quotaPercent + '%';
         
+        // Color coding for quota bar
         const quotaBar = document.getElementById('quotaBar');
         if (quotaPercent < 50) {
-            quotaBar.style.background = '#10b981';
+            quotaBar.style.background = '#4CAF50'; // Green
         } else if (quotaPercent < 80) {
-            quotaBar.style.background = '#f59e0b';
+            quotaBar.style.background = '#FF9800'; // Orange
         } else {
-            quotaBar.style.background = '#ef4444';
+            quotaBar.style.background = '#F44336'; // Red
         }
         
+        // Update cache stats
         document.getElementById('cacheEntries').textContent = stats.entries;
         document.getElementById('cacheBadge').textContent = stats.entries;
         
+        // Calculate hit rate (approximation based on entries vs requests)
         const hitRate = stats.entries > 0 ? Math.min(100, Math.round((stats.entries / quotaUsed) * 100)) : 0;
         document.getElementById('cacheHitRate').textContent = hitRate + '%';
         
+        // Saved requests (rough estimate)
         const savedRequests = Math.max(0, stats.entries - quotaUsed);
         document.getElementById('cacheSavedRequests').textContent = savedRequests;
         
+        // Update cache details
         updateCacheDetails();
     }
     
@@ -916,7 +923,7 @@
         const entries = cacheKeys.map(key => {
             try {
                 const { timestamp } = JSON.parse(localStorage.getItem(key));
-                const age = Math.round((Date.now() - timestamp) / 1000);
+                const age = Math.round((Date.now() - timestamp) / 1000); // seconds
                 const endpoint = key.replace('api_cache:', '').split(':')[0];
                 return { key, endpoint, age };
             } catch {
@@ -926,7 +933,7 @@
           .sort((a, b) => a.age - b.age);
         
         let html = '<div class="cache-entries-list">';
-        entries.slice(0, 10).forEach(entry => {
+        entries.slice(0, 10).forEach(entry => { // Show only first 10
             const ageStr = entry.age < 60 ? `${entry.age}s` : `${Math.round(entry.age/60)}m`;
             html += `
                 <div class="cache-entry-item">
@@ -966,6 +973,7 @@
         }
     }
     
+    // Initial badge update
     document.addEventListener('DOMContentLoaded', () => {
         setTimeout(() => {
             if (window.apiClient) {
