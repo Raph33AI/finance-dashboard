@@ -1,29 +1,83 @@
 /* ==============================================
-   DASHBOARD.JS - Logique du dashboard financier
+   DASHBOARD.JS - Modern Financial Dashboard 2024
+   Version optimisée avec ES6+ et meilleures pratiques
    ============================================== */
 
-// Module Dashboard (pattern IIFE pour éviter la pollution du scope global)
+/**
+ * Module Dashboard - Pattern IIFE pour encapsulation
+ * Gestion complète d'un tableau de bord financier personnel
+ */
 const Dashboard = (function() {
     'use strict';
     
-    // ========== VARIABLES PRIVÉES ==========
+    // ========================================
+    // VARIABLES PRIVÉES
+    // ========================================
+    
     let allData = [];
-    let chart1Instance, chart4Instance, chart5Instance, chart6Instance;
+    let chartInstances = {
+        chart1: null,
+        chart2: null,
+        chart3: null,
+        chart4: null,
+        chart5: null,
+        chart6: null,
+        chart7: null
+    };
     let currentMonthIndex = 0;
-    let monthlyEstYield = 8; // % annual
-    let inflationRate = 2.5; // % annual
+    let monthlyEstYield = 8; // % annuel
+    let inflationRate = 2.5; // % annuel
     let showInflation = false;
     
-    // ========== INITIALISATION ==========
+    // Configuration par défaut
+    const DEFAULT_CONFIG = {
+        startMonthsCount: 300,
+        defaultSalary: 3000,
+        defaultMisc: 100,
+        defaultRent: 800,
+        defaultFood: 300,
+        defaultFixCosts: 150,
+        defaultOthers: 200,
+        defaultLoan: 300,
+        defaultInvestment: 500
+    };
+    
+    // ========================================
+    // INITIALISATION
+    // ========================================
     
     /**
      * Initialise le dashboard au chargement de la page
      */
     function init() {
-        initData();
-        renderTable();
-        updateAllCharts();
-        updateLastUpdateTime();
+        console.log('🚀 Initialisation du Dashboard...');
+        
+        try {
+            initData();
+            renderTable();
+            updateAllCharts();
+            updateLastUpdateTime();
+            initEventListeners();
+            
+            console.log('✅ Dashboard initialisé avec succès');
+        } catch (error) {
+            console.error('❌ Erreur lors de l\'initialisation:', error);
+            showNotification('Erreur lors de l\'initialisation du dashboard', 'error');
+        }
+    }
+    
+    /**
+     * Initialise les event listeners supplémentaires
+     */
+    function initEventListeners() {
+        // Écoute du redimensionnement pour adapter les graphiques
+        let resizeTimer;
+        window.addEventListener('resize', () => {
+            clearTimeout(resizeTimer);
+            resizeTimer = setTimeout(() => {
+                updateAllCharts();
+            }, 250);
+        });
     }
     
     /**
@@ -31,21 +85,27 @@ const Dashboard = (function() {
      */
     function updateLastUpdateTime() {
         const now = new Date();
-        const formatted = now.toLocaleDateString('en-US', { 
+        const formatted = now.toLocaleDateString('fr-FR', { 
+            day: '2-digit',
             month: '2-digit', 
-            day: '2-digit', 
             year: 'numeric',
             hour: '2-digit',
             minute: '2-digit'
         });
         const elem = document.getElementById('lastUpdate');
-        if (elem) elem.textContent = 'Last update: ' + formatted;
+        if (elem) elem.textContent = formatted;
     }
     
-    // ========== GESTION DES DONNÉES ==========
+    // ========================================
+    // GESTION DES DONNÉES
+    // ========================================
     
     /**
      * Génère un tableau de mois
+     * @param {number} startYear - Année de départ
+     * @param {number} startMonth - Mois de départ (1-12)
+     * @param {number} count - Nombre de mois à générer
+     * @returns {Array<string>} Tableau de mois au format "MM/YYYY"
      */
     function generateMonths(startYear, startMonth, count) {
         const months = [];
@@ -64,7 +124,8 @@ const Dashboard = (function() {
     }
     
     /**
-     * Trouve l'index du mois actuel
+     * Trouve l'index du mois actuel dans les données
+     * @returns {number} Index du mois actuel
      */
     function findCurrentMonthIndex() {
         const today = new Date();
@@ -81,29 +142,36 @@ const Dashboard = (function() {
     }
     
     /**
-     * Initialise les données (depuis localStorage ou valeurs par défaut)
+     * Initialise les données depuis localStorage ou valeurs par défaut
      */
     function initData() {
         const saved = localStorage.getItem('financialDataDynamic');
         const savedYield = localStorage.getItem('monthlyEstYield');
         const savedInflation = localStorage.getItem('inflationRate');
         
+        // Restauration des paramètres
         if (savedYield) {
             monthlyEstYield = parseFloat(savedYield);
-            document.getElementById('monthlyEstYield').value = monthlyEstYield;
+            const yieldInput = document.getElementById('monthlyEstYield');
+            if (yieldInput) yieldInput.value = monthlyEstYield;
             updateEstYieldDisplay();
         }
         
         if (savedInflation) {
             inflationRate = parseFloat(savedInflation);
-            document.getElementById('inflationRate').value = inflationRate;
+            const inflationInput = document.getElementById('inflationRate');
+            if (inflationInput) inflationInput.value = inflationRate;
         }
         
+        // Restauration des données
         if (saved) {
             try {
                 allData = JSON.parse(saved);
-                if (allData.length === 0) throw 'Empty data';
+                if (!Array.isArray(allData) || allData.length === 0) {
+                    throw new Error('Données invalides');
+                }
             } catch(e) {
+                console.warn('⚠️ Données sauvegardées invalides, création de nouvelles données');
                 createDefaultData();
             }
         } else {
@@ -122,25 +190,27 @@ const Dashboard = (function() {
         const today = new Date();
         const startYear = today.getFullYear();
         const startMonth = today.getMonth() + 1;
-        const months = generateMonths(startYear, startMonth, 300);
+        const months = generateMonths(startYear, startMonth, DEFAULT_CONFIG.startMonthsCount);
         
         allData = months.map(month => ({
             month: month,
-            salary: 3000, 
-            misc: 100,
-            rent: 800, 
-            food: 300, 
-            fixCosts: 150, 
-            others: 200, 
-            loan: 300,
-            investment: 500,
+            salary: DEFAULT_CONFIG.defaultSalary, 
+            misc: DEFAULT_CONFIG.defaultMisc,
+            rent: DEFAULT_CONFIG.defaultRent, 
+            food: DEFAULT_CONFIG.defaultFood, 
+            fixCosts: DEFAULT_CONFIG.defaultFixCosts, 
+            others: DEFAULT_CONFIG.defaultOthers, 
+            loan: DEFAULT_CONFIG.defaultLoan,
+            investment: DEFAULT_CONFIG.defaultInvestment,
             monthlyGain: 0,
             cumulatedGains: 0, 
             peeLoreal: 0
         }));
     }
     
-    // ========== CALCULS ==========
+    // ========================================
+    // CALCULS FINANCIERS
+    // ========================================
     
     /**
      * Calcule tous les indicateurs financiers
@@ -150,29 +220,38 @@ const Dashboard = (function() {
         let cumulatedInvestment = 0;
         
         allData.forEach(row => {
+            // Calcul des revenus totaux
             row.totalIncome = (row.salary || 0) + (row.misc || 0);
+            
+            // Calcul des dépenses totales
             row.totalExpenses = (row.rent || 0) + (row.food || 0) + 
                                 (row.fixCosts || 0) + (row.others || 0) + 
                                 (row.loan || 0);
+            
+            // Calcul de l'épargne mensuelle
             row.savings = row.totalIncome - row.totalExpenses;
             
+            // Calcul de l'épargne cumulée
             cumulatedSavings += row.savings;
             row.cumulatedSavings = cumulatedSavings;
             
+            // Calcul de l'investissement cumulé
             cumulatedInvestment += (row.investment || 0);
             row.cumulatedInvestment = cumulatedInvestment;
             
+            // Calcul du portefeuille total
             row.totalPortfolio = cumulatedInvestment + 
                                 (row.cumulatedGains || 0) + 
                                 (row.peeLoreal || 0);
             
+            // Calcul du ROI
             row.roi = cumulatedInvestment > 0 ? 
                       ((row.cumulatedGains || 0) / cumulatedInvestment * 100) : 0;
         });
     }
     
     /**
-     * Recalcule les gains d'investissement
+     * Recalcule les gains d'investissement avec intérêts composés
      */
     function recalculateGains() {
         const monthlyYieldRate = monthlyEstYield / 12 / 100;
@@ -183,8 +262,10 @@ const Dashboard = (function() {
             let monthlyGain = 0;
             
             if (index === 0) {
+                // Premier mois : gain sur la moitié de l'investissement
                 monthlyGain = monthlyYieldRate * monthlyInvestment / 2;
             } else {
+                // Mois suivants : gain sur le capital précédent + nouvel investissement
                 const previousRow = allData[index - 1];
                 const previousCapital = (previousRow.cumulatedInvestment || 0) + 
                                        (previousRow.cumulatedGains || 0);
@@ -200,22 +281,29 @@ const Dashboard = (function() {
         renderTable();
         autoSave();
         updateAllCharts();
+        
+        showNotification('Gains recalculés avec succès', 'success');
     }
     
-    // ========== GESTION DES PARAMÈTRES ==========
+    // ========================================
+    // GESTION DES PARAMÈTRES
+    // ========================================
     
     /**
      * Met à jour le rendement mensuel estimé
      */
     function updateEstYield() {
-        monthlyEstYield = parseFloat(document.getElementById('monthlyEstYield').value) || 0;
+        const input = document.getElementById('monthlyEstYield');
+        if (!input) return;
+        
+        monthlyEstYield = parseFloat(input.value) || 0;
         updateEstYieldDisplay();
         localStorage.setItem('monthlyEstYield', monthlyEstYield);
         recalculateGains();
     }
     
     /**
-     * Affiche le rendement mensuel
+     * Affiche le rendement mensuel calculé
      */
     function updateEstYieldDisplay() {
         const monthlyRate = (monthlyEstYield / 12).toFixed(2);
@@ -227,9 +315,17 @@ const Dashboard = (function() {
      * Met à jour le taux d'inflation
      */
     function updateInflationRate() {
-        inflationRate = parseFloat(document.getElementById('inflationRate').value) || 2.5;
+        const input = document.getElementById('inflationRate');
+        if (!input) return;
+        
+        inflationRate = parseFloat(input.value) || 2.5;
         localStorage.setItem('inflationRate', inflationRate);
-        if (showInflation) updateAllCharts();
+        
+        if (showInflation) {
+            updateAllCharts();
+        }
+        
+        showNotification('Taux d\'inflation mis à jour', 'info');
     }
     
     /**
@@ -241,35 +337,56 @@ const Dashboard = (function() {
         const status = document.getElementById('inflationStatus');
         
         if (showInflation) {
-            btn.textContent = 'Hide Inflation-Adjusted Charts';
-            btn.style.background = 'linear-gradient(135deg, #6C3483 0%, #9D5CE6 100%)';
-            status.textContent = 'ON';
-            status.style.color = '#4A74F3';
+            if (btn) {
+                btn.textContent = 'Masquer l\'ajustement inflation';
+                btn.classList.add('active');
+            }
+            if (status) {
+                status.textContent = 'ACTIVÉ';
+                status.style.color = 'var(--success-color)';
+            }
         } else {
-            btn.textContent = 'Show Inflation-Adjusted Charts';
-            btn.style.background = 'linear-gradient(135deg, #4A74F3 0%, #6C8BE0 100%)';
-            status.textContent = 'OFF';
-            status.style.color = '#9D5CE6';
+            if (btn) {
+                btn.textContent = 'Afficher l\'ajustement inflation';
+                btn.classList.remove('active');
+            }
+            if (status) {
+                status.textContent = 'DÉSACTIVÉ';
+                status.style.color = 'var(--text-tertiary)';
+            }
         }
         
         updateAllCharts();
+        showNotification(
+            showInflation ? 'Ajustement inflation activé' : 'Ajustement inflation désactivé', 
+            'info'
+        );
     }
     
     /**
      * Ajuste une valeur pour l'inflation
+     * @param {number} value - Valeur nominale
+     * @param {number} monthIndex - Index du mois
+     * @returns {number} Valeur réelle ajustée
      */
     function adjustForInflation(value, monthIndex) {
         const monthlyInflation = Math.pow(1 + inflationRate / 100, 1/12) - 1;
         return value / Math.pow(1 + monthlyInflation, monthIndex);
     }
     
-    // ========== GESTION DE LA TIMELINE ==========
+    // ========================================
+    // GESTION DE LA TIMELINE
+    // ========================================
     
     /**
-     * Ajoute des mois avant
+     * Ajoute des mois avant le premier mois
+     * @param {number} count - Nombre de mois à ajouter
      */
     function addMonthsBefore(count) {
-        if (allData.length === 0) return;
+        if (allData.length === 0) {
+            createDefaultData();
+            return;
+        }
         
         const firstMonth = allData[0].month;
         const [m, y] = firstMonth.split('/').map(Number);
@@ -284,9 +401,14 @@ const Dashboard = (function() {
         const newMonths = generateMonths(year, month, count);
         const newRows = newMonths.map(month => ({
             month: month,
-            salary: 3000, misc: 100,
-            rent: 800, food: 300, fixCosts: 150, others: 200, loan: 300,
-            investment: 500,
+            salary: DEFAULT_CONFIG.defaultSalary,
+            misc: DEFAULT_CONFIG.defaultMisc,
+            rent: DEFAULT_CONFIG.defaultRent,
+            food: DEFAULT_CONFIG.defaultFood,
+            fixCosts: DEFAULT_CONFIG.defaultFixCosts,
+            others: DEFAULT_CONFIG.defaultOthers,
+            loan: DEFAULT_CONFIG.defaultLoan,
+            investment: DEFAULT_CONFIG.defaultInvestment,
             monthlyGain: 0,
             cumulatedGains: 0, 
             peeLoreal: 0
@@ -297,13 +419,19 @@ const Dashboard = (function() {
         currentMonthIndex = findCurrentMonthIndex();
         updateTotalMonthsDisplay();
         updateAllCharts();
+        
+        showNotification(`${count} mois ajoutés avant`, 'success');
     }
     
     /**
-     * Ajoute des mois après
+     * Ajoute des mois après le dernier mois
+     * @param {number} count - Nombre de mois à ajouter
      */
     function addMonthsAfter(count) {
-        if (allData.length === 0) return;
+        if (allData.length === 0) {
+            createDefaultData();
+            return;
+        }
         
         const lastMonth = allData[allData.length - 1].month;
         const [m, y] = lastMonth.split('/').map(Number);
@@ -318,9 +446,14 @@ const Dashboard = (function() {
         const newMonths = generateMonths(year, month, count);
         const newRows = newMonths.map(month => ({
             month: month,
-            salary: 3000, misc: 100,
-            rent: 800, food: 300, fixCosts: 150, others: 200, loan: 300,
-            investment: 500,
+            salary: DEFAULT_CONFIG.defaultSalary,
+            misc: DEFAULT_CONFIG.defaultMisc,
+            rent: DEFAULT_CONFIG.defaultRent,
+            food: DEFAULT_CONFIG.defaultFood,
+            fixCosts: DEFAULT_CONFIG.defaultFixCosts,
+            others: DEFAULT_CONFIG.defaultOthers,
+            loan: DEFAULT_CONFIG.defaultLoan,
+            investment: DEFAULT_CONFIG.defaultInvestment,
             monthlyGain: 0,
             cumulatedGains: 0, 
             peeLoreal: 0
@@ -330,23 +463,27 @@ const Dashboard = (function() {
         recalculateGains();
         updateTotalMonthsDisplay();
         updateAllCharts();
+        
+        showNotification(`${count} mois ajoutés après`, 'success');
     }
     
     /**
-     * Supprime une ligne
+     * Supprime une ligne de données
+     * @param {number} index - Index de la ligne à supprimer
      */
     function deleteRow(index) {
         if (allData.length <= 12) {
-            alert('Cannot delete! Minimum 12 months required.');
+            showNotification('Impossible de supprimer ! Minimum 12 mois requis.', 'error');
             return;
         }
         
-        if (confirm('Delete month ' + allData[index].month + '?')) {
+        if (confirm(`Supprimer le mois ${allData[index].month} ?`)) {
             allData.splice(index, 1);
             recalculateGains();
             currentMonthIndex = findCurrentMonthIndex();
             updateTotalMonthsDisplay();
             updateAllCharts();
+            showNotification('Mois supprimé', 'success');
         }
     }
     
@@ -358,89 +495,124 @@ const Dashboard = (function() {
         if (elem) elem.textContent = allData.length;
     }
     
-    // ========== SAUVEGARDE/CHARGEMENT ==========
+    // ========================================
+    // SAUVEGARDE ET EXPORT
+    // ========================================
     
     /**
-     * Sauvegarde manuelle
+     * Sauvegarde manuelle des données
      */
     function saveData() {
-        calculateAll();
-        localStorage.setItem('financialDataDynamic', JSON.stringify(allData));
-        localStorage.setItem('monthlyEstYield', monthlyEstYield);
-        localStorage.setItem('inflationRate', inflationRate);
-        window.FinanceDashboard.showNotification('Data saved successfully!', 'success');
+        try {
+            calculateAll();
+            localStorage.setItem('financialDataDynamic', JSON.stringify(allData));
+            localStorage.setItem('monthlyEstYield', monthlyEstYield);
+            localStorage.setItem('inflationRate', inflationRate);
+            updateLastUpdateTime();
+            showNotification('Données sauvegardées avec succès !', 'success');
+        } catch (error) {
+            console.error('Erreur lors de la sauvegarde:', error);
+            showNotification('Erreur lors de la sauvegarde', 'error');
+        }
     }
     
     /**
-     * Sauvegarde automatique
+     * Sauvegarde automatique (sans notification)
      */
     function autoSave() {
-        calculateAll();
-        localStorage.setItem('financialDataDynamic', JSON.stringify(allData));
-        localStorage.setItem('monthlyEstYield', monthlyEstYield);
-        localStorage.setItem('inflationRate', inflationRate);
+        try {
+            calculateAll();
+            localStorage.setItem('financialDataDynamic', JSON.stringify(allData));
+            localStorage.setItem('monthlyEstYield', monthlyEstYield);
+            localStorage.setItem('inflationRate', inflationRate);
+            updateLastUpdateTime();
+        } catch (error) {
+            console.error('Erreur lors de la sauvegarde automatique:', error);
+        }
     }
     
     /**
-     * Exporte en JSON
+     * Exporte les données en JSON
      */
     function exportToJSON() {
-        const exportData = {
-            monthlyEstYield: monthlyEstYield,
-            inflationRate: inflationRate,
-            data: allData
-        };
-        const json = JSON.stringify(exportData, null, 2);
-        const blob = new Blob([json], { type: 'application/json' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = 'financial_data_' + new Date().toISOString().split('T')[0] + '.json';
-        a.click();
-        URL.revokeObjectURL(url);
-        window.FinanceDashboard.showNotification('Data exported successfully!', 'success');
+        try {
+            const exportData = {
+                version: '2.0',
+                exportDate: new Date().toISOString(),
+                monthlyEstYield: monthlyEstYield,
+                inflationRate: inflationRate,
+                data: allData
+            };
+            
+            const json = JSON.stringify(exportData, null, 2);
+            const blob = new Blob([json], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `financial_dashboard_${new Date().toISOString().split('T')[0]}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+            
+            showNotification('Données exportées avec succès !', 'success');
+        } catch (error) {
+            console.error('Erreur lors de l\'export:', error);
+            showNotification('Erreur lors de l\'export', 'error');
+        }
     }
     
     /**
-     * Importe depuis JSON
+     * Importe des données depuis un fichier JSON
      */
     function importFromJSON() {
         const input = document.createElement('input');
         input.type = 'file';
         input.accept = 'application/json';
+        
         input.onchange = e => {
             const file = e.target.files[0];
+            if (!file) return;
+            
             const reader = new FileReader();
             reader.onload = event => {
                 try {
                     const imported = JSON.parse(event.target.result);
-                    if (imported.data) {
-                        allData = imported.data;
-                        if (imported.monthlyEstYield) {
-                            monthlyEstYield = imported.monthlyEstYield;
-                            document.getElementById('monthlyEstYield').value = monthlyEstYield;
-                            updateEstYieldDisplay();
-                        }
-                        if (imported.inflationRate) {
-                            inflationRate = imported.inflationRate;
-                            document.getElementById('inflationRate').value = inflationRate;
-                        }
-                    } else {
-                        allData = imported;
+                    
+                    // Validation des données
+                    if (!imported.data || !Array.isArray(imported.data)) {
+                        throw new Error('Format de données invalide');
                     }
+                    
+                    allData = imported.data;
+                    
+                    if (imported.monthlyEstYield) {
+                        monthlyEstYield = imported.monthlyEstYield;
+                        const yieldInput = document.getElementById('monthlyEstYield');
+                        if (yieldInput) yieldInput.value = monthlyEstYield;
+                        updateEstYieldDisplay();
+                    }
+                    
+                    if (imported.inflationRate) {
+                        inflationRate = imported.inflationRate;
+                        const inflationInput = document.getElementById('inflationRate');
+                        if (inflationInput) inflationInput.value = inflationRate;
+                    }
+                    
                     calculateAll();
                     currentMonthIndex = findCurrentMonthIndex();
                     renderTable();
                     saveData();
                     updateTotalMonthsDisplay();
                     updateAllCharts();
-                    window.FinanceDashboard.showNotification('Data imported successfully!', 'success');
+                    
+                    showNotification('Données importées avec succès !', 'success');
                 } catch (err) {
-                    window.FinanceDashboard.showNotification('Import error: ' + err.message, 'error');
+                    console.error('Erreur lors de l\'import:', err);
+                    showNotification('Erreur lors de l\'import: ' + err.message, 'error');
                 }
             };
             reader.readAsText(file);
         };
+        
         input.click();
     }
     
@@ -448,24 +620,43 @@ const Dashboard = (function() {
      * Réinitialise aux valeurs par défaut
      */
     function resetToDefault() {
-        if (confirm('Reset all data to default 300 months?')) {
+        if (confirm('Réinitialiser toutes les données aux valeurs par défaut (300 mois) ?')) {
             localStorage.removeItem('financialDataDynamic');
             localStorage.removeItem('monthlyEstYield');
             localStorage.removeItem('inflationRate');
+            
             monthlyEstYield = 8;
             inflationRate = 2.5;
-            document.getElementById('monthlyEstYield').value = 8;
-            document.getElementById('inflationRate').value = 2.5;
-            updateEstYieldDisplay();
             showInflation = false;
+            
+            const yieldInput = document.getElementById('monthlyEstYield');
+            const inflationInput = document.getElementById('inflationRate');
+            const inflationBtn = document.getElementById('btnToggleInflation');
+            const inflationStatus = document.getElementById('inflationStatus');
+            
+            if (yieldInput) yieldInput.value = 8;
+            if (inflationInput) inflationInput.value = 2.5;
+            if (inflationBtn) {
+                inflationBtn.textContent = 'Afficher l\'ajustement inflation';
+                inflationBtn.classList.remove('active');
+            }
+            if (inflationStatus) {
+                inflationStatus.textContent = 'DÉSACTIVÉ';
+                inflationStatus.style.color = 'var(--text-tertiary)';
+            }
+            
+            updateEstYieldDisplay();
             initData();
             renderTable();
             updateAllCharts();
-            window.FinanceDashboard.showNotification('Data reset to default!', 'info');
+            
+            showNotification('Données réinitialisées !', 'info');
         }
     }
     
-    // ========== AFFICHAGE DU TABLEAU ==========
+    // ========================================
+    // AFFICHAGE DU TABLEAU
+    // ========================================
     
     /**
      * Affiche le tableau de données
@@ -478,33 +669,88 @@ const Dashboard = (function() {
         
         allData.forEach((row, index) => {
             const tr = document.createElement('tr');
+            
+            // Coloration de la ligne du mois actuel
+            if (index === currentMonthIndex) {
+                tr.classList.add('current-month');
+                tr.style.background = 'rgba(37, 99, 235, 0.05)';
+            }
+            
             tr.innerHTML = `
                 <td>${row.month}</td>
-                <td><input type='number' step='0.01' value='${row.salary}' onchange='Dashboard.updateValue(${index}, "salary", this.value)'></td>
-                <td><input type='number' step='0.01' value='${row.misc}' onchange='Dashboard.updateValue(${index}, "misc", this.value)'></td>
-                <td class='calculated'>${row.totalIncome.toFixed(0)}</td>
-                <td><input type='number' step='0.01' value='${row.rent}' onchange='Dashboard.updateValue(${index}, "rent", this.value)'></td>
-                <td><input type='number' step='0.01' value='${row.food}' onchange='Dashboard.updateValue(${index}, "food", this.value)'></td>
-                <td><input type='number' step='0.01' value='${row.fixCosts}' onchange='Dashboard.updateValue(${index}, "fixCosts", this.value)'></td>
-                <td><input type='number' step='0.01' value='${row.others}' onchange='Dashboard.updateValue(${index}, "others", this.value)'></td>
-                <td><input type='number' step='0.01' value='${row.loan}' onchange='Dashboard.updateValue(${index}, "loan", this.value)'></td>
-                <td class='calculated'>${row.totalExpenses.toFixed(0)}</td>
-                <td class='calculated' style='color: ${row.savings >= 0 ? "#2649B2" : "#C39BD3"};'>${row.savings.toFixed(0)}</td>
-                <td><input type='number' step='0.01' value='${row.investment}' onchange='Dashboard.updateValue(${index}, "investment", this.value)'></td>
-                <td class='calculated' style='background: #D4D9F0;'>${row.monthlyGain.toFixed(2)}</td>
-                <td class='calculated'>${row.cumulatedGains.toFixed(0)}</td>
-                <td><input type='number' step='0.01' value='${row.peeLoreal}' onchange='Dashboard.updateValue(${index}, "peeLoreal", this.value)'></td>
-                <td class='calculated'>${row.cumulatedInvestment.toFixed(0)}</td>
-                <td class='calculated'>${row.totalPortfolio.toFixed(0)}</td>
-                <td class='calculated'>${row.roi.toFixed(2)}%</td>
-                <td><button class='btn-delete' onclick='Dashboard.deleteRow(${index})'>X</button></td>
+                <td><input type='number' step='0.01' value='${row.salary}' 
+                    onchange='Dashboard.updateValue(${index}, "salary", this.value)'
+                    aria-label='Salaire ${row.month}'></td>
+                <td><input type='number' step='0.01' value='${row.misc}' 
+                    onchange='Dashboard.updateValue(${index}, "misc", this.value)'
+                    aria-label='Revenus divers ${row.month}'></td>
+                <td class='calculated'>${formatCurrency(row.totalIncome)}</td>
+                <td><input type='number' step='0.01' value='${row.rent}' 
+                    onchange='Dashboard.updateValue(${index}, "rent", this.value)'
+                    aria-label='Loyer ${row.month}'></td>
+                <td><input type='number' step='0.01' value='${row.food}' 
+                    onchange='Dashboard.updateValue(${index}, "food", this.value)'
+                    aria-label='Alimentation ${row.month}'></td>
+                <td><input type='number' step='0.01' value='${row.fixCosts}' 
+                    onchange='Dashboard.updateValue(${index}, "fixCosts", this.value)'
+                    aria-label='Coûts fixes ${row.month}'></td>
+                <td><input type='number' step='0.01' value='${row.others}' 
+                    onchange='Dashboard.updateValue(${index}, "others", this.value)'
+                    aria-label='Autres dépenses ${row.month}'></td>
+                <td><input type='number' step='0.01' value='${row.loan}' 
+                    onchange='Dashboard.updateValue(${index}, "loan", this.value)'
+                    aria-label='Prêts ${row.month}'></td>
+                <td class='calculated'>${formatCurrency(row.totalExpenses)}</td>
+                <td class='calculated' style='color: ${row.savings >= 0 ? "var(--success-color)" : "var(--danger-color)"};'>
+                    ${formatCurrency(row.savings)}
+                </td>
+                <td><input type='number' step='0.01' value='${row.investment}' 
+                    onchange='Dashboard.updateValue(${index}, "investment", this.value)'
+                    aria-label='Investissement ${row.month}'></td>
+                <td class='calculated' style='background: var(--background-tertiary);'>
+                    ${formatCurrency(row.monthlyGain, 2)}
+                </td>
+                <td class='calculated'>${formatCurrency(row.cumulatedGains)}</td>
+                <td><input type='number' step='0.01' value='${row.peeLoreal}' 
+                    onchange='Dashboard.updateValue(${index}, "peeLoreal", this.value)'
+                    aria-label='PEE ${row.month}'></td>
+                <td class='calculated'>${formatCurrency(row.cumulatedInvestment)}</td>
+                <td class='calculated' style='font-weight: 700; color: var(--primary-color);'>
+                    ${formatCurrency(row.totalPortfolio)}
+                </td>
+                <td class='calculated' style='color: ${row.roi >= 0 ? "var(--success-color)" : "var(--danger-color)"};'>
+                    ${row.roi.toFixed(2)}%
+                </td>
+                <td>
+                    <button class='btn-delete' 
+                        onclick='Dashboard.deleteRow(${index})'
+                        aria-label='Supprimer ${row.month}'>
+                        <i class='fas fa-trash'></i>
+                    </button>
+                </td>
             `;
             tbody.appendChild(tr);
         });
     }
     
     /**
+     * Formate un nombre en devise
+     * @param {number} value - Valeur à formater
+     * @param {number} decimals - Nombre de décimales
+     * @returns {string} Valeur formatée
+     */
+    function formatCurrency(value, decimals = 0) {
+        return value.toLocaleString('fr-FR', {
+            minimumFractionDigits: decimals,
+            maximumFractionDigits: decimals
+        });
+    }
+    
+    /**
      * Met à jour une valeur du tableau
+     * @param {number} index - Index de la ligne
+     * @param {string} field - Nom du champ
+     * @param {string|number} value - Nouvelle valeur
      */
     function updateValue(index, field, value) {
         allData[index][field] = parseFloat(value) || 0;
@@ -518,19 +764,27 @@ const Dashboard = (function() {
         }
     }
     
-    // ========== ÉDITION EN MASSE ==========
+    // ========================================
+    // ÉDITION EN MASSE
+    // ========================================
     
     /**
      * Applique une modification en masse
      */
     function applyBulkEdit() {
-        const category = document.getElementById('bulkCategory').value;
-        const startMonth = document.getElementById('bulkStartMonth').value;
-        const endMonth = document.getElementById('bulkEndMonth').value;
-        const value = parseFloat(document.getElementById('bulkValue').value);
+        const category = document.getElementById('bulkCategory')?.value;
+        const startMonth = document.getElementById('bulkStartMonth')?.value;
+        const endMonth = document.getElementById('bulkEndMonth')?.value;
+        const valueInput = document.getElementById('bulkValue')?.value;
         
-        if (!startMonth || !endMonth || isNaN(value)) {
-            alert('Please fill all fields!'); 
+        if (!category || !startMonth || !endMonth || !valueInput) {
+            showNotification('Veuillez remplir tous les champs !', 'error');
+            return;
+        }
+        
+        const value = parseFloat(valueInput);
+        if (isNaN(value)) {
+            showNotification('Valeur invalide !', 'error');
             return;
         }
         
@@ -547,6 +801,11 @@ const Dashboard = (function() {
         };
         
         const field = fieldMap[category];
+        if (!field) {
+            showNotification('Catégorie invalide !', 'error');
+            return;
+        }
+        
         const [startY, startM] = startMonth.split('-').map(Number);
         const [endY, endM] = endMonth.split('-').map(Number);
         
@@ -571,41 +830,50 @@ const Dashboard = (function() {
             autoSave();
         }
         
-        window.FinanceDashboard.showNotification(
-            'Applied ' + value + ' EUR to ' + count + ' months for ' + category, 
+        showNotification(
+            `${value} EUR appliqué à ${count} mois pour ${category}`, 
             'success'
         );
     }
     
-    // ========== STATISTIQUES ==========
+    // ========================================
+    // STATISTIQUES
+    // ========================================
     
     /**
-     * Met à jour les statistiques
+     * Met à jour les cartes de statistiques
      */
     function updateStats() {
+        if (allData.length === 0) return;
+        
         const currentRow = allData[currentMonthIndex];
         const monthName = currentRow.month;
         
         const html = `
             <div class='stat-card'>
-                <h3>Monthly Income (${monthName})</h3>
-                <div class='value'>${currentRow.totalIncome.toLocaleString()} EUR</div>
+                <h3><i class='fas fa-coins'></i> Revenus Mensuels</h3>
+                <div class='value'>${formatCurrency(currentRow.totalIncome)} €</div>
+                <div class='stat-subtitle'>${monthName}</div>
             </div>
             <div class='stat-card'>
-                <h3>Monthly Expenses (${monthName})</h3>
-                <div class='value'>${currentRow.totalExpenses.toLocaleString()} EUR</div>
+                <h3><i class='fas fa-shopping-cart'></i> Dépenses Mensuelles</h3>
+                <div class='value'>${formatCurrency(currentRow.totalExpenses)} €</div>
+                <div class='stat-subtitle'>${monthName}</div>
+            </div>
+            <div class='stat-card ${currentRow.cumulatedSavings > 0 ? "positive" : "negative"}'>
+                <h3><i class='fas fa-piggy-bank'></i> Épargne Totale</h3>
+                <div class='value'>${formatCurrency(currentRow.cumulatedSavings)} €</div>
+                <div class='stat-subtitle'>${monthName}</div>
             </div>
             <div class='stat-card positive'>
-                <h3>Total Savings (${monthName})</h3>
-                <div class='value'>${currentRow.cumulatedSavings.toLocaleString()} EUR</div>
+                <h3><i class='fas fa-chart-line'></i> Portefeuille Total</h3>
+                <div class='value'>${formatCurrency(currentRow.totalPortfolio)} €</div>
+                <div class='stat-subtitle'>${monthName}</div>
             </div>
-            <div class='stat-card positive'>
-                <h3>Total Portfolio (${monthName})</h3>
-                <div class='value'>${currentRow.totalPortfolio.toLocaleString()} EUR</div>
-            </div>
-            <div class='stat-card ${currentRow.roi > 0 ? 'positive' : 'negative'}'>
-                <h3>ROI (${monthName})</h3>
+            <div class='stat-card ${currentRow.roi > 0 ? 'positive' : currentRow.roi < 0 ? 'negative' : 'neutral'}'>
+                <h3><i class='fas fa-percentage'></i> ROI</h3>
                 <div class='value'>${currentRow.roi.toFixed(1)}%</div>
+                <div class='stat-subtitle'>${monthName}</div>
             </div>
         `;
         
@@ -613,40 +881,45 @@ const Dashboard = (function() {
         if (container) container.innerHTML = html;
     }
     
-    // ========== GRAPHIQUES ==========
-    // (Je vais créer les fonctions de graphiques dans le prochain message car c'est très long)
-    
-// ========== GRAPHIQUES (CHARTS) ==========
+    // ========================================
+    // GRAPHIQUES (Suite dans le prochain message...)
+    // ========================================
     
     /**
      * Initialise les filtres de mois pour les graphiques
      */
     function initMonthFilters() {
-        const incomeFilter = document.getElementById('incomeMonthFilter');
-        const expenseFilter = document.getElementById('expenseMonthFilter');
-        const budgetFilter = document.getElementById('budgetMonthFilter');
+        const filters = [
+            'incomeMonthFilter',
+            'expenseMonthFilter',
+            'budgetMonthFilter'
+        ];
         
-        if (!incomeFilter || !expenseFilter || !budgetFilter) return;
-        
-        incomeFilter.innerHTML = '';
-        expenseFilter.innerHTML = '';
-        budgetFilter.innerHTML = '';
-        
-        allData.forEach((row, index) => {
-            const opt1 = new Option(row.month, index);
-            const opt2 = new Option(row.month, index);
-            const opt3 = new Option(row.month, index);
+        filters.forEach(filterId => {
+            const select = document.getElementById(filterId);
+            if (!select) return;
             
-            if (index === currentMonthIndex) {
-                opt1.selected = true;
-                opt2.selected = true;
-                opt3.selected = true;
-            }
+            select.innerHTML = '';
             
-            incomeFilter.add(opt1);
-            expenseFilter.add(opt2);
-            budgetFilter.add(opt3);
+            allData.forEach((row, index) => {
+                const option = new Option(row.month, index);
+                if (index === currentMonthIndex) {
+                    option.selected = true;
+                }
+                select.add(option);
+            });
         });
+    }
+    
+    /**
+     * Détruit un graphique s'il existe
+     * @param {string} chartKey - Clé du graphique
+     */
+    function destroyChart(chartKey) {
+        if (chartInstances[chartKey]) {
+            chartInstances[chartKey].destroy();
+            chartInstances[chartKey] = null;
+        }
     }
     
     /**
@@ -658,13 +931,14 @@ const Dashboard = (function() {
         const expenseValues = allData.map(d => d.totalExpenses);
         const savingsValues = allData.map(d => d.savings);
         
-        if (chart1Instance) chart1Instance.destroy();
+        destroyChart('chart1');
         
-        chart1Instance = Highcharts.chart('chart1', {
+        chartInstances.chart1 = Highcharts.chart('chart1', {
             chart: { 
                 type: 'line', 
                 backgroundColor: 'transparent', 
-                zoomType: 'x' 
+                zoomType: 'x',
+                height: 500
             },
             title: { text: null },
             xAxis: { 
@@ -672,43 +946,56 @@ const Dashboard = (function() {
                 crosshair: true, 
                 labels: { 
                     rotation: -45, 
-                    style: { fontSize: '10px' } 
+                    style: { 
+                        fontSize: '10px',
+                        color: 'var(--text-secondary)'
+                    } 
                 } 
             },
             yAxis: { 
                 title: { 
-                    text: 'Amount (EUR)', 
-                    style: { color: '#2649B2' } 
-                } 
+                    text: 'Montant (EUR)', 
+                    style: { color: 'var(--text-primary)' } 
+                },
+                labels: {
+                    style: { color: 'var(--text-secondary)' }
+                },
+                gridLineColor: 'var(--border-color)'
             },
             tooltip: { 
                 shared: true, 
                 valueDecimals: 0, 
-                valueSuffix: ' EUR' 
+                valueSuffix: ' €',
+                backgroundColor: 'var(--background-primary)',
+                borderColor: 'var(--border-color)',
+                style: { color: 'var(--text-primary)' }
+            },
+            legend: {
+                itemStyle: { color: 'var(--text-primary)' }
             },
             series: [
                 { 
-                    name: 'Income', 
+                    name: 'Revenus', 
                     data: incomeValues, 
-                    color: '#4A74F3', 
+                    color: 'var(--primary-color)', 
                     lineWidth: 2 
                 },
                 { 
-                    name: 'Expenses', 
+                    name: 'Dépenses', 
                     data: expenseValues, 
-                    color: '#8E44AD', 
+                    color: 'var(--danger-color)', 
                     lineWidth: 2 
                 },
                 { 
-                    name: 'Monthly Savings', 
+                    name: 'Épargne Mensuelle', 
                     data: savingsValues, 
-                    color: '#2649B2', 
+                    color: 'var(--success-color)', 
                     type: 'area', 
                     fillColor: { 
                         linearGradient: [0, 0, 0, 300], 
                         stops: [
-                            [0, 'rgba(38,73,178,0.3)'], 
-                            [1, 'rgba(38,73,178,0.05)']
+                            [0, 'rgba(16, 185, 129, 0.3)'], 
+                            [1, 'rgba(16, 185, 129, 0.05)']
                         ] 
                     }, 
                     lineWidth: 2 
@@ -731,39 +1018,47 @@ const Dashboard = (function() {
         
         if (!row) return;
         
-        Highcharts.chart('chart2', {
+        destroyChart('chart2');
+        
+        chartInstances.chart2 = Highcharts.chart('chart2', {
             chart: { 
                 type: 'pie', 
-                backgroundColor: 'transparent' 
+                backgroundColor: 'transparent',
+                height: 400
             },
             title: { 
-                text: row.month, 
+                text: `Revenus - ${row.month}`, 
                 style: { 
-                    color: '#2649B2', 
-                    fontWeight: 'bold' 
+                    color: 'var(--text-primary)', 
+                    fontWeight: '600',
+                    fontSize: '1rem'
                 } 
             },
             tooltip: { 
-                pointFormat: '<b>{point.name}</b>: {point.y:,.0f} EUR ({point.percentage:.1f}%)' 
+                pointFormat: '<b>{point.name}</b>: {point.y:,.0f} € ({point.percentage:.1f}%)',
+                backgroundColor: 'var(--background-primary)',
+                borderColor: 'var(--border-color)',
+                style: { color: 'var(--text-primary)' }
+            },
+            legend: {
+                itemStyle: { color: 'var(--text-primary)' }
             },
             series: [{
-                name: 'Amount',
+                name: 'Montant',
                 data: [
-                    { name: 'Salary', y: row.salary },
-                    { name: 'Misc.', y: row.misc }
-                ],
-                colorByPoint: true
+                    { name: 'Salaire', y: row.salary, color: 'var(--primary-color)' },
+                    { name: 'Divers', y: row.misc, color: 'var(--primary-light)' }
+                ]
             }],
-            colors: ['#2649B2', '#4A74F3'],
             plotOptions: {
                 pie: {
                     innerSize: '50%',
                     dataLabels: {
-                        format: '<b>{point.name}</b>: {point.y:,.0f} EUR',
-                        style: { color: '#2649B2' }
+                        format: '<b>{point.name}</b>: {point.y:,.0f} €',
+                        style: { color: 'var(--text-primary)' }
                     },
                     borderWidth: 2,
-                    borderColor: '#E8DAEF'
+                    borderColor: 'var(--border-color)'
                 }
             },
             credits: { enabled: false }
@@ -779,41 +1074,49 @@ const Dashboard = (function() {
         
         if (!row) return;
         
-        Highcharts.chart('chart3', {
+        destroyChart('chart3');
+        
+        chartInstances.chart3 = Highcharts.chart('chart3', {
             chart: { 
                 type: 'pie', 
-                backgroundColor: 'transparent' 
+                backgroundColor: 'transparent',
+                height: 400
             },
             title: { 
-                text: row.month, 
+                text: `Dépenses - ${row.month}`, 
                 style: { 
-                    color: '#6C3483', 
-                    fontWeight: 'bold' 
+                    color: 'var(--text-primary)', 
+                    fontWeight: '600',
+                    fontSize: '1rem'
                 } 
             },
             tooltip: { 
-                pointFormat: '<b>{point.name}</b>: {point.y:,.0f} EUR ({point.percentage:.1f}%)' 
+                pointFormat: '<b>{point.name}</b>: {point.y:,.0f} € ({point.percentage:.1f}%)',
+                backgroundColor: 'var(--background-primary)',
+                borderColor: 'var(--border-color)',
+                style: { color: 'var(--text-primary)' }
+            },
+            legend: {
+                itemStyle: { color: 'var(--text-primary)' }
             },
             series: [{
-                name: 'Amount',
+                name: 'Montant',
                 data: [
-                    { name: 'Rent', y: row.rent },
-                    { name: 'Food', y: row.food },
-                    { name: 'Fix Costs', y: row.fixCosts },
-                    { name: 'Others', y: row.others },
-                    { name: 'Loan', y: row.loan }
-                ],
-                colorByPoint: true
+                    { name: 'Loyer', y: row.rent, color: '#dc2626' },
+                    { name: 'Alimentation', y: row.food, color: '#f97316' },
+                    { name: 'Coûts Fixes', y: row.fixCosts, color: '#f59e0b' },
+                    { name: 'Autres', y: row.others, color: '#eab308' },
+                    { name: 'Prêts', y: row.loan, color: '#84cc16' }
+                ]
             }],
-            colors: ['#5B2C6F', '#6C3483', '#8E44AD', '#9D5CE6', '#C39BD3'],
             plotOptions: {
                 pie: {
                     dataLabels: {
-                        format: '<b>{point.name}</b>: {point.y:,.0f} EUR',
-                        style: { color: '#5B2C6F' }
+                        format: '<b>{point.name}</b>: {point.y:,.0f} €',
+                        style: { color: 'var(--text-primary)' }
                     },
                     borderWidth: 2,
-                    borderColor: '#E8DAEF'
+                    borderColor: 'var(--border-color)'
                 }
             },
             credits: { enabled: false }
@@ -830,14 +1133,14 @@ const Dashboard = (function() {
             allData.map((d, i) => adjustForInflation(d.cumulatedSavings, i)) : [];
         
         const series = [{
-            name: 'Nominal Savings',
+            name: 'Épargne Nominale',
             data: savingsData,
-            color: '#2649B2',
+            color: 'var(--success-color)',
             fillColor: {
                 linearGradient: [0, 0, 0, 300],
                 stops: [
-                    [0, 'rgba(38,73,178,0.5)'],
-                    [1, 'rgba(38,73,178,0.1)']
+                    [0, 'rgba(16, 185, 129, 0.5)'],
+                    [1, 'rgba(16, 185, 129, 0.1)']
                 ]
             },
             lineWidth: 2
@@ -845,34 +1148,36 @@ const Dashboard = (function() {
         
         if (showInflation) {
             series.push({
-                name: 'Real Savings (Inflation-Adjusted)',
+                name: 'Épargne Réelle (Ajustée Inflation)',
                 data: savingsDataReal,
-                color: '#9D5CE6',
+                color: 'var(--accent-color)',
                 dashStyle: 'Dash',
                 fillColor: {
                     linearGradient: [0, 0, 0, 300],
                     stops: [
-                        [0, 'rgba(157,92,230,0.3)'],
-                        [1, 'rgba(157,92,230,0.05)']
+                        [0, 'rgba(139, 92, 246, 0.3)'],
+                        [1, 'rgba(139, 92, 246, 0.05)']
                     ]
                 },
                 lineWidth: 2
             });
         }
         
-        if (chart4Instance) chart4Instance.destroy();
+        destroyChart('chart4');
         
-        chart4Instance = Highcharts.chart('chart4', {
+        chartInstances.chart4 = Highcharts.chart('chart4', {
             chart: { 
                 type: 'area', 
-                backgroundColor: 'transparent' 
+                backgroundColor: 'transparent',
+                height: 500
             },
             title: { 
                 text: showInflation ? 
-                    'Inflation Rate: ' + inflationRate + '% annual' : null,
+                    `Taux d'inflation: ${inflationRate}% annuel` : null,
                 style: { 
-                    color: '#9D5CE6', 
-                    fontSize: '0.9em' 
+                    color: 'var(--accent-color)', 
+                    fontSize: '0.9rem',
+                    fontWeight: '500'
                 }
             },
             xAxis: {
@@ -880,19 +1185,32 @@ const Dashboard = (function() {
                 crosshair: true,
                 labels: {
                     rotation: -45,
-                    style: { fontSize: '10px' }
+                    style: { 
+                        fontSize: '10px',
+                        color: 'var(--text-secondary)'
+                    }
                 }
             },
             yAxis: {
                 title: {
-                    text: 'Cumulated Savings (EUR)',
-                    style: { color: '#2649B2' }
-                }
+                    text: 'Épargne Cumulée (EUR)',
+                    style: { color: 'var(--text-primary)' }
+                },
+                labels: {
+                    style: { color: 'var(--text-secondary)' }
+                },
+                gridLineColor: 'var(--border-color)'
             },
             tooltip: {
                 shared: true,
                 valueDecimals: 0,
-                valueSuffix: ' EUR'
+                valueSuffix: ' €',
+                backgroundColor: 'var(--background-primary)',
+                borderColor: 'var(--border-color)',
+                style: { color: 'var(--text-primary)' }
+            },
+            legend: {
+                itemStyle: { color: 'var(--text-primary)' }
             },
             series: series,
             plotOptions: {
@@ -919,62 +1237,64 @@ const Dashboard = (function() {
         
         const series = [
             {
-                name: 'Cumulated Investment',
+                name: 'Investissement Cumulé',
                 data: cumInv,
-                color: '#6C8BE0',
+                color: '#3b82f6',
                 lineWidth: 2
             },
             {
-                name: 'Cumulated Gains',
+                name: 'Gains Cumulés',
                 data: gains,
-                color: '#8E7DE3',
+                color: '#8b5cf6',
                 dashStyle: 'ShortDot',
                 lineWidth: 2
             },
             {
-                name: "PEE L'Oreal",
+                name: "PEE L'Oréal",
                 data: pee,
-                color: '#9D5CE6',
+                color: '#ec4899',
                 lineWidth: 2
             },
             {
-                name: 'Total Portfolio',
+                name: 'Portefeuille Total',
                 data: portfolio,
-                color: '#2649B2',
+                color: 'var(--primary-color)',
                 lineWidth: 3
             }
         ];
         
         if (showInflation) {
             series.push({
-                name: 'Portfolio (Real)',
+                name: 'Portefeuille (Réel)',
                 data: portfolioReal,
-                color: '#B55CE6',
+                color: 'var(--accent-color)',
                 dashStyle: 'Dash',
                 lineWidth: 3
             });
             series.push({
-                name: 'Investment (Real)',
+                name: 'Investissement (Réel)',
                 data: cumInvReal,
-                color: '#D4D9F0',
+                color: '#94a3b8',
                 dashStyle: 'Dash',
                 lineWidth: 2
             });
         }
         
-        if (chart5Instance) chart5Instance.destroy();
+        destroyChart('chart5');
         
-        chart5Instance = Highcharts.chart('chart5', {
+        chartInstances.chart5 = Highcharts.chart('chart5', {
             chart: { 
                 type: 'line', 
-                backgroundColor: 'transparent' 
+                backgroundColor: 'transparent',
+                height: 500
             },
             title: {
                 text: showInflation ? 
-                    'Inflation Rate: ' + inflationRate + '% annual' : null,
+                    `Taux d'inflation: ${inflationRate}% annuel` : null,
                 style: {
-                    color: '#9D5CE6',
-                    fontSize: '0.9em'
+                    color: 'var(--accent-color)',
+                    fontSize: '0.9rem',
+                    fontWeight: '500'
                 }
             },
             xAxis: {
@@ -982,19 +1302,32 @@ const Dashboard = (function() {
                 crosshair: true,
                 labels: {
                     rotation: -45,
-                    style: { fontSize: '10px' }
+                    style: { 
+                        fontSize: '10px',
+                        color: 'var(--text-secondary)'
+                    }
                 }
             },
             yAxis: {
                 title: {
-                    text: 'Value (EUR)',
-                    style: { color: '#2649B2' }
-                }
+                    text: 'Valeur (EUR)',
+                    style: { color: 'var(--text-primary)' }
+                },
+                labels: {
+                    style: { color: 'var(--text-secondary)' }
+                },
+                gridLineColor: 'var(--border-color)'
             },
             tooltip: {
                 shared: true,
                 valueDecimals: 0,
-                valueSuffix: ' EUR'
+                valueSuffix: ' €',
+                backgroundColor: 'var(--background-primary)',
+                borderColor: 'var(--border-color)',
+                style: { color: 'var(--text-primary)' }
+            },
+            legend: {
+                itemStyle: { color: 'var(--text-primary)' }
             },
             series: series,
             plotOptions: {
@@ -1011,12 +1344,13 @@ const Dashboard = (function() {
         const months = allData.map(d => d.month);
         const roi = allData.map(d => d.roi);
         
-        if (chart6Instance) chart6Instance.destroy();
+        destroyChart('chart6');
         
-        chart6Instance = Highcharts.chart('chart6', {
+        chartInstances.chart6 = Highcharts.chart('chart6', {
             chart: { 
                 type: 'area', 
-                backgroundColor: 'transparent' 
+                backgroundColor: 'transparent',
+                height: 500
             },
             title: { text: null },
             xAxis: {
@@ -1024,34 +1358,47 @@ const Dashboard = (function() {
                 crosshair: true,
                 labels: {
                     rotation: -45,
-                    style: { fontSize: '10px' }
+                    style: { 
+                        fontSize: '10px',
+                        color: 'var(--text-secondary)'
+                    }
                 }
             },
             yAxis: {
                 title: {
                     text: 'ROI (%)',
-                    style: { color: '#2649B2' }
+                    style: { color: 'var(--text-primary)' }
                 },
+                labels: {
+                    style: { color: 'var(--text-secondary)' }
+                },
+                gridLineColor: 'var(--border-color)',
                 plotLines: [{
                     value: 0,
-                    color: '#8E44AD',
+                    color: 'var(--danger-color)',
                     width: 2,
                     dashStyle: 'Dash'
                 }]
             },
             tooltip: {
                 valueDecimals: 2,
-                valueSuffix: '%'
+                valueSuffix: '%',
+                backgroundColor: 'var(--background-primary)',
+                borderColor: 'var(--border-color)',
+                style: { color: 'var(--text-primary)' }
+            },
+            legend: {
+                itemStyle: { color: 'var(--text-primary)' }
             },
             series: [{
                 name: 'ROI',
                 data: roi,
-                color: '#4A74F3',
+                color: 'var(--success-color)',
                 fillColor: {
                     linearGradient: [0, 0, 0, 300],
                     stops: [
-                        [0, 'rgba(74,116,243,0.4)'],
-                        [1, 'rgba(74,116,243,0.05)']
+                        [0, 'rgba(16, 185, 129, 0.4)'],
+                        [1, 'rgba(16, 185, 129, 0.05)']
                     ]
                 },
                 lineWidth: 2
@@ -1081,54 +1428,64 @@ const Dashboard = (function() {
         const wantsPercent = total > 0 ? (wantsAmount / total * 100) : 0;
         const savingsPercent = total > 0 ? (savingsAmount / total * 100) : 0;
         
-        Highcharts.chart('chart7', {
+        destroyChart('chart7');
+        
+        chartInstances.chart7 = Highcharts.chart('chart7', {
             chart: { 
                 type: 'pie', 
-                backgroundColor: 'transparent' 
+                backgroundColor: 'transparent',
+                height: 400
             },
             title: {
-                text: row.month + ' - Total: ' + total.toLocaleString() + ' EUR',
+                text: `Allocation Budgétaire - ${row.month} - Total: ${formatCurrency(total)} €`,
                 style: {
-                    color: '#2649B2',
-                    fontWeight: 'bold'
+                    color: 'var(--text-primary)',
+                    fontWeight: '600',
+                    fontSize: '1rem'
                 }
             },
             tooltip: {
                 useHTML: true,
-                pointFormat: '<b>{point.name}</b><br/>Amount: <b>{point.amount:,.0f} EUR</b><br/>Percentage: <b>{point.percentage:.1f}%</b>'
+                pointFormat: '<b>{point.name}</b><br/>Montant: <b>{point.amount:,.0f} €</b><br/>Pourcentage: <b>{point.percentage:.1f}%</b>',
+                backgroundColor: 'var(--background-primary)',
+                borderColor: 'var(--border-color)',
+                style: { color: 'var(--text-primary)' }
+            },
+            legend: {
+                itemStyle: { color: 'var(--text-primary)' }
             },
             plotOptions: {
                 pie: {
                     innerSize: '60%',
                     dataLabels: {
                         enabled: true,
-                        format: '<b>{point.name}</b><br/>{point.percentage:.1f}%<br/>{point.amount:,.0f} EUR',
-                        style: { color: '#2649B2' }
+                        format: '<b>{point.name}</b><br/>{point.percentage:.1f}%<br/>{point.amount:,.0f} €',
+                        style: { color: 'var(--text-primary)' }
                     },
                     borderWidth: 2,
-                    borderColor: '#E8DAEF'
+                    borderColor: 'var(--border-color)'
                 }
             },
             series: [{
                 name: 'Budget',
                 data: [
                     {
-                        name: 'Needs',
+                        name: 'Besoins',
                         y: needsPercent,
                         amount: needsAmount,
-                        color: '#6C3483'
+                        color: 'var(--danger-color)'
                     },
                     {
-                        name: 'Wants',
+                        name: 'Envies',
                         y: wantsPercent,
                         amount: wantsAmount,
-                        color: '#9D5CE6'
+                        color: 'var(--warning-color)'
                     },
                     {
-                        name: 'Savings',
+                        name: 'Épargne',
                         y: savingsPercent,
                         amount: savingsAmount,
-                        color: '#2649B2'
+                        color: 'var(--success-color)'
                     }
                 ]
             }],
@@ -1140,18 +1497,43 @@ const Dashboard = (function() {
      * Met à jour tous les graphiques
      */
     function updateAllCharts() {
-        updateStats();
-        initMonthFilters();
-        createChart1();
-        updateChart2();
-        updateChart3();
-        createChart4();
-        createChart5();
-        createChart6();
-        updateChart7();
+        try {
+            updateStats();
+            initMonthFilters();
+            createChart1();
+            updateChart2();
+            updateChart3();
+            createChart4();
+            createChart5();
+            createChart6();
+            updateChart7();
+        } catch (error) {
+            console.error('Erreur lors de la mise à jour des graphiques:', error);
+        }
     }
-
-// ========== EXPORTS PUBLICS ==========
+    
+    // ========================================
+    // NOTIFICATIONS
+    // ========================================
+    
+    /**
+     * Affiche une notification
+     * @param {string} message - Message à afficher
+     * @param {string} type - Type de notification (success, error, info, warning)
+     */
+    function showNotification(message, type = 'info') {
+        // Utilise le système de notification du common.js si disponible
+        if (window.FinanceDashboard && window.FinanceDashboard.showNotification) {
+            window.FinanceDashboard.showNotification(message, type);
+        } else {
+            console.log(`[${type.toUpperCase()}] ${message}`);
+        }
+    }
+    
+    // ========================================
+    // API PUBLIQUE
+    // ========================================
+    
     return {
         // Initialisation
         init,
@@ -1188,5 +1570,15 @@ const Dashboard = (function() {
     };
 })();
 
-// Initialisation au chargement de la page
-window.addEventListener('DOMContentLoaded', Dashboard.init);
+// ========================================
+// INITIALISATION AU CHARGEMENT
+// ========================================
+
+window.addEventListener('DOMContentLoaded', () => {
+    Dashboard.init();
+});
+
+// Export pour utilisation dans d'autres modules si nécessaire
+if (typeof module !== 'undefined' && module.exports) {
+    module.exports = Dashboard;
+}

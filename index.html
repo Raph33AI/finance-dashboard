@@ -3,11 +3,14 @@
 <head>
     <meta charset='UTF-8'>
     <meta name='viewport' content='width=device-width, initial-scale=1.0'>
-    <title>Dashboard - Finance Pro</title>
+    <meta name='description' content='Dashboard financier personnel moderne avec gestion budgétaire, investissements et simulations'>
+    <meta name='author' content='Finance Pro'>
+    <title>Dashboard Budget - Finance Pro</title>
     
     <!-- Highcharts -->
     <script src='https://code.highcharts.com/highcharts.js'></script>
     <script src='https://code.highcharts.com/modules/exporting.js'></script>
+    <script src='https://code.highcharts.com/modules/export-data.js'></script>
     
     <!-- Font Awesome pour les icônes -->
     <link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css'>
@@ -16,14 +19,19 @@
     <link rel='stylesheet' href='assets/css/common.css'>
     <link rel='stylesheet' href='assets/css/sidebar.css'>
     <link rel='stylesheet' href='assets/css/dashboard.css'>
+    
+    <!-- Favicon -->
+    <link rel='icon' type='image/svg+xml' href='assets/images/favicon.svg'>
 </head>
 <body>
     <div class='layout-wrapper'>
-        <!-- Sidebar Navigation -->
+        <!-- ============================================
+             SIDEBAR NAVIGATION
+             ============================================ -->
         <aside class='sidebar' id='sidebar'>
             <div class='sidebar-header'>
                 <h2><i class='fas fa-chart-line'></i> Finance Hub</h2>
-                <button class='sidebar-toggle' id='sidebarToggle'>
+                <button class='sidebar-toggle' id='sidebarToggle' aria-label='Toggle sidebar'>
                     <i class='fas fa-bars'></i>
                 </button>
             </div>
@@ -31,7 +39,7 @@
             <nav class='sidebar-nav'>
                 <!-- Budget Section -->
                 <div class='nav-section'>
-                    <button class='nav-folder active'>
+                    <button class='nav-folder active' aria-expanded='true'>
                         <i class='fas fa-wallet'></i>
                         <span>Budget</span>
                         <i class='fas fa-chevron-down arrow'></i>
@@ -46,7 +54,7 @@
                 
                 <!-- Simulation Section -->
                 <div class='nav-section'>
-                    <button class='nav-folder'>
+                    <button class='nav-folder' aria-expanded='false'>
                         <i class='fas fa-calculator'></i>
                         <span>Simulation</span>
                         <i class='fas fa-chevron-down arrow'></i>
@@ -73,7 +81,7 @@
                 
                 <!-- Stocks Section -->
                 <div class='nav-section'>
-                    <button class='nav-folder'>
+                    <button class='nav-folder' aria-expanded='false'>
                         <i class='fas fa-chart-candlestick'></i>
                         <span>Stocks</span>
                         <i class='fas fa-chevron-down arrow'></i>
@@ -87,245 +95,377 @@
                 </div>
             </nav>
             
-            <!-- Sidebar Footer - Version avec authentification -->
-            <div class="sidebar-footer">
-                <div class="user-info" id="userInfoSection">
-                    <!-- État non connecté -->
-                    <button class="user-profile-btn" id="userProfileBtn" aria-label="Accéder à mon profil">
-                        <i class="fas fa-user-circle"></i>
-                        <div class="user-details">
-                            <span class="user-name">Connexion</span>
-                            <span class="user-status">Cliquez pour vous connecter</span>
+            <!-- Sidebar Footer -->
+            <div class='sidebar-footer'>
+                <div class='user-info' id='userInfoSection'>
+                    <button class='user-profile-btn' id='userProfileBtn' aria-label='Accéder à mon profil'>
+                        <i class='fas fa-user-circle'></i>
+                        <div class='user-details'>
+                            <span class='user-name'>Connexion</span>
+                            <span class='user-status'>Cliquez pour vous connecter</span>
                         </div>
-                        <i class="fas fa-chevron-right arrow-icon"></i>
+                        <i class='fas fa-chevron-right arrow-icon'></i>
                     </button>
                 </div>
             </div>
         </aside>
         
-        <!-- Main Content Area -->
+        <!-- ============================================
+             MAIN CONTENT AREA
+             ============================================ -->
         <div class='main-content'>
             <!-- Header -->
             <header class='top-header'>
                 <div class='header-left'>
-                    <button class='mobile-toggle' id='mobileToggle'>
+                    <button class='mobile-toggle' id='mobileToggle' aria-label='Toggle navigation'>
                         <i class='fas fa-bars'></i>
                     </button>
-                    <h1>Personal Finance Dashboard</h1>
+                    <h1><i class='fas fa-chart-area'></i> Dashboard Budget Personnel</h1>
                 </div>
                 <div class='header-right'>
-                    <!-- ✅ NOUVEAU : Bouton Dark Mode -->
-                    <button class='dark-mode-toggle' id='darkModeToggle' aria-label='Toggle dark mode' title='Toggle dark mode'>
+                    <!-- Dark Mode Toggle -->
+                    <button class='dark-mode-toggle' id='darkModeToggle' aria-label='Basculer en mode sombre' title='Mode sombre'>
                         <i class='fas fa-moon' aria-hidden='true'></i>
                     </button>
                     
                     <span class='last-update'>
                         <i class='fas fa-clock'></i>
-                        <span id='lastUpdate'></span>
+                        <span id='lastUpdate'>Chargement...</span>
                     </span>
                 </div>
             </header>
             
             <div class='container'>
-                <!-- Stats Cards -->
-                <div id='statsContainer' class='stats-grid'></div>
+                <!-- ============================================
+                     STATS CARDS
+                     ============================================ -->
+                <div id='statsContainer' class='stats-grid'>
+                    <!-- Généré dynamiquement par JavaScript -->
+                </div>
                 
-                <!-- Main Content -->
+                <!-- ============================================
+                     MAIN CONTENT
+                     ============================================ -->
                 <div class='content'>
-                    <div class='section'>
-                        <h2 class='section-title'>Financial Data - Dynamic Timeline</h2>
+                    <section class='section'>
+                        <h2 class='section-title'>
+                            <i class='fas fa-database'></i>
+                            Données Financières - Timeline Dynamique
+                        </h2>
                         
+                        <!-- Info Box -->
                         <div class='info-box'>
-                            <h4>How to use</h4>
-                            <p>Edit values directly in the table | Use Bulk Edit to apply values to date ranges | Add past/future months with the buttons below | Adjust Monthly Est Yield to calculate gains automatically | All changes are auto-saved in your browser</p>
+                            <h4><i class='fas fa-info-circle'></i> Guide d'utilisation</h4>
+                            <p>
+                                Modifiez les valeurs directement dans le tableau | 
+                                Utilisez l'édition en masse pour appliquer des valeurs sur des périodes | 
+                                Ajoutez des mois passés/futurs avec les boutons ci-dessous | 
+                                Ajustez le rendement mensuel pour calculer automatiquement les gains | 
+                                Toutes les modifications sont automatiquement sauvegardées
+                            </p>
                         </div>
                         
-                        <!-- Timeline Management -->
+                        <!-- ============================================
+                             TIMELINE MANAGEMENT
+                             ============================================ -->
                         <div class='toolbar'>
-                            <h3>Timeline Management</h3>
+                            <h3><i class='fas fa-calendar-alt'></i> Gestion de la Timeline</h3>
                             <div class='toolbar-row'>
-                                <button class='btn-add' onclick='Dashboard.addMonthsBefore(12)'>+ 12 Months Before</button>
-                                <button class='btn-add' onclick='Dashboard.addMonthsBefore(1)'>+ 1 Month Before</button>
-                                <button class='btn-add' onclick='Dashboard.addMonthsAfter(1)'>+ 1 Month After</button>
-                                <button class='btn-add' onclick='Dashboard.addMonthsAfter(12)'>+ 12 Months After</button>
-                                <span class='total-months'>Total Months: <span id='totalMonthsDisplay'>300</span></span>
+                                <button class='btn-add' onclick='Dashboard.addMonthsBefore(12)'>
+                                    <i class='fas fa-plus'></i> 12 Mois Avant
+                                </button>
+                                <button class='btn-add' onclick='Dashboard.addMonthsBefore(1)'>
+                                    <i class='fas fa-plus'></i> 1 Mois Avant
+                                </button>
+                                <button class='btn-add' onclick='Dashboard.addMonthsAfter(1)'>
+                                    <i class='fas fa-plus'></i> 1 Mois Après
+                                </button>
+                                <button class='btn-add' onclick='Dashboard.addMonthsAfter(12)'>
+                                    <i class='fas fa-plus'></i> 12 Mois Après
+                                </button>
+                                <span class='total-months'>
+                                    <i class='fas fa-hashtag'></i>
+                                    Total Mois: <span id='totalMonthsDisplay'>300</span>
+                                </span>
                             </div>
                         </div>
                         
-                        <!-- Parameters Grid -->
+                        <!-- ============================================
+                             PARAMETERS GRID
+                             ============================================ -->
                         <div class='parameters-grid'>
                             <!-- Investment Parameters -->
                             <div class='toolbar'>
-                                <h3>Investment Parameters</h3>
+                                <h3><i class='fas fa-chart-line'></i> Paramètres d'Investissement</h3>
                                 <div class='toolbar-row'>
-                                    <label>Monthly Est Yield (% annual):</label>
-                                    <input type='number' id='monthlyEstYield' step='0.1' value='8' 
-                                           onchange='Dashboard.updateEstYield()'>
+                                    <label for='monthlyEstYield'>
+                                        <i class='fas fa-percent'></i>
+                                        Rendement Annuel Estimé (%):
+                                    </label>
+                                    <input type='number' 
+                                           id='monthlyEstYield' 
+                                           step='0.1' 
+                                           value='8' 
+                                           onchange='Dashboard.updateEstYield()'
+                                           aria-label='Rendement annuel estimé'>
                                     <span class='yield-display'>
-                                        = <span id='monthlyEstYieldDisplay'>0.67</span>% monthly
+                                        = <span id='monthlyEstYieldDisplay'>0.67</span>% mensuel
                                     </span>
                                 </div>
                                 <div class='toolbar-row'>
-                                    <button class='btn-primary' onclick='Dashboard.recalculateGains()'>Recalculate All Gains</button>
+                                    <button class='btn-success' onclick='Dashboard.recalculateGains()'>
+                                        <i class='fas fa-calculator'></i>
+                                        Recalculer Tous les Gains
+                                    </button>
                                 </div>
                             </div>
                             
                             <!-- Inflation Adjustment -->
                             <div class='toolbar'>
-                                <h3>Inflation Adjustment</h3>
+                                <h3><i class='fas fa-fire'></i> Ajustement Inflation</h3>
                                 <div class='toolbar-row'>
-                                    <label>Annual Inflation Rate (%):</label>
-                                    <input type='number' id='inflationRate' step='0.1' value='2.5' 
-                                           onchange='Dashboard.updateInflationRate()'>
-                                    <button class='btn-success' onclick='Dashboard.toggleInflationCharts()' id='btnToggleInflation'>
-                                        Show Inflation-Adjusted Charts
+                                    <label for='inflationRate'>
+                                        <i class='fas fa-arrow-trend-up'></i>
+                                        Taux d'Inflation Annuel (%):
+                                    </label>
+                                    <input type='number' 
+                                           id='inflationRate' 
+                                           step='0.1' 
+                                           value='2.5' 
+                                           onchange='Dashboard.updateInflationRate()'
+                                           aria-label='Taux d\'inflation annuel'>
+                                </div>
+                                <div class='toolbar-row'>
+                                    <button class='btn-success' 
+                                            onclick='Dashboard.toggleInflationCharts()' 
+                                            id='btnToggleInflation'>
+                                        <i class='fas fa-chart-simple'></i>
+                                        Afficher l'Ajustement Inflation
                                     </button>
-                                    <span id='inflationStatus' class='inflation-status'>OFF</span>
+                                    <span id='inflationStatus' class='inflation-status'>DÉSACTIVÉ</span>
                                 </div>
                             </div>
                         </div>
                         
-                        <!-- Bulk Edit Tool -->
-                        <div class='toolbar'>
-                            <h3>Bulk Edit Tool</h3>
-                            <div class='toolbar-row'>
-                                <label>Category:</label>
-                                <select id='bulkCategory'>
-                                    <option value='Salary'>Income - Salary</option>
-                                    <option value='Misc.'>Income - Misc.</option>
-                                    <option value='Rent'>Expenses - Rent</option>
-                                    <option value='Food'>Expenses - Food</option>
-                                    <option value='Fix Costs'>Expenses - Fix Costs</option>
-                                    <option value='Others (Shopping; Restaurant)'>Expenses - Others</option>
-                                    <option value='Investment'>Investment - Monthly Investment</option>
-                                    <option value='Loan (Studies; rental investment)'>Expenses - Loan</option>
-                                    <option value="PEE L'OREAL">Investment - PEE L'Oreal</option>
-                                </select>
-                            </div>
-                            <div class='toolbar-row'>
-                                <label>From:</label>
-                                <input type='month' id='bulkStartMonth'>
-                                <label>To:</label>
-                                <input type='month' id='bulkEndMonth'>
-                            </div>
-                            <div class='toolbar-row'>
-                                <label>Value:</label>
-                                <input type='number' id='bulkValue' step='0.01' placeholder='0.00'>
-                                <button class='btn-success' onclick='Dashboard.applyBulkEdit()'>Apply</button>
+                        <!-- ============================================
+                             BULK EDIT TOOL
+                             ============================================ -->
+                        <div class='bulk-edit-section'>
+                            <h3><i class='fas fa-edit'></i> Outil d'Édition en Masse</h3>
+                            <div class='bulk-edit-form'>
+                                <div class='form-row'>
+                                    <label for='bulkCategory'>
+                                        <i class='fas fa-tag'></i>
+                                        Catégorie:
+                                    </label>
+                                    <select id='bulkCategory'>
+                                        <option value='Salary'>Revenus - Salaire</option>
+                                        <option value='Misc.'>Revenus - Divers</option>
+                                        <option value='Rent'>Dépenses - Loyer</option>
+                                        <option value='Food'>Dépenses - Alimentation</option>
+                                        <option value='Fix Costs'>Dépenses - Coûts Fixes</option>
+                                        <option value='Others (Shopping; Restaurant)'>Dépenses - Autres</option>
+                                        <option value='Investment'>Investissement - Mensuel</option>
+                                        <option value='Loan (Studies; rental investment)'>Dépenses - Prêts</option>
+                                        <option value="PEE L'OREAL">Investissement - PEE L'Oréal</option>
+                                    </select>
+                                </div>
+                                <div class='form-row'>
+                                    <label for='bulkStartMonth'>
+                                        <i class='fas fa-calendar-day'></i>
+                                        De:
+                                    </label>
+                                    <input type='month' id='bulkStartMonth'>
+                                    <label for='bulkEndMonth'>
+                                        <i class='fas fa-calendar-day'></i>
+                                        À:
+                                    </label>
+                                    <input type='month' id='bulkEndMonth'>
+                                </div>
+                                <div class='form-row'>
+                                    <label for='bulkValue'>
+                                        <i class='fas fa-euro-sign'></i>
+                                        Valeur:
+                                    </label>
+                                    <input type='number' 
+                                           id='bulkValue' 
+                                           step='0.01' 
+                                           placeholder='0.00'
+                                           aria-label='Valeur à appliquer'>
+                                    <button class='btn-success' onclick='Dashboard.applyBulkEdit()'>
+                                        <i class='fas fa-check'></i>
+                                        Appliquer
+                                    </button>
+                                </div>
                             </div>
                         </div>
                         
-                        <!-- Data Management -->
+                        <!-- ============================================
+                             DATA MANAGEMENT
+                             ============================================ -->
                         <div class='toolbar'>
-                            <h3>Data Management</h3>
+                            <h3><i class='fas fa-database'></i> Gestion des Données</h3>
                             <div class='toolbar-row'>
-                                <button class='btn-primary' onclick='Dashboard.saveData()'>Save All</button>
-                                <button class='btn-secondary' onclick='Dashboard.exportToJSON()'>Export JSON</button>
-                                <button class='btn-secondary' onclick='Dashboard.importFromJSON()'>Import JSON</button>
-                                <button class='btn-secondary' onclick='Dashboard.resetToDefault()'>Reset</button>
-                                <button class='btn-primary' onclick='Dashboard.updateAllCharts()'>Update Charts</button>
+                                <button class='btn-success' onclick='Dashboard.saveData()'>
+                                    <i class='fas fa-save'></i>
+                                    Sauvegarder
+                                </button>
+                                <button class='btn-secondary' onclick='Dashboard.exportToJSON()'>
+                                    <i class='fas fa-download'></i>
+                                    Exporter JSON
+                                </button>
+                                <button class='btn-secondary' onclick='Dashboard.importFromJSON()'>
+                                    <i class='fas fa-upload'></i>
+                                    Importer JSON
+                                </button>
+                                <button class='btn-secondary' onclick='Dashboard.resetToDefault()'>
+                                    <i class='fas fa-redo'></i>
+                                    Réinitialiser
+                                </button>
+                                <button class='btn-add' onclick='Dashboard.updateAllCharts()'>
+                                    <i class='fas fa-sync'></i>
+                                    Actualiser Graphiques
+                                </button>
                             </div>
                         </div>
                         
-                        <!-- Data Table -->
+                        <!-- ============================================
+                             DATA TABLE
+                             ============================================ -->
                         <div class='table-container'>
                             <table class='data-table'>
                                 <thead>
                                     <tr>
-                                        <th rowspan='2'>Month</th>
-                                        <th colspan='3' style='background: #4A74F3; text-align: center;'>INCOME</th>
-                                        <th colspan='7' style='background: #8E44AD; text-align: center;'>EXPENSES</th>
-                                        <th colspan='7' style='background: #6C3483; text-align: center;'>INVESTMENT</th>
-                                        <th rowspan='2' style='background: #9D5CE6;'>Actions</th>
+                                        <th rowspan='2'>Mois</th>
+                                        <th colspan='3' style='background: var(--primary-color); text-align: center;'>REVENUS</th>
+                                        <th colspan='7' style='background: var(--danger-color); text-align: center;'>DÉPENSES</th>
+                                        <th colspan='7' style='background: var(--accent-color); text-align: center;'>INVESTISSEMENT</th>
+                                        <th rowspan='2' style='background: var(--secondary-color);'>Actions</th>
                                     </tr>
                                     <tr>
-                                        <th style='background: #4A74F3;'>Salary</th>
-                                        <th style='background: #4A74F3;'>Misc.</th>
-                                        <th style='background: #6C8BE0;'>Total</th>
-                                        <th style='background: #8E44AD;'>Rent</th>
-                                        <th style='background: #8E44AD;'>Food</th>
-                                        <th style='background: #8E44AD;'>Fix</th>
-                                        <th style='background: #8E44AD;'>Others</th>
-                                        <th style='background: #8E44AD;'>Loan</th>
-                                        <th style='background: #9D5CE6;'>Total</th>
-                                        <th style='background: #9D5CE6;'>Save</th>
-                                        <th style='background: #6C3483;'>Monthly Invest</th>
-                                        <th style='background: #6C3483;'>Monthly Gain</th>
-                                        <th style='background: #6C3483;'>Cum. Gains</th>
-                                        <th style='background: #6C3483;'>PEE</th>
-                                        <th style='background: #9D5CE6;'>Cum.Inv</th>
-                                        <th style='background: #9D5CE6;'>Portfolio</th>
-                                        <th style='background: #9D5CE6;'>ROI%</th>
+                                        <th style='background: var(--primary-color);'>Salaire</th>
+                                        <th style='background: var(--primary-color);'>Divers</th>
+                                        <th style='background: var(--primary-light);'>Total</th>
+                                        <th style='background: var(--danger-color);'>Loyer</th>
+                                        <th style='background: var(--danger-color);'>Aliment.</th>
+                                        <th style='background: var(--danger-color);'>Fixes</th>
+                                        <th style='background: var(--danger-color);'>Autres</th>
+                                        <th style='background: var(--danger-color);'>Prêts</th>
+                                        <th style='background: #dc2626;'>Total</th>
+                                        <th style='background: #dc2626;'>Épargne</th>
+                                        <th style='background: var(--accent-color);'>Inv. Mens.</th>
+                                        <th style='background: var(--accent-color);'>Gain Mens.</th>
+                                        <th style='background: var(--accent-color);'>Gain Cum.</th>
+                                        <th style='background: var(--accent-color);'>PEE</th>
+                                        <th style='background: #7c3aed;'>Inv. Cum.</th>
+                                        <th style='background: #7c3aed;'>Portfolio</th>
+                                        <th style='background: #7c3aed;'>ROI%</th>
                                     </tr>
                                 </thead>
-                                <tbody id='dataTableBody'></tbody>
+                                <tbody id='dataTableBody'>
+                                    <!-- Généré dynamiquement par JavaScript -->
+                                </tbody>
                             </table>
                         </div>
-                    </div>
+                    </section>
                     
-                    <!-- Charts Section -->
-                    <div class='charts-container'>
+                    <!-- ============================================
+                         CHARTS SECTION
+                         ============================================ -->
+                    <section class='charts-container'>
+                        <!-- Chart 1: Income vs Expenses -->
                         <div class='chart-wrapper'>
-                            <h2 class='section-title'>Income vs Expenses Evolution</h2>
+                            <h3><i class='fas fa-chart-line'></i> Évolution Revenus vs Dépenses</h3>
                             <div id='chart1' class='chart'></div>
                         </div>
                         
+                        <!-- Charts Grid 2 columns -->
                         <div class='grid-2'>
+                            <!-- Chart 2: Income Breakdown -->
                             <div class='chart-wrapper'>
-                                <h2 class='section-title'>Income Breakdown</h2>
+                                <h3><i class='fas fa-chart-pie'></i> Répartition des Revenus</h3>
                                 <div class='local-filter'>
-                                    <label>Select Month:</label>
+                                    <label for='incomeMonthFilter'>
+                                        <i class='fas fa-filter'></i>
+                                        Mois:
+                                    </label>
                                     <select id='incomeMonthFilter' onchange='Dashboard.updateChart2()'></select>
                                 </div>
-                                <div id='chart2' class='chart'></div>
+                                <div id='chart2' class='chart chart-medium'></div>
                             </div>
+                            
+                            <!-- Chart 3: Expenses Breakdown -->
                             <div class='chart-wrapper'>
-                                <h2 class='section-title'>Expenses Breakdown</h2>
+                                <h3><i class='fas fa-chart-pie'></i> Répartition des Dépenses</h3>
                                 <div class='local-filter'>
-                                    <label>Select Month:</label>
+                                    <label for='expenseMonthFilter'>
+                                        <i class='fas fa-filter'></i>
+                                        Mois:
+                                    </label>
                                     <select id='expenseMonthFilter' onchange='Dashboard.updateChart3()'></select>
                                 </div>
-                                <div id='chart3' class='chart'></div>
+                                <div id='chart3' class='chart chart-medium'></div>
                             </div>
                         </div>
                         
+                        <!-- Chart 7: Budget Allocation -->
                         <div class='chart-wrapper'>
-                            <h2 class='section-title'>Budget Allocation</h2>
+                            <h3><i class='fas fa-bullseye'></i> Allocation Budgétaire (50/30/20)</h3>
                             <div class='local-filter'>
-                                <label>Select Month:</label>
+                                <label for='budgetMonthFilter'>
+                                    <i class='fas fa-filter'></i>
+                                    Mois:
+                                </label>
                                 <select id='budgetMonthFilter' onchange='Dashboard.updateChart7()'></select>
                             </div>
-                            <div id='chart7' class='chart'></div>
+                            <div id='chart7' class='chart chart-medium'></div>
                         </div>
                         
+                        <!-- Chart 4: Savings Evolution -->
                         <div class='chart-wrapper'>
-                            <h2 class='section-title'>Savings Evolution</h2>
+                            <h3><i class='fas fa-piggy-bank'></i> Évolution de l'Épargne Cumulée</h3>
                             <div id='chart4' class='chart'></div>
                         </div>
                         
+                        <!-- Charts Grid 2 columns -->
                         <div class='grid-2'>
+                            <!-- Chart 5: Investment Portfolio -->
                             <div class='chart-wrapper'>
-                                <h2 class='section-title'>Investment Portfolio</h2>
+                                <h3><i class='fas fa-briefcase'></i> Portefeuille d'Investissement</h3>
                                 <div id='chart5' class='chart'></div>
                             </div>
+                            
+                            <!-- Chart 6: ROI Evolution -->
                             <div class='chart-wrapper'>
-                                <h2 class='section-title'>ROI Evolution</h2>
+                                <h3><i class='fas fa-percentage'></i> Évolution du ROI</h3>
                                 <div id='chart6' class='chart'></div>
                             </div>
                         </div>
-                    </div>
+                    </section>
                 </div>
                 
-                <!-- Footer -->
-                <footer>
-                    <p>Financial Dashboard | Auto-saved in browser localStorage</p>
+                <!-- ============================================
+                     FOOTER
+                     ============================================ -->
+                <footer class='footer'>
+                    <p>
+                        <i class='fas fa-shield-alt'></i>
+                        Dashboard Financier Personnel | Données sauvegardées localement dans votre navigateur
+                    </p>
+                    <p class='footer-links'>
+                        <a href='#'>Confidentialité</a> |
+                        <a href='#'>CGU</a> |
+                        <a href='#'>Support</a>
+                    </p>
                 </footer>
             </div>
         </div>
     </div>
     
-    <!-- Scripts -->
-    <script src='assets/js/dark-mode.js'></script>  <!-- ✅ NOUVEAU -->
+    <!-- ============================================
+         SCRIPTS
+         ============================================ -->
+    <script src='assets/js/dark-mode.js'></script>
     <script src='assets/js/common.js'></script>
     <script src='assets/js/sidebar.js'></script>
     <script src='assets/js/dashboard.js'></script>

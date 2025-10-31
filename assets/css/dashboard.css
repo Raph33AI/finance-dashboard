@@ -1,52 +1,77 @@
 /* ==============================================
    DASHBOARD.CSS - Modern Minimalist Design 2024
-   Blanc/Gris/Noir + Dark Mode Support
+   Version optimisée avec Container Queries
+   Compatible avec le système de design Market-Data
    ============================================== */
 
-/* Stats Grid */
+/* ============================================
+   STATS GRID - Indicateurs Principaux
+   ============================================ */
+
 .stats-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 20px;
-    padding: 30px;
+    gap: var(--spacing-lg);
+    padding: var(--spacing-xl);
     background: var(--background-secondary);
     border-radius: var(--radius-xl);
-}
-
-body.dark-mode .stats-grid {
-    background: var(--background-primary);
+    margin-bottom: var(--spacing-xl);
+    border: 1px solid var(--border-color);
+    box-shadow: var(--shadow-sm);
+    container-type: inline-size;
 }
 
 .stat-card {
     background: var(--background-primary);
-    padding: 20px;
-    border-radius: 15px;
-    box-shadow: var(--shadow-md);
+    padding: var(--spacing-xl);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
     text-align: center;
-    transition: all 0.3s;
+    transition: all var(--transition-base);
     border: 1px solid var(--border-color);
     border-left: 4px solid var(--primary-color);
+    position: relative;
+    overflow: hidden;
+}
+
+.stat-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--primary-color), var(--primary-light));
+    opacity: 0;
+    transition: opacity var(--transition-base);
+}
+
+.stat-card:hover::before {
+    opacity: 1;
 }
 
 .stat-card:hover {
-    transform: translateY(-5px);
+    transform: translateY(-4px);
     box-shadow: var(--shadow-lg);
     border-left-color: var(--primary-dark);
+    border-color: var(--border-color-hover);
 }
 
 .stat-card h3 {
-    font-size: 0.9em;
+    font-size: 0.8125rem;
     color: var(--text-secondary);
-    margin-bottom: 10px;
+    margin: 0 0 var(--spacing-md) 0;
     text-transform: uppercase;
     font-weight: 600;
     letter-spacing: 0.05em;
 }
 
 .stat-card .value {
-    font-size: 2em;
-    font-weight: bold;
+    font-size: 2rem;
+    font-weight: 700;
     color: var(--primary-color);
+    line-height: 1.2;
+    margin: 0;
 }
 
 .stat-card.positive .value {
@@ -57,28 +82,44 @@ body.dark-mode .stats-grid {
     color: var(--danger-color);
 }
 
-/* Toolbar */
+.stat-card.neutral .value {
+    color: var(--accent-color);
+}
+
+/* ============================================
+   TOOLBAR - Paramètres et Contrôles
+   ============================================ */
+
 .toolbar {
-    background: var(--background-secondary);
-    padding: 20px;
-    border-radius: var(--radius-lg);
-    margin-bottom: 20px;
+    background: var(--background-primary);
+    padding: var(--spacing-xl);
+    border-radius: var(--radius-xl);
+    margin-bottom: var(--spacing-xl);
     border: 1px solid var(--border-color);
+    box-shadow: var(--shadow-sm);
 }
 
 .toolbar h3 {
     color: var(--text-primary);
-    margin-bottom: 15px;
+    margin: 0 0 var(--spacing-lg) 0;
     font-size: 1.125rem;
     font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+}
+
+.toolbar h3 i {
+    color: var(--primary-color);
+    font-size: 1.1rem;
 }
 
 .toolbar-row {
     display: flex;
-    gap: 15px;
+    gap: var(--spacing-lg);
     align-items: center;
     flex-wrap: wrap;
-    margin-bottom: 15px;
+    margin-bottom: var(--spacing-lg);
 }
 
 .toolbar-row:last-child {
@@ -86,21 +127,30 @@ body.dark-mode .stats-grid {
 }
 
 .toolbar label {
-    font-weight: 600;
+    font-weight: 500;
     color: var(--text-primary);
-    font-size: 0.9em;
-    min-width: 80px;
+    font-size: 0.9375rem;
+    min-width: 100px;
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+}
+
+.toolbar label i {
+    color: var(--text-secondary);
+    font-size: 0.875rem;
 }
 
 .toolbar input,
 .toolbar select {
-    padding: 10px;
+    padding: 0.75rem 1rem;
     border: 1px solid var(--border-color);
     border-radius: var(--radius-md);
-    font-size: 0.95em;
+    font-size: 0.9375rem;
     background: var(--background-primary);
     color: var(--text-primary);
     transition: all var(--transition-base);
+    font-family: inherit;
 }
 
 .toolbar input:focus,
@@ -110,17 +160,29 @@ body.dark-mode .stats-grid {
     box-shadow: 0 0 0 3px rgb(37 99 235 / 0.1);
 }
 
+.toolbar input:hover,
+.toolbar select:hover {
+    border-color: var(--border-color-hover);
+}
+
+/* ============================================
+   BUTTONS - Styles des Boutons
+   ============================================ */
+
 .btn-add {
     background: var(--primary-color);
     color: white;
-    padding: 10px 25px;
+    padding: 0.75rem 1.5rem;
     border: none;
     border-radius: var(--radius-md);
-    font-size: 0.95em;
+    font-size: 0.9375rem;
     font-weight: 600;
     cursor: pointer;
-    margin: 5px;
+    margin: var(--spacing-xs);
     transition: all var(--transition-base);
+    display: inline-flex;
+    align-items: center;
+    gap: var(--spacing-sm);
 }
 
 .btn-add:hover {
@@ -129,16 +191,28 @@ body.dark-mode .stats-grid {
     box-shadow: var(--shadow-md);
 }
 
+.btn-add:active {
+    transform: translateY(0);
+}
+
+.btn-add:focus-visible {
+    outline: 2px solid var(--primary-color);
+    outline-offset: 2px;
+}
+
 .btn-success {
     background: var(--success-color);
     color: white;
-    padding: 12px 30px;
+    padding: 0.875rem 2rem;
     border: none;
     border-radius: var(--radius-md);
-    font-size: 1em;
+    font-size: 1rem;
     font-weight: 600;
     cursor: pointer;
     transition: all var(--transition-base);
+    display: inline-flex;
+    align-items: center;
+    gap: var(--spacing-sm);
 }
 
 .btn-success:hover {
@@ -147,51 +221,171 @@ body.dark-mode .stats-grid {
     box-shadow: var(--shadow-md);
 }
 
+.btn-success:active {
+    transform: translateY(0);
+}
+
+.btn-success:focus-visible {
+    outline: 2px solid var(--success-color);
+    outline-offset: 2px;
+}
+
+.btn-danger {
+    background: var(--danger-color);
+    color: white;
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: var(--radius-md);
+    font-size: 0.9375rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all var(--transition-base);
+    display: inline-flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+}
+
+.btn-danger:hover {
+    background: #dc2626;
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+.btn-danger:focus-visible {
+    outline: 2px solid var(--danger-color);
+    outline-offset: 2px;
+}
+
+.btn-secondary {
+    background: var(--background-tertiary);
+    color: var(--text-primary);
+    padding: 0.75rem 1.5rem;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    font-size: 0.9375rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all var(--transition-base);
+    display: inline-flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+}
+
+.btn-secondary:hover {
+    background: var(--border-color-hover);
+    border-color: var(--border-color-hover);
+}
+
+.btn-secondary:focus-visible {
+    outline: 2px solid var(--primary-color);
+    outline-offset: 2px;
+}
+
+/* ============================================
+   PARAMETERS GRID
+   ============================================ */
+
+.parameters-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: var(--spacing-xl);
+    margin-bottom: var(--spacing-xl);
+}
+
+.parameter-group {
+    background: var(--background-secondary);
+    padding: var(--spacing-lg);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border-color);
+    border-left: 3px solid var(--primary-color);
+}
+
+.parameter-group h4 {
+    color: var(--text-primary);
+    font-size: 1rem;
+    font-weight: 600;
+    margin: 0 0 var(--spacing-md) 0;
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+}
+
+.parameter-group h4 i {
+    color: var(--primary-color);
+}
+
+/* ============================================
+   TOTAL MONTHS DISPLAY
+   ============================================ */
+
 .total-months {
     color: var(--text-primary);
     font-weight: 600;
-    margin-left: 20px;
+    margin-left: var(--spacing-lg);
+    font-size: 0.9375rem;
+    display: inline-flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    padding: 0.5rem 1rem;
+    background: var(--background-secondary);
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-color);
 }
 
 .total-months span {
     color: var(--primary-color);
-    font-size: 1.1em;
+    font-size: 1.25rem;
     font-weight: 700;
-}
-
-.parameters-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 20px;
-    margin-bottom: 20px;
 }
 
 .yield-display {
     color: var(--primary-color);
     font-weight: 600;
-    margin-left: 10px;
+    margin-left: var(--spacing-md);
+    font-size: 1rem;
+    padding: 0.25rem 0.75rem;
+    background: rgb(37 99 235 / 0.1);
+    border-radius: var(--radius-sm);
 }
 
 .inflation-status {
     color: var(--accent-color);
     font-weight: 600;
-    margin-left: 15px;
+    margin-left: var(--spacing-lg);
+    font-size: 0.9375rem;
+    padding: 0.375rem 0.875rem;
+    background: rgb(139 92 246 / 0.1);
+    border-radius: var(--radius-md);
+    display: inline-flex;
+    align-items: center;
+    gap: var(--spacing-xs);
 }
 
-/* Table Styles */
+.inflation-status::before {
+    content: '📊';
+    font-size: 1rem;
+}
+
+/* ============================================
+   TABLE CONTAINER - Tableau de Données
+   ============================================ */
+
 .table-container {
     overflow-x: auto;
     max-height: 600px;
     overflow-y: auto;
-    border-radius: var(--radius-lg);
+    border-radius: var(--radius-xl);
     box-shadow: var(--shadow-md);
     border: 1px solid var(--border-color);
+    background: var(--background-primary);
+    margin-bottom: var(--spacing-xl);
 }
 
 .data-table {
     width: 100%;
     border-collapse: collapse;
-    font-size: 0.85em;
+    font-size: 0.875rem;
+    position: relative;
 }
 
 .data-table thead {
@@ -199,36 +393,32 @@ body.dark-mode .stats-grid {
     color: white;
     position: sticky;
     top: 0;
-    z-index: 10;
-}
-
-body.dark-mode .data-table thead {
-    background: var(--primary-color);
+    z-index: 100;
+    box-shadow: var(--shadow-sm);
 }
 
 .data-table th {
-    padding: 12px 8px;
+    padding: var(--spacing-md) var(--spacing-sm);
     text-align: left;
     font-weight: 600;
     white-space: nowrap;
-    border-right: 1px solid rgba(255,255,255,0.2);
-    font-size: 0.85em;
+    border-right: 1px solid rgba(255, 255, 255, 0.2);
+    font-size: 0.8125rem;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
 }
 
 .data-table th:first-child {
     position: sticky;
     left: 0;
-    z-index: 11;
+    z-index: 110;
     background: var(--text-primary);
-}
-
-body.dark-mode .data-table th:first-child {
-    background: var(--primary-color);
+    box-shadow: 2px 0 4px rgba(0, 0, 0, 0.1);
 }
 
 .data-table tbody tr {
     border-bottom: 1px solid var(--border-color);
-    transition: background 0.2s;
+    transition: background var(--transition-fast);
 }
 
 .data-table tbody tr:hover {
@@ -244,9 +434,10 @@ body.dark-mode .data-table th:first-child {
 }
 
 .data-table td {
-    padding: 6px 4px;
+    padding: var(--spacing-sm) var(--spacing-xs);
     border-right: 1px solid var(--border-color);
     color: var(--text-primary);
+    font-size: 0.875rem;
 }
 
 .data-table td:first-child {
@@ -255,8 +446,9 @@ body.dark-mode .data-table th:first-child {
     background: var(--background-primary);
     font-weight: 600;
     color: var(--primary-color);
-    z-index: 1;
-    font-size: 0.8em;
+    z-index: 10;
+    font-size: 0.8125rem;
+    box-shadow: 2px 0 4px rgba(0, 0, 0, 0.05);
 }
 
 .data-table tbody tr:nth-child(even) td:first-child {
@@ -268,20 +460,27 @@ body.dark-mode .data-table th:first-child {
 }
 
 .data-table input {
-    width: 80px;
-    padding: 4px;
+    width: 90px;
+    padding: 0.375rem 0.5rem;
     border: 1px solid var(--border-color);
     border-radius: var(--radius-sm);
-    font-size: 0.85em;
+    font-size: 0.875rem;
     text-align: right;
     background: var(--background-primary);
     color: var(--text-primary);
+    font-family: inherit;
+    transition: all var(--transition-base);
 }
 
 .data-table input:focus {
     outline: none;
     border-color: var(--primary-color);
-    background: rgba(37, 99, 235, 0.05);
+    background: rgb(37 99 235 / 0.05);
+    box-shadow: 0 0 0 3px rgb(37 99 235 / 0.1);
+}
+
+.data-table input:hover {
+    border-color: var(--border-color-hover);
 }
 
 .data-table .calculated {
@@ -289,61 +488,112 @@ body.dark-mode .data-table th:first-child {
     font-weight: 600;
     color: var(--text-primary);
     text-align: right;
-    padding: 6px 8px;
-    font-size: 0.85em;
-}
-
-body.dark-mode .data-table .calculated {
-    background: var(--background-secondary);
+    padding: var(--spacing-sm) var(--spacing-md);
+    font-size: 0.875rem;
 }
 
 .data-table .btn-delete {
-    background: var(--danger-color);
-    color: white;
+    background: rgb(239 68 68 / 0.1);
+    color: var(--danger-color);
     border: none;
-    padding: 3px 8px;
+    padding: 0.375rem 0.75rem;
     border-radius: var(--radius-sm);
     cursor: pointer;
-    font-size: 0.75em;
+    font-size: 0.75rem;
     font-weight: 600;
     transition: all var(--transition-base);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .data-table .btn-delete:hover {
-    background: #dc2626;
+    background: var(--danger-color);
+    color: white;
     transform: scale(1.05);
 }
 
-/* Charts Container */
+.data-table .btn-delete:focus-visible {
+    outline: 2px solid var(--danger-color);
+    outline-offset: 2px;
+}
+
+/* ============================================
+   CHARTS CONTAINER - Graphiques
+   ============================================ */
+
 .charts-container {
-    padding: 30px;
+    padding: var(--spacing-xl);
     background: var(--background-secondary);
     border-radius: var(--radius-xl);
+    border: 1px solid var(--border-color);
+    margin-bottom: var(--spacing-xl);
 }
 
 .chart-wrapper {
     background: var(--background-primary);
-    margin-bottom: 30px;
+    margin-bottom: var(--spacing-2xl);
     border-radius: var(--radius-xl);
     box-shadow: var(--shadow-sm);
-    padding: 20px;
+    padding: var(--spacing-xl);
     border: 1px solid var(--border-color);
+    transition: all var(--transition-base);
 }
+
+.chart-wrapper:last-child {
+    margin-bottom: 0;
+}
+
+.chart-wrapper:hover {
+    box-shadow: var(--shadow-md);
+    border-color: var(--border-color-hover);
+}
+
+.chart-wrapper h3 {
+    color: var(--text-primary);
+    font-size: 1.125rem;
+    font-weight: 600;
+    margin: 0 0 var(--spacing-lg) 0;
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    padding-bottom: var(--spacing-md);
+    border-bottom: 2px solid var(--border-color);
+}
+
+.chart-wrapper h3 i {
+    color: var(--primary-color);
+    font-size: 1.1rem;
+}
+
+/* ============================================
+   CHARTS GRID
+   ============================================ */
 
 .grid-2 {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(600px, 1fr));
-    gap: 30px;
+    grid-template-columns: repeat(auto-fit, minmax(min(600px, 100%), 1fr));
+    gap: var(--spacing-xl);
 }
 
+.grid-3 {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(400px, 100%), 1fr));
+    gap: var(--spacing-xl);
+}
+
+/* ============================================
+   LOCAL FILTER - Filtres Graphiques
+   ============================================ */
+
 .local-filter {
-    margin: 15px 0;
-    padding: 15px;
+    margin: var(--spacing-lg) 0;
+    padding: var(--spacing-lg);
     background: var(--background-secondary);
     border-radius: var(--radius-lg);
     display: flex;
     align-items: center;
-    gap: 15px;
+    gap: var(--spacing-lg);
     flex-wrap: wrap;
     border: 1px solid var(--border-color);
     border-left: 4px solid var(--primary-color);
@@ -352,20 +602,28 @@ body.dark-mode .data-table .calculated {
 .local-filter label {
     font-weight: 600;
     color: var(--text-primary);
-    font-size: 0.9em;
+    font-size: 0.9375rem;
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+}
+
+.local-filter label i {
+    color: var(--primary-color);
 }
 
 .local-filter select {
-    padding: 8px 15px;
+    padding: 0.625rem 1rem;
     border: 1px solid var(--border-color);
     border-radius: var(--radius-md);
-    font-size: 0.9em;
+    font-size: 0.9375rem;
     min-width: 200px;
     cursor: pointer;
     background: var(--background-primary);
     color: var(--text-primary);
     font-weight: 500;
     transition: all var(--transition-base);
+    font-family: inherit;
 }
 
 .local-filter select:focus {
@@ -374,28 +632,151 @@ body.dark-mode .data-table .calculated {
     box-shadow: 0 0 0 3px rgb(37 99 235 / 0.1);
 }
 
-/* Highcharts Dark Mode Override */
-body.dark-mode .highcharts-background {
+.local-filter select:hover {
+    border-color: var(--border-color-hover);
+}
+
+/* ============================================
+   BULK EDIT SECTION
+   ============================================ */
+
+.bulk-edit-section {
+    background: var(--background-primary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-xl);
+    padding: var(--spacing-xl);
+    margin-bottom: var(--spacing-xl);
+    box-shadow: var(--shadow-sm);
+}
+
+.bulk-edit-section h3 {
+    color: var(--text-primary);
+    font-size: 1.125rem;
+    font-weight: 600;
+    margin: 0 0 var(--spacing-lg) 0;
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+}
+
+.bulk-edit-section h3 i {
+    color: var(--accent-color);
+}
+
+.bulk-edit-form {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-lg);
+}
+
+.form-row {
+    display: flex;
+    gap: var(--spacing-md);
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.form-row label {
+    font-weight: 500;
+    color: var(--text-primary);
+    font-size: 0.9375rem;
+    min-width: 120px;
+}
+
+/* ============================================
+   HIGHCHARTS CUSTOM STYLING
+   ============================================ */
+
+.highcharts-container {
+    border-radius: var(--radius-md);
+}
+
+.highcharts-background {
     fill: var(--background-primary);
 }
 
-body.dark-mode .highcharts-title,
-body.dark-mode .highcharts-subtitle,
-body.dark-mode .highcharts-axis-labels text {
+.highcharts-title {
     fill: var(--text-primary) !important;
+    font-weight: 600 !important;
 }
 
-body.dark-mode .highcharts-grid-line {
+.highcharts-subtitle {
+    fill: var(--text-secondary) !important;
+}
+
+.highcharts-axis-labels text {
+    fill: var(--text-secondary) !important;
+    font-size: 0.8125rem !important;
+}
+
+.highcharts-axis-title {
+    fill: var(--text-primary) !important;
+    font-weight: 600 !important;
+}
+
+.highcharts-grid-line {
     stroke: var(--border-color);
 }
 
-body.dark-mode .highcharts-legend-item text {
+.highcharts-legend-item text {
     fill: var(--text-primary) !important;
+    font-weight: 500 !important;
 }
 
-/* Responsive */
-@media (max-width: 768px) {
+.highcharts-tooltip-box {
+    fill: var(--background-primary);
+    stroke: var(--border-color);
+}
+
+/* ============================================
+   LOADING STATE
+   ============================================ */
+
+.loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    backdrop-filter: blur(4px);
+}
+
+.loading-spinner {
+    width: 48px;
+    height: 48px;
+    border: 4px solid var(--border-color);
+    border-top-color: var(--primary-color);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* ============================================
+   RESPONSIVE DESIGN
+   ============================================ */
+
+@media (max-width: 1200px) {
     .grid-2 {
+        grid-template-columns: 1fr;
+    }
+    
+    .grid-3 {
+        grid-template-columns: repeat(auto-fit, minmax(min(350px, 100%), 1fr));
+    }
+}
+
+@media (max-width: 768px) {
+    .stats-grid {
+        padding: var(--spacing-lg);
+        gap: var(--spacing-md);
         grid-template-columns: 1fr;
     }
     
@@ -408,8 +789,126 @@ body.dark-mode .highcharts-legend-item text {
         align-items: stretch;
     }
     
-    .stats-grid {
-        padding: 20px;
-        gap: 15px;
+    .toolbar label {
+        min-width: auto;
+    }
+    
+    .toolbar input,
+    .toolbar select {
+        width: 100%;
+    }
+    
+    .local-filter {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .local-filter select {
+        width: 100%;
+    }
+    
+    .form-row {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .form-row label {
+        min-width: auto;
+    }
+    
+    .chart-wrapper {
+        padding: var(--spacing-lg);
+    }
+    
+    .charts-container {
+        padding: var(--spacing-lg);
+    }
+    
+    .total-months {
+        margin-left: 0;
+        margin-top: var(--spacing-sm);
+    }
+    
+    .inflation-status {
+        margin-left: 0;
+        margin-top: var(--spacing-sm);
+    }
+}
+
+@media (max-width: 480px) {
+    .stat-card .value {
+        font-size: 1.5rem;
+    }
+    
+    .data-table {
+        font-size: 0.75rem;
+    }
+    
+    .data-table th,
+    .data-table td {
+        padding: var(--spacing-xs);
+    }
+    
+    .data-table input {
+        width: 70px;
+        font-size: 0.75rem;
+    }
+    
+    .toolbar {
+        padding: var(--spacing-lg);
+    }
+    
+    .chart-wrapper h3 {
+        font-size: 1rem;
+    }
+}
+
+/* ============================================
+   ACCESSIBILITY & REDUCED MOTION
+   ============================================ */
+
+@media (prefers-reduced-motion: reduce) {
+    .stat-card,
+    .chart-wrapper,
+    .btn-add,
+    .btn-success,
+    .btn-danger,
+    .btn-secondary,
+    .data-table tbody tr {
+        transition: none;
+    }
+    
+    .loading-spinner {
+        animation: none;
+    }
+}
+
+/* Focus visible pour accessibilité clavier */
+*:focus-visible {
+    outline: 2px solid var(--primary-color);
+    outline-offset: 2px;
+}
+
+/* ============================================
+   PRINT STYLES
+   ============================================ */
+
+@media print {
+    .toolbar,
+    .bulk-edit-section,
+    .btn-add,
+    .btn-success,
+    .btn-danger,
+    .btn-delete {
+        display: none;
+    }
+    
+    .stats-grid,
+    .chart-wrapper {
+        page-break-inside: avoid;
+    }
+    
+    .data-table {
+        font-size: 0.7rem;
     }
 }
