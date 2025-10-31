@@ -1,8 +1,13 @@
 /* ==============================================
    MARKET-DATA.JS - Market Data & Technical Analysis
+   Migré vers Twelve Data API + Cloudflare Workers Backend
    ============================================== */
 
 const MarketData = {
+    // API Client
+    apiClient: null,
+    
+    // Current State
     currentSymbol: '',
     currentPeriod: '1M',
     stockData: null,
@@ -10,14 +15,6 @@ const MarketData = {
     // Search functionality
     selectedSuggestionIndex: -1,
     searchTimeout: null,
-    
-    // Proxy CORS
-    CORS_PROXIES: [
-        'https://api.allorigins.win/raw?url=',
-        'https://corsproxy.io/?',
-        'https://api.codetabs.com/v1/proxy?quest='
-    ],
-    currentProxyIndex: 0,
     
     // Watchlist & Alerts
     watchlist: [],
@@ -32,9 +29,22 @@ const MarketData = {
     
     // Initialize
     init() {
+        // ✅ Initialiser le client API
+        this.apiClient = new FinanceAPIClient({
+            baseURL: APP_CONFIG.API_BASE_URL,
+            cacheDuration: APP_CONFIG.CACHE_DURATION,
+            maxRetries: APP_CONFIG.MAX_RETRIES,
+            onLoadingChange: (isLoading) => {
+                this.showLoading(isLoading);
+            }
+        });
+        
+        // Rendre accessible globalement pour le widget cache
+        window.apiClient = this.apiClient;
+        
         this.updateLastUpdate();
         this.setupEventListeners();
-        this.setupSearchListeners(); // ✅ AJOUTÉ
+        this.setupSearchListeners();
         this.loadWatchlistFromStorage();
         this.loadAlertsFromStorage();
         this.requestNotificationPermission();
@@ -62,9 +72,8 @@ const MarketData = {
         document.getElementById('toggleVolume')?.addEventListener('change', () => this.updateChart());
     },
     
-    // ========== NOUVELLE FONCTIONNALITÉ DE RECHERCHE ==========
+    // ========== RECHERCHE AVEC TWELVE DATA ==========
     
-    // Setup search listeners with autocomplete
     setupSearchListeners() {
         const input = document.getElementById('symbolInput');
         if (input) {
@@ -119,12 +128,12 @@ const MarketData = {
         
         clearTimeout(this.searchTimeout);
         this.searchTimeout = setTimeout(() => {
-            this.searchYahooFinance(trimmedQuery);
+            this.searchSymbols(trimmedQuery);
         }, 300);
     },
     
-    async searchYahooFinance(query) {
-        console.log('🔍 Searching Yahoo Finance for:', query);
+    async searchSymbols(query) {
+        console.log('🔍 Searching Twelve Data for:', query);
         
         const container = document.getElementById('searchSuggestions');
         if (!container) return;
@@ -133,32 +142,12 @@ const MarketData = {
         container.classList.add('active');
         
         try {
-            const searchUrl = `https://query1.finance.yahoo.com/v1/finance/search?q=${encodeURIComponent(query)}&quotesCount=20&newsCount=0&enableFuzzyQuery=false`;
+            const results = await this.apiClient.searchSymbol(query);
             
-            for (let i = 0; i < this.CORS_PROXIES.length; i++) {
-                try {
-                    const proxyUrl = this.CORS_PROXIES[i];
-                    const url = proxyUrl + encodeURIComponent(searchUrl);
-                    
-                    const response = await fetch(url);
-                    if (!response.ok) throw new Error(`HTTP ${response.status}`);
-                    
-                    const data = await response.json();
-                    
-                    if (data.quotes && data.quotes.length > 0) {
-                        this.displaySearchResults(data.quotes, query);
-                    } else {
-                        this.displayNoResults();
-                    }
-                    
-                    return;
-                    
-                } catch (error) {
-                    console.warn(`Search proxy ${i + 1} failed:`, error.message);
-                    if (i === this.CORS_PROXIES.length - 1) {
-                        throw error;
-                    }
-                }
+            if (results.results && results.results.length > 0) {
+                this.displaySearchResults(results.results, query);
+            } else {
+                this.displayNoResults();
             }
             
         } catch (error) {
@@ -167,31 +156,36 @@ const MarketData = {
         }
     },
     
-    displaySearchResults(quotes, query) {
+    displaySearchResults(results, query) {
         const container = document.getElementById('searchSuggestions');
         if (!container) return;
         
+        // Grouper par type
         const stocks = [];
         const etfs = [];
         const crypto = [];
         const indices = [];
         const other = [];
         
-        quotes.forEach(quote => {
-            const item = {
-                symbol: quote.symbol,
-                name: quote.shortname || quote.longname || quote.symbol,
-                type: quote.quoteType || 'EQUITY',
-                exchange: quote.exchange || '',
-                score: quote.score || 0
-            };
+        results.forEach(item => {
+            const type = (item.type || 'EQUITY').toUpperCase();
             
-            switch (item.type) {
-                case 'EQUITY': stocks.push(item); break;
-                case 'ETF': etfs.push(item); break;
-                case 'CRYPTOCURRENCY': crypto.push(item); break;
-                case 'INDEX': indices.push(item); break;
-                default: other.push(item);
+            switch (type) {
+                case 'COMMON STOCK':
+                case 'EQUITY':
+                    stocks.push(item);
+                    break;
+                case 'ETF':
+                    etfs.push(item);
+                    break;
+                case 'CRYPTOCURRENCY':
+                    crypto.push(item);
+                    break;
+                case 'INDEX':
+                    indices.push(item);
+                    break;
+                default:
+                    other.push(item);
             }
         });
         
@@ -327,9 +321,8 @@ const MarketData = {
         suggestions[this.selectedSuggestionIndex].scrollIntoView({ block: 'nearest', behavior: 'smooth' });
     },
     
-    // ========== FIN NOUVELLE FONCTIONNALITÉ ==========
+    // ========== CHARGEMENT DES DONNÉES ==========
     
-    // Search Stock
     searchStock() {
         const symbol = document.getElementById('symbolInput').value.trim().toUpperCase();
         if (symbol) {
@@ -337,17 +330,28 @@ const MarketData = {
         }
     },
     
-    // Load Symbol Data
     async loadSymbol(symbol) {
         this.currentSymbol = symbol;
         document.getElementById('symbolInput').value = symbol;
         
         this.showLoading(true);
         this.hideResults();
-        this.hideSuggestions(); // ✅ AJOUTÉ - Cache les suggestions lors du chargement
+        this.hideSuggestions();
         
         try {
-            await this.fetchYahooFinanceData(symbol);
+            // Récupérer quote + time series en parallèle
+            const [quote, timeSeries] = await Promise.all([
+                this.apiClient.getQuote(symbol),
+                this.getTimeSeriesForPeriod(symbol, this.currentPeriod)
+            ]);
+            
+            // Construire stockData
+            this.stockData = {
+                symbol: quote.symbol,
+                prices: timeSeries.data,
+                quote: quote
+            };
+            
             this.displayStockOverview();
             this.displayResults();
             this.showLoading(false);
@@ -355,140 +359,41 @@ const MarketData = {
             
         } catch (error) {
             console.error('Error loading stock data:', error);
-            console.log('Using demo data as fallback...');
-            this.stockData = this.generateDemoData(symbol);
-            this.displayStockOverview();
-            this.displayResults();
+            this.showNotification(error.message, 'alert');
             this.showLoading(false);
-            this.updateAddToWatchlistButton();
         }
     },
     
-    // Fetch from Yahoo Finance with CORS proxy
-    async fetchYahooFinanceData(symbol) {
-        const period = this.getPeriodParams(this.currentPeriod);
-        const targetUrl = `https://query1.finance.yahoo.com/v8/finance/chart/${symbol}?interval=${period.interval}&range=${period.range}`;
+    async getTimeSeriesForPeriod(symbol, period) {
+        const periodMap = {
+            '1M': { interval: '1day', outputsize: 30 },
+            '3M': { interval: '1day', outputsize: 90 },
+            '6M': { interval: '1day', outputsize: 180 },
+            '1Y': { interval: '1day', outputsize: 252 },
+            '5Y': { interval: '1week', outputsize: 260 },
+            'MAX': { interval: '1month', outputsize: 300 }
+        };
         
-        // Try with CORS proxy
-        for (let i = 0; i < this.CORS_PROXIES.length; i++) {
-            try {
-                const proxyUrl = this.CORS_PROXIES[i];
-                const url = proxyUrl + encodeURIComponent(targetUrl);
-                
-                console.log(`Attempting fetch with proxy ${i + 1}...`);
-                const response = await fetch(url);
-                
-                if (!response.ok) {
-                    throw new Error(`HTTP ${response.status}`);
-                }
-                
-                const data = await response.json();
-                
-                if (data.chart && data.chart.error) {
-                    throw new Error(data.chart.error.description);
-                }
-                
-                const result = data.chart.result[0];
-                this.stockData = this.parseYahooData(result);
-                
-                // Fetch quote data
-                await this.fetchQuoteData(symbol);
-                
-                console.log('✅ Data fetched successfully');
-                return;
-                
-            } catch (error) {
-                console.warn(`Proxy ${i + 1} failed:`, error.message);
-                if (i === this.CORS_PROXIES.length - 1) {
-                    throw new Error('All proxies failed');
-                }
-            }
-        }
-    },
-    
-    // Fetch Quote Data
-    async fetchQuoteData(symbol) {
-        try {
-            const targetUrl = `https://query1.finance.yahoo.com/v7/finance/quote?symbols=${symbol}`;
-            const proxyUrl = this.CORS_PROXIES[0];
-            const url = proxyUrl + encodeURIComponent(targetUrl);
-            
-            const response = await fetch(url);
-            const data = await response.json();
-            
-            if (data.quoteResponse && data.quoteResponse.result.length > 0) {
-                const quote = data.quoteResponse.result[0];
-                this.stockData.quote = {
-                    name: quote.longName || quote.shortName || symbol,
-                    symbol: quote.symbol,
-                    price: quote.regularMarketPrice,
-                    change: quote.regularMarketChange,
-                    changePercent: quote.regularMarketChangePercent,
-                    open: quote.regularMarketOpen,
-                    high: quote.regularMarketDayHigh,
-                    low: quote.regularMarketDayLow,
-                    volume: quote.regularMarketVolume,
-                    marketCap: quote.marketCap,
-                    pe: quote.trailingPE
-                };
-            }
-        } catch (error) {
-            console.warn('Quote fetch failed, using fallback data');
-            const lastPrice = this.stockData.prices[this.stockData.prices.length - 1];
-            const prevPrice = this.stockData.prices[this.stockData.prices.length - 2] || lastPrice;
-            
-            this.stockData.quote = {
-                name: symbol,
-                symbol: symbol,
-                price: lastPrice.close,
-                change: lastPrice.close - prevPrice.close,
-                changePercent: ((lastPrice.close - prevPrice.close) / prevPrice.close) * 100,
-                open: lastPrice.open,
-                high: lastPrice.high,
-                low: lastPrice.low,
-                volume: lastPrice.volume,
-                marketCap: null,
-                pe: null
-            };
-        }
-    },
-    
-    // Parse Yahoo Finance Data
-    parseYahooData(result) {
-        const timestamps = result.timestamp;
-        const quotes = result.indicators.quote[0];
+        const config = periodMap[period] || periodMap['6M'];
+        const result = await this.apiClient.getTimeSeries(symbol, config.interval, config.outputsize);
         
-        const prices = timestamps.map((time, i) => ({
-            timestamp: time * 1000,
-            open: quotes.open[i],
-            high: quotes.high[i],
-            low: quotes.low[i],
-            close: quotes.close[i],
-            volume: quotes.volume[i]
-        })).filter(p => p.close !== null);
+        // Transformer les données pour correspondre au format attendu
+        const transformedData = result.data.map(item => ({
+            timestamp: new Date(item.datetime).getTime(),
+            open: item.open,
+            high: item.high,
+            low: item.low,
+            close: item.close,
+            volume: item.volume
+        }));
         
         return {
-            symbol: result.meta.symbol,
-            prices: prices,
-            currency: result.meta.currency,
-            quote: {}
+            symbol: result.symbol,
+            interval: result.interval,
+            data: transformedData
         };
     },
     
-    // Get Period Parameters
-    getPeriodParams(period) {
-        const params = {
-            '1M': { range: '1mo', interval: '1d' },
-            '3M': { range: '3mo', interval: '1d' },
-            '6M': { range: '6mo', interval: '1d' },
-            '1Y': { range: '1y', interval: '1d' },
-            '5Y': { range: '5y', interval: '1wk' },
-            'MAX': { range: 'max', interval: '1mo' }
-        };
-        return params[period] || params['1Y'];
-    },
-    
-    // Change Period
     changePeriod(period) {
         this.currentPeriod = period;
         
@@ -501,13 +406,11 @@ const MarketData = {
             this.loadSymbol(this.currentSymbol);
         }
         
-        // Reload comparison if active
         if (this.comparisonSymbols.length > 0) {
             this.loadComparison();
         }
     },
     
-    // Update Chart (when toggles change)
     updateChart() {
         if (this.stockData) {
             this.createPriceChart();
@@ -518,18 +421,15 @@ const MarketData = {
     // COMPARISON FUNCTIONS
     // ============================================
     
-    // Open comparison modal
     openComparisonModal() {
         document.getElementById('modalAddComparison').style.display = 'block';
     },
     
-    // Close comparison modal
     closeComparisonModal() {
         document.getElementById('modalAddComparison').style.display = 'none';
         document.getElementById('comparisonSymbols').value = '';
     },
     
-    // Load comparison
     async loadComparison() {
         const input = document.getElementById('comparisonSymbols').value;
         const symbols = input.split(',')
@@ -550,10 +450,8 @@ const MarketData = {
         this.comparisonSymbols = symbols;
         this.comparisonData = {};
         
-        // Show loading
         this.showNotification(`Loading ${symbols.length} stocks for comparison...`, 'info');
         
-        // Fetch data for all symbols
         let successCount = 0;
         for (const symbol of symbols) {
             try {
@@ -562,7 +460,6 @@ const MarketData = {
             } catch (error) {
                 console.error(`Failed to load ${symbol}:`, error);
             }
-            await this.sleep(500);
         }
         
         if (successCount < 2) {
@@ -570,81 +467,40 @@ const MarketData = {
             return;
         }
         
-        // Display comparison
         this.displayComparison();
         this.showNotification(`✅ Comparison loaded for ${successCount} stocks`, 'success');
     },
     
-    // Fetch comparison data for a symbol
     async fetchComparisonData(symbol) {
-        const period = this.getPeriodParams(this.currentPeriod);
-        const targetUrl = `https://query1.finance.yahoo.com/v8/finance/chart/${symbol}?interval=${period.interval}&range=${period.range}`;
-        const proxyUrl = this.CORS_PROXIES[0];
-        const url = proxyUrl + encodeURIComponent(targetUrl);
+        const timeSeries = await this.getTimeSeriesForPeriod(symbol, this.currentPeriod);
+        const quote = await this.apiClient.getQuote(symbol);
         
-        const response = await fetch(url);
-        const data = await response.json();
-        
-        if (data.chart && data.chart.error) {
-            throw new Error(data.chart.error.description);
-        }
-        
-        const result = data.chart.result[0];
-        const timestamps = result.timestamp;
-        const quotes = result.indicators.quote[0];
-        
-        const prices = timestamps.map((time, i) => ({
-            timestamp: time * 1000,
-            close: quotes.close[i]
-        })).filter(p => p.close !== null);
-        
-        // Fetch quote for additional info
-        const quoteUrl = proxyUrl + encodeURIComponent(`https://query1.finance.yahoo.com/v7/finance/quote?symbols=${symbol}`);
-        let quote = { symbol: symbol, name: symbol };
-        
-        try {
-            const quoteResponse = await fetch(quoteUrl);
-            const quoteData = await quoteResponse.json();
-            if (quoteData.quoteResponse && quoteData.quoteResponse.result.length > 0) {
-                const q = quoteData.quoteResponse.result[0];
-                quote = {
-                    symbol: q.symbol,
-                    name: q.longName || q.shortName || symbol,
-                    price: q.regularMarketPrice,
-                    change: q.regularMarketChange,
-                    changePercent: q.regularMarketChangePercent,
-                    marketCap: q.marketCap,
-                    pe: q.trailingPE,
-                    volume: q.regularMarketVolume
-                };
-            }
-        } catch (error) {
-            console.warn('Quote fetch failed for', symbol);
-        }
+        const prices = timeSeries.data.map(item => ({
+            timestamp: item.timestamp,
+            close: item.close
+        }));
         
         this.comparisonData[symbol] = {
             prices: prices,
-            quote: quote
+            quote: {
+                symbol: quote.symbol,
+                name: quote.name || symbol,
+                price: quote.price,
+                change: quote.change,
+                changePercent: quote.percentChange
+            }
         };
     },
     
-    // Display comparison
     displayComparison() {
-        // Hide empty state, show comparison
         document.getElementById('comparisonEmpty').classList.add('hidden');
         document.getElementById('comparisonContainer').classList.remove('hidden');
         
-        // Render stock chips
         this.renderComparisonChips();
-        
-        // Create comparison chart
         this.createComparisonChart();
-        
-        // Create comparison table
         this.createComparisonTable();
     },
     
-    // Render comparison chips
     renderComparisonChips() {
         const container = document.getElementById('comparisonStocks');
         
@@ -670,7 +526,6 @@ const MarketData = {
         }).join('');
     },
     
-    // Remove from comparison
     removeFromComparison(symbol) {
         this.comparisonSymbols = this.comparisonSymbols.filter(s => s !== symbol);
         delete this.comparisonData[symbol];
@@ -682,7 +537,6 @@ const MarketData = {
         }
     },
     
-    // Clear comparison
     clearComparison() {
         if (this.comparisonSymbols.length > 0 && !confirm('Clear comparison?')) {
             return;
@@ -695,7 +549,6 @@ const MarketData = {
         document.getElementById('comparisonContainer').classList.add('hidden');
     },
     
-    // Create comparison chart
     createComparisonChart() {
         const series = [];
         
@@ -703,7 +556,6 @@ const MarketData = {
             const data = this.comparisonData[symbol];
             if (!data) return;
             
-            // Normalize to 100 (first price = 100)
             const firstPrice = data.prices[0].close;
             const normalizedData = data.prices.map(p => [
                 p.timestamp,
@@ -735,30 +587,7 @@ const MarketData = {
                 style: { color: '#6C3483' }
             },
             rangeSelector: {
-                selected: 1,
-                buttons: [{
-                    type: 'month',
-                    count: 1,
-                    text: '1m'
-                }, {
-                    type: 'month',
-                    count: 3,
-                    text: '3m'
-                }, {
-                    type: 'month',
-                    count: 6,
-                    text: '6m'
-                }, {
-                    type: 'ytd',
-                    text: 'YTD'
-                }, {
-                    type: 'year',
-                    count: 1,
-                    text: '1y'
-                }, {
-                    type: 'all',
-                    text: 'All'
-                }]
+                selected: 1
             },
             yAxis: {
                 title: {
@@ -775,12 +604,7 @@ const MarketData = {
                         align: 'right',
                         style: { color: '#6C8BE0' }
                     }
-                }],
-                labels: {
-                    formatter: function() {
-                        return this.value.toFixed(0);
-                    }
-                }
+                }]
             },
             tooltip: {
                 shared: true,
@@ -797,21 +621,16 @@ const MarketData = {
             legend: {
                 enabled: true,
                 align: 'center',
-                verticalAlign: 'bottom',
-                itemStyle: {
-                    fontWeight: 'bold'
-                }
+                verticalAlign: 'bottom'
             },
             series: series,
             credits: { enabled: false }
         });
     },
     
-    // Create comparison table
     createComparisonTable() {
         const metrics = [];
         
-        // Calculate metrics for each stock
         this.comparisonSymbols.forEach(symbol => {
             const data = this.comparisonData[symbol];
             if (!data) return;
@@ -825,7 +644,7 @@ const MarketData = {
             const maxPrice = Math.max(...prices);
             const minPrice = Math.min(...prices);
             const maxDrawdown = this.calculateMaxDrawdown(prices);
-            const sharpeRatio = totalReturn / volatility; // Simplified
+            const sharpeRatio = totalReturn / volatility;
             
             metrics.push({
                 symbol: symbol,
@@ -836,20 +655,15 @@ const MarketData = {
                 maxPrice: maxPrice,
                 minPrice: minPrice,
                 maxDrawdown: maxDrawdown,
-                sharpeRatio: sharpeRatio,
-                marketCap: data.quote.marketCap,
-                pe: data.quote.pe,
-                volume: data.quote.volume
+                sharpeRatio: sharpeRatio
             });
         });
         
-        // Find best/worst for highlighting
         const bestReturn = Math.max(...metrics.map(m => m.totalReturn));
         const worstReturn = Math.min(...metrics.map(m => m.totalReturn));
         const lowestVol = Math.min(...metrics.map(m => m.volatility));
         const bestSharpe = Math.max(...metrics.map(m => m.sharpeRatio));
         
-        // Create table HTML
         const tableHTML = `
             <table>
                 <thead>
@@ -860,8 +674,6 @@ const MarketData = {
                         <th>Volatility</th>
                         <th>Max Drawdown</th>
                         <th>Sharpe Ratio</th>
-                        <th>Market Cap</th>
-                        <th>P/E Ratio</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -881,12 +693,6 @@ const MarketData = {
                             <td class='${m.sharpeRatio === bestSharpe ? 'best-value' : ''} value-neutral'>
                                 ${m.sharpeRatio.toFixed(2)}
                             </td>
-                            <td class='value-neutral'>
-                                ${m.marketCap ? this.formatLargeNumber(m.marketCap) : 'N/A'}
-                            </td>
-                            <td class='value-neutral'>
-                                ${m.pe ? m.pe.toFixed(2) : 'N/A'}
-                            </td>
                         </tr>
                     `).join('')}
                 </tbody>
@@ -896,7 +702,6 @@ const MarketData = {
         document.getElementById('comparisonTable').innerHTML = tableHTML;
     },
     
-    // Calculate max drawdown
     calculateMaxDrawdown(prices) {
         let maxDrawdown = 0;
         let peak = prices[0];
@@ -914,7 +719,6 @@ const MarketData = {
         return maxDrawdown;
     },
     
-    // Calculate volatility from prices
     calculateVolatilityFromPrices(prices) {
         const returns = [];
         for (let i = 1; i < prices.length; i++) {
@@ -926,14 +730,13 @@ const MarketData = {
         const variance = returns.reduce((sum, r) => sum + Math.pow(r - mean, 2), 0) / returns.length;
         const stdDev = Math.sqrt(variance);
         
-        return stdDev * Math.sqrt(252) * 100; // Annualized
+        return stdDev * Math.sqrt(252) * 100;
     },
 
-// ============================================
+    // ============================================
     // WATCHLIST FUNCTIONS
     // ============================================
     
-    // Load watchlist from localStorage
     loadWatchlistFromStorage() {
         const saved = localStorage.getItem('market_watchlist');
         if (saved) {
@@ -943,19 +746,16 @@ const MarketData = {
         }
     },
     
-    // Save watchlist to localStorage
     saveWatchlistToStorage() {
         localStorage.setItem('market_watchlist', JSON.stringify(this.watchlist));
     },
     
-    // Add current stock to watchlist
     addCurrentToWatchlist() {
         if (!this.currentSymbol) {
             alert('Please search for a stock first');
             return;
         }
         
-        // Check if already in watchlist
         if (this.watchlist.some(item => item.symbol === this.currentSymbol)) {
             alert(`${this.currentSymbol} is already in your watchlist`);
             return;
@@ -973,11 +773,9 @@ const MarketData = {
         this.refreshSingleWatchlistItem(this.currentSymbol);
         this.updateAddToWatchlistButton();
         
-        // Show success notification
         this.showNotification(`✅ ${this.currentSymbol} added to watchlist`, 'success');
     },
     
-    // Remove from watchlist
     removeFromWatchlist(symbol) {
         if (confirm(`Remove ${symbol} from watchlist?`)) {
             this.watchlist = this.watchlist.filter(item => item.symbol !== symbol);
@@ -988,7 +786,6 @@ const MarketData = {
         }
     },
     
-    // Clear entire watchlist
     clearWatchlist() {
         if (this.watchlist.length === 0) {
             alert('Watchlist is already empty');
@@ -1004,7 +801,6 @@ const MarketData = {
         }
     },
     
-    // Render watchlist
     renderWatchlist() {
         const container = document.getElementById('watchlistContainer');
         
@@ -1049,7 +845,6 @@ const MarketData = {
         `).join('');
     },
     
-    // Refresh entire watchlist
     async refreshWatchlist() {
         if (this.watchlist.length === 0) {
             return;
@@ -1059,14 +854,12 @@ const MarketData = {
         
         for (const item of this.watchlist) {
             await this.refreshSingleWatchlistItem(item.symbol);
-            await this.sleep(500);
         }
         
         this.updateLastUpdate();
         this.checkAlerts();
     },
     
-    // Refresh single watchlist item
     async refreshSingleWatchlistItem(symbol) {
         const card = document.getElementById(`watchlist-${symbol}`);
         if (!card) return;
@@ -1074,45 +867,34 @@ const MarketData = {
         card.classList.add('watchlist-loading');
         
         try {
-            const targetUrl = `https://query1.finance.yahoo.com/v7/finance/quote?symbols=${symbol}`;
-            const proxyUrl = this.CORS_PROXIES[0];
-            const url = proxyUrl + encodeURIComponent(targetUrl);
+            const quote = await this.apiClient.getQuote(symbol);
             
-            const response = await fetch(url);
-            const data = await response.json();
+            const price = quote.price || 0;
+            const change = quote.change || 0;
+            const changePercent = quote.percentChange || 0;
+            const open = quote.open || 0;
+            const volume = quote.volume || 0;
             
-            if (data.quoteResponse && data.quoteResponse.result.length > 0) {
-                const quote = data.quoteResponse.result[0];
-                
-                const price = quote.regularMarketPrice || 0;
-                const change = quote.regularMarketChange || 0;
-                const changePercent = quote.regularMarketChangePercent || 0;
-                const open = quote.regularMarketOpen || 0;
-                const volume = quote.regularMarketVolume || 0;
-                
-                // Update card
-                card.querySelector('.watchlist-price').textContent = this.formatCurrency(price);
-                
-                const changeEl = card.querySelector('.watchlist-change');
-                const icon = change >= 0 ? 'fa-arrow-up' : 'fa-arrow-down';
-                const changeClass = change >= 0 ? 'positive' : 'negative';
-                changeEl.className = `watchlist-change ${changeClass}`;
-                changeEl.innerHTML = `
-                    <i class='fas ${icon}'></i>
-                    <span>${change >= 0 ? '+' : ''}${this.formatCurrency(change)} (${change >= 0 ? '+' : ''}${changePercent.toFixed(2)}%)</span>
-                `;
-                
-                const stats = card.querySelectorAll('.watchlist-stat-value');
-                stats[0].textContent = this.formatCurrency(open);
-                stats[1].textContent = this.formatVolume(volume);
-                
-                // Update watchlist item data for alerts
-                const watchlistItem = this.watchlist.find(w => w.symbol === symbol);
-                if (watchlistItem) {
-                    watchlistItem.currentPrice = price;
-                    watchlistItem.change = change;
-                    watchlistItem.changePercent = changePercent;
-                }
+            card.querySelector('.watchlist-price').textContent = this.formatCurrency(price);
+            
+            const changeEl = card.querySelector('.watchlist-change');
+            const icon = change >= 0 ? 'fa-arrow-up' : 'fa-arrow-down';
+            const changeClass = change >= 0 ? 'positive' : 'negative';
+            changeEl.className = `watchlist-change ${changeClass}`;
+            changeEl.innerHTML = `
+                <i class='fas ${icon}'></i>
+                <span>${change >= 0 ? '+' : ''}${this.formatCurrency(change)} (${change >= 0 ? '+' : ''}${changePercent.toFixed(2)}%)</span>
+            `;
+            
+            const stats = card.querySelectorAll('.watchlist-stat-value');
+            stats[0].textContent = this.formatCurrency(open);
+            stats[1].textContent = this.formatVolume(volume);
+            
+            const watchlistItem = this.watchlist.find(w => w.symbol === symbol);
+            if (watchlistItem) {
+                watchlistItem.currentPrice = price;
+                watchlistItem.change = change;
+                watchlistItem.changePercent = changePercent;
             }
         } catch (error) {
             console.error(`Error refreshing ${symbol}:`, error);
@@ -1121,7 +903,6 @@ const MarketData = {
         }
     },
     
-    // Start auto-refresh (every 60 seconds)
     startWatchlistAutoRefresh() {
         this.watchlistRefreshInterval = setInterval(() => {
             if (this.watchlist.length > 0) {
@@ -1130,12 +911,6 @@ const MarketData = {
         }, 60000);
     },
     
-    // Sleep helper
-    sleep(ms) {
-        return new Promise(resolve => setTimeout(resolve, ms));
-    },
-    
-    // Update "Add to Watchlist" button state
     updateAddToWatchlistButton() {
         const btn = document.getElementById('btnAddCurrent');
         if (!btn) return;
@@ -1156,7 +931,6 @@ const MarketData = {
     // ALERTS FUNCTIONS
     // ============================================
     
-    // Load alerts from localStorage
     loadAlertsFromStorage() {
         const saved = localStorage.getItem('market_alerts');
         if (saved) {
@@ -1165,38 +939,31 @@ const MarketData = {
         }
     },
     
-    // Save alerts to localStorage
     saveAlertsToStorage() {
         localStorage.setItem('market_alerts', JSON.stringify(this.alerts));
     },
     
-    // Open alert modal
     openAlertModal() {
         document.getElementById('modalCreateAlert').style.display = 'block';
-        // Pre-fill with current symbol if available
         if (this.currentSymbol) {
             document.getElementById('alertSymbol').value = this.currentSymbol;
         }
     },
     
-    // Close alert modal
     closeAlertModal() {
         document.getElementById('modalCreateAlert').style.display = 'none';
-        // Clear form
         document.getElementById('alertSymbol').value = '';
         document.getElementById('alertPrice').value = '';
         document.getElementById('alertType').value = 'above';
         document.getElementById('alertNote').value = '';
     },
     
-    // Create alert
     createAlert() {
         const symbol = document.getElementById('alertSymbol').value.trim().toUpperCase();
         const price = parseFloat(document.getElementById('alertPrice').value);
         const type = document.getElementById('alertType').value;
         const note = document.getElementById('alertNote').value.trim();
         
-        // Validation
         if (!symbol) {
             alert('Please enter a stock symbol');
             return;
@@ -1207,7 +974,6 @@ const MarketData = {
             return;
         }
         
-        // Create alert object
         const alert = {
             id: Date.now(),
             symbol: symbol,
@@ -1225,7 +991,6 @@ const MarketData = {
         
         this.showNotification(`✅ Alert created for ${symbol}`, 'success');
         
-        // Add to watchlist if not already there
         if (!this.watchlist.some(w => w.symbol === symbol)) {
             this.watchlist.push({
                 symbol: symbol,
@@ -1238,7 +1003,6 @@ const MarketData = {
         }
     },
     
-    // Delete alert
     deleteAlert(alertId) {
         if (confirm('Delete this alert?')) {
             this.alerts = this.alerts.filter(a => a.id !== alertId);
@@ -1248,7 +1012,6 @@ const MarketData = {
         }
     },
     
-    // Render alerts
     renderAlerts() {
         const container = document.getElementById('alertsContainer');
         
@@ -1287,7 +1050,6 @@ const MarketData = {
         }).join('');
     },
     
-    // Check alerts
     checkAlerts() {
         let triggeredCount = 0;
         
@@ -1321,7 +1083,6 @@ const MarketData = {
         }
     },
     
-    // Request notification permission
     requestNotificationPermission() {
         if ('Notification' in window && Notification.permission === 'default') {
             Notification.requestPermission().then(permission => {
@@ -1332,9 +1093,7 @@ const MarketData = {
         }
     },
     
-    // Show notification
     showNotification(message, type = 'info', useBrowserNotification = false) {
-        // Browser notification
         if (useBrowserNotification && this.notificationPermission) {
             new Notification('Market Data Alert', {
                 body: message,
@@ -1342,7 +1101,6 @@ const MarketData = {
             });
         }
         
-        // In-page notification (toast)
         const toast = document.createElement('div');
         toast.className = `toast toast-${type}`;
         toast.textContent = message;
@@ -1369,21 +1127,19 @@ const MarketData = {
         }, 5000);
     },
 
-// ============================================
+    // ============================================
     // DISPLAY FUNCTIONS
     // ============================================
     
-    // Display Stock Overview
     displayStockOverview() {
         const quote = this.stockData.quote;
-        const lastPrice = this.stockData.prices[this.stockData.prices.length - 1];
         
         document.getElementById('stockName').textContent = quote.name || this.currentSymbol;
         document.getElementById('stockSymbol').textContent = quote.symbol || this.currentSymbol;
         
-        const price = quote.price || lastPrice.close;
+        const price = quote.price;
         const change = quote.change || 0;
-        const changePercent = quote.changePercent || 0;
+        const changePercent = quote.percentChange || 0;
         
         document.getElementById('currentPrice').textContent = this.formatCurrency(price);
         
@@ -1392,18 +1148,16 @@ const MarketData = {
         priceChangeEl.textContent = changeText;
         priceChangeEl.className = change >= 0 ? 'price-change positive' : 'price-change negative';
         
-        // Stats
-        document.getElementById('statOpen').textContent = this.formatCurrency(quote.open || lastPrice.open);
-        document.getElementById('statHigh').textContent = this.formatCurrency(quote.high || lastPrice.high);
-        document.getElementById('statLow').textContent = this.formatCurrency(quote.low || lastPrice.low);
-        document.getElementById('statVolume').textContent = this.formatVolume(quote.volume || lastPrice.volume);
-        document.getElementById('statMarketCap').textContent = quote.marketCap ? this.formatLargeNumber(quote.marketCap) : 'N/A';
-        document.getElementById('statPE').textContent = quote.pe ? quote.pe.toFixed(2) : 'N/A';
+        document.getElementById('statOpen').textContent = this.formatCurrency(quote.open);
+        document.getElementById('statHigh').textContent = this.formatCurrency(quote.high);
+        document.getElementById('statLow').textContent = this.formatCurrency(quote.low);
+        document.getElementById('statVolume').textContent = this.formatVolume(quote.volume);
+        document.getElementById('statMarketCap').textContent = 'N/A';
+        document.getElementById('statPE').textContent = 'N/A';
         
         document.getElementById('stockOverview').classList.remove('hidden');
     },
     
-    // Display Results
     displayResults() {
         this.createPriceChart();
         this.createRSIChart();
@@ -1414,7 +1168,6 @@ const MarketData = {
         document.getElementById('resultsPanel').classList.remove('hidden');
     },
     
-    // Create Price Chart
     createPriceChart() {
         const prices = this.stockData.prices;
         const ohlc = prices.map(p => [p.timestamp, p.open, p.high, p.low, p.close]);
@@ -1436,7 +1189,6 @@ const MarketData = {
             }
         ];
         
-        // Add SMA
         if (showSMA) {
             series.push({
                 type: 'sma',
@@ -1456,7 +1208,6 @@ const MarketData = {
             });
         }
         
-        // Add EMA
         if (showEMA) {
             series.push({
                 type: 'ema',
@@ -1476,7 +1227,6 @@ const MarketData = {
             });
         }
         
-        // Add Bollinger Bands
         if (showBB) {
             series.push({
                 type: 'bb',
@@ -1488,7 +1238,6 @@ const MarketData = {
             });
         }
         
-        // Add Volume
         if (showVolume) {
             series.push({
                 type: 'column',
@@ -1509,34 +1258,7 @@ const MarketData = {
                 style: { color: '#2649B2', fontWeight: 'bold' }
             },
             rangeSelector: {
-                selected: 1,
-                buttons: [{
-                    type: 'week',
-                    count: 1,
-                    text: '1w'
-                }, {
-                    type: 'month',
-                    count: 1,
-                    text: '1m'
-                }, {
-                    type: 'month',
-                    count: 3,
-                    text: '3m'
-                }, {
-                    type: 'month',
-                    count: 6,
-                    text: '6m'
-                }, {
-                    type: 'ytd',
-                    text: 'YTD'
-                }, {
-                    type: 'year',
-                    count: 1,
-                    text: '1y'
-                }, {
-                    type: 'all',
-                    text: 'All'
-                }]
+                selected: 1
             },
             yAxis: [{
                 labels: {
@@ -1570,11 +1292,8 @@ const MarketData = {
         });
     },
     
-    // Create RSI Chart - VERSION MANUELLE
     createRSIChart() {
         const prices = this.stockData.prices;
-        
-        // Calculer RSI manuellement
         const rsiData = this.calculateRSIArray(prices, 14);
         
         Highcharts.chart('rsiChart', {
@@ -1604,8 +1323,7 @@ const MarketData = {
                         text: 'Overbought (70)',
                         align: 'right',
                         style: { color: '#dc3545', fontWeight: 'bold' }
-                    },
-                    zIndex: 5
+                    }
                 }, {
                     value: 30,
                     color: '#28a745',
@@ -1615,8 +1333,7 @@ const MarketData = {
                         text: 'Oversold (30)',
                         align: 'right',
                         style: { color: '#28a745', fontWeight: 'bold' }
-                    },
-                    zIndex: 5
+                    }
                 }, {
                     value: 50,
                     color: '#6C8BE0',
@@ -1626,8 +1343,7 @@ const MarketData = {
                         text: 'Neutral (50)',
                         align: 'right',
                         style: { color: '#6C8BE0' }
-                    },
-                    zIndex: 5
+                    }
                 }],
                 min: 0,
                 max: 100
@@ -1673,7 +1389,6 @@ const MarketData = {
         });
     },
     
-    // Calculer RSI pour tous les points
     calculateRSIArray(prices, period = 14) {
         const rsiData = [];
         
@@ -1681,7 +1396,6 @@ const MarketData = {
             return rsiData;
         }
         
-        // Premier RSI
         let gains = 0;
         let losses = 0;
         
@@ -1698,7 +1412,6 @@ const MarketData = {
         const rsi = 100 - (100 / (1 + rs));
         rsiData.push([prices[period].timestamp, rsi]);
         
-        // RSI suivants
         for (let i = period + 1; i < prices.length; i++) {
             const change = prices[i].close - prices[i - 1].close;
             
@@ -1718,11 +1431,8 @@ const MarketData = {
         return rsiData;
     },
     
-    // Create MACD Chart - VERSION MANUELLE
     createMACDChart() {
         const prices = this.stockData.prices;
-        
-        // Calculer MACD manuellement
         const macdData = this.calculateMACDArray(prices);
         
         Highcharts.chart('macdChart', {
@@ -1752,8 +1462,7 @@ const MarketData = {
                         text: 'Zero Line',
                         align: 'right',
                         style: { color: '#6C8BE0' }
-                    },
-                    zIndex: 5
+                    }
                 }]
             },
             tooltip: {
@@ -1796,25 +1505,20 @@ const MarketData = {
         });
     },
     
-    // Calculer MACD pour tous les points
     calculateMACDArray(prices, shortPeriod = 12, longPeriod = 26, signalPeriod = 9) {
         const closePrices = prices.map(p => p.close);
         
-        // Calculer EMA
         const emaShort = this.calculateEMAArray(closePrices, shortPeriod);
         const emaLong = this.calculateEMAArray(closePrices, longPeriod);
         
-        // MACD Line = EMA(12) - EMA(26)
         const macdLine = [];
         for (let i = longPeriod - 1; i < prices.length; i++) {
             const macdValue = emaShort[i] - emaLong[i];
             macdLine.push(macdValue);
         }
         
-        // Signal Line = EMA(9) of MACD
         const signalLine = this.calculateEMAArray(macdLine, signalPeriod);
         
-        // Préparer les données pour Highcharts
         const macdData = [];
         const signalData = [];
         const histogramData = [];
@@ -1844,24 +1548,20 @@ const MarketData = {
         };
     },
     
-    // Calculer EMA array
     calculateEMAArray(data, period) {
         const k = 2 / (period + 1);
         const emaArray = [];
         
-        // Remplir les premiers éléments avec undefined
         for (let i = 0; i < period - 1; i++) {
             emaArray[i] = undefined;
         }
         
-        // Premier EMA = SMA
         let sum = 0;
         for (let i = 0; i < period; i++) {
             sum += data[i];
         }
         emaArray[period - 1] = sum / period;
         
-        // EMA suivants
         for (let i = period; i < data.length; i++) {
             const ema = data[i] * k + emaArray[i - 1] * (1 - k);
             emaArray[i] = ema;
@@ -1870,7 +1570,6 @@ const MarketData = {
         return emaArray;
     },
     
-    // Calculate RSI (single value)
     calculateRSI(prices, period = 14) {
         if (prices.length < period + 1) return null;
         
@@ -1903,19 +1602,16 @@ const MarketData = {
         return rsi;
     },
     
-    // Display Trading Signals
     displayTradingSignals() {
         const prices = this.stockData.prices;
         const currentPrice = prices[prices.length - 1].close;
         const rsi = this.calculateRSI(prices);
         
-        // Calculate simple signals
         const sma20 = this.calculateSMA(prices, 20);
         const sma50 = this.calculateSMA(prices, 50);
         
         const signals = [];
         
-        // RSI Signal
         let rsiSignal = 'neutral';
         let rsiStatus = 'Neutral';
         if (rsi < 30) {
@@ -1933,7 +1629,6 @@ const MarketData = {
             type: rsiSignal
         });
         
-        // Moving Average Signal
         let maSignal = 'neutral';
         let maStatus = 'Neutral';
         if (currentPrice > sma20 && sma20 > sma50) {
@@ -1951,7 +1646,6 @@ const MarketData = {
             type: maSignal
         });
         
-        // Trend Signal
         const priceChange = ((currentPrice - prices[0].close) / prices[0].close) * 100;
         signals.push({
             title: 'Overall Trend',
@@ -1960,7 +1654,6 @@ const MarketData = {
             type: priceChange > 0 ? 'bullish' : priceChange < 0 ? 'bearish' : 'neutral'
         });
         
-        // Volatility
         const volatility = this.calculateVolatility(prices);
         signals.push({
             title: 'Volatility',
@@ -1969,7 +1662,6 @@ const MarketData = {
             type: 'neutral'
         });
         
-        // Render signals
         const container = document.getElementById('tradingSignals');
         container.innerHTML = signals.map(signal => `
             <div class='signal-card ${signal.type}'>
@@ -1980,32 +1672,26 @@ const MarketData = {
         `).join('');
     },
     
-    // Display Key Statistics
     displayKeyStatistics() {
         const prices = this.stockData.prices;
         
         const stats = [];
         
-        // 52-week high/low
         const high52w = Math.max(...prices.map(p => p.high));
         const low52w = Math.min(...prices.map(p => p.low));
         
         stats.push({ label: '52W High', value: this.formatCurrency(high52w) });
         stats.push({ label: '52W Low', value: this.formatCurrency(low52w) });
         
-        // Average volume
         const avgVolume = prices.reduce((sum, p) => sum + p.volume, 0) / prices.length;
         stats.push({ label: 'Avg Volume', value: this.formatVolume(avgVolume) });
         
-        // Volatility
         const volatility = this.calculateVolatility(prices);
         stats.push({ label: 'Volatility', value: `${volatility.toFixed(2)}%` });
         
-        // Beta & Sharpe
         stats.push({ label: 'Beta', value: 'N/A' });
         stats.push({ label: 'Sharpe Ratio', value: 'N/A' });
         
-        // Render stats
         const container = document.getElementById('keyStats');
         container.innerHTML = stats.map(stat => `
             <div class='stat-box'>
@@ -2015,14 +1701,12 @@ const MarketData = {
         `).join('');
     },
     
-    // Calculate SMA
     calculateSMA(prices, period) {
         if (prices.length < period) return 0;
         const sum = prices.slice(-period).reduce((acc, p) => acc + p.close, 0);
         return sum / period;
     },
     
-    // Calculate Volatility
     calculateVolatility(prices) {
         const returns = [];
         for (let i = 1; i < prices.length; i++) {
@@ -2034,66 +1718,23 @@ const MarketData = {
         const variance = returns.reduce((sum, r) => sum + Math.pow(r - mean, 2), 0) / returns.length;
         const stdDev = Math.sqrt(variance);
         
-        return stdDev * Math.sqrt(252) * 100; // Annualized
-    },
-    
-    // Generate Demo Data (fallback)
-    generateDemoData(symbol) {
-        const days = 365;
-        const prices = [];
-        let price = 100;
-        
-        for (let i = 0; i < days; i++) {
-            const change = (Math.random() - 0.5) * 4;
-            price = price * (1 + change / 100);
-            
-            const timestamp = Date.now() - (days - i) * 24 * 60 * 60 * 1000;
-            prices.push({
-                timestamp: timestamp,
-                open: price * (1 + (Math.random() - 0.5) * 0.01),
-                high: price * (1 + Math.random() * 0.02),
-                low: price * (1 - Math.random() * 0.02),
-                close: price,
-                volume: Math.floor(Math.random() * 10000000)
-            });
-        }
-        
-        return {
-            symbol: symbol,
-            prices: prices,
-            currency: 'USD',
-            quote: {
-                name: symbol + ' Inc.',
-                symbol: symbol,
-                price: price,
-                change: price - 100,
-                changePercent: ((price - 100) / 100) * 100,
-                open: price * 0.99,
-                high: price * 1.01,
-                low: price * 0.98,
-                volume: 50000000,
-                marketCap: price * 1000000000,
-                pe: 25.5
-            }
-        };
+        return stdDev * Math.sqrt(252) * 100;
     },
     
     // ============================================
     // UTILITY FUNCTIONS
     // ============================================
     
-    // Format Currency
     formatCurrency(value) {
         if (!value && value !== 0) return 'N/A';
         return new Intl.NumberFormat('en-US', {
             style: 'currency',
-            currency: this.stockData?.currency || 'USD',
+            currency: 'USD',
             minimumFractionDigits: 2,
             maximumFractionDigits: 2
         }).format(value);
     },
     
-    // Format Volume
     formatVolume(value) {
         if (!value) return 'N/A';
         if (value >= 1e9) return (value / 1e9).toFixed(2) + 'B';
@@ -2102,7 +1743,6 @@ const MarketData = {
         return value.toFixed(0);
     },
     
-    // Format Large Number
     formatLargeNumber(value) {
         if (!value) return 'N/A';
         if (value >= 1e12) return '$' + (value / 1e12).toFixed(2) + 'T';
@@ -2111,7 +1751,6 @@ const MarketData = {
         return '$' + value.toFixed(0);
     },
     
-    // Show Loading
     showLoading(show) {
         const loader = document.getElementById('loadingIndicator');
         if (show) {
@@ -2121,13 +1760,11 @@ const MarketData = {
         }
     },
     
-    // Hide Results
     hideResults() {
         document.getElementById('stockOverview').classList.add('hidden');
         document.getElementById('resultsPanel').classList.add('hidden');
     },
     
-    // Update Last Update
     updateLastUpdate() {
         const now = new Date();
         const formatted = now.toLocaleString('fr-FR', {
