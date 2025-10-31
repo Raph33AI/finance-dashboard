@@ -950,3 +950,156 @@ footer {
         scroll-behavior: auto !important;
     }
 }
+
+/* ============================================
+   DARK MODE - Variables et styles
+   ============================================ */
+
+body.dark-mode {
+    /* Couleurs principales en dark mode */
+    --primary-color: #3b82f6;
+    --primary-dark: #2563eb;
+    --primary-light: #60a5fa;
+    
+    --secondary-color: #94a3b8;
+    --secondary-dark: #cbd5e1;
+    --secondary-light: #64748b;
+    
+    /* Couleurs d'accent */
+    --accent-color: #a78bfa;
+    --success-color: #34d399;
+    --danger-color: #f87171;
+    --warning-color: #fbbf24;
+    
+    /* Couleurs neutres inversées */
+    --background-primary: #1e293b;
+    --background-secondary: #0f172a;
+    --background-tertiary: #334155;
+    
+    --text-primary: #f1f5f9;
+    --text-secondary: #cbd5e1;
+    --text-tertiary: #94a3b8;
+    
+    --border-color: #334155;
+    --border-color-hover: #475569;
+}
+
+/* Bouton de toggle dark mode */
+.dark-mode-toggle {
+    background: var(--background-tertiary);
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+    width: 40px;
+    height: 40px;
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: all var(--transition-base);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.25rem;
+}
+
+.dark-mode-toggle:hover {
+    background: var(--border-color-hover);
+    transform: scale(1.05);
+}
+
+.dark-mode-toggle:focus-visible {
+    outline: 2px solid var(--primary-color);
+    outline-offset: 2px;
+}
+
+.dark-mode-toggle i {
+    transition: transform var(--transition-base);
+}
+
+.dark-mode-toggle:active i {
+    transform: rotate(20deg);
+}
+
+/* ============================================
+   DARK MODE - Ajustements spécifiques
+   ============================================ */
+
+body.dark-mode .card,
+body.dark-mode .section,
+body.dark-mode .search-panel,
+body.dark-mode .watchlist-section,
+body.dark-mode .alerts-section,
+body.dark-mode .comparison-section,
+body.dark-mode .results-panel,
+body.dark-mode .company-profile-section {
+    background: var(--background-primary);
+    border-color: var(--border-color);
+}
+
+body.dark-mode .stock-overview {
+    background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%);
+}
+
+body.dark-mode .company-header-section {
+    background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+}
+
+body.dark-mode .stat-box,
+body.dark-mode .watchlist-card,
+body.dark-mode .alert-card,
+body.dark-mode .signal-card {
+    background: var(--background-secondary);
+    border-color: var(--border-color);
+}
+
+body.dark-mode .top-header {
+    background: var(--background-primary);
+    border-bottom: 1px solid var(--border-color);
+}
+
+body.dark-mode footer {
+    background: var(--background-primary);
+    border-top-color: var(--border-color);
+}
+
+body.dark-mode .form-input,
+body.dark-mode .form-select,
+body.dark-mode .form-textarea {
+    background: var(--background-secondary);
+    border-color: var(--border-color);
+    color: var(--text-primary);
+}
+
+body.dark-mode .modal-content {
+    background: var(--background-primary);
+}
+
+body.dark-mode .search-suggestions {
+    background: var(--background-primary);
+    border-color: var(--border-color);
+}
+
+body.dark-mode .suggestion-item:hover,
+body.dark-mode .suggestion-item.selected {
+    background: var(--background-secondary);
+}
+
+body.dark-mode .suggestion-category {
+    background: var(--background-tertiary);
+}
+
+/* Highcharts dark mode */
+body.dark-mode .highcharts-background {
+    fill: var(--background-primary);
+}
+
+body.dark-mode .highcharts-title,
+body.dark-mode .highcharts-subtitle {
+    fill: var(--text-primary);
+}
+
+body.dark-mode .highcharts-axis-labels text {
+    fill: var(--text-secondary);
+}
+
+body.dark-mode .highcharts-grid-line {
+    stroke: var(--border-color);
+}

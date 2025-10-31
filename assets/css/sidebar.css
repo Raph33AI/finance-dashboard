@@ -18,12 +18,43 @@
     --content-padding-mobile: 20px;
 }
 
-/* Layout Wrapper avec dégradé moderne */
+/* Layout Wrapper - CORRIGÉ : Fond blanc/gris au lieu de violet */
 .layout-wrapper {
     display: flex;
     min-height: 100vh;
-    background: linear-gradient(135deg, #5B2C6F 0%, #2649B2 50%, #4A74F3 100%);
+    /* ✅ NOUVEAU : Fond gris clair au lieu du dégradé violet */
+    background: #f5f7fa;
     padding: 20px;
+}
+
+/* Dark mode pour layout-wrapper */
+body.dark-mode .layout-wrapper {
+    background: #0f172a;
+}
+
+/* Main content - CORRIGÉ : Enlever l'ombre violette */
+.main-content {
+    flex: 1;
+    margin-left: calc(var(--sidebar-width) + var(--content-padding-desktop));
+    transition: margin-left var(--transition-speed) ease;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    
+    background: white;
+    border-radius: 20px;
+    /* ✅ CORRIGÉ : Ombre grise au lieu de violette */
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.08);
+    overflow: hidden;
+    
+    max-width: var(--content-max-width);
+    margin-right: auto;
+}
+
+/* Dark mode pour main-content */
+body.dark-mode .main-content {
+    background: #1e293b;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
 }
 
 /* ===================================
@@ -562,5 +593,31 @@
     .nav-folder span,
     .nav-folder .arrow {
         transition: none;
+    }
+}
+
+/* Dark mode pour la sidebar */
+body.dark-mode .sidebar {
+    background: #0f1419;
+}
+
+body.dark-mode .sidebar-hover,
+body.dark-mode .nav-folder:hover,
+body.dark-mode .nav-link:hover {
+    background: #1a1f28;
+}
+
+body.dark-mode .nav-folder.active {
+    background: #1e40af;
+}
+
+body.dark-mode .nav-link.active {
+    background: rgba(30, 64, 175, 0.3);
+}
+
+/* Responsive dark mode */
+@media (max-width: 1024px) {
+    body.dark-mode .main-content {
+        border-radius: 0;
     }
 }
