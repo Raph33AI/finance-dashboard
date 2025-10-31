@@ -16,6 +16,10 @@
     <!-- Styles -->
     <link rel='stylesheet' href='assets/css/common.css'>
     <link rel='stylesheet' href='assets/css/sidebar.css'>
+    <!-- Pour auth.html -->
+    <link rel="stylesheet" href="css/auth.css">
+    <!-- Pour profile.html -->
+    <link rel="stylesheet" href="css/profile.css">
     <link rel='stylesheet' href='assets/css/risk-parity.css'>
 </head>
 <body>
@@ -91,10 +95,18 @@
                 </div>
             </nav>
             
-            <div class='sidebar-footer'>
-                <div class='user-info'>
-                    <i class='fas fa-user-circle'></i>
-                    <span>Raphael NARDONE</span>
+            <!-- Sidebar Footer - Version avec authentification -->
+            <div class="sidebar-footer">
+                <div class="user-info" id="userInfoSection">
+                    <!-- État non connecté -->
+                    <button class="user-profile-btn" id="userProfileBtn" aria-label="Accéder à mon profil">
+                        <i class="fas fa-user-circle"></i>
+                        <div class="user-details">
+                            <span class="user-name">Connexion</span>
+                            <span class="user-status">Cliquez pour vous connecter</span>
+                        </div>
+                        <i class="fas fa-chevron-right arrow-icon"></i>
+                    </button>
                 </div>
             </div>
         </aside>
@@ -297,6 +309,7 @@
     <!-- Scripts -->
     <script src='assets/js/common.js'></script>
     <script src='assets/js/sidebar.js'></script>
+    <script src="js/auth-manager.js"></script>
     <script src='assets/js/risk-parity.js'></script>
 </body>
 </html>

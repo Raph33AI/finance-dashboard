@@ -7,7 +7,7 @@
     <meta name='author' content='Raphael NARDONE'>
     <meta name='theme-color' content='#2563eb'>
     
-    <title>Market Data - Raphael NARDONE | Finance Dashboard</title>
+    <title>Market Data | Finance Dashboard</title>
     
     <!-- Preconnect pour optimisation -->
     <link rel='preconnect' href='https://code.highcharts.com'>
@@ -31,6 +31,10 @@
     <!-- Styles -->
     <link rel='stylesheet' href='assets/css/common.css'>
     <link rel='stylesheet' href='assets/css/sidebar.css'>
+    <!-- Pour auth.html -->
+    <link rel="stylesheet" href="css/auth.css">
+    <!-- Pour profile.html -->
+    <link rel="stylesheet" href="css/profile.css">
     <link rel='stylesheet' href='assets/css/market-data.css'>
     <link rel='stylesheet' href='assets/css/cache-widget.css'>
 </head>
@@ -118,10 +122,18 @@
                 </div>
             </nav>
             
-            <div class='sidebar-footer'>
-                <div class='user-info'>
-                    <i class='fas fa-user-circle' aria-hidden='true'></i>
-                    <span>Raphael NARDONE</span>
+            <!-- Sidebar Footer - Version avec authentification -->
+            <div class="sidebar-footer">
+                <div class="user-info" id="userInfoSection">
+                    <!-- État non connecté -->
+                    <button class="user-profile-btn" id="userProfileBtn" aria-label="Accéder à mon profil">
+                        <i class="fas fa-user-circle"></i>
+                        <div class="user-details">
+                            <span class="user-name">Connexion</span>
+                            <span class="user-status">Cliquez pour vous connecter</span>
+                        </div>
+                        <i class="fas fa-chevron-right arrow-icon"></i>
+                    </button>
                 </div>
             </div>
         </aside>
@@ -969,6 +981,7 @@
     <script src='assets/js/dark-mode.js'></script>  <!-- ✅ NOUVEAU -->
     <script src='assets/js/common.js'></script>
     <script src='assets/js/sidebar.js'></script>
+    <script src="js/auth-manager.js"></script>
     <script src='assets/js/market-data.js'></script>
 </body>
 </html>

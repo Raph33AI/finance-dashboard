@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mon Profil - Finance Pro</title>
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Styles -->
+    <link rel="stylesheet" href="css/sidebar.css">
+    <link rel="stylesheet" href="css/profile.css">
+</head>
+<body>
+    <div class="layout-wrapper">
+        <!-- SIDEBAR (Copiez votre sidebar existante ici) -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <h2>
+                    <i class="fas fa-chart-line"></i>
+                    <span>Finance Pro</span>
+                </h2>
+                <button class="sidebar-toggle" id="sidebarToggle" aria-label="Toggle sidebar" aria-expanded="true">
+                    <i class="fas fa-bars"></i>
+                </button>
+            </div>
+
+            <nav class="sidebar-nav">
+                <!-- Votre navigation existante -->
+                <div class="nav-section">
+                    <button class="nav-folder" aria-expanded="false">
+                        <i class="fas fa-home"></i>
+                        <span>Accueil</span>
+                        <i class="fas fa-chevron-down arrow"></i>
+                    </button>
+                    <div class="nav-submenu">
+                        <a href="index.html" class="nav-link">
+                            <i class="fas fa-tachometer-alt"></i>
+                            <span>Dashboard</span>
+                        </a>
+                    </div>
+                </div>
+            </nav>
+
+            <div class="sidebar-footer">
+                <div class="user-info" id="userInfoSection">
+                    <button class="user-profile-btn" id="userProfileBtn" aria-label="Accéder à mon profil">
+                        <i class="fas fa-user-circle"></i>
+                        <div class="user-details">
+                            <span class="user-name">Connexion</span>
+                            <span class="user-status">Cliquez pour vous connecter</span>
+                        </div>
+                        <i class="fas fa-chevron-right arrow-icon"></i>
+                    </button>
+                </div>
+            </div>
+        </aside>
+
+        <!-- MAIN CONTENT -->
+        <main class="main-content">
+            <!-- Top Header -->
+            <header class="top-header">
+                <div class="header-content-wrapper">
+                    <div class="header-left">
+                        <button class="mobile-toggle" id="mobileToggle" aria-label="Toggle menu">
+                            <i class="fas fa-bars"></i>
+                        </button>
+                        <h1>Mon Profil</h1>
+                    </div>
+                    <div class="header-right">
+                        <button class="btn-secondary" id="logoutBtn">
+                            <i class="fas fa-sign-out-alt"></i>
+                            <span>Déconnexion</span>
+                        </button>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Profile Content -->
+            <div class="container">
+                <div class="content profile-content">
+                    <!-- Profile Header Card -->
+                    <div class="profile-header-card">
+                        <div class="profile-banner"></div>
+                        <div class="profile-header-content">
+                            <div class="profile-avatar-section">
+                                <div class="profile-avatar-wrapper">
+                                    <img src="" alt="Avatar" class="profile-avatar" id="profileAvatar">
+                                    <div class="profile-avatar-placeholder" id="avatarPlaceholder">
+                                        <i class="fas fa-user"></i>
+                                    </div>
+                                    <button class="avatar-upload-btn" id="avatarUploadBtn">
+                                        <i class="fas fa-camera"></i>
+                                    </button>
+                                    <input type="file" id="avatarInput" accept="image/*" hidden>
+                                </div>
+                                <div class="profile-header-info">
+                                    <h2 class="profile-name" id="profileName">Chargement...</h2>
+                                    <p class="profile-email" id="profileEmail"></p>
+                                    <div class="profile-badges">
+                                        <span class="badge badge-success">
+                                            <i class="fas fa-check-circle"></i>
+                                            Compte vérifié
+                                        </span>
+                                        <span class="badge badge-info" id="memberSince">
+                                            <i class="fas fa-calendar"></i>
+                                            Membre depuis...
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Profile Tabs -->
+                    <div class="profile-tabs">
+                        <button class="tab-btn active" data-tab="info">
+                            <i class="fas fa-user"></i>
+                            <span>Informations</span>
+                        </button>
+                        <button class="tab-btn" data-tab="security">
+                            <i class="fas fa-lock"></i>
+                            <span>Sécurité</span>
+                        </button>
+                        <button class="tab-btn" data-tab="preferences">
+                            <i class="fas fa-cog"></i>
+                            <span>Préférences</span>
+                        </button>
+                    </div>
+
+                    <!-- Tab Content -->
+                    <div class="tab-content-wrapper">
+                        <!-- Informations Tab -->
+                        <div class="tab-content active" id="infoTab">
+                            <div class="profile-card">
+                                <div class="card-header">
+                                    <h3>
+                                        <i class="fas fa-id-card"></i>
+                                        Informations personnelles
+                                    </h3>
+                                    <button class="btn-primary btn-sm" id="editInfoBtn">
+                                        <i class="fas fa-edit"></i>
+                                        Modifier
+                                    </button>
+                                </div>
+                                <form class="profile-form" id="profileInfoForm">
+                                    <div class="form-row">
+                                        <div class="form-group">
+                                            <label for="editFirstName">
+                                                <i class="fas fa-user"></i>
+                                                Prénom
+                                            </label>
+                                            <input type="text" id="editFirstName" disabled>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="editLastName">
+                                                <i class="fas fa-user"></i>
+                                                Nom
+                                            </label>
+                                            <input type="text" id="editLastName" disabled>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="editEmail">
+                                            <i class="fas fa-envelope"></i>
+                                            Email
+                                        </label>
+                                        <input type="email" id="editEmail" disabled>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="editPhone">
+                                            <i class="fas fa-phone"></i>
+                                            Téléphone
+                                        </label>
+                                        <input type="tel" id="editPhone" disabled>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="editCompany">
+                                            <i class="fas fa-building"></i>
+                                            Entreprise
+                                        </label>
+                                        <input type="text" id="editCompany" disabled>
+                                    </div>
+                                    <div class="form-message" id="infoMessage"></div>
+                                    <div class="form-actions hidden" id="infoActions">
+                                        <button type="button" class="btn-secondary" id="cancelInfoBtn">
+                                            Annuler
+                                        </button>
+                                        <button type="submit" class="btn-primary">
+                                            <i class="fas fa-save"></i>
+                                            Enregistrer
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+
+                            <!-- Account Stats -->
+                            <div class="profile-card">
+                                <div class="card-header">
+                                    <h3>
+                                        <i class="fas fa-chart-bar"></i>
+                                        Statistiques du compte
+                                    </h3>
+                                </div>
+                                <div class="stats-grid">
+                                    <div class="stat-item">
+                                        <div class="stat-icon">
+                                            <i class="fas fa-calendar-check"></i>
+                                        </div>
+                                        <div class="stat-info">
+                                            <span class="stat-label">Dernière connexion</span>
+                                            <span class="stat-value" id="lastLogin">Aujourd'hui</span>
+                                        </div>
+                                    </div>
+                                    <div class="stat-item">
+                                        <div class="stat-icon">
+                                            <i class="fas fa-file-alt"></i>
+                                        </div>
+                                        <div class="stat-info">
+                                            <span class="stat-label">Documents</span>
+                                            <span class="stat-value">0</span>
+                                        </div>
+                                    </div>
+                                    <div class="stat-item">
+                                        <div class="stat-icon">
+                                            <i class="fas fa-chart-line"></i>
+                                        </div>
+                                        <div class="stat-info">
+                                            <span class="stat-label">Analyses</span>
+                                            <span class="stat-value">0</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Security Tab -->
+                        <div class="tab-content" id="securityTab">
+                            <div class="profile-card">
+                                <div class="card-header">
+                                    <h3>
+                                        <i class="fas fa-key"></i>
+                                        Changer le mot de passe
+                                    </h3>
+                                </div>
+                                <form class="profile-form" id="passwordForm">
+                                    <div class="form-group">
+                                        <label for="currentPassword">
+                                            <i class="fas fa-lock"></i>
+                                            Mot de passe actuel
+                                        </label>
+                                        <div class="password-input">
+                                            <input type="password" id="currentPassword" required>
+                                            <button type="button" class="toggle-password" data-target="currentPassword">
+                                                <i class="fas fa-eye"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="newPassword">
+                                            <i class="fas fa-lock"></i>
+                                            Nouveau mot de passe
+                                        </label>
+                                        <div class="password-input">
+                                            <input type="password" id="newPassword" required minlength="8">
+                                            <button type="button" class="toggle-password" data-target="newPassword">
+                                                <i class="fas fa-eye"></i>
+                                            </button>
+                                        </div>
+                                        <small class="input-hint">Minimum 8 caractères</small>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="confirmNewPassword">
+                                            <i class="fas fa-lock"></i>
+                                            Confirmer le nouveau mot de passe
+                                        </label>
+                                        <div class="password-input">
+                                            <input type="password" id="confirmNewPassword" required minlength="8">
+                                            <button type="button" class="toggle-password" data-target="confirmNewPassword">
+                                                <i class="fas fa-eye"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div class="form-message" id="passwordMessage"></div>
+                                    <button type="submit" class="btn-primary">
+                                        <i class="fas fa-save"></i>
+                                        Changer le mot de passe
+                                    </button>
+                                </form>
+                            </div>
+
+                            <!-- Danger Zone -->
+                            <div class="profile-card danger-zone">
+                                <div class="card-header">
+                                    <h3>
+                                        <i class="fas fa-exclamation-triangle"></i>
+                                        Zone dangereuse
+                                    </h3>
+                                </div>
+                                <div class="danger-zone-content">
+                                    <div class="danger-item">
+                                        <div>
+                                            <h4>Supprimer mon compte</h4>
+                                            <p>Une fois supprimé, votre compte ne pourra pas être récupéré.</p>
+                                        </div>
+                                        <button class="btn-danger" id="deleteAccountBtn">
+                                            <i class="fas fa-trash"></i>
+                                            Supprimer
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Preferences Tab -->
+                        <div class="tab-content" id="preferencesTab">
+                            <div class="profile-card">
+                                <div class="card-header">
+                                    <h3>
+                                        <i class="fas fa-palette"></i>
+                                        Apparence
+                                    </h3>
+                                </div>
+                                <div class="preferences-list">
+                                    <div class="preference-item">
+                                        <div class="preference-info">
+                                            <i class="fas fa-moon"></i>
+                                            <div>
+                                                <h4>Mode sombre</h4>
+                                                <p>Activer le thème sombre</p>
+                                            </div>
+                                        </div>
+                                        <label class="toggle-switch">
+                                            <input type="checkbox" id="darkModeToggle">
+                                            <span class="toggle-slider"></span>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="profile-card">
+                                <div class="card-header">
+                                    <h3>
+                                        <i class="fas fa-bell"></i>
+                                        Notifications
+                                    </h3>
+                                </div>
+                                <div class="preferences-list">
+                                    <div class="preference-item">
+                                        <div class="preference-info">
+                                            <i class="fas fa-envelope"></i>
+                                            <div>
+                                                <h4>Notifications par email</h4>
+                                                <p>Recevoir des alertes par email</p>
+                                            </div>
+                                        </div>
+                                        <label class="toggle-switch">
+                                            <input type="checkbox" id="emailNotifications" checked>
+                                            <span class="toggle-slider"></span>
+                                        </label>
+                                    </div>
+                                    <div class="preference-item">
+                                        <div class="preference-info">
+                                            <i class="fas fa-newspaper"></i>
+                                            <div>
+                                                <h4>Newsletter</h4>
+                                                <p>Recevoir les actualités financières</p>
+                                            </div>
+                                        </div>
+                                        <label class="toggle-switch">
+                                            <input type="checkbox" id="newsletter" checked>
+                                            <span class="toggle-slider"></span>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Footer -->
+            <footer>
+                <p>&copy; 2024 Finance Pro. Tous droits réservés.</p>
+            </footer>
+        </main>
+    </div>
+
+    <!-- Overlay for mobile -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <!-- Scripts -->
+    <script src="js/auth-manager.js"></script>
+    <script src="js/sidebar.js"></script>
+    <script src="js/profile.js"></script>
+</body>
+</html>

@@ -312,3 +312,123 @@ window.SidebarManager = {
     updateLastUpdateTime,
     setActivePage
 };
+
+/* ===================================
+   USER PROFILE SECTION
+   Gestion de l'affichage du profil utilisateur
+   =================================== */
+
+/**
+ * Initialise la section profil utilisateur
+ */
+function initializeUserProfile() {
+    const userProfileBtn = document.getElementById('userProfileBtn');
+    
+    if (!userProfileBtn) {
+        console.warn('User profile button not found');
+        return;
+    }
+
+    // Écouter les clics sur le bouton profil
+    userProfileBtn.addEventListener('click', handleProfileClick);
+
+    // Écouter les changements d'authentification
+    if (window.authManager) {
+        window.authManager.addListener(handleAuthChange);
+        
+        // Mettre à jour l'affichage initial
+        updateUserDisplay();
+    } else {
+        console.error('AuthManager not found. Please include auth-manager.js before sidebar.js');
+    }
+}
+
+/**
+ * Gère le clic sur le bouton profil
+ */
+function handleProfileClick() {
+    const isAuthenticated = window.authManager && window.authManager.isAuthenticated();
+    
+    if (isAuthenticated) {
+        // Rediriger vers la page de profil
+        window.location.href = 'profile.html';
+    } else {
+        // Rediriger vers la page de connexion
+        window.location.href = 'auth.html';
+    }
+}
+
+/**
+ * Gère les changements d'état d'authentification
+ * @param {string} event - Type d'événement
+ * @param {Object} data - Données associées
+ */
+function handleAuthChange(event, data) {
+    console.log('Auth event:', event, data);
+    updateUserDisplay();
+}
+
+/**
+ * Met à jour l'affichage du profil utilisateur
+ */
+function updateUserDisplay() {
+    const userProfileBtn = document.getElementById('userProfileBtn');
+    if (!userProfileBtn) return;
+
+    const isAuthenticated = window.authManager && window.authManager.isAuthenticated();
+    const currentUser = window.authManager ? window.authManager.getCurrentUser() : null;
+
+    if (isAuthenticated && currentUser) {
+        // Utilisateur connecté
+        userProfileBtn.classList.add('logged-in');
+        
+        const fullName = `${currentUser.firstName} ${currentUser.lastName}`;
+        const initials = `${currentUser.firstName.charAt(0)}${currentUser.lastName.charAt(0)}`.toUpperCase();
+        
+        userProfileBtn.innerHTML = `
+            ${currentUser.avatar 
+                ? `<img src="${currentUser.avatar}" alt="${fullName}" class="user-avatar">` 
+                : `<i class="fas fa-user-circle"></i>`
+            }
+            <div class="user-details">
+                <span class="user-name">${fullName}</span>
+                <span class="user-status">● Connecté</span>
+            </div>
+            <i class="fas fa-chevron-right arrow-icon"></i>
+        `;
+        
+        userProfileBtn.setAttribute('aria-label', `Profil de ${fullName}`);
+    } else {
+        // Utilisateur non connecté
+        userProfileBtn.classList.remove('logged-in');
+        
+        userProfileBtn.innerHTML = `
+            <i class="fas fa-user-circle"></i>
+            <div class="user-details">
+                <span class="user-name">Connexion</span>
+                <span class="user-status">Cliquez pour vous connecter</span>
+            </div>
+            <i class="fas fa-chevron-right arrow-icon"></i>
+        `;
+        
+        userProfileBtn.setAttribute('aria-label', 'Se connecter');
+    }
+}
+
+// Initialiser le profil utilisateur au chargement
+document.addEventListener('DOMContentLoaded', () => {
+    initializeUserProfile();
+});
+
+// Mettre à jour lors du retour sur la page
+window.addEventListener('pageshow', (event) => {
+    if (event.persisted) {
+        updateUserDisplay();
+    }
+});
+
+// Export pour utilisation globale
+window.UserProfileManager = {
+    updateUserDisplay,
+    handleProfileClick
+};

@@ -3,7 +3,7 @@
 <head>
     <meta charset='UTF-8'>
     <meta name='viewport' content='width=device-width, initial-scale=1.0'>
-    <title>Financial Dashboard - Raphael NARDONE</title>
+    <title>Dashboard - Finance Pro</title>
     
     <!-- Highcharts -->
     <script src='https://code.highcharts.com/highcharts.js'></script>
@@ -15,6 +15,10 @@
     <!-- Styles -->
     <link rel='stylesheet' href='assets/css/common.css'>
     <link rel='stylesheet' href='assets/css/sidebar.css'>
+        <!-- Pour auth.html -->
+    <link rel="stylesheet" href="css/auth.css">
+    <!-- Pour profile.html -->
+    <link rel="stylesheet" href="css/profile.css">
     <link rel='stylesheet' href='assets/css/dashboard.css'>
 </head>
 <body>
@@ -87,10 +91,18 @@
                 </div>
             </nav>
             
-            <div class='sidebar-footer'>
-                <div class='user-info'>
-                    <i class='fas fa-user-circle'></i>
-                    <span>Raphael NARDONE</span>
+            <!-- Sidebar Footer - Version avec authentification -->
+            <div class="sidebar-footer">
+                <div class="user-info" id="userInfoSection">
+                    <!-- État non connecté -->
+                    <button class="user-profile-btn" id="userProfileBtn" aria-label="Accéder à mon profil">
+                        <i class="fas fa-user-circle"></i>
+                        <div class="user-details">
+                            <span class="user-name">Connexion</span>
+                            <span class="user-status">Cliquez pour vous connecter</span>
+                        </div>
+                        <i class="fas fa-chevron-right arrow-icon"></i>
+                    </button>
                 </div>
             </div>
         </aside>
@@ -106,6 +118,11 @@
                     <h1>Personal Finance Dashboard</h1>
                 </div>
                 <div class='header-right'>
+                    <!-- ✅ NOUVEAU : Bouton Dark Mode -->
+                    <button class='dark-mode-toggle' id='darkModeToggle' aria-label='Toggle dark mode' title='Toggle dark mode'>
+                        <i class='fas fa-moon' aria-hidden='true'></i>
+                    </button>
+                    
                     <span class='last-update'>
                         <i class='fas fa-clock'></i>
                         <span id='lastUpdate'></span>
@@ -312,8 +329,10 @@
     </div>
     
     <!-- Scripts -->
+    <script src='assets/js/dark-mode.js'></script>  <!-- ✅ NOUVEAU -->
     <script src='assets/js/common.js'></script>
     <script src='assets/js/sidebar.js'></script>
+    <script src="js/auth-manager.js"></script>
     <script src='assets/js/dashboard.js'></script>
 </body>
 </html>
