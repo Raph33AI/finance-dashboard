@@ -1,6 +1,6 @@
 /* ==============================================
    DASHBOARD.JS - Modern Financial Dashboard 2024
-   Version optimisée avec ES6+ et meilleures pratiques
+   Version optimisée avec palette Bleu/Violet
    ============================================== */
 
 /**
@@ -9,6 +9,29 @@
  */
 const Dashboard = (function() {
     'use strict';
+    
+    // ========================================
+    // PALETTE DE COULEURS BLEU/VIOLET
+    // ========================================
+    
+    const COLORS = {
+        // Bleus
+        primaryBlue: '#4A74F3',
+        darkBlue: '#2649B2',
+        lightBlue: '#6C8BE0',
+        veryLightBlue: '#D4D9F0',
+        
+        // Violets
+        primaryViolet: '#8E44AD',
+        darkViolet: '#6C3483',
+        lightViolet: '#9D5CE6',
+        veryLightViolet: '#C39BD3',
+        mediumViolet: '#8E7DE3',
+        
+        // Spéciaux
+        accent: '#B55CE6',
+        neutral: '#94a3b8'
+    };
     
     // ========================================
     // VARIABLES PRIVÉES
@@ -343,7 +366,7 @@ const Dashboard = (function() {
             }
             if (status) {
                 status.textContent = 'ACTIVÉ';
-                status.style.color = 'var(--success-color)';
+                status.style.color = COLORS.primaryViolet;
             }
         } else {
             if (btn) {
@@ -673,7 +696,7 @@ const Dashboard = (function() {
             // Coloration de la ligne du mois actuel
             if (index === currentMonthIndex) {
                 tr.classList.add('current-month');
-                tr.style.background = 'rgba(37, 99, 235, 0.05)';
+                tr.style.background = 'rgba(74, 116, 243, 0.05)';
             }
             
             tr.innerHTML = `
@@ -701,13 +724,13 @@ const Dashboard = (function() {
                     onchange='Dashboard.updateValue(${index}, "loan", this.value)'
                     aria-label='Prêts ${row.month}'></td>
                 <td class='calculated'>${formatCurrency(row.totalExpenses)}</td>
-                <td class='calculated' style='color: ${row.savings >= 0 ? "var(--success-color)" : "var(--danger-color)"};'>
+                <td class='calculated' style='color: ${row.savings >= 0 ? COLORS.darkBlue : COLORS.primaryViolet};'>
                     ${formatCurrency(row.savings)}
                 </td>
                 <td><input type='number' step='0.01' value='${row.investment}' 
                     onchange='Dashboard.updateValue(${index}, "investment", this.value)'
                     aria-label='Investissement ${row.month}'></td>
-                <td class='calculated' style='background: var(--background-tertiary);'>
+                <td class='calculated' style='background: ${COLORS.veryLightBlue};'>
                     ${formatCurrency(row.monthlyGain, 2)}
                 </td>
                 <td class='calculated'>${formatCurrency(row.cumulatedGains)}</td>
@@ -715,10 +738,10 @@ const Dashboard = (function() {
                     onchange='Dashboard.updateValue(${index}, "peeLoreal", this.value)'
                     aria-label='PEE ${row.month}'></td>
                 <td class='calculated'>${formatCurrency(row.cumulatedInvestment)}</td>
-                <td class='calculated' style='font-weight: 700; color: var(--primary-color);'>
+                <td class='calculated' style='font-weight: 700; color: ${COLORS.darkBlue};'>
                     ${formatCurrency(row.totalPortfolio)}
                 </td>
-                <td class='calculated' style='color: ${row.roi >= 0 ? "var(--success-color)" : "var(--danger-color)"};'>
+                <td class='calculated' style='color: ${row.roi >= 0 ? COLORS.darkBlue : COLORS.primaryViolet};'>
                     ${row.roi.toFixed(2)}%
                 </td>
                 <td>
@@ -882,7 +905,7 @@ const Dashboard = (function() {
     }
     
     // ========================================
-    // GRAPHIQUES (Suite dans le prochain message...)
+    // GRAPHIQUES - PALETTE BLEU/VIOLET
     // ========================================
     
     /**
@@ -977,25 +1000,25 @@ const Dashboard = (function() {
                 { 
                     name: 'Revenus', 
                     data: incomeValues, 
-                    color: 'var(--primary-color)', 
+                    color: COLORS.primaryBlue, 
                     lineWidth: 2 
                 },
                 { 
                     name: 'Dépenses', 
                     data: expenseValues, 
-                    color: 'var(--danger-color)', 
+                    color: COLORS.primaryViolet, 
                     lineWidth: 2 
                 },
                 { 
                     name: 'Épargne Mensuelle', 
                     data: savingsValues, 
-                    color: 'var(--success-color)', 
+                    color: COLORS.darkBlue, 
                     type: 'area', 
                     fillColor: { 
                         linearGradient: [0, 0, 0, 300], 
                         stops: [
-                            [0, 'rgba(16, 185, 129, 0.3)'], 
-                            [1, 'rgba(16, 185, 129, 0.05)']
+                            [0, 'rgba(38, 73, 178, 0.3)'], 
+                            [1, 'rgba(38, 73, 178, 0.05)']
                         ] 
                     }, 
                     lineWidth: 2 
@@ -1046,8 +1069,8 @@ const Dashboard = (function() {
             series: [{
                 name: 'Montant',
                 data: [
-                    { name: 'Salaire', y: row.salary, color: 'var(--primary-color)' },
-                    { name: 'Divers', y: row.misc, color: 'var(--primary-light)' }
+                    { name: 'Salaire', y: row.salary, color: COLORS.darkBlue },
+                    { name: 'Divers', y: row.misc, color: COLORS.primaryBlue }
                 ]
             }],
             plotOptions: {
@@ -1102,11 +1125,11 @@ const Dashboard = (function() {
             series: [{
                 name: 'Montant',
                 data: [
-                    { name: 'Loyer', y: row.rent, color: '#dc2626' },
-                    { name: 'Alimentation', y: row.food, color: '#f97316' },
-                    { name: 'Coûts Fixes', y: row.fixCosts, color: '#f59e0b' },
-                    { name: 'Autres', y: row.others, color: '#eab308' },
-                    { name: 'Prêts', y: row.loan, color: '#84cc16' }
+                    { name: 'Loyer', y: row.rent, color: COLORS.darkViolet },
+                    { name: 'Alimentation', y: row.food, color: COLORS.primaryViolet },
+                    { name: 'Coûts Fixes', y: row.fixCosts, color: COLORS.lightViolet },
+                    { name: 'Autres', y: row.others, color: COLORS.veryLightViolet },
+                    { name: 'Prêts', y: row.loan, color: COLORS.mediumViolet }
                 ]
             }],
             plotOptions: {
@@ -1135,12 +1158,12 @@ const Dashboard = (function() {
         const series = [{
             name: 'Épargne Nominale',
             data: savingsData,
-            color: 'var(--success-color)',
+            color: COLORS.darkBlue,
             fillColor: {
                 linearGradient: [0, 0, 0, 300],
                 stops: [
-                    [0, 'rgba(16, 185, 129, 0.5)'],
-                    [1, 'rgba(16, 185, 129, 0.1)']
+                    [0, 'rgba(38, 73, 178, 0.5)'],
+                    [1, 'rgba(38, 73, 178, 0.1)']
                 ]
             },
             lineWidth: 2
@@ -1150,13 +1173,13 @@ const Dashboard = (function() {
             series.push({
                 name: 'Épargne Réelle (Ajustée Inflation)',
                 data: savingsDataReal,
-                color: 'var(--accent-color)',
+                color: COLORS.lightViolet,
                 dashStyle: 'Dash',
                 fillColor: {
                     linearGradient: [0, 0, 0, 300],
                     stops: [
-                        [0, 'rgba(139, 92, 246, 0.3)'],
-                        [1, 'rgba(139, 92, 246, 0.05)']
+                        [0, 'rgba(157, 92, 230, 0.3)'],
+                        [1, 'rgba(157, 92, 230, 0.05)']
                     ]
                 },
                 lineWidth: 2
@@ -1175,7 +1198,7 @@ const Dashboard = (function() {
                 text: showInflation ? 
                     `Taux d'inflation: ${inflationRate}% annuel` : null,
                 style: { 
-                    color: 'var(--accent-color)', 
+                    color: COLORS.lightViolet, 
                     fontSize: '0.9rem',
                     fontWeight: '500'
                 }
@@ -1239,26 +1262,26 @@ const Dashboard = (function() {
             {
                 name: 'Investissement Cumulé',
                 data: cumInv,
-                color: '#3b82f6',
+                color: COLORS.lightBlue,
                 lineWidth: 2
             },
             {
                 name: 'Gains Cumulés',
                 data: gains,
-                color: '#8b5cf6',
+                color: COLORS.mediumViolet,
                 dashStyle: 'ShortDot',
                 lineWidth: 2
             },
             {
                 name: "PEE L'Oréal",
                 data: pee,
-                color: '#ec4899',
+                color: COLORS.lightViolet,
                 lineWidth: 2
             },
             {
                 name: 'Portefeuille Total',
                 data: portfolio,
-                color: 'var(--primary-color)',
+                color: COLORS.darkBlue,
                 lineWidth: 3
             }
         ];
@@ -1267,14 +1290,14 @@ const Dashboard = (function() {
             series.push({
                 name: 'Portefeuille (Réel)',
                 data: portfolioReal,
-                color: 'var(--accent-color)',
+                color: COLORS.accent,
                 dashStyle: 'Dash',
                 lineWidth: 3
             });
             series.push({
                 name: 'Investissement (Réel)',
                 data: cumInvReal,
-                color: '#94a3b8',
+                color: COLORS.veryLightBlue,
                 dashStyle: 'Dash',
                 lineWidth: 2
             });
@@ -1292,7 +1315,7 @@ const Dashboard = (function() {
                 text: showInflation ? 
                     `Taux d'inflation: ${inflationRate}% annuel` : null,
                 style: {
-                    color: 'var(--accent-color)',
+                    color: COLORS.lightViolet,
                     fontSize: '0.9rem',
                     fontWeight: '500'
                 }
@@ -1375,7 +1398,7 @@ const Dashboard = (function() {
                 gridLineColor: 'var(--border-color)',
                 plotLines: [{
                     value: 0,
-                    color: 'var(--danger-color)',
+                    color: COLORS.primaryViolet,
                     width: 2,
                     dashStyle: 'Dash'
                 }]
@@ -1393,12 +1416,12 @@ const Dashboard = (function() {
             series: [{
                 name: 'ROI',
                 data: roi,
-                color: 'var(--success-color)',
+                color: COLORS.primaryBlue,
                 fillColor: {
                     linearGradient: [0, 0, 0, 300],
                     stops: [
-                        [0, 'rgba(16, 185, 129, 0.4)'],
-                        [1, 'rgba(16, 185, 129, 0.05)']
+                        [0, 'rgba(74, 116, 243, 0.4)'],
+                        [1, 'rgba(74, 116, 243, 0.05)']
                     ]
                 },
                 lineWidth: 2
@@ -1473,19 +1496,19 @@ const Dashboard = (function() {
                         name: 'Besoins',
                         y: needsPercent,
                         amount: needsAmount,
-                        color: 'var(--danger-color)'
+                        color: COLORS.darkViolet
                     },
                     {
                         name: 'Envies',
                         y: wantsPercent,
                         amount: wantsAmount,
-                        color: 'var(--warning-color)'
+                        color: COLORS.lightViolet
                     },
                     {
                         name: 'Épargne',
                         y: savingsPercent,
                         amount: savingsAmount,
-                        color: 'var(--success-color)'
+                        color: COLORS.darkBlue
                     }
                 ]
             }],
