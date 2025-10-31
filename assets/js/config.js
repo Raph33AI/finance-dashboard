@@ -4,7 +4,7 @@
 
 const CONFIG = {
     // 🔧 Backend API URL - ⚠️ REMPLACE PAR TON URL CLOUDFLARE WORKER
-    API_BASE_URL: 'finance-hub-api.raphnardone.workers.dev',
+    API_BASE_URL: 'https://finance-hub-api.raphnardone.workers.dev/api',
     
     // GitHub Pages URL 
     GITHUB_PAGES_URL: 'https://raph33ai.github.io/finance-dashboard',
