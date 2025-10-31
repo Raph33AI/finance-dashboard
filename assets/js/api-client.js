@@ -1,6 +1,6 @@
 /* ==============================================
    API-CLIENT.JS - Twelve Data API Client avec Cache
-   Version optimisée pour le plan Basic
+   Version corrigée pour la vraie structure API
    ============================================== */
 
 class FinanceAPIClient {
@@ -186,6 +186,34 @@ class FinanceAPIClient {
     }
     
     // ============================================
+    // HELPER METHODS
+    // ============================================
+    
+    parseNumber(value) {
+        if (value === null || value === undefined || value === '') return 0;
+        if (typeof value === 'number') return value;
+        const parsed = parseFloat(value);
+        return isNaN(parsed) ? 0 : parsed;
+    }
+    
+    safeGet(obj, path, defaultValue = null) {
+        try {
+            const keys = path.split('.');
+            let result = obj;
+            for (const key of keys) {
+                if (result && typeof result === 'object' && key in result) {
+                    result = result[key];
+                } else {
+                    return defaultValue;
+                }
+            }
+            return result !== undefined ? result : defaultValue;
+        } catch {
+            return defaultValue;
+        }
+    }
+    
+    // ============================================
     // API ENDPOINTS
     // ============================================
     
@@ -193,35 +221,45 @@ class FinanceAPIClient {
      * 🔍 Recherche de symboles
      */
     async searchSymbol(query) {
-        return await this.makeRequest('symbol_search', {
+        const data = await this.makeRequest('symbol_search', {
             symbol: query,
             outputsize: 30
         });
+        
+        return {
+            data: data.data || [],
+            status: data.status || 'ok'
+        };
     }
     
     /**
-     * 💰 Quote en temps réel
+     * 💰 Quote en temps réel (CORRIGÉ !)
      */
     async getQuote(symbol) {
         const data = await this.makeRequest('quote', { symbol });
         
+        console.log('📦 Quote data received:', data);
+        
+        // Twelve Data peut retourner soit un objet direct, soit dans data.quote
+        const quote = data.quote || data;
+        
         return {
-            symbol: data.symbol,
-            name: data.name || symbol,
-            exchange: data.exchange,
-            currency: data.currency,
-            price: parseFloat(data.close) || 0,
-            open: parseFloat(data.open) || 0,
-            high: parseFloat(data.high) || 0,
-            low: parseFloat(data.low) || 0,
-            volume: parseInt(data.volume) || 0,
-            previousClose: parseFloat(data.previous_close) || 0,
-            change: parseFloat(data.change) || 0,
-            percentChange: parseFloat(data.percent_change) || 0,
-            fiftyTwoWeekHigh: parseFloat(data.fifty_two_week.high) || 0,
-            fiftyTwoWeekLow: parseFloat(data.fifty_two_week.low) || 0,
-            averageVolume: parseInt(data.average_volume) || 0,
-            timestamp: data.timestamp
+            symbol: this.safeGet(quote, 'symbol', symbol),
+            name: this.safeGet(quote, 'name', symbol),
+            exchange: this.safeGet(quote, 'exchange', ''),
+            currency: this.safeGet(quote, 'currency', 'USD'),
+            price: this.parseNumber(this.safeGet(quote, 'close')),
+            open: this.parseNumber(this.safeGet(quote, 'open')),
+            high: this.parseNumber(this.safeGet(quote, 'high')),
+            low: this.parseNumber(this.safeGet(quote, 'low')),
+            volume: parseInt(this.safeGet(quote, 'volume', 0)),
+            previousClose: this.parseNumber(this.safeGet(quote, 'previous_close')),
+            change: this.parseNumber(this.safeGet(quote, 'change')),
+            percentChange: this.parseNumber(this.safeGet(quote, 'percent_change')),
+            fiftyTwoWeekHigh: this.parseNumber(this.safeGet(quote, 'fifty_two_week.high')),
+            fiftyTwoWeekLow: this.parseNumber(this.safeGet(quote, 'fifty_two_week.low')),
+            averageVolume: parseInt(this.safeGet(quote, 'average_volume', 0)),
+            timestamp: this.safeGet(quote, 'timestamp', Date.now())
         };
     }
     
@@ -229,39 +267,50 @@ class FinanceAPIClient {
      * 📊 Séries temporelles (données historiques)
      */
     async getTimeSeries(symbol, interval = '1day', outputsize = 30) {
-        const data = await this.makeRequest('time_series', {
-            symbol,
-            interval,
-            outputsize
-        });
-        
-        if (!data.values || data.values.length === 0) {
-            throw new Error('No time series data available for this symbol');
+        try {
+            const data = await this.makeRequest('time_series', {
+                symbol,
+                interval,
+                outputsize
+            });
+            
+            console.log('📦 Time series data received:', data);
+            
+            const values = data.values || data.data || [];
+            
+            if (values.length === 0) {
+                throw new Error('No time series data available for this symbol');
+            }
+            
+            return {
+                symbol: this.safeGet(data, 'meta.symbol', symbol),
+                interval: this.safeGet(data, 'meta.interval', interval),
+                currency: this.safeGet(data, 'meta.currency', 'USD'),
+                exchange: this.safeGet(data, 'meta.exchange', ''),
+                data: values.map(item => ({
+                    datetime: item.datetime,
+                    timestamp: new Date(item.datetime).getTime(),
+                    open: this.parseNumber(item.open),
+                    high: this.parseNumber(item.high),
+                    low: this.parseNumber(item.low),
+                    close: this.parseNumber(item.close),
+                    volume: parseInt(item.volume) || 0
+                })).reverse() // Inverser pour avoir l'ordre chronologique
+            };
+        } catch (error) {
+            console.error('Time series error:', error);
+            throw error;
         }
-        
-        return {
-            symbol: data.meta?.symbol || symbol,
-            interval: data.meta?.interval || interval,
-            currency: data.meta?.currency,
-            exchange: data.meta?.exchange,
-            data: data.values.map(item => ({
-                datetime: item.datetime,
-                timestamp: new Date(item.datetime).getTime(),
-                open: parseFloat(item.open),
-                high: parseFloat(item.high),
-                low: parseFloat(item.low),
-                close: parseFloat(item.close),
-                volume: parseInt(item.volume) || 0
-            })).reverse() // Inverser pour avoir l'ordre chronologique
-        };
     }
     
     /**
-     * 🏢 Profil de l'entreprise (NOUVEAU !)
+     * 🏢 Profil de l'entreprise
      */
     async getProfile(symbol) {
         try {
             const data = await this.makeRequest('profile', { symbol });
+            
+            console.log('📦 Profile data received:', data);
             
             // Vérifier si des données sont retournées
             if (!data || data.status === 'error') {
@@ -270,31 +319,33 @@ class FinanceAPIClient {
             }
             
             return {
-                symbol: data.symbol || symbol,
-                name: data.name || symbol,
-                sector: data.sector || 'N/A',
-                industry: data.industry || 'N/A',
-                country: data.country || 'N/A',
-                website: data.website || '',
-                description: data.description || 'No description available',
-                ceo: data.ceo || 'N/A',
-                employees: data.employees || 'N/A',
-                address: data.address || 'N/A',
-                phone: data.phone || 'N/A',
-                founded: data.founded || 'N/A'
+                symbol: this.safeGet(data, 'symbol', symbol),
+                name: this.safeGet(data, 'name', symbol),
+                sector: this.safeGet(data, 'sector', 'N/A'),
+                industry: this.safeGet(data, 'industry', 'N/A'),
+                country: this.safeGet(data, 'country', 'N/A'),
+                website: this.safeGet(data, 'website', ''),
+                description: this.safeGet(data, 'description', 'No description available'),
+                ceo: this.safeGet(data, 'ceo', 'N/A'),
+                employees: this.safeGet(data, 'employees', 'N/A'),
+                address: this.safeGet(data, 'address', 'N/A'),
+                phone: this.safeGet(data, 'phone', 'N/A'),
+                founded: this.safeGet(data, 'founded', 'N/A')
             };
         } catch (error) {
             console.warn('Profile endpoint not accessible:', error.message);
             return null;
         }
     }
-
+    
     /**
-     * 📈 Statistiques fondamentales (NOUVEAU !)
+     * 📈 Statistiques fondamentales
      */
     async getStatistics(symbol) {
         try {
             const data = await this.makeRequest('statistics', { symbol });
+            
+            console.log('📦 Statistics data received:', data);
             
             // Vérifier si des données sont retournées
             if (!data || data.status === 'error') {
@@ -304,57 +355,59 @@ class FinanceAPIClient {
             
             return {
                 // Valuation Metrics
-                marketCap: this.parseNumber(data.valuations_metrics?.market_capitalization),
-                enterpriseValue: this.parseNumber(data.valuations_metrics?.enterprise_value),
-                trailingPE: this.parseNumber(data.valuations_metrics?.trailing_pe),
-                forwardPE: this.parseNumber(data.valuations_metrics?.forward_pe),
-                pegRatio: this.parseNumber(data.valuations_metrics?.peg_ratio),
-                priceToSales: this.parseNumber(data.valuations_metrics?.price_to_sales_ttm),
-                priceToBook: this.parseNumber(data.valuations_metrics?.price_to_book_mrq),
-                evToRevenue: this.parseNumber(data.valuations_metrics?.enterprise_to_revenue),
-                evToEbitda: this.parseNumber(data.valuations_metrics?.enterprise_to_ebitda),
+                marketCap: this.parseNumber(this.safeGet(data, 'valuations_metrics.market_capitalization')),
+                enterpriseValue: this.parseNumber(this.safeGet(data, 'valuations_metrics.enterprise_value')),
+                trailingPE: this.parseNumber(this.safeGet(data, 'valuations_metrics.trailing_pe')),
+                forwardPE: this.parseNumber(this.safeGet(data, 'valuations_metrics.forward_pe')),
+                pegRatio: this.parseNumber(this.safeGet(data, 'valuations_metrics.peg_ratio')),
+                priceToSales: this.parseNumber(this.safeGet(data, 'valuations_metrics.price_to_sales_ttm')),
+                priceToBook: this.parseNumber(this.safeGet(data, 'valuations_metrics.price_to_book_mrq')),
+                evToRevenue: this.parseNumber(this.safeGet(data, 'valuations_metrics.enterprise_to_revenue')),
+                evToEbitda: this.parseNumber(this.safeGet(data, 'valuations_metrics.enterprise_to_ebitda')),
                 
                 // Financial Highlights
-                profitMargin: this.parseNumber(data.financials_highlights?.profit_margin),
-                operatingMargin: this.parseNumber(data.financials_highlights?.operating_margin),
-                returnOnAssets: this.parseNumber(data.financials_highlights?.return_on_assets_ttm),
-                returnOnEquity: this.parseNumber(data.financials_highlights?.return_on_equity_ttm),
-                revenue: this.parseNumber(data.financials_highlights?.revenue_ttm),
-                revenuePerShare: this.parseNumber(data.financials_highlights?.revenue_per_share_ttm),
-                grossProfit: this.parseNumber(data.financials_highlights?.gross_profit_ttm),
-                ebitda: this.parseNumber(data.financials_highlights?.ebitda),
-                netIncome: this.parseNumber(data.financials_highlights?.net_income_to_common_ttm),
-                eps: this.parseNumber(data.financials_highlights?.diluted_eps_ttm),
+                profitMargin: this.parseNumber(this.safeGet(data, 'financials_highlights.profit_margin')),
+                operatingMargin: this.parseNumber(this.safeGet(data, 'financials_highlights.operating_margin')),
+                returnOnAssets: this.parseNumber(this.safeGet(data, 'financials_highlights.return_on_assets_ttm')),
+                returnOnEquity: this.parseNumber(this.safeGet(data, 'financials_highlights.return_on_equity_ttm')),
+                revenue: this.parseNumber(this.safeGet(data, 'financials_highlights.revenue_ttm')),
+                revenuePerShare: this.parseNumber(this.safeGet(data, 'financials_highlights.revenue_per_share_ttm')),
+                grossProfit: this.parseNumber(this.safeGet(data, 'financials_highlights.gross_profit_ttm')),
+                ebitda: this.parseNumber(this.safeGet(data, 'financials_highlights.ebitda')),
+                netIncome: this.parseNumber(this.safeGet(data, 'financials_highlights.net_income_to_common_ttm')),
+                eps: this.parseNumber(this.safeGet(data, 'financials_highlights.diluted_eps_ttm')),
                 
                 // Stock Statistics
-                beta: this.parseNumber(data.statistics?.beta),
-                fiftyTwoWeekChange: this.parseNumber(data.statistics?.['52_week_change']),
-                sharesOutstanding: this.parseNumber(data.statistics?.shares_outstanding),
-                sharesFloat: this.parseNumber(data.statistics?.shares_float),
-                sharesShort: this.parseNumber(data.statistics?.shares_short),
-                shortRatio: this.parseNumber(data.statistics?.short_ratio),
-                shortPercentOfFloat: this.parseNumber(data.statistics?.short_percent_of_float),
+                beta: this.parseNumber(this.safeGet(data, 'statistics.beta')),
+                fiftyTwoWeekChange: this.parseNumber(this.safeGet(data, 'statistics.52_week_change')),
+                sharesOutstanding: this.parseNumber(this.safeGet(data, 'statistics.shares_outstanding')),
+                sharesFloat: this.parseNumber(this.safeGet(data, 'statistics.shares_float')),
+                sharesShort: this.parseNumber(this.safeGet(data, 'statistics.shares_short')),
+                shortRatio: this.parseNumber(this.safeGet(data, 'statistics.short_ratio')),
+                shortPercentOfFloat: this.parseNumber(this.safeGet(data, 'statistics.short_percent_of_float')),
                 
                 // Dividends
-                dividendRate: this.parseNumber(data.dividends_and_splits?.forward_annual_dividend_rate),
-                dividendYield: this.parseNumber(data.dividends_and_splits?.forward_annual_dividend_yield),
-                payoutRatio: this.parseNumber(data.dividends_and_splits?.payout_ratio),
-                exDividendDate: data.dividends_and_splits?.ex_dividend_date || '',
-                lastSplitDate: data.dividends_and_splits?.last_split_date || '',
-                lastSplitFactor: data.dividends_and_splits?.last_split_factor || ''
+                dividendRate: this.parseNumber(this.safeGet(data, 'dividends_and_splits.forward_annual_dividend_rate')),
+                dividendYield: this.parseNumber(this.safeGet(data, 'dividends_and_splits.forward_annual_dividend_yield')),
+                payoutRatio: this.parseNumber(this.safeGet(data, 'dividends_and_splits.payout_ratio')),
+                exDividendDate: this.safeGet(data, 'dividends_and_splits.ex_dividend_date', ''),
+                lastSplitDate: this.safeGet(data, 'dividends_and_splits.last_split_date', ''),
+                lastSplitFactor: this.safeGet(data, 'dividends_and_splits.last_split_factor', '')
             };
         } catch (error) {
             console.warn('Statistics endpoint not accessible:', error.message);
             return null;
         }
     }
-
+    
     /**
-     * 🎨 Logo de l'entreprise (NOUVEAU !)
+     * 🎨 Logo de l'entreprise
      */
     async getLogo(symbol) {
         try {
             const data = await this.makeRequest('logo', { symbol });
+            
+            console.log('📦 Logo data received:', data);
             
             if (!data || data.status === 'error' || !data.url) {
                 console.warn('Logo not available for', symbol);
@@ -367,16 +420,6 @@ class FinanceAPIClient {
             return '';
         }
     }
-
-    /**
-     * Helper: Parse number safely
-     */
-    parseNumber(value) {
-        if (value === null || value === undefined || value === '') return 0;
-        if (typeof value === 'number') return value;
-        const parsed = parseFloat(value);
-        return isNaN(parsed) ? 0 : parsed;
-    }
     
     /**
      * 🔄 Taux de change (pour crypto et forex)
@@ -388,7 +431,7 @@ class FinanceAPIClient {
             });
             
             return {
-                rate: parseFloat(data.rate),
+                rate: this.parseNumber(data.rate),
                 timestamp: data.timestamp
             };
         } catch (error) {
