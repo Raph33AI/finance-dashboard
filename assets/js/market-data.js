@@ -908,7 +908,7 @@ const MarketData = {
             if (this.watchlist.length > 0) {
                 this.refreshWatchlist();
             }
-        }, 60000);
+        }, 3600000);
     },
     
     updateAddToWatchlistButton() {
