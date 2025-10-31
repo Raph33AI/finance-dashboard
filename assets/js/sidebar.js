@@ -1,50 +1,67 @@
-// ===================================
-// SIDEBAR NAVIGATION FUNCTIONALITY
-// ===================================
+/* ===================================
+   SIDEBAR NAVIGATION FUNCTIONALITY
+   Version optimisée ES6+ 2024
+   =================================== */
 
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', () => {
     initializeSidebar();
 });
 
+/**
+ * Initialise toutes les fonctionnalités de la sidebar
+ */
 function initializeSidebar() {
     const sidebar = document.getElementById('sidebar');
     const sidebarToggle = document.getElementById('sidebarToggle');
     const mobileToggle = document.getElementById('mobileToggle');
     const navFolders = document.querySelectorAll('.nav-folder');
     
+    if (!sidebar) {
+        console.warn('Sidebar element not found');
+        return;
+    }
+    
     // Toggle sidebar collapse (desktop)
     if (sidebarToggle) {
-        sidebarToggle.addEventListener('click', function() {
+        sidebarToggle.addEventListener('click', () => {
             sidebar.classList.toggle('collapsed');
-            localStorage.setItem('sidebarCollapsed', sidebar.classList.contains('collapsed'));
+            const isCollapsed = sidebar.classList.contains('collapsed');
+            localStorage.setItem('sidebarCollapsed', isCollapsed);
+            
+            // Annoncer le changement pour l'accessibilité
+            sidebarToggle.setAttribute('aria-expanded', !isCollapsed);
         });
     }
     
     // Toggle sidebar mobile
     if (mobileToggle) {
-        mobileToggle.addEventListener('click', function() {
+        mobileToggle.addEventListener('click', () => {
             sidebar.classList.toggle('mobile-open');
+            const isOpen = sidebar.classList.contains('mobile-open');
             toggleOverlay();
+            
+            // Accessibility
+            mobileToggle.setAttribute('aria-expanded', isOpen);
+            
+            // Piéger le focus dans la sidebar si ouverte
+            if (isOpen) {
+                trapFocusInSidebar(sidebar);
+            }
         });
     }
     
-    // Folder toggle functionality
+    // Folder toggle functionality avec meilleure gestion
     navFolders.forEach(folder => {
-        folder.addEventListener('click', function(e) {
+        folder.addEventListener('click', (e) => {
             e.preventDefault();
-            const section = this.closest('.nav-section');
-            const wasActive = section.classList.contains('active');
-            
-            // Close all sections
-            document.querySelectorAll('.nav-section').forEach(s => {
-                s.classList.remove('active');
-                s.querySelector('.nav-folder').classList.remove('active');
-            });
-            
-            // Open clicked section if it wasn't active
-            if (!wasActive) {
-                section.classList.add('active');
-                this.classList.add('active');
+            handleFolderToggle(folder);
+        });
+        
+        // Support clavier
+        folder.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                handleFolderToggle(folder);
             }
         });
     });
@@ -52,20 +69,61 @@ function initializeSidebar() {
     // Set active page
     setActivePage();
     
-    // ✅ MODIFICATION : Restore sidebar state OU collapse par défaut
-    restoreSidebarState();
+    // Restore sidebar state OU collapse par défaut
+    restoreSidebarState(sidebar);
     
     // Auto-open section containing active page
-    const activeLink = document.querySelector('.nav-link.active');
-    if (activeLink) {
-        const section = activeLink.closest('.nav-section');
-        if (section) {
-            section.classList.add('active');
-            section.querySelector('.nav-folder').classList.add('active');
+    autoOpenActiveSection();
+    
+    // Handle window resize
+    handleWindowResize(sidebar);
+    
+    // Close sidebar on ESC key
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && sidebar.classList.contains('mobile-open')) {
+            sidebar.classList.remove('mobile-open');
+            const overlay = document.querySelector('.sidebar-overlay');
+            if (overlay) {
+                overlay.classList.remove('active');
+            }
+            if (mobileToggle) {
+                mobileToggle.focus();
+            }
         }
+    });
+}
+
+/**
+ * Gère le toggle d'un folder
+ * @param {HTMLElement} folder - L'élément folder
+ */
+function handleFolderToggle(folder) {
+    const section = folder.closest('.nav-section');
+    if (!section) return;
+    
+    const wasActive = section.classList.contains('active');
+    
+    // Close all sections
+    document.querySelectorAll('.nav-section').forEach(s => {
+        s.classList.remove('active');
+        const folderBtn = s.querySelector('.nav-folder');
+        if (folderBtn) {
+            folderBtn.classList.remove('active');
+            folderBtn.setAttribute('aria-expanded', 'false');
+        }
+    });
+    
+    // Open clicked section if it wasn't active
+    if (!wasActive) {
+        section.classList.add('active');
+        folder.classList.add('active');
+        folder.setAttribute('aria-expanded', 'true');
     }
 }
 
+/**
+ * Définit la page active dans la navigation
+ */
 function setActivePage() {
     const currentPage = window.location.pathname.split('/').pop() || 'index.html';
     const navLinks = document.querySelectorAll('.nav-link');
@@ -74,19 +132,19 @@ function setActivePage() {
         const linkPage = link.getAttribute('href');
         if (linkPage === currentPage) {
             link.classList.add('active');
+            link.setAttribute('aria-current', 'page');
         } else {
             link.classList.remove('active');
+            link.removeAttribute('aria-current');
         }
     });
 }
 
-function restoreSidebarState() {
-    const sidebar = document.getElementById('sidebar');
-    
-    // ✅ OPTION 1 : TOUJOURS COLLAPSÉE PAR DÉFAUT (décommentez celle-ci pour forcer le collapse)
-    // sidebar.classList.add('collapsed');
-    
-    // ✅ OPTION 2 : Se souvenir du dernier état (actuel)
+/**
+ * Restaure l'état de la sidebar depuis localStorage
+ * @param {HTMLElement} sidebar - L'élément sidebar
+ */
+function restoreSidebarState(sidebar) {
     const isCollapsed = localStorage.getItem('sidebarCollapsed');
     
     // Si aucune préférence sauvegardée, collapse par défaut
@@ -96,8 +154,57 @@ function restoreSidebarState() {
     } else if (isCollapsed === 'true') {
         sidebar.classList.add('collapsed');
     }
+    
+    // Update ARIA
+    const toggle = document.getElementById('sidebarToggle');
+    if (toggle) {
+        toggle.setAttribute('aria-expanded', isCollapsed !== 'true');
+    }
 }
 
+/**
+ * Ouvre automatiquement la section contenant la page active
+ */
+function autoOpenActiveSection() {
+    const activeLink = document.querySelector('.nav-link.active');
+    if (activeLink) {
+        const section = activeLink.closest('.nav-section');
+        if (section) {
+            section.classList.add('active');
+            const folder = section.querySelector('.nav-folder');
+            if (folder) {
+                folder.classList.add('active');
+                folder.setAttribute('aria-expanded', 'true');
+            }
+        }
+    }
+}
+
+/**
+ * Gère le redimensionnement de la fenêtre
+ * @param {HTMLElement} sidebar - L'élément sidebar
+ */
+function handleWindowResize(sidebar) {
+    let resizeTimer;
+    window.addEventListener('resize', () => {
+        clearTimeout(resizeTimer);
+        resizeTimer = setTimeout(() => {
+            const isMobile = window.innerWidth <= 1024;
+            
+            if (!isMobile && sidebar.classList.contains('mobile-open')) {
+                sidebar.classList.remove('mobile-open');
+                const overlay = document.querySelector('.sidebar-overlay');
+                if (overlay) {
+                    overlay.classList.remove('active');
+                }
+            }
+        }, 250);
+    });
+}
+
+/**
+ * Toggle l'overlay pour mobile
+ */
 function toggleOverlay() {
     let overlay = document.querySelector('.sidebar-overlay');
     
@@ -106,30 +213,102 @@ function toggleOverlay() {
         overlay.className = 'sidebar-overlay';
         document.body.appendChild(overlay);
         
-        overlay.addEventListener('click', function() {
-            document.getElementById('sidebar').classList.remove('mobile-open');
-            this.classList.remove('active');
+        overlay.addEventListener('click', () => {
+            const sidebar = document.getElementById('sidebar');
+            if (sidebar) {
+                sidebar.classList.remove('mobile-open');
+            }
+            overlay.classList.remove('active');
+            
+            // Remettre le focus sur le toggle
+            const mobileToggle = document.getElementById('mobileToggle');
+            if (mobileToggle) {
+                mobileToggle.focus();
+            }
         });
     }
     
     overlay.classList.toggle('active');
 }
 
-// Update last update time
+/**
+ * Piège le focus dans la sidebar (accessibilité mobile)
+ * @param {HTMLElement} sidebar - L'élément sidebar
+ */
+function trapFocusInSidebar(sidebar) {
+    const focusableElements = sidebar.querySelectorAll(
+        'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+    );
+    
+    if (focusableElements.length === 0) return;
+    
+    const firstFocusable = focusableElements[0];
+    const lastFocusable = focusableElements[focusableElements.length - 1];
+    
+    // Focus sur le premier élément
+    setTimeout(() => firstFocusable.focus(), 100);
+    
+    const handleTabKey = (e) => {
+        if (e.key !== 'Tab') return;
+        
+        if (e.shiftKey) {
+            if (document.activeElement === firstFocusable) {
+                e.preventDefault();
+                lastFocusable.focus();
+            }
+        } else {
+            if (document.activeElement === lastFocusable) {
+                e.preventDefault();
+                firstFocusable.focus();
+            }
+        }
+    };
+    
+    sidebar.addEventListener('keydown', handleTabKey);
+    
+    // Nettoyer l'event listener quand la sidebar se ferme
+    const observer = new MutationObserver((mutations) => {
+        mutations.forEach((mutation) => {
+            if (mutation.attributeName === 'class') {
+                const isClosed = !sidebar.classList.contains('mobile-open');
+                if (isClosed) {
+                    sidebar.removeEventListener('keydown', handleTabKey);
+                    observer.disconnect();
+                }
+            }
+        });
+    });
+    
+    observer.observe(sidebar, { attributes: true });
+}
+
+/**
+ * Met à jour l'heure de dernière mise à jour
+ */
 function updateLastUpdateTime() {
     const lastUpdateElement = document.getElementById('lastUpdate');
-    if (lastUpdateElement) {
-        const now = new Date();
-        const timeString = now.toLocaleString('fr-FR', {
-            day: '2-digit',
-            month: '2-digit',
-            year: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit'
-        });
-        lastUpdateElement.textContent = `Dernière mise à jour: ${timeString}`;
-    }
+    if (!lastUpdateElement) return;
+    
+    const now = new Date();
+    const timeString = now.toLocaleString('fr-FR', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+    });
+    lastUpdateElement.textContent = `Dernière mise à jour: ${timeString}`;
 }
 
 // Call on page load
 updateLastUpdateTime();
+
+// Update every minute
+setInterval(updateLastUpdateTime, 60000);
+
+// Export pour utilisation globale
+window.SidebarManager = {
+    toggleOverlay,
+    updateLastUpdateTime,
+    setActivePage
+};

@@ -1,5 +1,6 @@
 /* ============================================
-   CACHE MONITORING WIDGET
+   CACHE MONITORING WIDGET - Modern Design
+   Version optimisée 2024
    ============================================ */
 
 /* Fixed Button */
@@ -19,14 +20,26 @@
     color: white;
     font-size: 24px;
     cursor: pointer;
-    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
-    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgb(102 126 234 / 0.4);
+    transition: all var(--transition-base, 0.3s ease);
     position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .cache-toggle-btn:hover {
     transform: scale(1.1);
-    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+    box-shadow: 0 6px 20px rgb(102 126 234 / 0.6);
+}
+
+.cache-toggle-btn:active {
+    transform: scale(1.05);
+}
+
+.cache-toggle-btn:focus-visible {
+    outline: 3px solid rgb(102 126 234 / 0.5);
+    outline-offset: 3px;
 }
 
 .cache-badge {
@@ -36,14 +49,15 @@
     background: #ff4757;
     color: white;
     border-radius: 50%;
-    width: 24px;
+    min-width: 24px;
     height: 24px;
     font-size: 11px;
-    font-weight: bold;
+    font-weight: 700;
     display: flex;
     align-items: center;
     justify-content: center;
     border: 2px solid white;
+    padding: 0 4px;
 }
 
 /* Cache Panel */
@@ -51,14 +65,14 @@
     position: fixed;
     bottom: 90px;
     right: 20px;
-    width: 380px;
+    width: min(380px, calc(100vw - 40px));
     max-height: 600px;
-    background: white;
+    background: var(--background-primary, white);
     border-radius: 15px;
-    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 10px 40px rgb(0 0 0 / 0.2);
     z-index: 9999;
     overflow: hidden;
-    transition: all 0.3s ease;
+    transition: all var(--transition-base, 0.3s ease);
     animation: slideInRight 0.3s ease;
 }
 
@@ -90,47 +104,64 @@
     margin: 0;
     font-size: 16px;
     font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 8px;
 }
 
 .close-cache-panel {
-    background: rgba(255, 255, 255, 0.2);
+    background: rgb(255 255 255 / 0.2);
     border: none;
     color: white;
     width: 30px;
     height: 30px;
     border-radius: 50%;
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: all var(--transition-fast, 0.2s ease);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
 }
 
 .close-cache-panel:hover {
-    background: rgba(255, 255, 255, 0.3);
+    background: rgb(255 255 255 / 0.3);
+    transform: rotate(90deg);
+}
+
+.close-cache-panel:focus-visible {
+    outline: 2px solid white;
+    outline-offset: 2px;
 }
 
 .cache-panel-body {
     padding: 20px;
     max-height: 520px;
     overflow-y: auto;
+    overflow-x: hidden;
 }
 
 /* Cache Sections */
 .cache-section {
     margin-bottom: 20px;
     padding-bottom: 20px;
-    border-bottom: 1px solid #eee;
+    border-bottom: 1px solid var(--border-color, #e2e8f0);
 }
 
 .cache-section:last-child {
     border-bottom: none;
+    margin-bottom: 0;
+    padding-bottom: 0;
 }
 
 .cache-section h4 {
     margin: 0 0 15px 0;
     font-size: 14px;
-    color: #333;
+    color: var(--text-primary, #0f172a);
     display: flex;
     align-items: center;
     gap: 8px;
+    font-weight: 600;
 }
 
 .cache-section h4 i {
@@ -139,7 +170,7 @@
 
 /* Quota Display */
 .quota-display {
-    background: #f8f9fa;
+    background: var(--background-secondary, #f8f9fa);
     padding: 15px;
     border-radius: 10px;
 }
@@ -147,7 +178,7 @@
 .quota-bar-container {
     width: 100%;
     height: 20px;
-    background: #e0e0e0;
+    background: var(--background-tertiary, #e0e0e0);
     border-radius: 10px;
     overflow: hidden;
     margin-bottom: 10px;
@@ -158,11 +189,28 @@
     background: #4CAF50;
     transition: all 0.5s ease;
     border-radius: 10px;
+    position: relative;
+}
+
+.quota-bar::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(90deg, transparent, rgb(255 255 255 / 0.3), transparent);
+    animation: shimmer 2s infinite;
+}
+
+@keyframes shimmer {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
 }
 
 .quota-stats {
     font-size: 14px;
-    color: #555;
+    color: var(--text-secondary, #555);
     text-align: center;
     font-weight: 500;
 }
@@ -180,23 +228,32 @@
 }
 
 .cache-stat-item {
-    background: #f8f9fa;
+    background: var(--background-secondary, #f8f9fa);
     padding: 12px;
     border-radius: 8px;
     text-align: center;
+    transition: all var(--transition-fast, 0.2s ease);
+}
+
+.cache-stat-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgb(0 0 0 / 0.1);
 }
 
 .cache-stat-label {
     font-size: 11px;
-    color: #888;
+    color: var(--text-tertiary, #888);
     margin-bottom: 5px;
     text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-weight: 600;
 }
 
 .cache-stat-value {
     font-size: 20px;
     font-weight: 700;
     color: #667eea;
+    line-height: 1;
 }
 
 /* Cache Actions */
@@ -213,11 +270,25 @@
     cursor: pointer;
     font-size: 13px;
     font-weight: 500;
-    transition: all 0.2s ease;
+    transition: all var(--transition-fast, 0.2s ease);
     display: flex;
     align-items: center;
     justify-content: center;
     gap: 8px;
+}
+
+.cache-action-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgb(0 0 0 / 0.15);
+}
+
+.cache-action-btn:active {
+    transform: translateY(0);
+}
+
+.cache-action-btn:focus-visible {
+    outline: 2px solid currentColor;
+    outline-offset: 2px;
 }
 
 .cache-action-btn.refresh {
@@ -251,13 +322,15 @@
 .cache-details {
     max-height: 200px;
     overflow-y: auto;
+    overflow-x: hidden;
 }
 
 .cache-empty {
     text-align: center;
-    color: #999;
+    color: var(--text-tertiary, #999);
     font-style: italic;
     padding: 20px;
+    font-size: 14px;
 }
 
 .cache-entries-list {
@@ -271,19 +344,31 @@
     justify-content: space-between;
     align-items: center;
     padding: 8px 12px;
-    background: #f8f9fa;
+    background: var(--background-secondary, #f8f9fa);
     border-radius: 6px;
     font-size: 12px;
+    transition: all var(--transition-fast, 0.2s ease);
+}
+
+.cache-entry-item:hover {
+    background: var(--background-tertiary, #e2e8f0);
+    transform: translateX(2px);
 }
 
 .cache-entry-endpoint {
-    color: #333;
+    color: var(--text-primary, #333);
     font-weight: 500;
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .cache-entry-age {
-    color: #888;
+    color: var(--text-tertiary, #888);
     font-size: 11px;
+    flex-shrink: 0;
+    margin-left: 8px;
 }
 
 .cache-entry-more {
@@ -292,6 +377,14 @@
     font-size: 12px;
     margin-top: 10px;
     font-weight: 500;
+    cursor: pointer;
+    padding: 8px;
+    border-radius: 6px;
+    transition: all var(--transition-fast, 0.2s ease);
+}
+
+.cache-entry-more:hover {
+    background: var(--background-secondary, #f8f9fa);
 }
 
 /* Scrollbar Styling */
@@ -302,7 +395,7 @@
 
 .cache-panel-body::-webkit-scrollbar-track,
 .cache-details::-webkit-scrollbar-track {
-    background: #f1f1f1;
+    background: var(--background-secondary, #f1f1f1);
     border-radius: 10px;
 }
 
@@ -312,15 +405,75 @@
     border-radius: 10px;
 }
 
+.cache-panel-body::-webkit-scrollbar-thumb:hover,
+.cache-details::-webkit-scrollbar-thumb:hover {
+    background: #5568d3;
+}
+
 /* Mobile Responsive */
 @media (max-width: 768px) {
+    .cache-widget {
+        bottom: 10px;
+        right: 10px;
+    }
+    
+    .cache-toggle-btn {
+        width: 50px;
+        height: 50px;
+        font-size: 20px;
+    }
+    
+    .cache-badge {
+        width: 20px;
+        height: 20px;
+        font-size: 10px;
+    }
+    
     .cache-panel {
-        width: calc(100vw - 40px);
-        right: 20px;
-        bottom: 90px;
+        width: calc(100vw - 20px);
+        right: 10px;
+        bottom: 70px;
+        max-height: 70vh;
     }
     
     .cache-stats-grid {
         grid-template-columns: 1fr;
+    }
+    
+    .cache-panel-body {
+        padding: 15px;
+        max-height: calc(70vh - 60px);
+    }
+}
+
+/* Dark mode support (si activé) */
+@media (prefers-color-scheme: dark) {
+    /*
+    .cache-panel {
+        background: #1e293b;
+    }
+    
+    .cache-stat-item,
+    .quota-display,
+    .cache-entry-item {
+        background: #334155;
+    }
+    
+    .cache-section h4,
+    .cache-entry-endpoint {
+        color: #f1f5f9;
+    }
+    */
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+    .cache-panel,
+    .cache-toggle-btn,
+    .cache-action-btn,
+    .cache-stat-item,
+    .quota-bar {
+        transition: none;
+        animation: none;
     }
 }

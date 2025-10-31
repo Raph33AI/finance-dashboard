@@ -1,5 +1,6 @@
 /* ===================================
-   SIDEBAR NAVIGATION STYLES
+   SIDEBAR NAVIGATION STYLES - Modern 2024
+   Version optimisée avec meilleures pratiques
    =================================== */
 
 :root {
@@ -7,7 +8,7 @@
     --sidebar-collapsed-width: 70px;
     --sidebar-bg: #1a1d29;
     --sidebar-hover: #252937;
-    --sidebar-active: #2649B2;
+    --sidebar-active: #2563eb;
     --sidebar-text: #e4e6eb;
     --sidebar-text-secondary: #b0b3b8;
     --transition-speed: 0.3s;
@@ -17,25 +18,12 @@
     --content-padding-mobile: 20px;
 }
 
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
-
-body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background: #f5f7fa;
-    overflow-x: hidden;
-}
-
-/* Layout Wrapper */
+/* Layout Wrapper avec dégradé moderne */
 .layout-wrapper {
     display: flex;
     min-height: 100vh;
-    /* ✅ NOUVEAU : Le background dégradé du body est maintenant appliqué ici */
     background: linear-gradient(135deg, #5B2C6F 0%, #2649B2 50%, #4A74F3 100%);
-    padding: 20px; /* ✅ NOUVEAU : Padding global pour le layout-wrapper */
+    padding: 20px;
 }
 
 /* ===================================
@@ -47,15 +35,16 @@ body {
     background: var(--sidebar-bg);
     color: var(--sidebar-text);
     position: fixed;
-    left: 0;
-    top: 0;
-    height: 100vh;
+    left: 20px;
+    top: 20px;
+    height: calc(100vh - 40px);
     display: flex;
     flex-direction: column;
     transition: width var(--transition-speed) ease;
     z-index: 1000;
-    box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 10px 40px rgb(0 0 0 / 0.3);
     overflow: hidden;
+    border-radius: 20px;
 }
 
 .sidebar.collapsed {
@@ -65,11 +54,12 @@ body {
 /* Sidebar Header */
 .sidebar-header {
     padding: 20px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    border-bottom: 1px solid rgb(255 255 255 / 0.1);
     display: flex;
     align-items: center;
     justify-content: space-between;
     min-height: 70px;
+    flex-shrink: 0;
 }
 
 .sidebar-header h2 {
@@ -81,6 +71,7 @@ body {
     white-space: nowrap;
     overflow: hidden;
     transition: opacity var(--transition-speed);
+    margin: 0;
 }
 
 .sidebar-header h2 i {
@@ -96,7 +87,7 @@ body {
     font-size: 20px;
     cursor: pointer;
     padding: 8px;
-    border-radius: 4px;
+    border-radius: 6px;
     transition: background var(--transition-speed);
     flex-shrink: 0;
 }
@@ -105,13 +96,17 @@ body {
     background: var(--sidebar-hover);
 }
 
+.sidebar-toggle:focus-visible {
+    outline: 2px solid #4A74F3;
+    outline-offset: 2px;
+}
+
 .sidebar.collapsed .sidebar-header h2 span {
     opacity: 0;
     width: 0;
     display: inline-block;
     transition: opacity var(--transition-speed), width var(--transition-speed);
 }
-
 
 /* Sidebar Navigation */
 .sidebar-nav {
@@ -130,12 +125,12 @@ body {
 }
 
 .sidebar-nav::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.2);
+    background: rgb(255 255 255 / 0.2);
     border-radius: 3px;
 }
 
 .sidebar-nav::-webkit-scrollbar-thumb:hover {
-    background: rgba(255, 255, 255, 0.3);
+    background: rgb(255 255 255 / 0.3);
 }
 
 /* Navigation Section */
@@ -158,15 +153,40 @@ body {
     font-size: 15px;
     font-weight: 500;
     position: relative;
+    text-align: left;
+}
+
+.nav-folder::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 3px;
+    background: transparent;
+    transition: background var(--transition-speed);
 }
 
 .nav-folder:hover {
     background: var(--sidebar-hover);
 }
 
+.nav-folder:hover::before {
+    background: #4A74F3;
+}
+
 .nav-folder.active {
     background: var(--sidebar-active);
     color: white;
+}
+
+.nav-folder.active::before {
+    background: white;
+}
+
+.nav-folder:focus-visible {
+    outline: 2px solid #4A74F3;
+    outline-offset: -2px;
 }
 
 .nav-folder i:first-child {
@@ -205,7 +225,7 @@ body {
     max-height: 0;
     overflow: hidden;
     transition: max-height var(--transition-speed) ease;
-    background: rgba(0, 0, 0, 0.2);
+    background: rgb(0 0 0 / 0.2);
 }
 
 .nav-section.active .nav-submenu {
@@ -221,6 +241,18 @@ body {
     text-decoration: none;
     transition: all var(--transition-speed);
     font-size: 14px;
+    position: relative;
+}
+
+.nav-link::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 3px;
+    background: transparent;
+    transition: background var(--transition-speed);
 }
 
 .nav-link:hover {
@@ -229,11 +261,23 @@ body {
     padding-left: 56px;
 }
 
+.nav-link:hover::before {
+    background: rgb(74 116 243 / 0.5);
+}
+
 .nav-link.active {
-    background: rgba(70, 116, 243, 0.2);
+    background: rgb(70 116 243 / 0.2);
     color: #4A74F3;
-    border-left: 3px solid #4A74F3;
-    padding-left: 49px;
+    font-weight: 500;
+}
+
+.nav-link.active::before {
+    background: #4A74F3;
+}
+
+.nav-link:focus-visible {
+    outline: 2px solid #4A74F3;
+    outline-offset: -2px;
 }
 
 .nav-link i {
@@ -254,8 +298,9 @@ body {
 
 /* Sidebar Footer */
 .sidebar-footer {
-    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    border-top: 1px solid rgb(255 255 255 / 0.1);
     padding: 20px;
+    flex-shrink: 0;
 }
 
 .user-info {
@@ -285,7 +330,7 @@ body {
 
 .main-content {
     flex: 1;
-    margin-left: var(--sidebar-width);
+    margin-left: calc(var(--sidebar-width) + var(--content-padding-desktop));
     transition: margin-left var(--transition-speed) ease;
     min-height: 100vh;
     display: flex;
@@ -293,35 +338,32 @@ body {
     
     background: white;
     border-radius: 20px;
-    box-shadow: 0 20px 60px rgba(91,44,111,0.4);
+    box-shadow: 0 20px 60px rgb(91 44 111 / 0.4);
     overflow: hidden;
     
-    /* ✅ NOUVEAU : Centrage du main-content au sein du layout-wrapper */
     max-width: var(--content-max-width);
-    margin-right: auto; /* Ajouté pour centrer le main-content dans le layout-wrapper */
-    margin-left: calc(var(--sidebar-width) + var(--content-padding-desktop)); /* Ajuste le décalage pour laisser de l'espace à la sidebar */
+    margin-right: auto;
 }
 
 .sidebar.collapsed ~ .main-content {
-    margin-left: calc(var(--sidebar-collapsed-width) + var(--content-padding-desktop)); /* Ajuste pour la sidebar collapsée */
+    margin-left: calc(var(--sidebar-collapsed-width) + var(--content-padding-desktop));
 }
 
 /* Top Header */
 .top-header {
     background: white;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    box-shadow: 0 2px 4px rgb(0 0 0 / 0.05);
     display: flex;
     align-items: center;
     justify-content: space-between;
     position: sticky;
     top: 0;
     z-index: 100;
-    padding: 20px var(--content-padding-desktop); /* Applique le padding du main-content */
+    padding: 20px var(--content-padding-desktop);
 }
 
-/* ✅ Wrapper pour le contenu du header pour aligner avec le container */
 .header-content-wrapper {
-    max-width: var(--content-max-width); /* Limite la largeur du contenu interne du header */
+    max-width: var(--content-max-width);
     margin: 0 auto;
     width: 100%;
     display: flex;
@@ -339,6 +381,7 @@ body {
     font-size: 24px;
     color: #1a1d29;
     font-weight: 600;
+    margin: 0;
 }
 
 .mobile-toggle {
@@ -349,6 +392,17 @@ body {
     color: #1a1d29;
     cursor: pointer;
     padding: 8px;
+    border-radius: 6px;
+    transition: background var(--transition-speed);
+}
+
+.mobile-toggle:hover {
+    background: var(--background-secondary, #f8fafc);
+}
+
+.mobile-toggle:focus-visible {
+    outline: 2px solid #2563eb;
+    outline-offset: 2px;
 }
 
 .header-right {
@@ -372,23 +426,19 @@ body {
 /* Container */
 .container {
     flex: 1;
-    /* ✅ NOUVEAU : Le container prend toute la largeur disponible et ajoute son propre padding interne */
-    width: 100%; /* S'étend sur toute la largeur disponible */
-    max-width: 100%; /* S'assurer qu'il ne soit pas limité */
-    margin: 0; /* Pas de margin auto, car cela est géré par le main-content */
-    padding: 0 var(--content-padding-desktop); /* Padding interne pour le contenu principal */
+    width: 100%;
+    max-width: 100%;
+    margin: 0;
+    padding: 0 var(--content-padding-desktop);
 }
 
-/* ✅ NOUVEAU : Le 'content' à l'intérieur du container s'étend */
 .container .content {
-    width: 100%; /* S'assurer qu'il prend 100% de la largeur de son parent */
-    /* Le padding sera géré par la .section ou les éléments internes */
+    width: 100%;
 }
 
-/* ✅ NOUVEAU : S'assurer que le pied de page prend toute la largeur du main-content */
 .main-content footer {
     width: 100%;
-    padding: 20px var(--content-padding-desktop); /* Applique le padding latéral au footer */
+    padding: 20px var(--content-padding-desktop);
 }
 
 /* ===================================
@@ -396,8 +446,16 @@ body {
    =================================== */
 
 @media (max-width: 1024px) {
+    .layout-wrapper {
+        padding: 0;
+    }
+    
     .sidebar {
         transform: translateX(-100%);
+        left: 0;
+        top: 0;
+        height: 100vh;
+        border-radius: 0;
     }
     
     .sidebar.mobile-open {
@@ -406,7 +464,7 @@ body {
     
     .main-content {
         margin-left: 0 !important;
-        padding: 0; /* Plus de padding ici, il sera géré par le container */
+        padding: 0;
         max-width: 100% !important;
         border-radius: 0 !important;
         box-shadow: none !important;
@@ -421,17 +479,16 @@ body {
         display: none;
     }
 
-    /* Ajuster le top-header et le container pour les écrans plus petits */
     .top-header {
         padding: 20px var(--content-padding-mobile);
     }
 
     .container {
-        padding: 0 var(--content-padding-mobile); /* Ajuste le padding du container sur mobile */
+        padding: 0 var(--content-padding-mobile);
     }
 
     .main-content footer {
-        padding: 20px var(--content-padding-mobile); /* Ajuste le padding du footer sur mobile */
+        padding: 20px var(--content-padding-mobile);
     }
 }
 
@@ -448,9 +505,8 @@ body {
         font-size: 12px;
     }
 
-    /* ✅ NOUVEAU : Ajuster le padding global du layout-wrapper sur mobile */
     .layout-wrapper {
-        padding: 10px;
+        padding: 0;
     }
 }
 
@@ -462,10 +518,49 @@ body {
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(0, 0, 0, 0.5);
+    background: rgb(0 0 0 / 0.5);
     z-index: 999;
+    backdrop-filter: blur(4px);
 }
 
 .sidebar-overlay.active {
     display: block;
+}
+
+/* Touch device optimizations */
+@media (hover: none) and (pointer: coarse) {
+    .nav-folder,
+    .nav-link {
+        padding-top: 16px;
+        padding-bottom: 16px;
+    }
+    
+    .sidebar-toggle,
+    .mobile-toggle {
+        padding: 12px;
+    }
+}
+
+/* Dark mode support (optionnel) */
+@media (prefers-color-scheme: dark) {
+    /*
+    :root {
+        --sidebar-bg: #0f1419;
+        --sidebar-hover: #1a1f28;
+    }
+    */
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+    .sidebar,
+    .main-content,
+    .nav-folder,
+    .nav-link,
+    .nav-submenu,
+    .sidebar-header h2 span,
+    .nav-folder span,
+    .nav-folder .arrow {
+        transition: none;
+    }
 }

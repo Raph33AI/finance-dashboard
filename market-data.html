@@ -3,21 +3,30 @@
 <head>
     <meta charset='UTF-8'>
     <meta name='viewport' content='width=device-width, initial-scale=1.0'>
-    <title>Market Data - Raphael NARDONE</title>
+    <meta name='description' content='Market Data Dashboard - Real-time stock analysis, technical indicators, watchlist and price alerts'>
+    <meta name='author' content='Raphael NARDONE'>
+    <meta name='theme-color' content='#2563eb'>
+    
+    <title>Market Data - Raphael NARDONE | Finance Dashboard</title>
+    
+    <!-- Preconnect pour optimisation -->
+    <link rel='preconnect' href='https://code.highcharts.com'>
+    <link rel='preconnect' href='https://cdnjs.cloudflare.com'>
     
     <!-- Highcharts - ORDRE IMPORTANT -->
-    <script src='https://code.highcharts.com/stock/highstock.js'></script>
-    <script src='https://code.highcharts.com/stock/indicators/indicators-all.js'></script>
-    <script src='https://code.highcharts.com/stock/modules/drag-panes.js'></script>
-    <script src='https://code.highcharts.com/modules/annotations-advanced.js'></script>
-    <script src='https://code.highcharts.com/modules/price-indicator.js'></script>
-    <script src='https://code.highcharts.com/modules/full-screen.js'></script>
-    <script src='https://code.highcharts.com/modules/stock-tools.js'></script>
-    <script src='https://code.highcharts.com/modules/exporting.js'></script>
-    <script src='https://code.highcharts.com/modules/export-data.js'></script>
+    <script src='https://code.highcharts.com/stock/highstock.js' defer></script>
+    <script src='https://code.highcharts.com/stock/indicators/indicators-all.js' defer></script>
+    <script src='https://code.highcharts.com/stock/modules/drag-panes.js' defer></script>
+    <script src='https://code.highcharts.com/modules/annotations-advanced.js' defer></script>
+    <script src='https://code.highcharts.com/modules/price-indicator.js' defer></script>
+    <script src='https://code.highcharts.com/modules/full-screen.js' defer></script>
+    <script src='https://code.highcharts.com/modules/stock-tools.js' defer></script>
+    <script src='https://code.highcharts.com/modules/exporting.js' defer></script>
+    <script src='https://code.highcharts.com/modules/export-data.js' defer></script>
+    <script src='https://code.highcharts.com/modules/accessibility.js' defer></script>
     
     <!-- Font Awesome -->
-    <link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css'>
+    <link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css' integrity='sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==' crossorigin='anonymous' referrerpolicy='no-referrer'>
     
     <!-- Styles -->
     <link rel='stylesheet' href='assets/css/common.css'>
@@ -31,25 +40,28 @@
         <!-- ============================================
              SIDEBAR NAVIGATION
              ============================================ -->
-        <aside class='sidebar' id='sidebar'>
+        <aside class='sidebar' id='sidebar' role='navigation' aria-label='Main navigation'>
             <div class='sidebar-header'>
-                <h2><i class='fas fa-chart-line'></i> Finance Hub</h2>
-                <button class='sidebar-toggle' id='sidebarToggle'>
-                    <i class='fas fa-bars'></i>
+                <h2>
+                    <i class='fas fa-chart-line' aria-hidden='true'></i>
+                    <span>Finance Hub</span>
+                </h2>
+                <button class='sidebar-toggle' id='sidebarToggle' aria-label='Toggle sidebar' aria-expanded='false'>
+                    <i class='fas fa-bars' aria-hidden='true'></i>
                 </button>
             </div>
             
             <nav class='sidebar-nav'>
                 <!-- Budget Section -->
                 <div class='nav-section'>
-                    <button class='nav-folder'>
-                        <i class='fas fa-wallet'></i>
+                    <button class='nav-folder' aria-expanded='false' aria-controls='budget-submenu'>
+                        <i class='fas fa-wallet' aria-hidden='true'></i>
                         <span>Budget</span>
-                        <i class='fas fa-chevron-down arrow'></i>
+                        <i class='fas fa-chevron-down arrow' aria-hidden='true'></i>
                     </button>
-                    <div class='nav-submenu'>
+                    <div class='nav-submenu' id='budget-submenu'>
                         <a href='index.html' class='nav-link'>
-                            <i class='fas fa-home'></i>
+                            <i class='fas fa-home' aria-hidden='true'></i>
                             <span>Dashboard Budget</span>
                         </a>
                     </div>
@@ -57,26 +69,26 @@
                 
                 <!-- Simulation Section -->
                 <div class='nav-section'>
-                    <button class='nav-folder'>
-                        <i class='fas fa-calculator'></i>
+                    <button class='nav-folder' aria-expanded='false' aria-controls='simulation-submenu'>
+                        <i class='fas fa-calculator' aria-hidden='true'></i>
                         <span>Simulation</span>
-                        <i class='fas fa-chevron-down arrow'></i>
+                        <i class='fas fa-chevron-down arrow' aria-hidden='true'></i>
                     </button>
-                    <div class='nav-submenu'>
+                    <div class='nav-submenu' id='simulation-submenu'>
                         <a href='monte-carlo.html' class='nav-link'>
-                            <i class='fas fa-dice'></i>
+                            <i class='fas fa-dice' aria-hidden='true'></i>
                             <span>Monte Carlo</span>
                         </a>
                         <a href='portfolio-optimizer.html' class='nav-link'>
-                            <i class='fas fa-chart-pie'></i>
+                            <i class='fas fa-chart-pie' aria-hidden='true'></i>
                             <span>Markowitz</span>
                         </a>
                         <a href='risk-parity.html' class='nav-link'>
-                            <i class='fas fa-balance-scale'></i>
+                            <i class='fas fa-balance-scale' aria-hidden='true'></i>
                             <span>Risk Parity</span>
                         </a>
                         <a href='scenario-analysis.html' class='nav-link'>
-                            <i class='fas fa-flask'></i>
+                            <i class='fas fa-flask' aria-hidden='true'></i>
                             <span>Scénarios</span>
                         </a>
                     </div>
@@ -84,22 +96,22 @@
                 
                 <!-- Stocks Section -->
                 <div class='nav-section active'>
-                    <button class='nav-folder active'>
-                        <i class='fas fa-chart-line'></i>
+                    <button class='nav-folder active' aria-expanded='true' aria-controls='stocks-submenu'>
+                        <i class='fas fa-chart-line' aria-hidden='true'></i>
                         <span>Stocks</span>
-                        <i class='fas fa-chevron-down arrow'></i>
+                        <i class='fas fa-chevron-down arrow' aria-hidden='true'></i>
                     </button>
-                    <div class='nav-submenu' style='display: block;'>
-                        <a href='market-data.html' class='nav-link active'>
-                            <i class='fas fa-globe'></i>
+                    <div class='nav-submenu' id='stocks-submenu'>
+                        <a href='market-data.html' class='nav-link active' aria-current='page'>
+                            <i class='fas fa-globe' aria-hidden='true'></i>
                             <span>Market Data</span>
                         </a>
                         <a href='advanced-analysis.html' class='nav-link'>
-                            <i class='fas fa-chart-area'></i>
+                            <i class='fas fa-chart-area' aria-hidden='true'></i>
                             <span>Advanced Analysis</span>
                         </a>
                         <a href='trend-prediction.html' class='nav-link'>
-                            <i class='fas fa-globe'></i>
+                            <i class='fas fa-brain' aria-hidden='true'></i>
                             <span>ML Predictions</span>
                         </a>
                     </div>
@@ -108,29 +120,32 @@
             
             <div class='sidebar-footer'>
                 <div class='user-info'>
-                    <i class='fas fa-user-circle'></i>
+                    <i class='fas fa-user-circle' aria-hidden='true'></i>
                     <span>Raphael NARDONE</span>
                 </div>
             </div>
         </aside>
         
+        <!-- Sidebar Overlay (mobile) -->
+        <div class='sidebar-overlay' id='sidebarOverlay' aria-hidden='true'></div>
+        
         <!-- ============================================
              MAIN CONTENT AREA
              ============================================ -->
-        <div class='main-content'>
+        <main class='main-content' role='main'>
             <!-- Top Header -->
             <header class='top-header'>
-                <div class="header-content-wrapper">
+                <div class='header-content-wrapper'>
                     <div class='header-left'>
-                        <button class='mobile-toggle' id='mobileToggle'>
-                            <i class='fas fa-bars'></i>
+                        <button class='mobile-toggle' id='mobileToggle' aria-label='Toggle navigation menu' aria-expanded='false'>
+                            <i class='fas fa-bars' aria-hidden='true'></i>
                         </button>
                         <h1>Market Data</h1>
                     </div>
                     <div class='header-right'>
-                        <span class='last-update'>
-                            <i class='fas fa-clock'></i>
-                            <span id='lastUpdate'></span>
+                        <span class='last-update' aria-live='polite'>
+                            <i class='fas fa-clock' aria-hidden='true'></i>
+                            <span id='lastUpdate'>Loading...</span>
                         </span>
                     </div>
                 </div>
@@ -142,83 +157,87 @@
                 <div class='content'>
                     
                     <!-- Search Panel -->
-                    <div class='search-panel card'>
+                    <section class='search-panel card' aria-labelledby='search-title'>
                         <div class='card-header'>
-                            <h2 class='card-title'>
-                                <i class='fas fa-search'></i> Search Stock for Market Data
+                            <h2 class='card-title' id='search-title'>
+                                <i class='fas fa-search' aria-hidden='true'></i> Search Stock for Market Data
                             </h2>
-                            <span class='help-icon' onclick='openModal("modalSearchHelp")'>?</span>
+                            <button class='help-icon' onclick='openModal("modalSearchHelp")' aria-label='Help about searching stocks'>?</button>
                         </div>
                         
                         <div class='card-body'>
                             <div class='search-container'>
                                 <!-- Search Input + Button -->
                                 <div class='search-input-wrapper'>
+                                    <label for='symbolInput' class='sr-only'>Stock symbol or company name</label>
                                     <input type='text' 
                                         id='symbolInput' 
                                         class='form-input'
                                         placeholder='Search by symbol or company name (e.g., AAPL, Apple, Tesla)...'
                                         autocomplete='off'
-                                        value='AAPL'>
-                                    <button class='btn btn-primary btn-search' onclick='MarketData.searchStock()'>
-                                        <i class='fas fa-chart-area'></i> Analyze Stock
+                                        value='AAPL'
+                                        aria-describedby='search-instructions'>
+                                    <button class='btn btn-primary btn-search' onclick='MarketData.searchStock()' aria-label='Analyze selected stock'>
+                                        <i class='fas fa-chart-area' aria-hidden='true'></i> Analyze Stock
                                     </button>
                                     
-                                    <!-- Suggestions dropdown (hidden by default) -->
-                                    <div class='search-suggestions' id='searchSuggestions'></div>
+                                    <!-- Suggestions dropdown -->
+                                    <div class='search-suggestions' id='searchSuggestions' role='listbox' aria-label='Search suggestions'></div>
                                 </div>
+                                
+                                <span id='search-instructions' class='sr-only'>Type to search for stocks. Use arrow keys to navigate suggestions, Enter to select.</span>
                                 
                                 <!-- Popular Stocks -->
                                 <div class='popular-stocks'>
                                     <span class='quick-label'>Popular Stocks:</span>
-                                    <button class='symbol-chip' onclick='MarketData.loadSymbol("AAPL")'>
-                                        <i class='fab fa-apple'></i> AAPL
+                                    <button class='symbol-chip' onclick='MarketData.loadSymbol("AAPL")' aria-label='Load Apple stock'>
+                                        <i class='fab fa-apple' aria-hidden='true'></i> AAPL
                                     </button>
-                                    <button class='symbol-chip' onclick='MarketData.loadSymbol("MSFT")'>
-                                        <i class='fab fa-microsoft'></i> MSFT
+                                    <button class='symbol-chip' onclick='MarketData.loadSymbol("MSFT")' aria-label='Load Microsoft stock'>
+                                        <i class='fab fa-microsoft' aria-hidden='true'></i> MSFT
                                     </button>
-                                    <button class='symbol-chip' onclick='MarketData.loadSymbol("GOOGL")'>
-                                        <i class='fab fa-google'></i> GOOGL
+                                    <button class='symbol-chip' onclick='MarketData.loadSymbol("GOOGL")' aria-label='Load Google stock'>
+                                        <i class='fab fa-google' aria-hidden='true'></i> GOOGL
                                     </button>
-                                    <button class='symbol-chip' onclick='MarketData.loadSymbol("TSLA")'>
-                                        <i class='fas fa-car'></i> TSLA
+                                    <button class='symbol-chip' onclick='MarketData.loadSymbol("TSLA")' aria-label='Load Tesla stock'>
+                                        <i class='fas fa-car' aria-hidden='true'></i> TSLA
                                     </button>
-                                    <button class='symbol-chip' onclick='MarketData.loadSymbol("BTC-USD")'>
-                                        <i class='fab fa-bitcoin'></i> BTC-USD
+                                    <button class='symbol-chip' onclick='MarketData.loadSymbol("BTC-USD")' aria-label='Load Bitcoin price'>
+                                        <i class='fab fa-bitcoin' aria-hidden='true'></i> BTC-USD
                                     </button>
-                                    <button class='symbol-chip' onclick='MarketData.loadSymbol("^GSPC")'>
-                                        <i class='fas fa-chart-line'></i> S&P 500
+                                    <button class='symbol-chip' onclick='MarketData.loadSymbol("^GSPC")' aria-label='Load S&P 500 index'>
+                                        <i class='fas fa-chart-line' aria-hidden='true'></i> S&P 500
                                     </button>
                                 </div>
                                 
                                 <!-- Period Selection -->
-                                <div class='time-period-selector'>
-                                    <label>Time Period:</label>
-                                    <button class='period-btn active' data-period='1M' onclick='MarketData.changePeriod("1M")'>1M</button>
-                                    <button class='period-btn' data-period='3M' onclick='MarketData.changePeriod("3M")'>3M</button>
-                                    <button class='period-btn' data-period='6M' onclick='MarketData.changePeriod("6M")'>6M</button>
-                                    <button class='period-btn' data-period='1Y' onclick='MarketData.changePeriod("1Y")'>1Y</button>
-                                    <button class='period-btn' data-period='5Y' onclick='MarketData.changePeriod("5Y")'>5Y</button>
-                                    <button class='period-btn' data-period='MAX' onclick='MarketData.changePeriod("MAX")'>MAX</button>
+                                <div class='time-period-selector' role='group' aria-labelledby='period-label'>
+                                    <label id='period-label'>Time Period:</label>
+                                    <button class='period-btn active' data-period='1M' onclick='MarketData.changePeriod("1M")' aria-pressed='true'>1M</button>
+                                    <button class='period-btn' data-period='3M' onclick='MarketData.changePeriod("3M")' aria-pressed='false'>3M</button>
+                                    <button class='period-btn' data-period='6M' onclick='MarketData.changePeriod("6M")' aria-pressed='false'>6M</button>
+                                    <button class='period-btn' data-period='1Y' onclick='MarketData.changePeriod("1Y")' aria-pressed='false'>1Y</button>
+                                    <button class='period-btn' data-period='5Y' onclick='MarketData.changePeriod("5Y")' aria-pressed='false'>5Y</button>
+                                    <button class='period-btn' data-period='MAX' onclick='MarketData.changePeriod("MAX")' aria-pressed='false'>MAX</button>
                                 </div>
                             </div>
                         </div>
-                    </div>
+                    </section>
                     
                     <!-- ============================================
                          STOCK COMPARISON SECTION
                          ============================================ -->
-                    <div class='comparison-section card'>
+                    <section class='comparison-section card' aria-labelledby='comparison-title'>
                         <div class='card-header comparison-header'>
-                            <h2 class='card-title'>
-                                <i class='fas fa-chart-bar'></i> Stock Comparison
+                            <h2 class='card-title' id='comparison-title'>
+                                <i class='fas fa-chart-bar' aria-hidden='true'></i> Stock Comparison
                             </h2>
                             <div class='comparison-actions'>
                                 <button class='btn btn-primary btn-compare' onclick='MarketData.openComparisonModal()'>
-                                    <i class='fas fa-plus'></i> Add Stocks to Compare
+                                    <i class='fas fa-plus' aria-hidden='true'></i> Add Stocks to Compare
                                 </button>
                                 <button class='btn btn-danger btn-clear-comparison' onclick='MarketData.clearComparison()'>
-                                    <i class='fas fa-trash'></i> Clear All
+                                    <i class='fas fa-trash' aria-hidden='true'></i> Clear All
                                 </button>
                             </div>
                         </div>
@@ -226,211 +245,215 @@
                         <div class='card-body'>
                             <div id='comparisonContainer' class='comparison-container hidden'>
                                 <!-- Selected stocks chips -->
-                                <div class='comparison-stocks' id='comparisonStocks'></div>
+                                <div class='comparison-stocks' id='comparisonStocks' role='list' aria-label='Stocks being compared'></div>
                                 
                                 <!-- Comparison Chart -->
                                 <div class='comparison-chart-wrapper'>
                                     <h3 class='subsection-title'>Performance Comparison (Normalized to 100)</h3>
-                                    <div id='comparisonChart' class='chart'></div>
+                                    <div id='comparisonChart' class='chart' role='img' aria-label='Stock performance comparison chart'></div>
                                 </div>
                                 
                                 <!-- Comparison Table -->
                                 <div class='comparison-table-wrapper'>
                                     <h3 class='subsection-title'>Key Metrics Comparison</h3>
-                                    <div id='comparisonTable' class='comparison-table'></div>
+                                    <div id='comparisonTable' class='comparison-table' role='region' aria-label='Comparison metrics table'></div>
                                 </div>
                             </div>
                             
                             <div id='comparisonEmpty' class='comparison-empty'>
-                                <i class='fas fa-chart-line'></i>
+                                <i class='fas fa-chart-line' aria-hidden='true'></i>
                                 <p>No stocks to compare</p>
                                 <p class='hint'>Click "Add Stocks to Compare" to get started</p>
                             </div>
                         </div>
-                    </div>
+                    </section>
                     
                     <!-- ============================================
                          WATCHLIST SECTION
                          ============================================ -->
-                    <div class='watchlist-section card'>
+                    <section class='watchlist-section card' aria-labelledby='watchlist-title'>
                         <div class='card-header watchlist-header'>
-                            <h2 class='card-title'>
-                                <i class='fas fa-star'></i> My Watchlist
+                            <h2 class='card-title' id='watchlist-title'>
+                                <i class='fas fa-star' aria-hidden='true'></i> My Watchlist
                             </h2>
                             <div class='watchlist-actions'>
                                 <button class='btn btn-success btn-add-current' onclick='MarketData.addCurrentToWatchlist()' id='btnAddCurrent' disabled>
-                                    <i class='fas fa-plus'></i> Add Current Stock
+                                    <i class='fas fa-plus' aria-hidden='true'></i> Add Current Stock
                                 </button>
                                 <button class='btn btn-primary btn-refresh-watchlist' onclick='MarketData.refreshWatchlist()'>
-                                    <i class='fas fa-sync-alt'></i> Refresh All
+                                    <i class='fas fa-sync-alt' aria-hidden='true'></i> Refresh All
                                 </button>
                                 <button class='btn btn-danger btn-clear-watchlist' onclick='MarketData.clearWatchlist()'>
-                                    <i class='fas fa-trash'></i> Clear All
+                                    <i class='fas fa-trash' aria-hidden='true'></i> Clear All
                                 </button>
                             </div>
                         </div>
                         
                         <div class='card-body'>
-                            <div id='watchlistContainer' class='watchlist-container'>
+                            <div id='watchlistContainer' class='watchlist-container' role='list' aria-label='Watchlist stocks'>
                                 <div class='watchlist-empty'>
-                                    <i class='fas fa-star-half-alt'></i>
+                                    <i class='fas fa-star-half-alt' aria-hidden='true'></i>
                                     <p>Your watchlist is empty</p>
                                     <p class='hint'>Search for a stock and click "Add to Watchlist" to start tracking</p>
                                 </div>
                             </div>
                         </div>
-                    </div>
+                    </section>
                     
                     <!-- ============================================
                          PRICE ALERTS SECTION
                          ============================================ -->
-                    <div class='alerts-section card'>
+                    <section class='alerts-section card' aria-labelledby='alerts-title'>
                         <div class='card-header alerts-header'>
-                            <h2 class='card-title'>
-                                <i class='fas fa-bell'></i> Price Alerts
+                            <h2 class='card-title' id='alerts-title'>
+                                <i class='fas fa-bell' aria-hidden='true'></i> Price Alerts
                             </h2>
                             <button class='btn btn-accent btn-create-alert' onclick='MarketData.openAlertModal()'>
-                                <i class='fas fa-plus'></i> Create Alert
+                                <i class='fas fa-plus' aria-hidden='true'></i> Create Alert
                             </button>
                         </div>
                         
                         <div class='card-body'>
-                            <div id='alertsContainer' class='alerts-container'>
+                            <div id='alertsContainer' class='alerts-container' role='list' aria-label='Active price alerts'>
                                 <div class='alerts-empty'>
-                                    <i class='fas fa-bell-slash'></i>
+                                    <i class='fas fa-bell-slash' aria-hidden='true'></i>
                                     <p>No active alerts</p>
                                     <p class='hint'>Create price alerts to get notified when a stock reaches your target</p>
                                 </div>
                             </div>
                         </div>
-                    </div>
+                    </section>
                     
                     <!-- Loading Indicator -->
-                    <div id='loadingIndicator' class='loading-indicator hidden'>
-                        <i class='fas fa-spinner fa-spin'></i> Loading market data...
+                    <div id='loadingIndicator' class='loading-indicator hidden' role='status' aria-live='polite'>
+                        <i class='fas fa-spinner fa-spin' aria-hidden='true'></i> Loading market data...
                     </div>
                     
                     <!-- Stock Overview -->
-                    <div id='stockOverview' class='stock-overview hidden'>
+                    <section id='stockOverview' class='stock-overview hidden' aria-labelledby='stock-overview-title'>
                         <div class='overview-header'>
                             <div class='stock-title'>
                                 <h2 id='stockName'>-</h2>
                                 <span id='stockSymbol' class='stock-symbol'>-</span>
                             </div>
                             <div class='stock-price-section'>
-                                <div id='currentPrice' class='current-price'>-</div>
-                                <div id='priceChange' class='price-change'>-</div>
+                                <div id='currentPrice' class='current-price' aria-label='Current stock price'>-</div>
+                                <div id='priceChange' class='price-change' aria-label='Price change'>-</div>
                             </div>
                         </div>
                         
-                        <div class='overview-stats'>
-                            <div class='stat-item'>
+                        <div class='overview-stats' role='list' aria-label='Stock statistics'>
+                            <div class='stat-item' role='listitem'>
                                 <span class='stat-label'>Open</span>
                                 <span id='statOpen' class='stat-value'>-</span>
                             </div>
-                            <div class='stat-item'>
+                            <div class='stat-item' role='listitem'>
                                 <span class='stat-label'>High</span>
                                 <span id='statHigh' class='stat-value'>-</span>
                             </div>
-                            <div class='stat-item'>
+                            <div class='stat-item' role='listitem'>
                                 <span class='stat-label'>Low</span>
                                 <span id='statLow' class='stat-value'>-</span>
                             </div>
-                            <div class='stat-item'>
+                            <div class='stat-item' role='listitem'>
                                 <span class='stat-label'>Volume</span>
                                 <span id='statVolume' class='stat-value'>-</span>
                             </div>
-                            <div class='stat-item'>
+                            <div class='stat-item' role='listitem'>
                                 <span class='stat-label'>Mkt Cap</span>
                                 <span id='statMarketCap' class='stat-value'>-</span>
                             </div>
-                            <div class='stat-item'>
+                            <div class='stat-item' role='listitem'>
                                 <span class='stat-label'>P/E Ratio</span>
                                 <span id='statPE' class='stat-value'>-</span>
                             </div>
                         </div>
-                    </div>
+                    </section>
 
-                    <!-- 🆕 NOUVELLE SECTION : Company Profile & Statistics -->
-                    <div id='companyProfileSection' class='company-profile-section card hidden'>
+                    <!-- Company Profile & Statistics -->
+                    <section id='companyProfileSection' class='company-profile-section card hidden' aria-labelledby='company-profile-title'>
                         <!-- Le contenu sera généré dynamiquement par JavaScript -->
-                    </div>
+                    </section>
                     
                     <!-- Results Panel -->
-                    <div id='resultsPanel' class='results-panel card hidden'>
+                    <section id='resultsPanel' class='results-panel card hidden' aria-labelledby='results-title'>
                         <div class='card-body'>
                             
                             <!-- Price Chart -->
                             <div class='chart-section'>
-                                <h3 class='subsection-title'>
-                                    <i class='fas fa-chart-line'></i> Price Chart with Technical Indicators
-                                    <span class='help-icon' onclick='openModal("modalChartHelp")'>?</span>
+                                <h3 class='subsection-title' id='price-chart-title'>
+                                    <i class='fas fa-chart-line' aria-hidden='true'></i> Price Chart with Technical Indicators
+                                    <button class='help-icon' onclick='openModal("modalChartHelp")' aria-label='Help about price chart'>?</button>
                                 </h3>
-                                <div class='indicator-toggles'>
+                                <div class='indicator-toggles' role='group' aria-label='Technical indicator toggles'>
                                     <label><input type='checkbox' id='toggleSMA' checked> SMA (20, 50)</label>
                                     <label><input type='checkbox' id='toggleEMA'> EMA (12, 26)</label>
                                     <label><input type='checkbox' id='toggleBB' checked> Bollinger Bands</label>
                                     <label><input type='checkbox' id='toggleVolume' checked> Volume</label>
                                 </div>
-                                <div id='priceChart' class='chart'></div>
+                                <div id='priceChart' class='chart' role='img' aria-labelledby='price-chart-title'></div>
                             </div>
                             
                             <!-- Technical Indicators -->
                             <div class='charts-grid-2'>
                                 <div class='chart-section'>
-                                    <h3 class='subsection-title'>
-                                        <i class='fas fa-wave-square'></i> RSI (Relative Strength Index)
-                                        <span class='help-icon' onclick='openModal("modalRSI")'>?</span>
+                                    <h3 class='subsection-title' id='rsi-title'>
+                                        <i class='fas fa-wave-square' aria-hidden='true'></i> RSI (Relative Strength Index)
+                                        <button class='help-icon' onclick='openModal("modalRSI")' aria-label='Help about RSI'>?</button>
                                     </h3>
-                                    <div id='rsiChart' class='chart chart-medium'></div>
+                                    <div id='rsiChart' class='chart chart-medium' role='img' aria-labelledby='rsi-title'></div>
                                 </div>
                                 
                                 <div class='chart-section'>
-                                    <h3 class='subsection-title'>
-                                        <i class='fas fa-chart-bar'></i> MACD (Moving Average Convergence Divergence)
-                                        <span class='help-icon' onclick='openModal("modalMACD")'>?</span>
+                                    <h3 class='subsection-title' id='macd-title'>
+                                        <i class='fas fa-chart-bar' aria-hidden='true'></i> MACD (Moving Average Convergence Divergence)
+                                        <button class='help-icon' onclick='openModal("modalMACD")' aria-label='Help about MACD'>?</button>
                                     </h3>
-                                    <div id='macdChart' class='chart chart-medium'></div>
+                                    <div id='macdChart' class='chart chart-medium' role='img' aria-labelledby='macd-title'></div>
                                 </div>
                             </div>
                             
                             <!-- Trading Signals -->
                             <div class='signals-section'>
-                                <h3 class='subsection-title'>
-                                    <i class='fas fa-signal'></i> Trading Signals
-                                    <span class='help-icon' onclick='openModal("modalSignals")'>?</span>
+                                <h3 class='subsection-title' id='signals-title'>
+                                    <i class='fas fa-signal' aria-hidden='true'></i> Trading Signals
+                                    <button class='help-icon' onclick='openModal("modalSignals")' aria-label='Help about trading signals'>?</button>
                                 </h3>
-                                <div id='tradingSignals' class='signals-grid'></div>
+                                <div id='tradingSignals' class='signals-grid' role='list' aria-labelledby='signals-title'></div>
                             </div>
                             
                             <!-- Key Statistics -->
                             <div class='stats-section'>
-                                <h3 class='subsection-title'><i class='fas fa-table'></i> Key Statistics</h3>
-                                <div id='keyStats' class='stats-grid'></div>
+                                <h3 class='subsection-title'><i class='fas fa-table' aria-hidden='true'></i> Key Statistics</h3>
+                                <div id='keyStats' class='stats-grid' role='list' aria-label='Key stock statistics'></div>
                             </div>
                             
                         </div>
-                    </div>
+                    </section>
                 </div>
                 
                 <!-- Footer -->
-                <footer>
-                    <p>Market Data | Real-time financial data and technical analysis</p>
+                <footer role='contentinfo'>
+                    <p>&copy; 2024 Market Data Dashboard | Real-time financial data and technical analysis</p>
                     <p class='data-source'>Data provided by Twelve Data</p>
                 </footer>
             </div>
-        </div>
+        </main>
         
     </div>
     
     <!-- ============================================
          MODALS
          ============================================ -->
-    <div id='modalSearchHelp' class='modal'>
+         
+    <!-- Search Help Modal -->
+    <div id='modalSearchHelp' class='modal' role='dialog' aria-labelledby='search-help-title' aria-modal='true'>
         <div class='modal-content'>
             <div class='modal-header'>
-                <h2>🔍 How to Search Stocks</h2>
-                <span class='close-modal' onclick='closeModal("modalSearchHelp")'>&times;</span>
+                <h2 id='search-help-title'>🔍 How to Search Stocks</h2>
+                <button class='close-modal' onclick='closeModal("modalSearchHelp")' aria-label='Close dialog'>
+                    <i class='fas fa-times' aria-hidden='true'></i>
+                </button>
             </div>
             <div class='modal-body'>
                 <h3>📊 Symbol Format</h3>
@@ -458,172 +481,92 @@
         </div>
     </div>
     
-    <div id='modalComparison' class='modal'>
+    <!-- Comparison Modal -->
+    <div id='modalAddComparison' class='modal' role='dialog' aria-labelledby='add-comparison-title' aria-modal='true'>
         <div class='modal-content'>
             <div class='modal-header'>
-                <h2>📊 Stock Comparison Tool</h2>
-                <span class='close-modal' onclick='closeModal("modalComparison")'>&times;</span>
+                <h2 id='add-comparison-title'>📊 Add Stocks to Compare</h2>
+                <button class='close-modal' onclick='MarketData.closeComparisonModal()' aria-label='Close dialog'>
+                    <i class='fas fa-times' aria-hidden='true'></i>
+                </button>
             </div>
             <div class='modal-body'>
-                <h3>🎯 What is Stock Comparison?</h3>
-                <p>Stock Comparison allows you to visualize and analyze multiple stocks side-by-side to identify the best performers.</p>
-                
-                <h3>✨ Features</h3>
-                <ul>
-                    <li><strong>Normalized Performance:</strong> All stocks start at 100 for easy comparison</li>
-                    <li><strong>Visual Charts:</strong> See relative performance over time</li>
-                    <li><strong>Metrics Table:</strong> Compare key statistics (returns, volatility, etc.)</li>
-                    <li><strong>Up to 5 Stocks:</strong> Compare multiple stocks simultaneously</li>
-                </ul>
-                
-                <h3>📈 How to Use</h3>
-                <ol>
-                    <li>Click "Add Stocks to Compare"</li>
-                    <li>Enter stock symbols (e.g., AAPL, MSFT, GOOGL)</li>
-                    <li>View the normalized performance chart</li>
-                    <li>Analyze the comparison table</li>
-                    <li>Identify winners and losers!</li>
-                </ol>
-                
-                <div class='info-box success'>
-                    💡 <strong>Pro Tip:</strong> Compare stocks in the same sector for better insights (e.g., AAPL vs MSFT vs GOOGL).
-                </div>
-            </div>
-        </div>
-    </div>
-    
-    <div id='modalAddComparison' class='modal'>
-        <div class='modal-content'>
-            <div class='modal-header'>
-                <h2>📊 Add Stocks to Compare</h2>
-                <span class='close-modal' onclick='MarketData.closeComparisonModal()'>&times;</span>
-            </div>
-            <div class='modal-body'>
-                <div class='comparison-form'>
+                <form class='comparison-form' onsubmit='event.preventDefault(); MarketData.loadComparison();'>
                     <div class='form-group'>
                         <label class='form-label' for='comparisonSymbols'>Stock Symbols (separated by commas)</label>
                         <input type='text' 
                                id='comparisonSymbols' 
                                class='form-input'
                                placeholder='e.g., AAPL, MSFT, GOOGL, TSLA'
-                               style='text-transform: uppercase;'>
-                        <p class='text-muted' style='font-size: 0.875rem; margin-top: 0.5rem;'>Enter 2-5 stock symbols to compare</p>
+                               style='text-transform: uppercase;'
+                               required
+                               aria-describedby='comparison-hint'>
+                        <p id='comparison-hint' class='text-muted' style='font-size: 0.875rem; margin-top: 0.5rem;'>Enter 2-5 stock symbols to compare</p>
                     </div>
                     
                     <div class='comparison-quick-presets'>
                         <label class='form-label'>Quick Presets:</label>
-                        <button class='preset-btn' onclick='document.getElementById("comparisonSymbols").value = "AAPL, MSFT, GOOGL, AMZN"'>
-                            <i class='fas fa-laptop'></i> Big Tech
+                        <button type='button' class='preset-btn' onclick='document.getElementById("comparisonSymbols").value = "AAPL, MSFT, GOOGL, AMZN"'>
+                            <i class='fas fa-laptop' aria-hidden='true'></i> Big Tech
                         </button>
-                        <button class='preset-btn' onclick='document.getElementById("comparisonSymbols").value = "TSLA, F, GM, TM"'>
-                            <i class='fas fa-car'></i> Auto Industry
+                        <button type='button' class='preset-btn' onclick='document.getElementById("comparisonSymbols").value = "TSLA, F, GM, TM"'>
+                            <i class='fas fa-car' aria-hidden='true'></i> Auto Industry
                         </button>
-                        <button class='preset-btn' onclick='document.getElementById("comparisonSymbols").value = "JPM, BAC, WFC, C"'>
-                            <i class='fas fa-university'></i> Banks
+                        <button type='button' class='preset-btn' onclick='document.getElementById("comparisonSymbols").value = "JPM, BAC, WFC, C"'>
+                            <i class='fas fa-university' aria-hidden='true'></i> Banks
                         </button>
-                        <button class='preset-btn' onclick='document.getElementById("comparisonSymbols").value = "^GSPC, ^DJI, ^IXIC"'>
-                            <i class='fas fa-chart-line'></i> Market Indices
+                        <button type='button' class='preset-btn' onclick='document.getElementById("comparisonSymbols").value = "^GSPC, ^DJI, ^IXIC"'>
+                            <i class='fas fa-chart-line' aria-hidden='true'></i> Market Indices
                         </button>
                     </div>
-                </div>
+                </form>
             </div>
             <div class='modal-footer'>
-                <button class='btn btn-success' onclick='MarketData.loadComparison()'>
-                    <i class='fas fa-chart-line'></i> Compare Stocks
+                <button type='button' class='btn btn-success' onclick='MarketData.loadComparison()'>
+                    <i class='fas fa-chart-line' aria-hidden='true'></i> Compare Stocks
                 </button>
-                <button class='btn btn-secondary' onclick='MarketData.closeComparisonModal()'>
+                <button type='button' class='btn btn-secondary' onclick='MarketData.closeComparisonModal()'>
                     Cancel
                 </button>
             </div>
         </div>
     </div>
     
-    <div id='modalWatchlist' class='modal'>
+    <!-- Create Alert Modal -->
+    <div id='modalCreateAlert' class='modal' role='dialog' aria-labelledby='create-alert-title' aria-modal='true'>
         <div class='modal-content'>
             <div class='modal-header'>
-                <h2>⭐ Watchlist Feature</h2>
-                <span class='close-modal' onclick='closeModal("modalWatchlist")'>&times;</span>
+                <h2 id='create-alert-title'>🔔 Create Price Alert</h2>
+                <button class='close-modal' onclick='MarketData.closeAlertModal()' aria-label='Close dialog'>
+                    <i class='fas fa-times' aria-hidden='true'></i>
+                </button>
             </div>
             <div class='modal-body'>
-                <h3>📊 What is a Watchlist?</h3>
-                <p>A watchlist lets you track multiple stocks simultaneously without having to search for them repeatedly.</p>
-                
-                <h3>✨ Features</h3>
-                <ul>
-                    <li><strong>Real-time Updates:</strong> Prices refresh automatically every 60 seconds</li>
-                    <li><strong>Persistent Storage:</strong> Your watchlist is saved in your browser</li>
-                    <li><strong>Quick Access:</strong> Click any stock to view detailed charts</li>
-                    <li><strong>Performance Tracking:</strong> See daily changes at a glance</li>
-                </ul>
-                
-                <h3>🎯 How to Use</h3>
-                <ol>
-                    <li>Search for a stock using the search bar</li>
-                    <li>Click "Add to Watchlist" button</li>
-                    <li>Your stock appears in the watchlist with live data</li>
-                    <li>Click "Refresh All" to update all prices manually</li>
-                </ol>
-                
-                <div class='info-box success'>
-                    💡 <strong>Pro Tip:</strong> Combine watchlist with price alerts to never miss important price movements!
-                </div>
-            </div>
-        </div>
-    </div>
-    
-    <div id='modalAlerts' class='modal'>
-        <div class='modal-content'>
-            <div class='modal-header'>
-                <h2>🔔 Price Alerts</h2>
-                <span class='close-modal' onclick='closeModal("modalAlerts")'>&times;</span>
-            </div>
-            <div class='modal-body'>
-                <h3>📢 What are Price Alerts?</h3>
-                <p>Price alerts notify you when a stock reaches your specified target price.</p>
-                
-                <h3>📊 Alert Types</h3>
-                <ul>
-                    <li><strong>Above:</strong> Triggers when price goes above your target</li>
-                    <li><strong>Below:</strong> Triggers when price goes below your target</li>
-                </ul>
-                
-                <h3>🎯 How to Create an Alert</h3>
-                <ol>
-                    <li>Click "Create Alert" button</li>
-                    <li>Enter the stock symbol</li>
-                    <li>Set your target price</li>
-                    <li>Choose alert type (above/below)</li>
-                    <li>Click "Create" - you'll be notified when triggered!</li>
-                </ol>
-                
-                <div class='info-box warning'>
-                    💡 <strong>Note:</strong> Alerts are checked during watchlist refresh. Enable browser notifications for best results!
-                </div>
-            </div>
-        </div>
-    </div>
-    
-    <div id='modalCreateAlert' class='modal'>
-        <div class='modal-content'>
-            <div class='modal-header'>
-                <h2>🔔 Create Price Alert</h2>
-                <span class='close-modal' onclick='MarketData.closeAlertModal()'>&times;</span>
-            </div>
-            <div class='modal-body'>
-                <div class='alert-form'>
+                <form class='alert-form' onsubmit='event.preventDefault(); MarketData.createAlert();'>
                     <div class='form-group'>
                         <label class='form-label' for='alertSymbol'>Stock Symbol</label>
-                        <input type='text' id='alertSymbol' class='form-input' placeholder='e.g., AAPL' style='text-transform: uppercase;'>
+                        <input type='text' 
+                               id='alertSymbol' 
+                               class='form-input' 
+                               placeholder='e.g., AAPL' 
+                               style='text-transform: uppercase;'
+                               required>
                     </div>
                     
                     <div class='form-group'>
                         <label class='form-label' for='alertPrice'>Target Price</label>
-                        <input type='number' id='alertPrice' class='form-input' placeholder='e.g., 150.00' step='0.01'>
+                        <input type='number' 
+                               id='alertPrice' 
+                               class='form-input' 
+                               placeholder='e.g., 150.00' 
+                               step='0.01'
+                               min='0'
+                               required>
                     </div>
                     
                     <div class='form-group'>
                         <label class='form-label' for='alertType'>Alert Condition</label>
-                        <select id='alertType' class='form-select'>
+                        <select id='alertType' class='form-select' required>
                             <option value='above'>Price goes ABOVE target</option>
                             <option value='below'>Price goes BELOW target</option>
                         </select>
@@ -631,26 +574,32 @@
                     
                     <div class='form-group'>
                         <label class='form-label' for='alertNote'>Note (Optional)</label>
-                        <input type='text' id='alertNote' class='form-input' placeholder='e.g., Buy signal, Take profit...'>
+                        <input type='text' 
+                               id='alertNote' 
+                               class='form-input' 
+                               placeholder='e.g., Buy signal, Take profit...'>
                     </div>
-                </div>
+                </form>
             </div>
             <div class='modal-footer'>
-                <button class='btn btn-success' onclick='MarketData.createAlert()'>
-                    <i class='fas fa-check'></i> Create Alert
+                <button type='button' class='btn btn-success' onclick='MarketData.createAlert()'>
+                    <i class='fas fa-check' aria-hidden='true'></i> Create Alert
                 </button>
-                <button class='btn btn-secondary' onclick='MarketData.closeAlertModal()'>
+                <button type='button' class='btn btn-secondary' onclick='MarketData.closeAlertModal()'>
                     Cancel
                 </button>
             </div>
         </div>
     </div>
     
-    <div id='modalChartHelp' class='modal'>
+    <!-- Chart Help Modal -->
+    <div id='modalChartHelp' class='modal' role='dialog' aria-labelledby='chart-help-title' aria-modal='true'>
         <div class='modal-content'>
             <div class='modal-header'>
-                <h2>📈 Understanding Price Charts</h2>
-                <span class='close-modal' onclick='closeModal("modalChartHelp")'>&times;</span>
+                <h2 id='chart-help-title'>📈 Understanding Price Charts</h2>
+                <button class='close-modal' onclick='closeModal("modalChartHelp")' aria-label='Close dialog'>
+                    <i class='fas fa-times' aria-hidden='true'></i>
+                </button>
             </div>
             <div class='modal-body'>
                 <h3>📊 Technical Indicators</h3>
@@ -675,11 +624,14 @@
         </div>
     </div>
     
-    <div id='modalRSI' class='modal'>
+    <!-- RSI Help Modal -->
+    <div id='modalRSI' class='modal' role='dialog' aria-labelledby='rsi-help-title' aria-modal='true'>
         <div class='modal-content'>
             <div class='modal-header'>
-                <h2>📊 RSI - Relative Strength Index</h2>
-                <span class='close-modal' onclick='closeModal("modalRSI")'>&times;</span>
+                <h2 id='rsi-help-title'>📊 RSI - Relative Strength Index</h2>
+                <button class='close-modal' onclick='closeModal("modalRSI")' aria-label='Close dialog'>
+                    <i class='fas fa-times' aria-hidden='true'></i>
+                </button>
             </div>
             <div class='modal-body'>
                 <h3>📐 What is RSI?</h3>
@@ -687,8 +639,8 @@
                 
                 <h3>📈 Interpretation</h3>
                 <ul>
-                    <li><strong>RSI > 70:</strong> Overbought → Possible reversal down ⚠️</li>
-                    <li><strong>RSI < 30:</strong> Oversold → Possible reversal up 🚀</li>
+                    <li><strong>RSI &gt; 70:</strong> Overbought → Possible reversal down ⚠️</li>
+                    <li><strong>RSI &lt; 30:</strong> Oversold → Possible reversal up 🚀</li>
                     <li><strong>RSI = 50:</strong> Neutral</li>
                 </ul>
                 
@@ -705,11 +657,14 @@
         </div>
     </div>
     
-    <div id='modalMACD' class='modal'>
+    <!-- MACD Help Modal -->
+    <div id='modalMACD' class='modal' role='dialog' aria-labelledby='macd-help-title' aria-modal='true'>
         <div class='modal-content'>
             <div class='modal-header'>
-                <h2>📊 MACD - Moving Average Convergence Divergence</h2>
-                <span class='close-modal' onclick='closeModal("modalMACD")'>&times;</span>
+                <h2 id='macd-help-title'>📊 MACD - Moving Average Convergence Divergence</h2>
+                <button class='close-modal' onclick='closeModal("modalMACD")' aria-label='Close dialog'>
+                    <i class='fas fa-times' aria-hidden='true'></i>
+                </button>
             </div>
             <div class='modal-body'>
                 <h3>📐 What is MACD?</h3>
@@ -734,18 +689,21 @@
         </div>
     </div>
     
-    <div id='modalSignals' class='modal'>
+    <!-- Signals Help Modal -->
+    <div id='modalSignals' class='modal' role='dialog' aria-labelledby='signals-help-title' aria-modal='true'>
         <div class='modal-content'>
             <div class='modal-header'>
-                <h2>🎯 Trading Signals Explained</h2>
-                <span class='close-modal' onclick='closeModal("modalSignals")'>&times;</span>
+                <h2 id='signals-help-title'>🎯 Trading Signals Explained</h2>
+                <button class='close-modal' onclick='closeModal("modalSignals")' aria-label='Close dialog'>
+                    <i class='fas fa-times' aria-hidden='true'></i>
+                </button>
             </div>
             <div class='modal-body'>
                 <h3>🚦 Signal Types</h3>
                 
                 <h4>🟢 Bullish Signals (Buy)</h4>
                 <ul>
-                    <li>RSI oversold (<30) and reversing up</li>
+                    <li>RSI oversold (&lt;30) and reversing up</li>
                     <li>MACD crossing above signal line</li>
                     <li>Price bouncing off lower Bollinger Band</li>
                     <li>Golden Cross: Short MA crosses above Long MA</li>
@@ -753,7 +711,7 @@
                 
                 <h4>🔴 Bearish Signals (Sell)</h4>
                 <ul>
-                    <li>RSI overbought (>70) and reversing down</li>
+                    <li>RSI overbought (&gt;70) and reversing down</li>
                     <li>MACD crossing below signal line</li>
                     <li>Price rejected at upper Bollinger Band</li>
                     <li>Death Cross: Short MA crosses below Long MA</li>
@@ -770,26 +728,26 @@
         CACHE MONITORING WIDGET
         ============================================ -->
     <div id='cacheWidget' class='cache-widget'>
-        <button class='cache-toggle-btn' onclick='toggleCachePanel()' title='Cache Statistics'>
-            <i class='fas fa-database'></i>
-            <span class='cache-badge' id='cacheBadge'>0</span>
+        <button class='cache-toggle-btn' onclick='toggleCachePanel()' aria-label='Toggle cache statistics panel'>
+            <i class='fas fa-database' aria-hidden='true'></i>
+            <span class='cache-badge' id='cacheBadge' aria-label='Number of cached entries'>0</span>
         </button>
     </div>
     
-    <div id='cachePanel' class='cache-panel hidden'>
+    <aside id='cachePanel' class='cache-panel hidden' role='complementary' aria-labelledby='cache-panel-title'>
         <div class='cache-panel-header'>
-            <h3><i class='fas fa-database'></i> Cache & API Monitoring</h3>
-            <button class='close-cache-panel' onclick='toggleCachePanel()'>
-                <i class='fas fa-times'></i>
+            <h3 id='cache-panel-title'><i class='fas fa-database' aria-hidden='true'></i> Cache & API Monitoring</h3>
+            <button class='close-cache-panel' onclick='toggleCachePanel()' aria-label='Close cache panel'>
+                <i class='fas fa-times' aria-hidden='true'></i>
             </button>
         </div>
         
         <div class='cache-panel-body'>
             <!-- API Quota -->
             <div class='cache-section'>
-                <h4><i class='fas fa-cloud'></i> API Quota Today</h4>
+                <h4><i class='fas fa-cloud' aria-hidden='true'></i> API Quota Today</h4>
                 <div class='quota-display'>
-                    <div class='quota-bar-container'>
+                    <div class='quota-bar-container' role='progressbar' aria-valuenow='0' aria-valuemin='0' aria-valuemax='800' aria-label='API quota usage'>
                         <div class='quota-bar' id='quotaBar' style='width: 0%'></div>
                     </div>
                     <div class='quota-stats'>
@@ -801,7 +759,7 @@
             
             <!-- Cache Stats -->
             <div class='cache-section'>
-                <h4><i class='fas fa-save'></i> Local Cache</h4>
+                <h4><i class='fas fa-save' aria-hidden='true'></i> Local Cache</h4>
                 <div class='cache-stats-grid'>
                     <div class='cache-stat-item'>
                         <div class='cache-stat-label'>Entries</div>
@@ -820,29 +778,29 @@
             
             <!-- Actions -->
             <div class='cache-section'>
-                <h4><i class='fas fa-cog'></i> Actions</h4>
+                <h4><i class='fas fa-cog' aria-hidden='true'></i> Actions</h4>
                 <div class='cache-actions'>
                     <button class='cache-action-btn refresh' onclick='refreshCacheStats()'>
-                        <i class='fas fa-sync-alt'></i> Refresh Stats
+                        <i class='fas fa-sync-alt' aria-hidden='true'></i> Refresh Stats
                     </button>
                     <button class='cache-action-btn clear' onclick='clearAllCache()'>
-                        <i class='fas fa-trash'></i> Clear Cache
+                        <i class='fas fa-trash' aria-hidden='true'></i> Clear Cache
                     </button>
                     <button class='cache-action-btn reset' onclick='resetQuotaCounter()'>
-                        <i class='fas fa-redo'></i> Reset Counter
+                        <i class='fas fa-redo' aria-hidden='true'></i> Reset Counter
                     </button>
                 </div>
             </div>
             
             <!-- Cache Details -->
             <div class='cache-section'>
-                <h4><i class='fas fa-list'></i> Cache Details</h4>
+                <h4><i class='fas fa-list' aria-hidden='true'></i> Cache Details</h4>
                 <div class='cache-details' id='cacheDetails'>
                     <div class='cache-empty'>No cache entries</div>
                 </div>
             </div>
         </div>
-    </div>
+    </aside>
     
     <!-- Cache Stats Auto-Update -->
     <script>
@@ -858,11 +816,12 @@
         
         if (isHidden) {
             panel.classList.remove('hidden');
+            panel.setAttribute('aria-hidden', 'false');
             refreshCacheStats();
-            // Auto-refresh every 5 seconds when open
             cacheStatsInterval = setInterval(refreshCacheStats, 5000);
         } else {
             panel.classList.add('hidden');
+            panel.setAttribute('aria-hidden', 'true');
             clearInterval(cacheStatsInterval);
         }
     }
@@ -872,7 +831,6 @@
         
         const stats = window.apiClient.getCacheStats();
         
-        // Update quota
         const quotaUsed = stats.requestsToday;
         const quotaTotal = 800;
         const quotaPercent = (quotaUsed / quotaTotal) * 100;
@@ -881,31 +839,28 @@
         document.getElementById('quotaUsed').textContent = quotaUsed;
         document.getElementById('quotaTotal').textContent = quotaTotal;
         document.getElementById('quotaRemaining').textContent = `(${quotaRemaining} left)`;
-        document.getElementById('quotaBar').style.width = quotaPercent + '%';
         
-        // Color coding for quota bar
         const quotaBar = document.getElementById('quotaBar');
+        quotaBar.style.width = quotaPercent + '%';
+        quotaBar.setAttribute('aria-valuenow', quotaPercent);
+        
         if (quotaPercent < 50) {
-            quotaBar.style.background = '#4CAF50'; // Green
+            quotaBar.style.background = '#4CAF50';
         } else if (quotaPercent < 80) {
-            quotaBar.style.background = '#FF9800'; // Orange
+            quotaBar.style.background = '#FF9800';
         } else {
-            quotaBar.style.background = '#F44336'; // Red
+            quotaBar.style.background = '#F44336';
         }
         
-        // Update cache stats
         document.getElementById('cacheEntries').textContent = stats.entries;
         document.getElementById('cacheBadge').textContent = stats.entries;
         
-        // Calculate hit rate (approximation based on entries vs requests)
         const hitRate = stats.entries > 0 ? Math.min(100, Math.round((stats.entries / quotaUsed) * 100)) : 0;
         document.getElementById('cacheHitRate').textContent = hitRate + '%';
         
-        // Saved requests (rough estimate)
         const savedRequests = Math.max(0, stats.entries - quotaUsed);
         document.getElementById('cacheSavedRequests').textContent = savedRequests;
         
-        // Update cache details
         updateCacheDetails();
     }
     
@@ -923,7 +878,7 @@
         const entries = cacheKeys.map(key => {
             try {
                 const { timestamp } = JSON.parse(localStorage.getItem(key));
-                const age = Math.round((Date.now() - timestamp) / 1000); // seconds
+                const age = Math.round((Date.now() - timestamp) / 1000);
                 const endpoint = key.replace('api_cache:', '').split(':')[0];
                 return { key, endpoint, age };
             } catch {
@@ -933,7 +888,7 @@
           .sort((a, b) => a.age - b.age);
         
         let html = '<div class="cache-entries-list">';
-        entries.slice(0, 10).forEach(entry => { // Show only first 10
+        entries.slice(0, 10).forEach(entry => {
             const ageStr = entry.age < 60 ? `${entry.age}s` : `${Math.round(entry.age/60)}m`;
             html += `
                 <div class="cache-entry-item">
@@ -956,7 +911,9 @@
             if (window.apiClient) {
                 window.apiClient.clearCache();
                 refreshCacheStats();
-                alert('✅ Cache cleared successfully!');
+                if (window.FinanceDashboard && window.FinanceDashboard.showNotification) {
+                    window.FinanceDashboard.showNotification('✅ Cache cleared successfully!', 'success');
+                }
             }
         }
     }
@@ -969,7 +926,9 @@
                 window.apiClient.requestCount = 0;
             }
             refreshCacheStats();
-            alert('✅ Quota counter reset!');
+            if (window.FinanceDashboard && window.FinanceDashboard.showNotification) {
+                window.FinanceDashboard.showNotification('✅ Quota counter reset!', 'success');
+            }
         }
     }
     
@@ -983,6 +942,21 @@
         }, 1000);
     });
     </script>
+    
+    <!-- Screen reader only class -->
+    <style>
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border-width: 0;
+        }
+    </style>
 
     <!-- Scripts - ORDRE IMPORTANT -->
     <script src='assets/js/config.js'></script>
