@@ -23,6 +23,7 @@
     <link rel='stylesheet' href='assets/css/common.css'>
     <link rel='stylesheet' href='assets/css/sidebar.css'>
     <link rel='stylesheet' href='assets/css/market-data.css'>
+    <link rel='stylesheet' href='assets/css/cache-widget.css'>
 </head>
 <body>
     <div class='layout-wrapper'>
@@ -200,7 +201,7 @@
                     </div>
                     
                     <!-- ============================================
-                         STOCK COMPARISON SECTION (NOUVEAU)
+                         STOCK COMPARISON SECTION
                          ============================================ -->
                     <div class='comparison-section'>
                         <div class='comparison-header'>
@@ -751,6 +752,216 @@
         </div>
     </div>
     
+    <!-- ============================================
+         CACHE MONITORING WIDGET
+         ============================================ -->
+    <div id='cacheWidget' class='cache-widget'>
+        <button class='cache-toggle-btn' onclick='toggleCachePanel()' title='Cache Statistics'>
+            <i class='fas fa-database'></i>
+            <span class='cache-badge' id='cacheBadge'>0</span>
+        </button>
+    </div>
+    
+    <div id='cachePanel' class='cache-panel hidden'>
+        <div class='cache-panel-header'>
+            <h3><i class='fas fa-database'></i> Cache & API Monitoring</h3>
+            <button class='close-cache-panel' onclick='toggleCachePanel()'>
+                <i class='fas fa-times'></i>
+            </button>
+        </div>
+        
+        <div class='cache-panel-body'>
+            <!-- API Quota -->
+            <div class='cache-section'>
+                <h4><i class='fas fa-cloud'></i> API Quota Today</h4>
+                <div class='quota-display'>
+                    <div class='quota-bar-container'>
+                        <div class='quota-bar' id='quotaBar' style='width: 0%'></div>
+                    </div>
+                    <div class='quota-stats'>
+                        <span id='quotaUsed'>0</span> / <span id='quotaTotal'>800</span> requests
+                        <span class='quota-remaining' id='quotaRemaining'>(800 left)</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Cache Stats -->
+            <div class='cache-section'>
+                <h4><i class='fas fa-save'></i> Local Cache</h4>
+                <div class='cache-stats-grid'>
+                    <div class='cache-stat-item'>
+                        <div class='cache-stat-label'>Entries</div>
+                        <div class='cache-stat-value' id='cacheEntries'>0</div>
+                    </div>
+                    <div class='cache-stat-item'>
+                        <div class='cache-stat-label'>Hit Rate</div>
+                        <div class='cache-stat-value' id='cacheHitRate'>0%</div>
+                    </div>
+                    <div class='cache-stat-item'>
+                        <div class='cache-stat-label'>Saved Requests</div>
+                        <div class='cache-stat-value' id='cacheSavedRequests'>0</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Actions -->
+            <div class='cache-section'>
+                <h4><i class='fas fa-cog'></i> Actions</h4>
+                <div class='cache-actions'>
+                    <button class='cache-action-btn refresh' onclick='refreshCacheStats()'>
+                        <i class='fas fa-sync-alt'></i> Refresh Stats
+                    </button>
+                    <button class='cache-action-btn clear' onclick='clearAllCache()'>
+                        <i class='fas fa-trash'></i> Clear Cache
+                    </button>
+                    <button class='cache-action-btn reset' onclick='resetQuotaCounter()'>
+                        <i class='fas fa-redo'></i> Reset Counter
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Cache Details -->
+            <div class='cache-section'>
+                <h4><i class='fas fa-list'></i> Cache Details</h4>
+                <div class='cache-details' id='cacheDetails'>
+                    <div class='cache-empty'>No cache entries</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Cache Stats Auto-Update -->
+    <script>
+    // ============================================
+    // CACHE MONITORING FUNCTIONS
+    // ============================================
+    
+    let cacheStatsInterval = null;
+    
+    function toggleCachePanel() {
+        const panel = document.getElementById('cachePanel');
+        const isHidden = panel.classList.contains('hidden');
+        
+        if (isHidden) {
+            panel.classList.remove('hidden');
+            refreshCacheStats();
+            cacheStatsInterval = setInterval(refreshCacheStats, 5000);
+        } else {
+            panel.classList.add('hidden');
+            clearInterval(cacheStatsInterval);
+        }
+    }
+    
+    function refreshCacheStats() {
+        if (!window.apiClient) return;
+        
+        const stats = window.apiClient.getCacheStats();
+        
+        const quotaUsed = stats.requestsToday;
+        const quotaTotal = 800;
+        const quotaPercent = (quotaUsed / quotaTotal) * 100;
+        const quotaRemaining = quotaTotal - quotaUsed;
+        
+        document.getElementById('quotaUsed').textContent = quotaUsed;
+        document.getElementById('quotaTotal').textContent = quotaTotal;
+        document.getElementById('quotaRemaining').textContent = `(${quotaRemaining} left)`;
+        document.getElementById('quotaBar').style.width = quotaPercent + '%';
+        
+        const quotaBar = document.getElementById('quotaBar');
+        if (quotaPercent < 50) {
+            quotaBar.style.background = '#4CAF50';
+        } else if (quotaPercent < 80) {
+            quotaBar.style.background = '#FF9800';
+        } else {
+            quotaBar.style.background = '#F44336';
+        }
+        
+        document.getElementById('cacheEntries').textContent = stats.entries;
+        document.getElementById('cacheBadge').textContent = stats.entries;
+        
+        const hitRate = stats.entries > 0 ? Math.min(100, Math.round((stats.entries / quotaUsed) * 100)) : 0;
+        document.getElementById('cacheHitRate').textContent = hitRate + '%';
+        
+        const savedRequests = Math.max(0, stats.entries - quotaUsed);
+        document.getElementById('cacheSavedRequests').textContent = savedRequests;
+        
+        updateCacheDetails();
+    }
+    
+    function updateCacheDetails() {
+        const keys = Object.keys(localStorage);
+        const cacheKeys = keys.filter(k => k.startsWith('api_cache:'));
+        
+        const detailsContainer = document.getElementById('cacheDetails');
+        
+        if (cacheKeys.length === 0) {
+            detailsContainer.innerHTML = '<div class="cache-empty">No cache entries</div>';
+            return;
+        }
+        
+        const entries = cacheKeys.map(key => {
+            try {
+                const { timestamp } = JSON.parse(localStorage.getItem(key));
+                const age = Math.round((Date.now() - timestamp) / 1000);
+                const endpoint = key.replace('api_cache:', '').split(':')[0];
+                return { key, endpoint, age };
+            } catch {
+                return null;
+            }
+        }).filter(e => e !== null)
+          .sort((a, b) => a.age - b.age);
+        
+        let html = '<div class="cache-entries-list">';
+        entries.slice(0, 10).forEach(entry => {
+            const ageStr = entry.age < 60 ? `${entry.age}s` : `${Math.round(entry.age/60)}m`;
+            html += `
+                <div class="cache-entry-item">
+                    <span class="cache-entry-endpoint">${entry.endpoint}</span>
+                    <span class="cache-entry-age">${ageStr} ago</span>
+                </div>
+            `;
+        });
+        html += '</div>';
+        
+        if (entries.length > 10) {
+            html += `<div class="cache-entry-more">+${entries.length - 10} more entries</div>`;
+        }
+        
+        detailsContainer.innerHTML = html;
+    }
+    
+    function clearAllCache() {
+        if (confirm('⚠️ Clear all cached data?\nThis will force fresh API requests.')) {
+            if (window.apiClient) {
+                window.apiClient.clearCache();
+                refreshCacheStats();
+                alert('✅ Cache cleared successfully!');
+            }
+        }
+    }
+    
+    function resetQuotaCounter() {
+        if (confirm('⚠️ Reset API quota counter?\nThis should only be done at the start of a new day.')) {
+            localStorage.setItem('api_request_count', '0');
+            localStorage.setItem('api_counter_reset_date', new Date().toDateString());
+            if (window.apiClient) {
+                window.apiClient.requestCount = 0;
+            }
+            refreshCacheStats();
+            alert('✅ Quota counter reset!');
+        }
+    }
+    
+    document.addEventListener('DOMContentLoaded', () => {
+        setTimeout(() => {
+            if (window.apiClient) {
+                const stats = window.apiClient.getCacheStats();
+                document.getElementById('cacheBadge').textContent = stats.entries;
+            }
+        }, 1000);
+    });
+    </script>
+
     <!-- Scripts - ORDRE IMPORTANT -->
     <script src='assets/js/config.js'></script>
     <script src='assets/js/api-client.js'></script>

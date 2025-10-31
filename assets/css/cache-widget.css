@@ -1,0 +1,326 @@
+/* ============================================
+   CACHE MONITORING WIDGET
+   ============================================ */
+
+/* Fixed Button */
+.cache-widget {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 9998;
+}
+
+.cache-toggle-btn {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border: none;
+    color: white;
+    font-size: 24px;
+    cursor: pointer;
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.cache-toggle-btn:hover {
+    transform: scale(1.1);
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+}
+
+.cache-badge {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    background: #ff4757;
+    color: white;
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+    font-size: 11px;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid white;
+}
+
+/* Cache Panel */
+.cache-panel {
+    position: fixed;
+    bottom: 90px;
+    right: 20px;
+    width: 380px;
+    max-height: 600px;
+    background: white;
+    border-radius: 15px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+    z-index: 9999;
+    overflow: hidden;
+    transition: all 0.3s ease;
+    animation: slideInRight 0.3s ease;
+}
+
+.cache-panel.hidden {
+    display: none;
+}
+
+@keyframes slideInRight {
+    from {
+        opacity: 0;
+        transform: translateX(100px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.cache-panel-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 15px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.cache-panel-header h3 {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.close-cache-panel {
+    background: rgba(255, 255, 255, 0.2);
+    border: none;
+    color: white;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.close-cache-panel:hover {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+.cache-panel-body {
+    padding: 20px;
+    max-height: 520px;
+    overflow-y: auto;
+}
+
+/* Cache Sections */
+.cache-section {
+    margin-bottom: 20px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid #eee;
+}
+
+.cache-section:last-child {
+    border-bottom: none;
+}
+
+.cache-section h4 {
+    margin: 0 0 15px 0;
+    font-size: 14px;
+    color: #333;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.cache-section h4 i {
+    color: #667eea;
+}
+
+/* Quota Display */
+.quota-display {
+    background: #f8f9fa;
+    padding: 15px;
+    border-radius: 10px;
+}
+
+.quota-bar-container {
+    width: 100%;
+    height: 20px;
+    background: #e0e0e0;
+    border-radius: 10px;
+    overflow: hidden;
+    margin-bottom: 10px;
+}
+
+.quota-bar {
+    height: 100%;
+    background: #4CAF50;
+    transition: all 0.5s ease;
+    border-radius: 10px;
+}
+
+.quota-stats {
+    font-size: 14px;
+    color: #555;
+    text-align: center;
+    font-weight: 500;
+}
+
+.quota-remaining {
+    color: #667eea;
+    font-weight: 600;
+}
+
+/* Cache Stats Grid */
+.cache-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+}
+
+.cache-stat-item {
+    background: #f8f9fa;
+    padding: 12px;
+    border-radius: 8px;
+    text-align: center;
+}
+
+.cache-stat-label {
+    font-size: 11px;
+    color: #888;
+    margin-bottom: 5px;
+    text-transform: uppercase;
+}
+
+.cache-stat-value {
+    font-size: 20px;
+    font-weight: 700;
+    color: #667eea;
+}
+
+/* Cache Actions */
+.cache-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.cache-action-btn {
+    padding: 10px 15px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.cache-action-btn.refresh {
+    background: #667eea;
+    color: white;
+}
+
+.cache-action-btn.refresh:hover {
+    background: #5568d3;
+}
+
+.cache-action-btn.clear {
+    background: #ff4757;
+    color: white;
+}
+
+.cache-action-btn.clear:hover {
+    background: #ee3e4e;
+}
+
+.cache-action-btn.reset {
+    background: #ffa502;
+    color: white;
+}
+
+.cache-action-btn.reset:hover {
+    background: #e69500;
+}
+
+/* Cache Details */
+.cache-details {
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.cache-empty {
+    text-align: center;
+    color: #999;
+    font-style: italic;
+    padding: 20px;
+}
+
+.cache-entries-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.cache-entry-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 12px;
+    background: #f8f9fa;
+    border-radius: 6px;
+    font-size: 12px;
+}
+
+.cache-entry-endpoint {
+    color: #333;
+    font-weight: 500;
+}
+
+.cache-entry-age {
+    color: #888;
+    font-size: 11px;
+}
+
+.cache-entry-more {
+    text-align: center;
+    color: #667eea;
+    font-size: 12px;
+    margin-top: 10px;
+    font-weight: 500;
+}
+
+/* Scrollbar Styling */
+.cache-panel-body::-webkit-scrollbar,
+.cache-details::-webkit-scrollbar {
+    width: 6px;
+}
+
+.cache-panel-body::-webkit-scrollbar-track,
+.cache-details::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 10px;
+}
+
+.cache-panel-body::-webkit-scrollbar-thumb,
+.cache-details::-webkit-scrollbar-thumb {
+    background: #667eea;
+    border-radius: 10px;
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+    .cache-panel {
+        width: calc(100vw - 40px);
+        right: 20px;
+        bottom: 90px;
+    }
+    
+    .cache-stats-grid {
+        grid-template-columns: 1fr;
+    }
+}
