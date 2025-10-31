@@ -1,6 +1,6 @@
 /* ==============================================
    API-CLIENT.JS - Twelve Data API Client avec Cache
-   Version corrigée pour la vraie structure API
+   Compatible avec ton Cloudflare Worker existant
    ============================================== */
 
 class FinanceAPIClient {
@@ -162,14 +162,14 @@ class FinanceAPIClient {
                 }
                 
                 const errorData = await response.json().catch(() => ({}));
-                throw new Error(errorData.message || `API Error: ${response.status}`);
+                throw new Error(errorData.error || errorData.message || `API Error: ${response.status}`);
             }
             
             const data = await response.json();
             
             // Vérifier si l'API retourne une erreur dans les données
-            if (data.status === 'error') {
-                throw new Error(data.message || 'API returned an error');
+            if (data.status === 'error' || data.error) {
+                throw new Error(data.error || data.message || 'API returned an error');
             }
             
             this.incrementRequestCount();
@@ -214,61 +214,59 @@ class FinanceAPIClient {
     }
     
     // ============================================
-    // API ENDPOINTS
+    // API ENDPOINTS (Adaptés à ton Worker)
     // ============================================
     
     /**
      * 🔍 Recherche de symboles
+     * Ton Worker utilise : /api/search avec paramètre "query"
      */
     async searchSymbol(query) {
-        const data = await this.makeRequest('symbol_search', {
-            symbol: query,
-            outputsize: 30
-        });
+        const data = await this.makeRequest('search', { query });
         
         return {
-            data: data.data || [],
-            status: data.status || 'ok'
+            data: data.results || [],
+            status: 'ok'
         };
     }
     
     /**
-     * 💰 Quote en temps réel (CORRIGÉ !)
+     * 💰 Quote en temps réel
+     * Ton Worker transforme déjà les données !
      */
     async getQuote(symbol) {
         const data = await this.makeRequest('quote', { symbol });
         
         console.log('📦 Quote data received:', data);
         
-        // Twelve Data peut retourner soit un objet direct, soit dans data.quote
-        const quote = data.quote || data;
-        
+        // Ton Worker retourne déjà les données transformées
         return {
-            symbol: this.safeGet(quote, 'symbol', symbol),
-            name: this.safeGet(quote, 'name', symbol),
-            exchange: this.safeGet(quote, 'exchange', ''),
-            currency: this.safeGet(quote, 'currency', 'USD'),
-            price: this.parseNumber(this.safeGet(quote, 'close')),
-            open: this.parseNumber(this.safeGet(quote, 'open')),
-            high: this.parseNumber(this.safeGet(quote, 'high')),
-            low: this.parseNumber(this.safeGet(quote, 'low')),
-            volume: parseInt(this.safeGet(quote, 'volume', 0)),
-            previousClose: this.parseNumber(this.safeGet(quote, 'previous_close')),
-            change: this.parseNumber(this.safeGet(quote, 'change')),
-            percentChange: this.parseNumber(this.safeGet(quote, 'percent_change')),
-            fiftyTwoWeekHigh: this.parseNumber(this.safeGet(quote, 'fifty_two_week.high')),
-            fiftyTwoWeekLow: this.parseNumber(this.safeGet(quote, 'fifty_two_week.low')),
-            averageVolume: parseInt(this.safeGet(quote, 'average_volume', 0)),
-            timestamp: this.safeGet(quote, 'timestamp', Date.now())
+            symbol: data.symbol || symbol,
+            name: data.name || symbol,
+            exchange: data.exchange || '',
+            currency: data.currency || 'USD',
+            price: this.parseNumber(data.price),
+            open: this.parseNumber(data.open),
+            high: this.parseNumber(data.high),
+            low: this.parseNumber(data.low),
+            volume: parseInt(data.volume) || 0,
+            previousClose: this.parseNumber(data.previousClose),
+            change: this.parseNumber(data.change),
+            percentChange: this.parseNumber(data.percentChange),
+            fiftyTwoWeekHigh: 0, // Pas disponible dans quote
+            fiftyTwoWeekLow: 0,  // Pas disponible dans quote
+            averageVolume: 0,    // Pas disponible dans quote
+            timestamp: data.timestamp || Date.now()
         };
     }
     
     /**
      * 📊 Séries temporelles (données historiques)
+     * Ton Worker utilise : /api/time-series (avec tiret !)
      */
     async getTimeSeries(symbol, interval = '1day', outputsize = 30) {
         try {
-            const data = await this.makeRequest('time_series', {
+            const data = await this.makeRequest('time-series', {
                 symbol,
                 interval,
                 outputsize
@@ -276,18 +274,17 @@ class FinanceAPIClient {
             
             console.log('📦 Time series data received:', data);
             
-            const values = data.values || data.data || [];
-            
-            if (values.length === 0) {
+            // Ton Worker transforme déjà les données !
+            if (!data.data || data.data.length === 0) {
                 throw new Error('No time series data available for this symbol');
             }
             
             return {
-                symbol: this.safeGet(data, 'meta.symbol', symbol),
-                interval: this.safeGet(data, 'meta.interval', interval),
-                currency: this.safeGet(data, 'meta.currency', 'USD'),
-                exchange: this.safeGet(data, 'meta.exchange', ''),
-                data: values.map(item => ({
+                symbol: data.symbol || symbol,
+                interval: data.interval || interval,
+                currency: 'USD',
+                exchange: '',
+                data: data.data.map(item => ({
                     datetime: item.datetime,
                     timestamp: new Date(item.datetime).getTime(),
                     open: this.parseNumber(item.open),
@@ -295,7 +292,7 @@ class FinanceAPIClient {
                     low: this.parseNumber(item.low),
                     close: this.parseNumber(item.close),
                     volume: parseInt(item.volume) || 0
-                })).reverse() // Inverser pour avoir l'ordre chronologique
+                }))
             };
         } catch (error) {
             console.error('Time series error:', error);
@@ -305,6 +302,7 @@ class FinanceAPIClient {
     
     /**
      * 🏢 Profil de l'entreprise
+     * Ton Worker utilise : /api/profile
      */
     async getProfile(symbol) {
         try {
@@ -313,7 +311,7 @@ class FinanceAPIClient {
             console.log('📦 Profile data received:', data);
             
             // Vérifier si des données sont retournées
-            if (!data || data.status === 'error') {
+            if (!data || data.status === 'error' || data.error) {
                 console.warn('Profile data not available for', symbol);
                 return null;
             }
@@ -333,13 +331,14 @@ class FinanceAPIClient {
                 founded: this.safeGet(data, 'founded', 'N/A')
             };
         } catch (error) {
-            console.warn('Profile endpoint not accessible:', error.message);
+            console.warn('Profile endpoint error:', error.message);
             return null;
         }
     }
     
     /**
      * 📈 Statistiques fondamentales
+     * Ton Worker utilise : /api/statistics
      */
     async getStatistics(symbol) {
         try {
@@ -348,7 +347,7 @@ class FinanceAPIClient {
             console.log('📦 Statistics data received:', data);
             
             // Vérifier si des données sont retournées
-            if (!data || data.status === 'error') {
+            if (!data || data.status === 'error' || data.error) {
                 console.warn('Statistics data not available for', symbol);
                 return null;
             }
@@ -395,47 +394,36 @@ class FinanceAPIClient {
                 lastSplitFactor: this.safeGet(data, 'dividends_and_splits.last_split_factor', '')
             };
         } catch (error) {
-            console.warn('Statistics endpoint not accessible:', error.message);
+            console.warn('Statistics endpoint error:', error.message);
             return null;
         }
     }
     
     /**
      * 🎨 Logo de l'entreprise
+     * Ton Worker ne supporte pas cet endpoint, on retourne vide
      */
     async getLogo(symbol) {
-        try {
-            const data = await this.makeRequest('logo', { symbol });
-            
-            console.log('📦 Logo data received:', data);
-            
-            if (!data || data.status === 'error' || !data.url) {
-                console.warn('Logo not available for', symbol);
-                return '';
-            }
-            
-            return data.url;
-        } catch (error) {
-            console.warn('Logo endpoint not accessible:', error.message);
-            return '';
-        }
+        console.warn('Logo endpoint not available in Worker');
+        return '';
     }
     
     /**
-     * 🔄 Taux de change (pour crypto et forex)
+     * 📊 Indicateurs techniques
+     * Ton Worker utilise : /api/technical-indicators
      */
-    async getExchangeRate(symbol1, symbol2) {
+    async getTechnicalIndicator(symbol, indicator, interval = '1day', timePeriod = 14) {
         try {
-            const data = await this.makeRequest('exchange_rate', {
-                symbol: `${symbol1}/${symbol2}`
+            const data = await this.makeRequest('technical-indicators', {
+                symbol,
+                indicator,
+                interval,
+                time_period: timePeriod
             });
             
-            return {
-                rate: this.parseNumber(data.rate),
-                timestamp: data.timestamp
-            };
+            return data;
         } catch (error) {
-            console.warn('Exchange rate not available:', error.message);
+            console.warn(`Technical indicator ${indicator} error:`, error.message);
             return null;
         }
     }
