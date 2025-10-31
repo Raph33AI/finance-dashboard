@@ -142,60 +142,65 @@
                 <div class='content'>
                     
                     <!-- Search Panel -->
-                    <div class='search-panel'>
-                        <h2 class='panel-title'>
-                            <i class='fas fa-search'></i> Search Stock for Market Data
+                    <div class='search-panel card'>
+                        <div class='card-header'>
+                            <h2 class='card-title'>
+                                <i class='fas fa-search'></i> Search Stock for Market Data
+                            </h2>
                             <span class='help-icon' onclick='openModal("modalSearchHelp")'>?</span>
-                        </h2>
+                        </div>
                         
-                        <div class='search-container'>
-                            <!-- Search Input + Button -->
-                            <div class='search-input-wrapper'>
-                                <input type='text' 
-                                    id='symbolInput' 
-                                    placeholder='Search by symbol or company name (e.g., AAPL, Apple, Tesla)...'
-                                    autocomplete='off'
-                                    value='AAPL'>
-                                <button class='btn-search' onclick='MarketData.searchStock()'>
-                                    <i class='fas fa-chart-area'></i> Analyze Stock
-                                </button>
+                        <div class='card-body'>
+                            <div class='search-container'>
+                                <!-- Search Input + Button -->
+                                <div class='search-input-wrapper'>
+                                    <input type='text' 
+                                        id='symbolInput' 
+                                        class='form-input'
+                                        placeholder='Search by symbol or company name (e.g., AAPL, Apple, Tesla)...'
+                                        autocomplete='off'
+                                        value='AAPL'>
+                                    <button class='btn btn-primary btn-search' onclick='MarketData.searchStock()'>
+                                        <i class='fas fa-chart-area'></i> Analyze Stock
+                                    </button>
+                                    
+                                    <!-- Suggestions dropdown (hidden by default) -->
+                                    <div class='search-suggestions' id='searchSuggestions'></div>
+                                </div>
                                 
-                                <!-- Suggestions dropdown (hidden by default) -->
-                                <div class='search-suggestions' id='searchSuggestions'></div>
-                            </div>
-                            
-                            <!-- Popular Stocks -->
-                            <div class='popular-stocks'>
-                                <span class='quick-label'>Popular Stocks:</span>
-                                <button class='symbol-chip' onclick='MarketData.loadSymbol("AAPL")'>
-                                    <i class='fab fa-apple'></i> AAPL
-                                </button>
-                                <button class='symbol-chip' onclick='MarketData.loadSymbol("MSFT")'>
-                                    <i class='fab fa-microsoft'></i> MSFT
-                                </button>
-                                <button class='symbol-chip' onclick='MarketData.loadSymbol("GOOGL")'>
-                                    <i class='fab fa-google'></i> GOOGL
-                                </button>
-                                <button class='symbol-chip' onclick='MarketData.loadSymbol("TSLA")'>
-                                    <i class='fas fa-car'></i> TSLA
-                                </button>
-                                <button class='symbol-chip' onclick='MarketData.loadSymbol("BTC-USD")'>
-                                    <i class='fab fa-bitcoin'></i> BTC-USD
-                                </button>
-                                <button class='symbol-chip' onclick='MarketData.loadSymbol("^GSPC")'>
-                                    <i class='fas fa-chart-line'></i> S&P 500
-                                </button>
-                            </div>
-                            
-                            <!-- Period Selection -->
-                            <div class='time-period-selector'>
-                                <label>Time Period:</label>
-                                <button class='period-btn active' data-period='1M' onclick='MarketData.changePeriod("1M")'>1M</button>
-                                <button class='period-btn' data-period='3M' onclick='MarketData.changePeriod("3M")'>3M</button>
-                                <button class='period-btn' data-period='6M' onclick='MarketData.changePeriod("6M")'>6M</button>
-                                <button class='period-btn' data-period='1Y' onclick='MarketData.changePeriod("1Y")'>1Y</button>
-                                <button class='period-btn' data-period='5Y' onclick='MarketData.changePeriod("5Y")'>5Y</button>
-                                <button class='period-btn' data-period='MAX' onclick='MarketData.changePeriod("MAX")'>MAX</button>
+                                <!-- Popular Stocks -->
+                                <div class='popular-stocks'>
+                                    <span class='quick-label'>Popular Stocks:</span>
+                                    <button class='symbol-chip' onclick='MarketData.loadSymbol("AAPL")'>
+                                        <i class='fab fa-apple'></i> AAPL
+                                    </button>
+                                    <button class='symbol-chip' onclick='MarketData.loadSymbol("MSFT")'>
+                                        <i class='fab fa-microsoft'></i> MSFT
+                                    </button>
+                                    <button class='symbol-chip' onclick='MarketData.loadSymbol("GOOGL")'>
+                                        <i class='fab fa-google'></i> GOOGL
+                                    </button>
+                                    <button class='symbol-chip' onclick='MarketData.loadSymbol("TSLA")'>
+                                        <i class='fas fa-car'></i> TSLA
+                                    </button>
+                                    <button class='symbol-chip' onclick='MarketData.loadSymbol("BTC-USD")'>
+                                        <i class='fab fa-bitcoin'></i> BTC-USD
+                                    </button>
+                                    <button class='symbol-chip' onclick='MarketData.loadSymbol("^GSPC")'>
+                                        <i class='fas fa-chart-line'></i> S&P 500
+                                    </button>
+                                </div>
+                                
+                                <!-- Period Selection -->
+                                <div class='time-period-selector'>
+                                    <label>Time Period:</label>
+                                    <button class='period-btn active' data-period='1M' onclick='MarketData.changePeriod("1M")'>1M</button>
+                                    <button class='period-btn' data-period='3M' onclick='MarketData.changePeriod("3M")'>3M</button>
+                                    <button class='period-btn' data-period='6M' onclick='MarketData.changePeriod("6M")'>6M</button>
+                                    <button class='period-btn' data-period='1Y' onclick='MarketData.changePeriod("1Y")'>1Y</button>
+                                    <button class='period-btn' data-period='5Y' onclick='MarketData.changePeriod("5Y")'>5Y</button>
+                                    <button class='period-btn' data-period='MAX' onclick='MarketData.changePeriod("MAX")'>MAX</button>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -203,73 +208,75 @@
                     <!-- ============================================
                          STOCK COMPARISON SECTION
                          ============================================ -->
-                    <div class='comparison-section'>
-                        <div class='comparison-header'>
-                            <h2 class='panel-title'>
+                    <div class='comparison-section card'>
+                        <div class='card-header comparison-header'>
+                            <h2 class='card-title'>
                                 <i class='fas fa-chart-bar'></i> Stock Comparison
-                                <span class='help-icon' onclick='openModal("modalComparison")'>?</span>
                             </h2>
                             <div class='comparison-actions'>
-                                <button class='btn-compare' onclick='MarketData.openComparisonModal()'>
+                                <button class='btn btn-primary btn-compare' onclick='MarketData.openComparisonModal()'>
                                     <i class='fas fa-plus'></i> Add Stocks to Compare
                                 </button>
-                                <button class='btn-clear-comparison' onclick='MarketData.clearComparison()'>
+                                <button class='btn btn-danger btn-clear-comparison' onclick='MarketData.clearComparison()'>
                                     <i class='fas fa-trash'></i> Clear All
                                 </button>
                             </div>
                         </div>
                         
-                        <div id='comparisonContainer' class='comparison-container hidden'>
-                            <!-- Selected stocks chips -->
-                            <div class='comparison-stocks' id='comparisonStocks'></div>
-                            
-                            <!-- Comparison Chart -->
-                            <div class='comparison-chart-wrapper'>
-                                <h3 class='subsection-title'>Performance Comparison (Normalized to 100)</h3>
-                                <div id='comparisonChart' class='chart'></div>
+                        <div class='card-body'>
+                            <div id='comparisonContainer' class='comparison-container hidden'>
+                                <!-- Selected stocks chips -->
+                                <div class='comparison-stocks' id='comparisonStocks'></div>
+                                
+                                <!-- Comparison Chart -->
+                                <div class='comparison-chart-wrapper'>
+                                    <h3 class='subsection-title'>Performance Comparison (Normalized to 100)</h3>
+                                    <div id='comparisonChart' class='chart'></div>
+                                </div>
+                                
+                                <!-- Comparison Table -->
+                                <div class='comparison-table-wrapper'>
+                                    <h3 class='subsection-title'>Key Metrics Comparison</h3>
+                                    <div id='comparisonTable' class='comparison-table'></div>
+                                </div>
                             </div>
                             
-                            <!-- Comparison Table -->
-                            <div class='comparison-table-wrapper'>
-                                <h3 class='subsection-title'>Key Metrics Comparison</h3>
-                                <div id='comparisonTable' class='comparison-table'></div>
+                            <div id='comparisonEmpty' class='comparison-empty'>
+                                <i class='fas fa-chart-line'></i>
+                                <p>No stocks to compare</p>
+                                <p class='hint'>Click "Add Stocks to Compare" to get started</p>
                             </div>
-                        </div>
-                        
-                        <div id='comparisonEmpty' class='comparison-empty'>
-                            <i class='fas fa-chart-line'></i>
-                            <p>No stocks to compare</p>
-                            <p class='hint'>Click "Add Stocks to Compare" to get started</p>
                         </div>
                     </div>
                     
                     <!-- ============================================
                          WATCHLIST SECTION
                          ============================================ -->
-                    <div class='watchlist-section'>
-                        <div class='watchlist-header'>
-                            <h2 class='panel-title'>
+                    <div class='watchlist-section card'>
+                        <div class='card-header watchlist-header'>
+                            <h2 class='card-title'>
                                 <i class='fas fa-star'></i> My Watchlist
-                                <span class='help-icon' onclick='openModal("modalWatchlist")'>?</span>
                             </h2>
                             <div class='watchlist-actions'>
-                                <button class='btn-add-current' onclick='MarketData.addCurrentToWatchlist()' id='btnAddCurrent' disabled>
+                                <button class='btn btn-success btn-add-current' onclick='MarketData.addCurrentToWatchlist()' id='btnAddCurrent' disabled>
                                     <i class='fas fa-plus'></i> Add Current Stock
                                 </button>
-                                <button class='btn-refresh-watchlist' onclick='MarketData.refreshWatchlist()'>
+                                <button class='btn btn-primary btn-refresh-watchlist' onclick='MarketData.refreshWatchlist()'>
                                     <i class='fas fa-sync-alt'></i> Refresh All
                                 </button>
-                                <button class='btn-clear-watchlist' onclick='MarketData.clearWatchlist()'>
+                                <button class='btn btn-danger btn-clear-watchlist' onclick='MarketData.clearWatchlist()'>
                                     <i class='fas fa-trash'></i> Clear All
                                 </button>
                             </div>
                         </div>
                         
-                        <div id='watchlistContainer' class='watchlist-container'>
-                            <div class='watchlist-empty'>
-                                <i class='fas fa-star-half-alt'></i>
-                                <p>Your watchlist is empty</p>
-                                <p class='hint'>Search for a stock and click "Add to Watchlist" to start tracking</p>
+                        <div class='card-body'>
+                            <div id='watchlistContainer' class='watchlist-container'>
+                                <div class='watchlist-empty'>
+                                    <i class='fas fa-star-half-alt'></i>
+                                    <p>Your watchlist is empty</p>
+                                    <p class='hint'>Search for a stock and click "Add to Watchlist" to start tracking</p>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -277,22 +284,23 @@
                     <!-- ============================================
                          PRICE ALERTS SECTION
                          ============================================ -->
-                    <div class='alerts-section'>
-                        <div class='alerts-header'>
-                            <h2 class='panel-title'>
+                    <div class='alerts-section card'>
+                        <div class='card-header alerts-header'>
+                            <h2 class='card-title'>
                                 <i class='fas fa-bell'></i> Price Alerts
-                                <span class='help-icon' onclick='openModal("modalAlerts")'>?</span>
                             </h2>
-                            <button class='btn-create-alert' onclick='MarketData.openAlertModal()'>
+                            <button class='btn btn-accent btn-create-alert' onclick='MarketData.openAlertModal()'>
                                 <i class='fas fa-plus'></i> Create Alert
                             </button>
                         </div>
                         
-                        <div id='alertsContainer' class='alerts-container'>
-                            <div class='alerts-empty'>
-                                <i class='fas fa-bell-slash'></i>
-                                <p>No active alerts</p>
-                                <p class='hint'>Create price alerts to get notified when a stock reaches your target</p>
+                        <div class='card-body'>
+                            <div id='alertsContainer' class='alerts-container'>
+                                <div class='alerts-empty'>
+                                    <i class='fas fa-bell-slash'></i>
+                                    <p>No active alerts</p>
+                                    <p class='hint'>Create price alerts to get notified when a stock reaches your target</p>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -344,57 +352,59 @@
                     </div>
                     
                     <!-- Results Panel -->
-                    <div id='resultsPanel' class='results-panel hidden'>
-                        
-                        <!-- Price Chart -->
-                        <div class='chart-section'>
-                            <h3 class='subsection-title'>
-                                Price Chart with Technical Indicators
-                                <span class='help-icon' onclick='openModal("modalChartHelp")'>?</span>
-                            </h3>
-                            <div class='indicator-toggles'>
-                                <label><input type='checkbox' id='toggleSMA' checked> SMA (20, 50)</label>
-                                <label><input type='checkbox' id='toggleEMA'> EMA (12, 26)</label>
-                                <label><input type='checkbox' id='toggleBB' checked> Bollinger Bands</label>
-                                <label><input type='checkbox' id='toggleVolume' checked> Volume</label>
-                            </div>
-                            <div id='priceChart' class='chart'></div>
-                        </div>
-                        
-                        <!-- Technical Indicators -->
-                        <div class='charts-grid-2'>
+                    <div id='resultsPanel' class='results-panel card hidden'>
+                        <div class='card-body'>
+                            
+                            <!-- Price Chart -->
                             <div class='chart-section'>
                                 <h3 class='subsection-title'>
-                                    RSI (Relative Strength Index)
-                                    <span class='help-icon' onclick='openModal("modalRSI")'>?</span>
+                                    <i class='fas fa-chart-line'></i> Price Chart with Technical Indicators
+                                    <span class='help-icon' onclick='openModal("modalChartHelp")'>?</span>
                                 </h3>
-                                <div id='rsiChart' class='chart chart-medium'></div>
+                                <div class='indicator-toggles'>
+                                    <label><input type='checkbox' id='toggleSMA' checked> SMA (20, 50)</label>
+                                    <label><input type='checkbox' id='toggleEMA'> EMA (12, 26)</label>
+                                    <label><input type='checkbox' id='toggleBB' checked> Bollinger Bands</label>
+                                    <label><input type='checkbox' id='toggleVolume' checked> Volume</label>
+                                </div>
+                                <div id='priceChart' class='chart'></div>
                             </div>
                             
-                            <div class='chart-section'>
-                                <h3 class='subsection-title'>
-                                    MACD (Moving Average Convergence Divergence)
-                                    <span class='help-icon' onclick='openModal("modalMACD")'>?</span>
-                                </h3>
-                                <div id='macdChart' class='chart chart-medium'></div>
+                            <!-- Technical Indicators -->
+                            <div class='charts-grid-2'>
+                                <div class='chart-section'>
+                                    <h3 class='subsection-title'>
+                                        <i class='fas fa-wave-square'></i> RSI (Relative Strength Index)
+                                        <span class='help-icon' onclick='openModal("modalRSI")'>?</span>
+                                    </h3>
+                                    <div id='rsiChart' class='chart chart-medium'></div>
+                                </div>
+                                
+                                <div class='chart-section'>
+                                    <h3 class='subsection-title'>
+                                        <i class='fas fa-chart-bar'></i> MACD (Moving Average Convergence Divergence)
+                                        <span class='help-icon' onclick='openModal("modalMACD")'>?</span>
+                                    </h3>
+                                    <div id='macdChart' class='chart chart-medium'></div>
+                                </div>
                             </div>
+                            
+                            <!-- Trading Signals -->
+                            <div class='signals-section'>
+                                <h3 class='subsection-title'>
+                                    <i class='fas fa-signal'></i> Trading Signals
+                                    <span class='help-icon' onclick='openModal("modalSignals")'>?</span>
+                                </h3>
+                                <div id='tradingSignals' class='signals-grid'></div>
+                            </div>
+                            
+                            <!-- Key Statistics -->
+                            <div class='stats-section'>
+                                <h3 class='subsection-title'><i class='fas fa-table'></i> Key Statistics</h3>
+                                <div id='keyStats' class='stats-grid'></div>
+                            </div>
+                            
                         </div>
-                        
-                        <!-- Trading Signals -->
-                        <div class='signals-section'>
-                            <h3 class='subsection-title'>
-                                Trading Signals
-                                <span class='help-icon' onclick='openModal("modalSignals")'>?</span>
-                            </h3>
-                            <div id='tradingSignals' class='signals-grid'></div>
-                        </div>
-                        
-                        <!-- Key Statistics -->
-                        <div class='stats-section'>
-                            <h3 class='subsection-title'>Key Statistics</h3>
-                            <div id='keyStats' class='stats-grid'></div>
-                        </div>
-                        
                     </div>
                 </div>
                 
@@ -436,7 +446,7 @@
                     <li>Key statistics (P/E ratio, market cap, etc.)</li>
                 </ul>
                 
-                <div class='tip-box'>
+                <div class='info-box'>
                     💡 <strong>Pro Tip:</strong> Use the time period buttons to analyze different timeframes and spot trends!
                 </div>
             </div>
@@ -451,7 +461,7 @@
             </div>
             <div class='modal-body'>
                 <h3>🎯 What is Stock Comparison?</h3>
-                <p><span class='key-term'>Stock Comparison</span> allows you to visualize and analyze multiple stocks side-by-side to identify the best performers.</p>
+                <p>Stock Comparison allows you to visualize and analyze multiple stocks side-by-side to identify the best performers.</p>
                 
                 <h3>✨ Features</h3>
                 <ul>
@@ -470,7 +480,7 @@
                     <li>Identify winners and losers!</li>
                 </ol>
                 
-                <div class='tip-box'>
+                <div class='info-box success'>
                     💡 <strong>Pro Tip:</strong> Compare stocks in the same sector for better insights (e.g., AAPL vs MSFT vs GOOGL).
                 </div>
             </div>
@@ -486,39 +496,39 @@
             <div class='modal-body'>
                 <div class='comparison-form'>
                     <div class='form-group'>
-                        <label for='comparisonSymbols'>Stock Symbols (separated by commas)</label>
+                        <label class='form-label' for='comparisonSymbols'>Stock Symbols (separated by commas)</label>
                         <input type='text' 
                                id='comparisonSymbols' 
+                               class='form-input'
                                placeholder='e.g., AAPL, MSFT, GOOGL, TSLA'
                                style='text-transform: uppercase;'>
-                        <div class='hint'>Enter 2-5 stock symbols to compare</div>
+                        <p class='text-muted' style='font-size: 0.875rem; margin-top: 0.5rem;'>Enter 2-5 stock symbols to compare</p>
                     </div>
                     
                     <div class='comparison-quick-presets'>
-                        <label>Quick Presets:</label>
+                        <label class='form-label'>Quick Presets:</label>
                         <button class='preset-btn' onclick='document.getElementById("comparisonSymbols").value = "AAPL, MSFT, GOOGL, AMZN"'>
-                            Big Tech
+                            <i class='fas fa-laptop'></i> Big Tech
                         </button>
                         <button class='preset-btn' onclick='document.getElementById("comparisonSymbols").value = "TSLA, F, GM, TM"'>
-                            Auto Industry
+                            <i class='fas fa-car'></i> Auto Industry
                         </button>
                         <button class='preset-btn' onclick='document.getElementById("comparisonSymbols").value = "JPM, BAC, WFC, C"'>
-                            Banks
+                            <i class='fas fa-university'></i> Banks
                         </button>
                         <button class='preset-btn' onclick='document.getElementById("comparisonSymbols").value = "^GSPC, ^DJI, ^IXIC"'>
-                            Market Indices
-                        </button>
-                    </div>
-                    
-                    <div class='form-actions'>
-                        <button class='btn-create' onclick='MarketData.loadComparison()'>
-                            <i class='fas fa-chart-line'></i> Compare Stocks
-                        </button>
-                        <button class='btn-cancel' onclick='MarketData.closeComparisonModal()'>
-                            Cancel
+                            <i class='fas fa-chart-line'></i> Market Indices
                         </button>
                     </div>
                 </div>
+            </div>
+            <div class='modal-footer'>
+                <button class='btn btn-success' onclick='MarketData.loadComparison()'>
+                    <i class='fas fa-chart-line'></i> Compare Stocks
+                </button>
+                <button class='btn btn-secondary' onclick='MarketData.closeComparisonModal()'>
+                    Cancel
+                </button>
             </div>
         </div>
     </div>
@@ -531,7 +541,7 @@
             </div>
             <div class='modal-body'>
                 <h3>📊 What is a Watchlist?</h3>
-                <p>A <span class='key-term'>watchlist</span> lets you track multiple stocks simultaneously without having to search for them repeatedly.</p>
+                <p>A watchlist lets you track multiple stocks simultaneously without having to search for them repeatedly.</p>
                 
                 <h3>✨ Features</h3>
                 <ul>
@@ -549,7 +559,7 @@
                     <li>Click "Refresh All" to update all prices manually</li>
                 </ol>
                 
-                <div class='tip-box'>
+                <div class='info-box success'>
                     💡 <strong>Pro Tip:</strong> Combine watchlist with price alerts to never miss important price movements!
                 </div>
             </div>
@@ -564,7 +574,7 @@
             </div>
             <div class='modal-body'>
                 <h3>📢 What are Price Alerts?</h3>
-                <p><span class='key-term'>Price alerts</span> notify you when a stock reaches your specified target price.</p>
+                <p>Price alerts notify you when a stock reaches your specified target price.</p>
                 
                 <h3>📊 Alert Types</h3>
                 <ul>
@@ -581,7 +591,7 @@
                     <li>Click "Create" - you'll be notified when triggered!</li>
                 </ol>
                 
-                <div class='tip-box'>
+                <div class='info-box warning'>
                     💡 <strong>Note:</strong> Alerts are checked during watchlist refresh. Enable browser notifications for best results!
                 </div>
             </div>
@@ -597,37 +607,36 @@
             <div class='modal-body'>
                 <div class='alert-form'>
                     <div class='form-group'>
-                        <label for='alertSymbol'>Stock Symbol</label>
-                        <input type='text' id='alertSymbol' placeholder='e.g., AAPL' style='text-transform: uppercase;'>
+                        <label class='form-label' for='alertSymbol'>Stock Symbol</label>
+                        <input type='text' id='alertSymbol' class='form-input' placeholder='e.g., AAPL' style='text-transform: uppercase;'>
                     </div>
                     
                     <div class='form-group'>
-                        <label for='alertPrice'>Target Price</label>
-                        <input type='number' id='alertPrice' placeholder='e.g., 150.00' step='0.01'>
+                        <label class='form-label' for='alertPrice'>Target Price</label>
+                        <input type='number' id='alertPrice' class='form-input' placeholder='e.g., 150.00' step='0.01'>
                     </div>
                     
                     <div class='form-group'>
-                        <label for='alertType'>Alert Condition</label>
-                        <select id='alertType'>
+                        <label class='form-label' for='alertType'>Alert Condition</label>
+                        <select id='alertType' class='form-select'>
                             <option value='above'>Price goes ABOVE target</option>
                             <option value='below'>Price goes BELOW target</option>
                         </select>
                     </div>
                     
                     <div class='form-group'>
-                        <label for='alertNote'>Note (Optional)</label>
-                        <input type='text' id='alertNote' placeholder='e.g., Buy signal, Take profit...'>
-                    </div>
-                    
-                    <div class='form-actions'>
-                        <button class='btn-create' onclick='MarketData.createAlert()'>
-                            <i class='fas fa-check'></i> Create Alert
-                        </button>
-                        <button class='btn-cancel' onclick='MarketData.closeAlertModal()'>
-                            Cancel
-                        </button>
+                        <label class='form-label' for='alertNote'>Note (Optional)</label>
+                        <input type='text' id='alertNote' class='form-input' placeholder='e.g., Buy signal, Take profit...'>
                     </div>
                 </div>
+            </div>
+            <div class='modal-footer'>
+                <button class='btn btn-success' onclick='MarketData.createAlert()'>
+                    <i class='fas fa-check'></i> Create Alert
+                </button>
+                <button class='btn btn-secondary' onclick='MarketData.closeAlertModal()'>
+                    Cancel
+                </button>
             </div>
         </div>
     </div>
@@ -642,19 +651,19 @@
                 <h3>📊 Technical Indicators</h3>
                 
                 <h4>1️⃣ SMA (Simple Moving Average)</h4>
-                <p>Average price over a period (e.g., 20 or 50 days). Helps identify <span class='key-term'>trends</span>.</p>
+                <p>Average price over a period (e.g., 20 or 50 days). Helps identify trends.</p>
                 <ul>
                     <li><strong>Price above SMA:</strong> Bullish signal 📈</li>
                     <li><strong>Price below SMA:</strong> Bearish signal 📉</li>
                 </ul>
                 
                 <h4>2️⃣ EMA (Exponential Moving Average)</h4>
-                <p>Like SMA but gives more weight to recent prices. More <span class='key-term'>responsive</span> to changes.</p>
+                <p>Like SMA but gives more weight to recent prices. More responsive to changes.</p>
                 
                 <h4>3️⃣ Bollinger Bands</h4>
                 <p>Shows price volatility. Price touching upper band = <strong>overbought</strong>, lower band = <strong>oversold</strong>.</p>
                 
-                <div class='tip-box'>
+                <div class='info-box'>
                     💡 Combine multiple indicators for better signals!
                 </div>
             </div>
@@ -669,7 +678,7 @@
             </div>
             <div class='modal-body'>
                 <h3>📐 What is RSI?</h3>
-                <p>The <span class='key-term'>RSI</span> measures the speed and magnitude of price changes. It oscillates between <strong>0 and 100</strong>.</p>
+                <p>The RSI measures the speed and magnitude of price changes. It oscillates between <strong>0 and 100</strong>.</p>
                 
                 <h3>📈 Interpretation</h3>
                 <ul>
@@ -678,13 +687,13 @@
                     <li><strong>RSI = 50:</strong> Neutral</li>
                 </ul>
                 
-                <div class='formula-box'>
-                    <strong>Formula:</strong><br>
-                    RSI = 100 - [100 / (1 + RS)]<br>
-                    RS = Average Gain / Average Loss (over 14 periods)
+                <div class='info-box'>
+                    <h4>Formula:</h4>
+                    <p>RSI = 100 - [100 / (1 + RS)]</p>
+                    <p>RS = Average Gain / Average Loss (over 14 periods)</p>
                 </div>
                 
-                <div class='tip-box'>
+                <div class='info-box success'>
                     💡 <strong>Trading Strategy:</strong> Buy when RSI crosses above 30, sell when it crosses below 70.
                 </div>
             </div>
@@ -699,7 +708,7 @@
             </div>
             <div class='modal-body'>
                 <h3>📐 What is MACD?</h3>
-                <p>The <span class='key-term'>MACD</span> shows the relationship between two moving averages. It consists of:</p>
+                <p>The MACD shows the relationship between two moving averages. It consists of:</p>
                 <ul>
                     <li><strong>MACD Line:</strong> EMA(12) - EMA(26)</li>
                     <li><strong>Signal Line:</strong> EMA(9) of MACD</li>
@@ -713,7 +722,7 @@
                     <li><strong>Histogram increasing:</strong> Momentum strengthening</li>
                 </ul>
                 
-                <div class='tip-box'>
+                <div class='info-box success'>
                     💡 <strong>Pro Tip:</strong> MACD works best in trending markets, not in sideways/ranging markets.
                 </div>
             </div>
@@ -745,7 +754,7 @@
                     <li>Death Cross: Short MA crosses below Long MA</li>
                 </ul>
                 
-                <div class='warning-box'>
+                <div class='info-box warning'>
                     ⚠️ <strong>Warning:</strong> No signal is 100% accurate. Always combine multiple indicators and use risk management!
                 </div>
             </div>
@@ -869,11 +878,11 @@
         
         const quotaBar = document.getElementById('quotaBar');
         if (quotaPercent < 50) {
-            quotaBar.style.background = '#4CAF50';
+            quotaBar.style.background = '#10b981';
         } else if (quotaPercent < 80) {
-            quotaBar.style.background = '#FF9800';
+            quotaBar.style.background = '#f59e0b';
         } else {
-            quotaBar.style.background = '#F44336';
+            quotaBar.style.background = '#ef4444';
         }
         
         document.getElementById('cacheEntries').textContent = stats.entries;
