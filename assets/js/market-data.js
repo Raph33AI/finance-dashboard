@@ -1,6 +1,6 @@
 /* ==============================================
    MARKET-DATA.JS - Market Data & Technical Analysis
-   Migré vers Twelve Data API + Cloudflare Workers Backend
+   Version optimisée avec tous les endpoints Twelve Data Basic
    ============================================== */
 
 const MarketData = {
@@ -11,6 +11,9 @@ const MarketData = {
     currentSymbol: '',
     currentPeriod: '1M',
     stockData: null,
+    profileData: null,
+    statisticsData: null,
+    logoUrl: '',
     
     // Search functionality
     selectedSuggestionIndex: -1,
@@ -25,7 +28,7 @@ const MarketData = {
     // Comparison
     comparisonSymbols: [],
     comparisonData: {},
-    comparisonColors: ['#2649B2', '#4A74F3', '#8E7DE3', '#9D5CE6', '#6C8BE0'],
+    comparisonColors: ['#2563eb', '#10b981', '#f59e0b', '#8b5cf6', '#ef4444'],
     
     // Initialize
     init() {
@@ -144,8 +147,8 @@ const MarketData = {
         try {
             const results = await this.apiClient.searchSymbol(query);
             
-            if (results.results && results.results.length > 0) {
-                this.displaySearchResults(results.results, query);
+            if (results.data && results.data.length > 0) {
+                this.displaySearchResults(results.data, query);
             } else {
                 this.displayNoResults();
             }
@@ -168,24 +171,18 @@ const MarketData = {
         const other = [];
         
         results.forEach(item => {
-            const type = (item.type || 'EQUITY').toUpperCase();
+            const type = (item.instrument_type || 'Common Stock').toLowerCase();
             
-            switch (type) {
-                case 'COMMON STOCK':
-                case 'EQUITY':
-                    stocks.push(item);
-                    break;
-                case 'ETF':
-                    etfs.push(item);
-                    break;
-                case 'CRYPTOCURRENCY':
-                    crypto.push(item);
-                    break;
-                case 'INDEX':
-                    indices.push(item);
-                    break;
-                default:
-                    other.push(item);
+            if (type.includes('stock') || type.includes('equity')) {
+                stocks.push(item);
+            } else if (type.includes('etf')) {
+                etfs.push(item);
+            } else if (type.includes('crypto') || type.includes('digital currency')) {
+                crypto.push(item);
+            } else if (type.includes('index')) {
+                indices.push(item);
+            } else {
+                other.push(item);
             }
         });
         
@@ -234,7 +231,7 @@ const MarketData = {
         
         items.slice(0, 10).forEach(item => {
             const highlightedSymbol = this.highlightMatch(item.symbol, query);
-            const highlightedName = this.highlightMatch(item.name, query);
+            const highlightedName = this.highlightMatch(item.instrument_name, query);
             
             html += `
                 <div class="suggestion-item" data-symbol="${item.symbol}">
@@ -339,10 +336,13 @@ const MarketData = {
         this.hideSuggestions();
         
         try {
-            // Récupérer quote + time series en parallèle
-            const [quote, timeSeries] = await Promise.all([
+            // 🆕 Récupérer quote + time series + profile + statistics + logo en parallèle
+            const [quote, timeSeries, profile, statistics, logo] = await Promise.all([
                 this.apiClient.getQuote(symbol),
-                this.getTimeSeriesForPeriod(symbol, this.currentPeriod)
+                this.getTimeSeriesForPeriod(symbol, this.currentPeriod),
+                this.apiClient.getProfile(symbol).catch(() => null),
+                this.apiClient.getStatistics(symbol).catch(() => null),
+                this.apiClient.getLogo(symbol).catch(() => '')
             ]);
             
             // Construire stockData
@@ -352,7 +352,12 @@ const MarketData = {
                 quote: quote
             };
             
+            this.profileData = profile;
+            this.statisticsData = statistics;
+            this.logoUrl = logo;
+            
             this.displayStockOverview();
+            this.displayCompanyProfile(); // 🆕
             this.displayResults();
             this.showLoading(false);
             this.updateAddToWatchlistButton();
@@ -377,21 +382,7 @@ const MarketData = {
         const config = periodMap[period] || periodMap['6M'];
         const result = await this.apiClient.getTimeSeries(symbol, config.interval, config.outputsize);
         
-        // Transformer les données pour correspondre au format attendu
-        const transformedData = result.data.map(item => ({
-            timestamp: new Date(item.datetime).getTime(),
-            open: item.open,
-            high: item.high,
-            low: item.low,
-            close: item.close,
-            volume: item.volume
-        }));
-        
-        return {
-            symbol: result.symbol,
-            interval: result.interval,
-            data: transformedData
-        };
+        return result;
     },
     
     changePeriod(period) {
@@ -417,16 +408,190 @@ const MarketData = {
         }
     },
     
+    // ========== NOUVEAU : AFFICHAGE DU PROFIL ENTREPRISE ==========
+    
+    displayCompanyProfile() {
+        // Trouver ou créer la section de profil
+        let profileSection = document.getElementById('companyProfileSection');
+        
+        if (!profileSection) {
+            // Créer la section si elle n'existe pas
+            const stockOverview = document.getElementById('stockOverview');
+            profileSection = document.createElement('div');
+            profileSection.id = 'companyProfileSection';
+            profileSection.className = 'company-profile-section card hidden';
+            stockOverview.insertAdjacentElement('afterend', profileSection);
+        }
+        
+        if (!this.profileData && !this.statisticsData) {
+            profileSection.classList.add('hidden');
+            return;
+        }
+        
+        let html = `
+            <div class='card-header'>
+                <h2 class='card-title'>
+                    <i class='fas fa-building'></i> Company Information
+                </h2>
+            </div>
+            <div class='card-body'>
+        `;
+        
+        // 🆕 Logo et profil
+        if (this.profileData || this.logoUrl) {
+            html += `<div class='company-header-section'>`;
+            
+            if (this.logoUrl) {
+                html += `
+                    <div class='company-logo'>
+                        <img src='${this.logoUrl}' alt='${this.currentSymbol} logo' onerror='this.style.display="none"'>
+                    </div>
+                `;
+            }
+            
+            if (this.profileData) {
+                html += `
+                    <div class='company-info-grid'>
+                        <div class='info-item'>
+                            <span class='info-label'><i class='fas fa-industry'></i> Sector</span>
+                            <span class='info-value'>${this.profileData.sector}</span>
+                        </div>
+                        <div class='info-item'>
+                            <span class='info-label'><i class='fas fa-cogs'></i> Industry</span>
+                            <span class='info-value'>${this.profileData.industry}</span>
+                        </div>
+                        <div class='info-item'>
+                            <span class='info-label'><i class='fas fa-globe'></i> Country</span>
+                            <span class='info-value'>${this.profileData.country}</span>
+                        </div>
+                        <div class='info-item'>
+                            <span class='info-label'><i class='fas fa-users'></i> Employees</span>
+                            <span class='info-value'>${this.formatNumber(this.profileData.employees)}</span>
+                        </div>
+                        <div class='info-item'>
+                            <span class='info-label'><i class='fas fa-calendar'></i> Founded</span>
+                            <span class='info-value'>${this.profileData.founded}</span>
+                        </div>
+                        <div class='info-item'>
+                            <span class='info-label'><i class='fas fa-user-tie'></i> CEO</span>
+                            <span class='info-value'>${this.profileData.ceo}</span>
+                        </div>
+                    </div>
+                `;
+                
+                if (this.profileData.description && this.profileData.description !== 'No description available') {
+                    html += `
+                        <div class='company-description'>
+                            <h4><i class='fas fa-info-circle'></i> About</h4>
+                            <p>${this.profileData.description}</p>
+                        </div>
+                    `;
+                }
+                
+                if (this.profileData.website) {
+                    html += `
+                        <div class='company-links'>
+                            <a href='${this.profileData.website}' target='_blank' class='btn btn-secondary btn-sm'>
+                                <i class='fas fa-external-link-alt'></i> Visit Website
+                            </a>
+                        </div>
+                    `;
+                }
+            }
+            
+            html += `</div>`;
+        }
+        
+        // 🆕 Statistiques fondamentales
+        if (this.statisticsData) {
+            html += `
+                <div class='fundamental-stats'>
+                    <h3 class='subsection-title'><i class='fas fa-chart-bar'></i> Fundamental Statistics</h3>
+                    
+                    <div class='stats-category'>
+                        <h4>Valuation Metrics</h4>
+                        <div class='stats-grid'>
+                            ${this.createStatItem('Market Cap', this.formatLargeNumber(this.statisticsData.marketCap))}
+                            ${this.createStatItem('Enterprise Value', this.formatLargeNumber(this.statisticsData.enterpriseValue))}
+                            ${this.createStatItem('P/E Ratio (TTM)', this.formatRatio(this.statisticsData.trailingPE))}
+                            ${this.createStatItem('Forward P/E', this.formatRatio(this.statisticsData.forwardPE))}
+                            ${this.createStatItem('PEG Ratio', this.formatRatio(this.statisticsData.pegRatio))}
+                            ${this.createStatItem('Price/Sales', this.formatRatio(this.statisticsData.priceToSales))}
+                            ${this.createStatItem('Price/Book', this.formatRatio(this.statisticsData.priceToBook))}
+                            ${this.createStatItem('EV/Revenue', this.formatRatio(this.statisticsData.evToRevenue))}
+                        </div>
+                    </div>
+                    
+                    <div class='stats-category'>
+                        <h4>Profitability & Returns</h4>
+                        <div class='stats-grid'>
+                            ${this.createStatItem('Profit Margin', this.formatPercent(this.statisticsData.profitMargin))}
+                            ${this.createStatItem('Operating Margin', this.formatPercent(this.statisticsData.operatingMargin))}
+                            ${this.createStatItem('ROA', this.formatPercent(this.statisticsData.returnOnAssets))}
+                            ${this.createStatItem('ROE', this.formatPercent(this.statisticsData.returnOnEquity))}
+                            ${this.createStatItem('Revenue (TTM)', this.formatLargeNumber(this.statisticsData.revenue))}
+                            ${this.createStatItem('EBITDA', this.formatLargeNumber(this.statisticsData.ebitda))}
+                            ${this.createStatItem('Net Income', this.formatLargeNumber(this.statisticsData.netIncome))}
+                            ${this.createStatItem('EPS (Diluted)', this.formatCurrency(this.statisticsData.eps))}
+                        </div>
+                    </div>
+                    
+                    <div class='stats-category'>
+                        <h4>Stock Statistics</h4>
+                        <div class='stats-grid'>
+                            ${this.createStatItem('Beta', this.formatRatio(this.statisticsData.beta))}
+                            ${this.createStatItem('52W Change', this.formatPercent(this.statisticsData.fiftyTwoWeekChange))}
+                            ${this.createStatItem('Shares Outstanding', this.formatLargeNumber(this.statisticsData.sharesOutstanding))}
+                            ${this.createStatItem('Float', this.formatLargeNumber(this.statisticsData.sharesFloat))}
+                            ${this.createStatItem('Short Interest', this.formatLargeNumber(this.statisticsData.sharesShort))}
+                            ${this.createStatItem('Short Ratio', this.formatRatio(this.statisticsData.shortRatio))}
+                            ${this.createStatItem('Short % of Float', this.formatPercent(this.statisticsData.shortPercentOfFloat))}
+                        </div>
+                    </div>
+                    
+                    ${this.statisticsData.dividendRate > 0 ? `
+                    <div class='stats-category'>
+                        <h4>Dividends & Splits</h4>
+                        <div class='stats-grid'>
+                            ${this.createStatItem('Dividend Rate', this.formatCurrency(this.statisticsData.dividendRate))}
+                            ${this.createStatItem('Dividend Yield', this.formatPercent(this.statisticsData.dividendYield))}
+                            ${this.createStatItem('Payout Ratio', this.formatPercent(this.statisticsData.payoutRatio))}
+                            ${this.statisticsData.exDividendDate ? this.createStatItem('Ex-Dividend Date', this.statisticsData.exDividendDate) : ''}
+                        </div>
+                    </div>
+                    ` : ''}
+                </div>
+            `;
+        }
+        
+        html += `</div>`; // fin card-body
+        
+        profileSection.innerHTML = html;
+        profileSection.classList.remove('hidden');
+    },
+    
+    createStatItem(label, value) {
+        if (!value || value === 'N/A' || value === '$0' || value === '0') {
+            return '';
+        }
+        return `
+            <div class='stat-box'>
+                <div class='label'>${label}</div>
+                <div class='value'>${value}</div>
+            </div>
+        `;
+    },
+    
     // ============================================
     // COMPARISON FUNCTIONS
     // ============================================
     
     openComparisonModal() {
-        document.getElementById('modalAddComparison').style.display = 'block';
+        document.getElementById('modalAddComparison').classList.add('active');
     },
     
     closeComparisonModal() {
-        document.getElementById('modalAddComparison').style.display = 'none';
+        document.getElementById('modalAddComparison').classList.remove('active');
         document.getElementById('comparisonSymbols').value = '';
     },
     
@@ -475,20 +640,9 @@ const MarketData = {
         const timeSeries = await this.getTimeSeriesForPeriod(symbol, this.currentPeriod);
         const quote = await this.apiClient.getQuote(symbol);
         
-        const prices = timeSeries.data.map(item => ({
-            timestamp: item.timestamp,
-            close: item.close
-        }));
-        
         this.comparisonData[symbol] = {
-            prices: prices,
-            quote: {
-                symbol: quote.symbol,
-                name: quote.name || symbol,
-                price: quote.price,
-                change: quote.change,
-                changePercent: quote.percentChange
-            }
+            prices: timeSeries.data,
+            quote: quote
         };
     },
     
@@ -508,8 +662,9 @@ const MarketData = {
             const data = this.comparisonData[symbol];
             if (!data) return '';
             
-            const firstPrice = data.prices[0].close;
-            const lastPrice = data.prices[data.prices.length - 1].close;
+            const prices = data.prices;
+            const firstPrice = prices[0].close;
+            const lastPrice = prices[prices.length - 1].close;
             const performance = ((lastPrice - firstPrice) / firstPrice) * 100;
             const perfClass = performance >= 0 ? 'positive' : 'negative';
             const perfSign = performance >= 0 ? '+' : '';
@@ -566,9 +721,10 @@ const MarketData = {
                 name: symbol,
                 data: normalizedData,
                 color: this.comparisonColors[index],
-                lineWidth: 3,
+                lineWidth: 2,
                 marker: {
-                    enabled: false
+                    enabled: false,
+                    radius: 3
                 }
             });
         });
@@ -576,52 +732,100 @@ const MarketData = {
         Highcharts.stockChart('comparisonChart', {
             chart: {
                 height: 500,
-                borderRadius: 15
+                borderRadius: 12,
+                style: {
+                    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif'
+                }
             },
             title: {
                 text: 'Stock Performance Comparison (Normalized)',
-                style: { color: '#2649B2', fontWeight: 'bold' }
+                style: { 
+                    color: '#0f172a',
+                    fontWeight: '600',
+                    fontSize: '1.25rem'
+                }
             },
             subtitle: {
                 text: 'All stocks start at 100 for easy comparison',
-                style: { color: '#6C3483' }
+                style: { 
+                    color: '#64748b',
+                    fontSize: '0.875rem'
+                }
             },
             rangeSelector: {
-                selected: 1
+                selected: 1,
+                buttonTheme: {
+                    fill: 'white',
+                    stroke: '#e2e8f0',
+                    'stroke-width': 1,
+                    r: 6,
+                    style: {
+                        color: '#475569',
+                        fontWeight: '500'
+                    },
+                    states: {
+                        hover: {
+                            fill: '#f1f5f9'
+                        },
+                        select: {
+                            fill: '#2563eb',
+                            style: {
+                                color: 'white'
+                            }
+                        }
+                    }
+                }
             },
             yAxis: {
                 title: {
                     text: 'Performance (Base 100)',
-                    style: { color: '#2649B2' }
+                    style: { color: '#475569' }
                 },
                 plotLines: [{
                     value: 100,
-                    color: '#6C8BE0',
+                    color: '#94a3b8',
                     dashStyle: 'Dash',
-                    width: 2,
+                    width: 1,
                     label: {
                         text: 'Start (100)',
                         align: 'right',
-                        style: { color: '#6C8BE0' }
+                        style: { color: '#94a3b8' }
                     }
-                }]
+                }],
+                gridLineColor: '#f1f5f9'
+            },
+            xAxis: {
+                gridLineColor: '#f1f5f9'
             },
             tooltip: {
                 shared: true,
                 crosshairs: true,
-                borderRadius: 10,
+                borderRadius: 8,
+                borderWidth: 1,
+                borderColor: '#e2e8f0',
+                backgroundColor: 'white',
+                shadow: {
+                    color: 'rgba(0, 0, 0, 0.1)',
+                    offsetX: 0,
+                    offsetY: 2,
+                    width: 4
+                },
                 valueDecimals: 2,
                 pointFormatter: function() {
                     const change = this.y - 100;
                     const changeSign = change >= 0 ? '+' : '';
-                    const color = change >= 0 ? '#28a745' : '#dc3545';
+                    const color = change >= 0 ? '#10b981' : '#ef4444';
                     return `<span style="color:${this.color}">●</span> ${this.series.name}: <b>${this.y.toFixed(2)}</b> (<span style="color:${color}">${changeSign}${change.toFixed(2)}%</span>)<br/>`;
                 }
             },
             legend: {
                 enabled: true,
                 align: 'center',
-                verticalAlign: 'bottom'
+                verticalAlign: 'bottom',
+                itemStyle: {
+                    color: '#475569',
+                    fontWeight: '500'
+                }
             },
             series: series,
             credits: { enabled: false }
@@ -644,12 +848,12 @@ const MarketData = {
             const maxPrice = Math.max(...prices);
             const minPrice = Math.min(...prices);
             const maxDrawdown = this.calculateMaxDrawdown(prices);
-            const sharpeRatio = totalReturn / volatility;
+            const sharpeRatio = totalReturn / (volatility || 1);
             
             metrics.push({
                 symbol: symbol,
-                name: data.quote.name,
-                currentPrice: data.quote.price || lastPrice,
+                name: data.quote.name || symbol,
+                currentPrice: data.quote.price,
                 totalReturn: totalReturn,
                 volatility: volatility,
                 maxPrice: maxPrice,
@@ -869,11 +1073,11 @@ const MarketData = {
         try {
             const quote = await this.apiClient.getQuote(symbol);
             
-            const price = quote.price || 0;
-            const change = quote.change || 0;
-            const changePercent = quote.percentChange || 0;
-            const open = quote.open || 0;
-            const volume = quote.volume || 0;
+            const price = quote.price;
+            const change = quote.change;
+            const changePercent = quote.percentChange;
+            const open = quote.open;
+            const volume = quote.volume;
             
             card.querySelector('.watchlist-price').textContent = this.formatCurrency(price);
             
@@ -908,7 +1112,7 @@ const MarketData = {
             if (this.watchlist.length > 0) {
                 this.refreshWatchlist();
             }
-        }, 3600000);
+        }, 3600000); // 1 heure
     },
     
     updateAddToWatchlistButton() {
@@ -944,14 +1148,14 @@ const MarketData = {
     },
     
     openAlertModal() {
-        document.getElementById('modalCreateAlert').style.display = 'block';
+        document.getElementById('modalCreateAlert').classList.add('active');
         if (this.currentSymbol) {
             document.getElementById('alertSymbol').value = this.currentSymbol;
         }
     },
     
     closeAlertModal() {
-        document.getElementById('modalCreateAlert').style.display = 'none';
+        document.getElementById('modalCreateAlert').classList.remove('active');
         document.getElementById('alertSymbol').value = '';
         document.getElementById('alertPrice').value = '';
         document.getElementById('alertType').value = 'above';
@@ -1108,13 +1312,13 @@ const MarketData = {
             position: fixed;
             top: 20px;
             right: 20px;
-            background: ${type === 'success' ? '#28a745' : type === 'alert' ? '#ffc107' : '#2649B2'};
+            background: ${type === 'success' ? '#10b981' : type === 'alert' ? '#f59e0b' : '#2563eb'};
             color: white;
-            padding: 15px 25px;
-            border-radius: 10px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            padding: 1rem 1.5rem;
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-xl);
             z-index: 10000;
-            font-weight: bold;
+            font-weight: 500;
             max-width: 400px;
             animation: slideInRight 0.3s ease;
         `;
@@ -1138,8 +1342,8 @@ const MarketData = {
         document.getElementById('stockSymbol').textContent = quote.symbol || this.currentSymbol;
         
         const price = quote.price;
-        const change = quote.change || 0;
-        const changePercent = quote.percentChange || 0;
+        const change = quote.change;
+        const changePercent = quote.percentChange;
         
         document.getElementById('currentPrice').textContent = this.formatCurrency(price);
         
@@ -1152,8 +1356,15 @@ const MarketData = {
         document.getElementById('statHigh').textContent = this.formatCurrency(quote.high);
         document.getElementById('statLow').textContent = this.formatCurrency(quote.low);
         document.getElementById('statVolume').textContent = this.formatVolume(quote.volume);
-        document.getElementById('statMarketCap').textContent = 'N/A';
-        document.getElementById('statPE').textContent = 'N/A';
+        
+        // 🆕 Utiliser les stats si disponibles
+        if (this.statisticsData) {
+            document.getElementById('statMarketCap').textContent = this.formatLargeNumber(this.statisticsData.marketCap);
+            document.getElementById('statPE').textContent = this.formatRatio(this.statisticsData.trailingPE);
+        } else {
+            document.getElementById('statMarketCap').textContent = 'N/A';
+            document.getElementById('statPE').textContent = 'N/A';
+        }
         
         document.getElementById('stockOverview').classList.remove('hidden');
     },
@@ -1184,8 +1395,8 @@ const MarketData = {
                 name: this.currentSymbol,
                 data: ohlc,
                 id: 'price',
-                color: '#dc3545',
-                upColor: '#28a745'
+                color: '#ef4444',
+                upColor: '#10b981'
             }
         ];
         
@@ -1194,7 +1405,7 @@ const MarketData = {
                 type: 'sma',
                 linkedTo: 'price',
                 params: { period: 20 },
-                color: '#2649B2',
+                color: '#2563eb',
                 lineWidth: 2,
                 name: 'SMA 20'
             });
@@ -1202,7 +1413,7 @@ const MarketData = {
                 type: 'sma',
                 linkedTo: 'price',
                 params: { period: 50 },
-                color: '#9D5CE6',
+                color: '#8b5cf6',
                 lineWidth: 2,
                 name: 'SMA 50'
             });
@@ -1213,7 +1424,7 @@ const MarketData = {
                 type: 'ema',
                 linkedTo: 'price',
                 params: { period: 12 },
-                color: '#4A74F3',
+                color: '#06b6d4',
                 lineWidth: 2,
                 name: 'EMA 12'
             });
@@ -1221,7 +1432,7 @@ const MarketData = {
                 type: 'ema',
                 linkedTo: 'price',
                 params: { period: 26 },
-                color: '#8E7DE3',
+                color: '#14b8a6',
                 lineWidth: 2,
                 name: 'EMA 26'
             });
@@ -1231,8 +1442,8 @@ const MarketData = {
             series.push({
                 type: 'bb',
                 linkedTo: 'price',
-                color: '#6C8BE0',
-                fillOpacity: 0.1,
+                color: '#64748b',
+                fillOpacity: 0.05,
                 lineWidth: 1,
                 name: 'Bollinger Bands'
             });
@@ -1244,48 +1455,102 @@ const MarketData = {
                 name: 'Volume',
                 data: volume,
                 yAxis: 1,
-                color: '#D4D9F0'
+                color: '#cbd5e1'
             });
         }
         
         Highcharts.stockChart('priceChart', {
             chart: {
                 height: 600,
-                borderRadius: 15
+                borderRadius: 12,
+                style: {
+                    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif'
+                }
             },
             title: {
                 text: `${this.currentSymbol} Price Chart`,
-                style: { color: '#2649B2', fontWeight: 'bold' }
+                style: { 
+                    color: '#0f172a',
+                    fontWeight: '600',
+                    fontSize: '1.25rem'
+                }
             },
             rangeSelector: {
-                selected: 1
+                selected: 1,
+                buttonTheme: {
+                    fill: 'white',
+                    stroke: '#e2e8f0',
+                    'stroke-width': 1,
+                    r: 6,
+                    style: {
+                        color: '#475569',
+                        fontWeight: '500'
+                    },
+                    states: {
+                        hover: {
+                            fill: '#f1f5f9'
+                        },
+                        select: {
+                            fill: '#2563eb',
+                            style: {
+                                color: 'white'
+                            }
+                        }
+                    }
+                }
             },
             yAxis: [{
                 labels: {
                     align: 'right',
-                    x: -3
+                    x: -3,
+                    style: {
+                        color: '#475569'
+                    }
                 },
                 title: {
-                    text: 'Price'
+                    text: 'Price',
+                    style: {
+                        color: '#475569'
+                    }
                 },
                 height: '75%',
-                lineWidth: 2
+                lineWidth: 1,
+                gridLineColor: '#f1f5f9'
             }, {
                 labels: {
                     align: 'right',
-                    x: -3
+                    x: -3,
+                    style: {
+                        color: '#475569'
+                    }
                 },
                 title: {
-                    text: 'Volume'
+                    text: 'Volume',
+                    style: {
+                        color: '#475569'
+                    }
                 },
                 top: '80%',
                 height: '20%',
                 offset: 0,
-                lineWidth: 2
+                lineWidth: 1,
+                gridLineColor: '#f1f5f9'
             }],
+            xAxis: {
+                gridLineColor: '#f1f5f9'
+            },
             tooltip: {
                 split: true,
-                borderRadius: 10
+                borderRadius: 8,
+                borderWidth: 1,
+                borderColor: '#e2e8f0',
+                backgroundColor: 'white',
+                shadow: {
+                    color: 'rgba(0, 0, 0, 0.1)',
+                    offsetX: 0,
+                    offsetY: 2,
+                    width: 4
+                }
             },
             series: series,
             credits: { enabled: false }
@@ -1298,58 +1563,67 @@ const MarketData = {
         
         Highcharts.chart('rsiChart', {
             chart: {
-                borderRadius: 15,
-                height: 400
+                borderRadius: 12,
+                height: 400,
+                style: {
+                    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif'
+                }
             },
             title: {
                 text: 'RSI Indicator',
-                style: { color: '#2649B2', fontWeight: 'bold' }
+                style: { 
+                    color: '#0f172a',
+                    fontWeight: '600',
+                    fontSize: '1.125rem'
+                }
             },
             xAxis: {
                 type: 'datetime',
-                crosshair: true
+                crosshair: true,
+                gridLineColor: '#f1f5f9'
             },
             yAxis: {
                 title: { 
                     text: 'RSI',
-                    style: { color: '#2649B2' }
+                    style: { color: '#475569' }
                 },
                 plotLines: [{
                     value: 70,
-                    color: '#dc3545',
-                    dashStyle: 'ShortDash',
+                    color: '#ef4444',
+                    dashStyle: 'Dash',
                     width: 2,
                     label: {
                         text: 'Overbought (70)',
                         align: 'right',
-                        style: { color: '#dc3545', fontWeight: 'bold' }
+                        style: { color: '#ef4444', fontWeight: '600' }
                     }
                 }, {
                     value: 30,
-                    color: '#28a745',
-                    dashStyle: 'ShortDash',
+                    color: '#10b981',
+                    dashStyle: 'Dash',
                     width: 2,
                     label: {
                         text: 'Oversold (30)',
                         align: 'right',
-                        style: { color: '#28a745', fontWeight: 'bold' }
+                        style: { color: '#10b981', fontWeight: '600' }
                     }
                 }, {
                     value: 50,
-                    color: '#6C8BE0',
+                    color: '#94a3b8',
                     dashStyle: 'Dot',
                     width: 1,
                     label: {
                         text: 'Neutral (50)',
                         align: 'right',
-                        style: { color: '#6C8BE0' }
+                        style: { color: '#94a3b8' }
                     }
                 }],
                 min: 0,
-                max: 100
+                max: 100,
+                gridLineColor: '#f1f5f9'
             },
             tooltip: {
-                borderRadius: 10,
+                borderRadius: 8,
                 crosshairs: true,
                 shared: true,
                 valueDecimals: 2
@@ -1359,11 +1633,11 @@ const MarketData = {
                     fillColor: {
                         linearGradient: { x1: 0, y1: 0, x2: 0, y2: 1 },
                         stops: [
-                            [0, 'rgba(74, 116, 243, 0.3)'],
-                            [1, 'rgba(74, 116, 243, 0.05)']
+                            [0, 'rgba(37, 99, 235, 0.3)'],
+                            [1, 'rgba(37, 99, 235, 0.05)']
                         ]
                     },
-                    lineWidth: 3,
+                    lineWidth: 2,
                     marker: {
                         enabled: false
                     },
@@ -1374,15 +1648,15 @@ const MarketData = {
                 type: 'area',
                 name: 'RSI (14)',
                 data: rsiData,
-                color: '#4A74F3',
+                color: '#2563eb',
                 zones: [{
                     value: 30,
-                    color: '#28a745'
+                    color: '#10b981'
                 }, {
                     value: 70,
-                    color: '#ffc107'
+                    color: '#f59e0b'
                 }, {
-                    color: '#dc3545'
+                    color: '#ef4444'
                 }]
             }],
             credits: { enabled: false }
@@ -1437,36 +1711,45 @@ const MarketData = {
         
         Highcharts.chart('macdChart', {
             chart: {
-                borderRadius: 15,
-                height: 400
+                borderRadius: 12,
+                height: 400,
+                style: {
+                    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif'
+                }
             },
             title: {
                 text: 'MACD Indicator',
-                style: { color: '#2649B2', fontWeight: 'bold' }
+                style: { 
+                    color: '#0f172a',
+                    fontWeight: '600',
+                    fontSize: '1.125rem'
+                }
             },
             xAxis: {
                 type: 'datetime',
-                crosshair: true
+                crosshair: true,
+                gridLineColor: '#f1f5f9'
             },
             yAxis: {
                 title: { 
                     text: 'MACD',
-                    style: { color: '#2649B2' }
+                    style: { color: '#475569' }
                 },
                 plotLines: [{
                     value: 0,
-                    color: '#6C8BE0',
+                    color: '#94a3b8',
                     dashStyle: 'Dash',
                     width: 2,
                     label: {
                         text: 'Zero Line',
                         align: 'right',
-                        style: { color: '#6C8BE0' }
+                        style: { color: '#94a3b8' }
                     }
-                }]
+                }],
+                gridLineColor: '#f1f5f9'
             },
             tooltip: {
-                borderRadius: 10,
+                borderRadius: 8,
                 crosshairs: true,
                 shared: true,
                 valueDecimals: 2
@@ -1480,7 +1763,7 @@ const MarketData = {
                 type: 'line',
                 name: 'MACD Line',
                 data: macdData.macd,
-                color: '#2649B2',
+                color: '#2563eb',
                 lineWidth: 2,
                 marker: {
                     enabled: false
@@ -1489,7 +1772,7 @@ const MarketData = {
                 type: 'line',
                 name: 'Signal Line',
                 data: macdData.signal,
-                color: '#9D5CE6',
+                color: '#8b5cf6',
                 lineWidth: 2,
                 marker: {
                     enabled: false
@@ -1498,7 +1781,7 @@ const MarketData = {
                 type: 'column',
                 name: 'Histogram',
                 data: macdData.histogram,
-                color: '#6C8BE0',
+                color: '#64748b',
                 pointWidth: 3
             }],
             credits: { enabled: false }
@@ -1674,23 +1957,44 @@ const MarketData = {
     
     displayKeyStatistics() {
         const prices = this.stockData.prices;
+        const quote = this.stockData.quote;
         
         const stats = [];
         
-        const high52w = Math.max(...prices.map(p => p.high));
-        const low52w = Math.min(...prices.map(p => p.low));
+        // 🆕 Utiliser 52W High/Low depuis le quote si disponible
+        const high52w = quote.fiftyTwoWeekHigh || Math.max(...prices.map(p => p.high));
+        const low52w = quote.fiftyTwoWeekLow || Math.min(...prices.map(p => p.low));
         
         stats.push({ label: '52W High', value: this.formatCurrency(high52w) });
         stats.push({ label: '52W Low', value: this.formatCurrency(low52w) });
         
-        const avgVolume = prices.reduce((sum, p) => sum + p.volume, 0) / prices.length;
+        // 🆕 Utiliser averageVolume depuis le quote
+        const avgVolume = quote.averageVolume || (prices.reduce((sum, p) => sum + p.volume, 0) / prices.length);
         stats.push({ label: 'Avg Volume', value: this.formatVolume(avgVolume) });
         
         const volatility = this.calculateVolatility(prices);
         stats.push({ label: 'Volatility', value: `${volatility.toFixed(2)}%` });
         
-        stats.push({ label: 'Beta', value: 'N/A' });
-        stats.push({ label: 'Sharpe Ratio', value: 'N/A' });
+        // 🆕 Si on a des statistiques, afficher Beta et Sharpe
+        if (this.statisticsData) {
+            if (this.statisticsData.beta) {
+                stats.push({ label: 'Beta', value: this.formatRatio(this.statisticsData.beta) });
+            }
+            
+            // Calculer le Sharpe Ratio approximatif
+            const returns = [];
+            for (let i = 1; i < prices.length; i++) {
+                returns.push((prices[i].close - prices[i-1].close) / prices[i-1].close);
+            }
+            const avgReturn = returns.reduce((sum, r) => sum + r, 0) / returns.length;
+            const annualizedReturn = avgReturn * 252 * 100;
+            const sharpeRatio = volatility > 0 ? (annualizedReturn / volatility) : 0;
+            
+            stats.push({ label: 'Sharpe Ratio', value: sharpeRatio.toFixed(2) });
+        } else {
+            stats.push({ label: 'Beta', value: 'N/A' });
+            stats.push({ label: 'Sharpe Ratio', value: 'N/A' });
+        }
         
         const container = document.getElementById('keyStats');
         container.innerHTML = stats.map(stat => `
@@ -1748,7 +2052,24 @@ const MarketData = {
         if (value >= 1e12) return '$' + (value / 1e12).toFixed(2) + 'T';
         if (value >= 1e9) return '$' + (value / 1e9).toFixed(2) + 'B';
         if (value >= 1e6) return '$' + (value / 1e6).toFixed(2) + 'M';
+        if (value >= 1e3) return '$' + (value / 1e3).toFixed(2) + 'K';
         return '$' + value.toFixed(0);
+    },
+    
+    formatNumber(value) {
+        if (!value || value === 'N/A') return 'N/A';
+        if (typeof value === 'string') value = parseInt(value);
+        return new Intl.NumberFormat('en-US').format(value);
+    },
+    
+    formatPercent(value) {
+        if (!value && value !== 0) return 'N/A';
+        return (value * 100).toFixed(2) + '%';
+    },
+    
+    formatRatio(value) {
+        if (!value && value !== 0) return 'N/A';
+        return value.toFixed(2);
     },
     
     showLoading(show) {
@@ -1763,6 +2084,10 @@ const MarketData = {
     hideResults() {
         document.getElementById('stockOverview').classList.add('hidden');
         document.getElementById('resultsPanel').classList.add('hidden');
+        const profileSection = document.getElementById('companyProfileSection');
+        if (profileSection) {
+            profileSection.classList.add('hidden');
+        }
     },
     
     updateLastUpdate() {
