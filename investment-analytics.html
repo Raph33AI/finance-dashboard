@@ -7,14 +7,12 @@
     
     <!-- Highcharts + Extensions -->
     <script src='https://code.highcharts.com/highcharts.js'></script>
+    <script src='https://code.highcharts.com/stock/highstock.js'></script>
     <script src='https://code.highcharts.com/highcharts-more.js'></script>
     <script src='https://code.highcharts.com/modules/heatmap.js'></script>
     <script src='https://code.highcharts.com/modules/treemap.js'></script>
     <script src='https://code.highcharts.com/modules/exporting.js'></script>
     <script src='https://code.highcharts.com/modules/export-data.js'></script>
-    
-    <!-- Chart.js -->
-    <script src='https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js'></script>
     
     <!-- Math.js -->
     <script src='https://cdnjs.cloudflare.com/ajax/libs/mathjs/12.2.0/math.min.js'></script>
@@ -40,7 +38,6 @@
             </div>
             
             <nav class='sidebar-nav'>
-                <!-- Home -->
                 <div class='nav-section'>
                     <a href='index.html' class='nav-link'>
                         <i class='fas fa-rocket'></i>
@@ -48,7 +45,6 @@
                     </a>
                 </div>
                 
-                <!-- Budget Section -->
                 <div class='nav-section'>
                     <button class='nav-folder active'>
                         <i class='fas fa-wallet'></i>
@@ -67,7 +63,6 @@
                     </div>
                 </div>
                 
-                <!-- Simulation Section -->
                 <div class='nav-section'>
                     <button class='nav-folder'>
                         <i class='fas fa-calculator'></i>
@@ -94,7 +89,6 @@
                     </div>
                 </div>
                 
-                <!-- Stocks Section -->
                 <div class='nav-section'>
                     <button class='nav-folder'>
                         <i class='fas fa-chart-candlestick'></i>
@@ -118,7 +112,6 @@
                 </div>
             </nav>
             
-            <!-- Sidebar Footer -->
             <div class="sidebar-footer">
                 <div class="user-info" id="userInfoSection">
                     <button class="user-profile-btn" id="userProfileBtn" aria-label="Access my profile">
@@ -144,7 +137,6 @@
                     <h1><i class='fas fa-chart-line'></i> Investment Performance Analytics</h1>
                 </div>
                 <div class='header-right'>
-                    <!-- Dark Mode Toggle -->
                     <button class='dark-mode-toggle' id='darkModeToggle' aria-label='Toggle dark mode' title='Toggle dark mode'>
                         <i class='fas fa-moon' aria-hidden='true'></i>
                     </button>
@@ -157,6 +149,58 @@
             </header>
             
             <div class='container'>
+                
+                <!-- ========== ASSET ALLOCATION CONFIGURATION ========== -->
+                <section class='analytics-section asset-config-section'>
+                    <div class='section-header'>
+                        <h2><i class='fas fa-sliders-h'></i> Portfolio Configuration</h2>
+                        <div class='header-actions'>
+                            <button class='btn-icon' onclick='InvestmentAnalytics.saveAssets()' title='Save configuration'>
+                                <i class='fas fa-save'></i>
+                            </button>
+                            <button class='btn-icon' onclick='InvestmentAnalytics.resetAssets()' title='Reset to default'>
+                                <i class='fas fa-redo'></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class='info-box'>
+                        <i class='fas fa-info-circle'></i>
+                        <p><strong>Configure your portfolio allocation:</strong> Define which assets compose your monthly investment. Total allocation must equal 100%. Data is automatically synced with your Budget Dashboard.</p>
+                    </div>
+                    
+                    <div class='portfolio-summary'>
+                        <div class='summary-item'>
+                            <div class='summary-label'>Total Monthly Investment</div>
+                            <div class='summary-value' id='totalMonthlyInvestment'>€0</div>
+                            <div class='summary-hint'>From Budget Dashboard</div>
+                        </div>
+                        <div class='summary-item'>
+                            <div class='summary-label'>Total Allocated</div>
+                            <div class='summary-value' id='totalAllocatedPercent'>0%</div>
+                            <div class='summary-hint' id='allocationStatus'>Add assets below</div>
+                        </div>
+                        <div class='summary-item'>
+                            <div class='summary-label'>Number of Assets</div>
+                            <div class='summary-value' id='numberOfAssets'>0</div>
+                            <div class='summary-hint'>Diversification</div>
+                        </div>
+                    </div>
+                    
+                    <div class='asset-allocation-manager'>
+                        <div class='manager-header'>
+                            <h3><i class='fas fa-layer-group'></i> Asset Allocation</h3>
+                            <button class='btn-primary' onclick='InvestmentAnalytics.openAddAssetModal()'>
+                                <i class='fas fa-plus'></i> Add Asset
+                            </button>
+                        </div>
+                        
+                        <div class='assets-list' id='assetsList'>
+                            <!-- Assets will be injected here -->
+                        </div>
+                    </div>
+                </section>
+                
                 <!-- KPI Dashboard -->
                 <section class='analytics-section'>
                     <div class='section-header'>
@@ -172,7 +216,7 @@
                     </div>
                     
                     <div class='kpi-grid' id='kpiGrid'>
-                        <!-- KPIs will be injected here by JS -->
+                        <!-- KPIs will be injected here -->
                     </div>
                 </section>
                 
@@ -207,7 +251,7 @@
                         </div>
                         
                         <div class='chart-card'>
-                            <h3 class='chart-title'>Contribution by Investment</h3>
+                            <h3 class='chart-title'>Contribution by Asset</h3>
                             <div id='chartContribution' class='chart-container'></div>
                         </div>
                     </div>
@@ -241,7 +285,6 @@
                         </div>
                     </div>
                     
-                    <!-- Risk Metrics Table -->
                     <div class='risk-metrics-container'>
                         <h3><i class='fas fa-table'></i> Detailed Risk Metrics</h3>
                         <div class='table-responsive'>
@@ -254,9 +297,7 @@
                                         <th>Benchmark</th>
                                     </tr>
                                 </thead>
-                                <tbody>
-                                    <!-- Will be filled dynamically -->
-                                </tbody>
+                                <tbody></tbody>
                             </table>
                         </div>
                     </div>
@@ -268,7 +309,7 @@
                         <h2><i class='fas fa-project-diagram'></i> Correlation Matrix</h2>
                         <div class='header-info'>
                             <i class='fas fa-info-circle'></i>
-                            <span>Correlation between your different investments</span>
+                            <span>Correlation between your portfolio assets</span>
                         </div>
                     </div>
                     
@@ -276,9 +317,7 @@
                         <div id='chartCorrelationMatrix' class='chart-container-large'></div>
                     </div>
                     
-                    <div class='correlation-insights' id='correlationInsights'>
-                        <!-- Dynamic insights on correlation -->
-                    </div>
+                    <div class='correlation-insights' id='correlationInsights'></div>
                 </section>
                 
                 <!-- Advanced Metrics -->
@@ -310,7 +349,7 @@
                     </div>
                 </section>
                 
-                <!-- ========== AI RECOMMENDATIONS SECTION ========== -->
+                <!-- AI RECOMMENDATIONS SECTION -->
                 <section class='analytics-section ai-section'>
                     <div class='section-header'>
                         <h2><i class='fas fa-brain'></i> Artificial Intelligence - Recommendations</h2>
@@ -319,7 +358,6 @@
                         </button>
                     </div>
                     
-                    <!-- AI Loading State -->
                     <div class='ai-loading hidden' id='aiLoading'>
                         <div class='loading-spinner'></div>
                         <p>AI models are analyzing your portfolio...</p>
@@ -328,9 +366,7 @@
                         </div>
                     </div>
                     
-                    <!-- AI Models Grid -->
                     <div class='ai-models-grid' id='aiModelsGrid'>
-                        <!-- Model 1: Portfolio Optimizer -->
                         <div class='ai-model-card'>
                             <div class='model-header'>
                                 <div class='model-icon optimizer'>
@@ -349,7 +385,6 @@
                             </div>
                         </div>
                         
-                        <!-- Model 2: LSTM Predictor -->
                         <div class='ai-model-card'>
                             <div class='model-header'>
                                 <div class='model-icon predictor'>
@@ -368,7 +403,6 @@
                             </div>
                         </div>
                         
-                        <!-- Model 3: Risk Analyzer -->
                         <div class='ai-model-card'>
                             <div class='model-header'>
                                 <div class='model-icon risk'>
@@ -387,7 +421,6 @@
                             </div>
                         </div>
                         
-                        <!-- Model 4: Smart Rebalancer -->
                         <div class='ai-model-card'>
                             <div class='model-header'>
                                 <div class='model-icon rebalancer'>
@@ -407,15 +440,11 @@
                         </div>
                     </div>
                     
-                    <!-- AI Recommendations Summary -->
                     <div class='ai-recommendations' id='aiRecommendations'>
                         <h3><i class='fas fa-lightbulb'></i> Consolidated Recommendations</h3>
-                        <div class='recommendations-list' id='recommendationsList'>
-                            <!-- List of recommendations -->
-                        </div>
+                        <div class='recommendations-list' id='recommendationsList'></div>
                     </div>
                     
-                    <!-- AI Prediction Chart -->
                     <div class='chart-card'>
                         <h3 class='chart-title'>AI Predictions - Future Scenarios</h3>
                         <div id='chartAIPredictions' class='chart-container-large'></div>
@@ -444,15 +473,127 @@
                         <div id='chartBenchmarkComparison' class='chart-container-large'></div>
                     </div>
                     
-                    <div class='comparison-metrics' id='comparisonMetrics'>
-                        <!-- Comparison table -->
-                    </div>
+                    <div class='comparison-metrics' id='comparisonMetrics'></div>
                 </section>
                 
-                <!-- Footer -->
                 <footer>
                     <p>Investment Performance Analytics | Data synchronized with Budget Dashboard</p>
                 </footer>
+            </div>
+        </div>
+    </div>
+    
+    <!-- ADD ASSET MODAL -->
+    <div class='modal' id='modalAddAsset'>
+        <div class='modal-content modal-medium'>
+            <div class='modal-header'>
+                <h2><i class='fas fa-plus-circle'></i> Add Asset to Portfolio</h2>
+                <button class='modal-close' onclick='InvestmentAnalytics.closeAddAssetModal()'>
+                    <i class='fas fa-times'></i>
+                </button>
+            </div>
+            <div class='modal-body'>
+                <div class='form-group'>
+                    <label for='assetName'>Asset Name</label>
+                    <input type='text' id='assetName' placeholder='e.g., S&P 500, MSCI World, Bitcoin'>
+                </div>
+                
+                <div class='form-group'>
+                    <label for='assetTicker'>Ticker Symbol (optional)</label>
+                    <input type='text' id='assetTicker' placeholder='e.g., SPY, VWCE, BTC'>
+                </div>
+                
+                <div class='form-group'>
+                    <label for='assetType'>Asset Type</label>
+                    <select id='assetType'>
+                        <option value='equity'>Equity / Stocks</option>
+                        <option value='bonds'>Bonds / Fixed Income</option>
+                        <option value='crypto'>Cryptocurrency</option>
+                        <option value='commodities'>Commodities</option>
+                        <option value='real-estate'>Real Estate</option>
+                        <option value='cash'>Cash / Money Market</option>
+                        <option value='other'>Other</option>
+                    </select>
+                </div>
+                
+                <div class='form-group'>
+                    <label for='assetAllocation'>Allocation (%)</label>
+                    <input type='number' id='assetAllocation' min='0' max='100' step='0.1' placeholder='0.0'>
+                    <small class='form-hint'>Percentage of your monthly investment</small>
+                </div>
+            </div>
+            <div class='modal-footer'>
+                <button class='btn-secondary' onclick='InvestmentAnalytics.closeAddAssetModal()'>Cancel</button>
+                <button class='btn-primary' onclick='InvestmentAnalytics.addAsset()'>
+                    <i class='fas fa-check'></i> Add Asset
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- EDIT ASSET MODAL -->
+    <div class='modal' id='modalEditAsset'>
+        <div class='modal-content modal-medium'>
+            <div class='modal-header'>
+                <h2><i class='fas fa-edit'></i> Edit Asset</h2>
+                <button class='modal-close' onclick='InvestmentAnalytics.closeEditAssetModal()'>
+                    <i class='fas fa-times'></i>
+                </button>
+            </div>
+            <div class='modal-body'>
+                <input type='hidden' id='editAssetId'>
+                
+                <div class='form-group'>
+                    <label for='editAssetName'>Asset Name</label>
+                    <input type='text' id='editAssetName'>
+                </div>
+                
+                <div class='form-group'>
+                    <label for='editAssetTicker'>Ticker Symbol</label>
+                    <input type='text' id='editAssetTicker'>
+                </div>
+                
+                <div class='form-group'>
+                    <label for='editAssetType'>Asset Type</label>
+                    <select id='editAssetType'>
+                        <option value='equity'>Equity / Stocks</option>
+                        <option value='bonds'>Bonds / Fixed Income</option>
+                        <option value='crypto'>Cryptocurrency</option>
+                        <option value='commodities'>Commodities</option>
+                        <option value='real-estate'>Real Estate</option>
+                        <option value='cash'>Cash / Money Market</option>
+                        <option value='other'>Other</option>
+                    </select>
+                </div>
+                
+                <div class='form-group'>
+                    <label for='editAssetAllocation'>Allocation (%)</label>
+                    <input type='number' id='editAssetAllocation' min='0' max='100' step='0.1'>
+                </div>
+            </div>
+            <div class='modal-footer'>
+                <button class='btn-secondary' onclick='InvestmentAnalytics.closeEditAssetModal()'>Cancel</button>
+                <button class='btn-primary' onclick='InvestmentAnalytics.updateAsset()'>
+                    <i class='fas fa-save'></i> Save Changes
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- RECOMMENDATION DETAILS MODAL -->
+    <div class='modal' id='modalRecommendationDetails'>
+        <div class='modal-content modal-large'>
+            <div class='modal-header'>
+                <h2><i class='fas fa-lightbulb'></i> <span id='recDetailTitle'>Recommendation Details</span></h2>
+                <button class='modal-close' onclick='InvestmentAnalytics.closeRecommendationModal()'>
+                    <i class='fas fa-times'></i>
+                </button>
+            </div>
+            <div class='modal-body' id='recDetailBody'>
+                <!-- Will be filled dynamically -->
+            </div>
+            <div class='modal-footer'>
+                <button class='btn-primary' onclick='InvestmentAnalytics.closeRecommendationModal()'>Close</button>
             </div>
         </div>
     </div>
