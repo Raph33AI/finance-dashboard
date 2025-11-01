@@ -10,6 +10,8 @@
     <script src="https://code.highcharts.com/highcharts.js"></script>
     <script src="https://code.highcharts.com/modules/exporting.js"></script>
     <script src="https://code.highcharts.com/modules/stock.js"></script>
+    <script src="https://code.highcharts.com/modules/histogram-bellcurve.js"></script>
+    <script src="https://code.highcharts.com/modules/heatmap.js"></script>
     
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -146,14 +148,14 @@
         <section class="demo-content">
             <div class="container">
                 
-                <!-- TOOL 1: Company Search -->
+                <!-- TOOL 1: Company Search - AMÉLIORÉ -->
                 <div class="demo-tool active" id="tool-company-search">
                     <div class="tool-header">
                         <h2>
                             <i class="fas fa-search"></i>
-                            Company Search & Comparison
+                            Company Search & Deep Analysis
                         </h2>
-                        <p>Search for any company and find comparable peers instantly using our AI engine</p>
+                        <p>Search for any company and get comprehensive financial insights powered by AI</p>
                     </div>
                     
                     <div class="search-interface-demo">
@@ -190,17 +192,31 @@
                                 </div>
                             </div>
                         </div>
+                        
+                        <!-- NOUVEAU : Graphiques additionnels -->
+                        <div id="companyExtraCharts" style="display:none; margin-top: 2rem;">
+                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 2rem;">
+                                <div class="chart-container">
+                                    <h4 style="margin-bottom: 1rem;"><i class="fas fa-chart-area"></i> Performance vs Market</h4>
+                                    <div id="companyPerformanceChart" class="chart-area" style="height: 300px;"></div>
+                                </div>
+                                <div class="chart-container">
+                                    <h4 style="margin-bottom: 1rem;"><i class="fas fa-star"></i> Analyst Ratings</h4>
+                                    <div id="companyRatingsChart" class="chart-area" style="height: 300px;"></div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 
-                <!-- TOOL 2: Live Stock Quotes -->
+                <!-- TOOL 2: Live Stock Quotes - AMÉLIORÉ -->
                 <div class="demo-tool" id="tool-live-quotes">
                     <div class="tool-header">
                         <h2>
                             <i class="fas fa-chart-line"></i>
-                            Live Stock Quotes
+                            Live Stock Quotes & Market Intelligence
                         </h2>
-                        <p>Real-time stock prices, charts, and key metrics</p>
+                        <p>Real-time stock prices, advanced charts, and market sentiment analysis</p>
                     </div>
                     
                     <div class="live-quotes-interface">
@@ -227,17 +243,23 @@
                         <div class="quote-chart-container">
                             <div id="liveQuoteChart" class="chart-area"></div>
                         </div>
+                        
+                        <!-- NOUVEAU : Market Sentiment -->
+                        <div id="marketSentiment" style="display:none; margin-top: 2rem;">
+                            <h4><i class="fas fa-comments"></i> Market Sentiment Analysis</h4>
+                            <div id="sentimentGauge" style="height: 250px;"></div>
+                        </div>
                     </div>
                 </div>
                 
-                <!-- TOOL 3: Portfolio Builder -->
+                <!-- TOOL 3: Portfolio Builder - AMÉLIORÉ -->
                 <div class="demo-tool" id="tool-portfolio-builder">
                     <div class="tool-header">
                         <h2>
                             <i class="fas fa-briefcase"></i>
-                            Portfolio Builder
+                            Portfolio Builder & Optimizer
                         </h2>
-                        <p>Build a diversified portfolio and see allocation recommendations</p>
+                        <p>Build a diversified portfolio with AI-powered optimization recommendations</p>
                     </div>
                     
                     <div class="portfolio-interface">
@@ -300,21 +322,36 @@
                                 </table>
                             </div>
                             
-                            <div class="portfolio-chart">
-                                <div id="portfolioAllocationChart"></div>
+                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 2rem; margin-top: 2rem;">
+                                <div class="portfolio-chart">
+                                    <h4><i class="fas fa-pie-chart"></i> Asset Allocation</h4>
+                                    <div id="portfolioAllocationChart"></div>
+                                </div>
+                                
+                                <!-- NOUVEAU : Correlation Matrix -->
+                                <div id="portfolioCorrelation" style="display:none;">
+                                    <h4><i class="fas fa-project-diagram"></i> Correlation Matrix</h4>
+                                    <div id="correlationHeatmap" style="height: 300px;"></div>
+                                </div>
+                            </div>
+                            
+                            <!-- NOUVEAU : Performance Chart -->
+                            <div id="portfolioPerformance" style="display:none; margin-top: 2rem;">
+                                <h4><i class="fas fa-chart-area"></i> Portfolio Performance vs Benchmark</h4>
+                                <div id="portfolioPerformanceChart" style="height: 400px;"></div>
                             </div>
                         </div>
                     </div>
                 </div>
                 
-                <!-- TOOL 4: Technical Analysis -->
+                <!-- TOOL 4: Technical Analysis - DÉJÀ BIEN -->
                 <div class="demo-tool" id="tool-technical-analysis">
                     <div class="tool-header">
                         <h2>
                             <i class="fas fa-chart-bar"></i>
-                            Technical Analysis
+                            Advanced Technical Analysis
                         </h2>
-                        <p>Advanced technical indicators and chart patterns</p>
+                        <p>Professional-grade technical indicators and pattern recognition</p>
                     </div>
                     
                     <div class="technical-interface">
@@ -375,14 +412,14 @@
                     </div>
                 </div>
                 
-                <!-- TOOL 5: Risk Calculator -->
+                <!-- TOOL 5: Risk Calculator - AMÉLIORÉ -->
                 <div class="demo-tool" id="tool-risk-calculator">
                     <div class="tool-header">
                         <h2>
                             <i class="fas fa-shield-alt"></i>
-                            Risk Calculator
+                            Advanced Risk Analytics
                         </h2>
-                        <p>Calculate VaR, volatility, and other risk metrics</p>
+                        <p>Comprehensive risk assessment with Monte Carlo simulation</p>
                     </div>
                     
                     <div class="risk-interface">
@@ -454,16 +491,22 @@
                             </div>
                         </div>
                     </div>
+                    
+                    <!-- NOUVEAU : Monte Carlo Simulation -->
+                    <div id="monteCarloSection" style="display:none; margin-top: 2rem;">
+                        <h4><i class="fas fa-dice"></i> Monte Carlo Simulation (10,000 scenarios)</h4>
+                        <div id="monteCarloChart" style="height: 400px;"></div>
+                    </div>
                 </div>
                 
-                <!-- TOOL 6: AI Insights -->
+                <!-- TOOL 6: AI Insights - AMÉLIORÉ -->
                 <div class="demo-tool" id="tool-ai-insights">
                     <div class="tool-header">
                         <h2>
                             <i class="fas fa-brain"></i>
-                            AI-Powered Insights
+                            AI-Powered Market Intelligence
                         </h2>
-                        <p>Get machine learning predictions and sentiment analysis</p>
+                        <p>Deep learning predictions, sentiment analysis, and opportunity detection</p>
                     </div>
                     
                     <div class="ai-interface">
@@ -504,6 +547,12 @@
                                     </div>
                                 </div>
                             </div>
+                        </div>
+                        
+                        <!-- NOUVEAU : Prediction Chart -->
+                        <div id="aiPredictionChart" style="display:none; margin-top: 2rem;">
+                            <h4><i class="fas fa-crystal-ball"></i> AI Price Prediction Model</h4>
+                            <div id="predictionChartContainer" style="height: 400px;"></div>
                         </div>
                     </div>
                 </div>

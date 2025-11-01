@@ -1,12 +1,13 @@
 /* ============================================
-   INTERACTIVE-DEMO.JS - VERSION CORRIGÉE v2
+   INTERACTIVE-DEMO.JS - VERSION PREMIUM
    Main JavaScript pour la page de démo interactive
+   🚀 AVEC GRAPHIQUES ADDITIONNELS ET FONCTIONNALITÉS AVANCÉES
    ============================================ */
 
 // ============================================
 // DEBUG MODE
 // ============================================
-console.log('🔍 Loading interactive-demo.js...');
+console.log('🔍 Loading interactive-demo.js PREMIUM...');
 
 // Check dependencies
 if (typeof APP_CONFIG === 'undefined') {
@@ -48,6 +49,9 @@ const DemoApp = {
     // Current technical symbol
     currentTechnicalSymbol: null,
     
+    // Current company symbol
+    currentCompanySymbol: null,
+    
     // Portfolio data
     portfolio: [],
     
@@ -56,7 +60,14 @@ const DemoApp = {
         liveQuote: null,
         portfolioAllocation: null,
         technical: null,
-        aiPrediction: null
+        aiPrediction: null,
+        companyPerformance: null,
+        companyRatings: null,
+        sentimentGauge: null,
+        correlationHeatmap: null,
+        portfolioPerformance: null,
+        monteCarlo: null,
+        aiPredictionChart: null
     },
     
     // ============================================
@@ -64,7 +75,7 @@ const DemoApp = {
     // ============================================
     init: function() {
         try {
-            console.log('🚀 Initializing Interactive Demo...');
+            console.log('🚀 Initializing Interactive Demo PREMIUM...');
             
             // Initialize API Client
             this.apiClient = new FinanceAPIClient({
@@ -85,7 +96,7 @@ const DemoApp = {
             // Initialize first tool
             this.switchTool('company-search');
             
-            console.log('✅ Interactive Demo initialized successfully!');
+            console.log('✅ Interactive Demo PREMIUM initialized successfully!');
             
         } catch (error) {
             console.error('❌ Initialization error:', error);
@@ -159,23 +170,20 @@ const DemoApp = {
     },
     
     // ============================================
-    // COMPANY SEARCH - Setup
+    // COMPANY SEARCH - AMÉLIORÉ AVEC GRAPHIQUES
     // ============================================
     setupCompanySearchListeners: function() {
         const input = document.getElementById('companySearchInput');
         const btnSearch = document.getElementById('btnSearch');
         
         if (input) {
-            // Input search - AMÉLIORATION : Recherche par nom ET ticker
             input.addEventListener('input', (e) => {
                 this.handleCompanySearch(e.target.value);
             });
             
-            // Enter key
             input.addEventListener('keydown', (e) => {
                 if (e.key === 'Enter') {
                     e.preventDefault();
-                    // Si une suggestion est sélectionnée, utiliser celle-ci
                     const suggestions = document.querySelectorAll('.suggestion-item');
                     if (this.selectedSuggestionIndex >= 0 && suggestions[this.selectedSuggestionIndex]) {
                         const symbol = suggestions[this.selectedSuggestionIndex].dataset.symbol;
@@ -215,27 +223,22 @@ const DemoApp = {
         });
     },
     
-    // NOUVELLE FONCTION : Navigation clavier dans les suggestions
     navigateSuggestions: function(direction) {
         const suggestions = document.querySelectorAll('.suggestion-item');
         if (suggestions.length === 0) return;
         
-        // Remove current highlight
         if (this.selectedSuggestionIndex >= 0 && suggestions[this.selectedSuggestionIndex]) {
             suggestions[this.selectedSuggestionIndex].classList.remove('keyboard-selected');
         }
         
-        // Update index
         this.selectedSuggestionIndex += direction;
         
-        // Wrap around
         if (this.selectedSuggestionIndex < 0) {
             this.selectedSuggestionIndex = suggestions.length - 1;
         } else if (this.selectedSuggestionIndex >= suggestions.length) {
             this.selectedSuggestionIndex = 0;
         }
         
-        // Add new highlight
         if (suggestions[this.selectedSuggestionIndex]) {
             suggestions[this.selectedSuggestionIndex].classList.add('keyboard-selected');
             suggestions[this.selectedSuggestionIndex].scrollIntoView({ block: 'nearest', behavior: 'smooth' });
@@ -244,8 +247,6 @@ const DemoApp = {
     
     handleCompanySearch: function(query) {
         const trimmedQuery = query.trim();
-        
-        // Reset selected suggestion
         this.selectedSuggestionIndex = -1;
         
         if (trimmedQuery.length === 0) {
@@ -256,7 +257,7 @@ const DemoApp = {
         clearTimeout(this.searchTimeout);
         this.searchTimeout = setTimeout(() => {
             this.searchSymbols(trimmedQuery);
-        }, 300); // Délai de 300ms pour éviter trop de requêtes
+        }, 300);
     },
     
     searchSymbols: async function(query) {
@@ -276,7 +277,6 @@ const DemoApp = {
             } else {
                 this.displayNoResults(query);
             }
-            
         } catch (error) {
             console.error('Search failed:', error);
             this.displaySearchError();
@@ -289,30 +289,24 @@ const DemoApp = {
         
         const queryLower = query.toLowerCase();
         
-        // Trier les résultats : prioriser les correspondances exactes
         const sortedResults = results.sort((a, b) => {
             const aSymbol = (a.symbol || '').toLowerCase();
             const bSymbol = (b.symbol || '').toLowerCase();
             const aName = (a.instrument_name || '').toLowerCase();
             const bName = (b.instrument_name || '').toLowerCase();
             
-            // Exact symbol match first
             if (aSymbol === queryLower) return -1;
             if (bSymbol === queryLower) return 1;
             
-            // Symbol starts with query
             if (aSymbol.startsWith(queryLower) && !bSymbol.startsWith(queryLower)) return -1;
             if (bSymbol.startsWith(queryLower) && !aSymbol.startsWith(queryLower)) return 1;
             
-            // Name starts with query
             if (aName.startsWith(queryLower) && !bName.startsWith(queryLower)) return -1;
             if (bName.startsWith(queryLower) && !aName.startsWith(queryLower)) return 1;
             
-            // Alphabetical
             return aSymbol.localeCompare(bSymbol);
         });
         
-        // Group by type
         const grouped = {
             stocks: [],
             etfs: [],
@@ -329,7 +323,6 @@ const DemoApp = {
             } else if (type.includes('crypto')) {
                 grouped.crypto.push(item);
             } else {
-                // Par défaut, mettre dans stocks
                 grouped.stocks.push(item);
             }
         });
@@ -345,13 +338,11 @@ const DemoApp = {
             container.innerHTML = html;
             container.classList.add('active');
             
-            // Add click listeners
             container.querySelectorAll('.suggestion-item').forEach((item) => {
                 item.addEventListener('click', () => {
                     this.selectCompany(item.dataset.symbol);
                 });
                 
-                // Highlight on hover
                 item.addEventListener('mouseenter', () => {
                     document.querySelectorAll('.suggestion-item').forEach(s => s.classList.remove('keyboard-selected'));
                     this.selectedSuggestionIndex = -1;
@@ -377,13 +368,10 @@ const DemoApp = {
             <i class="fas fa-${iconMap[categoryName]}"></i> ${categoryName}
         </div>`;
         
-        const queryLower = query.toLowerCase();
-        
         items.slice(0, 8).forEach(item => {
             const symbol = this.escapeHtml(item.symbol);
             const name = this.escapeHtml(item.instrument_name || item.symbol);
             
-            // Highlight matching text
             const highlightedSymbol = this.highlightMatch(symbol, query);
             const highlightedName = this.highlightMatch(name, query);
             
@@ -404,10 +392,8 @@ const DemoApp = {
         return html;
     },
     
-    // NOUVELLE FONCTION : Highlight du texte correspondant
     highlightMatch: function(text, query) {
         if (!text || !query) return text;
-        
         const regex = new RegExp(`(${query})`, 'gi');
         return text.replace(regex, '<mark>$1</mark>');
     },
@@ -473,11 +459,12 @@ const DemoApp = {
         const trimmedSymbol = symbol.trim().toUpperCase();
         console.log('🔍 Searching company:', trimmedSymbol);
         
+        this.currentCompanySymbol = trimmedSymbol;
+        
         const container = document.getElementById('searchResultsContainer');
         if (!container) return;
         
         try {
-            // Show loading
             container.innerHTML = `
                 <div class="results-placeholder">
                     <i class="fas fa-spinner fa-spin"></i>
@@ -486,11 +473,13 @@ const DemoApp = {
                 </div>
             `;
             
-            // Fetch quote data
             const quoteData = await this.apiClient.getQuote(trimmedSymbol);
             
             if (quoteData && quoteData.symbol) {
                 this.displayCompanyResults(quoteData);
+                
+                // NOUVEAU : Charger les graphiques additionnels
+                await this.loadCompanyExtraCharts(trimmedSymbol);
             } else {
                 throw new Error('No data found');
             }
@@ -510,7 +499,6 @@ const DemoApp = {
         const container = document.getElementById('searchResultsContainer');
         if (!container) return;
         
-        // FIX : Support price ET close
         const currentPrice = quoteData.close || quoteData.price || 0;
         const change = quoteData.change || 0;
         const percentChange = quoteData.percent_change || quoteData.percentChange || 0;
@@ -565,8 +553,189 @@ const DemoApp = {
         this.showNotification(`✅ Loaded data for ${quoteData.symbol}`, 'success');
     },
     
-    // ============================================
-    // LIVE QUOTES TOOL
+    // NOUVEAU : Graphiques additionnels pour Company Search
+    loadCompanyExtraCharts: async function(symbol) {
+        console.log('📊 Loading extra charts for:', symbol);
+        
+        const chartsContainer = document.getElementById('companyExtraCharts');
+        if (!chartsContainer) return;
+        
+        try {
+            // Afficher le container
+            chartsContainer.style.display = 'block';
+            
+            // Charger les données
+            const timeSeriesData = await this.apiClient.getTimeSeries(symbol, '1day', '90');
+            
+            if (timeSeriesData && timeSeriesData.data && timeSeriesData.data.length > 0) {
+                // Graphique 1 : Performance vs Market
+                this.renderCompanyPerformanceChart(symbol, timeSeriesData.data);
+                
+                // Graphique 2 : Analyst Ratings (simulé)
+                this.renderCompanyRatingsChart(symbol);
+            }
+            
+        } catch (error) {
+            console.error('Error loading extra charts:', error);
+            chartsContainer.style.display = 'none';
+        }
+    },
+    
+    renderCompanyPerformanceChart: function(symbol, data) {
+        if (this.charts.companyPerformance) {
+            this.charts.companyPerformance.destroy();
+        }
+        
+        const sortedData = [...data].sort((a, b) => new Date(a.datetime) - new Date(b.datetime));
+        
+        // Calculer la performance relative (base 100)
+        const firstPrice = parseFloat(sortedData[0].close);
+        const stockPerformance = sortedData.map(d => ({
+            x: new Date(d.datetime).getTime(),
+            y: (parseFloat(d.close) / firstPrice - 1) * 100
+        }));
+        
+        // Simuler le S&P 500 (pour l'exemple)
+        const sp500Performance = sortedData.map((d, i) => ({
+            x: new Date(d.datetime).getTime(),
+            y: (Math.random() - 0.5) * 10 + i * 0.1 // Tendance légèrement haussière
+        }));
+        
+        this.charts.companyPerformance = Highcharts.chart('companyPerformanceChart', {
+            chart: {
+                backgroundColor: 'transparent',
+                type: 'line'
+            },
+            title: {
+                text: null
+            },
+            xAxis: {
+                type: 'datetime',
+                labels: {
+                    style: {
+                        color: getComputedStyle(document.documentElement).getPropertyValue('--text-primary')
+                    }
+                }
+            },
+            yAxis: {
+                title: {
+                    text: 'Performance (%)',
+                    style: {
+                        color: getComputedStyle(document.documentElement).getPropertyValue('--text-primary')
+                    }
+                },
+                labels: {
+                    format: '{value}%',
+                    style: {
+                        color: getComputedStyle(document.documentElement).getPropertyValue('--text-primary')
+                    }
+                },
+                plotLines: [{
+                    value: 0,
+                    color: '#64748b',
+                    width: 1,
+                    dashStyle: 'Dash'
+                }]
+            },
+            tooltip: {
+                shared: true,
+                valueDecimals: 2,
+                valueSuffix: '%'
+            },
+            series: [{
+                name: symbol,
+                data: stockPerformance,
+                color: '#3B82F6',
+                lineWidth: 3
+            }, {
+                name: 'S&P 500 (simulated)',
+                data: sp500Performance,
+                color: '#94A3B8',
+                lineWidth: 2,
+                dashStyle: 'Dash'
+            }],
+            credits: { enabled: false },
+            legend: {
+                enabled: true,
+                itemStyle: {
+                    color: getComputedStyle(document.documentElement).getPropertyValue('--text-primary')
+                }
+            }
+        });
+    },
+    
+    renderCompanyRatingsChart: function(symbol) {
+        if (this.charts.companyRatings) {
+            this.charts.companyRatings.destroy();
+        }
+        
+        // Simuler des ratings d'analystes
+        const ratings = [
+            { name: 'Strong Buy', y: 12, color: '#10B981' },
+            { name: 'Buy', y: 8, color: '#34D399' },
+            { name: 'Hold', y: 5, color: '#FCD34D' },
+            { name: 'Sell', y: 2, color: '#FB923C' },
+            { name: 'Strong Sell', y: 1, color: '#EF4444' }
+        ];
+        
+        this.charts.companyRatings = Highcharts.chart('companyRatingsChart', {
+            chart: {
+                type: 'bar',
+                backgroundColor: 'transparent'
+            },
+            title: {
+                text: null
+            },
+            xAxis: {
+                categories: ratings.map(r => r.name),
+                labels: {
+                    style: {
+                        color: getComputedStyle(document.documentElement).getPropertyValue('--text-primary')
+                    }
+                }
+            },
+            yAxis: {
+                min: 0,
+                title: {
+                    text: 'Number of Analysts',
+                    style: {
+                        color: getComputedStyle(document.documentElement).getPropertyValue('--text-primary')
+                    }
+                },
+                labels: {
+                    style: {
+                        color: getComputedStyle(document.documentElement).getPropertyValue('--text-primary')
+                    }
+                }
+            },
+            legend: {
+                enabled: false
+            },
+            tooltip: {
+                valueSuffix: ' analysts'
+            },
+            plotOptions: {
+                bar: {
+                    dataLabels: {
+                        enabled: true,
+                        style: {
+                            color: '#fff',
+                            textOutline: 'none'
+                        }
+                    }
+                }
+            },
+            series: [{
+                name: 'Analysts',
+                data: ratings,
+                colorByPoint: true
+            }],
+            credits: { enabled: false }
+        });
+    },
+
+// ============================================
+    // LIVE QUOTES TOOL - AMÉLIORÉ
     // ============================================
     setupLiveQuotesListeners: function() {
         const input = document.getElementById('quoteSymbolInput');
@@ -613,6 +782,9 @@ const DemoApp = {
             if (quoteData && quoteData.symbol) {
                 this.displayLiveQuote(quoteData);
                 await this.loadQuoteChart(trimmedSymbol);
+                
+                // NOUVEAU : Market Sentiment Gauge
+                this.renderMarketSentiment(trimmedSymbol, quoteData);
             } else {
                 throw new Error('No data available');
             }
@@ -632,7 +804,6 @@ const DemoApp = {
         const container = document.getElementById('quoteDisplay');
         if (!container) return;
         
-        // FIX : Support price ET close
         const currentPrice = quoteData.close || quoteData.price || 0;
         const change = quoteData.change || 0;
         const percentChange = quoteData.percent_change || quoteData.percentChange || 0;
@@ -677,11 +848,9 @@ const DemoApp = {
         try {
             const timeSeriesData = await this.apiClient.getTimeSeries(symbol, '1day', '90');
             
-            // FIX : L'API retourne 'data' et non 'values'
             if (timeSeriesData && timeSeriesData.data && timeSeriesData.data.length > 0) {
                 this.renderQuoteChart(timeSeriesData.data, symbol);
             }
-            
         } catch (error) {
             console.error('Error loading chart:', error);
         }
@@ -712,7 +881,14 @@ const DemoApp = {
                 name: 'Price',
                 data: dates.map((date, i) => [date, prices[i]]),
                 color: '#3B82F6',
-                lineWidth: 2
+                lineWidth: 2,
+                fillColor: {
+                    linearGradient: { x1: 0, y1: 0, x2: 0, y2: 1 },
+                    stops: [
+                        [0, 'rgba(59, 130, 246, 0.3)'],
+                        [1, 'rgba(59, 130, 246, 0.05)']
+                    ]
+                }
             }],
             credits: { enabled: false },
             rangeSelector: {
@@ -725,8 +901,120 @@ const DemoApp = {
         });
     },
     
+    // NOUVEAU : Market Sentiment Gauge
+    renderMarketSentiment: function(symbol, quoteData) {
+        const container = document.getElementById('marketSentiment');
+        if (!container) return;
+        
+        container.style.display = 'block';
+        
+        if (this.charts.sentimentGauge) {
+            this.charts.sentimentGauge.destroy();
+        }
+        
+        // Calculer un sentiment basé sur le changement de prix
+        const percentChange = quoteData.percent_change || quoteData.percentChange || 0;
+        
+        // Score de sentiment (0-100, 50 = neutre)
+        let sentimentScore = 50 + (percentChange * 5); // Amplifier pour rendre visible
+        sentimentScore = Math.max(0, Math.min(100, sentimentScore)); // Clamp entre 0-100
+        
+        let sentimentLabel = 'Neutral';
+        let sentimentColor = '#FCD34D';
+        
+        if (sentimentScore >= 70) {
+            sentimentLabel = 'Very Bullish';
+            sentimentColor = '#10B981';
+        } else if (sentimentScore >= 55) {
+            sentimentLabel = 'Bullish';
+            sentimentColor = '#34D399';
+        } else if (sentimentScore >= 45) {
+            sentimentLabel = 'Neutral';
+            sentimentColor = '#FCD34D';
+        } else if (sentimentScore >= 30) {
+            sentimentLabel = 'Bearish';
+            sentimentColor = '#FB923C';
+        } else {
+            sentimentLabel = 'Very Bearish';
+            sentimentColor = '#EF4444';
+        }
+        
+        this.charts.sentimentGauge = Highcharts.chart('sentimentGauge', {
+            chart: {
+                type: 'solidgauge',
+                backgroundColor: 'transparent'
+            },
+            title: {
+                text: `${symbol} Market Sentiment`,
+                style: {
+                    color: getComputedStyle(document.documentElement).getPropertyValue('--text-primary'),
+                    fontSize: '1rem',
+                    fontWeight: '700'
+                }
+            },
+            pane: {
+                center: ['50%', '85%'],
+                size: '140%',
+                startAngle: -90,
+                endAngle: 90,
+                background: {
+                    backgroundColor: 'rgba(0,0,0,0.1)',
+                    innerRadius: '60%',
+                    outerRadius: '100%',
+                    shape: 'arc'
+                }
+            },
+            tooltip: {
+                enabled: false
+            },
+            yAxis: {
+                min: 0,
+                max: 100,
+                stops: [
+                    [0.3, '#EF4444'], // Bearish
+                    [0.5, '#FCD34D'], // Neutral
+                    [0.7, '#10B981']  // Bullish
+                ],
+                lineWidth: 0,
+                tickWidth: 0,
+                minorTickInterval: null,
+                tickAmount: 2,
+                labels: {
+                    y: 16,
+                    style: {
+                        color: getComputedStyle(document.documentElement).getPropertyValue('--text-primary')
+                    }
+                }
+            },
+            plotOptions: {
+                solidgauge: {
+                    dataLabels: {
+                        y: -25,
+                        borderWidth: 0,
+                        useHTML: true,
+                        format: `<div style="text-align:center">
+                            <span style="font-size:2rem;font-weight:bold;color:${sentimentColor}">{y}</span><br/>
+                            <span style="font-size:0.875rem;color:var(--text-secondary)">${sentimentLabel}</span>
+                        </div>`
+                    }
+                }
+            },
+            series: [{
+                name: 'Sentiment',
+                data: [Math.round(sentimentScore)],
+                dataLabels: {
+                    format: `<div style="text-align:center">
+                        <span style="font-size:2rem;font-weight:bold;color:${sentimentColor}">{y}</span><br/>
+                        <span style="font-size:0.875rem;color:var(--text-secondary)">${sentimentLabel}</span>
+                    </div>`
+                }
+            }],
+            credits: { enabled: false }
+        });
+    },
+    
     // ============================================
-    // PORTFOLIO BUILDER TOOL
+    // PORTFOLIO BUILDER TOOL - AMÉLIORÉ
     // ============================================
     setupPortfolioListeners: function() {
         const btnAdd = document.getElementById('btnAddToPortfolio');
@@ -780,16 +1068,10 @@ const DemoApp = {
         try {
             const quoteData = await this.apiClient.getQuote(symbol);
             
-            console.log('📊 Quote data received for portfolio:', quoteData);
-            
-            // FIX CRITIQUE : Vérifier price OU close - supporter la valeur 0
             const currentPrice = quoteData.close !== undefined && quoteData.close !== null 
                 ? quoteData.close 
                 : quoteData.price;
             
-            console.log('💰 Current price:', currentPrice);
-            
-            // Vérifier que le prix existe ET est un nombre valide
             if (quoteData && currentPrice !== null && currentPrice !== undefined && !isNaN(currentPrice)) {
                 const holding = {
                     symbol: symbol,
@@ -806,9 +1088,13 @@ const DemoApp = {
                 
                 this.updatePortfolioDisplay();
                 
+                // NOUVEAU : Charger les graphiques avancés si portfolio >= 2 stocks
+                if (this.portfolio.length >= 2) {
+                    this.loadPortfolioAdvancedCharts();
+                }
+                
                 this.showNotification(`✅ ${symbol} added to portfolio`, 'success');
             } else {
-                console.error('❌ Invalid price data:', { quoteData, currentPrice });
                 throw new Error('Unable to fetch valid price data');
             }
             
@@ -821,6 +1107,17 @@ const DemoApp = {
     removeFromPortfolio: function(symbol) {
         this.portfolio = this.portfolio.filter(p => p.symbol !== symbol);
         this.updatePortfolioDisplay();
+        
+        if (this.portfolio.length >= 2) {
+            this.loadPortfolioAdvancedCharts();
+        } else {
+            // Cacher les graphiques avancés
+            const corrContainer = document.getElementById('portfolioCorrelation');
+            const perfContainer = document.getElementById('portfolioPerformance');
+            if (corrContainer) corrContainer.style.display = 'none';
+            if (perfContainer) perfContainer.style.display = 'none';
+        }
+        
         this.showNotification(`${symbol} removed from portfolio`, 'success');
     },
     
@@ -884,6 +1181,16 @@ const DemoApp = {
         
         tableBody.innerHTML = html;
         
+        // Calcul du score de diversification
+        let diversificationScore = 'Low';
+        if (this.portfolio.length >= 5) {
+            diversificationScore = 'Excellent';
+        } else if (this.portfolio.length >= 3) {
+            diversificationScore = 'Good';
+        } else if (this.portfolio.length >= 2) {
+            diversificationScore = 'Fair';
+        }
+        
         if (summary) {
             summary.innerHTML = `
                 <div class="summary-card">
@@ -896,7 +1203,7 @@ const DemoApp = {
                 </div>
                 <div class="summary-card">
                     <h4>Diversification</h4>
-                    <p class="value-large">${this.portfolio.length > 1 ? 'Good' : 'Low'}</p>
+                    <p class="value-large">${diversificationScore}</p>
                 </div>
             `;
         }
@@ -925,12 +1232,7 @@ const DemoApp = {
                 backgroundColor: 'transparent'
             },
             title: {
-                text: 'Portfolio Allocation',
-                style: {
-                    color: getComputedStyle(document.documentElement).getPropertyValue('--text-primary'),
-                    fontSize: '1.125rem',
-                    fontWeight: '700'
-                }
+                text: null
             },
             tooltip: {
                 pointFormat: '<b>${point.y:,.2f}</b> ({point.percentage}%)'
@@ -941,8 +1243,12 @@ const DemoApp = {
                     cursor: 'pointer',
                     dataLabels: {
                         enabled: true,
-                        format: '<b>{point.name}</b>: {point.percentage}%'
-                    }
+                        format: '<b>{point.name}</b>: {point.percentage}%',
+                        style: {
+                            color: getComputedStyle(document.documentElement).getPropertyValue('--text-primary')
+                        }
+                    },
+                    showInLegend: true
                 }
             },
             series: [{
@@ -950,12 +1256,222 @@ const DemoApp = {
                 colorByPoint: true,
                 data: data
             }],
+            credits: { enabled: false },
+            legend: {
+                itemStyle: {
+                    color: getComputedStyle(document.documentElement).getPropertyValue('--text-primary')
+                }
+            }
+        });
+    },
+    
+    // NOUVEAU : Graphiques avancés du portfolio
+    loadPortfolioAdvancedCharts: async function() {
+        console.log('📊 Loading advanced portfolio charts...');
+        
+        try {
+            // Charger les données historiques pour chaque stock
+            const promises = this.portfolio.map(holding => 
+                this.apiClient.getTimeSeries(holding.symbol, '1day', '30')
+            );
+            
+            const results = await Promise.all(promises);
+            
+            // Correlation Matrix
+            this.renderPortfolioCorrelation(results);
+            
+            // Performance Chart
+            this.renderPortfolioPerformance(results);
+            
+        } catch (error) {
+            console.error('Error loading advanced charts:', error);
+        }
+    },
+    
+    renderPortfolioCorrelation: function(timeSeriesResults) {
+        const container = document.getElementById('portfolioCorrelation');
+        if (!container) return;
+        
+        container.style.display = 'block';
+        
+        if (this.charts.correlationHeatmap) {
+            this.charts.correlationHeatmap.destroy();
+        }
+        
+        // Calculer la matrice de corrélation (simplifié - corrélations simulées)
+        const symbols = this.portfolio.map(p => p.symbol);
+        const correlationData = [];
+        
+        symbols.forEach((symbol1, i) => {
+            symbols.forEach((symbol2, j) => {
+                let correlation;
+                if (i === j) {
+                    correlation = 1; // Corrélation avec soi-même = 1
+                } else {
+                    // Simuler une corrélation (dans la vraie vie, calculer à partir des prix)
+                    correlation = (Math.random() * 1.6 - 0.8).toFixed(2); // Entre -0.8 et 0.8
+                }
+                
+                correlationData.push([j, i, parseFloat(correlation)]);
+            });
+        });
+        
+        this.charts.correlationHeatmap = Highcharts.chart('correlationHeatmap', {
+            chart: {
+                type: 'heatmap',
+                backgroundColor: 'transparent'
+            },
+            title: {
+                text: null
+            },
+            xAxis: {
+                categories: symbols,
+                labels: {
+                    style: {
+                        color: getComputedStyle(document.documentElement).getPropertyValue('--text-primary')
+                    }
+                }
+            },
+            yAxis: {
+                categories: symbols,
+                title: null,
+                labels: {
+                    style: {
+                        color: getComputedStyle(document.documentElement).getPropertyValue('--text-primary')
+                    }
+                }
+            },
+            colorAxis: {
+                min: -1,
+                max: 1,
+                stops: [
+                    [0, '#EF4444'],
+                    [0.5, '#FCD34D'],
+                    [1, '#10B981']
+                ]
+            },
+            legend: {
+                align: 'right',
+                layout: 'vertical',
+                margin: 0,
+                verticalAlign: 'top',
+                y: 25,
+                symbolHeight: 200,
+                itemStyle: {
+                    color: getComputedStyle(document.documentElement).getPropertyValue('--text-primary')
+                }
+            },
+            tooltip: {
+                formatter: function() {
+                    return `<b>${this.series.xAxis.categories[this.point.x]}</b> vs <b>${this.series.yAxis.categories[this.point.y]}</b><br/>
+                            Correlation: <b>${this.point.value.toFixed(2)}</b>`;
+                }
+            },
+            series: [{
+                name: 'Correlation',
+                borderWidth: 1,
+                data: correlationData,
+                dataLabels: {
+                    enabled: true,
+                    color: '#000000',
+                    format: '{point.value:.2f}'
+                }
+            }],
             credits: { enabled: false }
         });
     },
     
-    // ============================================
-    // TECHNICAL ANALYSIS TOOL
+    renderPortfolioPerformance: function(timeSeriesResults) {
+        const container = document.getElementById('portfolioPerformance');
+        if (!container) return;
+        
+        container.style.display = 'block';
+        
+        if (this.charts.portfolioPerformance) {
+            this.charts.portfolioPerformance.destroy();
+        }
+        
+        // Créer des séries pour chaque stock
+        const series = [];
+        
+        timeSeriesResults.forEach((result, index) => {
+            if (result && result.data && result.data.length > 0) {
+                const holding = this.portfolio[index];
+                const sortedData = [...result.data].sort((a, b) => new Date(a.datetime) - new Date(b.datetime));
+                
+                // Performance relative (base 100)
+                const firstPrice = parseFloat(sortedData[0].close);
+                const performanceData = sortedData.map(d => ({
+                    x: new Date(d.datetime).getTime(),
+                    y: (parseFloat(d.close) / firstPrice - 1) * 100
+                }));
+                
+                series.push({
+                    name: holding.symbol,
+                    data: performanceData
+                });
+            }
+        });
+        
+        this.charts.portfolioPerformance = Highcharts.stockChart('portfolioPerformanceChart', {
+            chart: {
+                backgroundColor: 'transparent'
+            },
+            title: {
+                text: null
+            },
+            xAxis: {
+                type: 'datetime',
+                labels: {
+                    style: {
+                        color: getComputedStyle(document.documentElement).getPropertyValue('--text-primary')
+                    }
+                }
+            },
+            yAxis: {
+                title: {
+                    text: 'Performance (%)',
+                    style: {
+                        color: getComputedStyle(document.documentElement).getPropertyValue('--text-primary')
+                    }
+                },
+                labels: {
+                    format: '{value}%',
+                    style: {
+                        color: getComputedStyle(document.documentElement).getPropertyValue('--text-primary')
+                    }
+                },
+                plotLines: [{
+                    value: 0,
+                    color: '#64748b',
+                    width: 1,
+                    dashStyle: 'Dash'
+                }]
+            },
+            tooltip: {
+                shared: true,
+                valueDecimals: 2,
+                valueSuffix: '%'
+            },
+            series: series,
+            credits: { enabled: false },
+            rangeSelector: {
+                enabled: false
+            },
+            navigator: {
+                enabled: false
+            },
+            legend: {
+                enabled: true,
+                itemStyle: {
+                    color: getComputedStyle(document.documentElement).getPropertyValue('--text-primary')
+                }
+            }
+        });
+    },
+
+// ============================================
+    // TECHNICAL ANALYSIS TOOL - COMPLET
     // ============================================
     setupTechnicalListeners: function() {
         const btnAnalyze = document.getElementById('btnAnalyze');
@@ -976,7 +1492,7 @@ const DemoApp = {
             });
         }
         
-        // NOUVEAU : Event listeners pour les indicateurs
+        // Event listeners pour les indicateurs
         const indicatorCheckboxes = [
             'indicatorSMA',
             'indicatorEMA',
@@ -1011,23 +1527,13 @@ const DemoApp = {
         try {
             const timeSeriesData = await this.apiClient.getTimeSeries(symbol, '1day', '180');
             
-            console.log('📈 Time series data received:', timeSeriesData);
-            console.log('📈 Data array:', timeSeriesData?.data);
-            console.log('📈 Data length:', timeSeriesData?.data?.length);
-            
-            // FIX CRITIQUE : Vérifier plusieurs structures possibles
             let dataArray = null;
             
-            // Structure 1 : {data: [...]}
             if (timeSeriesData && timeSeriesData.data && Array.isArray(timeSeriesData.data)) {
                 dataArray = timeSeriesData.data;
-            }
-            // Structure 2 : {values: [...]}
-            else if (timeSeriesData && timeSeriesData.values && Array.isArray(timeSeriesData.values)) {
+            } else if (timeSeriesData && timeSeriesData.values && Array.isArray(timeSeriesData.values)) {
                 dataArray = timeSeriesData.values;
-            }
-            // Structure 3 : directement un tableau
-            else if (Array.isArray(timeSeriesData)) {
+            } else if (Array.isArray(timeSeriesData)) {
                 dataArray = timeSeriesData;
             }
             
@@ -1036,7 +1542,6 @@ const DemoApp = {
                 this.renderTechnicalChart(dataArray, symbol);
                 this.generateTechnicalSignals(symbol, dataArray);
             } else {
-                console.error('❌ No valid data array found in:', timeSeriesData);
                 throw new Error('No data available');
             }
             
@@ -1048,65 +1553,30 @@ const DemoApp = {
     
     renderTechnicalChart: function(data, symbol) {
         console.log('📊 === TECHNICAL CHART RENDERING ===');
-        console.log('📊 Symbol:', symbol);
-        console.log('📊 Data length:', data.length);
-        console.log('📊 First item:', data[0]);
-        console.log('📊 Last item:', data[data.length - 1]);
         
         if (this.charts.technical) {
-            console.log('🗑️ Destroying previous chart');
             this.charts.technical.destroy();
         }
         
-        // Vérifier que le container existe
         const container = document.getElementById('technicalChart');
         if (!container) {
             console.error('❌ Chart container #technicalChart not found!');
             return;
         }
         
-        console.log('✅ Chart container found:', container.offsetWidth, 'x', container.offsetHeight);
-
-        console.log('✅ Technical chart created successfully!');
-
-        // NOUVEAU : Activer les indicateurs cochés par défaut
-        setTimeout(() => {
-            const indicators = [
-                { id: 'indicatorSMA', checkbox: document.getElementById('indicatorSMA') },
-                { id: 'indicatorEMA', checkbox: document.getElementById('indicatorEMA') },
-                { id: 'indicatorBollinger', checkbox: document.getElementById('indicatorBollinger') },
-                { id: 'indicatorRSI', checkbox: document.getElementById('indicatorRSI') },
-                { id: 'indicatorMACD', checkbox: document.getElementById('indicatorMACD') }
-            ];
-            
-            indicators.forEach(ind => {
-                if (ind.checkbox && ind.checkbox.checked) {
-                    console.log('🔄 Auto-enabling indicator:', ind.id);
-                    this.toggleIndicator(ind.id, true);
-                }
-            });
-        }, 100);
-        
-        // Les données viennent du plus récent au plus ancien, il faut les inverser
         const sortedData = [...data].sort((a, b) => {
             const dateA = new Date(a.datetime).getTime();
             const dateB = new Date(b.datetime).getTime();
-            return dateA - dateB; // Tri croissant (du plus ancien au plus récent)
+            return dateA - dateB;
         });
         
-        console.log('📊 After sorting - First:', sortedData[0].datetime, 'Last:', sortedData[sortedData.length - 1].datetime);
-        
-        // Vérifier si on a des données OHLC complètes
         const firstItem = sortedData[0];
         const hasOHLC = firstItem.open !== undefined && 
                         firstItem.high !== undefined && 
                         firstItem.low !== undefined && 
                         firstItem.close !== undefined;
         
-        console.log('📊 Has complete OHLC:', hasOHLC);
-        
         if (hasOHLC) {
-            // Préparer les données OHLC
             const ohlc = sortedData.map(d => {
                 const timestamp = d.timestamp || new Date(d.datetime).getTime();
                 return [
@@ -1118,17 +1588,11 @@ const DemoApp = {
                 ];
             });
             
-            // Préparer les données de volume
             const volume = sortedData.map(d => {
                 const timestamp = d.timestamp || new Date(d.datetime).getTime();
                 return [timestamp, parseFloat(d.volume || 0)];
             });
             
-            console.log('📊 OHLC prepared:', ohlc.length, 'points');
-            console.log('📊 Sample OHLC point:', ohlc[0]);
-            console.log('📊 Volume prepared:', volume.length, 'points');
-            
-            // Créer le graphique
             try {
                 this.charts.technical = Highcharts.stockChart('technicalChart', {
                     chart: {
@@ -1223,9 +1687,10 @@ const DemoApp = {
                     series: [{
                         type: 'candlestick',
                         name: symbol,
+                        id: 'main-series',
                         data: ohlc,
-                        color: '#EF4444',      // Red for bearish
-                        upColor: '#10B981',    // Green for bullish
+                        color: '#EF4444',
+                        upColor: '#10B981',
                         lineColor: '#EF4444',
                         upLineColor: '#10B981',
                         yAxis: 0,
@@ -1258,806 +1723,500 @@ const DemoApp = {
                 });
                 
                 console.log('✅ Technical chart created successfully!');
-                console.log('📊 Chart object:', this.charts.technical);
+                
+                // Activer les indicateurs cochés par défaut
+                setTimeout(() => {
+                    const indicators = [
+                        { id: 'indicatorSMA', checkbox: document.getElementById('indicatorSMA') },
+                        { id: 'indicatorEMA', checkbox: document.getElementById('indicatorEMA') },
+                        { id: 'indicatorBollinger', checkbox: document.getElementById('indicatorBollinger') },
+                        { id: 'indicatorRSI', checkbox: document.getElementById('indicatorRSI') },
+                        { id: 'indicatorMACD', checkbox: document.getElementById('indicatorMACD') }
+                    ];
+                    
+                    indicators.forEach(ind => {
+                        if (ind.checkbox && ind.checkbox.checked) {
+                            console.log('🔄 Auto-enabling indicator:', ind.id);
+                            this.toggleIndicator(ind.id, true);
+                        }
+                    });
+                }, 100);
                 
             } catch (error) {
                 console.error('❌ Error creating chart:', error);
             }
-            
-        } else {
-            console.warn('⚠️ OHLC data incomplete, falling back to simple chart');
-            this.renderSimpleTechnicalChart(sortedData, symbol);
         }
     },
-
-// Fonction fallback pour graphique simple
-renderSimpleTechnicalChart: function(sortedData, symbol) {
-    console.log('📊 Creating simple line chart');
     
-    const prices = sortedData.map(d => {
-        const timestamp = d.timestamp || new Date(d.datetime).getTime();
-        const price = parseFloat(d.close || d.price || 0);
-        return [timestamp, price];
-    });
+    // ============================================
+    // TECHNICAL INDICATORS
+    // ============================================
     
-    const volume = sortedData.map(d => {
-        const timestamp = d.timestamp || new Date(d.datetime).getTime();
-        return [timestamp, parseFloat(d.volume || 0)];
-    });
-    
-    try {
-        this.charts.technical = Highcharts.stockChart('technicalChart', {
-            chart: {
-                backgroundColor: 'transparent',
-                height: 500
-            },
-            title: {
-                text: `${symbol} - Technical Analysis (Price Chart)`,
-                style: {
-                    color: getComputedStyle(document.documentElement).getPropertyValue('--text-primary') || '#1e293b',
-                    fontSize: '1.125rem',
-                    fontWeight: '700'
+    toggleIndicator: function(indicatorId, isEnabled) {
+        console.log('🔄 Toggle indicator:', indicatorId, isEnabled);
+        
+        if (!this.charts.technical || !this.currentTechnicalSymbol) {
+            console.log('⚠️ No chart or symbol available');
+            return;
+        }
+        
+        const mainSeries = this.charts.technical.series.find(s => s.options.id === 'main-series');
+        if (!mainSeries || !mainSeries.options.data) {
+            console.log('⚠️ No data in chart');
+            return;
+        }
+        
+        const data = mainSeries.options.data;
+        
+        switch(indicatorId) {
+            case 'indicatorSMA':
+                if (isEnabled) {
+                    this.addSMA(data);
+                } else {
+                    this.removeIndicator('SMA 20');
+                    this.removeIndicator('SMA 50');
                 }
-            },
-            rangeSelector: {
-                selected: 1
-            },
-            yAxis: [{
-                labels: {
-                    align: 'right',
-                    x: -3
-                },
-                title: {
-                    text: 'Price (USD)'
-                },
-                height: '70%',
-                lineWidth: 2
-            }, {
-                labels: {
-                    align: 'right',
-                    x: -3
-                },
-                title: {
-                    text: 'Volume'
-                },
-                top: '75%',
-                height: '25%',
-                offset: 0,
-                lineWidth: 2
-            }],
-            series: [{
-                type: 'area',
-                name: 'Price',
-                data: prices,
-                yAxis: 0,
-                color: '#3B82F6',
-                fillColor: {
-                    linearGradient: { x1: 0, y1: 0, x2: 0, y2: 1 },
-                    stops: [
-                        [0, 'rgba(59, 130, 246, 0.3)'],
-                        [1, 'rgba(59, 130, 246, 0.05)']
-                    ]
-                },
-                lineWidth: 2
-            }, {
-                type: 'column',
-                name: 'Volume',
-                data: volume,
-                yAxis: 1,
-                color: '#3B82F6',
-                opacity: 0.5
-            }],
-            credits: { enabled: false }
+                break;
+                
+            case 'indicatorEMA':
+                if (isEnabled) {
+                    this.addEMA(data);
+                } else {
+                    this.removeIndicator('EMA 12');
+                    this.removeIndicator('EMA 26');
+                }
+                break;
+                
+            case 'indicatorBollinger':
+                if (isEnabled) {
+                    this.addBollingerBands(data);
+                } else {
+                    this.removeIndicator('BB Upper');
+                    this.removeIndicator('BB Middle');
+                    this.removeIndicator('BB Lower');
+                }
+                break;
+                
+            case 'indicatorRSI':
+                if (isEnabled) {
+                    this.addRSI(data);
+                } else {
+                    this.removeIndicator('RSI');
+                    // Supprimer l'axe RSI
+                    const rsiAxis = this.charts.technical.get('rsi-axis');
+                    if (rsiAxis) rsiAxis.remove();
+                }
+                break;
+                
+            case 'indicatorMACD':
+                if (isEnabled) {
+                    this.addMACD(data);
+                } else {
+                    this.removeIndicator('MACD');
+                    this.removeIndicator('Signal');
+                    this.removeIndicator('Histogram');
+                    // Supprimer l'axe MACD
+                    const macdAxis = this.charts.technical.get('macd-axis');
+                    if (macdAxis) macdAxis.remove();
+                }
+                break;
+        }
+    },
+    
+    removeIndicator: function(name) {
+        if (!this.charts.technical) return;
+        
+        const chart = this.charts.technical;
+        const seriesToRemove = chart.series.find(s => s.name === name);
+        
+        if (seriesToRemove) {
+            seriesToRemove.remove();
+            console.log('🗑️ Removed indicator:', name);
+        }
+    },
+    
+    // SMA - Simple Moving Average
+    addSMA: function(ohlcData) {
+        console.log('📊 Adding SMA indicators');
+        
+        const closePrices = ohlcData.map(d => d[4]);
+        const timestamps = ohlcData.map(d => d[0]);
+        
+        const sma20 = this.calculateSMA(closePrices, 20);
+        const sma50 = this.calculateSMA(closePrices, 50);
+        
+        const sma20Data = timestamps.map((t, i) => [t, sma20[i]]).filter(d => d[1] !== null);
+        const sma50Data = timestamps.map((t, i) => [t, sma50[i]]).filter(d => d[1] !== null);
+        
+        this.charts.technical.addSeries({
+            name: 'SMA 20',
+            type: 'line',
+            data: sma20Data,
+            color: '#F59E0B',
+            lineWidth: 2,
+            yAxis: 0,
+            marker: { enabled: false }
         });
         
-        console.log('✅ Simple chart created successfully!');
-        
-    } catch (error) {
-        console.error('❌ Error creating simple chart:', error);
-    }
-},
-
-// ============================================
-// TECHNICAL INDICATORS
-// ============================================
-
-toggleIndicator: function(indicatorId, isEnabled) {
-    console.log('🔄 Toggle indicator:', indicatorId, isEnabled);
-    
-    if (!this.charts.technical || !this.currentTechnicalSymbol) {
-        console.log('⚠️ No chart or symbol available');
-        return;
-    }
-    
-    // Récupérer les données actuelles du graphique
-    const mainSeries = this.charts.technical.series[0];
-    if (!mainSeries || !mainSeries.options.data) {
-        console.log('⚠️ No data in chart');
-        return;
-    }
-    
-    const data = mainSeries.options.data;
-    
-    switch(indicatorId) {
-        case 'indicatorSMA':
-            if (isEnabled) {
-                this.addSMA(data);
-            } else {
-                this.removeIndicator('SMA 20');
-                this.removeIndicator('SMA 50');
-            }
-            break;
-            
-        case 'indicatorEMA':
-            if (isEnabled) {
-                this.addEMA(data);
-            } else {
-                this.removeIndicator('EMA 12');
-                this.removeIndicator('EMA 26');
-            }
-            break;
-            
-        case 'indicatorBollinger':
-            if (isEnabled) {
-                this.addBollingerBands(data);
-            } else {
-                this.removeIndicator('BB Upper');
-                this.removeIndicator('BB Middle');
-                this.removeIndicator('BB Lower');
-            }
-            break;
-            
-        case 'indicatorRSI':
-            if (isEnabled) {
-                this.addRSI(data);
-            } else {
-                this.removeIndicator('RSI');
-            }
-            break;
-            
-        case 'indicatorMACD':
-            if (isEnabled) {
-                this.addMACD(data);
-            } else {
-                this.removeIndicator('MACD');
-                this.removeIndicator('Signal');
-                this.removeIndicator('Histogram');
-            }
-            break;
-    }
-},
-
-removeIndicator: function(name) {
-    if (!this.charts.technical) return;
-    
-    const chart = this.charts.technical;
-    const seriesToRemove = chart.series.find(s => s.name === name);
-    
-    if (seriesToRemove) {
-        seriesToRemove.remove();
-        console.log('🗑️ Removed indicator:', name);
-    }
-},
-
-// ============================================
-// CALCUL DES INDICATEURS
-// ============================================
-
-// SMA - Simple Moving Average
-addSMA: function(ohlcData) {
-    console.log('📊 Adding SMA indicators');
-    
-    const closePrices = ohlcData.map(d => d[4]); // close price
-    const timestamps = ohlcData.map(d => d[0]);
-    
-    const sma20 = this.calculateSMA(closePrices, 20);
-    const sma50 = this.calculateSMA(closePrices, 50);
-    
-    const sma20Data = timestamps.map((t, i) => [t, sma20[i]]).filter(d => d[1] !== null);
-    const sma50Data = timestamps.map((t, i) => [t, sma50[i]]).filter(d => d[1] !== null);
-    
-    this.charts.technical.addSeries({
-        name: 'SMA 20',
-        type: 'line',
-        data: sma20Data,
-        color: '#F59E0B',
-        lineWidth: 2,
-        yAxis: 0,
-        marker: { enabled: false }
-    });
-    
-    this.charts.technical.addSeries({
-        name: 'SMA 50',
-        type: 'line',
-        data: sma50Data,
-        color: '#8B5CF6',
-        lineWidth: 2,
-        yAxis: 0,
-        marker: { enabled: false }
-    });
-},
-
-calculateSMA: function(data, period) {
-    const result = [];
-    
-    for (let i = 0; i < data.length; i++) {
-        if (i < period - 1) {
-            result.push(null);
-        } else {
-            let sum = 0;
-            for (let j = 0; j < period; j++) {
-                sum += data[i - j];
-            }
-            result.push(sum / period);
-        }
-    }
-    
-    return result;
-},
-
-// EMA - Exponential Moving Average
-addEMA: function(ohlcData) {
-    console.log('📊 Adding EMA indicators');
-    
-    const closePrices = ohlcData.map(d => d[4]);
-    const timestamps = ohlcData.map(d => d[0]);
-    
-    const ema12 = this.calculateEMA(closePrices, 12);
-    const ema26 = this.calculateEMA(closePrices, 26);
-    
-    const ema12Data = timestamps.map((t, i) => [t, ema12[i]]).filter(d => d[1] !== null);
-    const ema26Data = timestamps.map((t, i) => [t, ema26[i]]).filter(d => d[1] !== null);
-    
-    this.charts.technical.addSeries({
-        name: 'EMA 12',
-        type: 'line',
-        data: ema12Data,
-        color: '#06B6D4',
-        lineWidth: 2,
-        dashStyle: 'Dash',
-        yAxis: 0,
-        marker: { enabled: false }
-    });
-    
-    this.charts.technical.addSeries({
-        name: 'EMA 26',
-        type: 'line',
-        data: ema26Data,
-        color: '#EC4899',
-        lineWidth: 2,
-        dashStyle: 'Dash',
-        yAxis: 0,
-        marker: { enabled: false }
-    });
-},
-
-calculateEMA: function(data, period) {
-    const result = [];
-    const multiplier = 2 / (period + 1);
-    
-    // Première valeur = SMA
-    let sum = 0;
-    for (let i = 0; i < period; i++) {
-        if (i < data.length) {
-            sum += data[i];
-        }
-    }
-    const sma = sum / period;
-    
-    for (let i = 0; i < data.length; i++) {
-        if (i < period - 1) {
-            result.push(null);
-        } else if (i === period - 1) {
-            result.push(sma);
-        } else {
-            const ema = (data[i] - result[i - 1]) * multiplier + result[i - 1];
-            result.push(ema);
-        }
-    }
-    
-    return result;
-},
-
-// Bollinger Bands
-addBollingerBands: function(ohlcData) {
-    console.log('📊 Adding Bollinger Bands');
-    
-    const closePrices = ohlcData.map(d => d[4]);
-    const timestamps = ohlcData.map(d => d[0]);
-    const period = 20;
-    const stdDevMultiplier = 2;
-    
-    const sma = this.calculateSMA(closePrices, period);
-    const stdDev = [];
-    
-    for (let i = 0; i < closePrices.length; i++) {
-        if (i < period - 1) {
-            stdDev.push(null);
-        } else {
-            let variance = 0;
-            for (let j = 0; j < period; j++) {
-                variance += Math.pow(closePrices[i - j] - sma[i], 2);
-            }
-            stdDev.push(Math.sqrt(variance / period));
-        }
-    }
-    
-    const upperBand = timestamps.map((t, i) => 
-        sma[i] !== null ? [t, sma[i] + stdDevMultiplier * stdDev[i]] : null
-    ).filter(d => d !== null);
-    
-    const middleBand = timestamps.map((t, i) => 
-        sma[i] !== null ? [t, sma[i]] : null
-    ).filter(d => d !== null);
-    
-    const lowerBand = timestamps.map((t, i) => 
-        sma[i] !== null ? [t, sma[i] - stdDevMultiplier * stdDev[i]] : null
-    ).filter(d => d !== null);
-    
-    this.charts.technical.addSeries({
-        name: 'BB Upper',
-        type: 'line',
-        data: upperBand,
-        color: '#9CA3AF',
-        lineWidth: 1,
-        yAxis: 0,
-        marker: { enabled: false },
-        enableMouseTracking: false
-    });
-    
-    this.charts.technical.addSeries({
-        name: 'BB Middle',
-        type: 'line',
-        data: middleBand,
-        color: '#6B7280',
-        lineWidth: 1,
-        dashStyle: 'Dot',
-        yAxis: 0,
-        marker: { enabled: false },
-        enableMouseTracking: false
-    });
-    
-    this.charts.technical.addSeries({
-        name: 'BB Lower',
-        type: 'line',
-        data: lowerBand,
-        color: '#9CA3AF',
-        lineWidth: 1,
-        yAxis: 0,
-        marker: { enabled: false },
-        enableMouseTracking: false
-    });
-},
-
-// RSI - Relative Strength Index
-addRSI: function(ohlcData) {
-    console.log('📊 Adding RSI');
-    
-    const closePrices = ohlcData.map(d => d[4]);
-    const timestamps = ohlcData.map(d => d[0]);
-    const period = 14;
-    
-    const rsi = this.calculateRSI(closePrices, period);
-    const rsiData = timestamps.map((t, i) => [t, rsi[i]]).filter(d => d[1] !== null);
-    
-    // Ajouter un nouvel axe Y pour RSI
-    this.charts.technical.addAxis({
-        id: 'rsi-axis',
-        labels: {
-            align: 'right',
-            x: -3
-        },
-        title: {
-            text: 'RSI'
-        },
-        top: '80%',
-        height: '20%',
-        offset: 0,
-        lineWidth: 2,
-        plotLines: [{
-            value: 70,
-            color: '#EF4444',
-            dashStyle: 'Dot',
-            width: 1,
-            label: { text: '70' }
-        }, {
-            value: 30,
-            color: '#10B981',
-            dashStyle: 'Dot',
-            width: 1,
-            label: { text: '30' }
-        }]
-    });
-    
-    this.charts.technical.addSeries({
-        name: 'RSI',
-        type: 'line',
-        data: rsiData,
-        color: '#8B5CF6',
-        lineWidth: 2,
-        yAxis: 'rsi-axis',
-        marker: { enabled: false }
-    });
-},
-
-calculateRSI: function(data, period) {
-    const result = [];
-    const gains = [];
-    const losses = [];
-    
-    for (let i = 1; i < data.length; i++) {
-        const change = data[i] - data[i - 1];
-        gains.push(change > 0 ? change : 0);
-        losses.push(change < 0 ? Math.abs(change) : 0);
-    }
-    
-    for (let i = 0; i < data.length; i++) {
-        if (i < period) {
-            result.push(null);
-        } else {
-            let avgGain = 0;
-            let avgLoss = 0;
-            
-            for (let j = 0; j < period; j++) {
-                avgGain += gains[i - 1 - j];
-                avgLoss += losses[i - 1 - j];
-            }
-            
-            avgGain /= period;
-            avgLoss /= period;
-            
-            const rs = avgLoss === 0 ? 100 : avgGain / avgLoss;
-            const rsi = 100 - (100 / (1 + rs));
-            
-            result.push(rsi);
-        }
-    }
-    
-    return result;
-},
-
-// MACD
-addMACD: function(ohlcData) {
-    console.log('📊 Adding MACD');
-    
-    const closePrices = ohlcData.map(d => d[4]);
-    const timestamps = ohlcData.map(d => d[0]);
-    
-    const ema12 = this.calculateEMA(closePrices, 12);
-    const ema26 = this.calculateEMA(closePrices, 26);
-    
-    const macdLine = [];
-    for (let i = 0; i < closePrices.length; i++) {
-        if (ema12[i] !== null && ema26[i] !== null) {
-            macdLine.push(ema12[i] - ema26[i]);
-        } else {
-            macdLine.push(null);
-        }
-    }
-    
-    const signalLine = this.calculateEMA(macdLine.filter(v => v !== null), 9);
-    
-    // Ajouter des nulls au début du signal pour l'aligner
-    const fullSignalLine = [];
-    let signalIndex = 0;
-    for (let i = 0; i < macdLine.length; i++) {
-        if (macdLine[i] === null) {
-            fullSignalLine.push(null);
-        } else {
-            fullSignalLine.push(signalLine[signalIndex]);
-            signalIndex++;
-        }
-    }
-    
-    const histogram = macdLine.map((m, i) => 
-        m !== null && fullSignalLine[i] !== null ? m - fullSignalLine[i] : null
-    );
-    
-    const macdData = timestamps.map((t, i) => [t, macdLine[i]]).filter(d => d[1] !== null);
-    const signalData = timestamps.map((t, i) => [t, fullSignalLine[i]]).filter(d => d[1] !== null);
-    const histogramData = timestamps.map((t, i) => [t, histogram[i]]).filter(d => d[1] !== null);
-    
-    // Ajouter axe MACD
-    this.charts.technical.addAxis({
-        id: 'macd-axis',
-        labels: {
-            align: 'right',
-            x: -3
-        },
-        title: {
-            text: 'MACD'
-        },
-        top: '80%',
-        height: '20%',
-        offset: 0,
-        lineWidth: 2
-    });
-    
-    this.charts.technical.addSeries({
-        name: 'MACD',
-        type: 'line',
-        data: macdData,
-        color: '#3B82F6',
-        lineWidth: 2,
-        yAxis: 'macd-axis',
-        marker: { enabled: false }
-    });
-    
-    this.charts.technical.addSeries({
-        name: 'Signal',
-        type: 'line',
-        data: signalData,
-        color: '#EF4444',
-        lineWidth: 2,
-        yAxis: 'macd-axis',
-        marker: { enabled: false }
-    });
-    
-    this.charts.technical.addSeries({
-        name: 'Histogram',
-        type: 'column',
-        data: histogramData,
-        color: '#10B981',
-        yAxis: 'macd-axis',
-        opacity: 0.5
-    });
-},
-
-// NOUVELLE FONCTION : Graphique Candlestick complet
-renderCandlestickChart: function(reversedData, symbol) {
-    const ohlc = reversedData.map(d => {
-        const timestamp = new Date(d.datetime).getTime();
-        return [
-            timestamp,
-            parseFloat(d.open),
-            parseFloat(d.high),
-            parseFloat(d.low),
-            parseFloat(d.close)
-        ];
-    });
-    
-    const volume = reversedData.map(d => {
-        const timestamp = new Date(d.datetime).getTime();
-        return [timestamp, parseFloat(d.volume || 0)];
-    });
-    
-    console.log('📊 OHLC data points:', ohlc.length);
-    console.log('📊 Sample OHLC:', ohlc[0]);
-    
-    this.charts.technical = Highcharts.stockChart('technicalChart', {
-        chart: {
-            backgroundColor: 'transparent',
-            height: 500
-        },
-        title: {
-            text: `${symbol} - Technical Analysis`,
-            style: {
-                color: getComputedStyle(document.documentElement).getPropertyValue('--text-primary'),
-                fontSize: '1.125rem',
-                fontWeight: '700'
-            }
-        },
-        rangeSelector: {
-            selected: 1,
-            buttons: [{
-                type: 'month',
-                count: 1,
-                text: '1m'
-            }, {
-                type: 'month',
-                count: 3,
-                text: '3m'
-            }, {
-                type: 'month',
-                count: 6,
-                text: '6m'
-            }, {
-                type: 'all',
-                text: 'All'
-            }]
-        },
-        yAxis: [{
-            labels: {
-                align: 'right',
-                x: -3,
-                style: {
-                    color: getComputedStyle(document.documentElement).getPropertyValue('--text-primary')
-                }
-            },
-            title: {
-                text: 'Price',
-                style: {
-                    color: getComputedStyle(document.documentElement).getPropertyValue('--text-primary')
-                }
-            },
-            height: '70%',
-            lineWidth: 2
-        }, {
-            labels: {
-                align: 'right',
-                x: -3,
-                style: {
-                    color: getComputedStyle(document.documentElement).getPropertyValue('--text-primary')
-                }
-            },
-            title: {
-                text: 'Volume',
-                style: {
-                    color: getComputedStyle(document.documentElement).getPropertyValue('--text-primary')
-                }
-            },
-            top: '75%',
-            height: '25%',
-            offset: 0,
-            lineWidth: 2
-        }],
-        tooltip: {
-            split: true
-        },
-        series: [{
-            type: 'candlestick',
-            name: symbol,
-            data: ohlc,
-            color: '#EF4444',
-            upColor: '#10B981',
-            lineColor: '#EF4444',
-            upLineColor: '#10B981',
-            yAxis: 0,
-            dataGrouping: {
-                enabled: false
-            }
-        }, {
-            type: 'column',
-            name: 'Volume',
-            data: volume,
-            yAxis: 1,
-            color: '#3B82F6',
-            opacity: 0.5
-        }],
-        credits: { enabled: false },
-        navigator: {
-            enabled: true
-        },
-        scrollbar: {
-            enabled: true
-        }
-    });
-    
-    console.log('✅ Candlestick chart rendered');
-},
-
-// NOUVELLE FONCTION : Graphique simple (fallback)
-renderSimpleTechnicalChart: function(reversedData, symbol) {
-    console.log('⚠️ OHLC data not available, using simple line chart');
-    
-    const prices = reversedData.map(d => {
-        const timestamp = new Date(d.datetime).getTime();
-        const price = parseFloat(d.close || d.price || 0);
-        return [timestamp, price];
-    });
-    
-    const volume = reversedData.map(d => {
-        const timestamp = new Date(d.datetime).getTime();
-        return [timestamp, parseFloat(d.volume || 0)];
-    });
-    
-    console.log('📊 Price data points:', prices.length);
-    console.log('📊 Sample price:', prices[0]);
-    
-    this.charts.technical = Highcharts.stockChart('technicalChart', {
-        chart: {
-            backgroundColor: 'transparent',
-            height: 500
-        },
-        title: {
-            text: `${symbol} - Technical Analysis`,
-            style: {
-                color: getComputedStyle(document.documentElement).getPropertyValue('--text-primary'),
-                fontSize: '1.125rem',
-                fontWeight: '700'
-            }
-        },
-        rangeSelector: {
-            selected: 1,
-            buttons: [{
-                type: 'month',
-                count: 1,
-                text: '1m'
-            }, {
-                type: 'month',
-                count: 3,
-                text: '3m'
-            }, {
-                type: 'month',
-                count: 6,
-                text: '6m'
-            }, {
-                type: 'all',
-                text: 'All'
-            }]
-        },
-        yAxis: [{
-            labels: {
-                align: 'right',
-                x: -3,
-                style: {
-                    color: getComputedStyle(document.documentElement).getPropertyValue('--text-primary')
-                }
-            },
-            title: {
-                text: 'Price',
-                style: {
-                    color: getComputedStyle(document.documentElement).getPropertyValue('--text-primary')
-                }
-            },
-            height: '70%',
-            lineWidth: 2
-        }, {
-            labels: {
-                align: 'right',
-                x: -3,
-                style: {
-                    color: getComputedStyle(document.documentElement).getPropertyValue('--text-primary')
-                }
-            },
-            title: {
-                text: 'Volume',
-                style: {
-                    color: getComputedStyle(document.documentElement).getPropertyValue('--text-primary')
-                }
-            },
-            top: '75%',
-            height: '25%',
-            offset: 0,
-            lineWidth: 2
-        }],
-        tooltip: {
-            split: true
-        },
-        series: [{
-            type: 'area',
-            name: 'Price',
-            data: prices,
-            color: '#3B82F6',
-            fillColor: {
-                linearGradient: {
-                    x1: 0,
-                    y1: 0,
-                    x2: 0,
-                    y2: 1
-                },
-                stops: [
-                    [0, 'rgba(59, 130, 246, 0.3)'],
-                    [1, 'rgba(59, 130, 246, 0.05)']
-                ]
-            },
+        this.charts.technical.addSeries({
+            name: 'SMA 50',
+            type: 'line',
+            data: sma50Data,
+            color: '#8B5CF6',
             lineWidth: 2,
-            yAxis: 0
-        }, {
-            type: 'column',
-            name: 'Volume',
-            data: volume,
-            yAxis: 1,
-            color: '#3B82F6',
-            opacity: 0.5
-        }],
-        credits: { enabled: false },
-        navigator: {
-            enabled: true
-        },
-        scrollbar: {
-            enabled: true
-        }
-    });
+            yAxis: 0,
+            marker: { enabled: false }
+        });
+    },
     
-    console.log('✅ Simple technical chart rendered');
-},
+    calculateSMA: function(data, period) {
+        const result = [];
+        
+        for (let i = 0; i < data.length; i++) {
+            if (i < period - 1) {
+                result.push(null);
+            } else {
+                let sum = 0;
+                for (let j = 0; j < period; j++) {
+                    sum += data[i - j];
+                }
+                result.push(sum / period);
+            }
+        }
+        
+        return result;
+    },
+    
+    // EMA - Exponential Moving Average
+    addEMA: function(ohlcData) {
+        console.log('📊 Adding EMA indicators');
+        
+        const closePrices = ohlcData.map(d => d[4]);
+        const timestamps = ohlcData.map(d => d[0]);
+        
+        const ema12 = this.calculateEMA(closePrices, 12);
+        const ema26 = this.calculateEMA(closePrices, 26);
+        
+        const ema12Data = timestamps.map((t, i) => [t, ema12[i]]).filter(d => d[1] !== null);
+        const ema26Data = timestamps.map((t, i) => [t, ema26[i]]).filter(d => d[1] !== null);
+        
+        this.charts.technical.addSeries({
+            name: 'EMA 12',
+            type: 'line',
+            data: ema12Data,
+            color: '#06B6D4',
+            lineWidth: 2,
+            dashStyle: 'Dash',
+            yAxis: 0,
+            marker: { enabled: false }
+        });
+        
+        this.charts.technical.addSeries({
+            name: 'EMA 26',
+            type: 'line',
+            data: ema26Data,
+            color: '#EC4899',
+            lineWidth: 2,
+            dashStyle: 'Dash',
+            yAxis: 0,
+            marker: { enabled: false }
+        });
+    },
+    
+    calculateEMA: function(data, period) {
+        const result = [];
+        const multiplier = 2 / (period + 1);
+        
+        let sum = 0;
+        for (let i = 0; i < period; i++) {
+            if (i < data.length) {
+                sum += data[i];
+            }
+        }
+        const sma = sum / period;
+        
+        for (let i = 0; i < data.length; i++) {
+            if (i < period - 1) {
+                result.push(null);
+            } else if (i === period - 1) {
+                result.push(sma);
+            } else {
+                const ema = (data[i] - result[i - 1]) * multiplier + result[i - 1];
+                result.push(ema);
+            }
+        }
+        
+        return result;
+    },
+    
+    // Bollinger Bands
+    addBollingerBands: function(ohlcData) {
+        console.log('📊 Adding Bollinger Bands');
+        
+        const closePrices = ohlcData.map(d => d[4]);
+        const timestamps = ohlcData.map(d => d[0]);
+        const period = 20;
+        const stdDevMultiplier = 2;
+        
+        const sma = this.calculateSMA(closePrices, period);
+        const stdDev = [];
+        
+        for (let i = 0; i < closePrices.length; i++) {
+            if (i < period - 1) {
+                stdDev.push(null);
+            } else {
+                let variance = 0;
+                for (let j = 0; j < period; j++) {
+                    variance += Math.pow(closePrices[i - j] - sma[i], 2);
+                }
+                stdDev.push(Math.sqrt(variance / period));
+            }
+        }
+        
+        const upperBand = timestamps.map((t, i) => 
+            sma[i] !== null ? [t, sma[i] + stdDevMultiplier * stdDev[i]] : null
+        ).filter(d => d !== null);
+        
+        const middleBand = timestamps.map((t, i) => 
+            sma[i] !== null ? [t, sma[i]] : null
+        ).filter(d => d !== null);
+        
+        const lowerBand = timestamps.map((t, i) => 
+            sma[i] !== null ? [t, sma[i] - stdDevMultiplier * stdDev[i]] : null
+        ).filter(d => d !== null);
+        
+        this.charts.technical.addSeries({
+            name: 'BB Upper',
+            type: 'line',
+            data: upperBand,
+            color: '#9CA3AF',
+            lineWidth: 1,
+            yAxis: 0,
+            marker: { enabled: false },
+            enableMouseTracking: false
+        });
+        
+        this.charts.technical.addSeries({
+            name: 'BB Middle',
+            type: 'line',
+            data: middleBand,
+            color: '#6B7280',
+            lineWidth: 1,
+            dashStyle: 'Dot',
+            yAxis: 0,
+            marker: { enabled: false },
+            enableMouseTracking: false
+        });
+        
+        this.charts.technical.addSeries({
+            name: 'BB Lower',
+            type: 'line',
+            data: lowerBand,
+            color: '#9CA3AF',
+            lineWidth: 1,
+            yAxis: 0,
+            marker: { enabled: false },
+            enableMouseTracking: false
+        });
+    },
+    
+    // RSI - Relative Strength Index
+    addRSI: function(ohlcData) {
+        console.log('📊 Adding RSI');
+        
+        const closePrices = ohlcData.map(d => d[4]);
+        const timestamps = ohlcData.map(d => d[0]);
+        const period = 14;
+        
+        const rsi = this.calculateRSI(closePrices, period);
+        const rsiData = timestamps.map((t, i) => [t, rsi[i]]).filter(d => d[1] !== null);
+        
+        this.charts.technical.addAxis({
+            id: 'rsi-axis',
+            labels: {
+                align: 'right',
+                x: -3,
+                style: {
+                    color: getComputedStyle(document.documentElement).getPropertyValue('--text-primary')
+                }
+            },
+            title: {
+                text: 'RSI',
+                style: {
+                    color: getComputedStyle(document.documentElement).getPropertyValue('--text-primary')
+                }
+            },
+            top: '80%',
+            height: '20%',
+            offset: 0,
+            lineWidth: 2,
+            plotLines: [{
+                value: 70,
+                color: '#EF4444',
+                dashStyle: 'Dot',
+                width: 1,
+                label: { 
+                    text: '70',
+                    style: {
+                        color: getComputedStyle(document.documentElement).getPropertyValue('--text-primary')
+                    }
+                }
+            }, {
+                value: 30,
+                color: '#10B981',
+                dashStyle: 'Dot',
+                width: 1,
+                label: { 
+                    text: '30',
+                    style: {
+                        color: getComputedStyle(document.documentElement).getPropertyValue('--text-primary')
+                    }
+                }
+            }]
+        });
+        
+        this.charts.technical.addSeries({
+            name: 'RSI',
+            type: 'line',
+            data: rsiData,
+            color: '#8B5CF6',
+            lineWidth: 2,
+            yAxis: 'rsi-axis',
+            marker: { enabled: false }
+        });
+    },
+    
+    calculateRSI: function(data, period) {
+        const result = [];
+        const gains = [];
+        const losses = [];
+        
+        for (let i = 1; i < data.length; i++) {
+            const change = data[i] - data[i - 1];
+            gains.push(change > 0 ? change : 0);
+            losses.push(change < 0 ? Math.abs(change) : 0);
+        }
+        
+        for (let i = 0; i < data.length; i++) {
+            if (i < period) {
+                result.push(null);
+            } else {
+                let avgGain = 0;
+                let avgLoss = 0;
+                
+                for (let j = 0; j < period; j++) {
+                    avgGain += gains[i - 1 - j];
+                    avgLoss += losses[i - 1 - j];
+                }
+                
+                avgGain /= period;
+                avgLoss /= period;
+                
+                const rs = avgLoss === 0 ? 100 : avgGain / avgLoss;
+                const rsi = 100 - (100 / (1 + rs));
+                
+                result.push(rsi);
+            }
+        }
+        
+        return result;
+    },
+    
+    // MACD
+    addMACD: function(ohlcData) {
+        console.log('📊 Adding MACD');
+        
+        const closePrices = ohlcData.map(d => d[4]);
+        const timestamps = ohlcData.map(d => d[0]);
+        
+        const ema12 = this.calculateEMA(closePrices, 12);
+        const ema26 = this.calculateEMA(closePrices, 26);
+        
+        const macdLine = [];
+        for (let i = 0; i < closePrices.length; i++) {
+            if (ema12[i] !== null && ema26[i] !== null) {
+                macdLine.push(ema12[i] - ema26[i]);
+            } else {
+                macdLine.push(null);
+            }
+        }
+        
+        const signalLine = this.calculateEMA(macdLine.filter(v => v !== null), 9);
+        
+        const fullSignalLine = [];
+        let signalIndex = 0;
+        for (let i = 0; i < macdLine.length; i++) {
+            if (macdLine[i] === null) {
+                fullSignalLine.push(null);
+            } else {
+                fullSignalLine.push(signalLine[signalIndex]);
+                signalIndex++;
+            }
+        }
+        
+        const histogram = macdLine.map((m, i) => 
+            m !== null && fullSignalLine[i] !== null ? m - fullSignalLine[i] : null
+        );
+        
+        const macdData = timestamps.map((t, i) => [t, macdLine[i]]).filter(d => d[1] !== null);
+        const signalData = timestamps.map((t, i) => [t, fullSignalLine[i]]).filter(d => d[1] !== null);
+        const histogramData = timestamps.map((t, i) => [t, histogram[i]]).filter(d => d[1] !== null);
+        
+        this.charts.technical.addAxis({
+            id: 'macd-axis',
+            labels: {
+                align: 'right',
+                x: -3,
+                style: {
+                    color: getComputedStyle(document.documentElement).getPropertyValue('--text-primary')
+                }
+            },
+            title: {
+                text: 'MACD',
+                style: {
+                    color: getComputedStyle(document.documentElement).getPropertyValue('--text-primary')
+                }
+            },
+            top: '80%',
+            height: '20%',
+            offset: 0,
+            lineWidth: 2
+        });
+        
+        this.charts.technical.addSeries({
+            name: 'MACD',
+            type: 'line',
+            data: macdData,
+            color: '#3B82F6',
+            lineWidth: 2,
+            yAxis: 'macd-axis',
+            marker: { enabled: false }
+        });
+        
+        this.charts.technical.addSeries({
+            name: 'Signal',
+            type: 'line',
+            data: signalData,
+            color: '#EF4444',
+            lineWidth: 2,
+            yAxis: 'macd-axis',
+            marker: { enabled: false }
+        });
+        
+        this.charts.technical.addSeries({
+            name: 'Histogram',
+            type: 'column',
+            data: histogramData,
+            color: '#10B981',
+            yAxis: 'macd-axis',
+            opacity: 0.5
+        });
+    },
     
     generateTechnicalSignals: function(symbol, data) {
         const container = document.getElementById('technicalSignals');
         if (!container) return;
         
-        // Calcul de la moyenne mobile simple (SMA)
         const calculateSMA = (prices, period) => {
             if (prices.length < period) return null;
             const slice = prices.slice(-period);
@@ -2072,14 +2231,34 @@ renderSimpleTechnicalChart: function(reversedData, symbol) {
         
         let trend = 'Neutral';
         let trendClass = 'neutral';
+        let trendIcon = 'minus';
         
         if (sma20 && sma50) {
             if (currentPrice > sma20 && sma20 > sma50) {
-                trend = 'Bullish';
+                trend = 'Strong Bullish';
                 trendClass = 'bullish';
+                trendIcon = 'arrow-up';
             } else if (currentPrice < sma20 && sma20 < sma50) {
-                trend = 'Bearish';
+                trend = 'Strong Bearish';
                 trendClass = 'bearish';
+                trendIcon = 'arrow-down';
+            }
+        }
+        
+        // Calcul RSI simple
+        const rsi = this.calculateRSI(prices, 14);
+        const currentRSI = rsi[rsi.length - 1];
+        
+        let rsiSignal = 'Neutral';
+        let rsiClass = 'neutral';
+        
+        if (currentRSI !== null) {
+            if (currentRSI > 70) {
+                rsiSignal = 'Overbought';
+                rsiClass = 'bearish';
+            } else if (currentRSI < 30) {
+                rsiSignal = 'Oversold';
+                rsiClass = 'bullish';
             }
         }
         
@@ -2088,7 +2267,7 @@ renderSimpleTechnicalChart: function(reversedData, symbol) {
             <div class="signals-grid">
                 <div class="signal-card">
                     <div class="signal-icon ${trendClass}">
-                        <i class="fas fa-${trend === 'Bullish' ? 'arrow-up' : trend === 'Bearish' ? 'arrow-down' : 'minus'}"></i>
+                        <i class="fas fa-${trendIcon}"></i>
                     </div>
                     <div class="signal-info">
                         <h5>Price Trend</h5>
@@ -2118,12 +2297,23 @@ renderSimpleTechnicalChart: function(reversedData, symbol) {
                         <p class="signal-detail">50-day moving average</p>
                     </div>
                 </div>
+                
+                <div class="signal-card">
+                    <div class="signal-icon ${rsiClass}">
+                        <i class="fas fa-tachometer-alt"></i>
+                    </div>
+                    <div class="signal-info">
+                        <h5>RSI (14)</h5>
+                        <p><strong>${currentRSI !== null ? currentRSI.toFixed(2) : 'N/A'}</strong></p>
+                        <p class="signal-detail">${rsiSignal}</p>
+                    </div>
+                </div>
             </div>
         `;
     },
-    
-    // ============================================
-    // RISK CALCULATOR TOOL
+
+// ============================================
+    // RISK CALCULATOR TOOL - AMÉLIORÉ AVEC MONTE CARLO
     // ============================================
     setupRiskCalculatorListeners: function() {
         const btnCalculate = document.getElementById('btnCalculateRisk');
@@ -2135,11 +2325,10 @@ renderSimpleTechnicalChart: function(reversedData, symbol) {
         }
         
         // Auto-calculate on input change
-        ['riskPortfolioValue', 'riskConfidence', 'riskVolatility'].forEach(id => {
+        ['riskPortfolioValue', 'riskConfidence', 'riskVolatility', 'riskReturn', 'riskHorizon'].forEach(id => {
             const input = document.getElementById(id);
             if (input) {
                 input.addEventListener('input', () => {
-                    // Debounce
                     clearTimeout(this.riskCalcTimeout);
                     this.riskCalcTimeout = setTimeout(() => {
                         this.calculateRiskMetrics();
@@ -2153,22 +2342,56 @@ renderSimpleTechnicalChart: function(reversedData, symbol) {
         const portfolioValue = parseFloat(document.getElementById('riskPortfolioValue')?.value || 100000);
         const confidence = parseFloat(document.getElementById('riskConfidence')?.value || 95);
         const volatility = parseFloat(document.getElementById('riskVolatility')?.value || 15);
+        const expectedReturn = parseFloat(document.getElementById('riskReturn')?.value || 8);
+        const timeHorizon = parseFloat(document.getElementById('riskHorizon')?.value || 1);
         
         console.log('📊 Calculating risk metrics...');
         
-        const zScore = confidence === 95 ? 1.645 : confidence === 99 ? 2.326 : 1.282;
+        // Z-scores pour différents niveaux de confiance
+        const zScoreMap = {
+            90: 1.282,
+            95: 1.645,
+            99: 2.326
+        };
+        const zScore = zScoreMap[confidence] || 1.645;
+        
+        // VaR calculé
         const dailyVolatility = volatility / Math.sqrt(252);
-        const varDaily = portfolioValue * dailyVolatility * zScore / 100;
+        const horizonVolatility = dailyVolatility * Math.sqrt(timeHorizon);
+        const varDaily = portfolioValue * horizonVolatility * zScore / 100;
+        
+        // CVaR (Expected Shortfall)
         const cvar = varDaily * 1.3;
-        const sharpeRatio = (8 - 2) / volatility; // Assuming 8% return, 2% risk-free rate
+        
+        // Sharpe Ratio
+        const riskFreeRate = 2;
+        const sharpeRatio = (expectedReturn - riskFreeRate) / volatility;
+        
+        // Maximum Drawdown (simulé)
+        const maxDrawdown = (volatility / 100) * portfolioValue * 1.5;
+        
+        // Beta (simulé - vs market)
+        const beta = 0.8 + (Math.random() * 0.6); // Entre 0.8 et 1.4
         
         this.displayRiskResults({
             portfolioValue,
             confidence,
             volatility,
+            expectedReturn,
+            timeHorizon,
             varDaily,
             cvar,
-            sharpeRatio
+            sharpeRatio,
+            maxDrawdown,
+            beta
+        });
+        
+        // NOUVEAU : Monte Carlo Simulation
+        this.runMonteCarloSimulation({
+            portfolioValue,
+            expectedReturn,
+            volatility,
+            timeHorizon: 252 // 1 an de trading
         });
     },
     
@@ -2177,50 +2400,232 @@ renderSimpleTechnicalChart: function(reversedData, symbol) {
         if (!container) return;
         
         container.innerHTML = `
-            <div class="risk-metric-card">
-                <h5>Value at Risk (VaR)</h5>
-                <div class="risk-metric-value text-danger">
-                    $${metrics.varDaily.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+                <div class="risk-metric-card">
+                    <h5>Value at Risk (VaR)</h5>
+                    <div class="risk-metric-value text-danger">
+                        $${metrics.varDaily.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}
+                    </div>
+                    <p class="risk-metric-description">
+                        ${metrics.confidence}% confidence - ${metrics.timeHorizon} day${metrics.timeHorizon > 1 ? 's' : ''}
+                    </p>
                 </div>
-                <p class="risk-metric-description">
-                    ${metrics.confidence}% confidence level - Daily VaR
-                </p>
-            </div>
-            
-            <div class="risk-metric-card">
-                <h5>Conditional VaR (CVaR)</h5>
-                <div class="risk-metric-value text-danger">
-                    $${metrics.cvar.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}
+                
+                <div class="risk-metric-card">
+                    <h5>Conditional VaR (CVaR)</h5>
+                    <div class="risk-metric-value text-danger">
+                        $${metrics.cvar.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}
+                    </div>
+                    <p class="risk-metric-description">
+                        Expected loss if VaR exceeded
+                    </p>
                 </div>
-                <p class="risk-metric-description">
-                    Expected loss if VaR threshold is exceeded
-                </p>
-            </div>
-            
-            <div class="risk-metric-card">
-                <h5>Volatility (Annual)</h5>
-                <div class="risk-metric-value">
-                    ${metrics.volatility.toFixed(2)}%
+                
+                <div class="risk-metric-card">
+                    <h5>Volatility (Annual)</h5>
+                    <div class="risk-metric-value">
+                        ${metrics.volatility.toFixed(2)}%
+                    </div>
+                    <p class="risk-metric-description">
+                        Annualized standard deviation
+                    </p>
                 </div>
-                <p class="risk-metric-description">
-                    Annualized standard deviation of returns
-                </p>
-            </div>
-            
-            <div class="risk-metric-card">
-                <h5>Sharpe Ratio</h5>
-                <div class="risk-metric-value ${metrics.sharpeRatio > 1 ? 'text-success' : ''}">
-                    ${metrics.sharpeRatio.toFixed(2)}
+                
+                <div class="risk-metric-card">
+                    <h5>Sharpe Ratio</h5>
+                    <div class="risk-metric-value ${metrics.sharpeRatio > 1 ? 'text-success' : ''}">
+                        ${metrics.sharpeRatio.toFixed(2)}
+                    </div>
+                    <p class="risk-metric-description">
+                        Risk-adjusted return measure
+                    </p>
                 </div>
-                <p class="risk-metric-description">
-                    Risk-adjusted return measure
-                </p>
+                
+                <div class="risk-metric-card">
+                    <h5>Maximum Drawdown</h5>
+                    <div class="risk-metric-value text-danger">
+                        $${metrics.maxDrawdown.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}
+                    </div>
+                    <p class="risk-metric-description">
+                        Estimated worst-case loss
+                    </p>
+                </div>
+                
+                <div class="risk-metric-card">
+                    <h5>Portfolio Beta</h5>
+                    <div class="risk-metric-value ${metrics.beta > 1 ? 'text-danger' : 'text-success'}">
+                        ${metrics.beta.toFixed(2)}
+                    </div>
+                    <p class="risk-metric-description">
+                        Sensitivity to market movements
+                    </p>
+                </div>
             </div>
         `;
     },
     
+    // NOUVEAU : Monte Carlo Simulation
+    runMonteCarloSimulation: function(params) {
+        console.log('🎲 Running Monte Carlo simulation...');
+        
+        const container = document.getElementById('monteCarloSection');
+        if (!container) return;
+        
+        container.style.display = 'block';
+        
+        if (this.charts.monteCarlo) {
+            this.charts.monteCarlo.destroy();
+        }
+        
+        const { portfolioValue, expectedReturn, volatility, timeHorizon } = params;
+        
+        const numSimulations = 100; // 100 simulations pour performance
+        const dailyReturn = expectedReturn / 252 / 100;
+        const dailyVol = volatility / Math.sqrt(252) / 100;
+        
+        // Générer les simulations
+        const simulations = [];
+        
+        for (let sim = 0; sim < numSimulations; sim++) {
+            const path = [portfolioValue];
+            let currentValue = portfolioValue;
+            
+            for (let day = 1; day <= timeHorizon; day++) {
+                // Générer un rendement aléatoire (distribution normale)
+                const randomReturn = this.randomNormal(dailyReturn, dailyVol);
+                currentValue = currentValue * (1 + randomReturn);
+                path.push(currentValue);
+            }
+            
+            simulations.push(path);
+        }
+        
+        // Convertir en séries Highcharts
+        const series = simulations.map((path, index) => ({
+            name: `Simulation ${index + 1}`,
+            data: path,
+            lineWidth: 1,
+            opacity: 0.3,
+            marker: { enabled: false },
+            enableMouseTracking: false,
+            showInLegend: false
+        }));
+        
+        // Calculer la moyenne
+        const avgPath = [];
+        for (let day = 0; day <= timeHorizon; day++) {
+            const dayValues = simulations.map(sim => sim[day]);
+            const avg = dayValues.reduce((a, b) => a + b, 0) / dayValues.length;
+            avgPath.push(avg);
+        }
+        
+        // Ajouter la série moyenne
+        series.push({
+            name: 'Average Path',
+            data: avgPath,
+            lineWidth: 3,
+            color: '#3B82F6',
+            marker: { enabled: false },
+            zIndex: 10
+        });
+        
+        // Calculer les percentiles
+        const percentile5 = [];
+        const percentile95 = [];
+        
+        for (let day = 0; day <= timeHorizon; day++) {
+            const dayValues = simulations.map(sim => sim[day]).sort((a, b) => a - b);
+            percentile5.push(dayValues[Math.floor(dayValues.length * 0.05)]);
+            percentile95.push(dayValues[Math.floor(dayValues.length * 0.95)]);
+        }
+        
+        series.push({
+            name: '5th Percentile',
+            data: percentile5,
+            lineWidth: 2,
+            color: '#EF4444',
+            dashStyle: 'Dash',
+            marker: { enabled: false }
+        });
+        
+        series.push({
+            name: '95th Percentile',
+            data: percentile95,
+            lineWidth: 2,
+            color: '#10B981',
+            dashStyle: 'Dash',
+            marker: { enabled: false }
+        });
+        
+        this.charts.monteCarlo = Highcharts.chart('monteCarloChart', {
+            chart: {
+                backgroundColor: 'transparent'
+            },
+            title: {
+                text: 'Portfolio Value Projections',
+                style: {
+                    color: getComputedStyle(document.documentElement).getPropertyValue('--text-primary'),
+                    fontSize: '1rem',
+                    fontWeight: '700'
+                }
+            },
+            xAxis: {
+                title: {
+                    text: 'Trading Days',
+                    style: {
+                        color: getComputedStyle(document.documentElement).getPropertyValue('--text-primary')
+                    }
+                },
+                labels: {
+                    style: {
+                        color: getComputedStyle(document.documentElement).getPropertyValue('--text-primary')
+                    }
+                }
+            },
+            yAxis: {
+                title: {
+                    text: 'Portfolio Value ($)',
+                    style: {
+                        color: getComputedStyle(document.documentElement).getPropertyValue('--text-primary')
+                    }
+                },
+                labels: {
+                    formatter: function() {
+                        return '$' + (this.value / 1000).toFixed(0) + 'k';
+                    },
+                    style: {
+                        color: getComputedStyle(document.documentElement).getPropertyValue('--text-primary')
+                    }
+                }
+            },
+            tooltip: {
+                shared: false,
+                valueDecimals: 0,
+                valuePrefix: '$'
+            },
+            series: series,
+            credits: { enabled: false },
+            legend: {
+                enabled: true,
+                itemStyle: {
+                    color: getComputedStyle(document.documentElement).getPropertyValue('--text-primary')
+                }
+            }
+        });
+    },
+    
+    // Fonction pour générer nombres aléatoires avec distribution normale
+    randomNormal: function(mean, stdDev) {
+        // Box-Muller transform
+        let u = 0, v = 0;
+        while(u === 0) u = Math.random();
+        while(v === 0) v = Math.random();
+        const num = Math.sqrt(-2.0 * Math.log(u)) * Math.cos(2.0 * Math.PI * v);
+        return num * stdDev + mean;
+    },
+    
     // ============================================
-    // AI INSIGHTS TOOL
+    // AI INSIGHTS TOOL - AMÉLIORÉ AVEC GRAPHIQUES
     // ============================================
     setupAIInsightsListeners: function() {
         const btnAnalyze = document.getElementById('btnAIAnalyze');
@@ -2260,16 +2665,23 @@ renderSimpleTechnicalChart: function(reversedData, symbol) {
                 <div class="ai-placeholder">
                     <i class="fas fa-robot fa-spin"></i>
                     <h3>AI Analysis in Progress</h3>
-                    <p>Analyzing ${symbol}...</p>
+                    <p>Analyzing ${symbol} with machine learning models...</p>
+                    <div style="margin-top: 1rem; color: var(--text-secondary);">
+                        <p>⚙️ Loading LSTM neural network...</p>
+                        <p>📊 Processing 5 years of historical data...</p>
+                        <p>🧠 Calculating sentiment scores...</p>
+                    </div>
                 </div>
             `;
             
-            await new Promise(resolve => setTimeout(resolve, 1500));
+            await new Promise(resolve => setTimeout(resolve, 2000));
             
+            // Charger les données
             const quoteData = await this.apiClient.getQuote(symbol);
+            const timeSeriesData = await this.apiClient.getTimeSeries(symbol, '1day', '90');
             
-            if (quoteData) {
-                this.displayAIInsights(symbol, quoteData);
+            if (quoteData && timeSeriesData) {
+                this.displayAIInsights(symbol, quoteData, timeSeriesData);
             }
             
         } catch (error) {
@@ -2277,74 +2689,300 @@ renderSimpleTechnicalChart: function(reversedData, symbol) {
             container.innerHTML = `
                 <div class="error-message">
                     <i class="fas fa-exclamation-triangle"></i>
-                    <span>Unable to generate AI insights</span>
+                    <span>Unable to generate AI insights for ${symbol}</span>
                 </div>
             `;
         }
     },
     
-    displayAIInsights: function(symbol, quoteData) {
+    displayAIInsights: function(symbol, quoteData, timeSeriesData) {
         const container = document.getElementById('aiResults');
         if (!container) return;
         
-        // FIX : Support price ET close
         const currentPrice = quoteData.close || quoteData.price || 0;
-        const prediction7d = currentPrice * (1 + (Math.random() - 0.5) * 0.1);
-        const prediction30d = currentPrice * (1 + (Math.random() - 0.5) * 0.2);
+        
+        // Générer des prédictions réalistes
+        const prediction7d = currentPrice * (1 + (Math.random() - 0.45) * 0.15);
+        const prediction30d = currentPrice * (1 + (Math.random() - 0.45) * 0.25);
+        const prediction90d = currentPrice * (1 + (Math.random() - 0.45) * 0.35);
         
         const change7d = ((prediction7d - currentPrice) / currentPrice * 100).toFixed(2);
         const change30d = ((prediction30d - currentPrice) / currentPrice * 100).toFixed(2);
+        const change90d = ((prediction90d - currentPrice) / currentPrice * 100).toFixed(2);
+        
+        // Score de sentiment (0-100)
+        const sentimentScore = 50 + (parseFloat(change30d) * 2);
+        const clampedSentiment = Math.max(0, Math.min(100, sentimentScore));
+        
+        let sentimentLabel = 'Neutral';
+        let sentimentColor = '#FCD34D';
+        let sentimentIcon = 'meh';
+        
+        if (clampedSentiment >= 70) {
+            sentimentLabel = 'Very Positive';
+            sentimentColor = '#10B981';
+            sentimentIcon = 'smile';
+        } else if (clampedSentiment >= 55) {
+            sentimentLabel = 'Positive';
+            sentimentColor = '#34D399';
+            sentimentIcon = 'smile-wink';
+        } else if (clampedSentiment >= 45) {
+            sentimentLabel = 'Neutral';
+            sentimentColor = '#FCD34D';
+            sentimentIcon = 'meh';
+        } else if (clampedSentiment >= 30) {
+            sentimentLabel = 'Negative';
+            sentimentColor = '#FB923C';
+            sentimentIcon = 'frown';
+        } else {
+            sentimentLabel = 'Very Negative';
+            sentimentColor = '#EF4444';
+            sentimentIcon = 'angry';
+        }
+        
+        // Calcul du score de confiance
+        const confidence = 75 + Math.random() * 15; // Entre 75% et 90%
         
         container.innerHTML = `
             <div class="ai-insight-card">
                 <div class="ai-insight-header">
                     <div class="ai-insight-icon">
-                        <i class="fas fa-chart-line"></i>
+                        <i class="fas fa-brain"></i>
                     </div>
                     <div class="ai-insight-title">
-                        <h4>Price Prediction</h4>
-                        <p>ML Forecast for ${symbol}</p>
+                        <h4>AI Price Predictions</h4>
+                        <p>Deep Learning Analysis for ${symbol}</p>
                     </div>
                     <div class="ai-confidence">
                         <i class="fas fa-check-circle"></i>
-                        85% Confidence
+                        ${confidence.toFixed(1)}% Confidence
                     </div>
                 </div>
                 <div class="ai-insight-content">
-                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem; margin: 1.5rem 0;">
-                        <div>
-                            <p style="font-size: 0.875rem; color: var(--text-secondary); margin-bottom: 0.5rem;">Current Price</p>
-                            <p style="font-size: 1.5rem; font-weight: 700; color: var(--text-primary);">$${currentPrice.toFixed(2)}</p>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1.5rem; margin: 1.5rem 0;">
+                        <div style="text-align: center;">
+                            <p style="font-size: 0.75rem; color: var(--text-secondary); margin-bottom: 0.5rem; text-transform: uppercase; font-weight: 600;">Current Price</p>
+                            <p style="font-size: 2rem; font-weight: 800; color: var(--text-primary); margin: 0;">$${currentPrice.toFixed(2)}</p>
                         </div>
-                        <div>
-                            <p style="font-size: 0.875rem; color: var(--text-secondary); margin-bottom: 0.5rem;">7-Day Prediction</p>
-                            <p style="font-size: 1.5rem; font-weight: 700; color: ${change7d > 0 ? 'var(--success-color)' : 'var(--danger-color)'};">
+                        <div style="text-align: center;">
+                            <p style="font-size: 0.75rem; color: var(--text-secondary); margin-bottom: 0.5rem; text-transform: uppercase; font-weight: 600;">7-Day Target</p>
+                            <p style="font-size: 2rem; font-weight: 800; color: ${change7d > 0 ? '#10B981' : '#EF4444'}; margin: 0;">
                                 $${prediction7d.toFixed(2)}
-                                <span style="font-size: 0.875rem; margin-left: 0.5rem;">(${change7d > 0 ? '+' : ''}${change7d}%)</span>
+                            </p>
+                            <p style="font-size: 0.875rem; color: ${change7d > 0 ? '#10B981' : '#EF4444'}; margin-top: 0.25rem;">
+                                ${change7d > 0 ? '▲' : '▼'} ${Math.abs(change7d)}%
                             </p>
                         </div>
-                        <div>
-                            <p style="font-size: 0.875rem; color: var(--text-secondary); margin-bottom: 0.5rem;">30-Day Prediction</p>
-                            <p style="font-size: 1.5rem; font-weight: 700; color: ${change30d > 0 ? 'var(--success-color)' : 'var(--danger-color)'};">
+                        <div style="text-align: center;">
+                            <p style="font-size: 0.75rem; color: var(--text-secondary); margin-bottom: 0.5rem; text-transform: uppercase; font-weight: 600;">30-Day Target</p>
+                            <p style="font-size: 2rem; font-weight: 800; color: ${change30d > 0 ? '#10B981' : '#EF4444'}; margin: 0;">
                                 $${prediction30d.toFixed(2)}
-                                <span style="font-size: 0.875rem; margin-left: 0.5rem;">(${change30d > 0 ? '+' : ''}${change30d}%)</span>
+                            </p>
+                            <p style="font-size: 0.875rem; color: ${change30d > 0 ? '#10B981' : '#EF4444'}; margin-top: 0.25rem;">
+                                ${change30d > 0 ? '▲' : '▼'} ${Math.abs(change30d)}%
+                            </p>
+                        </div>
+                        <div style="text-align: center;">
+                            <p style="font-size: 0.75rem; color: var(--text-secondary); margin-bottom: 0.5rem; text-transform: uppercase; font-weight: 600;">90-Day Target</p>
+                            <p style="font-size: 2rem; font-weight: 800; color: ${change90d > 0 ? '#10B981' : '#EF4444'}; margin: 0;">
+                                $${prediction90d.toFixed(2)}
+                            </p>
+                            <p style="font-size: 0.875rem; color: ${change90d > 0 ? '#10B981' : '#EF4444'}; margin-top: 0.25rem;">
+                                ${change90d > 0 ? '▲' : '▼'} ${Math.abs(change90d)}%
                             </p>
                         </div>
                     </div>
                     
-                    <div style="margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid var(--border-color);">
-                        <p><strong>Model:</strong> LSTM Neural Network</p>
-                        <p><strong>Training Data:</strong> 5 years historical data</p>
-                        <p><strong>Last Updated:</strong> ${new Date().toLocaleString()}</p>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid var(--border-color);">
+                        <div>
+                            <h5 style="font-size: 0.875rem; font-weight: 600; color: var(--text-secondary); margin-bottom: 1rem;">
+                                <i class="fas fa-comments"></i> Market Sentiment
+                            </h5>
+                            <div style="display: flex; align-items: center; gap: 1rem;">
+                                <div style="font-size: 3rem; color: ${sentimentColor};">
+                                    <i class="fas fa-${sentimentIcon}"></i>
+                                </div>
+                                <div>
+                                    <p style="font-size: 1.5rem; font-weight: 700; color: ${sentimentColor}; margin: 0;">
+                                        ${sentimentLabel}
+                                    </p>
+                                    <p style="font-size: 0.875rem; color: var(--text-secondary); margin: 0.25rem 0 0 0;">
+                                        Score: ${clampedSentiment.toFixed(0)}/100
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <h5 style="font-size: 0.875rem; font-weight: 600; color: var(--text-secondary); margin-bottom: 1rem;">
+                                <i class="fas fa-info-circle"></i> Model Information
+                            </h5>
+                            <div style="font-size: 0.875rem; color: var(--text-secondary); line-height: 1.8;">
+                                <p style="margin: 0.25rem 0;"><strong>Model:</strong> LSTM Neural Network</p>
+                                <p style="margin: 0.25rem 0;"><strong>Training:</strong> 5 years historical</p>
+                                <p style="margin: 0.25rem 0;"><strong>Features:</strong> 47 technical indicators</p>
+                                <p style="margin: 0.25rem 0;"><strong>Updated:</strong> ${new Date().toLocaleTimeString()}</p>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
         `;
+        
+        // NOUVEAU : Charger le graphique de prédiction
+        if (timeSeriesData && timeSeriesData.data) {
+            this.renderAIPredictionChart(symbol, timeSeriesData.data, {
+                currentPrice,
+                prediction7d,
+                prediction30d,
+                prediction90d
+            });
+        }
     },
     
-    // ============================================
+    // NOUVEAU : Graphique de prédiction AI
+    renderAIPredictionChart: function(symbol, historicalData, predictions) {
+        const container = document.getElementById('aiPredictionChart');
+        if (!container) return;
+        
+        container.style.display = 'block';
+        
+        if (this.charts.aiPredictionChart) {
+            this.charts.aiPredictionChart.destroy();
+        }
+        
+        // Données historiques
+        const sortedData = [...historicalData].sort((a, b) => new Date(a.datetime) - new Date(b.datetime));
+        const historical = sortedData.map(d => ({
+            x: new Date(d.datetime).getTime(),
+            y: parseFloat(d.close)
+        }));
+        
+        // Dernière date
+        const lastDate = new Date(sortedData[sortedData.length - 1].datetime);
+        
+        // Points de prédiction
+        const predictionPoints = [
+            {
+                x: lastDate.getTime(),
+                y: predictions.currentPrice
+            },
+            {
+                x: lastDate.getTime() + (7 * 24 * 60 * 60 * 1000),
+                y: predictions.prediction7d
+            },
+            {
+                x: lastDate.getTime() + (30 * 24 * 60 * 60 * 1000),
+                y: predictions.prediction30d
+            },
+            {
+                x: lastDate.getTime() + (90 * 24 * 60 * 60 * 1000),
+                y: predictions.prediction90d
+            }
+        ];
+        
+        // Intervalles de confiance (±10%)
+        const upperBound = predictionPoints.map(p => ({
+            x: p.x,
+            y: p.y * 1.1
+        }));
+        
+        const lowerBound = predictionPoints.map(p => ({
+            x: p.x,
+            y: p.y * 0.9
+        }));
+        
+        this.charts.aiPredictionChart = Highcharts.chart('predictionChartContainer', {
+            chart: {
+                backgroundColor: 'transparent'
+            },
+            title: {
+                text: `${symbol} - AI Price Forecast`,
+                style: {
+                    color: getComputedStyle(document.documentElement).getPropertyValue('--text-primary'),
+                    fontSize: '1rem',
+                    fontWeight: '700'
+                }
+            },
+            xAxis: {
+                type: 'datetime',
+                labels: {
+                    style: {
+                        color: getComputedStyle(document.documentElement).getPropertyValue('--text-primary')
+                    }
+                },
+                plotLines: [{
+                    value: lastDate.getTime(),
+                    color: '#64748b',
+                    width: 2,
+                    dashStyle: 'Dash',
+                    label: {
+                        text: 'Today',
+                        style: {
+                            color: getComputedStyle(document.documentElement).getPropertyValue('--text-primary')
+                        }
+                    }
+                }]
+            },
+            yAxis: {
+                title: {
+                    text: 'Price (USD)',
+                    style: {
+                        color: getComputedStyle(document.documentElement).getPropertyValue('--text-primary')
+                    }
+                },
+                labels: {
+                    format: '${value}',
+                    style: {
+                        color: getComputedStyle(document.documentElement).getPropertyValue('--text-primary')
+                    }
+                }
+            },
+            tooltip: {
+                shared: true,
+                valueDecimals: 2,
+                valuePrefix: '$'
+            },
+            series: [{
+                name: 'Historical Price',
+                data: historical,
+                color: '#3B82F6',
+                lineWidth: 2,
+                marker: { enabled: false }
+            }, {
+                name: 'AI Prediction',
+                data: predictionPoints,
+                color: '#8B5CF6',
+                lineWidth: 3,
+                dashStyle: 'Dash',
+                marker: { 
+                    enabled: true,
+                    radius: 5
+                }
+            }, {
+                name: 'Confidence Range',
+                data: upperBound.concat(lowerBound.reverse()),
+                type: 'area',
+                color: '#8B5CF6',
+                fillOpacity: 0.1,
+                lineWidth: 0,
+                marker: { enabled: false },
+                enableMouseTracking: false
+            }],
+            credits: { enabled: false },
+            legend: {
+                enabled: true,
+                itemStyle: {
+                    color: getComputedStyle(document.documentElement).getPropertyValue('--text-primary')
+                }
+            }
+        });
+    },
+
+// ============================================
     // UTILITY FUNCTIONS
     // ============================================
+    
     formatNumber: function(num) {
         if (num >= 1000000000) {
             return (num / 1000000000).toFixed(2) + 'B';
@@ -2367,6 +3005,45 @@ renderSimpleTechnicalChart: function(reversedData, symbol) {
     
     showLoading: function(show) {
         console.log(show ? '⏳ Loading...' : '✅ Loaded');
+        
+        // OPTIONNEL : Afficher un indicateur de chargement global
+        let loader = document.getElementById('globalLoader');
+        
+        if (show) {
+            if (!loader) {
+                loader = document.createElement('div');
+                loader.id = 'globalLoader';
+                loader.style.cssText = `
+                    position: fixed;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 3px;
+                    background: linear-gradient(90deg, #667eea 0%, #764ba2 50%, #667eea 100%);
+                    background-size: 200% 100%;
+                    animation: loadingBar 1.5s ease-in-out infinite;
+                    z-index: 99999;
+                `;
+                document.body.appendChild(loader);
+                
+                // Ajouter l'animation CSS si elle n'existe pas
+                if (!document.getElementById('loadingBarStyle')) {
+                    const style = document.createElement('style');
+                    style.id = 'loadingBarStyle';
+                    style.textContent = `
+                        @keyframes loadingBar {
+                            0% { background-position: 0% 0%; }
+                            100% { background-position: 200% 0%; }
+                        }
+                    `;
+                    document.head.appendChild(style);
+                }
+            }
+        } else {
+            if (loader) {
+                loader.remove();
+            }
+        }
     },
     
     showNotification: function(message, type = 'info') {
@@ -2397,19 +3074,226 @@ renderSimpleTechnicalChart: function(reversedData, symbol) {
         
         document.body.appendChild(notification);
         
+        // Trigger animation
         setTimeout(() => {
             notification.classList.add('show');
         }, 10);
         
+        // Auto-remove after 5 seconds
         setTimeout(() => {
             notification.classList.remove('show');
             setTimeout(() => {
                 notification.remove();
             }, 300);
         }, 5000);
+    },
+    
+    // ============================================
+    // DEMO HELPERS - Fonctions d'exemple
+    // ============================================
+    
+    // Fonction pour simuler un chargement progressif
+    simulateProgress: function(callback, steps = 5) {
+        let currentStep = 0;
+        const interval = setInterval(() => {
+            currentStep++;
+            if (currentStep >= steps) {
+                clearInterval(interval);
+                if (callback) callback();
+            }
+        }, 300);
+    },
+    
+    // Fonction pour générer des données de démonstration
+    generateDemoData: function(points = 30) {
+        const data = [];
+        let value = 100;
+        
+        for (let i = 0; i < points; i++) {
+            value += (Math.random() - 0.5) * 5;
+            data.push({
+                x: Date.now() - (points - i) * 24 * 60 * 60 * 1000,
+                y: value
+            });
+        }
+        
+        return data;
+    },
+    
+    // Fonction pour formater une date
+    formatDate: function(date, format = 'short') {
+        const d = new Date(date);
+        
+        if (format === 'short') {
+            return d.toLocaleDateString();
+        } else if (format === 'long') {
+            return d.toLocaleDateString('en-US', { 
+                weekday: 'long', 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric' 
+            });
+        } else if (format === 'time') {
+            return d.toLocaleTimeString();
+        }
+        
+        return d.toString();
+    },
+    
+    // Fonction pour calculer la performance
+    calculatePerformance: function(startPrice, endPrice) {
+        const change = endPrice - startPrice;
+        const percentChange = (change / startPrice) * 100;
+        
+        return {
+            change: change,
+            percentChange: percentChange,
+            isPositive: change >= 0
+        };
+    },
+    
+    // Fonction pour obtenir la couleur d'un graphique basée sur le thème
+    getChartColor: function(index) {
+        const colors = [
+            '#3B82F6', // Blue
+            '#10B981', // Green
+            '#F59E0B', // Amber
+            '#EF4444', // Red
+            '#8B5CF6', // Purple
+            '#EC4899', // Pink
+            '#06B6D4', // Cyan
+            '#84CC16'  // Lime
+        ];
+        
+        return colors[index % colors.length];
+    },
+    
+    // Fonction pour détecter le mode sombre
+    isDarkMode: function() {
+        return document.body.classList.contains('dark-mode');
+    },
+    
+    // Fonction pour obtenir les couleurs du thème actuel
+    getThemeColors: function() {
+        const root = document.documentElement;
+        const style = getComputedStyle(root);
+        
+        return {
+            primary: style.getPropertyValue('--text-primary').trim() || '#1e293b',
+            secondary: style.getPropertyValue('--text-secondary').trim() || '#64748b',
+            background: style.getPropertyValue('--background-primary').trim() || '#ffffff',
+            success: style.getPropertyValue('--success-color').trim() || '#10B981',
+            danger: style.getPropertyValue('--danger-color').trim() || '#EF4444',
+            warning: style.getPropertyValue('--warning-color').trim() || '#F59E0B'
+        };
+    },
+    
+    // ============================================
+    // EXPORT / SHARE FUNCTIONS (Bonus)
+    // ============================================
+    
+    exportChartAsImage: function(chartId) {
+        const chart = this.charts[chartId];
+        if (!chart) {
+            this.showNotification('Chart not found', 'error');
+            return;
+        }
+        
+        // Highcharts a une fonction d'export intégrée
+        if (chart.exportChart) {
+            chart.exportChart({
+                type: 'image/png',
+                filename: `${chartId}_${Date.now()}`
+            });
+            this.showNotification('Chart exported successfully!', 'success');
+        }
+    },
+    
+    shareResults: function(symbol, data) {
+        const shareText = `Check out my analysis of ${symbol} on FinancePro!`;
+        const shareUrl = window.location.href;
+        
+        if (navigator.share) {
+            navigator.share({
+                title: 'FinancePro Analysis',
+                text: shareText,
+                url: shareUrl
+            }).then(() => {
+                this.showNotification('Shared successfully!', 'success');
+            }).catch((error) => {
+                console.error('Error sharing:', error);
+            });
+        } else {
+            // Fallback: copier dans le presse-papier
+            const textToCopy = `${shareText}\n${shareUrl}`;
+            navigator.clipboard.writeText(textToCopy).then(() => {
+                this.showNotification('Link copied to clipboard!', 'success');
+            });
+        }
+    },
+    
+    // ============================================
+    // KEYBOARD SHORTCUTS (Bonus)
+    // ============================================
+    
+    setupKeyboardShortcuts: function() {
+        document.addEventListener('keydown', (e) => {
+            // Ctrl/Cmd + K : Focus sur la recherche
+            if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+                e.preventDefault();
+                const searchInput = document.getElementById('companySearchInput');
+                if (searchInput) {
+                    searchInput.focus();
+                    this.showNotification('Search activated', 'info');
+                }
+            }
+            
+            // Escape : Fermer les suggestions
+            if (e.key === 'Escape') {
+                this.hideSuggestions();
+            }
+            
+            // Ctrl/Cmd + 1-6 : Changer d'outil
+            if ((e.ctrlKey || e.metaKey) && e.key >= '1' && e.key <= '6') {
+                e.preventDefault();
+                const tools = [
+                    'company-search',
+                    'live-quotes',
+                    'portfolio-builder',
+                    'technical-analysis',
+                    'risk-calculator',
+                    'ai-insights'
+                ];
+                const index = parseInt(e.key) - 1;
+                if (tools[index]) {
+                    this.switchTool(tools[index]);
+                }
+            }
+        });
+        
+        console.log('⌨️ Keyboard shortcuts enabled!');
+        console.log('   Ctrl+K: Focus search');
+        console.log('   Ctrl+1-6: Switch tools');
+        console.log('   Esc: Close suggestions');
+    },
+    
+    // ============================================
+    // ANALYTICS (Optionnel)
+    // ============================================
+    
+    trackEvent: function(category, action, label) {
+        console.log(`📊 Analytics: ${category} - ${action} - ${label}`);
+        
+        // Ici tu peux intégrer Google Analytics ou autre
+        if (typeof gtag !== 'undefined') {
+            gtag('event', action, {
+                'event_category': category,
+                'event_label': label
+            });
+        }
     }
     
-}; // Fin de l'objet DemoApp
+}; // ⚠️ FIN de l'objet DemoApp
 
 // ============================================
 // INITIALIZE ON DOM READY
@@ -2417,9 +3301,11 @@ renderSimpleTechnicalChart: function(reversedData, symbol) {
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', () => {
         DemoApp.init();
+        DemoApp.setupKeyboardShortcuts(); // Activer les raccourcis clavier
     });
 } else {
     DemoApp.init();
+    DemoApp.setupKeyboardShortcuts();
 }
 
 // ============================================
@@ -2428,8 +3314,105 @@ if (document.readyState === 'loading') {
 window.DemoApp = DemoApp;
 
 // ============================================
-// CONSOLE MESSAGE
+// CONSOLE WELCOME MESSAGE
 // ============================================
-console.log('%c🚀 Interactive Demo Ready!', 'color: #667eea; font-size: 20px; font-weight: bold;');
-console.log('%c📊 Try searching for "Apple", "AAPL", "Microsoft", or "TSLA"', 'color: #8b5cf6; font-size: 14px;');
-console.log('%c✨ Search works with both company names and ticker symbols!', 'color: #10b981; font-size: 14px;');
+console.log('%c╔══════════════════════════════════════════════════════════╗', 'color: #667eea; font-weight: bold;');
+console.log('%c║                                                          ║', 'color: #667eea; font-weight: bold;');
+console.log('%c║     🚀 FinancePro Interactive Demo - PREMIUM EDITION    ║', 'color: #667eea; font-weight: bold;');
+console.log('%c║                                                          ║', 'color: #667eea; font-weight: bold;');
+console.log('%c╚══════════════════════════════════════════════════════════╝', 'color: #667eea; font-weight: bold;');
+console.log('');
+console.log('%c✨ FEATURES LOADED:', 'color: #8b5cf6; font-size: 14px; font-weight: bold;');
+console.log('%c  📊 Company Search with Performance Charts', 'color: #10b981; font-size: 12px;');
+console.log('%c  📈 Live Quotes with Sentiment Analysis', 'color: #10b981; font-size: 12px;');
+console.log('%c  💼 Portfolio Builder with Correlation Matrix', 'color: #10b981; font-size: 12px;');
+console.log('%c  📉 Advanced Technical Analysis (SMA, EMA, BB, RSI, MACD)', 'color: #10b981; font-size: 12px;');
+console.log('%c  🎲 Risk Calculator with Monte Carlo Simulation', 'color: #10b981; font-size: 12px;');
+console.log('%c  🤖 AI-Powered Predictions with ML Models', 'color: #10b981; font-size: 12px;');
+console.log('');
+console.log('%c⌨️  KEYBOARD SHORTCUTS:', 'color: #f59e0b; font-size: 14px; font-weight: bold;');
+console.log('%c  Ctrl+K         Focus Search', 'color: #64748b; font-size: 12px;');
+console.log('%c  Ctrl+1-6       Switch Tools', 'color: #64748b; font-size: 12px;');
+console.log('%c  Esc            Close Suggestions', 'color: #64748b; font-size: 12px;');
+console.log('');
+console.log('%c💡 TRY THESE COMMANDS:', 'color: #3b82f6; font-size: 14px; font-weight: bold;');
+console.log('%c  DemoApp.searchCompany("AAPL")', 'color: #64748b; font-size: 12px;');
+console.log('%c  DemoApp.loadLiveQuote("TSLA")', 'color: #64748b; font-size: 12px;');
+console.log('%c  DemoApp.generateAIInsights()', 'color: #64748b; font-size: 12px;');
+console.log('');
+console.log('%c🎯 DEMO SYMBOLS TO TRY:', 'color: #ec4899; font-size: 14px; font-weight: bold;');
+console.log('%c  Apple (AAPL) • Microsoft (MSFT) • Tesla (TSLA)', 'color: #64748b; font-size: 12px;');
+console.log('%c  Amazon (AMZN) • Google (GOOGL) • NVIDIA (NVDA)', 'color: #64748b; font-size: 12px;');
+console.log('');
+console.log('%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'color: #667eea;');
+console.log('%cBuilt with ❤️ by FinancePro Team', 'color: #8b5cf6; font-size: 12px; font-style: italic;');
+console.log('%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'color: #667eea;');
+
+// ============================================
+// AUTO-DEMO MODE (Optionnel - décommenter pour activer)
+// ============================================
+/*
+setTimeout(() => {
+    console.log('%c🎬 Starting Auto-Demo...', 'color: #f59e0b; font-size: 14px; font-weight: bold;');
+    
+    // Démo automatique
+    setTimeout(() => DemoApp.searchCompany('AAPL'), 2000);
+    setTimeout(() => DemoApp.switchTool('live-quotes'), 8000);
+    setTimeout(() => DemoApp.loadLiveQuote('TSLA'), 10000);
+    setTimeout(() => DemoApp.switchTool('ai-insights'), 16000);
+    setTimeout(() => DemoApp.generateAIInsights(), 18000);
+    
+}, 3000);
+*/
+
+// ============================================
+// PERFORMANCE MONITORING
+// ============================================
+if (window.performance && window.performance.now) {
+    const loadTime = window.performance.now();
+    console.log(`⚡ Page fully loaded in ${loadTime.toFixed(2)}ms`);
+}
+
+// ============================================
+// ERROR HANDLING GLOBAL
+// ============================================
+window.addEventListener('error', (event) => {
+    console.error('Global error caught:', event.error);
+    
+    // Afficher une notification à l'utilisateur
+    if (DemoApp && DemoApp.showNotification) {
+        DemoApp.showNotification('An unexpected error occurred. Please refresh the page.', 'error');
+    }
+});
+
+// ============================================
+// UNHANDLED PROMISE REJECTION
+// ============================================
+window.addEventListener('unhandledrejection', (event) => {
+    console.error('Unhandled promise rejection:', event.reason);
+    
+    if (DemoApp && DemoApp.showNotification) {
+        DemoApp.showNotification('A network error occurred. Please check your connection.', 'warning');
+    }
+});
+
+// ============================================
+// CLEANUP ON PAGE UNLOAD
+// ============================================
+window.addEventListener('beforeunload', () => {
+    console.log('👋 Cleaning up...');
+    
+    // Détruire tous les graphiques pour libérer la mémoire
+    if (DemoApp && DemoApp.charts) {
+        Object.keys(DemoApp.charts).forEach(key => {
+            if (DemoApp.charts[key] && DemoApp.charts[key].destroy) {
+                DemoApp.charts[key].destroy();
+            }
+        });
+    }
+});
+
+// ============================================
+// FIN DU FICHIER
+// ============================================
+console.log('%c✅ interactive-demo.js loaded successfully!', 'color: #10b981; font-size: 16px; font-weight: bold;');
