@@ -282,13 +282,13 @@ if (ctaButtons.loginBtn) {
     }
 });
 
-// Demo buttons
-[ctaButtons.heroWatchDemo, ctaButtons.tryDemoBtn, ctaButtons.scheduleDemo].forEach(btn => {
+// ✅ DEMO BUTTONS - REDIRECTION VERS LA PAGE INTERACTIVE
+[ctaButtons.heroWatchDemo, ctaButtons.tryDemoBtn].forEach(btn => {
     if (btn) {
-        btn.addEventListener('click', () => {
-            console.log('Demo clicked');
-            // In production: show video modal or redirect to demo page
-            alert('Demo functionality will be implemented here');
+        btn.addEventListener('click', (e) => {
+            e.preventDefault();
+            console.log('🎯 Redirecting to interactive demo...');
+            window.location.href = 'interactive-demo.html';
         });
     }
 });
