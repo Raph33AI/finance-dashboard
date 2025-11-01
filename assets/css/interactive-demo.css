@@ -1925,3 +1925,307 @@ html {
         transition-duration: 0.01ms !important;
     }
 }
+
+/* ============================================
+   AMÉLIORATIONS RECHERCHE - NAVIGATION CLAVIER
+   ============================================ */
+
+/* Highlight de la suggestion sélectionnée au clavier */
+.suggestion-item.keyboard-selected {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+    color: white;
+    transform: translateX(5px);
+}
+
+.suggestion-item.keyboard-selected .suggestion-symbol,
+.suggestion-item.keyboard-selected .suggestion-name,
+.suggestion-item.keyboard-selected .suggestion-exchange {
+    color: white !important;
+}
+
+/* Highlight du texte correspondant dans les résultats */
+.suggestion-item mark {
+    background-color: #FEF3C7;
+    color: #92400E;
+    padding: 2px 4px;
+    border-radius: 3px;
+    font-weight: 600;
+}
+
+.suggestion-item.keyboard-selected mark {
+    background-color: rgba(255, 255, 255, 0.3);
+    color: white;
+}
+
+body.dark-mode .suggestion-item mark {
+    background-color: #854D0E;
+    color: #FEF3C7;
+}
+
+/* ============================================
+   SIGNAUX TECHNIQUES - AMÉLIORATIONS
+   ============================================ */
+
+/* Amélioration des icônes de signaux */
+.signal-icon.bullish {
+    background: linear-gradient(135deg, #10B981, #059669) !important;
+    color: white !important;
+}
+
+.signal-icon.bearish {
+    background: linear-gradient(135deg, #EF4444, #DC2626) !important;
+    color: white !important;
+}
+
+.signal-icon.neutral {
+    background: linear-gradient(135deg, #3B82F6, #2563EB) !important;
+    color: white !important;
+}
+
+/* Détails supplémentaires des signaux */
+.signal-detail {
+    font-size: 0.75rem !important;
+    margin-top: 0.25rem !important;
+    opacity: 0.8;
+}
+
+/* ============================================
+   RISK METRICS - AMÉLIORATIONS
+   ============================================ */
+
+/* Amélioration des valeurs de risque */
+.risk-metric-value.text-danger {
+    color: #EF4444 !important;
+}
+
+.risk-metric-value.text-success {
+    color: #10B981 !important;
+}
+
+/* ============================================
+   AI INSIGHTS - AMÉLIORATIONS
+   ============================================ */
+
+/* Header amélioré pour les insights AI */
+.ai-insight-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+    padding: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+    margin: -1.5rem -1.5rem 1.5rem -1.5rem;
+}
+
+.ai-insight-icon {
+    width: 50px !important;
+    height: 50px !important;
+    background: rgba(255, 255, 255, 0.2) !important;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    color: white !important;
+}
+
+.ai-insight-title h4 {
+    margin: 0;
+    color: white !important;
+    font-size: 1.25rem;
+}
+
+.ai-insight-title p {
+    margin: 0.25rem 0 0 0;
+    color: rgba(255, 255, 255, 0.9) !important;
+    font-size: 0.875rem;
+}
+
+.ai-confidence {
+    background: rgba(255, 255, 255, 0.2) !important;
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    color: white !important;
+    font-size: 0.875rem;
+    font-weight: 600;
+    border: none;
+}
+
+.ai-insight-content {
+    padding: 0;
+    color: var(--text-primary);
+    line-height: 1.7;
+}
+
+/* ============================================
+   NOTIFICATIONS TOAST - NOUVEAU
+   ============================================ */
+
+.notification-toast {
+    position: fixed;
+    top: 20px;
+    right: -400px;
+    background: white;
+    border-radius: 12px;
+    padding: 1rem 1.5rem;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    min-width: 300px;
+    max-width: 400px;
+    z-index: 10000;
+    transition: right 0.3s ease;
+}
+
+body.dark-mode .notification-toast {
+    background: var(--background-secondary);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+}
+
+.notification-toast.show {
+    right: 20px;
+}
+
+.notification-toast i {
+    font-size: 1.5rem;
+    flex-shrink: 0;
+}
+
+.notification-success {
+    border-left: 4px solid #10B981;
+}
+
+.notification-success i {
+    color: #10B981;
+}
+
+.notification-error {
+    border-left: 4px solid #EF4444;
+}
+
+.notification-error i {
+    color: #EF4444;
+}
+
+.notification-warning {
+    border-left: 4px solid #F59E0B;
+}
+
+.notification-warning i {
+    color: #F59E0B;
+}
+
+.notification-info {
+    border-left: 4px solid #3B82F6;
+}
+
+.notification-info i {
+    color: #3B82F6;
+}
+
+.notification-toast span {
+    flex: 1;
+    font-size: 0.9375rem;
+    color: var(--text-primary);
+    line-height: 1.5;
+}
+
+.notification-close {
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+    padding: 0.25rem;
+    font-size: 1.125rem;
+    transition: color 0.2s ease;
+    flex-shrink: 0;
+}
+
+.notification-close:hover {
+    color: var(--text-primary);
+}
+
+/* ============================================
+   RESPONSIVE NOTIFICATIONS
+   ============================================ */
+
+@media (max-width: 768px) {
+    .notification-toast {
+        right: -100%;
+        left: auto;
+        min-width: auto;
+        max-width: calc(100% - 2rem);
+        margin: 0 1rem;
+    }
+    
+    .notification-toast.show {
+        right: 0;
+        left: 1rem;
+    }
+}
+
+/* ============================================
+   AMÉLIORATIONS ACCESSIBILITÉ
+   ============================================ */
+
+/* Focus visible pour navigation clavier */
+.suggestion-item:focus,
+.tool-card:focus,
+.btn-search:focus,
+button:focus {
+    outline: 2px solid var(--primary-color);
+    outline-offset: 2px;
+}
+
+/* Transition douce pour les suggestions */
+.search-suggestions {
+    animation: slideDown 0.2s ease-out;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ============================================
+   AMÉLIORATIONS PORTFOLIO
+   ============================================ */
+
+/* Animation lors de l'ajout au portfolio */
+.portfolio-table tbody tr {
+    animation: slideInFromLeft 0.3s ease-out;
+}
+
+@keyframes slideInFromLeft {
+    from {
+        opacity: 0;
+        transform: translateX(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+/* ============================================
+   LISTE UL dans NO-RESULTS
+   ============================================ */
+
+.no-results ul {
+    text-align: left;
+    margin: 0.5rem auto;
+    padding-left: 1.5rem;
+    max-width: 300px;
+    color: var(--text-secondary);
+}
+
+.no-results ul li {
+    margin: 0.25rem 0;
+}

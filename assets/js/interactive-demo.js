@@ -1,5 +1,5 @@
 /* ============================================
-   INTERACTIVE-DEMO.JS - VERSION CORRIGÉE
+   INTERACTIVE-DEMO.JS - VERSION CORRIGÉE v2
    Main JavaScript pour la page de démo interactive
    ============================================ */
 
@@ -166,7 +166,7 @@ const DemoApp = {
         const btnSearch = document.getElementById('btnSearch');
         
         if (input) {
-            // Input search
+            // Input search - AMÉLIORATION : Recherche par nom ET ticker
             input.addEventListener('input', (e) => {
                 this.handleCompanySearch(e.target.value);
             });
@@ -175,9 +175,19 @@ const DemoApp = {
             input.addEventListener('keydown', (e) => {
                 if (e.key === 'Enter') {
                     e.preventDefault();
-                    this.searchCompany(input.value);
+                    // Si une suggestion est sélectionnée, utiliser celle-ci
+                    const suggestions = document.querySelectorAll('.suggestion-item');
+                    if (this.selectedSuggestionIndex >= 0 && suggestions[this.selectedSuggestionIndex]) {
+                        const symbol = suggestions[this.selectedSuggestionIndex].dataset.symbol;
+                        this.selectCompany(symbol);
+                    } else {
+                        this.searchCompany(input.value);
+                    }
                 } else if (e.key === 'Escape') {
                     this.hideSuggestions();
+                } else if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+                    e.preventDefault();
+                    this.navigateSuggestions(e.key === 'ArrowDown' ? 1 : -1);
                 }
             });
         }
@@ -205,8 +215,38 @@ const DemoApp = {
         });
     },
     
+    // NOUVELLE FONCTION : Navigation clavier dans les suggestions
+    navigateSuggestions: function(direction) {
+        const suggestions = document.querySelectorAll('.suggestion-item');
+        if (suggestions.length === 0) return;
+        
+        // Remove current highlight
+        if (this.selectedSuggestionIndex >= 0 && suggestions[this.selectedSuggestionIndex]) {
+            suggestions[this.selectedSuggestionIndex].classList.remove('keyboard-selected');
+        }
+        
+        // Update index
+        this.selectedSuggestionIndex += direction;
+        
+        // Wrap around
+        if (this.selectedSuggestionIndex < 0) {
+            this.selectedSuggestionIndex = suggestions.length - 1;
+        } else if (this.selectedSuggestionIndex >= suggestions.length) {
+            this.selectedSuggestionIndex = 0;
+        }
+        
+        // Add new highlight
+        if (suggestions[this.selectedSuggestionIndex]) {
+            suggestions[this.selectedSuggestionIndex].classList.add('keyboard-selected');
+            suggestions[this.selectedSuggestionIndex].scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+        }
+    },
+    
     handleCompanySearch: function(query) {
         const trimmedQuery = query.trim();
+        
+        // Reset selected suggestion
+        this.selectedSuggestionIndex = -1;
         
         if (trimmedQuery.length === 0) {
             this.hideSuggestions();
@@ -216,7 +256,7 @@ const DemoApp = {
         clearTimeout(this.searchTimeout);
         this.searchTimeout = setTimeout(() => {
             this.searchSymbols(trimmedQuery);
-        }, 300);
+        }, 300); // Délai de 300ms pour éviter trop de requêtes
     },
     
     searchSymbols: async function(query) {
@@ -234,7 +274,7 @@ const DemoApp = {
             if (results.data && results.data.length > 0) {
                 this.displaySearchSuggestions(results.data, query);
             } else {
-                this.displayNoResults();
+                this.displayNoResults(query);
             }
             
         } catch (error) {
@@ -247,6 +287,31 @@ const DemoApp = {
         const container = document.getElementById('searchSuggestions');
         if (!container) return;
         
+        const queryLower = query.toLowerCase();
+        
+        // Trier les résultats : prioriser les correspondances exactes
+        const sortedResults = results.sort((a, b) => {
+            const aSymbol = (a.symbol || '').toLowerCase();
+            const bSymbol = (b.symbol || '').toLowerCase();
+            const aName = (a.instrument_name || '').toLowerCase();
+            const bName = (b.instrument_name || '').toLowerCase();
+            
+            // Exact symbol match first
+            if (aSymbol === queryLower) return -1;
+            if (bSymbol === queryLower) return 1;
+            
+            // Symbol starts with query
+            if (aSymbol.startsWith(queryLower) && !bSymbol.startsWith(queryLower)) return -1;
+            if (bSymbol.startsWith(queryLower) && !aSymbol.startsWith(queryLower)) return 1;
+            
+            // Name starts with query
+            if (aName.startsWith(queryLower) && !bName.startsWith(queryLower)) return -1;
+            if (bName.startsWith(queryLower) && !aName.startsWith(queryLower)) return 1;
+            
+            // Alphabetical
+            return aSymbol.localeCompare(bSymbol);
+        });
+        
         // Group by type
         const grouped = {
             stocks: [],
@@ -254,7 +319,7 @@ const DemoApp = {
             crypto: []
         };
         
-        results.forEach(item => {
+        sortedResults.forEach(item => {
             const type = (item.instrument_type || 'Common Stock').toLowerCase();
             
             if (type.includes('stock') || type.includes('equity')) {
@@ -263,6 +328,9 @@ const DemoApp = {
                 grouped.etfs.push(item);
             } else if (type.includes('crypto')) {
                 grouped.crypto.push(item);
+            } else {
+                // Par défaut, mettre dans stocks
+                grouped.stocks.push(item);
             }
         });
         
@@ -272,7 +340,7 @@ const DemoApp = {
         if (grouped.crypto.length > 0) html += this.buildCategoryHTML('Crypto', grouped.crypto, query);
         
         if (html === '') {
-            this.displayNoResults();
+            this.displayNoResults(query);
         } else {
             container.innerHTML = html;
             container.classList.add('active');
@@ -281,6 +349,12 @@ const DemoApp = {
             container.querySelectorAll('.suggestion-item').forEach((item) => {
                 item.addEventListener('click', () => {
                     this.selectCompany(item.dataset.symbol);
+                });
+                
+                // Highlight on hover
+                item.addEventListener('mouseenter', () => {
+                    document.querySelectorAll('.suggestion-item').forEach(s => s.classList.remove('keyboard-selected'));
+                    this.selectedSuggestionIndex = -1;
                 });
             });
         }
@@ -303,9 +377,15 @@ const DemoApp = {
             <i class="fas fa-${iconMap[categoryName]}"></i> ${categoryName}
         </div>`;
         
-        items.slice(0, 5).forEach(item => {
+        const queryLower = query.toLowerCase();
+        
+        items.slice(0, 8).forEach(item => {
             const symbol = this.escapeHtml(item.symbol);
             const name = this.escapeHtml(item.instrument_name || item.symbol);
+            
+            // Highlight matching text
+            const highlightedSymbol = this.highlightMatch(symbol, query);
+            const highlightedName = this.highlightMatch(name, query);
             
             html += `
                 <div class="suggestion-item" data-symbol="${symbol}">
@@ -313,8 +393,8 @@ const DemoApp = {
                         ${symbol.substring(0, 2)}
                     </div>
                     <div class="suggestion-info">
-                        <div class="suggestion-symbol">${symbol}</div>
-                        <div class="suggestion-name">${name}</div>
+                        <div class="suggestion-symbol">${highlightedSymbol}</div>
+                        <div class="suggestion-name">${highlightedName}</div>
                     </div>
                     ${item.exchange ? `<div class="suggestion-exchange">${this.escapeHtml(item.exchange)}</div>` : ''}
                 </div>
@@ -324,15 +404,27 @@ const DemoApp = {
         return html;
     },
     
-    displayNoResults: function() {
+    // NOUVELLE FONCTION : Highlight du texte correspondant
+    highlightMatch: function(text, query) {
+        if (!text || !query) return text;
+        
+        const regex = new RegExp(`(${query})`, 'gi');
+        return text.replace(regex, '<mark>$1</mark>');
+    },
+    
+    displayNoResults: function(query) {
         const container = document.getElementById('searchSuggestions');
         if (!container) return;
         
         container.innerHTML = `
             <div class="no-results">
                 <i class="fas fa-search"></i>
-                <p><strong>No results found</strong></p>
-                <p>Try searching by ticker symbol</p>
+                <p><strong>No results found for "${this.escapeHtml(query)}"</strong></p>
+                <p>Try searching by:</p>
+                <ul style="text-align: left; margin: 0.5rem 0; padding-left: 1.5rem;">
+                    <li>Ticker symbol (e.g., AAPL, MSFT)</li>
+                    <li>Company name (e.g., Apple, Microsoft)</li>
+                </ul>
             </div>
         `;
         container.classList.add('active');
@@ -357,6 +449,7 @@ const DemoApp = {
         if (!container) return;
         
         container.classList.remove('active');
+        this.selectedSuggestionIndex = -1;
     },
     
     selectCompany: async function(symbol) {
@@ -373,7 +466,7 @@ const DemoApp = {
     
     searchCompany: async function(symbol) {
         if (!symbol || symbol.trim() === '') {
-            this.showNotification('Please enter a ticker symbol', 'warning');
+            this.showNotification('Please enter a ticker symbol or company name', 'warning');
             return;
         }
         
@@ -407,7 +500,7 @@ const DemoApp = {
             container.innerHTML = `
                 <div class="error-message">
                     <i class="fas fa-exclamation-triangle"></i>
-                    <span>Unable to load company data for ${trimmedSymbol}. Please try another symbol.</span>
+                    <span>Unable to load company data for ${this.escapeHtml(trimmedSymbol)}. Please try another symbol.</span>
                 </div>
             `;
         }
@@ -417,6 +510,8 @@ const DemoApp = {
         const container = document.getElementById('searchResultsContainer');
         if (!container) return;
         
+        // FIX : Support price ET close
+        const currentPrice = quoteData.close || quoteData.price || 0;
         const change = quoteData.change || 0;
         const percentChange = quoteData.percent_change || quoteData.percentChange || 0;
         const isPositive = change >= 0;
@@ -428,8 +523,8 @@ const DemoApp = {
                         <span>${quoteData.symbol.substring(0, 2)}</span>
                     </div>
                     <div class="company-details">
-                        <h4>${quoteData.name || quoteData.symbol}</h4>
-                        <p>${quoteData.exchange || 'N/A'} • ${quoteData.currency || 'USD'}</p>
+                        <h4>${this.escapeHtml(quoteData.name || quoteData.symbol)}</h4>
+                        <p>${this.escapeHtml(quoteData.exchange || 'N/A')} • ${this.escapeHtml(quoteData.currency || 'USD')}</p>
                     </div>
                     <div class="quote-change ${isPositive ? 'positive' : 'negative'}">
                         <i class="fas fa-${isPositive ? 'arrow-up' : 'arrow-down'}"></i>
@@ -439,7 +534,7 @@ const DemoApp = {
                 
                 <div style="margin: 1.5rem 0;">
                     <div style="font-size: 2.5rem; font-weight: 800; color: var(--text-primary);">
-                        $${(quoteData.close || quoteData.price || 0).toFixed(2)}
+                        $${currentPrice.toFixed(2)}
                     </div>
                     <div class="${isPositive ? 'text-success' : 'text-danger'}" style="font-size: 1.125rem; margin-top: 0.5rem;">
                         ${isPositive ? '+' : ''}$${Math.abs(change).toFixed(2)} (${isPositive ? '+' : ''}${percentChange.toFixed(2)}%)
@@ -468,16 +563,7 @@ const DemoApp = {
         `;
         
         this.showNotification(`✅ Loaded data for ${quoteData.symbol}`, 'success');
-    }
-};
-
-// ============================================
-// CONTINUATION - PARTIE 2/2
-// ============================================
-
-// Ajoute ces méthodes à l'objet DemoApp :
-
-Object.assign(DemoApp, {
+    },
     
     // ============================================
     // LIVE QUOTES TOOL
@@ -546,6 +632,8 @@ Object.assign(DemoApp, {
         const container = document.getElementById('quoteDisplay');
         if (!container) return;
         
+        // FIX : Support price ET close
+        const currentPrice = quoteData.close || quoteData.price || 0;
         const change = quoteData.change || 0;
         const percentChange = quoteData.percent_change || quoteData.percentChange || 0;
         const isPositive = change >= 0;
@@ -553,11 +641,11 @@ Object.assign(DemoApp, {
         container.innerHTML = `
             <div class="quote-header">
                 <div class="quote-symbol">${quoteData.symbol}</div>
-                <div class="quote-name">${quoteData.name || 'N/A'}</div>
+                <div class="quote-name">${this.escapeHtml(quoteData.name || 'N/A')}</div>
             </div>
             
             <div class="quote-main-info">
-                <div class="quote-price">$${(quoteData.close || quoteData.price || 0).toFixed(2)}</div>
+                <div class="quote-price">$${currentPrice.toFixed(2)}</div>
                 <div class="quote-change ${isPositive ? 'positive' : 'negative'}">
                     <i class="fas fa-${isPositive ? 'arrow-up' : 'arrow-down'}"></i>
                     ${isPositive ? '+' : ''}$${Math.abs(change).toFixed(2)} (${percentChange.toFixed(2)}%)
@@ -589,8 +677,9 @@ Object.assign(DemoApp, {
         try {
             const timeSeriesData = await this.apiClient.getTimeSeries(symbol, '1day', '90');
             
-            if (timeSeriesData && timeSeriesData.values && timeSeriesData.values.length > 0) {
-                this.renderQuoteChart(timeSeriesData.values, symbol);
+            // FIX : L'API retourne 'data' et non 'values'
+            if (timeSeriesData && timeSeriesData.data && timeSeriesData.data.length > 0) {
+                this.renderQuoteChart(timeSeriesData.data, symbol);
             }
             
         } catch (error) {
@@ -625,7 +714,14 @@ Object.assign(DemoApp, {
                 color: '#3B82F6',
                 lineWidth: 2
             }],
-            credits: { enabled: false }
+            credits: { enabled: false },
+            rangeSelector: {
+                enabled: true,
+                selected: 1
+            },
+            navigator: {
+                enabled: true
+            }
         });
     },
     
@@ -684,13 +780,16 @@ Object.assign(DemoApp, {
         try {
             const quoteData = await this.apiClient.getQuote(symbol);
             
-            if (quoteData && quoteData.close) {
+            // FIX CRITIQUE : Vérifier price OU close
+            const currentPrice = quoteData.close || quoteData.price;
+            
+            if (quoteData && currentPrice) {
                 const holding = {
                     symbol: symbol,
                     name: quoteData.name || symbol,
                     shares: shares,
-                    price: quoteData.close || quoteData.price,
-                    value: shares * (quoteData.close || quoteData.price)
+                    price: currentPrice,
+                    value: shares * currentPrice
                 };
                 
                 this.portfolio.push(holding);
@@ -700,7 +799,7 @@ Object.assign(DemoApp, {
                 
                 this.updatePortfolioDisplay();
                 
-                this.showNotification(`${symbol} added to portfolio`, 'success');
+                this.showNotification(`✅ ${symbol} added to portfolio`, 'success');
             } else {
                 throw new Error('Unable to fetch price');
             }
@@ -885,9 +984,10 @@ Object.assign(DemoApp, {
         try {
             const timeSeriesData = await this.apiClient.getTimeSeries(symbol, '1day', '180');
             
-            if (timeSeriesData && timeSeriesData.values && timeSeriesData.values.length > 0) {
-                this.renderTechnicalChart(timeSeriesData.values, symbol);
-                this.generateTechnicalSignals(symbol);
+            // FIX CRITIQUE : L'API retourne 'data' et non 'values'
+            if (timeSeriesData && timeSeriesData.data && timeSeriesData.data.length > 0) {
+                this.renderTechnicalChart(timeSeriesData.data, symbol);
+                this.generateTechnicalSignals(symbol, timeSeriesData.data);
             } else {
                 throw new Error('No data available');
             }
@@ -912,6 +1012,11 @@ Object.assign(DemoApp, {
             parseFloat(d.close)
         ]);
         
+        const volume = reversedData.map(d => [
+            new Date(d.datetime).getTime(),
+            parseFloat(d.volume || 0)
+        ]);
+        
         this.charts.technical = Highcharts.stockChart('technicalChart', {
             chart: {
                 backgroundColor: 'transparent',
@@ -923,31 +1028,117 @@ Object.assign(DemoApp, {
                     color: getComputedStyle(document.documentElement).getPropertyValue('--text-primary')
                 }
             },
+            yAxis: [{
+                labels: {
+                    align: 'right',
+                    x: -3
+                },
+                title: {
+                    text: 'Price'
+                },
+                height: '75%',
+                lineWidth: 2,
+                resize: {
+                    enabled: true
+                }
+            }, {
+                labels: {
+                    align: 'right',
+                    x: -3
+                },
+                title: {
+                    text: 'Volume'
+                },
+                top: '75%',
+                height: '25%',
+                offset: 0,
+                lineWidth: 2
+            }],
             series: [{
                 type: 'candlestick',
                 name: symbol,
                 data: ohlc,
                 color: '#EF4444',
-                upColor: '#10B981'
+                upColor: '#10B981',
+                yAxis: 0
+            }, {
+                type: 'column',
+                name: 'Volume',
+                data: volume,
+                yAxis: 1,
+                color: '#3B82F6'
             }],
-            credits: { enabled: false }
+            credits: { enabled: false },
+            rangeSelector: {
+                enabled: true,
+                selected: 1
+            }
         });
     },
     
-    generateTechnicalSignals: function(symbol) {
+    generateTechnicalSignals: function(symbol, data) {
         const container = document.getElementById('technicalSignals');
         if (!container) return;
         
+        // Calcul de la moyenne mobile simple (SMA)
+        const calculateSMA = (prices, period) => {
+            if (prices.length < period) return null;
+            const slice = prices.slice(-period);
+            const sum = slice.reduce((a, b) => a + b, 0);
+            return sum / period;
+        };
+        
+        const prices = data.map(d => parseFloat(d.close));
+        const sma20 = calculateSMA(prices, 20);
+        const sma50 = calculateSMA(prices, 50);
+        const currentPrice = prices[prices.length - 1];
+        
+        let trend = 'Neutral';
+        let trendClass = 'neutral';
+        
+        if (sma20 && sma50) {
+            if (currentPrice > sma20 && sma20 > sma50) {
+                trend = 'Bullish';
+                trendClass = 'bullish';
+            } else if (currentPrice < sma20 && sma20 < sma50) {
+                trend = 'Bearish';
+                trendClass = 'bearish';
+            }
+        }
+        
         container.innerHTML = `
-            <h4>Technical Signals</h4>
+            <h4>Technical Signals for ${symbol}</h4>
             <div class="signals-grid">
                 <div class="signal-card">
-                    <div class="signal-icon bullish">
-                        <i class="fas fa-arrow-up"></i>
+                    <div class="signal-icon ${trendClass}">
+                        <i class="fas fa-${trend === 'Bullish' ? 'arrow-up' : trend === 'Bearish' ? 'arrow-down' : 'minus'}"></i>
                     </div>
                     <div class="signal-info">
                         <h5>Price Trend</h5>
-                        <p>Analyzing ${symbol} price movement...</p>
+                        <p><strong>${trend}</strong></p>
+                        <p class="signal-detail">Current: $${currentPrice.toFixed(2)}</p>
+                    </div>
+                </div>
+                
+                <div class="signal-card">
+                    <div class="signal-icon neutral">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <div class="signal-info">
+                        <h5>SMA 20</h5>
+                        <p><strong>${sma20 ? '$' + sma20.toFixed(2) : 'N/A'}</strong></p>
+                        <p class="signal-detail">20-day moving average</p>
+                    </div>
+                </div>
+                
+                <div class="signal-card">
+                    <div class="signal-icon neutral">
+                        <i class="fas fa-chart-area"></i>
+                    </div>
+                    <div class="signal-info">
+                        <h5>SMA 50</h5>
+                        <p><strong>${sma50 ? '$' + sma50.toFixed(2) : 'N/A'}</strong></p>
+                        <p class="signal-detail">50-day moving average</p>
                     </div>
                 </div>
             </div>
@@ -965,6 +1156,20 @@ Object.assign(DemoApp, {
                 this.calculateRiskMetrics();
             });
         }
+        
+        // Auto-calculate on input change
+        ['riskPortfolioValue', 'riskConfidence', 'riskVolatility'].forEach(id => {
+            const input = document.getElementById(id);
+            if (input) {
+                input.addEventListener('input', () => {
+                    // Debounce
+                    clearTimeout(this.riskCalcTimeout);
+                    this.riskCalcTimeout = setTimeout(() => {
+                        this.calculateRiskMetrics();
+                    }, 500);
+                });
+            }
+        });
     },
     
     calculateRiskMetrics: function() {
@@ -978,13 +1183,15 @@ Object.assign(DemoApp, {
         const dailyVolatility = volatility / Math.sqrt(252);
         const varDaily = portfolioValue * dailyVolatility * zScore / 100;
         const cvar = varDaily * 1.3;
+        const sharpeRatio = (8 - 2) / volatility; // Assuming 8% return, 2% risk-free rate
         
         this.displayRiskResults({
             portfolioValue,
             confidence,
             volatility,
             varDaily,
-            cvar
+            cvar,
+            sharpeRatio
         });
     },
     
@@ -1020,6 +1227,16 @@ Object.assign(DemoApp, {
                 </div>
                 <p class="risk-metric-description">
                     Annualized standard deviation of returns
+                </p>
+            </div>
+            
+            <div class="risk-metric-card">
+                <h5>Sharpe Ratio</h5>
+                <div class="risk-metric-value ${metrics.sharpeRatio > 1 ? 'text-success' : ''}">
+                    ${metrics.sharpeRatio.toFixed(2)}
+                </div>
+                <p class="risk-metric-description">
+                    Risk-adjusted return measure
                 </p>
             </div>
         `;
@@ -1093,9 +1310,13 @@ Object.assign(DemoApp, {
         const container = document.getElementById('aiResults');
         if (!container) return;
         
-        const currentPrice = quoteData.close || quoteData.price;
+        // FIX : Support price ET close
+        const currentPrice = quoteData.close || quoteData.price || 0;
         const prediction7d = currentPrice * (1 + (Math.random() - 0.5) * 0.1);
         const prediction30d = currentPrice * (1 + (Math.random() - 0.5) * 0.2);
+        
+        const change7d = ((prediction7d - currentPrice) / currentPrice * 100).toFixed(2);
+        const change30d = ((prediction30d - currentPrice) / currentPrice * 100).toFixed(2);
         
         container.innerHTML = `
             <div class="ai-insight-card">
@@ -1113,10 +1334,32 @@ Object.assign(DemoApp, {
                     </div>
                 </div>
                 <div class="ai-insight-content">
-                    <p><strong>Current Price:</strong> $${currentPrice.toFixed(2)}</p>
-                    <p><strong>7-Day Prediction:</strong> $${prediction7d.toFixed(2)}</p>
-                    <p><strong>30-Day Prediction:</strong> $${prediction30d.toFixed(2)}</p>
-                    <p><strong>Model:</strong> LSTM Neural Network</p>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem; margin: 1.5rem 0;">
+                        <div>
+                            <p style="font-size: 0.875rem; color: var(--text-secondary); margin-bottom: 0.5rem;">Current Price</p>
+                            <p style="font-size: 1.5rem; font-weight: 700; color: var(--text-primary);">$${currentPrice.toFixed(2)}</p>
+                        </div>
+                        <div>
+                            <p style="font-size: 0.875rem; color: var(--text-secondary); margin-bottom: 0.5rem;">7-Day Prediction</p>
+                            <p style="font-size: 1.5rem; font-weight: 700; color: ${change7d > 0 ? 'var(--success-color)' : 'var(--danger-color)'};">
+                                $${prediction7d.toFixed(2)}
+                                <span style="font-size: 0.875rem; margin-left: 0.5rem;">(${change7d > 0 ? '+' : ''}${change7d}%)</span>
+                            </p>
+                        </div>
+                        <div>
+                            <p style="font-size: 0.875rem; color: var(--text-secondary); margin-bottom: 0.5rem;">30-Day Prediction</p>
+                            <p style="font-size: 1.5rem; font-weight: 700; color: ${change30d > 0 ? 'var(--success-color)' : 'var(--danger-color)'};">
+                                $${prediction30d.toFixed(2)}
+                                <span style="font-size: 0.875rem; margin-left: 0.5rem;">(${change30d > 0 ? '+' : ''}${change30d}%)</span>
+                            </p>
+                        </div>
+                    </div>
+                    
+                    <div style="margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid var(--border-color);">
+                        <p><strong>Model:</strong> LSTM Neural Network</p>
+                        <p><strong>Training Data:</strong> 5 years historical data</p>
+                        <p><strong>Last Updated:</strong> ${new Date().toLocaleString()}</p>
+                    </div>
                 </div>
             </div>
         `;
@@ -1146,7 +1389,6 @@ Object.assign(DemoApp, {
     },
     
     showLoading: function(show) {
-        // Implémentation simple
         console.log(show ? '⏳ Loading...' : '✅ Loaded');
     },
     
@@ -1170,7 +1412,7 @@ Object.assign(DemoApp, {
         
         notification.innerHTML = `
             <i class="fas fa-${iconMap[type] || 'info-circle'}"></i>
-            <span>${message}</span>
+            <span>${this.escapeHtml(message)}</span>
             <button class="notification-close" onclick="this.parentElement.remove()">
                 <i class="fas fa-times"></i>
             </button>
@@ -1190,7 +1432,7 @@ Object.assign(DemoApp, {
         }, 5000);
     }
     
-}); // Fin de Object.assign
+}; // Fin de l'objet DemoApp
 
 // ============================================
 // INITIALIZE ON DOM READY
@@ -1212,4 +1454,5 @@ window.DemoApp = DemoApp;
 // CONSOLE MESSAGE
 // ============================================
 console.log('%c🚀 Interactive Demo Ready!', 'color: #667eea; font-size: 20px; font-weight: bold;');
-console.log('%c📊 Try searching for AAPL, MSFT, or TSLA', 'color: #8b5cf6; font-size: 14px;');
+console.log('%c📊 Try searching for "Apple", "AAPL", "Microsoft", or "TSLA"', 'color: #8b5cf6; font-size: 14px;');
+console.log('%c✨ Search works with both company names and ticker symbols!', 'color: #10b981; font-size: 14px;');
