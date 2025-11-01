@@ -1101,8 +1101,8 @@
                 </div>
             </div>
 
-            <div class="footer-bottom">
-                <p>&copy; 2024 FinancePro. All rights reserved.</p>
+           <div class="footer-bottom">
+                <p>&copy; <span id="currentYear">2024</span> FinancePro. All rights reserved.</p>
                 <div class="footer-bottom-links">
                     <a href="#">Privacy</a>
                     <a href="#">Terms</a>
@@ -1110,6 +1110,10 @@
                     <a href="#">Security</a>
                 </div>
             </div>
+
+            <script>
+                document.getElementById('currentYear').textContent = new Date().getFullYear();
+            </script>
         </div>
     </footer>
 
