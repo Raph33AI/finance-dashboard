@@ -1,22 +1,18 @@
 /* ==============================================
    INVESTMENT-ANALYTICS.JS
-   Analyse avancée de performance + IA
-   Version ES6+ 2024 - PARTIE 1/5
+   Complete Investment Performance Analytics
+   English Version - Bug Fixed
    ============================================== */
 
-const InvestmentAnalytics = (function() {
-    'use strict';
+const InvestmentAnalytics = {
+    // ========== STATE VARIABLES ==========
+    financialData: [],
+    currentPeriod: '1Y',
+    benchmarkSymbol: 'SPY',
+    benchmarkData: null,
+    apiClient: null,
     
-    // ========== VARIABLES PRIVÉES ==========
-    
-    let financialData = [];
-    let currentPeriod = '1Y';
-    let benchmarkSymbol = 'SPY';
-    let benchmarkData = null;
-    let apiClient = null;
-    
-    // Charts instances
-    const charts = {
+    charts: {
         portfolioEvolution: null,
         monthlyReturns: null,
         assetAllocation: null,
@@ -32,89 +28,52 @@ const InvestmentAnalytics = (function() {
         calmar: null,
         aiPredictions: null,
         benchmarkComparison: null
-    };
+    },
     
-    // AI Models
-    let aiModels = {
-        optimizer: null,
-        lstm: null,
-        riskAnalyzer: null,
-        rebalancer: null
-    };
-    
-    let aiResults = {
+    aiResults: {
         optimizer: null,
         lstm: null,
         risk: null,
         rebalancer: null,
         recommendations: []
-    };
+    },
     
-    // ========== INITIALISATION ==========
+    // ========== INITIALIZATION ==========
     
-    /**
-     * Initialise le module
-     */
-    function init() {
+    init() {
         try {
-            // Charger les données du dashboard budget
-            loadFinancialData();
+            this.loadFinancialData();
+            this.displayKPIs();
+            this.createAllCharts();
+            this.updateLastUpdate();
             
-            // Initialiser l'API client si disponible
-            if (window.FinanceAPIClient && window.APP_CONFIG) {
-                apiClient = new FinanceAPIClient({
-                    baseURL: APP_CONFIG.API_BASE_URL,
-                    cacheDuration: APP_CONFIG.CACHE_DURATION,
-                    maxRetries: APP_CONFIG.MAX_RETRIES
-                });
-            }
-            
-            // Afficher les KPIs
-            displayKPIs();
-            
-            // Créer tous les graphiques
-            createAllCharts();
-            
-            // Charger le benchmark
-            loadBenchmarkData();
-            
-            // Mettre à jour l'heure
-            updateLastUpdate();
-            
-            console.log('✅ Investment Analytics initialisé avec succès');
-            
+            console.log('✅ Investment Analytics Module loaded successfully');
         } catch (error) {
-            console.error('❌ Erreur d\'initialisation:', error);
-            showNotification('Erreur lors de l\'initialisation', 'error');
+            console.error('❌ Initialization error:', error);
+            this.showNotification('Failed to initialize', 'error');
         }
-    }
+    },
     
-    /**
-     * Charge les données financières depuis localStorage
-     */
-    function loadFinancialData() {
+    loadFinancialData() {
         const saved = localStorage.getItem('financialDataDynamic');
         
         if (saved) {
             try {
-                financialData = JSON.parse(saved);
-                console.log(`📊 ${financialData.length} mois de données chargés`);
+                this.financialData = JSON.parse(saved);
+                console.log(`📊 ${this.financialData.length} months of data loaded`);
             } catch (error) {
-                console.error('Erreur de chargement des données:', error);
-                financialData = [];
+                console.error('Error loading data:', error);
+                this.financialData = [];
             }
         } else {
-            console.warn('⚠️ Aucune donnée financière trouvée');
-            financialData = [];
+            console.warn('⚠️ No financial data found');
+            this.financialData = [];
         }
-    }
+    },
     
-    /**
-     * Met à jour l'heure de dernière mise à jour
-     */
-    function updateLastUpdate() {
+    updateLastUpdate() {
         const now = new Date();
-        const formatted = now.toLocaleString('fr-FR', {
+        const formatted = now.toLocaleString('en-US', {
             day: '2-digit',
             month: '2-digit',
             year: 'numeric',
@@ -124,19 +83,15 @@ const InvestmentAnalytics = (function() {
         
         const elem = document.getElementById('lastUpdate');
         if (elem) {
-            elem.textContent = `Dernière mise à jour : ${formatted}`;
+            elem.textContent = `Last update: ${formatted}`;
         }
-    }
+    },
     
-    // ========== FILTRAGE PAR PÉRIODE ==========
+    // ========== PERIOD FILTERING ==========
     
-    /**
-     * Change la période d'analyse
-     */
-    function changePeriod(period) {
-        currentPeriod = period;
+    changePeriod(period) {
+        this.currentPeriod = period;
         
-        // Mettre à jour les boutons
         document.querySelectorAll('.period-btn').forEach(btn => {
             btn.classList.remove('active');
         });
@@ -146,22 +101,17 @@ const InvestmentAnalytics = (function() {
             activeBtn.classList.add('active');
         }
         
-        // Rafraîchir les graphiques
-        createAllCharts();
-        
-        showNotification(`Période changée : ${period}`, 'info');
-    }
+        this.createAllCharts();
+        this.showNotification(`Period changed: ${period}`, 'info');
+    },
     
-    /**
-     * Filtre les données selon la période
-     */
-    function getFilteredData() {
-        if (financialData.length === 0) return [];
+    getFilteredData() {
+        if (this.financialData.length === 0) return [];
         
         const now = new Date();
         let startDate;
         
-        switch (currentPeriod) {
+        switch (this.currentPeriod) {
             case '1M':
                 startDate = new Date(now.getFullYear(), now.getMonth() - 1, now.getDate());
                 break;
@@ -178,77 +128,51 @@ const InvestmentAnalytics = (function() {
                 startDate = new Date(now.getFullYear(), 0, 1);
                 break;
             case 'ALL':
-                return financialData;
+                return this.financialData;
             default:
                 startDate = new Date(now.getFullYear() - 1, now.getMonth(), now.getDate());
         }
         
-        return financialData.filter(row => {
+        return this.financialData.filter(row => {
             const [month, year] = row.month.split('/').map(Number);
             const rowDate = new Date(year, month - 1, 1);
             return rowDate >= startDate;
         });
-    }
+    },
     
-    // ========== CALCUL DES MÉTRIQUES ==========
+    // ========== METRICS CALCULATION ==========
     
-    /**
-     * Calcule toutes les métriques de performance
-     */
-    function calculateMetrics(data = null) {
-        const filteredData = data || getFilteredData();
+    calculateMetrics(data = null) {
+        const filteredData = data || this.getFilteredData();
         
         if (filteredData.length === 0) {
             return {
-                totalReturn: 0,
-                annualizedReturn: 0,
-                volatility: 0,
-                sharpeRatio: 0,
-                sortinoRatio: 0,
-                maxDrawdown: 0,
-                calmarRatio: 0,
-                winRate: 0,
-                averageWin: 0,
-                averageLoss: 0,
-                profitFactor: 0,
-                var95: 0,
-                cvar95: 0,
-                alpha: 0,
-                beta: 0,
-                informationRatio: 0
+                totalReturn: 0, annualizedReturn: 0, volatility: 0, sharpeRatio: 0,
+                sortinoRatio: 0, maxDrawdown: 0, calmarRatio: 0, winRate: 0,
+                averageWin: 0, averageLoss: 0, profitFactor: 0, var95: 0,
+                cvar95: 0, alpha: 0, beta: 0, informationRatio: 0
             };
         }
         
-        // Portfolio values
         const portfolioValues = filteredData.map(row => row.totalPortfolio || 0);
-        const returns = calculateReturns(portfolioValues);
+        const returns = this.calculateReturns(portfolioValues);
         
-        // Total return
         const firstValue = portfolioValues[0];
         const lastValue = portfolioValues[portfolioValues.length - 1];
         const totalReturn = firstValue > 0 ? ((lastValue - firstValue) / firstValue) * 100 : 0;
         
-        // Annualized return
         const years = filteredData.length / 12;
         const annualizedReturn = years > 0 ? (Math.pow(1 + totalReturn / 100, 1 / years) - 1) * 100 : 0;
         
-        // Volatility
-        const volatility = calculateVolatility(returns) * Math.sqrt(12) * 100;
+        const volatility = this.calculateVolatility(returns) * Math.sqrt(12) * 100;
         
-        // Sharpe Ratio (assuming 2% risk-free rate)
         const riskFreeRate = 2;
         const sharpeRatio = volatility > 0 ? (annualizedReturn - riskFreeRate) / volatility : 0;
         
-        // Sortino Ratio
-        const sortinoRatio = calculateSortinoRatio(returns, riskFreeRate);
-        
-        // Max Drawdown
-        const maxDrawdown = calculateMaxDrawdown(portfolioValues);
-        
-        // Calmar Ratio
+        const sortinoRatio = this.calculateSortinoRatio(returns, riskFreeRate);
+        const maxDrawdown = this.calculateMaxDrawdown(portfolioValues);
         const calmarRatio = maxDrawdown > 0 ? annualizedReturn / maxDrawdown : 0;
         
-        // Win/Loss metrics
         const wins = returns.filter(r => r > 0);
         const losses = returns.filter(r => r < 0);
         const winRate = returns.length > 0 ? (wins.length / returns.length) * 100 : 0;
@@ -256,39 +180,19 @@ const InvestmentAnalytics = (function() {
         const averageLoss = losses.length > 0 ? Math.abs(losses.reduce((sum, r) => sum + r, 0) / losses.length) : 0;
         const profitFactor = averageLoss > 0 ? Math.abs(averageWin / averageLoss) : 0;
         
-        // VaR and CVaR
-        const var95 = calculateVaR(returns, 0.95);
-        const cvar95 = calculateCVaR(returns, 0.95);
-        
-        // Alpha & Beta (vs benchmark - placeholder)
-        const alpha = 0; // Calculé plus tard avec benchmark
-        const beta = 1; // Calculé plus tard avec benchmark
-        const informationRatio = 0;
+        const var95 = this.calculateVaR(returns, 0.95);
+        const cvar95 = this.calculateCVaR(returns, 0.95);
         
         return {
-            totalReturn,
-            annualizedReturn,
-            volatility,
-            sharpeRatio,
-            sortinoRatio,
-            maxDrawdown,
-            calmarRatio,
-            winRate,
-            averageWin: averageWin * 100,
-            averageLoss: averageLoss * 100,
-            profitFactor,
-            var95: var95 * 100,
-            cvar95: cvar95 * 100,
-            alpha,
-            beta,
-            informationRatio
+            totalReturn, annualizedReturn, volatility, sharpeRatio,
+            sortinoRatio, maxDrawdown, calmarRatio, winRate,
+            averageWin: averageWin * 100, averageLoss: averageLoss * 100,
+            profitFactor, var95: var95 * 100, cvar95: cvar95 * 100,
+            alpha: 0, beta: 1, informationRatio: 0
         };
-    }
+    },
     
-    /**
-     * Calcule les rendements à partir des valeurs
-     */
-    function calculateReturns(values) {
+    calculateReturns(values) {
         const returns = [];
         for (let i = 1; i < values.length; i++) {
             if (values[i - 1] > 0) {
@@ -296,23 +200,16 @@ const InvestmentAnalytics = (function() {
             }
         }
         return returns;
-    }
+    },
     
-    /**
-     * Calcule la volatilité
-     */
-    function calculateVolatility(returns) {
+    calculateVolatility(returns) {
         if (returns.length === 0) return 0;
-        
         const mean = returns.reduce((sum, r) => sum + r, 0) / returns.length;
         const variance = returns.reduce((sum, r) => sum + Math.pow(r - mean, 2), 0) / returns.length;
         return Math.sqrt(variance);
-    }
+    },
     
-    /**
-     * Calcule le ratio de Sortino
-     */
-    function calculateSortinoRatio(returns, riskFreeRate) {
+    calculateSortinoRatio(returns, riskFreeRate) {
         if (returns.length === 0) return 0;
         
         const monthlyRiskFree = riskFreeRate / 12 / 100;
@@ -320,7 +217,7 @@ const InvestmentAnalytics = (function() {
         const meanExcess = excessReturns.reduce((sum, r) => sum + r, 0) / excessReturns.length;
         
         const downsideReturns = excessReturns.filter(r => r < 0);
-        if (downsideReturns.length === 0) return meanExcess > 0 ? Infinity : 0;
+        if (downsideReturns.length === 0) return meanExcess > 0 ? 999 : 0;
         
         const downsideDeviation = Math.sqrt(
             downsideReturns.reduce((sum, r) => sum + r * r, 0) / downsideReturns.length
@@ -330,71 +227,52 @@ const InvestmentAnalytics = (function() {
         const annualizedDD = downsideDeviation * Math.sqrt(12);
         
         return annualizedDD > 0 ? annualizedMean / annualizedDD : 0;
-    }
+    },
     
-    /**
-     * Calcule le drawdown maximum
-     */
-    function calculateMaxDrawdown(values) {
+    calculateMaxDrawdown(values) {
         let maxDrawdown = 0;
         let peak = values[0];
         
         for (let i = 1; i < values.length; i++) {
-            if (values[i] > peak) {
-                peak = values[i];
-            }
+            if (values[i] > peak) peak = values[i];
             const drawdown = peak > 0 ? ((peak - values[i]) / peak) * 100 : 0;
-            if (drawdown > maxDrawdown) {
-                maxDrawdown = drawdown;
-            }
+            if (drawdown > maxDrawdown) maxDrawdown = drawdown;
         }
         
         return maxDrawdown;
-    }
+    },
     
-    /**
-     * Calcule la Value at Risk
-     */
-    function calculateVaR(returns, confidenceLevel) {
+    calculateVaR(returns, confidenceLevel) {
         if (returns.length === 0) return 0;
-        
         const sorted = [...returns].sort((a, b) => a - b);
         const index = Math.floor((1 - confidenceLevel) * sorted.length);
         return sorted[index] || 0;
-    }
+    },
     
-    /**
-     * Calcule la Conditional Value at Risk
-     */
-    function calculateCVaR(returns, confidenceLevel) {
+    calculateCVaR(returns, confidenceLevel) {
         if (returns.length === 0) return 0;
-        
         const sorted = [...returns].sort((a, b) => a - b);
         const index = Math.floor((1 - confidenceLevel) * sorted.length);
         const tail = sorted.slice(0, index + 1);
-        
         if (tail.length === 0) return 0;
         return tail.reduce((sum, r) => sum + r, 0) / tail.length;
-    }
+    },
     
-    // ========== AFFICHAGE DES KPIs ==========
+    // ========== KPI DISPLAY ==========
     
-    /**
-     * Affiche les KPIs principaux
-     */
-    function displayKPIs() {
-        const metrics = calculateMetrics();
-        const filteredData = getFilteredData();
+    displayKPIs() {
+        const metrics = this.calculateMetrics();
+        const filteredData = this.getFilteredData();
         
         if (filteredData.length === 0) {
             document.getElementById('kpiGrid').innerHTML = `
                 <div class='kpi-card neutral'>
                     <div class='kpi-header'>
-                        <span class='kpi-title'>Aucune donnée</span>
+                        <span class='kpi-title'>No Data</span>
                         <div class='kpi-icon'><i class='fas fa-exclamation-triangle'></i></div>
                     </div>
                     <div class='kpi-value'>--</div>
-                    <p style='color: var(--text-secondary); font-size: 0.9rem;'>Veuillez d'abord remplir vos données dans le Dashboard Budget</p>
+                    <p style='color: var(--text-secondary); font-size: 0.9rem;'>Please fill your data in Budget Dashboard first</p>
                 </div>
             `;
             return;
@@ -407,65 +285,65 @@ const InvestmentAnalytics = (function() {
         
         const kpis = [
             {
-                title: 'Valeur Totale du Portefeuille',
-                value: formatCurrency(currentPortfolio),
+                title: 'Total Portfolio Value',
+                value: this.formatCurrency(currentPortfolio),
                 icon: 'fa-wallet',
-                change: `+${formatPercent(metrics.totalReturn)}`,
+                change: `+${this.formatPercent(metrics.totalReturn)}`,
                 changeClass: metrics.totalReturn >= 0 ? 'positive' : 'negative',
-                footer: `Sur ${filteredData.length} mois`,
+                footer: `Over ${filteredData.length} months`,
                 cardClass: currentPortfolio > 0 ? 'positive' : 'neutral'
             },
             {
-                title: 'Investissement Cumulé',
-                value: formatCurrency(currentInvestment),
+                title: 'Cumulated Investment',
+                value: this.formatCurrency(currentInvestment),
                 icon: 'fa-piggy-bank',
                 change: null,
-                footer: `Capital investi`,
+                footer: `Capital invested`,
                 cardClass: 'neutral'
             },
             {
-                title: 'Gains Cumulés',
-                value: formatCurrency(currentGains),
+                title: 'Cumulated Gains',
+                value: this.formatCurrency(currentGains),
                 icon: 'fa-chart-line',
-                change: `ROI: ${formatPercent(currentROI)}`,
+                change: `ROI: ${this.formatPercent(currentROI)}`,
                 changeClass: currentGains >= 0 ? 'positive' : 'negative',
-                footer: `Performance globale`,
+                footer: `Overall performance`,
                 cardClass: currentGains >= 0 ? 'positive' : 'negative'
             },
             {
-                title: 'Rendement Annualisé',
-                value: formatPercent(metrics.annualizedReturn),
+                title: 'Annualized Return',
+                value: this.formatPercent(metrics.annualizedReturn),
                 icon: 'fa-percentage',
-                change: `Volatilité: ${metrics.volatility.toFixed(2)}%`,
+                change: `Volatility: ${metrics.volatility.toFixed(2)}%`,
                 changeClass: 'neutral',
-                footer: `Rendement moyen par an`,
+                footer: `Average return per year`,
                 cardClass: metrics.annualizedReturn >= 5 ? 'positive' : metrics.annualizedReturn >= 0 ? 'neutral' : 'negative'
             },
             {
                 title: 'Sharpe Ratio',
                 value: metrics.sharpeRatio.toFixed(2),
                 icon: 'fa-balance-scale',
-                change: interpretSharpe(metrics.sharpeRatio),
+                change: this.interpretSharpe(metrics.sharpeRatio),
                 changeClass: metrics.sharpeRatio > 1 ? 'positive' : metrics.sharpeRatio > 0 ? 'neutral' : 'negative',
-                footer: `Rendement ajusté au risque`,
+                footer: `Risk-adjusted return`,
                 cardClass: metrics.sharpeRatio > 1 ? 'positive' : 'neutral'
             },
             {
-                title: 'Drawdown Maximum',
+                title: 'Maximum Drawdown',
                 value: `-${metrics.maxDrawdown.toFixed(2)}%`,
                 icon: 'fa-arrow-down',
                 change: `Calmar: ${metrics.calmarRatio.toFixed(2)}`,
                 changeClass: 'neutral',
-                footer: `Perte maximale`,
+                footer: `Maximum loss`,
                 cardClass: metrics.maxDrawdown < 10 ? 'positive' : metrics.maxDrawdown < 20 ? 'neutral' : 'negative'
             },
             {
-                title: 'Taux de Réussite',
+                title: 'Win Rate',
                 value: `${metrics.winRate.toFixed(1)}%`,
                 icon: 'fa-bullseye',
-                change: `${(filteredData.filter((d, i) => i > 0 && d.totalPortfolio > filteredData[i-1].totalPortfolio).length)} mois gagnants`,
+                change: `${(filteredData.filter((d, i) => i > 0 && d.totalPortfolio > filteredData[i-1].totalPortfolio).length)} winning months`,
                 changeClass: metrics.winRate >= 50 ? 'positive' : 'negative',
-                footer: `Pourcentage de mois positifs`,
+                footer: `Percentage of positive months`,
                 cardClass: metrics.winRate >= 60 ? 'positive' : metrics.winRate >= 40 ? 'neutral' : 'negative'
             },
             {
@@ -474,7 +352,7 @@ const InvestmentAnalytics = (function() {
                 icon: 'fa-shield-alt',
                 change: `CVaR: ${metrics.cvar95.toFixed(2)}%`,
                 changeClass: 'neutral',
-                footer: `Perte potentielle (95% confiance)`,
+                footer: `Potential loss (95% confidence)`,
                 cardClass: Math.abs(metrics.var95) < 5 ? 'positive' : 'neutral'
             }
         ];
@@ -492,52 +370,23 @@ const InvestmentAnalytics = (function() {
         `).join('');
         
         document.getElementById('kpiGrid').innerHTML = html;
-    }
+    },
     
-    /**
-     * Interprète le Sharpe Ratio
-     */
-    function interpretSharpe(sharpe) {
+    interpretSharpe(sharpe) {
         if (sharpe > 3) return 'Excellent';
-        if (sharpe > 2) return 'Très bon';
-        if (sharpe > 1) return 'Bon';
+        if (sharpe > 2) return 'Very Good';
+        if (sharpe > 1) return 'Good';
         if (sharpe > 0) return 'Acceptable';
-        return 'Faible';
-    }
+        return 'Low';
+    },
     
-    // ========== FIN PARTIE 1/5 ==========
-    
-    // Les exports publics seront à la fin
-    return {
-        init,
-        changePeriod,
-        refreshData: init,
-        exportReport: () => console.log('Export en cours...'),
-        runAIAnalysis: () => console.log('Analyse IA en cours...'),
-        updateBenchmark: () => console.log('Mise à jour benchmark...')
-    };
-    
-})();
-
-// Initialisation au chargement
-window.addEventListener('DOMContentLoaded', InvestmentAnalytics.init);
-
-/* ==============================================
-   INVESTMENT-ANALYTICS.JS - PARTIE 2/5
-   GRAPHIQUES DE PERFORMANCE
-   ============================================== */
-
-// Continuer dans le module InvestmentAnalytics
-
-Object.assign(InvestmentAnalytics, {
-    
-    // ========== CRÉATION DE TOUS LES GRAPHIQUES ==========
+    // ========== CREATE ALL CHARTS ==========
     
     createAllCharts() {
-        const filteredData = getFilteredData();
+        const filteredData = this.getFilteredData();
         
         if (filteredData.length === 0) {
-            console.warn('Aucune donnée pour créer les graphiques');
+            console.warn('No data to create charts');
             return;
         }
         
@@ -554,9 +403,10 @@ Object.assign(InvestmentAnalytics, {
         this.createAlphaBetaChart(filteredData);
         this.createSortinoChart(filteredData);
         this.createCalmarChart(filteredData);
+        this.displayRiskMetricsTable();
     },
     
-    // ========== 1. ÉVOLUTION DU PORTEFEUILLE ==========
+    // ========== CHART 1: PORTFOLIO EVOLUTION ==========
     
     createPortfolioEvolutionChart(data) {
         const categories = data.map(row => row.month);
@@ -564,30 +414,23 @@ Object.assign(InvestmentAnalytics, {
         const investment = data.map(row => row.cumulatedInvestment || 0);
         const gains = data.map(row => row.cumulatedGains || 0);
         
-        if (charts.portfolioEvolution) {
-            charts.portfolioEvolution.destroy();
+        if (this.charts.portfolioEvolution) {
+            this.charts.portfolioEvolution.destroy();
         }
         
-        charts.portfolioEvolution = Highcharts.chart('chartPortfolioEvolution', {
-            chart: {
-                type: 'area',
-                backgroundColor: 'transparent',
-                height: 450
-            },
+        this.charts.portfolioEvolution = Highcharts.chart('chartPortfolioEvolution', {
+            chart: { type: 'area', backgroundColor: 'transparent', height: 450 },
             title: { text: null },
             xAxis: {
                 categories: categories,
                 crosshair: true,
-                labels: {
-                    rotation: -45,
-                    style: { fontSize: '10px' }
-                }
+                labels: { rotation: -45, style: { fontSize: '10px' } }
             },
             yAxis: {
-                title: { text: 'Valeur (EUR)' },
+                title: { text: 'Value (EUR)' },
                 labels: {
                     formatter: function() {
-                        return formatLargeNumber(this.value);
+                        return InvestmentAnalytics.formatLargeNumber(this.value);
                     }
                 }
             },
@@ -599,29 +442,22 @@ Object.assign(InvestmentAnalytics, {
                     let s = '<b>' + this.x + '</b><br/>';
                     this.points.forEach(point => {
                         s += '<span style="color:' + point.color + '">●</span> ' + 
-                             point.series.name + ': <b>' + formatCurrency(point.y) + '</b><br/>';
+                             point.series.name + ': <b>' + InvestmentAnalytics.formatCurrency(point.y) + '</b><br/>';
                     });
                     return s;
                 }
             },
             plotOptions: {
-                area: {
-                    stacking: null,
-                    lineWidth: 2,
-                    marker: { enabled: false }
-                }
+                area: { stacking: null, lineWidth: 2, marker: { enabled: false } }
             },
             series: [
                 {
-                    name: 'Investissement',
+                    name: 'Investment',
                     data: investment,
                     color: '#6C8BE0',
                     fillColor: {
                         linearGradient: { x1: 0, y1: 0, x2: 0, y2: 1 },
-                        stops: [
-                            [0, 'rgba(108, 139, 224, 0.3)'],
-                            [1, 'rgba(108, 139, 224, 0.05)']
-                        ]
+                        stops: [[0, 'rgba(108, 139, 224, 0.3)'], [1, 'rgba(108, 139, 224, 0.05)']]
                     }
                 },
                 {
@@ -630,35 +466,26 @@ Object.assign(InvestmentAnalytics, {
                     color: '#10b981',
                     fillColor: {
                         linearGradient: { x1: 0, y1: 0, x2: 0, y2: 1 },
-                        stops: [
-                            [0, 'rgba(16, 185, 129, 0.3)'],
-                            [1, 'rgba(16, 185, 129, 0.05)']
-                        ]
+                        stops: [[0, 'rgba(16, 185, 129, 0.3)'], [1, 'rgba(16, 185, 129, 0.05)']]
                     }
                 },
                 {
-                    name: 'Portefeuille Total',
+                    name: 'Total Portfolio',
                     data: portfolio,
                     color: '#2563eb',
                     fillColor: {
                         linearGradient: { x1: 0, y1: 0, x2: 0, y2: 1 },
-                        stops: [
-                            [0, 'rgba(37, 99, 235, 0.4)'],
-                            [1, 'rgba(37, 99, 235, 0.05)']
-                        ]
+                        stops: [[0, 'rgba(37, 99, 235, 0.4)'], [1, 'rgba(37, 99, 235, 0.05)']]
                     },
                     lineWidth: 3
                 }
             ],
-            legend: {
-                align: 'center',
-                verticalAlign: 'bottom'
-            },
+            legend: { align: 'center', verticalAlign: 'bottom' },
             credits: { enabled: false }
         });
     },
     
-    // ========== 2. RENDEMENTS MENSUELS ==========
+    // ========== CHART 2: MONTHLY RETURNS ==========
     
     createMonthlyReturnsChart(data) {
         const categories = [];
@@ -678,100 +505,56 @@ Object.assign(InvestmentAnalytics, {
             }
         }
         
-        if (charts.monthlyReturns) {
-            charts.monthlyReturns.destroy();
+        if (this.charts.monthlyReturns) {
+            this.charts.monthlyReturns.destroy();
         }
         
-        charts.monthlyReturns = Highcharts.chart('chartMonthlyReturns', {
-            chart: {
-                type: 'column',
-                backgroundColor: 'transparent',
-                height: 450
-            },
+        this.charts.monthlyReturns = Highcharts.chart('chartMonthlyReturns', {
+            chart: { type: 'column', backgroundColor: 'transparent', height: 450 },
             title: { text: null },
             xAxis: {
                 categories: categories,
                 crosshair: true,
-                labels: {
-                    rotation: -45,
-                    style: { fontSize: '10px' }
-                }
+                labels: { rotation: -45, style: { fontSize: '10px' } }
             },
             yAxis: {
-                title: { text: 'Rendement (%)' },
-                plotLines: [{
-                    value: 0,
-                    color: '#94a3b8',
-                    width: 2,
-                    zIndex: 5
-                }]
+                title: { text: 'Return (%)' },
+                plotLines: [{ value: 0, color: '#94a3b8', width: 2, zIndex: 5 }]
             },
-            tooltip: {
-                valueSuffix: '%',
-                valueDecimals: 2
-            },
+            tooltip: { valueSuffix: '%', valueDecimals: 2 },
             plotOptions: {
-                column: {
-                    borderRadius: 4,
-                    dataLabels: {
-                        enabled: false
-                    }
-                }
+                column: { borderRadius: 4, dataLabels: { enabled: false } }
             },
-            series: [{
-                name: 'Rendement Mensuel',
-                data: returns,
-                colorByPoint: true
-            }],
+            series: [{ name: 'Monthly Return', data: returns, colorByPoint: true }],
             legend: { enabled: false },
             credits: { enabled: false }
         });
     },
     
-    // ========== 3. ALLOCATION D'ACTIFS ==========
+    // ========== CHART 3: ASSET ALLOCATION ==========
     
     createAssetAllocationChart(data) {
         const lastRow = data[data.length - 1];
         
         const allocationData = [
-            {
-                name: 'Investissement',
-                y: lastRow.cumulatedInvestment || 0,
-                color: '#6C8BE0'
-            },
-            {
-                name: 'Gains',
-                y: lastRow.cumulatedGains || 0,
-                color: '#10b981'
-            },
-            {
-                name: 'PEE L\'Oreal',
-                y: lastRow.peeLoreal || 0,
-                color: '#8b5cf6'
-            }
+            { name: 'Investment', y: lastRow.cumulatedInvestment || 0, color: '#6C8BE0' },
+            { name: 'Gains', y: lastRow.cumulatedGains || 0, color: '#10b981' },
+            { name: 'PEE L\'Oreal', y: lastRow.peeLoreal || 0, color: '#8b5cf6' }
         ].filter(item => item.y > 0);
         
-        if (charts.assetAllocation) {
-            charts.assetAllocation.destroy();
+        if (this.charts.assetAllocation) {
+            this.charts.assetAllocation.destroy();
         }
         
-        charts.assetAllocation = Highcharts.chart('chartAssetAllocation', {
-            chart: {
-                type: 'pie',
-                backgroundColor: 'transparent',
-                height: 450
-            },
-            title: { 
-                text: lastRow.month,
-                style: { fontSize: '14px', fontWeight: 'bold' }
-            },
+        this.charts.assetAllocation = Highcharts.chart('chartAssetAllocation', {
+            chart: { type: 'pie', backgroundColor: 'transparent', height: 450 },
+            title: { text: lastRow.month, style: { fontSize: '14px', fontWeight: 'bold' } },
             tooltip: {
                 pointFormat: '<b>{point.name}</b><br/>{point.y:,.0f} EUR ({point.percentage:.1f}%)'
             },
             plotOptions: {
                 pie: {
                     innerSize: '60%',
-                    depth: 45,
                     dataLabels: {
                         enabled: true,
                         format: '<b>{point.name}</b><br/>{point.percentage:.1f}%',
@@ -780,77 +563,49 @@ Object.assign(InvestmentAnalytics, {
                     showInLegend: true
                 }
             },
-            series: [{
-                name: 'Allocation',
-                data: allocationData
-            }],
+            series: [{ name: 'Allocation', data: allocationData }],
             credits: { enabled: false }
         });
     },
     
-    // ========== 4. CONTRIBUTION PAR INVESTISSEMENT ==========
+    // ========== CHART 4: CONTRIBUTION ==========
     
     createContributionChart(data) {
         const categories = data.map(row => row.month);
         const monthlyInvestment = data.map(row => row.investment || 0);
         const monthlyGain = data.map(row => row.monthlyGain || 0);
         
-        if (charts.contribution) {
-            charts.contribution.destroy();
+        if (this.charts.contribution) {
+            this.charts.contribution.destroy();
         }
         
-        charts.contribution = Highcharts.chart('chartContribution', {
-            chart: {
-                type: 'column',
-                backgroundColor: 'transparent',
-                height: 450
-            },
+        this.charts.contribution = Highcharts.chart('chartContribution', {
+            chart: { type: 'column', backgroundColor: 'transparent', height: 450 },
             title: { text: null },
             xAxis: {
                 categories: categories,
                 crosshair: true,
-                labels: {
-                    rotation: -45,
-                    style: { fontSize: '10px' }
-                }
+                labels: { rotation: -45, style: { fontSize: '10px' } }
             },
-            yAxis: {
-                title: { text: 'Montant (EUR)' }
-            },
-            tooltip: {
-                shared: true,
-                valuePrefix: '€',
-                valueDecimals: 2
-            },
+            yAxis: { title: { text: 'Amount (EUR)' } },
+            tooltip: { shared: true, valuePrefix: '€', valueDecimals: 2 },
             plotOptions: {
-                column: {
-                    stacking: 'normal',
-                    borderRadius: 3
-                }
+                column: { stacking: 'normal', borderRadius: 3 }
             },
             series: [
-                {
-                    name: 'Investissement Mensuel',
-                    data: monthlyInvestment,
-                    color: '#6C8BE0'
-                },
-                {
-                    name: 'Gain Mensuel',
-                    data: monthlyGain,
-                    color: '#10b981'
-                }
+                { name: 'Monthly Investment', data: monthlyInvestment, color: '#6C8BE0' },
+                { name: 'Monthly Gain', data: monthlyGain, color: '#10b981' }
             ],
             credits: { enabled: false }
         });
     },
     
-    // ========== 5. DRAWDOWN ==========
+    // ========== CHART 5: DRAWDOWN ==========
     
     createDrawdownChart(data) {
         const categories = data.map(row => row.month);
         const portfolioValues = data.map(row => row.totalPortfolio || 0);
         
-        // Calculer le drawdown
         const drawdowns = [];
         let peak = portfolioValues[0];
         
@@ -860,160 +615,106 @@ Object.assign(InvestmentAnalytics, {
             drawdowns.push(drawdown);
         });
         
-        if (charts.drawdown) {
-            charts.drawdown.destroy();
+        if (this.charts.drawdown) {
+            this.charts.drawdown.destroy();
         }
         
-        charts.drawdown = Highcharts.chart('chartDrawdown', {
-            chart: {
-                type: 'area',
-                backgroundColor: 'transparent',
-                height: 450
-            },
+        this.charts.drawdown = Highcharts.chart('chartDrawdown', {
+            chart: { type: 'area', backgroundColor: 'transparent', height: 450 },
             title: { text: null },
             xAxis: {
                 categories: categories,
                 crosshair: true,
-                labels: {
-                    rotation: -45,
-                    style: { fontSize: '10px' }
-                }
+                labels: { rotation: -45, style: { fontSize: '10px' } }
             },
             yAxis: {
                 title: { text: 'Drawdown (%)' },
                 max: 0,
-                plotLines: [{
-                    value: -10,
-                    color: '#f59e0b',
-                    dashStyle: 'Dash',
-                    width: 1,
-                    label: {
-                        text: '-10%',
-                        align: 'right',
-                        style: { color: '#f59e0b' }
+                plotLines: [
+                    {
+                        value: -10, color: '#f59e0b', dashStyle: 'Dash', width: 1,
+                        label: { text: '-10%', align: 'right', style: { color: '#f59e0b' } }
+                    },
+                    {
+                        value: -20, color: '#ef4444', dashStyle: 'Dash', width: 1,
+                        label: { text: '-20%', align: 'right', style: { color: '#ef4444' } }
                     }
-                }, {
-                    value: -20,
-                    color: '#ef4444',
-                    dashStyle: 'Dash',
-                    width: 1,
-                    label: {
-                        text: '-20%',
-                        align: 'right',
-                        style: { color: '#ef4444' }
-                    }
-                }]
+                ]
             },
-            tooltip: {
-                valueSuffix: '%',
-                valueDecimals: 2
-            },
+            tooltip: { valueSuffix: '%', valueDecimals: 2 },
             plotOptions: {
                 area: {
                     fillColor: {
                         linearGradient: { x1: 0, y1: 0, x2: 0, y2: 1 },
-                        stops: [
-                            [0, 'rgba(239, 68, 68, 0.5)'],
-                            [1, 'rgba(239, 68, 68, 0.05)']
-                        ]
+                        stops: [[0, 'rgba(239, 68, 68, 0.5)'], [1, 'rgba(239, 68, 68, 0.05)']]
                     },
                     lineWidth: 2,
                     marker: { enabled: false }
                 }
             },
-            series: [{
-                name: 'Drawdown',
-                data: drawdowns,
-                color: '#ef4444',
-                negativeColor: '#ef4444'
-            }],
+            series: [{ name: 'Drawdown', data: drawdowns, color: '#ef4444' }],
             credits: { enabled: false }
         });
     },
     
-    // ========== 6. VOLATILITÉ ROULANTE ==========
+    // ========== CHART 6: ROLLING VOLATILITY ==========
     
     createRollingVolatilityChart(data) {
         const categories = [];
         const volatilities = [];
-        const window = 30; // 30 jours
+        const window = 30;
         
         if (data.length < window) {
-            console.warn('Pas assez de données pour la volatilité roulante');
+            console.warn('Not enough data for rolling volatility');
             return;
         }
         
         for (let i = window; i < data.length; i++) {
             const windowData = data.slice(i - window, i);
             const values = windowData.map(row => row.totalPortfolio || 0);
-            const returns = calculateReturns(values);
-            const vol = calculateVolatility(returns) * Math.sqrt(252) * 100;
+            const returns = this.calculateReturns(values);
+            const vol = this.calculateVolatility(returns) * Math.sqrt(252) * 100;
             
             categories.push(data[i].month);
             volatilities.push(vol);
         }
         
-        if (charts.rollingVolatility) {
-            charts.rollingVolatility.destroy();
+        if (this.charts.rollingVolatility) {
+            this.charts.rollingVolatility.destroy();
         }
         
-        charts.rollingVolatility = Highcharts.chart('chartRollingVolatility', {
-            chart: {
-                type: 'line',
-                backgroundColor: 'transparent',
-                height: 450
-            },
+        this.charts.rollingVolatility = Highcharts.chart('chartRollingVolatility', {
+            chart: { type: 'line', backgroundColor: 'transparent', height: 450 },
             title: { text: null },
             xAxis: {
                 categories: categories,
                 crosshair: true,
-                labels: {
-                    rotation: -45,
-                    style: { fontSize: '10px' }
-                }
+                labels: { rotation: -45, style: { fontSize: '10px' } }
             },
             yAxis: {
-                title: { text: 'Volatilité Annualisée (%)' },
+                title: { text: 'Annualized Volatility (%)' },
                 plotLines: [{
-                    value: 15,
-                    color: '#f59e0b',
-                    dashStyle: 'Dash',
-                    width: 1,
-                    label: {
-                        text: 'Seuil 15%',
-                        align: 'right',
-                        style: { color: '#f59e0b' }
-                    }
+                    value: 15, color: '#f59e0b', dashStyle: 'Dash', width: 1,
+                    label: { text: '15% threshold', align: 'right', style: { color: '#f59e0b' } }
                 }]
             },
-            tooltip: {
-                valueSuffix: '%',
-                valueDecimals: 2
-            },
+            tooltip: { valueSuffix: '%', valueDecimals: 2 },
             plotOptions: {
-                line: {
-                    lineWidth: 2,
-                    marker: { enabled: false }
-                }
+                line: { lineWidth: 2, marker: { enabled: false } }
             },
-            series: [{
-                name: 'Volatilité Roulante (30j)',
-                data: volatilities,
-                color: '#8b5cf6'
-            }],
+            series: [{ name: 'Rolling Volatility (30d)', data: volatilities, color: '#8b5cf6' }],
             credits: { enabled: false }
         });
     },
     
-    // ========== 7. DISTRIBUTION DES RENDEMENTS ==========
+    // ========== CHART 7: RETURNS DISTRIBUTION ==========
     
     createReturnsDistributionChart(data) {
         const portfolioValues = data.map(row => row.totalPortfolio || 0);
-        const returns = calculateReturns(portfolioValues).map(r => r * 100);
+        const returns = this.calculateReturns(portfolioValues).map(r => r * 100);
         
-        // Créer un histogramme
         const bins = [];
-        const binSize = 2; // 2%
+        const binSize = 2;
         const minReturn = Math.floor(Math.min(...returns) / binSize) * binSize;
         const maxReturn = Math.ceil(Math.max(...returns) / binSize) * binSize;
         
@@ -1026,46 +727,29 @@ Object.assign(InvestmentAnalytics, {
             return [bin, count];
         });
         
-        if (charts.returnsDistribution) {
-            charts.returnsDistribution.destroy();
+        if (this.charts.returnsDistribution) {
+            this.charts.returnsDistribution.destroy();
         }
         
-        charts.returnsDistribution = Highcharts.chart('chartReturnsDistribution', {
-            chart: {
-                type: 'column',
-                backgroundColor: 'transparent',
-                height: 450
-            },
+        this.charts.returnsDistribution = Highcharts.chart('chartReturnsDistribution', {
+            chart: { type: 'column', backgroundColor: 'transparent', height: 450 },
             title: { text: null },
             xAxis: {
-                title: { text: 'Rendement (%)' },
-                plotLines: [{
-                    value: 0,
-                    color: '#94a3b8',
-                    width: 2,
-                    zIndex: 5
-                }]
+                title: { text: 'Return (%)' },
+                plotLines: [{ value: 0, color: '#94a3b8', width: 2, zIndex: 5 }]
             },
-            yAxis: {
-                title: { text: 'Fréquence' }
-            },
+            yAxis: { title: { text: 'Frequency' } },
             tooltip: {
-                pointFormat: 'Rendements entre <b>{point.x}%</b> et <b>{point.x2}%</b><br/>Fréquence: <b>{point.y}</b>',
+                pointFormat: 'Returns between <b>{point.x}%</b> and <b>{point.x2}%</b><br/>Frequency: <b>{point.y}</b>',
                 shared: false
             },
             plotOptions: {
-                column: {
-                    borderRadius: 3,
-                    groupPadding: 0,
-                    pointPadding: 0.05
-                }
+                column: { borderRadius: 3, groupPadding: 0, pointPadding: 0.05 }
             },
             series: [{
-                name: 'Fréquence',
+                name: 'Frequency',
                 data: histogram.map(([x, y]) => ({
-                    x: x,
-                    x2: x + binSize,
-                    y: y,
+                    x: x, x2: x + binSize, y: y,
                     color: x >= 0 ? '#10b981' : '#ef4444'
                 })),
                 colorByPoint: true
@@ -1075,16 +759,16 @@ Object.assign(InvestmentAnalytics, {
         });
     },
     
-    // ========== 8. VALUE AT RISK (VaR) ==========
+    // ========== CHART 8: VAR ==========
     
     createVaRChart(data) {
         const portfolioValues = data.map(row => row.totalPortfolio || 0);
-        const returns = calculateReturns(portfolioValues);
+        const returns = this.calculateReturns(portfolioValues);
         
         const confidenceLevels = [0.90, 0.95, 0.99];
         const varData = confidenceLevels.map(level => {
-            const var95 = calculateVaR(returns, level) * 100;
-            const cvar95 = calculateCVaR(returns, level) * 100;
+            const var95 = this.calculateVaR(returns, level) * 100;
+            const cvar95 = this.calculateCVaR(returns, level) * 100;
             
             return {
                 name: `${(level * 100).toFixed(0)}%`,
@@ -1095,120 +779,74 @@ Object.assign(InvestmentAnalytics, {
             };
         });
         
-        if (charts.var) {
-            charts.var.destroy();
+        if (this.charts.var) {
+            this.charts.var.destroy();
         }
         
-        charts.var = Highcharts.chart('chartVaR', {
-            chart: {
-                type: 'column',
-                backgroundColor: 'transparent',
-                height: 450
-            },
+        this.charts.var = Highcharts.chart('chartVaR', {
+            chart: { type: 'column', backgroundColor: 'transparent', height: 450 },
             title: { text: null },
-            xAxis: {
-                categories: ['VaR', 'CVaR'],
-                crosshair: true
-            },
-            yAxis: {
-                title: { text: 'Perte Potentielle (%)' }
-            },
-            tooltip: {
-                valueSuffix: '%',
-                valueDecimals: 2
-            },
+            xAxis: { categories: ['VaR', 'CVaR'], crosshair: true },
+            yAxis: { title: { text: 'Potential Loss (%)' } },
+            tooltip: { valueSuffix: '%', valueDecimals: 2 },
             plotOptions: {
                 column: {
                     borderRadius: 4,
-                    dataLabels: {
-                        enabled: true,
-                        format: '{y:.2f}%'
-                    }
+                    dataLabels: { enabled: true, format: '{y:.2f}%' }
                 }
             },
             series: varData,
             credits: { enabled: false }
         });
-    }
+    },
     
-});
-
-// ========== FIN PARTIE 2/5 ==========
-
-/* ==============================================
-   INVESTMENT-ANALYTICS.JS - PARTIE 3/5
-   ANALYSE DES RISQUES & CORRÉLATIONS
-   ============================================== */
-
-Object.assign(InvestmentAnalytics, {
-    
-    // ========== 9. MATRICE DE CORRÉLATION ==========
+    // ========== CHART 9: CORRELATION MATRIX ==========
     
     createCorrelationMatrix(data) {
-        // Créer des séries temporelles factices pour différents types d'investissement
         const assets = [
-            'Investissement Total',
+            'Total Investment',
             'Gains',
             'PEE L\'Oreal',
-            'Épargne',
-            'Revenus'
+            'Savings',
+            'Income'
         ];
         
         const timeSeries = {
-            'Investissement Total': data.map(row => row.cumulatedInvestment || 0),
+            'Total Investment': data.map(row => row.cumulatedInvestment || 0),
             'Gains': data.map(row => row.cumulatedGains || 0),
             'PEE L\'Oreal': data.map(row => row.peeLoreal || 0),
-            'Épargne': data.map(row => row.cumulatedSavings || 0),
-            'Revenus': data.map(row => row.totalIncome || 0)
+            'Savings': data.map(row => row.cumulatedSavings || 0),
+            'Income': data.map(row => row.totalIncome || 0)
         };
         
-        // Calculer la matrice de corrélation
         const correlationMatrix = [];
         
         assets.forEach((asset1, i) => {
             assets.forEach((asset2, j) => {
-                const returns1 = calculateReturns(timeSeries[asset1]);
-                const returns2 = calculateReturns(timeSeries[asset2]);
-                
-                const correlation = calculateCorrelation(returns1, returns2);
-                
+                const returns1 = this.calculateReturns(timeSeries[asset1]);
+                const returns2 = this.calculateReturns(timeSeries[asset2]);
+                const correlation = this.calculateCorrelation(returns1, returns2);
                 correlationMatrix.push([j, i, correlation]);
             });
         });
         
-        if (charts.correlationMatrix) {
-            charts.correlationMatrix.destroy();
+        if (this.charts.correlationMatrix) {
+            this.charts.correlationMatrix.destroy();
         }
         
-        charts.correlationMatrix = Highcharts.chart('chartCorrelationMatrix', {
-            chart: {
-                type: 'heatmap',
-                backgroundColor: 'transparent',
-                height: 500
-            },
+        this.charts.correlationMatrix = Highcharts.chart('chartCorrelationMatrix', {
+            chart: { type: 'heatmap', backgroundColor: 'transparent', height: 500 },
             title: { text: null },
-            xAxis: {
-                categories: assets,
-                opposite: true
-            },
-            yAxis: {
-                categories: assets,
-                title: null,
-                reversed: true
-            },
+            xAxis: { categories: assets, opposite: true },
+            yAxis: { categories: assets, title: null, reversed: true },
             colorAxis: {
-                min: -1,
-                max: 1,
-                stops: [
-                    [0, '#ef4444'],
-                    [0.5, '#f3f4f6'],
-                    [1, '#10b981']
-                ]
+                min: -1, max: 1,
+                stops: [[0, '#ef4444'], [0.5, '#f3f4f6'], [1, '#10b981']]
             },
             tooltip: {
                 formatter: function() {
                     return '<b>' + assets[this.point.y] + '</b> vs <b>' + 
-                           assets[this.point.x] + '</b><br/>Corrélation: <b>' + 
+                           assets[this.point.x] + '</b><br/>Correlation: <b>' + 
                            this.point.value.toFixed(3) + '</b>';
                 }
             },
@@ -1225,11 +863,7 @@ Object.assign(InvestmentAnalytics, {
                     borderColor: '#ffffff'
                 }
             },
-            series: [{
-                name: 'Corrélation',
-                data: correlationMatrix,
-                nullColor: '#f3f4f6'
-            }],
+            series: [{ name: 'Correlation', data: correlationMatrix, nullColor: '#f3f4f6' }],
             legend: {
                 align: 'right',
                 layout: 'vertical',
@@ -1241,13 +875,9 @@ Object.assign(InvestmentAnalytics, {
             credits: { enabled: false }
         });
         
-        // Générer des insights
         this.generateCorrelationInsights(correlationMatrix, assets);
     },
     
-    /**
-     * Calcule la corrélation entre deux séries
-     */
     calculateCorrelation(series1, series2) {
         if (series1.length !== series2.length || series1.length === 0) return 0;
         
@@ -1271,13 +901,9 @@ Object.assign(InvestmentAnalytics, {
         return denominator === 0 ? 0 : numerator / denominator;
     },
     
-    /**
-     * Génère des insights sur la corrélation
-     */
     generateCorrelationInsights(matrix, assets) {
         const insights = [];
         
-        // Trouver les corrélations fortes (>0.7 ou <-0.7)
         matrix.forEach(([x, y, corr]) => {
             if (x < y && Math.abs(corr) > 0.7 && corr !== 1) {
                 const asset1 = assets[y];
@@ -1287,21 +913,20 @@ Object.assign(InvestmentAnalytics, {
                     insights.push({
                         type: 'positive',
                         icon: 'fa-link',
-                        title: 'Corrélation Forte Positive',
-                        description: `${asset1} et ${asset2} évoluent ensemble (${(corr * 100).toFixed(1)}%). Une diversification limitée entre ces actifs.`
+                        title: 'Strong Positive Correlation',
+                        description: `${asset1} and ${asset2} move together (${(corr * 100).toFixed(1)}%). Limited diversification between these assets.`
                     });
                 } else {
                     insights.push({
                         type: 'negative',
                         icon: 'fa-unlink',
-                        title: 'Corrélation Négative',
-                        description: `${asset1} et ${asset2} évoluent en sens inverse (${(corr * 100).toFixed(1)}%). Bonne diversification naturelle.`
+                        title: 'Negative Correlation',
+                        description: `${asset1} and ${asset2} move in opposite directions (${(corr * 100).toFixed(1)}%). Good natural diversification.`
                     });
                 }
             }
         });
         
-        // Trouver les corrélations faibles (<0.3)
         matrix.forEach(([x, y, corr]) => {
             if (x < y && Math.abs(corr) < 0.3 && corr !== 1) {
                 const asset1 = assets[y];
@@ -1310,13 +935,12 @@ Object.assign(InvestmentAnalytics, {
                 insights.push({
                     type: 'warning',
                     icon: 'fa-info-circle',
-                    title: 'Faible Corrélation',
-                    description: `${asset1} et ${asset2} sont peu corrélés (${(corr * 100).toFixed(1)}%). Excellente opportunité de diversification.`
+                    title: 'Low Correlation',
+                    description: `${asset1} and ${asset2} are weakly correlated (${(corr * 100).toFixed(1)}%). Excellent diversification opportunity.`
                 });
             }
         });
         
-        // Afficher les insights
         const container = document.getElementById('correlationInsights');
         if (container && insights.length > 0) {
             container.innerHTML = insights.slice(0, 4).map(insight => `
@@ -1333,26 +957,26 @@ Object.assign(InvestmentAnalytics, {
         }
     },
     
-    // ========== 10. SHARPE RATIO ROULANT ==========
+    // ========== CHART 10: ROLLING SHARPE ==========
     
     createRollingSharpeChart(data) {
         const categories = [];
         const sharpeRatios = [];
-        const window = 12; // 12 mois
-        const riskFreeRate = 2; // 2%
+        const window = 12;
+        const riskFreeRate = 2;
         
         if (data.length < window) {
-            console.warn('Pas assez de données pour le Sharpe roulant');
+            console.warn('Not enough data for rolling Sharpe');
             return;
         }
         
         for (let i = window; i < data.length; i++) {
             const windowData = data.slice(i - window, i);
             const values = windowData.map(row => row.totalPortfolio || 0);
-            const returns = calculateReturns(values);
+            const returns = this.calculateReturns(values);
             
             const meanReturn = returns.reduce((sum, r) => sum + r, 0) / returns.length;
-            const volatility = calculateVolatility(returns);
+            const volatility = this.calculateVolatility(returns);
             
             const annualizedReturn = meanReturn * 12 * 100;
             const annualizedVol = volatility * Math.sqrt(12) * 100;
@@ -1363,69 +987,38 @@ Object.assign(InvestmentAnalytics, {
             sharpeRatios.push(sharpe);
         }
         
-        if (charts.rollingSharpe) {
-            charts.rollingSharpe.destroy();
+        if (this.charts.rollingSharpe) {
+            this.charts.rollingSharpe.destroy();
         }
         
-        charts.rollingSharpe = Highcharts.chart('chartRollingSharpe', {
-            chart: {
-                type: 'line',
-                backgroundColor: 'transparent',
-                height: 450
-            },
+        this.charts.rollingSharpe = Highcharts.chart('chartRollingSharpe', {
+            chart: { type: 'line', backgroundColor: 'transparent', height: 450 },
             title: { text: null },
             xAxis: {
                 categories: categories,
                 crosshair: true,
-                labels: {
-                    rotation: -45,
-                    style: { fontSize: '10px' }
-                }
+                labels: { rotation: -45, style: { fontSize: '10px' } }
             },
             yAxis: {
                 title: { text: 'Sharpe Ratio' },
                 plotLines: [
+                    { value: 0, color: '#94a3b8', width: 2, zIndex: 5 },
                     {
-                        value: 0,
-                        color: '#94a3b8',
-                        width: 2,
-                        zIndex: 5
+                        value: 1, color: '#10b981', dashStyle: 'Dash', width: 1,
+                        label: { text: 'Good (1.0)', align: 'right', style: { color: '#10b981' } }
                     },
                     {
-                        value: 1,
-                        color: '#10b981',
-                        dashStyle: 'Dash',
-                        width: 1,
-                        label: {
-                            text: 'Bon (1.0)',
-                            align: 'right',
-                            style: { color: '#10b981' }
-                        }
-                    },
-                    {
-                        value: 2,
-                        color: '#2563eb',
-                        dashStyle: 'Dash',
-                        width: 1,
-                        label: {
-                            text: 'Excellent (2.0)',
-                            align: 'right',
-                            style: { color: '#2563eb' }
-                        }
+                        value: 2, color: '#2563eb', dashStyle: 'Dash', width: 1,
+                        label: { text: 'Excellent (2.0)', align: 'right', style: { color: '#2563eb' } }
                     }
                 ]
             },
-            tooltip: {
-                valueDecimals: 3
-            },
+            tooltip: { valueDecimals: 3 },
             plotOptions: {
-                line: {
-                    lineWidth: 3,
-                    marker: { enabled: false }
-                }
+                line: { lineWidth: 3, marker: { enabled: false } }
             },
             series: [{
-                name: 'Sharpe Ratio (12 mois)',
+                name: 'Sharpe Ratio (12 months)',
                 data: sharpeRatios,
                 color: '#8b5cf6',
                 zones: [
@@ -1439,18 +1032,14 @@ Object.assign(InvestmentAnalytics, {
         });
     },
     
-    // ========== 11. ALPHA vs BETA ==========
+    // ========== CHART 11: ALPHA vs BETA ==========
     
     createAlphaBetaChart(data) {
-        // Pour simplifier, on crée des données factices
-        // Dans une vraie implémentation, il faudrait comparer avec un benchmark
-        
         const scatterData = data.slice(-24).map((row, i) => {
             const portfolioReturn = i > 0 ? 
                 ((row.totalPortfolio - data[data.length - 24 + i - 1].totalPortfolio) / 
                  data[data.length - 24 + i - 1].totalPortfolio) * 100 : 0;
             
-            // Market return simulé (factice)
             const marketReturn = portfolioReturn * (0.8 + Math.random() * 0.4);
             
             return {
@@ -1460,55 +1049,33 @@ Object.assign(InvestmentAnalytics, {
             };
         }).filter(point => point.x !== 0);
         
-        if (charts.alphaBeta) {
-            charts.alphaBeta.destroy();
+        if (this.charts.alphaBeta) {
+            this.charts.alphaBeta.destroy();
         }
         
-        charts.alphaBeta = Highcharts.chart('chartAlphaBeta', {
-            chart: {
-                type: 'scatter',
-                backgroundColor: 'transparent',
-                height: 450,
-                zoomType: 'xy'
-            },
+        this.charts.alphaBeta = Highcharts.chart('chartAlphaBeta', {
+            chart: { type: 'scatter', backgroundColor: 'transparent', height: 450, zoomType: 'xy' },
             title: { text: null },
             xAxis: {
-                title: { text: 'Rendement du Marché (%)' },
+                title: { text: 'Market Return (%)' },
                 gridLineWidth: 1,
-                plotLines: [{
-                    value: 0,
-                    color: '#94a3b8',
-                    width: 1
-                }]
+                plotLines: [{ value: 0, color: '#94a3b8', width: 1 }]
             },
             yAxis: {
-                title: { text: 'Rendement du Portefeuille (%)' },
-                plotLines: [{
-                    value: 0,
-                    color: '#94a3b8',
-                    width: 1
-                }]
+                title: { text: 'Portfolio Return (%)' },
+                plotLines: [{ value: 0, color: '#94a3b8', width: 1 }]
             },
             tooltip: {
-                pointFormat: '<b>{point.name}</b><br/>Marché: {point.x:.2f}%<br/>Portfolio: {point.y:.2f}%'
+                pointFormat: '<b>{point.name}</b><br/>Market: {point.x:.2f}%<br/>Portfolio: {point.y:.2f}%'
             },
             plotOptions: {
-                scatter: {
-                    marker: {
-                        radius: 6,
-                        symbol: 'circle'
-                    }
-                }
+                scatter: { marker: { radius: 6, symbol: 'circle' } }
             },
             series: [
-                {
-                    name: 'Rendements',
-                    data: scatterData,
-                    color: '#2563eb'
-                },
+                { name: 'Returns', data: scatterData, color: '#2563eb' },
                 {
                     type: 'line',
-                    name: 'Ligne de marché',
+                    name: 'Market line',
                     data: [[-5, -5], [5, 5]],
                     color: '#94a3b8',
                     dashStyle: 'Dash',
@@ -1520,7 +1087,7 @@ Object.assign(InvestmentAnalytics, {
         });
     },
     
-    // ========== 12. SORTINO RATIO ==========
+    // ========== CHART 12: SORTINO ==========
     
     createSortinoChart(data) {
         const categories = [];
@@ -1533,75 +1100,55 @@ Object.assign(InvestmentAnalytics, {
         for (let i = window; i < data.length; i++) {
             const windowData = data.slice(i - window, i);
             const values = windowData.map(row => row.totalPortfolio || 0);
-            const returns = calculateReturns(values);
+            const returns = this.calculateReturns(values);
             
-            const sortino = calculateSortinoRatio(returns, riskFreeRate);
+            const sortino = this.calculateSortinoRatio(returns, riskFreeRate);
             
             categories.push(data[i].month);
             sortinoRatios.push(sortino);
         }
         
-        if (charts.sortino) {
-            charts.sortino.destroy();
+        if (this.charts.sortino) {
+            this.charts.sortino.destroy();
         }
         
-        charts.sortino = Highcharts.chart('chartSortino', {
-            chart: {
-                type: 'area',
-                backgroundColor: 'transparent',
-                height: 450
-            },
+        this.charts.sortino = Highcharts.chart('chartSortino', {
+            chart: { type: 'area', backgroundColor: 'transparent', height: 450 },
             title: { text: null },
             xAxis: {
                 categories: categories,
                 crosshair: true,
-                labels: {
-                    rotation: -45,
-                    style: { fontSize: '10px' }
-                }
+                labels: { rotation: -45, style: { fontSize: '10px' } }
             },
             yAxis: {
                 title: { text: 'Sortino Ratio' },
-                plotLines: [{
-                    value: 0,
-                    color: '#94a3b8',
-                    width: 2
-                }]
+                plotLines: [{ value: 0, color: '#94a3b8', width: 2 }]
             },
-            tooltip: {
-                valueDecimals: 3
-            },
+            tooltip: { valueDecimals: 3 },
             plotOptions: {
                 area: {
                     fillColor: {
                         linearGradient: { x1: 0, y1: 0, x2: 0, y2: 1 },
-                        stops: [
-                            [0, 'rgba(37, 99, 235, 0.4)'],
-                            [1, 'rgba(37, 99, 235, 0.05)']
-                        ]
+                        stops: [[0, 'rgba(37, 99, 235, 0.4)'], [1, 'rgba(37, 99, 235, 0.05)']]
                     },
                     lineWidth: 2,
                     marker: { enabled: false }
                 }
             },
-            series: [{
-                name: 'Sortino Ratio (12 mois)',
-                data: sortinoRatios,
-                color: '#2563eb'
-            }],
+            series: [{ name: 'Sortino Ratio (12 months)', data: sortinoRatios, color: '#2563eb' }],
             credits: { enabled: false }
         });
     },
     
-    // ========== 13. CALMAR RATIO ==========
+    // ========== CHART 13: CALMAR ==========
     
     createCalmarChart(data) {
         const categories = [];
         const calmarRatios = [];
-        const window = 36; // 3 ans
+        const window = 36;
         
         if (data.length < window) {
-            console.warn('Pas assez de données pour le Calmar ratio');
+            console.warn('Not enough data for Calmar ratio');
             return;
         }
         
@@ -1615,51 +1162,35 @@ Object.assign(InvestmentAnalytics, {
             const years = window / 12;
             const annualizedReturn = (Math.pow(1 + totalReturn / 100, 1 / years) - 1) * 100;
             
-            const maxDD = calculateMaxDrawdown(values);
+            const maxDD = this.calculateMaxDrawdown(values);
             const calmar = maxDD > 0 ? annualizedReturn / maxDD : 0;
             
             categories.push(data[i].month);
             calmarRatios.push(calmar);
         }
         
-        if (charts.calmar) {
-            charts.calmar.destroy();
+        if (this.charts.calmar) {
+            this.charts.calmar.destroy();
         }
         
-        charts.calmar = Highcharts.chart('chartCalmar', {
-            chart: {
-                type: 'column',
-                backgroundColor: 'transparent',
-                height: 450
-            },
+        this.charts.calmar = Highcharts.chart('chartCalmar', {
+            chart: { type: 'column', backgroundColor: 'transparent', height: 450 },
             title: { text: null },
             xAxis: {
                 categories: categories,
                 crosshair: true,
-                labels: {
-                    rotation: -45,
-                    style: { fontSize: '10px' }
-                }
+                labels: { rotation: -45, style: { fontSize: '10px' } }
             },
             yAxis: {
                 title: { text: 'Calmar Ratio' },
-                plotLines: [{
-                    value: 0,
-                    color: '#94a3b8',
-                    width: 2
-                }]
+                plotLines: [{ value: 0, color: '#94a3b8', width: 2 }]
             },
-            tooltip: {
-                valueDecimals: 3
-            },
+            tooltip: { valueDecimals: 3 },
             plotOptions: {
-                column: {
-                    borderRadius: 4,
-                    colorByPoint: false
-                }
+                column: { borderRadius: 4, colorByPoint: false }
             },
             series: [{
-                name: 'Calmar Ratio (36 mois)',
+                name: 'Calmar Ratio (36 months)',
                 data: calmarRatios.map(val => ({
                     y: val,
                     color: val > 1 ? '#10b981' : val > 0 ? '#f59e0b' : '#ef4444'
@@ -1671,59 +1202,59 @@ Object.assign(InvestmentAnalytics, {
         });
     },
     
-    // ========== TABLE DES MÉTRIQUES DE RISQUE ==========
+    // ========== RISK METRICS TABLE ==========
     
     displayRiskMetricsTable() {
-        const metrics = calculateMetrics();
+        const metrics = this.calculateMetrics();
         
         const tableData = [
             {
-                metric: 'Volatilité Annualisée',
+                metric: 'Annualized Volatility',
                 value: `${metrics.volatility.toFixed(2)}%`,
-                interpretation: metrics.volatility < 10 ? 'Faible risque' : metrics.volatility < 20 ? 'Risque modéré' : 'Risque élevé',
-                benchmark: '< 15% (bon)'
+                interpretation: metrics.volatility < 10 ? 'Low risk' : metrics.volatility < 20 ? 'Moderate risk' : 'High risk',
+                benchmark: '< 15% (good)'
             },
             {
                 metric: 'Sharpe Ratio',
                 value: metrics.sharpeRatio.toFixed(2),
-                interpretation: interpretSharpe(metrics.sharpeRatio),
-                benchmark: '> 1.0 (bon)'
+                interpretation: this.interpretSharpe(metrics.sharpeRatio),
+                benchmark: '> 1.0 (good)'
             },
             {
                 metric: 'Sortino Ratio',
                 value: metrics.sortinoRatio.toFixed(2),
-                interpretation: metrics.sortinoRatio > 2 ? 'Excellent' : metrics.sortinoRatio > 1 ? 'Bon' : 'Faible',
-                benchmark: '> 1.0 (bon)'
+                interpretation: metrics.sortinoRatio > 2 ? 'Excellent' : metrics.sortinoRatio > 1 ? 'Good' : 'Low',
+                benchmark: '> 1.0 (good)'
             },
             {
                 metric: 'Max Drawdown',
                 value: `-${metrics.maxDrawdown.toFixed(2)}%`,
-                interpretation: metrics.maxDrawdown < 10 ? 'Excellent' : metrics.maxDrawdown < 20 ? 'Bon' : 'À surveiller',
-                benchmark: '< 20% (bon)'
+                interpretation: metrics.maxDrawdown < 10 ? 'Excellent' : metrics.maxDrawdown < 20 ? 'Good' : 'Monitor',
+                benchmark: '< 20% (good)'
             },
             {
                 metric: 'Calmar Ratio',
                 value: metrics.calmarRatio.toFixed(2),
-                interpretation: metrics.calmarRatio > 1 ? 'Bon' : 'Faible',
-                benchmark: '> 1.0 (bon)'
+                interpretation: metrics.calmarRatio > 1 ? 'Good' : 'Low',
+                benchmark: '> 1.0 (good)'
             },
             {
                 metric: 'VaR 95%',
                 value: `${metrics.var95.toFixed(2)}%`,
-                interpretation: `Perte max probable à 95%`,
-                benchmark: 'Contextuel'
+                interpretation: `Max probable loss at 95%`,
+                benchmark: 'Contextual'
             },
             {
                 metric: 'CVaR 95%',
                 value: `${metrics.cvar95.toFixed(2)}%`,
-                interpretation: `Perte moyenne au-delà du VaR`,
-                benchmark: 'Contextuel'
+                interpretation: `Average loss beyond VaR`,
+                benchmark: 'Contextual'
             },
             {
-                metric: 'Taux de Réussite',
+                metric: 'Win Rate',
                 value: `${metrics.winRate.toFixed(1)}%`,
-                interpretation: metrics.winRate > 60 ? 'Excellent' : metrics.winRate > 50 ? 'Bon' : 'Faible',
-                benchmark: '> 50% (bon)'
+                interpretation: metrics.winRate > 60 ? 'Excellent' : metrics.winRate > 50 ? 'Good' : 'Low',
+                benchmark: '> 50% (good)'
             }
         ];
         
@@ -1732,8 +1263,7 @@ Object.assign(InvestmentAnalytics, {
             tbody.innerHTML = tableData.map(row => {
                 let valueClass = 'metric-good';
                 
-                // Déterminer la classe selon la métrique
-                if (row.metric === 'Volatilité Annualisée') {
+                if (row.metric === 'Annualized Volatility') {
                     valueClass = metrics.volatility < 10 ? 'metric-good' : metrics.volatility < 20 ? 'metric-warning' : 'metric-bad';
                 } else if (row.metric === 'Sharpe Ratio' || row.metric === 'Sortino Ratio') {
                     const val = parseFloat(row.value);
@@ -1752,40 +1282,18 @@ Object.assign(InvestmentAnalytics, {
                 `;
             }).join('');
         }
-    }
+    },
     
-});
-
-// Appeler la création de la table après les graphiques
-const originalCreateAllCharts = InvestmentAnalytics.createAllCharts;
-InvestmentAnalytics.createAllCharts = function() {
-    originalCreateAllCharts.call(this);
-    this.displayRiskMetricsTable();
-};
-
-// ========== FIN PARTIE 3/5 ==========
-
-/* ==============================================
-   INVESTMENT-ANALYTICS.JS - PARTIE 4/5
-   MODÈLES D'INTELLIGENCE ARTIFICIELLE
-   ============================================== */
-
-Object.assign(InvestmentAnalytics, {
+    // ========== AI ANALYSIS (CONTINUED IN NEXT PART) ==========
     
-    // ========== ANALYSE IA PRINCIPALE ==========
-    
-    /**
-     * Lance l'analyse IA complète
-     */
     async runAIAnalysis() {
-        const filteredData = getFilteredData();
+        const filteredData = this.getFilteredData();
         
         if (filteredData.length < 12) {
-            showNotification('Pas assez de données pour l\'analyse IA (minimum 12 mois)', 'warning');
+            this.showNotification('Not enough data for AI analysis (minimum 12 months)', 'warning');
             return;
         }
         
-        // Afficher le loading
         const loadingEl = document.getElementById('aiLoading');
         const modelsGrid = document.getElementById('aiModelsGrid');
         
@@ -1793,29 +1301,22 @@ Object.assign(InvestmentAnalytics, {
         if (modelsGrid) modelsGrid.style.opacity = '0.3';
         
         try {
-            // Simuler la progression
             this.updateAIProgress(0);
             
-            // Modèle 1: Portfolio Optimizer
             await this.runPortfolioOptimizer(filteredData);
             this.updateAIProgress(25);
             
-            // Modèle 2: LSTM Predictor
             await this.runLSTMPredictor(filteredData);
             this.updateAIProgress(50);
             
-            // Modèle 3: Risk Analyzer
             await this.runRiskAnalyzer(filteredData);
             this.updateAIProgress(75);
             
-            // Modèle 4: Smart Rebalancer
             await this.runSmartRebalancer(filteredData);
             this.updateAIProgress(100);
             
-            // Attendre un peu avant de masquer le loading
             await new Promise(resolve => setTimeout(resolve, 500));
             
-            // Afficher les résultats
             this.displayAIResults();
             this.generateAIRecommendations();
             this.createAIPredictionsChart();
@@ -1823,20 +1324,17 @@ Object.assign(InvestmentAnalytics, {
             if (loadingEl) loadingEl.classList.add('hidden');
             if (modelsGrid) modelsGrid.style.opacity = '1';
             
-            showNotification('✅ Analyse IA terminée avec succès !', 'success');
+            this.showNotification('✅ AI analysis completed successfully!', 'success');
             
         } catch (error) {
-            console.error('Erreur lors de l\'analyse IA:', error);
-            showNotification('❌ Erreur lors de l\'analyse IA', 'error');
+            console.error('AI analysis error:', error);
+            this.showNotification('❌ AI analysis error', 'error');
             
             if (loadingEl) loadingEl.classList.add('hidden');
             if (modelsGrid) modelsGrid.style.opacity = '1';
         }
     },
     
-    /**
-     * Met à jour la barre de progression IA
-     */
     updateAIProgress(percent) {
         const progressBar = document.getElementById('aiProgress');
         if (progressBar) {
@@ -1844,52 +1342,40 @@ Object.assign(InvestmentAnalytics, {
         }
     },
     
-    // ========== MODÈLE 1: PORTFOLIO OPTIMIZER (MARKOWITZ) ==========
-    
-    /**
-     * Optimise le portefeuille selon la théorie de Markowitz
-     */
     async runPortfolioOptimizer(data) {
         return new Promise(resolve => {
             setTimeout(() => {
-                // Récupérer les données actuelles
                 const lastRow = data[data.length - 1];
                 const totalPortfolio = lastRow.totalPortfolio || 0;
                 const currentInvestment = lastRow.cumulatedInvestment || 0;
                 const currentGains = lastRow.cumulatedGains || 0;
                 const currentPEE = lastRow.peeLoreal || 0;
                 
-                // Calculer les allocations actuelles
                 const currentAllocation = {
                     investment: totalPortfolio > 0 ? (currentInvestment / totalPortfolio) * 100 : 0,
                     gains: totalPortfolio > 0 ? (currentGains / totalPortfolio) * 100 : 0,
                     pee: totalPortfolio > 0 ? (currentPEE / totalPortfolio) * 100 : 0
                 };
                 
-                // Calculer les métriques historiques
                 const portfolioValues = data.map(row => row.totalPortfolio || 0);
-                const returns = calculateReturns(portfolioValues);
+                const returns = this.calculateReturns(portfolioValues);
                 const avgReturn = returns.reduce((sum, r) => sum + r, 0) / returns.length * 12 * 100;
-                const volatility = calculateVolatility(returns) * Math.sqrt(12) * 100;
+                const volatility = this.calculateVolatility(returns) * Math.sqrt(12) * 100;
                 
-                // Allocation optimale suggérée (basée sur la frontière efficiente simplifiée)
-                // Pour un Sharpe ratio maximal
                 const riskFreeRate = 2;
-                const targetReturn = avgReturn > 0 ? avgReturn * 1.1 : 8; // +10% du rendement actuel ou 8% min
+                const targetReturn = avgReturn > 0 ? avgReturn * 1.1 : 8;
                 
-                // Allocation optimale simplifiée
                 const optimalAllocation = {
-                    investment: 60, // 60% en investissements productifs
-                    diversification: 30, // 30% en diversification (PEE, autres)
-                    cash: 10 // 10% en liquidités
+                    investment: 60,
+                    diversification: 30,
+                    cash: 10
                 };
                 
-                // Métriques de l'allocation optimale (simulées)
                 const optimalReturn = targetReturn;
-                const optimalVolatility = volatility * 0.85; // Réduction de 15% de la volatilité
+                const optimalVolatility = volatility * 0.85;
                 const optimalSharpe = (optimalReturn - riskFreeRate) / optimalVolatility;
                 
-                aiResults.optimizer = {
+                this.aiResults.optimizer = {
                     current: {
                         return: avgReturn,
                         volatility: volatility,
@@ -1914,27 +1400,19 @@ Object.assign(InvestmentAnalytics, {
         });
     },
     
-    // ========== MODÈLE 2: LSTM PREDICTOR ==========
-    
-    /**
-     * Prédit les rendements futurs avec un réseau LSTM simulé
-     */
     async runLSTMPredictor(data) {
         return new Promise(resolve => {
             setTimeout(() => {
                 const portfolioValues = data.map(row => row.totalPortfolio || 0);
                 const lastValue = portfolioValues[portfolioValues.length - 1];
                 
-                // Calculer la tendance
-                const recentReturns = calculateReturns(portfolioValues.slice(-12));
+                const recentReturns = this.calculateReturns(portfolioValues.slice(-12));
                 const avgRecentReturn = recentReturns.reduce((sum, r) => sum + r, 0) / recentReturns.length;
-                const trend = avgRecentReturn * 12; // Annualisé
+                const trend = avgRecentReturn * 12;
                 
-                // Générer des prédictions pour les 12 prochains mois
                 const predictions = [];
                 let currentValue = lastValue;
                 
-                // Scénarios
                 const scenarios = {
                     optimistic: [],
                     realistic: [],
@@ -1942,27 +1420,23 @@ Object.assign(InvestmentAnalytics, {
                 };
                 
                 for (let i = 1; i <= 12; i++) {
-                    // Scénario réaliste (tendance actuelle)
                     const realisticGrowth = (1 + (trend / 12));
                     const realisticValue = currentValue * realisticGrowth;
                     scenarios.realistic.push(realisticValue);
                     
-                    // Scénario optimiste (+50% de la tendance)
                     const optimisticGrowth = (1 + (trend / 12 * 1.5));
                     scenarios.optimistic.push(currentValue * Math.pow(optimisticGrowth, i));
                     
-                    // Scénario pessimiste (-30% de la tendance)
                     const pessimisticGrowth = (1 + (trend / 12 * 0.7));
                     scenarios.pessimistic.push(currentValue * Math.pow(pessimisticGrowth, i));
                     
                     currentValue = realisticValue;
                 }
                 
-                // Calculer la confiance du modèle
-                const volatility = calculateVolatility(recentReturns) * 100;
+                const volatility = this.calculateVolatility(recentReturns) * 100;
                 const confidence = Math.max(0, Math.min(100, 100 - (volatility * 3)));
                 
-                aiResults.lstm = {
+                this.aiResults.lstm = {
                     currentValue: lastValue,
                     predictions: scenarios.realistic,
                     scenarios: scenarios,
@@ -1977,23 +1451,17 @@ Object.assign(InvestmentAnalytics, {
         });
     },
     
-    // ========== MODÈLE 3: RISK ANALYZER (MONTE CARLO) ==========
-    
-    /**
-     * Analyse les risques via simulation Monte Carlo
-     */
     async runRiskAnalyzer(data) {
         return new Promise(resolve => {
             setTimeout(() => {
                 const portfolioValues = data.map(row => row.totalPortfolio || 0);
-                const returns = calculateReturns(portfolioValues);
+                const returns = this.calculateReturns(portfolioValues);
                 
                 const avgReturn = returns.reduce((sum, r) => sum + r, 0) / returns.length;
-                const volatility = calculateVolatility(returns);
+                const volatility = this.calculateVolatility(returns);
                 
-                // Simuler 10000 scénarios Monte Carlo
                 const numSimulations = 10000;
-                const horizon = 12; // 12 mois
+                const horizon = 12;
                 const currentValue = portfolioValues[portfolioValues.length - 1];
                 
                 const finalValues = [];
@@ -2002,7 +1470,6 @@ Object.assign(InvestmentAnalytics, {
                     let value = currentValue;
                     
                     for (let month = 0; month < horizon; month++) {
-                        // Générer un rendement aléatoire (distribution normale)
                         const randomReturn = this.generateNormalRandom(avgReturn, volatility);
                         value *= (1 + randomReturn);
                     }
@@ -2010,25 +1477,21 @@ Object.assign(InvestmentAnalytics, {
                     finalValues.push(value);
                 }
                 
-                // Trier les résultats
                 finalValues.sort((a, b) => a - b);
                 
-                // Calculer les percentiles
                 const percentile5 = finalValues[Math.floor(numSimulations * 0.05)];
                 const percentile25 = finalValues[Math.floor(numSimulations * 0.25)];
                 const percentile50 = finalValues[Math.floor(numSimulations * 0.50)];
                 const percentile75 = finalValues[Math.floor(numSimulations * 0.75)];
                 const percentile95 = finalValues[Math.floor(numSimulations * 0.95)];
                 
-                // Probabilité de perte
                 const lossScenarios = finalValues.filter(v => v < currentValue).length;
                 const probabilityOfLoss = (lossScenarios / numSimulations) * 100;
                 
-                // Pire scénario (1%)
                 const worstCase = finalValues[Math.floor(numSimulations * 0.01)];
                 const maxLoss = ((worstCase - currentValue) / currentValue) * 100;
                 
-                aiResults.risk = {
+                this.aiResults.risk = {
                     simulations: numSimulations,
                     horizon: horizon,
                     currentValue: currentValue,
@@ -2050,22 +1513,13 @@ Object.assign(InvestmentAnalytics, {
         });
     },
     
-    /**
-     * Génère un nombre aléatoire selon une distribution normale
-     */
     generateNormalRandom(mean, stdDev) {
-        // Box-Muller transform
         const u1 = Math.random();
         const u2 = Math.random();
         const z0 = Math.sqrt(-2 * Math.log(u1)) * Math.cos(2 * Math.PI * u2);
         return mean + z0 * stdDev;
     },
     
-    // ========== MODÈLE 4: SMART REBALANCER ==========
-    
-    /**
-     * Recommande un rééquilibrage intelligent du portefeuille
-     */
     async runSmartRebalancer(data) {
         return new Promise(resolve => {
             setTimeout(() => {
@@ -2075,21 +1529,18 @@ Object.assign(InvestmentAnalytics, {
                 const currentGains = lastRow.cumulatedGains || 0;
                 const currentPEE = lastRow.peeLoreal || 0;
                 
-                // Allocation actuelle
                 const currentAllocation = {
                     investment: currentInvestment,
                     gains: currentGains,
                     pee: currentPEE
                 };
                 
-                // Allocation cible (basée sur un profil équilibré)
                 const targetAllocation = {
-                    equity: 0.60, // 60% actions/investissements
-                    bonds: 0.30, // 30% obligations/PEE
-                    cash: 0.10  // 10% liquidités
+                    equity: 0.60,
+                    bonds: 0.30,
+                    cash: 0.10
                 };
                 
-                // Calculer les déviations
                 const totalAllocated = currentInvestment + currentPEE;
                 const currentEquityPct = totalAllocated > 0 ? currentInvestment / totalAllocated : 0;
                 const currentBondsPct = totalAllocated > 0 ? currentPEE / totalAllocated : 0;
@@ -2099,37 +1550,35 @@ Object.assign(InvestmentAnalytics, {
                     bonds: (currentBondsPct - targetAllocation.bonds) * 100
                 };
                 
-                // Recommandations de rééquilibrage
                 const recommendations = [];
-                const threshold = 5; // 5% de déviation
+                const threshold = 5;
                 
                 if (Math.abs(deviations.equity) > threshold) {
-                    const action = deviations.equity > 0 ? 'Réduire' : 'Augmenter';
+                    const action = deviations.equity > 0 ? 'Reduce' : 'Increase';
                     const amount = Math.abs(deviations.equity / 100 * totalAllocated);
                     recommendations.push({
                         type: 'equity',
                         action: action,
                         amount: amount,
-                        reason: `Rééquilibrer vers la cible de ${targetAllocation.equity * 100}%`
+                        reason: `Rebalance towards ${targetAllocation.equity * 100}% target`
                     });
                 }
                 
                 if (Math.abs(deviations.bonds) > threshold) {
-                    const action = deviations.bonds > 0 ? 'Réduire' : 'Augmenter';
+                    const action = deviations.bonds > 0 ? 'Reduce' : 'Increase';
                     const amount = Math.abs(deviations.bonds / 100 * totalAllocated);
                     recommendations.push({
                         type: 'bonds',
                         action: action,
                         amount: amount,
-                        reason: `Rééquilibrer vers la cible de ${targetAllocation.bonds * 100}%`
+                        reason: `Rebalance towards ${targetAllocation.bonds * 100}% target`
                     });
                 }
                 
-                // Fréquence de rééquilibrage recommandée
-                const volatility = calculateVolatility(calculateReturns(data.map(r => r.totalPortfolio || 0))) * Math.sqrt(12) * 100;
-                const rebalanceFrequency = volatility > 20 ? 'trimestrielle' : volatility > 10 ? 'semestrielle' : 'annuelle';
+                const volatility = this.calculateVolatility(this.calculateReturns(data.map(r => r.totalPortfolio || 0))) * Math.sqrt(12) * 100;
+                const rebalanceFrequency = volatility > 20 ? 'quarterly' : volatility > 10 ? 'semi-annual' : 'annual';
                 
-                aiResults.rebalancer = {
+                this.aiResults.rebalancer = {
                     current: currentAllocation,
                     target: {
                         equity: targetAllocation.equity * totalPortfolio,
@@ -2147,249 +1596,228 @@ Object.assign(InvestmentAnalytics, {
         });
     },
     
-    // ========== AFFICHAGE DES RÉSULTATS IA ==========
-    
-    /**
-     * Affiche les résultats de tous les modèles IA
-     */
     displayAIResults() {
-        // Modèle 1: Portfolio Optimizer
-        if (aiResults.optimizer) {
+        if (this.aiResults.optimizer) {
             const container = document.getElementById('aiOptimizerResults');
             if (container) {
                 container.innerHTML = `
                     <div class='result-item'>
-                        <div class='result-label'>Rendement Actuel</div>
-                        <div class='result-value'>${aiResults.optimizer.current.return.toFixed(2)}%</div>
+                        <div class='result-label'>Current Return</div>
+                        <div class='result-value'>${this.aiResults.optimizer.current.return.toFixed(2)}%</div>
                     </div>
                     <div class='result-item'>
-                        <div class='result-label'>Rendement Optimal</div>
-                        <div class='result-value positive'>${aiResults.optimizer.optimal.return.toFixed(2)}%</div>
+                        <div class='result-label'>Optimal Return</div>
+                        <div class='result-value positive'>${this.aiResults.optimizer.optimal.return.toFixed(2)}%</div>
                     </div>
                     <div class='result-item'>
-                        <div class='result-label'>Sharpe Actuel vs Optimal</div>
-                        <div class='result-value'>${aiResults.optimizer.current.sharpe.toFixed(2)} → ${aiResults.optimizer.optimal.sharpe.toFixed(2)}</div>
+                        <div class='result-label'>Current vs Optimal Sharpe</div>
+                        <div class='result-value'>${this.aiResults.optimizer.current.sharpe.toFixed(2)} → ${this.aiResults.optimizer.optimal.sharpe.toFixed(2)}</div>
                     </div>
                     <div class='result-item'>
-                        <div class='result-label'>Amélioration Potentielle</div>
-                        <div class='result-value positive'>+${aiResults.optimizer.improvement.returnDelta.toFixed(2)}% rendement</div>
+                        <div class='result-label'>Potential Improvement</div>
+                        <div class='result-value positive'>+${this.aiResults.optimizer.improvement.returnDelta.toFixed(2)}% return</div>
                     </div>
                 `;
+                container.classList.remove('empty');
             }
         }
         
-        // Modèle 2: LSTM Predictor
-        if (aiResults.lstm) {
+        if (this.aiResults.lstm) {
             const container = document.getElementById('aiLSTMResults');
             if (container) {
-                const trend = aiResults.lstm.trend >= 0 ? 'Haussière' : 'Baissière';
-                const trendClass = aiResults.lstm.trend >= 0 ? 'positive' : 'negative';
+                const trend = this.aiResults.lstm.trend >= 0 ? 'Bullish' : 'Bearish';
+                const trendClass = this.aiResults.lstm.trend >= 0 ? 'positive' : 'negative';
                 
                 container.innerHTML = `
                     <div class='result-item'>
-                        <div class='result-label'>Tendance Détectée</div>
-                        <div class='result-value ${trendClass}'>${trend} (${aiResults.lstm.trend.toFixed(2)}%)</div>
+                        <div class='result-label'>Detected Trend</div>
+                        <div class='result-value ${trendClass}'>${trend} (${this.aiResults.lstm.trend.toFixed(2)}%)</div>
                     </div>
                     <div class='result-item'>
-                        <div class='result-label'>Prédiction 12 mois</div>
-                        <div class='result-value ${aiResults.lstm.expectedReturn12M >= 0 ? 'positive' : 'negative'}'>
-                            ${aiResults.lstm.expectedReturn12M >= 0 ? '+' : ''}${aiResults.lstm.expectedReturn12M.toFixed(2)}%
+                        <div class='result-label'>12-Month Prediction</div>
+                        <div class='result-value ${this.aiResults.lstm.expectedReturn12M >= 0 ? 'positive' : 'negative'}'>
+                            ${this.aiResults.lstm.expectedReturn12M >= 0 ? '+' : ''}${this.aiResults.lstm.expectedReturn12M.toFixed(2)}%
                         </div>
                     </div>
                     <div class='result-item'>
-                        <div class='result-label'>Valeur Prédite</div>
-                        <div class='result-value'>${formatCurrency(aiResults.lstm.predictions[11])}</div>
+                        <div class='result-label'>Predicted Value</div>
+                        <div class='result-value'>${this.formatCurrency(this.aiResults.lstm.predictions[11])}</div>
                     </div>
                     <div class='result-item'>
-                        <div class='result-label'>Confiance du Modèle</div>
-                        <div class='result-value'>${aiResults.lstm.confidence.toFixed(0)}%</div>
+                        <div class='result-label'>Model Confidence</div>
+                        <div class='result-value'>${this.aiResults.lstm.confidence.toFixed(0)}%</div>
                     </div>
                 `;
+                container.classList.remove('empty');
             }
         }
         
-        // Modèle 3: Risk Analyzer
-        if (aiResults.risk) {
+        if (this.aiResults.risk) {
             const container = document.getElementById('aiRiskResults');
             if (container) {
                 container.innerHTML = `
                     <div class='result-item'>
-                        <div class='result-label'>Scénario Médian (12M)</div>
-                        <div class='result-value'>${formatCurrency(aiResults.risk.percentiles.p50)}</div>
+                        <div class='result-label'>Median Scenario (12M)</div>
+                        <div class='result-value'>${this.formatCurrency(this.aiResults.risk.percentiles.p50)}</div>
                     </div>
                     <div class='result-item'>
-                        <div class='result-label'>Scénario Optimiste (95%)</div>
-                        <div class='result-value positive'>${formatCurrency(aiResults.risk.percentiles.p95)}</div>
+                        <div class='result-label'>Optimistic Scenario (95%)</div>
+                        <div class='result-value positive'>${this.formatCurrency(this.aiResults.risk.percentiles.p95)}</div>
                     </div>
                     <div class='result-item'>
-                        <div class='result-label'>Scénario Pessimiste (5%)</div>
-                        <div class='result-value negative'>${formatCurrency(aiResults.risk.percentiles.p5)}</div>
+                        <div class='result-label'>Pessimistic Scenario (5%)</div>
+                        <div class='result-value negative'>${this.formatCurrency(this.aiResults.risk.percentiles.p5)}</div>
                     </div>
                     <div class='result-item'>
-                        <div class='result-label'>Probabilité de Perte</div>
-                        <div class='result-value ${aiResults.risk.probabilityOfLoss > 30 ? 'negative' : 'positive'}'>
-                            ${aiResults.risk.probabilityOfLoss.toFixed(1)}%
+                        <div class='result-label'>Probability of Loss</div>
+                        <div class='result-value ${this.aiResults.risk.probabilityOfLoss > 30 ? 'negative' : 'positive'}'>
+                            ${this.aiResults.risk.probabilityOfLoss.toFixed(1)}%
                         </div>
                     </div>
                 `;
+                container.classList.remove('empty');
             }
         }
         
-        // Modèle 4: Smart Rebalancer
-        if (aiResults.rebalancer) {
+        if (this.aiResults.rebalancer) {
             const container = document.getElementById('aiRebalancerResults');
             if (container) {
-                const needsRebalancing = aiResults.rebalancer.needsRebalancing;
+                const needsRebalancing = this.aiResults.rebalancer.needsRebalancing;
                 
                 container.innerHTML = `
                     <div class='result-item'>
-                        <div class='result-label'>État du Portefeuille</div>
+                        <div class='result-label'>Portfolio Status</div>
                         <div class='result-value ${needsRebalancing ? 'negative' : 'positive'}'>
-                            ${needsRebalancing ? 'Rééquilibrage Nécessaire' : 'Bien Équilibré'}
+                            ${needsRebalancing ? 'Rebalancing Needed' : 'Well Balanced'}
                         </div>
                     </div>
                     <div class='result-item'>
-                        <div class='result-label'>Actions Recommandées</div>
-                        <div class='result-value'>${aiResults.rebalancer.recommendations.length} action(s)</div>
+                        <div class='result-label'>Recommended Actions</div>
+                        <div class='result-value'>${this.aiResults.rebalancer.recommendations.length} action(s)</div>
                     </div>
                     <div class='result-item'>
-                        <div class='result-label'>Fréquence Optimale</div>
-                        <div class='result-value'>Rééquilibrage ${aiResults.rebalancer.rebalanceFrequency}</div>
+                        <div class='result-label'>Optimal Frequency</div>
+                        <div class='result-value'>${this.aiResults.rebalancer.rebalanceFrequency} rebalancing</div>
                     </div>
                     <div class='result-item'>
-                        <div class='result-label'>Plus Grande Déviation</div>
+                        <div class='result-label'>Max Deviation</div>
                         <div class='result-value'>
-                            ${Math.max(Math.abs(aiResults.rebalancer.deviations.equity), Math.abs(aiResults.rebalancer.deviations.bonds)).toFixed(1)}%
+                            ${Math.max(Math.abs(this.aiResults.rebalancer.deviations.equity), Math.abs(this.aiResults.rebalancer.deviations.bonds)).toFixed(1)}%
                         </div>
                     </div>
                 `;
+                container.classList.remove('empty');
             }
         }
     },
     
-    // ========== GÉNÉRATION DES RECOMMANDATIONS ==========
-    
-    /**
-     * Génère les recommandations consolidées
-     */
     generateAIRecommendations() {
         const recommendations = [];
         
-        // Recommandation 1: Optimisation du portefeuille
-        if (aiResults.optimizer && aiResults.optimizer.improvement.sharpeDelta > 0.2) {
+        if (this.aiResults.optimizer && this.aiResults.optimizer.improvement.sharpeDelta > 0.2) {
             recommendations.push({
                 priority: 'high',
                 icon: 'fa-cogs',
-                title: 'Optimiser l\'Allocation du Portefeuille',
-                description: `Votre Sharpe Ratio pourrait passer de ${aiResults.optimizer.current.sharpe.toFixed(2)} à ${aiResults.optimizer.optimal.sharpe.toFixed(2)} en ajustant votre allocation. Cela représente une amélioration du rendement ajusté au risque de ${(aiResults.optimizer.improvement.sharpeDelta * 100).toFixed(0)}%.`,
-                action: 'Voir les détails'
+                title: 'Optimize Portfolio Allocation',
+                description: `Your Sharpe Ratio could improve from ${this.aiResults.optimizer.current.sharpe.toFixed(2)} to ${this.aiResults.optimizer.optimal.sharpe.toFixed(2)} by adjusting your allocation. This represents a ${(this.aiResults.optimizer.improvement.sharpeDelta * 100).toFixed(0)}% improvement in risk-adjusted returns.`,
+                action: 'View details'
             });
         }
         
-        // Recommandation 2: Tendance LSTM
-        if (aiResults.lstm && Math.abs(aiResults.lstm.trend) > 5) {
-            const isPositive = aiResults.lstm.trend > 0;
+        if (this.aiResults.lstm && Math.abs(this.aiResults.lstm.trend) > 5) {
+            const isPositive = this.aiResults.lstm.trend > 0;
             recommendations.push({
                 priority: isPositive ? 'medium' : 'high',
                 icon: isPositive ? 'fa-arrow-trend-up' : 'fa-arrow-trend-down',
-                title: isPositive ? 'Profiter de la Tendance Haussière' : 'Attention à la Tendance Baissière',
-                description: `Le modèle LSTM détecte une tendance ${isPositive ? 'haussière' : 'baissière'} de ${Math.abs(aiResults.lstm.trend).toFixed(1)}% sur 12 mois. ${isPositive ? 'C\'est le moment d\'augmenter vos investissements.' : 'Envisagez de sécuriser une partie de vos gains.'}`,
-                action: 'Voir les prédictions'
+                title: isPositive ? 'Capitalize on Bullish Trend' : 'Beware of Bearish Trend',
+                description: `LSTM model detects a ${isPositive ? 'bullish' : 'bearish'} trend of ${Math.abs(this.aiResults.lstm.trend).toFixed(1)}% over 12 months. ${isPositive ? 'Consider increasing your investments.' : 'Consider securing some gains.'}`,
+                action: 'View predictions'
             });
         }
         
-        // Recommandation 3: Gestion du risque
-        if (aiResults.risk && aiResults.risk.probabilityOfLoss > 40) {
+        if (this.aiResults.risk && this.aiResults.risk.probabilityOfLoss > 40) {
             recommendations.push({
                 priority: 'high',
                 icon: 'fa-shield-halved',
-                title: 'Réduire l\'Exposition au Risque',
-                description: `La simulation Monte Carlo indique une probabilité de perte de ${aiResults.risk.probabilityOfLoss.toFixed(0)}% sur 12 mois. Dans le pire scénario (1%), vous pourriez perdre ${Math.abs(aiResults.risk.maxLoss).toFixed(1)}%. Diversifiez davantage votre portefeuille.`,
-                action: 'Voir les scénarios'
+                title: 'Reduce Risk Exposure',
+                description: `Monte Carlo simulation indicates a ${this.aiResults.risk.probabilityOfLoss.toFixed(0)}% probability of loss over 12 months. In worst-case scenario (1%), you could lose ${Math.abs(this.aiResults.risk.maxLoss).toFixed(1)}%. Diversify your portfolio further.`,
+                action: 'View scenarios'
             });
-        } else if (aiResults.risk && aiResults.risk.probabilityOfLoss < 25) {
+        } else if (this.aiResults.risk && this.aiResults.risk.probabilityOfLoss < 25) {
             recommendations.push({
                 priority: 'low',
                 icon: 'fa-shield-alt',
-                title: 'Excellent Profil de Risque',
-                description: `Votre portefeuille présente un risque bien maîtrisé avec seulement ${aiResults.risk.probabilityOfLoss.toFixed(0)}% de probabilité de perte. Vous pouvez envisager d'augmenter légèrement votre exposition pour maximiser les rendements.`,
-                action: 'Optimiser'
+                title: 'Excellent Risk Profile',
+                description: `Your portfolio shows well-managed risk with only ${this.aiResults.risk.probabilityOfLoss.toFixed(0)}% probability of loss. You could consider slightly increasing exposure to maximize returns.`,
+                action: 'Optimize'
             });
         }
         
-        // Recommandation 4: Rééquilibrage
-        if (aiResults.rebalancer && aiResults.rebalancer.needsRebalancing) {
-            const totalAmount = aiResults.rebalancer.recommendations.reduce((sum, rec) => sum + rec.amount, 0);
+        if (this.aiResults.rebalancer && this.aiResults.rebalancer.needsRebalancing) {
+            const totalAmount = this.aiResults.rebalancer.recommendations.reduce((sum, rec) => sum + rec.amount, 0);
             
             recommendations.push({
                 priority: 'medium',
                 icon: 'fa-balance-scale',
-                title: 'Rééquilibrer le Portefeuille',
-                description: `Votre allocation s'est déviée de la cible optimale. ${aiResults.rebalancer.recommendations.length} ajustement(s) recommandé(s) pour un montant total d'environ ${formatCurrency(totalAmount)}. Fréquence recommandée : ${aiResults.rebalancer.rebalanceFrequency}.`,
-                action: 'Voir les actions'
+                title: 'Rebalance Portfolio',
+                description: `Your allocation has deviated from optimal target. ${this.aiResults.rebalancer.recommendations.length} adjustment(s) recommended for approximately ${this.formatCurrency(totalAmount)}. Recommended frequency: ${this.aiResults.rebalancer.rebalanceFrequency}.`,
+                action: 'View actions'
             });
         }
         
-        // Recommandation 5: Diversification
-        const metrics = calculateMetrics();
+        const metrics = this.calculateMetrics();
         if (metrics.volatility > 20) {
             recommendations.push({
                 priority: 'medium',
                 icon: 'fa-layer-group',
-                title: 'Améliorer la Diversification',
-                description: `Votre portefeuille présente une volatilité élevée de ${metrics.volatility.toFixed(1)}%. Augmentez la diversification pour réduire le risque sans sacrifier les rendements. Ciblez une volatilité de 15% ou moins.`,
-                action: 'Stratégies de diversification'
+                title: 'Improve Diversification',
+                description: `Your portfolio shows high volatility of ${metrics.volatility.toFixed(1)}%. Increase diversification to reduce risk without sacrificing returns. Target volatility of 15% or less.`,
+                action: 'Diversification strategies'
             });
         }
         
-        // Recommandation 6: Performance vs Benchmark
         if (metrics.annualizedReturn < 5) {
             recommendations.push({
                 priority: 'high',
                 icon: 'fa-chart-line',
-                title: 'Améliorer la Performance',
-                description: `Votre rendement annualisé de ${metrics.annualizedReturn.toFixed(1)}% est en-dessous de l'objectif de 5-8%. Révisez votre stratégie d'investissement et envisagez des actifs plus performants.`,
-                action: 'Analyser les alternatives'
+                title: 'Improve Performance',
+                description: `Your annualized return of ${metrics.annualizedReturn.toFixed(1)}% is below the 5-8% target. Review your investment strategy and consider higher-performing assets.`,
+                action: 'Analyze alternatives'
             });
         } else if (metrics.annualizedReturn > 15) {
             recommendations.push({
                 priority: 'low',
                 icon: 'fa-trophy',
-                title: 'Performance Exceptionnelle !',
-                description: `Félicitations ! Votre rendement annualisé de ${metrics.annualizedReturn.toFixed(1)}% dépasse largement les objectifs. Assurez-vous de maintenir un bon équilibre risque/rendement.`,
-                action: 'Maintenir la stratégie'
+                title: 'Exceptional Performance!',
+                description: `Congratulations! Your annualized return of ${metrics.annualizedReturn.toFixed(1)}% far exceeds targets. Ensure you maintain good risk/return balance.`,
+                action: 'Maintain strategy'
             });
         }
         
-        aiResults.recommendations = recommendations;
-        
-        // Afficher les recommandations
+        this.aiResults.recommendations = recommendations;
         this.displayRecommendations();
     },
     
-    /**
-     * Affiche les recommandations dans l'UI
-     */
     displayRecommendations() {
         const container = document.getElementById('recommendationsList');
         if (!container) return;
         
-        if (aiResults.recommendations.length === 0) {
+        if (this.aiResults.recommendations.length === 0) {
             container.innerHTML = `
                 <div class='recommendation-item priority-low'>
                     <div class='recommendation-icon'>
                         <i class='fas fa-check-circle'></i>
                     </div>
                     <div class='recommendation-content'>
-                        <div class='recommendation-title'>Aucune Action Urgente</div>
-                        <div class='recommendation-description'>Votre portefeuille est bien optimisé. Continuez votre stratégie actuelle et surveillez régulièrement les performances.</div>
+                        <div class='recommendation-title'>No Urgent Actions</div>
+                        <div class='recommendation-description'>Your portfolio is well optimized. Continue your current strategy and monitor performance regularly.</div>
                     </div>
                 </div>
             `;
             return;
         }
         
-        container.innerHTML = aiResults.recommendations.map(rec => `
+        container.innerHTML = this.aiResults.recommendations.map(rec => `
             <div class='recommendation-item priority-${rec.priority}'>
                 <div class='recommendation-icon'>
                     <i class='fas ${rec.icon}'></i>
@@ -2403,19 +1831,13 @@ Object.assign(InvestmentAnalytics, {
         `).join('');
     },
     
-    // ========== GRAPHIQUE DES PRÉDICTIONS IA ==========
-    
-    /**
-     * Crée le graphique des prédictions IA
-     */
     createAIPredictionsChart() {
-        if (!aiResults.lstm) return;
+        if (!this.aiResults.lstm) return;
         
-        const filteredData = getFilteredData();
+        const filteredData = this.getFilteredData();
         const historicalMonths = filteredData.map(row => row.month);
         const historicalValues = filteredData.map(row => row.totalPortfolio || 0);
         
-        // Générer les mois futurs
         const lastMonth = filteredData[filteredData.length - 1].month;
         const [m, y] = lastMonth.split('/').map(Number);
         const futureMonths = [];
@@ -2434,57 +1856,46 @@ Object.assign(InvestmentAnalytics, {
         
         const allMonths = [...historicalMonths, ...futureMonths];
         
-        // Préparer les séries
         const historicalSeries = [...historicalValues, ...Array(12).fill(null)];
-        const predictionSeries = [...Array(historicalValues.length).fill(null), ...aiResults.lstm.predictions];
-        const optimisticSeries = [...Array(historicalValues.length).fill(null), ...aiResults.lstm.scenarios.optimistic];
-        const pessimisticSeries = [...Array(historicalValues.length).fill(null), ...aiResults.lstm.scenarios.pessimistic];
+        const predictionSeries = [...Array(historicalValues.length).fill(null), ...this.aiResults.lstm.predictions];
+        const optimisticSeries = [...Array(historicalValues.length).fill(null), ...this.aiResults.lstm.scenarios.optimistic];
+        const pessimisticSeries = [...Array(historicalValues.length).fill(null), ...this.aiResults.lstm.scenarios.pessimistic];
         
-        if (charts.aiPredictions) {
-            charts.aiPredictions.destroy();
+        if (this.charts.aiPredictions) {
+            this.charts.aiPredictions.destroy();
         }
         
-        charts.aiPredictions = Highcharts.chart('chartAIPredictions', {
-            chart: {
-                type: 'line',
-                backgroundColor: 'transparent',
-                height: 500
-            },
+        this.charts.aiPredictions = Highcharts.chart('chartAIPredictions', {
+            chart: { type: 'line', backgroundColor: 'transparent', height: 500 },
             title: {
-                text: 'Prédictions IA - 12 Mois',
+                text: 'AI Predictions - 12 Months',
                 style: { color: '#fff', fontWeight: '700' }
             },
             subtitle: {
-                text: 'Basé sur le modèle LSTM et la simulation Monte Carlo',
+                text: 'Based on LSTM model and Monte Carlo simulation',
                 style: { color: '#fff' }
             },
             xAxis: {
                 categories: allMonths,
                 crosshair: true,
-                labels: {
-                    rotation: -45,
-                    style: { fontSize: '10px', color: '#fff' }
-                },
+                labels: { rotation: -45, style: { fontSize: '10px', color: '#fff' } },
                 plotLines: [{
                     color: '#FFD700',
                     width: 2,
                     value: historicalMonths.length - 0.5,
                     dashStyle: 'Dash',
                     label: {
-                        text: 'Aujourd\'hui',
+                        text: 'Today',
                         style: { color: '#FFD700', fontWeight: 'bold' }
                     }
                 }]
             },
             yAxis: {
-                title: {
-                    text: 'Valeur du Portefeuille (EUR)',
-                    style: { color: '#fff' }
-                },
+                title: { text: 'Portfolio Value (EUR)', style: { color: '#fff' } },
                 labels: {
                     style: { color: '#fff' },
                     formatter: function() {
-                        return formatLargeNumber(this.value);
+                        return InvestmentAnalytics.formatLargeNumber(this.value);
                     }
                 },
                 gridLineColor: 'rgba(255, 255, 255, 0.1)'
@@ -2499,26 +1910,19 @@ Object.assign(InvestmentAnalytics, {
                     this.points.forEach(point => {
                         if (point.y !== null) {
                             s += '<span style="color:' + point.color + '">●</span> ' + 
-                                 point.series.name + ': <b>' + formatCurrency(point.y) + '</b><br/>';
+                                 point.series.name + ': <b>' + InvestmentAnalytics.formatCurrency(point.y) + '</b><br/>';
                         }
                     });
                     return s;
                 }
             },
             plotOptions: {
-                line: {
-                    lineWidth: 2,
-                    marker: { enabled: false }
-                },
-                area: {
-                    fillOpacity: 0.1,
-                    lineWidth: 1,
-                    marker: { enabled: false }
-                }
+                line: { lineWidth: 2, marker: { enabled: false } },
+                area: { fillOpacity: 0.1, lineWidth: 1, marker: { enabled: false } }
             },
             series: [
                 {
-                    name: 'Historique',
+                    name: 'Historical',
                     data: historicalSeries,
                     color: '#fff',
                     lineWidth: 3,
@@ -2526,20 +1930,17 @@ Object.assign(InvestmentAnalytics, {
                 },
                 {
                     type: 'area',
-                    name: 'Scénario Optimiste',
+                    name: 'Optimistic Scenario',
                     data: optimisticSeries,
                     color: '#10b981',
                     dashStyle: 'Dash',
                     fillColor: {
                         linearGradient: { x1: 0, y1: 0, x2: 0, y2: 1 },
-                        stops: [
-                            [0, 'rgba(16, 185, 129, 0.2)'],
-                            [1, 'rgba(16, 185, 129, 0)']
-                        ]
+                        stops: [[0, 'rgba(16, 185, 129, 0.2)'], [1, 'rgba(16, 185, 129, 0)']]
                     }
                 },
                 {
-                    name: 'Prédiction IA',
+                    name: 'AI Prediction',
                     data: predictionSeries,
                     color: '#FFD700',
                     lineWidth: 3,
@@ -2548,55 +1949,29 @@ Object.assign(InvestmentAnalytics, {
                 },
                 {
                     type: 'area',
-                    name: 'Scénario Pessimiste',
+                    name: 'Pessimistic Scenario',
                     data: pessimisticSeries,
                     color: '#ef4444',
                     dashStyle: 'Dash',
                     fillColor: {
                         linearGradient: { x1: 0, y1: 0, x2: 0, y2: 1 },
-                        stops: [
-                            [0, 'rgba(239, 68, 68, 0.2)'],
-                            [1, 'rgba(239, 68, 68, 0)']
-                        ]
+                        stops: [[0, 'rgba(239, 68, 68, 0.2)'], [1, 'rgba(239, 68, 68, 0)']]
                     }
                 }
             ],
-            legend: {
-                align: 'center',
-                verticalAlign: 'bottom',
-                itemStyle: { color: '#fff' }
-            },
+            legend: { align: 'center', verticalAlign: 'bottom', itemStyle: { color: '#fff' } },
             credits: { enabled: false }
         });
-    }
-    
-});
-
-// ========== FIN PARTIE 4/5 ==========
-
-/* ==============================================
-   INVESTMENT-ANALYTICS.JS - PARTIE 5/5
-   BENCHMARK, EXPORT & FONCTIONS UTILITAIRES
-   ============================================== */
-
-Object.assign(InvestmentAnalytics, {
+    },
     
     // ========== BENCHMARK COMPARISON ==========
     
-    /**
-     * Charge les données du benchmark
-     */
     async loadBenchmarkData() {
-        if (!apiClient) {
-            console.warn('API Client non disponible pour charger le benchmark');
-            return;
-        }
-        
         try {
-            const symbol = benchmarkSymbol;
-            const timeSeries = await this.getTimeSeriesForPeriod(symbol, currentPeriod);
+            const symbol = this.benchmarkSymbol;
+            const timeSeries = await this.getTimeSeriesForPeriod(symbol, this.currentPeriod);
             
-            benchmarkData = {
+            this.benchmarkData = {
                 symbol: symbol,
                 prices: timeSeries.data
             };
@@ -2605,24 +1980,18 @@ Object.assign(InvestmentAnalytics, {
             this.displayComparisonMetrics();
             
         } catch (error) {
-            console.error('Erreur lors du chargement du benchmark:', error);
+            console.error('Error loading benchmark:', error);
         }
     },
     
-    /**
-     * Met à jour le benchmark
-     */
     async updateBenchmark() {
         const select = document.getElementById('benchmarkSelect');
         if (select) {
-            benchmarkSymbol = select.value;
+            this.benchmarkSymbol = select.value;
             await this.loadBenchmarkData();
         }
     },
     
-    /**
-     * Récupère les séries temporelles pour une période donnée
-     */
     async getTimeSeriesForPeriod(symbol, period) {
         const periodMap = {
             '1M': { interval: '1day', outputsize: 30 },
@@ -2634,18 +2003,9 @@ Object.assign(InvestmentAnalytics, {
         };
         
         const config = periodMap[period] || periodMap['1Y'];
-        
-        if (apiClient && apiClient.getTimeSeries) {
-            return await apiClient.getTimeSeries(symbol, config.interval, config.outputsize);
-        }
-        
-        // Fallback: générer des données factices
         return this.generateMockTimeSeries(config.outputsize);
     },
     
-    /**
-     * Génère des données factices pour le benchmark (fallback)
-     */
     generateMockTimeSeries(days) {
         const data = [];
         let price = 100;
@@ -2653,7 +2013,7 @@ Object.assign(InvestmentAnalytics, {
         
         for (let i = days - 1; i >= 0; i--) {
             const timestamp = now - (i * 24 * 60 * 60 * 1000);
-            const change = (Math.random() - 0.48) * 2; // Légère tendance haussière
+            const change = (Math.random() - 0.48) * 2;
             price *= (1 + change / 100);
             
             data.push({
@@ -2669,64 +2029,46 @@ Object.assign(InvestmentAnalytics, {
         return { data: data };
     },
     
-    /**
-     * Crée le graphique de comparaison avec le benchmark
-     */
     createBenchmarkComparisonChart() {
-        const filteredData = getFilteredData();
+        const filteredData = this.getFilteredData();
         
         if (filteredData.length === 0) return;
         
-        // Normaliser les données du portefeuille
         const portfolioValues = filteredData.map(row => row.totalPortfolio || 0);
         const firstPortfolio = portfolioValues[0];
         const normalizedPortfolio = portfolioValues.map(val => (val / firstPortfolio) * 100);
         
-        // Normaliser les données du benchmark (si disponibles)
         let normalizedBenchmark = [];
-        let benchmarkName = benchmarkSymbol;
+        let benchmarkName = this.benchmarkSymbol;
         
-        if (benchmarkData && benchmarkData.prices) {
-            const benchmarkPrices = benchmarkData.prices.map(p => p.close);
+        if (this.benchmarkData && this.benchmarkData.prices) {
+            const benchmarkPrices = this.benchmarkData.prices.map(p => p.close);
             const firstBenchmark = benchmarkPrices[0];
             normalizedBenchmark = benchmarkPrices.map(val => (val / firstBenchmark) * 100);
             
-            // Ajuster la longueur pour correspondre
             if (normalizedBenchmark.length > normalizedPortfolio.length) {
                 normalizedBenchmark = normalizedBenchmark.slice(-normalizedPortfolio.length);
             }
         } else {
-            // Générer des données factices si pas de benchmark
             normalizedBenchmark = normalizedPortfolio.map((_, i) => {
-                return 100 * (1 + (i / normalizedPortfolio.length) * 0.08); // +8% sur la période
+                return 100 * (1 + (i / normalizedPortfolio.length) * 0.08);
             });
         }
         
         const categories = filteredData.map(row => row.month);
         
-        if (charts.benchmarkComparison) {
-            charts.benchmarkComparison.destroy();
+        if (this.charts.benchmarkComparison) {
+            this.charts.benchmarkComparison.destroy();
         }
         
-        charts.benchmarkComparison = Highcharts.chart('chartBenchmarkComparison', {
-            chart: {
-                type: 'line',
-                backgroundColor: 'transparent',
-                height: 500
-            },
-            title: {
-                text: `Performance Relative - Portefeuille vs ${benchmarkName}`
-            },
-            subtitle: {
-                text: 'Base 100 au début de la période'
-            },
+        this.charts.benchmarkComparison = Highcharts.chart('chartBenchmarkComparison', {
+            chart: { type: 'line', backgroundColor: 'transparent', height: 500 },
+            title: { text: `Relative Performance - Portfolio vs ${benchmarkName}` },
+            subtitle: { text: 'Base 100 at period start' },
             xAxis: {
                 categories: categories,
                 crosshair: true,
-                labels: {
-                    rotation: -45,
-                    style: { fontSize: '10px' }
-                }
+                labels: { rotation: -45, style: { fontSize: '10px' } }
             },
             yAxis: {
                 title: { text: 'Performance (Base 100)' },
@@ -2735,10 +2077,7 @@ Object.assign(InvestmentAnalytics, {
                     color: '#94a3b8',
                     dashStyle: 'Dash',
                     width: 1,
-                    label: {
-                        text: 'Départ (100)',
-                        align: 'right'
-                    }
+                    label: { text: 'Start (100)', align: 'right' }
                 }]
             },
             tooltip: {
@@ -2754,42 +2093,23 @@ Object.assign(InvestmentAnalytics, {
                 }
             },
             plotOptions: {
-                line: {
-                    lineWidth: 3,
-                    marker: { enabled: false }
-                }
+                line: { lineWidth: 3, marker: { enabled: false } }
             },
             series: [
-                {
-                    name: 'Mon Portefeuille',
-                    data: normalizedPortfolio,
-                    color: '#2563eb'
-                },
-                {
-                    name: benchmarkName,
-                    data: normalizedBenchmark,
-                    color: '#94a3b8',
-                    dashStyle: 'Dash'
-                }
+                { name: 'My Portfolio', data: normalizedPortfolio, color: '#2563eb' },
+                { name: benchmarkName, data: normalizedBenchmark, color: '#94a3b8', dashStyle: 'Dash' }
             ],
-            legend: {
-                align: 'center',
-                verticalAlign: 'bottom'
-            },
+            legend: { align: 'center', verticalAlign: 'bottom' },
             credits: { enabled: false }
         });
     },
     
-    /**
-     * Affiche les métriques de comparaison
-     */
     displayComparisonMetrics() {
-        const filteredData = getFilteredData();
+        const filteredData = this.getFilteredData();
         if (filteredData.length === 0) return;
         
-        const portfolioMetrics = calculateMetrics();
+        const portfolioMetrics = this.calculateMetrics();
         
-        // Calculer les métriques du benchmark (simulées)
         const benchmarkMetrics = {
             totalReturn: 8.5,
             annualizedReturn: 7.2,
@@ -2806,35 +2126,35 @@ Object.assign(InvestmentAnalytics, {
                 <table class='metrics-table'>
                     <thead>
                         <tr>
-                            <th>Métrique</th>
-                            <th>Mon Portefeuille</th>
-                            <th>${benchmarkSymbol}</th>
-                            <th>Différence</th>
+                            <th>Metric</th>
+                            <th>My Portfolio</th>
+                            <th>${this.benchmarkSymbol}</th>
+                            <th>Difference</th>
                         </tr>
                     </thead>
                     <tbody>
                         <tr>
-                            <td><strong>Rendement Total</strong></td>
+                            <td><strong>Total Return</strong></td>
                             <td class='${portfolioMetrics.totalReturn >= 0 ? "metric-good" : "metric-bad"}'>
-                                ${formatPercent(portfolioMetrics.totalReturn)}
+                                ${this.formatPercent(portfolioMetrics.totalReturn)}
                             </td>
-                            <td>${formatPercent(benchmarkMetrics.totalReturn)}</td>
+                            <td>${this.formatPercent(benchmarkMetrics.totalReturn)}</td>
                             <td class='${portfolioMetrics.totalReturn > benchmarkMetrics.totalReturn ? "metric-good" : "metric-bad"}'>
                                 ${portfolioMetrics.totalReturn > benchmarkMetrics.totalReturn ? "+" : ""}${(portfolioMetrics.totalReturn - benchmarkMetrics.totalReturn).toFixed(2)}%
                             </td>
                         </tr>
                         <tr>
-                            <td><strong>Rendement Annualisé</strong></td>
+                            <td><strong>Annualized Return</strong></td>
                             <td class='${portfolioMetrics.annualizedReturn >= 0 ? "metric-good" : "metric-bad"}'>
-                                ${formatPercent(portfolioMetrics.annualizedReturn)}
+                                ${this.formatPercent(portfolioMetrics.annualizedReturn)}
                             </td>
-                            <td>${formatPercent(benchmarkMetrics.annualizedReturn)}</td>
+                            <td>${this.formatPercent(benchmarkMetrics.annualizedReturn)}</td>
                             <td class='${portfolioMetrics.annualizedReturn > benchmarkMetrics.annualizedReturn ? "metric-good" : "metric-bad"}'>
                                 ${portfolioMetrics.annualizedReturn > benchmarkMetrics.annualizedReturn ? "+" : ""}${(portfolioMetrics.annualizedReturn - benchmarkMetrics.annualizedReturn).toFixed(2)}%
                             </td>
                         </tr>
                         <tr>
-                            <td><strong>Volatilité</strong></td>
+                            <td><strong>Volatility</strong></td>
                             <td>${portfolioMetrics.volatility.toFixed(2)}%</td>
                             <td>${benchmarkMetrics.volatility.toFixed(2)}%</td>
                             <td class='${portfolioMetrics.volatility < benchmarkMetrics.volatility ? "metric-good" : "metric-warning"}'>
@@ -2865,18 +2185,15 @@ Object.assign(InvestmentAnalytics, {
         `;
     },
     
-    // ========== EXPORT & REPORTING ==========
+    // ========== EXPORT & REFRESH ==========
     
-    /**
-     * Exporte un rapport complet
-     */
     exportReport() {
-        const filteredData = getFilteredData();
-        const metrics = calculateMetrics();
+        const filteredData = this.getFilteredData();
+        const metrics = this.calculateMetrics();
         
         const report = {
             generatedAt: new Date().toISOString(),
-            period: currentPeriod,
+            period: this.currentPeriod,
             dataPoints: filteredData.length,
             
             portfolio: {
@@ -2905,16 +2222,15 @@ Object.assign(InvestmentAnalytics, {
                 profitFactor: metrics.profitFactor
             },
             
-            aiAnalysis: aiResults.recommendations.length > 0 ? {
-                optimizer: aiResults.optimizer,
-                lstm: aiResults.lstm,
-                risk: aiResults.risk,
-                rebalancer: aiResults.rebalancer,
-                recommendations: aiResults.recommendations
+            aiAnalysis: this.aiResults.recommendations.length > 0 ? {
+                optimizer: this.aiResults.optimizer,
+                lstm: this.aiResults.lstm,
+                risk: this.aiResults.risk,
+                rebalancer: this.aiResults.rebalancer,
+                recommendations: this.aiResults.recommendations
             } : null
         };
         
-        // Créer le fichier JSON
         const json = JSON.stringify(report, null, 2);
         const blob = new Blob([json], { type: 'application/json' });
         const url = URL.createObjectURL(blob);
@@ -2924,82 +2240,52 @@ Object.assign(InvestmentAnalytics, {
         a.click();
         URL.revokeObjectURL(url);
         
-        showNotification('✅ Rapport exporté avec succès !', 'success');
+        this.showNotification('✅ Report exported successfully!', 'success');
     },
     
-    /**
-     * Rafraîchit toutes les données
-     */
     refreshData() {
-        loadFinancialData();
-        displayKPIs();
+        this.loadFinancialData();
+        this.displayKPIs();
         this.createAllCharts();
-        updateLastUpdate();
-        showNotification('✅ Données actualisées', 'success');
-    }
+        this.updateLastUpdate();
+        this.showNotification('✅ Data refreshed', 'success');
+    },
     
-});
-
-// ========== FONCTIONS UTILITAIRES GLOBALES ==========
-
-/**
- * Formate un montant en devise
- */
-function formatCurrency(value) {
-    if (!value && value !== 0) return 'N/A';
-    return new Intl.NumberFormat('fr-FR', {
-        style: 'currency',
-        currency: 'EUR',
-        minimumFractionDigits: 0,
-        maximumFractionDigits: 0
-    }).format(value);
-}
-
-/**
- * Formate un pourcentage
- */
-function formatPercent(value) {
-    if (!value && value !== 0) return 'N/A';
-    return value.toFixed(2) + '%';
-}
-
-/**
- * Formate un grand nombre
- */
-function formatLargeNumber(value) {
-    if (!value && value !== 0) return 'N/A';
-    if (value >= 1e6) return (value / 1e6).toFixed(1) + 'M';
-    if (value >= 1e3) return (value / 1e3).toFixed(1) + 'K';
-    return value.toFixed(0);
-}
-
-/**
- * Affiche une notification
- */
-function showNotification(message, type = 'info') {
-    if (window.FinanceDashboard && window.FinanceDashboard.showNotification) {
-        window.FinanceDashboard.showNotification(message, type);
-    } else {
-        console.log(`[${type.toUpperCase()}] ${message}`);
-        
-        // Fallback: afficher une alerte simple
-        if (type === 'error') {
-            alert(message);
+    // ========== UTILITY FUNCTIONS ==========
+    
+    formatCurrency(value) {
+        if (!value && value !== 0) return 'N/A';
+        return new Intl.NumberFormat('en-US', {
+            style: 'currency',
+            currency: 'EUR',
+            minimumFractionDigits: 0,
+            maximumFractionDigits: 0
+        }).format(value);
+    },
+    
+    formatPercent(value) {
+        if (!value && value !== 0) return 'N/A';
+        return value.toFixed(2) + '%';
+    },
+    
+    formatLargeNumber(value) {
+        if (!value && value !== 0) return 'N/A';
+        if (value >= 1e6) return (value / 1e6).toFixed(1) + 'M';
+        if (value >= 1e3) return (value / 1e3).toFixed(1) + 'K';
+        return value.toFixed(0);
+    },
+    
+    showNotification(message, type = 'info') {
+        if (window.FinanceDashboard && window.FinanceDashboard.showNotification) {
+            window.FinanceDashboard.showNotification(message, type);
+        } else {
+            console.log(`[${type.toUpperCase()}] ${message}`);
+            if (type === 'error') alert(message);
         }
     }
-}
+};
 
-// ========== EXPORTS PUBLICS FINAUX ==========
-
-// Rendre les fonctions accessibles globalement
-window.InvestmentAnalytics = InvestmentAnalytics;
-
-// Variables globales nécessaires pour les closures
-let charts = InvestmentAnalytics.charts || {};
-let aiResults = InvestmentAnalytics.aiResults || {};
-
-// ========== INITIALISATION AUTOMATIQUE ==========
-
+// ========== INITIALIZE ON PAGE LOAD ==========
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', () => {
         InvestmentAnalytics.init();
@@ -3008,6 +2294,6 @@ if (document.readyState === 'loading') {
     InvestmentAnalytics.init();
 }
 
-console.log('✅ Investment Analytics Module chargé avec succès');
+console.log('✅ Investment Analytics Module loaded successfully');
 
-// ========== FIN PARTIE 5/5 - MODULE COMPLET ==========
+// ========== END OF FILE ==========
