@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Demo - FinancePro</title>
+    <meta name="description" content="Try FinancePro's AI-powered financial analysis tools with real market data">
+    
+    <!-- Highcharts for advanced charts -->
+    <script src="https://code.highcharts.com/highcharts.js"></script>
+    <script src="https://code.highcharts.com/modules/exporting.js"></script>
+    <script src="https://code.highcharts.com/modules/stock.js"></script>
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Styles -->
+    <link rel="stylesheet" href="assets/css/common.css">
+    <link rel="stylesheet" href="assets/css/interactive-demo.css">
+</head>
+<body class="demo-page">
+    
+    <!-- Simple Navigation Header -->
+    <nav class="demo-nav">
+        <div class="demo-nav-container">
+            <div class="demo-brand">
+                <div class="brand-logo">
+                    <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+                        <path d="M16 2L2 9L16 16L30 9L16 2Z" fill="#3B82F6"/>
+                        <path d="M2 23L16 30L30 23V9L16 16L2 9V23Z" fill="#2563EB" opacity="0.8"/>
+                    </svg>
+                </div>
+                <span class="brand-text">Finance<strong>Pro</strong></span>
+                <span class="demo-badge-nav">
+                    <i class="fas fa-flask"></i> Demo
+                </span>
+            </div>
+            
+            <div class="demo-nav-actions">
+                <button class="dark-mode-toggle" id="darkModeToggle" title="Toggle dark mode">
+                    <i class="fas fa-moon"></i>
+                </button>
+                <a href="index.html" class="btn-back-home">
+                    <i class="fas fa-home"></i>
+                    <span>Back to Home</span>
+                </a>
+            </div>
+        </div>
+    </nav>
+    
+    <!-- Main Demo Container -->
+    <main class="demo-main">
+        
+        <!-- Hero Section -->
+        <section class="demo-hero">
+            <div class="demo-hero-content">
+                <span class="hero-badge">
+                    <i class="fas fa-bolt"></i>
+                    Interactive Demo
+                </span>
+                <h1 class="demo-hero-title">
+                    Experience FinancePro
+                    <span class="gradient-text">in Action</span>
+                </h1>
+                <p class="demo-hero-description">
+                    Explore our AI-powered financial analysis tools with real market data. 
+                    No signup required - try all features instantly.
+                </p>
+                <div class="demo-hero-stats">
+                    <div class="hero-stat">
+                        <i class="fas fa-rocket"></i>
+                        <span>6+ Interactive Tools</span>
+                    </div>
+                    <div class="hero-stat">
+                        <i class="fas fa-database"></i>
+                        <span>Real-time Market Data</span>
+                    </div>
+                    <div class="hero-stat">
+                        <i class="fas fa-brain"></i>
+                        <span>AI-Powered Analysis</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Demo Tools Navigation -->
+        <section class="demo-tools-nav">
+            <div class="container">
+                <h2 class="section-title">Choose a Demo Tool</h2>
+                <div class="tools-grid">
+                    <button class="tool-card active" data-tool="company-search">
+                        <div class="tool-icon">
+                            <i class="fas fa-search"></i>
+                        </div>
+                        <h3>Company Search</h3>
+                        <p>Find and compare companies instantly</p>
+                    </button>
+                    
+                    <button class="tool-card" data-tool="live-quotes">
+                        <div class="tool-icon">
+                            <i class="fas fa-chart-line"></i>
+                        </div>
+                        <h3>Live Stock Quotes</h3>
+                        <p>Real-time market data and analysis</p>
+                    </button>
+                    
+                    <button class="tool-card" data-tool="portfolio-builder">
+                        <div class="tool-icon">
+                            <i class="fas fa-briefcase"></i>
+                        </div>
+                        <h3>Portfolio Builder</h3>
+                        <p>Create and optimize your portfolio</p>
+                    </button>
+                    
+                    <button class="tool-card" data-tool="technical-analysis">
+                        <div class="tool-icon">
+                            <i class="fas fa-chart-bar"></i>
+                        </div>
+                        <h3>Technical Analysis</h3>
+                        <p>Advanced indicators and patterns</p>
+                    </button>
+                    
+                    <button class="tool-card" data-tool="risk-calculator">
+                        <div class="tool-icon">
+                            <i class="fas fa-shield-alt"></i>
+                        </div>
+                        <h3>Risk Calculator</h3>
+                        <p>VaR, volatility, and risk metrics</p>
+                    </button>
+                    
+                    <button class="tool-card" data-tool="ai-insights">
+                        <div class="tool-icon">
+                            <i class="fas fa-brain"></i>
+                        </div>
+                        <h3>AI Insights</h3>
+                        <p>Machine learning predictions</p>
+                    </button>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Demo Content Area -->
+        <section class="demo-content">
+            <div class="container">
+                
+                <!-- TOOL 1: Company Search -->
+                <div class="demo-tool active" id="tool-company-search">
+                    <div class="tool-header">
+                        <h2>
+                            <i class="fas fa-search"></i>
+                            Company Search & Comparison
+                        </h2>
+                        <p>Search for any company and find comparable peers instantly using our AI engine</p>
+                    </div>
+                    
+                    <div class="search-interface-demo">
+                        <!-- Search Bar -->
+                        <div class="search-box-wrapper">
+                            <div class="search-box">
+                                <i class="fas fa-search"></i>
+                                <input 
+                                    type="text" 
+                                    placeholder="Search for a company (e.g., Apple, Tesla, Microsoft)..." 
+                                    id="companySearchInput"
+                                    autocomplete="off"
+                                >
+                                <button class="btn-search" id="btnSearch">
+                                    <i class="fas fa-arrow-right"></i>
+                                </button>
+                            </div>
+                            <div class="search-suggestions" id="searchSuggestions"></div>
+                        </div>
+                        
+                        <!-- Search Results -->
+                        <div class="search-results-container" id="searchResultsContainer">
+                            <div class="results-placeholder">
+                                <i class="fas fa-search"></i>
+                                <h3>Start Searching</h3>
+                                <p>Enter a company name or ticker symbol above to begin</p>
+                                <div class="popular-searches">
+                                    <span class="popular-label">Popular:</span>
+                                    <button class="popular-tag" data-symbol="AAPL">Apple</button>
+                                    <button class="popular-tag" data-symbol="TSLA">Tesla</button>
+                                    <button class="popular-tag" data-symbol="MSFT">Microsoft</button>
+                                    <button class="popular-tag" data-symbol="GOOGL">Google</button>
+                                    <button class="popular-tag" data-symbol="AMZN">Amazon</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- TOOL 2: Live Stock Quotes -->
+                <div class="demo-tool" id="tool-live-quotes">
+                    <div class="tool-header">
+                        <h2>
+                            <i class="fas fa-chart-line"></i>
+                            Live Stock Quotes
+                        </h2>
+                        <p>Real-time stock prices, charts, and key metrics</p>
+                    </div>
+                    
+                    <div class="live-quotes-interface">
+                        <div class="quote-search">
+                            <input 
+                                type="text" 
+                                placeholder="Enter ticker symbol (e.g., AAPL)..." 
+                                id="quoteSymbolInput"
+                                class="form-input"
+                            >
+                            <button class="btn btn-primary" id="btnLoadQuote">
+                                <i class="fas fa-sync"></i>
+                                Get Quote
+                            </button>
+                        </div>
+                        
+                        <div class="quote-display" id="quoteDisplay">
+                            <div class="quote-placeholder">
+                                <i class="fas fa-chart-line"></i>
+                                <p>Enter a ticker symbol to see live quotes</p>
+                            </div>
+                        </div>
+                        
+                        <div class="quote-chart-container">
+                            <div id="liveQuoteChart" class="chart-area"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- TOOL 3: Portfolio Builder -->
+                <div class="demo-tool" id="tool-portfolio-builder">
+                    <div class="tool-header">
+                        <h2>
+                            <i class="fas fa-briefcase"></i>
+                            Portfolio Builder
+                        </h2>
+                        <p>Build a diversified portfolio and see allocation recommendations</p>
+                    </div>
+                    
+                    <div class="portfolio-interface">
+                        <div class="portfolio-add">
+                            <input 
+                                type="text" 
+                                placeholder="Ticker symbol" 
+                                id="portfolioSymbol"
+                                class="form-input"
+                            >
+                            <input 
+                                type="number" 
+                                placeholder="Shares" 
+                                id="portfolioShares"
+                                class="form-input"
+                                min="1"
+                            >
+                            <button class="btn btn-success" id="btnAddToPortfolio">
+                                <i class="fas fa-plus"></i>
+                                Add to Portfolio
+                            </button>
+                        </div>
+                        
+                        <div class="portfolio-display">
+                            <div class="portfolio-summary" id="portfolioSummary">
+                                <div class="summary-card">
+                                    <h4>Total Value</h4>
+                                    <p class="value-large">$0.00</p>
+                                </div>
+                                <div class="summary-card">
+                                    <h4>Holdings</h4>
+                                    <p class="value-large">0</p>
+                                </div>
+                                <div class="summary-card">
+                                    <h4>Diversification</h4>
+                                    <p class="value-large">N/A</p>
+                                </div>
+                            </div>
+                            
+                            <div class="portfolio-table-wrapper">
+                                <table class="portfolio-table" id="portfolioTable">
+                                    <thead>
+                                        <tr>
+                                            <th>Symbol</th>
+                                            <th>Shares</th>
+                                            <th>Price</th>
+                                            <th>Value</th>
+                                            <th>Allocation</th>
+                                            <th>Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="portfolioTableBody">
+                                        <tr class="empty-state">
+                                            <td colspan="6">
+                                                <i class="fas fa-briefcase"></i>
+                                                <p>Your portfolio is empty. Add some stocks to get started!</p>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            
+                            <div class="portfolio-chart">
+                                <div id="portfolioAllocationChart"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- TOOL 4: Technical Analysis -->
+                <div class="demo-tool" id="tool-technical-analysis">
+                    <div class="tool-header">
+                        <h2>
+                            <i class="fas fa-chart-bar"></i>
+                            Technical Analysis
+                        </h2>
+                        <p>Advanced technical indicators and chart patterns</p>
+                    </div>
+                    
+                    <div class="technical-interface">
+                        <div class="technical-controls">
+                            <input 
+                                type="text" 
+                                placeholder="Enter ticker symbol..." 
+                                id="technicalSymbol"
+                                class="form-input"
+                            >
+                            <button class="btn btn-primary" id="btnAnalyze">
+                                <i class="fas fa-chart-line"></i>
+                                Analyze
+                            </button>
+                        </div>
+                        
+                        <div class="indicators-panel">
+                            <h4>Active Indicators</h4>
+                            <div class="indicators-grid">
+                                <label class="indicator-checkbox">
+                                    <input type="checkbox" id="ind-sma" checked>
+                                    <span>SMA (20, 50)</span>
+                                </label>
+                                <label class="indicator-checkbox">
+                                    <input type="checkbox" id="ind-ema">
+                                    <span>EMA (12, 26)</span>
+                                </label>
+                                <label class="indicator-checkbox">
+                                    <input type="checkbox" id="ind-bb">
+                                    <span>Bollinger Bands</span>
+                                </label>
+                                <label class="indicator-checkbox">
+                                    <input type="checkbox" id="ind-rsi">
+                                    <span>RSI (14)</span>
+                                </label>
+                                <label class="indicator-checkbox">
+                                    <input type="checkbox" id="ind-macd">
+                                    <span>MACD</span>
+                                </label>
+                                <label class="indicator-checkbox">
+                                    <input type="checkbox" id="ind-volume" checked>
+                                    <span>Volume</span>
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div class="technical-chart-container">
+                            <div id="technicalChart" class="chart-area"></div>
+                        </div>
+                        
+                        <div class="technical-signals" id="technicalSignals">
+                            <h4>Technical Signals</h4>
+                            <div class="signals-placeholder">
+                                <i class="fas fa-chart-bar"></i>
+                                <p>Analyze a stock to see technical signals</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- TOOL 5: Risk Calculator -->
+                <div class="demo-tool" id="tool-risk-calculator">
+                    <div class="tool-header">
+                        <h2>
+                            <i class="fas fa-shield-alt"></i>
+                            Risk Calculator
+                        </h2>
+                        <p>Calculate VaR, volatility, and other risk metrics</p>
+                    </div>
+                    
+                    <div class="risk-interface">
+                        <div class="risk-inputs">
+                            <div class="form-group">
+                                <label class="form-label">Portfolio Value ($)</label>
+                                <input 
+                                    type="number" 
+                                    id="riskPortfolioValue"
+                                    class="form-input"
+                                    value="100000"
+                                    min="1000"
+                                    step="1000"
+                                >
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Confidence Level (%)</label>
+                                <input 
+                                    type="number" 
+                                    id="riskConfidence"
+                                    class="form-input"
+                                    value="95"
+                                    min="90"
+                                    max="99"
+                                    step="1"
+                                >
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Time Horizon (days)</label>
+                                <input 
+                                    type="number" 
+                                    id="riskHorizon"
+                                    class="form-input"
+                                    value="1"
+                                    min="1"
+                                    max="30"
+                                >
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Expected Return (% annual)</label>
+                                <input 
+                                    type="number" 
+                                    id="riskReturn"
+                                    class="form-input"
+                                    value="8"
+                                    step="0.1"
+                                >
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Volatility (% annual)</label>
+                                <input 
+                                    type="number" 
+                                    id="riskVolatility"
+                                    class="form-input"
+                                    value="15"
+                                    step="0.1"
+                                >
+                            </div>
+                            <button class="btn btn-primary btn-block" id="btnCalculateRisk">
+                                <i class="fas fa-calculator"></i>
+                                Calculate Risk Metrics
+                            </button>
+                        </div>
+                        
+                        <div class="risk-results" id="riskResults">
+                            <div class="results-placeholder">
+                                <i class="fas fa-shield-alt"></i>
+                                <p>Enter parameters and calculate to see risk metrics</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- TOOL 6: AI Insights -->
+                <div class="demo-tool" id="tool-ai-insights">
+                    <div class="tool-header">
+                        <h2>
+                            <i class="fas fa-brain"></i>
+                            AI-Powered Insights
+                        </h2>
+                        <p>Get machine learning predictions and sentiment analysis</p>
+                    </div>
+                    
+                    <div class="ai-interface">
+                        <div class="ai-search">
+                            <input 
+                                type="text" 
+                                placeholder="Enter ticker symbol for AI analysis..." 
+                                id="aiSymbolInput"
+                                class="form-input"
+                            >
+                            <button class="btn btn-accent" id="btnAIAnalyze">
+                                <i class="fas fa-brain"></i>
+                                Generate AI Insights
+                            </button>
+                        </div>
+                        
+                        <div class="ai-results" id="aiResults">
+                            <div class="ai-placeholder">
+                                <i class="fas fa-robot"></i>
+                                <h3>AI Analysis Ready</h3>
+                                <p>Enter a ticker symbol to get ML-powered predictions and insights</p>
+                                <div class="ai-features">
+                                    <div class="ai-feature">
+                                        <i class="fas fa-chart-line"></i>
+                                        <span>Price Prediction</span>
+                                    </div>
+                                    <div class="ai-feature">
+                                        <i class="fas fa-comments"></i>
+                                        <span>Sentiment Analysis</span>
+                                    </div>
+                                    <div class="ai-feature">
+                                        <i class="fas fa-bullseye"></i>
+                                        <span>Trend Detection</span>
+                                    </div>
+                                    <div class="ai-feature">
+                                        <i class="fas fa-exclamation-triangle"></i>
+                                        <span>Risk Assessment</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+            </div>
+        </section>
+        
+        <!-- CTA Section -->
+        <section class="demo-cta">
+            <div class="container">
+                <div class="cta-content">
+                    <h2>Ready to unlock the full potential?</h2>
+                    <p>Get unlimited access to all features, real-time data, and advanced analytics</p>
+                    <div class="cta-buttons">
+                        <a href="index.html#pricing" class="btn btn-cta-primary">
+                            <i class="fas fa-rocket"></i>
+                            View Pricing Plans
+                        </a>
+                        <a href="index.html" class="btn btn-cta-secondary">
+                            <i class="fas fa-home"></i>
+                            Back to Home
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+    </main>
+    
+    <!-- Footer simplifié -->
+    <footer class="demo-footer">
+        <div class="container">
+            <p>&copy; <span id="currentYear">2024</span> FinancePro. All rights reserved.</p>
+            <div class="footer-links">
+                <a href="index.html">Home</a>
+                <a href="index.html#features">Features</a>
+                <a href="index.html#pricing">Pricing</a>
+            </div>
+        </div>
+    </footer>
+    
+    <!-- Scripts -->
+    <script src="assets/js/config.js"></script>
+    <script src="assets/js/api-client.js"></script>
+    <script src="assets/js/dark-mode.js"></script>
+    <script src="assets/js/interactive-demo.js"></script>
+    
+    <script>
+        // Update copyright year
+        document.getElementById('currentYear').textContent = new Date().getFullYear();
+    </script>
+</body>
+</html>

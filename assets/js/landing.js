@@ -472,3 +472,28 @@ window.addEventListener('scroll', throttle(revealOnScroll, 100));
 window.addEventListener('scroll', throttle(animateNumbers, 100));
 
 console.log('✅ Landing page initialized successfully!');
+
+// ============================================
+// DEMO BUTTON HANDLER
+// ============================================
+const tryDemoBtn = document.getElementById('tryDemoBtn');
+const heroWatchDemo = document.getElementById('heroWatchDemo');
+
+if (tryDemoBtn) {
+    tryDemoBtn.addEventListener('click', () => {
+        window.location.href = 'interactive-demo.html';
+    });
+}
+
+if (heroWatchDemo) {
+    heroWatchDemo.addEventListener('click', () => {
+        window.location.href = 'interactive-demo.html';
+    });
+}
+
+// All demo CTAs
+document.querySelectorAll('[data-action="demo"]').forEach(btn => {
+    btn.addEventListener('click', () => {
+        window.location.href = 'interactive-demo.html';
+    });
+});
