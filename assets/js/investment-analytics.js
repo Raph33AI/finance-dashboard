@@ -742,7 +742,7 @@
                 },
                 {
                     title: 'Annualized Return',
-                    value: this.formatPercent(metrics.annualized Return),
+                    value: this.formatPercent(metrics.annualizedReturn),
                     icon: 'fa-percentage',
                     change: `Volatility: ${metrics.volatility.toFixed(2)}%`,
                     changeClass: metrics.volatility < 15 ? 'positive' : 'neutral',
