@@ -975,6 +975,25 @@ const DemoApp = {
                 this.analyzeTechnical();
             });
         }
+        
+        // NOUVEAU : Event listeners pour les indicateurs
+        const indicatorCheckboxes = [
+            'indicatorSMA',
+            'indicatorEMA',
+            'indicatorBollinger',
+            'indicatorRSI',
+            'indicatorMACD',
+            'indicatorVolume'
+        ];
+        
+        indicatorCheckboxes.forEach(id => {
+            const checkbox = document.getElementById(id);
+            if (checkbox) {
+                checkbox.addEventListener('change', (e) => {
+                    this.toggleIndicator(id, e.target.checked);
+                });
+            }
+        });
     },
     
     analyzeTechnical: async function() {
@@ -1047,6 +1066,26 @@ const DemoApp = {
         }
         
         console.log('✅ Chart container found:', container.offsetWidth, 'x', container.offsetHeight);
+
+        console.log('✅ Technical chart created successfully!');
+
+        // NOUVEAU : Activer les indicateurs cochés par défaut
+        setTimeout(() => {
+            const indicators = [
+                { id: 'indicatorSMA', checkbox: document.getElementById('indicatorSMA') },
+                { id: 'indicatorEMA', checkbox: document.getElementById('indicatorEMA') },
+                { id: 'indicatorBollinger', checkbox: document.getElementById('indicatorBollinger') },
+                { id: 'indicatorRSI', checkbox: document.getElementById('indicatorRSI') },
+                { id: 'indicatorMACD', checkbox: document.getElementById('indicatorMACD') }
+            ];
+            
+            indicators.forEach(ind => {
+                if (ind.checkbox && ind.checkbox.checked) {
+                    console.log('🔄 Auto-enabling indicator:', ind.id);
+                    this.toggleIndicator(ind.id, true);
+                }
+            });
+        }, 100);
         
         // Les données viennent du plus récent au plus ancien, il faut les inverser
         const sortedData = [...data].sort((a, b) => {
@@ -1316,6 +1355,452 @@ renderSimpleTechnicalChart: function(sortedData, symbol) {
     } catch (error) {
         console.error('❌ Error creating simple chart:', error);
     }
+},
+
+// ============================================
+// TECHNICAL INDICATORS
+// ============================================
+
+toggleIndicator: function(indicatorId, isEnabled) {
+    console.log('🔄 Toggle indicator:', indicatorId, isEnabled);
+    
+    if (!this.charts.technical || !this.currentTechnicalSymbol) {
+        console.log('⚠️ No chart or symbol available');
+        return;
+    }
+    
+    // Récupérer les données actuelles du graphique
+    const mainSeries = this.charts.technical.series[0];
+    if (!mainSeries || !mainSeries.options.data) {
+        console.log('⚠️ No data in chart');
+        return;
+    }
+    
+    const data = mainSeries.options.data;
+    
+    switch(indicatorId) {
+        case 'indicatorSMA':
+            if (isEnabled) {
+                this.addSMA(data);
+            } else {
+                this.removeIndicator('SMA 20');
+                this.removeIndicator('SMA 50');
+            }
+            break;
+            
+        case 'indicatorEMA':
+            if (isEnabled) {
+                this.addEMA(data);
+            } else {
+                this.removeIndicator('EMA 12');
+                this.removeIndicator('EMA 26');
+            }
+            break;
+            
+        case 'indicatorBollinger':
+            if (isEnabled) {
+                this.addBollingerBands(data);
+            } else {
+                this.removeIndicator('BB Upper');
+                this.removeIndicator('BB Middle');
+                this.removeIndicator('BB Lower');
+            }
+            break;
+            
+        case 'indicatorRSI':
+            if (isEnabled) {
+                this.addRSI(data);
+            } else {
+                this.removeIndicator('RSI');
+            }
+            break;
+            
+        case 'indicatorMACD':
+            if (isEnabled) {
+                this.addMACD(data);
+            } else {
+                this.removeIndicator('MACD');
+                this.removeIndicator('Signal');
+                this.removeIndicator('Histogram');
+            }
+            break;
+    }
+},
+
+removeIndicator: function(name) {
+    if (!this.charts.technical) return;
+    
+    const chart = this.charts.technical;
+    const seriesToRemove = chart.series.find(s => s.name === name);
+    
+    if (seriesToRemove) {
+        seriesToRemove.remove();
+        console.log('🗑️ Removed indicator:', name);
+    }
+},
+
+// ============================================
+// CALCUL DES INDICATEURS
+// ============================================
+
+// SMA - Simple Moving Average
+addSMA: function(ohlcData) {
+    console.log('📊 Adding SMA indicators');
+    
+    const closePrices = ohlcData.map(d => d[4]); // close price
+    const timestamps = ohlcData.map(d => d[0]);
+    
+    const sma20 = this.calculateSMA(closePrices, 20);
+    const sma50 = this.calculateSMA(closePrices, 50);
+    
+    const sma20Data = timestamps.map((t, i) => [t, sma20[i]]).filter(d => d[1] !== null);
+    const sma50Data = timestamps.map((t, i) => [t, sma50[i]]).filter(d => d[1] !== null);
+    
+    this.charts.technical.addSeries({
+        name: 'SMA 20',
+        type: 'line',
+        data: sma20Data,
+        color: '#F59E0B',
+        lineWidth: 2,
+        yAxis: 0,
+        marker: { enabled: false }
+    });
+    
+    this.charts.technical.addSeries({
+        name: 'SMA 50',
+        type: 'line',
+        data: sma50Data,
+        color: '#8B5CF6',
+        lineWidth: 2,
+        yAxis: 0,
+        marker: { enabled: false }
+    });
+},
+
+calculateSMA: function(data, period) {
+    const result = [];
+    
+    for (let i = 0; i < data.length; i++) {
+        if (i < period - 1) {
+            result.push(null);
+        } else {
+            let sum = 0;
+            for (let j = 0; j < period; j++) {
+                sum += data[i - j];
+            }
+            result.push(sum / period);
+        }
+    }
+    
+    return result;
+},
+
+// EMA - Exponential Moving Average
+addEMA: function(ohlcData) {
+    console.log('📊 Adding EMA indicators');
+    
+    const closePrices = ohlcData.map(d => d[4]);
+    const timestamps = ohlcData.map(d => d[0]);
+    
+    const ema12 = this.calculateEMA(closePrices, 12);
+    const ema26 = this.calculateEMA(closePrices, 26);
+    
+    const ema12Data = timestamps.map((t, i) => [t, ema12[i]]).filter(d => d[1] !== null);
+    const ema26Data = timestamps.map((t, i) => [t, ema26[i]]).filter(d => d[1] !== null);
+    
+    this.charts.technical.addSeries({
+        name: 'EMA 12',
+        type: 'line',
+        data: ema12Data,
+        color: '#06B6D4',
+        lineWidth: 2,
+        dashStyle: 'Dash',
+        yAxis: 0,
+        marker: { enabled: false }
+    });
+    
+    this.charts.technical.addSeries({
+        name: 'EMA 26',
+        type: 'line',
+        data: ema26Data,
+        color: '#EC4899',
+        lineWidth: 2,
+        dashStyle: 'Dash',
+        yAxis: 0,
+        marker: { enabled: false }
+    });
+},
+
+calculateEMA: function(data, period) {
+    const result = [];
+    const multiplier = 2 / (period + 1);
+    
+    // Première valeur = SMA
+    let sum = 0;
+    for (let i = 0; i < period; i++) {
+        if (i < data.length) {
+            sum += data[i];
+        }
+    }
+    const sma = sum / period;
+    
+    for (let i = 0; i < data.length; i++) {
+        if (i < period - 1) {
+            result.push(null);
+        } else if (i === period - 1) {
+            result.push(sma);
+        } else {
+            const ema = (data[i] - result[i - 1]) * multiplier + result[i - 1];
+            result.push(ema);
+        }
+    }
+    
+    return result;
+},
+
+// Bollinger Bands
+addBollingerBands: function(ohlcData) {
+    console.log('📊 Adding Bollinger Bands');
+    
+    const closePrices = ohlcData.map(d => d[4]);
+    const timestamps = ohlcData.map(d => d[0]);
+    const period = 20;
+    const stdDevMultiplier = 2;
+    
+    const sma = this.calculateSMA(closePrices, period);
+    const stdDev = [];
+    
+    for (let i = 0; i < closePrices.length; i++) {
+        if (i < period - 1) {
+            stdDev.push(null);
+        } else {
+            let variance = 0;
+            for (let j = 0; j < period; j++) {
+                variance += Math.pow(closePrices[i - j] - sma[i], 2);
+            }
+            stdDev.push(Math.sqrt(variance / period));
+        }
+    }
+    
+    const upperBand = timestamps.map((t, i) => 
+        sma[i] !== null ? [t, sma[i] + stdDevMultiplier * stdDev[i]] : null
+    ).filter(d => d !== null);
+    
+    const middleBand = timestamps.map((t, i) => 
+        sma[i] !== null ? [t, sma[i]] : null
+    ).filter(d => d !== null);
+    
+    const lowerBand = timestamps.map((t, i) => 
+        sma[i] !== null ? [t, sma[i] - stdDevMultiplier * stdDev[i]] : null
+    ).filter(d => d !== null);
+    
+    this.charts.technical.addSeries({
+        name: 'BB Upper',
+        type: 'line',
+        data: upperBand,
+        color: '#9CA3AF',
+        lineWidth: 1,
+        yAxis: 0,
+        marker: { enabled: false },
+        enableMouseTracking: false
+    });
+    
+    this.charts.technical.addSeries({
+        name: 'BB Middle',
+        type: 'line',
+        data: middleBand,
+        color: '#6B7280',
+        lineWidth: 1,
+        dashStyle: 'Dot',
+        yAxis: 0,
+        marker: { enabled: false },
+        enableMouseTracking: false
+    });
+    
+    this.charts.technical.addSeries({
+        name: 'BB Lower',
+        type: 'line',
+        data: lowerBand,
+        color: '#9CA3AF',
+        lineWidth: 1,
+        yAxis: 0,
+        marker: { enabled: false },
+        enableMouseTracking: false
+    });
+},
+
+// RSI - Relative Strength Index
+addRSI: function(ohlcData) {
+    console.log('📊 Adding RSI');
+    
+    const closePrices = ohlcData.map(d => d[4]);
+    const timestamps = ohlcData.map(d => d[0]);
+    const period = 14;
+    
+    const rsi = this.calculateRSI(closePrices, period);
+    const rsiData = timestamps.map((t, i) => [t, rsi[i]]).filter(d => d[1] !== null);
+    
+    // Ajouter un nouvel axe Y pour RSI
+    this.charts.technical.addAxis({
+        id: 'rsi-axis',
+        labels: {
+            align: 'right',
+            x: -3
+        },
+        title: {
+            text: 'RSI'
+        },
+        top: '80%',
+        height: '20%',
+        offset: 0,
+        lineWidth: 2,
+        plotLines: [{
+            value: 70,
+            color: '#EF4444',
+            dashStyle: 'Dot',
+            width: 1,
+            label: { text: '70' }
+        }, {
+            value: 30,
+            color: '#10B981',
+            dashStyle: 'Dot',
+            width: 1,
+            label: { text: '30' }
+        }]
+    });
+    
+    this.charts.technical.addSeries({
+        name: 'RSI',
+        type: 'line',
+        data: rsiData,
+        color: '#8B5CF6',
+        lineWidth: 2,
+        yAxis: 'rsi-axis',
+        marker: { enabled: false }
+    });
+},
+
+calculateRSI: function(data, period) {
+    const result = [];
+    const gains = [];
+    const losses = [];
+    
+    for (let i = 1; i < data.length; i++) {
+        const change = data[i] - data[i - 1];
+        gains.push(change > 0 ? change : 0);
+        losses.push(change < 0 ? Math.abs(change) : 0);
+    }
+    
+    for (let i = 0; i < data.length; i++) {
+        if (i < period) {
+            result.push(null);
+        } else {
+            let avgGain = 0;
+            let avgLoss = 0;
+            
+            for (let j = 0; j < period; j++) {
+                avgGain += gains[i - 1 - j];
+                avgLoss += losses[i - 1 - j];
+            }
+            
+            avgGain /= period;
+            avgLoss /= period;
+            
+            const rs = avgLoss === 0 ? 100 : avgGain / avgLoss;
+            const rsi = 100 - (100 / (1 + rs));
+            
+            result.push(rsi);
+        }
+    }
+    
+    return result;
+},
+
+// MACD
+addMACD: function(ohlcData) {
+    console.log('📊 Adding MACD');
+    
+    const closePrices = ohlcData.map(d => d[4]);
+    const timestamps = ohlcData.map(d => d[0]);
+    
+    const ema12 = this.calculateEMA(closePrices, 12);
+    const ema26 = this.calculateEMA(closePrices, 26);
+    
+    const macdLine = [];
+    for (let i = 0; i < closePrices.length; i++) {
+        if (ema12[i] !== null && ema26[i] !== null) {
+            macdLine.push(ema12[i] - ema26[i]);
+        } else {
+            macdLine.push(null);
+        }
+    }
+    
+    const signalLine = this.calculateEMA(macdLine.filter(v => v !== null), 9);
+    
+    // Ajouter des nulls au début du signal pour l'aligner
+    const fullSignalLine = [];
+    let signalIndex = 0;
+    for (let i = 0; i < macdLine.length; i++) {
+        if (macdLine[i] === null) {
+            fullSignalLine.push(null);
+        } else {
+            fullSignalLine.push(signalLine[signalIndex]);
+            signalIndex++;
+        }
+    }
+    
+    const histogram = macdLine.map((m, i) => 
+        m !== null && fullSignalLine[i] !== null ? m - fullSignalLine[i] : null
+    );
+    
+    const macdData = timestamps.map((t, i) => [t, macdLine[i]]).filter(d => d[1] !== null);
+    const signalData = timestamps.map((t, i) => [t, fullSignalLine[i]]).filter(d => d[1] !== null);
+    const histogramData = timestamps.map((t, i) => [t, histogram[i]]).filter(d => d[1] !== null);
+    
+    // Ajouter axe MACD
+    this.charts.technical.addAxis({
+        id: 'macd-axis',
+        labels: {
+            align: 'right',
+            x: -3
+        },
+        title: {
+            text: 'MACD'
+        },
+        top: '80%',
+        height: '20%',
+        offset: 0,
+        lineWidth: 2
+    });
+    
+    this.charts.technical.addSeries({
+        name: 'MACD',
+        type: 'line',
+        data: macdData,
+        color: '#3B82F6',
+        lineWidth: 2,
+        yAxis: 'macd-axis',
+        marker: { enabled: false }
+    });
+    
+    this.charts.technical.addSeries({
+        name: 'Signal',
+        type: 'line',
+        data: signalData,
+        color: '#EF4444',
+        lineWidth: 2,
+        yAxis: 'macd-axis',
+        marker: { enabled: false }
+    });
+    
+    this.charts.technical.addSeries({
+        name: 'Histogram',
+        type: 'column',
+        data: histogramData,
+        color: '#10B981',
+        yAxis: 'macd-axis',
+        opacity: 0.5
+    });
 },
 
 // NOUVELLE FONCTION : Graphique Candlestick complet
