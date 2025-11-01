@@ -1408,3 +1408,34 @@ body.dark-mode .asset-allocation-manager {
         flex: 1;
     }
 }
+
+/* Fix page title color in dark mode */
+.dark-mode #pageTitle,
+.dark-mode .top-header h1 {
+    color: #ffffff !important;
+}
+
+.dark-mode .chart-title {
+    color: #ffffff !important;
+}
+
+.dark-mode .section-header h2 {
+    color: #ffffff !important;
+}
+
+/* Ensure all chart legends are visible in dark mode */
+.dark-mode .highcharts-legend-item text {
+    fill: #ffffff !important;
+}
+
+.dark-mode .highcharts-axis-labels text {
+    fill: #ffffff !important;
+}
+
+.dark-mode .highcharts-title {
+    fill: #ffffff !important;
+}
+
+.dark-mode .highcharts-subtitle {
+    fill: #cccccc !important;
+}
