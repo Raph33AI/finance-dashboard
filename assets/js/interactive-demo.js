@@ -780,16 +780,23 @@ const DemoApp = {
         try {
             const quoteData = await this.apiClient.getQuote(symbol);
             
-            // FIX CRITIQUE : Vérifier price OU close
-            const currentPrice = quoteData.close || quoteData.price;
+            console.log('📊 Quote data received for portfolio:', quoteData);
             
-            if (quoteData && currentPrice) {
+            // FIX CRITIQUE : Vérifier price OU close - supporter la valeur 0
+            const currentPrice = quoteData.close !== undefined && quoteData.close !== null 
+                ? quoteData.close 
+                : quoteData.price;
+            
+            console.log('💰 Current price:', currentPrice);
+            
+            // Vérifier que le prix existe ET est un nombre valide
+            if (quoteData && currentPrice !== null && currentPrice !== undefined && !isNaN(currentPrice)) {
                 const holding = {
                     symbol: symbol,
                     name: quoteData.name || symbol,
                     shares: shares,
-                    price: currentPrice,
-                    value: shares * currentPrice
+                    price: parseFloat(currentPrice),
+                    value: shares * parseFloat(currentPrice)
                 };
                 
                 this.portfolio.push(holding);
@@ -801,12 +808,13 @@ const DemoApp = {
                 
                 this.showNotification(`✅ ${symbol} added to portfolio`, 'success');
             } else {
-                throw new Error('Unable to fetch price');
+                console.error('❌ Invalid price data:', { quoteData, currentPrice });
+                throw new Error('Unable to fetch valid price data');
             }
             
         } catch (error) {
             console.error('Error adding to portfolio:', error);
-            this.showNotification('Unable to add symbol to portfolio', 'error');
+            this.showNotification(`Unable to add ${symbol} to portfolio. Please try again.`, 'error');
         }
     },
     
@@ -984,17 +992,38 @@ const DemoApp = {
         try {
             const timeSeriesData = await this.apiClient.getTimeSeries(symbol, '1day', '180');
             
-            // FIX CRITIQUE : L'API retourne 'data' et non 'values'
-            if (timeSeriesData && timeSeriesData.data && timeSeriesData.data.length > 0) {
-                this.renderTechnicalChart(timeSeriesData.data, symbol);
-                this.generateTechnicalSignals(symbol, timeSeriesData.data);
+            console.log('📈 Time series data received:', timeSeriesData);
+            console.log('📈 Data array:', timeSeriesData?.data);
+            console.log('📈 Data length:', timeSeriesData?.data?.length);
+            
+            // FIX CRITIQUE : Vérifier plusieurs structures possibles
+            let dataArray = null;
+            
+            // Structure 1 : {data: [...]}
+            if (timeSeriesData && timeSeriesData.data && Array.isArray(timeSeriesData.data)) {
+                dataArray = timeSeriesData.data;
+            }
+            // Structure 2 : {values: [...]}
+            else if (timeSeriesData && timeSeriesData.values && Array.isArray(timeSeriesData.values)) {
+                dataArray = timeSeriesData.values;
+            }
+            // Structure 3 : directement un tableau
+            else if (Array.isArray(timeSeriesData)) {
+                dataArray = timeSeriesData;
+            }
+            
+            if (dataArray && dataArray.length > 0) {
+                console.log('✅ Using data array with', dataArray.length, 'items');
+                this.renderTechnicalChart(dataArray, symbol);
+                this.generateTechnicalSignals(symbol, dataArray);
             } else {
+                console.error('❌ No valid data array found in:', timeSeriesData);
                 throw new Error('No data available');
             }
             
         } catch (error) {
             console.error('Error analyzing:', error);
-            this.showNotification('Unable to load technical data', 'error');
+            this.showNotification('Unable to load technical data for ' + symbol, 'error');
         }
     },
     
