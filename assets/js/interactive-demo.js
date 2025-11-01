@@ -1028,31 +1028,293 @@ const DemoApp = {
     },
     
     renderTechnicalChart: function(data, symbol) {
-    if (this.charts.technical) {
-        this.charts.technical.destroy();
-    }
+        console.log('📊 === TECHNICAL CHART RENDERING ===');
+        console.log('📊 Symbol:', symbol);
+        console.log('📊 Data length:', data.length);
+        console.log('📊 First item:', data[0]);
+        console.log('📊 Last item:', data[data.length - 1]);
+        
+        if (this.charts.technical) {
+            console.log('🗑️ Destroying previous chart');
+            this.charts.technical.destroy();
+        }
+        
+        // Vérifier que le container existe
+        const container = document.getElementById('technicalChart');
+        if (!container) {
+            console.error('❌ Chart container #technicalChart not found!');
+            return;
+        }
+        
+        console.log('✅ Chart container found:', container.offsetWidth, 'x', container.offsetHeight);
+        
+        // Les données viennent du plus récent au plus ancien, il faut les inverser
+        const sortedData = [...data].sort((a, b) => {
+            const dateA = new Date(a.datetime).getTime();
+            const dateB = new Date(b.datetime).getTime();
+            return dateA - dateB; // Tri croissant (du plus ancien au plus récent)
+        });
+        
+        console.log('📊 After sorting - First:', sortedData[0].datetime, 'Last:', sortedData[sortedData.length - 1].datetime);
+        
+        // Vérifier si on a des données OHLC complètes
+        const firstItem = sortedData[0];
+        const hasOHLC = firstItem.open !== undefined && 
+                        firstItem.high !== undefined && 
+                        firstItem.low !== undefined && 
+                        firstItem.close !== undefined;
+        
+        console.log('📊 Has complete OHLC:', hasOHLC);
+        
+        if (hasOHLC) {
+            // Préparer les données OHLC
+            const ohlc = sortedData.map(d => {
+                const timestamp = d.timestamp || new Date(d.datetime).getTime();
+                return [
+                    timestamp,
+                    parseFloat(d.open),
+                    parseFloat(d.high),
+                    parseFloat(d.low),
+                    parseFloat(d.close)
+                ];
+            });
+            
+            // Préparer les données de volume
+            const volume = sortedData.map(d => {
+                const timestamp = d.timestamp || new Date(d.datetime).getTime();
+                return [timestamp, parseFloat(d.volume || 0)];
+            });
+            
+            console.log('📊 OHLC prepared:', ohlc.length, 'points');
+            console.log('📊 Sample OHLC point:', ohlc[0]);
+            console.log('📊 Volume prepared:', volume.length, 'points');
+            
+            // Créer le graphique
+            try {
+                this.charts.technical = Highcharts.stockChart('technicalChart', {
+                    chart: {
+                        backgroundColor: 'transparent',
+                        height: 500
+                    },
+                    title: {
+                        text: `${symbol} - Technical Analysis`,
+                        style: {
+                            color: getComputedStyle(document.documentElement).getPropertyValue('--text-primary') || '#1e293b',
+                            fontSize: '1.125rem',
+                            fontWeight: '700'
+                        }
+                    },
+                    rangeSelector: {
+                        selected: 1,
+                        buttons: [{
+                            type: 'month',
+                            count: 1,
+                            text: '1m'
+                        }, {
+                            type: 'month',
+                            count: 3,
+                            text: '3m'
+                        }, {
+                            type: 'month',
+                            count: 6,
+                            text: '6m'
+                        }, {
+                            type: 'all',
+                            text: 'All'
+                        }],
+                        buttonTheme: {
+                            style: {
+                                color: getComputedStyle(document.documentElement).getPropertyValue('--text-primary') || '#1e293b'
+                            }
+                        }
+                    },
+                    yAxis: [{
+                        labels: {
+                            align: 'right',
+                            x: -3,
+                            style: {
+                                color: getComputedStyle(document.documentElement).getPropertyValue('--text-primary') || '#1e293b'
+                            }
+                        },
+                        title: {
+                            text: 'Price (USD)',
+                            style: {
+                                color: getComputedStyle(document.documentElement).getPropertyValue('--text-primary') || '#1e293b'
+                            }
+                        },
+                        height: '70%',
+                        lineWidth: 2,
+                        resize: {
+                            enabled: true
+                        }
+                    }, {
+                        labels: {
+                            align: 'right',
+                            x: -3,
+                            style: {
+                                color: getComputedStyle(document.documentElement).getPropertyValue('--text-primary') || '#1e293b'
+                            }
+                        },
+                        title: {
+                            text: 'Volume',
+                            style: {
+                                color: getComputedStyle(document.documentElement).getPropertyValue('--text-primary') || '#1e293b'
+                            }
+                        },
+                        top: '75%',
+                        height: '25%',
+                        offset: 0,
+                        lineWidth: 2
+                    }],
+                    xAxis: {
+                        type: 'datetime',
+                        labels: {
+                            style: {
+                                color: getComputedStyle(document.documentElement).getPropertyValue('--text-primary') || '#1e293b'
+                            }
+                        }
+                    },
+                    tooltip: {
+                        split: true,
+                        backgroundColor: getComputedStyle(document.documentElement).getPropertyValue('--background-primary') || '#ffffff',
+                        style: {
+                            color: getComputedStyle(document.documentElement).getPropertyValue('--text-primary') || '#1e293b'
+                        }
+                    },
+                    series: [{
+                        type: 'candlestick',
+                        name: symbol,
+                        data: ohlc,
+                        color: '#EF4444',      // Red for bearish
+                        upColor: '#10B981',    // Green for bullish
+                        lineColor: '#EF4444',
+                        upLineColor: '#10B981',
+                        yAxis: 0,
+                        dataGrouping: {
+                            enabled: false
+                        }
+                    }, {
+                        type: 'column',
+                        name: 'Volume',
+                        data: volume,
+                        yAxis: 1,
+                        color: '#3B82F6',
+                        opacity: 0.5
+                    }],
+                    credits: { 
+                        enabled: false 
+                    },
+                    navigator: {
+                        enabled: true,
+                        series: {
+                            color: '#3B82F6'
+                        }
+                    },
+                    scrollbar: {
+                        enabled: true
+                    },
+                    legend: {
+                        enabled: false
+                    }
+                });
+                
+                console.log('✅ Technical chart created successfully!');
+                console.log('📊 Chart object:', this.charts.technical);
+                
+            } catch (error) {
+                console.error('❌ Error creating chart:', error);
+            }
+            
+        } else {
+            console.warn('⚠️ OHLC data incomplete, falling back to simple chart');
+            this.renderSimpleTechnicalChart(sortedData, symbol);
+        }
+    },
+
+// Fonction fallback pour graphique simple
+renderSimpleTechnicalChart: function(sortedData, symbol) {
+    console.log('📊 Creating simple line chart');
     
-    console.log('📊 Rendering technical chart for', symbol);
-    console.log('📊 Data received:', data);
-    console.log('📊 First data point:', data[0]);
+    const prices = sortedData.map(d => {
+        const timestamp = d.timestamp || new Date(d.datetime).getTime();
+        const price = parseFloat(d.close || d.price || 0);
+        return [timestamp, price];
+    });
     
-    const reversedData = [...data].reverse();
+    const volume = sortedData.map(d => {
+        const timestamp = d.timestamp || new Date(d.datetime).getTime();
+        return [timestamp, parseFloat(d.volume || 0)];
+    });
     
-    // Vérifier si on a des données OHLC complètes
-    const hasOHLC = reversedData[0] && 
-                    reversedData[0].open !== undefined && 
-                    reversedData[0].high !== undefined && 
-                    reversedData[0].low !== undefined && 
-                    reversedData[0].close !== undefined;
-    
-    console.log('📊 Has OHLC data:', hasOHLC);
-    
-    if (hasOHLC) {
-        // Mode Candlestick complet
-        this.renderCandlestickChart(reversedData, symbol);
-    } else {
-        // Mode simple (ligne) si pas de données OHLC
-        this.renderSimpleTechnicalChart(reversedData, symbol);
+    try {
+        this.charts.technical = Highcharts.stockChart('technicalChart', {
+            chart: {
+                backgroundColor: 'transparent',
+                height: 500
+            },
+            title: {
+                text: `${symbol} - Technical Analysis (Price Chart)`,
+                style: {
+                    color: getComputedStyle(document.documentElement).getPropertyValue('--text-primary') || '#1e293b',
+                    fontSize: '1.125rem',
+                    fontWeight: '700'
+                }
+            },
+            rangeSelector: {
+                selected: 1
+            },
+            yAxis: [{
+                labels: {
+                    align: 'right',
+                    x: -3
+                },
+                title: {
+                    text: 'Price (USD)'
+                },
+                height: '70%',
+                lineWidth: 2
+            }, {
+                labels: {
+                    align: 'right',
+                    x: -3
+                },
+                title: {
+                    text: 'Volume'
+                },
+                top: '75%',
+                height: '25%',
+                offset: 0,
+                lineWidth: 2
+            }],
+            series: [{
+                type: 'area',
+                name: 'Price',
+                data: prices,
+                yAxis: 0,
+                color: '#3B82F6',
+                fillColor: {
+                    linearGradient: { x1: 0, y1: 0, x2: 0, y2: 1 },
+                    stops: [
+                        [0, 'rgba(59, 130, 246, 0.3)'],
+                        [1, 'rgba(59, 130, 246, 0.05)']
+                    ]
+                },
+                lineWidth: 2
+            }, {
+                type: 'column',
+                name: 'Volume',
+                data: volume,
+                yAxis: 1,
+                color: '#3B82F6',
+                opacity: 0.5
+            }],
+            credits: { enabled: false }
+        });
+        
+        console.log('✅ Simple chart created successfully!');
+        
+    } catch (error) {
+        console.error('❌ Error creating simple chart:', error);
     }
 },
 
