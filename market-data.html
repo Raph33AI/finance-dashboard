@@ -40,28 +40,33 @@
         <!-- ============================================
              SIDEBAR NAVIGATION
              ============================================ -->
-        <aside class='sidebar' id='sidebar' role='navigation' aria-label='Main navigation'>
+        <aside class='sidebar' id='sidebar'>
             <div class='sidebar-header'>
-                <h2>
-                    <i class='fas fa-chart-line' aria-hidden='true'></i>
-                    <span>Finance Hub</span>
-                </h2>
-                <button class='sidebar-toggle' id='sidebarToggle' aria-label='Toggle sidebar' aria-expanded='false'>
-                    <i class='fas fa-bars' aria-hidden='true'></i>
+                <h2><i class='fas fa-chart-line'></i> Finance Hub</h2>
+                <button class='sidebar-toggle' id='sidebarToggle'>
+                    <i class='fas fa-bars'></i>
                 </button>
             </div>
             
             <nav class='sidebar-nav'>
+                <!-- ✅ NOUVEAU : Landing Page -->
+                <div class='nav-section'>
+                    <a href='index.html' class='nav-link'>
+                        <i class='fas fa-rocket'></i>
+                        <span>Accueil</span>
+                    </a>
+                </div>
+                
                 <!-- Budget Section -->
                 <div class='nav-section'>
-                    <button class='nav-folder' aria-expanded='false' aria-controls='budget-submenu'>
-                        <i class='fas fa-wallet' aria-hidden='true'></i>
+                    <button class='nav-folder active'>
+                        <i class='fas fa-wallet'></i>
                         <span>Budget</span>
-                        <i class='fas fa-chevron-down arrow' aria-hidden='true'></i>
+                        <i class='fas fa-chevron-down arrow'></i>
                     </button>
-                    <div class='nav-submenu' id='budget-submenu'>
-                        <a href='index.html' class='nav-link'>
-                            <i class='fas fa-home' aria-hidden='true'></i>
+                    <div class='nav-submenu' style='display: block;'>
+                        <a href='dashboard-financier.html' class='nav-link active'>
+                            <i class='fas fa-home'></i>
                             <span>Dashboard Budget</span>
                         </a>
                     </div>
@@ -69,59 +74,50 @@
                 
                 <!-- Simulation Section -->
                 <div class='nav-section'>
-                    <button class='nav-folder' aria-expanded='false' aria-controls='simulation-submenu'>
-                        <i class='fas fa-calculator' aria-hidden='true'></i>
+                    <button class='nav-folder'>
+                        <i class='fas fa-calculator'></i>
                         <span>Simulation</span>
-                        <i class='fas fa-chevron-down arrow' aria-hidden='true'></i>
+                        <i class='fas fa-chevron-down arrow'></i>
                     </button>
-                    <div class='nav-submenu' id='simulation-submenu'>
+                    <div class='nav-submenu'>
                         <a href='monte-carlo.html' class='nav-link'>
-                            <i class='fas fa-dice' aria-hidden='true'></i>
+                            <i class='fas fa-dice'></i>
                             <span>Monte Carlo</span>
                         </a>
                         <a href='portfolio-optimizer.html' class='nav-link'>
-                            <i class='fas fa-chart-pie' aria-hidden='true'></i>
+                            <i class='fas fa-chart-pie'></i>
                             <span>Markowitz</span>
                         </a>
                         <a href='risk-parity.html' class='nav-link'>
-                            <i class='fas fa-balance-scale' aria-hidden='true'></i>
+                            <i class='fas fa-balance-scale'></i>
                             <span>Risk Parity</span>
                         </a>
                         <a href='scenario-analysis.html' class='nav-link'>
-                            <i class='fas fa-flask' aria-hidden='true'></i>
+                            <i class='fas fa-flask'></i>
                             <span>Scénarios</span>
                         </a>
                     </div>
                 </div>
                 
                 <!-- Stocks Section -->
-                <div class='nav-section active'>
-                    <button class='nav-folder active' aria-expanded='true' aria-controls='stocks-submenu'>
-                        <i class='fas fa-chart-line' aria-hidden='true'></i>
+                <div class='nav-section'>
+                    <button class='nav-folder'>
+                        <i class='fas fa-chart-candlestick'></i>
                         <span>Stocks</span>
-                        <i class='fas fa-chevron-down arrow' aria-hidden='true'></i>
+                        <i class='fas fa-chevron-down arrow'></i>
                     </button>
-                    <div class='nav-submenu' id='stocks-submenu'>
-                        <a href='market-data.html' class='nav-link active' aria-current='page'>
-                            <i class='fas fa-globe' aria-hidden='true'></i>
+                    <div class='nav-submenu'>
+                        <a href='market-data.html' class='nav-link'>
+                            <i class='fas fa-globe'></i>
                             <span>Market Data</span>
-                        </a>
-                        <a href='advanced-analysis.html' class='nav-link'>
-                            <i class='fas fa-chart-area' aria-hidden='true'></i>
-                            <span>Advanced Analysis</span>
-                        </a>
-                        <a href='trend-prediction.html' class='nav-link'>
-                            <i class='fas fa-brain' aria-hidden='true'></i>
-                            <span>ML Predictions</span>
                         </a>
                     </div>
                 </div>
             </nav>
             
-            <!-- Sidebar Footer - Version avec authentification -->
+            <!-- Sidebar Footer -->
             <div class="sidebar-footer">
                 <div class="user-info" id="userInfoSection">
-                    <!-- État non connecté -->
                     <button class="user-profile-btn" id="userProfileBtn" aria-label="Accéder à mon profil">
                         <i class="fas fa-user-circle"></i>
                         <div class="user-details">

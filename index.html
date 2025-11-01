@@ -1,333 +1,1111 @@
 <!DOCTYPE html>
-<html lang='fr'>
+<html lang="en">
 <head>
-    <meta charset='UTF-8'>
-    <meta name='viewport' content='width=device-width, initial-scale=1.0'>
-    <title>Dashboard - Finance Pro</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="AI-powered financial analysis platform - Market analysis, M&A screening, and quantitative finance tools">
+    <meta name="keywords" content="finance, AI, portfolio optimization, risk management, quantitative analysis">
+    <title>FinancePro - AI-Powered Financial Intelligence Platform</title>
     
-    <!-- Highcharts -->
-    <script src='https://code.highcharts.com/highcharts.js'></script>
-    <script src='https://code.highcharts.com/modules/exporting.js'></script>
+    <!-- Stylesheets -->
+    <link rel="stylesheet" href="assets/css/common.css">
+    <link rel="stylesheet" href="assets/css/landing.css">
     
-    <!-- Font Awesome pour les icônes -->
-    <link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css'>
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     
-    <!-- Styles -->
-    <link rel='stylesheet' href='assets/css/common.css'>
-    <link rel='stylesheet' href='assets/css/sidebar.css'>
-    <link rel='stylesheet' href='assets/css/dashboard.css'>
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
-    <div class='layout-wrapper'>
-        <!-- Sidebar Navigation -->
-        <aside class='sidebar' id='sidebar'>
-            <div class='sidebar-header'>
-                <h2><i class='fas fa-chart-line'></i> Finance Hub</h2>
-                <button class='sidebar-toggle' id='sidebarToggle'>
-                    <i class='fas fa-bars'></i>
+    
+    <!-- Top Navigation -->
+    <nav class="landing-nav" id="landingNav">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <div class="brand-logo">
+                    <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+                        <path d="M16 2L2 9L16 16L30 9L16 2Z" fill="#3B82F6"/>
+                        <path d="M2 23L16 30L30 23V9L16 16L2 9V23Z" fill="#2563EB" opacity="0.8"/>
+                    </svg>
+                </div>
+                <span class="brand-text">Finance<strong>Pro</strong></span>
+                <span class="ai-badge">AI</span>
+            </div>
+            
+            <div class="nav-menu" id="navMenu">
+                <a href="#features" class="nav-link">Features</a>
+                <a href="#solutions" class="nav-link">Solutions</a>
+                <a href="#tools" class="nav-link">Tools</a>
+                <a href="#pricing" class="nav-link">Pricing</a>
+            </div>
+            
+            <div class="nav-cta">
+                <button class="btn-text" id="loginBtn">Log in</button>
+                <button class="btn-primary-nav" id="signupBtn">
+                    Start Free Trial
+                    <i class="fas fa-arrow-right"></i>
                 </button>
             </div>
-            
-            <nav class='sidebar-nav'>
-                <!-- Budget Section -->
-                <div class='nav-section'>
-                    <button class='nav-folder active'>
-                        <i class='fas fa-wallet'></i>
-                        <span>Budget</span>
-                        <i class='fas fa-chevron-down arrow'></i>
-                    </button>
-                    <div class='nav-submenu' style='display: block;'>
-                        <a href='index.html' class='nav-link active'>
-                            <i class='fas fa-home'></i>
-                            <span>Dashboard Budget</span>
-                        </a>
-                    </div>
+
+            <button class="mobile-menu-btn" id="mobileMenuBtn">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-bg">
+            <div class="gradient-orb orb-1"></div>
+            <div class="gradient-orb orb-2"></div>
+            <div class="grid-pattern"></div>
+        </div>
+        
+        <div class="hero-container">
+            <div class="hero-content">
+                <!-- Announcement Badge -->
+                <div class="announcement-badge" data-aos="fade-up">
+                    <span class="badge-icon">✨</span>
+                    <span class="badge-text">New: Real-time AI Market Analysis</span>
+                    <i class="fas fa-arrow-right"></i>
                 </div>
                 
-                <!-- Simulation Section -->
-                <div class='nav-section'>
-                    <button class='nav-folder'>
-                        <i class='fas fa-calculator'></i>
-                        <span>Simulation</span>
-                        <i class='fas fa-chevron-down arrow'></i>
+                <!-- Main Headline -->
+                <h1 class="hero-headline" data-aos="fade-up" data-aos-delay="100">
+                    Financial Analysis
+                    <span class="gradient-text-hero">20x Faster</span>
+                    with Artificial Intelligence
+                </h1>
+                
+                <!-- Subheadline -->
+                <p class="hero-subheadline" data-aos="fade-up" data-aos-delay="200">
+                    Transform your investment decisions with our AI-powered platform. 
+                    M&A screening, valuation, portfolio optimization, and market analysis 
+                    in under 3 clicks.
+                </p>
+                
+                <!-- CTA Buttons -->
+                <div class="hero-cta" data-aos="fade-up" data-aos-delay="300">
+                    <button class="btn-hero-primary" id="heroGetStarted">
+                        <i class="fas fa-rocket"></i>
+                        Get Started Free
                     </button>
-                    <div class='nav-submenu'>
-                        <a href='monte-carlo.html' class='nav-link'>
-                            <i class='fas fa-dice'></i>
-                            <span>Monte Carlo</span>
-                        </a>
-                        <a href='portfolio-optimizer.html' class='nav-link'>
-                            <i class='fas fa-chart-pie'></i>
-                            <span>Markowitz</span>
-                        </a>
-                        <a href='risk-parity.html' class='nav-link'>
-                            <i class='fas fa-balance-scale'></i>
-                            <span>Risk Parity</span>
-                        </a>
-                        <a href='scenario-analysis.html' class='nav-link'>
-                            <i class='fas fa-flask'></i>
-                            <span>Scénarios</span>
-                        </a>
-                    </div>
+                    <button class="btn-hero-secondary" id="heroWatchDemo">
+                        <i class="fas fa-play-circle"></i>
+                        Watch Demo
+                    </button>
                 </div>
                 
-                <!-- Stocks Section -->
-                <div class='nav-section'>
-                    <button class='nav-folder'>
-                        <i class='fas fa-chart-candlestick'></i>
-                        <span>Stocks</span>
-                        <i class='fas fa-chevron-down arrow'></i>
-                    </button>
-                    <div class='nav-submenu'>
-                        <a href='market-data.html' class='nav-link'>
-                            <i class='fas fa-globe'></i>
-                            <span>Market Data</span>
-                        </a>
+                <!-- Social Proof -->
+                <div class="social-proof" data-aos="fade-up" data-aos-delay="400">
+                    <div class="proof-item">
+                        <span class="proof-number">10,000+</span>
+                        <span class="proof-label">Finance Professionals</span>
                     </div>
-                </div>
-            </nav>
-            
-            <!-- Sidebar Footer - Version avec authentification -->
-            <div class="sidebar-footer">
-                <div class="user-info" id="userInfoSection">
-                    <!-- État non connecté -->
-                    <button class="user-profile-btn" id="userProfileBtn" aria-label="Accéder à mon profil">
-                        <i class="fas fa-user-circle"></i>
-                        <div class="user-details">
-                            <span class="user-name">Connexion</span>
-                            <span class="user-status">Cliquez pour vous connecter</span>
-                        </div>
-                        <i class="fas fa-chevron-right arrow-icon"></i>
-                    </button>
+                    <div class="proof-divider"></div>
+                    <div class="proof-item">
+                        <span class="proof-number">1M+</span>
+                        <span class="proof-label">Analyses Performed</span>
+                    </div>
+                    <div class="proof-divider"></div>
+                    <div class="proof-item">
+                        <span class="proof-number">500K+</span>
+                        <span class="proof-label">Companies Tracked</span>
+                    </div>
                 </div>
             </div>
-        </aside>
-        
-        <!-- Main Content Area -->
-        <div class='main-content'>
-            <!-- Header -->
-            <header class='top-header'>
-                <div class='header-left'>
-                    <button class='mobile-toggle' id='mobileToggle'>
-                        <i class='fas fa-bars'></i>
-                    </button>
-                    <h1>Personal Finance Dashboard</h1>
-                </div>
-                <div class='header-right'>
-                    <!-- ✅ NOUVEAU : Bouton Dark Mode -->
-                    <button class='dark-mode-toggle' id='darkModeToggle' aria-label='Toggle dark mode' title='Toggle dark mode'>
-                        <i class='fas fa-moon' aria-hidden='true'></i>
-                    </button>
-                    
-                    <span class='last-update'>
-                        <i class='fas fa-clock'></i>
-                        <span id='lastUpdate'></span>
-                    </span>
-                </div>
-            </header>
             
-            <div class='container'>
-                <!-- Stats Cards -->
-                <div id='statsContainer' class='stats-grid'></div>
-                
-                <!-- Main Content -->
-                <div class='content'>
-                    <div class='section'>
-                        <h2 class='section-title'>Financial Data - Dynamic Timeline</h2>
-                        
-                        <div class='info-box'>
-                            <h4>How to use</h4>
-                            <p>Edit values directly in the table | Use Bulk Edit to apply values to date ranges | Add past/future months with the buttons below | Adjust Monthly Est Yield to calculate gains automatically | All changes are auto-saved in your browser</p>
+            <!-- Hero Visual -->
+            <div class="hero-visual" data-aos="fade-left" data-aos-delay="200">
+                <div class="dashboard-mockup">
+                    <!-- Browser Chrome -->
+                    <div class="browser-chrome">
+                        <div class="chrome-dots">
+                            <span class="dot red"></span>
+                            <span class="dot yellow"></span>
+                            <span class="dot green"></span>
                         </div>
-                        
-                        <!-- Timeline Management -->
-                        <div class='toolbar'>
-                            <h3>Timeline Management</h3>
-                            <div class='toolbar-row'>
-                                <button class='btn-add' onclick='Dashboard.addMonthsBefore(12)'>+ 12 Months Before</button>
-                                <button class='btn-add' onclick='Dashboard.addMonthsBefore(1)'>+ 1 Month Before</button>
-                                <button class='btn-add' onclick='Dashboard.addMonthsAfter(1)'>+ 1 Month After</button>
-                                <button class='btn-add' onclick='Dashboard.addMonthsAfter(12)'>+ 12 Months After</button>
-                                <span class='total-months'>Total Months: <span id='totalMonthsDisplay'>300</span></span>
-                            </div>
+                        <div class="chrome-title">dashboard-financier.html</div>
+                        <div class="chrome-actions">
+                            <i class="fas fa-shield-alt"></i>
                         </div>
-                        
-                        <!-- Parameters Grid -->
-                        <div class='parameters-grid'>
-                            <!-- Investment Parameters -->
-                            <div class='toolbar'>
-                                <h3>Investment Parameters</h3>
-                                <div class='toolbar-row'>
-                                    <label>Monthly Est Yield (% annual):</label>
-                                    <input type='number' id='monthlyEstYield' step='0.1' value='8' 
-                                           onchange='Dashboard.updateEstYield()'>
-                                    <span class='yield-display'>
-                                        = <span id='monthlyEstYieldDisplay'>0.67</span>% monthly
-                                    </span>
+                    </div>
+                    
+                    <!-- Dashboard Content -->
+                    <div class="mockup-content">
+                        <!-- Top Stats Row -->
+                        <div class="mockup-stats-row">
+                            <div class="stat-card stat-primary">
+                                <div class="stat-header">
+                                    <i class="fas fa-chart-line"></i>
+                                    <span>Portfolio Value</span>
                                 </div>
-                                <div class='toolbar-row'>
-                                    <button class='btn-primary' onclick='Dashboard.recalculateGains()'>Recalculate All Gains</button>
+                                <div class="stat-value">$2,847,392</div>
+                                <div class="stat-change positive">
+                                    <i class="fas fa-arrow-up"></i>
+                                    <span>+24.5% YTD</span>
                                 </div>
                             </div>
                             
-                            <!-- Inflation Adjustment -->
-                            <div class='toolbar'>
-                                <h3>Inflation Adjustment</h3>
-                                <div class='toolbar-row'>
-                                    <label>Annual Inflation Rate (%):</label>
-                                    <input type='number' id='inflationRate' step='0.1' value='2.5' 
-                                           onchange='Dashboard.updateInflationRate()'>
-                                    <button class='btn-success' onclick='Dashboard.toggleInflationCharts()' id='btnToggleInflation'>
-                                        Show Inflation-Adjusted Charts
-                                    </button>
-                                    <span id='inflationStatus' class='inflation-status'>OFF</span>
+                            <div class="stat-card">
+                                <div class="stat-header">
+                                    <i class="fas fa-brain"></i>
+                                    <span>AI Confidence</span>
                                 </div>
+                                <div class="stat-value">94%</div>
+                                <div class="stat-badge">High</div>
                             </div>
-                        </div>
-                        
-                        <!-- Bulk Edit Tool -->
-                        <div class='toolbar'>
-                            <h3>Bulk Edit Tool</h3>
-                            <div class='toolbar-row'>
-                                <label>Category:</label>
-                                <select id='bulkCategory'>
-                                    <option value='Salary'>Income - Salary</option>
-                                    <option value='Misc.'>Income - Misc.</option>
-                                    <option value='Rent'>Expenses - Rent</option>
-                                    <option value='Food'>Expenses - Food</option>
-                                    <option value='Fix Costs'>Expenses - Fix Costs</option>
-                                    <option value='Others (Shopping; Restaurant)'>Expenses - Others</option>
-                                    <option value='Investment'>Investment - Monthly Investment</option>
-                                    <option value='Loan (Studies; rental investment)'>Expenses - Loan</option>
-                                    <option value="PEE L'OREAL">Investment - PEE L'Oreal</option>
-                                </select>
-                            </div>
-                            <div class='toolbar-row'>
-                                <label>From:</label>
-                                <input type='month' id='bulkStartMonth'>
-                                <label>To:</label>
-                                <input type='month' id='bulkEndMonth'>
-                            </div>
-                            <div class='toolbar-row'>
-                                <label>Value:</label>
-                                <input type='number' id='bulkValue' step='0.01' placeholder='0.00'>
-                                <button class='btn-success' onclick='Dashboard.applyBulkEdit()'>Apply</button>
-                            </div>
-                        </div>
-                        
-                        <!-- Data Management -->
-                        <div class='toolbar'>
-                            <h3>Data Management</h3>
-                            <div class='toolbar-row'>
-                                <button class='btn-primary' onclick='Dashboard.saveData()'>Save All</button>
-                                <button class='btn-secondary' onclick='Dashboard.exportToJSON()'>Export JSON</button>
-                                <button class='btn-secondary' onclick='Dashboard.importFromJSON()'>Import JSON</button>
-                                <button class='btn-secondary' onclick='Dashboard.resetToDefault()'>Reset</button>
-                                <button class='btn-primary' onclick='Dashboard.updateAllCharts()'>Update Charts</button>
-                            </div>
-                        </div>
-                        
-                        <!-- Data Table -->
-                        <div class='table-container'>
-                            <table class='data-table'>
-                                <thead>
-                                    <tr>
-                                        <th rowspan='2'>Month</th>
-                                        <th colspan='3' style='background: #4A74F3; text-align: center;'>INCOME</th>
-                                        <th colspan='7' style='background: #8E44AD; text-align: center;'>EXPENSES</th>
-                                        <th colspan='7' style='background: #6C3483; text-align: center;'>INVESTMENT</th>
-                                        <th rowspan='2' style='background: #9D5CE6;'>Actions</th>
-                                    </tr>
-                                    <tr>
-                                        <th style='background: #4A74F3;'>Salary</th>
-                                        <th style='background: #4A74F3;'>Misc.</th>
-                                        <th style='background: #6C8BE0;'>Total</th>
-                                        <th style='background: #8E44AD;'>Rent</th>
-                                        <th style='background: #8E44AD;'>Food</th>
-                                        <th style='background: #8E44AD;'>Fix</th>
-                                        <th style='background: #8E44AD;'>Others</th>
-                                        <th style='background: #8E44AD;'>Loan</th>
-                                        <th style='background: #9D5CE6;'>Total</th>
-                                        <th style='background: #9D5CE6;'>Save</th>
-                                        <th style='background: #6C3483;'>Monthly Invest</th>
-                                        <th style='background: #6C3483;'>Monthly Gain</th>
-                                        <th style='background: #6C3483;'>Cum. Gains</th>
-                                        <th style='background: #6C3483;'>PEE</th>
-                                        <th style='background: #9D5CE6;'>Cum.Inv</th>
-                                        <th style='background: #9D5CE6;'>Portfolio</th>
-                                        <th style='background: #9D5CE6;'>ROI%</th>
-                                    </tr>
-                                </thead>
-                                <tbody id='dataTableBody'></tbody>
-                            </table>
-                        </div>
-                    </div>
-                    
-                    <!-- Charts Section -->
-                    <div class='charts-container'>
-                        <div class='chart-wrapper'>
-                            <h2 class='section-title'>Income vs Expenses Evolution</h2>
-                            <div id='chart1' class='chart'></div>
-                        </div>
-                        
-                        <div class='grid-2'>
-                            <div class='chart-wrapper'>
-                                <h2 class='section-title'>Income Breakdown</h2>
-                                <div class='local-filter'>
-                                    <label>Select Month:</label>
-                                    <select id='incomeMonthFilter' onchange='Dashboard.updateChart2()'></select>
+                            
+                            <div class="stat-card">
+                                <div class="stat-header">
+                                    <i class="fas fa-shield-alt"></i>
+                                    <span>Risk Score</span>
                                 </div>
-                                <div id='chart2' class='chart'></div>
+                                <div class="stat-value">7.2</div>
+                                <div class="stat-badge moderate">Moderate</div>
                             </div>
-                            <div class='chart-wrapper'>
-                                <h2 class='section-title'>Expenses Breakdown</h2>
-                                <div class='local-filter'>
-                                    <label>Select Month:</label>
-                                    <select id='expenseMonthFilter' onchange='Dashboard.updateChart3()'></select>
+                        </div>
+                        
+                        <!-- Chart Area -->
+                        <div class="mockup-chart-area">
+                            <canvas id="heroChart"></canvas>
+                        </div>
+                        
+                        <!-- AI Insights -->
+                        <div class="mockup-insights">
+                            <div class="insight-header">
+                                <i class="fas fa-lightbulb"></i>
+                                <span>AI Insights</span>
+                            </div>
+                            <div class="insight-item">
+                                <div class="insight-icon success">
+                                    <i class="fas fa-check"></i>
                                 </div>
-                                <div id='chart3' class='chart'></div>
+                                <span>Portfolio rebalancing recommended</span>
                             </div>
-                        </div>
-                        
-                        <div class='chart-wrapper'>
-                            <h2 class='section-title'>Budget Allocation</h2>
-                            <div class='local-filter'>
-                                <label>Select Month:</label>
-                                <select id='budgetMonthFilter' onchange='Dashboard.updateChart7()'></select>
-                            </div>
-                            <div id='chart7' class='chart'></div>
-                        </div>
-                        
-                        <div class='chart-wrapper'>
-                            <h2 class='section-title'>Savings Evolution</h2>
-                            <div id='chart4' class='chart'></div>
-                        </div>
-                        
-                        <div class='grid-2'>
-                            <div class='chart-wrapper'>
-                                <h2 class='section-title'>Investment Portfolio</h2>
-                                <div id='chart5' class='chart'></div>
-                            </div>
-                            <div class='chart-wrapper'>
-                                <h2 class='section-title'>ROI Evolution</h2>
-                                <div id='chart6' class='chart'></div>
+                            <div class="insight-item">
+                                <div class="insight-icon warning">
+                                    <i class="fas fa-exclamation"></i>
+                                </div>
+                                <span>VaR exceeds risk threshold by 2.3%</span>
                             </div>
                         </div>
                     </div>
                 </div>
-                
-                <!-- Footer -->
-                <footer>
-                    <p>Financial Dashboard | Auto-saved in browser localStorage</p>
-                </footer>
             </div>
         </div>
-    </div>
-    
+    </section>
+
+    <!-- Trusted By Section -->
+    <section class="trusted-by">
+        <div class="container-fluid">
+            <p class="trusted-title">Trusted by leading financial institutions</p>
+            <div class="trusted-logos">
+                <div class="logo-wrapper">
+                    <span class="company-logo">Goldman Sachs</span>
+                </div>
+                <div class="logo-wrapper">
+                    <span class="company-logo">J.P. Morgan</span>
+                </div>
+                <div class="logo-wrapper">
+                    <span class="company-logo">BlackRock</span>
+                </div>
+                <div class="logo-wrapper">
+                    <span class="company-logo">Citadel</span>
+                </div>
+                <div class="logo-wrapper">
+                    <span class="company-logo">Morgan Stanley</span>
+                </div>
+                <div class="logo-wrapper">
+                    <span class="company-logo">Bridgewater</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="features-section" id="features">
+        <div class="container-fluid">
+            <div class="section-header">
+                <span class="section-tag">Platform Features</span>
+                <h2 class="section-title">Everything you need to excel in finance</h2>
+                <p class="section-description">
+                    Professional-grade tools designed for investment bankers, 
+                    financial analysts, and portfolio managers
+                </p>
+            </div>
+
+            <div class="features-grid">
+                <!-- Feature 1: Advanced Analysis -->
+                <div class="feature-card feature-highlight" data-aos="fade-up">
+                    <div class="feature-header">
+                        <div class="feature-icon">
+                            <i class="fas fa-brain"></i>
+                        </div>
+                        <span class="feature-badge">Most Popular</span>
+                    </div>
+                    <h3 class="feature-title">Advanced Analysis</h3>
+                    <p class="feature-description">
+                        Sophisticated technical and fundamental analysis tools powered by 
+                        machine learning algorithms for accurate market predictions.
+                    </p>
+                    <ul class="feature-benefits">
+                        <li>
+                            <i class="fas fa-check-circle"></i>
+                            <span>LSTM & Random Forest predictions</span>
+                        </li>
+                        <li>
+                            <i class="fas fa-check-circle"></i>
+                            <span>Pattern recognition algorithms</span>
+                        </li>
+                        <li>
+                            <i class="fas fa-check-circle"></i>
+                            <span>Automated technical indicators</span>
+                        </li>
+                        <li>
+                            <i class="fas fa-check-circle"></i>
+                            <span>Real-time sentiment analysis</span>
+                        </li>
+                    </ul>
+                    <a href="advanced-analysis.html" class="feature-link">
+                        Explore Advanced Analysis
+                        <i class="fas fa-arrow-right"></i>
+                    </a>
+                </div>
+
+                <!-- Feature 2: Market Data -->
+                <div class="feature-card" data-aos="fade-up" data-aos-delay="100">
+                    <div class="feature-header">
+                        <div class="feature-icon">
+                            <i class="fas fa-database"></i>
+                        </div>
+                    </div>
+                    <h3 class="feature-title">Market Data Hub</h3>
+                    <p class="feature-description">
+                        Real-time access to 500K+ companies with comprehensive financial data, 
+                        ratios, historical prices, and news feeds.
+                    </p>
+                    <ul class="feature-benefits">
+                        <li>
+                            <i class="fas fa-check-circle"></i>
+                            <span>Live market data feeds</span>
+                        </li>
+                        <li>
+                            <i class="fas fa-check-circle"></i>
+                            <span>20+ years historical data</span>
+                        </li>
+                        <li>
+                            <i class="fas fa-check-circle"></i>
+                            <span>100+ financial metrics</span>
+                        </li>
+                    </ul>
+                    <a href="market-data.html" class="feature-link">
+                        Explore Market Data
+                        <i class="fas fa-arrow-right"></i>
+                    </a>
+                </div>
+
+                <!-- Feature 3: Portfolio Optimizer -->
+                <div class="feature-card" data-aos="fade-up" data-aos-delay="200">
+                    <div class="feature-header">
+                        <div class="feature-icon">
+                            <i class="fas fa-chart-pie"></i>
+                        </div>
+                    </div>
+                    <h3 class="feature-title">Portfolio Optimization</h3>
+                    <p class="feature-description">
+                        Markowitz, Black-Litterman, and Risk Parity models for 
+                        optimal asset allocation and diversification.
+                    </p>
+                    <ul class="feature-benefits">
+                        <li>
+                            <i class="fas fa-check-circle"></i>
+                            <span>Mean-variance optimization</span>
+                        </li>
+                        <li>
+                            <i class="fas fa-check-circle"></i>
+                            <span>Black-Litterman allocation</span>
+                        </li>
+                        <li>
+                            <i class="fas fa-check-circle"></i>
+                            <span>Constraint-based optimization</span>
+                        </li>
+                    </ul>
+                    <a href="portfolio-optimizer.html" class="feature-link">
+                        Explore Optimizer
+                        <i class="fas fa-arrow-right"></i>
+                    </a>
+                </div>
+
+                <!-- Feature 4: Risk Parity -->
+                <div class="feature-card" data-aos="fade-up">
+                    <div class="feature-header">
+                        <div class="feature-icon">
+                            <i class="fas fa-balance-scale"></i>
+                        </div>
+                    </div>
+                    <h3 class="feature-title">Risk Parity Strategies</h3>
+                    <p class="feature-description">
+                        Advanced risk parity implementation for balanced risk contribution 
+                        across your entire portfolio.
+                    </p>
+                    <ul class="feature-benefits">
+                        <li>
+                            <i class="fas fa-check-circle"></i>
+                            <span>Equal risk contribution</span>
+                        </li>
+                        <li>
+                            <i class="fas fa-check-circle"></i>
+                            <span>Volatility targeting</span>
+                        </li>
+                        <li>
+                            <i class="fas fa-check-circle"></i>
+                            <span>Dynamic rebalancing</span>
+                        </li>
+                    </ul>
+                    <a href="risk-parity.html" class="feature-link">
+                        Explore Risk Parity
+                        <i class="fas fa-arrow-right"></i>
+                    </a>
+                </div>
+
+                <!-- Feature 5: Monte Carlo -->
+                <div class="feature-card" data-aos="fade-up" data-aos-delay="100">
+                    <div class="feature-header">
+                        <div class="feature-icon">
+                            <i class="fas fa-dice"></i>
+                        </div>
+                    </div>
+                    <h3 class="feature-title">Monte Carlo Simulation</h3>
+                    <p class="feature-description">
+                        Run thousands of simulations to model potential outcomes and 
+                        assess portfolio risk under various scenarios.
+                    </p>
+                    <ul class="feature-benefits">
+                        <li>
+                            <i class="fas fa-check-circle"></i>
+                            <span>10,000+ simulation paths</span>
+                        </li>
+                        <li>
+                            <i class="fas fa-check-circle"></i>
+                            <span>VaR & CVaR calculations</span>
+                        </li>
+                        <li>
+                            <i class="fas fa-check-circle"></i>
+                            <span>Probability distributions</span>
+                        </li>
+                    </ul>
+                    <a href="monte-carlo.html" class="feature-link">
+                        Explore Monte Carlo
+                        <i class="fas fa-arrow-right"></i>
+                    </a>
+                </div>
+
+                <!-- Feature 6: Scenario Analysis -->
+                <div class="feature-card" data-aos="fade-up" data-aos-delay="200">
+                    <div class="feature-header">
+                        <div class="feature-icon">
+                            <i class="fas fa-project-diagram"></i>
+                        </div>
+                    </div>
+                    <h3 class="feature-title">Scenario Analysis</h3>
+                    <p class="feature-description">
+                        Test your portfolio against historical crises and custom scenarios 
+                        to understand potential impacts.
+                    </p>
+                    <ul class="feature-benefits">
+                        <li>
+                            <i class="fas fa-check-circle"></i>
+                            <span>Historical stress tests</span>
+                        </li>
+                        <li>
+                            <i class="fas fa-check-circle"></i>
+                            <span>Custom scenario builder</span>
+                        </li>
+                        <li>
+                            <i class="fas fa-check-circle"></i>
+                            <span>Impact analysis reports</span>
+                        </li>
+                    </ul>
+                    <a href="scenario-analysis.html" class="feature-link">
+                        Explore Scenarios
+                        <i class="fas fa-arrow-right"></i>
+                    </a>
+                </div>
+
+                <!-- Feature 7: Trend Prediction -->
+                <div class="feature-card" data-aos="fade-up">
+                    <div class="feature-header">
+                        <div class="feature-icon">
+                            <i class="fas fa-chart-line"></i>
+                        </div>
+                    </div>
+                    <h3 class="feature-title">AI Trend Prediction</h3>
+                    <p class="feature-description">
+                        Machine learning models to forecast market trends and identify 
+                        emerging opportunities before the market.
+                    </p>
+                    <ul class="feature-benefits">
+                        <li>
+                            <i class="fas fa-check-circle"></i>
+                            <span>Neural network forecasting</span>
+                        </li>
+                        <li>
+                            <i class="fas fa-check-circle"></i>
+                            <span>Confidence intervals</span>
+                        </li>
+                        <li>
+                            <i class="fas fa-check-circle"></i>
+                            <span>Multi-timeframe analysis</span>
+                        </li>
+                    </ul>
+                    <a href="trend-prediction.html" class="feature-link">
+                        Explore Predictions
+                        <i class="fas fa-arrow-right"></i>
+                    </a>
+                </div>
+
+                <!-- Feature 8: Dashboard -->
+                <div class="feature-card" data-aos="fade-up" data-aos-delay="100">
+                    <div class="feature-header">
+                        <div class="feature-icon">
+                            <i class="fas fa-tachometer-alt"></i>
+                        </div>
+                    </div>
+                    <h3 class="feature-title">Interactive Dashboard</h3>
+                    <p class="feature-description">
+                        Comprehensive financial dashboard with real-time updates, 
+                        customizable widgets, and advanced visualizations.
+                    </p>
+                    <ul class="feature-benefits">
+                        <li>
+                            <i class="fas fa-check-circle"></i>
+                            <span>Real-time data streaming</span>
+                        </li>
+                        <li>
+                            <i class="fas fa-check-circle"></i>
+                            <span>Customizable layouts</span>
+                        </li>
+                        <li>
+                            <i class="fas fa-check-circle"></i>
+                            <span>Advanced charting tools</span>
+                        </li>
+                    </ul>
+                    <a href="dashboard-financier.html" class="feature-link">
+                        Explore Dashboard
+                        <i class="fas fa-arrow-right"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Interactive Demo Section -->
+    <section class="demo-interactive" id="demo">
+        <div class="container-fluid">
+            <div class="demo-wrapper">
+                <div class="demo-left">
+                    <span class="section-tag">Interactive Demo</span>
+                    <h2 class="demo-title">
+                        Find comparable companies in
+                        <span class="highlight-gradient">3 seconds</span>
+                    </h2>
+                    <p class="demo-description">
+                        Our AI engine analyzes millions of financial data points to 
+                        instantly suggest the most relevant companies for your analysis.
+                    </p>
+                    
+                    <div class="demo-stats-grid">
+                        <div class="demo-stat">
+                            <div class="demo-stat-icon">
+                                <i class="fas fa-bolt"></i>
+                            </div>
+                            <div class="demo-stat-content">
+                                <h4>20x Faster</h4>
+                                <p>Than traditional manual analysis</p>
+                            </div>
+                        </div>
+                        
+                        <div class="demo-stat">
+                            <div class="demo-stat-icon">
+                                <i class="fas fa-bullseye"></i>
+                            </div>
+                            <div class="demo-stat-content">
+                                <h4>110% More Accurate</h4>
+                                <p>With our AI relevancy algorithm</p>
+                            </div>
+                        </div>
+                        
+                        <div class="demo-stat">
+                            <div class="demo-stat-icon">
+                                <i class="fas fa-sync-alt"></i>
+                            </div>
+                            <div class="demo-stat-content">
+                                <h4>Real-time Data</h4>
+                                <p>Continuous updates from 100+ sources</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button class="btn-demo-cta" id="tryDemoBtn">
+                        Try Interactive Demo
+                        <i class="fas fa-arrow-right"></i>
+                    </button>
+                </div>
+                
+                <div class="demo-right">
+                    <div class="search-interface">
+                        <!-- Search Bar -->
+                        <div class="search-box-wrapper">
+                            <div class="search-box">
+                                <i class="fas fa-search"></i>
+                                <input 
+                                    type="text" 
+                                    placeholder="Search for a company..." 
+                                    value="Tesla Inc."
+                                    id="companySearch"
+                                >
+                                <div class="search-strength">
+                                    <div class="strength-bar high"></div>
+                                    <span class="strength-label">Strong</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Results -->
+                        <div class="search-results">
+                            <div class="results-header">
+                                <span>3 comparable companies found</span>
+                                <span class="results-time">0.3s</span>
+                            </div>
+                            
+                            <!-- Result Card 1 -->
+                            <div class="company-result-card highlight">
+                                <div class="company-result-header">
+                                    <div class="company-avatar">
+                                        <span>T</span>
+                                    </div>
+                                    <div class="company-details">
+                                        <h4>Tesla, Inc.</h4>
+                                        <p>NASDAQ: TSLA • Automotive</p>
+                                    </div>
+                                    <div class="relevancy-score">
+                                        <div class="score-circle">
+                                            <span class="score-value">98</span>
+                                        </div>
+                                        <span class="score-label">Relevancy</span>
+                                    </div>
+                                </div>
+                                <div class="company-metrics">
+                                    <div class="metric-item">
+                                        <span class="metric-label">Market Cap</span>
+                                        <span class="metric-value">$752.3B</span>
+                                    </div>
+                                    <div class="metric-item">
+                                        <span class="metric-label">Revenue</span>
+                                        <span class="metric-value">$96.8B</span>
+                                    </div>
+                                    <div class="metric-item">
+                                        <span class="metric-label">EV/EBITDA</span>
+                                        <span class="metric-value">34.2x</span>
+                                    </div>
+                                    <div class="metric-item">
+                                        <span class="metric-label">P/E Ratio</span>
+                                        <span class="metric-value">68.5</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Result Card 2 -->
+                            <div class="company-result-card">
+                                <div class="company-result-header">
+                                    <div class="company-avatar">
+                                        <span>L</span>
+                                    </div>
+                                    <div class="company-details">
+                                        <h4>Lucid Group, Inc.</h4>
+                                        <p>NASDAQ: LCID • Automotive</p>
+                                    </div>
+                                    <div class="relevancy-score">
+                                        <div class="score-circle">
+                                            <span class="score-value">94</span>
+                                        </div>
+                                        <span class="score-label">Relevancy</span>
+                                    </div>
+                                </div>
+                                <div class="company-metrics">
+                                    <div class="metric-item">
+                                        <span class="metric-label">Market Cap</span>
+                                        <span class="metric-value">$12.4B</span>
+                                    </div>
+                                    <div class="metric-item">
+                                        <span class="metric-label">Revenue</span>
+                                        <span class="metric-value">$608M</span>
+                                    </div>
+                                    <div class="metric-item">
+                                        <span class="metric-label">EV/EBITDA</span>
+                                        <span class="metric-value">—</span>
+                                    </div>
+                                    <div class="metric-item">
+                                        <span class="metric-label">P/E Ratio</span>
+                                        <span class="metric-value">—</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Result Card 3 -->
+                            <div class="company-result-card">
+                                <div class="company-result-header">
+                                    <div class="company-avatar">
+                                        <span>R</span>
+                                    </div>
+                                    <div class="company-details">
+                                        <h4>Rivian Automotive, Inc.</h4>
+                                        <p>NASDAQ: RIVN • Automotive</p>
+                                    </div>
+                                    <div class="relevancy-score">
+                                        <div class="score-circle">
+                                            <span class="score-value">92</span>
+                                        </div>
+                                        <span class="score-label">Relevancy</span>
+                                    </div>
+                                </div>
+                                <div class="company-metrics">
+                                    <div class="metric-item">
+                                        <span class="metric-label">Market Cap</span>
+                                        <span class="metric-value">$18.2B</span>
+                                    </div>
+                                    <div class="metric-item">
+                                        <span class="metric-label">Revenue</span>
+                                        <span class="metric-value">$4.4B</span>
+                                    </div>
+                                    <div class="metric-item">
+                                        <span class="metric-label">EV/EBITDA</span>
+                                        <span class="metric-value">—</span>
+                                    </div>
+                                    <div class="metric-item">
+                                        <span class="metric-label">P/E Ratio</span>
+                                        <span class="metric-value">—</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Solutions Section -->
+    <section class="solutions-section" id="solutions">
+        <div class="container-fluid">
+            <div class="section-header">
+                <span class="section-tag">Solutions</span>
+                <h2 class="section-title">Built for your role</h2>
+                <p class="section-description">
+                    Specialized tools and workflows designed for finance professionals
+                </p>
+            </div>
+
+            <div class="solutions-grid">
+                <div class="solution-card" data-aos="zoom-in">
+                    <div class="solution-icon-wrapper">
+                        <div class="solution-icon">
+                            <i class="fas fa-briefcase"></i>
+                        </div>
+                    </div>
+                    <h3>Investment Bankers</h3>
+                    <p>
+                        Accelerate deal flow with intelligent M&A screening, 
+                        automated valuation models, and instant pitch book generation.
+                    </p>
+                    <div class="solution-features">
+                        <span class="feature-pill">M&A Screening</span>
+                        <span class="feature-pill">DCF Models</span>
+                        <span class="feature-pill">Comp Analysis</span>
+                        <span class="feature-pill">Deal Sourcing</span>
+                    </div>
+                    <a href="scenario-analysis.html" class="solution-link">
+                        Learn more <i class="fas fa-arrow-right"></i>
+                    </a>
+                </div>
+
+                <div class="solution-card" data-aos="zoom-in" data-aos-delay="100">
+                    <div class="solution-icon-wrapper">
+                        <div class="solution-icon">
+                            <i class="fas fa-user-tie"></i>
+                        </div>
+                    </div>
+                    <h3>Asset Managers</h3>
+                    <p>
+                        Optimize allocations with advanced quantitative models and 
+                        real-time risk management across all asset classes.
+                    </p>
+                    <div class="solution-features">
+                        <span class="feature-pill">Portfolio Opt</span>
+                        <span class="feature-pill">Risk Management</span>
+                        <span class="feature-pill">Performance</span>
+                        <span class="feature-pill">Reporting</span>
+                    </div>
+                    <a href="portfolio-optimizer.html" class="solution-link">
+                        Learn more <i class="fas fa-arrow-right"></i>
+                    </a>
+                </div>
+
+                <div class="solution-card" data-aos="zoom-in" data-aos-delay="200">
+                    <div class="solution-icon-wrapper">
+                        <div class="solution-icon">
+                            <i class="fas fa-chart-line"></i>
+                        </div>
+                    </div>
+                    <h3>Quantitative Analysts</h3>
+                    <p>
+                        Develop and backtest sophisticated strategies with our 
+                        modeling, simulation, and machine learning toolkit.
+                    </p>
+                    <div class="solution-features">
+                        <span class="feature-pill">Backtesting</span>
+                        <span class="feature-pill">Monte Carlo</span>
+                        <span class="feature-pill">ML Models</span>
+                        <span class="feature-pill">Factor Analysis</span>
+                    </div>
+                    <a href="monte-carlo.html" class="solution-link">
+                        Learn more <i class="fas fa-arrow-right"></i>
+                    </a>
+                </div>
+
+                <div class="solution-card" data-aos="zoom-in" data-aos-delay="300">
+                    <div class="solution-icon-wrapper">
+                        <div class="solution-icon">
+                            <i class="fas fa-university"></i>
+                        </div>
+                    </div>
+                    <h3>Research Analysts</h3>
+                    <p>
+                        Produce institutional-quality research with enriched data, 
+                        professional visualizations, and automated reports.
+                    </p>
+                    <div class="solution-features">
+                        <span class="feature-pill">Data Analytics</span>
+                        <span class="feature-pill">Visualization</span>
+                        <span class="feature-pill">Reports</span>
+                        <span class="feature-pill">Screening</span>
+                    </div>
+                    <a href="advanced-analysis.html" class="solution-link">
+                        Learn more <i class="fas fa-arrow-right"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Tools Section -->
+    <section class="tools-section" id="tools">
+        <div class="container-fluid">
+            <div class="section-header">
+                <span class="section-tag">Quantitative Tools</span>
+                <h2 class="section-title">Advanced algorithms for financial analysis</h2>
+            </div>
+
+            <div class="tools-grid-advanced">
+                <div class="tool-card-advanced" data-aos="fade-up">
+                    <div class="tool-icon-advanced">
+                        <i class="fas fa-calculator"></i>
+                    </div>
+                    <h4>Value at Risk (VaR)</h4>
+                    <p>Historical, parametric, and Monte Carlo VaR calculations with confidence intervals</p>
+                    <div class="tool-tags">
+                        <span>Risk</span>
+                        <span>Quantitative</span>
+                    </div>
+                </div>
+
+                <div class="tool-card-advanced" data-aos="fade-up" data-aos-delay="50">
+                    <div class="tool-icon-advanced">
+                        <i class="fas fa-project-diagram"></i>
+                    </div>
+                    <h4>Black-Litterman Model</h4>
+                    <p>Combine market equilibrium with investor views for optimal asset allocation</p>
+                    <div class="tool-tags">
+                        <span>Allocation</span>
+                        <span>Optimization</span>
+                    </div>
+                </div>
+
+                <div class="tool-card-advanced" data-aos="fade-up" data-aos-delay="100">
+                    <div class="tool-icon-advanced">
+                        <i class="fas fa-wave-square"></i>
+                    </div>
+                    <h4>Technical Analysis</h4>
+                    <p>RSI, MACD, Bollinger Bands, moving averages, and 50+ technical indicators</p>
+                    <div class="tool-tags">
+                        <span>Trading</span>
+                        <span>Indicators</span>
+                    </div>
+                </div>
+
+                <div class="tool-card-advanced" data-aos="fade-up" data-aos-delay="150">
+                    <div class="tool-icon-advanced">
+                        <i class="fas fa-robot"></i>
+                    </div>
+                    <h4>Machine Learning Models</h4>
+                    <p>LSTM, Random Forest, and regression models for predictive analytics</p>
+                    <div class="tool-tags">
+                        <span>AI</span>
+                        <span>Prediction</span>
+                    </div>
+                </div>
+
+                <div class="tool-card-advanced" data-aos="fade-up" data-aos-delay="200">
+                    <div class="tool-icon-advanced">
+                        <i class="fas fa-sitemap"></i>
+                    </div>
+                    <h4>Correlation Analysis</h4>
+                    <p>Dynamic correlation matrices and dependency structure analysis</p>
+                    <div class="tool-tags">
+                        <span>Statistics</span>
+                        <span>Analysis</span>
+                    </div>
+                </div>
+
+                <div class="tool-card-advanced" data-aos="fade-up" data-aos-delay="250">
+                    <div class="tool-icon-advanced">
+                        <i class="fas fa-chart-area"></i>
+                    </div>
+                    <h4>Backtesting Engine</h4>
+                    <p>Test strategies on historical data with comprehensive performance metrics</p>
+                    <div class="tool-tags">
+                        <span>Strategy</span>
+                        <span>Performance</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Pricing Section -->
+    <section class="pricing-section" id="pricing">
+        <div class="container-fluid">
+            <div class="section-header">
+                <span class="section-tag">Pricing</span>
+                <h2 class="section-title">Choose your plan</h2>
+                <p class="section-description">Start free, upgrade as you grow</p>
+            </div>
+
+            <div class="pricing-toggle">
+                <span class="toggle-label">Monthly</span>
+                <label class="toggle-switch">
+                    <input type="checkbox" id="pricingToggle">
+                    <span class="toggle-slider"></span>
+                </label>
+                <span class="toggle-label">Annual <span class="save-badge">Save 20%</span></span>
+            </div>
+
+            <div class="pricing-grid">
+                <!-- Free Tier -->
+                <div class="pricing-card" data-aos="fade-up">
+                    <div class="pricing-header">
+                        <h3>Starter</h3>
+                        <p>Perfect for individual analysts</p>
+                    </div>
+                    <div class="pricing-price">
+                        <span class="currency">$</span>
+                        <span class="amount">0</span>
+                        <span class="period">/month</span>
+                    </div>
+                    <ul class="pricing-features">
+                        <li><i class="fas fa-check"></i> Up to 10 analyses/month</li>
+                        <li><i class="fas fa-check"></i> Basic market data</li>
+                        <li><i class="fas fa-check"></i> Portfolio tracking</li>
+                        <li><i class="fas fa-check"></i> Standard support</li>
+                        <li class="disabled"><i class="fas fa-times"></i> AI predictions</li>
+                        <li class="disabled"><i class="fas fa-times"></i> Advanced optimization</li>
+                    </ul>
+                    <button class="btn-pricing">Get Started</button>
+                </div>
+
+                <!-- Professional Tier -->
+                <div class="pricing-card featured" data-aos="fade-up" data-aos-delay="100">
+                    <div class="popular-badge">Most Popular</div>
+                    <div class="pricing-header">
+                        <h3>Professional</h3>
+                        <p>For serious finance professionals</p>
+                    </div>
+                    <div class="pricing-price">
+                        <span class="currency">$</span>
+                        <span class="amount" data-monthly="99" data-annual="79">99</span>
+                        <span class="period">/month</span>
+                    </div>
+                    <ul class="pricing-features">
+                        <li><i class="fas fa-check"></i> Unlimited analyses</li>
+                        <li><i class="fas fa-check"></i> Real-time market data</li>
+                        <li><i class="fas fa-check"></i> All optimization models</li>
+                        <li><i class="fas fa-check"></i> AI predictions & insights</li>
+                        <li><i class="fas fa-check"></i> Monte Carlo simulations</li>
+                        <li><i class="fas fa-check"></i> Priority support</li>
+                    </ul>
+                    <button class="btn-pricing featured">Start Free Trial</button>
+                </div>
+
+                <!-- Enterprise Tier -->
+                <div class="pricing-card" data-aos="fade-up" data-aos-delay="200">
+                    <div class="pricing-header">
+                        <h3>Enterprise</h3>
+                        <p>For teams and organizations</p>
+                    </div>
+                    <div class="pricing-price">
+                        <span class="amount-custom">Custom</span>
+                    </div>
+                    <ul class="pricing-features">
+                        <li><i class="fas fa-check"></i> Everything in Professional</li>
+                        <li><i class="fas fa-check"></i> Unlimited team members</li>
+                        <li><i class="fas fa-check"></i> Custom integrations</li>
+                        <li><i class="fas fa-check"></i> Dedicated support</li>
+                        <li><i class="fas fa-check"></i> SLA guarantee</li>
+                        <li><i class="fas fa-check"></i> On-premise deployment</li>
+                    </ul>
+                    <button class="btn-pricing">Contact Sales</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="cta-final">
+        <div class="container-fluid">
+            <div class="cta-content-wrapper">
+                <div class="cta-content">
+                    <h2 class="cta-title">Ready to transform your financial analysis?</h2>
+                    <p class="cta-subtitle">
+                        Join thousands of finance professionals using FinancePro
+                    </p>
+                    <div class="cta-buttons">
+                        <button class="btn-cta-primary" id="finalCTABtn">
+                            Start Free Trial
+                            <i class="fas fa-arrow-right"></i>
+                        </button>
+                        <button class="btn-cta-secondary" id="scheduleDemo">
+                            Schedule a Demo
+                        </button>
+                    </div>
+                    <p class="cta-note">No credit card required • 14-day free trial</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="landing-footer">
+        <div class="container-fluid">
+            <div class="footer-grid">
+                <div class="footer-col footer-brand-col">
+                    <div class="footer-brand">
+                        <div class="brand-logo">
+                            <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+                                <path d="M16 2L2 9L16 16L30 9L16 2Z" fill="#3B82F6"/>
+                                <path d="M2 23L16 30L30 23V9L16 16L2 9V23Z" fill="#2563EB" opacity="0.8"/>
+                            </svg>
+                        </div>
+                        <span class="brand-text">Finance<strong>Pro</strong></span>
+                    </div>
+                    <p class="footer-description">
+                        AI-powered financial analysis platform for investment professionals.
+                    </p>
+                    <div class="footer-social">
+                        <a href="#" aria-label="LinkedIn"><i class="fab fa-linkedin"></i></a>
+                        <a href="#" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
+                        <a href="#" aria-label="GitHub"><i class="fab fa-github"></i></a>
+                        <a href="#" aria-label="YouTube"><i class="fab fa-youtube"></i></a>
+                    </div>
+                </div>
+
+                <div class="footer-col">
+                    <h4>Product</h4>
+                    <ul>
+                        <li><a href="#features">Features</a></li>
+                        <li><a href="dashboard-financier.html">Dashboard</a></li>
+                        <li><a href="market-data.html">Market Data</a></li>
+                        <li><a href="portfolio-optimizer.html">Portfolio Optimizer</a></li>
+                        <li><a href="#pricing">Pricing</a></li>
+                    </ul>
+                </div>
+
+                <div class="footer-col">
+                    <h4>Tools</h4>
+                    <ul>
+                        <li><a href="advanced-analysis.html">Advanced Analysis</a></li>
+                        <li><a href="monte-carlo.html">Monte Carlo</a></li>
+                        <li><a href="risk-parity.html">Risk Parity</a></li>
+                        <li><a href="scenario-analysis.html">Scenario Analysis</a></li>
+                        <li><a href="trend-prediction.html">Trend Prediction</a></li>
+                    </ul>
+                </div>
+
+                <div class="footer-col">
+                    <h4>Solutions</h4>
+                    <ul>
+                        <li><a href="#solutions">Investment Banking</a></li>
+                        <li><a href="#solutions">Asset Management</a></li>
+                        <li><a href="#solutions">Quantitative Finance</a></li>
+                        <li><a href="#solutions">Research</a></li>
+                    </ul>
+                </div>
+
+                <div class="footer-col">
+                    <h4>Resources</h4>
+                    <ul>
+                        <li><a href="#">Documentation</a></li>
+                        <li><a href="#">API Reference</a></li>
+                        <li><a href="#">Blog</a></li>
+                        <li><a href="#">Support</a></li>
+                        <li><a href="#">Status</a></li>
+                    </ul>
+                </div>
+
+                <div class="footer-col">
+                    <h4>Company</h4>
+                    <ul>
+                        <li><a href="#">About Us</a></li>
+                        <li><a href="#">Careers</a></li>
+                        <li><a href="#">Contact</a></li>
+                        <li><a href="#">Privacy Policy</a></li>
+                        <li><a href="#">Terms of Service</a></li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="footer-bottom">
+                <p>&copy; 2024 FinancePro. All rights reserved.</p>
+                <div class="footer-bottom-links">
+                    <a href="#">Privacy</a>
+                    <a href="#">Terms</a>
+                    <a href="#">Cookies</a>
+                    <a href="#">Security</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
     <!-- Scripts -->
-    <script src='assets/js/dark-mode.js'></script>  <!-- ✅ NOUVEAU -->
-    <script src='assets/js/common.js'></script>
-    <script src='assets/js/sidebar.js'></script>
-    <script src='assets/js/dashboard.js'></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+    <script src="assets/js/common.js"></script>
+    <script src="assets/js/landing.js"></script>
+    
+    <!-- AOS Animation Library -->
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <script>
+        AOS.init({
+            duration: 800,
+            easing: 'ease-out-cubic',
+            once: true,
+            offset: 50
+        });
+    </script>
 </body>
 </html>

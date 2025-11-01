@@ -33,15 +33,23 @@
             </div>
             
             <nav class='sidebar-nav'>
+                <!-- ✅ NOUVEAU : Landing Page -->
+                <div class='nav-section'>
+                    <a href='index.html' class='nav-link'>
+                        <i class='fas fa-rocket'></i>
+                        <span>Accueil</span>
+                    </a>
+                </div>
+                
                 <!-- Budget Section -->
                 <div class='nav-section'>
-                    <button class='nav-folder'>
+                    <button class='nav-folder active'>
                         <i class='fas fa-wallet'></i>
                         <span>Budget</span>
                         <i class='fas fa-chevron-down arrow'></i>
                     </button>
-                    <div class='nav-submenu'>
-                        <a href='index.html' class='nav-link'>
+                    <div class='nav-submenu' style='display: block;'>
+                        <a href='dashboard-financier.html' class='nav-link active'>
                             <i class='fas fa-home'></i>
                             <span>Dashboard Budget</span>
                         </a>
@@ -49,13 +57,13 @@
                 </div>
                 
                 <!-- Simulation Section -->
-                <div class='nav-section active'>
-                    <button class='nav-folder active'>
+                <div class='nav-section'>
+                    <button class='nav-folder'>
                         <i class='fas fa-calculator'></i>
                         <span>Simulation</span>
                         <i class='fas fa-chevron-down arrow'></i>
                     </button>
-                    <div class='nav-submenu' style='display: block;'>
+                    <div class='nav-submenu'>
                         <a href='monte-carlo.html' class='nav-link'>
                             <i class='fas fa-dice'></i>
                             <span>Monte Carlo</span>
@@ -64,7 +72,7 @@
                             <i class='fas fa-chart-pie'></i>
                             <span>Markowitz</span>
                         </a>
-                        <a href='risk-parity.html' class='nav-link active'>
+                        <a href='risk-parity.html' class='nav-link'>
                             <i class='fas fa-balance-scale'></i>
                             <span>Risk Parity</span>
                         </a>
@@ -78,7 +86,7 @@
                 <!-- Stocks Section -->
                 <div class='nav-section'>
                     <button class='nav-folder'>
-                        <i class='fas fa-chart-line'></i>
+                        <i class='fas fa-chart-candlestick'></i>
                         <span>Stocks</span>
                         <i class='fas fa-chevron-down arrow'></i>
                     </button>
@@ -91,10 +99,9 @@
                 </div>
             </nav>
             
-            <!-- Sidebar Footer - Version avec authentification -->
+            <!-- Sidebar Footer -->
             <div class="sidebar-footer">
                 <div class="user-info" id="userInfoSection">
-                    <!-- État non connecté -->
                     <button class="user-profile-btn" id="userProfileBtn" aria-label="Accéder à mon profil">
                         <i class="fas fa-user-circle"></i>
                         <div class="user-details">
