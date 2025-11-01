@@ -351,6 +351,18 @@
                 
                 <!-- AI RECOMMENDATIONS SECTION -->
                 <section class='analytics-section ai-section'>
+                    <!-- AI Prediction Horizon Selector -->
+                    <div class='horizon-selector' style='background: rgba(255,255,255,0.15); padding: 20px; border-radius: 12px; margin: 20px 0; position: relative; z-index: 1;'>
+                        <h3 style='color: white; margin-bottom: 15px;'><i class='fas fa-calendar-alt'></i> Prediction Horizon</h3>
+                        <div style='display: flex; gap: 10px; flex-wrap: wrap;'>
+                            <button class='period-btn' onclick='InvestmentAnalytics.setPredictionHorizon(3)'>3 Months</button>
+                            <button class='period-btn' onclick='InvestmentAnalytics.setPredictionHorizon(6)'>6 Months</button>
+                            <button class='period-btn active' onclick='InvestmentAnalytics.setPredictionHorizon(12)'>1 Year</button>
+                            <button class='period-btn' onclick='InvestmentAnalytics.setPredictionHorizon(24)'>2 Years</button>
+                            <button class='period-btn' onclick='InvestmentAnalytics.setPredictionHorizon(36)'>3 Years</button>
+                            <button class='period-btn' onclick='InvestmentAnalytics.setPredictionHorizon(60)'>5 Years</button>
+                        </div>
+                    </div>
                     <div class='section-header'>
                         <h2><i class='fas fa-brain'></i> Artificial Intelligence - Recommendations</h2>
                         <button class='btn-primary' onclick='InvestmentAnalytics.runAIAnalysis()'>
