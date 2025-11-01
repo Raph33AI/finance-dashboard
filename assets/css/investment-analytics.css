@@ -1439,3 +1439,205 @@ body.dark-mode .asset-allocation-manager {
 .dark-mode .highcharts-subtitle {
     fill: #cccccc !important;
 }
+
+/* ========== MODERN BUTTONS STYLE ========== */
+
+.btn-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 12px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    position: relative;
+    overflow: hidden;
+}
+
+.btn-primary::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left 0.5s;
+}
+
+.btn-primary:hover::before {
+    left: 100%;
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.6);
+}
+
+.btn-primary:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 10px rgba(102, 126, 234, 0.4);
+}
+
+.btn-primary i {
+    font-size: 16px;
+}
+
+/* Dark mode button */
+.dark-mode .btn-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+}
+
+.dark-mode .btn-primary:hover {
+    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.5);
+}
+
+/* Secondary button style */
+.btn-secondary {
+    background: rgba(148, 163, 184, 0.1);
+    border: 2px solid rgba(148, 163, 184, 0.3);
+    color: #64748b;
+    padding: 10px 20px;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-secondary:hover {
+    background: rgba(148, 163, 184, 0.2);
+    border-color: rgba(148, 163, 184, 0.5);
+    transform: translateY(-1px);
+}
+
+.dark-mode .btn-secondary {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(255, 255, 255, 0.2);
+    color: #cbd5e1;
+}
+
+.dark-mode .btn-secondary:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.3);
+}
+
+/* Icon buttons */
+.btn-icon {
+    background: rgba(148, 163, 184, 0.1);
+    border: none;
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    color: #64748b;
+}
+
+.btn-icon:hover {
+    background: rgba(102, 126, 234, 0.1);
+    color: #667eea;
+    transform: translateY(-2px);
+}
+
+.dark-mode .btn-icon {
+    background: rgba(255, 255, 255, 0.05);
+    color: #cbd5e1;
+}
+
+.dark-mode .btn-icon:hover {
+    background: rgba(102, 126, 234, 0.2);
+    color: #818cf8;
+}
+
+/* Period buttons (for prediction horizon) */
+.period-btn {
+    background: rgba(148, 163, 184, 0.1);
+    border: 2px solid transparent;
+    color: #64748b;
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.period-btn:hover {
+    background: rgba(102, 126, 234, 0.1);
+    color: #667eea;
+    border-color: rgba(102, 126, 234, 0.3);
+}
+
+.period-btn.active {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-color: transparent;
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+}
+
+.dark-mode .period-btn {
+    background: rgba(255, 255, 255, 0.05);
+    color: #cbd5e1;
+}
+
+.dark-mode .period-btn:hover {
+    background: rgba(102, 126, 234, 0.15);
+    color: #818cf8;
+}
+
+.dark-mode .period-btn.active {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+}
+
+/* Manager header buttons */
+.manager-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.manager-header h3 {
+    margin: 0;
+    font-size: 18px;
+    color: #1f2937;
+}
+
+.dark-mode .manager-header h3 {
+    color: #ffffff;
+}
+
+/* Horizon selector */
+.horizon-selector {
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(10px);
+    padding: 20px;
+    border-radius: 12px;
+    margin: 20px 0;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.horizon-selector h3 {
+    color: white;
+    margin-bottom: 15px;
+    font-size: 16px;
+    font-weight: 600;
+}
+
+#horizonButtons {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
