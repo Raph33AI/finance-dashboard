@@ -2229,3 +2229,253 @@ button:focus {
 .no-results ul li {
     margin: 0.25rem 0;
 }
+
+/* ============================================
+   DARK MODE - CORRECTIONS COMPLÈTES HIGHCHARTS
+   ============================================ */
+
+body.dark-mode {
+    --text-primary: #f1f5f9;
+    --text-secondary: #cbd5e1;
+    --text-tertiary: #94a3b8;
+    --background-primary: #1e293b;
+    --background-secondary: #0f172a;
+    --background-tertiary: #334155;
+    --border-color: #334155;
+}
+
+/* GRAPHIQUES HIGHCHARTS - TEXTES */
+body.dark-mode .highcharts-root text,
+body.dark-mode .highcharts-title,
+body.dark-mode .highcharts-axis-title,
+body.dark-mode .highcharts-axis-labels text,
+body.dark-mode .highcharts-legend-item text,
+body.dark-mode .highcharts-label text {
+    fill: #f1f5f9 !important;
+}
+
+body.dark-mode .highcharts-data-label text {
+    fill: #ffffff !important;
+    text-shadow: 0 0 3px rgba(0,0,0,0.8);
+}
+
+/* GRAPHIQUES HIGHCHARTS - TOOLTIPS */
+body.dark-mode .highcharts-tooltip-box {
+    fill: #1e293b !important;
+    stroke: #334155 !important;
+}
+
+body.dark-mode .highcharts-tooltip text,
+body.dark-mode .highcharts-tooltip th,
+body.dark-mode .highcharts-tooltip td {
+    fill: #f1f5f9 !important;
+}
+
+/* GRAPHIQUES HIGHCHARTS - GRILLES ET AXES */
+body.dark-mode .highcharts-grid-line {
+    stroke: #334155 !important;
+}
+
+body.dark-mode .highcharts-axis-line,
+body.dark-mode .highcharts-tick {
+    stroke: #475569 !important;
+}
+
+/* GRAPHIQUES HIGHCHARTS - BOUTONS */
+body.dark-mode .highcharts-button-box {
+    fill: #334155 !important;
+}
+
+body.dark-mode .highcharts-button text,
+body.dark-mode .highcharts-range-selector-buttons text {
+    fill: #cbd5e1 !important;
+}
+
+/* GRAPHIQUES HIGHCHARTS - NAVIGATOR ET SCROLLBAR */
+body.dark-mode .highcharts-navigator-outline {
+    stroke: #475569 !important;
+}
+
+body.dark-mode .highcharts-navigator-handle {
+    fill: #475569 !important;
+    stroke: #64748b !important;
+}
+
+body.dark-mode .highcharts-scrollbar-track {
+    fill: #0f172a !important;
+    stroke: #334155 !important;
+}
+
+body.dark-mode .highcharts-scrollbar-thumb {
+    fill: #475569 !important;
+    stroke: #64748b !important;
+}
+
+/* INPUTS ET FORMULAIRES */
+body.dark-mode .search-box,
+body.dark-mode .form-input {
+    background: var(--background-secondary);
+    border-color: var(--border-color);
+    color: var(--text-primary);
+}
+
+body.dark-mode .search-box input,
+body.dark-mode .form-input {
+    color: var(--text-primary);
+}
+
+body.dark-mode .search-box input::placeholder,
+body.dark-mode .form-input::placeholder {
+    color: var(--text-tertiary);
+}
+
+/* CARTES ET CONTAINERS */
+body.dark-mode .search-interface-demo,
+body.dark-mode .live-quotes-interface,
+body.dark-mode .portfolio-interface,
+body.dark-mode .technical-interface,
+body.dark-mode .risk-interface,
+body.dark-mode .ai-interface,
+body.dark-mode .company-result-card,
+body.dark-mode .quote-display,
+body.dark-mode .quote-stat,
+body.dark-mode .summary-card,
+body.dark-mode .risk-metric-card,
+body.dark-mode .signal-card {
+    background: var(--background-primary);
+    border-color: var(--border-color);
+}
+
+/* TABLEAUX */
+body.dark-mode .portfolio-table {
+    background: var(--background-primary);
+    border-color: var(--border-color);
+}
+
+body.dark-mode .portfolio-table thead {
+    background: var(--background-tertiary);
+}
+
+body.dark-mode .portfolio-table th,
+body.dark-mode .portfolio-table td {
+    color: var(--text-primary);
+    border-color: var(--border-color);
+}
+
+/* SUGGESTIONS */
+body.dark-mode .search-suggestions {
+    background: var(--background-primary);
+    border-color: var(--border-color);
+}
+
+body.dark-mode .suggestion-item:hover {
+    background: var(--background-tertiary) !important;
+}
+
+body.dark-mode .suggestion-category {
+    background: var(--background-tertiary);
+    color: var(--text-secondary);
+}
+
+body.dark-mode .suggestion-exchange {
+    background: var(--background-tertiary);
+    color: var(--text-tertiary);
+}
+
+/* INDICATEURS TECHNIQUES */
+body.dark-mode .indicators-panel,
+body.dark-mode .technical-signals {
+    background: var(--background-secondary);
+    border-color: var(--border-color);
+}
+
+body.dark-mode .indicator-checkbox:hover {
+    background: var(--background-tertiary);
+}
+
+/* RISK CALCULATOR */
+body.dark-mode .risk-inputs,
+body.dark-mode .risk-results {
+    background: var(--background-secondary);
+    border-color: var(--border-color);
+}
+
+/* AI FEATURES */
+body.dark-mode .ai-feature {
+    background: var(--background-secondary);
+    border-color: var(--border-color);
+}
+
+/* PLACEHOLDERS */
+body.dark-mode .results-placeholder,
+body.dark-mode .quote-placeholder,
+body.dark-mode .ai-placeholder {
+    color: var(--text-secondary);
+}
+
+body.dark-mode .results-placeholder h3,
+body.dark-mode .ai-placeholder h3 {
+    color: var(--text-primary);
+}
+
+/* POPULAR TAGS */
+body.dark-mode .popular-tag {
+    background: var(--background-tertiary);
+    border-color: var(--border-color);
+    color: var(--text-primary);
+}
+
+/* MESSAGES */
+body.dark-mode .error-message {
+    background: rgba(239, 68, 68, 0.15);
+    color: #fca5a5;
+}
+
+body.dark-mode .success-message {
+    background: rgba(16, 185, 129, 0.15);
+    color: #6ee7b7;
+}
+
+/* NOTIFICATION TOAST */
+body.dark-mode .notification-toast {
+    background: var(--background-primary);
+    border: 1px solid var(--border-color);
+}
+
+body.dark-mode .notification-toast span {
+    color: var(--text-primary);
+}
+
+/* SCROLLBAR */
+body.dark-mode ::-webkit-scrollbar-track {
+    background: var(--background-secondary);
+}
+
+body.dark-mode ::-webkit-scrollbar-thumb {
+    background: var(--background-tertiary);
+}
+
+body.dark-mode ::-webkit-scrollbar-thumb:hover {
+    background: #475569;
+}
+
+/* HEADINGS */
+body.dark-mode h4,
+body.dark-mode h5 {
+    color: var(--text-primary) !important;
+}
+
+/* LABELS ET VALEURS */
+body.dark-mode .metric-label,
+body.dark-mode .quote-stat-label,
+body.dark-mode .risk-metric-description,
+body.dark-mode .signal-detail {
+    color: var(--text-secondary) !important;
+}
+
+body.dark-mode .metric-value,
+body.dark-mode .quote-stat-value,
+body.dark-mode .value-large,
+body.dark-mode .quote-price {
+    color: var(--text-primary) !important;
+}
