@@ -665,23 +665,38 @@
         // ========== KPI DISPLAY ==========
         
         displayKPIs: function() {
-            // TOUJOURS calculer les KPIs sur TOUTES les données historiques jusqu'à aujourd'hui
+            // ✅ TOUJOURS calculer les KPIs sur TOUTES les données historiques jusqu'à aujourd'hui
             const now = new Date();
             const currentMonthStr = String(now.getMonth() + 1).padStart(2, '0') + '/' + now.getFullYear();
             
             let currentMonthIndex = this.financialData.findIndex(row => row.month === currentMonthStr);
             if (currentMonthIndex === -1) {
+                // Si mois actuel pas trouvé, prendre le dernier mois disponible
                 currentMonthIndex = this.financialData.length - 1;
+                console.warn('⚠️ Current month not found for KPIs, using last available month');
             }
             
+            // ✅ Utiliser TOUTES les données historiques (pas filtrées par période)
             const allHistoricalData = this.financialData.slice(0, currentMonthIndex + 1);
+            
+            console.log('📊 KPIs Calculation:', {
+                totalMonthsAvailable: this.financialData.length,
+                historicalMonthsUsed: allHistoricalData.length,
+                currentMonth: allHistoricalData[allHistoricalData.length - 1]?.month,
+                selectedPeriod: this.currentPeriod + ' (not affecting KPIs)'
+            });
+            
             const metrics = this.calculateMetrics(allHistoricalData);
             
             if (allHistoricalData.length === 0) {
                 document.getElementById('kpiGrid').innerHTML = `
                     <div class='kpi-card neutral'>
-                        <div class='kpi-value'>No Data</div>
-                        <p>Fill your data in Budget Dashboard first</p>
+                        <div class='kpi-header'>
+                            <span class='kpi-title'>No Data Available</span>
+                            <div class='kpi-icon'><i class='fas fa-exclamation-triangle'></i></div>
+                        </div>
+                        <div class='kpi-value'>---</div>
+                        <p style='color:#94a3b8;margin-top:10px;'>Please fill your data in Budget Dashboard first</p>
                     </div>
                 `;
                 return;
@@ -692,25 +707,27 @@
             const [month, year] = currentMonth.split('/');
             const monthName = new Date(year, month - 1).toLocaleString('en-US', { month: 'long', year: 'numeric' });
             
-            const currentPortfolio = lastRow.totalPortfolio || 0;
-            const currentInvestment = lastRow.cumulatedInvestment || 0;
-            const currentGains = lastRow.cumulatedGains || 0;
-            const currentROI = lastRow.roi || 0;
+            const currentPortfolio = parseFloat(lastRow.totalPortfolio) || 0;
+            const currentInvestment = parseFloat(lastRow.cumulatedInvestment) || 0;
+            const currentGains = parseFloat(lastRow.cumulatedGains) || 0;
+            const currentROI = parseFloat(lastRow.roi) || 0;
             
             const kpis = [
                 {
                     title: 'Total Portfolio Value',
                     value: this.formatCurrency(currentPortfolio),
                     icon: 'fa-wallet',
-                    change: `+${this.formatPercent(metrics.totalReturn)}`,
+                    change: metrics.totalReturn >= 0 ? `+${this.formatPercent(metrics.totalReturn)}` : this.formatPercent(metrics.totalReturn),
                     changeClass: metrics.totalReturn >= 0 ? 'positive' : 'negative',
-                    footer: `${monthName} • ${allHistoricalData.length} months history`,
+                    footer: `${monthName} • ${allHistoricalData.length} months of history`,
                     cardClass: currentPortfolio > 0 ? 'positive' : 'neutral'
                 },
                 {
                     title: 'Cumulated Investment',
                     value: this.formatCurrency(currentInvestment),
                     icon: 'fa-piggy-bank',
+                    change: currentInvestment > 0 ? `${((currentInvestment / allHistoricalData.length).toFixed(0))} EUR/month avg` : null,
+                    changeClass: 'neutral',
                     footer: `As of ${monthName}`,
                     cardClass: 'neutral'
                 },
@@ -725,18 +742,20 @@
                 },
                 {
                     title: 'Annualized Return',
-                    value: this.formatPercent(metrics.annualizedReturn),
+                    value: this.formatPercent(metrics.annualized Return),
                     icon: 'fa-percentage',
                     change: `Volatility: ${metrics.volatility.toFixed(2)}%`,
-                    footer: `Historical performance`,
-                    cardClass: metrics.annualizedReturn >= 5 ? 'positive' : 'neutral'
+                    changeClass: metrics.volatility < 15 ? 'positive' : 'neutral',
+                    footer: `${allHistoricalData.length} months analyzed`,
+                    cardClass: metrics.annualizedReturn >= 5 ? 'positive' : metrics.annualizedReturn >= 0 ? 'neutral' : 'negative'
                 },
                 {
                     title: 'Sharpe Ratio',
                     value: metrics.sharpeRatio.toFixed(2),
                     icon: 'fa-balance-scale',
                     change: this.interpretSharpe(metrics.sharpeRatio),
-                    footer: `Risk-adjusted return`,
+                    changeClass: metrics.sharpeRatio > 1 ? 'positive' : metrics.sharpeRatio > 0 ? 'neutral' : 'negative',
+                    footer: `Risk-adjusted performance`,
                     cardClass: metrics.sharpeRatio > 1 ? 'positive' : 'neutral'
                 },
                 {
@@ -744,6 +763,7 @@
                     value: `-${metrics.maxDrawdown.toFixed(2)}%`,
                     icon: 'fa-arrow-down',
                     change: `Calmar: ${metrics.calmarRatio.toFixed(2)}`,
+                    changeClass: metrics.calmarRatio > 1 ? 'positive' : 'neutral',
                     footer: `Worst historical decline`,
                     cardClass: metrics.maxDrawdown < 10 ? 'positive' : metrics.maxDrawdown < 20 ? 'neutral' : 'negative'
                 },
@@ -751,7 +771,9 @@
                     title: 'Win Rate',
                     value: `${metrics.winRate.toFixed(1)}%`,
                     icon: 'fa-bullseye',
-                    footer: `Positive months`,
+                    change: metrics.winRate >= 60 ? 'Excellent' : metrics.winRate >= 50 ? 'Good' : 'Needs improvement',
+                    changeClass: metrics.winRate >= 60 ? 'positive' : 'neutral',
+                    footer: `Percentage of positive months`,
                     cardClass: metrics.winRate >= 60 ? 'positive' : 'neutral'
                 },
                 {
@@ -759,7 +781,8 @@
                     value: `${Math.abs(metrics.var95).toFixed(2)}%`,
                     icon: 'fa-shield-alt',
                     change: `CVaR: ${Math.abs(metrics.cvar95).toFixed(2)}%`,
-                    footer: `Potential loss`,
+                    changeClass: 'neutral',
+                    footer: `Maximum probable monthly loss`,
                     cardClass: 'neutral'
                 }
             ];
@@ -777,6 +800,8 @@
             `).join('');
             
             document.getElementById('kpiGrid').innerHTML = html;
+            
+            console.log('✅ KPIs displayed based on', allHistoricalData.length, 'historical months');
         },
         
         interpretSharpe: function(sharpe) {
@@ -1690,47 +1715,144 @@
         async runLSTMPredictor(data) {
             return new Promise(resolve => {
                 setTimeout(() => {
-                    const portfolioValues = data.map(row => row.totalPortfolio || 0);
-                    const lastValue = portfolioValues[portfolioValues.length - 1];
-                    const recentReturns = this.calculateReturns(portfolioValues.slice(-12));
-                    const avgRecentReturn = recentReturns.reduce((sum, r) => sum + r, 0) / recentReturns.length;
-                    const trend = avgRecentReturn * 12;
-                    const volatility = this.calculateVolatility(recentReturns);
+                    // ✅ MEGA FIX: Utiliser TOUTES les données historiques réelles + projections futures du Dashboard
+                    const now = new Date();
+                    const currentMonthStr = String(now.getMonth() + 1).padStart(2, '0') + '/' + now.getFullYear();
                     
-                    const predictions = {
-                        optimistic: [],
-                        realistic: [],
-                        pessimistic: []
-                    };
+                    // Trouver l'index du mois actuel dans TOUTES les données
+                    let currentMonthIndex = this.financialData.findIndex(row => row.month === currentMonthStr);
                     
-                    let currentValue = lastValue;
-                    const maxHorizon = 60;
-                    
-                    for (let i = 1; i <= maxHorizon; i++) {
-                        const realisticGrowth = 1 + (trend / 12);
-                        const realisticValue = currentValue * realisticGrowth;
-                        predictions.realistic.push(realisticValue);
-                        
-                        const optimisticGrowth = 1 + (trend / 12 * 1.5);
-                        predictions.optimistic.push(lastValue * Math.pow(optimisticGrowth, i));
-                        
-                        const pessimisticGrowth = 1 + (trend / 12 * 0.7);
-                        predictions.pessimistic.push(lastValue * Math.pow(pessimisticGrowth, i));
-                        
-                        currentValue = realisticValue;
+                    if (currentMonthIndex === -1) {
+                        // Si mois actuel pas trouvé, prendre le dernier mois disponible
+                        currentMonthIndex = this.financialData.length - 1;
+                        console.warn('⚠️ Current month not found in data, using last available month:', 
+                                    this.financialData[currentMonthIndex].month);
                     }
                     
-                    const confidence = Math.max(0, Math.min(100, 100 - (volatility * 300)));
+                    // ✅ DONNÉES HISTORIQUES RÉELLES (passé jusqu'à aujourd'hui)
+                    const historicalData = this.financialData.slice(0, currentMonthIndex + 1);
+                    const lastHistoricalValue = parseFloat(historicalData[historicalData.length - 1].totalPortfolio) || 0;
+                    const lastHistoricalInvestment = parseFloat(historicalData[historicalData.length - 1].cumulatedInvestment) || 0;
                     
-                    this.aiResults.lstm = {
-                        currentValue: lastValue,
-                        predictions: predictions,
-                        trend: trend * 100,
-                        confidence: confidence,
-                        expectedReturn12M: ((predictions.realistic[11] - lastValue) / lastValue) * 100
+                    // ✅ DONNÉES FUTURES RÉELLES du Dashboard Budget (projections déjà calculées)
+                    const futureData = this.financialData.slice(currentMonthIndex + 1);
+                    
+                    console.log('🔬 LSTM Predictor - Data Analysis:', {
+                        totalMonthsInDashboard: this.financialData.length,
+                        historicalMonths: historicalData.length,
+                        currentMonth: historicalData[historicalData.length - 1].month,
+                        currentPortfolioValue: this.formatCurrency(lastHistoricalValue),
+                        currentInvestment: this.formatCurrency(lastHistoricalInvestment),
+                        futureMonthsAvailable: futureData.length,
+                        firstFutureMonth: futureData[0]?.month || 'N/A',
+                        predictionHorizon: this.predictionHorizon
+                    });
+                    
+                    // ✅ Vérifier qu'on a assez de données futures
+                    if (futureData.length < this.predictionHorizon) {
+                        console.warn(`⚠️ Only ${futureData.length} future months available, but prediction horizon is ${this.predictionHorizon} months. Using available data.`);
+                    }
+                    
+                    // ✅ EXTRAIRE LES VRAIES PROJECTIONS DU DASHBOARD BUDGET
+                    const maxPredictionMonths = Math.min(this.predictionHorizon, futureData.length);
+                    const realisticPredictions = [];
+                    
+                    for (let i = 0; i < maxPredictionMonths; i++) {
+                        const futureRow = futureData[i];
+                        // Utiliser la vraie valeur projetée du Dashboard Budget
+                        const projectedValue = parseFloat(futureRow.totalPortfolio) || 0;
+                        realisticPredictions.push(projectedValue);
+                    }
+                    
+                    // ✅ Si pas assez de données futures, extrapoler avec la tendance historique
+                    if (realisticPredictions.length < this.predictionHorizon) {
+                        console.log(`📊 Extrapolating remaining ${this.predictionHorizon - realisticPredictions.length} months using historical trend`);
+                        
+                        // Calculer la tendance sur les 12 derniers mois historiques
+                        const recentHistorical = historicalData.slice(-12);
+                        const historicalValues = recentHistorical.map(row => parseFloat(row.totalPortfolio) || 0);
+                        const historicalReturns = this.calculateReturns(historicalValues);
+                        const avgMonthlyReturn = historicalReturns.reduce((sum, r) => sum + r, 0) / historicalReturns.length;
+                        
+                        // Extrapoler
+                        let lastValue = realisticPredictions.length > 0 ? 
+                                    realisticPredictions[realisticPredictions.length - 1] : 
+                                    lastHistoricalValue;
+                        
+                        for (let i = realisticPredictions.length; i < this.predictionHorizon; i++) {
+                            lastValue = lastValue * (1 + avgMonthlyReturn);
+                            realisticPredictions.push(lastValue);
+                        }
+                    }
+                    
+                    // ✅ CALCULER LES SCÉNARIOS OPTIMISTE ET PESSIMISTE
+                    // Basés sur la volatilité historique réelle
+                    const historicalValues = historicalData.map(row => parseFloat(row.totalPortfolio) || 0);
+                    const historicalReturns = this.calculateReturns(historicalValues);
+                    const volatility = this.calculateVolatility(historicalReturns);
+                    const avgReturn = historicalReturns.reduce((sum, r) => sum + r, 0) / historicalReturns.length;
+                    
+                    // Scénario optimiste : +1.5 écart-type
+                    // Scénario pessimiste : -1.5 écart-type
+                    const optimisticPredictions = [];
+                    const pessimisticPredictions = [];
+                    
+                    let optimisticValue = lastHistoricalValue;
+                    let pessimisticValue = lastHistoricalValue;
+                    
+                    for (let i = 0; i < this.predictionHorizon; i++) {
+                        // Optimiste
+                        const optimisticReturn = avgReturn + (1.5 * volatility);
+                        optimisticValue *= (1 + optimisticReturn);
+                        optimisticPredictions.push(optimisticValue);
+                        
+                        // Pessimiste
+                        const pessimisticReturn = avgReturn - (1.5 * volatility);
+                        pessimisticValue *= (1 + pessimisticReturn);
+                        pessimisticPredictions.push(pessimisticValue);
+                    }
+                    
+                    // ✅ STOCKER LES RÉSULTATS
+                    const predictions = {
+                        realistic: realisticPredictions,
+                        optimistic: optimisticPredictions,
+                        pessimistic: pessimisticPredictions
                     };
                     
-                    console.log('✅ LSTM predictor completed');
+                    // Calculer la confiance basée sur la volatilité
+                    const confidence = Math.max(0, Math.min(100, 100 - (volatility * 300)));
+                    
+                    // Calculer le rendement attendu sur 12 mois
+                    const value12Months = realisticPredictions[Math.min(11, realisticPredictions.length - 1)];
+                    const expectedReturn12M = lastHistoricalValue > 0 ? 
+                                            ((value12Months - lastHistoricalValue) / lastHistoricalValue) * 100 : 0;
+                    
+                    // Calculer la tendance annualisée
+                    const trend = avgReturn * 12 * 100;
+                    
+                    this.aiResults.lstm = {
+                        currentValue: lastHistoricalValue,
+                        predictions: predictions,
+                        trend: trend,
+                        confidence: confidence,
+                        expectedReturn12M: expectedReturn12M,
+                        volatility: volatility * Math.sqrt(12) * 100, // Annualisée
+                        dataSource: futureData.length >= this.predictionHorizon ? 
+                                'Dashboard Budget Real Projections' : 
+                                'Dashboard + Historical Extrapolation',
+                        historicalMonths: historicalData.length,
+                        projectedMonths: realisticPredictions.length
+                    };
+                    
+                    console.log('✅ LSTM Predictor Results:', {
+                        currentValue: this.formatCurrency(lastHistoricalValue),
+                        predicted12M: this.formatCurrency(value12Months),
+                        expectedReturn12M: expectedReturn12M.toFixed(2) + '%',
+                        trend: trend.toFixed(2) + '% annual',
+                        confidence: confidence.toFixed(0) + '%',
+                        dataSource: this.aiResults.lstm.dataSource
+                    });
+                    
                     resolve();
                 }, 1000);
             });
@@ -2116,8 +2238,12 @@
         },
         
         createAIPredictionsChart: function() {
-            if (!this.aiResults.lstm) {
-                console.warn('No LSTM results to display');
+            if (!this.aiResults.lstm || !this.aiResults.lstm.predictions) {
+                console.warn('⚠️ No LSTM results available for chart');
+                const chartContainer = document.getElementById('chartAIPredictions');
+                if (chartContainer) {
+                    chartContainer.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:400px;color:#94a3b8;">Run AI Analysis first to see predictions</div>';
+                }
                 return;
             }
             
@@ -2131,24 +2257,29 @@
                 console.warn('⚠️ Current month not found, using last available:', this.financialData[currentMonthIndex].month);
             }
             
-            // Prendre TOUTES les données historiques jusqu'au mois actuel
+            // ✅ DONNÉES HISTORIQUES COMPLÈTES (passé + mois actuel)
             const historicalData = this.financialData.slice(0, currentMonthIndex + 1);
             const historicalMonths = historicalData.map(row => row.month);
             
-            // ✅ VRAIES VALEURS du Budget Dashboard (parseFloat pour éviter les bugs)
-            const historicalValues = historicalData.map(row => parseFloat(row.totalPortfolio) || 0);
-            
-            console.log('📊 AI Predictions - Using REAL data from Budget Dashboard:', {
-                historicalMonths: historicalMonths.length,
-                firstMonth: historicalMonths[0],
-                currentMonth: historicalMonths[historicalMonths.length - 1],
-                firstValue: historicalValues[0],
-                currentValue: historicalValues[historicalValues.length - 1]
+            // ✅ VRAIES VALEURS du Budget Dashboard (parseFloat pour sécurité)
+            const historicalValues = historicalData.map(row => {
+                const value = parseFloat(row.totalPortfolio);
+                return isNaN(value) ? 0 : value;
             });
             
-            // Générer les mois futurs
-            const lastMonth = historicalMonths[historicalMonths.length - 1];
-            const [m, y] = lastMonth.split('/').map(Number);
+            const lastHistoricalMonth = historicalMonths[historicalMonths.length - 1];
+            const lastHistoricalValue = historicalValues[historicalValues.length - 1];
+            
+            console.log('📊 AI Predictions Chart - Historical Data:', {
+                months: historicalMonths.length,
+                firstMonth: historicalMonths[0],
+                lastMonth: lastHistoricalMonth,
+                firstValue: this.formatCurrency(historicalValues[0]),
+                lastValue: this.formatCurrency(lastHistoricalValue)
+            });
+            
+            // ✅ GÉNÉRER LES MOIS FUTURS
+            const [m, y] = lastHistoricalMonth.split('/').map(Number);
             const futureMonths = [];
             
             let month = m;
@@ -2165,37 +2296,73 @@
             
             const allMonths = [...historicalMonths, ...futureMonths];
             
+            console.log('📅 Future months generated:', {
+                count: futureMonths.length,
+                firstFuture: futureMonths[0],
+                lastFuture: futureMonths[futureMonths.length - 1]
+            });
+            
+            // ✅ RÉCUPÉRER LES PRÉDICTIONS
             const realisticPredictions = this.aiResults.lstm.predictions.realistic.slice(0, this.predictionHorizon);
             const optimisticPredictions = this.aiResults.lstm.predictions.optimistic.slice(0, this.predictionHorizon);
             const pessimisticPredictions = this.aiResults.lstm.predictions.pessimistic.slice(0, this.predictionHorizon);
             
+            // ✅ CONSTRUIRE LES SÉRIES POUR HIGHCHARTS
+            // Historique : valeurs réelles, puis null pour le futur
             const historicalSeries = [...historicalValues, ...Array(this.predictionHorizon).fill(null)];
+            
+            // Prédictions : null pour le passé, puis valeurs prédites
             const predictionSeries = [...Array(historicalValues.length).fill(null), ...realisticPredictions];
             const optimisticSeries = [...Array(historicalValues.length).fill(null), ...optimisticPredictions];
             const pessimisticSeries = [...Array(historicalValues.length).fill(null), ...pessimisticPredictions];
             
-            if (this.charts.aiPredictions) this.charts.aiPredictions.destroy();
+            console.log('📈 Chart series prepared:', {
+                historicalPoints: historicalValues.length,
+                predictionPoints: realisticPredictions.length,
+                totalMonths: allMonths.length
+            });
+            
+            // ✅ DÉTRUIRE LE GRAPHIQUE PRÉCÉDENT
+            if (this.charts.aiPredictions) {
+                this.charts.aiPredictions.destroy();
+            }
             
             const colors = this.getChartColors();
             const self = this;
             
+            // ✅ CRÉER LE GRAPHIQUE
             this.charts.aiPredictions = Highcharts.chart('chartAIPredictions', {
-                chart: { type: 'line', backgroundColor: colors.background, height: 500 },
+                chart: {
+                    type: 'line',
+                    backgroundColor: colors.background,
+                    height: 500,
+                    style: { fontFamily: "'Inter', sans-serif" }
+                },
                 title: {
-                    text: `AI Predictions - ${this.predictionHorizon} Months Horizon`,
-                    style: { color: colors.title, fontWeight: '700' }
+                    text: `AI Portfolio Predictions - ${this.predictionHorizon} Months Horizon`,
+                    style: {
+                        color: colors.title,
+                        fontWeight: '700',
+                        fontSize: '18px'
+                    }
                 },
                 subtitle: {
-                    text: 'Based on real portfolio data, LSTM model and Monte Carlo simulation',
-                    style: { color: colors.text }
+                    text: `Based on ${historicalValues.length} months of real data from Budget Dashboard • Data source: ${this.aiResults.lstm.dataSource}`,
+                    style: {
+                        color: colors.text,
+                        fontSize: '12px'
+                    }
                 },
                 xAxis: {
                     categories: allMonths,
                     crosshair: true,
-                    labels: { 
-                        rotation: -45, 
-                        style: { fontSize: '10px', color: colors.text },
-                        step: Math.max(1, Math.floor(allMonths.length / 15))
+                    labels: {
+                        rotation: -45,
+                        style: {
+                            fontSize: '10px',
+                            color: colors.text
+                        },
+                        step: Math.max(1, Math.floor(allMonths.length / 20))
                     },
                     plotLines: [{
                         color: colors.prediction,
@@ -2203,89 +2370,159 @@
                         value: historicalValues.length - 0.5,
                         dashStyle: 'Dash',
                         label: {
-                            text: 'Today (' + lastMonth + ')',
-                            style: { color: colors.prediction, fontWeight: 'bold', fontSize: '12px' }
+                            text: `📍 TODAY (${lastHistoricalMonth})`,
+                            align: 'center',
+                            style: {
+                                color: colors.prediction,
+                                fontWeight: 'bold',
+                                fontSize: '13px',
+                                backgroundColor: this.isDarkMode ? 'rgba(0,0,0,0.7)' : 'rgba(255,255,255,0.9)',
+                                padding: '4px'
+                            },
+                            y: -10
                         },
-                        zIndex: 5
-                    }]
+                        zIndex: 10
+                    }],
+                    gridLineColor: colors.gridLine
                 },
                 yAxis: {
-                    title: { text: 'Portfolio Value (EUR)', style: { color: colors.text } },
+                    title: {
+                        text: 'Portfolio Value (EUR)',
+                        style: { color: colors.text, fontWeight: '600' }
+                    },
                     labels: {
                         style: { color: colors.text },
-                        formatter: function() { return self.formatLargeNumber(this.value); }
+                        formatter: function() {
+                            return self.formatLargeNumber(this.value);
+                        }
                     },
                     gridLineColor: colors.gridLine
                 },
                 tooltip: {
                     shared: true,
                     crosshairs: true,
+                    backgroundColor: this.isDarkMode ? 'rgba(30, 30, 30, 0.95)' : 'rgba(255, 255, 255, 0.95)',
+                    borderColor: colors.gridLine,
+                    style: { color: colors.text },
                     formatter: function() {
                         let s = '<b>' + this.x + '</b><br/>';
+                        const isHistorical = this.x === allMonths[historicalValues.length - 1] || 
+                                        allMonths.indexOf(this.x) < historicalValues.length;
+                        
+                        if (isHistorical) {
+                            s += '<span style="color:#94a3b8;">●</span> <i>Historical data</i><br/>';
+                        } else {
+                            s += '<span style="color:#FFD700;">●</span> <i>AI Predictions</i><br/>';
+                        }
+                        
                         this.points.forEach(point => {
-                            if (point.y !== null) {
-                                s += '<span style="color:' + point.color + '">●</span> ' + 
+                            if (point.y !== null && point.y !== undefined) {
+                                s += '<span style="color:' + point.color + '">●</span> ' +
                                     point.series.name + ': <b>' + self.formatCurrency(point.y) + '</b><br/>';
                             }
                         });
+                        
                         return s;
                     }
                 },
                 plotOptions: {
-                    line: { lineWidth: 2, marker: { enabled: false } },
-                    area: { fillOpacity: 0.1, lineWidth: 1, marker: { enabled: false } }
+                    line: {
+                        lineWidth: 2,
+                        marker: {
+                            enabled: false,
+                            states: {
+                                hover: { enabled: true, radius: 5 }
+                            }
+                        }
+                    },
+                    area: {
+                        fillOpacity: 0.15,
+                        lineWidth: 2,
+                        marker: { enabled: false }
+                    }
                 },
                 series: [
                     {
-                        name: 'Historical (Real Data)',
+                        name: 'Historical Portfolio (Real Data)',
                         data: historicalSeries,
                         color: colors.historical,
                         lineWidth: 3,
-                        zIndex: 5
-                    },
-                    {
-                        type: 'area',
-                        name: 'Optimistic Scenario',
-                        data: optimisticSeries,
-                        color: colors.optimistic,
-                        dashStyle: 'Dash',
-                        fillColor: {
-                            linearGradient: { x1: 0, y1: 0, x2: 0, y2: 1 },
-                            stops: [[0, 'rgba(16, 185, 129, 0.2)'], [1, 'rgba(16, 185, 129, 0)']]
+                        zIndex: 5,
+                        marker: {
+                            enabled: false,
+                            states: {
+                                hover: { enabled: true, radius: 6, lineWidth: 2 }
+                            }
                         }
                     },
                     {
-                        name: 'AI Prediction',
+                        type: 'area',
+                        name: 'Optimistic Scenario (+1.5σ)',
+                        data: optimisticSeries,
+                        color: colors.optimistic,
+                        dashStyle: 'Dot',
+                        fillColor: {
+                            linearGradient: { x1: 0, y1: 0, x2: 0, y2: 1 },
+                            stops: [
+                                [0, this.isDarkMode ? 'rgba(16, 185, 129, 0.25)' : 'rgba(16, 185, 129, 0.15)'],
+                                [1, 'rgba(16, 185, 129, 0)']
+                            ]
+                        },
+                        zIndex: 2
+                    },
+                    {
+                        name: 'Realistic Prediction (AI)',
                         data: predictionSeries,
                         color: colors.prediction,
                         lineWidth: 3,
-                        dashStyle: 'Dot',
-                        zIndex: 4
+                        dashStyle: 'Dash',
+                        zIndex: 4,
+                        marker: {
+                            symbol: 'circle',
+                            enabled: false,
+                            states: {
+                                hover: { enabled: true, radius: 6, lineWidth: 2 }
+                            }
+                        }
                     },
                     {
                         type: 'area',
-                        name: 'Pessimistic Scenario',
+                        name: 'Pessimistic Scenario (-1.5σ)',
                         data: pessimisticSeries,
                         color: colors.pessimistic,
-                        dashStyle: 'Dash',
+                        dashStyle: 'Dot',
                         fillColor: {
                             linearGradient: { x1: 0, y1: 0, x2: 0, y2: 1 },
-                            stops: [[0, 'rgba(239, 68, 68, 0.2)'], [1, 'rgba(239, 68, 68, 0)']]
-                        }
+                            stops: [
+                                [0, this.isDarkMode ? 'rgba(239, 68, 68, 0.25)' : 'rgba(239, 68, 68, 0.15)'],
+                                [1, 'rgba(239, 68, 68, 0)']
+                            ]
+                        },
+                        zIndex: 1
                     }
                 ],
-                legend: { 
-                    align: 'center', 
-                    verticalAlign: 'bottom', 
-                    itemStyle: { color: colors.text } 
+                legend: {
+                    align: 'center',
+                    verticalAlign: 'bottom',
+                    itemStyle: {
+                        color: colors.text,
+                        fontWeight: '500'
+                    },
+                    itemHoverStyle: {
+                        color: colors.prediction
+                    }
                 },
                 credits: { enabled: false }
             });
             
-            console.log(`✅ AI Predictions: ${historicalValues.length} real historical months + ${this.predictionHorizon} predicted months`);
-            console.log(`📅 Today marker at: ${lastMonth} (index ${historicalValues.length - 1})`);
+            console.log(`✅ AI Predictions Chart Created:`, {
+                historicalMonths: historicalValues.length,
+                predictedMonths: this.predictionHorizon,
+                totalMonths: allMonths.length,
+                currentValue: this.formatCurrency(lastHistoricalValue),
+                predicted12M: this.formatCurrency(realisticPredictions[Math.min(11, realisticPredictions.length - 1)])
+            });
         },
-
 // ========== PDF EXPORT (NEW) ==========
         
         async exportReport() {
