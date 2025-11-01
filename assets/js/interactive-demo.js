@@ -1028,82 +1028,283 @@ const DemoApp = {
     },
     
     renderTechnicalChart: function(data, symbol) {
-        if (this.charts.technical) {
-            this.charts.technical.destroy();
-        }
-        
-        const reversedData = [...data].reverse();
-        const ohlc = reversedData.map(d => [
-            new Date(d.datetime).getTime(),
+    if (this.charts.technical) {
+        this.charts.technical.destroy();
+    }
+    
+    console.log('📊 Rendering technical chart for', symbol);
+    console.log('📊 Data received:', data);
+    console.log('📊 First data point:', data[0]);
+    
+    const reversedData = [...data].reverse();
+    
+    // Vérifier si on a des données OHLC complètes
+    const hasOHLC = reversedData[0] && 
+                    reversedData[0].open !== undefined && 
+                    reversedData[0].high !== undefined && 
+                    reversedData[0].low !== undefined && 
+                    reversedData[0].close !== undefined;
+    
+    console.log('📊 Has OHLC data:', hasOHLC);
+    
+    if (hasOHLC) {
+        // Mode Candlestick complet
+        this.renderCandlestickChart(reversedData, symbol);
+    } else {
+        // Mode simple (ligne) si pas de données OHLC
+        this.renderSimpleTechnicalChart(reversedData, symbol);
+    }
+},
+
+// NOUVELLE FONCTION : Graphique Candlestick complet
+renderCandlestickChart: function(reversedData, symbol) {
+    const ohlc = reversedData.map(d => {
+        const timestamp = new Date(d.datetime).getTime();
+        return [
+            timestamp,
             parseFloat(d.open),
             parseFloat(d.high),
             parseFloat(d.low),
             parseFloat(d.close)
-        ]);
-        
-        const volume = reversedData.map(d => [
-            new Date(d.datetime).getTime(),
-            parseFloat(d.volume || 0)
-        ]);
-        
-        this.charts.technical = Highcharts.stockChart('technicalChart', {
-            chart: {
-                backgroundColor: 'transparent',
-                height: 500
-            },
-            title: {
-                text: `${symbol} - Technical Analysis`,
+        ];
+    });
+    
+    const volume = reversedData.map(d => {
+        const timestamp = new Date(d.datetime).getTime();
+        return [timestamp, parseFloat(d.volume || 0)];
+    });
+    
+    console.log('📊 OHLC data points:', ohlc.length);
+    console.log('📊 Sample OHLC:', ohlc[0]);
+    
+    this.charts.technical = Highcharts.stockChart('technicalChart', {
+        chart: {
+            backgroundColor: 'transparent',
+            height: 500
+        },
+        title: {
+            text: `${symbol} - Technical Analysis`,
+            style: {
+                color: getComputedStyle(document.documentElement).getPropertyValue('--text-primary'),
+                fontSize: '1.125rem',
+                fontWeight: '700'
+            }
+        },
+        rangeSelector: {
+            selected: 1,
+            buttons: [{
+                type: 'month',
+                count: 1,
+                text: '1m'
+            }, {
+                type: 'month',
+                count: 3,
+                text: '3m'
+            }, {
+                type: 'month',
+                count: 6,
+                text: '6m'
+            }, {
+                type: 'all',
+                text: 'All'
+            }]
+        },
+        yAxis: [{
+            labels: {
+                align: 'right',
+                x: -3,
                 style: {
                     color: getComputedStyle(document.documentElement).getPropertyValue('--text-primary')
                 }
             },
-            yAxis: [{
-                labels: {
-                    align: 'right',
-                    x: -3
-                },
-                title: {
-                    text: 'Price'
-                },
-                height: '75%',
-                lineWidth: 2,
-                resize: {
-                    enabled: true
+            title: {
+                text: 'Price',
+                style: {
+                    color: getComputedStyle(document.documentElement).getPropertyValue('--text-primary')
                 }
-            }, {
-                labels: {
-                    align: 'right',
-                    x: -3
-                },
-                title: {
-                    text: 'Volume'
-                },
-                top: '75%',
-                height: '25%',
-                offset: 0,
-                lineWidth: 2
-            }],
-            series: [{
-                type: 'candlestick',
-                name: symbol,
-                data: ohlc,
-                color: '#EF4444',
-                upColor: '#10B981',
-                yAxis: 0
-            }, {
-                type: 'column',
-                name: 'Volume',
-                data: volume,
-                yAxis: 1,
-                color: '#3B82F6'
-            }],
-            credits: { enabled: false },
-            rangeSelector: {
-                enabled: true,
-                selected: 1
+            },
+            height: '70%',
+            lineWidth: 2
+        }, {
+            labels: {
+                align: 'right',
+                x: -3,
+                style: {
+                    color: getComputedStyle(document.documentElement).getPropertyValue('--text-primary')
+                }
+            },
+            title: {
+                text: 'Volume',
+                style: {
+                    color: getComputedStyle(document.documentElement).getPropertyValue('--text-primary')
+                }
+            },
+            top: '75%',
+            height: '25%',
+            offset: 0,
+            lineWidth: 2
+        }],
+        tooltip: {
+            split: true
+        },
+        series: [{
+            type: 'candlestick',
+            name: symbol,
+            data: ohlc,
+            color: '#EF4444',
+            upColor: '#10B981',
+            lineColor: '#EF4444',
+            upLineColor: '#10B981',
+            yAxis: 0,
+            dataGrouping: {
+                enabled: false
             }
-        });
-    },
+        }, {
+            type: 'column',
+            name: 'Volume',
+            data: volume,
+            yAxis: 1,
+            color: '#3B82F6',
+            opacity: 0.5
+        }],
+        credits: { enabled: false },
+        navigator: {
+            enabled: true
+        },
+        scrollbar: {
+            enabled: true
+        }
+    });
+    
+    console.log('✅ Candlestick chart rendered');
+},
+
+// NOUVELLE FONCTION : Graphique simple (fallback)
+renderSimpleTechnicalChart: function(reversedData, symbol) {
+    console.log('⚠️ OHLC data not available, using simple line chart');
+    
+    const prices = reversedData.map(d => {
+        const timestamp = new Date(d.datetime).getTime();
+        const price = parseFloat(d.close || d.price || 0);
+        return [timestamp, price];
+    });
+    
+    const volume = reversedData.map(d => {
+        const timestamp = new Date(d.datetime).getTime();
+        return [timestamp, parseFloat(d.volume || 0)];
+    });
+    
+    console.log('📊 Price data points:', prices.length);
+    console.log('📊 Sample price:', prices[0]);
+    
+    this.charts.technical = Highcharts.stockChart('technicalChart', {
+        chart: {
+            backgroundColor: 'transparent',
+            height: 500
+        },
+        title: {
+            text: `${symbol} - Technical Analysis`,
+            style: {
+                color: getComputedStyle(document.documentElement).getPropertyValue('--text-primary'),
+                fontSize: '1.125rem',
+                fontWeight: '700'
+            }
+        },
+        rangeSelector: {
+            selected: 1,
+            buttons: [{
+                type: 'month',
+                count: 1,
+                text: '1m'
+            }, {
+                type: 'month',
+                count: 3,
+                text: '3m'
+            }, {
+                type: 'month',
+                count: 6,
+                text: '6m'
+            }, {
+                type: 'all',
+                text: 'All'
+            }]
+        },
+        yAxis: [{
+            labels: {
+                align: 'right',
+                x: -3,
+                style: {
+                    color: getComputedStyle(document.documentElement).getPropertyValue('--text-primary')
+                }
+            },
+            title: {
+                text: 'Price',
+                style: {
+                    color: getComputedStyle(document.documentElement).getPropertyValue('--text-primary')
+                }
+            },
+            height: '70%',
+            lineWidth: 2
+        }, {
+            labels: {
+                align: 'right',
+                x: -3,
+                style: {
+                    color: getComputedStyle(document.documentElement).getPropertyValue('--text-primary')
+                }
+            },
+            title: {
+                text: 'Volume',
+                style: {
+                    color: getComputedStyle(document.documentElement).getPropertyValue('--text-primary')
+                }
+            },
+            top: '75%',
+            height: '25%',
+            offset: 0,
+            lineWidth: 2
+        }],
+        tooltip: {
+            split: true
+        },
+        series: [{
+            type: 'area',
+            name: 'Price',
+            data: prices,
+            color: '#3B82F6',
+            fillColor: {
+                linearGradient: {
+                    x1: 0,
+                    y1: 0,
+                    x2: 0,
+                    y2: 1
+                },
+                stops: [
+                    [0, 'rgba(59, 130, 246, 0.3)'],
+                    [1, 'rgba(59, 130, 246, 0.05)']
+                ]
+            },
+            lineWidth: 2,
+            yAxis: 0
+        }, {
+            type: 'column',
+            name: 'Volume',
+            data: volume,
+            yAxis: 1,
+            color: '#3B82F6',
+            opacity: 0.5
+        }],
+        credits: { enabled: false },
+        navigator: {
+            enabled: true
+        },
+        scrollbar: {
+            enabled: true
+        }
+    });
+    
+    console.log('✅ Simple technical chart rendered');
+},
     
     generateTechnicalSignals: function(symbol, data) {
         const container = document.getElementById('technicalSignals');
