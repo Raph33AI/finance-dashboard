@@ -401,30 +401,66 @@
             
             this.createAllCharts();
             this.displayKPIs();
-            this.showNotification(`Period: ${period}`, 'info');
+            
+            let periodLabel = period;
+            if (period === 'YTG') periodLabel = 'Year To Go (until Dec 31)';
+            else if (period === '2Y') periodLabel = '2 Years';
+            this.showNotification(`View: ${periodLabel}`, 'info');
         },
         
         getFilteredData: function() {
             if (this.financialData.length === 0) return [];
             
+            // Trouver le mois actuel dans les données
             const now = new Date();
-            let startDate;
+            const currentMonthStr = String(now.getMonth() + 1).padStart(2, '0') + '/' + now.getFullYear();
             
-            switch (this.currentPeriod) {
-                case '1M': startDate = new Date(now.getFullYear(), now.getMonth() - 1); break;
-                case '3M': startDate = new Date(now.getFullYear(), now.getMonth() - 3); break;
-                case '6M': startDate = new Date(now.getFullYear(), now.getMonth() - 6); break;
-                case '1Y': startDate = new Date(now.getFullYear() - 1, now.getMonth()); break;
-                case 'YTD': startDate = new Date(now.getFullYear(), 0, 1); break;
-                case 'ALL': return this.financialData;
-                default: startDate = new Date(now.getFullYear() - 1, now.getMonth());
+            let currentMonthIndex = this.financialData.findIndex(row => row.month === currentMonthStr);
+            
+            // Si mois actuel pas trouvé, prendre le dernier mois disponible
+            if (currentMonthIndex === -1) {
+                currentMonthIndex = this.financialData.length - 1;
+                console.warn('⚠️ Current month not found, using last available:', this.financialData[currentMonthIndex].month);
             }
             
-            return this.financialData.filter(row => {
-                const [month, year] = row.month.split('/').map(Number);
-                const rowDate = new Date(year, month - 1, 1);
-                return rowDate >= startDate;
-            });
+            let endIndex = this.financialData.length - 1;
+            
+            switch (this.currentPeriod) {
+                case '1M':
+                    endIndex = Math.min(currentMonthIndex + 1, this.financialData.length - 1);
+                    break;
+                case '3M':
+                    endIndex = Math.min(currentMonthIndex + 3, this.financialData.length - 1);
+                    break;
+                case '6M':
+                    endIndex = Math.min(currentMonthIndex + 6, this.financialData.length - 1);
+                    break;
+                case '1Y':
+                    endIndex = Math.min(currentMonthIndex + 12, this.financialData.length - 1);
+                    break;
+                case '2Y':
+                    endIndex = Math.min(currentMonthIndex + 24, this.financialData.length - 1);
+                    break;
+                case 'YTG':
+                    // Jusqu'à la fin de l'année en cours
+                    const endOfYear = new Date(now.getFullYear(), 11, 31); // 31 Dec
+                    const monthsToEndOfYear = (endOfYear.getFullYear() - now.getFullYear()) * 12 + 
+                                            (endOfYear.getMonth() - now.getMonth());
+                    endIndex = Math.min(currentMonthIndex + monthsToEndOfYear, this.financialData.length - 1);
+                    break;
+                case 'ALL':
+                    endIndex = this.financialData.length - 1;
+                    break;
+                default:
+                    endIndex = Math.min(currentMonthIndex + 12, this.financialData.length - 1);
+            }
+            
+            // Retourner les données du mois actuel jusqu'à l'horizon choisi
+            const filteredData = this.financialData.slice(currentMonthIndex, endIndex + 1);
+            
+            console.log(`📊 Period ${this.currentPeriod}: Showing ${filteredData.length} months from ${filteredData[0]?.month} to ${filteredData[filteredData.length - 1]?.month}`);
+            
+            return filteredData;
         },
         
         // ========== METRICS CALCULATION ==========
@@ -629,10 +665,19 @@
         // ========== KPI DISPLAY ==========
         
         displayKPIs: function() {
-            const metrics = this.calculateMetrics();
-            const filteredData = this.getFilteredData();
+            // TOUJOURS calculer les KPIs sur TOUTES les données historiques jusqu'à aujourd'hui
+            const now = new Date();
+            const currentMonthStr = String(now.getMonth() + 1).padStart(2, '0') + '/' + now.getFullYear();
             
-            if (filteredData.length === 0) {
+            let currentMonthIndex = this.financialData.findIndex(row => row.month === currentMonthStr);
+            if (currentMonthIndex === -1) {
+                currentMonthIndex = this.financialData.length - 1;
+            }
+            
+            const allHistoricalData = this.financialData.slice(0, currentMonthIndex + 1);
+            const metrics = this.calculateMetrics(allHistoricalData);
+            
+            if (allHistoricalData.length === 0) {
                 document.getElementById('kpiGrid').innerHTML = `
                     <div class='kpi-card neutral'>
                         <div class='kpi-value'>No Data</div>
@@ -642,7 +687,7 @@
                 return;
             }
             
-            const lastRow = filteredData[filteredData.length - 1];
+            const lastRow = allHistoricalData[allHistoricalData.length - 1];
             const currentMonth = lastRow.month;
             const [month, year] = currentMonth.split('/');
             const monthName = new Date(year, month - 1).toLocaleString('en-US', { month: 'long', year: 'numeric' });
@@ -659,7 +704,7 @@
                     icon: 'fa-wallet',
                     change: `+${this.formatPercent(metrics.totalReturn)}`,
                     changeClass: metrics.totalReturn >= 0 ? 'positive' : 'negative',
-                    footer: `${monthName} • Over ${filteredData.length} months`,
+                    footer: `${monthName} • ${allHistoricalData.length} months history`,
                     cardClass: currentPortfolio > 0 ? 'positive' : 'neutral'
                 },
                 {
@@ -683,7 +728,7 @@
                     value: this.formatPercent(metrics.annualizedReturn),
                     icon: 'fa-percentage',
                     change: `Volatility: ${metrics.volatility.toFixed(2)}%`,
-                    footer: `Period: ${this.currentPeriod}`,
+                    footer: `Historical performance`,
                     cardClass: metrics.annualizedReturn >= 5 ? 'positive' : 'neutral'
                 },
                 {
@@ -691,7 +736,7 @@
                     value: metrics.sharpeRatio.toFixed(2),
                     icon: 'fa-balance-scale',
                     change: this.interpretSharpe(metrics.sharpeRatio),
-                    footer: `Risk-adjusted`,
+                    footer: `Risk-adjusted return`,
                     cardClass: metrics.sharpeRatio > 1 ? 'positive' : 'neutral'
                 },
                 {
@@ -699,7 +744,7 @@
                     value: `-${metrics.maxDrawdown.toFixed(2)}%`,
                     icon: 'fa-arrow-down',
                     change: `Calmar: ${metrics.calmarRatio.toFixed(2)}`,
-                    footer: `Worst decline`,
+                    footer: `Worst historical decline`,
                     cardClass: metrics.maxDrawdown < 10 ? 'positive' : metrics.maxDrawdown < 20 ? 'neutral' : 'negative'
                 },
                 {
@@ -2070,36 +2115,39 @@
             if (modal) modal.classList.remove('active');
         },
         
-        // ✅ MEGA FIX: AI Predictions Chart with CURRENT MONTH and visible line
         createAIPredictionsChart: function() {
             if (!this.aiResults.lstm) {
                 console.warn('No LSTM results to display');
                 return;
             }
             
-            const filteredData = this.getFilteredData();
-            const historicalMonths = filteredData.map(row => row.month);
-            const historicalValues = filteredData.map(row => row.totalPortfolio || 0);
-            
-            // ✅ FIX: Trouver le VRAI mois actuel (pas le dernier des données)
+            // ✅ UTILISER TOUTES LES DONNÉES HISTORIQUES RÉELLES
             const now = new Date();
             const currentMonthStr = String(now.getMonth() + 1).padStart(2, '0') + '/' + now.getFullYear();
             
-            // Trouver l'index du mois actuel dans les données
-            let currentMonthIndex = historicalMonths.findIndex(m => m === currentMonthStr);
-            
-            // Si mois actuel pas trouvé, prendre le dernier mois disponible
+            let currentMonthIndex = this.financialData.findIndex(row => row.month === currentMonthStr);
             if (currentMonthIndex === -1) {
-                currentMonthIndex = historicalMonths.length - 1;
-                console.warn('⚠️ Current month not found in data, using last available month:', historicalMonths[currentMonthIndex]);
+                currentMonthIndex = this.financialData.length - 1;
+                console.warn('⚠️ Current month not found, using last available:', this.financialData[currentMonthIndex].month);
             }
             
-            // Prendre seulement les données jusqu'au mois actuel
-            const historicalMonthsUpToNow = historicalMonths.slice(0, currentMonthIndex + 1);
-            const historicalValuesUpToNow = historicalValues.slice(0, currentMonthIndex + 1);
+            // Prendre TOUTES les données historiques jusqu'au mois actuel
+            const historicalData = this.financialData.slice(0, currentMonthIndex + 1);
+            const historicalMonths = historicalData.map(row => row.month);
             
-            // Générer les mois futurs à partir du mois actuel
-            const lastMonth = historicalMonthsUpToNow[historicalMonthsUpToNow.length - 1];
+            // ✅ VRAIES VALEURS du Budget Dashboard (parseFloat pour éviter les bugs)
+            const historicalValues = historicalData.map(row => parseFloat(row.totalPortfolio) || 0);
+            
+            console.log('📊 AI Predictions - Using REAL data from Budget Dashboard:', {
+                historicalMonths: historicalMonths.length,
+                firstMonth: historicalMonths[0],
+                currentMonth: historicalMonths[historicalMonths.length - 1],
+                firstValue: historicalValues[0],
+                currentValue: historicalValues[historicalValues.length - 1]
+            });
+            
+            // Générer les mois futurs
+            const lastMonth = historicalMonths[historicalMonths.length - 1];
             const [m, y] = lastMonth.split('/').map(Number);
             const futureMonths = [];
             
@@ -2115,16 +2163,16 @@
                 futureMonths.push(String(month).padStart(2, '0') + '/' + year);
             }
             
-            const allMonths = [...historicalMonthsUpToNow, ...futureMonths];
+            const allMonths = [...historicalMonths, ...futureMonths];
             
             const realisticPredictions = this.aiResults.lstm.predictions.realistic.slice(0, this.predictionHorizon);
             const optimisticPredictions = this.aiResults.lstm.predictions.optimistic.slice(0, this.predictionHorizon);
             const pessimisticPredictions = this.aiResults.lstm.predictions.pessimistic.slice(0, this.predictionHorizon);
             
-            const historicalSeries = [...historicalValuesUpToNow, ...Array(this.predictionHorizon).fill(null)];
-            const predictionSeries = [...Array(historicalValuesUpToNow.length).fill(null), ...realisticPredictions];
-            const optimisticSeries = [...Array(historicalValuesUpToNow.length).fill(null), ...optimisticPredictions];
-            const pessimisticSeries = [...Array(historicalValuesUpToNow.length).fill(null), ...pessimisticPredictions];
+            const historicalSeries = [...historicalValues, ...Array(this.predictionHorizon).fill(null)];
+            const predictionSeries = [...Array(historicalValues.length).fill(null), ...realisticPredictions];
+            const optimisticSeries = [...Array(historicalValues.length).fill(null), ...optimisticPredictions];
+            const pessimisticSeries = [...Array(historicalValues.length).fill(null), ...pessimisticPredictions];
             
             if (this.charts.aiPredictions) this.charts.aiPredictions.destroy();
             
@@ -2138,7 +2186,7 @@
                     style: { color: colors.title, fontWeight: '700' }
                 },
                 subtitle: {
-                    text: 'Based on LSTM model and Monte Carlo simulation',
+                    text: 'Based on real portfolio data, LSTM model and Monte Carlo simulation',
                     style: { color: colors.text }
                 },
                 xAxis: {
@@ -2147,16 +2195,16 @@
                     labels: { 
                         rotation: -45, 
                         style: { fontSize: '10px', color: colors.text },
-                        step: Math.max(1, Math.floor(allMonths.length / 12))
+                        step: Math.max(1, Math.floor(allMonths.length / 15))
                     },
                     plotLines: [{
                         color: colors.prediction,
-                        width: 2,
-                        value: historicalValuesUpToNow.length - 0.5,
+                        width: 3,
+                        value: historicalValues.length - 0.5,
                         dashStyle: 'Dash',
                         label: {
                             text: 'Today (' + lastMonth + ')',
-                            style: { color: colors.prediction, fontWeight: 'bold' }
+                            style: { color: colors.prediction, fontWeight: 'bold', fontSize: '12px' }
                         },
                         zIndex: 5
                     }]
@@ -2177,7 +2225,7 @@
                         this.points.forEach(point => {
                             if (point.y !== null) {
                                 s += '<span style="color:' + point.color + '">●</span> ' + 
-                                     point.series.name + ': <b>' + self.formatCurrency(point.y) + '</b><br/>';
+                                    point.series.name + ': <b>' + self.formatCurrency(point.y) + '</b><br/>';
                             }
                         });
                         return s;
@@ -2189,7 +2237,7 @@
                 },
                 series: [
                     {
-                        name: 'Historical',
+                        name: 'Historical (Real Data)',
                         data: historicalSeries,
                         color: colors.historical,
                         lineWidth: 3,
@@ -2234,8 +2282,8 @@
                 credits: { enabled: false }
             });
             
-            console.log(`✅ AI Predictions chart created: ${historicalValuesUpToNow.length} historical + ${this.predictionHorizon} future months`);
-            console.log(`📅 Today marker at: ${lastMonth} (index ${historicalValuesUpToNow.length - 1})`);
+            console.log(`✅ AI Predictions: ${historicalValues.length} real historical months + ${this.predictionHorizon} predicted months`);
+            console.log(`📅 Today marker at: ${lastMonth} (index ${historicalValues.length - 1})`);
         },
 
 // ========== PDF EXPORT (NEW) ==========
