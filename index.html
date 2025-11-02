@@ -1190,8 +1190,22 @@
         </div>
     </footer>
 
-    <!-- Scripts -->
+    <!-- ═══════════════════════════════════════════════════════════════
+         SCRIPTS - ORDER IS IMPORTANT!
+         ═══════════════════════════════════════════════════════════════ -->
+    
+    <!-- Firebase SDK (version 9 en mode compat) -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    
+    <!-- Firebase Configuration -->
+    <script src="assets/js/firebase-config.js"></script>
+    
+    <!-- Chart.js -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+    
+    <!-- Application Scripts -->
     <script src="assets/js/common.js"></script>
     <script src="assets/js/landing.js"></script>
     <script src="assets/js/auth-system.js"></script>
