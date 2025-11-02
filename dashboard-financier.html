@@ -15,6 +15,7 @@
     <!-- Styles -->
     <link rel='stylesheet' href='assets/css/common.css'>
     <link rel='stylesheet' href='assets/css/sidebar.css'>
+    <link rel="stylesheet" href="assets/css/user-menu.css">
     <link rel='stylesheet' href='assets/css/dashboard.css'>
 
     <!-- ===== AJOUTE CES LIGNES (FIREBASE) ===== -->
@@ -122,15 +123,56 @@
             </nav>
             
             <!-- Sidebar Footer -->
-            <div class="sidebar-footer">
-                <div class="user-info" id="userInfoSection">
-                    <button class="user-profile-btn" id="userProfileBtn" aria-label="Accéder à mon profil">
-                        <i class="fas fa-user-circle"></i>
-                        <div class="user-details">
-                            <span class="user-name">Connexion</span>
-                            <span class="user-status">Cliquez pour vous connecter</span>
+            <div class="user-profile-menu">
+                <!-- Avatar utilisateur -->
+                <div class="user-avatar-wrapper" id="userMenuToggle">
+                    <img data-user-photo src="https://ui-avatars.com/api/?name=User&background=2563eb&color=fff" 
+                        alt="Avatar" 
+                        class="user-avatar">
+                    <div class="user-status-indicator"></div>
+                </div>
+                
+                <!-- Dropdown menu -->
+                <div class="user-dropdown-menu" id="userDropdown">
+                    <div class="user-dropdown-header">
+                        <img data-user-photo src="https://ui-avatars.com/api/?name=User&background=2563eb&color=fff" 
+                            alt="Avatar" 
+                            class="dropdown-avatar">
+                        <div class="user-dropdown-info">
+                            <h4 data-user-name class="user-dropdown-name">Chargement...</h4>
+                            <p data-user-email class="user-dropdown-email">Chargement...</p>
                         </div>
-                        <i class="fas fa-chevron-right arrow-icon"></i>
+                    </div>
+                    
+                    <div class="user-dropdown-divider"></div>
+                    
+                    <div class="user-dropdown-plan">
+                        <i class="fas fa-crown"></i>
+                        <span>Plan : <strong data-user-plan>Gratuit</strong></span>
+                    </div>
+                    
+                    <div class="user-dropdown-divider"></div>
+                    
+                    <nav class="user-dropdown-nav">
+                        <a href="user-profile.html" class="dropdown-item">
+                            <i class="fas fa-user"></i>
+                            <span>Mon profil</span>
+                        </a>
+                        <a href="settings.html" class="dropdown-item">
+                            <i class="fas fa-cog"></i>
+                            <span>Paramètres</span>
+                        </a>
+                        <a href="#" class="dropdown-item">
+                            <i class="fas fa-question-circle"></i>
+                            <span>Aide</span>
+                        </a>
+                    </nav>
+                    
+                    <div class="user-dropdown-divider"></div>
+                    
+                    <button onclick="logout()" class="dropdown-item logout-btn">
+                        <i class="fas fa-sign-out-alt"></i>
+                        <span>Déconnexion</span>
                     </button>
                 </div>
             </div>
