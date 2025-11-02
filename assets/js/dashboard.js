@@ -1192,69 +1192,37 @@ const Dashboard = (function() {
 window.addEventListener('DOMContentLoaded', Dashboard.init);
 
 /* ============================================
-   MENU UTILISATEUR - TOGGLE
+   SIDEBAR USER MENU - Toggle
    ============================================ */
 
 document.addEventListener('DOMContentLoaded', () => {
-    const userMenuToggle = document.getElementById('userMenuToggle');
-    const userDropdown = document.getElementById('userDropdown');
+    const sidebarUserTrigger = document.getElementById('sidebarUserTrigger');
+    const sidebarUserDropdown = document.getElementById('sidebarUserDropdown');
     
-    if (userMenuToggle && userDropdown) {
-        // Toggle menu au clic
-        userMenuToggle.addEventListener('click', (e) => {
+    if (sidebarUserTrigger && sidebarUserDropdown) {
+        // Toggle dropdown au clic
+        sidebarUserTrigger.addEventListener('click', (e) => {
             e.stopPropagation();
-            userDropdown.classList.toggle('active');
+            
+            // Toggle classes
+            sidebarUserTrigger.classList.toggle('active');
+            sidebarUserDropdown.classList.toggle('active');
         });
         
-        // Fermer le menu si on clique ailleurs
+        // Fermer le dropdown si on clique ailleurs
         document.addEventListener('click', (e) => {
-            if (!userDropdown.contains(e.target) && !userMenuToggle.contains(e.target)) {
-                userDropdown.classList.remove('active');
+            if (!sidebarUserDropdown.contains(e.target) && 
+                !sidebarUserTrigger.contains(e.target)) {
+                sidebarUserTrigger.classList.remove('active');
+                sidebarUserDropdown.classList.remove('active');
             }
         });
         
-        // Empêcher la fermeture si on clique dans le menu
-        userDropdown.addEventListener('click', (e) => {
+        // Empêcher la fermeture si on clique dans le dropdown
+        sidebarUserDropdown.addEventListener('click', (e) => {
             e.stopPropagation();
         });
     }
 });
 
-/* ============================================
-   CHARGEMENT DES DONNÉES UTILISATEUR
-   ============================================ */
-
-// Écouter l'événement quand les données utilisateur sont chargées
-window.addEventListener('userDataLoaded', (e) => {
-    const userData = e.detail;
-    console.log('✅ Données utilisateur reçues dans le dashboard:', userData);
-    
-    // Mettre à jour l'interface avec les données
-    updateDashboardWithUserData(userData);
-});
-
-/**
- * Mettre à jour le dashboard avec les données utilisateur
- */
-function updateDashboardWithUserData(userData) {
-    // Afficher un message de bienvenue personnalisé
-    const welcomeMessage = document.querySelector('.welcome-message');
-    if (welcomeMessage) {
-        const firstName = userData.firstName || userData.displayName?.split(' ')[0] || 'Utilisateur';
-        welcomeMessage.textContent = `Bienvenue, ${firstName} !`;
-    }
-    
-    // Afficher le plan de l'utilisateur
-    const planBadge = document.querySelector('[data-user-plan]');
-    if (planBadge && userData.plan) {
-        const planNames = {
-            'free': 'Gratuit',
-            'professional': 'Professionnel',
-            'enterprise': 'Enterprise'
-        };
-        planBadge.textContent = planNames[userData.plan] || 'Gratuit';
-    }
-    
-    // Tu peux ajouter d'autres personnalisations ici
-    console.log('✅ Dashboard mis à jour avec les données utilisateur');
-}
+console.log('✅ Menu utilisateur sidebar initialisé');

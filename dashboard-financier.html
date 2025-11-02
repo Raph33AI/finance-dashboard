@@ -33,8 +33,9 @@
 </head>
 <body>
     <div class='layout-wrapper'>
-        <!-- Sidebar Navigation - VERSION COMPLÈTE -->
+        <!-- Sidebar Navigation - VERSION CORRIGÉE -->
         <aside class='sidebar' id='sidebar'>
+            <!-- Header -->
             <div class='sidebar-header'>
                 <h2><i class='fas fa-chart-line'></i> Finance Hub</h2>
                 <button class='sidebar-toggle' id='sidebarToggle'>
@@ -42,6 +43,7 @@
                 </button>
             </div>
             
+            <!-- Navigation -->
             <nav class='sidebar-nav'>
                 <!-- ✅ Landing Page / Accueil -->
                 <div class='nav-section'>
@@ -63,7 +65,6 @@
                             <i class='fas fa-home'></i>
                             <span>Dashboard Budget</span>
                         </a>
-                        <!-- 🆕 NOUVEAU LIEN -->
                         <a href='investment-analytics.html' class='nav-link'>
                             <i class='fas fa-chart-bar'></i>
                             <span>Investment Analytics</span>
@@ -122,60 +123,62 @@
                 </div>
             </nav>
             
-            <!-- Sidebar Footer -->
-            <div class="user-profile-menu">
-                <!-- Avatar utilisateur -->
-                <div class="user-avatar-wrapper" id="userMenuToggle">
-                    <img data-user-photo src="https://ui-avatars.com/api/?name=User&background=2563eb&color=fff" 
-                        alt="Avatar" 
-                        class="user-avatar">
-                    <div class="user-status-indicator"></div>
-                </div>
-                
-                <!-- Dropdown menu -->
-                <div class="user-dropdown-menu" id="userDropdown">
-                    <div class="user-dropdown-header">
-                        <img data-user-photo src="https://ui-avatars.com/api/?name=User&background=2563eb&color=fff" 
+            <!-- ===== SIDEBAR FOOTER - MENU UTILISATEUR ===== -->
+            <div class="sidebar-footer">
+                <div class="sidebar-user-menu">
+                    <!-- Trigger (élément cliquable) -->
+                    <div class="sidebar-user-trigger" id="sidebarUserTrigger">
+                        <img data-user-photo 
+                            src="https://ui-avatars.com/api/?name=User&background=2563eb&color=fff" 
                             alt="Avatar" 
-                            class="dropdown-avatar">
-                        <div class="user-dropdown-info">
-                            <h4 data-user-name class="user-dropdown-name">Chargement...</h4>
-                            <p data-user-email class="user-dropdown-email">Chargement...</p>
+                            class="sidebar-user-avatar">
+                        <div class="sidebar-user-info">
+                            <span data-user-name class="sidebar-user-name">Utilisateur</span>
+                            <span data-user-plan class="sidebar-user-plan">Gratuit</span>
                         </div>
+                        <i class="fas fa-chevron-up sidebar-user-arrow"></i>
                     </div>
                     
-                    <div class="user-dropdown-divider"></div>
-                    
-                    <div class="user-dropdown-plan">
-                        <i class="fas fa-crown"></i>
-                        <span>Plan : <strong data-user-plan>Gratuit</strong></span>
+                    <!-- Dropdown (s'ouvre vers le haut) -->
+                    <div class="sidebar-user-dropdown" id="sidebarUserDropdown">
+                        <div class="user-dropdown-header">
+                            <img data-user-photo 
+                                src="https://ui-avatars.com/api/?name=User&background=2563eb&color=fff" 
+                                alt="Avatar" 
+                                class="user-dropdown-avatar">
+                            <div class="user-dropdown-details">
+                                <h4 data-user-name class="user-dropdown-name">Utilisateur</h4>
+                                <p data-user-email class="user-dropdown-email">email@exemple.com</p>
+                            </div>
+                        </div>
+                        
+                        <div class="user-dropdown-divider"></div>
+                        
+                        <nav class="user-dropdown-links">
+                            <a href="user-profile.html" class="user-dropdown-link">
+                                <i class="fas fa-user"></i>
+                                <span>Mon profil</span>
+                            </a>
+                            <a href="settings.html" class="user-dropdown-link">
+                                <i class="fas fa-cog"></i>
+                                <span>Paramètres</span>
+                            </a>
+                            <a href="#" class="user-dropdown-link">
+                                <i class="fas fa-question-circle"></i>
+                                <span>Aide</span>
+                            </a>
+                        </nav>
+                        
+                        <div class="user-dropdown-divider"></div>
+                        
+                        <button onclick="logout()" class="user-dropdown-logout">
+                            <i class="fas fa-sign-out-alt"></i>
+                            <span>Déconnexion</span>
+                        </button>
                     </div>
-                    
-                    <div class="user-dropdown-divider"></div>
-                    
-                    <nav class="user-dropdown-nav">
-                        <a href="user-profile.html" class="dropdown-item">
-                            <i class="fas fa-user"></i>
-                            <span>Mon profil</span>
-                        </a>
-                        <a href="settings.html" class="dropdown-item">
-                            <i class="fas fa-cog"></i>
-                            <span>Paramètres</span>
-                        </a>
-                        <a href="#" class="dropdown-item">
-                            <i class="fas fa-question-circle"></i>
-                            <span>Aide</span>
-                        </a>
-                    </nav>
-                    
-                    <div class="user-dropdown-divider"></div>
-                    
-                    <button onclick="logout()" class="dropdown-item logout-btn">
-                        <i class="fas fa-sign-out-alt"></i>
-                        <span>Déconnexion</span>
-                    </button>
                 </div>
             </div>
+            <!-- ===== FIN SIDEBAR FOOTER ===== -->
         </aside>
         
         <!-- Main Content Area -->

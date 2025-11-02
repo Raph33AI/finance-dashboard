@@ -332,6 +332,7 @@ body.dark-mode .main-content {
     border-top: 1px solid rgb(255 255 255 / 0.1);
     padding: 20px;
     flex-shrink: 0;
+    margin-top: auto; /* ✅ Force le footer à rester en bas */
 }
 
 .user-info {

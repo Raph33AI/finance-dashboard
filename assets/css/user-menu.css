@@ -1,63 +1,108 @@
 /* ============================================
-   USER MENU - Menu utilisateur
+   SIDEBAR USER MENU - Menu utilisateur intégré
    ============================================ */
 
-.user-profile-menu {
+/* Footer de la sidebar (en bas) */
+.sidebar-footer {
+    margin-top: auto;
+    padding: 1rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(0, 0, 0, 0.2);
+}
+
+/* Menu utilisateur */
+.sidebar-user-menu {
     position: relative;
 }
 
-/* Avatar */
-.user-avatar-wrapper {
-    position: relative;
-    cursor: pointer;
+/* Trigger (élément cliquable) */
+.sidebar-user-trigger {
     display: flex;
     align-items: center;
     gap: 0.75rem;
+    padding: 0.75rem;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    background: transparent;
+    border: none;
+    width: 100%;
 }
 
-.user-avatar {
+.sidebar-user-trigger:hover {
+    background: rgba(59, 130, 246, 0.1);
+}
+
+.sidebar-user-trigger.active {
+    background: rgba(59, 130, 246, 0.15);
+}
+
+/* Avatar */
+.sidebar-user-avatar {
     width: 40px;
     height: 40px;
     border-radius: 50%;
-    border: 2px solid var(--border-color);
+    border: 2px solid rgba(59, 130, 246, 0.5);
     object-fit: cover;
-    transition: all 0.3s ease;
+    flex-shrink: 0;
 }
 
-.user-avatar-wrapper:hover .user-avatar {
-    border-color: var(--primary-color);
-    transform: scale(1.05);
+/* Infos utilisateur */
+.sidebar-user-info {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.125rem;
 }
 
-.user-status-indicator {
+.sidebar-user-name {
+    font-size: 0.9375rem;
+    font-weight: 600;
+    color: #fff;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.sidebar-user-plan {
+    font-size: 0.75rem;
+    color: rgba(255, 255, 255, 0.6);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+/* Flèche */
+.sidebar-user-arrow {
+    font-size: 0.875rem;
+    color: rgba(255, 255, 255, 0.6);
+    transition: transform 0.3s ease;
+    flex-shrink: 0;
+}
+
+.sidebar-user-trigger.active .sidebar-user-arrow {
+    transform: rotate(180deg);
+}
+
+/* Dropdown (s'ouvre vers le haut) */
+.sidebar-user-dropdown {
     position: absolute;
-    bottom: 0;
+    bottom: calc(100% + 0.5rem);
+    left: 0;
     right: 0;
-    width: 12px;
-    height: 12px;
-    background: var(--success-color);
-    border: 2px solid var(--background-primary);
-    border-radius: 50%;
-}
-
-/* Dropdown Menu */
-.user-dropdown-menu {
-    position: absolute;
-    top: calc(100% + 1rem);
-    right: 0;
-    width: 280px;
-    background: var(--background-primary);
-    border: 1px solid var(--border-color);
+    background: #1e293b;
+    border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 12px;
-    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.3);
     opacity: 0;
     visibility: hidden;
-    transform: translateY(-10px);
+    transform: translateY(10px);
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     z-index: 1000;
+    overflow: hidden;
 }
 
-.user-dropdown-menu.active {
+.sidebar-user-dropdown.active {
     opacity: 1;
     visibility: visible;
     transform: translateY(0);
@@ -67,26 +112,27 @@
 .user-dropdown-header {
     display: flex;
     align-items: center;
-    gap: 1rem;
-    padding: 1.25rem;
+    gap: 0.75rem;
+    padding: 1rem;
 }
 
-.dropdown-avatar {
-    width: 56px;
-    height: 56px;
-    border-radius: 12px;
+.user-dropdown-avatar {
+    width: 48px;
+    height: 48px;
+    border-radius: 10px;
     object-fit: cover;
+    flex-shrink: 0;
 }
 
-.user-dropdown-info {
+.user-dropdown-details {
     flex: 1;
     min-width: 0;
 }
 
 .user-dropdown-name {
-    font-size: 1rem;
+    font-size: 0.9375rem;
     font-weight: 700;
-    color: var(--text-primary);
+    color: #fff;
     margin: 0 0 0.25rem 0;
     white-space: nowrap;
     overflow: hidden;
@@ -94,98 +140,130 @@
 }
 
 .user-dropdown-email {
-    font-size: 0.875rem;
-    color: var(--text-secondary);
+    font-size: 0.8125rem;
+    color: rgba(255, 255, 255, 0.6);
     margin: 0;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
 }
 
-/* Plan badge */
-.user-dropdown-plan {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.75rem 1.25rem;
-    background: linear-gradient(135deg, rgba(37, 99, 235, 0.1) 0%, rgba(139, 92, 246, 0.1) 100%);
-    margin: 0 0.75rem;
-    border-radius: 8px;
-    font-size: 0.875rem;
-    color: var(--text-secondary);
-}
-
-.user-dropdown-plan i {
-    color: var(--warning-color);
-}
-
-.user-dropdown-plan strong {
-    color: var(--primary-color);
-    font-weight: 700;
-}
-
 /* Divider */
 .user-dropdown-divider {
     height: 1px;
-    background: var(--border-color);
-    margin: 0.5rem 0;
+    background: rgba(255, 255, 255, 0.1);
+    margin: 0;
 }
 
-/* Navigation items */
-.user-dropdown-nav {
+/* Links */
+.user-dropdown-links {
     padding: 0.5rem;
 }
 
-.dropdown-item {
+.user-dropdown-link {
     display: flex;
     align-items: center;
     gap: 0.75rem;
-    padding: 0.75rem 1rem;
+    padding: 0.75rem 0.875rem;
     border-radius: 8px;
-    color: var(--text-secondary);
+    color: rgba(255, 255, 255, 0.8);
     text-decoration: none;
-    font-size: 0.9375rem;
+    font-size: 0.875rem;
     font-weight: 500;
     transition: all 0.3s ease;
-    cursor: pointer;
+}
+
+.user-dropdown-link:hover {
+    background: rgba(59, 130, 246, 0.1);
+    color: #fff;
+}
+
+.user-dropdown-link i {
+    font-size: 1rem;
+    width: 20px;
+    text-align: center;
+    color: rgba(255, 255, 255, 0.6);
+}
+
+.user-dropdown-link:hover i {
+    color: #3b82f6;
+}
+
+/* Logout button */
+.user-dropdown-logout {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.875rem;
     border: none;
     background: transparent;
-    width: 100%;
+    color: #ef4444;
+    font-size: 0.875rem;
+    font-weight: 600;
+    cursor: pointer;
+    border-radius: 0 0 12px 12px;
+    transition: all 0.3s ease;
     text-align: left;
 }
 
-.dropdown-item:hover {
-    background: var(--background-tertiary);
-    color: var(--text-primary);
+.user-dropdown-logout:hover {
+    background: rgba(239, 68, 68, 0.1);
 }
 
-.dropdown-item i {
-    font-size: 1.125rem;
+.user-dropdown-logout i {
+    font-size: 1rem;
     width: 20px;
     text-align: center;
 }
 
-/* Logout button */
-.logout-btn {
-    color: var(--error-color);
+/* Sidebar collapsed (réduite) */
+.sidebar.collapsed .sidebar-user-info,
+.sidebar.collapsed .sidebar-user-arrow {
+    display: none;
 }
 
-.logout-btn:hover {
-    background: rgba(239, 68, 68, 0.1);
-    color: var(--error-color);
+.sidebar.collapsed .sidebar-user-trigger {
+    justify-content: center;
+    padding: 0.75rem;
+}
+
+.sidebar.collapsed .sidebar-user-dropdown {
+    left: calc(100% + 0.5rem);
+    right: auto;
+    bottom: 0;
+    width: 280px;
+    transform: translateX(-10px);
+}
+
+.sidebar.collapsed .sidebar-user-dropdown.active {
+    transform: translateX(0);
 }
 
 /* Dark mode */
-body.dark-mode .user-dropdown-menu {
-    background: var(--background-secondary);
-    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+body.dark-mode .sidebar-user-dropdown {
+    background: #0f172a;
+    border-color: rgba(255, 255, 255, 0.08);
 }
 
-/* Responsive */
-@media (max-width: 640px) {
-    .user-dropdown-menu {
+body.dark-mode .sidebar-user-trigger:hover {
+    background: rgba(59, 130, 246, 0.15);
+}
+
+body.dark-mode .user-dropdown-divider {
+    background: rgba(255, 255, 255, 0.08);
+}
+
+/* Responsive - Mobile */
+@media (max-width: 768px) {
+    .sidebar-footer {
+        position: relative;
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+        padding: 0.75rem;
+    }
+    
+    .sidebar-user-dropdown {
         position: fixed;
-        top: auto;
         bottom: 0;
         left: 0;
         right: 0;
@@ -194,7 +272,23 @@ body.dark-mode .user-dropdown-menu {
         transform: translateY(100%);
     }
     
-    .user-dropdown-menu.active {
+    .sidebar-user-dropdown.active {
         transform: translateY(0);
     }
+}
+
+/* Animation supplémentaire */
+@keyframes slideUpFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.sidebar-user-dropdown.active {
+    animation: slideUpFadeIn 0.3s ease;
 }
