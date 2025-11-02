@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Paramètres - FinancePro</title>
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Styles -->
+    <link rel="stylesheet" href="assets/css/common.css">
+    <link rel="stylesheet" href="assets/css/sidebar.css">
+    <link rel="stylesheet" href="assets/css/user-menu.css">
+    <link rel="stylesheet" href="assets/css/settings.css">
+    
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    
+    <!-- Configuration Firebase -->
+    <script src="assets/js/firebase-config.js"></script>
+    
+    <!-- Protection de la page -->
+    <script src="assets/js/auth-guard.js"></script>
+</head>
+<body>
+    
+    <div class="layout-wrapper">
+        
+        <!-- SIDEBAR (copie ta sidebar ici - même que user-profile.html) -->
+        <aside class='sidebar' id='sidebar'>
+            <!-- ... Même sidebar que user-profile.html ... -->
+        </aside>
+        
+        <!-- CONTENU PRINCIPAL -->
+        <main class="main-content">
+            
+            <!-- Header -->
+            <div class="top-header">
+                <div class="header-content-wrapper">
+                    <div class="header-left">
+                        <button class='mobile-toggle' id='mobileToggle'>
+                            <i class='fas fa-bars'></i>
+                        </button>
+                        <h1><i class="fas fa-cog"></i> Paramètres</h1>
+                    </div>
+                    <div class="header-right">
+                        <a href="dashboard-financier.html" class="btn-secondary">
+                            <i class="fas fa-arrow-left"></i>
+                            Retour au dashboard
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Contenu -->
+            <div class="container">
+                <div class="settings-container">
+                    
+                    <!-- Navigation Paramètres -->
+                    <div class="settings-nav">
+                        <button class="settings-nav-item active" data-tab="general">
+                            <i class="fas fa-sliders-h"></i>
+                            <span>Général</span>
+                        </button>
+                        <button class="settings-nav-item" data-tab="appearance">
+                            <i class="fas fa-palette"></i>
+                            <span>Apparence</span>
+                        </button>
+                        <button class="settings-nav-item" data-tab="notifications">
+                            <i class="fas fa-bell"></i>
+                            <span>Notifications</span>
+                        </button>
+                        <button class="settings-nav-item" data-tab="privacy">
+                            <i class="fas fa-shield-alt"></i>
+                            <span>Confidentialité</span>
+                        </button>
+                        <button class="settings-nav-item" data-tab="data">
+                            <i class="fas fa-database"></i>
+                            <span>Données</span>
+                        </button>
+                    </div>
+                    
+                    <!-- Contenu Paramètres -->
+                    <div class="settings-content">
+                        
+                        <!-- TAB: Général -->
+                        <div class="settings-tab active" id="tab-general">
+                            <h2>Paramètres généraux</h2>
+                            
+                            <div class="settings-section">
+                                <h3>Langue & Région</h3>
+                                <div class="setting-item">
+                                    <div class="setting-info">
+                                        <label for="language">Langue de l'interface</label>
+                                        <p>Choisissez la langue d'affichage de l'application</p>
+                                    </div>
+                                    <select id="language" class="setting-select">
+                                        <option value="fr" selected>Français</option>
+                                        <option value="en">English</option>
+                                        <option value="es">Español</option>
+                                        <option value="de">Deutsch</option>
+                                    </select>
+                                </div>
+                                
+                                <div class="setting-item">
+                                    <div class="setting-info">
+                                        <label for="timezone">Fuseau horaire</label>
+                                        <p>Définit comment les dates et heures sont affichées</p>
+                                    </div>
+                                    <select id="timezone" class="setting-select">
+                                        <option value="Europe/Paris" selected>Paris (GMT+1)</option>
+                                        <option value="America/New_York">New York (GMT-5)</option>
+                                        <option value="Asia/Tokyo">Tokyo (GMT+9)</option>
+                                        <option value="Europe/London">Londres (GMT+0)</option>
+                                    </select>
+                                </div>
+                                
+                                <div class="setting-item">
+                                    <div class="setting-info">
+                                        <label for="currency">Devise par défaut</label>
+                                        <p>Devise utilisée pour les analyses financières</p>
+                                    </div>
+                                    <select id="currency" class="setting-select">
+                                        <option value="EUR" selected>Euro (€)</option>
+                                        <option value="USD">Dollar US ($)</option>
+                                        <option value="GBP">Livre Sterling (£)</option>
+                                        <option value="JPY">Yen (¥)</option>
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <div class="settings-actions">
+                                <button class="btn-save" id="saveGeneralSettings">
+                                    <i class="fas fa-save"></i>
+                                    Enregistrer les modifications
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- TAB: Apparence -->
+                        <div class="settings-tab" id="tab-appearance">
+                            <h2>Apparence</h2>
+                            
+                            <div class="settings-section">
+                                <h3>Thème</h3>
+                                <div class="theme-selector">
+                                    <div class="theme-option" data-theme="light">
+                                        <div class="theme-preview light">
+                                            <div class="preview-header"></div>
+                                            <div class="preview-content"></div>
+                                        </div>
+                                        <h4>Clair</h4>
+                                        <p>Thème lumineux pour la journée</p>
+                                    </div>
+                                    
+                                    <div class="theme-option active" data-theme="dark">
+                                        <div class="theme-preview dark">
+                                            <div class="preview-header"></div>
+                                            <div class="preview-content"></div>
+                                        </div>
+                                        <h4>Sombre</h4>
+                                        <p>Thème sombre pour les yeux</p>
+                                    </div>
+                                    
+                                    <div class="theme-option" data-theme="auto">
+                                        <div class="theme-preview auto">
+                                            <div class="preview-header"></div>
+                                            <div class="preview-content"></div>
+                                        </div>
+                                        <h4>Automatique</h4>
+                                        <p>S'adapte à votre système</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="settings-section">
+                                <h3>Interface</h3>
+                                <div class="setting-item">
+                                    <div class="setting-info">
+                                        <label>Animations</label>
+                                        <p>Activer les animations de l'interface</p>
+                                    </div>
+                                    <label class="toggle-switch">
+                                        <input type="checkbox" id="enableAnimations" checked>
+                                        <span class="toggle-slider"></span>
+                                    </label>
+                                </div>
+                                
+                                <div class="setting-item">
+                                    <div class="setting-info">
+                                        <label>Sidebar réduite par défaut</label>
+                                        <p>La sidebar sera réduite au chargement</p>
+                                    </div>
+                                    <label class="toggle-switch">
+                                        <input type="checkbox" id="collapsedSidebar">
+                                        <span class="toggle-slider"></span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- TAB: Notifications -->
+                        <div class="settings-tab" id="tab-notifications">
+                            <h2>Notifications</h2>
+                            
+                            <div class="settings-section">
+                                <h3>Notifications Email</h3>
+                                <div class="setting-item">
+                                    <div class="setting-info">
+                                        <label>Newsletter hebdomadaire</label>
+                                        <p>Recevoir un résumé hebdomadaire des marchés</p>
+                                    </div>
+                                    <label class="toggle-switch">
+                                        <input type="checkbox" id="weeklyNewsletter" checked>
+                                        <span class="toggle-slider"></span>
+                                    </label>
+                                </div>
+                                
+                                <div class="setting-item">
+                                    <div class="setting-info">
+                                        <label>Alertes de prix</label>
+                                        <p>Recevoir des alertes quand vos seuils sont atteints</p>
+                                    </div>
+                                    <label class="toggle-switch">
+                                        <input type="checkbox" id="priceAlerts" checked>
+                                        <span class="toggle-slider"></span>
+                                    </label>
+                                </div>
+                                
+                                <div class="setting-item">
+                                    <div class="setting-info">
+                                        <label>Nouvelles fonctionnalités</label>
+                                        <p>Être informé des nouvelles fonctionnalités</p>
+                                    </div>
+                                    <label class="toggle-switch">
+                                        <input type="checkbox" id="featureUpdates" checked>
+                                        <span class="toggle-slider"></span>
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            <div class="settings-section">
+                                <h3>Notifications Push</h3>
+                                <div class="notification-status">
+                                    <i class="fas fa-bell-slash"></i>
+                                    <p>Les notifications push ne sont pas encore disponibles</p>
+                                    <button class="btn-secondary" disabled>
+                                        Bientôt disponible
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <div class="settings-actions">
+                                <button class="btn-save" id="saveNotificationSettings">
+                                    <i class="fas fa-save"></i>
+                                    Enregistrer les modifications
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- TAB: Confidentialité -->
+                        <div class="settings-tab" id="tab-privacy">
+                            <h2>Confidentialité & Sécurité</h2>
+                            
+                            <div class="settings-section">
+                                <h3>Données personnelles</h3>
+                                <div class="setting-item">
+                                    <div class="setting-info">
+                                        <label>Profil public</label>
+                                        <p>Permettre aux autres utilisateurs de voir votre profil</p>
+                                    </div>
+                                    <label class="toggle-switch">
+                                        <input type="checkbox" id="publicProfile">
+                                        <span class="toggle-slider"></span>
+                                    </label>
+                                </div>
+                                
+                                <div class="setting-item">
+                                    <div class="setting-info">
+                                        <label>Analyses publiques</label>
+                                        <p>Partager vos analyses avec la communauté</p>
+                                    </div>
+                                    <label class="toggle-switch">
+                                        <input type="checkbox" id="publicAnalyses">
+                                        <span class="toggle-slider"></span>
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            <div class="settings-section">
+                                <h3>Collecte de données</h3>
+                                <div class="setting-item">
+                                    <div class="setting-info">
+                                        <label>Analytics</label>
+                                        <p>Nous aider à améliorer l'application en partageant des données d'utilisation anonymes</p>
+                                    </div>
+                                    <label class="toggle-switch">
+                                        <input type="checkbox" id="analytics" checked>
+                                        <span class="toggle-slider"></span>
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            <div class="settings-actions">
+                                <button class="btn-save" id="savePrivacySettings">
+                                    <i class="fas fa-save"></i>
+                                    Enregistrer les modifications
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- TAB: Données -->
+                        <div class="settings-tab" id="tab-data">
+                            <h2>Gestion des données</h2>
+                            
+                            <div class="settings-section">
+                                <h3>Exporter vos données</h3>
+                                <p>Téléchargez une copie de toutes vos données (conforme RGPD)</p>
+                                <button class="btn-secondary" id="exportDataBtn">
+                                    <i class="fas fa-download"></i>
+                                    Exporter mes données
+                                </button>
+                            </div>
+                            
+                            <div class="settings-section">
+                                <h3>Effacer le cache</h3>
+                                <p>Supprime les données temporaires pour libérer de l'espace</p>
+                                <button class="btn-secondary" id="clearCacheBtn">
+                                    <i class="fas fa-broom"></i>
+                                    Effacer le cache
+                                </button>
+                            </div>
+                            
+                            <div class="settings-section danger-section">
+                                <h3>Zone de danger</h3>
+                                <p>Ces actions sont irréversibles</p>
+                                <div class="danger-actions">
+                                    <button class="btn-danger" id="deleteAllAnalyses">
+                                        <i class="fas fa-trash"></i>
+                                        Supprimer toutes mes analyses
+                                    </button>
+                                    <button class="btn-danger" id="deleteAllPortfolios">
+                                        <i class="fas fa-trash"></i>
+                                        Supprimer tous mes portfolios
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                    </div>
+                    
+                </div>
+            </div>
+            
+        </main>
+        
+    </div>
+    
+    <!-- Toast Container -->
+    <div class="toast-container" id="toastContainer"></div>
+    
+    <!-- Scripts -->
+    <script src="assets/js/common.js"></script>
+    <script src="assets/js/sidebar.js"></script>
+    <script src="assets/js/settings.js"></script>
+    
+    <!-- Script menu utilisateur -->
+    <script>
+        // Même script que user-profile.html
+    </script>
+    
+</body>
+</html>
