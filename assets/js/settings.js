@@ -1,5 +1,6 @@
 /* ============================================
    SETTINGS.JS - Gestion de la page paramètres
+   VERSION CORRIGÉE avec support du thème global
    ============================================ */
 
 // Variables globales
@@ -83,6 +84,7 @@ async function loadUserSettings(userId) {
 
 /**
  * Appliquer les paramètres aux éléments du DOM
+ * VERSION CORRIGÉE - Utilise le thème global
  */
 function applySettingsToDOM() {
     // Général
@@ -90,14 +92,20 @@ function applySettingsToDOM() {
     document.getElementById('timezone').value = currentUserSettings.timezone || 'Europe/Paris';
     document.getElementById('currency').value = currentUserSettings.currency || 'EUR';
     
-    // Apparence
+    // Apparence - Utiliser le thème depuis localStorage/Firestore via la fonction globale
+    const currentTheme = currentUserSettings.theme || (window.getCurrentTheme ? window.getCurrentTheme() : 'dark');
     const themeOptions = document.querySelectorAll('.theme-option');
     themeOptions.forEach(option => {
         option.classList.remove('active');
-        if (option.dataset.theme === currentUserSettings.theme) {
+        if (option.dataset.theme === currentTheme) {
             option.classList.add('active');
         }
     });
+    
+    // Appliquer le thème immédiatement si la fonction globale existe
+    if (window.setTheme) {
+        window.setTheme(currentTheme);
+    }
     
     document.getElementById('enableAnimations').checked = currentUserSettings.enableAnimations !== false;
     document.getElementById('collapsedSidebar').checked = currentUserSettings.collapsedSidebar || false;
@@ -144,14 +152,23 @@ function initializeTabNavigation() {
 }
 
 // ============================================
-// SÉLECTEUR DE THÈME
+// SÉLECTEUR DE THÈME - VERSION CORRIGÉE
 // ============================================
 
 function initializeThemeSelector() {
     const themeOptions = document.querySelectorAll('.theme-option');
     
+    // Appliquer le thème actuel au chargement
+    const currentTheme = window.getCurrentTheme ? window.getCurrentTheme() : 'dark';
     themeOptions.forEach(option => {
-        option.addEventListener('click', () => {
+        option.classList.remove('active');
+        if (option.dataset.theme === currentTheme) {
+            option.classList.add('active');
+        }
+    });
+    
+    themeOptions.forEach(option => {
+        option.addEventListener('click', async () => {
             const theme = option.dataset.theme;
             
             // Désactiver tous les thèmes
@@ -160,42 +177,96 @@ function initializeThemeSelector() {
             // Activer le thème cliqué
             option.classList.add('active');
             
-            // Mettre à jour les paramètres
+            // Mettre à jour les paramètres locaux
             currentUserSettings.theme = theme;
             
-            // Appliquer le thème
-            applyTheme(theme);
+            // Appliquer le thème via la fonction globale
+            if (window.setTheme) {
+                window.setTheme(theme);
+                console.log('🎨 Thème appliqué via setTheme():', theme);
+            } else {
+                console.error('❌ Fonction setTheme non disponible');
+                // Fallback si theme.js n'est pas chargé
+                applyThemeFallback(theme);
+            }
+            
+            // Sauvegarder dans Firestore
+            await saveThemeToFirestore(theme);
+            
+            // Afficher une notification
+            showToast('success', 'Thème appliqué !', `Le thème ${getThemeLabel(theme)} est maintenant actif sur toutes les pages`);
         });
     });
 }
 
 /**
- * Appliquer un thème
+ * Sauvegarder le thème dans Firestore
+ * VERSION CORRIGÉE - Fonction autonome
  */
-function applyTheme(theme) {
+async function saveThemeToFirestore(theme) {
+    const user = getCurrentUser();
+    if (!user) {
+        console.log('👤 Utilisateur non connecté, thème sauvegardé en local uniquement');
+        return;
+    }
+    
+    try {
+        await firebaseDb
+            .collection('users')
+            .doc(user.uid)
+            .collection('settings')
+            .doc('preferences')
+            .set({
+                theme: theme,
+                updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+            }, { merge: true });
+        
+        console.log('✅ Thème sauvegardé dans Firestore:', theme);
+    } catch (error) {
+        console.error('❌ Erreur lors de la sauvegarde du thème:', error);
+    }
+}
+
+/**
+ * Fallback pour appliquer le thème si theme.js n'est pas chargé
+ */
+function applyThemeFallback(theme) {
     const body = document.body;
     
     switch(theme) {
         case 'light':
             body.classList.remove('dark-mode');
+            localStorage.setItem('theme', 'light');
             break;
         case 'dark':
             body.classList.add('dark-mode');
+            localStorage.setItem('theme', 'dark');
             break;
         case 'auto':
-            // Détecter les préférences système
-            if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+            const prefersDark = window.matchMedia && 
+                               window.matchMedia('(prefers-color-scheme: dark)').matches;
+            if (prefersDark) {
                 body.classList.add('dark-mode');
             } else {
                 body.classList.remove('dark-mode');
             }
+            localStorage.setItem('theme', 'auto');
             break;
     }
     
-    // Sauvegarder dans localStorage pour persistance
-    localStorage.setItem('theme', theme);
-    
-    console.log('🎨 Thème appliqué:', theme);
+    console.log('⚠️ Thème appliqué en mode fallback:', theme);
+}
+
+/**
+ * Obtenir le label du thème
+ */
+function getThemeLabel(theme) {
+    switch(theme) {
+        case 'light': return 'clair';
+        case 'dark': return 'sombre';
+        case 'auto': return 'automatique';
+        default: return theme;
+    }
 }
 
 // ============================================
@@ -380,6 +451,15 @@ async function exportUserData() {
         const userDoc = await firebaseDb.collection('users').doc(user.uid).get();
         const userData = userDoc.data();
         
+        // Récupérer les paramètres
+        const settingsDoc = await firebaseDb
+            .collection('users')
+            .doc(user.uid)
+            .collection('settings')
+            .doc('preferences')
+            .get();
+        const settingsData = settingsDoc.exists ? settingsDoc.data() : {};
+        
         // Récupérer les analyses
         const analysesSnapshot = await firebaseDb
             .collection('users')
@@ -405,9 +485,11 @@ async function exportUserData() {
         // Créer l'objet d'export
         const exportData = {
             user: userData,
+            settings: settingsData,
             analyses: analyses,
             portfolios: portfolios,
-            exportDate: new Date().toISOString()
+            exportDate: new Date().toISOString(),
+            version: '1.0'
         };
         
         // Convertir en JSON et télécharger
@@ -424,7 +506,12 @@ async function exportUserData() {
         URL.revokeObjectURL(url);
         
         showToast('success', 'Export réussi !', 'Vos données ont été téléchargées');
-        console.log('✅ Données exportées');
+        console.log('✅ Données exportées:', {
+            user: !!userData,
+            settings: !!settingsData,
+            analysesCount: analyses.length,
+            portfoliosCount: portfolios.length
+        });
         
     } catch (error) {
         console.error('❌ Erreur lors de l\'export:', error);
@@ -436,7 +523,7 @@ async function exportUserData() {
  * Effacer le cache
  */
 function clearCache() {
-    if (!confirm('Êtes-vous sûr de vouloir effacer le cache ?')) {
+    if (!confirm('Êtes-vous sûr de vouloir effacer le cache ?\n\nCela supprimera les données temporaires mais pas vos paramètres importants.')) {
         return;
     }
     
@@ -447,7 +534,7 @@ function clearCache() {
         
         for (let i = 0; i < localStorage.length; i++) {
             const key = localStorage.key(i);
-            if (!essentialKeys.includes(key)) {
+            if (key && !essentialKeys.includes(key)) {
                 keysToRemove.push(key);
             }
         }
@@ -457,8 +544,8 @@ function clearCache() {
         // Effacer sessionStorage
         sessionStorage.clear();
         
-        showToast('success', 'Cache effacé !', 'Les données temporaires ont été supprimées');
-        console.log('✅ Cache effacé');
+        showToast('success', 'Cache effacé !', `${keysToRemove.length} éléments temporaires supprimés`);
+        console.log('✅ Cache effacé:', keysToRemove);
         
     } catch (error) {
         console.error('❌ Erreur lors de l\'effacement du cache:', error);
@@ -473,7 +560,8 @@ async function deleteAllAnalyses() {
     const confirmed = confirm(
         '⚠️ ATTENTION ⚠️\n\n' +
         'Êtes-vous sûr de vouloir supprimer TOUTES vos analyses ?\n\n' +
-        'Cette action est IRRÉVERSIBLE !'
+        'Cette action est IRRÉVERSIBLE !\n\n' +
+        'Tapez OUI pour confirmer'
     );
     
     if (!confirmed) return;
@@ -494,14 +582,14 @@ async function deleteAllAnalyses() {
             .collection('analyses')
             .get();
         
-        // Supprimer toutes les analyses
+        // Supprimer toutes les analyses par batch
         const batch = firebaseDb.batch();
         analysesSnapshot.docs.forEach(doc => {
             batch.delete(doc.ref);
         });
         await batch.commit();
         
-        showToast('success', 'Analyses supprimées', `${analysesSnapshot.size} analyses ont été supprimées`);
+        showToast('success', 'Analyses supprimées', `${analysesSnapshot.size} analyse(s) supprimée(s)`);
         console.log(`✅ ${analysesSnapshot.size} analyses supprimées`);
         
     } catch (error) {
@@ -517,7 +605,8 @@ async function deleteAllPortfolios() {
     const confirmed = confirm(
         '⚠️ ATTENTION ⚠️\n\n' +
         'Êtes-vous sûr de vouloir supprimer TOUS vos portfolios ?\n\n' +
-        'Cette action est IRRÉVERSIBLE !'
+        'Cette action est IRRÉVERSIBLE !\n\n' +
+        'Tapez OUI pour confirmer'
     );
     
     if (!confirmed) return;
@@ -538,14 +627,14 @@ async function deleteAllPortfolios() {
             .collection('portfolios')
             .get();
         
-        // Supprimer tous les portfolios
+        // Supprimer tous les portfolios par batch
         const batch = firebaseDb.batch();
         portfoliosSnapshot.docs.forEach(doc => {
             batch.delete(doc.ref);
         });
         await batch.commit();
         
-        showToast('success', 'Portfolios supprimés', `${portfoliosSnapshot.size} portfolios ont été supprimés`);
+        showToast('success', 'Portfolios supprimés', `${portfoliosSnapshot.size} portfolio(s) supprimé(s)`);
         console.log(`✅ ${portfoliosSnapshot.size} portfolios supprimés`);
         
     } catch (error) {
@@ -561,7 +650,10 @@ async function deleteAllPortfolios() {
 function showToast(type, title, message) {
     const toastContainer = document.getElementById('toastContainer');
     
-    if (!toastContainer) return;
+    if (!toastContainer) {
+        console.warn('⚠️ Toast container non trouvé');
+        return;
+    }
     
     const toast = document.createElement('div');
     toast.className = `toast ${type}`;
@@ -599,12 +691,15 @@ function showToast(type, title, message) {
         removeToast(toast);
     });
     
+    // Auto-suppression après 5 secondes
     setTimeout(() => {
         removeToast(toast);
     }, 5000);
 }
 
 function removeToast(toast) {
+    if (!toast || !toast.parentNode) return;
+    
     toast.style.animation = 'slideOutRight 0.3s ease forwards';
     setTimeout(() => {
         if (toast.parentNode) {
@@ -613,7 +708,7 @@ function removeToast(toast) {
     }, 300);
 }
 
-// Animation de sortie
+// Animation de sortie pour les toasts
 const style = document.createElement('style');
 style.textContent = `
     @keyframes slideOutRight {
@@ -629,4 +724,4 @@ style.textContent = `
 `;
 document.head.appendChild(style);
 
-console.log('✅ Script de paramètres chargé');
+console.log('✅ Script de paramètres chargé (version corrigée avec support thème global)');
