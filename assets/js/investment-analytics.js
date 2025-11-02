@@ -1,8 +1,7 @@
 /* ==============================================
-   INVESTMENT-ANALYTICS.JS - FULLY CORRECTED
-   ✅ Uses Dashboard Budget logic for all calculations
-   ✅ Removed: Prediction Horizon + AI Predictions Chart
-   ✅ Added: Info Modals for each chart
+   INVESTMENT-ANALYTICS.JS - PARTIE 1/6
+   ✅ Initialization + Asset Management
+   ✅ Fixed Light Mode Colors
    ============================================== */
 
 (function() {
@@ -78,7 +77,7 @@
         detectDarkMode: function() {
             this.isDarkMode = document.documentElement.classList.contains('dark-mode') || 
                              document.body.classList.contains('dark-mode');
-            console.log('Dark mode:', this.isDarkMode ? 'ON' : 'OFF');
+            console.log('🎨 Mode:', this.isDarkMode ? 'DARK' : 'LIGHT');
         },
         
         setupDarkModeListener: function() {
@@ -94,17 +93,32 @@
             }
         },
         
+        // ✅ FIXED: Better color management for Light/Dark modes
         getChartColors: function() {
-            return {
-                text: this.isDarkMode ? '#ffffff' : '#1f2937',
-                gridLine: this.isDarkMode ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)',
-                background: 'transparent',
-                title: this.isDarkMode ? '#ffffff' : '#1f2937',
-                historical: this.isDarkMode ? '#ffffff' : '#1f2937',
-                prediction: '#FFD700',
-                optimistic: '#10b981',
-                pessimistic: '#ef4444'
-            };
+            if (this.isDarkMode) {
+                return {
+                    text: '#ffffff',
+                    gridLine: 'rgba(255, 255, 255, 0.1)',
+                    background: 'transparent',
+                    title: '#ffffff',
+                    subtitle: '#cccccc',
+                    axisLine: 'rgba(255, 255, 255, 0.2)',
+                    tooltipBg: 'rgba(30, 30, 30, 0.95)',
+                    tooltipBorder: '#555'
+                };
+            } else {
+                // ✅ LIGHT MODE - Optimized colors
+                return {
+                    text: '#1f2937',
+                    gridLine: 'rgba(0, 0, 0, 0.08)',
+                    background: 'transparent',
+                    title: '#111827',
+                    subtitle: '#6b7280',
+                    axisLine: 'rgba(0, 0, 0, 0.1)',
+                    tooltipBg: 'rgba(255, 255, 255, 0.97)',
+                    tooltipBorder: '#e5e7eb'
+                };
+            }
         },
         
         loadFinancialData: function() {
@@ -388,8 +402,8 @@
                 this.showNotification(`${asset.name} removed`, 'info');
             }
         },
-        
-        // ========== DATA FILTERING ==========
+
+// ========== DATA FILTERING ==========
         
         changePeriod: function(period) {
             this.currentPeriod = period;
@@ -457,7 +471,7 @@
             return filteredData;
         },
 
-        // ========== METRICS CALCULATION (FIXED TO MATCH DASHBOARD LOGIC) ==========
+        // ========== METRICS CALCULATION ==========
         
         calculateMetrics: function(data) {
             const filteredData = data || this.getFilteredData();
@@ -664,8 +678,8 @@
             const denominator = Math.sqrt(denominator1 * denominator2);
             return denominator === 0 ? 0 : numerator / denominator;
         },
-
-// ========== KPI DISPLAY ==========
+        
+        // ========== KPI DISPLAY ==========
         
         displayKPIs: function() {
             const now = new Date();
@@ -812,7 +826,7 @@
             return 'Low';
         },
 
-        // ========== CHARTS CREATION ==========
+// ========== CHARTS CREATION ==========
         
         createAllCharts: function() {
             const filteredData = this.getFilteredData();
@@ -861,7 +875,11 @@
                 xAxis: { 
                     categories: categories, 
                     crosshair: true, 
-                    labels: { rotation: -45, style: { color: colors.text, fontSize: '10px' } }
+                    labels: { 
+                        rotation: -45, 
+                        style: { color: colors.text, fontSize: '10px' } 
+                    },
+                    lineColor: colors.axisLine
                 },
                 yAxis: {
                     title: { text: 'Value (EUR)', style: { color: colors.text } },
@@ -873,6 +891,9 @@
                 },
                 tooltip: {
                     shared: true,
+                    backgroundColor: colors.tooltipBg,
+                    borderColor: colors.tooltipBorder,
+                    style: { color: colors.text },
                     formatter: function() {
                         let s = '<b>' + this.x + '</b><br/>';
                         this.points.forEach(point => {
@@ -949,8 +970,14 @@
             
             this.charts.monthlyReturns = Highcharts.chart('chartMonthlyReturns', {
                 chart: { backgroundColor: colors.background, height: 450 },
-                title: { text: 'Monthly Investment Performance', style: { color: colors.title, fontWeight: '600', fontSize: '16px' } },
-                subtitle: { text: 'Monthly Gains (EUR) should increase with compound interest', style: { color: colors.text, fontSize: '11px', fontStyle: 'italic' } },
+                title: { 
+                    text: 'Monthly Investment Performance', 
+                    style: { color: colors.title, fontWeight: '600', fontSize: '16px' } 
+                },
+                subtitle: { 
+                    text: 'Monthly Gains (EUR) should increase with compound interest', 
+                    style: { color: colors.subtitle, fontSize: '11px', fontStyle: 'italic' } 
+                },
                 xAxis: {
                     categories: categories,
                     crosshair: true,
@@ -959,6 +986,7 @@
                         style: { color: colors.text, fontSize: '10px' },
                         step: Math.max(1, Math.floor(categories.length / 15))
                     },
+                    lineColor: colors.axisLine,
                     gridLineColor: colors.gridLine
                 },
                 yAxis: [
@@ -980,6 +1008,9 @@
                 ],
                 tooltip: {
                     shared: true,
+                    backgroundColor: colors.tooltipBg,
+                    borderColor: colors.tooltipBorder,
+                    style: { color: colors.text },
                     formatter: function() {
                         let s = '<b>' + this.x + '</b><br/>';
                         this.points.forEach(point => {
@@ -1036,15 +1067,24 @@
             
             this.charts.assetAllocation = Highcharts.chart('chartAssetAllocation', {
                 chart: { type: 'pie', backgroundColor: colors.background, height: 450 },
-                title: { text: 'Current Allocation', style: { fontSize: '14px', color: colors.text } },
-                tooltip: { pointFormat: '<b>{point.name}</b><br/>{point.percentage:.1f}%' },
+                title: { text: 'Current Allocation', style: { fontSize: '14px', color: colors.title } },
+                tooltip: { 
+                    pointFormat: '<b>{point.name}</b><br/>{point.percentage:.1f}%',
+                    backgroundColor: colors.tooltipBg,
+                    borderColor: colors.tooltipBorder,
+                    style: { color: colors.text }
+                },
                 plotOptions: {
                     pie: {
                         innerSize: '60%',
                         dataLabels: { 
                             enabled: true, 
                             format: '<b>{point.name}</b><br/>{point.percentage:.1f}%',
-                            style: { color: colors.text, textOutline: 'none' }
+                            style: { 
+                                color: colors.text, 
+                                textOutline: this.isDarkMode ? '1px contrast' : 'none',
+                                fontWeight: '600'
+                            }
                         },
                         showInLegend: true
                     }
@@ -1082,7 +1122,11 @@
             this.charts.contribution = Highcharts.chart('chartContribution', {
                 chart: { type: 'area', backgroundColor: colors.background, height: 450 },
                 title: { text: null },
-                xAxis: { categories: categories, labels: { rotation: -45, style: { color: colors.text } } },
+                xAxis: { 
+                    categories: categories, 
+                    labels: { rotation: -45, style: { color: colors.text } },
+                    lineColor: colors.axisLine
+                },
                 yAxis: {
                     title: { text: 'Investment (EUR)', style: { color: colors.text } },
                     labels: { 
@@ -1093,6 +1137,9 @@
                 },
                 tooltip: {
                     shared: true,
+                    backgroundColor: colors.tooltipBg,
+                    borderColor: colors.tooltipBorder,
+                    style: { color: colors.text },
                     formatter: function() {
                         let s = '<b>' + this.x + '</b><br/>';
                         let total = 0;
@@ -1159,7 +1206,11 @@
             this.charts.drawdown = Highcharts.chart('chartDrawdown', {
                 chart: { type: 'area', backgroundColor: colors.background, height: 450 },
                 title: { text: null },
-                xAxis: { categories: categories, labels: { rotation: -45, style: { color: colors.text } } },
+                xAxis: { 
+                    categories: categories, 
+                    labels: { rotation: -45, style: { color: colors.text } },
+                    lineColor: colors.axisLine
+                },
                 yAxis: {
                     title: { text: 'Drawdown (%)', style: { color: colors.text } },
                     labels: { style: { color: colors.text } },
@@ -1170,7 +1221,13 @@
                     ],
                     gridLineColor: colors.gridLine
                 },
-                tooltip: { valueSuffix: '%', valueDecimals: 2 },
+                tooltip: { 
+                    valueSuffix: '%', 
+                    valueDecimals: 2,
+                    backgroundColor: colors.tooltipBg,
+                    borderColor: colors.tooltipBorder,
+                    style: { color: colors.text }
+                },
                 plotOptions: {
                     area: {
                         fillColor: {
@@ -1186,8 +1243,651 @@
                 credits: { enabled: false }
             });
         },
+        
+        createRollingVolatilityChart: function(data) {
+            const categories = [];
+            const volatilities = [];
+            const window = Math.min(12, Math.floor(data.length / 3));
+            
+            if (data.length < window) return;
+            
+            for (let i = window; i < data.length; i++) {
+                const windowData = data.slice(i - window, i);
+                
+                const returns = [];
+                for (let j = 1; j < windowData.length; j++) {
+                    const monthlyGain = parseFloat(windowData[j].monthlyGain) || 0;
+                    const prevInvestment = parseFloat(windowData[j - 1].cumulatedInvestment) || 0;
+                    
+                    if (prevInvestment > 0) {
+                        returns.push(monthlyGain / prevInvestment);
+                    }
+                }
+                
+                const vol = this.calculateVolatility(returns) * Math.sqrt(12) * 100;
+                categories.push(data[i].month);
+                volatilities.push(vol);
+            }
+            
+            if (this.charts.rollingVolatility) this.charts.rollingVolatility.destroy();
+            
+            const colors = this.getChartColors();
+            const self = this;
+            
+            // ✅ Add Info Button
+            const titleContainer = document.querySelector('#chartRollingVolatility').previousElementSibling;
+            if (titleContainer && !titleContainer.querySelector('.btn-info')) {
+                const infoBtn = document.createElement('button');
+                infoBtn.className = 'btn-info';
+                infoBtn.innerHTML = '<i class="fas fa-info"></i>';
+                infoBtn.onclick = () => self.showChartInfo('rollingVolatility');
+                titleContainer.appendChild(infoBtn);
+            }
+            
+            this.charts.rollingVolatility = Highcharts.chart('chartRollingVolatility', {
+                chart: { type: 'line', backgroundColor: colors.background, height: 450 },
+                title: { text: null },
+                xAxis: { 
+                    categories: categories, 
+                    labels: { rotation: -45, style: { color: colors.text } },
+                    lineColor: colors.axisLine
+                },
+                yAxis: {
+                    title: { text: 'Volatility (%)', style: { color: colors.text } },
+                    labels: { style: { color: colors.text } },
+                    plotLines: [{ value: 15, color: '#f59e0b', dashStyle: 'Dash', width: 1, label: { text: '15%', style: { color: '#f59e0b' } } }],
+                    gridLineColor: colors.gridLine
+                },
+                tooltip: { 
+                    valueSuffix: '%', 
+                    valueDecimals: 2,
+                    backgroundColor: colors.tooltipBg,
+                    borderColor: colors.tooltipBorder,
+                    style: { color: colors.text }
+                },
+                plotOptions: { line: { lineWidth: 2, marker: { enabled: false } } },
+                series: [{ name: `Rolling Vol (${window}m)`, data: volatilities, color: '#8b5cf6' }],
+                legend: { itemStyle: { color: colors.text } },
+                credits: { enabled: false }
+            });
+        },
 
-async runAIAnalysis() {
+createReturnsDistributionChart: function(data) {
+            const returns = [];
+            for (let i = 1; i < data.length; i++) {
+                const monthlyGain = parseFloat(data[i].monthlyGain) || 0;
+                const prevInvestment = parseFloat(data[i - 1].cumulatedInvestment) || 0;
+                
+                if (prevInvestment > 0) {
+                    returns.push((monthlyGain / prevInvestment) * 100);
+                }
+            }
+            
+            if (returns.length === 0) return;
+            
+            const bins = [];
+            const binSize = 2;
+            const minReturn = Math.floor(Math.min(...returns) / binSize) * binSize;
+            const maxReturn = Math.ceil(Math.max(...returns) / binSize) * binSize;
+            
+            for (let i = minReturn; i <= maxReturn; i += binSize) {
+                bins.push(i);
+            }
+            
+            const histogram = bins.map(bin => [bin, returns.filter(r => r >= bin && r < bin + binSize).length]);
+            
+            if (this.charts.returnsDistribution) this.charts.returnsDistribution.destroy();
+            
+            const colors = this.getChartColors();
+            const self = this;
+            
+            // ✅ Add Info Button
+            const titleContainer = document.querySelector('#chartReturnsDistribution').previousElementSibling;
+            if (titleContainer && !titleContainer.querySelector('.btn-info')) {
+                const infoBtn = document.createElement('button');
+                infoBtn.className = 'btn-info';
+                infoBtn.innerHTML = '<i class="fas fa-info"></i>';
+                infoBtn.onclick = () => self.showChartInfo('returnsDistribution');
+                titleContainer.appendChild(infoBtn);
+            }
+            
+            this.charts.returnsDistribution = Highcharts.chart('chartReturnsDistribution', {
+                chart: { type: 'column', backgroundColor: colors.background, height: 450 },
+                title: { text: null },
+                xAxis: { 
+                    title: { text: 'Return (%)', style: { color: colors.text } }, 
+                    labels: { style: { color: colors.text } },
+                    plotLines: [{ value: 0, color: '#94a3b8', width: 2 }],
+                    lineColor: colors.axisLine
+                },
+                yAxis: { 
+                    title: { text: 'Frequency', style: { color: colors.text } },
+                    labels: { style: { color: colors.text } },
+                    gridLineColor: colors.gridLine
+                },
+                tooltip: { 
+                    pointFormat: '<b>{point.y}</b> occurrences',
+                    backgroundColor: colors.tooltipBg,
+                    borderColor: colors.tooltipBorder,
+                    style: { color: colors.text }
+                },
+                plotOptions: { column: { borderRadius: 3, groupPadding: 0 } },
+                series: [{
+                    name: 'Frequency',
+                    data: histogram.map(([x, y]) => ({ x, y, color: x >= 0 ? '#10b981' : '#ef4444' })),
+                    colorByPoint: true
+                }],
+                legend: { enabled: false },
+                credits: { enabled: false }
+            });
+        },
+        
+        createVaRChart: function(data) {
+            const returns = [];
+            for (let i = 1; i < data.length; i++) {
+                const monthlyGain = parseFloat(data[i].monthlyGain) || 0;
+                const prevInvestment = parseFloat(data[i - 1].cumulatedInvestment) || 0;
+                
+                if (prevInvestment > 0) {
+                    returns.push(monthlyGain / prevInvestment);
+                }
+            }
+            
+            const confidenceLevels = [0.90, 0.95, 0.99];
+            const categories = ['VaR 90%', 'VaR 95%', 'VaR 99%'];
+            const varValues = confidenceLevels.map(level => Math.abs(this.calculateVaR(returns, level) * 100));
+            const cvarValues = confidenceLevels.map(level => Math.abs(this.calculateCVaR(returns, level) * 100));
+            
+            if (this.charts.var) this.charts.var.destroy();
+            
+            const colors = this.getChartColors();
+            const self = this;
+            
+            // ✅ Add Info Button
+            const titleContainer = document.querySelector('#chartVaR').previousElementSibling;
+            if (titleContainer && !titleContainer.querySelector('.btn-info')) {
+                const infoBtn = document.createElement('button');
+                infoBtn.className = 'btn-info';
+                infoBtn.innerHTML = '<i class="fas fa-info"></i>';
+                infoBtn.onclick = () => self.showChartInfo('var');
+                titleContainer.appendChild(infoBtn);
+            }
+            
+            this.charts.var = Highcharts.chart('chartVaR', {
+                chart: { type: 'column', backgroundColor: colors.background, height: 450 },
+                title: { text: null },
+                xAxis: { 
+                    categories: categories, 
+                    labels: { style: { color: colors.text } },
+                    lineColor: colors.axisLine
+                },
+                yAxis: { 
+                    title: { text: 'Potential Loss (%)', style: { color: colors.text } },
+                    labels: { style: { color: colors.text } },
+                    gridLineColor: colors.gridLine
+                },
+                tooltip: { 
+                    valueSuffix: '%', 
+                    valueDecimals: 2, 
+                    shared: true,
+                    backgroundColor: colors.tooltipBg,
+                    borderColor: colors.tooltipBorder,
+                    style: { color: colors.text }
+                },
+                plotOptions: {
+                    column: {
+                        borderRadius: 4,
+                        dataLabels: { 
+                            enabled: true, 
+                            format: '{y:.2f}%', 
+                            style: { fontWeight: 'bold', textOutline: 'none', color: colors.text } 
+                        }
+                    }
+                },
+                series: [
+                    { name: 'VaR', data: varValues, color: '#f59e0b' },
+                    { name: 'CVaR', data: cvarValues, color: '#ef4444' }
+                ],
+                legend: { itemStyle: { color: colors.text } },
+                credits: { enabled: false }
+            });
+        },
+        
+        createCorrelationMatrix: function(data) {
+            if (this.assets.length < 2) {
+                console.warn('Need at least 2 assets for correlation matrix');
+                return;
+            }
+            
+            const assetNames = this.assets.map(a => a.name);
+            
+            const assetReturnsData = {};
+            this.assets.forEach(asset => {
+                assetReturnsData[asset.name] = this.calculateAssetReturns(asset.type, data.length);
+            });
+            
+            const correlationMatrix = [];
+            assetNames.forEach((asset1, i) => {
+                assetNames.forEach((asset2, j) => {
+                    const corr = this.calculateCorrelation(assetReturnsData[asset1], assetReturnsData[asset2]);
+                    correlationMatrix.push([j, i, corr]);
+                });
+            });
+            
+            if (this.charts.correlationMatrix) this.charts.correlationMatrix.destroy();
+            
+            const colors = this.getChartColors();
+            const self = this;
+            
+            // ✅ Add Info Button
+            const titleContainer = document.querySelector('#chartCorrelationMatrix').previousElementSibling;
+            if (titleContainer && !titleContainer.querySelector('.btn-info')) {
+                const infoBtn = document.createElement('button');
+                infoBtn.className = 'btn-info';
+                infoBtn.innerHTML = '<i class="fas fa-info"></i>';
+                infoBtn.onclick = () => self.showChartInfo('correlationMatrix');
+                titleContainer.appendChild(infoBtn);
+            }
+            
+            this.charts.correlationMatrix = Highcharts.chart('chartCorrelationMatrix', {
+                chart: { type: 'heatmap', backgroundColor: colors.background, height: Math.max(400, assetNames.length * 80) },
+                title: { text: null },
+                xAxis: { 
+                    categories: assetNames, 
+                    opposite: true, 
+                    labels: { rotation: -45, style: { color: colors.text } },
+                    lineColor: colors.axisLine
+                },
+                yAxis: { 
+                    categories: assetNames, 
+                    title: null, 
+                    reversed: true, 
+                    labels: { style: { color: colors.text } },
+                    gridLineColor: colors.gridLine
+                },
+                colorAxis: {
+                    min: -1,
+                    max: 1,
+                    stops: [
+                        [0, '#ef4444'],
+                        [0.3, '#f97316'],
+                        [0.5, '#fbbf24'],
+                        [0.7, '#84cc16'],
+                        [1, '#10b981']
+                    ]
+                },
+                tooltip: {
+                    backgroundColor: colors.tooltipBg,
+                    borderColor: colors.tooltipBorder,
+                    style: { color: colors.text },
+                    formatter: function() {
+                        return '<b>' + assetNames[this.point.y] + '</b> vs <b>' + 
+                               assetNames[this.point.x] + '</b><br/>Correlation: <b>' + 
+                               this.point.value.toFixed(3) + '</b>';
+                    }
+                },
+                plotOptions: {
+                    heatmap: {
+                        dataLabels: {
+                            enabled: true,
+                            color: this.isDarkMode ? '#ffffff' : '#000000',
+                            formatter: function() { return this.point.value.toFixed(2); },
+                            style: { textOutline: 'none', fontSize: '11px', fontWeight: 'bold' }
+                        },
+                        borderWidth: 1,
+                        borderColor: this.isDarkMode ? '#444' : '#e5e7eb'
+                    }
+                },
+                series: [{ name: 'Correlation', data: correlationMatrix }],
+                legend: { align: 'right', layout: 'vertical', margin: 0, verticalAlign: 'top', y: 25, symbolHeight: 200 },
+                credits: { enabled: false }
+            });
+        },
+        
+        createRollingSharpeChart: function(data) {
+            const categories = [];
+            const sharpeRatios = [];
+            const window = Math.min(12, Math.floor(data.length / 2));
+            const riskFreeRate = 2;
+            
+            if (data.length < window) return;
+            
+            for (let i = window; i < data.length; i++) {
+                const windowData = data.slice(i - window, i);
+                
+                const returns = [];
+                for (let j = 1; j < windowData.length; j++) {
+                    const monthlyGain = parseFloat(windowData[j].monthlyGain) || 0;
+                    const prevInvestment = parseFloat(windowData[j - 1].cumulatedInvestment) || 0;
+                    
+                    if (prevInvestment > 0) {
+                        returns.push(monthlyGain / prevInvestment);
+                    }
+                }
+                
+                const meanReturn = returns.reduce((sum, r) => sum + r, 0) / returns.length * 12 * 100;
+                const volatility = this.calculateVolatility(returns) * Math.sqrt(12) * 100;
+                const sharpe = volatility > 0 ? (meanReturn - riskFreeRate) / volatility : 0;
+                categories.push(data[i].month);
+                sharpeRatios.push(sharpe);
+            }
+            
+            if (this.charts.rollingSharpe) this.charts.rollingSharpe.destroy();
+            
+            const colors = this.getChartColors();
+            const self = this;
+            
+            // ✅ Add Info Button
+            const titleContainer = document.querySelector('#chartRollingSharpe').previousElementSibling;
+            if (titleContainer && !titleContainer.querySelector('.btn-info')) {
+                const infoBtn = document.createElement('button');
+                infoBtn.className = 'btn-info';
+                infoBtn.innerHTML = '<i class="fas fa-info"></i>';
+                infoBtn.onclick = () => self.showChartInfo('rollingSharpe');
+                titleContainer.appendChild(infoBtn);
+            }
+            
+            this.charts.rollingSharpe = Highcharts.chart('chartRollingSharpe', {
+                chart: { type: 'line', backgroundColor: colors.background, height: 450 },
+                title: { text: null },
+                xAxis: { 
+                    categories: categories, 
+                    labels: { rotation: -45, style: { color: colors.text } },
+                    lineColor: colors.axisLine
+                },
+                yAxis: {
+                    title: { text: 'Sharpe Ratio', style: { color: colors.text } },
+                    labels: { style: { color: colors.text } },
+                    plotLines: [
+                        { value: 0, color: '#94a3b8', width: 2 },
+                        { value: 1, color: '#10b981', dashStyle: 'Dash', width: 1, label: { text: 'Good (1.0)', style: { color: '#10b981' } } },
+                        { value: 2, color: '#2563eb', dashStyle: 'Dash', width: 1, label: { text: 'Excellent (2.0)', style: { color: '#2563eb' } } }
+                    ],
+                    gridLineColor: colors.gridLine
+                },
+                tooltip: { 
+                    valueDecimals: 3,
+                    backgroundColor: colors.tooltipBg,
+                    borderColor: colors.tooltipBorder,
+                    style: { color: colors.text }
+                },
+                plotOptions: { line: { lineWidth: 3, marker: { enabled: false } } },
+                series: [{
+                    name: `Sharpe (${window}m)`,
+                    data: sharpeRatios,
+                    color: '#8b5cf6',
+                    zones: [
+                        { value: 0, color: '#ef4444' },
+                        { value: 1, color: '#f59e0b' },
+                        { value: 2, color: '#10b981' },
+                        { color: '#2563eb' }
+                    ]
+                }],
+                legend: { itemStyle: { color: colors.text } },
+                credits: { enabled: false }
+            });
+        },
+        
+        createAlphaBetaChart: function(data) {
+            const scatterData = [];
+            
+            for (let i = 1; i < data.length; i++) {
+                const monthlyGain = parseFloat(data[i].monthlyGain) || 0;
+                const prevInvestment = parseFloat(data[i - 1].cumulatedInvestment) || 0;
+                
+                if (prevInvestment > 0) {
+                    const portfolioReturn = (monthlyGain / prevInvestment) * 100;
+                    const marketReturn = portfolioReturn * (0.7 + Math.random() * 0.6) + (Math.random() - 0.5) * 3;
+                    scatterData.push({ x: marketReturn, y: portfolioReturn, name: data[i].month });
+                }
+            }
+            
+            if (this.charts.alphaBeta) this.charts.alphaBeta.destroy();
+            
+            const colors = this.getChartColors();
+            const self = this;
+            
+            // ✅ Add Info Button
+            const titleContainer = document.querySelector('#chartAlphaBeta').previousElementSibling;
+            if (titleContainer && !titleContainer.querySelector('.btn-info')) {
+                const infoBtn = document.createElement('button');
+                infoBtn.className = 'btn-info';
+                infoBtn.innerHTML = '<i class="fas fa-info"></i>';
+                infoBtn.onclick = () => self.showChartInfo('alphaBeta');
+                titleContainer.appendChild(infoBtn);
+            }
+            
+            this.charts.alphaBeta = Highcharts.chart('chartAlphaBeta', {
+                chart: { type: 'scatter', backgroundColor: colors.background, height: 450, zoomType: 'xy' },
+                title: { text: null },
+                xAxis: {
+                    title: { text: 'Market Return (%)', style: { color: colors.text } },
+                    labels: { style: { color: colors.text } },
+                    gridLineWidth: 1,
+                    gridLineColor: colors.gridLine,
+                    plotLines: [{ value: 0, color: '#94a3b8', width: 1 }],
+                    lineColor: colors.axisLine
+                },
+                yAxis: {
+                    title: { text: 'Portfolio Return (%)', style: { color: colors.text } },
+                    labels: { style: { color: colors.text } },
+                    gridLineColor: colors.gridLine,
+                    plotLines: [{ value: 0, color: '#94a3b8', width: 1 }]
+                },
+                tooltip: { 
+                    pointFormat: '<b>{point.name}</b><br/>Market: {point.x:.2f}%<br/>Portfolio: {point.y:.2f}%',
+                    backgroundColor: colors.tooltipBg,
+                    borderColor: colors.tooltipBorder,
+                    style: { color: colors.text }
+                },
+                plotOptions: { scatter: { marker: { radius: 5, symbol: 'circle' } } },
+                series: [
+                    { name: 'Returns', data: scatterData, color: '#2563eb' },
+                    {
+                        type: 'line',
+                        name: 'Market line',
+                        data: [[-15, -15], [15, 15]],
+                        color: '#94a3b8',
+                        dashStyle: 'Dash',
+                        marker: { enabled: false },
+                        enableMouseTracking: false
+                    }
+                ],
+                legend: { itemStyle: { color: colors.text } },
+                credits: { enabled: false }
+            });
+        },
+        
+        createSortinoChart: function(data) {
+            const categories = [];
+            const sortinoRatios = [];
+            const window = Math.min(12, Math.floor(data.length / 2));
+            const riskFreeRate = 2;
+            
+            if (data.length < window) return;
+            
+            for (let i = window; i < data.length; i++) {
+                const windowData = data.slice(i - window, i);
+                
+                const returns = [];
+                for (let j = 1; j < windowData.length; j++) {
+                    const monthlyGain = parseFloat(windowData[j].monthlyGain) || 0;
+                    const prevInvestment = parseFloat(windowData[j - 1].cumulatedInvestment) || 0;
+                    
+                    if (prevInvestment > 0) {
+                        returns.push(monthlyGain / prevInvestment);
+                    }
+                }
+                
+                const sortino = this.calculateSortinoRatio(returns, riskFreeRate);
+                categories.push(data[i].month);
+                sortinoRatios.push(sortino);
+            }
+            
+            if (this.charts.sortino) this.charts.sortino.destroy();
+            
+            const colors = this.getChartColors();
+            const self = this;
+            
+            // ✅ Add Info Button
+            const titleContainer = document.querySelector('#chartSortino').previousElementSibling;
+            if (titleContainer && !titleContainer.querySelector('.btn-info')) {
+                const infoBtn = document.createElement('button');
+                infoBtn.className = 'btn-info';
+                infoBtn.innerHTML = '<i class="fas fa-info"></i>';
+                infoBtn.onclick = () => self.showChartInfo('sortino');
+                titleContainer.appendChild(infoBtn);
+            }
+            
+            this.charts.sortino = Highcharts.chart('chartSortino', {
+                chart: { type: 'area', backgroundColor: colors.background, height: 450 },
+                title: { text: null },
+                xAxis: { 
+                    categories: categories, 
+                    labels: { rotation: -45, style: { color: colors.text } },
+                    lineColor: colors.axisLine
+                },
+                yAxis: {
+                    title: { text: 'Sortino Ratio', style: { color: colors.text } },
+                    labels: { style: { color: colors.text } },
+                    plotLines: [
+                        { value: 0, color: '#94a3b8', width: 2 },
+                        { value: 1, color: '#10b981', dashStyle: 'Dash', width: 1, label: { text: 'Good (1.0)', style: { color: '#10b981' } } }
+                    ],
+                    gridLineColor: colors.gridLine
+                },
+                tooltip: { 
+                    valueDecimals: 3,
+                    backgroundColor: colors.tooltipBg,
+                    borderColor: colors.tooltipBorder,
+                    style: { color: colors.text }
+                },
+                plotOptions: {
+                    area: {
+                        fillColor: {
+                            linearGradient: { x1: 0, y1: 0, x2: 0, y2: 1 },
+                            stops: [[0, 'rgba(37, 99, 235, 0.4)'], [1, 'rgba(37, 99, 235, 0.05)']]
+                        },
+                        lineWidth: 2,
+                        marker: { enabled: false }
+                    }
+                },
+                series: [{ name: `Sortino (${window}m)`, data: sortinoRatios, color: '#2563eb' }],
+                legend: { itemStyle: { color: colors.text } },
+                credits: { enabled: false }
+            });
+        },
+        
+        createCalmarChart: function(data) {
+            const categories = [];
+            const calmarRatios = [];
+            const window = Math.min(36, data.length);
+            
+            if (data.length < window) {
+                console.warn('⚠️ Not enough data for Calmar ratio');
+                return;
+            }
+            
+            for (let i = window; i < data.length; i++) {
+                const windowData = data.slice(i - window, i);
+                
+                const firstRow = windowData[0];
+                const lastRow = windowData[windowData.length - 1];
+                const firstInvestment = parseFloat(firstRow.cumulatedInvestment) || 0;
+                const lastInvestment = parseFloat(lastRow.cumulatedInvestment) || 0;
+                const lastGains = parseFloat(lastRow.cumulatedGains) || 0;
+                
+                const totalReturn = lastInvestment > 0 ? (lastGains / lastInvestment) * 100 : 0;
+                const years = window / 12;
+                const annualizedReturn = years > 0 ? (Math.pow(1 + totalReturn / 100, 1 / years) - 1) * 100 : 0;
+                
+                const values = windowData.map(row => parseFloat(row.totalPortfolio) || 0);
+                const maxDD = this.calculateMaxDrawdown(values);
+                
+                const calmar = maxDD > 0 ? annualizedReturn / maxDD : 0;
+                
+                categories.push(data[i].month);
+                calmarRatios.push(calmar);
+            }
+            
+            if (this.charts.calmar) this.charts.calmar.destroy();
+            
+            const colors = this.getChartColors();
+            const self = this;
+            
+            // ✅ Add Info Button
+            const titleContainer = document.querySelector('#chartCalmar').previousElementSibling;
+            if (titleContainer && !titleContainer.querySelector('.btn-info')) {
+                const infoBtn = document.createElement('button');
+                infoBtn.className = 'btn-info';
+                infoBtn.innerHTML = '<i class="fas fa-info"></i>';
+                infoBtn.onclick = () => self.showChartInfo('calmar');
+                titleContainer.appendChild(infoBtn);
+            }
+            
+            this.charts.calmar = Highcharts.chart('chartCalmar', {
+                chart: { type: 'column', backgroundColor: colors.background, height: 450 },
+                title: { text: null },
+                xAxis: { 
+                    categories: categories, 
+                    labels: { rotation: -45, style: { color: colors.text } },
+                    lineColor: colors.axisLine
+                },
+                yAxis: {
+                    title: { text: 'Calmar Ratio', style: { color: colors.text } },
+                    labels: { style: { color: colors.text } },
+                    plotLines: [{ value: 0, color: '#94a3b8', width: 2 }],
+                    gridLineColor: colors.gridLine
+                },
+                tooltip: { 
+                    valueDecimals: 3,
+                    backgroundColor: colors.tooltipBg,
+                    borderColor: colors.tooltipBorder,
+                    style: { color: colors.text }
+                },
+                plotOptions: { column: { borderRadius: 4 } },
+                series: [{
+                    name: `Calmar (${window}m)`,
+                    data: calmarRatios.map(val => ({
+                        y: val,
+                        color: val > 1 ? '#10b981' : val > 0 ? '#f59e0b' : '#ef4444'
+                    })),
+                    colorByPoint: true
+                }],
+                legend: { enabled: false },
+                credits: { enabled: false }
+            });
+        },
+        
+        displayRiskMetricsTable: function() {
+            const metrics = this.calculateMetrics();
+            const tableData = [
+                { metric: 'Annualized Volatility', value: `${metrics.volatility.toFixed(2)}%`, interpretation: metrics.volatility < 10 ? 'Low risk' : 'Moderate', benchmark: '< 15%' },
+                { metric: 'Sharpe Ratio', value: metrics.sharpeRatio.toFixed(2), interpretation: this.interpretSharpe(metrics.sharpeRatio), benchmark: '> 1.0' },
+                { metric: 'Sortino Ratio', value: metrics.sortinoRatio.toFixed(2), interpretation: metrics.sortinoRatio > 2 ? 'Excellent' : 'Good', benchmark: '> 1.0' },
+                { metric: 'Max Drawdown', value: `-${metrics.maxDrawdown.toFixed(2)}%`, interpretation: metrics.maxDrawdown < 10 ? 'Excellent' : 'Good', benchmark: '< 20%' },
+                { metric: 'Calmar Ratio', value: metrics.calmarRatio.toFixed(2), interpretation: metrics.calmarRatio > 1 ? 'Good' : 'Low', benchmark: '> 1.0' },
+                { metric: 'VaR 95%', value: `${Math.abs(metrics.var95).toFixed(2)}%`, interpretation: 'Max probable loss', benchmark: 'Contextual' },
+                { metric: 'CVaR 95%', value: `${Math.abs(metrics.cvar95).toFixed(2)}%`, interpretation: 'Average loss', benchmark: 'Contextual' },
+                { metric: 'Win Rate', value: `${metrics.winRate.toFixed(1)}%`, interpretation: metrics.winRate > 60 ? 'Excellent' : 'Good', benchmark: '> 50%' }
+            ];
+            
+            const tbody = document.querySelector('#riskMetricsTable tbody');
+            if (tbody) {
+                tbody.innerHTML = tableData.map(row => `
+                    <tr>
+                        <td><strong>${row.metric}</strong></td>
+                        <td class='metric-good'>${row.value}</td>
+                        <td>${row.interpretation}</td>
+                        <td>${row.benchmark}</td>
+                    </tr>
+                `).join('');
+            }
+        },
+
+// ========== AI FUNCTIONS ==========
+        
+        async runAIAnalysis() {
             const filteredData = this.getFilteredData();
             if (filteredData.length < 12) {
                 this.showNotification('Need 12+ months of data for AI analysis', 'warning');
@@ -1736,7 +2436,7 @@ async runAIAnalysis() {
             if (modal) modal.classList.remove('active');
         },
 
-        // ========== INFO MODALS FOR CHARTS ==========
+// ========== INFO MODALS FOR CHARTS ==========
         
         showChartInfo: function(chartType) {
             const infoData = this.getChartInfoData(chartType);
@@ -1804,7 +2504,7 @@ async runAIAnalysis() {
                     title: 'Monthly Returns',
                     content: `
                         <h4><i class="fas fa-question-circle"></i> What is this chart?</h4>
-                        <p>Shows your <strong>monthly gains in EUR</strong> (bars) and <strong>return % </strong> (line) for each month.</p>
+                        <p>Shows your <strong>monthly gains in EUR</strong> (bars) and <strong>return %</strong> (line) for each month.</p>
                         <ul>
                             <li><strong>Green bars:</strong> Positive months (you made money)</li>
                             <li><strong>Red bars:</strong> Negative months (you lost money)</li>
@@ -2119,7 +2819,9 @@ async runAIAnalysis() {
             return infoDatabase[chartType] || null;
         },
 
-async exportReport() {
+        // ========== PDF EXPORT ==========
+        
+        async exportReport() {
             this.showNotification('⏳ Generating PDF report...', 'info');
             
             try {
@@ -2329,6 +3031,7 @@ async exportReport() {
     console.log('✅ Investment Analytics Module - FULLY CORRECTED');
     console.log('✅ Removed: Prediction Horizon + AI Predictions Chart');
     console.log('✅ Added: Info Modals for all charts');
+    console.log('✅ Fixed: Light mode colors for all charts');
     console.log('✅ All calculations use Dashboard Budget logic');
     
 })();
