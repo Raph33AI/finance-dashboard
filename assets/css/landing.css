@@ -966,6 +966,7 @@ body.dark-mode .demo-interactive {
     line-height: 1.2;
     margin-bottom: 1.5rem;
     letter-spacing: -0.02em;
+    color: #ffffff; /* ✅ AJOUTÉ : Force le blanc */
 }
 
 .highlight-gradient {
