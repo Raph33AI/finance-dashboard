@@ -1,6 +1,7 @@
 /* ═══════════════════════════════════════════════════════════════
    AUTH-SYSTEM.JS - FinancePro Navigation Authentication
    Gestion du menu profil utilisateur dans la navigation
+   Compatible avec firebase-config.js, auth.js, profile.js
    ═══════════════════════════════════════════════════════════════ */
 
 // ============================================
@@ -17,18 +18,17 @@ let userProfileData = null;
 document.addEventListener('DOMContentLoaded', () => {
     console.log('🚀 Initializing navigation auth system...');
     
-    // Vérifier si Firebase est initialisé
-    if (!isFirebaseInitialized()) {
-        console.warn('⚠️ Firebase not initialized - running in demo mode');
-        // En mode démo sans Firebase, on peut simuler un utilisateur
-        // ou laisser le système en mode "logged out"
-    } else {
-        // Écouter les changements d'état d'authentification
-        initializeAuthStateListener();
+    // Vérifier que Firebase est bien initialisé
+    if (typeof firebase === 'undefined' || typeof firebaseAuth === 'undefined') {
+        console.error('❌ Firebase not initialized! Make sure firebase-config.js is loaded first.');
+        return;
     }
     
     // Initialiser les event listeners du menu
     initializeProfileMenuListeners();
+    
+    // Écouter les changements d'état d'authentification
+    initializeAuthStateListener();
     
     console.log('✅ Navigation auth system initialized');
 });
@@ -85,9 +85,9 @@ async function loadUserProfileData(uid) {
         
         if (userDoc.exists) {
             userProfileData = userDoc.data();
-            console.log('✅ User profile loaded:', userProfileData);
+            console.log('✅ User profile loaded from Firestore');
         } else {
-            console.warn('⚠️ User profile not found in Firestore');
+            console.warn('⚠️ User profile not found in Firestore, using Firebase Auth data');
             
             // Créer un profil basique si inexistant
             userProfileData = {
@@ -124,7 +124,7 @@ function updateNavigationUI(isAuthenticated) {
     const navCtaLoggedIn = document.getElementById('navCtaLoggedIn');
     
     if (!navCtaLoggedOut || !navCtaLoggedIn) {
-        console.warn('⚠️ Navigation elements not found');
+        console.warn('⚠️ Navigation elements not found on this page');
         return;
     }
     
@@ -348,10 +348,8 @@ async function handleLogout() {
     
     try {
         // Déconnexion Firebase
-        if (isFirebaseInitialized()) {
-            await firebaseAuth.signOut();
-            console.log('✅ Logout successful');
-        }
+        await firebaseAuth.signOut();
+        console.log('✅ Logout successful');
         
         // Message de confirmation
         showNotification('success', 'Logged out successfully', 'You have been logged out.');
@@ -378,11 +376,15 @@ function handleSettings() {
     console.log('⚙️ Settings clicked');
     closeProfileDropdown();
     
-    // TODO: Rediriger vers la page de paramètres
-    showNotification('info', 'Settings', 'Settings page coming soon!');
+    // Rediriger vers la page de profil si elle existe
+    // Sinon afficher une notification
+    const profilePageExists = true; // Change selon ton setup
     
-    // Décommenter quand la page sera prête :
-    // window.location.href = 'settings.html';
+    if (profilePageExists) {
+        window.location.href = 'profile.html';
+    } else {
+        showNotification('info', 'Settings', 'Settings page coming soon!');
+    }
 }
 
 // ============================================
@@ -409,15 +411,6 @@ function formatPlanName(plan) {
     };
     
     return planNames[plan.toLowerCase()] || 'Free';
-}
-
-/**
- * Vérifier si Firebase est initialisé
- */
-function isFirebaseInitialized() {
-    return typeof firebase !== 'undefined' 
-        && typeof firebaseAuth !== 'undefined' 
-        && typeof firebaseDb !== 'undefined';
 }
 
 /**
@@ -469,54 +462,6 @@ function showNotification(type, title, message) {
 }
 
 // ============================================
-// DEMO MODE (si Firebase non disponible)
-// ============================================
-
-/**
- * Mode démo pour tester sans Firebase
- * À utiliser uniquement en développement
- */
-window.enableDemoMode = function() {
-    console.log('🎭 Demo mode enabled');
-    
-    // Simuler un utilisateur
-    currentUser = {
-        uid: 'demo-user-123',
-        email: 'demo@financepro.com',
-        displayName: 'Demo User',
-        photoURL: null
-    };
-    
-    userProfileData = {
-        firstName: 'Demo',
-        lastName: 'User',
-        email: 'demo@financepro.com',
-        photoURL: null,
-        plan: 'professional',
-        company: 'FinancePro Inc.'
-    };
-    
-    updateNavigationUI(true);
-    updateUserProfileDisplay();
-    
-    console.log('✅ Demo mode activated - User logged in');
-};
-
-/**
- * Désactiver le mode démo
- */
-window.disableDemoMode = function() {
-    console.log('🎭 Demo mode disabled');
-    
-    currentUser = null;
-    userProfileData = null;
-    
-    updateNavigationUI(false);
-    
-    console.log('✅ Demo mode deactivated - User logged out');
-};
-
-// ============================================
 // PUBLIC API (accessible globalement)
 // ============================================
 
@@ -525,11 +470,11 @@ window.authSystem = {
     getUserProfile: () => userProfileData,
     logout: handleLogout,
     isAuthenticated: () => currentUser !== null,
-    refreshProfile: () => {
+    refreshProfile: async () => {
         if (currentUser) {
-            return loadUserProfileData(currentUser.uid).then(() => {
-                updateUserProfileDisplay();
-            });
+            await loadUserProfileData(currentUser.uid);
+            updateUserProfileDisplay();
+            console.log('✅ Profile refreshed');
         }
     }
 };
