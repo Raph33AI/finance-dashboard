@@ -497,3 +497,36 @@ document.querySelectorAll('[data-action="demo"]').forEach(btn => {
         window.location.href = 'interactive-demo.html';
     });
 });
+
+// ============================================
+// REDIRECTION VERS LA PAGE D'AUTHENTIFICATION
+// ============================================
+
+// Login button
+if (ctaButtons.loginBtn) {
+    ctaButtons.loginBtn.addEventListener('click', () => {
+        console.log('🔐 Redirection vers la page de connexion...');
+        window.location.href = 'auth.html';
+    });
+}
+
+// Signup buttons - redirection vers auth.html
+[ctaButtons.signupBtn, ctaButtons.heroGetStarted, ctaButtons.finalCTABtn].forEach(btn => {
+    if (btn) {
+        btn.addEventListener('click', () => {
+            console.log('📝 Redirection vers la page d\'inscription...');
+            window.location.href = 'auth.html#signup';
+        });
+    }
+});
+
+// Détecter si on arrive avec #signup dans l'URL
+if (window.location.pathname.includes('auth.html') && window.location.hash === '#signup') {
+    // Le script auth.js gérera l'affichage du formulaire d'inscription
+    setTimeout(() => {
+        const switchToSignupBtn = document.getElementById('switchToSignup');
+        if (switchToSignupBtn) {
+            switchToSignupBtn.click();
+        }
+    }, 100);
+}
