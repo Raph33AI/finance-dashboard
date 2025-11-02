@@ -108,31 +108,11 @@ function initializeEventListeners() {
         googleLoginBtn.addEventListener('click', () => handleSocialLogin('google'));
     }
     
-    const appleLoginBtn = document.getElementById('appleLoginBtn');
-    if (appleLoginBtn) {
-        appleLoginBtn.addEventListener('click', () => handleSocialLogin('apple'));
-    }
-    
-    const microsoftLoginBtn = document.getElementById('microsoftLoginBtn');
-    if (microsoftLoginBtn) {
-        microsoftLoginBtn.addEventListener('click', () => handleSocialLogin('microsoft'));
-    }
-    
     // === BOUTONS SOCIAUX - SIGNUP ===
     
     const googleSignupBtn = document.getElementById('googleSignupBtn');
     if (googleSignupBtn) {
         googleSignupBtn.addEventListener('click', () => handleSocialLogin('google'));
-    }
-    
-    const appleSignupBtn = document.getElementById('appleSignupBtn');
-    if (appleSignupBtn) {
-        appleSignupBtn.addEventListener('click', () => handleSocialLogin('apple'));
-    }
-    
-    const microsoftSignupBtn = document.getElementById('microsoftSignupBtn');
-    if (microsoftSignupBtn) {
-        microsoftSignupBtn.addEventListener('click', () => handleSocialLogin('microsoft'));
     }
     
     // === TOGGLE PASSWORD VISIBILITY ===
@@ -405,14 +385,6 @@ async function handleSocialLogin(providerType) {
         case 'google':
             provider = googleProvider;
             providerName = 'Google';
-            break;
-        case 'apple':
-            provider = appleProvider;
-            providerName = 'Apple';
-            break;
-        case 'microsoft':
-            provider = microsoftProvider;
-            providerName = 'Microsoft';
             break;
         default:
             console.error('Provider inconnu:', providerType);
