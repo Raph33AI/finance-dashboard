@@ -1,6 +1,5 @@
 /* ==============================================
    DASHBOARD.JS - Logique du dashboard financier
-   VERSION FIRESTORE - Sauvegarde par utilisateur
    ============================================== */
 
 // Module Dashboard (pattern IIFE pour éviter la pollution du scope global)
@@ -15,44 +14,16 @@ const Dashboard = (function() {
     let inflationRate = 2.5; // % annual
     let showInflation = false;
     
-    // ID du dashboard actuel (pour Firestore)
-    let currentDashboardId = null;
-    
     // ========== INITIALISATION ==========
     
     /**
      * Initialise le dashboard au chargement de la page
      */
-    async function init() {
-        console.log('🚀 Initializing Dashboard...');
-        
-        // Attendre que userDataManager soit prêt
-        if (typeof userDataManager === 'undefined' || !userDataManager.isAuthenticated()) {
-            console.warn('⚠️ User not authenticated, waiting...');
-            
-            // Écouter l'événement d'authentification
-            window.addEventListener('userAuthenticated', async () => {
-                console.log('✅ User authenticated, loading dashboard data...');
-                await loadDashboardData();
-                finalizeInit();
-            });
-            
-            return;
-        }
-        
-        // Si déjà authentifié, charger directement
-        await loadDashboardData();
-        finalizeInit();
-    }
-    
-    /**
-     * Finalise l'initialisation après chargement des données
-     */
-    function finalizeInit() {
+    function init() {
+        initData();
         renderTable();
         updateAllCharts();
         updateLastUpdateTime();
-        console.log('✅ Dashboard initialized successfully');
     }
     
     /**
@@ -110,6 +81,41 @@ const Dashboard = (function() {
     }
     
     /**
+     * Initialise les données (depuis localStorage ou valeurs par défaut)
+     */
+    function initData() {
+        const saved = localStorage.getItem('financialDataDynamic');
+        const savedYield = localStorage.getItem('monthlyEstYield');
+        const savedInflation = localStorage.getItem('inflationRate');
+        
+        if (savedYield) {
+            monthlyEstYield = parseFloat(savedYield);
+            document.getElementById('monthlyEstYield').value = monthlyEstYield;
+            updateEstYieldDisplay();
+        }
+        
+        if (savedInflation) {
+            inflationRate = parseFloat(savedInflation);
+            document.getElementById('inflationRate').value = inflationRate;
+        }
+        
+        if (saved) {
+            try {
+                allData = JSON.parse(saved);
+                if (allData.length === 0) throw 'Empty data';
+            } catch(e) {
+                createDefaultData();
+            }
+        } else {
+            createDefaultData();
+        }
+        
+        calculateAll();
+        currentMonthIndex = findCurrentMonthIndex();
+        updateTotalMonthsDisplay();
+    }
+    
+    /**
      * Crée les données par défaut
      */
     function createDefaultData() {
@@ -132,94 +138,6 @@ const Dashboard = (function() {
             cumulatedGains: 0, 
             peeLoreal: 0
         }));
-    }
-    
-    /**
-     * Charge les données du dashboard depuis Firestore
-     */
-    async function loadDashboardData() {
-        try {
-            // Charger les simulations de type 'dashboard'
-            const dashboards = await userDataManager.loadSimulations('dashboard');
-            
-            if (dashboards && dashboards.length > 0) {
-                // Charger le dashboard le plus récent
-                const latestDashboard = dashboards[0];
-                currentDashboardId = latestDashboard.id;
-                
-                // Restaurer les données
-                allData = latestDashboard.parameters.allData || [];
-                monthlyEstYield = latestDashboard.parameters.monthlyEstYield || 8;
-                inflationRate = latestDashboard.parameters.inflationRate || 2.5;
-                
-                // Mettre à jour l'UI
-                document.getElementById('monthlyEstYield').value = monthlyEstYield;
-                document.getElementById('inflationRate').value = inflationRate;
-                updateEstYieldDisplay();
-                
-                console.log('✅ Dashboard data loaded from Firestore');
-            } else {
-                // Pas de dashboard existant, créer les données par défaut
-                console.log('ℹ️ No existing dashboard, creating default data');
-                createDefaultData();
-                
-                // Sauvegarder immédiatement dans Firestore
-                await saveDashboardToFirestore();
-            }
-            
-            calculateAll();
-            currentMonthIndex = findCurrentMonthIndex();
-            updateTotalMonthsDisplay();
-            
-        } catch (error) {
-            console.error('❌ Error loading dashboard data:', error);
-            
-            // Fallback : créer les données par défaut
-            createDefaultData();
-            calculateAll();
-            currentMonthIndex = findCurrentMonthIndex();
-            updateTotalMonthsDisplay();
-        }
-    }
-    
-    /**
-     * Sauvegarde le dashboard dans Firestore
-     */
-    async function saveDashboardToFirestore() {
-        if (!userDataManager || !userDataManager.isAuthenticated()) {
-            console.warn('⚠️ Cannot save: user not authenticated');
-            return;
-        }
-        
-        try {
-            const dashboardData = {
-                type: 'dashboard',
-                name: 'Financial Dashboard',
-                parameters: {
-                    allData: allData,
-                    monthlyEstYield: monthlyEstYield,
-                    inflationRate: inflationRate
-                },
-                results: {
-                    totalMonths: allData.length,
-                    currentMonth: allData[currentMonthIndex]?.month,
-                    totalPortfolio: allData[allData.length - 1]?.totalPortfolio || 0,
-                    totalSavings: allData[allData.length - 1]?.cumulatedSavings || 0,
-                    currentROI: allData[currentMonthIndex]?.roi || 0
-                }
-            };
-            
-            currentDashboardId = await userDataManager.saveSimulation(
-                dashboardData, 
-                currentDashboardId
-            );
-            
-            console.log('✅ Dashboard saved to Firestore');
-            
-        } catch (error) {
-            console.error('❌ Error saving dashboard:', error);
-            throw error;
-        }
     }
     
     // ========== CALCULS ==========
@@ -256,7 +174,7 @@ const Dashboard = (function() {
     /**
      * Recalcule les gains d'investissement
      */
-    async function recalculateGains() {
+    function recalculateGains() {
         const monthlyYieldRate = monthlyEstYield / 12 / 100;
         let cumulatedGains = 0;
         
@@ -280,7 +198,7 @@ const Dashboard = (function() {
         
         calculateAll();
         renderTable();
-        await autoSave();
+        autoSave();
         updateAllCharts();
     }
     
@@ -289,10 +207,11 @@ const Dashboard = (function() {
     /**
      * Met à jour le rendement mensuel estimé
      */
-    async function updateEstYield() {
+    function updateEstYield() {
         monthlyEstYield = parseFloat(document.getElementById('monthlyEstYield').value) || 0;
         updateEstYieldDisplay();
-        await recalculateGains();
+        localStorage.setItem('monthlyEstYield', monthlyEstYield);
+        recalculateGains();
     }
     
     /**
@@ -307,10 +226,10 @@ const Dashboard = (function() {
     /**
      * Met à jour le taux d'inflation
      */
-    async function updateInflationRate() {
+    function updateInflationRate() {
         inflationRate = parseFloat(document.getElementById('inflationRate').value) || 2.5;
+        localStorage.setItem('inflationRate', inflationRate);
         if (showInflation) updateAllCharts();
-        await autoSave();
     }
     
     /**
@@ -349,7 +268,7 @@ const Dashboard = (function() {
     /**
      * Ajoute des mois avant
      */
-    async function addMonthsBefore(count) {
+    function addMonthsBefore(count) {
         if (allData.length === 0) return;
         
         const firstMonth = allData[0].month;
@@ -374,7 +293,7 @@ const Dashboard = (function() {
         }));
         
         allData = newRows.concat(allData);
-        await recalculateGains();
+        recalculateGains();
         currentMonthIndex = findCurrentMonthIndex();
         updateTotalMonthsDisplay();
         updateAllCharts();
@@ -383,7 +302,7 @@ const Dashboard = (function() {
     /**
      * Ajoute des mois après
      */
-    async function addMonthsAfter(count) {
+    function addMonthsAfter(count) {
         if (allData.length === 0) return;
         
         const lastMonth = allData[allData.length - 1].month;
@@ -408,7 +327,7 @@ const Dashboard = (function() {
         }));
         
         allData = allData.concat(newRows);
-        await recalculateGains();
+        recalculateGains();
         updateTotalMonthsDisplay();
         updateAllCharts();
     }
@@ -416,7 +335,7 @@ const Dashboard = (function() {
     /**
      * Supprime une ligne
      */
-    async function deleteRow(index) {
+    function deleteRow(index) {
         if (allData.length <= 12) {
             alert('Cannot delete! Minimum 12 months required.');
             return;
@@ -424,7 +343,7 @@ const Dashboard = (function() {
         
         if (confirm('Delete month ' + allData[index].month + '?')) {
             allData.splice(index, 1);
-            await recalculateGains();
+            recalculateGains();
             currentMonthIndex = findCurrentMonthIndex();
             updateTotalMonthsDisplay();
             updateAllCharts();
@@ -444,39 +363,22 @@ const Dashboard = (function() {
     /**
      * Sauvegarde manuelle
      */
-    async function saveData() {
-        try {
-            calculateAll();
-            await saveDashboardToFirestore();
-            window.FinanceDashboard.showNotification('Data saved successfully!', 'success');
-        } catch (error) {
-            console.error('Error saving data:', error);
-            window.FinanceDashboard.showNotification('Error saving data!', 'error');
-        }
+    function saveData() {
+        calculateAll();
+        localStorage.setItem('financialDataDynamic', JSON.stringify(allData));
+        localStorage.setItem('monthlyEstYield', monthlyEstYield);
+        localStorage.setItem('inflationRate', inflationRate);
+        window.FinanceDashboard.showNotification('Data saved successfully!', 'success');
     }
     
     /**
-     * Sauvegarde automatique avec debounce
+     * Sauvegarde automatique
      */
-    async function autoSave() {
-        if (!userDataManager || !userDataManager.isAuthenticated()) {
-            return;
-        }
-        
+    function autoSave() {
         calculateAll();
-        
-        // Utiliser le système d'auto-save de userDataManager
-        userDataManager.scheduleAutoSave(
-            async () => {
-                try {
-                    await saveDashboardToFirestore();
-                    console.log('💾 Auto-saved to Firestore');
-                } catch (error) {
-                    console.error('Error auto-saving:', error);
-                }
-            },
-            null
-        );
+        localStorage.setItem('financialDataDynamic', JSON.stringify(allData));
+        localStorage.setItem('monthlyEstYield', monthlyEstYield);
+        localStorage.setItem('inflationRate', inflationRate);
     }
     
     /**
@@ -486,8 +388,7 @@ const Dashboard = (function() {
         const exportData = {
             monthlyEstYield: monthlyEstYield,
             inflationRate: inflationRate,
-            data: allData,
-            exportDate: new Date().toISOString()
+            data: allData
         };
         const json = JSON.stringify(exportData, null, 2);
         const blob = new Blob([json], { type: 'application/json' });
@@ -507,10 +408,10 @@ const Dashboard = (function() {
         const input = document.createElement('input');
         input.type = 'file';
         input.accept = 'application/json';
-        input.onchange = async (e) => {
+        input.onchange = e => {
             const file = e.target.files[0];
             const reader = new FileReader();
-            reader.onload = async (event) => {
+            reader.onload = event => {
                 try {
                     const imported = JSON.parse(event.target.result);
                     if (imported.data) {
@@ -530,7 +431,7 @@ const Dashboard = (function() {
                     calculateAll();
                     currentMonthIndex = findCurrentMonthIndex();
                     renderTable();
-                    await saveData();
+                    saveData();
                     updateTotalMonthsDisplay();
                     updateAllCharts();
                     window.FinanceDashboard.showNotification('Data imported successfully!', 'success');
@@ -546,38 +447,21 @@ const Dashboard = (function() {
     /**
      * Réinitialise aux valeurs par défaut
      */
-    async function resetToDefault() {
-        if (confirm('Reset all data to default 300 months? This will delete your current dashboard from Firestore.')) {
-            try {
-                // Supprimer le dashboard actuel de Firestore si existe
-                if (currentDashboardId && userDataManager) {
-                    await userDataManager.deleteSimulation(currentDashboardId);
-                }
-                
-                currentDashboardId = null;
-                monthlyEstYield = 8;
-                inflationRate = 2.5;
-                document.getElementById('monthlyEstYield').value = 8;
-                document.getElementById('inflationRate').value = 2.5;
-                updateEstYieldDisplay();
-                showInflation = false;
-                
-                createDefaultData();
-                calculateAll();
-                currentMonthIndex = findCurrentMonthIndex();
-                
-                // Sauvegarder le nouveau dashboard dans Firestore
-                await saveDashboardToFirestore();
-                
-                renderTable();
-                updateTotalMonthsDisplay();
-                updateAllCharts();
-                
-                window.FinanceDashboard.showNotification('Data reset to default!', 'info');
-            } catch (error) {
-                console.error('Error resetting data:', error);
-                window.FinanceDashboard.showNotification('Error resetting data!', 'error');
-            }
+    function resetToDefault() {
+        if (confirm('Reset all data to default 300 months?')) {
+            localStorage.removeItem('financialDataDynamic');
+            localStorage.removeItem('monthlyEstYield');
+            localStorage.removeItem('inflationRate');
+            monthlyEstYield = 8;
+            inflationRate = 2.5;
+            document.getElementById('monthlyEstYield').value = 8;
+            document.getElementById('inflationRate').value = 2.5;
+            updateEstYieldDisplay();
+            showInflation = false;
+            initData();
+            renderTable();
+            updateAllCharts();
+            window.FinanceDashboard.showNotification('Data reset to default!', 'info');
         }
     }
     
@@ -622,15 +506,15 @@ const Dashboard = (function() {
     /**
      * Met à jour une valeur du tableau
      */
-    async function updateValue(index, field, value) {
+    function updateValue(index, field, value) {
         allData[index][field] = parseFloat(value) || 0;
         
         if (field === 'investment') {
-            await recalculateGains();
+            recalculateGains();
         } else {
             calculateAll();
             renderTable();
-            await autoSave();
+            autoSave();
         }
     }
     
@@ -639,7 +523,7 @@ const Dashboard = (function() {
     /**
      * Applique une modification en masse
      */
-    async function applyBulkEdit() {
+    function applyBulkEdit() {
         const category = document.getElementById('bulkCategory').value;
         const startMonth = document.getElementById('bulkStartMonth').value;
         const endMonth = document.getElementById('bulkEndMonth').value;
@@ -680,11 +564,11 @@ const Dashboard = (function() {
         });
         
         if (field === 'investment') {
-            await recalculateGains();
+            recalculateGains();
         } else {
             calculateAll();
             renderTable();
-            await autoSave();
+            autoSave();
         }
         
         window.FinanceDashboard.showNotification(
@@ -728,45 +612,528 @@ const Dashboard = (function() {
         const container = document.getElementById('statsContainer');
         if (container) container.innerHTML = html;
     }
-
-    // ========== GRAPHIQUES (CHARTS) ==========
-    // [... Le reste du code des graphiques reste IDENTIQUE ...]
-    // Je ne le répète pas ici pour gagner de la place, mais garde tout le code
-    // des fonctions createChart1(), updateChart2(), etc.
+    
+    // ========== GRAPHIQUES ==========
+    // (Je vais créer les fonctions de graphiques dans le prochain message car c'est très long)
+    
+// ========== GRAPHIQUES (CHARTS) ==========
     
     /**
      * Initialise les filtres de mois pour les graphiques
      */
     function initMonthFilters() {
-        // ... code identique ...
+        const incomeFilter = document.getElementById('incomeMonthFilter');
+        const expenseFilter = document.getElementById('expenseMonthFilter');
+        const budgetFilter = document.getElementById('budgetMonthFilter');
+        
+        if (!incomeFilter || !expenseFilter || !budgetFilter) return;
+        
+        incomeFilter.innerHTML = '';
+        expenseFilter.innerHTML = '';
+        budgetFilter.innerHTML = '';
+        
+        allData.forEach((row, index) => {
+            const opt1 = new Option(row.month, index);
+            const opt2 = new Option(row.month, index);
+            const opt3 = new Option(row.month, index);
+            
+            if (index === currentMonthIndex) {
+                opt1.selected = true;
+                opt2.selected = true;
+                opt3.selected = true;
+            }
+            
+            incomeFilter.add(opt1);
+            expenseFilter.add(opt2);
+            budgetFilter.add(opt3);
+        });
     }
     
+    /**
+     * Graphique 1 : Évolution Revenus vs Dépenses
+     */
     function createChart1() {
-        // ... code identique ...
+        const months = allData.map(d => d.month);
+        const incomeValues = allData.map(d => d.totalIncome);
+        const expenseValues = allData.map(d => d.totalExpenses);
+        const savingsValues = allData.map(d => d.savings);
+        
+        if (chart1Instance) chart1Instance.destroy();
+        
+        chart1Instance = Highcharts.chart('chart1', {
+            chart: { 
+                type: 'line', 
+                backgroundColor: 'transparent', 
+                zoomType: 'x' 
+            },
+            title: { text: null },
+            xAxis: { 
+                categories: months, 
+                crosshair: true, 
+                labels: { 
+                    rotation: -45, 
+                    style: { fontSize: '10px' } 
+                } 
+            },
+            yAxis: { 
+                title: { 
+                    text: 'Amount (EUR)', 
+                    style: { color: '#2649B2' } 
+                } 
+            },
+            tooltip: { 
+                shared: true, 
+                valueDecimals: 0, 
+                valueSuffix: ' EUR' 
+            },
+            series: [
+                { 
+                    name: 'Income', 
+                    data: incomeValues, 
+                    color: '#4A74F3', 
+                    lineWidth: 2 
+                },
+                { 
+                    name: 'Expenses', 
+                    data: expenseValues, 
+                    color: '#8E44AD', 
+                    lineWidth: 2 
+                },
+                { 
+                    name: 'Monthly Savings', 
+                    data: savingsValues, 
+                    color: '#2649B2', 
+                    type: 'area', 
+                    fillColor: { 
+                        linearGradient: [0, 0, 0, 300], 
+                        stops: [
+                            [0, 'rgba(38,73,178,0.3)'], 
+                            [1, 'rgba(38,73,178,0.05)']
+                        ] 
+                    }, 
+                    lineWidth: 2 
+                }
+            ],
+            plotOptions: { 
+                line: { marker: { enabled: false } }, 
+                area: { marker: { enabled: false } } 
+            },
+            credits: { enabled: false }
+        });
     }
     
+    /**
+     * Graphique 2 : Répartition des Revenus
+     */
     function updateChart2() {
-        // ... code identique ...
+        const monthIndex = parseInt(document.getElementById('incomeMonthFilter')?.value || 0);
+        const row = allData[monthIndex];
+        
+        if (!row) return;
+        
+        Highcharts.chart('chart2', {
+            chart: { 
+                type: 'pie', 
+                backgroundColor: 'transparent' 
+            },
+            title: { 
+                text: row.month, 
+                style: { 
+                    color: '#2649B2', 
+                    fontWeight: 'bold' 
+                } 
+            },
+            tooltip: { 
+                pointFormat: '<b>{point.name}</b>: {point.y:,.0f} EUR ({point.percentage:.1f}%)' 
+            },
+            series: [{
+                name: 'Amount',
+                data: [
+                    { name: 'Salary', y: row.salary },
+                    { name: 'Misc.', y: row.misc }
+                ],
+                colorByPoint: true
+            }],
+            colors: ['#2649B2', '#4A74F3'],
+            plotOptions: {
+                pie: {
+                    innerSize: '50%',
+                    dataLabels: {
+                        format: '<b>{point.name}</b>: {point.y:,.0f} EUR',
+                        style: { color: '#2649B2' }
+                    },
+                    borderWidth: 2,
+                    borderColor: '#E8DAEF'
+                }
+            },
+            credits: { enabled: false }
+        });
     }
     
+    /**
+     * Graphique 3 : Répartition des Dépenses
+     */
     function updateChart3() {
-        // ... code identique ...
+        const monthIndex = parseInt(document.getElementById('expenseMonthFilter')?.value || 0);
+        const row = allData[monthIndex];
+        
+        if (!row) return;
+        
+        Highcharts.chart('chart3', {
+            chart: { 
+                type: 'pie', 
+                backgroundColor: 'transparent' 
+            },
+            title: { 
+                text: row.month, 
+                style: { 
+                    color: '#6C3483', 
+                    fontWeight: 'bold' 
+                } 
+            },
+            tooltip: { 
+                pointFormat: '<b>{point.name}</b>: {point.y:,.0f} EUR ({point.percentage:.1f}%)' 
+            },
+            series: [{
+                name: 'Amount',
+                data: [
+                    { name: 'Rent', y: row.rent },
+                    { name: 'Food', y: row.food },
+                    { name: 'Fix Costs', y: row.fixCosts },
+                    { name: 'Others', y: row.others },
+                    { name: 'Loan', y: row.loan }
+                ],
+                colorByPoint: true
+            }],
+            colors: ['#5B2C6F', '#6C3483', '#8E44AD', '#9D5CE6', '#C39BD3'],
+            plotOptions: {
+                pie: {
+                    dataLabels: {
+                        format: '<b>{point.name}</b>: {point.y:,.0f} EUR',
+                        style: { color: '#5B2C6F' }
+                    },
+                    borderWidth: 2,
+                    borderColor: '#E8DAEF'
+                }
+            },
+            credits: { enabled: false }
+        });
     }
     
+    /**
+     * Graphique 4 : Évolution de l'Épargne Cumulée
+     */
     function createChart4() {
-        // ... code identique ...
+        const months = allData.map(d => d.month);
+        const savingsData = allData.map(d => d.cumulatedSavings);
+        const savingsDataReal = showInflation ? 
+            allData.map((d, i) => adjustForInflation(d.cumulatedSavings, i)) : [];
+        
+        const series = [{
+            name: 'Nominal Savings',
+            data: savingsData,
+            color: '#2649B2',
+            fillColor: {
+                linearGradient: [0, 0, 0, 300],
+                stops: [
+                    [0, 'rgba(38,73,178,0.5)'],
+                    [1, 'rgba(38,73,178,0.1)']
+                ]
+            },
+            lineWidth: 2
+        }];
+        
+        if (showInflation) {
+            series.push({
+                name: 'Real Savings (Inflation-Adjusted)',
+                data: savingsDataReal,
+                color: '#9D5CE6',
+                dashStyle: 'Dash',
+                fillColor: {
+                    linearGradient: [0, 0, 0, 300],
+                    stops: [
+                        [0, 'rgba(157,92,230,0.3)'],
+                        [1, 'rgba(157,92,230,0.05)']
+                    ]
+                },
+                lineWidth: 2
+            });
+        }
+        
+        if (chart4Instance) chart4Instance.destroy();
+        
+        chart4Instance = Highcharts.chart('chart4', {
+            chart: { 
+                type: 'area', 
+                backgroundColor: 'transparent' 
+            },
+            title: { 
+                text: showInflation ? 
+                    'Inflation Rate: ' + inflationRate + '% annual' : null,
+                style: { 
+                    color: '#9D5CE6', 
+                    fontSize: '0.9em' 
+                }
+            },
+            xAxis: {
+                categories: months,
+                crosshair: true,
+                labels: {
+                    rotation: -45,
+                    style: { fontSize: '10px' }
+                }
+            },
+            yAxis: {
+                title: {
+                    text: 'Cumulated Savings (EUR)',
+                    style: { color: '#2649B2' }
+                }
+            },
+            tooltip: {
+                shared: true,
+                valueDecimals: 0,
+                valueSuffix: ' EUR'
+            },
+            series: series,
+            plotOptions: {
+                area: { marker: { enabled: false } }
+            },
+            credits: { enabled: false }
+        });
     }
     
+    /**
+     * Graphique 5 : Portefeuille d'Investissement
+     */
     function createChart5() {
-        // ... code identique ...
+        const months = allData.map(d => d.month);
+        const cumInv = allData.map(d => d.cumulatedInvestment);
+        const gains = allData.map(d => d.cumulatedGains);
+        const pee = allData.map(d => d.peeLoreal);
+        const portfolio = allData.map(d => d.totalPortfolio);
+        
+        const portfolioReal = showInflation ? 
+            allData.map((d, i) => adjustForInflation(d.totalPortfolio, i)) : [];
+        const cumInvReal = showInflation ? 
+            allData.map((d, i) => adjustForInflation(d.cumulatedInvestment, i)) : [];
+        
+        const series = [
+            {
+                name: 'Cumulated Investment',
+                data: cumInv,
+                color: '#6C8BE0',
+                lineWidth: 2
+            },
+            {
+                name: 'Cumulated Gains',
+                data: gains,
+                color: '#8E7DE3',
+                dashStyle: 'ShortDot',
+                lineWidth: 2
+            },
+            {
+                name: "PEE L'Oreal",
+                data: pee,
+                color: '#9D5CE6',
+                lineWidth: 2
+            },
+            {
+                name: 'Total Portfolio',
+                data: portfolio,
+                color: '#2649B2',
+                lineWidth: 3
+            }
+        ];
+        
+        if (showInflation) {
+            series.push({
+                name: 'Portfolio (Real)',
+                data: portfolioReal,
+                color: '#B55CE6',
+                dashStyle: 'Dash',
+                lineWidth: 3
+            });
+            series.push({
+                name: 'Investment (Real)',
+                data: cumInvReal,
+                color: '#D4D9F0',
+                dashStyle: 'Dash',
+                lineWidth: 2
+            });
+        }
+        
+        if (chart5Instance) chart5Instance.destroy();
+        
+        chart5Instance = Highcharts.chart('chart5', {
+            chart: { 
+                type: 'line', 
+                backgroundColor: 'transparent' 
+            },
+            title: {
+                text: showInflation ? 
+                    'Inflation Rate: ' + inflationRate + '% annual' : null,
+                style: {
+                    color: '#9D5CE6',
+                    fontSize: '0.9em'
+                }
+            },
+            xAxis: {
+                categories: months,
+                crosshair: true,
+                labels: {
+                    rotation: -45,
+                    style: { fontSize: '10px' }
+                }
+            },
+            yAxis: {
+                title: {
+                    text: 'Value (EUR)',
+                    style: { color: '#2649B2' }
+                }
+            },
+            tooltip: {
+                shared: true,
+                valueDecimals: 0,
+                valueSuffix: ' EUR'
+            },
+            series: series,
+            plotOptions: {
+                line: { marker: { enabled: false } }
+            },
+            credits: { enabled: false }
+        });
     }
     
+    /**
+     * Graphique 6 : Évolution du ROI
+     */
     function createChart6() {
-        // ... code identique ...
+        const months = allData.map(d => d.month);
+        const roi = allData.map(d => d.roi);
+        
+        if (chart6Instance) chart6Instance.destroy();
+        
+        chart6Instance = Highcharts.chart('chart6', {
+            chart: { 
+                type: 'area', 
+                backgroundColor: 'transparent' 
+            },
+            title: { text: null },
+            xAxis: {
+                categories: months,
+                crosshair: true,
+                labels: {
+                    rotation: -45,
+                    style: { fontSize: '10px' }
+                }
+            },
+            yAxis: {
+                title: {
+                    text: 'ROI (%)',
+                    style: { color: '#2649B2' }
+                },
+                plotLines: [{
+                    value: 0,
+                    color: '#8E44AD',
+                    width: 2,
+                    dashStyle: 'Dash'
+                }]
+            },
+            tooltip: {
+                valueDecimals: 2,
+                valueSuffix: '%'
+            },
+            series: [{
+                name: 'ROI',
+                data: roi,
+                color: '#4A74F3',
+                fillColor: {
+                    linearGradient: [0, 0, 0, 300],
+                    stops: [
+                        [0, 'rgba(74,116,243,0.4)'],
+                        [1, 'rgba(74,116,243,0.05)']
+                    ]
+                },
+                lineWidth: 2
+            }],
+            plotOptions: {
+                area: { marker: { enabled: false } }
+            },
+            credits: { enabled: false }
+        });
     }
     
+    /**
+     * Graphique 7 : Allocation Budgétaire (50/30/20)
+     */
     function updateChart7() {
-        // ... code identique ...
+        const monthIndex = parseInt(document.getElementById('budgetMonthFilter')?.value || 0);
+        const row = allData[monthIndex];
+        
+        if (!row) return;
+        
+        const needsAmount = row.rent + row.food + row.fixCosts + row.loan;
+        const wantsAmount = row.others;
+        const savingsAmount = row.investment + row.savings;
+        const total = row.totalIncome;
+        
+        const needsPercent = total > 0 ? (needsAmount / total * 100) : 0;
+        const wantsPercent = total > 0 ? (wantsAmount / total * 100) : 0;
+        const savingsPercent = total > 0 ? (savingsAmount / total * 100) : 0;
+        
+        Highcharts.chart('chart7', {
+            chart: { 
+                type: 'pie', 
+                backgroundColor: 'transparent' 
+            },
+            title: {
+                text: row.month + ' - Total: ' + total.toLocaleString() + ' EUR',
+                style: {
+                    color: '#2649B2',
+                    fontWeight: 'bold'
+                }
+            },
+            tooltip: {
+                useHTML: true,
+                pointFormat: '<b>{point.name}</b><br/>Amount: <b>{point.amount:,.0f} EUR</b><br/>Percentage: <b>{point.percentage:.1f}%</b>'
+            },
+            plotOptions: {
+                pie: {
+                    innerSize: '60%',
+                    dataLabels: {
+                        enabled: true,
+                        format: '<b>{point.name}</b><br/>{point.percentage:.1f}%<br/>{point.amount:,.0f} EUR',
+                        style: { color: '#2649B2' }
+                    },
+                    borderWidth: 2,
+                    borderColor: '#E8DAEF'
+                }
+            },
+            series: [{
+                name: 'Budget',
+                data: [
+                    {
+                        name: 'Needs',
+                        y: needsPercent,
+                        amount: needsAmount,
+                        color: '#6C3483'
+                    },
+                    {
+                        name: 'Wants',
+                        y: wantsPercent,
+                        amount: wantsAmount,
+                        color: '#9D5CE6'
+                    },
+                    {
+                        name: 'Savings',
+                        y: savingsPercent,
+                        amount: savingsAmount,
+                        color: '#2649B2'
+                    }
+                ]
+            }],
+            credits: { enabled: false }
+        });
     }
     
     /**
@@ -784,7 +1151,7 @@ const Dashboard = (function() {
         updateChart7();
     }
 
-    // ========== EXPORTS PUBLICS ==========
+// ========== EXPORTS PUBLICS ==========
     return {
         // Initialisation
         init,
@@ -858,4 +1225,4 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
-console.log('✅ Dashboard module loaded with Firestore support');
+console.log('✅ Menu utilisateur sidebar initialisé');
