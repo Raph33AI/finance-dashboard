@@ -560,32 +560,55 @@
         },
         
         calculateSortinoRatio: function(returns, riskFreeRate) {
-            if (returns.length === 0) return 0;
+            if (!returns || returns.length === 0) {
+                return 0;
+            }
             
-            // ✅ FIX: Returns are already in decimal format (0.05 = 5%)
-            const monthlyRiskFree = riskFreeRate / 12 / 100;
-            const excessReturns = returns.map(r => r - monthlyRiskFree);
+            // Filter valid returns
+            const validReturns = returns.filter(r => !isNaN(r) && isFinite(r));
+            
+            if (validReturns.length === 0) {
+                return 0;
+            }
+            
+            // Monthly risk-free rate (2% annual / 12 months / 100 to convert to decimal)
+            const monthlyRiskFree = (riskFreeRate / 100) / 12;
+            
+            // Calculate excess returns (return - risk free rate)
+            const excessReturns = validReturns.map(r => r - monthlyRiskFree);
+            
+            // Average excess return
             const meanExcess = excessReturns.reduce((sum, r) => sum + r, 0) / excessReturns.length;
             
-            // ✅ FIX: Calculate downside deviation properly
+            // Get only negative excess returns (downside risk)
             const downsideReturns = excessReturns.filter(r => r < 0);
             
             if (downsideReturns.length === 0) {
-                // No negative returns - portfolio only goes up!
-                return meanExcess > 0 ? 5.0 : 0; // Cap at reasonable value instead of 999
+                // No downside! Portfolio always beats risk-free rate
+                return meanExcess > 0 ? 3.0 : 0;
             }
             
-            // ✅ FIX: Proper downside deviation calculation
-            const downsideVariance = downsideReturns.reduce((sum, r) => sum + (r * r), 0) / downsideReturns.length;
+            // Calculate downside deviation
+            const downsideSquaredSum = downsideReturns.reduce((sum, r) => sum + (r * r), 0);
+            const downsideVariance = downsideSquaredSum / downsideReturns.length;
             const downsideDeviation = Math.sqrt(downsideVariance);
             
-            if (downsideDeviation === 0) return 0;
+            if (downsideDeviation === 0 || isNaN(downsideDeviation) || !isFinite(downsideDeviation)) {
+                return 0;
+            }
             
-            // ✅ FIX: Annualize properly
+            // Annualize both numerator and denominator
             const annualizedExcessReturn = meanExcess * 12;
             const annualizedDownsideDeviation = downsideDeviation * Math.sqrt(12);
             
-            return annualizedExcessReturn / annualizedDownsideDeviation;
+            const sortino = annualizedExcessReturn / annualizedDownsideDeviation;
+            
+            // Final safety check
+            if (isNaN(sortino) || !isFinite(sortino)) {
+                return 0;
+            }
+            
+            return sortino;
         },
         
         calculateMaxDrawdown: function(values) {
@@ -2026,73 +2049,90 @@ createReturnsDistributionChart: function(data) {
         async runLSTMPredictor(data) {
             return new Promise(resolve => {
                 setTimeout(() => {
-                    const now = new Date();
-                    const currentMonthStr = String(now.getMonth() + 1).padStart(2, '0') + '/' + now.getFullYear();
+                    console.log('🚀 LSTM Predictor Starting...');
                     
-                    let currentMonthIndex = this.financialData.findIndex(row => row.month === currentMonthStr);
+                    // ✅ FIX: Use ALL filtered data as historical data
+                    // Since your data is all projections (11/2025-10/2050), we treat them as historical for analysis
+                    const historicalData = data; // Use filtered data from period selector
                     
-                    if (currentMonthIndex === -1) {
-                        currentMonthIndex = this.financialData.length - 1;
-                    }
+                    console.log('📊 Using Data:', historicalData.length, 'months');
                     
-                    const historicalData = this.financialData.slice(0, currentMonthIndex + 1);
-                    
-                    // ✅ FIX: Check if we have enough historical data
                     if (historicalData.length < 2) {
-                        console.warn('⚠️ Not enough historical data for LSTM predictor');
+                        console.error('❌ LSTM: Not enough data');
                         this.aiResults.lstm = {
                             currentValue: 0,
                             trend: 0,
                             confidence: 0,
                             expectedReturn12M: 0,
                             volatility: 0,
-                            dataSource: 'Insufficient Data',
+                            dataSource: 'Insufficient Data (< 2 months)',
                             historicalMonths: historicalData.length
                         };
                         resolve();
                         return;
                     }
                     
-                    const lastHistoricalValue = parseFloat(historicalData[historicalData.length - 1].totalPortfolio) || 0;
+                    // Get last portfolio value
+                    const lastRow = historicalData[historicalData.length - 1];
+                    const lastHistoricalValue = parseFloat(lastRow.totalPortfolio) || 0;
                     
-                    // ✅ FIX: Better returns calculation with validation
+                    console.log('💰 Last Portfolio Value:', this.formatCurrency(lastHistoricalValue));
+                    
+                    // Calculate returns from the data
                     const returns = [];
+                    
                     for (let i = 1; i < historicalData.length; i++) {
-                        const monthlyGain = parseFloat(historicalData[i].monthlyGain) || 0;
-                        const prevInvestment = parseFloat(historicalData[i - 1].cumulatedInvestment) || 0;
+                        const currentRow = historicalData[i];
+                        const prevRow = historicalData[i - 1];
                         
-                        if (prevInvestment > 0) {
+                        const monthlyGain = parseFloat(currentRow.monthlyGain);
+                        const prevInvestment = parseFloat(prevRow.cumulatedInvestment);
+                        
+                        if (!isNaN(monthlyGain) && !isNaN(prevInvestment) && prevInvestment > 0) {
                             const monthlyReturn = monthlyGain / prevInvestment;
-                            // ✅ FIX: Filter out extreme outliers that could skew results
-                            if (!isNaN(monthlyReturn) && isFinite(monthlyReturn)) {
+                            
+                            // Sanity check
+                            if (!isNaN(monthlyReturn) && isFinite(monthlyReturn) && Math.abs(monthlyReturn) < 10) {
                                 returns.push(monthlyReturn);
                             }
                         }
                     }
                     
-                    // ✅ FIX: Validate we have returns data
+                    console.log('✅ Valid Returns:', returns.length);
+                    console.log('📊 Sample Returns:', returns.slice(0, 5).map(r => (r * 100).toFixed(3) + '%'));
+                    
                     if (returns.length === 0) {
-                        console.warn('⚠️ No valid returns calculated for LSTM');
+                        console.error('❌ LSTM: No valid returns');
                         this.aiResults.lstm = {
                             currentValue: lastHistoricalValue,
                             trend: 0,
                             confidence: 0,
                             expectedReturn12M: 0,
                             volatility: 0,
-                            dataSource: 'No Returns Data',
+                            dataSource: 'No Valid Returns',
                             historicalMonths: historicalData.length
                         };
                         resolve();
                         return;
                     }
                     
-                    // ✅ FIX: Calculate volatility and avgReturn with safety checks
-                    const volatility = this.calculateVolatility(returns);
-                    const avgReturn = returns.reduce((sum, r) => sum + r, 0) / returns.length;
+                    // Calculate average return
+                    const sumReturns = returns.reduce((sum, r) => sum + r, 0);
+                    const avgReturn = sumReturns / returns.length;
                     
-                    // ✅ FIX: Validate calculations
-                    if (isNaN(volatility) || isNaN(avgReturn)) {
-                        console.error('❌ Invalid volatility or avgReturn:', { volatility, avgReturn });
+                    console.log('📈 Average Monthly Return:', (avgReturn * 100).toFixed(3) + '%');
+                    
+                    // Calculate volatility
+                    const mean = avgReturn;
+                    const squaredDiffs = returns.map(r => Math.pow(r - mean, 2));
+                    const variance = squaredDiffs.reduce((sum, val) => sum + val, 0) / returns.length;
+                    const monthlyVolatility = Math.sqrt(variance);
+                    
+                    console.log('📉 Monthly Volatility:', (monthlyVolatility * 100).toFixed(3) + '%');
+                    
+                    // Check for NaN
+                    if (isNaN(avgReturn) || isNaN(monthlyVolatility)) {
+                        console.error('❌ LSTM: Invalid calculations', { avgReturn, monthlyVolatility });
                         this.aiResults.lstm = {
                             currentValue: lastHistoricalValue,
                             trend: 0,
@@ -2106,34 +2146,32 @@ createReturnsDistributionChart: function(data) {
                         return;
                     }
                     
-                    // ✅ FIX: Calculate confidence with better formula
-                    const annualizedVolatility = volatility * Math.sqrt(12) * 100;
-                    const confidence = Math.max(0, Math.min(100, 100 - (annualizedVolatility * 2)));
+                    // Annualize (12 months)
+                    const annualizedReturn = avgReturn * 12 * 100; // Convert to %
+                    const annualizedVolatility = monthlyVolatility * Math.sqrt(12) * 100; // Convert to %
                     
-                    // ✅ FIX: Calculate trend (annualized return in %)
-                    const trend = avgReturn * 12 * 100;
-                    const expectedReturn12M = trend;
+                    // Calculate confidence (lower volatility = higher confidence)
+                    const confidence = Math.max(0, Math.min(100, 100 - (annualizedVolatility * 2.5)));
                     
-                    console.log('✅ LSTM Calculation:', {
-                        historicalMonths: historicalData.length,
-                        returnsCount: returns.length,
-                        avgMonthlyReturn: (avgReturn * 100).toFixed(3) + '%',
-                        annualizedReturn: trend.toFixed(2) + '%',
-                        volatility: annualizedVolatility.toFixed(2) + '%',
-                        confidence: confidence.toFixed(1) + '%'
+                    console.log('🎯 LSTM Results:', {
+                        monthlyReturn: (avgReturn * 100).toFixed(3) + '%',
+                        annualizedReturn: annualizedReturn.toFixed(2) + '%',
+                        annualizedVolatility: annualizedVolatility.toFixed(2) + '%',
+                        confidence: confidence.toFixed(1) + '%',
+                        dataPoints: returns.length
                     });
                     
                     this.aiResults.lstm = {
                         currentValue: lastHistoricalValue,
-                        trend: trend,
+                        trend: annualizedReturn,
                         confidence: confidence,
-                        expectedReturn12M: expectedReturn12M,
+                        expectedReturn12M: annualizedReturn,
                         volatility: annualizedVolatility,
-                        dataSource: 'Dashboard Budget Historical Data',
+                        dataSource: `Dashboard Budget Data (${historicalData.length} months analyzed)`,
                         historicalMonths: historicalData.length
                     };
                     
-                    console.log('✅ LSTM completed successfully');
+                    console.log('✅ LSTM Completed Successfully');
                     resolve();
                 }, 1000);
             });
