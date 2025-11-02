@@ -38,10 +38,9 @@
 <body>
     <div class='layout-wrapper'>
         
-        <!-- ============================================
-             SIDEBAR NAVIGATION
-             ============================================ -->
+        <!-- Sidebar Navigation - VERSION CORRIGÉE -->
         <aside class='sidebar' id='sidebar'>
+            <!-- Header -->
             <div class='sidebar-header'>
                 <h2><i class='fas fa-chart-line'></i> Finance Hub</h2>
                 <button class='sidebar-toggle' id='sidebarToggle'>
@@ -49,6 +48,7 @@
                 </button>
             </div>
             
+            <!-- Navigation -->
             <nav class='sidebar-nav'>
                 <!-- ✅ Landing Page / Accueil -->
                 <div class='nav-section'>
@@ -70,7 +70,6 @@
                             <i class='fas fa-home'></i>
                             <span>Dashboard Budget</span>
                         </a>
-                        <!-- 🆕 NOUVEAU LIEN -->
                         <a href='investment-analytics.html' class='nav-link'>
                             <i class='fas fa-chart-bar'></i>
                             <span>Investment Analytics</span>
@@ -129,19 +128,62 @@
                 </div>
             </nav>
             
-            <!-- Sidebar Footer -->
+            <!-- ===== SIDEBAR FOOTER - MENU UTILISATEUR ===== -->
             <div class="sidebar-footer">
-                <div class="user-info" id="userInfoSection">
-                    <button class="user-profile-btn" id="userProfileBtn" aria-label="Accéder à mon profil">
-                        <i class="fas fa-user-circle"></i>
-                        <div class="user-details">
-                            <span class="user-name">Connexion</span>
-                            <span class="user-status">Cliquez pour vous connecter</span>
+                <div class="sidebar-user-menu">
+                    <!-- Trigger (élément cliquable) -->
+                    <div class="sidebar-user-trigger" id="sidebarUserTrigger">
+                        <img data-user-photo 
+                            src="https://ui-avatars.com/api/?name=User&background=2563eb&color=fff" 
+                            alt="Avatar" 
+                            class="sidebar-user-avatar">
+                        <div class="sidebar-user-info">
+                            <span data-user-name class="sidebar-user-name">User</span>
+                            <span data-user-plan class="sidebar-user-plan">Free Plan</span>
                         </div>
-                        <i class="fas fa-chevron-right arrow-icon"></i>
-                    </button>
+                        <i class="fas fa-chevron-up sidebar-user-arrow"></i>
+                    </div>
+                    
+                    <!-- Dropdown (s'ouvre vers le haut) -->
+                    <div class="sidebar-user-dropdown" id="sidebarUserDropdown">
+                        <div class="user-dropdown-header">
+                            <img data-user-photo 
+                                src="https://ui-avatars.com/api/?name=User&background=2563eb&color=fff" 
+                                alt="Avatar" 
+                                class="user-dropdown-avatar">
+                            <div class="user-dropdown-details">
+                                <h4 data-user-name class="user-dropdown-name">User</h4>
+                                <p data-user-email class="user-dropdown-email">email@example.com</p>
+                            </div>
+                        </div>
+                        
+                        <div class="user-dropdown-divider"></div>
+                        
+                        <nav class="user-dropdown-links">
+                            <a href="user-profile.html" class="user-dropdown-link">
+                                <i class="fas fa-user"></i>
+                                <span>My profile</span>
+                            </a>
+                            <a href="settings.html" class="user-dropdown-link">
+                                <i class="fas fa-cog"></i>
+                                <span>Settings</span>
+                            </a>
+                            <a href="#" class="user-dropdown-link">
+                                <i class="fas fa-question-circle"></i>
+                                <span>Help</span>
+                            </a>
+                        </nav>
+                        
+                        <div class="user-dropdown-divider"></div>
+                        
+                        <button onclick="logout()" class="user-dropdown-logout">
+                            <i class="fas fa-sign-out-alt"></i>
+                            <span>Disconnect</span>
+                        </button>
+                    </div>
                 </div>
             </div>
+            <!-- ===== FIN SIDEBAR FOOTER ===== -->
         </aside>
         
         <!-- ============================================

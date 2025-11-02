@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mon Profil - FinancePro</title>
+    <title>My Profile - FinancePro</title>
     
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -20,17 +20,17 @@
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-storage-compat.js"></script>
     
-    <!-- Configuration Firebase -->
+    <!-- Firebase Configuration -->
     <script src="assets/js/firebase-config.js"></script>
     
-    <!-- Protection de la page -->
+    <!-- Page Protection -->
     <script src="assets/js/auth-guard.js"></script>
 </head>
 <body>
     
     <div class="layout-wrapper">
         
-        <!-- SIDEBAR (copie ta sidebar existante ici) -->
+        <!-- SIDEBAR -->
         <aside class='sidebar' id='sidebar'>
             <div class='sidebar-header'>
                 <h2><i class='fas fa-chart-line'></i> Finance Hub</h2>
@@ -43,7 +43,7 @@
                 <div class='nav-section'>
                     <a href='index.html' class='nav-link'>
                         <i class='fas fa-rocket'></i>
-                        <span>Accueil</span>
+                        <span>Home</span>
                     </a>
                 </div>
                 
@@ -56,7 +56,7 @@
                     <div class='nav-submenu'>
                         <a href='dashboard-financier.html' class='nav-link'>
                             <i class='fas fa-home'></i>
-                            <span>Dashboard Budget</span>
+                            <span>Budget Dashboard</span>
                         </a>
                         <a href='investment-analytics.html' class='nav-link'>
                             <i class='fas fa-chart-bar'></i>
@@ -86,7 +86,7 @@
                         </a>
                         <a href='scenario-analysis.html' class='nav-link'>
                             <i class='fas fa-flask'></i>
-                            <span>Scénarios</span>
+                            <span>Scenarios</span>
                         </a>
                     </div>
                 </div>
@@ -122,8 +122,8 @@
                              alt="Avatar" 
                              class="sidebar-user-avatar">
                         <div class="sidebar-user-info">
-                            <span data-user-name class="sidebar-user-name">Utilisateur</span>
-                            <span data-user-plan class="sidebar-user-plan">Gratuit</span>
+                            <span data-user-name class="sidebar-user-name">User</span>
+                            <span data-user-plan class="sidebar-user-plan">Free</span>
                         </div>
                         <i class="fas fa-chevron-up sidebar-user-arrow"></i>
                     </div>
@@ -135,8 +135,8 @@
                                  alt="Avatar" 
                                  class="user-dropdown-avatar">
                             <div class="user-dropdown-details">
-                                <h4 data-user-name class="user-dropdown-name">Utilisateur</h4>
-                                <p data-user-email class="user-dropdown-email">email@exemple.com</p>
+                                <h4 data-user-name class="user-dropdown-name">User</h4>
+                                <p data-user-email class="user-dropdown-email">email@example.com</p>
                             </div>
                         </div>
                         
@@ -145,15 +145,15 @@
                         <nav class="user-dropdown-links">
                             <a href="user-profile.html" class="user-dropdown-link">
                                 <i class="fas fa-user"></i>
-                                <span>Mon profil</span>
+                                <span>My Profile</span>
                             </a>
                             <a href="settings.html" class="user-dropdown-link">
                                 <i class="fas fa-cog"></i>
-                                <span>Paramètres</span>
+                                <span>Settings</span>
                             </a>
                             <a href="#" class="user-dropdown-link">
                                 <i class="fas fa-question-circle"></i>
-                                <span>Aide</span>
+                                <span>Help</span>
                             </a>
                         </nav>
                         
@@ -161,14 +161,14 @@
                         
                         <button onclick="logout()" class="user-dropdown-logout">
                             <i class="fas fa-sign-out-alt"></i>
-                            <span>Déconnexion</span>
+                            <span>Logout</span>
                         </button>
                     </div>
                 </div>
             </div>
         </aside>
         
-        <!-- CONTENU PRINCIPAL -->
+        <!-- MAIN CONTENT -->
         <main class="main-content">
             
             <!-- Header -->
@@ -178,22 +178,22 @@
                         <button class='mobile-toggle' id='mobileToggle'>
                             <i class='fas fa-bars'></i>
                         </button>
-                        <h1><i class="fas fa-user"></i> Mon Profil</h1>
+                        <h1><i class="fas fa-user"></i> My Profile</h1>
                     </div>
                     <div class="header-right">
                         <a href="dashboard-financier.html" class="btn-secondary">
                             <i class="fas fa-arrow-left"></i>
-                            Retour au dashboard
+                            Back to dashboard
                         </a>
                     </div>
                 </div>
             </div>
             
-            <!-- Contenu -->
+            <!-- Content -->
             <div class="container">
                 <div class="profile-container">
                     
-                    <!-- Section Avatar & Info de base -->
+                    <!-- Avatar & Basic Info Section -->
                     <div class="profile-section profile-header-section">
                         <div class="profile-avatar-wrapper">
                             <div class="profile-avatar-container">
@@ -204,7 +204,7 @@
                                      id="profileAvatar">
                                 <div class="avatar-overlay" id="avatarOverlay">
                                     <i class="fas fa-camera"></i>
-                                    <span>Changer</span>
+                                    <span>Change</span>
                                 </div>
                                 <input type="file" 
                                        id="avatarInput" 
@@ -212,26 +212,26 @@
                                        style="display: none;">
                             </div>
                             <div class="profile-header-info">
-                                <h2 data-user-name class="profile-username">Chargement...</h2>
-                                <p data-user-email class="profile-email">email@exemple.com</p>
+                                <h2 data-user-name class="profile-username">Loading...</h2>
+                                <p data-user-email class="profile-email">email@example.com</p>
                                 <div class="profile-badges">
-                                    <span class="badge badge-plan" data-user-plan>Gratuit</span>
+                                    <span class="badge badge-plan" data-user-plan>Free</span>
                                     <span class="badge badge-verified" id="verifiedBadge" style="display: none;">
                                         <i class="fas fa-check-circle"></i>
-                                        Vérifié
+                                        Verified
                                     </span>
                                 </div>
                             </div>
                         </div>
                     </div>
                     
-                    <!-- Section Informations personnelles -->
+                    <!-- Personal Information Section -->
                     <div class="profile-section">
                         <div class="section-header">
-                            <h3><i class="fas fa-id-card"></i> Informations personnelles</h3>
+                            <h3><i class="fas fa-id-card"></i> Personal Information</h3>
                             <button class="btn-edit" id="editPersonalInfo">
                                 <i class="fas fa-edit"></i>
-                                Modifier
+                                Edit
                             </button>
                         </div>
                         
@@ -240,24 +240,24 @@
                                 <div class="form-group">
                                     <label for="firstName">
                                         <i class="fas fa-user"></i>
-                                        Prénom
+                                        First Name
                                     </label>
                                     <input type="text" 
                                            id="firstName" 
                                            class="form-input" 
-                                           placeholder="Jean"
+                                           placeholder="John"
                                            disabled>
                                 </div>
                                 
                                 <div class="form-group">
                                     <label for="lastName">
                                         <i class="fas fa-user"></i>
-                                        Nom
+                                        Last Name
                                     </label>
                                     <input type="text" 
                                            id="lastName" 
                                            class="form-input" 
-                                           placeholder="Dupont"
+                                           placeholder="Smith"
                                            disabled>
                                 </div>
                             </div>
@@ -266,44 +266,44 @@
                                 <div class="form-group">
                                     <label for="company">
                                         <i class="fas fa-building"></i>
-                                        Entreprise
+                                        Company
                                     </label>
                                     <input type="text" 
                                            id="company" 
                                            class="form-input" 
-                                           placeholder="Nom de votre entreprise"
+                                           placeholder="Your company name"
                                            disabled>
                                 </div>
                                 
                                 <div class="form-group">
                                     <label for="phone">
                                         <i class="fas fa-phone"></i>
-                                        Téléphone
+                                        Phone
                                     </label>
                                     <input type="tel" 
                                            id="phone" 
                                            class="form-input" 
-                                           placeholder="+33 6 12 34 56 78"
+                                           placeholder="+1 (555) 123-4567"
                                            disabled>
                                 </div>
                             </div>
                             
                             <div class="form-actions" style="display: none;" id="personalInfoActions">
                                 <button type="button" class="btn-cancel" id="cancelPersonalInfo">
-                                    Annuler
+                                    Cancel
                                 </button>
                                 <button type="submit" class="btn-save">
                                     <i class="fas fa-save"></i>
-                                    Enregistrer
+                                    Save
                                 </button>
                             </div>
                         </form>
                     </div>
                     
-                    <!-- Section Sécurité -->
+                    <!-- Security Section -->
                     <div class="profile-section">
                         <div class="section-header">
-                            <h3><i class="fas fa-shield-alt"></i> Sécurité</h3>
+                            <h3><i class="fas fa-shield-alt"></i> Security</h3>
                         </div>
                         
                         <div class="security-items">
@@ -312,12 +312,12 @@
                                     <i class="fas fa-envelope"></i>
                                     <div>
                                         <h4>Email</h4>
-                                        <p data-user-email>email@exemple.com</p>
+                                        <p data-user-email>email@example.com</p>
                                     </div>
                                 </div>
                                 <button class="btn-secondary" id="changeEmailBtn" disabled>
                                     <i class="fas fa-lock"></i>
-                                    Verrouillé
+                                    Locked
                                 </button>
                             </div>
                             
@@ -325,12 +325,12 @@
                                 <div class="security-item-info">
                                     <i class="fas fa-key"></i>
                                     <div>
-                                        <h4>Mot de passe</h4>
-                                        <p>Dernière modification : Jamais</p>
+                                        <h4>Password</h4>
+                                        <p>Last modified: Never</p>
                                     </div>
                                 </div>
                                 <button class="btn-secondary" id="changePasswordBtn">
-                                    Modifier
+                                    Change
                                 </button>
                             </div>
                             
@@ -338,22 +338,22 @@
                                 <div class="security-item-info">
                                     <i class="fas fa-shield-alt"></i>
                                     <div>
-                                        <h4>Authentification à deux facteurs</h4>
-                                        <p>Désactivée</p>
+                                        <h4>Two-factor Authentication</h4>
+                                        <p>Disabled</p>
                                     </div>
                                 </div>
                                 <button class="btn-secondary" disabled>
                                     <i class="fas fa-lock"></i>
-                                    Bientôt disponible
+                                    Coming soon
                                 </button>
                             </div>
                         </div>
                     </div>
                     
-                    <!-- Section Statistiques d'utilisation -->
+                    <!-- Usage Statistics Section -->
                     <div class="profile-section">
                         <div class="section-header">
-                            <h3><i class="fas fa-chart-bar"></i> Statistiques d'utilisation</h3>
+                            <h3><i class="fas fa-chart-bar"></i> Usage Statistics</h3>
                         </div>
                         
                         <div class="stats-grid">
@@ -362,8 +362,8 @@
                                     <i class="fas fa-calendar"></i>
                                 </div>
                                 <div class="stat-content">
-                                    <h4>Membre depuis</h4>
-                                    <p id="memberSince">Chargement...</p>
+                                    <h4>Member since</h4>
+                                    <p id="memberSince">Loading...</p>
                                 </div>
                             </div>
                             
@@ -372,8 +372,8 @@
                                     <i class="fas fa-sign-in-alt"></i>
                                 </div>
                                 <div class="stat-content">
-                                    <h4>Dernière connexion</h4>
-                                    <p id="lastLogin">Chargement...</p>
+                                    <h4>Last login</h4>
+                                    <p id="lastLogin">Loading...</p>
                                 </div>
                             </div>
                             
@@ -382,7 +382,7 @@
                                     <i class="fas fa-chart-line"></i>
                                 </div>
                                 <div class="stat-content">
-                                    <h4>Analyses effectuées</h4>
+                                    <h4>Analyses performed</h4>
                                     <p id="analysesCount">0</p>
                                 </div>
                             </div>
@@ -392,28 +392,28 @@
                                     <i class="fas fa-briefcase"></i>
                                 </div>
                                 <div class="stat-content">
-                                    <h4>Portfolios créés</h4>
+                                    <h4>Portfolios created</h4>
                                     <p id="portfoliosCount">0</p>
                                 </div>
                             </div>
                         </div>
                     </div>
                     
-                    <!-- Section Danger Zone -->
+                    <!-- Danger Zone Section -->
                     <div class="profile-section danger-section">
                         <div class="section-header">
-                            <h3><i class="fas fa-exclamation-triangle"></i> Zone de danger</h3>
+                            <h3><i class="fas fa-exclamation-triangle"></i> Danger Zone</h3>
                         </div>
                         
                         <div class="danger-items">
                             <div class="danger-item">
                                 <div class="danger-item-info">
-                                    <h4>Supprimer mon compte</h4>
-                                    <p>Cette action est irréversible. Toutes vos données seront définitivement supprimées.</p>
+                                    <h4>Delete my account</h4>
+                                    <p>This action is irreversible. All your data will be permanently deleted.</p>
                                 </div>
                                 <button class="btn-danger" id="deleteAccountBtn">
                                     <i class="fas fa-trash"></i>
-                                    Supprimer mon compte
+                                    Delete my account
                                 </button>
                             </div>
                         </div>
@@ -429,11 +429,11 @@
     <!-- Toast Container -->
     <div class="toast-container" id="toastContainer"></div>
     
-    <!-- Modal Changement de mot de passe -->
+    <!-- Change Password Modal -->
     <div class="modal" id="changePasswordModal">
         <div class="modal-content">
             <div class="modal-header">
-                <h3><i class="fas fa-key"></i> Modifier le mot de passe</h3>
+                <h3><i class="fas fa-key"></i> Change Password</h3>
                 <button class="modal-close" id="closePasswordModal">
                     <i class="fas fa-times"></i>
                 </button>
@@ -441,7 +441,7 @@
             <form id="changePasswordForm">
                 <div class="modal-body">
                     <div class="form-group">
-                        <label for="newPassword">Nouveau mot de passe</label>
+                        <label for="newPassword">New password</label>
                         <input type="password" 
                                id="newPassword" 
                                class="form-input" 
@@ -449,7 +449,7 @@
                                required>
                     </div>
                     <div class="form-group">
-                        <label for="confirmPassword">Confirmer le mot de passe</label>
+                        <label for="confirmPassword">Confirm password</label>
                         <input type="password" 
                                id="confirmPassword" 
                                class="form-input" 
@@ -459,11 +459,11 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn-cancel" id="cancelPasswordChange">
-                        Annuler
+                        Cancel
                     </button>
                     <button type="submit" class="btn-save">
                         <i class="fas fa-save"></i>
-                        Modifier
+                        Change
                     </button>
                 </div>
             </form>
@@ -475,7 +475,7 @@
     <script src="assets/js/sidebar.js"></script>
     <script src="assets/js/profile.js"></script>
     
-    <!-- Script menu utilisateur -->
+    <!-- User Menu Script -->
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const sidebarUserTrigger = document.getElementById('sidebarUserTrigger');

@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Paramètres - FinancePro</title>
+    <title>Settings - FinancePro</title>
     
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -19,22 +19,155 @@
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
     
-    <!-- Configuration Firebase -->
+    <!-- Firebase Configuration -->
     <script src="assets/js/firebase-config.js"></script>
     
-    <!-- Protection de la page -->
+    <!-- Page Protection -->
     <script src="assets/js/auth-guard.js"></script>
 </head>
 <body>
     
     <div class="layout-wrapper">
         
-        <!-- SIDEBAR (copie ta sidebar ici - même que user-profile.html) -->
+        <!-- SIDEBAR (copy your sidebar here - same as user-profile.html) -->
         <aside class='sidebar' id='sidebar'>
-            <!-- ... Même sidebar que user-profile.html ... -->
+            <div class='sidebar-header'>
+                <h2><i class='fas fa-chart-line'></i> Finance Hub</h2>
+                <button class='sidebar-toggle' id='sidebarToggle'>
+                    <i class='fas fa-bars'></i>
+                </button>
+            </div>
+            
+            <nav class='sidebar-nav'>
+                <div class='nav-section'>
+                    <a href='index.html' class='nav-link'>
+                        <i class='fas fa-rocket'></i>
+                        <span>Home</span>
+                    </a>
+                </div>
+                
+                <div class='nav-section'>
+                    <button class='nav-folder'>
+                        <i class='fas fa-wallet'></i>
+                        <span>Budget</span>
+                        <i class='fas fa-chevron-down arrow'></i>
+                    </button>
+                    <div class='nav-submenu'>
+                        <a href='dashboard-financier.html' class='nav-link'>
+                            <i class='fas fa-home'></i>
+                            <span>Budget Dashboard</span>
+                        </a>
+                        <a href='investment-analytics.html' class='nav-link'>
+                            <i class='fas fa-chart-bar'></i>
+                            <span>Investment Analytics</span>
+                        </a>
+                    </div>
+                </div>
+                
+                <div class='nav-section'>
+                    <button class='nav-folder'>
+                        <i class='fas fa-calculator'></i>
+                        <span>Simulation</span>
+                        <i class='fas fa-chevron-down arrow'></i>
+                    </button>
+                    <div class='nav-submenu'>
+                        <a href='monte-carlo.html' class='nav-link'>
+                            <i class='fas fa-dice'></i>
+                            <span>Monte Carlo</span>
+                        </a>
+                        <a href='portfolio-optimizer.html' class='nav-link'>
+                            <i class='fas fa-chart-pie'></i>
+                            <span>Markowitz</span>
+                        </a>
+                        <a href='risk-parity.html' class='nav-link'>
+                            <i class='fas fa-balance-scale'></i>
+                            <span>Risk Parity</span>
+                        </a>
+                        <a href='scenario-analysis.html' class='nav-link'>
+                            <i class='fas fa-flask'></i>
+                            <span>Scenarios</span>
+                        </a>
+                    </div>
+                </div>
+                
+                <div class='nav-section'>
+                    <button class='nav-folder'>
+                        <i class='fas fa-chart-candlestick'></i>
+                        <span>Stocks</span>
+                        <i class='fas fa-chevron-down arrow'></i>
+                    </button>
+                    <div class='nav-submenu'>
+                        <a href='market-data.html' class='nav-link'>
+                            <i class='fas fa-database'></i>
+                            <span>Market Data</span>
+                        </a>
+                        <a href='advanced-analysis.html' class='nav-link'>
+                            <i class='fas fa-brain'></i>
+                            <span>Advanced Analysis</span>
+                        </a>
+                        <a href='trend-prediction.html' class='nav-link'>
+                            <i class='fas fa-chart-line'></i>
+                            <span>Trend Prediction</span>
+                        </a>
+                    </div>
+                </div>
+            </nav>
+            
+            <div class="sidebar-footer">
+                <div class="sidebar-user-menu">
+                    <div class="sidebar-user-trigger" id="sidebarUserTrigger">
+                        <img data-user-photo 
+                             src="https://ui-avatars.com/api/?name=User&background=2563eb&color=fff" 
+                             alt="Avatar" 
+                             class="sidebar-user-avatar">
+                        <div class="sidebar-user-info">
+                            <span data-user-name class="sidebar-user-name">User</span>
+                            <span data-user-plan class="sidebar-user-plan">Free</span>
+                        </div>
+                        <i class="fas fa-chevron-up sidebar-user-arrow"></i>
+                    </div>
+                    
+                    <div class="sidebar-user-dropdown" id="sidebarUserDropdown">
+                        <div class="user-dropdown-header">
+                            <img data-user-photo 
+                                 src="https://ui-avatars.com/api/?name=User&background=2563eb&color=fff" 
+                                 alt="Avatar" 
+                                 class="user-dropdown-avatar">
+                            <div class="user-dropdown-details">
+                                <h4 data-user-name class="user-dropdown-name">User</h4>
+                                <p data-user-email class="user-dropdown-email">email@example.com</p>
+                            </div>
+                        </div>
+                        
+                        <div class="user-dropdown-divider"></div>
+                        
+                        <nav class="user-dropdown-links">
+                            <a href="user-profile.html" class="user-dropdown-link">
+                                <i class="fas fa-user"></i>
+                                <span>My profile</span>
+                            </a>
+                            <a href="settings.html" class="user-dropdown-link">
+                                <i class="fas fa-cog"></i>
+                                <span>Settings</span>
+                            </a>
+                            <a href="#" class="user-dropdown-link">
+                                <i class="fas fa-question-circle"></i>
+                                <span>Help</span>
+                            </a>
+                        </nav>
+                        
+                        <div class="user-dropdown-divider"></div>
+                        
+                        <button onclick="logout()" class="user-dropdown-logout">
+                            <i class="fas fa-sign-out-alt"></i>
+                            <span>Sign out</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
         </aside>
         
-        <!-- CONTENU PRINCIPAL -->
+        <!-- MAIN CONTENT -->
         <main class="main-content">
             
             <!-- Header -->
@@ -44,30 +177,30 @@
                         <button class='mobile-toggle' id='mobileToggle'>
                             <i class='fas fa-bars'></i>
                         </button>
-                        <h1><i class="fas fa-cog"></i> Paramètres</h1>
+                        <h1><i class="fas fa-cog"></i> Settings</h1>
                     </div>
                     <div class="header-right">
                         <a href="dashboard-financier.html" class="btn-secondary">
                             <i class="fas fa-arrow-left"></i>
-                            Retour au dashboard
+                            Back to dashboard
                         </a>
                     </div>
                 </div>
             </div>
             
-            <!-- Contenu -->
+            <!-- Content -->
             <div class="container">
                 <div class="settings-container">
                     
-                    <!-- Navigation Paramètres -->
+                    <!-- Settings Navigation -->
                     <div class="settings-nav">
                         <button class="settings-nav-item active" data-tab="general">
                             <i class="fas fa-sliders-h"></i>
-                            <span>Général</span>
+                            <span>General</span>
                         </button>
                         <button class="settings-nav-item" data-tab="appearance">
                             <i class="fas fa-palette"></i>
-                            <span>Apparence</span>
+                            <span>Appearance</span>
                         </button>
                         <button class="settings-nav-item" data-tab="notifications">
                             <i class="fas fa-bell"></i>
@@ -75,31 +208,31 @@
                         </button>
                         <button class="settings-nav-item" data-tab="privacy">
                             <i class="fas fa-shield-alt"></i>
-                            <span>Confidentialité</span>
+                            <span>Privacy</span>
                         </button>
                         <button class="settings-nav-item" data-tab="data">
                             <i class="fas fa-database"></i>
-                            <span>Données</span>
+                            <span>Data</span>
                         </button>
                     </div>
                     
-                    <!-- Contenu Paramètres -->
+                    <!-- Settings Content -->
                     <div class="settings-content">
                         
-                        <!-- TAB: Général -->
+                        <!-- TAB: General -->
                         <div class="settings-tab active" id="tab-general">
-                            <h2>Paramètres généraux</h2>
+                            <h2>General Settings</h2>
                             
                             <div class="settings-section">
-                                <h3>Langue & Région</h3>
+                                <h3>Language & Region</h3>
                                 <div class="setting-item">
                                     <div class="setting-info">
-                                        <label for="language">Langue de l'interface</label>
-                                        <p>Choisissez la langue d'affichage de l'application</p>
+                                        <label for="language">Interface language</label>
+                                        <p>Choose the application display language</p>
                                     </div>
                                     <select id="language" class="setting-select">
-                                        <option value="fr" selected>Français</option>
-                                        <option value="en">English</option>
+                                        <option value="en" selected>English</option>
+                                        <option value="fr">Français</option>
                                         <option value="es">Español</option>
                                         <option value="de">Deutsch</option>
                                     </select>
@@ -107,26 +240,26 @@
                                 
                                 <div class="setting-item">
                                     <div class="setting-info">
-                                        <label for="timezone">Fuseau horaire</label>
-                                        <p>Définit comment les dates et heures sont affichées</p>
+                                        <label for="timezone">Timezone</label>
+                                        <p>Defines how dates and times are displayed</p>
                                     </div>
                                     <select id="timezone" class="setting-select">
-                                        <option value="Europe/Paris" selected>Paris (GMT+1)</option>
-                                        <option value="America/New_York">New York (GMT-5)</option>
+                                        <option value="America/New_York" selected>New York (GMT-5)</option>
+                                        <option value="Europe/London">London (GMT+0)</option>
+                                        <option value="Europe/Paris">Paris (GMT+1)</option>
                                         <option value="Asia/Tokyo">Tokyo (GMT+9)</option>
-                                        <option value="Europe/London">Londres (GMT+0)</option>
                                     </select>
                                 </div>
                                 
                                 <div class="setting-item">
                                     <div class="setting-info">
-                                        <label for="currency">Devise par défaut</label>
-                                        <p>Devise utilisée pour les analyses financières</p>
+                                        <label for="currency">Default currency</label>
+                                        <p>Currency used for financial analysis</p>
                                     </div>
                                     <select id="currency" class="setting-select">
-                                        <option value="EUR" selected>Euro (€)</option>
-                                        <option value="USD">Dollar US ($)</option>
-                                        <option value="GBP">Livre Sterling (£)</option>
+                                        <option value="USD" selected>US Dollar ($)</option>
+                                        <option value="EUR">Euro (€)</option>
+                                        <option value="GBP">Pound Sterling (£)</option>
                                         <option value="JPY">Yen (¥)</option>
                                     </select>
                                 </div>
@@ -135,25 +268,25 @@
                             <div class="settings-actions">
                                 <button class="btn-save" id="saveGeneralSettings">
                                     <i class="fas fa-save"></i>
-                                    Enregistrer les modifications
+                                    Save changes
                                 </button>
                             </div>
                         </div>
                         
-                        <!-- TAB: Apparence -->
+                        <!-- TAB: Appearance -->
                         <div class="settings-tab" id="tab-appearance">
-                            <h2>Apparence</h2>
+                            <h2>Appearance</h2>
                             
                             <div class="settings-section">
-                                <h3>Thème</h3>
+                                <h3>Theme</h3>
                                 <div class="theme-selector">
                                     <div class="theme-option" data-theme="light">
                                         <div class="theme-preview light">
                                             <div class="preview-header"></div>
                                             <div class="preview-content"></div>
                                         </div>
-                                        <h4>Clair</h4>
-                                        <p>Thème lumineux pour la journée</p>
+                                        <h4>Light</h4>
+                                        <p>Light theme for daytime</p>
                                     </div>
                                     
                                     <div class="theme-option active" data-theme="dark">
@@ -161,8 +294,8 @@
                                             <div class="preview-header"></div>
                                             <div class="preview-content"></div>
                                         </div>
-                                        <h4>Sombre</h4>
-                                        <p>Thème sombre pour les yeux</p>
+                                        <h4>Dark</h4>
+                                        <p>Dark theme for your eyes</p>
                                     </div>
                                     
                                     <div class="theme-option" data-theme="auto">
@@ -170,8 +303,8 @@
                                             <div class="preview-header"></div>
                                             <div class="preview-content"></div>
                                         </div>
-                                        <h4>Automatique</h4>
-                                        <p>S'adapte à votre système</p>
+                                        <h4>Auto</h4>
+                                        <p>Adapts to your system</p>
                                     </div>
                                 </div>
                             </div>
@@ -181,7 +314,7 @@
                                 <div class="setting-item">
                                     <div class="setting-info">
                                         <label>Animations</label>
-                                        <p>Activer les animations de l'interface</p>
+                                        <p>Enable interface animations</p>
                                     </div>
                                     <label class="toggle-switch">
                                         <input type="checkbox" id="enableAnimations" checked>
@@ -191,8 +324,8 @@
                                 
                                 <div class="setting-item">
                                     <div class="setting-info">
-                                        <label>Sidebar réduite par défaut</label>
-                                        <p>La sidebar sera réduite au chargement</p>
+                                        <label>Collapsed sidebar by default</label>
+                                        <p>The sidebar will be collapsed on load</p>
                                     </div>
                                     <label class="toggle-switch">
                                         <input type="checkbox" id="collapsedSidebar">
@@ -207,11 +340,11 @@
                             <h2>Notifications</h2>
                             
                             <div class="settings-section">
-                                <h3>Notifications Email</h3>
+                                <h3>Email Notifications</h3>
                                 <div class="setting-item">
                                     <div class="setting-info">
-                                        <label>Newsletter hebdomadaire</label>
-                                        <p>Recevoir un résumé hebdomadaire des marchés</p>
+                                        <label>Weekly newsletter</label>
+                                        <p>Receive a weekly summary of market trends</p>
                                     </div>
                                     <label class="toggle-switch">
                                         <input type="checkbox" id="weeklyNewsletter" checked>
@@ -221,8 +354,8 @@
                                 
                                 <div class="setting-item">
                                     <div class="setting-info">
-                                        <label>Alertes de prix</label>
-                                        <p>Recevoir des alertes quand vos seuils sont atteints</p>
+                                        <label>Price alerts</label>
+                                        <p>Receive alerts when your thresholds are reached</p>
                                     </div>
                                     <label class="toggle-switch">
                                         <input type="checkbox" id="priceAlerts" checked>
@@ -232,8 +365,8 @@
                                 
                                 <div class="setting-item">
                                     <div class="setting-info">
-                                        <label>Nouvelles fonctionnalités</label>
-                                        <p>Être informé des nouvelles fonctionnalités</p>
+                                        <label>New features</label>
+                                        <p>Be notified of new features</p>
                                     </div>
                                     <label class="toggle-switch">
                                         <input type="checkbox" id="featureUpdates" checked>
@@ -243,12 +376,12 @@
                             </div>
                             
                             <div class="settings-section">
-                                <h3>Notifications Push</h3>
+                                <h3>Push Notifications</h3>
                                 <div class="notification-status">
                                     <i class="fas fa-bell-slash"></i>
-                                    <p>Les notifications push ne sont pas encore disponibles</p>
+                                    <p>Push notifications are not yet available</p>
                                     <button class="btn-secondary" disabled>
-                                        Bientôt disponible
+                                        Coming soon
                                     </button>
                                 </div>
                             </div>
@@ -256,21 +389,21 @@
                             <div class="settings-actions">
                                 <button class="btn-save" id="saveNotificationSettings">
                                     <i class="fas fa-save"></i>
-                                    Enregistrer les modifications
+                                    Save changes
                                 </button>
                             </div>
                         </div>
                         
-                        <!-- TAB: Confidentialité -->
+                        <!-- TAB: Privacy -->
                         <div class="settings-tab" id="tab-privacy">
-                            <h2>Confidentialité & Sécurité</h2>
+                            <h2>Privacy & Security</h2>
                             
                             <div class="settings-section">
-                                <h3>Données personnelles</h3>
+                                <h3>Personal Data</h3>
                                 <div class="setting-item">
                                     <div class="setting-info">
-                                        <label>Profil public</label>
-                                        <p>Permettre aux autres utilisateurs de voir votre profil</p>
+                                        <label>Public profile</label>
+                                        <p>Allow other users to view your profile</p>
                                     </div>
                                     <label class="toggle-switch">
                                         <input type="checkbox" id="publicProfile">
@@ -280,8 +413,8 @@
                                 
                                 <div class="setting-item">
                                     <div class="setting-info">
-                                        <label>Analyses publiques</label>
-                                        <p>Partager vos analyses avec la communauté</p>
+                                        <label>Public analyses</label>
+                                        <p>Share your analyses with the community</p>
                                     </div>
                                     <label class="toggle-switch">
                                         <input type="checkbox" id="publicAnalyses">
@@ -291,11 +424,11 @@
                             </div>
                             
                             <div class="settings-section">
-                                <h3>Collecte de données</h3>
+                                <h3>Data Collection</h3>
                                 <div class="setting-item">
                                     <div class="setting-info">
                                         <label>Analytics</label>
-                                        <p>Nous aider à améliorer l'application en partageant des données d'utilisation anonymes</p>
+                                        <p>Help us improve the app by sharing anonymous usage data</p>
                                     </div>
                                     <label class="toggle-switch">
                                         <input type="checkbox" id="analytics" checked>
@@ -307,44 +440,44 @@
                             <div class="settings-actions">
                                 <button class="btn-save" id="savePrivacySettings">
                                     <i class="fas fa-save"></i>
-                                    Enregistrer les modifications
+                                    Save changes
                                 </button>
                             </div>
                         </div>
                         
-                        <!-- TAB: Données -->
+                        <!-- TAB: Data -->
                         <div class="settings-tab" id="tab-data">
-                            <h2>Gestion des données</h2>
+                            <h2>Data Management</h2>
                             
                             <div class="settings-section">
-                                <h3>Exporter vos données</h3>
-                                <p>Téléchargez une copie de toutes vos données (conforme RGPD)</p>
+                                <h3>Export your data</h3>
+                                <p>Download a copy of all your data (GDPR compliant)</p>
                                 <button class="btn-secondary" id="exportDataBtn">
                                     <i class="fas fa-download"></i>
-                                    Exporter mes données
+                                    Export my data
                                 </button>
                             </div>
                             
                             <div class="settings-section">
-                                <h3>Effacer le cache</h3>
-                                <p>Supprime les données temporaires pour libérer de l'espace</p>
+                                <h3>Clear cache</h3>
+                                <p>Delete temporary data to free up space</p>
                                 <button class="btn-secondary" id="clearCacheBtn">
                                     <i class="fas fa-broom"></i>
-                                    Effacer le cache
+                                    Clear cache
                                 </button>
                             </div>
                             
                             <div class="settings-section danger-section">
-                                <h3>Zone de danger</h3>
-                                <p>Ces actions sont irréversibles</p>
+                                <h3>Danger Zone</h3>
+                                <p>These actions are irreversible</p>
                                 <div class="danger-actions">
                                     <button class="btn-danger" id="deleteAllAnalyses">
                                         <i class="fas fa-trash"></i>
-                                        Supprimer toutes mes analyses
+                                        Delete all my analyses
                                     </button>
                                     <button class="btn-danger" id="deleteAllPortfolios">
                                         <i class="fas fa-trash"></i>
-                                        Supprimer tous mes portfolios
+                                        Delete all my portfolios
                                     </button>
                                 </div>
                             </div>
@@ -367,9 +500,32 @@
     <script src="assets/js/sidebar.js"></script>
     <script src="assets/js/settings.js"></script>
     
-    <!-- Script menu utilisateur -->
+    <!-- User menu script -->
     <script>
-        // Même script que user-profile.html
+        document.addEventListener('DOMContentLoaded', () => {
+            const sidebarUserTrigger = document.getElementById('sidebarUserTrigger');
+            const sidebarUserDropdown = document.getElementById('sidebarUserDropdown');
+            
+            if (sidebarUserTrigger && sidebarUserDropdown) {
+                sidebarUserTrigger.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    sidebarUserTrigger.classList.toggle('active');
+                    sidebarUserDropdown.classList.toggle('active');
+                });
+                
+                document.addEventListener('click', (e) => {
+                    if (!sidebarUserDropdown.contains(e.target) && 
+                        !sidebarUserTrigger.contains(e.target)) {
+                        sidebarUserTrigger.classList.remove('active');
+                        sidebarUserDropdown.classList.remove('active');
+                    }
+                });
+                
+                sidebarUserDropdown.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                });
+            }
+        });
     </script>
     
 </body>
