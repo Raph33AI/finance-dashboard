@@ -1,42 +1,42 @@
 /* ============================================
    AUTH.JS - FinancePro Authentication
-   Gestion complète de l'authentification
+   Complete authentication management
    ============================================ */
 
 // ============================================
-// VARIABLES GLOBALES
+// GLOBAL VARIABLES
 // ============================================
 
 let isProcessing = false;
 
 // ============================================
-// INITIALISATION AU CHARGEMENT
+// INITIALIZATION ON LOAD
 // ============================================
 
 document.addEventListener('DOMContentLoaded', () => {
-    console.log('🚀 Initialisation du système d\'authentification...');
+    console.log('🚀 Initializing authentication system...');
     
-    // Vérifier si Firebase est initialisé
+    // Check if Firebase is initialized
     if (!isFirebaseInitialized()) {
-        showToast('error', 'Erreur', 'Impossible de se connecter au service d\'authentification.');
+        showToast('error', 'Error', 'Unable to connect to authentication service.');
         return;
     }
     
-    // Initialiser les gestionnaires d'événements
+    // Initialize event listeners
     initializeEventListeners();
     
-    // Vérifier si l'utilisateur est déjà connecté
+    // Check if user is already logged in
     checkAuthState();
     
-    console.log('✅ Système d\'authentification initialisé');
+    console.log('✅ Authentication system initialized');
 });
 
 // ============================================
-// GESTIONNAIRES D'ÉVÉNEMENTS
+// EVENT LISTENERS
 // ============================================
 
 function initializeEventListeners() {
-    // === NAVIGATION ENTRE FORMULAIRES ===
+    // === FORM NAVIGATION ===
     
     const switchToSignupBtn = document.getElementById('switchToSignup');
     const switchToLoginBtn = document.getElementById('switchToLogin');
@@ -81,7 +81,7 @@ function initializeEventListeners() {
         });
     }
     
-    // === FORMULAIRES ===
+    // === FORMS ===
     
     // Login form
     const loginForm = document.getElementById('emailLoginForm');
@@ -101,14 +101,14 @@ function initializeEventListeners() {
         resetForm.addEventListener('submit', handlePasswordReset);
     }
     
-    // === BOUTONS SOCIAUX - LOGIN ===
+    // === SOCIAL BUTTONS - LOGIN ===
     
     const googleLoginBtn = document.getElementById('googleLoginBtn');
     if (googleLoginBtn) {
         googleLoginBtn.addEventListener('click', () => handleSocialLogin('google'));
     }
     
-    // === BOUTONS SOCIAUX - SIGNUP ===
+    // === SOCIAL BUTTONS - SIGNUP ===
     
     const googleSignupBtn = document.getElementById('googleSignupBtn');
     if (googleSignupBtn) {
@@ -142,7 +142,7 @@ function initializeEventListeners() {
 }
 
 // ============================================
-// NAVIGATION ENTRE FORMULAIRES
+// FORM NAVIGATION
 // ============================================
 
 function showForm(formType) {
@@ -150,12 +150,12 @@ function showForm(formType) {
     const signupForm = document.getElementById('signupForm');
     const resetPasswordForm = document.getElementById('resetPasswordForm');
     
-    // Cacher tous les formulaires
+    // Hide all forms
     loginForm.classList.add('hidden');
     signupForm.classList.add('hidden');
     resetPasswordForm.classList.add('hidden');
     
-    // Afficher le formulaire demandé
+    // Show requested form
     switch(formType) {
         case 'login':
             loginForm.classList.remove('hidden');
@@ -168,16 +168,16 @@ function showForm(formType) {
             break;
     }
     
-    // Réinitialiser les erreurs
+    // Clear errors
     clearAllErrors();
 }
 
 // ============================================
-// AUTHENTIFICATION PAR EMAIL
+// EMAIL AUTHENTICATION
 // ============================================
 
 /**
- * Gestion de la connexion par email
+ * Handle email login
  */
 async function handleEmailLogin(e) {
     e.preventDefault();
@@ -190,54 +190,54 @@ async function handleEmailLogin(e) {
     
     // Validation
     if (!validateEmail(email)) {
-        showFieldError('loginEmail', 'Adresse email invalide');
+        showFieldError('loginEmail', 'Invalid email address');
         return;
     }
     
     if (!password) {
-        showFieldError('loginPassword', 'Mot de passe requis');
+        showFieldError('loginPassword', 'Password required');
         return;
     }
     
-    // Effacer les erreurs précédentes
+    // Clear previous errors
     clearAllErrors();
     
-    // Afficher le loader
+    // Show loader
     setButtonLoading('loginSubmitBtn', true);
     isProcessing = true;
     
     try {
-        // Configurer la persistance
+        // Configure persistence
         const persistence = rememberMe 
             ? firebase.auth.Auth.Persistence.LOCAL 
             : firebase.auth.Auth.Persistence.SESSION;
         
         await firebaseAuth.setPersistence(persistence);
         
-        // Connexion
+        // Sign in
         const userCredential = await firebaseAuth.signInWithEmailAndPassword(email, password);
         const user = userCredential.user;
         
-        console.log('✅ Connexion réussie:', user.email);
+        console.log('✅ Login successful:', user.email);
         
-        // Enregistrer la connexion dans Firestore
+        // Log user login in Firestore
         await logUserLogin(user.uid, 'email');
         
-        // Afficher un message de succès
-        showToast('success', 'Connexion réussie !', `Bienvenue ${user.email}`);
+        // Show success message
+        showToast('success', 'Login successful!', `Welcome ${user.email}`);
         
-        // Rediriger vers le dashboard
+        // Redirect to dashboard
         setTimeout(() => {
             window.location.href = 'dashboard-financier.html';
         }, 1000);
         
     } catch (error) {
-        console.error('❌ Erreur de connexion:', error);
+        console.error('❌ Login error:', error);
         
         const errorMessage = getFirebaseErrorMessage(error.code);
-        showToast('error', 'Erreur de connexion', errorMessage);
+        showToast('error', 'Login error', errorMessage);
         
-        // Afficher l'erreur sur le champ approprié
+        // Show error on appropriate field
         if (error.code === 'auth/user-not-found' || error.code === 'auth/invalid-email') {
             showFieldError('loginEmail', errorMessage);
         } else {
@@ -251,7 +251,7 @@ async function handleEmailLogin(e) {
 }
 
 /**
- * Gestion de l'inscription par email
+ * Handle email signup
  */
 async function handleEmailSignup(e) {
     e.preventDefault();
@@ -269,58 +269,58 @@ async function handleEmailSignup(e) {
     let hasError = false;
     
     if (!firstName) {
-        showFieldError('signupFirstName', 'Prénom requis');
+        showFieldError('signupFirstName', 'First name required');
         hasError = true;
     }
     
     if (!lastName) {
-        showFieldError('signupLastName', 'Nom requis');
+        showFieldError('signupLastName', 'Last name required');
         hasError = true;
     }
     
     if (!validateEmail(email)) {
-        showFieldError('signupEmail', 'Adresse email invalide');
+        showFieldError('signupEmail', 'Invalid email address');
         hasError = true;
     }
     
     if (password.length < 6) {
-        showFieldError('signupPassword', 'Le mot de passe doit contenir au moins 6 caractères');
+        showFieldError('signupPassword', 'Password must be at least 6 characters');
         hasError = true;
     }
     
     if (!acceptTerms) {
-        showFieldError('acceptTerms', 'Vous devez accepter les conditions d\'utilisation');
+        showFieldError('acceptTerms', 'You must accept the terms of service');
         hasError = true;
     }
     
     if (hasError) return;
     
-    // Effacer les erreurs précédentes
+    // Clear previous errors
     clearAllErrors();
     
-    // Afficher le loader
+    // Show loader
     setButtonLoading('signupSubmitBtn', true);
     isProcessing = true;
     
     try {
-        // Créer le compte
+        // Create account
         const userCredential = await firebaseAuth.createUserWithEmailAndPassword(email, password);
         const user = userCredential.user;
         
-        console.log('✅ Compte créé:', user.email);
+        console.log('✅ Account created:', user.email);
         
-        // Mettre à jour le profil
+        // Update profile
         await user.updateProfile({
             displayName: `${firstName} ${lastName}`
         });
         
-        // Envoyer un email de vérification
+        // Send verification email
         await user.sendEmailVerification({
             url: window.location.origin + '/dashboard-financier.html',
             handleCodeInApp: true
         });
         
-        // Créer le profil utilisateur dans Firestore
+        // Create user profile in Firestore
         await createUserProfile(user.uid, {
             firstName,
             lastName,
@@ -329,7 +329,7 @@ async function handleEmailSignup(e) {
             createdAt: firebase.firestore.FieldValue.serverTimestamp(),
             emailVerified: false,
             plan: 'free',
-            trialEndsAt: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000), // 14 jours
+            trialEndsAt: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000), // 14 days
             metadata: {
                 signupMethod: 'email',
                 userAgent: navigator.userAgent,
@@ -337,22 +337,22 @@ async function handleEmailSignup(e) {
             }
         });
         
-        // Enregistrer la connexion
+        // Log login
         await logUserLogin(user.uid, 'email_signup');
         
-        // Afficher un message de succès
-        showToast('success', 'Compte créé !', 'Un email de vérification vous a été envoyé.');
+        // Show success message
+        showToast('success', 'Account created!', 'A verification email has been sent.');
         
-        // Rediriger vers le dashboard
+        // Redirect to dashboard
         setTimeout(() => {
             window.location.href = 'dashboard-financier.html';
         }, 2000);
         
     } catch (error) {
-        console.error('❌ Erreur d\'inscription:', error);
+        console.error('❌ Signup error:', error);
         
         const errorMessage = getFirebaseErrorMessage(error.code);
-        showToast('error', 'Erreur d\'inscription', errorMessage);
+        showToast('error', 'Signup error', errorMessage);
         
         if (error.code === 'auth/email-already-in-use') {
             showFieldError('signupEmail', errorMessage);
@@ -367,11 +367,11 @@ async function handleEmailSignup(e) {
 }
 
 // ============================================
-// AUTHENTIFICATION SOCIALE
+// SOCIAL AUTHENTICATION
 // ============================================
 
 /**
- * Gestion de la connexion sociale (Google, Apple, Microsoft)
+ * Handle social login (Google, Apple, Microsoft)
  */
 async function handleSocialLogin(providerType) {
     if (isProcessing) return;
@@ -387,22 +387,22 @@ async function handleSocialLogin(providerType) {
             providerName = 'Google';
             break;
         default:
-            console.error('Provider inconnu:', providerType);
+            console.error('Unknown provider:', providerType);
             isProcessing = false;
             return;
     }
     
     try {
-        console.log(`🔐 Tentative de connexion avec ${providerName}...`);
+        console.log(`🔐 Attempting login with ${providerName}...`);
         
-        // Connexion avec popup
+        // Sign in with popup
         const result = await firebaseAuth.signInWithPopup(provider);
         const user = result.user;
         const isNewUser = result.additionalUserInfo.isNewUser;
         
-        console.log('✅ Connexion réussie avec', providerName, ':', user.email);
+        console.log('✅ Login successful with', providerName, ':', user.email);
         
-        // Si c'est un nouvel utilisateur, créer son profil
+        // If new user, create profile
         if (isNewUser) {
             const profile = result.additionalUserInfo.profile;
             
@@ -423,30 +423,30 @@ async function handleSocialLogin(providerType) {
             });
         }
         
-        // Enregistrer la connexion
+        // Log login
         await logUserLogin(user.uid, providerType);
         
-        // Message de succès
-        showToast('success', 'Connexion réussie !', `Bienvenue ${user.displayName || user.email}`);
+        // Success message
+        showToast('success', 'Login successful!', `Welcome ${user.displayName || user.email}`);
         
-        // Rediriger
+        // Redirect
         setTimeout(() => {
             window.location.href = 'dashboard-financier.html';
         }, 1000);
         
     } catch (error) {
-        console.error(`❌ Erreur de connexion avec ${providerName}:`, error);
+        console.error(`❌ Login error with ${providerName}:`, error);
         
-        // Gestion spécifique des erreurs de popup
+        // Handle specific popup errors
         if (error.code === 'auth/popup-closed-by-user') {
-            showToast('warning', 'Connexion annulée', 'Vous avez fermé la fenêtre de connexion.');
+            showToast('warning', 'Login cancelled', 'You closed the login window.');
         } else if (error.code === 'auth/popup-blocked') {
-            showToast('error', 'Popup bloquée', 'Veuillez autoriser les popups pour ce site.');
+            showToast('error', 'Popup blocked', 'Please allow popups for this site.');
         } else if (error.code === 'auth/account-exists-with-different-credential') {
-            showToast('error', 'Compte existant', 'Un compte existe déjà avec cet email. Utilisez une autre méthode de connexion.');
+            showToast('error', 'Account exists', 'An account already exists with this email. Use another login method.');
         } else {
             const errorMessage = getFirebaseErrorMessage(error.code);
-            showToast('error', 'Erreur de connexion', errorMessage);
+            showToast('error', 'Login error', errorMessage);
         }
         
     } finally {
@@ -455,11 +455,11 @@ async function handleSocialLogin(providerType) {
 }
 
 // ============================================
-// RÉINITIALISATION DE MOT DE PASSE
+// PASSWORD RESET
 // ============================================
 
 /**
- * Gestion de la réinitialisation de mot de passe
+ * Handle password reset
  */
 async function handlePasswordReset(e) {
     e.preventDefault();
@@ -470,35 +470,35 @@ async function handlePasswordReset(e) {
     
     // Validation
     if (!validateEmail(email)) {
-        showFieldError('resetEmail', 'Adresse email invalide');
+        showFieldError('resetEmail', 'Invalid email address');
         return;
     }
     
-    // Effacer les erreurs précédentes
+    // Clear previous errors
     clearAllErrors();
     
-    // Afficher le loader
+    // Show loader
     setButtonLoading('resetSubmitBtn', true);
     isProcessing = true;
     
     try {
-        // Envoyer l'email de réinitialisation
+        // Send reset email
         await firebaseAuth.sendPasswordResetEmail(email, {
             url: window.location.origin + '/auth.html',
             handleCodeInApp: true
         });
         
-        console.log('✅ Email de réinitialisation envoyé à:', email);
+        console.log('✅ Reset email sent to:', email);
         
-        // Masquer le formulaire et afficher le message de succès
+        // Hide form and show success message
         document.getElementById('emailResetForm').classList.add('hidden');
         document.getElementById('resetSuccess').classList.remove('hidden');
         
     } catch (error) {
-        console.error('❌ Erreur lors de l\'envoi de l\'email:', error);
+        console.error('❌ Error sending email:', error);
         
         const errorMessage = getFirebaseErrorMessage(error.code);
-        showToast('error', 'Erreur', errorMessage);
+        showToast('error', 'Error', errorMessage);
         showFieldError('resetEmail', errorMessage);
         
     } finally {
@@ -508,24 +508,24 @@ async function handlePasswordReset(e) {
 }
 
 // ============================================
-// FIRESTORE - GESTION DES PROFILS
+// FIRESTORE - PROFILE MANAGEMENT
 // ============================================
 
 /**
- * Créer un profil utilisateur dans Firestore
+ * Create user profile in Firestore
  */
 async function createUserProfile(uid, profileData) {
     try {
         await firebaseDb.collection('users').doc(uid).set(profileData, { merge: true });
-        console.log('✅ Profil utilisateur créé/mis à jour dans Firestore');
+        console.log('✅ User profile created/updated in Firestore');
     } catch (error) {
-        console.error('❌ Erreur lors de la création du profil:', error);
+        console.error('❌ Error creating profile:', error);
         throw error;
     }
 }
 
 /**
- * Enregistrer une connexion utilisateur
+ * Log user login
  */
 async function logUserLogin(uid, method) {
     try {
@@ -533,38 +533,38 @@ async function logUserLogin(uid, method) {
             timestamp: firebase.firestore.FieldValue.serverTimestamp(),
             method: method,
             userAgent: navigator.userAgent,
-            ip: 'client-side' // L'IP devrait être récupérée côté serveur
+            ip: 'client-side' // IP should be retrieved server-side
         });
         
-        // Mettre à jour la dernière connexion
+        // Update last login
         await firebaseDb.collection('users').doc(uid).update({
             lastLoginAt: firebase.firestore.FieldValue.serverTimestamp(),
             lastLoginMethod: method
         });
         
-        console.log('✅ Connexion enregistrée dans Firestore');
+        console.log('✅ Login recorded in Firestore');
     } catch (error) {
-        console.error('❌ Erreur lors de l\'enregistrement de la connexion:', error);
+        console.error('❌ Error logging login:', error);
     }
 }
 
 // ============================================
-// VÉRIFICATION DE L'ÉTAT D'AUTHENTIFICATION
+// AUTH STATE CHECK
 // ============================================
 
 /**
- * Vérifier si l'utilisateur est déjà connecté
+ * Check if user is already logged in
  */
 function checkAuthState() {
     const user = getCurrentUser();
     
     if (user) {
-        console.log('ℹ️ Utilisateur déjà connecté:', user.email);
+        console.log('ℹ️ User already logged in:', user.email);
         
-        // Afficher une notification
-        showToast('info', 'Déjà connecté', 'Vous êtes déjà connecté. Redirection...');
+        // Show notification
+        showToast('info', 'Already logged in', 'You are already logged in. Redirecting...');
         
-        // Rediriger vers le dashboard après 1 seconde
+        // Redirect to dashboard after 1 second
         setTimeout(() => {
             window.location.href = 'dashboard-financier.html';
         }, 1000);
@@ -572,11 +572,11 @@ function checkAuthState() {
 }
 
 // ============================================
-// UTILITAIRES DE VALIDATION
+// VALIDATION UTILITIES
 // ============================================
 
 /**
- * Valider une adresse email
+ * Validate email address
  */
 function validateEmail(email) {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -584,7 +584,7 @@ function validateEmail(email) {
 }
 
 /**
- * Vérifier la force du mot de passe
+ * Check password strength
  */
 function checkPasswordStrength(password) {
     const strengthIndicator = document.getElementById('passwordStrength');
@@ -594,16 +594,16 @@ function checkPasswordStrength(password) {
     if (!strengthIndicator || !strengthText || !strengthBars.length) return;
     
     let strength = 0;
-    let strengthLabel = 'Très faible';
+    let strengthLabel = 'Very weak';
     
-    // Critères de force
+    // Strength criteria
     if (password.length >= 6) strength++;
     if (password.length >= 10) strength++;
     if (/[a-z]/.test(password) && /[A-Z]/.test(password)) strength++;
     if (/[0-9]/.test(password)) strength++;
     if (/[^a-zA-Z0-9]/.test(password)) strength++;
     
-    // Mettre à jour les barres
+    // Update bars
     strengthBars.forEach((bar, index) => {
         bar.classList.remove('active', 'medium', 'strong');
         
@@ -620,23 +620,23 @@ function checkPasswordStrength(password) {
         }
     });
     
-    // Mettre à jour le texte
+    // Update text
     switch(strength) {
         case 0:
         case 1:
-            strengthLabel = 'Très faible';
+            strengthLabel = 'Very weak';
             break;
         case 2:
-            strengthLabel = 'Faible';
+            strengthLabel = 'Weak';
             break;
         case 3:
-            strengthLabel = 'Moyen';
+            strengthLabel = 'Medium';
             break;
         case 4:
-            strengthLabel = 'Fort';
+            strengthLabel = 'Strong';
             break;
         case 5:
-            strengthLabel = 'Très fort';
+            strengthLabel = 'Very strong';
             break;
     }
     
@@ -644,7 +644,7 @@ function checkPasswordStrength(password) {
 }
 
 /**
- * Basculer la visibilité du mot de passe
+ * Toggle password visibility
  */
 function togglePasswordVisibility(inputId, toggleButton) {
     const passwordInput = document.getElementById(inputId);
@@ -662,11 +662,11 @@ function togglePasswordVisibility(inputId, toggleButton) {
 }
 
 // ============================================
-// GESTION DES ERREURS DE FORMULAIRE
+// FORM ERROR MANAGEMENT
 // ============================================
 
 /**
- * Afficher une erreur sur un champ
+ * Show field error
  */
 function showFieldError(fieldId, message) {
     const field = document.getElementById(fieldId);
@@ -683,7 +683,7 @@ function showFieldError(fieldId, message) {
 }
 
 /**
- * Effacer toutes les erreurs
+ * Clear all errors
  */
 function clearAllErrors() {
     const errorFields = document.querySelectorAll('.form-input.error');
@@ -697,11 +697,11 @@ function clearAllErrors() {
 }
 
 // ============================================
-// GESTION DES BOUTONS
+// BUTTON MANAGEMENT
 // ============================================
 
 /**
- * Activer/désactiver l'état de chargement d'un bouton
+ * Enable/disable button loading state
  */
 function setButtonLoading(buttonId, isLoading) {
     const button = document.getElementById(buttonId);
@@ -718,22 +718,22 @@ function setButtonLoading(buttonId, isLoading) {
 }
 
 // ============================================
-// NOTIFICATIONS TOAST
+// TOAST NOTIFICATIONS
 // ============================================
 
 /**
- * Afficher une notification toast
+ * Show toast notification
  */
 function showToast(type, title, message) {
     const toastContainer = document.getElementById('toastContainer');
     
     if (!toastContainer) return;
     
-    // Créer l'élément toast
+    // Create toast element
     const toast = document.createElement('div');
     toast.className = `toast ${type}`;
     
-    // Icône en fonction du type
+    // Icon based on type
     let iconClass = 'fa-info-circle';
     switch(type) {
         case 'success':
@@ -760,23 +760,23 @@ function showToast(type, title, message) {
         </button>
     `;
     
-    // Ajouter au conteneur
+    // Add to container
     toastContainer.appendChild(toast);
     
-    // Gestionnaire de fermeture
+    // Close handler
     const closeBtn = toast.querySelector('.toast-close');
     closeBtn.addEventListener('click', () => {
         removeToast(toast);
     });
     
-    // Auto-suppression après 5 secondes
+    // Auto-remove after 5 seconds
     setTimeout(() => {
         removeToast(toast);
     }, 5000);
 }
 
 /**
- * Supprimer une notification toast
+ * Remove toast notification
  */
 function removeToast(toast) {
     toast.style.animation = 'slideOutRight 0.3s ease forwards';
@@ -787,7 +787,7 @@ function removeToast(toast) {
     }, 300);
 }
 
-// Animation de sortie
+// Exit animation
 const style = document.createElement('style');
 style.textContent = `
     @keyframes slideOutRight {
@@ -804,17 +804,17 @@ style.textContent = `
 document.head.appendChild(style);
 
 // ============================================
-// ÉCOUTEURS D'ÉVÉNEMENTS GLOBAUX
+// GLOBAL EVENT LISTENERS
 // ============================================
 
-// Détecter la déconnexion
+// Detect logout
 window.addEventListener('userLoggedOut', () => {
-    console.log('ℹ️ Utilisateur déconnecté');
+    console.log('ℹ️ User logged out');
 });
 
-// Détecter l'authentification
+// Detect authentication
 window.addEventListener('userAuthenticated', (e) => {
-    console.log('✅ Utilisateur authentifié:', e.detail);
+    console.log('✅ User authenticated:', e.detail);
 });
 
-console.log('✅ Script d\'authentification chargé');
+console.log('✅ Authentication script loaded');

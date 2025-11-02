@@ -1,9 +1,9 @@
 /* ============================================
    AUTH.CSS - FinancePro Authentication Page
-   Design moderne et minimaliste
+   Modern and minimalist design
    ============================================ */
 
-/* Import des variables de common.css */
+/* Import variables from common.css */
 @import url('common.css');
 
 /* ============================================
@@ -76,7 +76,7 @@ body.dark-mode .back-to-home:hover {
 }
 
 /* ============================================
-   AUTH WRAPPER - LAYOUT PRINCIPAL
+   AUTH WRAPPER - MAIN LAYOUT
    ============================================ */
 
 .auth-wrapper {
@@ -87,6 +87,7 @@ body.dark-mode .back-to-home:hover {
 
 /* ============================================
    LEFT SIDE - BRANDING SECTION
+   ✅ CORRECTION: TEXTE EN BLANC
    ============================================ */
 
 .auth-branding {
@@ -103,7 +104,7 @@ body.dark-mode .back-to-home:hover {
     position: relative;
     z-index: 2;
     max-width: 500px;
-    color: white;
+    color: #ffffff; /* ✅ BLANC PAR DÉFAUT */
 }
 
 /* Brand Header */
@@ -129,18 +130,19 @@ body.dark-mode .back-to-home:hover {
 .brand-name {
     font-size: 1.75rem;
     font-weight: 700;
-    color: white;
+    color: #ffffff; /* ✅ BLANC */
     letter-spacing: -0.02em;
 }
 
 .brand-name strong {
     font-weight: 900;
+    color: #ffffff; /* ✅ BLANC */
 }
 
 .ai-badge-auth {
     background: rgba(255, 255, 255, 0.2);
     backdrop-filter: blur(10px);
-    color: white;
+    color: #ffffff; /* ✅ BLANC */
     font-size: 0.75rem;
     font-weight: 800;
     padding: 0.375rem 0.75rem;
@@ -159,6 +161,7 @@ body.dark-mode .back-to-home:hover {
     font-weight: 700;
     margin-bottom: 2rem;
     line-height: 1.3;
+    color: #ffffff; /* ✅ BLANC */
 }
 
 .features-list {
@@ -188,19 +191,21 @@ body.dark-mode .back-to-home:hover {
 
 .feature-icon-check i {
     font-size: 0.875rem;
-    color: white;
+    color: #ffffff; /* ✅ BLANC */
 }
 
 .feature-text h3 {
     font-size: 1.125rem;
     font-weight: 600;
     margin-bottom: 0.25rem;
+    color: #ffffff; /* ✅ BLANC */
 }
 
 .feature-text p {
     font-size: 0.9375rem;
     opacity: 0.9;
     line-height: 1.5;
+    color: rgba(255, 255, 255, 0.9); /* ✅ BLANC AVEC OPACITÉ */
 }
 
 /* Testimonial */
@@ -221,6 +226,7 @@ body.dark-mode .back-to-home:hover {
     font-size: 1.5rem;
     opacity: 0.5;
     margin-bottom: 0.75rem;
+    color: #ffffff; /* ✅ BLANC */
 }
 
 .testimonial-text {
@@ -228,6 +234,7 @@ body.dark-mode .back-to-home:hover {
     line-height: 1.7;
     opacity: 0.95;
     font-style: italic;
+    color: rgba(255, 255, 255, 0.95); /* ✅ BLANC */
 }
 
 .testimonial-author {
@@ -246,17 +253,20 @@ body.dark-mode .back-to-home:hover {
     justify-content: center;
     font-weight: 700;
     font-size: 1.125rem;
+    color: #ffffff; /* ✅ BLANC */
 }
 
 .author-info h4 {
     font-size: 1rem;
     font-weight: 600;
     margin-bottom: 0.125rem;
+    color: #ffffff; /* ✅ BLANC */
 }
 
 .author-info p {
     font-size: 0.875rem;
     opacity: 0.8;
+    color: rgba(255, 255, 255, 0.8); /* ✅ BLANC */
 }
 
 /* Background Decoration */
@@ -1154,6 +1164,20 @@ body.dark-mode .form-input {
 
 body.dark-mode .checkbox-custom {
     background: var(--background-secondary);
+}
+
+body.dark-mode .toast {
+    background: var(--background-secondary);
+    border-color: rgba(255, 255, 255, 0.1);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+}
+
+body.dark-mode .toast-title {
+    color: var(--text-primary);
+}
+
+body.dark-mode .toast-message {
+    color: var(--text-secondary);
 }
 
 /* ============================================
