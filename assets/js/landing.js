@@ -265,19 +265,17 @@ const ctaButtons = {
 // Login button
 if (ctaButtons.loginBtn) {
     ctaButtons.loginBtn.addEventListener('click', () => {
-        console.log('Login clicked');
-        // In production: redirect to login page or show modal
-        alert('Login functionality will be implemented here');
+        console.log('🔐 Redirection to Sign Up Page...');
+        window.location.href = 'auth.html';
     });
 }
 
-// Signup buttons
+// Signup buttons - redirection vers auth.html
 [ctaButtons.signupBtn, ctaButtons.heroGetStarted, ctaButtons.finalCTABtn].forEach(btn => {
     if (btn) {
         btn.addEventListener('click', () => {
-            console.log('Signup clicked');
-            // In production: redirect to signup page or show modal
-            alert('Sign up functionality will be implemented here');
+            console.log('📝 Redirection vers la page d\'inscription...');
+            window.location.href = 'auth.html#signup';
         });
     }
 });
@@ -498,27 +496,6 @@ document.querySelectorAll('[data-action="demo"]').forEach(btn => {
     });
 });
 
-// ============================================
-// REDIRECTION VERS LA PAGE D'AUTHENTIFICATION
-// ============================================
-
-// Login button
-if (ctaButtons.loginBtn) {
-    ctaButtons.loginBtn.addEventListener('click', () => {
-        console.log('🔐 Redirection vers la page de connexion...');
-        window.location.href = 'auth.html';
-    });
-}
-
-// Signup buttons - redirection vers auth.html
-[ctaButtons.signupBtn, ctaButtons.heroGetStarted, ctaButtons.finalCTABtn].forEach(btn => {
-    if (btn) {
-        btn.addEventListener('click', () => {
-            console.log('📝 Redirection vers la page d\'inscription...');
-            window.location.href = 'auth.html#signup';
-        });
-    }
-});
 
 // Détecter si on arrive avec #signup dans l'URL
 if (window.location.pathname.includes('auth.html') && window.location.hash === '#signup') {
