@@ -884,43 +884,212 @@
         },
         
         createMonthlyReturnsChart: function(data) {
-            if (data.length < 2) return;
+            if (data.length < 2) {
+                console.warn('⚠️ Not enough data for monthly returns chart');
+                return;
+            }
+            
+            // ✅ CORRECTION MAJEURE : Afficher les GAINS ABSOLUS MENSUELS au lieu des returns en %
+            // Car avec investissements réguliers + intérêts composés, les gains en EUR augmentent
+            // même si les returns en % diminuent (capital de base qui grandit)
             
             const categories = [];
-            const returns = [];
+            const monthlyGainsAbsolute = []; // Gains en EUR
+            const monthlyReturnsPercent = []; // Returns en % (pour comparaison)
+            const monthlyInvestments = []; // Investissements mensuels
             
-            for (let i = 1; i < data.length; i++) {
-                const prevValue = data[i - 1].totalPortfolio;
-                const currentValue = data[i].totalPortfolio;
-                if (prevValue && prevValue > 0 && currentValue) {
-                    const returnPct = ((currentValue - prevValue) / prevValue) * 100;
-                    categories.push(data[i].month);
-                    returns.push({ y: returnPct, color: returnPct >= 0 ? '#10b981' : '#ef4444' });
+            data.forEach((row, index) => {
+                if (index === 0) return; // Skip first month (no previous data)
+                
+                const month = row.month;
+                categories.push(month);
+                
+                // ✅ GAIN ABSOLU MENSUEL (ce qui devrait augmenter avec les intérêts composés)
+                const monthlyGain = parseFloat(row.monthlyGain) || 0;
+                monthlyGainsAbsolute.push({
+                    y: monthlyGain,
+                    color: monthlyGain >= 0 ? '#10b981' : '#ef4444'
+                });
+                
+                // Investment mensuel (pour référence)
+                const investment = parseFloat(row.investment) || 0;
+                monthlyInvestments.push(investment);
+                
+                // ✅ RETURN EN % (pour comparaison)
+                const prevValue = parseFloat(data[index - 1].totalPortfolio) || 0;
+                const currentValue = parseFloat(row.totalPortfolio) || 0;
+                
+                let returnPct = 0;
+                if (prevValue > 0 && currentValue > 0) {
+                    // Return HORS contribution mensuelle (pour voir la vraie performance)
+                    const valueWithoutInvestment = currentValue - investment;
+                    returnPct = ((valueWithoutInvestment - prevValue) / prevValue) * 100;
                 }
-            }
+                
+                monthlyReturnsPercent.push({
+                    y: returnPct,
+                    color: returnPct >= 0 ? '#2563eb' : '#8b5cf6'
+                });
+            });
             
             if (this.charts.monthlyReturns) this.charts.monthlyReturns.destroy();
             
             const colors = this.getChartColors();
+            const self = this;
             
+            // ✅ GRAPHIQUE DOUBLE : Gains absolus + Returns %
             this.charts.monthlyReturns = Highcharts.chart('chartMonthlyReturns', {
-                chart: { type: 'column', backgroundColor: colors.background, height: 450 },
-                title: { text: null },
-                xAxis: { 
-                    categories: categories, 
-                    labels: { rotation: -45, style: { color: colors.text } }
+                chart: {
+                    backgroundColor: colors.background,
+                    height: 450,
+                    style: { fontFamily: "'Inter', sans-serif" }
                 },
-                yAxis: { 
-                    title: { text: 'Return (%)', style: { color: colors.text } },
-                    labels: { style: { color: colors.text } },
-                    plotLines: [{ value: 0, color: '#94a3b8', width: 2 }],
+                title: {
+                    text: 'Monthly Performance Analysis',
+                    style: { color: colors.title, fontWeight: '600', fontSize: '16px' }
+                },
+                subtitle: {
+                    text: 'Absolute gains (EUR) should increase with compound interest, while % returns may decrease as capital grows',
+                    style: { color: colors.text, fontSize: '11px', fontStyle: 'italic' }
+                },
+                xAxis: {
+                    categories: categories,
+                    crosshair: true,
+                    labels: {
+                        rotation: -45,
+                        style: { color: colors.text, fontSize: '10px' },
+                        step: Math.max(1, Math.floor(categories.length / 15))
+                    },
                     gridLineColor: colors.gridLine
                 },
-                tooltip: { valueSuffix: '%', valueDecimals: 2 },
-                plotOptions: { column: { borderRadius: 4 } },
-                series: [{ name: 'Monthly Return', data: returns, colorByPoint: true }],
-                legend: { enabled: false },
+                yAxis: [
+                    {
+                        // Axe principal : Gains absolus en EUR
+                        title: {
+                            text: 'Monthly Gains (EUR)',
+                            style: { color: '#10b981', fontWeight: '600' }
+                        },
+                        labels: {
+                            style: { color: colors.text },
+                            formatter: function() {
+                                return self.formatLargeNumber(this.value);
+                            }
+                        },
+                        gridLineColor: colors.gridLine,
+                        plotLines: [{
+                            value: 0,
+                            color: '#94a3b8',
+                            width: 2,
+                            zIndex: 4
+                        }]
+                    },
+                    {
+                        // Axe secondaire : Returns en %
+                        title: {
+                            text: 'Monthly Return (%)',
+                            style: { color: '#2563eb', fontWeight: '600' }
+                        },
+                        labels: {
+                            style: { color: colors.text },
+                            format: '{value}%'
+                        },
+                        opposite: true,
+                        gridLineWidth: 0
+                    }
+                ],
+                tooltip: {
+                    shared: true,
+                    backgroundColor: this.isDarkMode ? 'rgba(30, 30, 30, 0.95)' : 'rgba(255, 255, 255, 0.95)',
+                    borderColor: colors.gridLine,
+                    style: { color: colors.text },
+                    formatter: function() {
+                        let s = '<b>' + this.x + '</b><br/>';
+                        
+                        this.points.forEach(point => {
+                            const seriesName = point.series.name;
+                            const value = point.y;
+                            
+                            if (seriesName === 'Monthly Gains') {
+                                s += '<span style="color:' + point.color + '">●</span> ' +
+                                    seriesName + ': <b>' + self.formatCurrency(value) + '</b><br/>';
+                            } else if (seriesName === 'Monthly Investment') {
+                                s += '<span style="color:' + point.color + '">●</span> ' +
+                                    seriesName + ': <b>' + self.formatCurrency(value) + '</b><br/>';
+                            } else {
+                                s += '<span style="color:' + point.color + '">●</span> ' +
+                                    seriesName + ': <b>' + value.toFixed(2) + '%</b><br/>';
+                            }
+                        });
+                        
+                        return s;
+                    }
+                },
+                plotOptions: {
+                    column: {
+                        borderRadius: 4,
+                        borderWidth: 0
+                    },
+                    line: {
+                        lineWidth: 2,
+                        marker: { enabled: false }
+                    }
+                },
+                series: [
+                    {
+                        name: 'Monthly Gains',
+                        type: 'column',
+                        data: monthlyGainsAbsolute,
+                        yAxis: 0,
+                        colorByPoint: true,
+                        tooltip: {
+                            valueSuffix: ' EUR'
+                        }
+                    },
+                    {
+                        name: 'Monthly Investment',
+                        type: 'line',
+                        data: monthlyInvestments,
+                        yAxis: 0,
+                        color: '#94a3b8',
+                        dashStyle: 'Dash',
+                        tooltip: {
+                            valueSuffix: ' EUR'
+                        },
+                        lineWidth: 1.5
+                    },
+                    {
+                        name: 'Return %',
+                        type: 'line',
+                        data: monthlyReturnsPercent,
+                        yAxis: 1,
+                        color: '#2563eb',
+                        dashStyle: 'Dot',
+                        tooltip: {
+                            valueSuffix: '%'
+                        },
+                        lineWidth: 2,
+                        visible: false // Masqué par défaut, utilisateur peut l'activer
+                    }
+                ],
+                legend: {
+                    align: 'center',
+                    verticalAlign: 'bottom',
+                    itemStyle: {
+                        color: colors.text,
+                        fontWeight: '500'
+                    }
+                },
                 credits: { enabled: false }
+            });
+            
+            console.log('✅ Monthly Returns Chart created:', {
+                dataPoints: categories.length,
+                avgMonthlyGain: (monthlyGainsAbsolute.reduce((sum, d) => sum + d.y, 0) / monthlyGainsAbsolute.length).toFixed(2) + ' EUR',
+                firstMonthGain: monthlyGainsAbsolute[0]?.y.toFixed(2) + ' EUR',
+                lastMonthGain: monthlyGainsAbsolute[monthlyGainsAbsolute.length - 1]?.y.toFixed(2) + ' EUR',
+                trend: monthlyGainsAbsolute[monthlyGainsAbsolute.length - 1]?.y > monthlyGainsAbsolute[0]?.y ? 
+                    '📈 Increasing (compound interest working!)' : 
+                    '📉 Decreasing (investigate!)'
             });
         },
         
