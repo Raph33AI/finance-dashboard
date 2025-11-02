@@ -1,209 +1,103 @@
 /* ============================================
-   THEME.JS - Gestion globale du thème
+   THEME.JS - Gestion du thème (Light/Dark/Auto)
    ============================================ */
-
-/**
- * Script de gestion du thème
- * DOIT être chargé en premier pour éviter le flash de thème incorrect
- */
 
 (function() {
     'use strict';
     
-    /**
-     * Applique immédiatement le thème au chargement
-     * Appelé de manière synchrone pour éviter le flash
-     */
-    function applyThemeImmediately() {
-        // Récupérer le thème depuis localStorage
-        const savedTheme = localStorage.getItem('theme') || 'dark';
-        
-        applyTheme(savedTheme);
-        
-        console.log('🎨 Thème appliqué au chargement:', savedTheme);
-    }
+    // Thème par défaut
+    let currentTheme = 'dark';
     
     /**
-     * Applique un thème spécifique
+     * Appliquer un thème
      */
     function applyTheme(theme) {
-        const body = document.body;
+        const html = document.documentElement;
         
-        switch(theme) {
-            case 'light':
-                body.classList.remove('dark-mode');
-                break;
+        if (theme === 'auto') {
+            // Détecter la préférence système
+            const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            html.setAttribute('data-theme', prefersDark ? 'dark' : 'light');
+        } else {
+            html.setAttribute('data-theme', theme);
+        }
+        
+        currentTheme = theme;
+        localStorage.setItem('financepro_theme', theme);
+        
+        console.log('🎨 Thème appliqué:', theme);
+    }
+    
+    /**
+     * Charger le thème au démarrage
+     */
+    function loadTheme() {
+        // Priorité 1: localStorage
+        const savedTheme = localStorage.getItem('financepro_theme');
+        if (savedTheme) {
+            applyTheme(savedTheme);
+            console.log('🎨 Thème appliqué au chargement:', savedTheme);
+            return;
+        }
+        
+        // Priorité 2: Thème par défaut
+        applyTheme('dark');
+    }
+    
+    /**
+     * Synchroniser avec Firestore (optionnel)
+     */
+    async function syncThemeWithFirestore() {
+        try {
+            const user = firebase.auth().currentUser;
+            if (!user) return;
             
-            case 'dark':
-                body.classList.add('dark-mode');
-                break;
+            const themeRef = firebase.firestore()
+                .collection('users')
+                .doc(user.uid)
+                .collection('settings')
+                .doc('preferences');
             
-            case 'auto':
-                // Détecter les préférences système
-                const prefersDark = window.matchMedia && 
-                                   window.matchMedia('(prefers-color-scheme: dark)').matches;
-                
-                if (prefersDark) {
-                    body.classList.add('dark-mode');
-                } else {
-                    body.classList.remove('dark-mode');
-                }
-                break;
+            await themeRef.set({
+                theme: currentTheme
+            }, { merge: true });
             
-            default:
-                body.classList.add('dark-mode');
+            console.log('✅ Thème synchronisé avec Firestore');
+            
+        } catch (error) {
+            // Ignorer silencieusement les erreurs de sync
+            console.log('ℹ️ Sync Firestore ignorée:', error.code);
         }
     }
     
     /**
-     * Écouter les changements de préférences système (pour mode auto)
-     */
-    function watchSystemTheme() {
-        if (!window.matchMedia) return;
-        
-        const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-        
-        mediaQuery.addEventListener('change', (e) => {
-            const savedTheme = localStorage.getItem('theme');
-            
-            // Seulement si le mode auto est activé
-            if (savedTheme === 'auto') {
-                applyTheme('auto');
-                console.log('🎨 Thème système changé:', e.matches ? 'dark' : 'light');
-            }
-        });
-    }
-    
-    /**
-     * Écouter les changements de thème dans d'autres onglets
-     */
-    function watchStorageChanges() {
-        window.addEventListener('storage', (e) => {
-            if (e.key === 'theme' && e.newValue) {
-                applyTheme(e.newValue);
-                console.log('🎨 Thème synchronisé depuis un autre onglet:', e.newValue);
-            }
-        });
-    }
-    
-    /**
-     * Fonction publique pour changer le thème
+     * Changer le thème
      */
     window.setTheme = function(theme) {
-        if (!['light', 'dark', 'auto'].includes(theme)) {
-            console.error('❌ Thème invalide:', theme);
-            return;
-        }
-        
-        // Sauvegarder dans localStorage
-        localStorage.setItem('theme', theme);
-        
-        // Appliquer le thème
         applyTheme(theme);
-        
-        // Sauvegarder dans Firestore si l'utilisateur est connecté
-        saveThemeToFirestore(theme);
-        
-        console.log('🎨 Thème changé:', theme);
+        syncThemeWithFirestore();
     };
     
     /**
-     * Sauvegarder le thème dans Firestore
-     */
-    async function saveThemeToFirestore(theme) {
-        // Attendre que Firebase soit initialisé
-        if (typeof firebase === 'undefined' || !firebase.auth) {
-            console.log('⏳ Firebase non encore chargé, thème sauvegardé en local uniquement');
-            return;
-        }
-        
-        const user = firebase.auth().currentUser;
-        if (!user) {
-            console.log('👤 Utilisateur non connecté, thème sauvegardé en local uniquement');
-            return;
-        }
-        
-        try {
-            await firebase.firestore()
-                .collection('users')
-                .doc(user.uid)
-                .collection('settings')
-                .doc('preferences')
-                .set({
-                    theme: theme,
-                    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-                }, { merge: true });
-            
-            console.log('✅ Thème sauvegardé dans Firestore');
-        } catch (error) {
-            console.error('❌ Erreur lors de la sauvegarde du thème:', error);
-        }
-    }
-    
-    /**
-     * Charger le thème depuis Firestore
-     */
-    window.loadThemeFromFirestore = async function() {
-        if (typeof firebase === 'undefined' || !firebase.auth) {
-            console.log('⏳ Firebase non encore chargé');
-            return;
-        }
-        
-        const user = firebase.auth().currentUser;
-        if (!user) return;
-        
-        try {
-            const doc = await firebase.firestore()
-                .collection('users')
-                .doc(user.uid)
-                .collection('settings')
-                .doc('preferences')
-                .get();
-            
-            if (doc.exists && doc.data().theme) {
-                const theme = doc.data().theme;
-                
-                // Sauvegarder dans localStorage
-                localStorage.setItem('theme', theme);
-                
-                // Appliquer le thème
-                applyTheme(theme);
-                
-                console.log('✅ Thème chargé depuis Firestore:', theme);
-            }
-        } catch (error) {
-            console.error('❌ Erreur lors du chargement du thème:', error);
-        }
-    };
-    
-    /**
-     * Récupérer le thème actuel
+     * Obtenir le thème actuel
      */
     window.getCurrentTheme = function() {
-        return localStorage.getItem('theme') || 'dark';
+        return currentTheme;
     };
     
-    // ============================================
-    // INITIALISATION IMMÉDIATE
-    // ============================================
+    // Charger le thème au démarrage
+    loadTheme();
     
-    // Appliquer le thème IMMÉDIATEMENT (synchrone)
-    applyThemeImmediately();
-    
-    // Après le chargement du DOM
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', () => {
-            watchSystemTheme();
-            watchStorageChanges();
-        });
-    } else {
-        watchSystemTheme();
-        watchStorageChanges();
-    }
-    
-    // Charger depuis Firestore quand l'utilisateur est connecté
+    // Synchroniser quand l'utilisateur se connecte
     window.addEventListener('userDataLoaded', () => {
-        window.loadThemeFromFirestore();
+        syncThemeWithFirestore();
+    });
+    
+    // Écouter les changements de préférence système
+    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
+        if (currentTheme === 'auto') {
+            applyTheme('auto');
+        }
     });
     
     console.log('✅ Système de thème initialisé');
