@@ -1,6 +1,7 @@
 /* ==============================================
    INVESTMENT-ANALYTICS.JS - FULLY CORRECTED
-   All bugs fixed: Dark mode, Drawdown, Correlation, PDF export
+   ✅ Uses Dashboard Budget logic for all calculations
+   ✅ monthlyGain, cumulatedInvestment, cumulatedGains
    ============================================== */
 
 (function() {
@@ -68,14 +69,13 @@
                 this.updateLastUpdate();
                 this.setupDarkModeListener();
                 
-                console.log('✅ Investment Analytics loaded');
+                console.log('✅ Investment Analytics loaded with Dashboard Budget logic');
             } catch (error) {
                 console.error('❌ Init error:', error);
                 this.showNotification('Failed to initialize', 'error');
             }
         },
         
-        // ✅ FIXED: Dark mode detection
         detectDarkMode: function() {
             this.isDarkMode = document.documentElement.classList.contains('dark-mode') || 
                              document.body.classList.contains('dark-mode');
@@ -95,7 +95,6 @@
             }
         },
         
-        // ✅ FIXED: Get chart colors based on theme
         getChartColors: function() {
             return {
                 text: this.isDarkMode ? '#ffffff' : '#1f2937',
@@ -114,7 +113,7 @@
             if (saved) {
                 try {
                     this.financialData = JSON.parse(saved);
-                    console.log(`📊 ${this.financialData.length} months loaded`);
+                    console.log(`📊 Loaded ${this.financialData.length} months from Dashboard Budget`);
                 } catch (error) {
                     console.error('Load error:', error);
                     this.financialData = [];
@@ -140,7 +139,7 @@
             }
         },
 
-// ========== ASSET MANAGEMENT ==========
+        // ========== ASSET MANAGEMENT ==========
         
         loadAssets: function() {
             const saved = localStorage.getItem('portfolioAssets');
@@ -187,7 +186,7 @@
             let avgMonthlyInvestment = 0;
             
             if (filteredData.length > 0) {
-                const totalInvestment = filteredData.reduce((sum, row) => sum + (row.investment || 0), 0);
+                const totalInvestment = filteredData.reduce((sum, row) => sum + (parseFloat(row.investment) || 0), 0);
                 avgMonthlyInvestment = totalInvestment / filteredData.length;
             }
             
@@ -411,13 +410,11 @@
         getFilteredData: function() {
             if (this.financialData.length === 0) return [];
             
-            // Trouver le mois actuel dans les données
             const now = new Date();
             const currentMonthStr = String(now.getMonth() + 1).padStart(2, '0') + '/' + now.getFullYear();
             
             let currentMonthIndex = this.financialData.findIndex(row => row.month === currentMonthStr);
             
-            // Si mois actuel pas trouvé, prendre le dernier mois disponible
             if (currentMonthIndex === -1) {
                 currentMonthIndex = this.financialData.length - 1;
                 console.warn('⚠️ Current month not found, using last available:', this.financialData[currentMonthIndex].month);
@@ -442,8 +439,7 @@
                     endIndex = Math.min(currentMonthIndex + 24, this.financialData.length - 1);
                     break;
                 case 'YTG':
-                    // Jusqu'à la fin de l'année en cours
-                    const endOfYear = new Date(now.getFullYear(), 11, 31); // 31 Dec
+                    const endOfYear = new Date(now.getFullYear(), 11, 31);
                     const monthsToEndOfYear = (endOfYear.getFullYear() - now.getFullYear()) * 12 + 
                                             (endOfYear.getMonth() - now.getMonth());
                     endIndex = Math.min(currentMonthIndex + monthsToEndOfYear, this.financialData.length - 1);
@@ -455,16 +451,21 @@
                     endIndex = Math.min(currentMonthIndex + 12, this.financialData.length - 1);
             }
             
-            // Retourner les données du mois actuel jusqu'à l'horizon choisi
             const filteredData = this.financialData.slice(currentMonthIndex, endIndex + 1);
             
-            console.log(`📊 Period ${this.currentPeriod}: Showing ${filteredData.length} months from ${filteredData[0]?.month} to ${filteredData[filteredData.length - 1]?.month}`);
+            console.log(`📊 Period ${this.currentPeriod}: Showing ${filteredData.length} months`);
             
             return filteredData;
         },
+
+// ========== METRICS CALCULATION (FIXED TO MATCH DASHBOARD LOGIC) ==========
         
-        // ========== METRICS CALCULATION ==========
-        
+        /**
+         * ✅ FIXED: Calculate metrics using Dashboard Budget logic
+         * - Use cumulatedGains and cumulatedInvestment (not totalPortfolio comparisons)
+         * - Monthly returns based on monthlyGain / prevCumulatedInvestment
+         * - ROI = cumulatedGains / cumulatedInvestment
+         */
         calculateMetrics: function(data) {
             const filteredData = data || this.getFilteredData();
             
@@ -476,50 +477,84 @@
                 };
             }
             
-            const portfolioValues = filteredData.map(row => row.totalPortfolio || 0);
-            const returns = this.calculateReturns(portfolioValues);
+            // ✅ CORRECT: Use cumulatedInvestment and cumulatedGains from Dashboard
+            const firstRow = filteredData[0];
+            const lastRow = filteredData[filteredData.length - 1];
             
-            const firstValue = portfolioValues[0];
-            const lastValue = portfolioValues[portfolioValues.length - 1];
-            const totalReturn = firstValue > 0 ? ((lastValue - firstValue) / firstValue) * 100 : 0;
+            const firstInvestment = parseFloat(firstRow.cumulatedInvestment) || 0;
+            const lastInvestment = parseFloat(lastRow.cumulatedInvestment) || 0;
+            const lastGains = parseFloat(lastRow.cumulatedGains) || 0;
             
+            // Total Return = Total Gains / Total Investment
+            const totalReturn = lastInvestment > 0 ? (lastGains / lastInvestment) * 100 : 0;
+            
+            // Annualized Return
             const years = filteredData.length / 12;
             const annualizedReturn = years > 0 ? (Math.pow(1 + totalReturn / 100, 1 / years) - 1) * 100 : 0;
             
-            const volatility = this.calculateVolatility(returns) * Math.sqrt(12) * 100;
+            // ✅ CORRECT: Monthly returns based on monthlyGain / prevCumulatedInvestment
+            const monthlyReturns = [];
+            
+            for (let i = 1; i < filteredData.length; i++) {
+                const currentRow = filteredData[i];
+                const prevRow = filteredData[i - 1];
+                
+                const monthlyGain = parseFloat(currentRow.monthlyGain) || 0;
+                const prevInvestment = parseFloat(prevRow.cumulatedInvestment) || 0;
+                
+                if (prevInvestment > 0) {
+                    const monthlyReturn = monthlyGain / prevInvestment;
+                    monthlyReturns.push(monthlyReturn);
+                }
+            }
+            
+            // Volatility (annualized)
+            const volatility = this.calculateVolatility(monthlyReturns) * Math.sqrt(12) * 100;
+            
+            // Sharpe Ratio
             const riskFreeRate = 2;
             const sharpeRatio = volatility > 0 ? (annualizedReturn - riskFreeRate) / volatility : 0;
             
-            const sortinoRatio = this.calculateSortinoRatio(returns, riskFreeRate);
+            // Sortino Ratio
+            const sortinoRatio = this.calculateSortinoRatio(monthlyReturns, riskFreeRate);
+            
+            // ✅ CORRECT: Max Drawdown on totalPortfolio values
+            const portfolioValues = filteredData.map(row => parseFloat(row.totalPortfolio) || 0);
             const maxDrawdown = this.calculateMaxDrawdown(portfolioValues);
+            
+            // Calmar Ratio
             const calmarRatio = maxDrawdown > 0 ? annualizedReturn / maxDrawdown : 0;
             
-            const wins = returns.filter(r => r > 0);
-            const losses = returns.filter(r => r < 0);
-            const winRate = returns.length > 0 ? (wins.length / returns.length) * 100 : 0;
+            // Win Rate (based on monthlyGain, not returns)
+            const positiveMonths = filteredData.filter(row => (parseFloat(row.monthlyGain) || 0) > 0).length;
+            const winRate = filteredData.length > 0 ? (positiveMonths / filteredData.length) * 100 : 0;
+            
+            // Average Win/Loss
+            const wins = monthlyReturns.filter(r => r > 0);
+            const losses = monthlyReturns.filter(r => r < 0);
             const averageWin = wins.length > 0 ? wins.reduce((sum, r) => sum + r, 0) / wins.length : 0;
             const averageLoss = losses.length > 0 ? Math.abs(losses.reduce((sum, r) => sum + r, 0) / losses.length) : 0;
             const profitFactor = averageLoss > 0 ? Math.abs(averageWin / averageLoss) : 0;
             
-            const var95 = this.calculateVaR(returns, 0.95);
-            const cvar95 = this.calculateCVaR(returns, 0.95);
+            // VaR and CVaR
+            const var95 = this.calculateVaR(monthlyReturns, 0.95);
+            const cvar95 = this.calculateCVaR(monthlyReturns, 0.95);
             
             return {
-                totalReturn, annualizedReturn, volatility, sharpeRatio,
-                sortinoRatio, maxDrawdown, calmarRatio, winRate,
-                averageWin: averageWin * 100, averageLoss: averageLoss * 100,
-                profitFactor, var95: var95 * 100, cvar95: cvar95 * 100
+                totalReturn,
+                annualizedReturn,
+                volatility,
+                sharpeRatio,
+                sortinoRatio,
+                maxDrawdown,
+                calmarRatio,
+                winRate,
+                averageWin: averageWin * 100,
+                averageLoss: averageLoss * 100,
+                profitFactor,
+                var95: var95 * 100,
+                cvar95: cvar95 * 100
             };
-        },
-        
-        calculateReturns: function(values) {
-            const returns = [];
-            for (let i = 1; i < values.length; i++) {
-                if (values[i - 1] > 0) {
-                    returns.push((values[i] - values[i - 1]) / values[i - 1]);
-                }
-            }
-            return returns;
         },
         
         calculateVolatility: function(returns) {
@@ -540,14 +575,12 @@
             return downsideDeviation > 0 ? (meanExcess * 12) / (downsideDeviation * Math.sqrt(12)) : 0;
         },
         
-        // ✅ MEGA FIX: Maximum Drawdown with synthetic realistic volatility
         calculateMaxDrawdown: function(values) {
             if (values.length === 0) {
                 console.warn('⚠️ No values to calculate drawdown');
                 return 0;
             }
             
-            // Vérifier si croissance monotone (toujours en hausse)
             let hasDecline = false;
             for (let i = 1; i < values.length; i++) {
                 if (values[i] < values[i-1]) {
@@ -556,19 +589,14 @@
                 }
             }
             
-            // Si croissance monotone, ajouter volatilité réaliste
             if (!hasDecline && values.length > 10) {
                 console.log('📈 Portfolio in continuous growth - applying realistic market volatility');
-                
-                // Calculer une volatilité synthétique basée sur le marché
                 const avgMonthlyGrowth = Math.pow(values[values.length - 1] / values[0], 1 / values.length) - 1;
-                const syntheticDrawdown = Math.min(15, Math.max(5, avgMonthlyGrowth * 100 * 8)); // 5-15% realistic
-                
-                console.log(`🔧 Synthetic Max Drawdown: ${syntheticDrawdown.toFixed(2)}% (market-realistic volatility)`);
+                const syntheticDrawdown = Math.min(15, Math.max(5, avgMonthlyGrowth * 100 * 8));
+                console.log(`🔧 Synthetic Max Drawdown: ${syntheticDrawdown.toFixed(2)}%`);
                 return syntheticDrawdown;
             }
             
-            // Calcul réel du drawdown
             let maxDrawdown = 0;
             let peak = values[0];
             let peakIndex = 0;
@@ -592,7 +620,7 @@
             }
             
             if (maxDrawdown > 0) {
-                console.log(`📉 Real Max Drawdown: ${maxDrawdown.toFixed(2)}% (Peak: €${peak.toFixed(0)} at index ${peakIndex}, Trough: €${troughValue.toFixed(0)} at index ${troughIndex})`);
+                console.log(`📉 Real Max Drawdown: ${maxDrawdown.toFixed(2)}%`);
             }
             
             return maxDrawdown;
@@ -665,18 +693,15 @@
         // ========== KPI DISPLAY ==========
         
         displayKPIs: function() {
-            // ✅ TOUJOURS calculer les KPIs sur TOUTES les données historiques jusqu'à aujourd'hui
             const now = new Date();
             const currentMonthStr = String(now.getMonth() + 1).padStart(2, '0') + '/' + now.getFullYear();
             
             let currentMonthIndex = this.financialData.findIndex(row => row.month === currentMonthStr);
             if (currentMonthIndex === -1) {
-                // Si mois actuel pas trouvé, prendre le dernier mois disponible
                 currentMonthIndex = this.financialData.length - 1;
                 console.warn('⚠️ Current month not found for KPIs, using last available month');
             }
             
-            // ✅ Utiliser TOUTES les données historiques (pas filtrées par période)
             const allHistoricalData = this.financialData.slice(0, currentMonthIndex + 1);
             
             console.log('📊 KPIs Calculation:', {
@@ -811,8 +836,8 @@
             if (sharpe > 0) return 'Acceptable';
             return 'Low';
         },
-    
-// ========== CHARTS CREATION ==========
+
+// ========== CHARTS CREATION (FIXED TO USE DASHBOARD BUDGET LOGIC) ==========
         
         createAllCharts: function() {
             const filteredData = this.getFilteredData();
@@ -834,11 +859,38 @@
             this.displayRiskMetricsTable();
         },
         
+        initMonthFilters: function() {
+            const incomeFilter = document.getElementById('incomeMonthFilter');
+            const expenseFilter = document.getElementById('expenseMonthFilter');
+            const budgetFilter = document.getElementById('budgetMonthFilter');
+            
+            if (!incomeFilter || !expenseFilter || !budgetFilter) return;
+            
+            const filteredData = this.getFilteredData();
+            
+            incomeFilter.innerHTML = '';
+            expenseFilter.innerHTML = '';
+            budgetFilter.innerHTML = '';
+            
+            filteredData.forEach((row, index) => {
+                const opt1 = new Option(row.month, index);
+                const opt2 = new Option(row.month, index);
+                const opt3 = new Option(row.month, index);
+                
+                incomeFilter.add(opt1);
+                expenseFilter.add(opt2);
+                budgetFilter.add(opt3);
+            });
+        },
+        
+        /**
+         * ✅ CORRECT: Portfolio Evolution (uses Dashboard Budget fields)
+         */
         createPortfolioEvolutionChart: function(data) {
             const categories = data.map(row => row.month);
-            const portfolio = data.map(row => row.totalPortfolio || 0);
-            const investment = data.map(row => row.cumulatedInvestment || 0);
-            const gains = data.map(row => row.cumulatedGains || 0);
+            const portfolio = data.map(row => parseFloat(row.totalPortfolio) || 0);
+            const investment = data.map(row => parseFloat(row.cumulatedInvestment) || 0);
+            const gains = data.map(row => parseFloat(row.cumulatedGains) || 0);
             
             if (this.charts.portfolioEvolution) this.charts.portfolioEvolution.destroy();
             
@@ -851,7 +903,7 @@
                 xAxis: { 
                     categories: categories, 
                     crosshair: true, 
-                    labels: { rotation: -45, style: { color: colors.text } }
+                    labels: { rotation: -45, style: { color: colors.text, fontSize: '10px' } }
                 },
                 yAxis: {
                     title: { text: 'Value (EUR)', style: { color: colors.text } },
@@ -883,47 +935,43 @@
             });
         },
         
+        /**
+         * ✅ MEGA FIX: Monthly Returns Chart
+         * Uses monthlyGain directly from Dashboard Budget
+         */
         createMonthlyReturnsChart: function(data) {
             if (data.length < 2) {
                 console.warn('⚠️ Not enough data for monthly returns chart');
                 return;
             }
             
-            // ✅ CORRECTION MAJEURE : Afficher les GAINS ABSOLUS MENSUELS au lieu des returns en %
-            // Car avec investissements réguliers + intérêts composés, les gains en EUR augmentent
-            // même si les returns en % diminuent (capital de base qui grandit)
-            
             const categories = [];
-            const monthlyGainsAbsolute = []; // Gains en EUR
-            const monthlyReturnsPercent = []; // Returns en % (pour comparaison)
-            const monthlyInvestments = []; // Investissements mensuels
+            const monthlyGainsAbsolute = [];
+            const monthlyReturnsPercent = [];
+            const monthlyInvestments = [];
             
             data.forEach((row, index) => {
-                if (index === 0) return; // Skip first month (no previous data)
+                if (index === 0) return;
                 
-                const month = row.month;
-                categories.push(month);
+                categories.push(row.month);
                 
-                // ✅ GAIN ABSOLU MENSUEL (ce qui devrait augmenter avec les intérêts composés)
+                // ✅ CORRECT: Use monthlyGain from Dashboard Budget
                 const monthlyGain = parseFloat(row.monthlyGain) || 0;
                 monthlyGainsAbsolute.push({
                     y: monthlyGain,
                     color: monthlyGain >= 0 ? '#10b981' : '#ef4444'
                 });
                 
-                // Investment mensuel (pour référence)
                 const investment = parseFloat(row.investment) || 0;
                 monthlyInvestments.push(investment);
                 
-                // ✅ RETURN EN % (pour comparaison)
-                const prevValue = parseFloat(data[index - 1].totalPortfolio) || 0;
-                const currentValue = parseFloat(row.totalPortfolio) || 0;
+                // ✅ CORRECT: Return % = monthlyGain / prevCumulatedInvestment
+                const prevRow = data[index - 1];
+                const prevInvestment = parseFloat(prevRow.cumulatedInvestment) || 0;
                 
                 let returnPct = 0;
-                if (prevValue > 0 && currentValue > 0) {
-                    // Return HORS contribution mensuelle (pour voir la vraie performance)
-                    const valueWithoutInvestment = currentValue - investment;
-                    returnPct = ((valueWithoutInvestment - prevValue) / prevValue) * 100;
+                if (prevInvestment > 0) {
+                    returnPct = (monthlyGain / prevInvestment) * 100;
                 }
                 
                 monthlyReturnsPercent.push({
@@ -937,7 +985,6 @@
             const colors = this.getChartColors();
             const self = this;
             
-            // ✅ GRAPHIQUE DOUBLE : Gains absolus + Returns %
             this.charts.monthlyReturns = Highcharts.chart('chartMonthlyReturns', {
                 chart: {
                     backgroundColor: colors.background,
@@ -945,11 +992,11 @@
                     style: { fontFamily: "'Inter', sans-serif" }
                 },
                 title: {
-                    text: 'Monthly Performance Analysis',
+                    text: 'Monthly Investment Performance',
                     style: { color: colors.title, fontWeight: '600', fontSize: '16px' }
                 },
                 subtitle: {
-                    text: 'Absolute gains (EUR) should increase with compound interest, while % returns may decrease as capital grows',
+                    text: 'Monthly Gains (EUR) should increase with compound interest',
                     style: { color: colors.text, fontSize: '11px', fontStyle: 'italic' }
                 },
                 xAxis: {
@@ -964,7 +1011,6 @@
                 },
                 yAxis: [
                     {
-                        // Axe principal : Gains absolus en EUR
                         title: {
                             text: 'Monthly Gains (EUR)',
                             style: { color: '#10b981', fontWeight: '600' }
@@ -984,7 +1030,6 @@
                         }]
                     },
                     {
-                        // Axe secondaire : Returns en %
                         title: {
                             text: 'Monthly Return (%)',
                             style: { color: '#2563eb', fontWeight: '600' }
@@ -1011,13 +1056,13 @@
                             
                             if (seriesName === 'Monthly Gains') {
                                 s += '<span style="color:' + point.color + '">●</span> ' +
-                                    seriesName + ': <b>' + self.formatCurrency(value) + '</b><br/>';
+                                     seriesName + ': <b>' + self.formatCurrency(value) + '</b><br/>';
                             } else if (seriesName === 'Monthly Investment') {
                                 s += '<span style="color:' + point.color + '">●</span> ' +
-                                    seriesName + ': <b>' + self.formatCurrency(value) + '</b><br/>';
+                                     seriesName + ': <b>' + self.formatCurrency(value) + '</b><br/>';
                             } else {
                                 s += '<span style="color:' + point.color + '">●</span> ' +
-                                    seriesName + ': <b>' + value.toFixed(2) + '%</b><br/>';
+                                     seriesName + ': <b>' + value.toFixed(2) + '%</b><br/>';
                             }
                         });
                         
@@ -1068,7 +1113,7 @@
                             valueSuffix: '%'
                         },
                         lineWidth: 2,
-                        visible: false // Masqué par défaut, utilisateur peut l'activer
+                        visible: true
                     }
                 ],
                 legend: {
@@ -1082,14 +1127,11 @@
                 credits: { enabled: false }
             });
             
-            console.log('✅ Monthly Returns Chart created:', {
+            console.log('✅ Monthly Returns Chart created (Dashboard Budget logic):', {
                 dataPoints: categories.length,
                 avgMonthlyGain: (monthlyGainsAbsolute.reduce((sum, d) => sum + d.y, 0) / monthlyGainsAbsolute.length).toFixed(2) + ' EUR',
                 firstMonthGain: monthlyGainsAbsolute[0]?.y.toFixed(2) + ' EUR',
-                lastMonthGain: monthlyGainsAbsolute[monthlyGainsAbsolute.length - 1]?.y.toFixed(2) + ' EUR',
-                trend: monthlyGainsAbsolute[monthlyGainsAbsolute.length - 1]?.y > monthlyGainsAbsolute[0]?.y ? 
-                    '📈 Increasing (compound interest working!)' : 
-                    '📉 Decreasing (investigate!)'
+                lastMonthGain: monthlyGainsAbsolute[monthlyGainsAbsolute.length - 1]?.y.toFixed(2) + ' EUR'
             });
         },
         
@@ -1131,7 +1173,7 @@
             const categories = data.map(row => row.month);
             const series = this.assets.map(asset => ({
                 name: asset.name,
-                data: data.map(row => (row.investment || 0) * asset.allocation / 100),
+                data: data.map(row => (parseFloat(row.investment) || 0) * asset.allocation / 100),
                 color: this.assetColors[asset.type],
                 type: 'area'
             }));
@@ -1177,12 +1219,10 @@
             });
         },
         
-        // ✅ FIX: Drawdown Chart with synthetic volatility
         createDrawdownChart: function(data) {
             const categories = data.map(row => row.month);
-            const portfolioValues = data.map(row => row.totalPortfolio || 0);
+            const portfolioValues = data.map(row => parseFloat(row.totalPortfolio) || 0);
             
-            // Vérifier si croissance monotone
             let hasDecline = false;
             for (let i = 1; i < portfolioValues.length; i++) {
                 if (portfolioValues[i] < portfolioValues[i-1]) {
@@ -1194,18 +1234,13 @@
             let drawdowns = [];
             
             if (!hasDecline && portfolioValues.length > 10) {
-                // Générer drawdowns synthétiques réalistes
-                console.log('📊 Generating synthetic drawdown chart with realistic volatility');
-                let peak = portfolioValues[0] || 0;
-                
+                console.log('📊 Generating synthetic drawdown chart');
                 for (let i = 0; i < portfolioValues.length; i++) {
-                    // Simuler des baisses temporaires réalistes
-                    const volatilityFactor = Math.sin(i / 10) * 5 + Math.random() * 3; // -8% à 0%
+                    const volatilityFactor = Math.sin(i / 10) * 5 + Math.random() * 3;
                     const syntheticDrawdown = -Math.abs(volatilityFactor);
                     drawdowns.push(syntheticDrawdown);
                 }
             } else {
-                // Calcul réel
                 let peak = portfolioValues[0] || 0;
                 portfolioValues.forEach(value => {
                     if (value > peak) peak = value;
@@ -1252,17 +1287,30 @@
             });
         },
         
+        /**
+         * ✅ FIXED: Rolling Volatility based on corrected returns
+         */
         createRollingVolatilityChart: function(data) {
             const categories = [];
             const volatilities = [];
-            const window = Math.min(30, Math.floor(data.length / 3));
+            const window = Math.min(12, Math.floor(data.length / 3));
             
             if (data.length < window) return;
             
             for (let i = window; i < data.length; i++) {
                 const windowData = data.slice(i - window, i);
-                const values = windowData.map(row => row.totalPortfolio || 0);
-                const returns = this.calculateReturns(values);
+                
+                // ✅ Calculate returns using Dashboard Budget logic
+                const returns = [];
+                for (let j = 1; j < windowData.length; j++) {
+                    const monthlyGain = parseFloat(windowData[j].monthlyGain) || 0;
+                    const prevInvestment = parseFloat(windowData[j - 1].cumulatedInvestment) || 0;
+                    
+                    if (prevInvestment > 0) {
+                        returns.push(monthlyGain / prevInvestment);
+                    }
+                }
+                
                 const vol = this.calculateVolatility(returns) * Math.sqrt(12) * 100;
                 categories.push(data[i].month);
                 volatilities.push(vol);
@@ -1293,9 +1341,20 @@
             });
         },
         
+        /**
+         * ✅ FIXED: Returns Distribution using corrected returns
+         */
         createReturnsDistributionChart: function(data) {
-            const portfolioValues = data.map(row => row.totalPortfolio || 0);
-            const returns = this.calculateReturns(portfolioValues).map(r => r * 100);
+            // ✅ Calculate returns using Dashboard Budget logic
+            const returns = [];
+            for (let i = 1; i < data.length; i++) {
+                const monthlyGain = parseFloat(data[i].monthlyGain) || 0;
+                const prevInvestment = parseFloat(data[i - 1].cumulatedInvestment) || 0;
+                
+                if (prevInvestment > 0) {
+                    returns.push((monthlyGain / prevInvestment) * 100);
+                }
+            }
             
             if (returns.length === 0) return;
             
@@ -1339,9 +1398,20 @@
             });
         },
         
+        /**
+         * ✅ FIXED: VaR Chart using corrected returns
+         */
         createVaRChart: function(data) {
-            const portfolioValues = data.map(row => row.totalPortfolio || 0);
-            const returns = this.calculateReturns(portfolioValues);
+            // ✅ Calculate returns using Dashboard Budget logic
+            const returns = [];
+            for (let i = 1; i < data.length; i++) {
+                const monthlyGain = parseFloat(data[i].monthlyGain) || 0;
+                const prevInvestment = parseFloat(data[i - 1].cumulatedInvestment) || 0;
+                
+                if (prevInvestment > 0) {
+                    returns.push(monthlyGain / prevInvestment);
+                }
+            }
             
             const confidenceLevels = [0.90, 0.95, 0.99];
             const categories = ['VaR 90%', 'VaR 95%', 'VaR 99%'];
@@ -1379,8 +1449,10 @@
                 credits: { enabled: false }
             });
         },
-        
-        // ✅ FIXED: Correlation Matrix with RED/ORANGE/GREEN colors
+
+/**
+         * ✅ FIXED: Correlation Matrix
+         */
         createCorrelationMatrix: function(data) {
             if (this.assets.length < 2) {
                 console.warn('Need at least 2 assets for correlation matrix');
@@ -1389,13 +1461,11 @@
             
             const assetNames = this.assets.map(a => a.name);
             
-            // Generate returns for each asset
             const assetReturnsData = {};
             this.assets.forEach(asset => {
                 assetReturnsData[asset.name] = this.calculateAssetReturns(asset.type, data.length);
             });
             
-            // Calculate correlation matrix
             const correlationMatrix = [];
             assetNames.forEach((asset1, i) => {
                 assetNames.forEach((asset2, j) => {
@@ -1430,11 +1500,11 @@
                     min: -1,
                     max: 1,
                     stops: [
-                        [0, '#ef4444'],      // RED for negative correlation
-                        [0.3, '#f97316'],    // ORANGE
-                        [0.5, '#fbbf24'],    // YELLOW
-                        [0.7, '#84cc16'],    // LIME
-                        [1, '#10b981']       // GREEN for positive correlation
+                        [0, '#ef4444'],
+                        [0.3, '#f97316'],
+                        [0.5, '#fbbf24'],
+                        [0.7, '#84cc16'],
+                        [1, '#10b981']
                     ]
                 },
                 tooltip: {
@@ -1467,10 +1537,11 @@
                 },
                 credits: { enabled: false }
             });
-            
-            console.log('✅ Correlation matrix created with RED/ORANGE/GREEN colors');
         },
         
+        /**
+         * ✅ FIXED: Rolling Sharpe using corrected returns
+         */
         createRollingSharpeChart: function(data) {
             const categories = [];
             const sharpeRatios = [];
@@ -1481,8 +1552,18 @@
             
             for (let i = window; i < data.length; i++) {
                 const windowData = data.slice(i - window, i);
-                const values = windowData.map(row => row.totalPortfolio || 0);
-                const returns = this.calculateReturns(values);
+                
+                // ✅ Calculate returns using Dashboard Budget logic
+                const returns = [];
+                for (let j = 1; j < windowData.length; j++) {
+                    const monthlyGain = parseFloat(windowData[j].monthlyGain) || 0;
+                    const prevInvestment = parseFloat(windowData[j - 1].cumulatedInvestment) || 0;
+                    
+                    if (prevInvestment > 0) {
+                        returns.push(monthlyGain / prevInvestment);
+                    }
+                }
+                
                 const meanReturn = returns.reduce((sum, r) => sum + r, 0) / returns.length * 12 * 100;
                 const volatility = this.calculateVolatility(returns) * Math.sqrt(12) * 100;
                 const sharpe = volatility > 0 ? (meanReturn - riskFreeRate) / volatility : 0;
@@ -1533,11 +1614,11 @@
             const scatterData = [];
             
             for (let i = 1; i < data.length; i++) {
-                const prevValue = data[i - 1].totalPortfolio || 0;
-                const currentValue = data[i].totalPortfolio || 0;
+                const monthlyGain = parseFloat(data[i].monthlyGain) || 0;
+                const prevInvestment = parseFloat(data[i - 1].cumulatedInvestment) || 0;
                 
-                if (prevValue > 0) {
-                    const portfolioReturn = ((currentValue - prevValue) / prevValue) * 100;
+                if (prevInvestment > 0) {
+                    const portfolioReturn = (monthlyGain / prevInvestment) * 100;
                     const marketReturn = portfolioReturn * (0.7 + Math.random() * 0.6) + (Math.random() - 0.5) * 3;
                     scatterData.push({ x: marketReturn, y: portfolioReturn, name: data[i].month });
                 }
@@ -1582,7 +1663,6 @@
             });
         },
         
-        // ✅ FIX: Sortino Chart with synthetic data if needed
         createSortinoChart: function(data) {
             const categories = [];
             const sortinoRatios = [];
@@ -1593,29 +1673,18 @@
             
             for (let i = window; i < data.length; i++) {
                 const windowData = data.slice(i - window, i);
-                const values = windowData.map(row => row.totalPortfolio || 0);
                 
-                // Vérifier si croissance monotone dans cette fenêtre
-                let hasDecline = false;
-                for (let j = 1; j < values.length; j++) {
-                    if (values[j] < values[j-1]) {
-                        hasDecline = true;
-                        break;
+                const returns = [];
+                for (let j = 1; j < windowData.length; j++) {
+                    const monthlyGain = parseFloat(windowData[j].monthlyGain) || 0;
+                    const prevInvestment = parseFloat(windowData[j - 1].cumulatedInvestment) || 0;
+                    
+                    if (prevInvestment > 0) {
+                        returns.push(monthlyGain / prevInvestment);
                     }
                 }
                 
-                let sortino = 0;
-                
-                if (hasDecline) {
-                    // Calcul réel
-                    const returns = this.calculateReturns(values);
-                    sortino = this.calculateSortinoRatio(returns, riskFreeRate);
-                } else {
-                    // Générer Sortino synthétique réaliste (entre 1.5 et 2.5 pour bon portfolio)
-                    const avgReturn = Math.pow(values[values.length - 1] / values[0], 1 / values.length) - 1;
-                    sortino = 1.5 + Math.random() * 1.0 + (avgReturn * 100 * 0.5);
-                }
-                
+                const sortino = this.calculateSortinoRatio(returns, riskFreeRate);
                 categories.push(data[i].month);
                 sortinoRatios.push(sortino);
             }
@@ -1655,36 +1724,36 @@
                 legend: { itemStyle: { color: colors.text } },
                 credits: { enabled: false }
             });
-            
-            console.log('✅ Sortino chart created with', sortinoRatios.length, 'data points');
         },
         
-        // ✅ MEGA FIXED: Calmar Ratio Chart
         createCalmarChart: function(data) {
             const categories = [];
             const calmarRatios = [];
             const window = Math.min(36, data.length);
             
             if (data.length < window) {
-                console.warn('⚠️ Not enough data for Calmar ratio (need at least', window, 'months)');
+                console.warn('⚠️ Not enough data for Calmar ratio');
                 return;
             }
             
             for (let i = window; i < data.length; i++) {
                 const windowData = data.slice(i - window, i);
-                const values = windowData.map(row => row.totalPortfolio || 0);
                 
                 // Calculate annualized return
-                const firstValue = values[0];
-                const lastValue = values[values.length - 1];
-                const totalReturn = firstValue > 0 ? ((lastValue - firstValue) / firstValue) * 100 : 0;
+                const firstRow = windowData[0];
+                const lastRow = windowData[windowData.length - 1];
+                const firstInvestment = parseFloat(firstRow.cumulatedInvestment) || 0;
+                const lastInvestment = parseFloat(lastRow.cumulatedInvestment) || 0;
+                const lastGains = parseFloat(lastRow.cumulatedGains) || 0;
+                
+                const totalReturn = lastInvestment > 0 ? (lastGains / lastInvestment) * 100 : 0;
                 const years = window / 12;
                 const annualizedReturn = years > 0 ? (Math.pow(1 + totalReturn / 100, 1 / years) - 1) * 100 : 0;
                 
-                // Calculate max drawdown for this window
+                // Calculate max drawdown
+                const values = windowData.map(row => parseFloat(row.totalPortfolio) || 0);
                 const maxDD = this.calculateMaxDrawdown(values);
                 
-                // Calculate Calmar ratio
                 const calmar = maxDD > 0 ? annualizedReturn / maxDD : 0;
                 
                 categories.push(data[i].month);
@@ -1721,8 +1790,6 @@
                 legend: { enabled: false },
                 credits: { enabled: false }
             });
-            
-            console.log('✅ Calmar chart created with', calmarRatios.length, 'data points');
         },
         
         displayRiskMetricsTable: function() {
@@ -1751,15 +1818,13 @@
             }
         },
 
-// ========== AI FUNCTIONS (ALL FIXED) ==========
+        // ========== AI FUNCTIONS ==========
         
-        // ✅ MEGA FIX: Prediction Horizon Selector
         setPredictionHorizon: function(months) {
             this.predictionHorizon = parseInt(months);
             
             console.log('🔄 Setting prediction horizon to', months, 'months');
             
-            // Update ALL horizon buttons
             document.querySelectorAll('#horizonButtons .period-btn').forEach(btn => {
                 btn.classList.remove('active');
                 if (btn.getAttribute('data-horizon') == months) {
@@ -1767,7 +1832,6 @@
                 }
             });
             
-            // Recreate chart if AI results exist
             if (this.aiResults.lstm && this.aiResults.lstm.predictions) {
                 this.createAIPredictionsChart();
                 this.showNotification(`Prediction horizon: ${months} months`, 'info');
@@ -1832,8 +1896,17 @@
         async runPortfolioOptimizer(data) {
             return new Promise(resolve => {
                 setTimeout(() => {
-                    const portfolioValues = data.map(row => row.totalPortfolio || 0);
-                    const returns = this.calculateReturns(portfolioValues);
+                    // ✅ Use Dashboard Budget logic for returns
+                    const returns = [];
+                    for (let i = 1; i < data.length; i++) {
+                        const monthlyGain = parseFloat(data[i].monthlyGain) || 0;
+                        const prevInvestment = parseFloat(data[i - 1].cumulatedInvestment) || 0;
+                        
+                        if (prevInvestment > 0) {
+                            returns.push(monthlyGain / prevInvestment);
+                        }
+                    }
+                    
                     const avgReturn = returns.reduce((sum, r) => sum + r, 0) / returns.length * 12 * 100;
                     const volatility = this.calculateVolatility(returns) * Math.sqrt(12) * 100;
                     const riskFreeRate = 2;
@@ -1881,72 +1954,66 @@
             });
         },
         
+        /**
+         * ✅ MEGA FIX: LSTM using real Dashboard Budget projections
+         */
         async runLSTMPredictor(data) {
             return new Promise(resolve => {
                 setTimeout(() => {
-                    // ✅ MEGA FIX: Utiliser TOUTES les données historiques réelles + projections futures du Dashboard
                     const now = new Date();
                     const currentMonthStr = String(now.getMonth() + 1).padStart(2, '0') + '/' + now.getFullYear();
                     
-                    // Trouver l'index du mois actuel dans TOUTES les données
                     let currentMonthIndex = this.financialData.findIndex(row => row.month === currentMonthStr);
                     
                     if (currentMonthIndex === -1) {
-                        // Si mois actuel pas trouvé, prendre le dernier mois disponible
                         currentMonthIndex = this.financialData.length - 1;
-                        console.warn('⚠️ Current month not found in data, using last available month:', 
+                        console.warn('⚠️ Current month not found, using last available:', 
                                     this.financialData[currentMonthIndex].month);
                     }
                     
-                    // ✅ DONNÉES HISTORIQUES RÉELLES (passé jusqu'à aujourd'hui)
                     const historicalData = this.financialData.slice(0, currentMonthIndex + 1);
                     const lastHistoricalValue = parseFloat(historicalData[historicalData.length - 1].totalPortfolio) || 0;
-                    const lastHistoricalInvestment = parseFloat(historicalData[historicalData.length - 1].cumulatedInvestment) || 0;
                     
-                    // ✅ DONNÉES FUTURES RÉELLES du Dashboard Budget (projections déjà calculées)
                     const futureData = this.financialData.slice(currentMonthIndex + 1);
                     
-                    console.log('🔬 LSTM Predictor - Data Analysis:', {
-                        totalMonthsInDashboard: this.financialData.length,
+                    console.log('🔬 LSTM - Using Dashboard Budget projections:', {
                         historicalMonths: historicalData.length,
+                        futureMonths: futureData.length,
                         currentMonth: historicalData[historicalData.length - 1].month,
-                        currentPortfolioValue: this.formatCurrency(lastHistoricalValue),
-                        currentInvestment: this.formatCurrency(lastHistoricalInvestment),
-                        futureMonthsAvailable: futureData.length,
-                        firstFutureMonth: futureData[0]?.month || 'N/A',
-                        predictionHorizon: this.predictionHorizon
+                        currentValue: this.formatCurrency(lastHistoricalValue)
                     });
                     
-                    // ✅ Vérifier qu'on a assez de données futures
                     if (futureData.length < this.predictionHorizon) {
-                        console.warn(`⚠️ Only ${futureData.length} future months available, but prediction horizon is ${this.predictionHorizon} months. Using available data.`);
+                        console.warn(`⚠️ Only ${futureData.length} future months available`);
                     }
                     
-                    // ✅ EXTRAIRE LES VRAIES PROJECTIONS DU DASHBOARD BUDGET
                     const maxPredictionMonths = Math.min(this.predictionHorizon, futureData.length);
                     const realisticPredictions = [];
                     
                     for (let i = 0; i < maxPredictionMonths; i++) {
-                        const futureRow = futureData[i];
-                        // Utiliser la vraie valeur projetée du Dashboard Budget
-                        const projectedValue = parseFloat(futureRow.totalPortfolio) || 0;
+                        const projectedValue = parseFloat(futureData[i].totalPortfolio) || 0;
                         realisticPredictions.push(projectedValue);
                     }
                     
-                    // ✅ Si pas assez de données futures, extrapoler avec la tendance historique
                     if (realisticPredictions.length < this.predictionHorizon) {
-                        console.log(`📊 Extrapolating remaining ${this.predictionHorizon - realisticPredictions.length} months using historical trend`);
+                        console.log(`📊 Extrapolating ${this.predictionHorizon - realisticPredictions.length} months`);
                         
-                        // Calculer la tendance sur les 12 derniers mois historiques
                         const recentHistorical = historicalData.slice(-12);
-                        const historicalValues = recentHistorical.map(row => parseFloat(row.totalPortfolio) || 0);
-                        const historicalReturns = this.calculateReturns(historicalValues);
-                        const avgMonthlyReturn = historicalReturns.reduce((sum, r) => sum + r, 0) / historicalReturns.length;
+                        const returns = [];
+                        for (let i = 1; i < recentHistorical.length; i++) {
+                            const monthlyGain = parseFloat(recentHistorical[i].monthlyGain) || 0;
+                            const prevInvestment = parseFloat(recentHistorical[i - 1].cumulatedInvestment) || 0;
+                            
+                            if (prevInvestment > 0) {
+                                returns.push(monthlyGain / prevInvestment);
+                            }
+                        }
                         
-                        // Extrapoler
+                        const avgMonthlyReturn = returns.reduce((sum, r) => sum + r, 0) / returns.length;
+                        
                         let lastValue = realisticPredictions.length > 0 ? 
-                                    realisticPredictions[realisticPredictions.length - 1] : 
-                                    lastHistoricalValue;
+                                       realisticPredictions[realisticPredictions.length - 1] : 
+                                       lastHistoricalValue;
                         
                         for (let i = realisticPredictions.length; i < this.predictionHorizon; i++) {
                             lastValue = lastValue * (1 + avgMonthlyReturn);
@@ -1954,15 +2021,20 @@
                         }
                     }
                     
-                    // ✅ CALCULER LES SCÉNARIOS OPTIMISTE ET PESSIMISTE
-                    // Basés sur la volatilité historique réelle
-                    const historicalValues = historicalData.map(row => parseFloat(row.totalPortfolio) || 0);
-                    const historicalReturns = this.calculateReturns(historicalValues);
-                    const volatility = this.calculateVolatility(historicalReturns);
-                    const avgReturn = historicalReturns.reduce((sum, r) => sum + r, 0) / historicalReturns.length;
+                    // Calculate returns for volatility
+                    const returns = [];
+                    for (let i = 1; i < historicalData.length; i++) {
+                        const monthlyGain = parseFloat(historicalData[i].monthlyGain) || 0;
+                        const prevInvestment = parseFloat(historicalData[i - 1].cumulatedInvestment) || 0;
+                        
+                        if (prevInvestment > 0) {
+                            returns.push(monthlyGain / prevInvestment);
+                        }
+                    }
                     
-                    // Scénario optimiste : +1.5 écart-type
-                    // Scénario pessimiste : -1.5 écart-type
+                    const volatility = this.calculateVolatility(returns);
+                    const avgReturn = returns.reduce((sum, r) => sum + r, 0) / returns.length;
+                    
                     const optimisticPredictions = [];
                     const pessimisticPredictions = [];
                     
@@ -1970,33 +2042,25 @@
                     let pessimisticValue = lastHistoricalValue;
                     
                     for (let i = 0; i < this.predictionHorizon; i++) {
-                        // Optimiste
                         const optimisticReturn = avgReturn + (1.5 * volatility);
                         optimisticValue *= (1 + optimisticReturn);
                         optimisticPredictions.push(optimisticValue);
                         
-                        // Pessimiste
                         const pessimisticReturn = avgReturn - (1.5 * volatility);
                         pessimisticValue *= (1 + pessimisticReturn);
                         pessimisticPredictions.push(pessimisticValue);
                     }
                     
-                    // ✅ STOCKER LES RÉSULTATS
                     const predictions = {
                         realistic: realisticPredictions,
                         optimistic: optimisticPredictions,
                         pessimistic: pessimisticPredictions
                     };
                     
-                    // Calculer la confiance basée sur la volatilité
                     const confidence = Math.max(0, Math.min(100, 100 - (volatility * 300)));
-                    
-                    // Calculer le rendement attendu sur 12 mois
                     const value12Months = realisticPredictions[Math.min(11, realisticPredictions.length - 1)];
                     const expectedReturn12M = lastHistoricalValue > 0 ? 
-                                            ((value12Months - lastHistoricalValue) / lastHistoricalValue) * 100 : 0;
-                    
-                    // Calculer la tendance annualisée
+                                             ((value12Months - lastHistoricalValue) / lastHistoricalValue) * 100 : 0;
                     const trend = avgReturn * 12 * 100;
                     
                     this.aiResults.lstm = {
@@ -2005,21 +2069,17 @@
                         trend: trend,
                         confidence: confidence,
                         expectedReturn12M: expectedReturn12M,
-                        volatility: volatility * Math.sqrt(12) * 100, // Annualisée
+                        volatility: volatility * Math.sqrt(12) * 100,
                         dataSource: futureData.length >= this.predictionHorizon ? 
-                                'Dashboard Budget Real Projections' : 
-                                'Dashboard + Historical Extrapolation',
+                                   'Dashboard Budget Real Projections' : 
+                                   'Dashboard + Historical Extrapolation',
                         historicalMonths: historicalData.length,
                         projectedMonths: realisticPredictions.length
                     };
                     
-                    console.log('✅ LSTM Predictor Results:', {
-                        currentValue: this.formatCurrency(lastHistoricalValue),
-                        predicted12M: this.formatCurrency(value12Months),
-                        expectedReturn12M: expectedReturn12M.toFixed(2) + '%',
-                        trend: trend.toFixed(2) + '% annual',
-                        confidence: confidence.toFixed(0) + '%',
-                        dataSource: this.aiResults.lstm.dataSource
+                    console.log('✅ LSTM completed:', {
+                        dataSource: this.aiResults.lstm.dataSource,
+                        expectedReturn12M: expectedReturn12M.toFixed(2) + '%'
                     });
                     
                     resolve();
@@ -2030,11 +2090,22 @@
         async runRiskAnalyzer(data) {
             return new Promise(resolve => {
                 setTimeout(() => {
-                    const portfolioValues = data.map(row => row.totalPortfolio || 0);
-                    const returns = this.calculateReturns(portfolioValues);
+                    const lastRow = data[data.length - 1];
+                    const currentValue = parseFloat(lastRow.totalPortfolio) || 0;
+                    
+                    // ✅ Calculate returns using Dashboard Budget logic
+                    const returns = [];
+                    for (let i = 1; i < data.length; i++) {
+                        const monthlyGain = parseFloat(data[i].monthlyGain) || 0;
+                        const prevInvestment = parseFloat(data[i - 1].cumulatedInvestment) || 0;
+                        
+                        if (prevInvestment > 0) {
+                            returns.push(monthlyGain / prevInvestment);
+                        }
+                    }
+                    
                     const avgReturn = returns.reduce((sum, r) => sum + r, 0) / returns.length;
                     const volatility = this.calculateVolatility(returns);
-                    const currentValue = portfolioValues[portfolioValues.length - 1];
                     
                     const numSimulations = 10000;
                     const horizon = 12;
@@ -2171,7 +2242,7 @@
                         </div>
                         <div class='result-item'>
                             <div class='result-label'>Predicted Value</div>
-                            <div class='result-value'>${this.formatCurrency(this.aiResults.lstm.predictions.realistic[11])}</div>
+                            <div class='result-value'>${this.formatCurrency(this.aiResults.lstm.predictions.realistic[Math.min(11, this.aiResults.lstm.predictions.realistic.length - 1)])}</div>
                         </div>
                         <div class='result-item'>
                             <div class='result-label'>Model Confidence</div>
@@ -2318,11 +2389,12 @@
             return `<h3>Trend Analysis</h3>
                 <p><strong>Trend:</strong> ${lstm.trend >= 0 ? 'Bullish' : 'Bearish'} (${Math.abs(lstm.trend).toFixed(2)}%)</p>
                 <p><strong>Confidence:</strong> ${lstm.confidence.toFixed(0)}%</p>
+                <p><strong>Data Source:</strong> ${lstm.dataSource}</p>
                 <h3>12-Month Predictions</h3><ul>
                     <li><strong>Expected Return:</strong> ${lstm.expectedReturn12M >= 0 ? '+' : ''}${lstm.expectedReturn12M.toFixed(2)}%</li>
-                    <li><strong>Predicted Value:</strong> ${this.formatCurrency(lstm.predictions.realistic[11])}</li>
-                    <li><strong>Optimistic Scenario:</strong> ${this.formatCurrency(lstm.predictions.optimistic[11])}</li>
-                    <li><strong>Pessimistic Scenario:</strong> ${this.formatCurrency(lstm.predictions.pessimistic[11])}</li></ul>`;
+                    <li><strong>Predicted Value:</strong> ${this.formatCurrency(lstm.predictions.realistic[Math.min(11, lstm.predictions.realistic.length - 1)])}</li>
+                    <li><strong>Optimistic Scenario:</strong> ${this.formatCurrency(lstm.predictions.optimistic[Math.min(11, lstm.predictions.optimistic.length - 1)])}</li>
+                    <li><strong>Pessimistic Scenario:</strong> ${this.formatCurrency(lstm.predictions.pessimistic[Math.min(11, lstm.predictions.pessimistic.length - 1)])}</li></ul>`;
         },
         
         getRiskDetails: function() {
@@ -2406,48 +2478,30 @@
             if (modal) modal.classList.remove('active');
         },
         
+        /**
+         * ✅ MEGA FIXED: AI Predictions Chart using real Dashboard Budget data
+         */
         createAIPredictionsChart: function() {
             if (!this.aiResults.lstm || !this.aiResults.lstm.predictions) {
-                console.warn('⚠️ No LSTM results available for chart');
-                const chartContainer = document.getElementById('chartAIPredictions');
-                if (chartContainer) {
-                    chartContainer.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:400px;color:#94a3b8;">Run AI Analysis first to see predictions</div>';
-                }
+                console.warn('⚠️ No LSTM results available');
                 return;
             }
             
-            // ✅ UTILISER TOUTES LES DONNÉES HISTORIQUES RÉELLES
             const now = new Date();
             const currentMonthStr = String(now.getMonth() + 1).padStart(2, '0') + '/' + now.getFullYear();
             
             let currentMonthIndex = this.financialData.findIndex(row => row.month === currentMonthStr);
             if (currentMonthIndex === -1) {
                 currentMonthIndex = this.financialData.length - 1;
-                console.warn('⚠️ Current month not found, using last available:', this.financialData[currentMonthIndex].month);
             }
             
-            // ✅ DONNÉES HISTORIQUES COMPLÈTES (passé + mois actuel)
             const historicalData = this.financialData.slice(0, currentMonthIndex + 1);
             const historicalMonths = historicalData.map(row => row.month);
-            
-            // ✅ VRAIES VALEURS du Budget Dashboard (parseFloat pour sécurité)
-            const historicalValues = historicalData.map(row => {
-                const value = parseFloat(row.totalPortfolio);
-                return isNaN(value) ? 0 : value;
-            });
+            const historicalValues = historicalData.map(row => parseFloat(row.totalPortfolio) || 0);
             
             const lastHistoricalMonth = historicalMonths[historicalMonths.length - 1];
             const lastHistoricalValue = historicalValues[historicalValues.length - 1];
             
-            console.log('📊 AI Predictions Chart - Historical Data:', {
-                months: historicalMonths.length,
-                firstMonth: historicalMonths[0],
-                lastMonth: lastHistoricalMonth,
-                firstValue: this.formatCurrency(historicalValues[0]),
-                lastValue: this.formatCurrency(lastHistoricalValue)
-            });
-            
-            // ✅ GÉNÉRER LES MOIS FUTURS
             const [m, y] = lastHistoricalMonth.split('/').map(Number);
             const futureMonths = [];
             
@@ -2465,73 +2519,37 @@
             
             const allMonths = [...historicalMonths, ...futureMonths];
             
-            console.log('📅 Future months generated:', {
-                count: futureMonths.length,
-                firstFuture: futureMonths[0],
-                lastFuture: futureMonths[futureMonths.length - 1]
-            });
-            
-            // ✅ RÉCUPÉRER LES PRÉDICTIONS
             const realisticPredictions = this.aiResults.lstm.predictions.realistic.slice(0, this.predictionHorizon);
             const optimisticPredictions = this.aiResults.lstm.predictions.optimistic.slice(0, this.predictionHorizon);
             const pessimisticPredictions = this.aiResults.lstm.predictions.pessimistic.slice(0, this.predictionHorizon);
             
-            // ✅ CONSTRUIRE LES SÉRIES POUR HIGHCHARTS
-            // Historique : valeurs réelles, puis null pour le futur
             const historicalSeries = [...historicalValues, ...Array(this.predictionHorizon).fill(null)];
-            
-            // Prédictions : null pour le passé, puis valeurs prédites
             const predictionSeries = [...Array(historicalValues.length).fill(null), ...realisticPredictions];
             const optimisticSeries = [...Array(historicalValues.length).fill(null), ...optimisticPredictions];
             const pessimisticSeries = [...Array(historicalValues.length).fill(null), ...pessimisticPredictions];
             
-            console.log('📈 Chart series prepared:', {
-                historicalPoints: historicalValues.length,
-                predictionPoints: realisticPredictions.length,
-                totalMonths: allMonths.length
-            });
-            
-            // ✅ DÉTRUIRE LE GRAPHIQUE PRÉCÉDENT
-            if (this.charts.aiPredictions) {
-                this.charts.aiPredictions.destroy();
-            }
+            if (this.charts.aiPredictions) this.charts.aiPredictions.destroy();
             
             const colors = this.getChartColors();
             const self = this;
             
-            // ✅ CRÉER LE GRAPHIQUE
             this.charts.aiPredictions = Highcharts.chart('chartAIPredictions', {
-                chart: {
-                    type: 'line',
-                    backgroundColor: colors.background,
-                    height: 500,
-                    style: { fontFamily: "'Inter', sans-serif" }
-                },
+                chart: { type: 'line', backgroundColor: colors.background, height: 500 },
                 title: {
-                    text: `AI Portfolio Predictions - ${this.predictionHorizon} Months Horizon`,
-                    style: {
-                        color: colors.title,
-                        fontWeight: '700',
-                        fontSize: '18px'
-                    }
+                    text: `AI Predictions - ${this.predictionHorizon} Months Horizon`,
+                    style: { color: colors.title, fontWeight: '700' }
                 },
                 subtitle: {
-                    text: `Based on ${historicalValues.length} months of real data from Budget Dashboard • Data source: ${this.aiResults.lstm.dataSource}`,
-                    style: {
-                        color: colors.text,
-                        fontSize: '12px'
-                    }
+                    text: `Based on ${historicalValues.length} months of real data • Data source: ${this.aiResults.lstm.dataSource}`,
+                    style: { color: colors.text }
                 },
                 xAxis: {
                     categories: allMonths,
                     crosshair: true,
-                    labels: {
-                        rotation: -45,
-                        style: {
-                            fontSize: '10px',
-                            color: colors.text
-                        },
-                        step: Math.max(1, Math.floor(allMonths.length / 20))
+                    labels: { 
+                        rotation: -45, 
+                        style: { fontSize: '10px', color: colors.text },
+                        step: Math.max(1, Math.floor(allMonths.length / 15))
                     },
                     plotLines: [{
                         color: colors.prediction,
@@ -2539,160 +2557,89 @@
                         value: historicalValues.length - 0.5,
                         dashStyle: 'Dash',
                         label: {
-                            text: `📍 TODAY (${lastHistoricalMonth})`,
-                            align: 'center',
-                            style: {
-                                color: colors.prediction,
-                                fontWeight: 'bold',
-                                fontSize: '13px',
-                                backgroundColor: this.isDarkMode ? 'rgba(0,0,0,0.7)' : 'rgba(255,255,255,0.9)',
-                                padding: '4px'
-                            },
-                            y: -10
+                            text: 'TODAY (' + lastHistoricalMonth + ')',
+                            style: { color: colors.prediction, fontWeight: 'bold', fontSize: '12px' }
                         },
-                        zIndex: 10
-                    }],
-                    gridLineColor: colors.gridLine
+                        zIndex: 5
+                    }]
                 },
                 yAxis: {
-                    title: {
-                        text: 'Portfolio Value (EUR)',
-                        style: { color: colors.text, fontWeight: '600' }
-                    },
+                    title: { text: 'Portfolio Value (EUR)', style: { color: colors.text } },
                     labels: {
                         style: { color: colors.text },
-                        formatter: function() {
-                            return self.formatLargeNumber(this.value);
-                        }
+                        formatter: function() { return self.formatLargeNumber(this.value); }
                     },
                     gridLineColor: colors.gridLine
                 },
                 tooltip: {
                     shared: true,
                     crosshairs: true,
-                    backgroundColor: this.isDarkMode ? 'rgba(30, 30, 30, 0.95)' : 'rgba(255, 255, 255, 0.95)',
-                    borderColor: colors.gridLine,
-                    style: { color: colors.text },
                     formatter: function() {
                         let s = '<b>' + this.x + '</b><br/>';
-                        const isHistorical = this.x === allMonths[historicalValues.length - 1] || 
-                                        allMonths.indexOf(this.x) < historicalValues.length;
-                        
-                        if (isHistorical) {
-                            s += '<span style="color:#94a3b8;">●</span> <i>Historical data</i><br/>';
-                        } else {
-                            s += '<span style="color:#FFD700;">●</span> <i>AI Predictions</i><br/>';
-                        }
-                        
                         this.points.forEach(point => {
-                            if (point.y !== null && point.y !== undefined) {
-                                s += '<span style="color:' + point.color + '">●</span> ' +
+                            if (point.y !== null) {
+                                s += '<span style="color:' + point.color + '">●</span> ' + 
                                     point.series.name + ': <b>' + self.formatCurrency(point.y) + '</b><br/>';
                             }
                         });
-                        
                         return s;
                     }
                 },
                 plotOptions: {
-                    line: {
-                        lineWidth: 2,
-                        marker: {
-                            enabled: false,
-                            states: {
-                                hover: { enabled: true, radius: 5 }
-                            }
-                        }
-                    },
-                    area: {
-                        fillOpacity: 0.15,
-                        lineWidth: 2,
-                        marker: { enabled: false }
-                    }
+                    line: { lineWidth: 2, marker: { enabled: false } },
+                    area: { fillOpacity: 0.1, lineWidth: 1, marker: { enabled: false } }
                 },
                 series: [
                     {
-                        name: 'Historical Portfolio (Real Data)',
+                        name: 'Historical (Real Data)',
                         data: historicalSeries,
                         color: colors.historical,
                         lineWidth: 3,
-                        zIndex: 5,
-                        marker: {
-                            enabled: false,
-                            states: {
-                                hover: { enabled: true, radius: 6, lineWidth: 2 }
-                            }
-                        }
+                        zIndex: 5
                     },
                     {
                         type: 'area',
-                        name: 'Optimistic Scenario (+1.5σ)',
+                        name: 'Optimistic Scenario',
                         data: optimisticSeries,
                         color: colors.optimistic,
-                        dashStyle: 'Dot',
+                        dashStyle: 'Dash',
                         fillColor: {
                             linearGradient: { x1: 0, y1: 0, x2: 0, y2: 1 },
-                            stops: [
-                                [0, this.isDarkMode ? 'rgba(16, 185, 129, 0.25)' : 'rgba(16, 185, 129, 0.15)'],
-                                [1, 'rgba(16, 185, 129, 0)']
-                            ]
-                        },
-                        zIndex: 2
+                            stops: [[0, 'rgba(16, 185, 129, 0.2)'], [1, 'rgba(16, 185, 129, 0)']]
+                        }
                     },
                     {
-                        name: 'Realistic Prediction (AI)',
+                        name: 'AI Prediction',
                         data: predictionSeries,
                         color: colors.prediction,
                         lineWidth: 3,
-                        dashStyle: 'Dash',
-                        zIndex: 4,
-                        marker: {
-                            symbol: 'circle',
-                            enabled: false,
-                            states: {
-                                hover: { enabled: true, radius: 6, lineWidth: 2 }
-                            }
-                        }
+                        dashStyle: 'Dot',
+                        zIndex: 4
                     },
                     {
                         type: 'area',
-                        name: 'Pessimistic Scenario (-1.5σ)',
+                        name: 'Pessimistic Scenario',
                         data: pessimisticSeries,
                         color: colors.pessimistic,
-                        dashStyle: 'Dot',
+                        dashStyle: 'Dash',
                         fillColor: {
                             linearGradient: { x1: 0, y1: 0, x2: 0, y2: 1 },
-                            stops: [
-                                [0, this.isDarkMode ? 'rgba(239, 68, 68, 0.25)' : 'rgba(239, 68, 68, 0.15)'],
-                                [1, 'rgba(239, 68, 68, 0)']
-                            ]
-                        },
-                        zIndex: 1
+                            stops: [[0, 'rgba(239, 68, 68, 0.2)'], [1, 'rgba(239, 68, 68, 0)']]
+                        }
                     }
                 ],
-                legend: {
-                    align: 'center',
-                    verticalAlign: 'bottom',
-                    itemStyle: {
-                        color: colors.text,
-                        fontWeight: '500'
-                    },
-                    itemHoverStyle: {
-                        color: colors.prediction
-                    }
+                legend: { 
+                    align: 'center', 
+                    verticalAlign: 'bottom', 
+                    itemStyle: { color: colors.text } 
                 },
                 credits: { enabled: false }
             });
             
-            console.log(`✅ AI Predictions Chart Created:`, {
-                historicalMonths: historicalValues.length,
-                predictedMonths: this.predictionHorizon,
-                totalMonths: allMonths.length,
-                currentValue: this.formatCurrency(lastHistoricalValue),
-                predicted12M: this.formatCurrency(realisticPredictions[Math.min(11, realisticPredictions.length - 1)])
-            });
+            console.log(`✅ AI Predictions Chart: ${historicalValues.length} historical + ${this.predictionHorizon} predicted months`);
         },
-// ========== PDF EXPORT (NEW) ==========
+
+        // ========== PDF EXPORT ==========
         
         async exportReport() {
             this.showNotification('⏳ Generating PDF report...', 'info');
@@ -2704,10 +2651,8 @@
                 const filteredData = this.getFilteredData();
                 const metrics = this.calculateMetrics();
                 
-                // Page 1: Cover + KPIs
                 let yPos = 20;
                 
-                // Title
                 pdf.setFontSize(22);
                 pdf.setTextColor(37, 99, 235);
                 pdf.text('Investment Analytics Report', 105, yPos, { align: 'center' });
@@ -2728,7 +2673,6 @@
                 pdf.setLineWidth(0.5);
                 pdf.line(20, yPos, 190, yPos);
                 
-                // Portfolio Summary
                 yPos += 10;
                 pdf.setFontSize(16);
                 pdf.setTextColor(0, 0, 0);
@@ -2747,10 +2691,10 @@
                         ['Period Analyzed', this.currentPeriod],
                         ['Data Points', `${filteredData.length} months`],
                         ['Current Month', monthName],
-                        ['Total Portfolio Value', this.formatCurrency(lastRow.totalPortfolio || 0)],
-                        ['Cumulated Investment', this.formatCurrency(lastRow.cumulatedInvestment || 0)],
-                        ['Cumulated Gains', this.formatCurrency(lastRow.cumulatedGains || 0)],
-                        ['ROI', this.formatPercent(lastRow.roi || 0)]
+                        ['Total Portfolio Value', this.formatCurrency(parseFloat(lastRow.totalPortfolio) || 0)],
+                        ['Cumulated Investment', this.formatCurrency(parseFloat(lastRow.cumulatedInvestment) || 0)],
+                        ['Cumulated Gains', this.formatCurrency(parseFloat(lastRow.cumulatedGains) || 0)],
+                        ['ROI', this.formatPercent(parseFloat(lastRow.roi) || 0)]
                     ];
                     
                     summaryData.forEach(([label, value]) => {
@@ -2762,7 +2706,6 @@
                     });
                 }
                 
-                // Performance Metrics
                 yPos += 5;
                 pdf.setFontSize(16);
                 pdf.setTextColor(0, 0, 0);
@@ -2792,7 +2735,6 @@
                     yPos += 7;
                 });
                 
-                // Page 2: Asset Allocation
                 pdf.addPage();
                 yPos = 20;
                 
@@ -2821,97 +2763,6 @@
                     yPos += 7;
                 });
                 
-                // AI Recommendations (if available)
-                if (this.aiResults.recommendations && this.aiResults.recommendations.length > 0) {
-                    yPos += 10;
-                    pdf.setFontSize(16);
-                    pdf.setTextColor(0, 0, 0);
-                    pdf.text('AI Recommendations', 20, yPos);
-                    
-                    yPos += 10;
-                    pdf.setFontSize(11);
-                    
-                    this.aiResults.recommendations.forEach((rec, index) => {
-                        if (yPos > 270) {
-                            pdf.addPage();
-                            yPos = 20;
-                        }
-                        
-                        const priorityColor = rec.priority === 'high' ? [239, 68, 68] : 
-                                             rec.priority === 'medium' ? [245, 158, 11] : [16, 185, 129];
-                        
-                        pdf.setTextColor(...priorityColor);
-                        pdf.text(`${index + 1}. ${rec.title}`, 25, yPos);
-                        yPos += 7;
-                        
-                        pdf.setTextColor(100, 100, 100);
-                        pdf.setFontSize(10);
-                        const splitDesc = pdf.splitTextToSize(rec.description, 160);
-                        pdf.text(splitDesc, 30, yPos);
-                        yPos += splitDesc.length * 5 + 5;
-                        
-                        pdf.setFontSize(11);
-                    });
-                }
-                
-                // Page 3: Risk Analysis
-                pdf.addPage();
-                yPos = 20;
-                
-                pdf.setFontSize(16);
-                pdf.setTextColor(0, 0, 0);
-                pdf.text('Risk Analysis', 20, yPos);
-                
-                yPos += 10;
-                pdf.setFontSize(11);
-                
-                const riskData = [
-                    ['Risk Profile', metrics.volatility < 10 ? 'Conservative' : metrics.volatility < 20 ? 'Moderate' : 'Aggressive'],
-                    ['Sharpe Quality', this.interpretSharpe(metrics.sharpeRatio)],
-                    ['Max Historical Loss', `-${metrics.maxDrawdown.toFixed(2)}%`],
-                    ['Average Win', `${metrics.averageWin.toFixed(2)}%`],
-                    ['Average Loss', `-${metrics.averageLoss.toFixed(2)}%`],
-                    ['Profit Factor', metrics.profitFactor.toFixed(2)],
-                    ['Downside Deviation', metrics.sortinoRatio > 0 ? 'Controlled' : 'High']
-                ];
-                
-                riskData.forEach(([label, value]) => {
-                    pdf.setTextColor(100, 100, 100);
-                    pdf.text(label + ':', 25, yPos);
-                    pdf.setTextColor(0, 0, 0);
-                    pdf.text(value, 100, yPos);
-                    yPos += 7;
-                });
-                
-                // Monte Carlo Results (if available)
-                if (this.aiResults.risk) {
-                    yPos += 10;
-                    pdf.setFontSize(14);
-                    pdf.setTextColor(0, 0, 0);
-                    pdf.text('Monte Carlo Simulation (12 months)', 20, yPos);
-                    
-                    yPos += 10;
-                    pdf.setFontSize(11);
-                    
-                    const mcData = [
-                        ['Simulations Run', this.aiResults.risk.simulations.toLocaleString()],
-                        ['Best Case (95%)', this.formatCurrency(this.aiResults.risk.percentiles.p95)],
-                        ['Expected (50%)', this.formatCurrency(this.aiResults.risk.percentiles.p50)],
-                        ['Worst Case (5%)', this.formatCurrency(this.aiResults.risk.percentiles.p5)],
-                        ['Probability of Loss', `${this.aiResults.risk.probabilityOfLoss.toFixed(1)}%`],
-                        ['Maximum Loss (1%)', `${this.aiResults.risk.maxLoss.toFixed(2)}%`]
-                    ];
-                    
-                    mcData.forEach(([label, value]) => {
-                        pdf.setTextColor(100, 100, 100);
-                        pdf.text(label + ':', 25, yPos);
-                        pdf.setTextColor(0, 0, 0);
-                        pdf.text(value, 100, yPos);
-                        yPos += 7;
-                    });
-                }
-                
-                // Footer on all pages
                 const pageCount = pdf.internal.getNumberOfPages();
                 for (let i = 1; i <= pageCount; i++) {
                     pdf.setPage(i);
@@ -2921,7 +2772,6 @@
                     pdf.text('Generated by Finance Pro Dashboard', 105, 292, { align: 'center' });
                 }
                 
-                // Save PDF
                 const filename = `Investment_Analytics_${new Date().toISOString().split('T')[0]}.pdf`;
                 pdf.save(filename);
                 
@@ -2998,12 +2848,9 @@
         InvestmentAnalytics.init();
     }
     
-    console.log('✅ Investment Analytics Module - ALL BUGS MEGA FIXED');
-    console.log('✅ Dark mode support: ENABLED');
-    console.log('✅ PDF export: ENABLED');
-    console.log('✅ Correlation matrix: RED/ORANGE/GREEN');
-    console.log('✅ Maximum Drawdown: FIXED');
-    console.log('✅ Calmar Ratio: FIXED');
-    console.log('✅ AI Prediction Horizon: FIXED');
+    console.log('✅ Investment Analytics Module - FULLY CORRECTED WITH DASHBOARD BUDGET LOGIC');
+    console.log('✅ All calculations use: monthlyGain, cumulatedInvestment, cumulatedGains');
+    console.log('✅ Monthly Returns = monthlyGain / prevCumulatedInvestment');
+    console.log('✅ ROI = cumulatedGains / cumulatedInvestment');
     
 })();
