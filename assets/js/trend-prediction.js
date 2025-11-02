@@ -1647,3 +1647,39 @@ document.addEventListener('DOMContentLoaded', () => {
     console.log('🤖 ML Trend Prediction - Initializing...');
     TrendPrediction.init();
 });
+
+/* ============================================
+   SIDEBAR USER MENU - Toggle
+   ============================================ */
+
+document.addEventListener('DOMContentLoaded', () => {
+    const sidebarUserTrigger = document.getElementById('sidebarUserTrigger');
+    const sidebarUserDropdown = document.getElementById('sidebarUserDropdown');
+    
+    if (sidebarUserTrigger && sidebarUserDropdown) {
+        // Toggle dropdown au clic
+        sidebarUserTrigger.addEventListener('click', (e) => {
+            e.stopPropagation();
+            
+            // Toggle classes
+            sidebarUserTrigger.classList.toggle('active');
+            sidebarUserDropdown.classList.toggle('active');
+        });
+        
+        // Fermer le dropdown si on clique ailleurs
+        document.addEventListener('click', (e) => {
+            if (!sidebarUserDropdown.contains(e.target) && 
+                !sidebarUserTrigger.contains(e.target)) {
+                sidebarUserTrigger.classList.remove('active');
+                sidebarUserDropdown.classList.remove('active');
+            }
+        });
+        
+        // Empêcher la fermeture si on clique dans le dropdown
+        sidebarUserDropdown.addEventListener('click', (e) => {
+            e.stopPropagation();
+        });
+    }
+});
+
+console.log('✅ Menu utilisateur sidebar initialisé');
