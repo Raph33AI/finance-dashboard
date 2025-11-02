@@ -240,13 +240,15 @@
                                 <div class='toolbar-row'>
                                     <label>Monthly Est Yield (% annual):</label>
                                     <input type='number' id='monthlyEstYield' step='0.1' value='8' 
-                                           onchange='Dashboard.updateEstYield()'>
+                                        onchange='Dashboard.updateEstYield()'>
                                     <span class='yield-display'>
                                         = <span id='monthlyEstYieldDisplay'>0.67</span>% monthly
                                     </span>
                                 </div>
-                                <div class='toolbar-row'>
-                                    <button class='btn-primary' onclick='Dashboard.recalculateGains()'>Recalculate All Gains</button>
+                                <div class='toolbar-row' style='justify-content: center; margin-top: 15px;'>
+                                    <button class='btn-primary' onclick='Dashboard.recalculateGains()'>
+                                        <i class='fas fa-calculator'></i> Recalculate All Gains
+                                    </button>
                                 </div>
                             </div>
                             
@@ -298,12 +300,22 @@
                         <!-- Data Management -->
                         <div class='toolbar'>
                             <h3>Data Management</h3>
-                            <div class='toolbar-row'>
-                                <button class='btn-primary' onclick='Dashboard.saveData()'>Save All</button>
-                                <button class='btn-secondary' onclick='Dashboard.exportToJSON()'>Export JSON</button>
-                                <button class='btn-secondary' onclick='Dashboard.importFromJSON()'>Import JSON</button>
-                                <button class='btn-secondary' onclick='Dashboard.resetToDefault()'>Reset</button>
-                                <button class='btn-primary' onclick='Dashboard.updateAllCharts()'>Update Charts</button>
+                            <div class='toolbar-row' style='justify-content: center; gap: 10px; flex-wrap: wrap;'>
+                                <button class='btn-primary' onclick='Dashboard.saveData()'>
+                                    <i class='fas fa-save'></i> Save All
+                                </button>
+                                <button class='btn-secondary' onclick='Dashboard.exportToJSON()'>
+                                    <i class='fas fa-file-export'></i> Export JSON
+                                </button>
+                                <button class='btn-secondary' onclick='Dashboard.importFromJSON()'>
+                                    <i class='fas fa-file-import'></i> Import JSON
+                                </button>
+                                <button class='btn-secondary' onclick='Dashboard.resetToDefault()'>
+                                    <i class='fas fa-undo'></i> Reset
+                                </button>
+                                <button class='btn-primary' onclick='Dashboard.updateAllCharts()'>
+                                    <i class='fas fa-chart-line'></i> Update Charts
+                                </button>
                             </div>
                         </div>
                         
