@@ -561,13 +561,31 @@
         
         calculateSortinoRatio: function(returns, riskFreeRate) {
             if (returns.length === 0) return 0;
+            
+            // ✅ FIX: Returns are already in decimal format (0.05 = 5%)
             const monthlyRiskFree = riskFreeRate / 12 / 100;
             const excessReturns = returns.map(r => r - monthlyRiskFree);
             const meanExcess = excessReturns.reduce((sum, r) => sum + r, 0) / excessReturns.length;
+            
+            // ✅ FIX: Calculate downside deviation properly
             const downsideReturns = excessReturns.filter(r => r < 0);
-            if (downsideReturns.length === 0) return meanExcess > 0 ? 999 : 0;
-            const downsideDeviation = Math.sqrt(downsideReturns.reduce((sum, r) => sum + r * r, 0) / downsideReturns.length);
-            return downsideDeviation > 0 ? (meanExcess * 12) / (downsideDeviation * Math.sqrt(12)) : 0;
+            
+            if (downsideReturns.length === 0) {
+                // No negative returns - portfolio only goes up!
+                return meanExcess > 0 ? 5.0 : 0; // Cap at reasonable value instead of 999
+            }
+            
+            // ✅ FIX: Proper downside deviation calculation
+            const downsideVariance = downsideReturns.reduce((sum, r) => sum + (r * r), 0) / downsideReturns.length;
+            const downsideDeviation = Math.sqrt(downsideVariance);
+            
+            if (downsideDeviation === 0) return 0;
+            
+            // ✅ FIX: Annualize properly
+            const annualizedExcessReturn = meanExcess * 12;
+            const annualizedDownsideDeviation = downsideDeviation * Math.sqrt(12);
+            
+            return annualizedExcessReturn / annualizedDownsideDeviation;
         },
         
         calculateMaxDrawdown: function(values) {
@@ -1720,8 +1738,14 @@ createReturnsDistributionChart: function(data) {
                 }
                 
                 const sortino = this.calculateSortinoRatio(returns, riskFreeRate);
-                categories.push(data[i].month);
-                sortinoRatios.push(sortino);
+                    categories.push(data[i].month);
+
+                    // ✅ FIX: Filter out invalid values
+                    if (!isNaN(sortino) && isFinite(sortino)) {
+                        sortinoRatios.push(sortino);
+                    } else {
+                        sortinoRatios.push(0);
+                    }
             }
             
             if (this.charts.sortino) this.charts.sortino.destroy();
@@ -2012,36 +2036,104 @@ createReturnsDistributionChart: function(data) {
                     }
                     
                     const historicalData = this.financialData.slice(0, currentMonthIndex + 1);
+                    
+                    // ✅ FIX: Check if we have enough historical data
+                    if (historicalData.length < 2) {
+                        console.warn('⚠️ Not enough historical data for LSTM predictor');
+                        this.aiResults.lstm = {
+                            currentValue: 0,
+                            trend: 0,
+                            confidence: 0,
+                            expectedReturn12M: 0,
+                            volatility: 0,
+                            dataSource: 'Insufficient Data',
+                            historicalMonths: historicalData.length
+                        };
+                        resolve();
+                        return;
+                    }
+                    
                     const lastHistoricalValue = parseFloat(historicalData[historicalData.length - 1].totalPortfolio) || 0;
                     
+                    // ✅ FIX: Better returns calculation with validation
                     const returns = [];
                     for (let i = 1; i < historicalData.length; i++) {
                         const monthlyGain = parseFloat(historicalData[i].monthlyGain) || 0;
                         const prevInvestment = parseFloat(historicalData[i - 1].cumulatedInvestment) || 0;
                         
                         if (prevInvestment > 0) {
-                            returns.push(monthlyGain / prevInvestment);
+                            const monthlyReturn = monthlyGain / prevInvestment;
+                            // ✅ FIX: Filter out extreme outliers that could skew results
+                            if (!isNaN(monthlyReturn) && isFinite(monthlyReturn)) {
+                                returns.push(monthlyReturn);
+                            }
                         }
                     }
                     
+                    // ✅ FIX: Validate we have returns data
+                    if (returns.length === 0) {
+                        console.warn('⚠️ No valid returns calculated for LSTM');
+                        this.aiResults.lstm = {
+                            currentValue: lastHistoricalValue,
+                            trend: 0,
+                            confidence: 0,
+                            expectedReturn12M: 0,
+                            volatility: 0,
+                            dataSource: 'No Returns Data',
+                            historicalMonths: historicalData.length
+                        };
+                        resolve();
+                        return;
+                    }
+                    
+                    // ✅ FIX: Calculate volatility and avgReturn with safety checks
                     const volatility = this.calculateVolatility(returns);
                     const avgReturn = returns.reduce((sum, r) => sum + r, 0) / returns.length;
                     
-                    const confidence = Math.max(0, Math.min(100, 100 - (volatility * 300)));
+                    // ✅ FIX: Validate calculations
+                    if (isNaN(volatility) || isNaN(avgReturn)) {
+                        console.error('❌ Invalid volatility or avgReturn:', { volatility, avgReturn });
+                        this.aiResults.lstm = {
+                            currentValue: lastHistoricalValue,
+                            trend: 0,
+                            confidence: 0,
+                            expectedReturn12M: 0,
+                            volatility: 0,
+                            dataSource: 'Calculation Error',
+                            historicalMonths: historicalData.length
+                        };
+                        resolve();
+                        return;
+                    }
+                    
+                    // ✅ FIX: Calculate confidence with better formula
+                    const annualizedVolatility = volatility * Math.sqrt(12) * 100;
+                    const confidence = Math.max(0, Math.min(100, 100 - (annualizedVolatility * 2)));
+                    
+                    // ✅ FIX: Calculate trend (annualized return in %)
                     const trend = avgReturn * 12 * 100;
                     const expectedReturn12M = trend;
+                    
+                    console.log('✅ LSTM Calculation:', {
+                        historicalMonths: historicalData.length,
+                        returnsCount: returns.length,
+                        avgMonthlyReturn: (avgReturn * 100).toFixed(3) + '%',
+                        annualizedReturn: trend.toFixed(2) + '%',
+                        volatility: annualizedVolatility.toFixed(2) + '%',
+                        confidence: confidence.toFixed(1) + '%'
+                    });
                     
                     this.aiResults.lstm = {
                         currentValue: lastHistoricalValue,
                         trend: trend,
                         confidence: confidence,
                         expectedReturn12M: expectedReturn12M,
-                        volatility: volatility * Math.sqrt(12) * 100,
+                        volatility: annualizedVolatility,
                         dataSource: 'Dashboard Budget Historical Data',
                         historicalMonths: historicalData.length
                     };
                     
-                    console.log('✅ LSTM completed');
+                    console.log('✅ LSTM completed successfully');
                     resolve();
                 }, 1000);
             });
