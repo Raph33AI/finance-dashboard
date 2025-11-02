@@ -10,6 +10,7 @@
     <!-- Stylesheets -->
     <link rel="stylesheet" href="assets/css/common.css">
     <link rel="stylesheet" href="assets/css/landing.css">
+    <link rel="stylesheet" href="assets/css/profile-menu.css">
     
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -21,7 +22,9 @@
 </head>
 <body>
     
-    <!-- Top Navigation -->
+    <!-- ═══════════════════════════════════════════════════════════════
+         Top Navigation - MODIFIÉE POUR INCLURE LE MENU PROFIL
+         ═══════════════════════════════════════════════════════════════ -->
     <nav class="landing-nav" id="landingNav">
         <div class="nav-container">
             <div class="nav-brand">
@@ -42,12 +45,145 @@
                 <a href="#pricing" class="nav-link">Pricing</a>
             </div>
             
+            <!-- ═══════════════════════════════════════════════════════════
+                 NOUVELLE SECTION CTA : Affichage conditionnel
+                 - Si NON connecté : boutons "Log in" et "Start Free Trial"
+                 - Si CONNECTÉ : menu profil avec photo et dropdown
+                 ═══════════════════════════════════════════════════════════ -->
             <div class="nav-cta">
-                <button class="btn-text" id="loginBtn">Log in</button>
-                <button class="btn-primary-nav" id="signupBtn">
-                    Start Free Trial
-                    <i class="fas fa-arrow-right"></i>
-                </button>
+                <!-- Boutons pour utilisateurs NON connectés -->
+                <div class="nav-cta-logged-out" id="navCtaLoggedOut">
+                    <button class="btn-text" id="loginBtn">Log in</button>
+                    <button class="btn-primary-nav" id="signupBtn">
+                        Start Free Trial
+                        <i class="fas fa-arrow-right"></i>
+                    </button>
+                </div>
+
+                <!-- Menu profil pour utilisateurs CONNECTÉS -->
+                <div class="nav-cta-logged-in" id="navCtaLoggedIn" style="display: none;">
+                    <div class="user-profile-menu">
+                        <button class="user-profile-button" id="userProfileButton" aria-expanded="false" aria-haspopup="true">
+                            <div class="user-avatar-wrapper">
+                                <img src="https://ui-avatars.com/api/?name=John+Doe&background=3B82F6&color=fff&bold=true&size=96" 
+                                     alt="User Profile" 
+                                     class="user-avatar"
+                                     id="userAvatarImg">
+                                <span class="user-status-dot"></span>
+                            </div>
+                            <div class="user-info-text">
+                                <span class="user-display-name" id="userDisplayName">John Doe</span>
+                                <span class="user-plan-badge" id="userPlanBadge">Professional</span>
+                            </div>
+                            <i class="fas fa-chevron-down user-dropdown-icon"></i>
+                        </button>
+
+                        <!-- Dropdown Menu -->
+                        <div class="user-dropdown-menu" id="userDropdownMenu" role="menu">
+                            <!-- Header avec infos utilisateur -->
+                            <div class="dropdown-header">
+                                <div class="dropdown-user-card">
+                                    <img src="https://ui-avatars.com/api/?name=John+Doe&background=3B82F6&color=fff&bold=true&size=96" 
+                                         alt="User Profile"
+                                         id="dropdownAvatarImg">
+                                    <div class="dropdown-user-text">
+                                        <h4 id="dropdownUserName">John Doe</h4>
+                                        <p id="dropdownUserEmail">john.doe@financepro.com</p>
+                                    </div>
+                                </div>
+                                <div class="dropdown-plan-info">
+                                    <i class="fas fa-crown"></i>
+                                    <span id="dropdownUserPlan">Professional</span>
+                                </div>
+                            </div>
+
+                            <div class="dropdown-divider"></div>
+
+                            <!-- Navigation principale -->
+                            <div class="dropdown-section">
+                                <a href="dashboard-financier.html" class="dropdown-link" role="menuitem">
+                                    <div class="dropdown-link-icon">
+                                        <i class="fas fa-tachometer-alt"></i>
+                                    </div>
+                                    <div class="dropdown-link-text">
+                                        <span class="dropdown-link-title">Dashboard</span>
+                                        <span class="dropdown-link-desc">View your analytics</span>
+                                    </div>
+                                </a>
+
+                                <a href="portfolio-optimizer.html" class="dropdown-link" role="menuitem">
+                                    <div class="dropdown-link-icon">
+                                        <i class="fas fa-chart-pie"></i>
+                                    </div>
+                                    <div class="dropdown-link-text">
+                                        <span class="dropdown-link-title">My Portfolio</span>
+                                        <span class="dropdown-link-desc">Manage investments</span>
+                                    </div>
+                                </a>
+
+                                <a href="#" class="dropdown-link" role="menuitem">
+                                    <div class="dropdown-link-icon">
+                                        <i class="fas fa-bell"></i>
+                                    </div>
+                                    <div class="dropdown-link-text">
+                                        <span class="dropdown-link-title">Notifications</span>
+                                        <span class="dropdown-link-desc">3 new alerts</span>
+                                    </div>
+                                    <span class="dropdown-notification-badge">3</span>
+                                </a>
+                            </div>
+
+                            <div class="dropdown-divider"></div>
+
+                            <!-- Paramètres et support -->
+                            <div class="dropdown-section">
+                                <a href="#" class="dropdown-link" role="menuitem" id="settingsLink">
+                                    <div class="dropdown-link-icon">
+                                        <i class="fas fa-cog"></i>
+                                    </div>
+                                    <div class="dropdown-link-text">
+                                        <span class="dropdown-link-title">Settings</span>
+                                        <span class="dropdown-link-desc">Account preferences</span>
+                                    </div>
+                                </a>
+
+                                <a href="#" class="dropdown-link" role="menuitem">
+                                    <div class="dropdown-link-icon">
+                                        <i class="fas fa-credit-card"></i>
+                                    </div>
+                                    <div class="dropdown-link-text">
+                                        <span class="dropdown-link-title">Billing</span>
+                                        <span class="dropdown-link-desc">Manage subscription</span>
+                                    </div>
+                                </a>
+
+                                <a href="#" class="dropdown-link" role="menuitem">
+                                    <div class="dropdown-link-icon">
+                                        <i class="fas fa-question-circle"></i>
+                                    </div>
+                                    <div class="dropdown-link-text">
+                                        <span class="dropdown-link-title">Help & Support</span>
+                                        <span class="dropdown-link-desc">Get assistance</span>
+                                    </div>
+                                </a>
+                            </div>
+
+                            <div class="dropdown-divider"></div>
+
+                            <!-- Déconnexion -->
+                            <div class="dropdown-section">
+                                <button class="dropdown-link dropdown-link-danger" role="menuitem" id="logoutButton">
+                                    <div class="dropdown-link-icon">
+                                        <i class="fas fa-sign-out-alt"></i>
+                                    </div>
+                                    <div class="dropdown-link-text">
+                                        <span class="dropdown-link-title">Log Out</span>
+                                    </div>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <button class="mobile-menu-btn" id="mobileMenuBtn">
@@ -94,7 +230,7 @@
                     <button class="btn-hero-primary" id="heroGetStarted">
                         <i class="fas fa-rocket"></i>
                         Get Started Free
-                    </button>+
+                    </button>
                 </div>
                 
                 <!-- Social Proof -->
@@ -196,40 +332,6 @@
             </div>
         </div>
     </section>
-
-<!-- 
-╔══════════════════════════════════════════════════════════════╗
-║  TRUSTED BY SECTION - TEMPORAIREMENT DÉSACTIVÉE              ║
-║  Raison: En attente de logos réels                           ║
-║  Date: 2024                                                  ║
-╚══════════════════════════════════════════════════════════════╝
-
-    <section class="trusted-by">
-        <div class="container-fluid">
-            <p class="trusted-title">Trusted by leading financial institutions</p>
-            <div class="trusted-logos">
-                <div class="logo-wrapper">
-                    <span class="company-logo">Goldman Sachs</span>
-                </div>
-                <div class="logo-wrapper">
-                    <span class="company-logo">J.P. Morgan</span>
-                </div>
-                <div class="logo-wrapper">
-                    <span class="company-logo">BlackRock</span>
-                </div>
-                <div class="logo-wrapper">
-                    <span class="company-logo">Citadel</span>
-                </div>
-                <div class="logo-wrapper">
-                    <span class="company-logo">Morgan Stanley</span>
-                </div>
-                <div class="logo-wrapper">
-                    <span class="company-logo">Bridgewater</span>
-                </div>
-            </div>
-        </div>
-    </section>
--->
 
     <!-- Features Section -->
     <section class="features-section" id="features">
@@ -1016,20 +1118,6 @@
                     <p class="footer-description">
                         AI-powered financial analysis platform for investment professionals.
                     </p>
-                    
-                    <!-- 
-                    ════════════════════════════════════════════
-                    RÉSEAUX SOCIAUX - DÉSACTIVÉS
-                    ════════════════════════════════════════════
-                    -->
-                    <!--
-                    <div class="footer-social">
-                        <a href="#" aria-label="LinkedIn"><i class="fab fa-linkedin"></i></a>
-                        <a href="#" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
-                        <a href="#" aria-label="GitHub"><i class="fab fa-github"></i></a>
-                        <a href="#" aria-label="YouTube"><i class="fab fa-youtube"></i></a>
-                    </div>
-                    -->
                 </div>
 
                 <div class="footer-col">
@@ -1079,14 +1167,6 @@
                     <h4>Company</h4>
                     <ul>
                         <li><a href="#">About Us</a></li>
-                        
-                        <!-- 
-                        ════════════════════════════════════════════
-                        CAREERS - DÉSACTIVÉ
-                        ════════════════════════════════════════════
-                        -->
-                        <!-- <li><a href="#">Careers</a></li> -->
-                        
                         <li><a href="#">Contact</a></li>
                         <li><a href="#">Privacy Policy</a></li>
                         <li><a href="#">Terms of Service</a></li>
@@ -1114,6 +1194,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
     <script src="assets/js/common.js"></script>
     <script src="assets/js/landing.js"></script>
+    <script src="assets/js/auth-system.js"></script>
     
     <!-- AOS Animation Library -->
     <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
