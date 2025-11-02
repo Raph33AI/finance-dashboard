@@ -1,6 +1,7 @@
 /* ==============================================
    INVESTMENT-ANALYTICS.CSS
    Styles pour la page d'analyse de performance
+   ✅ AVEC MODALS D'INFORMATION
    ============================================== */
 
 /* ========== ANALYTICS SECTION ========== */
@@ -66,6 +67,257 @@
     gap: 8px;
     color: var(--text-secondary);
     font-size: 0.9rem;
+}
+
+/* ========== INFO BUTTON (pour chaque graphique) ========== */
+
+.chart-card {
+    background: var(--background-primary);
+    border-radius: var(--radius-lg);
+    padding: 20px;
+    border: 1px solid var(--border-color);
+    box-shadow: var(--shadow-sm);
+    transition: all var(--transition-base);
+    position: relative;
+}
+
+.chart-card:hover {
+    box-shadow: var(--shadow-md);
+}
+
+.chart-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 15px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    justify-content: space-between;
+}
+
+.btn-info {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: rgba(37, 99, 235, 0.1);
+    border: 2px solid rgba(37, 99, 235, 0.3);
+    color: var(--primary-color);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.9rem;
+    transition: all 0.3s ease;
+    flex-shrink: 0;
+}
+
+.btn-info:hover {
+    background: var(--primary-color);
+    color: white;
+    transform: scale(1.15) rotate(10deg);
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.4);
+}
+
+.dark-mode .btn-info {
+    background: rgba(102, 126, 234, 0.15);
+    border-color: rgba(102, 126, 234, 0.4);
+    color: #818cf8;
+}
+
+.dark-mode .btn-info:hover {
+    background: #667eea;
+    color: white;
+}
+
+/* ========== MODAL INFO (explications) ========== */
+
+.modal-info {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.75);
+    z-index: 10000;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(8px);
+    animation: fadeIn 0.3s ease-out;
+}
+
+.modal-info.active {
+    display: flex;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.modal-info-content {
+    background: var(--background-primary);
+    border-radius: var(--radius-xl);
+    box-shadow: 0 25px 70px rgba(0, 0, 0, 0.4);
+    max-height: 85vh;
+    overflow-y: auto;
+    animation: slideInUp 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    width: 90%;
+    max-width: 700px;
+    border: 2px solid var(--primary-color);
+}
+
+@keyframes slideInUp {
+    from {
+        opacity: 0;
+        transform: translateY(50px) scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+.modal-info-header {
+    padding: 25px 30px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: white;
+}
+
+.modal-info-header h3 {
+    font-size: 1.4rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 0;
+    color: white;
+}
+
+.modal-info-header h3 i {
+    font-size: 1.6rem;
+    color: #FFD700;
+}
+
+.modal-info-close {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: none;
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    font-size: 1.2rem;
+}
+
+.modal-info-close:hover {
+    background: rgba(239, 68, 68, 0.9);
+    transform: rotate(90deg) scale(1.1);
+}
+
+.modal-info-body {
+    padding: 30px;
+    color: var(--text-primary);
+}
+
+.modal-info-body h4 {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--primary-color);
+    margin-top: 25px;
+    margin-bottom: 15px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.modal-info-body h4:first-child {
+    margin-top: 0;
+}
+
+.modal-info-body p {
+    font-size: 1rem;
+    line-height: 1.7;
+    color: var(--text-secondary);
+    margin-bottom: 15px;
+}
+
+.modal-info-body ul {
+    margin-left: 20px;
+    margin-bottom: 15px;
+}
+
+.modal-info-body li {
+    font-size: 0.95rem;
+    line-height: 1.6;
+    color: var(--text-secondary);
+    margin-bottom: 8px;
+}
+
+.modal-info-body strong {
+    color: var(--text-primary);
+    font-weight: 600;
+}
+
+.info-highlight {
+    background: rgba(37, 99, 235, 0.1);
+    border-left: 4px solid var(--primary-color);
+    padding: 15px 20px;
+    border-radius: var(--radius-md);
+    margin: 20px 0;
+}
+
+.dark-mode .info-highlight {
+    background: rgba(102, 126, 234, 0.15);
+}
+
+.info-highlight p {
+    margin: 0;
+    font-style: italic;
+}
+
+.info-example {
+    background: var(--background-secondary);
+    border-radius: var(--radius-md);
+    padding: 15px 20px;
+    margin: 15px 0;
+    border: 1px solid var(--border-color);
+}
+
+.info-example strong {
+    color: var(--success-color);
+}
+
+.metric-badge {
+    display: inline-block;
+    padding: 4px 12px;
+    background: var(--primary-color);
+    color: white;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    margin-left: 8px;
+}
+
+.metric-badge.good {
+    background: var(--success-color);
+}
+
+.metric-badge.warning {
+    background: var(--accent-color);
+}
+
+.metric-badge.bad {
+    background: var(--danger-color);
 }
 
 /* ========== KPI GRID ========== */
@@ -239,29 +491,6 @@
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
     gap: 25px;
-}
-
-.chart-card {
-    background: var(--background-primary);
-    border-radius: var(--radius-lg);
-    padding: 20px;
-    border: 1px solid var(--border-color);
-    box-shadow: var(--shadow-sm);
-    transition: all var(--transition-base);
-}
-
-.chart-card:hover {
-    box-shadow: var(--shadow-md);
-}
-
-.chart-title {
-    font-size: 1.1rem;
-    font-weight: 700;
-    color: var(--text-primary);
-    margin-bottom: 15px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
 }
 
 .chart-container {
@@ -881,6 +1110,10 @@ body.dark-mode .recommendation-item {
     
     .analytics-section {
         padding: 20px;
+    }
+    
+    .modal-info-content {
+        width: 95%;
     }
 }
 
@@ -1527,117 +1760,4 @@ body.dark-mode .asset-allocation-manager {
 .dark-mode .btn-secondary:hover {
     background: rgba(255, 255, 255, 0.1);
     border-color: rgba(255, 255, 255, 0.3);
-}
-
-/* Icon buttons */
-.btn-icon {
-    background: rgba(148, 163, 184, 0.1);
-    border: none;
-    width: 40px;
-    height: 40px;
-    border-radius: 10px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    color: #64748b;
-}
-
-.btn-icon:hover {
-    background: rgba(102, 126, 234, 0.1);
-    color: #667eea;
-    transform: translateY(-2px);
-}
-
-.dark-mode .btn-icon {
-    background: rgba(255, 255, 255, 0.05);
-    color: #cbd5e1;
-}
-
-.dark-mode .btn-icon:hover {
-    background: rgba(102, 126, 234, 0.2);
-    color: #818cf8;
-}
-
-/* Period buttons (for prediction horizon) */
-.period-btn {
-    background: rgba(148, 163, 184, 0.1);
-    border: 2px solid transparent;
-    color: #64748b;
-    padding: 8px 16px;
-    border-radius: 8px;
-    font-size: 13px;
-    font-weight: 500;
-    cursor: pointer;
-    transition: all 0.3s ease;
-}
-
-.period-btn:hover {
-    background: rgba(102, 126, 234, 0.1);
-    color: #667eea;
-    border-color: rgba(102, 126, 234, 0.3);
-}
-
-.period-btn.active {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
-    border-color: transparent;
-    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
-}
-
-.dark-mode .period-btn {
-    background: rgba(255, 255, 255, 0.05);
-    color: #cbd5e1;
-}
-
-.dark-mode .period-btn:hover {
-    background: rgba(102, 126, 234, 0.15);
-    color: #818cf8;
-}
-
-.dark-mode .period-btn.active {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
-}
-
-/* Manager header buttons */
-.manager-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 20px;
-}
-
-.manager-header h3 {
-    margin: 0;
-    font-size: 18px;
-    color: #1f2937;
-}
-
-.dark-mode .manager-header h3 {
-    color: #ffffff;
-}
-
-/* Horizon selector */
-.horizon-selector {
-    background: rgba(255, 255, 255, 0.15);
-    backdrop-filter: blur(10px);
-    padding: 20px;
-    border-radius: 12px;
-    margin: 20px 0;
-    border: 1px solid rgba(255, 255, 255, 0.2);
-}
-
-.horizon-selector h3 {
-    color: white;
-    margin-bottom: 15px;
-    font-size: 16px;
-    font-weight: 600;
-}
-
-#horizonButtons {
-    display: flex;
-    gap: 10px;
-    flex-wrap: wrap;
 }

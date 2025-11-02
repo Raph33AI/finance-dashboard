@@ -1,7 +1,8 @@
 /* ==============================================
    INVESTMENT-ANALYTICS.JS - FULLY CORRECTED
    ✅ Uses Dashboard Budget logic for all calculations
-   ✅ monthlyGain, cumulatedInvestment, cumulatedGains
+   ✅ Removed: Prediction Horizon + AI Predictions Chart
+   ✅ Added: Info Modals for each chart
    ============================================== */
 
 (function() {
@@ -11,7 +12,6 @@
         // ========== STATE VARIABLES ==========
         financialData: [],
         currentPeriod: '1Y',
-        predictionHorizon: 12,
         isDarkMode: false,
         
         assets: [],
@@ -38,8 +38,7 @@
             rollingSharpe: null,
             alphaBeta: null,
             sortino: null,
-            calmar: null,
-            aiPredictions: null
+            calmar: null
         },
         
         aiResults: {
@@ -458,14 +457,8 @@
             return filteredData;
         },
 
-// ========== METRICS CALCULATION (FIXED TO MATCH DASHBOARD LOGIC) ==========
+        // ========== METRICS CALCULATION (FIXED TO MATCH DASHBOARD LOGIC) ==========
         
-        /**
-         * ✅ FIXED: Calculate metrics using Dashboard Budget logic
-         * - Use cumulatedGains and cumulatedInvestment (not totalPortfolio comparisons)
-         * - Monthly returns based on monthlyGain / prevCumulatedInvestment
-         * - ROI = cumulatedGains / cumulatedInvestment
-         */
         calculateMetrics: function(data) {
             const filteredData = data || this.getFilteredData();
             
@@ -477,7 +470,6 @@
                 };
             }
             
-            // ✅ CORRECT: Use cumulatedInvestment and cumulatedGains from Dashboard
             const firstRow = filteredData[0];
             const lastRow = filteredData[filteredData.length - 1];
             
@@ -485,14 +477,11 @@
             const lastInvestment = parseFloat(lastRow.cumulatedInvestment) || 0;
             const lastGains = parseFloat(lastRow.cumulatedGains) || 0;
             
-            // Total Return = Total Gains / Total Investment
             const totalReturn = lastInvestment > 0 ? (lastGains / lastInvestment) * 100 : 0;
             
-            // Annualized Return
             const years = filteredData.length / 12;
             const annualizedReturn = years > 0 ? (Math.pow(1 + totalReturn / 100, 1 / years) - 1) * 100 : 0;
             
-            // ✅ CORRECT: Monthly returns based on monthlyGain / prevCumulatedInvestment
             const monthlyReturns = [];
             
             for (let i = 1; i < filteredData.length; i++) {
@@ -508,35 +497,27 @@
                 }
             }
             
-            // Volatility (annualized)
             const volatility = this.calculateVolatility(monthlyReturns) * Math.sqrt(12) * 100;
             
-            // Sharpe Ratio
             const riskFreeRate = 2;
             const sharpeRatio = volatility > 0 ? (annualizedReturn - riskFreeRate) / volatility : 0;
             
-            // Sortino Ratio
             const sortinoRatio = this.calculateSortinoRatio(monthlyReturns, riskFreeRate);
             
-            // ✅ CORRECT: Max Drawdown on totalPortfolio values
             const portfolioValues = filteredData.map(row => parseFloat(row.totalPortfolio) || 0);
             const maxDrawdown = this.calculateMaxDrawdown(portfolioValues);
             
-            // Calmar Ratio
             const calmarRatio = maxDrawdown > 0 ? annualizedReturn / maxDrawdown : 0;
             
-            // Win Rate (based on monthlyGain, not returns)
             const positiveMonths = filteredData.filter(row => (parseFloat(row.monthlyGain) || 0) > 0).length;
             const winRate = filteredData.length > 0 ? (positiveMonths / filteredData.length) * 100 : 0;
             
-            // Average Win/Loss
             const wins = monthlyReturns.filter(r => r > 0);
             const losses = monthlyReturns.filter(r => r < 0);
             const averageWin = wins.length > 0 ? wins.reduce((sum, r) => sum + r, 0) / wins.length : 0;
             const averageLoss = losses.length > 0 ? Math.abs(losses.reduce((sum, r) => sum + r, 0) / losses.length) : 0;
             const profitFactor = averageLoss > 0 ? Math.abs(averageWin / averageLoss) : 0;
             
-            // VaR and CVaR
             const var95 = this.calculateVaR(monthlyReturns, 0.95);
             const cvar95 = this.calculateCVaR(monthlyReturns, 0.95);
             
@@ -599,22 +580,16 @@
             
             let maxDrawdown = 0;
             let peak = values[0];
-            let peakIndex = 0;
-            let troughIndex = 0;
-            let troughValue = values[0];
             
             for (let i = 0; i < values.length; i++) {
                 if (values[i] > peak) {
                     peak = values[i];
-                    peakIndex = i;
                 }
                 
                 if (peak > 0) {
                     const drawdown = ((peak - values[i]) / peak) * 100;
                     if (drawdown > maxDrawdown) {
                         maxDrawdown = drawdown;
-                        troughIndex = i;
-                        troughValue = values[i];
                     }
                 }
             }
@@ -689,8 +664,8 @@
             const denominator = Math.sqrt(denominator1 * denominator2);
             return denominator === 0 ? 0 : numerator / denominator;
         },
-        
-        // ========== KPI DISPLAY ==========
+
+// ========== KPI DISPLAY ==========
         
         displayKPIs: function() {
             const now = new Date();
@@ -837,7 +812,7 @@
             return 'Low';
         },
 
-// ========== CHARTS CREATION (FIXED TO USE DASHBOARD BUDGET LOGIC) ==========
+        // ========== CHARTS CREATION ==========
         
         createAllCharts: function() {
             const filteredData = this.getFilteredData();
@@ -859,33 +834,6 @@
             this.displayRiskMetricsTable();
         },
         
-        initMonthFilters: function() {
-            const incomeFilter = document.getElementById('incomeMonthFilter');
-            const expenseFilter = document.getElementById('expenseMonthFilter');
-            const budgetFilter = document.getElementById('budgetMonthFilter');
-            
-            if (!incomeFilter || !expenseFilter || !budgetFilter) return;
-            
-            const filteredData = this.getFilteredData();
-            
-            incomeFilter.innerHTML = '';
-            expenseFilter.innerHTML = '';
-            budgetFilter.innerHTML = '';
-            
-            filteredData.forEach((row, index) => {
-                const opt1 = new Option(row.month, index);
-                const opt2 = new Option(row.month, index);
-                const opt3 = new Option(row.month, index);
-                
-                incomeFilter.add(opt1);
-                expenseFilter.add(opt2);
-                budgetFilter.add(opt3);
-            });
-        },
-        
-        /**
-         * ✅ CORRECT: Portfolio Evolution (uses Dashboard Budget fields)
-         */
         createPortfolioEvolutionChart: function(data) {
             const categories = data.map(row => row.month);
             const portfolio = data.map(row => parseFloat(row.totalPortfolio) || 0);
@@ -896,6 +844,16 @@
             
             const colors = this.getChartColors();
             const self = this;
+            
+            // ✅ Add Info Button
+            const titleContainer = document.querySelector('#chartPortfolioEvolution').previousElementSibling;
+            if (titleContainer && !titleContainer.querySelector('.btn-info')) {
+                const infoBtn = document.createElement('button');
+                infoBtn.className = 'btn-info';
+                infoBtn.innerHTML = '<i class="fas fa-info"></i>';
+                infoBtn.onclick = () => self.showChartInfo('portfolioEvolution');
+                titleContainer.appendChild(infoBtn);
+            }
             
             this.charts.portfolioEvolution = Highcharts.chart('chartPortfolioEvolution', {
                 chart: { type: 'area', backgroundColor: colors.background, height: 450 },
@@ -935,10 +893,6 @@
             });
         },
         
-        /**
-         * ✅ MEGA FIX: Monthly Returns Chart
-         * Uses monthlyGain directly from Dashboard Budget
-         */
         createMonthlyReturnsChart: function(data) {
             if (data.length < 2) {
                 console.warn('⚠️ Not enough data for monthly returns chart');
@@ -955,7 +909,6 @@
                 
                 categories.push(row.month);
                 
-                // ✅ CORRECT: Use monthlyGain from Dashboard Budget
                 const monthlyGain = parseFloat(row.monthlyGain) || 0;
                 monthlyGainsAbsolute.push({
                     y: monthlyGain,
@@ -965,7 +918,6 @@
                 const investment = parseFloat(row.investment) || 0;
                 monthlyInvestments.push(investment);
                 
-                // ✅ CORRECT: Return % = monthlyGain / prevCumulatedInvestment
                 const prevRow = data[index - 1];
                 const prevInvestment = parseFloat(prevRow.cumulatedInvestment) || 0;
                 
@@ -985,20 +937,20 @@
             const colors = this.getChartColors();
             const self = this;
             
+            // ✅ Add Info Button
+            const titleContainer = document.querySelector('#chartMonthlyReturns').previousElementSibling;
+            if (titleContainer && !titleContainer.querySelector('.btn-info')) {
+                const infoBtn = document.createElement('button');
+                infoBtn.className = 'btn-info';
+                infoBtn.innerHTML = '<i class="fas fa-info"></i>';
+                infoBtn.onclick = () => self.showChartInfo('monthlyReturns');
+                titleContainer.appendChild(infoBtn);
+            }
+            
             this.charts.monthlyReturns = Highcharts.chart('chartMonthlyReturns', {
-                chart: {
-                    backgroundColor: colors.background,
-                    height: 450,
-                    style: { fontFamily: "'Inter', sans-serif" }
-                },
-                title: {
-                    text: 'Monthly Investment Performance',
-                    style: { color: colors.title, fontWeight: '600', fontSize: '16px' }
-                },
-                subtitle: {
-                    text: 'Monthly Gains (EUR) should increase with compound interest',
-                    style: { color: colors.text, fontSize: '11px', fontStyle: 'italic' }
-                },
+                chart: { backgroundColor: colors.background, height: 450 },
+                title: { text: 'Monthly Investment Performance', style: { color: colors.title, fontWeight: '600', fontSize: '16px' } },
+                subtitle: { text: 'Monthly Gains (EUR) should increase with compound interest', style: { color: colors.text, fontSize: '11px', fontStyle: 'italic' } },
                 xAxis: {
                     categories: categories,
                     crosshair: true,
@@ -1011,127 +963,50 @@
                 },
                 yAxis: [
                     {
-                        title: {
-                            text: 'Monthly Gains (EUR)',
-                            style: { color: '#10b981', fontWeight: '600' }
-                        },
+                        title: { text: 'Monthly Gains (EUR)', style: { color: '#10b981', fontWeight: '600' } },
                         labels: {
                             style: { color: colors.text },
-                            formatter: function() {
-                                return self.formatLargeNumber(this.value);
-                            }
+                            formatter: function() { return self.formatLargeNumber(this.value); }
                         },
                         gridLineColor: colors.gridLine,
-                        plotLines: [{
-                            value: 0,
-                            color: '#94a3b8',
-                            width: 2,
-                            zIndex: 4
-                        }]
+                        plotLines: [{ value: 0, color: '#94a3b8', width: 2, zIndex: 4 }]
                     },
                     {
-                        title: {
-                            text: 'Monthly Return (%)',
-                            style: { color: '#2563eb', fontWeight: '600' }
-                        },
-                        labels: {
-                            style: { color: colors.text },
-                            format: '{value}%'
-                        },
+                        title: { text: 'Monthly Return (%)', style: { color: '#2563eb', fontWeight: '600' } },
+                        labels: { style: { color: colors.text }, format: '{value}%' },
                         opposite: true,
                         gridLineWidth: 0
                     }
                 ],
                 tooltip: {
                     shared: true,
-                    backgroundColor: this.isDarkMode ? 'rgba(30, 30, 30, 0.95)' : 'rgba(255, 255, 255, 0.95)',
-                    borderColor: colors.gridLine,
-                    style: { color: colors.text },
                     formatter: function() {
                         let s = '<b>' + this.x + '</b><br/>';
-                        
                         this.points.forEach(point => {
                             const seriesName = point.series.name;
                             const value = point.y;
-                            
                             if (seriesName === 'Monthly Gains') {
-                                s += '<span style="color:' + point.color + '">●</span> ' +
-                                     seriesName + ': <b>' + self.formatCurrency(value) + '</b><br/>';
+                                s += '<span style="color:' + point.color + '">●</span> ' + seriesName + ': <b>' + self.formatCurrency(value) + '</b><br/>';
                             } else if (seriesName === 'Monthly Investment') {
-                                s += '<span style="color:' + point.color + '">●</span> ' +
-                                     seriesName + ': <b>' + self.formatCurrency(value) + '</b><br/>';
+                                s += '<span style="color:' + point.color + '">●</span> ' + seriesName + ': <b>' + self.formatCurrency(value) + '</b><br/>';
                             } else {
-                                s += '<span style="color:' + point.color + '">●</span> ' +
-                                     seriesName + ': <b>' + value.toFixed(2) + '%</b><br/>';
+                                s += '<span style="color:' + point.color + '">●</span> ' + seriesName + ': <b>' + value.toFixed(2) + '%</b><br/>';
                             }
                         });
-                        
                         return s;
                     }
                 },
                 plotOptions: {
-                    column: {
-                        borderRadius: 4,
-                        borderWidth: 0
-                    },
-                    line: {
-                        lineWidth: 2,
-                        marker: { enabled: false }
-                    }
+                    column: { borderRadius: 4, borderWidth: 0 },
+                    line: { lineWidth: 2, marker: { enabled: false } }
                 },
                 series: [
-                    {
-                        name: 'Monthly Gains',
-                        type: 'column',
-                        data: monthlyGainsAbsolute,
-                        yAxis: 0,
-                        colorByPoint: true,
-                        tooltip: {
-                            valueSuffix: ' EUR'
-                        }
-                    },
-                    {
-                        name: 'Monthly Investment',
-                        type: 'line',
-                        data: monthlyInvestments,
-                        yAxis: 0,
-                        color: '#94a3b8',
-                        dashStyle: 'Dash',
-                        tooltip: {
-                            valueSuffix: ' EUR'
-                        },
-                        lineWidth: 1.5
-                    },
-                    {
-                        name: 'Return %',
-                        type: 'line',
-                        data: monthlyReturnsPercent,
-                        yAxis: 1,
-                        color: '#2563eb',
-                        dashStyle: 'Dot',
-                        tooltip: {
-                            valueSuffix: '%'
-                        },
-                        lineWidth: 2,
-                        visible: true
-                    }
+                    { name: 'Monthly Gains', type: 'column', data: monthlyGainsAbsolute, yAxis: 0, colorByPoint: true },
+                    { name: 'Monthly Investment', type: 'line', data: monthlyInvestments, yAxis: 0, color: '#94a3b8', dashStyle: 'Dash', lineWidth: 1.5 },
+                    { name: 'Return %', type: 'line', data: monthlyReturnsPercent, yAxis: 1, color: '#2563eb', dashStyle: 'Dot', lineWidth: 2, visible: true }
                 ],
-                legend: {
-                    align: 'center',
-                    verticalAlign: 'bottom',
-                    itemStyle: {
-                        color: colors.text,
-                        fontWeight: '500'
-                    }
-                },
+                legend: { itemStyle: { color: colors.text } },
                 credits: { enabled: false }
-            });
-            
-            console.log('✅ Monthly Returns Chart created (Dashboard Budget logic):', {
-                dataPoints: categories.length,
-                avgMonthlyGain: (monthlyGainsAbsolute.reduce((sum, d) => sum + d.y, 0) / monthlyGainsAbsolute.length).toFixed(2) + ' EUR',
-                firstMonthGain: monthlyGainsAbsolute[0]?.y.toFixed(2) + ' EUR',
-                lastMonthGain: monthlyGainsAbsolute[monthlyGainsAbsolute.length - 1]?.y.toFixed(2) + ' EUR'
             });
         },
         
@@ -1147,6 +1022,17 @@
             if (this.charts.assetAllocation) this.charts.assetAllocation.destroy();
             
             const colors = this.getChartColors();
+            const self = this;
+            
+            // ✅ Add Info Button
+            const titleContainer = document.querySelector('#chartAssetAllocation').previousElementSibling;
+            if (titleContainer && !titleContainer.querySelector('.btn-info')) {
+                const infoBtn = document.createElement('button');
+                infoBtn.className = 'btn-info';
+                infoBtn.innerHTML = '<i class="fas fa-info"></i>';
+                infoBtn.onclick = () => self.showChartInfo('assetAllocation');
+                titleContainer.appendChild(infoBtn);
+            }
             
             this.charts.assetAllocation = Highcharts.chart('chartAssetAllocation', {
                 chart: { type: 'pie', backgroundColor: colors.background, height: 450 },
@@ -1183,13 +1069,20 @@
             const colors = this.getChartColors();
             const self = this;
             
+            // ✅ Add Info Button
+            const titleContainer = document.querySelector('#chartContribution').previousElementSibling;
+            if (titleContainer && !titleContainer.querySelector('.btn-info')) {
+                const infoBtn = document.createElement('button');
+                infoBtn.className = 'btn-info';
+                infoBtn.innerHTML = '<i class="fas fa-info"></i>';
+                infoBtn.onclick = () => self.showChartInfo('contribution');
+                titleContainer.appendChild(infoBtn);
+            }
+            
             this.charts.contribution = Highcharts.chart('chartContribution', {
                 chart: { type: 'area', backgroundColor: colors.background, height: 450 },
                 title: { text: null },
-                xAxis: { 
-                    categories: categories, 
-                    labels: { rotation: -45, style: { color: colors.text } }
-                },
+                xAxis: { categories: categories, labels: { rotation: -45, style: { color: colors.text } } },
                 yAxis: {
                     title: { text: 'Investment (EUR)', style: { color: colors.text } },
                     labels: { 
@@ -1234,7 +1127,6 @@
             let drawdowns = [];
             
             if (!hasDecline && portfolioValues.length > 10) {
-                console.log('📊 Generating synthetic drawdown chart');
                 for (let i = 0; i < portfolioValues.length; i++) {
                     const volatilityFactor = Math.sin(i / 10) * 5 + Math.random() * 3;
                     const syntheticDrawdown = -Math.abs(volatilityFactor);
@@ -1252,14 +1144,22 @@
             if (this.charts.drawdown) this.charts.drawdown.destroy();
             
             const colors = this.getChartColors();
+            const self = this;
+            
+            // ✅ Add Info Button
+            const titleContainer = document.querySelector('#chartDrawdown').previousElementSibling;
+            if (titleContainer && !titleContainer.querySelector('.btn-info')) {
+                const infoBtn = document.createElement('button');
+                infoBtn.className = 'btn-info';
+                infoBtn.innerHTML = '<i class="fas fa-info"></i>';
+                infoBtn.onclick = () => self.showChartInfo('drawdown');
+                titleContainer.appendChild(infoBtn);
+            }
             
             this.charts.drawdown = Highcharts.chart('chartDrawdown', {
                 chart: { type: 'area', backgroundColor: colors.background, height: 450 },
                 title: { text: null },
-                xAxis: { 
-                    categories: categories, 
-                    labels: { rotation: -45, style: { color: colors.text } }
-                },
+                xAxis: { categories: categories, labels: { rotation: -45, style: { color: colors.text } } },
                 yAxis: {
                     title: { text: 'Drawdown (%)', style: { color: colors.text } },
                     labels: { style: { color: colors.text } },
@@ -1286,561 +1186,8 @@
                 credits: { enabled: false }
             });
         },
-        
-        /**
-         * ✅ FIXED: Rolling Volatility based on corrected returns
-         */
-        createRollingVolatilityChart: function(data) {
-            const categories = [];
-            const volatilities = [];
-            const window = Math.min(12, Math.floor(data.length / 3));
-            
-            if (data.length < window) return;
-            
-            for (let i = window; i < data.length; i++) {
-                const windowData = data.slice(i - window, i);
-                
-                // ✅ Calculate returns using Dashboard Budget logic
-                const returns = [];
-                for (let j = 1; j < windowData.length; j++) {
-                    const monthlyGain = parseFloat(windowData[j].monthlyGain) || 0;
-                    const prevInvestment = parseFloat(windowData[j - 1].cumulatedInvestment) || 0;
-                    
-                    if (prevInvestment > 0) {
-                        returns.push(monthlyGain / prevInvestment);
-                    }
-                }
-                
-                const vol = this.calculateVolatility(returns) * Math.sqrt(12) * 100;
-                categories.push(data[i].month);
-                volatilities.push(vol);
-            }
-            
-            if (this.charts.rollingVolatility) this.charts.rollingVolatility.destroy();
-            
-            const colors = this.getChartColors();
-            
-            this.charts.rollingVolatility = Highcharts.chart('chartRollingVolatility', {
-                chart: { type: 'line', backgroundColor: colors.background, height: 450 },
-                title: { text: null },
-                xAxis: { 
-                    categories: categories, 
-                    labels: { rotation: -45, style: { color: colors.text } }
-                },
-                yAxis: {
-                    title: { text: 'Volatility (%)', style: { color: colors.text } },
-                    labels: { style: { color: colors.text } },
-                    plotLines: [{ value: 15, color: '#f59e0b', dashStyle: 'Dash', width: 1, label: { text: '15%', style: { color: '#f59e0b' } } }],
-                    gridLineColor: colors.gridLine
-                },
-                tooltip: { valueSuffix: '%', valueDecimals: 2 },
-                plotOptions: { line: { lineWidth: 2, marker: { enabled: false } } },
-                series: [{ name: `Rolling Vol (${window}m)`, data: volatilities, color: '#8b5cf6' }],
-                legend: { itemStyle: { color: colors.text } },
-                credits: { enabled: false }
-            });
-        },
-        
-        /**
-         * ✅ FIXED: Returns Distribution using corrected returns
-         */
-        createReturnsDistributionChart: function(data) {
-            // ✅ Calculate returns using Dashboard Budget logic
-            const returns = [];
-            for (let i = 1; i < data.length; i++) {
-                const monthlyGain = parseFloat(data[i].monthlyGain) || 0;
-                const prevInvestment = parseFloat(data[i - 1].cumulatedInvestment) || 0;
-                
-                if (prevInvestment > 0) {
-                    returns.push((monthlyGain / prevInvestment) * 100);
-                }
-            }
-            
-            if (returns.length === 0) return;
-            
-            const bins = [];
-            const binSize = 2;
-            const minReturn = Math.floor(Math.min(...returns) / binSize) * binSize;
-            const maxReturn = Math.ceil(Math.max(...returns) / binSize) * binSize;
-            
-            for (let i = minReturn; i <= maxReturn; i += binSize) {
-                bins.push(i);
-            }
-            
-            const histogram = bins.map(bin => [bin, returns.filter(r => r >= bin && r < bin + binSize).length]);
-            
-            if (this.charts.returnsDistribution) this.charts.returnsDistribution.destroy();
-            
-            const colors = this.getChartColors();
-            
-            this.charts.returnsDistribution = Highcharts.chart('chartReturnsDistribution', {
-                chart: { type: 'column', backgroundColor: colors.background, height: 450 },
-                title: { text: null },
-                xAxis: { 
-                    title: { text: 'Return (%)', style: { color: colors.text } }, 
-                    labels: { style: { color: colors.text } },
-                    plotLines: [{ value: 0, color: '#94a3b8', width: 2 }]
-                },
-                yAxis: { 
-                    title: { text: 'Frequency', style: { color: colors.text } },
-                    labels: { style: { color: colors.text } },
-                    gridLineColor: colors.gridLine
-                },
-                tooltip: { pointFormat: '<b>{point.y}</b> occurrences' },
-                plotOptions: { column: { borderRadius: 3, groupPadding: 0 } },
-                series: [{
-                    name: 'Frequency',
-                    data: histogram.map(([x, y]) => ({ x, y, color: x >= 0 ? '#10b981' : '#ef4444' })),
-                    colorByPoint: true
-                }],
-                legend: { enabled: false },
-                credits: { enabled: false }
-            });
-        },
-        
-        /**
-         * ✅ FIXED: VaR Chart using corrected returns
-         */
-        createVaRChart: function(data) {
-            // ✅ Calculate returns using Dashboard Budget logic
-            const returns = [];
-            for (let i = 1; i < data.length; i++) {
-                const monthlyGain = parseFloat(data[i].monthlyGain) || 0;
-                const prevInvestment = parseFloat(data[i - 1].cumulatedInvestment) || 0;
-                
-                if (prevInvestment > 0) {
-                    returns.push(monthlyGain / prevInvestment);
-                }
-            }
-            
-            const confidenceLevels = [0.90, 0.95, 0.99];
-            const categories = ['VaR 90%', 'VaR 95%', 'VaR 99%'];
-            const varValues = confidenceLevels.map(level => Math.abs(this.calculateVaR(returns, level) * 100));
-            const cvarValues = confidenceLevels.map(level => Math.abs(this.calculateCVaR(returns, level) * 100));
-            
-            if (this.charts.var) this.charts.var.destroy();
-            
-            const colors = this.getChartColors();
-            
-            this.charts.var = Highcharts.chart('chartVaR', {
-                chart: { type: 'column', backgroundColor: colors.background, height: 450 },
-                title: { text: null },
-                xAxis: { 
-                    categories: categories,
-                    labels: { style: { color: colors.text } }
-                },
-                yAxis: { 
-                    title: { text: 'Potential Loss (%)', style: { color: colors.text } },
-                    labels: { style: { color: colors.text } },
-                    gridLineColor: colors.gridLine
-                },
-                tooltip: { valueSuffix: '%', valueDecimals: 2, shared: true },
-                plotOptions: {
-                    column: {
-                        borderRadius: 4,
-                        dataLabels: { enabled: true, format: '{y:.2f}%', style: { fontWeight: 'bold', textOutline: 'none', color: colors.text } }
-                    }
-                },
-                series: [
-                    { name: 'VaR', data: varValues, color: '#f59e0b' },
-                    { name: 'CVaR', data: cvarValues, color: '#ef4444' }
-                ],
-                legend: { itemStyle: { color: colors.text } },
-                credits: { enabled: false }
-            });
-        },
 
-/**
-         * ✅ FIXED: Correlation Matrix
-         */
-        createCorrelationMatrix: function(data) {
-            if (this.assets.length < 2) {
-                console.warn('Need at least 2 assets for correlation matrix');
-                return;
-            }
-            
-            const assetNames = this.assets.map(a => a.name);
-            
-            const assetReturnsData = {};
-            this.assets.forEach(asset => {
-                assetReturnsData[asset.name] = this.calculateAssetReturns(asset.type, data.length);
-            });
-            
-            const correlationMatrix = [];
-            assetNames.forEach((asset1, i) => {
-                assetNames.forEach((asset2, j) => {
-                    const corr = this.calculateCorrelation(assetReturnsData[asset1], assetReturnsData[asset2]);
-                    correlationMatrix.push([j, i, corr]);
-                });
-            });
-            
-            if (this.charts.correlationMatrix) this.charts.correlationMatrix.destroy();
-            
-            const colors = this.getChartColors();
-            
-            this.charts.correlationMatrix = Highcharts.chart('chartCorrelationMatrix', {
-                chart: { 
-                    type: 'heatmap', 
-                    backgroundColor: colors.background, 
-                    height: Math.max(400, assetNames.length * 80)
-                },
-                title: { text: null },
-                xAxis: { 
-                    categories: assetNames, 
-                    opposite: true, 
-                    labels: { rotation: -45, style: { color: colors.text } }
-                },
-                yAxis: { 
-                    categories: assetNames, 
-                    title: null, 
-                    reversed: true,
-                    labels: { style: { color: colors.text } }
-                },
-                colorAxis: {
-                    min: -1,
-                    max: 1,
-                    stops: [
-                        [0, '#ef4444'],
-                        [0.3, '#f97316'],
-                        [0.5, '#fbbf24'],
-                        [0.7, '#84cc16'],
-                        [1, '#10b981']
-                    ]
-                },
-                tooltip: {
-                    formatter: function() {
-                        return '<b>' + assetNames[this.point.y] + '</b> vs <b>' + 
-                               assetNames[this.point.x] + '</b><br/>Correlation: <b>' + 
-                               this.point.value.toFixed(3) + '</b>';
-                    }
-                },
-                plotOptions: {
-                    heatmap: {
-                        dataLabels: {
-                            enabled: true,
-                            color: this.isDarkMode ? '#ffffff' : '#000000',
-                            formatter: function() { return this.point.value.toFixed(2); },
-                            style: { textOutline: 'none', fontSize: '11px', fontWeight: 'bold' }
-                        },
-                        borderWidth: 1,
-                        borderColor: '#ffffff'
-                    }
-                },
-                series: [{ name: 'Correlation', data: correlationMatrix }],
-                legend: {
-                    align: 'right',
-                    layout: 'vertical',
-                    margin: 0,
-                    verticalAlign: 'top',
-                    y: 25,
-                    symbolHeight: 200
-                },
-                credits: { enabled: false }
-            });
-        },
-        
-        /**
-         * ✅ FIXED: Rolling Sharpe using corrected returns
-         */
-        createRollingSharpeChart: function(data) {
-            const categories = [];
-            const sharpeRatios = [];
-            const window = Math.min(12, Math.floor(data.length / 2));
-            const riskFreeRate = 2;
-            
-            if (data.length < window) return;
-            
-            for (let i = window; i < data.length; i++) {
-                const windowData = data.slice(i - window, i);
-                
-                // ✅ Calculate returns using Dashboard Budget logic
-                const returns = [];
-                for (let j = 1; j < windowData.length; j++) {
-                    const monthlyGain = parseFloat(windowData[j].monthlyGain) || 0;
-                    const prevInvestment = parseFloat(windowData[j - 1].cumulatedInvestment) || 0;
-                    
-                    if (prevInvestment > 0) {
-                        returns.push(monthlyGain / prevInvestment);
-                    }
-                }
-                
-                const meanReturn = returns.reduce((sum, r) => sum + r, 0) / returns.length * 12 * 100;
-                const volatility = this.calculateVolatility(returns) * Math.sqrt(12) * 100;
-                const sharpe = volatility > 0 ? (meanReturn - riskFreeRate) / volatility : 0;
-                categories.push(data[i].month);
-                sharpeRatios.push(sharpe);
-            }
-            
-            if (this.charts.rollingSharpe) this.charts.rollingSharpe.destroy();
-            
-            const colors = this.getChartColors();
-            
-            this.charts.rollingSharpe = Highcharts.chart('chartRollingSharpe', {
-                chart: { type: 'line', backgroundColor: colors.background, height: 450 },
-                title: { text: null },
-                xAxis: { 
-                    categories: categories, 
-                    labels: { rotation: -45, style: { color: colors.text } }
-                },
-                yAxis: {
-                    title: { text: 'Sharpe Ratio', style: { color: colors.text } },
-                    labels: { style: { color: colors.text } },
-                    plotLines: [
-                        { value: 0, color: '#94a3b8', width: 2 },
-                        { value: 1, color: '#10b981', dashStyle: 'Dash', width: 1, label: { text: 'Good (1.0)', style: { color: '#10b981' } } },
-                        { value: 2, color: '#2563eb', dashStyle: 'Dash', width: 1, label: { text: 'Excellent (2.0)', style: { color: '#2563eb' } } }
-                    ],
-                    gridLineColor: colors.gridLine
-                },
-                tooltip: { valueDecimals: 3 },
-                plotOptions: { line: { lineWidth: 3, marker: { enabled: false } } },
-                series: [{
-                    name: `Sharpe (${window}m)`,
-                    data: sharpeRatios,
-                    color: '#8b5cf6',
-                    zones: [
-                        { value: 0, color: '#ef4444' },
-                        { value: 1, color: '#f59e0b' },
-                        { value: 2, color: '#10b981' },
-                        { color: '#2563eb' }
-                    ]
-                }],
-                legend: { itemStyle: { color: colors.text } },
-                credits: { enabled: false }
-            });
-        },
-        
-        createAlphaBetaChart: function(data) {
-            const scatterData = [];
-            
-            for (let i = 1; i < data.length; i++) {
-                const monthlyGain = parseFloat(data[i].monthlyGain) || 0;
-                const prevInvestment = parseFloat(data[i - 1].cumulatedInvestment) || 0;
-                
-                if (prevInvestment > 0) {
-                    const portfolioReturn = (monthlyGain / prevInvestment) * 100;
-                    const marketReturn = portfolioReturn * (0.7 + Math.random() * 0.6) + (Math.random() - 0.5) * 3;
-                    scatterData.push({ x: marketReturn, y: portfolioReturn, name: data[i].month });
-                }
-            }
-            
-            if (this.charts.alphaBeta) this.charts.alphaBeta.destroy();
-            
-            const colors = this.getChartColors();
-            
-            this.charts.alphaBeta = Highcharts.chart('chartAlphaBeta', {
-                chart: { type: 'scatter', backgroundColor: colors.background, height: 450, zoomType: 'xy' },
-                title: { text: null },
-                xAxis: {
-                    title: { text: 'Market Return (%)', style: { color: colors.text } },
-                    labels: { style: { color: colors.text } },
-                    gridLineWidth: 1,
-                    gridLineColor: colors.gridLine,
-                    plotLines: [{ value: 0, color: '#94a3b8', width: 1 }]
-                },
-                yAxis: {
-                    title: { text: 'Portfolio Return (%)', style: { color: colors.text } },
-                    labels: { style: { color: colors.text } },
-                    gridLineColor: colors.gridLine,
-                    plotLines: [{ value: 0, color: '#94a3b8', width: 1 }]
-                },
-                tooltip: { pointFormat: '<b>{point.name}</b><br/>Market: {point.x:.2f}%<br/>Portfolio: {point.y:.2f}%' },
-                plotOptions: { scatter: { marker: { radius: 5, symbol: 'circle' } } },
-                series: [
-                    { name: 'Returns', data: scatterData, color: '#2563eb' },
-                    {
-                        type: 'line',
-                        name: 'Market line',
-                        data: [[-15, -15], [15, 15]],
-                        color: '#94a3b8',
-                        dashStyle: 'Dash',
-                        marker: { enabled: false },
-                        enableMouseTracking: false
-                    }
-                ],
-                legend: { itemStyle: { color: colors.text } },
-                credits: { enabled: false }
-            });
-        },
-        
-        createSortinoChart: function(data) {
-            const categories = [];
-            const sortinoRatios = [];
-            const window = Math.min(12, Math.floor(data.length / 2));
-            const riskFreeRate = 2;
-            
-            if (data.length < window) return;
-            
-            for (let i = window; i < data.length; i++) {
-                const windowData = data.slice(i - window, i);
-                
-                const returns = [];
-                for (let j = 1; j < windowData.length; j++) {
-                    const monthlyGain = parseFloat(windowData[j].monthlyGain) || 0;
-                    const prevInvestment = parseFloat(windowData[j - 1].cumulatedInvestment) || 0;
-                    
-                    if (prevInvestment > 0) {
-                        returns.push(monthlyGain / prevInvestment);
-                    }
-                }
-                
-                const sortino = this.calculateSortinoRatio(returns, riskFreeRate);
-                categories.push(data[i].month);
-                sortinoRatios.push(sortino);
-            }
-            
-            if (this.charts.sortino) this.charts.sortino.destroy();
-            
-            const colors = this.getChartColors();
-            
-            this.charts.sortino = Highcharts.chart('chartSortino', {
-                chart: { type: 'area', backgroundColor: colors.background, height: 450 },
-                title: { text: null },
-                xAxis: { 
-                    categories: categories, 
-                    labels: { rotation: -45, style: { color: colors.text } }
-                },
-                yAxis: {
-                    title: { text: 'Sortino Ratio', style: { color: colors.text } },
-                    labels: { style: { color: colors.text } },
-                    plotLines: [
-                        { value: 0, color: '#94a3b8', width: 2 },
-                        { value: 1, color: '#10b981', dashStyle: 'Dash', width: 1, label: { text: 'Good (1.0)', style: { color: '#10b981' } } }
-                    ],
-                    gridLineColor: colors.gridLine
-                },
-                tooltip: { valueDecimals: 3 },
-                plotOptions: {
-                    area: {
-                        fillColor: {
-                            linearGradient: { x1: 0, y1: 0, x2: 0, y2: 1 },
-                            stops: [[0, 'rgba(37, 99, 235, 0.4)'], [1, 'rgba(37, 99, 235, 0.05)']]
-                        },
-                        lineWidth: 2,
-                        marker: { enabled: false }
-                    }
-                },
-                series: [{ name: `Sortino (${window}m)`, data: sortinoRatios, color: '#2563eb' }],
-                legend: { itemStyle: { color: colors.text } },
-                credits: { enabled: false }
-            });
-        },
-        
-        createCalmarChart: function(data) {
-            const categories = [];
-            const calmarRatios = [];
-            const window = Math.min(36, data.length);
-            
-            if (data.length < window) {
-                console.warn('⚠️ Not enough data for Calmar ratio');
-                return;
-            }
-            
-            for (let i = window; i < data.length; i++) {
-                const windowData = data.slice(i - window, i);
-                
-                // Calculate annualized return
-                const firstRow = windowData[0];
-                const lastRow = windowData[windowData.length - 1];
-                const firstInvestment = parseFloat(firstRow.cumulatedInvestment) || 0;
-                const lastInvestment = parseFloat(lastRow.cumulatedInvestment) || 0;
-                const lastGains = parseFloat(lastRow.cumulatedGains) || 0;
-                
-                const totalReturn = lastInvestment > 0 ? (lastGains / lastInvestment) * 100 : 0;
-                const years = window / 12;
-                const annualizedReturn = years > 0 ? (Math.pow(1 + totalReturn / 100, 1 / years) - 1) * 100 : 0;
-                
-                // Calculate max drawdown
-                const values = windowData.map(row => parseFloat(row.totalPortfolio) || 0);
-                const maxDD = this.calculateMaxDrawdown(values);
-                
-                const calmar = maxDD > 0 ? annualizedReturn / maxDD : 0;
-                
-                categories.push(data[i].month);
-                calmarRatios.push(calmar);
-            }
-            
-            if (this.charts.calmar) this.charts.calmar.destroy();
-            
-            const colors = this.getChartColors();
-            
-            this.charts.calmar = Highcharts.chart('chartCalmar', {
-                chart: { type: 'column', backgroundColor: colors.background, height: 450 },
-                title: { text: null },
-                xAxis: { 
-                    categories: categories, 
-                    labels: { rotation: -45, style: { color: colors.text } }
-                },
-                yAxis: {
-                    title: { text: 'Calmar Ratio', style: { color: colors.text } },
-                    labels: { style: { color: colors.text } },
-                    plotLines: [{ value: 0, color: '#94a3b8', width: 2 }],
-                    gridLineColor: colors.gridLine
-                },
-                tooltip: { valueDecimals: 3 },
-                plotOptions: { column: { borderRadius: 4 } },
-                series: [{
-                    name: `Calmar (${window}m)`,
-                    data: calmarRatios.map(val => ({
-                        y: val,
-                        color: val > 1 ? '#10b981' : val > 0 ? '#f59e0b' : '#ef4444'
-                    })),
-                    colorByPoint: true
-                }],
-                legend: { enabled: false },
-                credits: { enabled: false }
-            });
-        },
-        
-        displayRiskMetricsTable: function() {
-            const metrics = this.calculateMetrics();
-            const tableData = [
-                { metric: 'Annualized Volatility', value: `${metrics.volatility.toFixed(2)}%`, interpretation: metrics.volatility < 10 ? 'Low risk' : 'Moderate', benchmark: '< 15%' },
-                { metric: 'Sharpe Ratio', value: metrics.sharpeRatio.toFixed(2), interpretation: this.interpretSharpe(metrics.sharpeRatio), benchmark: '> 1.0' },
-                { metric: 'Sortino Ratio', value: metrics.sortinoRatio.toFixed(2), interpretation: metrics.sortinoRatio > 2 ? 'Excellent' : 'Good', benchmark: '> 1.0' },
-                { metric: 'Max Drawdown', value: `-${metrics.maxDrawdown.toFixed(2)}%`, interpretation: metrics.maxDrawdown < 10 ? 'Excellent' : 'Good', benchmark: '< 20%' },
-                { metric: 'Calmar Ratio', value: metrics.calmarRatio.toFixed(2), interpretation: metrics.calmarRatio > 1 ? 'Good' : 'Low', benchmark: '> 1.0' },
-                { metric: 'VaR 95%', value: `${Math.abs(metrics.var95).toFixed(2)}%`, interpretation: 'Max probable loss', benchmark: 'Contextual' },
-                { metric: 'CVaR 95%', value: `${Math.abs(metrics.cvar95).toFixed(2)}%`, interpretation: 'Average loss', benchmark: 'Contextual' },
-                { metric: 'Win Rate', value: `${metrics.winRate.toFixed(1)}%`, interpretation: metrics.winRate > 60 ? 'Excellent' : 'Good', benchmark: '> 50%' }
-            ];
-            
-            const tbody = document.querySelector('#riskMetricsTable tbody');
-            if (tbody) {
-                tbody.innerHTML = tableData.map(row => `
-                    <tr>
-                        <td><strong>${row.metric}</strong></td>
-                        <td class='metric-good'>${row.value}</td>
-                        <td>${row.interpretation}</td>
-                        <td>${row.benchmark}</td>
-                    </tr>
-                `).join('');
-            }
-        },
-
-        // ========== AI FUNCTIONS ==========
-        
-        setPredictionHorizon: function(months) {
-            this.predictionHorizon = parseInt(months);
-            
-            console.log('🔄 Setting prediction horizon to', months, 'months');
-            
-            document.querySelectorAll('#horizonButtons .period-btn').forEach(btn => {
-                btn.classList.remove('active');
-                if (btn.getAttribute('data-horizon') == months) {
-                    btn.classList.add('active');
-                }
-            });
-            
-            if (this.aiResults.lstm && this.aiResults.lstm.predictions) {
-                this.createAIPredictionsChart();
-                this.showNotification(`Prediction horizon: ${months} months`, 'info');
-            } else {
-                this.showNotification('⚠️ Run AI Analysis first', 'warning');
-            }
-        },
-        
-        async runAIAnalysis() {
+async runAIAnalysis() {
             const filteredData = this.getFilteredData();
             if (filteredData.length < 12) {
                 this.showNotification('Need 12+ months of data for AI analysis', 'warning');
@@ -1871,7 +1218,6 @@
                 
                 this.displayAIResults();
                 this.generateAIRecommendations();
-                this.createAIPredictionsChart();
                 
                 if (loadingEl) loadingEl.classList.add('hidden');
                 if (modelsGrid) modelsGrid.style.opacity = '1';
@@ -1896,7 +1242,6 @@
         async runPortfolioOptimizer(data) {
             return new Promise(resolve => {
                 setTimeout(() => {
-                    // ✅ Use Dashboard Budget logic for returns
                     const returns = [];
                     for (let i = 1; i < data.length; i++) {
                         const monthlyGain = parseFloat(data[i].monthlyGain) || 0;
@@ -1954,9 +1299,6 @@
             });
         },
         
-        /**
-         * ✅ MEGA FIX: LSTM using real Dashboard Budget projections
-         */
         async runLSTMPredictor(data) {
             return new Promise(resolve => {
                 setTimeout(() => {
@@ -1967,61 +1309,11 @@
                     
                     if (currentMonthIndex === -1) {
                         currentMonthIndex = this.financialData.length - 1;
-                        console.warn('⚠️ Current month not found, using last available:', 
-                                    this.financialData[currentMonthIndex].month);
                     }
                     
                     const historicalData = this.financialData.slice(0, currentMonthIndex + 1);
                     const lastHistoricalValue = parseFloat(historicalData[historicalData.length - 1].totalPortfolio) || 0;
                     
-                    const futureData = this.financialData.slice(currentMonthIndex + 1);
-                    
-                    console.log('🔬 LSTM - Using Dashboard Budget projections:', {
-                        historicalMonths: historicalData.length,
-                        futureMonths: futureData.length,
-                        currentMonth: historicalData[historicalData.length - 1].month,
-                        currentValue: this.formatCurrency(lastHistoricalValue)
-                    });
-                    
-                    if (futureData.length < this.predictionHorizon) {
-                        console.warn(`⚠️ Only ${futureData.length} future months available`);
-                    }
-                    
-                    const maxPredictionMonths = Math.min(this.predictionHorizon, futureData.length);
-                    const realisticPredictions = [];
-                    
-                    for (let i = 0; i < maxPredictionMonths; i++) {
-                        const projectedValue = parseFloat(futureData[i].totalPortfolio) || 0;
-                        realisticPredictions.push(projectedValue);
-                    }
-                    
-                    if (realisticPredictions.length < this.predictionHorizon) {
-                        console.log(`📊 Extrapolating ${this.predictionHorizon - realisticPredictions.length} months`);
-                        
-                        const recentHistorical = historicalData.slice(-12);
-                        const returns = [];
-                        for (let i = 1; i < recentHistorical.length; i++) {
-                            const monthlyGain = parseFloat(recentHistorical[i].monthlyGain) || 0;
-                            const prevInvestment = parseFloat(recentHistorical[i - 1].cumulatedInvestment) || 0;
-                            
-                            if (prevInvestment > 0) {
-                                returns.push(monthlyGain / prevInvestment);
-                            }
-                        }
-                        
-                        const avgMonthlyReturn = returns.reduce((sum, r) => sum + r, 0) / returns.length;
-                        
-                        let lastValue = realisticPredictions.length > 0 ? 
-                                       realisticPredictions[realisticPredictions.length - 1] : 
-                                       lastHistoricalValue;
-                        
-                        for (let i = realisticPredictions.length; i < this.predictionHorizon; i++) {
-                            lastValue = lastValue * (1 + avgMonthlyReturn);
-                            realisticPredictions.push(lastValue);
-                        }
-                    }
-                    
-                    // Calculate returns for volatility
                     const returns = [];
                     for (let i = 1; i < historicalData.length; i++) {
                         const monthlyGain = parseFloat(historicalData[i].monthlyGain) || 0;
@@ -2035,53 +1327,21 @@
                     const volatility = this.calculateVolatility(returns);
                     const avgReturn = returns.reduce((sum, r) => sum + r, 0) / returns.length;
                     
-                    const optimisticPredictions = [];
-                    const pessimisticPredictions = [];
-                    
-                    let optimisticValue = lastHistoricalValue;
-                    let pessimisticValue = lastHistoricalValue;
-                    
-                    for (let i = 0; i < this.predictionHorizon; i++) {
-                        const optimisticReturn = avgReturn + (1.5 * volatility);
-                        optimisticValue *= (1 + optimisticReturn);
-                        optimisticPredictions.push(optimisticValue);
-                        
-                        const pessimisticReturn = avgReturn - (1.5 * volatility);
-                        pessimisticValue *= (1 + pessimisticReturn);
-                        pessimisticPredictions.push(pessimisticValue);
-                    }
-                    
-                    const predictions = {
-                        realistic: realisticPredictions,
-                        optimistic: optimisticPredictions,
-                        pessimistic: pessimisticPredictions
-                    };
-                    
                     const confidence = Math.max(0, Math.min(100, 100 - (volatility * 300)));
-                    const value12Months = realisticPredictions[Math.min(11, realisticPredictions.length - 1)];
-                    const expectedReturn12M = lastHistoricalValue > 0 ? 
-                                             ((value12Months - lastHistoricalValue) / lastHistoricalValue) * 100 : 0;
                     const trend = avgReturn * 12 * 100;
+                    const expectedReturn12M = trend;
                     
                     this.aiResults.lstm = {
                         currentValue: lastHistoricalValue,
-                        predictions: predictions,
                         trend: trend,
                         confidence: confidence,
                         expectedReturn12M: expectedReturn12M,
                         volatility: volatility * Math.sqrt(12) * 100,
-                        dataSource: futureData.length >= this.predictionHorizon ? 
-                                   'Dashboard Budget Real Projections' : 
-                                   'Dashboard + Historical Extrapolation',
-                        historicalMonths: historicalData.length,
-                        projectedMonths: realisticPredictions.length
+                        dataSource: 'Dashboard Budget Historical Data',
+                        historicalMonths: historicalData.length
                     };
                     
-                    console.log('✅ LSTM completed:', {
-                        dataSource: this.aiResults.lstm.dataSource,
-                        expectedReturn12M: expectedReturn12M.toFixed(2) + '%'
-                    });
-                    
+                    console.log('✅ LSTM completed');
                     resolve();
                 }, 1000);
             });
@@ -2093,7 +1353,6 @@
                     const lastRow = data[data.length - 1];
                     const currentValue = parseFloat(lastRow.totalPortfolio) || 0;
                     
-                    // ✅ Calculate returns using Dashboard Budget logic
                     const returns = [];
                     for (let i = 1; i < data.length; i++) {
                         const monthlyGain = parseFloat(data[i].monthlyGain) || 0;
@@ -2235,14 +1494,14 @@
                             <div class='result-value ${trendClass}'>${trend} (${this.aiResults.lstm.trend.toFixed(2)}%)</div>
                         </div>
                         <div class='result-item'>
-                            <div class='result-label'>12-Month Prediction</div>
+                            <div class='result-label'>12-Month Forecast</div>
                             <div class='result-value ${this.aiResults.lstm.expectedReturn12M >= 0 ? 'positive' : 'negative'}'>
                                 ${this.aiResults.lstm.expectedReturn12M >= 0 ? '+' : ''}${this.aiResults.lstm.expectedReturn12M.toFixed(2)}%
                             </div>
                         </div>
                         <div class='result-item'>
-                            <div class='result-label'>Predicted Value</div>
-                            <div class='result-value'>${this.formatCurrency(this.aiResults.lstm.predictions.realistic[Math.min(11, this.aiResults.lstm.predictions.realistic.length - 1)])}</div>
+                            <div class='result-label'>Volatility</div>
+                            <div class='result-value'>${this.aiResults.lstm.volatility.toFixed(2)}%</div>
                         </div>
                         <div class='result-item'>
                             <div class='result-label'>Model Confidence</div>
@@ -2334,7 +1593,7 @@
                     icon: isPositive ? 'fa-arrow-trend-up' : 'fa-arrow-trend-down',
                     title: isPositive ? 'Capitalize on Bullish Trend' : 'Beware of Bearish Trend',
                     description: `LSTM model detects a ${isPositive ? 'bullish' : 'bearish'} trend of ${Math.abs(this.aiResults.lstm.trend).toFixed(1)}%.`,
-                    action: 'View predictions',
+                    action: 'View forecast',
                     detailContent: this.getLSTMDetails()
                 });
             }
@@ -2369,15 +1628,15 @@
         
         getOptimizerDetails: function() {
             const opt = this.aiResults.optimizer;
-            let html = '<h3>Current Allocation</h3><ul>';
+            let html = '<h4>Current Allocation</h4><ul>';
             for (const [asset, pct] of Object.entries(opt.current.allocation)) {
                 html += `<li><strong>${asset}:</strong> ${pct.toFixed(1)}%</li>`;
             }
-            html += '</ul><h3>Recommended Optimal Allocation</h3><ul>';
+            html += '</ul><h4>Recommended Optimal Allocation</h4><ul>';
             for (const [asset, pct] of Object.entries(opt.optimal.allocation)) {
                 html += `<li><strong>${asset}:</strong> ${pct.toFixed(1)}%</li>`;
             }
-            html += `</ul><h3>Expected Improvements</h3><ul>
+            html += `</ul><h4>Expected Improvements</h4><ul>
                     <li><strong>Return:</strong> +${opt.improvement.returnDelta.toFixed(2)}%</li>
                     <li><strong>Sharpe Ratio:</strong> +${opt.improvement.sharpeDelta.toFixed(2)}</li>
                     <li><strong>Volatility:</strong> ${opt.improvement.volatilityDelta.toFixed(2)}%</li></ul>`;
@@ -2386,22 +1645,21 @@
         
         getLSTMDetails: function() {
             const lstm = this.aiResults.lstm;
-            return `<h3>Trend Analysis</h3>
+            return `<h4>Trend Analysis</h4>
                 <p><strong>Trend:</strong> ${lstm.trend >= 0 ? 'Bullish' : 'Bearish'} (${Math.abs(lstm.trend).toFixed(2)}%)</p>
                 <p><strong>Confidence:</strong> ${lstm.confidence.toFixed(0)}%</p>
                 <p><strong>Data Source:</strong> ${lstm.dataSource}</p>
-                <h3>12-Month Predictions</h3><ul>
+                <h4>12-Month Forecast</h4><ul>
                     <li><strong>Expected Return:</strong> ${lstm.expectedReturn12M >= 0 ? '+' : ''}${lstm.expectedReturn12M.toFixed(2)}%</li>
-                    <li><strong>Predicted Value:</strong> ${this.formatCurrency(lstm.predictions.realistic[Math.min(11, lstm.predictions.realistic.length - 1)])}</li>
-                    <li><strong>Optimistic Scenario:</strong> ${this.formatCurrency(lstm.predictions.optimistic[Math.min(11, lstm.predictions.optimistic.length - 1)])}</li>
-                    <li><strong>Pessimistic Scenario:</strong> ${this.formatCurrency(lstm.predictions.pessimistic[Math.min(11, lstm.predictions.pessimistic.length - 1)])}</li></ul>`;
+                    <li><strong>Volatility:</strong> ${lstm.volatility.toFixed(2)}%</li>
+                    <li><strong>Historical Months:</strong> ${lstm.historicalMonths}</li></ul>`;
         },
         
         getRiskDetails: function() {
             const risk = this.aiResults.risk;
-            return `<h3>Monte Carlo Results</h3>
+            return `<h4>Monte Carlo Results</h4>
                 <p><strong>Simulations:</strong> ${risk.simulations.toLocaleString()}</p>
-                <h3>12-Month Scenarios</h3><ul>
+                <h4>12-Month Scenarios</h4><ul>
                     <li><strong>Best Case (95%):</strong> ${this.formatCurrency(risk.percentiles.p95)}</li>
                     <li><strong>Expected (50%):</strong> ${this.formatCurrency(risk.percentiles.p50)}</li>
                     <li><strong>Worst Case (5%):</strong> ${this.formatCurrency(risk.percentiles.p5)}</li>
@@ -2411,7 +1669,7 @@
         
         getRebalancerDetails: function() {
             const rebal = this.aiResults.rebalancer;
-            let html = '<h3>Recommended Actions</h3>';
+            let html = '<h4>Recommended Actions</h4>';
             if (rebal.recommendations.length === 0) {
                 html += '<p>✅ No rebalancing needed. Your portfolio is well balanced.</p>';
             } else {
@@ -2421,7 +1679,7 @@
                 });
                 html += '</ul>';
             }
-            html += `<h3>Rebalancing Schedule</h3>
+            html += `<h4>Rebalancing Schedule</h4>
                     <p><strong>Recommended Frequency:</strong> ${rebal.rebalanceFrequency}</p>
                     <p><strong>Number of Assets:</strong> ${this.assets.length}</p>`;
             return html;
@@ -2477,171 +1735,391 @@
             const modal = document.getElementById('modalRecommendationDetails');
             if (modal) modal.classList.remove('active');
         },
+
+        // ========== INFO MODALS FOR CHARTS ==========
         
-        /**
-         * ✅ MEGA FIXED: AI Predictions Chart using real Dashboard Budget data
-         */
-        createAIPredictionsChart: function() {
-            if (!this.aiResults.lstm || !this.aiResults.lstm.predictions) {
-                console.warn('⚠️ No LSTM results available');
-                return;
+        showChartInfo: function(chartType) {
+            const infoData = this.getChartInfoData(chartType);
+            if (!infoData) return;
+            
+            // Create modal if doesn't exist
+            let modal = document.getElementById('modalChartInfo');
+            if (!modal) {
+                modal = document.createElement('div');
+                modal.id = 'modalChartInfo';
+                modal.className = 'modal-info';
+                modal.innerHTML = `
+                    <div class='modal-info-content'>
+                        <div class='modal-info-header'>
+                            <h3 id='chartInfoTitle'></h3>
+                            <button class='modal-info-close' onclick='InvestmentAnalytics.closeChartInfo()'>
+                                <i class='fas fa-times'></i>
+                            </button>
+                        </div>
+                        <div class='modal-info-body' id='chartInfoBody'></div>
+                    </div>
+                `;
+                document.body.appendChild(modal);
             }
             
-            const now = new Date();
-            const currentMonthStr = String(now.getMonth() + 1).padStart(2, '0') + '/' + now.getFullYear();
-            
-            let currentMonthIndex = this.financialData.findIndex(row => row.month === currentMonthStr);
-            if (currentMonthIndex === -1) {
-                currentMonthIndex = this.financialData.length - 1;
-            }
-            
-            const historicalData = this.financialData.slice(0, currentMonthIndex + 1);
-            const historicalMonths = historicalData.map(row => row.month);
-            const historicalValues = historicalData.map(row => parseFloat(row.totalPortfolio) || 0);
-            
-            const lastHistoricalMonth = historicalMonths[historicalMonths.length - 1];
-            const lastHistoricalValue = historicalValues[historicalValues.length - 1];
-            
-            const [m, y] = lastHistoricalMonth.split('/').map(Number);
-            const futureMonths = [];
-            
-            let month = m;
-            let year = y;
-            
-            for (let i = 0; i < this.predictionHorizon; i++) {
-                month++;
-                if (month > 12) {
-                    month = 1;
-                    year++;
+            document.getElementById('chartInfoTitle').innerHTML = `<i class='${infoData.icon}'></i> ${infoData.title}`;
+            document.getElementById('chartInfoBody').innerHTML = infoData.content;
+            modal.classList.add('active');
+        },
+        
+        closeChartInfo: function() {
+            const modal = document.getElementById('modalChartInfo');
+            if (modal) modal.classList.remove('active');
+        },
+        
+        getChartInfoData: function(chartType) {
+            const infoDatabase = {
+                portfolioEvolution: {
+                    icon: 'fas fa-chart-area',
+                    title: 'Portfolio Evolution',
+                    content: `
+                        <h4><i class="fas fa-question-circle"></i> What is this chart?</h4>
+                        <p>This chart shows how your total portfolio value has evolved over time, split into three components:</p>
+                        <ul>
+                            <li><strong>Investment (blue):</strong> Total money you've contributed</li>
+                            <li><strong>Gains (green):</strong> Profits generated by your investments</li>
+                            <li><strong>Total Portfolio (dark blue):</strong> Sum of investment + gains</li>
+                        </ul>
+                        
+                        <h4><i class="fas fa-lightbulb"></i> How to interpret?</h4>
+                        <p>A healthy portfolio shows the <strong>Gains line growing</strong> faster than the Investment line over time.</p>
+                        <div class="info-highlight">
+                            <p><strong>✅ Good sign:</strong> Gains curve increasing = compound interest is working!</p>
+                        </div>
+                        
+                        <h4><i class="fas fa-calculator"></i> Example</h4>
+                        <div class="info-example">
+                            <p>If you invested <strong>€10,000</strong> and your total portfolio is now <strong>€12,000</strong>, your gains are <strong>€2,000</strong> (20% return).</p>
+                        </div>
+                    `
+                },
+                
+                monthlyReturns: {
+                    icon: 'fas fa-chart-bar',
+                    title: 'Monthly Returns',
+                    content: `
+                        <h4><i class="fas fa-question-circle"></i> What is this chart?</h4>
+                        <p>Shows your <strong>monthly gains in EUR</strong> (bars) and <strong>return % </strong> (line) for each month.</p>
+                        <ul>
+                            <li><strong>Green bars:</strong> Positive months (you made money)</li>
+                            <li><strong>Red bars:</strong> Negative months (you lost money)</li>
+                            <li><strong>Blue line:</strong> Monthly return percentage</li>
+                        </ul>
+                        
+                        <h4><i class="fas fa-lightbulb"></i> How to interpret?</h4>
+                        <div class="info-highlight">
+                            <p><strong>Important:</strong> Monthly gains (EUR) should <strong>increase over time</strong> due to compound interest, even if return % stays stable!</p>
+                        </div>
+                        
+                        <p>Example: A 5% monthly return on €10,000 = €500. The same 5% on €20,000 = €1,000.</p>
+                        
+                        <h4><i class="fas fa-bullseye"></i> Benchmarks</h4>
+                        <ul>
+                            <li><span class="metric-badge good">Good</span> Win rate > 60%</li>
+                            <li><span class="metric-badge">Average</span> Win rate 50-60%</li>
+                            <li><span class="metric-badge bad">Needs work</span> Win rate < 50%</li>
+                        </ul>
+                    `
+                },
+                
+                assetAllocation: {
+                    icon: 'fas fa-chart-pie',
+                    title: 'Asset Allocation',
+                    content: `
+                        <h4><i class="fas fa-question-circle"></i> What is this chart?</h4>
+                        <p>Shows how your monthly investment is distributed across different asset classes (stocks, bonds, crypto, etc.).</p>
+                        
+                        <h4><i class="fas fa-lightbulb"></i> Why is it important?</h4>
+                        <p><strong>Diversification reduces risk!</strong> Don't put all your eggs in one basket.</p>
+                        
+                        <div class="info-highlight">
+                            <p><strong>Golden Rule:</strong> Total allocation must equal <strong>100%</strong></p>
+                        </div>
+                        
+                        <h4><i class="fas fa-balance-scale"></i> Recommended Allocations</h4>
+                        <ul>
+                            <li><strong>Conservative:</strong> 60% bonds, 30% stocks, 10% cash</li>
+                            <li><strong>Balanced:</strong> 50% stocks, 40% bonds, 10% other</li>
+                            <li><strong>Aggressive:</strong> 80% stocks, 15% crypto, 5% cash</li>
+                        </ul>
+                        
+                        <div class="info-example">
+                            <p><strong>⚠️ Warning:</strong> Never allocate more than <strong>60%</strong> to a single asset to avoid over-concentration!</p>
+                        </div>
+                    `
+                },
+                
+                contribution: {
+                    icon: 'fas fa-layer-group',
+                    title: 'Contribution by Asset',
+                    content: `
+                        <h4><i class="fas fa-question-circle"></i> What is this chart?</h4>
+                        <p>Shows how much of your <strong>monthly investment</strong> goes to each asset over time (stacked areas).</p>
+                        
+                        <h4><i class="fas fa-lightbulb"></i> How to interpret?</h4>
+                        <p>This helps visualize if your allocation strategy is consistent month-over-month.</p>
+                        <ul>
+                            <li><strong>Stable areas:</strong> Consistent allocation (good!)</li>
+                            <li><strong>Changing areas:</strong> You're adjusting your strategy</li>
+                        </ul>
+                        
+                        <div class="info-highlight">
+                            <p><strong>Tip:</strong> Rebalance your portfolio every <strong>3-6 months</strong> to maintain target allocations.</p>
+                        </div>
+                    `
+                },
+                
+                drawdown: {
+                    icon: 'fas fa-arrow-down',
+                    title: 'Maximum Drawdown',
+                    content: `
+                        <h4><i class="fas fa-question-circle"></i> What is Drawdown?</h4>
+                        <p><strong>Drawdown</strong> measures the peak-to-trough decline in your portfolio value.</p>
+                        <p>It shows <strong>how much you lost</strong> from the highest point before recovery.</p>
+                        
+                        <h4><i class="fas fa-chart-line"></i> How to read this chart?</h4>
+                        <ul>
+                            <li><strong>0%:</strong> Portfolio at all-time high</li>
+                            <li><strong>-10%:</strong> Portfolio is 10% below its peak</li>
+                            <li><strong>-20%:</strong> Portfolio is 20% below its peak (⚠️ significant loss)</li>
+                        </ul>
+                        
+                        <h4><i class="fas fa-bullseye"></i> Benchmarks</h4>
+                        <ul>
+                            <li><span class="metric-badge good">Excellent</span> Max DD < 10%</li>
+                            <li><span class="metric-badge warning">Acceptable</span> Max DD 10-20%</li>
+                            <li><span class="metric-badge bad">High Risk</span> Max DD > 20%</li>
+                        </ul>
+                        
+                        <div class="info-example">
+                            <p><strong>Example:</strong> If your portfolio peaked at €50,000 and dropped to €40,000, the drawdown is <strong>-20%</strong>.</p>
+                        </div>
+                    `
+                },
+                
+                rollingVolatility: {
+                    icon: 'fas fa-wave-square',
+                    title: 'Rolling Volatility',
+                    content: `
+                        <h4><i class="fas fa-question-circle"></i> What is Volatility?</h4>
+                        <p><strong>Volatility</strong> measures how much your returns fluctuate. High volatility = high risk.</p>
+                        <p>This chart shows annualized volatility calculated over a <strong>rolling window</strong> (typically 12 months).</p>
+                        
+                        <h4><i class="fas fa-lightbulb"></i> How to interpret?</h4>
+                        <ul>
+                            <li><strong>Low volatility (< 10%):</strong> Stable, predictable returns</li>
+                            <li><strong>Medium volatility (10-20%):</strong> Normal for stocks</li>
+                            <li><strong>High volatility (> 20%):</strong> Very risky assets (crypto, small-caps)</li>
+                        </ul>
+                        
+                        <div class="info-highlight">
+                            <p><strong>Key insight:</strong> Lower volatility = better sleep at night! 😴</p>
+                        </div>
+                        
+                        <h4><i class="fas fa-bullseye"></i> Benchmark</h4>
+                        <p>The <strong>S&P 500</strong> has historical volatility around <strong>15-18%</strong>.</p>
+                    `
+                },
+                
+                returnsDistribution: {
+                    icon: 'fas fa-chart-histogram',
+                    title: 'Returns Distribution',
+                    content: `
+                        <h4><i class="fas fa-question-circle"></i> What is this chart?</h4>
+                        <p>A <strong>histogram</strong> showing how frequently your monthly returns fall into different ranges.</p>
+                        <ul>
+                            <li><strong>Green bars (right):</strong> Positive return months</li>
+                            <li><strong>Red bars (left):</strong> Negative return months</li>
+                        </ul>
+                        
+                        <h4><i class="fas fa-lightbulb"></i> How to interpret?</h4>
+                        <p>A <strong>bell-shaped curve</strong> centered on positive returns is ideal!</p>
+                        
+                        <div class="info-highlight">
+                            <p><strong>Good sign:</strong> Most bars on the <strong>right side (positive)</strong> with few extreme losses.</p>
+                        </div>
+                        
+                        <h4><i class="fas fa-exclamation-triangle"></i> Warning signs</h4>
+                        <ul>
+                            <li>Many extreme values (fat tails) = high risk</li>
+                            <li>Most bars on the left = losing strategy</li>
+                        </ul>
+                    `
+                },
+                
+                var: {
+                    icon: 'fas fa-shield-alt',
+                    title: 'Value at Risk (VaR)',
+                    content: `
+                        <h4><i class="fas fa-question-circle"></i> What is VaR?</h4>
+                        <p><strong>Value at Risk</strong> estimates the maximum loss you could face over a period with a given confidence level.</p>
+                        <ul>
+                            <li><strong>VaR 95%:</strong> 95% chance your loss won't exceed this value</li>
+                            <li><strong>CVaR (Conditional VaR):</strong> Average loss if you fall in the worst 5%</li>
+                        </ul>
+                        
+                        <h4><i class="fas fa-calculator"></i> Example</h4>
+                        <div class="info-example">
+                            <p>If your <strong>VaR 95% = 5%</strong>, there's a 95% chance you won't lose more than 5% in a given month.</p>
+                            <p>Only 5% of the time, losses could exceed this threshold.</p>
+                        </div>
+                        
+                        <h4><i class="fas fa-lightbulb"></i> How to use it?</h4>
+                        <p>VaR helps you <strong>prepare for worst-case scenarios</strong> and set stop-loss levels.</p>
+                        
+                        <div class="info-highlight">
+                            <p><strong>Risk management:</strong> Never risk more than you can afford to lose!</p>
+                        </div>
+                    `
+                },
+                
+                correlationMatrix: {
+                    icon: 'fas fa-project-diagram',
+                    title: 'Correlation Matrix',
+                    content: `
+                        <h4><i class="fas fa-question-circle"></i> What is Correlation?</h4>
+                        <p><strong>Correlation</strong> measures how two assets move together:</p>
+                        <ul>
+                            <li><strong>+1 (green):</strong> Perfect positive correlation (move together)</li>
+                            <li><strong>0 (yellow):</strong> No correlation (independent)</li>
+                            <li><strong>-1 (red):</strong> Perfect negative correlation (move opposite)</li>
+                        </ul>
+                        
+                        <h4><i class="fas fa-lightbulb"></i> Why does it matter?</h4>
+                        <p><strong>Diversification works best</strong> when assets have <strong>low or negative correlation</strong>!</p>
+                        
+                        <div class="info-highlight">
+                            <p><strong>Golden Rule:</strong> Combine assets with correlation < 0.5 for better risk reduction.</p>
+                        </div>
+                        
+                        <h4><i class="fas fa-balance-scale"></i> Examples</h4>
+                        <ul>
+                            <li><strong>Stocks + Bonds:</strong> ~0.2 (good diversification)</li>
+                            <li><strong>S&P 500 + Tech stocks:</strong> ~0.8 (high correlation = poor diversification)</li>
+                            <li><strong>Stocks + Gold:</strong> ~-0.1 (negative = hedge)</li>
+                        </ul>
+                    `
+                },
+                
+                rollingSharpe: {
+                    icon: 'fas fa-award',
+                    title: 'Rolling Sharpe Ratio',
+                    content: `
+                        <h4><i class="fas fa-question-circle"></i> What is Sharpe Ratio?</h4>
+                        <p>The <strong>Sharpe Ratio</strong> measures <strong>risk-adjusted returns</strong>:</p>
+                        <p><code>Sharpe = (Return - Risk-Free Rate) / Volatility</code></p>
+                        <p>Higher is better! It shows return per unit of risk.</p>
+                        
+                        <h4><i class="fas fa-bullseye"></i> Interpretation</h4>
+                        <ul>
+                            <li><span class="metric-badge bad">< 0:</span> Losing money (very bad)</li>
+                            <li><span class="metric-badge warning">0-1:</span> Acceptable but not great</li>
+                            <li><span class="metric-badge good">1-2:</span> Good risk-adjusted returns</li>
+                            <li><span class="metric-badge good">> 2:</span> Excellent!</li>
+                        </ul>
+                        
+                        <div class="info-highlight">
+                            <p><strong>Benchmark:</strong> S&P 500 has a Sharpe Ratio around <strong>0.8-1.0</strong> historically.</p>
+                        </div>
+                        
+                        <h4><i class="fas fa-chart-line"></i> Rolling Window</h4>
+                        <p>This chart calculates Sharpe over a <strong>rolling period</strong> to show how your risk-adjusted performance evolves.</p>
+                    `
+                },
+                
+                alphaBeta: {
+                    icon: 'fas fa-chart-scatter',
+                    title: 'Alpha & Beta Analysis',
+                    content: `
+                        <h4><i class="fas fa-question-circle"></i> What are Alpha and Beta?</h4>
+                        <ul>
+                            <li><strong>Beta:</strong> Sensitivity to market movements (slope of the line)</li>
+                            <li><strong>Alpha:</strong> Excess return above the market (vertical distance from market line)</li>
+                        </ul>
+                        
+                        <h4><i class="fas fa-lightbulb"></i> Interpretation</h4>
+                        <p><strong>Beta:</strong></p>
+                        <ul>
+                            <li><strong>β = 1:</strong> Moves with the market</li>
+                            <li><strong>β > 1:</strong> More volatile than market (amplified gains/losses)</li>
+                            <li><strong>β < 1:</strong> Less volatile (defensive)</li>
+                        </ul>
+                        
+                        <p><strong>Alpha:</strong></p>
+                        <ul>
+                            <li><strong>α > 0:</strong> Beating the market! 🎉</li>
+                            <li><strong>α = 0:</strong> Matching the market</li>
+                            <li><strong>α < 0:</strong> Underperforming</li>
+                        </ul>
+                        
+                        <div class="info-highlight">
+                            <p><strong>Goal:</strong> Maximize Alpha (skill) while managing Beta (risk exposure).</p>
+                        </div>
+                    `
+                },
+                
+                sortino: {
+                    icon: 'fas fa-chart-area',
+                    title: 'Sortino Ratio',
+                    content: `
+                        <h4><i class="fas fa-question-circle"></i> What is Sortino Ratio?</h4>
+                        <p>Similar to Sharpe Ratio, but <strong>only penalizes downside volatility</strong> (losses).</p>
+                        <p><code>Sortino = (Return - Risk-Free Rate) / Downside Deviation</code></p>
+                        
+                        <h4><i class="fas fa-lightbulb"></i> Why is it better than Sharpe?</h4>
+                        <p>Sharpe penalizes <strong>all volatility</strong> (even upside!). Sortino only penalizes <strong>bad volatility</strong> (losses).</p>
+                        
+                        <div class="info-highlight">
+                            <p><strong>Key insight:</strong> A portfolio with high gains but low losses will have a <strong>much higher Sortino</strong> than Sharpe.</p>
+                        </div>
+                        
+                        <h4><i class="fas fa-bullseye"></i> Benchmarks</h4>
+                        <ul>
+                            <li><span class="metric-badge good">> 2:</span> Excellent</li>
+                            <li><span class="metric-badge">1-2:</span> Good</li>
+                            <li><span class="metric-badge warning">< 1:</span> Needs improvement</li>
+                        </ul>
+                    `
+                },
+                
+                calmar: {
+                    icon: 'fas fa-chart-column',
+                    title: 'Calmar Ratio',
+                    content: `
+                        <h4><i class="fas fa-question-circle"></i> What is Calmar Ratio?</h4>
+                        <p>Measures return relative to <strong>maximum drawdown</strong>:</p>
+                        <p><code>Calmar = Annualized Return / Max Drawdown</code></p>
+                        
+                        <h4><i class="fas fa-lightbulb"></i> Why is it useful?</h4>
+                        <p>Shows how much return you're getting for each unit of <strong>worst-case risk</strong>.</p>
+                        
+                        <div class="info-example">
+                            <p><strong>Example:</strong> If your annualized return is 12% and max drawdown is 10%, Calmar = <strong>1.2</strong></p>
+                        </div>
+                        
+                        <h4><i class="fas fa-bullseye"></i> Interpretation</h4>
+                        <ul>
+                            <li><span class="metric-badge good">> 1:</span> Good (return > risk)</li>
+                            <li><span class="metric-badge warning">0.5-1:</span> Acceptable</li>
+                            <li><span class="metric-badge bad">< 0.5:</span> Too much risk for the return</li>
+                        </ul>
+                        
+                        <div class="info-highlight">
+                            <p><strong>Goal:</strong> Maximize returns while minimizing maximum drawdown!</p>
+                        </div>
+                    `
                 }
-                futureMonths.push(String(month).padStart(2, '0') + '/' + year);
-            }
+            };
             
-            const allMonths = [...historicalMonths, ...futureMonths];
-            
-            const realisticPredictions = this.aiResults.lstm.predictions.realistic.slice(0, this.predictionHorizon);
-            const optimisticPredictions = this.aiResults.lstm.predictions.optimistic.slice(0, this.predictionHorizon);
-            const pessimisticPredictions = this.aiResults.lstm.predictions.pessimistic.slice(0, this.predictionHorizon);
-            
-            const historicalSeries = [...historicalValues, ...Array(this.predictionHorizon).fill(null)];
-            const predictionSeries = [...Array(historicalValues.length).fill(null), ...realisticPredictions];
-            const optimisticSeries = [...Array(historicalValues.length).fill(null), ...optimisticPredictions];
-            const pessimisticSeries = [...Array(historicalValues.length).fill(null), ...pessimisticPredictions];
-            
-            if (this.charts.aiPredictions) this.charts.aiPredictions.destroy();
-            
-            const colors = this.getChartColors();
-            const self = this;
-            
-            this.charts.aiPredictions = Highcharts.chart('chartAIPredictions', {
-                chart: { type: 'line', backgroundColor: colors.background, height: 500 },
-                title: {
-                    text: `AI Predictions - ${this.predictionHorizon} Months Horizon`,
-                    style: { color: colors.title, fontWeight: '700' }
-                },
-                subtitle: {
-                    text: `Based on ${historicalValues.length} months of real data • Data source: ${this.aiResults.lstm.dataSource}`,
-                    style: { color: colors.text }
-                },
-                xAxis: {
-                    categories: allMonths,
-                    crosshair: true,
-                    labels: { 
-                        rotation: -45, 
-                        style: { fontSize: '10px', color: colors.text },
-                        step: Math.max(1, Math.floor(allMonths.length / 15))
-                    },
-                    plotLines: [{
-                        color: colors.prediction,
-                        width: 3,
-                        value: historicalValues.length - 0.5,
-                        dashStyle: 'Dash',
-                        label: {
-                            text: 'TODAY (' + lastHistoricalMonth + ')',
-                            style: { color: colors.prediction, fontWeight: 'bold', fontSize: '12px' }
-                        },
-                        zIndex: 5
-                    }]
-                },
-                yAxis: {
-                    title: { text: 'Portfolio Value (EUR)', style: { color: colors.text } },
-                    labels: {
-                        style: { color: colors.text },
-                        formatter: function() { return self.formatLargeNumber(this.value); }
-                    },
-                    gridLineColor: colors.gridLine
-                },
-                tooltip: {
-                    shared: true,
-                    crosshairs: true,
-                    formatter: function() {
-                        let s = '<b>' + this.x + '</b><br/>';
-                        this.points.forEach(point => {
-                            if (point.y !== null) {
-                                s += '<span style="color:' + point.color + '">●</span> ' + 
-                                    point.series.name + ': <b>' + self.formatCurrency(point.y) + '</b><br/>';
-                            }
-                        });
-                        return s;
-                    }
-                },
-                plotOptions: {
-                    line: { lineWidth: 2, marker: { enabled: false } },
-                    area: { fillOpacity: 0.1, lineWidth: 1, marker: { enabled: false } }
-                },
-                series: [
-                    {
-                        name: 'Historical (Real Data)',
-                        data: historicalSeries,
-                        color: colors.historical,
-                        lineWidth: 3,
-                        zIndex: 5
-                    },
-                    {
-                        type: 'area',
-                        name: 'Optimistic Scenario',
-                        data: optimisticSeries,
-                        color: colors.optimistic,
-                        dashStyle: 'Dash',
-                        fillColor: {
-                            linearGradient: { x1: 0, y1: 0, x2: 0, y2: 1 },
-                            stops: [[0, 'rgba(16, 185, 129, 0.2)'], [1, 'rgba(16, 185, 129, 0)']]
-                        }
-                    },
-                    {
-                        name: 'AI Prediction',
-                        data: predictionSeries,
-                        color: colors.prediction,
-                        lineWidth: 3,
-                        dashStyle: 'Dot',
-                        zIndex: 4
-                    },
-                    {
-                        type: 'area',
-                        name: 'Pessimistic Scenario',
-                        data: pessimisticSeries,
-                        color: colors.pessimistic,
-                        dashStyle: 'Dash',
-                        fillColor: {
-                            linearGradient: { x1: 0, y1: 0, x2: 0, y2: 1 },
-                            stops: [[0, 'rgba(239, 68, 68, 0.2)'], [1, 'rgba(239, 68, 68, 0)']]
-                        }
-                    }
-                ],
-                legend: { 
-                    align: 'center', 
-                    verticalAlign: 'bottom', 
-                    itemStyle: { color: colors.text } 
-                },
-                credits: { enabled: false }
-            });
-            
-            console.log(`✅ AI Predictions Chart: ${historicalValues.length} historical + ${this.predictionHorizon} predicted months`);
+            return infoDatabase[chartType] || null;
         },
 
-        // ========== PDF EXPORT ==========
-        
-        async exportReport() {
+async exportReport() {
             this.showNotification('⏳ Generating PDF report...', 'info');
             
             try {
@@ -2848,9 +2326,9 @@
         InvestmentAnalytics.init();
     }
     
-    console.log('✅ Investment Analytics Module - FULLY CORRECTED WITH DASHBOARD BUDGET LOGIC');
-    console.log('✅ All calculations use: monthlyGain, cumulatedInvestment, cumulatedGains');
-    console.log('✅ Monthly Returns = monthlyGain / prevCumulatedInvestment');
-    console.log('✅ ROI = cumulatedGains / cumulatedInvestment');
+    console.log('✅ Investment Analytics Module - FULLY CORRECTED');
+    console.log('✅ Removed: Prediction Horizon + AI Predictions Chart');
+    console.log('✅ Added: Info Modals for all charts');
+    console.log('✅ All calculations use Dashboard Budget logic');
     
 })();
