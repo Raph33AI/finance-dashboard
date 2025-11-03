@@ -1,5 +1,6 @@
 /* ==============================================
    DASHBOARD.JS - Logique du dashboard financier
+   Version Cloud avec Cloudflare Workers
    ============================================== */
 
 // Module Dashboard (pattern IIFE pour éviter la pollution du scope global)
@@ -19,11 +20,29 @@ const Dashboard = (function() {
     /**
      * Initialise le dashboard au chargement de la page
      */
-    function init() {
-        initData();
+    async function init() {
+        console.log('🚀 Initializing Dashboard...');
+        
+        // Attendre que l'utilisateur soit authentifié
+        const waitForAuth = new Promise((resolve) => {
+            const unsubscribe = firebase.auth().onAuthStateChanged((user) => {
+                if (user) {
+                    console.log('✅ User authenticated, loading data...');
+                    unsubscribe();
+                    resolve();
+                }
+            });
+        });
+        
+        await waitForAuth;
+        
+        // Charger les données
+        await initData();
         renderTable();
         updateAllCharts();
         updateLastUpdateTime();
+        
+        console.log('✅ Dashboard initialized');
     }
     
     /**
@@ -81,34 +100,61 @@ const Dashboard = (function() {
     }
     
     /**
-     * Initialise les données (depuis localStorage ou valeurs par défaut)
+     * Initialise les données (depuis Cloudflare ou localStorage si hors ligne)
      */
-    function initData() {
-        const saved = localStorage.getItem('financialDataDynamic');
-        const savedYield = localStorage.getItem('monthlyEstYield');
-        const savedInflation = localStorage.getItem('inflationRate');
+    async function initData() {
+        console.log('📥 Loading data...');
         
-        if (savedYield) {
-            monthlyEstYield = parseFloat(savedYield);
-            document.getElementById('monthlyEstYield').value = monthlyEstYield;
-            updateEstYieldDisplay();
+        // Essayer de charger depuis Cloudflare
+        let loadedFromCloud = false;
+        
+        if (window.SimulationManager) {
+            const currentSimName = window.SimulationManager.getCurrentSimulationName() || 'default';
+            console.log(`🔄 Loading simulation "${currentSimName}" from cloud...`);
+            
+            const cloudData = await window.SimulationManager.loadSimulation(currentSimName);
+            
+            if (cloudData && cloudData.data && cloudData.data.length > 0) {
+                // Charger depuis Cloudflare
+                console.log('✅ Loaded from Cloudflare');
+                monthlyEstYield = cloudData.monthlyEstYield || 8;
+                inflationRate = cloudData.inflationRate || 2.5;
+                allData = cloudData.data;
+                loadedFromCloud = true;
+            }
         }
         
-        if (savedInflation) {
-            inflationRate = parseFloat(savedInflation);
-            document.getElementById('inflationRate').value = inflationRate;
-        }
-        
-        if (saved) {
-            try {
-                allData = JSON.parse(saved);
-                if (allData.length === 0) throw 'Empty data';
-            } catch(e) {
+        // Fallback sur localStorage si pas chargé depuis cloud
+        if (!loadedFromCloud) {
+            console.log('⚠️ Loading from localStorage (fallback)');
+            const saved = localStorage.getItem('financialDataDynamic');
+            const savedYield = localStorage.getItem('monthlyEstYield');
+            const savedInflation = localStorage.getItem('inflationRate');
+            
+            if (savedYield) {
+                monthlyEstYield = parseFloat(savedYield);
+            }
+            
+            if (savedInflation) {
+                inflationRate = parseFloat(savedInflation);
+            }
+            
+            if (saved) {
+                try {
+                    allData = JSON.parse(saved);
+                    if (allData.length === 0) throw 'Empty data';
+                } catch(e) {
+                    createDefaultData();
+                }
+            } else {
                 createDefaultData();
             }
-        } else {
-            createDefaultData();
         }
+        
+        // Mettre à jour l'UI
+        document.getElementById('monthlyEstYield').value = monthlyEstYield;
+        document.getElementById('inflationRate').value = inflationRate;
+        updateEstYieldDisplay();
         
         calculateAll();
         currentMonthIndex = findCurrentMonthIndex();
@@ -119,6 +165,7 @@ const Dashboard = (function() {
      * Crée les données par défaut
      */
     function createDefaultData() {
+        console.log('📝 Creating default data...');
         const today = new Date();
         const startYear = today.getFullYear();
         const startMonth = today.getMonth() + 1;
@@ -201,8 +248,8 @@ const Dashboard = (function() {
         autoSave();
         updateAllCharts();
     }
-    
-    // ========== GESTION DES PARAMÈTRES ==========
+
+// ========== GESTION DES PARAMÈTRES ==========
     
     /**
      * Met à jour le rendement mensuel estimé
@@ -358,27 +405,107 @@ const Dashboard = (function() {
         if (elem) elem.textContent = allData.length;
     }
     
-    // ========== SAUVEGARDE/CHARGEMENT ==========
+    // ========== SAUVEGARDE/CHARGEMENT (VERSION CLOUD) ==========
     
     /**
-     * Sauvegarde manuelle
+     * Sauvegarde manuelle (vers Cloudflare)
      */
-    function saveData() {
+    async function saveData() {
         calculateAll();
-        localStorage.setItem('financialDataDynamic', JSON.stringify(allData));
-        localStorage.setItem('monthlyEstYield', monthlyEstYield);
-        localStorage.setItem('inflationRate', inflationRate);
-        window.FinanceDashboard.showNotification('Data saved successfully!', 'success');
+        
+        // Préparer les données
+        const simulationData = {
+            monthlyEstYield: monthlyEstYield,
+            inflationRate: inflationRate,
+            data: allData
+        };
+        
+        // Obtenir le nom de la simulation actuelle
+        const name = window.SimulationManager 
+            ? window.SimulationManager.getCurrentSimulationName() 
+            : 'default';
+        
+        // Sauvegarder sur Cloudflare
+        if (window.SimulationManager) {
+            const success = await window.SimulationManager.saveSimulation(name, simulationData);
+            
+            if (!success) {
+                // Fallback sur localStorage en cas d'erreur
+                localStorage.setItem('financialDataDynamic', JSON.stringify(allData));
+                localStorage.setItem('monthlyEstYield', monthlyEstYield);
+                localStorage.setItem('inflationRate', inflationRate);
+                window.FinanceDashboard.showNotification('Saved locally (cloud save failed)', 'warning');
+            }
+        } else {
+            // Pas de SimulationManager, utiliser localStorage
+            localStorage.setItem('financialDataDynamic', JSON.stringify(allData));
+            localStorage.setItem('monthlyEstYield', monthlyEstYield);
+            localStorage.setItem('inflationRate', inflationRate);
+            window.FinanceDashboard.showNotification('Data saved locally!', 'success');
+        }
     }
     
     /**
-     * Sauvegarde automatique
+     * Sauvegarde automatique (débounced)
      */
+    let autoSaveTimeout;
     function autoSave() {
+        clearTimeout(autoSaveTimeout);
+        autoSaveTimeout = setTimeout(async () => {
+            calculateAll();
+            
+            const simulationData = {
+                monthlyEstYield: monthlyEstYield,
+                inflationRate: inflationRate,
+                data: allData
+            };
+            
+            if (window.SimulationManager) {
+                const name = window.SimulationManager.getCurrentSimulationName() || 'default';
+                await window.SimulationManager.saveSimulation(name, simulationData);
+            } else {
+                // Fallback localStorage
+                localStorage.setItem('financialDataDynamic', JSON.stringify(allData));
+                localStorage.setItem('monthlyEstYield', monthlyEstYield);
+                localStorage.setItem('inflationRate', inflationRate);
+            }
+        }, 2000); // Sauvegarde après 2 secondes d'inactivité
+    }
+    
+    /**
+     * Charge des données de simulation
+     */
+    function loadSimulationData(simulationData) {
+        if (!simulationData) return;
+        
+        console.log('📥 Loading simulation data...');
+        
+        monthlyEstYield = simulationData.monthlyEstYield || 8;
+        inflationRate = simulationData.inflationRate || 2.5;
+        allData = simulationData.data || [];
+        
+        document.getElementById('monthlyEstYield').value = monthlyEstYield;
+        document.getElementById('inflationRate').value = inflationRate;
+        updateEstYieldDisplay();
+        
         calculateAll();
-        localStorage.setItem('financialDataDynamic', JSON.stringify(allData));
-        localStorage.setItem('monthlyEstYield', monthlyEstYield);
-        localStorage.setItem('inflationRate', inflationRate);
+        renderTable();
+        updateAllCharts();
+        currentMonthIndex = findCurrentMonthIndex();
+        updateTotalMonthsDisplay();
+        
+        window.FinanceDashboard.showNotification('Simulation loaded successfully!', 'success');
+    }
+    
+    /**
+     * Récupère les données actuelles
+     */
+    function getCurrentData() {
+        return {
+            monthlyEstYield: monthlyEstYield,
+            inflationRate: inflationRate,
+            data: allData
+        };
     }
     
     /**
@@ -458,14 +585,15 @@ const Dashboard = (function() {
             document.getElementById('inflationRate').value = 2.5;
             updateEstYieldDisplay();
             showInflation = false;
-            initData();
+            createDefaultData();
+            calculateAll();
             renderTable();
             updateAllCharts();
             window.FinanceDashboard.showNotification('Data reset to default!', 'info');
         }
     }
-    
-    // ========== AFFICHAGE DU TABLEAU ==========
+
+// ========== AFFICHAGE DU TABLEAU ==========
     
     /**
      * Affiche le tableau de données
@@ -612,10 +740,7 @@ const Dashboard = (function() {
         const container = document.getElementById('statsContainer');
         if (container) container.innerHTML = html;
     }
-    
-    // ========== GRAPHIQUES ==========
-    // (Je vais créer les fonctions de graphiques dans le prochain message car c'est très long)
-    
+
 // ========== GRAPHIQUES (CHARTS) ==========
     
     /**
@@ -1184,7 +1309,11 @@ const Dashboard = (function() {
         updateAllCharts,
         updateChart2,
         updateChart3,
-        updateChart7
+        updateChart7,
+        
+        // Gestion des simulations (NOUVEAU)
+        loadSimulationData,
+        getCurrentData
     };
 })();
 
@@ -1225,4 +1354,4 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
-console.log('✅ Menu utilisateur sidebar initialisé');
+console.log('✅ Dashboard script loaded - Cloud version');

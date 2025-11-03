@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang='fr'>
+<html lang='en'>
 <head>
     <meta charset='UTF-8'>
     <meta name='viewport' content='width=device-width, initial-scale=1.0'>
@@ -18,7 +18,6 @@
     <link rel="stylesheet" href="assets/css/user-menu.css">
     <link rel='stylesheet' href='assets/css/dashboard.css'>
 
-    <!-- ===== AJOUTE CES LIGNES (FIREBASE) ===== -->
     <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
@@ -29,7 +28,6 @@
     
     <!-- Protection de la page (AUTH GUARD) -->
     <script src="assets/js/auth-guard.js"></script>
-    <!-- ===== FIN DES AJOUTS ===== -->
 </head>
 <body>
 
@@ -40,7 +38,7 @@
     <script src="assets/js/theme-charts.js"></script>
 
     <div class='layout-wrapper'>
-        <!-- Sidebar Navigation - VERSION CORRIGÉE -->
+        <!-- Sidebar Navigation -->
         <aside class='sidebar' id='sidebar'>
             <!-- Header -->
             <div class='sidebar-header'>
@@ -68,7 +66,7 @@
                         <i class='fas fa-chevron-down arrow'></i>
                     </button>
                     <div class='nav-submenu' style='display: block;'>
-                        <a href='dashboard-financier.html' class='nav-link'>
+                        <a href='dashboard-financier.html' class='nav-link active'>
                             <i class='fas fa-home'></i>
                             <span>Dashboard Budget</span>
                         </a>
@@ -187,7 +185,7 @@
             </div>
             <!-- ===== FIN SIDEBAR FOOTER ===== -->
         </aside>
-        
+
         <!-- Main Content Area -->
         <div class='main-content'>
             <!-- Header -->
@@ -217,26 +215,37 @@
                         
                         <div class='info-box'>
                             <h4>How to use</h4>
-                            <p>Edit values directly in the table | Use Bulk Edit to apply values to date ranges | Add past/future months with the buttons below | Adjust Monthly Est Yield to calculate gains automatically | All changes are auto-saved in your browser</p>
+                            <p>Edit values directly in the table | Use Bulk Edit to apply values to date ranges | Add past/future months with the buttons below | Adjust Monthly Est Yield to calculate gains automatically | All changes are auto-saved to cloud</p>
                         </div>
                         
                         <!-- Timeline Management -->
                         <div class='toolbar'>
-                            <h3>Timeline Management</h3>
+                            <h3><i class='fas fa-calendar-alt'></i> Timeline Management</h3>
                             <div class='toolbar-row'>
-                                <button class='btn-add' onclick='Dashboard.addMonthsBefore(12)'>+ 12 Months Before</button>
-                                <button class='btn-add' onclick='Dashboard.addMonthsBefore(1)'>+ 1 Month Before</button>
-                                <button class='btn-add' onclick='Dashboard.addMonthsAfter(1)'>+ 1 Month After</button>
-                                <button class='btn-add' onclick='Dashboard.addMonthsAfter(12)'>+ 12 Months After</button>
-                                <span class='total-months'>Total Months: <span id='totalMonthsDisplay'>300</span></span>
+                                <button class='btn-add' onclick='Dashboard.addMonthsBefore(12)'>
+                                    <i class='fas fa-backward'></i> + 12 Months Before
+                                </button>
+                                <button class='btn-add' onclick='Dashboard.addMonthsBefore(1)'>
+                                    <i class='fas fa-step-backward'></i> + 1 Month Before
+                                </button>
+                                <button class='btn-add' onclick='Dashboard.addMonthsAfter(1)'>
+                                    <i class='fas fa-step-forward'></i> + 1 Month After
+                                </button>
+                                <button class='btn-add' onclick='Dashboard.addMonthsAfter(12)'>
+                                    <i class='fas fa-forward'></i> + 12 Months After
+                                </button>
+                                <span class='total-months'>
+                                    <i class='fas fa-calendar-check'></i> 
+                                    Total Months: <span id='totalMonthsDisplay'>300</span>
+                                </span>
                             </div>
                         </div>
-                        
+
                         <!-- Parameters Grid -->
                         <div class='parameters-grid'>
                             <!-- Investment Parameters -->
                             <div class='toolbar'>
-                                <h3>Investment Parameters</h3>
+                                <h3><i class='fas fa-chart-line'></i> Investment Parameters</h3>
                                 <div class='toolbar-row'>
                                     <label>Monthly Est Yield (% annual):</label>
                                     <input type='number' id='monthlyEstYield' step='0.1' value='8' 
@@ -254,7 +263,7 @@
                             
                             <!-- Inflation Adjustment -->
                             <div class='toolbar'>
-                                <h3>Inflation Adjustment</h3>
+                                <h3><i class='fas fa-percentage'></i> Inflation Adjustment</h3>
                                 <div class='toolbar-row'>
                                     <label>Annual Inflation Rate (%):</label>
                                     <input type='number' id='inflationRate' step='0.1' value='2.5' 
@@ -269,7 +278,7 @@
                         
                         <!-- Bulk Edit Tool -->
                         <div class='toolbar'>
-                            <h3>Bulk Edit Tool</h3>
+                            <h3><i class='fas fa-edit'></i> Bulk Edit Tool</h3>
                             <div class='toolbar-row'>
                                 <label>Category:</label>
                                 <select id='bulkCategory'>
@@ -291,19 +300,44 @@
                                 <input type='month' id='bulkEndMonth'>
                             </div>
                             <div class='toolbar-row'>
-                                <label>Value:</label>
+                                <label>Value (EUR):</label>
                                 <input type='number' id='bulkValue' step='0.01' placeholder='0.00'>
-                                <button class='btn-success' onclick='Dashboard.applyBulkEdit()'>Apply</button>
+                                <button class='btn-success' onclick='Dashboard.applyBulkEdit()'>
+                                    <i class='fas fa-check'></i> Apply
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- ===== SIMULATION MANAGEMENT (NOUVEAU) ===== -->
+                        <div class='toolbar simulation-management'>
+                            <h3>
+                                <i class='fas fa-database'></i> Simulation Management
+                            </h3>
+                            
+                            <div class='current-simulation-display'>
+                                <span class='label'>
+                                    <i class='fas fa-folder-open'></i> Current simulation:
+                                </span>
+                                <span class='value' id='currentSimulationName'>default</span>
+                            </div>
+                            
+                            <div class='toolbar-row' style='justify-content: center; gap: 10px; flex-wrap: wrap; margin-top: 15px;'>
+                                <button class='btn-success' onclick='SimulationManager.createNewSimulation()'>
+                                    <i class='fas fa-plus-circle'></i> New Simulation
+                                </button>
+                                <button class='btn-primary' onclick='Dashboard.saveData()'>
+                                    <i class='fas fa-cloud-upload-alt'></i> Save Current
+                                </button>
+                                <button class='btn-secondary' onclick='document.getElementById("simulationsModal").classList.add("active")'>
+                                    <i class='fas fa-list'></i> Manage Simulations
+                                </button>
                             </div>
                         </div>
                         
                         <!-- Data Management -->
                         <div class='toolbar'>
-                            <h3>Data Management</h3>
+                            <h3><i class='fas fa-cog'></i> Data Management</h3>
                             <div class='toolbar-row' style='justify-content: center; gap: 10px; flex-wrap: wrap;'>
-                                <button class='btn-primary' onclick='Dashboard.saveData()'>
-                                    <i class='fas fa-save'></i> Save All
-                                </button>
                                 <button class='btn-secondary' onclick='Dashboard.exportToJSON()'>
                                     <i class='fas fa-file-export'></i> Export JSON
                                 </button>
@@ -314,7 +348,7 @@
                                     <i class='fas fa-undo'></i> Reset
                                 </button>
                                 <button class='btn-primary' onclick='Dashboard.updateAllCharts()'>
-                                    <i class='fas fa-chart-line'></i> Update Charts
+                                    <i class='fas fa-sync-alt'></i> Refresh Charts
                                 </button>
                             </div>
                         </div>
@@ -354,17 +388,20 @@
                             </table>
                         </div>
                     </div>
-                    
                     <!-- Charts Section -->
                     <div class='charts-container'>
                         <div class='chart-wrapper'>
-                            <h2 class='section-title'>Income vs Expenses Evolution</h2>
+                            <h2 class='section-title'>
+                                <i class='fas fa-chart-area'></i> Income vs Expenses Evolution
+                            </h2>
                             <div id='chart1' class='chart'></div>
                         </div>
                         
                         <div class='grid-2'>
                             <div class='chart-wrapper'>
-                                <h2 class='section-title'>Income Breakdown</h2>
+                                <h2 class='section-title'>
+                                    <i class='fas fa-money-bill-wave'></i> Income Breakdown
+                                </h2>
                                 <div class='local-filter'>
                                     <label>Select Month:</label>
                                     <select id='incomeMonthFilter' onchange='Dashboard.updateChart2()'></select>
@@ -372,7 +409,9 @@
                                 <div id='chart2' class='chart'></div>
                             </div>
                             <div class='chart-wrapper'>
-                                <h2 class='section-title'>Expenses Breakdown</h2>
+                                <h2 class='section-title'>
+                                    <i class='fas fa-shopping-cart'></i> Expenses Breakdown
+                                </h2>
                                 <div class='local-filter'>
                                     <label>Select Month:</label>
                                     <select id='expenseMonthFilter' onchange='Dashboard.updateChart3()'></select>
@@ -382,7 +421,9 @@
                         </div>
                         
                         <div class='chart-wrapper'>
-                            <h2 class='section-title'>Budget Allocation</h2>
+                            <h2 class='section-title'>
+                                <i class='fas fa-balance-scale'></i> Budget Allocation (50/30/20 Rule)
+                            </h2>
                             <div class='local-filter'>
                                 <label>Select Month:</label>
                                 <select id='budgetMonthFilter' onchange='Dashboard.updateChart7()'></select>
@@ -391,17 +432,23 @@
                         </div>
                         
                         <div class='chart-wrapper'>
-                            <h2 class='section-title'>Savings Evolution</h2>
+                            <h2 class='section-title'>
+                                <i class='fas fa-piggy-bank'></i> Savings Evolution
+                            </h2>
                             <div id='chart4' class='chart'></div>
                         </div>
                         
                         <div class='grid-2'>
                             <div class='chart-wrapper'>
-                                <h2 class='section-title'>Investment Portfolio</h2>
+                                <h2 class='section-title'>
+                                    <i class='fas fa-briefcase'></i> Investment Portfolio
+                                </h2>
                                 <div id='chart5' class='chart'></div>
                             </div>
                             <div class='chart-wrapper'>
-                                <h2 class='section-title'>ROI Evolution</h2>
+                                <h2 class='section-title'>
+                                    <i class='fas fa-percent'></i> ROI Evolution
+                                </h2>
                                 <div id='chart6' class='chart'></div>
                             </div>
                         </div>
@@ -410,16 +457,65 @@
                 
                 <!-- Footer -->
                 <footer>
-                    <p>Financial Dashboard | Auto-saved in browser localStorage</p>
+                    <p>
+                        <i class='fas fa-cloud'></i> Financial Dashboard | 
+                        Auto-saved to cloud with <strong>Cloudflare Workers</strong>
+                    </p>
                 </footer>
+            </div>
+        </div>
+    </div>
+
+<!-- ===== SIMULATIONS MODAL (NOUVEAU) ===== -->
+    <div class='modal' id='simulationsModal'>
+        <div class='modal-content'>
+            <div class='modal-header'>
+                <h2>
+                    <i class='fas fa-database'></i> Manage Simulations
+                </h2>
+                <button class='modal-close' onclick='document.getElementById("simulationsModal").classList.remove("active")'>
+                    <i class='fas fa-times'></i>
+                </button>
+            </div>
+            
+            <div class='modal-body'>
+                <div class='simulations-info'>
+                    <p>
+                        <i class='fas fa-info-circle'></i> 
+                        <strong>Your simulations are stored in the cloud.</strong>
+                        Create multiple scenarios, compare them, and access them from any device!
+                    </p>
+                </div>
+                
+                <div id='simulationsListContainer'>
+                    <!-- Filled dynamically by simulation-manager.js -->
+                    <div class='loading-simulations'>
+                        <i class='fas fa-spinner fa-spin'></i> Loading simulations...
+                    </div>
+                </div>
+            </div>
+            
+            <div class='modal-footer'>
+                <button class='btn-primary' onclick='SimulationManager.createNewSimulation()'>
+                    <i class='fas fa-plus'></i> New Simulation
+                </button>
+                <button class='btn-secondary' onclick='document.getElementById("simulationsModal").classList.remove("active")'>
+                    <i class='fas fa-times'></i> Close
+                </button>
             </div>
         </div>
     </div>
     
     <!-- Scripts -->
-    <script src='assets/js/dark-mode.js'></script>  <!-- ✅ NOUVEAU -->
+    <script src='assets/js/dark-mode.js'></script>
     <script src='assets/js/common.js'></script>
     <script src='assets/js/sidebar.js'></script>
+    
+    <!-- ✅ NOUVEAU : Simulation Manager (DOIT être chargé AVANT dashboard.js) -->
+    <script src='assets/js/simulation-manager.js'></script>
+    
+    <!-- Dashboard Script -->
     <script src='assets/js/dashboard.js'></script>
+    
 </body>
 </html>

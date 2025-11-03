@@ -1,0 +1,20 @@
+name = "finance-hub-api"
+type = "javascript"
+account_id = "4c6002f0fa4c94e0f85798128757d385"
+workers_dev = true
+compatibility_date = "2024-01-01"
+
+[build]
+command = ""
+
+[build.upload]
+format = "service-worker"
+
+[[kv_namespaces]]
+binding = "SIMULATIONS_KV"
+id = "85ed20674241412792dad6dfa8cbe039"
+
+[env.production]
+name = "finance-hub-api"
+workers_dev = false
+route = "https://finance-hub-api.raphnardone.workers.dev/*"
