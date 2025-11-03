@@ -1716,3 +1716,410 @@
         transition: none;
     }
 }
+
+/* ============================================
+   PORTFOLIO MANAGEMENT SECTION (NOUVEAU)
+   ============================================ */
+
+.portfolio-management-section {
+    background: var(--background-primary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-xl);
+    padding: var(--spacing-xl);
+    margin-bottom: var(--spacing-xl);
+    box-shadow: var(--shadow-sm);
+}
+
+.simulation-management {
+    background: linear-gradient(135deg, #f8fafc 0%, #e0e7ff 100%);
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-xl);
+    border: 1px solid #e0e7ff;
+    margin-bottom: var(--spacing-lg);
+}
+
+[data-theme="dark"] .simulation-management {
+    background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+    border-color: #334155;
+}
+
+.current-simulation-display {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    margin-bottom: var(--spacing-lg);
+    font-size: 1.125rem;
+}
+
+.current-simulation-display .label {
+    color: var(--text-secondary);
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+}
+
+.current-simulation-display .value {
+    color: var(--primary-color);
+    font-weight: 700;
+    font-size: 1.25rem;
+    background: white;
+    padding: 0.5rem 1.25rem;
+    border-radius: var(--radius-md);
+    border: 2px solid var(--primary-color);
+    box-shadow: 0 2px 4px rgba(37, 99, 235, 0.1);
+}
+
+[data-theme="dark"] .current-simulation-display .value {
+    background: #0f172a;
+    border-color: #3b82f6;
+    color: #60a5fa;
+}
+
+.toolbar-row {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+    flex-wrap: wrap;
+}
+
+/* ============================================
+   PORTFOLIOS MODAL (NOUVEAU)
+   ============================================ */
+
+.simulations-info {
+    background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+    border-left: 4px solid var(--primary-color);
+    padding: var(--spacing-lg) var(--spacing-xl);
+    border-radius: var(--radius-md);
+    margin-bottom: var(--spacing-xl);
+}
+
+[data-theme="dark"] .simulations-info {
+    background: linear-gradient(135deg, #1e3a5f 0%, #1e40af 100%);
+    border-color: #3b82f6;
+}
+
+.simulations-info p {
+    margin: 0;
+    color: var(--text-primary);
+    font-size: 0.9375rem;
+    line-height: 1.6;
+}
+
+.simulations-info i {
+    color: var(--primary-color);
+    margin-right: var(--spacing-xs);
+}
+
+.simulations-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-md);
+}
+
+.simulation-item {
+    background: var(--background-primary);
+    border: 2px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-lg);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--spacing-md);
+    transition: all var(--transition-base);
+}
+
+.simulation-item:hover {
+    border-color: var(--primary-color);
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.1);
+    transform: translateY(-2px);
+}
+
+.simulation-item.active {
+    background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+    border-color: var(--primary-color);
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.15);
+}
+
+[data-theme="dark"] .simulation-item {
+    background: #1e293b;
+    border-color: #334155;
+}
+
+[data-theme="dark"] .simulation-item:hover {
+    border-color: #3b82f6;
+}
+
+[data-theme="dark"] .simulation-item.active {
+    background: linear-gradient(135deg, #1e3a5f 0%, #1e40af 100%);
+    border-color: #3b82f6;
+}
+
+.simulation-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.simulation-name {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: var(--spacing-xs);
+}
+
+.simulation-name i {
+    color: var(--primary-color);
+    font-size: 1rem;
+}
+
+.simulation-meta {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+}
+
+.simulation-meta i {
+    color: var(--text-tertiary);
+    font-size: 0.8125rem;
+}
+
+.simulation-actions {
+    display: flex;
+    gap: var(--spacing-sm);
+    flex-wrap: wrap;
+}
+
+.badge-current {
+    background: var(--success-color);
+    color: white;
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-left: var(--spacing-xs);
+}
+
+.badge-default {
+    background: var(--secondary-color);
+    color: white;
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-left: var(--spacing-xs);
+}
+
+.no-portfolios {
+    text-align: center;
+    padding: var(--spacing-2xl);
+    color: var(--text-secondary);
+}
+
+.no-portfolios i {
+    font-size: 3rem;
+    color: var(--border-color-hover);
+    margin-bottom: var(--spacing-lg);
+    opacity: 0.3;
+}
+
+.no-portfolios p {
+    margin: var(--spacing-sm) 0;
+    font-size: 1rem;
+}
+
+.loading-simulations {
+    text-align: center;
+    padding: var(--spacing-xl);
+    color: var(--text-secondary);
+    font-size: 1rem;
+}
+
+.loading-simulations i {
+    margin-right: var(--spacing-sm);
+    color: var(--primary-color);
+    animation: spin 1s linear infinite;
+}
+
+/* Button Sizes */
+.btn-sm {
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+    border-radius: var(--radius-md);
+    font-weight: 500;
+    cursor: pointer;
+    transition: all var(--transition-base);
+    border: none;
+    display: inline-flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+}
+
+.btn-sm.btn-primary {
+    background: var(--primary-color);
+    color: white;
+}
+
+.btn-sm.btn-primary:hover {
+    background: var(--primary-dark);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-sm);
+}
+
+.btn-sm.btn-success {
+    background: var(--success-color);
+    color: white;
+}
+
+.btn-sm.btn-success:hover {
+    background: #059669;
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-sm);
+}
+
+.btn-sm.btn-success:disabled {
+    background: var(--background-tertiary);
+    color: var(--text-tertiary);
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+.btn-sm.btn-secondary {
+    background: var(--background-tertiary);
+    color: var(--text-primary);
+    border: 1px solid var(--border-color);
+}
+
+.btn-sm.btn-secondary:hover {
+    background: var(--background-secondary);
+    border-color: var(--border-color-hover);
+    transform: translateY(-1px);
+}
+
+.btn-sm.btn-danger {
+    background: var(--danger-color);
+    color: white;
+}
+
+.btn-sm.btn-danger:hover {
+    background: #dc2626;
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-sm);
+}
+
+/* Info Box Styles */
+.info-box {
+    background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+    border-left: 4px solid var(--primary-color);
+    padding: var(--spacing-lg);
+    border-radius: var(--radius-md);
+    margin-top: var(--spacing-lg);
+}
+
+[data-theme="dark"] .info-box {
+    background: linear-gradient(135deg, #1e3a5f 0%, #1e40af 100%);
+}
+
+.info-box h4 {
+    margin: 0 0 var(--spacing-sm) 0;
+    color: var(--text-primary);
+    font-size: 1rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+}
+
+.info-box h4 i {
+    color: var(--primary-color);
+}
+
+.info-box p {
+    margin: 0;
+    color: var(--text-secondary);
+    font-size: 0.9375rem;
+    line-height: 1.6;
+}
+
+/* ============================================
+   RESPONSIVE - PORTFOLIO SECTION
+   ============================================ */
+
+@media (max-width: 768px) {
+    .simulation-management {
+        padding: var(--spacing-lg);
+    }
+    
+    .current-simulation-display {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .current-simulation-display .value {
+        width: 100%;
+    }
+    
+    .toolbar-row {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .toolbar-row button {
+        width: 100%;
+        justify-content: center;
+    }
+    
+    .simulation-item {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .simulation-actions {
+        width: 100%;
+        flex-direction: column;
+    }
+    
+    .simulation-actions button {
+        width: 100%;
+        justify-content: center;
+    }
+}
+
+@media (max-width: 480px) {
+    .portfolio-management-section {
+        padding: var(--spacing-lg);
+    }
+    
+    .simulation-management {
+        padding: var(--spacing-md);
+    }
+    
+    .current-simulation-display {
+        font-size: 1rem;
+    }
+    
+    .current-simulation-display .value {
+        font-size: 1.125rem;
+        padding: 0.375rem 1rem;
+    }
+    
+    .simulation-name {
+        font-size: 1rem;
+    }
+    
+    .simulation-meta {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: var(--spacing-xs);
+    }
+}

@@ -1,6 +1,6 @@
 /* =====================================================
    CLOUDFLARE WORKER - Finance Dashboard API
-   Gestion des simulations multi-utilisateurs
+   Gestion des simulations ET portfolios multi-utilisateurs
    ===================================================== */
 
 // ========== CONFIGURATION FIREBASE ==========
@@ -37,7 +37,7 @@ async function handleRequest(request) {
 
         console.log(`📨 Incoming request: ${request.method} ${path}`);
 
-        // Router
+        // ========== ROUTES SIMULATIONS (Dashboard) ==========
         if (path === '/api/simulations' && request.method === 'GET') {
             return await getSimulationsList(request);
         }
@@ -58,12 +58,34 @@ async function handleRequest(request) {
             return await deleteSimulation(request);
         }
 
+        // ========== ✨ ROUTES PORTFOLIOS (Market Data) ✨ ==========
+        if (path === '/api/portfolios' && request.method === 'GET') {
+            return await getPortfoliosList(request);
+        }
+        
+        if (path === '/api/portfolios' && request.method === 'POST') {
+            return await createPortfolio(request);
+        }
+        
+        if (path.match(/^\/api\/portfolios\/[^/]+$/) && request.method === 'GET') {
+            return await getPortfolio(request);
+        }
+        
+        if (path.match(/^\/api\/portfolios\/[^/]+$/) && request.method === 'PUT') {
+            return await updatePortfolio(request);
+        }
+        
+        if (path.match(/^\/api\/portfolios\/[^/]+$/) && request.method === 'DELETE') {
+            return await deletePortfolio(request);
+        }
+
         // Health check endpoint
         if (path === '/health' || path === '/') {
             return jsonResponse({ 
                 status: 'ok', 
                 message: 'Finance Hub API is running',
-                version: '1.0.0',
+                version: '2.0.0',
+                features: ['simulations', 'portfolios'],
                 timestamp: new Date().toISOString()
             });
         }
@@ -118,6 +140,10 @@ async function verifyFirebaseToken(request) {
     
     return uid;
 }
+
+// =====================================================
+// SIMULATIONS ENDPOINTS (Dashboard)
+// =====================================================
 
 /**
  * GET /api/simulations - Liste toutes les simulations de l'utilisateur
@@ -359,6 +385,262 @@ async function deleteSimulation(request) {
         }, 500);
     }
 }
+
+// =====================================================
+// ✨ PORTFOLIOS ENDPOINTS (Market Data) ✨
+// =====================================================
+
+/**
+ * GET /api/portfolios - Liste tous les portfolios de l'utilisateur
+ */
+async function getPortfoliosList(request) {
+    try {
+        const uid = await verifyFirebaseToken(request);
+        
+        console.log(`📋 Fetching portfolios list for user: ${uid}`);
+        
+        // Lister toutes les clés de l'utilisateur
+        const listResult = await SIMULATIONS_KV.list({ 
+            prefix: `user:${uid}:portfolio:` 
+        });
+        
+        const portfolios = listResult.keys.map(key => {
+            const name = key.name.replace(`user:${uid}:portfolio:`, '');
+            return {
+                name: name,
+                key: key.name,
+                metadata: key.metadata || {}
+            };
+        });
+
+        console.log(`✅ Found ${portfolios.length} portfolios`);
+
+        return jsonResponse({ 
+            success: true, 
+            portfolios: portfolios,
+            count: portfolios.length
+        });
+
+    } catch (error) {
+        console.error('❌ Error in getPortfoliosList:', error);
+        return jsonResponse({ 
+            error: 'Authentication failed', 
+            message: error.message 
+        }, 401);
+    }
+}
+
+/**
+ * GET /api/portfolios/:name - Récupère un portfolio spécifique
+ */
+async function getPortfolio(request) {
+    try {
+        const uid = await verifyFirebaseToken(request);
+        const url = new URL(request.url);
+        const portfolioName = decodeURIComponent(url.pathname.split('/').pop());
+        
+        console.log(`📥 Loading portfolio "${portfolioName}" for user: ${uid}`);
+        
+        const key = `user:${uid}:portfolio:${portfolioName}`;
+        const data = await SIMULATIONS_KV.get(key, { type: 'json' });
+
+        if (!data) {
+            console.log(`⚠️ Portfolio "${portfolioName}" not found`);
+            return jsonResponse({ 
+                error: 'Portfolio not found' 
+            }, 404);
+        }
+
+        console.log(`✅ Portfolio "${portfolioName}" loaded successfully`);
+
+        return jsonResponse({ 
+            success: true, 
+            portfolio: {
+                name: portfolioName,
+                data: data
+            }
+        });
+
+    } catch (error) {
+        console.error('❌ Error in getPortfolio:', error);
+        return jsonResponse({ 
+            error: 'Authentication failed', 
+            message: error.message 
+        }, 401);
+    }
+}
+
+/**
+ * POST /api/portfolios - Crée un nouveau portfolio
+ */
+async function createPortfolio(request) {
+    try {
+        const uid = await verifyFirebaseToken(request);
+        const body = await request.json();
+        
+        if (!body.name) {
+            return jsonResponse({ 
+                error: 'Portfolio name is required' 
+            }, 400);
+        }
+
+        console.log(`➕ Creating portfolio "${body.name}" for user: ${uid}`);
+
+        const key = `user:${uid}:portfolio:${body.name}`;
+        
+        // Vérifier si le portfolio existe déjà
+        const existing = await SIMULATIONS_KV.get(key);
+        if (existing) {
+            console.log(`⚠️ Portfolio "${body.name}" already exists`);
+            return jsonResponse({ 
+                error: 'Portfolio already exists' 
+            }, 409);
+        }
+
+        const portfolioData = {
+            watchlist: body.watchlist || [],
+            alerts: body.alerts || [],
+            comparisonSymbols: body.comparisonSymbols || [],
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString()
+        };
+
+        await SIMULATIONS_KV.put(
+            key, 
+            JSON.stringify(portfolioData),
+            {
+                metadata: {
+                    createdAt: portfolioData.createdAt,
+                    updatedAt: portfolioData.updatedAt,
+                    watchlistCount: portfolioData.watchlist.length,
+                    alertsCount: portfolioData.alerts.length,
+                    comparisonCount: portfolioData.comparisonSymbols.length
+                }
+            }
+        );
+
+        console.log(`✅ Portfolio "${body.name}" created successfully`);
+
+        return jsonResponse({ 
+            success: true, 
+            message: 'Portfolio created successfully',
+            portfolio: {
+                name: body.name,
+                data: portfolioData
+            }
+        }, 201);
+
+    } catch (error) {
+        console.error('❌ Error in createPortfolio:', error);
+        return jsonResponse({ 
+            error: 'Failed to create portfolio', 
+            message: error.message 
+        }, 500);
+    }
+}
+
+/**
+ * PUT /api/portfolios/:name - Met à jour un portfolio existant
+ */
+async function updatePortfolio(request) {
+    try {
+        const uid = await verifyFirebaseToken(request);
+        const url = new URL(request.url);
+        const portfolioName = decodeURIComponent(url.pathname.split('/').pop());
+        const body = await request.json();
+        
+        console.log(`📝 Updating portfolio "${portfolioName}" for user: ${uid}`);
+        
+        const key = `user:${uid}:portfolio:${portfolioName}`;
+        
+        // Vérifier si le portfolio existe
+        const existing = await SIMULATIONS_KV.get(key, { type: 'json' });
+        
+        // Si le portfolio n'existe pas, le créer (comportement upsert)
+        const portfolioData = {
+            watchlist: body.watchlist ?? (existing?.watchlist || []),
+            alerts: body.alerts ?? (existing?.alerts || []),
+            comparisonSymbols: body.comparisonSymbols ?? (existing?.comparisonSymbols || []),
+            createdAt: existing?.createdAt || new Date().toISOString(),
+            updatedAt: new Date().toISOString()
+        };
+
+        await SIMULATIONS_KV.put(
+            key, 
+            JSON.stringify(portfolioData),
+            {
+                metadata: {
+                    createdAt: portfolioData.createdAt,
+                    updatedAt: portfolioData.updatedAt,
+                    watchlistCount: portfolioData.watchlist.length,
+                    alertsCount: portfolioData.alerts.length,
+                    comparisonCount: portfolioData.comparisonSymbols.length
+                }
+            }
+        );
+
+        console.log(`✅ Portfolio "${portfolioName}" updated successfully`);
+
+        return jsonResponse({ 
+            success: true, 
+            message: 'Portfolio updated successfully',
+            portfolio: {
+                name: portfolioName,
+                data: portfolioData
+            }
+        });
+
+    } catch (error) {
+        console.error('❌ Error in updatePortfolio:', error);
+        return jsonResponse({ 
+            error: 'Failed to update portfolio', 
+            message: error.message 
+        }, 500);
+    }
+}
+
+/**
+ * DELETE /api/portfolios/:name - Supprime un portfolio
+ */
+async function deletePortfolio(request) {
+    try {
+        const uid = await verifyFirebaseToken(request);
+        const url = new URL(request.url);
+        const portfolioName = decodeURIComponent(url.pathname.split('/').pop());
+        
+        // Empêcher la suppression du portfolio "default"
+        if (portfolioName === 'default') {
+            console.log(`⚠️ Cannot delete default portfolio`);
+            return jsonResponse({ 
+                error: 'Cannot delete default portfolio' 
+            }, 403);
+        }
+        
+        console.log(`🗑️ Deleting portfolio "${portfolioName}" for user: ${uid}`);
+        
+        const key = `user:${uid}:portfolio:${portfolioName}`;
+        
+        await SIMULATIONS_KV.delete(key);
+
+        console.log(`✅ Portfolio "${portfolioName}" deleted successfully`);
+
+        return jsonResponse({ 
+            success: true, 
+            message: 'Portfolio deleted successfully'
+        });
+
+    } catch (error) {
+        console.error('❌ Error in deletePortfolio:', error);
+        return jsonResponse({ 
+            error: 'Failed to delete portfolio', 
+            message: error.message 
+        }, 500);
+    }
+}
+
+// =====================================================
+// HELPER FUNCTIONS
+// =====================================================
 
 /**
  * Helper pour créer des réponses JSON
