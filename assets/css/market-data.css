@@ -1,6 +1,6 @@
 /* ==============================================
    MARKET-DATA.CSS - Modern Minimalist Design 2024
-   Version optimisée avec Container Queries
+   Version optimisée avec Container Queries - CORRIGÉ
    ============================================== */
 
 /* ============================================
@@ -1431,7 +1431,7 @@
 }
 
 /* ============================================
-   COMPANY PROFILE SECTION
+   COMPANY PROFILE SECTION - ✅ CORRIGÉ AVEC ACCORDÉON
    ============================================ */
 
 .company-profile-section {
@@ -1533,6 +1533,56 @@
     flex-wrap: wrap;
 }
 
+/* ✅ ACCORDÉON - NOUVEAU */
+.company-accordion {
+    margin-bottom: var(--spacing-md);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    background: var(--background-primary);
+}
+
+.accordion-header {
+    background: var(--background-secondary);
+    padding: var(--spacing-md) var(--spacing-lg);
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-weight: 600;
+    color: var(--text-primary);
+    transition: all var(--transition-base);
+    user-select: none;
+}
+
+.accordion-header:hover {
+    background: var(--background-tertiary);
+}
+
+.accordion-header i.fa-chevron-down {
+    transition: transform var(--transition-base);
+    color: var(--primary-color);
+}
+
+.accordion-header.active i.fa-chevron-down {
+    transform: rotate(180deg);
+}
+
+.accordion-content {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease-out;
+}
+
+.accordion-content.active {
+    max-height: 3000px;
+    transition: max-height 0.5s ease-in;
+}
+
+.accordion-body {
+    padding: var(--spacing-lg);
+}
+
 /* Fundamental Statistics */
 .fundamental-stats {
     padding: var(--spacing-xl);
@@ -1582,143 +1632,7 @@
 }
 
 /* ============================================
-   RESPONSIVE
-   ============================================ */
-
-@media (max-width: 1024px) {
-    .charts-grid-2 {
-        grid-template-columns: 1fr;
-    }
-}
-
-@media (max-width: 768px) {
-    .search-input-wrapper {
-        flex-direction: column;
-    }
-    
-    .search-suggestions {
-        right: 0;
-    }
-    
-    .overview-header {
-        flex-direction: column;
-        align-items: flex-start;
-    }
-    
-    .stock-price-section {
-        text-align: left;
-    }
-    
-    .overview-stats {
-        grid-template-columns: repeat(2, 1fr);
-    }
-    
-    .current-price {
-        font-size: 2rem;
-    }
-    
-    .watchlist-header,
-    .alerts-header,
-    .comparison-header {
-        flex-direction: column;
-        align-items: flex-start;
-    }
-    
-    .watchlist-actions,
-    .comparison-actions {
-        width: 100%;
-        flex-direction: column;
-    }
-    
-    .watchlist-actions button,
-    .comparison-actions button {
-        width: 100%;
-    }
-    
-    .watchlist-container {
-        grid-template-columns: 1fr;
-    }
-    
-    .alert-card {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: var(--spacing-sm);
-    }
-    
-    .comparison-table {
-        font-size: 0.8125rem;
-    }
-    
-    .comparison-table th,
-    .comparison-table td {
-        padding: var(--spacing-sm);
-    }
-    
-    .company-info-grid {
-        grid-template-columns: 1fr;
-    }
-    
-    .company-logo img {
-        max-width: 100px;
-        max-height: 60px;
-    }
-    
-    .fundamental-stats {
-        padding: var(--spacing-lg);
-    }
-    
-    .stats-category h4 {
-        font-size: 1rem;
-    }
-    
-    .stats-grid .stat-box .value {
-        font-size: 1.25rem;
-    }
-}
-
-@media (max-width: 480px) {
-    .popular-stocks,
-    .time-period-selector {
-        flex-direction: column;
-        align-items: flex-start;
-    }
-    
-    .symbol-chip,
-    .period-btn {
-        width: 100%;
-        justify-content: center;
-    }
-    
-    .company-header-section {
-        padding: var(--spacing-lg);
-    }
-    
-    .fundamental-stats {
-        padding: var(--spacing-md);
-    }
-    
-    .stats-category {
-        margin-bottom: var(--spacing-xl);
-    }
-}
-
-/* ============================================
-   REDUCED MOTION
-   ============================================ */
-
-@media (prefers-reduced-motion: reduce) {
-    .watchlist-card,
-    .alert-card,
-    .signal-card,
-    .stat-box,
-    .comparison-stock-chip,
-    .preset-btn {
-        transition: none;
-    }
-}
-
-/* ============================================
-   PORTFOLIO MANAGEMENT SECTION (NOUVEAU)
+   ✅ PORTFOLIO MANAGEMENT SECTION - TEXTE BLANC FORCÉ
    ============================================ */
 
 .portfolio-management-section {
@@ -1731,16 +1645,16 @@
 }
 
 .simulation-management {
-    background: linear-gradient(135deg, #f8fafc 0%, #e0e7ff 100%);
+    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important;
     border-radius: var(--radius-lg);
     padding: var(--spacing-xl);
-    border: 1px solid #e0e7ff;
+    border: 1px solid #2563eb;
     margin-bottom: var(--spacing-lg);
 }
 
 [data-theme="dark"] .simulation-management {
-    background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
-    border-color: #334155;
+    background: linear-gradient(135deg, #1e40af 0%, #1e3a8a 100%) !important;
+    border-color: #1e40af;
 }
 
 .current-simulation-display {
@@ -1753,28 +1667,26 @@
 }
 
 .current-simulation-display .label {
-    color: var(--text-secondary);
+    color: white !important;
     font-weight: 500;
     display: flex;
     align-items: center;
     gap: var(--spacing-sm);
 }
 
-.current-simulation-display .value {
-    color: var(--primary-color);
-    font-weight: 700;
-    font-size: 1.25rem;
-    background: white;
-    padding: 0.5rem 1.25rem;
-    border-radius: var(--radius-md);
-    border: 2px solid var(--primary-color);
-    box-shadow: 0 2px 4px rgba(37, 99, 235, 0.1);
+.current-simulation-display .label i {
+    color: white !important;
 }
 
-[data-theme="dark"] .current-simulation-display .value {
-    background: #0f172a;
-    border-color: #3b82f6;
-    color: #60a5fa;
+.current-simulation-display .value {
+    color: white !important;
+    font-weight: 700;
+    font-size: 1.25rem;
+    background: rgba(255, 255, 255, 0.2) !important;
+    padding: 0.5rem 1.25rem;
+    border-radius: var(--radius-md);
+    border: 2px solid white !important;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .toolbar-row {
@@ -1784,8 +1696,42 @@
     flex-wrap: wrap;
 }
 
+/* ✅ INFO BOX - TEXTE BLANC FORCÉ */
+.info-box {
+    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important;
+    border-left: 4px solid white !important;
+    padding: var(--spacing-lg);
+    border-radius: var(--radius-md);
+    margin-top: var(--spacing-lg);
+}
+
+[data-theme="dark"] .info-box {
+    background: linear-gradient(135deg, #1e40af 0%, #1e3a8a 100%) !important;
+}
+
+.info-box h4 {
+    margin: 0 0 var(--spacing-sm) 0;
+    color: white !important;
+    font-size: 1rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+}
+
+.info-box h4 i {
+    color: white !important;
+}
+
+.info-box p {
+    margin: 0;
+    color: white !important;
+    font-size: 0.9375rem;
+    line-height: 1.6;
+}
+
 /* ============================================
-   PORTFOLIOS MODAL (NOUVEAU)
+   PORTFOLIOS MODAL
    ============================================ */
 
 .simulations-info {
@@ -2017,45 +1963,100 @@
     box-shadow: var(--shadow-sm);
 }
 
-/* Info Box Styles */
-.info-box {
-    background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
-    border-left: 4px solid var(--primary-color);
-    padding: var(--spacing-lg);
-    border-radius: var(--radius-md);
-    margin-top: var(--spacing-lg);
-}
-
-[data-theme="dark"] .info-box {
-    background: linear-gradient(135deg, #1e3a5f 0%, #1e40af 100%);
-}
-
-.info-box h4 {
-    margin: 0 0 var(--spacing-sm) 0;
-    color: var(--text-primary);
-    font-size: 1rem;
-    font-weight: 600;
-    display: flex;
-    align-items: center;
-    gap: var(--spacing-sm);
-}
-
-.info-box h4 i {
-    color: var(--primary-color);
-}
-
-.info-box p {
-    margin: 0;
-    color: var(--text-secondary);
-    font-size: 0.9375rem;
-    line-height: 1.6;
-}
-
 /* ============================================
-   RESPONSIVE - PORTFOLIO SECTION
+   RESPONSIVE
    ============================================ */
 
+@media (max-width: 1024px) {
+    .charts-grid-2 {
+        grid-template-columns: 1fr;
+    }
+}
+
 @media (max-width: 768px) {
+    .search-input-wrapper {
+        flex-direction: column;
+    }
+    
+    .search-suggestions {
+        right: 0;
+    }
+    
+    .overview-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .stock-price-section {
+        text-align: left;
+    }
+    
+    .overview-stats {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .current-price {
+        font-size: 2rem;
+    }
+    
+    .watchlist-header,
+    .alerts-header,
+    .comparison-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .watchlist-actions,
+    .comparison-actions {
+        width: 100%;
+        flex-direction: column;
+    }
+    
+    .watchlist-actions button,
+    .comparison-actions button {
+        width: 100%;
+    }
+    
+    .watchlist-container {
+        grid-template-columns: 1fr;
+    }
+    
+    .alert-card {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: var(--spacing-sm);
+    }
+    
+    .comparison-table {
+        font-size: 0.8125rem;
+    }
+    
+    .comparison-table th,
+    .comparison-table td {
+        padding: var(--spacing-sm);
+    }
+    
+    .company-info-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .company-logo img {
+        max-width: 100px;
+        max-height: 60px;
+    }
+    
+    .fundamental-stats {
+        padding: var(--spacing-lg);
+    }
+    
+    .stats-category h4 {
+        font-size: 1rem;
+    }
+    
+    .stats-grid .stat-box .value {
+        font-size: 1.25rem;
+    }
+    
     .simulation-management {
         padding: var(--spacing-lg);
     }
@@ -2096,6 +2097,30 @@
 }
 
 @media (max-width: 480px) {
+    .popular-stocks,
+    .time-period-selector {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .symbol-chip,
+    .period-btn {
+        width: 100%;
+        justify-content: center;
+    }
+    
+    .company-header-section {
+        padding: var(--spacing-lg);
+    }
+    
+    .fundamental-stats {
+        padding: var(--spacing-md);
+    }
+    
+    .stats-category {
+        margin-bottom: var(--spacing-xl);
+    }
+    
     .portfolio-management-section {
         padding: var(--spacing-lg);
     }
@@ -2121,5 +2146,41 @@
         flex-direction: column;
         align-items: flex-start;
         gap: var(--spacing-xs);
+    }
+}
+
+/* ============================================
+   REDUCED MOTION
+   ============================================ */
+
+@media (prefers-reduced-motion: reduce) {
+    .watchlist-card,
+    .alert-card,
+    .signal-card,
+    .stat-box,
+    .comparison-stock-chip,
+    .preset-btn {
+        transition: none;
+    }
+}
+
+/* ============================================
+   ANIMATION KEYFRAMES
+   ============================================ */
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
     }
 }
