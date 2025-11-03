@@ -249,7 +249,7 @@ const Dashboard = (function() {
         updateAllCharts();
     }
 
-// ========== GESTION DES PARAMÈTRES ==========
+    // ========== GESTION DES PARAMÈTRES ==========
     
     /**
      * Met à jour le rendement mensuel estimé
@@ -593,7 +593,7 @@ const Dashboard = (function() {
         }
     }
 
-// ========== AFFICHAGE DU TABLEAU ==========
+    // ========== AFFICHAGE DU TABLEAU ==========
     
     /**
      * Affiche le tableau de données
@@ -741,7 +741,7 @@ const Dashboard = (function() {
         if (container) container.innerHTML = html;
     }
 
-// ========== GRAPHIQUES (CHARTS) ==========
+    // ========== GRAPHIQUES (CHARTS) ==========
     
     /**
      * Initialise les filtres de mois pour les graphiques
@@ -1276,7 +1276,7 @@ const Dashboard = (function() {
         updateChart7();
     }
 
-// ========== EXPORTS PUBLICS ==========
+    // ========== EXPORTS PUBLICS ==========
     return {
         // Initialisation
         init,
@@ -1311,11 +1311,14 @@ const Dashboard = (function() {
         updateChart3,
         updateChart7,
         
-        // Gestion des simulations (NOUVEAU)
+        // Gestion des simulations
         loadSimulationData,
         getCurrentData
     };
 })();
+
+// ========== EXPOSITION GLOBALE DU DASHBOARD (✅ LIGNE CRITIQUE AJOUTÉE) ==========
+window.Dashboard = Dashboard;
 
 // Initialisation au chargement de la page
 window.addEventListener('DOMContentLoaded', Dashboard.init);
