@@ -10,7 +10,7 @@ const PortfolioManager = (function() {
     let currentPortfolioName = 'default';
     let availablePortfolios = [];
     let cloudflareWorkerURL = 'https://finance-hub-api.raphnardone.workers.dev';
-    const API_PREFIX = '/api'; // ✅ AJOUTÉ
+    const API_PREFIX = '/api';
     
     // ========== INITIALISATION ==========
     
@@ -56,13 +56,19 @@ const PortfolioManager = (function() {
                     resolve();
                 }
             });
+            
+            // ✅ CORRIGÉ : Timeout de sécurité pour éviter le blocage infini
+            setTimeout(() => {
+                console.warn('⚠️ Firebase Auth timeout, continuing with local mode');
+                resolve();
+            }, 3000);
         });
     }
     
     // ========== GESTION DES PORTEFEUILLES ==========
     
     /**
-     * Charge la liste des portefeuilles depuis le cloud
+     * ✅ CORRIGÉ : Charge la liste des portefeuilles depuis le cloud
      */
     async function loadPortfoliosList() {
         try {
@@ -70,12 +76,13 @@ const PortfolioManager = (function() {
             if (!user) {
                 console.warn('⚠️ No user authenticated');
                 availablePortfolios = [{ name: 'default', createdAt: Date.now() }];
+                // ✅ CORRIGÉ : Mettre à jour immédiatement l'affichage
+                renderPortfoliosList();
                 return;
             }
             
             const idToken = await user.getIdToken();
             
-            // ✅ CORRIGÉ : /api/portfolios
             const response = await fetch(`${cloudflareWorkerURL}${API_PREFIX}/portfolios`, {
                 method: 'GET',
                 headers: {
@@ -98,9 +105,14 @@ const PortfolioManager = (function() {
             
             console.log('✅ Loaded portfolios list:', availablePortfolios.length);
             
+            // ✅ CORRIGÉ : Mettre à jour l'affichage immédiatement
+            renderPortfoliosList();
+            
         } catch (error) {
             console.error('❌ Error loading portfolios list:', error);
             availablePortfolios = [{ name: 'default', createdAt: Date.now() }];
+            // ✅ CORRIGÉ : Toujours afficher quelque chose
+            renderPortfoliosList();
         }
     }
     
@@ -119,7 +131,6 @@ const PortfolioManager = (function() {
             
             const idToken = await user.getIdToken();
             
-            // ✅ CORRIGÉ : /api/portfolios/:name
             const response = await fetch(`${cloudflareWorkerURL}${API_PREFIX}/portfolios/${encodeURIComponent(name)}`, {
                 method: 'GET',
                 headers: {
@@ -139,7 +150,6 @@ const PortfolioManager = (function() {
             const data = await response.json();
             console.log('✅ Portfolio loaded from cloud');
             
-            // ✅ CORRIGÉ : extraire les données correctement
             return data.portfolio?.data || data;
             
         } catch (error) {
@@ -164,7 +174,6 @@ const PortfolioManager = (function() {
             
             const idToken = await user.getIdToken();
             
-            // ✅ CORRIGÉ : payload conforme au worker
             const payload = {
                 name: name,
                 watchlist: portfolioData.watchlist || [],
@@ -172,7 +181,6 @@ const PortfolioManager = (function() {
                 comparisonSymbols: portfolioData.comparisonSymbols || []
             };
             
-            // ✅ CORRIGÉ : /api/portfolios/:name
             const response = await fetch(`${cloudflareWorkerURL}${API_PREFIX}/portfolios/${encodeURIComponent(name)}`, {
                 method: 'PUT',
                 headers: {
@@ -234,7 +242,6 @@ const PortfolioManager = (function() {
             
             const idToken = await user.getIdToken();
             
-            // ✅ CORRIGÉ : /api/portfolios/:name
             const response = await fetch(`${cloudflareWorkerURL}${API_PREFIX}/portfolios/${encodeURIComponent(name)}`, {
                 method: 'DELETE',
                 headers: {
@@ -259,7 +266,6 @@ const PortfolioManager = (function() {
             
             // Recharger la liste
             await loadPortfoliosList();
-            renderPortfoliosList();
             
             if (window.FinanceDashboard && window.FinanceDashboard.showNotification) {
                 window.FinanceDashboard.showNotification(`Portfolio "${name}" deleted`, 'info');
@@ -279,7 +285,7 @@ const PortfolioManager = (function() {
     }
     
     /**
-     * Change de portefeuille actif
+     * ✅ CORRIGÉ : Change de portefeuille actif avec mise à jour immédiate
      */
     async function switchPortfolio(name) {
         console.log(`🔄 Switching to portfolio "${name}"...`);
@@ -294,16 +300,19 @@ const PortfolioManager = (function() {
         currentPortfolioName = name;
         localStorage.setItem('currentMarketPortfolio', name);
         
+        // ✅ CORRIGÉ : Mettre à jour immédiatement l'affichage
+        updateCurrentPortfolioDisplay();
+        
         // Charger le nouveau portefeuille
         const portfolioData = await loadPortfolio(name);
-        
-        // Mettre à jour l'affichage
-        updateCurrentPortfolioDisplay();
         
         // Charger les données dans MarketData
         if (window.MarketData && window.MarketData.loadPortfolioData) {
             window.MarketData.loadPortfolioData(portfolioData);
         }
+        
+        // ✅ CORRIGÉ : Mettre à jour la liste des portfolios pour refléter le changement
+        renderPortfoliosList();
         
         // Fermer le modal
         const modal = document.getElementById('portfoliosModal');
@@ -354,7 +363,6 @@ const PortfolioManager = (function() {
         if (success) {
             await loadPortfoliosList();
             await switchPortfolio(trimmedName);
-            renderPortfoliosList();
         }
     }
     
@@ -401,7 +409,6 @@ const PortfolioManager = (function() {
         
         if (success) {
             await loadPortfoliosList();
-            renderPortfoliosList();
             
             if (window.FinanceDashboard && window.FinanceDashboard.showNotification) {
                 window.FinanceDashboard.showNotification(`Portfolio duplicated as "${trimmedName}"`, 'success');
@@ -458,7 +465,6 @@ const PortfolioManager = (function() {
                 }
                 
                 await loadPortfoliosList();
-                renderPortfoliosList();
                 
                 if (window.FinanceDashboard && window.FinanceDashboard.showNotification) {
                     window.FinanceDashboard.showNotification(`Portfolio renamed to "${trimmedName}"`, 'success');
@@ -481,7 +487,6 @@ const PortfolioManager = (function() {
             
             const idToken = await user.getIdToken();
             
-            // ✅ CORRIGÉ : /api/portfolios/:name
             await fetch(`${cloudflareWorkerURL}${API_PREFIX}/portfolios/${encodeURIComponent(name)}`, {
                 method: 'DELETE',
                 headers: {
@@ -510,11 +515,13 @@ const PortfolioManager = (function() {
     }
     
     /**
-     * Affiche la liste des portefeuilles dans le modal
+     * ✅ CORRIGÉ : Affiche la liste des portefeuilles dans le modal
      */
     function renderPortfoliosList() {
         const container = document.getElementById('portfoliosListContainer');
         if (!container) return;
+        
+        // ✅ CORRIGÉ : Supprimer immédiatement le "Loading..."
         
         if (availablePortfolios.length === 0) {
             container.innerHTML = `
@@ -669,4 +676,4 @@ window.addEventListener('DOMContentLoaded', () => {
     }, 500);
 });
 
-console.log('✅ Portfolio Manager loaded - Cloud version');
+console.log('✅ Portfolio Manager loaded - Cloud version CORRECTED');

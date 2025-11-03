@@ -1,6 +1,6 @@
 /* ==============================================
    MARKET-DATA.JS - Market Data & Technical Analysis
-   Version Cloud avec Cloudflare Workers - PARTIE 1/4
+   Version Cloud avec Cloudflare Workers - CORRIGÉ
    ============================================== */
 
 const MarketData = {
@@ -99,6 +99,11 @@ const MarketData = {
                     resolve();
                 }
             });
+            
+            // Timeout de sécurité
+            setTimeout(() => {
+                resolve();
+            }, 3000);
         });
     },
     
@@ -219,7 +224,7 @@ const MarketData = {
             clearTimeout(timeout);
             timeout = setTimeout(async () => {
                 await MarketData.saveCurrentPortfolio();
-            }, 2000); // Sauvegarde après 2 secondes d'inactivité
+            }, 2000);
         };
     })(),
     
@@ -310,7 +315,7 @@ const MarketData = {
         document.getElementById('toggleVolume')?.addEventListener('change', updateChart);
     },
     
-    // ========== SEARCH FUNCTIONALITY (CODE COMPLET ICI) ==========
+    // ========== SEARCH FUNCTIONALITY ==========
     
     setupSearchListeners() {
         const input = document.getElementById('symbolInput');
@@ -670,13 +675,10 @@ const MarketData = {
     
 };
 
-// ========== PARTIE 2/4 - WATCHLIST FUNCTIONS (MODIFIÉ POUR CLOUD) ==========
+// ========== WATCHLIST FUNCTIONS (MODIFIÉ POUR CLOUD) ==========
 
 Object.assign(MarketData, {
     
-    /**
-     * ✅ MODIFIÉ : Charge la watchlist depuis localStorage (fallback uniquement)
-     */
     loadWatchlistFromStorage() {
         const saved = localStorage.getItem('market_watchlist');
         if (saved) {
@@ -690,9 +692,6 @@ Object.assign(MarketData, {
         }
     },
     
-    /**
-     * ✅ MODIFIÉ : Sauvegarde la watchlist (localStorage + cloud via autoSave)
-     */
     saveWatchlistToStorage() {
         try {
             localStorage.setItem('market_watchlist', JSON.stringify(this.watchlist));
@@ -701,9 +700,6 @@ Object.assign(MarketData, {
         }
     },
     
-    /**
-     * ✅ MODIFIÉ : Ajoute à la watchlist et sauvegarde automatiquement
-     */
     addCurrentToWatchlist() {
         if (!this.currentSymbol) {
             alert('Please search for a stock first');
@@ -723,7 +719,6 @@ Object.assign(MarketData, {
         
         this.watchlist.push(watchlistItem);
         
-        // ✅ MODIFIÉ : Sauvegarder automatiquement dans le cloud
         this.saveWatchlistToStorage();
         this.autoSave();
         
@@ -734,14 +729,10 @@ Object.assign(MarketData, {
         this.showNotification(`✅ ${this.currentSymbol} added to watchlist`, 'success');
     },
     
-    /**
-     * ✅ MODIFIÉ : Supprime de la watchlist et sauvegarde
-     */
     removeFromWatchlist(symbol) {
         if (confirm(`Remove ${symbol} from watchlist?`)) {
             this.watchlist = this.watchlist.filter(item => item.symbol !== symbol);
             
-            // ✅ MODIFIÉ : Sauvegarder automatiquement
             this.saveWatchlistToStorage();
             this.autoSave();
             
@@ -751,9 +742,6 @@ Object.assign(MarketData, {
         }
     },
     
-    /**
-     * ✅ MODIFIÉ : Efface toute la watchlist et sauvegarde
-     */
     clearWatchlist() {
         if (this.watchlist.length === 0) {
             alert('Watchlist is already empty');
@@ -763,7 +751,6 @@ Object.assign(MarketData, {
         if (confirm(`Clear all ${this.watchlist.length} stocks from watchlist?`)) {
             this.watchlist = [];
             
-            // ✅ MODIFIÉ : Sauvegarder automatiquement
             this.saveWatchlistToStorage();
             this.autoSave();
             
@@ -772,9 +759,6 @@ Object.assign(MarketData, {
             this.showNotification('Watchlist cleared', 'info');
         }
     },
-    
-    // renderWatchlist, refreshWatchlist, etc. - IDENTIQUES
-    // ... (garde le code existant)
     
     renderWatchlist() {
         const container = document.getElementById('watchlistContainer');
@@ -905,13 +889,10 @@ Object.assign(MarketData, {
     
 });
 
-// ========== PARTIE 3/4 - ALERTS FUNCTIONS (MODIFIÉ POUR CLOUD) ==========
+// ========== ALERTS FUNCTIONS (MODIFIÉ POUR CLOUD) ==========
 
 Object.assign(MarketData, {
     
-    /**
-     * ✅ MODIFIÉ : Charge les alertes depuis localStorage (fallback)
-     */
     loadAlertsFromStorage() {
         const saved = localStorage.getItem('market_alerts');
         if (saved) {
@@ -925,9 +906,6 @@ Object.assign(MarketData, {
         }
     },
     
-    /**
-     * ✅ MODIFIÉ : Sauvegarde les alertes (localStorage + cloud)
-     */
     saveAlertsToStorage() {
         try {
             localStorage.setItem('market_alerts', JSON.stringify(this.alerts));
@@ -936,10 +914,17 @@ Object.assign(MarketData, {
         }
     },
     
+    /**
+     * ✅ CORRIGÉ : Ouvre le modal d'alerte (utilise openModal de common.js)
+     */
     openAlertModal() {
-        if (window.FinanceDashboard && window.FinanceDashboard.openModal) {
-            window.FinanceDashboard.openModal('modalCreateAlert');
+        if (window.openModal) {
+            window.openModal('modalCreateAlert');
+        } else {
+            const modal = document.getElementById('modalCreateAlert');
+            if (modal) modal.classList.add('active');
         }
+        
         if (this.currentSymbol) {
             const input = document.getElementById('alertSymbol');
             if (input) {
@@ -948,19 +933,23 @@ Object.assign(MarketData, {
         }
     },
     
+    /**
+     * ✅ CORRIGÉ : Ferme le modal d'alerte
+     */
     closeAlertModal() {
-        if (window.FinanceDashboard && window.FinanceDashboard.closeModal) {
-            window.FinanceDashboard.closeModal('modalCreateAlert');
+        if (window.closeModal) {
+            window.closeModal('modalCreateAlert');
+        } else {
+            const modal = document.getElementById('modalCreateAlert');
+            if (modal) modal.classList.remove('active');
         }
+        
         document.getElementById('alertSymbol').value = '';
         document.getElementById('alertPrice').value = '';
         document.getElementById('alertType').value = 'above';
         document.getElementById('alertNote').value = '';
     },
     
-    /**
-     * ✅ MODIFIÉ : Crée une alerte et sauvegarde
-     */
     createAlert() {
         const symbol = document.getElementById('alertSymbol').value.trim().toUpperCase();
         const price = parseFloat(document.getElementById('alertPrice').value);
@@ -989,7 +978,6 @@ Object.assign(MarketData, {
         
         this.alerts.push(alert);
         
-        // ✅ MODIFIÉ : Sauvegarder automatiquement
         this.saveAlertsToStorage();
         this.autoSave();
         
@@ -1011,14 +999,10 @@ Object.assign(MarketData, {
         }
     },
     
-    /**
-     * ✅ MODIFIÉ : Supprime une alerte et sauvegarde
-     */
     deleteAlert(alertId) {
         if (confirm('Delete this alert?')) {
             this.alerts = this.alerts.filter(a => a.id !== alertId);
             
-            // ✅ MODIFIÉ : Sauvegarder automatiquement
             this.saveAlertsToStorage();
             this.autoSave();
             
@@ -1094,7 +1078,6 @@ Object.assign(MarketData, {
         });
         
         if (triggeredCount > 0) {
-            // ✅ MODIFIÉ : Sauvegarder automatiquement
             this.saveAlertsToStorage();
             this.autoSave();
             this.renderAlerts();
@@ -1113,32 +1096,39 @@ Object.assign(MarketData, {
     
 });
 
-// ========== PARTIE 4/4 - COMPARISON FUNCTIONS (MODIFIÉ POUR CLOUD) ==========
+// ========== COMPARISON FUNCTIONS (MODIFIÉ POUR CLOUD) ==========
 
 Object.assign(MarketData, {
     
     /**
-     * ✅ MODIFIÉ : Ouvre le modal de comparaison
+     * ✅ CORRIGÉ : Ouvre le modal de comparaison
      */
     openComparisonModal() {
-        if (window.FinanceDashboard && window.FinanceDashboard.openModal) {
-            window.FinanceDashboard.openModal('modalAddComparison');
+        if (window.openModal) {
+            window.openModal('modalAddComparison');
+        } else {
+            const modal = document.getElementById('modalAddComparison');
+            if (modal) modal.classList.add('active');
         }
     },
     
+    /**
+     * ✅ CORRIGÉ : Ferme le modal de comparaison
+     */
     closeComparisonModal() {
-        if (window.FinanceDashboard && window.FinanceDashboard.closeModal) {
-            window.FinanceDashboard.closeModal('modalAddComparison');
+        if (window.closeModal) {
+            window.closeModal('modalAddComparison');
+        } else {
+            const modal = document.getElementById('modalAddComparison');
+            if (modal) modal.classList.remove('active');
         }
+        
         const input = document.getElementById('comparisonSymbols');
         if (input) {
             input.value = '';
         }
     },
     
-    /**
-     * ✅ MODIFIÉ : Charge une comparaison et sauvegarde
-     */
     async loadComparison() {
         const input = document.getElementById('comparisonSymbols');
         if (!input) return;
@@ -1161,7 +1151,6 @@ Object.assign(MarketData, {
         this.comparisonSymbols = symbols;
         this.comparisonData = {};
         
-        // ✅ MODIFIÉ : Sauvegarder automatiquement les symboles de comparaison
         this.autoSave();
         
         this.showNotification(`Loading ${symbols.length} stocks for comparison...`, 'info');
@@ -1181,9 +1170,6 @@ Object.assign(MarketData, {
         this.showNotification(`✅ Comparison loaded for ${successCount} stocks`, 'success');
     },
     
-    /**
-     * ✅ NOUVEAU : Charge une comparaison depuis une liste de symboles
-     */
     async loadComparisonFromSymbols(symbols) {
         if (!symbols || symbols.length < 2) return;
         
@@ -1252,14 +1238,10 @@ Object.assign(MarketData, {
         }).join('');
     },
     
-    /**
-     * ✅ MODIFIÉ : Supprime un symbole de la comparaison et sauvegarde
-     */
     removeFromComparison(symbol) {
         this.comparisonSymbols = this.comparisonSymbols.filter(s => s !== symbol);
         delete this.comparisonData[symbol];
         
-        // ✅ MODIFIÉ : Sauvegarder automatiquement
         this.autoSave();
         
         if (this.comparisonSymbols.length < 2) {
@@ -1269,9 +1251,6 @@ Object.assign(MarketData, {
         }
     },
     
-    /**
-     * ✅ MODIFIÉ : Efface toute la comparaison et sauvegarde
-     */
     clearComparison() {
         if (this.comparisonSymbols.length > 0 && !confirm('Clear comparison?')) {
             return;
@@ -1280,7 +1259,6 @@ Object.assign(MarketData, {
         this.comparisonSymbols = [];
         this.comparisonData = {};
         
-        // ✅ MODIFIÉ : Sauvegarder automatiquement
         this.autoSave();
         
         const emptyEl = document.getElementById('comparisonEmpty');
@@ -1537,362 +1515,236 @@ Object.assign(MarketData, {
     
 });
 
-// ========== LOADING STOCK DATA (IDENTIQUE - garde le code existant) ==========
+// ========== DISPLAY STOCK OVERVIEW ==========
 
 Object.assign(MarketData, {
     
-    setupSearchListeners() {
-        const input = document.getElementById('symbolInput');
-        if (!input) return;
+    displayStockOverview() {
+        const quote = this.stockData.quote;
         
-        input.addEventListener('input', (e) => {
-            this.handleSearch(e.target.value);
-        });
+        document.getElementById('stockName').textContent = quote.name || this.currentSymbol;
+        document.getElementById('stockSymbol').textContent = quote.symbol || this.currentSymbol;
         
-        input.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter') {
-                e.preventDefault();
-                if (this.selectedSuggestionIndex >= 0) {
-                    const suggestions = document.querySelectorAll('.suggestion-item');
-                    if (suggestions[this.selectedSuggestionIndex]) {
-                        const symbol = suggestions[this.selectedSuggestionIndex].dataset.symbol;
-                        this.selectSuggestion(symbol);
-                    }
-                } else {
-                    this.searchStock();
-                }
-            } else if (e.key === 'ArrowDown') {
-                e.preventDefault();
-                this.navigateSuggestions('down');
-            } else if (e.key === 'ArrowUp') {
-                e.preventDefault();
-                this.navigateSuggestions('up');
-            } else if (e.key === 'Escape') {
-                this.hideSuggestions();
-            }
-        });
+        const price = quote.price;
+        const change = quote.change;
+        const changePercent = quote.percentChange;
         
-        input.addEventListener('focus', (e) => {
-            if (e.target.value.trim().length > 0) {
-                this.handleSearch(e.target.value);
-            }
-        });
+        document.getElementById('currentPrice').textContent = this.formatCurrency(price);
         
-        document.addEventListener('click', (e) => {
-            if (!e.target.closest('.search-input-wrapper')) {
-                this.hideSuggestions();
-            }
-        });
+        const priceChangeEl = document.getElementById('priceChange');
+        const changeText = `${change >= 0 ? '+' : ''}${this.formatCurrency(change)} (${change >= 0 ? '+' : ''}${changePercent.toFixed(2)}%)`;
+        priceChangeEl.textContent = changeText;
+        priceChangeEl.className = change >= 0 ? 'price-change positive' : 'price-change negative';
+        
+        document.getElementById('statOpen').textContent = this.formatCurrency(quote.open);
+        document.getElementById('statHigh').textContent = this.formatCurrency(quote.high);
+        document.getElementById('statLow').textContent = this.formatCurrency(quote.low);
+        document.getElementById('statVolume').textContent = this.formatVolume(quote.volume);
+        
+        if (this.statisticsData) {
+            document.getElementById('statMarketCap').textContent = this.formatLargeNumber(this.statisticsData.marketCap);
+            document.getElementById('statPE').textContent = this.formatRatio(this.statisticsData.trailingPE);
+        } else {
+            document.getElementById('statMarketCap').textContent = 'N/A';
+            document.getElementById('statPE').textContent = 'N/A';
+        }
+        
+        document.getElementById('stockOverview').classList.remove('hidden');
     },
     
-    handleSearch(query) {
-        const trimmedQuery = query.trim();
+    /**
+     * ✅ CORRIGÉ : Company Profile avec ACCORDÉON COMPACT
+     */
+    displayCompanyProfile() {
+        let profileSection = document.getElementById('companyProfileSection');
         
-        if (trimmedQuery.length === 0) {
-            this.hideSuggestions();
+        if (!profileSection) {
+            const stockOverview = document.getElementById('stockOverview');
+            if (!stockOverview) return;
+            
+            profileSection = document.createElement('section');
+            profileSection.id = 'companyProfileSection';
+            profileSection.className = 'company-profile-section card hidden';
+            stockOverview.insertAdjacentElement('afterend', profileSection);
+        }
+        
+        if (!this.profileData && !this.statisticsData) {
+            profileSection.classList.add('hidden');
             return;
         }
         
-        clearTimeout(this.searchTimeout);
-        this.searchTimeout = setTimeout(() => {
-            this.searchSymbols(trimmedQuery);
-        }, 300);
-    },
-    
-    async searchSymbols(query) {
-        console.log('🔍 Searching Twelve Data for:', query);
+        let html = `
+            <div class='card-header'>
+                <h2 class='card-title'>
+                    <i class='fas fa-building'></i> Company Information & Statistics
+                </h2>
+            </div>
+            <div class='card-body'>
+        `;
         
-        const container = document.getElementById('searchSuggestions');
-        if (!container) return;
-        
-        container.innerHTML = '<div class="suggestion-loading"><i class="fas fa-spinner fa-spin"></i> Searching...</div>';
-        container.classList.add('active');
-        
-        try {
-            const results = await this.apiClient.searchSymbol(query);
+        // ✅ ACCORDÉON 1 : Company Information
+        if (this.profileData || this.logoUrl) {
+            html += `
+                <div class='company-accordion'>
+                    <div class='accordion-header' onclick='MarketData.toggleAccordion(this)'>
+                        <span><i class='fas fa-building'></i> Company Information</span>
+                        <i class='fas fa-chevron-down'></i>
+                    </div>
+                    <div class='accordion-content'>
+                        <div class='accordion-body'>
+            `;
             
-            if (results.data && results.data.length > 0) {
-                this.displaySearchResults(results.data, query);
-            } else {
-                this.displayNoResults();
+            if (this.logoUrl) {
+                html += `
+                    <div class='company-logo'>
+                        <img src='${this.escapeHtml(this.logoUrl)}' alt='${this.escapeHtml(this.currentSymbol)} logo' onerror='this.style.display="none"'>
+                    </div>
+                `;
             }
             
-        } catch (error) {
-            console.error('Search failed:', error);
-            this.displaySearchError();
-        }
-    },
-    
-    displaySearchResults(results, query) {
-        const container = document.getElementById('searchSuggestions');
-        if (!container) return;
-        
-        // Grouper par type
-        const grouped = {
-            stocks: [],
-            etfs: [],
-            crypto: [],
-            indices: [],
-            other: []
-        };
-        
-        results.forEach(item => {
-            const type = (item.instrument_type || 'Common Stock').toLowerCase();
-            
-            if (type.includes('stock') || type.includes('equity')) {
-                grouped.stocks.push(item);
-            } else if (type.includes('etf')) {
-                grouped.etfs.push(item);
-            } else if (type.includes('crypto') || type.includes('digital currency')) {
-                grouped.crypto.push(item);
-            } else if (type.includes('index')) {
-                grouped.indices.push(item);
-            } else {
-                grouped.other.push(item);
+            if (this.profileData) {
+                html += `<div class='company-info-grid'>`;
+                
+                if (this.profileData.sector) {
+                    html += `
+                        <div class='info-item'>
+                            <span class='info-label'><i class='fas fa-industry'></i> Sector</span>
+                            <span class='info-value'>${this.escapeHtml(this.profileData.sector)}</span>
+                        </div>`;
+                }
+                
+                if (this.profileData.industry) {
+                    html += `
+                        <div class='info-item'>
+                            <span class='info-label'><i class='fas fa-cogs'></i> Industry</span>
+                            <span class='info-value'>${this.escapeHtml(this.profileData.industry)}</span>
+                        </div>`;
+                }
+                
+                if (this.profileData.country) {
+                    html += `
+                        <div class='info-item'>
+                            <span class='info-label'><i class='fas fa-globe'></i> Country</span>
+                            <span class='info-value'>${this.escapeHtml(this.profileData.country)}</span>
+                        </div>`;
+                }
+                
+                if (this.profileData.employees) {
+                    html += `
+                        <div class='info-item'>
+                            <span class='info-label'><i class='fas fa-users'></i> Employees</span>
+                            <span class='info-value'>${this.formatNumber(this.profileData.employees)}</span>
+                        </div>`;
+                }
+                
+                html += `</div>`;
+                
+                if (this.profileData.description && this.profileData.description !== 'No description available') {
+                    html += `
+                        <div class='company-description'>
+                            <h4><i class='fas fa-info-circle'></i> About</h4>
+                            <p>${this.escapeHtml(this.profileData.description)}</p>
+                        </div>
+                    `;
+                }
             }
-        });
-        
-        let html = '';
-        if (grouped.stocks.length > 0) html += this.buildCategoryHTML('Stocks', grouped.stocks, query);
-        if (grouped.etfs.length > 0) html += this.buildCategoryHTML('ETFs', grouped.etfs, query);
-        if (grouped.crypto.length > 0) html += this.buildCategoryHTML('Cryptocurrencies', grouped.crypto, query);
-        if (grouped.indices.length > 0) html += this.buildCategoryHTML('Indices', grouped.indices, query);
-        if (grouped.other.length > 0) html += this.buildCategoryHTML('Other', grouped.other, query);
-        
-        if (html === '') {
-            this.displayNoResults();
-        } else {
-            container.innerHTML = html;
-            container.classList.add('active');
-            this.selectedSuggestionIndex = -1;
-            
-            container.querySelectorAll('.suggestion-item').forEach((item) => {
-                item.addEventListener('click', () => {
-                    this.selectSuggestion(item.dataset.symbol);
-                });
-            });
-        }
-    },
-    
-    buildCategoryHTML(categoryName, items, query) {
-        const iconMap = {
-            'Stocks': 'chart-line',
-            'ETFs': 'layer-group',
-            'Cryptocurrencies': 'coins',
-            'Indices': 'chart-bar',
-            'Other': 'folder'
-        };
-        
-        const sectorMap = {
-            'Stocks': 'tech',
-            'ETFs': 'etf',
-            'Cryptocurrencies': 'crypto',
-            'Indices': 'finance',
-            'Other': 'industrial'
-        };
-        
-        let html = `<div class="suggestion-category">
-            <i class="fas fa-${iconMap[categoryName] || 'folder'}"></i> ${categoryName}
-        </div>`;
-        
-        items.slice(0, 10).forEach(item => {
-            const highlightedSymbol = this.highlightMatch(item.symbol, query);
-            const highlightedName = this.highlightMatch(item.instrument_name, query);
             
             html += `
-                <div class="suggestion-item" data-symbol="${this.escapeHtml(item.symbol)}">
-                    <div class="suggestion-icon ${sectorMap[categoryName] || 'tech'}">
-                        ${this.escapeHtml(item.symbol.substring(0, 2))}
+                        </div>
                     </div>
-                    <div class="suggestion-info">
-                        <div class="suggestion-symbol">${highlightedSymbol}</div>
-                        <div class="suggestion-name">${highlightedName}</div>
-                    </div>
-                    ${item.exchange ? `<div class="suggestion-exchange">${this.escapeHtml(item.exchange)}</div>` : ''}
                 </div>
             `;
+        }
+        
+        // ✅ ACCORDÉON 2 : Fundamental Statistics
+        if (this.statisticsData) {
+            html += `
+                <div class='company-accordion'>
+                    <div class='accordion-header' onclick='MarketData.toggleAccordion(this)'>
+                        <span><i class='fas fa-chart-bar'></i> Fundamental Statistics</span>
+                        <i class='fas fa-chevron-down'></i>
+                    </div>
+                    <div class='accordion-content'>
+                        <div class='accordion-body'>
+                            <div class='stats-category'>
+                                <h4>Valuation Metrics</h4>
+                                <div class='stats-grid'>
+                                    ${this.createStatItem('Market Cap', this.formatLargeNumber(this.statisticsData.marketCap))}
+                                    ${this.createStatItem('P/E Ratio', this.formatRatio(this.statisticsData.trailingPE))}
+                                    ${this.createStatItem('Price/Book', this.formatRatio(this.statisticsData.priceToBook))}
+                                    ${this.createStatItem('EV/Revenue', this.formatRatio(this.statisticsData.evToRevenue))}
+                                </div>
+                            </div>
+                            
+                            <div class='stats-category'>
+                                <h4>Profitability</h4>
+                                <div class='stats-grid'>
+                                    ${this.createStatItem('Profit Margin', this.formatPercent(this.statisticsData.profitMargin))}
+                                    ${this.createStatItem('ROE', this.formatPercent(this.statisticsData.returnOnEquity))}
+                                    ${this.createStatItem('Revenue', this.formatLargeNumber(this.statisticsData.revenue))}
+                                    ${this.createStatItem('EPS', this.formatCurrency(this.statisticsData.eps))}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+        
+        html += `</div>`;
+        
+        profileSection.innerHTML = html;
+        profileSection.classList.remove('hidden');
+    },
+    
+    /**
+     * ✅ NOUVEAU : Toggle accordéon
+     */
+    toggleAccordion(headerElement) {
+        const content = headerElement.nextElementSibling;
+        const isActive = headerElement.classList.contains('active');
+        
+        // Fermer tous les autres accordéons
+        document.querySelectorAll('.accordion-header.active').forEach(h => {
+            h.classList.remove('active');
+            h.nextElementSibling.classList.remove('active');
         });
         
-        return html;
+        // Toggle l'accordéon actuel
+        if (!isActive) {
+            headerElement.classList.add('active');
+            content.classList.add('active');
+        }
     },
     
-    highlightMatch(text, query) {
-        if (!text || !query) return this.escapeHtml(text);
-        const escapedText = this.escapeHtml(text);
-        const escapedQuery = this.escapeHtml(query);
-        const regex = new RegExp(`(${escapedQuery})`, 'gi');
-        return escapedText.replace(regex, '<span class="suggestion-match">$1</span>');
-    },
-    
-    displayNoResults() {
-        const container = document.getElementById('searchSuggestions');
-        if (!container) return;
-        
-        container.innerHTML = `
-            <div class="no-results">
-                <i class="fas fa-search"></i>
-                <p><strong>No results found</strong></p>
-                <p>Try searching by ticker symbol or company name</p>
+    createStatItem(label, value) {
+        if (!value || value === 'N/A' || value === '$0' || value === '0' || value === '0%') {
+            return '';
+        }
+        return `
+            <div class='stat-box'>
+                <div class='label'>${this.escapeHtml(label)}</div>
+                <div class='value'>${value}</div>
             </div>
         `;
-        container.classList.add('active');
     },
     
-    displaySearchError() {
-        const container = document.getElementById('searchSuggestions');
-        if (!container) return;
+    displayResults() {
+        this.createPriceChart();
+        this.createRSIChart();
+        this.createMACDChart();
+        this.displayTradingSignals();
+        this.displayKeyStatistics();
         
-        container.innerHTML = `
-            <div class="no-results">
-                <i class="fas fa-exclamation-triangle"></i>
-                <p><strong>Search temporarily unavailable</strong></p>
-                <p>Please enter a ticker symbol directly</p>
-            </div>
-        `;
-        container.classList.add('active');
-    },
-    
-    selectSuggestion(symbol) {
-        const input = document.getElementById('symbolInput');
-        if (input) {
-            input.value = symbol;
-        }
-        this.hideSuggestions();
-        this.loadSymbol(symbol);
-    },
-    
-    hideSuggestions() {
-        const container = document.getElementById('searchSuggestions');
-        if (!container) return;
-        
-        container.classList.remove('active');
-        this.selectedSuggestionIndex = -1;
-    },
-    
-    navigateSuggestions(direction) {
-        const suggestions = document.querySelectorAll('.suggestion-item');
-        if (suggestions.length === 0) return;
-        
-        if (this.selectedSuggestionIndex >= 0) {
-            suggestions[this.selectedSuggestionIndex].classList.remove('selected');
-        }
-        
-        if (direction === 'down') {
-            this.selectedSuggestionIndex = (this.selectedSuggestionIndex + 1) % suggestions.length;
-        } else {
-            this.selectedSuggestionIndex = this.selectedSuggestionIndex <= 0 
-                ? suggestions.length - 1 
-                : this.selectedSuggestionIndex - 1;
-        }
-        
-        suggestions[this.selectedSuggestionIndex].classList.add('selected');
-        suggestions[this.selectedSuggestionIndex].scrollIntoView({ block: 'nearest', behavior: 'smooth' });
-    },
-    
-    searchStock() {
-        const input = document.getElementById('symbolInput');
-        if (!input) return;
-        
-        const symbol = input.value.trim().toUpperCase();
-        if (symbol) {
-            this.loadSymbol(symbol);
-        }
-    },
-    
-    async loadSymbol(symbol) {
-        this.currentSymbol = symbol;
-        
-        const input = document.getElementById('symbolInput');
-        if (input) {
-            input.value = symbol;
-        }
-        
-        this.showLoading(true);
-        this.hideResults();
-        this.hideSuggestions();
-        
-        try {
-            const [quote, timeSeries, profile, statistics, logo] = await Promise.allSettled([
-                this.apiClient.getQuote(symbol),
-                this.getTimeSeriesForPeriod(symbol, this.currentPeriod),
-                this.apiClient.getProfile(symbol),
-                this.apiClient.getStatistics(symbol),
-                this.apiClient.getLogo(symbol)
-            ]);
-            
-            if (quote.status !== 'fulfilled' || timeSeries.status !== 'fulfilled') {
-                throw new Error('Failed to load stock data');
-            }
-            
-            this.stockData = {
-                symbol: quote.value.symbol,
-                prices: timeSeries.value.data,
-                quote: quote.value
-            };
-            
-            this.profileData = profile.status === 'fulfilled' ? profile.value : null;
-            this.statisticsData = statistics.status === 'fulfilled' ? statistics.value : null;
-            this.logoUrl = logo.status === 'fulfilled' ? logo.value : '';
-            
-            this.displayStockOverview();
-            this.displayCompanyProfile();
-            this.displayResults();
-            this.updateAddToWatchlistButton();
-            
-        } catch (error) {
-            console.error('Error loading stock data:', error);
-            this.showNotification(error.message || 'Failed to load stock data', 'error');
-        } finally {
-            this.showLoading(false);
-        }
-    },
-    
-    async getTimeSeriesForPeriod(symbol, period) {
-        const periodMap = {
-            '1M': { interval: '1day', outputsize: 30 },
-            '3M': { interval: '1day', outputsize: 90 },
-            '6M': { interval: '1day', outputsize: 180 },
-            '1Y': { interval: '1day', outputsize: 252 },
-            '5Y': { interval: '1week', outputsize: 260 },
-            'MAX': { interval: '1month', outputsize: 300 }
-        };
-        
-        const config = periodMap[period] || periodMap['6M'];
-        return await this.apiClient.getTimeSeries(symbol, config.interval, config.outputsize);
-    },
-    
-    changePeriod(period) {
-        this.currentPeriod = period;
-        
-        document.querySelectorAll('.period-btn').forEach(btn => {
-            btn.classList.remove('active');
-            btn.setAttribute('aria-pressed', 'false');
-        });
-        
-        const activeBtn = document.querySelector(`[data-period="${period}"]`);
-        if (activeBtn) {
-            activeBtn.classList.add('active');
-            activeBtn.setAttribute('aria-pressed', 'true');
-        }
-        
-        if (this.currentSymbol) {
-            this.loadSymbol(this.currentSymbol);
-        }
-        
-        if (this.comparisonSymbols.length > 0) {
-            this.loadComparisonFromSymbols(this.comparisonSymbols);
-        }
-    },
-    
-    updateChart() {
-        if (this.stockData) {
-            this.createPriceChart();
-        }
+        document.getElementById('resultsPanel').classList.remove('hidden');
     }
     
 });
 
-// ========== UTILITY FUNCTIONS (GARDE LE CODE EXISTANT) ==========
+// ========== CHARTS - Continuer avec createPriceChart, createRSIChart, createMACDChart... ==========
+// (Le reste du code des graphiques reste IDENTIQUE à votre version originale)
+
+// ========== UTILITY FUNCTIONS ==========
 
 Object.assign(MarketData, {
     
@@ -2001,283 +1853,7 @@ document.addEventListener('DOMContentLoaded', () => {
 // ========== EXPOSITION GLOBALE ==========
 window.MarketData = MarketData;
 
-/* ============================================
-   SIDEBAR USER MENU - Toggle
-   ============================================ */
-
-document.addEventListener('DOMContentLoaded', () => {
-    const sidebarUserTrigger = document.getElementById('sidebarUserTrigger');
-    const sidebarUserDropdown = document.getElementById('sidebarUserDropdown');
-    
-    if (sidebarUserTrigger && sidebarUserDropdown) {
-        // Toggle dropdown au clic
-        sidebarUserTrigger.addEventListener('click', (e) => {
-            e.stopPropagation();
-            
-            // Toggle classes
-            sidebarUserTrigger.classList.toggle('active');
-            sidebarUserDropdown.classList.toggle('active');
-        });
-        
-        // Fermer le dropdown si on clique ailleurs
-        document.addEventListener('click', (e) => {
-            if (!sidebarUserDropdown.contains(e.target) && 
-                !sidebarUserTrigger.contains(e.target)) {
-                sidebarUserTrigger.classList.remove('active');
-                sidebarUserDropdown.classList.remove('active');
-            }
-        });
-        
-        // Empêcher la fermeture si on clique dans le dropdown
-        sidebarUserDropdown.addEventListener('click', (e) => {
-            e.stopPropagation();
-        });
-    }
-});
-
-console.log('✅ Market Data script loaded - Cloud version');
-
-// ========== DISPLAY STOCK OVERVIEW (IDENTIQUE) ==========
-
-Object.assign(MarketData, {
-    
-    displayStockOverview() {
-        const quote = this.stockData.quote;
-        
-        document.getElementById('stockName').textContent = quote.name || this.currentSymbol;
-        document.getElementById('stockSymbol').textContent = quote.symbol || this.currentSymbol;
-        
-        const price = quote.price;
-        const change = quote.change;
-        const changePercent = quote.percentChange;
-        
-        document.getElementById('currentPrice').textContent = this.formatCurrency(price);
-        
-        const priceChangeEl = document.getElementById('priceChange');
-        const changeText = `${change >= 0 ? '+' : ''}${this.formatCurrency(change)} (${change >= 0 ? '+' : ''}${changePercent.toFixed(2)}%)`;
-        priceChangeEl.textContent = changeText;
-        priceChangeEl.className = change >= 0 ? 'price-change positive' : 'price-change negative';
-        
-        document.getElementById('statOpen').textContent = this.formatCurrency(quote.open);
-        document.getElementById('statHigh').textContent = this.formatCurrency(quote.high);
-        document.getElementById('statLow').textContent = this.formatCurrency(quote.low);
-        document.getElementById('statVolume').textContent = this.formatVolume(quote.volume);
-        
-        if (this.statisticsData) {
-            document.getElementById('statMarketCap').textContent = this.formatLargeNumber(this.statisticsData.marketCap);
-            document.getElementById('statPE').textContent = this.formatRatio(this.statisticsData.trailingPE);
-        } else {
-            document.getElementById('statMarketCap').textContent = 'N/A';
-            document.getElementById('statPE').textContent = 'N/A';
-        }
-        
-        document.getElementById('stockOverview').classList.remove('hidden');
-    },
-    
-    displayCompanyProfile() {
-        let profileSection = document.getElementById('companyProfileSection');
-        
-        if (!profileSection) {
-            const stockOverview = document.getElementById('stockOverview');
-            if (!stockOverview) return;
-            
-            profileSection = document.createElement('section');
-            profileSection.id = 'companyProfileSection';
-            profileSection.className = 'company-profile-section card hidden';
-            stockOverview.insertAdjacentElement('afterend', profileSection);
-        }
-        
-        if (!this.profileData && !this.statisticsData) {
-            profileSection.classList.add('hidden');
-            return;
-        }
-        
-        let html = `
-            <div class='card-header'>
-                <h2 class='card-title'>
-                    <i class='fas fa-building'></i> Company Information
-                </h2>
-            </div>
-            <div class='card-body'>
-        `;
-        
-        if (this.profileData || this.logoUrl) {
-            html += `<div class='company-header-section'>`;
-            
-            if (this.logoUrl) {
-                html += `
-                    <div class='company-logo'>
-                        <img src='${this.escapeHtml(this.logoUrl)}' alt='${this.escapeHtml(this.currentSymbol)} logo' onerror='this.style.display="none"'>
-                    </div>
-                `;
-            }
-            
-            if (this.profileData) {
-                html += `<div class='company-info-grid'>`;
-                
-                if (this.profileData.sector) {
-                    html += `
-                        <div class='info-item'>
-                            <span class='info-label'><i class='fas fa-industry'></i> Sector</span>
-                            <span class='info-value'>${this.escapeHtml(this.profileData.sector)}</span>
-                        </div>`;
-                }
-                
-                if (this.profileData.industry) {
-                    html += `
-                        <div class='info-item'>
-                            <span class='info-label'><i class='fas fa-cogs'></i> Industry</span>
-                            <span class='info-value'>${this.escapeHtml(this.profileData.industry)}</span>
-                        </div>`;
-                }
-                
-                if (this.profileData.country) {
-                    html += `
-                        <div class='info-item'>
-                            <span class='info-label'><i class='fas fa-globe'></i> Country</span>
-                            <span class='info-value'>${this.escapeHtml(this.profileData.country)}</span>
-                        </div>`;
-                }
-                
-                if (this.profileData.employees) {
-                    html += `
-                        <div class='info-item'>
-                            <span class='info-label'><i class='fas fa-users'></i> Employees</span>
-                            <span class='info-value'>${this.formatNumber(this.profileData.employees)}</span>
-                        </div>`;
-                }
-                
-                if (this.profileData.founded) {
-                    html += `
-                        <div class='info-item'>
-                            <span class='info-label'><i class='fas fa-calendar'></i> Founded</span>
-                            <span class='info-value'>${this.escapeHtml(this.profileData.founded)}</span>
-                        </div>`;
-                }
-                
-                if (this.profileData.ceo) {
-                    html += `
-                        <div class='info-item'>
-                            <span class='info-label'><i class='fas fa-user-tie'></i> CEO</span>
-                            <span class='info-value'>${this.escapeHtml(this.profileData.ceo)}</span>
-                        </div>`;
-                }
-                
-                html += `</div>`;
-                
-                if (this.profileData.description && this.profileData.description !== 'No description available') {
-                    html += `
-                        <div class='company-description'>
-                            <h4><i class='fas fa-info-circle'></i> About</h4>
-                            <p>${this.escapeHtml(this.profileData.description)}</p>
-                        </div>
-                    `;
-                }
-                
-                if (this.profileData.website) {
-                    html += `
-                        <div class='company-links'>
-                            <a href='${this.escapeHtml(this.profileData.website)}' target='_blank' rel='noopener noreferrer' class='btn btn-secondary btn-sm'>
-                                <i class='fas fa-external-link-alt'></i> Visit Website
-                            </a>
-                        </div>
-                    `;
-                }
-            }
-            
-            html += `</div>`;
-        }
-        
-        if (this.statisticsData) {
-            html += `
-                <div class='fundamental-stats'>
-                    <h3 class='subsection-title'><i class='fas fa-chart-bar'></i> Fundamental Statistics</h3>
-                    
-                    <div class='stats-category'>
-                        <h4>Valuation Metrics</h4>
-                        <div class='stats-grid'>
-                            ${this.createStatItem('Market Cap', this.formatLargeNumber(this.statisticsData.marketCap))}
-                            ${this.createStatItem('Enterprise Value', this.formatLargeNumber(this.statisticsData.enterpriseValue))}
-                            ${this.createStatItem('P/E Ratio (TTM)', this.formatRatio(this.statisticsData.trailingPE))}
-                            ${this.createStatItem('Forward P/E', this.formatRatio(this.statisticsData.forwardPE))}
-                            ${this.createStatItem('PEG Ratio', this.formatRatio(this.statisticsData.pegRatio))}
-                            ${this.createStatItem('Price/Sales', this.formatRatio(this.statisticsData.priceToSales))}
-                            ${this.createStatItem('Price/Book', this.formatRatio(this.statisticsData.priceToBook))}
-                            ${this.createStatItem('EV/Revenue', this.formatRatio(this.statisticsData.evToRevenue))}
-                        </div>
-                    </div>
-                    
-                    <div class='stats-category'>
-                        <h4>Profitability & Returns</h4>
-                        <div class='stats-grid'>
-                            ${this.createStatItem('Profit Margin', this.formatPercent(this.statisticsData.profitMargin))}
-                            ${this.createStatItem('Operating Margin', this.formatPercent(this.statisticsData.operatingMargin))}
-                            ${this.createStatItem('ROA', this.formatPercent(this.statisticsData.returnOnAssets))}
-                            ${this.createStatItem('ROE', this.formatPercent(this.statisticsData.returnOnEquity))}
-                            ${this.createStatItem('Revenue (TTM)', this.formatLargeNumber(this.statisticsData.revenue))}
-                            ${this.createStatItem('EBITDA', this.formatLargeNumber(this.statisticsData.ebitda))}
-                            ${this.createStatItem('Net Income', this.formatLargeNumber(this.statisticsData.netIncome))}
-                            ${this.createStatItem('EPS (Diluted)', this.formatCurrency(this.statisticsData.eps))}
-                        </div>
-                    </div>
-                    
-                    <div class='stats-category'>
-                        <h4>Stock Statistics</h4>
-                        <div class='stats-grid'>
-                            ${this.createStatItem('Beta', this.formatRatio(this.statisticsData.beta))}
-                            ${this.createStatItem('52W Change', this.formatPercent(this.statisticsData.fiftyTwoWeekChange))}
-                            ${this.createStatItem('Shares Outstanding', this.formatLargeNumber(this.statisticsData.sharesOutstanding))}
-                            ${this.createStatItem('Float', this.formatLargeNumber(this.statisticsData.sharesFloat))}
-                            ${this.createStatItem('Short Interest', this.formatLargeNumber(this.statisticsData.sharesShort))}
-                            ${this.createStatItem('Short Ratio', this.formatRatio(this.statisticsData.shortRatio))}
-                            ${this.createStatItem('Short % of Float', this.formatPercent(this.statisticsData.shortPercentOfFloat))}
-                        </div>
-                    </div>
-                    
-                    ${this.statisticsData.dividendRate > 0 ? `
-                    <div class='stats-category'>
-                        <h4>Dividends & Splits</h4>
-                        <div class='stats-grid'>
-                            ${this.createStatItem('Dividend Rate', this.formatCurrency(this.statisticsData.dividendRate))}
-                            ${this.createStatItem('Dividend Yield', this.formatPercent(this.statisticsData.dividendYield))}
-                            ${this.createStatItem('Payout Ratio', this.formatPercent(this.statisticsData.payoutRatio))}
-                            ${this.statisticsData.exDividendDate ? this.createStatItem('Ex-Dividend Date', this.statisticsData.exDividendDate) : ''}
-                        </div>
-                    </div>
-                    ` : ''}
-                </div>
-            `;
-        }
-        
-        html += `</div>`;
-        
-        profileSection.innerHTML = html;
-        profileSection.classList.remove('hidden');
-    },
-    
-    createStatItem(label, value) {
-        if (!value || value === 'N/A' || value === '$0' || value === '0' || value === '0%') {
-            return '';
-        }
-        return `
-            <div class='stat-box'>
-                <div class='label'>${this.escapeHtml(label)}</div>
-                <div class='value'>${value}</div>
-            </div>
-        `;
-    },
-    
-    displayResults() {
-        this.createPriceChart();
-        this.createRSIChart();
-        this.createMACDChart();
-        this.displayTradingSignals();
-        this.displayKeyStatistics();
-        
-        document.getElementById('resultsPanel').classList.remove('hidden');
-    }
-    
-});
+console.log('✅ Market Data script loaded - Cloud version CORRECTED');
 
 // ========== CHARTS - PRICE CHART ==========
 
@@ -2955,3 +2531,141 @@ Object.assign(MarketData, {
     }
     
 });
+
+// ========== UTILITY FUNCTIONS ==========
+
+Object.assign(MarketData, {
+    
+    formatCurrency(value) {
+        if (!value && value !== 0) return 'N/A';
+        return new Intl.NumberFormat('en-US', {
+            style: 'currency',
+            currency: 'USD',
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        }).format(value);
+    },
+    
+    formatVolume(value) {
+        if (!value) return 'N/A';
+        if (value >= 1e9) return (value / 1e9).toFixed(2) + 'B';
+        if (value >= 1e6) return (value / 1e6).toFixed(2) + 'M';
+        if (value >= 1e3) return (value / 1e3).toFixed(2) + 'K';
+        return value.toFixed(0);
+    },
+    
+    formatLargeNumber(value) {
+        if (!value) return 'N/A';
+        if (value >= 1e12) return '$' + (value / 1e12).toFixed(2) + 'T';
+        if (value >= 1e9) return '$' + (value / 1e9).toFixed(2) + 'B';
+        if (value >= 1e6) return '$' + (value / 1e6).toFixed(2) + 'M';
+        if (value >= 1e3) return '$' + (value / 1e3).toFixed(2) + 'K';
+        return '$' + value.toFixed(0);
+    },
+    
+    formatNumber(value) {
+        if (!value || value === 'N/A') return 'N/A';
+        if (typeof value === 'string') value = parseInt(value);
+        return new Intl.NumberFormat('en-US').format(value);
+    },
+    
+    formatPercent(value) {
+        if (!value && value !== 0) return 'N/A';
+        return (value * 100).toFixed(2) + '%';
+    },
+    
+    formatRatio(value) {
+        if (!value && value !== 0) return 'N/A';
+        return value.toFixed(2);
+    },
+    
+    showLoading(show) {
+        const loader = document.getElementById('loadingIndicator');
+        if (loader) {
+            if (show) {
+                loader.classList.remove('hidden');
+            } else {
+                loader.classList.add('hidden');
+            }
+        }
+    },
+    
+    hideResults() {
+        const overview = document.getElementById('stockOverview');
+        const results = document.getElementById('resultsPanel');
+        const profile = document.getElementById('companyProfileSection');
+        
+        if (overview) overview.classList.add('hidden');
+        if (results) results.classList.add('hidden');
+        if (profile) profile.classList.add('hidden');
+    },
+    
+    updateLastUpdate() {
+        const el = document.getElementById('lastUpdate');
+        if (!el) return;
+        
+        const now = new Date();
+        const formatted = now.toLocaleString('fr-FR', {
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+        });
+        el.textContent = `Last update: ${formatted}`;
+    },
+    
+    showNotification(message, type = 'info') {
+        if (window.FinanceDashboard && window.FinanceDashboard.showNotification) {
+            window.FinanceDashboard.showNotification(message, type);
+        } else {
+            console.log(`[${type.toUpperCase()}]`, message);
+        }
+    }
+    
+});
+
+// ========== INITIALIZE WHEN DOM IS LOADED ==========
+
+document.addEventListener('DOMContentLoaded', () => {
+    MarketData.init();
+});
+
+// ========== EXPOSITION GLOBALE ==========
+window.MarketData = MarketData;
+
+/* ============================================
+   SIDEBAR USER MENU - Toggle
+   ============================================ */
+
+document.addEventListener('DOMContentLoaded', () => {
+    const sidebarUserTrigger = document.getElementById('sidebarUserTrigger');
+    const sidebarUserDropdown = document.getElementById('sidebarUserDropdown');
+    
+    if (sidebarUserTrigger && sidebarUserDropdown) {
+        // Toggle dropdown au clic
+        sidebarUserTrigger.addEventListener('click', (e) => {
+            e.stopPropagation();
+            
+            // Toggle classes
+            sidebarUserTrigger.classList.toggle('active');
+            sidebarUserDropdown.classList.toggle('active');
+        });
+        
+        // Fermer le dropdown si on clique ailleurs
+        document.addEventListener('click', (e) => {
+            if (!sidebarUserDropdown.contains(e.target) && 
+                !sidebarUserTrigger.contains(e.target)) {
+                sidebarUserTrigger.classList.remove('active');
+                sidebarUserDropdown.classList.remove('active');
+            }
+        });
+        
+        // Empêcher la fermeture si on clique dans le dropdown
+        sidebarUserDropdown.addEventListener('click', (e) => {
+            e.stopPropagation();
+        });
+    }
+});
+
+console.log('✅ Market Data script loaded - Cloud version CORRECTED');

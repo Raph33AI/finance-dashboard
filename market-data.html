@@ -270,7 +270,8 @@
                                 </div>
                             </div>
                             
-                            <div class='info-box' style='margin-top: 1rem;'>
+                            <!-- ✅ CORRIGÉ : Texte blanc forcé -->
+                            <div class='info-box info-box-white-text' style='margin-top: 1rem;'>
                                 <h4><i class='fas fa-info-circle'></i> How it works</h4>
                                 <p>Create multiple portfolios to organize your watchlists, alerts, and stock comparisons. All portfolios are automatically saved to the cloud and accessible from any device.</p>
                             </div>
@@ -346,9 +347,6 @@
                         </div>
                     </section>
                     
-                    <!-- LE RESTE DU CODE HTML RESTE IDENTIQUE... -->
-                    <!-- (Je garde tout le code existant pour les sections suivantes) -->
-                    
                     <!-- Stock Comparison Section -->
                     <section class='comparison-section card' aria-labelledby='comparison-title'>
                         <div class='card-header comparison-header'>
@@ -358,7 +356,7 @@
                             <div class='comparison-actions'>
                                 <button class='btn btn-primary btn-compare' onclick='MarketData.openComparisonModal()'>
                                     <i class='fas fa-plus' aria-hidden='true'></i> Add Stocks to Compare
-                                </button>
+                                    </button>
                                 <button class='btn btn-danger btn-clear-comparison' onclick='MarketData.clearComparison()'>
                                     <i class='fas fa-trash' aria-hidden='true'></i> Clear All
                                 </button>
@@ -489,9 +487,9 @@
                         </div>
                     </section>
 
-                    <!-- Company Profile & Statistics -->
+                    <!-- ✅ CORRIGÉ : Company Profile & Statistics EN ACCORDÉON COMPACT -->
                     <section id='companyProfileSection' class='company-profile-section card hidden' aria-labelledby='company-profile-title'>
-                        <!-- Le contenu sera généré dynamiquement par JavaScript -->
+                        <!-- Le contenu sera généré dynamiquement par JavaScript avec des accordéons -->
                     </section>
                     
                     <!-- Results Panel -->
@@ -562,7 +560,7 @@
     </div>
     
     <!-- ============================================
-         MODALS (TOUS LES MODALS EXISTANTS + NOUVEAU)
+         MODALS (TOUS LES MODALS EXISTANTS + NOUVEAUX CORRIGÉS)
          ============================================ -->
          
     <!-- ===== 🆕 PORTFOLIOS MODAL ===== -->
@@ -605,6 +603,96 @@
         </div>
     </div>
     
+    <!-- ✅ CORRIGÉ : Modal pour Add Comparison -->
+    <div id='modalAddComparison' class='modal' role='dialog' aria-labelledby='comparison-modal-title' aria-modal='true'>
+        <div class='modal-content'>
+            <div class='modal-header'>
+                <h2 id='comparison-modal-title'>📊 Add Stocks to Compare</h2>
+                <button class='close-modal' onclick='MarketData.closeComparisonModal()' aria-label='Close dialog'>
+                    <i class='fas fa-times' aria-hidden='true'></i>
+                </button>
+            </div>
+            <div class='modal-body'>
+                <form class='comparison-form' onsubmit='event.preventDefault(); MarketData.loadComparison();'>
+                    <div class='form-group'>
+                        <label for='comparisonSymbols'>Enter stock symbols (comma-separated):</label>
+                        <input type='text' id='comparisonSymbols' class='form-input' placeholder='e.g., AAPL, MSFT, GOOGL, TSLA' required>
+                        <small>You can compare up to 5 stocks at once</small>
+                    </div>
+                    
+                    <div class='comparison-quick-presets'>
+                        <label>Quick Presets:</label>
+                        <button type='button' class='preset-btn' onclick='document.getElementById("comparisonSymbols").value="AAPL,MSFT,GOOGL,META,AMZN"'>
+                            <i class='fas fa-laptop-code'></i> Big Tech (FAANG)
+                        </button>
+                        <button type='button' class='preset-btn' onclick='document.getElementById("comparisonSymbols").value="BTC-USD,ETH-USD,BNB-USD,ADA-USD"'>
+                            <i class='fab fa-bitcoin'></i> Top Cryptocurrencies
+                        </button>
+                        <button type='button' class='preset-btn' onclick='document.getElementById("comparisonSymbols").value="^GSPC,^DJI,^IXIC,^FTSE"'>
+                            <i class='fas fa-chart-line'></i> Major Indices
+                        </button>
+                    </div>
+                    
+                    <div class='form-actions'>
+                        <button type='submit' class='btn btn-create'>
+                            <i class='fas fa-chart-bar'></i> Load Comparison
+                        </button>
+                        <button type='button' class='btn btn-cancel' onclick='MarketData.closeComparisonModal()'>
+                            <i class='fas fa-times'></i> Cancel
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <!-- ✅ CORRIGÉ : Modal pour Create Alert -->
+    <div id='modalCreateAlert' class='modal' role='dialog' aria-labelledby='alert-modal-title' aria-modal='true'>
+        <div class='modal-content'>
+            <div class='modal-header'>
+                <h2 id='alert-modal-title'>🔔 Create Price Alert</h2>
+                <button class='close-modal' onclick='MarketData.closeAlertModal()' aria-label='Close dialog'>
+                    <i class='fas fa-times' aria-hidden='true'></i>
+                </button>
+            </div>
+            <div class='modal-body'>
+                <form class='alert-form' onsubmit='event.preventDefault(); MarketData.createAlert();'>
+                    <div class='form-group'>
+                        <label for='alertSymbol'>Stock Symbol:</label>
+                        <input type='text' id='alertSymbol' class='form-input' placeholder='e.g., AAPL' required>
+                    </div>
+                    
+                    <div class='form-group'>
+                        <label for='alertPrice'>Target Price (USD):</label>
+                        <input type='number' id='alertPrice' class='form-input' placeholder='e.g., 150.00' step='0.01' min='0' required>
+                    </div>
+                    
+                    <div class='form-group'>
+                        <label for='alertType'>Alert Type:</label>
+                        <select id='alertType' class='form-input'>
+                            <option value='above'>Alert when price goes ABOVE target</option>
+                            <option value='below'>Alert when price goes BELOW target</option>
+                        </select>
+                    </div>
+                    
+                    <div class='form-group'>
+                        <label for='alertNote'>Note (optional):</label>
+                        <textarea id='alertNote' class='form-input' rows='3' placeholder='Add a personal note for this alert...'></textarea>
+                    </div>
+                    
+                    <div class='form-actions'>
+                        <button type='submit' class='btn btn-create'>
+                            <i class='fas fa-bell'></i> Create Alert
+                        </button>
+                        <button type='button' class='btn btn-cancel' onclick='MarketData.closeAlertModal()'>
+                            <i class='fas fa-times'></i> Cancel
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
     <!-- Search Help Modal -->
     <div id='modalSearchHelp' class='modal' role='dialog' aria-labelledby='search-help-title' aria-modal='true'>
         <div class='modal-content'>
@@ -640,11 +728,6 @@
         </div>
     </div>
     
-    <!-- (TOUS LES AUTRES MODALS RESTENT IDENTIQUES) -->
-    <!-- Comparison Modal, Alert Modal, Chart Help, RSI Help, MACD Help, Signals Help -->
-    
-    <!-- LES MODALS EXISTANTS ICI... (je les garde tels quels pour économiser de l'espace) -->
-    
     <!-- ============================================
         CACHE MONITORING WIDGET
         ============================================ -->
@@ -654,15 +737,6 @@
             <span class='cache-badge' id='cacheBadge' aria-label='Number of cached entries'>0</span>
         </button>
     </div>
-    
-    <aside id='cachePanel' class='cache-panel hidden' role='complementary' aria-labelledby='cache-panel-title'>
-        <!-- (Code du cache panel identique) -->
-    </aside>
-    
-    <!-- Cache Stats Auto-Update -->
-    <script>
-    // (Code cache monitoring identique)
-    </script>
     
     <!-- Screen reader only class -->
     <style>
@@ -678,35 +752,77 @@
             border-width: 0;
         }
         
-        /* ===== STYLES POUR PORTFOLIO MANAGEMENT ===== */
-        .portfolio-management-section {
-            margin-bottom: 2rem;
+        /* ===== ✅ CORRIGÉ : Texte blanc forcé dans info-box ===== */
+        .info-box-white-text,
+        .info-box-white-text h4,
+        .info-box-white-text p {
+            color: white !important;
         }
         
-        .simulation-management {
-            background: linear-gradient(135deg, #f8fafc 0%, #e0e7ff 100%);
-            border-radius: 12px;
-            padding: 1.5rem;
+        .info-box-white-text h4 i {
+            color: white !important;
         }
         
-        .current-simulation-display {
+        /* ===== ✅ CORRIGÉ : Texte blanc dans simulation-management ===== */
+        .simulation-management,
+        .simulation-management .label,
+        .simulation-management .value {
+            color: white !important;
+        }
+        
+        [data-theme="dark"] .simulation-management .label,
+        [data-theme="dark"] .simulation-management .value {
+            color: white !important;
+        }
+        
+        /* ===== ✅ NOUVEAU : Accordéon pour Company Profile ===== */
+        .company-accordion {
+            margin-bottom: var(--spacing-md);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            background: var(--background-primary);
+        }
+        
+        .accordion-header {
+            background: var(--background-secondary);
+            padding: var(--spacing-md) var(--spacing-lg);
+            cursor: pointer;
             display: flex;
+            justify-content: space-between;
             align-items: center;
-            justify-content: center;
-            gap: 0.75rem;
-            margin-bottom: 1rem;
-            font-size: 1.125rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            transition: all var(--transition-base);
+            user-select: none;
         }
         
-        .current-simulation-display .label {
-            color: #64748b;
-            font-weight: 500;
+        .accordion-header:hover {
+            background: var(--background-tertiary);
         }
         
-        .current-simulation-display .value {
-            color: #2563eb;
-            font-weight: 700;
-            font-size: 1.25rem;
+        .accordion-header i.fa-chevron-down {
+            transition: transform var(--transition-base);
+            color: var(--primary-color);
+        }
+        
+        .accordion-header.active i.fa-chevron-down {
+            transform: rotate(180deg);
+        }
+        
+        .accordion-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out;
+        }
+        
+        .accordion-content.active {
+            max-height: 3000px;
+            transition: max-height 0.5s ease-in;
+        }
+        
+        .accordion-body {
+            padding: var(--spacing-lg);
         }
     </style>
 
