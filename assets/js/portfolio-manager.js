@@ -9,7 +9,7 @@ const PortfolioManager = (function() {
     // ========== VARIABLES PRIVÉES ==========
     let currentPortfolioName = 'default';
     let availablePortfolios = [];
-    let cloudflareWorkerURL = 'https://finance-dashboard-storage.raphael-nardone.workers.dev';
+    let cloudflareWorkerURL = 'https://finance-hub-api.raphnardone.workers.dev';
     
     // ========== INITIALISATION ==========
     
