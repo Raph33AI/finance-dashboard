@@ -1,6 +1,6 @@
 /* ==============================================
    PORTFOLIO-MANAGER.JS - Gestion Multi-Portefeuilles Market Data
-   Version Cloud avec Cloudflare Workers
+   Version Cloud avec Cloudflare Workers - CORRIGÉ
    ============================================== */
 
 const PortfolioManager = (function() {
@@ -10,6 +10,7 @@ const PortfolioManager = (function() {
     let currentPortfolioName = 'default';
     let availablePortfolios = [];
     let cloudflareWorkerURL = 'https://finance-hub-api.raphnardone.workers.dev';
+    const API_PREFIX = '/api'; // ✅ AJOUTÉ
     
     // ========== INITIALISATION ==========
     
@@ -74,7 +75,8 @@ const PortfolioManager = (function() {
             
             const idToken = await user.getIdToken();
             
-            const response = await fetch(`${cloudflareWorkerURL}/portfolios/list`, {
+            // ✅ CORRIGÉ : /api/portfolios
+            const response = await fetch(`${cloudflareWorkerURL}${API_PREFIX}/portfolios`, {
                 method: 'GET',
                 headers: {
                     'Authorization': `Bearer ${idToken}`,
@@ -117,7 +119,8 @@ const PortfolioManager = (function() {
             
             const idToken = await user.getIdToken();
             
-            const response = await fetch(`${cloudflareWorkerURL}/portfolios/${encodeURIComponent(name)}`, {
+            // ✅ CORRIGÉ : /api/portfolios/:name
+            const response = await fetch(`${cloudflareWorkerURL}${API_PREFIX}/portfolios/${encodeURIComponent(name)}`, {
                 method: 'GET',
                 headers: {
                     'Authorization': `Bearer ${idToken}`,
@@ -136,7 +139,8 @@ const PortfolioManager = (function() {
             const data = await response.json();
             console.log('✅ Portfolio loaded from cloud');
             
-            return data;
+            // ✅ CORRIGÉ : extraire les données correctement
+            return data.portfolio?.data || data;
             
         } catch (error) {
             console.error('❌ Error loading portfolio:', error);
@@ -160,13 +164,16 @@ const PortfolioManager = (function() {
             
             const idToken = await user.getIdToken();
             
+            // ✅ CORRIGÉ : payload conforme au worker
             const payload = {
                 name: name,
-                data: portfolioData,
-                timestamp: Date.now()
+                watchlist: portfolioData.watchlist || [],
+                alerts: portfolioData.alerts || [],
+                comparisonSymbols: portfolioData.comparisonSymbols || []
             };
             
-            const response = await fetch(`${cloudflareWorkerURL}/portfolios/${encodeURIComponent(name)}`, {
+            // ✅ CORRIGÉ : /api/portfolios/:name
+            const response = await fetch(`${cloudflareWorkerURL}${API_PREFIX}/portfolios/${encodeURIComponent(name)}`, {
                 method: 'PUT',
                 headers: {
                     'Authorization': `Bearer ${idToken}`,
@@ -227,7 +234,8 @@ const PortfolioManager = (function() {
             
             const idToken = await user.getIdToken();
             
-            const response = await fetch(`${cloudflareWorkerURL}/portfolios/${encodeURIComponent(name)}`, {
+            // ✅ CORRIGÉ : /api/portfolios/:name
+            const response = await fetch(`${cloudflareWorkerURL}${API_PREFIX}/portfolios/${encodeURIComponent(name)}`, {
                 method: 'DELETE',
                 headers: {
                     'Authorization': `Bearer ${idToken}`,
@@ -473,7 +481,8 @@ const PortfolioManager = (function() {
             
             const idToken = await user.getIdToken();
             
-            await fetch(`${cloudflareWorkerURL}/portfolios/${encodeURIComponent(name)}`, {
+            // ✅ CORRIGÉ : /api/portfolios/:name
+            await fetch(`${cloudflareWorkerURL}${API_PREFIX}/portfolios/${encodeURIComponent(name)}`, {
                 method: 'DELETE',
                 headers: {
                     'Authorization': `Bearer ${idToken}`,
