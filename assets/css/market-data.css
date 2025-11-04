@@ -1,7 +1,41 @@
 /* ==============================================
    MARKET-DATA.CSS - Modern Minimalist Design 2024
-   Version optimisée avec Container Queries - CORRIGÉ
+   Version optimisée avec Container Queries - AMÉLIORÉ
+   Nouvelles nuances de bleu + Portfolio Management corrigé
    ============================================== */
+
+/* ============================================
+   🎨 NOUVELLES VARIABLES DE COULEURS BLEUES
+   ============================================ */
+
+:root {
+    /* Nouveaux bleus modernes et élégants */
+    --primary-color: #1e5eeb;          /* Bleu primaire éclatant */
+    --primary-light: #4c8aff;          /* Bleu clair lumineux */
+    --primary-dark: #0d3d9f;           /* Bleu foncé profond */
+    --primary-ultra-light: #e8f2ff;    /* Bleu très clair pour backgrounds */
+    
+    /* Bleus pour gradients */
+    --gradient-blue-start: #1e5eeb;
+    --gradient-blue-mid: #2d6bff;
+    --gradient-blue-end: #4c8aff;
+    
+    /* Bleus spécifiques dark mode */
+    --dark-blue-primary: #1a4db8;
+    --dark-blue-secondary: #153a8a;
+    --dark-blue-tertiary: #0f2d6b;
+}
+
+[data-theme="dark"] {
+    --primary-color: #4c8aff;
+    --primary-light: #6da3ff;
+    --primary-dark: #1a4db8;
+    --primary-ultra-light: #0f2451;
+    
+    --gradient-blue-start: #1a4db8;
+    --gradient-blue-mid: #2d6bff;
+    --gradient-blue-end: #4c8aff;
+}
 
 /* ============================================
    SEARCH PANEL
@@ -62,7 +96,7 @@
 #symbolInput:focus {
     outline: none;
     border-color: var(--primary-color);
-    box-shadow: 0 0 0 3px rgb(37 99 235 / 0.1);
+    box-shadow: 0 0 0 3px rgb(30 94 235 / 0.1);
 }
 
 #symbolInput::placeholder {
@@ -180,7 +214,7 @@
 }
 
 .suggestion-icon.tech {
-    background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
+    background: linear-gradient(135deg, var(--gradient-blue-start), var(--gradient-blue-end));
 }
 
 .suggestion-icon.finance {
@@ -341,7 +375,7 @@
 .period-btn:hover {
     border-color: var(--primary-color);
     color: var(--primary-color);
-    background: rgb(37 99 235 / 0.05);
+    background: rgb(30 94 235 / 0.05);
 }
 
 .period-btn.active {
@@ -722,7 +756,7 @@
 }
 
 .alert-status.active {
-    background: rgb(37 99 235 / 0.1);
+    background: rgb(30 94 235 / 0.1);
     color: var(--primary-color);
 }
 
@@ -825,7 +859,7 @@
    ============================================ */
 
 .stock-overview {
-    background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
+    background: linear-gradient(135deg, var(--gradient-blue-start), var(--gradient-blue-end));
     color: white;
     padding: var(--spacing-2xl);
     border-radius: var(--radius-xl);
@@ -1100,7 +1134,7 @@
     left: 0;
     width: 100%;
     height: 3px;
-    background: linear-gradient(90deg, var(--primary-color), var(--primary-light));
+    background: linear-gradient(90deg, var(--gradient-blue-start), var(--gradient-blue-end));
     opacity: 0;
     transition: opacity var(--transition-base);
 }
@@ -1140,7 +1174,7 @@
 }
 
 .stat-box.highlight {
-    background: linear-gradient(135deg, rgb(37 99 235 / 0.05), rgb(37 99 235 / 0.02));
+    background: linear-gradient(135deg, rgb(30 94 235 / 0.05), rgb(30 94 235 / 0.02));
     border-color: var(--primary-color);
 }
 
@@ -1632,7 +1666,7 @@
 }
 
 /* ============================================
-   ✅ PORTFOLIO MANAGEMENT SECTION - TEXTE BLANC FORCÉ
+   ✅ PORTFOLIO MANAGEMENT SECTION - TOUT EN BLANC !
    ============================================ */
 
 .portfolio-management-section {
@@ -1644,19 +1678,22 @@
     box-shadow: var(--shadow-sm);
 }
 
+/* ✅ SIMULATION MANAGEMENT - GRADIENT BLEU + TEXTE BLANC */
 .simulation-management {
-    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important;
+    background: linear-gradient(135deg, var(--gradient-blue-start), var(--gradient-blue-end)) !important;
     border-radius: var(--radius-lg);
     padding: var(--spacing-xl);
-    border: 1px solid #2563eb;
+    border: 1px solid var(--primary-dark);
     margin-bottom: var(--spacing-lg);
+    box-shadow: 0 4px 12px rgba(30, 94, 235, 0.15);
 }
 
 [data-theme="dark"] .simulation-management {
-    background: linear-gradient(135deg, #1e40af 0%, #1e3a8a 100%) !important;
-    border-color: #1e40af;
+    background: linear-gradient(135deg, var(--dark-blue-primary), var(--dark-blue-secondary)) !important;
+    border-color: var(--dark-blue-tertiary);
 }
 
+/* ✅ CURRENT SIMULATION DISPLAY - TEXTE BLANC TOTAL */
 .current-simulation-display {
     display: flex;
     align-items: center;
@@ -1666,8 +1703,11 @@
     font-size: 1.125rem;
 }
 
-.current-simulation-display .label {
+.current-simulation-display * {
     color: white !important;
+}
+
+.current-simulation-display .label {
     font-weight: 500;
     display: flex;
     align-items: center;
@@ -1675,20 +1715,21 @@
 }
 
 .current-simulation-display .label i {
-    color: white !important;
+    font-size: 1.25rem;
 }
 
 .current-simulation-display .value {
-    color: white !important;
     font-weight: 700;
     font-size: 1.25rem;
-    background: rgba(255, 255, 255, 0.2) !important;
+    background: rgba(255, 255, 255, 0.25) !important;
     padding: 0.5rem 1.25rem;
     border-radius: var(--radius-md);
-    border: 2px solid white !important;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    border: 2px solid rgba(255, 255, 255, 0.5) !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    backdrop-filter: blur(10px);
 }
 
+/* ✅ TOOLBAR ROW - TEXTE BLANC POUR LES BOUTONS */
 .toolbar-row {
     display: flex;
     align-items: center;
@@ -1696,22 +1737,22 @@
     flex-wrap: wrap;
 }
 
-/* ✅ INFO BOX - TEXTE BLANC FORCÉ */
+/* ✅ INFO BOX - TEXTE BLANC TOTAL */
 .info-box {
-    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important;
+    background: rgba(255, 255, 255, 0.1) !important;
     border-left: 4px solid white !important;
     padding: var(--spacing-lg);
     border-radius: var(--radius-md);
     margin-top: var(--spacing-lg);
+    backdrop-filter: blur(10px);
 }
 
-[data-theme="dark"] .info-box {
-    background: linear-gradient(135deg, #1e40af 0%, #1e3a8a 100%) !important;
+.info-box * {
+    color: white !important;
 }
 
 .info-box h4 {
     margin: 0 0 var(--spacing-sm) 0;
-    color: white !important;
     font-size: 1rem;
     font-weight: 600;
     display: flex;
@@ -1719,23 +1760,19 @@
     gap: var(--spacing-sm);
 }
 
-.info-box h4 i {
-    color: white !important;
-}
-
 .info-box p {
     margin: 0;
-    color: white !important;
     font-size: 0.9375rem;
     line-height: 1.6;
 }
 
 /* ============================================
-   PORTFOLIOS MODAL
+   ✅ PORTFOLIOS MODAL - NOUVEAU STYLE
    ============================================ */
 
+/* ✅ INFO SECTION DANS LA MODALE */
 .simulations-info {
-    background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+    background: linear-gradient(135deg, var(--primary-ultra-light) 0%, #dbeafe 100%);
     border-left: 4px solid var(--primary-color);
     padding: var(--spacing-lg) var(--spacing-xl);
     border-radius: var(--radius-md);
@@ -1744,7 +1781,7 @@
 
 [data-theme="dark"] .simulations-info {
     background: linear-gradient(135deg, #1e3a5f 0%, #1e40af 100%);
-    border-color: #3b82f6;
+    border-color: var(--primary-light);
 }
 
 .simulations-info p {
@@ -1759,12 +1796,14 @@
     margin-right: var(--spacing-xs);
 }
 
+/* ✅ LISTE DES SIMULATIONS */
 .simulations-list {
     display: flex;
     flex-direction: column;
     gap: var(--spacing-md);
 }
 
+/* ✅ ITEM DE SIMULATION */
 .simulation-item {
     background: var(--background-primary);
     border: 2px solid var(--border-color);
@@ -1779,14 +1818,14 @@
 
 .simulation-item:hover {
     border-color: var(--primary-color);
-    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.1);
+    box-shadow: 0 4px 12px rgba(30, 94, 235, 0.1);
     transform: translateY(-2px);
 }
 
 .simulation-item.active {
-    background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+    background: linear-gradient(135deg, var(--primary-ultra-light) 0%, #dbeafe 100%);
     border-color: var(--primary-color);
-    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.15);
+    box-shadow: 0 4px 12px rgba(30, 94, 235, 0.15);
 }
 
 [data-theme="dark"] .simulation-item {
@@ -1795,14 +1834,15 @@
 }
 
 [data-theme="dark"] .simulation-item:hover {
-    border-color: #3b82f6;
+    border-color: var(--primary-light);
 }
 
 [data-theme="dark"] .simulation-item.active {
     background: linear-gradient(135deg, #1e3a5f 0%, #1e40af 100%);
-    border-color: #3b82f6;
+    border-color: var(--primary-light);
 }
 
+/* ✅ INFO DU PORTFOLIO */
 .simulation-info {
     flex: 1;
     min-width: 0;
@@ -1823,25 +1863,62 @@
     font-size: 1rem;
 }
 
+/* ✅ DATE DE CRÉATION - CORRECTION */
 .simulation-meta {
     display: flex;
     align-items: center;
     gap: var(--spacing-md);
     font-size: 0.875rem;
     color: var(--text-secondary);
+    flex-wrap: wrap;
 }
 
-.simulation-meta i {
-    color: var(--text-tertiary);
+.simulation-meta .creation-date {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+    font-weight: 500;
+    color: var(--text-secondary);
+}
+
+.simulation-meta .creation-date i {
+    color: var(--primary-color);
     font-size: 0.8125rem;
 }
 
+.simulation-meta .creation-date .date-value {
+    color: var(--text-primary);
+    font-weight: 600;
+}
+
+/* Alternative styling pour la date */
+.portfolio-date,
+.simulation-date {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    background: var(--background-secondary);
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    font-weight: 500;
+}
+
+.portfolio-date i,
+.simulation-date i {
+    color: var(--primary-color);
+    font-size: 0.75rem;
+}
+
+/* ✅ ACTIONS DU PORTFOLIO */
 .simulation-actions {
     display: flex;
     gap: var(--spacing-sm);
     flex-wrap: wrap;
 }
 
+/* ✅ BADGES */
 .badge-current {
     background: var(--success-color);
     color: white;
@@ -1852,6 +1929,7 @@
     text-transform: uppercase;
     letter-spacing: 0.05em;
     margin-left: var(--spacing-xs);
+    box-shadow: 0 2px 4px rgba(16, 185, 129, 0.2);
 }
 
 .badge-default {
@@ -1864,8 +1942,10 @@
     text-transform: uppercase;
     letter-spacing: 0.05em;
     margin-left: var(--spacing-xs);
+    box-shadow: 0 2px 4px rgba(100, 116, 139, 0.2);
 }
 
+/* ✅ ÉTAT VIDE */
 .no-portfolios {
     text-align: center;
     padding: var(--spacing-2xl);
@@ -1884,6 +1964,7 @@
     font-size: 1rem;
 }
 
+/* ✅ LOADING STATE */
 .loading-simulations {
     text-align: center;
     padding: var(--spacing-xl);
@@ -1897,7 +1978,69 @@
     animation: spin 1s linear infinite;
 }
 
-/* Button Sizes */
+/* ============================================
+   ✅ MODAL CLOSE BUTTON - NOUVEAU STYLE
+   ============================================ */
+
+.modal-close,
+.close-modal,
+.btn-close-modal {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    width: 36px;
+    height: 36px;
+    border-radius: var(--radius-md);
+    background: rgba(239, 68, 68, 0.1);
+    border: 1px solid rgba(239, 68, 68, 0.2);
+    color: var(--danger-color);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all var(--transition-base);
+    font-size: 1.125rem;
+    z-index: 10;
+}
+
+.modal-close:hover,
+.close-modal:hover,
+.btn-close-modal:hover {
+    background: var(--danger-color);
+    color: white;
+    border-color: var(--danger-color);
+    transform: scale(1.1) rotate(90deg);
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+}
+
+.modal-close:active,
+.close-modal:active,
+.btn-close-modal:active {
+    transform: scale(0.95) rotate(90deg);
+}
+
+.modal-close i,
+.close-modal i,
+.btn-close-modal i {
+    transition: transform var(--transition-base);
+}
+
+/* Variante pour bouton en bas de modal */
+.modal-footer .btn-close-modal {
+    position: static;
+    width: auto;
+    padding: 0.625rem 1.5rem;
+    border-radius: var(--radius-md);
+}
+
+.modal-footer .btn-close-modal:hover {
+    transform: translateY(-1px);
+}
+
+/* ============================================
+   ✅ BUTTON SIZES & VARIANTS
+   ============================================ */
+
 .btn-sm {
     padding: 0.5rem 1rem;
     font-size: 0.875rem;
@@ -1938,6 +2081,7 @@
     color: var(--text-tertiary);
     cursor: not-allowed;
     opacity: 0.6;
+    transform: none;
 }
 
 .btn-sm.btn-secondary {
@@ -2094,6 +2238,11 @@
         width: 100%;
         justify-content: center;
     }
+    
+    .simulation-meta {
+        flex-direction: column;
+        align-items: flex-start;
+    }
 }
 
 @media (max-width: 480px) {
@@ -2142,10 +2291,12 @@
         font-size: 1rem;
     }
     
-    .simulation-meta {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: var(--spacing-xs);
+    .modal-close,
+    .close-modal,
+    .btn-close-modal {
+        width: 32px;
+        height: 32px;
+        font-size: 1rem;
     }
 }
 
@@ -2159,7 +2310,10 @@
     .signal-card,
     .stat-box,
     .comparison-stock-chip,
-    .preset-btn {
+    .preset-btn,
+    .simulation-item,
+    .modal-close,
+    .close-modal {
         transition: none;
     }
 }
