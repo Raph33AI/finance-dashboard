@@ -11,11 +11,8 @@ const PortfolioManager = (function() {
 
     let firebaseReady = false;
     let currentUser = null;
-    const FIREBASE_TIMEOUT = 15000; // 15 secondes
+    const FIREBASE_TIMEOUT = 15000;
 
-    /**
-     * Attendre l'initialisation de Firebase
-     */
     function waitForFirebase() {
         return new Promise((resolve) => {
             const startTime = Date.now();
@@ -54,9 +51,6 @@ const PortfolioManager = (function() {
         });
     }
 
-    /**
-     * 🔧 Assurer que le document utilisateur existe
-     */
     async function ensureUserDocument() {
         if (!firebaseReady || !currentUser) {
             return false;
@@ -95,7 +89,6 @@ const PortfolioManager = (function() {
         }
     }
 
-    // Initialiser au chargement
     (async function init() {
         console.log('🔄 Initializing Portfolio Manager...');
         await waitForFirebase();
@@ -111,11 +104,8 @@ const PortfolioManager = (function() {
     // 📊 GESTION DES PORTFOLIOS
     // ═══════════════════════════════════════════════════════════════
 
-    let currentPortfolio = 'default';
+    let currentPortfolio = localStorage.getItem('currentPortfolio') || 'default';
 
-    /**
-     * 📋 Lister tous les portfolios
-     */
     async function listPortfolios() {
         if (!firebaseReady || !currentUser) {
             return listLocalPortfolios();
@@ -148,9 +138,6 @@ const PortfolioManager = (function() {
         }
     }
 
-    /**
-     * 📋 Lister les portfolios locaux
-     */
     function listLocalPortfolios() {
         const portfolios = [];
         for (let i = 0; i < localStorage.length; i++) {
@@ -172,9 +159,6 @@ const PortfolioManager = (function() {
         return portfolios;
     }
 
-    /**
-     * 📥 Charger un portfolio depuis le cloud
-     */
     async function loadFromCloud(portfolioName) {
         console.log(`📥 Loading portfolio "${portfolioName}" from cloud...`);
         
@@ -197,7 +181,6 @@ const PortfolioManager = (function() {
                 const data = doc.data();
                 console.log('✅ Portfolio loaded from cloud');
                 
-                // Sauvegarder aussi localement
                 localStorage.setItem(`portfolio_${portfolioName}`, JSON.stringify(data));
                 
                 return data;
@@ -212,9 +195,6 @@ const PortfolioManager = (function() {
         }
     }
 
-    /**
-     * 📥 Charger un portfolio depuis le stockage local
-     */
     function loadFromLocal(portfolioName) {
         const key = `portfolio_${portfolioName}`;
         const data = localStorage.getItem(key);
@@ -231,9 +211,6 @@ const PortfolioManager = (function() {
         return createDefaultPortfolioData(portfolioName);
     }
 
-    /**
-     * 💾 Sauvegarder un portfolio dans le cloud
-     */
     async function saveToCloud(portfolioName, data) {
         console.log(`💾 Saving portfolio "${portfolioName}" to cloud...`);
         
@@ -284,9 +261,6 @@ const PortfolioManager = (function() {
         }
     }
 
-    /**
-     * 🗑️ Supprimer un portfolio
-     */
     async function deletePortfolio(portfolioName) {
         if (portfolioName === 'default') {
             console.warn('⚠️ Cannot delete default portfolio');
@@ -295,7 +269,6 @@ const PortfolioManager = (function() {
         
         console.log(`🗑️ Deleting portfolio "${portfolioName}"...`);
         
-        // Supprimer du cloud
         if (firebaseReady && currentUser) {
             try {
                 const db = firebase.firestore();
@@ -314,10 +287,8 @@ const PortfolioManager = (function() {
             }
         }
         
-        // Supprimer du local
         localStorage.removeItem(`portfolio_${portfolioName}`);
         
-        // Si c'était le portfolio actuel, revenir à default
         if (currentPortfolio === portfolioName) {
             currentPortfolio = 'default';
             localStorage.setItem('currentPortfolio', 'default');
@@ -326,27 +297,19 @@ const PortfolioManager = (function() {
         return true;
     }
 
-    /**
-     * 🔄 Changer de portfolio actif
-     */
     async function switchPortfolio(portfolioName) {
         console.log(`🔄 Switching to portfolio "${portfolioName}"...`);
         
         currentPortfolio = portfolioName;
         localStorage.setItem('currentPortfolio', portfolioName);
         
-        // Charger les données du portfolio
         const data = await loadFromCloud(portfolioName);
         
-        // Mettre à jour l'affichage
         updateCurrentPortfolioDisplay(portfolioName);
         
         return data;
     }
 
-    /**
-     * ➕ Créer un nouveau portfolio
-     */
     async function createNewPortfolio() {
         const name = prompt('Nom du nouveau portfolio:', '');
         
@@ -356,21 +319,17 @@ const PortfolioManager = (function() {
         
         const portfolioName = name.trim();
         
-        // Vérifier si existe déjà
         const portfolios = await listPortfolios();
         if (portfolios.some(p => p.name === portfolioName)) {
             alert('Un portfolio avec ce nom existe déjà !');
             return null;
         }
         
-        // Créer le portfolio
         const data = createDefaultPortfolioData(portfolioName);
         await saveToCloud(portfolioName, data);
         
-        // Basculer vers ce portfolio
         await switchPortfolio(portfolioName);
         
-        // Rafraîchir la liste
         if (typeof MarketData !== 'undefined' && MarketData.refreshPortfoliosList) {
             MarketData.refreshPortfoliosList();
         }
@@ -378,9 +337,6 @@ const PortfolioManager = (function() {
         return data;
     }
 
-    /**
-     * 📋 Créer les données par défaut d'un portfolio
-     */
     function createDefaultPortfolioData(name) {
         return {
             name: name,
@@ -392,9 +348,6 @@ const PortfolioManager = (function() {
         };
     }
 
-    /**
-     * 🔄 Mettre à jour l'affichage du portfolio actuel
-     */
     function updateCurrentPortfolioDisplay(portfolioName) {
         const display = document.getElementById('currentPortfolioName');
         if (display) {
@@ -402,24 +355,15 @@ const PortfolioManager = (function() {
         }
     }
 
-    /**
-     * 🔄 Définir un portfolio par défaut
-     */
     async function setDefaultPortfolio(portfolioName) {
         localStorage.setItem('defaultPortfolio', portfolioName);
         console.log(`✅ Default portfolio set to: ${portfolioName}`);
     }
 
-    /**
-     * 📖 Obtenir le portfolio par défaut
-     */
     function getDefaultPortfolio() {
         return localStorage.getItem('defaultPortfolio') || 'default';
     }
 
-    /**
-     * 📖 Obtenir le portfolio actuel
-     */
     function getCurrentPortfolio() {
         return currentPortfolio;
     }
@@ -429,6 +373,7 @@ const PortfolioManager = (function() {
     // ═══════════════════════════════════════════════════════════════
 
     return {
+        // Méthodes principales
         listPortfolios,
         loadFromCloud,
         saveToCloud,
@@ -439,6 +384,11 @@ const PortfolioManager = (function() {
         getDefaultPortfolio,
         getCurrentPortfolio,
         
+        // ✅ ALIAS POUR COMPATIBILITÉ
+        getCurrentPortfolioName: getCurrentPortfolio,
+        loadPortfolio: loadFromCloud,
+        savePortfolio: saveToCloud,
+        
         // État Firebase
         isFirebaseReady: () => firebaseReady,
         getCurrentUser: () => currentUser
@@ -446,5 +396,4 @@ const PortfolioManager = (function() {
 
 })();
 
-// Exposer globalement
 window.PortfolioManager = PortfolioManager;
