@@ -51,6 +51,9 @@ const PortfolioManager = (function() {
         });
     }
 
+    /**
+     * 🔧 Assurer que le document utilisateur existe
+     */
     async function ensureUserDocument() {
         if (!firebaseReady || !currentUser) {
             return false;
@@ -89,6 +92,82 @@ const PortfolioManager = (function() {
         }
     }
 
+    /**
+     * 🔧 Assurer qu'au moins le portfolio "default" existe
+     */
+    async function ensureDefaultPortfolio() {
+        if (!firebaseReady || !currentUser) {
+            // Mode local : créer default si n'existe pas
+            const localDefault = localStorage.getItem('portfolio_default');
+            if (!localDefault) {
+                console.log('📝 Creating default portfolio locally...');
+                const defaultData = createDefaultPortfolioData('default');
+                localStorage.setItem('portfolio_default', JSON.stringify(defaultData));
+            }
+            return false;
+        }
+        
+        try {
+            const db = firebase.firestore();
+            const userId = currentUser.uid;
+            
+            // Vérifier si le portfolio "default" existe
+            const defaultDoc = await db
+                .collection('users')
+                .doc(userId)
+                .collection('portfolios')
+                .doc('default')
+                .get();
+            
+            if (!defaultDoc.exists) {
+                console.log('📝 Creating default portfolio in cloud...');
+                
+                const defaultData = createDefaultPortfolioData('default');
+                
+                await db
+                    .collection('users')
+                    .doc(userId)
+                    .collection('portfolios')
+                    .doc('default')
+                    .set(defaultData);
+                
+                console.log('✅ Default portfolio created');
+            } else {
+                console.log('✅ Default portfolio already exists');
+            }
+            
+            return true;
+            
+        } catch (error) {
+            console.error('❌ Error ensuring default portfolio:', error);
+            
+            // Fallback local
+            const localDefault = localStorage.getItem('portfolio_default');
+            if (!localDefault) {
+                const defaultData = createDefaultPortfolioData('default');
+                localStorage.setItem('portfolio_default', JSON.stringify(defaultData));
+            }
+            
+            return false;
+        }
+    }
+
+    /**
+     * 📋 Créer les données par défaut d'un portfolio
+     */
+    function createDefaultPortfolioData(name) {
+        return {
+            name: name,
+            watchlist: [],
+            alerts: [],
+            comparisons: [],
+            comparisonSymbols: [],
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString()
+        };
+    }
+
+    // Initialiser au chargement
     (async function init() {
         console.log('🔄 Initializing Portfolio Manager...');
         await waitForFirebase();
@@ -97,6 +176,9 @@ const PortfolioManager = (function() {
             console.warn('⚠️ Running in LOCAL MODE (Firebase not available)');
         } else {
             await ensureUserDocument();
+            
+            // ✅ NOUVEAU : Assurer qu'au moins un portfolio existe
+            await ensureDefaultPortfolio();
         }
     })();
 
@@ -106,6 +188,9 @@ const PortfolioManager = (function() {
 
     let currentPortfolio = localStorage.getItem('currentPortfolio') || 'default';
 
+    /**
+     * 📋 Lister tous les portfolios
+     */
     async function listPortfolios() {
         if (!firebaseReady || !currentUser) {
             return listLocalPortfolios();
@@ -130,6 +215,27 @@ const PortfolioManager = (function() {
             });
             
             console.log('✅ Loaded portfolios list:', portfolios.length);
+            
+            // ✅ NOUVEAU : Si aucun portfolio, créer default
+            if (portfolios.length === 0) {
+                console.log('📝 No portfolios found, creating default...');
+                await ensureDefaultPortfolio();
+                
+                // Recharger
+                const snapshot2 = await db
+                    .collection('users')
+                    .doc(userId)
+                    .collection('portfolios')
+                    .get();
+                
+                snapshot2.forEach((doc) => {
+                    portfolios.push({
+                        name: doc.id,
+                        ...doc.data()
+                    });
+                });
+            }
+            
             return portfolios;
             
         } catch (error) {
@@ -138,6 +244,9 @@ const PortfolioManager = (function() {
         }
     }
 
+    /**
+     * 📋 Lister les portfolios locaux
+     */
     function listLocalPortfolios() {
         const portfolios = [];
         for (let i = 0; i < localStorage.length; i++) {
@@ -155,10 +264,25 @@ const PortfolioManager = (function() {
                 }
             }
         }
+        
+        // ✅ NOUVEAU : Si aucun portfolio local, créer default
+        if (portfolios.length === 0) {
+            console.log('📝 No local portfolios found, creating default...');
+            const defaultData = createDefaultPortfolioData('default');
+            localStorage.setItem('portfolio_default', JSON.stringify(defaultData));
+            portfolios.push({
+                name: 'default',
+                ...defaultData
+            });
+        }
+        
         console.log('✅ Loaded local portfolios:', portfolios.length);
         return portfolios;
     }
 
+    /**
+     * 📥 Charger un portfolio depuis le cloud
+     */
     async function loadFromCloud(portfolioName) {
         console.log(`📥 Loading portfolio "${portfolioName}" from cloud...`);
         
@@ -195,6 +319,9 @@ const PortfolioManager = (function() {
         }
     }
 
+    /**
+     * 📥 Charger un portfolio depuis le stockage local
+     */
     function loadFromLocal(portfolioName) {
         const key = `portfolio_${portfolioName}`;
         const data = localStorage.getItem(key);
@@ -211,6 +338,9 @@ const PortfolioManager = (function() {
         return createDefaultPortfolioData(portfolioName);
     }
 
+    /**
+     * 💾 Sauvegarder un portfolio dans le cloud
+     */
     async function saveToCloud(portfolioName, data) {
         console.log(`💾 Saving portfolio "${portfolioName}" to cloud...`);
         
@@ -261,6 +391,9 @@ const PortfolioManager = (function() {
         }
     }
 
+    /**
+     * 🗑️ Supprimer un portfolio
+     */
     async function deletePortfolio(portfolioName) {
         if (portfolioName === 'default') {
             console.warn('⚠️ Cannot delete default portfolio');
@@ -297,6 +430,9 @@ const PortfolioManager = (function() {
         return true;
     }
 
+    /**
+     * 🔄 Changer de portfolio actif
+     */
     async function switchPortfolio(portfolioName) {
         console.log(`🔄 Switching to portfolio "${portfolioName}"...`);
         
@@ -310,6 +446,9 @@ const PortfolioManager = (function() {
         return data;
     }
 
+    /**
+     * ➕ Créer un nouveau portfolio
+     */
     async function createNewPortfolio() {
         const name = prompt('Nom du nouveau portfolio:', '');
         
@@ -337,17 +476,9 @@ const PortfolioManager = (function() {
         return data;
     }
 
-    function createDefaultPortfolioData(name) {
-        return {
-            name: name,
-            watchlist: [],
-            alerts: [],
-            comparisons: [],
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString()
-        };
-    }
-
+    /**
+     * 🔄 Mettre à jour l'affichage du portfolio actuel
+     */
     function updateCurrentPortfolioDisplay(portfolioName) {
         const display = document.getElementById('currentPortfolioName');
         if (display) {
@@ -355,15 +486,24 @@ const PortfolioManager = (function() {
         }
     }
 
+    /**
+     * 🔄 Définir un portfolio par défaut
+     */
     async function setDefaultPortfolio(portfolioName) {
         localStorage.setItem('defaultPortfolio', portfolioName);
         console.log(`✅ Default portfolio set to: ${portfolioName}`);
     }
 
+    /**
+     * 📖 Obtenir le portfolio par défaut
+     */
     function getDefaultPortfolio() {
         return localStorage.getItem('defaultPortfolio') || 'default';
     }
 
+    /**
+     * 📖 Obtenir le portfolio actuel
+     */
     function getCurrentPortfolio() {
         return currentPortfolio;
     }
