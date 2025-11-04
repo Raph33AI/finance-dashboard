@@ -570,8 +570,18 @@
                 <h2>
                     <i class='fas fa-briefcase'></i> Manage Portfolios
                 </h2>
-                <button class='modal-close' onclick='document.getElementById("portfoliosModal").classList.remove("active")'>
-                    <i class='fas fa-times'></i>
+                <button class='btn btn-secondary' onclick='(async function() {
+                    const modal = document.getElementById("portfoliosModal");
+                    if (modal) {
+                        modal.classList.add("active");
+                        if (window.MarketData && window.MarketData.refreshPortfoliosList) {
+                            await window.MarketData.refreshPortfoliosList();
+                        } else {
+                            console.error("MarketData.refreshPortfoliosList not found");
+                        }
+                    }
+                })()'>
+                    <i class='fas fa-list'></i> Manage Portfolios
                 </button>
             </div>
             
