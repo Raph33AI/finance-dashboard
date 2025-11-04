@@ -2338,3 +2338,230 @@
         transform: rotate(360deg);
     }
 }
+
+/* ═══════════════════════════════════════════════════════════════
+   ✅ CORRECTIONS PORTFOLIO MANAGEMENT - TEXTE BLANC FORCÉ
+   ═══════════════════════════════════════════════════════════════ */
+
+/* Portfolio Management - Background bleu avec gradient */
+.simulation-management {
+    background: linear-gradient(135deg, #1e5eeb 0%, #4c8aff 100%) !important;
+    border-radius: 12px;
+    padding: 2rem;
+    border: 1px solid #0d3d9f;
+    margin-bottom: 1rem;
+    box-shadow: 0 4px 12px rgba(30, 94, 235, 0.15);
+}
+
+/* TOUT le texte en BLANC dans simulation-management */
+.simulation-management,
+.simulation-management *,
+.simulation-management .label,
+.simulation-management .value,
+.simulation-management span,
+.simulation-management h4,
+.simulation-management p,
+.simulation-management i,
+.current-simulation-display,
+.current-simulation-display *,
+.current-simulation-display .label,
+.current-simulation-display .value,
+.current-simulation-display span,
+.current-simulation-display i {
+    color: white !important;
+}
+
+/* Valeur du portfolio actuel */
+.current-simulation-display .value {
+    background: rgba(255, 255, 255, 0.25) !important;
+    border: 2px solid rgba(255, 255, 255, 0.5) !important;
+    padding: 0.5rem 1.25rem;
+    border-radius: 8px;
+    font-weight: 700;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    backdrop-filter: blur(10px);
+}
+
+/* Info box - texte blanc forcé */
+.info-box-white-text,
+.info-box-white-text *,
+.info-box-white-text h4,
+.info-box-white-text p,
+.info-box-white-text i {
+    color: white !important;
+}
+
+/* Simulations Info Box dans la modale - BLEU avec texte sombre */
+.simulations-info {
+    background: linear-gradient(135deg, #e8f2ff 0%, #dbeafe 100%) !important;
+    border-left: 4px solid #1e5eeb !important;
+    padding: 1rem 1.5rem;
+    border-radius: 8px;
+    margin-bottom: 1.5rem;
+}
+
+.simulations-info p {
+    margin: 0;
+    color: #0f172a !important;
+    font-size: 0.9375rem;
+    line-height: 1.6;
+}
+
+.simulations-info i {
+    color: #1e5eeb !important;
+    margin-right: 0.5rem;
+}
+
+[data-theme="dark"] .simulations-info {
+    background: linear-gradient(135deg, #1e3a5f 0%, #1e40af 100%) !important;
+    border-color: #4c8aff !important;
+}
+
+[data-theme="dark"] .simulations-info p {
+    color: #f8fafc !important;
+}
+
+[data-theme="dark"] .simulations-info i {
+    color: #6da3ff !important;
+}
+
+/* Portfolios Items - couleur adaptée */
+.simulation-item {
+    background: var(--background-primary);
+    border: 2px solid var(--border-color);
+    border-radius: 12px;
+    padding: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.simulation-item:hover {
+    border-color: #1e5eeb;
+    box-shadow: 0 4px 12px rgba(30, 94, 235, 0.1);
+    transform: translateY(-2px);
+}
+
+.simulation-item.active {
+    background: linear-gradient(135deg, #e8f2ff 0%, #dbeafe 100%);
+    border-color: #1e5eeb;
+    box-shadow: 0 4px 12px rgba(30, 94, 235, 0.15);
+}
+
+[data-theme="dark"] .simulation-item {
+    background: #1e293b;
+    border-color: #334155;
+}
+
+[data-theme="dark"] .simulation-item:hover {
+    border-color: #4c8aff;
+}
+
+[data-theme="dark"] .simulation-item.active {
+    background: linear-gradient(135deg, #1e3a5f 0%, #1e40af 100%);
+    border-color: #4c8aff;
+}
+
+/* Date de création - CORRECTION */
+.simulation-meta {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    flex-wrap: wrap;
+}
+
+.simulation-meta .creation-date,
+.portfolio-date,
+.simulation-date {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    background: var(--background-secondary);
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    font-weight: 500;
+}
+
+.simulation-meta .creation-date i,
+.portfolio-date i,
+.simulation-date i {
+    color: #1e5eeb;
+    font-size: 0.75rem;
+}
+
+/* Boutons dans la modale */
+.btn-sm.btn-primary {
+    background: #1e5eeb !important;
+    color: white !important;
+    border-color: #1e5eeb !important;
+}
+
+.btn-sm.btn-primary:hover {
+    background: #0d3d9f !important;
+    border-color: #0d3d9f !important;
+}
+
+.btn-sm.btn-success {
+    background: #10b981 !important;
+    color: white !important;
+}
+
+.btn-sm.btn-success:hover {
+    background: #059669 !important;
+}
+
+.btn-sm.btn-danger {
+    background: #ef4444 !important;
+    color: white !important;
+}
+
+.btn-sm.btn-danger:hover {
+    background: #dc2626 !important;
+}
+
+/* Badges */
+.badge-current {
+    background: #10b981 !important;
+    color: white !important;
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    box-shadow: 0 2px 4px rgba(16, 185, 129, 0.2);
+}
+
+.badge-default {
+    background: #64748b !important;
+    color: white !important;
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    box-shadow: 0 2px 4px rgba(100, 116, 139, 0.2);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .simulation-management {
+        padding: 1rem;
+    }
+    
+    .current-simulation-display {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .current-simulation-display .value {
+        width: 100%;
+    }
+}
