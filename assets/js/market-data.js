@@ -28,7 +28,7 @@ const MarketData = {
     // Comparison
     comparisonSymbols: [],
     comparisonData: {},
-    comparisonColors: ['#2563eb', '#10b981', '#f59e0b', '#8b5cf6', '#ef4444'],
+    comparisonColors: ['#1e5eeb', '#10b981', '#f59e0b', '#8b5cf6', '#ef4444'],
     
     // Charts instances
     charts: {
@@ -114,13 +114,13 @@ const MarketData = {
         console.log('📥 Loading current portfolio...');
         
         const currentPortfolioName = window.PortfolioManager 
-            ? window.PortfolioManager.getCurrentPortfolioName() 
+            ? window.PortfolioManager.getCurrentPortfolio() 
             : 'default';
         
         let loadedFromCloud = false;
         
         if (window.PortfolioManager) {
-            const portfolioData = await window.PortfolioManager.loadPortfolio(currentPortfolioName);
+            const portfolioData = await window.PortfolioManager.loadFromCloud(currentPortfolioName);
             
             if (portfolioData) {
                 console.log('✅ Loaded portfolio from cloud');
@@ -195,11 +195,11 @@ const MarketData = {
         const portfolioData = this.getCurrentPortfolioData();
         
         const currentPortfolioName = window.PortfolioManager 
-            ? window.PortfolioManager.getCurrentPortfolioName() 
+            ? window.PortfolioManager.getCurrentPortfolio() 
             : 'default';
         
         if (window.PortfolioManager) {
-            const success = await window.PortfolioManager.savePortfolio(currentPortfolioName, portfolioData);
+            const success = await window.PortfolioManager.saveToCloud(currentPortfolioName, portfolioData);
             
             if (!success) {
                 // Fallback localStorage
@@ -236,7 +236,7 @@ const MarketData = {
         
         const exportData = {
             portfolioName: window.PortfolioManager 
-                ? window.PortfolioManager.getCurrentPortfolioName() 
+                ? window.PortfolioManager.getCurrentPortfolio() 
                 : 'default',
             exportDate: new Date().toISOString(),
             data: portfolioData
@@ -291,6 +291,232 @@ const MarketData = {
             reader.readAsText(file);
         };
         input.click();
+    },
+    
+    /**
+     * ✅ NOUVEAU : Rafraîchir la liste des portfolios dans la modale
+     */
+    async refreshPortfoliosList() {
+        console.log('🔄 Refreshing portfolios list...');
+        
+        const container = document.getElementById('portfoliosListContainer');
+        if (!container) {
+            console.error('❌ portfoliosListContainer not found');
+            return;
+        }
+        
+        // Afficher le loading
+        container.innerHTML = `
+            <div class="loading-simulations">
+                <i class="fas fa-spinner fa-spin"></i> Loading portfolios...
+            </div>
+        `;
+        
+        try {
+            // Récupérer la liste des portfolios
+            const portfolios = await PortfolioManager.listPortfolios();
+            const currentPortfolio = PortfolioManager.getCurrentPortfolio();
+            
+            console.log('📋 Portfolios loaded:', portfolios.length);
+            
+            if (portfolios.length === 0) {
+                // Aucun portfolio
+                container.innerHTML = `
+                    <div class="no-portfolios">
+                        <i class="fas fa-folder-open"></i>
+                        <p>No portfolios found</p>
+                        <p class="hint">Click "New Portfolio" to create one</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            // Afficher la liste des portfolios
+            const portfoliosList = portfolios.map(portfolio => {
+                const isActive = portfolio.name === currentPortfolio;
+                const createdDate = portfolio.createdAt 
+                    ? (typeof portfolio.createdAt === 'string' 
+                        ? new Date(portfolio.createdAt).toLocaleDateString('fr-FR', {
+                            year: 'numeric',
+                            month: 'short',
+                            day: 'numeric'
+                        })
+                        : portfolio.createdAt.toDate 
+                            ? portfolio.createdAt.toDate().toLocaleDateString('fr-FR', {
+                                year: 'numeric',
+                                month: 'short',
+                                day: 'numeric'
+                            })
+                            : 'N/A')
+                    : 'N/A';
+                
+                return `
+                    <div class="simulation-item ${isActive ? 'active' : ''}" data-portfolio="${portfolio.name}">
+                        <div class="simulation-info">
+                            <div class="simulation-name">
+                                <i class="fas fa-folder"></i>
+                                ${this.escapeHtml(portfolio.name)}
+                                ${isActive ? '<span class="badge-current">ACTIVE</span>' : ''}
+                                ${portfolio.name === 'default' ? '<span class="badge-default">DEFAULT</span>' : ''}
+                            </div>
+                            <div class="simulation-meta">
+                                <span class="creation-date">
+                                    <i class="far fa-calendar"></i>
+                                    Created: ${createdDate}
+                                </span>
+                                <span>
+                                    <i class="fas fa-star"></i>
+                                    ${portfolio.watchlist?.length || 0} stocks
+                                </span>
+                                <span>
+                                    <i class="fas fa-bell"></i>
+                                    ${portfolio.alerts?.length || 0} alerts
+                                </span>
+                            </div>
+                        </div>
+                        <div class="simulation-actions">
+                            ${!isActive ? `
+                                <button class="btn-sm btn-primary" onclick="MarketData.loadPortfolioFromModal('${portfolio.name}')">
+                                    <i class="fas fa-folder-open"></i> Load
+                                </button>
+                            ` : `
+                                <button class="btn-sm btn-success" disabled>
+                                    <i class="fas fa-check"></i> Active
+                                </button>
+                            `}
+                            ${portfolio.name !== 'default' ? `
+                                <button class="btn-sm btn-secondary" onclick="MarketData.renamePortfolio('${portfolio.name}')">
+                                    <i class="fas fa-edit"></i> Rename
+                                </button>
+                                <button class="btn-sm btn-danger" onclick="MarketData.deletePortfolioFromModal('${portfolio.name}')">
+                                    <i class="fas fa-trash"></i> Delete
+                                </button>
+                            ` : ''}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+            
+            container.innerHTML = `
+                <div class="simulations-list">
+                    ${portfoliosList}
+                </div>
+            `;
+            
+            console.log('✅ Portfolios list displayed');
+            
+        } catch (error) {
+            console.error('❌ Error loading portfolios:', error);
+            container.innerHTML = `
+                <div class="no-portfolios">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <p>Error loading portfolios</p>
+                    <p class="hint">${this.escapeHtml(error.message)}</p>
+                </div>
+            `;
+        }
+    },
+    
+    /**
+     * ✅ NOUVEAU : Charger un portfolio depuis la modale
+     */
+    async loadPortfolioFromModal(portfolioName) {
+        console.log(`📂 Loading portfolio "${portfolioName}" from modal...`);
+        
+        try {
+            await PortfolioManager.switchPortfolio(portfolioName);
+            await this.loadCurrentPortfolio();
+            
+            // Rafraîchir la liste
+            await this.refreshPortfoliosList();
+            
+            this.showNotification(`Portfolio "${portfolioName}" loaded!`, 'success');
+            
+        } catch (error) {
+            console.error('❌ Error loading portfolio:', error);
+            this.showNotification('Error loading portfolio: ' + error.message, 'error');
+        }
+    },
+    
+    /**
+     * ✅ NOUVEAU : Supprimer un portfolio depuis la modale
+     */
+    async deletePortfolioFromModal(portfolioName) {
+        if (!confirm(`Are you sure you want to delete portfolio "${portfolioName}"?`)) {
+            return;
+        }
+        
+        console.log(`🗑️ Deleting portfolio "${portfolioName}"...`);
+        
+        try {
+            await PortfolioManager.deletePortfolio(portfolioName);
+            
+            // Rafraîchir la liste
+            await this.refreshPortfoliosList();
+            
+            this.showNotification(`Portfolio "${portfolioName}" deleted`, 'success');
+            
+        } catch (error) {
+            console.error('❌ Error deleting portfolio:', error);
+            this.showNotification('Error deleting portfolio: ' + error.message, 'error');
+        }
+    },
+    
+    /**
+     * ✅ NOUVEAU : Renommer un portfolio
+     */
+    async renamePortfolio(oldName) {
+        const newName = prompt(`Rename portfolio "${oldName}" to:`, oldName);
+        
+        if (!newName || newName.trim() === '' || newName === oldName) {
+            return;
+        }
+        
+        console.log(`✏️ Renaming portfolio "${oldName}" to "${newName}"...`);
+        
+        try {
+            // Charger les données de l'ancien portfolio
+            const data = await PortfolioManager.loadFromCloud(oldName);
+            
+            // Sauvegarder avec le nouveau nom
+            data.name = newName;
+            await PortfolioManager.saveToCloud(newName, data);
+            
+            // Supprimer l'ancien
+            await PortfolioManager.deletePortfolio(oldName);
+            
+            // Si c'était le portfolio actif, le basculer
+            if (PortfolioManager.getCurrentPortfolio() === oldName) {
+                await PortfolioManager.switchPortfolio(newName);
+            }
+            
+            // Rafraîchir la liste
+            await this.refreshPortfoliosList();
+            
+            this.showNotification(`Portfolio renamed to "${newName}"`, 'success');
+            
+        } catch (error) {
+            console.error('❌ Error renaming portfolio:', error);
+            this.showNotification('Error renaming portfolio: ' + error.message, 'error');
+        }
+    },
+    
+    /**
+     * ✅ NOUVEAU : Ouvrir la modale de gestion des portfolios
+     */
+    async openPortfoliosModal() {
+        console.log('📂 Opening portfolios modal...');
+        
+        // Ouvrir la modale
+        const modal = document.getElementById('portfoliosModal');
+        if (modal) {
+            modal.classList.add('active');
+            
+            // Charger la liste des portfolios
+            await this.refreshPortfoliosList();
+        } else {
+            console.error('❌ portfoliosModal not found');
+        }
     },
     
     // ========== EVENT LISTENERS ==========
@@ -666,6 +892,26 @@ const MarketData = {
         }
     },
     
+    /**
+     * ✅ NOUVEAU : Toggle accordéon
+     */
+    toggleAccordion(headerElement) {
+        const content = headerElement.nextElementSibling;
+        const isActive = headerElement.classList.contains('active');
+        
+        // Fermer tous les autres accordéons
+        document.querySelectorAll('.accordion-header.active').forEach(h => {
+            h.classList.remove('active');
+            h.nextElementSibling.classList.remove('active');
+        });
+        
+        // Toggle l'accordéon actuel
+        if (!isActive) {
+            headerElement.classList.add('active');
+            content.classList.add('active');
+        }
+    },
+    
     escapeHtml(text) {
         if (!text) return '';
         const div = document.createElement('div');
@@ -914,9 +1160,6 @@ Object.assign(MarketData, {
         }
     },
     
-    /**
-     * ✅ CORRIGÉ : Ouvre le modal d'alerte (utilise openModal de common.js)
-     */
     openAlertModal() {
         if (window.openModal) {
             window.openModal('modalCreateAlert');
@@ -933,9 +1176,6 @@ Object.assign(MarketData, {
         }
     },
     
-    /**
-     * ✅ CORRIGÉ : Ferme le modal d'alerte
-     */
     closeAlertModal() {
         if (window.closeModal) {
             window.closeModal('modalCreateAlert');
@@ -1100,9 +1340,6 @@ Object.assign(MarketData, {
 
 Object.assign(MarketData, {
     
-    /**
-     * ✅ CORRIGÉ : Ouvre le modal de comparaison
-     */
     openComparisonModal() {
         if (window.openModal) {
             window.openModal('modalAddComparison');
@@ -1112,9 +1349,6 @@ Object.assign(MarketData, {
         }
     },
     
-    /**
-     * ✅ CORRIGÉ : Ferme le modal de comparaison
-     */
     closeComparisonModal() {
         if (window.closeModal) {
             window.closeModal('modalAddComparison');
@@ -1273,6 +1507,625 @@ Object.assign(MarketData, {
         }
     },
     
+    calculateMaxDrawdown(prices) {
+        let maxDrawdown = 0;
+        let peak = prices[0];
+        
+        for (let i = 1; i < prices.length; i++) {
+            if (prices[i] > peak) {
+                peak = prices[i];
+            }
+            const drawdown = ((peak - prices[i]) / peak) * 100;
+            if (drawdown > maxDrawdown) {
+                maxDrawdown = drawdown;
+            }
+        }
+        
+        return maxDrawdown;
+    },
+    
+    calculateVolatilityFromPrices(prices) {
+        const returns = [];
+        for (let i = 1; i < prices.length; i++) {
+            const ret = (prices[i] - prices[i - 1]) / prices[i - 1];
+            returns.push(ret);
+        }
+        
+        const mean = returns.reduce((sum, r) => sum + r, 0) / returns.length;
+        const variance = returns.reduce((sum, r) => sum + Math.pow(r - mean, 2), 0) / returns.length;
+        const stdDev = Math.sqrt(variance);
+        
+        return stdDev * Math.sqrt(252) * 100;
+    }
+    
+});
+
+// ========== DISPLAY STOCK OVERVIEW ==========
+
+Object.assign(MarketData, {
+    
+    displayStockOverview() {
+        const quote = this.stockData.quote;
+        
+        document.getElementById('stockName').textContent = quote.name || this.currentSymbol;
+        document.getElementById('stockSymbol').textContent = quote.symbol || this.currentSymbol;
+        
+        const price = quote.price;
+        const change = quote.change;
+        const changePercent = quote.percentChange;
+        
+        document.getElementById('currentPrice').textContent = this.formatCurrency(price);
+        
+        const priceChangeEl = document.getElementById('priceChange');
+        const changeText = `${change >= 0 ? '+' : ''}${this.formatCurrency(change)} (${change >= 0 ? '+' : ''}${changePercent.toFixed(2)}%)`;
+        priceChangeEl.textContent = changeText;
+        priceChangeEl.className = change >= 0 ? 'price-change positive' : 'price-change negative';
+        
+        document.getElementById('statOpen').textContent = this.formatCurrency(quote.open);
+        document.getElementById('statHigh').textContent = this.formatCurrency(quote.high);
+        document.getElementById('statLow').textContent = this.formatCurrency(quote.low);
+        document.getElementById('statVolume').textContent = this.formatVolume(quote.volume);
+        
+        if (this.statisticsData) {
+            document.getElementById('statMarketCap').textContent = this.formatLargeNumber(this.statisticsData.marketCap);
+            document.getElementById('statPE').textContent = this.formatRatio(this.statisticsData.trailingPE);
+        } else {
+            document.getElementById('statMarketCap').textContent = 'N/A';
+            document.getElementById('statPE').textContent = 'N/A';
+        }
+        
+        document.getElementById('stockOverview').classList.remove('hidden');
+    },
+    
+    displayCompanyProfile() {
+        let profileSection = document.getElementById('companyProfileSection');
+        
+        if (!profileSection) {
+            const stockOverview = document.getElementById('stockOverview');
+            if (!stockOverview) return;
+            
+            profileSection = document.createElement('section');
+            profileSection.id = 'companyProfileSection';
+            profileSection.className = 'company-profile-section card hidden';
+            stockOverview.insertAdjacentElement('afterend', profileSection);
+        }
+        
+        if (!this.profileData && !this.statisticsData) {
+            profileSection.classList.add('hidden');
+            return;
+        }
+        
+        let html = `
+            <div class='card-header'>
+                <h2 class='card-title'>
+                    <i class='fas fa-building'></i> Company Information & Statistics
+                </h2>
+            </div>
+            <div class='card-body'>
+        `;
+        
+        // ACCORDÉON 1 : Company Information
+        if (this.profileData || this.logoUrl) {
+            html += `
+                <div class='company-accordion'>
+                    <div class='accordion-header' onclick='MarketData.toggleAccordion(this)'>
+                        <span><i class='fas fa-building'></i> Company Information</span>
+                        <i class='fas fa-chevron-down'></i>
+                    </div>
+                    <div class='accordion-content'>
+                        <div class='accordion-body'>
+            `;
+            
+            if (this.logoUrl) {
+                html += `
+                    <div class='company-logo'>
+                        <img src='${this.escapeHtml(this.logoUrl)}' alt='${this.escapeHtml(this.currentSymbol)} logo' onerror='this.style.display="none"'>
+                    </div>
+                `;
+            }
+            
+            if (this.profileData) {
+                html += `<div class='company-info-grid'>`;
+                
+                if (this.profileData.sector) {
+                    html += `
+                        <div class='info-item'>
+                            <span class='info-label'><i class='fas fa-industry'></i> Sector</span>
+                            <span class='info-value'>${this.escapeHtml(this.profileData.sector)}</span>
+                        </div>`;
+                }
+                
+                if (this.profileData.industry) {
+                    html += `
+                        <div class='info-item'>
+                            <span class='info-label'><i class='fas fa-cogs'></i> Industry</span>
+                            <span class='info-value'>${this.escapeHtml(this.profileData.industry)}</span>
+                        </div>`;
+                }
+                
+                if (this.profileData.country) {
+                    html += `
+                        <div class='info-item'>
+                            <span class='info-label'><i class='fas fa-globe'></i> Country</span>
+                            <span class='info-value'>${this.escapeHtml(this.profileData.country)}</span>
+                        </div>`;
+                }
+                
+                if (this.profileData.employees) {
+                    html += `
+                        <div class='info-item'>
+                            <span class='info-label'><i class='fas fa-users'></i> Employees</span>
+                            <span class='info-value'>${this.formatNumber(this.profileData.employees)}</span>
+                        </div>`;
+                }
+                
+                html += `</div>`;
+                
+                if (this.profileData.description && this.profileData.description !== 'No description available') {
+                    html += `
+                        <div class='company-description'>
+                            <h4><i class='fas fa-info-circle'></i> About</h4>
+                            <p>${this.escapeHtml(this.profileData.description)}</p>
+                        </div>
+                    `;
+                }
+            }
+            
+            html += `
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+        
+        // ACCORDÉON 2 : Fundamental Statistics
+        if (this.statisticsData) {
+            html += `
+                <div class='company-accordion'>
+                    <div class='accordion-header' onclick='MarketData.toggleAccordion(this)'>
+                        <span><i class='fas fa-chart-bar'></i> Fundamental Statistics</span>
+                        <i class='fas fa-chevron-down'></i>
+                    </div>
+                    <div class='accordion-content'>
+                        <div class='accordion-body'>
+                            <div class='stats-category'>
+                                <h4>Valuation Metrics</h4>
+                                <div class='stats-grid'>
+                                    ${this.createStatItem('Market Cap', this.formatLargeNumber(this.statisticsData.marketCap))}
+                                    ${this.createStatItem('P/E Ratio', this.formatRatio(this.statisticsData.trailingPE))}
+                                    ${this.createStatItem('Price/Book', this.formatRatio(this.statisticsData.priceToBook))}
+                                    ${this.createStatItem('EV/Revenue', this.formatRatio(this.statisticsData.evToRevenue))}
+                                </div>
+                            </div>
+                            
+                            <div class='stats-category'>
+                                <h4>Profitability</h4>
+                                <div class='stats-grid'>
+                                    ${this.createStatItem('Profit Margin', this.formatPercent(this.statisticsData.profitMargin))}
+                                    ${this.createStatItem('ROE', this.formatPercent(this.statisticsData.returnOnEquity))}
+                                    ${this.createStatItem('Revenue', this.formatLargeNumber(this.statisticsData.revenue))}
+                                    ${this.createStatItem('EPS', this.formatCurrency(this.statisticsData.eps))}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+        
+        html += `</div>`;
+        
+        profileSection.innerHTML = html;
+        profileSection.classList.remove('hidden');
+    },
+    
+    createStatItem(label, value) {
+        if (!value || value === 'N/A' || value === '$0' || value === '0' || value === '0%') {
+            return '';
+        }
+        return `
+            <div class='stat-box'>
+                <div class='label'>${this.escapeHtml(label)}</div>
+                <div class='value'>${value}</div>
+            </div>
+        `;
+    },
+    
+    displayResults() {
+        this.createPriceChart();
+        this.createRSIChart();
+        this.createMACDChart();
+        this.displayTradingSignals();
+        this.displayKeyStatistics();
+        
+        document.getElementById('resultsPanel').classList.remove('hidden');
+    }
+    
+});
+
+// ========== CHARTS - PRICE CHART ==========
+
+Object.assign(MarketData, {
+    
+    createPriceChart() {
+        const prices = this.stockData.prices;
+        const ohlc = prices.map(p => [p.timestamp, p.open, p.high, p.low, p.close]);
+        const volume = prices.map(p => [p.timestamp, p.volume]);
+        
+        const showSMA = document.getElementById('toggleSMA')?.checked !== false;
+        const showEMA = document.getElementById('toggleEMA')?.checked || false;
+        const showBB = document.getElementById('toggleBB')?.checked !== false;
+        const showVolume = document.getElementById('toggleVolume')?.checked !== false;
+        
+        const series = [
+            {
+                type: 'candlestick',
+                name: this.currentSymbol,
+                data: ohlc,
+                id: 'price',
+                color: '#ef4444',
+                upColor: '#10b981'
+            }
+        ];
+        
+        if (showSMA) {
+            series.push({
+                type: 'sma',
+                linkedTo: 'price',
+                params: { period: 20 },
+                color: '#1e5eeb',
+                lineWidth: 2,
+                name: 'SMA 20'
+            });
+            series.push({
+                type: 'sma',
+                linkedTo: 'price',
+                params: { period: 50 },
+                color: '#8b5cf6',
+                lineWidth: 2,
+                name: 'SMA 50'
+            });
+        }
+        
+        if (showEMA) {
+            series.push({
+                type: 'ema',
+                linkedTo: 'price',
+                params: { period: 12 },
+                color: '#06b6d4',
+                lineWidth: 2,
+                name: 'EMA 12'
+            });
+            series.push({
+                type: 'ema',
+                linkedTo: 'price',
+                params: { period: 26 },
+                color: '#14b8a6',
+                lineWidth: 2,
+                name: 'EMA 26'
+            });
+        }
+        
+        if (showBB) {
+            series.push({
+                type: 'bb',
+                linkedTo: 'price',
+                color: '#64748b',
+                fillOpacity: 0.05,
+                lineWidth: 1,
+                name: 'Bollinger Bands'
+            });
+        }
+        
+        if (showVolume) {
+            series.push({
+                type: 'column',
+                name: 'Volume',
+                data: volume,
+                yAxis: 1,
+                color: '#cbd5e1'
+            });
+        }
+        
+        if (this.charts.price) {
+            this.charts.price.destroy();
+        }
+        
+        this.charts.price = Highcharts.stockChart('priceChart', {
+            chart: {
+                height: 600,
+                borderRadius: 12,
+                style: {
+                    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif'
+                }
+            },
+            title: {
+                text: `${this.currentSymbol} Price Chart`,
+                style: { 
+                    color: '#0f172a',
+                    fontWeight: '600',
+                    fontSize: '1.25rem'
+                }
+            },
+            rangeSelector: {
+                selected: 1,
+                buttonTheme: {
+                    fill: 'white',
+                    stroke: '#e2e8f0',
+                    'stroke-width': 1,
+                    r: 6,
+                    style: {
+                        color: '#475569',
+                        fontWeight: '500'
+                    },
+                    states: {
+                        hover: {
+                            fill: '#f1f5f9'
+                        },
+                        select: {
+                            fill: '#1e5eeb',
+                            style: {
+                                color: 'white'
+                            }
+                        }
+                    }
+                }
+            },
+            yAxis: [{
+                labels: {
+                    align: 'right',
+                    x: -3,
+                    style: {
+                        color: '#475569'
+                    }
+                },
+                title: {
+                    text: 'Price',
+                    style: {
+                        color: '#475569'
+                    }
+                },
+                height: '75%',
+                lineWidth: 1,
+                gridLineColor: '#f1f5f9'
+            }, {
+                labels: {
+                    align: 'right',
+                    x: -3,
+                    style: {
+                        color: '#475569'
+                    }
+                },
+                title: {
+                    text: 'Volume',
+                    style: {
+                        color: '#475569'
+                    }
+                },
+                top: '80%',
+                height: '20%',
+                offset: 0,
+                lineWidth: 1,
+                gridLineColor: '#f1f5f9'
+            }],
+            xAxis: {
+                gridLineColor: '#f1f5f9'
+            },
+            tooltip: {
+                split: true,
+                borderRadius: 8,
+                borderWidth: 1,
+                borderColor: '#e2e8f0',
+                backgroundColor: 'white',
+                shadow: {
+                    color: 'rgba(0, 0, 0, 0.1)',
+                    offsetX: 0,
+                    offsetY: 2,
+                    width: 4
+                }
+            },
+            series: series,
+            credits: { enabled: false }
+        });
+    },
+    
+    createRSIChart() {
+        const prices = this.stockData.prices;
+        const rsiData = this.calculateRSIArray(prices, 14);
+        
+        if (this.charts.rsi) {
+            this.charts.rsi.destroy();
+        }
+        
+        this.charts.rsi = Highcharts.chart('rsiChart', {
+            chart: {
+                borderRadius: 12,
+                height: 400,
+                style: {
+                    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif'
+                }
+            },
+            title: {
+                text: 'RSI Indicator',
+                style: { 
+                    color: '#0f172a',
+                    fontWeight: '600',
+                    fontSize: '1.125rem'
+                }
+            },
+            xAxis: {
+                type: 'datetime',
+                crosshair: true,
+                gridLineColor: '#f1f5f9'
+            },
+            yAxis: {
+                title: { 
+                    text: 'RSI',
+                    style: { color: '#475569' }
+                },
+                plotLines: [{
+                    value: 70,
+                    color: '#ef4444',
+                    dashStyle: 'Dash',
+                    width: 2,
+                    label: {
+                        text: 'Overbought (70)',
+                        align: 'right',
+                        style: { color: '#ef4444', fontWeight: '600' }
+                    }
+                }, {
+                    value: 30,
+                    color: '#10b981',
+                    dashStyle: 'Dash',
+                    width: 2,
+                    label: {
+                        text: 'Oversold (30)',
+                        align: 'right',
+                        style: { color: '#10b981', fontWeight: '600' }
+                    }
+                }, {
+                    value: 50,
+                    color: '#94a3b8',
+                    dashStyle: 'Dot',
+                    width: 1,
+                    label: {
+                        text: 'Neutral (50)',
+                        align: 'right',
+                        style: { color: '#94a3b8' }
+                    }
+                }],
+                min: 0,
+                max: 100,
+                gridLineColor: '#f1f5f9'
+            },
+            tooltip: {
+                borderRadius: 8,
+                crosshairs: true,
+                shared: true,
+                valueDecimals: 2
+            },
+            plotOptions: {
+                area: {
+                    fillColor: {
+                        linearGradient: { x1: 0, y1: 0, x2: 0, y2: 1 },
+                        stops: [
+                            [0, 'rgba(30, 94, 235, 0.3)'],
+                            [1, 'rgba(30, 94, 235, 0.05)']
+                        ]
+                    },
+                    lineWidth: 2,
+                    marker: {
+                        enabled: false
+                    },
+                    threshold: null
+                }
+            },
+            series: [{
+                type: 'area',
+                name: 'RSI (14)',
+                data: rsiData,
+                color: '#1e5eeb',
+                zones: [{
+                    value: 30,
+                    color: '#10b981'
+                }, {
+                    value: 70,
+                    color: '#f59e0b'
+                }, {
+                    color: '#ef4444'
+                }]
+            }],
+            credits: { enabled: false }
+        });
+    },
+    
+    createMACDChart() {
+        const prices = this.stockData.prices;
+        const macdData = this.calculateMACDArray(prices);
+        
+        if (this.charts.macd) {
+            this.charts.macd.destroy();
+        }
+        
+        this.charts.macd = Highcharts.chart('macdChart', {
+            chart: {
+                borderRadius: 12,
+                height: 400,
+                style: {
+                    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif'
+                }
+            },
+            title: {
+                text: 'MACD Indicator',
+                style: { 
+                    color: '#0f172a',
+                    fontWeight: '600',
+                    fontSize: '1.125rem'
+                }
+            },
+            xAxis: {
+                type: 'datetime',
+                crosshair: true,
+                gridLineColor: '#f1f5f9'
+            },
+            yAxis: {
+                title: { 
+                    text: 'MACD',
+                    style: { color: '#475569' }
+                },
+                plotLines: [{
+                    value: 0,
+                    color: '#94a3b8',
+                    dashStyle: 'Dash',
+                    width: 2,
+                    label: {
+                        text: 'Zero Line',
+                        align: 'right',
+                        style: { color: '#94a3b8' }
+                    }
+                }],
+                gridLineColor: '#f1f5f9'
+            },
+            tooltip: {
+                borderRadius: 8,
+                crosshairs: true,
+                shared: true,
+                valueDecimals: 2
+            },
+            plotOptions: {
+                column: {
+                    borderRadius: '25%'
+                }
+            },
+            series: [{
+                type: 'line',
+                name: 'MACD Line',
+                data: macdData.macd,
+                color: '#1e5eeb',
+                lineWidth: 2,
+                marker: {
+                    enabled: false
+                }
+            }, {
+                type: 'line',
+                name: 'Signal Line',
+                data: macdData.signal,
+                color: '#8b5cf6',
+                lineWidth: 2,
+                marker: {
+                    enabled: false
+                }
+            }, {
+                type: 'column',
+                name: 'Histogram',
+                data: macdData.histogram,
+                color: '#64748b',
+                pointWidth: 3
+            }],
+            credits: { enabled: false }
+        });
+    },
+    
     createComparisonChart() {
         const series = [];
         
@@ -1341,7 +2194,7 @@ Object.assign(MarketData, {
                             fill: '#f1f5f9'
                         },
                         select: {
-                            fill: '#2563eb',
+                            fill: '#1e5eeb',
                             style: {
                                 color: 'white'
                             }
@@ -1482,681 +2335,6 @@ Object.assign(MarketData, {
         }
     },
     
-    calculateMaxDrawdown(prices) {
-        let maxDrawdown = 0;
-        let peak = prices[0];
-        
-        for (let i = 1; i < prices.length; i++) {
-            if (prices[i] > peak) {
-                peak = prices[i];
-            }
-            const drawdown = ((peak - prices[i]) / peak) * 100;
-            if (drawdown > maxDrawdown) {
-                maxDrawdown = drawdown;
-            }
-        }
-        
-        return maxDrawdown;
-    },
-    
-    calculateVolatilityFromPrices(prices) {
-        const returns = [];
-        for (let i = 1; i < prices.length; i++) {
-            const ret = (prices[i] - prices[i - 1]) / prices[i - 1];
-            returns.push(ret);
-        }
-        
-        const mean = returns.reduce((sum, r) => sum + r, 0) / returns.length;
-        const variance = returns.reduce((sum, r) => sum + Math.pow(r - mean, 2), 0) / returns.length;
-        const stdDev = Math.sqrt(variance);
-        
-        return stdDev * Math.sqrt(252) * 100;
-    }
-    
-});
-
-// ========== DISPLAY STOCK OVERVIEW ==========
-
-Object.assign(MarketData, {
-    
-    displayStockOverview() {
-        const quote = this.stockData.quote;
-        
-        document.getElementById('stockName').textContent = quote.name || this.currentSymbol;
-        document.getElementById('stockSymbol').textContent = quote.symbol || this.currentSymbol;
-        
-        const price = quote.price;
-        const change = quote.change;
-        const changePercent = quote.percentChange;
-        
-        document.getElementById('currentPrice').textContent = this.formatCurrency(price);
-        
-        const priceChangeEl = document.getElementById('priceChange');
-        const changeText = `${change >= 0 ? '+' : ''}${this.formatCurrency(change)} (${change >= 0 ? '+' : ''}${changePercent.toFixed(2)}%)`;
-        priceChangeEl.textContent = changeText;
-        priceChangeEl.className = change >= 0 ? 'price-change positive' : 'price-change negative';
-        
-        document.getElementById('statOpen').textContent = this.formatCurrency(quote.open);
-        document.getElementById('statHigh').textContent = this.formatCurrency(quote.high);
-        document.getElementById('statLow').textContent = this.formatCurrency(quote.low);
-        document.getElementById('statVolume').textContent = this.formatVolume(quote.volume);
-        
-        if (this.statisticsData) {
-            document.getElementById('statMarketCap').textContent = this.formatLargeNumber(this.statisticsData.marketCap);
-            document.getElementById('statPE').textContent = this.formatRatio(this.statisticsData.trailingPE);
-        } else {
-            document.getElementById('statMarketCap').textContent = 'N/A';
-            document.getElementById('statPE').textContent = 'N/A';
-        }
-        
-        document.getElementById('stockOverview').classList.remove('hidden');
-    },
-    
-    /**
-     * ✅ CORRIGÉ : Company Profile avec ACCORDÉON COMPACT
-     */
-    displayCompanyProfile() {
-        let profileSection = document.getElementById('companyProfileSection');
-        
-        if (!profileSection) {
-            const stockOverview = document.getElementById('stockOverview');
-            if (!stockOverview) return;
-            
-            profileSection = document.createElement('section');
-            profileSection.id = 'companyProfileSection';
-            profileSection.className = 'company-profile-section card hidden';
-            stockOverview.insertAdjacentElement('afterend', profileSection);
-        }
-        
-        if (!this.profileData && !this.statisticsData) {
-            profileSection.classList.add('hidden');
-            return;
-        }
-        
-        let html = `
-            <div class='card-header'>
-                <h2 class='card-title'>
-                    <i class='fas fa-building'></i> Company Information & Statistics
-                </h2>
-            </div>
-            <div class='card-body'>
-        `;
-        
-        // ✅ ACCORDÉON 1 : Company Information
-        if (this.profileData || this.logoUrl) {
-            html += `
-                <div class='company-accordion'>
-                    <div class='accordion-header' onclick='MarketData.toggleAccordion(this)'>
-                        <span><i class='fas fa-building'></i> Company Information</span>
-                        <i class='fas fa-chevron-down'></i>
-                    </div>
-                    <div class='accordion-content'>
-                        <div class='accordion-body'>
-            `;
-            
-            if (this.logoUrl) {
-                html += `
-                    <div class='company-logo'>
-                        <img src='${this.escapeHtml(this.logoUrl)}' alt='${this.escapeHtml(this.currentSymbol)} logo' onerror='this.style.display="none"'>
-                    </div>
-                `;
-            }
-            
-            if (this.profileData) {
-                html += `<div class='company-info-grid'>`;
-                
-                if (this.profileData.sector) {
-                    html += `
-                        <div class='info-item'>
-                            <span class='info-label'><i class='fas fa-industry'></i> Sector</span>
-                            <span class='info-value'>${this.escapeHtml(this.profileData.sector)}</span>
-                        </div>`;
-                }
-                
-                if (this.profileData.industry) {
-                    html += `
-                        <div class='info-item'>
-                            <span class='info-label'><i class='fas fa-cogs'></i> Industry</span>
-                            <span class='info-value'>${this.escapeHtml(this.profileData.industry)}</span>
-                        </div>`;
-                }
-                
-                if (this.profileData.country) {
-                    html += `
-                        <div class='info-item'>
-                            <span class='info-label'><i class='fas fa-globe'></i> Country</span>
-                            <span class='info-value'>${this.escapeHtml(this.profileData.country)}</span>
-                        </div>`;
-                }
-                
-                if (this.profileData.employees) {
-                    html += `
-                        <div class='info-item'>
-                            <span class='info-label'><i class='fas fa-users'></i> Employees</span>
-                            <span class='info-value'>${this.formatNumber(this.profileData.employees)}</span>
-                        </div>`;
-                }
-                
-                html += `</div>`;
-                
-                if (this.profileData.description && this.profileData.description !== 'No description available') {
-                    html += `
-                        <div class='company-description'>
-                            <h4><i class='fas fa-info-circle'></i> About</h4>
-                            <p>${this.escapeHtml(this.profileData.description)}</p>
-                        </div>
-                    `;
-                }
-            }
-            
-            html += `
-                        </div>
-                    </div>
-                </div>
-            `;
-        }
-        
-        // ✅ ACCORDÉON 2 : Fundamental Statistics
-        if (this.statisticsData) {
-            html += `
-                <div class='company-accordion'>
-                    <div class='accordion-header' onclick='MarketData.toggleAccordion(this)'>
-                        <span><i class='fas fa-chart-bar'></i> Fundamental Statistics</span>
-                        <i class='fas fa-chevron-down'></i>
-                    </div>
-                    <div class='accordion-content'>
-                        <div class='accordion-body'>
-                            <div class='stats-category'>
-                                <h4>Valuation Metrics</h4>
-                                <div class='stats-grid'>
-                                    ${this.createStatItem('Market Cap', this.formatLargeNumber(this.statisticsData.marketCap))}
-                                    ${this.createStatItem('P/E Ratio', this.formatRatio(this.statisticsData.trailingPE))}
-                                    ${this.createStatItem('Price/Book', this.formatRatio(this.statisticsData.priceToBook))}
-                                    ${this.createStatItem('EV/Revenue', this.formatRatio(this.statisticsData.evToRevenue))}
-                                </div>
-                            </div>
-                            
-                            <div class='stats-category'>
-                                <h4>Profitability</h4>
-                                <div class='stats-grid'>
-                                    ${this.createStatItem('Profit Margin', this.formatPercent(this.statisticsData.profitMargin))}
-                                    ${this.createStatItem('ROE', this.formatPercent(this.statisticsData.returnOnEquity))}
-                                    ${this.createStatItem('Revenue', this.formatLargeNumber(this.statisticsData.revenue))}
-                                    ${this.createStatItem('EPS', this.formatCurrency(this.statisticsData.eps))}
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            `;
-        }
-        
-        html += `</div>`;
-        
-        profileSection.innerHTML = html;
-        profileSection.classList.remove('hidden');
-    },
-    
-    /**
-     * ✅ NOUVEAU : Toggle accordéon
-     */
-    toggleAccordion(headerElement) {
-        const content = headerElement.nextElementSibling;
-        const isActive = headerElement.classList.contains('active');
-        
-        // Fermer tous les autres accordéons
-        document.querySelectorAll('.accordion-header.active').forEach(h => {
-            h.classList.remove('active');
-            h.nextElementSibling.classList.remove('active');
-        });
-        
-        // Toggle l'accordéon actuel
-        if (!isActive) {
-            headerElement.classList.add('active');
-            content.classList.add('active');
-        }
-    },
-    
-    createStatItem(label, value) {
-        if (!value || value === 'N/A' || value === '$0' || value === '0' || value === '0%') {
-            return '';
-        }
-        return `
-            <div class='stat-box'>
-                <div class='label'>${this.escapeHtml(label)}</div>
-                <div class='value'>${value}</div>
-            </div>
-        `;
-    },
-    
-    displayResults() {
-        this.createPriceChart();
-        this.createRSIChart();
-        this.createMACDChart();
-        this.displayTradingSignals();
-        this.displayKeyStatistics();
-        
-        document.getElementById('resultsPanel').classList.remove('hidden');
-    }
-    
-});
-
-// ========== CHARTS - Continuer avec createPriceChart, createRSIChart, createMACDChart... ==========
-// (Le reste du code des graphiques reste IDENTIQUE à votre version originale)
-
-// ========== UTILITY FUNCTIONS ==========
-
-Object.assign(MarketData, {
-    
-    formatCurrency(value) {
-        if (!value && value !== 0) return 'N/A';
-        return new Intl.NumberFormat('en-US', {
-            style: 'currency',
-            currency: 'USD',
-            minimumFractionDigits: 2,
-            maximumFractionDigits: 2
-        }).format(value);
-    },
-    
-    formatVolume(value) {
-        if (!value) return 'N/A';
-        if (value >= 1e9) return (value / 1e9).toFixed(2) + 'B';
-        if (value >= 1e6) return (value / 1e6).toFixed(2) + 'M';
-        if (value >= 1e3) return (value / 1e3).toFixed(2) + 'K';
-        return value.toFixed(0);
-    },
-    
-    formatLargeNumber(value) {
-        if (!value) return 'N/A';
-        if (value >= 1e12) return '$' + (value / 1e12).toFixed(2) + 'T';
-        if (value >= 1e9) return '$' + (value / 1e9).toFixed(2) + 'B';
-        if (value >= 1e6) return '$' + (value / 1e6).toFixed(2) + 'M';
-        if (value >= 1e3) return '$' + (value / 1e3).toFixed(2) + 'K';
-        return '$' + value.toFixed(0);
-    },
-    
-    formatNumber(value) {
-        if (!value || value === 'N/A') return 'N/A';
-        if (typeof value === 'string') value = parseInt(value);
-        return new Intl.NumberFormat('en-US').format(value);
-    },
-    
-    formatPercent(value) {
-        if (!value && value !== 0) return 'N/A';
-        return (value * 100).toFixed(2) + '%';
-    },
-    
-    formatRatio(value) {
-        if (!value && value !== 0) return 'N/A';
-        return value.toFixed(2);
-    },
-    
-    escapeHtml(text) {
-        if (!text) return '';
-        const div = document.createElement('div');
-        div.textContent = text;
-        return div.innerHTML;
-    },
-    
-    showLoading(show) {
-        const loader = document.getElementById('loadingIndicator');
-        if (loader) {
-            if (show) {
-                loader.classList.remove('hidden');
-            } else {
-                loader.classList.add('hidden');
-            }
-        }
-    },
-    
-    hideResults() {
-        const overview = document.getElementById('stockOverview');
-        const results = document.getElementById('resultsPanel');
-        const profile = document.getElementById('companyProfileSection');
-        
-        if (overview) overview.classList.add('hidden');
-        if (results) results.classList.add('hidden');
-        if (profile) profile.classList.add('hidden');
-    },
-    
-    updateLastUpdate() {
-        const el = document.getElementById('lastUpdate');
-        if (!el) return;
-        
-        const now = new Date();
-        const formatted = now.toLocaleString('fr-FR', {
-            day: '2-digit',
-            month: '2-digit',
-            year: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit'
-        });
-        el.textContent = `Last update: ${formatted}`;
-    },
-    
-    showNotification(message, type = 'info') {
-        if (window.FinanceDashboard && window.FinanceDashboard.showNotification) {
-            window.FinanceDashboard.showNotification(message, type);
-        } else {
-            console.log(`[${type.toUpperCase()}]`, message);
-        }
-    }
-    
-});
-
-// ========== INITIALIZE WHEN DOM IS LOADED ==========
-
-document.addEventListener('DOMContentLoaded', () => {
-    MarketData.init();
-});
-
-// ========== EXPOSITION GLOBALE ==========
-window.MarketData = MarketData;
-
-console.log('✅ Market Data script loaded - Cloud version CORRECTED');
-
-// ========== CHARTS - PRICE CHART ==========
-
-Object.assign(MarketData, {
-    
-    createPriceChart() {
-        const prices = this.stockData.prices;
-        const ohlc = prices.map(p => [p.timestamp, p.open, p.high, p.low, p.close]);
-        const volume = prices.map(p => [p.timestamp, p.volume]);
-        
-        const showSMA = document.getElementById('toggleSMA')?.checked !== false;
-        const showEMA = document.getElementById('toggleEMA')?.checked || false;
-        const showBB = document.getElementById('toggleBB')?.checked !== false;
-        const showVolume = document.getElementById('toggleVolume')?.checked !== false;
-        
-        const series = [
-            {
-                type: 'candlestick',
-                name: this.currentSymbol,
-                data: ohlc,
-                id: 'price',
-                color: '#ef4444',
-                upColor: '#10b981'
-            }
-        ];
-        
-        if (showSMA) {
-            series.push({
-                type: 'sma',
-                linkedTo: 'price',
-                params: { period: 20 },
-                color: '#2563eb',
-                lineWidth: 2,
-                name: 'SMA 20'
-            });
-            series.push({
-                type: 'sma',
-                linkedTo: 'price',
-                params: { period: 50 },
-                color: '#8b5cf6',
-                lineWidth: 2,
-                name: 'SMA 50'
-            });
-        }
-        
-        if (showEMA) {
-            series.push({
-                type: 'ema',
-                linkedTo: 'price',
-                params: { period: 12 },
-                color: '#06b6d4',
-                lineWidth: 2,
-                name: 'EMA 12'
-            });
-            series.push({
-                type: 'ema',
-                linkedTo: 'price',
-                params: { period: 26 },
-                color: '#14b8a6',
-                lineWidth: 2,
-                name: 'EMA 26'
-            });
-        }
-        
-        if (showBB) {
-            series.push({
-                type: 'bb',
-                linkedTo: 'price',
-                color: '#64748b',
-                fillOpacity: 0.05,
-                lineWidth: 1,
-                name: 'Bollinger Bands'
-            });
-        }
-        
-        if (showVolume) {
-            series.push({
-                type: 'column',
-                name: 'Volume',
-                data: volume,
-                yAxis: 1,
-                color: '#cbd5e1'
-            });
-        }
-        
-        if (this.charts.price) {
-            this.charts.price.destroy();
-        }
-        
-        this.charts.price = Highcharts.stockChart('priceChart', {
-            chart: {
-                height: 600,
-                borderRadius: 12,
-                style: {
-                    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif'
-                }
-            },
-            title: {
-                text: `${this.currentSymbol} Price Chart`,
-                style: { 
-                    color: '#0f172a',
-                    fontWeight: '600',
-                    fontSize: '1.25rem'
-                }
-            },
-            rangeSelector: {
-                selected: 1,
-                buttonTheme: {
-                    fill: 'white',
-                    stroke: '#e2e8f0',
-                    'stroke-width': 1,
-                    r: 6,
-                    style: {
-                        color: '#475569',
-                        fontWeight: '500'
-                    },
-                    states: {
-                        hover: {
-                            fill: '#f1f5f9'
-                        },
-                        select: {
-                            fill: '#2563eb',
-                            style: {
-                                color: 'white'
-                            }
-                        }
-                    }
-                }
-            },
-            yAxis: [{
-                labels: {
-                    align: 'right',
-                    x: -3,
-                    style: {
-                        color: '#475569'
-                    }
-                },
-                title: {
-                    text: 'Price',
-                    style: {
-                        color: '#475569'
-                    }
-                },
-                height: '75%',
-                lineWidth: 1,
-                gridLineColor: '#f1f5f9'
-            }, {
-                labels: {
-                    align: 'right',
-                    x: -3,
-                    style: {
-                        color: '#475569'
-                    }
-                },
-                title: {
-                    text: 'Volume',
-                    style: {
-                        color: '#475569'
-                    }
-                },
-                top: '80%',
-                height: '20%',
-                offset: 0,
-                lineWidth: 1,
-                gridLineColor: '#f1f5f9'
-            }],
-            xAxis: {
-                gridLineColor: '#f1f5f9'
-            },
-            tooltip: {
-                split: true,
-                borderRadius: 8,
-                borderWidth: 1,
-                borderColor: '#e2e8f0',
-                backgroundColor: 'white',
-                shadow: {
-                    color: 'rgba(0, 0, 0, 0.1)',
-                    offsetX: 0,
-                    offsetY: 2,
-                    width: 4
-                }
-            },
-            series: series,
-            credits: { enabled: false }
-        });
-    }
-    
-});
-
-// ========== RSI CHART ==========
-
-Object.assign(MarketData, {
-    
-    createRSIChart() {
-        const prices = this.stockData.prices;
-        const rsiData = this.calculateRSIArray(prices, 14);
-        
-        if (this.charts.rsi) {
-            this.charts.rsi.destroy();
-        }
-        
-        this.charts.rsi = Highcharts.chart('rsiChart', {
-            chart: {
-                borderRadius: 12,
-                height: 400,
-                style: {
-                    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif'
-                }
-            },
-            title: {
-                text: 'RSI Indicator',
-                style: { 
-                    color: '#0f172a',
-                    fontWeight: '600',
-                    fontSize: '1.125rem'
-                }
-            },
-            xAxis: {
-                type: 'datetime',
-                crosshair: true,
-                gridLineColor: '#f1f5f9'
-            },
-            yAxis: {
-                title: { 
-                    text: 'RSI',
-                    style: { color: '#475569' }
-                },
-                plotLines: [{
-                    value: 70,
-                    color: '#ef4444',
-                    dashStyle: 'Dash',
-                    width: 2,
-                    label: {
-                        text: 'Overbought (70)',
-                        align: 'right',
-                        style: { color: '#ef4444', fontWeight: '600' }
-                    }
-                }, {
-                    value: 30,
-                    color: '#10b981',
-                    dashStyle: 'Dash',
-                    width: 2,
-                    label: {
-                        text: 'Oversold (30)',
-                        align: 'right',
-                        style: { color: '#10b981', fontWeight: '600' }
-                    }
-                }, {
-                    value: 50,
-                    color: '#94a3b8',
-                    dashStyle: 'Dot',
-                    width: 1,
-                    label: {
-                        text: 'Neutral (50)',
-                        align: 'right',
-                        style: { color: '#94a3b8' }
-                    }
-                }],
-                min: 0,
-                max: 100,
-                gridLineColor: '#f1f5f9'
-            },
-            tooltip: {
-                borderRadius: 8,
-                crosshairs: true,
-                shared: true,
-                valueDecimals: 2
-            },
-            plotOptions: {
-                area: {
-                    fillColor: {
-                        linearGradient: { x1: 0, y1: 0, x2: 0, y2: 1 },
-                        stops: [
-                            [0, 'rgba(37, 99, 235, 0.3)'],
-                            [1, 'rgba(37, 99, 235, 0.05)']
-                        ]
-                    },
-                    lineWidth: 2,
-                    marker: {
-                        enabled: false
-                    },
-                    threshold: null
-                }
-            },
-            series: [{
-                type: 'area',
-                name: 'RSI (14)',
-                data: rsiData,
-                color: '#2563eb',
-                zones: [{
-                    value: 30,
-                    color: '#10b981'
-                }, {
-                    value: 70,
-                    color: '#f59e0b'
-                }, {
-                    color: '#ef4444'
-                }]
-            }],
-            credits: { enabled: false }
-        });
-    },
-    
     calculateRSIArray(prices, period = 14) {
         const rsiData = [];
         
@@ -2229,99 +2407,6 @@ Object.assign(MarketData, {
         const rsi = 100 - (100 / (1 + rs));
         
         return rsi;
-    }
-    
-});
-
-// ========== MACD CHART ==========
-
-Object.assign(MarketData, {
-    
-    createMACDChart() {
-        const prices = this.stockData.prices;
-        const macdData = this.calculateMACDArray(prices);
-        
-        if (this.charts.macd) {
-            this.charts.macd.destroy();
-        }
-        
-        this.charts.macd = Highcharts.chart('macdChart', {
-            chart: {
-                borderRadius: 12,
-                height: 400,
-                style: {
-                    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif'
-                }
-            },
-            title: {
-                text: 'MACD Indicator',
-                style: { 
-                    color: '#0f172a',
-                    fontWeight: '600',
-                    fontSize: '1.125rem'
-                }
-            },
-            xAxis: {
-                type: 'datetime',
-                crosshair: true,
-                gridLineColor: '#f1f5f9'
-            },
-            yAxis: {
-                title: { 
-                    text: 'MACD',
-                    style: { color: '#475569' }
-                },
-                plotLines: [{
-                    value: 0,
-                    color: '#94a3b8',
-                    dashStyle: 'Dash',
-                    width: 2,
-                    label: {
-                        text: 'Zero Line',
-                        align: 'right',
-                        style: { color: '#94a3b8' }
-                    }
-                }],
-                gridLineColor: '#f1f5f9'
-            },
-            tooltip: {
-                borderRadius: 8,
-                crosshairs: true,
-                shared: true,
-                valueDecimals: 2
-            },
-            plotOptions: {
-                column: {
-                    borderRadius: '25%'
-                }
-            },
-            series: [{
-                type: 'line',
-                name: 'MACD Line',
-                data: macdData.macd,
-                color: '#2563eb',
-                lineWidth: 2,
-                marker: {
-                    enabled: false
-                }
-            }, {
-                type: 'line',
-                name: 'Signal Line',
-                data: macdData.signal,
-                color: '#8b5cf6',
-                lineWidth: 2,
-                marker: {
-                    enabled: false
-                }
-            }, {
-                type: 'column',
-                name: 'Histogram',
-                data: macdData.histogram,
-                color: '#64748b',
-                pointWidth: 3
-            }],
-            credits: { enabled: false }
-        });
     },
     
     calculateMACDArray(prices, shortPeriod = 12, longPeriod = 26, signalPeriod = 9) {
@@ -2387,13 +2472,7 @@ Object.assign(MarketData, {
         }
         
         return emaArray;
-    }
-    
-});
-
-// ========== TRADING SIGNALS ==========
-
-Object.assign(MarketData, {
+    },
     
     displayTradingSignals() {
         const prices = this.stockData.prices;
@@ -2464,8 +2543,6 @@ Object.assign(MarketData, {
             </div>
         `).join('');
     },
-    
-    // ========== KEY STATISTICS ==========
     
     displayKeyStatistics() {
         const prices = this.stockData.prices;
@@ -2633,39 +2710,5 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // ========== EXPOSITION GLOBALE ==========
 window.MarketData = MarketData;
-
-/* ============================================
-   SIDEBAR USER MENU - Toggle
-   ============================================ */
-
-document.addEventListener('DOMContentLoaded', () => {
-    const sidebarUserTrigger = document.getElementById('sidebarUserTrigger');
-    const sidebarUserDropdown = document.getElementById('sidebarUserDropdown');
-    
-    if (sidebarUserTrigger && sidebarUserDropdown) {
-        // Toggle dropdown au clic
-        sidebarUserTrigger.addEventListener('click', (e) => {
-            e.stopPropagation();
-            
-            // Toggle classes
-            sidebarUserTrigger.classList.toggle('active');
-            sidebarUserDropdown.classList.toggle('active');
-        });
-        
-        // Fermer le dropdown si on clique ailleurs
-        document.addEventListener('click', (e) => {
-            if (!sidebarUserDropdown.contains(e.target) && 
-                !sidebarUserTrigger.contains(e.target)) {
-                sidebarUserTrigger.classList.remove('active');
-                sidebarUserDropdown.classList.remove('active');
-            }
-        });
-        
-        // Empêcher la fermeture si on clique dans le dropdown
-        sidebarUserDropdown.addEventListener('click', (e) => {
-            e.stopPropagation();
-        });
-    }
-});
 
 console.log('✅ Market Data script loaded - Cloud version CORRECTED');
