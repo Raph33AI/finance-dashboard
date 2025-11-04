@@ -258,7 +258,15 @@
                                     <button class='btn btn-primary' onclick='MarketData.saveCurrentPortfolio()'>
                                         <i class='fas fa-cloud-upload-alt'></i> Save Current
                                     </button>
-                                    <button class='btn btn-secondary' onclick='document.getElementById("portfoliosModal").classList.add("active")'>
+                                    <button class='btn btn-secondary' onclick='MarketData.openPortfoliosModal ? MarketData.openPortfoliosModal() : (function() {
+                                        const modal = document.getElementById("portfoliosModal");
+                                        if (modal) {
+                                            modal.classList.add("active");
+                                            if (window.MarketData && window.MarketData.refreshPortfoliosList) {
+                                                window.MarketData.refreshPortfoliosList();
+                                            }
+                                        }
+                                    })()'>
                                         <i class='fas fa-list'></i> Manage Portfolios
                                     </button>
                                     <button class='btn btn-secondary' onclick='MarketData.exportPortfolioJSON()'>
