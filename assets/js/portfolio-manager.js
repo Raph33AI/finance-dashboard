@@ -1,679 +1,450 @@
-/* ==============================================
-   PORTFOLIO-MANAGER.JS - Gestion Multi-Portefeuilles Market Data
-   Version Cloud avec Cloudflare Workers - CORRIGÉ
-   ============================================== */
+// ═══════════════════════════════════════════════════════════════
+// 📁 PORTFOLIO MANAGER - Multi-portfolios avec Cloud Sync
+// ═══════════════════════════════════════════════════════════════
 
 const PortfolioManager = (function() {
     'use strict';
-    
-    // ========== VARIABLES PRIVÉES ==========
-    let currentPortfolioName = 'default';
-    let availablePortfolios = [];
-    let cloudflareWorkerURL = 'https://finance-hub-api.raphnardone.workers.dev';
-    const API_PREFIX = '/api';
-    
-    // ========== INITIALISATION ==========
-    
+
+    // ═══════════════════════════════════════════════════════════════
+    // 🔥 FIREBASE INITIALIZATION
+    // ═══════════════════════════════════════════════════════════════
+
+    let firebaseReady = false;
+    let currentUser = null;
+    const FIREBASE_TIMEOUT = 15000; // 15 secondes
+
     /**
-     * Initialise le gestionnaire de portefeuilles
+     * Attendre l'initialisation de Firebase
      */
-    async function init() {
-        console.log('🚀 Initializing Portfolio Manager...');
-        
-        // Attendre que Firebase soit prêt
-        await waitForFirebaseAuth();
-        
-        // Charger le portfolio courant depuis localStorage
-        const savedPortfolio = localStorage.getItem('currentMarketPortfolio');
-        if (savedPortfolio) {
-            currentPortfolioName = savedPortfolio;
-        }
-        
-        // Charger la liste des portefeuilles
-        await loadPortfoliosList();
-        
-        // Mettre à jour l'affichage
-        updateCurrentPortfolioDisplay();
-        
-        console.log('✅ Portfolio Manager initialized');
-    }
-    
-    /**
-     * Attend que Firebase Auth soit prêt
-     */
-    function waitForFirebaseAuth() {
+    function waitForFirebase() {
         return new Promise((resolve) => {
-            if (!firebase || !firebase.auth) {
-                console.warn('⚠️ Firebase not available, Portfolio Manager will work in local mode');
-                resolve();
-                return;
-            }
+            const startTime = Date.now();
             
-            const unsubscribe = firebase.auth().onAuthStateChanged((user) => {
-                if (user) {
-                    console.log('✅ Firebase Auth ready for Portfolio Manager');
-                    unsubscribe();
-                    resolve();
+            const checkAuth = setInterval(() => {
+                const elapsed = Date.now() - startTime;
+                
+                if (window.firebase && firebase.auth) {
+                    const auth = firebase.auth();
+                    
+                    auth.onAuthStateChanged((user) => {
+                        clearInterval(checkAuth);
+                        firebaseReady = true;
+                        currentUser = user;
+                        
+                        if (user) {
+                            console.log('✅ Firebase Auth ready - User:', user.email);
+                        } else {
+                            console.log('✅ Firebase Auth ready - No user');
+                        }
+                        
+                        resolve(true);
+                    }, (error) => {
+                        console.error('❌ Firebase Auth error:', error);
+                        clearInterval(checkAuth);
+                        resolve(false);
+                    });
                 }
-            });
-            
-            // ✅ CORRIGÉ : Timeout de sécurité pour éviter le blocage infini
-            setTimeout(() => {
-                console.warn('⚠️ Firebase Auth timeout, continuing with local mode');
-                resolve();
-            }, 3000);
+                
+                if (elapsed > FIREBASE_TIMEOUT) {
+                    clearInterval(checkAuth);
+                    console.warn('⚠️ Firebase Auth timeout after 15s, continuing with local mode');
+                    resolve(false);
+                }
+            }, 100);
         });
     }
-    
-    // ========== GESTION DES PORTEFEUILLES ==========
-    
+
     /**
-     * ✅ CORRIGÉ : Charge la liste des portefeuilles depuis le cloud
+     * 🔧 Assurer que le document utilisateur existe
      */
-    async function loadPortfoliosList() {
+    async function ensureUserDocument() {
+        if (!firebaseReady || !currentUser) {
+            return false;
+        }
+        
         try {
-            const user = firebase.auth().currentUser;
-            if (!user) {
-                console.warn('⚠️ No user authenticated');
-                availablePortfolios = [{ name: 'default', createdAt: Date.now() }];
-                // ✅ CORRIGÉ : Mettre à jour immédiatement l'affichage
-                renderPortfoliosList();
-                return;
+            const db = firebase.firestore();
+            const userId = currentUser.uid;
+            const userRef = db.collection('users').doc(userId);
+            
+            const doc = await userRef.get();
+            
+            if (!doc.exists) {
+                console.log('📝 Creating user document...');
+                
+                await userRef.set({
+                    email: currentUser.email,
+                    displayName: currentUser.displayName || 'User',
+                    photoURL: currentUser.photoURL || null,
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                    lastLogin: firebase.firestore.FieldValue.serverTimestamp()
+                });
+                
+                console.log('✅ User document created');
+            } else {
+                await userRef.update({
+                    lastLogin: firebase.firestore.FieldValue.serverTimestamp()
+                });
             }
             
-            const idToken = await user.getIdToken();
-            
-            const response = await fetch(`${cloudflareWorkerURL}${API_PREFIX}/portfolios`, {
-                method: 'GET',
-                headers: {
-                    'Authorization': `Bearer ${idToken}`,
-                    'Content-Type': 'application/json'
-                }
-            });
-            
-            if (!response.ok) {
-                throw new Error(`HTTP ${response.status}`);
-            }
-            
-            const data = await response.json();
-            availablePortfolios = data.portfolios || [];
-            
-            // S'assurer que 'default' existe toujours
-            if (!availablePortfolios.some(p => p.name === 'default')) {
-                availablePortfolios.unshift({ name: 'default', createdAt: Date.now() });
-            }
-            
-            console.log('✅ Loaded portfolios list:', availablePortfolios.length);
-            
-            // ✅ CORRIGÉ : Mettre à jour l'affichage immédiatement
-            renderPortfoliosList();
+            return true;
             
         } catch (error) {
-            console.error('❌ Error loading portfolios list:', error);
-            availablePortfolios = [{ name: 'default', createdAt: Date.now() }];
-            // ✅ CORRIGÉ : Toujours afficher quelque chose
-            renderPortfoliosList();
+            console.error('❌ Error ensuring user document:', error);
+            return false;
         }
     }
-    
+
+    // Initialiser au chargement
+    (async function init() {
+        console.log('🔄 Initializing Portfolio Manager...');
+        await waitForFirebase();
+        
+        if (!firebaseReady) {
+            console.warn('⚠️ Running in LOCAL MODE (Firebase not available)');
+        } else {
+            await ensureUserDocument();
+        }
+    })();
+
+    // ═══════════════════════════════════════════════════════════════
+    // 📊 GESTION DES PORTFOLIOS
+    // ═══════════════════════════════════════════════════════════════
+
+    let currentPortfolio = 'default';
+
     /**
-     * Charge un portefeuille depuis le cloud
+     * 📋 Lister tous les portfolios
      */
-    async function loadPortfolio(name) {
+    async function listPortfolios() {
+        if (!firebaseReady || !currentUser) {
+            return listLocalPortfolios();
+        }
+        
         try {
-            console.log(`📥 Loading portfolio "${name}" from cloud...`);
+            const db = firebase.firestore();
+            const userId = currentUser.uid;
             
-            const user = firebase.auth().currentUser;
-            if (!user) {
-                console.warn('⚠️ No user authenticated, loading from localStorage');
-                return loadFromLocalStorage(name);
-            }
+            const snapshot = await db
+                .collection('users')
+                .doc(userId)
+                .collection('portfolios')
+                .get();
             
-            const idToken = await user.getIdToken();
-            
-            const response = await fetch(`${cloudflareWorkerURL}${API_PREFIX}/portfolios/${encodeURIComponent(name)}`, {
-                method: 'GET',
-                headers: {
-                    'Authorization': `Bearer ${idToken}`,
-                    'Content-Type': 'application/json'
-                }
+            const portfolios = [];
+            snapshot.forEach((doc) => {
+                portfolios.push({
+                    name: doc.id,
+                    ...doc.data()
+                });
             });
             
-            if (!response.ok) {
-                if (response.status === 404) {
-                    console.log('ℹ️ Portfolio not found in cloud, creating new one');
-                    return null;
-                }
-                throw new Error(`HTTP ${response.status}`);
-            }
-            
-            const data = await response.json();
-            console.log('✅ Portfolio loaded from cloud');
-            
-            return data.portfolio?.data || data;
+            console.log('✅ Loaded portfolios list:', portfolios.length);
+            return portfolios;
             
         } catch (error) {
-            console.error('❌ Error loading portfolio:', error);
-            return loadFromLocalStorage(name);
+            console.error('❌ Error listing portfolios:', error);
+            return listLocalPortfolios();
         }
     }
-    
+
     /**
-     * Sauvegarde un portefeuille dans le cloud
+     * 📋 Lister les portfolios locaux
      */
-    async function savePortfolio(name, portfolioData) {
+    function listLocalPortfolios() {
+        const portfolios = [];
+        for (let i = 0; i < localStorage.length; i++) {
+            const key = localStorage.key(i);
+            if (key.startsWith('portfolio_')) {
+                const name = key.replace('portfolio_', '');
+                try {
+                    const data = JSON.parse(localStorage.getItem(key));
+                    portfolios.push({
+                        name: name,
+                        ...data
+                    });
+                } catch (e) {
+                    console.error('Error parsing portfolio:', name, e);
+                }
+            }
+        }
+        console.log('✅ Loaded local portfolios:', portfolios.length);
+        return portfolios;
+    }
+
+    /**
+     * 📥 Charger un portfolio depuis le cloud
+     */
+    async function loadFromCloud(portfolioName) {
+        console.log(`📥 Loading portfolio "${portfolioName}" from cloud...`);
+        
+        if (!firebaseReady || !currentUser) {
+            return loadFromLocal(portfolioName);
+        }
+        
         try {
-            console.log(`💾 Saving portfolio "${name}" to cloud...`);
+            const db = firebase.firestore();
+            const userId = currentUser.uid;
             
-            const user = firebase.auth().currentUser;
-            if (!user) {
-                console.warn('⚠️ No user authenticated, saving to localStorage');
-                saveToLocalStorage(name, portfolioData);
-                return false;
+            const doc = await db
+                .collection('users')
+                .doc(userId)
+                .collection('portfolios')
+                .doc(portfolioName)
+                .get();
+            
+            if (doc.exists) {
+                const data = doc.data();
+                console.log('✅ Portfolio loaded from cloud');
+                
+                // Sauvegarder aussi localement
+                localStorage.setItem(`portfolio_${portfolioName}`, JSON.stringify(data));
+                
+                return data;
+            } else {
+                console.log('⚠️ Portfolio not found in cloud, checking local...');
+                return loadFromLocal(portfolioName);
             }
             
-            const idToken = await user.getIdToken();
+        } catch (error) {
+            console.error('❌ Error loading from cloud:', error);
+            return loadFromLocal(portfolioName);
+        }
+    }
+
+    /**
+     * 📥 Charger un portfolio depuis le stockage local
+     */
+    function loadFromLocal(portfolioName) {
+        const key = `portfolio_${portfolioName}`;
+        const data = localStorage.getItem(key);
+        
+        if (data) {
+            try {
+                return JSON.parse(data);
+            } catch (e) {
+                console.error('Error parsing local portfolio:', e);
+                return createDefaultPortfolioData(portfolioName);
+            }
+        }
+        
+        return createDefaultPortfolioData(portfolioName);
+    }
+
+    /**
+     * 💾 Sauvegarder un portfolio dans le cloud
+     */
+    async function saveToCloud(portfolioName, data) {
+        console.log(`💾 Saving portfolio "${portfolioName}" to cloud...`);
+        
+        if (!firebaseReady || !currentUser) {
+            console.warn('⚠️ Firebase not ready, saving locally only');
+            localStorage.setItem(`portfolio_${portfolioName}`, JSON.stringify(data));
+            return false;
+        }
+        
+        try {
+            await ensureUserDocument();
             
-            const payload = {
-                name: name,
-                watchlist: portfolioData.watchlist || [],
-                alerts: portfolioData.alerts || [],
-                comparisonSymbols: portfolioData.comparisonSymbols || []
+            const db = firebase.firestore();
+            const userId = currentUser.uid;
+            
+            const portfolioData = {
+                ...data,
+                updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+                createdAt: data.createdAt || firebase.firestore.FieldValue.serverTimestamp()
             };
             
-            const response = await fetch(`${cloudflareWorkerURL}${API_PREFIX}/portfolios/${encodeURIComponent(name)}`, {
-                method: 'PUT',
-                headers: {
-                    'Authorization': `Bearer ${idToken}`,
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(payload)
+            const savePromise = db
+                .collection('users')
+                .doc(userId)
+                .collection('portfolios')
+                .doc(portfolioName)
+                .set(portfolioData, { merge: true });
+            
+            const timeoutPromise = new Promise((_, reject) => {
+                setTimeout(() => reject(new Error('Save timeout')), 10000);
             });
             
-            if (!response.ok) {
-                throw new Error(`HTTP ${response.status}`);
-            }
+            await Promise.race([savePromise, timeoutPromise]);
             
             console.log('✅ Portfolio saved to cloud');
             
-            // Sauvegarder aussi en local (backup)
-            saveToLocalStorage(name, portfolioData);
-            
-            // Mettre à jour la liste
-            await loadPortfoliosList();
-            
-            if (window.FinanceDashboard && window.FinanceDashboard.showNotification) {
-                window.FinanceDashboard.showNotification(`✅ Portfolio "${name}" saved to cloud`, 'success');
-            }
+            localStorage.setItem(`portfolio_${portfolioName}`, JSON.stringify(data));
             
             return true;
             
         } catch (error) {
-            console.error('❌ Error saving portfolio:', error);
-            saveToLocalStorage(name, portfolioData);
+            console.error('❌ Error saving to cloud:', error);
+            console.warn('💾 Falling back to local storage');
             
-            if (window.FinanceDashboard && window.FinanceDashboard.showNotification) {
-                window.FinanceDashboard.showNotification('⚠️ Saved locally (cloud sync failed)', 'warning');
-            }
+            localStorage.setItem(`portfolio_${portfolioName}`, JSON.stringify(data));
             
             return false;
         }
     }
-    
+
     /**
-     * Supprime un portefeuille du cloud
+     * 🗑️ Supprimer un portfolio
      */
-    async function deletePortfolio(name) {
-        if (name === 'default') {
-            alert('Cannot delete the default portfolio');
+    async function deletePortfolio(portfolioName) {
+        if (portfolioName === 'default') {
+            console.warn('⚠️ Cannot delete default portfolio');
             return false;
         }
         
-        if (!confirm(`⚠️ Delete portfolio "${name}"?\n\nThis will permanently delete:\n- Watchlist\n- Alerts\n- Comparisons\n\nThis action cannot be undone!`)) {
-            return false;
+        console.log(`🗑️ Deleting portfolio "${portfolioName}"...`);
+        
+        // Supprimer du cloud
+        if (firebaseReady && currentUser) {
+            try {
+                const db = firebase.firestore();
+                const userId = currentUser.uid;
+                
+                await db
+                    .collection('users')
+                    .doc(userId)
+                    .collection('portfolios')
+                    .doc(portfolioName)
+                    .delete();
+                
+                console.log('✅ Portfolio deleted from cloud');
+            } catch (error) {
+                console.error('❌ Error deleting from cloud:', error);
+            }
         }
         
-        try {
-            const user = firebase.auth().currentUser;
-            if (!user) {
-                console.warn('⚠️ No user authenticated');
-                return false;
-            }
-            
-            const idToken = await user.getIdToken();
-            
-            const response = await fetch(`${cloudflareWorkerURL}${API_PREFIX}/portfolios/${encodeURIComponent(name)}`, {
-                method: 'DELETE',
-                headers: {
-                    'Authorization': `Bearer ${idToken}`,
-                    'Content-Type': 'application/json'
-                }
-            });
-            
-            if (!response.ok) {
-                throw new Error(`HTTP ${response.status}`);
-            }
-            
-            console.log('✅ Portfolio deleted from cloud');
-            
-            // Supprimer aussi du localStorage
-            localStorage.removeItem(`market_portfolio_${name}`);
-            
-            // Si c'est le portfolio courant, revenir à 'default'
-            if (currentPortfolioName === name) {
-                await switchPortfolio('default');
-            }
-            
-            // Recharger la liste
-            await loadPortfoliosList();
-            
-            if (window.FinanceDashboard && window.FinanceDashboard.showNotification) {
-                window.FinanceDashboard.showNotification(`Portfolio "${name}" deleted`, 'info');
-            }
-            
-            return true;
-            
-        } catch (error) {
-            console.error('❌ Error deleting portfolio:', error);
-            
-            if (window.FinanceDashboard && window.FinanceDashboard.showNotification) {
-                window.FinanceDashboard.showNotification('Failed to delete portfolio', 'error');
-            }
-            
-            return false;
+        // Supprimer du local
+        localStorage.removeItem(`portfolio_${portfolioName}`);
+        
+        // Si c'était le portfolio actuel, revenir à default
+        if (currentPortfolio === portfolioName) {
+            currentPortfolio = 'default';
+            localStorage.setItem('currentPortfolio', 'default');
         }
+        
+        return true;
     }
-    
+
     /**
-     * ✅ CORRIGÉ : Change de portefeuille actif avec mise à jour immédiate
+     * 🔄 Changer de portfolio actif
      */
-    async function switchPortfolio(name) {
-        console.log(`🔄 Switching to portfolio "${name}"...`);
+    async function switchPortfolio(portfolioName) {
+        console.log(`🔄 Switching to portfolio "${portfolioName}"...`);
         
-        // Sauvegarder le portefeuille actuel avant de changer
-        if (window.MarketData && window.MarketData.getCurrentPortfolioData) {
-            const currentData = window.MarketData.getCurrentPortfolioData();
-            await savePortfolio(currentPortfolioName, currentData);
-        }
+        currentPortfolio = portfolioName;
+        localStorage.setItem('currentPortfolio', portfolioName);
         
-        // Changer le portefeuille courant
-        currentPortfolioName = name;
-        localStorage.setItem('currentMarketPortfolio', name);
+        // Charger les données du portfolio
+        const data = await loadFromCloud(portfolioName);
         
-        // ✅ CORRIGÉ : Mettre à jour immédiatement l'affichage
-        updateCurrentPortfolioDisplay();
+        // Mettre à jour l'affichage
+        updateCurrentPortfolioDisplay(portfolioName);
         
-        // Charger le nouveau portefeuille
-        const portfolioData = await loadPortfolio(name);
-        
-        // Charger les données dans MarketData
-        if (window.MarketData && window.MarketData.loadPortfolioData) {
-            window.MarketData.loadPortfolioData(portfolioData);
-        }
-        
-        // ✅ CORRIGÉ : Mettre à jour la liste des portfolios pour refléter le changement
-        renderPortfoliosList();
-        
-        // Fermer le modal
-        const modal = document.getElementById('portfoliosModal');
-        if (modal) {
-            modal.classList.remove('active');
-        }
-        
-        if (window.FinanceDashboard && window.FinanceDashboard.showNotification) {
-            window.FinanceDashboard.showNotification(`Switched to portfolio "${name}"`, 'success');
-        }
+        return data;
     }
-    
+
     /**
-     * Crée un nouveau portefeuille
+     * ➕ Créer un nouveau portfolio
      */
     async function createNewPortfolio() {
-        const name = prompt('📁 Enter portfolio name:\n\n(e.g., "Tech Stocks", "Crypto Watch", "Dividend Portfolio")');
+        const name = prompt('Nom du nouveau portfolio:', '');
         
-        if (!name) return;
-        
-        const trimmedName = name.trim();
-        
-        if (trimmedName === '') {
-            alert('Portfolio name cannot be empty');
-            return;
+        if (!name || name.trim() === '') {
+            return null;
         }
         
-        if (!/^[a-zA-Z0-9\s\-_]+$/.test(trimmedName)) {
-            alert('Portfolio name can only contain letters, numbers, spaces, hyphens and underscores');
-            return;
+        const portfolioName = name.trim();
+        
+        // Vérifier si existe déjà
+        const portfolios = await listPortfolios();
+        if (portfolios.some(p => p.name === portfolioName)) {
+            alert('Un portfolio avec ce nom existe déjà !');
+            return null;
         }
         
-        if (availablePortfolios.some(p => p.name.toLowerCase() === trimmedName.toLowerCase())) {
-            alert(`Portfolio "${trimmedName}" already exists`);
-            return;
+        // Créer le portfolio
+        const data = createDefaultPortfolioData(portfolioName);
+        await saveToCloud(portfolioName, data);
+        
+        // Basculer vers ce portfolio
+        await switchPortfolio(portfolioName);
+        
+        // Rafraîchir la liste
+        if (typeof MarketData !== 'undefined' && MarketData.refreshPortfoliosList) {
+            MarketData.refreshPortfoliosList();
         }
         
-        // Créer un portefeuille vide
-        const emptyPortfolio = {
+        return data;
+    }
+
+    /**
+     * 📋 Créer les données par défaut d'un portfolio
+     */
+    function createDefaultPortfolioData(name) {
+        return {
+            name: name,
             watchlist: [],
             alerts: [],
-            comparisonSymbols: [],
-            createdAt: Date.now()
+            comparisons: [],
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString()
         };
-        
-        const success = await savePortfolio(trimmedName, emptyPortfolio);
-        
-        if (success) {
-            await loadPortfoliosList();
-            await switchPortfolio(trimmedName);
-        }
     }
-    
+
     /**
-     * Duplique un portefeuille
+     * 🔄 Mettre à jour l'affichage du portfolio actuel
      */
-    async function duplicatePortfolio(name) {
-        const newName = prompt(`📋 Duplicate "${name}" as:\n\n(New portfolio name)`);
-        
-        if (!newName) return;
-        
-        const trimmedName = newName.trim();
-        
-        if (trimmedName === '') {
-            alert('Portfolio name cannot be empty');
-            return;
-        }
-        
-        if (availablePortfolios.some(p => p.name.toLowerCase() === trimmedName.toLowerCase())) {
-            alert(`Portfolio "${trimmedName}" already exists`);
-            return;
-        }
-        
-        // Charger le portefeuille source
-        const sourceData = await loadPortfolio(name);
-        
-        if (!sourceData) {
-            alert('Failed to load source portfolio');
-            return;
-        }
-        
-        // Créer une copie
-        const duplicatedData = {
-            watchlist: [...(sourceData.watchlist || [])],
-            alerts: [...(sourceData.alerts || [])].map(alert => ({
-                ...alert,
-                id: Date.now() + Math.random() // Nouveau ID
-            })),
-            comparisonSymbols: [...(sourceData.comparisonSymbols || [])],
-            createdAt: Date.now()
-        };
-        
-        const success = await savePortfolio(trimmedName, duplicatedData);
-        
-        if (success) {
-            await loadPortfoliosList();
-            
-            if (window.FinanceDashboard && window.FinanceDashboard.showNotification) {
-                window.FinanceDashboard.showNotification(`Portfolio duplicated as "${trimmedName}"`, 'success');
-            }
+    function updateCurrentPortfolioDisplay(portfolioName) {
+        const display = document.getElementById('currentPortfolioName');
+        if (display) {
+            display.textContent = portfolioName;
         }
     }
-    
+
     /**
-     * Renomme un portefeuille
+     * 🔄 Définir un portfolio par défaut
      */
-    async function renamePortfolio(oldName) {
-        if (oldName === 'default') {
-            alert('Cannot rename the default portfolio');
-            return;
-        }
-        
-        const newName = prompt(`✏️ Rename "${oldName}" to:`, oldName);
-        
-        if (!newName || newName.trim() === oldName) return;
-        
-        const trimmedName = newName.trim();
-        
-        if (trimmedName === '') {
-            alert('Portfolio name cannot be empty');
-            return;
-        }
-        
-        if (availablePortfolios.some(p => p.name.toLowerCase() === trimmedName.toLowerCase())) {
-            alert(`Portfolio "${trimmedName}" already exists`);
-            return;
-        }
-        
-        try {
-            // Charger les données
-            const portfolioData = await loadPortfolio(oldName);
-            
-            if (!portfolioData) {
-                alert('Failed to load portfolio');
-                return;
-            }
-            
-            // Sauvegarder avec le nouveau nom
-            const success = await savePortfolio(trimmedName, portfolioData);
-            
-            if (success) {
-                // Supprimer l'ancien
-                await deletePortfolioSilent(oldName);
-                
-                // Si c'était le portefeuille courant, mettre à jour
-                if (currentPortfolioName === oldName) {
-                    currentPortfolioName = trimmedName;
-                    localStorage.setItem('currentMarketPortfolio', trimmedName);
-                    updateCurrentPortfolioDisplay();
-                }
-                
-                await loadPortfoliosList();
-                
-                if (window.FinanceDashboard && window.FinanceDashboard.showNotification) {
-                    window.FinanceDashboard.showNotification(`Portfolio renamed to "${trimmedName}"`, 'success');
-                }
-            }
-            
-        } catch (error) {
-            console.error('Error renaming portfolio:', error);
-            alert('Failed to rename portfolio');
-        }
+    async function setDefaultPortfolio(portfolioName) {
+        localStorage.setItem('defaultPortfolio', portfolioName);
+        console.log(`✅ Default portfolio set to: ${portfolioName}`);
     }
-    
+
     /**
-     * Supprime un portefeuille sans confirmation (pour le renommage)
+     * 📖 Obtenir le portfolio par défaut
      */
-    async function deletePortfolioSilent(name) {
-        try {
-            const user = firebase.auth().currentUser;
-            if (!user) return;
-            
-            const idToken = await user.getIdToken();
-            
-            await fetch(`${cloudflareWorkerURL}${API_PREFIX}/portfolios/${encodeURIComponent(name)}`, {
-                method: 'DELETE',
-                headers: {
-                    'Authorization': `Bearer ${idToken}`,
-                    'Content-Type': 'application/json'
-                }
-            });
-            
-            localStorage.removeItem(`market_portfolio_${name}`);
-            
-        } catch (error) {
-            console.error('Error deleting portfolio silently:', error);
-        }
+    function getDefaultPortfolio() {
+        return localStorage.getItem('defaultPortfolio') || 'default';
     }
-    
-    // ========== AFFICHAGE ==========
-    
+
     /**
-     * Met à jour l'affichage du portefeuille courant
+     * 📖 Obtenir le portfolio actuel
      */
-    function updateCurrentPortfolioDisplay() {
-        const displayElement = document.getElementById('currentPortfolioName');
-        if (displayElement) {
-            displayElement.textContent = currentPortfolioName;
-        }
+    function getCurrentPortfolio() {
+        return currentPortfolio;
     }
-    
-    /**
-     * ✅ CORRIGÉ : Affiche la liste des portefeuilles dans le modal
-     */
-    function renderPortfoliosList() {
-        const container = document.getElementById('portfoliosListContainer');
-        if (!container) return;
-        
-        // ✅ CORRIGÉ : Supprimer immédiatement le "Loading..."
-        
-        if (availablePortfolios.length === 0) {
-            container.innerHTML = `
-                <div class='no-portfolios'>
-                    <i class='fas fa-folder-open'></i>
-                    <p>No portfolios found</p>
-                    <button class='btn btn-primary' onclick='PortfolioManager.createNewPortfolio()'>
-                        <i class='fas fa-plus'></i> Create First Portfolio
-                    </button>
-                </div>
-            `;
-            return;
-        }
-        
-        const sortedPortfolios = [...availablePortfolios].sort((a, b) => {
-            if (a.name === 'default') return -1;
-            if (b.name === 'default') return 1;
-            return b.createdAt - a.createdAt;
-        });
-        
-        let html = '<div class="simulations-list">';
-        
-        sortedPortfolios.forEach(portfolio => {
-            const isCurrent = portfolio.name === currentPortfolioName;
-            const createdDate = new Date(portfolio.createdAt).toLocaleDateString('fr-FR');
-            const isDefault = portfolio.name === 'default';
-            
-            html += `
-                <div class='simulation-item ${isCurrent ? 'active' : ''}'>
-                    <div class='simulation-info'>
-                        <div class='simulation-name'>
-                            <i class='fas fa-${isCurrent ? 'folder-open' : 'folder'}'></i>
-                            ${escapeHtml(portfolio.name)}
-                            ${isCurrent ? '<span class="badge-current">ACTIVE</span>' : ''}
-                            ${isDefault ? '<span class="badge-default">DEFAULT</span>' : ''}
-                        </div>
-                        <div class='simulation-meta'>
-                            <span><i class='fas fa-calendar'></i> Created: ${createdDate}</span>
-                        </div>
-                    </div>
-                    
-                    <div class='simulation-actions'>
-                        ${!isCurrent ? `
-                            <button class='btn btn-sm btn-primary' onclick='PortfolioManager.switchPortfolio("${escapeHtml(portfolio.name)}")' title='Load this portfolio'>
-                                <i class='fas fa-folder-open'></i> Load
-                            </button>
-                        ` : `
-                            <button class='btn btn-sm btn-success' disabled title='Currently active'>
-                                <i class='fas fa-check'></i> Active
-                            </button>
-                        `}
-                        
-                        <button class='btn btn-sm btn-secondary' onclick='PortfolioManager.duplicatePortfolio("${escapeHtml(portfolio.name)}")' title='Duplicate'>
-                            <i class='fas fa-copy'></i>
-                        </button>
-                        
-                        ${!isDefault ? `
-                            <button class='btn btn-sm btn-secondary' onclick='PortfolioManager.renamePortfolio("${escapeHtml(portfolio.name)}")' title='Rename'>
-                                <i class='fas fa-edit'></i>
-                            </button>
-                            
-                            <button class='btn btn-sm btn-danger' onclick='PortfolioManager.deletePortfolio("${escapeHtml(portfolio.name)}")' title='Delete'>
-                                <i class='fas fa-trash'></i>
-                            </button>
-                        ` : ''}
-                    </div>
-                </div>
-            `;
-        });
-        
-        html += '</div>';
-        
-        container.innerHTML = html;
-    }
-    
-    // ========== STORAGE LOCAL (FALLBACK) ==========
-    
-    /**
-     * Charge depuis localStorage
-     */
-    function loadFromLocalStorage(name) {
-        try {
-            const saved = localStorage.getItem(`market_portfolio_${name}`);
-            if (saved) {
-                return JSON.parse(saved);
-            }
-            return null;
-        } catch (error) {
-            console.error('Error loading from localStorage:', error);
-            return null;
-        }
-    }
-    
-    /**
-     * Sauvegarde dans localStorage
-     */
-    function saveToLocalStorage(name, data) {
-        try {
-            localStorage.setItem(`market_portfolio_${name}`, JSON.stringify(data));
-        } catch (error) {
-            console.error('Error saving to localStorage:', error);
-        }
-    }
-    
-    // ========== UTILITAIRES ==========
-    
-    function escapeHtml(text) {
-        const div = document.createElement('div');
-        div.textContent = text;
-        return div.innerHTML;
-    }
-    
-    /**
-     * Récupère le nom du portefeuille courant
-     */
-    function getCurrentPortfolioName() {
-        return currentPortfolioName;
-    }
-    
-    /**
-     * Récupère la liste des portefeuilles
-     */
-    function getAvailablePortfolios() {
-        return availablePortfolios;
-    }
-    
-    // ========== EXPORTS PUBLICS ==========
+
+    // ═══════════════════════════════════════════════════════════════
+    // 🌐 API PUBLIQUE
+    // ═══════════════════════════════════════════════════════════════
+
     return {
-        init,
-        loadPortfolio,
-        savePortfolio,
+        listPortfolios,
+        loadFromCloud,
+        saveToCloud,
         deletePortfolio,
         switchPortfolio,
         createNewPortfolio,
-        duplicatePortfolio,
-        renamePortfolio,
-        renderPortfoliosList,
-        getCurrentPortfolioName,
-        getAvailablePortfolios,
-        updateCurrentPortfolioDisplay
+        setDefaultPortfolio,
+        getDefaultPortfolio,
+        getCurrentPortfolio,
+        
+        // État Firebase
+        isFirebaseReady: () => firebaseReady,
+        getCurrentUser: () => currentUser
     };
+
 })();
 
-// ========== EXPOSITION GLOBALE ==========
+// Exposer globalement
 window.PortfolioManager = PortfolioManager;
-
-// ========== INITIALISATION ==========
-window.addEventListener('DOMContentLoaded', () => {
-    // Attendre un peu pour que Firebase soit prêt
-    setTimeout(() => {
-        PortfolioManager.init();
-    }, 500);
-});
-
-console.log('✅ Portfolio Manager loaded - Cloud version CORRECTED');
