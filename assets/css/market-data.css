@@ -2338,3 +2338,14 @@
         transform: rotate(360deg);
     }
 }
+
+/* Portfolio Management - Texte blanc forcé */
+.simulation-management {
+    background: linear-gradient(135deg, var(--gradient-blue-start), var(--gradient-blue-end)) !important;
+}
+
+.simulation-management *,
+.current-simulation-display *,
+.info-box-white-text * {
+    color: white !important;
+}
