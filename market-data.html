@@ -932,5 +932,94 @@
     
     <!-- Market Data Script -->
     <script src='assets/js/market-data.js'></script>
+
+    <!-- Market Data Script -->
+    <script src='assets/js/market-data.js'></script>
+    
+    <!-- ============================================
+         ✅ FIX MENU UTILISATEUR - Force l'initialisation
+         ============================================ -->
+    <script>
+        /**
+         * Force l'initialisation du menu utilisateur
+         * (car il semble que sidebar.js ne l'initialise pas correctement sur cette page)
+         */
+        (function forceUserMenuInit() {
+            console.log('🔧 Force initializing user menu...');
+            
+            // Attendre que tout soit chargé
+            const initMenu = () => {
+                const trigger = document.getElementById('sidebarUserTrigger');
+                const dropdown = document.getElementById('sidebarUserDropdown');
+                
+                if (!trigger || !dropdown) {
+                    console.error('❌ User menu elements not found');
+                    return;
+                }
+                
+                // Supprimer tous les anciens event listeners (si existants)
+                const newTrigger = trigger.cloneNode(true);
+                trigger.parentNode.replaceChild(newTrigger, trigger);
+                
+                // Récupérer les nouvelles références
+                const freshTrigger = document.getElementById('sidebarUserTrigger');
+                const freshDropdown = document.getElementById('sidebarUserDropdown');
+                
+                console.log('✅ Adding click event to trigger...');
+                
+                // Ajouter l'événement de clic
+                freshTrigger.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    
+                    console.log('👆 User menu trigger clicked!');
+                    
+                    // Toggle le dropdown
+                    const isActive = freshDropdown.classList.contains('active');
+                    
+                    if (isActive) {
+                        freshDropdown.classList.remove('active');
+                        console.log('🔽 Closing dropdown');
+                    } else {
+                        freshDropdown.classList.add('active');
+                        console.log('🔼 Opening dropdown');
+                    }
+                    
+                    // Animer la flèche
+                    const arrow = freshTrigger.querySelector('.sidebar-user-arrow');
+                    if (arrow) {
+                        arrow.style.transform = isActive ? 'rotate(0deg)' : 'rotate(180deg)';
+                        arrow.style.transition = 'transform 0.3s ease';
+                    }
+                });
+                
+                // Fermer si on clique ailleurs
+                document.addEventListener('click', function(e) {
+                    if (!freshTrigger.contains(e.target) && !freshDropdown.contains(e.target)) {
+                        freshDropdown.classList.remove('active');
+                        const arrow = freshTrigger.querySelector('.sidebar-user-arrow');
+                        if (arrow) {
+                            arrow.style.transform = 'rotate(0deg)';
+                        }
+                    }
+                });
+                
+                // Empêcher la fermeture si on clique dans le dropdown
+                freshDropdown.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                });
+                
+                console.log('✅ User menu initialized successfully!');
+            };
+            
+            // Exécuter immédiatement si le DOM est prêt
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', initMenu);
+            } else {
+                // DOM déjà prêt, exécuter avec un petit délai pour être sûr
+                setTimeout(initMenu, 100);
+            }
+        })();
+    </script>
 </body>
 </html>
