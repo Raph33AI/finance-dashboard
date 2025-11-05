@@ -239,7 +239,8 @@
                                 <button class='btn-primary' onclick='Dashboard.saveData()'>
                                     <i class='fas fa-cloud-upload-alt'></i> Save Current
                                 </button>
-                                <button class='btn-secondary' onclick='document.getElementById("simulationsModal").classList.add("active")'>
+                                <!-- ✅ CORRECTION ICI : Appeler openSimulationsModal() -->
+                                <button class='btn-secondary' onclick='openSimulationsModal()'>
                                     <i class='fas fa-list'></i> Manage Simulations
                                 </button>
                             </div>
@@ -461,7 +462,7 @@
                 <footer>
                     <p>
                         <i class='fas fa-cloud'></i> Financial Dashboard | 
-                        Auto-saved to cloud with <strong>Cloudflare Workers</strong>
+                        Auto-saved to cloud with <strong>Firebase Firestore</strong>
                     </p>
                 </footer>
             </div>
@@ -475,7 +476,7 @@
                 <h2>
                     <i class='fas fa-database'></i> Manage Simulations
                 </h2>
-                <button class='modal-close' onclick='document.getElementById("simulationsModal").classList.remove("active")'>
+                <button class='modal-close' onclick='closeSimulationsModal()'>
                     <i class='fas fa-times'></i>
                 </button>
             </div>
@@ -490,7 +491,7 @@
                 </div>
                 
                 <div id='simulationsListContainer'>
-                    <!-- Filled dynamically by simulation-manager.js -->
+                    <!-- ✅ État initial de chargement -->
                     <div class='loading-simulations'>
                         <i class='fas fa-spinner fa-spin'></i> Loading simulations...
                     </div>
@@ -501,12 +502,94 @@
                 <button class='btn-primary' onclick='SimulationManager.createNewSimulation()'>
                     <i class='fas fa-plus'></i> New Simulation
                 </button>
-                <button class='btn-secondary' onclick='document.getElementById("simulationsModal").classList.remove("active")'>
+                <button class='btn-secondary' onclick='closeSimulationsModal()'>
                     <i class='fas fa-times'></i> Close
                 </button>
             </div>
         </div>
     </div>
+    
+    <!-- ✅ AJOUT : Script pour gérer le modal -->
+    <script>
+        /**
+         * 🔓 Ouvre le modal et charge les simulations
+         */
+        async function openSimulationsModal() {
+            console.log('🔓 Opening Simulations Modal...');
+            
+            const modal = document.getElementById('simulationsModal');
+            const container = document.getElementById('simulationsListContainer');
+            
+            if (!modal || !container) {
+                console.error('❌ Modal or container not found');
+                return;
+            }
+            
+            // Afficher le modal
+            modal.classList.add('active');
+            
+            // Réinitialiser le container avec un loader
+            container.innerHTML = `
+                <div class='loading-simulations'>
+                    <i class='fas fa-spinner fa-spin'></i> Loading simulations...
+                </div>
+            `;
+            
+            // Charger les simulations
+            try {
+                if (typeof SimulationManager !== 'undefined') {
+                    await SimulationManager.fetchSimulationsList();
+                    console.log('✅ Simulations loaded successfully');
+                } else {
+                    console.error('❌ SimulationManager not found');
+                    container.innerHTML = `
+                        <div class='no-simulations'>
+                            <i class='fas fa-exclamation-triangle' style='font-size: 3em; margin-bottom: 15px; color: #e74c3c;'></i>
+                            <p>Error: Simulation Manager not loaded</p>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                console.error('❌ Error loading simulations:', error);
+                container.innerHTML = `
+                    <div class='no-simulations'>
+                        <i class='fas fa-exclamation-triangle' style='font-size: 3em; margin-bottom: 15px; color: #e74c3c;'></i>
+                        <p>Error loading simulations</p>
+                        <p style='font-size: 0.9em; margin-top: 10px;'>${error.message}</p>
+                    </div>
+                `;
+            }
+        }
+        
+        /**
+         * 🔒 Ferme le modal
+         */
+        function closeSimulationsModal() {
+            const modal = document.getElementById('simulationsModal');
+            if (modal) {
+                modal.classList.remove('active');
+            }
+        }
+        
+        /**
+         * 🚪 Ferme le modal si on clique à l'extérieur
+         */
+        window.addEventListener('click', function(event) {
+            const modal = document.getElementById('simulationsModal');
+            if (event.target === modal) {
+                closeSimulationsModal();
+            }
+        });
+        
+        /**
+         * ⌨️ Ferme le modal avec la touche Escape
+         */
+        window.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                closeSimulationsModal();
+            }
+        });
+    </script>
     
     <!-- Scripts -->
     <script src='assets/js/dark-mode.js'></script>
