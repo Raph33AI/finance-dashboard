@@ -605,10 +605,10 @@ const SimulationManager = (function() {
         
         if (!simulations || simulations.length === 0) {
             container.innerHTML = `
-                <div class="no-simulations">
-                    <i class="fas fa-folder-open" style="font-size: 3em; margin-bottom: 15px; opacity: 0.3;"></i>
+                <div class='no-simulations'>
+                    <i class='fas fa-folder-open' style='font-size: 3em; margin-bottom: 15px; opacity: 0.3;'></i>
                     <p>No saved simulations yet.</p>
-                    <p style="font-size: 0.9em; margin-top: 10px;">Create your first simulation to get started!</p>
+                    <p style='font-size: 0.9em; margin-top: 10px;'>Create your first simulation to get started!</p>
                 </div>
             `;
             return;
@@ -623,33 +623,91 @@ const SimulationManager = (function() {
                 : new Date(sim.createdAt);
             
             item.innerHTML = `
-                <div class="simulation-info">
+                <div class="simulation-info" onclick="loadAndCloseSimulation('${sim.name}')">
                     <span class="simulation-name">
-                        <i class="fas fa-database"></i> ${sim.name}
+                        <i class='fas fa-database'></i> ${sim.name}
+                        ${sim.name === currentSimulation ? '<i class="fas fa-check-circle" style="color: #10b981; margin-left: 8px;"></i>' : ''}
                     </span>
                     <span class="simulation-date">
-                        <i class="fas fa-clock"></i> ${formatDate(updatedDate)}
+                        <i class='fas fa-clock'></i> ${formatDate(updatedDate)}
                     </span>
                 </div>
-                <div class="simulation-actions">
-                    <button onclick="SimulationManager.switchSimulation('${sim.name}')" 
-                            class="btn-icon" title="Load">
-                        <i class="fas fa-folder-open"></i>
-                    </button>
-                    <button onclick="SimulationManager.renameSimulation('${sim.name}')" 
+                <div class="simulation-actions" onclick="event.stopPropagation()">
+                    <button onclick="renameSimulationAndRefresh('${sim.name}')" 
                             class="btn-icon" title="Rename">
-                        <i class="fas fa-edit"></i>
+                        <i class='fas fa-edit'></i>
                     </button>
-                    <button onclick="SimulationManager.deleteSimulation('${sim.name}')" 
+                    <button onclick="deleteSimulationAndRefresh('${sim.name}')" 
                             class="btn-icon btn-danger" title="Delete">
-                        <i class="fas fa-trash"></i>
+                        <i class='fas fa-trash'></i>
                     </button>
                 </div>
             `;
+            
             container.appendChild(item);
         });
     }
 
+    /**
+     * 🔄 Charge une simulation et ferme le modal
+     */
+    async function loadAndCloseSimulation(simulationName) {
+        console.log(`🔄 Loading and switching to simulation "${simulationName}"...`);
+        
+        // Empêcher le double-clic pendant le chargement
+        const container = document.getElementById('simulationsListContainer');
+        if (container) {
+            container.style.pointerEvents = 'none';
+        }
+        
+        try {
+            // Switch vers la simulation
+            await switchSimulation(simulationName);
+            
+            // Fermer le modal
+            if (typeof closeSimulationsModal === 'function') {
+                closeSimulationsModal();
+            } else {
+                const modal = document.getElementById('simulationsModal');
+                if (modal) {
+                    modal.classList.remove('active');
+                }
+            }
+            
+            showNotification(`Simulation "${simulationName}" loaded successfully!`, 'success');
+            
+        } catch (error) {
+            console.error('❌ Error loading simulation:', error);
+            showNotification(`Error loading simulation "${simulationName}"`, 'error');
+        } finally {
+            // Réactiver les clics
+            if (container) {
+                container.style.pointerEvents = 'auto';
+            }
+        }
+    }
+
+    /**
+     * 🔄 Renomme et rafraîchit la liste
+     */
+    async function renameSimulationAndRefresh(simulationName) {
+        const success = await renameSimulation(simulationName);
+        if (success) {
+            // La liste est déjà rafraîchie dans renameSimulation()
+            // Pas besoin de recharger
+        }
+    }
+
+    /**
+     * 🗑️ Supprime et rafraîchit la liste
+     */
+    async function deleteSimulationAndRefresh(simulationName) {
+        const success = await deleteSimulation(simulationName);
+        if (success) {
+            // La liste est déjà rafraîchie dans deleteSimulation()
+            // Pas besoin de recharger
+        }
+    }
     /**
      * 🔄 Définir une simulation par défaut
      */
@@ -727,6 +785,11 @@ const SimulationManager = (function() {
         getCurrentSimulation,
         fetchSimulationsList,
         
+        // ✅ NOUVEAU : Méthodes pour l'UI
+        loadAndCloseSimulation,      // ⬅️ AJOUT
+        renameSimulationAndRefresh,  // ⬅️ AJOUT
+        deleteSimulationAndRefresh,  // ⬅️ AJOUT
+
         // ✅ ALIAS POUR COMPATIBILITÉ
         getCurrentSimulationName: getCurrentSimulation,
         loadSimulation: loadFromCloud,
