@@ -1656,3 +1656,113 @@
     position: relative;
     z-index: auto !important;
 }
+
+/* ============================================
+   ✅✅✅ PORTFOLIO ITEMS - SPÉCIFICITÉ MAXIMALE
+   Forces les couleurs identiques à Simulation Management
+   ============================================ */
+
+/* Items NON ACTIFS - Fond BLANC/GRIS CLAIR par défaut */
+#portfoliosListContainer .simulation-item:not(.active) {
+    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%) !important;
+    border: 2px solid #e5e7eb !important;
+}
+
+/* Texte NOIR sur items NON ACTIFS */
+#portfoliosListContainer .simulation-item:not(.active) .simulation-name {
+    color: #1f2937 !important;
+}
+
+#portfoliosListContainer .simulation-item:not(.active) .simulation-date {
+    color: #6b7280 !important;
+}
+
+/* Icônes VIOLETTES sur items NON ACTIFS */
+#portfoliosListContainer .simulation-item:not(.active) .simulation-name i:first-child {
+    color: #667eea !important;
+}
+
+#portfoliosListContainer .simulation-item:not(.active) .simulation-date i {
+    color: #9ca3af !important;
+}
+
+/* Hover : Fond BLEU CLAIR sur items NON ACTIFS */
+#portfoliosListContainer .simulation-item:not(.active):hover {
+    background: linear-gradient(135deg, #e0e7ff 0%, #c7d2fe 100%) !important;
+    border-color: #667eea !important;
+}
+
+/* Items ACTIFS - Fond VERT + Bordure DORÉE */
+#portfoliosListContainer .simulation-item.active {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
+    border: 2px solid #ffd700 !important;
+    box-shadow: 0 8px 20px rgba(16, 185, 129, 0.4) !important;
+}
+
+/* Texte BLANC sur items ACTIFS */
+#portfoliosListContainer .simulation-item.active .simulation-name,
+#portfoliosListContainer .simulation-item.active .simulation-date {
+    color: white !important;
+}
+
+/* Icônes DORÉES sur items ACTIFS */
+#portfoliosListContainer .simulation-item.active .simulation-name i:first-child,
+#portfoliosListContainer .simulation-item.active .fa-check-circle {
+    color: #ffd700 !important;
+}
+
+#portfoliosListContainer .simulation-item.active .simulation-date i {
+    color: rgba(255, 255, 255, 0.7) !important;
+}
+
+/* Boutons sur items NON ACTIFS */
+#portfoliosListContainer .simulation-item:not(.active) .btn-icon {
+    background: rgba(102, 126, 234, 0.1) !important;
+    color: #667eea !important;
+}
+
+#portfoliosListContainer .simulation-item:not(.active) .btn-icon:hover {
+    background: #667eea !important;
+    color: white !important;
+}
+
+#portfoliosListContainer .simulation-item:not(.active) .btn-icon.btn-danger {
+    background: rgba(239, 68, 68, 0.1) !important;
+    color: #ef4444 !important;
+}
+
+#portfoliosListContainer .simulation-item:not(.active) .btn-icon.btn-danger:hover {
+    background: #ef4444 !important;
+    color: white !important;
+}
+
+/* Boutons sur items ACTIFS */
+#portfoliosListContainer .simulation-item.active .btn-icon {
+    background: rgba(255, 255, 255, 0.3) !important;
+    color: white !important;
+}
+
+#portfoliosListContainer .simulation-item.active .btn-icon:hover {
+    background: rgba(255, 255, 255, 0.5) !important;
+}
+
+/* DARK MODE */
+[data-theme="dark"] #portfoliosListContainer .simulation-item:not(.active) {
+    background: linear-gradient(135deg, #1e293b 0%, #334155 100%) !important;
+    border-color: #475569 !important;
+}
+
+[data-theme="dark"] #portfoliosListContainer .simulation-item:not(.active) .simulation-name,
+[data-theme="dark"] #portfoliosListContainer .simulation-item:not(.active) .simulation-date {
+    color: white !important;
+}
+
+[data-theme="dark"] #portfoliosListContainer .simulation-item:not(.active):hover {
+    background: #334155 !important;
+    border-color: #667eea !important;
+}
+
+[data-theme="dark"] #portfoliosListContainer .simulation-item.active {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
+    border-color: #ffd700 !important;
+}
