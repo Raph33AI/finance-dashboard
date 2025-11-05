@@ -1555,3 +1555,104 @@
 .content > section:last-child {
     margin-bottom: 0;
 }
+
+/* ============================================
+   ✅ FIX MENU UTILISATEUR - Spécifique à Market Data
+   ============================================ */
+
+/* S'assurer que la sidebar est au-dessus du main-content */
+.sidebar {
+    z-index: 1000 !important;
+}
+
+/* Footer sidebar doit être cliquable */
+.sidebar-footer {
+    position: relative;
+    z-index: 101 !important;
+    pointer-events: auto !important;
+}
+
+/* Menu utilisateur cliquable */
+.sidebar-user-menu {
+    position: relative;
+    z-index: 101 !important;
+    pointer-events: auto !important;
+}
+
+.sidebar-user-trigger {
+    pointer-events: auto !important;
+    cursor: pointer !important;
+    position: relative;
+    z-index: 102 !important;
+}
+
+/* Dropdown au-dessus de TOUT (même des modals) */
+.sidebar-user-dropdown {
+    position: absolute !important;
+    bottom: 100% !important;
+    left: 0 !important;
+    right: 0 !important;
+    margin-bottom: 0.5rem !important;
+    z-index: 15000 !important; /* ✅ Plus haut que les modals (10000) */
+    pointer-events: none;
+}
+
+.sidebar-user-dropdown.active {
+    pointer-events: auto !important;
+    z-index: 15000 !important;
+}
+
+/* Tous les éléments du dropdown sont cliquables */
+.sidebar-user-dropdown * {
+    pointer-events: auto !important;
+}
+
+.user-dropdown-link,
+.user-dropdown-logout {
+    pointer-events: auto !important;
+    cursor: pointer !important;
+}
+
+/* Main content ne doit PAS bloquer la sidebar */
+.main-content {
+    position: relative;
+    z-index: 1 !important;
+    pointer-events: auto !important;
+}
+
+/* Layout wrapper ne doit pas bloquer */
+.layout-wrapper {
+    position: relative;
+    z-index: auto !important;
+}
+
+/* Les modals doivent rester sous le dropdown user */
+.modal {
+    z-index: 10000 !important; /* En dessous du dropdown user */
+}
+
+.modal.active {
+    z-index: 10000 !important;
+}
+
+/* Cache widget ne doit pas bloquer */
+.cache-widget {
+    z-index: 9000 !important;
+}
+
+/* ✅ CORRECTION : S'assurer qu'aucun overlay ne bloque */
+.sidebar-overlay {
+    z-index: 999 !important; /* En dessous de la sidebar */
+}
+
+/* ✅ CORRECTION : Container ne doit pas déborder sur la sidebar */
+.container {
+    position: relative;
+    z-index: auto !important;
+}
+
+/* ✅ CORRECTION : Cards ne doivent pas déborder */
+.card {
+    position: relative;
+    z-index: auto !important;
+}
