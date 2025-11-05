@@ -1,13 +1,13 @@
 /* ==============================================
    MARKET-DATA.CSS - Version Ultra-Compacte 2024
-   ✅ COULEURS VIOLETTES pour Portfolio Management (identique à Simulation)
+   ✅ COULEURS VIOLETTES COMPLÈTES pour Portfolio Management (100% identique à Simulation)
    ============================================== */
 
 /* ============================================
    🎨 VARIABLES SPÉCIFIQUES MARKET DATA
    ============================================ */
 :root {
-    /* ✅ NOUVEAU : Couleurs violettes pour Portfolio Management (identique à Simulation) */
+    /* ✅ Couleurs violettes pour Portfolio Management (identique à Simulation) */
     --portfolio-gradient-start: #667eea;
     --portfolio-gradient-end: #764ba2;
     --portfolio-gold: #ffd700;
@@ -660,7 +660,7 @@
 .accordion-body { padding: var(--md-padding); }
 
 /* ============================================
-   💼 PORTFOLIO MANAGEMENT - ✅ COULEURS VIOLETTES (Identique à Simulation)
+   💼 PORTFOLIO MANAGEMENT - ✅ 100% IDENTIQUE À SIMULATION
    ============================================ */
 .portfolio-management-section {
     background: var(--background-primary);
@@ -674,9 +674,9 @@
 /* ✅ GRADIENT VIOLET (identique à simulation-management) */
 .simulation-management {
     background: linear-gradient(135deg, var(--portfolio-gradient-start) 0%, var(--portfolio-gradient-end) 100%) !important;
-    color: white;
+    color: white !important;
     padding: 1.5rem;
-    border-radius: var(--radius-lg);
+    border-radius: 15px;
     box-shadow: 0 10px 30px var(--portfolio-shadow);
     margin-bottom: var(--md-gap);
 }
@@ -686,17 +686,24 @@
     box-shadow: 0 10px 30px var(--portfolio-shadow);
 }
 
+/* ✅ TITRE H3 - Blanc */
+.simulation-management h3 {
+    color: white !important;
+    margin-bottom: 1.25rem;
+}
+
+.simulation-management h3 i {
+    color: white !important;
+}
+
 /* ✅ CURRENT PORTFOLIO DISPLAY - Violet + Doré */
 .current-simulation-display {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.75rem;
-    margin-bottom: var(--md-gap);
-    background: rgba(255, 255, 255, 0.15);
-    padding: 1rem;
+    background: rgba(255, 255, 255, 0.15) !important;
+    padding: 15px;
     border-radius: 10px;
+    text-align: center;
     backdrop-filter: blur(10px);
+    margin-bottom: 1.25rem;
 }
 
 .current-simulation-display * {
@@ -704,14 +711,14 @@
 }
 
 .current-simulation-display .label {
+    font-size: 0.9em;
+    opacity: 0.9;
+    margin-right: 10px;
     font-weight: 500;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
 }
 
 .current-simulation-display .label i {
-    font-size: 1.25rem;
+    color: white !important;
 }
 
 /* ✅ VALUE EN DORÉ (identique à simulation) */
@@ -719,19 +726,86 @@
     font-size: 1.2em !important;
     font-weight: bold !important;
     color: var(--portfolio-gold) !important;
-    background: rgba(255, 255, 255, 0.15) !important;
-    padding: 0.5rem 1.25rem;
-    border-radius: var(--radius-md);
-    border: 2px solid rgba(255, 255, 255, 0.3) !important;
-    backdrop-filter: blur(10px);
+    background: transparent !important;
 }
 
 [data-theme="dark"] .current-simulation-display .value {
     color: var(--portfolio-gold) !important;
-    background: rgba(255, 255, 255, 0.15) !important;
 }
 
-/* ✅ INFO BOX - Texte blanc */
+/* ✅ TOOLBAR ROW - Tous les éléments en blanc */
+.toolbar-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+/* ✅ TOUS LES BOUTONS DANS SIMULATION-MANAGEMENT - Style cohérent */
+.simulation-management .btn,
+.simulation-management .btn-success,
+.simulation-management .btn-primary,
+.simulation-management .btn-secondary,
+.simulation-management button {
+    margin: 5px;
+    transition: all var(--transition-base);
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+    padding: 12px 30px;
+    border-radius: var(--radius-md);
+    font-size: 1em;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+/* ✅ Boutons spécifiques avec leurs couleurs */
+.simulation-management .btn-success {
+    background: var(--success-color);
+    color: white !important;
+}
+
+.simulation-management .btn-success:hover {
+    background: #059669;
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+.simulation-management .btn-primary {
+    background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+    color: white !important;
+    box-shadow: 0 2px 8px rgba(37, 99, 235, 0.2);
+}
+
+.simulation-management .btn-primary:hover {
+    background: linear-gradient(135deg, #1d4ed8 0%, #1e40af 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.4);
+}
+
+.simulation-management .btn-secondary {
+    background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%);
+    color: white !important;
+    box-shadow: 0 2px 8px rgba(107, 114, 128, 0.2);
+}
+
+.simulation-management .btn-secondary:hover {
+    background: linear-gradient(135deg, #4b5563 0%, #374151 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(107, 114, 128, 0.4);
+}
+
+/* ✅ Icônes des boutons - Blanc */
+.simulation-management .btn i,
+.simulation-management .btn-success i,
+.simulation-management .btn-primary i,
+.simulation-management .btn-secondary i {
+    color: white !important;
+}
+
+/* ✅ INFO BOX - Texte blanc total */
 .info-box,
 .info-box-white-text {
     background: rgba(255, 255, 255, 0.1) !important;
@@ -739,6 +813,7 @@
     padding: var(--md-padding);
     border-radius: var(--radius-md);
     backdrop-filter: blur(10px);
+    margin-top: 15px;
 }
 
 .info-box *,
@@ -769,15 +844,6 @@
     line-height: 1.6;
 }
 
-/* ✅ TOOLBAR ROW */
-.toolbar-row {
-    display: flex;
-    align-items: center;
-    gap: var(--md-gap);
-    flex-wrap: wrap;
-    justify-content: center;
-}
-
 /* ============================================
    🎭 MODALS - ✅ HEADER VIOLET pour Portfolio Modal
    ============================================ */
@@ -806,9 +872,13 @@
     flex-direction: column;
 }
 
-/* ✅ MODAL HEADER - Violet pour Portfolio, Bleu pour les autres */
+[data-theme="dark"] .modal-content {
+    background: var(--background-primary);
+}
+
+/* ✅ MODAL HEADER - Bleu par défaut */
 .modal-header {
-    padding: 1.5rem 2rem;
+    padding: 25px 30px;
     background: var(--md-gradient);
     color: white;
     display: flex;
@@ -823,65 +893,95 @@
 
 .modal-header h2 {
     margin: 0;
-    font-size: 1.5rem;
+    font-size: 1.5em;
+    color: white;
+}
+
+.modal-header h2 i {
     color: white;
 }
 
 .modal-close,
 .close-modal {
-    background: rgba(255, 255, 255, 0.2);
+    background: none;
     border: none;
     color: white;
+    font-size: 1.5em;
+    cursor: pointer;
+    transition: transform 0.2s;
     width: 36px;
     height: 36px;
-    border-radius: var(--radius-md);
-    cursor: pointer;
-    transition: all var(--transition-base);
     display: flex;
     align-items: center;
     justify-content: center;
+    border-radius: var(--radius-md);
 }
 
 .modal-close:hover,
 .close-modal:hover {
     transform: rotate(90deg);
-    background: rgba(255, 255, 255, 0.3);
+    background: rgba(255, 255, 255, 0.2);
 }
 
 .modal-body {
-    padding: 2rem;
+    padding: 30px;
     overflow-y: auto;
     flex: 1;
 }
 
 .modal-footer {
-    padding: 1.25rem 2rem;
-    background: var(--background-secondary);
+    padding: 20px 30px;
+    background: #f8f9fa;
     display: flex;
     justify-content: flex-end;
-    gap: 0.625rem;
+    gap: 10px;
     border-top: 1px solid var(--border-color);
+}
+
+[data-theme="dark"] .modal-footer {
+    background: var(--background-secondary);
 }
 
 /* ============================================
    📋 SIMULATION ITEMS (Portfolios) - ✅ Identique à Simulation
    ============================================ */
 .simulations-info {
-    background: rgba(102, 126, 234, 0.05);
+    background: linear-gradient(135deg, #e8f2ff 0%, #dbeafe 100%);
     border-left: 4px solid var(--portfolio-gradient-start);
-    padding: var(--md-padding);
+    padding: var(--md-padding) 1.5rem;
     border-radius: var(--radius-md);
-    margin-bottom: var(--md-gap);
+    margin-bottom: 1.5rem;
 }
 
 [data-theme="dark"] .simulations-info {
-    background: rgba(102, 126, 234, 0.1);
+    background: linear-gradient(135deg, #1e3a5f 0%, #1e40af 100%);
+    border-color: var(--portfolio-gradient-end);
+}
+
+.simulations-info p {
+    margin: 0;
+    color: var(--text-primary);
+    font-size: 0.9375rem;
+    line-height: 1.6;
+}
+
+.simulations-info i {
+    color: var(--portfolio-gradient-start);
+    margin-right: 0.5rem;
+}
+
+[data-theme="dark"] .simulations-info p {
+    color: white;
+}
+
+[data-theme="dark"] .simulations-info i {
+    color: var(--portfolio-gradient-end);
 }
 
 #portfoliosListContainer {
     display: flex;
     flex-direction: column;
-    gap: var(--md-gap);
+    gap: 15px;
 }
 
 /* ✅ SIMULATION ITEM - Identique au dashboard */
@@ -889,12 +989,12 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 1.25rem;
-    background: var(--md-gradient-card);
+    padding: 20px;
+    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
     border-radius: 12px;
+    transition: all 0.3s ease;
     border: 2px solid transparent;
     cursor: pointer;
-    transition: all 0.3s ease;
     position: relative;
     overflow: hidden;
 }
@@ -903,7 +1003,7 @@
     background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
 }
 
-/* ✅ Animation au hover - identique */
+/* ✅ Animation au hover */
 .simulation-item::before {
     content: '';
     position: absolute;
@@ -924,7 +1024,16 @@
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
 }
 
-/* ✅ ACTIVE STATE - Vert avec bordure dorée (identique) */
+.simulation-item:not(.active):hover {
+    background: linear-gradient(135deg, #e0e7ff 0%, #c7d2fe 100%);
+    border-color: var(--portfolio-gradient-start);
+}
+
+[data-theme="dark"] .simulation-item:not(.active):hover {
+    background: var(--background-tertiary);
+}
+
+/* ✅ ACTIVE STATE - Vert avec bordure dorée */
 .simulation-item.active {
     background: linear-gradient(135deg, #10b981 0%, #059669 100%);
     color: white;
@@ -952,33 +1061,39 @@
 }
 
 .simulation-name {
-    font-weight: 600;
-    font-size: 1.1rem;
+    font-weight: bold;
+    font-size: 1.1em;
     display: flex;
     align-items: center;
-    gap: 0.625rem;
-    margin-bottom: 0.25rem;
+    gap: 10px;
+    margin-bottom: 5px;
+}
+
+.simulation-name i {
+    font-size: 1rem;
 }
 
 .simulation-date {
-    font-size: 0.85rem;
+    font-size: 0.85em;
     opacity: 0.7;
     display: flex;
     align-items: center;
-    gap: 0.375rem;
+    gap: 6px;
 }
 
 .simulation-item.active .simulation-date {
-    opacity: 0.95;
+    color: rgba(255, 255, 255, 0.9);
+    opacity: 1;
 }
 
 .simulation-actions {
     display: flex;
-    gap: 0.5rem;
+    gap: 8px;
+    position: relative;
     z-index: 10;
 }
 
-/* ✅ BTN-ICON - Identique */
+/* ✅ BTN-ICON */
 .btn-icon {
     background: rgba(255, 255, 255, 0.9);
     border: none;
@@ -1063,23 +1178,38 @@
     .popular-stocks, .time-period-selector { flex-direction: column; align-items: flex-start; }
     .symbol-chip, .period-btn { width: 100%; justify-content: center; }
     
-    .simulation-management { padding: 1rem; }
+    .simulation-management {
+        padding: var(--md-padding);
+    }
+    
     .current-simulation-display {
         flex-direction: column;
         text-align: center;
     }
+    
+    .current-simulation-display .value {
+        width: 100%;
+    }
+    
     .toolbar-row {
         flex-direction: column;
         align-items: stretch;
     }
-    .toolbar-row button {
+    
+    .toolbar-row button,
+    .simulation-management .btn,
+    .simulation-management .btn-success,
+    .simulation-management .btn-primary,
+    .simulation-management .btn-secondary {
         width: 100%;
         justify-content: center;
     }
+    
     .simulation-item {
         flex-direction: column;
         align-items: flex-start;
     }
+    
     .simulation-actions {
         width: 100%;
         flex-direction: row;
@@ -1092,6 +1222,24 @@
    ============================================ */
 [data-theme="dark"] .stock-overview {
     background: linear-gradient(135deg, #1a4db8 0%, #2d6bff 100%);
+}
+
+[data-theme="dark"] .simulation-management .btn-primary {
+    box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
+}
+
+[data-theme="dark"] .simulation-management .btn-primary:hover {
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.5);
+}
+
+[data-theme="dark"] .simulation-management .btn-secondary {
+    background: linear-gradient(135deg, #374151 0%, #1f2937 100%);
+    box-shadow: 0 2px 8px rgba(55, 65, 81, 0.3);
+}
+
+[data-theme="dark"] .simulation-management .btn-secondary:hover {
+    background: linear-gradient(135deg, #1f2937 0%, #111827 100%);
+    box-shadow: 0 4px 12px rgba(55, 65, 81, 0.5);
 }
 
 /* ============================================
