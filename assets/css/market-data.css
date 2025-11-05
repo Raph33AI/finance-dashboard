@@ -1,13 +1,19 @@
 /* ==============================================
    MARKET-DATA.CSS - Version Ultra-Compacte 2024
-   Optimisée avec CSS Variables & Modern Syntax
+   ✅ COULEURS VIOLETTES pour Portfolio Management (identique à Simulation)
    ============================================== */
 
 /* ============================================
    🎨 VARIABLES SPÉCIFIQUES MARKET DATA
    ============================================ */
 :root {
-    /* Bleus modernes */
+    /* ✅ NOUVEAU : Couleurs violettes pour Portfolio Management (identique à Simulation) */
+    --portfolio-gradient-start: #667eea;
+    --portfolio-gradient-end: #764ba2;
+    --portfolio-gold: #ffd700;
+    --portfolio-shadow: rgba(102, 126, 234, 0.3);
+    
+    /* Bleus pour le reste de Market Data */
     --md-blue-primary: #1e5eeb;
     --md-blue-light: #4c8aff;
     --md-blue-dark: #0d3d9f;
@@ -23,6 +29,13 @@
 }
 
 [data-theme="dark"] {
+    /* Portfolio Management reste violet même en dark mode */
+    --portfolio-gradient-start: #667eea;
+    --portfolio-gradient-end: #764ba2;
+    --portfolio-gold: #ffd700;
+    --portfolio-shadow: rgba(102, 126, 234, 0.4);
+    
+    /* Bleus dark mode */
     --md-blue-primary: #4c8aff;
     --md-blue-dark: #1a4db8;
     --md-blue-bg: #0f2451;
@@ -647,47 +660,126 @@
 .accordion-body { padding: var(--md-padding); }
 
 /* ============================================
-   💼 PORTFOLIO MANAGEMENT
+   💼 PORTFOLIO MANAGEMENT - ✅ COULEURS VIOLETTES (Identique à Simulation)
    ============================================ */
-.simulation-management {
-    background: var(--md-gradient) !important;
-    border-radius: var(--radius-lg);
+.portfolio-management-section {
+    background: var(--background-primary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-xl);
     padding: var(--md-padding);
+    margin-bottom: var(--md-gap);
+    box-shadow: var(--shadow-sm);
+}
+
+/* ✅ GRADIENT VIOLET (identique à simulation-management) */
+.simulation-management {
+    background: linear-gradient(135deg, var(--portfolio-gradient-start) 0%, var(--portfolio-gradient-end) 100%) !important;
+    color: white;
+    padding: 1.5rem;
+    border-radius: var(--radius-lg);
+    box-shadow: 0 10px 30px var(--portfolio-shadow);
     margin-bottom: var(--md-gap);
 }
 
+[data-theme="dark"] .simulation-management {
+    background: linear-gradient(135deg, var(--portfolio-gradient-start) 0%, var(--portfolio-gradient-end) 100%) !important;
+    box-shadow: 0 10px 30px var(--portfolio-shadow);
+}
+
+/* ✅ CURRENT PORTFOLIO DISPLAY - Violet + Doré */
 .current-simulation-display {
     display: flex;
     align-items: center;
     justify-content: center;
     gap: 0.75rem;
     margin-bottom: var(--md-gap);
+    background: rgba(255, 255, 255, 0.15);
+    padding: 1rem;
+    border-radius: 10px;
+    backdrop-filter: blur(10px);
 }
 
-.current-simulation-display * { color: white !important; }
-
-.current-simulation-display .value {
-    background: rgba(255, 255, 255, 0.25) !important;
-    padding: 0.5rem 1.25rem;
-    border-radius: var(--radius-md);
-    border: 2px solid rgba(255, 255, 255, 0.5) !important;
-    font-weight: 700;
-}
-
-.info-box-white-text,
-.info-box-white-text * {
+.current-simulation-display * {
     color: white !important;
 }
 
+.current-simulation-display .label {
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.current-simulation-display .label i {
+    font-size: 1.25rem;
+}
+
+/* ✅ VALUE EN DORÉ (identique à simulation) */
+.current-simulation-display .value {
+    font-size: 1.2em !important;
+    font-weight: bold !important;
+    color: var(--portfolio-gold) !important;
+    background: rgba(255, 255, 255, 0.15) !important;
+    padding: 0.5rem 1.25rem;
+    border-radius: var(--radius-md);
+    border: 2px solid rgba(255, 255, 255, 0.3) !important;
+    backdrop-filter: blur(10px);
+}
+
+[data-theme="dark"] .current-simulation-display .value {
+    color: var(--portfolio-gold) !important;
+    background: rgba(255, 255, 255, 0.15) !important;
+}
+
+/* ✅ INFO BOX - Texte blanc */
+.info-box,
+.info-box-white-text {
+    background: rgba(255, 255, 255, 0.1) !important;
+    border-left: 4px solid white !important;
+    padding: var(--md-padding);
+    border-radius: var(--radius-md);
+    backdrop-filter: blur(10px);
+}
+
+.info-box *,
+.info-box-white-text *,
+.info-box h4,
+.info-box-white-text h4,
+.info-box p,
+.info-box-white-text p,
+.info-box h4 i,
+.info-box-white-text h4 i {
+    color: white !important;
+}
+
+.info-box h4,
+.info-box-white-text h4 {
+    margin: 0 0 0.5rem 0;
+    font-size: 1rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.info-box p,
+.info-box-white-text p {
+    margin: 0;
+    font-size: 0.9375rem;
+    line-height: 1.6;
+}
+
+/* ✅ TOOLBAR ROW */
 .toolbar-row {
     display: flex;
     align-items: center;
     gap: var(--md-gap);
     flex-wrap: wrap;
+    justify-content: center;
 }
 
 /* ============================================
-   🎭 MODALS
+   🎭 MODALS - ✅ HEADER VIOLET pour Portfolio Modal
    ============================================ */
 .modal {
     display: none;
@@ -714,6 +806,7 @@
     flex-direction: column;
 }
 
+/* ✅ MODAL HEADER - Violet pour Portfolio, Bleu pour les autres */
 .modal-header {
     padding: 1.5rem 2rem;
     background: var(--md-gradient);
@@ -721,6 +814,11 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
+}
+
+/* ✅ SPÉCIFIQUE POUR LE PORTFOLIO MODAL - Gradient Violet */
+#portfoliosModal .modal-header {
+    background: linear-gradient(135deg, var(--portfolio-gradient-start) 0%, var(--portfolio-gradient-end) 100%);
 }
 
 .modal-header h2 {
@@ -766,14 +864,18 @@
 }
 
 /* ============================================
-   📋 SIMULATION ITEMS (Portfolios)
+   📋 SIMULATION ITEMS (Portfolios) - ✅ Identique à Simulation
    ============================================ */
 .simulations-info {
-    background: var(--md-blue-bg);
-    border-left: 4px solid var(--md-blue-primary);
+    background: rgba(102, 126, 234, 0.05);
+    border-left: 4px solid var(--portfolio-gradient-start);
     padding: var(--md-padding);
     border-radius: var(--radius-md);
     margin-bottom: var(--md-gap);
+}
+
+[data-theme="dark"] .simulations-info {
+    background: rgba(102, 126, 234, 0.1);
 }
 
 #portfoliosListContainer {
@@ -782,28 +884,56 @@
     gap: var(--md-gap);
 }
 
+/* ✅ SIMULATION ITEM - Identique au dashboard */
 .simulation-item {
     display: flex;
     justify-content: space-between;
     align-items: center;
     padding: 1.25rem;
     background: var(--md-gradient-card);
-    border-radius: var(--radius-lg);
+    border-radius: 12px;
     border: 2px solid transparent;
     cursor: pointer;
-    transition: all var(--transition-base);
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+[data-theme="dark"] .simulation-item {
+    background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+}
+
+/* ✅ Animation au hover - identique */
+.simulation-item::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left 0.5s;
+}
+
+.simulation-item:hover::before {
+    left: 100%;
 }
 
 .simulation-item:hover {
     transform: translateY(-2px);
-    box-shadow: var(--shadow-md);
-    border-color: var(--md-blue-primary);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
 }
 
+/* ✅ ACTIVE STATE - Vert avec bordure dorée (identique) */
 .simulation-item.active {
     background: linear-gradient(135deg, #10b981 0%, #059669 100%);
     color: white;
-    border-color: #ffd700;
+    border-color: var(--portfolio-gold);
+    box-shadow: 0 8px 20px rgba(16, 185, 129, 0.4);
+}
+
+[data-theme="dark"] .simulation-item.active {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
 }
 
 .simulation-item.active .simulation-name,
@@ -811,7 +941,15 @@
     color: white;
 }
 
-.simulation-info { flex: 1; }
+.simulation-item.active .simulation-name i:first-child {
+    color: var(--portfolio-gold);
+}
+
+.simulation-info {
+    flex: 1;
+    cursor: pointer;
+    user-select: none;
+}
 
 .simulation-name {
     font-weight: 600;
@@ -830,21 +968,26 @@
     gap: 0.375rem;
 }
 
+.simulation-item.active .simulation-date {
+    opacity: 0.95;
+}
+
 .simulation-actions {
     display: flex;
     gap: 0.5rem;
     z-index: 10;
 }
 
+/* ✅ BTN-ICON - Identique */
 .btn-icon {
     background: rgba(255, 255, 255, 0.9);
     border: none;
     width: 36px;
     height: 36px;
-    border-radius: var(--radius-md);
+    border-radius: 8px;
     cursor: pointer;
-    transition: all var(--transition-base);
-    color: var(--md-blue-primary);
+    transition: all 0.2s;
+    color: var(--portfolio-gradient-start);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -855,11 +998,55 @@
     transform: scale(1.1);
 }
 
-.btn-icon.btn-danger { color: var(--danger-color); }
+.btn-icon.btn-danger {
+    color: #e74c3c;
+}
 
 .btn-icon.btn-danger:hover {
-    background: var(--danger-color);
+    background: #e74c3c;
     color: white;
+}
+
+.simulation-item.active .btn-icon {
+    background: rgba(255, 255, 255, 0.3);
+    color: white;
+}
+
+.simulation-item.active .btn-icon:hover {
+    background: rgba(255, 255, 255, 0.5);
+}
+
+/* ✅ LOADING STATE */
+.loading-simulations {
+    text-align: center;
+    padding: var(--md-padding);
+    color: var(--text-secondary);
+    font-size: 1rem;
+}
+
+.loading-simulations i {
+    margin-right: 0.5rem;
+    color: var(--portfolio-gradient-start);
+    animation: spin 1s linear infinite;
+}
+
+.simulation-item.loading {
+    opacity: 0.6;
+    pointer-events: none;
+}
+
+.simulation-item.loading::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 30px;
+    height: 30px;
+    border: 3px solid rgba(255, 255, 255, 0.3);
+    border-top-color: white;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
 }
 
 /* ============================================
@@ -875,6 +1062,29 @@
     .watchlist-actions, .comparison-actions { width: 100%; flex-direction: column; }
     .popular-stocks, .time-period-selector { flex-direction: column; align-items: flex-start; }
     .symbol-chip, .period-btn { width: 100%; justify-content: center; }
+    
+    .simulation-management { padding: 1rem; }
+    .current-simulation-display {
+        flex-direction: column;
+        text-align: center;
+    }
+    .toolbar-row {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    .toolbar-row button {
+        width: 100%;
+        justify-content: center;
+    }
+    .simulation-item {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    .simulation-actions {
+        width: 100%;
+        flex-direction: row;
+        justify-content: flex-end;
+    }
 }
 
 /* ============================================
@@ -884,14 +1094,6 @@
     background: linear-gradient(135deg, #1a4db8 0%, #2d6bff 100%);
 }
 
-[data-theme="dark"] .simulation-item {
-    background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
-}
-
-[data-theme="dark"] .simulation-item:hover {
-    border-color: var(--md-blue-light);
-}
-
 /* ============================================
    ⚡ ANIMATIONS
    ============================================ */
@@ -899,16 +1101,13 @@
     to { transform: rotate(360deg); }
 }
 
-.loading-simulations i,
-.loading-indicator i {
-    animation: spin 1s linear infinite;
-}
-
 /* ============================================
    ♿ ACCESSIBILITY
    ============================================ */
 @media (prefers-reduced-motion: reduce) {
-    * {
+    *,
+    *::before,
+    *::after {
         animation-duration: 0.01ms !important;
         transition-duration: 0.01ms !important;
     }
