@@ -1,5 +1,6 @@
 // ═══════════════════════════════════════════════════════════════
 // 📁 PORTFOLIO MANAGER - Multi-portfolios avec Cloud Sync
+// Version améliorée avec gestion UI complète (comme Simulation Manager)
 // ═══════════════════════════════════════════════════════════════
 
 const PortfolioManager = (function() {
@@ -176,8 +177,6 @@ const PortfolioManager = (function() {
             console.warn('⚠️ Running in LOCAL MODE (Firebase not available)');
         } else {
             await ensureUserDocument();
-            
-            // ✅ NOUVEAU : Assurer qu'au moins un portfolio existe
             await ensureDefaultPortfolio();
         }
     })();
@@ -216,7 +215,7 @@ const PortfolioManager = (function() {
             
             console.log('✅ Loaded portfolios list:', portfolios.length);
             
-            // ✅ NOUVEAU : Si aucun portfolio, créer default
+            // Si aucun portfolio, créer default
             if (portfolios.length === 0) {
                 console.log('📝 No portfolios found, creating default...');
                 await ensureDefaultPortfolio();
@@ -265,7 +264,7 @@ const PortfolioManager = (function() {
             }
         }
         
-        // ✅ NOUVEAU : Si aucun portfolio local, créer default
+        // Si aucun portfolio local, créer default
         if (portfolios.length === 0) {
             console.log('📝 No local portfolios found, creating default...');
             const defaultData = createDefaultPortfolioData('default');
@@ -379,6 +378,8 @@ const PortfolioManager = (function() {
             
             localStorage.setItem(`portfolio_${portfolioName}`, JSON.stringify(data));
             
+            showNotification(`Portfolio "${portfolioName}" saved successfully!`, 'success');
+            
             return true;
             
         } catch (error) {
@@ -386,6 +387,8 @@ const PortfolioManager = (function() {
             console.warn('💾 Falling back to local storage');
             
             localStorage.setItem(`portfolio_${portfolioName}`, JSON.stringify(data));
+            
+            showNotification(`Portfolio saved locally (offline mode)`, 'warning');
             
             return false;
         }
@@ -397,6 +400,11 @@ const PortfolioManager = (function() {
     async function deletePortfolio(portfolioName) {
         if (portfolioName === 'default') {
             console.warn('⚠️ Cannot delete default portfolio');
+            showNotification('Cannot delete default portfolio', 'error');
+            return false;
+        }
+        
+        if (!confirm(`Are you sure you want to delete portfolio "${portfolioName}"?`)) {
             return false;
         }
         
@@ -427,6 +435,11 @@ const PortfolioManager = (function() {
             localStorage.setItem('currentPortfolio', 'default');
         }
         
+        // Rafraîchir l'UI
+        await fetchPortfoliosList();
+        
+        showNotification(`Portfolio "${portfolioName}" deleted successfully!`, 'success');
+        
         return true;
     }
 
@@ -442,6 +455,13 @@ const PortfolioManager = (function() {
         const data = await loadFromCloud(portfolioName);
         
         updateCurrentPortfolioDisplay(portfolioName);
+        
+        // Appliquer les données au MarketData (si disponible)
+        if (window.MarketData && window.MarketData.loadPortfolioData) {
+            window.MarketData.loadPortfolioData(data);
+        }
+        
+        showNotification(`Switched to portfolio "${portfolioName}"`, 'success');
         
         return data;
     }
@@ -464,16 +484,95 @@ const PortfolioManager = (function() {
             return null;
         }
         
-        const data = createDefaultPortfolioData(portfolioName);
+        // Créer avec les données actuelles ou par défaut
+        let data;
+        if (window.MarketData && window.MarketData.getCurrentData) {
+            data = window.MarketData.getCurrentData();
+            data.name = portfolioName;
+        } else {
+            data = createDefaultPortfolioData(portfolioName);
+        }
+        
         await saveToCloud(portfolioName, data);
         
         await switchPortfolio(portfolioName);
         
-        if (typeof MarketData !== 'undefined' && MarketData.refreshPortfoliosList) {
-            MarketData.refreshPortfoliosList();
-        }
+        // Rafraîchir la liste
+        await fetchPortfoliosList();
         
         return data;
+    }
+
+    /**
+     * 🔄 Renommer un portfolio
+     */
+    async function renamePortfolio(oldName) {
+        if (oldName === 'default') {
+            showNotification('Cannot rename default portfolio', 'error');
+            return false;
+        }
+        
+        const newName = prompt(`Renommer le portfolio "${oldName}" en:`, oldName);
+        
+        if (!newName || newName === oldName) {
+            return false;
+        }
+        
+        const portfolios = await listPortfolios();
+        if (portfolios.some(p => p.name === newName)) {
+            showNotification('Un portfolio avec ce nom existe déjà', 'error');
+            return false;
+        }
+        
+        try {
+            // Charger l'ancien portfolio
+            const data = await loadFromCloud(oldName);
+            
+            if (!data) {
+                showNotification('Error loading portfolio', 'error');
+                return false;
+            }
+            
+            // Mettre à jour le nom
+            data.name = newName;
+            
+            // Créer le nouveau
+            await saveToCloud(newName, data);
+            
+            // Supprimer l'ancien (sans confirmation)
+            if (firebaseReady && currentUser) {
+                const db = firebase.firestore();
+                const userId = currentUser.uid;
+                
+                await db
+                    .collection('users')
+                    .doc(userId)
+                    .collection('portfolios')
+                    .doc(oldName)
+                    .delete();
+            }
+            
+            localStorage.removeItem(`portfolio_${oldName}`);
+            
+            // Si c'était le portfolio actif
+            if (currentPortfolio === oldName) {
+                currentPortfolio = newName;
+                localStorage.setItem('currentPortfolio', newName);
+                updateCurrentPortfolioDisplay(newName);
+            }
+            
+            // Rafraîchir la liste
+            await fetchPortfoliosList();
+            
+            showNotification(`Portfolio renamed to "${newName}"`, 'success');
+            
+            return true;
+            
+        } catch (error) {
+            console.error('❌ Error renaming portfolio:', error);
+            showNotification('Error renaming portfolio', 'error');
+            return false;
+        }
     }
 
     /**
@@ -482,7 +581,129 @@ const PortfolioManager = (function() {
     function updateCurrentPortfolioDisplay(portfolioName) {
         const display = document.getElementById('currentPortfolioName');
         if (display) {
-            display.textContent = portfolioName;
+            display.textContent = portfolioName || currentPortfolio;
+        }
+    }
+
+    /**
+     * 🔄 Récupérer et afficher la liste des portfolios
+     */
+    async function fetchPortfoliosList() {
+        const portfolios = await listPortfolios();
+        updatePortfoliosListUI(portfolios);
+        return portfolios;
+    }
+
+    /**
+     * 🖼️ Mettre à jour l'affichage de la liste des portfolios
+     */
+    function updatePortfoliosListUI(portfolios) {
+        const container = document.getElementById('portfoliosListContainer');
+        if (!container) return;
+        
+        container.innerHTML = '';
+        
+        if (!portfolios || portfolios.length === 0) {
+            container.innerHTML = `
+                <div class='no-portfolios'>
+                    <i class='fas fa-folder-open' style='font-size: 3em; margin-bottom: 15px; opacity: 0.3;'></i>
+                    <p>No saved portfolios yet.</p>
+                    <p style='font-size: 0.9em; margin-top: 10px;'>Create your first portfolio to get started!</p>
+                </div>
+            `;
+            return;
+        }
+        
+        portfolios.forEach(portfolio => {
+            const item = document.createElement('div');
+            item.className = `simulation-item ${portfolio.name === currentPortfolio ? 'active' : ''}`;
+            
+            const updatedDate = portfolio.updatedAt 
+                ? (portfolio.updatedAt.toDate ? portfolio.updatedAt.toDate() : new Date(portfolio.updatedAt))
+                : new Date(portfolio.createdAt);
+            
+            item.innerHTML = `
+                <div class="simulation-info" onclick="loadAndClosePortfolio('${portfolio.name}')">
+                    <span class="simulation-name">
+                        <i class='fas fa-briefcase'></i> ${portfolio.name}
+                        ${portfolio.name === currentPortfolio ? '<i class="fas fa-check-circle" style="color: #10b981; margin-left: 8px;"></i>' : ''}
+                    </span>
+                    <span class="simulation-date">
+                        <i class='fas fa-clock'></i> ${formatDate(updatedDate)}
+                    </span>
+                </div>
+                <div class="simulation-actions" onclick="event.stopPropagation()">
+                    <button onclick="renamePortfolioAndRefresh('${portfolio.name}')" 
+                            class="btn-icon" title="Rename">
+                        <i class='fas fa-edit'></i>
+                    </button>
+                    <button onclick="deletePortfolioAndRefresh('${portfolio.name}')" 
+                            class="btn-icon btn-danger" title="Delete">
+                        <i class='fas fa-trash'></i>
+                    </button>
+                </div>
+            `;
+            
+            container.appendChild(item);
+        });
+    }
+
+    /**
+     * 🔄 Charge un portfolio et ferme le modal
+     */
+    async function loadAndClosePortfolio(portfolioName) {
+        console.log(`🔄 Loading and switching to portfolio "${portfolioName}"...`);
+        
+        // Empêcher le double-clic pendant le chargement
+        const container = document.getElementById('portfoliosListContainer');
+        if (container) {
+            container.style.pointerEvents = 'none';
+        }
+        
+        try {
+            // Switch vers le portfolio
+            await switchPortfolio(portfolioName);
+            
+            // Fermer le modal
+            if (typeof closePortfoliosModal === 'function') {
+                closePortfoliosModal();
+            } else {
+                const modal = document.getElementById('portfoliosModal');
+                if (modal) {
+                    modal.classList.remove('active');
+                }
+            }
+            
+            showNotification(`Portfolio "${portfolioName}" loaded successfully!`, 'success');
+            
+        } catch (error) {
+            console.error('❌ Error loading portfolio:', error);
+            showNotification(`Error loading portfolio "${portfolioName}"`, 'error');
+        } finally {
+            // Réactiver les clics
+            if (container) {
+                container.style.pointerEvents = 'auto';
+            }
+        }
+    }
+
+    /**
+     * 🔄 Renomme et rafraîchit la liste
+     */
+    async function renamePortfolioAndRefresh(portfolioName) {
+        const success = await renamePortfolio(portfolioName);
+        if (success) {
+            // La liste est déjà rafraîchie dans renamePortfolio()
+        }
+    }
+
+    /**
+     * 🗑️ Supprime et rafraîchit la liste
+     */
+    async function deletePortfolioAndRefresh(portfolioName) {
+        const success = await deletePortfolio(portfolioName);
+        if (success) {
+            // La liste est déjà rafraîchie dans deletePortfolio()
         }
     }
 
@@ -508,6 +729,43 @@ const PortfolioManager = (function() {
         return currentPortfolio;
     }
 
+    /**
+     * 📅 Formate une date en format lisible
+     */
+    function formatDate(date) {
+        if (!date) return 'N/A';
+        
+        if (typeof date === 'string') {
+            date = new Date(date);
+        }
+        
+        return date.toLocaleDateString('en-US', {
+            month: 'short',
+            day: 'numeric',
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+        });
+    }
+
+    /**
+     * 📢 Affiche une notification
+     */
+    function showNotification(message, type = 'info') {
+        if (window.MarketData && window.MarketData.showNotification) {
+            window.MarketData.showNotification(message, type);
+        } else if (window.FinanceDashboard && window.FinanceDashboard.showNotification) {
+            window.FinanceDashboard.showNotification(message, type);
+        } else {
+            console.log(`[${type.toUpperCase()}] ${message}`);
+            
+            // Fallback : alert pour les erreurs
+            if (type === 'error') {
+                alert(message);
+            }
+        }
+    }
+
     // ═══════════════════════════════════════════════════════════════
     // 🌐 API PUBLIQUE
     // ═══════════════════════════════════════════════════════════════
@@ -520,10 +778,17 @@ const PortfolioManager = (function() {
         deletePortfolio,
         switchPortfolio,
         createNewPortfolio,
+        renamePortfolio,
         setDefaultPortfolio,
         getDefaultPortfolio,
         getCurrentPortfolio,
+        fetchPortfoliosList,
         
+        // ✅ NOUVEAU : Méthodes pour l'UI
+        loadAndClosePortfolio,
+        renamePortfolioAndRefresh,
+        deletePortfolioAndRefresh,
+
         // ✅ ALIAS POUR COMPATIBILITÉ
         getCurrentPortfolioName: getCurrentPortfolio,
         loadPortfolio: loadFromCloud,
@@ -536,4 +801,7 @@ const PortfolioManager = (function() {
 
 })();
 
+// Exposer globalement
 window.PortfolioManager = PortfolioManager;
+
+console.log('✅ Portfolio Manager loaded successfully');

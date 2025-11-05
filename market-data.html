@@ -7,7 +7,7 @@
     <meta name='author' content='Raphael NARDONE'>
     <meta name='theme-color' content='#2563eb'>
     
-    <title>Market Data</title>
+    <title>Market Data - Finance Hub</title>
     
     <!-- Preconnect pour optimisation -->
     <link rel='preconnect' href='https://code.highcharts.com'>
@@ -31,7 +31,7 @@
     <!-- Styles -->
     <link rel='stylesheet' href='assets/css/common.css'>
     <link rel='stylesheet' href='assets/css/sidebar.css'>
-    <link rel="stylesheet" href="assets/css/user-menu.css">
+    <link rel='stylesheet' href='assets/css/user-menu.css'>
     <link rel='stylesheet' href='assets/css/market-data.css'>
     <link rel='stylesheet' href='assets/css/cache-widget.css'>
     
@@ -56,7 +56,9 @@
 
     <div class='layout-wrapper'>
         
-        <!-- Sidebar Navigation -->
+        <!-- ============================================
+             SIDEBAR NAVIGATION
+             ============================================ -->
         <aside class='sidebar' id='sidebar'>
             <!-- Header -->
             <div class='sidebar-header'>
@@ -68,7 +70,7 @@
             
             <!-- Navigation -->
             <nav class='sidebar-nav'>
-                <!-- ✅ Landing Page / Accueil -->
+                <!-- Landing Page / Accueil -->
                 <div class='nav-section'>
                     <a href='index.html' class='nav-link'>
                         <i class='fas fa-rocket'></i>
@@ -76,14 +78,14 @@
                     </a>
                 </div>
                 
-                <!-- ✅ Budget Section -->
+                <!-- Budget Section -->
                 <div class='nav-section'>
-                    <button class='nav-folder active'>
+                    <button class='nav-folder'>
                         <i class='fas fa-wallet'></i>
                         <span>Budget</span>
                         <i class='fas fa-chevron-down arrow'></i>
                     </button>
-                    <div class='nav-submenu' style='display: block;'>
+                    <div class='nav-submenu'>
                         <a href='dashboard-financier.html' class='nav-link'>
                             <i class='fas fa-home'></i>
                             <span>Dashboard Budget</span>
@@ -95,7 +97,7 @@
                     </div>
                 </div>
                 
-                <!-- ✅ Simulation Section -->
+                <!-- Simulation Section -->
                 <div class='nav-section'>
                     <button class='nav-folder'>
                         <i class='fas fa-calculator'></i>
@@ -122,15 +124,15 @@
                     </div>
                 </div>
                 
-                <!-- ✅ Stocks Section -->
+                <!-- Stocks Section -->
                 <div class='nav-section'>
-                    <button class='nav-folder'>
+                    <button class='nav-folder active'>
                         <i class='fas fa-chart-candlestick'></i>
                         <span>Stocks</span>
                         <i class='fas fa-chevron-down arrow'></i>
                     </button>
-                    <div class='nav-submenu'>
-                        <a href='market-data.html' class='nav-link'>
+                    <div class='nav-submenu' style='display: block;'>
+                        <a href='market-data.html' class='nav-link active'>
                             <i class='fas fa-database'></i>
                             <span>Market Data</span>
                         </a>
@@ -146,7 +148,7 @@
                 </div>
             </nav>
             
-            <!-- ===== SIDEBAR FOOTER - MENU UTILISATEUR ===== -->
+            <!-- Sidebar Footer - Menu Utilisateur -->
             <div class="sidebar-footer">
                 <div class="sidebar-user-menu">
                     <!-- Trigger (élément cliquable) -->
@@ -201,7 +203,6 @@
                     </div>
                 </div>
             </div>
-            <!-- ===== FIN SIDEBAR FOOTER ===== -->
         </aside>
         
         <!-- Sidebar Overlay (mobile) -->
@@ -234,7 +235,9 @@
                 <!-- Main Content -->
                 <div class='content'>
                     
-                    <!-- ===== 🆕 PORTFOLIO MANAGEMENT SECTION ===== -->
+                    <!-- ============================================
+                         📁 PORTFOLIO MANAGEMENT SECTION
+                         ============================================ -->
                     <section class='card portfolio-management-section' aria-labelledby='portfolio-title'>
                         <div class='card-header'>
                             <h2 class='card-title' id='portfolio-title'>
@@ -258,15 +261,7 @@
                                     <button class='btn btn-primary' onclick='MarketData.saveCurrentPortfolio()'>
                                         <i class='fas fa-cloud-upload-alt'></i> Save Current
                                     </button>
-                                    <button class='btn btn-secondary' onclick='MarketData.openPortfoliosModal ? MarketData.openPortfoliosModal() : (function() {
-                                        const modal = document.getElementById("portfoliosModal");
-                                        if (modal) {
-                                            modal.classList.add("active");
-                                            if (window.MarketData && window.MarketData.refreshPortfoliosList) {
-                                                window.MarketData.refreshPortfoliosList();
-                                            }
-                                        }
-                                    })()'>
+                                    <button class='btn btn-secondary' onclick='openPortfoliosModal()'>
                                         <i class='fas fa-list'></i> Manage Portfolios
                                     </button>
                                     <button class='btn btn-secondary' onclick='MarketData.exportPortfolioJSON()'>
@@ -278,16 +273,16 @@
                                 </div>
                             </div>
                             
-                            <!-- ✅ CORRIGÉ : Texte blanc forcé -->
                             <div class='info-box info-box-white-text' style='margin-top: 1rem;'>
                                 <h4><i class='fas fa-info-circle'></i> How it works</h4>
                                 <p>Create multiple portfolios to organize your watchlists, alerts, and stock comparisons. All portfolios are automatically saved to the cloud and accessible from any device.</p>
                             </div>
                         </div>
                     </section>
-                    <!-- ===== FIN PORTFOLIO MANAGEMENT ===== -->
                     
-                    <!-- Search Panel -->
+                    <!-- ============================================
+                         🔍 SEARCH PANEL
+                         ============================================ -->
                     <section class='search-panel card' aria-labelledby='search-title'>
                         <div class='card-header'>
                             <h2 class='card-title' id='search-title'>
@@ -355,7 +350,9 @@
                         </div>
                     </section>
                     
-                    <!-- Stock Comparison Section -->
+                    <!-- ============================================
+                         📊 STOCK COMPARISON SECTION
+                         ============================================ -->
                     <section class='comparison-section card' aria-labelledby='comparison-title'>
                         <div class='card-header comparison-header'>
                             <h2 class='card-title' id='comparison-title'>
@@ -364,7 +361,7 @@
                             <div class='comparison-actions'>
                                 <button class='btn btn-primary btn-compare' onclick='MarketData.openComparisonModal()'>
                                     <i class='fas fa-plus' aria-hidden='true'></i> Add Stocks to Compare
-                                    </button>
+                                </button>
                                 <button class='btn btn-danger btn-clear-comparison' onclick='MarketData.clearComparison()'>
                                     <i class='fas fa-trash' aria-hidden='true'></i> Clear All
                                 </button>
@@ -397,7 +394,9 @@
                         </div>
                     </section>
                     
-                    <!-- Watchlist Section -->
+                    <!-- ============================================
+                         ⭐ WATCHLIST SECTION
+                         ============================================ -->
                     <section class='watchlist-section card' aria-labelledby='watchlist-title'>
                         <div class='card-header watchlist-header'>
                             <h2 class='card-title' id='watchlist-title'>
@@ -427,7 +426,9 @@
                         </div>
                     </section>
                     
-                    <!-- Price Alerts Section -->
+                    <!-- ============================================
+                         🔔 PRICE ALERTS SECTION
+                         ============================================ -->
                     <section class='alerts-section card' aria-labelledby='alerts-title'>
                         <div class='card-header alerts-header'>
                             <h2 class='card-title' id='alerts-title'>
@@ -449,12 +450,16 @@
                         </div>
                     </section>
                     
-                    <!-- Loading Indicator -->
+                    <!-- ============================================
+                         📊 LOADING INDICATOR
+                         ============================================ -->
                     <div id='loadingIndicator' class='loading-indicator hidden' role='status' aria-live='polite'>
                         <i class='fas fa-spinner fa-spin' aria-hidden='true'></i> Loading market data...
                     </div>
                     
-                    <!-- Stock Overview -->
+                    <!-- ============================================
+                         📈 STOCK OVERVIEW
+                         ============================================ -->
                     <section id='stockOverview' class='stock-overview hidden' aria-labelledby='stock-overview-title'>
                         <div class='overview-header'>
                             <div class='stock-title'>
@@ -495,12 +500,16 @@
                         </div>
                     </section>
 
-                    <!-- ✅ CORRIGÉ : Company Profile & Statistics EN ACCORDÉON COMPACT -->
+                    <!-- ============================================
+                         🏢 COMPANY PROFILE & STATISTICS (Accordéon)
+                         ============================================ -->
                     <section id='companyProfileSection' class='company-profile-section card hidden' aria-labelledby='company-profile-title'>
                         <!-- Le contenu sera généré dynamiquement par JavaScript avec des accordéons -->
                     </section>
                     
-                    <!-- Results Panel -->
+                    <!-- ============================================
+                         📊 RESULTS PANEL
+                         ============================================ -->
                     <section id='resultsPanel' class='results-panel card hidden' aria-labelledby='results-title'>
                         <div class='card-body'>
                             
@@ -568,16 +577,19 @@
     </div>
     
     <!-- ============================================
-         MODALS (TOUS LES MODALS EXISTANTS + NOUVEAUX CORRIGÉS)
+         MODALS
          ============================================ -->
          
-    <!-- ===== 🆕 PORTFOLIOS MODAL ===== -->
-    <div class='modal' id='portfoliosModal'>
+    <!-- 📁 PORTFOLIOS MODAL -->
+    <div class='modal' id='portfoliosModal' role='dialog' aria-labelledby='portfolios-modal-title' aria-modal='true'>
         <div class='modal-content'>
             <div class='modal-header'>
-                <h2>
+                <h2 id='portfolios-modal-title'>
                     <i class='fas fa-briefcase'></i> Manage Portfolios
                 </h2>
+                <button class='close-modal' onclick='closePortfoliosModal()' aria-label='Close dialog'>
+                    <i class='fas fa-times'></i>
+                </button>
             </div>
             
             <div class='modal-body'>
@@ -590,7 +602,6 @@
                 </div>
                 
                 <div id='portfoliosListContainer'>
-                    <!-- Filled dynamically by portfolio-manager.js -->
                     <div class='loading-simulations'>
                         <i class='fas fa-spinner fa-spin'></i> Loading portfolios...
                     </div>
@@ -601,20 +612,22 @@
                 <button class='btn btn-primary' onclick='PortfolioManager.createNewPortfolio()'>
                     <i class='fas fa-plus'></i> New Portfolio
                 </button>
-                <button class='btn btn-secondary' onclick='document.getElementById("portfoliosModal").classList.remove("active")'>
+                <button class='btn btn-secondary' onclick='closePortfoliosModal()'>
                     <i class='fas fa-times'></i> Close
                 </button>
             </div>
         </div>
     </div>
     
-    <!-- ✅ CORRIGÉ : Modal pour Add Comparison -->
+    <!-- 📊 ADD COMPARISON MODAL -->
     <div id='modalAddComparison' class='modal' role='dialog' aria-labelledby='comparison-modal-title' aria-modal='true'>
         <div class='modal-content'>
             <div class='modal-header'>
-                <h2 id='comparison-modal-title'>📊 Add Stocks to Compare</h2>
+                <h2 id='comparison-modal-title'>
+                    <i class='fas fa-chart-bar'></i> Add Stocks to Compare
+                </h2>
                 <button class='close-modal' onclick='MarketData.closeComparisonModal()' aria-label='Close dialog'>
-                    <i class='fas fa-times' aria-hidden='true'></i>
+                    <i class='fas fa-times'></i>
                 </button>
             </div>
             <div class='modal-body'>
@@ -651,13 +664,15 @@
         </div>
     </div>
     
-    <!-- ✅ CORRIGÉ : Modal pour Create Alert -->
+    <!-- 🔔 CREATE ALERT MODAL -->
     <div id='modalCreateAlert' class='modal' role='dialog' aria-labelledby='alert-modal-title' aria-modal='true'>
         <div class='modal-content'>
             <div class='modal-header'>
-                <h2 id='alert-modal-title'>🔔 Create Price Alert</h2>
+                <h2 id='alert-modal-title'>
+                    <i class='fas fa-bell'></i> Create Price Alert
+                </h2>
                 <button class='close-modal' onclick='MarketData.closeAlertModal()' aria-label='Close dialog'>
-                    <i class='fas fa-times' aria-hidden='true'></i>
+                    <i class='fas fa-times'></i>
                 </button>
             </div>
             <div class='modal-body'>
@@ -698,13 +713,15 @@
         </div>
     </div>
     
-    <!-- Search Help Modal -->
+    <!-- ❓ SEARCH HELP MODAL -->
     <div id='modalSearchHelp' class='modal' role='dialog' aria-labelledby='search-help-title' aria-modal='true'>
         <div class='modal-content'>
             <div class='modal-header'>
-                <h2 id='search-help-title'>🔍 How to Search Stocks</h2>
+                <h2 id='search-help-title'>
+                    <i class='fas fa-question-circle'></i> How to Search Stocks
+                </h2>
                 <button class='close-modal' onclick='closeModal("modalSearchHelp")' aria-label='Close dialog'>
-                    <i class='fas fa-times' aria-hidden='true'></i>
+                    <i class='fas fa-times'></i>
                 </button>
             </div>
             <div class='modal-body'>
@@ -734,8 +751,8 @@
     </div>
     
     <!-- ============================================
-        CACHE MONITORING WIDGET
-        ============================================ -->
+         CACHE MONITORING WIDGET
+         ============================================ -->
     <div id='cacheWidget' class='cache-widget'>
         <button class='cache-toggle-btn' onclick='toggleCachePanel()' aria-label='Toggle cache statistics panel'>
             <i class='fas fa-database' aria-hidden='true'></i>
@@ -743,8 +760,11 @@
         </button>
     </div>
     
-    <!-- Screen reader only class -->
+    <!-- ============================================
+         INLINE STYLES FOR CORRECTIONS
+         ============================================ -->
     <style>
+        /* Screen reader only class */
         .sr-only {
             position: absolute;
             width: 1px;
@@ -757,88 +777,156 @@
             border-width: 0;
         }
         
-        /* ===== ✅ CORRIGÉ : Texte blanc forcé dans info-box ===== */
+        /* Texte blanc forcé dans info-box */
         .info-box-white-text,
         .info-box-white-text h4,
-        .info-box-white-text p {
-            color: white !important;
-        }
-        
+        .info-box-white-text p,
         .info-box-white-text h4 i {
             color: white !important;
         }
         
-        /* ===== ✅ CORRIGÉ : Texte blanc dans simulation-management ===== */
+        /* Texte blanc dans simulation-management */
         .simulation-management,
         .simulation-management .label,
-        .simulation-management .value {
+        .simulation-management .value,
+        .simulation-management i {
             color: white !important;
         }
         
         [data-theme="dark"] .simulation-management .label,
-        [data-theme="dark"] .simulation-management .value {
+        [data-theme="dark"] .simulation-management .value,
+        [data-theme="dark"] .simulation-management i {
             color: white !important;
-        }
-        
-        /* ===== ✅ NOUVEAU : Accordéon pour Company Profile ===== */
-        .company-accordion {
-            margin-bottom: var(--spacing-md);
-            border: 1px solid var(--border-color);
-            border-radius: var(--radius-lg);
-            overflow: hidden;
-            background: var(--background-primary);
-        }
-        
-        .accordion-header {
-            background: var(--background-secondary);
-            padding: var(--spacing-md) var(--spacing-lg);
-            cursor: pointer;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            font-weight: 600;
-            color: var(--text-primary);
-            transition: all var(--transition-base);
-            user-select: none;
-        }
-        
-        .accordion-header:hover {
-            background: var(--background-tertiary);
-        }
-        
-        .accordion-header i.fa-chevron-down {
-            transition: transform var(--transition-base);
-            color: var(--primary-color);
-        }
-        
-        .accordion-header.active i.fa-chevron-down {
-            transform: rotate(180deg);
-        }
-        
-        .accordion-content {
-            max-height: 0;
-            overflow: hidden;
-            transition: max-height 0.3s ease-out;
-        }
-        
-        .accordion-content.active {
-            max-height: 3000px;
-            transition: max-height 0.5s ease-in;
-        }
-        
-        .accordion-body {
-            padding: var(--spacing-lg);
         }
     </style>
 
-    <!-- Scripts - ORDRE IMPORTANT -->
+    <!-- ============================================
+         SCRIPTS - ORDRE IMPORTANT
+         ============================================ -->
+    
+    <!-- Portfolio Modal Management Script -->
+    <script>
+        /**
+         * 🔓 Ouvre le modal des portfolios
+         */
+        async function openPortfoliosModal() {
+            console.log('🔓 Opening Portfolios Modal...');
+            
+            const modal = document.getElementById('portfoliosModal');
+            const container = document.getElementById('portfoliosListContainer');
+            
+            if (!modal || !container) {
+                console.error('❌ Modal or container not found');
+                return;
+            }
+            
+            // Afficher le modal
+            modal.classList.add('active');
+            
+            // Réinitialiser le container avec un loader
+            container.innerHTML = `
+                <div class='loading-simulations'>
+                    <i class='fas fa-spinner fa-spin'></i> Loading portfolios...
+                </div>
+            `;
+            
+            // Charger les portfolios
+            try {
+                if (typeof PortfolioManager !== 'undefined') {
+                    await PortfolioManager.fetchPortfoliosList();
+                    console.log('✅ Portfolios loaded successfully');
+                } else {
+                    console.error('❌ PortfolioManager not found');
+                    container.innerHTML = `
+                        <div class='no-portfolios'>
+                            <i class='fas fa-exclamation-triangle' style='font-size: 3em; margin-bottom: 15px; color: #e74c3c;'></i>
+                            <p>Error: Portfolio Manager not loaded</p>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                console.error('❌ Error loading portfolios:', error);
+                container.innerHTML = `
+                    <div class='no-portfolios'>
+                        <i class='fas fa-exclamation-triangle' style='font-size: 3em; margin-bottom: 15px; color: #e74c3c;'></i>
+                        <p>Error loading portfolios</p>
+                        <p style='font-size: 0.9em; margin-top: 10px;'>${error.message}</p>
+                    </div>
+                `;
+            }
+        }
+        
+        /**
+         * 🔒 Ferme le modal des portfolios
+         */
+        function closePortfoliosModal() {
+            const modal = document.getElementById('portfoliosModal');
+            if (modal) {
+                modal.classList.remove('active');
+            }
+        }
+        
+        /**
+         * 📋 Ouvre un modal générique
+         */
+        function openModal(modalId) {
+            const modal = document.getElementById(modalId);
+            if (modal) {
+                modal.classList.add('active');
+            }
+        }
+        
+        /**
+         * 📋 Ferme un modal générique
+         */
+        function closeModal(modalId) {
+            const modal = document.getElementById(modalId);
+            if (modal) {
+                modal.classList.remove('active');
+            }
+        }
+        
+        /**
+         * 🚪 Ferme le modal si on clique à l'extérieur
+         */
+        window.addEventListener('click', function(event) {
+            if (event.target.classList.contains('modal')) {
+                event.target.classList.remove('active');
+            }
+        });
+        
+        /**
+         * ⌨️ Ferme les modals avec la touche Escape
+         */
+        window.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                document.querySelectorAll('.modal.active').forEach(modal => {
+                    modal.classList.remove('active');
+                });
+            }
+        });
+        
+        /**
+         * ✅ Exposer les fonctions du PortfolioManager au chargement
+         */
+        window.addEventListener('DOMContentLoaded', function() {
+            if (typeof PortfolioManager !== 'undefined') {
+                window.loadAndClosePortfolio = PortfolioManager.loadAndClosePortfolio;
+                window.renamePortfolioAndRefresh = PortfolioManager.renamePortfolioAndRefresh;
+                window.deletePortfolioAndRefresh = PortfolioManager.deletePortfolioAndRefresh;
+                console.log('✅ PortfolioManager functions exposed globally');
+            }
+        });
+    </script>
+    
+    <!-- Core Scripts -->
     <script src='assets/js/config.js'></script>
     <script src='assets/js/api-client.js'></script>
     <script src='assets/js/dark-mode.js'></script>
     <script src='assets/js/common.js'></script>
     <script src='assets/js/sidebar.js'></script>
     
-    <!-- ✅ Portfolio Manager (DOIT être chargé AVANT market-data.js) -->
+    <!-- Portfolio Manager (DOIT être chargé AVANT market-data.js) -->
     <script src='assets/js/portfolio-manager.js'></script>
     
     <!-- Market Data Script -->
