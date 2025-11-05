@@ -1,6 +1,7 @@
 /* ==============================================
    API-CLIENT.JS - Twelve Data API Client avec Cache
    Compatible avec ton Cloudflare Worker existant
+   VERSION SANS LIMITATION D'API
    ============================================== */
 
 class FinanceAPIClient {
@@ -9,32 +10,6 @@ class FinanceAPIClient {
         this.cacheDuration = config.cacheDuration || 3600000; // 5 min par défaut
         this.maxRetries = config.maxRetries || 3;
         this.onLoadingChange = config.onLoadingChange || (() => {});
-        
-        // Compteur de requêtes API
-        this.requestCount = parseInt(localStorage.getItem('api_request_count') || '0');
-        this.lastResetDate = localStorage.getItem('api_counter_reset_date') || new Date().toDateString();
-        this.checkAndResetCounter();
-    }
-    
-    checkAndResetCounter() {
-        const today = new Date().toDateString();
-        if (this.lastResetDate !== today) {
-            this.requestCount = 0;
-            localStorage.setItem('api_request_count', '0');
-            localStorage.setItem('api_counter_reset_date', today);
-            this.lastResetDate = today;
-            console.log('🔄 API counter reset for new day');
-        }
-    }
-    
-    incrementRequestCount() {
-        this.requestCount++;
-        localStorage.setItem('api_request_count', this.requestCount.toString());
-        console.log(`📊 API Requests today: ${this.requestCount}/800`);
-        
-        if (this.requestCount >= 800) {
-            console.warn('⚠️ Daily API limit (800) reached!');
-        }
     }
     
     // ============================================
@@ -120,8 +95,7 @@ class FinanceAPIClient {
         const keys = Object.keys(localStorage);
         const cacheKeys = keys.filter(k => k.startsWith('api_cache:'));
         return {
-            entries: cacheKeys.length,
-            requestsToday: this.requestCount
+            entries: cacheKeys.length
         };
     }
     
@@ -136,11 +110,6 @@ class FinanceAPIClient {
         const cachedData = this.getFromCache(cacheKey);
         if (cachedData) {
             return cachedData;
-        }
-        
-        // Vérifier la limite quotidienne
-        if (this.requestCount >= 800) {
-            throw new Error('Daily API limit reached (800/800). Please try again tomorrow.');
         }
         
         this.onLoadingChange(true);
@@ -172,7 +141,7 @@ class FinanceAPIClient {
                 throw new Error(data.error || data.message || 'API returned an error');
             }
             
-            this.incrementRequestCount();
+            // Sauvegarder dans le cache
             this.saveToCache(cacheKey, data);
             
             return data;
