@@ -6,7 +6,7 @@
 class FinanceAPIClient {
     constructor(config = {}) {
         this.baseURL = config.baseURL || '';
-        this.cacheDuration = config.cacheDuration || 300000; // 5 min par défaut
+        this.cacheDuration = config.cacheDuration || 3600000; // 5 min par défaut
         this.maxRetries = config.maxRetries || 3;
         this.onLoadingChange = config.onLoadingChange || (() => {});
         
