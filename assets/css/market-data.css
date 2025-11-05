@@ -1,24 +1,21 @@
 /* ==============================================
-   MARKET-DATA.CSS - Version Ultra-Compacte 2024
-   ✅ TOUTES CORRECTIONS APPLIQUÉES
-   - Couleurs violettes pour Portfolio Management
-   - Boutons et textes blancs
-   - Espacement entre blocs
-   - Centrage du texte
-   - Fond blanc pour portfolios non sélectionnés
+   MARKET-DATA.CSS - Version Complète Corrigée
+   ✅ Option 2 : Fond BLANC pour portfolios non actifs
+   ✅ Menu sidebar cliquable
+   ✅ Texte lisible partout
    ============================================== */
 
 /* ============================================
    🎨 VARIABLES SPÉCIFIQUES MARKET DATA
    ============================================ */
 :root {
-    /* Couleurs violettes pour Portfolio Management (identique à Simulation) */
+    /* Couleurs violettes pour Portfolio Management */
     --portfolio-gradient-start: #667eea;
     --portfolio-gradient-end: #764ba2;
     --portfolio-gold: #ffd700;
     --portfolio-shadow: rgba(102, 126, 234, 0.3);
     
-    /* Bleus pour le reste de Market Data */
+    /* Bleus pour Market Data */
     --md-blue-primary: #1e5eeb;
     --md-blue-light: #4c8aff;
     --md-blue-dark: #0d3d9f;
@@ -34,13 +31,11 @@
 }
 
 [data-theme="dark"] {
-    /* Portfolio Management reste violet même en dark mode */
     --portfolio-gradient-start: #667eea;
     --portfolio-gradient-end: #764ba2;
     --portfolio-gold: #ffd700;
     --portfolio-shadow: rgba(102, 126, 234, 0.4);
     
-    /* Bleus dark mode */
     --md-blue-primary: #4c8aff;
     --md-blue-dark: #1a4db8;
     --md-blue-bg: #0f2451;
@@ -788,7 +783,6 @@
     margin-bottom: 2rem;
 }
 
-/* Gradient VIOLET (identique à simulation-management) */
 .simulation-management {
     background: linear-gradient(135deg, var(--portfolio-gradient-start) 0%, var(--portfolio-gradient-end) 100%) !important;
     color: white !important;
@@ -803,7 +797,6 @@
     box-shadow: 0 10px 30px var(--portfolio-shadow);
 }
 
-/* Titre H3 - Blanc */
 .simulation-management h3 {
     color: white !important;
     margin-bottom: 1.25rem;
@@ -813,7 +806,6 @@
     color: white !important;
 }
 
-/* CURRENT PORTFOLIO DISPLAY - Violet + Doré */
 .current-simulation-display {
     background: rgba(255, 255, 255, 0.15) !important;
     padding: 15px;
@@ -838,7 +830,6 @@
     color: white !important;
 }
 
-/* VALUE EN DORÉ */
 .current-simulation-display .value {
     font-size: 1.2em !important;
     font-weight: bold !important;
@@ -850,7 +841,6 @@
     color: var(--portfolio-gold) !important;
 }
 
-/* TOOLBAR ROW */
 .toolbar-row {
     display: flex;
     align-items: center;
@@ -859,7 +849,6 @@
     justify-content: center;
 }
 
-/* TOUS LES BOUTONS DANS SIMULATION-MANAGEMENT */
 .simulation-management .btn,
 .simulation-management .btn-success,
 .simulation-management .btn-primary,
@@ -878,7 +867,6 @@
     gap: 0.5rem;
 }
 
-/* Boutons Success */
 .simulation-management .btn-success {
     background: var(--success-color);
     color: white !important;
@@ -890,7 +878,6 @@
     box-shadow: var(--shadow-md);
 }
 
-/* Boutons Primary */
 .simulation-management .btn-primary {
     background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
     color: white !important;
@@ -903,7 +890,6 @@
     box-shadow: 0 4px 12px rgba(37, 99, 235, 0.4);
 }
 
-/* Boutons Secondary */
 .simulation-management .btn-secondary {
     background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%);
     color: white !important;
@@ -916,7 +902,6 @@
     box-shadow: 0 4px 12px rgba(107, 114, 128, 0.4);
 }
 
-/* Icônes des boutons - Blanc */
 .simulation-management .btn i,
 .simulation-management .btn-success i,
 .simulation-management .btn-primary i,
@@ -924,7 +909,6 @@
     color: white !important;
 }
 
-/* INFO BOX - Texte blanc total */
 .info-box,
 .info-box-white-text {
     background: rgba(255, 255, 255, 0.1) !important;
@@ -997,7 +981,6 @@
     background: var(--background-primary);
 }
 
-/* MODAL HEADER - Bleu par défaut */
 .modal-header {
     padding: 25px 30px;
     background: var(--md-gradient);
@@ -1007,7 +990,6 @@
     align-items: center;
 }
 
-/* SPÉCIFIQUE POUR LE PORTFOLIO MODAL - Gradient Violet */
 #portfoliosModal .modal-header {
     background: linear-gradient(135deg, var(--portfolio-gradient-start) 0%, var(--portfolio-gradient-end) 100%);
 }
@@ -1064,7 +1046,7 @@
 }
 
 /* ============================================
-   📋 SIMULATION ITEMS (Portfolios) - FOND BLANC
+   📋 SIMULATION ITEMS - ✅ OPTION 2 : FOND BLANC
    ============================================ */
 .simulations-info {
     background: linear-gradient(135deg, #e8f2ff 0%, #dbeafe 100%);
@@ -1105,22 +1087,25 @@
     gap: 15px;
 }
 
-/* ✅ ITEMS NON ACTIFS - FOND BLANC */
+/* ✅ OPTION 2 : Items NON ACTIFS - FOND BLANC/Gris clair */
+.simulation-item:not(.active) {
+    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%) !important;
+    border: 2px solid #e5e7eb;
+    color: var(--text-primary);
+}
+
 .simulation-item {
     display: flex;
     justify-content: space-between;
     align-items: center;
     padding: 20px;
-    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
     border-radius: 12px;
     transition: all 0.3s ease;
-    border: 2px solid transparent;
     cursor: pointer;
     position: relative;
     overflow: hidden;
 }
 
-/* Animation au hover */
 .simulation-item::before {
     content: '';
     position: absolute;
@@ -1142,11 +1127,29 @@
 }
 
 .simulation-item:not(.active):hover {
-    background: linear-gradient(135deg, #e0e7ff 0%, #c7d2fe 100%);
+    background: linear-gradient(135deg, #e0e7ff 0%, #c7d2fe 100%) !important;
     border-color: var(--portfolio-gradient-start);
 }
 
-/* ✅ ITEM ACTIF - Vert avec bordure dorée */
+/* ✅ Texte FONCÉ sur fond clair pour items non actifs */
+.simulation-item:not(.active) .simulation-name,
+.simulation-item:not(.active) .simulation-date {
+    color: #1f2937 !important;
+}
+
+.simulation-item:not(.active) .simulation-name i {
+    color: var(--portfolio-gradient-start) !important;
+}
+
+.simulation-item:not(.active) .simulation-date {
+    color: #6b7280 !important;
+}
+
+.simulation-item:not(.active) .simulation-date i {
+    color: #9ca3af !important;
+}
+
+/* ✅ Item ACTIF - Vert avec bordure dorée */
 .simulation-item.active {
     background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
     color: white !important;
@@ -1154,17 +1157,6 @@
     box-shadow: 0 8px 20px rgba(16, 185, 129, 0.4);
 }
 
-/* Texte des items non actifs */
-.simulation-item:not(.active) .simulation-name,
-.simulation-item:not(.active) .simulation-date {
-    color: var(--text-primary);
-}
-
-.simulation-item:not(.active) .simulation-name i {
-    color: var(--portfolio-gradient-start);
-}
-
-/* Texte des items actifs */
 .simulation-item.active .simulation-name,
 .simulation-item.active .simulation-date {
     color: white !important;
@@ -1213,7 +1205,7 @@
     z-index: 10;
 }
 
-/* Boutons d'action sur items non actifs */
+/* ✅ Boutons sur items NON ACTIFS */
 .simulation-item:not(.active) .btn-icon {
     background: rgba(102, 126, 234, 0.1);
     color: var(--portfolio-gradient-start);
@@ -1244,7 +1236,7 @@
     color: white;
 }
 
-/* Boutons d'action sur item actif */
+/* ✅ Boutons sur item ACTIF */
 .simulation-item.active .btn-icon {
     background: rgba(255, 255, 255, 0.3);
     color: white;
@@ -1265,7 +1257,6 @@
     transform: scale(1.1);
 }
 
-/* LOADING STATE */
 .loading-simulations {
     text-align: center;
     padding: var(--md-padding);
@@ -1299,14 +1290,28 @@
 }
 
 /* ============================================
-   🌙 DARK MODE - Items de portfolio
+   🌙 DARK MODE
    ============================================ */
 [data-theme="dark"] .simulation-item:not(.active) {
-    background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+    background: linear-gradient(135deg, #1e293b 0%, #334155 100%) !important;
+    border-color: #475569;
+}
+
+[data-theme="dark"] .simulation-item:not(.active) .simulation-name,
+[data-theme="dark"] .simulation-item:not(.active) .simulation-date {
+    color: white !important;
+}
+
+[data-theme="dark"] .simulation-item:not(.active) .simulation-name i {
+    color: var(--portfolio-gradient-start) !important;
+}
+
+[data-theme="dark"] .simulation-item:not(.active) .simulation-date {
+    color: rgba(255, 255, 255, 0.8) !important;
 }
 
 [data-theme="dark"] .simulation-item:not(.active):hover {
-    background: var(--background-tertiary);
+    background: var(--background-tertiary) !important;
     border-color: var(--portfolio-gradient-start);
 }
 
@@ -1520,7 +1525,7 @@
 .loading-indicator {
     background: var(--background-secondary);
     border: 1px solid var(--border-color);
-    padding: var(--spacing-2xl, 2rem);
+    padding: 2rem;
     border-radius: var(--radius-lg);
     text-align: center;
     font-size: 1.125rem;
@@ -1539,9 +1544,6 @@
     margin-bottom: 2rem;
 }
 
-/* ============================================
-   🎨 ADDITIONAL SECTIONS SPACING
-   ============================================ */
 .portfolio-management-section,
 .search-panel,
 .comparison-section,
