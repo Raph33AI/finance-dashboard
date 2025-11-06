@@ -9,13 +9,16 @@
     <meta name="description" content="Follow the latest financial market news in real-time">
     <meta name="keywords" content="finance, news, markets, stocks, crypto, forex">
     
+    <!-- Favicon (optionnel) -->
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📰</text></svg>">
+    
     <!-- Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     
     <!-- Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
-    <!-- CSS -->
+    <!-- ✅ CSS -->
     <link rel="stylesheet" href="css/news.css">
 </head>
 <body>
@@ -93,39 +96,7 @@
                 <div class="market-item loading">
                     <div class="skeleton skeleton-text"></div>
                 </div>
-                <div class="market-item loading">
-                    <div class="skeleton skeleton-text"></div>
-                </div>
-                <div class="market-item loading">
-                    <div class="skeleton skeleton-text"></div>
-                </div>
             </div>
-        </div>
-
-        <!-- Quick Watchlist -->
-        <div class="sidebar-widget">
-            <h4 class="widget-title">
-                <i class="fas fa-star"></i>
-                Quick Watch
-                <button class="widget-action" id="addToWatchlist" title="Add Symbol">
-                    <i class="fas fa-plus"></i>
-                </button>
-            </h4>
-            <div class="quick-watchlist" id="quickWatchlist">
-                <p class="empty-message">No symbols in watchlist</p>
-            </div>
-        </div>
-
-        <!-- Quick Actions -->
-        <div class="sidebar-actions">
-            <button class="action-btn" id="quickSearch">
-                <i class="fas fa-search"></i>
-                <span>Quick Search</span>
-            </button>
-            <button class="action-btn" id="createAlert">
-                <i class="fas fa-bell"></i>
-                <span>Create Alert</span>
-            </button>
         </div>
 
         <!-- Footer -->
@@ -143,9 +114,7 @@
          ======================================== -->
     <div class="main-container">
         
-        <!-- ========================================
-             HEADER / NAVIGATION
-             ======================================== -->
+        <!-- HEADER -->
         <header class="news-header">
             <div class="container">
                 <div class="header-content">
@@ -180,9 +149,7 @@
             </div>
         </header>
 
-        <!-- ========================================
-             HERO SECTION
-             ======================================== -->
+        <!-- HERO SECTION -->
         <section class="hero-section">
             <div class="container">
                 <div class="hero-content">
@@ -194,7 +161,6 @@
                         Stay updated with the latest market news from around the world
                     </p>
                     
-                    <!-- Live Indicator -->
                     <div class="live-indicator">
                         <span class="pulse"></span>
                         <span class="text">LIVE</span>
@@ -205,9 +171,7 @@
             </div>
         </section>
 
-        <!-- ========================================
-             FILTERS & SEARCH
-             ======================================== -->
+        <!-- FILTERS & SEARCH -->
         <section class="filters-section">
             <div class="container">
                 <div class="filters-container">
@@ -247,7 +211,7 @@
                         <input 
                             type="text" 
                             id="symbolInput" 
-                            placeholder="Filter by symbol (e.g., AAPL, TSLA)"
+                            placeholder="Filter by symbol"
                             maxlength="10"
                         >
                         <button class="apply-symbol" id="applySymbol">
@@ -269,9 +233,7 @@
             </div>
         </section>
 
-        <!-- ========================================
-             NEWS GRID
-             ======================================== -->
+        <!-- NEWS GRID -->
         <main class="news-main">
             <div class="container">
                 
@@ -323,9 +285,7 @@
             </div>
         </main>
 
-        <!-- ========================================
-             FOOTER
-             ======================================== -->
+        <!-- FOOTER -->
         <footer class="news-footer">
             <div class="container">
                 <div class="footer-content">
@@ -347,9 +307,7 @@
 
     </div>
 
-    <!-- ========================================
-         NEWS DETAIL MODAL
-         ======================================== -->
+    <!-- NEWS DETAIL MODAL -->
     <div class="modal-overlay" id="newsModal">
         <div class="modal-content">
             <button class="modal-close" id="closeModal">
@@ -362,21 +320,33 @@
         </div>
     </div>
 
-    <!-- ========================================
-         SCROLL TO TOP BUTTON
-         ======================================== -->
+    <!-- SCROLL TO TOP BUTTON -->
     <button class="scroll-to-top" id="scrollToTop">
         <i class="fas fa-arrow-up"></i>
     </button>
 
-    <!-- ========================================
-         SIDEBAR OVERLAY (Mobile)
-         ======================================== -->
+    <!-- SIDEBAR OVERLAY (Mobile) -->
     <div class="sidebar-overlay" id="sidebarOverlay"></div>
 
     <!-- ========================================
-         JAVASCRIPT
+         JAVASCRIPT - ORDRE IMPORTANT !
          ======================================== -->
+    
+    <!-- 1. Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    
+    <!-- 2. Configuration Firebase -->
+    <script src="js/firebase-config.js"></script>
+    
+    <!-- 3. Configuration App -->
+    <script src="js/config.js"></script>
+    
+    <!-- 4. API Client -->
+    <script src="js/api-client.js"></script>
+    
+    <!-- 5. News App -->
     <script src="js/news.js"></script>
 
 </body>
