@@ -1,13 +1,13 @@
 /* ==============================================
    API-CLIENT.JS - Twelve Data API Client avec Cache
    Compatible avec ton Cloudflare Worker existant
-   VERSION SANS LIMITATION D'API
+   VERSION SANS LIMITATION D'API + NEWS
    ============================================== */
 
 class FinanceAPIClient {
     constructor(config = {}) {
         this.baseURL = config.baseURL || '';
-        this.cacheDuration = config.cacheDuration || 3600000; // 5 min par défaut
+        this.cacheDuration = config.cacheDuration || 3600000; // 1h par défaut
         this.maxRetries = config.maxRetries || 3;
         this.onLoadingChange = config.onLoadingChange || (() => {});
     }
@@ -222,9 +222,9 @@ class FinanceAPIClient {
             previousClose: this.parseNumber(data.previousClose),
             change: this.parseNumber(data.change),
             percentChange: this.parseNumber(data.percentChange),
-            fiftyTwoWeekHigh: 0, // Pas disponible dans quote
-            fiftyTwoWeekLow: 0,  // Pas disponible dans quote
-            averageVolume: 0,    // Pas disponible dans quote
+            fiftyTwoWeekHigh: 0,
+            fiftyTwoWeekLow: 0,
+            averageVolume: 0,
             timestamp: data.timestamp || Date.now()
         };
     }
@@ -243,7 +243,6 @@ class FinanceAPIClient {
             
             console.log('📦 Time series data received:', data);
             
-            // Ton Worker transforme déjà les données !
             if (!data.data || data.data.length === 0) {
                 throw new Error('No time series data available for this symbol');
             }
@@ -279,7 +278,6 @@ class FinanceAPIClient {
             
             console.log('📦 Profile data received:', data);
             
-            // Vérifier si des données sont retournées
             if (!data || data.status === 'error' || data.error) {
                 console.warn('Profile data not available for', symbol);
                 return null;
@@ -315,7 +313,6 @@ class FinanceAPIClient {
             
             console.log('📦 Statistics data received:', data);
             
-            // Vérifier si des données sont retournées
             if (!data || data.status === 'error' || data.error) {
                 console.warn('Statistics data not available for', symbol);
                 return null;
@@ -395,5 +392,158 @@ class FinanceAPIClient {
             console.warn(`Technical indicator ${indicator} error:`, error.message);
             return null;
         }
+    }
+    
+    /**
+     * 📰 Financial News by Category
+     * Ton Worker utilise : /api/news
+     * @param {string} category - News category (general, forex, crypto, merger)
+     * @param {number} limit - Maximum number of news items (default: 50)
+     * @returns {Promise<Object>} News data with array of articles
+     */
+    async getNews(category = 'general', limit = 50) {
+        try {
+            console.log(`📰 Fetching news for category: ${category}`);
+            
+            const data = await this.makeRequest('news', {
+                category,
+                limit
+            });
+            
+            console.log('📦 News data received:', data);
+            
+            // Vérifier si des données sont retournées
+            if (!data || data.status === 'error' || data.error) {
+                console.warn('News data not available');
+                return {
+                    data: [],
+                    category: category,
+                    count: 0,
+                    status: 'error',
+                    error: data?.error || 'No news data available'
+                };
+            }
+            
+            // Ton Worker peut retourner soit data.news soit data.data ou directement data comme array
+            let newsArray = [];
+            
+            if (Array.isArray(data)) {
+                newsArray = data;
+            } else if (data.news && Array.isArray(data.news)) {
+                newsArray = data.news;
+            } else if (data.data && Array.isArray(data.data)) {
+                newsArray = data.data;
+            } else if (data.results && Array.isArray(data.results)) {
+                newsArray = data.results;
+            }
+            
+            // Transformer et normaliser les données
+            const transformedNews = newsArray.map(item => {
+                return {
+                    id: item.id || item.uuid || `${Date.now()}_${Math.random()}`,
+                    category: item.category || category,
+                    headline: item.headline || item.title || 'No headline',
+                    summary: item.summary || item.description || '',
+                    source: item.source || 'Unknown',
+                    url: item.url || item.link || '#',
+                    image: item.image || item.imageUrl || item.thumbnail || '',
+                    datetime: this.parseDateTime(item.datetime || item.publishedAt || item.date),
+                    timestamp: this.parseTimestamp(item.datetime || item.publishedAt || item.date),
+                    related: this.parseRelatedSymbols(item.related || item.symbols || item.tickers)
+                };
+            });
+            
+            return {
+                data: transformedNews,
+                category: category,
+                count: transformedNews.length,
+                status: 'ok'
+            };
+            
+        } catch (error) {
+            console.error('❌ News endpoint error:', error);
+            
+            // Retourner un objet vide au lieu de throw pour éviter de casser l'UI
+            return {
+                data: [],
+                category: category,
+                count: 0,
+                status: 'error',
+                error: error.message
+            };
+        }
+    }
+    
+    /**
+     * 🕐 Parse datetime from various formats
+     * @param {string|number} datetime - DateTime in various formats
+     * @returns {Date} Parsed date object
+     */
+    parseDateTime(datetime) {
+        if (!datetime) return new Date();
+        
+        // Si c'est déjà un timestamp Unix (en secondes)
+        if (typeof datetime === 'number' && datetime < 10000000000) {
+            return new Date(datetime * 1000);
+        }
+        
+        // Si c'est un timestamp en millisecondes
+        if (typeof datetime === 'number') {
+            return new Date(datetime);
+        }
+        
+        // Si c'est une string ISO
+        if (typeof datetime === 'string') {
+            return new Date(datetime);
+        }
+        
+        return new Date();
+    }
+    
+    /**
+     * 🕐 Parse timestamp to milliseconds
+     * @param {string|number} datetime - DateTime in various formats
+     * @returns {number} Timestamp in milliseconds
+     */
+    parseTimestamp(datetime) {
+        if (!datetime) return Date.now();
+        
+        // Si c'est déjà un timestamp Unix (en secondes)
+        if (typeof datetime === 'number' && datetime < 10000000000) {
+            return datetime * 1000;
+        }
+        
+        // Si c'est un timestamp en millisecondes
+        if (typeof datetime === 'number') {
+            return datetime;
+        }
+        
+        // Si c'est une string ISO
+        if (typeof datetime === 'string') {
+            return new Date(datetime).getTime();
+        }
+        
+        return Date.now();
+    }
+    
+    /**
+     * 🏷️ Parse related symbols from various formats
+     * @param {string|Array} related - Related symbols (comma-separated string or array)
+     * @returns {Array<string>} Array of symbols
+     */
+    parseRelatedSymbols(related) {
+        if (!related) return [];
+        
+        // Si c'est déjà un array
+        if (Array.isArray(related)) {
+            return related.slice(0, 5); // Limiter à 5 symboles max
+        }
+        
+        // Si c'est une string séparée par des virgules
+        if (typeof related === 'string') {
+            return related.split(',').map(s => s.trim()).filter(s => s).slice(0, 5);
+        }
+        
+        return [];
     }
 }
