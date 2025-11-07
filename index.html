@@ -1268,11 +1268,13 @@
         // INITIALISATION AOS (Animate On Scroll)
         // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
         AOS.init({
-            duration: 800,
-            easing: 'ease-out-cubic',
-            once: true,
-            offset: 50,
-            disable: false
+            duration: 800,              // Durée de l'animation
+            easing: 'ease-out-cubic',   // Courbe d'animation
+            once: true,                 // ✅ Animation UNE SEULE FOIS
+            offset: 50,                 // Décalage avant déclenchement
+            disable: false,             // Activé sur tous les devices
+            mirror: false,              // ✅ NE PAS rejouer au scroll inverse
+            anchorPlacement: 'top-bottom' // Position de déclenchement
         });
 
         // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━

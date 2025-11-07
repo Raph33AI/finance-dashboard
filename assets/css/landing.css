@@ -4178,6 +4178,83 @@ body.dark-mode .search-results::-webkit-scrollbar-thumb:hover {
     }
 }
 
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   🎈 ANIMATION DE LÉVITATION
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+
+/* Animation de lévitation douce */
+@keyframes levitate {
+    0%, 100% {
+        transform: translateY(0px);
+    }
+    50% {
+        transform: translateY(-10px);
+    }
+}
+
+/* Appliquer la lévitation aux éléments animés */
+.levitate {
+    animation: levitate 4s ease-in-out infinite;
+}
+
+/* Titres de sections - Lévitation plus prononcée */
+.section-title.levitate,
+.hero-headline.levitate {
+    animation: levitate 5s ease-in-out infinite;
+}
+
+.gradient-text-hero.levitate {
+    animation: levitate 6s ease-in-out infinite;
+    animation-delay: 0.3s;
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   🔧 CORRECTION DES ANIMATIONS AOS
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+
+/* Empêcher les animations AOS de se répéter */
+[data-aos].aos-animate {
+    transition-property: transform, opacity;
+    transition-duration: 0.8s;
+    transition-timing-function: ease-out;
+}
+
+/* Assurer que les éléments restent visibles après l'animation */
+[data-aos].aos-animate {
+    opacity: 1 !important;
+    transform: translate(0, 0) !important;
+}
+
+/* État initial des éléments AOS */
+[data-aos]:not(.aos-animate) {
+    opacity: 0;
+}
+
+/* Fade up */
+[data-aos="fade-up"]:not(.aos-animate) {
+    transform: translateY(30px);
+}
+
+/* Fade down */
+[data-aos="fade-down"]:not(.aos-animate) {
+    transform: translateY(-30px);
+}
+
+/* Fade left */
+[data-aos="fade-left"]:not(.aos-animate) {
+    transform: translateX(30px);
+}
+
+/* Fade right */
+[data-aos="fade-right"]:not(.aos-animate) {
+    transform: translateX(-30px);
+}
+
+/* Zoom in */
+[data-aos="zoom-in"]:not(.aos-animate) {
+    transform: scale(0.9);
+}
+
 /* ============================================
    DEBUG HELPERS (Development Only)
    ============================================ */

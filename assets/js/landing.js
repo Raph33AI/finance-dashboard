@@ -1058,6 +1058,7 @@ class DemoSearchManager {
 class ScrollRevealManager {
     constructor() {
         this.elements = document.querySelectorAll('[data-aos]');
+        this.animatedElements = new Set(); // ✅ Tracker les éléments déjà animés
         this.init();
     }
 
@@ -1068,9 +1069,18 @@ class ScrollRevealManager {
 
     revealOnScroll() {
         this.elements.forEach(element => {
+            // ✅ Ne pas animer si déjà animé
+            if (this.animatedElements.has(element)) return;
+
             const elementTop = element.getBoundingClientRect().top;
             if (elementTop < window.innerHeight - 150) {
                 element.classList.add('aos-animate');
+                this.animatedElements.add(element); // ✅ Marquer comme animé
+                
+                // ✅ Ajouter la classe "levitate" après l'animation
+                setTimeout(() => {
+                    element.classList.add('levitate');
+                }, 800); // Attendre la fin de l'animation AOS
             }
         });
     }
