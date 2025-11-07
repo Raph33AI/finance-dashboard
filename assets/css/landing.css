@@ -4255,6 +4255,33 @@ body.dark-mode .search-results::-webkit-scrollbar-thumb:hover {
     transform: scale(0.9);
 }
 
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   🪙 AJUSTEMENT DE LA POSITION DE LA PIÈCE DÉCORATIVE
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+
+/* Décaler la pièce vers la droite */
+.gradient-text-hero::after,
+.hero-headline .gradient-text-hero::after {
+    right: -80px !important;  /* Ajuste cette valeur selon tes besoins */
+    /* ou utilise left si c'est positionné avec left */
+    left: auto !important;
+}
+
+/* Si c'est un élément séparé dans le hero */
+.hero-content .coin,
+.hero .coin-decoration,
+.hero-headline + .coin {
+    transform: translateX(60px); /* Déplace de 60px vers la droite */
+}
+
+/* Responsive - Cacher sur mobile si besoin */
+@media (max-width: 768px) {
+    .gradient-text-hero::after,
+    .hero .coin-decoration {
+        display: none;
+    }
+}
+
 /* ============================================
    DEBUG HELPERS (Development Only)
    ============================================ */
