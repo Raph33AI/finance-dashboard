@@ -6,10 +6,12 @@
 
 class FinanceAPIClient {
     constructor(config = {}) {
-        this.baseURL = config.baseURL || '';
+        this.baseURL = config.baseURL || 'https://finance-hub-api.raphnardone.workers.dev';
         this.cacheDuration = config.cacheDuration || 3600000; // 1h par défaut
         this.maxRetries = config.maxRetries || 3;
         this.onLoadingChange = config.onLoadingChange || (() => {});
+        
+        console.log('🔧 API Client initialized with baseURL:', this.baseURL);
     }
     
     // ============================================
@@ -114,12 +116,14 @@ class FinanceAPIClient {
         
         this.onLoadingChange(true);
         
+        // ✅ CONSTRUCTION CORRECTE DE L'URL
         const queryString = new URLSearchParams(params).toString();
         const url = `${this.baseURL}/api/${endpoint}?${queryString}`;
         
+        console.log(`🌐 API Request: ${endpoint}`, params);
+        console.log(`📡 Full URL: ${url}`);
+        
         try {
-            console.log(`🌐 API Request: ${endpoint}`, params);
-            
             const response = await fetch(url);
             
             if (!response.ok) {
@@ -236,15 +240,10 @@ class FinanceAPIClient {
     // MARKET DATA ENDPOINTS
     // ============================================
     
-    /**
-     * 🔍 Recherche de symboles
-     * GET /api/search?query=apple
-     */
     async searchSymbol(query) {
         try {
             const data = await this.makeRequest('search', { query });
             
-            // Finnhub retourne { data: [...], count: X }
             return {
                 data: data.data || [],
                 count: data.count || 0,
@@ -261,10 +260,6 @@ class FinanceAPIClient {
         }
     }
     
-    /**
-     * 💰 Quote en temps réel
-     * GET /api/quote?symbol=AAPL
-     */
     async getQuote(symbol) {
         const data = await this.makeRequest('quote', { symbol });
         
@@ -287,10 +282,6 @@ class FinanceAPIClient {
         };
     }
     
-    /**
-     * 📊 Séries temporelles (données historiques)
-     * GET /api/time-series?symbol=AAPL&interval=1day&outputsize=100
-     */
     async getTimeSeries(symbol, interval = '1day', outputsize = 100) {
         try {
             const data = await this.makeRequest('time-series', {
@@ -301,7 +292,6 @@ class FinanceAPIClient {
             
             console.log('📦 Time series data received:', data);
             
-            // Finnhub retourne { meta: {...}, values: [...], status: 'ok' }
             if (!data.values || data.values.length === 0) {
                 throw new Error('No time series data available');
             }
@@ -327,10 +317,6 @@ class FinanceAPIClient {
         }
     }
     
-    /**
-     * 🏢 Profil de l'entreprise
-     * GET /api/profile?symbol=AAPL
-     */
     async getProfile(symbol) {
         try {
             const data = await this.makeRequest('profile', { symbol });
@@ -356,7 +342,6 @@ class FinanceAPIClient {
                 weburl: data.weburl || '',
                 logo: data.logo || '',
                 finnhubIndustry: data.finnhubIndustry || 'N/A',
-                // Mappings pour compatibilité
                 sector: data.finnhubIndustry || 'N/A',
                 industry: data.finnhubIndustry || 'N/A',
                 website: data.weburl || '',
@@ -372,10 +357,6 @@ class FinanceAPIClient {
         }
     }
     
-    /**
-     * 🤝 Entreprises similaires/concurrentes
-     * GET /api/peers?symbol=AAPL
-     */
     async getPeers(symbol) {
         try {
             const data = await this.makeRequest('peers', { symbol });
@@ -398,10 +379,6 @@ class FinanceAPIClient {
         }
     }
     
-    /**
-     * 📋 Liste des symboles par exchange
-     * GET /api/symbols?exchange=US
-     */
     async getSymbols(exchange = 'US') {
         try {
             const data = await this.makeRequest('symbols', { exchange });
@@ -426,10 +403,6 @@ class FinanceAPIClient {
         }
     }
     
-    /**
-     * 🕐 Statut des marchés
-     * GET /api/market-status?exchange=US
-     */
     async getMarketStatus(exchange = 'US') {
         try {
             const data = await this.makeRequest('market-status', { exchange });
@@ -455,9 +428,6 @@ class FinanceAPIClient {
         }
     }
     
-    /**
-     * 🎨 Logo de l'entreprise (via profile)
-     */
     async getLogo(symbol) {
         try {
             const profile = await this.getProfile(symbol);
@@ -472,16 +442,10 @@ class FinanceAPIClient {
     // NEWS ENDPOINTS
     // ============================================
     
-    /**
-     * 📰 Actualités du marché par catégorie
-     * GET /api/news?category=general
-     * Catégories: general, forex, crypto, merger
-     */
     async getNews(category = 'general', limit = 50) {
         try {
             console.log(`📰 Fetching news for category: ${category}`);
             
-            // Finnhub retourne directement un array
             const data = await this.makeRequest('news', { category });
             
             console.log('📦 News data received:', data);
@@ -496,10 +460,8 @@ class FinanceAPIClient {
                 newsArray = data.data;
             }
             
-            // Limiter au nombre demandé
             newsArray = newsArray.slice(0, limit);
             
-            // Transformer les données Finnhub
             const transformedNews = newsArray.map(item => ({
                 id: item.id || `${item.datetime || Date.now()}_${Math.random()}`,
                 category: item.category || category,
@@ -532,15 +494,10 @@ class FinanceAPIClient {
         }
     }
     
-    /**
-     * ✨ 📰 Actualités spécifiques à une entreprise
-     * GET /api/company-news?symbol=AAPL&from=2024-01-01&to=2024-12-31
-     */
     async getCompanyNews(symbol, from = null, to = null) {
         try {
             const params = { symbol };
             
-            // Dates par défaut : 7 derniers jours
             if (!to) {
                 to = new Date().toISOString().split('T')[0];
             }
@@ -603,10 +560,6 @@ class FinanceAPIClient {
         }
     }
     
-    /**
-     * ✨ 📊 Sentiment des actualités
-     * GET /api/news-sentiment?symbol=AAPL
-     */
     async getNewsSentiment(symbol) {
         try {
             console.log(`📊 Fetching news sentiment for ${symbol}`);
@@ -647,10 +600,6 @@ class FinanceAPIClient {
     // ANALYSIS ENDPOINTS
     // ============================================
     
-    /**
-     * ✨ 📈 Tendances des recommandations d'analystes
-     * GET /api/recommendation-trends?symbol=AAPL
-     */
     async getRecommendationTrends(symbol) {
         try {
             console.log(`📈 Fetching recommendation trends for ${symbol}`);
@@ -659,7 +608,6 @@ class FinanceAPIClient {
             
             console.log('📦 Recommendation trends received:', data);
             
-            // Finnhub retourne un array de périodes
             if (!Array.isArray(data)) {
                 return {
                     symbol: symbol,
@@ -693,10 +641,6 @@ class FinanceAPIClient {
         }
     }
     
-    /**
-     * ✨ 🎯 Objectifs de prix des analystes
-     * GET /api/price-target?symbol=AAPL
-     */
     async getPriceTarget(symbol) {
         try {
             console.log(`🎯 Fetching price target for ${symbol}`);
@@ -725,10 +669,6 @@ class FinanceAPIClient {
         }
     }
     
-    /**
-     * ✨ 📊 Changements de recommandations (Upgrades/Downgrades)
-     * GET /api/upgrade-downgrade?symbol=AAPL&from=2024-01-01&to=2024-12-31
-     */
     async getUpgradeDowngrade(symbol = null, from = null, to = null) {
         try {
             const params = {};
@@ -783,10 +723,6 @@ class FinanceAPIClient {
         }
     }
     
-    /**
-     * ✨ 💰 Résultats vs estimations (Earnings Surprises)
-     * GET /api/earnings-surprises?symbol=AAPL
-     */
     async getEarningsSurprises(symbol) {
         try {
             console.log(`💰 Fetching earnings surprises for ${symbol}`);
@@ -826,10 +762,6 @@ class FinanceAPIClient {
         }
     }
     
-    /**
-     * ✨ 💵 Estimations de revenus
-     * GET /api/revenue-estimates?symbol=AAPL&freq=quarterly
-     */
     async getRevenueEstimates(symbol, freq = 'quarterly') {
         try {
             console.log(`💵 Fetching revenue estimates for ${symbol} (${freq})`);
@@ -871,10 +803,6 @@ class FinanceAPIClient {
         }
     }
     
-    /**
-     * ✨ 📊 Estimations de bénéfices par action (EPS)
-     * GET /api/eps-estimates?symbol=AAPL&freq=quarterly
-     */
     async getEPSEstimates(symbol, freq = 'quarterly') {
         try {
             console.log(`📊 Fetching EPS estimates for ${symbol} (${freq})`);
@@ -920,15 +848,10 @@ class FinanceAPIClient {
     // CALENDAR ENDPOINTS
     // ============================================
     
-    /**
-     * 📅 Calendrier des résultats financiers
-     * GET /api/earnings-calendar?from=2024-01-01&to=2024-12-31&symbol=AAPL
-     */
     async getEarningsCalendar(from = null, to = null, symbol = null) {
         try {
             const params = {};
             
-            // Dates par défaut : 7 prochains jours
             if (!to) {
                 to = new Date().toISOString().split('T')[0];
             }
@@ -951,7 +874,6 @@ class FinanceAPIClient {
             
             console.log('📦 Earnings calendar received:', data);
             
-            // Finnhub retourne { earningsCalendar: [...] }
             let eventsArray = [];
             
             if (data.earningsCalendar && Array.isArray(data.earningsCalendar)) {
@@ -993,15 +915,10 @@ class FinanceAPIClient {
         }
     }
     
-    /**
-     * 🚀 Calendrier des IPO
-     * GET /api/ipo-calendar?from=2024-01-01&to=2024-12-31
-     */
     async getIPOCalendar(from = null, to = null) {
         try {
             const params = {};
             
-            // Dates par défaut : 30 prochains jours
             if (!to) {
                 to = new Date().toISOString().split('T')[0];
             }
@@ -1020,7 +937,6 @@ class FinanceAPIClient {
             
             console.log('📦 IPO calendar received:', data);
             
-            // Finnhub retourne { ipoCalendar: [...] }
             let ipoArray = [];
             
             if (data.ipoCalendar && Array.isArray(data.ipoCalendar)) {
@@ -1060,22 +976,85 @@ class FinanceAPIClient {
     }
     
     // ============================================
-    // LEGACY / DEPRECATED METHODS (Pour compatibilité)
+    // BATCH LOADING (pour plusieurs symboles)
     // ============================================
     
-    /**
-     * ❌ DEPRECATED - Technical indicators (PREMIUM)
-     * Conservé pour compatibilité mais retourne null
-     */
+    async getMultipleQuotes(symbols, batchSize = 50, delayBetweenBatches = 60000) {
+        const results = {};
+        const batches = [];
+        
+        for (let i = 0; i < symbols.length; i += batchSize) {
+            batches.push(symbols.slice(i, i + batchSize));
+        }
+        
+        console.log(`📊 Loading ${symbols.length} symbols in ${batches.length} batches`);
+        
+        for (let i = 0; i < batches.length; i++) {
+            const batch = batches[i];
+            
+            console.log(`🔄 Batch ${i + 1}/${batches.length} (${batch.length} symbols)`);
+            
+            const batchPromises = batch.map(async (symbol) => {
+                try {
+                    const quote = await this.getQuote(symbol);
+                    results[symbol] = quote;
+                    return { symbol, success: true };
+                } catch (error) {
+                    console.error(`❌ Error loading ${symbol}:`, error.message);
+                    results[symbol] = { error: error.message };
+                    return { symbol, success: false };
+                }
+            });
+            
+            await Promise.all(batchPromises);
+            
+            if (i < batches.length - 1) {
+                console.log(`⏳ Waiting ${delayBetweenBatches/1000}s...`);
+                await new Promise(resolve => setTimeout(resolve, delayBetweenBatches));
+            }
+        }
+        
+        return results;
+    }
+    
+    async getAllUSSymbols() {
+        const cacheKey = 'all_us_symbols_v1';
+        
+        try {
+            const cached = localStorage.getItem(cacheKey);
+            if (cached) {
+                const { data, timestamp } = JSON.parse(cached);
+                const age = Date.now() - timestamp;
+                
+                if (age < 7 * 24 * 60 * 60 * 1000) {
+                    console.log(`✅ Using cached US symbols (age: ${Math.round(age/1000/60/60)}h)`);
+                    return data;
+                }
+            }
+        } catch (e) {
+            console.warn('Cache read error:', e);
+        }
+        
+        console.log('📥 Fetching all US symbols from API...');
+        const symbolsData = await this.getSymbols('US');
+        
+        localStorage.setItem(cacheKey, JSON.stringify({
+            data: symbolsData.symbols,
+            timestamp: Date.now()
+        }));
+        
+        return symbolsData.symbols;
+    }
+    
+    // ============================================
+    // LEGACY / DEPRECATED
+    // ============================================
+    
     async getTechnicalIndicator(symbol, indicator, interval = '1day', timePeriod = 14) {
         console.warn('⚠️ Technical indicators endpoint is not available (PREMIUM feature)');
         return null;
     }
     
-    /**
-     * ❌ DEPRECATED - Statistics (PREMIUM)
-     * Conservé pour compatibilité mais retourne null
-     */
     async getStatistics(symbol) {
         console.warn('⚠️ Statistics endpoint is not available (PREMIUM feature)');
         return null;
