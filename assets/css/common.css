@@ -2,7 +2,14 @@
    COMMON.CSS - Modern Minimalist Design 2024
    Version optimisée avec DARK MODE complet
    🎨 NOUVELLES NUANCES DE BLEU - 2024
+   ✨ POLICE SATOSHI INTÉGRÉE
    ============================================== */
+
+/* ============================================
+   IMPORT POLICE SATOSHI
+   ============================================ */
+
+@import url('https://api.fontshare.com/v2/css?f[]=satoshi@900,700,500,400,300&display=swap');
 
 /* ============================================
    VARIABLES CSS - MODE CLAIR
@@ -51,6 +58,7 @@
     --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -1px rgb(0 0 0 / 0.06);
     --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -2px rgb(0 0 0 / 0.05);
     --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 10px 10px -5px rgb(0 0 0 / 0.04);
+    --shadow-2xl: 0 25px 50px -12px rgb(0 0 0 / 0.25);
     
     /* GRAPHIQUES - MODE CLAIR */
     --chart-bg: #ffffff;
@@ -145,6 +153,7 @@ body.dark-mode {
     --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.6), 0 2px 4px -1px rgba(0, 0, 0, 0.5);
     --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.7), 0 4px 6px -2px rgba(0, 0, 0, 0.6);
     --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.8), 0 10px 10px -5px rgba(0, 0, 0, 0.7);
+    --shadow-2xl: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
     
     /* GRAPHIQUES - MODE SOMBRE */
     --chart-bg: #1e293b;
@@ -696,7 +705,7 @@ body.dark-mode .badge-warning {
 }
 
 /* ============================================
-   MODALS - Dark mode support + BOUTON FERMETU RE STYLISÉ
+   MODALS - Dark mode support + BOUTON FERMETURE STYLISÉ
    ============================================ */
 
 .modal {
@@ -1205,104 +1214,6 @@ body.dark-mode::-webkit-scrollbar-thumb:hover {
     transform: rotate(20deg);
 }
 
-/* ============================================
-   RESPONSIVE - Mobile First
-   ============================================ */
-
-@media (max-width: 768px) {
-    html {
-        font-size: 14px;
-    }
-    
-    .container {
-        padding-inline: var(--spacing-md);
-    }
-    
-    .content {
-        padding-block: var(--spacing-lg);
-    }
-    
-    .card,
-    .section {
-        padding: var(--spacing-lg);
-    }
-    
-    .modal-content {
-        max-width: 100%;
-        margin: var(--spacing-md);
-    }
-    
-    .modal-footer {
-        flex-direction: column;
-    }
-    
-    .modal-footer .btn {
-        width: 100%;
-    }
-}
-
-@media (max-width: 480px) {
-    .card,
-    .section {
-        padding: var(--spacing-md);
-    }
-    
-    .btn {
-        width: 100%;
-        justify-content: center;
-    }
-    
-    .card-header {
-        flex-direction: column;
-        align-items: flex-start;
-    }
-}
-
-/* ============================================
-   PRINT STYLES
-   ============================================ */
-
-@media print {
-    body {
-        background: white !important;
-        color: black !important;
-    }
-    
-    .sidebar,
-    .mobile-toggle,
-    .btn,
-    .dark-mode-toggle,
-    .modal {
-        display: none !important;
-    }
-    
-    .main-content {
-        margin: 0 !important;
-        box-shadow: none !important;
-    }
-    
-    .card,
-    .section {
-        border: 1px solid #ccc !important;
-        box-shadow: none !important;
-    }
-}
-
-/* ============================================
-   REDUCED MOTION SUPPORT
-   ============================================ */
-
-@media (prefers-reduced-motion: reduce) {
-    *,
-    *::before,
-    *::after {
-        animation-duration: 0.01ms !important;
-        animation-iteration-count: 1 !important;
-        transition-duration: 0.01ms !important;
-        scroll-behavior: auto !important;
-    }
-}
-
 /* ═══════════════════════════════════════════════════════════════
    AJOUTS POUR LE MENU PROFIL - USER AUTHENTICATION
    ═══════════════════════════════════════════════════════════════ */
@@ -1773,7 +1684,41 @@ body.dark-mode .dropdown-link:hover .dropdown-link-icon {
     background: var(--primary-color);
 }
 
+/* ============================================
+   RESPONSIVE - Mobile First
+   ============================================ */
+
 @media (max-width: 768px) {
+    html {
+        font-size: 14px;
+    }
+    
+    .container {
+        padding-inline: var(--spacing-md);
+    }
+    
+    .content {
+        padding-block: var(--spacing-lg);
+    }
+    
+    .card,
+    .section {
+        padding: var(--spacing-lg);
+    }
+    
+    .modal-content {
+        max-width: 100%;
+        margin: var(--spacing-md);
+    }
+    
+    .modal-footer {
+        flex-direction: column;
+    }
+    
+    .modal-footer .btn {
+        width: 100%;
+    }
+
     .user-info-text {
         display: none;
     }
@@ -1833,6 +1778,21 @@ body.dark-mode .dropdown-link:hover .dropdown-link-icon {
 }
 
 @media (max-width: 480px) {
+    .card,
+    .section {
+        padding: var(--spacing-md);
+    }
+    
+    .btn {
+        width: 100%;
+        justify-content: center;
+    }
+    
+    .card-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
     .user-dropdown-menu {
         position: fixed;
         top: auto;
@@ -1853,3 +1813,52 @@ body.dark-mode .dropdown-link:hover .dropdown-link-icon {
         transform: translateY(100%);
     }
 }
+
+/* ============================================
+   PRINT STYLES
+   ============================================ */
+
+@media print {
+    body {
+        background: white !important;
+        color: black !important;
+    }
+    
+    .sidebar,
+    .mobile-toggle,
+    .btn,
+    .dark-mode-toggle,
+    .modal {
+        display: none !important;
+    }
+    
+    .main-content {
+        margin: 0 !important;
+        box-shadow: none !important;
+    }
+    
+    .card,
+    .section {
+        border: 1px solid #ccc !important;
+        box-shadow: none !important;
+    }
+}
+
+/* ============================================
+   REDUCED MOTION SUPPORT
+   ============================================ */
+
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+}
+
+/* ============================================
+   FIN DE COMMON.CSS
+   ============================================ */
