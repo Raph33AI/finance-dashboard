@@ -296,33 +296,23 @@ class FinanceAPIClient {
     
     async getTimeSeries(symbol, interval = '1day', outputsize = 100) {
         try {
-            const data = await this.makeRequest('time-series', {
-            symbol,
-            interval,
-            outputsize
-            });
+            const data = await this.makeRequest('time-series', { symbol, interval, outputsize });
             
             console.log('📦 Time series data received:', data);
             
-            // Vérifier que les données existent
-            if (!data || !data.values || data.values.length === 0) {
+            if (!data || !data.data || data.data.length === 0) {
             throw new Error('No time series data available');
             }
             
+            console.log(`✅ Found ${data.data.length} candles`);
+            
+            // Le Worker a déjà tout transformé !
             return {
-            symbol: data.meta?.symbol || symbol,
-            interval: data.meta?.interval || interval,
-            currency: data.meta?.currency || 'USD',
-            exchange: data.meta?.exchange || '',
-            data: data.values.map(item => ({
-                datetime: item.datetime,
-                timestamp: new Date(item.datetime).getTime(),
-                open: this.parseNumber(item.open),
-                high: this.parseNumber(item.high),
-                low: this.parseNumber(item.low),
-                close: this.parseNumber(item.close),
-                volume: parseInt(item.volume) || 0
-            })).reverse() // Twelve Data retourne du plus récent au plus ancien
+            symbol: data.symbol || symbol,
+            interval: data.interval || interval,
+            currency: 'USD',
+            exchange: '',
+            data: data.data
             };
         } catch (error) {
             console.error('Time series error:', error);
