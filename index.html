@@ -1416,507 +1416,507 @@
      THREE.JS - OBJETS 3D VOLUMÉTRIQUES
      ═══════════════════════════════════════════════════════════════ -->
 
-    <!-- Three.js Library -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<!-- Three.js Library -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 
-    <!-- Script pour créer les objets 3D -->
-    <script>
-    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-    // 🎨 SYSTÈME D'OBJETS 3D VOLUMÉTRIQUES POUR LANDING
-    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+<!-- Script pour créer les objets 3D -->
+<script>
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// 🎨 SYSTÈME D'OBJETS 3D VOLUMÉTRIQUES POUR LANDING
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-    class Landing3DObjects {
-        constructor() {
-            this.scenes = [];
-            this.init();
-        }
+class Landing3DObjects {
+    constructor() {
+        this.scenes = [];
+        this.init();
+    }
 
-        init() {
-            // Créer des objets 3D pour chaque icône de feature-card
-            this.createFeatureIcons3D();
-            
-            // Créer un graphique 3D dans le hero
-            this.createHeroChart3D();
-            
-            // Créer des pièces de monnaie 3D
-            this.createCoins3D();
-            
-            // Animer tous les objets
-            this.animate();
-        }
+    init() {
+        // Créer des objets 3D pour chaque icône de feature-card
+        this.createFeatureIcons3D();
+        
+        // Créer un graphique 3D dans le hero
+        this.createHeroChart3D();
+        
+        // Créer des pièces de monnaie 3D
+        this.createCoins3D();
+        
+        // Animer tous les objets
+        this.animate();
+    }
 
-        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-        // 🎯 CRÉER DES ICÔNES 3D POUR LES FEATURE CARDS
-        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-        createFeatureIcons3D() {
-            const featureIcons = document.querySelectorAll('.feature-icon');
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    // 🎯 CRÉER DES ICÔNES 3D POUR LES FEATURE CARDS
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    createFeatureIcons3D() {
+        const featureIcons = document.querySelectorAll('.feature-icon');
+        
+        featureIcons.forEach((iconContainer, index) => {
+            // Cacher l'icône Font Awesome
+            const faIcon = iconContainer.querySelector('i');
+            if (faIcon) faIcon.style.display = 'none';
             
-            featureIcons.forEach((iconContainer, index) => {
-                // Cacher l'icône Font Awesome
-                const faIcon = iconContainer.querySelector('i');
-                if (faIcon) faIcon.style.display = 'none';
-                
-                // Créer un canvas pour Three.js
-                const canvas = document.createElement('canvas');
-                canvas.style.width = '100%';
-                canvas.style.height = '100%';
-                iconContainer.appendChild(canvas);
-                
-                // Setup Three.js
-                const scene = new THREE.Scene();
-                const camera = new THREE.PerspectiveCamera(50, 1, 0.1, 1000);
-                const renderer = new THREE.WebGLRenderer({ 
-                    canvas, 
-                    alpha: true, 
-                    antialias: true 
-                });
-                
-                renderer.setSize(56, 56);
-                renderer.setPixelRatio(window.devicePixelRatio);
-                camera.position.z = 3;
-                
-                // Créer différents objets 3D selon l'index
-                let object;
-                
-                switch(index % 6) {
-                    case 0: // Cerveau (Brain)
-                        object = this.createBrain();
-                        break;
-                    case 1: // Base de données (Database)
-                        object = this.createDatabase();
-                        break;
-                    case 2: // Graphique circulaire (Pie Chart)
-                        object = this.createPieChart();
-                        break;
-                    case 3: // Balance (Scale)
-                        object = this.createScale();
-                        break;
-                    case 4: // Dé (Dice)
-                        object = this.createDice();
-                        break;
-                    case 5: // Graphique (Chart)
-                        object = this.createBarChart();
-                        break;
-                    default:
-                        object = this.createCube();
-                }
-                
-                scene.add(object);
-                
-                // Lumières
-                const light1 = new THREE.PointLight(0x4c8aff, 1, 100);
-                light1.position.set(5, 5, 5);
-                scene.add(light1);
-                
-                const light2 = new THREE.PointLight(0x8b5cf6, 0.8, 100);
-                light2.position.set(-5, -5, 5);
-                scene.add(light2);
-                
-                const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
-                scene.add(ambientLight);
-                
-                // Stocker pour animation
-                this.scenes.push({
-                    scene,
-                    camera,
-                    renderer,
-                    object,
-                    canvas,
-                    iconContainer
-                });
-                
-                // Interaction hover
-                iconContainer.addEventListener('mouseenter', () => {
-                    object.userData.hovered = true;
-                });
-                
-                iconContainer.addEventListener('mouseleave', () => {
-                    object.userData.hovered = false;
-                });
-            });
-        }
-
-        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-        // 🧠 CRÉER UN CERVEAU 3D
-        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-        createBrain() {
-            const group = new THREE.Group();
-            
-            // Sphère principale
-            const sphereGeometry = new THREE.SphereGeometry(0.8, 32, 32);
-            const sphereMaterial = new THREE.MeshPhongMaterial({
-                color: 0x4c8aff,
-                shininess: 100,
-                specular: 0x8b5cf6
-            });
-            const sphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
-            group.add(sphere);
-            
-            // Ajouter des "lobes" pour faire un cerveau
-            for (let i = 0; i < 8; i++) {
-                const lobeGeometry = new THREE.SphereGeometry(0.3, 16, 16);
-                const lobe = new THREE.Mesh(lobeGeometry, sphereMaterial);
-                const angle = (i / 8) * Math.PI * 2;
-                lobe.position.x = Math.cos(angle) * 0.6;
-                lobe.position.y = Math.sin(angle) * 0.6;
-                lobe.position.z = Math.random() * 0.3;
-                group.add(lobe);
-            }
-            
-            return group;
-        }
-
-        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-        // 💾 CRÉER UNE BASE DE DONNÉES 3D
-        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-        createDatabase() {
-            const group = new THREE.Group();
-            
-            const cylinderGeometry = new THREE.CylinderGeometry(0.6, 0.6, 0.3, 32);
-            const material = new THREE.MeshPhongMaterial({
-                color: 0x4c8aff,
-                shininess: 100
-            });
-            
-            // Empiler 3 cylindres
-            for (let i = 0; i < 3; i++) {
-                const cylinder = new THREE.Mesh(cylinderGeometry, material);
-                cylinder.position.y = i * 0.4 - 0.4;
-                group.add(cylinder);
-            }
-            
-            return group;
-        }
-
-        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-        // 📊 CRÉER UN GRAPHIQUE CIRCULAIRE 3D
-        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-        createPieChart() {
-            const group = new THREE.Group();
-            
-            const colors = [0x4c8aff, 0x8b5cf6, 0x10b981, 0xf59e0b];
-            const segments = 4;
-            
-            for (let i = 0; i < segments; i++) {
-                const geometry = new THREE.CylinderGeometry(
-                    0.7, 0.7, 0.3, 32, 1, false,
-                    (i / segments) * Math.PI * 2,
-                    (Math.PI * 2) / segments
-                );
-                
-                const material = new THREE.MeshPhongMaterial({
-                    color: colors[i],
-                    shininess: 100
-                });
-                
-                const segment = new THREE.Mesh(geometry, material);
-                const angle = ((i + 0.5) / segments) * Math.PI * 2;
-                segment.position.x = Math.cos(angle) * 0.1;
-                segment.position.z = Math.sin(angle) * 0.1;
-                
-                group.add(segment);
-            }
-            
-            return group;
-        }
-
-        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-        // ⚖️ CRÉER UNE BALANCE 3D
-        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-        createScale() {
-            const group = new THREE.Group();
-            
-            const material = new THREE.MeshPhongMaterial({
-                color: 0x4c8aff,
-                shininess: 100
-            });
-            
-            // Base
-            const baseGeometry = new THREE.CylinderGeometry(0.3, 0.4, 0.2, 32);
-            const base = new THREE.Mesh(baseGeometry, material);
-            base.position.y = -0.6;
-            group.add(base);
-            
-            // Tige
-            const poleGeometry = new THREE.CylinderGeometry(0.05, 0.05, 1, 16);
-            const pole = new THREE.Mesh(poleGeometry, material);
-            pole.position.y = -0.1;
-            group.add(pole);
-            
-            // Plateaux
-            const plateGeometry = new THREE.CylinderGeometry(0.3, 0.3, 0.05, 32);
-            const plate1 = new THREE.Mesh(plateGeometry, material);
-            plate1.position.set(-0.5, 0.4, 0);
-            group.add(plate1);
-            
-            const plate2 = new THREE.Mesh(plateGeometry, material);
-            plate2.position.set(0.5, 0.4, 0);
-            group.add(plate2);
-            
-            return group;
-        }
-
-        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-        // 🎲 CRÉER UN DÉ 3D
-        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-        createDice() {
-            const geometry = new THREE.BoxGeometry(0.8, 0.8, 0.8);
-            const material = new THREE.MeshPhongMaterial({
-                color: 0x4c8aff,
-                shininess: 100
-            });
-            
-            const dice = new THREE.Mesh(geometry, material);
-            
-            // Arrondir les bords
-            const edges = new THREE.EdgesGeometry(geometry);
-            const lineMaterial = new THREE.LineBasicMaterial({ 
-                color: 0x8b5cf6, 
-                linewidth: 2 
-            });
-            const wireframe = new THREE.LineSegments(edges, lineMaterial);
-            dice.add(wireframe);
-            
-            return dice;
-        }
-
-        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-        // 📊 CRÉER UN GRAPHIQUE EN BARRES 3D
-        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-        createBarChart() {
-            const group = new THREE.Group();
-            
-            const material = new THREE.MeshPhongMaterial({
-                color: 0x4c8aff,
-                shininess: 100
-            });
-            
-            const heights = [0.4, 0.7, 0.5, 0.9, 0.6];
-            
-            for (let i = 0; i < heights.length; i++) {
-                const geometry = new THREE.BoxGeometry(0.15, heights[i], 0.15);
-                const bar = new THREE.Mesh(geometry, material);
-                bar.position.x = (i - 2) * 0.25;
-                bar.position.y = heights[i] / 2 - 0.5;
-                group.add(bar);
-            }
-            
-            return group;
-        }
-
-        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-        // 📦 CRÉER UN CUBE GÉNÉRIQUE
-        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-        createCube() {
-            const geometry = new THREE.BoxGeometry(0.8, 0.8, 0.8);
-            const material = new THREE.MeshPhongMaterial({
-                color: 0x4c8aff,
-                shininess: 100
-            });
-            
-            return new THREE.Mesh(geometry, material);
-        }
-
-        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-        // 📈 CRÉER UN GRAPHIQUE 3D DANS LE HERO
-        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-        createHeroChart3D() {
-            const chartArea = document.querySelector('.mockup-chart-area');
-            if (!chartArea) return;
-            
-            // Cacher le canvas existant
-            const existingCanvas = chartArea.querySelector('canvas');
-            if (existingCanvas) existingCanvas.style.display = 'none';
-            
-            // Créer nouveau canvas
+            // Créer un canvas pour Three.js
             const canvas = document.createElement('canvas');
-            chartArea.appendChild(canvas);
+            canvas.style.width = '100%';
+            canvas.style.height = '100%';
+            iconContainer.appendChild(canvas);
             
+            // Setup Three.js
             const scene = new THREE.Scene();
-            const camera = new THREE.PerspectiveCamera(
-                50, 
-                chartArea.offsetWidth / chartArea.offsetHeight, 
-                0.1, 
-                1000
-            );
-            
+            const camera = new THREE.PerspectiveCamera(50, 1, 0.1, 1000);
             const renderer = new THREE.WebGLRenderer({ 
                 canvas, 
                 alpha: true, 
                 antialias: true 
             });
             
-            renderer.setSize(chartArea.offsetWidth, chartArea.offsetHeight);
+            renderer.setSize(56, 56);
             renderer.setPixelRatio(window.devicePixelRatio);
-            camera.position.set(5, 3, 5);
-            camera.lookAt(0, 0, 0);
+            camera.position.z = 3;
             
-            // Créer un graphique 3D volumétrique
-            const group = new THREE.Group();
+            // Créer différents objets 3D selon l'index
+            let object;
             
-            const data = [2.4, 2.52, 2.68, 2.75, 2.82, 2.847];
-            const material = new THREE.MeshPhongMaterial({
-                color: 0x4c8aff,
-                shininess: 100,
-                transparent: true,
-                opacity: 0.8
-            });
-            
-            for (let i = 0; i < data.length; i++) {
-                const height = data[i];
-                const geometry = new THREE.BoxGeometry(0.3, height, 0.3);
-                const bar = new THREE.Mesh(geometry, material);
-                bar.position.x = (i - 2.5) * 0.5;
-                bar.position.y = height / 2;
-                group.add(bar);
+            switch(index % 6) {
+                case 0: // Cerveau (Brain)
+                    object = this.createBrain();
+                    break;
+                case 1: // Base de données (Database)
+                    object = this.createDatabase();
+                    break;
+                case 2: // Graphique circulaire (Pie Chart)
+                    object = this.createPieChart();
+                    break;
+                case 3: // Balance (Scale)
+                    object = this.createScale();
+                    break;
+                case 4: // Dé (Dice)
+                    object = this.createDice();
+                    break;
+                case 5: // Graphique (Chart)
+                    object = this.createBarChart();
+                    break;
+                default:
+                    object = this.createCube();
             }
             
-            scene.add(group);
+            scene.add(object);
             
             // Lumières
-            const light1 = new THREE.DirectionalLight(0xffffff, 1);
+            const light1 = new THREE.PointLight(0x4c8aff, 1, 100);
             light1.position.set(5, 5, 5);
             scene.add(light1);
             
-            const light2 = new THREE.DirectionalLight(0x8b5cf6, 0.5);
-            light2.position.set(-5, 3, -5);
+            const light2 = new THREE.PointLight(0x8b5cf6, 0.8, 100);
+            light2.position.set(-5, -5, 5);
             scene.add(light2);
             
-            const ambientLight = new THREE.AmbientLight(0xffffff, 0.4);
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+            scene.add(ambientLight);
+            
+            // Stocker pour animation
+            this.scenes.push({
+                scene,
+                camera,
+                renderer,
+                object,
+                canvas,
+                iconContainer
+            });
+            
+            // Interaction hover
+            iconContainer.addEventListener('mouseenter', () => {
+                object.userData.hovered = true;
+            });
+            
+            iconContainer.addEventListener('mouseleave', () => {
+                object.userData.hovered = false;
+            });
+        });
+    }
+
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    // 🧠 CRÉER UN CERVEAU 3D
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    createBrain() {
+        const group = new THREE.Group();
+        
+        // Sphère principale
+        const sphereGeometry = new THREE.SphereGeometry(0.8, 32, 32);
+        const sphereMaterial = new THREE.MeshPhongMaterial({
+            color: 0x4c8aff,
+            shininess: 100,
+            specular: 0x8b5cf6
+        });
+        const sphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
+        group.add(sphere);
+        
+        // Ajouter des "lobes" pour faire un cerveau
+        for (let i = 0; i < 8; i++) {
+            const lobeGeometry = new THREE.SphereGeometry(0.3, 16, 16);
+            const lobe = new THREE.Mesh(lobeGeometry, sphereMaterial);
+            const angle = (i / 8) * Math.PI * 2;
+            lobe.position.x = Math.cos(angle) * 0.6;
+            lobe.position.y = Math.sin(angle) * 0.6;
+            lobe.position.z = Math.random() * 0.3;
+            group.add(lobe);
+        }
+        
+        return group;
+    }
+
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    // 💾 CRÉER UNE BASE DE DONNÉES 3D
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    createDatabase() {
+        const group = new THREE.Group();
+        
+        const cylinderGeometry = new THREE.CylinderGeometry(0.6, 0.6, 0.3, 32);
+        const material = new THREE.MeshPhongMaterial({
+            color: 0x4c8aff,
+            shininess: 100
+        });
+        
+        // Empiler 3 cylindres
+        for (let i = 0; i < 3; i++) {
+            const cylinder = new THREE.Mesh(cylinderGeometry, material);
+            cylinder.position.y = i * 0.4 - 0.4;
+            group.add(cylinder);
+        }
+        
+        return group;
+    }
+
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    // 📊 CRÉER UN GRAPHIQUE CIRCULAIRE 3D
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    createPieChart() {
+        const group = new THREE.Group();
+        
+        const colors = [0x4c8aff, 0x8b5cf6, 0x10b981, 0xf59e0b];
+        const segments = 4;
+        
+        for (let i = 0; i < segments; i++) {
+            const geometry = new THREE.CylinderGeometry(
+                0.7, 0.7, 0.3, 32, 1, false,
+                (i / segments) * Math.PI * 2,
+                (Math.PI * 2) / segments
+            );
+            
+            const material = new THREE.MeshPhongMaterial({
+                color: colors[i],
+                shininess: 100
+            });
+            
+            const segment = new THREE.Mesh(geometry, material);
+            const angle = ((i + 0.5) / segments) * Math.PI * 2;
+            segment.position.x = Math.cos(angle) * 0.1;
+            segment.position.z = Math.sin(angle) * 0.1;
+            
+            group.add(segment);
+        }
+        
+        return group;
+    }
+
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    // ⚖️ CRÉER UNE BALANCE 3D
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    createScale() {
+        const group = new THREE.Group();
+        
+        const material = new THREE.MeshPhongMaterial({
+            color: 0x4c8aff,
+            shininess: 100
+        });
+        
+        // Base
+        const baseGeometry = new THREE.CylinderGeometry(0.3, 0.4, 0.2, 32);
+        const base = new THREE.Mesh(baseGeometry, material);
+        base.position.y = -0.6;
+        group.add(base);
+        
+        // Tige
+        const poleGeometry = new THREE.CylinderGeometry(0.05, 0.05, 1, 16);
+        const pole = new THREE.Mesh(poleGeometry, material);
+        pole.position.y = -0.1;
+        group.add(pole);
+        
+        // Plateaux
+        const plateGeometry = new THREE.CylinderGeometry(0.3, 0.3, 0.05, 32);
+        const plate1 = new THREE.Mesh(plateGeometry, material);
+        plate1.position.set(-0.5, 0.4, 0);
+        group.add(plate1);
+        
+        const plate2 = new THREE.Mesh(plateGeometry, material);
+        plate2.position.set(0.5, 0.4, 0);
+        group.add(plate2);
+        
+        return group;
+    }
+
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    // 🎲 CRÉER UN DÉ 3D
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    createDice() {
+        const geometry = new THREE.BoxGeometry(0.8, 0.8, 0.8);
+        const material = new THREE.MeshPhongMaterial({
+            color: 0x4c8aff,
+            shininess: 100
+        });
+        
+        const dice = new THREE.Mesh(geometry, material);
+        
+        // Arrondir les bords
+        const edges = new THREE.EdgesGeometry(geometry);
+        const lineMaterial = new THREE.LineBasicMaterial({ 
+            color: 0x8b5cf6, 
+            linewidth: 2 
+        });
+        const wireframe = new THREE.LineSegments(edges, lineMaterial);
+        dice.add(wireframe);
+        
+        return dice;
+    }
+
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    // 📊 CRÉER UN GRAPHIQUE EN BARRES 3D
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    createBarChart() {
+        const group = new THREE.Group();
+        
+        const material = new THREE.MeshPhongMaterial({
+            color: 0x4c8aff,
+            shininess: 100
+        });
+        
+        const heights = [0.4, 0.7, 0.5, 0.9, 0.6];
+        
+        for (let i = 0; i < heights.length; i++) {
+            const geometry = new THREE.BoxGeometry(0.15, heights[i], 0.15);
+            const bar = new THREE.Mesh(geometry, material);
+            bar.position.x = (i - 2) * 0.25;
+            bar.position.y = heights[i] / 2 - 0.5;
+            group.add(bar);
+        }
+        
+        return group;
+    }
+
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    // 📦 CRÉER UN CUBE GÉNÉRIQUE
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    createCube() {
+        const geometry = new THREE.BoxGeometry(0.8, 0.8, 0.8);
+        const material = new THREE.MeshPhongMaterial({
+            color: 0x4c8aff,
+            shininess: 100
+        });
+        
+        return new THREE.Mesh(geometry, material);
+    }
+
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    // 📈 CRÉER UN GRAPHIQUE 3D DANS LE HERO
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    createHeroChart3D() {
+        const chartArea = document.querySelector('.mockup-chart-area');
+        if (!chartArea) return;
+        
+        // Cacher le canvas existant
+        const existingCanvas = chartArea.querySelector('canvas');
+        if (existingCanvas) existingCanvas.style.display = 'none';
+        
+        // Créer nouveau canvas
+        const canvas = document.createElement('canvas');
+        chartArea.appendChild(canvas);
+        
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(
+            50, 
+            chartArea.offsetWidth / chartArea.offsetHeight, 
+            0.1, 
+            1000
+        );
+        
+        const renderer = new THREE.WebGLRenderer({ 
+            canvas, 
+            alpha: true, 
+            antialias: true 
+        });
+        
+        renderer.setSize(chartArea.offsetWidth, chartArea.offsetHeight);
+        renderer.setPixelRatio(window.devicePixelRatio);
+        camera.position.set(5, 3, 5);
+        camera.lookAt(0, 0, 0);
+        
+        // Créer un graphique 3D volumétrique
+        const group = new THREE.Group();
+        
+        const data = [2.4, 2.52, 2.68, 2.75, 2.82, 2.847];
+        const material = new THREE.MeshPhongMaterial({
+            color: 0x4c8aff,
+            shininess: 100,
+            transparent: true,
+            opacity: 0.8
+        });
+        
+        for (let i = 0; i < data.length; i++) {
+            const height = data[i];
+            const geometry = new THREE.BoxGeometry(0.3, height, 0.3);
+            const bar = new THREE.Mesh(geometry, material);
+            bar.position.x = (i - 2.5) * 0.5;
+            bar.position.y = height / 2;
+            group.add(bar);
+        }
+        
+        scene.add(group);
+        
+        // Lumières
+        const light1 = new THREE.DirectionalLight(0xffffff, 1);
+        light1.position.set(5, 5, 5);
+        scene.add(light1);
+        
+        const light2 = new THREE.DirectionalLight(0x8b5cf6, 0.5);
+        light2.position.set(-5, 3, -5);
+        scene.add(light2);
+        
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.4);
+        scene.add(ambientLight);
+        
+        this.scenes.push({
+            scene,
+            camera,
+            renderer,
+            object: group,
+            canvas,
+            isChart: true
+        });
+    }
+
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    // 💰 CRÉER DES PIÈCES DE MONNAIE 3D
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    createCoins3D() {
+        const hero = document.querySelector('.hero-bg');
+        if (!hero) return;
+        
+        // Créer un conteneur pour les pièces
+        const coinsContainer = document.createElement('div');
+        coinsContainer.style.position = 'absolute';
+        coinsContainer.style.top = '0';
+        coinsContainer.style.left = '0';
+        coinsContainer.style.width = '100%';
+        coinsContainer.style.height = '100%';
+        coinsContainer.style.pointerEvents = 'none';
+        coinsContainer.style.zIndex = '1';
+        hero.appendChild(coinsContainer);
+        
+        // Créer 5 pièces flottantes
+        for (let i = 0; i < 5; i++) {
+            const coinCanvas = document.createElement('canvas');
+            coinCanvas.style.position = 'absolute';
+            coinCanvas.style.width = '80px';
+            coinCanvas.style.height = '80px';
+            coinCanvas.style.left = `${20 + i * 15}%`;
+            coinCanvas.style.top = `${30 + (i % 2) * 20}%`;
+            coinsContainer.appendChild(coinCanvas);
+            
+            const scene = new THREE.Scene();
+            const camera = new THREE.PerspectiveCamera(50, 1, 0.1, 1000);
+            const renderer = new THREE.WebGLRenderer({ 
+                canvas: coinCanvas, 
+                alpha: true, 
+                antialias: true 
+            });
+            
+            renderer.setSize(80, 80);
+            renderer.setPixelRatio(window.devicePixelRatio);
+            camera.position.z = 3;
+            
+            // Créer une pièce (cylindre)
+            const coinGeometry = new THREE.CylinderGeometry(0.6, 0.6, 0.1, 32);
+            const coinMaterial = new THREE.MeshPhongMaterial({
+                color: 0xf59e0b,
+                shininess: 100,
+                specular: 0xfbbf24
+            });
+            
+            const coin = new THREE.Mesh(coinGeometry, coinMaterial);
+            coin.rotation.x = Math.PI / 2;
+            scene.add(coin);
+            
+            // Lumières
+            const light = new THREE.PointLight(0xffffff, 1, 100);
+            light.position.set(2, 2, 2);
+            scene.add(light);
+            
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
             scene.add(ambientLight);
             
             this.scenes.push({
                 scene,
                 camera,
                 renderer,
-                object: group,
-                canvas,
-                isChart: true
+                object: coin,
+                canvas: coinCanvas,
+                isCoin: true,
+                speed: 0.01 + Math.random() * 0.02
             });
         }
+    }
 
-        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-        // 💰 CRÉER DES PIÈCES DE MONNAIE 3D
-        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-        createCoins3D() {
-            const hero = document.querySelector('.hero-bg');
-            if (!hero) return;
-            
-            // Créer un conteneur pour les pièces
-            const coinsContainer = document.createElement('div');
-            coinsContainer.style.position = 'absolute';
-            coinsContainer.style.top = '0';
-            coinsContainer.style.left = '0';
-            coinsContainer.style.width = '100%';
-            coinsContainer.style.height = '100%';
-            coinsContainer.style.pointerEvents = 'none';
-            coinsContainer.style.zIndex = '1';
-            hero.appendChild(coinsContainer);
-            
-            // Créer 5 pièces flottantes
-            for (let i = 0; i < 5; i++) {
-                const coinCanvas = document.createElement('canvas');
-                coinCanvas.style.position = 'absolute';
-                coinCanvas.style.width = '80px';
-                coinCanvas.style.height = '80px';
-                coinCanvas.style.left = `${20 + i * 15}%`;
-                coinCanvas.style.top = `${30 + (i % 2) * 20}%`;
-                coinsContainer.appendChild(coinCanvas);
-                
-                const scene = new THREE.Scene();
-                const camera = new THREE.PerspectiveCamera(50, 1, 0.1, 1000);
-                const renderer = new THREE.WebGLRenderer({ 
-                    canvas: coinCanvas, 
-                    alpha: true, 
-                    antialias: true 
-                });
-                
-                renderer.setSize(80, 80);
-                renderer.setPixelRatio(window.devicePixelRatio);
-                camera.position.z = 3;
-                
-                // Créer une pièce (cylindre)
-                const coinGeometry = new THREE.CylinderGeometry(0.6, 0.6, 0.1, 32);
-                const coinMaterial = new THREE.MeshPhongMaterial({
-                    color: 0xf59e0b,
-                    shininess: 100,
-                    specular: 0xfbbf24
-                });
-                
-                const coin = new THREE.Mesh(coinGeometry, coinMaterial);
-                coin.rotation.x = Math.PI / 2;
-                scene.add(coin);
-                
-                // Lumières
-                const light = new THREE.PointLight(0xffffff, 1, 100);
-                light.position.set(2, 2, 2);
-                scene.add(light);
-                
-                const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
-                scene.add(ambientLight);
-                
-                this.scenes.push({
-                    scene,
-                    camera,
-                    renderer,
-                    object: coin,
-                    canvas: coinCanvas,
-                    isCoin: true,
-                    speed: 0.01 + Math.random() * 0.02
-                });
-            }
-        }
-
-        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-        // 🎬 ANIMATION LOOP
-        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-        animate() {
-            requestAnimationFrame(() => this.animate());
-            
-            this.scenes.forEach(({ scene, camera, renderer, object, isCoin, isChart, speed }) => {
-                if (object) {
-                    if (isCoin) {
-                        // Rotation continue pour les pièces
-                        object.rotation.y += speed;
-                        object.rotation.z += speed * 0.5;
-                    } else if (isChart) {
-                        // Rotation lente pour le graphique
-                        object.rotation.y += 0.005;
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    // 🎬 ANIMATION LOOP
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    animate() {
+        requestAnimationFrame(() => this.animate());
+        
+        this.scenes.forEach(({ scene, camera, renderer, object, isCoin, isChart, speed }) => {
+            if (object) {
+                if (isCoin) {
+                    // Rotation continue pour les pièces
+                    object.rotation.y += speed;
+                    object.rotation.z += speed * 0.5;
+                } else if (isChart) {
+                    // Rotation lente pour le graphique
+                    object.rotation.y += 0.005;
+                } else {
+                    // Rotation normale
+                    object.rotation.x += 0.01;
+                    object.rotation.y += 0.01;
+                    
+                    // Animation hover
+                    if (object.userData.hovered) {
+                        object.rotation.x += 0.02;
+                        object.rotation.y += 0.02;
+                        object.scale.lerp(new THREE.Vector3(1.2, 1.2, 1.2), 0.1);
                     } else {
-                        // Rotation normale
-                        object.rotation.x += 0.01;
-                        object.rotation.y += 0.01;
-                        
-                        // Animation hover
-                        if (object.userData.hovered) {
-                            object.rotation.x += 0.02;
-                            object.rotation.y += 0.02;
-                            object.scale.lerp(new THREE.Vector3(1.2, 1.2, 1.2), 0.1);
-                        } else {
-                            object.scale.lerp(new THREE.Vector3(1, 1, 1), 0.1);
-                        }
+                        object.scale.lerp(new THREE.Vector3(1, 1, 1), 0.1);
                     }
                 }
-                
-                renderer.render(scene, camera);
-            });
-        }
-    }
-
-    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-    // 🚀 INITIALISATION
-    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-    // Attendre que la page soit chargée
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', () => {
-            new Landing3DObjects();
-            console.log('%c🎨 Objets 3D volumétriques chargés !', 'background: #10b981; color: white; padding: 10px; font-weight: bold;');
+            }
+            
+            renderer.render(scene, camera);
         });
-    } else {
+    }
+}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// 🚀 INITIALISATION
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+// Attendre que la page soit chargée
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => {
         new Landing3DObjects();
         console.log('%c🎨 Objets 3D volumétriques chargés !', 'background: #10b981; color: white; padding: 10px; font-weight: bold;');
-    }
-    </script>
+    });
+} else {
+    new Landing3DObjects();
+    console.log('%c🎨 Objets 3D volumétriques chargés !', 'background: #10b981; color: white; padding: 10px; font-weight: bold;');
+}
+</script>
 </body>
 </html>
