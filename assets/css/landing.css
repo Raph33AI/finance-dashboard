@@ -7,6 +7,7 @@
 
 /* ============================================
    POLICE SATOSHI - UNIQUEMENT POUR LANDING
+   ✅ AVEC EXCEPTION POUR FONT AWESOME
    ============================================ */
 
 body.landing-page,
@@ -14,10 +15,29 @@ body.landing-page,
     font-family: 'Satoshi', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
 }
 
-/* Si la page landing utilise une classe spécifique sur le body */
-body.page-landing,
-body.page-landing * {
-    font-family: 'Satoshi', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
+/* ✅ EXCEPTION CRITIQUE : Restaurer Font Awesome */
+body.landing-page i[class*="fa-"],
+body.landing-page .fa,
+body.landing-page .fas,
+body.landing-page .far,
+body.landing-page .fab,
+.landing-page i[class*="fa-"],
+.landing-page .fa,
+.landing-page .fas,
+.landing-page .far,
+.landing-page .fab {
+    font-family: "Font Awesome 6 Free", "Font Awesome 6 Brands" !important;
+    font-style: normal !important;
+    font-weight: 900 !important;
+    font-variant: normal !important;
+    text-rendering: auto !important;
+    -webkit-font-smoothing: antialiased !important;
+}
+
+body.landing-page .fab,
+.landing-page .fab {
+    font-family: "Font Awesome 6 Brands" !important;
+    font-weight: 400 !important;
 }
 
 /* ============================================
