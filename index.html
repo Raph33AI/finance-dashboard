@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,23 +7,30 @@
     <meta name="keywords" content="finance, AI, portfolio optimization, risk management, quantitative analysis">
     <title>FinancePro - AI-Powered Financial Intelligence Platform</title>
     
-    <!-- Stylesheets -->
-    <link rel="stylesheet" href="assets/css/common.css">
-    <link rel="stylesheet" href="assets/css/landing.css">
-    <link rel="stylesheet" href="assets/css/user-menu.css">
-    
-    <!-- Fonts -->
+    <!-- ✅ Preconnect pour optimiser les performances -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://api.fontshare.com">
     
-    <!-- Icons -->
+    <!-- ✅ STYLESHEETS - AVEC PARAMÈTRES DE VERSION POUR FORCER LE RECHARGEMENT -->
+    <link rel="stylesheet" href="assets/css/common.css?v=20241215">
+    <link rel="stylesheet" href="assets/css/landing.css?v=20241215">
+    
+    <!-- ✅ Font Awesome pour les icônes -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- ✅ AOS Animation Library CSS -->
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    
+    <!-- Favicon (optionnel) -->
+    <link rel="icon" type="image/svg+xml" href="assets/images/favicon.svg">
 </head>
-<body>
+
+<!-- ✅ IMPORTANT : CLASSE "landing-page" AJOUTÉE AU BODY -->
+<body class="landing-page">
     
     <!-- ═══════════════════════════════════════════════════════════════
-         Top Navigation - MODIFIÉE POUR INCLURE LE MENU PROFIL
+         NAVIGATION - VERSION 3D OPTIMISÉE
          ═══════════════════════════════════════════════════════════════ -->
     <nav class="landing-nav" id="landingNav">
         <div class="nav-container">
@@ -45,11 +52,7 @@
                 <a href="#pricing" class="nav-link">Pricing</a>
             </div>
             
-            <!-- ═══════════════════════════════════════════════════════════
-                 NOUVELLE SECTION CTA : Affichage conditionnel
-                 - Si NON connecté : boutons "Log in" et "Start Free Trial"
-                 - Si CONNECTÉ : menu profil avec photo et dropdown
-                 ═══════════════════════════════════════════════════════════ -->
+            <!-- CTA Navigation -->
             <div class="nav-cta">
                 <!-- Boutons pour utilisateurs NON connectés -->
                 <div class="nav-cta-logged-out" id="navCtaLoggedOut">
@@ -176,7 +179,7 @@
                 </div>
             </div>
 
-            <button class="mobile-menu-btn" id="mobileMenuBtn">
+            <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Toggle mobile menu">
                 <span></span>
                 <span></span>
                 <span></span>
@@ -184,8 +187,10 @@
         </div>
     </nav>
 
-    <!-- Hero Section -->
-    <section class="hero">
+    <!-- ═══════════════════════════════════════════════════════════════
+         HERO SECTION - AVEC ANIMATIONS 3D
+         ═══════════════════════════════════════════════════════════════ -->
+    <section class="hero" id="hero">
         <div class="hero-bg">
             <div class="gradient-orb orb-1"></div>
             <div class="gradient-orb orb-2"></div>
@@ -219,7 +224,11 @@
                 <div class="hero-cta" data-aos="fade-up" data-aos-delay="300">
                     <button class="btn-hero-primary" id="heroGetStarted">
                         <i class="fas fa-rocket"></i>
-                        Get Started Free
+                        <span>Get Started Free</span>
+                    </button>
+                    <button class="btn-hero-secondary" id="heroWatchDemo">
+                        <i class="fas fa-play-circle"></i>
+                        <span>Watch Demo</span>
                     </button>
                 </div>
                 
@@ -323,13 +332,41 @@
         </div>
     </section>
 
-    <!-- Features Section -->
+    <!-- ═══════════════════════════════════════════════════════════════
+         TRUSTED BY SECTION
+         ═══════════════════════════════════════════════════════════════ -->
+    <section class="trusted-by">
+        <div class="container-fluid">
+            <p class="trusted-title">Trusted by leading financial institutions</p>
+            <div class="trusted-logos">
+                <div class="logo-wrapper">
+                    <span class="company-logo">Goldman Sachs</span>
+                </div>
+                <div class="logo-wrapper">
+                    <span class="company-logo">JP Morgan</span>
+                </div>
+                <div class="logo-wrapper">
+                    <span class="company-logo">Morgan Stanley</span>
+                </div>
+                <div class="logo-wrapper">
+                    <span class="company-logo">BlackRock</span>
+                </div>
+                <div class="logo-wrapper">
+                    <span class="company-logo">Vanguard</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════════════════════════
+         FEATURES SECTION - AVEC EFFETS 3D
+         ═══════════════════════════════════════════════════════════════ -->
     <section class="features-section" id="features">
         <div class="container-fluid">
             <div class="section-header">
-                <span class="section-tag">Platform Features</span>
-                <h2 class="section-title">Everything you need to excel in finance</h2>
-                <p class="section-description">
+                <span class="section-tag" data-aos="fade-up">Platform Features</span>
+                <h2 class="section-title" data-aos="fade-up" data-aos-delay="100">Everything you need to excel in finance</h2>
+                <p class="section-description" data-aos="fade-up" data-aos-delay="200">
                     Professional-grade tools designed for investment bankers, 
                     financial analysts, and portfolio managers
                 </p>
@@ -368,7 +405,7 @@
                         </li>
                     </ul>
                     <a href="advanced-analysis.html" class="feature-link">
-                        Explore Advanced Analysis
+                        <span>Explore Advanced Analysis</span>
                         <i class="fas fa-arrow-right"></i>
                     </a>
                 </div>
@@ -400,7 +437,7 @@
                         </li>
                     </ul>
                     <a href="market-data.html" class="feature-link">
-                        Explore Market Data
+                        <span>Explore Market Data</span>
                         <i class="fas fa-arrow-right"></i>
                     </a>
                 </div>
@@ -432,7 +469,7 @@
                         </li>
                     </ul>
                     <a href="portfolio-optimizer.html" class="feature-link">
-                        Explore Optimizer
+                        <span>Explore Optimizer</span>
                         <i class="fas fa-arrow-right"></i>
                     </a>
                 </div>
@@ -464,7 +501,7 @@
                         </li>
                     </ul>
                     <a href="risk-parity.html" class="feature-link">
-                        Explore Risk Parity
+                        <span>Explore Risk Parity</span>
                         <i class="fas fa-arrow-right"></i>
                     </a>
                 </div>
@@ -496,7 +533,7 @@
                         </li>
                     </ul>
                     <a href="monte-carlo.html" class="feature-link">
-                        Explore Monte Carlo
+                        <span>Explore Monte Carlo</span>
                         <i class="fas fa-arrow-right"></i>
                     </a>
                 </div>
@@ -528,7 +565,7 @@
                         </li>
                     </ul>
                     <a href="scenario-analysis.html" class="feature-link">
-                        Explore Scenarios
+                        <span>Explore Scenarios</span>
                         <i class="fas fa-arrow-right"></i>
                     </a>
                 </div>
@@ -560,7 +597,7 @@
                         </li>
                     </ul>
                     <a href="trend-prediction.html" class="feature-link">
-                        Explore Predictions
+                        <span>Explore Predictions</span>
                         <i class="fas fa-arrow-right"></i>
                     </a>
                 </div>
@@ -592,7 +629,7 @@
                         </li>
                     </ul>
                     <a href="dashboard-financier.html" class="feature-link">
-                        Explore Dashboard
+                        <span>Explore Dashboard</span>
                         <i class="fas fa-arrow-right"></i>
                     </a>
                 </div>
@@ -600,11 +637,13 @@
         </div>
     </section>
 
-    <!-- Interactive Demo Section -->
+<!-- ═══════════════════════════════════════════════════════════════
+         INTERACTIVE DEMO SECTION - AVEC EFFETS 3D
+         ═══════════════════════════════════════════════════════════════ -->
     <section class="demo-interactive" id="demo">
         <div class="container-fluid">
             <div class="demo-wrapper">
-                <div class="demo-left">
+                <div class="demo-left" data-aos="fade-right">
                     <span class="section-tag">Interactive Demo</span>
                     <h2 class="demo-title">
                         Find comparable companies in
@@ -648,12 +687,12 @@
                     </div>
 
                     <button class="btn-demo-cta" id="tryDemoBtn">
-                        Try Interactive Demo
+                        <span>Try Interactive Demo</span>
                         <i class="fas fa-arrow-right"></i>
                     </button>
                 </div>
                 
-                <div class="demo-right">
+                <div class="demo-right" data-aos="fade-left">
                     <div class="search-interface">
                         <!-- Search Bar -->
                         <div class="search-box-wrapper">
@@ -664,6 +703,7 @@
                                     placeholder="Search for a company..." 
                                     value="Tesla Inc."
                                     id="companySearch"
+                                    aria-label="Search for a company"
                                 >
                                 <div class="search-strength">
                                     <div class="strength-bar high"></div>
@@ -796,13 +836,15 @@
         </div>
     </section>
 
-    <!-- Solutions Section -->
+    <!-- ═══════════════════════════════════════════════════════════════
+         SOLUTIONS SECTION - AVEC ROTATION 3D
+         ═══════════════════════════════════════════════════════════════ -->
     <section class="solutions-section" id="solutions">
         <div class="container-fluid">
             <div class="section-header">
-                <span class="section-tag">Solutions</span>
-                <h2 class="section-title">Built for your role</h2>
-                <p class="section-description">
+                <span class="section-tag" data-aos="fade-up">Solutions</span>
+                <h2 class="section-title" data-aos="fade-up" data-aos-delay="100">Built for your role</h2>
+                <p class="section-description" data-aos="fade-up" data-aos-delay="200">
                     Specialized tools and workflows designed for finance professionals
                 </p>
             </div>
@@ -826,7 +868,8 @@
                         <span class="feature-pill">Deal Sourcing</span>
                     </div>
                     <a href="scenario-analysis.html" class="solution-link">
-                        Learn more <i class="fas fa-arrow-right"></i>
+                        <span>Learn more</span>
+                        <i class="fas fa-arrow-right"></i>
                     </a>
                 </div>
 
@@ -848,7 +891,8 @@
                         <span class="feature-pill">Reporting</span>
                     </div>
                     <a href="portfolio-optimizer.html" class="solution-link">
-                        Learn more <i class="fas fa-arrow-right"></i>
+                        <span>Learn more</span>
+                        <i class="fas fa-arrow-right"></i>
                     </a>
                 </div>
 
@@ -870,7 +914,8 @@
                         <span class="feature-pill">Factor Analysis</span>
                     </div>
                     <a href="monte-carlo.html" class="solution-link">
-                        Learn more <i class="fas fa-arrow-right"></i>
+                        <span>Learn more</span>
+                        <i class="fas fa-arrow-right"></i>
                     </a>
                 </div>
 
@@ -892,19 +937,22 @@
                         <span class="feature-pill">Screening</span>
                     </div>
                     <a href="advanced-analysis.html" class="solution-link">
-                        Learn more <i class="fas fa-arrow-right"></i>
+                        <span>Learn more</span>
+                        <i class="fas fa-arrow-right"></i>
                     </a>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- Tools Section -->
+    <!-- ═══════════════════════════════════════════════════════════════
+         TOOLS SECTION - AVEC EFFETS 3D
+         ═══════════════════════════════════════════════════════════════ -->
     <section class="tools-section" id="tools">
         <div class="container-fluid">
             <div class="section-header">
-                <span class="section-tag">Quantitative Tools</span>
-                <h2 class="section-title">Advanced algorithms for financial analysis</h2>
+                <span class="section-tag" data-aos="fade-up">Quantitative Tools</span>
+                <h2 class="section-title" data-aos="fade-up" data-aos-delay="100">Advanced algorithms for financial analysis</h2>
             </div>
 
             <div class="tools-grid-advanced">
@@ -983,16 +1031,18 @@
         </div>
     </section>
 
-    <!-- Pricing Section -->
+    <!-- ═══════════════════════════════════════════════════════════════
+         PRICING SECTION - AVEC FLIP 3D
+         ═══════════════════════════════════════════════════════════════ -->
     <section class="pricing-section" id="pricing">
         <div class="container-fluid">
             <div class="section-header">
-                <span class="section-tag">Pricing</span>
-                <h2 class="section-title">Choose your plan</h2>
-                <p class="section-description">Start free, upgrade as you grow</p>
+                <span class="section-tag" data-aos="fade-up">Pricing</span>
+                <h2 class="section-title" data-aos="fade-up" data-aos-delay="100">Choose your plan</h2>
+                <p class="section-description" data-aos="fade-up" data-aos-delay="200">Start free, upgrade as you grow</p>
             </div>
 
-            <div class="pricing-toggle">
+            <div class="pricing-toggle" data-aos="fade-up" data-aos-delay="300">
                 <span class="toggle-label">Monthly</span>
                 <label class="toggle-switch">
                     <input type="checkbox" id="pricingToggle">
@@ -1070,19 +1120,24 @@
         </div>
     </section>
 
-    <!-- CTA Section -->
+    <!-- ═══════════════════════════════════════════════════════════════
+         CTA FINAL SECTION
+         ═══════════════════════════════════════════════════════════════ -->
     <section class="cta-final">
         <div class="container-fluid">
             <div class="cta-content-wrapper">
-                <div class="cta-content">
+                <div class="cta-content" data-aos="zoom-in">
                     <h2 class="cta-title">Ready to transform your financial analysis?</h2>
                     <p class="cta-subtitle">
                         Join thousands of finance professionals using FinancePro
                     </p>
                     <div class="cta-buttons">
                         <button class="btn-cta-primary" id="finalCTABtn">
-                            Start Free Trial
+                            <span>Start Free Trial</span>
                             <i class="fas fa-arrow-right"></i>
+                        </button>
+                        <button class="btn-cta-secondary" id="contactSalesBtn">
+                            <span>Contact Sales</span>
                         </button>
                     </div>
                     <p class="cta-note">No credit card required • 14-day free trial</p>
@@ -1091,7 +1146,9 @@
         </div>
     </section>
 
-    <!-- Footer -->
+    <!-- ═══════════════════════════════════════════════════════════════
+         FOOTER
+         ═══════════════════════════════════════════════════════════════ -->
     <footer class="landing-footer">
         <div class="container-fluid">
             <div class="footer-grid">
@@ -1108,6 +1165,12 @@
                     <p class="footer-description">
                         AI-powered financial analysis platform for investment professionals.
                     </p>
+                    <div class="footer-social">
+                        <a href="#" aria-label="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
+                        <a href="#" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
+                        <a href="#" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#" aria-label="GitHub"><i class="fab fa-github"></i></a>
+                    </div>
                 </div>
 
                 <div class="footer-col">
@@ -1164,7 +1227,7 @@
                 </div>
             </div>
 
-           <div class="footer-bottom">
+            <div class="footer-bottom">
                 <p>&copy; <span id="currentYear">2024</span> FinancePro. All rights reserved.</p>
                 <div class="footer-bottom-links">
                     <a href="#">Privacy</a>
@@ -1173,16 +1236,18 @@
                     <a href="#">Security</a>
                 </div>
             </div>
-
-            <script>
-                document.getElementById('currentYear').textContent = new Date().getFullYear();
-            </script>
         </div>
     </footer>
 
     <!-- ═══════════════════════════════════════════════════════════════
-         SCRIPTS - ORDER IS IMPORTANT!
+         SCRIPTS - ORDRE IMPORTANT !
          ═══════════════════════════════════════════════════════════════ -->
+    
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    
+    <!-- AOS Animation Library -->
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
     
     <!-- Firebase SDK (version 9 en mode compat) -->
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
@@ -1192,24 +1257,159 @@
     <!-- Firebase Configuration -->
     <script src="assets/js/firebase-config.js"></script>
     
-    <!-- Chart.js -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
-    
     <!-- Application Scripts -->
     <script src="assets/js/common.js"></script>
     <script src="assets/js/landing.js"></script>
     <script src="assets/js/auth-system.js"></script>
     
-    <!-- AOS Animation Library -->
-    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
-    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <!-- ✅ INITIALISATION DES ANIMATIONS -->
     <script>
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        // INITIALISATION AOS (Animate On Scroll)
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
         AOS.init({
             duration: 800,
             easing: 'ease-out-cubic',
             once: true,
-            offset: 50
+            offset: 50,
+            disable: false
         });
+
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        // ANNÉE DYNAMIQUE DANS LE FOOTER
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        document.getElementById('currentYear').textContent = new Date().getFullYear();
+
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        // NAVIGATION STICKY AU SCROLL
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        const landingNav = document.getElementById('landingNav');
+        let lastScroll = 0;
+
+        window.addEventListener('scroll', () => {
+            const currentScroll = window.pageYOffset;
+            
+            if (currentScroll > 50) {
+                landingNav.classList.add('scrolled');
+            } else {
+                landingNav.classList.remove('scrolled');
+            }
+            
+            lastScroll = currentScroll;
+        });
+
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        // MOBILE MENU TOGGLE
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+        const navMenu = document.getElementById('navMenu');
+
+        if (mobileMenuBtn) {
+            mobileMenuBtn.addEventListener('click', () => {
+                mobileMenuBtn.classList.toggle('active');
+                navMenu.classList.toggle('active');
+            });
+        }
+
+        // Fermer le menu mobile lors du clic sur un lien
+        const navLinks = document.querySelectorAll('.nav-link');
+        navLinks.forEach(link => {
+            link.addEventListener('click', () => {
+                mobileMenuBtn.classList.remove('active');
+                navMenu.classList.remove('active');
+            });
+        });
+
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        // SMOOTH SCROLL POUR LES ANCRES
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                const href = this.getAttribute('href');
+                if (href !== '#' && href.length > 1) {
+                    e.preventDefault();
+                    const target = document.querySelector(href);
+                    if (target) {
+                        const offset = 80;
+                        const targetPosition = target.offsetTop - offset;
+                        
+                        window.scrollTo({
+                            top: targetPosition,
+                            behavior: 'smooth'
+                        });
+                    }
+                }
+            });
+        });
+
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        // PRICING TOGGLE (Monthly/Annual)
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        const pricingToggle = document.getElementById('pricingToggle');
+        const amountElements = document.querySelectorAll('.amount[data-monthly]');
+
+        if (pricingToggle) {
+            pricingToggle.addEventListener('change', function() {
+                const isAnnual = this.checked;
+                
+                amountElements.forEach(el => {
+                    const monthlyPrice = el.getAttribute('data-monthly');
+                    const annualPrice = el.getAttribute('data-annual');
+                    
+                    el.textContent = isAnnual ? annualPrice : monthlyPrice;
+                });
+            });
+        }
+
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        // HERO CHART SIMPLE (Optionnel)
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        const heroChartCanvas = document.getElementById('heroChart');
+        
+        if (heroChartCanvas && typeof Chart !== 'undefined') {
+            const ctx = heroChartCanvas.getContext('2d');
+            
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+                    datasets: [{
+                        label: 'Portfolio Growth',
+                        data: [2400000, 2520000, 2680000, 2750000, 2820000, 2847392],
+                        borderColor: '#3B82F6',
+                        backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                        borderWidth: 2,
+                        fill: true,
+                        tension: 0.4,
+                        pointRadius: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        x: {
+                            display: false
+                        },
+                        y: {
+                            display: false
+                        }
+                    }
+                }
+            });
+        }
+
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        // CONSOLE LOG POUR CONFIRMATION
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        console.log('%c🚀 FinancePro Landing Page Loaded Successfully!', 'color: #3B82F6; font-size: 16px; font-weight: bold;');
+        console.log('%c✨ Animations 3D activées', 'color: #8B5CF6; font-size: 14px;');
+        console.log('%c💎 Police Satoshi chargée', 'color: #10B981; font-size: 14px;');
     </script>
 </body>
 </html>
