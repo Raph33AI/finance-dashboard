@@ -1,6 +1,6 @@
 /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
    LANDING.JS - FinancePro Landing Page Premium 3D
-   Version COMPLÈTE avec Three.js Integration
+   Version COMPLÈTE avec Three.js Integration + DEBUG
    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -728,59 +728,171 @@ class MobileMenuManager {
 }
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-// 👤 USER MENU MANAGER
+// 👤 USER MENU MANAGER - VERSION RENFORCÉE AVEC DEBUG
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 class UserMenuManager {
     constructor() {
+        console.log('%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'color: #3B82F6; font-weight: bold;');
+        console.log('%c🔍 UserMenuManager - Initialisation', 'color: #3B82F6; font-weight: bold;');
+        console.log('%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'color: #3B82F6; font-weight: bold;');
+        
         this.profileButton = document.getElementById('userProfileButton');
         this.dropdownMenu = document.getElementById('userDropdownMenu');
         this.logoutButton = document.getElementById('logoutButton');
         this.settingsLink = document.getElementById('settingsLink');
+        
+        console.log('📦 Éléments trouvés:');
+        console.log('  ├─ Profile Button:', this.profileButton);
+        console.log('  ├─ Dropdown Menu:', this.dropdownMenu);
+        console.log('  ├─ Logout Button:', this.logoutButton);
+        console.log('  └─ Settings Link:', this.settingsLink);
+        
         this.init();
     }
 
     init() {
-        if (!this.profileButton || !this.dropdownMenu) return;
+        if (!this.profileButton || !this.dropdownMenu) {
+            console.error('❌ Éléments manquants !');
+            console.error('  ├─ profileButton:', this.profileButton ? '✅ OK' : '❌ MANQUANT');
+            console.error('  └─ dropdownMenu:', this.dropdownMenu ? '✅ OK' : '❌ MANQUANT');
+            return;
+        }
 
+        console.log('✅ Tous les éléments trouvés - Configuration des événements...');
+
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        // MÉTHODE 1 : Click direct avec useCapture
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        console.log('🎯 Ajout du listener MÉTHODE 1 (direct + capture)');
         this.profileButton.addEventListener('click', (e) => {
+            console.log('%c🔴 CLIC DÉTECTÉ - MÉTHODE 1', 'background: #ef4444; color: white; padding: 5px 10px; font-weight: bold;');
+            console.log('  ├─ Target:', e.target);
+            console.log('  ├─ CurrentTarget:', e.currentTarget);
+            console.log('  └─ TimeStamp:', e.timeStamp);
+            
+            e.preventDefault();
             e.stopPropagation();
             this.toggleDropdown();
-        });
+        }, true); // ✅ useCapture = true
 
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        // MÉTHODE 2 : Délégation d'événement sur le document
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        console.log('🎯 Ajout du listener MÉTHODE 2 (délégation document)');
         document.addEventListener('click', (e) => {
-            if (!this.dropdownMenu.contains(e.target) && !this.profileButton.contains(e.target)) {
-                this.closeDropdown();
+            const target = e.target;
+            
+            // Si clic sur le bouton ou un de ses enfants
+            if (this.profileButton.contains(target)) {
+                console.log('%c🟢 CLIC DÉTECTÉ - MÉTHODE 2 (délégation)', 'background: #10b981; color: white; padding: 5px 10px; font-weight: bold;');
+                console.log('  ├─ Clicked element:', target);
+                console.log('  ├─ Profile button:', this.profileButton);
+                console.log('  └─ Contains check: TRUE');
+                
+                e.preventDefault();
+                e.stopPropagation();
+                this.toggleDropdown();
+                return;
+            }
+            
+            // Si clic en dehors, fermer
+            if (!this.dropdownMenu.contains(target)) {
+                if (this.dropdownMenu.classList.contains('active')) {
+                    console.log('🔒 Clic en dehors - Fermeture du menu');
+                    this.closeDropdown();
+                }
             }
         });
 
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        // MÉTHODE 3 : Listener sur TOUS les enfants du bouton
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        console.log('🎯 Ajout du listener MÉTHODE 3 (enfants du bouton)');
+        const allButtonChildren = this.profileButton.querySelectorAll('*');
+        console.log(`  └─ ${allButtonChildren.length} éléments enfants trouvés`);
+        
+        allButtonChildren.forEach((child, index) => {
+            child.addEventListener('click', (e) => {
+                console.log(`%c🟡 CLIC DÉTECTÉ - MÉTHODE 3 (enfant ${index})`, 'background: #f59e0b; color: white; padding: 5px 10px; font-weight: bold;');
+                console.log('  ├─ Enfant cliqué:', child);
+                console.log('  └─ Type:', child.tagName);
+                
+                e.preventDefault();
+                e.stopPropagation();
+                this.toggleDropdown();
+            });
+        });
+
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        // Bouton Déconnexion
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
         if (this.logoutButton) {
+            console.log('✅ Listener déconnexion ajouté');
             this.logoutButton.addEventListener('click', () => {
+                console.log('🔓 Bouton déconnexion cliqué');
                 this.handleLogout();
             });
         }
 
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        // Lien Paramètres
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
         if (this.settingsLink) {
+            console.log('✅ Listener paramètres ajouté');
             this.settingsLink.addEventListener('click', (e) => {
                 e.preventDefault();
                 console.log('🔧 Redirection vers les paramètres...');
                 window.location.href = 'settings.html';
             });
         }
+
+        console.log('%c✅ UserMenuManager initialisé avec succès !', 'color: #10b981; font-weight: bold;');
+        console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n');
     }
 
     toggleDropdown() {
+        console.log('%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'color: #8b5cf6; font-weight: bold;');
+        console.log('%c🔵 toggleDropdown() APPELÉE', 'color: #8b5cf6; font-weight: bold; font-size: 14px;');
+        
         const isExpanded = this.profileButton.getAttribute('aria-expanded') === 'true';
-        this.profileButton.setAttribute('aria-expanded', !isExpanded);
+        console.log('📊 État actuel du menu:', isExpanded ? '✅ OUVERT' : '❌ FERMÉ');
+        
+        const newState = !isExpanded;
+        console.log('🎯 Nouvel état:', newState ? '✅ OUVERT' : '❌ FERMÉ');
+        
+        // Changer l'attribut aria-expanded
+        this.profileButton.setAttribute('aria-expanded', newState);
+        console.log('✅ aria-expanded mis à jour:', newState);
+        
+        // Toggle la classe active
         this.dropdownMenu.classList.toggle('active');
-
+        console.log('✅ Classe "active" toggled');
+        console.log('📋 Classes du dropdown:', this.dropdownMenu.className);
+        
+        // Animer le chevron
         const chevron = this.profileButton.querySelector('.user-dropdown-icon');
         if (chevron) {
-            chevron.style.transform = isExpanded ? 'rotate(0deg)' : 'rotate(180deg)';
+            const rotation = newState ? 'rotate(180deg)' : 'rotate(0deg)';
+            chevron.style.transform = rotation;
+            console.log('✅ Chevron rotaté:', rotation);
+        } else {
+            console.warn('⚠️ Chevron non trouvé');
         }
+        
+        // Vérification finale
+        const finalState = this.dropdownMenu.classList.contains('active');
+        console.log('%c🎉 RÉSULTAT FINAL:', 'font-weight: bold;', finalState ? '✅ MENU OUVERT' : '❌ MENU FERMÉ');
+        console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n');
     }
 
     closeDropdown() {
+        if (!this.dropdownMenu.classList.contains('active')) {
+            console.log('ℹ️ Menu déjà fermé - Aucune action');
+            return;
+        }
+        
+        console.log('🔒 Fermeture du menu...');
         this.profileButton.setAttribute('aria-expanded', 'false');
         this.dropdownMenu.classList.remove('active');
         
@@ -788,6 +900,8 @@ class UserMenuManager {
         if (chevron) {
             chevron.style.transform = 'rotate(0deg)';
         }
+        
+        console.log('✅ Menu fermé');
     }
 
     handleLogout() {
@@ -803,15 +917,11 @@ class UserMenuManager {
                     console.error('❌ Erreur lors de la déconnexion:', error);
                 });
         } else {
+            console.log('⚠️ Firebase non disponible - Redirection directe');
             window.location.href = 'index.html';
         }
     }
 }
-
-// DEBUG - À retirer ensuite
-console.log('🔍 UserMenuManager initialisé');
-console.log('Profile Button:', document.getElementById('userProfileButton'));
-console.log('Dropdown Menu:', document.getElementById('userDropdownMenu'));
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 // 🔐 AUTH STATE MANAGER
@@ -1165,7 +1275,7 @@ class DemoSearchManager {
 class ScrollRevealManager {
     constructor() {
         this.elements = document.querySelectorAll('[data-aos]');
-        this.animatedElements = new Set(); // ✅ Tracker les éléments déjà animés
+        this.animatedElements = new Set();
         this.init();
     }
 
@@ -1176,18 +1286,16 @@ class ScrollRevealManager {
 
     revealOnScroll() {
         this.elements.forEach(element => {
-            // ✅ Ne pas animer si déjà animé
             if (this.animatedElements.has(element)) return;
 
             const elementTop = element.getBoundingClientRect().top;
             if (elementTop < window.innerHeight - 150) {
                 element.classList.add('aos-animate');
-                this.animatedElements.add(element); // ✅ Marquer comme animé
+                this.animatedElements.add(element);
                 
-                // ✅ Ajouter la classe "levitate" après l'animation
                 setTimeout(() => {
                     element.classList.add('levitate');
-                }, 800); // Attendre la fin de l'animation AOS
+                }, 800);
             }
         });
     }
@@ -1420,10 +1528,7 @@ class LandingApp {
 // 🎬 LANCEMENT DE L'APPLICATION
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-// ✅ Utiliser un nom de variable unique
 const financeLandingApp = new LandingApp();
-
-// ✅ Export global pour débogage (optionnel)
 window.FinanceLandingApp = financeLandingApp;
 
 console.log('%c✅ Landing page initialized successfully!', 'color: #10B981; font-size: 14px; font-weight: bold;');
