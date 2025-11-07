@@ -276,57 +276,59 @@ class FinanceAPIClient {
         
         console.log('📦 Quote data received:', data);
         
+        // Twelve Data retourne directement les bonnes données
         return {
             symbol: data.symbol || symbol,
             name: data.name || symbol,
             exchange: data.exchange || '',
             currency: data.currency || 'USD',
-            price: this.parseNumber(data.price),
+            price: this.parseNumber(data.close || data.price),
             open: this.parseNumber(data.open),
             high: this.parseNumber(data.high),
             low: this.parseNumber(data.low),
             volume: parseInt(data.volume) || 0,
-            previousClose: this.parseNumber(data.previousClose),
+            previousClose: this.parseNumber(data.previous_close),
             change: this.parseNumber(data.change),
-            percentChange: this.parseNumber(data.percentChange),
+            percentChange: this.parseNumber(data.percent_change),
             timestamp: data.timestamp || Date.now()
         };
-    }
+        }
     
     async getTimeSeries(symbol, interval = '1day', outputsize = 100) {
         try {
             const data = await this.makeRequest('time-series', {
-                symbol,
-                interval,
-                outputsize
+            symbol,
+            interval,
+            outputsize
             });
             
             console.log('📦 Time series data received:', data);
             
-            if (!data.values || data.values.length === 0) {
-                throw new Error('No time series data available');
+            // Vérifier que les données existent
+            if (!data || !data.values || data.values.length === 0) {
+            throw new Error('No time series data available');
             }
             
             return {
-                symbol: data.meta?.symbol || symbol,
-                interval: data.meta?.interval || interval,
-                currency: 'USD',
-                exchange: '',
-                data: data.values.map(item => ({
-                    datetime: item.datetime,
-                    timestamp: item.timestamp || new Date(item.datetime).getTime(),
-                    open: this.parseNumber(item.open),
-                    high: this.parseNumber(item.high),
-                    low: this.parseNumber(item.low),
-                    close: this.parseNumber(item.close),
-                    volume: parseInt(item.volume) || 0
-                }))
+            symbol: data.meta?.symbol || symbol,
+            interval: data.meta?.interval || interval,
+            currency: data.meta?.currency || 'USD',
+            exchange: data.meta?.exchange || '',
+            data: data.values.map(item => ({
+                datetime: item.datetime,
+                timestamp: new Date(item.datetime).getTime(),
+                open: this.parseNumber(item.open),
+                high: this.parseNumber(item.high),
+                low: this.parseNumber(item.low),
+                close: this.parseNumber(item.close),
+                volume: parseInt(item.volume) || 0
+            })).reverse() // Twelve Data retourne du plus récent au plus ancien
             };
         } catch (error) {
             console.error('Time series error:', error);
             throw error;
         }
-    }
+        }
     
     async getProfile(symbol) {
         try {
