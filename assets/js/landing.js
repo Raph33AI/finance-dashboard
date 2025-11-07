@@ -808,6 +808,11 @@ class UserMenuManager {
     }
 }
 
+// DEBUG - À retirer ensuite
+console.log('🔍 UserMenuManager initialisé');
+console.log('Profile Button:', document.getElementById('userProfileButton'));
+console.log('Dropdown Menu:', document.getElementById('userDropdownMenu'));
+
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 // 🔐 AUTH STATE MANAGER
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
