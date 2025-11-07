@@ -304,20 +304,30 @@
                         
                         <!-- Chart Area -->
                         <div class="mockup-chart-area">
-                            <div class="chart-header">
-                                <div class="chart-title">
-                                    <span class="chart-symbol">AAPL</span>
-                                    <span class="chart-price">$178.32</span>
-                                    <span class="chart-change positive">+2.4%</span>
+                            <!-- Header du graphique -->
+                            <div class="chart-header-stock">
+                                <div class="stock-info">
+                                    <span class="stock-symbol">AAPL</span>
+                                    <span class="stock-price">$178.32</span>
+                                    <span class="stock-change positive">
+                                        <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                                            <path d="M6 2L10 8H2L6 2Z" fill="currentColor"/>
+                                        </svg>
+                                        +2.4%
+                                    </span>
                                 </div>
-                                <div class="chart-timeframes">
-                                    <button class="timeframe-btn active">1D</button>
-                                    <button class="timeframe-btn">1W</button>
-                                    <button class="timeframe-btn">1M</button>
-                                    <button class="timeframe-btn">1Y</button>
+                                <div class="stock-timeframes">
+                                    <button class="tf-btn active" data-period="1d">1D</button>
+                                    <button class="tf-btn" data-period="1w">1W</button>
+                                    <button class="tf-btn" data-period="1m">1M</button>
+                                    <button class="tf-btn" data-period="1y">1Y</button>
                                 </div>
                             </div>
-                            <canvas id="heroChart"></canvas>
+                            
+                            <!-- Canvas pour le graphique -->
+                            <div class="chart-canvas-wrapper">
+                                <canvas id="stockChart"></canvas>
+                            </div>
                         </div>
                         
                         <!-- AI Insights -->

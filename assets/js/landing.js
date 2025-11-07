@@ -866,44 +866,66 @@ class AuthStateManager {
 }
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-// 📊 HERO CHART MANAGER - CANDLESTICK
+// 📊 GRAPHIQUE BOURSIER - VERSION SIMPLIFIÉE
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 class HeroChartManager {
     constructor() {
-        this.canvas = document.getElementById('heroChart');
+        this.canvas = document.getElementById('stockChart');
         this.chart = null;
+        this.currentPeriod = '1d';
+        
+        console.log('📊 Initialisation du graphique boursier...');
+        
+        if (!this.canvas) {
+            console.error('❌ Canvas #stockChart introuvable');
+            return;
+        }
+        
+        if (typeof Chart === 'undefined') {
+            console.error('❌ Chart.js non chargé');
+            return;
+        }
+        
         this.init();
     }
 
     init() {
-        if (!this.canvas || typeof Chart === 'undefined') {
-            console.warn('⚠️ Canvas ou Chart.js non disponible');
-            return;
-        }
+        console.log('✅ Création du graphique...');
+        this.createChart();
+        this.setupTimeframeButtons();
+    }
 
+    createChart() {
         const ctx = this.canvas.getContext('2d');
         
-        // Générer des données de chandelier réalistes
-        const candlestickData = this.generateCandlestickData();
+        // Générer des données réalistes
+        const data = this.generateStockData(30);
         
         this.chart = new Chart(ctx, {
-            type: 'candlestick',
+            type: 'line',
             data: {
+                labels: data.labels,
                 datasets: [{
-                    label: 'AAPL Stock Price',
-                    data: candlestickData,
-                    borderColor: {
-                        up: '#10B981',      // Vert pour hausse
-                        down: '#EF4444',    // Rouge pour baisse
-                        unchanged: '#6B7280'
+                    label: 'Price',
+                    data: data.prices,
+                    borderColor: '#3B82F6',
+                    backgroundColor: (context) => {
+                        const ctx = context.chart.ctx;
+                        const gradient = ctx.createLinearGradient(0, 0, 0, 250);
+                        gradient.addColorStop(0, 'rgba(59, 130, 246, 0.25)');
+                        gradient.addColorStop(1, 'rgba(59, 130, 246, 0)');
+                        return gradient;
                     },
-                    backgroundColor: {
-                        up: 'rgba(16, 185, 129, 0.8)',
-                        down: 'rgba(239, 68, 68, 0.8)',
-                        unchanged: 'rgba(107, 114, 128, 0.8)'
-                    },
-                    borderWidth: 1.5
+                    borderWidth: 2.5,
+                    fill: true,
+                    tension: 0.4,
+                    pointRadius: 0,
+                    pointHoverRadius: 6,
+                    pointHoverBackgroundColor: '#3B82F6',
+                    pointHoverBorderColor: '#ffffff',
+                    pointHoverBorderWidth: 3,
+                    pointHitRadius: 30
                 }]
             },
             options: {
@@ -917,9 +939,9 @@ class HeroChartManager {
                         enabled: true,
                         mode: 'index',
                         intersect: false,
-                        backgroundColor: 'rgba(0, 0, 0, 0.9)',
-                        titleColor: '#fff',
-                        bodyColor: '#fff',
+                        backgroundColor: 'rgba(15, 23, 42, 0.95)',
+                        titleColor: '#ffffff',
+                        bodyColor: '#ffffff',
                         borderColor: '#3B82F6',
                         borderWidth: 1,
                         padding: 12,
@@ -927,40 +949,22 @@ class HeroChartManager {
                         displayColors: false,
                         callbacks: {
                             title: function(context) {
-                                const date = new Date(context[0].raw.x);
-                                return date.toLocaleDateString('en-US', {
-                                    month: 'short',
-                                    day: 'numeric',
-                                    year: 'numeric'
-                                });
+                                return context[0].label;
                             },
                             label: function(context) {
-                                const point = context.raw;
-                                return [
-                                    `Open: $${point.o.toFixed(2)}`,
-                                    `High: $${point.h.toFixed(2)}`,
-                                    `Low: $${point.l.toFixed(2)}`,
-                                    `Close: $${point.c.toFixed(2)}`
-                                ];
+                                return '$' + context.parsed.y.toFixed(2);
                             }
                         }
                     }
                 },
                 scales: {
                     x: {
-                        type: 'time',
-                        time: {
-                            unit: 'day',
-                            displayFormats: {
-                                day: 'MMM dd'
-                            }
-                        },
                         grid: {
                             display: false,
                             drawBorder: false
                         },
                         ticks: {
-                            color: '#6B7280',
+                            color: '#94a3b8',
                             font: {
                                 size: 11,
                                 weight: '500'
@@ -973,18 +977,19 @@ class HeroChartManager {
                     y: {
                         position: 'right',
                         grid: {
-                            color: 'rgba(0, 0, 0, 0.04)',
+                            color: 'rgba(148, 163, 184, 0.1)',
                             drawBorder: false
                         },
                         ticks: {
-                            color: '#6B7280',
+                            color: '#94a3b8',
                             font: {
                                 size: 11,
                                 weight: '500'
                             },
                             callback: function(value) {
                                 return '$' + value.toFixed(0);
-                            }
+                            },
+                            count: 5
                         }
                     }
                 },
@@ -996,100 +1001,78 @@ class HeroChartManager {
             }
         });
 
-        this.observeChart();
-        this.setupTimeframeButtons();
+        console.log('✅ Graphique créé avec succès !');
     }
 
-    generateCandlestickData() {
-        const data = [];
-        const startDate = new Date();
-        startDate.setDate(startDate.getDate() - 30); // 30 jours de données
-        
+    generateStockData(days) {
+        const labels = [];
+        const prices = [];
+        const today = new Date();
         let basePrice = 170;
-        
-        for (let i = 0; i < 30; i++) {
-            const date = new Date(startDate);
-            date.setDate(date.getDate() + i);
+
+        for (let i = days - 1; i >= 0; i--) {
+            const date = new Date(today);
+            date.setDate(date.getDate() - i);
             
-            // Générer des variations réalistes
-            const volatility = 3 + Math.random() * 2;
-            const trend = Math.random() > 0.5 ? 1 : -1;
+            // Format de date
+            const month = date.toLocaleDateString('en-US', { month: 'short' });
+            const day = date.getDate();
+            labels.push(`${month} ${day}`);
             
-            const open = basePrice;
-            const close = open + (Math.random() * volatility * trend);
-            const high = Math.max(open, close) + Math.random() * 2;
-            const low = Math.min(open, close) - Math.random() * 2;
-            
-            data.push({
-                x: date.getTime(),
-                o: parseFloat(open.toFixed(2)),
-                h: parseFloat(high.toFixed(2)),
-                l: parseFloat(low.toFixed(2)),
-                c: parseFloat(close.toFixed(2))
-            });
-            
-            // Tendance haussière progressive
-            basePrice = close + (Math.random() * 0.5);
+            // Générer prix avec tendance haussière
+            const change = (Math.random() - 0.4) * 4;
+            basePrice += change;
+            prices.push(parseFloat(basePrice.toFixed(2)));
         }
-        
-        return data;
+
+        return { labels, prices };
     }
 
     setupTimeframeButtons() {
-        const buttons = document.querySelectorAll('.timeframe-btn');
+        const buttons = document.querySelectorAll('.tf-btn');
+        
         buttons.forEach(btn => {
             btn.addEventListener('click', () => {
-                // Retirer active de tous les boutons
+                // Retirer active de tous
                 buttons.forEach(b => b.classList.remove('active'));
+                
                 // Ajouter active au bouton cliqué
                 btn.classList.add('active');
                 
-                // Régénérer les données selon le timeframe
-                const timeframe = btn.textContent;
-                this.updateChartData(timeframe);
+                // Récupérer la période
+                const period = btn.getAttribute('data-period');
+                this.updateChartData(period);
             });
         });
     }
 
-    updateChartData(timeframe) {
+    updateChartData(period) {
         if (!this.chart) return;
 
         let days;
-        switch(timeframe) {
-            case '1D':
-                days = 1;
+        switch(period) {
+            case '1d':
+                days = 24; // 24 heures
                 break;
-            case '1W':
+            case '1w':
                 days = 7;
                 break;
-            case '1M':
+            case '1m':
                 days = 30;
                 break;
-            case '1Y':
+            case '1y':
                 days = 365;
                 break;
             default:
                 days = 30;
         }
 
-        // Générer nouvelles données
-        const newData = this.generateCandlestickData(days);
-        this.chart.data.datasets[0].data = newData;
-        this.chart.update('active');
-    }
+        console.log(`📊 Mise à jour du graphique : ${period} (${days} points)`);
 
-    observeChart() {
-        if (!this.canvas) return;
-        
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting && this.chart) {
-                    this.chart.update('show');
-                }
-            });
-        }, { threshold: 0.3 });
-        
-        observer.observe(this.canvas);
+        const newData = this.generateStockData(days);
+        this.chart.data.labels = newData.labels;
+        this.chart.data.datasets[0].data = newData.prices;
+        this.chart.update('active');
     }
 }
 
