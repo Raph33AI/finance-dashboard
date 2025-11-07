@@ -4256,30 +4256,135 @@ body.dark-mode .search-results::-webkit-scrollbar-thumb:hover {
 }
 
 /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-   🪙 AJUSTEMENT DE LA POSITION DE LA PIÈCE DÉCORATIVE
+   📊 GRAPHIQUE CANDLESTICK PROFESSIONNEL
    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
-/* Décaler la pièce vers la droite */
-.gradient-text-hero::after,
-.hero-headline .gradient-text-hero::after {
-    right: -80px !important;  /* Ajuste cette valeur selon tes besoins */
-    /* ou utilise left si c'est positionné avec left */
-    left: auto !important;
+.mockup-chart-area {
+    padding: 1.5rem;
+    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+    border-radius: 12px;
+    position: relative;
 }
 
-/* Si c'est un élément séparé dans le hero */
-.hero-content .coin,
-.hero .coin-decoration,
-.hero-headline + .coin {
-    transform: translateX(60px); /* Déplace de 60px vers la droite */
+.chart-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
 }
 
-/* Responsive - Cacher sur mobile si besoin */
-@media (max-width: 768px) {
-    .gradient-text-hero::after,
-    .hero .coin-decoration {
-        display: none;
-    }
+.chart-title {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.chart-symbol {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #1e293b;
+    letter-spacing: -0.02em;
+}
+
+.chart-price {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #0f172a;
+}
+
+.chart-change {
+    font-size: 0.95rem;
+    font-weight: 600;
+    padding: 0.25rem 0.75rem;
+    border-radius: 6px;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.chart-change.positive {
+    color: #059669;
+    background: rgba(16, 185, 129, 0.1);
+}
+
+.chart-change.positive::before {
+    content: '▲';
+    font-size: 0.75rem;
+}
+
+.chart-change.negative {
+    color: #dc2626;
+    background: rgba(220, 38, 38, 0.1);
+}
+
+.chart-change.negative::before {
+    content: '▼';
+    font-size: 0.75rem;
+}
+
+.chart-timeframes {
+    display: flex;
+    gap: 0.5rem;
+    background: #ffffff;
+    padding: 0.25rem;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.timeframe-btn {
+    padding: 0.5rem 1rem;
+    border: none;
+    background: transparent;
+    color: #64748b;
+    font-size: 0.875rem;
+    font-weight: 600;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.timeframe-btn:hover {
+    background: #f1f5f9;
+    color: #3B82F6;
+}
+
+.timeframe-btn.active {
+    background: #3B82F6;
+    color: #ffffff;
+    box-shadow: 0 2px 4px rgba(59, 130, 246, 0.3);
+}
+
+#heroChart {
+    max-height: 280px;
+}
+
+/* Dark mode support */
+body.dark-mode .mockup-chart-area {
+    background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+}
+
+body.dark-mode .chart-header {
+    border-bottom-color: rgba(255, 255, 255, 0.1);
+}
+
+body.dark-mode .chart-symbol,
+body.dark-mode .chart-price {
+    color: #ffffff;
+}
+
+body.dark-mode .chart-timeframes {
+    background: #0f172a;
+}
+
+body.dark-mode .timeframe-btn {
+    color: #94a3b8;
+}
+
+body.dark-mode .timeframe-btn:hover {
+    background: #1e293b;
+    color: #60a5fa;
 }
 
 /* ============================================

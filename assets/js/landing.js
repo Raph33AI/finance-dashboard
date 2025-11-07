@@ -866,7 +866,7 @@ class AuthStateManager {
 }
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-// 📊 HERO CHART MANAGER (Chart.js)
+// 📊 HERO CHART MANAGER - CANDLESTICK
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 class HeroChartManager {
@@ -877,92 +877,210 @@ class HeroChartManager {
     }
 
     init() {
-        if (!this.canvas || typeof Chart === 'undefined') return;
+        if (!this.canvas || typeof Chart === 'undefined') {
+            console.warn('⚠️ Canvas ou Chart.js non disponible');
+            return;
+        }
 
         const ctx = this.canvas.getContext('2d');
         
-        const labels = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'];
-        const portfolioData = [2400000, 2520000, 2680000, 2750000, 2820000, 2847392];
-        const benchmarkData = [2350000, 2480000, 2590000, 2640000, 2700000, 2750000];
+        // Générer des données de chandelier réalistes
+        const candlestickData = this.generateCandlestickData();
         
         this.chart = new Chart(ctx, {
-            type: 'line',
+            type: 'candlestick',
             data: {
-                labels: labels,
-                datasets: [
-                    {
-                        label: 'Portfolio Value',
-                        data: portfolioData,
-                        borderColor: '#3B82F6',
-                        backgroundColor: 'rgba(59, 130, 246, 0.1)',
-                        borderWidth: 3,
-                        fill: true,
-                        tension: 0.4,
-                        pointRadius: 0,
-                        pointHoverRadius: 6,
-                        pointHoverBackgroundColor: '#3B82F6',
-                        pointHoverBorderColor: '#fff',
-                        pointHoverBorderWidth: 2
+                datasets: [{
+                    label: 'AAPL Stock Price',
+                    data: candlestickData,
+                    borderColor: {
+                        up: '#10B981',      // Vert pour hausse
+                        down: '#EF4444',    // Rouge pour baisse
+                        unchanged: '#6B7280'
                     },
-                    {
-                        label: 'Benchmark',
-                        data: benchmarkData,
-                        borderColor: '#9CA3AF',
-                        backgroundColor: 'rgba(156, 163, 175, 0.05)',
-                        borderWidth: 2,
-                        fill: true,
-                        tension: 0.4,
-                        pointRadius: 0,
-                        pointHoverRadius: 6,
-                        pointHoverBackgroundColor: '#9CA3AF',
-                        pointHoverBorderColor: '#fff',
-                        pointHoverBorderWidth: 2,
-                        borderDash: [5, 5]
-                    }
-                ]
+                    backgroundColor: {
+                        up: 'rgba(16, 185, 129, 0.8)',
+                        down: 'rgba(239, 68, 68, 0.8)',
+                        unchanged: 'rgba(107, 114, 128, 0.8)'
+                    },
+                    borderWidth: 1.5
+                }]
             },
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
                 plugins: {
-                    legend: { display: false },
+                    legend: {
+                        display: false
+                    },
                     tooltip: {
+                        enabled: true,
                         mode: 'index',
                         intersect: false,
-                        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                        backgroundColor: 'rgba(0, 0, 0, 0.9)',
+                        titleColor: '#fff',
+                        bodyColor: '#fff',
+                        borderColor: '#3B82F6',
+                        borderWidth: 1,
                         padding: 12,
                         cornerRadius: 8,
+                        displayColors: false,
                         callbacks: {
+                            title: function(context) {
+                                const date = new Date(context[0].raw.x);
+                                return date.toLocaleDateString('en-US', {
+                                    month: 'short',
+                                    day: 'numeric',
+                                    year: 'numeric'
+                                });
+                            },
                             label: function(context) {
-                                let label = context.dataset.label || '';
-                                if (label) label += ': ';
-                                label += '$' + (context.parsed.y / 1000000).toFixed(2) + 'M';
-                                return label;
+                                const point = context.raw;
+                                return [
+                                    `Open: $${point.o.toFixed(2)}`,
+                                    `High: $${point.h.toFixed(2)}`,
+                                    `Low: $${point.l.toFixed(2)}`,
+                                    `Close: $${point.c.toFixed(2)}`
+                                ];
                             }
                         }
                     }
                 },
                 scales: {
                     x: {
-                        grid: { display: false },
-                        ticks: { color: '#6B7280' }
-                    },
-                    y: {
-                        grid: { color: 'rgba(0, 0, 0, 0.05)' },
+                        type: 'time',
+                        time: {
+                            unit: 'day',
+                            displayFormats: {
+                                day: 'MMM dd'
+                            }
+                        },
+                        grid: {
+                            display: false,
+                            drawBorder: false
+                        },
                         ticks: {
                             color: '#6B7280',
-                            callback: (value) => '$' + (value / 1000000) + 'M'
+                            font: {
+                                size: 11,
+                                weight: '500'
+                            },
+                            maxRotation: 0,
+                            autoSkip: true,
+                            maxTicksLimit: 6
+                        }
+                    },
+                    y: {
+                        position: 'right',
+                        grid: {
+                            color: 'rgba(0, 0, 0, 0.04)',
+                            drawBorder: false
+                        },
+                        ticks: {
+                            color: '#6B7280',
+                            font: {
+                                size: 11,
+                                weight: '500'
+                            },
+                            callback: function(value) {
+                                return '$' + value.toFixed(0);
+                            }
                         }
                     }
+                },
+                interaction: {
+                    mode: 'nearest',
+                    axis: 'x',
+                    intersect: false
                 }
             }
         });
 
         this.observeChart();
+        this.setupTimeframeButtons();
+    }
+
+    generateCandlestickData() {
+        const data = [];
+        const startDate = new Date();
+        startDate.setDate(startDate.getDate() - 30); // 30 jours de données
+        
+        let basePrice = 170;
+        
+        for (let i = 0; i < 30; i++) {
+            const date = new Date(startDate);
+            date.setDate(date.getDate() + i);
+            
+            // Générer des variations réalistes
+            const volatility = 3 + Math.random() * 2;
+            const trend = Math.random() > 0.5 ? 1 : -1;
+            
+            const open = basePrice;
+            const close = open + (Math.random() * volatility * trend);
+            const high = Math.max(open, close) + Math.random() * 2;
+            const low = Math.min(open, close) - Math.random() * 2;
+            
+            data.push({
+                x: date.getTime(),
+                o: parseFloat(open.toFixed(2)),
+                h: parseFloat(high.toFixed(2)),
+                l: parseFloat(low.toFixed(2)),
+                c: parseFloat(close.toFixed(2))
+            });
+            
+            // Tendance haussière progressive
+            basePrice = close + (Math.random() * 0.5);
+        }
+        
+        return data;
+    }
+
+    setupTimeframeButtons() {
+        const buttons = document.querySelectorAll('.timeframe-btn');
+        buttons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                // Retirer active de tous les boutons
+                buttons.forEach(b => b.classList.remove('active'));
+                // Ajouter active au bouton cliqué
+                btn.classList.add('active');
+                
+                // Régénérer les données selon le timeframe
+                const timeframe = btn.textContent;
+                this.updateChartData(timeframe);
+            });
+        });
+    }
+
+    updateChartData(timeframe) {
+        if (!this.chart) return;
+
+        let days;
+        switch(timeframe) {
+            case '1D':
+                days = 1;
+                break;
+            case '1W':
+                days = 7;
+                break;
+            case '1M':
+                days = 30;
+                break;
+            case '1Y':
+                days = 365;
+                break;
+            default:
+                days = 30;
+        }
+
+        // Générer nouvelles données
+        const newData = this.generateCandlestickData(days);
+        this.chart.data.datasets[0].data = newData;
+        this.chart.update('active');
     }
 
     observeChart() {
         if (!this.canvas) return;
+        
         const observer = new IntersectionObserver((entries) => {
             entries.forEach(entry => {
                 if (entry.isIntersecting && this.chart) {
@@ -970,6 +1088,7 @@ class HeroChartManager {
                 }
             });
         }, { threshold: 0.3 });
+        
         observer.observe(this.canvas);
     }
 }

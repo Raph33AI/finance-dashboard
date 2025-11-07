@@ -304,6 +304,19 @@
                         
                         <!-- Chart Area -->
                         <div class="mockup-chart-area">
+                            <div class="chart-header">
+                                <div class="chart-title">
+                                    <span class="chart-symbol">AAPL</span>
+                                    <span class="chart-price">$178.32</span>
+                                    <span class="chart-change positive">+2.4%</span>
+                                </div>
+                                <div class="chart-timeframes">
+                                    <button class="timeframe-btn active">1D</button>
+                                    <button class="timeframe-btn">1W</button>
+                                    <button class="timeframe-btn">1M</button>
+                                    <button class="timeframe-btn">1Y</button>
+                                </div>
+                            </div>
                             <canvas id="heroChart"></canvas>
                         </div>
                         
@@ -1245,6 +1258,12 @@
     
     <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
+    <!-- ✅ NOUVEAU : Plugin Candlestick pour Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-chart-financial@0.2.1/dist/chartjs-chart-financial.min.js"></script>
+
+    <!-- ✅ NOUVEAU : Adaptateur de dates -->
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3.0.0/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
     
     <!-- AOS Animation Library -->
     <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
