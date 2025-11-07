@@ -1387,10 +1387,7 @@ class LandingApp {
         console.log('%c🚀 FinancePro Landing - Initialisation...', 'color: #3B82F6; font-size: 14px; font-weight: bold;');
 
         try {
-            // ✅ INITIALISER LES OBJETS 3D EN PREMIER
-            this.managers.objects3D = new Landing3DObjects();
-            
-            // Puis les autres managers
+            // Initialiser tous les managers
             this.managers.navigation = new NavigationManager();
             this.managers.mobileMenu = new MobileMenuManager();
             this.managers.userMenu = new UserMenuManager();
@@ -1406,7 +1403,6 @@ class LandingApp {
             this.managers.performance = new PerformanceMonitor();
 
             console.log('%c✅ Tous les modules chargés avec succès!', 'color: #10B981; font-size: 14px; font-weight: bold;');
-            console.log('%c🎨 Objets 3D Three.js actifs', 'color: #8B5CF6; font-size: 12px;');
             console.log('%c💎 Animations prêtes', 'color: #F59E0B; font-size: 12px;');
 
         } catch (error) {
@@ -1416,9 +1412,13 @@ class LandingApp {
 }
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-// 🎬 LANCEMENT
+// 🎬 LANCEMENT DE L'APPLICATION
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-const app = new LandingApp();
+// ✅ Utiliser un nom de variable unique
+const financeLandingApp = new LandingApp();
 
-console.log('%c🎨 FinancePro Landing - Objets 3D volumétriques chargés !', 'background: #10b981; color: white; padding: 10px; font-weight: bold;');
+// ✅ Export global pour débogage (optionnel)
+window.FinanceLandingApp = financeLandingApp;
+
+console.log('%c✅ Landing page initialized successfully!', 'color: #10B981; font-size: 14px; font-weight: bold;');
