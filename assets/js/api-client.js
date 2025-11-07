@@ -6,13 +6,24 @@
 
 class FinanceAPIClient {
     constructor(config = {}) {
-        this.baseURL = config.baseURL || 'https://finance-hub-api.raphnardone.workers.dev';
-        this.cacheDuration = config.cacheDuration || 3600000; // 1h par défaut
-        this.maxRetries = config.maxRetries || 3;
-        this.onLoadingChange = config.onLoadingChange || (() => {});
-        
-        console.log('🔧 API Client initialized with baseURL:', this.baseURL);
+    // ✅ Enlever /api automatiquement s'il est présent
+    let baseURL = config.baseURL || 'https://finance-hub-api.raphnardone.workers.dev';
+    
+    // Retirer /api à la fin si présent
+    if (baseURL.endsWith('/api')) {
+        baseURL = baseURL.slice(0, -4);
     }
+    if (baseURL.endsWith('/api/')) {
+        baseURL = baseURL.slice(0, -5);
+    }
+    
+    this.baseURL = baseURL;
+    this.cacheDuration = config.cacheDuration || 3600000;
+    this.maxRetries = config.maxRetries || 3;
+    this.onLoadingChange = config.onLoadingChange || (() => {});
+    
+    console.log('🔧 API Client initialized with baseURL:', this.baseURL);
+}
     
     // ============================================
     // CACHE MANAGEMENT
