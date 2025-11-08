@@ -1,5 +1,6 @@
 // ============================================
 // COMPANY INSIGHTS - PREMIUM VERSION
+// Graphiques minimalistes et modernes
 // ============================================
 
 const CompanyInsights = {
@@ -14,7 +15,7 @@ const CompanyInsights = {
             this.finnhubClient = new FinnHubClient();
             
             const urlParams = new URLSearchParams(window.location.search);
-            const symbol = urlParams.get('symbol') || 'AAPL'; // ✅ Défaut: AAPL
+            const symbol = urlParams.get('symbol') || 'AAPL';
             
             document.getElementById('symbolInput').value = symbol.toUpperCase();
             await this.loadCompanyData();
@@ -265,7 +266,6 @@ const CompanyInsights = {
         const section = document.getElementById('sentimentChartSection');
         section.style.display = 'block';
 
-        // Grouper par jour
         const sentimentByDay = {};
         
         news.forEach(item => {
@@ -285,19 +285,29 @@ const CompanyInsights = {
         const negativeData = sortedDays.map(day => sentimentByDay[day].negative);
         const neutralData = sortedDays.map(day => sentimentByDay[day].neutral);
 
+        const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+        const textColor = isDark ? '#e4e4e7' : '#18181b';
+        const gridColor = isDark ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.05)';
+
         Highcharts.chart('sentimentTrendChart', {
             chart: {
                 type: 'area',
-                backgroundColor: 'transparent'
+                backgroundColor: 'transparent',
+                style: {
+                    fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif"
+                }
             },
             title: {
                 text: null
             },
             xAxis: {
                 categories: sortedDays,
+                lineColor: gridColor,
+                tickColor: gridColor,
                 labels: {
                     style: {
-                        color: getComputedStyle(document.documentElement).getPropertyValue('--text-primary')
+                        color: textColor,
+                        fontSize: '12px'
                     }
                 }
             },
@@ -305,50 +315,93 @@ const CompanyInsights = {
                 title: {
                     text: 'Number of News',
                     style: {
-                        color: getComputedStyle(document.documentElement).getPropertyValue('--text-primary')
+                        color: textColor,
+                        fontSize: '13px',
+                        fontWeight: '600'
                     }
                 },
+                gridLineColor: gridColor,
                 labels: {
                     style: {
-                        color: getComputedStyle(document.documentElement).getPropertyValue('--text-primary')
+                        color: textColor,
+                        fontSize: '12px'
                     }
-                },
-                gridLineColor: getComputedStyle(document.documentElement).getPropertyValue('--border-color')
+                }
             },
             legend: {
                 itemStyle: {
-                    color: getComputedStyle(document.documentElement).getPropertyValue('--text-primary')
+                    color: textColor,
+                    fontSize: '13px',
+                    fontWeight: '500'
+                },
+                itemHoverStyle: {
+                    color: isDark ? '#ffffff' : '#000000'
                 }
             },
             tooltip: {
                 shared: true,
-                backgroundColor: getComputedStyle(document.documentElement).getPropertyValue('--card-bg'),
+                backgroundColor: isDark ? 'rgba(30, 30, 30, 0.95)' : 'rgba(255, 255, 255, 0.95)',
+                borderColor: isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)',
+                borderRadius: 8,
+                shadow: false,
                 style: {
-                    color: getComputedStyle(document.documentElement).getPropertyValue('--text-primary')
+                    color: textColor,
+                    fontSize: '13px'
                 }
             },
             plotOptions: {
                 area: {
                     stacking: 'normal',
-                    lineColor: '#ffffff',
-                    lineWidth: 1,
+                    lineWidth: 2,
                     marker: {
-                        enabled: false
+                        enabled: false,
+                        states: {
+                            hover: {
+                                enabled: true,
+                                radius: 5
+                            }
+                        }
+                    },
+                    states: {
+                        hover: {
+                            lineWidthPlus: 0
+                        }
                     }
                 }
             },
             series: [{
                 name: 'Positive',
                 data: positiveData,
-                color: 'rgba(39, 174, 96, 0.8)'
+                color: {
+                    linearGradient: { x1: 0, y1: 0, x2: 0, y2: 1 },
+                    stops: [
+                        [0, 'rgba(16, 185, 129, 0.7)'],
+                        [1, 'rgba(16, 185, 129, 0.1)']
+                    ]
+                },
+                lineColor: '#10b981'
             }, {
                 name: 'Neutral',
                 data: neutralData,
-                color: 'rgba(149, 165, 166, 0.8)'
+                color: {
+                    linearGradient: { x1: 0, y1: 0, x2: 0, y2: 1 },
+                    stops: [
+                        [0, 'rgba(148, 163, 184, 0.7)'],
+                        [1, 'rgba(148, 163, 184, 0.1)']
+                    ]
+                },
+                lineColor: '#94a3b8'
             }, {
                 name: 'Negative',
                 data: negativeData,
-                color: 'rgba(231, 76, 60, 0.8)'
+                color: {
+                    linearGradient: { x1: 0, y1: 0, x2: 0, y2: 1 },
+                    stops: [
+                        [0, 'rgba(239, 68, 68, 0.7)'],
+                        [1, 'rgba(239, 68, 68, 0.1)']
+                    ]
+                },
+                lineColor: '#ef4444'
             }],
             credits: {
                 enabled: false
@@ -634,7 +687,6 @@ const CompanyInsights = {
     }
 };
 
-// Initialiser au chargement de la page
 document.addEventListener('DOMContentLoaded', () => {
     CompanyInsights.init();
 });
