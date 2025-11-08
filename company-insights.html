@@ -8,6 +8,9 @@
     <!-- Font Awesome -->
     <link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css'>
     
+    <!-- Highcharts -->
+    <script src='https://code.highcharts.com/highcharts.js'></script>
+    
     <!-- Styles -->
     <link rel='stylesheet' href='assets/css/common.css'>
     <link rel='stylesheet' href='assets/css/sidebar.css'>
@@ -30,6 +33,7 @@
 
     <!-- Theme Script -->
     <script src="assets/js/theme.js"></script>
+    <script src="assets/js/theme-charts.js"></script>
 
     <div class='layout-wrapper'>
         <!-- Sidebar Navigation -->
@@ -212,6 +216,18 @@
                             <button class='btn-primary' onclick='CompanyInsights.loadCompanyData()'>
                                 <i class='fas fa-search'></i> Search
                             </button>
+                            
+                            <!-- Quick Access Buttons -->
+                            <div style='display: flex; gap: 10px; margin-left: 20px;'>
+                                <button class='btn-secondary' onclick='CompanyInsights.quickLoad("AAPL")' 
+                                        style='padding: 8px 16px; font-size: 0.9em;'>AAPL</button>
+                                <button class='btn-secondary' onclick='CompanyInsights.quickLoad("MSFT")' 
+                                        style='padding: 8px 16px; font-size: 0.9em;'>MSFT</button>
+                                <button class='btn-secondary' onclick='CompanyInsights.quickLoad("GOOGL")' 
+                                        style='padding: 8px 16px; font-size: 0.9em;'>GOOGL</button>
+                                <button class='btn-secondary' onclick='CompanyInsights.quickLoad("TSLA")' 
+                                        style='padding: 8px 16px; font-size: 0.9em;'>TSLA</button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -222,11 +238,38 @@
                 <!-- Sentiment & Impact Analysis -->
                 <div id='sentimentContainer'></div>
 
+                <!-- Sentiment Chart -->
+                <div class='section' id='sentimentChartSection' style='display: none;'>
+                    <h2 class='section-title'>
+                        <i class='fas fa-chart-line'></i> Sentiment Trend Analysis
+                    </h2>
+                    <div class='chart-wrapper'>
+                        <div id='sentimentTrendChart' class='chart' style='height: 350px;'></div>
+                    </div>
+                </div>
+
                 <!-- Company News -->
                 <div class='section' id='newsSection' style='display: none;'>
                     <h2 class='section-title'>
-                        <i class='fas fa-newspaper'></i> Company News (Last 30 Days)
+                        <i class='fas fa-newspaper'></i> Company News
                     </h2>
+                    
+                    <div class='toolbar'>
+                        <div class='toolbar-row'>
+                            <label><i class='fas fa-calendar'></i> Time Period:</label>
+                            <select id='newsPeriod' onchange='CompanyInsights.loadCompanyNews(CompanyInsights.currentSymbol)'>
+                                <option value='7'>Last 7 Days</option>
+                                <option value='30' selected>Last 30 Days</option>
+                                <option value='60'>Last 60 Days</option>
+                                <option value='90'>Last 90 Days</option>
+                            </select>
+                            
+                            <button class='btn-success' onclick='CompanyInsights.exportNews()'>
+                                <i class='fas fa-download'></i> Export
+                            </button>
+                        </div>
+                    </div>
+                    
                     <div id='companyNewsContainer' class='news-grid'></div>
                 </div>
 
@@ -237,6 +280,9 @@
                     </h2>
                     <div id='peersContainer' class='peers-container'></div>
                 </div>
+
+                <!-- Basic Financials -->
+                <div id='financialsContainer'></div>
 
                 <footer>
                     <p>

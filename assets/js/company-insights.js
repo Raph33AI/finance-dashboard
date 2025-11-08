@@ -1,27 +1,24 @@
 // ============================================
-// COMPANY INSIGHTS - PAGE LOGIC
+// COMPANY INSIGHTS - PREMIUM VERSION
 // ============================================
 
 const CompanyInsights = {
     finnhubClient: null,
     currentSymbol: null,
+    allNews: [],
 
     async init() {
-        console.log('🚀 Initializing Company Insights...');
+        console.log('🚀 Initializing Company Insights Premium...');
         
         try {
             this.finnhubClient = new FinnHubClient();
             
-            // Vérifier si un symbole est passé en URL
             const urlParams = new URLSearchParams(window.location.search);
-            const symbol = urlParams.get('symbol');
+            const symbol = urlParams.get('symbol') || 'AAPL'; // ✅ Défaut: AAPL
             
-            if (symbol) {
-                document.getElementById('symbolInput').value = symbol.toUpperCase();
-                await this.loadCompanyData();
-            }
+            document.getElementById('symbolInput').value = symbol.toUpperCase();
+            await this.loadCompanyData();
             
-            // Écouter la touche Enter
             document.getElementById('symbolInput').addEventListener('keypress', (e) => {
                 if (e.key === 'Enter') {
                     this.loadCompanyData();
@@ -36,6 +33,11 @@ const CompanyInsights = {
         }
     },
 
+    quickLoad(symbol) {
+        document.getElementById('symbolInput').value = symbol;
+        this.loadCompanyData();
+    },
+
     async loadCompanyData() {
         const symbol = document.getElementById('symbolInput').value.trim().toUpperCase();
         
@@ -45,8 +47,6 @@ const CompanyInsights = {
         }
 
         this.currentSymbol = symbol;
-        
-        // Afficher les loaders
         this.showLoading();
 
         try {
@@ -54,7 +54,8 @@ const CompanyInsights = {
                 this.loadCompanyProfile(symbol),
                 this.loadSentimentAnalysis(symbol),
                 this.loadCompanyNews(symbol),
-                this.loadPeers(symbol)
+                this.loadPeers(symbol),
+                this.loadBasicFinancials(symbol)
             ]);
         } catch (error) {
             console.error('❌ Error loading company data:', error);
@@ -73,9 +74,11 @@ const CompanyInsights = {
         document.getElementById('sentimentContainer').innerHTML = '';
         document.getElementById('companyNewsContainer').innerHTML = '';
         document.getElementById('peersContainer').innerHTML = '';
+        document.getElementById('financialsContainer').innerHTML = '';
         
         document.getElementById('newsSection').style.display = 'none';
         document.getElementById('peersSection').style.display = 'none';
+        document.getElementById('sentimentChartSection').style.display = 'none';
     },
 
     async loadCompanyProfile(symbol) {
@@ -133,6 +136,10 @@ const CompanyInsights = {
                             <div class='company-detail-label'><i class='fas fa-chart-area'></i> Outstanding Shares</div>
                             <div class='company-detail-value'>${profile.shareOutstanding ? profile.shareOutstanding.toFixed(2) + 'M' : 'N/A'}</div>
                         </div>
+                        <div class='company-detail-item'>
+                            <div class='company-detail-label'><i class='fas fa-phone'></i> Phone</div>
+                            <div class='company-detail-value' style='font-size: 1.1em;'>${profile.phone || 'N/A'}</div>
+                        </div>
                     </div>
                     
                     ${profile.weburl ? `
@@ -179,7 +186,7 @@ const CompanyInsights = {
                     <div class='stats-row'>
                         <div class='stat-card'>
                             <div class='stat-card-icon'>💭</div>
-                            <div class='stat-card-value'>${score.toFixed(2)}</div>
+                            <div class='stat-card-value'>${score.toFixed(3)}</div>
                             <div class='stat-card-label'>Sentiment Score</div>
                         </div>
                         <div class='stat-card'>
@@ -191,6 +198,11 @@ const CompanyInsights = {
                             <div class='stat-card-icon'>${analysis.longTermImpact.direction === 'Positive' ? '🚀' : analysis.longTermImpact.direction === 'Negative' ? '⚠️' : '⏸️'}</div>
                             <div class='stat-card-value'>${analysis.longTermImpact.direction}</div>
                             <div class='stat-card-label'>Long-Term Impact</div>
+                        </div>
+                        <div class='stat-card'>
+                            <div class='stat-card-icon'>📊</div>
+                            <div class='stat-card-value'>${analysis.shortTermImpact.confidence}</div>
+                            <div class='stat-card-label'>Confidence Level</div>
                         </div>
                     </div>
                     
@@ -216,9 +228,17 @@ const CompanyInsights = {
     async loadCompanyNews(symbol) {
         const container = document.getElementById('companyNewsContainer');
         const section = document.getElementById('newsSection');
+        const days = parseInt(document.getElementById('newsPeriod').value);
 
         try {
-            const news = await this.finnhubClient.getCompanyNews(symbol);
+            const toDate = new Date();
+            const fromDate = new Date();
+            fromDate.setDate(fromDate.getDate() - days);
+            
+            const from = fromDate.toISOString().split('T')[0];
+            const to = toDate.toISOString().split('T')[0];
+
+            const news = await this.finnhubClient.getCompanyNews(symbol, from, to);
 
             if (!Array.isArray(news) || news.length === 0) {
                 section.style.display = 'none';
@@ -226,16 +246,114 @@ const CompanyInsights = {
             }
 
             section.style.display = 'block';
+            this.allNews = news;
 
-            container.innerHTML = news.slice(0, 12).map((item, index) => {
+            container.innerHTML = news.slice(0, 30).map((item, index) => {
                 const sentiment = this.analyzeSentiment(item.headline + ' ' + (item.summary || ''));
                 return this.renderNewsCard(item, sentiment, index);
             }).join('');
+
+            this.renderSentimentTrend(news);
 
         } catch (error) {
             console.error('Error loading company news:', error);
             section.style.display = 'none';
         }
+    },
+
+    renderSentimentTrend(news) {
+        const section = document.getElementById('sentimentChartSection');
+        section.style.display = 'block';
+
+        // Grouper par jour
+        const sentimentByDay = {};
+        
+        news.forEach(item => {
+            const date = new Date(item.datetime * 1000);
+            const dayKey = date.toISOString().split('T')[0];
+            
+            if (!sentimentByDay[dayKey]) {
+                sentimentByDay[dayKey] = { positive: 0, negative: 0, neutral: 0 };
+            }
+            
+            const sentiment = this.analyzeSentiment(item.headline + ' ' + (item.summary || ''));
+            sentimentByDay[dayKey][sentiment]++;
+        });
+
+        const sortedDays = Object.keys(sentimentByDay).sort();
+        const positiveData = sortedDays.map(day => sentimentByDay[day].positive);
+        const negativeData = sortedDays.map(day => sentimentByDay[day].negative);
+        const neutralData = sortedDays.map(day => sentimentByDay[day].neutral);
+
+        Highcharts.chart('sentimentTrendChart', {
+            chart: {
+                type: 'area',
+                backgroundColor: 'transparent'
+            },
+            title: {
+                text: null
+            },
+            xAxis: {
+                categories: sortedDays,
+                labels: {
+                    style: {
+                        color: getComputedStyle(document.documentElement).getPropertyValue('--text-primary')
+                    }
+                }
+            },
+            yAxis: {
+                title: {
+                    text: 'Number of News',
+                    style: {
+                        color: getComputedStyle(document.documentElement).getPropertyValue('--text-primary')
+                    }
+                },
+                labels: {
+                    style: {
+                        color: getComputedStyle(document.documentElement).getPropertyValue('--text-primary')
+                    }
+                },
+                gridLineColor: getComputedStyle(document.documentElement).getPropertyValue('--border-color')
+            },
+            legend: {
+                itemStyle: {
+                    color: getComputedStyle(document.documentElement).getPropertyValue('--text-primary')
+                }
+            },
+            tooltip: {
+                shared: true,
+                backgroundColor: getComputedStyle(document.documentElement).getPropertyValue('--card-bg'),
+                style: {
+                    color: getComputedStyle(document.documentElement).getPropertyValue('--text-primary')
+                }
+            },
+            plotOptions: {
+                area: {
+                    stacking: 'normal',
+                    lineColor: '#ffffff',
+                    lineWidth: 1,
+                    marker: {
+                        enabled: false
+                    }
+                }
+            },
+            series: [{
+                name: 'Positive',
+                data: positiveData,
+                color: 'rgba(39, 174, 96, 0.8)'
+            }, {
+                name: 'Neutral',
+                data: neutralData,
+                color: 'rgba(149, 165, 166, 0.8)'
+            }, {
+                name: 'Negative',
+                data: negativeData,
+                color: 'rgba(231, 76, 60, 0.8)'
+            }],
+            credits: {
+                enabled: false
+            }
+        });
     },
 
     async loadPeers(symbol) {
@@ -264,10 +382,134 @@ const CompanyInsights = {
         }
     },
 
+    async loadBasicFinancials(symbol) {
+        const container = document.getElementById('financialsContainer');
+
+        try {
+            const financials = await this.finnhubClient.getBasicFinancials(symbol);
+
+            if (!financials || !financials.metric) {
+                return;
+            }
+
+            const metric = financials.metric;
+
+            container.innerHTML = `
+                <div class='section'>
+                    <h2 class='section-title'>
+                        <i class='fas fa-chart-pie'></i> Key Financial Metrics
+                    </h2>
+                    
+                    <div class='stats-row' style='grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));'>
+                        ${metric['52WeekHigh'] ? `
+                            <div class='stat-card'>
+                                <div class='stat-card-icon'>📈</div>
+                                <div class='stat-card-value'>$${metric['52WeekHigh'].toFixed(2)}</div>
+                                <div class='stat-card-label'>52-Week High</div>
+                            </div>
+                        ` : ''}
+                        
+                        ${metric['52WeekLow'] ? `
+                            <div class='stat-card'>
+                                <div class='stat-card-icon'>📉</div>
+                                <div class='stat-card-value'>$${metric['52WeekLow'].toFixed(2)}</div>
+                                <div class='stat-card-label'>52-Week Low</div>
+                            </div>
+                        ` : ''}
+                        
+                        ${metric['peBasicExclExtraTTM'] ? `
+                            <div class='stat-card'>
+                                <div class='stat-card-icon'>📊</div>
+                                <div class='stat-card-value'>${metric['peBasicExclExtraTTM'].toFixed(2)}</div>
+                                <div class='stat-card-label'>P/E Ratio (TTM)</div>
+                            </div>
+                        ` : ''}
+                        
+                        ${metric['epsBasicExclExtraItemsAnnual'] ? `
+                            <div class='stat-card'>
+                                <div class='stat-card-icon'>💰</div>
+                                <div class='stat-card-value'>$${metric['epsBasicExclExtraItemsAnnual'].toFixed(2)}</div>
+                                <div class='stat-card-label'>EPS (Annual)</div>
+                            </div>
+                        ` : ''}
+                        
+                        ${metric['beta'] ? `
+                            <div class='stat-card'>
+                                <div class='stat-card-icon'>📐</div>
+                                <div class='stat-card-value'>${metric['beta'].toFixed(2)}</div>
+                                <div class='stat-card-label'>Beta</div>
+                            </div>
+                        ` : ''}
+                        
+                        ${metric['dividendYieldIndicatedAnnual'] ? `
+                            <div class='stat-card'>
+                                <div class='stat-card-icon'>💵</div>
+                                <div class='stat-card-value'>${metric['dividendYieldIndicatedAnnual'].toFixed(2)}%</div>
+                                <div class='stat-card-label'>Dividend Yield</div>
+                            </div>
+                        ` : ''}
+                        
+                        ${metric['roeTTM'] ? `
+                            <div class='stat-card'>
+                                <div class='stat-card-icon'>🎯</div>
+                                <div class='stat-card-value'>${metric['roeTTM'].toFixed(2)}%</div>
+                                <div class='stat-card-label'>ROE (TTM)</div>
+                            </div>
+                        ` : ''}
+                        
+                        ${metric['currentRatioAnnual'] ? `
+                            <div class='stat-card'>
+                                <div class='stat-card-icon'>⚖️</div>
+                                <div class='stat-card-value'>${metric['currentRatioAnnual'].toFixed(2)}</div>
+                                <div class='stat-card-label'>Current Ratio</div>
+                            </div>
+                        ` : ''}
+                    </div>
+                </div>
+            `;
+
+        } catch (error) {
+            console.error('Error loading basic financials:', error);
+        }
+    },
+
     selectPeer(symbol) {
         document.getElementById('symbolInput').value = symbol;
         this.loadCompanyData();
         window.scrollTo({ top: 0, behavior: 'smooth' });
+    },
+
+    exportNews() {
+        if (this.allNews.length === 0) {
+            alert('No news to export');
+            return;
+        }
+
+        const csvContent = this.convertNewsToCSV(this.allNews);
+        const blob = new Blob([csvContent], { type: 'text/csv' });
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `${this.currentSymbol}-news-${new Date().toISOString().split('T')[0]}.csv`;
+        a.click();
+        window.URL.revokeObjectURL(url);
+    },
+
+    convertNewsToCSV(news) {
+        const headers = ['Date', 'Source', 'Headline', 'Summary', 'Sentiment', 'URL'];
+        const rows = news.map(item => {
+            const sentiment = this.analyzeSentiment(item.headline + ' ' + (item.summary || ''));
+            return [
+                new Date(item.datetime * 1000).toISOString(),
+                item.source || 'Unknown',
+                `"${(item.headline || '').replace(/"/g, '""')}"`,
+                `"${(item.summary || '').replace(/"/g, '""')}"`,
+                sentiment,
+                item.url || ''
+            ].join(',');
+        });
+
+        return [headers.join(','), ...rows].join('\n');
     },
 
     renderNewsCard(item, sentiment, index) {
