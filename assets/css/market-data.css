@@ -1,8 +1,8 @@
 /* ==============================================
-   MARKET-DATA.CSS - Version Complète Corrigée
-   ✅ Option 2 : Fond BLANC pour portfolios non actifs
+   MARKET-DATA.CSS - Version Complète avec Cache Widget
+   ✅ Fond BLANC pour portfolios non actifs
    ✅ Menu sidebar cliquable
-   ✅ Texte lisible partout
+   ✅ Cache Widget complet
    ============================================== */
 
 /* ============================================
@@ -25,6 +25,15 @@
     --md-gradient: linear-gradient(135deg, #1e5eeb 0%, #4c8aff 100%);
     --md-gradient-card: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
     
+    /* Cache Widget Colors */
+    --cache-bg: #ffffff;
+    --cache-border: #e5e7eb;
+    --cache-text: #1f2937;
+    --cache-text-secondary: #6b7280;
+    --cache-success: #10b981;
+    --cache-warning: #f59e0b;
+    --cache-danger: #ef4444;
+    
     /* Spacing */
     --md-gap: clamp(0.75rem, 2vw, 1rem);
     --md-padding: clamp(1rem, 3vw, 1.5rem);
@@ -40,6 +49,15 @@
     --md-blue-dark: #1a4db8;
     --md-blue-bg: #0f2451;
     --md-gradient-card: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+    
+    /* Cache Widget Dark Mode */
+    --cache-bg: #1e293b;
+    --cache-border: #334155;
+    --cache-text: #f1f5f9;
+    --cache-text-secondary: #94a3b8;
+    --cache-success: #10b981;
+    --cache-warning: #f59e0b;
+    --cache-danger: #ef4444;
 }
 
 /* ============================================
@@ -853,6 +871,8 @@
 .simulation-management .btn-success,
 .simulation-management .btn-primary,
 .simulation-management .btn-secondary,
+.simulation-management .btn-warning,
+.simulation-management .btn-info,
 .simulation-management button {
     margin: 5px;
     transition: all var(--transition-base);
@@ -902,10 +922,36 @@
     box-shadow: 0 4px 12px rgba(107, 114, 128, 0.4);
 }
 
+.simulation-management .btn-warning {
+    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+    color: white !important;
+    box-shadow: 0 2px 8px rgba(245, 158, 11, 0.2);
+}
+
+.simulation-management .btn-warning:hover {
+    background: linear-gradient(135deg, #d97706 0%, #b45309 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(245, 158, 11, 0.4);
+}
+
+.simulation-management .btn-info {
+    background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%);
+    color: white !important;
+    box-shadow: 0 2px 8px rgba(6, 182, 212, 0.2);
+}
+
+.simulation-management .btn-info:hover {
+    background: linear-gradient(135deg, #0891b2 0%, #0e7490 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(6, 182, 212, 0.4);
+}
+
 .simulation-management .btn i,
 .simulation-management .btn-success i,
 .simulation-management .btn-primary i,
-.simulation-management .btn-secondary i {
+.simulation-management .btn-secondary i,
+.simulation-management .btn-warning i,
+.simulation-management .btn-info i {
     color: white !important;
 }
 
@@ -945,6 +991,341 @@
     margin: 0;
     font-size: 0.9375rem;
     line-height: 1.6;
+}
+
+/* ============================================
+   🗄️ CACHE WIDGET - COMPLET
+   ============================================ */
+
+/* Container principal du widget */
+.cache-widget {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    width: 380px;
+    max-height: 80vh;
+    background: var(--cache-bg);
+    border: 1px solid var(--cache-border);
+    border-radius: 16px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+    z-index: 9000;
+    display: none;
+    flex-direction: column;
+    overflow: hidden;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.cache-widget.active {
+    display: flex;
+    animation: slideIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Header du widget */
+.cache-widget-header {
+    background: linear-gradient(135deg, var(--md-blue-primary) 0%, var(--md-blue-dark) 100%);
+    color: white;
+    padding: 1rem 1.25rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.cache-widget-header h3 {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.cache-close-btn {
+    background: rgba(255, 255, 255, 0.1);
+    border: none;
+    color: white;
+    width: 28px;
+    height: 28px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.cache-close-btn:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: rotate(90deg);
+}
+
+/* Body du widget */
+.cache-widget-body {
+    padding: 1rem;
+    overflow-y: auto;
+    flex: 1;
+    max-height: calc(80vh - 60px);
+}
+
+.cache-widget-body::-webkit-scrollbar {
+    width: 6px;
+}
+
+.cache-widget-body::-webkit-scrollbar-track {
+    background: var(--background-secondary);
+    border-radius: 3px;
+}
+
+.cache-widget-body::-webkit-scrollbar-thumb {
+    background: var(--border-color);
+    border-radius: 3px;
+}
+
+.cache-widget-body::-webkit-scrollbar-thumb:hover {
+    background: var(--text-secondary);
+}
+
+/* Section du widget */
+.cache-section {
+    margin-bottom: 1.25rem;
+    padding-bottom: 1.25rem;
+    border-bottom: 1px solid var(--cache-border);
+}
+
+.cache-section:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+    padding-bottom: 0;
+}
+
+.cache-section h4 {
+    margin: 0 0 0.75rem 0;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--cache-text);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.cache-section h4 i {
+    color: var(--md-blue-primary);
+}
+
+/* Statistiques */
+.cache-stat-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+    font-size: 0.875rem;
+}
+
+.cache-stat-label {
+    color: var(--cache-text-secondary);
+    font-weight: 500;
+}
+
+.cache-stat-value {
+    color: var(--cache-text);
+    font-weight: 700;
+    font-size: 1.125rem;
+}
+
+.cache-stat-unit {
+    color: var(--cache-text-secondary);
+    font-size: 0.8125rem;
+    margin-left: 0.25rem;
+}
+
+/* Barre de progression */
+.cache-progress-bar {
+    width: 100%;
+    height: 8px;
+    background: var(--background-secondary);
+    border-radius: 4px;
+    overflow: hidden;
+    margin: 0.75rem 0 1rem 0;
+}
+
+.cache-progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--cache-success), #059669);
+    border-radius: 4px;
+    transition: width 0.3s ease, background 0.3s ease;
+}
+
+/* Actions du cache */
+.cache-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.btn-cache {
+    padding: 0.625rem 1rem;
+    border: none;
+    border-radius: 8px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.btn-cache-refresh {
+    background: linear-gradient(135deg, var(--md-blue-primary), var(--md-blue-dark));
+    color: white;
+}
+
+.btn-cache-refresh:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(30, 94, 235, 0.3);
+}
+
+.btn-cache-clear {
+    background: linear-gradient(135deg, #f59e0b, #d97706);
+    color: white;
+}
+
+.btn-cache-clear:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+}
+
+.btn-cache-export {
+    background: linear-gradient(135deg, #10b981, #059669);
+    color: white;
+}
+
+.btn-cache-export:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+}
+
+/* Activité récente */
+.cache-activity {
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.cache-activity-entry {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem;
+    background: var(--background-secondary);
+    border-radius: 6px;
+    margin-bottom: 0.5rem;
+    font-size: 0.8125rem;
+}
+
+.cache-activity-time {
+    color: var(--cache-text-secondary);
+    font-weight: 500;
+    min-width: 60px;
+}
+
+.cache-activity-icon {
+    font-size: 1rem;
+}
+
+.cache-activity-text {
+    color: var(--cache-text);
+    flex: 1;
+}
+
+.cache-empty-state {
+    text-align: center;
+    color: var(--cache-text-secondary);
+    font-size: 0.875rem;
+    padding: 1rem;
+}
+
+/* Bouton toggle (quand fermé) */
+.cache-toggle-btn {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    width: 56px;
+    height: 56px;
+    background: linear-gradient(135deg, var(--md-blue-primary), var(--md-blue-dark));
+    color: white;
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+    box-shadow: 0 4px 20px rgba(30, 94, 235, 0.4);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9001;
+}
+
+.cache-widget.active + .cache-toggle-btn {
+    display: none;
+}
+
+.cache-toggle-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 25px rgba(30, 94, 235, 0.5);
+}
+
+.cache-toggle-btn i {
+    font-size: 1.25rem;
+}
+
+.cache-badge {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    background: var(--cache-danger);
+    color: white;
+    font-size: 0.625rem;
+    font-weight: 700;
+    padding: 3px 6px;
+    border-radius: 10px;
+    min-width: 20px;
+    text-align: center;
+    box-shadow: 0 2px 8px rgba(239, 68, 68, 0.4);
+}
+
+/* Dark mode pour le cache widget */
+[data-theme="dark"] .cache-widget {
+    background: var(--cache-bg);
+    border-color: var(--cache-border);
+}
+
+[data-theme="dark"] .cache-widget-header {
+    background: linear-gradient(135deg, #1a4db8 0%, #0d3d9f 100%);
+}
+
+[data-theme="dark"] .cache-stat-row {
+    color: var(--cache-text);
+}
+
+[data-theme="dark"] .cache-activity-entry {
+    background: #334155;
+}
+
+[data-theme="dark"] .cache-toggle-btn {
+    background: linear-gradient(135deg, #4c8aff 0%, #1a4db8 100%);
 }
 
 /* ============================================
@@ -1046,7 +1427,7 @@
 }
 
 /* ============================================
-   📋 SIMULATION ITEMS - ✅ OPTION 2 : FOND BLANC
+   📋 SIMULATION ITEMS
    ============================================ */
 .simulations-info {
     background: linear-gradient(135deg, #e8f2ff 0%, #dbeafe 100%);
@@ -1087,7 +1468,6 @@
     gap: 15px;
 }
 
-/* ✅ OPTION 2 : Items NON ACTIFS - FOND BLANC/Gris clair */
 .simulation-item:not(.active) {
     background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%) !important;
     border: 2px solid #e5e7eb;
@@ -1131,7 +1511,6 @@
     border-color: var(--portfolio-gradient-start);
 }
 
-/* ✅ Texte FONCÉ sur fond clair pour items non actifs */
 .simulation-item:not(.active) .simulation-name,
 .simulation-item:not(.active) .simulation-date {
     color: #1f2937 !important;
@@ -1149,7 +1528,6 @@
     color: #9ca3af !important;
 }
 
-/* ✅ Item ACTIF - Vert avec bordure dorée */
 .simulation-item.active {
     background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
     color: white !important;
@@ -1190,7 +1568,8 @@
     font-size: 1rem;
 }
 
-.simulation-date {
+.simulation-date,
+.simulation-meta {
     font-size: 0.85em;
     opacity: 0.7;
     display: flex;
@@ -1205,8 +1584,8 @@
     z-index: 10;
 }
 
-/* ✅ Boutons sur items NON ACTIFS */
-.simulation-item:not(.active) .btn-icon {
+.simulation-item:not(.active) .btn-icon,
+.simulation-item:not(.active) .btn-sm {
     background: rgba(102, 126, 234, 0.1);
     color: var(--portfolio-gradient-start);
     border: none;
@@ -1218,43 +1597,46 @@
     display: flex;
     align-items: center;
     justify-content: center;
+    padding: 0.5rem 1rem;
+    width: auto;
 }
 
-.simulation-item:not(.active) .btn-icon:hover {
+.simulation-item:not(.active) .btn-icon:hover,
+.simulation-item:not(.active) .btn-sm:hover {
     background: var(--portfolio-gradient-start);
     color: white;
-    transform: scale(1.1);
+    transform: scale(1.05);
 }
 
-.simulation-item:not(.active) .btn-icon.btn-danger {
+.simulation-item:not(.active) .btn-danger {
     background: rgba(239, 68, 68, 0.1);
     color: var(--danger-color);
 }
 
-.simulation-item:not(.active) .btn-icon.btn-danger:hover {
+.simulation-item:not(.active) .btn-danger:hover {
     background: var(--danger-color);
     color: white;
 }
 
-/* ✅ Boutons sur item ACTIF */
-.simulation-item.active .btn-icon {
+.simulation-item.active .btn-icon,
+.simulation-item.active .btn-sm {
     background: rgba(255, 255, 255, 0.3);
     color: white;
     border: none;
-    width: 36px;
-    height: 36px;
     border-radius: 8px;
     cursor: pointer;
     transition: all 0.2s;
     display: flex;
     align-items: center;
     justify-content: center;
+    padding: 0.5rem 1rem;
 }
 
-.simulation-item.active .btn-icon:hover {
+.simulation-item.active .btn-icon:hover,
+.simulation-item.active .btn-sm:hover {
     background: rgba(255, 255, 255, 0.5);
     color: white;
-    transform: scale(1.1);
+    transform: scale(1.05);
 }
 
 .loading-simulations {
@@ -1446,6 +1828,24 @@
         flex-direction: row;
         justify-content: flex-end;
     }
+    
+    /* Cache widget responsive */
+    .cache-widget {
+        width: 100%;
+        max-width: 100%;
+        bottom: 0;
+        right: 0;
+        left: 0;
+        border-radius: 16px 16px 0 0;
+        max-height: 70vh;
+    }
+    
+    .cache-toggle-btn {
+        bottom: 15px;
+        right: 15px;
+        width: 50px;
+        height: 50px;
+    }
 }
 
 @media (max-width: 480px) {
@@ -1465,6 +1865,14 @@
     .card-title {
         font-size: 1.125rem;
     }
+    
+    .cache-widget {
+        max-height: 80vh;
+    }
+    
+    .cache-widget-body {
+        max-height: calc(80vh - 60px);
+    }
 }
 
 /* ============================================
@@ -1473,6 +1881,15 @@
 @keyframes spin {
     to {
         transform: rotate(360deg);
+    }
+}
+
+@keyframes pulse {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.5;
     }
 }
 
@@ -1557,22 +1974,18 @@
 }
 
 /* ============================================
-   ✅ FIX MENU UTILISATEUR - Spécifique à Market Data
+   ✅ FIX MENU UTILISATEUR
    ============================================ */
-
-/* S'assurer que la sidebar est au-dessus du main-content */
 .sidebar {
     z-index: 1000 !important;
 }
 
-/* Footer sidebar doit être cliquable */
 .sidebar-footer {
     position: relative;
     z-index: 101 !important;
     pointer-events: auto !important;
 }
 
-/* Menu utilisateur cliquable */
 .sidebar-user-menu {
     position: relative;
     z-index: 101 !important;
@@ -1586,14 +1999,13 @@
     z-index: 102 !important;
 }
 
-/* Dropdown au-dessus de TOUT (même des modals) */
 .sidebar-user-dropdown {
     position: absolute !important;
     bottom: 100% !important;
     left: 0 !important;
     right: 0 !important;
     margin-bottom: 0.5rem !important;
-    z-index: 15000 !important; /* ✅ Plus haut que les modals (10000) */
+    z-index: 15000 !important;
     pointer-events: none;
 }
 
@@ -1602,7 +2014,6 @@
     z-index: 15000 !important;
 }
 
-/* Tous les éléments du dropdown sont cliquables */
 .sidebar-user-dropdown * {
     pointer-events: auto !important;
 }
@@ -1613,45 +2024,38 @@
     cursor: pointer !important;
 }
 
-/* Main content ne doit PAS bloquer la sidebar */
 .main-content {
     position: relative;
     z-index: 1 !important;
     pointer-events: auto !important;
 }
 
-/* Layout wrapper ne doit pas bloquer */
 .layout-wrapper {
     position: relative;
     z-index: auto !important;
 }
 
-/* Les modals doivent rester sous le dropdown user */
 .modal {
-    z-index: 10000 !important; /* En dessous du dropdown user */
+    z-index: 10000 !important;
 }
 
 .modal.active {
     z-index: 10000 !important;
 }
 
-/* Cache widget ne doit pas bloquer */
 .cache-widget {
     z-index: 9000 !important;
 }
 
-/* ✅ CORRECTION : S'assurer qu'aucun overlay ne bloque */
 .sidebar-overlay {
-    z-index: 999 !important; /* En dessous de la sidebar */
+    z-index: 999 !important;
 }
 
-/* ✅ CORRECTION : Container ne doit pas déborder sur la sidebar */
 .container {
     position: relative;
     z-index: auto !important;
 }
 
-/* ✅ CORRECTION : Cards ne doivent pas déborder */
 .card {
     position: relative;
     z-index: auto !important;
@@ -1659,101 +2063,98 @@
 
 /* ============================================
    ✅✅✅ PORTFOLIO ITEMS - SPÉCIFICITÉ MAXIMALE
-   Forces les couleurs identiques à Simulation Management
    ============================================ */
-
-/* Items NON ACTIFS - Fond BLANC/GRIS CLAIR par défaut */
 #portfoliosListContainer .simulation-item:not(.active) {
     background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%) !important;
     border: 2px solid #e5e7eb !important;
 }
 
-/* Texte NOIR sur items NON ACTIFS */
 #portfoliosListContainer .simulation-item:not(.active) .simulation-name {
     color: #1f2937 !important;
 }
 
-#portfoliosListContainer .simulation-item:not(.active) .simulation-date {
+#portfoliosListContainer .simulation-item:not(.active) .simulation-date,
+#portfoliosListContainer .simulation-item:not(.active) .simulation-meta {
     color: #6b7280 !important;
 }
 
-/* Icônes VIOLETTES sur items NON ACTIFS */
 #portfoliosListContainer .simulation-item:not(.active) .simulation-name i:first-child {
     color: #667eea !important;
 }
 
-#portfoliosListContainer .simulation-item:not(.active) .simulation-date i {
+#portfoliosListContainer .simulation-item:not(.active) .simulation-date i,
+#portfoliosListContainer .simulation-item:not(.active) .simulation-meta i {
     color: #9ca3af !important;
 }
 
-/* Hover : Fond BLEU CLAIR sur items NON ACTIFS */
 #portfoliosListContainer .simulation-item:not(.active):hover {
     background: linear-gradient(135deg, #e0e7ff 0%, #c7d2fe 100%) !important;
     border-color: #667eea !important;
 }
 
-/* Items ACTIFS - Fond VERT + Bordure DORÉE */
 #portfoliosListContainer .simulation-item.active {
     background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
     border: 2px solid #ffd700 !important;
     box-shadow: 0 8px 20px rgba(16, 185, 129, 0.4) !important;
 }
 
-/* Texte BLANC sur items ACTIFS */
 #portfoliosListContainer .simulation-item.active .simulation-name,
-#portfoliosListContainer .simulation-item.active .simulation-date {
+#portfoliosListContainer .simulation-item.active .simulation-date,
+#portfoliosListContainer .simulation-item.active .simulation-meta {
     color: white !important;
 }
 
-/* Icônes DORÉES sur items ACTIFS */
 #portfoliosListContainer .simulation-item.active .simulation-name i:first-child,
 #portfoliosListContainer .simulation-item.active .fa-check-circle {
     color: #ffd700 !important;
 }
 
-#portfoliosListContainer .simulation-item.active .simulation-date i {
+#portfoliosListContainer .simulation-item.active .simulation-date i,
+#portfoliosListContainer .simulation-item.active .simulation-meta i {
     color: rgba(255, 255, 255, 0.7) !important;
 }
 
-/* Boutons sur items NON ACTIFS */
-#portfoliosListContainer .simulation-item:not(.active) .btn-icon {
+#portfoliosListContainer .simulation-item:not(.active) .btn-icon,
+#portfoliosListContainer .simulation-item:not(.active) .btn-sm {
     background: rgba(102, 126, 234, 0.1) !important;
     color: #667eea !important;
 }
 
-#portfoliosListContainer .simulation-item:not(.active) .btn-icon:hover {
+#portfoliosListContainer .simulation-item:not(.active) .btn-icon:hover,
+#portfoliosListContainer .simulation-item:not(.active) .btn-sm:hover {
     background: #667eea !important;
     color: white !important;
 }
 
-#portfoliosListContainer .simulation-item:not(.active) .btn-icon.btn-danger {
+#portfoliosListContainer .simulation-item:not(.active) .btn-danger {
     background: rgba(239, 68, 68, 0.1) !important;
     color: #ef4444 !important;
 }
 
-#portfoliosListContainer .simulation-item:not(.active) .btn-icon.btn-danger:hover {
+#portfoliosListContainer .simulation-item:not(.active) .btn-danger:hover {
     background: #ef4444 !important;
     color: white !important;
 }
 
-/* Boutons sur items ACTIFS */
-#portfoliosListContainer .simulation-item.active .btn-icon {
+#portfoliosListContainer .simulation-item.active .btn-icon,
+#portfoliosListContainer .simulation-item.active .btn-sm {
     background: rgba(255, 255, 255, 0.3) !important;
     color: white !important;
 }
 
-#portfoliosListContainer .simulation-item.active .btn-icon:hover {
+#portfoliosListContainer .simulation-item.active .btn-icon:hover,
+#portfoliosListContainer .simulation-item.active .btn-sm:hover {
     background: rgba(255, 255, 255, 0.5) !important;
 }
 
-/* DARK MODE */
 [data-theme="dark"] #portfoliosListContainer .simulation-item:not(.active) {
     background: linear-gradient(135deg, #1e293b 0%, #334155 100%) !important;
     border-color: #475569 !important;
 }
 
 [data-theme="dark"] #portfoliosListContainer .simulation-item:not(.active) .simulation-name,
-[data-theme="dark"] #portfoliosListContainer .simulation-item:not(.active) .simulation-date {
+[data-theme="dark"] #portfoliosListContainer .simulation-item:not(.active) .simulation-date,
+[data-theme="dark"] #portfoliosListContainer .simulation-item:not(.active) .simulation-meta {
     color: white !important;
 }
 
