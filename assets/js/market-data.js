@@ -1046,11 +1046,10 @@ Object.assign(MarketData, {
     },
     
     openAlertModal() {
-        if (window.openModal) {
-            window.openModal('modalCreateAlert');
-        } else {
-            const modal = document.getElementById('modalCreateAlert');
-            if (modal) modal.classList.add('active');
+        const modal = document.getElementById('modalCreateAlert');
+        if (modal) {
+            modal.classList.add('active');
+            document.body.style.overflow = 'hidden'; // Empêcher le scroll
         }
         
         if (this.currentSymbol) {
@@ -1062,17 +1061,21 @@ Object.assign(MarketData, {
     },
     
     closeAlertModal() {
-        if (window.closeModal) {
-            window.closeModal('modalCreateAlert');
-        } else {
-            const modal = document.getElementById('modalCreateAlert');
-            if (modal) modal.classList.remove('active');
+        const modal = document.getElementById('modalCreateAlert');
+        if (modal) {
+            modal.classList.remove('active');
+            document.body.style.overflow = ''; // Réactiver le scroll
         }
         
-        document.getElementById('alertSymbol').value = '';
-        document.getElementById('alertPrice').value = '';
-        document.getElementById('alertType').value = 'above';
-        document.getElementById('alertNote').value = '';
+        const symbolInput = document.getElementById('alertSymbol');
+        const priceInput = document.getElementById('alertPrice');
+        const typeInput = document.getElementById('alertType');
+        const noteInput = document.getElementById('alertNote');
+        
+        if (symbolInput) symbolInput.value = '';
+        if (priceInput) priceInput.value = '';
+        if (typeInput) typeInput.value = 'above';
+        if (noteInput) noteInput.value = '';
     },
     
     createAlert() {
@@ -1226,20 +1229,18 @@ Object.assign(MarketData, {
 Object.assign(MarketData, {
     
     openComparisonModal() {
-        if (window.openModal) {
-            window.openModal('modalAddComparison');
-        } else {
-            const modal = document.getElementById('modalAddComparison');
-            if (modal) modal.classList.add('active');
+        const modal = document.getElementById('modalAddComparison');
+        if (modal) {
+            modal.classList.add('active');
+            document.body.style.overflow = 'hidden';
         }
     },
     
     closeComparisonModal() {
-        if (window.closeModal) {
-            window.closeModal('modalAddComparison');
-        } else {
-            const modal = document.getElementById('modalAddComparison');
-            if (modal) modal.classList.remove('active');
+        const modal = document.getElementById('modalAddComparison');
+        if (modal) {
+            modal.classList.remove('active');
+            document.body.style.overflow = '';
         }
         
         const input = document.getElementById('comparisonSymbols');
@@ -1650,7 +1651,6 @@ Object.assign(MarketData, {
                             <div class="simulation-name">
                                 <i class="fas fa-folder"></i>
                                 ${this.escapeHtml(portfolio.name)}
-                                ${isActive ? '<span class="badge-current">ACTIVE</span>' : ''}
                                 ${portfolio.name === 'default' ? '<span class="badge-default">DEFAULT</span>' : ''}
                             </div>
                             <div class="simulation-meta">
@@ -1781,6 +1781,7 @@ Object.assign(MarketData, {
         const modal = document.getElementById('portfoliosModal');
         if (modal) {
             modal.classList.add('active');
+            document.body.style.overflow = 'hidden';
             await this.refreshPortfoliosList();
         } else {
             console.error('❌ portfoliosModal not found');
@@ -1888,14 +1889,15 @@ Object.assign(MarketData, {
                     <div class='accordion-content'>
                         <div class='accordion-body'>
             `;
-            
-            if (this.logoUrl) {
-                html += `
-                    <div class='company-logo'>
-                        <img src='${this.escapeHtml(this.logoUrl)}' alt='${this.escapeHtml(this.currentSymbol)} logo' onerror='this.style.display="none"'>
-                    </div>
-                `;
-            }
+
+            // Logo désactivé pour économiser l'espace
+            // if (this.logoUrl) {
+            //     html += `
+            //         <div class='company-logo'>
+            //             <img src='${this.escapeHtml(this.logoUrl)}' alt='${this.escapeHtml(this.currentSymbol)} logo' onerror='this.style.display="none"'>
+            //         </div>
+            //     `;
+            // }
             
             if (this.profileData) {
                 html += `<div class='company-info-grid'>`;

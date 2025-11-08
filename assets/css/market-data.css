@@ -963,6 +963,7 @@
     border-radius: var(--radius-md);
     backdrop-filter: blur(10px);
     margin-top: 15px;
+    margin-bottom: 0 !important;
 }
 
 .info-box *,
@@ -2166,4 +2167,123 @@
 [data-theme="dark"] #portfoliosListContainer .simulation-item.active {
     background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
     border-color: #ffd700 !important;
+}
+
+/* ============================================
+   🔧 CORRECTIONS VISUELLES - MARKET DATA
+   ============================================ */
+
+/* MASQUER LE LOGO COMPANY */
+.company-logo {
+    display: none !important;
+}
+
+/* ESPACEMENT ENTRE LES PORTFOLIOS */
+.simulation-item {
+    margin-bottom: 1.25rem !important;
+}
+
+.simulation-item:last-child {
+    margin-bottom: 0 !important;
+}
+
+/* RÉDUIRE L'ESPACE BLANC DANS PORTFOLIO MANAGEMENT */
+.simulation-management {
+    padding-bottom: 1rem !important;
+}
+
+.simulations-list {
+    padding-bottom: 0 !important;
+    margin-bottom: 0 !important;
+}
+
+#portfoliosListContainer {
+    gap: 1rem !important;
+}
+
+/* RÉDUIRE L'ESPACE DANS LES CARDS */
+.card-body {
+    padding-bottom: 1.5rem !important;
+}
+
+/* RÉDUIRE L'ESPACE DANS LES ACCORDÉONS */
+.accordion-content {
+    padding-bottom: 0 !important;
+}
+
+.accordion-body {
+    padding-bottom: 1rem !important;
+}
+
+.company-accordion:last-child {
+    margin-bottom: 0 !important;
+}
+
+/* AMÉLIORATION DU BADGE ACTIVE (si vous gardez le badge dans le nom) */
+.badge-current {
+    background: linear-gradient(135deg, #10b981, #059669);
+    color: white;
+    padding: 0.25rem 0.75rem;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    margin-left: 0.5rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    box-shadow: 0 2px 4px rgba(16, 185, 129, 0.3);
+    display: inline-block;
+}
+
+.badge-default {
+    background: #64748b;
+    color: white;
+    padding: 0.25rem 0.75rem;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    margin-left: 0.5rem;
+    display: inline-block;
+}
+
+/* FIX MODALS - Scroll du body */
+body.modal-open {
+    overflow: hidden !important;
+}
+
+.modal.active {
+    display: flex !important;
+    overflow-y: auto;
+}
+
+.modal-content {
+    margin: auto;
+}
+
+/* AMÉLIORATION DES BOUTONS DANS LES PORTFOLIOS */
+.simulation-actions {
+    display: flex;
+    gap: 0.5rem;
+    flex-shrink: 0;
+    align-items: center;
+}
+
+.btn-sm {
+    white-space: nowrap;
+    padding: 0.5rem 1rem !important;
+    font-size: 0.875rem !important;
+}
+
+/* RESPONSIVE - Espacement sur mobile */
+@media (max-width: 768px) {
+    .simulation-item {
+        margin-bottom: 1rem !important;
+    }
+    
+    .simulation-management {
+        padding-bottom: 0.75rem !important;
+    }
+    
+    #portfoliosListContainer {
+        gap: 0.75rem !important;
+    }
 }
