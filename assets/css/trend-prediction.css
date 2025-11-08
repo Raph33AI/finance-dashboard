@@ -1,6 +1,87 @@
 /* ==============================================
-   TREND-PREDICTION.CSS - COMPLETE VERSION
+   TREND-PREDICTION.CSS - COMPLETE & CORRECTED VERSION
    ============================================== */
+
+/* ============================================
+   GLOBAL SPACING & SECTIONS
+   ============================================ */
+
+.section-title {
+    margin-bottom: 25px;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.section-title i {
+    color: var(--primary-color);
+}
+
+.section-title .help-icon {
+    margin-left: auto;
+}
+
+/* ✅ SPACING POUR LES SECTIONS PRINCIPALES */
+.prediction-overview,
+.chart-section,
+.models-section,
+.performance-section,
+.recommendation-section {
+    margin-bottom: 30px;
+}
+
+.search-panel {
+    margin-bottom: 30px;
+}
+
+.stock-header {
+    margin-bottom: 30px;
+}
+
+/* ============================================
+   HEADER CACHE BUTTON (CORRECTION)
+   ============================================ */
+
+.btn-icon-header {
+    position: relative;
+    background: var(--background-secondary);
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+    width: 40px;
+    height: 40px;
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: all var(--transition-base);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-left: 12px;
+}
+
+.btn-icon-header:hover {
+    background: var(--primary-color);
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(38, 73, 178, 0.3);
+}
+
+.cache-badge-mini {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    background: #ef4444;
+    color: white;
+    font-size: 0.625rem;
+    font-weight: 700;
+    padding: 2px 5px;
+    border-radius: 10px;
+    min-width: 18px;
+    text-align: center;
+    line-height: 1.2;
+}
 
 /* ============================================
    SMART SEARCH BAR WITH AUTOCOMPLETE
@@ -8,21 +89,37 @@
 
 .search-input-wrapper {
     position: relative;
+    margin-bottom: 20px; /* ✅ ESPACE AJOUTÉ */
 }
 
 #symbolInput {
     width: 100%;
     padding: 15px 20px;
-    border: 2px solid #D4D9F0;
+    border: 2px solid var(--border-color, #D4D9F0);
     border-radius: 15px;
     font-size: 1rem;
     transition: all 0.3s ease;
+    background: var(--background-primary);
+    color: var(--text-primary);
 }
 
 #symbolInput:focus {
     outline: none;
-    border-color: #4A74F3;
+    border-color: var(--primary-color, #4A74F3);
     box-shadow: 0 0 0 3px rgba(74, 116, 243, 0.1);
+}
+
+/* ✅ BOUTON "RUN ML MODELS" - ESPACEMENT CORRIGÉ */
+.btn-analyze {
+    margin-top: 15px;
+    width: 100%;
+    padding: 14px 24px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
 }
 
 .search-suggestions {
@@ -30,8 +127,8 @@
     top: calc(100% + 5px);
     left: 0;
     right: 0;
-    background: white;
-    border: 2px solid #4A74F3;
+    background: var(--background-primary);
+    border: 2px solid var(--primary-color, #4A74F3);
     border-radius: 15px;
     max-height: 500px;
     overflow-y: auto;
@@ -75,7 +172,7 @@
     display: flex;
     align-items: center;
     gap: 15px;
-    border-bottom: 1px solid #f0f0f0;
+    border-bottom: 1px solid var(--border-color, #f0f0f0);
     transition: all 0.2s ease;
 }
 
@@ -155,7 +252,7 @@
 
 .suggestion-name {
     font-size: 0.9rem;
-    color: #6c757d;
+    color: var(--text-secondary, #6c757d);
 }
 
 .suggestion-match {
@@ -168,13 +265,34 @@
 .no-results {
     padding: 30px 20px;
     text-align: center;
-    color: #6c757d;
+    color: var(--text-secondary, #6c757d);
 }
 
 .no-results i {
     font-size: 3rem;
     margin-bottom: 15px;
     color: #d0d0d0;
+}
+
+.suggestion-loading {
+    padding: 30px 20px;
+    text-align: center;
+    color: var(--text-secondary, #6c757d);
+    font-size: 1.1rem;
+}
+
+.suggestion-loading i {
+    font-size: 2rem;
+    margin-bottom: 10px;
+    color: #2649B2;
+}
+
+.suggestion-exchange {
+    font-size: 0.85rem;
+    color: var(--text-secondary, #6c757d);
+    background: var(--background-secondary, #f0f0f0);
+    padding: 4px 10px;
+    border-radius: 12px;
 }
 
 /* ============================================
@@ -187,17 +305,18 @@
     gap: 10px;
     align-items: center;
     margin-top: 20px;
+    margin-bottom: 20px; /* ✅ ESPACE AJOUTÉ */
 }
 
 .quick-label {
     font-weight: 600;
-    color: #2649B2;
+    color: var(--primary-color, #2649B2);
     margin-right: 10px;
 }
 
 .symbol-chip {
-    background: white;
-    border: 2px solid #D4D9F0;
+    background: var(--background-primary);
+    border: 2px solid var(--border-color, #D4D9F0);
     padding: 8px 16px;
     border-radius: 25px;
     cursor: pointer;
@@ -206,6 +325,7 @@
     display: flex;
     align-items: center;
     gap: 8px;
+    color: var(--text-primary);
 }
 
 .symbol-chip:hover {
@@ -221,6 +341,130 @@
 }
 
 /* ============================================
+   PREDICTION SETTINGS
+   ============================================ */
+
+.prediction-settings {
+    display: flex;
+    gap: 30px;
+    margin-top: 25px; /* ✅ ESPACE AJOUTÉ */
+    margin-bottom: 0;
+    flex-wrap: wrap;
+}
+
+.setting-group {
+    flex: 1;
+    min-width: 250px;
+}
+
+.setting-group label {
+    display: block;
+    margin-bottom: 10px;
+    font-weight: 600;
+    color: var(--primary-color, #2649B2);
+}
+
+.horizon-btn {
+    background: var(--background-primary);
+    border: 2px solid var(--border-color, #D4D9F0);
+    padding: 10px 20px;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-weight: 600;
+    margin-right: 10px;
+    margin-bottom: 10px;
+    color: var(--text-primary);
+}
+
+.horizon-btn:hover {
+    border-color: var(--primary-color, #4A74F3);
+    color: var(--primary-color, #4A74F3);
+}
+
+.horizon-btn.active {
+    background: linear-gradient(135deg, #2649B2, #4A74F3);
+    border-color: #2649B2;
+    color: white;
+}
+
+.setting-group select,
+.form-select {
+    width: 100%;
+    padding: 12px;
+    border: 2px solid var(--border-color, #D4D9F0);
+    border-radius: 10px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: border-color 0.3s ease;
+    background: var(--background-primary);
+    color: var(--text-primary);
+}
+
+.setting-group select:focus,
+.form-select:focus {
+    outline: none;
+    border-color: var(--primary-color, #4A74F3);
+}
+
+/* ============================================
+   STOCK HEADER
+   ============================================ */
+
+.stock-header {
+    background: var(--background-primary);
+    border-radius: 20px;
+    padding: 30px;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
+    margin-top: 30px; /* ✅ ESPACE AJOUTÉ */
+}
+
+.header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 20px;
+}
+
+.stock-info h2 {
+    margin: 0;
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.stock-name {
+    font-size: 1.1rem;
+    color: var(--text-secondary);
+    font-weight: 500;
+}
+
+.stock-price {
+    text-align: right;
+}
+
+.price {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 5px;
+}
+
+.change {
+    font-size: 1.2rem;
+    font-weight: 600;
+}
+
+.change.positive {
+    color: #28a745;
+}
+
+.change.negative {
+    color: #dc3545;
+}
+
+/* ============================================
    PREDICTION OVERVIEW
    ============================================ */
 
@@ -228,6 +472,7 @@
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     border-radius: 20px;
     padding: 40px;
+    margin-top: 30px; /* ✅ ESPACE AJOUTÉ */
     margin-bottom: 30px;
     box-shadow: 0 10px 40px rgba(102, 126, 234, 0.3);
 }
@@ -236,6 +481,23 @@
     color: white;
     margin-bottom: 30px;
     font-size: 1.8rem;
+}
+
+.prediction-overview .section-title .help-icon {
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+    width: 32px;
+    height: 32px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    transition: all 0.3s ease;
+}
+
+.prediction-overview .section-title .help-icon:hover {
+    background: rgba(255, 255, 255, 0.3);
+    transform: scale(1.1);
 }
 
 .ensemble-cards {
@@ -307,6 +569,7 @@
     font-weight: bold;
     color: #2649B2;
     margin-bottom: 5px;
+    line-height: 1.2;
 }
 
 .card-sublabel {
@@ -316,72 +579,11 @@
 }
 
 /* ============================================
-   PREDICTION SETTINGS
-   ============================================ */
-
-.prediction-settings {
-    display: flex;
-    gap: 30px;
-    margin-top: 20px;
-    flex-wrap: wrap;
-}
-
-.setting-group {
-    flex: 1;
-    min-width: 250px;
-}
-
-.setting-group label {
-    display: block;
-    margin-bottom: 10px;
-    font-weight: 600;
-    color: #2649B2;
-}
-
-.horizon-btn {
-    background: white;
-    border: 2px solid #D4D9F0;
-    padding: 10px 20px;
-    border-radius: 10px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    font-weight: 600;
-    margin-right: 10px;
-    margin-bottom: 10px;
-}
-
-.horizon-btn:hover {
-    border-color: #4A74F3;
-    color: #4A74F3;
-}
-
-.horizon-btn.active {
-    background: linear-gradient(135deg, #2649B2, #4A74F3);
-    border-color: #2649B2;
-    color: white;
-}
-
-.setting-group select {
-    width: 100%;
-    padding: 12px;
-    border: 2px solid #D4D9F0;
-    border-radius: 10px;
-    font-size: 1rem;
-    cursor: pointer;
-    transition: border-color 0.3s ease;
-}
-
-.setting-group select:focus {
-    outline: none;
-    border-color: #4A74F3;
-}
-
-/* ============================================
    CHART SECTION
    ============================================ */
 
 .chart-section {
-    background: white;
+    background: var(--background-primary);
     border-radius: 20px;
     padding: 30px;
     margin-bottom: 30px;
@@ -392,11 +594,17 @@
     min-height: 600px;
 }
 
+.chart {
+    width: 100%;
+    min-height: 300px;
+}
+
 /* ============================================
    MODELS GRID
    ============================================ */
 
 .models-section {
+    margin-top: 30px; /* ✅ ESPACE AJOUTÉ */
     margin-bottom: 30px;
 }
 
@@ -407,7 +615,7 @@
 }
 
 .model-card {
-    background: white;
+    background: var(--background-primary);
     border-radius: 15px;
     padding: 20px;
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
@@ -425,12 +633,12 @@
     align-items: center;
     margin-bottom: 15px;
     padding-bottom: 15px;
-    border-bottom: 2px solid #f0f0f0;
+    border-bottom: 2px solid var(--border-color, #f0f0f0);
 }
 
 .model-header h4 {
     margin: 0;
-    color: #2649B2;
+    color: var(--primary-color, #2649B2);
     font-size: 1.1rem;
     display: flex;
     align-items: center;
@@ -473,20 +681,20 @@
 .metric {
     text-align: center;
     padding: 12px;
-    background: #f8f9fa;
+    background: var(--background-secondary, #f8f9fa);
     border-radius: 10px;
 }
 
 .metric span {
     display: block;
     font-size: 0.85rem;
-    color: #6c757d;
+    color: var(--text-secondary, #6c757d);
     margin-bottom: 5px;
 }
 
 .metric strong {
     font-size: 1.2rem;
-    color: #2649B2;
+    color: var(--primary-color, #2649B2);
 }
 
 /* ============================================
@@ -494,9 +702,10 @@
    ============================================ */
 
 .performance-section {
-    background: white;
+    background: var(--background-primary);
     border-radius: 20px;
     padding: 30px;
+    margin-top: 30px; /* ✅ ESPACE AJOUTÉ */
     margin-bottom: 30px;
     box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
 }
@@ -525,7 +734,7 @@
 .performance-table td {
     padding: 15px;
     text-align: left;
-    border-bottom: 1px solid #e0e0e0;
+    border-bottom: 1px solid var(--border-color, #e0e0e0);
 }
 
 .performance-table th {
@@ -538,12 +747,12 @@
 }
 
 .performance-table tr:hover {
-    background: #f8f9fa;
+    background: var(--background-secondary, #f8f9fa);
 }
 
 .performance-table .rank {
     font-weight: bold;
-    color: #2649B2;
+    color: var(--primary-color, #2649B2);
 }
 
 .performance-table .best {
@@ -559,11 +768,12 @@
    ============================================ */
 
 .recommendation-section {
+    margin-top: 30px; /* ✅ ESPACE AJOUTÉ */
     margin-bottom: 30px;
 }
 
 .recommendation-card {
-    background: white;
+    background: var(--background-primary);
     border-radius: 20px;
     padding: 40px;
     box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
@@ -575,7 +785,7 @@
     gap: 25px;
     margin-bottom: 30px;
     padding-bottom: 25px;
-    border-bottom: 3px solid #f0f0f0;
+    border-bottom: 3px solid var(--border-color, #f0f0f0);
 }
 
 .recommendation-icon {
@@ -627,17 +837,23 @@
 .recommendation-header h4 {
     margin: 0;
     font-size: 2rem;
-    color: #2649B2;
+    color: var(--text-primary);
 }
 
 .recommendation-header p {
     margin: 5px 0 0 0;
-    color: #6c757d;
+    color: var(--text-secondary, #6c757d);
     font-size: 1.1rem;
 }
 
 .recommendation-body {
     margin-bottom: 25px;
+}
+
+.recommendation-body h4 {
+    color: var(--text-primary);
+    margin-top: 20px;
+    margin-bottom: 15px;
 }
 
 .recommendation-body ul {
@@ -648,19 +864,20 @@
 .recommendation-body li {
     padding: 15px;
     margin-bottom: 10px;
-    background: #f8f9fa;
-    border-left: 4px solid #2649B2;
+    background: var(--background-secondary, #f8f9fa);
+    border-left: 4px solid var(--primary-color, #2649B2);
     border-radius: 5px;
+    color: var(--text-primary);
 }
 
 .recommendation-body li i {
     margin-right: 10px;
-    color: #2649B2;
+    color: var(--primary-color, #2649B2);
 }
 
 .recommendation-footer {
     padding-top: 25px;
-    border-top: 2px solid #f0f0f0;
+    border-top: 2px solid var(--border-color, #f0f0f0);
 }
 
 .disclaimer {
@@ -680,6 +897,10 @@
     margin-top: 2px;
 }
 
+.disclaimer div {
+    color: #856404;
+}
+
 /* ============================================
    LOADING INDICATOR
    ============================================ */
@@ -687,28 +908,61 @@
 .loading-indicator {
     text-align: center;
     padding: 60px 20px;
-    background: white;
+    background: var(--background-primary);
     border-radius: 20px;
     box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
     margin-bottom: 30px;
+    margin-top: 30px; /* ✅ ESPACE AJOUTÉ */
 }
 
 .loading-indicator i {
     font-size: 3rem;
-    color: #2649B2;
+    color: var(--primary-color, #2649B2);
     margin-bottom: 20px;
 }
 
 #loadingText {
     display: block;
     font-size: 1.2rem;
-    color: #6c757d;
+    color: var(--text-secondary, #6c757d);
     font-weight: 600;
+}
+
+/* ============================================
+   HELP ICON (GLOBAL)
+   ============================================ */
+
+.help-icon {
+    background: var(--background-secondary, #f0f0f0);
+    color: var(--text-primary);
+    border: none;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: bold;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+}
+
+.help-icon:hover {
+    background: var(--primary-color, #2649B2);
+    color: white;
+    transform: scale(1.1);
 }
 
 /* ============================================
    RESPONSIVE
    ============================================ */
+
+@media (max-width: 1200px) {
+    .models-grid {
+        grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    }
+}
 
 @media (max-width: 768px) {
     .ensemble-cards {
@@ -739,6 +993,41 @@
     .search-suggestions {
         max-height: 300px;
     }
+    
+    .header-content {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .stock-price {
+        text-align: left;
+    }
+    
+    .prediction-overview {
+        padding: 25px;
+    }
+    
+    .recommendation-card {
+        padding: 25px;
+    }
+}
+
+@media (max-width: 480px) {
+    .section-title {
+        font-size: 1.2rem;
+    }
+    
+    .card-value {
+        font-size: 1.5rem;
+    }
+    
+    .price {
+        font-size: 2rem;
+    }
+    
+    .change {
+        font-size: 1rem;
+    }
 }
 
 /* ============================================
@@ -750,7 +1039,7 @@
 }
 
 .search-suggestions::-webkit-scrollbar-track {
-    background: #f0f0f0;
+    background: var(--background-secondary, #f0f0f0);
     border-radius: 10px;
 }
 
@@ -764,26 +1053,73 @@
 }
 
 /* ============================================
-   ADDITIONAL SEARCH STYLES
+   DARK MODE SUPPORT
    ============================================ */
 
-.suggestion-loading {
-    padding: 30px 20px;
-    text-align: center;
-    color: #6c757d;
-    font-size: 1.1rem;
+[data-theme="dark"] .suggestion-item:hover,
+[data-theme="dark"] .suggestion-item.selected {
+    background: linear-gradient(90deg, #1e293b, #334155);
 }
 
-.suggestion-loading i {
-    font-size: 2rem;
-    margin-bottom: 10px;
-    color: #2649B2;
+[data-theme="dark"] .suggestion-symbol {
+    color: #60a5fa;
 }
 
-.suggestion-exchange {
-    font-size: 0.85rem;
-    color: #6c757d;
-    background: #f0f0f0;
-    padding: 4px 10px;
-    border-radius: 12px;
+[data-theme="dark"] .card-value {
+    color: #60a5fa;
 }
+
+[data-theme="dark"] .recommendation-body li {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+[data-theme="dark"] .metric {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+[data-theme="dark"] .performance-table tr:hover {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+/* ============================================
+   UTILITY CLASSES
+   ============================================ */
+
+.hidden {
+    display: none !important;
+}
+
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border-width: 0;
+}
+
+/* ============================================
+   ANIMATIONS
+   ============================================ */
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.results-panel > * {
+    animation: fadeIn 0.5s ease-out;
+}
+
+/* ============================================
+   FIN DU FICHIER
+   ============================================ */
