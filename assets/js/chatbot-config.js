@@ -12,9 +12,9 @@ const ChatbotConfig = {
     
     // 🎨 PERSONNALISATION
     branding: {
-        name: 'FinanceGPT',
+        name: 'Aurelia',
         tagline: 'Expert IA • Powered by Gemini',
-        avatar: '💼',
+        avatar: '💎',
         primaryColor: '#3b82f6',
         accentColor: '#10b981'
     },
@@ -41,7 +41,7 @@ const ChatbotConfig = {
     
     // 💬 MESSAGES PAR DÉFAUT
     messages: {
-        welcome: "👋 Bonjour ! Je suis FinanceGPT, votre assistant financier IA. Comment puis-je vous aider ?",
+        welcome: "👋 Bonjour ! Je suis Aurelia, votre assistant financier IA. Comment puis-je vous aider ?",
         error: "😔 Désolé, une erreur s'est produite. Veuillez réessayer.",
         noData: "Aucune donnée disponible pour cette requête.",
         apiKeyMissing: "⚠️ Clé API manquante. Veuillez configurer vos clés dans chatbot-config.js"

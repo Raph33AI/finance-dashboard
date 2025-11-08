@@ -61,11 +61,11 @@ class ChatbotUI {
                     <div class="chatbot-header">
                         <div class="chatbot-header-info">
                             <div class="chatbot-avatar">
-                                💼
+                                💎
                                 <span class="chatbot-status-indicator"></span>
                             </div>
                             <div class="chatbot-title-section">
-                                <h3>FinanceGPT</h3>
+                                <h3>Aurelia</h3>
                                 <p>Expert IA • Powered by Gemini</p>
                             </div>
                         </div>
@@ -293,7 +293,7 @@ class ChatbotUI {
             minute: '2-digit' 
         });
         
-        const avatar = role === 'bot' ? '💼' : '👤';
+        const avatar = role === 'bot' ? '💎' : '👤';
         
         let contentHTML = '';
         
@@ -486,7 +486,7 @@ class ChatbotUI {
         typingDiv.className = 'chatbot-message bot';
         typingDiv.id = 'typing-indicator';
         typingDiv.innerHTML = `
-            <div class="chatbot-message-avatar">💼</div>
+            <div class="chatbot-message-avatar">💎</div>
             <div class="chatbot-message-content">
                 <div class="chatbot-typing">
                     <div class="chatbot-typing-dot"></div>
@@ -524,7 +524,7 @@ class ChatbotUI {
      */
     showWelcomeMessage() {
         this.addMessage('bot', {
-            text: `👋 **Bonjour ! Je suis FinanceGPT**, votre assistant financier IA alimenté par Google Gemini.
+            text: `👋 **Bonjour ! Je suis Aurelia**, votre assistant financier IA alimenté par Google Gemini.
 
 Je peux vous aider à :
 

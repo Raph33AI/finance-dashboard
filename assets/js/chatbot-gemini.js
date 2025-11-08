@@ -16,7 +16,7 @@ class GeminiAIIntegration {
     }
 
     buildSystemContext() {
-        return `Tu es FinanceGPT, un expert financier IA.
+        return `Tu es Aurelia, un expert financier IA.
 
 MISSION: Fournir des analyses financières précises, chiffrées et actionnables.
 
