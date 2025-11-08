@@ -1,18 +1,18 @@
 /* ========================================
-   GOOGLE GEMINI PRO INTEGRATION
-   Version corrigée et optimisée
+   GOOGLE GEMINI 2.5 FLASH INTEGRATION
+   Version finale corrigée
    ======================================== */
 
 class GeminiAIIntegration {
     constructor(apiKey) {
         this.apiKey = apiKey;
         this.baseURL = 'https://generativelanguage.googleapis.com/v1beta';
-        this.model = 'gemini-1.5-flash-latest';  // Modèle le plus récent
+        this.model = 'gemini-2.5-flash';  // ✅ MODÈLE CORRECT
         this.conversationHistory = [];
         this.systemContext = this.buildSystemContext();
         this.maxHistoryLength = 10;
         
-        console.log('🤖 Gemini AI initialized with model:', this.model);
+        console.log('✅ Gemini 2.5 Flash initialized');
     }
 
     buildSystemContext() {
@@ -49,7 +49,6 @@ RÈGLES:
         try {
             const fullMessage = this.buildFullMessage(userMessage, financialContext);
             
-            // Construction du contenu pour Gemini
             const contents = [{
                 parts: [{
                     text: `${this.systemContext}\n\nQuestion: ${fullMessage}`
@@ -58,7 +57,7 @@ RÈGLES:
 
             const url = `${this.baseURL}/models/${this.model}:generateContent?key=${this.apiKey}`;
             
-            console.log('📡 Appel Gemini API...');
+            console.log('📡 Appel Gemini 2.5 Flash...');
 
             const response = await fetch(url, {
                 method: 'POST',
@@ -97,19 +96,12 @@ RÈGLES:
 
             if (!response.ok) {
                 const errorText = await response.text();
-                console.error('❌ Gemini API Error Response:', errorText);
-                
-                if (response.status === 404) {
-                    throw new Error('API Key invalide ou API non activée. Vérifiez votre clé sur https://aistudio.google.com');
-                } else if (response.status === 403) {
-                    throw new Error('API Generative Language non activée. Activez-la sur https://console.cloud.google.com/apis/library/generativelanguage.googleapis.com');
-                }
-                
+                console.error('❌ Gemini API Error:', errorText);
                 throw new Error(`Gemini API Error ${response.status}: ${errorText}`);
             }
 
             const data = await response.json();
-            console.log('✅ Réponse Gemini reçue');
+            console.log('✅ Réponse reçue de Gemini 2.5 Flash');
 
             if (!data.candidates || data.candidates.length === 0) {
                 throw new Error('Aucune réponse de Gemini');
@@ -123,7 +115,6 @@ RÈGLES:
 
             const assistantMessage = candidate.content.parts[0].text;
 
-            // Sauvegarde dans l'historique
             this.conversationHistory.push({
                 role: 'user',
                 message: userMessage,
@@ -141,7 +132,7 @@ RÈGLES:
             return this.parseResponse(assistantMessage);
 
         } catch (error) {
-            console.error('❌ Gemini Chat Error:', error);
+            console.error('❌ Chat Error:', error);
             throw error;
         }
     }
@@ -287,4 +278,4 @@ RÈGLES:
 }
 
 window.GeminiAIIntegration = GeminiAIIntegration;
-console.log('✅ GeminiAIIntegration chargé (modèle: gemini-1.5-flash-latest)');
+console.log('✅ GeminiAIIntegration chargé (Gemini 2.5 Flash)');
