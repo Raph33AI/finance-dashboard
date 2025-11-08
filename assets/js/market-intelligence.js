@@ -1,5 +1,6 @@
 // ============================================
 // MARKET INTELLIGENCE - PREMIUM VERSION
+// Graphiques minimalistes et modernes
 // ============================================
 
 const MarketIntelligence = {
@@ -87,12 +88,10 @@ const MarketIntelligence = {
             return this.renderNewsCard(item, sentiment, index);
         }).join('');
 
-        // Update stats
         document.getElementById('totalNewsCount').textContent = this.allNews.length;
         document.getElementById('positiveNewsCount').textContent = positiveCount;
         document.getElementById('negativeNewsCount').textContent = negativeCount;
 
-        // Load More button
         const loadMoreContainer = document.getElementById('loadMoreContainer');
         if (this.displayedNewsCount < this.allNews.length) {
             loadMoreContainer.innerHTML = `
@@ -162,40 +161,59 @@ const MarketIntelligence = {
             else neutralCount++;
         });
 
+        const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+        const textColor = isDark ? '#e4e4e7' : '#18181b';
+        const gridColor = isDark ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.05)';
+
         Highcharts.chart('sentimentChart', {
             chart: {
                 type: 'pie',
-                backgroundColor: 'transparent'
+                backgroundColor: 'transparent',
+                style: {
+                    fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif"
+                }
             },
             title: {
                 text: null
             },
             tooltip: {
-                pointFormat: '{series.name}: <b>{point.percentage:.1f}%</b> ({point.y} news)',
-                backgroundColor: getComputedStyle(document.documentElement).getPropertyValue('--card-bg'),
+                backgroundColor: isDark ? 'rgba(30, 30, 30, 0.95)' : 'rgba(255, 255, 255, 0.95)',
+                borderColor: isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)',
+                borderRadius: 8,
+                shadow: false,
                 style: {
-                    color: getComputedStyle(document.documentElement).getPropertyValue('--text-primary')
-                }
+                    color: textColor,
+                    fontSize: '13px',
+                    fontWeight: '500'
+                },
+                pointFormat: '<b>{point.percentage:.1f}%</b><br/>{point.y} news articles'
             },
             plotOptions: {
                 pie: {
+                    innerSize: '60%',
+                    depth: 45,
                     allowPointSelect: true,
                     cursor: 'pointer',
+                    borderWidth: 0,
                     dataLabels: {
                         enabled: true,
-                        format: '<b>{point.name}</b>: {point.percentage:.1f}%',
+                        format: '<b>{point.name}</b><br>{point.percentage:.1f}%',
+                        distance: 20,
                         style: {
-                            color: getComputedStyle(document.documentElement).getPropertyValue('--text-primary'),
-                            fontSize: '14px',
-                            fontWeight: 'bold'
+                            color: textColor,
+                            fontSize: '13px',
+                            fontWeight: '600',
+                            textOutline: 'none'
                         }
                     },
-                    showInLegend: true
-                }
-            },
-            legend: {
-                itemStyle: {
-                    color: getComputedStyle(document.documentElement).getPropertyValue('--text-primary')
+                    states: {
+                        hover: {
+                            brightness: 0.1,
+                            halo: {
+                                size: 0
+                            }
+                        }
+                    }
                 }
             },
             series: [{
@@ -204,15 +222,33 @@ const MarketIntelligence = {
                 data: [{
                     name: 'Positive',
                     y: positiveCount,
-                    color: '#27ae60'
+                    color: {
+                        linearGradient: { x1: 0, y1: 0, x2: 1, y2: 1 },
+                        stops: [
+                            [0, '#10b981'],
+                            [1, '#059669']
+                        ]
+                    }
                 }, {
                     name: 'Neutral',
                     y: neutralCount,
-                    color: '#95a5a6'
+                    color: {
+                        linearGradient: { x1: 0, y1: 0, x2: 1, y2: 1 },
+                        stops: [
+                            [0, '#94a3b8'],
+                            [1, '#64748b']
+                        ]
+                    }
                 }, {
                     name: 'Negative',
                     y: negativeCount,
-                    color: '#e74c3c'
+                    color: {
+                        linearGradient: { x1: 0, y1: 0, x2: 1, y2: 1 },
+                        stops: [
+                            [0, '#ef4444'],
+                            [1, '#dc2626']
+                        ]
+                    }
                 }]
             }],
             credits: {
@@ -456,7 +492,6 @@ const MarketIntelligence = {
     }
 };
 
-// Initialiser au chargement de la page
 document.addEventListener('DOMContentLoaded', () => {
     MarketIntelligence.init();
 });
