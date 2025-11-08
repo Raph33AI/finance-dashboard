@@ -1,104 +1,147 @@
 /* ========================================
-   INTÉGRATION GOOGLE GEMINI PRO
-   IA Conversationnelle 100% GRATUITE
+   GOOGLE GEMINI PRO INTEGRATION
+   Version corrigée et optimisée
    ======================================== */
 
 class GeminiAIIntegration {
     constructor(apiKey) {
         this.apiKey = apiKey;
         this.baseURL = 'https://generativelanguage.googleapis.com/v1beta';
-        this.model = 'gemini-1.5-flash';
+        this.model = 'gemini-1.5-flash-latest';  // Modèle le plus récent
         this.conversationHistory = [];
         this.systemContext = this.buildSystemContext();
         this.maxHistoryLength = 10;
+        
+        console.log('🤖 Gemini AI initialized with model:', this.model);
     }
 
     buildSystemContext() {
-        return `Tu es un assistant financier IA expert nommé "FinanceGPT".
+        return `Tu es FinanceGPT, un expert financier IA.
 
-EXPERTISES: Analyse financière, IPOs, Trading, Valorisation, ML Finance
+MISSION: Fournir des analyses financières précises, chiffrées et actionnables.
 
-STYLE: Précis, chiffré, avec graphiques et 3 actions concrètes
+EXPERTISES: Analyse financière, IPOs, REX, Valorisation, Trading
 
-FORMAT GRAPHIQUES:
+STYLE:
+- Structuré avec sections claires
+- Chiffres et données concrètes
+- Emojis pour la clarté
+- Toujours terminer par "Actions suggérées:" avec 3 points
+
+FORMAT GRAPHIQUE (si pertinent):
 GRAPHIQUE_DATA:
 {
   "type": "line",
   "title": "Titre",
-  "labels": ["2019", "2020"],
-  "datasets": [{"label": "Revenue", "data": [100, 120], "color": "#3b82f6"}],
-  "insights": ["Insight 1"],
+  "labels": ["2020", "2021", "2022"],
+  "datasets": [{"label": "Revenue", "data": [100, 120, 150], "color": "#3b82f6"}],
+  "insights": ["Croissance de 50%"],
   "formatValue": "$"
 }
 
-RÈGLES: Sources + Disclaimer + Objectivité
-
-ACTIONS: Toujours terminer par "Actions suggérées:" + 3 points`;
+RÈGLES:
+- Cite sources
+- Ajoute disclaimer "Ceci n'est pas un conseil en investissement"
+- Reste objectif`;
     }
 
     async chat(userMessage, financialContext = null) {
         try {
             const fullMessage = this.buildFullMessage(userMessage, financialContext);
             
-            this.conversationHistory.push({
-                role: 'user',
-                parts: [{ text: fullMessage }]
+            // Construction du contenu pour Gemini
+            const contents = [{
+                parts: [{
+                    text: `${this.systemContext}\n\nQuestion: ${fullMessage}`
+                }]
+            }];
+
+            const url = `${this.baseURL}/models/${this.model}:generateContent?key=${this.apiKey}`;
+            
+            console.log('📡 Appel Gemini API...');
+
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    contents: contents,
+                    generationConfig: {
+                        temperature: 0.7,
+                        topK: 40,
+                        topP: 0.95,
+                        maxOutputTokens: 2048,
+                        candidateCount: 1
+                    },
+                    safetySettings: [
+                        {
+                            category: "HARM_CATEGORY_HARASSMENT",
+                            threshold: "BLOCK_MEDIUM_AND_ABOVE"
+                        },
+                        {
+                            category: "HARM_CATEGORY_HATE_SPEECH",
+                            threshold: "BLOCK_MEDIUM_AND_ABOVE"
+                        },
+                        {
+                            category: "HARM_CATEGORY_SEXUALLY_EXPLICIT",
+                            threshold: "BLOCK_MEDIUM_AND_ABOVE"
+                        },
+                        {
+                            category: "HARM_CATEGORY_DANGEROUS_CONTENT",
+                            threshold: "BLOCK_MEDIUM_AND_ABOVE"
+                        }
+                    ]
+                })
             });
 
-            this.limitHistory();
-
-            const contents = [
-                { role: 'user', parts: [{ text: this.systemContext }] },
-                { role: 'model', parts: [{ text: "Je suis FinanceGPT, prêt à vous aider !" }] },
-                ...this.conversationHistory
-            ];
-
-            const response = await fetch(
-                `${this.baseURL}/models/${this.model}:generateContent?key=${this.apiKey}`,
-                {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        contents: contents,
-                        generationConfig: {
-                            temperature: 0.7,
-                            topK: 40,
-                            topP: 0.95,
-                            maxOutputTokens: 2048
-                        },
-                        safetySettings: [
-                            { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_NONE" },
-                            { category: "HARM_CATEGORY_HATE_SPEECH", threshold: "BLOCK_NONE" },
-                            { category: "HARM_CATEGORY_SEXUALLY_EXPLICIT", threshold: "BLOCK_NONE" },
-                            { category: "HARM_CATEGORY_DANGEROUS_CONTENT", threshold: "BLOCK_NONE" }
-                        ]
-                    })
-                }
-            );
-
             if (!response.ok) {
-                const errorData = await response.json();
-                console.error('Gemini API Error:', errorData);
-                throw new Error(`Gemini API Error: ${response.status}`);
+                const errorText = await response.text();
+                console.error('❌ Gemini API Error Response:', errorText);
+                
+                if (response.status === 404) {
+                    throw new Error('API Key invalide ou API non activée. Vérifiez votre clé sur https://aistudio.google.com');
+                } else if (response.status === 403) {
+                    throw new Error('API Generative Language non activée. Activez-la sur https://console.cloud.google.com/apis/library/generativelanguage.googleapis.com');
+                }
+                
+                throw new Error(`Gemini API Error ${response.status}: ${errorText}`);
             }
 
             const data = await response.json();
-            
+            console.log('✅ Réponse Gemini reçue');
+
             if (!data.candidates || data.candidates.length === 0) {
-                throw new Error('No response from Gemini');
+                throw new Error('Aucune réponse de Gemini');
             }
 
-            const assistantMessage = data.candidates[0].content.parts[0].text;
+            const candidate = data.candidates[0];
+            
+            if (!candidate.content || !candidate.content.parts || candidate.content.parts.length === 0) {
+                throw new Error('Réponse Gemini vide');
+            }
 
+            const assistantMessage = candidate.content.parts[0].text;
+
+            // Sauvegarde dans l'historique
             this.conversationHistory.push({
-                role: 'model',
-                parts: [{ text: assistantMessage }]
+                role: 'user',
+                message: userMessage,
+                timestamp: new Date()
             });
+            
+            this.conversationHistory.push({
+                role: 'assistant',
+                message: assistantMessage,
+                timestamp: new Date()
+            });
+            
+            this.limitHistory();
 
             return this.parseResponse(assistantMessage);
 
         } catch (error) {
-            console.error('Gemini Chat Error:', error);
+            console.error('❌ Gemini Chat Error:', error);
             throw error;
         }
     }
@@ -106,18 +149,25 @@ ACTIONS: Toujours terminer par "Actions suggérées:" + 3 points`;
     buildFullMessage(message, context) {
         if (!context) return message;
 
-        let enriched = message + '\n\nDONNEES DISPONIBLES:\n';
+        let enriched = message + '\n\nDONNÉES DISPONIBLES:\n';
 
         if (context.quote) {
-            enriched += `Prix: $${context.quote.c.toFixed(2)} (${context.quote.dp.toFixed(2)}%)\n`;
+            enriched += `Prix: $${context.quote.c.toFixed(2)} (${context.quote.dp >= 0 ? '+' : ''}${context.quote.dp.toFixed(2)}%)\n`;
         }
 
         if (context.profile) {
-            enriched += `Entreprise: ${context.profile.name} - ${context.profile.finnhubIndustry}\n`;
+            enriched += `Entreprise: ${context.profile.name}\n`;
+            enriched += `Secteur: ${context.profile.finnhubIndustry || 'N/A'}\n`;
+            enriched += `Pays: ${context.profile.country || 'N/A'}\n`;
+        }
+
+        if (context.financials && context.financials.metric) {
+            const m = context.financials.metric;
+            enriched += `P/E: ${m.peNormalizedAnnual || 'N/A'}, Beta: ${m.beta || 'N/A'}\n`;
         }
 
         if (context.rex) {
-            enriched += `REX: ${context.rex.years} annees de donnees\n`;
+            enriched += `REX: ${context.rex.years} années de données disponibles\n`;
         }
 
         return enriched;
@@ -131,13 +181,14 @@ ACTIONS: Toujours terminer par "Actions suggérées:" + 3 points`;
             insights: [],
             actions: [],
             tables: [],
-            hasDisclaimer: response.includes('conseil') || response.includes('DYOR')
+            hasDisclaimer: response.toLowerCase().includes('conseil') || response.includes('DYOR')
         };
 
+        // Extraction graphique
         try {
-            const chartMatch = response.match(/GRAPHIQUE_DATA:\s*(\{[\s\S]*?\})/);
+            const chartMatch = response.match(/GRAPHIQUE_DATA:\s*\{[\s\S]*?\}/);
             if (chartMatch) {
-                const chartData = JSON.parse(chartMatch[1]);
+                const chartData = JSON.parse(chartMatch[0].replace('GRAPHIQUE_DATA:', '').trim());
                 result.hasChart = true;
                 result.chartData.push(chartData);
                 if (chartData.insights) {
@@ -145,17 +196,19 @@ ACTIONS: Toujours terminer par "Actions suggérées:" + 3 points`;
                 }
             }
         } catch (e) {
-            console.error('Chart parse error:', e);
+            console.log('Pas de graphique dans cette réponse');
         }
 
-        const actionsMatch = response.match(/Actions?\s+sugg[ée]r[ée]es?\s*:?\s*\n((?:[-•]\s*.+\n?)+)/i);
+        // Extraction actions
+        const actionsMatch = response.match(/Actions?\s+sugg[ée]r[ée]es?\s*:?\s*\n((?:[-•*]\s*.+\n?)+)/i);
         if (actionsMatch) {
-            const items = actionsMatch[1].match(/[-•]\s*(.+)/g);
+            const items = actionsMatch[1].match(/[-•*]\s*(.+)/g);
             if (items) {
-                result.actions = items.map(i => i.replace(/^[-•]\s*/, '').trim());
+                result.actions = items.map(i => i.replace(/^[-•*]\s*/, '').trim());
             }
         }
 
+        // Extraction tableaux
         const lines = response.split('\n');
         let table = [];
         lines.forEach(line => {
@@ -166,33 +219,35 @@ ACTIONS: Toujours terminer par "Actions suggérées:" + 3 points`;
                 table = [];
             }
         });
-        if (table.length > 0) result.tables.push(table.join('\n'));
+        if (table.length > 0) {
+            result.tables.push(table.join('\n'));
+        }
 
         return result;
     }
 
     async analyzeFinancials(symbol, data) {
-        const prompt = `Analyse financiere complete de ${symbol}. Fournis: 1) Summary 2) Forces/Faiblesses 3) Recommandation 4) Actions suggerees`;
+        const prompt = `Analyse financière complète de ${symbol}. Fournis: 1) Summary 2) Forces/Faiblesses 3) Recommandation 4) Actions suggérées`;
         return await this.chat(prompt, data);
     }
 
     async compareCompanies(symbols, dataArray) {
-        const prompt = `Compare ${symbols.join(' vs ')}. Fournis: 1) Tableau 2) Classement 3) Recommandations 4) Actions suggerees`;
+        const prompt = `Compare ${symbols.join(' vs ')}. Fournis tableau comparatif, analyse et actions suggérées`;
         return await this.chat(prompt, { comparison: dataArray });
     }
 
     async analyzeREX(symbol, rexData) {
-        const prompt = `Analyse REX de ${symbol} sur ${rexData.years} ans. Fournis: 1) Evolution CA 2) Marges 3) Graphiques 4) Actions suggerees`;
+        const prompt = `Analyse REX de ${symbol} sur ${rexData.years} ans. Fournis évolution, tendances et actions suggérées`;
         return await this.chat(prompt, { rex: rexData });
     }
 
     async predictTrends(symbol, historicalData, timeframe) {
-        const prompt = `Analyse predictive ${symbol} sur ${timeframe}. Fournis: 1) Tendance 2) Niveaux cles 3) Risques 4) Actions suggerees`;
+        const prompt = `Analyse prédictive ${symbol} sur ${timeframe}. Fournis tendances, niveaux clés et actions suggérées`;
         return await this.chat(prompt, { timeSeries: historicalData });
     }
 
     async explainConcept(concept, level = 'intermediate') {
-        const prompt = `Explique "${concept}" niveau ${level}. Fournis: 1) Definition 2) Exemple 3) Application 4) Actions suggerees`;
+        const prompt = `Explique "${concept}" niveau ${level}. Fournis définition, exemple pratique et actions suggérées`;
         return await this.chat(prompt);
     }
 
@@ -232,4 +287,4 @@ ACTIONS: Toujours terminer par "Actions suggérées:" + 3 points`;
 }
 
 window.GeminiAIIntegration = GeminiAIIntegration;
-console.log('✅ GeminiAIIntegration chargé');
+console.log('✅ GeminiAIIntegration chargé (modèle: gemini-1.5-flash-latest)');
