@@ -592,7 +592,7 @@
     </div>
     
     <!-- ============================================
-         🗄️ CACHE MONITORING WIDGET (IDENTIQUE À MARKET DATA)
+         🗄️ CACHE MONITORING WIDGET
          ============================================ -->
     <div id='cacheWidget' class='cache-widget'>
         <div class='cache-widget-header'>
@@ -832,10 +832,10 @@
          📜 SCRIPTS - ORDRE IMPORTANT
          ============================================ -->
     
-    <!-- ✅ Cache Widget Script (IDENTIQUE À MARKET DATA) -->
+    <!-- ✅ Cache Widget Script (VERSION CORRIGÉE) -->
     <script>
         /**
-         * 🗄️ Cache Widget Management (COPIE EXACTE DE MARKET DATA)
+         * 🗄️ Cache Widget Management (VERSION CORRIGÉE)
          */
         let cacheWidgetOpen = false;
         let cacheStats = {
@@ -1031,6 +1031,7 @@
                 }
             },
             
+            // ✅ FONCTION CORRIGÉE
             logActivity: function(type, symbol, fromCache) {
                 const activityEl = document.getElementById('cacheActivity');
                 if (!activityEl) return;
@@ -1047,15 +1048,20 @@
                     <span class='cache-activity-text'>${type} ${symbol} from ${source}</span>
                 `;
                 
-                if (activityEl.firstChild && activityEl.firstChild.classList.contains('cache-empty-state')) {
+                // ✅ CORRECTION : Utiliser querySelector au lieu de firstChild.classList
+                const emptyState = activityEl.querySelector('.cache-empty-state');
+                if (emptyState) {
                     activityEl.innerHTML = '';
                 }
+                
                 activityEl.insertBefore(entry, activityEl.firstChild);
                 
+                // Garder seulement les 10 dernières
                 while (activityEl.children.length > 10) {
                     activityEl.removeChild(activityEl.lastChild);
                 }
                 
+                // Mettre à jour les stats
                 if (fromCache) {
                     cacheStats.hits++;
                 } else {
