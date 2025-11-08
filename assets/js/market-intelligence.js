@@ -1,6 +1,6 @@
 // ============================================
 // MARKET INTELLIGENCE - PREMIUM VERSION
-// Graphiques minimalistes et modernes
+// Graphiques avec textes en noir
 // ============================================
 
 const MarketIntelligence = {
@@ -161,10 +161,6 @@ const MarketIntelligence = {
             else neutralCount++;
         });
 
-        const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-        const textColor = isDark ? '#e4e4e7' : '#18181b';
-        const gridColor = isDark ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.05)';
-
         Highcharts.chart('sentimentChart', {
             chart: {
                 type: 'pie',
@@ -177,12 +173,12 @@ const MarketIntelligence = {
                 text: null
             },
             tooltip: {
-                backgroundColor: isDark ? 'rgba(30, 30, 30, 0.95)' : 'rgba(255, 255, 255, 0.95)',
-                borderColor: isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)',
+                backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                borderColor: 'rgba(0, 0, 0, 0.1)',
                 borderRadius: 8,
                 shadow: false,
                 style: {
-                    color: textColor,
+                    color: '#18181b',
                     fontSize: '13px',
                     fontWeight: '500'
                 },
@@ -200,7 +196,7 @@ const MarketIntelligence = {
                         format: '<b>{point.name}</b><br>{point.percentage:.1f}%',
                         distance: 20,
                         style: {
-                            color: textColor,
+                            color: '#18181b',
                             fontSize: '13px',
                             fontWeight: '600',
                             textOutline: 'none'
