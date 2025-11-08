@@ -6,11 +6,17 @@
 class FinancialChatbotEngine {
     constructor(apiKey, finnhubApiKey) {
         this.gemini = new GeminiAIIntegration(apiKey);
-        this.apiClient = window.FinnhubClient  ? new FinnhubAPIClient(finnhubApiKey) : null;
+        this.apiClient = window.FinnhubClient ? new FinnhubClient(finnhubApiKey) : null;
         this.ipoAnalyzer = this.apiClient ? new IPOAnalyzer(this.apiClient) : null;
         this.analytics = this.apiClient ? new AdvancedFinancialAnalytics(this.apiClient) : null;
         this.conversationHistory = [];
         this.context = {};
+        
+        console.log('🤖 FinancialChatbotEngine initialized');
+        console.log('  - Gemini:', this.gemini ? 'OK' : 'ERROR');
+        console.log('  - Finnhub:', this.apiClient ? 'OK' : 'NO API');
+        console.log('  - IPO Analyzer:', this.ipoAnalyzer ? 'OK' : 'DISABLED');
+        console.log('  - Analytics:', this.analytics ? 'OK' : 'DISABLED');
     }
 
     /**
@@ -18,16 +24,12 @@ class FinancialChatbotEngine {
      */
     async processMessage(userMessage) {
         try {
-            // Ajout à l'historique
             this.addToHistory('user', userMessage);
             
-            // Détection de l'intention
             const intent = this.detectIntent(userMessage);
             
-            // Collecte des données financières si nécessaire
             const financialContext = await this.gatherFinancialContext(intent);
             
-            // Traitement selon l'intention
             let response;
             
             switch(intent.type) {
@@ -79,7 +81,6 @@ class FinancialChatbotEngine {
                     response = await this.handleGeneralQuery(userMessage, financialContext);
             }
             
-            // Ajout de la réponse à l'historique
             this.addToHistory('assistant', response);
             
             return response;
@@ -96,7 +97,6 @@ class FinancialChatbotEngine {
     detectIntent(message) {
         const lowerMessage = message.toLowerCase();
         
-        // IPO Recommendations
         if (this.matchesPattern(lowerMessage, ['meilleur', 'top', 'ipo', 'recommand', 'pépite', 'opportunité ipo'])) {
             return {
                 type: 'IPO_RECOMMENDATION',
@@ -104,7 +104,6 @@ class FinancialChatbotEngine {
             };
         }
         
-        // REX Analysis
         if (this.matchesPattern(lowerMessage, ['rex', 'résultat d\'exploitation', 'résultat opération', 'operating income'])) {
             return {
                 type: 'REX_ANALYSIS',
@@ -112,7 +111,6 @@ class FinancialChatbotEngine {
             };
         }
         
-        // Balance Sheet
         if (this.matchesPattern(lowerMessage, ['bilan', 'balance sheet', 'actif', 'passif'])) {
             return {
                 type: 'BALANCE_SHEET',
@@ -120,7 +118,6 @@ class FinancialChatbotEngine {
             };
         }
         
-        // Cash Flow
         if (this.matchesPattern(lowerMessage, ['cash flow', 'flux de trésorerie', 'free cash flow'])) {
             return {
                 type: 'CASH_FLOW',
@@ -128,7 +125,6 @@ class FinancialChatbotEngine {
             };
         }
         
-        // Financial Analysis
         if (this.matchesPattern(lowerMessage, ['analyse', 'analyser', 'étude financière', 'fondamentaux'])) {
             return {
                 type: 'FINANCIAL_ANALYSIS',
@@ -136,7 +132,6 @@ class FinancialChatbotEngine {
             };
         }
         
-        // Stock Comparison
         if (this.matchesPattern(lowerMessage, ['compar', 'vs', 'versus', 'entre'])) {
             return {
                 type: 'STOCK_COMPARISON',
@@ -144,7 +139,6 @@ class FinancialChatbotEngine {
             };
         }
         
-        // Market Data
         if (this.matchesPattern(lowerMessage, ['prix', 'cours', 'cotation', 'quote', 'valeur'])) {
             return {
                 type: 'MARKET_DATA',
@@ -152,7 +146,6 @@ class FinancialChatbotEngine {
             };
         }
         
-        // News
         if (this.matchesPattern(lowerMessage, ['news', 'actualité', 'nouvelle', 'info'])) {
             return {
                 type: 'NEWS_REQUEST',
@@ -160,7 +153,6 @@ class FinancialChatbotEngine {
             };
         }
         
-        // Prediction
         if (this.matchesPattern(lowerMessage, ['prédic', 'prévis', 'tendance', 'futur'])) {
             return {
                 type: 'PREDICTION',
@@ -168,7 +160,6 @@ class FinancialChatbotEngine {
             };
         }
         
-        // Concept Explanation
         if (this.matchesPattern(lowerMessage, ['qu\'est-ce', 'c\'est quoi', 'définition', 'expliqu'])) {
             return {
                 type: 'CONCEPT_EXPLANATION',
@@ -191,7 +182,6 @@ class FinancialChatbotEngine {
             const symbol = intent.params?.symbol;
             
             if (symbol) {
-                // Récupération des données de base
                 const [quote, profile, financials] = await Promise.all([
                     this.apiClient.getQuote(symbol).catch(() => null),
                     this.apiClient.getCompanyProfile(symbol).catch(() => null),
@@ -233,7 +223,6 @@ class FinancialChatbotEngine {
                 };
             }
             
-            // Utilise Gemini pour générer une analyse enrichie
             const prompt = `Analyse ces ${topIPOs.length} IPOs prometteuses et fournis une recommandation détaillée :
 
 ${JSON.stringify(topIPOs, null, 2)}
@@ -242,12 +231,10 @@ Fournis :
 1. Un résumé exécutif
 2. Le top 3 avec justifications
 3. Un tableau comparatif
-4. Des graphiques de scoring
-5. Des actions suggérées`;
+4. Des actions suggérées`;
             
             const response = await this.gemini.chat(prompt, { ipos: topIPOs });
             
-            // Ajoute les données IPO structurées
             response.ipoData = topIPOs;
             response.type = 'ipo_recommendation';
             
@@ -260,13 +247,46 @@ Fournis :
     }
 
     /**
+     * Gère la recherche d'IPO
+     */
+    async handleIPOSearch(intent, context) {
+        try {
+            if (!this.ipoAnalyzer) {
+                return await this.gemini.chat("L'utilisateur recherche des IPOs spécifiques.", context);
+            }
+            
+            const results = await this.ipoAnalyzer.searchIPOs(intent.params);
+            
+            if (results.length === 0) {
+                return {
+                    text: "Aucune IPO trouvée correspondant à vos critères.",
+                    type: 'text'
+                };
+            }
+            
+            const response = await this.gemini.chat(
+                `Analyse ces IPOs trouvées selon les critères de recherche: ${JSON.stringify(results, null, 2)}`,
+                { ipos: results }
+            );
+            
+            response.ipoData = results;
+            response.type = 'ipo_search';
+            
+            return response;
+            
+        } catch (error) {
+            return this.getErrorResponse(error);
+        }
+    }
+
+    /**
      * Gère l'analyse REX
      */
     async handleREXAnalysis(intent, context) {
         try {
             if (!this.analytics) {
                 return await this.gemini.chat(
-                    `L'utilisateur demande une analyse des résultats d'exploitation. Explique ce qu'est le REX et son importance.`,
+                    "L'utilisateur demande une analyse des résultats d'exploitation. Explique le concept de REX.",
                     context
                 );
             }
@@ -283,7 +303,6 @@ Fournis :
             
             const rexData = await this.analytics.getOperatingResults(symbol, years);
             
-            // Utilise Gemini pour l'analyse
             const response = await this.gemini.analyzeREX(symbol, rexData);
             response.rexData = rexData;
             response.type = 'rex_analysis';
@@ -311,13 +330,17 @@ Fournis :
                 };
             }
             
+            if (!this.analytics) {
+                return await this.gemini.chat(`Analyse du bilan de ${symbol}`, context);
+            }
+            
             const balanceData = await this.analytics.getBalanceSheet(symbol, years);
             
             const prompt = `Analyse ce bilan sur ${years} ans pour ${symbol} :
 
 ${JSON.stringify(balanceData, null, 2)}
 
-Fournis une analyse complète avec graphiques.`;
+Fournis une analyse complète.`;
             
             const response = await this.gemini.chat(prompt, { balance: balanceData });
             response.balanceData = balanceData;
@@ -345,13 +368,17 @@ Fournis une analyse complète avec graphiques.`;
                 };
             }
             
+            if (!this.analytics) {
+                return await this.gemini.chat(`Analyse du cash flow de ${symbol}`, context);
+            }
+            
             const cashFlowData = await this.analytics.getCashFlows(symbol, years);
             
             const prompt = `Analyse ce cash flow sur ${years} ans pour ${symbol} :
 
 ${JSON.stringify(cashFlowData, null, 2)}
 
-Fournis une analyse détaillée avec graphiques et insights.`;
+Fournis une analyse détaillée.`;
             
             const response = await this.gemini.chat(prompt, { cashFlow: cashFlowData });
             response.cashFlowData = cashFlowData;
@@ -378,19 +405,19 @@ Fournis une analyse détaillée avec graphiques et insights.`;
                 };
             }
             
-            // Collecte toutes les données
-            const [rex, balance, cashFlow] = await Promise.all([
-                this.analytics.getOperatingResults(symbol, 5).catch(() => null),
-                this.analytics.getBalanceSheet(symbol, 5).catch(() => null),
-                this.analytics.getCashFlows(symbol, 5).catch(() => null)
-            ]);
+            let fullContext = { ...context };
             
-            const fullContext = {
-                ...context,
-                rex,
-                balance,
-                cashFlow
-            };
+            if (this.analytics) {
+                const [rex, balance, cashFlow] = await Promise.all([
+                    this.analytics.getOperatingResults(symbol, 5).catch(() => null),
+                    this.analytics.getBalanceSheet(symbol, 5).catch(() => null),
+                    this.analytics.getCashFlows(symbol, 5).catch(() => null)
+                ]);
+                
+                if (rex) fullContext.rex = rex;
+                if (balance) fullContext.balance = balance;
+                if (cashFlow) fullContext.cashFlow = cashFlow;
+            }
             
             const response = await this.gemini.analyzeFinancials(symbol, fullContext);
             response.type = 'financial_analysis';
@@ -416,7 +443,10 @@ Fournis une analyse détaillée avec graphiques et insights.`;
                 };
             }
             
-            // Collecte des données pour chaque symbole
+            if (!this.apiClient) {
+                return await this.gemini.chat(`Compare ${symbols.join(' vs ')}`, context);
+            }
+            
             const dataPromises = symbols.map(async (symbol) => {
                 const [quote, profile, financials] = await Promise.all([
                     this.apiClient.getQuote(symbol).catch(() => null),
@@ -473,24 +503,24 @@ Fournis une analyse détaillée avec graphiques et insights.`;
     async handleNewsRequest(intent, context) {
         try {
             const symbol = intent.params.symbol;
-            let news;
+            let news = [];
             
-            if (symbol) {
-                news = await this.apiClient.getCompanyNews(symbol, 
-                    new Date(Date.now() - 7*24*60*60*1000).toISOString().split('T')[0],
-                    new Date().toISOString().split('T')[0]
-                );
-            } else {
-                news = await this.apiClient.getMarketNews('general');
+            if (this.apiClient) {
+                if (symbol) {
+                    const today = new Date();
+                    const from = new Date(today.setDate(today.getDate() - 7)).toISOString().split('T')[0];
+                    const to = new Date().toISOString().split('T')[0];
+                    news = await this.apiClient.getCompanyNews(symbol, from, to).catch(() => []);
+                } else {
+                    news = await this.apiClient.getMarketNews('general').catch(() => []);
+                }
             }
             
-            const response = await this.gemini.chat(
-                `Résume ces actualités financières de manière claire et actionnable :
-
-${JSON.stringify(news.slice(0, 10), null, 2)}`,
-                { news }
-            );
+            const prompt = news.length > 0 
+                ? `Résume ces actualités financières : ${JSON.stringify(news.slice(0, 10), null, 2)}`
+                : "L'utilisateur demande des actualités financières.";
             
+            const response = await this.gemini.chat(prompt, { news });
             response.newsData = news;
             response.type = 'news';
             
@@ -515,10 +545,15 @@ ${JSON.stringify(news.slice(0, 10), null, 2)}`,
                 };
             }
             
-            // Récupère les données historiques
-            const timeSeries = await this.apiClient.getTimeSeries(symbol, '1day', 365);
+            let timeSeries = [];
+            if (this.apiClient) {
+                const data = await this.apiClient.getTimeSeries(symbol, '1day', 365).catch(() => null);
+                if (data && data.data) {
+                    timeSeries = data.data;
+                }
+            }
             
-            const response = await this.gemini.predictTrends(symbol, timeSeries.data, '6 mois');
+            const response = await this.gemini.predictTrends(symbol, timeSeries, '6 mois');
             response.type = 'prediction';
             
             return response;
@@ -614,5 +649,4 @@ ${JSON.stringify(news.slice(0, 10), null, 2)}`,
     }
 }
 
-// Export global
 window.FinancialChatbotEngine = FinancialChatbotEngine;
