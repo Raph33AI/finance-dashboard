@@ -3,27 +3,32 @@
 <head>
     <meta charset='UTF-8'>
     <meta name='viewport' content='width=device-width, initial-scale=1.0'>
-    <title>ML Trend Prediction</title>
+    <meta name='description' content='ML Trend Prediction - Machine learning stock price forecasting with multiple AI models'>
+    <meta name='author' content='Raphael NARDONE'>
+    <meta name='theme-color' content='#2649B2'>
+    
+    <title>ML Trend Prediction - Finance Hub</title>
+    
+    <!-- Preconnect pour optimisation -->
+    <link rel='preconnect' href='https://code.highcharts.com'>
+    <link rel='preconnect' href='https://cdnjs.cloudflare.com'>
     
     <!-- Highcharts -->
-    <script src='https://code.highcharts.com/stock/highstock.js'></script>
-    <script src='https://code.highcharts.com/highcharts-more.js'></script>
-    <script src='https://code.highcharts.com/modules/exporting.js'></script>
+    <script src='https://code.highcharts.com/stock/highstock.js' defer></script>
+    <script src='https://code.highcharts.com/highcharts-more.js' defer></script>
+    <script src='https://code.highcharts.com/modules/exporting.js' defer></script>
+    <script src='https://code.highcharts.com/modules/accessibility.js' defer></script>
     
     <!-- Font Awesome -->
-    <link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css'>
+    <link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css' integrity='sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==' crossorigin='anonymous' referrerpolicy='no-referrer'>
     
     <!-- Styles -->
     <link rel='stylesheet' href='assets/css/common.css'>
     <link rel='stylesheet' href='assets/css/sidebar.css'>
-    <link rel="stylesheet" href="assets/css/user-menu.css">
-    <!-- Pour auth.html -->
-    <link rel="stylesheet" href="css/auth.css">
-    <!-- Pour profile.html -->
-    <link rel="stylesheet" href="css/profile.css">
+    <link rel='stylesheet' href='assets/css/user-menu.css'>
+    <link rel='stylesheet' href='assets/css/cache-widget.css'>
     <link rel='stylesheet' href='assets/css/trend-prediction.css'>
-
-    <!-- ===== AJOUTE CES LIGNES (FIREBASE) ===== -->
+    
     <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
@@ -34,7 +39,6 @@
     
     <!-- Protection de la page (AUTH GUARD) -->
     <script src="assets/js/auth-guard.js"></script>
-    <!-- ===== FIN DES AJOUTS ===== -->
 </head>
 <body>
 
@@ -46,7 +50,9 @@
 
     <div class='layout-wrapper'>
         
-        <!-- Sidebar Navigation - VERSION CORRIGÉE -->
+        <!-- ============================================
+             SIDEBAR NAVIGATION
+             ============================================ -->
         <aside class='sidebar' id='sidebar'>
             <!-- Header -->
             <div class='sidebar-header'>
@@ -58,7 +64,7 @@
             
             <!-- Navigation -->
             <nav class='sidebar-nav'>
-                <!-- ✅ Landing Page / Accueil -->
+                <!-- Landing Page / Accueil -->
                 <div class='nav-section'>
                     <a href='index.html' class='nav-link'>
                         <i class='fas fa-rocket'></i>
@@ -66,14 +72,14 @@
                     </a>
                 </div>
                 
-                <!-- ✅ Budget Section -->
+                <!-- Budget Section -->
                 <div class='nav-section'>
-                    <button class='nav-folder active'>
+                    <button class='nav-folder'>
                         <i class='fas fa-wallet'></i>
                         <span>Budget</span>
                         <i class='fas fa-chevron-down arrow'></i>
                     </button>
-                    <div class='nav-submenu' style='display: block;'>
+                    <div class='nav-submenu'>
                         <a href='dashboard-financier.html' class='nav-link'>
                             <i class='fas fa-home'></i>
                             <span>Dashboard Budget</span>
@@ -85,7 +91,7 @@
                     </div>
                 </div>
                 
-                <!-- ✅ Simulation Section -->
+                <!-- Simulation Section -->
                 <div class='nav-section'>
                     <button class='nav-folder'>
                         <i class='fas fa-calculator'></i>
@@ -112,14 +118,14 @@
                     </div>
                 </div>
                 
-                <!-- ✅ Stocks Section -->
+                <!-- Stocks Section -->
                 <div class='nav-section'>
-                    <button class='nav-folder'>
+                    <button class='nav-folder active'>
                         <i class='fas fa-chart-candlestick'></i>
                         <span>Stocks</span>
                         <i class='fas fa-chevron-down arrow'></i>
                     </button>
-                    <div class='nav-submenu'>
+                    <div class='nav-submenu' style='display: block;'>
                         <a href='market-data.html' class='nav-link'>
                             <i class='fas fa-database'></i>
                             <span>Market Data</span>
@@ -128,7 +134,7 @@
                             <i class='fas fa-brain'></i>
                             <span>Advanced Analysis</span>
                         </a>
-                        <a href='trend-prediction.html' class='nav-link'>
+                        <a href='trend-prediction.html' class='nav-link active'>
                             <i class='fas fa-chart-line'></i>
                             <span>Trend Prediction</span>
                         </a>
@@ -194,24 +200,32 @@
             <!-- ===== FIN SIDEBAR FOOTER ===== -->
         </aside>
         
+        <!-- Sidebar Overlay (mobile) -->
+        <div class='sidebar-overlay' id='sidebarOverlay' aria-hidden='true'></div>
+        
         <!-- ============================================
              MAIN CONTENT AREA
              ============================================ -->
-        <div class='main-content'>
+        <main class='main-content' role='main'>
             <!-- Top Header -->
             <header class='top-header'>
                 <div class="header-content-wrapper">
                     <div class='header-left'>
-                        <button class='mobile-toggle' id='mobileToggle'>
-                            <i class='fas fa-bars'></i>
+                        <button class='mobile-toggle' id='mobileToggle' aria-label='Toggle navigation menu' aria-expanded='false'>
+                            <i class='fas fa-bars' aria-hidden='true'></i>
                         </button>
                         <h1><i class='fas fa-brain'></i> Machine Learning Trend Prediction</h1>
                     </div>
                     <div class='header-right'>
-                        <span class='last-update'>
-                            <i class='fas fa-clock'></i>
-                            <span id='lastUpdate'></span>
+                        <span class='last-update' aria-live='polite'>
+                            <i class='fas fa-clock' aria-hidden='true'></i>
+                            <span id='lastUpdate'>Loading...</span>
                         </span>
+                        <!-- ✅ NOUVEAU : Bouton de contrôle du cache -->
+                        <button class='btn-icon-header' onclick='toggleCacheWidget()' aria-label='Toggle cache widget' title='View cache statistics'>
+                            <i class='fas fa-database' aria-hidden='true'></i>
+                            <span class='cache-badge-mini' id='cacheBadgeMini'>0</span>
+                        </button>
                     </div>
                 </div>
             </header>
@@ -222,95 +236,109 @@
                 <div class='content'>
                     
                     <!-- Search Panel -->
-                    <div class='search-panel'>
-                        <h2 class='panel-title'>
-                            <i class='fas fa-search'></i> Select Stock for ML Analysis
-                            <span class='help-icon' onclick='openModal("modalIntro")'>?</span>
-                        </h2>
+                    <section class='search-panel card' aria-labelledby='search-title'>
+                        <div class='card-header'>
+                            <h2 class='card-title' id='search-title'>
+                                <i class='fas fa-search'></i> Select Stock for ML Analysis
+                            </h2>
+                            <button class='help-icon' onclick='openModal("modalIntro")' aria-label='Help about ML prediction'>?</button>
+                        </div>
                         
-                        <div class='search-container'>
-                            <div class='search-input-wrapper'>
-                                <input type='text' 
-                                       id='symbolInput' 
-                                       placeholder='Search by symbol or company name (e.g., AAPL, Apple, Tesla)...'
-                                       autocomplete='off'>
-                                <button class='btn-analyze' onclick='TrendPrediction.analyzeStock()'>
-                                    <i class='fas fa-robot'></i> Run ML Models
-                                </button>
-                                
-                                <!-- Suggestions dropdown -->
-                                <div class='search-suggestions' id='searchSuggestions'></div>
-                            </div>
-                            
-                            <div class='popular-stocks'>
-                                <span class='quick-label'>Popular Stocks:</span>
-                                <button class='symbol-chip' onclick='TrendPrediction.loadSymbol("AAPL")'>
-                                    <i class='fab fa-apple'></i> AAPL
-                                </button>
-                                <button class='symbol-chip' onclick='TrendPrediction.loadSymbol("MSFT")'>
-                                    <i class='fab fa-microsoft'></i> MSFT
-                                </button>
-                                <button class='symbol-chip' onclick='TrendPrediction.loadSymbol("GOOGL")'>
-                                    <i class='fab fa-google'></i> GOOGL
-                                </button>
-                                <button class='symbol-chip' onclick='TrendPrediction.loadSymbol("AMZN")'>
-                                    <i class='fab fa-amazon'></i> AMZN
-                                </button>
-                                <button class='symbol-chip' onclick='TrendPrediction.loadSymbol("TSLA")'>
-                                    <i class='fas fa-car'></i> TSLA
-                                </button>
-                                <button class='symbol-chip' onclick='TrendPrediction.loadSymbol("NVDA")'>
-                                    <i class='fas fa-microchip'></i> NVDA
-                                </button>
-                                <button class='symbol-chip' onclick='TrendPrediction.loadSymbol("META")'>
-                                    <i class='fab fa-meta'></i> META
-                                </button>
-                                <button class='symbol-chip' onclick='TrendPrediction.loadSymbol("NFLX")'>
-                                    <i class='fas fa-film'></i> NFLX
-                                </button>
-                            </div>
-                            
-                            <div class='prediction-settings'>
-                                <div class='setting-group'>
-                                    <label>Prediction Horizon:</label>
-                                    <button class='horizon-btn active' data-days='7' onclick='TrendPrediction.changeHorizon(7)'>7 days</button>
-                                    <button class='horizon-btn' data-days='15' onclick='TrendPrediction.changeHorizon(15)'>15 days</button>
-                                    <button class='horizon-btn' data-days='30' onclick='TrendPrediction.changeHorizon(30)'>30 days</button>
-                                    <button class='horizon-btn' data-days='60' onclick='TrendPrediction.changeHorizon(60)'>60 days</button>
+                        <div class='card-body'>
+                            <div class='search-container'>
+                                <div class='search-input-wrapper'>
+                                    <label for='symbolInput' class='sr-only'>Stock symbol or company name</label>
+                                    <input type='text' 
+                                           id='symbolInput' 
+                                           class='form-input'
+                                           placeholder='Search by symbol or company name (e.g., AAPL, Apple, Tesla)...'
+                                           autocomplete='off'
+                                           value='AAPL'
+                                           aria-describedby='search-instructions'>
+                                    <button class='btn btn-primary btn-analyze' onclick='TrendPrediction.analyzeStock()' aria-label='Run ML models on selected stock'>
+                                        <i class='fas fa-robot' aria-hidden='true'></i> Run ML Models
+                                    </button>
+                                    
+                                    <!-- Suggestions dropdown -->
+                                    <div class='search-suggestions' id='searchSuggestions' role='listbox' aria-label='Search suggestions'></div>
                                 </div>
                                 
-                                <div class='setting-group'>
-                                    <label>Training Period:</label>
-                                    <select id='trainingPeriod' onchange='TrendPrediction.changeTrainingPeriod(this.value)'>
-                                        <option value='3M'>3 Months</option>
-                                        <option value='6M' selected>6 Months</option>
-                                        <option value='1Y'>1 Year</option>
-                                        <option value='2Y'>2 Years</option>
-                                    </select>
+                                <span id='search-instructions' class='sr-only'>Type to search for stocks. Use arrow keys to navigate suggestions, Enter to select.</span>
+                                
+                                <div class='popular-stocks'>
+                                    <span class='quick-label'>Popular Stocks:</span>
+                                    <button class='symbol-chip' onclick='TrendPrediction.loadSymbol("AAPL")' aria-label='Load Apple stock'>
+                                        <i class='fab fa-apple' aria-hidden='true'></i> AAPL
+                                    </button>
+                                    <button class='symbol-chip' onclick='TrendPrediction.loadSymbol("MSFT")' aria-label='Load Microsoft stock'>
+                                        <i class='fab fa-microsoft' aria-hidden='true'></i> MSFT
+                                    </button>
+                                    <button class='symbol-chip' onclick='TrendPrediction.loadSymbol("GOOGL")' aria-label='Load Google stock'>
+                                        <i class='fab fa-google' aria-hidden='true'></i> GOOGL
+                                    </button>
+                                    <button class='symbol-chip' onclick='TrendPrediction.loadSymbol("AMZN")' aria-label='Load Amazon stock'>
+                                        <i class='fab fa-amazon' aria-hidden='true'></i> AMZN
+                                    </button>
+                                    <button class='symbol-chip' onclick='TrendPrediction.loadSymbol("TSLA")' aria-label='Load Tesla stock'>
+                                        <i class='fas fa-car' aria-hidden='true'></i> TSLA
+                                    </button>
+                                    <button class='symbol-chip' onclick='TrendPrediction.loadSymbol("NVDA")' aria-label='Load Nvidia stock'>
+                                        <i class='fas fa-microchip' aria-hidden='true'></i> NVDA
+                                    </button>
+                                    <button class='symbol-chip' onclick='TrendPrediction.loadSymbol("META")' aria-label='Load Meta stock'>
+                                        <i class='fab fa-meta' aria-hidden='true'></i> META
+                                    </button>
+                                    <button class='symbol-chip' onclick='TrendPrediction.loadSymbol("NFLX")' aria-label='Load Netflix stock'>
+                                        <i class='fas fa-film' aria-hidden='true'></i> NFLX
+                                    </button>
+                                </div>
+                                
+                                <div class='prediction-settings' role='group' aria-label='Prediction parameters'>
+                                    <div class='setting-group'>
+                                        <label id='horizon-label'>Prediction Horizon:</label>
+                                        <div role='group' aria-labelledby='horizon-label'>
+                                            <button class='horizon-btn active' data-days='7' onclick='TrendPrediction.changeHorizon(7)' aria-pressed='true'>7 days</button>
+                                            <button class='horizon-btn' data-days='15' onclick='TrendPrediction.changeHorizon(15)' aria-pressed='false'>15 days</button>
+                                            <button class='horizon-btn' data-days='30' onclick='TrendPrediction.changeHorizon(30)' aria-pressed='false'>30 days</button>
+                                            <button class='horizon-btn' data-days='60' onclick='TrendPrediction.changeHorizon(60)' aria-pressed='false'>60 days</button>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class='setting-group'>
+                                        <label for='trainingPeriod'>Training Period:</label>
+                                        <select id='trainingPeriod' class='form-select' onchange='TrendPrediction.changeTrainingPeriod(this.value)'>
+                                            <option value='3M'>3 Months</option>
+                                            <option value='6M' selected>6 Months</option>
+                                            <option value='1Y'>1 Year</option>
+                                            <option value='2Y'>2 Years</option>
+                                        </select>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
+                    </section>
                     
                     <!-- Loading Indicator -->
-                    <div id='loadingIndicator' class='loading-indicator hidden'>
-                        <i class='fas fa-spinner fa-spin'></i> 
+                    <div id='loadingIndicator' class='loading-indicator hidden' role='status' aria-live='polite'>
+                        <i class='fas fa-spinner fa-spin' aria-hidden='true'></i> 
                         <span id='loadingText'>Loading data and training models...</span>
                     </div>
                     
                     <!-- Stock Header -->
-                    <div id='stockHeader' class='stock-header hidden'>
-                        <div class='header-content'>
-                            <div class='stock-info'>
-                                <h2 id='stockSymbol'>-</h2>
-                                <span id='stockName' class='stock-name'>-</span>
-                            </div>
-                            <div class='stock-price'>
-                                <div id='currentPrice' class='price'>-</div>
-                                <div id='priceChange' class='change'>-</div>
+                    <section id='stockHeader' class='stock-header card hidden' aria-labelledby='stock-title'>
+                        <div class='card-body'>
+                            <div class='header-content'>
+                                <div class='stock-info'>
+                                    <h2 id='stockSymbol'>-</h2>
+                                    <span id='stockName' class='stock-name'>-</span>
+                                </div>
+                                <div class='stock-price'>
+                                    <div id='currentPrice' class='price' aria-label='Current stock price'>-</div>
+                                    <div id='priceChange' class='change' aria-label='Price change'>-</div>
+                                </div>
                             </div>
                         </div>
-                    </div>
+                    </section>
                     
                     <!-- Results Panel -->
                     <div id='resultsPanel' class='results-panel hidden'>
@@ -318,226 +346,322 @@
                         <!-- ============================================
                              ENSEMBLE PREDICTION OVERVIEW
                              ============================================ -->
-                        <div class='prediction-overview'>
-                            <h3 class='section-title'>
-                                <i class='fas fa-chart-line'></i> Ensemble Prediction
-                                <span class='help-icon' onclick='openModal("modalEnsemble")'>?</span>
+                        <section class='prediction-overview' aria-labelledby='ensemble-title'>
+                            <h3 class='section-title' id='ensemble-title'>
+                                <i class='fas fa-chart-line' aria-hidden='true'></i> Ensemble Prediction
+                                <button class='help-icon' onclick='openModal("modalEnsemble")' aria-label='Help about ensemble prediction'>?</button>
                             </h3>
                             
-                            <div class='ensemble-cards'>
-                                <div class='ensemble-card'>
-                                    <div class='card-icon bullish'>
+                            <div class='ensemble-cards' role='list' aria-label='Ensemble prediction metrics'>
+                                <div class='ensemble-card' role='listitem'>
+                                    <div class='card-icon bullish' aria-hidden='true'>
                                         <i class='fas fa-chart-line'></i>
                                     </div>
                                     <div class='card-content'>
                                         <div class='card-label'>Predicted Price</div>
-                                        <div class='card-value' id='ensemblePrice'>-</div>
+                                        <div class='card-value' id='ensemblePrice' aria-label='Predicted price'>-</div>
                                         <div class='card-sublabel' id='ensembleChange'>-</div>
                                     </div>
                                 </div>
                                 
-                                <div class='ensemble-card'>
-                                    <div class='card-icon neutral'>
+                                <div class='ensemble-card' role='listitem'>
+                                    <div class='card-icon neutral' aria-hidden='true'>
                                         <i class='fas fa-crosshairs'></i>
                                     </div>
                                     <div class='card-content'>
                                         <div class='card-label'>Confidence Range</div>
-                                        <div class='card-value' id='ensembleRange'>-</div>
+                                        <div class='card-value' id='ensembleRange' aria-label='Confidence range'>-</div>
                                         <div class='card-sublabel'>95% Confidence</div>
                                     </div>
                                 </div>
                                 
-                                <div class='ensemble-card'>
-                                    <div class='card-icon' id='signalIcon'>
+                                <div class='ensemble-card' role='listitem'>
+                                    <div class='card-icon' id='signalIcon' aria-hidden='true'>
                                         <i class='fas fa-balance-scale'></i>
                                     </div>
                                     <div class='card-content'>
                                         <div class='card-label'>Trading Signal</div>
-                                        <div class='card-value' id='ensembleSignal'>-</div>
+                                        <div class='card-value' id='ensembleSignal' aria-label='Trading signal'>-</div>
                                         <div class='card-sublabel' id='ensembleStrength'>-</div>
                                     </div>
                                 </div>
                                 
-                                <div class='ensemble-card'>
-                                    <div class='card-icon accuracy'>
+                                <div class='ensemble-card' role='listitem'>
+                                    <div class='card-icon accuracy' aria-hidden='true'>
                                         <i class='fas fa-bullseye'></i>
                                     </div>
                                     <div class='card-content'>
                                         <div class='card-label'>Model Accuracy</div>
-                                        <div class='card-value' id='ensembleAccuracy'>-</div>
+                                        <div class='card-value' id='ensembleAccuracy' aria-label='Model accuracy'>-</div>
                                         <div class='card-sublabel'>Average R² Score</div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
+                        </section>
                         
                         <!-- ============================================
                              COMPARISON CHART
                              ============================================ -->
-                        <div class='chart-section'>
-                            <h3 class='section-title'>
-                                <i class='fas fa-layer-group'></i> Model Comparison Chart
-                            </h3>
-                            <div id='comparisonChart' class='chart chart-large'></div>
-                        </div>
+                        <section class='chart-section card' aria-labelledby='comparison-chart-title'>
+                            <div class='card-header'>
+                                <h3 class='card-title' id='comparison-chart-title'>
+                                    <i class='fas fa-layer-group' aria-hidden='true'></i> Model Comparison Chart
+                                </h3>
+                            </div>
+                            <div class='card-body'>
+                                <div id='comparisonChart' class='chart chart-large' role='img' aria-labelledby='comparison-chart-title'></div>
+                            </div>
+                        </section>
                         
                         <!-- ============================================
                              INDIVIDUAL MODELS
                              ============================================ -->
-                        <div class='models-section'>
-                            <h3 class='section-title'>
-                                <i class='fas fa-robot'></i> Individual Model Results
+                        <section class='models-section' aria-labelledby='models-title'>
+                            <h3 class='section-title' id='models-title'>
+                                <i class='fas fa-robot' aria-hidden='true'></i> Individual Model Results
                             </h3>
                             
-                            <div class='models-grid'>
+                            <div class='models-grid' role='list' aria-label='Individual ML models'>
                                 
                                 <!-- Linear Regression -->
-                                <div class='model-card'>
-                                    <div class='model-header'>
-                                        <h4><i class='fas fa-chart-line'></i> Linear Regression</h4>
+                                <article class='model-card card' role='listitem' aria-labelledby='model-linear-title'>
+                                    <div class='card-header model-header'>
+                                        <h4 id='model-linear-title'><i class='fas fa-chart-line' aria-hidden='true'></i> Linear Regression</h4>
                                         <span class='model-badge' id='badge-linear'>Training...</span>
                                     </div>
-                                    <div class='model-chart' id='chart-linear'></div>
-                                    <div class='model-metrics' id='metrics-linear'>
-                                        <div class='metric'><span>Predicted:</span> <strong>-</strong></div>
-                                        <div class='metric'><span>R²:</span> <strong>-</strong></div>
-                                        <div class='metric'><span>RMSE:</span> <strong>-</strong></div>
+                                    <div class='card-body'>
+                                        <div class='model-chart' id='chart-linear' role='img' aria-label='Linear regression chart'></div>
+                                        <div class='model-metrics' id='metrics-linear' role='list' aria-label='Linear regression metrics'>
+                                            <div class='metric' role='listitem'><span>Predicted:</span> <strong>-</strong></div>
+                                            <div class='metric' role='listitem'><span>R²:</span> <strong>-</strong></div>
+                                            <div class='metric' role='listitem'><span>RMSE:</span> <strong>-</strong></div>
+                                        </div>
                                     </div>
-                                </div>
+                                </article>
                                 
                                 <!-- Polynomial Regression -->
-                                <div class='model-card'>
-                                    <div class='model-header'>
-                                        <h4><i class='fas fa-bezier-curve'></i> Polynomial Regression</h4>
+                                <article class='model-card card' role='listitem' aria-labelledby='model-polynomial-title'>
+                                    <div class='card-header model-header'>
+                                        <h4 id='model-polynomial-title'><i class='fas fa-bezier-curve' aria-hidden='true'></i> Polynomial Regression</h4>
                                         <span class='model-badge' id='badge-polynomial'>Training...</span>
                                     </div>
-                                    <div class='model-chart' id='chart-polynomial'></div>
-                                    <div class='model-metrics' id='metrics-polynomial'>
-                                        <div class='metric'><span>Predicted:</span> <strong>-</strong></div>
-                                        <div class='metric'><span>R²:</span> <strong>-</strong></div>
-                                        <div class='metric'><span>RMSE:</span> <strong>-</strong></div>
+                                    <div class='card-body'>
+                                        <div class='model-chart' id='chart-polynomial' role='img' aria-label='Polynomial regression chart'></div>
+                                        <div class='model-metrics' id='metrics-polynomial' role='list' aria-label='Polynomial regression metrics'>
+                                            <div class='metric' role='listitem'><span>Predicted:</span> <strong>-</strong></div>
+                                            <div class='metric' role='listitem'><span>R²:</span> <strong>-</strong></div>
+                                            <div class='metric' role='listitem'><span>RMSE:</span> <strong>-</strong></div>
+                                        </div>
                                     </div>
-                                </div>
+                                </article>
                                 
                                 <!-- Exponential Smoothing -->
-                                <div class='model-card'>
-                                    <div class='model-header'>
-                                        <h4><i class='fas fa-wave-square'></i> Exponential Smoothing</h4>
+                                <article class='model-card card' role='listitem' aria-labelledby='model-exponential-title'>
+                                    <div class='card-header model-header'>
+                                        <h4 id='model-exponential-title'><i class='fas fa-wave-square' aria-hidden='true'></i> Exponential Smoothing</h4>
                                         <span class='model-badge' id='badge-exponential'>Training...</span>
                                     </div>
-                                    <div class='model-chart' id='chart-exponential'></div>
-                                    <div class='model-metrics' id='metrics-exponential'>
-                                        <div class='metric'><span>Predicted:</span> <strong>-</strong></div>
-                                        <div class='metric'><span>R²:</span> <strong>-</strong></div>
-                                        <div class='metric'><span>RMSE:</span> <strong>-</strong></div>
+                                    <div class='card-body'>
+                                        <div class='model-chart' id='chart-exponential' role='img' aria-label='Exponential smoothing chart'></div>
+                                        <div class='model-metrics' id='metrics-exponential' role='list' aria-label='Exponential smoothing metrics'>
+                                            <div class='metric' role='listitem'><span>Predicted:</span> <strong>-</strong></div>
+                                            <div class='metric' role='listitem'><span>R²:</span> <strong>-</strong></div>
+                                            <div class='metric' role='listitem'><span>RMSE:</span> <strong>-</strong></div>
+                                        </div>
                                     </div>
-                                </div>
+                                </article>
                                 
                                 <!-- K-Nearest Neighbors -->
-                                <div class='model-card'>
-                                    <div class='model-header'>
-                                        <h4><i class='fas fa-project-diagram'></i> K-Nearest Neighbors</h4>
+                                <article class='model-card card' role='listitem' aria-labelledby='model-knn-title'>
+                                    <div class='card-header model-header'>
+                                        <h4 id='model-knn-title'><i class='fas fa-project-diagram' aria-hidden='true'></i> K-Nearest Neighbors</h4>
                                         <span class='model-badge' id='badge-knn'>Training...</span>
                                     </div>
-                                    <div class='model-chart' id='chart-knn'></div>
-                                    <div class='model-metrics' id='metrics-knn'>
-                                        <div class='metric'><span>Predicted:</span> <strong>-</strong></div>
-                                        <div class='metric'><span>R²:</span> <strong>-</strong></div>
-                                        <div class='metric'><span>RMSE:</span> <strong>-</strong></div>
+                                    <div class='card-body'>
+                                        <div class='model-chart' id='chart-knn' role='img' aria-label='KNN chart'></div>
+                                        <div class='model-metrics' id='metrics-knn' role='list' aria-label='KNN metrics'>
+                                            <div class='metric' role='listitem'><span>Predicted:</span> <strong>-</strong></div>
+                                            <div class='metric' role='listitem'><span>R²:</span> <strong>-</strong></div>
+                                            <div class='metric' role='listitem'><span>RMSE:</span> <strong>-</strong></div>
+                                        </div>
                                     </div>
-                                </div>
+                                </article>
                                 
                                 <!-- Neural Network -->
-                                <div class='model-card'>
-                                    <div class='model-header'>
-                                        <h4><i class='fas fa-brain'></i> Neural Network</h4>
+                                <article class='model-card card' role='listitem' aria-labelledby='model-neural-title'>
+                                    <div class='card-header model-header'>
+                                        <h4 id='model-neural-title'><i class='fas fa-brain' aria-hidden='true'></i> Neural Network</h4>
                                         <span class='model-badge' id='badge-neural'>Training...</span>
                                     </div>
-                                    <div class='model-chart' id='chart-neural'></div>
-                                    <div class='model-metrics' id='metrics-neural'>
-                                        <div class='metric'><span>Predicted:</span> <strong>-</strong></div>
-                                        <div class='metric'><span>R²:</span> <strong>-</strong></div>
-                                        <div class='metric'><span>RMSE:</span> <strong>-</strong></div>
+                                    <div class='card-body'>
+                                        <div class='model-chart' id='chart-neural' role='img' aria-label='Neural network chart'></div>
+                                        <div class='model-metrics' id='metrics-neural' role='list' aria-label='Neural network metrics'>
+                                            <div class='metric' role='listitem'><span>Predicted:</span> <strong>-</strong></div>
+                                            <div class='metric' role='listitem'><span>R²:</span> <strong>-</strong></div>
+                                            <div class='metric' role='listitem'><span>RMSE:</span> <strong>-</strong></div>
+                                        </div>
                                     </div>
-                                </div>
+                                </article>
                                 
                                 <!-- ARIMA -->
-                                <div class='model-card'>
-                                    <div class='model-header'>
-                                        <h4><i class='fas fa-chart-area'></i> ARIMA</h4>
+                                <article class='model-card card' role='listitem' aria-labelledby='model-arima-title'>
+                                    <div class='card-header model-header'>
+                                        <h4 id='model-arima-title'><i class='fas fa-chart-area' aria-hidden='true'></i> ARIMA</h4>
                                         <span class='model-badge' id='badge-arima'>Training...</span>
                                     </div>
-                                    <div class='model-chart' id='chart-arima'></div>
-                                    <div class='model-metrics' id='metrics-arima'>
-                                        <div class='metric'><span>Predicted:</span> <strong>-</strong></div>
-                                        <div class='metric'><span>R²:</span> <strong>-</strong></div>
-                                        <div class='metric'><span>RMSE:</span> <strong>-</strong></div>
+                                    <div class='card-body'>
+                                        <div class='model-chart' id='chart-arima' role='img' aria-label='ARIMA chart'></div>
+                                        <div class='model-metrics' id='metrics-arima' role='list' aria-label='ARIMA metrics'>
+                                            <div class='metric' role='listitem'><span>Predicted:</span> <strong>-</strong></div>
+                                            <div class='metric' role='listitem'><span>R²:</span> <strong>-</strong></div>
+                                            <div class='metric' role='listitem'><span>RMSE:</span> <strong>-</strong></div>
+                                        </div>
                                     </div>
-                                </div>
+                                </article>
                                 
                             </div>
-                        </div>
+                        </section>
                         
                         <!-- ============================================
                              PERFORMANCE COMPARISON
                              ============================================ -->
-                        <div class='performance-section'>
-                            <h3 class='section-title'>
-                                <i class='fas fa-medal'></i> Model Performance Comparison
-                            </h3>
-                            
-                            <div class='performance-grid'>
-                                <div class='performance-chart' id='accuracyChart'></div>
-                                <div class='performance-chart' id='errorChart'></div>
+                        <section class='performance-section card' aria-labelledby='performance-title'>
+                            <div class='card-header'>
+                                <h3 class='card-title' id='performance-title'>
+                                    <i class='fas fa-medal' aria-hidden='true'></i> Model Performance Comparison
+                                </h3>
                             </div>
-                            
-                            <div class='performance-table' id='performanceTable'></div>
-                        </div>
+                            <div class='card-body'>
+                                <div class='performance-grid'>
+                                    <div class='performance-chart' id='accuracyChart' role='img' aria-label='Model accuracy comparison'></div>
+                                    <div class='performance-chart' id='errorChart' role='img' aria-label='Model error comparison'></div>
+                                </div>
+                                
+                                <div class='performance-table' id='performanceTable' role='region' aria-label='Performance metrics table'></div>
+                            </div>
+                        </section>
                         
                         <!-- ============================================
                              RECOMMENDATION
                              ============================================ -->
-                        <div class='recommendation-section'>
-                            <h3 class='section-title'>
-                                <i class='fas fa-lightbulb'></i> AI-Powered Recommendation
+                        <section class='recommendation-section' aria-labelledby='recommendation-main-title'>
+                            <h3 class='section-title' id='recommendation-main-title'>
+                                <i class='fas fa-lightbulb' aria-hidden='true'></i> AI-Powered Recommendation
                             </h3>
                             
-                            <div class='recommendation-card' id='recommendationCard'>
-                                <div class='recommendation-header'>
-                                    <div class='recommendation-icon' id='recommendationIcon'>
-                                        <i class='fas fa-robot'></i>
+                            <div class='recommendation-card card' id='recommendationCard'>
+                                <div class='card-body'>
+                                    <div class='recommendation-header'>
+                                        <div class='recommendation-icon' id='recommendationIcon' aria-hidden='true'>
+                                            <i class='fas fa-robot'></i>
+                                        </div>
+                                        <div>
+                                            <h4 id='recommendationTitle'>Analyzing...</h4>
+                                            <p id='recommendationSubtitle'>Machine learning models are processing...</p>
+                                        </div>
                                     </div>
-                                    <div>
-                                        <h4 id='recommendationTitle'>Analyzing...</h4>
-                                        <p id='recommendationSubtitle'>Machine learning models are processing...</p>
+                                    
+                                    <div class='recommendation-body' id='recommendationBody'>
+                                        <!-- Sera rempli dynamiquement -->
                                     </div>
-                                </div>
-                                
-                                <div class='recommendation-body' id='recommendationBody'>
-                                    <!-- Sera rempli dynamiquement -->
-                                </div>
-                                
-                                <div class='recommendation-footer'>
-                                    <div class='disclaimer'>
-                                        <i class='fas fa-exclamation-triangle'></i>
-                                        <strong>Disclaimer:</strong> These predictions are generated by machine learning models for educational purposes only. 
-                                        Always conduct your own research and consult with financial advisors before making investment decisions.
+                                    
+                                    <div class='recommendation-footer'>
+                                        <div class='disclaimer'>
+                                            <i class='fas fa-exclamation-triangle' aria-hidden='true'></i>
+                                            <div>
+                                                <strong>Disclaimer:</strong> These predictions are generated by machine learning models for educational purposes only. 
+                                                Always conduct your own research and consult with financial advisors before making investment decisions.
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
+                        </section>
                         
                     </div>
                 </div>
                 
                 <!-- Footer -->
-                <footer>
-                    <p>Machine Learning Trend Prediction | Powered by Advanced AI Algorithms</p>
-                    <p class='data-source'>Historical data provided by Yahoo Finance</p>
+                <footer role='contentinfo'>
+                    <p>&copy; 2024 ML Trend Prediction | Powered by Advanced AI Algorithms</p>
+                    <p class='data-source'>Data provided by Twelve Data | Rate Limit: 8 requests/minute</p>
                 </footer>
             </div>
+        </main>
+        
+    </div>
+    
+    <!-- ============================================
+         🗄️ CACHE MONITORING WIDGET (IDENTIQUE À MARKET DATA)
+         ============================================ -->
+    <div id='cacheWidget' class='cache-widget'>
+        <div class='cache-widget-header'>
+            <h3><i class='fas fa-database'></i> Cache & Rate Limit Monitor</h3>
+            <button class='cache-close-btn' onclick='toggleCacheWidget()' aria-label='Close cache widget'>
+                <i class='fas fa-times'></i>
+            </button>
         </div>
         
+        <div class='cache-widget-body'>
+            <!-- Rate Limit Section -->
+            <div class='cache-section'>
+                <h4><i class='fas fa-tachometer-alt'></i> API Rate Limit</h4>
+                <div class='cache-stat-row'>
+                    <span class='cache-stat-label'>Remaining Requests:</span>
+                    <span class='cache-stat-value' id='rateLimitRemaining'>8</span>
+                    <span class='cache-stat-unit'>/ 8 per minute</span>
+                </div>
+                <div class='cache-progress-bar'>
+                    <div class='cache-progress-fill' id='rateLimitProgress' style='width: 100%;'></div>
+                </div>
+                <div class='cache-stat-row'>
+                    <span class='cache-stat-label'>Queue Length:</span>
+                    <span class='cache-stat-value' id='queueLength'>0</span>
+                    <span class='cache-stat-unit'>pending requests</span>
+                </div>
+            </div>
+            
+            <!-- Cache Statistics -->
+            <div class='cache-section'>
+                <h4><i class='fas fa-hdd'></i> Local Cache Statistics</h4>
+                <div class='cache-stat-row'>
+                    <span class='cache-stat-label'>Cached Entries:</span>
+                    <span class='cache-stat-value' id='cacheEntriesCount'>0</span>
+                </div>
+                <div class='cache-stat-row'>
+                    <span class='cache-stat-label'>Cache Size:</span>
+                    <span class='cache-stat-value' id='cacheSize'>0 KB</span>
+                </div>
+                <div class='cache-stat-row'>
+                    <span class='cache-stat-label'>Hit Rate:</span>
+                    <span class='cache-stat-value' id='cacheHitRate'>N/A</span>
+                </div>
+            </div>
+            
+            <!-- Actions -->
+            <div class='cache-section'>
+                <h4><i class='fas fa-wrench'></i> Actions</h4>
+                <div class='cache-actions'>
+                    <button class='btn-cache btn-cache-refresh' onclick='refreshCacheStats()'>
+                        <i class='fas fa-sync-alt'></i> Refresh Stats
+                    </button>
+                    <button class='btn-cache btn-cache-clear' onclick='clearLocalCache()'>
+                        <i class='fas fa-broom'></i> Clear Cache
+                    </button>
+                    <button class='btn-cache btn-cache-export' onclick='exportCacheData()'>
+                        <i class='fas fa-download'></i> Export Data
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Recent Activity -->
+            <div class='cache-section'>
+                <h4><i class='fas fa-history'></i> Recent API Calls</h4>
+                <div class='cache-activity' id='cacheActivity'>
+                    <p class='cache-empty-state'>No recent activity</p>
+                </div>
+            </div>
+        </div>
     </div>
     
     <!-- ============================================
@@ -545,11 +669,13 @@
          ============================================ -->
     
     <!-- Modal Intro -->
-    <div id='modalIntro' class='modal'>
+    <div id='modalIntro' class='modal' role='dialog' aria-labelledby='intro-modal-title' aria-modal='true'>
         <div class='modal-content'>
             <div class='modal-header'>
-                <h2>🤖 Machine Learning Trend Prediction</h2>
-                <span class='close-modal' onclick='closeModal("modalIntro")'>&times;</span>
+                <h2 id='intro-modal-title'>🤖 Machine Learning Trend Prediction</h2>
+                <button class='close-modal' onclick='closeModal("modalIntro")' aria-label='Close dialog'>
+                    <i class='fas fa-times'></i>
+                </button>
             </div>
             <div class='modal-body'>
                 <h3>🧠 What is this page?</h3>
@@ -584,11 +710,13 @@
     </div>
     
     <!-- Modal Ensemble -->
-    <div id='modalEnsemble' class='modal'>
+    <div id='modalEnsemble' class='modal' role='dialog' aria-labelledby='ensemble-modal-title' aria-modal='true'>
         <div class='modal-content'>
             <div class='modal-header'>
-                <h2>🎯 Ensemble Prediction</h2>
-                <span class='close-modal' onclick='closeModal("modalEnsemble")'>&times;</span>
+                <h2 id='ensemble-modal-title'>🎯 Ensemble Prediction</h2>
+                <button class='close-modal' onclick='closeModal("modalEnsemble")' aria-label='Close dialog'>
+                    <i class='fas fa-times'></i>
+                </button>
             </div>
             <div class='modal-body'>
                 <h3>What is Ensemble Learning?</h3>
@@ -613,10 +741,451 @@
         </div>
     </div>
     
-    <!-- Scripts -->
-    <script src='assets/js/dark-mode.js'></script>  <!-- ✅ NOUVEAU -->
+    <!-- ============================================
+         INLINE STYLES FOR CORRECTIONS
+         ============================================ -->
+    <style>
+        /* Screen reader only class */
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border-width: 0;
+        }
+        
+        /* Badge cache mini dans header */
+        .cache-badge-mini {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background: var(--danger-color);
+            color: white;
+            font-size: 0.625rem;
+            font-weight: 600;
+            padding: 2px 5px;
+            border-radius: 10px;
+            min-width: 18px;
+            text-align: center;
+        }
+        
+        .btn-icon-header {
+            position: relative;
+            background: var(--background-secondary);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            width: 40px;
+            height: 40px;
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            transition: all var(--transition-base);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .btn-icon-header:hover {
+            background: var(--primary-color);
+            color: white;
+            transform: translateY(-2px);
+        }
+        
+        /* Styles pour les modals */
+        .formula-box {
+            background: #f8f9fa;
+            border-left: 4px solid #2649B2;
+            padding: 15px 20px;
+            margin: 15px 0;
+            border-radius: 5px;
+        }
+        
+        .tip-box {
+            background: #d4edda;
+            border-left: 4px solid #28a745;
+            padding: 15px 20px;
+            margin: 15px 0;
+            border-radius: 5px;
+        }
+        
+        .warning-box {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px 20px;
+            margin: 15px 0;
+            border-radius: 5px;
+        }
+        
+        .key-term {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-weight: 700;
+        }
+    </style>
+    
+    <!-- ============================================
+         📜 SCRIPTS - ORDRE IMPORTANT
+         ============================================ -->
+    
+    <!-- ✅ Cache Widget Script (IDENTIQUE À MARKET DATA) -->
+    <script>
+        /**
+         * 🗄️ Cache Widget Management (COPIE EXACTE DE MARKET DATA)
+         */
+        let cacheWidgetOpen = false;
+        let cacheStats = {
+            hits: 0,
+            misses: 0,
+            entries: 0,
+            size: 0
+        };
+        
+        function toggleCacheWidget() {
+            const widget = document.getElementById('cacheWidget');
+            if (!widget) return;
+            
+            cacheWidgetOpen = !cacheWidgetOpen;
+            
+            if (cacheWidgetOpen) {
+                widget.classList.add('active');
+                refreshCacheStats();
+            } else {
+                widget.classList.remove('active');
+            }
+        }
+        
+        function refreshCacheStats() {
+            console.log('🔄 Refreshing cache stats...');
+            
+            let entries = 0;
+            let totalSize = 0;
+            
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                if (key && key.startsWith('tp_cache_')) {
+                    entries++;
+                    const value = localStorage.getItem(key);
+                    if (value) {
+                        totalSize += value.length;
+                    }
+                }
+            }
+            
+            cacheStats.entries = entries;
+            cacheStats.size = totalSize;
+            
+            const entriesEl = document.getElementById('cacheEntriesCount');
+            const sizeEl = document.getElementById('cacheSize');
+            const hitRateEl = document.getElementById('cacheHitRate');
+            const badgeEl = document.getElementById('cacheBadge');
+            const badgeMiniEl = document.getElementById('cacheBadgeMini');
+            
+            if (entriesEl) entriesEl.textContent = entries;
+            if (sizeEl) sizeEl.textContent = (totalSize / 1024).toFixed(2) + ' KB';
+            if (badgeEl) badgeEl.textContent = entries;
+            if (badgeMiniEl) badgeMiniEl.textContent = entries;
+            
+            const total = cacheStats.hits + cacheStats.misses;
+            if (total > 0 && hitRateEl) {
+                const hitRate = (cacheStats.hits / total * 100).toFixed(1);
+                hitRateEl.textContent = hitRate + '%';
+            }
+            
+            console.log('✅ Cache stats refreshed:', cacheStats);
+        }
+        
+        function clearLocalCache() {
+            if (!confirm('Are you sure you want to clear the local cache? This will remove all cached stock data.')) {
+                return;
+            }
+            
+            console.log('🗑️ Clearing local cache...');
+            
+            let cleared = 0;
+            const keys = [];
+            
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                if (key && key.startsWith('tp_cache_')) {
+                    keys.push(key);
+                }
+            }
+            
+            keys.forEach(key => {
+                localStorage.removeItem(key);
+                cleared++;
+            });
+            
+            cacheStats.hits = 0;
+            cacheStats.misses = 0;
+            
+            console.log(`✅ Cleared ${cleared} cache entries`);
+            
+            refreshCacheStats();
+            
+            if (window.TrendPrediction && window.TrendPrediction.showNotification) {
+                window.TrendPrediction.showNotification(`Cache cleared: ${cleared} entries removed`, 'success');
+            } else {
+                alert(`Cache cleared: ${cleared} entries removed`);
+            }
+        }
+        
+        function exportCacheData() {
+            console.log('📤 Exporting cache data...');
+            
+            const cacheData = {};
+            
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                if (key && key.startsWith('tp_cache_')) {
+                    try {
+                        const value = localStorage.getItem(key);
+                        cacheData[key] = JSON.parse(value);
+                    } catch (e) {
+                        cacheData[key] = localStorage.getItem(key);
+                    }
+                }
+            }
+            
+            const exportObj = {
+                exportDate: new Date().toISOString(),
+                stats: cacheStats,
+                data: cacheData
+            };
+            
+            const json = JSON.stringify(exportObj, null, 2);
+            const blob = new Blob([json], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `trend_cache_export_${new Date().toISOString().split('T')[0]}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+            
+            console.log('✅ Cache data exported');
+            
+            if (window.TrendPrediction && window.TrendPrediction.showNotification) {
+                window.TrendPrediction.showNotification('Cache data exported successfully!', 'success');
+            }
+        }
+        
+        setInterval(() => {
+            if (cacheWidgetOpen) {
+                refreshCacheStats();
+            } else {
+                let entries = 0;
+                for (let i = 0; i < localStorage.length; i++) {
+                    const key = localStorage.key(i);
+                    if (key && key.startsWith('tp_cache_')) {
+                        entries++;
+                    }
+                }
+                const badgeEl = document.getElementById('cacheBadge');
+                const badgeMiniEl = document.getElementById('cacheBadgeMini');
+                if (badgeEl) badgeEl.textContent = entries;
+                if (badgeMiniEl) badgeMiniEl.textContent = entries;
+            }
+        }, 5000);
+        
+        window.cacheWidget = {
+            updateRateLimitStatus: function(remaining, max) {
+                const remainingEl = document.getElementById('rateLimitRemaining');
+                const progressEl = document.getElementById('rateLimitProgress');
+                
+                if (remainingEl) {
+                    remainingEl.textContent = remaining;
+                }
+                
+                if (progressEl) {
+                    const percentage = (remaining / max) * 100;
+                    progressEl.style.width = percentage + '%';
+                    
+                    if (percentage > 50) {
+                        progressEl.style.background = 'linear-gradient(90deg, #10b981, #059669)';
+                    } else if (percentage > 25) {
+                        progressEl.style.background = 'linear-gradient(90deg, #f59e0b, #d97706)';
+                    } else {
+                        progressEl.style.background = 'linear-gradient(90deg, #ef4444, #dc2626)';
+                    }
+                }
+            },
+            
+            updateQueueStatus: function(length, waitTime) {
+                const queueEl = document.getElementById('queueLength');
+                
+                if (queueEl) {
+                    queueEl.textContent = length;
+                    
+                    if (length > 0) {
+                        queueEl.style.color = '#ef4444';
+                        queueEl.style.fontWeight = '700';
+                    } else {
+                        queueEl.style.color = '';
+                        queueEl.style.fontWeight = '';
+                    }
+                }
+            },
+            
+            logActivity: function(type, symbol, fromCache) {
+                const activityEl = document.getElementById('cacheActivity');
+                if (!activityEl) return;
+                
+                const now = new Date().toLocaleTimeString('fr-FR');
+                const icon = fromCache ? '💾' : '🌐';
+                const source = fromCache ? 'Cache' : 'API';
+                
+                const entry = document.createElement('div');
+                entry.className = 'cache-activity-entry';
+                entry.innerHTML = `
+                    <span class='cache-activity-time'>${now}</span>
+                    <span class='cache-activity-icon'>${icon}</span>
+                    <span class='cache-activity-text'>${type} ${symbol} from ${source}</span>
+                `;
+                
+                if (activityEl.firstChild && activityEl.firstChild.classList.contains('cache-empty-state')) {
+                    activityEl.innerHTML = '';
+                }
+                activityEl.insertBefore(entry, activityEl.firstChild);
+                
+                while (activityEl.children.length > 10) {
+                    activityEl.removeChild(activityEl.lastChild);
+                }
+                
+                if (fromCache) {
+                    cacheStats.hits++;
+                } else {
+                    cacheStats.misses++;
+                }
+            }
+        };
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            refreshCacheStats();
+        });
+    </script>
+    
+    <!-- Modal Management Script -->
+    <script>
+        function openModal(modalId) {
+            const modal = document.getElementById(modalId);
+            if (modal) {
+                modal.classList.add('active');
+                document.body.style.overflow = 'hidden';
+            } else {
+                console.warn('⚠️ Modal not found:', modalId);
+            }
+        }
+        
+        function closeModal(modalId) {
+            const modal = document.getElementById(modalId);
+            if (modal) {
+                modal.classList.remove('active');
+                document.body.style.overflow = '';
+            }
+        }
+        
+        window.addEventListener('click', function(event) {
+            if (event.target.classList.contains('modal')) {
+                event.target.classList.remove('active');
+                document.body.style.overflow = '';
+            }
+        });
+        
+        window.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                document.querySelectorAll('.modal.active').forEach(modal => {
+                    modal.classList.remove('active');
+                });
+                document.body.style.overflow = '';
+            }
+        });
+    </script>
+    
+    <!-- ✅ Core Scripts (ORDRE IMPORTANT) -->
+    <script src='assets/js/config.js'></script>
+    <script src='assets/js/api-client.js'></script>
+    <script src='assets/js/dark-mode.js'></script>
     <script src='assets/js/common.js'></script>
     <script src='assets/js/sidebar.js'></script>
+    
+    <!-- ✅ Trend Prediction Script (VERSION CORRIGÉE AVEC TWELVE DATA) -->
     <script src='assets/js/trend-prediction.js'></script>
+    
+    <!-- ============================================
+         ✅ FIX MENU UTILISATEUR - Force l'initialisation
+         ============================================ -->
+    <script>
+        (function forceUserMenuInit() {
+            console.log('🔧 Force initializing user menu...');
+            
+            const initMenu = () => {
+                const trigger = document.getElementById('sidebarUserTrigger');
+                const dropdown = document.getElementById('sidebarUserDropdown');
+                
+                if (!trigger || !dropdown) {
+                    console.error('❌ User menu elements not found');
+                    return;
+                }
+                
+                const newTrigger = trigger.cloneNode(true);
+                trigger.parentNode.replaceChild(newTrigger, trigger);
+                
+                const freshTrigger = document.getElementById('sidebarUserTrigger');
+                const freshDropdown = document.getElementById('sidebarUserDropdown');
+                
+                console.log('✅ Adding click event to trigger...');
+                
+                freshTrigger.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    
+                    console.log('👆 User menu trigger clicked!');
+                    
+                    const isActive = freshDropdown.classList.contains('active');
+                    
+                    if (isActive) {
+                        freshDropdown.classList.remove('active');
+                        console.log('🔽 Closing dropdown');
+                    } else {
+                        freshDropdown.classList.add('active');
+                        console.log('🔼 Opening dropdown');
+                    }
+                    
+                    const arrow = freshTrigger.querySelector('.sidebar-user-arrow');
+                    if (arrow) {
+                        arrow.style.transform = isActive ? 'rotate(0deg)' : 'rotate(180deg)';
+                        arrow.style.transition = 'transform 0.3s ease';
+                    }
+                });
+                
+                document.addEventListener('click', function(e) {
+                    if (!freshTrigger.contains(e.target) && !freshDropdown.contains(e.target)) {
+                        freshDropdown.classList.remove('active');
+                        const arrow = freshTrigger.querySelector('.sidebar-user-arrow');
+                        if (arrow) {
+                            arrow.style.transform = 'rotate(0deg)';
+                        }
+                    }
+                });
+                
+                freshDropdown.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                });
+                
+                console.log('✅ User menu initialized successfully!');
+            };
+            
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', initMenu);
+            } else {
+                setTimeout(initMenu, 100);
+            }
+        })();
+    </script>
 </body>
 </html>

@@ -1,12 +1,175 @@
 /* ==============================================
-   TREND-PREDICTION.JS - YAHOO FINANCE API SEARCH
+   TREND-PREDICTION.JS - ML STOCK PREDICTION
+   Version avec Twelve Data API + Rate Limiting + Cache Optimisé
    ============================================== */
 
+// ========== RATE LIMITER (IDENTIQUE À MARKET DATA) ==========
+class RateLimiter {
+    constructor(maxRequests = 8, windowMs = 60000) {
+        this.maxRequests = maxRequests;
+        this.windowMs = windowMs;
+        this.queue = [];
+        this.requestTimes = [];
+        this.processing = false;
+    }
+    
+    async execute(fn, priority = 'normal') {
+        return new Promise((resolve, reject) => {
+            this.queue.push({
+                fn,
+                priority,
+                resolve,
+                reject,
+                timestamp: Date.now()
+            });
+            
+            this.queue.sort((a, b) => {
+                const priorities = { high: 3, normal: 2, low: 1 };
+                return (priorities[b.priority] || 2) - (priorities[a.priority] || 2);
+            });
+            
+            this.processQueue();
+        });
+    }
+    
+    async processQueue() {
+        if (this.processing || this.queue.length === 0) return;
+        
+        this.processing = true;
+        
+        while (this.queue.length > 0) {
+            const now = Date.now();
+            this.requestTimes = this.requestTimes.filter(time => now - time < this.windowMs);
+            
+            if (this.requestTimes.length >= this.maxRequests) {
+                const oldestRequest = Math.min(...this.requestTimes);
+                const waitTime = this.windowMs - (now - oldestRequest) + 100;
+                
+                console.log(`⏳ Rate limit reached. Waiting ${Math.ceil(waitTime/1000)}s...`);
+                
+                if (window.cacheWidget) {
+                    window.cacheWidget.updateQueueStatus(this.queue.length, waitTime);
+                }
+                
+                await this.sleep(waitTime);
+                continue;
+            }
+            
+            const item = this.queue.shift();
+            this.requestTimes.push(Date.now());
+            
+            try {
+                const result = await item.fn();
+                item.resolve(result);
+            } catch (error) {
+                item.reject(error);
+            }
+            
+            await this.sleep(100);
+        }
+        
+        this.processing = false;
+        
+        if (window.cacheWidget) {
+            window.cacheWidget.updateQueueStatus(0, 0);
+        }
+    }
+    
+    sleep(ms) {
+        return new Promise(resolve => setTimeout(resolve, ms));
+    }
+    
+    getRemainingRequests() {
+        const now = Date.now();
+        this.requestTimes = this.requestTimes.filter(time => now - time < this.windowMs);
+        return this.maxRequests - this.requestTimes.length;
+    }
+    
+    getQueueLength() {
+        return this.queue.length;
+    }
+}
+
+// ========== CACHE OPTIMISÉ (IDENTIQUE À MARKET DATA) ==========
+class OptimizedCache {
+    constructor() {
+        this.prefix = 'tp_cache_'; // trend prediction cache
+        this.staticTTL = 24 * 60 * 60 * 1000; // 24h
+        this.dynamicTTL = 5 * 60 * 1000; // 5min
+    }
+    
+    set(key, data, ttl = null) {
+        try {
+            const cacheData = {
+                data,
+                timestamp: Date.now(),
+                ttl: ttl || this.dynamicTTL
+            };
+            localStorage.setItem(this.prefix + key, JSON.stringify(cacheData));
+            return true;
+        } catch (error) {
+            console.warn('Cache storage error:', error);
+            return false;
+        }
+    }
+    
+    get(key) {
+        try {
+            const cached = localStorage.getItem(this.prefix + key);
+            if (!cached) return null;
+            
+            const cacheData = JSON.parse(cached);
+            const now = Date.now();
+            
+            if (now - cacheData.timestamp > cacheData.ttl) {
+                this.delete(key);
+                return null;
+            }
+            
+            return cacheData.data;
+        } catch (error) {
+            console.warn('Cache retrieval error:', error);
+            return null;
+        }
+    }
+    
+    delete(key) {
+        localStorage.removeItem(this.prefix + key);
+    }
+    
+    clear() {
+        Object.keys(localStorage)
+            .filter(key => key.startsWith(this.prefix))
+            .forEach(key => localStorage.removeItem(key));
+    }
+    
+    getAge(key) {
+        try {
+            const cached = localStorage.getItem(this.prefix + key);
+            if (!cached) return null;
+            
+            const cacheData = JSON.parse(cached);
+            return Date.now() - cacheData.timestamp;
+        } catch {
+            return null;
+        }
+    }
+}
+
+// ========== MAIN TREND PREDICTION OBJECT ==========
 const TrendPrediction = {
+    // API Client & Cache
+    apiClient: null,
+    rateLimiter: null,
+    optimizedCache: null,
+    
+    // Current State
     currentSymbol: 'AAPL',
     predictionHorizon: 7,
     trainingPeriod: '6M',
     stockData: null,
+    
+    // Search functionality
     selectedSuggestionIndex: -1,
     searchTimeout: null,
     
@@ -19,13 +182,6 @@ const TrendPrediction = {
         neural: null,
         arima: null
     },
-    
-    // CORS Proxies
-    CORS_PROXIES: [
-        'https://api.allorigins.win/raw?url=',
-        'https://corsproxy.io/?',
-        'https://api.codetabs.com/v1/proxy?quest='
-    ],
     
     // Colors
     colors: {
@@ -43,57 +199,139 @@ const TrendPrediction = {
     // INITIALIZATION
     // ============================================
     
-    init() {
-        console.log('🤖 ML Trend Prediction - Initializing...');
-        this.updateLastUpdate();
-        this.setupEventListeners();
-        
-        setTimeout(() => {
-            this.loadSymbol(this.currentSymbol);
-        }, 500);
+    async init() {
+        try {
+            console.log('🤖 Initializing ML Trend Prediction with Rate Limiting...');
+            
+            // Initialiser le rate limiter (8 req/min)
+            this.rateLimiter = new RateLimiter(8, 60000);
+            this.optimizedCache = new OptimizedCache();
+            
+            // Attendre l'authentification
+            await this.waitForAuth();
+            
+            // Initialiser le client API
+            this.apiClient = new FinanceAPIClient({
+                baseURL: APP_CONFIG.API_BASE_URL,
+                cacheDuration: APP_CONFIG.CACHE_DURATION || 300000,
+                maxRetries: APP_CONFIG.MAX_RETRIES || 2,
+                onLoadingChange: (isLoading) => {
+                    this.showLoading(isLoading);
+                }
+            });
+            
+            // Rendre accessible globalement
+            window.apiClient = this.apiClient;
+            window.rateLimiter = this.rateLimiter;
+            
+            this.updateLastUpdate();
+            this.setupEventListeners();
+            this.setupSearchListeners();
+            this.startCacheMonitoring();
+            
+            // Auto-load default symbol
+            setTimeout(() => {
+                this.loadSymbol(this.currentSymbol);
+            }, 500);
+            
+            console.log('✅ ML Trend Prediction initialized with rate limiting');
+            
+        } catch (error) {
+            console.error('Initialization error:', error);
+            this.showNotification('Failed to initialize application', 'error');
+        }
+    },
+    
+    async waitForAuth() {
+        return new Promise((resolve) => {
+            if (!firebase || !firebase.auth) {
+                console.warn('⚠️ Firebase not available');
+                resolve();
+                return;
+            }
+            
+            const unsubscribe = firebase.auth().onAuthStateChanged((user) => {
+                if (user) {
+                    console.log('✅ User authenticated for ML Trend Prediction');
+                    unsubscribe();
+                    resolve();
+                }
+            });
+            
+            setTimeout(() => {
+                resolve();
+            }, 3000);
+        });
+    },
+    
+    startCacheMonitoring() {
+        setInterval(() => {
+            if (window.cacheWidget) {
+                const remaining = this.rateLimiter.getRemainingRequests();
+                const queueLength = this.rateLimiter.getQueueLength();
+                
+                window.cacheWidget.updateRateLimitStatus(remaining, 8);
+                
+                if (queueLength > 0) {
+                    window.cacheWidget.updateQueueStatus(queueLength, 0);
+                }
+            }
+        }, 1000);
+    },
+    
+    async apiRequest(fn, priority = 'normal') {
+        return await this.rateLimiter.execute(fn, priority);
     },
     
     setupEventListeners() {
         const input = document.getElementById('symbolInput');
         if (input) {
-            // Input change for search
-            input.addEventListener('input', (e) => {
-                this.handleSearch(e.target.value);
-            });
-            
-            // Enter key
-            input.addEventListener('keydown', (e) => {
+            input.addEventListener('keypress', (e) => {
                 if (e.key === 'Enter') {
                     e.preventDefault();
-                    if (this.selectedSuggestionIndex >= 0) {
-                        const suggestions = document.querySelectorAll('.suggestion-item');
-                        if (suggestions[this.selectedSuggestionIndex]) {
-                            const symbol = suggestions[this.selectedSuggestionIndex].dataset.symbol;
-                            this.selectSuggestion(symbol);
-                        }
-                    } else {
-                        this.analyzeStock();
-                    }
-                } else if (e.key === 'ArrowDown') {
-                    e.preventDefault();
-                    this.navigateSuggestions('down');
-                } else if (e.key === 'ArrowUp') {
-                    e.preventDefault();
-                    this.navigateSuggestions('up');
-                } else if (e.key === 'Escape') {
-                    this.hideSuggestions();
-                }
-            });
-            
-            // Focus shows suggestions if there's a value
-            input.addEventListener('focus', (e) => {
-                if (e.target.value.trim().length > 0) {
-                    this.handleSearch(e.target.value);
+                    this.analyzeStock();
                 }
             });
         }
+    },
+    
+    setupSearchListeners() {
+        const input = document.getElementById('symbolInput');
+        if (!input) return;
         
-        // Click outside to close
+        input.addEventListener('input', (e) => {
+            this.handleSearch(e.target.value);
+        });
+        
+        input.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                if (this.selectedSuggestionIndex >= 0) {
+                    const suggestions = document.querySelectorAll('.suggestion-item');
+                    if (suggestions[this.selectedSuggestionIndex]) {
+                        const symbol = suggestions[this.selectedSuggestionIndex].dataset.symbol;
+                        this.selectSuggestion(symbol);
+                    }
+                } else {
+                    this.analyzeStock();
+                }
+            } else if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                this.navigateSuggestions('down');
+            } else if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                this.navigateSuggestions('up');
+            } else if (e.key === 'Escape') {
+                this.hideSuggestions();
+            }
+        });
+        
+        input.addEventListener('focus', (e) => {
+            if (e.target.value.trim().length > 0) {
+                this.handleSearch(e.target.value);
+            }
+        });
+        
         document.addEventListener('click', (e) => {
             if (!e.target.closest('.search-input-wrapper')) {
                 this.hideSuggestions();
@@ -102,7 +340,7 @@ const TrendPrediction = {
     },
     
     // ============================================
-    // YAHOO FINANCE SEARCH API
+    // SEARCH WITH TWELVE DATA API
     // ============================================
     
     handleSearch(query) {
@@ -113,50 +351,44 @@ const TrendPrediction = {
             return;
         }
         
-        // Debounce search
         clearTimeout(this.searchTimeout);
+        
         this.searchTimeout = setTimeout(() => {
-            this.searchYahooFinance(trimmedQuery);
-        }, 300);
+            this.searchSymbols(trimmedQuery);
+        }, 500);
     },
     
-    async searchYahooFinance(query) {
-        console.log('🔍 Searching Yahoo Finance for:', query);
+    async searchSymbols(query) {
+        console.log('🔍 Searching for:', query);
         
         const container = document.getElementById('searchSuggestions');
+        if (!container) return;
+        
+        // Vérifier le cache
+        const cacheKey = `search_${query.toUpperCase()}`;
+        const cached = this.optimizedCache.get(cacheKey);
+        
+        if (cached) {
+            console.log('✅ Search results from cache');
+            this.displaySearchResults(cached, query);
+            return;
+        }
+        
         container.innerHTML = '<div class="suggestion-loading"><i class="fas fa-spinner fa-spin"></i> Searching...</div>';
         container.classList.add('active');
         
         try {
-            // Yahoo Finance Autosuggest API
-            const searchUrl = `https://query1.finance.yahoo.com/v1/finance/search?q=${encodeURIComponent(query)}&quotesCount=20&newsCount=0&enableFuzzyQuery=false`;
+            const results = await this.apiRequest(() => this.apiClient.searchSymbol(query), 'low');
             
-            // Try with CORS proxy
-            for (let i = 0; i < this.CORS_PROXIES.length; i++) {
-                try {
-                    const proxyUrl = this.CORS_PROXIES[i];
-                    const url = proxyUrl + encodeURIComponent(searchUrl);
-                    
-                    const response = await fetch(url);
-                    if (!response.ok) throw new Error(`HTTP ${response.status}`);
-                    
-                    const data = await response.json();
-                    console.log('✅ Search results:', data);
-                    
-                    if (data.quotes && data.quotes.length > 0) {
-                        this.displaySearchResults(data.quotes, query);
-                    } else {
-                        this.displayNoResults();
-                    }
-                    
-                    return;
-                    
-                } catch (error) {
-                    console.warn(`Search proxy ${i + 1} failed:`, error.message);
-                    if (i === this.CORS_PROXIES.length - 1) {
-                        throw error;
-                    }
+            if (results.data && results.data.length > 0) {
+                this.optimizedCache.set(cacheKey, results.data, 60 * 60 * 1000);
+                this.displaySearchResults(results.data, query);
+                
+                if (window.cacheWidget) {
+                    window.cacheWidget.logActivity('Search', query, false);
                 }
+            } else {
+                this.displayNoResults();
             }
             
         } catch (error) {
@@ -165,65 +397,40 @@ const TrendPrediction = {
         }
     },
     
-    displaySearchResults(quotes, query) {
+    displaySearchResults(results, query) {
         const container = document.getElementById('searchSuggestions');
+        if (!container) return;
         
-        // Filter and group by type
-        const stocks = [];
-        const etfs = [];
-        const crypto = [];
-        const indices = [];
-        const other = [];
+        const grouped = {
+            stocks: [],
+            etfs: [],
+            crypto: [],
+            indices: [],
+            other: []
+        };
         
-        quotes.forEach(quote => {
-            const item = {
-                symbol: quote.symbol,
-                name: quote.shortname || quote.longname || quote.symbol,
-                type: quote.quoteType || 'EQUITY',
-                exchange: quote.exchange || '',
-                score: quote.score || 0
-            };
+        results.forEach(item => {
+            const type = (item.instrument_type || 'Common Stock').toLowerCase();
             
-            switch (item.type) {
-                case 'EQUITY':
-                    stocks.push(item);
-                    break;
-                case 'ETF':
-                    etfs.push(item);
-                    break;
-                case 'CRYPTOCURRENCY':
-                    crypto.push(item);
-                    break;
-                case 'INDEX':
-                    indices.push(item);
-                    break;
-                default:
-                    other.push(item);
+            if (type.includes('stock') || type.includes('equity')) {
+                grouped.stocks.push(item);
+            } else if (type.includes('etf')) {
+                grouped.etfs.push(item);
+            } else if (type.includes('crypto') || type.includes('digital currency')) {
+                grouped.crypto.push(item);
+            } else if (type.includes('index')) {
+                grouped.indices.push(item);
+            } else {
+                grouped.other.push(item);
             }
         });
         
-        // Build HTML
         let html = '';
-        
-        if (stocks.length > 0) {
-            html += this.buildCategoryHTML('Stocks', stocks, query);
-        }
-        
-        if (etfs.length > 0) {
-            html += this.buildCategoryHTML('ETFs', etfs, query);
-        }
-        
-        if (crypto.length > 0) {
-            html += this.buildCategoryHTML('Cryptocurrencies', crypto, query);
-        }
-        
-        if (indices.length > 0) {
-            html += this.buildCategoryHTML('Indices', indices, query);
-        }
-        
-        if (other.length > 0) {
-            html += this.buildCategoryHTML('Other', other, query);
-        }
+        if (grouped.stocks.length > 0) html += this.buildCategoryHTML('Stocks', grouped.stocks, query);
+        if (grouped.etfs.length > 0) html += this.buildCategoryHTML('ETFs', grouped.etfs, query);
+        if (grouped.crypto.length > 0) html += this.buildCategoryHTML('Cryptocurrencies', grouped.crypto, query);
+        if (grouped.indices.length > 0) html += this.buildCategoryHTML('Indices', grouped.indices, query);
+        if (grouped.other.length > 0) html += this.buildCategoryHTML('Other', grouped.other, query);
         
         if (html === '') {
             this.displayNoResults();
@@ -232,8 +439,7 @@ const TrendPrediction = {
             container.classList.add('active');
             this.selectedSuggestionIndex = -1;
             
-            // Add click listeners
-            container.querySelectorAll('.suggestion-item').forEach((item, index) => {
+            container.querySelectorAll('.suggestion-item').forEach((item) => {
                 item.addEventListener('click', () => {
                     this.selectSuggestion(item.dataset.symbol);
                 });
@@ -264,18 +470,18 @@ const TrendPrediction = {
         
         items.slice(0, 10).forEach(item => {
             const highlightedSymbol = this.highlightMatch(item.symbol, query);
-            const highlightedName = this.highlightMatch(item.name, query);
+            const highlightedName = this.highlightMatch(item.instrument_name, query);
             
             html += `
-                <div class="suggestion-item" data-symbol="${item.symbol}">
+                <div class="suggestion-item" data-symbol="${this.escapeHtml(item.symbol)}">
                     <div class="suggestion-icon ${sectorMap[categoryName] || 'tech'}">
-                        ${item.symbol.substring(0, 2)}
+                        ${this.escapeHtml(item.symbol.substring(0, 2))}
                     </div>
                     <div class="suggestion-info">
                         <div class="suggestion-symbol">${highlightedSymbol}</div>
                         <div class="suggestion-name">${highlightedName}</div>
                     </div>
-                    ${item.exchange ? `<div class="suggestion-exchange">${item.exchange}</div>` : ''}
+                    ${item.exchange ? `<div class="suggestion-exchange">${this.escapeHtml(item.exchange)}</div>` : ''}
                 </div>
             `;
         });
@@ -284,14 +490,17 @@ const TrendPrediction = {
     },
     
     highlightMatch(text, query) {
-        if (!text || !query) return text;
-        
-        const regex = new RegExp(`(${query})`, 'gi');
-        return text.replace(regex, '<span class="suggestion-match">$1</span>');
+        if (!text || !query) return this.escapeHtml(text);
+        const escapedText = this.escapeHtml(text);
+        const escapedQuery = this.escapeHtml(query);
+        const regex = new RegExp(`(${escapedQuery})`, 'gi');
+        return escapedText.replace(regex, '<span class="suggestion-match">$1</span>');
     },
     
     displayNoResults() {
         const container = document.getElementById('searchSuggestions');
+        if (!container) return;
+        
         container.innerHTML = `
             <div class="no-results">
                 <i class="fas fa-search"></i>
@@ -304,6 +513,8 @@ const TrendPrediction = {
     
     displaySearchError() {
         const container = document.getElementById('searchSuggestions');
+        if (!container) return;
+        
         container.innerHTML = `
             <div class="no-results">
                 <i class="fas fa-exclamation-triangle"></i>
@@ -315,13 +526,18 @@ const TrendPrediction = {
     },
     
     selectSuggestion(symbol) {
-        document.getElementById('symbolInput').value = symbol;
+        const input = document.getElementById('symbolInput');
+        if (input) {
+            input.value = symbol;
+        }
         this.hideSuggestions();
         this.loadSymbol(symbol);
     },
     
     hideSuggestions() {
         const container = document.getElementById('searchSuggestions');
+        if (!container) return;
+        
         container.classList.remove('active');
         this.selectedSuggestionIndex = -1;
     },
@@ -330,12 +546,10 @@ const TrendPrediction = {
         const suggestions = document.querySelectorAll('.suggestion-item');
         if (suggestions.length === 0) return;
         
-        // Remove previous selection
         if (this.selectedSuggestionIndex >= 0) {
             suggestions[this.selectedSuggestionIndex].classList.remove('selected');
         }
         
-        // Update index
         if (direction === 'down') {
             this.selectedSuggestionIndex = (this.selectedSuggestionIndex + 1) % suggestions.length;
         } else {
@@ -344,13 +558,12 @@ const TrendPrediction = {
                 : this.selectedSuggestionIndex - 1;
         }
         
-        // Add new selection
         suggestions[this.selectedSuggestionIndex].classList.add('selected');
         suggestions[this.selectedSuggestionIndex].scrollIntoView({ block: 'nearest', behavior: 'smooth' });
     },
     
     // ============================================
-    // STOCK ANALYSIS
+    // STOCK ANALYSIS WITH TWELVE DATA
     // ============================================
     
     analyzeStock() {
@@ -365,129 +578,87 @@ const TrendPrediction = {
         document.getElementById('symbolInput').value = symbol;
         this.hideSuggestions();
         
-        this.showLoading(true, 'Fetching historical data...');
+        this.showLoading(true, 'Fetching historical data from Twelve Data...');
         this.hideResults();
         
         try {
-            await this.fetchStockData(symbol);
+            console.log(`📊 Loading ${symbol} with Twelve Data API...`);
+            
+            // Charger depuis le cache d'abord
+            const cachedQuote = this.optimizedCache.get(`quote_${symbol}`);
+            
+            // Données critiques avec rate limiting
+            const [quote, timeSeries] = await Promise.all([
+                this.apiRequest(() => this.apiClient.getQuote(symbol), 'high'),
+                this.apiRequest(() => this.getTimeSeriesForPeriod(symbol, this.trainingPeriod), 'high')
+            ]);
+            
+            if (!quote || !timeSeries) {
+                throw new Error('Failed to load stock data');
+            }
+            
+            this.stockData = {
+                symbol: quote.symbol,
+                prices: timeSeries.data,
+                quote: quote,
+                currency: 'USD'
+            };
+            
+            // Cache le quote
+            this.optimizedCache.set(`quote_${symbol}`, quote, 60000);
+            
+            if (window.cacheWidget) {
+                window.cacheWidget.logActivity('Quote', symbol, false);
+            }
+            
             this.displayStockHeader();
             
             await this.trainAllModels();
             this.displayResults();
             
             this.showLoading(false);
+            
+            console.log('✅ Stock data loaded and models trained');
             
         } catch (error) {
             console.error('Error loading stock data:', error);
-            console.log('Using demo data as fallback...');
-            this.stockData = this.generateDemoData(symbol);
-            this.displayStockHeader();
-            
-            await this.trainAllModels();
-            this.displayResults();
-            
+            this.showNotification(error.message || 'Failed to load stock data', 'error');
             this.showLoading(false);
         }
     },
     
-    async fetchStockData(symbol) {
-        const period = this.getPeriodParams(this.trainingPeriod);
-        const targetUrl = `https://query1.finance.yahoo.com/v8/finance/chart/${symbol}?interval=${period.interval}&range=${period.range}`;
-        
-        for (let i = 0; i < this.CORS_PROXIES.length; i++) {
-            try {
-                const proxyUrl = this.CORS_PROXIES[i];
-                const url = proxyUrl + encodeURIComponent(targetUrl);
-                
-                const response = await fetch(url);
-                if (!response.ok) throw new Error(`HTTP ${response.status}`);
-                
-                const data = await response.json();
-                if (data.chart && data.chart.error) {
-                    throw new Error(data.chart.error.description);
-                }
-                
-                const result = data.chart.result[0];
-                this.stockData = this.parseYahooData(result);
-                await this.fetchQuoteData(symbol);
-                
-                console.log('✅ Data fetched successfully');
-                return;
-                
-            } catch (error) {
-                console.warn(`Proxy ${i + 1} failed:`, error.message);
-                if (i === this.CORS_PROXIES.length - 1) {
-                    throw new Error('All proxies failed');
-                }
-            }
-        }
-    },
-    
-    async fetchQuoteData(symbol) {
-        try {
-            const targetUrl = `https://query1.finance.yahoo.com/v7/finance/quote?symbols=${symbol}`;
-            const proxyUrl = this.CORS_PROXIES[0];
-            const url = proxyUrl + encodeURIComponent(targetUrl);
-            
-            const response = await fetch(url);
-            const data = await response.json();
-            
-            if (data.quoteResponse && data.quoteResponse.result.length > 0) {
-                const quote = data.quoteResponse.result[0];
-                this.stockData.quote = {
-                    name: quote.longName || quote.shortName || symbol,
-                    symbol: quote.symbol,
-                    price: quote.regularMarketPrice,
-                    change: quote.regularMarketChange,
-                    changePercent: quote.regularMarketChangePercent
-                };
-            } else {
-                throw new Error('No quote data');
-            }
-        } catch (error) {
-            console.warn('Quote fetch failed, using fallback');
-            const lastPrice = this.stockData.prices[this.stockData.prices.length - 1];
-            const prevPrice = this.stockData.prices[this.stockData.prices.length - 2] || lastPrice;
-            
-            this.stockData.quote = {
-                name: symbol,
-                symbol: symbol,
-                price: lastPrice.close,
-                change: lastPrice.close - prevPrice.close,
-                changePercent: ((lastPrice.close - prevPrice.close) / prevPrice.close) * 100
-            };
-        }
-    },
-    
-    parseYahooData(result) {
-        const timestamps = result.timestamp;
-        const quotes = result.indicators.quote[0];
-        
-        const prices = timestamps.map((time, i) => ({
-            timestamp: time * 1000,
-            open: quotes.open[i],
-            high: quotes.high[i],
-            low: quotes.low[i],
-            close: quotes.close[i],
-            volume: quotes.volume[i]
-        })).filter(p => p.close !== null);
-        
-        return {
-            symbol: result.meta.symbol,
-            prices: prices,
-            currency: result.meta.currency,
-            quote: {}
+    async getTimeSeriesForPeriod(symbol, period) {
+        const periodMap = {
+            '3M': { interval: '1day', outputsize: 90 },
+            '6M': { interval: '1day', outputsize: 180 },
+            '1Y': { interval: '1day', outputsize: 252 },
+            '2Y': { interval: '1day', outputsize: 504 }
         };
-    },
-    
-    getPeriodParams(period) {
-        const params = {
-            '3M': { range: '3mo', interval: '1d' },
-            '6M': { range: '6mo', interval: '1d' },
-            '1Y': { range: '1y', interval: '1d' },
-            '2Y': { range: '2y', interval: '1d' }
-        };
-        return params[period] || params['6M'];
+        
+        const config = periodMap[period] || periodMap['6M'];
+        
+        // Vérifier le cache
+        const cacheKey = `timeseries_${symbol}_${period}`;
+        const cached = this.optimizedCache.get(cacheKey);
+        
+        if (cached) {
+            console.log(`✅ Time series for ${symbol} loaded from cache`);
+            if (window.cacheWidget) {
+                window.cacheWidget.logActivity('TimeSeries', symbol, true);
+            }
+            return cached;
+        }
+        
+        const data = await this.apiClient.getTimeSeries(symbol, config.interval, config.outputsize);
+        
+        // Cache pour 5 minutes
+        this.optimizedCache.set(cacheKey, data, 5 * 60 * 1000);
+        
+        if (window.cacheWidget) {
+            window.cacheWidget.logActivity('TimeSeries', symbol, false);
+        }
+        
+        return data;
     },
     
     changeHorizon(days) {
@@ -495,8 +666,14 @@ const TrendPrediction = {
         
         document.querySelectorAll('.horizon-btn').forEach(btn => {
             btn.classList.remove('active');
+            btn.setAttribute('aria-pressed', 'false');
         });
-        document.querySelector(`[data-days="${days}"]`)?.classList.add('active');
+        
+        const activeBtn = document.querySelector(`[data-days="${days}"]`);
+        if (activeBtn) {
+            activeBtn.classList.add('active');
+            activeBtn.setAttribute('aria-pressed', 'true');
+        }
         
         if (this.currentSymbol && this.stockData) {
             this.trainAllModels();
@@ -560,9 +737,18 @@ const TrendPrediction = {
         console.log('✅ All models trained');
     },
     
-    // ============================================
-    // LINEAR REGRESSION
-    // ============================================
+    sleep(ms) {
+        return new Promise(resolve => setTimeout(resolve, ms));
+    }
+};
+
+// ========== CONTINUATION DE TREND-PREDICTION.JS ==========
+
+// ============================================
+// LINEAR REGRESSION
+// ============================================
+
+Object.assign(TrendPrediction, {
     
     async trainLinearRegression(prices) {
         const n = prices.length;
@@ -950,7 +1136,7 @@ const TrendPrediction = {
     },
     
     // ============================================
-    // HELPER FUNCTIONS
+    // HELPER FUNCTIONS FOR ML
     // ============================================
     
     solveLinearSystem(X, y) {
@@ -1035,15 +1221,17 @@ const TrendPrediction = {
             sum += Math.pow(actual[i] - predicted[i], 2);
         }
         return Math.sqrt(sum / actual.length);
-    },
+    }
     
-    sleep(ms) {
-        return new Promise(resolve => setTimeout(resolve, ms));
-    },
-    
-    // ============================================
-    // DISPLAY FUNCTIONS
-    // ============================================
+});
+
+// ========== CONTINUATION ET FIN DE TREND-PREDICTION.JS ==========
+
+// ============================================
+// DISPLAY FUNCTIONS
+// ============================================
+
+Object.assign(TrendPrediction, {
     
     displayStockHeader() {
         const quote = this.stockData.quote;
@@ -1053,7 +1241,7 @@ const TrendPrediction = {
         
         const price = quote.price || 0;
         const change = quote.change || 0;
-        const changePercent = quote.changePercent || 0;
+        const changePercent = quote.percentChange || 0;
         
         document.getElementById('currentPrice').textContent = this.formatCurrency(price);
         
@@ -1075,9 +1263,11 @@ const TrendPrediction = {
         const metricsContainer = document.getElementById(`metrics-${modelName}`);
         if (metricsContainer) {
             const metrics = metricsContainer.querySelectorAll('.metric strong');
-            metrics[0].textContent = this.formatCurrency(modelResult.finalPrediction);
-            metrics[1].textContent = (modelResult.r2 * 100).toFixed(1) + '%';
-            metrics[2].textContent = modelResult.rmse.toFixed(2);
+            if (metrics.length >= 3) {
+                metrics[0].textContent = this.formatCurrency(modelResult.finalPrediction);
+                metrics[1].textContent = (modelResult.r2 * 100).toFixed(1) + '%';
+                metrics[2].textContent = modelResult.rmse.toFixed(2);
+            }
         }
         
         this.createModelChart(modelName, modelResult);
@@ -1116,7 +1306,9 @@ const TrendPrediction = {
             tooltip: {
                 shared: true,
                 crosshairs: true,
-                borderRadius: 10
+                borderRadius: 10,
+                valueDecimals: 2,
+                valuePrefix: '$'
             },
             plotOptions: {
                 series: {
@@ -1150,6 +1342,10 @@ const TrendPrediction = {
         
         document.getElementById('resultsPanel').classList.remove('hidden');
     },
+    
+    // ============================================
+    // COMPARISON CHART
+    // ============================================
     
     createComparisonChart() {
         const prices = this.stockData.prices;
@@ -1199,10 +1395,22 @@ const TrendPrediction = {
             },
             title: {
                 text: `${this.currentSymbol} - ML Model Predictions Comparison`,
-                style: { color: this.colors.primary, fontWeight: 'bold' }
+                style: { 
+                    color: this.colors.primary, 
+                    fontWeight: 'bold',
+                    fontSize: '1.25rem'
+                }
+            },
+            subtitle: {
+                text: `Prediction Horizon: ${this.predictionHorizon} days | Training Period: ${this.trainingPeriod}`,
+                style: { 
+                    color: '#64748b',
+                    fontSize: '0.875rem'
+                }
             },
             rangeSelector: { enabled: false },
             navigator: { enabled: false },
+            scrollbar: { enabled: false },
             xAxis: {
                 type: 'datetime',
                 plotLines: [{
@@ -1212,31 +1420,54 @@ const TrendPrediction = {
                     width: 2,
                     label: {
                         text: 'Prediction Start',
-                        style: { color: '#dc3545', fontWeight: 'bold' }
-                    }
+                        style: { 
+                            color: '#dc3545', 
+                            fontWeight: 'bold' 
+                        }
+                    },
+                    zIndex: 5
                 }]
             },
             yAxis: {
-                title: { text: 'Price' }
+                title: { 
+                    text: 'Price (USD)',
+                    style: { color: '#475569' }
+                },
+                labels: {
+                    formatter: function() {
+                        return '$' + this.value.toFixed(2);
+                    }
+                }
             },
             tooltip: {
                 shared: true,
                 crosshairs: true,
-                borderRadius: 10
+                borderRadius: 10,
+                valueDecimals: 2,
+                valuePrefix: '$'
             },
             legend: {
                 enabled: true,
                 align: 'center',
-                verticalAlign: 'bottom'
+                verticalAlign: 'bottom',
+                itemStyle: {
+                    color: '#475569',
+                    fontWeight: '500'
+                }
             },
             series: series,
             credits: { enabled: false }
         });
     },
     
+    // ============================================
+    // PERFORMANCE CHARTS
+    // ============================================
+    
     createPerformanceCharts() {
         const models = Object.entries(this.models).filter(([_, m]) => m !== null);
         
+        // Accuracy Chart
         const accuracyData = models.map(([name, model]) => ({
             name: model.name,
             y: model.r2 * 100,
@@ -1246,18 +1477,33 @@ const TrendPrediction = {
         Highcharts.chart('accuracyChart', {
             chart: {
                 type: 'column',
-                borderRadius: 15
+                borderRadius: 15,
+                height: 400
             },
             title: {
                 text: 'Model Accuracy (R² Score)',
-                style: { color: this.colors.primary, fontWeight: 'bold' }
+                style: { 
+                    color: this.colors.primary, 
+                    fontWeight: 'bold',
+                    fontSize: '1.125rem'
+                }
             },
             xAxis: {
-                type: 'category'
+                type: 'category',
+                labels: {
+                    style: { 
+                        color: '#475569',
+                        fontWeight: '500'
+                    }
+                }
             },
             yAxis: {
-                title: { text: 'R² Score (%)' },
-                max: 100
+                title: { 
+                    text: 'R² Score (%)',
+                    style: { color: '#475569' }
+                },
+                max: 100,
+                gridLineColor: '#f1f5f9'
             },
             legend: { enabled: false },
             tooltip: {
@@ -1269,17 +1515,23 @@ const TrendPrediction = {
                     borderRadius: '25%',
                     dataLabels: {
                         enabled: true,
-                        format: '{point.y:.1f}%'
+                        format: '{point.y:.1f}%',
+                        style: {
+                            fontWeight: 'bold',
+                            color: '#475569'
+                        }
                     }
                 }
             },
             series: [{
                 name: 'Accuracy',
-                data: accuracyData
+                data: accuracyData,
+                colorByPoint: true
             }],
             credits: { enabled: false }
         });
         
+        // Error Chart
         const errorData = models.map(([name, model]) => ({
             name: model.name,
             y: model.rmse,
@@ -1289,17 +1541,32 @@ const TrendPrediction = {
         Highcharts.chart('errorChart', {
             chart: {
                 type: 'bar',
-                borderRadius: 15
+                borderRadius: 15,
+                height: 400
             },
             title: {
                 text: 'Model Error (RMSE)',
-                style: { color: this.colors.primary, fontWeight: 'bold' }
+                style: { 
+                    color: this.colors.primary, 
+                    fontWeight: 'bold',
+                    fontSize: '1.125rem'
+                }
             },
             xAxis: {
-                type: 'category'
+                type: 'category',
+                labels: {
+                    style: { 
+                        color: '#475569',
+                        fontWeight: '500'
+                    }
+                }
             },
             yAxis: {
-                title: { text: 'RMSE (Lower is Better)' }
+                title: { 
+                    text: 'RMSE (Lower is Better)',
+                    style: { color: '#475569' }
+                },
+                gridLineColor: '#f1f5f9'
             },
             legend: { enabled: false },
             tooltip: {
@@ -1311,21 +1578,32 @@ const TrendPrediction = {
                     borderRadius: '25%',
                     dataLabels: {
                         enabled: true,
-                        format: '{point.y:.2f}'
+                        format: '{point.y:.2f}',
+                        style: {
+                            fontWeight: 'bold',
+                            color: '#475569'
+                        }
                     }
                 }
             },
             series: [{
                 name: 'RMSE',
-                data: errorData
+                data: errorData,
+                colorByPoint: true
             }],
             credits: { enabled: false }
         });
     },
     
+    // ============================================
+    // PERFORMANCE TABLE
+    // ============================================
+    
     createPerformanceTable() {
         const models = Object.entries(this.models).filter(([_, m]) => m !== null);
         models.sort((a, b) => b[1].r2 - a[1].r2);
+        
+        const currentPrice = this.stockData.quote.price;
         
         const tableHTML = `
             <table>
@@ -1341,18 +1619,17 @@ const TrendPrediction = {
                 </thead>
                 <tbody>
                     ${models.map(([name, model], index) => {
-                        const currentPrice = this.stockData.quote.price;
                         const change = ((model.finalPrediction - currentPrice) / currentPrice) * 100;
                         const rowClass = index === 0 ? 'best' : index === models.length - 1 ? 'worst' : '';
                         
                         return `
                             <tr class='${rowClass}'>
                                 <td class='rank'>#${index + 1}</td>
-                                <td><strong>${model.name}</strong></td>
+                                <td><strong>${this.escapeHtml(model.name)}</strong></td>
                                 <td>${this.formatCurrency(model.finalPrediction)}</td>
                                 <td>${(model.r2 * 100).toFixed(2)}%</td>
                                 <td>${model.rmse.toFixed(2)}</td>
-                                <td style='color: ${change >= 0 ? this.colors.success : this.colors.danger}'>
+                                <td style='color: ${change >= 0 ? this.colors.success : this.colors.danger}; font-weight: 600;'>
                                     ${change >= 0 ? '+' : ''}${change.toFixed(2)}%
                                 </td>
                             </tr>
@@ -1365,9 +1642,14 @@ const TrendPrediction = {
         document.getElementById('performanceTable').innerHTML = tableHTML;
     },
     
+    // ============================================
+    // ENSEMBLE PREDICTION
+    // ============================================
+    
     displayEnsemblePrediction() {
         const models = Object.values(this.models).filter(m => m !== null);
         
+        // Weighted average based on R² scores
         let sumWeightedPrediction = 0;
         let sumWeights = 0;
         
@@ -1379,6 +1661,7 @@ const TrendPrediction = {
         
         const ensemblePrediction = sumWeightedPrediction / sumWeights;
         
+        // Calculate confidence range
         const predictions = models.map(m => m.finalPrediction);
         const mean = predictions.reduce((a, b) => a + b) / predictions.length;
         const variance = predictions.reduce((sum, p) => sum + Math.pow(p - mean, 2), 0) / predictions.length;
@@ -1393,12 +1676,16 @@ const TrendPrediction = {
         const change = ensemblePrediction - currentPrice;
         const changePercent = (change / currentPrice) * 100;
         
+        // Update UI
         document.getElementById('ensemblePrice').textContent = this.formatCurrency(ensemblePrediction);
-        document.getElementById('ensembleChange').textContent = `${change >= 0 ? '+' : ''}${this.formatCurrency(change)} (${change >= 0 ? '+' : ''}${changePercent.toFixed(2)}%)`;
-        document.getElementById('ensembleChange').style.color = change >= 0 ? this.colors.success : this.colors.danger;
+        
+        const changeEl = document.getElementById('ensembleChange');
+        changeEl.textContent = `${change >= 0 ? '+' : ''}${this.formatCurrency(change)} (${change >= 0 ? '+' : ''}${changePercent.toFixed(2)}%)`;
+        changeEl.style.color = change >= 0 ? this.colors.success : this.colors.danger;
         
         document.getElementById('ensembleRange').textContent = `${this.formatCurrency(lower)} - ${this.formatCurrency(upper)}`;
         
+        // Trading Signal
         let signal = 'HOLD';
         let signalClass = 'neutral';
         let strength = 'Moderate';
@@ -1429,6 +1716,10 @@ const TrendPrediction = {
         
         document.getElementById('ensembleAccuracy').textContent = (avgAccuracy * 100).toFixed(1) + '%';
     },
+    
+    // ============================================
+    // RECOMMENDATION
+    // ============================================
     
     displayRecommendation() {
         const models = Object.values(this.models).filter(m => m !== null);
@@ -1561,39 +1852,11 @@ const TrendPrediction = {
     // UTILITY FUNCTIONS
     // ============================================
     
-    generateDemoData(symbol) {
-        console.log('📊 Generating demo data for', symbol);
-        const days = 180;
-        const prices = [];
-        let price = 150;
-        
-        for (let i = 0; i < days; i++) {
-            const change = (Math.random() - 0.48) * 3;
-            price = price * (1 + change / 100);
-            
-            const timestamp = Date.now() - (days - i) * 24 * 60 * 60 * 1000;
-            prices.push({
-                timestamp: timestamp,
-                open: price * (1 + (Math.random() - 0.5) * 0.01),
-                high: price * (1 + Math.random() * 0.02),
-                low: price * (1 - Math.random() * 0.02),
-                close: price,
-                volume: Math.floor(Math.random() * 10000000)
-            });
-        }
-        
-        return {
-            symbol: symbol,
-            prices: prices,
-            currency: 'USD',
-            quote: {
-                name: symbol + ' Inc.',
-                symbol: symbol,
-                price: price,
-                change: price - 150,
-                changePercent: ((price - 150) / 150) * 100
-            }
-        };
+    escapeHtml(text) {
+        if (!text) return '';
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
     },
     
     formatCurrency(value) {
@@ -1639,47 +1902,26 @@ const TrendPrediction = {
         if (updateElement) {
             updateElement.textContent = `Last update: ${formatted}`;
         }
+    },
+    
+    showNotification(message, type = 'info') {
+        if (window.FinanceDashboard && window.FinanceDashboard.showNotification) {
+            window.FinanceDashboard.showNotification(message, type);
+        } else {
+            console.log(`[${type.toUpperCase()}]`, message);
+        }
     }
-};
+    
+});
 
-// Initialize when DOM is loaded
+// ========== INITIALIZE WHEN DOM IS LOADED ==========
+
 document.addEventListener('DOMContentLoaded', () => {
-    console.log('🤖 ML Trend Prediction - Initializing...');
+    console.log('🤖 ML Trend Prediction - Starting initialization...');
     TrendPrediction.init();
 });
 
-/* ============================================
-   SIDEBAR USER MENU - Toggle
-   ============================================ */
+// ========== EXPOSITION GLOBALE ==========
+window.TrendPrediction = TrendPrediction;
 
-document.addEventListener('DOMContentLoaded', () => {
-    const sidebarUserTrigger = document.getElementById('sidebarUserTrigger');
-    const sidebarUserDropdown = document.getElementById('sidebarUserDropdown');
-    
-    if (sidebarUserTrigger && sidebarUserDropdown) {
-        // Toggle dropdown au clic
-        sidebarUserTrigger.addEventListener('click', (e) => {
-            e.stopPropagation();
-            
-            // Toggle classes
-            sidebarUserTrigger.classList.toggle('active');
-            sidebarUserDropdown.classList.toggle('active');
-        });
-        
-        // Fermer le dropdown si on clique ailleurs
-        document.addEventListener('click', (e) => {
-            if (!sidebarUserDropdown.contains(e.target) && 
-                !sidebarUserTrigger.contains(e.target)) {
-                sidebarUserTrigger.classList.remove('active');
-                sidebarUserDropdown.classList.remove('active');
-            }
-        });
-        
-        // Empêcher la fermeture si on clique dans le dropdown
-        sidebarUserDropdown.addEventListener('click', (e) => {
-            e.stopPropagation();
-        });
-    }
-});
-
-console.log('✅ Menu utilisateur sidebar initialisé');
+console.log('✅ ML Trend Prediction script loaded - COMPLETE VERSION with Twelve Data API + Rate Limiting + Cache');
