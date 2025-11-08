@@ -1,0 +1,182 @@
+{
+  "definitions": {
+    "IPO": {
+      "term": "IPO (Initial Public Offering)",
+      "definition": "Une IPO est l'introduction en bourse d'une entreprise. C'est le processus par lequel une société privée vend ses actions au grand public pour la première fois, permettant ainsi de lever des capitaux et d'offrir de la liquidité aux actionnaires existants.",
+      "example": "En 2021, Rivian a réalisé l'une des plus grandes IPOs de l'histoire automobile avec une valorisation de 66,5 milliards de dollars.",
+      "relatedTerms": ["Lock-up Period", "Underwriter", "Prospectus"]
+    },
+    
+    "REX": {
+      "term": "REX (Résultat d'Exploitation)",
+      "definition": "Le résultat d'exploitation (Operating Income en anglais) représente le bénéfice généré par les activités principales de l'entreprise, avant déduction des intérêts et impôts. Formule : Chiffre d'Affaires - Charges d'Exploitation.",
+      "example": "Si Apple réalise 394B$ de CA avec 170B$ de charges d'exploitation, son REX est de 224B$, soit une marge opérationnelle de 56.9%.",
+      "relatedTerms": ["EBITDA", "Marge opérationnelle", "EBIT"]
+    },
+    
+    "P/E Ratio": {
+      "term": "Price-to-Earnings Ratio (P/E)",
+      "definition": "Le ratio cours/bénéfice mesure la valorisation d'une entreprise en comparant son prix d'action actuel à son bénéfice par action (EPS). Formule : Prix de l'action ÷ EPS. Un P/E élevé peut suggérer que le marché anticipe une forte croissance future.",
+      "example": "Tesla avec un P/E de 70 est considérée comme surévaluée comparée à Ford (P/E de 6), mais cela reflète les attentes de croissance différentes.",
+      "relatedTerms": ["PEG Ratio", "Forward P/E", "EPS"]
+    },
+    
+    "Market Cap": {
+      "term": "Capitalisation Boursière (Market Capitalization)",
+      "definition": "La capitalisation boursière représente la valeur totale de toutes les actions en circulation d'une entreprise. Formule : Prix de l'action × Nombre d'actions en circulation.",
+      "categories": {
+        "Mega-cap": "> 200 milliards $",
+        "Large-cap": "10-200 milliards $",
+        "Mid-cap": "2-10 milliards $",
+        "Small-cap": "300M-2 milliards $",
+        "Micro-cap": "< 300 millions $"
+      },
+      "example": "Apple avec ~3 trillions $ est une mega-cap, tandis qu'une startup IPO à 500M$ est une small-cap."
+    },
+    
+    "Beta": {
+      "term": "Coefficient Beta",
+      "definition": "Le Beta mesure la volatilité ou le risque systématique d'une action par rapport à l'ensemble du marché (généralement le S&P 500).",
+      "interpretation": {
+        "Beta = 1": "Volatilité égale au marché",
+        "Beta > 1": "Plus volatile que le marché (ex: Beta 1.5 = 50% plus volatile)",
+        "Beta < 1": "Moins volatile que le marché",
+        "Beta négatif": "Mouvement inverse au marché (rare)"
+      },
+      "example": "NVIDIA avec un Beta de 1.7 fluctue 70% plus que le marché."
+    },
+    
+    "EPS": {
+      "term": "Earnings Per Share (Bénéfice par Action)",
+      "definition": "L'EPS représente la portion du bénéfice net d'une entreprise allouée à chaque action ordinaire en circulation. Formule : (Bénéfice net - Dividendes préférentiels) ÷ Nombre moyen d'actions en circulation.",
+      "types": {
+        "Basic EPS": "Calcul simple sans dilution",
+        "Diluted EPS": "Inclut l'effet des options et convertibles",
+        "TTM EPS": "Trailing Twelve Months (12 derniers mois)"
+      },
+      "example": "Microsoft avec 72.7B$ de bénéfice et 7.4B actions a un EPS de ~9.82$"
+    },
+    
+    "ROE": {
+      "term": "Return on Equity (Rendement des Capitaux Propres)",
+      "definition": "Le ROE mesure la rentabilité d'une entreprise par rapport aux capitaux propres. Formule : Bénéfice net ÷ Capitaux propres × 100.",
+      "interpretation": {
+        "> 20%": "Excellent - Entreprise très rentable",
+        "15-20%": "Bon - Performance solide",
+        "10-15%": "Moyen - Acceptable",
+        "< 10%": "Faible - Problème potentiel"
+      },
+      "example": "Apple avec un ROE de 147% démontre une utilisation exceptionnelle des capitaux propres."
+    },
+    
+    "Free Cash Flow": {
+      "term": "Free Cash Flow (FCF)",
+      "definition": "Le flux de trésorerie disponible représente la trésorerie générée par l'entreprise après avoir payé les dépenses d'exploitation et les investissements en capital. Formule : Operating Cash Flow - Capital Expenditures.",
+      "importance": "Indicateur clé de la capacité d'une entreprise à générer de la trésorerie pour rémunérer les actionnaires (dividendes, rachats d'actions) ou investir dans la croissance.",
+      "example": "Meta génère ~40B$ de FCF annuel, lui permettant d'investir massivement dans le metaverse tout en rachetant ses propres actions."
+    },
+    
+    "EBITDA": {
+      "term": "Earnings Before Interest, Taxes, Depreciation and Amortization",
+      "definition": "L'EBITDA mesure la performance opérationnelle d'une entreprise en excluant les décisions financières et comptables. C'est un proxy du cash flow opérationnel.",
+      "formule": "Bénéfice Net + Intérêts + Impôts + Dépréciation + Amortissement",
+      "usage": "Utile pour comparer des entreprises dans différents pays/secteurs avec structures fiscales et de capital différentes.",
+      "limites": "Peut masquer les besoins réels en investissement (CapEx)"
+    },
+    
+    "DCF": {
+      "term": "Discounted Cash Flow (Flux de Trésorerie Actualisés)",
+      "definition": "Méthode de valorisation qui estime la valeur d'un investissement basée sur ses flux de trésorerie futurs attendus, actualisés à leur valeur présente.",
+      "etapes": [
+        "1. Projeter les Free Cash Flows futurs (5-10 ans)",
+        "2. Calculer la valeur terminale",
+        "3. Actualiser tous les flux au taux WACC",
+        "4. Sommer pour obtenir la valeur d'entreprise"
+      ],
+      "example": "Si on projette 10B$ de FCF/an pour 10 ans avec WACC de 8%, la valeur présente est ~67B$"
+    }
+  },
+  
+  "investmentStrategies": {
+    "value": {
+      "name": "Value Investing",
+      "description": "Investissement dans des actions sous-évaluées par rapport à leur valeur intrinsèque.",
+      "metrics": ["P/E ratio faible", "P/B < 1", "Dividend yield élevé"],
+      "investors": ["Warren Buffett", "Benjamin Graham"],
+      "example": "Acheter une action avec P/E de 10 alors que le secteur est à 20"
+    },
+    
+    "growth": {
+      "name": "Growth Investing",
+      "description": "Focus sur les entreprises dont les bénéfices/revenus croissent plus rapidement que la moyenne du marché.",
+      "metrics": ["Revenue growth > 20%", "EPS growth > 15%", "Strong TAM"],
+      "investors": ["Cathie Wood", "Peter Lynch"],
+      "example": "Investir dans NVIDIA anticipant la révolution IA"
+    },
+    
+    "dividend": {
+      "name": "Dividend Investing",
+      "description": "Investissement dans des entreprises versant régulièrement des dividendes élevés.",
+      "metrics": ["Dividend yield > 3%", "Payout ratio sain", "Historique stable"],
+      "benefits": "Revenu passif régulier, moins de volatilité",
+      "example": "Coca-Cola, Procter & Gamble, Johnson & Johnson"
+    },
+    
+    "momentum": {
+      "name": "Momentum Investing",
+      "description": "Acheter des actions en forte hausse, parier sur la continuation de la tendance.",
+      "indicators": ["RSI", "MACD", "Moving Averages"],
+      "risk": "Volatilité élevée, timing crucial",
+      "example": "Acheter TSLA lors de breakouts au-dessus de résistances clés"
+    }
+  },
+  
+  "riskProfiles": {
+    "conservative": {
+      "description": "Préservation du capital, volatilité minimale",
+      "allocation": "20% actions, 70% obligations, 10% cash",
+      "expectedReturn": "3-6% annuel",
+      "suitableFor": "Retraités, horizon court terme"
+    },
+    
+    "moderate": {
+      "description": "Équilibre entre croissance et sécurité",
+      "allocation": "60% actions, 35% obligations, 5% alternatives",
+      "expectedReturn": "6-10% annuel",
+      "suitableFor": "Investisseurs long terme, âge moyen"
+    },
+    
+    "aggressive": {
+      "description": "Maximisation de la croissance, tolérance élevée au risque",
+      "allocation": "90% actions (dont 30% small-caps/tech), 5% crypto, 5% cash",
+      "expectedReturn": "10-15%+ annuel",
+      "suitableFor": "Jeunes investisseurs, horizon 20+ ans"
+    }
+  },
+  
+  "sectorTrends": {
+    "Technology": {
+      "growthRate": 15,
+      "hotTopics": ["IA/ML", "Cloud Computing", "Cybersécurité"],
+      "leaders": ["MSFT", "AAPL", "NVDA", "GOOGL"]
+    },
+    
+    "Healthcare": {
+      "growthRate": 12,
+      "hotTopics": ["Biotech", "Telehealth", "Precision Medicine"],
+      "leaders": ["JNJ", "UNH", "PFE"]
+    },
+    
+    "FinTech": {
+      "growthRate": 18,
+      "hotTopics": ["Digital Payments", "Blockchain", "Neobanks"],
+      "leaders": ["SQ", "PYPL", "V"]
+    },
+    
+    "Clean Energy": {
+      "growthRate": 20,
+      "hotTopics": ["Solar", "EVs", "Battery Tech"],
+      "leaders": ["TSLA", "ENPH", "NEE"]
+    }
+  }
+}

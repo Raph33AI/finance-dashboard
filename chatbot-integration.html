@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Votre Page - Financial Platform</title>
+    
+    <!-- ===== CHATBOT CSS ===== -->
+    <link rel="stylesheet" href="/assets/css/chatbot-styles.css">
+    
+    <!-- Vos autres CSS -->
+</head>
+<body>
+    
+    <!-- VOTRE CONTENU EXISTANT -->
+    <header>
+        <!-- ... -->
+    </header>
+    
+    <main>
+        <!-- ... -->
+    </main>
+    
+    <footer>
+        <!-- ... -->
+    </footer>
+    
+    
+    <!-- ===== CHATBOT CONTAINER ===== -->
+    <div id="chatbot-root"></div>
+    
+    
+    <!-- ===== CHATBOT SCRIPTS (à la fin avant </body>) ===== -->
+    
+    <!-- 1. Configuration -->
+    <script src="/assets/js/chatbot-config.js"></script>
+    
+    <!-- 2. API Client Finnhub (si vous en avez déjà un, gardez-le) -->
+    <script src="/assets/js/api-client.js"></script>
+    
+    <!-- 3. Modules du Chatbot -->
+    <script src="/assets/js/chatbot-charts.js"></script>
+    <script src="/assets/js/chatbot-suggestions.js"></script>
+    <script src="/assets/js/chatbot-ipo-analyzer.js"></script>
+    <script src="/assets/js/chatbot-analytics.js"></script>
+    <script src="/assets/js/chatbot-gemini.js"></script>
+    <script src="/assets/js/chatbot-ai-engine.js"></script>
+    <script src="/assets/js/chatbot-ui.js"></script>
+    
+    <!-- 4. Initialisation -->
+    <script>
+        // Attend que le DOM soit chargé
+        document.addEventListener('DOMContentLoaded', function() {
+            
+            // Validation de la configuration
+            if (!ChatbotConfig.validate()) {
+                console.error('Chatbot configuration invalide. Veuillez vérifier chatbot-config.js');
+                return;
+            }
+            
+            // Initialisation du chatbot
+            try {
+                window.financialChatbot = new ChatbotUI(
+                    'chatbot-root',
+                    ChatbotConfig.api.gemini,
+                    ChatbotConfig.api.finnhub
+                );
+                
+                console.log('✅ Chatbot FinanceGPT initialisé avec succès');
+                
+            } catch (error) {
+                console.error('❌ Erreur d\'initialisation du chatbot:', error);
+            }
+        });
+    </script>
+    
+    <!-- Vos autres scripts -->
+    
+</body>
+</html>

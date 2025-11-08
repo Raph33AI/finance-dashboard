@@ -15,6 +15,7 @@
     <link rel='stylesheet' href='assets/css/common.css'>
     <link rel='stylesheet' href='assets/css/sidebar.css'>
     <link rel="stylesheet" href="assets/css/user-menu.css">
+    <link rel="stylesheet" href="/assets/css/chatbot-styles.css">
     <link rel='stylesheet' href='assets/css/finnhub-pages.css'>
 
     <!-- Firebase SDK -->
@@ -330,5 +331,31 @@
     <script src='assets/js/sidebar.js'></script>
     <script src='assets/js/finnhub-client.js'></script>
     <script src='assets/js/market-intelligence.js'></script>
+
+    <!-- Container du chatbot -->
+    <div id="chatbot-root"></div>
+
+    <!-- Scripts du chatbot -->
+    <script src="/assets/js/chatbot-config.js"></script>
+    <script src="/assets/js/api-client.js"></script>
+    <script src="/assets/js/chatbot-charts.js"></script>
+    <script src="/assets/js/chatbot-suggestions.js"></script>
+    <script src="/assets/js/chatbot-ipo-analyzer.js"></script>
+    <script src="/assets/js/chatbot-analytics.js"></script>
+    <script src="/assets/js/chatbot-gemini.js"></script>
+    <script src="/assets/js/chatbot-ai-engine.js"></script>
+    <script src="/assets/js/chatbot-ui.js"></script>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        if (ChatbotConfig.validate()) {
+            window.financialChatbot = new ChatbotUI(
+                'chatbot-root',
+                ChatbotConfig.api.gemini,
+                ChatbotConfig.api.finnhub
+            );
+        }
+    });
+    </script>
 </body>
 </html>
