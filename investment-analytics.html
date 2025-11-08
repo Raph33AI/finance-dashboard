@@ -32,29 +32,27 @@
     <link rel='stylesheet' href='assets/css/dashboard.css'>
     <link rel='stylesheet' href='assets/css/investment-analytics.css'>
     
-    <!-- ===== AJOUTE CES LIGNES (FIREBASE) ===== -->
-    <!-- Firebase SDK -->
+    <!-- ✅ FIREBASE SDK -->
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
     
-    <!-- Configuration Firebase -->
+    <!-- ✅ FIREBASE CONFIG -->
     <script src="assets/js/firebase-config.js"></script>
     
-    <!-- Protection de la page (AUTH GUARD) -->
+    <!-- ✅ AUTH GUARD -->
     <script src="assets/js/auth-guard.js"></script>
-    <!-- ===== FIN DES AJOUTS ===== -->
 </head>
 <body>
 
-    <!-- ⚡ THEME SCRIPT - DOIT ÊTRE CHARGÉ EN PREMIER -->
+    <!-- ⚡ THEME SCRIPT -->
     <script src="assets/js/theme.js"></script>
 
-    <!-- 🎨 THEME CHARTS - POUR LES GRAPHIQUES -->
+    <!-- 🎨 THEME CHARTS -->
     <script src="assets/js/theme-charts.js"></script>
 
     <div class='layout-wrapper'>
-        <!-- Sidebar Navigation - VERSION CORRIGÉE -->
+        <!-- Sidebar Navigation -->
         <aside class='sidebar' id='sidebar'>
             <!-- Header -->
             <div class='sidebar-header'>
@@ -86,7 +84,7 @@
                             <i class='fas fa-home'></i>
                             <span>Dashboard Budget</span>
                         </a>
-                        <a href='investment-analytics.html' class='nav-link'>
+                        <a href='investment-analytics.html' class='nav-link active'>
                             <i class='fas fa-chart-bar'></i>
                             <span>Investment Analytics</span>
                         </a>
@@ -139,6 +137,10 @@
                         <a href='trend-prediction.html' class='nav-link'>
                             <i class='fas fa-chart-line'></i>
                             <span>Trend Prediction</span>
+                        </a>
+                        <a href='news.html' class='nav-link'>
+                            <i class='fas fa-newspaper'></i>
+                            <span>News</span>
                         </a>
                     </div>
                 </div>
@@ -645,6 +647,11 @@
     <script src='assets/js/dark-mode.js'></script>
     <script src='assets/js/common.js'></script>
     <script src='assets/js/sidebar.js'></script>
+    
+    <!-- ✅ AJOUT CRITIQUE : SimulationManager AVANT investment-analytics.js -->
+    <script src='assets/js/simulation-manager.js'></script>
+    
+    <!-- ✅ Investment Analytics Script (CORRIGÉ) -->
     <script src='assets/js/investment-analytics.js'></script>
 </body>
 </html>

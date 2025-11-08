@@ -1,7 +1,9 @@
 /* ==============================================
-   INVESTMENT-ANALYTICS.JS - PARTIE 1/6
-   ✅ Initialization + Asset Management
-   ✅ Fixed Light Mode Colors
+   INVESTMENT-ANALYTICS.JS - VERSION COMPLÈTE CORRIGÉE
+   ✅ Synchronisation avec Dashboard Budget
+   ✅ Chargement Firestore/Cloud en priorité
+   ✅ Fallback localStorage
+   ✅ Graphiques + AI + Metrics complets
    ============================================== */
 
 (function() {
@@ -50,15 +52,23 @@
         
         // ========== INITIALIZATION ==========
         
-        init: function() {
+        init: async function() {
             if (typeof Highcharts === 'undefined') {
                 console.error('❌ Highcharts not loaded!');
                 return;
             }
             
             try {
+                console.log('🚀 Investment Analytics - Initializing...');
+                
                 this.detectDarkMode();
-                this.loadFinancialData();
+                
+                // ✅ CORRECTION : Attendre l'authentification Firebase
+                await this.waitForAuth();
+                
+                // ✅ CORRECTION : Charger données depuis Firestore en priorité
+                await this.loadFinancialData();
+                
                 this.loadAssets();
                 this.updatePortfolioSummary();
                 this.renderAssetsList();
@@ -67,11 +77,34 @@
                 this.updateLastUpdate();
                 this.setupDarkModeListener();
                 
-                console.log('✅ Investment Analytics loaded with Dashboard Budget logic');
+                console.log('✅ Investment Analytics initialized successfully');
+                console.log(`📊 Loaded ${this.financialData.length} months of data`);
+                
             } catch (error) {
                 console.error('❌ Init error:', error);
                 this.showNotification('Failed to initialize', 'error');
             }
+        },
+        
+        // ✅ NOUVEAU : Attendre que Firebase soit prêt
+        waitForAuth: async function() {
+            return new Promise((resolve) => {
+                if (!firebase || !firebase.auth) {
+                    console.warn('⚠️ Firebase not available, proceeding without auth');
+                    resolve();
+                    return;
+                }
+                
+                const unsubscribe = firebase.auth().onAuthStateChanged((user) => {
+                    if (user) {
+                        console.log('✅ User authenticated:', user.email);
+                    } else {
+                        console.log('⚠️ No user authenticated, using local data only');
+                    }
+                    unsubscribe();
+                    resolve();
+                });
+            });
         },
         
         detectDarkMode: function() {
@@ -93,7 +126,6 @@
             }
         },
         
-        // ✅ FIXED: Better color management for Light/Dark modes
         getChartColors: function() {
             if (this.isDarkMode) {
                 return {
@@ -107,7 +139,6 @@
                     tooltipBorder: '#555'
                 };
             } else {
-                // ✅ LIGHT MODE - Optimized colors
                 return {
                     text: '#1f2937',
                     gridLine: 'rgba(0, 0, 0, 0.08)',
@@ -121,18 +152,67 @@
             }
         },
         
-        loadFinancialData: function() {
-            const saved = localStorage.getItem('financialDataDynamic');
-            if (saved) {
+        // ✅ CORRECTION CRITIQUE : Nouvelle fonction de chargement des données
+        loadFinancialData: async function() {
+            console.log('📥 Loading financial data...');
+            
+            let loadedFromCloud = false;
+            
+            // ========== PRIORITÉ 1 : Charger depuis FIRESTORE/CLOUDFLARE ==========
+            if (window.SimulationManager) {
                 try {
-                    this.financialData = JSON.parse(saved);
-                    console.log(`📊 Loaded ${this.financialData.length} months from Dashboard Budget`);
+                    const currentSimName = window.SimulationManager.getCurrentSimulationName() || 'default';
+                    console.log(`🔄 Attempting to load simulation "${currentSimName}" from cloud...`);
+                    
+                    const cloudData = await window.SimulationManager.loadSimulation(currentSimName);
+                    
+                    if (cloudData && cloudData.data && Array.isArray(cloudData.data) && cloudData.data.length > 0) {
+                        this.financialData = cloudData.data;
+                        loadedFromCloud = true;
+                        console.log(`✅ Loaded ${this.financialData.length} months from Firestore (simulation: ${currentSimName})`);
+                        
+                        // ✅ Sauvegarder en local pour backup
+                        try {
+                            localStorage.setItem('financialDataDynamic', JSON.stringify(this.financialData));
+                        } catch (e) {
+                            console.warn('⚠️ Could not save to localStorage:', e);
+                        }
+                    } else {
+                        console.warn('⚠️ No data in cloud simulation, trying localStorage...');
+                    }
                 } catch (error) {
-                    console.error('Load error:', error);
-                    this.financialData = [];
+                    console.error('❌ Error loading from cloud:', error);
                 }
             } else {
-                this.financialData = [];
+                console.warn('⚠️ SimulationManager not available');
+            }
+            
+            // ========== PRIORITÉ 2 : Fallback sur LOCALSTORAGE ==========
+            if (!loadedFromCloud) {
+                console.log('🔄 Loading from localStorage (fallback)...');
+                const saved = localStorage.getItem('financialDataDynamic');
+                
+                if (saved) {
+                    try {
+                        this.financialData = JSON.parse(saved);
+                        console.log(`✅ Loaded ${this.financialData.length} months from localStorage`);
+                    } catch (error) {
+                        console.error('❌ Error parsing localStorage data:', error);
+                        this.financialData = [];
+                    }
+                } else {
+                    console.warn('⚠️ No data in localStorage either');
+                    this.financialData = [];
+                }
+            }
+            
+            // ========== PRIORITÉ 3 : Aucune donnée trouvée ==========
+            if (this.financialData.length === 0) {
+                console.warn('⚠️ No financial data found!');
+                this.showNotification('No data found. Please fill your Budget Dashboard first.', 'warning');
+            } else {
+                console.log(`✅ Final data loaded: ${this.financialData.length} months`);
+                console.log(`📅 First month: ${this.financialData[0].month}, Last month: ${this.financialData[this.financialData.length - 1].month}`);
             }
         },
         
@@ -403,7 +483,7 @@
             }
         },
 
-// ========== DATA FILTERING ==========
+        // ========== DATA FILTERING ==========
         
         changePeriod: function(period) {
             this.currentPeriod = period;
@@ -564,31 +644,21 @@
                 return 0;
             }
             
-            // Filter valid returns
             const validReturns = returns.filter(r => !isNaN(r) && isFinite(r));
             
             if (validReturns.length === 0) {
                 return 0;
             }
             
-            // Monthly risk-free rate (2% annual / 12 months / 100 to convert to decimal)
             const monthlyRiskFree = (riskFreeRate / 100) / 12;
-            
-            // Calculate excess returns (return - risk free rate)
             const excessReturns = validReturns.map(r => r - monthlyRiskFree);
-            
-            // Average excess return
             const meanExcess = excessReturns.reduce((sum, r) => sum + r, 0) / excessReturns.length;
-            
-            // Get only negative excess returns (downside risk)
             const downsideReturns = excessReturns.filter(r => r < 0);
             
             if (downsideReturns.length === 0) {
-                // No downside! Portfolio always beats risk-free rate
                 return meanExcess > 0 ? 3.0 : 0;
             }
             
-            // Calculate downside deviation
             const downsideSquaredSum = downsideReturns.reduce((sum, r) => sum + (r * r), 0);
             const downsideVariance = downsideSquaredSum / downsideReturns.length;
             const downsideDeviation = Math.sqrt(downsideVariance);
@@ -597,13 +667,11 @@
                 return 0;
             }
             
-            // Annualize both numerator and denominator
             const annualizedExcessReturn = meanExcess * 12;
             const annualizedDownsideDeviation = downsideDeviation * Math.sqrt(12);
             
             const sortino = annualizedExcessReturn / annualizedDownsideDeviation;
             
-            // Final safety check
             if (isNaN(sortino) || !isFinite(sortino)) {
                 return 0;
             }
@@ -867,7 +935,7 @@
             return 'Low';
         },
 
-// ========== CHARTS CREATION ==========
+        // ========== CHARTS CREATION ==========
         
         createAllCharts: function() {
             const filteredData = this.getFilteredData();
@@ -899,16 +967,6 @@
             
             const colors = this.getChartColors();
             const self = this;
-            
-            // ✅ Add Info Button
-            const titleContainer = document.querySelector('#chartPortfolioEvolution').previousElementSibling;
-            if (titleContainer && !titleContainer.querySelector('.btn-info')) {
-                const infoBtn = document.createElement('button');
-                infoBtn.className = 'btn-info';
-                infoBtn.innerHTML = '<i class="fas fa-info"></i>';
-                infoBtn.onclick = () => self.showChartInfo('portfolioEvolution');
-                titleContainer.appendChild(infoBtn);
-            }
             
             this.charts.portfolioEvolution = Highcharts.chart('chartPortfolioEvolution', {
                 chart: { type: 'area', backgroundColor: colors.background, height: 450 },
@@ -999,16 +1057,6 @@
             const colors = this.getChartColors();
             const self = this;
             
-            // ✅ Add Info Button
-            const titleContainer = document.querySelector('#chartMonthlyReturns').previousElementSibling;
-            if (titleContainer && !titleContainer.querySelector('.btn-info')) {
-                const infoBtn = document.createElement('button');
-                infoBtn.className = 'btn-info';
-                infoBtn.innerHTML = '<i class="fas fa-info"></i>';
-                infoBtn.onclick = () => self.showChartInfo('monthlyReturns');
-                titleContainer.appendChild(infoBtn);
-            }
-            
             this.charts.monthlyReturns = Highcharts.chart('chartMonthlyReturns', {
                 chart: { backgroundColor: colors.background, height: 450 },
                 title: { 
@@ -1094,17 +1142,6 @@
             if (this.charts.assetAllocation) this.charts.assetAllocation.destroy();
             
             const colors = this.getChartColors();
-            const self = this;
-            
-            // ✅ Add Info Button
-            const titleContainer = document.querySelector('#chartAssetAllocation').previousElementSibling;
-            if (titleContainer && !titleContainer.querySelector('.btn-info')) {
-                const infoBtn = document.createElement('button');
-                infoBtn.className = 'btn-info';
-                infoBtn.innerHTML = '<i class="fas fa-info"></i>';
-                infoBtn.onclick = () => self.showChartInfo('assetAllocation');
-                titleContainer.appendChild(infoBtn);
-            }
             
             this.charts.assetAllocation = Highcharts.chart('chartAssetAllocation', {
                 chart: { type: 'pie', backgroundColor: colors.background, height: 450 },
@@ -1149,16 +1186,6 @@
             
             const colors = this.getChartColors();
             const self = this;
-            
-            // ✅ Add Info Button
-            const titleContainer = document.querySelector('#chartContribution').previousElementSibling;
-            if (titleContainer && !titleContainer.querySelector('.btn-info')) {
-                const infoBtn = document.createElement('button');
-                infoBtn.className = 'btn-info';
-                infoBtn.innerHTML = '<i class="fas fa-info"></i>';
-                infoBtn.onclick = () => self.showChartInfo('contribution');
-                titleContainer.appendChild(infoBtn);
-            }
             
             this.charts.contribution = Highcharts.chart('chartContribution', {
                 chart: { type: 'area', backgroundColor: colors.background, height: 450 },
@@ -1232,17 +1259,6 @@
             if (this.charts.drawdown) this.charts.drawdown.destroy();
             
             const colors = this.getChartColors();
-            const self = this;
-            
-            // ✅ Add Info Button
-            const titleContainer = document.querySelector('#chartDrawdown').previousElementSibling;
-            if (titleContainer && !titleContainer.querySelector('.btn-info')) {
-                const infoBtn = document.createElement('button');
-                infoBtn.className = 'btn-info';
-                infoBtn.innerHTML = '<i class="fas fa-info"></i>';
-                infoBtn.onclick = () => self.showChartInfo('drawdown');
-                titleContainer.appendChild(infoBtn);
-            }
             
             this.charts.drawdown = Highcharts.chart('chartDrawdown', {
                 chart: { type: 'area', backgroundColor: colors.background, height: 450 },
@@ -1313,17 +1329,6 @@
             if (this.charts.rollingVolatility) this.charts.rollingVolatility.destroy();
             
             const colors = this.getChartColors();
-            const self = this;
-            
-            // ✅ Add Info Button
-            const titleContainer = document.querySelector('#chartRollingVolatility').previousElementSibling;
-            if (titleContainer && !titleContainer.querySelector('.btn-info')) {
-                const infoBtn = document.createElement('button');
-                infoBtn.className = 'btn-info';
-                infoBtn.innerHTML = '<i class="fas fa-info"></i>';
-                infoBtn.onclick = () => self.showChartInfo('rollingVolatility');
-                titleContainer.appendChild(infoBtn);
-            }
             
             this.charts.rollingVolatility = Highcharts.chart('chartRollingVolatility', {
                 chart: { type: 'line', backgroundColor: colors.background, height: 450 },
@@ -1353,7 +1358,7 @@
             });
         },
 
-createReturnsDistributionChart: function(data) {
+        createReturnsDistributionChart: function(data) {
             const returns = [];
             for (let i = 1; i < data.length; i++) {
                 const monthlyGain = parseFloat(data[i].monthlyGain) || 0;
@@ -1380,17 +1385,6 @@ createReturnsDistributionChart: function(data) {
             if (this.charts.returnsDistribution) this.charts.returnsDistribution.destroy();
             
             const colors = this.getChartColors();
-            const self = this;
-            
-            // ✅ Add Info Button
-            const titleContainer = document.querySelector('#chartReturnsDistribution').previousElementSibling;
-            if (titleContainer && !titleContainer.querySelector('.btn-info')) {
-                const infoBtn = document.createElement('button');
-                infoBtn.className = 'btn-info';
-                infoBtn.innerHTML = '<i class="fas fa-info"></i>';
-                infoBtn.onclick = () => self.showChartInfo('returnsDistribution');
-                titleContainer.appendChild(infoBtn);
-            }
             
             this.charts.returnsDistribution = Highcharts.chart('chartReturnsDistribution', {
                 chart: { type: 'column', backgroundColor: colors.background, height: 450 },
@@ -1442,17 +1436,6 @@ createReturnsDistributionChart: function(data) {
             if (this.charts.var) this.charts.var.destroy();
             
             const colors = this.getChartColors();
-            const self = this;
-            
-            // ✅ Add Info Button
-            const titleContainer = document.querySelector('#chartVaR').previousElementSibling;
-            if (titleContainer && !titleContainer.querySelector('.btn-info')) {
-                const infoBtn = document.createElement('button');
-                infoBtn.className = 'btn-info';
-                infoBtn.innerHTML = '<i class="fas fa-info"></i>';
-                infoBtn.onclick = () => self.showChartInfo('var');
-                titleContainer.appendChild(infoBtn);
-            }
             
             this.charts.var = Highcharts.chart('chartVaR', {
                 chart: { type: 'column', backgroundColor: colors.background, height: 450 },
@@ -1518,17 +1501,6 @@ createReturnsDistributionChart: function(data) {
             if (this.charts.correlationMatrix) this.charts.correlationMatrix.destroy();
             
             const colors = this.getChartColors();
-            const self = this;
-            
-            // ✅ Add Info Button
-            const titleContainer = document.querySelector('#chartCorrelationMatrix').previousElementSibling;
-            if (titleContainer && !titleContainer.querySelector('.btn-info')) {
-                const infoBtn = document.createElement('button');
-                infoBtn.className = 'btn-info';
-                infoBtn.innerHTML = '<i class="fas fa-info"></i>';
-                infoBtn.onclick = () => self.showChartInfo('correlationMatrix');
-                titleContainer.appendChild(infoBtn);
-            }
             
             this.charts.correlationMatrix = Highcharts.chart('chartCorrelationMatrix', {
                 chart: { type: 'heatmap', backgroundColor: colors.background, height: Math.max(400, assetNames.length * 80) },
@@ -1616,17 +1588,6 @@ createReturnsDistributionChart: function(data) {
             if (this.charts.rollingSharpe) this.charts.rollingSharpe.destroy();
             
             const colors = this.getChartColors();
-            const self = this;
-            
-            // ✅ Add Info Button
-            const titleContainer = document.querySelector('#chartRollingSharpe').previousElementSibling;
-            if (titleContainer && !titleContainer.querySelector('.btn-info')) {
-                const infoBtn = document.createElement('button');
-                infoBtn.className = 'btn-info';
-                infoBtn.innerHTML = '<i class="fas fa-info"></i>';
-                infoBtn.onclick = () => self.showChartInfo('rollingSharpe');
-                titleContainer.appendChild(infoBtn);
-            }
             
             this.charts.rollingSharpe = Highcharts.chart('chartRollingSharpe', {
                 chart: { type: 'line', backgroundColor: colors.background, height: 450 },
@@ -1686,17 +1647,6 @@ createReturnsDistributionChart: function(data) {
             if (this.charts.alphaBeta) this.charts.alphaBeta.destroy();
             
             const colors = this.getChartColors();
-            const self = this;
-            
-            // ✅ Add Info Button
-            const titleContainer = document.querySelector('#chartAlphaBeta').previousElementSibling;
-            if (titleContainer && !titleContainer.querySelector('.btn-info')) {
-                const infoBtn = document.createElement('button');
-                infoBtn.className = 'btn-info';
-                infoBtn.innerHTML = '<i class="fas fa-info"></i>';
-                infoBtn.onclick = () => self.showChartInfo('alphaBeta');
-                titleContainer.appendChild(infoBtn);
-            }
             
             this.charts.alphaBeta = Highcharts.chart('chartAlphaBeta', {
                 chart: { type: 'scatter', backgroundColor: colors.background, height: 450, zoomType: 'xy' },
