@@ -15,7 +15,7 @@
     <link rel='stylesheet' href='assets/css/common.css'>
     <link rel='stylesheet' href='assets/css/sidebar.css'>
     <link rel="stylesheet" href="assets/css/user-menu.css">
-    <link rel="stylesheet" href="/assets/css/chatbot-styles.css">
+    <link rel="stylesheet" href="assets/css/chatbot-styles.css">
     <link rel='stylesheet' href='assets/css/finnhub-pages.css'>
 
     <!-- Firebase SDK -->
@@ -326,36 +326,77 @@
         </div>
     </div>
 
-    <!-- Scripts -->
+    <!-- Scripts existants -->
     <script src='assets/js/common.js'></script>
     <script src='assets/js/sidebar.js'></script>
     <script src='assets/js/finnhub-client.js'></script>
     <script src='assets/js/market-intelligence.js'></script>
 
+    <!-- ========================================
+         CHATBOT IA FINANCIER
+         ======================================== -->
+    
     <!-- Container du chatbot -->
     <div id="chatbot-root"></div>
 
-    <!-- Scripts du chatbot -->
-    <script src="/assets/js/chatbot-config.js"></script>
-    <script src="/assets/js/api-client.js"></script>
-    <script src="/assets/js/chatbot-charts.js"></script>
-    <script src="/assets/js/chatbot-suggestions.js"></script>
-    <script src="/assets/js/chatbot-ipo-analyzer.js"></script>
-    <script src="/assets/js/chatbot-analytics.js"></script>
-    <script src="/assets/js/chatbot-gemini.js"></script>
-    <script src="/assets/js/chatbot-ai-engine.js"></script>
-    <script src="/assets/js/chatbot-ui.js"></script>
+    <!-- Scripts du chatbot (ORDRE IMPORTANT) -->
+    <script src="assets/js/chatbot-config.js"></script>
+    <script src="assets/js/chatbot-charts.js"></script>
+    <script src="assets/js/chatbot-suggestions.js"></script>
+    <script src="assets/js/chatbot-ipo-analyzer.js"></script>
+    <script src="assets/js/chatbot-analytics.js"></script>
+    <script src="assets/js/chatbot-gemini.js"></script>
+    <script src="assets/js/chatbot-ai-engine.js"></script>
+    <script src="assets/js/chatbot-ui.js"></script>
 
+    <!-- Initialisation du chatbot -->
     <script>
     document.addEventListener('DOMContentLoaded', function() {
-        if (ChatbotConfig.validate()) {
+        console.log('🤖 Initialisation du chatbot FinanceGPT...');
+        
+        // Vérification que ChatbotConfig est chargé
+        if (typeof ChatbotConfig === 'undefined') {
+            console.error('❌ ChatbotConfig non défini !');
+            console.error('📁 Vérifiez que le fichier assets/js/chatbot-config.js existe et est accessible');
+            return;
+        }
+        
+        console.log('✅ ChatbotConfig chargé');
+        
+        // Validation de la configuration
+        if (!ChatbotConfig.validate()) {
+            console.warn('⚠️ Configuration du chatbot invalide');
+            console.warn('🔑 Vérifiez vos clés API dans assets/js/chatbot-config.js');
+            return;
+        }
+        
+        console.log('✅ Configuration validée');
+        
+        // Vérification que ChatbotUI est disponible
+        if (typeof ChatbotUI === 'undefined') {
+            console.error('❌ ChatbotUI non défini !');
+            console.error('📁 Vérifiez que le fichier assets/js/chatbot-ui.js existe et est accessible');
+            return;
+        }
+        
+        console.log('✅ ChatbotUI chargé');
+        
+        // Initialisation du chatbot
+        try {
             window.financialChatbot = new ChatbotUI(
                 'chatbot-root',
                 ChatbotConfig.api.gemini,
                 ChatbotConfig.api.finnhub
             );
+            console.log('🎉 Chatbot FinanceGPT initialisé avec succès !');
+            console.log('💼 Cliquez sur le bouton flottant pour ouvrir le chatbot');
+        } catch (error) {
+            console.error('❌ Erreur lors de l\'initialisation du chatbot:', error);
+            console.error('📋 Détails:', error.message);
+            console.error('🔍 Stack:', error.stack);
         }
     });
     </script>
+
 </body>
 </html>
