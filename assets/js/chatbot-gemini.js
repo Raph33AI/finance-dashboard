@@ -1,7 +1,6 @@
 /* ========================================
    INTÉGRATION GOOGLE GEMINI PRO
    IA Conversationnelle 100% GRATUITE
-   Version Corrigée - Sans erreurs Regex
    ======================================== */
 
 class GeminiAIIntegration {
@@ -15,72 +14,26 @@ class GeminiAIIntegration {
     }
 
     buildSystemContext() {
-        return `Tu es un assistant financier IA expert et ultra-compétent nommé "FinanceGPT" spécialisé dans :
+        return `Tu es un assistant financier IA expert nommé "FinanceGPT".
 
-**EXPERTISES :**
-- Analyse financière approfondie (bilans, comptes de résultat, cash flow)
-- IPOs et marchés primaires avec scoring intelligent
-- Trading et analyse technique avancée
-- Valorisation d'entreprises (DCF, multiples, comparables)
-- Machine Learning appliqué à la finance
-- Économie et macroéconomie mondiale
-- Résultats d'exploitation (REX) multi-années
+EXPERTISES: Analyse financière, IPOs, Trading, Valorisation, ML Finance
 
-**CAPACITÉS :**
-- Analyse de données financières en temps réel via Finnhub API
-- Recommandations d'investissement basées sur des données objectives
-- Comparaisons multi-entreprises détaillées
-- Prédictions quantitatives avec analyse de risque
-- Explications pédagogiques adaptées au niveau de l'utilisateur
-- Génération de graphiques interactifs
+STYLE: Précis, chiffré, avec graphiques et 3 actions concrètes
 
-**STYLE DE RÉPONSE :**
-- Précis, factuel et chiffré avec sources
-- Utilise des emojis pertinents pour la clarté
-- Structure les réponses en sections claires (titres, listes, tableaux)
-- Propose toujours 3 "Actions suggérées" concrètes
-- Vulgarise les concepts complexes quand nécessaire
-- Génère des graphiques quand c'est pertinent
-
-**FORMAT GRAPHIQUES :**
-Quand tu fournis des données visualisables, utilise ce format JSON :
-
+FORMAT GRAPHIQUES:
 GRAPHIQUE_DATA:
-\`\`\`json
 {
-  "type": "line|bar|pie|multi-line",
-  "title": "Titre descriptif",
-  "labels": ["2019", "2020", "2021", "2022", "2023"],
-  "datasets": [
-    {
-      "label": "Revenue (M$)",
-      "data": [100, 120, 150, 180, 200],
-      "color": "#3b82f6"
-    }
-  ],
-  "insights": [
-    "Insight 1",
-    "Insight 2"
-  ],
+  "type": "line",
+  "title": "Titre",
+  "labels": ["2019", "2020"],
+  "datasets": [{"label": "Revenue", "data": [100, 120], "color": "#3b82f6"}],
+  "insights": ["Insight 1"],
   "formatValue": "$"
 }
-\`\`\`
 
-**RÈGLES IMPORTANTES :**
-1. Cite TOUJOURS tes sources de données
-2. Indique les limites et incertitudes de tes analyses
-3. Ajoute le disclaimer : "Ceci n'est pas un conseil en investissement. DYOR."
-4. Reste objectif, jamais promotionnel
-5. Structure TOUJOURS avec des sections claires
+RÈGLES: Sources + Disclaimer + Objectivité
 
-**ACTIONS SUGGÉRÉES :**
-Termine TOUJOURS par une section :
-**Actions suggérées :**
-- Action 1
-- Action 2
-- Action 3
-
-Maintenant, aide l'utilisateur avec expertise et enthousiasme !`;
+ACTIONS: Toujours terminer par "Actions suggérées:" + 3 points`;
     }
 
     async chat(userMessage, financialContext = null) {
@@ -95,16 +48,8 @@ Maintenant, aide l'utilisateur avec expertise et enthousiasme !`;
             this.limitHistory();
 
             const contents = [
-                {
-                    role: 'user',
-                    parts: [{ text: this.systemContext }]
-                },
-                {
-                    role: 'model',
-                    parts: [{ 
-                        text: "Parfait ! Je suis FinanceGPT, votre expert financier IA. Je fournirai des analyses précises, des graphiques interactifs et des recommandations actionnables. Toutes mes réponses incluront des sources, des insights et des actions concrètes. Comment puis-je vous aider aujourd'hui ?" 
-                    }]
-                },
+                { role: 'user', parts: [{ text: this.systemContext }] },
+                { role: 'model', parts: [{ text: "Je suis FinanceGPT, prêt à vous aider !" }] },
                 ...this.conversationHistory
             ];
 
@@ -112,35 +57,20 @@ Maintenant, aide l'utilisateur avec expertise et enthousiasme !`;
                 `${this.baseURL}/models/${this.model}:generateContent?key=${this.apiKey}`,
                 {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
+                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         contents: contents,
                         generationConfig: {
                             temperature: 0.7,
                             topK: 40,
                             topP: 0.95,
-                            maxOutputTokens: 2048,
-                            stopSequences: []
+                            maxOutputTokens: 2048
                         },
                         safetySettings: [
-                            {
-                                category: "HARM_CATEGORY_HARASSMENT",
-                                threshold: "BLOCK_NONE"
-                            },
-                            {
-                                category: "HARM_CATEGORY_HATE_SPEECH",
-                                threshold: "BLOCK_NONE"
-                            },
-                            {
-                                category: "HARM_CATEGORY_SEXUALLY_EXPLICIT",
-                                threshold: "BLOCK_NONE"
-                            },
-                            {
-                                category: "HARM_CATEGORY_DANGEROUS_CONTENT",
-                                threshold: "BLOCK_NONE"
-                            }
+                            { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_NONE" },
+                            { category: "HARM_CATEGORY_HATE_SPEECH", threshold: "BLOCK_NONE" },
+                            { category: "HARM_CATEGORY_SEXUALLY_EXPLICIT", threshold: "BLOCK_NONE" },
+                            { category: "HARM_CATEGORY_DANGEROUS_CONTENT", threshold: "BLOCK_NONE" }
                         ]
                     })
                 }
@@ -176,45 +106,19 @@ Maintenant, aide l'utilisateur avec expertise et enthousiasme !`;
     buildFullMessage(message, context) {
         if (!context) return message;
 
-        let enriched = message + '\n\n**DONNÉES FINANCIÈRES DISPONIBLES :**\n';
+        let enriched = message + '\n\nDONNEES DISPONIBLES:\n';
 
         if (context.quote) {
-            enriched += `\n**Prix en temps réel :**\n`;
-            enriched += `- Prix actuel : $${context.quote.c.toFixed(2)}\n`;
-            enriched += `- Variation : ${context.quote.d >= 0 ? '+' : ''}${context.quote.d.toFixed(2)} (${context.quote.dp.toFixed(2)}%)\n`;
-            enriched += `- High/Low jour : $${context.quote.h.toFixed(2)} / $${context.quote.l.toFixed(2)}\n`;
-            enriched += `- Volume : ${context.quote.v ? context.quote.v.toLocaleString() : 'N/A'}\n`;
+            enriched += `Prix: $${context.quote.c.toFixed(2)} (${context.quote.dp.toFixed(2)}%)\n`;
         }
 
         if (context.profile) {
-            enriched += `\n**Profil entreprise :**\n`;
-            enriched += `- Nom : ${context.profile.name}\n`;
-            enriched += `- Ticker : ${context.profile.ticker}\n`;
-            enriched += `- Secteur : ${context.profile.finnhubIndustry || 'N/A'}\n`;
-            enriched += `- Pays : ${context.profile.country || 'N/A'}\n`;
-            enriched += `- Market Cap : $${((context.profile.marketCapitalization || 0) / 1000).toFixed(2)}B\n`;
-            enriched += `- IPO Date : ${context.profile.ipo || 'N/A'}\n`;
-        }
-
-        if (context.financials && context.financials.metric) {
-            enriched += `\n**Métriques financières :**\n`;
-            const m = context.financials.metric;
-            enriched += `- P/E Ratio : ${m.peNormalizedAnnual || 'N/A'}\n`;
-            enriched += `- EPS (TTM) : $${m.epsBasicExclExtraItemsTTM || 'N/A'}\n`;
-            enriched += `- Beta : ${m.beta || 'N/A'}\n`;
-            enriched += `- ROE : ${m.roeTTM || 'N/A'}%\n`;
-            enriched += `- ROA : ${m.roaTTM || 'N/A'}%\n`;
-            enriched += `- Dividend Yield : ${m.dividendYieldIndicatedAnnual || 'N/A'}%\n`;
+            enriched += `Entreprise: ${context.profile.name} - ${context.profile.finnhubIndustry}\n`;
         }
 
         if (context.rex) {
-            enriched += `\n**Résultats d'Exploitation (${context.rex.years} années) :**\n`;
-            context.rex.data.forEach(year => {
-                enriched += `- ${year.year} : CA $${(year.revenue / 1e6).toFixed(0)}M, REX $${(year.operatingIncome / 1e6).toFixed(0)}M (marge ${year.operatingMargin.toFixed(1)}%)\n`;
-            });
+            enriched += `REX: ${context.rex.years} annees de donnees\n`;
         }
-
-        enriched += `\n**Note :** Utilise ces données pour générer une analyse complète avec graphiques au format spécifié.`;
 
         return enriched;
     }
@@ -227,8 +131,105 @@ Maintenant, aide l'utilisateur avec expertise et enthousiasme !`;
             insights: [],
             actions: [],
             tables: [],
-            hasDisclaimer: response.includes('conseil en investissement') || response.includes('DYOR')
+            hasDisclaimer: response.includes('conseil') || response.includes('DYOR')
         };
 
-        // Extraction des graphiques JSON
-        const chartRegex = /GRAPHIQUE_DATA:\s*
+        try {
+            const chartMatch = response.match(/GRAPHIQUE_DATA:\s*(\{[\s\S]*?\})/);
+            if (chartMatch) {
+                const chartData = JSON.parse(chartMatch[1]);
+                result.hasChart = true;
+                result.chartData.push(chartData);
+                if (chartData.insights) {
+                    result.insights.push(...chartData.insights);
+                }
+            }
+        } catch (e) {
+            console.error('Chart parse error:', e);
+        }
+
+        const actionsMatch = response.match(/Actions?\s+sugg[ée]r[ée]es?\s*:?\s*\n((?:[-•]\s*.+\n?)+)/i);
+        if (actionsMatch) {
+            const items = actionsMatch[1].match(/[-•]\s*(.+)/g);
+            if (items) {
+                result.actions = items.map(i => i.replace(/^[-•]\s*/, '').trim());
+            }
+        }
+
+        const lines = response.split('\n');
+        let table = [];
+        lines.forEach(line => {
+            if (line.trim().startsWith('|')) {
+                table.push(line);
+            } else if (table.length > 0) {
+                result.tables.push(table.join('\n'));
+                table = [];
+            }
+        });
+        if (table.length > 0) result.tables.push(table.join('\n'));
+
+        return result;
+    }
+
+    async analyzeFinancials(symbol, data) {
+        const prompt = `Analyse financiere complete de ${symbol}. Fournis: 1) Summary 2) Forces/Faiblesses 3) Recommandation 4) Actions suggerees`;
+        return await this.chat(prompt, data);
+    }
+
+    async compareCompanies(symbols, dataArray) {
+        const prompt = `Compare ${symbols.join(' vs ')}. Fournis: 1) Tableau 2) Classement 3) Recommandations 4) Actions suggerees`;
+        return await this.chat(prompt, { comparison: dataArray });
+    }
+
+    async analyzeREX(symbol, rexData) {
+        const prompt = `Analyse REX de ${symbol} sur ${rexData.years} ans. Fournis: 1) Evolution CA 2) Marges 3) Graphiques 4) Actions suggerees`;
+        return await this.chat(prompt, { rex: rexData });
+    }
+
+    async predictTrends(symbol, historicalData, timeframe) {
+        const prompt = `Analyse predictive ${symbol} sur ${timeframe}. Fournis: 1) Tendance 2) Niveaux cles 3) Risques 4) Actions suggerees`;
+        return await this.chat(prompt, { timeSeries: historicalData });
+    }
+
+    async explainConcept(concept, level = 'intermediate') {
+        const prompt = `Explique "${concept}" niveau ${level}. Fournis: 1) Definition 2) Exemple 3) Application 4) Actions suggerees`;
+        return await this.chat(prompt);
+    }
+
+    resetConversation() {
+        this.conversationHistory = [];
+    }
+
+    limitHistory() {
+        const max = this.maxHistoryLength * 2;
+        if (this.conversationHistory.length > max) {
+            this.conversationHistory = this.conversationHistory.slice(-max);
+        }
+    }
+
+    getHistory() {
+        return this.conversationHistory;
+    }
+
+    exportHistory() {
+        return JSON.stringify({
+            timestamp: new Date().toISOString(),
+            model: this.model,
+            history: this.conversationHistory
+        }, null, 2);
+    }
+
+    importHistory(jsonString) {
+        try {
+            const data = JSON.parse(jsonString);
+            this.conversationHistory = data.history || [];
+            return true;
+        } catch (error) {
+            console.error('Import error:', error);
+            return false;
+        }
+    }
+}
+
+window.GeminiAIIntegration = GeminiAIIntegration;
+console.log('✅ GeminiAIIntegration chargé');
