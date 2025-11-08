@@ -216,6 +216,18 @@
                             <button class='btn-primary' onclick='AnalystCoverage.loadAnalystData()'>
                                 <i class='fas fa-search'></i> Search
                             </button>
+                            
+                            <!-- Quick Access Buttons -->
+                            <div style='display: flex; gap: 10px; margin-left: 20px;'>
+                                <button class='btn-secondary' onclick='AnalystCoverage.quickLoad("AAPL")' 
+                                        style='padding: 8px 16px; font-size: 0.9em;'>AAPL</button>
+                                <button class='btn-secondary' onclick='AnalystCoverage.quickLoad("MSFT")' 
+                                        style='padding: 8px 16px; font-size: 0.9em;'>MSFT</button>
+                                <button class='btn-secondary' onclick='AnalystCoverage.quickLoad("GOOGL")' 
+                                        style='padding: 8px 16px; font-size: 0.9em;'>GOOGL</button>
+                                <button class='btn-secondary' onclick='AnalystCoverage.quickLoad("NVDA")' 
+                                        style='padding: 8px 16px; font-size: 0.9em;'>NVDA</button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -231,6 +243,33 @@
                     <div class='chart-wrapper'>
                         <div id='recommendationsChart' class='chart' style='height: 400px;'></div>
                     </div>
+                </div>
+
+                <!-- Pie Chart -->
+                <div class='section' id='pieChartSection' style='display: none;'>
+                    <h2 class='section-title'>
+                        <i class='fas fa-chart-pie'></i> Current Recommendations Distribution
+                    </h2>
+                    <div class='chart-wrapper'>
+                        <div id='recommendationsPieChart' class='chart' style='height: 350px;'></div>
+                    </div>
+                </div>
+
+                <!-- Historical Table -->
+                <div class='section' id='historySection' style='display: none;'>
+                    <h2 class='section-title'>
+                        <i class='fas fa-history'></i> Historical Recommendations
+                    </h2>
+                    
+                    <div class='toolbar'>
+                        <div class='toolbar-row'>
+                            <button class='btn-success' onclick='AnalystCoverage.exportRecommendations()'>
+                                <i class='fas fa-download'></i> Export Data
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div id='historyTableContainer'></div>
                 </div>
 
                 <footer>

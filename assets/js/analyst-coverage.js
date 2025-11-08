@@ -1,24 +1,23 @@
 // ============================================
-// ANALYST COVERAGE - PAGE LOGIC
+// ANALYST COVERAGE - PREMIUM VERSION
 // ============================================
 
 const AnalystCoverage = {
     finnhubClient: null,
     currentSymbol: null,
+    allRecommendations: [],
 
     async init() {
-        console.log('🚀 Initializing Analyst Coverage...');
+        console.log('🚀 Initializing Analyst Coverage Premium...');
         
         try {
             this.finnhubClient = new FinnHubClient();
             
             const urlParams = new URLSearchParams(window.location.search);
-            const symbol = urlParams.get('symbol');
+            const symbol = urlParams.get('symbol') || 'TSLA'; // ✅ Défaut: TSLA
             
-            if (symbol) {
-                document.getElementById('symbolInput').value = symbol.toUpperCase();
-                await this.loadAnalystData();
-            }
+            document.getElementById('symbolInput').value = symbol.toUpperCase();
+            await this.loadAnalystData();
             
             document.getElementById('symbolInput').addEventListener('keypress', (e) => {
                 if (e.key === 'Enter') {
@@ -32,6 +31,11 @@ const AnalystCoverage = {
         } catch (error) {
             console.error('❌ Initialization error:', error);
         }
+    },
+
+    quickLoad(symbol) {
+        document.getElementById('symbolInput').value = symbol;
+        this.loadAnalystData();
     },
 
     async loadAnalystData() {
@@ -53,6 +57,8 @@ const AnalystCoverage = {
         `;
 
         document.getElementById('chartSection').style.display = 'none';
+        document.getElementById('pieChartSection').style.display = 'none';
+        document.getElementById('historySection').style.display = 'none';
 
         try {
             const recommendations = await this.finnhubClient.getRecommendation(symbol);
@@ -67,8 +73,11 @@ const AnalystCoverage = {
                 return;
             }
 
+            this.allRecommendations = recommendations;
             this.renderRecommendations(recommendations);
             this.renderChart(recommendations);
+            this.renderPieChart(recommendations[0]);
+            this.renderHistoryTable(recommendations);
 
         } catch (error) {
             console.error('Error loading analyst data:', error);
@@ -81,6 +90,8 @@ const AnalystCoverage = {
         const latest = data[0];
 
         const total = latest.strongBuy + latest.buy + latest.hold + latest.sell + latest.strongSell;
+        const bullishPercent = ((latest.strongBuy + latest.buy) / total * 100).toFixed(1);
+        const bearishPercent = ((latest.sell + latest.strongSell) / total * 100).toFixed(1);
 
         container.innerHTML = `
             <div class='section'>
@@ -143,18 +154,36 @@ const AnalystCoverage = {
                     </div>
                 </div>
                 
+                <div class='stats-row' style='margin-top: 30px;'>
+                    <div class='stat-card'>
+                        <div class='stat-card-icon'>📊</div>
+                        <div class='stat-card-value'>${total}</div>
+                        <div class='stat-card-label'>Total Analysts</div>
+                    </div>
+                    <div class='stat-card'>
+                        <div class='stat-card-icon'>📈</div>
+                        <div class='stat-card-value'>${bullishPercent}%</div>
+                        <div class='stat-card-label'>Bullish (Buy/Strong Buy)</div>
+                    </div>
+                    <div class='stat-card'>
+                        <div class='stat-card-icon'>📉</div>
+                        <div class='stat-card-value'>${bearishPercent}%</div>
+                        <div class='stat-card-label'>Bearish (Sell/Strong Sell)</div>
+                    </div>
+                    <div class='stat-card'>
+                        <div class='stat-card-icon'>🎯</div>
+                        <div class='stat-card-value'>${this.getConsensusRating(latest)}</div>
+                        <div class='stat-card-label'>Consensus Rating</div>
+                    </div>
+                </div>
+                
                 <div class='toolbar' style='margin-top: 30px;'>
                     <div style='text-align: center; padding: 20px;'>
                         <h3 style='margin-bottom: 15px; color: var(--text-primary);'>
-                            <i class='fas fa-chart-pie'></i> Consensus Rating
+                            <i class='fas fa-lightbulb'></i> Investment Recommendation
                         </h3>
-                        <div style='font-size: 2em; font-weight: 800; background: var(--gradient-primary); 
-                                    -webkit-background-clip: text; -webkit-text-fill-color: transparent; 
-                                    background-clip: text;'>
-                            ${this.getConsensusRating(latest)}
-                        </div>
-                        <div style='color: var(--text-secondary); margin-top: 10px; font-size: 1.1em;'>
-                            Based on ${total} analyst${total !== 1 ? 's' : ''}
+                        <div style='font-size: 1.5em; font-weight: 800;'>
+                            ${this.getInvestmentAdvice(latest)}
                         </div>
                     </div>
                 </div>
@@ -183,6 +212,24 @@ const AnalystCoverage = {
         if (avgScore >= 2.5) return 'Hold';
         if (avgScore >= 1.5) return 'Sell';
         return 'Strong Sell';
+    },
+
+    getInvestmentAdvice(data) {
+        const total = data.strongBuy + data.buy + data.hold + data.sell + data.strongSell;
+        const bullishPercent = (data.strongBuy + data.buy) / total * 100;
+        const bearishPercent = (data.sell + data.strongSell) / total * 100;
+
+        if (bullishPercent >= 70) {
+            return '🚀 Strong Buy Signal - High analyst confidence';
+        } else if (bullishPercent >= 50) {
+            return '📈 Buy Signal - Positive analyst sentiment';
+        } else if (bearishPercent >= 50) {
+            return '📉 Sell Signal - Negative analyst sentiment';
+        } else if (bearishPercent >= 70) {
+            return '⚠️ Strong Sell Signal - High caution advised';
+        } else {
+            return '⏸️ Hold - Mixed analyst opinions';
+        }
     },
 
     renderChart(data) {
@@ -274,6 +321,161 @@ const AnalystCoverage = {
                 enabled: false
             }
         });
+    },
+
+    renderPieChart(latest) {
+        const section = document.getElementById('pieChartSection');
+        section.style.display = 'block';
+
+        Highcharts.chart('recommendationsPieChart', {
+            chart: {
+                type: 'pie',
+                backgroundColor: 'transparent'
+            },
+            title: {
+                text: null
+            },
+            tooltip: {
+                pointFormat: '{series.name}: <b>{point.percentage:.1f}%</b> ({point.y} analysts)',
+                backgroundColor: getComputedStyle(document.documentElement).getPropertyValue('--card-bg'),
+                style: {
+                    color: getComputedStyle(document.documentElement).getPropertyValue('--text-primary')
+                }
+            },
+            plotOptions: {
+                pie: {
+                    allowPointSelect: true,
+                    cursor: 'pointer',
+                    dataLabels: {
+                        enabled: true,
+                        format: '<b>{point.name}</b>: {point.percentage:.1f}%',
+                        style: {
+                            color: getComputedStyle(document.documentElement).getPropertyValue('--text-primary'),
+                            fontSize: '14px',
+                            fontWeight: 'bold'
+                        }
+                    },
+                    showInLegend: true
+                }
+            },
+            legend: {
+                itemStyle: {
+                    color: getComputedStyle(document.documentElement).getPropertyValue('--text-primary')
+                }
+            },
+            series: [{
+                name: 'Recommendations',
+                colorByPoint: true,
+                data: [{
+                    name: 'Strong Buy',
+                    y: latest.strongBuy,
+                    color: '#27ae60'
+                }, {
+                    name: 'Buy',
+                    y: latest.buy,
+                    color: '#2ecc71'
+                }, {
+                    name: 'Hold',
+                    y: latest.hold,
+                    color: '#f39c12'
+                }, {
+                    name: 'Sell',
+                    y: latest.sell,
+                    color: '#e67e22'
+                }, {
+                    name: 'Strong Sell',
+                    y: latest.strongSell,
+                    color: '#e74c3c'
+                }]
+            }],
+            credits: {
+                enabled: false
+            }
+        });
+    },
+
+    renderHistoryTable(data) {
+        const section = document.getElementById('historySection');
+        const container = document.getElementById('historyTableContainer');
+        
+        section.style.display = 'block';
+
+        const sortedData = data.sort((a, b) => new Date(b.period) - new Date(a.period));
+
+        container.innerHTML = `
+            <div class='earnings-table'>
+                <table>
+                    <thead>
+                        <tr>
+                            <th><i class='fas fa-calendar'></i> Period</th>
+                            <th><i class='fas fa-arrow-up'></i> Strong Buy</th>
+                            <th><i class='fas fa-thumbs-up'></i> Buy</th>
+                            <th><i class='fas fa-hand-paper'></i> Hold</th>
+                            <th><i class='fas fa-thumbs-down'></i> Sell</th>
+                            <th><i class='fas fa-arrow-down'></i> Strong Sell</th>
+                            <th><i class='fas fa-users'></i> Total</th>
+                            <th><i class='fas fa-star'></i> Consensus</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${sortedData.map(item => {
+                            const total = item.strongBuy + item.buy + item.hold + item.sell + item.strongSell;
+                            const consensus = this.getConsensusRating(item);
+                            
+                            return `
+                                <tr>
+                                    <td><strong>${item.period}</strong></td>
+                                    <td style='color: #27ae60; font-weight: 700;'>${item.strongBuy}</td>
+                                    <td style='color: #2ecc71; font-weight: 700;'>${item.buy}</td>
+                                    <td style='color: #f39c12; font-weight: 700;'>${item.hold}</td>
+                                    <td style='color: #e67e22; font-weight: 700;'>${item.sell}</td>
+                                    <td style='color: #e74c3c; font-weight: 700;'>${item.strongSell}</td>
+                                    <td><strong>${total}</strong></td>
+                                    <td><strong>${consensus}</strong></td>
+                                </tr>
+                            `;
+                        }).join('')}
+                    </tbody>
+                </table>
+            </div>
+        `;
+    },
+
+    exportRecommendations() {
+        if (this.allRecommendations.length === 0) {
+            alert('No data to export');
+            return;
+        }
+
+        const csvContent = this.convertToCSV(this.allRecommendations);
+        const blob = new Blob([csvContent], { type: 'text/csv' });
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `${this.currentSymbol}-analyst-recommendations-${new Date().toISOString().split('T')[0]}.csv`;
+        a.click();
+        window.URL.revokeObjectURL(url);
+    },
+
+    convertToCSV(data) {
+        const headers = ['Period', 'Strong Buy', 'Buy', 'Hold', 'Sell', 'Strong Sell', 'Total', 'Consensus'];
+        const rows = data.map(item => {
+            const total = item.strongBuy + item.buy + item.hold + item.sell + item.strongSell;
+            const consensus = this.getConsensusRating(item);
+            
+            return [
+                item.period,
+                item.strongBuy,
+                item.buy,
+                item.hold,
+                item.sell,
+                item.strongSell,
+                total,
+                consensus
+            ].join(',');
+        });
+
+        return [headers.join(','), ...rows].join('\n');
     },
 
     updateLastUpdate() {
