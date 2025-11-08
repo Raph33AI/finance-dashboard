@@ -216,9 +216,24 @@
                             <button class='btn-primary' onclick='EarningsEstimates.loadEarningsData()'>
                                 <i class='fas fa-search'></i> Search
                             </button>
+                            
+                            <!-- Quick Access Buttons -->
+                            <div style='display: flex; gap: 10px; margin-left: 20px;'>
+                                <button class='btn-secondary' onclick='EarningsEstimates.quickLoad("AAPL")' 
+                                        style='padding: 8px 16px; font-size: 0.9em;'>AAPL</button>
+                                <button class='btn-secondary' onclick='EarningsEstimates.quickLoad("MSFT")' 
+                                        style='padding: 8px 16px; font-size: 0.9em;'>MSFT</button>
+                                <button class='btn-secondary' onclick='EarningsEstimates.quickLoad("GOOGL")' 
+                                        style='padding: 8px 16px; font-size: 0.9em;'>GOOGL</button>
+                                <button class='btn-secondary' onclick='EarningsEstimates.quickLoad("META")' 
+                                        style='padding: 8px 16px; font-size: 0.9em;'>META</button>
+                            </div>
                         </div>
                     </div>
                 </div>
+
+                <!-- Earnings Summary Stats -->
+                <div id='earningsSummaryContainer'></div>
 
                 <!-- Historical Earnings -->
                 <div id='earningsHistoryContainer'></div>
@@ -230,6 +245,16 @@
                     </h2>
                     <div class='chart-wrapper'>
                         <div id='earningsChart' class='chart' style='height: 450px;'></div>
+                    </div>
+                </div>
+
+                <!-- Surprise Chart -->
+                <div class='section' id='surpriseChartSection' style='display: none;'>
+                    <h2 class='section-title'>
+                        <i class='fas fa-bolt'></i> Earnings Surprise Trend
+                    </h2>
+                    <div class='chart-wrapper'>
+                        <div id='surpriseChart' class='chart' style='height: 350px;'></div>
                     </div>
                 </div>
 

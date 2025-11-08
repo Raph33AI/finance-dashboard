@@ -1,24 +1,23 @@
 // ============================================
-// EARNINGS & ESTIMATES - PAGE LOGIC
+// EARNINGS & ESTIMATES - PREMIUM VERSION
 // ============================================
 
 const EarningsEstimates = {
     finnhubClient: null,
     currentSymbol: null,
+    allEarnings: [],
 
     async init() {
-        console.log('🚀 Initializing Earnings & Estimates...');
+        console.log('🚀 Initializing Earnings & Estimates Premium...');
         
         try {
             this.finnhubClient = new FinnHubClient();
             
             const urlParams = new URLSearchParams(window.location.search);
-            const symbol = urlParams.get('symbol');
+            const symbol = urlParams.get('symbol') || 'NVDA'; // ✅ Défaut: NVDA
             
-            if (symbol) {
-                document.getElementById('symbolInput').value = symbol.toUpperCase();
-                await this.loadEarningsData();
-            }
+            document.getElementById('symbolInput').value = symbol.toUpperCase();
+            await this.loadEarningsData();
             
             document.getElementById('symbolInput').addEventListener('keypress', (e) => {
                 if (e.key === 'Enter') {
@@ -32,6 +31,11 @@ const EarningsEstimates = {
         } catch (error) {
             console.error('❌ Initialization error:', error);
         }
+    },
+
+    quickLoad(symbol) {
+        document.getElementById('symbolInput').value = symbol;
+        this.loadEarningsData();
     },
 
     async loadEarningsData() {
@@ -53,7 +57,9 @@ const EarningsEstimates = {
         `;
 
         document.getElementById('chartSection').style.display = 'none';
+        document.getElementById('surpriseChartSection').style.display = 'none';
         document.getElementById('financialsContainer').innerHTML = '';
+        document.getElementById('earningsSummaryContainer').innerHTML = '';
 
         try {
             await Promise.all([
@@ -68,6 +74,7 @@ const EarningsEstimates = {
 
     async loadEarningsHistory(symbol) {
         const container = document.getElementById('earningsHistoryContainer');
+        const summaryContainer = document.getElementById('earningsSummaryContainer');
 
         try {
             const earnings = await this.finnhubClient.getEarnings(symbol);
@@ -82,14 +89,24 @@ const EarningsEstimates = {
                 return;
             }
 
-            // Inverser pour avoir les plus récents en premier
-            const sortedEarnings = earnings.sort((a, b) => new Date(b.period) - new Date(a.period));
+            this.allEarnings = earnings.sort((a, b) => new Date(b.period) - new Date(a.period));
+
+            // Calculer les statistiques
+            this.renderEarningsSummary(this.allEarnings);
 
             container.innerHTML = `
                 <div class='section'>
                     <h2 class='section-title'>
                         <i class='fas fa-history'></i> Historical Earnings Results
                     </h2>
+                    
+                    <div class='toolbar'>
+                        <div class='toolbar-row'>
+                            <button class='btn-success' onclick='EarningsEstimates.exportEarnings()'>
+                                <i class='fas fa-download'></i> Export Data
+                            </button>
+                        </div>
+                    </div>
                     
                     <div class='earnings-table'>
                         <table>
@@ -99,11 +116,12 @@ const EarningsEstimates = {
                                     <th><i class='fas fa-chart-line'></i> Actual EPS</th>
                                     <th><i class='fas fa-bullseye'></i> Estimated EPS</th>
                                     <th><i class='fas fa-percentage'></i> Surprise</th>
+                                    <th><i class='fas fa-percentage'></i> Surprise %</th>
                                     <th><i class='fas fa-signal'></i> Performance</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                ${sortedEarnings.slice(0, 12).map(item => {
+                                ${this.allEarnings.slice(0, 20).map(item => {
                                     const actual = item.actual !== null ? item.actual : 'N/A';
                                     const estimate = item.estimate !== null ? item.estimate : 'N/A';
                                     const surprise = item.surprise !== null ? item.surprise : null;
@@ -130,7 +148,9 @@ const EarningsEstimates = {
                                             <td>$${estimate !== 'N/A' ? estimate.toFixed(2) : 'N/A'}</td>
                                             <td class='${performanceClass}'>
                                                 ${surprise !== null ? (surprise > 0 ? '+' : '') + '$' + surprise.toFixed(2) : 'N/A'}
-                                                ${surprisePercent !== null ? ' (' + (surprisePercent > 0 ? '+' : '') + surprisePercent.toFixed(1) + '%)' : ''}
+                                            </td>
+                                            <td class='${performanceClass}'>
+                                                ${surprisePercent !== null ? (surprisePercent > 0 ? '+' : '') + surprisePercent.toFixed(1) + '%' : 'N/A'}
                                             </td>
                                             <td class='${performanceClass}'>
                                                 ${performanceIcon} <strong>${performanceText}</strong>
@@ -144,7 +164,8 @@ const EarningsEstimates = {
                 </div>
             `;
 
-            this.renderEarningsChart(sortedEarnings);
+            this.renderEarningsChart(this.allEarnings);
+            this.renderSurpriseChart(this.allEarnings);
 
         } catch (error) {
             console.error('Error loading earnings history:', error);
@@ -152,12 +173,76 @@ const EarningsEstimates = {
         }
     },
 
+    renderEarningsSummary(earnings) {
+        const container = document.getElementById('earningsSummaryContainer');
+
+        let beatCount = 0;
+        let missCount = 0;
+        let inlineCount = 0;
+        let totalSurprise = 0;
+        let validSurprises = 0;
+
+        earnings.forEach(item => {
+            if (item.surprise !== null) {
+                if (item.surprise > 0) beatCount++;
+                else if (item.surprise < 0) missCount++;
+                else inlineCount++;
+                
+                totalSurprise += item.surprise;
+                validSurprises++;
+            }
+        });
+
+        const avgSurprise = validSurprises > 0 ? (totalSurprise / validSurprises).toFixed(3) : 0;
+        const beatRate = earnings.length > 0 ? ((beatCount / earnings.length) * 100).toFixed(1) : 0;
+
+        container.innerHTML = `
+            <div class='section'>
+                <h2 class='section-title'>
+                    <i class='fas fa-chart-pie'></i> Earnings Performance Summary
+                </h2>
+                
+                <div class='stats-row'>
+                    <div class='stat-card'>
+                        <div class='stat-card-icon'>📊</div>
+                        <div class='stat-card-value'>${earnings.length}</div>
+                        <div class='stat-card-label'>Total Reports</div>
+                    </div>
+                    <div class='stat-card'>
+                        <div class='stat-card-icon'>✅</div>
+                        <div class='stat-card-value'>${beatCount}</div>
+                        <div class='stat-card-label'>Earnings Beat</div>
+                    </div>
+                    <div class='stat-card'>
+                        <div class='stat-card-icon'>❌</div>
+                        <div class='stat-card-value'>${missCount}</div>
+                        <div class='stat-card-label'>Earnings Miss</div>
+                    </div>
+                    <div class='stat-card'>
+                        <div class='stat-card-icon'>➡️</div>
+                        <div class='stat-card-value'>${inlineCount}</div>
+                        <div class='stat-card-label'>In-line</div>
+                    </div>
+                    <div class='stat-card'>
+                        <div class='stat-card-icon'>📈</div>
+                        <div class='stat-card-value'>${beatRate}%</div>
+                        <div class='stat-card-label'>Beat Rate</div>
+                    </div>
+                    <div class='stat-card'>
+                        <div class='stat-card-icon'>💰</div>
+                        <div class='stat-card-value'>$${avgSurprise}</div>
+                        <div class='stat-card-label'>Avg Surprise</div>
+                    </div>
+                </div>
+            </div>
+        `;
+    },
+
     renderEarningsChart(earnings) {
         const chartSection = document.getElementById('chartSection');
         chartSection.style.display = 'block';
 
-        // Inverser pour afficher chronologiquement
-        const sortedData = earnings.slice(0, 12).reverse();
+        const sortedData = earnings.slice(0, 20).reverse();
 
         const categories = sortedData.map(item => this.formatPeriod(item.period));
         const actualEPS = sortedData.map(item => item.actual !== null ? item.actual : null);
@@ -252,6 +337,90 @@ const EarningsEstimates = {
         });
     },
 
+    renderSurpriseChart(earnings) {
+        const section = document.getElementById('surpriseChartSection');
+        section.style.display = 'block';
+
+        const sortedData = earnings.slice(0, 20).reverse();
+
+        const categories = sortedData.map(item => this.formatPeriod(item.period));
+        const surpriseData = sortedData.map(item => item.surprisePercent !== null ? item.surprisePercent : 0);
+
+        Highcharts.chart('surpriseChart', {
+            chart: {
+                type: 'column',
+                backgroundColor: 'transparent'
+            },
+            title: {
+                text: null
+            },
+            xAxis: {
+                categories: categories,
+                labels: {
+                    style: {
+                        color: getComputedStyle(document.documentElement).getPropertyValue('--text-primary')
+                    }
+                }
+            },
+            yAxis: {
+                title: {
+                    text: 'Surprise (%)',
+                    style: {
+                        color: getComputedStyle(document.documentElement).getPropertyValue('--text-primary')
+                    }
+                },
+                labels: {
+                    style: {
+                        color: getComputedStyle(document.documentElement).getPropertyValue('--text-primary')
+                    },
+                    formatter: function() {
+                        return this.value.toFixed(1) + '%';
+                    }
+                },
+                gridLineColor: getComputedStyle(document.documentElement).getPropertyValue('--border-color'),
+                plotLines: [{
+                    value: 0,
+                    color: getComputedStyle(document.documentElement).getPropertyValue('--text-secondary'),
+                    width: 2,
+                    zIndex: 4
+                }]
+            },
+            legend: {
+                enabled: false
+            },
+            tooltip: {
+                backgroundColor: getComputedStyle(document.documentElement).getPropertyValue('--card-bg'),
+                style: {
+                    color: getComputedStyle(document.documentElement).getPropertyValue('--text-primary')
+                },
+                formatter: function() {
+                    const color = this.y >= 0 ? '#27ae60' : '#e74c3c';
+                    return '<b>' + this.x + '</b><br/>' +
+                           '<span style="color:' + color + '">●</span> Surprise: <b>' + 
+                           (this.y > 0 ? '+' : '') + this.y.toFixed(1) + '%</b>';
+                }
+            },
+            plotOptions: {
+                column: {
+                    colorByPoint: false,
+                    zones: [{
+                        value: 0,
+                        color: '#e74c3c'
+                    }, {
+                        color: '#27ae60'
+                    }]
+                }
+            },
+            series: [{
+                name: 'Surprise',
+                data: surpriseData
+            }],
+            credits: {
+                enabled: false
+            }
+        });
+    },
+
     async loadBasicFinancials(symbol) {
         const container = document.getElementById('financialsContainer');
 
@@ -287,9 +456,17 @@ const EarningsEstimates = {
                             </div>
                         ` : ''}
                         
-                        ${metric['peBasicExclExtraTTM'] ? `
+                        ${metric['52WeekPriceReturnDaily'] ? `
                             <div class='stat-card'>
                                 <div class='stat-card-icon'>📊</div>
+                                <div class='stat-card-value'>${metric['52WeekPriceReturnDaily'].toFixed(2)}%</div>
+                                <div class='stat-card-label'>52-Week Return</div>
+                            </div>
+                        ` : ''}
+                        
+                        ${metric['peBasicExclExtraTTM'] ? `
+                            <div class='stat-card'>
+                                <div class='stat-card-icon'>💹</div>
                                 <div class='stat-card-value'>${metric['peBasicExclExtraTTM'].toFixed(2)}</div>
                                 <div class='stat-card-label'>P/E Ratio (TTM)</div>
                             </div>
@@ -334,6 +511,30 @@ const EarningsEstimates = {
                                 <div class='stat-card-label'>Current Ratio</div>
                             </div>
                         ` : ''}
+                        
+                        ${metric['grossMarginAnnual'] ? `
+                            <div class='stat-card'>
+                                <div class='stat-card-icon'>📊</div>
+                                <div class='stat-card-value'>${metric['grossMarginAnnual'].toFixed(2)}%</div>
+                                <div class='stat-card-label'>Gross Margin</div>
+                            </div>
+                        ` : ''}
+                        
+                        ${metric['operatingMarginAnnual'] ? `
+                            <div class='stat-card'>
+                                <div class='stat-card-icon'>💼</div>
+                                <div class='stat-card-value'>${metric['operatingMarginAnnual'].toFixed(2)}%</div>
+                                <div class='stat-card-label'>Operating Margin</div>
+                            </div>
+                        ` : ''}
+                        
+                        ${metric['netProfitMarginAnnual'] ? `
+                            <div class='stat-card'>
+                                <div class='stat-card-icon'>💎</div>
+                                <div class='stat-card-value'>${metric['netProfitMarginAnnual'].toFixed(2)}%</div>
+                                <div class='stat-card-label'>Net Profit Margin</div>
+                            </div>
+                        ` : ''}
                     </div>
                 </div>
             `;
@@ -341,6 +542,48 @@ const EarningsEstimates = {
         } catch (error) {
             console.error('Error loading basic financials:', error);
         }
+    },
+
+    exportEarnings() {
+        if (this.allEarnings.length === 0) {
+            alert('No data to export');
+            return;
+        }
+
+        const csvContent = this.convertToCSV(this.allEarnings);
+        const blob = new Blob([csvContent], { type: 'text/csv' });
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `${this.currentSymbol}-earnings-${new Date().toISOString().split('T')[0]}.csv`;
+        a.click();
+        window.URL.revokeObjectURL(url);
+    },
+
+    convertToCSV(data) {
+        const headers = ['Period', 'Actual EPS', 'Estimated EPS', 'Surprise', 'Surprise %', 'Performance'];
+        const rows = data.map(item => {
+            const actual = item.actual !== null ? item.actual.toFixed(2) : 'N/A';
+            const estimate = item.estimate !== null ? item.estimate.toFixed(2) : 'N/A';
+            const surprise = item.surprise !== null ? item.surprise.toFixed(2) : 'N/A';
+            const surprisePercent = item.surprisePercent !== null ? item.surprisePercent.toFixed(2) : 'N/A';
+            
+            let performance = 'In-line';
+            if (item.surprise !== null) {
+                performance = item.surprise > 0 ? 'Beat' : item.surprise < 0 ? 'Miss' : 'In-line';
+            }
+            
+            return [
+                item.period,
+                actual,
+                estimate,
+                surprise,
+                surprisePercent,
+                performance
+            ].join(',');
+        });
+
+        return [headers.join(','), ...rows].join('\n');
     },
 
     formatPeriod(period) {
