@@ -6,7 +6,7 @@
 class FinancialChatbotEngine {
     constructor(apiKey, finnhubApiKey) {
         this.gemini = new GeminiAIIntegration(apiKey);
-        this.apiClient = window.FinnhubAPIClient ? new FinnhubAPIClient(finnhubApiKey) : null;
+        this.apiClient = window.FinnhubClient  ? new FinnhubAPIClient(finnhubApiKey) : null;
         this.ipoAnalyzer = this.apiClient ? new IPOAnalyzer(this.apiClient) : null;
         this.analytics = this.apiClient ? new AdvancedFinancialAnalytics(this.apiClient) : null;
         this.conversationHistory = [];
