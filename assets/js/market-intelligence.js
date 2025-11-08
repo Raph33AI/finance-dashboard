@@ -1,19 +1,21 @@
 // ============================================
-// MARKET INTELLIGENCE - PAGE LOGIC v2.0
-// Avec support des images et effets optimisés
+// MARKET INTELLIGENCE - PREMIUM VERSION
 // ============================================
 
 const MarketIntelligence = {
     finnhubClient: null,
+    allNews: [],
+    displayedNewsCount: 20,
 
     async init() {
-        console.log('🚀 Initializing Market Intelligence v2.0...');
+        console.log('🚀 Initializing Market Intelligence Premium...');
         
         try {
             this.finnhubClient = new FinnHubClient();
             await this.loadData();
             this.updateLastUpdate();
             console.log('✅ Market Intelligence initialized');
+            
         } catch (error) {
             console.error('❌ Initialization error:', error);
             this.showGlobalError('Failed to initialize Market Intelligence: ' + error.message);
@@ -34,6 +36,7 @@ const MarketIntelligence = {
     async loadMarketNews() {
         const container = document.getElementById('marketNewsContainer');
         const category = document.getElementById('categoryFilter').value;
+        const limit = parseInt(document.getElementById('newsLimit').value);
 
         container.innerHTML = `
             <div class='loading-container'>
@@ -52,26 +55,14 @@ const MarketIntelligence = {
                         <p class='empty-text'>No news available for ${category}</p>
                     </div>
                 `;
-                document.getElementById('totalNewsCount').textContent = '0';
-                document.getElementById('positiveNewsCount').textContent = '0';
-                document.getElementById('negativeNewsCount').textContent = '0';
+                document.getElementById('loadMoreContainer').innerHTML = '';
                 return;
             }
 
-            let positiveCount = 0;
-            let negativeCount = 0;
-
-            container.innerHTML = news.slice(0, 20).map((item, index) => {
-                const sentiment = this.analyzeSentiment(item.headline + ' ' + (item.summary || ''));
-                if (sentiment === 'positive') positiveCount++;
-                if (sentiment === 'negative') negativeCount++;
-
-                return this.renderNewsCard(item, sentiment, index);
-            }).join('');
-
-            document.getElementById('totalNewsCount').textContent = news.length;
-            document.getElementById('positiveNewsCount').textContent = positiveCount;
-            document.getElementById('negativeNewsCount').textContent = negativeCount;
+            this.allNews = news;
+            this.displayedNewsCount = Math.min(20, limit);
+            this.renderNews();
+            this.renderSentimentChart();
 
         } catch (error) {
             console.error('Error loading market news:', error);
@@ -79,11 +70,53 @@ const MarketIntelligence = {
         }
     },
 
+    renderNews() {
+        const container = document.getElementById('marketNewsContainer');
+        const newsToDisplay = this.allNews.slice(0, this.displayedNewsCount);
+        
+        let positiveCount = 0;
+        let negativeCount = 0;
+        let neutralCount = 0;
+
+        container.innerHTML = newsToDisplay.map((item, index) => {
+            const sentiment = this.analyzeSentiment(item.headline + ' ' + (item.summary || ''));
+            if (sentiment === 'positive') positiveCount++;
+            else if (sentiment === 'negative') negativeCount++;
+            else neutralCount++;
+
+            return this.renderNewsCard(item, sentiment, index);
+        }).join('');
+
+        // Update stats
+        document.getElementById('totalNewsCount').textContent = this.allNews.length;
+        document.getElementById('positiveNewsCount').textContent = positiveCount;
+        document.getElementById('negativeNewsCount').textContent = negativeCount;
+
+        // Load More button
+        const loadMoreContainer = document.getElementById('loadMoreContainer');
+        if (this.displayedNewsCount < this.allNews.length) {
+            loadMoreContainer.innerHTML = `
+                <button class='btn-primary' onclick='MarketIntelligence.loadMoreNews()'>
+                    <i class='fas fa-chevron-down'></i> Load More (${this.allNews.length - this.displayedNewsCount} remaining)
+                </button>
+            `;
+        } else {
+            loadMoreContainer.innerHTML = '';
+        }
+    },
+
+    loadMoreNews() {
+        const limit = parseInt(document.getElementById('newsLimit').value);
+        this.displayedNewsCount = Math.min(this.displayedNewsCount + 20, limit, this.allNews.length);
+        this.renderNews();
+        window.scrollTo({ top: document.getElementById('marketNewsContainer').offsetTop - 100, behavior: 'smooth' });
+    },
+
     renderNewsCard(item, sentiment, index) {
         const hasImage = item.image && item.image.trim() !== '';
         
         return `
-            <div class='news-card' onclick='window.open("${item.url}", "_blank")' style='animation-delay: ${index * 0.05}s;'>
+            <div class='news-card' onclick='window.open("${item.url}", "_blank")' style='animation-delay: ${(index % 20) * 0.05}s;'>
                 ${hasImage ? `
                     <div class='news-image'>
                         <img src='${item.image}' 
@@ -117,42 +150,101 @@ const MarketIntelligence = {
         `;
     },
 
-    getImagePlaceholder() {
-        const gradients = [
-            'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-            'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
-            'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
-            'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)',
-            'linear-gradient(135deg, #fa709a 0%, #fee140 100%)',
-        ];
-        
-        const randomGradient = gradients[Math.floor(Math.random() * gradients.length)];
-        
-        return `
-            <div class='news-image-placeholder' style='background: ${randomGradient};'>
-                <i class='fas fa-newspaper'></i>
-            </div>
-        `;
+    renderSentimentChart() {
+        let positiveCount = 0;
+        let negativeCount = 0;
+        let neutralCount = 0;
+
+        this.allNews.forEach(item => {
+            const sentiment = this.analyzeSentiment(item.headline + ' ' + (item.summary || ''));
+            if (sentiment === 'positive') positiveCount++;
+            else if (sentiment === 'negative') negativeCount++;
+            else neutralCount++;
+        });
+
+        Highcharts.chart('sentimentChart', {
+            chart: {
+                type: 'pie',
+                backgroundColor: 'transparent'
+            },
+            title: {
+                text: null
+            },
+            tooltip: {
+                pointFormat: '{series.name}: <b>{point.percentage:.1f}%</b> ({point.y} news)',
+                backgroundColor: getComputedStyle(document.documentElement).getPropertyValue('--card-bg'),
+                style: {
+                    color: getComputedStyle(document.documentElement).getPropertyValue('--text-primary')
+                }
+            },
+            plotOptions: {
+                pie: {
+                    allowPointSelect: true,
+                    cursor: 'pointer',
+                    dataLabels: {
+                        enabled: true,
+                        format: '<b>{point.name}</b>: {point.percentage:.1f}%',
+                        style: {
+                            color: getComputedStyle(document.documentElement).getPropertyValue('--text-primary'),
+                            fontSize: '14px',
+                            fontWeight: 'bold'
+                        }
+                    },
+                    showInLegend: true
+                }
+            },
+            legend: {
+                itemStyle: {
+                    color: getComputedStyle(document.documentElement).getPropertyValue('--text-primary')
+                }
+            },
+            series: [{
+                name: 'Sentiment',
+                colorByPoint: true,
+                data: [{
+                    name: 'Positive',
+                    y: positiveCount,
+                    color: '#27ae60'
+                }, {
+                    name: 'Neutral',
+                    y: neutralCount,
+                    color: '#95a5a6'
+                }, {
+                    name: 'Negative',
+                    y: negativeCount,
+                    color: '#e74c3c'
+                }]
+            }],
+            credits: {
+                enabled: false
+            }
+        });
     },
 
     async loadEarningsCalendar() {
         const container = document.getElementById('earningsCalendarContainer');
+        const days = parseInt(document.getElementById('earningsPeriod').value);
 
         try {
-            const calendar = await this.finnhubClient.getEarningsCalendar();
+            const from = new Date().toISOString().split('T')[0];
+            const toDate = new Date();
+            toDate.setDate(toDate.getDate() + days);
+            const to = toDate.toISOString().split('T')[0];
+
+            const calendar = await this.finnhubClient.getEarningsCalendar(from, to);
 
             if (!calendar || !calendar.earningsCalendar || calendar.earningsCalendar.length === 0) {
                 container.innerHTML = `
                     <div class='empty-state'>
                         <i class='fas fa-calendar-times empty-icon'></i>
-                        <p class='empty-text'>No upcoming earnings in the next 30 days</p>
+                        <p class='empty-text'>No upcoming earnings in the next ${days} days</p>
                     </div>
                 `;
                 document.getElementById('upcomingEarningsCount').textContent = '0';
                 return;
             }
 
-            const earnings = calendar.earningsCalendar.slice(0, 50);
+            const earnings = calendar.earningsCalendar.slice(0, 100);
 
             container.innerHTML = `
                 <div class='earnings-table'>
@@ -164,11 +256,12 @@ const MarketIntelligence = {
                                 <th><i class='fas fa-building'></i> Company</th>
                                 <th><i class='fas fa-chart-line'></i> EPS Estimate</th>
                                 <th><i class='fas fa-dollar-sign'></i> Revenue Estimate</th>
+                                <th><i class='fas fa-external-link-alt'></i> Actions</th>
                             </tr>
                         </thead>
                         <tbody>
                             ${earnings.map(item => `
-                                <tr onclick='MarketIntelligence.openCompanyInsights("${item.symbol}")'>
+                                <tr>
                                     <td><strong>${this.formatEarningsDate(item.date)}</strong></td>
                                     <td>
                                         <span style='
@@ -183,6 +276,12 @@ const MarketIntelligence = {
                                     <td>${this.escapeHtml(item.name || item.symbol || 'N/A')}</td>
                                     <td>${item.epsEstimate ? '<strong>$' + item.epsEstimate.toFixed(2) + '</strong>' : '<span style="color: var(--text-secondary);">N/A</span>'}</td>
                                     <td>${item.revenueEstimate ? '<strong>$' + (item.revenueEstimate / 1e9).toFixed(2) + 'B</strong>' : '<span style="color: var(--text-secondary);">N/A</span>'}</td>
+                                    <td>
+                                        <button class='btn-primary' onclick='MarketIntelligence.openCompanyInsights("${item.symbol}")' 
+                                                style='padding: 8px 16px; font-size: 0.85em;'>
+                                            <i class='fas fa-search'></i> View
+                                        </button>
+                                    </td>
                                 </tr>
                             `).join('')}
                         </tbody>
@@ -200,6 +299,44 @@ const MarketIntelligence = {
 
     openCompanyInsights(symbol) {
         window.location.href = `company-insights.html?symbol=${symbol}`;
+    },
+
+    exportNews() {
+        if (this.allNews.length === 0) {
+            alert('No news to export');
+            return;
+        }
+
+        const category = document.getElementById('categoryFilter').value;
+        const csvContent = this.convertNewsToCSV(this.allNews);
+        const blob = new Blob([csvContent], { type: 'text/csv' });
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `market-news-${category}-${new Date().toISOString().split('T')[0]}.csv`;
+        a.click();
+        window.URL.revokeObjectURL(url);
+    },
+
+    convertNewsToCSV(news) {
+        const headers = ['Date', 'Source', 'Headline', 'Summary', 'Sentiment', 'URL'];
+        const rows = news.map(item => {
+            const sentiment = this.analyzeSentiment(item.headline + ' ' + (item.summary || ''));
+            return [
+                new Date(item.datetime * 1000).toISOString(),
+                item.source || 'Unknown',
+                `"${(item.headline || '').replace(/"/g, '""')}"`,
+                `"${(item.summary || '').replace(/"/g, '""')}"`,
+                sentiment,
+                item.url || ''
+            ].join(',');
+        });
+
+        return [headers.join(','), ...rows].join('\n');
+    },
+
+    exportEarnings() {
+        alert('Earnings export feature - Coming soon!');
     },
 
     analyzeSentiment(text) {
@@ -253,6 +390,24 @@ const MarketIntelligence = {
         });
     },
 
+    getImagePlaceholder() {
+        const gradients = [
+            'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+            'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
+            'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
+            'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)',
+            'linear-gradient(135deg, #fa709a 0%, #fee140 100%)',
+        ];
+        
+        const randomGradient = gradients[Math.floor(Math.random() * gradients.length)];
+        
+        return `
+            <div class='news-image-placeholder' style='background: ${randomGradient};'>
+                <i class='fas fa-newspaper'></i>
+            </div>
+        `;
+    },
+
     updateLastUpdate() {
         const now = new Date();
         const formatted = now.toLocaleString('en-US', {
@@ -278,7 +433,7 @@ const MarketIntelligence = {
             <div class='error-container'>
                 <i class='fas fa-exclamation-triangle error-icon'></i>
                 <p class='error-message'>${message}</p>
-                <button class='btn-primary' onclick='MarketIntelligence.loadData()' style='margin-top: 20px;'>
+                <button class='btn-primary' onclick='MarketIntelligence.loadData()'>
                     <i class='fas fa-sync'></i> Retry
                 </button>
             </div>
@@ -292,7 +447,7 @@ const MarketIntelligence = {
                 <div class='error-container'>
                     <i class='fas fa-exclamation-triangle error-icon'></i>
                     <p class='error-message'>${message}</p>
-                    <button class='btn-primary' onclick='location.reload()' style='margin-top: 20px;'>
+                    <button class='btn-primary' onclick='location.reload()'>
                         <i class='fas fa-redo'></i> Reload Page
                     </button>
                 </div>

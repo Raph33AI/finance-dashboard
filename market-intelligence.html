@@ -8,6 +8,9 @@
     <!-- Font Awesome -->
     <link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css'>
     
+    <!-- Highcharts -->
+    <script src='https://code.highcharts.com/highcharts.js'></script>
+    
     <!-- Styles -->
     <link rel='stylesheet' href='assets/css/common.css'>
     <link rel='stylesheet' href='assets/css/sidebar.css'>
@@ -30,6 +33,7 @@
 
     <!-- Theme Script -->
     <script src="assets/js/theme.js"></script>
+    <script src="assets/js/theme-charts.js"></script>
 
     <div class='layout-wrapper'>
         <!-- Sidebar Navigation -->
@@ -224,6 +228,16 @@
                     </div>
                 </div>
 
+                <!-- Sentiment Chart -->
+                <div class='section'>
+                    <h2 class='section-title'>
+                        <i class='fas fa-chart-pie'></i> Sentiment Distribution
+                    </h2>
+                    <div class='chart-wrapper'>
+                        <div id='sentimentChart' class='chart' style='height: 350px;'></div>
+                    </div>
+                </div>
+
                 <!-- Market News Section -->
                 <div class='section'>
                     <h2 class='section-title'>
@@ -239,8 +253,20 @@
                                 <option value='crypto'>Cryptocurrency</option>
                                 <option value='merger'>M&A</option>
                             </select>
+                            
+                            <label><i class='fas fa-sort-amount-down'></i> Show:</label>
+                            <select id='newsLimit' onchange='MarketIntelligence.loadMarketNews()'>
+                                <option value='20'>20 News</option>
+                                <option value='50'>50 News</option>
+                                <option value='100'>100 News</option>
+                            </select>
+                            
                             <button class='btn-primary' onclick='MarketIntelligence.loadMarketNews()'>
                                 <i class='fas fa-sync'></i> Refresh
+                            </button>
+                            
+                            <button class='btn-success' onclick='MarketIntelligence.exportNews()'>
+                                <i class='fas fa-download'></i> Export
                             </button>
                         </div>
                     </div>
@@ -251,6 +277,9 @@
                             <p class='loading-text'>Loading market news...</p>
                         </div>
                     </div>
+                    
+                    <!-- Load More Button -->
+                    <div style='text-align: center; margin-top: 30px;' id='loadMoreContainer'></div>
                 </div>
 
                 <!-- Earnings Calendar -->
@@ -258,6 +287,26 @@
                     <h2 class='section-title'>
                         <i class='fas fa-calendar-alt'></i> Upcoming Earnings Calendar
                     </h2>
+                    
+                    <div class='toolbar'>
+                        <div class='toolbar-row'>
+                            <label><i class='fas fa-calendar'></i> Time Period:</label>
+                            <select id='earningsPeriod' onchange='MarketIntelligence.loadEarningsCalendar()'>
+                                <option value='7'>Next 7 Days</option>
+                                <option value='30' selected>Next 30 Days</option>
+                                <option value='60'>Next 60 Days</option>
+                                <option value='90'>Next 90 Days</option>
+                            </select>
+                            
+                            <button class='btn-primary' onclick='MarketIntelligence.loadEarningsCalendar()'>
+                                <i class='fas fa-sync'></i> Refresh
+                            </button>
+                            
+                            <button class='btn-success' onclick='MarketIntelligence.exportEarnings()'>
+                                <i class='fas fa-download'></i> Export
+                            </button>
+                        </div>
+                    </div>
 
                     <div id='earningsCalendarContainer'>
                         <div class='loading-container'>
