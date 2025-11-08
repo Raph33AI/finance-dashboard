@@ -1,5 +1,6 @@
 // ============================================
 // ANALYST COVERAGE - PREMIUM VERSION
+// Graphiques minimalistes et modernes
 // ============================================
 
 const AnalystCoverage = {
@@ -14,7 +15,7 @@ const AnalystCoverage = {
             this.finnhubClient = new FinnHubClient();
             
             const urlParams = new URLSearchParams(window.location.search);
-            const symbol = urlParams.get('symbol') || 'TSLA'; // ✅ Défaut: TSLA
+            const symbol = urlParams.get('symbol') || 'TSLA';
             
             document.getElementById('symbolInput').value = symbol.toUpperCase();
             await this.loadAnalystData();
@@ -245,19 +246,29 @@ const AnalystCoverage = {
         const sell = sortedData.map(item => item.sell);
         const strongSell = sortedData.map(item => item.strongSell);
 
+        const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+        const textColor = isDark ? '#e4e4e7' : '#18181b';
+        const gridColor = isDark ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.05)';
+
         Highcharts.chart('recommendationsChart', {
             chart: {
                 type: 'column',
-                backgroundColor: 'transparent'
+                backgroundColor: 'transparent',
+                style: {
+                    fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif"
+                }
             },
             title: {
                 text: null
             },
             xAxis: {
                 categories: categories,
+                lineColor: gridColor,
+                tickColor: gridColor,
                 labels: {
                     style: {
-                        color: getComputedStyle(document.documentElement).getPropertyValue('--text-primary')
+                        color: textColor,
+                        fontSize: '12px'
                     }
                 }
             },
@@ -266,31 +277,45 @@ const AnalystCoverage = {
                 title: {
                     text: 'Number of Analysts',
                     style: {
-                        color: getComputedStyle(document.documentElement).getPropertyValue('--text-primary')
+                        color: textColor,
+                        fontSize: '13px',
+                        fontWeight: '600'
                     }
                 },
+                gridLineColor: gridColor,
                 labels: {
                     style: {
-                        color: getComputedStyle(document.documentElement).getPropertyValue('--text-primary')
+                        color: textColor,
+                        fontSize: '12px'
                     }
-                },
-                gridLineColor: getComputedStyle(document.documentElement).getPropertyValue('--border-color')
+                }
             },
             legend: {
                 itemStyle: {
-                    color: getComputedStyle(document.documentElement).getPropertyValue('--text-primary')
+                    color: textColor,
+                    fontSize: '13px',
+                    fontWeight: '500'
+                },
+                itemHoverStyle: {
+                    color: isDark ? '#ffffff' : '#000000'
                 }
             },
             tooltip: {
                 shared: true,
-                backgroundColor: getComputedStyle(document.documentElement).getPropertyValue('--card-bg'),
+                backgroundColor: isDark ? 'rgba(30, 30, 30, 0.95)' : 'rgba(255, 255, 255, 0.95)',
+                borderColor: isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)',
+                borderRadius: 8,
+                shadow: false,
                 style: {
-                    color: getComputedStyle(document.documentElement).getPropertyValue('--text-primary')
+                    color: textColor,
+                    fontSize: '13px'
                 }
             },
             plotOptions: {
                 column: {
                     stacking: 'normal',
+                    borderWidth: 0,
+                    borderRadius: 4,
                     dataLabels: {
                         enabled: false
                     }
@@ -299,23 +324,53 @@ const AnalystCoverage = {
             series: [{
                 name: 'Strong Buy',
                 data: strongBuy,
-                color: '#27ae60'
+                color: {
+                    linearGradient: { x1: 0, y1: 0, x2: 0, y2: 1 },
+                    stops: [
+                        [0, '#059669'],
+                        [1, '#047857']
+                    ]
+                }
             }, {
                 name: 'Buy',
                 data: buy,
-                color: '#2ecc71'
+                color: {
+                    linearGradient: { x1: 0, y1: 0, x2: 0, y2: 1 },
+                    stops: [
+                        [0, '#10b981'],
+                        [1, '#059669']
+                    ]
+                }
             }, {
                 name: 'Hold',
                 data: hold,
-                color: '#f39c12'
+                color: {
+                    linearGradient: { x1: 0, y1: 0, x2: 0, y2: 1 },
+                    stops: [
+                        [0, '#f59e0b'],
+                        [1, '#d97706']
+                    ]
+                }
             }, {
                 name: 'Sell',
                 data: sell,
-                color: '#e67e22'
+                color: {
+                    linearGradient: { x1: 0, y1: 0, x2: 0, y2: 1 },
+                    stops: [
+                        [0, '#f97316'],
+                        [1, '#ea580c']
+                    ]
+                }
             }, {
                 name: 'Strong Sell',
                 data: strongSell,
-                color: '#e74c3c'
+                color: {
+                    linearGradient: { x1: 0, y1: 0, x2: 0, y2: 1 },
+                    stops: [
+                        [0, '#ef4444'],
+                        [1, '#dc2626']
+                    ]
+                }
             }],
             credits: {
                 enabled: false
@@ -327,40 +382,57 @@ const AnalystCoverage = {
         const section = document.getElementById('pieChartSection');
         section.style.display = 'block';
 
+        const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+        const textColor = isDark ? '#e4e4e7' : '#18181b';
+
         Highcharts.chart('recommendationsPieChart', {
             chart: {
                 type: 'pie',
-                backgroundColor: 'transparent'
+                backgroundColor: 'transparent',
+                style: {
+                    fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif"
+                }
             },
             title: {
                 text: null
             },
             tooltip: {
-                pointFormat: '{series.name}: <b>{point.percentage:.1f}%</b> ({point.y} analysts)',
-                backgroundColor: getComputedStyle(document.documentElement).getPropertyValue('--card-bg'),
+                backgroundColor: isDark ? 'rgba(30, 30, 30, 0.95)' : 'rgba(255, 255, 255, 0.95)',
+                borderColor: isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)',
+                borderRadius: 8,
+                shadow: false,
                 style: {
-                    color: getComputedStyle(document.documentElement).getPropertyValue('--text-primary')
-                }
+                    color: textColor,
+                    fontSize: '13px',
+                    fontWeight: '500'
+                },
+                pointFormat: '<b>{point.percentage:.1f}%</b><br/>{point.y} analysts'
             },
             plotOptions: {
                 pie: {
+                    innerSize: '60%',
                     allowPointSelect: true,
                     cursor: 'pointer',
+                    borderWidth: 0,
                     dataLabels: {
                         enabled: true,
-                        format: '<b>{point.name}</b>: {point.percentage:.1f}%',
+                        format: '<b>{point.name}</b><br>{point.percentage:.1f}%',
+                        distance: 20,
                         style: {
-                            color: getComputedStyle(document.documentElement).getPropertyValue('--text-primary'),
-                            fontSize: '14px',
-                            fontWeight: 'bold'
+                            color: textColor,
+                            fontSize: '13px',
+                            fontWeight: '600',
+                            textOutline: 'none'
                         }
                     },
-                    showInLegend: true
-                }
-            },
-            legend: {
-                itemStyle: {
-                    color: getComputedStyle(document.documentElement).getPropertyValue('--text-primary')
+                    states: {
+                        hover: {
+                            brightness: 0.1,
+                            halo: {
+                                size: 0
+                            }
+                        }
+                    }
                 }
             },
             series: [{
@@ -369,23 +441,53 @@ const AnalystCoverage = {
                 data: [{
                     name: 'Strong Buy',
                     y: latest.strongBuy,
-                    color: '#27ae60'
+                    color: {
+                        linearGradient: { x1: 0, y1: 0, x2: 1, y2: 1 },
+                        stops: [
+                            [0, '#059669'],
+                            [1, '#047857']
+                        ]
+                    }
                 }, {
                     name: 'Buy',
                     y: latest.buy,
-                    color: '#2ecc71'
+                    color: {
+                        linearGradient: { x1: 0, y1: 0, x2: 1, y2: 1 },
+                        stops: [
+                            [0, '#10b981'],
+                            [1, '#059669']
+                        ]
+                    }
                 }, {
                     name: 'Hold',
                     y: latest.hold,
-                    color: '#f39c12'
+                    color: {
+                        linearGradient: { x1: 0, y1: 0, x2: 1, y2: 1 },
+                        stops: [
+                            [0, '#f59e0b'],
+                            [1, '#d97706']
+                        ]
+                    }
                 }, {
                     name: 'Sell',
                     y: latest.sell,
-                    color: '#e67e22'
+                    color: {
+                        linearGradient: { x1: 0, y1: 0, x2: 1, y2: 1 },
+                        stops: [
+                            [0, '#f97316'],
+                            [1, '#ea580c']
+                        ]
+                    }
                 }, {
                     name: 'Strong Sell',
                     y: latest.strongSell,
-                    color: '#e74c3c'
+                    color: {
+                        linearGradient: { x1: 0, y1: 0, x2: 1, y2: 1 },
+                        stops: [
+                            [0, '#ef4444'],
+                            [1, '#dc2626']
+                        ]
+                    }
                 }]
             }],
             credits: {
@@ -425,11 +527,11 @@ const AnalystCoverage = {
                             return `
                                 <tr>
                                     <td><strong>${item.period}</strong></td>
-                                    <td style='color: #27ae60; font-weight: 700;'>${item.strongBuy}</td>
-                                    <td style='color: #2ecc71; font-weight: 700;'>${item.buy}</td>
-                                    <td style='color: #f39c12; font-weight: 700;'>${item.hold}</td>
-                                    <td style='color: #e67e22; font-weight: 700;'>${item.sell}</td>
-                                    <td style='color: #e74c3c; font-weight: 700;'>${item.strongSell}</td>
+                                    <td style='color: #059669; font-weight: 700;'>${item.strongBuy}</td>
+                                    <td style='color: #10b981; font-weight: 700;'>${item.buy}</td>
+                                    <td style='color: #f59e0b; font-weight: 700;'>${item.hold}</td>
+                                    <td style='color: #f97316; font-weight: 700;'>${item.sell}</td>
+                                    <td style='color: #ef4444; font-weight: 700;'>${item.strongSell}</td>
                                     <td><strong>${total}</strong></td>
                                     <td><strong>${consensus}</strong></td>
                                 </tr>
@@ -504,7 +606,6 @@ const AnalystCoverage = {
     }
 };
 
-// Initialiser au chargement de la page
 document.addEventListener('DOMContentLoaded', () => {
     AnalystCoverage.init();
 });

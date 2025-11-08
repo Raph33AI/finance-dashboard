@@ -1,5 +1,6 @@
 // ============================================
 // EARNINGS & ESTIMATES - PREMIUM VERSION
+// Graphiques minimalistes et modernes
 // ============================================
 
 const EarningsEstimates = {
@@ -14,7 +15,7 @@ const EarningsEstimates = {
             this.finnhubClient = new FinnHubClient();
             
             const urlParams = new URLSearchParams(window.location.search);
-            const symbol = urlParams.get('symbol') || 'NVDA'; // ✅ Défaut: NVDA
+            const symbol = urlParams.get('symbol') || 'NVDA';
             
             document.getElementById('symbolInput').value = symbol.toUpperCase();
             await this.loadEarningsData();
@@ -91,7 +92,6 @@ const EarningsEstimates = {
 
             this.allEarnings = earnings.sort((a, b) => new Date(b.period) - new Date(a.period));
 
-            // Calculer les statistiques
             this.renderEarningsSummary(this.allEarnings);
 
             container.innerHTML = `
@@ -248,19 +248,29 @@ const EarningsEstimates = {
         const actualEPS = sortedData.map(item => item.actual !== null ? item.actual : null);
         const estimateEPS = sortedData.map(item => item.estimate !== null ? item.estimate : null);
 
+        const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+        const textColor = isDark ? '#e4e4e7' : '#18181b';
+        const gridColor = isDark ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.05)';
+
         Highcharts.chart('earningsChart', {
             chart: {
                 type: 'line',
-                backgroundColor: 'transparent'
+                backgroundColor: 'transparent',
+                style: {
+                    fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif"
+                }
             },
             title: {
                 text: null
             },
             xAxis: {
                 categories: categories,
+                lineColor: gridColor,
+                tickColor: gridColor,
                 labels: {
                     style: {
-                        color: getComputedStyle(document.documentElement).getPropertyValue('--text-primary')
+                        color: textColor,
+                        fontSize: '12px'
                     }
                 }
             },
@@ -268,29 +278,41 @@ const EarningsEstimates = {
                 title: {
                     text: 'EPS ($)',
                     style: {
-                        color: getComputedStyle(document.documentElement).getPropertyValue('--text-primary')
+                        color: textColor,
+                        fontSize: '13px',
+                        fontWeight: '600'
                     }
                 },
+                gridLineColor: gridColor,
                 labels: {
                     style: {
-                        color: getComputedStyle(document.documentElement).getPropertyValue('--text-primary')
+                        color: textColor,
+                        fontSize: '12px'
                     },
                     formatter: function() {
                         return '$' + this.value.toFixed(2);
                     }
-                },
-                gridLineColor: getComputedStyle(document.documentElement).getPropertyValue('--border-color')
+                }
             },
             legend: {
                 itemStyle: {
-                    color: getComputedStyle(document.documentElement).getPropertyValue('--text-primary')
+                    color: textColor,
+                    fontSize: '13px',
+                    fontWeight: '500'
+                },
+                itemHoverStyle: {
+                    color: isDark ? '#ffffff' : '#000000'
                 }
             },
             tooltip: {
                 shared: true,
-                backgroundColor: getComputedStyle(document.documentElement).getPropertyValue('--card-bg'),
+                backgroundColor: isDark ? 'rgba(30, 30, 30, 0.95)' : 'rgba(255, 255, 255, 0.95)',
+                borderColor: isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)',
+                borderRadius: 8,
+                shadow: false,
                 style: {
-                    color: getComputedStyle(document.documentElement).getPropertyValue('--text-primary')
+                    color: textColor,
+                    fontSize: '13px'
                 },
                 formatter: function() {
                     let tooltip = '<b>' + this.x + '</b><br/>';
@@ -309,7 +331,14 @@ const EarningsEstimates = {
                     enableMouseTracking: true,
                     marker: {
                         enabled: true,
-                        radius: 5
+                        radius: 5,
+                        symbol: 'circle'
+                    },
+                    lineWidth: 3,
+                    states: {
+                        hover: {
+                            lineWidthPlus: 0
+                        }
                     }
                 }
             },
@@ -317,18 +346,22 @@ const EarningsEstimates = {
                 name: 'Actual EPS',
                 data: actualEPS,
                 color: '#667eea',
-                lineWidth: 3,
                 marker: {
-                    symbol: 'circle'
+                    fillColor: '#667eea',
+                    lineColor: '#ffffff',
+                    lineWidth: 2
                 }
             }, {
                 name: 'Estimated EPS',
                 data: estimateEPS,
-                color: '#f39c12',
+                color: '#f59e0b',
+                dashStyle: 'Dash',
                 lineWidth: 2,
-                dashStyle: 'ShortDash',
                 marker: {
-                    symbol: 'diamond'
+                    symbol: 'diamond',
+                    fillColor: '#f59e0b',
+                    lineColor: '#ffffff',
+                    lineWidth: 2
                 }
             }],
             credits: {
@@ -346,19 +379,29 @@ const EarningsEstimates = {
         const categories = sortedData.map(item => this.formatPeriod(item.period));
         const surpriseData = sortedData.map(item => item.surprisePercent !== null ? item.surprisePercent : 0);
 
+        const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+        const textColor = isDark ? '#e4e4e7' : '#18181b';
+        const gridColor = isDark ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.05)';
+
         Highcharts.chart('surpriseChart', {
             chart: {
                 type: 'column',
-                backgroundColor: 'transparent'
+                backgroundColor: 'transparent',
+                style: {
+                    fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif"
+                }
             },
             title: {
                 text: null
             },
             xAxis: {
                 categories: categories,
+                lineColor: gridColor,
+                tickColor: gridColor,
                 labels: {
                     style: {
-                        color: getComputedStyle(document.documentElement).getPropertyValue('--text-primary')
+                        color: textColor,
+                        fontSize: '12px'
                     }
                 }
             },
@@ -366,21 +409,24 @@ const EarningsEstimates = {
                 title: {
                     text: 'Surprise (%)',
                     style: {
-                        color: getComputedStyle(document.documentElement).getPropertyValue('--text-primary')
+                        color: textColor,
+                        fontSize: '13px',
+                        fontWeight: '600'
                     }
                 },
+                gridLineColor: gridColor,
                 labels: {
                     style: {
-                        color: getComputedStyle(document.documentElement).getPropertyValue('--text-primary')
+                        color: textColor,
+                        fontSize: '12px'
                     },
                     formatter: function() {
                         return this.value.toFixed(1) + '%';
                     }
                 },
-                gridLineColor: getComputedStyle(document.documentElement).getPropertyValue('--border-color'),
                 plotLines: [{
                     value: 0,
-                    color: getComputedStyle(document.documentElement).getPropertyValue('--text-secondary'),
+                    color: gridColor,
                     width: 2,
                     zIndex: 4
                 }]
@@ -389,12 +435,16 @@ const EarningsEstimates = {
                 enabled: false
             },
             tooltip: {
-                backgroundColor: getComputedStyle(document.documentElement).getPropertyValue('--card-bg'),
+                backgroundColor: isDark ? 'rgba(30, 30, 30, 0.95)' : 'rgba(255, 255, 255, 0.95)',
+                borderColor: isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)',
+                borderRadius: 8,
+                shadow: false,
                 style: {
-                    color: getComputedStyle(document.documentElement).getPropertyValue('--text-primary')
+                    color: textColor,
+                    fontSize: '13px'
                 },
                 formatter: function() {
-                    const color = this.y >= 0 ? '#27ae60' : '#e74c3c';
+                    const color = this.y >= 0 ? '#10b981' : '#ef4444';
                     return '<b>' + this.x + '</b><br/>' +
                            '<span style="color:' + color + '">●</span> Surprise: <b>' + 
                            (this.y > 0 ? '+' : '') + this.y.toFixed(1) + '%</b>';
@@ -402,12 +452,26 @@ const EarningsEstimates = {
             },
             plotOptions: {
                 column: {
+                    borderRadius: 4,
+                    borderWidth: 0,
                     colorByPoint: false,
                     zones: [{
                         value: 0,
-                        color: '#e74c3c'
+                        color: {
+                            linearGradient: { x1: 0, y1: 0, x2: 0, y2: 1 },
+                            stops: [
+                                [0, '#ef4444'],
+                                [1, '#dc2626']
+                            ]
+                        }
                     }, {
-                        color: '#27ae60'
+                        color: {
+                            linearGradient: { x1: 0, y1: 0, x2: 0, y2: 1 },
+                            stops: [
+                                [0, '#10b981'],
+                                [1, '#059669']
+                            ]
+                        }
                     }]
                 }
             },
@@ -622,7 +686,6 @@ const EarningsEstimates = {
     }
 };
 
-// Initialiser au chargement de la page
 document.addEventListener('DOMContentLoaded', () => {
     EarningsEstimates.init();
 });
