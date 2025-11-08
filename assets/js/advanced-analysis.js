@@ -1,8 +1,169 @@
 /* ==============================================
    ADVANCED-ANALYSIS.JS - COMPLETE & CORRECTED
+   ✅ Twelve Data API + RateLimiter + OptimizedCache
    ============================================== */
 
+// ========== RATE LIMITER (COPIÉ DE MARKET DATA) ==========
+class RateLimiter {
+    constructor(maxRequests = 8, windowMs = 60000) {
+        this.maxRequests = maxRequests;
+        this.windowMs = windowMs;
+        this.queue = [];
+        this.requestTimes = [];
+        this.processing = false;
+    }
+    
+    async execute(fn, priority = 'normal') {
+        return new Promise((resolve, reject) => {
+            this.queue.push({
+                fn,
+                priority,
+                resolve,
+                reject,
+                timestamp: Date.now()
+            });
+            
+            this.queue.sort((a, b) => {
+                const priorities = { high: 3, normal: 2, low: 1 };
+                return (priorities[b.priority] || 2) - (priorities[a.priority] || 2);
+            });
+            
+            this.processQueue();
+        });
+    }
+    
+    async processQueue() {
+        if (this.processing || this.queue.length === 0) return;
+        
+        this.processing = true;
+        
+        while (this.queue.length > 0) {
+            const now = Date.now();
+            this.requestTimes = this.requestTimes.filter(time => now - time < this.windowMs);
+            
+            if (this.requestTimes.length >= this.maxRequests) {
+                const oldestRequest = Math.min(...this.requestTimes);
+                const waitTime = this.windowMs - (now - oldestRequest) + 100;
+                
+                console.log(`⏳ Rate limit reached. Waiting ${Math.ceil(waitTime/1000)}s...`);
+                
+                if (window.cacheWidget) {
+                    window.cacheWidget.updateQueueStatus(this.queue.length, waitTime);
+                }
+                
+                await this.sleep(waitTime);
+                continue;
+            }
+            
+            const item = this.queue.shift();
+            this.requestTimes.push(Date.now());
+            
+            try {
+                const result = await item.fn();
+                item.resolve(result);
+            } catch (error) {
+                item.reject(error);
+            }
+            
+            await this.sleep(100);
+        }
+        
+        this.processing = false;
+        
+        if (window.cacheWidget) {
+            window.cacheWidget.updateQueueStatus(0, 0);
+        }
+    }
+    
+    sleep(ms) {
+        return new Promise(resolve => setTimeout(resolve, ms));
+    }
+    
+    getRemainingRequests() {
+        const now = Date.now();
+        this.requestTimes = this.requestTimes.filter(time => now - time < this.windowMs);
+        return this.maxRequests - this.requestTimes.length;
+    }
+    
+    getQueueLength() {
+        return this.queue.length;
+    }
+}
+
+// ========== OPTIMIZED CACHE (COPIÉ DE MARKET DATA) ==========
+class OptimizedCache {
+    constructor() {
+        this.prefix = 'aa_cache_'; // Advanced Analysis cache
+        this.staticTTL = 24 * 60 * 60 * 1000; // 24h
+        this.dynamicTTL = 5 * 60 * 1000; // 5min
+    }
+    
+    set(key, data, ttl = null) {
+        try {
+            const cacheData = {
+                data,
+                timestamp: Date.now(),
+                ttl: ttl || this.dynamicTTL
+            };
+            localStorage.setItem(this.prefix + key, JSON.stringify(cacheData));
+            return true;
+        } catch (error) {
+            console.warn('Cache storage error:', error);
+            return false;
+        }
+    }
+    
+    get(key) {
+        try {
+            const cached = localStorage.getItem(this.prefix + key);
+            if (!cached) return null;
+            
+            const cacheData = JSON.parse(cached);
+            const now = Date.now();
+            
+            if (now - cacheData.timestamp > cacheData.ttl) {
+                this.delete(key);
+                return null;
+            }
+            
+            return cacheData.data;
+        } catch (error) {
+            console.warn('Cache retrieval error:', error);
+            return null;
+        }
+    }
+    
+    delete(key) {
+        localStorage.removeItem(this.prefix + key);
+    }
+    
+    clear() {
+        Object.keys(localStorage)
+            .filter(key => key.startsWith(this.prefix))
+            .forEach(key => localStorage.removeItem(key));
+    }
+    
+    getAge(key) {
+        try {
+            const cached = localStorage.getItem(this.prefix + key);
+            if (!cached) return null;
+            
+            const cacheData = JSON.parse(cached);
+            return Date.now() - cacheData.timestamp;
+        } catch {
+            return null;
+        }
+    }
+}
+
+// ========== MAIN OBJECT ==========
 const AdvancedAnalysis = {
+    // ✅ NOUVEAUX : API Client et Rate Limiter
+    apiClient: null,
+    rateLimiter: null,
+    optimizedCache: null,
+    
+    // Existing properties
     currentSymbol: 'AAPL',
     currentPeriod: '6M',
     stockData: null,
@@ -21,12 +182,6 @@ const AdvancedAnalysis = {
         vwap: null
     },
     
-    CORS_PROXIES: [
-        'https://api.allorigins.win/raw?url=',
-        'https://corsproxy.io/?',
-        'https://api.codetabs.com/v1/proxy?quest='
-    ],
-    
     colors: {
         primary: '#2649B2',
         secondary: '#4A74F3',
@@ -39,25 +194,96 @@ const AdvancedAnalysis = {
     },
     
     // ============================================
-    // INITIALIZATION
+    // ✅ INITIALIZATION (MODIFIÉE)
     // ============================================
     
-    init() {
-        console.log('🚀 Advanced Analysis - Initializing...');
+    async init() {
+        console.log('🚀 Advanced Analysis - Initializing with Twelve Data API...');
+        
+        // ✅ Initialiser le rate limiter (8 req/min)
+        this.rateLimiter = new RateLimiter(8, 60000);
+        this.optimizedCache = new OptimizedCache();
+        
+        // ✅ Attendre que l'utilisateur soit authentifié
+        await this.waitForAuth();
+        
+        // ✅ Initialiser le client API
+        this.apiClient = new FinanceAPIClient({
+            baseURL: APP_CONFIG.API_BASE_URL,
+            cacheDuration: APP_CONFIG.CACHE_DURATION || 300000,
+            maxRetries: APP_CONFIG.MAX_RETRIES || 2,
+            onLoadingChange: (isLoading) => {
+                this.showLoading(isLoading);
+            }
+        });
+        
+        // Rendre accessible globalement
+        window.apiClient = this.apiClient;
+        window.rateLimiter = this.rateLimiter;
+        
         this.updateLastUpdate();
         this.setupEventListeners();
-        this.loadSymbol(this.currentSymbol);
+        this.startCacheMonitoring();
+        
+        // Auto-load default symbol
+        setTimeout(() => {
+            this.loadSymbol(this.currentSymbol);
+        }, 500);
+        
+        console.log('✅ Advanced Analysis initialized with rate limiting');
+    },
+    
+    // ✅ NOUVEAU : Wait for Auth
+    async waitForAuth() {
+        return new Promise((resolve) => {
+            if (!firebase || !firebase.auth) {
+                console.warn('⚠️ Firebase not available');
+                resolve();
+                return;
+            }
+            
+            const unsubscribe = firebase.auth().onAuthStateChanged((user) => {
+                if (user) {
+                    console.log('✅ User authenticated for Advanced Analysis');
+                    unsubscribe();
+                    resolve();
+                }
+            });
+            
+            setTimeout(() => {
+                resolve();
+            }, 3000);
+        });
+    },
+    
+    // ✅ NOUVEAU : Cache Monitoring
+    startCacheMonitoring() {
+        setInterval(() => {
+            if (window.cacheWidget) {
+                const remaining = this.rateLimiter.getRemainingRequests();
+                const queueLength = this.rateLimiter.getQueueLength();
+                
+                window.cacheWidget.updateRateLimitStatus(remaining, 8);
+                
+                if (queueLength > 0) {
+                    window.cacheWidget.updateQueueStatus(queueLength, 0);
+                }
+            }
+        }, 1000);
+    },
+    
+    // ✅ NOUVEAU : API Request avec Rate Limiting
+    async apiRequest(fn, priority = 'normal') {
+        return await this.rateLimiter.execute(fn, priority);
     },
     
     setupEventListeners() {
         const input = document.getElementById('symbolInput');
         if (input) {
-            // Input change for search
             input.addEventListener('input', (e) => {
                 this.handleSearch(e.target.value);
             });
             
-            // Enter key
             input.addEventListener('keydown', (e) => {
                 if (e.key === 'Enter') {
                     e.preventDefault();
@@ -81,7 +307,6 @@ const AdvancedAnalysis = {
                 }
             });
             
-            // Focus shows suggestions if there's a value
             input.addEventListener('focus', (e) => {
                 if (e.target.value.trim().length > 0) {
                     this.handleSearch(e.target.value);
@@ -89,7 +314,6 @@ const AdvancedAnalysis = {
             });
         }
         
-        // Click outside to close
         document.addEventListener('click', (e) => {
             if (!e.target.closest('.search-input-wrapper')) {
                 this.hideSuggestions();
@@ -98,7 +322,7 @@ const AdvancedAnalysis = {
     },
     
     // ============================================
-    // YAHOO FINANCE SEARCH API
+    // ✅ SEARCH - MODIFIÉ POUR TWELVE DATA
     // ============================================
     
     handleSearch(query) {
@@ -109,50 +333,27 @@ const AdvancedAnalysis = {
             return;
         }
         
-        // Debounce search
         clearTimeout(this.searchTimeout);
+        
         this.searchTimeout = setTimeout(() => {
-            this.searchYahooFinance(trimmedQuery);
-        }, 300);
+            this.searchSymbols(trimmedQuery);
+        }, 500);
     },
     
-    async searchYahooFinance(query) {
-        console.log('🔍 Searching Yahoo Finance for:', query);
+    async searchSymbols(query) {
+        console.log('🔍 Searching for:', query);
         
         const container = document.getElementById('searchSuggestions');
         container.innerHTML = '<div class="suggestion-loading"><i class="fas fa-spinner fa-spin"></i> Searching...</div>';
         container.classList.add('active');
         
         try {
-            // Yahoo Finance Autosuggest API
-            const searchUrl = `https://query1.finance.yahoo.com/v1/finance/search?q=${encodeURIComponent(query)}&quotesCount=20&newsCount=0&enableFuzzyQuery=false`;
+            const results = await this.apiRequest(() => this.apiClient.searchSymbol(query), 'low');
             
-            // Try with CORS proxy
-            for (let i = 0; i < this.CORS_PROXIES.length; i++) {
-                try {
-                    const proxyUrl = this.CORS_PROXIES[i];
-                    const url = proxyUrl + encodeURIComponent(searchUrl);
-                    
-                    const response = await fetch(url);
-                    if (!response.ok) throw new Error(`HTTP ${response.status}`);
-                    
-                    const data = await response.json();
-                    console.log('✅ Search results:', data);
-                    
-                    if (data.quotes && data.quotes.length > 0) {
-                        this.displaySearchResults(data.quotes, query);
-                    } else {
-                        this.displayNoResults();
-                    }
-                    
-                    return;
-                    
-                } catch (error) {
-                    console.warn(`Search proxy ${i + 1} failed:`, error.message);
-                    if (i === this.CORS_PROXIES.length - 1) {
-                        throw error;
-                    }
-                }
+            if (results.data && results.data.length > 0) {
+                this.displaySearchResults(results.data, query);
+            } else {
+                this.displayNoResults();
             }
             
         } catch (error) {
@@ -164,7 +365,6 @@ const AdvancedAnalysis = {
     displaySearchResults(quotes, query) {
         const container = document.getElementById('searchSuggestions');
         
-        // Filter and group by type
         const stocks = [];
         const etfs = [];
         const crypto = [];
@@ -172,54 +372,27 @@ const AdvancedAnalysis = {
         const other = [];
         
         quotes.forEach(quote => {
-            const item = {
-                symbol: quote.symbol,
-                name: quote.shortname || quote.longname || quote.symbol,
-                type: quote.quoteType || 'EQUITY',
-                exchange: quote.exchange || '',
-                score: quote.score || 0
-            };
+            const type = (quote.instrument_type || 'Common Stock').toLowerCase();
             
-            switch (item.type) {
-                case 'EQUITY':
-                    stocks.push(item);
-                    break;
-                case 'ETF':
-                    etfs.push(item);
-                    break;
-                case 'CRYPTOCURRENCY':
-                    crypto.push(item);
-                    break;
-                case 'INDEX':
-                    indices.push(item);
-                    break;
-                default:
-                    other.push(item);
+            if (type.includes('stock') || type.includes('equity')) {
+                stocks.push(quote);
+            } else if (type.includes('etf')) {
+                etfs.push(quote);
+            } else if (type.includes('crypto') || type.includes('digital currency')) {
+                crypto.push(quote);
+            } else if (type.includes('index')) {
+                indices.push(quote);
+            } else {
+                other.push(quote);
             }
         });
         
-        // Build HTML
         let html = '';
-        
-        if (stocks.length > 0) {
-            html += this.buildCategoryHTML('Stocks', stocks, query);
-        }
-        
-        if (etfs.length > 0) {
-            html += this.buildCategoryHTML('ETFs', etfs, query);
-        }
-        
-        if (crypto.length > 0) {
-            html += this.buildCategoryHTML('Cryptocurrencies', crypto, query);
-        }
-        
-        if (indices.length > 0) {
-            html += this.buildCategoryHTML('Indices', indices, query);
-        }
-        
-        if (other.length > 0) {
-            html += this.buildCategoryHTML('Other', other, query);
-        }
+        if (stocks.length > 0) html += this.buildCategoryHTML('Stocks', stocks, query);
+        if (etfs.length > 0) html += this.buildCategoryHTML('ETFs', etfs, query);
+        if (crypto.length > 0) html += this.buildCategoryHTML('Cryptocurrencies', crypto, query);
+        if (indices.length > 0) html += this.buildCategoryHTML('Indices', indices, query);
+        if (other.length > 0) html += this.buildCategoryHTML('Other', other, query);
         
         if (html === '') {
             this.displayNoResults();
@@ -228,8 +401,7 @@ const AdvancedAnalysis = {
             container.classList.add('active');
             this.selectedSuggestionIndex = -1;
             
-            // Add click listeners
-            container.querySelectorAll('.suggestion-item').forEach((item, index) => {
+            container.querySelectorAll('.suggestion-item').forEach((item) => {
                 item.addEventListener('click', () => {
                     this.selectSuggestion(item.dataset.symbol);
                 });
@@ -260,18 +432,18 @@ const AdvancedAnalysis = {
         
         items.slice(0, 10).forEach(item => {
             const highlightedSymbol = this.highlightMatch(item.symbol, query);
-            const highlightedName = this.highlightMatch(item.name, query);
+            const highlightedName = this.highlightMatch(item.instrument_name, query);
             
             html += `
-                <div class="suggestion-item" data-symbol="${item.symbol}">
+                <div class="suggestion-item" data-symbol="${this.escapeHtml(item.symbol)}">
                     <div class="suggestion-icon ${sectorMap[categoryName] || 'tech'}">
-                        ${item.symbol.substring(0, 2)}
+                        ${this.escapeHtml(item.symbol.substring(0, 2))}
                     </div>
                     <div class="suggestion-info">
                         <div class="suggestion-symbol">${highlightedSymbol}</div>
                         <div class="suggestion-name">${highlightedName}</div>
                     </div>
-                    ${item.exchange ? `<div class="suggestion-exchange">${item.exchange}</div>` : ''}
+                    ${item.exchange ? `<div class="suggestion-exchange">${this.escapeHtml(item.exchange)}</div>` : ''}
                 </div>
             `;
         });
@@ -280,10 +452,18 @@ const AdvancedAnalysis = {
     },
     
     highlightMatch(text, query) {
-        if (!text || !query) return text;
-        
-        const regex = new RegExp(`(${query})`, 'gi');
-        return text.replace(regex, '<span class="suggestion-match">$1</span>');
+        if (!text || !query) return this.escapeHtml(text);
+        const escapedText = this.escapeHtml(text);
+        const escapedQuery = this.escapeHtml(query);
+        const regex = new RegExp(`(${escapedQuery})`, 'gi');
+        return escapedText.replace(regex, '<span class="suggestion-match">$1</span>');
+    },
+    
+    escapeHtml(text) {
+        if (!text) return '';
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
     },
     
     displayNoResults() {
@@ -326,12 +506,10 @@ const AdvancedAnalysis = {
         const suggestions = document.querySelectorAll('.suggestion-item');
         if (suggestions.length === 0) return;
         
-        // Remove previous selection
         if (this.selectedSuggestionIndex >= 0) {
             suggestions[this.selectedSuggestionIndex].classList.remove('selected');
         }
         
-        // Update index
         if (direction === 'down') {
             this.selectedSuggestionIndex = (this.selectedSuggestionIndex + 1) % suggestions.length;
         } else {
@@ -340,13 +518,12 @@ const AdvancedAnalysis = {
                 : this.selectedSuggestionIndex - 1;
         }
         
-        // Add new selection
         suggestions[this.selectedSuggestionIndex].classList.add('selected');
         suggestions[this.selectedSuggestionIndex].scrollIntoView({ block: 'nearest', behavior: 'smooth' });
     },
     
     // ============================================
-    // STOCK ANALYSIS
+    // ✅ LOAD SYMBOL - MODIFIÉ POUR TWELVE DATA
     // ============================================
     
     analyzeStock() {
@@ -365,7 +542,27 @@ const AdvancedAnalysis = {
         this.hideResults();
         
         try {
-            await this.fetchStockData(symbol);
+            console.log(`📊 Loading ${symbol} with Twelve Data API...`);
+            
+            // ✅ Charger les données avec rate limiting (priorité haute)
+            const [quote, timeSeries] = await Promise.all([
+                this.apiRequest(() => this.apiClient.getQuote(symbol), 'high'),
+                this.apiRequest(() => this.getTimeSeriesForPeriod(symbol, this.currentPeriod), 'high')
+            ]);
+            
+            if (!quote || !timeSeries) {
+                throw new Error('Failed to load stock data');
+            }
+            
+            this.stockData = {
+                symbol: quote.symbol,
+                prices: timeSeries.data,
+                currency: 'USD',
+                quote: quote
+            };
+            
+            console.log('✅ Data loaded successfully');
+            
             this.displayStockHeader();
             this.updateAllIndicators();
             this.showLoading(false);
@@ -380,124 +577,28 @@ const AdvancedAnalysis = {
         }
     },
     
-    async fetchStockData(symbol) {
-        const period = this.getPeriodParams(this.currentPeriod);
-        const targetUrl = `https://query1.finance.yahoo.com/v8/finance/chart/${symbol}?interval=${period.interval}&range=${period.range}`;
-        
-        for (let i = 0; i < this.CORS_PROXIES.length; i++) {
-            try {
-                const proxyUrl = this.CORS_PROXIES[i];
-                const url = proxyUrl + encodeURIComponent(targetUrl);
-                const response = await fetch(url);
-                
-                if (!response.ok) throw new Error(`HTTP ${response.status}`);
-                
-                const data = await response.json();
-                if (data.chart && data.chart.error) {
-                    throw new Error(data.chart.error.description);
-                }
-                
-                const result = data.chart.result[0];
-                this.stockData = this.parseYahooData(result);
-                await this.fetchQuoteData(symbol);
-                
-                console.log('✅ Data fetched successfully');
-                return;
-                
-            } catch (error) {
-                console.warn(`Proxy ${i + 1} failed:`, error.message);
-                if (i === this.CORS_PROXIES.length - 1) {
-                    throw new Error('All proxies failed');
-                }
-            }
-        }
-    },
-    
-    async fetchQuoteData(symbol) {
-        try {
-            const targetUrl = `https://query1.finance.yahoo.com/v7/finance/quote?symbols=${symbol}`;
-            const proxyUrl = this.CORS_PROXIES[0];
-            const url = proxyUrl + encodeURIComponent(targetUrl);
-            
-            const response = await fetch(url);
-            const data = await response.json();
-            
-            if (data.quoteResponse && data.quoteResponse.result.length > 0) {
-                const quote = data.quoteResponse.result[0];
-                this.stockData.quote = {
-                    name: quote.longName || quote.shortName || symbol,
-                    symbol: quote.symbol,
-                    price: quote.regularMarketPrice,
-                    change: quote.regularMarketChange,
-                    changePercent: quote.regularMarketChangePercent
-                };
-            } else {
-                throw new Error('No quote data');
-            }
-        } catch (error) {
-            console.warn('Quote fetch failed, using fallback');
-            
-            if (!this.stockData || !this.stockData.prices || this.stockData.prices.length === 0) {
-                this.stockData.quote = {
-                    name: symbol,
-                    symbol: symbol,
-                    price: 0,
-                    change: 0,
-                    changePercent: 0
-                };
-                return;
-            }
-            
-            const lastPrice = this.stockData.prices[this.stockData.prices.length - 1];
-            const prevPrice = this.stockData.prices[this.stockData.prices.length - 2] || lastPrice;
-            
-            this.stockData.quote = {
-                name: symbol,
-                symbol: symbol,
-                price: lastPrice.close,
-                change: lastPrice.close - prevPrice.close,
-                changePercent: ((lastPrice.close - prevPrice.close) / prevPrice.close) * 100
-            };
-        }
-    },
-    
-    parseYahooData(result) {
-        const timestamps = result.timestamp;
-        const quotes = result.indicators.quote[0];
-        
-        const prices = timestamps.map((time, i) => ({
-            timestamp: time * 1000,
-            open: quotes.open[i],
-            high: quotes.high[i],
-            low: quotes.low[i],
-            close: quotes.close[i],
-            volume: quotes.volume[i]
-        })).filter(p => p.close !== null);
-        
-        return {
-            symbol: result.meta.symbol,
-            prices: prices,
-            currency: result.meta.currency,
-            quote: {}
+    // ✅ NOUVEAU : Get Time Series avec les bons paramètres
+    async getTimeSeriesForPeriod(symbol, period) {
+        const periodMap = {
+            '1M': { interval: '1day', outputsize: 30 },
+            '3M': { interval: '1day', outputsize: 90 },
+            '6M': { interval: '1day', outputsize: 180 },
+            '1Y': { interval: '1day', outputsize: 252 },
+            '5Y': { interval: '1week', outputsize: 260 }
         };
+        
+        const config = periodMap[period] || periodMap['6M'];
+        return await this.apiClient.getTimeSeries(symbol, config.interval, config.outputsize);
     },
+
+// ============================================
+    // ✅ CHANGE PERIOD - CORRIGÉ
+    // ============================================
     
-    getPeriodParams(period) {
-        const params = {
-            '1M': { range: '1mo', interval: '1d' },
-            '3M': { range: '3mo', interval: '1d' },
-            '6M': { range: '6mo', interval: '1d' },
-            '1Y': { range: '1y', interval: '1d' },
-            '5Y': { range: '5y', interval: '1wk' }
-        };
-        return params[period] || params['6M'];
-    },
-    
-    // ✅ CORRECTION : Enlever la classe active de tous les boutons
     changePeriod(period) {
         this.currentPeriod = period;
         
-        // Enlever la classe active de TOUS les boutons
+        // ✅ Enlever la classe active de TOUS les boutons
         document.querySelectorAll('.horizon-btn').forEach(btn => {
             btn.classList.remove('active');
         });
@@ -526,7 +627,7 @@ const AdvancedAnalysis = {
                     symbol: this.currentSymbol,
                     price: lastPrice.close,
                     change: lastPrice.close - prevPrice.close,
-                    changePercent: ((lastPrice.close - prevPrice.close) / prevPrice.close) * 100
+                    percentChange: ((lastPrice.close - prevPrice.close) / prevPrice.close) * 100
                 };
             }
         }
@@ -538,7 +639,7 @@ const AdvancedAnalysis = {
         
         const price = displayQuote.price !== undefined && displayQuote.price !== null ? displayQuote.price : 0;
         const change = displayQuote.change !== undefined && displayQuote.change !== null ? displayQuote.change : 0;
-        const changePercent = displayQuote.changePercent !== undefined && displayQuote.changePercent !== null ? displayQuote.changePercent : 0;
+        const changePercent = displayQuote.percentChange !== undefined && displayQuote.percentChange !== null ? displayQuote.percentChange : 0;
         
         document.getElementById('currentPrice').textContent = this.formatCurrency(price);
         
@@ -1479,9 +1580,9 @@ const AdvancedAnalysis = {
         signalBox.className = `signal-box ${signal}`;
         signalBox.textContent = text;
     },
-    
-    // ============================================
-    // FIBONACCI
+
+// ============================================
+    // FIBONACCI RETRACEMENTS
     // ============================================
     
     updateFibonacciChart() {
@@ -1718,7 +1819,7 @@ const AdvancedAnalysis = {
     },
     
     // ============================================
-    // VWAP
+    // VWAP (Volume Weighted Average Price)
     // ============================================
     
     updateVWAPChart() {
@@ -1884,6 +1985,7 @@ const AdvancedAnalysis = {
         const prices = this.stockData.prices;
         const signals = [];
         
+        // Calculate all indicators
         const stochastic = this.calculateStochastic(prices);
         const williams = this.calculateWilliams(prices);
         const adxData = this.calculateADX(prices);
@@ -1892,6 +1994,7 @@ const AdvancedAnalysis = {
         const vwap = this.calculateVWAP(prices);
         const ichimoku = this.calculateIchimoku(prices);
         
+        // Stochastic
         if (stochastic.k.length > 0) {
             const lastK = stochastic.k[stochastic.k.length - 1][1];
             let stochasticSignal = 0;
@@ -1900,6 +2003,7 @@ const AdvancedAnalysis = {
             signals.push({ name: 'Stochastic', value: lastK.toFixed(2), signal: stochasticSignal });
         }
         
+        // Williams %R
         if (williams.length > 0) {
             const lastWilliams = williams[williams.length - 1][1];
             let williamsSignal = 0;
@@ -1908,6 +2012,7 @@ const AdvancedAnalysis = {
             signals.push({ name: 'Williams %R', value: lastWilliams.toFixed(2), signal: williamsSignal });
         }
         
+        // ADX
         let adxSignal = 0;
         let adxValue = 'N/A';
         if (adxData.adx.length > 0 && adxData.plusDI.length > 0 && adxData.minusDI.length > 0) {
@@ -1922,6 +2027,7 @@ const AdvancedAnalysis = {
         }
         signals.push({ name: 'ADX', value: adxValue, signal: adxSignal });
         
+        // Parabolic SAR
         if (sar.length > 0) {
             const lastPrice = prices[prices.length - 1].close;
             const lastSAR = sar[sar.length - 1][1];
@@ -1929,6 +2035,7 @@ const AdvancedAnalysis = {
             signals.push({ name: 'Parabolic SAR', value: this.formatCurrency(lastSAR), signal: sarSignal });
         }
         
+        // OBV
         if (obv.length >= 20) {
             const recentOBV = obv.slice(-20);
             const obvTrend = recentOBV[recentOBV.length - 1][1] - recentOBV[0][1];
@@ -1936,6 +2043,7 @@ const AdvancedAnalysis = {
             signals.push({ name: 'OBV', value: obvTrend > 0 ? 'Rising' : obvTrend < 0 ? 'Falling' : 'Flat', signal: obvSignal });
         }
         
+        // VWAP
         if (vwap.vwap.length > 0) {
             const lastPrice = prices[prices.length - 1].close;
             const lastVWAP = vwap.vwap[vwap.vwap.length - 1][1];
@@ -1943,6 +2051,7 @@ const AdvancedAnalysis = {
             signals.push({ name: 'VWAP', value: this.formatCurrency(lastVWAP), signal: vwapSignal });
         }
         
+        // Ichimoku Cloud
         if (ichimoku.spanA.length > 0 && ichimoku.spanB.length > 0) {
             const lastPrice = prices[prices.length - 1].close;
             const lastCloudTop = Math.max(
@@ -1968,6 +2077,7 @@ const AdvancedAnalysis = {
             signals.push({ name: 'Ichimoku Cloud', value: ichimokuValue, signal: ichimokuSignal });
         }
         
+        // Calculate consolidated signal
         if (signals.length > 0) {
             const totalSignal = signals.reduce((sum, s) => sum + s.signal, 0);
             const maxSignal = signals.length;
@@ -2062,7 +2172,7 @@ const AdvancedAnalysis = {
                 symbol: symbol,
                 price: price,
                 change: price - 100,
-                changePercent: ((price - 100) / 100) * 100
+                percentChange: ((price - 100) / 100) * 100
             }
         };
     },
@@ -2109,15 +2219,18 @@ const AdvancedAnalysis = {
     }
 };
 
-// Initialize when DOM is loaded
+// ============================================
+// INITIALIZE ON DOM LOADED
+// ============================================
+
 document.addEventListener('DOMContentLoaded', () => {
     console.log('🚀 Advanced Analysis - Initializing...');
     AdvancedAnalysis.init();
 });
 
-/* ============================================
-   SIDEBAR USER MENU - Toggle
-   ============================================ */
+// ============================================
+// SIDEBAR USER MENU - Toggle
+// ============================================
 
 document.addEventListener('DOMContentLoaded', () => {
     const sidebarUserTrigger = document.getElementById('sidebarUserTrigger');
@@ -2149,4 +2262,4 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
-console.log('✅ Menu utilisateur sidebar initialisé');
+console.log('✅ Advanced Analysis script loaded - COMPLETE VERSION with Twelve Data API');
