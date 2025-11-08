@@ -52,6 +52,9 @@ const MarketIntelligence = {
                         <p class='empty-text'>No news available for ${category}</p>
                     </div>
                 `;
+                document.getElementById('totalNewsCount').textContent = '0';
+                document.getElementById('positiveNewsCount').textContent = '0';
+                document.getElementById('negativeNewsCount').textContent = '0';
                 return;
             }
 
@@ -80,7 +83,7 @@ const MarketIntelligence = {
         const hasImage = item.image && item.image.trim() !== '';
         
         return `
-            <div class='news-card' onclick='window.open("${item.url}", "_blank")' style='animation-delay: ${index * 0.1}s;'>
+            <div class='news-card' onclick='window.open("${item.url}", "_blank")' style='animation-delay: ${index * 0.05}s;'>
                 ${hasImage ? `
                     <div class='news-image'>
                         <img src='${item.image}' 
@@ -200,8 +203,8 @@ const MarketIntelligence = {
     },
 
     analyzeSentiment(text) {
-        const positiveWords = ['gain', 'profit', 'growth', 'surge', 'rally', 'bullish', 'upgrade', 'strong', 'positive', 'beat', 'outperform', 'rise', 'jump', 'soar', 'record', 'high', 'success'];
-        const negativeWords = ['loss', 'decline', 'fall', 'drop', 'bearish', 'downgrade', 'weak', 'negative', 'miss', 'underperform', 'plunge', 'crash', 'sink', 'concern', 'risk', 'warning'];
+        const positiveWords = ['gain', 'profit', 'growth', 'surge', 'rally', 'bullish', 'upgrade', 'strong', 'positive', 'beat', 'outperform', 'rise', 'jump', 'soar', 'record', 'high', 'success', 'boost', 'top', 'best'];
+        const negativeWords = ['loss', 'decline', 'fall', 'drop', 'bearish', 'downgrade', 'weak', 'negative', 'miss', 'underperform', 'plunge', 'crash', 'sink', 'concern', 'risk', 'warning', 'threat', 'fear', 'worst'];
 
         const textLower = text.toLowerCase();
         let positiveScore = 0;
@@ -253,15 +256,18 @@ const MarketIntelligence = {
     updateLastUpdate() {
         const now = new Date();
         const formatted = now.toLocaleString('en-US', {
-            month: 'short',
-            day: 'numeric',
+            month: '2-digit',
+            day: '2-digit',
+            year: 'numeric',
             hour: '2-digit',
-            minute: '2-digit'
+            minute: '2-digit',
+            hour12: false
         });
         document.getElementById('lastUpdate').textContent = formatted;
     },
 
     escapeHtml(text) {
+        if (!text) return '';
         const div = document.createElement('div');
         div.textContent = text;
         return div.innerHTML;
