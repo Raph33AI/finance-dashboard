@@ -300,25 +300,58 @@ class FinanceAPIClient {
             
             console.log('📦 Time series data received:', data);
             
-            if (!data || !data.data || data.data.length === 0) {
-            throw new Error('No time series data available');
+            // ✅ CORRECTION : Gérer à la fois data.values (Twelve Data) et data.data (Worker transformé)
+            let timeSeriesData = null;
+            
+            // Essayer d'abord data.data (Worker transformé)
+            if (data && data.data && Array.isArray(data.data)) {
+                timeSeriesData = data.data;
+            } 
+            // Sinon essayer data.values (Twelve Data brut)
+            else if (data && data.values && Array.isArray(data.values)) {
+                console.log('⚠️ Using raw Twelve Data format (values)');
+                timeSeriesData = data.values;
             }
             
-            console.log(`✅ Found ${data.data.length} candles`);
+            // Vérifier qu'on a des données
+            if (!timeSeriesData || timeSeriesData.length === 0) {
+                throw new Error('No time series data available');
+            }
             
-            // Le Worker a déjà tout transformé !
+            console.log(`✅ Found ${timeSeriesData.length} candles`);
+            
+            // ✅ Transformer les données si elles viennent directement de Twelve Data
+            const transformedData = timeSeriesData.map(item => {
+                // Si déjà transformé par le Worker, retourner tel quel
+                if (item.timestamp) {
+                    return item;
+                }
+                
+                // Sinon transformer depuis le format Twelve Data
+                return {
+                    datetime: item.datetime,
+                    timestamp: new Date(item.datetime).getTime(),
+                    open: parseFloat(item.open),
+                    high: parseFloat(item.high),
+                    low: parseFloat(item.low),
+                    close: parseFloat(item.close),
+                    volume: parseInt(item.volume || 0)
+                };
+            }).reverse(); // Twelve Data retourne du plus récent au plus ancien
+            
             return {
-            symbol: data.symbol || symbol,
-            interval: data.interval || interval,
-            currency: 'USD',
-            exchange: '',
-            data: data.data
+                symbol: data.symbol || symbol,
+                interval: data.interval || interval,
+                currency: 'USD',
+                exchange: '',
+                data: transformedData
             };
+            
         } catch (error) {
             console.error('Time series error:', error);
             throw error;
         }
-        }
+    }
     
     async getProfile(symbol) {
         try {
