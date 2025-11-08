@@ -8,16 +8,22 @@ const MarketIntelligence = {
     async init() {
         console.log('🚀 Initializing Market Intelligence...');
         
-        // Initialiser le client FinnHub
-        this.finnhubClient = new FinnHubClient('https://finance-hub-api.your-subdomain.workers.dev');
-        
-        // Charger les données
-        await this.loadData();
-        
-        // Mettre à jour l'heure
-        this.updateLastUpdate();
-        
-        console.log('✅ Market Intelligence initialized');
+        try {
+            // ✅ Initialiser le client FinnHub
+            this.finnhubClient = new FinnHubClient();
+            
+            // Charger les données
+            await this.loadData();
+            
+            // Mettre à jour l'heure
+            this.updateLastUpdate();
+            
+            console.log('✅ Market Intelligence initialized');
+            
+        } catch (error) {
+            console.error('❌ Initialization error:', error);
+            this.showGlobalError('Failed to initialize Market Intelligence: ' + error.message);
+        }
     },
 
     async loadData() {
@@ -28,7 +34,6 @@ const MarketIntelligence = {
             ]);
         } catch (error) {
             console.error('❌ Error loading data:', error);
-            this.showError('Failed to load market intelligence data');
         }
     },
 
@@ -56,11 +61,9 @@ const MarketIntelligence = {
                 return;
             }
 
-            // Analyser le sentiment
             let positiveCount = 0;
             let negativeCount = 0;
 
-            // Afficher les news
             container.innerHTML = news.slice(0, 20).map(item => {
                 const sentiment = this.analyzeSentiment(item.headline + ' ' + (item.summary || ''));
                 if (sentiment === 'positive') positiveCount++;
@@ -78,7 +81,7 @@ const MarketIntelligence = {
                             <span class='sentiment-badge sentiment-${sentiment}'>
                                 ${sentiment.toUpperCase()}
                             </span>
-                            <a href='${item.url}' target='_blank' class='news-link'>
+                            <a href='${item.url}' target='_blank' class='news-link' onclick='event.stopPropagation();'>
                                 Read more <i class='fas fa-external-link-alt'></i>
                             </a>
                         </div>
@@ -86,7 +89,6 @@ const MarketIntelligence = {
                 `;
             }).join('');
 
-            // Mettre à jour les stats
             document.getElementById('totalNewsCount').textContent = news.length;
             document.getElementById('positiveNewsCount').textContent = positiveCount;
             document.getElementById('negativeNewsCount').textContent = negativeCount;
@@ -156,8 +158,8 @@ const MarketIntelligence = {
     },
 
     analyzeSentiment(text) {
-        const positiveWords = ['gain', 'profit', 'growth', 'surge', 'rally', 'bullish', 'upgrade', 'strong', 'positive', 'beat', 'outperform'];
-        const negativeWords = ['loss', 'decline', 'fall', 'drop', 'bearish', 'downgrade', 'weak', 'negative', 'miss', 'underperform'];
+        const positiveWords = ['gain', 'profit', 'growth', 'surge', 'rally', 'bullish', 'upgrade', 'strong', 'positive', 'beat', 'outperform', 'rise', 'jump', 'soar'];
+        const negativeWords = ['loss', 'decline', 'fall', 'drop', 'bearish', 'downgrade', 'weak', 'negative', 'miss', 'underperform', 'plunge', 'crash', 'sink'];
 
         const textLower = text.toLowerCase();
         let positiveScore = 0;
@@ -201,12 +203,23 @@ const MarketIntelligence = {
             <div class='error-container'>
                 <i class='fas fa-exclamation-triangle error-icon'></i>
                 <p class='error-message'>${message}</p>
+                <button class='btn-primary' onclick='MarketIntelligence.loadData()'>
+                    <i class='fas fa-sync'></i> Retry
+                </button>
             </div>
         `;
     },
 
-    showError(message) {
-        console.error(message);
+    showGlobalError(message) {
+        const container = document.querySelector('.container');
+        if (container) {
+            container.innerHTML = `
+                <div class='error-container'>
+                    <i class='fas fa-exclamation-triangle error-icon'></i>
+                    <p class='error-message'>${message}</p>
+                </div>
+            `;
+        }
     }
 };
 

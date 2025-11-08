@@ -4,8 +4,17 @@
 // ============================================
 
 class FinnHubClient {
-    constructor(workerUrl) {
-        this.workerUrl = workerUrl || 'https://finance-hub-api.your-subdomain.workers.dev';
+    constructor(workerUrl = null) {
+        // ✅ Utiliser CONFIG.API_BASE_URL si disponible
+        this.workerUrl = workerUrl || (typeof CONFIG !== 'undefined' ? CONFIG.API_BASE_URL : null);
+        
+        if (!this.workerUrl) {
+            console.error('❌ Worker URL not configured! Please check CONFIG.API_BASE_URL');
+            throw new Error('Worker URL not configured');
+        }
+        
+        console.log('✅ FinnHub Client initialized with URL:', this.workerUrl);
+        
         this.cache = new Map();
         this.cacheDuration = {
             companyNews: 30 * 60 * 1000,      // 30 minutes
@@ -38,7 +47,12 @@ class FinnHubClient {
         console.log(`📡 FinnHub API Call: ${endpoint}`, params);
 
         try {
-            const response = await fetch(url);
+            const response = await fetch(url, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            });
             
             if (!response.ok) {
                 const errorData = await response.json().catch(() => ({}));
@@ -63,14 +77,11 @@ class FinnHubClient {
 
     /**
      * 📰 Récupère les news d'une entreprise
-     * @param {string} symbol - Symbole de l'action (ex: "AAPL")
-     * @param {string} from - Date de début (format YYYY-MM-DD)
-     * @param {string} to - Date de fin (format YYYY-MM-DD)
      */
     async getCompanyNews(symbol, from = null, to = null) {
         if (!from) {
             const date = new Date();
-            date.setDate(date.getDate() - 30); // 30 jours avant
+            date.setDate(date.getDate() - 30);
             from = date.toISOString().split('T')[0];
         }
         if (!to) {
@@ -82,7 +93,6 @@ class FinnHubClient {
 
     /**
      * 📰 Récupère les news du marché général
-     * @param {string} category - Catégorie (general, forex, crypto, merger)
      */
     async getMarketNews(category = 'general') {
         return await this.makeRequest('market-news', { category });
@@ -90,7 +100,6 @@ class FinnHubClient {
 
     /**
      * 💭 Récupère le sentiment des news pour une action
-     * @param {string} symbol - Symbole de l'action
      */
     async getSentiment(symbol) {
         return await this.makeRequest('sentiment', { symbol });
@@ -98,7 +107,6 @@ class FinnHubClient {
 
     /**
      * 📊 Récupère les recommandations des analystes
-     * @param {string} symbol - Symbole de l'action
      */
     async getRecommendation(symbol) {
         return await this.makeRequest('recommendation', { symbol });
@@ -106,7 +114,6 @@ class FinnHubClient {
 
     /**
      * 💰 Récupère les résultats financiers (earnings)
-     * @param {string} symbol - Symbole de l'action
      */
     async getEarnings(symbol) {
         return await this.makeRequest('earnings', { symbol });
@@ -114,9 +121,6 @@ class FinnHubClient {
 
     /**
      * 📅 Récupère le calendrier des résultats
-     * @param {string} from - Date de début
-     * @param {string} to - Date de fin
-     * @param {string} symbol - (Optionnel) Filtrer par symbole
      */
     async getEarningsCalendar(from = null, to = null, symbol = '') {
         if (!from) {
@@ -124,7 +128,7 @@ class FinnHubClient {
         }
         if (!to) {
             const date = new Date();
-            date.setDate(date.getDate() + 30); // 30 jours après
+            date.setDate(date.getDate() + 30);
             to = date.toISOString().split('T')[0];
         }
 
@@ -133,7 +137,6 @@ class FinnHubClient {
 
     /**
      * 🏢 Récupère le profil d'une entreprise
-     * @param {string} symbol - Symbole de l'action
      */
     async getCompanyProfile(symbol) {
         return await this.makeRequest('company-profile', { symbol });
@@ -141,7 +144,6 @@ class FinnHubClient {
 
     /**
      * 🔗 Récupère les entreprises similaires (peers)
-     * @param {string} symbol - Symbole de l'action
      */
     async getPeers(symbol) {
         return await this.makeRequest('peers', { symbol });
@@ -149,8 +151,6 @@ class FinnHubClient {
 
     /**
      * 📊 Récupère les métriques financières de base
-     * @param {string} symbol - Symbole de l'action
-     * @param {string} metric - Type de métrique (all par défaut)
      */
     async getBasicFinancials(symbol, metric = 'all') {
         return await this.makeRequest('basic-financials', { symbol, metric });
@@ -158,7 +158,6 @@ class FinnHubClient {
 
     /**
      * 🔍 Analyse l'impact potentiel des news sur le cours de l'action
-     * (Fonction personnalisée qui combine sentiment + news récentes)
      */
     async analyzeNewsImpact(symbol) {
         try {
@@ -167,7 +166,6 @@ class FinnHubClient {
                 this.getCompanyNews(symbol)
             ]);
 
-            // Analyser les 10 dernières news
             const recentNews = Array.isArray(news) ? news.slice(0, 10) : [];
             
             const analysis = {
@@ -197,7 +195,7 @@ class FinnHubClient {
      * Calcule l'impact potentiel basé sur le sentiment
      */
     calculateImpact(sentiment, term = 'short') {
-        if (!sentiment || !sentiment.sentiment) {
+        if (!sentiment || typeof sentiment.sentiment === 'undefined') {
             return { direction: 'Neutral', confidence: 'Low' };
         }
 
@@ -221,7 +219,7 @@ class FinnHubClient {
      * Génère une recommandation basée sur le sentiment
      */
     getRecommendationFromSentiment(sentiment) {
-        if (!sentiment || !sentiment.sentiment) {
+        if (!sentiment || typeof sentiment.sentiment === 'undefined') {
             return 'Hold - Insufficient data';
         }
 
