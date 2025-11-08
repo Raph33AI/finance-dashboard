@@ -1330,101 +1330,780 @@
 }
 
 /* ============================================
-   🎭 MODALS
+   🎭 MODALS - VERSION COMPLÈTE ET CORRIGÉE
    ============================================ */
+
+/* Overlay du modal (fond semi-transparent) */
 .modal {
     display: none;
     position: fixed;
-    inset: 0;
-    background: rgba(0, 0, 0, 0.6);
-    backdrop-filter: blur(5px);
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(15, 23, 42, 0.75);
+    backdrop-filter: blur(4px);
     z-index: 10000;
-    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    overflow-y: auto;
+    padding: 20px;
     align-items: center;
+    justify-content: center;
 }
 
+/* Modal visible */
 .modal.active {
-    display: flex;
+    display: flex !important;
+    opacity: 1;
+    animation: modalFadeIn 0.3s ease;
 }
 
+@keyframes modalFadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+/* Contenu du modal */
 .modal-content {
     background: var(--background-primary);
-    border-radius: 20px;
+    border-radius: var(--radius-xl);
     box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-    max-width: 700px;
-    width: 90%;
-    max-height: 80vh;
+    width: 100%;
+    max-width: 800px;
+    max-height: 90vh;
     overflow: hidden;
     display: flex;
     flex-direction: column;
+    transform: scale(0.95);
+    transition: transform 0.3s ease;
+    margin: auto;
+    position: relative;
 }
 
-[data-theme="dark"] .modal-content {
-    background: var(--background-primary);
+.modal.active .modal-content {
+    transform: scale(1);
+    animation: modalSlideIn 0.3s ease;
 }
 
+@keyframes modalSlideIn {
+    from {
+        transform: scale(0.9) translateY(-20px);
+        opacity: 0;
+    }
+    to {
+        transform: scale(1) translateY(0);
+        opacity: 1;
+    }
+}
+
+/* Header du modal */
 .modal-header {
-    padding: 25px 30px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 24px 30px;
+    border-bottom: 1px solid var(--border-color);
     background: var(--md-gradient);
     color: white;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+    border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+    flex-shrink: 0;
 }
 
+/* Header spécial pour portfolios modal */
 #portfoliosModal .modal-header {
     background: linear-gradient(135deg, var(--portfolio-gradient-start) 0%, var(--portfolio-gradient-end) 100%);
 }
 
 .modal-header h2 {
     margin: 0;
-    font-size: 1.5em;
-    color: white;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: white !important;
+    display: flex;
+    align-items: center;
+    gap: 12px;
 }
 
 .modal-header h2 i {
-    color: white;
+    color: white !important;
 }
 
-.modal-close,
-.close-modal {
-    background: none;
+/* Bouton de fermeture */
+.close-modal,
+.modal-close {
+    background: rgba(255, 255, 255, 0.1);
     border: none;
-    color: white;
-    font-size: 1.5em;
+    font-size: 1.5rem;
+    color: white !important;
     cursor: pointer;
-    transition: transform 0.2s;
-    width: 36px;
-    height: 36px;
+    width: 40px;
+    height: 40px;
     display: flex;
     align-items: center;
     justify-content: center;
     border-radius: var(--radius-md);
+    transition: all 0.2s ease;
+    flex-shrink: 0;
 }
 
-.modal-close:hover,
-.close-modal:hover {
-    transform: rotate(90deg);
+.close-modal:hover,
+.modal-close:hover {
     background: rgba(255, 255, 255, 0.2);
+    transform: rotate(90deg);
 }
 
+/* Body du modal */
 .modal-body {
     padding: 30px;
     overflow-y: auto;
     flex: 1;
+    color: var(--text-primary);
+    background: var(--background-primary);
 }
 
+/* Scrollbar personnalisée pour modal-body */
+.modal-body::-webkit-scrollbar {
+    width: 8px;
+}
+
+.modal-body::-webkit-scrollbar-track {
+    background: var(--background-secondary);
+    border-radius: 4px;
+}
+
+.modal-body::-webkit-scrollbar-thumb {
+    background: var(--border-color);
+    border-radius: 4px;
+}
+
+.modal-body::-webkit-scrollbar-thumb:hover {
+    background: var(--text-secondary);
+}
+
+/* Footer du modal */
 .modal-footer {
-    padding: 20px 30px;
-    background: #f8f9fa;
     display: flex;
+    align-items: center;
     justify-content: flex-end;
-    gap: 10px;
+    gap: 12px;
+    padding: 20px 30px;
     border-top: 1px solid var(--border-color);
+    background: var(--background-secondary);
+    border-radius: 0 0 var(--radius-xl) var(--radius-xl);
+    flex-shrink: 0;
+}
+
+/* ============================================
+   📋 FORMULAIRES DANS LES MODALS
+   ============================================ */
+
+.modal-body form,
+.comparison-form,
+.alert-form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.form-group label {
+    font-weight: 600;
+    color: var(--text-primary);
+    font-size: 0.95rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.form-input,
+.modal-body input[type="text"],
+.modal-body input[type="number"],
+.modal-body select,
+.modal-body textarea {
+    width: 100%;
+    padding: 12px 16px;
+    border: 2px solid var(--border-color);
+    border-radius: var(--radius-md);
+    font-size: 1rem;
+    color: var(--text-primary);
+    background: var(--background-primary);
+    transition: all 0.2s ease;
+    font-family: inherit;
+}
+
+.form-input:focus,
+.modal-body input:focus,
+.modal-body select:focus,
+.modal-body textarea:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(30, 94, 235, 0.1);
+}
+
+.form-input::placeholder,
+.modal-body input::placeholder,
+.modal-body textarea::placeholder {
+    color: var(--text-tertiary);
+}
+
+.form-group small {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    margin-top: -4px;
+}
+
+/* Actions des formulaires */
+.form-actions {
+    display: flex;
+    gap: 12px;
+    margin-top: 10px;
+}
+
+.form-actions button {
+    flex: 1;
+    padding: 12px 24px;
+    border-radius: var(--radius-md);
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: none;
+    font-size: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.btn-create {
+    background: var(--md-gradient);
+    color: white;
+}
+
+.btn-create:hover {
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-md);
+}
+
+.btn-cancel {
+    background: var(--background-secondary);
+    color: var(--text-primary);
+    border: 1px solid var(--border-color);
+}
+
+.btn-cancel:hover {
+    background: var(--background-tertiary);
+}
+
+/* ============================================
+   📦 INFO BOX DANS LES MODALS
+   ============================================ */
+
+.simulations-info {
+    background: linear-gradient(135deg, var(--portfolio-gradient-start) 0%, var(--portfolio-gradient-end) 100%);
+    color: white !important;
+    padding: 16px 20px;
+    border-radius: var(--radius-lg);
+    margin-bottom: 24px;
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+}
+
+.simulations-info p {
+    margin: 0;
+    color: white !important;
+    font-size: 0.95rem;
+    line-height: 1.6;
+}
+
+.simulations-info i {
+    color: white !important;
+    font-size: 1.2rem;
+    flex-shrink: 0;
+    margin-top: 2px;
+}
+
+.simulations-info strong {
+    color: white !important;
+    font-weight: 600;
+}
+
+/* ============================================
+   📂 LISTE DES PORTFOLIOS/SIMULATIONS
+   ============================================ */
+
+#portfoliosListContainer {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.simulations-list {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.simulation-item {
+    background: var(--background-secondary);
+    border: 2px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    transition: all 0.2s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Effet de brillance au hover */
+.simulation-item::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+    transition: left 0.5s;
+}
+
+.simulation-item:hover::before {
+    left: 100%;
+}
+
+.simulation-item:hover {
+    border-color: var(--primary-color);
+    box-shadow: 0 4px 12px rgba(30, 94, 235, 0.1);
+    transform: translateY(-2px);
+    cursor: pointer;
+}
+
+/* Portfolio ACTIF */
+.simulation-item.active {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
+    border-color: var(--portfolio-gold) !important;
+    box-shadow: 0 8px 20px rgba(16, 185, 129, 0.4);
+    color: white !important;
+}
+
+.simulation-item.active * {
+    color: white !important;
+}
+
+/* Portfolio NON ACTIF (BLANC) */
+.simulation-item:not(.active) {
+    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%) !important;
+    border: 2px solid #e5e7eb !important;
+}
+
+.simulation-item:not(.active):hover {
+    background: linear-gradient(135deg, #e0e7ff 0%, #c7d2fe 100%) !important;
+    border-color: var(--portfolio-gradient-start) !important;
+}
+
+.simulation-item:not(.active) .simulation-name,
+.simulation-item:not(.active) .simulation-meta {
+    color: #1f2937 !important;
+}
+
+.simulation-item:not(.active) .simulation-name i:first-child {
+    color: var(--portfolio-gradient-start) !important;
+}
+
+.simulation-item:not(.active) .simulation-meta {
+    color: #6b7280 !important;
+}
+
+.simulation-item:not(.active) .simulation-meta i {
+    color: #9ca3af !important;
+}
+
+/* Informations du portfolio */
+.simulation-info {
+    flex: 1;
+    cursor: pointer;
+    user-select: none;
+}
+
+.simulation-name {
+    font-size: 1.1rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 8px;
+}
+
+.simulation-name i {
+    font-size: 1rem;
+}
+
+.badge-default {
+    background: var(--success-color);
+    color: white;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+}
+
+.creation-date {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.simulation-meta {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+    font-size: 0.9rem;
+}
+
+.simulation-meta span {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+/* Actions du portfolio */
+.simulation-actions {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    position: relative;
+    z-index: 10;
+}
+
+.btn-sm {
+    padding: 8px 16px;
+    font-size: 0.875rem;
+    border: none;
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    white-space: nowrap;
+}
+
+/* Boutons pour portfolios NON ACTIFS */
+.simulation-item:not(.active) .btn-sm {
+    background: rgba(102, 126, 234, 0.1);
+    color: var(--portfolio-gradient-start);
+}
+
+.simulation-item:not(.active) .btn-sm:hover {
+    background: var(--portfolio-gradient-start);
+    color: white;
+    transform: scale(1.05);
+}
+
+.simulation-item:not(.active) .btn-primary {
+    background: rgba(30, 94, 235, 0.1);
+    color: var(--md-blue-primary);
+}
+
+.simulation-item:not(.active) .btn-primary:hover {
+    background: var(--md-blue-primary);
+    color: white;
+}
+
+.simulation-item:not(.active) .btn-danger {
+    background: rgba(239, 68, 68, 0.1);
+    color: var(--danger-color);
+}
+
+.simulation-item:not(.active) .btn-danger:hover {
+    background: var(--danger-color);
+    color: white;
+}
+
+/* Boutons pour portfolio ACTIF */
+.simulation-item.active .btn-sm {
+    background: rgba(255, 255, 255, 0.3);
+    color: white;
+}
+
+.simulation-item.active .btn-sm:hover {
+    background: rgba(255, 255, 255, 0.5);
+    transform: scale(1.05);
+}
+
+.simulation-item.active .btn-success {
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+    cursor: default;
+}
+
+/* États de chargement */
+.loading-simulations {
+    text-align: center;
+    padding: 3rem 2rem;
+    color: var(--text-secondary);
+    font-size: 1rem;
+}
+
+.loading-simulations i {
+    margin-right: 0.5rem;
+    color: var(--portfolio-gradient-start);
+    animation: spin 1s linear infinite;
+}
+
+.simulation-item.loading {
+    opacity: 0.6;
+    pointer-events: none;
+}
+
+/* Message d'erreur ou vide */
+.no-simulations {
+    text-align: center;
+    padding: 3rem 2rem;
+    color: var(--text-secondary);
+}
+
+.no-simulations i {
+    font-size: 3rem;
+    opacity: 0.2;
+    margin-bottom: 1rem;
+    display: block;
+}
+
+.no-simulations p {
+    margin: 0.5rem 0;
+    font-size: 1rem;
+}
+
+.no-simulations .hint {
+    font-size: 0.875rem;
+    opacity: 0.7;
+    margin-top: 0.75rem;
+}
+
+/* ============================================
+   🌙 DARK MODE POUR MODALS
+   ============================================ */
+
+[data-theme="dark"] .modal-content {
+    background: var(--background-primary);
+    border: 1px solid var(--border-color);
+}
+
+[data-theme="dark"] .modal-header {
+    border-bottom-color: var(--border-color);
+}
+
+[data-theme="dark"] .modal-body {
+    background: var(--background-primary);
+    color: var(--text-primary);
 }
 
 [data-theme="dark"] .modal-footer {
     background: var(--background-secondary);
+    border-top-color: var(--border-color);
+}
+
+[data-theme="dark"] .simulation-item:not(.active) {
+    background: linear-gradient(135deg, #1e293b 0%, #334155 100%) !important;
+    border-color: #475569 !important;
+}
+
+[data-theme="dark"] .simulation-item:not(.active) .simulation-name,
+[data-theme="dark"] .simulation-item:not(.active) .simulation-meta {
+    color: white !important;
+}
+
+[data-theme="dark"] .simulation-item:not(.active) .simulation-name i:first-child {
+    color: var(--portfolio-gradient-start) !important;
+}
+
+[data-theme="dark"] .simulation-item:not(.active) .simulation-meta {
+    color: rgba(255, 255, 255, 0.8) !important;
+}
+
+[data-theme="dark"] .simulation-item:not(.active):hover {
+    background: var(--background-tertiary) !important;
+    border-color: var(--portfolio-gradient-start) !important;
+}
+
+[data-theme="dark"] .simulation-item.active {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
+    border-color: var(--portfolio-gold) !important;
+}
+
+/* ============================================
+   📱 RESPONSIVE MODALS
+   ============================================ */
+
+@media (max-width: 768px) {
+    .modal {
+        padding: 10px;
+    }
+    
+    .modal-content {
+        max-width: 100%;
+        max-height: 95vh;
+        border-radius: var(--radius-lg);
+    }
+    
+    .modal-header {
+        padding: 20px;
+        border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+    }
+    
+    .modal-header h2 {
+        font-size: 1.25rem;
+    }
+    
+    .modal-body {
+        padding: 20px;
+    }
+    
+    .modal-footer {
+        padding: 15px 20px;
+        flex-direction: column;
+        border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+    }
+    
+    .modal-footer .btn {
+        width: 100%;
+    }
+    
+    .form-actions {
+        flex-direction: column;
+    }
+    
+    .form-actions button {
+        width: 100%;
+    }
+    
+    .simulation-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 15px;
+        padding: 15px;
+    }
+    
+    .simulation-actions {
+        width: 100%;
+        justify-content: flex-start;
+    }
+    
+    .simulation-meta {
+        flex-direction: column;
+        gap: 8px;
+    }
+}
+
+@media (max-width: 480px) {
+    .modal {
+        padding: 5px;
+    }
+    
+    .modal-header {
+        padding: 15px;
+    }
+    
+    .modal-body {
+        padding: 15px;
+    }
+    
+    .modal-footer {
+        padding: 12px 15px;
+    }
+    
+    .simulation-item {
+        padding: 12px;
+    }
+    
+    .btn-sm {
+        font-size: 0.8125rem;
+        padding: 6px 12px;
+    }
+}
+
+/* ============================================
+   🔧 UTILITAIRES MODALS
+   ============================================ */
+
+/* Empêcher le scroll du body quand modal ouvert */
+body.modal-open {
+    overflow: hidden !important;
+}
+
+/* Presets de comparaison */
+.comparison-quick-presets {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.comparison-quick-presets label {
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 5px;
+}
+
+.preset-btn {
+    background: var(--background-secondary);
+    border: 1px solid var(--border-color);
+    padding: 12px 16px;
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-weight: 500;
+    text-align: left;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: var(--text-primary);
+}
+
+.preset-btn:hover {
+    background: var(--md-blue-primary);
+    border-color: var(--md-blue-primary);
+    color: white;
+    transform: translateX(4px);
+}
+
+.preset-btn i {
+    font-size: 1.1rem;
+}
+
+/* Note optionnelle dans alert form */
+.alert-note {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    margin-top: 0.5rem;
+    padding: 0.5rem;
+    background: var(--background-secondary);
+    border-radius: var(--radius-sm);
+}
+
+.alert-condition .price {
+    font-weight: 700;
+    color: var(--primary-color);
 }
 
 /* ============================================
