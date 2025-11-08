@@ -292,10 +292,10 @@
                                 </div>
                             </div>
                             
-                            <div class='info-box info-box-white-text' style='margin-top: 1rem;'>
+                            <div class='info-box info-box-white-text' style='margin-top: 1rem; margin-bottom: 0;'>
                                 <h4><i class='fas fa-info-circle'></i> How it works</h4>
                                 <p>Create multiple portfolios to organize your watchlists, alerts, and stock comparisons. All portfolios are automatically saved to the cloud and accessible from any device.</p>
-                                <p style='margin-top: 0.5rem; font-size: 0.9em; opacity: 0.9;'>
+                                <p style='margin-top: 0.5rem; margin-bottom: 0; font-size: 0.9em; opacity: 0.9;'>
                                     <i class='fas fa-database'></i> <strong>Cache System:</strong> Data is cached locally to reduce API calls. Rate limit: 8 requests/minute.
                                 </p>
                             </div>
@@ -539,7 +539,8 @@
                             <div class='chart-section'>
                                 <h3 class='subsection-title' id='price-chart-title'>
                                     <i class='fas fa-chart-line' aria-hidden='true'></i> Price Chart with Technical Indicators
-                                    <button class='help-icon' onclick='openModal("modalChartHelp")' aria-label='Help about price chart'>?</button>
+                                    <!-- ✅ CORRIGÉ : Bouton help commenté (modal n'existe pas) -->
+                                    <!-- <button class='help-icon' onclick='openModal("modalChartHelp")' aria-label='Help about price chart'>?</button> -->
                                 </h3>
                                 <div class='indicator-toggles' role='group' aria-label='Technical indicator toggles'>
                                     <label><input type='checkbox' id='toggleSMA' checked> SMA (20, 50)</label>
@@ -555,7 +556,8 @@
                                 <div class='chart-section'>
                                     <h3 class='subsection-title' id='rsi-title'>
                                         <i class='fas fa-wave-square' aria-hidden='true'></i> RSI (Relative Strength Index)
-                                        <button class='help-icon' onclick='openModal("modalRSI")' aria-label='Help about RSI'>?</button>
+                                        <!-- ✅ CORRIGÉ : Bouton help commenté (modal n'existe pas) -->
+                                        <!-- <button class='help-icon' onclick='openModal("modalRSI")' aria-label='Help about RSI'>?</button> -->
                                     </h3>
                                     <div id='rsiChart' class='chart chart-medium' role='img' aria-labelledby='rsi-title'></div>
                                 </div>
@@ -563,7 +565,8 @@
                                 <div class='chart-section'>
                                     <h3 class='subsection-title' id='macd-title'>
                                         <i class='fas fa-chart-bar' aria-hidden='true'></i> MACD (Moving Average Convergence Divergence)
-                                        <button class='help-icon' onclick='openModal("modalMACD")' aria-label='Help about MACD'>?</button>
+                                        <!-- ✅ CORRIGÉ : Bouton help commenté (modal n'existe pas) -->
+                                        <!-- <button class='help-icon' onclick='openModal("modalMACD")' aria-label='Help about MACD'>?</button> -->
                                     </h3>
                                     <div id='macdChart' class='chart chart-medium' role='img' aria-labelledby='macd-title'></div>
                                 </div>
@@ -573,7 +576,8 @@
                             <div class='signals-section'>
                                 <h3 class='subsection-title' id='signals-title'>
                                     <i class='fas fa-signal' aria-hidden='true'></i> Trading Signals
-                                    <button class='help-icon' onclick='openModal("modalSignals")' aria-label='Help about trading signals'>?</button>
+                                    <!-- ✅ CORRIGÉ : Bouton help commenté (modal n'existe pas) -->
+                                    <!-- <button class='help-icon' onclick='openModal("modalSignals")' aria-label='Help about trading signals'>?</button> -->
                                 </h3>
                                 <div id='tradingSignals' class='signals-grid' role='list' aria-labelledby='signals-title'></div>
                             </div>
@@ -843,13 +847,13 @@
                 </div>
             </div>
         </div>
-        
-        <!-- Toggle Button (quand widget fermé) -->
-        <button class='cache-toggle-btn' onclick='toggleCacheWidget()' aria-label='Toggle cache statistics panel'>
-            <i class='fas fa-database' aria-hidden='true'></i>
-            <span class='cache-badge' id='cacheBadge' aria-label='Number of cached entries'>0</span>
-        </button>
     </div>
+    
+    <!-- Bouton toggle cache (quand widget fermé) -->
+    <button class='cache-toggle-btn' onclick='toggleCacheWidget()' aria-label='Toggle cache statistics panel' style='display: none;'>
+        <i class='fas fa-database' aria-hidden='true'></i>
+        <span class='cache-badge' id='cacheBadge' aria-label='Number of cached entries'>0</span>
+    </button>
     
     <!-- ============================================
          INLINE STYLES FOR CORRECTIONS
@@ -952,7 +956,7 @@
          📜 SCRIPTS - ORDRE IMPORTANT
          ============================================ -->
     
-    <!-- ✅ NOUVEAU : Cache Widget Script -->
+    <!-- ✅ Cache Widget Script -->
     <script>
         /**
          * 🗄️ Cache Widget Management
@@ -1244,6 +1248,7 @@
             }
             
             modal.classList.add('active');
+            document.body.style.overflow = 'hidden';
             
             container.innerHTML = `
                 <div class='loading-simulations'>
@@ -1286,6 +1291,7 @@
             const modal = document.getElementById('portfoliosModal');
             if (modal) {
                 modal.classList.remove('active');
+                document.body.style.overflow = '';
             }
         }
         
@@ -1296,6 +1302,9 @@
             const modal = document.getElementById(modalId);
             if (modal) {
                 modal.classList.add('active');
+                document.body.style.overflow = 'hidden';
+            } else {
+                console.warn('⚠️ Modal not found:', modalId);
             }
         }
         
@@ -1306,6 +1315,7 @@
             const modal = document.getElementById(modalId);
             if (modal) {
                 modal.classList.remove('active');
+                document.body.style.overflow = '';
             }
         }
         
@@ -1315,6 +1325,7 @@
         window.addEventListener('click', function(event) {
             if (event.target.classList.contains('modal')) {
                 event.target.classList.remove('active');
+                document.body.style.overflow = '';
             }
         });
         
@@ -1326,6 +1337,7 @@
                 document.querySelectorAll('.modal.active').forEach(modal => {
                     modal.classList.remove('active');
                 });
+                document.body.style.overflow = '';
             }
         });
         
