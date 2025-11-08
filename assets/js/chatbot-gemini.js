@@ -7,7 +7,7 @@ class GeminiAIIntegration {
     constructor(apiKey) {
         this.apiKey = apiKey;
         this.baseURL = 'https://generativelanguage.googleapis.com/v1beta';
-        this.model = 'gemini-pro';
+        this.model = 'gemini-1.5-flash';
         this.conversationHistory = [];
         this.systemContext = this.buildSystemContext();
         this.maxHistoryLength = 10;
