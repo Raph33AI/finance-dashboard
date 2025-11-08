@@ -1,11 +1,174 @@
 /* ==============================================
    MARKET-DATA.JS - Market Data & Technical Analysis
-   Version Cloud avec Cloudflare Workers - CORRIGÉ
+   Version Cloud avec RATE LIMITING et CACHE OPTIMISÉ - COMPLET
    ============================================== */
+
+// ========== RATE LIMITER ==========
+class RateLimiter {
+    constructor(maxRequests = 8, windowMs = 60000) {
+        this.maxRequests = maxRequests;
+        this.windowMs = windowMs;
+        this.queue = [];
+        this.requestTimes = [];
+        this.processing = false;
+    }
+    
+    async execute(fn, priority = 'normal') {
+        return new Promise((resolve, reject) => {
+            this.queue.push({
+                fn,
+                priority,
+                resolve,
+                reject,
+                timestamp: Date.now()
+            });
+            
+            // Trier par priorité (high > normal > low)
+            this.queue.sort((a, b) => {
+                const priorities = { high: 3, normal: 2, low: 1 };
+                return (priorities[b.priority] || 2) - (priorities[a.priority] || 2);
+            });
+            
+            this.processQueue();
+        });
+    }
+    
+    async processQueue() {
+        if (this.processing || this.queue.length === 0) return;
+        
+        this.processing = true;
+        
+        while (this.queue.length > 0) {
+            // Nettoyer les anciennes requêtes
+            const now = Date.now();
+            this.requestTimes = this.requestTimes.filter(time => now - time < this.windowMs);
+            
+            // Vérifier si on peut faire une requête
+            if (this.requestTimes.length >= this.maxRequests) {
+                const oldestRequest = Math.min(...this.requestTimes);
+                const waitTime = this.windowMs - (now - oldestRequest) + 100;
+                
+                console.log(`⏳ Rate limit reached. Waiting ${Math.ceil(waitTime/1000)}s...`);
+                
+                // Mettre à jour l'indicateur de cache
+                if (window.cacheWidget) {
+                    window.cacheWidget.updateQueueStatus(this.queue.length, waitTime);
+                }
+                
+                await this.sleep(waitTime);
+                continue;
+            }
+            
+            // Exécuter la prochaine requête
+            const item = this.queue.shift();
+            this.requestTimes.push(Date.now());
+            
+            try {
+                const result = await item.fn();
+                item.resolve(result);
+            } catch (error) {
+                item.reject(error);
+            }
+            
+            // Petit délai entre les requêtes
+            await this.sleep(100);
+        }
+        
+        this.processing = false;
+        
+        // Mettre à jour l'indicateur
+        if (window.cacheWidget) {
+            window.cacheWidget.updateQueueStatus(0, 0);
+        }
+    }
+    
+    sleep(ms) {
+        return new Promise(resolve => setTimeout(resolve, ms));
+    }
+    
+    getRemainingRequests() {
+        const now = Date.now();
+        this.requestTimes = this.requestTimes.filter(time => now - time < this.windowMs);
+        return this.maxRequests - this.requestTimes.length;
+    }
+    
+    getQueueLength() {
+        return this.queue.length;
+    }
+}
+
+// ========== CACHE OPTIMISÉ ==========
+class OptimizedCache {
+    constructor() {
+        this.prefix = 'md_cache_';
+        this.staticTTL = 24 * 60 * 60 * 1000; // 24h pour données statiques
+        this.dynamicTTL = 5 * 60 * 1000; // 5min pour données dynamiques
+    }
+    
+    set(key, data, ttl = null) {
+        try {
+            const cacheData = {
+                data,
+                timestamp: Date.now(),
+                ttl: ttl || this.dynamicTTL
+            };
+            localStorage.setItem(this.prefix + key, JSON.stringify(cacheData));
+            return true;
+        } catch (error) {
+            console.warn('Cache storage error:', error);
+            return false;
+        }
+    }
+    
+    get(key) {
+        try {
+            const cached = localStorage.getItem(this.prefix + key);
+            if (!cached) return null;
+            
+            const cacheData = JSON.parse(cached);
+            const now = Date.now();
+            
+            // Vérifier expiration
+            if (now - cacheData.timestamp > cacheData.ttl) {
+                this.delete(key);
+                return null;
+            }
+            
+            return cacheData.data;
+        } catch (error) {
+            console.warn('Cache retrieval error:', error);
+            return null;
+        }
+    }
+    
+    delete(key) {
+        localStorage.removeItem(this.prefix + key);
+    }
+    
+    clear() {
+        Object.keys(localStorage)
+            .filter(key => key.startsWith(this.prefix))
+            .forEach(key => localStorage.removeItem(key));
+    }
+    
+    getAge(key) {
+        try {
+            const cached = localStorage.getItem(this.prefix + key);
+            if (!cached) return null;
+            
+            const cacheData = JSON.parse(cached);
+            return Date.now() - cacheData.timestamp;
+        } catch {
+            return null;
+        }
+    }
+}
 
 const MarketData = {
     // API Client
     apiClient: null,
+    rateLimiter: null,
+    optimizedCache: null,
     
     // Current State
     currentSymbol: '',
@@ -19,11 +182,12 @@ const MarketData = {
     selectedSuggestionIndex: -1,
     searchTimeout: null,
     
-    // Watchlist & Alerts (MODIFIÉ POUR CLOUD)
+    // Watchlist & Alerts
     watchlist: [],
     alerts: [],
     watchlistRefreshInterval: null,
     notificationPermission: false,
+    lastWatchlistRefresh: 0,
     
     // Comparison
     comparisonSymbols: [],
@@ -38,11 +202,15 @@ const MarketData = {
         comparison: null
     },
     
-    // ========== INITIALIZATION (MODIFIÉ POUR CLOUD) ==========
+    // ========== INITIALIZATION ==========
     
     async init() {
         try {
-            console.log('🚀 Initializing Market Data...');
+            console.log('🚀 Initializing Market Data with Rate Limiting...');
+            
+            // Initialiser le rate limiter (8 req/min)
+            this.rateLimiter = new RateLimiter(8, 60000);
+            this.optimizedCache = new OptimizedCache();
             
             // Attendre que l'utilisateur soit authentifié
             await this.waitForAuth();
@@ -50,21 +218,22 @@ const MarketData = {
             // Initialiser le client API
             this.apiClient = new FinanceAPIClient({
                 baseURL: APP_CONFIG.API_BASE_URL,
-                cacheDuration: APP_CONFIG.CACHE_DURATION,
-                maxRetries: APP_CONFIG.MAX_RETRIES,
+                cacheDuration: APP_CONFIG.CACHE_DURATION || 300000,
+                maxRetries: APP_CONFIG.MAX_RETRIES || 2,
                 onLoadingChange: (isLoading) => {
                     this.showLoading(isLoading);
                 }
             });
             
-            // Rendre accessible globalement pour le widget cache
+            // Rendre accessible globalement
             window.apiClient = this.apiClient;
+            window.rateLimiter = this.rateLimiter;
             
             this.updateLastUpdate();
             this.setupEventListeners();
             this.setupSearchListeners();
+            this.startCacheMonitoring();
             
-            // ✅ NOUVEAU : Charger le portefeuille courant depuis le cloud
             await this.loadCurrentPortfolio();
             
             this.requestNotificationPermission();
@@ -75,15 +244,33 @@ const MarketData = {
                 this.loadSymbol('AAPL');
             }, 500);
             
+            console.log('✅ Market Data initialized with rate limiting');
+            
         } catch (error) {
             console.error('Initialization error:', error);
             this.showNotification('Failed to initialize application', 'error');
         }
     },
     
-    /**
-     * ✅ NOUVEAU : Attend que Firebase Auth soit prêt
-     */
+    startCacheMonitoring() {
+        setInterval(() => {
+            if (window.cacheWidget) {
+                const remaining = this.rateLimiter.getRemainingRequests();
+                const queueLength = this.rateLimiter.getQueueLength();
+                
+                window.cacheWidget.updateRateLimitStatus(remaining, 8);
+                
+                if (queueLength > 0) {
+                    window.cacheWidget.updateQueueStatus(queueLength, 0);
+                }
+            }
+        }, 1000);
+    },
+    
+    async apiRequest(fn, priority = 'normal') {
+        return await this.rateLimiter.execute(fn, priority);
+    },
+    
     async waitForAuth() {
         return new Promise((resolve) => {
             if (!firebase || !firebase.auth) {
@@ -100,448 +287,467 @@ const MarketData = {
                 }
             });
             
-            // Timeout de sécurité
             setTimeout(() => {
                 resolve();
             }, 3000);
         });
     },
     
-    /**
-     * ✅ NOUVEAU : Charge le portefeuille courant depuis le cloud
-     */
-    async loadCurrentPortfolio() {
-        console.log('📥 Loading current portfolio...');
-        
-        const currentPortfolioName = window.PortfolioManager 
-            ? window.PortfolioManager.getCurrentPortfolio() 
-            : 'default';
-        
-        let loadedFromCloud = false;
-        
-        if (window.PortfolioManager) {
-            const portfolioData = await window.PortfolioManager.loadFromCloud(currentPortfolioName);
-            
-            if (portfolioData) {
-                console.log('✅ Loaded portfolio from cloud');
-                this.loadPortfolioData(portfolioData);
-                loadedFromCloud = true;
-            }
-        }
-        
-        // Fallback sur localStorage si pas chargé depuis cloud
-        if (!loadedFromCloud) {
-            console.log('⚠️ Loading from localStorage (fallback)');
-            this.loadWatchlistFromStorage();
-            this.loadAlertsFromStorage();
-        }
-        
-        // Rafraîchir la watchlist
-        if (this.watchlist.length > 0) {
-            this.renderWatchlist();
-            this.refreshWatchlist();
-        }
-        
-        // Afficher les alertes
-        if (this.alerts.length > 0) {
-            this.renderAlerts();
-        }
-    },
+    // ========== LOAD SYMBOL (OPTIMISÉ) ==========
     
-    /**
-     * ✅ NOUVEAU : Charge les données d'un portefeuille
-     */
-    loadPortfolioData(portfolioData) {
-        if (!portfolioData) return;
+    async loadSymbol(symbol) {
+        this.currentSymbol = symbol;
         
-        console.log('📥 Loading portfolio data...');
-        
-        // Charger la watchlist
-        this.watchlist = portfolioData.watchlist || [];
-        
-        // Charger les alertes
-        this.alerts = portfolioData.alerts || [];
-        
-        // Charger les comparaisons
-        this.comparisonSymbols = portfolioData.comparisonSymbols || [];
-        
-        // Mettre à jour l'affichage
-        this.renderWatchlist();
-        this.renderAlerts();
-        
-        if (this.comparisonSymbols.length >= 2) {
-            this.loadComparisonFromSymbols(this.comparisonSymbols);
-        }
-        
-        this.showNotification('Portfolio loaded successfully!', 'success');
-    },
-    
-    /**
-     * ✅ NOUVEAU : Récupère les données du portefeuille courant
-     */
-    getCurrentPortfolioData() {
-        return {
-            watchlist: this.watchlist,
-            alerts: this.alerts,
-            comparisonSymbols: this.comparisonSymbols,
-            timestamp: Date.now()
-        };
-    },
-    
-    /**
-     * ✅ NOUVEAU : Sauvegarde le portefeuille courant
-     */
-    async saveCurrentPortfolio() {
-        const portfolioData = this.getCurrentPortfolioData();
-        
-        const currentPortfolioName = window.PortfolioManager 
-            ? window.PortfolioManager.getCurrentPortfolio() 
-            : 'default';
-        
-        if (window.PortfolioManager) {
-            const success = await window.PortfolioManager.saveToCloud(currentPortfolioName, portfolioData);
-            
-            if (!success) {
-                // Fallback localStorage
-                this.saveWatchlistToStorage();
-                this.saveAlertsToStorage();
-                this.showNotification('Saved locally (cloud save failed)', 'warning');
-            }
-        } else {
-            // Pas de PortfolioManager, utiliser localStorage
-            this.saveWatchlistToStorage();
-            this.saveAlertsToStorage();
-            this.showNotification('Portfolio saved locally!', 'success');
-        }
-    },
-    
-    /**
-     * ✅ NOUVEAU : Sauvegarde automatique (debounced)
-     */
-    autoSave: (() => {
-        let timeout;
-        return function() {
-            clearTimeout(timeout);
-            timeout = setTimeout(async () => {
-                await MarketData.saveCurrentPortfolio();
-            }, 2000);
-        };
-    })(),
-    
-    /**
-     * ✅ NOUVEAU : Exporte le portefeuille en JSON
-     */
-    exportPortfolioJSON() {
-        const portfolioData = this.getCurrentPortfolioData();
-        
-        const exportData = {
-            portfolioName: window.PortfolioManager 
-                ? window.PortfolioManager.getCurrentPortfolio() 
-                : 'default',
-            exportDate: new Date().toISOString(),
-            data: portfolioData
-        };
-        
-        const json = JSON.stringify(exportData, null, 2);
-        const blob = new Blob([json], { type: 'application/json' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `market_portfolio_${exportData.portfolioName}_${new Date().toISOString().split('T')[0]}.json`;
-        a.click();
-        URL.revokeObjectURL(url);
-        
-        this.showNotification('Portfolio exported successfully!', 'success');
-    },
-    
-    /**
-     * ✅ NOUVEAU : Importe un portefeuille depuis JSON
-     */
-    importPortfolioJSON() {
-        const input = document.createElement('input');
-        input.type = 'file';
-        input.accept = 'application/json';
-        input.onchange = async (e) => {
-            const file = e.target.files[0];
-            const reader = new FileReader();
-            reader.onload = async (event) => {
-                try {
-                    const imported = JSON.parse(event.target.result);
-                    
-                    let portfolioData;
-                    if (imported.data) {
-                        portfolioData = imported.data;
-                    } else {
-                        portfolioData = imported;
-                    }
-                    
-                    // Charger les données
-                    this.loadPortfolioData(portfolioData);
-                    
-                    // Sauvegarder
-                    await this.saveCurrentPortfolio();
-                    
-                    this.showNotification('Portfolio imported successfully!', 'success');
-                    
-                } catch (err) {
-                    console.error('Import error:', err);
-                    this.showNotification('Import error: ' + err.message, 'error');
-                }
-            };
-            reader.readAsText(file);
-        };
-        input.click();
-    },
-    
-    /**
-     * ✅ NOUVEAU : Rafraîchir la liste des portfolios dans la modale
-     */
-    async refreshPortfoliosList() {
-        console.log('🔄 Refreshing portfolios list...');
-        
-        const container = document.getElementById('portfoliosListContainer');
-        if (!container) {
-            console.error('❌ portfoliosListContainer not found');
-            return;
-        }
-        
-        // Afficher le loading
-        container.innerHTML = `
-            <div class="loading-simulations">
-                <i class="fas fa-spinner fa-spin"></i> Loading portfolios...
-            </div>
-        `;
-        
-        try {
-            // Récupérer la liste des portfolios
-            const portfolios = await PortfolioManager.listPortfolios();
-            const currentPortfolio = PortfolioManager.getCurrentPortfolio();
-            
-            console.log('📋 Portfolios loaded:', portfolios.length);
-            
-            if (portfolios.length === 0) {
-                // Aucun portfolio
-                container.innerHTML = `
-                    <div class="no-portfolios">
-                        <i class="fas fa-folder-open"></i>
-                        <p>No portfolios found</p>
-                        <p class="hint">Click "New Portfolio" to create one</p>
-                    </div>
-                `;
-                return;
-            }
-            
-            // Afficher la liste des portfolios
-            const portfoliosList = portfolios.map(portfolio => {
-                const isActive = portfolio.name === currentPortfolio;
-                const createdDate = portfolio.createdAt 
-                    ? (typeof portfolio.createdAt === 'string' 
-                        ? new Date(portfolio.createdAt).toLocaleDateString('fr-FR', {
-                            year: 'numeric',
-                            month: 'short',
-                            day: 'numeric'
-                        })
-                        : portfolio.createdAt.toDate 
-                            ? portfolio.createdAt.toDate().toLocaleDateString('fr-FR', {
-                                year: 'numeric',
-                                month: 'short',
-                                day: 'numeric'
-                            })
-                            : 'N/A')
-                    : 'N/A';
-                
-                return `
-                    <div class="simulation-item ${isActive ? 'active' : ''}" data-portfolio="${portfolio.name}">
-                        <div class="simulation-info">
-                            <div class="simulation-name">
-                                <i class="fas fa-folder"></i>
-                                ${this.escapeHtml(portfolio.name)}
-                                ${isActive ? '<span class="badge-current">ACTIVE</span>' : ''}
-                                ${portfolio.name === 'default' ? '<span class="badge-default">DEFAULT</span>' : ''}
-                            </div>
-                            <div class="simulation-meta">
-                                <span class="creation-date">
-                                    <i class="far fa-calendar"></i>
-                                    Created: ${createdDate}
-                                </span>
-                                <span>
-                                    <i class="fas fa-star"></i>
-                                    ${portfolio.watchlist?.length || 0} stocks
-                                </span>
-                                <span>
-                                    <i class="fas fa-bell"></i>
-                                    ${portfolio.alerts?.length || 0} alerts
-                                </span>
-                            </div>
-                        </div>
-                        <div class="simulation-actions">
-                            ${!isActive ? `
-                                <button class="btn-sm btn-primary" onclick="MarketData.loadPortfolioFromModal('${portfolio.name}')">
-                                    <i class="fas fa-folder-open"></i> Load
-                                </button>
-                            ` : `
-                                <button class="btn-sm btn-success" disabled>
-                                    <i class="fas fa-check"></i> Active
-                                </button>
-                            `}
-                            ${portfolio.name !== 'default' ? `
-                                <button class="btn-sm btn-secondary" onclick="MarketData.renamePortfolio('${portfolio.name}')">
-                                    <i class="fas fa-edit"></i> Rename
-                                </button>
-                                <button class="btn-sm btn-danger" onclick="MarketData.deletePortfolioFromModal('${portfolio.name}')">
-                                    <i class="fas fa-trash"></i> Delete
-                                </button>
-                            ` : ''}
-                        </div>
-                    </div>
-                `;
-            }).join('');
-            
-            container.innerHTML = `
-                <div class="simulations-list">
-                    ${portfoliosList}
-                </div>
-            `;
-            
-            console.log('✅ Portfolios list displayed');
-            
-        } catch (error) {
-            console.error('❌ Error loading portfolios:', error);
-            container.innerHTML = `
-                <div class="no-portfolios">
-                    <i class="fas fa-exclamation-triangle"></i>
-                    <p>Error loading portfolios</p>
-                    <p class="hint">${this.escapeHtml(error.message)}</p>
-                </div>
-            `;
-        }
-    },
-    
-    /**
-     * ✅ NOUVEAU : Charger un portfolio depuis la modale
-     */
-    async loadPortfolioFromModal(portfolioName) {
-        console.log(`📂 Loading portfolio "${portfolioName}" from modal...`);
-        
-        try {
-            await PortfolioManager.switchPortfolio(portfolioName);
-            await this.loadCurrentPortfolio();
-            
-            // Rafraîchir la liste
-            await this.refreshPortfoliosList();
-            
-            this.showNotification(`Portfolio "${portfolioName}" loaded!`, 'success');
-            
-        } catch (error) {
-            console.error('❌ Error loading portfolio:', error);
-            this.showNotification('Error loading portfolio: ' + error.message, 'error');
-        }
-    },
-    
-    /**
-     * ✅ NOUVEAU : Supprimer un portfolio depuis la modale
-     */
-    async deletePortfolioFromModal(portfolioName) {
-        if (!confirm(`Are you sure you want to delete portfolio "${portfolioName}"?`)) {
-            return;
-        }
-        
-        console.log(`🗑️ Deleting portfolio "${portfolioName}"...`);
-        
-        try {
-            await PortfolioManager.deletePortfolio(portfolioName);
-            
-            // Rafraîchir la liste
-            await this.refreshPortfoliosList();
-            
-            this.showNotification(`Portfolio "${portfolioName}" deleted`, 'success');
-            
-        } catch (error) {
-            console.error('❌ Error deleting portfolio:', error);
-            this.showNotification('Error deleting portfolio: ' + error.message, 'error');
-        }
-    },
-    
-    /**
-     * ✅ NOUVEAU : Renommer un portfolio
-     */
-    async renamePortfolio(oldName) {
-        const newName = prompt(`Rename portfolio "${oldName}" to:`, oldName);
-        
-        if (!newName || newName.trim() === '' || newName === oldName) {
-            return;
-        }
-        
-        console.log(`✏️ Renaming portfolio "${oldName}" to "${newName}"...`);
-        
-        try {
-            // Charger les données de l'ancien portfolio
-            const data = await PortfolioManager.loadFromCloud(oldName);
-            
-            // Sauvegarder avec le nouveau nom
-            data.name = newName;
-            await PortfolioManager.saveToCloud(newName, data);
-            
-            // Supprimer l'ancien
-            await PortfolioManager.deletePortfolio(oldName);
-            
-            // Si c'était le portfolio actif, le basculer
-            if (PortfolioManager.getCurrentPortfolio() === oldName) {
-                await PortfolioManager.switchPortfolio(newName);
-            }
-            
-            // Rafraîchir la liste
-            await this.refreshPortfoliosList();
-            
-            this.showNotification(`Portfolio renamed to "${newName}"`, 'success');
-            
-        } catch (error) {
-            console.error('❌ Error renaming portfolio:', error);
-            this.showNotification('Error renaming portfolio: ' + error.message, 'error');
-        }
-    },
-    
-    /**
-     * ✅ NOUVEAU : Ouvrir la modale de gestion des portfolios
-     */
-    async openPortfoliosModal() {
-        console.log('📂 Opening portfolios modal...');
-        
-        // Ouvrir la modale
-        const modal = document.getElementById('portfoliosModal');
-        if (modal) {
-            modal.classList.add('active');
-            
-            // Charger la liste des portfolios
-            await this.refreshPortfoliosList();
-        } else {
-            console.error('❌ portfoliosModal not found');
-        }
-    },
-    
-    // ========== EVENT LISTENERS ==========
-    
-    setupEventListeners() {
         const input = document.getElementById('symbolInput');
         if (input) {
-            input.addEventListener('keypress', (e) => {
-                if (e.key === 'Enter') {
-                    e.preventDefault();
-                    this.searchStock();
-                }
-            });
+            input.value = symbol;
         }
         
-        // Indicator toggles
-        const updateChart = () => this.updateChart();
+        this.showLoading(true);
+        this.hideResults();
+        this.hideSuggestions();
         
-        document.getElementById('toggleSMA')?.addEventListener('change', updateChart);
-        document.getElementById('toggleEMA')?.addEventListener('change', updateChart);
-        document.getElementById('toggleBB')?.addEventListener('change', updateChart);
-        document.getElementById('toggleVolume')?.addEventListener('change', updateChart);
+        try {
+            console.log(`📊 Loading ${symbol} with optimized cache...`);
+            
+            // Charger d'abord depuis le cache local
+            const cachedProfile = this.optimizedCache.get(`profile_${symbol}`);
+            const cachedLogo = this.optimizedCache.get(`logo_${symbol}`);
+            const cachedStats = this.optimizedCache.get(`stats_${symbol}`);
+            
+            // Données critiques avec rate limiting (priorité haute)
+            const [quote, timeSeries] = await Promise.all([
+                this.apiRequest(() => this.apiClient.getQuote(symbol), 'high'),
+                this.apiRequest(() => this.getTimeSeriesForPeriod(symbol, this.currentPeriod), 'high')
+            ]);
+            
+            if (!quote || !timeSeries) {
+                throw new Error('Failed to load stock data');
+            }
+            
+            this.stockData = {
+                symbol: quote.symbol,
+                prices: timeSeries.data,
+                quote: quote
+            };
+            
+            // Afficher immédiatement les données critiques
+            this.displayStockOverview();
+            this.displayResults();
+            this.updateAddToWatchlistButton();
+            
+            // Utiliser le cache pour les données statiques
+            this.profileData = cachedProfile;
+            this.statisticsData = cachedStats;
+            this.logoUrl = cachedLogo || '';
+            
+            if (cachedProfile || cachedStats) {
+                this.displayCompanyProfile();
+                console.log('✅ Loaded profile/stats from cache');
+            }
+            
+            // Charger les données statiques en arrière-plan
+            this.loadStaticDataInBackground(symbol);
+            
+        } catch (error) {
+            console.error('Error loading stock data:', error);
+            this.showNotification(error.message || 'Failed to load stock data', 'error');
+        } finally {
+            this.showLoading(false);
+        }
     },
     
-    // ========== SEARCH FUNCTIONALITY ==========
+    async loadStaticDataInBackground(symbol) {
+        try {
+            const [profile, statistics, logo] = await Promise.allSettled([
+                this.apiRequest(() => this.apiClient.getProfile(symbol), 'low'),
+                this.apiRequest(() => this.apiClient.getStatistics(symbol), 'low'),
+                this.apiRequest(() => this.apiClient.getLogo(symbol), 'low')
+            ]);
+            
+            let updated = false;
+            
+            if (profile.status === 'fulfilled' && profile.value) {
+                this.profileData = profile.value;
+                this.optimizedCache.set(`profile_${symbol}`, profile.value, this.optimizedCache.staticTTL);
+                updated = true;
+            }
+            
+            if (statistics.status === 'fulfilled' && statistics.value) {
+                this.statisticsData = statistics.value;
+                this.optimizedCache.set(`stats_${symbol}`, statistics.value, this.optimizedCache.staticTTL);
+                updated = true;
+            }
+            
+            if (logo.status === 'fulfilled' && logo.value) {
+                this.logoUrl = logo.value;
+                this.optimizedCache.set(`logo_${symbol}`, logo.value, this.optimizedCache.staticTTL);
+                updated = true;
+            }
+            
+            if (updated) {
+                this.displayCompanyProfile();
+                console.log('✅ Updated static data in background');
+            }
+            
+        } catch (error) {
+            console.warn('Background data load failed:', error);
+        }
+    },
+    
+    async getTimeSeriesForPeriod(symbol, period) {
+        const periodMap = {
+            '1M': { interval: '1day', outputsize: 30 },
+            '3M': { interval: '1day', outputsize: 90 },
+            '6M': { interval: '1day', outputsize: 180 },
+            '1Y': { interval: '1day', outputsize: 252 },
+            '5Y': { interval: '1week', outputsize: 260 },
+            'MAX': { interval: '1month', outputsize: 300 }
+        };
+        
+        const config = periodMap[period] || periodMap['6M'];
+        return await this.apiClient.getTimeSeries(symbol, config.interval, config.outputsize);
+    },
+    
+    changePeriod(period) {
+        this.currentPeriod = period;
+        
+        document.querySelectorAll('.period-btn').forEach(btn => {
+            btn.classList.remove('active');
+            btn.setAttribute('aria-pressed', 'false');
+        });
+        
+        const activeBtn = document.querySelector(`[data-period="${period}"]`);
+        if (activeBtn) {
+            activeBtn.classList.add('active');
+            activeBtn.setAttribute('aria-pressed', 'true');
+        }
+        
+        if (this.currentSymbol) {
+            this.loadSymbol(this.currentSymbol);
+        }
+        
+        if (this.comparisonSymbols.length > 0) {
+            this.loadComparisonFromSymbols(this.comparisonSymbols);
+        }
+    },
+    
+    updateChart() {
+        if (this.stockData) {
+            this.createPriceChart();
+        }
+    },
+    
+    toggleAccordion(headerElement) {
+        const content = headerElement.nextElementSibling;
+        const isActive = headerElement.classList.contains('active');
+        
+        document.querySelectorAll('.accordion-header.active').forEach(h => {
+            h.classList.remove('active');
+            h.nextElementSibling.classList.remove('active');
+        });
+        
+        if (!isActive) {
+            headerElement.classList.add('active');
+            content.classList.add('active');
+        }
+    },
+    
+    escapeHtml(text) {
+        if (!text) return '';
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+    
+};
+
+// ========== WATCHLIST FUNCTIONS (OPTIMISÉ) ==========
+
+Object.assign(MarketData, {
+    
+    loadWatchlistFromStorage() {
+        const saved = localStorage.getItem('market_watchlist');
+        if (saved) {
+            try {
+                this.watchlist = JSON.parse(saved);
+                this.renderWatchlist();
+            } catch (error) {
+                console.error('Error loading watchlist:', error);
+                this.watchlist = [];
+            }
+        }
+    },
+    
+    saveWatchlistToStorage() {
+        try {
+            localStorage.setItem('market_watchlist', JSON.stringify(this.watchlist));
+        } catch (error) {
+            console.error('Error saving watchlist:', error);
+        }
+    },
+    
+    addCurrentToWatchlist() {
+        if (!this.currentSymbol) {
+            alert('Please search for a stock first');
+            return;
+        }
+        
+        if (this.watchlist.some(item => item.symbol === this.currentSymbol)) {
+            alert(`${this.currentSymbol} is already in your watchlist`);
+            return;
+        }
+        
+        const watchlistItem = {
+            symbol: this.currentSymbol,
+            name: this.stockData.quote.name || this.currentSymbol,
+            addedAt: Date.now()
+        };
+        
+        this.watchlist.push(watchlistItem);
+        
+        this.saveWatchlistToStorage();
+        this.autoSave();
+        
+        this.renderWatchlist();
+        this.refreshSingleWatchlistItem(this.currentSymbol);
+        this.updateAddToWatchlistButton();
+        
+        this.showNotification(`✅ ${this.currentSymbol} added to watchlist`, 'success');
+    },
+    
+    removeFromWatchlist(symbol) {
+        if (confirm(`Remove ${symbol} from watchlist?`)) {
+            this.watchlist = this.watchlist.filter(item => item.symbol !== symbol);
+            
+            this.saveWatchlistToStorage();
+            this.autoSave();
+            
+            this.renderWatchlist();
+            this.updateAddToWatchlistButton();
+            this.showNotification(`${symbol} removed from watchlist`, 'info');
+        }
+    },
+    
+    clearWatchlist() {
+        if (this.watchlist.length === 0) {
+            alert('Watchlist is already empty');
+            return;
+        }
+        
+        if (confirm(`Clear all ${this.watchlist.length} stocks from watchlist?`)) {
+            this.watchlist = [];
+            
+            this.saveWatchlistToStorage();
+            this.autoSave();
+            
+            this.renderWatchlist();
+            this.updateAddToWatchlistButton();
+            this.showNotification('Watchlist cleared', 'info');
+        }
+    },
+    
+    renderWatchlist() {
+        const container = document.getElementById('watchlistContainer');
+        if (!container) return;
+        
+        if (this.watchlist.length === 0) {
+            container.innerHTML = `
+                <div class='watchlist-empty'>
+                    <i class='fas fa-star-half-alt'></i>
+                    <p>Your watchlist is empty</p>
+                    <p class='hint'>Search for a stock and click "Add to Watchlist" to start tracking</p>
+                </div>
+            `;
+            return;
+        }
+        
+        container.innerHTML = this.watchlist.map(item => `
+            <div class='watchlist-card' id='watchlist-${item.symbol}' onclick='MarketData.loadSymbol("${item.symbol}")'>
+                <div class='watchlist-card-header'>
+                    <div>
+                        <div class='watchlist-symbol'>${this.escapeHtml(item.symbol)}</div>
+                        <div class='watchlist-name'>${this.escapeHtml(item.name)}</div>
+                    </div>
+                    <button class='watchlist-remove' onclick='event.stopPropagation(); MarketData.removeFromWatchlist("${item.symbol}")' aria-label='Remove ${item.symbol} from watchlist'>
+                        <i class='fas fa-times'></i>
+                    </button>
+                </div>
+                <div class='watchlist-price'>--</div>
+                <div class='watchlist-change'>
+                    <i class='fas fa-minus'></i>
+                    <span>--</span>
+                </div>
+                <div class='watchlist-stats'>
+                    <div class='watchlist-stat'>
+                        <span class='watchlist-stat-label'>Open</span>
+                        <span class='watchlist-stat-value'>--</span>
+                    </div>
+                    <div class='watchlist-stat'>
+                        <span class='watchlist-stat-label'>Volume</span>
+                        <span class='watchlist-stat-value'>--</span>
+                    </div>
+                </div>
+            </div>
+        `).join('');
+    },
+    
+    async refreshWatchlist() {
+        if (this.watchlist.length === 0) {
+            return;
+        }
+        
+        // THROTTLING : Ne pas rafraîchir plus d'une fois toutes les 5 minutes
+        const now = Date.now();
+        const minInterval = 5 * 60 * 1000;
+        
+        if (now - this.lastWatchlistRefresh < minInterval) {
+            const remaining = Math.ceil((minInterval - (now - this.lastWatchlistRefresh)) / 1000);
+            this.showNotification(`Watchlist refreshed ${Math.ceil((now - this.lastWatchlistRefresh) / 1000)}s ago. Wait ${remaining}s`, 'info');
+            return;
+        }
+        
+        this.lastWatchlistRefresh = now;
+        
+        // Charger d'abord depuis le cache
+        let cacheHits = 0;
+        for (const item of this.watchlist) {
+            const cached = this.optimizedCache.get(`quote_${item.symbol}`);
+            if (cached && this.optimizedCache.getAge(`quote_${item.symbol}`) < 60000) {
+                this.updateWatchlistCard(item.symbol, cached);
+                cacheHits++;
+            }
+        }
+        
+        if (cacheHits > 0) {
+            console.log(`✅ Loaded ${cacheHits}/${this.watchlist.length} from cache`);
+        }
+        
+        // RATE LIMITING : Refresh par batch de 5 max
+        const batchSize = 5;
+        const symbolsToRefresh = this.watchlist.map(item => item.symbol);
+        
+        this.showNotification(`Refreshing ${symbolsToRefresh.length} stocks...`, 'info');
+        
+        for (let i = 0; i < symbolsToRefresh.length; i += batchSize) {
+            const batch = symbolsToRefresh.slice(i, i + batchSize);
+            
+            await Promise.all(
+                batch.map(symbol => this.refreshSingleWatchlistItem(symbol))
+            );
+            
+            if (i + batchSize < symbolsToRefresh.length) {
+                console.log(`⏳ Batch ${Math.ceil((i + batchSize) / batchSize)} completed, waiting...`);
+                await this.rateLimiter.sleep(2000);
+            }
+        }
+        
+        this.updateLastUpdate();
+        this.checkAlerts();
+        this.showNotification('✅ Watchlist refreshed!', 'success');
+    },
+    
+    async refreshSingleWatchlistItem(symbol) {
+        const card = document.getElementById(`watchlist-${symbol}`);
+        if (!card) return;
+        
+        card.classList.add('watchlist-loading');
+        
+        try {
+            const quote = await this.apiRequest(() => this.apiClient.getQuote(symbol), 'normal');
+            
+            this.optimizedCache.set(`quote_${symbol}`, quote, 60000);
+            
+            this.updateWatchlistCard(symbol, quote);
+            
+            const watchlistItem = this.watchlist.find(w => w.symbol === symbol);
+            if (watchlistItem) {
+                watchlistItem.currentPrice = quote.price;
+                watchlistItem.change = quote.change;
+                watchlistItem.changePercent = quote.percentChange;
+            }
+            
+        } catch (error) {
+            console.error(`Error refreshing ${symbol}:`, error);
+            
+            const cached = this.optimizedCache.get(`quote_${symbol}`);
+            if (cached) {
+                this.updateWatchlistCard(symbol, cached);
+                console.log(`✅ Using cached data for ${symbol}`);
+            }
+        } finally {
+            card.classList.remove('watchlist-loading');
+        }
+    },
+    
+    updateWatchlistCard(symbol, quote) {
+        const card = document.getElementById(`watchlist-${symbol}`);
+        if (!card) return;
+        
+        const price = quote.price;
+        const change = quote.change;
+        const changePercent = quote.percentChange;
+        const open = quote.open;
+        const volume = quote.volume;
+        
+        card.querySelector('.watchlist-price').textContent = this.formatCurrency(price);
+        
+        const changeEl = card.querySelector('.watchlist-change');
+        const icon = change >= 0 ? 'fa-arrow-up' : 'fa-arrow-down';
+        const changeClass = change >= 0 ? 'positive' : 'negative';
+        changeEl.className = `watchlist-change ${changeClass}`;
+        changeEl.innerHTML = `
+            <i class='fas ${icon}'></i>
+            <span>${change >= 0 ? '+' : ''}${this.formatCurrency(change)} (${change >= 0 ? '+' : ''}${changePercent.toFixed(2)}%)</span>
+        `;
+        
+        const stats = card.querySelectorAll('.watchlist-stat-value');
+        stats[0].textContent = this.formatCurrency(open);
+        stats[1].textContent = this.formatVolume(volume);
+        
+        const cacheAge = this.optimizedCache.getAge(`quote_${symbol}`);
+        if (cacheAge && cacheAge > 0) {
+            const ageSeconds = Math.floor(cacheAge / 1000);
+            if (ageSeconds < 60) {
+                card.setAttribute('title', `Updated ${ageSeconds}s ago (from cache)`);
+            }
+        }
+    },
+    
+    startWatchlistAutoRefresh() {
+        if (this.watchlistRefreshInterval) {
+            clearInterval(this.watchlistRefreshInterval);
+        }
+        
+        this.watchlistRefreshInterval = setInterval(() => {
+            if (this.watchlist.length > 0) {
+                console.log('⏰ Auto-refresh triggered');
+                this.refreshWatchlist();
+            }
+        }, 2 * 60 * 60 * 1000); // 2 heures
+    },
+    
+    updateAddToWatchlistButton() {
+        const btn = document.getElementById('btnAddCurrent');
+        if (!btn) return;
+        
+        if (this.currentSymbol && !this.watchlist.some(w => w.symbol === this.currentSymbol)) {
+            btn.disabled = false;
+            btn.innerHTML = `<i class='fas fa-plus'></i> Add ${this.currentSymbol} to Watchlist`;
+        } else if (this.currentSymbol) {
+            btn.disabled = true;
+            btn.innerHTML = `<i class='fas fa-check'></i> Already in Watchlist`;
+        } else {
+            btn.disabled = true;
+            btn.innerHTML = `<i class='fas fa-plus'></i> Add Current Stock`;
+        }
+    }
+    
+});
+
+// ========== SEARCH FUNCTIONS (OPTIMISÉ) ==========
+
+Object.assign(MarketData, {
     
     setupSearchListeners() {
         const input = document.getElementById('symbolInput');
@@ -596,24 +802,36 @@ const MarketData = {
         }
         
         clearTimeout(this.searchTimeout);
+        
         this.searchTimeout = setTimeout(() => {
             this.searchSymbols(trimmedQuery);
-        }, 300);
+        }, 500);
     },
     
     async searchSymbols(query) {
-        console.log('🔍 Searching Twelve Data for:', query);
+        console.log('🔍 Searching for:', query);
         
         const container = document.getElementById('searchSuggestions');
         if (!container) return;
+        
+        // Vérifier le cache d'abord
+        const cacheKey = `search_${query.toUpperCase()}`;
+        const cached = this.optimizedCache.get(cacheKey);
+        
+        if (cached) {
+            console.log('✅ Search results from cache');
+            this.displaySearchResults(cached, query);
+            return;
+        }
         
         container.innerHTML = '<div class="suggestion-loading"><i class="fas fa-spinner fa-spin"></i> Searching...</div>';
         container.classList.add('active');
         
         try {
-            const results = await this.apiClient.searchSymbol(query);
+            const results = await this.apiRequest(() => this.apiClient.searchSymbol(query), 'low');
             
             if (results.data && results.data.length > 0) {
+                this.optimizedCache.set(cacheKey, results.data, 60 * 60 * 1000);
                 this.displaySearchResults(results.data, query);
             } else {
                 this.displayNoResults();
@@ -629,7 +847,6 @@ const MarketData = {
         const container = document.getElementById('searchSuggestions');
         if (!container) return;
         
-        // Grouper par type
         const grouped = {
             stocks: [],
             etfs: [],
@@ -799,343 +1016,11 @@ const MarketData = {
         if (symbol) {
             this.loadSymbol(symbol);
         }
-    },
-    
-    async loadSymbol(symbol) {
-        this.currentSymbol = symbol;
-        
-        const input = document.getElementById('symbolInput');
-        if (input) {
-            input.value = symbol;
-        }
-        
-        this.showLoading(true);
-        this.hideResults();
-        this.hideSuggestions();
-        
-        try {
-            const [quote, timeSeries, profile, statistics, logo] = await Promise.allSettled([
-                this.apiClient.getQuote(symbol),
-                this.getTimeSeriesForPeriod(symbol, this.currentPeriod),
-                this.apiClient.getProfile(symbol),
-                this.apiClient.getStatistics(symbol),
-                this.apiClient.getLogo(symbol)
-            ]);
-            
-            if (quote.status !== 'fulfilled' || timeSeries.status !== 'fulfilled') {
-                throw new Error('Failed to load stock data');
-            }
-            
-            this.stockData = {
-                symbol: quote.value.symbol,
-                prices: timeSeries.value.data,
-                quote: quote.value
-            };
-            
-            this.profileData = profile.status === 'fulfilled' ? profile.value : null;
-            this.statisticsData = statistics.status === 'fulfilled' ? statistics.value : null;
-            this.logoUrl = logo.status === 'fulfilled' ? logo.value : '';
-            
-            this.displayStockOverview();
-            this.displayCompanyProfile();
-            this.displayResults();
-            this.updateAddToWatchlistButton();
-            
-        } catch (error) {
-            console.error('Error loading stock data:', error);
-            this.showNotification(error.message || 'Failed to load stock data', 'error');
-        } finally {
-            this.showLoading(false);
-        }
-    },
-    
-    async getTimeSeriesForPeriod(symbol, period) {
-        const periodMap = {
-            '1M': { interval: '1day', outputsize: 30 },
-            '3M': { interval: '1day', outputsize: 90 },
-            '6M': { interval: '1day', outputsize: 180 },
-            '1Y': { interval: '1day', outputsize: 252 },
-            '5Y': { interval: '1week', outputsize: 260 },
-            'MAX': { interval: '1month', outputsize: 300 }
-        };
-        
-        const config = periodMap[period] || periodMap['6M'];
-        return await this.apiClient.getTimeSeries(symbol, config.interval, config.outputsize);
-    },
-    
-    changePeriod(period) {
-        this.currentPeriod = period;
-        
-        document.querySelectorAll('.period-btn').forEach(btn => {
-            btn.classList.remove('active');
-            btn.setAttribute('aria-pressed', 'false');
-        });
-        
-        const activeBtn = document.querySelector(`[data-period="${period}"]`);
-        if (activeBtn) {
-            activeBtn.classList.add('active');
-            activeBtn.setAttribute('aria-pressed', 'true');
-        }
-        
-        if (this.currentSymbol) {
-            this.loadSymbol(this.currentSymbol);
-        }
-        
-        if (this.comparisonSymbols.length > 0) {
-            this.loadComparisonFromSymbols(this.comparisonSymbols);
-        }
-    },
-    
-    updateChart() {
-        if (this.stockData) {
-            this.createPriceChart();
-        }
-    },
-    
-    /**
-     * ✅ NOUVEAU : Toggle accordéon
-     */
-    toggleAccordion(headerElement) {
-        const content = headerElement.nextElementSibling;
-        const isActive = headerElement.classList.contains('active');
-        
-        // Fermer tous les autres accordéons
-        document.querySelectorAll('.accordion-header.active').forEach(h => {
-            h.classList.remove('active');
-            h.nextElementSibling.classList.remove('active');
-        });
-        
-        // Toggle l'accordéon actuel
-        if (!isActive) {
-            headerElement.classList.add('active');
-            content.classList.add('active');
-        }
-    },
-    
-    escapeHtml(text) {
-        if (!text) return '';
-        const div = document.createElement('div');
-        div.textContent = text;
-        return div.innerHTML;
-    }
-    
-};
-
-// ========== WATCHLIST FUNCTIONS (MODIFIÉ POUR CLOUD) ==========
-
-Object.assign(MarketData, {
-    
-    loadWatchlistFromStorage() {
-        const saved = localStorage.getItem('market_watchlist');
-        if (saved) {
-            try {
-                this.watchlist = JSON.parse(saved);
-                this.renderWatchlist();
-            } catch (error) {
-                console.error('Error loading watchlist:', error);
-                this.watchlist = [];
-            }
-        }
-    },
-    
-    saveWatchlistToStorage() {
-        try {
-            localStorage.setItem('market_watchlist', JSON.stringify(this.watchlist));
-        } catch (error) {
-            console.error('Error saving watchlist:', error);
-        }
-    },
-    
-    addCurrentToWatchlist() {
-        if (!this.currentSymbol) {
-            alert('Please search for a stock first');
-            return;
-        }
-        
-        if (this.watchlist.some(item => item.symbol === this.currentSymbol)) {
-            alert(`${this.currentSymbol} is already in your watchlist`);
-            return;
-        }
-        
-        const watchlistItem = {
-            symbol: this.currentSymbol,
-            name: this.stockData.quote.name || this.currentSymbol,
-            addedAt: Date.now()
-        };
-        
-        this.watchlist.push(watchlistItem);
-        
-        this.saveWatchlistToStorage();
-        this.autoSave();
-        
-        this.renderWatchlist();
-        this.refreshSingleWatchlistItem(this.currentSymbol);
-        this.updateAddToWatchlistButton();
-        
-        this.showNotification(`✅ ${this.currentSymbol} added to watchlist`, 'success');
-    },
-    
-    removeFromWatchlist(symbol) {
-        if (confirm(`Remove ${symbol} from watchlist?`)) {
-            this.watchlist = this.watchlist.filter(item => item.symbol !== symbol);
-            
-            this.saveWatchlistToStorage();
-            this.autoSave();
-            
-            this.renderWatchlist();
-            this.updateAddToWatchlistButton();
-            this.showNotification(`${symbol} removed from watchlist`, 'info');
-        }
-    },
-    
-    clearWatchlist() {
-        if (this.watchlist.length === 0) {
-            alert('Watchlist is already empty');
-            return;
-        }
-        
-        if (confirm(`Clear all ${this.watchlist.length} stocks from watchlist?`)) {
-            this.watchlist = [];
-            
-            this.saveWatchlistToStorage();
-            this.autoSave();
-            
-            this.renderWatchlist();
-            this.updateAddToWatchlistButton();
-            this.showNotification('Watchlist cleared', 'info');
-        }
-    },
-    
-    renderWatchlist() {
-        const container = document.getElementById('watchlistContainer');
-        if (!container) return;
-        
-        if (this.watchlist.length === 0) {
-            container.innerHTML = `
-                <div class='watchlist-empty'>
-                    <i class='fas fa-star-half-alt'></i>
-                    <p>Your watchlist is empty</p>
-                    <p class='hint'>Search for a stock and click "Add to Watchlist" to start tracking</p>
-                </div>
-            `;
-            return;
-        }
-        
-        container.innerHTML = this.watchlist.map(item => `
-            <div class='watchlist-card' id='watchlist-${item.symbol}' onclick='MarketData.loadSymbol("${item.symbol}")'>
-                <div class='watchlist-card-header'>
-                    <div>
-                        <div class='watchlist-symbol'>${this.escapeHtml(item.symbol)}</div>
-                        <div class='watchlist-name'>${this.escapeHtml(item.name)}</div>
-                    </div>
-                    <button class='watchlist-remove' onclick='event.stopPropagation(); MarketData.removeFromWatchlist("${item.symbol}")' aria-label='Remove ${item.symbol} from watchlist'>
-                        <i class='fas fa-times'></i>
-                    </button>
-                </div>
-                <div class='watchlist-price'>--</div>
-                <div class='watchlist-change'>
-                    <i class='fas fa-minus'></i>
-                    <span>--</span>
-                </div>
-                <div class='watchlist-stats'>
-                    <div class='watchlist-stat'>
-                        <span class='watchlist-stat-label'>Open</span>
-                        <span class='watchlist-stat-value'>--</span>
-                    </div>
-                    <div class='watchlist-stat'>
-                        <span class='watchlist-stat-label'>Volume</span>
-                        <span class='watchlist-stat-value'>--</span>
-                    </div>
-                </div>
-            </div>
-        `).join('');
-    },
-    
-    async refreshWatchlist() {
-        if (this.watchlist.length === 0) {
-            return;
-        }
-        
-        this.showNotification('Refreshing watchlist...', 'info');
-        
-        for (const item of this.watchlist) {
-            await this.refreshSingleWatchlistItem(item.symbol);
-        }
-        
-        this.updateLastUpdate();
-        this.checkAlerts();
-    },
-    
-    async refreshSingleWatchlistItem(symbol) {
-        const card = document.getElementById(`watchlist-${symbol}`);
-        if (!card) return;
-        
-        card.classList.add('watchlist-loading');
-        
-        try {
-            const quote = await this.apiClient.getQuote(symbol);
-            
-            const price = quote.price;
-            const change = quote.change;
-            const changePercent = quote.percentChange;
-            const open = quote.open;
-            const volume = quote.volume;
-            
-            card.querySelector('.watchlist-price').textContent = this.formatCurrency(price);
-            
-            const changeEl = card.querySelector('.watchlist-change');
-            const icon = change >= 0 ? 'fa-arrow-up' : 'fa-arrow-down';
-            const changeClass = change >= 0 ? 'positive' : 'negative';
-            changeEl.className = `watchlist-change ${changeClass}`;
-            changeEl.innerHTML = `
-                <i class='fas ${icon}'></i>
-                <span>${change >= 0 ? '+' : ''}${this.formatCurrency(change)} (${change >= 0 ? '+' : ''}${changePercent.toFixed(2)}%)</span>
-            `;
-            
-            const stats = card.querySelectorAll('.watchlist-stat-value');
-            stats[0].textContent = this.formatCurrency(open);
-            stats[1].textContent = this.formatVolume(volume);
-            
-            const watchlistItem = this.watchlist.find(w => w.symbol === symbol);
-            if (watchlistItem) {
-                watchlistItem.currentPrice = price;
-                watchlistItem.change = change;
-                watchlistItem.changePercent = changePercent;
-            }
-        } catch (error) {
-            console.error(`Error refreshing ${symbol}:`, error);
-        } finally {
-            card.classList.remove('watchlist-loading');
-        }
-    },
-    
-    startWatchlistAutoRefresh() {
-        this.watchlistRefreshInterval = setInterval(() => {
-            if (this.watchlist.length > 0) {
-                this.refreshWatchlist();
-            }
-        }, 3600000); // 1 heure
-    },
-    
-    updateAddToWatchlistButton() {
-        const btn = document.getElementById('btnAddCurrent');
-        if (!btn) return;
-        
-        if (this.currentSymbol && !this.watchlist.some(w => w.symbol === this.currentSymbol)) {
-            btn.disabled = false;
-            btn.innerHTML = `<i class='fas fa-plus'></i> Add ${this.currentSymbol} to Watchlist`;
-        } else if (this.currentSymbol) {
-            btn.disabled = true;
-            btn.innerHTML = `<i class='fas fa-check'></i> Already in Watchlist`;
-        } else {
-            btn.disabled = true;
-            btn.innerHTML = `<i class='fas fa-plus'></i> Add Current Stock`;
-        }
     }
     
 });
 
-// ========== ALERTS FUNCTIONS (MODIFIÉ POUR CLOUD) ==========
+// ========== ALERTS FUNCTIONS ==========
 
 Object.assign(MarketData, {
     
@@ -1336,7 +1221,7 @@ Object.assign(MarketData, {
     
 });
 
-// ========== COMPARISON FUNCTIONS (MODIFIÉ POUR CLOUD) ==========
+// ========== COMPARISON FUNCTIONS (OPTIMISÉ) ==========
 
 Object.assign(MarketData, {
     
@@ -1389,9 +1274,16 @@ Object.assign(MarketData, {
         
         this.showNotification(`Loading ${symbols.length} stocks for comparison...`, 'info');
         
-        const results = await Promise.allSettled(
-            symbols.map(symbol => this.fetchComparisonData(symbol))
-        );
+        const results = [];
+        for (const symbol of symbols) {
+            try {
+                await this.fetchComparisonData(symbol);
+                results.push({ status: 'fulfilled' });
+            } catch (error) {
+                console.error(`Failed to load ${symbol}:`, error);
+                results.push({ status: 'rejected' });
+            }
+        }
         
         const successCount = results.filter(r => r.status === 'fulfilled').length;
         
@@ -1412,9 +1304,16 @@ Object.assign(MarketData, {
         
         this.showNotification(`Loading comparison...`, 'info');
         
-        const results = await Promise.allSettled(
-            symbols.map(symbol => this.fetchComparisonData(symbol))
-        );
+        const results = [];
+        for (const symbol of symbols) {
+            try {
+                await this.fetchComparisonData(symbol);
+                results.push({ status: 'fulfilled' });
+            } catch (error) {
+                console.error(`Failed to load ${symbol}:`, error);
+                results.push({ status: 'rejected' });
+            }
+        }
         
         const successCount = results.filter(r => r.status === 'fulfilled').length;
         
@@ -1424,8 +1323,8 @@ Object.assign(MarketData, {
     },
     
     async fetchComparisonData(symbol) {
-        const timeSeries = await this.getTimeSeriesForPeriod(symbol, this.currentPeriod);
-        const quote = await this.apiClient.getQuote(symbol);
+        const timeSeries = await this.apiRequest(() => this.getTimeSeriesForPeriod(symbol, this.currentPeriod), 'normal');
+        const quote = await this.apiRequest(() => this.apiClient.getQuote(symbol), 'normal');
         
         this.comparisonData[symbol] = {
             prices: timeSeries.data,
@@ -1540,6 +1439,381 @@ Object.assign(MarketData, {
     
 });
 
+// ========== PORTFOLIO MANAGEMENT (CLOUD) ==========
+
+Object.assign(MarketData, {
+    
+    async loadCurrentPortfolio() {
+        console.log('📥 Loading current portfolio...');
+        
+        const currentPortfolioName = window.PortfolioManager 
+            ? window.PortfolioManager.getCurrentPortfolio() 
+            : 'default';
+        
+        let loadedFromCloud = false;
+        
+        if (window.PortfolioManager) {
+            const portfolioData = await window.PortfolioManager.loadFromCloud(currentPortfolioName);
+            
+            if (portfolioData) {
+                console.log('✅ Loaded portfolio from cloud');
+                this.loadPortfolioData(portfolioData);
+                loadedFromCloud = true;
+            }
+        }
+        
+        if (!loadedFromCloud) {
+            console.log('⚠️ Loading from localStorage (fallback)');
+            this.loadWatchlistFromStorage();
+            this.loadAlertsFromStorage();
+        }
+        
+        if (this.watchlist.length > 0) {
+            this.renderWatchlist();
+            this.refreshWatchlist();
+        }
+        
+        if (this.alerts.length > 0) {
+            this.renderAlerts();
+        }
+    },
+    
+    loadPortfolioData(portfolioData) {
+        if (!portfolioData) return;
+        
+        console.log('📥 Loading portfolio data...');
+        
+        this.watchlist = portfolioData.watchlist || [];
+        this.alerts = portfolioData.alerts || [];
+        this.comparisonSymbols = portfolioData.comparisonSymbols || [];
+        
+        this.renderWatchlist();
+        this.renderAlerts();
+        
+        if (this.comparisonSymbols.length >= 2) {
+            this.loadComparisonFromSymbols(this.comparisonSymbols);
+        }
+        
+        this.showNotification('Portfolio loaded successfully!', 'success');
+    },
+    
+    getCurrentPortfolioData() {
+        return {
+            watchlist: this.watchlist,
+            alerts: this.alerts,
+            comparisonSymbols: this.comparisonSymbols,
+            timestamp: Date.now()
+        };
+    },
+    
+    async saveCurrentPortfolio() {
+        const portfolioData = this.getCurrentPortfolioData();
+        
+        const currentPortfolioName = window.PortfolioManager 
+            ? window.PortfolioManager.getCurrentPortfolio() 
+            : 'default';
+        
+        if (window.PortfolioManager) {
+            const success = await window.PortfolioManager.saveToCloud(currentPortfolioName, portfolioData);
+            
+            if (!success) {
+                this.saveWatchlistToStorage();
+                this.saveAlertsToStorage();
+                this.showNotification('Saved locally (cloud save failed)', 'warning');
+            }
+        } else {
+            this.saveWatchlistToStorage();
+            this.saveAlertsToStorage();
+            this.showNotification('Portfolio saved locally!', 'success');
+        }
+    },
+    
+    autoSave: (() => {
+        let timeout;
+        return function() {
+            clearTimeout(timeout);
+            timeout = setTimeout(async () => {
+                await MarketData.saveCurrentPortfolio();
+            }, 2000);
+        };
+    })(),
+    
+    exportPortfolioJSON() {
+        const portfolioData = this.getCurrentPortfolioData();
+        
+        const exportData = {
+            portfolioName: window.PortfolioManager 
+                ? window.PortfolioManager.getCurrentPortfolio() 
+                : 'default',
+            exportDate: new Date().toISOString(),
+            data: portfolioData
+        };
+        
+        const json = JSON.stringify(exportData, null, 2);
+        const blob = new Blob([json], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `market_portfolio_${exportData.portfolioName}_${new Date().toISOString().split('T')[0]}.json`;
+        a.click();
+        URL.revokeObjectURL(url);
+        
+        this.showNotification('Portfolio exported successfully!', 'success');
+    },
+    
+    importPortfolioJSON() {
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.accept = 'application/json';
+        input.onchange = async (e) => {
+            const file = e.target.files[0];
+            const reader = new FileReader();
+            reader.onload = async (event) => {
+                try {
+                    const imported = JSON.parse(event.target.result);
+                    
+                    let portfolioData;
+                    if (imported.data) {
+                        portfolioData = imported.data;
+                    } else {
+                        portfolioData = imported;
+                    }
+                    
+                    this.loadPortfolioData(portfolioData);
+                    await this.saveCurrentPortfolio();
+                    
+                    this.showNotification('Portfolio imported successfully!', 'success');
+                    
+                } catch (err) {
+                    console.error('Import error:', err);
+                    this.showNotification('Import error: ' + err.message, 'error');
+                }
+            };
+            reader.readAsText(file);
+        };
+        input.click();
+    },
+    
+    async refreshPortfoliosList() {
+        console.log('🔄 Refreshing portfolios list...');
+        
+        const container = document.getElementById('portfoliosListContainer');
+        if (!container) {
+            console.error('❌ portfoliosListContainer not found');
+            return;
+        }
+        
+        container.innerHTML = `
+            <div class="loading-simulations">
+                <i class="fas fa-spinner fa-spin"></i> Loading portfolios...
+            </div>
+        `;
+        
+        try {
+            const portfolios = await PortfolioManager.listPortfolios();
+            const currentPortfolio = PortfolioManager.getCurrentPortfolio();
+            
+            console.log('📋 Portfolios loaded:', portfolios.length);
+            
+            if (portfolios.length === 0) {
+                container.innerHTML = `
+                    <div class="no-portfolios">
+                        <i class="fas fa-folder-open"></i>
+                        <p>No portfolios found</p>
+                        <p class="hint">Click "New Portfolio" to create one</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            const portfoliosList = portfolios.map(portfolio => {
+                const isActive = portfolio.name === currentPortfolio;
+                const createdDate = portfolio.createdAt 
+                    ? (typeof portfolio.createdAt === 'string' 
+                        ? new Date(portfolio.createdAt).toLocaleDateString('fr-FR', {
+                            year: 'numeric',
+                            month: 'short',
+                            day: 'numeric'
+                        })
+                        : portfolio.createdAt.toDate 
+                            ? portfolio.createdAt.toDate().toLocaleDateString('fr-FR', {
+                                year: 'numeric',
+                                month: 'short',
+                                day: 'numeric'
+                            })
+                            : 'N/A')
+                    : 'N/A';
+                
+                return `
+                    <div class="simulation-item ${isActive ? 'active' : ''}" data-portfolio="${portfolio.name}">
+                        <div class="simulation-info">
+                            <div class="simulation-name">
+                                <i class="fas fa-folder"></i>
+                                ${this.escapeHtml(portfolio.name)}
+                                ${isActive ? '<span class="badge-current">ACTIVE</span>' : ''}
+                                ${portfolio.name === 'default' ? '<span class="badge-default">DEFAULT</span>' : ''}
+                            </div>
+                            <div class="simulation-meta">
+                                <span class="creation-date">
+                                    <i class="far fa-calendar"></i>
+                                    Created: ${createdDate}
+                                </span>
+                                <span>
+                                    <i class="fas fa-star"></i>
+                                    ${portfolio.watchlist?.length || 0} stocks
+                                </span>
+                                <span>
+                                    <i class="fas fa-bell"></i>
+                                    ${portfolio.alerts?.length || 0} alerts
+                                </span>
+                            </div>
+                        </div>
+                        <div class="simulation-actions">
+                            ${!isActive ? `
+                                <button class="btn-sm btn-primary" onclick="MarketData.loadPortfolioFromModal('${portfolio.name}')">
+                                    <i class="fas fa-folder-open"></i> Load
+                                </button>
+                            ` : `
+                                <button class="btn-sm btn-success" disabled>
+                                    <i class="fas fa-check"></i> Active
+                                </button>
+                            `}
+                            ${portfolio.name !== 'default' ? `
+                                <button class="btn-sm btn-secondary" onclick="MarketData.renamePortfolio('${portfolio.name}')">
+                                    <i class="fas fa-edit"></i> Rename
+                                </button>
+                                <button class="btn-sm btn-danger" onclick="MarketData.deletePortfolioFromModal('${portfolio.name}')">
+                                    <i class="fas fa-trash"></i> Delete
+                                </button>
+                            ` : ''}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+            
+            container.innerHTML = `
+                <div class="simulations-list">
+                    ${portfoliosList}
+                </div>
+            `;
+            
+            console.log('✅ Portfolios list displayed');
+            
+        } catch (error) {
+            console.error('❌ Error loading portfolios:', error);
+            container.innerHTML = `
+                <div class="no-portfolios">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <p>Error loading portfolios</p>
+                    <p class="hint">${this.escapeHtml(error.message)}</p>
+                </div>
+            `;
+        }
+    },
+    
+    async loadPortfolioFromModal(portfolioName) {
+        console.log(`📂 Loading portfolio "${portfolioName}" from modal...`);
+        
+        try {
+            await PortfolioManager.switchPortfolio(portfolioName);
+            await this.loadCurrentPortfolio();
+            await this.refreshPortfoliosList();
+            
+            this.showNotification(`Portfolio "${portfolioName}" loaded!`, 'success');
+            
+        } catch (error) {
+            console.error('❌ Error loading portfolio:', error);
+            this.showNotification('Error loading portfolio: ' + error.message, 'error');
+        }
+    },
+    
+    async deletePortfolioFromModal(portfolioName) {
+        if (!confirm(`Are you sure you want to delete portfolio "${portfolioName}"?`)) {
+            return;
+        }
+        
+        console.log(`🗑️ Deleting portfolio "${portfolioName}"...`);
+        
+        try {
+            await PortfolioManager.deletePortfolio(portfolioName);
+            await this.refreshPortfoliosList();
+            
+            this.showNotification(`Portfolio "${portfolioName}" deleted`, 'success');
+            
+        } catch (error) {
+            console.error('❌ Error deleting portfolio:', error);
+            this.showNotification('Error deleting portfolio: ' + error.message, 'error');
+        }
+    },
+    
+    async renamePortfolio(oldName) {
+        const newName = prompt(`Rename portfolio "${oldName}" to:`, oldName);
+        
+        if (!newName || newName.trim() === '' || newName === oldName) {
+            return;
+        }
+        
+        console.log(`✏️ Renaming portfolio "${oldName}" to "${newName}"...`);
+        
+        try {
+            const data = await PortfolioManager.loadFromCloud(oldName);
+            data.name = newName;
+            await PortfolioManager.saveToCloud(newName, data);
+            await PortfolioManager.deletePortfolio(oldName);
+            
+            if (PortfolioManager.getCurrentPortfolio() === oldName) {
+                await PortfolioManager.switchPortfolio(newName);
+            }
+            
+            await this.refreshPortfoliosList();
+            
+            this.showNotification(`Portfolio renamed to "${newName}"`, 'success');
+            
+        } catch (error) {
+            console.error('❌ Error renaming portfolio:', error);
+            this.showNotification('Error renaming portfolio: ' + error.message, 'error');
+        }
+    },
+    
+    async openPortfoliosModal() {
+        console.log('📂 Opening portfolios modal...');
+        
+        const modal = document.getElementById('portfoliosModal');
+        if (modal) {
+            modal.classList.add('active');
+            await this.refreshPortfoliosList();
+        } else {
+            console.error('❌ portfoliosModal not found');
+        }
+    }
+    
+});
+
+// ========== EVENT LISTENERS ==========
+
+Object.assign(MarketData, {
+    
+    setupEventListeners() {
+        const input = document.getElementById('symbolInput');
+        if (input) {
+            input.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    this.searchStock();
+                }
+            });
+        }
+        
+        const updateChart = () => this.updateChart();
+        
+        document.getElementById('toggleSMA')?.addEventListener('change', updateChart);
+        document.getElementById('toggleEMA')?.addEventListener('change', updateChart);
+        document.getElementById('toggleBB')?.addEventListener('change', updateChart);
+        document.getElementById('toggleVolume')?.addEventListener('change', updateChart);
+    }
+    
+});
+
 // ========== DISPLAY STOCK OVERVIEW ==========
 
 Object.assign(MarketData, {
@@ -1604,7 +1878,6 @@ Object.assign(MarketData, {
             <div class='card-body'>
         `;
         
-        // ACCORDÉON 1 : Company Information
         if (this.profileData || this.logoUrl) {
             html += `
                 <div class='company-accordion'>
@@ -1678,7 +1951,6 @@ Object.assign(MarketData, {
             `;
         }
         
-        // ACCORDÉON 2 : Fundamental Statistics
         if (this.statisticsData) {
             html += `
                 <div class='company-accordion'>
@@ -2333,7 +2605,13 @@ Object.assign(MarketData, {
         if (tableContainer) {
             tableContainer.innerHTML = tableHTML;
         }
-    },
+    }
+    
+});
+
+// ========== TECHNICAL INDICATORS CALCULATIONS ==========
+
+Object.assign(MarketData, {
     
     calculateRSIArray(prices, period = 14) {
         const rsiData = [];
@@ -2711,4 +2989,4 @@ document.addEventListener('DOMContentLoaded', () => {
 // ========== EXPOSITION GLOBALE ==========
 window.MarketData = MarketData;
 
-console.log('✅ Market Data script loaded - Cloud version CORRECTED');
+console.log('✅ Market Data script loaded - OPTIMIZED with Rate Limiting & Cache - COMPLETE VERSION');

@@ -227,6 +227,11 @@
                             <i class='fas fa-clock' aria-hidden='true'></i>
                             <span id='lastUpdate'>Loading...</span>
                         </span>
+                        <!-- ✅ NOUVEAU : Bouton de contrôle du cache -->
+                        <button class='btn-icon-header' onclick='toggleCacheWidget()' aria-label='Toggle cache widget' title='View cache statistics'>
+                            <i class='fas fa-database' aria-hidden='true'></i>
+                            <span class='cache-badge-mini' id='cacheBadgeMini'>0</span>
+                        </button>
                     </div>
                 </div>
             </header>
@@ -237,7 +242,7 @@
                 <div class='content'>
                     
                     <!-- ============================================
-                         📁 PORTFOLIO MANAGEMENT SECTION
+                         📁 PORTFOLIO MANAGEMENT SECTION (MODIFIÉ)
                          ============================================ -->
                     <section class='card portfolio-management-section' aria-labelledby='portfolio-title'>
                         <div class='card-header'>
@@ -255,7 +260,9 @@
                                     <span class='value' id='currentPortfolioName'>default</span>
                                 </div>
                                 
+                                <!-- ✅ MODIFIÉ : Ajout des boutons de gestion du cache -->
                                 <div class='toolbar-row' style='justify-content: center; gap: 10px; flex-wrap: wrap; margin-top: 15px;'>
+                                    <!-- Boutons Portfolio -->
                                     <button class='btn btn-success' onclick='PortfolioManager.createNewPortfolio()'>
                                         <i class='fas fa-plus-circle'></i> New Portfolio
                                     </button>
@@ -271,16 +278,30 @@
                                     <button class='btn btn-secondary' onclick='MarketData.importPortfolioJSON()'>
                                         <i class='fas fa-file-import'></i> Import JSON
                                     </button>
+                                    
+                                    <!-- ✅ NOUVEAU : Séparateur visuel -->
+                                    <div style='width: 100%; height: 1px; background: rgba(255,255,255,0.2); margin: 5px 0;'></div>
+                                    
+                                    <!-- ✅ NOUVEAU : Boutons de gestion du cache -->
+                                    <button class='btn btn-warning' onclick='clearLocalCache()' title='Clear local cache (keeps cloud data)'>
+                                        <i class='fas fa-broom'></i> Clear Local Cache
+                                    </button>
+                                    <button class='btn btn-info' onclick='viewCacheStats()' title='View detailed cache statistics'>
+                                        <i class='fas fa-chart-pie'></i> Cache Stats
+                                    </button>
                                 </div>
                             </div>
                             
                             <div class='info-box info-box-white-text' style='margin-top: 1rem;'>
                                 <h4><i class='fas fa-info-circle'></i> How it works</h4>
                                 <p>Create multiple portfolios to organize your watchlists, alerts, and stock comparisons. All portfolios are automatically saved to the cloud and accessible from any device.</p>
+                                <p style='margin-top: 0.5rem; font-size: 0.9em; opacity: 0.9;'>
+                                    <i class='fas fa-database'></i> <strong>Cache System:</strong> Data is cached locally to reduce API calls. Rate limit: 8 requests/minute.
+                                </p>
                             </div>
                         </div>
                     </section>
-                    
+
                     <!-- ============================================
                          🔍 SEARCH PANEL
                          ============================================ -->
@@ -570,7 +591,7 @@
                 <!-- Footer -->
                 <footer role='contentinfo'>
                     <p>&copy; 2024 Market Data Dashboard | Real-time financial data and technical analysis</p>
-                    <p class='data-source'>Data provided by Twelve Data</p>
+                    <p class='data-source'>Data provided by Twelve Data | Rate Limit: 8 requests/minute</p>
                 </footer>
             </div>
         </main>
@@ -750,12 +771,81 @@
             </div>
         </div>
     </div>
-    
-    <!-- ============================================
-         CACHE MONITORING WIDGET
+
+<!-- ============================================
+         🗄️ CACHE MONITORING WIDGET (NOUVEAU & COMPLET)
          ============================================ -->
     <div id='cacheWidget' class='cache-widget'>
-        <button class='cache-toggle-btn' onclick='toggleCachePanel()' aria-label='Toggle cache statistics panel'>
+        <div class='cache-widget-header'>
+            <h3><i class='fas fa-database'></i> Cache & Rate Limit Monitor</h3>
+            <button class='cache-close-btn' onclick='toggleCacheWidget()' aria-label='Close cache widget'>
+                <i class='fas fa-times'></i>
+            </button>
+        </div>
+        
+        <div class='cache-widget-body'>
+            <!-- Rate Limit Section -->
+            <div class='cache-section'>
+                <h4><i class='fas fa-tachometer-alt'></i> API Rate Limit</h4>
+                <div class='cache-stat-row'>
+                    <span class='cache-stat-label'>Remaining Requests:</span>
+                    <span class='cache-stat-value' id='rateLimitRemaining'>8</span>
+                    <span class='cache-stat-unit'>/ 8 per minute</span>
+                </div>
+                <div class='cache-progress-bar'>
+                    <div class='cache-progress-fill' id='rateLimitProgress' style='width: 100%;'></div>
+                </div>
+                <div class='cache-stat-row'>
+                    <span class='cache-stat-label'>Queue Length:</span>
+                    <span class='cache-stat-value' id='queueLength'>0</span>
+                    <span class='cache-stat-unit'>pending requests</span>
+                </div>
+            </div>
+            
+            <!-- Cache Statistics -->
+            <div class='cache-section'>
+                <h4><i class='fas fa-hdd'></i> Local Cache Statistics</h4>
+                <div class='cache-stat-row'>
+                    <span class='cache-stat-label'>Cached Entries:</span>
+                    <span class='cache-stat-value' id='cacheEntriesCount'>0</span>
+                </div>
+                <div class='cache-stat-row'>
+                    <span class='cache-stat-label'>Cache Size:</span>
+                    <span class='cache-stat-value' id='cacheSize'>0 KB</span>
+                </div>
+                <div class='cache-stat-row'>
+                    <span class='cache-stat-label'>Hit Rate:</span>
+                    <span class='cache-stat-value' id='cacheHitRate'>N/A</span>
+                </div>
+            </div>
+            
+            <!-- Actions -->
+            <div class='cache-section'>
+                <h4><i class='fas fa-wrench'></i> Actions</h4>
+                <div class='cache-actions'>
+                    <button class='btn-cache btn-cache-refresh' onclick='refreshCacheStats()'>
+                        <i class='fas fa-sync-alt'></i> Refresh Stats
+                    </button>
+                    <button class='btn-cache btn-cache-clear' onclick='clearLocalCache()'>
+                        <i class='fas fa-broom'></i> Clear Cache
+                    </button>
+                    <button class='btn-cache btn-cache-export' onclick='exportCacheData()'>
+                        <i class='fas fa-download'></i> Export Data
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Recent Activity -->
+            <div class='cache-section'>
+                <h4><i class='fas fa-history'></i> Recent API Calls</h4>
+                <div class='cache-activity' id='cacheActivity'>
+                    <p class='cache-empty-state'>No recent activity</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Toggle Button (quand widget fermé) -->
+        <button class='cache-toggle-btn' onclick='toggleCacheWidget()' aria-label='Toggle cache statistics panel'>
             <i class='fas fa-database' aria-hidden='true'></i>
             <span class='cache-badge' id='cacheBadge' aria-label='Number of cached entries'>0</span>
         </button>
@@ -799,11 +889,343 @@
         [data-theme="dark"] .simulation-management i {
             color: white !important;
         }
+        
+        /* Badge cache mini dans header */
+        .cache-badge-mini {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background: var(--danger-color);
+            color: white;
+            font-size: 0.625rem;
+            font-weight: 600;
+            padding: 2px 5px;
+            border-radius: 10px;
+            min-width: 18px;
+            text-align: center;
+        }
+        
+        .btn-icon-header {
+            position: relative;
+            background: var(--background-secondary);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            width: 40px;
+            height: 40px;
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            transition: all var(--transition-base);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .btn-icon-header:hover {
+            background: var(--primary-color);
+            color: white;
+            transform: translateY(-2px);
+        }
+        
+        /* Boutons warning et info dans toolbar */
+        .btn-warning {
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            color: white !important;
+            border: none;
+        }
+        
+        .btn-warning:hover {
+            background: linear-gradient(135deg, #d97706 0%, #b45309 100%);
+        }
+        
+        .btn-info {
+            background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%);
+            color: white !important;
+            border: none;
+        }
+        
+        .btn-info:hover {
+            background: linear-gradient(135deg, #0891b2 0%, #0e7490 100%);
+        }
     </style>
 
     <!-- ============================================
-         SCRIPTS - ORDRE IMPORTANT
+         📜 SCRIPTS - ORDRE IMPORTANT
          ============================================ -->
+    
+    <!-- ✅ NOUVEAU : Cache Widget Script -->
+    <script>
+        /**
+         * 🗄️ Cache Widget Management
+         */
+        let cacheWidgetOpen = false;
+        let cacheStats = {
+            hits: 0,
+            misses: 0,
+            entries: 0,
+            size: 0
+        };
+        
+        /**
+         * Toggle cache widget
+         */
+        function toggleCacheWidget() {
+            const widget = document.getElementById('cacheWidget');
+            if (!widget) return;
+            
+            cacheWidgetOpen = !cacheWidgetOpen;
+            
+            if (cacheWidgetOpen) {
+                widget.classList.add('active');
+                refreshCacheStats();
+            } else {
+                widget.classList.remove('active');
+            }
+        }
+        
+        /**
+         * Refresh cache statistics
+         */
+        function refreshCacheStats() {
+            console.log('🔄 Refreshing cache stats...');
+            
+            // Compter les entrées en cache
+            let entries = 0;
+            let totalSize = 0;
+            
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                if (key && key.startsWith('md_cache_')) {
+                    entries++;
+                    const value = localStorage.getItem(key);
+                    if (value) {
+                        totalSize += value.length;
+                    }
+                }
+            }
+            
+            cacheStats.entries = entries;
+            cacheStats.size = totalSize;
+            
+            // Mettre à jour l'affichage
+            const entriesEl = document.getElementById('cacheEntriesCount');
+            const sizeEl = document.getElementById('cacheSize');
+            const hitRateEl = document.getElementById('cacheHitRate');
+            const badgeEl = document.getElementById('cacheBadge');
+            const badgeMiniEl = document.getElementById('cacheBadgeMini');
+            
+            if (entriesEl) entriesEl.textContent = entries;
+            if (sizeEl) sizeEl.textContent = (totalSize / 1024).toFixed(2) + ' KB';
+            if (badgeEl) badgeEl.textContent = entries;
+            if (badgeMiniEl) badgeMiniEl.textContent = entries;
+            
+            // Calculer le hit rate
+            const total = cacheStats.hits + cacheStats.misses;
+            if (total > 0 && hitRateEl) {
+                const hitRate = (cacheStats.hits / total * 100).toFixed(1);
+                hitRateEl.textContent = hitRate + '%';
+            }
+            
+            console.log('✅ Cache stats refreshed:', cacheStats);
+        }
+        
+        /**
+         * Clear local cache
+         */
+        function clearLocalCache() {
+            if (!confirm('Are you sure you want to clear the local cache? This will remove all cached stock data.')) {
+                return;
+            }
+            
+            console.log('🗑️ Clearing local cache...');
+            
+            let cleared = 0;
+            const keys = [];
+            
+            // Collecter les clés à supprimer
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                if (key && key.startsWith('md_cache_')) {
+                    keys.push(key);
+                }
+            }
+            
+            // Supprimer les entrées
+            keys.forEach(key => {
+                localStorage.removeItem(key);
+                cleared++;
+            });
+            
+            // Réinitialiser les stats
+            cacheStats.hits = 0;
+            cacheStats.misses = 0;
+            
+            console.log(`✅ Cleared ${cleared} cache entries`);
+            
+            refreshCacheStats();
+            
+            if (window.MarketData && window.MarketData.showNotification) {
+                window.MarketData.showNotification(`Cache cleared: ${cleared} entries removed`, 'success');
+            } else {
+                alert(`Cache cleared: ${cleared} entries removed`);
+            }
+        }
+        
+        /**
+         * View detailed cache statistics
+         */
+        function viewCacheStats() {
+            refreshCacheStats();
+            toggleCacheWidget();
+        }
+        
+        /**
+         * Export cache data
+         */
+        function exportCacheData() {
+            console.log('📤 Exporting cache data...');
+            
+            const cacheData = {};
+            
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                if (key && key.startsWith('md_cache_')) {
+                    try {
+                        const value = localStorage.getItem(key);
+                        cacheData[key] = JSON.parse(value);
+                    } catch (e) {
+                        cacheData[key] = localStorage.getItem(key);
+                    }
+                }
+            }
+            
+            const exportObj = {
+                exportDate: new Date().toISOString(),
+                stats: cacheStats,
+                data: cacheData
+            };
+            
+            const json = JSON.stringify(exportObj, null, 2);
+            const blob = new Blob([json], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `cache_export_${new Date().toISOString().split('T')[0]}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+            
+            console.log('✅ Cache data exported');
+            
+            if (window.MarketData && window.MarketData.showNotification) {
+                window.MarketData.showNotification('Cache data exported successfully!', 'success');
+            }
+        }
+        
+        /**
+         * Auto-refresh cache stats every 5 seconds
+         */
+        setInterval(() => {
+            if (cacheWidgetOpen) {
+                refreshCacheStats();
+            } else {
+                // Juste mettre à jour le badge
+                let entries = 0;
+                for (let i = 0; i < localStorage.length; i++) {
+                    const key = localStorage.key(i);
+                    if (key && key.startsWith('md_cache_')) {
+                        entries++;
+                    }
+                }
+                const badgeEl = document.getElementById('cacheBadge');
+                const badgeMiniEl = document.getElementById('cacheBadgeMini');
+                if (badgeEl) badgeEl.textContent = entries;
+                if (badgeMiniEl) badgeMiniEl.textContent = entries;
+            }
+        }, 5000);
+        
+        /**
+         * Exposer l'objet cacheWidget globalement
+         */
+        window.cacheWidget = {
+            updateRateLimitStatus: function(remaining, max) {
+                const remainingEl = document.getElementById('rateLimitRemaining');
+                const progressEl = document.getElementById('rateLimitProgress');
+                
+                if (remainingEl) {
+                    remainingEl.textContent = remaining;
+                }
+                
+                if (progressEl) {
+                    const percentage = (remaining / max) * 100;
+                    progressEl.style.width = percentage + '%';
+                    
+                    // Couleur selon le pourcentage
+                    if (percentage > 50) {
+                        progressEl.style.background = 'linear-gradient(90deg, #10b981, #059669)';
+                    } else if (percentage > 25) {
+                        progressEl.style.background = 'linear-gradient(90deg, #f59e0b, #d97706)';
+                    } else {
+                        progressEl.style.background = 'linear-gradient(90deg, #ef4444, #dc2626)';
+                    }
+                }
+            },
+            
+            updateQueueStatus: function(length, waitTime) {
+                const queueEl = document.getElementById('queueLength');
+                
+                if (queueEl) {
+                    queueEl.textContent = length;
+                    
+                    if (length > 0) {
+                        queueEl.style.color = '#ef4444';
+                        queueEl.style.fontWeight = '700';
+                    } else {
+                        queueEl.style.color = '';
+                        queueEl.style.fontWeight = '';
+                    }
+                }
+            },
+            
+            logActivity: function(type, symbol, fromCache) {
+                const activityEl = document.getElementById('cacheActivity');
+                if (!activityEl) return;
+                
+                const now = new Date().toLocaleTimeString('fr-FR');
+                const icon = fromCache ? '💾' : '🌐';
+                const source = fromCache ? 'Cache' : 'API';
+                
+                const entry = document.createElement('div');
+                entry.className = 'cache-activity-entry';
+                entry.innerHTML = `
+                    <span class='cache-activity-time'>${now}</span>
+                    <span class='cache-activity-icon'>${icon}</span>
+                    <span class='cache-activity-text'>${type} ${symbol} from ${source}</span>
+                `;
+                
+                // Insérer en premier
+                if (activityEl.firstChild && activityEl.firstChild.classList.contains('cache-empty-state')) {
+                    activityEl.innerHTML = '';
+                }
+                activityEl.insertBefore(entry, activityEl.firstChild);
+                
+                // Garder seulement les 10 dernières
+                while (activityEl.children.length > 10) {
+                    activityEl.removeChild(activityEl.lastChild);
+                }
+                
+                // Mettre à jour les stats
+                if (fromCache) {
+                    cacheStats.hits++;
+                } else {
+                    cacheStats.misses++;
+                }
+            }
+        };
+        
+        // Initialiser au chargement
+        document.addEventListener('DOMContentLoaded', () => {
+            refreshCacheStats();
+        });
+    </script>
     
     <!-- Portfolio Modal Management Script -->
     <script>
@@ -821,19 +1243,19 @@
                 return;
             }
             
-            // Afficher le modal
             modal.classList.add('active');
             
-            // Réinitialiser le container avec un loader
             container.innerHTML = `
                 <div class='loading-simulations'>
                     <i class='fas fa-spinner fa-spin'></i> Loading portfolios...
                 </div>
             `;
             
-            // Charger les portfolios
             try {
-                if (typeof PortfolioManager !== 'undefined') {
+                if (typeof MarketData !== 'undefined' && MarketData.refreshPortfoliosList) {
+                    await MarketData.refreshPortfoliosList();
+                    console.log('✅ Portfolios loaded successfully');
+                } else if (typeof PortfolioManager !== 'undefined') {
                     await PortfolioManager.fetchPortfoliosList();
                     console.log('✅ Portfolios loaded successfully');
                 } else {
@@ -930,7 +1352,7 @@
     <!-- Portfolio Manager (DOIT être chargé AVANT market-data.js) -->
     <script src='assets/js/portfolio-manager.js'></script>
     
-    <!-- Market Data Script -->
+    <!-- Market Data Script (VERSION OPTIMISÉE AVEC RATE LIMITING) -->
     <script src='assets/js/market-data.js'></script>
     
     <!-- ============================================
@@ -939,12 +1361,10 @@
     <script>
         /**
          * Force l'initialisation du menu utilisateur
-         * (car il semble que sidebar.js ne l'initialise pas correctement sur cette page)
          */
         (function forceUserMenuInit() {
             console.log('🔧 Force initializing user menu...');
             
-            // Attendre que tout soit chargé
             const initMenu = () => {
                 const trigger = document.getElementById('sidebarUserTrigger');
                 const dropdown = document.getElementById('sidebarUserDropdown');
@@ -954,24 +1374,21 @@
                     return;
                 }
                 
-                // Supprimer tous les anciens event listeners (si existants)
+                // Supprimer tous les anciens event listeners
                 const newTrigger = trigger.cloneNode(true);
                 trigger.parentNode.replaceChild(newTrigger, trigger);
                 
-                // Récupérer les nouvelles références
                 const freshTrigger = document.getElementById('sidebarUserTrigger');
                 const freshDropdown = document.getElementById('sidebarUserDropdown');
                 
                 console.log('✅ Adding click event to trigger...');
                 
-                // Ajouter l'événement de clic
                 freshTrigger.addEventListener('click', function(e) {
                     e.preventDefault();
                     e.stopPropagation();
                     
                     console.log('👆 User menu trigger clicked!');
                     
-                    // Toggle le dropdown
                     const isActive = freshDropdown.classList.contains('active');
                     
                     if (isActive) {
@@ -982,7 +1399,6 @@
                         console.log('🔼 Opening dropdown');
                     }
                     
-                    // Animer la flèche
                     const arrow = freshTrigger.querySelector('.sidebar-user-arrow');
                     if (arrow) {
                         arrow.style.transform = isActive ? 'rotate(0deg)' : 'rotate(180deg)';
@@ -1009,11 +1425,9 @@
                 console.log('✅ User menu initialized successfully!');
             };
             
-            // Exécuter immédiatement si le DOM est prêt
             if (document.readyState === 'loading') {
                 document.addEventListener('DOMContentLoaded', initMenu);
             } else {
-                // DOM déjà prêt, exécuter avec un petit délai pour être sûr
                 setTimeout(initMenu, 100);
             }
         })();
