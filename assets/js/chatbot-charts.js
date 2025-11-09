@@ -25,7 +25,7 @@ class ChatbotCharts {
     configureChartDefaults() {
         Chart.defaults.color = this.config.charts.colors.text;
         Chart.defaults.borderColor = this.config.charts.colors.grid;
-        Chart.defaults.font.family = this.config.ui.fontFamily || "'Inter', sans-serif";
+        Chart.defaults.font.family = "'Inter', sans-serif";
         Chart.defaults.animation.duration = this.config.charts.animation.duration;
         Chart.defaults.animation.easing = this.config.charts.animation.easing;
     }
@@ -45,8 +45,11 @@ class ChatbotCharts {
             // Generate unique ID
             const chartId = `chart-${++this.chartCounter}`;
             
+            // ✅ CONVERTIR CANDLESTICK EN LINE (Chart.js standard)
+            const displayType = type === 'candlestick' ? 'line' : type;
+            
             // Create chart container HTML
-            const chartHTML = this.createChartHTML(chartId, symbol, type);
+            const chartHTML = this.createChartHTML(chartId, symbol, displayType);
             container.innerHTML = chartHTML;
             
             // Get canvas element
@@ -57,25 +60,23 @@ class ChatbotCharts {
 
             // Fetch data based on chart type
             let chartData;
-            switch (type) {
-                case 'candlestick':
-                    chartData = await this.fetchCandlestickData(symbol, data);
-                    break;
-                case 'line':
-                    chartData = await this.fetchLineData(symbol, data);
-                    break;
-                case 'bar':
-                    chartData = await this.fetchBarData(symbol, data);
-                    break;
-                case 'area':
-                    chartData = await this.fetchAreaData(symbol, data);
-                    break;
-                default:
-                    chartData = await this.fetchLineData(symbol, data);
+            if (type === 'candlestick') {
+                // ✅ Pour candlestick, utiliser line avec min/max
+                chartData = await this.fetchCandlestickData(symbol, data);
+                // Convertir en données line
+                chartData = this.convertCandlestickToLine(chartData);
+            } else if (type === 'line') {
+                chartData = await this.fetchLineData(symbol, data);
+            } else if (type === 'bar') {
+                chartData = await this.fetchBarData(symbol, data);
+            } else if (type === 'area') {
+                chartData = await this.fetchAreaData(symbol, data);
+            } else {
+                chartData = await this.fetchLineData(symbol, data);
             }
 
             // Create chart
-            const chart = this.renderChart(canvas, type, chartData, indicators);
+            const chart = this.renderChart(canvas, displayType, chartData, indicators);
             
             // Store chart reference
             this.activeCharts.set(chartId, chart);
@@ -104,9 +105,6 @@ class ChatbotCharts {
                         <button class="chart-btn" data-action="export" data-chart="${chartId}">
                             📥 Export
                         </button>
-                        <button class="chart-btn" data-action="fullscreen" data-chart="${chartId}">
-                            ⛶ Fullscreen
-                        </button>
                     </div>
                 </div>
                 <div class="chart-canvas-wrapper">
@@ -124,11 +122,8 @@ class ChatbotCharts {
         
         let chartConfig;
         switch (type) {
-            case 'candlestick':
-                chartConfig = this.getCandlestickConfig(data, indicators);
-                break;
             case 'line':
-                chartConfig = this.getLineConfig(data);
+                chartConfig = this.getLineConfig(data, indicators);
                 break;
             case 'bar':
                 chartConfig = this.getBarConfig(data);
@@ -137,39 +132,78 @@ class ChatbotCharts {
                 chartConfig = this.getAreaConfig(data);
                 break;
             default:
-                chartConfig = this.getLineConfig(data);
+                chartConfig = this.getLineConfig(data, indicators);
         }
 
         return new Chart(ctx, chartConfig);
     }
 
     // ============================================
-    // LINE CHART CONFIG
+    // LINE CHART CONFIG (avec indicateurs optionnels)
     // ============================================
-    getLineConfig(data) {
+    getLineConfig(data, indicators = []) {
+        const datasets = [{
+            label: 'Price',
+            data: data.values,
+            borderColor: this.config.charts.colors.primary,
+            backgroundColor: this.hexToRgba(this.config.charts.colors.primary, 0.1),
+            borderWidth: 2,
+            tension: 0.4,
+            fill: true,
+            pointRadius: 0,
+            pointHoverRadius: 5,
+            pointHoverBackgroundColor: this.config.charts.colors.primary,
+            pointHoverBorderColor: '#fff',
+            pointHoverBorderWidth: 2
+        }];
+
+        // ✅ AJOUTER INDICATEURS TECHNIQUES SI DEMANDÉS
+        if (indicators && indicators.includes('sma') && data.values.length > 0) {
+            const sma20 = this.calculateSMA(data.values, 20);
+            datasets.push({
+                label: 'SMA 20',
+                data: sma20,
+                borderColor: '#f59e0b',
+                backgroundColor: 'transparent',
+                borderWidth: 1.5,
+                tension: 0.4,
+                fill: false,
+                pointRadius: 0,
+                borderDash: [5, 5]
+            });
+        }
+
+        if (indicators && indicators.includes('sma') && data.values.length > 0) {
+            const sma50 = this.calculateSMA(data.values, 50);
+            datasets.push({
+                label: 'SMA 50',
+                data: sma50,
+                borderColor: '#10b981',
+                backgroundColor: 'transparent',
+                borderWidth: 1.5,
+                tension: 0.4,
+                fill: false,
+                pointRadius: 0,
+                borderDash: [10, 5]
+            });
+        }
+
         return {
             type: 'line',
             data: {
                 labels: data.labels,
-                datasets: [{
-                    label: 'Price',
-                    data: data.values,
-                    borderColor: this.config.charts.colors.primary,
-                    backgroundColor: this.hexToRgba(this.config.charts.colors.primary, 0.1),
-                    borderWidth: 2,
-                    tension: 0.4,
-                    fill: true,
-                    pointRadius: 0,
-                    pointHoverRadius: 5,
-                    pointHoverBackgroundColor: this.config.charts.colors.primary,
-                    pointHoverBorderColor: '#fff',
-                    pointHoverBorderWidth: 2
-                }]
+                datasets: datasets
             },
             options: this.getCommonOptions({
                 plugins: {
                     legend: {
-                        display: true
+                        display: indicators && indicators.length > 0,
+                        position: 'top',
+                        labels: {
+                            color: this.config.charts.colors.text,
+                            usePointStyle: true,
+                            padding: 15
+                        }
                     },
                     tooltip: {
                         mode: 'index',
@@ -180,10 +214,10 @@ class ChatbotCharts {
                         titleColor: '#fff',
                         bodyColor: '#fff',
                         padding: 12,
-                        displayColors: false,
+                        displayColors: true,
                         callbacks: {
                             label: (context) => {
-                                return `Price: $${context.parsed.y.toFixed(2)}`;
+                                return `${context.dataset.label}: $${context.parsed.y.toFixed(2)}`;
                             }
                         }
                     }
@@ -204,10 +238,46 @@ class ChatbotCharts {
     // AREA CHART CONFIG
     // ============================================
     getAreaConfig(data) {
-        const config = this.getLineConfig(data);
-        config.data.datasets[0].fill = 'start';
-        config.data.datasets[0].backgroundColor = this.createGradient(data.values);
-        return config;
+        return {
+            type: 'line',
+            data: {
+                labels: data.labels,
+                datasets: [{
+                    label: 'Price',
+                    data: data.values,
+                    borderColor: this.config.charts.colors.primary,
+                    backgroundColor: this.hexToRgba(this.config.charts.colors.primary, 0.3),
+                    borderWidth: 2,
+                    tension: 0.4,
+                    fill: true,
+                    pointRadius: 0,
+                    pointHoverRadius: 5
+                }]
+            },
+            options: this.getCommonOptions({
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                        borderColor: this.config.charts.colors.primary,
+                        borderWidth: 1,
+                        callbacks: {
+                            label: (context) => `Price: $${context.parsed.y.toFixed(2)}`
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: false,
+                        ticks: {
+                            callback: (value) => '$' + value.toFixed(2)
+                        }
+                    }
+                }
+            })
+        };
     }
 
     // ============================================
@@ -221,7 +291,7 @@ class ChatbotCharts {
                 datasets: [{
                     label: 'Volume',
                     data: data.values,
-                    backgroundColor: this.config.charts.colors.primary,
+                    backgroundColor: this.hexToRgba(this.config.charts.colors.primary, 0.7),
                     borderColor: this.config.charts.colors.primary,
                     borderWidth: 1
                 }]
@@ -229,56 +299,12 @@ class ChatbotCharts {
             options: this.getCommonOptions({
                 plugins: {
                     legend: {
-                        display: true
+                        display: false
                     },
                     tooltip: {
                         backgroundColor: 'rgba(0, 0, 0, 0.8)',
                         borderColor: this.config.charts.colors.primary,
                         borderWidth: 1
-                    }
-                }
-            })
-        };
-    }
-
-    // ============================================
-    // CANDLESTICK CHART CONFIG
-    // ============================================
-    getCandlestickConfig(data, indicators = []) {
-        const datasets = [{
-            label: 'Price',
-            data: data.candlesticks,
-            type: 'candlestick',
-            color: {
-                up: this.config.charts.colors.success,
-                down: this.config.charts.colors.danger,
-                unchanged: this.config.charts.colors.text
-            }
-        }];
-
-        // Add technical indicators
-        if (indicators.includes('sma')) {
-            datasets.push({
-                label: 'SMA 20',
-                data: this.calculateSMA(data.closes, 20),
-                type: 'line',
-                borderColor: this.config.charts.colors.warning,
-                borderWidth: 1,
-                pointRadius: 0,
-                fill: false
-            });
-        }
-
-        return {
-            type: 'candlestick',
-            data: {
-                labels: data.labels,
-                datasets: datasets
-            },
-            options: this.getCommonOptions({
-                plugins: {
-                    legend: {
-                        display: true
                     }
                 }
             })
@@ -309,22 +335,7 @@ class ChatbotCharts {
                     borderWidth: 1,
                     padding: 12,
                     cornerRadius: 8
-                },
-                zoom: this.config.charts.enableZoom ? {
-                    zoom: {
-                        wheel: {
-                            enabled: true
-                        },
-                        pinch: {
-                            enabled: true
-                        },
-                        mode: 'x'
-                    },
-                    pan: {
-                        enabled: this.config.charts.enablePan,
-                        mode: 'x'
-                    }
-                } : undefined
+                }
             },
             scales: {
                 x: {
@@ -357,7 +368,6 @@ class ChatbotCharts {
     // FETCH DATA METHODS
     // ============================================
     async fetchLineData(symbol, period) {
-        // Mock data - replace with actual API call
         const dataPoints = this.getDataPointsCount(period);
         const now = Date.now();
         const interval = this.getIntervalMillis(period);
@@ -370,9 +380,8 @@ class ChatbotCharts {
             const timestamp = now - (dataPoints - i) * interval;
             labels.push(new Date(timestamp).toLocaleDateString());
             
-            // Simulate price movement
             basePrice += (Math.random() - 0.5) * 5;
-            values.push(basePrice);
+            values.push(parseFloat(basePrice.toFixed(2)));
         }
         
         return { labels, values };
@@ -398,13 +407,27 @@ class ChatbotCharts {
             const high = Math.max(open, close) + Math.random() * 3;
             const low = Math.min(open, close) - Math.random() * 3;
             
-            candlesticks.push({ x: date, o: open, h: high, l: low, c: close });
-            closes.push(close);
+            candlesticks.push({ 
+                x: date, 
+                o: parseFloat(open.toFixed(2)), 
+                h: parseFloat(high.toFixed(2)), 
+                l: parseFloat(low.toFixed(2)), 
+                c: parseFloat(close.toFixed(2)) 
+            });
+            closes.push(parseFloat(close.toFixed(2)));
             
             basePrice = close;
         }
         
         return { labels, candlesticks, closes };
+    }
+
+    // ✅ NOUVELLE MÉTHODE : Convertir candlestick en line
+    convertCandlestickToLine(candlestickData) {
+        return {
+            labels: candlestickData.labels,
+            values: candlestickData.closes
+        };
     }
 
     async fetchBarData(symbol, period) {
@@ -425,7 +448,7 @@ class ChatbotCharts {
                 sma.push(null);
             } else {
                 const sum = data.slice(i - period + 1, i + 1).reduce((a, b) => a + b, 0);
-                sma.push(sum / period);
+                sma.push(parseFloat((sum / period).toFixed(2)));
             }
         }
         return sma;
@@ -435,7 +458,6 @@ class ChatbotCharts {
         const ema = [];
         const multiplier = 2 / (period + 1);
         
-        // Start with SMA
         let sum = 0;
         for (let i = 0; i < period; i++) {
             sum += data[i];
@@ -443,7 +465,6 @@ class ChatbotCharts {
         }
         ema[period - 1] = sum / period;
         
-        // Calculate EMA
         for (let i = period; i < data.length; i++) {
             ema.push((data[i] - ema[i - 1]) * multiplier + ema[i - 1]);
         }
@@ -478,20 +499,22 @@ class ChatbotCharts {
             '3m': 90,
             '6m': 180,
             '1y': 365,
+            '2y': 730,
             'ytd': 250,
             'ipo': 60
         };
-        return counts[period] || 30;
+        return counts[period] || 90;
     }
 
     getIntervalMillis(period) {
         const intervals = {
-            '1d': 3600000, // 1 hour
-            '1w': 86400000, // 1 day
-            '1m': 86400000, // 1 day
+            '1d': 3600000,
+            '1w': 86400000,
+            '1m': 86400000,
             '3m': 86400000,
             '6m': 86400000,
             '1y': 86400000,
+            '2y': 86400000,
             'ytd': 86400000,
             'ipo': 86400000
         };
@@ -503,11 +526,6 @@ class ChatbotCharts {
         const g = parseInt(hex.slice(3, 5), 16);
         const b = parseInt(hex.slice(5, 7), 16);
         return `rgba(${r}, ${g}, ${b}, ${alpha})`;
-    }
-
-    createGradient(values) {
-        // This would need canvas context - simplified for now
-        return this.hexToRgba(this.config.charts.colors.primary, 0.2);
     }
 
     deepMerge(target, source) {
