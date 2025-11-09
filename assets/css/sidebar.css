@@ -1,11 +1,11 @@
 /* ===================================
-   SIDEBAR PREMIUM 3D - GLASSMORPHISM
-   AlphaVault AI - Version Corrigée
+   SIDEBAR PREMIUM 3D - VERSION FINALE
+   AlphaVault AI - État Collapsed Amélioré
    =================================== */
 
 :root {
     --sidebar-width: 280px;
-    --sidebar-collapsed-width: 80px;
+    --sidebar-collapsed-width: 75px;
     --sidebar-bg: rgba(15, 20, 31, 0.95);
     --sidebar-hover: rgba(255, 255, 255, 0.08);
     --sidebar-active: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -26,7 +26,7 @@
 .layout-wrapper {
     display: flex;
     min-height: 100vh;
-    background: #f5f7fa; /* ✅ FOND BLANC/GRIS CLAIR */
+    background: #f5f7fa;
     padding: 20px;
     position: relative;
 }
@@ -45,9 +45,9 @@ body.dark-mode .layout-wrapper {
     min-height: 100vh;
     display: flex;
     flex-direction: column;
-    background: white; /* ✅ FOND BLANC */
+    background: white;
     border-radius: 20px;
-    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08); /* ✅ OMBRE GRISE */
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
     overflow: hidden;
 }
 
@@ -70,7 +70,7 @@ body.dark-mode .main-content {
     -webkit-backdrop-filter: blur(20px) saturate(150%);
     color: var(--sidebar-text);
     position: fixed;
-    left: 20px; /* ✅ FLOTTANTE */
+    left: 20px;
     top: 20px;
     height: calc(100vh - 40px);
     display: flex;
@@ -78,7 +78,7 @@ body.dark-mode .main-content {
     transition: width var(--transition-speed) var(--transition-smooth);
     z-index: 1000;
     box-shadow: var(--shadow-premium);
-    border-radius: 20px; /* ✅ FLOTTANTE */
+    border-radius: 20px;
     border: 1px solid rgba(255, 255, 255, 0.1);
     overflow: hidden;
 }
@@ -111,7 +111,7 @@ body.dark-mode .main-content {
     transition: all var(--transition-speed) var(--transition-smooth);
 }
 
-/* Logo 3D - Optimisé */
+/* Logo 3D */
 .logo-3d {
     width: 42px;
     height: 42px;
@@ -129,7 +129,6 @@ body.dark-mode .main-content {
     height: 100%;
 }
 
-/* Gradient animé simplifié */
 .logo-gradient-1 {
     stop-color: #667eea;
 }
@@ -172,7 +171,7 @@ body.dark-mode .main-content {
     opacity: 0.8;
 }
 
-/* Collapsed state */
+/* ✅ Collapsed state - AMÉLIORÉ */
 .sidebar.collapsed .brand-text {
     opacity: 0;
     width: 0;
@@ -183,7 +182,7 @@ body.dark-mode .main-content {
     gap: 0;
 }
 
-/* Toggle Button - SIMPLIFIÉ */
+/* Toggle Button */
 .sidebar-toggle {
     background: rgba(255, 255, 255, 0.05);
     border: 1px solid rgba(255, 255, 255, 0.1);
@@ -192,7 +191,7 @@ body.dark-mode .main-content {
     cursor: pointer;
     padding: 9px;
     border-radius: 10px;
-    transition: all 0.2s ease; /* ✅ TRANSITION RAPIDE */
+    transition: all 0.2s ease;
     flex-shrink: 0;
     width: 36px;
     height: 36px;
@@ -217,6 +216,12 @@ body.dark-mode .main-content {
 
 .sidebar.collapsed .sidebar-toggle i {
     transform: rotate(180deg);
+}
+
+/* ✅ Mode collapsed - Centrer le toggle */
+.sidebar.collapsed .sidebar-header {
+    justify-content: center;
+    padding: 25px 10px;
 }
 
 /* ===================================
@@ -251,9 +256,10 @@ body.dark-mode .main-content {
 /* Navigation Section */
 .nav-section {
     margin-bottom: 4px;
+    position: relative;
 }
 
-/* Navigation Folder - OPTIMISÉ */
+/* ✅ Navigation Folder - AMÉLIORÉ MODE COLLAPSED */
 .nav-folder {
     width: 100%;
     background: none;
@@ -264,7 +270,7 @@ body.dark-mode .main-content {
     align-items: center;
     gap: 13px;
     cursor: pointer;
-    transition: all 0.15s ease; /* ✅ TRANSITION RAPIDE */
+    transition: all 0.15s ease;
     font-size: 15px;
     font-weight: 500;
     position: relative;
@@ -282,7 +288,7 @@ body.dark-mode .main-content {
     height: 60%;
     background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
     border-radius: 0 3px 3px 0;
-    transition: width 0.15s ease; /* ✅ TRANSITION RAPIDE */
+    transition: width 0.15s ease;
 }
 
 .nav-folder:hover::before {
@@ -295,7 +301,6 @@ body.dark-mode .main-content {
 
 .nav-folder:hover {
     background: var(--sidebar-hover);
-    padding-left: 22px;
 }
 
 .nav-folder.active {
@@ -303,17 +308,17 @@ body.dark-mode .main-content {
     color: var(--sidebar-text-light);
 }
 
-/* Icon - OPTIMISÉ */
+/* ✅ Icon - CENTRÉ en mode collapsed */
 .nav-folder i:first-child {
-    font-size: 19px;
-    width: 22px;
+    font-size: 20px;
+    width: 24px;
     text-align: center;
     flex-shrink: 0;
-    transition: all 0.15s ease; /* ✅ TRANSITION RAPIDE */
+    transition: all 0.15s ease;
 }
 
 .nav-folder:hover i:first-child {
-    transform: scale(1.08);
+    transform: scale(1.1);
     color: var(--accent-primary);
 }
 
@@ -330,10 +335,10 @@ body.dark-mode .main-content {
     transition: opacity var(--transition-speed) var(--transition-smooth);
 }
 
-/* Arrow - OPTIMISÉ */
+/* Arrow */
 .nav-folder .arrow {
     font-size: 11px;
-    transition: transform 0.2s ease, opacity 0.2s ease; /* ✅ TRANSITION RAPIDE */
+    transition: transform 0.2s ease, opacity 0.2s ease;
     flex-shrink: 0;
     opacity: 0.6;
 }
@@ -347,26 +352,92 @@ body.dark-mode .main-content {
     color: var(--accent-primary);
 }
 
-/* Collapsed state */
+/* ✅ COLLAPSED STATE - PARFAIT CENTRAGE */
+.sidebar.collapsed .nav-folder {
+    justify-content: center;
+    padding: 15px 0;
+}
+
 .sidebar.collapsed .nav-folder span,
 .sidebar.collapsed .nav-folder .arrow {
     opacity: 0;
     width: 0;
+    display: none;
 }
 
+/* ✅ TOOLTIP AU SURVOL EN MODE COLLAPSED */
 .sidebar.collapsed .nav-folder {
-    justify-content: center;
-    padding-left: 20px;
-    padding-right: 20px;
+    position: relative;
+}
+
+.sidebar.collapsed .nav-folder::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    left: calc(100% + 15px);
+    top: 50%;
+    transform: translateY(-50%) translateX(-10px);
+    background: rgba(15, 20, 31, 0.95);
+    backdrop-filter: blur(10px);
+    color: white;
+    padding: 10px 16px;
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 500;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: all 0.2s ease;
+    z-index: 10000;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(102, 126, 234, 0.3);
+}
+
+/* Flèche du tooltip */
+.sidebar.collapsed .nav-folder::before {
+    content: '';
+    position: absolute;
+    left: calc(100% + 8px);
+    top: 50%;
+    transform: translateY(-50%);
+    width: 0;
+    height: 0;
+    border-style: solid;
+    border-width: 6px 7px 6px 0;
+    border-color: transparent rgba(15, 20, 31, 0.95) transparent transparent;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+    z-index: 10001;
+}
+
+.sidebar.collapsed .nav-folder:hover::after {
+    opacity: 1;
+    transform: translateY(-50%) translateX(0);
+}
+
+.sidebar.collapsed .nav-folder:hover::before {
+    opacity: 1;
+}
+
+/* ✅ INDICATEUR ACTIF PLUS VISIBLE */
+.sidebar.collapsed .nav-folder.active {
+    background: rgba(102, 126, 234, 0.2);
+    border-radius: 12px;
+    margin: 4px 8px;
+    box-shadow: 0 0 20px rgba(102, 126, 234, 0.3);
+}
+
+.sidebar.collapsed .nav-folder.active i:first-child {
+    color: var(--accent-primary);
+    filter: drop-shadow(0 0 8px rgba(102, 126, 234, 0.6));
 }
 
 /* ===================================
-   NAVIGATION SUBMENU - OPTIMISÉ
+   NAVIGATION SUBMENU
    =================================== */
 .nav-submenu {
     max-height: 0;
     overflow: hidden;
-    transition: max-height 0.25s ease; /* ✅ TRANSITION RAPIDE */
+    transition: max-height 0.25s ease;
     background: rgba(0, 0, 0, 0.15);
 }
 
@@ -381,7 +452,7 @@ body.dark-mode .main-content {
     padding: 11px 20px 11px 54px;
     color: var(--sidebar-text-secondary);
     text-decoration: none;
-    transition: all 0.15s ease; /* ✅ TRANSITION RAPIDE */
+    transition: all 0.15s ease;
     font-size: 14px;
     position: relative;
     border-left: 2px solid transparent;
@@ -397,7 +468,7 @@ body.dark-mode .main-content {
     height: 5px;
     background: rgba(102, 126, 234, 0.3);
     border-radius: 50%;
-    transition: all 0.15s ease; /* ✅ TRANSITION RAPIDE */
+    transition: all 0.15s ease;
 }
 
 .nav-link:hover {
@@ -441,7 +512,7 @@ body.dark-mode .main-content {
 }
 
 /* ===================================
-   SIDEBAR FOOTER
+   SIDEBAR FOOTER - AMÉLIORÉ
    =================================== */
 .sidebar-footer {
     border-top: 1px solid rgba(255, 255, 255, 0.08);
@@ -460,6 +531,7 @@ body.dark-mode .main-content {
     padding: 9px;
     border-radius: 11px;
     cursor: pointer;
+    position: relative;
 }
 
 .user-info:hover {
@@ -485,7 +557,6 @@ body.dark-mode .main-content {
     color: white;
 }
 
-/* Badge en ligne */
 .user-avatar::after {
     content: '';
     position: absolute;
@@ -518,20 +589,51 @@ body.dark-mode .main-content {
     opacity: 0.8;
 }
 
+/* ✅ Mode collapsed - Centrer l'avatar */
 .sidebar.collapsed .user-details {
     opacity: 0;
     width: 0;
+    display: none;
 }
 
 .sidebar.collapsed .user-info {
     justify-content: center;
+    padding: 9px 0;
+}
+
+/* ✅ Tooltip pour l'avatar en mode collapsed */
+.sidebar.collapsed .user-info::after {
+    content: attr(data-user);
+    position: absolute;
+    left: calc(100% + 15px);
+    top: 50%;
+    transform: translateY(-50%) translateX(-10px);
+    background: rgba(15, 20, 31, 0.95);
+    backdrop-filter: blur(10px);
+    color: white;
+    padding: 10px 16px;
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 500;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: all 0.2s ease;
+    z-index: 10000;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(102, 126, 234, 0.3);
+}
+
+.sidebar.collapsed .user-info:hover::after {
+    opacity: 1;
+    transform: translateY(-50%) translateX(0);
 }
 
 /* ===================================
    TOP HEADER
    =================================== */
 .top-header {
-    background: white; /* ✅ FOND BLANC */
+    background: white;
     border-bottom: 1px solid rgba(0, 0, 0, 0.06);
     padding: 20px 40px;
     display: flex;
@@ -694,7 +796,6 @@ body.dark-mode .last-update {
     }
 }
 
-/* GPU Acceleration - Optimisé */
 .sidebar,
 .logo-3d,
 .nav-folder,
