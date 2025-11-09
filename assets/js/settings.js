@@ -1,5 +1,5 @@
 /* ============================================
-   SETTINGS.JS - Gestion de la page paramètres
+   SETTINGS.JS - Gestion de la page paramètres (Sans Appearance)
    ============================================ */
 
 // Variables globales
@@ -10,10 +10,7 @@ let currentSettings = {
     timezone: 'America/New_York',
     currency: 'USD',
     
-    // Appearance
-    theme: 'dark',
-    enableAnimations: true,
-    collapsedSidebar: false,
+    // ❌ APPEARANCE SUPPRIMÉ
     
     // Notifications
     weeklyNewsletter: true,
@@ -33,24 +30,19 @@ let currentSettings = {
 document.addEventListener('DOMContentLoaded', () => {
     console.log('🚀 Initialisation de la page paramètres...');
     
-    // Vérifier si Firebase est initialisé
     if (!isFirebaseInitialized()) {
         showToast('error', 'Erreur', 'Impossible de charger les paramètres');
         return;
     }
     
-    // Initialiser les gestionnaires d'événements
     initializeEventListeners();
     
     console.log('✅ Page paramètres initialisée');
 });
 
-// Écouter l'événement quand les données sont chargées
 window.addEventListener('userDataLoaded', (e) => {
     currentUserData = e.detail;
     console.log('✅ Données utilisateur reçues:', currentUserData);
-    
-    // Charger les paramètres
     loadSettings();
 });
 
@@ -58,9 +50,6 @@ window.addEventListener('userDataLoaded', (e) => {
 // CHARGEMENT DES PARAMÈTRES
 // ============================================
 
-/**
- * Charger les paramètres depuis Firestore
- */
 async function loadSettings() {
     try {
         console.log('📥 Chargement des paramètres...');
@@ -71,7 +60,6 @@ async function loadSettings() {
             return;
         }
         
-        // Référence au document settings
         const settingsRef = firebaseDb
             .collection('users')
             .doc(currentUserData.uid)
@@ -82,26 +70,19 @@ async function loadSettings() {
         
         if (!settingsDoc.exists) {
             console.log('⚠️ Paramètres inexistants, création avec valeurs par défaut...');
-            
-            // Créer le document avec les valeurs par défaut
             await settingsRef.set(currentSettings);
-            
             console.log('✅ Paramètres créés avec succès');
         } else {
-            // Charger les paramètres existants
             const data = settingsDoc.data();
             currentSettings = { ...currentSettings, ...data };
-            
             console.log('✅ Paramètres chargés:', currentSettings);
         }
         
-        // Appliquer les paramètres à l'interface
         applySettingsToUI();
         
     } catch (error) {
         console.error('❌ Erreur lors du chargement des paramètres:', error);
         
-        // Si erreur de permissions, utiliser les valeurs par défaut
         if (error.code === 'permission-denied') {
             console.log('⚠️ Permissions refusées, utilisation des valeurs par défaut');
             loadDefaultSettings();
@@ -111,13 +92,9 @@ async function loadSettings() {
     }
 }
 
-/**
- * Charger les paramètres par défaut
- */
 function loadDefaultSettings() {
     console.log('📥 Chargement des paramètres par défaut');
     
-    // Charger depuis localStorage si disponible
     const savedSettings = localStorage.getItem('financepro_settings');
     if (savedSettings) {
         try {
@@ -131,27 +108,13 @@ function loadDefaultSettings() {
     applySettingsToUI();
 }
 
-/**
- * Appliquer les paramètres à l'interface
- */
 function applySettingsToUI() {
     // General
     document.getElementById('language').value = currentSettings.language || 'en';
     document.getElementById('timezone').value = currentSettings.timezone || 'America/New_York';
     document.getElementById('currency').value = currentSettings.currency || 'USD';
     
-    // Appearance
-    const themeOptions = document.querySelectorAll('.theme-option');
-    themeOptions.forEach(option => {
-        if (option.dataset.theme === currentSettings.theme) {
-            option.classList.add('active');
-        } else {
-            option.classList.remove('active');
-        }
-    });
-    
-    document.getElementById('enableAnimations').checked = currentSettings.enableAnimations !== false;
-    document.getElementById('collapsedSidebar').checked = currentSettings.collapsedSidebar === true;
+    // ❌ APPEARANCE SUPPRIMÉ (pas de thème ici)
     
     // Notifications
     document.getElementById('weeklyNewsletter').checked = currentSettings.weeklyNewsletter !== false;
@@ -171,7 +134,7 @@ function applySettingsToUI() {
 // ============================================
 
 function initializeEventListeners() {
-    // === NAVIGATION ENTRE TABS ===
+    // Navigation entre tabs
     const tabButtons = document.querySelectorAll('.settings-nav-item');
     tabButtons.forEach(button => {
         button.addEventListener('click', () => {
@@ -179,20 +142,14 @@ function initializeEventListeners() {
         });
     });
     
-    // === SÉLECTION DU THÈME ===
-    const themeOptions = document.querySelectorAll('.theme-option');
-    themeOptions.forEach(option => {
-        option.addEventListener('click', () => {
-            selectTheme(option.dataset.theme);
-        });
-    });
+    // ❌ THEME SELECTOR SUPPRIMÉ
     
-    // === BOUTONS DE SAUVEGARDE ===
+    // Boutons de sauvegarde
     document.getElementById('saveGeneralSettings')?.addEventListener('click', saveGeneralSettings);
     document.getElementById('saveNotificationSettings')?.addEventListener('click', saveNotificationSettings);
     document.getElementById('savePrivacySettings')?.addEventListener('click', savePrivacySettings);
     
-    // === BOUTONS D'ACTION DATA ===
+    // Boutons d'action data
     document.getElementById('exportDataBtn')?.addEventListener('click', exportUserData);
     document.getElementById('clearCacheBtn')?.addEventListener('click', clearCache);
     document.getElementById('deleteAllAnalyses')?.addEventListener('click', deleteAllAnalyses);
@@ -204,7 +161,6 @@ function initializeEventListeners() {
 // ============================================
 
 function switchTab(tabName) {
-    // Désactiver tous les boutons et tabs
     document.querySelectorAll('.settings-nav-item').forEach(btn => {
         btn.classList.remove('active');
     });
@@ -212,7 +168,6 @@ function switchTab(tabName) {
         tab.classList.remove('active');
     });
     
-    // Activer le bouton et tab sélectionné
     document.querySelector(`[data-tab="${tabName}"]`).classList.add('active');
     document.getElementById(`tab-${tabName}`).classList.add('active');
     
@@ -220,37 +175,9 @@ function switchTab(tabName) {
 }
 
 // ============================================
-// SÉLECTION DU THÈME
-// ============================================
-
-function selectTheme(theme) {
-    // Mettre à jour l'interface
-    document.querySelectorAll('.theme-option').forEach(option => {
-        option.classList.remove('active');
-    });
-    document.querySelector(`[data-theme="${theme}"]`).classList.add('active');
-    
-    // Mettre à jour les paramètres
-    currentSettings.theme = theme;
-    
-    // Appliquer le thème immédiatement
-    if (window.setTheme) {
-        window.setTheme(theme);
-    }
-    
-    // Sauvegarder
-    saveAppearanceSettings();
-    
-    console.log('🎨 Thème sélectionné:', theme);
-}
-
-// ============================================
 // SAUVEGARDE DES PARAMÈTRES
 // ============================================
 
-/**
- * Sauvegarder les paramètres généraux
- */
 async function saveGeneralSettings() {
     currentSettings.language = document.getElementById('language').value;
     currentSettings.timezone = document.getElementById('timezone').value;
@@ -260,19 +187,6 @@ async function saveGeneralSettings() {
     showToast('success', 'Succès !', 'Paramètres généraux sauvegardés');
 }
 
-/**
- * Sauvegarder les paramètres d'apparence
- */
-async function saveAppearanceSettings() {
-    currentSettings.enableAnimations = document.getElementById('enableAnimations').checked;
-    currentSettings.collapsedSidebar = document.getElementById('collapsedSidebar').checked;
-    
-    await saveSettings();
-}
-
-/**
- * Sauvegarder les paramètres de notifications
- */
 async function saveNotificationSettings() {
     currentSettings.weeklyNewsletter = document.getElementById('weeklyNewsletter').checked;
     currentSettings.priceAlerts = document.getElementById('priceAlerts').checked;
@@ -282,9 +196,6 @@ async function saveNotificationSettings() {
     showToast('success', 'Succès !', 'Préférences de notifications sauvegardées');
 }
 
-/**
- * Sauvegarder les paramètres de confidentialité
- */
 async function savePrivacySettings() {
     currentSettings.publicProfile = document.getElementById('publicProfile').checked;
     currentSettings.publicAnalyses = document.getElementById('publicAnalyses').checked;
@@ -294,15 +205,10 @@ async function savePrivacySettings() {
     showToast('success', 'Succès !', 'Paramètres de confidentialité sauvegardés');
 }
 
-/**
- * Fonction générique pour sauvegarder
- */
 async function saveSettings() {
     try {
-        // Sauvegarder dans localStorage
         localStorage.setItem('financepro_settings', JSON.stringify(currentSettings));
         
-        // Sauvegarder dans Firestore si connecté
         if (currentUserData) {
             const settingsRef = firebaseDb
                 .collection('users')
@@ -325,9 +231,6 @@ async function saveSettings() {
 // GESTION DES DONNÉES
 // ============================================
 
-/**
- * Exporter les données utilisateur
- */
 async function exportUserData() {
     if (!currentUserData) {
         showToast('error', 'Erreur', 'Vous devez être connecté');
@@ -343,15 +246,13 @@ async function exportUserData() {
             exportDate: new Date().toISOString()
         };
         
-        // Créer un fichier JSON
         const dataStr = JSON.stringify(exportData, null, 2);
         const dataBlob = new Blob([dataStr], { type: 'application/json' });
         
-        // Télécharger
         const url = URL.createObjectURL(dataBlob);
         const link = document.createElement('a');
         link.href = url;
-        link.download = `financepro-export-${Date.now()}.json`;
+        link.download = `alphavault-export-${Date.now()}.json`;
         link.click();
         
         showToast('success', 'Succès !', 'Vos données ont été exportées');
@@ -362,9 +263,6 @@ async function exportUserData() {
     }
 }
 
-/**
- * Vider le cache
- */
 function clearCache() {
     const confirmed = confirm(
         'Êtes-vous sûr de vouloir vider le cache ?\n\n' +
@@ -374,7 +272,6 @@ function clearCache() {
     if (!confirmed) return;
     
     try {
-        // Vider localStorage (sauf les données essentielles)
         const essentialKeys = ['financepro_user', 'financepro_theme', 'financepro_settings'];
         const allKeys = Object.keys(localStorage);
         
@@ -392,9 +289,6 @@ function clearCache() {
     }
 }
 
-/**
- * Supprimer toutes les analyses
- */
 async function deleteAllAnalyses() {
     const confirmed = confirm(
         '⚠️ ATTENTION ⚠️\n\n' +
@@ -408,19 +302,13 @@ async function deleteAllAnalyses() {
     
     try {
         // TODO: Implémenter la suppression réelle
-        // Pour l'instant, juste un placeholder
-        
         showToast('success', 'Succès !', 'Analyses supprimées');
-        
     } catch (error) {
         console.error('❌ Erreur:', error);
         showToast('error', 'Erreur', 'Impossible de supprimer les analyses');
     }
 }
 
-/**
- * Supprimer tous les portfolios
- */
 async function deleteAllPortfolios() {
     const confirmed = confirm(
         '⚠️ ATTENTION ⚠️\n\n' +
@@ -434,9 +322,7 @@ async function deleteAllPortfolios() {
     
     try {
         // TODO: Implémenter la suppression réelle
-        
         showToast('success', 'Succès !', 'Portfolios supprimés');
-        
     } catch (error) {
         console.error('❌ Erreur:', error);
         showToast('error', 'Erreur', 'Impossible de supprimer les portfolios');
@@ -447,9 +333,6 @@ async function deleteAllPortfolios() {
 // UTILITAIRES
 // ============================================
 
-/**
- * Afficher une notification toast
- */
 function showToast(type, title, message) {
     const toastContainer = document.getElementById('toastContainer');
     
@@ -496,9 +379,6 @@ function showToast(type, title, message) {
     }, 5000);
 }
 
-/**
- * Supprimer un toast
- */
 function removeToast(toast) {
     toast.style.animation = 'slideOutRight 0.3s ease forwards';
     setTimeout(() => {
@@ -508,4 +388,4 @@ function removeToast(toast) {
     }, 300);
 }
 
-console.log('✅ Script de paramètres chargé (version corrigée avec support thème global)');
+console.log('✅ Script de paramètres chargé (sans Appearance)');
