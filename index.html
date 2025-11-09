@@ -1329,7 +1329,7 @@
     </footer>
 
     <!-- ═══════════════════════════════════════════════════════════════
-         SCRIPTS - ORDRE CRITIQUE
+         SCRIPTS - ORDRE CRITIQUE POUR API + ALPHY
          ═══════════════════════════════════════════════════════════════ -->
     
     <!-- Chart.js -->
@@ -1349,10 +1349,14 @@
     <!-- Firebase Config -->
     <script src="assets/js/firebase-config.js"></script>
     
-    <!-- API Client (IMPORTANT - AVANT LE TICKER) -->
+    <!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+         API CLIENT - DOIT ÊTRE CHARGÉ AVANT LE TICKER !
+         ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
     <script src="assets/js/api-client.js"></script>
     
-    <!-- Chatbot Scripts (ORDRE CRITIQUE) -->
+    <!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+         CHATBOT ALPHY AI - ORDRE CRITIQUE !
+         ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
     <script src="assets/js/chatbot-config.js"></script>
     <script src="assets/js/chatbot-gemini.js"></script>
     <script src="assets/js/chatbot-analytics.js"></script>
@@ -1365,21 +1369,27 @@
     <!-- Application Scripts -->
     <script src="assets/js/common.js"></script>
     <script src="assets/js/landing.js"></script>
+    
+    <!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+         MARKET TICKER - APRÈS API CLIENT !
+         ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
     <script src="assets/js/landing-market-ticker.js"></script>
+    
     <script src="assets/js/auth-system.js"></script>
     
     <!-- ═══════════════════════════════════════════════════════════════
-         INITIALISATION
+         INITIALISATION GLOBALE
          ═══════════════════════════════════════════════════════════════ -->
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            console.log('%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'color: #3B82F6; font-weight: bold;');
-            console.log('%c🚀 AlphaVault AI - Initialization', 'color: #3B82F6; font-size: 16px; font-weight: bold;');
-            console.log('%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'color: #3B82F6; font-weight: bold;');
+            console.log('%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'color: #3B82F6; font-weight: bold; font-size: 14px;');
+            console.log('%c🚀 AlphaVault AI - Platform Initialization', 'color: #3B82F6; font-size: 18px; font-weight: bold;');
+            console.log('%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'color: #3B82F6; font-weight: bold; font-size: 14px;');
             
-            // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-            // AOS Animation Init
-            // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+            // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+            // 1. AOS ANIMATIONS
+            // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+            console.log('%c🎨 Initializing AOS Animations...', 'color: #8B5CF6; font-weight: bold;');
             AOS.init({
                 duration: 800,
                 easing: 'ease-out-cubic',
@@ -1387,64 +1397,137 @@
                 offset: 50,
                 mirror: false
             });
-            console.log('✅ AOS Animations initialized');
+            console.log('✅ AOS Animations initialized\n');
 
-            // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-            // Année dynamique
-            // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-            document.getElementById('currentYear').textContent = new Date().getFullYear();
+            // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+            // 2. ANNÉE DYNAMIQUE
+            // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+            const yearElement = document.getElementById('currentYear');
+            if (yearElement) {
+                yearElement.textContent = new Date().getFullYear();
+                console.log('✅ Dynamic year updated\n');
+            }
 
-            // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-            // Initialiser Alphy AI Chatbot
-            // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-            console.log('%c🤖 Initializing Alphy AI Chatbot...', 'color: #8B5CF6; font-weight: bold;');
+            // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+            // 3. VÉRIFIER API CLIENT
+            // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+            console.log('%c📡 Checking API Client...', 'color: #3B82F6; font-weight: bold;');
+            if (typeof window.TwelveDataClient !== 'undefined') {
+                console.log('%c✅ TwelveDataClient loaded successfully', 'color: #10b981; font-weight: bold;');
+                console.log('   Market Ticker will use REAL-TIME API data\n');
+            } else {
+                console.error('%c❌ TwelveDataClient NOT FOUND!', 'color: #ef4444; font-weight: bold;');
+                console.error('   📋 Make sure api-client.js is loaded correctly');
+                console.error('   📋 Check the file path: assets/js/api-client.js\n');
+            }
+
+            // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+            // 4. INITIALISER ALPHY AI CHATBOT
+            // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+            console.log('%c🤖 Initializing Alphy AI Chatbot...', 'color: #8B5CF6; font-weight: bold; font-size: 16px;');
             
-            if (typeof ChatbotConfig !== 'undefined' && typeof ChatbotUI !== 'undefined') {
+            // Vérifier que tous les composants sont chargés
+            const chatbotChecks = {
+                'ChatbotConfig': typeof ChatbotConfig !== 'undefined',
+                'ChatbotUI': typeof ChatbotUI !== 'undefined',
+                'FinancialChatbotEngine': typeof FinancialChatbotEngine !== 'undefined',
+                'GeminiAIIntegration': typeof GeminiAIIntegration !== 'undefined'
+            };
+
+            console.log('📦 Chatbot Components Status:');
+            Object.entries(chatbotChecks).forEach(([name, loaded]) => {
+                const status = loaded ? '✅' : '❌';
+                const color = loaded ? '#10b981' : '#ef4444';
+                console.log(`%c   ${status} ${name}`, `color: ${color}; font-weight: bold;`);
+            });
+
+            // Initialiser le chatbot si tous les composants sont présents
+            if (chatbotChecks.ChatbotConfig && chatbotChecks.ChatbotUI) {
                 try {
                     window.financialChatbot = new ChatbotUI(ChatbotConfig);
-                    console.log('%c✅ Alphy AI Chatbot initialized successfully!', 'color: #10b981; font-weight: bold;');
-                    console.log('💬 Chatbot ready - Click the floating button to chat');
+                    console.log('%c✅ Alphy AI Chatbot initialized successfully!', 'color: #10b981; font-weight: bold; font-size: 14px;');
+                    console.log('   💬 Chatbot is ready to use');
+                    console.log('   🎯 Click the floating button in bottom-right to start chatting\n');
+                    
+                    // Vérifier que le chatbot a bien une méthode open
+                    if (typeof window.financialChatbot.open === 'function') {
+                        console.log('   ✅ chatbot.open() method available');
+                    } else {
+                        console.warn('   ⚠️ chatbot.open() method not found');
+                    }
+                    
                 } catch (error) {
-                    console.error('❌ Error initializing Alphy chatbot:', error);
+                    console.error('%c❌ Error initializing Alphy chatbot:', 'color: #ef4444; font-weight: bold;');
+                    console.error(error);
+                    console.error('📋 Stack trace:', error.stack);
                 }
             } else {
-                console.warn('⚠️ Chatbot components not found');
-                console.warn('  ├─ ChatbotConfig:', typeof ChatbotConfig !== 'undefined' ? '✅' : '❌');
-                console.warn('  └─ ChatbotUI:', typeof ChatbotUI !== 'undefined' ? '✅' : '❌');
+                console.error('%c❌ Chatbot initialization FAILED - Missing components', 'color: #ef4444; font-weight: bold;');
+                console.error('📋 Make sure all chatbot-*.js files are loaded in the correct order\n');
             }
 
-            // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-            // Bouton "Chat with Alphy" dans la section Alphy
-            // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+            // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+            // 5. BOUTON "CHAT WITH ALPHY" - SECTION ALPHY AI
+            // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+            console.log('%c🔘 Setting up "Chat with Alphy" button...', 'color: #8B5CF6; font-weight: bold;');
+            
             const openAlphyBtn = document.getElementById('openAlphyChat');
             if (openAlphyBtn) {
-                openAlphyBtn.addEventListener('click', () => {
-                    console.log('🔵 "Chat with Alphy" button clicked');
+                console.log('   ✅ Button #openAlphyChat found');
+                
+                openAlphyBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    console.log('%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'color: #8B5CF6; font-weight: bold;');
+                    console.log('%c🔵 "Chat with Alphy" BUTTON CLICKED', 'color: #8B5CF6; font-weight: bold; font-size: 14px;');
+                    console.log('%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'color: #8B5CF6; font-weight: bold;');
+                    
                     if (window.financialChatbot) {
-                        window.financialChatbot.open();
-                        console.log('✅ Chatbot opened');
+                        console.log('   ✅ Chatbot instance found');
+                        
+                        if (typeof window.financialChatbot.open === 'function') {
+                            console.log('   🚀 Opening chatbot...');
+                            try {
+                                window.financialChatbot.open();
+                                console.log('%c   ✅ Chatbot opened successfully!', 'color: #10b981; font-weight: bold;');
+                            } catch (error) {
+                                console.error('   ❌ Error opening chatbot:', error);
+                            }
+                        } else {
+                            console.error('   ❌ chatbot.open() method not available');
+                            console.error('   Available methods:', Object.keys(window.financialChatbot));
+                            alert('Chatbot interface error. Check console for details.');
+                        }
                     } else {
-                        console.error('❌ Chatbot not initialized yet');
-                        alert('Chatbot is loading... Please wait a moment and try again.');
+                        console.error('   ❌ window.financialChatbot is not defined');
+                        console.error('   The chatbot was not initialized properly');
+                        alert('Chatbot is not initialized. Please refresh the page.');
                     }
                 });
-                console.log('✅ "Chat with Alphy" button listener added');
+                
+                console.log('   ✅ Click listener added to button\n');
+            } else {
+                console.error('   ❌ Button #openAlphyChat NOT FOUND in DOM');
+                console.error('   Make sure the button exists in the HTML\n');
             }
 
-            // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-            // Vérifier API Client
-            // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-            setTimeout(() => {
-                if (window.TwelveDataClient) {
-                    console.log('✅ API Client (TwelveDataClient) loaded');
-                } else {
-                    console.warn('⚠️ API Client not found - Market Ticker will use dynamic mock data');
-                }
-            }, 1000);
-
-            console.log('%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'color: #3B82F6; font-weight: bold;');
-            console.log('%c✨ All systems ready!', 'color: #10b981; font-size: 14px; font-weight: bold;');
-            console.log('%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n', 'color: #3B82F6; font-weight: bold;');
+            // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+            // 6. RÉSUMÉ FINAL
+            // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+            console.log('%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'color: #3B82F6; font-weight: bold; font-size: 14px;');
+            console.log('%c✨ AlphaVault AI - All Systems Ready!', 'color: #10b981; font-size: 18px; font-weight: bold;');
+            console.log('%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'color: #3B82F6; font-weight: bold; font-size: 14px;');
+            console.log('');
+            console.log('%cSystem Status:', 'font-weight: bold; font-size: 14px;');
+            console.log(`   ${chatbotChecks.ChatbotUI ? '✅' : '❌'} Alphy AI Chatbot`);
+            console.log(`   ${typeof window.TwelveDataClient !== 'undefined' ? '✅' : '❌'} API Client (Real-time Data)`);
+            console.log(`   ${typeof window.marketTicker !== 'undefined' ? '✅' : '❌'} Market Ticker`);
+            console.log('');
+            console.log('%cHow to use:', 'font-weight: bold; font-size: 14px;');
+            console.log('   💬 Click the chat button (bottom-right) to talk with Alphy');
+            console.log('   📊 Market ticker updates automatically every 30 seconds');
+            console.log('   🎨 All animations are enabled');
+            console.log('');
+            console.log('%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'color: #3B82F6; font-weight: bold; font-size: 14px;');
         });
     </script>
 </body>

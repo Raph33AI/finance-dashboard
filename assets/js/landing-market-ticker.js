@@ -1,5 +1,6 @@
 /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-   📊 MARKET TICKER - REAL-TIME DATA WITH DYNAMIC MOCK
+   📊 MARKET TICKER - 100% REAL-TIME API DATA
+   NO MOCK DATA - ONLY LIVE MARKET DATA FROM API
    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
 class MarketTicker {
@@ -10,107 +11,144 @@ class MarketTicker {
             'TSLA', 'META', 'NFLX', 'AMD', 'INTC',
             'JPM', 'BAC', 'V', 'MA', 'DIS'
         ];
-        this.updateInterval = 5000; // 5 seconds for dynamic updates
+        this.updateInterval = 30000; // 30 secondes (limite API)
         this.apiClient = null;
-        this.retryCount = 0;
-        this.maxRetries = 3;
-        
-        // Prix de base pour chaque symbole
-        this.basePrices = {
-            'AAPL': 178.32,
-            'MSFT': 374.58,
-            'GOOGL': 138.21,
-            'AMZN': 145.78,
-            'NVDA': 485.32,
-            'TSLA': 242.84,
-            'META': 356.77,
-            'NFLX': 489.32,
-            'AMD': 142.67,
-            'INTC': 43.21,
-            'JPM': 152.45,
-            'BAC': 34.56,
-            'V': 245.67,
-            'MA': 412.89,
-            'DIS': 95.23
-        };
-        
-        // Prix actuels (mis à jour dynamiquement)
-        this.currentPrices = { ...this.basePrices };
+        this.isLoading = false;
+        this.lastUpdate = null;
         
         this.init();
     }
 
     init() {
         if (!this.tickerContainer) {
-            console.warn('⚠️ Market ticker container not found');
+            console.error('❌ Market ticker container #tickerContent not found');
             return;
         }
 
-        console.log('📊 Market Ticker initializing...');
+        console.log('%c📊 Market Ticker - Initializing...', 'color: #3B82F6; font-weight: bold;');
         
-        // Wait for API client
+        // Afficher le loading state
+        this.showLoadingState();
+        
+        // Attendre que l'API Client soit disponible
         this.waitForAPIClient();
+    }
+
+    showLoadingState() {
+        this.tickerContainer.innerHTML = `
+            <div class="ticker-item loading">
+                <span class="ticker-symbol">⏳</span>
+                <span class="ticker-price">Loading real-time data...</span>
+                <span class="ticker-change">--</span>
+            </div>
+        `;
+    }
+
+    showErrorState() {
+        this.tickerContainer.innerHTML = `
+            <div class="ticker-item error">
+                <span class="ticker-symbol">⚠️</span>
+                <span class="ticker-price">Unable to load market data</span>
+                <span class="ticker-change">Check API</span>
+            </div>
+        `;
     }
 
     waitForAPIClient() {
         let attempts = 0;
-        const maxAttempts = 50; // 5 seconds max
+        const maxAttempts = 100; // 10 secondes max
 
         const checkAPI = setInterval(() => {
             attempts++;
 
+            // Vérifier si TwelveDataClient existe
             if (window.TwelveDataClient) {
                 clearInterval(checkAPI);
-                this.apiClient = new window.TwelveDataClient();
-                console.log('✅ API Client connected for Market Ticker');
-                this.loadTickerData();
                 
-                // Update regularly
-                setInterval(() => this.loadTickerData(), this.updateInterval);
+                try {
+                    this.apiClient = new window.TwelveDataClient();
+                    console.log('%c✅ API Client connected successfully', 'color: #10b981; font-weight: bold;');
+                    console.log('📡 Starting real-time market data stream...');
+                    
+                    // Charger les données immédiatement
+                    this.loadRealTimeData();
+                    
+                    // Mettre à jour régulièrement
+                    setInterval(() => {
+                        if (!this.isLoading) {
+                            this.loadRealTimeData();
+                        }
+                    }, this.updateInterval);
+                    
+                } catch (error) {
+                    console.error('❌ Error initializing API Client:', error);
+                    this.showErrorState();
+                }
             } else if (attempts >= maxAttempts) {
                 clearInterval(checkAPI);
-                console.warn('⚠️ API Client not available - using dynamic mock data');
-                this.loadDynamicMockData();
-                
-                // Update mock data every 5 seconds
-                setInterval(() => this.loadDynamicMockData(), this.updateInterval);
+                console.error('❌ API Client (TwelveDataClient) not found after 10 seconds');
+                console.error('📋 Make sure api-client.js is loaded before landing-market-ticker.js');
+                this.showErrorState();
+            }
+
+            // Log de progression tous les 2 secondes
+            if (attempts % 20 === 0) {
+                console.log(`⏳ Waiting for API Client... (${attempts/10}s)`);
             }
         }, 100);
     }
 
-    async loadTickerData() {
+    async loadRealTimeData() {
         if (!this.apiClient) {
-            console.warn('⚠️ API Client not initialized - using dynamic mock data');
-            this.loadDynamicMockData();
+            console.error('❌ API Client not initialized');
+            this.showErrorState();
             return;
         }
 
+        if (this.isLoading) {
+            console.log('⏳ Previous request still loading, skipping...');
+            return;
+        }
+
+        this.isLoading = true;
+        console.log('%c📊 Fetching REAL-TIME market data from API...', 'color: #3B82F6; font-weight: bold;');
+
         try {
-            console.log('📊 Fetching real-time market data from API...');
-            
+            // Fetch data for all symbols in parallel
             const promises = this.symbols.map(async (symbol) => {
                 try {
+                    console.log(`  📈 Fetching ${symbol}...`);
                     const quote = await this.apiClient.getQuote(symbol);
                     
+                    // Extraire les données de l'API
                     const price = parseFloat(quote.close || quote.price || quote.last || 0);
-                    const previousClose = parseFloat(quote.previous_close || price);
-                    const change = previousClose > 0 
-                        ? ((price - previousClose) / previousClose) * 100 
-                        : parseFloat(quote.percent_change || 0);
+                    const previousClose = parseFloat(quote.previous_close || 0);
+                    
+                    // Calculer le changement
+                    let change = 0;
+                    if (quote.percent_change !== undefined) {
+                        change = parseFloat(quote.percent_change);
+                    } else if (previousClose > 0 && price > 0) {
+                        change = ((price - previousClose) / previousClose) * 100;
+                    }
+
+                    console.log(`  ✅ ${symbol}: $${price.toFixed(2)} (${change >= 0 ? '+' : ''}${change.toFixed(2)}%)`);
 
                     return {
                         symbol: symbol,
                         price: price,
                         change: change,
-                        success: price > 0
+                        success: price > 0,
+                        timestamp: Date.now()
                     };
                 } catch (error) {
-                    console.warn(`⚠️ Error fetching ${symbol}:`, error.message);
+                    console.error(`  ❌ Error fetching ${symbol}:`, error.message);
                     return {
                         symbol: symbol,
                         price: 0,
                         change: 0,
-                        success: false
+                        success: false,
+                        error: error.message
                     };
                 }
             });
@@ -119,63 +157,34 @@ class MarketTicker {
             const validResults = results.filter(r => r.success);
 
             if (validResults.length > 0) {
-                console.log(`✅ Loaded ${validResults.length}/${this.symbols.length} stocks from API`);
+                console.log(`%c✅ Successfully loaded ${validResults.length}/${this.symbols.length} stocks`, 'color: #10b981; font-weight: bold;');
+                this.lastUpdate = new Date();
                 this.renderTicker(validResults);
-                this.retryCount = 0;
             } else {
-                console.warn('⚠️ No valid data from API - using dynamic mock data');
-                this.loadDynamicMockData();
+                console.error('❌ No valid data received from API');
+                this.showErrorState();
             }
             
         } catch (error) {
-            console.error('❌ Error loading ticker data:', error);
-            
-            if (this.retryCount < this.maxRetries) {
-                this.retryCount++;
-                console.log(`🔄 Retrying... (${this.retryCount}/${this.maxRetries})`);
-                setTimeout(() => this.loadTickerData(), 2000);
-            } else {
-                console.warn('⚠️ Max retries reached - using dynamic mock data');
-                this.loadDynamicMockData();
-            }
+            console.error('❌ Fatal error loading market data:', error);
+            this.showErrorState();
+        } finally {
+            this.isLoading = false;
         }
     }
 
-    loadDynamicMockData() {
-        console.log('📊 Generating dynamic market data...');
-        
-        const mockData = this.symbols.map(symbol => {
-            // Récupérer le prix actuel ou le prix de base
-            const currentPrice = this.currentPrices[symbol] || this.basePrices[symbol];
-            
-            // Générer une variation réaliste (-2% à +2%)
-            const variationPercent = (Math.random() - 0.5) * 0.04; // -2% to +2%
-            const priceChange = currentPrice * variationPercent;
-            const newPrice = currentPrice + priceChange;
-            
-            // Mettre à jour le prix actuel
-            this.currentPrices[symbol] = newPrice;
-            
-            // Calculer le changement en pourcentage par rapport au prix de base
-            const changePercent = ((newPrice - this.basePrices[symbol]) / this.basePrices[symbol]) * 100;
-            
-            return {
-                symbol: symbol,
-                price: newPrice,
-                change: changePercent
-            };
-        });
-
-        this.renderTicker(mockData);
-    }
-
     renderTicker(data) {
+        if (!data || data.length === 0) {
+            this.showErrorState();
+            return;
+        }
+
         const tickerHTML = data.map(stock => {
             const changeClass = stock.change >= 0 ? 'positive' : 'negative';
             const changeSign = stock.change >= 0 ? '+' : '';
 
             return `
-                <div class="ticker-item">
+                <div class="ticker-item" data-symbol="${stock.symbol}">
                     <span class="ticker-symbol">${stock.symbol}</span>
                     <span class="ticker-price">$${stock.price.toFixed(2)}</span>
                     <span class="ticker-change ${changeClass}">${changeSign}${stock.change.toFixed(2)}%</span>
@@ -183,19 +192,31 @@ class MarketTicker {
             `;
         }).join('');
 
+        // Mettre à jour le contenu
         this.tickerContainer.innerHTML = tickerHTML;
+        
+        // Dupliquer pour l'effet de défilement infini
         this.duplicateTickerContent();
+
+        // Log de confirmation
+        console.log(`📊 Ticker updated at ${this.lastUpdate.toLocaleTimeString()}`);
     }
 
     duplicateTickerContent() {
-        // Duplicate content for infinite scroll effect
+        // Dupliquer le contenu pour créer un défilement infini fluide
         const content = this.tickerContainer.innerHTML;
         this.tickerContainer.innerHTML = content + content;
     }
 }
 
-// Initialize on DOM load
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// INITIALISATION AU CHARGEMENT DE LA PAGE
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
 document.addEventListener('DOMContentLoaded', () => {
-    console.log('🎬 Initializing Market Ticker...');
+    console.log('%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'color: #3B82F6; font-weight: bold;');
+    console.log('%c🎬 Market Ticker - Starting...', 'color: #3B82F6; font-weight: bold;');
+    console.log('%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'color: #3B82F6; font-weight: bold;');
+    
     window.marketTicker = new MarketTicker();
 });
