@@ -11,7 +11,7 @@ const ChatbotConfig = {
         gemini: {
             // IMPORTANT: Replace with your actual Gemini API key
             apiKey: 'AIzaSyDWbJhZm4hUls0t7qkwmDwrAZCJTLXXztU',
-            endpoint: 'https://generativelanguage.googleapis.com/v1beta',
+            endpoint: 'https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent',
             model: 'gemini-2.5-flash',
             // Supercharged parameters for premium responses
             maxOutputTokens: 8192, // 4x increase from default 2048
@@ -40,14 +40,14 @@ const ChatbotConfig = {
         
         finnhub: {
             // IMPORTANT: Replace with your actual Finnhub API key
-            apiKey: 'YOUR_FINNHUB_API_KEY_HERE',
+            apiKey: 'd45qhbpr01qieo4rfq9gd45qhbpr01qieo4rfqa0',
             endpoint: 'https://finnhub.io/api/v1',
             websocket: 'wss://ws.finnhub.io'
         },
         
         twelveData: {
             // Optional: For advanced market data
-            apiKey: 'YOUR_TWELVE_DATA_API_KEY_HERE',
+            apiKey: '57e3c785fda7424d97ab195f22263765',
             endpoint: 'https://api.twelvedata.com'
         }
     },
