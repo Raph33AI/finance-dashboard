@@ -1,182 +1,289 @@
 {
-  "definitions": {
+  "financial_terms": {
     "IPO": {
-      "term": "IPO (Initial Public Offering)",
-      "definition": "Une IPO est l'introduction en bourse d'une entreprise. C'est le processus par lequel une société privée vend ses actions au grand public pour la première fois, permettant ainsi de lever des capitaux et d'offrir de la liquidité aux actionnaires existants.",
-      "example": "En 2021, Rivian a réalisé l'une des plus grandes IPOs de l'histoire automobile avec une valorisation de 66,5 milliards de dollars.",
-      "relatedTerms": ["Lock-up Period", "Underwriter", "Prospectus"]
+      "name": "Initial Public Offering",
+      "definition": "The process by which a private company offers shares to the public for the first time",
+      "example": "When a company 'goes public', it conducts an IPO to raise capital from public investors",
+      "related": ["Stock", "Market Cap", "Underwriter"]
     },
-    
-    "REX": {
-      "term": "REX (Résultat d'Exploitation)",
-      "definition": "Le résultat d'exploitation (Operating Income en anglais) représente le bénéfice généré par les activités principales de l'entreprise, avant déduction des intérêts et impôts. Formule : Chiffre d'Affaires - Charges d'Exploitation.",
-      "example": "Si Apple réalise 394B$ de CA avec 170B$ de charges d'exploitation, son REX est de 224B$, soit une marge opérationnelle de 56.9%.",
-      "relatedTerms": ["EBITDA", "Marge opérationnelle", "EBIT"]
-    },
-    
     "P/E Ratio": {
-      "term": "Price-to-Earnings Ratio (P/E)",
-      "definition": "Le ratio cours/bénéfice mesure la valorisation d'une entreprise en comparant son prix d'action actuel à son bénéfice par action (EPS). Formule : Prix de l'action ÷ EPS. Un P/E élevé peut suggérer que le marché anticipe une forte croissance future.",
-      "example": "Tesla avec un P/E de 70 est considérée comme surévaluée comparée à Ford (P/E de 6), mais cela reflète les attentes de croissance différentes.",
-      "relatedTerms": ["PEG Ratio", "Forward P/E", "EPS"]
+      "name": "Price-to-Earnings Ratio",
+      "definition": "A valuation metric that compares a company's stock price to its earnings per share",
+      "formula": "P/E = Stock Price / Earnings Per Share",
+      "interpretation": "Higher P/E may indicate overvaluation or high growth expectations. Lower P/E may indicate undervaluation or low growth",
+      "related": ["EPS", "Valuation", "PEG Ratio"]
     },
-    
-    "Market Cap": {
-      "term": "Capitalisation Boursière (Market Capitalization)",
-      "definition": "La capitalisation boursière représente la valeur totale de toutes les actions en circulation d'une entreprise. Formule : Prix de l'action × Nombre d'actions en circulation.",
-      "categories": {
-        "Mega-cap": "> 200 milliards $",
-        "Large-cap": "10-200 milliards $",
-        "Mid-cap": "2-10 milliards $",
-        "Small-cap": "300M-2 milliards $",
-        "Micro-cap": "< 300 millions $"
-      },
-      "example": "Apple avec ~3 trillions $ est une mega-cap, tandis qu'une startup IPO à 500M$ est une small-cap."
-    },
-    
-    "Beta": {
-      "term": "Coefficient Beta",
-      "definition": "Le Beta mesure la volatilité ou le risque systématique d'une action par rapport à l'ensemble du marché (généralement le S&P 500).",
-      "interpretation": {
-        "Beta = 1": "Volatilité égale au marché",
-        "Beta > 1": "Plus volatile que le marché (ex: Beta 1.5 = 50% plus volatile)",
-        "Beta < 1": "Moins volatile que le marché",
-        "Beta négatif": "Mouvement inverse au marché (rare)"
-      },
-      "example": "NVIDIA avec un Beta de 1.7 fluctue 70% plus que le marché."
-    },
-    
     "EPS": {
-      "term": "Earnings Per Share (Bénéfice par Action)",
-      "definition": "L'EPS représente la portion du bénéfice net d'une entreprise allouée à chaque action ordinaire en circulation. Formule : (Bénéfice net - Dividendes préférentiels) ÷ Nombre moyen d'actions en circulation.",
-      "types": {
-        "Basic EPS": "Calcul simple sans dilution",
-        "Diluted EPS": "Inclut l'effet des options et convertibles",
-        "TTM EPS": "Trailing Twelve Months (12 derniers mois)"
-      },
-      "example": "Microsoft avec 72.7B$ de bénéfice et 7.4B actions a un EPS de ~9.82$"
+      "name": "Earnings Per Share",
+      "definition": "A company's net profit divided by the number of outstanding shares",
+      "formula": "EPS = Net Income / Outstanding Shares",
+      "importance": "Key indicator of company profitability on a per-share basis",
+      "related": ["P/E Ratio", "Dividends", "Net Income"]
     },
-    
+    "Market Cap": {
+      "name": "Market Capitalization",
+      "definition": "Total market value of a company's outstanding shares",
+      "formula": "Market Cap = Share Price × Outstanding Shares",
+      "categories": {
+        "Mega Cap": "> $200 billion",
+        "Large Cap": "$10-200 billion",
+        "Mid Cap": "$2-10 billion",
+        "Small Cap": "$300 million - $2 billion",
+        "Micro Cap": "< $300 million"
+      },
+      "related": ["Stock Price", "Outstanding Shares"]
+    },
     "ROE": {
-      "term": "Return on Equity (Rendement des Capitaux Propres)",
-      "definition": "Le ROE mesure la rentabilité d'une entreprise par rapport aux capitaux propres. Formule : Bénéfice net ÷ Capitaux propres × 100.",
+      "name": "Return on Equity",
+      "definition": "Measure of profitability that shows how much profit a company generates with shareholders' equity",
+      "formula": "ROE = Net Income / Shareholders' Equity × 100%",
+      "interpretation": "Higher ROE indicates better efficiency in generating returns",
+      "related": ["ROA", "ROI", "Net Income"]
+    },
+    "Dividend Yield": {
+      "name": "Dividend Yield",
+      "definition": "Annual dividend payment as a percentage of stock price",
+      "formula": "Dividend Yield = Annual Dividend per Share / Stock Price × 100%",
+      "interpretation": "Higher yield may indicate good income investment, but verify sustainability",
+      "related": ["Dividends", "Payout Ratio"]
+    },
+    "Beta": {
+      "name": "Beta Coefficient",
+      "definition": "Measure of a stock's volatility compared to the overall market",
       "interpretation": {
-        "> 20%": "Excellent - Entreprise très rentable",
-        "15-20%": "Bon - Performance solide",
-        "10-15%": "Moyen - Acceptable",
-        "< 10%": "Faible - Problème potentiel"
+        "> 1": "More volatile than market",
+        "= 1": "Moves with market",
+        "< 1": "Less volatile than market",
+        "< 0": "Inverse correlation to market"
       },
-      "example": "Apple avec un ROE de 147% démontre une utilisation exceptionnelle des capitaux propres."
+      "related": ["Volatility", "Risk", "Alpha"]
     },
-    
-    "Free Cash Flow": {
-      "term": "Free Cash Flow (FCF)",
-      "definition": "Le flux de trésorerie disponible représente la trésorerie générée par l'entreprise après avoir payé les dépenses d'exploitation et les investissements en capital. Formule : Operating Cash Flow - Capital Expenditures.",
-      "importance": "Indicateur clé de la capacité d'une entreprise à générer de la trésorerie pour rémunérer les actionnaires (dividendes, rachats d'actions) ou investir dans la croissance.",
-      "example": "Meta génère ~40B$ de FCF annuel, lui permettant d'investir massivement dans le metaverse tout en rachetant ses propres actions."
-    },
-    
     "EBITDA": {
-      "term": "Earnings Before Interest, Taxes, Depreciation and Amortization",
-      "definition": "L'EBITDA mesure la performance opérationnelle d'une entreprise en excluant les décisions financières et comptables. C'est un proxy du cash flow opérationnel.",
-      "formule": "Bénéfice Net + Intérêts + Impôts + Dépréciation + Amortissement",
-      "usage": "Utile pour comparer des entreprises dans différents pays/secteurs avec structures fiscales et de capital différentes.",
-      "limites": "Peut masquer les besoins réels en investissement (CapEx)"
+      "name": "Earnings Before Interest, Taxes, Depreciation, and Amortization",
+      "definition": "Measure of company's operating performance",
+      "formula": "EBITDA = Revenue - Operating Expenses (excluding interest, taxes, depreciation, amortization)",
+      "use_case": "Compare profitability between companies and industries",
+      "related": ["Operating Income", "Net Income", "Cash Flow"]
     },
-    
-    "DCF": {
-      "term": "Discounted Cash Flow (Flux de Trésorerie Actualisés)",
-      "definition": "Méthode de valorisation qui estime la valeur d'un investissement basée sur ses flux de trésorerie futurs attendus, actualisés à leur valeur présente.",
-      "etapes": [
-        "1. Projeter les Free Cash Flows futurs (5-10 ans)",
-        "2. Calculer la valeur terminale",
-        "3. Actualiser tous les flux au taux WACC",
-        "4. Sommer pour obtenir la valeur d'entreprise"
-      ],
-      "example": "Si on projette 10B$ de FCF/an pour 10 ans avec WACC de 8%, la valeur présente est ~67B$"
+    "RSI": {
+      "name": "Relative Strength Index",
+      "definition": "Momentum indicator measuring speed and magnitude of price changes",
+      "range": "0 to 100",
+      "interpretation": {
+        "> 70": "Overbought - potential sell signal",
+        "< 30": "Oversold - potential buy signal",
+        "50": "Neutral"
+      },
+      "period": "Typically 14 days",
+      "related": ["MACD", "Momentum", "Technical Analysis"]
+    },
+    "MACD": {
+      "name": "Moving Average Convergence Divergence",
+      "definition": "Trend-following momentum indicator showing relationship between two moving averages",
+      "components": {
+        "MACD Line": "12-day EMA - 26-day EMA",
+        "Signal Line": "9-day EMA of MACD line",
+        "Histogram": "MACD line - Signal line"
+      },
+      "signals": {
+        "Bullish": "MACD crosses above signal line",
+        "Bearish": "MACD crosses below signal line"
+      },
+      "related": ["RSI", "Moving Averages", "Technical Analysis"]
     }
   },
   
-  "investmentStrategies": {
-    "value": {
-      "name": "Value Investing",
-      "description": "Investissement dans des actions sous-évaluées par rapport à leur valeur intrinsèque.",
-      "metrics": ["P/E ratio faible", "P/B < 1", "Dividend yield élevé"],
-      "investors": ["Warren Buffett", "Benjamin Graham"],
-      "example": "Acheter une action avec P/E de 10 alors que le secteur est à 20"
+  "market_indices": {
+    "S&P 500": {
+      "name": "Standard & Poor's 500",
+      "description": "Stock market index tracking 500 largest U.S. publicly traded companies",
+      "symbol": "SPY (ETF)",
+      "weight_method": "Market-cap weighted",
+      "sectors": ["Technology", "Healthcare", "Financials", "Consumer", "Industrials"]
     },
-    
-    "growth": {
-      "name": "Growth Investing",
-      "description": "Focus sur les entreprises dont les bénéfices/revenus croissent plus rapidement que la moyenne du marché.",
-      "metrics": ["Revenue growth > 20%", "EPS growth > 15%", "Strong TAM"],
-      "investors": ["Cathie Wood", "Peter Lynch"],
-      "example": "Investir dans NVIDIA anticipant la révolution IA"
+    "NASDAQ": {
+      "name": "NASDAQ Composite",
+      "description": "Index of all stocks listed on NASDAQ exchange, heavy in technology",
+      "symbol": "QQQ (ETF)",
+      "characteristics": "Tech-heavy, growth-oriented",
+      "notable_companies": ["Apple", "Microsoft", "Amazon", "Alphabet", "Meta"]
     },
-    
-    "dividend": {
-      "name": "Dividend Investing",
-      "description": "Investissement dans des entreprises versant régulièrement des dividendes élevés.",
-      "metrics": ["Dividend yield > 3%", "Payout ratio sain", "Historique stable"],
-      "benefits": "Revenu passif régulier, moins de volatilité",
-      "example": "Coca-Cola, Procter & Gamble, Johnson & Johnson"
+    "Dow Jones": {
+      "name": "Dow Jones Industrial Average",
+      "description": "Price-weighted index of 30 prominent U.S. companies",
+      "symbol": "DIA (ETF)",
+      "weight_method": "Price-weighted",
+      "history": "Oldest U.S. market index (since 1896)"
     },
-    
-    "momentum": {
-      "name": "Momentum Investing",
-      "description": "Acheter des actions en forte hausse, parier sur la continuation de la tendance.",
+    "VIX": {
+      "name": "Volatility Index",
+      "description": "Measure of market's expectation of 30-day volatility",
+      "nickname": "Fear Index",
+      "interpretation": {
+        "< 12": "Low volatility",
+        "12-20": "Normal volatility",
+        "20-30": "Elevated volatility",
+        "> 30": "High volatility/fear"
+      }
+    }
+  },
+  
+  "investment_strategies": {
+    "Value Investing": {
+      "description": "Strategy of selecting stocks trading below their intrinsic value",
+      "key_metrics": ["P/E Ratio", "P/B Ratio", "Dividend Yield"],
+      "famous_investors": ["Warren Buffett", "Benjamin Graham"],
+      "approach": "Buy undervalued stocks with strong fundamentals and hold long-term"
+    },
+    "Growth Investing": {
+      "description": "Investing in companies expected to grow at above-average rate",
+      "key_metrics": ["Revenue Growth", "EPS Growth", "Forward P/E"],
+      "characteristics": "Higher P/E ratios, reinvest earnings, focus on future potential",
+      "sectors": ["Technology", "Healthcare", "Consumer Discretionary"]
+    },
+    "Dividend Investing": {
+      "description": "Focus on stocks that pay regular, sustainable dividends",
+      "key_metrics": ["Dividend Yield", "Payout Ratio", "Dividend Growth Rate"],
+      "benefits": ["Regular income", "Lower volatility", "Compounding returns"],
+      "target_companies": "Mature, profitable companies with stable cash flows"
+    },
+    "Momentum Trading": {
+      "description": "Strategy based on continuing trends in stock prices",
       "indicators": ["RSI", "MACD", "Moving Averages"],
-      "risk": "Volatilité élevée, timing crucial",
-      "example": "Acheter TSLA lors de breakouts au-dessus de résistances clés"
+      "timeframe": "Short to medium term",
+      "risk": "Higher risk, requires active management"
     }
   },
   
-  "riskProfiles": {
-    "conservative": {
-      "description": "Préservation du capital, volatilité minimale",
-      "allocation": "20% actions, 70% obligations, 10% cash",
-      "expectedReturn": "3-6% annuel",
-      "suitableFor": "Retraités, horizon court terme"
-    },
-    
-    "moderate": {
-      "description": "Équilibre entre croissance et sécurité",
-      "allocation": "60% actions, 35% obligations, 5% alternatives",
-      "expectedReturn": "6-10% annuel",
-      "suitableFor": "Investisseurs long terme, âge moyen"
-    },
-    
-    "aggressive": {
-      "description": "Maximisation de la croissance, tolérance élevée au risque",
-      "allocation": "90% actions (dont 30% small-caps/tech), 5% crypto, 5% cash",
-      "expectedReturn": "10-15%+ annuel",
-      "suitableFor": "Jeunes investisseurs, horizon 20+ ans"
-    }
-  },
-  
-  "sectorTrends": {
+  "sectors": {
     "Technology": {
-      "growthRate": 15,
-      "hotTopics": ["IA/ML", "Cloud Computing", "Cybersécurité"],
-      "leaders": ["MSFT", "AAPL", "NVDA", "GOOGL"]
+      "description": "Companies producing software, hardware, semiconductors, and IT services",
+      "characteristics": "High growth, innovation-driven, higher volatility",
+      "examples": ["Apple", "Microsoft", "NVIDIA", "Google"],
+      "trends": ["AI", "Cloud Computing", "Cybersecurity", "5G"]
     },
-    
     "Healthcare": {
-      "growthRate": 12,
-      "hotTopics": ["Biotech", "Telehealth", "Precision Medicine"],
-      "leaders": ["JNJ", "UNH", "PFE"]
+      "description": "Pharmaceuticals, biotech, medical devices, healthcare services",
+      "characteristics": "Defensive sector, driven by demographics and innovation",
+      "examples": ["Johnson & Johnson", "Pfizer", "UnitedHealth"],
+      "trends": ["Biotech", "Personalized Medicine", "Digital Health"]
     },
-    
-    "FinTech": {
-      "growthRate": 18,
-      "hotTopics": ["Digital Payments", "Blockchain", "Neobanks"],
-      "leaders": ["SQ", "PYPL", "V"]
+    "Financials": {
+      "description": "Banks, insurance, asset management, fintech",
+      "characteristics": "Interest rate sensitive, economic cycle dependent",
+      "examples": ["JPMorgan", "Berkshire Hathaway", "Visa"],
+      "trends": ["Digital Banking", "Blockchain", "RegTech"]
     },
-    
-    "Clean Energy": {
-      "growthRate": 20,
-      "hotTopics": ["Solar", "EVs", "Battery Tech"],
-      "leaders": ["TSLA", "ENPH", "NEE"]
+    "Consumer Discretionary": {
+      "description": "Non-essential goods and services",
+      "characteristics": "Economic cycle sensitive, driven by consumer confidence",
+      "examples": ["Amazon", "Tesla", "Nike", "Starbucks"],
+      "sub_sectors": ["Retail", "Automotive", "Entertainment", "Restaurants"]
+    },
+    "Energy": {
+      "description": "Oil, gas, renewable energy companies",
+      "characteristics": "Commodity price dependent, cyclical",
+      "examples": ["ExxonMobil", "Chevron", "NextEra Energy"],
+      "trends": ["Renewable Energy", "Electric Vehicles", "Energy Storage"]
     }
-  }
+  },
+  
+  "ipo_evaluation_criteria": {
+    "Company Fundamentals": {
+      "factors": [
+        "Revenue growth trajectory",
+        "Path to profitability",
+        "Unit economics",
+        "Cash burn rate",
+        "Competitive advantages"
+      ]
+    },
+    "Market Opportunity": {
+      "factors": [
+        "Total addressable market (TAM)",
+        "Market growth rate",
+        "Competitive landscape",
+        "Market share potential",
+        "Barriers to entry"
+      ]
+    },
+    "Management Team": {
+      "factors": [
+        "Track record of executives",
+        "Industry experience",
+        "Corporate governance",
+        "Insider ownership",
+        "Board composition"
+      ]
+    },
+    "Valuation": {
+      "factors": [
+        "IPO pricing vs comparables",
+        "Price-to-sales ratio",
+        "Growth-adjusted multiples",
+        "Post-money valuation",
+        "Dilution from offering"
+      ]
+    },
+    "Red Flags": {
+      "warnings": [
+        "Unprofitable with no clear path to profitability",
+        "Declining revenue or growth rate",
+        "High customer concentration",
+        "Significant insider selling",
+        "Complex corporate structure",
+        "Pending litigation",
+        "Regulatory uncertainties"
+      ]
+    }
+  },
+  
+  "risk_management": {
+    "Diversification": {
+      "principle": "Don't put all eggs in one basket",
+      "strategies": [
+        "Spread investments across sectors",
+        "Mix of growth and value stocks",
+        "Geographic diversification",
+        "Asset class diversification"
+      ]
+    },
+    "Position Sizing": {
+      "guideline": "Limit single position to 5-10% of portfolio",
+      "rationale": "Minimize impact of individual stock failures"
+    },
+    "Stop Loss": {
+      "definition": "Predetermined price level to exit losing position",
+      "typical_range": "7-10% below purchase price",
+      "purpose": "Limit downside risk"
+    },
+    "Rebalancing": {
+      "frequency": "Quarterly or annually",
+      "purpose": "Maintain target asset allocation",
+      "trigger": "When allocation drifts >5% from target"
+    }
+  },
+  
+  "faq": [
+    {
+      "question": "What is the best time to invest in an IPO?",
+      "answer": "There's no universally 'best' time. Many experts suggest waiting 3-6 months after IPO for price stabilization and more financial data. The lockup period expiration (typically 180 days) often creates volatility. Research the company thoroughly and invest based on fundamentals, not hype."
+    },
+    {
+      "question": "How do I evaluate if a stock is overvalued or undervalued?",
+      "answer": "Compare multiple metrics: P/E ratio vs industry average, PEG ratio (P/E divided by growth rate), Price-to-Book ratio, and DCF (Discounted Cash Flow) analysis. Also consider qualitative factors like competitive advantages, management quality, and industry trends."
+    },
+    {
+      "question": "What's the difference between market cap and enterprise value?",
+      "answer": "Market Cap = Share Price × Shares Outstanding. Enterprise Value = Market Cap + Debt - Cash. EV gives a more complete picture of company value as it accounts for debt and cash, making it better for comparing companies with different capital structures."
+    },
+    {
+      "question": "Should I invest in dividend stocks or growth stocks?",
+      "answer": "It depends on your goals. Dividend stocks provide regular income and lower volatility, suitable for income-focused or conservative investors. Growth stocks offer higher potential returns but more volatility, better for long-term capital appreciation. A balanced portfolio often includes both."
+    },
+    {
+      "question": "How much of my portfolio should be in IPOs?",
+      "answer": "IPOs are higher risk. Most financial advisors recommend limiting IPO exposure to 5-10% of your portfolio. Prioritize established companies and diversification. Only invest in IPOs you've thoroughly researched and understand."
+    }
+  ]
 }

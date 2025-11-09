@@ -1,652 +1,594 @@
-/* ========================================
-   MOTEUR PRINCIPAL IA DU CHATBOT
-   Orchestration Gemini + Analytics + IPO
-   ======================================== */
+// ============================================
+// FINANCIAL CHATBOT - AI ENGINE PREMIUM
+// Core Intelligence & Orchestration
+// ============================================
 
 class FinancialChatbotEngine {
-    constructor(apiKey, finnhubApiKey) {
-        this.gemini = new GeminiAIIntegration(apiKey);
-        this.apiClient = window.FinnhubClient ? new FinnhubClient(finnhubApiKey) : null;
-        this.ipoAnalyzer = this.apiClient ? new IPOAnalyzer(this.apiClient) : null;
-        this.analytics = this.apiClient ? new AdvancedFinancialAnalytics(this.apiClient) : null;
-        this.conversationHistory = [];
-        this.context = {};
+    constructor(config) {
+        this.config = config;
+        this.geminiAI = null;
+        this.ipoAnalyzer = null;
+        this.analytics = null;
+        this.charts = null;
         
-        console.log('🤖 FinancialChatbotEngine initialized');
-        console.log('  - Gemini:', this.gemini ? 'OK' : 'ERROR');
-        console.log('  - Finnhub:', this.apiClient ? 'OK' : 'NO API');
-        console.log('  - IPO Analyzer:', this.ipoAnalyzer ? 'OK' : 'DISABLED');
-        console.log('  - Analytics:', this.analytics ? 'OK' : 'DISABLED');
+        // Message queue for processing
+        this.messageQueue = [];
+        this.isProcessing = false;
+        
+        // Context management
+        this.currentContext = {
+            topic: null,
+            symbol: null,
+            lastIntent: null,
+            userPreferences: {}
+        };
+        
+        // Performance metrics
+        this.metrics = {
+            totalMessages: 0,
+            successfulResponses: 0,
+            errors: 0,
+            averageResponseTime: 0,
+            totalResponseTime: 0
+        };
+        
+        // Cache for frequent queries
+        this.responseCache = new Map();
+        this.cacheExpiration = 300000; // 5 minutes
+        
+        this.initialize();
     }
 
-    /**
-     * Traite un message utilisateur
-     */
-    async processMessage(userMessage) {
+    // ============================================
+    // INITIALIZATION
+    // ============================================
+    async initialize() {
         try {
-            this.addToHistory('user', userMessage);
-            
-            const intent = this.detectIntent(userMessage);
-            
-            const financialContext = await this.gatherFinancialContext(intent);
-            
-            let response;
-            
-            switch(intent.type) {
-                case 'IPO_RECOMMENDATION':
-                    response = await this.handleIPORecommendation(intent, financialContext);
-                    break;
-                
-                case 'IPO_SEARCH':
-                    response = await this.handleIPOSearch(intent, financialContext);
-                    break;
-                
-                case 'REX_ANALYSIS':
-                    response = await this.handleREXAnalysis(intent, financialContext);
-                    break;
-                
-                case 'BALANCE_SHEET':
-                    response = await this.handleBalanceSheet(intent, financialContext);
-                    break;
-                
-                case 'CASH_FLOW':
-                    response = await this.handleCashFlow(intent, financialContext);
-                    break;
-                
-                case 'FINANCIAL_ANALYSIS':
-                    response = await this.handleFinancialAnalysis(intent, financialContext);
-                    break;
-                
-                case 'STOCK_COMPARISON':
-                    response = await this.handleStockComparison(intent, financialContext);
-                    break;
-                
-                case 'MARKET_DATA':
-                    response = await this.handleMarketData(intent, financialContext);
-                    break;
-                
-                case 'NEWS_REQUEST':
-                    response = await this.handleNewsRequest(intent, financialContext);
-                    break;
-                
-                case 'PREDICTION':
-                    response = await this.handlePrediction(intent, financialContext);
-                    break;
-                
-                case 'CONCEPT_EXPLANATION':
-                    response = await this.handleConceptExplanation(intent, financialContext);
-                    break;
-                
-                default:
-                    response = await this.handleGeneralQuery(userMessage, financialContext);
+            // Initialize Gemini AI
+            if (typeof GeminiAI !== 'undefined') {
+                this.geminiAI = new GeminiAI(this.config);
+                console.log('✅ Gemini AI initialized');
             }
-            
-            this.addToHistory('assistant', response);
-            
-            return response;
+
+            // Initialize IPO Analyzer
+            if (typeof IPOAnalyzer !== 'undefined') {
+                this.ipoAnalyzer = new IPOAnalyzer(this.config);
+                console.log('✅ IPO Analyzer initialized');
+            }
+
+            // Initialize Analytics
+            if (typeof FinancialAnalytics !== 'undefined') {
+                this.analytics = new FinancialAnalytics(this.config);
+                console.log('✅ Analytics initialized');
+            }
+
+            // Initialize Charts
+            if (typeof ChatbotCharts !== 'undefined') {
+                this.charts = new ChatbotCharts(this.config);
+                console.log('✅ Charts initialized');
+            }
+
+            console.log('🚀 Financial Chatbot Engine ready!');
             
         } catch (error) {
-            console.error('Message processing error:', error);
-            return this.getErrorResponse(error);
+            console.error('❌ Engine initialization error:', error);
         }
     }
 
-    /**
-     * Détecte l'intention de l'utilisateur
-     */
+    // ============================================
+    // PROCESS USER MESSAGE
+    // ============================================
+    async processMessage(userMessage) {
+        const startTime = performance.now();
+        
+        try {
+            this.metrics.totalMessages++;
+
+            // Check cache first
+            const cachedResponse = this.checkCache(userMessage);
+            if (cachedResponse) {
+                console.log('📦 Returning cached response');
+                return cachedResponse;
+            }
+
+            // Detect intent and extract entities
+            const intent = this.detectIntent(userMessage);
+            const entities = this.extractEntities(userMessage);
+
+            // Build context
+            const context = await this.buildContext(intent, entities);
+
+            // Route to appropriate handler
+            let response;
+            switch (intent.type) {
+                case 'IPO_ANALYSIS':
+                    response = await this.handleIPOQuery(userMessage, entities, context);
+                    break;
+                    
+                case 'STOCK_ANALYSIS':
+                    response = await this.handleStockQuery(userMessage, entities, context);
+                    break;
+                    
+                case 'MARKET_OVERVIEW':
+                    response = await this.handleMarketQuery(userMessage, context);
+                    break;
+                    
+                case 'TECHNICAL_ANALYSIS':
+                    response = await this.handleTechnicalQuery(userMessage, entities, context);
+                    break;
+                    
+                case 'GENERAL_FINANCE':
+                    response = await this.handleGeneralQuery(userMessage, context);
+                    break;
+                    
+                default:
+                    response = await this.handleGenericQuery(userMessage, context);
+            }
+
+            // Add metadata
+            response.intent = intent;
+            response.entities = entities;
+            response.processingTime = performance.now() - startTime;
+
+            // Cache response
+            this.cacheResponse(userMessage, response);
+
+            // Update metrics
+            this.updateMetrics(true, response.processingTime);
+
+            // Update context
+            this.updateContext(intent, entities);
+
+            return response;
+
+        } catch (error) {
+            console.error('❌ Message processing error:', error);
+            this.updateMetrics(false, performance.now() - startTime);
+            
+            return {
+                text: this.config.errors.messages.unknown,
+                error: true,
+                chartRequests: [],
+                suggestions: []
+            };
+        }
+    }
+
+    // ============================================
+    // INTENT DETECTION
+    // ============================================
     detectIntent(message) {
         const lowerMessage = message.toLowerCase();
         
-        if (this.matchesPattern(lowerMessage, ['meilleur', 'top', 'ipo', 'recommand', 'pépite', 'opportunité ipo'])) {
-            return {
-                type: 'IPO_RECOMMENDATION',
-                params: this.extractIPOParams(lowerMessage)
-            };
+        // IPO related
+        if (this.matchesPattern(lowerMessage, [
+            'ipo', 'initial public offering', 'newly listed', 'recent listing',
+            'going public', 'public offering', 'upcoming ipo'
+        ])) {
+            return { type: 'IPO_ANALYSIS', confidence: 0.9 };
         }
-        
-        if (this.matchesPattern(lowerMessage, ['rex', 'résultat d\'exploitation', 'résultat opération', 'operating income'])) {
-            return {
-                type: 'REX_ANALYSIS',
-                params: this.extractSymbolAndYears(lowerMessage)
-            };
+
+        // Stock analysis
+        if (this.matchesPattern(lowerMessage, [
+            'analyze', 'stock', 'share', 'ticker', 'company',
+            'valuation', 'fundamental', 'earnings'
+        ]) || /\b[A-Z]{1,5}\b/.test(message)) {
+            return { type: 'STOCK_ANALYSIS', confidence: 0.85 };
         }
-        
-        if (this.matchesPattern(lowerMessage, ['bilan', 'balance sheet', 'actif', 'passif'])) {
-            return {
-                type: 'BALANCE_SHEET',
-                params: this.extractSymbolAndYears(lowerMessage)
-            };
+
+        // Market overview
+        if (this.matchesPattern(lowerMessage, [
+            'market', 'indices', 'dow', 'nasdaq', 's&p', 'sp500',
+            'market overview', 'market summary', 'market today'
+        ])) {
+            return { type: 'MARKET_OVERVIEW', confidence: 0.88 };
         }
-        
-        if (this.matchesPattern(lowerMessage, ['cash flow', 'flux de trésorerie', 'free cash flow'])) {
-            return {
-                type: 'CASH_FLOW',
-                params: this.extractSymbolAndYears(lowerMessage)
-            };
+
+        // Technical analysis
+        if (this.matchesPattern(lowerMessage, [
+            'chart', 'technical', 'rsi', 'macd', 'moving average',
+            'support', 'resistance', 'trend', 'pattern', 'indicator'
+        ])) {
+            return { type: 'TECHNICAL_ANALYSIS', confidence: 0.87 };
         }
-        
-        if (this.matchesPattern(lowerMessage, ['analyse', 'analyser', 'étude financière', 'fondamentaux'])) {
-            return {
-                type: 'FINANCIAL_ANALYSIS',
-                params: this.extractSymbol(lowerMessage)
-            };
+
+        // General finance
+        if (this.matchesPattern(lowerMessage, [
+            'what is', 'explain', 'define', 'how does', 'tell me about',
+            'p/e ratio', 'eps', 'dividend', 'beta', 'portfolio'
+        ])) {
+            return { type: 'GENERAL_FINANCE', confidence: 0.75 };
         }
-        
-        if (this.matchesPattern(lowerMessage, ['compar', 'vs', 'versus', 'entre'])) {
-            return {
-                type: 'STOCK_COMPARISON',
-                params: this.extractComparisonSymbols(lowerMessage)
-            };
-        }
-        
-        if (this.matchesPattern(lowerMessage, ['prix', 'cours', 'cotation', 'quote', 'valeur'])) {
-            return {
-                type: 'MARKET_DATA',
-                params: this.extractSymbol(lowerMessage)
-            };
-        }
-        
-        if (this.matchesPattern(lowerMessage, ['news', 'actualité', 'nouvelle', 'info'])) {
-            return {
-                type: 'NEWS_REQUEST',
-                params: this.extractSymbol(lowerMessage)
-            };
-        }
-        
-        if (this.matchesPattern(lowerMessage, ['prédic', 'prévis', 'tendance', 'futur'])) {
-            return {
-                type: 'PREDICTION',
-                params: this.extractSymbol(lowerMessage)
-            };
-        }
-        
-        if (this.matchesPattern(lowerMessage, ['qu\'est-ce', 'c\'est quoi', 'définition', 'expliqu'])) {
-            return {
-                type: 'CONCEPT_EXPLANATION',
-                concept: message
-            };
-        }
-        
-        return { type: 'GENERAL', message };
+
+        return { type: 'GENERIC', confidence: 0.5 };
     }
 
-    /**
-     * Rassemble le contexte financier nécessaire
-     */
-    async gatherFinancialContext(intent) {
-        const context = {};
-        
-        try {
-            if (!this.apiClient) return context;
-            
-            const symbol = intent.params?.symbol;
-            
-            if (symbol) {
-                const [quote, profile, financials] = await Promise.all([
-                    this.apiClient.getQuote(symbol).catch(() => null),
-                    this.apiClient.getCompanyProfile(symbol).catch(() => null),
-                    this.apiClient.getBasicFinancials(symbol).catch(() => null)
-                ]);
-                
-                if (quote) context.quote = quote;
-                if (profile) context.profile = profile;
-                if (financials) context.financials = financials;
+    // ============================================
+    // ENTITY EXTRACTION
+    // ============================================
+    extractEntities(message) {
+        const entities = {
+            symbols: [],
+            companies: [],
+            sectors: [],
+            timeframes: [],
+            metrics: [],
+            numbers: []
+        };
+
+        // Extract stock symbols (1-5 uppercase letters)
+        const symbolRegex = /\b[A-Z]{1,5}\b/g;
+        const symbols = message.match(symbolRegex) || [];
+        entities.symbols = symbols.filter(s => 
+            s.length >= 1 && s.length <= 5 && !['IPO', 'USA', 'CEO', 'CFO', 'AI'].includes(s)
+        );
+
+        // Extract timeframes
+        const timeframePatterns = {
+            '1d': /\b(today|1\s*day)\b/i,
+            '1w': /\b(week|1\s*week|7\s*days?)\b/i,
+            '1m': /\b(month|1\s*month|30\s*days?)\b/i,
+            '3m': /\b(3\s*months?|quarter)\b/i,
+            '6m': /\b(6\s*months?|half\s*year)\b/i,
+            '1y': /\b(year|1\s*year|12\s*months?)\b/i,
+            'ytd': /\b(ytd|year\s*to\s*date)\b/i
+        };
+
+        for (const [timeframe, pattern] of Object.entries(timeframePatterns)) {
+            if (pattern.test(message)) {
+                entities.timeframes.push(timeframe);
             }
-            
-        } catch (error) {
-            console.error('Context gathering error:', error);
         }
-        
+
+        // Extract metrics
+        const metricPatterns = [
+            'p/e', 'pe ratio', 'price to earnings',
+            'eps', 'earnings per share',
+            'revenue', 'sales',
+            'profit', 'net income',
+            'margin', 'profit margin',
+            'debt', 'debt to equity',
+            'roe', 'return on equity',
+            'market cap', 'market capitalization',
+            'dividend', 'dividend yield',
+            'volume', 'trading volume'
+        ];
+
+        metricPatterns.forEach(metric => {
+            if (message.toLowerCase().includes(metric)) {
+                entities.metrics.push(metric);
+            }
+        });
+
+        // Extract numbers (for price targets, percentages, etc.)
+        const numberRegex = /\$?[\d,]+\.?\d*%?/g;
+        entities.numbers = message.match(numberRegex) || [];
+
+        return entities;
+    }
+
+    // ============================================
+    // BUILD CONTEXT
+    // ============================================
+    async buildContext(intent, entities) {
+        const context = {
+            intent: intent,
+            entities: entities,
+            timestamp: Date.now()
+        };
+
+        // Add market data if available
+        if (this.analytics) {
+            try {
+                context.marketData = await this.analytics.getMarketOverview();
+            } catch (error) {
+                console.warn('Could not fetch market data:', error);
+            }
+        }
+
+        // Add IPO data for IPO-related queries
+        if (intent.type === 'IPO_ANALYSIS' && this.ipoAnalyzer) {
+            try {
+                context.ipoData = await this.ipoAnalyzer.getTopIPOs(5);
+            } catch (error) {
+                console.warn('Could not fetch IPO data:', error);
+            }
+        }
+
         return context;
     }
 
-    /**
-     * Gère les recommandations d'IPO
-     */
-    async handleIPORecommendation(intent, context) {
-        try {
-            if (!this.ipoAnalyzer) {
-                return await this.gemini.chat(
-                    "L'utilisateur demande des recommandations d'IPO. Fournis une analyse générale des IPOs prometteuses actuelles.",
-                    context
-                );
-            }
-            
-            const limit = intent.params.limit || 5;
-            const topIPOs = await this.ipoAnalyzer.findTopUpcomingIPOs(limit);
-            
-            if (topIPOs.length === 0) {
-                return {
-                    text: "😔 Aucune IPO correspondant aux critères n'est disponible actuellement. Le marché des IPOs est peut-être calme en ce moment.",
-                    type: 'text',
-                    hasChart: false
-                };
-            }
-            
-            const prompt = `Analyse ces ${topIPOs.length} IPOs prometteuses et fournis une recommandation détaillée :
+    // ============================================
+    // HANDLE IPO QUERY
+    // ============================================
+    async handleIPOQuery(message, entities, context) {
+        console.log('📊 Processing IPO query...');
 
-${JSON.stringify(topIPOs, null, 2)}
-
-Fournis :
-1. Un résumé exécutif
-2. Le top 3 avec justifications
-3. Un tableau comparatif
-4. Des actions suggérées`;
-            
-            const response = await this.gemini.chat(prompt, { ipos: topIPOs });
-            
-            response.ipoData = topIPOs;
-            response.type = 'ipo_recommendation';
-            
-            return response;
-            
-        } catch (error) {
-            console.error('IPO Recommendation error:', error);
-            return this.getErrorResponse(error);
-        }
-    }
-
-    /**
-     * Gère la recherche d'IPO
-     */
-    async handleIPOSearch(intent, context) {
-        try {
-            if (!this.ipoAnalyzer) {
-                return await this.gemini.chat("L'utilisateur recherche des IPOs spécifiques.", context);
-            }
-            
-            const results = await this.ipoAnalyzer.searchIPOs(intent.params);
-            
-            if (results.length === 0) {
-                return {
-                    text: "Aucune IPO trouvée correspondant à vos critères.",
-                    type: 'text'
-                };
-            }
-            
-            const response = await this.gemini.chat(
-                `Analyse ces IPOs trouvées selon les critères de recherche: ${JSON.stringify(results, null, 2)}`,
-                { ipos: results }
-            );
-            
-            response.ipoData = results;
-            response.type = 'ipo_search';
-            
-            return response;
-            
-        } catch (error) {
-            return this.getErrorResponse(error);
-        }
-    }
-
-    /**
-     * Gère l'analyse REX
-     */
-    async handleREXAnalysis(intent, context) {
-        try {
-            if (!this.analytics) {
-                return await this.gemini.chat(
-                    "L'utilisateur demande une analyse des résultats d'exploitation. Explique le concept de REX.",
-                    context
-                );
-            }
-            
-            const symbol = intent.params.symbol;
-            const years = intent.params.years || 5;
-            
-            if (!symbol) {
-                return {
-                    text: "Pour quelle entreprise souhaitez-vous analyser les résultats d'exploitation (REX) ?",
-                    type: 'question'
-                };
-            }
-            
-            const rexData = await this.analytics.getOperatingResults(symbol, years);
-            
-            const response = await this.gemini.analyzeREX(symbol, rexData);
-            response.rexData = rexData;
-            response.type = 'rex_analysis';
-            
-            return response;
-            
-        } catch (error) {
-            console.error('REX Analysis error:', error);
-            return this.getErrorResponse(error);
-        }
-    }
-
-    /**
-     * Gère l'analyse du bilan
-     */
-    async handleBalanceSheet(intent, context) {
-        try {
-            const symbol = intent.params.symbol;
-            const years = intent.params.years || 5;
-            
-            if (!symbol) {
-                return {
-                    text: "Pour quelle entreprise souhaitez-vous voir le bilan ?",
-                    type: 'question'
-                };
-            }
-            
-            if (!this.analytics) {
-                return await this.gemini.chat(`Analyse du bilan de ${symbol}`, context);
-            }
-            
-            const balanceData = await this.analytics.getBalanceSheet(symbol, years);
-            
-            const prompt = `Analyse ce bilan sur ${years} ans pour ${symbol} :
-
-${JSON.stringify(balanceData, null, 2)}
-
-Fournis une analyse complète.`;
-            
-            const response = await this.gemini.chat(prompt, { balance: balanceData });
-            response.balanceData = balanceData;
-            response.type = 'balance_sheet';
-            
-            return response;
-            
-        } catch (error) {
-            return this.getErrorResponse(error);
-        }
-    }
-
-    /**
-     * Gère l'analyse cash flow
-     */
-    async handleCashFlow(intent, context) {
-        try {
-            const symbol = intent.params.symbol;
-            const years = intent.params.years || 5;
-            
-            if (!symbol) {
-                return {
-                    text: "Pour quelle entreprise souhaitez-vous analyser le cash flow ?",
-                    type: 'question'
-                };
-            }
-            
-            if (!this.analytics) {
-                return await this.gemini.chat(`Analyse du cash flow de ${symbol}`, context);
-            }
-            
-            const cashFlowData = await this.analytics.getCashFlows(symbol, years);
-            
-            const prompt = `Analyse ce cash flow sur ${years} ans pour ${symbol} :
-
-${JSON.stringify(cashFlowData, null, 2)}
-
-Fournis une analyse détaillée.`;
-            
-            const response = await this.gemini.chat(prompt, { cashFlow: cashFlowData });
-            response.cashFlowData = cashFlowData;
-            response.type = 'cash_flow';
-            
-            return response;
-            
-        } catch (error) {
-            return this.getErrorResponse(error);
-        }
-    }
-
-    /**
-     * Gère l'analyse financière complète
-     */
-    async handleFinancialAnalysis(intent, context) {
-        try {
-            const symbol = intent.params.symbol;
-            
-            if (!symbol) {
-                return {
-                    text: "Quelle action souhaitez-vous que j'analyse ?",
-                    type: 'question'
-                };
-            }
-            
-            let fullContext = { ...context };
-            
-            if (this.analytics) {
-                const [rex, balance, cashFlow] = await Promise.all([
-                    this.analytics.getOperatingResults(symbol, 5).catch(() => null),
-                    this.analytics.getBalanceSheet(symbol, 5).catch(() => null),
-                    this.analytics.getCashFlows(symbol, 5).catch(() => null)
-                ]);
+        let aiResponse = await this.geminiAI.generateResponse(message, context);
+        
+        // If specific symbol mentioned, analyze it
+        if (entities.symbols.length > 0 && this.ipoAnalyzer) {
+            const symbol = entities.symbols[0];
+            try {
+                const ipoAnalysis = await this.ipoAnalyzer.analyzeIPO(symbol);
                 
-                if (rex) fullContext.rex = rex;
-                if (balance) fullContext.balance = balance;
-                if (cashFlow) fullContext.cashFlow = cashFlow;
-            }
-            
-            const response = await this.gemini.analyzeFinancials(symbol, fullContext);
-            response.type = 'financial_analysis';
-            
-            return response;
-            
-        } catch (error) {
-            return this.getErrorResponse(error);
-        }
-    }
-
-    /**
-     * Gère la comparaison d'actions
-     */
-    async handleStockComparison(intent, context) {
-        try {
-            const symbols = intent.params.symbols;
-            
-            if (!symbols || symbols.length < 2) {
-                return {
-                    text: "Quelles actions souhaitez-vous comparer ? (format: AAPL vs MSFT)",
-                    type: 'question'
-                };
-            }
-            
-            if (!this.apiClient) {
-                return await this.gemini.chat(`Compare ${symbols.join(' vs ')}`, context);
-            }
-            
-            const dataPromises = symbols.map(async (symbol) => {
-                const [quote, profile, financials] = await Promise.all([
-                    this.apiClient.getQuote(symbol).catch(() => null),
-                    this.apiClient.getCompanyProfile(symbol).catch(() => null),
-                    this.apiClient.getBasicFinancials(symbol).catch(() => null)
-                ]);
-                
-                return { symbol, quote, profile, financials };
-            });
-            
-            const comparisonData = await Promise.all(dataPromises);
-            
-            const response = await this.gemini.compareCompanies(symbols, comparisonData);
-            response.comparisonData = comparisonData;
-            response.type = 'comparison';
-            
-            return response;
-            
-        } catch (error) {
-            return this.getErrorResponse(error);
-        }
-    }
-
-    /**
-     * Gère les données de marché
-     */
-    async handleMarketData(intent, context) {
-        try {
-            const symbol = intent.params.symbol;
-            
-            if (!symbol) {
-                return {
-                    text: "Quel symbole boursier souhaitez-vous consulter ?",
-                    type: 'question'
-                };
-            }
-            
-            const response = await this.gemini.chat(
-                `Fournis les données de marché en temps réel pour ${symbol} de manière claire et structurée.`,
-                context
-            );
-            
-            response.type = 'market_data';
-            return response;
-            
-        } catch (error) {
-            return this.getErrorResponse(error);
-        }
-    }
-
-    /**
-     * Gère les requêtes d'actualités
-     */
-    async handleNewsRequest(intent, context) {
-        try {
-            const symbol = intent.params.symbol;
-            let news = [];
-            
-            if (this.apiClient) {
-                if (symbol) {
-                    const today = new Date();
-                    const from = new Date(today.setDate(today.getDate() - 7)).toISOString().split('T')[0];
-                    const to = new Date().toISOString().split('T')[0];
-                    news = await this.apiClient.getCompanyNews(symbol, from, to).catch(() => []);
-                } else {
-                    news = await this.apiClient.getMarketNews('general').catch(() => []);
+                if (ipoAnalysis) {
+                    // Enhance AI response with detailed IPO analysis
+                    aiResponse.text += `\n\n📊 **Detailed IPO Analysis for ${symbol}:**\n`;
+                    aiResponse.text += this.formatIPOAnalysis(ipoAnalysis);
+                    
+                    // Add chart request if not already present
+                    if (!aiResponse.chartRequests || aiResponse.chartRequests.length === 0) {
+                        aiResponse.chartRequests = [{
+                            type: 'line',
+                            symbol: symbol,
+                            data: 'ipo'
+                        }];
+                    }
                 }
+            } catch (error) {
+                console.warn('IPO analysis failed:', error);
             }
-            
-            const prompt = news.length > 0 
-                ? `Résume ces actualités financières : ${JSON.stringify(news.slice(0, 10), null, 2)}`
-                : "L'utilisateur demande des actualités financières.";
-            
-            const response = await this.gemini.chat(prompt, { news });
-            response.newsData = news;
-            response.type = 'news';
-            
-            return response;
-            
-        } catch (error) {
-            return this.getErrorResponse(error);
         }
+
+        // Add IPO-specific suggestions
+        aiResponse.suggestions = this.config.suggestions.followUp.ipo;
+
+        return aiResponse;
     }
 
-    /**
-     * Gère les prédictions
-     */
-    async handlePrediction(intent, context) {
-        try {
-            const symbol = intent.params.symbol;
-            
-            if (!symbol) {
-                return {
-                    text: "Pour quelle action souhaitez-vous une analyse prédictive ?",
-                    type: 'question'
-                };
+    // ============================================
+    // HANDLE STOCK QUERY
+    // ============================================
+    async handleStockQuery(message, entities, context) {
+        console.log('📈 Processing stock query...');
+
+        // Add stock data to context if symbol is present
+        if (entities.symbols.length > 0 && this.analytics) {
+            const symbol = entities.symbols[0];
+            try {
+                const stockData = await this.analytics.getStockData(symbol);
+                context.stockData = stockData;
+            } catch (error) {
+                console.warn('Could not fetch stock data:', error);
             }
-            
-            let timeSeries = [];
-            if (this.apiClient) {
-                const data = await this.apiClient.getTimeSeries(symbol, '1day', 365).catch(() => null);
-                if (data && data.data) {
-                    timeSeries = data.data;
-                }
-            }
-            
-            const response = await this.gemini.predictTrends(symbol, timeSeries, '6 mois');
-            response.type = 'prediction';
-            
-            return response;
-            
-        } catch (error) {
-            return this.getErrorResponse(error);
         }
+
+        const aiResponse = await this.geminiAI.generateResponse(message, context);
+        
+        // Add stock-specific suggestions
+        aiResponse.suggestions = this.config.suggestions.followUp.stock;
+
+        return aiResponse;
     }
 
-    /**
-     * Gère l'explication de concepts
-     */
-    async handleConceptExplanation(intent, context) {
-        const response = await this.gemini.explainConcept(intent.concept);
-        response.type = 'educational';
-        return response;
+    // ============================================
+    // HANDLE MARKET QUERY
+    // ============================================
+    async handleMarketQuery(message, context) {
+        console.log('🌐 Processing market query...');
+
+        const aiResponse = await this.geminiAI.generateResponse(message, context);
+        
+        // Add market chart if not present
+        if (!aiResponse.chartRequests || aiResponse.chartRequests.length === 0) {
+            aiResponse.chartRequests = [{
+                type: 'line',
+                symbol: 'SPY', // S&P 500 ETF as market proxy
+                data: '1m'
+            }];
+        }
+
+        // Add market-specific suggestions
+        aiResponse.suggestions = this.config.suggestions.followUp.market;
+
+        return aiResponse;
     }
 
-    /**
-     * Gère les requêtes générales
-     */
+    // ============================================
+    // HANDLE TECHNICAL QUERY
+    // ============================================
+    async handleTechnicalQuery(message, entities, context) {
+        console.log('📊 Processing technical analysis query...');
+
+        const aiResponse = await this.geminiAI.generateResponse(message, context);
+        
+        // Ensure candlestick chart for technical analysis
+        if (entities.symbols.length > 0) {
+            const symbol = entities.symbols[0];
+            const timeframe = entities.timeframes[0] || '3m';
+            
+            aiResponse.chartRequests = [{
+                type: 'candlestick',
+                symbol: symbol,
+                data: timeframe,
+                indicators: ['sma', 'rsi', 'macd'] // Add technical indicators
+            }];
+        }
+
+        return aiResponse;
+    }
+
+    // ============================================
+    // HANDLE GENERAL FINANCE QUERY
+    // ============================================
     async handleGeneralQuery(message, context) {
-        const response = await this.gemini.chat(message, context);
-        response.type = 'general';
-        return response;
+        console.log('💡 Processing general finance query...');
+
+        const aiResponse = await this.geminiAI.generateResponse(message, context);
+        
+        // Add initial suggestions for follow-up
+        aiResponse.suggestions = this.config.suggestions.initial;
+
+        return aiResponse;
     }
 
-    /**
-     * Utilitaires de détection
-     */
-    matchesPattern(message, patterns) {
-        return patterns.some(pattern => message.includes(pattern));
+    // ============================================
+    // HANDLE GENERIC QUERY
+    // ============================================
+    async handleGenericQuery(message, context) {
+        console.log('🤔 Processing generic query...');
+
+        const aiResponse = await this.geminiAI.generateResponse(message, context);
+        
+        // Add initial suggestions
+        aiResponse.suggestions = this.config.suggestions.initial;
+
+        return aiResponse;
     }
 
-    extractSymbol(message) {
-        const symbolMatch = message.match(/\b([A-Z]{1,5})\b/);
-        return { symbol: symbolMatch ? symbolMatch[0] : null };
+    // ============================================
+    // FORMAT IPO ANALYSIS
+    // ============================================
+    formatIPOAnalysis(analysis) {
+        let formatted = '';
+        
+        formatted += `**Overall Score:** ${analysis.score}/100 `;
+        formatted += analysis.score >= 75 ? '🌟 (High Potential)\n' : 
+                     analysis.score >= 60 ? '⭐ (Medium Potential)\n' : 
+                     '⚠️ (Lower Potential)\n';
+        
+        formatted += `\n**Score Breakdown:**\n`;
+        formatted += `• Financial Health: ${analysis.breakdown.financial}/100\n`;
+        formatted += `• Market Position: ${analysis.breakdown.market}/100\n`;
+        formatted += `• Valuation: ${analysis.breakdown.valuation}/100\n`;
+        formatted += `• Growth Potential: ${analysis.breakdown.growth}/100\n`;
+        formatted += `• Market Momentum: ${analysis.breakdown.momentum}/100\n`;
+        
+        if (analysis.strengths && analysis.strengths.length > 0) {
+            formatted += `\n**Key Strengths:**\n`;
+            analysis.strengths.forEach(s => formatted += `✓ ${s}\n`);
+        }
+        
+        if (analysis.risks && analysis.risks.length > 0) {
+            formatted += `\n**Key Risks:**\n`;
+            analysis.risks.forEach(r => formatted += `⚠️ ${r}\n`);
+        }
+        
+        return formatted;
     }
 
-    extractSymbolAndYears(message) {
-        const symbol = this.extractSymbol(message).symbol;
-        const yearsMatch = message.match(/(\d+)\s*(an|année|year)/i);
-        const years = yearsMatch ? parseInt(yearsMatch[1]) : 5;
-        return { symbol, years };
+    // ============================================
+    // UTILITY: PATTERN MATCHING
+    // ============================================
+    matchesPattern(text, patterns) {
+        return patterns.some(pattern => text.includes(pattern));
     }
 
-    extractComparisonSymbols(message) {
-        const symbols = message.match(/\b([A-Z]{1,5})\b/g);
-        return { symbols: symbols || [] };
+    // ============================================
+    // CACHE MANAGEMENT
+    // ============================================
+    checkCache(message) {
+        const cacheKey = this.getCacheKey(message);
+        const cached = this.responseCache.get(cacheKey);
+        
+        if (cached && Date.now() - cached.timestamp < this.cacheExpiration) {
+            return cached.response;
+        }
+        
+        return null;
     }
 
-    extractIPOParams(message) {
-        const numberMatch = message.match(/(\d+)/);
-        const limit = numberMatch ? parseInt(numberMatch[1]) : 5;
-        return { limit };
-    }
-
-    /**
-     * Gestion de l'historique
-     */
-    addToHistory(role, content) {
-        this.conversationHistory.push({
-            role,
-            content: typeof content === 'string' ? content : content.text,
-            timestamp: new Date()
+    cacheResponse(message, response) {
+        const cacheKey = this.getCacheKey(message);
+        this.responseCache.set(cacheKey, {
+            response: response,
+            timestamp: Date.now()
         });
         
-        if (this.conversationHistory.length > 50) {
-            this.conversationHistory = this.conversationHistory.slice(-50);
+        // Cleanup old cache entries
+        if (this.responseCache.size > 100) {
+            const firstKey = this.responseCache.keys().next().value;
+            this.responseCache.delete(firstKey);
         }
     }
 
-    /**
-     * Réponse d'erreur
-     */
-    getErrorResponse(error) {
-        console.error('Error:', error);
+    getCacheKey(message) {
+        return message.toLowerCase().trim().replace(/\s+/g, '_');
+    }
+
+    // ============================================
+    // CONTEXT MANAGEMENT
+    // ============================================
+    updateContext(intent, entities) {
+        this.currentContext.lastIntent = intent.type;
+        
+        if (entities.symbols.length > 0) {
+            this.currentContext.symbol = entities.symbols[0];
+        }
+        
+        if (intent.type === 'IPO_ANALYSIS') {
+            this.currentContext.topic = 'ipo';
+        } else if (intent.type === 'STOCK_ANALYSIS') {
+            this.currentContext.topic = 'stock';
+        } else if (intent.type === 'MARKET_OVERVIEW') {
+            this.currentContext.topic = 'market';
+        }
+    }
+
+    // ============================================
+    // METRICS
+    // ============================================
+    updateMetrics(success, responseTime) {
+        if (success) {
+            this.metrics.successfulResponses++;
+        } else {
+            this.metrics.errors++;
+        }
+        
+        this.metrics.totalResponseTime += responseTime;
+        this.metrics.averageResponseTime = 
+            this.metrics.totalResponseTime / this.metrics.totalMessages;
+    }
+
+    getMetrics() {
         return {
-            text: "😔 Désolé, une erreur s'est produite lors du traitement de votre demande. Pouvez-vous reformuler ou réessayer ?",
-            type: 'error',
-            hasChart: false,
-            error: error.message
+            ...this.metrics,
+            successRate: this.metrics.totalMessages > 0 
+                ? (this.metrics.successfulResponses / this.metrics.totalMessages * 100).toFixed(2) + '%'
+                : '0%',
+            averageResponseTime: this.metrics.averageResponseTime.toFixed(2) + 'ms'
         };
     }
 
-    /**
-     * Réinitialise la conversation
-     */
-    resetConversation() {
-        this.conversationHistory = [];
-        this.gemini.resetConversation();
-        this.context = {};
+    // ============================================
+    // CLEAR DATA
+    // ============================================
+    clearCache() {
+        this.responseCache.clear();
+        console.log('🧹 Cache cleared');
+    }
+
+    clearHistory() {
+        if (this.geminiAI) {
+            this.geminiAI.clearHistory();
+        }
+        this.currentContext = {
+            topic: null,
+            symbol: null,
+            lastIntent: null,
+            userPreferences: {}
+        };
+        console.log('🧹 History cleared');
+    }
+
+    reset() {
+        this.clearCache();
+        this.clearHistory();
+        this.metrics = {
+            totalMessages: 0,
+            successfulResponses: 0,
+            errors: 0,
+            averageResponseTime: 0,
+            totalResponseTime: 0
+        };
+        console.log('🔄 Engine reset');
     }
 }
 
-window.FinancialChatbotEngine = FinancialChatbotEngine;
+// ============================================
+// EXPORT
+// ============================================
+if (typeof module !== 'undefined' && module.exports) {
+    module.exports = FinancialChatbotEngine;
+}

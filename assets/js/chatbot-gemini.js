@@ -1,281 +1,441 @@
-/* ========================================
-   GOOGLE GEMINI 2.5 FLASH INTEGRATION
-   Version finale corrigée
-   ======================================== */
+// ============================================
+// GEMINI AI INTEGRATION - SUPERCHARGED
+// Ultra-Premium AI with Enhanced Prompts
+// ============================================
 
-class GeminiAIIntegration {
-    constructor(apiKey) {
-        this.apiKey = apiKey;
-        this.baseURL = 'https://generativelanguage.googleapis.com/v1beta';
-        this.model = 'gemini-2.5-flash';  // ✅ MODÈLE CORRECT
+class GeminiAI {
+    constructor(config) {
+        this.config = config;
+        this.apiKey = config.api.gemini.apiKey;
+        this.endpoint = config.api.gemini.endpoint;
         this.conversationHistory = [];
-        this.systemContext = this.buildSystemContext();
-        this.maxHistoryLength = 10;
+        this.contextWindow = [];
+        this.maxHistorySize = 10;
         
-        console.log('✅ Gemini 2.5 Flash initialized');
+        // Performance tracking
+        this.requestCount = 0;
+        this.totalTokens = 0;
+        
+        // Rate limiting
+        this.lastRequestTime = 0;
+        this.minRequestInterval = 1000; // 1 second between requests
+        
+        this.initializeSystemPrompt();
     }
 
-    buildSystemContext() {
-        return `Tu es Aurelia, un expert financier IA.
+    // ============================================
+    // SYSTEM PROMPT - ULTRA-OPTIMIZED
+    // ============================================
+    initializeSystemPrompt() {
+        this.systemPrompt = `You are an ELITE AI Financial Assistant with deep expertise in:
 
-MISSION: Fournir des analyses financières précises, chiffrées et actionnables.
+**CORE COMPETENCIES:**
+1. **IPO Analysis** - Comprehensive evaluation of Initial Public Offerings
+2. **Market Analysis** - Real-time market trends and sector insights
+3. **Technical Analysis** - Chart patterns, indicators (RSI, MACD, Bollinger Bands)
+4. **Fundamental Analysis** - Financial statements, valuation metrics, ratios
+5. **Quantitative Finance** - Risk models, portfolio optimization, derivatives
+6. **M&A Advisory** - Mergers, acquisitions, corporate restructuring
+7. **Economic Indicators** - GDP, inflation, employment, interest rates
 
-EXPERTISES: Analyse financière, IPOs, REX, Valorisation, Trading
+**RESPONSE GUIDELINES:**
+✅ **Professional & Precise** - Use financial terminology accurately
+✅ **Data-Driven** - Back claims with metrics, ratios, and numbers
+✅ **Actionable Insights** - Provide clear recommendations
+✅ **Chart Integration** - Request charts when relevant (ALWAYS include [CHART_REQUEST] tag)
+✅ **Structured Format** - Use bullet points, sections, and emphasis
+✅ **Risk Awareness** - Always mention risks and limitations
 
-STYLE:
-- Structuré avec sections claires
-- Chiffres et données concrètes
-- Emojis pour la clarté
-- Toujours terminer par "Actions suggérées:" avec 3 points
+**CHART REQUEST FORMAT:**
+When analysis would benefit from visualization, include:
+[CHART_REQUEST: type="{TYPE}", symbol="{SYMBOL}", data="{DATA}"]
 
-FORMAT GRAPHIQUE (si pertinent):
-GRAPHIQUE_DATA:
-{
-  "type": "line",
-  "title": "Titre",
-  "labels": ["2020", "2021", "2022"],
-  "datasets": [{"label": "Revenue", "data": [100, 120, 150], "color": "#3b82f6"}],
-  "insights": ["Croissance de 50%"],
-  "formatValue": "$"
-}
+Types: line, bar, candlestick, area, pie, radar
+Example: [CHART_REQUEST: type="candlestick", symbol="AAPL", data="6m"]
 
-RÈGLES:
-- Cite sources
-- Ajoute disclaimer "Ceci n'est pas un conseil en investissement"
-- Reste objectif`;
+**RESPONSE STRUCTURE:**
+📊 **Summary** - Quick overview (2-3 sentences)
+📈 **Analysis** - Detailed breakdown with metrics
+💡 **Insights** - Key takeaways
+⚠️ **Risks** - Potential concerns
+🎯 **Recommendation** - Clear action items
+
+**EXAMPLE RESPONSES:**
+
+**User:** "Analyze AAPL stock"
+
+**Assistant:**
+📊 **Summary**
+Apple Inc. (AAPL) is currently trading at $178.45, showing strong momentum with +2.3% gain today. Market cap: $2.8T, making it one of the largest tech companies globally.
+
+📈 **Technical Analysis**
+• **Price Action:** Breaking above 50-day SMA ($175.20)
+• **RSI:** 62 (neutral to bullish territory)
+• **MACD:** Bullish crossover detected
+• **Support:** $172.50 | **Resistance:** $182.00
+• **Volume:** Above average (+15% vs 30-day avg)
+
+[CHART_REQUEST: type="candlestick", symbol="AAPL", data="3m"]
+
+📈 **Fundamental Metrics**
+• **P/E Ratio:** 29.5 (premium vs sector avg 24.3)
+• **Revenue Growth:** +8.2% YoY
+• **Profit Margin:** 26.3% (excellent)
+• **ROE:** 147% (exceptional capital efficiency)
+• **Debt/Equity:** 1.8 (manageable leverage)
+
+💡 **Key Insights**
+✓ Services segment driving growth (+16% YoY)
+✓ iPhone sales stabilizing after seasonal dip
+✓ Vision Pro launch creating new revenue stream
+✓ Strong institutional ownership (61%)
+
+⚠️ **Risks**
+⚠️ Regulatory scrutiny in EU (App Store practices)
+⚠️ China exposure (~19% of revenue)
+⚠️ Premium valuation leaves little margin for error
+⚠️ Slowing iPhone upgrade cycles
+
+🎯 **Recommendation**
+**HOLD/BUY** - Strong fundamentals justify premium valuation. Consider entry on dips toward $172 support. Long-term outlook positive driven by services growth and ecosystem expansion.
+
+---
+
+**User:** "Show me high-potential IPOs"
+
+**Assistant:**
+📊 **Top High-Potential IPOs (2024)**
+
+**1. ARM Holdings (ARM) - Score: 87/100** 🌟
+• **Sector:** Semiconductors
+• **IPO Price:** $51 | **Current:** $68 (+33%)
+• **Market Cap:** $70B
+• **Strengths:** AI chip demand, 99% smartphone market share
+• **Valuation:** 25x forward sales (reasonable for growth)
+• **Risks:** China exposure, competitive threats
+
+[CHART_REQUEST: type="line", symbol="ARM", data="ipo"]
+
+**2. Instacart (CART) - Score: 76/100**
+• **Sector:** E-commerce/Delivery
+• **IPO Price:** $30 | **Current:** $35 (+17%)
+• **Market Cap:** $9.3B
+• **Strengths:** Market leader, profitable, ad revenue growth
+• **Valuation:** 3.2x forward revenue (attractive)
+• **Risks:** Competition from DoorDash, Uber
+
+**3. Klaviyo (KVYO) - Score: 82/100** 🚀
+• **Sector:** Marketing SaaS
+• **IPO Price:** $30 | **Current:** $38 (+27%)
+• **Market Cap:** $5.1B
+• **Strengths:** 130K customers, 50% revenue growth, AI integration
+• **Valuation:** 8.5x forward revenue (premium but justified)
+• **Risks:** Market saturation, customer churn
+
+💡 **Investment Strategy**
+✓ Diversify across 2-3 IPOs to manage risk
+✓ Wait for post-IPO lockup expiration volatility
+✓ Focus on profitable or near-profitable companies
+✓ Prioritize sectors with secular tailwinds (AI, cloud, fintech)
+
+⚠️ **IPO-Specific Risks**
+⚠️ Limited financial history
+⚠️ Lockup expirations can trigger selling pressure
+⚠️ IPO pricing may be inflated
+⚠️ Market volatility impact amplified
+
+**NOW, RESPOND TO USER QUERIES FOLLOWING THIS STRUCTURE.**`;
     }
 
-    async chat(userMessage, financialContext = null) {
+    // ============================================
+    // GENERATE RESPONSE
+    // ============================================
+    async generateResponse(userMessage, context = {}) {
         try {
-            const fullMessage = this.buildFullMessage(userMessage, financialContext);
-            
-            const contents = [{
+            // Validate API key
+            if (!this.apiKey || this.apiKey === 'YOUR_GEMINI_API_KEY_HERE') {
+                throw new Error('Gemini API key not configured. Please add your API key in chatbot-config.js');
+            }
+
+            // Rate limiting
+            await this.enforceRateLimit();
+
+            // Build enhanced prompt with context
+            const enhancedPrompt = this.buildEnhancedPrompt(userMessage, context);
+
+            // Make API request
+            const response = await this.makeGeminiRequest(enhancedPrompt);
+
+            // Process and enhance response
+            const processedResponse = this.processResponse(response);
+
+            // Update conversation history
+            this.updateHistory(userMessage, processedResponse);
+
+            // Track usage
+            this.trackUsage(response);
+
+            return processedResponse;
+
+        } catch (error) {
+            console.error('Gemini AI Error:', error);
+            return this.handleError(error);
+        }
+    }
+
+    // ============================================
+    // BUILD ENHANCED PROMPT WITH CONTEXT
+    // ============================================
+    buildEnhancedPrompt(userMessage, context) {
+        let prompt = this.systemPrompt + '\n\n';
+
+        // Add market context if available
+        if (context.marketData) {
+            prompt += `**CURRENT MARKET CONTEXT:**\n`;
+            prompt += `• S&P 500: ${context.marketData.sp500 || 'N/A'}\n`;
+            prompt += `• NASDAQ: ${context.marketData.nasdaq || 'N/A'}\n`;
+            prompt += `• Volatility (VIX): ${context.marketData.vix || 'N/A'}\n`;
+            prompt += `• Market Sentiment: ${context.marketData.sentiment || 'Neutral'}\n\n`;
+        }
+
+        // Add IPO context if available
+        if (context.ipoData) {
+            prompt += `**RECENT IPO DATA:**\n`;
+            context.ipoData.forEach(ipo => {
+                prompt += `• ${ipo.symbol}: ${ipo.name} - Score: ${ipo.score}/100\n`;
+            });
+            prompt += '\n';
+        }
+
+        // Add conversation history (last 3 exchanges for context)
+        if (this.conversationHistory.length > 0) {
+            prompt += `**CONVERSATION HISTORY:**\n`;
+            const recentHistory = this.conversationHistory.slice(-3);
+            recentHistory.forEach(entry => {
+                prompt += `User: ${entry.user}\n`;
+                prompt += `Assistant: ${entry.assistant.substring(0, 200)}...\n\n`;
+            });
+        }
+
+        // Add current user message
+        prompt += `**CURRENT USER QUERY:**\n${userMessage}\n\n`;
+        
+        // Explicit instruction for charts
+        prompt += `**INSTRUCTIONS:**\n`;
+        prompt += `1. Analyze the query thoroughly\n`;
+        prompt += `2. If visualization would help, include [CHART_REQUEST] tag\n`;
+        prompt += `3. Provide comprehensive response following the structure\n`;
+        prompt += `4. Be specific with numbers and metrics\n`;
+        prompt += `5. Always include risk assessment\n\n`;
+        
+        prompt += `**YOUR RESPONSE:**`;
+
+        return prompt;
+    }
+
+    // ============================================
+    // MAKE GEMINI API REQUEST
+    // ============================================
+    async makeGeminiRequest(prompt) {
+        const requestBody = {
+            contents: [{
                 parts: [{
-                    text: `${this.systemContext}\n\nQuestion: ${fullMessage}`
+                    text: prompt
                 }]
-            }];
+            }],
+            generationConfig: {
+                temperature: this.config.api.gemini.temperature,
+                topK: this.config.api.gemini.topK,
+                topP: this.config.api.gemini.topP,
+                maxOutputTokens: this.config.api.gemini.maxOutputTokens,
+                stopSequences: []
+            },
+            safetySettings: this.config.api.gemini.safetySettings
+        };
 
-            const url = `${this.baseURL}/models/${this.model}:generateContent?key=${this.apiKey}`;
-            
-            console.log('📡 Appel Gemini 2.5 Flash...');
-
-            const response = await fetch(url, {
+        const response = await fetch(
+            `${this.endpoint}?key=${this.apiKey}`,
+            {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({
-                    contents: contents,
-                    generationConfig: {
-                        temperature: 0.7,
-                        topK: 40,
-                        topP: 0.95,
-                        maxOutputTokens: 2048,
-                        candidateCount: 1
-                    },
-                    safetySettings: [
-                        {
-                            category: "HARM_CATEGORY_HARASSMENT",
-                            threshold: "BLOCK_MEDIUM_AND_ABOVE"
-                        },
-                        {
-                            category: "HARM_CATEGORY_HATE_SPEECH",
-                            threshold: "BLOCK_MEDIUM_AND_ABOVE"
-                        },
-                        {
-                            category: "HARM_CATEGORY_SEXUALLY_EXPLICIT",
-                            threshold: "BLOCK_MEDIUM_AND_ABOVE"
-                        },
-                        {
-                            category: "HARM_CATEGORY_DANGEROUS_CONTENT",
-                            threshold: "BLOCK_MEDIUM_AND_ABOVE"
-                        }
-                    ]
-                })
-            });
+                body: JSON.stringify(requestBody)
+            }
+        );
 
-            if (!response.ok) {
-                const errorText = await response.text();
-                console.error('❌ Gemini API Error:', errorText);
-                throw new Error(`Gemini API Error ${response.status}: ${errorText}`);
+        if (!response.ok) {
+            const errorData = await response.json().catch(() => ({}));
+            throw new Error(`Gemini API Error: ${response.status} - ${errorData.error?.message || 'Unknown error'}`);
+        }
+
+        return await response.json();
+    }
+
+    // ============================================
+    // PROCESS RESPONSE
+    // ============================================
+    processResponse(apiResponse) {
+        try {
+            const candidate = apiResponse.candidates?.[0];
+            
+            if (!candidate) {
+                throw new Error('No response candidate received');
             }
 
-            const data = await response.json();
-            console.log('✅ Réponse reçue de Gemini 2.5 Flash');
-
-            if (!data.candidates || data.candidates.length === 0) {
-                throw new Error('Aucune réponse de Gemini');
+            // Check for safety blocks
+            if (candidate.finishReason === 'SAFETY') {
+                return {
+                    text: "I apologize, but I cannot provide a response to that query due to safety guidelines. Please rephrase your question.",
+                    blocked: true
+                };
             }
 
-            const candidate = data.candidates[0];
+            const text = candidate.content?.parts?.[0]?.text || '';
             
-            if (!candidate.content || !candidate.content.parts || candidate.content.parts.length === 0) {
-                throw new Error('Réponse Gemini vide');
+            if (!text) {
+                throw new Error('Empty response received');
             }
 
-            const assistantMessage = candidate.content.parts[0].text;
+            // Extract chart requests
+            const chartRequests = this.extractChartRequests(text);
 
-            this.conversationHistory.push({
-                role: 'user',
-                message: userMessage,
-                timestamp: new Date()
-            });
-            
-            this.conversationHistory.push({
-                role: 'assistant',
-                message: assistantMessage,
-                timestamp: new Date()
-            });
-            
-            this.limitHistory();
+            // Clean text (remove chart request tags)
+            const cleanText = text.replace(/\[CHART_REQUEST:.*?\]/g, '').trim();
 
-            return this.parseResponse(assistantMessage);
+            return {
+                text: cleanText,
+                chartRequests: chartRequests,
+                tokens: apiResponse.usageMetadata || {},
+                blocked: false
+            };
 
         } catch (error) {
-            console.error('❌ Chat Error:', error);
-            throw error;
+            console.error('Error processing response:', error);
+            throw new Error('Failed to process AI response');
         }
     }
 
-    buildFullMessage(message, context) {
-        if (!context) return message;
+    // ============================================
+    // EXTRACT CHART REQUESTS
+    // ============================================
+    extractChartRequests(text) {
+        const chartRegex = /\[CHART_REQUEST:\s*type="([^"]+)",\s*symbol="([^"]+)",\s*data="([^"]+)"\]/g;
+        const requests = [];
+        let match;
 
-        let enriched = message + '\n\nDONNÉES DISPONIBLES:\n';
-
-        if (context.quote) {
-            enriched += `Prix: $${context.quote.c.toFixed(2)} (${context.quote.dp >= 0 ? '+' : ''}${context.quote.dp.toFixed(2)}%)\n`;
+        while ((match = chartRegex.exec(text)) !== null) {
+            requests.push({
+                type: match[1],
+                symbol: match[2],
+                data: match[3]
+            });
         }
 
-        if (context.profile) {
-            enriched += `Entreprise: ${context.profile.name}\n`;
-            enriched += `Secteur: ${context.profile.finnhubIndustry || 'N/A'}\n`;
-            enriched += `Pays: ${context.profile.country || 'N/A'}\n`;
-        }
-
-        if (context.financials && context.financials.metric) {
-            const m = context.financials.metric;
-            enriched += `P/E: ${m.peNormalizedAnnual || 'N/A'}, Beta: ${m.beta || 'N/A'}\n`;
-        }
-
-        if (context.rex) {
-            enriched += `REX: ${context.rex.years} années de données disponibles\n`;
-        }
-
-        return enriched;
+        return requests;
     }
 
-    parseResponse(response) {
-        const result = {
-            text: response,
-            hasChart: false,
-            chartData: [],
-            insights: [],
-            actions: [],
-            tables: [],
-            hasDisclaimer: response.toLowerCase().includes('conseil') || response.includes('DYOR')
-        };
-
-        // Extraction graphique
-        try {
-            const chartMatch = response.match(/GRAPHIQUE_DATA:\s*\{[\s\S]*?\}/);
-            if (chartMatch) {
-                const chartData = JSON.parse(chartMatch[0].replace('GRAPHIQUE_DATA:', '').trim());
-                result.hasChart = true;
-                result.chartData.push(chartData);
-                if (chartData.insights) {
-                    result.insights.push(...chartData.insights);
-                }
-            }
-        } catch (e) {
-            console.log('Pas de graphique dans cette réponse');
-        }
-
-        // Extraction actions
-        const actionsMatch = response.match(/Actions?\s+sugg[ée]r[ée]es?\s*:?\s*\n((?:[-•*]\s*.+\n?)+)/i);
-        if (actionsMatch) {
-            const items = actionsMatch[1].match(/[-•*]\s*(.+)/g);
-            if (items) {
-                result.actions = items.map(i => i.replace(/^[-•*]\s*/, '').trim());
-            }
-        }
-
-        // Extraction tableaux
-        const lines = response.split('\n');
-        let table = [];
-        lines.forEach(line => {
-            if (line.trim().startsWith('|')) {
-                table.push(line);
-            } else if (table.length > 0) {
-                result.tables.push(table.join('\n'));
-                table = [];
-            }
+    // ============================================
+    // UPDATE CONVERSATION HISTORY
+    // ============================================
+    updateHistory(userMessage, assistantResponse) {
+        this.conversationHistory.push({
+            user: userMessage,
+            assistant: assistantResponse.text,
+            timestamp: Date.now()
         });
-        if (table.length > 0) {
-            result.tables.push(table.join('\n'));
+
+        // Keep only last N exchanges
+        if (this.conversationHistory.length > this.maxHistorySize) {
+            this.conversationHistory.shift();
+        }
+    }
+
+    // ============================================
+    // RATE LIMITING
+    // ============================================
+    async enforceRateLimit() {
+        const now = Date.now();
+        const timeSinceLastRequest = now - this.lastRequestTime;
+
+        if (timeSinceLastRequest < this.minRequestInterval) {
+            const waitTime = this.minRequestInterval - timeSinceLastRequest;
+            await new Promise(resolve => setTimeout(resolve, waitTime));
         }
 
-        return result;
+        this.lastRequestTime = Date.now();
     }
 
-    async analyzeFinancials(symbol, data) {
-        const prompt = `Analyse financière complète de ${symbol}. Fournis: 1) Summary 2) Forces/Faiblesses 3) Recommandation 4) Actions suggérées`;
-        return await this.chat(prompt, data);
+    // ============================================
+    // TRACK USAGE
+    // ============================================
+    trackUsage(response) {
+        this.requestCount++;
+        
+        if (response.usageMetadata) {
+            this.totalTokens += (response.usageMetadata.totalTokenCount || 0);
+        }
+
+        if (this.config.development.debugMode) {
+            console.log('Gemini Usage:', {
+                requests: this.requestCount,
+                totalTokens: this.totalTokens,
+                lastResponse: response.usageMetadata
+            });
+        }
     }
 
-    async compareCompanies(symbols, dataArray) {
-        const prompt = `Compare ${symbols.join(' vs ')}. Fournis tableau comparatif, analyse et actions suggérées`;
-        return await this.chat(prompt, { comparison: dataArray });
+    // ============================================
+    // ERROR HANDLING
+    // ============================================
+    handleError(error) {
+        let userMessage = '';
+
+        if (error.message.includes('API key')) {
+            userMessage = this.config.errors.messages.apiKey;
+        } else if (error.message.includes('rate limit') || error.message.includes('429')) {
+            userMessage = this.config.errors.messages.rateLimit;
+        } else if (error.message.includes('timeout')) {
+            userMessage = this.config.errors.messages.timeout;
+        } else if (error.message.includes('network') || error.message.includes('fetch')) {
+            userMessage = this.config.errors.messages.network;
+        } else {
+            userMessage = this.config.errors.messages.unknown;
+        }
+
+        return {
+            text: `⚠️ **Error:** ${userMessage}\n\n*Technical details: ${error.message}*`,
+            error: true,
+            chartRequests: []
+        };
     }
 
-    async analyzeREX(symbol, rexData) {
-        const prompt = `Analyse REX de ${symbol} sur ${rexData.years} ans. Fournis évolution, tendances et actions suggérées`;
-        return await this.chat(prompt, { rex: rexData });
-    }
-
-    async predictTrends(symbol, historicalData, timeframe) {
-        const prompt = `Analyse prédictive ${symbol} sur ${timeframe}. Fournis tendances, niveaux clés et actions suggérées`;
-        return await this.chat(prompt, { timeSeries: historicalData });
-    }
-
-    async explainConcept(concept, level = 'intermediate') {
-        const prompt = `Explique "${concept}" niveau ${level}. Fournis définition, exemple pratique et actions suggérées`;
-        return await this.chat(prompt);
-    }
-
-    resetConversation() {
+    // ============================================
+    // CLEAR HISTORY
+    // ============================================
+    clearHistory() {
         this.conversationHistory = [];
+        this.contextWindow = [];
     }
 
-    limitHistory() {
-        const max = this.maxHistoryLength * 2;
-        if (this.conversationHistory.length > max) {
-            this.conversationHistory = this.conversationHistory.slice(-max);
-        }
-    }
-
-    getHistory() {
-        return this.conversationHistory;
-    }
-
-    exportHistory() {
-        return JSON.stringify({
-            timestamp: new Date().toISOString(),
-            model: this.model,
-            history: this.conversationHistory
-        }, null, 2);
-    }
-
-    importHistory(jsonString) {
-        try {
-            const data = JSON.parse(jsonString);
-            this.conversationHistory = data.history || [];
-            return true;
-        } catch (error) {
-            console.error('Import error:', error);
-            return false;
-        }
+    // ============================================
+    // GET STATS
+    // ============================================
+    getStats() {
+        return {
+            requestCount: this.requestCount,
+            totalTokens: this.totalTokens,
+            historySize: this.conversationHistory.length,
+            averageTokensPerRequest: this.requestCount > 0 
+                ? Math.round(this.totalTokens / this.requestCount) 
+                : 0
+        };
     }
 }
 
-window.GeminiAIIntegration = GeminiAIIntegration;
-console.log('✅ GeminiAIIntegration chargé (Gemini 2.5 Flash)');
+// ============================================
+// EXPORT
+// ============================================
+if (typeof module !== 'undefined' && module.exports) {
+    module.exports = GeminiAI;
+}

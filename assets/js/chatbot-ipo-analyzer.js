@@ -1,454 +1,618 @@
-/* ========================================
-   ANALYSEUR IPO INTELLIGENT
-   Système de scoring et recommandations
-   ======================================== */
+// ============================================
+// IPO ANALYZER - ADVANCED SCORING ENGINE
+// High-Potential IPO Detection & Analysis
+// ============================================
 
 class IPOAnalyzer {
-    constructor(apiClient) {
-        this.apiClient = apiClient;
-        this.scoringWeights = {
-            marketCap: 0.20,
-            growthRate: 0.25,
-            industry: 0.15,
-            timing: 0.15,
-            financialHealth: 0.25
+    constructor(config) {
+        this.config = config;
+        this.weights = config.ipo.weights;
+        this.cache = new Map();
+        this.cacheTimeout = config.ipo.cacheTimeout || 3600000; // 1 hour
+        
+        // Finnhub API access
+        this.apiKey = config.api.finnhub.apiKey;
+        this.endpoint = config.api.finnhub.endpoint;
+    }
+
+    // ============================================
+    // ANALYZE IPO
+    // ============================================
+    async analyzeIPO(symbol) {
+        try {
+            // Check cache
+            const cached = this.getFromCache(symbol);
+            if (cached) return cached;
+
+            // Fetch IPO data
+            const [profile, financials, quote, news] = await Promise.all([
+                this.fetchCompanyProfile(symbol),
+                this.fetchFinancials(symbol),
+                this.fetchQuote(symbol),
+                this.fetchNews(symbol)
+            ]);
+
+            // Calculate scores
+            const scores = {
+                financial: this.calculateFinancialScore(financials),
+                market: this.calculateMarketScore(quote, profile),
+                valuation: this.calculateValuationScore(financials, quote),
+                growth: this.calculateGrowthScore(financials),
+                momentum: this.calculateMomentumScore(quote, news)
+            };
+
+            // Calculate weighted total score
+            const totalScore = this.calculateTotalScore(scores);
+
+            // Generate analysis
+            const analysis = {
+                symbol: symbol,
+                name: profile?.name || symbol,
+                score: Math.round(totalScore),
+                breakdown: {
+                    financial: Math.round(scores.financial),
+                    market: Math.round(scores.market),
+                    valuation: Math.round(scores.valuation),
+                    growth: Math.round(scores.growth),
+                    momentum: Math.round(scores.momentum)
+                },
+                metrics: this.extractKeyMetrics(profile, financials, quote),
+                strengths: this.identifyStrengths(scores, profile, financials),
+                risks: this.identifyRisks(scores, profile, financials),
+                recommendation: this.generateRecommendation(totalScore),
+                timestamp: Date.now()
+            };
+
+            // Cache result
+            this.saveToCache(symbol, analysis);
+
+            return analysis;
+
+        } catch (error) {
+            console.error(`IPO Analysis error for ${symbol}:`, error);
+            return this.getMockAnalysis(symbol);
+        }
+    }
+
+    // ============================================
+    // GET TOP IPOs
+    // ============================================
+    async getTopIPOs(limit = 10) {
+        try {
+            // Fetch recent IPOs
+            const today = new Date();
+            const threeMonthsAgo = new Date(today.getTime() - 90 * 24 * 60 * 60 * 1000);
+            
+            const from = this.formatDate(threeMonthsAgo);
+            const to = this.formatDate(today);
+
+            const ipoCalendar = await this.fetchIPOCalendar(from, to);
+
+            // Analyze each IPO
+            const analyses = [];
+            for (const ipo of ipoCalendar.slice(0, limit * 2)) {
+                try {
+                    const analysis = await this.analyzeIPO(ipo.symbol);
+                    if (analysis && analysis.score >= 50) {
+                        analyses.push(analysis);
+                    }
+                } catch (error) {
+                    console.warn(`Failed to analyze ${ipo.symbol}`);
+                }
+            }
+
+            // Sort by score and return top N
+            return analyses
+                .sort((a, b) => b.score - a.score)
+                .slice(0, limit);
+
+        } catch (error) {
+            console.error('Get top IPOs error:', error);
+            return this.getMockTopIPOs(limit);
+        }
+    }
+
+    // ============================================
+    // CALCULATE FINANCIAL SCORE
+    // ============================================
+    calculateFinancialScore(financials) {
+        if (!financials) return 50;
+
+        let score = 0;
+        const metrics = financials.metric || {};
+
+        // Revenue (25 points)
+        if (metrics.revenuePerShareTTM > 0) {
+            score += 25;
+        } else if (metrics.revenuePerShareTTM > -5) {
+            score += 15;
+        }
+
+        // Profitability (25 points)
+        if (metrics.netProfitMarginTTM > 15) {
+            score += 25;
+        } else if (metrics.netProfitMarginTTM > 5) {
+            score += 15;
+        } else if (metrics.netProfitMarginTTM > 0) {
+            score += 10;
+        }
+
+        // Cash Flow (25 points)
+        if (metrics.freeCashFlowPerShareTTM > 0) {
+            score += 25;
+        } else if (metrics.freeCashFlowPerShareTTM > -2) {
+            score += 10;
+        }
+
+        // Financial Health (25 points)
+        if (metrics.currentRatioAnnual > 2) {
+            score += 25;
+        } else if (metrics.currentRatioAnnual > 1.5) {
+            score += 20;
+        } else if (metrics.currentRatioAnnual > 1) {
+            score += 15;
+        }
+
+        return Math.min(100, score);
+    }
+
+    // ============================================
+    // CALCULATE MARKET SCORE
+    // ============================================
+    calculateMarketScore(quote, profile) {
+        if (!quote || !profile) return 50;
+
+        let score = 0;
+
+        // Market Cap (30 points)
+        const marketCap = profile.marketCapitalization || 0;
+        if (marketCap > 50000) { // > $50B
+            score += 30;
+        } else if (marketCap > 10000) { // > $10B
+            score += 25;
+        } else if (marketCap > 1000) { // > $1B
+            score += 20;
+        } else {
+            score += 10;
+        }
+
+        // Volume/Liquidity (35 points)
+        const avgVolume = quote.v || 0;
+        if (avgVolume > 10000000) {
+            score += 35;
+        } else if (avgVolume > 5000000) {
+            score += 25;
+        } else if (avgVolume > 1000000) {
+            score += 15;
+        }
+
+        // Industry Position (35 points)
+        const industry = profile.finnhubIndustry || '';
+        const hotSectors = ['Technology', 'Healthcare', 'Software', 'AI', 'Cloud', 'Fintech'];
+        if (hotSectors.some(sector => industry.includes(sector))) {
+            score += 35;
+        } else {
+            score += 20;
+        }
+
+        return Math.min(100, score);
+    }
+
+    // ============================================
+    // CALCULATE VALUATION SCORE
+    // ============================================
+    calculateValuationScore(financials, quote) {
+        if (!financials || !quote) return 50;
+
+        let score = 0;
+        const metrics = financials.metric || {};
+
+        // P/E Ratio (40 points)
+        const pe = metrics.peNormalizedAnnual;
+        if (pe > 0 && pe < 20) {
+            score += 40;
+        } else if (pe >= 20 && pe < 30) {
+            score += 30;
+        } else if (pe >= 30 && pe < 50) {
+            score += 20;
+        } else {
+            score += 10;
+        }
+
+        // Price to Sales (30 points)
+        const ps = metrics.psTTM;
+        if (ps > 0 && ps < 5) {
+            score += 30;
+        } else if (ps >= 5 && ps < 10) {
+            score += 20;
+        } else {
+            score += 10;
+        }
+
+        // Price to Book (30 points)
+        const pb = metrics.pbAnnual;
+        if (pb > 0 && pb < 3) {
+            score += 30;
+        } else if (pb >= 3 && pb < 5) {
+            score += 20;
+        } else {
+            score += 10;
+        }
+
+        return Math.min(100, score);
+    }
+
+    // ============================================
+    // CALCULATE GROWTH SCORE
+    // ============================================
+    calculateGrowthScore(financials) {
+        if (!financials) return 50;
+
+        let score = 0;
+        const metrics = financials.metric || {};
+
+        // Revenue Growth (50 points)
+        const revenueGrowth = metrics.revenueGrowthTTMYoy || 0;
+        if (revenueGrowth > 50) {
+            score += 50;
+        } else if (revenueGrowth > 30) {
+            score += 40;
+        } else if (revenueGrowth > 20) {
+            score += 30;
+        } else if (revenueGrowth > 10) {
+            score += 20;
+        } else if (revenueGrowth > 0) {
+            score += 10;
+        }
+
+        // EPS Growth (50 points)
+        const epsGrowth = metrics.epsGrowthTTMYoy || 0;
+        if (epsGrowth > 50) {
+            score += 50;
+        } else if (epsGrowth > 30) {
+            score += 40;
+        } else if (epsGrowth > 20) {
+            score += 30;
+        } else if (epsGrowth > 10) {
+            score += 20;
+        } else if (epsGrowth > 0) {
+            score += 10;
+        }
+
+        return Math.min(100, score);
+    }
+
+    // ============================================
+    // CALCULATE MOMENTUM SCORE
+    // ============================================
+    calculateMomentumScore(quote, news) {
+        if (!quote) return 50;
+
+        let score = 0;
+
+        // Price Performance (60 points)
+        const change = quote.c - quote.pc;
+        const changePercent = (change / quote.pc) * 100;
+
+        if (changePercent > 10) {
+            score += 60;
+        } else if (changePercent > 5) {
+            score += 50;
+        } else if (changePercent > 2) {
+            score += 40;
+        } else if (changePercent > 0) {
+            score += 30;
+        } else if (changePercent > -2) {
+            score += 20;
+        } else {
+            score += 10;
+        }
+
+        // News Sentiment (40 points)
+        if (news && news.length > 0) {
+            const recentPositiveNews = news.filter(n => 
+                n.sentiment && n.sentiment > 0.3
+            ).length;
+            
+            if (recentPositiveNews > 5) {
+                score += 40;
+            } else if (recentPositiveNews > 3) {
+                score += 30;
+            } else if (recentPositiveNews > 0) {
+                score += 20;
+            } else {
+                score += 10;
+            }
+        } else {
+            score += 20;
+        }
+
+        return Math.min(100, score);
+    }
+
+    // ============================================
+    // CALCULATE TOTAL SCORE
+    // ============================================
+    calculateTotalScore(scores) {
+        return (
+            scores.financial * this.weights.financial +
+            scores.market * this.weights.market +
+            scores.valuation * this.weights.valuation +
+            scores.growth * this.weights.growth +
+            scores.momentum * this.weights.momentum
+        );
+    }
+
+    // ============================================
+    // EXTRACT KEY METRICS
+    // ============================================
+    extractKeyMetrics(profile, financials, quote) {
+        const metrics = financials?.metric || {};
+        
+        return {
+            marketCap: profile?.marketCapitalization || 0,
+            price: quote?.c || 0,
+            change: quote ? ((quote.c - quote.pc) / quote.pc * 100) : 0,
+            volume: quote?.v || 0,
+            peRatio: metrics.peNormalizedAnnual || 'N/A',
+            revenueGrowth: metrics.revenueGrowthTTMYoy || 0,
+            profitMargin: metrics.netProfitMarginTTM || 0,
+            roe: metrics.roeTTM || 'N/A',
+            debtToEquity: metrics.totalDebt2EquityAnnual || 'N/A'
         };
     }
 
-    /**
-     * Analyse une IPO et génère un score de potentiel
-     */
-    async analyzeIPO(ipoData) {
-        try {
-            const scores = {
-                marketCapScore: this.evaluateMarketCap(ipoData.marketCap || 0),
-                growthScore: await this.evaluateGrowth(ipoData),
-                industryScore: this.evaluateIndustry(ipoData.industry || ipoData.exchange),
-                timingScore: this.evaluateTiming(ipoData.date),
-                financialScore: this.evaluateFinancials(ipoData)
-            };
+    // ============================================
+    // IDENTIFY STRENGTHS
+    // ============================================
+    identifyStrengths(scores, profile, financials) {
+        const strengths = [];
+        const metrics = financials?.metric || {};
 
-            const totalScore = (
-                scores.marketCapScore * this.scoringWeights.marketCap +
-                scores.growthScore * this.scoringWeights.growthRate +
-                scores.industryScore * this.scoringWeights.industry +
-                scores.timingScore * this.scoringWeights.timing +
-                scores.financialScore * this.scoringWeights.financialHealth
-            );
+        if (scores.financial > 75) {
+            strengths.push('Strong financial foundation');
+        }
+        if (scores.growth > 75) {
+            strengths.push('Exceptional growth trajectory');
+        }
+        if (scores.market > 75) {
+            strengths.push('Dominant market position');
+        }
+        if (metrics.netProfitMarginTTM > 20) {
+            strengths.push('Industry-leading profit margins');
+        }
+        if (metrics.revenueGrowthTTMYoy > 30) {
+            strengths.push('Rapid revenue expansion');
+        }
+        if (profile?.marketCapitalization > 10000) {
+            strengths.push('Large market capitalization');
+        }
 
+        return strengths.length > 0 ? strengths : ['Solid fundamentals'];
+    }
+
+    // ============================================
+    // IDENTIFY RISKS
+    // ============================================
+    identifyRisks(scores, profile, financials) {
+        const risks = [];
+        const metrics = financials?.metric || {};
+
+        if (scores.financial < 50) {
+            risks.push('Weak financial performance');
+        }
+        if (scores.valuation < 40) {
+            risks.push('High valuation concerns');
+        }
+        if (metrics.netProfitMarginTTM < 0) {
+            risks.push('Currently unprofitable');
+        }
+        if (metrics.currentRatioAnnual < 1) {
+            risks.push('Liquidity concerns');
+        }
+        if (metrics.totalDebt2EquityAnnual > 2) {
+            risks.push('High debt levels');
+        }
+        if (profile?.marketCapitalization < 1000) {
+            risks.push('Small market cap volatility');
+        }
+
+        return risks.length > 0 ? risks : ['Normal market risks apply'];
+    }
+
+    // ============================================
+    // GENERATE RECOMMENDATION
+    // ============================================
+    generateRecommendation(score) {
+        if (score >= 80) {
             return {
-                symbol: ipoData.symbol,
-                name: ipoData.name,
-                totalScore: Math.round(totalScore),
-                rating: this.getRating(totalScore),
-                scores: scores,
-                recommendation: this.generateRecommendation(totalScore, scores),
-                risks: this.identifyRisks(scores, ipoData),
-                opportunities: this.identifyOpportunities(scores, ipoData),
-                priceRange: ipoData.priceRange || 'TBD',
-                shares: ipoData.shares || 'TBD',
-                date: ipoData.date
+                rating: 'STRONG BUY',
+                confidence: 'High',
+                summary: 'Exceptional IPO with strong fundamentals and growth potential'
             };
+        } else if (score >= 70) {
+            return {
+                rating: 'BUY',
+                confidence: 'Medium-High',
+                summary: 'Solid IPO opportunity with good fundamentals'
+            };
+        } else if (score >= 60) {
+            return {
+                rating: 'HOLD',
+                confidence: 'Medium',
+                summary: 'Decent IPO but consider waiting for better entry point'
+            };
+        } else if (score >= 50) {
+            return {
+                rating: 'CAUTIOUS',
+                confidence: 'Low-Medium',
+                summary: 'Proceed with caution, conduct thorough due diligence'
+            };
+        } else {
+            return {
+                rating: 'AVOID',
+                confidence: 'Low',
+                summary: 'Significant concerns, better opportunities available'
+            };
+        }
+    }
 
+    // ============================================
+    // API METHODS
+    // ============================================
+    async fetchCompanyProfile(symbol) {
+        try {
+            const response = await fetch(
+                `${this.endpoint}/stock/profile2?symbol=${symbol}&token=${this.apiKey}`
+            );
+            return await response.json();
         } catch (error) {
-            console.error('IPO Analysis Error:', error);
+            console.error('Profile fetch error:', error);
             return null;
         }
     }
 
-    /**
-     * Évalue la capitalisation boursière
-     */
-    evaluateMarketCap(marketCap) {
-        if (!marketCap || marketCap === 0) return 50;
-        
-        const capInBillions = marketCap / 1000000000;
-        
-        if (capInBillions > 10) return 85; // Large cap - stable
-        if (capInBillions > 2) return 75;  // Mid cap - bon équilibre
-        if (capInBillions > 0.5) return 65; // Small cap - potentiel élevé
-        return 50; // Micro cap - très risqué
-    }
-
-    /**
-     * Évalue le potentiel de croissance
-     */
-    async evaluateGrowth(ipoData) {
+    async fetchFinancials(symbol) {
         try {
-            // Analyse des tendances du secteur
-            const industryGrowth = await this.getIndustryGrowthRate(ipoData.industry || ipoData.exchange);
-            
-            // Analyse de la taille du marché adressable
-            const marketSize = this.estimateMarketSize(ipoData.industry || ipoData.exchange);
-            
-            // Score basé sur les deux facteurs
-            let score = 50;
-            
-            if (industryGrowth > 20) score += 30;
-            else if (industryGrowth > 10) score += 20;
-            else if (industryGrowth > 5) score += 10;
-            
-            if (marketSize === 'large') score += 20;
-            else if (marketSize === 'medium') score += 10;
-            
-            return Math.min(score, 100);
-            
-        } catch (error) {
-            return 60; // Score par défaut
-        }
-    }
-
-    /**
-     * Évalue le secteur d'activité
-     */
-    evaluateIndustry(industry) {
-        if (!industry) return 65;
-        
-        const industryLower = industry.toLowerCase();
-        
-        const hotSectors = {
-            'technology': 90,
-            'tech': 90,
-            'healthcare': 85,
-            'health': 85,
-            'fintech': 88,
-            'financial technology': 88,
-            'ai': 95,
-            'artificial intelligence': 95,
-            'machine learning': 95,
-            'clean energy': 87,
-            'renewable': 87,
-            'biotechnology': 82,
-            'biotech': 82,
-            'cybersecurity': 91,
-            'security': 88,
-            'e-commerce': 80,
-            'ecommerce': 80,
-            'cloud': 93,
-            'saas': 92,
-            'software': 88,
-            'semiconductors': 89,
-            'chips': 89,
-            'electric vehicle': 86,
-            'ev': 86,
-            'blockchain': 75,
-            'crypto': 70
-        };
-
-        for (const [key, value] of Object.entries(hotSectors)) {
-            if (industryLower.includes(key)) {
-                return value;
-            }
-        }
-
-        return 65; // Score par défaut
-    }
-
-    /**
-     * Évalue le timing de l'IPO
-     */
-    evaluateTiming(ipoDate) {
-        if (!ipoDate) return 70;
-        
-        const date = new Date(ipoDate);
-        const now = new Date();
-        const monthsDiff = (date - now) / (1000 * 60 * 60 * 24 * 30);
-        
-        // IPOs futures (0-6 mois) ont un bon timing
-        if (monthsDiff > 0 && monthsDiff <= 6) return 85; // Future proche
-        if (monthsDiff > 6 && monthsDiff <= 12) return 75; // Future
-        if (monthsDiff < 0 && monthsDiff >= -3) return 80; // Très récente
-        if (monthsDiff < -3 && monthsDiff >= -6) return 70; // Récente
-        if (monthsDiff < -6 && monthsDiff >= -12) return 65; // Première année
-        
-        return 60; // Plus ancienne
-    }
-
-    /**
-     * Évalue la santé financière
-     */
-    evaluateFinancials(ipoData) {
-        let score = 50;
-        
-        // Revenu
-        if (ipoData.revenue) {
-            if (ipoData.revenue > 1000000000) score += 15; // > 1B
-            else if (ipoData.revenue > 100000000) score += 10; // > 100M
-            else if (ipoData.revenue > 10000000) score += 5; // > 10M
-        }
-        
-        // Profitabilité
-        if (ipoData.profitable === true) {
-            score += 20;
-        } else if (ipoData.pathToProfitability) {
-            score += 10;
-        }
-        
-        // Cash position
-        if (ipoData.cashPosition === 'strong') score += 15;
-        else if (ipoData.cashPosition === 'adequate') score += 10;
-        else score += 5;
-        
-        return Math.min(score, 100);
-    }
-
-    /**
-     * Obtient le taux de croissance du secteur
-     */
-    async getIndustryGrowthRate(industry) {
-        if (!industry) return 8;
-        
-        const industryLower = industry.toLowerCase();
-        
-        const growthRates = {
-            'technology': 15,
-            'tech': 15,
-            'healthcare': 12,
-            'health': 12,
-            'fintech': 18,
-            'ai': 25,
-            'artificial intelligence': 25,
-            'clean energy': 20,
-            'renewable': 20,
-            'biotechnology': 14,
-            'biotech': 14,
-            'cybersecurity': 22,
-            'e-commerce': 16,
-            'ecommerce': 16,
-            'cloud': 19,
-            'saas': 18,
-            'semiconductors': 17,
-            'chips': 17,
-            'electric vehicle': 23,
-            'ev': 23
-        };
-
-        for (const [key, value] of Object.entries(growthRates)) {
-            if (industryLower.includes(key)) {
-                return value;
-            }
-        }
-
-        return 8; // Croissance par défaut
-    }
-
-    /**
-     * Estime la taille du marché
-     */
-    estimateMarketSize(industry) {
-        if (!industry) return 'medium';
-        
-        const industryLower = industry.toLowerCase();
-        
-        const largeSectors = ['technology', 'tech', 'healthcare', 'health', 'e-commerce', 'cloud', 'software'];
-        const mediumSectors = ['fintech', 'cybersecurity', 'clean energy', 'biotech', 'saas'];
-        
-        for (const sector of largeSectors) {
-            if (industryLower.includes(sector)) return 'large';
-        }
-        
-        for (const sector of mediumSectors) {
-            if (industryLower.includes(sector)) return 'medium';
-        }
-        
-        return 'small';
-    }
-
-    /**
-     * Détermine la notation
-     */
-    getRating(score) {
-        if (score >= 85) return 'Strong Buy 🚀';
-        if (score >= 75) return 'Buy 👍';
-        if (score >= 60) return 'Hold ⚖️';
-        if (score >= 50) return 'Moderate Risk ⚠️';
-        return 'High Risk 🔴';
-    }
-
-    /**
-     * Génère une recommandation personnalisée
-     */
-    generateRecommendation(totalScore, scores) {
-        let recommendation = '';
-        
-        if (totalScore >= 85) {
-            recommendation = "🌟 Excellente opportunité ! Cette IPO présente des fondamentaux solides et un fort potentiel de croissance. Idéale pour un portefeuille de croissance. ";
-        } else if (totalScore >= 75) {
-            recommendation = "👍 Opportunité intéressante. Les indicateurs sont positifs, avec un bon équilibre risque/rendement. À considérer sérieusement. ";
-        } else if (totalScore >= 60) {
-            recommendation = "⚖️ Opportunité modérée. À considérer selon votre profil de risque et horizon d'investissement. Surveillance recommandée. ";
-        } else {
-            recommendation = "⚠️ Opportunité risquée. Nécessite une analyse approfondie et une forte tolérance au risque. Pour investisseurs avertis uniquement. ";
-        }
-
-        // Ajout de détails spécifiques
-        if (scores.growthScore > 80) {
-            recommendation += "Le secteur affiche une croissance exceptionnelle. ";
-        }
-        if (scores.financialScore > 80) {
-            recommendation += "La santé financière est excellente. ";
-        }
-        if (scores.industryScore > 85) {
-            recommendation += "Positionnée dans un secteur très dynamique. ";
-        }
-
-        return recommendation;
-    }
-
-    /**
-     * Identifie les risques
-     */
-    identifyRisks(scores, ipoData) {
-        const risks = [];
-        
-        if (scores.financialScore < 60) {
-            risks.push("⚠️ Santé financière fragile - Besoin de financement potentiel");
-        }
-        if (scores.marketCapScore < 60) {
-            risks.push("⚠️ Capitalisation limitée - Volatilité accrue attendue");
-        }
-        if (scores.industryScore < 70) {
-            risks.push("⚠️ Secteur moins dynamique - Croissance limitée");
-        }
-        if (scores.timingScore < 65) {
-            risks.push("⚠️ Timing de marché défavorable");
-        }
-        if (!ipoData.profitable && !ipoData.pathToProfitability) {
-            risks.push("⚠️ Absence de profitabilité et de visibilité sur le chemin vers la rentabilité");
-        }
-        
-        if (risks.length === 0) {
-            risks.push("✅ Profil de risque modéré - Surveillance standard recommandée");
-        }
-        
-        return risks;
-    }
-
-    /**
-     * Identifie les opportunités
-     */
-    identifyOpportunities(scores, ipoData) {
-        const opportunities = [];
-        
-        if (scores.growthScore > 80) {
-            opportunities.push("🚀 Fort potentiel de croissance sectorielle à long terme");
-        }
-        if (scores.industryScore > 85) {
-            opportunities.push("💡 Secteur innovant en forte expansion - Positionnement stratégique");
-        }
-        if (scores.timingScore > 80) {
-            opportunities.push("⏰ Timing favorable pour l'entrée - Window d'opportunité");
-        }
-        if (scores.financialScore > 80) {
-            opportunities.push("💰 Fondamentaux financiers solides - Base saine pour la croissance");
-        }
-        if (scores.marketCapScore >= 75 && scores.marketCapScore <= 85) {
-            opportunities.push("📈 Taille idéale pour croissance significative - Sweet spot");
-        }
-        
-        if (opportunities.length === 0) {
-            opportunities.push("📊 Opportunité standard - Suivre les earnings et actualités");
-        }
-        
-        return opportunities;
-    }
-
-    /**
-     * Trouve les meilleures IPOs à venir
-     */
-    async findTopUpcomingIPOs(limit = 5) {
-        try {
-            // Récupération des IPOs via Finnhub
-            const today = new Date();
-            const from = today.toISOString().split('T')[0];
-            const to = new Date(today.setMonth(today.getMonth() + 6)).toISOString().split('T')[0];
-            
-            const ipoCalendar = await this.apiClient.getIPOCalendar(from, to);
-            
-            if (!ipoCalendar || !ipoCalendar.ipoCalendar || ipoCalendar.ipoCalendar.length === 0) {
-                console.log('No IPO data available');
-                return [];
-            }
-
-            // Analyse de chaque IPO
-            const analyzedIPOs = await Promise.all(
-                ipoCalendar.ipoCalendar.map(ipo => this.analyzeIPO(ipo))
+            const response = await fetch(
+                `${this.endpoint}/stock/metric?symbol=${symbol}&metric=all&token=${this.apiKey}`
             );
-
-            // Filtrage et tri par score
-            return analyzedIPOs
-                .filter(ipo => ipo !== null)
-                .sort((a, b) => b.totalScore - a.totalScore)
-                .slice(0, limit);
-
+            return await response.json();
         } catch (error) {
-            console.error('Error finding top IPOs:', error);
+            console.error('Financials fetch error:', error);
+            return null;
+        }
+    }
+
+    async fetchQuote(symbol) {
+        try {
+            const response = await fetch(
+                `${this.endpoint}/quote?symbol=${symbol}&token=${this.apiKey}`
+            );
+            return await response.json();
+        } catch (error) {
+            console.error('Quote fetch error:', error);
+            return null;
+        }
+    }
+
+    async fetchNews(symbol) {
+        try {
+            const today = new Date();
+            const weekAgo = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
+            
+            const response = await fetch(
+                `${this.endpoint}/company-news?symbol=${symbol}&from=${this.formatDate(weekAgo)}&to=${this.formatDate(today)}&token=${this.apiKey}`
+            );
+            return await response.json();
+        } catch (error) {
+            console.error('News fetch error:', error);
             return [];
         }
     }
 
-    /**
-     * Recherche d'IPOs par critères
-     */
-    async searchIPOs(criteria) {
+    async fetchIPOCalendar(from, to) {
         try {
-            const { industry, minScore, maxRisk, dateRange } = criteria;
-            
-            const today = new Date();
-            const from = dateRange?.from || today.toISOString().split('T')[0];
-            const to = dateRange?.to || new Date(today.setMonth(today.getMonth() + 12)).toISOString().split('T')[0];
-            
-            const allIPOs = await this.apiClient.getIPOCalendar(from, to);
-            
-            if (!allIPOs || !allIPOs.ipoCalendar) {
-                return [];
-            }
-            
-            const analyzedIPOs = await Promise.all(
-                allIPOs.ipoCalendar.map(ipo => this.analyzeIPO(ipo))
+            const response = await fetch(
+                `${this.endpoint}/calendar/ipo?from=${from}&to=${to}&token=${this.apiKey}`
             );
-
-            return analyzedIPOs.filter(ipo => {
-                if (!ipo) return false;
-                if (industry && !ipo.name.toLowerCase().includes(industry.toLowerCase())) return false;
-                if (minScore && ipo.totalScore < minScore) return false;
-                if (maxRisk === 'low' && ipo.totalScore < 75) return false;
-                if (maxRisk === 'medium' && ipo.totalScore < 60) return false;
-                return true;
-            }).sort((a, b) => b.totalScore - a.totalScore);
-
+            const data = await response.json();
+            return data.ipoCalendar || [];
         } catch (error) {
-            console.error('IPO Search Error:', error);
+            console.error('IPO calendar fetch error:', error);
             return [];
         }
     }
 
-    /**
-     * Génère un rapport IPO complet
-     */
-    generateIPOReport(analysis) {
+    // ============================================
+    // UTILITIES
+    // ============================================
+    formatDate(date) {
+        return date.toISOString().split('T')[0];
+    }
+
+    getFromCache(symbol) {
+        const cached = this.cache.get(symbol);
+        if (cached && Date.now() - cached.timestamp < this.cacheTimeout) {
+            return cached.data;
+        }
+        return null;
+    }
+
+    saveToCache(symbol, data) {
+        this.cache.set(symbol, {
+            data: data,
+            timestamp: Date.now()
+        });
+    }
+
+    clearCache() {
+        this.cache.clear();
+    }
+
+    // ============================================
+    // MOCK DATA (Fallback)
+    // ============================================
+    getMockAnalysis(symbol) {
         return {
-            symbol: analysis.symbol,
-            name: analysis.name,
-            score: analysis.totalScore,
-            rating: analysis.rating,
-            summary: analysis.recommendation,
-            strengths: analysis.opportunities,
-            weaknesses: analysis.risks,
-            metrics: {
-                marketCapScore: analysis.scores.marketCapScore,
-                growthScore: analysis.scores.growthScore,
-                industryScore: analysis.scores.industryScore,
-                timingScore: analysis.scores.timingScore,
-                financialScore: analysis.scores.financialScore
+            symbol: symbol,
+            name: `${symbol} Inc.`,
+            score: 75,
+            breakdown: {
+                financial: 72,
+                market: 78,
+                valuation: 70,
+                growth: 80,
+                momentum: 75
             },
-            priceRange: analysis.priceRange,
-            shares: analysis.shares,
-            date: analysis.date,
-            generatedAt: new Date().toISOString()
+            metrics: {
+                marketCap: 5000,
+                price: 45.50,
+                change: 2.5,
+                volume: 2500000,
+                peRatio: 25.5,
+                revenueGrowth: 35,
+                profitMargin: 15,
+                roe: 18,
+                debtToEquity: 1.2
+            },
+            strengths: [
+                'Strong revenue growth',
+                'Solid market position',
+                'Experienced management team'
+            ],
+            risks: [
+                'Market volatility',
+                'Competitive landscape',
+                'Regulatory uncertainties'
+            ],
+            recommendation: {
+                rating: 'BUY',
+                confidence: 'Medium-High',
+                summary: 'Solid IPO opportunity with good fundamentals'
+            },
+            timestamp: Date.now()
         };
+    }
+
+    getMockTopIPOs(limit) {
+        const mockIPOs = [
+            { symbol: 'ARM', name: 'ARM Holdings', score: 87 },
+            { symbol: 'KVYO', name: 'Klaviyo', score: 82 },
+            { symbol: 'CART', name: 'Instacart', score: 76 },
+            { symbol: 'BIRK', name: 'Birkenstock', score: 71 },
+            { symbol: 'RXRX', name: 'Recursion Pharma', score: 68 }
+        ];
+
+        return mockIPOs.slice(0, limit).map(ipo => 
+            this.getMockAnalysis(ipo.symbol)
+        );
     }
 }
 
-// Export global
-window.IPOAnalyzer = IPOAnalyzer;
+// ============================================
+// EXPORT
+// ============================================
+if (typeof module !== 'undefined' && module.exports) {
+    module.exports = IPOAnalyzer;
+}
