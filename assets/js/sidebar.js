@@ -1,314 +1,239 @@
-/* ===================================
-   SIDEBAR NAVIGATION FUNCTIONALITY
-   Version optimisée ES6+ 2024
-   =================================== */
+/**
+ * ===================================
+ * SIDEBAR PREMIUM - GESTION COMPLÈTE
+ * AlphaVault AI - Version Ultra-Moderne
+ * ===================================
+ */
 
+class SidebarManager {
+    constructor() {
+        this.sidebar = document.querySelector('.sidebar');
+        this.sidebarToggle = document.querySelector('.sidebar-toggle');
+        this.mobileToggle = document.querySelector('.mobile-toggle');
+        this.overlay = document.querySelector('.sidebar-overlay');
+        this.navFolders = document.querySelectorAll('.nav-folder');
+        this.navLinks = document.querySelectorAll('.nav-link');
+        
+        this.isMobile = window.innerWidth <= 1024;
+        this.isCollapsed = false;
+        
+        this.init();
+    }
+    
+    init() {
+        // Charger l'état sauvegardé
+        this.loadState();
+        
+        // Événements toggle
+        if (this.sidebarToggle) {
+            this.sidebarToggle.addEventListener('click', () => this.toggleCollapse());
+        }
+        
+        if (this.mobileToggle) {
+            this.mobileToggle.addEventListener('click', () => this.toggleMobile());
+        }
+        
+        if (this.overlay) {
+            this.overlay.addEventListener('click', () => this.closeMobile());
+        }
+        
+        // Événements folders (accordéon)
+        this.navFolders.forEach(folder => {
+            folder.addEventListener('click', (e) => this.toggleFolder(e));
+        });
+        
+        // Événements liens (active state)
+        this.navLinks.forEach(link => {
+            link.addEventListener('click', (e) => this.setActiveLink(e));
+        });
+        
+        // Gestion responsive
+        window.addEventListener('resize', () => this.handleResize());
+        
+        // Fermeture sur ESC
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && this.sidebar.classList.contains('mobile-open')) {
+                this.closeMobile();
+            }
+        });
+        
+        console.log('✅ SidebarManager initialisé');
+    }
+    
+    /**
+     * Toggle collapse desktop
+     */
+    toggleCollapse() {
+        this.isCollapsed = !this.isCollapsed;
+        this.sidebar.classList.toggle('collapsed');
+        
+        // Sauvegarder l'état
+        localStorage.setItem('sidebar-collapsed', this.isCollapsed);
+        
+        // Animation smooth
+        this.animateToggle();
+    }
+    
+    /**
+     * Toggle mobile
+     */
+    toggleMobile() {
+        const isOpen = this.sidebar.classList.contains('mobile-open');
+        
+        if (isOpen) {
+            this.closeMobile();
+        } else {
+            this.openMobile();
+        }
+    }
+    
+    /**
+     * Ouvrir mobile
+     */
+    openMobile() {
+        this.sidebar.classList.add('mobile-open');
+        this.overlay.classList.add('active');
+        document.body.style.overflow = 'hidden';
+    }
+    
+    /**
+     * Fermer mobile (CORRECTION DU BUG)
+     */
+    closeMobile() {
+        this.sidebar.classList.remove('mobile-open');
+        this.overlay.classList.remove('active');
+        document.body.style.overflow = '';
+        
+        // ✅ CORRECTION : Fermer tous les sous-menus ouverts
+        document.querySelectorAll('.nav-section.active').forEach(section => {
+            section.classList.remove('active');
+        });
+        
+        document.querySelectorAll('.nav-folder.active').forEach(folder => {
+            folder.classList.remove('active');
+        });
+    }
+    
+    /**
+     * Toggle folder (accordéon)
+     */
+    toggleFolder(e) {
+        const folder = e.currentTarget;
+        const section = folder.closest('.nav-section');
+        const isActive = section.classList.contains('active');
+        
+        // Mode accordéon : fermer les autres sections
+        if (!this.isCollapsed) {
+            document.querySelectorAll('.nav-section').forEach(s => {
+                if (s !== section) {
+                    s.classList.remove('active');
+                    s.querySelector('.nav-folder')?.classList.remove('active');
+                }
+            });
+        }
+        
+        // Toggle la section actuelle
+        section.classList.toggle('active');
+        folder.classList.toggle('active');
+        
+        // Animation
+        this.animateFolder(section, !isActive);
+    }
+    
+    /**
+     * Définir le lien actif
+     */
+    setActiveLink(e) {
+        // Retirer l'état actif de tous les liens
+        this.navLinks.forEach(link => link.classList.remove('active'));
+        
+        // Ajouter l'état actif au lien cliqué
+        e.currentTarget.classList.add('active');
+        
+        // Fermer mobile après clic
+        if (this.isMobile) {
+            setTimeout(() => this.closeMobile(), 300);
+        }
+    }
+    
+    /**
+     * Animation toggle
+     */
+    animateToggle() {
+        this.sidebar.style.transition = 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)';
+        
+        setTimeout(() => {
+            this.sidebar.style.transition = '';
+        }, 400);
+    }
+    
+    /**
+     * Animation folder
+     */
+    animateFolder(section, isOpening) {
+        const submenu = section.querySelector('.nav-submenu');
+        if (!submenu) return;
+        
+        if (isOpening) {
+            // Calculer la hauteur réelle
+            const height = submenu.scrollHeight;
+            submenu.style.maxHeight = height + 'px';
+        } else {
+            submenu.style.maxHeight = '0';
+        }
+    }
+    
+    /**
+     * Gestion responsive
+     */
+    handleResize() {
+        const wasMobile = this.isMobile;
+        this.isMobile = window.innerWidth <= 1024;
+        
+        // Passage desktop -> mobile
+        if (!wasMobile && this.isMobile) {
+            this.closeMobile();
+            this.sidebar.classList.remove('collapsed');
+        }
+        
+        // Passage mobile -> desktop
+        if (wasMobile && !this.isMobile) {
+            this.closeMobile();
+            if (this.isCollapsed) {
+                this.sidebar.classList.add('collapsed');
+            }
+        }
+    }
+    
+    /**
+     * Charger l'état sauvegardé
+     */
+    loadState() {
+        const savedCollapsed = localStorage.getItem('sidebar-collapsed');
+        
+        if (savedCollapsed === 'true' && !this.isMobile) {
+            this.isCollapsed = true;
+            this.sidebar.classList.add('collapsed');
+        }
+        
+        // Activer le lien de la page actuelle
+        const currentPath = window.location.pathname;
+        this.navLinks.forEach(link => {
+            if (link.getAttribute('href') === currentPath) {
+                link.classList.add('active');
+                
+                // Ouvrir le folder parent
+                const section = link.closest('.nav-section');
+                if (section) {
+                    section.classList.add('active');
+                    section.querySelector('.nav-folder')?.classList.add('active');
+                }
+            }
+        });
+    }
+}
+
+// Initialisation automatique
 document.addEventListener('DOMContentLoaded', () => {
-    initializeSidebar();
+    window.sidebarManager = new SidebarManager();
 });
-
-/**
- * Initialise toutes les fonctionnalités de la sidebar
- */
-function initializeSidebar() {
-    const sidebar = document.getElementById('sidebar');
-    const sidebarToggle = document.getElementById('sidebarToggle');
-    const mobileToggle = document.getElementById('mobileToggle');
-    const navFolders = document.querySelectorAll('.nav-folder');
-    
-    if (!sidebar) {
-        console.warn('Sidebar element not found');
-        return;
-    }
-    
-    // Toggle sidebar collapse (desktop)
-    if (sidebarToggle) {
-        sidebarToggle.addEventListener('click', () => {
-            sidebar.classList.toggle('collapsed');
-            const isCollapsed = sidebar.classList.contains('collapsed');
-            localStorage.setItem('sidebarCollapsed', isCollapsed);
-            
-            // Annoncer le changement pour l'accessibilité
-            sidebarToggle.setAttribute('aria-expanded', !isCollapsed);
-        });
-    }
-    
-    // Toggle sidebar mobile
-    if (mobileToggle) {
-        mobileToggle.addEventListener('click', () => {
-            sidebar.classList.toggle('mobile-open');
-            const isOpen = sidebar.classList.contains('mobile-open');
-            toggleOverlay();
-            
-            // Accessibility
-            mobileToggle.setAttribute('aria-expanded', isOpen);
-            
-            // Piéger le focus dans la sidebar si ouverte
-            if (isOpen) {
-                trapFocusInSidebar(sidebar);
-            }
-        });
-    }
-    
-    // Folder toggle functionality avec meilleure gestion
-    navFolders.forEach(folder => {
-        folder.addEventListener('click', (e) => {
-            e.preventDefault();
-            handleFolderToggle(folder);
-        });
-        
-        // Support clavier
-        folder.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter' || e.key === ' ') {
-                e.preventDefault();
-                handleFolderToggle(folder);
-            }
-        });
-    });
-    
-    // Set active page
-    setActivePage();
-    
-    // Restore sidebar state OU collapse par défaut
-    restoreSidebarState(sidebar);
-    
-    // Auto-open section containing active page
-    autoOpenActiveSection();
-    
-    // Handle window resize
-    handleWindowResize(sidebar);
-    
-    // Close sidebar on ESC key
-    document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape' && sidebar.classList.contains('mobile-open')) {
-            sidebar.classList.remove('mobile-open');
-            const overlay = document.querySelector('.sidebar-overlay');
-            if (overlay) {
-                overlay.classList.remove('active');
-            }
-            if (mobileToggle) {
-                mobileToggle.focus();
-            }
-        }
-    });
-}
-
-/**
- * Gère le toggle d'un folder
- * @param {HTMLElement} folder - L'élément folder
- */
-function handleFolderToggle(folder) {
-    const section = folder.closest('.nav-section');
-    if (!section) return;
-    
-    const wasActive = section.classList.contains('active');
-    
-    // Close all sections
-    document.querySelectorAll('.nav-section').forEach(s => {
-        s.classList.remove('active');
-        const folderBtn = s.querySelector('.nav-folder');
-        if (folderBtn) {
-            folderBtn.classList.remove('active');
-            folderBtn.setAttribute('aria-expanded', 'false');
-        }
-    });
-    
-    // Open clicked section if it wasn't active
-    if (!wasActive) {
-        section.classList.add('active');
-        folder.classList.add('active');
-        folder.setAttribute('aria-expanded', 'true');
-    }
-}
-
-/**
- * Définit la page active dans la navigation
- */
-function setActivePage() {
-    const currentPage = window.location.pathname.split('/').pop() || 'index.html';
-    const navLinks = document.querySelectorAll('.nav-link');
-    
-    navLinks.forEach(link => {
-        const linkPage = link.getAttribute('href');
-        if (linkPage === currentPage) {
-            link.classList.add('active');
-            link.setAttribute('aria-current', 'page');
-        } else {
-            link.classList.remove('active');
-            link.removeAttribute('aria-current');
-        }
-    });
-}
-
-/**
- * Restaure l'état de la sidebar depuis localStorage
- * @param {HTMLElement} sidebar - L'élément sidebar
- */
-function restoreSidebarState(sidebar) {
-    const isCollapsed = localStorage.getItem('sidebarCollapsed');
-    
-    // Si aucune préférence sauvegardée, collapse par défaut
-    if (isCollapsed === null) {
-        sidebar.classList.add('collapsed');
-        localStorage.setItem('sidebarCollapsed', 'true');
-    } else if (isCollapsed === 'true') {
-        sidebar.classList.add('collapsed');
-    }
-    
-    // Update ARIA
-    const toggle = document.getElementById('sidebarToggle');
-    if (toggle) {
-        toggle.setAttribute('aria-expanded', isCollapsed !== 'true');
-    }
-}
-
-/**
- * Ouvre automatiquement la section contenant la page active
- */
-function autoOpenActiveSection() {
-    const activeLink = document.querySelector('.nav-link.active');
-    if (activeLink) {
-        const section = activeLink.closest('.nav-section');
-        if (section) {
-            section.classList.add('active');
-            const folder = section.querySelector('.nav-folder');
-            if (folder) {
-                folder.classList.add('active');
-                folder.setAttribute('aria-expanded', 'true');
-            }
-        }
-    }
-}
-
-/**
- * Gère le redimensionnement de la fenêtre
- * @param {HTMLElement} sidebar - L'élément sidebar
- */
-function handleWindowResize(sidebar) {
-    let resizeTimer;
-    window.addEventListener('resize', () => {
-        clearTimeout(resizeTimer);
-        resizeTimer = setTimeout(() => {
-            const isMobile = window.innerWidth <= 1024;
-            
-            if (!isMobile && sidebar.classList.contains('mobile-open')) {
-                sidebar.classList.remove('mobile-open');
-                const overlay = document.querySelector('.sidebar-overlay');
-                if (overlay) {
-                    overlay.classList.remove('active');
-                }
-            }
-        }, 250);
-    });
-}
-
-/**
- * Toggle l'overlay pour mobile
- */
-function toggleOverlay() {
-    let overlay = document.querySelector('.sidebar-overlay');
-    
-    if (!overlay) {
-        overlay = document.createElement('div');
-        overlay.className = 'sidebar-overlay';
-        document.body.appendChild(overlay);
-        
-        overlay.addEventListener('click', () => {
-            const sidebar = document.getElementById('sidebar');
-            if (sidebar) {
-                sidebar.classList.remove('mobile-open');
-            }
-            overlay.classList.remove('active');
-            
-            // Remettre le focus sur le toggle
-            const mobileToggle = document.getElementById('mobileToggle');
-            if (mobileToggle) {
-                mobileToggle.focus();
-            }
-        });
-    }
-    
-    overlay.classList.toggle('active');
-}
-
-/**
- * Piège le focus dans la sidebar (accessibilité mobile)
- * @param {HTMLElement} sidebar - L'élément sidebar
- */
-function trapFocusInSidebar(sidebar) {
-    const focusableElements = sidebar.querySelectorAll(
-        'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
-    );
-    
-    if (focusableElements.length === 0) return;
-    
-    const firstFocusable = focusableElements[0];
-    const lastFocusable = focusableElements[focusableElements.length - 1];
-    
-    // Focus sur le premier élément
-    setTimeout(() => firstFocusable.focus(), 100);
-    
-    const handleTabKey = (e) => {
-        if (e.key !== 'Tab') return;
-        
-        if (e.shiftKey) {
-            if (document.activeElement === firstFocusable) {
-                e.preventDefault();
-                lastFocusable.focus();
-            }
-        } else {
-            if (document.activeElement === lastFocusable) {
-                e.preventDefault();
-                firstFocusable.focus();
-            }
-        }
-    };
-    
-    sidebar.addEventListener('keydown', handleTabKey);
-    
-    // Nettoyer l'event listener quand la sidebar se ferme
-    const observer = new MutationObserver((mutations) => {
-        mutations.forEach((mutation) => {
-            if (mutation.attributeName === 'class') {
-                const isClosed = !sidebar.classList.contains('mobile-open');
-                if (isClosed) {
-                    sidebar.removeEventListener('keydown', handleTabKey);
-                    observer.disconnect();
-                }
-            }
-        });
-    });
-    
-    observer.observe(sidebar, { attributes: true });
-}
-
-/**
- * Met à jour l'heure de dernière mise à jour
- */
-function updateLastUpdateTime() {
-    const lastUpdateElement = document.getElementById('lastUpdate');
-    if (!lastUpdateElement) return;
-    
-    const now = new Date();
-    const timeString = now.toLocaleString('fr-FR', {
-        day: '2-digit',
-        month: '2-digit',
-        year: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit'
-    });
-    lastUpdateElement.textContent = `Dernière mise à jour: ${timeString}`;
-}
-
-// Call on page load
-updateLastUpdateTime();
-
-// Update every minute
-setInterval(updateLastUpdateTime, 60000);
-
-// Export pour utilisation globale
-window.SidebarManager = {
-    toggleOverlay,
-    updateLastUpdateTime,
-    setActivePage
-};
