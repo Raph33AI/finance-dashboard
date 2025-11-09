@@ -82,7 +82,9 @@ class FinancialChatbotEngine {
             console.log('🎯 Intent detected:', intent.type);
             console.log('🔍 Entities extracted:', entities);
 
+            // ✅ AJOUTER LE MESSAGE AU CONTEXTE
             const context = await this.buildContext(intent, entities);
+            context.userMessage = userMessage; // ← AJOUTER CETTE LIGNE
 
             let response;
             switch (intent.type) {
@@ -272,7 +274,7 @@ class FinancialChatbotEngine {
     }
 
     // ============================================
-    // BUILD CONTEXT - AVEC DONNÉES RÉELLES
+    // BUILD CONTEXT - VERSION ULTRA-DEBUGGÉE
     // ============================================
     async buildContext(intent, entities) {
         const context = {
@@ -281,66 +283,133 @@ class FinancialChatbotEngine {
             timestamp: Date.now()
         };
 
-        console.log('🔧 Building context with real data...');
+        console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+        console.log('🔧 BUILDING CONTEXT');
+        console.log('Intent:', intent.type);
+        console.log('Entities:', entities);
+        console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
 
-        // ✅ CHARGER LES DONNÉES DE STOCK
+        // ✅ CHARGER LES DONNÉES POUR TOUTE REQUÊTE AVEC SYMBOLE
         if (entities.symbols && entities.symbols.length > 0 && this.analytics) {
             const symbol = entities.symbols[0];
-            console.log(`📊 Fetching real data for ${symbol}...`);
+            console.log(`\n📊 Symbol detected: ${symbol}`);
             
             try {
-                // Données en temps réel
+                // 1. DONNÉES EN TEMPS RÉEL
+                console.log(`   ⏳ Fetching real-time quote...`);
                 const stockData = await this.analytics.getStockData(symbol);
+                
                 if (stockData) {
                     context.stockData = stockData;
-                    console.log(`✅ Real stock data loaded for ${symbol}`);
-                    console.log(`   Price: $${stockData.quote?.current}`);
+                    console.log(`   ✅ Real-time quote loaded`);
+                    console.log(`      Price: $${stockData.quote?.current}`);
+                    console.log(`      Source: ${stockData.dataSource}`);
+                } else {
+                    console.warn(`   ⚠️ No stock data returned`);
                 }
                 
-                // ✅ DONNÉES HISTORIQUES (si période demandée)
+                // 2. DONNÉES HISTORIQUES (TOUJOURS CHARGER SI SYMBOLE PRÉSENT)
+                let timeframe = '1y'; // Défaut
+                let outputsize = 365; // Défaut
+                
+                // Détecter la période demandée
                 if (entities.timeframes && entities.timeframes.length > 0) {
-                    const timeframe = entities.timeframes[0];
-                    const outputsize = this.getOutputSize(timeframe);
-                    
-                    console.log(`📈 Fetching ${timeframe} time series (${outputsize} points)...`);
-                    
-                    const timeSeries = await this.analytics.getTimeSeries(symbol, '1day', outputsize);
-                    if (timeSeries) {
-                        context.timeSeriesData = timeSeries;
-                        console.log(`✅ Time series loaded: ${timeSeries.data.length} data points`);
+                    timeframe = entities.timeframes[0];
+                    outputsize = this.getOutputSize(timeframe);
+                    console.log(`   📅 Timeframe detected: ${timeframe} (${outputsize} points)`);
+                } else {
+                    // ✅ CHERCHER DANS LE MESSAGE DIRECTEMENT
+                    const message = context.userMessage || '';
+                    if (message.toLowerCase().includes('5 year')) {
+                        timeframe = '5y';
+                        outputsize = 1825;
+                    } else if (message.toLowerCase().includes('2 year')) {
+                        timeframe = '2y';
+                        outputsize = 730;
+                    } else if (message.toLowerCase().includes('10 year')) {
+                        timeframe = '10y';
+                        outputsize = 3650;
                     }
+                    console.log(`   📅 Timeframe inferred: ${timeframe} (${outputsize} points)`);
+                }
+                
+                console.log(`   ⏳ Fetching time series data...`);
+                const timeSeries = await this.analytics.getTimeSeries(symbol, '1day', outputsize);
+                
+                if (timeSeries && timeSeries.data && timeSeries.data.length > 0) {
+                    context.timeSeriesData = timeSeries;
+                    console.log(`   ✅ Time series loaded!`);
+                    console.log(`      Data points: ${timeSeries.data.length}`);
+                    console.log(`      From: ${timeSeries.data[0]?.datetime}`);
+                    console.log(`      To: ${timeSeries.data[timeSeries.data.length - 1]?.datetime}`);
+                    console.log(`      Source: ${timeSeries.dataSource}`);
+                    
+                    // ✅ STATS POUR GEMINI
+                    const prices = timeSeries.data.map(d => d.close);
+                    const firstPrice = prices[0];
+                    const lastPrice = prices[prices.length - 1];
+                    const minPrice = Math.min(...prices);
+                    const maxPrice = Math.max(...prices);
+                    const totalReturn = ((lastPrice - firstPrice) / firstPrice * 100).toFixed(2);
+                    
+                    context.historicalStats = {
+                        firstPrice: firstPrice,
+                        lastPrice: lastPrice,
+                        minPrice: minPrice,
+                        maxPrice: maxPrice,
+                        totalReturn: totalReturn,
+                        period: timeframe,
+                        dataPoints: timeSeries.data.length
+                    };
+                    
+                    console.log(`   📊 Historical stats calculated:`);
+                    console.log(`      First: $${firstPrice} → Last: $${lastPrice}`);
+                    console.log(`      Range: $${minPrice} - $${maxPrice}`);
+                    console.log(`      Total Return: ${totalReturn}%`);
+                } else {
+                    console.warn(`   ⚠️ No time series data returned`);
                 }
                 
             } catch (error) {
-                console.warn(`⚠️ Could not fetch stock data for ${symbol}:`, error);
+                console.error(`   ❌ Error fetching data for ${symbol}:`, error);
             }
+        } else {
+            console.log(`\n⚠️ No symbol detected or analytics not available`);
         }
 
         // ✅ DONNÉES DE MARCHÉ
         if (intent.type === 'MARKET_OVERVIEW' && this.analytics) {
-            console.log('🌐 Fetching market overview...');
+            console.log('\n🌐 Fetching market overview...');
             try {
                 const marketData = await this.analytics.getMarketOverview();
                 if (marketData) {
                     context.marketData = marketData;
-                    console.log('✅ Market overview loaded');
+                    console.log('   ✅ Market overview loaded');
                 }
             } catch (error) {
-                console.warn('⚠️ Could not fetch market data:', error);
+                console.warn('   ⚠️ Could not fetch market data:', error);
             }
         }
 
         // ✅ DONNÉES IPO
         if (intent.type === 'IPO_ANALYSIS' && this.ipoAnalyzer) {
+            console.log('\n📊 Fetching IPO data...');
             try {
                 context.ipoData = await this.ipoAnalyzer.getTopIPOs(5);
-                console.log('✅ IPO data loaded');
+                console.log('   ✅ IPO data loaded');
             } catch (error) {
-                console.warn('⚠️ Could not fetch IPO data:', error);
+                console.warn('   ⚠️ Could not fetch IPO data:', error);
             }
         }
 
-        console.log('✅ Context built:', Object.keys(context));
+        console.log('\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+        console.log('✅ CONTEXT BUILD COMPLETE');
+        console.log('Context keys:', Object.keys(context));
+        console.log('Has stockData:', !!context.stockData);
+        console.log('Has timeSeriesData:', !!context.timeSeriesData);
+        console.log('Has marketData:', !!context.marketData);
+        console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n');
+
         return context;
     }
 

@@ -173,99 +173,92 @@ The P/E ratio of 45.6 is elevated but justified by NVIDIA's dominant position in
         // ✅ INJECT STOCK DATA
         if (context.stockData) {
             const stock = context.stockData;
-            prompt += `**📊 STOCK DATA - ${stock.symbol}**\n`;
+            prompt += `**📊 CURRENT STOCK DATA - ${stock.symbol}**\n`;
             prompt += `**YOU MUST USE THESE EXACT NUMBERS:**\n\n`;
             
             if (stock.quote) {
-                prompt += `Quote (Real-Time):\n`;
+                prompt += `Current Quote:\n`;
                 prompt += `• Current Price: $${stock.quote.current}\n`;
                 prompt += `• Change: ${stock.quote.change >= 0 ? '+' : ''}$${stock.quote.change} (${stock.quote.changePercent}%)\n`;
                 prompt += `• Open: $${stock.quote.open}\n`;
                 prompt += `• High: $${stock.quote.high}\n`;
                 prompt += `• Low: $${stock.quote.low}\n`;
-                prompt += `• Previous Close: $${stock.quote.previousClose}\n`;
                 prompt += `• Volume: ${this.formatNumber(stock.quote.volume)}\n\n`;
             }
             
             if (stock.profile) {
-                prompt += `Company Profile:\n`;
-                prompt += `• Name: ${stock.profile.name}\n`;
-                prompt += `• Industry: ${stock.profile.industry || 'N/A'}\n`;
-                prompt += `• Sector: ${stock.profile.sector || 'N/A'}\n`;
-                prompt += `• Market Cap: $${this.formatNumber(stock.profile.marketCap)}M\n`;
-                prompt += `• Exchange: ${stock.profile.exchange || 'N/A'}\n\n`;
+                prompt += `Company: ${stock.profile.name}\n`;
+                prompt += `Industry: ${stock.profile.industry || 'N/A'}\n`;
+                prompt += `Market Cap: $${this.formatNumber(stock.profile.marketCap)}M\n\n`;
             }
             
             if (stock.metrics) {
-                prompt += `Financial Metrics:\n`;
-                prompt += `• P/E Ratio: ${stock.metrics.peRatio || 'N/A'}\n`;
-                prompt += `• EPS: $${stock.metrics.eps || 'N/A'}\n`;
-                prompt += `• Beta: ${stock.metrics.beta || 'N/A'}\n`;
-                prompt += `• 52-Week High: $${stock.metrics.week52High || 'N/A'}\n`;
-                prompt += `• 52-Week Low: $${stock.metrics.week52Low || 'N/A'}\n`;
-                prompt += `• Dividend Yield: ${stock.metrics.dividendYield || 'N/A'}%\n`;
-                prompt += `• Profit Margin: ${stock.metrics.profitMargin || 'N/A'}%\n`;
-                prompt += `• ROE: ${stock.metrics.roe || 'N/A'}%\n`;
-                prompt += `• Debt/Equity: ${stock.metrics.debtToEquity || 'N/A'}\n`;
-                prompt += `• Price/Book: ${stock.metrics.priceToBook || 'N/A'}\n`;
-                prompt += `• Price/Sales: ${stock.metrics.priceToSales || 'N/A'}\n\n`;
+                prompt += `Key Metrics:\n`;
+                prompt += `• P/E: ${stock.metrics.peRatio || 'N/A'}\n`;
+                prompt += `• 52-Week Range: $${stock.metrics.week52Low || 'N/A'} - $${stock.metrics.week52High || 'N/A'}\n\n`;
             }
-            
-            prompt += `Data Source: ${stock.dataSource}\n`;
-            prompt += `Timestamp: ${new Date(stock.timestamp).toLocaleString()}\n\n`;
         }
 
-        // ✅ INJECT MARKET OVERVIEW
+        // ✅ INJECT TIME SERIES DATA (CRUCIAL!)
+        if (context.timeSeriesData && context.timeSeriesData.data && context.timeSeriesData.data.length > 0) {
+            const ts = context.timeSeriesData;
+            const stats = context.historicalStats;
+            
+            prompt += `**📈 HISTORICAL PRICE DATA - ${ts.symbol}**\n`;
+            prompt += `**THIS IS THE DATA FOR THE CHART YOU MUST ANALYZE:**\n\n`;
+            
+            prompt += `Period: ${stats?.period || 'N/A'}\n`;
+            prompt += `Total Data Points: ${ts.data.length}\n`;
+            prompt += `Date Range: ${ts.data[0]?.datetime} to ${ts.data[ts.data.length - 1]?.datetime}\n\n`;
+            
+            prompt += `Price Evolution:\n`;
+            prompt += `• Starting Price (${ts.data[0]?.datetime}): $${stats?.firstPrice || ts.data[0]?.close}\n`;
+            prompt += `• Ending Price (${ts.data[ts.data.length - 1]?.datetime}): $${stats?.lastPrice || ts.data[ts.data.length - 1]?.close}\n`;
+            prompt += `• Lowest Price: $${stats?.minPrice}\n`;
+            prompt += `• Highest Price: $${stats?.maxPrice}\n`;
+            prompt += `• Total Return: ${stats?.totalReturn}%\n\n`;
+            
+            // ✅ SAMPLE DATA POINTS (pour que l'IA voie la tendance)
+            prompt += `Sample Price Points (every ${Math.floor(ts.data.length / 10)} days):\n`;
+            for (let i = 0; i < ts.data.length; i += Math.floor(ts.data.length / 10)) {
+                const point = ts.data[i];
+                prompt += `• ${point.datetime}: $${point.close}\n`;
+            }
+            prompt += `\n`;
+            
+            prompt += `Data Source: ${ts.dataSource}\n`;
+            prompt += `\n**IMPORTANT: A chart will be automatically generated with this data.**\n`;
+            prompt += `**Your job is to ANALYZE this historical performance.**\n\n`;
+        }
+
+        // ✅ INJECT MARKET DATA
         if (context.marketData) {
             const market = context.marketData;
-            prompt += `**🌐 MARKET OVERVIEW (Real-Time)**\n\n`;
+            prompt += `**🌐 MARKET OVERVIEW**\n\n`;
             
             if (market.sp500) {
-                prompt += `S&P 500 (${market.sp500.symbol}):\n`;
-                prompt += `• Price: $${market.sp500.price}\n`;
-                prompt += `• Change: ${market.sp500.change >= 0 ? '+' : ''}$${market.sp500.change} (${market.sp500.changePercent}%)\n\n`;
+                prompt += `S&P 500: $${market.sp500.price} (${market.sp500.changePercent}%)\n`;
             }
-            
             if (market.nasdaq) {
-                prompt += `NASDAQ (${market.nasdaq.symbol}):\n`;
-                prompt += `• Price: $${market.nasdaq.price}\n`;
-                prompt += `• Change: ${market.nasdaq.change >= 0 ? '+' : ''}$${market.nasdaq.change} (${market.nasdaq.changePercent}%)\n\n`;
+                prompt += `NASDAQ: $${market.nasdaq.price} (${market.nasdaq.changePercent}%)\n`;
             }
-            
-            if (market.dow) {
-                prompt += `Dow Jones (${market.dow.symbol}):\n`;
-                prompt += `• Price: $${market.dow.price}\n`;
-                prompt += `• Change: ${market.dow.change >= 0 ? '+' : ''}$${market.dow.change} (${market.dow.changePercent}%)\n\n`;
-            }
-            
-            prompt += `Data Source: ${market.dataSource}\n\n`;
-        }
-
-        // ✅ INJECT TIME SERIES (if available)
-        if (context.timeSeriesData) {
-            const ts = context.timeSeriesData;
-            prompt += `**📈 HISTORICAL DATA - ${ts.symbol}**\n`;
-            prompt += `Recent prices (last 5 days):\n`;
-            ts.data.slice(-5).forEach(day => {
-                prompt += `• ${day.datetime}: Close $${day.close} (High: $${day.high}, Low: $${day.low})\n`;
-            });
             prompt += `\n`;
         }
 
         prompt += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n`;
 
-        // Add conversation history
-        if (this.conversationHistory.length > 0) {
-            prompt += `**Previous Context:**\n`;
-            this.conversationHistory.slice(-2).forEach(entry => {
-                prompt += `User: ${entry.user}\n`;
-                prompt += `You: ${entry.assistant.substring(0, 100)}...\n\n`;
-            });
-        }
-
         // User query
         prompt += `**USER QUERY:**\n${userMessage}\n\n`;
-        prompt += `**YOUR RESPONSE (Use the exact data provided above):**\n`;
+        
+        // ✅ INSTRUCTION EXPLICITE
+        if (context.timeSeriesData) {
+            prompt += `**CRITICAL INSTRUCTION:**\n`;
+            prompt += `You have ${context.timeSeriesData.data.length} data points of historical prices above.\n`;
+            prompt += `Analyze this historical performance in detail. DO NOT say data is unavailable.\n`;
+            prompt += `A chart is being generated automatically - focus on analyzing the trend.\n\n`;
+        }
+        
+        prompt += `**YOUR RESPONSE:**\n`;
 
         return prompt;
     }
