@@ -87,7 +87,7 @@ const ChatbotConfig = {
         width: 420,
         height: 650,
         mobileBreakpoint: 768,
-        welcomeMessage: "Hello! 👋 I'm your AI Financial Assistant with real-time market data. How can I help you today?",
+        welcomeMessage: "Hello! 👋 I'm Alphy, your AI Financial Assistant with real-time market data. How can I help you today?",
         placeholderText: "Ask me anything about finance, stocks, IPOs...",
         showTimestamps: true,
         timestampFormat: 'HH:mm'
@@ -182,10 +182,10 @@ const ChatbotConfig = {
         supportedLanguages: ['en', 'fr'],
         translations: {
             en: {
-                welcome: "Hello! 👋 I'm your AI Financial Assistant with real-time market data.",
+                welcome: "Hello! 👋 I'm Alphy, your AI Financial Assistant with real-time market data.",
                 placeholder: "Ask me anything about finance, stocks, IPOs...",
                 send: "Send",
-                typing: "AI is typing...",
+                typing: "Alphy is typing...",
                 error: "Oops! Something went wrong.",
                 retry: "Retry",
                 clear: "Clear",
@@ -193,10 +193,10 @@ const ChatbotConfig = {
                 close: "Close"
             },
             fr: {
-                welcome: "Bonjour ! 👋 Je suis votre Assistant Financier IA avec données en temps réel.",
+                welcome: "Bonjour ! 👋 Je suis Alphy, votre Assistant Financier IA avec données en temps réel.",
                 placeholder: "Posez-moi des questions sur la finance, actions, IPO...",
                 send: "Envoyer",
-                typing: "L'IA écrit...",
+                typing: "Alphy écrit...",
                 error: "Oups ! Une erreur s'est produite.",
                 retry: "Réessayer",
                 clear: "Effacer",
