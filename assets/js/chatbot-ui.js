@@ -30,8 +30,13 @@ class ChatbotUI {
     // ============================================
     async init() {
         try {
+            console.log('🎨 Création de l\'interface UI...');
+            
             // Create UI structure
             this.createUI();
+            
+            // Wait for DOM insertion
+            await new Promise(resolve => setTimeout(resolve, 100));
             
             // Get element references
             this.cacheElements();
@@ -48,7 +53,7 @@ class ChatbotUI {
             // Show initial suggestions
             this.showInitialSuggestions();
             
-            console.log('✅ Chatbot UI initialized');
+            console.log('✅ Chatbot UI initialized successfully');
             
         } catch (error) {
             console.error('❌ UI initialization error:', error);
@@ -62,9 +67,6 @@ class ChatbotUI {
         const container = document.createElement('div');
         container.className = 'chatbot-container';
         container.innerHTML = `
-            <!-- Particles Background -->
-            <canvas id="particles-canvas"></canvas>
-            
             <!-- Toggle Button -->
             <button class="chatbot-toggle-btn" id="chatbot-toggle" aria-label="Toggle chatbot">
                 🤖
@@ -127,12 +129,15 @@ class ChatbotUI {
         `;
         
         document.body.appendChild(container);
+        console.log('✅ UI structure created');
     }
 
     // ============================================
     // CACHE DOM ELEMENTS
     // ============================================
     cacheElements() {
+        console.log('📦 Caching DOM elements...');
+        
         this.elements = {
             container: document.querySelector('.chatbot-container'),
             toggleBtn: document.getElementById('chatbot-toggle'),
@@ -142,86 +147,213 @@ class ChatbotUI {
             input: document.getElementById('chatbot-input'),
             sendBtn: document.getElementById('chatbot-send'),
             clearBtn: document.getElementById('clear-chat'),
-            minimizeBtn: document.getElementById('minimize-chat'),
-            particlesCanvas: document.getElementById('particles-canvas')
+            minimizeBtn: document.getElementById('minimize-chat')
         };
+        
+        // Verify all elements
+        let missingElements = [];
+        for (const [key, element] of Object.entries(this.elements)) {
+            if (!element) {
+                missingElements.push(key);
+                console.error(`❌ Element missing: ${key}`);
+            } else {
+                console.log(`✅ Element cached: ${key}`);
+            }
+        }
+        
+        if (missingElements.length > 0) {
+            console.error('❌ Missing elements:', missingElements);
+        } else {
+            console.log('✅ All elements cached successfully');
+        }
     }
 
     // ============================================
     // ATTACH EVENT LISTENERS
     // ============================================
     attachEventListeners() {
-        // Toggle button
-        this.elements.toggleBtn.addEventListener('click', () => this.toggleChat());
+        console.log('🔗 Attaching event listeners...');
+        
+        // Toggle button - SUPER ROBUSTE
+        if (this.elements.toggleBtn) {
+            // Supprimer tous les listeners existants
+            const newToggleBtn = this.elements.toggleBtn.cloneNode(true);
+            this.elements.toggleBtn.parentNode.replaceChild(newToggleBtn, this.elements.toggleBtn);
+            this.elements.toggleBtn = newToggleBtn;
+            
+            this.elements.toggleBtn.addEventListener('click', (e) => {
+                console.log('🖱️ TOGGLE BUTTON CLICKED!');
+                e.preventDefault();
+                e.stopPropagation();
+                this.toggleChat();
+            }, { capture: true, passive: false });
+            
+            console.log('✅ Toggle button listener attached');
+        } else {
+            console.error('❌ Toggle button not found!');
+        }
         
         // Minimize button
-        this.elements.minimizeBtn.addEventListener('click', () => this.toggleChat());
+        if (this.elements.minimizeBtn) {
+            this.elements.minimizeBtn.addEventListener('click', (e) => {
+                console.log('🖱️ MINIMIZE CLICKED');
+                e.preventDefault();
+                e.stopPropagation();
+                this.toggleChat();
+            });
+            console.log('✅ Minimize button listener attached');
+        }
         
         // Clear button
-        this.elements.clearBtn.addEventListener('click', () => this.clearChat());
+        if (this.elements.clearBtn) {
+            this.elements.clearBtn.addEventListener('click', (e) => {
+                console.log('🖱️ CLEAR CLICKED');
+                e.preventDefault();
+                e.stopPropagation();
+                this.clearChat();
+            });
+            console.log('✅ Clear button listener attached');
+        }
         
         // Send button
-        this.elements.sendBtn.addEventListener('click', () => this.sendMessage());
+        if (this.elements.sendBtn) {
+            this.elements.sendBtn.addEventListener('click', (e) => {
+                console.log('🖱️ SEND CLICKED');
+                e.preventDefault();
+                e.stopPropagation();
+                this.sendMessage();
+            });
+            console.log('✅ Send button listener attached');
+        }
         
         // Input field
-        this.elements.input.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter' && !e.shiftKey) {
-                e.preventDefault();
-                this.sendMessage();
-            }
-        });
-        
-        // Auto-resize textarea
-        this.elements.input.addEventListener('input', () => {
-            this.autoResizeTextarea();
-        });
+        if (this.elements.input) {
+            this.elements.input.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    this.sendMessage();
+                }
+            });
+            
+            this.elements.input.addEventListener('input', () => {
+                this.autoResizeTextarea();
+            });
+            console.log('✅ Input listeners attached');
+        }
         
         // Suggestions delegation
-        this.elements.suggestions.addEventListener('click', (e) => {
-            if (e.target.classList.contains('suggestion-chip')) {
-                this.onSuggestionClick(e.target.textContent);
-            }
-        });
+        if (this.elements.suggestions) {
+            this.elements.suggestions.addEventListener('click', (e) => {
+                if (e.target.classList.contains('suggestion-chip')) {
+                    console.log('🖱️ SUGGESTION CLICKED');
+                    this.onSuggestionClick(e.target.textContent);
+                }
+            });
+            console.log('✅ Suggestions listener attached');
+        }
+        
+        console.log('✅ All event listeners attached');
     }
 
     // ============================================
     // INITIALIZE COMPONENTS
     // ============================================
     async initializeComponents() {
+        console.log('🔧 Initializing components...');
+        
         // Initialize engine
         if (typeof FinancialChatbotEngine !== 'undefined') {
             this.engine = new FinancialChatbotEngine(this.config);
+            console.log('✅ Engine initialized');
+        } else {
+            console.warn('⚠️ FinancialChatbotEngine not available');
         }
         
         // Initialize charts
         if (typeof ChatbotCharts !== 'undefined') {
             this.charts = new ChatbotCharts(this.config);
+            console.log('✅ Charts initialized');
+        } else {
+            console.warn('⚠️ ChatbotCharts not available');
         }
         
         // Initialize suggestions
         if (typeof ChatbotSuggestions !== 'undefined') {
             this.suggestions = new ChatbotSuggestions(this.config);
-        }
-        
-        // Initialize particles background
-        if (this.config.ui.enableParticles && this.elements.particlesCanvas) {
-            this.initializeParticles();
+            console.log('✅ Suggestions initialized');
+        } else {
+            console.warn('⚠️ ChatbotSuggestions not available');
         }
     }
 
     // ============================================
-    // TOGGLE CHAT
+    // TOGGLE CHAT - VERSION ULTRA-ROBUSTE
     // ============================================
     toggleChat() {
+        console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+        console.log('🔄 toggleChat() APPELÉ');
+        console.log('État actuel isOpen:', this.isOpen);
+        console.log('Widget element:', this.elements.widget);
+        console.log('Widget classes AVANT:', this.elements.widget ? this.elements.widget.className : 'NULL');
+        
+        if (!this.elements.widget) {
+            console.error('❌ ERREUR: Widget element not found!');
+            return;
+        }
+        
+        // Toggle state
         this.isOpen = !this.isOpen;
+        console.log('Nouvel état isOpen:', this.isOpen);
         
         if (this.isOpen) {
+            console.log('📂 OUVERTURE du chatbot...');
+            
+            // Forcer l'affichage
+            this.elements.widget.style.display = 'flex';
             this.elements.widget.classList.remove('hidden');
-            this.elements.widget.classList.add('bounce-in');
-            this.elements.input.focus();
+            this.elements.widget.classList.add('chatbot-open');
+            
+            // Animation
+            setTimeout(() => {
+                this.elements.widget.classList.add('bounce-in');
+            }, 10);
+            
+            console.log('Widget classes APRÈS ouverture:', this.elements.widget.className);
+            console.log('Widget style.display:', this.elements.widget.style.display);
+            console.log('Widget computed display:', window.getComputedStyle(this.elements.widget).display);
+            console.log('Widget visibility:', window.getComputedStyle(this.elements.widget).visibility);
+            console.log('Widget opacity:', window.getComputedStyle(this.elements.widget).opacity);
+            
+            // Focus sur input après animation
+            setTimeout(() => {
+                if (this.elements.input) {
+                    this.elements.input.focus();
+                    console.log('✅ Focus sur input');
+                }
+            }, 300);
+            
+            console.log('✅ CHATBOT OUVERT');
+            
         } else {
-            this.elements.widget.classList.add('hidden');
+            console.log('📁 FERMETURE du chatbot...');
+            
+            // Retirer animations
+            this.elements.widget.classList.remove('bounce-in');
+            this.elements.widget.classList.remove('chatbot-open');
+            
+            // Cacher après animation
+            setTimeout(() => {
+                this.elements.widget.classList.add('hidden');
+                this.elements.widget.style.display = '';
+            }, 300);
+            
+            console.log('Widget classes APRÈS fermeture:', this.elements.widget.className);
+            console.log('✅ CHATBOT FERMÉ');
         }
+        
+        console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+        
+        return true; // Retourner true pour confirmer l'exécution
     }
 
     // ============================================
@@ -231,6 +363,8 @@ class ChatbotUI {
         const message = this.elements.input.value.trim();
         
         if (!message || this.isTyping) return;
+        
+        console.log('📤 Sending message:', message);
         
         // Clear input
         this.elements.input.value = '';
@@ -298,8 +432,6 @@ class ChatbotUI {
         
         const text = document.createElement('div');
         text.className = 'message-text';
-        
-        // Format content with markdown-like syntax
         text.innerHTML = this.formatMessage(content);
         
         bubble.appendChild(text);
@@ -328,18 +460,11 @@ class ChatbotUI {
     // FORMAT MESSAGE
     // ============================================
     formatMessage(text) {
-        // Convert markdown-like formatting to HTML
         let formatted = text
-            // Bold: **text**
             .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
-            // Italic: *text*
             .replace(/\*(.+?)\*/g, '<em>$1</em>')
-            // Code: `text`
             .replace(/`(.+?)`/g, '<code>$1</code>')
-            // Line breaks
-            .replace(/\n/g, '<br>')
-            // Emoji enhancement (keep as is)
-            .replace(/([\u{1F300}-\u{1F9FF}])/gu, '<span class="emoji">$1</span>');
+            .replace(/\n/g, '<br>');
         
         return formatted;
     }
@@ -490,80 +615,6 @@ class ChatbotUI {
     }
 
     // ============================================
-    // PARTICLES ANIMATION
-    // ============================================
-    initializeParticles() {
-        const canvas = this.elements.particlesCanvas;
-        const ctx = canvas.getContext('2d');
-        
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
-        
-        const particles = [];
-        const particleCount = this.config.ui.particleCount || 50;
-        
-        // Create particles
-        for (let i = 0; i < particleCount; i++) {
-            particles.push({
-                x: Math.random() * canvas.width,
-                y: Math.random() * canvas.height,
-                vx: (Math.random() - 0.5) * 0.5,
-                vy: (Math.random() - 0.5) * 0.5,
-                radius: Math.random() * 2 + 1
-            });
-        }
-        
-        // Animation loop
-        const animate = () => {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            
-            particles.forEach(p => {
-                // Update position
-                p.x += p.vx;
-                p.y += p.vy;
-                
-                // Bounce off edges
-                if (p.x < 0 || p.x > canvas.width) p.vx *= -1;
-                if (p.y < 0 || p.y > canvas.height) p.vy *= -1;
-                
-                // Draw particle
-                ctx.beginPath();
-                ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
-                ctx.fillStyle = 'rgba(102, 126, 234, 0.5)';
-                ctx.fill();
-            });
-            
-            // Draw connections
-            particles.forEach((p1, i) => {
-                particles.slice(i + 1).forEach(p2 => {
-                    const dx = p1.x - p2.x;
-                    const dy = p1.y - p2.y;
-                    const distance = Math.sqrt(dx * dx + dy * dy);
-                    
-                    if (distance < 100) {
-                        ctx.beginPath();
-                        ctx.moveTo(p1.x, p1.y);
-                        ctx.lineTo(p2.x, p2.y);
-                        ctx.strokeStyle = `rgba(102, 126, 234, ${0.2 * (1 - distance / 100)})`;
-                        ctx.lineWidth = 0.5;
-                        ctx.stroke();
-                    }
-                });
-            });
-            
-            requestAnimationFrame(animate);
-        };
-        
-        animate();
-        
-        // Resize handler
-        window.addEventListener('resize', () => {
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
-        });
-    }
-
-    // ============================================
     // DESTROY
     // ============================================
     destroy() {
@@ -575,15 +626,6 @@ class ChatbotUI {
             this.elements.container.remove();
         }
     }
-}
-
-// ============================================
-// AUTO-INITIALIZE ON DOM READY
-// ============================================
-if (typeof ChatbotConfig !== 'undefined') {
-    document.addEventListener('DOMContentLoaded', () => {
-        window.chatbotUI = new ChatbotUI(ChatbotConfig);
-    });
 }
 
 // ============================================
