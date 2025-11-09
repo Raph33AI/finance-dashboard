@@ -1350,7 +1350,12 @@
     <script src="assets/js/firebase-config.js"></script>
     
     <!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-         API CLIENT - DOIT ÊTRE CHARGÉ AVANT LE TICKER !
+         ✅ CONFIG - DOIT ÊTRE CHARGÉ EN PREMIER !
+         ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
+    <script src="assets/js/config.js"></script>
+    
+    <!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+         API CLIENT - APRÈS CONFIG, AVANT LE TICKER !
          ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
     <script src="assets/js/api-client.js"></script>
     
@@ -1371,7 +1376,7 @@
     <script src="assets/js/landing.js"></script>
     
     <!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-         MARKET TICKER - APRÈS API CLIENT !
+         MARKET TICKER - APRÈS CONFIG ET API CLIENT !
          ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
     <script src="assets/js/landing-market-ticker.js"></script>
     
@@ -1409,20 +1414,32 @@
             }
 
             // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-            // 3. VÉRIFIER API CLIENT
+            // 3. VÉRIFIER CONFIG
+            // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+            console.log('%c⚙️  Checking Configuration...', 'color: #3B82F6; font-weight: bold;');
+            if (window.APP_CONFIG) {
+                console.log('%c✅ APP_CONFIG loaded successfully', 'color: #10b981; font-weight: bold;');
+                console.log('   📡 API Base URL:', window.APP_CONFIG.API_BASE_URL);
+                console.log('   ⏱️  Quote Cache:', window.APP_CONFIG.CACHE_DURATION.quote / 1000 / 60, 'minutes');
+            } else {
+                console.warn('%c⚠️  APP_CONFIG not found - using defaults', 'color: #f59e0b; font-weight: bold;');
+            }
+
+            // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+            // 4. VÉRIFIER API CLIENT
             // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
             console.log('%c📡 Checking API Client...', 'color: #3B82F6; font-weight: bold;');
-            if (typeof window.TwelveDataClient !== 'undefined') {
-                console.log('%c✅ TwelveDataClient loaded successfully', 'color: #10b981; font-weight: bold;');
-                console.log('   Market Ticker will use REAL-TIME API data\n');
+            if (typeof window.FinanceAPIClient !== 'undefined') {
+                console.log('%c✅ FinanceAPIClient loaded successfully', 'color: #10b981; font-weight: bold;');
+                console.log('   📊 Market Ticker will use REAL-TIME API data\n');
             } else {
-                console.error('%c❌ TwelveDataClient NOT FOUND!', 'color: #ef4444; font-weight: bold;');
+                console.error('%c❌ FinanceAPIClient NOT FOUND!', 'color: #ef4444; font-weight: bold;');
                 console.error('   📋 Make sure api-client.js is loaded correctly');
                 console.error('   📋 Check the file path: assets/js/api-client.js\n');
             }
 
             // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-            // 4. INITIALISER ALPHY AI CHATBOT
+            // 5. INITIALISER ALPHY AI CHATBOT
             // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
             console.log('%c🤖 Initializing Alphy AI Chatbot...', 'color: #8B5CF6; font-weight: bold; font-size: 16px;');
             
@@ -1467,7 +1484,7 @@
             }
 
             // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-            // 5. BOUTON "CHAT WITH ALPHY" - SECTION ALPHY AI
+            // 6. BOUTON "CHAT WITH ALPHY" - SECTION ALPHY AI
             // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
             console.log('%c🔘 Setting up "Chat with Alphy" button...', 'color: #8B5CF6; font-weight: bold;');
             
@@ -1511,20 +1528,29 @@
             }
 
             // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-            // 6. RÉSUMÉ FINAL
+            // 7. RÉSUMÉ FINAL
             // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
             console.log('%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'color: #3B82F6; font-weight: bold; font-size: 14px;');
             console.log('%c✨ AlphaVault AI - All Systems Ready!', 'color: #10b981; font-size: 18px; font-weight: bold;');
             console.log('%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'color: #3B82F6; font-weight: bold; font-size: 14px;');
             console.log('');
             console.log('%cSystem Status:', 'font-weight: bold; font-size: 14px;');
-            console.log(`   ${chatbotChecks.ChatbotUI ? '✅' : '❌'} Alphy AI Chatbot`);
-            console.log(`   ${typeof window.TwelveDataClient !== 'undefined' ? '✅' : '❌'} API Client (Real-time Data)`);
+            console.log(`   ${window.APP_CONFIG ? '✅' : '❌'} Configuration`);
+            console.log(`   ${typeof window.FinanceAPIClient !== 'undefined' ? '✅' : '❌'} API Client (FinanceAPIClient)`);
             console.log(`   ${typeof window.marketTicker !== 'undefined' ? '✅' : '❌'} Market Ticker`);
+            console.log(`   ${chatbotChecks.ChatbotUI ? '✅' : '❌'} Alphy AI Chatbot`);
+            console.log('');
+            console.log('%cRefresh Settings:', 'font-weight: bold; font-size: 14px;');
+            if (window.APP_CONFIG) {
+                console.log(`   ⏱️  Quote Cache: ${window.APP_CONFIG.CACHE_DURATION.quote / 1000 / 60} minutes`);
+            }
+            if (window.marketTicker) {
+                console.log(`   🔄 Ticker Refresh: ${window.marketTicker.updateInterval / 1000 / 60} minutes`);
+            }
             console.log('');
             console.log('%cHow to use:', 'font-weight: bold; font-size: 14px;');
             console.log('   💬 Click the chat button (bottom-right) to talk with Alphy');
-            console.log('   📊 Market ticker updates automatically every 30 seconds');
+            console.log('   📊 Market ticker updates automatically every hour');
             console.log('   🎨 All animations are enabled');
             console.log('');
             console.log('%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'color: #3B82F6; font-weight: bold; font-size: 14px;');

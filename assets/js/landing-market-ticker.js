@@ -1,5 +1,6 @@
 /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
    📊 MARKET TICKER - 100% REAL-TIME API DATA
+   ✅ RAFRAÎCHISSEMENT TOUTES LES HEURES (1h = 3600000 ms)
    NO MOCK DATA - ONLY LIVE MARKET DATA FROM API
    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
@@ -11,7 +12,10 @@ class MarketTicker {
             'TSLA', 'META', 'NFLX', 'AMD', 'INTC',
             'JPM', 'BAC', 'V', 'MA', 'DIS'
         ];
-        this.updateInterval = 30000; // 30 secondes (limite API)
+        
+        // ✅ CORRECTION : 1 heure au lieu de 30 secondes
+        this.updateInterval = 3600000; // 1 HEURE (3600000 ms)
+        
         this.apiClient = null;
         this.isLoading = false;
         this.lastUpdate = null;
@@ -25,7 +29,10 @@ class MarketTicker {
             return;
         }
 
+        console.log('%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'color: #3B82F6; font-weight: bold;');
         console.log('%c📊 Market Ticker - Initializing...', 'color: #3B82F6; font-weight: bold;');
+        console.log('%c⏱️  Refresh interval: 1 HOUR', 'color: #10b981; font-weight: bold;');
+        console.log('%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'color: #3B82F6; font-weight: bold;');
         
         // Afficher le loading state
         this.showLoadingState();
@@ -61,21 +68,33 @@ class MarketTicker {
         const checkAPI = setInterval(() => {
             attempts++;
 
-            // Vérifier si TwelveDataClient existe
-            if (window.TwelveDataClient) {
+            // ✅ CORRECTION : Utiliser FinanceAPIClient au lieu de TwelveDataClient
+            if (window.FinanceAPIClient) {
                 clearInterval(checkAPI);
                 
                 try {
-                    this.apiClient = new window.TwelveDataClient();
+                    // ✅ Utiliser la configuration globale
+                    const config = window.APP_CONFIG ? {
+                        baseURL: window.APP_CONFIG.API_BASE_URL,
+                        cacheDuration: window.APP_CONFIG.CACHE_DURATION.quote,
+                        maxRetries: window.APP_CONFIG.MAX_RETRIES
+                    } : {};
+                    
+                    this.apiClient = new window.FinanceAPIClient(config);
+                    
                     console.log('%c✅ API Client connected successfully', 'color: #10b981; font-weight: bold;');
-                    console.log('📡 Starting real-time market data stream...');
+                    console.log('📡 Base URL:', this.apiClient.baseURL);
+                    console.log('⏱️  Cache Duration:', this.apiClient.cacheDuration / 1000 / 60, 'minutes');
+                    console.log('🔄 Refresh Interval:', this.updateInterval / 1000 / 60, 'minutes');
+                    console.log('📊 Starting real-time market data stream...');
                     
                     // Charger les données immédiatement
                     this.loadRealTimeData();
                     
-                    // Mettre à jour régulièrement
+                    // ✅ Mettre à jour toutes les heures
                     setInterval(() => {
                         if (!this.isLoading) {
+                            console.log('🔄 Hourly refresh triggered...');
                             this.loadRealTimeData();
                         }
                     }, this.updateInterval);
@@ -86,14 +105,15 @@ class MarketTicker {
                 }
             } else if (attempts >= maxAttempts) {
                 clearInterval(checkAPI);
-                console.error('❌ API Client (TwelveDataClient) not found after 10 seconds');
+                console.error('❌ FinanceAPIClient not found after 10 seconds');
                 console.error('📋 Make sure api-client.js is loaded before landing-market-ticker.js');
+                console.error('📋 Check that the class is exported as FinanceAPIClient (not TwelveDataClient)');
                 this.showErrorState();
             }
 
             // Log de progression tous les 2 secondes
             if (attempts % 20 === 0) {
-                console.log(`⏳ Waiting for API Client... (${attempts/10}s)`);
+                console.log(`⏳ Waiting for FinanceAPIClient... (${attempts/10}s)`);
             }
         }, 100);
     }
@@ -111,7 +131,10 @@ class MarketTicker {
         }
 
         this.isLoading = true;
+        const startTime = Date.now();
+        console.log('%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'color: #3B82F6; font-weight: bold;');
         console.log('%c📊 Fetching REAL-TIME market data from API...', 'color: #3B82F6; font-weight: bold;');
+        console.log(`⏰ Time: ${new Date().toLocaleTimeString()}`);
 
         try {
             // Fetch data for all symbols in parallel
@@ -121,18 +144,14 @@ class MarketTicker {
                     const quote = await this.apiClient.getQuote(symbol);
                     
                     // Extraire les données de l'API
-                    const price = parseFloat(quote.close || quote.price || quote.last || 0);
-                    const previousClose = parseFloat(quote.previous_close || 0);
-                    
-                    // Calculer le changement
-                    let change = 0;
-                    if (quote.percent_change !== undefined) {
-                        change = parseFloat(quote.percent_change);
-                    } else if (previousClose > 0 && price > 0) {
-                        change = ((price - previousClose) / previousClose) * 100;
-                    }
+                    const price = parseFloat(quote.price || quote.close || quote.last || 0);
+                    const change = parseFloat(quote.percentChange || quote.percent_change || 0);
 
-                    console.log(`  ✅ ${symbol}: $${price.toFixed(2)} (${change >= 0 ? '+' : ''}${change.toFixed(2)}%)`);
+                    if (price > 0) {
+                        console.log(`  ✅ ${symbol}: $${price.toFixed(2)} (${change >= 0 ? '+' : ''}${change.toFixed(2)}%)`);
+                    } else {
+                        console.warn(`  ⚠️ ${symbol}: No valid price data`);
+                    }
 
                     return {
                         symbol: symbol,
@@ -155,11 +174,16 @@ class MarketTicker {
 
             const results = await Promise.all(promises);
             const validResults = results.filter(r => r.success);
+            const loadTime = ((Date.now() - startTime) / 1000).toFixed(2);
 
             if (validResults.length > 0) {
-                console.log(`%c✅ Successfully loaded ${validResults.length}/${this.symbols.length} stocks`, 'color: #10b981; font-weight: bold;');
+                console.log(`%c✅ Successfully loaded ${validResults.length}/${this.symbols.length} stocks in ${loadTime}s`, 'color: #10b981; font-weight: bold;');
                 this.lastUpdate = new Date();
                 this.renderTicker(validResults);
+                
+                // Afficher la prochaine mise à jour
+                const nextUpdate = new Date(Date.now() + this.updateInterval);
+                console.log(`⏰ Next update at: ${nextUpdate.toLocaleTimeString()}`);
             } else {
                 console.error('❌ No valid data received from API');
                 this.showErrorState();
@@ -170,6 +194,7 @@ class MarketTicker {
             this.showErrorState();
         } finally {
             this.isLoading = false;
+            console.log('%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'color: #3B82F6; font-weight: bold;');
         }
     }
 
@@ -199,7 +224,8 @@ class MarketTicker {
         this.duplicateTickerContent();
 
         // Log de confirmation
-        console.log(`📊 Ticker updated at ${this.lastUpdate.toLocaleTimeString()}`);
+        console.log(`✅ Ticker updated at ${this.lastUpdate.toLocaleTimeString()}`);
+        console.log(`⏱️  Cache valid for ${this.apiClient.cacheDuration / 1000 / 60} minutes`);
     }
 
     duplicateTickerContent() {
