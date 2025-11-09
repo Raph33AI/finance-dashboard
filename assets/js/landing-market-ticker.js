@@ -1,5 +1,5 @@
 /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-   📊 MARKET TICKER - REAL-TIME DATA FROM FINNHUB
+   📊 MARKET TICKER - REAL-TIME DATA WITH DYNAMIC MOCK
    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
 class MarketTicker {
@@ -10,8 +10,33 @@ class MarketTicker {
             'TSLA', 'META', 'NFLX', 'AMD', 'INTC',
             'JPM', 'BAC', 'V', 'MA', 'DIS'
         ];
-        this.updateInterval = 30000; // 30 secondes
+        this.updateInterval = 5000; // 5 seconds for dynamic updates
         this.apiClient = null;
+        this.retryCount = 0;
+        this.maxRetries = 3;
+        
+        // Prix de base pour chaque symbole
+        this.basePrices = {
+            'AAPL': 178.32,
+            'MSFT': 374.58,
+            'GOOGL': 138.21,
+            'AMZN': 145.78,
+            'NVDA': 485.32,
+            'TSLA': 242.84,
+            'META': 356.77,
+            'NFLX': 489.32,
+            'AMD': 142.67,
+            'INTC': 43.21,
+            'JPM': 152.45,
+            'BAC': 34.56,
+            'V': 245.67,
+            'MA': 412.89,
+            'DIS': 95.23
+        };
+        
+        // Prix actuels (mis à jour dynamiquement)
+        this.currentPrices = { ...this.basePrices };
+        
         this.init();
     }
 
@@ -23,43 +48,61 @@ class MarketTicker {
 
         console.log('📊 Market Ticker initializing...');
         
-        // Attendre que l'API client soit disponible
+        // Wait for API client
         this.waitForAPIClient();
     }
 
     waitForAPIClient() {
+        let attempts = 0;
+        const maxAttempts = 50; // 5 seconds max
+
         const checkAPI = setInterval(() => {
+            attempts++;
+
             if (window.TwelveDataClient) {
                 clearInterval(checkAPI);
                 this.apiClient = new window.TwelveDataClient();
                 console.log('✅ API Client connected for Market Ticker');
                 this.loadTickerData();
+                
+                // Update regularly
                 setInterval(() => this.loadTickerData(), this.updateInterval);
+            } else if (attempts >= maxAttempts) {
+                clearInterval(checkAPI);
+                console.warn('⚠️ API Client not available - using dynamic mock data');
+                this.loadDynamicMockData();
+                
+                // Update mock data every 5 seconds
+                setInterval(() => this.loadDynamicMockData(), this.updateInterval);
             }
         }, 100);
-
-        // Timeout après 5 secondes
-        setTimeout(() => {
-            if (!this.apiClient) {
-                clearInterval(checkAPI);
-                console.warn('⚠️ API Client not available - using mock data');
-                this.loadMockData();
-            }
-        }, 5000);
     }
 
     async loadTickerData() {
+        if (!this.apiClient) {
+            console.warn('⚠️ API Client not initialized - using dynamic mock data');
+            this.loadDynamicMockData();
+            return;
+        }
+
         try {
-            console.log('📊 Loading real-time ticker data...');
+            console.log('📊 Fetching real-time market data from API...');
             
             const promises = this.symbols.map(async (symbol) => {
                 try {
                     const quote = await this.apiClient.getQuote(symbol);
+                    
+                    const price = parseFloat(quote.close || quote.price || quote.last || 0);
+                    const previousClose = parseFloat(quote.previous_close || price);
+                    const change = previousClose > 0 
+                        ? ((price - previousClose) / previousClose) * 100 
+                        : parseFloat(quote.percent_change || 0);
+
                     return {
                         symbol: symbol,
-                        price: quote.close || quote.price || 0,
-                        change: quote.percent_change || 0,
-                        success: true
+                        price: price,
+                        change: change,
+                        success: price > 0
                     };
                 } catch (error) {
                     console.warn(`⚠️ Error fetching ${symbol}:`, error.message);
@@ -73,20 +116,57 @@ class MarketTicker {
             });
 
             const results = await Promise.all(promises);
-            const validResults = results.filter(r => r.success && r.price > 0);
+            const validResults = results.filter(r => r.success);
 
             if (validResults.length > 0) {
+                console.log(`✅ Loaded ${validResults.length}/${this.symbols.length} stocks from API`);
                 this.renderTicker(validResults);
-                console.log(`✅ Loaded ${validResults.length} stocks`);
+                this.retryCount = 0;
             } else {
-                console.warn('⚠️ No valid data - using mock data');
-                this.loadMockData();
+                console.warn('⚠️ No valid data from API - using dynamic mock data');
+                this.loadDynamicMockData();
             }
             
         } catch (error) {
             console.error('❌ Error loading ticker data:', error);
-            this.loadMockData();
+            
+            if (this.retryCount < this.maxRetries) {
+                this.retryCount++;
+                console.log(`🔄 Retrying... (${this.retryCount}/${this.maxRetries})`);
+                setTimeout(() => this.loadTickerData(), 2000);
+            } else {
+                console.warn('⚠️ Max retries reached - using dynamic mock data');
+                this.loadDynamicMockData();
+            }
         }
+    }
+
+    loadDynamicMockData() {
+        console.log('📊 Generating dynamic market data...');
+        
+        const mockData = this.symbols.map(symbol => {
+            // Récupérer le prix actuel ou le prix de base
+            const currentPrice = this.currentPrices[symbol] || this.basePrices[symbol];
+            
+            // Générer une variation réaliste (-2% à +2%)
+            const variationPercent = (Math.random() - 0.5) * 0.04; // -2% to +2%
+            const priceChange = currentPrice * variationPercent;
+            const newPrice = currentPrice + priceChange;
+            
+            // Mettre à jour le prix actuel
+            this.currentPrices[symbol] = newPrice;
+            
+            // Calculer le changement en pourcentage par rapport au prix de base
+            const changePercent = ((newPrice - this.basePrices[symbol]) / this.basePrices[symbol]) * 100;
+            
+            return {
+                symbol: symbol,
+                price: newPrice,
+                change: changePercent
+            };
+        });
+
+        this.renderTicker(mockData);
     }
 
     renderTicker(data) {
@@ -107,31 +187,15 @@ class MarketTicker {
         this.duplicateTickerContent();
     }
 
-    loadMockData() {
-        const mockData = [
-            { symbol: 'AAPL', price: 178.32, change: 2.4 },
-            { symbol: 'MSFT', price: 374.58, change: 1.8 },
-            { symbol: 'GOOGL', price: 138.21, change: -0.5 },
-            { symbol: 'AMZN', price: 145.78, change: 3.2 },
-            { symbol: 'NVDA', price: 485.32, change: 5.7 },
-            { symbol: 'TSLA', price: 242.84, change: -1.2 },
-            { symbol: 'META', price: 356.77, change: 2.9 },
-            { symbol: 'NFLX', price: 489.32, change: 1.5 },
-            { symbol: 'AMD', price: 142.67, change: 4.1 },
-            { symbol: 'INTC', price: 43.21, change: -0.8 }
-        ];
-
-        this.renderTicker(mockData);
-    }
-
     duplicateTickerContent() {
-        // Dupliquer pour créer un défilement infini
+        // Duplicate content for infinite scroll effect
         const content = this.tickerContainer.innerHTML;
         this.tickerContainer.innerHTML = content + content;
     }
 }
 
-// Initialiser au chargement
+// Initialize on DOM load
 document.addEventListener('DOMContentLoaded', () => {
+    console.log('🎬 Initializing Market Ticker...');
     window.marketTicker = new MarketTicker();
 });
