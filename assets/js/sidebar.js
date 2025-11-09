@@ -1,7 +1,7 @@
 /**
  * ===================================
- * SIDEBAR PREMIUM - GESTION COMPLÈTE
- * AlphaVault AI - Version Ultra-Moderne
+ * SIDEBAR PREMIUM - VERSION CORRIGÉE
+ * AlphaVault AI - Performance Optimisée
  * ===================================
  */
 
@@ -17,38 +17,66 @@ class SidebarManager {
         this.isMobile = window.innerWidth <= 1024;
         this.isCollapsed = false;
         
+        // ✅ Debounce pour éviter les clics multiples
+        this.debounceTimeout = null;
+        
         this.init();
     }
     
     init() {
+        if (!this.sidebar) {
+            console.error('❌ Sidebar non trouvée');
+            return;
+        }
+        
         // Charger l'état sauvegardé
         this.loadState();
         
-        // Événements toggle
+        // ✅ Événements toggle avec debounce
         if (this.sidebarToggle) {
-            this.sidebarToggle.addEventListener('click', () => this.toggleCollapse());
+            this.sidebarToggle.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                this.debounce(() => this.toggleCollapse(), 100);
+            });
         }
         
         if (this.mobileToggle) {
-            this.mobileToggle.addEventListener('click', () => this.toggleMobile());
+            this.mobileToggle.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                this.debounce(() => this.toggleMobile(), 100);
+            });
         }
         
         if (this.overlay) {
-            this.overlay.addEventListener('click', () => this.closeMobile());
+            this.overlay.addEventListener('click', () => {
+                this.closeMobile();
+            });
         }
         
-        // Événements folders (accordéon)
+        // ✅ Événements folders optimisés
         this.navFolders.forEach(folder => {
-            folder.addEventListener('click', (e) => this.toggleFolder(e));
+            folder.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                this.debounce(() => this.toggleFolder(folder), 50);
+            });
         });
         
-        // Événements liens (active state)
+        // Événements liens
         this.navLinks.forEach(link => {
-            link.addEventListener('click', (e) => this.setActiveLink(e));
+            link.addEventListener('click', (e) => {
+                this.setActiveLink(link);
+            });
         });
         
         // Gestion responsive
-        window.addEventListener('resize', () => this.handleResize());
+        let resizeTimeout;
+        window.addEventListener('resize', () => {
+            clearTimeout(resizeTimeout);
+            resizeTimeout = setTimeout(() => this.handleResize(), 200);
+        });
         
         // Fermeture sur ESC
         document.addEventListener('keydown', (e) => {
@@ -61,7 +89,15 @@ class SidebarManager {
     }
     
     /**
-     * Toggle collapse desktop
+     * ✅ Debounce pour éviter les clics multiples
+     */
+    debounce(func, delay) {
+        clearTimeout(this.debounceTimeout);
+        this.debounceTimeout = setTimeout(func, delay);
+    }
+    
+    /**
+     * ✅ Toggle collapse desktop - CORRIGÉ
      */
     toggleCollapse() {
         this.isCollapsed = !this.isCollapsed;
@@ -70,8 +106,7 @@ class SidebarManager {
         // Sauvegarder l'état
         localStorage.setItem('sidebar-collapsed', this.isCollapsed);
         
-        // Animation smooth
-        this.animateToggle();
+        console.log('✅ Sidebar', this.isCollapsed ? 'collapsed' : 'expanded');
     }
     
     /**
@@ -94,17 +129,18 @@ class SidebarManager {
         this.sidebar.classList.add('mobile-open');
         this.overlay.classList.add('active');
         document.body.style.overflow = 'hidden';
+        console.log('✅ Sidebar mobile opened');
     }
     
     /**
-     * Fermer mobile (CORRECTION DU BUG)
+     * ✅ Fermer mobile - CORRIGÉ
      */
     closeMobile() {
         this.sidebar.classList.remove('mobile-open');
         this.overlay.classList.remove('active');
         document.body.style.overflow = '';
         
-        // ✅ CORRECTION : Fermer tous les sous-menus ouverts
+        // Fermer tous les sous-menus
         document.querySelectorAll('.nav-section.active').forEach(section => {
             section.classList.remove('active');
         });
@@ -112,22 +148,31 @@ class SidebarManager {
         document.querySelectorAll('.nav-folder.active').forEach(folder => {
             folder.classList.remove('active');
         });
+        
+        console.log('✅ Sidebar mobile closed');
     }
     
     /**
-     * Toggle folder (accordéon)
+     * ✅ Toggle folder - OPTIMISÉ
      */
-    toggleFolder(e) {
-        const folder = e.currentTarget;
+    toggleFolder(folder) {
         const section = folder.closest('.nav-section');
+        if (!section) return;
+        
         const isActive = section.classList.contains('active');
+        const submenu = section.querySelector('.nav-submenu');
         
         // Mode accordéon : fermer les autres sections
         if (!this.isCollapsed) {
             document.querySelectorAll('.nav-section').forEach(s => {
                 if (s !== section) {
                     s.classList.remove('active');
-                    s.querySelector('.nav-folder')?.classList.remove('active');
+                    const f = s.querySelector('.nav-folder');
+                    if (f) f.classList.remove('active');
+                    
+                    // Fermer l'animation
+                    const sub = s.querySelector('.nav-submenu');
+                    if (sub) sub.style.maxHeight = '0';
                 }
             });
         }
@@ -136,50 +181,33 @@ class SidebarManager {
         section.classList.toggle('active');
         folder.classList.toggle('active');
         
-        // Animation
-        this.animateFolder(section, !isActive);
+        // ✅ Animation optimisée
+        if (submenu) {
+            if (!isActive) {
+                // Ouverture
+                submenu.style.maxHeight = submenu.scrollHeight + 'px';
+            } else {
+                // Fermeture
+                submenu.style.maxHeight = '0';
+            }
+        }
+        
+        console.log('✅ Folder toggled:', folder.querySelector('span')?.textContent);
     }
     
     /**
      * Définir le lien actif
      */
-    setActiveLink(e) {
+    setActiveLink(link) {
         // Retirer l'état actif de tous les liens
-        this.navLinks.forEach(link => link.classList.remove('active'));
+        this.navLinks.forEach(l => l.classList.remove('active'));
         
         // Ajouter l'état actif au lien cliqué
-        e.currentTarget.classList.add('active');
+        link.classList.add('active');
         
         // Fermer mobile après clic
         if (this.isMobile) {
-            setTimeout(() => this.closeMobile(), 300);
-        }
-    }
-    
-    /**
-     * Animation toggle
-     */
-    animateToggle() {
-        this.sidebar.style.transition = 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)';
-        
-        setTimeout(() => {
-            this.sidebar.style.transition = '';
-        }, 400);
-    }
-    
-    /**
-     * Animation folder
-     */
-    animateFolder(section, isOpening) {
-        const submenu = section.querySelector('.nav-submenu');
-        if (!submenu) return;
-        
-        if (isOpening) {
-            // Calculer la hauteur réelle
-            const height = submenu.scrollHeight;
-            submenu.style.maxHeight = height + 'px';
-        } else {
-            submenu.style.maxHeight = '0';
+            setTimeout(() => this.closeMobile(), 250);
         }
     }
     
@@ -219,21 +247,29 @@ class SidebarManager {
         // Activer le lien de la page actuelle
         const currentPath = window.location.pathname;
         this.navLinks.forEach(link => {
-            if (link.getAttribute('href') === currentPath) {
+            const href = link.getAttribute('href');
+            if (href && currentPath.includes(href.replace('.html', ''))) {
                 link.classList.add('active');
                 
                 // Ouvrir le folder parent
                 const section = link.closest('.nav-section');
                 if (section) {
                     section.classList.add('active');
-                    section.querySelector('.nav-folder')?.classList.add('active');
+                    const folder = section.querySelector('.nav-folder');
+                    if (folder) folder.classList.add('active');
+                    
+                    // Animation initiale
+                    const submenu = section.querySelector('.nav-submenu');
+                    if (submenu) {
+                        submenu.style.maxHeight = submenu.scrollHeight + 'px';
+                    }
                 }
             }
         });
     }
 }
 
-// Initialisation automatique
+// ✅ Initialisation automatique
 document.addEventListener('DOMContentLoaded', () => {
     window.sidebarManager = new SidebarManager();
 });

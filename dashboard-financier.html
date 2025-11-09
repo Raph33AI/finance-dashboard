@@ -43,7 +43,7 @@
             <!-- Header avec Logo 3D -->
             <div class="sidebar-header">
                 <div class="logo-container">
-                    <!-- Logo 3D SVG - Graphique Financial -->
+                    <!-- Logo 3D SVG -->
                     <div class="logo-3d">
                         <svg class="logo-svg" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
                             <defs>
@@ -51,51 +51,28 @@
                                     <stop offset="0%" class="logo-gradient-1" />
                                     <stop offset="100%" class="logo-gradient-2" />
                                 </linearGradient>
-                                <filter id="glow">
-                                    <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
-                                    <feMerge>
-                                        <feMergeNode in="coloredBlur"/>
-                                        <feMergeNode in="SourceGraphic"/>
-                                    </feMerge>
-                                </filter>
                             </defs>
                             
-                            <!-- Graphique de croissance stylisé -->
+                            <!-- Graphique -->
                             <path d="M 20 80 L 30 70 L 40 75 L 50 60 L 60 65 L 70 45 L 80 50 L 90 30" 
                                   stroke="url(#logoGradient)" 
                                   stroke-width="4" 
                                   fill="none" 
                                   stroke-linecap="round" 
-                                  stroke-linejoin="round"
-                                  filter="url(#glow)">
-                                <animate attributeName="stroke-dasharray" 
-                                         from="0 300" 
-                                         to="300 0" 
-                                         dur="2s" 
-                                         repeatCount="indefinite"/>
-                            </path>
+                                  stroke-linejoin="round"/>
                             
-                            <!-- Points animés -->
-                            <circle cx="30" cy="70" r="4" fill="url(#logoGradient)">
-                                <animate attributeName="r" values="4;6;4" dur="1.5s" repeatCount="indefinite"/>
-                            </circle>
-                            <circle cx="50" cy="60" r="4" fill="url(#logoGradient)">
-                                <animate attributeName="r" values="4;6;4" dur="1.5s" begin="0.3s" repeatCount="indefinite"/>
-                            </circle>
-                            <circle cx="70" cy="45" r="4" fill="url(#logoGradient)">
-                                <animate attributeName="r" values="4;6;4" dur="1.5s" begin="0.6s" repeatCount="indefinite"/>
-                            </circle>
-                            <circle cx="90" cy="30" r="5" fill="url(#logoGradient)">
-                                <animate attributeName="r" values="5;8;5" dur="1.5s" begin="0.9s" repeatCount="indefinite"/>
-                            </circle>
+                            <!-- Points -->
+                            <circle cx="30" cy="70" r="4" fill="url(#logoGradient)"/>
+                            <circle cx="50" cy="60" r="4" fill="url(#logoGradient)"/>
+                            <circle cx="70" cy="45" r="4" fill="url(#logoGradient)"/>
+                            <circle cx="90" cy="30" r="5" fill="url(#logoGradient)"/>
                             
-                            <!-- Flèche de tendance -->
+                            <!-- Flèche -->
                             <path d="M 85 35 L 90 30 L 85 25" 
                                   stroke="url(#logoGradient)" 
                                   stroke-width="3" 
                                   fill="none" 
-                                  stroke-linecap="round"
-                                  filter="url(#glow)"/>
+                                  stroke-linecap="round"/>
                         </svg>
                     </div>
                     
