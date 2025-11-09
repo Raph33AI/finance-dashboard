@@ -137,8 +137,10 @@
                 </div>
             </nav>
             
+            <!-- ===== SIDEBAR FOOTER - MENU UTILISATEUR ===== -->
             <div class="sidebar-footer">
                 <div class="sidebar-user-menu">
+                    <!-- Trigger (élément cliquable) -->
                     <div class="sidebar-user-trigger" id="sidebarUserTrigger">
                         <img data-user-photo 
                             src="https://ui-avatars.com/api/?name=User&background=2563eb&color=fff" 
@@ -151,6 +153,7 @@
                         <i class="fas fa-chevron-up sidebar-user-arrow"></i>
                     </div>
                     
+                    <!-- Dropdown (s'ouvre vers le haut) -->
                     <div class="sidebar-user-dropdown" id="sidebarUserDropdown">
                         <div class="user-dropdown-header">
                             <img data-user-photo 
@@ -174,6 +177,10 @@
                                 <i class="fas fa-cog"></i>
                                 <span>Settings</span>
                             </a>
+                            <a href="#" class="user-dropdown-link">
+                                <i class="fas fa-question-circle"></i>
+                                <span>Help</span>
+                            </a>
                         </nav>
                         
                         <div class="user-dropdown-divider"></div>
@@ -185,7 +192,11 @@
                     </div>
                 </div>
             </div>
+            <!-- ===== FIN SIDEBAR FOOTER ===== -->
         </aside>
+        
+        <!-- Sidebar Overlay (mobile) -->
+        <div class='sidebar-overlay' id='sidebarOverlay' aria-hidden='true'></div>
 
         <!-- Main Content -->
         <div class='main-content'>
