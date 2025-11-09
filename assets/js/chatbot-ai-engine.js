@@ -140,19 +140,26 @@ class FinancialChatbotEngine {
     }
 
     // ============================================
-    // INTENT DETECTION - AMÉLIORÉ
+    // INTENT DETECTION - VERSION AMÉLIORÉE
     // ============================================
     detectIntent(message) {
         const lowerMessage = message.toLowerCase();
         
-        // ✅ DÉTECTER LES REQUÊTES D'ÉVOLUTION/HISTORIQUE
-        if (this.matchesPattern(lowerMessage, [
-            'evolution', 'historical', 'history', 'performance', 
-            'over the', 'past', 'last', 'since', 'trend',
-            'chart', 'graph', 'show me', 'display'
-        ]) && this.matchesPattern(lowerMessage, [
-            'year', 'month', 'week', 'day', 'period'
-        ])) {
+        // ✅ DÉTECTER REQUÊTES HISTORIQUES/ÉVOLUTION
+        const historyKeywords = ['evolution', 'historical', 'history', 'performance', 
+                                'over the', 'past', 'last', 'since', 'trend',
+                                'chart', 'graph', 'show me', 'display'];
+        
+        const periodKeywords = ['year', 'month', 'week', 'day', 'period', 'time'];
+        
+        const hasHistoryKeyword = historyKeywords.some(kw => lowerMessage.includes(kw));
+        const hasPeriodKeyword = periodKeywords.some(kw => lowerMessage.includes(kw));
+        
+        // ✅ Détection symbole (même minuscule)
+        const hasSymbol = /\b(nvda|aapl|msft|googl|amzn|tsla|meta|stock|share|ticker)\b/i.test(message);
+        
+        if (hasHistoryKeyword && (hasPeriodKeyword || hasSymbol)) {
+            console.log('✅ PRICE_HISTORY intent detected');
             return { type: 'PRICE_HISTORY', confidence: 0.95 };
         }
 
@@ -167,8 +174,8 @@ class FinancialChatbotEngine {
         // Stock analysis
         if (this.matchesPattern(lowerMessage, [
             'analyze', 'stock', 'share', 'ticker', 'company',
-            'valuation', 'fundamental', 'earnings'
-        ]) || /\b[A-Z]{1,5}\b/.test(message)) {
+            'valuation', 'fundamental', 'earnings', 'price'
+        ]) || /\b[A-Z]{1,5}\b/.test(message) || hasSymbol) {
             return { type: 'STOCK_ANALYSIS', confidence: 0.85 };
         }
 
@@ -182,8 +189,8 @@ class FinancialChatbotEngine {
 
         // Technical analysis
         if (this.matchesPattern(lowerMessage, [
-            'chart', 'technical', 'rsi', 'macd', 'moving average',
-            'support', 'resistance', 'trend', 'pattern', 'indicator'
+            'technical', 'rsi', 'macd', 'moving average',
+            'support', 'resistance', 'pattern', 'indicator'
         ])) {
             return { type: 'TECHNICAL_ANALYSIS', confidence: 0.87 };
         }
@@ -200,7 +207,7 @@ class FinancialChatbotEngine {
     }
 
     // ============================================
-    // ENTITY EXTRACTION - AMÉLIORÉ
+    // ENTITY EXTRACTION - AMÉLIORÉ AVEC MINUSCULES
     // ============================================
     extractEntities(message) {
         const entities = {
@@ -212,14 +219,63 @@ class FinancialChatbotEngine {
             numbers: []
         };
 
-        // Extract stock symbols
-        const symbolRegex = /\b[A-Z]{1,5}\b/g;
-        const symbols = message.match(symbolRegex) || [];
-        entities.symbols = symbols.filter(s => 
-            s.length >= 1 && s.length <= 5 && !['IPO', 'USA', 'CEO', 'CFO', 'AI', 'THE'].includes(s)
+        // ✅ EXTRACTION SYMBOLES AMÉLIORÉE (majuscules ET minuscules)
+        
+        // Méthode 1: Symboles en MAJUSCULES dans le message
+        const upperSymbolRegex = /\b[A-Z]{1,5}\b/g;
+        const upperSymbols = message.match(upperSymbolRegex) || [];
+        const validUpperSymbols = upperSymbols.filter(s => 
+            s.length >= 1 && s.length <= 5 && !['IPO', 'USA', 'CEO', 'CFO', 'AI', 'THE', 'AND', 'FOR', 'NOT'].includes(s)
         );
+        
+        // Méthode 2: Chercher des symboles connus (même en minuscules)
+        const knownStocks = [
+            'NVDA', 'AAPL', 'MSFT', 'GOOGL', 'GOOG', 'AMZN', 'TSLA', 'META', 'NFLX',
+            'AMD', 'INTC', 'QCOM', 'AVGO', 'TXN', 'AMAT', 'MU', 'LRCX', 'KLAC',
+            'SPY', 'QQQ', 'DIA', 'IWM', 'VTI', 'VOO',
+            'COIN', 'SQ', 'PYPL', 'V', 'MA', 'JPM', 'BAC', 'GS', 'MS',
+            'DIS', 'CMCSA', 'T', 'VZ', 'TMUS',
+            'BA', 'CAT', 'DE', 'GE', 'HON', 'MMM', 'RTX', 'UPS',
+            'XOM', 'CVX', 'COP', 'SLB', 'OXY',
+            'PFE', 'JNJ', 'UNH', 'ABBV', 'TMO', 'DHR', 'LLY', 'MRK',
+            'WMT', 'HD', 'MCD', 'NKE', 'SBUX', 'TGT', 'LOW', 'COST'
+        ];
+        
+        const lowerMessage = message.toLowerCase();
+        const foundKnownSymbols = knownStocks.filter(symbol => {
+            const lowerSymbol = symbol.toLowerCase();
+            // Chercher le symbole avec des délimiteurs de mots
+            const regex = new RegExp(`\\b${lowerSymbol}\\b`, 'i');
+            return regex.test(lowerMessage);
+        });
+        
+        // Méthode 3: Pattern "stock [SYMBOL]" ou "[SYMBOL] stock"
+        const stockPatternRegex = /(?:stock\s+|share\s+|ticker\s+)([a-z]{1,5})\b|\b([a-z]{1,5})(?:\s+stock|\s+share|\s+ticker)/gi;
+        let match;
+        const patternSymbols = [];
+        while ((match = stockPatternRegex.exec(message)) !== null) {
+            const symbol = (match[1] || match[2]).toUpperCase();
+            if (symbol.length >= 1 && symbol.length <= 5) {
+                patternSymbols.push(symbol);
+            }
+        }
+        
+        // ✅ COMBINER TOUTES LES MÉTHODES (en supprimant les doublons)
+        const allSymbols = [...new Set([
+            ...validUpperSymbols,
+            ...foundKnownSymbols,
+            ...patternSymbols
+        ])];
+        
+        entities.symbols = allSymbols;
+        
+        console.log('🔍 Symbol detection:');
+        console.log('   Upper symbols:', validUpperSymbols);
+        console.log('   Known stocks found:', foundKnownSymbols);
+        console.log('   Pattern matches:', patternSymbols);
+        console.log('   ✅ Final symbols:', allSymbols);
 
-        // ✅ EXTRACTION AMÉLIORÉE DES PÉRIODES
+        // ✅ EXTRACTION PÉRIODES (inchangé mais optimisé)
         const timeframePatterns = {
             '1d': /\b(today|1\s*day)\b/i,
             '1w': /\b(week|1\s*week|7\s*days?)\b/i,
@@ -240,10 +296,10 @@ class FinancialChatbotEngine {
             }
         }
 
-        // Si aucune période détectée mais mot-clé temporel présent
+        // Détection implicite de période
         if (entities.timeframes.length === 0) {
-            if (/\b(last|past|previous|over|since)\b/i.test(message)) {
-                entities.timeframes.push('1y'); // Par défaut 1 an
+            if (/\b(evolution|historical|history|performance|trend)\b/i.test(message)) {
+                entities.timeframes.push('1y'); // Défaut 1 an
             }
         }
 
