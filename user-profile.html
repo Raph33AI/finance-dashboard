@@ -33,19 +33,71 @@
         
         <!-- SIDEBAR -->
         <aside class='sidebar' id='sidebar'>
-            <div class='sidebar-header'>
-                <h2><i class='fas fa-chart-line'></i> Finance Hub</h2>
-                <button class='sidebar-toggle' id='sidebarToggle'>
-                    <i class='fas fa-bars'></i>
+            <!-- Header avec Logo 3D -->
+            <div class="sidebar-header">
+                <div class="logo-container">
+                    <!-- Logo 3D SVG -->
+                    <div class="logo-3d">
+                        <svg class="logo-svg" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                            <defs>
+                                <linearGradient id="logoGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                                    <stop offset="0%" class="logo-gradient-1" />
+                                    <stop offset="100%" class="logo-gradient-2" />
+                                </linearGradient>
+                            </defs>
+                            
+                            <!-- Graphique -->
+                            <path d="M 20 80 L 30 70 L 40 75 L 50 60 L 60 65 L 70 45 L 80 50 L 90 30" 
+                                  stroke="url(#logoGradient)" 
+                                  stroke-width="4" 
+                                  fill="none" 
+                                  stroke-linecap="round" 
+                                  stroke-linejoin="round"/>
+                            
+                            <!-- Points -->
+                            <circle cx="30" cy="70" r="4" fill="url(#logoGradient)"/>
+                            <circle cx="50" cy="60" r="4" fill="url(#logoGradient)"/>
+                            <circle cx="70" cy="45" r="4" fill="url(#logoGradient)"/>
+                            <circle cx="90" cy="30" r="5" fill="url(#logoGradient)"/>
+                            
+                            <!-- Flèche -->
+                            <path d="M 85 35 L 90 30 L 85 25" 
+                                  stroke="url(#logoGradient)" 
+                                  stroke-width="3" 
+                                  fill="none" 
+                                  stroke-linecap="round"/>
+                        </svg>
+                    </div>
+                    
+                    <!-- Brand Text -->
+                    <div class="brand-text">
+                        <h2 class="brand-name">AlphaVault AI</h2>
+                        <span class="brand-tagline">Investments</span>
+                    </div>
+                </div>
+                
+                <!-- Toggle Button -->
+                <button class="sidebar-toggle" aria-label="Toggle Sidebar">
+                    <i class="fas fa-angle-left"></i>
                 </button>
             </div>
             
-            <nav class='sidebar-nav'>
-                <div class='nav-section'>
-                    <a href='index.html' class='nav-link'>
-                        <i class='fas fa-rocket'></i>
+            <!-- Navigation -->
+            <nav class="sidebar-nav">
+                
+                <!-- ✅ Ajout data-tooltip pour chaque folder -->
+                <div class="nav-section">
+                    <button class="nav-folder" data-tooltip="Home">
+                        <i class="fas fa-home"></i>
                         <span>Home</span>
-                    </a>
+                        <i class="fas fa-chevron-down arrow"></i>
+                    </button>
+                    <div class="nav-submenu">
+                        <a href="index.html" class="nav-link">
+                            <i class="fas fa-home"></i>
+                            <span>Overview</span>
+                        </a>
+                    </div>
                 </div>
                 
                 <div class='nav-section'>
