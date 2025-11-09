@@ -1,6 +1,5 @@
 /* ===================================
-   SIDEBAR PREMIUM 3D - VERSION FINALE
-   AlphaVault AI - Corrections Finales
+   SIDEBAR PREMIUM - VERSION FINALE V2
    =================================== */
 
 :root {
@@ -8,67 +7,40 @@
     --sidebar-collapsed-width: 75px;
     --sidebar-bg: rgba(15, 20, 31, 0.95);
     --sidebar-hover: rgba(255, 255, 255, 0.08);
-    --sidebar-active: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     --sidebar-text: #e4e6eb;
-    --sidebar-text-secondary: #b0b3b8;
     --sidebar-text-light: #ffffff;
     --accent-primary: #667eea;
     --accent-secondary: #764ba2;
     --transition-speed: 0.25s;
     --transition-smooth: cubic-bezier(0.4, 0, 0.2, 1);
-    --shadow-premium: 0 20px 60px rgba(0, 0, 0, 0.3), 
-                      0 0 40px rgba(102, 126, 234, 0.1);
 }
 
-/* ===================================
-   LAYOUT WRAPPER - FOND BLANC
-   =================================== */
+/* LAYOUT */
 .layout-wrapper {
     display: flex;
     min-height: 100vh;
     background: #f5f7fa;
     padding: 20px;
-    position: relative;
 }
 
-body.dark-mode .layout-wrapper {
-    background: #0f172a;
-}
-
-/* ===================================
-   MAIN CONTENT - FOND BLANC
-   =================================== */
 .main-content {
     flex: 1;
     margin-left: calc(var(--sidebar-width) + 20px);
     transition: margin-left var(--transition-speed) var(--transition-smooth);
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
     background: white;
     border-radius: 20px;
     box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
-    overflow: hidden;
 }
 
 .sidebar.collapsed ~ .main-content {
     margin-left: calc(var(--sidebar-collapsed-width) + 20px);
 }
 
-body.dark-mode .main-content {
-    background: #1e293b;
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
-}
-
-/* ===================================
-   SIDEBAR - FLOTTANTE + GLASSMORPHISM
-   =================================== */
+/* SIDEBAR */
 .sidebar {
     width: var(--sidebar-width);
     background: var(--sidebar-bg);
     backdrop-filter: blur(20px) saturate(150%);
-    -webkit-backdrop-filter: blur(20px) saturate(150%);
-    color: var(--sidebar-text);
     position: fixed;
     left: 20px;
     top: 20px;
@@ -77,7 +49,7 @@ body.dark-mode .main-content {
     flex-direction: column;
     transition: width var(--transition-speed) var(--transition-smooth);
     z-index: 1000;
-    box-shadow: var(--shadow-premium);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
     border-radius: 20px;
     border: 1px solid rgba(255, 255, 255, 0.1);
     overflow: hidden;
@@ -87,9 +59,7 @@ body.dark-mode .main-content {
     width: var(--sidebar-collapsed-width);
 }
 
-/* ===================================
-   SIDEBAR HEADER - LOGO 3D
-   =================================== */
+/* HEADER */
 .sidebar-header {
     padding: 25px 20px;
     border-bottom: 1px solid rgba(255, 255, 255, 0.08);
@@ -97,32 +67,22 @@ body.dark-mode .main-content {
     align-items: center;
     justify-content: space-between;
     min-height: 85px;
-    flex-shrink: 0;
     background: rgba(255, 255, 255, 0.02);
 }
 
-/* Logo Container */
 .logo-container {
     display: flex;
     align-items: center;
     gap: 14px;
     flex: 1;
-    min-width: 0;
-    transition: opacity var(--transition-speed) var(--transition-smooth);
+    transition: all var(--transition-speed);
 }
 
-/* Logo 3D */
 .logo-3d {
     width: 42px;
     height: 42px;
-    position: relative;
     flex-shrink: 0;
-    transition: transform 0.2s ease, 
-                opacity var(--transition-speed) var(--transition-smooth);
-}
-
-.logo-3d:hover {
-    transform: scale(1.08);
+    transition: all 0.2s;
 }
 
 .logo-svg {
@@ -130,36 +90,22 @@ body.dark-mode .main-content {
     height: 100%;
 }
 
-.logo-gradient-1 {
-    stop-color: #667eea;
-}
-
-.logo-gradient-2 {
-    stop-color: #764ba2;
-}
-
-/* Brand Text */
 .brand-text {
     display: flex;
     flex-direction: column;
     gap: 2px;
-    overflow: hidden;
-    transition: opacity var(--transition-speed) var(--transition-smooth), 
-                width var(--transition-speed) var(--transition-smooth);
+    transition: all var(--transition-speed);
 }
 
 .brand-name {
     font-size: 19px;
     font-weight: 700;
     color: var(--sidebar-text-light);
-    letter-spacing: 0.3px;
     background: linear-gradient(135deg, #ffffff 0%, #667eea 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
-    background-clip: text;
     white-space: nowrap;
     margin: 0;
-    line-height: 1.2;
 }
 
 .brand-tagline {
@@ -168,24 +114,22 @@ body.dark-mode .main-content {
     color: var(--accent-primary);
     letter-spacing: 1.2px;
     text-transform: uppercase;
-    white-space: nowrap;
     opacity: 0.8;
 }
 
-/* ✅ Masquer complètement le logo en mode collapsed */
+/* COLLAPSED HEADER */
 .sidebar.collapsed .logo-container {
     opacity: 0;
-    pointer-events: none;
     width: 0;
     overflow: hidden;
 }
 
-.sidebar.collapsed .brand-text {
-    opacity: 0;
-    width: 0;
+.sidebar.collapsed .sidebar-header {
+    justify-content: center;
+    padding: 25px 10px;
 }
 
-/* ✅ CORRECTION : Toggle Button - CENTRÉ en collapsed */
+/* TOGGLE BUTTON */
 .sidebar-toggle {
     background: rgba(255, 255, 255, 0.05);
     border: 1px solid rgba(255, 255, 255, 0.1);
@@ -194,8 +138,7 @@ body.dark-mode .main-content {
     cursor: pointer;
     padding: 9px;
     border-radius: 10px;
-    transition: all 0.2s ease;
-    flex-shrink: 0;
+    transition: all 0.2s;
     width: 36px;
     height: 36px;
     display: flex;
@@ -205,46 +148,27 @@ body.dark-mode .main-content {
 
 .sidebar-toggle:hover {
     background: rgba(102, 126, 234, 0.2);
-    border-color: rgba(102, 126, 234, 0.4);
     transform: scale(1.05);
 }
 
-.sidebar-toggle:active {
-    transform: scale(0.95);
-}
-
 .sidebar-toggle i {
-    transition: transform 0.2s ease;
+    transition: transform 0.2s;
 }
 
 .sidebar.collapsed .sidebar-toggle i {
     transform: rotate(180deg);
 }
 
-/* ✅ CORRECTION : Centrer le toggle parfaitement en mode collapsed */
-.sidebar.collapsed .sidebar-header {
-    justify-content: center;
-    padding: 25px 0;
-}
-
-/* ===================================
-   SIDEBAR NAVIGATION
-   =================================== */
+/* NAVIGATION */
 .sidebar-nav {
     flex: 1;
     overflow-y: auto;
     overflow-x: hidden;
     padding: 10px 0;
-    scrollbar-width: thin;
-    scrollbar-color: rgba(102, 126, 234, 0.3) transparent;
 }
 
 .sidebar-nav::-webkit-scrollbar {
     width: 5px;
-}
-
-.sidebar-nav::-webkit-scrollbar-track {
-    background: transparent;
 }
 
 .sidebar-nav::-webkit-scrollbar-thumb {
@@ -252,35 +176,27 @@ body.dark-mode .main-content {
     border-radius: 10px;
 }
 
-.sidebar-nav::-webkit-scrollbar-thumb:hover {
-    background: rgba(102, 126, 234, 0.5);
-}
-
-/* Navigation Section */
 .nav-section {
     margin-bottom: 4px;
-    position: relative;
 }
 
-/* ✅ CORRECTION : Navigation Folder - Plus d'espace pour la flèche */
+/* NAV FOLDER - CORRECTION MAJEURE */
 .nav-folder {
     width: 100%;
     background: none;
     border: none;
     color: var(--sidebar-text);
-    padding: 13px 18px 13px 20px; /* ✅ Réduction du padding-right */
+    padding: 13px 12px 13px 20px; /* ✅ PADDING-RIGHT RÉDUIT */
     display: flex;
     align-items: center;
-    gap: 12px; /* ✅ Réduction du gap */
+    gap: 10px; /* ✅ GAP RÉDUIT */
     cursor: pointer;
-    transition: all 0.15s ease;
+    transition: all 0.15s;
     font-size: 15px;
     font-weight: 500;
     position: relative;
-    text-align: left;
 }
 
-/* Barre latérale */
 .nav-folder::before {
     content: '';
     position: absolute;
@@ -291,16 +207,11 @@ body.dark-mode .main-content {
     height: 60%;
     background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
     border-radius: 0 3px 3px 0;
-    transition: width 0.15s ease;
-    z-index: 1;
+    transition: width 0.15s;
 }
 
 .nav-folder:hover::before {
     width: 3px;
-}
-
-.nav-folder.active::before {
-    width: 4px;
 }
 
 .nav-folder:hover {
@@ -312,45 +223,42 @@ body.dark-mode .main-content {
     color: var(--sidebar-text-light);
 }
 
-/* Icon */
+.nav-folder.active::before {
+    width: 4px;
+}
+
+/* ICON */
 .nav-folder i:first-child {
     font-size: 20px;
     width: 24px;
     text-align: center;
     flex-shrink: 0;
-    transition: all 0.15s ease;
+    transition: all 0.15s;
 }
 
-.nav-folder:hover i:first-child {
-    transform: scale(1.1);
-    color: var(--accent-primary);
-}
-
+.nav-folder:hover i:first-child,
 .nav-folder.active i:first-child {
     color: var(--accent-primary);
 }
 
-/* ✅ CORRECTION : Label avec plus d'espace à droite */
+/* LABEL - CORRECTION */
 .nav-folder span {
     flex: 1;
-    text-align: left;
+    min-width: 0; /* ✅ IMPORTANT */
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    transition: opacity var(--transition-speed) var(--transition-smooth);
-    min-width: 0; /* ✅ Important pour text-overflow */
-    margin-right: 4px; /* ✅ Espace minimal */
+    transition: all var(--transition-speed);
 }
 
-/* ✅ CORRECTION : Arrow avec largeur fixe et alignée à droite */
+/* ARROW - CORRECTION MAJEURE */
 .nav-folder .arrow {
     font-size: 11px;
-    transition: transform 0.2s ease, opacity 0.2s ease;
+    width: 14px; /* ✅ LARGEUR FIXE */
     flex-shrink: 0;
     opacity: 0.6;
-    width: 16px; /* ✅ Largeur fixe */
-    text-align: center;
-    margin-left: auto; /* ✅ Poussé à droite */
+    transition: all 0.2s;
+    text-align: right; /* ✅ ALIGNÉ À DROITE */
 }
 
 .nav-folder:hover .arrow {
@@ -362,7 +270,7 @@ body.dark-mode .main-content {
     color: var(--accent-primary);
 }
 
-/* Mode collapsed */
+/* COLLAPSED STATE */
 .sidebar.collapsed .nav-folder {
     justify-content: center;
     padding: 15px 0;
@@ -370,16 +278,10 @@ body.dark-mode .main-content {
 
 .sidebar.collapsed .nav-folder span,
 .sidebar.collapsed .nav-folder .arrow {
-    opacity: 0;
-    width: 0;
     display: none;
 }
 
-/* TOOLTIPS en mode collapsed */
-.sidebar.collapsed .nav-folder {
-    position: relative;
-}
-
+/* TOOLTIP COLLAPSED */
 .sidebar.collapsed .nav-folder::after {
     content: attr(data-tooltip);
     position: absolute;
@@ -396,27 +298,10 @@ body.dark-mode .main-content {
     white-space: nowrap;
     opacity: 0;
     pointer-events: none;
-    transition: all 0.2s ease;
+    transition: all 0.2s;
     z-index: 10000;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
     border: 1px solid rgba(102, 126, 234, 0.3);
-}
-
-/* Flèche du tooltip */
-.sidebar.collapsed .nav-folder::before {
-    content: '';
-    position: absolute;
-    left: calc(100% + 8px);
-    top: 50%;
-    transform: translateY(-50%);
-    width: 0;
-    height: 0;
-    border-style: solid;
-    border-width: 6px 7px 6px 0;
-    border-color: transparent rgba(15, 20, 31, 0.95) transparent transparent;
-    opacity: 0;
-    transition: opacity 0.2s ease;
-    z-index: 10001;
 }
 
 .sidebar.collapsed .nav-folder:hover::after {
@@ -424,11 +309,6 @@ body.dark-mode .main-content {
     transform: translateY(-50%) translateX(0);
 }
 
-.sidebar.collapsed .nav-folder:hover::before {
-    opacity: 1;
-}
-
-/* Indicateur actif plus visible en mode collapsed */
 .sidebar.collapsed .nav-folder.active {
     background: rgba(102, 126, 234, 0.2);
     border-radius: 12px;
@@ -436,14 +316,7 @@ body.dark-mode .main-content {
     box-shadow: 0 0 20px rgba(102, 126, 234, 0.3);
 }
 
-.sidebar.collapsed .nav-folder.active i:first-child {
-    color: var(--accent-primary);
-    filter: drop-shadow(0 0 8px rgba(102, 126, 234, 0.6));
-}
-
-/* ===================================
-   NAVIGATION SUBMENU
-   =================================== */
+/* SUBMENU */
 .nav-submenu {
     max-height: 0;
     overflow: hidden;
@@ -460,12 +333,11 @@ body.dark-mode .main-content {
     align-items: center;
     gap: 13px;
     padding: 11px 20px 11px 54px;
-    color: var(--sidebar-text-secondary);
+    color: #b0b3b8;
     text-decoration: none;
-    transition: all 0.15s ease;
+    transition: all 0.15s;
     font-size: 14px;
     position: relative;
-    border-left: 2px solid transparent;
 }
 
 .nav-link::before {
@@ -478,30 +350,23 @@ body.dark-mode .main-content {
     height: 5px;
     background: rgba(102, 126, 234, 0.3);
     border-radius: 50%;
-    transition: all 0.15s ease;
+    transition: all 0.15s;
 }
 
 .nav-link:hover {
     background: var(--sidebar-hover);
     color: var(--sidebar-text);
     padding-left: 58px;
-    border-left-color: rgba(102, 126, 234, 0.3);
 }
 
 .nav-link:hover::before {
     background: var(--accent-primary);
-    transform: translateY(-50%) scale(1.2);
 }
 
 .nav-link.active {
     background: rgba(102, 126, 234, 0.08);
     color: var(--accent-primary);
     font-weight: 500;
-    border-left-color: var(--accent-primary);
-}
-
-.nav-link.active::before {
-    background: var(--accent-primary);
 }
 
 .nav-link i {
@@ -512,22 +377,14 @@ body.dark-mode .main-content {
     opacity: 0.7;
 }
 
-.nav-link:hover i,
-.nav-link.active i {
-    opacity: 1;
-}
-
 .sidebar.collapsed .nav-submenu {
     display: none;
 }
 
-/* ===================================
-   SIDEBAR FOOTER
-   =================================== */
+/* FOOTER */
 .sidebar-footer {
     border-top: 1px solid rgba(255, 255, 255, 0.08);
     padding: 18px;
-    flex-shrink: 0;
     background: rgba(255, 255, 255, 0.02);
 }
 
@@ -535,18 +392,16 @@ body.dark-mode .main-content {
     display: flex;
     align-items: center;
     gap: 12px;
-    color: var(--sidebar-text-secondary);
-    font-size: 14px;
-    transition: all 0.2s ease;
+    color: #b0b3b8;
     padding: 9px;
     border-radius: 11px;
     cursor: pointer;
+    transition: all 0.2s;
     position: relative;
 }
 
 .user-info:hover {
     background: rgba(255, 255, 255, 0.05);
-    color: var(--sidebar-text);
 }
 
 .user-avatar {
@@ -581,16 +436,13 @@ body.dark-mode .main-content {
 
 .user-details {
     flex: 1;
-    overflow: hidden;
-    transition: opacity var(--transition-speed) var(--transition-smooth), 
-                width var(--transition-speed) var(--transition-smooth);
+    transition: all var(--transition-speed);
 }
 
 .user-name {
     font-weight: 600;
     color: var(--sidebar-text-light);
     font-size: 14px;
-    margin-bottom: 2px;
 }
 
 .user-role {
@@ -599,10 +451,7 @@ body.dark-mode .main-content {
     opacity: 0.8;
 }
 
-/* Mode collapsed - Centrer l'avatar */
 .sidebar.collapsed .user-details {
-    opacity: 0;
-    width: 0;
     display: none;
 }
 
@@ -611,7 +460,6 @@ body.dark-mode .main-content {
     padding: 9px 0;
 }
 
-/* Tooltip pour l'avatar en mode collapsed */
 .sidebar.collapsed .user-info::after {
     content: attr(data-user);
     position: absolute;
@@ -619,19 +467,15 @@ body.dark-mode .main-content {
     top: 50%;
     transform: translateY(-50%) translateX(-10px);
     background: rgba(15, 20, 31, 0.95);
-    backdrop-filter: blur(10px);
     color: white;
     padding: 10px 16px;
     border-radius: 10px;
     font-size: 13px;
-    font-weight: 500;
     white-space: nowrap;
     opacity: 0;
-    pointer-events: none;
-    transition: all 0.2s ease;
+    transition: all 0.2s;
     z-index: 10000;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-    border: 1px solid rgba(102, 126, 234, 0.3);
 }
 
 .sidebar.collapsed .user-info:hover::after {
@@ -639,9 +483,7 @@ body.dark-mode .main-content {
     transform: translateY(-50%) translateX(0);
 }
 
-/* ===================================
-   TOP HEADER
-   =================================== */
+/* TOP HEADER */
 .top-header {
     background: white;
     border-bottom: 1px solid rgba(0, 0, 0, 0.06);
@@ -652,12 +494,6 @@ body.dark-mode .main-content {
     position: sticky;
     top: 0;
     z-index: 100;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
-}
-
-body.dark-mode .top-header {
-    background: #1e293b;
-    border-bottom-color: rgba(255, 255, 255, 0.05);
 }
 
 .header-left {
@@ -673,10 +509,6 @@ body.dark-mode .top-header {
     margin: 0;
 }
 
-body.dark-mode .header-left h1 {
-    color: var(--sidebar-text-light);
-}
-
 .mobile-toggle {
     display: none;
     background: rgba(0, 0, 0, 0.05);
@@ -686,22 +518,11 @@ body.dark-mode .header-left h1 {
     cursor: pointer;
     padding: 10px;
     border-radius: 10px;
-    transition: all 0.2s ease;
-}
-
-.mobile-toggle:hover {
-    background: rgba(102, 126, 234, 0.1);
-}
-
-body.dark-mode .mobile-toggle {
-    background: rgba(255, 255, 255, 0.05);
-    border-color: rgba(255, 255, 255, 0.1);
-    color: var(--sidebar-text);
+    transition: all 0.2s;
 }
 
 .header-right {
     display: flex;
-    align-items: center;
     gap: 20px;
 }
 
@@ -713,29 +534,16 @@ body.dark-mode .mobile-toggle {
     font-size: 14px;
 }
 
-body.dark-mode .last-update {
-    color: var(--sidebar-text-secondary);
-}
-
 .last-update i {
     color: var(--accent-primary);
 }
 
-/* ===================================
-   CONTAINER
-   =================================== */
 .container {
     flex: 1;
     padding: 30px 40px;
 }
 
-.container .content {
-    width: 100%;
-}
-
-/* ===================================
-   RESPONSIVE - MOBILE
-   =================================== */
+/* RESPONSIVE */
 @media (max-width: 1024px) {
     .layout-wrapper {
         padding: 0;
@@ -756,27 +564,13 @@ body.dark-mode .last-update {
     .main-content {
         margin-left: 0 !important;
         border-radius: 0;
-        box-shadow: none;
     }
     
     .mobile-toggle {
         display: flex;
     }
-    
-    .sidebar-toggle {
-        display: flex;
-    }
-
-    .top-header {
-        padding: 18px 20px;
-    }
-
-    .container {
-        padding: 20px;
-    }
 }
 
-/* Overlay mobile */
 .sidebar-overlay {
     display: none;
     position: fixed;
@@ -788,7 +582,7 @@ body.dark-mode .last-update {
     backdrop-filter: blur(4px);
     z-index: 999;
     opacity: 0;
-    transition: opacity 0.25s ease;
+    transition: opacity 0.25s;
 }
 
 .sidebar-overlay.active {
@@ -796,18 +590,8 @@ body.dark-mode .last-update {
     opacity: 1;
 }
 
-/* ===================================
-   OPTIMISATION PERFORMANCE
-   =================================== */
-@media (prefers-reduced-motion: reduce) {
-    * {
-        animation-duration: 0.01ms !important;
-        transition-duration: 0.01ms !important;
-    }
-}
-
+/* OPTIMISATION */
 .sidebar,
-.logo-3d,
 .nav-folder,
 .nav-link {
     transform: translateZ(0);
