@@ -3,106 +3,126 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="AI-powered financial analysis platform - Market analysis, M&A screening, and quantitative finance tools">
-    <meta name="keywords" content="finance, AI, portfolio optimization, risk management, quantitative analysis">
-    <title>FinancePro - AI-Powered Financial Intelligence Platform</title>
+    <meta name="description" content="AlphaVault AI - Plateforme d'analyse financière alimentée par l'IA - IPO, M&A, Finance Quantitative">
+    <meta name="keywords" content="finance, AI, IPO, portfolio optimization, AlphaVault, Alphy AI, investments">
+    <title>AlphaVault AI - Intelligence Financière Powered by AI</title>
     
-    <!-- ✅ Preconnect pour optimiser les performances -->
+    <!-- Preconnect -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="preconnect" href="https://api.fontshare.com">
     
-    <!-- ✅ STYLESHEETS - AVEC PARAMÈTRES DE VERSION POUR FORCER LE RECHARGEMENT -->
+    <!-- Stylesheets -->
     <link rel="stylesheet" href="assets/css/common.css">
     <link rel="stylesheet" href="assets/css/landing.css">
     
-    <!-- ✅ Font Awesome pour les icônes -->
+    <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
-    <!-- ✅ AOS Animation Library CSS -->
+    <!-- AOS Animation Library -->
     <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
     
-    <!-- Favicon (optionnel) -->
+    <!-- Favicon -->
     <link rel="icon" type="image/svg+xml" href="assets/images/favicon.svg">
 </head>
 
-<!-- ✅ IMPORTANT : CLASSE "landing-page" AJOUTÉE AU BODY -->
 <body class="landing-page">
     
     <!-- ═══════════════════════════════════════════════════════════════
-         NAVIGATION - VERSION 3D OPTIMISÉE
+         NAVIGATION
          ═══════════════════════════════════════════════════════════════ -->
     <nav class="landing-nav" id="landingNav">
         <div class="nav-container">
             <div class="nav-brand">
                 <div class="brand-logo">
-                    <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
-                        <path d="M16 2L2 9L16 16L30 9L16 2Z" fill="#3B82F6"/>
-                        <path d="M2 23L16 30L30 23V9L16 16L2 9V23Z" fill="#2563EB" opacity="0.8"/>
+                    <!-- Logo AlphaVault AI -->
+                    <svg class="logo-svg" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" width="32" height="32">
+                        <defs>
+                            <linearGradient id="logoGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" style="stop-color:#3B82F6;stop-opacity:1" />
+                                <stop offset="100%" style="stop-color:#8B5CF6;stop-opacity:1" />
+                            </linearGradient>
+                        </defs>
+                        
+                        <!-- Graphique montant -->
+                        <path d="M 20 80 L 30 70 L 40 75 L 50 60 L 60 65 L 70 45 L 80 50 L 90 30" 
+                              stroke="url(#logoGradient)" 
+                              stroke-width="4" 
+                              fill="none" 
+                              stroke-linecap="round" 
+                              stroke-linejoin="round"/>
+                        
+                        <!-- Points -->
+                        <circle cx="30" cy="70" r="4" fill="url(#logoGradient)"/>
+                        <circle cx="50" cy="60" r="4" fill="url(#logoGradient)"/>
+                        <circle cx="70" cy="45" r="4" fill="url(#logoGradient)"/>
+                        <circle cx="90" cy="30" r="5" fill="url(#logoGradient)"/>
+                        
+                        <!-- Flèche -->
+                        <path d="M 85 35 L 90 30 L 85 25" 
+                              stroke="url(#logoGradient)" 
+                              stroke-width="3" 
+                              fill="none" 
+                              stroke-linecap="round"/>
                     </svg>
                 </div>
-                <span class="brand-text">Finance<strong>Pro</strong></span>
+                <span class="brand-text">AlphaVault <strong>AI</strong></span>
                 <span class="ai-badge">AI</span>
             </div>
             
             <div class="nav-menu" id="navMenu">
                 <a href="#features" class="nav-link">Features</a>
+                <a href="#alphy-ai" class="nav-link">Alphy AI</a>
                 <a href="#solutions" class="nav-link">Solutions</a>
-                <a href="#tools" class="nav-link">Tools</a>
                 <a href="#pricing" class="nav-link">Pricing</a>
             </div>
             
             <!-- CTA Navigation -->
             <div class="nav-cta">
-                <!-- Boutons pour utilisateurs NON connectés -->
                 <div class="nav-cta-logged-out" id="navCtaLoggedOut">
                     <button class="btn-text" id="loginBtn">Log in</button>
                     <button class="btn-primary-nav" id="signupBtn">
-                        Start Free Trial
+                        Start Free
                         <i class="fas fa-arrow-right"></i>
                     </button>
                 </div>
 
-                <!-- Menu profil pour utilisateurs CONNECTÉS -->
                 <div class="nav-cta-logged-in" id="navCtaLoggedIn" style="display: none;">
                     <div class="user-profile-menu">
                         <button class="user-profile-button" id="userProfileButton" aria-expanded="false" aria-haspopup="true">
                             <div class="user-avatar-wrapper">
-                                <img src="https://ui-avatars.com/api/?name=John+Doe&background=3B82F6&color=fff&bold=true&size=96" 
+                                <img src="https://ui-avatars.com/api/?name=User&background=3B82F6&color=fff&bold=true&size=96" 
                                      alt="User Profile" 
                                      class="user-avatar"
                                      id="userAvatarImg">
                                 <span class="user-status-dot"></span>
                             </div>
                             <div class="user-info-text">
-                                <span class="user-display-name" id="userDisplayName">John Doe</span>
-                                <span class="user-plan-badge" id="userPlanBadge">Professional</span>
+                                <span class="user-display-name" id="userDisplayName">User</span>
+                                <span class="user-plan-badge" id="userPlanBadge">Free</span>
                             </div>
                             <i class="fas fa-chevron-down user-dropdown-icon"></i>
                         </button>
 
                         <!-- Dropdown Menu -->
                         <div class="user-dropdown-menu" id="userDropdownMenu" role="menu">
-                            <!-- Header avec infos utilisateur -->
                             <div class="dropdown-header">
                                 <div class="dropdown-user-card">
-                                    <img src="https://ui-avatars.com/api/?name=John+Doe&background=3B82F6&color=fff&bold=true&size=96" 
+                                    <img src="https://ui-avatars.com/api/?name=User&background=3B82F6&color=fff&bold=true&size=96" 
                                          alt="User Profile"
                                          id="dropdownAvatarImg">
                                     <div class="dropdown-user-text">
-                                        <h4 id="dropdownUserName">John Doe</h4>
-                                        <p id="dropdownUserEmail">john.doe@financepro.com</p>
+                                        <h4 id="dropdownUserName">User</h4>
+                                        <p id="dropdownUserEmail">user@alphavault.ai</p>
                                     </div>
                                 </div>
                                 <div class="dropdown-plan-info">
                                     <i class="fas fa-crown"></i>
-                                    <span id="dropdownUserPlan">Professional</span>
+                                    <span id="dropdownUserPlan">Free</span>
                                 </div>
                             </div>
 
                             <div class="dropdown-divider"></div>
 
-                            <!-- Navigation principale -->
                             <div class="dropdown-section">
                                 <a href="dashboard-financier.html" class="dropdown-link" role="menuitem">
                                     <div class="dropdown-link-icon">
@@ -128,7 +148,6 @@
 
                             <div class="dropdown-divider"></div>
 
-                            <!-- Paramètres et support -->
                             <div class="dropdown-section">
                                 <a href="#" class="dropdown-link" role="menuitem" id="settingsLink">
                                     <div class="dropdown-link-icon">
@@ -139,31 +158,10 @@
                                         <span class="dropdown-link-desc">Account preferences</span>
                                     </div>
                                 </a>
-
-                                <a href="#" class="dropdown-link" role="menuitem">
-                                    <div class="dropdown-link-icon">
-                                        <i class="fas fa-credit-card"></i>
-                                    </div>
-                                    <div class="dropdown-link-text">
-                                        <span class="dropdown-link-title">Billing</span>
-                                        <span class="dropdown-link-desc">Manage subscription</span>
-                                    </div>
-                                </a>
-
-                                <a href="#" class="dropdown-link" role="menuitem">
-                                    <div class="dropdown-link-icon">
-                                        <i class="fas fa-question-circle"></i>
-                                    </div>
-                                    <div class="dropdown-link-text">
-                                        <span class="dropdown-link-title">Help & Support</span>
-                                        <span class="dropdown-link-desc">Get assistance</span>
-                                    </div>
-                                </a>
                             </div>
 
                             <div class="dropdown-divider"></div>
 
-                            <!-- Déconnexion -->
                             <div class="dropdown-section">
                                 <button class="dropdown-link dropdown-link-danger" role="menuitem" id="logoutButton">
                                     <div class="dropdown-link-icon">
@@ -188,7 +186,7 @@
     </nav>
 
     <!-- ═══════════════════════════════════════════════════════════════
-         HERO SECTION - AVEC ANIMATIONS 3D
+         HERO SECTION
          ═══════════════════════════════════════════════════════════════ -->
     <section class="hero" id="hero">
         <div class="hero-bg">
@@ -199,49 +197,40 @@
         
         <div class="hero-container">
             <div class="hero-content">
-                <!-- Announcement Badge -->
                 <div class="announcement-badge" data-aos="fade-up">
                     <span class="badge-icon">✨</span>
-                    <span class="badge-text">New: Real-time AI Market Analysis</span>
+                    <span class="badge-text">New: Alphy AI - Your IPO Expert</span>
                     <i class="fas fa-arrow-right"></i>
                 </div>
                 
-                <!-- Main Headline -->
                 <h1 class="hero-headline" data-aos="fade-up" data-aos-delay="100">
-                    Financial Analysis
-                    <span class="gradient-text-hero">20x Faster</span>
-                    with Artificial Intelligence
+                    Financial Intelligence
+                    <span class="gradient-text-hero">Powered by AI</span>
+                    for Smart Investors
                 </h1>
                 
-                <!-- Subheadline -->
                 <p class="hero-subheadline" data-aos="fade-up" data-aos-delay="200">
-                    Transform your investment decisions with our AI-powered platform. 
-                    M&A screening, valuation, portfolio optimization, and market analysis 
-                    in under 3 clicks.
+                    Transformez vos décisions d'investissement avec AlphaVault AI. 
+                    Analyse IPO, screening M&A, optimisation de portfolio et intelligence 
+                    artificielle dédiée à la finance.
                 </p>
                 
-                <!-- CTA Buttons -->
                 <div class="hero-cta" data-aos="fade-up" data-aos-delay="300">
                     <button class="btn-hero-primary" id="heroGetStarted">
                         <i class="fas fa-rocket"></i>
-                        <span>Get Started Free</span>
-                    </button>
-                    <button class="btn-hero-secondary" id="heroWatchDemo">
-                        <i class="fas fa-play-circle"></i>
-                        <span>Watch Demo</span>
+                        <span>Start Free</span>
                     </button>
                 </div>
                 
-                <!-- Social Proof -->
                 <div class="social-proof" data-aos="fade-up" data-aos-delay="400">
                     <div class="proof-item">
                         <span class="proof-number">10,000+</span>
-                        <span class="proof-label">Finance Professionals</span>
+                        <span class="proof-label">Investors</span>
                     </div>
                     <div class="proof-divider"></div>
                     <div class="proof-item">
                         <span class="proof-number">1M+</span>
-                        <span class="proof-label">Analyses Performed</span>
+                        <span class="proof-label">Analyses</span>
                     </div>
                     <div class="proof-divider"></div>
                     <div class="proof-item">
@@ -254,22 +243,19 @@
             <!-- Hero Visual -->
             <div class="hero-visual" data-aos="fade-left" data-aos-delay="200">
                 <div class="dashboard-mockup">
-                    <!-- Browser Chrome -->
                     <div class="browser-chrome">
                         <div class="chrome-dots">
                             <span class="dot red"></span>
                             <span class="dot yellow"></span>
                             <span class="dot green"></span>
                         </div>
-                        <div class="chrome-title">dashboard-financier.html</div>
+                        <div class="chrome-title">AlphaVault Dashboard</div>
                         <div class="chrome-actions">
                             <i class="fas fa-shield-alt"></i>
                         </div>
                     </div>
                     
-                    <!-- Dashboard Content -->
                     <div class="mockup-content">
-                        <!-- Top Stats Row -->
                         <div class="mockup-stats-row">
                             <div class="stat-card stat-primary">
                                 <div class="stat-header">
@@ -304,7 +290,6 @@
                         
                         <!-- Chart Area -->
                         <div class="mockup-chart-area">
-                            <!-- Header du graphique -->
                             <div class="chart-header-stock">
                                 <div class="stock-info">
                                     <span class="stock-symbol">AAPL</span>
@@ -324,7 +309,6 @@
                                 </div>
                             </div>
                             
-                            <!-- Canvas pour le graphique -->
                             <div class="chart-canvas-wrapper">
                                 <canvas id="stockChart"></canvas>
                             </div>
@@ -334,19 +318,19 @@
                         <div class="mockup-insights">
                             <div class="insight-header">
                                 <i class="fas fa-lightbulb"></i>
-                                <span>AI Insights</span>
+                                <span>Alphy AI Insights</span>
                             </div>
                             <div class="insight-item">
                                 <div class="insight-icon success">
                                     <i class="fas fa-check"></i>
                                 </div>
-                                <span>Portfolio rebalancing recommended</span>
+                                <span>3 high-potential IPOs detected this week</span>
                             </div>
                             <div class="insight-item">
                                 <div class="insight-icon warning">
                                     <i class="fas fa-exclamation"></i>
                                 </div>
-                                <span>VaR exceeds risk threshold by 2.3%</span>
+                                <span>Portfolio rebalancing recommended</span>
                             </div>
                         </div>
                     </div>
@@ -356,33 +340,213 @@
     </section>
 
     <!-- ═══════════════════════════════════════════════════════════════
-         TRUSTED BY SECTION
+         MARKET TICKER - BANDEROLE DÉFILANTE
          ═══════════════════════════════════════════════════════════════ -->
-    <section class="trusted-by">
-        <div class="container-fluid">
-            <p class="trusted-title">Trusted by leading financial institutions</p>
-            <div class="trusted-logos">
-                <div class="logo-wrapper">
-                    <span class="company-logo">Goldman Sachs</span>
+    <section class="market-ticker">
+        <div class="ticker-wrapper">
+            <div class="ticker-content" id="tickerContent">
+                <!-- Contenu dynamique inséré par JS -->
+                <div class="ticker-item">
+                    <span class="ticker-symbol">AAPL</span>
+                    <span class="ticker-price">$178.32</span>
+                    <span class="ticker-change positive">+2.4%</span>
                 </div>
-                <div class="logo-wrapper">
-                    <span class="company-logo">JP Morgan</span>
+                <div class="ticker-item">
+                    <span class="ticker-symbol">MSFT</span>
+                    <span class="ticker-price">$374.58</span>
+                    <span class="ticker-change positive">+1.8%</span>
                 </div>
-                <div class="logo-wrapper">
-                    <span class="company-logo">Morgan Stanley</span>
+                <div class="ticker-item">
+                    <span class="ticker-symbol">GOOGL</span>
+                    <span class="ticker-price">$138.21</span>
+                    <span class="ticker-change negative">-0.5%</span>
                 </div>
-                <div class="logo-wrapper">
-                    <span class="company-logo">BlackRock</span>
+                <div class="ticker-item">
+                    <span class="ticker-symbol">AMZN</span>
+                    <span class="ticker-price">$145.78</span>
+                    <span class="ticker-change positive">+3.2%</span>
                 </div>
-                <div class="logo-wrapper">
-                    <span class="company-logo">Vanguard</span>
+                <div class="ticker-item">
+                    <span class="ticker-symbol">NVDA</span>
+                    <span class="ticker-price">$485.32</span>
+                    <span class="ticker-change positive">+5.7%</span>
+                </div>
+                <div class="ticker-item">
+                    <span class="ticker-symbol">TSLA</span>
+                    <span class="ticker-price">$242.84</span>
+                    <span class="ticker-change negative">-1.2%</span>
+                </div>
+                <div class="ticker-item">
+                    <span class="ticker-symbol">META</span>
+                    <span class="ticker-price">$356.77</span>
+                    <span class="ticker-change positive">+2.9%</span>
+                </div>
+                <div class="ticker-item">
+                    <span class="ticker-symbol">NFLX</span>
+                    <span class="ticker-price">$489.32</span>
+                    <span class="ticker-change positive">+1.5%</span>
                 </div>
             </div>
         </div>
     </section>
 
     <!-- ═══════════════════════════════════════════════════════════════
-         FEATURES SECTION - AVEC EFFETS 3D
+         ALPHY AI SECTION - IA SPÉCIALISÉE
+         ═══════════════════════════════════════════════════════════════ -->
+    <section class="alphy-ai-section" id="alphy-ai">
+        <div class="container-fluid">
+            <div class="alphy-wrapper">
+                <!-- Left: Alphy Presentation -->
+                <div class="alphy-content" data-aos="fade-right">
+                    <div class="alphy-badge">
+                        <i class="fas fa-sparkles"></i>
+                        <span>Powered by Advanced AI</span>
+                    </div>
+                    
+                    <h2 class="alphy-title">
+                        Meet <span class="gradient-text">Alphy AI</span>
+                        <br>Your Personal Financial Analyst
+                    </h2>
+                    
+                    <p class="alphy-description">
+                        Alphy est notre intelligence artificielle spécialisée, entraînée sur des millions 
+                        de données financières. Expert en IPO, M&A, instruments financiers et stratégies 
+                        d'investissement, Alphy vous accompagne 24/7 pour prendre les meilleures décisions.
+                    </p>
+
+                    <!-- Alphy Capabilities -->
+                    <div class="alphy-capabilities">
+                        <div class="capability-item">
+                            <div class="capability-icon">
+                                <i class="fas fa-rocket"></i>
+                            </div>
+                            <div class="capability-text">
+                                <h4>IPO Analysis</h4>
+                                <p>Détection et analyse des IPO à fort potentiel</p>
+                            </div>
+                        </div>
+
+                        <div class="capability-item">
+                            <div class="capability-icon">
+                                <i class="fas fa-chart-line"></i>
+                            </div>
+                            <div class="capability-text">
+                                <h4>Market Insights</h4>
+                                <p>Analyse temps réel des tendances de marché</p>
+                            </div>
+                        </div>
+
+                        <div class="capability-item">
+                            <div class="capability-icon">
+                                <i class="fas fa-lightbulb"></i>
+                            </div>
+                            <div class="capability-text">
+                                <h4>Smart Recommendations</h4>
+                                <p>Conseils personnalisés basés sur votre profil</p>
+                            </div>
+                        </div>
+
+                        <div class="capability-item">
+                            <div class="capability-icon">
+                                <i class="fas fa-shield-alt"></i>
+                            </div>
+                            <div class="capability-text">
+                                <h4>Risk Assessment</h4>
+                                <p>Évaluation intelligente des risques</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button class="btn-alphy-cta">
+                        <span>Chat with Alphy</span>
+                        <i class="fas fa-comments"></i>
+                    </button>
+                </div>
+
+                <!-- Right: Alphy Chat Interface -->
+                <div class="alphy-visual" data-aos="fade-left">
+                    <div class="alphy-chat-container">
+                        <div class="chat-header">
+                            <div class="chat-avatar">
+                                <div class="avatar-glow"></div>
+                                <i class="fas fa-robot"></i>
+                            </div>
+                            <div class="chat-header-text">
+                                <h4>Alphy AI</h4>
+                                <span class="status-online">
+                                    <span class="status-dot"></span>
+                                    Online
+                                </span>
+                            </div>
+                        </div>
+
+                        <div class="chat-messages">
+                            <div class="message ai-message">
+                                <div class="message-avatar">
+                                    <i class="fas fa-robot"></i>
+                                </div>
+                                <div class="message-content">
+                                    <p>👋 Bonjour ! Je suis Alphy, votre assistant IA spécialisé en finance.</p>
+                                </div>
+                            </div>
+
+                            <div class="message ai-message">
+                                <div class="message-avatar">
+                                    <i class="fas fa-robot"></i>
+                                </div>
+                                <div class="message-content">
+                                    <p>📊 J'ai détecté <strong>3 IPO prometteuses</strong> cette semaine :</p>
+                                    <div class="ipo-suggestion">
+                                        <div class="ipo-item">
+                                            <span class="ipo-symbol">TECH</span>
+                                            <span class="ipo-score">Score: 9.2/10</span>
+                                        </div>
+                                        <div class="ipo-item">
+                                            <span class="ipo-symbol">FINX</span>
+                                            <span class="ipo-score">Score: 8.7/10</span>
+                                        </div>
+                                        <div class="ipo-item">
+                                            <span class="ipo-symbol">BIOT</span>
+                                            <span class="ipo-score">Score: 8.5/10</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="message user-message">
+                                <div class="message-content">
+                                    <p>Analyse TECH pour moi 🚀</p>
+                                </div>
+                            </div>
+
+                            <div class="message ai-message typing">
+                                <div class="message-avatar">
+                                    <i class="fas fa-robot"></i>
+                                </div>
+                                <div class="message-content">
+                                    <div class="typing-indicator">
+                                        <span></span>
+                                        <span></span>
+                                        <span></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="chat-input-area">
+                            <input type="text" placeholder="Ask Alphy anything about finance..." class="chat-input">
+                            <button class="chat-send-btn">
+                                <i class="fas fa-paper-plane"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════════════════════════
+         FEATURES SECTION
          ═══════════════════════════════════════════════════════════════ -->
     <section class="features-section" id="features">
         <div class="container-fluid">
@@ -390,13 +554,12 @@
                 <span class="section-tag" data-aos="fade-up">Platform Features</span>
                 <h2 class="section-title" data-aos="fade-up" data-aos-delay="100">Everything you need to excel in finance</h2>
                 <p class="section-description" data-aos="fade-up" data-aos-delay="200">
-                    Professional-grade tools designed for investment bankers, 
-                    financial analysts, and portfolio managers
+                    Professional-grade tools for individual investors and finance professionals
                 </p>
             </div>
 
             <div class="features-grid">
-                <!-- Feature 1: Advanced Analysis -->
+                <!-- Feature 1 -->
                 <div class="feature-card feature-highlight" data-aos="fade-up">
                     <div class="feature-header">
                         <div class="feature-icon">
@@ -406,8 +569,8 @@
                     </div>
                     <h3 class="feature-title">Advanced Analysis</h3>
                     <p class="feature-description">
-                        Sophisticated technical and fundamental analysis tools powered by 
-                        machine learning algorithms for accurate market predictions.
+                        Sophisticated technical and fundamental analysis powered by 
+                        machine learning for accurate predictions.
                     </p>
                     <ul class="feature-benefits">
                         <li>
@@ -420,20 +583,16 @@
                         </li>
                         <li>
                             <i class="fas fa-check-circle"></i>
-                            <span>Automated technical indicators</span>
-                        </li>
-                        <li>
-                            <i class="fas fa-check-circle"></i>
                             <span>Real-time sentiment analysis</span>
                         </li>
                     </ul>
                     <a href="advanced-analysis.html" class="feature-link">
-                        <span>Explore Advanced Analysis</span>
+                        <span>Explore Analysis</span>
                         <i class="fas fa-arrow-right"></i>
                     </a>
                 </div>
 
-                <!-- Feature 2: Market Data -->
+                <!-- Feature 2 -->
                 <div class="feature-card" data-aos="fade-up" data-aos-delay="100">
                     <div class="feature-header">
                         <div class="feature-icon">
@@ -442,8 +601,8 @@
                     </div>
                     <h3 class="feature-title">Market Data Hub</h3>
                     <p class="feature-description">
-                        Real-time access to 500K+ companies with comprehensive financial data, 
-                        ratios, historical prices, and news feeds.
+                        Real-time access to 500K+ companies with comprehensive 
+                        financial data and news feeds.
                     </p>
                     <ul class="feature-benefits">
                         <li>
@@ -460,12 +619,12 @@
                         </li>
                     </ul>
                     <a href="market-data.html" class="feature-link">
-                        <span>Explore Market Data</span>
+                        <span>Explore Data</span>
                         <i class="fas fa-arrow-right"></i>
                     </a>
                 </div>
 
-                <!-- Feature 3: Portfolio Optimizer -->
+                <!-- Feature 3 -->
                 <div class="feature-card" data-aos="fade-up" data-aos-delay="200">
                     <div class="feature-header">
                         <div class="feature-icon">
@@ -474,8 +633,8 @@
                     </div>
                     <h3 class="feature-title">Portfolio Optimization</h3>
                     <p class="feature-description">
-                        Markowitz, Black-Litterman, and Risk Parity models for 
-                        optimal asset allocation and diversification.
+                        Markowitz, Black-Litterman models for optimal asset 
+                        allocation and diversification.
                     </p>
                     <ul class="feature-benefits">
                         <li>
@@ -497,470 +656,99 @@
                     </a>
                 </div>
 
-                <!-- Feature 4: Risk Parity -->
+                <!-- Feature 4 -->
                 <div class="feature-card" data-aos="fade-up">
                     <div class="feature-header">
                         <div class="feature-icon">
-                            <i class="fas fa-balance-scale"></i>
+                            <i class="fas fa-rocket"></i>
                         </div>
                     </div>
-                    <h3 class="feature-title">Risk Parity Strategies</h3>
+                    <h3 class="feature-title">IPO Screening</h3>
                     <p class="feature-description">
-                        Advanced risk parity implementation for balanced risk contribution 
-                        across your entire portfolio.
+                        Identify high-potential IPOs with Alphy AI's advanced 
+                        screening and valuation tools.
                     </p>
                     <ul class="feature-benefits">
                         <li>
                             <i class="fas fa-check-circle"></i>
-                            <span>Equal risk contribution</span>
+                            <span>AI-powered IPO detection</span>
                         </li>
                         <li>
                             <i class="fas fa-check-circle"></i>
-                            <span>Volatility targeting</span>
+                            <span>Valuation models</span>
                         </li>
                         <li>
                             <i class="fas fa-check-circle"></i>
-                            <span>Dynamic rebalancing</span>
+                            <span>Risk assessment</span>
                         </li>
                     </ul>
-                    <a href="risk-parity.html" class="feature-link">
-                        <span>Explore Risk Parity</span>
+                    <a href="ipo-screening.html" class="feature-link">
+                        <span>Explore IPO Tools</span>
                         <i class="fas fa-arrow-right"></i>
                     </a>
-                </div>
-
-                <!-- Feature 5: Monte Carlo -->
-                <div class="feature-card" data-aos="fade-up" data-aos-delay="100">
-                    <div class="feature-header">
-                        <div class="feature-icon">
-                            <i class="fas fa-dice"></i>
-                        </div>
-                    </div>
-                    <h3 class="feature-title">Monte Carlo Simulation</h3>
-                    <p class="feature-description">
-                        Run thousands of simulations to model potential outcomes and 
-                        assess portfolio risk under various scenarios.
-                    </p>
-                    <ul class="feature-benefits">
-                        <li>
-                            <i class="fas fa-check-circle"></i>
-                            <span>10,000+ simulation paths</span>
-                        </li>
-                        <li>
-                            <i class="fas fa-check-circle"></i>
-                            <span>VaR & CVaR calculations</span>
-                        </li>
-                        <li>
-                            <i class="fas fa-check-circle"></i>
-                            <span>Probability distributions</span>
-                        </li>
-                    </ul>
-                    <a href="monte-carlo.html" class="feature-link">
-                        <span>Explore Monte Carlo</span>
-                        <i class="fas fa-arrow-right"></i>
-                    </a>
-                </div>
-
-                <!-- Feature 6: Scenario Analysis -->
-                <div class="feature-card" data-aos="fade-up" data-aos-delay="200">
-                    <div class="feature-header">
-                        <div class="feature-icon">
-                            <i class="fas fa-project-diagram"></i>
-                        </div>
-                    </div>
-                    <h3 class="feature-title">Scenario Analysis</h3>
-                    <p class="feature-description">
-                        Test your portfolio against historical crises and custom scenarios 
-                        to understand potential impacts.
-                    </p>
-                    <ul class="feature-benefits">
-                        <li>
-                            <i class="fas fa-check-circle"></i>
-                            <span>Historical stress tests</span>
-                        </li>
-                        <li>
-                            <i class="fas fa-check-circle"></i>
-                            <span>Custom scenario builder</span>
-                        </li>
-                        <li>
-                            <i class="fas fa-check-circle"></i>
-                            <span>Impact analysis reports</span>
-                        </li>
-                    </ul>
-                    <a href="scenario-analysis.html" class="feature-link">
-                        <span>Explore Scenarios</span>
-                        <i class="fas fa-arrow-right"></i>
-                    </a>
-                </div>
-
-                <!-- Feature 7: Trend Prediction -->
-                <div class="feature-card" data-aos="fade-up">
-                    <div class="feature-header">
-                        <div class="feature-icon">
-                            <i class="fas fa-chart-line"></i>
-                        </div>
-                    </div>
-                    <h3 class="feature-title">AI Trend Prediction</h3>
-                    <p class="feature-description">
-                        Machine learning models to forecast market trends and identify 
-                        emerging opportunities before the market.
-                    </p>
-                    <ul class="feature-benefits">
-                        <li>
-                            <i class="fas fa-check-circle"></i>
-                            <span>Neural network forecasting</span>
-                        </li>
-                        <li>
-                            <i class="fas fa-check-circle"></i>
-                            <span>Confidence intervals</span>
-                        </li>
-                        <li>
-                            <i class="fas fa-check-circle"></i>
-                            <span>Multi-timeframe analysis</span>
-                        </li>
-                    </ul>
-                    <a href="trend-prediction.html" class="feature-link">
-                        <span>Explore Predictions</span>
-                        <i class="fas fa-arrow-right"></i>
-                    </a>
-                </div>
-
-                <!-- Feature 8: Dashboard -->
-                <div class="feature-card" data-aos="fade-up" data-aos-delay="100">
-                    <div class="feature-header">
-                        <div class="feature-icon">
-                            <i class="fas fa-tachometer-alt"></i>
-                        </div>
-                    </div>
-                    <h3 class="feature-title">Interactive Dashboard</h3>
-                    <p class="feature-description">
-                        Comprehensive financial dashboard with real-time updates, 
-                        customizable widgets, and advanced visualizations.
-                    </p>
-                    <ul class="feature-benefits">
-                        <li>
-                            <i class="fas fa-check-circle"></i>
-                            <span>Real-time data streaming</span>
-                        </li>
-                        <li>
-                            <i class="fas fa-check-circle"></i>
-                            <span>Customizable layouts</span>
-                        </li>
-                        <li>
-                            <i class="fas fa-check-circle"></i>
-                            <span>Advanced charting tools</span>
-                        </li>
-                    </ul>
-                    <a href="dashboard-financier.html" class="feature-link">
-                        <span>Explore Dashboard</span>
-                        <i class="fas fa-arrow-right"></i>
-                    </a>
-                </div>
-            </div>
-        </div>
-    </section>
-
-<!-- ═══════════════════════════════════════════════════════════════
-         INTERACTIVE DEMO SECTION - AVEC EFFETS 3D
-         ═══════════════════════════════════════════════════════════════ -->
-    <section class="demo-interactive" id="demo">
-        <div class="container-fluid">
-            <div class="demo-wrapper">
-                <div class="demo-left" data-aos="fade-right">
-                    <span class="section-tag">Interactive Demo</span>
-                    <h2 class="demo-title">
-                        Find comparable companies in
-                        <span class="highlight-gradient">3 seconds</span>
-                    </h2>
-                    <p class="demo-description">
-                        Our AI engine analyzes millions of financial data points to 
-                        instantly suggest the most relevant companies for your analysis.
-                    </p>
-                    
-                    <div class="demo-stats-grid">
-                        <div class="demo-stat">
-                            <div class="demo-stat-icon">
-                                <i class="fas fa-bolt"></i>
-                            </div>
-                            <div class="demo-stat-content">
-                                <h4>20x Faster</h4>
-                                <p>Than traditional manual analysis</p>
-                            </div>
-                        </div>
-                        
-                        <div class="demo-stat">
-                            <div class="demo-stat-icon">
-                                <i class="fas fa-bullseye"></i>
-                            </div>
-                            <div class="demo-stat-content">
-                                <h4>110% More Accurate</h4>
-                                <p>With our AI relevancy algorithm</p>
-                            </div>
-                        </div>
-                        
-                        <div class="demo-stat">
-                            <div class="demo-stat-icon">
-                                <i class="fas fa-sync-alt"></i>
-                            </div>
-                            <div class="demo-stat-content">
-                                <h4>Real-time Data</h4>
-                                <p>Continuous updates from 100+ sources</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <button class="btn-demo-cta" id="tryDemoBtn">
-                        <span>Try Interactive Demo</span>
-                        <i class="fas fa-arrow-right"></i>
-                    </button>
-                </div>
-                
-                <div class="demo-right" data-aos="fade-left">
-                    <div class="search-interface">
-                        <!-- Search Bar -->
-                        <div class="search-box-wrapper">
-                            <div class="search-box">
-                                <i class="fas fa-search"></i>
-                                <input 
-                                    type="text" 
-                                    placeholder="Search for a company..." 
-                                    value="Tesla Inc."
-                                    id="companySearch"
-                                    aria-label="Search for a company"
-                                >
-                                <div class="search-strength">
-                                    <div class="strength-bar high"></div>
-                                    <span class="strength-label">Strong</span>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <!-- Results -->
-                        <div class="search-results">
-                            <div class="results-header">
-                                <span>3 comparable companies found</span>
-                                <span class="results-time">0.3s</span>
-                            </div>
-                            
-                            <!-- Result Card 1 -->
-                            <div class="company-result-card highlight">
-                                <div class="company-result-header">
-                                    <div class="company-avatar">
-                                        <span>T</span>
-                                    </div>
-                                    <div class="company-details">
-                                        <h4>Tesla, Inc.</h4>
-                                        <p>NASDAQ: TSLA • Automotive</p>
-                                    </div>
-                                    <div class="relevancy-score">
-                                        <div class="score-circle">
-                                            <span class="score-value">98</span>
-                                        </div>
-                                        <span class="score-label">Relevancy</span>
-                                    </div>
-                                </div>
-                                <div class="company-metrics">
-                                    <div class="metric-item">
-                                        <span class="metric-label">Market Cap</span>
-                                        <span class="metric-value">$752.3B</span>
-                                    </div>
-                                    <div class="metric-item">
-                                        <span class="metric-label">Revenue</span>
-                                        <span class="metric-value">$96.8B</span>
-                                    </div>
-                                    <div class="metric-item">
-                                        <span class="metric-label">EV/EBITDA</span>
-                                        <span class="metric-value">34.2x</span>
-                                    </div>
-                                    <div class="metric-item">
-                                        <span class="metric-label">P/E Ratio</span>
-                                        <span class="metric-value">68.5</span>
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <!-- Result Card 2 -->
-                            <div class="company-result-card">
-                                <div class="company-result-header">
-                                    <div class="company-avatar">
-                                        <span>L</span>
-                                    </div>
-                                    <div class="company-details">
-                                        <h4>Lucid Group, Inc.</h4>
-                                        <p>NASDAQ: LCID • Automotive</p>
-                                    </div>
-                                    <div class="relevancy-score">
-                                        <div class="score-circle">
-                                            <span class="score-value">94</span>
-                                        </div>
-                                        <span class="score-label">Relevancy</span>
-                                    </div>
-                                </div>
-                                <div class="company-metrics">
-                                    <div class="metric-item">
-                                        <span class="metric-label">Market Cap</span>
-                                        <span class="metric-value">$12.4B</span>
-                                    </div>
-                                    <div class="metric-item">
-                                        <span class="metric-label">Revenue</span>
-                                        <span class="metric-value">$608M</span>
-                                    </div>
-                                    <div class="metric-item">
-                                        <span class="metric-label">EV/EBITDA</span>
-                                        <span class="metric-value">—</span>
-                                    </div>
-                                    <div class="metric-item">
-                                        <span class="metric-label">P/E Ratio</span>
-                                        <span class="metric-value">—</span>
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <!-- Result Card 3 -->
-                            <div class="company-result-card">
-                                <div class="company-result-header">
-                                    <div class="company-avatar">
-                                        <span>R</span>
-                                    </div>
-                                    <div class="company-details">
-                                        <h4>Rivian Automotive, Inc.</h4>
-                                        <p>NASDAQ: RIVN • Automotive</p>
-                                    </div>
-                                    <div class="relevancy-score">
-                                        <div class="score-circle">
-                                            <span class="score-value">92</span>
-                                        </div>
-                                        <span class="score-label">Relevancy</span>
-                                    </div>
-                                </div>
-                                <div class="company-metrics">
-                                    <div class="metric-item">
-                                        <span class="metric-label">Market Cap</span>
-                                        <span class="metric-value">$18.2B</span>
-                                    </div>
-                                    <div class="metric-item">
-                                        <span class="metric-label">Revenue</span>
-                                        <span class="metric-value">$4.4B</span>
-                                    </div>
-                                    <div class="metric-item">
-                                        <span class="metric-label">EV/EBITDA</span>
-                                        <span class="metric-value">—</span>
-                                    </div>
-                                    <div class="metric-item">
-                                        <span class="metric-label">P/E Ratio</span>
-                                        <span class="metric-value">—</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
                 </div>
             </div>
         </div>
     </section>
 
     <!-- ═══════════════════════════════════════════════════════════════
-         SOLUTIONS SECTION - AVEC ROTATION 3D
+         SOLUTIONS SECTION
          ═══════════════════════════════════════════════════════════════ -->
     <section class="solutions-section" id="solutions">
         <div class="container-fluid">
             <div class="section-header">
                 <span class="section-tag" data-aos="fade-up">Solutions</span>
-                <h2 class="section-title" data-aos="fade-up" data-aos-delay="100">Built for your role</h2>
+                <h2 class="section-title" data-aos="fade-up" data-aos-delay="100">Built for everyone</h2>
                 <p class="section-description" data-aos="fade-up" data-aos-delay="200">
-                    Specialized tools and workflows designed for finance professionals
+                    Whether you're an individual investor or a finance professional
                 </p>
             </div>
 
             <div class="solutions-grid">
+                <!-- Solution 1: Particuliers -->
                 <div class="solution-card" data-aos="zoom-in">
+                    <div class="solution-icon-wrapper">
+                        <div class="solution-icon">
+                            <i class="fas fa-user"></i>
+                        </div>
+                    </div>
+                    <h3>Individual Investors</h3>
+                    <p>
+                        Build and optimize your personal portfolio with AI-powered insights, 
+                        IPO detection, and risk management tools.
+                    </p>
+                    <div class="solution-features">
+                        <span class="feature-pill">Portfolio Builder</span>
+                        <span class="feature-pill">IPO Alerts</span>
+                        <span class="feature-pill">Risk Tools</span>
+                        <span class="feature-pill">AI Assistant</span>
+                    </div>
+                    <a href="#pricing" class="solution-link">
+                        <span>Start Free</span>
+                        <i class="fas fa-arrow-right"></i>
+                    </a>
+                </div>
+
+                <!-- Solution 2: Professionnels -->
+                <div class="solution-card" data-aos="zoom-in" data-aos-delay="100">
                     <div class="solution-icon-wrapper">
                         <div class="solution-icon">
                             <i class="fas fa-briefcase"></i>
                         </div>
                     </div>
-                    <h3>Investment Bankers</h3>
+                    <h3>Finance Professionals</h3>
                     <p>
-                        Accelerate deal flow with intelligent M&A screening, 
-                        automated valuation models, and instant pitch book generation.
+                        Advanced tools for investment bankers, analysts, and asset managers. 
+                        M&A screening, DCF models, and institutional-grade analytics.
                     </p>
                     <div class="solution-features">
                         <span class="feature-pill">M&A Screening</span>
                         <span class="feature-pill">DCF Models</span>
-                        <span class="feature-pill">Comp Analysis</span>
-                        <span class="feature-pill">Deal Sourcing</span>
+                        <span class="feature-pill">Quant Tools</span>
+                        <span class="feature-pill">API Access</span>
                     </div>
-                    <a href="scenario-analysis.html" class="solution-link">
-                        <span>Learn more</span>
-                        <i class="fas fa-arrow-right"></i>
-                    </a>
-                </div>
-
-                <div class="solution-card" data-aos="zoom-in" data-aos-delay="100">
-                    <div class="solution-icon-wrapper">
-                        <div class="solution-icon">
-                            <i class="fas fa-user-tie"></i>
-                        </div>
-                    </div>
-                    <h3>Asset Managers</h3>
-                    <p>
-                        Optimize allocations with advanced quantitative models and 
-                        real-time risk management across all asset classes.
-                    </p>
-                    <div class="solution-features">
-                        <span class="feature-pill">Portfolio Opt</span>
-                        <span class="feature-pill">Risk Management</span>
-                        <span class="feature-pill">Performance</span>
-                        <span class="feature-pill">Reporting</span>
-                    </div>
-                    <a href="portfolio-optimizer.html" class="solution-link">
-                        <span>Learn more</span>
-                        <i class="fas fa-arrow-right"></i>
-                    </a>
-                </div>
-
-                <div class="solution-card" data-aos="zoom-in" data-aos-delay="200">
-                    <div class="solution-icon-wrapper">
-                        <div class="solution-icon">
-                            <i class="fas fa-chart-line"></i>
-                        </div>
-                    </div>
-                    <h3>Quantitative Analysts</h3>
-                    <p>
-                        Develop and backtest sophisticated strategies with our 
-                        modeling, simulation, and machine learning toolkit.
-                    </p>
-                    <div class="solution-features">
-                        <span class="feature-pill">Backtesting</span>
-                        <span class="feature-pill">Monte Carlo</span>
-                        <span class="feature-pill">ML Models</span>
-                        <span class="feature-pill">Factor Analysis</span>
-                    </div>
-                    <a href="monte-carlo.html" class="solution-link">
-                        <span>Learn more</span>
-                        <i class="fas fa-arrow-right"></i>
-                    </a>
-                </div>
-
-                <div class="solution-card" data-aos="zoom-in" data-aos-delay="300">
-                    <div class="solution-icon-wrapper">
-                        <div class="solution-icon">
-                            <i class="fas fa-university"></i>
-                        </div>
-                    </div>
-                    <h3>Research Analysts</h3>
-                    <p>
-                        Produce institutional-quality research with enriched data, 
-                        professional visualizations, and automated reports.
-                    </p>
-                    <div class="solution-features">
-                        <span class="feature-pill">Data Analytics</span>
-                        <span class="feature-pill">Visualization</span>
-                        <span class="feature-pill">Reports</span>
-                        <span class="feature-pill">Screening</span>
-                    </div>
-                    <a href="advanced-analysis.html" class="solution-link">
-                        <span>Learn more</span>
+                    <a href="#pricing" class="solution-link">
+                        <span>Go Pro</span>
                         <i class="fas fa-arrow-right"></i>
                     </a>
                 </div>
@@ -969,201 +757,88 @@
     </section>
 
     <!-- ═══════════════════════════════════════════════════════════════
-         TOOLS SECTION - AVEC EFFETS 3D
-         ═══════════════════════════════════════════════════════════════ -->
-    <section class="tools-section" id="tools">
-        <div class="container-fluid">
-            <div class="section-header">
-                <span class="section-tag" data-aos="fade-up">Quantitative Tools</span>
-                <h2 class="section-title" data-aos="fade-up" data-aos-delay="100">Advanced algorithms for financial analysis</h2>
-            </div>
-
-            <div class="tools-grid-advanced">
-                <div class="tool-card-advanced" data-aos="fade-up">
-                    <div class="tool-icon-advanced">
-                        <i class="fas fa-calculator"></i>
-                    </div>
-                    <h4>Value at Risk (VaR)</h4>
-                    <p>Historical, parametric, and Monte Carlo VaR calculations with confidence intervals</p>
-                    <div class="tool-tags">
-                        <span>Risk</span>
-                        <span>Quantitative</span>
-                    </div>
-                </div>
-
-                <div class="tool-card-advanced" data-aos="fade-up" data-aos-delay="50">
-                    <div class="tool-icon-advanced">
-                        <i class="fas fa-project-diagram"></i>
-                    </div>
-                    <h4>Black-Litterman Model</h4>
-                    <p>Combine market equilibrium with investor views for optimal asset allocation</p>
-                    <div class="tool-tags">
-                        <span>Allocation</span>
-                        <span>Optimization</span>
-                    </div>
-                </div>
-
-                <div class="tool-card-advanced" data-aos="fade-up" data-aos-delay="100">
-                    <div class="tool-icon-advanced">
-                        <i class="fas fa-wave-square"></i>
-                    </div>
-                    <h4>Technical Analysis</h4>
-                    <p>RSI, MACD, Bollinger Bands, moving averages, and 50+ technical indicators</p>
-                    <div class="tool-tags">
-                        <span>Trading</span>
-                        <span>Indicators</span>
-                    </div>
-                </div>
-
-                <div class="tool-card-advanced" data-aos="fade-up" data-aos-delay="150">
-                    <div class="tool-icon-advanced">
-                        <i class="fas fa-robot"></i>
-                    </div>
-                    <h4>Machine Learning Models</h4>
-                    <p>LSTM, Random Forest, and regression models for predictive analytics</p>
-                    <div class="tool-tags">
-                        <span>AI</span>
-                        <span>Prediction</span>
-                    </div>
-                </div>
-
-                <div class="tool-card-advanced" data-aos="fade-up" data-aos-delay="200">
-                    <div class="tool-icon-advanced">
-                        <i class="fas fa-sitemap"></i>
-                    </div>
-                    <h4>Correlation Analysis</h4>
-                    <p>Dynamic correlation matrices and dependency structure analysis</p>
-                    <div class="tool-tags">
-                        <span>Statistics</span>
-                        <span>Analysis</span>
-                    </div>
-                </div>
-
-                <div class="tool-card-advanced" data-aos="fade-up" data-aos-delay="250">
-                    <div class="tool-icon-advanced">
-                        <i class="fas fa-chart-area"></i>
-                    </div>
-                    <h4>Backtesting Engine</h4>
-                    <p>Test strategies on historical data with comprehensive performance metrics</p>
-                    <div class="tool-tags">
-                        <span>Strategy</span>
-                        <span>Performance</span>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- ═══════════════════════════════════════════════════════════════
-         PRICING SECTION - AVEC FLIP 3D
+         PRICING SECTION - 2 OFFRES
          ═══════════════════════════════════════════════════════════════ -->
     <section class="pricing-section" id="pricing">
         <div class="container-fluid">
             <div class="section-header">
                 <span class="section-tag" data-aos="fade-up">Pricing</span>
-                <h2 class="section-title" data-aos="fade-up" data-aos-delay="100">Choose your plan</h2>
-                <p class="section-description" data-aos="fade-up" data-aos-delay="200">Start free, upgrade as you grow</p>
+                <h2 class="section-title" data-aos="fade-up" data-aos-delay="100">Simple, transparent pricing</h2>
+                <p class="section-description" data-aos="fade-up" data-aos-delay="200">Start free, upgrade when you're ready</p>
             </div>
 
-            <div class="pricing-toggle" data-aos="fade-up" data-aos-delay="300">
-                <span class="toggle-label">Monthly</span>
-                <label class="toggle-switch">
-                    <input type="checkbox" id="pricingToggle">
-                    <span class="toggle-slider"></span>
-                </label>
-                <span class="toggle-label">Annual <span class="save-badge">Save 20%</span></span>
-            </div>
-
-            <div class="pricing-grid">
+            <div class="pricing-grid-two">
                 <!-- Free Tier -->
                 <div class="pricing-card" data-aos="fade-up">
                     <div class="pricing-header">
-                        <h3>Starter</h3>
-                        <p>Perfect for individual analysts</p>
+                        <h3>AlphaVault Basic</h3>
+                        <p>Perfect to get started</p>
                     </div>
                     <div class="pricing-price">
-                        <span class="currency">$</span>
+                        <span class="currency">€</span>
                         <span class="amount">0</span>
                         <span class="period">/month</span>
                     </div>
                     <ul class="pricing-features">
-                        <li><i class="fas fa-check"></i> Up to 10 analyses/month</li>
-                        <li><i class="fas fa-check"></i> Basic market data</li>
+                        <li><i class="fas fa-check"></i> Access to basic market data</li>
                         <li><i class="fas fa-check"></i> Portfolio tracking</li>
-                        <li><i class="fas fa-check"></i> Standard support</li>
-                        <li class="disabled"><i class="fas fa-times"></i> AI predictions</li>
-                        <li class="disabled"><i class="fas fa-times"></i> Advanced optimization</li>
+                        <li><i class="fas fa-check"></i> Chat with Alphy AI (limited)</li>
+                        <li><i class="fas fa-check"></i> 10 analyses/month</li>
+                        <li class="disabled"><i class="fas fa-times"></i> Advanced IPO screening</li>
+                        <li class="disabled"><i class="fas fa-times"></i> Portfolio optimization</li>
+                        <li class="disabled"><i class="fas fa-times"></i> M&A tools</li>
+                        <li class="disabled"><i class="fas fa-times"></i> Priority support</li>
                     </ul>
-                    <button class="btn-pricing">Get Started</button>
+                    <button class="btn-pricing">Get Started Free</button>
                 </div>
 
-                <!-- Professional Tier -->
+                <!-- Pro Tier -->
                 <div class="pricing-card featured" data-aos="fade-up" data-aos-delay="100">
-                    <div class="popular-badge">Most Popular</div>
+                    <div class="popular-badge">🔥 Most Popular</div>
                     <div class="pricing-header">
-                        <h3>Professional</h3>
-                        <p>For serious finance professionals</p>
+                        <h3>AlphaVault Pro</h3>
+                        <p>Full access to all features</p>
                     </div>
                     <div class="pricing-price">
-                        <span class="currency">$</span>
-                        <span class="amount" data-monthly="99" data-annual="79">99</span>
+                        <span class="currency">€</span>
+                        <span class="amount">10</span>
                         <span class="period">/month</span>
                     </div>
                     <ul class="pricing-features">
-                        <li><i class="fas fa-check"></i> Unlimited analyses</li>
-                        <li><i class="fas fa-check"></i> Real-time market data</li>
-                        <li><i class="fas fa-check"></i> All optimization models</li>
-                        <li><i class="fas fa-check"></i> AI predictions & insights</li>
-                        <li><i class="fas fa-check"></i> Monte Carlo simulations</li>
+                        <li><i class="fas fa-check"></i> <strong>Everything in Basic</strong></li>
+                        <li><i class="fas fa-check"></i> <strong>Unlimited</strong> analyses</li>
+                        <li><i class="fas fa-check"></i> Advanced IPO screening & alerts</li>
+                        <li><i class="fas fa-check"></i> Portfolio optimization (Markowitz, Black-Litterman)</li>
+                        <li><i class="fas fa-check"></i> M&A screening tools</li>
+                        <li><i class="fas fa-check"></i> Real-time data & advanced charts</li>
+                        <li><i class="fas fa-check"></i> <strong>Unlimited</strong> Alphy AI access</li>
                         <li><i class="fas fa-check"></i> Priority support</li>
                     </ul>
-                    <button class="btn-pricing featured">Start Free Trial</button>
-                </div>
-
-                <!-- Enterprise Tier -->
-                <div class="pricing-card" data-aos="fade-up" data-aos-delay="200">
-                    <div class="pricing-header">
-                        <h3>Enterprise</h3>
-                        <p>For teams and organizations</p>
-                    </div>
-                    <div class="pricing-price">
-                        <span class="amount-custom">Custom</span>
-                    </div>
-                    <ul class="pricing-features">
-                        <li><i class="fas fa-check"></i> Everything in Professional</li>
-                        <li><i class="fas fa-check"></i> Unlimited team members</li>
-                        <li><i class="fas fa-check"></i> Custom integrations</li>
-                        <li><i class="fas fa-check"></i> Dedicated support</li>
-                        <li><i class="fas fa-check"></i> SLA guarantee</li>
-                        <li><i class="fas fa-check"></i> On-premise deployment</li>
-                    </ul>
-                    <button class="btn-pricing">Contact Sales</button>
+                    <button class="btn-pricing featured">Start 14-Day Free Trial</button>
+                    <p class="pricing-note">Same price as Spotify Premium ✨</p>
                 </div>
             </div>
         </div>
     </section>
 
     <!-- ═══════════════════════════════════════════════════════════════
-         CTA FINAL SECTION
+         CTA FINAL
          ═══════════════════════════════════════════════════════════════ -->
     <section class="cta-final">
         <div class="container-fluid">
             <div class="cta-content-wrapper">
                 <div class="cta-content" data-aos="zoom-in">
-                    <h2 class="cta-title">Ready to transform your financial analysis?</h2>
+                    <h2 class="cta-title">Ready to transform your investments?</h2>
                     <p class="cta-subtitle">
-                        Join thousands of finance professionals using FinancePro
+                        Join thousands of investors using AlphaVault AI
                     </p>
                     <div class="cta-buttons">
                         <button class="btn-cta-primary" id="finalCTABtn">
-                            <span>Start Free Trial</span>
+                            <span>Start Free Now</span>
                             <i class="fas fa-arrow-right"></i>
                         </button>
-                        <button class="btn-cta-secondary" id="contactSalesBtn">
-                            <span>Contact Sales</span>
-                        </button>
                     </div>
-                    <p class="cta-note">No credit card required • 14-day free trial</p>
+                    <p class="cta-note">No credit card required • Upgrade to Pro anytime for just €10/month</p>
                 </div>
             </div>
         </div>
@@ -1178,15 +853,17 @@
                 <div class="footer-col footer-brand-col">
                     <div class="footer-brand">
                         <div class="brand-logo">
-                            <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
-                                <path d="M16 2L2 9L16 16L30 9L16 2Z" fill="#3B82F6"/>
-                                <path d="M2 23L16 30L30 23V9L16 16L2 9V23Z" fill="#2563EB" opacity="0.8"/>
+                            <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" width="32" height="32">
+                                <path d="M 20 80 L 30 70 L 40 75 L 50 60 L 60 65 L 70 45 L 80 50 L 90 30" 
+                                      stroke="url(#logoGradient)" 
+                                      stroke-width="4" 
+                                      fill="none"/>
                             </svg>
                         </div>
-                        <span class="brand-text">Finance<strong>Pro</strong></span>
+                        <span class="brand-text">AlphaVault <strong>AI</strong></span>
                     </div>
                     <p class="footer-description">
-                        AI-powered financial analysis platform for investment professionals.
+                        AI-powered financial intelligence platform for smart investors.
                     </p>
                     <div class="footer-social">
                         <a href="#" aria-label="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
@@ -1200,9 +877,8 @@
                     <h4>Product</h4>
                     <ul>
                         <li><a href="#features">Features</a></li>
+                        <li><a href="#alphy-ai">Alphy AI</a></li>
                         <li><a href="dashboard-financier.html">Dashboard</a></li>
-                        <li><a href="market-data.html">Market Data</a></li>
-                        <li><a href="portfolio-optimizer.html">Portfolio Optimizer</a></li>
                         <li><a href="#pricing">Pricing</a></li>
                     </ul>
                 </div>
@@ -1210,32 +886,10 @@
                 <div class="footer-col">
                     <h4>Tools</h4>
                     <ul>
+                        <li><a href="ipo-screening.html">IPO Screening</a></li>
+                        <li><a href="portfolio-optimizer.html">Portfolio Optimizer</a></li>
+                        <li><a href="market-data.html">Market Data</a></li>
                         <li><a href="advanced-analysis.html">Advanced Analysis</a></li>
-                        <li><a href="monte-carlo.html">Monte Carlo</a></li>
-                        <li><a href="risk-parity.html">Risk Parity</a></li>
-                        <li><a href="scenario-analysis.html">Scenario Analysis</a></li>
-                        <li><a href="trend-prediction.html">Trend Prediction</a></li>
-                    </ul>
-                </div>
-
-                <div class="footer-col">
-                    <h4>Solutions</h4>
-                    <ul>
-                        <li><a href="#solutions">Investment Banking</a></li>
-                        <li><a href="#solutions">Asset Management</a></li>
-                        <li><a href="#solutions">Quantitative Finance</a></li>
-                        <li><a href="#solutions">Research</a></li>
-                    </ul>
-                </div>
-
-                <div class="footer-col">
-                    <h4>Resources</h4>
-                    <ul>
-                        <li><a href="#">Documentation</a></li>
-                        <li><a href="#">API Reference</a></li>
-                        <li><a href="#">Blog</a></li>
-                        <li><a href="#">Support</a></li>
-                        <li><a href="#">Status</a></li>
                     </ul>
                 </div>
 
@@ -1251,11 +905,10 @@
             </div>
 
             <div class="footer-bottom">
-                <p>&copy; <span id="currentYear">2024</span> FinancePro. All rights reserved.</p>
+                <p>&copy; <span id="currentYear">2024</span> AlphaVault AI. All rights reserved.</p>
                 <div class="footer-bottom-links">
                     <a href="#">Privacy</a>
                     <a href="#">Terms</a>
-                    <a href="#">Cookies</a>
                     <a href="#">Security</a>
                 </div>
             </div>
@@ -1263,187 +916,50 @@
     </footer>
 
     <!-- ═══════════════════════════════════════════════════════════════
-         SCRIPTS - ORDRE IMPORTANT !
+         SCRIPTS
          ═══════════════════════════════════════════════════════════════ -->
     
     <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-
-    <!-- ✅ NOUVEAU : Plugin Candlestick pour Chart.js -->
-    <script src="https://cdn.jsdelivr.net/npm/chartjs-chart-financial@0.2.1/dist/chartjs-chart-financial.min.js"></script>
-
-    <!-- ✅ NOUVEAU : Adaptateur de dates -->
-    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3.0.0/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
     
-    <!-- AOS Animation Library -->
+    <!-- AOS Animation -->
     <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
 
-    <!-- Three.js Library -->
+    <!-- Three.js -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     
-    <!-- Firebase SDK (version 9 en mode compat) -->
+    <!-- Firebase -->
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
     
-    <!-- Firebase Configuration -->
+    <!-- Firebase Config -->
     <script src="assets/js/firebase-config.js"></script>
+    
+    <!-- FinnHub Client -->
+    <script src="assets/js/finnhub-client.js"></script>
     
     <!-- Application Scripts -->
     <script src="assets/js/common.js"></script>
     <script src="assets/js/landing.js"></script>
+    <script src="assets/js/landing-market-ticker.js"></script>
     <script src="assets/js/auth-system.js"></script>
     
-    <!-- ✅ INITIALISATION DES ANIMATIONS -->
+    <!-- Initialisation -->
     <script>
-        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-        // INITIALISATION AOS (Animate On Scroll)
-        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        // AOS Init
         AOS.init({
-            duration: 800,              // Durée de l'animation
-            easing: 'ease-out-cubic',   // Courbe d'animation
-            once: true,                 // ✅ Animation UNE SEULE FOIS
-            offset: 50,                 // Décalage avant déclenchement
-            disable: false,             // Activé sur tous les devices
-            mirror: false,              // ✅ NE PAS rejouer au scroll inverse
-            anchorPlacement: 'top-bottom' // Position de déclenchement
+            duration: 800,
+            easing: 'ease-out-cubic',
+            once: true,
+            offset: 50,
+            mirror: false
         });
 
-        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-        // ANNÉE DYNAMIQUE DANS LE FOOTER
-        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        // Année dynamique
         document.getElementById('currentYear').textContent = new Date().getFullYear();
 
-        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-        // NAVIGATION STICKY AU SCROLL
-        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-        const landingNav = document.getElementById('landingNav');
-        let lastScroll = 0;
-
-        window.addEventListener('scroll', () => {
-            const currentScroll = window.pageYOffset;
-            
-            if (currentScroll > 50) {
-                landingNav.classList.add('scrolled');
-            } else {
-                landingNav.classList.remove('scrolled');
-            }
-            
-            lastScroll = currentScroll;
-        });
-
-        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-        // MOBILE MENU TOGGLE
-        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-        const mobileMenuBtn = document.getElementById('mobileMenuBtn');
-        const navMenu = document.getElementById('navMenu');
-
-        if (mobileMenuBtn) {
-            mobileMenuBtn.addEventListener('click', () => {
-                mobileMenuBtn.classList.toggle('active');
-                navMenu.classList.toggle('active');
-            });
-        }
-
-        // Fermer le menu mobile lors du clic sur un lien
-        const navLinks = document.querySelectorAll('.nav-link');
-        navLinks.forEach(link => {
-            link.addEventListener('click', () => {
-                mobileMenuBtn.classList.remove('active');
-                navMenu.classList.remove('active');
-            });
-        });
-
-        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-        // SMOOTH SCROLL POUR LES ANCRES
-        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-            anchor.addEventListener('click', function (e) {
-                const href = this.getAttribute('href');
-                if (href !== '#' && href.length > 1) {
-                    e.preventDefault();
-                    const target = document.querySelector(href);
-                    if (target) {
-                        const offset = 80;
-                        const targetPosition = target.offsetTop - offset;
-                        
-                        window.scrollTo({
-                            top: targetPosition,
-                            behavior: 'smooth'
-                        });
-                    }
-                }
-            });
-        });
-
-        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-        // PRICING TOGGLE (Monthly/Annual)
-        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-        const pricingToggle = document.getElementById('pricingToggle');
-        const amountElements = document.querySelectorAll('.amount[data-monthly]');
-
-        if (pricingToggle) {
-            pricingToggle.addEventListener('change', function() {
-                const isAnnual = this.checked;
-                
-                amountElements.forEach(el => {
-                    const monthlyPrice = el.getAttribute('data-monthly');
-                    const annualPrice = el.getAttribute('data-annual');
-                    
-                    el.textContent = isAnnual ? annualPrice : monthlyPrice;
-                });
-            });
-        }
-
-        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-        // HERO CHART SIMPLE (Optionnel)
-        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-        const heroChartCanvas = document.getElementById('heroChart');
-        
-        if (heroChartCanvas && typeof Chart !== 'undefined') {
-            const ctx = heroChartCanvas.getContext('2d');
-            
-            new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
-                    datasets: [{
-                        label: 'Portfolio Growth',
-                        data: [2400000, 2520000, 2680000, 2750000, 2820000, 2847392],
-                        borderColor: '#3B82F6',
-                        backgroundColor: 'rgba(59, 130, 246, 0.1)',
-                        borderWidth: 2,
-                        fill: true,
-                        tension: 0.4,
-                        pointRadius: 0
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            display: false
-                        }
-                    },
-                    scales: {
-                        x: {
-                            display: false
-                        },
-                        y: {
-                            display: false
-                        }
-                    }
-                }
-            });
-        }
-
-        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-        // CONSOLE LOG POUR CONFIRMATION
-        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-        console.log('%c🚀 FinancePro Landing Page Loaded Successfully!', 'color: #3B82F6; font-size: 16px; font-weight: bold;');
-        console.log('%c✨ Animations 3D activées', 'color: #8B5CF6; font-size: 14px;');
-        console.log('%c💎 Police Satoshi chargée', 'color: #10B981; font-size: 14px;');
+        console.log('%c🚀 AlphaVault AI Loaded!', 'color: #3B82F6; font-size: 16px; font-weight: bold;');
     </script>
 </body>
 </html>
