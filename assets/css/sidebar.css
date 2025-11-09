@@ -1,6 +1,6 @@
 /* ===================================
    SIDEBAR PREMIUM 3D - VERSION FINALE
-   AlphaVault AI - État Collapsed Amélioré
+   AlphaVault AI - Corrections Finales
    =================================== */
 
 :root {
@@ -108,7 +108,7 @@ body.dark-mode .main-content {
     gap: 14px;
     flex: 1;
     min-width: 0;
-    transition: all var(--transition-speed) var(--transition-smooth);
+    transition: opacity var(--transition-speed) var(--transition-smooth);
 }
 
 /* Logo 3D */
@@ -117,7 +117,8 @@ body.dark-mode .main-content {
     height: 42px;
     position: relative;
     flex-shrink: 0;
-    transition: transform 0.2s ease;
+    transition: transform 0.2s ease, 
+                opacity var(--transition-speed) var(--transition-smooth);
 }
 
 .logo-3d:hover {
@@ -171,15 +172,17 @@ body.dark-mode .main-content {
     opacity: 0.8;
 }
 
-/* ✅ Collapsed state - AMÉLIORÉ */
+/* ✅ CORRECTION 1 : Masquer complètement le logo en mode collapsed */
+.sidebar.collapsed .logo-container {
+    opacity: 0;
+    pointer-events: none;
+    width: 0;
+    overflow: hidden;
+}
+
 .sidebar.collapsed .brand-text {
     opacity: 0;
     width: 0;
-}
-
-.sidebar.collapsed .logo-container {
-    justify-content: center;
-    gap: 0;
 }
 
 /* Toggle Button */
@@ -218,10 +221,10 @@ body.dark-mode .main-content {
     transform: rotate(180deg);
 }
 
-/* ✅ Mode collapsed - Centrer le toggle */
+/* ✅ CORRECTION 2 : Centrer le toggle parfaitement en mode collapsed */
 .sidebar.collapsed .sidebar-header {
     justify-content: center;
-    padding: 25px 10px;
+    padding: 25px 0;
 }
 
 /* ===================================
@@ -259,7 +262,7 @@ body.dark-mode .main-content {
     position: relative;
 }
 
-/* ✅ Navigation Folder - AMÉLIORÉ MODE COLLAPSED */
+/* Navigation Folder */
 .nav-folder {
     width: 100%;
     background: none;
@@ -308,7 +311,7 @@ body.dark-mode .main-content {
     color: var(--sidebar-text-light);
 }
 
-/* ✅ Icon - CENTRÉ en mode collapsed */
+/* Icon */
 .nav-folder i:first-child {
     font-size: 20px;
     width: 24px;
@@ -332,7 +335,10 @@ body.dark-mode .main-content {
     text-align: left;
     white-space: nowrap;
     overflow: hidden;
+    text-overflow: ellipsis;
     transition: opacity var(--transition-speed) var(--transition-smooth);
+    /* ✅ CORRECTION 3 : Ajouter une marge à droite pour éviter l'empiètement */
+    margin-right: 8px;
 }
 
 /* Arrow */
@@ -341,6 +347,9 @@ body.dark-mode .main-content {
     transition: transform 0.2s ease, opacity 0.2s ease;
     flex-shrink: 0;
     opacity: 0.6;
+    margin-left: auto;
+    /* ✅ CORRECTION 4 : S'assurer que la flèche ne touche pas le texte */
+    min-width: 12px;
 }
 
 .nav-folder:hover .arrow {
@@ -352,7 +361,7 @@ body.dark-mode .main-content {
     color: var(--accent-primary);
 }
 
-/* ✅ COLLAPSED STATE - PARFAIT CENTRAGE */
+/* Mode collapsed */
 .sidebar.collapsed .nav-folder {
     justify-content: center;
     padding: 15px 0;
@@ -365,7 +374,7 @@ body.dark-mode .main-content {
     display: none;
 }
 
-/* ✅ TOOLTIP AU SURVOL EN MODE COLLAPSED */
+/* ✅ TOOLTIPS en mode collapsed */
 .sidebar.collapsed .nav-folder {
     position: relative;
 }
@@ -418,7 +427,7 @@ body.dark-mode .main-content {
     opacity: 1;
 }
 
-/* ✅ INDICATEUR ACTIF PLUS VISIBLE */
+/* Indicateur actif plus visible en mode collapsed */
 .sidebar.collapsed .nav-folder.active {
     background: rgba(102, 126, 234, 0.2);
     border-radius: 12px;
@@ -512,7 +521,7 @@ body.dark-mode .main-content {
 }
 
 /* ===================================
-   SIDEBAR FOOTER - AMÉLIORÉ
+   SIDEBAR FOOTER
    =================================== */
 .sidebar-footer {
     border-top: 1px solid rgba(255, 255, 255, 0.08);
@@ -589,7 +598,7 @@ body.dark-mode .main-content {
     opacity: 0.8;
 }
 
-/* ✅ Mode collapsed - Centrer l'avatar */
+/* Mode collapsed - Centrer l'avatar */
 .sidebar.collapsed .user-details {
     opacity: 0;
     width: 0;
@@ -601,7 +610,7 @@ body.dark-mode .main-content {
     padding: 9px 0;
 }
 
-/* ✅ Tooltip pour l'avatar en mode collapsed */
+/* Tooltip pour l'avatar en mode collapsed */
 .sidebar.collapsed .user-info::after {
     content: attr(data-user);
     position: absolute;
