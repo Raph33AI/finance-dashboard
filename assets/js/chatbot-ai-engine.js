@@ -11,11 +11,9 @@ class FinancialChatbotEngine {
         this.analytics = null;
         this.charts = null;
         
-        // Message queue for processing
         this.messageQueue = [];
         this.isProcessing = false;
         
-        // Context management
         this.currentContext = {
             topic: null,
             symbol: null,
@@ -23,7 +21,6 @@ class FinancialChatbotEngine {
             userPreferences: {}
         };
         
-        // Performance metrics
         this.metrics = {
             totalMessages: 0,
             successfulResponses: 0,
@@ -32,37 +29,29 @@ class FinancialChatbotEngine {
             totalResponseTime: 0
         };
         
-        // Cache for frequent queries
         this.responseCache = new Map();
-        this.cacheExpiration = 300000; // 5 minutes
+        this.cacheExpiration = 300000;
         
         this.initialize();
     }
 
-    // ============================================
-    // INITIALIZATION
-    // ============================================
     async initialize() {
         try {
-            // Initialize Gemini AI
             if (typeof GeminiAI !== 'undefined') {
                 this.geminiAI = new GeminiAI(this.config);
                 console.log('✅ Gemini AI initialized');
             }
 
-            // Initialize IPO Analyzer
             if (typeof IPOAnalyzer !== 'undefined') {
                 this.ipoAnalyzer = new IPOAnalyzer(this.config);
                 console.log('✅ IPO Analyzer initialized');
             }
 
-            // Initialize Analytics
             if (typeof FinancialAnalytics !== 'undefined') {
                 this.analytics = new FinancialAnalytics(this.config);
                 console.log('✅ Analytics initialized');
             }
 
-            // Initialize Charts
             if (typeof ChatbotCharts !== 'undefined') {
                 this.charts = new ChatbotCharts(this.config);
                 console.log('✅ Charts initialized');
@@ -75,30 +64,26 @@ class FinancialChatbotEngine {
         }
     }
 
-    // ============================================
-    // PROCESS USER MESSAGE
-    // ============================================
     async processMessage(userMessage) {
         const startTime = performance.now();
         
         try {
             this.metrics.totalMessages++;
 
-            // Check cache first
             const cachedResponse = this.checkCache(userMessage);
             if (cachedResponse) {
                 console.log('📦 Returning cached response');
                 return cachedResponse;
             }
 
-            // Detect intent and extract entities
             const intent = this.detectIntent(userMessage);
             const entities = this.extractEntities(userMessage);
 
-            // Build context
+            console.log('🎯 Intent detected:', intent.type);
+            console.log('🔍 Entities extracted:', entities);
+
             const context = await this.buildContext(intent, entities);
 
-            // Route to appropriate handler
             let response;
             switch (intent.type) {
                 case 'IPO_ANALYSIS':
@@ -117,6 +102,10 @@ class FinancialChatbotEngine {
                     response = await this.handleTechnicalQuery(userMessage, entities, context);
                     break;
                     
+                case 'PRICE_HISTORY':
+                    response = await this.handlePriceHistoryQuery(userMessage, entities, context);
+                    break;
+                    
                 case 'GENERAL_FINANCE':
                     response = await this.handleGeneralQuery(userMessage, context);
                     break;
@@ -125,18 +114,12 @@ class FinancialChatbotEngine {
                     response = await this.handleGenericQuery(userMessage, context);
             }
 
-            // Add metadata
             response.intent = intent;
             response.entities = entities;
             response.processingTime = performance.now() - startTime;
 
-            // Cache response
             this.cacheResponse(userMessage, response);
-
-            // Update metrics
             this.updateMetrics(true, response.processingTime);
-
-            // Update context
             this.updateContext(intent, entities);
 
             return response;
@@ -155,11 +138,22 @@ class FinancialChatbotEngine {
     }
 
     // ============================================
-    // INTENT DETECTION
+    // INTENT DETECTION - AMÉLIORÉ
     // ============================================
     detectIntent(message) {
         const lowerMessage = message.toLowerCase();
         
+        // ✅ DÉTECTER LES REQUÊTES D'ÉVOLUTION/HISTORIQUE
+        if (this.matchesPattern(lowerMessage, [
+            'evolution', 'historical', 'history', 'performance', 
+            'over the', 'past', 'last', 'since', 'trend',
+            'chart', 'graph', 'show me', 'display'
+        ]) && this.matchesPattern(lowerMessage, [
+            'year', 'month', 'week', 'day', 'period'
+        ])) {
+            return { type: 'PRICE_HISTORY', confidence: 0.95 };
+        }
+
         // IPO related
         if (this.matchesPattern(lowerMessage, [
             'ipo', 'initial public offering', 'newly listed', 'recent listing',
@@ -204,7 +198,7 @@ class FinancialChatbotEngine {
     }
 
     // ============================================
-    // ENTITY EXTRACTION
+    // ENTITY EXTRACTION - AMÉLIORÉ
     // ============================================
     extractEntities(message) {
         const entities = {
@@ -216,27 +210,38 @@ class FinancialChatbotEngine {
             numbers: []
         };
 
-        // Extract stock symbols (1-5 uppercase letters)
+        // Extract stock symbols
         const symbolRegex = /\b[A-Z]{1,5}\b/g;
         const symbols = message.match(symbolRegex) || [];
         entities.symbols = symbols.filter(s => 
-            s.length >= 1 && s.length <= 5 && !['IPO', 'USA', 'CEO', 'CFO', 'AI'].includes(s)
+            s.length >= 1 && s.length <= 5 && !['IPO', 'USA', 'CEO', 'CFO', 'AI', 'THE'].includes(s)
         );
 
-        // Extract timeframes
+        // ✅ EXTRACTION AMÉLIORÉE DES PÉRIODES
         const timeframePatterns = {
             '1d': /\b(today|1\s*day)\b/i,
             '1w': /\b(week|1\s*week|7\s*days?)\b/i,
-            '1m': /\b(month|1\s*month|30\s*days?)\b/i,
-            '3m': /\b(3\s*months?|quarter)\b/i,
-            '6m': /\b(6\s*months?|half\s*year)\b/i,
+            '1M': /\b(month|1\s*month|30\s*days?)\b/i,
+            '3M': /\b(3\s*months?|quarter)\b/i,
+            '6M': /\b(6\s*months?)\b/i,
             '1y': /\b(year|1\s*year|12\s*months?)\b/i,
-            'ytd': /\b(ytd|year\s*to\s*date)\b/i
+            '2y': /\b(2\s*years?|24\s*months?)\b/i,
+            '5y': /\b(5\s*years?|60\s*months?)\b/i,
+            '10y': /\b(10\s*years?)\b/i,
+            'ytd': /\b(ytd|year\s*to\s*date)\b/i,
+            'max': /\b(all\s*time|max|maximum|since\s*inception)\b/i
         };
 
         for (const [timeframe, pattern] of Object.entries(timeframePatterns)) {
             if (pattern.test(message)) {
                 entities.timeframes.push(timeframe);
+            }
+        }
+
+        // Si aucune période détectée mais mot-clé temporel présent
+        if (entities.timeframes.length === 0) {
+            if (/\b(last|past|previous|over|since)\b/i.test(message)) {
+                entities.timeframes.push('1y'); // Par défaut 1 an
             }
         }
 
@@ -260,112 +265,136 @@ class FinancialChatbotEngine {
             }
         });
 
-        // Extract numbers (for price targets, percentages, etc.)
         const numberRegex = /\$?[\d,]+\.?\d*%?/g;
         entities.numbers = message.match(numberRegex) || [];
 
         return entities;
     }
 
-// ============================================
-// BUILD CONTEXT - WITH REAL DATA
-// ============================================
-async buildContext(intent, entities) {
-    const context = {
-        intent: intent,
-        entities: entities,
-        timestamp: Date.now()
-    };
-
-    console.log('🔧 Building context with real data...');
-
-    // ✅ ADD STOCK DATA if symbol detected
-    if (entities.symbols && entities.symbols.length > 0 && this.analytics) {
-        const symbol = entities.symbols[0];
-        console.log(`📊 Fetching real data for ${symbol}...`);
-        
-        try {
-            const stockData = await this.analytics.getStockData(symbol);
-            if (stockData) {
-                context.stockData = stockData;
-                console.log(`✅ Real stock data loaded for ${symbol}`);
-                console.log(`   Price: $${stockData.quote?.current}`);
-            }
-            
-            // ✅ ALSO GET TIME SERIES for charts
-            const timeSeries = await this.analytics.getTimeSeries(symbol, '1day', 30);
-            if (timeSeries) {
-                context.timeSeriesData = timeSeries;
-                console.log(`✅ Time series data loaded (${timeSeries.data.length} points)`);
-            }
-        } catch (error) {
-            console.warn(`⚠️ Could not fetch stock data for ${symbol}:`, error);
-        }
-    }
-
-    // ✅ ADD MARKET DATA for market queries
-    if (intent.type === 'MARKET_OVERVIEW' && this.analytics) {
-        console.log('🌐 Fetching market overview...');
-        try {
-            const marketData = await this.analytics.getMarketOverview();
-            if (marketData) {
-                context.marketData = marketData;
-                console.log('✅ Market overview loaded');
-            }
-        } catch (error) {
-            console.warn('⚠️ Could not fetch market data:', error);
-        }
-    }
-
-    // ✅ ADD IPO DATA for IPO queries
-    if (intent.type === 'IPO_ANALYSIS' && this.ipoAnalyzer) {
-        try {
-            context.ipoData = await this.ipoAnalyzer.getTopIPOs(5);
-            console.log('✅ IPO data loaded');
-        } catch (error) {
-            console.warn('⚠️ Could not fetch IPO data:', error);
-        }
-    }
-
-    console.log('✅ Context built with real data:', Object.keys(context));
-    return context;
-}
-
     // ============================================
-    // HANDLE IPO QUERY
+    // BUILD CONTEXT - AVEC DONNÉES RÉELLES
     // ============================================
-    async handleIPOQuery(message, entities, context) {
-        console.log('📊 Processing IPO query...');
+    async buildContext(intent, entities) {
+        const context = {
+            intent: intent,
+            entities: entities,
+            timestamp: Date.now()
+        };
 
-        let aiResponse = await this.geminiAI.generateResponse(message, context);
-        
-        // If specific symbol mentioned, analyze it
-        if (entities.symbols.length > 0 && this.ipoAnalyzer) {
+        console.log('🔧 Building context with real data...');
+
+        // ✅ CHARGER LES DONNÉES DE STOCK
+        if (entities.symbols && entities.symbols.length > 0 && this.analytics) {
             const symbol = entities.symbols[0];
+            console.log(`📊 Fetching real data for ${symbol}...`);
+            
             try {
-                const ipoAnalysis = await this.ipoAnalyzer.analyzeIPO(symbol);
+                // Données en temps réel
+                const stockData = await this.analytics.getStockData(symbol);
+                if (stockData) {
+                    context.stockData = stockData;
+                    console.log(`✅ Real stock data loaded for ${symbol}`);
+                    console.log(`   Price: $${stockData.quote?.current}`);
+                }
                 
-                if (ipoAnalysis) {
-                    // Enhance AI response with detailed IPO analysis
-                    aiResponse.text += `\n\n📊 **Detailed IPO Analysis for ${symbol}:**\n`;
-                    aiResponse.text += this.formatIPOAnalysis(ipoAnalysis);
+                // ✅ DONNÉES HISTORIQUES (si période demandée)
+                if (entities.timeframes && entities.timeframes.length > 0) {
+                    const timeframe = entities.timeframes[0];
+                    const outputsize = this.getOutputSize(timeframe);
                     
-                    // Add chart request if not already present
-                    if (!aiResponse.chartRequests || aiResponse.chartRequests.length === 0) {
-                        aiResponse.chartRequests = [{
-                            type: 'line',
-                            symbol: symbol,
-                            data: 'ipo'
-                        }];
+                    console.log(`📈 Fetching ${timeframe} time series (${outputsize} points)...`);
+                    
+                    const timeSeries = await this.analytics.getTimeSeries(symbol, '1day', outputsize);
+                    if (timeSeries) {
+                        context.timeSeriesData = timeSeries;
+                        console.log(`✅ Time series loaded: ${timeSeries.data.length} data points`);
                     }
                 }
+                
             } catch (error) {
-                console.warn('IPO analysis failed:', error);
+                console.warn(`⚠️ Could not fetch stock data for ${symbol}:`, error);
             }
         }
 
-        // Add IPO-specific suggestions
-        aiResponse.suggestions = this.config.suggestions.followUp.ipo;
+        // ✅ DONNÉES DE MARCHÉ
+        if (intent.type === 'MARKET_OVERVIEW' && this.analytics) {
+            console.log('🌐 Fetching market overview...');
+            try {
+                const marketData = await this.analytics.getMarketOverview();
+                if (marketData) {
+                    context.marketData = marketData;
+                    console.log('✅ Market overview loaded');
+                }
+            } catch (error) {
+                console.warn('⚠️ Could not fetch market data:', error);
+            }
+        }
+
+        // ✅ DONNÉES IPO
+        if (intent.type === 'IPO_ANALYSIS' && this.ipoAnalyzer) {
+            try {
+                context.ipoData = await this.ipoAnalyzer.getTopIPOs(5);
+                console.log('✅ IPO data loaded');
+            } catch (error) {
+                console.warn('⚠️ Could not fetch IPO data:', error);
+            }
+        }
+
+        console.log('✅ Context built:', Object.keys(context));
+        return context;
+    }
+
+    // ============================================
+    // CALCULER LA TAILLE DE SORTIE SELON LA PÉRIODE
+    // ============================================
+    getOutputSize(timeframe) {
+        const sizes = {
+            '1d': 24,
+            '1w': 7,
+            '1M': 30,
+            '3M': 90,
+            '6M': 180,
+            '1y': 365,
+            '2y': 730,
+            '5y': 1825,
+            '10y': 3650,
+            'ytd': 250,
+            'max': 5000
+        };
+        return sizes[timeframe] || 365;
+    }
+
+    // ============================================
+    // HANDLE PRICE HISTORY QUERY (NOUVEAU)
+    // ============================================
+    async handlePriceHistoryQuery(message, entities, context) {
+        console.log('📈 Processing price history query...');
+
+        const aiResponse = await this.geminiAI.generateResponse(message, context);
+        
+        // ✅ FORCER LA GÉNÉRATION DE GRAPHIQUE
+        if (entities.symbols && entities.symbols.length > 0) {
+            const symbol = entities.symbols[0];
+            const timeframe = entities.timeframes[0] || '1y';
+            
+            // Si l'IA n'a pas demandé de graphique, on l'ajoute
+            if (!aiResponse.chartRequests || aiResponse.chartRequests.length === 0) {
+                aiResponse.chartRequests = [{
+                    type: 'line',
+                    symbol: symbol,
+                    data: timeframe,
+                    indicators: ['sma']
+                }];
+                console.log(`📊 Chart request added: ${symbol} ${timeframe}`);
+            }
+        }
+
+        aiResponse.suggestions = [
+            "Show technical indicators",
+            "Compare with S&P 500",
+            "Analyze volatility",
+            "Show volume trends"
+        ];
 
         return aiResponse;
     }
@@ -376,20 +405,8 @@ async buildContext(intent, entities) {
     async handleStockQuery(message, entities, context) {
         console.log('📈 Processing stock query...');
 
-        // Add stock data to context if symbol is present
-        if (entities.symbols.length > 0 && this.analytics) {
-            const symbol = entities.symbols[0];
-            try {
-                const stockData = await this.analytics.getStockData(symbol);
-                context.stockData = stockData;
-            } catch (error) {
-                console.warn('Could not fetch stock data:', error);
-            }
-        }
-
         const aiResponse = await this.geminiAI.generateResponse(message, context);
         
-        // Add stock-specific suggestions
         aiResponse.suggestions = this.config.suggestions.followUp.stock;
 
         return aiResponse;
@@ -403,16 +420,14 @@ async buildContext(intent, entities) {
 
         const aiResponse = await this.geminiAI.generateResponse(message, context);
         
-        // Add market chart if not present
         if (!aiResponse.chartRequests || aiResponse.chartRequests.length === 0) {
             aiResponse.chartRequests = [{
                 type: 'line',
-                symbol: 'SPY', // S&P 500 ETF as market proxy
-                data: '1m'
+                symbol: 'SPY',
+                data: '1M'
             }];
         }
 
-        // Add market-specific suggestions
         aiResponse.suggestions = this.config.suggestions.followUp.market;
 
         return aiResponse;
@@ -426,16 +441,15 @@ async buildContext(intent, entities) {
 
         const aiResponse = await this.geminiAI.generateResponse(message, context);
         
-        // Ensure candlestick chart for technical analysis
-        if (entities.symbols.length > 0) {
+        if (entities.symbols && entities.symbols.length > 0) {
             const symbol = entities.symbols[0];
-            const timeframe = entities.timeframes[0] || '3m';
+            const timeframe = entities.timeframes[0] || '3M';
             
             aiResponse.chartRequests = [{
-                type: 'candlestick',
+                type: 'line',
                 symbol: symbol,
                 data: timeframe,
-                indicators: ['sma', 'rsi', 'macd'] // Add technical indicators
+                indicators: ['sma', 'rsi']
             }];
         }
 
@@ -443,14 +457,47 @@ async buildContext(intent, entities) {
     }
 
     // ============================================
-    // HANDLE GENERAL FINANCE QUERY
+    // HANDLE IPO QUERY
+    // ============================================
+    async handleIPOQuery(message, entities, context) {
+        console.log('📊 Processing IPO query...');
+
+        let aiResponse = await this.geminiAI.generateResponse(message, context);
+        
+        if (entities.symbols.length > 0 && this.ipoAnalyzer) {
+            const symbol = entities.symbols[0];
+            try {
+                const ipoAnalysis = await this.ipoAnalyzer.analyzeIPO(symbol);
+                
+                if (ipoAnalysis) {
+                    aiResponse.text += `\n\n📊 **Detailed IPO Analysis for ${symbol}:**\n`;
+                    aiResponse.text += this.formatIPOAnalysis(ipoAnalysis);
+                    
+                    if (!aiResponse.chartRequests || aiResponse.chartRequests.length === 0) {
+                        aiResponse.chartRequests = [{
+                            type: 'line',
+                            symbol: symbol,
+                            data: '6M'
+                        }];
+                    }
+                }
+            } catch (error) {
+                console.warn('IPO analysis failed:', error);
+            }
+        }
+
+        aiResponse.suggestions = this.config.suggestions.followUp.ipo;
+
+        return aiResponse;
+    }
+
+    // ============================================
+    // HANDLE GENERAL QUERY
     // ============================================
     async handleGeneralQuery(message, context) {
         console.log('💡 Processing general finance query...');
 
         const aiResponse = await this.geminiAI.generateResponse(message, context);
-        
-        // Add initial suggestions for follow-up
         aiResponse.suggestions = this.config.suggestions.initial;
 
         return aiResponse;
@@ -463,16 +510,11 @@ async buildContext(intent, entities) {
         console.log('🤔 Processing generic query...');
 
         const aiResponse = await this.geminiAI.generateResponse(message, context);
-        
-        // Add initial suggestions
         aiResponse.suggestions = this.config.suggestions.initial;
 
         return aiResponse;
     }
 
-    // ============================================
-    // FORMAT IPO ANALYSIS
-    // ============================================
     formatIPOAnalysis(analysis) {
         let formatted = '';
         
@@ -481,36 +523,32 @@ async buildContext(intent, entities) {
                      analysis.score >= 60 ? '⭐ (Medium Potential)\n' : 
                      '⚠️ (Lower Potential)\n';
         
-        formatted += `\n**Score Breakdown:**\n`;
-        formatted += `• Financial Health: ${analysis.breakdown.financial}/100\n`;
-        formatted += `• Market Position: ${analysis.breakdown.market}/100\n`;
-        formatted += `• Valuation: ${analysis.breakdown.valuation}/100\n`;
-        formatted += `• Growth Potential: ${analysis.breakdown.growth}/100\n`;
-        formatted += `• Market Momentum: ${analysis.breakdown.momentum}/100\n`;
+        if (analysis.breakdown) {
+            formatted += `\n**Score Breakdown:**\n`;
+            formatted += `• Financial: ${analysis.breakdown.financial}/100\n`;
+            formatted += `• Market: ${analysis.breakdown.market}/100\n`;
+            formatted += `• Valuation: ${analysis.breakdown.valuation}/100\n`;
+            formatted += `• Growth: ${analysis.breakdown.growth}/100\n`;
+            formatted += `• Momentum: ${analysis.breakdown.momentum}/100\n`;
+        }
         
         if (analysis.strengths && analysis.strengths.length > 0) {
-            formatted += `\n**Key Strengths:**\n`;
+            formatted += `\n**Strengths:**\n`;
             analysis.strengths.forEach(s => formatted += `✓ ${s}\n`);
         }
         
         if (analysis.risks && analysis.risks.length > 0) {
-            formatted += `\n**Key Risks:**\n`;
+            formatted += `\n**Risks:**\n`;
             analysis.risks.forEach(r => formatted += `⚠️ ${r}\n`);
         }
         
         return formatted;
     }
 
-    // ============================================
-    // UTILITY: PATTERN MATCHING
-    // ============================================
     matchesPattern(text, patterns) {
         return patterns.some(pattern => text.includes(pattern));
     }
 
-    // ============================================
-    // CACHE MANAGEMENT
-    // ============================================
     checkCache(message) {
         const cacheKey = this.getCacheKey(message);
         const cached = this.responseCache.get(cacheKey);
@@ -529,7 +567,6 @@ async buildContext(intent, entities) {
             timestamp: Date.now()
         });
         
-        // Cleanup old cache entries
         if (this.responseCache.size > 100) {
             const firstKey = this.responseCache.keys().next().value;
             this.responseCache.delete(firstKey);
@@ -540,9 +577,6 @@ async buildContext(intent, entities) {
         return message.toLowerCase().trim().replace(/\s+/g, '_');
     }
 
-    // ============================================
-    // CONTEXT MANAGEMENT
-    // ============================================
     updateContext(intent, entities) {
         this.currentContext.lastIntent = intent.type;
         
@@ -552,16 +586,13 @@ async buildContext(intent, entities) {
         
         if (intent.type === 'IPO_ANALYSIS') {
             this.currentContext.topic = 'ipo';
-        } else if (intent.type === 'STOCK_ANALYSIS') {
+        } else if (intent.type === 'STOCK_ANALYSIS' || intent.type === 'PRICE_HISTORY') {
             this.currentContext.topic = 'stock';
         } else if (intent.type === 'MARKET_OVERVIEW') {
             this.currentContext.topic = 'market';
         }
     }
 
-    // ============================================
-    // METRICS
-    // ============================================
     updateMetrics(success, responseTime) {
         if (success) {
             this.metrics.successfulResponses++;
@@ -584,12 +615,8 @@ async buildContext(intent, entities) {
         };
     }
 
-    // ============================================
-    // CLEAR DATA
-    // ============================================
     clearCache() {
         this.responseCache.clear();
-        console.log('🧹 Cache cleared');
     }
 
     clearHistory() {
@@ -602,7 +629,6 @@ async buildContext(intent, entities) {
             lastIntent: null,
             userPreferences: {}
         };
-        console.log('🧹 History cleared');
     }
 
     reset() {
@@ -615,13 +641,9 @@ async buildContext(intent, entities) {
             averageResponseTime: 0,
             totalResponseTime: 0
         };
-        console.log('🔄 Engine reset');
     }
 }
 
-// ============================================
-// EXPORT
-// ============================================
 if (typeof module !== 'undefined' && module.exports) {
     module.exports = FinancialChatbotEngine;
 }

@@ -143,55 +143,62 @@ class FinancialAnalytics {
     // GET TIME SERIES DATA (for charts)
     // ============================================
     async getTimeSeries(symbol, interval = '1day', outputsize = 30) {
-        try {
-            console.log(`📈 Fetching time series for ${symbol}...`);
-            
-            const cacheKey = `timeseries_${symbol}_${interval}_${outputsize}`;
-            const cached = this.getFromCache(cacheKey);
-            if (cached) return cached;
-
-            // Use Twelve Data for time series
-            if (!this.twelveDataApiKey || this.twelveDataApiKey === 'TA_CLE_TWELVE_DATA_ICI') {
-                console.warn('⚠️ Twelve Data API key not configured');
-                return this.generateMockTimeSeries(symbol, outputsize);
-            }
-
-            const url = `${this.twelveDataEndpoint}/time_series?symbol=${symbol}&interval=${interval}&outputsize=${outputsize}&apikey=${this.twelveDataApiKey}`;
-            
-            const response = await fetch(url);
-            const data = await response.json();
-
-            if (data.status === 'error' || !data.values) {
-                console.warn('⚠️ Twelve Data error:', data.message);
-                return this.generateMockTimeSeries(symbol, outputsize);
-            }
-
-            const timeSeries = {
-                symbol: symbol,
-                interval: interval,
-                data: data.values.map(item => ({
-                    datetime: item.datetime,
-                    timestamp: new Date(item.datetime).getTime(),
-                    open: parseFloat(item.open),
-                    high: parseFloat(item.high),
-                    low: parseFloat(item.low),
-                    close: parseFloat(item.close),
-                    volume: parseInt(item.volume || 0)
-                })).reverse(), // Most recent last
-                timestamp: Date.now(),
-                dataSource: 'Twelve Data Real-Time'
-            };
-
-            this.saveToCache(cacheKey, timeSeries);
-            console.log(`✅ Time series fetched for ${symbol}`);
-            
-            return timeSeries;
-
-        } catch (error) {
-            console.error(`❌ Time series error for ${symbol}:`, error);
-            return this.generateMockTimeSeries(symbol, outputsize);
+    try {
+        console.log(`📈 Fetching time series for ${symbol}, outputsize: ${outputsize}...`);
+        
+        const cacheKey = `timeseries_${symbol}_${interval}_${outputsize}`;
+        const cached = this.getFromCache(cacheKey);
+        if (cached) {
+            console.log(`✅ Using cached time series for ${symbol}`);
+            return cached;
         }
+
+        // ✅ TWELVE DATA LIMITE À 5000 POINTS
+        const limitedSize = Math.min(outputsize, 5000);
+
+        if (!this.twelveDataApiKey || this.twelveDataApiKey === 'TA_CLE_TWELVE_DATA_ICI') {
+            console.warn('⚠️ Twelve Data API key not configured');
+            return this.generateMockTimeSeries(symbol, limitedSize);
+        }
+
+        const url = `${this.twelveDataEndpoint}/time_series?symbol=${symbol}&interval=${interval}&outputsize=${limitedSize}&apikey=${this.twelveDataApiKey}`;
+        
+        console.log(`📡 Calling Twelve Data API: ${url.substring(0, 100)}...`);
+        
+        const response = await fetch(url);
+        const data = await response.json();
+
+        if (data.status === 'error' || !data.values) {
+            console.warn('⚠️ Twelve Data error:', data.message || 'No values');
+            return this.generateMockTimeSeries(symbol, limitedSize);
+        }
+
+        const timeSeries = {
+            symbol: symbol,
+            interval: interval,
+            data: data.values.map(item => ({
+                datetime: item.datetime,
+                timestamp: new Date(item.datetime).getTime(),
+                open: parseFloat(item.open),
+                high: parseFloat(item.high),
+                low: parseFloat(item.low),
+                close: parseFloat(item.close),
+                volume: parseInt(item.volume || 0)
+            })).reverse(), // ✅ Plus récent à la fin
+            timestamp: Date.now(),
+            dataSource: 'Twelve Data Real-Time'
+        };
+
+        this.saveToCache(cacheKey, timeSeries);
+        console.log(`✅ Time series loaded: ${timeSeries.data.length} points from ${timeSeries.data[0]?.datetime} to ${timeSeries.data[timeSeries.data.length-1]?.datetime}`);
+        
+        return timeSeries;
+
+    } catch (error) {
+        console.error(`❌ Time series error for ${symbol}:`, error);
+        return this.generateMockTimeSeries(symbol, outputsize);
     }
+}
 
     // ============================================
     // FINNHUB API CALLS

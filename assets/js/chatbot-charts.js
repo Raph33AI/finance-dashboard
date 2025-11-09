@@ -365,9 +365,34 @@ class ChatbotCharts {
     }
 
     // ============================================
-    // FETCH DATA METHODS
+    // FETCH LINE DATA - AVEC VRAIES DONNÉES
     // ============================================
     async fetchLineData(symbol, period) {
+        console.log(`📊 Fetching line data for ${symbol}, period: ${period}`);
+        
+        // ✅ SI ANALYTICS DISPONIBLE, UTILISER VRAIES DONNÉES
+        if (window.financialChatbot && window.financialChatbot.engine && window.financialChatbot.engine.analytics) {
+            try {
+                const analytics = window.financialChatbot.engine.analytics;
+                const outputsize = this.getDataPointsCount(period);
+                
+                const timeSeries = await analytics.getTimeSeries(symbol, '1day', outputsize);
+                
+                if (timeSeries && timeSeries.data && timeSeries.data.length > 0) {
+                    console.log(`✅ Real data loaded: ${timeSeries.data.length} points`);
+                    
+                    return {
+                        labels: timeSeries.data.map(d => d.datetime),
+                        values: timeSeries.data.map(d => d.close)
+                    };
+                }
+            } catch (error) {
+                console.warn('⚠️ Could not fetch real data, using mock:', error);
+            }
+        }
+        
+        // ✅ FALLBACK: Mock data
+        console.warn(`⚠️ Using mock data for ${symbol}`);
         const dataPoints = this.getDataPointsCount(period);
         const now = Date.now();
         const interval = this.getIntervalMillis(period);
@@ -495,15 +520,18 @@ class ChatbotCharts {
         const counts = {
             '1d': 24,
             '1w': 7,
-            '1m': 30,
-            '3m': 90,
-            '6m': 180,
+            '1M': 30,
+            '3M': 90,
+            '6M': 180,
             '1y': 365,
             '2y': 730,
+            '5y': 1825,   // ✅ 5 ans
+            '10y': 3650,  // ✅ 10 ans
             'ytd': 250,
+            'max': 5000,
             'ipo': 60
         };
-        return counts[period] || 90;
+        return counts[period] || 365;
     }
 
     getIntervalMillis(period) {
