@@ -207,6 +207,84 @@ class FinancialChatbotEngine {
     }
 
     // ============================================
+    // COMPANY NAME TO SYMBOL MAPPING
+    // ============================================
+    getCompanySymbolMapping() {
+        return {
+            // Tech Giants
+            'nvidia': 'NVDA',
+            'apple': 'AAPL',
+            'microsoft': 'MSFT',
+            'google': 'GOOGL',
+            'alphabet': 'GOOGL',
+            'amazon': 'AMZN',
+            'tesla': 'TSLA',
+            'meta': 'META',
+            'facebook': 'META',
+            'netflix': 'NFLX',
+            
+            // Semiconductors
+            'amd': 'AMD',
+            'advanced micro devices': 'AMD',
+            'intel': 'INTC',
+            'qualcomm': 'QCOM',
+            'broadcom': 'AVGO',
+            'texas instruments': 'TXN',
+            'micron': 'MU',
+            
+            // Finance
+            'jpmorgan': 'JPM',
+            'jp morgan': 'JPM',
+            'bank of america': 'BAC',
+            'goldman sachs': 'GS',
+            'morgan stanley': 'MS',
+            'visa': 'V',
+            'mastercard': 'MA',
+            'paypal': 'PYPL',
+            'coinbase': 'COIN',
+            
+            // Consumer
+            'disney': 'DIS',
+            'walmart': 'WMT',
+            'mcdonalds': 'MCD',
+            "mcdonald's": 'MCD',
+            'nike': 'NKE',
+            'starbucks': 'SBUX',
+            'target': 'TGT',
+            'home depot': 'HD',
+            'costco': 'COST',
+            
+            // Healthcare
+            'pfizer': 'PFE',
+            'johnson & johnson': 'JNJ',
+            'johnson and johnson': 'JNJ',
+            'unitedhealth': 'UNH',
+            'merck': 'MRK',
+            'abbvie': 'ABBV',
+            
+            // Energy
+            'exxon': 'XOM',
+            'exxonmobil': 'XOM',
+            'chevron': 'CVX',
+            'conocophillips': 'COP',
+            'schlumberger': 'SLB',
+            
+            // Industrial
+            'boeing': 'BA',
+            'caterpillar': 'CAT',
+            'general electric': 'GE',
+            'honeywell': 'HON',
+            '3m': 'MMM',
+            'ups': 'UPS',
+            
+            // Telecom
+            'at&t': 'T',
+            'verizon': 'VZ',
+            't-mobile': 'TMUS'
+        };
+    }
+
+    // ============================================
     // ENTITY EXTRACTION - AMÉLIORÉ AVEC MINUSCULES
     // ============================================
     extractEntities(message) {
@@ -219,16 +297,14 @@ class FinancialChatbotEngine {
             numbers: []
         };
 
-        // ✅ EXTRACTION SYMBOLES AMÉLIORÉE (majuscules ET minuscules)
-        
-        // Méthode 1: Symboles en MAJUSCULES dans le message
+        // ✅ MÉTHODE 1: Symboles en MAJUSCULES
         const upperSymbolRegex = /\b[A-Z]{1,5}\b/g;
         const upperSymbols = message.match(upperSymbolRegex) || [];
         const validUpperSymbols = upperSymbols.filter(s => 
             s.length >= 1 && s.length <= 5 && !['IPO', 'USA', 'CEO', 'CFO', 'AI', 'THE', 'AND', 'FOR', 'NOT'].includes(s)
         );
         
-        // Méthode 2: Chercher des symboles connus (même en minuscules)
+        // ✅ MÉTHODE 2: Symboles connus (même en minuscules)
         const knownStocks = [
             'NVDA', 'AAPL', 'MSFT', 'GOOGL', 'GOOG', 'AMZN', 'TSLA', 'META', 'NFLX',
             'AMD', 'INTC', 'QCOM', 'AVGO', 'TXN', 'AMAT', 'MU', 'LRCX', 'KLAC',
@@ -244,12 +320,11 @@ class FinancialChatbotEngine {
         const lowerMessage = message.toLowerCase();
         const foundKnownSymbols = knownStocks.filter(symbol => {
             const lowerSymbol = symbol.toLowerCase();
-            // Chercher le symbole avec des délimiteurs de mots
             const regex = new RegExp(`\\b${lowerSymbol}\\b`, 'i');
             return regex.test(lowerMessage);
         });
         
-        // Méthode 3: Pattern "stock [SYMBOL]" ou "[SYMBOL] stock"
+        // ✅ MÉTHODE 3: Pattern "stock [SYMBOL]"
         const stockPatternRegex = /(?:stock\s+|share\s+|ticker\s+)([a-z]{1,5})\b|\b([a-z]{1,5})(?:\s+stock|\s+share|\s+ticker)/gi;
         let match;
         const patternSymbols = [];
@@ -260,11 +335,25 @@ class FinancialChatbotEngine {
             }
         }
         
-        // ✅ COMBINER TOUTES LES MÉTHODES (en supprimant les doublons)
+        // ✅ MÉTHODE 4: NOM D'ENTREPRISE → SYMBOLE
+        const companyMapping = this.getCompanySymbolMapping();
+        const companySymbols = [];
+        
+        for (const [companyName, symbol] of Object.entries(companyMapping)) {
+            // Chercher le nom de l'entreprise dans le message
+            const regex = new RegExp(`\\b${companyName}\\b`, 'i');
+            if (regex.test(lowerMessage)) {
+                companySymbols.push(symbol);
+                console.log(`   🏢 Company name detected: "${companyName}" → ${symbol}`);
+            }
+        }
+        
+        // ✅ COMBINER TOUTES LES MÉTHODES
         const allSymbols = [...new Set([
             ...validUpperSymbols,
             ...foundKnownSymbols,
-            ...patternSymbols
+            ...patternSymbols,
+            ...companySymbols
         ])];
         
         entities.symbols = allSymbols;
@@ -273,9 +362,10 @@ class FinancialChatbotEngine {
         console.log('   Upper symbols:', validUpperSymbols);
         console.log('   Known stocks found:', foundKnownSymbols);
         console.log('   Pattern matches:', patternSymbols);
+        console.log('   Company names found:', companySymbols);
         console.log('   ✅ Final symbols:', allSymbols);
 
-        // ✅ EXTRACTION PÉRIODES (inchangé mais optimisé)
+        // ✅ EXTRACTION PÉRIODES (inchangé)
         const timeframePatterns = {
             '1d': /\b(today|1\s*day)\b/i,
             '1w': /\b(week|1\s*week|7\s*days?)\b/i,
@@ -296,10 +386,9 @@ class FinancialChatbotEngine {
             }
         }
 
-        // Détection implicite de période
         if (entities.timeframes.length === 0) {
             if (/\b(evolution|historical|history|performance|trend)\b/i.test(message)) {
-                entities.timeframes.push('1y'); // Défaut 1 an
+                entities.timeframes.push('1y');
             }
         }
 
