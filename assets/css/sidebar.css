@@ -172,7 +172,7 @@ body.dark-mode .main-content {
     opacity: 0.8;
 }
 
-/* ✅ CORRECTION 1 : Masquer complètement le logo en mode collapsed */
+/* ✅ Masquer complètement le logo en mode collapsed */
 .sidebar.collapsed .logo-container {
     opacity: 0;
     pointer-events: none;
@@ -185,7 +185,7 @@ body.dark-mode .main-content {
     width: 0;
 }
 
-/* Toggle Button */
+/* ✅ CORRECTION : Toggle Button - CENTRÉ en collapsed */
 .sidebar-toggle {
     background: rgba(255, 255, 255, 0.05);
     border: 1px solid rgba(255, 255, 255, 0.1);
@@ -221,7 +221,7 @@ body.dark-mode .main-content {
     transform: rotate(180deg);
 }
 
-/* ✅ CORRECTION 2 : Centrer le toggle parfaitement en mode collapsed */
+/* ✅ CORRECTION : Centrer le toggle parfaitement en mode collapsed */
 .sidebar.collapsed .sidebar-header {
     justify-content: center;
     padding: 25px 0;
@@ -262,16 +262,16 @@ body.dark-mode .main-content {
     position: relative;
 }
 
-/* Navigation Folder */
+/* ✅ CORRECTION : Navigation Folder - Plus d'espace pour la flèche */
 .nav-folder {
     width: 100%;
     background: none;
     border: none;
     color: var(--sidebar-text);
-    padding: 13px 20px;
+    padding: 13px 18px 13px 20px; /* ✅ Réduction du padding-right */
     display: flex;
     align-items: center;
-    gap: 13px;
+    gap: 12px; /* ✅ Réduction du gap */
     cursor: pointer;
     transition: all 0.15s ease;
     font-size: 15px;
@@ -292,6 +292,7 @@ body.dark-mode .main-content {
     background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
     border-radius: 0 3px 3px 0;
     transition: width 0.15s ease;
+    z-index: 1;
 }
 
 .nav-folder:hover::before {
@@ -329,7 +330,7 @@ body.dark-mode .main-content {
     color: var(--accent-primary);
 }
 
-/* Label */
+/* ✅ CORRECTION : Label avec plus d'espace à droite */
 .nav-folder span {
     flex: 1;
     text-align: left;
@@ -337,19 +338,19 @@ body.dark-mode .main-content {
     overflow: hidden;
     text-overflow: ellipsis;
     transition: opacity var(--transition-speed) var(--transition-smooth);
-    /* ✅ CORRECTION 3 : Ajouter une marge à droite pour éviter l'empiètement */
-    margin-right: 8px;
+    min-width: 0; /* ✅ Important pour text-overflow */
+    margin-right: 4px; /* ✅ Espace minimal */
 }
 
-/* Arrow */
+/* ✅ CORRECTION : Arrow avec largeur fixe et alignée à droite */
 .nav-folder .arrow {
     font-size: 11px;
     transition: transform 0.2s ease, opacity 0.2s ease;
     flex-shrink: 0;
     opacity: 0.6;
-    margin-left: auto;
-    /* ✅ CORRECTION 4 : S'assurer que la flèche ne touche pas le texte */
-    min-width: 12px;
+    width: 16px; /* ✅ Largeur fixe */
+    text-align: center;
+    margin-left: auto; /* ✅ Poussé à droite */
 }
 
 .nav-folder:hover .arrow {
@@ -374,7 +375,7 @@ body.dark-mode .main-content {
     display: none;
 }
 
-/* ✅ TOOLTIPS en mode collapsed */
+/* TOOLTIPS en mode collapsed */
 .sidebar.collapsed .nav-folder {
     position: relative;
 }
