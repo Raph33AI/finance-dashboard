@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Profile - FinancePro</title>
+    <title>My Profile - AlphaVault AI</title>
     
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -27,16 +27,16 @@
     <script src="assets/js/auth-guard.js"></script>
 </head>
 <body>
-    <!-- ⚡ THEME SCRIPT - DOIT ÊTRE CHARGÉ EN PREMIER -->
+    <!-- ⚡ THEME SCRIPT -->
     <script src="assets/js/theme.js"></script>
+    
     <div class="layout-wrapper">
         
-        <!-- SIDEBAR -->
+        <!-- SIDEBAR (inchangée) -->
         <aside class='sidebar' id='sidebar'>
             <!-- Header avec Logo 3D -->
             <div class="sidebar-header">
                 <div class="logo-container">
-                    <!-- Logo 3D SVG -->
                     <div class="logo-3d">
                         <svg class="logo-svg" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
                             <defs>
@@ -45,22 +45,16 @@
                                     <stop offset="100%" class="logo-gradient-2" />
                                 </linearGradient>
                             </defs>
-                            
-                            <!-- Graphique -->
                             <path d="M 20 80 L 30 70 L 40 75 L 50 60 L 60 65 L 70 45 L 80 50 L 90 30" 
                                   stroke="url(#logoGradient)" 
                                   stroke-width="4" 
                                   fill="none" 
                                   stroke-linecap="round" 
                                   stroke-linejoin="round"/>
-                            
-                            <!-- Points -->
                             <circle cx="30" cy="70" r="4" fill="url(#logoGradient)"/>
                             <circle cx="50" cy="60" r="4" fill="url(#logoGradient)"/>
                             <circle cx="70" cy="45" r="4" fill="url(#logoGradient)"/>
                             <circle cx="90" cy="30" r="5" fill="url(#logoGradient)"/>
-                            
-                            <!-- Flèche -->
                             <path d="M 85 35 L 90 30 L 85 25" 
                                   stroke="url(#logoGradient)" 
                                   stroke-width="3" 
@@ -68,15 +62,11 @@
                                   stroke-linecap="round"/>
                         </svg>
                     </div>
-                    
-                    <!-- Brand Text -->
                     <div class="brand-text">
                         <h2 class="brand-name">AlphaVault AI</h2>
                         <span class="brand-tagline">Investments</span>
                     </div>
                 </div>
-                
-                <!-- Toggle Button -->
                 <button class="sidebar-toggle" aria-label="Toggle Sidebar">
                     <i class="fas fa-angle-left"></i>
                 </button>
@@ -84,8 +74,6 @@
             
             <!-- Navigation -->
             <nav class="sidebar-nav">
-                
-                <!-- ✅ Ajout data-tooltip pour chaque folder -->
                 <div class="nav-section">
                     <button class="nav-folder" data-tooltip="Home">
                         <i class="fas fa-home"></i>
@@ -224,19 +212,22 @@
         <!-- MAIN CONTENT -->
         <main class="main-content">
             
-            <!-- Header -->
+            <!-- Header Premium -->
             <div class="top-header">
                 <div class="header-content-wrapper">
                     <div class="header-left">
                         <button class='mobile-toggle' id='mobileToggle'>
                             <i class='fas fa-bars'></i>
                         </button>
-                        <h1><i class="fas fa-user"></i> My Profile</h1>
+                        <h1>
+                            <i class="fas fa-user-circle profile-icon-pulse"></i> 
+                            My Profile
+                        </h1>
                     </div>
                     <div class="header-right">
-                        <a href="dashboard-financier.html" class="btn-secondary">
+                        <a href="dashboard-financier.html" class="btn-back-dashboard">
                             <i class="fas fa-arrow-left"></i>
-                            Back to dashboard
+                            <span>Back to dashboard</span>
                         </a>
                     </div>
                 </div>
@@ -248,8 +239,12 @@
                     
                     <!-- Avatar & Basic Info Section -->
                     <div class="profile-section profile-header-section">
+                        <div class="gradient-orb gradient-orb-1"></div>
+                        <div class="gradient-orb gradient-orb-2"></div>
+                        
                         <div class="profile-avatar-wrapper">
                             <div class="profile-avatar-container">
+                                <div class="avatar-ring"></div>
                                 <img data-user-photo 
                                      src="https://ui-avatars.com/api/?name=User&background=2563eb&color=fff&size=200" 
                                      alt="Avatar" 
@@ -279,9 +274,12 @@
                     </div>
                     
                     <!-- Personal Information Section -->
-                    <div class="profile-section">
+                    <div class="profile-section glass-card">
                         <div class="section-header">
-                            <h3><i class="fas fa-id-card"></i> Personal Information</h3>
+                            <h3>
+                                <i class="fas fa-id-card section-icon-glow"></i> 
+                                Personal Information
+                            </h3>
                             <button class="btn-edit" id="editPersonalInfo">
                                 <i class="fas fa-edit"></i>
                                 Edit
@@ -354,15 +352,18 @@
                     </div>
                     
                     <!-- Security Section -->
-                    <div class="profile-section">
+                    <div class="profile-section glass-card">
                         <div class="section-header">
-                            <h3><i class="fas fa-shield-alt"></i> Security</h3>
+                            <h3>
+                                <i class="fas fa-shield-alt section-icon-glow"></i> 
+                                Security
+                            </h3>
                         </div>
                         
                         <div class="security-items">
                             <div class="security-item">
                                 <div class="security-item-info">
-                                    <i class="fas fa-envelope"></i>
+                                    <i class="fas fa-envelope security-icon-pulse"></i>
                                     <div>
                                         <h4>Email</h4>
                                         <p data-user-email>email@example.com</p>
@@ -376,7 +377,7 @@
                             
                             <div class="security-item">
                                 <div class="security-item-info">
-                                    <i class="fas fa-key"></i>
+                                    <i class="fas fa-key security-icon-pulse"></i>
                                     <div>
                                         <h4>Password</h4>
                                         <p>Last modified: Never</p>
@@ -389,7 +390,7 @@
                             
                             <div class="security-item">
                                 <div class="security-item-info">
-                                    <i class="fas fa-shield-alt"></i>
+                                    <i class="fas fa-shield-alt security-icon-pulse"></i>
                                     <div>
                                         <h4>Two-factor Authentication</h4>
                                         <p>Disabled</p>
@@ -404,9 +405,12 @@
                     </div>
                     
                     <!-- Usage Statistics Section -->
-                    <div class="profile-section">
+                    <div class="profile-section glass-card">
                         <div class="section-header">
-                            <h3><i class="fas fa-chart-bar"></i> Usage Statistics</h3>
+                            <h3>
+                                <i class="fas fa-chart-bar section-icon-glow"></i> 
+                                Usage Statistics
+                            </h3>
                         </div>
                         
                         <div class="stats-grid">
@@ -453,9 +457,12 @@
                     </div>
                     
                     <!-- Danger Zone Section -->
-                    <div class="profile-section danger-section">
+                    <div class="profile-section danger-section glass-card">
                         <div class="section-header">
-                            <h3><i class="fas fa-exclamation-triangle"></i> Danger Zone</h3>
+                            <h3>
+                                <i class="fas fa-exclamation-triangle section-icon-danger"></i> 
+                                Danger Zone
+                            </h3>
                         </div>
                         
                         <div class="danger-items">
@@ -484,7 +491,7 @@
     
     <!-- Change Password Modal -->
     <div class="modal" id="changePasswordModal">
-        <div class="modal-content">
+        <div class="modal-content glass-modal">
             <div class="modal-header">
                 <h3><i class="fas fa-key"></i> Change Password</h3>
                 <button class="modal-close" id="closePasswordModal">
