@@ -174,9 +174,8 @@ class ChatbotUI {
     attachEventListeners() {
         console.log('🔗 Attaching event listeners...');
         
-        // Toggle button - SUPER ROBUSTE
+        // Toggle button
         if (this.elements.toggleBtn) {
-            // Supprimer tous les listeners existants
             const newToggleBtn = this.elements.toggleBtn.cloneNode(true);
             this.elements.toggleBtn.parentNode.replaceChild(newToggleBtn, this.elements.toggleBtn);
             this.elements.toggleBtn = newToggleBtn;
@@ -189,29 +188,37 @@ class ChatbotUI {
             }, { capture: true, passive: false });
             
             console.log('✅ Toggle button listener attached');
-        } else {
-            console.error('❌ Toggle button not found!');
         }
         
-        // Minimize button
+        // ✅ MINIMIZE BUTTON - CORRIGÉ
         if (this.elements.minimizeBtn) {
+            const newMinimizeBtn = this.elements.minimizeBtn.cloneNode(true);
+            this.elements.minimizeBtn.parentNode.replaceChild(newMinimizeBtn, this.elements.minimizeBtn);
+            this.elements.minimizeBtn = newMinimizeBtn;
+            
             this.elements.minimizeBtn.addEventListener('click', (e) => {
                 console.log('🖱️ MINIMIZE CLICKED');
                 e.preventDefault();
                 e.stopPropagation();
                 this.toggleChat();
-            });
+            }, { capture: true, passive: false });
+            
             console.log('✅ Minimize button listener attached');
         }
         
-        // Clear button
+        // ✅ CLEAR BUTTON - CORRIGÉ
         if (this.elements.clearBtn) {
+            const newClearBtn = this.elements.clearBtn.cloneNode(true);
+            this.elements.clearBtn.parentNode.replaceChild(newClearBtn, this.elements.clearBtn);
+            this.elements.clearBtn = newClearBtn;
+            
             this.elements.clearBtn.addEventListener('click', (e) => {
                 console.log('🖱️ CLEAR CLICKED');
                 e.preventDefault();
                 e.stopPropagation();
                 this.clearChat();
-            });
+            }, { capture: true, passive: false });
+            
             console.log('✅ Clear button listener attached');
         }
         
@@ -287,73 +294,52 @@ class ChatbotUI {
     }
 
     // ============================================
-    // TOGGLE CHAT - VERSION ULTRA-ROBUSTE
+    // TOGGLE CHAT
     // ============================================
     toggleChat() {
-        console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-        console.log('🔄 toggleChat() APPELÉ');
-        console.log('État actuel isOpen:', this.isOpen);
-        console.log('Widget element:', this.elements.widget);
-        console.log('Widget classes AVANT:', this.elements.widget ? this.elements.widget.className : 'NULL');
+        console.log('🔄 toggleChat() called');
+        console.log('Current isOpen:', this.isOpen);
         
         if (!this.elements.widget) {
-            console.error('❌ ERREUR: Widget element not found!');
+            console.error('❌ Widget element not found!');
             return;
         }
         
-        // Toggle state
         this.isOpen = !this.isOpen;
-        console.log('Nouvel état isOpen:', this.isOpen);
+        console.log('New isOpen:', this.isOpen);
         
         if (this.isOpen) {
-            console.log('📂 OUVERTURE du chatbot...');
-            
-            // Forcer l'affichage
+            console.log('📂 Opening chatbot...');
             this.elements.widget.style.display = 'flex';
             this.elements.widget.classList.remove('hidden');
             this.elements.widget.classList.add('chatbot-open');
             
-            // Animation
             setTimeout(() => {
                 this.elements.widget.classList.add('bounce-in');
             }, 10);
             
-            console.log('Widget classes APRÈS ouverture:', this.elements.widget.className);
-            console.log('Widget style.display:', this.elements.widget.style.display);
-            console.log('Widget computed display:', window.getComputedStyle(this.elements.widget).display);
-            console.log('Widget visibility:', window.getComputedStyle(this.elements.widget).visibility);
-            console.log('Widget opacity:', window.getComputedStyle(this.elements.widget).opacity);
-            
-            // Focus sur input après animation
             setTimeout(() => {
                 if (this.elements.input) {
                     this.elements.input.focus();
-                    console.log('✅ Focus sur input');
                 }
             }, 300);
             
-            console.log('✅ CHATBOT OUVERT');
+            console.log('✅ Chatbot opened');
             
         } else {
-            console.log('📁 FERMETURE du chatbot...');
-            
-            // Retirer animations
+            console.log('📁 Closing chatbot...');
             this.elements.widget.classList.remove('bounce-in');
             this.elements.widget.classList.remove('chatbot-open');
             
-            // Cacher après animation
             setTimeout(() => {
                 this.elements.widget.classList.add('hidden');
                 this.elements.widget.style.display = '';
             }, 300);
             
-            console.log('Widget classes APRÈS fermeture:', this.elements.widget.className);
-            console.log('✅ CHATBOT FERMÉ');
+            console.log('✅ Chatbot closed');
         }
         
-        console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-        
-        return true; // Retourner true pour confirmer l'exécution
+        return true;
     }
 
     // ============================================
