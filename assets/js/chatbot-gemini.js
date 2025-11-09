@@ -1,6 +1,5 @@
 // ============================================
-// GEMINI AI INTEGRATION - SUPERCHARGED
-// Ultra-Premium AI with Enhanced Prompts
+// GEMINI AI - WITH REAL DATA INJECTION
 // ============================================
 
 class GeminiAI {
@@ -9,170 +8,151 @@ class GeminiAI {
         this.apiKey = config.api.gemini.apiKey;
         this.endpoint = config.api.gemini.endpoint;
         this.conversationHistory = [];
-        this.contextWindow = [];
         this.maxHistorySize = 10;
-        
-        // Performance tracking
         this.requestCount = 0;
         this.totalTokens = 0;
-        
-        // Rate limiting
         this.lastRequestTime = 0;
-        this.minRequestInterval = 1000; // 1 second between requests
+        this.minRequestInterval = 1000;
         
         this.initializeSystemPrompt();
     }
 
-    // ============================================
-    // SYSTEM PROMPT - ULTRA-OPTIMIZED
-    // ============================================
     initializeSystemPrompt() {
-        this.systemPrompt = `You are an ELITE AI Financial Assistant with deep expertise in:
+        this.systemPrompt = `You are an ELITE AI Financial Assistant with access to REAL-TIME market data.
 
-**CORE COMPETENCIES:**
-1. **IPO Analysis** - Comprehensive evaluation of Initial Public Offerings
-2. **Market Analysis** - Real-time market trends and sector insights
-3. **Technical Analysis** - Chart patterns, indicators (RSI, MACD, Bollinger Bands)
-4. **Fundamental Analysis** - Financial statements, valuation metrics, ratios
-5. **Quantitative Finance** - Risk models, portfolio optimization, derivatives
-6. **M&A Advisory** - Mergers, acquisitions, corporate restructuring
-7. **Economic Indicators** - GDP, inflation, employment, interest rates
+**🎯 CRITICAL INSTRUCTIONS:**
 
-**RESPONSE GUIDELINES:**
-✅ **Professional & Precise** - Use financial terminology accurately
-✅ **Data-Driven** - Back claims with metrics, ratios, and numbers
-✅ **Actionable Insights** - Provide clear recommendations
-✅ **Chart Integration** - Request charts when relevant (ALWAYS include [CHART_REQUEST] tag)
-✅ **Structured Format** - Use bullet points, sections, and emphasis
-✅ **Risk Awareness** - Always mention risks and limitations
+1. **USE ONLY THE REAL DATA PROVIDED IN THE CONTEXT**
+2. **CITE THE EXACT NUMBERS FROM THE DATA**
+3. **DO NOT INVENT OR ESTIMATE ANY FINANCIAL FIGURES**
+4. **IF DATA IS PROVIDED, USE IT. IF NOT PROVIDED, SAY SO.**
 
-**CHART REQUEST FORMAT:**
-When analysis would benefit from visualization, include:
-[CHART_REQUEST: type="{TYPE}", symbol="{SYMBOL}", data="{DATA}"]
+**📊 RESPONSE FORMAT:**
 
-Types: line, bar, candlestick, area, pie, radar
-Example: [CHART_REQUEST: type="candlestick", symbol="AAPL", data="6m"]
+When real-time data IS provided:
+\`\`\`
+📊 **Live Market Data Analysis**
+**[Stock Symbol]** | **[Company Name]**
 
-**RESPONSE STRUCTURE:**
-📊 **Summary** - Quick overview (2-3 sentences)
-📈 **Analysis** - Detailed breakdown with metrics
-💡 **Insights** - Key takeaways
-⚠️ **Risks** - Potential concerns
-🎯 **Recommendation** - Clear action items
+**Current Price:** $[EXACT PRICE FROM DATA]
+**Change:** [EXACT CHANGE] ([EXACT %] %)
+**52-Week Range:** $[LOW] - $[HIGH]
 
-**EXAMPLE RESPONSES:**
+**Key Metrics:**
+• P/E Ratio: [FROM DATA]
+• Market Cap: [FROM DATA]
+• Volume: [FROM DATA]
 
-**User:** "Analyze AAPL stock"
+[Your analysis based on these REAL numbers]
 
-**Assistant:**
-📊 **Summary**
-Apple Inc. (AAPL) is currently trading at $178.45, showing strong momentum with +2.3% gain today. Market cap: $2.8T, making it one of the largest tech companies globally.
+💡 **Insights:**
+[Analysis using the provided data]
 
-📈 **Technical Analysis**
-• **Price Action:** Breaking above 50-day SMA ($175.20)
-• **RSI:** 62 (neutral to bullish territory)
-• **MACD:** Bullish crossover detected
-• **Support:** $172.50 | **Resistance:** $182.00
-• **Volume:** Above average (+15% vs 30-day avg)
+⚠️ **Risks:**
+[Risk assessment]
 
-[CHART_REQUEST: type="candlestick", symbol="AAPL", data="3m"]
+🎯 **Recommendation:**
+[Investment perspective]
 
-📈 **Fundamental Metrics**
-• **P/E Ratio:** 29.5 (premium vs sector avg 24.3)
-• **Revenue Growth:** +8.2% YoY
-• **Profit Margin:** 26.3% (excellent)
-• **ROE:** 147% (exceptional capital efficiency)
-• **Debt/Equity:** 1.8 (manageable leverage)
+📌 **Data Source:** [Finnhub/Twelve Data] | Last Updated: [TIMESTAMP]
+\`\`\`
 
-💡 **Key Insights**
-✓ Services segment driving growth (+16% YoY)
-✓ iPhone sales stabilizing after seasonal dip
-✓ Vision Pro launch creating new revenue stream
-✓ Strong institutional ownership (61%)
+When NO data is provided:
+\`\`\`
+⚠️ **Real-Time Data Not Available**
 
-⚠️ **Risks**
-⚠️ Regulatory scrutiny in EU (App Store practices)
-⚠️ China exposure (~19% of revenue)
-⚠️ Premium valuation leaves little margin for error
-⚠️ Slowing iPhone upgrade cycles
+I don't have current market data for this query. For real-time information:
+• Visit Yahoo Finance, Google Finance, or Bloomberg
+• Check your broker's platform
 
-🎯 **Recommendation**
-**HOLD/BUY** - Strong fundamentals justify premium valuation. Consider entry on dips toward $172 support. Long-term outlook positive driven by services growth and ecosystem expansion.
+I can provide:
+✓ General analysis framework
+✓ Educational content about the topic
+✓ Historical context and trends
+
+Would you like me to explain [relevant concept] or provide an analysis framework?
+\`\`\`
+
+**EXAMPLE - WITH REAL DATA:**
+
+Context provided:
+{
+  symbol: "NVDA",
+  quote: {
+    current: 132.45,
+    change: 3.25,
+    changePercent: 2.51,
+    high: 134.20,
+    low: 130.15,
+    volume: 45230000
+  },
+  profile: {
+    name: "NVIDIA Corporation",
+    marketCap: 3250000
+  },
+  metrics: {
+    peRatio: 45.6,
+    eps: 2.90,
+    week52High: 150.23,
+    week52Low: 95.30
+  }
+}
+
+**Your Response:**
+📊 **Live Market Data Analysis**
+**NVDA** | **NVIDIA Corporation**
+
+**Current Price:** $132.45
+**Change:** +$3.25 (+2.51%) ↗️
+**52-Week Range:** $95.30 - $150.23
+**Volume:** 45.23M
+
+**Key Metrics:**
+• **P/E Ratio:** 45.6 (premium valuation for tech)
+• **Market Cap:** $3.25 Trillion
+• **EPS (TTM):** $2.90
+• **Today's Range:** $130.15 - $134.20
+
+📈 **Analysis:**
+NVIDIA is trading at $132.45, showing strong momentum with a +2.51% gain today. The stock is trading 11.8% below its 52-week high of $150.23, suggesting potential upside if AI demand continues.
+
+The P/E ratio of 45.6 is elevated but justified by NVIDIA's dominant position in AI chips. With 45.2M shares traded today (above average), there's strong investor interest.
+
+💡 **Key Insights:**
+✓ Stock recovering from recent pullback
+✓ Strong volume indicates institutional buying
+✓ 38% above 52-week low - solid support established
+✓ Trading in upper half of daily range (bullish intraday)
+
+⚠️ **Risks:**
+⚠️ Premium valuation at 45.6x earnings
+⚠️ 11.8% below recent high - resistance overhead
+⚠️ Semiconductor sector volatility
+⚠️ Concentration risk in AI market
+
+🎯 **Recommendation:**
+**HOLD/ACCUMULATE** - Current price of $132.45 offers reasonable entry for long-term investors. Watch for breakout above $135 (today's high $134.20) for momentum continuation. Strong fundamentals support current levels.
+
+📌 **Data Source:** Finnhub Real-Time | Updated: [Current Time]
 
 ---
 
-**User:** "Show me high-potential IPOs"
-
-**Assistant:**
-📊 **Top High-Potential IPOs (2024)**
-
-**1. ARM Holdings (ARM) - Score: 87/100** 🌟
-• **Sector:** Semiconductors
-• **IPO Price:** $51 | **Current:** $68 (+33%)
-• **Market Cap:** $70B
-• **Strengths:** AI chip demand, 99% smartphone market share
-• **Valuation:** 25x forward sales (reasonable for growth)
-• **Risks:** China exposure, competitive threats
-
-[CHART_REQUEST: type="line", symbol="ARM", data="ipo"]
-
-**2. Instacart (CART) - Score: 76/100**
-• **Sector:** E-commerce/Delivery
-• **IPO Price:** $30 | **Current:** $35 (+17%)
-• **Market Cap:** $9.3B
-• **Strengths:** Market leader, profitable, ad revenue growth
-• **Valuation:** 3.2x forward revenue (attractive)
-• **Risks:** Competition from DoorDash, Uber
-
-**3. Klaviyo (KVYO) - Score: 82/100** 🚀
-• **Sector:** Marketing SaaS
-• **IPO Price:** $30 | **Current:** $38 (+27%)
-• **Market Cap:** $5.1B
-• **Strengths:** 130K customers, 50% revenue growth, AI integration
-• **Valuation:** 8.5x forward revenue (premium but justified)
-• **Risks:** Market saturation, customer churn
-
-💡 **Investment Strategy**
-✓ Diversify across 2-3 IPOs to manage risk
-✓ Wait for post-IPO lockup expiration volatility
-✓ Focus on profitable or near-profitable companies
-✓ Prioritize sectors with secular tailwinds (AI, cloud, fintech)
-
-⚠️ **IPO-Specific Risks**
-⚠️ Limited financial history
-⚠️ Lockup expirations can trigger selling pressure
-⚠️ IPO pricing may be inflated
-⚠️ Market volatility impact amplified
-
-**NOW, RESPOND TO USER QUERIES FOLLOWING THIS STRUCTURE.**`;
+**NOW RESPOND TO THE USER'S QUERY USING THIS STRUCTURE.**`;
     }
 
-    // ============================================
-    // GENERATE RESPONSE
-    // ============================================
     async generateResponse(userMessage, context = {}) {
         try {
-            // Validate API key
             if (!this.apiKey || this.apiKey === 'YOUR_GEMINI_API_KEY_HERE') {
-                throw new Error('Gemini API key not configured. Please add your API key in chatbot-config.js');
+                throw new Error('Gemini API key not configured');
             }
 
-            // Rate limiting
             await this.enforceRateLimit();
 
-            // Build enhanced prompt with context
             const enhancedPrompt = this.buildEnhancedPrompt(userMessage, context);
-
-            // Make API request
             const response = await this.makeGeminiRequest(enhancedPrompt);
-
-            // Process and enhance response
             const processedResponse = this.processResponse(response);
 
-            // Update conversation history
             this.updateHistory(userMessage, processedResponse);
-
-            // Track usage
             this.trackUsage(response);
 
             return processedResponse;
@@ -183,59 +163,121 @@ Apple Inc. (AAPL) is currently trading at $178.45, showing strong momentum with 
         }
     }
 
-    // ============================================
-    // BUILD ENHANCED PROMPT WITH CONTEXT
-    // ============================================
     buildEnhancedPrompt(userMessage, context) {
         let prompt = this.systemPrompt + '\n\n';
 
-        // Add market context if available
+        prompt += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`;
+        prompt += `**REAL-TIME DATA CONTEXT**\n`;
+        prompt += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n`;
+
+        // ✅ INJECT STOCK DATA
+        if (context.stockData) {
+            const stock = context.stockData;
+            prompt += `**📊 STOCK DATA - ${stock.symbol}**\n`;
+            prompt += `**YOU MUST USE THESE EXACT NUMBERS:**\n\n`;
+            
+            if (stock.quote) {
+                prompt += `Quote (Real-Time):\n`;
+                prompt += `• Current Price: $${stock.quote.current}\n`;
+                prompt += `• Change: ${stock.quote.change >= 0 ? '+' : ''}$${stock.quote.change} (${stock.quote.changePercent}%)\n`;
+                prompt += `• Open: $${stock.quote.open}\n`;
+                prompt += `• High: $${stock.quote.high}\n`;
+                prompt += `• Low: $${stock.quote.low}\n`;
+                prompt += `• Previous Close: $${stock.quote.previousClose}\n`;
+                prompt += `• Volume: ${this.formatNumber(stock.quote.volume)}\n\n`;
+            }
+            
+            if (stock.profile) {
+                prompt += `Company Profile:\n`;
+                prompt += `• Name: ${stock.profile.name}\n`;
+                prompt += `• Industry: ${stock.profile.industry || 'N/A'}\n`;
+                prompt += `• Sector: ${stock.profile.sector || 'N/A'}\n`;
+                prompt += `• Market Cap: $${this.formatNumber(stock.profile.marketCap)}M\n`;
+                prompt += `• Exchange: ${stock.profile.exchange || 'N/A'}\n\n`;
+            }
+            
+            if (stock.metrics) {
+                prompt += `Financial Metrics:\n`;
+                prompt += `• P/E Ratio: ${stock.metrics.peRatio || 'N/A'}\n`;
+                prompt += `• EPS: $${stock.metrics.eps || 'N/A'}\n`;
+                prompt += `• Beta: ${stock.metrics.beta || 'N/A'}\n`;
+                prompt += `• 52-Week High: $${stock.metrics.week52High || 'N/A'}\n`;
+                prompt += `• 52-Week Low: $${stock.metrics.week52Low || 'N/A'}\n`;
+                prompt += `• Dividend Yield: ${stock.metrics.dividendYield || 'N/A'}%\n`;
+                prompt += `• Profit Margin: ${stock.metrics.profitMargin || 'N/A'}%\n`;
+                prompt += `• ROE: ${stock.metrics.roe || 'N/A'}%\n`;
+                prompt += `• Debt/Equity: ${stock.metrics.debtToEquity || 'N/A'}\n`;
+                prompt += `• Price/Book: ${stock.metrics.priceToBook || 'N/A'}\n`;
+                prompt += `• Price/Sales: ${stock.metrics.priceToSales || 'N/A'}\n\n`;
+            }
+            
+            prompt += `Data Source: ${stock.dataSource}\n`;
+            prompt += `Timestamp: ${new Date(stock.timestamp).toLocaleString()}\n\n`;
+        }
+
+        // ✅ INJECT MARKET OVERVIEW
         if (context.marketData) {
-            prompt += `**CURRENT MARKET CONTEXT:**\n`;
-            prompt += `• S&P 500: ${context.marketData.sp500 || 'N/A'}\n`;
-            prompt += `• NASDAQ: ${context.marketData.nasdaq || 'N/A'}\n`;
-            prompt += `• Volatility (VIX): ${context.marketData.vix || 'N/A'}\n`;
-            prompt += `• Market Sentiment: ${context.marketData.sentiment || 'Neutral'}\n\n`;
+            const market = context.marketData;
+            prompt += `**🌐 MARKET OVERVIEW (Real-Time)**\n\n`;
+            
+            if (market.sp500) {
+                prompt += `S&P 500 (${market.sp500.symbol}):\n`;
+                prompt += `• Price: $${market.sp500.price}\n`;
+                prompt += `• Change: ${market.sp500.change >= 0 ? '+' : ''}$${market.sp500.change} (${market.sp500.changePercent}%)\n\n`;
+            }
+            
+            if (market.nasdaq) {
+                prompt += `NASDAQ (${market.nasdaq.symbol}):\n`;
+                prompt += `• Price: $${market.nasdaq.price}\n`;
+                prompt += `• Change: ${market.nasdaq.change >= 0 ? '+' : ''}$${market.nasdaq.change} (${market.nasdaq.changePercent}%)\n\n`;
+            }
+            
+            if (market.dow) {
+                prompt += `Dow Jones (${market.dow.symbol}):\n`;
+                prompt += `• Price: $${market.dow.price}\n`;
+                prompt += `• Change: ${market.dow.change >= 0 ? '+' : ''}$${market.dow.change} (${market.dow.changePercent}%)\n\n`;
+            }
+            
+            prompt += `Data Source: ${market.dataSource}\n\n`;
         }
 
-        // Add IPO context if available
-        if (context.ipoData) {
-            prompt += `**RECENT IPO DATA:**\n`;
-            context.ipoData.forEach(ipo => {
-                prompt += `• ${ipo.symbol}: ${ipo.name} - Score: ${ipo.score}/100\n`;
+        // ✅ INJECT TIME SERIES (if available)
+        if (context.timeSeriesData) {
+            const ts = context.timeSeriesData;
+            prompt += `**📈 HISTORICAL DATA - ${ts.symbol}**\n`;
+            prompt += `Recent prices (last 5 days):\n`;
+            ts.data.slice(-5).forEach(day => {
+                prompt += `• ${day.datetime}: Close $${day.close} (High: $${day.high}, Low: $${day.low})\n`;
             });
-            prompt += '\n';
+            prompt += `\n`;
         }
 
-        // Add conversation history (last 3 exchanges for context)
+        prompt += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n`;
+
+        // Add conversation history
         if (this.conversationHistory.length > 0) {
-            prompt += `**CONVERSATION HISTORY:**\n`;
-            const recentHistory = this.conversationHistory.slice(-3);
-            recentHistory.forEach(entry => {
+            prompt += `**Previous Context:**\n`;
+            this.conversationHistory.slice(-2).forEach(entry => {
                 prompt += `User: ${entry.user}\n`;
-                prompt += `Assistant: ${entry.assistant.substring(0, 200)}...\n\n`;
+                prompt += `You: ${entry.assistant.substring(0, 100)}...\n\n`;
             });
         }
 
-        // Add current user message
-        prompt += `**CURRENT USER QUERY:**\n${userMessage}\n\n`;
-        
-        // Explicit instruction for charts
-        prompt += `**INSTRUCTIONS:**\n`;
-        prompt += `1. Analyze the query thoroughly\n`;
-        prompt += `2. If visualization would help, include [CHART_REQUEST] tag\n`;
-        prompt += `3. Provide comprehensive response following the structure\n`;
-        prompt += `4. Be specific with numbers and metrics\n`;
-        prompt += `5. Always include risk assessment\n\n`;
-        
-        prompt += `**YOUR RESPONSE:**`;
+        // User query
+        prompt += `**USER QUERY:**\n${userMessage}\n\n`;
+        prompt += `**YOUR RESPONSE (Use the exact data provided above):**\n`;
 
         return prompt;
     }
 
-    // ============================================
-    // MAKE GEMINI API REQUEST
-    // ============================================
+    formatNumber(num) {
+        if (!num) return 'N/A';
+        if (num >= 1000000000) return (num / 1000000000).toFixed(2) + 'B';
+        if (num >= 1000000) return (num / 1000000).toFixed(2) + 'M';
+        if (num >= 1000) return (num / 1000).toFixed(2) + 'K';
+        return num.toLocaleString();
+    }
+
     async makeGeminiRequest(prompt) {
         const requestBody = {
             contents: [{
@@ -247,8 +289,7 @@ Apple Inc. (AAPL) is currently trading at $178.45, showing strong momentum with 
                 temperature: this.config.api.gemini.temperature,
                 topK: this.config.api.gemini.topK,
                 topP: this.config.api.gemini.topP,
-                maxOutputTokens: this.config.api.gemini.maxOutputTokens,
-                stopSequences: []
+                maxOutputTokens: this.config.api.gemini.maxOutputTokens
             },
             safetySettings: this.config.api.gemini.safetySettings
         };
@@ -257,50 +298,26 @@ Apple Inc. (AAPL) is currently trading at $178.45, showing strong momentum with 
             `${this.endpoint}?key=${this.apiKey}`,
             {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(requestBody)
             }
         );
 
         if (!response.ok) {
             const errorData = await response.json().catch(() => ({}));
-            throw new Error(`Gemini API Error: ${response.status} - ${errorData.error?.message || 'Unknown error'}`);
+            throw new Error(`Gemini API Error: ${response.status}`);
         }
 
         return await response.json();
     }
 
-    // ============================================
-    // PROCESS RESPONSE
-    // ============================================
     processResponse(apiResponse) {
         try {
             const candidate = apiResponse.candidates?.[0];
+            if (!candidate) throw new Error('No response');
             
-            if (!candidate) {
-                throw new Error('No response candidate received');
-            }
-
-            // Check for safety blocks
-            if (candidate.finishReason === 'SAFETY') {
-                return {
-                    text: "I apologize, but I cannot provide a response to that query due to safety guidelines. Please rephrase your question.",
-                    blocked: true
-                };
-            }
-
             const text = candidate.content?.parts?.[0]?.text || '';
-            
-            if (!text) {
-                throw new Error('Empty response received');
-            }
-
-            // Extract chart requests
             const chartRequests = this.extractChartRequests(text);
-
-            // Clean text (remove chart request tags)
             const cleanText = text.replace(/\[CHART_REQUEST:.*?\]/g, '').trim();
 
             return {
@@ -309,16 +326,11 @@ Apple Inc. (AAPL) is currently trading at $178.45, showing strong momentum with 
                 tokens: apiResponse.usageMetadata || {},
                 blocked: false
             };
-
         } catch (error) {
-            console.error('Error processing response:', error);
             throw new Error('Failed to process AI response');
         }
     }
 
-    // ============================================
-    // EXTRACT CHART REQUESTS
-    // ============================================
     extractChartRequests(text) {
         const chartRegex = /\[CHART_REQUEST:\s*type="([^"]+)",\s*symbol="([^"]+)",\s*data="([^"]+)"\]/g;
         const requests = [];
@@ -335,9 +347,6 @@ Apple Inc. (AAPL) is currently trading at $178.45, showing strong momentum with 
         return requests;
     }
 
-    // ============================================
-    // UPDATE CONVERSATION HISTORY
-    // ============================================
     updateHistory(userMessage, assistantResponse) {
         this.conversationHistory.push({
             user: userMessage,
@@ -345,97 +354,48 @@ Apple Inc. (AAPL) is currently trading at $178.45, showing strong momentum with 
             timestamp: Date.now()
         });
 
-        // Keep only last N exchanges
         if (this.conversationHistory.length > this.maxHistorySize) {
             this.conversationHistory.shift();
         }
     }
 
-    // ============================================
-    // RATE LIMITING
-    // ============================================
     async enforceRateLimit() {
         const now = Date.now();
-        const timeSinceLastRequest = now - this.lastRequestTime;
-
-        if (timeSinceLastRequest < this.minRequestInterval) {
-            const waitTime = this.minRequestInterval - timeSinceLastRequest;
-            await new Promise(resolve => setTimeout(resolve, waitTime));
+        const timeSince = now - this.lastRequestTime;
+        if (timeSince < this.minRequestInterval) {
+            await new Promise(resolve => setTimeout(resolve, this.minRequestInterval - timeSince));
         }
-
         this.lastRequestTime = Date.now();
     }
 
-    // ============================================
-    // TRACK USAGE
-    // ============================================
     trackUsage(response) {
         this.requestCount++;
-        
         if (response.usageMetadata) {
             this.totalTokens += (response.usageMetadata.totalTokenCount || 0);
         }
-
-        if (this.config.development.debugMode) {
-            console.log('Gemini Usage:', {
-                requests: this.requestCount,
-                totalTokens: this.totalTokens,
-                lastResponse: response.usageMetadata
-            });
-        }
     }
 
-    // ============================================
-    // ERROR HANDLING
-    // ============================================
     handleError(error) {
-        let userMessage = '';
-
-        if (error.message.includes('API key')) {
-            userMessage = this.config.errors.messages.apiKey;
-        } else if (error.message.includes('rate limit') || error.message.includes('429')) {
-            userMessage = this.config.errors.messages.rateLimit;
-        } else if (error.message.includes('timeout')) {
-            userMessage = this.config.errors.messages.timeout;
-        } else if (error.message.includes('network') || error.message.includes('fetch')) {
-            userMessage = this.config.errors.messages.network;
-        } else {
-            userMessage = this.config.errors.messages.unknown;
-        }
-
         return {
-            text: `⚠️ **Error:** ${userMessage}\n\n*Technical details: ${error.message}*`,
+            text: `⚠️ **Error:** ${error.message}`,
             error: true,
             chartRequests: []
         };
     }
 
-    // ============================================
-    // CLEAR HISTORY
-    // ============================================
     clearHistory() {
         this.conversationHistory = [];
-        this.contextWindow = [];
     }
 
-    // ============================================
-    // GET STATS
-    // ============================================
     getStats() {
         return {
             requestCount: this.requestCount,
             totalTokens: this.totalTokens,
-            historySize: this.conversationHistory.length,
-            averageTokensPerRequest: this.requestCount > 0 
-                ? Math.round(this.totalTokens / this.requestCount) 
-                : 0
+            historySize: this.conversationHistory.length
         };
     }
 }
 
-// ============================================
-// EXPORT
-// ============================================
 if (typeof module !== 'undefined' && module.exports) {
     module.exports = GeminiAI;
 }

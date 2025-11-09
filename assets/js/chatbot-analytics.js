@@ -1,6 +1,6 @@
 // ============================================
 // ADVANCED FINANCIAL ANALYTICS
-// Market Data & Stock Analysis
+// Real Market Data Integration
 // ============================================
 
 class FinancialAnalytics {
@@ -8,119 +8,267 @@ class FinancialAnalytics {
         this.config = config;
         this.finnhubApiKey = config.api.finnhub.apiKey;
         this.finnhubEndpoint = config.api.finnhub.endpoint;
+        this.twelveDataApiKey = config.api.twelveData.apiKey;
+        this.twelveDataEndpoint = config.api.twelveData.endpoint;
         
-        // Cache for API responses
         this.cache = new Map();
-        this.cacheTimeout = 300000; // 5 minutes
+        this.cacheTimeout = 60000; // 1 minute cache
         
-        // Rate limiting
-        this.requestQueue = [];
-        this.isProcessingQueue = false;
-        this.maxRequestsPerMinute = 30;
         this.requestTimestamps = [];
+        this.maxRequestsPerMinute = 30;
     }
 
     // ============================================
-    // MARKET OVERVIEW
-    // ============================================
-    async getMarketOverview() {
-        try {
-            const cacheKey = 'market_overview';
-            const cached = this.getFromCache(cacheKey);
-            if (cached) return cached;
-
-            // Fetch major indices
-            const [sp500, nasdaq, dow, vix] = await Promise.all([
-                this.getQuote('SPY'),  // S&P 500 ETF
-                this.getQuote('QQQ'),  // NASDAQ ETF
-                this.getQuote('DIA'),  // Dow Jones ETF
-                this.getQuote('VIX')   // Volatility Index
-            ]);
-
-            const overview = {
-                sp500: this.formatQuoteData(sp500, 'S&P 500'),
-                nasdaq: this.formatQuoteData(nasdaq, 'NASDAQ'),
-                dow: this.formatQuoteData(dow, 'Dow Jones'),
-                vix: this.formatQuoteData(vix, 'VIX'),
-                sentiment: this.calculateMarketSentiment(sp500, vix),
-                timestamp: Date.now()
-            };
-
-            this.saveToCache(cacheKey, overview);
-            return overview;
-
-        } catch (error) {
-            console.error('Market overview error:', error);
-            return this.getMockMarketData();
-        }
-    }
-
-    // ============================================
-    // GET STOCK DATA
+    // GET REAL-TIME STOCK DATA
     // ============================================
     async getStockData(symbol) {
         try {
+            console.log(`📊 Fetching real data for ${symbol}...`);
+            
             const cacheKey = `stock_${symbol}`;
             const cached = this.getFromCache(cacheKey);
-            if (cached) return cached;
+            if (cached) {
+                console.log(`✅ Using cached data for ${symbol}`);
+                return cached;
+            }
 
+            // Fetch from Finnhub
             const [quote, profile, metrics] = await Promise.all([
                 this.getQuote(symbol),
                 this.getCompanyProfile(symbol),
                 this.getBasicFinancials(symbol)
             ]);
 
+            if (!quote || quote.c === 0) {
+                console.warn(`⚠️ No quote data for ${symbol}`);
+                return null;
+            }
+
             const stockData = {
                 symbol: symbol,
-                quote: quote,
-                profile: profile,
-                metrics: metrics,
-                analysis: this.analyzeStock(quote, metrics),
-                timestamp: Date.now()
+                quote: {
+                    current: quote.c,
+                    previousClose: quote.pc,
+                    change: quote.c - quote.pc,
+                    changePercent: ((quote.c - quote.pc) / quote.pc * 100).toFixed(2),
+                    high: quote.h,
+                    low: quote.l,
+                    open: quote.o,
+                    volume: quote.v,
+                    timestamp: quote.t
+                },
+                profile: profile ? {
+                    name: profile.name,
+                    ticker: profile.ticker,
+                    exchange: profile.exchange,
+                    industry: profile.finnhubIndustry,
+                    sector: profile.finnhubIndustry,
+                    marketCap: profile.marketCapitalization,
+                    country: profile.country,
+                    currency: profile.currency,
+                    ipo: profile.ipo,
+                    logo: profile.logo,
+                    phone: profile.phone,
+                    weburl: profile.weburl
+                } : null,
+                metrics: metrics ? {
+                    peRatio: metrics.peNormalizedAnnual,
+                    eps: metrics.epsBasicTTM,
+                    beta: metrics.beta,
+                    week52High: metrics['52WeekHigh'],
+                    week52Low: metrics['52WeekLow'],
+                    marketCap: metrics.marketCapitalization,
+                    dividendYield: metrics.dividendYieldIndicatedAnnual,
+                    revenueGrowth: metrics.revenueGrowthTTMYoy,
+                    profitMargin: metrics.netProfitMarginTTM,
+                    roe: metrics.roeTTM,
+                    roa: metrics.roaTTM,
+                    debtToEquity: metrics.totalDebt2EquityAnnual,
+                    currentRatio: metrics.currentRatioAnnual,
+                    priceToBook: metrics.pbAnnual,
+                    priceToSales: metrics.psTTM
+                } : null,
+                timestamp: Date.now(),
+                dataSource: 'Finnhub Real-Time'
             };
 
             this.saveToCache(cacheKey, stockData);
+            console.log(`✅ Real data fetched for ${symbol}:`, stockData.quote.current);
+            
             return stockData;
 
         } catch (error) {
-            console.error('Stock data error:', error);
-            throw error;
+            console.error(`❌ Error fetching stock data for ${symbol}:`, error);
+            return null;
         }
     }
 
     // ============================================
-    // GET QUOTE
+    // GET MARKET OVERVIEW
+    // ============================================
+    async getMarketOverview() {
+        try {
+            console.log('📊 Fetching market overview...');
+            
+            const cacheKey = 'market_overview';
+            const cached = this.getFromCache(cacheKey);
+            if (cached) return cached;
+
+            const [sp500, nasdaq, dow] = await Promise.all([
+                this.getQuote('SPY'),
+                this.getQuote('QQQ'),
+                this.getQuote('DIA')
+            ]);
+
+            const overview = {
+                sp500: this.formatIndexData(sp500, 'S&P 500', 'SPY'),
+                nasdaq: this.formatIndexData(nasdaq, 'NASDAQ', 'QQQ'),
+                dow: this.formatIndexData(dow, 'Dow Jones', 'DIA'),
+                timestamp: Date.now(),
+                dataSource: 'Finnhub Real-Time'
+            };
+
+            this.saveToCache(cacheKey, overview);
+            console.log('✅ Market overview fetched');
+            
+            return overview;
+
+        } catch (error) {
+            console.error('❌ Market overview error:', error);
+            return null;
+        }
+    }
+
+    // ============================================
+    // GET TIME SERIES DATA (for charts)
+    // ============================================
+    async getTimeSeries(symbol, interval = '1day', outputsize = 30) {
+        try {
+            console.log(`📈 Fetching time series for ${symbol}...`);
+            
+            const cacheKey = `timeseries_${symbol}_${interval}_${outputsize}`;
+            const cached = this.getFromCache(cacheKey);
+            if (cached) return cached;
+
+            // Use Twelve Data for time series
+            if (!this.twelveDataApiKey || this.twelveDataApiKey === 'TA_CLE_TWELVE_DATA_ICI') {
+                console.warn('⚠️ Twelve Data API key not configured');
+                return this.generateMockTimeSeries(symbol, outputsize);
+            }
+
+            const url = `${this.twelveDataEndpoint}/time_series?symbol=${symbol}&interval=${interval}&outputsize=${outputsize}&apikey=${this.twelveDataApiKey}`;
+            
+            const response = await fetch(url);
+            const data = await response.json();
+
+            if (data.status === 'error' || !data.values) {
+                console.warn('⚠️ Twelve Data error:', data.message);
+                return this.generateMockTimeSeries(symbol, outputsize);
+            }
+
+            const timeSeries = {
+                symbol: symbol,
+                interval: interval,
+                data: data.values.map(item => ({
+                    datetime: item.datetime,
+                    timestamp: new Date(item.datetime).getTime(),
+                    open: parseFloat(item.open),
+                    high: parseFloat(item.high),
+                    low: parseFloat(item.low),
+                    close: parseFloat(item.close),
+                    volume: parseInt(item.volume || 0)
+                })).reverse(), // Most recent last
+                timestamp: Date.now(),
+                dataSource: 'Twelve Data Real-Time'
+            };
+
+            this.saveToCache(cacheKey, timeSeries);
+            console.log(`✅ Time series fetched for ${symbol}`);
+            
+            return timeSeries;
+
+        } catch (error) {
+            console.error(`❌ Time series error for ${symbol}:`, error);
+            return this.generateMockTimeSeries(symbol, outputsize);
+        }
+    }
+
+    // ============================================
+    // FINNHUB API CALLS
     // ============================================
     async getQuote(symbol) {
+        if (!this.finnhubApiKey || this.finnhubApiKey === 'TA_CLE_FINNHUB_ICI') {
+            console.warn(`⚠️ Finnhub API key not configured`);
+            return null;
+        }
+
         try {
-            const data = await this.makeRequest(`/quote?symbol=${symbol}`);
+            await this.enforceRateLimit();
+            
+            const url = `${this.finnhubEndpoint}/quote?symbol=${symbol}&token=${this.finnhubApiKey}`;
+            const response = await fetch(url);
+            
+            if (!response.ok) {
+                throw new Error(`Finnhub API error: ${response.status}`);
+            }
+            
+            const data = await response.json();
+            this.trackRequest();
+            
             return data;
+            
         } catch (error) {
             console.error(`Quote error for ${symbol}:`, error);
             return null;
         }
     }
 
-    // ============================================
-    // GET COMPANY PROFILE
-    // ============================================
     async getCompanyProfile(symbol) {
+        if (!this.finnhubApiKey || this.finnhubApiKey === 'TA_CLE_FINNHUB_ICI') {
+            return null;
+        }
+
         try {
-            const data = await this.makeRequest(`/stock/profile2?symbol=${symbol}`);
+            await this.enforceRateLimit();
+            
+            const url = `${this.finnhubEndpoint}/stock/profile2?symbol=${symbol}&token=${this.finnhubApiKey}`;
+            const response = await fetch(url);
+            
+            if (!response.ok) {
+                throw new Error(`Finnhub API error: ${response.status}`);
+            }
+            
+            const data = await response.json();
+            this.trackRequest();
+            
             return data;
+            
         } catch (error) {
             console.error(`Profile error for ${symbol}:`, error);
             return null;
         }
     }
 
-    // ============================================
-    // GET BASIC FINANCIALS
-    // ============================================
     async getBasicFinancials(symbol) {
+        if (!this.finnhubApiKey || this.finnhubApiKey === 'TA_CLE_FINNHUB_ICI') {
+            return null;
+        }
+
         try {
-            const data = await this.makeRequest(`/stock/metric?symbol=${symbol}&metric=all`);
+            await this.enforceRateLimit();
+            
+            const url = `${this.finnhubEndpoint}/stock/metric?symbol=${symbol}&metric=all&token=${this.finnhubApiKey}`;
+            const response = await fetch(url);
+            
+            if (!response.ok) {
+                throw new Error(`Finnhub API error: ${response.status}`);
+            }
+            
+            const data = await response.json();
+            this.trackRequest();
+            
             return data?.metric || null;
+            
         } catch (error) {
             console.error(`Financials error for ${symbol}:`, error);
             return null;
@@ -128,249 +276,52 @@ class FinancialAnalytics {
     }
 
     // ============================================
-    // GET HISTORICAL DATA
+    // HELPER METHODS
     // ============================================
-    async getHistoricalData(symbol, from, to) {
-        try {
-            const fromTimestamp = Math.floor(new Date(from).getTime() / 1000);
-            const toTimestamp = Math.floor(new Date(to).getTime() / 1000);
-            
-            const data = await this.makeRequest(
-                `/stock/candle?symbol=${symbol}&resolution=D&from=${fromTimestamp}&to=${toTimestamp}`
-            );
-            
-            return this.formatHistoricalData(data);
-        } catch (error) {
-            console.error(`Historical data error for ${symbol}:`, error);
-            return null;
-        }
-    }
-
-    // ============================================
-    // GET IPO CALENDAR
-    // ============================================
-    async getIPOCalendar(from, to) {
-        try {
-            const data = await this.makeRequest(
-                `/calendar/ipo?from=${from}&to=${to}`
-            );
-            return data?.ipoCalendar || [];
-        } catch (error) {
-            console.error('IPO calendar error:', error);
-            return [];
-        }
-    }
-
-    // ============================================
-    // MAKE API REQUEST
-    // ============================================
-    async makeRequest(endpoint) {
-        // Check rate limit
-        await this.enforceRateLimit();
-
-        const url = `${this.finnhubEndpoint}${endpoint}&token=${this.finnhubApiKey}`;
+    formatIndexData(quote, name, symbol) {
+        if (!quote) return null;
         
-        try {
-            const response = await fetch(url);
-            
-            if (!response.ok) {
-                throw new Error(`API error: ${response.status}`);
-            }
-            
-            const data = await response.json();
-            
-            // Track request
-            this.requestTimestamps.push(Date.now());
-            
-            return data;
-            
-        } catch (error) {
-            console.error('API request failed:', error);
-            throw error;
-        }
+        const change = quote.c - quote.pc;
+        const changePercent = (change / quote.pc * 100).toFixed(2);
+        
+        return {
+            name: name,
+            symbol: symbol,
+            price: quote.c.toFixed(2),
+            change: change.toFixed(2),
+            changePercent: changePercent,
+            high: quote.h.toFixed(2),
+            low: quote.l.toFixed(2),
+            open: quote.o.toFixed(2),
+            volume: quote.v
+        };
     }
 
-    // ============================================
-    // RATE LIMITING
-    // ============================================
     async enforceRateLimit() {
         const now = Date.now();
         const oneMinuteAgo = now - 60000;
         
-        // Clean old timestamps
         this.requestTimestamps = this.requestTimestamps.filter(
             timestamp => timestamp > oneMinuteAgo
         );
         
-        // Check if limit reached
         if (this.requestTimestamps.length >= this.maxRequestsPerMinute) {
-            const oldestRequest = this.requestTimestamps[0];
-            const waitTime = 60000 - (now - oldestRequest);
-            
+            const waitTime = 60000 - (now - this.requestTimestamps[0]);
             if (waitTime > 0) {
-                console.log(`⏳ Rate limit: waiting ${waitTime}ms`);
                 await new Promise(resolve => setTimeout(resolve, waitTime));
             }
         }
     }
 
-    // ============================================
-    // FORMAT QUOTE DATA
-    // ============================================
-    formatQuoteData(quote, name) {
-        if (!quote) return null;
-        
-        const change = quote.c - quote.pc;
-        const changePercent = (change / quote.pc) * 100;
-        
-        return {
-            name: name,
-            price: quote.c,
-            previousClose: quote.pc,
-            change: change,
-            changePercent: changePercent,
-            high: quote.h,
-            low: quote.l,
-            open: quote.o,
-            volume: quote.v
-        };
+    trackRequest() {
+        this.requestTimestamps.push(Date.now());
     }
 
-    // ============================================
-    // FORMAT HISTORICAL DATA
-    // ============================================
-    formatHistoricalData(data) {
-        if (!data || data.s !== 'ok') return null;
-        
-        const formatted = [];
-        for (let i = 0; i < data.t.length; i++) {
-            formatted.push({
-                timestamp: data.t[i] * 1000,
-                date: new Date(data.t[i] * 1000),
-                open: data.o[i],
-                high: data.h[i],
-                low: data.l[i],
-                close: data.c[i],
-                volume: data.v[i]
-            });
-        }
-        
-        return formatted;
-    }
-
-    // ============================================
-    // ANALYZE STOCK
-    // ============================================
-    analyzeStock(quote, metrics) {
-        if (!quote || !metrics) return null;
-        
-        const analysis = {
-            momentum: this.analyzeMomentum(quote),
-            valuation: this.analyzeValuation(metrics),
-            fundamentals: this.analyzeFundamentals(metrics),
-            signals: []
-        };
-        
-        // Generate signals
-        if (analysis.momentum === 'bullish') {
-            analysis.signals.push('Strong upward momentum');
-        }
-        if (metrics.peNormalizedAnnual < 15) {
-            analysis.signals.push('Undervalued based on P/E');
-        }
-        if (metrics.revenueGrowthTTMYoy > 20) {
-            analysis.signals.push('Strong revenue growth');
-        }
-        
-        return analysis;
-    }
-
-    // ============================================
-    // ANALYZE MOMENTUM
-    // ============================================
-    analyzeMomentum(quote) {
-        if (!quote) return 'neutral';
-        
-        const changePercent = ((quote.c - quote.pc) / quote.pc) * 100;
-        
-        if (changePercent > 2) return 'bullish';
-        if (changePercent < -2) return 'bearish';
-        return 'neutral';
-    }
-
-    // ============================================
-    // ANALYZE VALUATION
-    // ============================================
-    analyzeValuation(metrics) {
-        if (!metrics) return 'neutral';
-        
-        const pe = metrics.peNormalizedAnnual;
-        
-        if (!pe) return 'unknown';
-        if (pe < 15) return 'undervalued';
-        if (pe > 30) return 'overvalued';
-        return 'fair';
-    }
-
-    // ============================================
-    // ANALYZE FUNDAMENTALS
-    // ============================================
-    analyzeFundamentals(metrics) {
-        if (!metrics) return 'neutral';
-        
-        const score = {
-            growth: 0,
-            profitability: 0,
-            financial_health: 0
-        };
-        
-        // Growth
-        if (metrics.revenueGrowthTTMYoy > 20) score.growth = 2;
-        else if (metrics.revenueGrowthTTMYoy > 10) score.growth = 1;
-        
-        // Profitability
-        if (metrics.netProfitMarginTTM > 20) score.profitability = 2;
-        else if (metrics.netProfitMarginTTM > 10) score.profitability = 1;
-        
-        // Financial health
-        if (metrics.currentRatioAnnual > 2) score.financial_health = 2;
-        else if (metrics.currentRatioAnnual > 1) score.financial_health = 1;
-        
-        const totalScore = score.growth + score.profitability + score.financial_health;
-        
-        if (totalScore >= 5) return 'strong';
-        if (totalScore >= 3) return 'good';
-        if (totalScore >= 1) return 'fair';
-        return 'weak';
-    }
-
-    // ============================================
-    // CALCULATE MARKET SENTIMENT
-    // ============================================
-    calculateMarketSentiment(sp500, vix) {
-        if (!sp500 || !vix) return 'Neutral';
-        
-        const sp500Change = ((sp500.c - sp500.pc) / sp500.pc) * 100;
-        const vixLevel = vix.c;
-        
-        if (sp500Change > 1 && vixLevel < 15) return 'Very Bullish';
-        if (sp500Change > 0 && vixLevel < 20) return 'Bullish';
-        if (sp500Change < -1 && vixLevel > 25) return 'Very Bearish';
-        if (sp500Change < 0 && vixLevel > 20) return 'Bearish';
-        
-        return 'Neutral';
-    }
-
-    // ============================================
-    // CACHE MANAGEMENT
-    // ============================================
     getFromCache(key) {
         const cached = this.cache.get(key);
-        
         if (cached && Date.now() - cached.timestamp < this.cacheTimeout) {
             return cached.data;
         }
-        
         return null;
     }
 
@@ -380,8 +331,7 @@ class FinancialAnalytics {
             timestamp: Date.now()
         });
         
-        // Cleanup old entries
-        if (this.cache.size > 50) {
+        if (this.cache.size > 100) {
             const firstKey = this.cache.keys().next().value;
             this.cache.delete(firstKey);
         }
@@ -392,36 +342,44 @@ class FinancialAnalytics {
     }
 
     // ============================================
-    // MOCK DATA (Fallback)
+    // MOCK DATA (FALLBACK UNIQUEMENT)
     // ============================================
-    getMockMarketData() {
+    generateMockTimeSeries(symbol, count) {
+        console.warn(`⚠️ Generating mock time series for ${symbol}`);
+        
+        const data = [];
+        let basePrice = 100 + Math.random() * 100;
+        const now = Date.now();
+        const dayMs = 86400000;
+        
+        for (let i = count - 1; i >= 0; i--) {
+            const timestamp = now - (i * dayMs);
+            const date = new Date(timestamp);
+            
+            const open = basePrice;
+            const close = open + (Math.random() - 0.5) * 10;
+            const high = Math.max(open, close) + Math.random() * 5;
+            const low = Math.min(open, close) - Math.random() * 5;
+            
+            data.push({
+                datetime: date.toISOString().split('T')[0],
+                timestamp: timestamp,
+                open: parseFloat(open.toFixed(2)),
+                high: parseFloat(high.toFixed(2)),
+                low: parseFloat(low.toFixed(2)),
+                close: parseFloat(close.toFixed(2)),
+                volume: Math.floor(Math.random() * 10000000)
+            });
+            
+            basePrice = close;
+        }
+        
         return {
-            sp500: {
-                name: 'S&P 500',
-                price: 4500,
-                change: 25.5,
-                changePercent: 0.57
-            },
-            nasdaq: {
-                name: 'NASDAQ',
-                price: 14200,
-                change: 85.2,
-                changePercent: 0.60
-            },
-            dow: {
-                name: 'Dow Jones',
-                price: 35000,
-                change: 150.0,
-                changePercent: 0.43
-            },
-            vix: {
-                name: 'VIX',
-                price: 16.5,
-                change: -0.8,
-                changePercent: -4.62
-            },
-            sentiment: 'Bullish',
-            timestamp: Date.now()
+            symbol: symbol,
+            interval: '1day',
+            data: data,
+            timestamp: Date.now(),
+            dataSource: 'Mock Data (Fallback)'
         };
     }
 }

@@ -9,13 +9,12 @@ const ChatbotConfig = {
     // ============================================
     api: {
         gemini: {
-            // IMPORTANT: Replace with your actual Gemini API key
+            // ✅ TA CLÉ GEMINI
             apiKey: 'AIzaSyDWbJhZm4hUls0t7qkwmDwrAZCJTLXXztU',
             endpoint: 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent',
             model: 'gemini-2.5-flash',
-            // Supercharged parameters for premium responses
-            maxOutputTokens: 8192, // 4x increase from default 2048
-            temperature: 0.85, // Higher creativity while maintaining accuracy
+            maxOutputTokens: 8192,
+            temperature: 0.85,
             topK: 40,
             topP: 0.95,
             safetySettings: [
@@ -39,14 +38,14 @@ const ChatbotConfig = {
         },
         
         finnhub: {
-            // IMPORTANT: Replace with your actual Finnhub API key
+            // ✅ METS TA VRAIE CLÉ FINNHUB ICI
             apiKey: 'd45qhbpr01qieo4rfq9gd45qhbpr01qieo4rfqa0',
             endpoint: 'https://finnhub.io/api/v1',
             websocket: 'wss://ws.finnhub.io'
         },
         
         twelveData: {
-            // Optional: For advanced market data
+            // ✅ METS TA VRAIE CLÉ TWELVE DATA ICI
             apiKey: '57e3c785fda7424d97ab195f22263765',
             endpoint: 'https://api.twelvedata.com'
         }
@@ -56,67 +55,42 @@ const ChatbotConfig = {
     // CHATBOT BEHAVIOR
     // ============================================
     behavior: {
-        // Response timing
-        typingDelay: 1500, // ms - simulated typing time
-        responseDelay: 300, // ms - delay before showing response
-        
-        // Message limits
+        typingDelay: 1500,
+        responseDelay: 300,
         maxMessageLength: 2000,
         maxHistorySize: 50,
-        
-        // Auto-suggestions
         showSuggestions: true,
         suggestionsDelay: 500,
         maxSuggestions: 4,
-        
-        // Chart generation
         autoGenerateCharts: true,
         chartAnimationDuration: 750,
-        
-        // Debouncing
-        inputDebounce: 300, // ms
-        
-        // Virtual scrolling
+        inputDebounce: 300,
         virtualScrollThreshold: 100,
-        
-        // Performance
         enableLazyLoading: true,
-        enableWebWorkers: true,
-        enableServiceWorker: true
+        enableWebWorkers: false,
+        enableServiceWorker: false
     },
 
     // ============================================
     // UI CUSTOMIZATION
     // ============================================
     ui: {
-        theme: 'futuristic', // futuristic | classic | minimal
+        theme: 'futuristic',
         primaryColor: '#667eea',
         accentColor: '#764ba2',
-        
-        // Avatar emojis
         botAvatar: '🤖',
         userAvatar: '👤',
-        
-        // Animations
         enableAnimations: true,
-        enableParticles: true,
-        particleCount: 50,
-        
-        // Position
-        position: 'bottom-right', // bottom-right | bottom-left | top-right | top-left
-        
-        // Size
+        enableParticles: false,
+        particleCount: 0,
+        position: 'bottom-right',
         width: 420,
         height: 650,
         mobileBreakpoint: 768,
-        
-        // Messages
-        welcomeMessage: "Hello! 👋 I'm your AI Financial Assistant. How can I help you today?",
-        placeholderText: "Ask me anything about finance, IPOs, market analysis...",
-        
-        // Timestamps
+        welcomeMessage: "Hello! 👋 I'm your AI Financial Assistant with real-time market data. How can I help you today?",
+        placeholderText: "Ask me anything about finance, stocks, IPOs...",
         showTimestamps: true,
-        timestampFormat: 'HH:mm' // 24-hour format
+        timestampFormat: 'HH:mm'
     },
 
     // ============================================
@@ -127,19 +101,18 @@ const ChatbotConfig = {
         marketData: true,
         chartGeneration: true,
         technicalIndicators: true,
-        sentimentAnalysis: true,
-        portfolioTracking: false, // Premium feature
-        realTimeAlerts: false, // Premium feature
+        sentimentAnalysis: false,
+        portfolioTracking: false,
+        realTimeAlerts: false,
         exportConversation: true,
-        voiceInput: false, // Future feature
-        multiLanguage: false // Future feature
+        voiceInput: false,
+        multiLanguage: false
     },
 
     // ============================================
     // IPO ANALYZER SETTINGS
     // ============================================
     ipo: {
-        // Scoring weights (must sum to 1.0)
         weights: {
             financial: 0.30,
             market: 0.25,
@@ -147,16 +120,10 @@ const ChatbotConfig = {
             growth: 0.15,
             momentum: 0.10
         },
-        
-        // Thresholds
         highPotentialThreshold: 75,
         mediumPotentialThreshold: 60,
-        
-        // Data refresh
-        cacheTimeout: 3600000, // 1 hour in ms
-        
-        // Analysis depth
-        lookbackPeriod: 90, // days
+        cacheTimeout: 3600000,
+        lookbackPeriod: 90,
         minDataPoints: 10
     },
 
@@ -164,9 +131,7 @@ const ChatbotConfig = {
     // CHART SETTINGS
     // ============================================
     charts: {
-        defaultType: 'line', // line | bar | candlestick | area
-        
-        // Colors
+        defaultType: 'line',
         colors: {
             primary: '#667eea',
             secondary: '#764ba2',
@@ -177,20 +142,14 @@ const ChatbotConfig = {
             grid: 'rgba(255, 255, 255, 0.1)',
             text: 'rgba(255, 255, 255, 0.8)'
         },
-        
-        // Animation
         animation: {
             duration: 750,
             easing: 'easeInOutQuart'
         },
-        
-        // Interactions
         enableZoom: true,
         enablePan: true,
         enableTooltip: true,
         enableLegend: true,
-        
-        // Technical indicators
         indicators: {
             sma: { periods: [20, 50, 200] },
             ema: { periods: [12, 26] },
@@ -198,8 +157,6 @@ const ChatbotConfig = {
             macd: { fast: 12, slow: 26, signal: 9 },
             bollingerBands: { period: 20, stdDev: 2 }
         },
-        
-        // Export
         exportFormats: ['png', 'svg', 'csv']
     },
 
@@ -207,8 +164,8 @@ const ChatbotConfig = {
     // ANALYTICS
     // ============================================
     analytics: {
-        enabled: false, // Set to true to enable analytics
-        trackingId: '', // Google Analytics ID
+        enabled: false,
+        trackingId: '',
         events: {
             messagesSent: true,
             chartsGenerated: true,
@@ -218,29 +175,29 @@ const ChatbotConfig = {
     },
 
     // ============================================
-    // LOCALIZATION (i18n)
+    // LOCALIZATION
     // ============================================
     localization: {
         defaultLanguage: 'en',
-        supportedLanguages: ['en', 'fr', 'es', 'de'],
+        supportedLanguages: ['en', 'fr'],
         translations: {
             en: {
-                welcome: "Hello! 👋 I'm your AI Financial Assistant. How can I help you today?",
-                placeholder: "Ask me anything about finance, IPOs, market analysis...",
+                welcome: "Hello! 👋 I'm your AI Financial Assistant with real-time market data.",
+                placeholder: "Ask me anything about finance, stocks, IPOs...",
                 send: "Send",
                 typing: "AI is typing...",
-                error: "Oops! Something went wrong. Please try again.",
+                error: "Oops! Something went wrong.",
                 retry: "Retry",
                 clear: "Clear",
                 export: "Export",
                 close: "Close"
             },
             fr: {
-                welcome: "Bonjour ! 👋 Je suis votre Assistant Financier IA. Comment puis-je vous aider aujourd'hui ?",
-                placeholder: "Posez-moi des questions sur la finance, les IPO, l'analyse de marché...",
+                welcome: "Bonjour ! 👋 Je suis votre Assistant Financier IA avec données en temps réel.",
+                placeholder: "Posez-moi des questions sur la finance, actions, IPO...",
                 send: "Envoyer",
-                typing: "L'IA est en train d'écrire...",
-                error: "Oups ! Quelque chose s'est mal passé. Veuillez réessayer.",
+                typing: "L'IA écrit...",
+                error: "Oups ! Une erreur s'est produite.",
                 retry: "Réessayer",
                 clear: "Effacer",
                 export: "Exporter",
@@ -254,61 +211,47 @@ const ChatbotConfig = {
     // ============================================
     suggestions: {
         initial: [
-            "📈 Show me trending IPOs",
-            "💰 Analyze AAPL stock",
-            "📊 Market overview today",
-            "🎯 High-potential opportunities"
+            "📈 Analyze NVDA stock",
+            "💰 Market overview today",
+            "📊 Show trending IPOs",
+            "🎯 AAPL technical analysis"
         ],
-        
         followUp: {
             ipo: [
                 "Show detailed analysis",
-                "Compare with similar IPOs",
-                "Show price history",
-                "Risk assessment"
+                "Compare with sector",
+                "Risk assessment",
+                "Price history"
             ],
             stock: [
                 "Show technical indicators",
-                "Compare with sector",
-                "Show earnings data",
-                "Analyst ratings"
+                "Earnings data",
+                "Analyst ratings",
+                "Compare with competitors"
             ],
             market: [
                 "Sector performance",
-                "Market sentiment",
+                "Top gainers today",
                 "Economic indicators",
-                "Top movers"
+                "Market sentiment"
             ]
         }
     },
 
     // ============================================
-    // PERFORMANCE OPTIMIZATION
+    // PERFORMANCE
     // ============================================
     performance: {
-        // Lazy loading
         lazyLoadImages: true,
         lazyLoadCharts: true,
-        
-        // Caching
         enableCache: true,
-        cacheExpiration: 3600000, // 1 hour
-        
-        // Compression
+        cacheExpiration: 300000,
         compressMessages: false,
-        
-        // Web Workers
-        useWebWorkers: true,
+        useWebWorkers: false,
         maxWorkers: 2,
-        
-        // Request batching
-        batchRequests: true,
-        batchDelay: 100, // ms
-        
-        // Throttling
+        batchRequests: false,
+        batchDelay: 100,
         maxRequestsPerMinute: 30,
-        
-        // Virtual scrolling
         virtualScrollItemHeight: 80,
         virtualScrollBuffer: 5
     },
@@ -318,16 +261,15 @@ const ChatbotConfig = {
     // ============================================
     errors: {
         maxRetries: 3,
-        retryDelay: 1000, // ms
+        retryDelay: 1000,
         showUserFriendlyMessages: true,
         logErrors: true,
-        
         messages: {
             network: "Network error. Please check your connection.",
             apiKey: "API key is missing or invalid.",
-            rateLimit: "Rate limit exceeded. Please wait a moment.",
+            rateLimit: "Rate limit exceeded. Please wait.",
             timeout: "Request timeout. Please try again.",
-            unknown: "An unexpected error occurred. Please try again."
+            unknown: "An unexpected error occurred."
         }
     },
 
@@ -335,15 +277,15 @@ const ChatbotConfig = {
     // DEVELOPMENT
     // ============================================
     development: {
-        debugMode: false, // Set to true for detailed console logs
-        mockApiResponses: false, // Use mock data instead of real APIs
+        debugMode: false,
+        mockApiResponses: false,
         showPerformanceMetrics: false,
         enableHotReload: false
     }
 };
 
 // ============================================
-// EXPORT CONFIGURATION
+// EXPORT
 // ============================================
 if (typeof module !== 'undefined' && module.exports) {
     module.exports = ChatbotConfig;

@@ -267,36 +267,69 @@ class FinancialChatbotEngine {
         return entities;
     }
 
-    // ============================================
-    // BUILD CONTEXT
-    // ============================================
-    async buildContext(intent, entities) {
-        const context = {
-            intent: intent,
-            entities: entities,
-            timestamp: Date.now()
-        };
+// ============================================
+// BUILD CONTEXT - WITH REAL DATA
+// ============================================
+async buildContext(intent, entities) {
+    const context = {
+        intent: intent,
+        entities: entities,
+        timestamp: Date.now()
+    };
 
-        // Add market data if available
-        if (this.analytics) {
-            try {
-                context.marketData = await this.analytics.getMarketOverview();
-            } catch (error) {
-                console.warn('Could not fetch market data:', error);
+    console.log('🔧 Building context with real data...');
+
+    // ✅ ADD STOCK DATA if symbol detected
+    if (entities.symbols && entities.symbols.length > 0 && this.analytics) {
+        const symbol = entities.symbols[0];
+        console.log(`📊 Fetching real data for ${symbol}...`);
+        
+        try {
+            const stockData = await this.analytics.getStockData(symbol);
+            if (stockData) {
+                context.stockData = stockData;
+                console.log(`✅ Real stock data loaded for ${symbol}`);
+                console.log(`   Price: $${stockData.quote?.current}`);
             }
-        }
-
-        // Add IPO data for IPO-related queries
-        if (intent.type === 'IPO_ANALYSIS' && this.ipoAnalyzer) {
-            try {
-                context.ipoData = await this.ipoAnalyzer.getTopIPOs(5);
-            } catch (error) {
-                console.warn('Could not fetch IPO data:', error);
+            
+            // ✅ ALSO GET TIME SERIES for charts
+            const timeSeries = await this.analytics.getTimeSeries(symbol, '1day', 30);
+            if (timeSeries) {
+                context.timeSeriesData = timeSeries;
+                console.log(`✅ Time series data loaded (${timeSeries.data.length} points)`);
             }
+        } catch (error) {
+            console.warn(`⚠️ Could not fetch stock data for ${symbol}:`, error);
         }
-
-        return context;
     }
+
+    // ✅ ADD MARKET DATA for market queries
+    if (intent.type === 'MARKET_OVERVIEW' && this.analytics) {
+        console.log('🌐 Fetching market overview...');
+        try {
+            const marketData = await this.analytics.getMarketOverview();
+            if (marketData) {
+                context.marketData = marketData;
+                console.log('✅ Market overview loaded');
+            }
+        } catch (error) {
+            console.warn('⚠️ Could not fetch market data:', error);
+        }
+    }
+
+    // ✅ ADD IPO DATA for IPO queries
+    if (intent.type === 'IPO_ANALYSIS' && this.ipoAnalyzer) {
+        try {
+            context.ipoData = await this.ipoAnalyzer.getTopIPOs(5);
+            console.log('✅ IPO data loaded');
+        } catch (error) {
+            console.warn('⚠️ Could not fetch IPO data:', error);
+        }
+    }
+
+    console.log('✅ Context built with real data:', Object.keys(context));
+    return context;
+}
 
     // ============================================
     // HANDLE IPO QUERY
