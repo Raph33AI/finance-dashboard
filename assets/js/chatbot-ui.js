@@ -81,7 +81,7 @@ class ChatbotUI {
                             ${this.config.ui.botAvatar}
                         </div>
                         <div class="chatbot-title-section">
-                            <h3 class="chatbot-title">Financial AI Assistant</h3>
+                            <h3 class="chatbot-title">Alphy - Financial AI Assistant</h3>
                             <div class="chatbot-status">
                                 <span class="status-indicator"></span>
                                 <span>Online</span>
