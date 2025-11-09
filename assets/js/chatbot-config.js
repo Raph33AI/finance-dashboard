@@ -11,7 +11,7 @@ const ChatbotConfig = {
         gemini: {
             // IMPORTANT: Replace with your actual Gemini API key
             apiKey: 'AIzaSyDWbJhZm4hUls0t7qkwmDwrAZCJTLXXztU',
-            endpoint: 'https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent',
+            endpoint: 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent',
             model: 'gemini-2.5-flash',
             // Supercharged parameters for premium responses
             maxOutputTokens: 8192, // 4x increase from default 2048
