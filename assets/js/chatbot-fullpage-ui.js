@@ -1,9 +1,11 @@
 // ============================================
-// CHATBOT FULL PAGE UI - VERSION FINALE
+// CHATBOT FULL PAGE UI - VERSION DEBUG
 // ============================================
 
 class ChatbotFullPageUI {
     constructor(config) {
+        console.log('🚀 [UI] Constructor called');
+        
         this.config = config;
         this.engine = null;
         this.charts = null;
@@ -25,36 +27,44 @@ class ChatbotFullPageUI {
 
     async init() {
         try {
-            console.log('🎨 Initializing Full Page UI...');
+            console.log('🎨 [UI] Initializing...');
             
             await new Promise(resolve => setTimeout(resolve, 100));
             
             this.cacheElements();
-            this.createFloatingToggle(); // ✅ Créer le bouton flottant
+            this.createSidebarToggle();
             this.attachEventListeners();
             await this.initializeComponents();
             
             this.loadConversations();
             
+            // Particles
             if (typeof initializeParticles === 'function') {
+                console.log('✨ [UI] Initializing particles...');
                 initializeParticles();
             }
             
+            // Robot 3D
+            console.log('🤖 [UI] Scheduling robot initialization...');
             setTimeout(() => {
                 if (typeof initRobot3D === 'function') {
-                    console.log('🤖 Initializing 3D Robot...');
+                    console.log('🤖 [UI] Calling initRobot3D()...');
                     initRobot3D();
+                } else {
+                    console.error('❌ [UI] initRobot3D function NOT FOUND!');
                 }
-            }, 500);
+            }, 800);
             
-            console.log('✅ Full Page UI initialized');
+            console.log('✅ [UI] Initialization complete');
             
         } catch (error) {
-            console.error('❌ Full Page UI initialization error:', error);
+            console.error('❌ [UI] Initialization error:', error);
         }
     }
 
     cacheElements() {
+        console.log('📦 [UI] Caching elements...');
+        
         this.elements = {
             messages: document.getElementById('chatbot-messages-content'),
             welcomeScreen: document.getElementById('welcome-screen'),
@@ -69,29 +79,42 @@ class ChatbotFullPageUI {
             settingsBtn: document.getElementById('settings-btn'),
             
             conversationsSidebar: document.getElementById('conversations-sidebar'),
-            conversationsToggle: document.getElementById('conversations-toggle'),
             conversationsList: document.getElementById('conversations-list')
         };
         
-        console.log('📦 Elements cached');
+        console.log('✅ [UI] Elements cached:', Object.keys(this.elements).length);
+        
+        // Debug missing elements
+        Object.entries(this.elements).forEach(([key, value]) => {
+            if (!value) {
+                console.warn(`⚠️ [UI] Element ${key} NOT FOUND!`);
+            }
+        });
     }
 
-    // ✅ CRÉER LE BOUTON TOGGLE FLOTTANT
-    createFloatingToggle() {
-        const floatingToggle = document.createElement('button');
-        floatingToggle.id = 'conversations-toggle-floating';
-        floatingToggle.className = 'conversations-toggle-floating';
-        floatingToggle.innerHTML = '<i class="fas fa-chevron-left"></i>';
-        floatingToggle.title = 'Toggle conversations';
+    createSidebarToggle() {
+        console.log('🔘 [UI] Creating sidebar toggle button...');
         
-        if (this.elements.conversationsSidebar) {
-            this.elements.conversationsSidebar.appendChild(floatingToggle);
-            this.elements.conversationsToggleFloating = floatingToggle;
-            console.log('✅ Floating toggle button created');
+        if (!this.elements.conversationsSidebar) {
+            console.error('❌ [UI] Cannot create toggle: sidebar not found');
+            return;
         }
+        
+        const toggleBtn = document.createElement('button');
+        toggleBtn.className = 'sidebar-toggle-btn';
+        toggleBtn.innerHTML = '<i class="fas fa-chevron-left"></i>';
+        toggleBtn.title = 'Toggle conversations';
+        
+        this.elements.conversationsSidebar.appendChild(toggleBtn);
+        this.elements.sidebarToggle = toggleBtn;
+        
+        console.log('✅ [UI] Toggle button created');
     }
 
     attachEventListeners() {
+        console.log('🔌 [UI] Attaching event listeners...');
+        
+        // Welcome suggestions
         const welcomeSuggestions = document.querySelectorAll('.welcome-suggestion-btn');
         welcomeSuggestions.forEach(btn => {
             btn.addEventListener('click', () => {
@@ -102,6 +125,7 @@ class ChatbotFullPageUI {
             });
         });
         
+        // Input events
         if (this.elements.input) {
             this.elements.input.addEventListener('keydown', (e) => {
                 if (e.key === 'Enter' && !e.shiftKey) {
@@ -116,12 +140,14 @@ class ChatbotFullPageUI {
             });
         }
         
+        // Send button
         if (this.elements.sendBtn) {
             this.elements.sendBtn.addEventListener('click', () => {
                 this.sendMessage();
             });
         }
         
+        // Clear input
         if (this.elements.inputClearBtn) {
             this.elements.inputClearBtn.addEventListener('click', () => {
                 if (this.elements.input) {
@@ -133,6 +159,7 @@ class ChatbotFullPageUI {
             });
         }
         
+        // Suggestions
         if (this.elements.inputSuggestions) {
             this.elements.inputSuggestions.addEventListener('click', (e) => {
                 if (e.target.classList.contains('input-suggestion-chip')) {
@@ -141,26 +168,22 @@ class ChatbotFullPageUI {
             });
         }
         
+        // New chat
         if (this.elements.newChatBtn) {
             this.elements.newChatBtn.addEventListener('click', () => {
                 this.startNewConversation();
             });
         }
         
-        // ✅ TOGGLE DANS LE HEADER
-        if (this.elements.conversationsToggle) {
-            this.elements.conversationsToggle.addEventListener('click', () => {
-                this.toggleConversationsSidebar();
+        // ✅ SIDEBAR TOGGLE
+        if (this.elements.sidebarToggle) {
+            this.elements.sidebarToggle.addEventListener('click', () => {
+                console.log('🔘 [UI] Toggle clicked');
+                this.toggleSidebar();
             });
         }
         
-        // ✅ TOGGLE FLOTTANT
-        if (this.elements.conversationsToggleFloating) {
-            this.elements.conversationsToggleFloating.addEventListener('click', () => {
-                this.toggleConversationsSidebar();
-            });
-        }
-        
+        // Conversations list
         if (this.elements.conversationsList) {
             this.elements.conversationsList.addEventListener('click', (e) => {
                 const item = e.target.closest('.conversation-item');
@@ -175,34 +198,64 @@ class ChatbotFullPageUI {
             });
         }
         
-        console.log('✅ Event listeners attached');
+        console.log('✅ [UI] Event listeners attached');
     }
 
     async initializeComponents() {
+        console.log('🔧 [UI] Initializing components...');
+        
         if (typeof FinancialChatbotEngine !== 'undefined') {
             this.engine = new FinancialChatbotEngine(this.config);
-            console.log('✅ Engine initialized');
+            console.log('✅ [UI] Engine initialized');
+        } else {
+            console.warn('⚠️ [UI] FinancialChatbotEngine not found');
         }
         
         if (typeof ChatbotCharts !== 'undefined') {
             this.charts = new ChatbotCharts(this.config);
-            console.log('✅ Charts initialized');
+            console.log('✅ [UI] Charts initialized');
+        } else {
+            console.warn('⚠️ [UI] ChatbotCharts not found');
         }
         
         if (typeof ChatbotSuggestions !== 'undefined') {
             this.suggestions = new ChatbotSuggestions(this.config);
-            console.log('✅ Suggestions initialized');
+            console.log('✅ [UI] Suggestions initialized');
+        } else {
+            console.warn('⚠️ [UI] ChatbotSuggestions not found');
         }
     }
 
     // ============================================
-    // CONVERSATIONS MANAGEMENT
+    // SIDEBAR TOGGLE
+    // ============================================
+    toggleSidebar() {
+        if (!this.elements.conversationsSidebar) {
+            console.error('❌ [UI] Cannot toggle: sidebar not found');
+            return;
+        }
+        
+        this.isSidebarOpen = !this.isSidebarOpen;
+        
+        if (this.isSidebarOpen) {
+            this.elements.conversationsSidebar.classList.remove('sidebar-closed');
+            console.log('📂 [UI] Sidebar OPENED');
+        } else {
+            this.elements.conversationsSidebar.classList.add('sidebar-closed');
+            console.log('📁 [UI] Sidebar CLOSED');
+        }
+    }
+
+    // ============================================
+    // CONVERSATIONS
     // ============================================
     loadConversations() {
+        console.log('💾 [UI] Loading conversations...');
+        
         const saved = localStorage.getItem('alphy_conversations');
         if (saved) {
             this.conversations = JSON.parse(saved);
-            console.log('✅ Conversations loaded:', this.conversations.length);
+            console.log('✅ [UI] Loaded', this.conversations.length, 'conversations');
         } else {
             this.conversations = [];
         }
@@ -221,7 +274,7 @@ class ChatbotFullPageUI {
     }
 
     startNewConversation() {
-        console.log('🆕 Starting new conversation...');
+        console.log('🆕 [UI] Starting new conversation...');
         
         const newConv = {
             id: 'conv-' + Date.now(),
@@ -239,11 +292,11 @@ class ChatbotFullPageUI {
         this.saveConversations();
         this.renderConversations();
         
-        console.log('✅ New conversation started:', newConv.id);
+        console.log('✅ [UI] New conversation started:', newConv.id);
     }
 
     resetInterface() {
-        console.log('🔄 Resetting interface...');
+        console.log('🔄 [UI] Resetting interface...');
         
         this.clearMessages();
         this.showWelcomeScreen();
@@ -262,7 +315,7 @@ class ChatbotFullPageUI {
             resetRobot3D();
         }
         
-        console.log('✅ Interface reset complete');
+        console.log('✅ [UI] Interface reset');
     }
 
     loadConversation(id) {
@@ -283,7 +336,7 @@ class ChatbotFullPageUI {
         }
         
         this.renderConversations();
-        console.log('✅ Conversation loaded:', id);
+        console.log('✅ [UI] Conversation loaded:', id);
     }
 
     deleteConversation(id) {
@@ -300,7 +353,7 @@ class ChatbotFullPageUI {
             
             this.saveConversations();
             this.renderConversations();
-            console.log('✅ Conversation deleted:', id);
+            console.log('✅ [UI] Conversation deleted:', id);
         }
     }
 
@@ -380,30 +433,12 @@ class ChatbotFullPageUI {
         `;
     }
 
-    // ✅ TOGGLE SIDEBAR
-    toggleConversationsSidebar() {
-        if (!this.elements.conversationsSidebar) {
-            console.error('❌ Sidebar element not found');
-            return;
-        }
-        
-        this.isSidebarOpen = !this.isSidebarOpen;
-        
-        if (this.isSidebarOpen) {
-            this.elements.conversationsSidebar.classList.remove('closed');
-            console.log('📂 Sidebar opened');
-        } else {
-            this.elements.conversationsSidebar.classList.add('closed');
-            console.log('📁 Sidebar closed');
-        }
-    }
-
     // ============================================
-    // SEND MESSAGE
+    // MESSAGES
     // ============================================
     async sendMessage(messageText = null) {
         if (!this.elements.input) {
-            console.error('❌ Input element not found!');
+            console.error('❌ [UI] Input not found');
             return;
         }
         
@@ -413,7 +448,7 @@ class ChatbotFullPageUI {
             return;
         }
         
-        console.log('📤 Sending message:', message);
+        console.log('📤 [UI] Sending message:', message);
         
         this.hideWelcomeScreen();
         
@@ -468,7 +503,7 @@ class ChatbotFullPageUI {
             }
             
         } catch (error) {
-            console.error('❌ Message processing error:', error);
+            console.error('❌ [UI] Message processing error:', error);
             this.hideTypingIndicator();
             
             if (typeof setRobotThinking === 'function') {
@@ -481,7 +516,7 @@ class ChatbotFullPageUI {
 
     addMessage(type, content, save = true) {
         if (!this.elements.messages) {
-            console.error('❌ Messages container not found!');
+            console.error('❌ [UI] Messages container not found');
             return;
         }
         
@@ -639,7 +674,7 @@ class ChatbotFullPageUI {
     showWelcomeScreen() {
         if (this.elements.welcomeScreen) {
             this.elements.welcomeScreen.style.display = 'block';
-            console.log('👋 Welcome screen shown');
+            console.log('👋 [UI] Welcome screen shown');
             
             setTimeout(() => {
                 if (typeof resetRobot3D === 'function') {
@@ -686,17 +721,30 @@ class ChatbotFullPageUI {
 // INITIALIZE
 // ============================================
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('🚀 Initializing Chatbot Full Page...');
+    console.log('🚀 [MAIN] DOM Content Loaded');
+    console.log('📋 [MAIN] Checking dependencies...');
     
+    // Check Three.js
+    if (typeof THREE !== 'undefined') {
+        console.log('✅ [MAIN] THREE.js loaded');
+    } else {
+        console.error('❌ [MAIN] THREE.js NOT loaded!');
+    }
+    
+    // Check ChatbotConfig
     if (typeof ChatbotConfig === 'undefined') {
-        console.error('❌ ChatbotConfig not defined!');
+        console.error('❌ [MAIN] ChatbotConfig not defined!');
         return;
     }
     
+    console.log('✅ [MAIN] ChatbotConfig found');
+    
     try {
         window.financialChatbotFullPage = new ChatbotFullPageUI(ChatbotConfig);
-        console.log('✅ Chatbot Full Page ready!');
+        console.log('✅ [MAIN] Chatbot initialized successfully!');
     } catch (error) {
-        console.error('❌ Initialization error:', error);
+        console.error('❌ [MAIN] Initialization error:', error);
     }
 });
+
+console.log('📝 [MAIN] chatbot-fullpage-ui.js loaded');
