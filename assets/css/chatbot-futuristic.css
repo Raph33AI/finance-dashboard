@@ -1,6 +1,6 @@
 /* ============================================
    CHATBOT FULL PAGE - VERSION FINALE CORRIGÉE
-   Flèche d'ouverture + Zone de chat pleine largeur ✅
+   Sans espace vide + Flèche d'ouverture ✅
    ============================================ */
 
 :root {
@@ -131,7 +131,7 @@ body {
 }
 
 /* ============================================
-   CONVERSATIONS SIDEBAR - AVEC TOGGLE ✅
+   CONVERSATIONS SIDEBAR - CORRECTION ESPACE VIDE ✅
    ============================================ */
 .conversations-sidebar {
     width: var(--sidebar-width);
@@ -140,15 +140,19 @@ body {
     border-right: 1px solid var(--chatbot-border);
     display: flex;
     flex-direction: column;
-    transition: transform var(--transition-smooth), opacity var(--transition-smooth);
+    transition: all var(--transition-smooth);
     z-index: 10;
     flex-shrink: 0;
     position: relative;
 }
 
-/* ✅ ÉTAT FERMÉ (COLLAPSED) */
+/* ✅ ÉTAT FERMÉ (COLLAPSED) - POSITION ABSOLUTE POUR NE PLUS PRENDRE DE PLACE */
 .conversations-sidebar.collapsed {
-    transform: translateX(calc(-1 * var(--sidebar-width)));
+    position: absolute;
+    left: 0;
+    top: 0;
+    height: 100%;
+    transform: translateX(-100%);
     opacity: 0;
     pointer-events: none;
 }
@@ -235,7 +239,8 @@ body {
 }
 
 /* ✅ Afficher uniquement quand sidebar fermée */
-.conversations-sidebar.collapsed ~ .chat-messages-area .sidebar-reopen-btn {
+.conversations-sidebar.collapsed ~ .chat-messages-area .sidebar-reopen-btn,
+body:has(.conversations-sidebar.collapsed) .sidebar-reopen-btn {
     opacity: 1;
     pointer-events: all;
 }
@@ -387,7 +392,7 @@ body {
 }
 
 /* ============================================
-   CHAT MESSAGES AREA - PLEINE LARGEUR QUAND SIDEBAR FERMÉE ✅
+   CHAT MESSAGES AREA - PLEINE LARGEUR AUTOMATIQUE ✅
    ============================================ */
 .chat-messages-area {
     flex: 1;
@@ -398,12 +403,8 @@ body {
     min-width: 0;
     position: relative;
     transition: all var(--transition-smooth);
-}
-
-/* ✅ QUAND SIDEBAR FERMÉE : Prendre toute la largeur */
-.conversations-sidebar.collapsed ~ .chat-messages-area {
+    /* ✅ IMPORTANT : Prendre tout l'espace disponible */
     width: 100%;
-    max-width: 100%;
 }
 
 .chatbot-messages-wrapper {
@@ -443,8 +444,8 @@ body {
 
 /* ✅ Quand sidebar fermée : agrandir la zone de contenu */
 .conversations-sidebar.collapsed ~ .chat-messages-area .chatbot-messages-content {
-    max-width: 1200px;
-    padding: 40px 60px;
+    max-width: 1400px;
+    padding: 40px 80px;
 }
 
 /* ============================================
@@ -800,7 +801,7 @@ body {
 
 /* ✅ Agrandir l'input quand sidebar fermée */
 .conversations-sidebar.collapsed ~ .chat-messages-area .input-container {
-    max-width: 1200px;
+    max-width: 1400px;
 }
 
 .input-wrapper {
@@ -912,7 +913,7 @@ body {
 
 /* ✅ Agrandir le footer quand sidebar fermée */
 .conversations-sidebar.collapsed ~ .chat-messages-area .input-footer {
-    max-width: 1200px;
+    max-width: 1400px;
 }
 
 .input-hint {
@@ -1002,8 +1003,13 @@ body {
     }
     
     .conversations-sidebar.collapsed ~ .chat-messages-area .chatbot-messages-content {
-        max-width: 1000px;
-        padding: 40px 40px;
+        max-width: 1200px;
+        padding: 40px 60px;
+    }
+    
+    .conversations-sidebar.collapsed ~ .chat-messages-area .input-container,
+    .conversations-sidebar.collapsed ~ .chat-messages-area .input-footer {
+        max-width: 1200px;
     }
 }
 
@@ -1057,6 +1063,11 @@ body {
     .conversations-sidebar.collapsed ~ .chat-messages-area .chatbot-messages-content {
         max-width: 900px;
         padding: 40px 20px;
+    }
+    
+    .conversations-sidebar.collapsed ~ .chat-messages-area .input-container,
+    .conversations-sidebar.collapsed ~ .chat-messages-area .input-footer {
+        max-width: 900px;
     }
 }
 
