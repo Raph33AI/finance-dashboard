@@ -8,10 +8,8 @@ let robotIdle = true;
 let robotThinking = false;
 let robotTalking = false;
 
-// Références aux parties du robot
 let robotHead, robotEyeLeft, robotEyeRight, robotBody, robotAntenna;
 
-// Mouse tracking
 let mouseX = 0, mouseY = 0;
 
 function initRobot3D() {
@@ -23,11 +21,17 @@ function initRobot3D() {
         return;
     }
     
+    // ✅ NETTOYER L'ANCIEN RENDERER SI EXISTE
+    if (robot3DRenderer) {
+        container.innerHTML = '';
+        disposeRobot3D();
+    }
+    
     // ============================================
     // SCENE SETUP
     // ============================================
     robot3DScene = new THREE.Scene();
-    robot3DScene.background = null; // Transparent
+    robot3DScene.background = null;
     
     // Camera
     robot3DCamera = new THREE.PerspectiveCamera(
@@ -53,16 +57,14 @@ function initRobot3D() {
     robot3DRenderer.toneMappingExposure = 1.2;
     
     container.appendChild(robot3DRenderer.domElement);
+    console.log('✅ Renderer created and appended');
     
     // ============================================
-    // LIGHTING (Ultra-réaliste)
+    // LIGHTING
     // ============================================
-    
-    // Ambient Light
     const ambientLight = new THREE.AmbientLight(0xffffff, 0.4);
     robot3DScene.add(ambientLight);
     
-    // Main Light (Frontal)
     const mainLight = new THREE.DirectionalLight(0xffffff, 1.2);
     mainLight.position.set(5, 8, 5);
     mainLight.castShadow = true;
@@ -70,23 +72,20 @@ function initRobot3D() {
     mainLight.shadow.mapSize.height = 2048;
     robot3DScene.add(mainLight);
     
-    // Rim Light (Contour)
     const rimLight = new THREE.DirectionalLight(0x8b5cf6, 0.6);
     rimLight.position.set(-5, 3, -5);
     robot3DScene.add(rimLight);
     
-    // Fill Light (Remplissage)
     const fillLight = new THREE.DirectionalLight(0x667eea, 0.4);
     fillLight.position.set(0, -5, 3);
     robot3DScene.add(fillLight);
     
-    // Point Light for Eyes (Glow effect)
     const eyeGlow = new THREE.PointLight(0x8b5cf6, 0.8, 10);
     eyeGlow.position.set(0, 0.5, 1.5);
     robot3DScene.add(eyeGlow);
     
     // ============================================
-    // CREATE ROBOT MODEL
+    // CREATE ROBOT
     // ============================================
     createRobotModel();
     
@@ -99,51 +98,49 @@ function initRobot3D() {
     });
     
     // ============================================
-    // RESIZE HANDLER
+    // RESIZE
     // ============================================
-    window.addEventListener('resize', () => {
-        if (!container) return;
-        
-        const width = container.clientWidth;
-        const height = container.clientHeight;
-        
-        robot3DCamera.aspect = width / height;
-        robot3DCamera.updateProjectionMatrix();
-        
-        robot3DRenderer.setSize(width, height);
-    });
+    window.addEventListener('resize', onRobotResize);
     
     // ============================================
     // START ANIMATION
     // ============================================
     animateRobot3D();
     
-    console.log('✅ 3D Robot initialized!');
+    console.log('✅ 3D Robot initialized successfully!');
+}
+
+function onRobotResize() {
+    const container = document.getElementById('robot-3d-container');
+    if (!container || !robot3DCamera || !robot3DRenderer) return;
+    
+    const width = container.clientWidth;
+    const height = container.clientHeight;
+    
+    robot3DCamera.aspect = width / height;
+    robot3DCamera.updateProjectionMatrix();
+    
+    robot3DRenderer.setSize(width, height);
 }
 
 function createRobotModel() {
     robot3DModel = new THREE.Group();
     
     // ============================================
-    // MATERIALS (PBR Realistic)
+    // MATERIALS
     // ============================================
-    
-    // Metal material (Head & Body)
     const metalMaterial = new THREE.MeshStandardMaterial({
         color: 0xe2e8f0,
         metalness: 0.8,
-        roughness: 0.2,
-        envMapIntensity: 1.5
+        roughness: 0.2
     });
     
-    // Dark metal (Body panel)
     const darkMetalMaterial = new THREE.MeshStandardMaterial({
         color: 0x1e293b,
         metalness: 0.9,
         roughness: 0.3
     });
     
-    // Eye material (Glowing)
     const eyeMaterial = new THREE.MeshStandardMaterial({
         color: 0x8b5cf6,
         emissive: 0x8b5cf6,
@@ -152,7 +149,6 @@ function createRobotModel() {
         roughness: 0.1
     });
     
-    // Antenna tip (Glowing)
     const antennaTipMaterial = new THREE.MeshStandardMaterial({
         color: 0xfbbf24,
         emissive: 0xfbbf24,
@@ -161,7 +157,6 @@ function createRobotModel() {
         roughness: 0.2
     });
     
-    // Tie material
     const tieMaterial = new THREE.MeshStandardMaterial({
         color: 0xdc2626,
         metalness: 0.2,
@@ -171,18 +166,10 @@ function createRobotModel() {
     // ============================================
     // HEAD
     // ============================================
-    const headGeometry = new THREE.BoxGeometry(1.2, 1.2, 1.2, 2, 2, 2);
+    const headGeometry = new THREE.BoxGeometry(1.2, 1.2, 1.2);
     robotHead = new THREE.Mesh(headGeometry, metalMaterial);
     robotHead.position.y = 1.5;
     robotHead.castShadow = true;
-    robotHead.receiveShadow = true;
-    
-    // Bevel edges for realism
-    const edges = new THREE.EdgesGeometry(headGeometry);
-    const lineMaterial = new THREE.LineBasicMaterial({ color: 0x94a3b8, linewidth: 2 });
-    const headEdges = new THREE.LineSegments(edges, lineMaterial);
-    robotHead.add(headEdges);
-    
     robot3DModel.add(robotHead);
     
     // ============================================
@@ -200,7 +187,6 @@ function createRobotModel() {
     robotEyeRight.castShadow = true;
     robot3DModel.add(robotEyeRight);
     
-    // Eye highlights (realistic reflection)
     const highlightGeometry = new THREE.SphereGeometry(0.06, 16, 16);
     const highlightMaterial = new THREE.MeshBasicMaterial({ color: 0xffffff });
     
@@ -247,14 +233,12 @@ function createRobotModel() {
     // ============================================
     // BODY
     // ============================================
-    const bodyGeometry = new THREE.BoxGeometry(1.4, 1.6, 1, 2, 2, 2);
+    const bodyGeometry = new THREE.BoxGeometry(1.4, 1.6, 1);
     robotBody = new THREE.Mesh(bodyGeometry, darkMetalMaterial);
     robotBody.position.y = 0.2;
     robotBody.castShadow = true;
-    robotBody.receiveShadow = true;
     robot3DModel.add(robotBody);
     
-    // Body panel (lighter)
     const panelGeometry = new THREE.BoxGeometry(0.9, 1.2, 0.05);
     const panel = new THREE.Mesh(panelGeometry, metalMaterial);
     panel.position.set(0, 0.2, 0.52);
@@ -284,7 +268,7 @@ function createRobotModel() {
     robot3DModel.add(tie);
     
     // ============================================
-    // BUTTONS (3 glowing buttons)
+    // BUTTONS
     // ============================================
     const buttonGeometry = new THREE.CylinderGeometry(0.06, 0.06, 0.03, 32);
     const buttonMaterial = new THREE.MeshStandardMaterial({
@@ -319,7 +303,6 @@ function createRobotModel() {
     rightArm.castShadow = true;
     robot3DModel.add(rightArm);
     
-    // Hands
     const handGeometry = new THREE.SphereGeometry(0.18, 32, 32);
     
     const leftHand = new THREE.Mesh(handGeometry, metalMaterial);
@@ -333,12 +316,12 @@ function createRobotModel() {
     robot3DModel.add(rightHand);
     
     // ============================================
-    // ADD MODEL TO SCENE
+    // ADD TO SCENE
     // ============================================
     robot3DScene.add(robot3DModel);
-    
-    // Initial rotation for better view
     robot3DModel.rotation.y = 0.2;
+    
+    console.log('✅ Robot model created');
 }
 
 function animateRobot3D() {
@@ -348,60 +331,46 @@ function animateRobot3D() {
     
     const time = Date.now() * 0.001;
     
-    // ============================================
-    // IDLE ANIMATION (Floating + Breathing)
-    // ============================================
+    // IDLE
     if (robotIdle) {
         robot3DModel.position.y = Math.sin(time * 1.5) * 0.15;
         robot3DModel.rotation.y = 0.2 + Math.sin(time * 0.5) * 0.1;
         
-        // Breathing (body scale)
         if (robotBody) {
             const breathe = 1 + Math.sin(time * 2) * 0.02;
             robotBody.scale.set(1, breathe, 1);
         }
     }
     
-    // ============================================
-    // THINKING ANIMATION
-    // ============================================
+    // THINKING
     if (robotThinking && robotHead) {
         robotHead.rotation.x = Math.sin(time * 3) * 0.1;
         robotHead.rotation.y = Math.sin(time * 2) * 0.15;
         
-        // Antenna wiggle
         if (robotAntenna) {
             robotAntenna.rotation.z = Math.sin(time * 4) * 0.2;
         }
     }
     
-    // ============================================
-    // TALKING ANIMATION
-    // ============================================
+    // TALKING
     if (robotTalking && robotHead) {
         robotHead.rotation.z = Math.sin(time * 10) * 0.05;
     }
     
-    // ============================================
-    // EYE BLINK (Random)
-    // ============================================
+    // BLINK
     if (Math.random() < 0.01) {
         if (robotEyeLeft && robotEyeRight) {
-            const blinkDuration = 100;
-            
             robotEyeLeft.scale.y = 0.1;
             robotEyeRight.scale.y = 0.1;
             
             setTimeout(() => {
                 robotEyeLeft.scale.y = 1;
                 robotEyeRight.scale.y = 1;
-            }, blinkDuration);
+            }, 100);
         }
     }
     
-    // ============================================
-    // MOUSE TRACKING (Head follows mouse)
-    // ============================================
+    // MOUSE TRACKING
     if (robotHead && !robotThinking) {
         const targetRotationY = mouseX * 0.3;
         const targetRotationX = mouseY * 0.2;
@@ -410,9 +379,7 @@ function animateRobot3D() {
         robotHead.rotation.x += (targetRotationX - robotHead.rotation.x) * 0.05;
     }
     
-    // ============================================
     // RENDER
-    // ============================================
     robot3DRenderer.render(robot3DScene, robot3DCamera);
 }
 
@@ -436,6 +403,10 @@ function resetRobot3D() {
         robot3DModel.rotation.set(0, 0.2, 0);
     }
     
+    if (robotHead) {
+        robotHead.rotation.set(0, 0, 0);
+    }
+    
     robotIdle = true;
     robotThinking = false;
     robotTalking = false;
@@ -443,20 +414,22 @@ function resetRobot3D() {
     console.log('🔄 Robot reset');
 }
 
-// ============================================
-// CLEANUP
-// ============================================
 function disposeRobot3D() {
     if (robotAnimationFrame) {
         cancelAnimationFrame(robotAnimationFrame);
+        robotAnimationFrame = null;
     }
     
     if (robot3DRenderer) {
         robot3DRenderer.dispose();
+        robot3DRenderer = null;
+    }
+    
+    if (robot3DScene) {
+        robot3DScene = null;
     }
     
     console.log('🗑️ Robot 3D disposed');
 }
 
-// Cleanup on page unload
 window.addEventListener('beforeunload', disposeRobot3D);

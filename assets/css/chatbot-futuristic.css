@@ -24,12 +24,15 @@
     --transition-fast: 200ms ease;
     --transition-base: 300ms ease;
     
-    /* ✅ NOUVELLE VARIABLE : Hauteur header */
+    /* ✅ HAUTEUR HEADER */
     --header-height: 70px;
+    
+    /* ✅ LARGEUR SIDEBAR CONVERSATIONS */
+    --conversations-width: 280px;
 }
 
 /* ============================================
-   PARTICLES BACKGROUND (DERRIÈRE TOUT)
+   PARTICLES BACKGROUND
    ============================================ */
 .particles-background {
     position: fixed !important;
@@ -43,7 +46,7 @@
 }
 
 /* ============================================
-   LAYOUT (Transparents pour voir particules)
+   LAYOUT
    ============================================ */
 body {
     background: transparent !important;
@@ -60,6 +63,9 @@ body {
     position: relative;
     z-index: 1;
     background: transparent !important;
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
 }
 
 .chatbot-top-header {
@@ -68,6 +74,7 @@ body {
     border-bottom: 1px solid var(--chatbot-border) !important;
     box-shadow: var(--shadow-sm);
     height: var(--header-height);
+    flex-shrink: 0;
 }
 
 .header-status {
@@ -119,33 +126,36 @@ body {
 }
 
 /* ============================================
-   CHAT LAYOUT - ✅ HAUTEURS SYNCHRONISÉES
+   ✅ CHAT LAYOUT - HAUTEURS PARFAITEMENT SYNCHRONISÉES
    ============================================ */
 .chat-layout {
     display: flex;
+    flex: 1;
     height: calc(100vh - var(--header-height));
-    position: relative;
+    overflow: hidden;
 }
 
 /* ============================================
-   CONVERSATIONS SIDEBAR - ✅ HAUTEUR FIXÉE
+   ✅ CONVERSATIONS SIDEBAR - SYSTÈME CORRIGÉ
    ============================================ */
 .conversations-sidebar {
-    width: 280px;
-    height: 100%; /* ✅ Prend toute la hauteur disponible */
+    width: var(--conversations-width);
+    flex-shrink: 0;
     background: rgba(255, 255, 255, 0.95);
     backdrop-filter: blur(20px) saturate(180%);
     border-right: 1px solid var(--chatbot-border);
     display: flex;
     flex-direction: column;
-    transition: transform var(--transition-base);
-    z-index: 10;
-    flex-shrink: 0;
+    transition: width var(--transition-base), opacity var(--transition-base);
+    overflow: hidden;
+    position: relative;
 }
 
-/* ✅ CORRECTION : État fermé de la sidebar */
+/* ✅ ÉTAT FERMÉ (width 0 au lieu de translateX) */
 .conversations-sidebar.closed {
-    transform: translateX(-100%);
+    width: 0;
+    opacity: 0;
+    border-right: none;
 }
 
 .conversations-header {
@@ -155,6 +165,7 @@ body {
     justify-content: space-between;
     align-items: center;
     flex-shrink: 0;
+    min-height: 70px;
 }
 
 .conversations-header h3 {
@@ -165,6 +176,7 @@ body {
     display: flex;
     align-items: center;
     gap: 8px;
+    white-space: nowrap;
 }
 
 .conversations-toggle {
@@ -179,6 +191,7 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
+    flex-shrink: 0;
 }
 
 .conversations-toggle:hover {
@@ -186,7 +199,7 @@ body {
     transform: scale(1.1);
 }
 
-/* ✅ Rotation de l'icône quand fermé */
+/* ✅ ICÔNE QUI TOURNE QUAND FERMÉ */
 .conversations-sidebar.closed .conversations-toggle i {
     transform: rotate(180deg);
 }
@@ -194,7 +207,21 @@ body {
 .conversations-list {
     flex: 1;
     overflow-y: auto;
+    overflow-x: hidden;
     padding: 16px;
+}
+
+.conversations-list::-webkit-scrollbar {
+    width: 6px;
+}
+
+.conversations-list::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.conversations-list::-webkit-scrollbar-thumb {
+    background: var(--chatbot-border);
+    border-radius: 3px;
 }
 
 .conversation-group {
@@ -233,6 +260,7 @@ body {
 .conversation-item i {
     color: var(--chatbot-text-secondary);
     font-size: 14px;
+    flex-shrink: 0;
 }
 
 .conversation-title {
@@ -254,6 +282,7 @@ body {
     cursor: pointer;
     opacity: 0;
     transition: all var(--transition-fast);
+    flex-shrink: 0;
 }
 
 .conversation-item:hover .conversation-delete {
@@ -266,7 +295,7 @@ body {
 }
 
 /* ============================================
-   CHAT MESSAGES AREA - ✅ HAUTEUR SYNCHRONISÉE
+   ✅ CHAT MESSAGES AREA - HAUTEUR SYNCHRONISÉE
    ============================================ */
 .chat-messages-area {
     flex: 1;
@@ -275,7 +304,7 @@ body {
     background: rgba(255, 255, 255, 0.6);
     backdrop-filter: blur(10px);
     min-width: 0;
-    height: 100%; /* ✅ Même hauteur que sidebar */
+    overflow: hidden;
 }
 
 .chatbot-messages-wrapper {
@@ -323,7 +352,7 @@ body {
 }
 
 /* ============================================
-   ✅ ROBOT 3D CONTAINER (Three.js Ready)
+   ✅ ROBOT 3D CONTAINER (VISIBLE ET CENTRÉ)
    ============================================ */
 .robot-3d-container-threejs {
     margin: 0 auto 30px;
@@ -331,20 +360,22 @@ body {
     max-width: 400px;
     height: 350px;
     position: relative;
-    overflow: hidden;
+    overflow: visible; /* ✅ IMPORTANT pour voir le robot */
     border-radius: var(--radius-xl);
-    background: radial-gradient(circle at 50% 50%, rgba(102, 126, 234, 0.1), transparent);
+    background: radial-gradient(circle at 50% 50%, rgba(102, 126, 234, 0.05), transparent);
 }
 
 #robot-3d-container {
     width: 100%;
     height: 100%;
+    position: relative; /* ✅ IMPORTANT */
 }
 
 #robot-3d-container canvas {
-    display: block;
+    display: block !important; /* ✅ IMPORTANT */
     width: 100% !important;
     height: 100% !important;
+    opacity: 1 !important; /* ✅ Forcer la visibilité */
 }
 
 /* ============================================
@@ -849,11 +880,12 @@ body {
         left: 0;
         top: 0;
         z-index: 100;
-        transform: translateX(-100%);
+        width: 0;
     }
     
     .conversations-sidebar.mobile-open {
-        transform: translateX(0);
+        width: var(--conversations-width);
+        opacity: 1;
     }
     
     .robot-3d-container-threejs {
