@@ -1,5 +1,6 @@
 /* ============================================
    CHATBOT FULL PAGE - VERSION FINALE CORRIGÉE
+   Avec Toggle Conversations Fonctionnel ✅
    ============================================ */
 
 :root {
@@ -23,6 +24,9 @@
     
     --transition-fast: 200ms ease;
     --transition-base: 300ms ease;
+    --transition-smooth: 400ms cubic-bezier(0.4, 0, 0.2, 1);
+    
+    --sidebar-width: 280px;
 }
 
 /* ============================================
@@ -121,21 +125,49 @@ body {
     display: flex;
     height: calc(100vh - 70px);
     position: relative;
+    overflow: hidden;
 }
 
 /* ============================================
-   CONVERSATIONS SIDEBAR
+   CONVERSATIONS SIDEBAR - AVEC TOGGLE ✅
    ============================================ */
 .conversations-sidebar {
-    width: 280px;
+    width: var(--sidebar-width);
     background: rgba(255, 255, 255, 0.95);
     backdrop-filter: blur(20px) saturate(180%);
     border-right: 1px solid var(--chatbot-border);
     display: flex;
     flex-direction: column;
-    transition: transform var(--transition-base);
+    transition: transform var(--transition-smooth), opacity var(--transition-smooth);
     z-index: 10;
     flex-shrink: 0;
+    position: relative;
+}
+
+/* ✅ ÉTAT FERMÉ (COLLAPSED) */
+.conversations-sidebar.collapsed {
+    transform: translateX(calc(-1 * var(--sidebar-width)));
+    opacity: 0;
+    pointer-events: none;
+}
+
+/* ✅ OVERLAY MOBILE (optionnel, pour fermer en cliquant à côté) */
+.conversations-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 9;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity var(--transition-smooth);
+}
+
+.conversations-sidebar.mobile-open ~ .conversations-overlay {
+    opacity: 1;
+    pointer-events: all;
 }
 
 .conversations-header {
@@ -144,6 +176,8 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    background: rgba(255, 255, 255, 0.6);
+    backdrop-filter: blur(10px);
 }
 
 .conversations-header h3 {
@@ -156,6 +190,11 @@ body {
     gap: 8px;
 }
 
+.conversations-header h3 i {
+    color: var(--neon-purple);
+}
+
+/* ✅ BOUTON TOGGLE AMÉLIORÉ */
 .conversations-toggle {
     width: 32px;
     height: 32px;
@@ -165,6 +204,48 @@ body {
     color: var(--chatbot-text);
     cursor: pointer;
     transition: all var(--transition-fast);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.conversations-toggle:hover {
+    background: #e2e8f0;
+    transform: scale(1.05);
+    box-shadow: var(--shadow-sm);
+}
+
+.conversations-toggle:active {
+    transform: scale(0.95);
+}
+
+/* ✅ ROTATION DE L'ICÔNE QUAND FERMÉ */
+.conversations-toggle i {
+    transition: transform var(--transition-smooth);
+}
+
+.conversations-sidebar.collapsed + .chat-messages-area .conversations-toggle i,
+.conversations-toggle.rotated i {
+    transform: rotate(180deg);
+}
+
+/* ✅ EFFET RIPPLE AU CLIC */
+.conversations-toggle::after {
+    content: '';
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background: rgba(102, 126, 234, 0.3);
+    border-radius: 50%;
+    transform: scale(0);
+    transition: transform 0.5s ease-out;
+}
+
+.conversations-toggle:active::after {
+    transform: scale(2);
+    opacity: 0;
 }
 
 .conversations-list {
@@ -173,9 +254,31 @@ body {
     padding: 16px;
 }
 
+.conversations-list::-webkit-scrollbar {
+    width: 6px;
+}
+
+.conversations-list::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.conversations-list::-webkit-scrollbar-thumb {
+    background: var(--chatbot-border);
+    border-radius: 3px;
+}
+
+.conversations-list::-webkit-scrollbar-thumb:hover {
+    background: #cbd5e1;
+}
+
 .conversation-group {
     margin-bottom: 24px;
+    animation: fade-in-up 0.4s ease-out backwards;
 }
+
+.conversation-group:nth-child(1) { animation-delay: 0.05s; }
+.conversation-group:nth-child(2) { animation-delay: 0.1s; }
+.conversation-group:nth-child(3) { animation-delay: 0.15s; }
 
 .group-title {
     font-size: 12px;
@@ -195,20 +298,48 @@ body {
     cursor: pointer;
     transition: all var(--transition-fast);
     margin-bottom: 4px;
+    position: relative;
+    overflow: hidden;
+}
+
+.conversation-item::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    height: 100%;
+    width: 3px;
+    background: var(--neon-purple);
+    transform: scaleY(0);
+    transition: transform var(--transition-fast);
 }
 
 .conversation-item:hover {
     background: rgba(241, 245, 249, 0.8);
+    transform: translateX(4px);
+}
+
+.conversation-item:hover::before {
+    transform: scaleY(1);
 }
 
 .conversation-item.active {
     background: #ede9fe;
-    border-left: 3px solid var(--neon-purple);
+}
+
+.conversation-item.active::before {
+    transform: scaleY(1);
 }
 
 .conversation-item i {
     color: var(--chatbot-text-secondary);
     font-size: 14px;
+    transition: color var(--transition-fast);
+}
+
+.conversation-item:hover i,
+.conversation-item.active i {
+    color: var(--neon-purple);
 }
 
 .conversation-title {
@@ -218,6 +349,7 @@ body {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    font-weight: 500;
 }
 
 .conversation-delete {
@@ -230,6 +362,7 @@ body {
     cursor: pointer;
     opacity: 0;
     transition: all var(--transition-fast);
+    border-radius: 4px;
 }
 
 .conversation-item:hover .conversation-delete {
@@ -238,11 +371,12 @@ body {
 
 .conversation-delete:hover {
     color: #ef4444;
+    background: rgba(239, 68, 68, 0.1);
     transform: scale(1.2);
 }
 
 /* ============================================
-   CHAT MESSAGES AREA
+   CHAT MESSAGES AREA - AVEC AJUSTEMENT AUTO ✅
    ============================================ */
 .chat-messages-area {
     flex: 1;
@@ -251,6 +385,12 @@ body {
     background: rgba(255, 255, 255, 0.6);
     backdrop-filter: blur(10px);
     min-width: 0;
+    transition: margin-left var(--transition-smooth);
+}
+
+/* ✅ QUAND SIDEBAR FERMÉE, PRENDRE TOUTE LA LARGEUR */
+.conversations-sidebar.collapsed ~ .chat-messages-area {
+    margin-left: 0;
 }
 
 .chatbot-messages-wrapper {
@@ -258,6 +398,7 @@ body {
     overflow-y: auto;
     overflow-x: hidden;
     background: transparent;
+    scroll-behavior: smooth;
 }
 
 .chatbot-messages-wrapper::-webkit-scrollbar {
@@ -271,6 +412,11 @@ body {
 .chatbot-messages-wrapper::-webkit-scrollbar-thumb {
     background: var(--chatbot-border);
     border-radius: 5px;
+    transition: background var(--transition-fast);
+}
+
+.chatbot-messages-wrapper::-webkit-scrollbar-thumb:hover {
+    background: #cbd5e1;
 }
 
 .chatbot-messages-content {
@@ -300,6 +446,16 @@ body {
 /* ============================================
    ROBOT 3D CONTAINER (TAILLE LIMITÉE)
    ============================================ */
+.robot-3d-container-threejs {
+    margin: 0 auto 30px;
+    width: 100%;
+    max-width: 400px;
+    height: 350px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
 .robot-3d-container {
     margin: 0 auto 30px;
     perspective: 1200px;
@@ -1135,4 +1291,79 @@ body {
 .chart-canvas-wrapper {
     position: relative;
     height: 400px;
+}
+
+/* ============================================
+   RESPONSIVE DESIGN
+   ============================================ */
+@media (max-width: 1024px) {
+    :root {
+        --sidebar-width: 260px;
+    }
+    
+    .welcome-title {
+        font-size: 36px;
+    }
+    
+    .welcome-features {
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    }
+}
+
+@media (max-width: 768px) {
+    /* ✅ SUR MOBILE, SIDEBAR EN OVERLAY */
+    .conversations-sidebar {
+        position: fixed;
+        left: 0;
+        top: 70px;
+        height: calc(100vh - 70px);
+        z-index: 100;
+        transform: translateX(-100%);
+    }
+    
+    .conversations-sidebar.mobile-open {
+        transform: translateX(0);
+        opacity: 1;
+        pointer-events: all;
+    }
+    
+    /* Toujours afficher le bouton toggle sur mobile */
+    .conversations-toggle {
+        display: flex;
+    }
+    
+    .welcome-title {
+        font-size: 28px;
+    }
+    
+    .welcome-subtitle {
+        font-size: 16px;
+    }
+    
+    .welcome-features {
+        grid-template-columns: 1fr;
+    }
+    
+    .welcome-suggestion-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .chatbot-input-area {
+        padding: 16px 20px 20px;
+    }
+}
+
+@media (max-width: 480px) {
+    .chatbot-messages-content {
+        padding: 20px 16px;
+    }
+    
+    .robot-3d {
+        width: 140px;
+        height: 180px;
+    }
+    
+    .welcome-title {
+        font-size: 24px;
+    }
 }

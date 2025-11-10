@@ -1,5 +1,5 @@
 // ============================================
-// CHATBOT FULL PAGE UI - WITH AUTO-RESET ON NEW CHAT
+// CHATBOT FULL PAGE UI - WITH AUTO-RESET & FUNCTIONAL TOGGLE ✅
 // ============================================
 
 class ChatbotFullPageUI {
@@ -18,6 +18,9 @@ class ChatbotFullPageUI {
         this.conversations = [];
         this.currentConversationId = null;
         
+        // ✅ État de la sidebar (mémorisé)
+        this.sidebarCollapsed = this.loadSidebarState();
+        
         this.init();
     }
 
@@ -32,6 +35,9 @@ class ChatbotFullPageUI {
             await this.initializeComponents();
             
             this.loadConversations();
+            
+            // ✅ Appliquer l'état sauvegardé de la sidebar
+            this.applySidebarState();
             
             if (typeof initializeParticles === 'function') {
                 initializeParticles();
@@ -128,7 +134,7 @@ class ChatbotFullPageUI {
             });
         }
         
-        // Conversations toggle
+        // ✅ CONVERSATIONS TOGGLE (AMÉLIORÉ)
         if (this.elements.conversationsToggle) {
             this.elements.conversationsToggle.addEventListener('click', () => {
                 this.toggleConversationsSidebar();
@@ -167,6 +173,58 @@ class ChatbotFullPageUI {
         if (typeof ChatbotSuggestions !== 'undefined') {
             this.suggestions = new ChatbotSuggestions(this.config);
             console.log('✅ Suggestions initialized');
+        }
+    }
+
+    // ============================================
+    // ✅ GESTION SIDEBAR TOGGLE (NOUVEAU)
+    // ============================================
+    
+    toggleConversationsSidebar() {
+        this.sidebarCollapsed = !this.sidebarCollapsed;
+        this.applySidebarState();
+        this.saveSidebarState();
+        
+        console.log(`📂 Sidebar ${this.sidebarCollapsed ? 'closed' : 'opened'}`);
+    }
+    
+    applySidebarState() {
+        if (!this.elements.conversationsSidebar) return;
+        
+        if (this.sidebarCollapsed) {
+            this.elements.conversationsSidebar.classList.add('collapsed');
+        } else {
+            this.elements.conversationsSidebar.classList.remove('collapsed');
+        }
+        
+        // ✅ Rotation de l'icône
+        if (this.elements.conversationsToggle) {
+            const icon = this.elements.conversationsToggle.querySelector('i');
+            if (icon) {
+                if (this.sidebarCollapsed) {
+                    icon.style.transform = 'rotate(180deg)';
+                } else {
+                    icon.style.transform = 'rotate(0deg)';
+                }
+            }
+        }
+    }
+    
+    saveSidebarState() {
+        try {
+            localStorage.setItem('alphy_sidebar_collapsed', JSON.stringify(this.sidebarCollapsed));
+        } catch (e) {
+            console.warn('⚠️ Could not save sidebar state:', e);
+        }
+    }
+    
+    loadSidebarState() {
+        try {
+            const saved = localStorage.getItem('alphy_sidebar_collapsed');
+            return saved ? JSON.parse(saved) : false; // Par défaut : ouvert
+        } catch (e) {
+            console.warn('⚠️ Could not load sidebar state:', e);
+            return false;
         }
     }
 
@@ -218,7 +276,7 @@ class ChatbotFullPageUI {
         console.log('✅ New conversation started:', newConv.id);
     }
 
-    // ✅ NOUVELLE MÉTHODE : Réinitialiser complètement l'interface
+    // ✅ RÉINITIALISER COMPLÈTEMENT L'INTERFACE
     resetInterface() {
         console.log('🔄 Resetting interface...');
         
@@ -352,18 +410,18 @@ class ChatbotFullPageUI {
         return `
             <div class="conversation-item ${isActive ? 'active' : ''}" data-id="${conv.id}">
                 <i class="fas fa-message"></i>
-                <span class="conversation-title">${conv.title}</span>
+                <span class="conversation-title">${this.escapeHtml(conv.title)}</span>
                 <button class="conversation-delete" title="Delete">
                     <i class="fas fa-trash"></i>
                 </button>
             </div>
         `;
     }
-
-    toggleConversationsSidebar() {
-        if (this.elements.conversationsSidebar) {
-            this.elements.conversationsSidebar.classList.toggle('mobile-open');
-        }
+    
+    escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
     }
 
     // ============================================
