@@ -30,6 +30,7 @@ class ChatbotFullPageUI {
             await new Promise(resolve => setTimeout(resolve, 100));
             
             this.cacheElements();
+            this.createFloatingToggle(); // ✅ Créer le bouton flottant
             this.attachEventListeners();
             await this.initializeComponents();
             
@@ -39,13 +40,10 @@ class ChatbotFullPageUI {
                 initializeParticles();
             }
             
-            // ✅ INITIALISER LE ROBOT 3D (APRÈS DOM READY)
             setTimeout(() => {
                 if (typeof initRobot3D === 'function') {
                     console.log('🤖 Initializing 3D Robot...');
                     initRobot3D();
-                } else {
-                    console.warn('⚠️ initRobot3D function not found');
                 }
             }, 500);
             
@@ -75,7 +73,22 @@ class ChatbotFullPageUI {
             conversationsList: document.getElementById('conversations-list')
         };
         
-        console.log('📦 Elements cached:', this.elements);
+        console.log('📦 Elements cached');
+    }
+
+    // ✅ CRÉER LE BOUTON TOGGLE FLOTTANT
+    createFloatingToggle() {
+        const floatingToggle = document.createElement('button');
+        floatingToggle.id = 'conversations-toggle-floating';
+        floatingToggle.className = 'conversations-toggle-floating';
+        floatingToggle.innerHTML = '<i class="fas fa-chevron-left"></i>';
+        floatingToggle.title = 'Toggle conversations';
+        
+        if (this.elements.conversationsSidebar) {
+            this.elements.conversationsSidebar.appendChild(floatingToggle);
+            this.elements.conversationsToggleFloating = floatingToggle;
+            console.log('✅ Floating toggle button created');
+        }
     }
 
     attachEventListeners() {
@@ -134,9 +147,16 @@ class ChatbotFullPageUI {
             });
         }
         
-        // ✅ TOGGLE CONVERSATIONS
+        // ✅ TOGGLE DANS LE HEADER
         if (this.elements.conversationsToggle) {
             this.elements.conversationsToggle.addEventListener('click', () => {
+                this.toggleConversationsSidebar();
+            });
+        }
+        
+        // ✅ TOGGLE FLOTTANT
+        if (this.elements.conversationsToggleFloating) {
+            this.elements.conversationsToggleFloating.addEventListener('click', () => {
                 this.toggleConversationsSidebar();
             });
         }
@@ -238,7 +258,6 @@ class ChatbotFullPageUI {
         this.messageCount = 0;
         this.chartCount = 0;
         
-        // ✅ RÉINITIALISER LE ROBOT
         if (typeof resetRobot3D === 'function') {
             resetRobot3D();
         }
@@ -361,7 +380,7 @@ class ChatbotFullPageUI {
         `;
     }
 
-    // ✅ TOGGLE SIDEBAR (AVEC WIDTH AU LIEU DE TRANSFORM)
+    // ✅ TOGGLE SIDEBAR
     toggleConversationsSidebar() {
         if (!this.elements.conversationsSidebar) {
             console.error('❌ Sidebar element not found');
@@ -622,7 +641,6 @@ class ChatbotFullPageUI {
             this.elements.welcomeScreen.style.display = 'block';
             console.log('👋 Welcome screen shown');
             
-            // ✅ RÉINITIALISER LE ROBOT APRÈS AFFICHAGE
             setTimeout(() => {
                 if (typeof resetRobot3D === 'function') {
                     resetRobot3D();

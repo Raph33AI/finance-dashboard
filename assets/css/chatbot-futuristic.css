@@ -1,5 +1,5 @@
 /* ============================================
-   CHATBOT FULL PAGE - VERSION FINALE CORRIGÉE
+   CHATBOT FULL PAGE - VERSION DÉFINITIVE
    ============================================ */
 
 :root {
@@ -24,10 +24,7 @@
     --transition-fast: 200ms ease;
     --transition-base: 300ms ease;
     
-    /* ✅ HAUTEUR HEADER */
     --header-height: 70px;
-    
-    /* ✅ LARGEUR SIDEBAR CONVERSATIONS */
     --conversations-width: 280px;
 }
 
@@ -126,13 +123,14 @@ body {
 }
 
 /* ============================================
-   ✅ CHAT LAYOUT - HAUTEURS PARFAITEMENT SYNCHRONISÉES
+   ✅ CHAT LAYOUT - HAUTEURS IDENTIQUES
    ============================================ */
 .chat-layout {
     display: flex;
     flex: 1;
     height: calc(100vh - var(--header-height));
     overflow: hidden;
+    position: relative;
 }
 
 /* ============================================
@@ -146,16 +144,54 @@ body {
     border-right: 1px solid var(--chatbot-border);
     display: flex;
     flex-direction: column;
-    transition: width var(--transition-base), opacity var(--transition-base);
+    transition: margin-left var(--transition-base), opacity var(--transition-base);
     overflow: hidden;
     position: relative;
+    height: 100%; /* ✅ MÊME HAUTEUR QUE CHAT LAYOUT */
 }
 
-/* ✅ ÉTAT FERMÉ (width 0 au lieu de translateX) */
+/* ✅ ÉTAT FERMÉ (margin-left négatif au lieu de width 0) */
 .conversations-sidebar.closed {
-    width: 0;
+    margin-left: calc(-1 * var(--conversations-width));
     opacity: 0;
-    border-right: none;
+}
+
+/* ✅ BOUTON TOGGLE FLOTTANT (visible même quand fermé) */
+.conversations-toggle-floating {
+    position: absolute;
+    left: var(--conversations-width);
+    top: 20px;
+    width: 40px;
+    height: 40px;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(20px);
+    border: 1px solid var(--chatbot-border);
+    border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+    color: var(--chatbot-text);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: var(--shadow-md);
+    transition: all var(--transition-base);
+    z-index: 20;
+}
+
+.conversations-sidebar.closed .conversations-toggle-floating {
+    left: 0;
+}
+
+.conversations-toggle-floating:hover {
+    background: #e2e8f0;
+    transform: scale(1.1);
+}
+
+.conversations-toggle-floating i {
+    transition: transform var(--transition-base);
+}
+
+.conversations-sidebar.closed .conversations-toggle-floating i {
+    transform: rotate(180deg);
 }
 
 .conversations-header {
@@ -199,7 +235,10 @@ body {
     transform: scale(1.1);
 }
 
-/* ✅ ICÔNE QUI TOURNE QUAND FERMÉ */
+.conversations-toggle i {
+    transition: transform var(--transition-base);
+}
+
 .conversations-sidebar.closed .conversations-toggle i {
     transform: rotate(180deg);
 }
@@ -295,7 +334,7 @@ body {
 }
 
 /* ============================================
-   ✅ CHAT MESSAGES AREA - HAUTEUR SYNCHRONISÉE
+   ✅ CHAT MESSAGES AREA - HAUTEUR IDENTIQUE
    ============================================ */
 .chat-messages-area {
     flex: 1;
@@ -304,6 +343,7 @@ body {
     background: rgba(255, 255, 255, 0.6);
     backdrop-filter: blur(10px);
     min-width: 0;
+    height: 100%; /* ✅ HAUTEUR IDENTIQUE */
     overflow: hidden;
 }
 
@@ -352,15 +392,15 @@ body {
 }
 
 /* ============================================
-   ✅ ROBOT 3D CONTAINER (VISIBLE ET CENTRÉ)
+   ✅ ROBOT 3D CONTAINER
    ============================================ */
 .robot-3d-container-threejs {
     margin: 0 auto 30px;
     width: 100%;
-    max-width: 400px;
-    height: 350px;
+    max-width: 450px;
+    height: 400px;
     position: relative;
-    overflow: visible; /* ✅ IMPORTANT pour voir le robot */
+    overflow: visible;
     border-radius: var(--radius-xl);
     background: radial-gradient(circle at 50% 50%, rgba(102, 126, 234, 0.05), transparent);
 }
@@ -368,14 +408,14 @@ body {
 #robot-3d-container {
     width: 100%;
     height: 100%;
-    position: relative; /* ✅ IMPORTANT */
+    position: relative;
 }
 
 #robot-3d-container canvas {
-    display: block !important; /* ✅ IMPORTANT */
+    display: block !important;
     width: 100% !important;
     height: 100% !important;
-    opacity: 1 !important; /* ✅ Forcer la visibilité */
+    opacity: 1 !important;
 }
 
 /* ============================================
@@ -880,11 +920,11 @@ body {
         left: 0;
         top: 0;
         z-index: 100;
-        width: 0;
+        margin-left: calc(-1 * var(--conversations-width));
     }
     
     .conversations-sidebar.mobile-open {
-        width: var(--conversations-width);
+        margin-left: 0;
         opacity: 1;
     }
     
