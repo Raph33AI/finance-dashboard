@@ -1,5 +1,5 @@
 // ============================================
-// CHATBOT FULL PAGE UI - WITH CONVERSATIONS HISTORY
+// CHATBOT FULL PAGE UI - WITH AUTO-RESET ON NEW CHAT
 // ============================================
 
 class ChatbotFullPageUI {
@@ -64,11 +64,6 @@ class ChatbotFullPageUI {
         };
         
         console.log('📦 Elements cached');
-        for (const [key, element] of Object.entries(this.elements)) {
-            if (!element) {
-                console.warn(`⚠️ Element missing: ${key}`);
-            }
-        }
     }
 
     attachEventListeners() {
@@ -201,6 +196,8 @@ class ChatbotFullPageUI {
     }
 
     startNewConversation() {
+        console.log('🆕 Starting new conversation...');
+        
         const newConv = {
             id: 'conv-' + Date.now(),
             title: 'New Conversation',
@@ -212,12 +209,40 @@ class ChatbotFullPageUI {
         this.conversations.unshift(newConv);
         this.currentConversationId = newConv.id;
         
-        this.clearMessages();
-        this.showWelcomeScreen();
+        // ✅ RÉINITIALISER COMPLÈTEMENT L'INTERFACE
+        this.resetInterface();
+        
         this.saveConversations();
         this.renderConversations();
         
         console.log('✅ New conversation started:', newConv.id);
+    }
+
+    // ✅ NOUVELLE MÉTHODE : Réinitialiser complètement l'interface
+    resetInterface() {
+        console.log('🔄 Resetting interface...');
+        
+        // Clear messages
+        this.clearMessages();
+        
+        // Show welcome screen with robot and features
+        this.showWelcomeScreen();
+        
+        // Show initial suggestions
+        this.showInitialSuggestions();
+        
+        // Clear input
+        if (this.elements.input) {
+            this.elements.input.value = '';
+            this.autoResizeTextarea();
+            this.updateCharCounter();
+        }
+        
+        // Reset counters
+        this.messageCount = 0;
+        this.chartCount = 0;
+        
+        console.log('✅ Interface reset complete');
     }
 
     loadConversation(id) {
@@ -229,6 +254,7 @@ class ChatbotFullPageUI {
         
         if (conv.messages.length === 0) {
             this.showWelcomeScreen();
+            this.showInitialSuggestions();
         } else {
             this.hideWelcomeScreen();
             conv.messages.forEach(msg => {
@@ -407,9 +433,6 @@ class ChatbotFullPageUI {
         }
     }
 
-    // ============================================
-    // ADD MESSAGE
-    // ============================================
     addMessage(type, content, save = true) {
         if (!this.elements.messages) {
             console.error('❌ Messages container not found!');
@@ -452,7 +475,6 @@ class ChatbotFullPageUI {
         
         this.messageCount++;
         
-        // Save to conversation
         if (save) {
             const conv = this.getCurrentConversation();
             if (conv) {
@@ -515,6 +537,14 @@ class ChatbotFullPageUI {
         }
     }
 
+    // ✅ AFFICHER LES SUGGESTIONS INITIALES
+    showInitialSuggestions() {
+        if (this.suggestions) {
+            const initial = this.suggestions.getInitialSuggestions();
+            this.showSuggestions(initial);
+        }
+    }
+
     showSuggestions(suggestions) {
         if (!this.elements.inputSuggestions) return;
         
@@ -552,14 +582,16 @@ class ChatbotFullPageUI {
 
     clearMessages() {
         if (this.elements.messages) {
-            this.elements.messages.innerHTML = '';
+            // ✅ IMPORTANT : Ne vider que les messages, pas le welcome screen
+            const messages = this.elements.messages.querySelectorAll('.message, .chart-message, #typing-indicator');
+            messages.forEach(msg => msg.remove());
         }
     }
 
     showWelcomeScreen() {
-        const welcomeHTML = document.querySelector('.welcome-screen');
-        if (welcomeHTML) {
-            welcomeHTML.style.display = 'block';
+        if (this.elements.welcomeScreen) {
+            this.elements.welcomeScreen.style.display = 'block';
+            console.log('👋 Welcome screen shown');
         }
     }
 
