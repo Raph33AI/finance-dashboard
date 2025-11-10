@@ -1,5 +1,5 @@
 // ============================================
-// ANIMATED PARTICLES BACKGROUND (Enhanced)
+// PARTICLES BACKGROUND (OPTIMIZED - 60 FPS)
 // ============================================
 
 function initializeParticles() {
@@ -9,37 +9,33 @@ function initializeParticles() {
         return;
     }
     
-    const ctx = canvas.getContext('2d');
+    const ctx = canvas.getContext('2d', { alpha: true });
     
-    // Set canvas size
+    // Resize canvas to full viewport
     function resizeCanvas() {
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
     }
     resizeCanvas();
     
-    // Particle settings (AUGMENTÉS pour plus de visibilité)
+    // Optimized settings
     const particles = [];
-    const particleCount = 120; // Augmenté de 80 à 120
-    const connectionDistance = 180; // Augmenté de 150 à 180
-    
-    // Colors (plus vifs)
-    const colors = [
-        '#667eea',
-        '#764ba2',
-        '#5b21b6',
-        '#6366f1',
-        '#8b5cf6'
-    ];
+    const particleCount = 80; // Optimisé pour performance
+    const connectionDistance = 150;
+    const colors = ['#667eea', '#764ba2', '#8b5cf6'];
     
     // Particle class
     class Particle {
         constructor() {
+            this.reset();
+        }
+        
+        reset() {
             this.x = Math.random() * canvas.width;
             this.y = Math.random() * canvas.height;
-            this.vx = (Math.random() - 0.5) * 0.8; // Légèrement plus rapide
-            this.vy = (Math.random() - 0.5) * 0.8;
-            this.radius = Math.random() * 2.5 + 1.5; // Plus gros
+            this.vx = (Math.random() - 0.5) * 0.5;
+            this.vy = (Math.random() - 0.5) * 0.5;
+            this.radius = Math.random() * 2 + 1;
             this.color = colors[Math.floor(Math.random() * colors.length)];
         }
         
@@ -56,10 +52,6 @@ function initializeParticles() {
             ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
             ctx.fillStyle = this.color;
             ctx.fill();
-            
-            // Glow effect (plus fort)
-            ctx.shadowBlur = 15;
-            ctx.shadowColor = this.color;
         }
     }
     
@@ -68,24 +60,35 @@ function initializeParticles() {
         particles.push(new Particle());
     }
     
-    // Animation loop
-    function animate() {
-        // Gradient background
+    // Optimized animation loop
+    let lastTime = 0;
+    const targetFPS = 60;
+    const frameTime = 1000 / targetFPS;
+    
+    function animate(currentTime) {
+        requestAnimationFrame(animate);
+        
+        const deltaTime = currentTime - lastTime;
+        if (deltaTime < frameTime) return;
+        
+        lastTime = currentTime - (deltaTime % frameTime);
+        
+        // Clear with gradient
         const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
         gradient.addColorStop(0, '#f8fafc');
         gradient.addColorStop(0.5, '#f1f5f9');
         gradient.addColorStop(1, '#e2e8f0');
-        
         ctx.fillStyle = gradient;
         ctx.fillRect(0, 0, canvas.width, canvas.height);
         
         // Update and draw particles
-        particles.forEach(particle => {
-            particle.update();
-            particle.draw();
-        });
+        for (let i = 0; i < particles.length; i++) {
+            particles[i].update();
+            particles[i].draw();
+        }
         
-        // Draw connections (plus visibles)
+        // Draw connections (optimized)
+        ctx.lineWidth = 1;
         for (let i = 0; i < particles.length; i++) {
             for (let j = i + 1; j < particles.length; j++) {
                 const dx = particles[i].x - particles[j].x;
@@ -93,9 +96,8 @@ function initializeParticles() {
                 const distance = Math.sqrt(dx * dx + dy * dy);
                 
                 if (distance < connectionDistance) {
-                    const opacity = (1 - distance / connectionDistance) * 0.5; // Plus opaque
+                    const opacity = (1 - distance / connectionDistance) * 0.4;
                     ctx.strokeStyle = `rgba(102, 126, 234, ${opacity})`;
-                    ctx.lineWidth = 1.5; // Plus épais
                     ctx.beginPath();
                     ctx.moveTo(particles[i].x, particles[i].y);
                     ctx.lineTo(particles[j].x, particles[j].y);
@@ -103,18 +105,21 @@ function initializeParticles() {
                 }
             }
         }
-        
-        requestAnimationFrame(animate);
     }
     
-    animate();
+    requestAnimationFrame(animate);
     
-    // Resize handler
+    // Debounced resize
+    let resizeTimeout;
     window.addEventListener('resize', () => {
-        resizeCanvas();
+        clearTimeout(resizeTimeout);
+        resizeTimeout = setTimeout(() => {
+            resizeCanvas();
+            particles.forEach(p => p.reset());
+        }, 250);
     });
     
-    console.log('✅ Particles initialized:', particleCount, 'particles');
+    console.log('✅ Particles optimized: 60 FPS target');
 }
 
 // Auto-initialize

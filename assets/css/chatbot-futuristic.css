@@ -1,20 +1,19 @@
 /* ============================================
-   CHATBOT FULL PAGE - PREMIUM DESIGN v2
-   Avec Robot 3D, Input Blanc, Historique
+   CHATBOT FULL PAGE - OPTIMIZED & REALISTIC
+   Performance optimisée + Robot 3D réaliste
    ============================================ */
 
 :root {
     --chatbot-bg: #f5f7fa;
     --chatbot-white: #ffffff;
     --chatbot-text: #1a202c;
-    --chatbot-text-secondary: #4a5568;
+    --chatbot-text-secondary: #64748b;
     --chatbot-border: #e2e8f0;
     
     --glass-white: rgba(255, 255, 255, 0.95);
     --glass-border: rgba(0, 0, 0, 0.08);
     
     --gradient-primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    --gradient-robot: linear-gradient(135deg, #4a5568 0%, #2d3748 100%);
     
     --neon-blue: #667eea;
     --neon-purple: #764ba2;
@@ -32,18 +31,24 @@
     --transition-base: 300ms ease;
 }
 
+/* Performance: GPU acceleration */
+* {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
 /* ============================================
-   PARTICLES BACKGROUND
+   PARTICLES BACKGROUND (FULL SCREEN)
    ============================================ */
 .particles-background {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    z-index: 0;
-    pointer-events: none;
-    background: linear-gradient(135deg, #f5f7fa 0%, #e9ecef 100%);
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    z-index: 0 !important;
+    pointer-events: none !important;
+    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
 }
 
 /* ============================================
@@ -52,7 +57,7 @@
 .chatbot-main-content {
     position: relative;
     z-index: 1;
-    background: var(--chatbot-bg);
+    background: transparent;
 }
 
 .chatbot-top-header {
@@ -115,7 +120,7 @@
 }
 
 /* ============================================
-   CHAT LAYOUT (Messages + Sidebar Historique)
+   CHAT LAYOUT
    ============================================ */
 .chat-layout {
     display: flex;
@@ -124,7 +129,7 @@
 }
 
 /* ============================================
-   CONVERSATIONS SIDEBAR (Historique)
+   CONVERSATIONS SIDEBAR
    ============================================ */
 .conversations-sidebar {
     width: 280px;
@@ -134,6 +139,7 @@
     flex-direction: column;
     transition: transform var(--transition-base);
     z-index: 10;
+    will-change: transform;
 }
 
 .conversations-sidebar.hidden {
@@ -177,6 +183,7 @@
     flex: 1;
     overflow-y: auto;
     padding: 16px;
+    scrollbar-width: thin;
 }
 
 .conversations-list::-webkit-scrollbar {
@@ -272,6 +279,7 @@
     overflow-y: auto;
     overflow-x: hidden;
     background: var(--chatbot-bg);
+    scrollbar-width: thin;
 }
 
 .chatbot-messages-wrapper::-webkit-scrollbar {
@@ -295,201 +303,360 @@
 }
 
 /* ============================================
-   ROBOT 3D (CSS Pure)
+   ROBOT 3D RÉALISTE (Ultra-optimisé)
    ============================================ */
 .robot-3d-container {
     margin-bottom: 40px;
-    perspective: 1000px;
+    perspective: 1200px;
+    perspective-origin: center;
 }
 
 .robot-3d {
-    width: 180px;
-    height: 220px;
+    width: 200px;
+    height: 250px;
     margin: 0 auto;
     position: relative;
-    animation: robot-float 3s ease-in-out infinite;
+    transform-style: preserve-3d;
+    animation: robot-float 4s ease-in-out infinite;
+    will-change: transform;
 }
 
 @keyframes robot-float {
-    0%, 100% { transform: translateY(0px) rotateY(0deg); }
-    50% { transform: translateY(-15px) rotateY(10deg); }
+    0%, 100% { 
+        transform: translateY(0px) rotateY(-5deg) rotateX(5deg);
+    }
+    50% { 
+        transform: translateY(-20px) rotateY(5deg) rotateX(-5deg);
+    }
 }
 
-/* Tête */
+/* Tête robotique réaliste */
 .robot-head {
-    width: 100px;
-    height: 100px;
-    background: linear-gradient(135deg, #cbd5e1 0%, #94a3b8 100%);
-    border-radius: 20px;
-    margin: 0 auto 10px;
+    width: 110px;
+    height: 110px;
+    background: linear-gradient(145deg, #e2e8f0, #cbd5e1);
+    border-radius: 25px;
+    margin: 0 auto 15px;
     position: relative;
-    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+    transform-style: preserve-3d;
+    box-shadow: 
+        0 20px 40px rgba(0, 0, 0, 0.3),
+        inset 0 -5px 15px rgba(0, 0, 0, 0.1),
+        inset 0 5px 15px rgba(255, 255, 255, 0.5);
+    transform: translateZ(20px);
 }
 
-.robot-antenna {
-    width: 4px;
-    height: 20px;
-    background: linear-gradient(to top, #64748b, #fbbf24);
+/* Reflet métallique */
+.robot-head::before {
+    content: '';
     position: absolute;
-    top: -20px;
+    top: 10%;
+    left: 15%;
+    width: 40%;
+    height: 30%;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.6), transparent);
+    border-radius: 50%;
+    filter: blur(8px);
+}
+
+/* Antenne avec éclairage */
+.robot-antenna {
+    width: 5px;
+    height: 25px;
+    background: linear-gradient(to top, #64748b, #94a3b8);
+    position: absolute;
+    top: -25px;
     left: 50%;
     transform: translateX(-50%);
-    border-radius: 2px;
+    border-radius: 3px;
+    box-shadow: 0 -5px 10px rgba(0, 0, 0, 0.2);
 }
 
 .robot-antenna::after {
     content: '';
-    width: 12px;
-    height: 12px;
-    background: #fbbf24;
+    width: 14px;
+    height: 14px;
+    background: radial-gradient(circle, #fbbf24, #f59e0b);
     border-radius: 50%;
     position: absolute;
-    top: -8px;
+    top: -10px;
     left: 50%;
     transform: translateX(-50%);
-    box-shadow: 0 0 15px #fbbf24;
+    box-shadow: 
+        0 0 20px #fbbf24,
+        0 0 40px rgba(251, 191, 36, 0.5),
+        inset 0 -2px 5px rgba(0, 0, 0, 0.3);
     animation: antenna-pulse 2s ease-in-out infinite;
 }
 
 @keyframes antenna-pulse {
-    0%, 100% { opacity: 1; transform: translateX(-50%) scale(1); }
-    50% { opacity: 0.7; transform: translateX(-50%) scale(1.3); }
+    0%, 100% { 
+        opacity: 1; 
+        transform: translateX(-50%) scale(1);
+        box-shadow: 0 0 20px #fbbf24, 0 0 40px rgba(251, 191, 36, 0.5);
+    }
+    50% { 
+        opacity: 0.8; 
+        transform: translateX(-50%) scale(1.2);
+        box-shadow: 0 0 30px #fbbf24, 0 0 60px rgba(251, 191, 36, 0.7);
+    }
 }
 
+/* Yeux avec effet LED réaliste */
 .robot-eyes {
     display: flex;
     justify-content: space-around;
-    padding: 25px 20px 0;
+    padding: 28px 25px 0;
+    transform: translateZ(10px);
 }
 
 .robot-eye {
-    width: 20px;
-    height: 20px;
-    background: #667eea;
+    width: 24px;
+    height: 24px;
+    background: radial-gradient(circle at 30% 30%, #8b5cf6, #6366f1, #4338ca);
     border-radius: 50%;
-    box-shadow: 0 0 20px #667eea, inset 0 0 10px rgba(255, 255, 255, 0.5);
-    animation: eye-blink 4s ease-in-out infinite;
+    position: relative;
+    box-shadow: 
+        0 0 15px #8b5cf6,
+        0 0 30px rgba(139, 92, 246, 0.6),
+        inset 0 2px 5px rgba(255, 255, 255, 0.4),
+        inset 0 -2px 5px rgba(0, 0, 0, 0.3);
+    animation: eye-glow 3s ease-in-out infinite;
 }
 
-@keyframes eye-blink {
-    0%, 96%, 100% { transform: scaleY(1); }
-    98% { transform: scaleY(0.1); }
+.robot-eye::before {
+    content: '';
+    position: absolute;
+    top: 20%;
+    left: 25%;
+    width: 40%;
+    height: 40%;
+    background: rgba(255, 255, 255, 0.8);
+    border-radius: 50%;
+    filter: blur(2px);
 }
 
+@keyframes eye-glow {
+    0%, 100% { 
+        box-shadow: 
+            0 0 15px #8b5cf6,
+            0 0 30px rgba(139, 92, 246, 0.6),
+            inset 0 2px 5px rgba(255, 255, 255, 0.4);
+    }
+    50% { 
+        box-shadow: 
+            0 0 25px #8b5cf6,
+            0 0 50px rgba(139, 92, 246, 0.8),
+            inset 0 2px 5px rgba(255, 255, 255, 0.6);
+    }
+}
+
+/* Bouche */
 .robot-mouth {
-    width: 50px;
-    height: 8px;
-    background: #1e293b;
-    border-radius: 0 0 25px 25px;
-    margin: 15px auto 0;
+    width: 55px;
+    height: 10px;
+    background: linear-gradient(to bottom, #1e293b, #0f172a);
+    border-radius: 0 0 28px 28px;
+    margin: 18px auto 0;
+    box-shadow: 
+        inset 0 3px 6px rgba(0, 0, 0, 0.5),
+        0 2px 4px rgba(0, 0, 0, 0.2);
+    transform: translateZ(5px);
 }
 
-/* Corps avec Costume */
+/* Corps avec costume professionnel */
 .robot-body {
-    width: 120px;
-    height: 80px;
-    background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+    width: 130px;
+    height: 90px;
+    background: linear-gradient(145deg, #1e293b, #0f172a);
     margin: 0 auto;
     position: relative;
-    border-radius: 15px 15px 8px 8px;
-    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+    border-radius: 18px 18px 10px 10px;
+    transform-style: preserve-3d;
+    box-shadow: 
+        0 25px 50px rgba(0, 0, 0, 0.4),
+        inset 0 -3px 10px rgba(0, 0, 0, 0.3),
+        inset 0 3px 10px rgba(255, 255, 255, 0.05);
+    transform: translateZ(10px);
 }
 
-/* Cravate */
+/* Reflet sur le costume */
+.robot-body::before {
+    content: '';
+    position: absolute;
+    top: 5%;
+    left: 10%;
+    width: 30%;
+    height: 40%;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), transparent);
+    border-radius: 50%;
+    filter: blur(10px);
+}
+
+/* Cravate 3D */
 .robot-tie {
-    width: 16px;
-    height: 45px;
-    background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%);
+    width: 18px;
+    height: 50px;
+    background: linear-gradient(145deg, #dc2626, #991b1b);
     position: absolute;
     top: 0;
     left: 50%;
-    transform: translateX(-50%);
+    transform: translateX(-50%) translateZ(15px);
     clip-path: polygon(50% 0%, 0% 15%, 25% 100%, 75% 100%, 100% 15%);
-    z-index: 2;
+    box-shadow: 
+        0 10px 20px rgba(0, 0, 0, 0.3),
+        inset 0 2px 5px rgba(255, 255, 255, 0.2),
+        inset 0 -2px 5px rgba(0, 0, 0, 0.3);
+    z-index: 3;
 }
 
-/* Revers de veste */
+/* Nœud de cravate */
+.robot-tie::before {
+    content: '';
+    position: absolute;
+    top: 8%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 16px;
+    height: 10px;
+    background: linear-gradient(145deg, #b91c1c, #7f1d1d);
+    border-radius: 3px;
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.4);
+}
+
+/* Revers de veste avec effet 3D */
 .robot-lapel {
-    width: 40px;
-    height: 60px;
-    background: #0f172a;
+    width: 45px;
+    height: 65px;
+    background: linear-gradient(145deg, #0f172a, #020617);
     position: absolute;
     top: 0;
+    box-shadow: 
+        inset 2px 2px 5px rgba(255, 255, 255, 0.05),
+        inset -2px -2px 5px rgba(0, 0, 0, 0.3);
 }
 
 .left-lapel {
     left: 0;
     clip-path: polygon(0 0, 70% 0, 100% 100%, 0 100%);
+    transform: translateZ(8px);
 }
 
 .right-lapel {
     right: 0;
     clip-path: polygon(30% 0, 100% 0, 100% 100%, 0 100%);
+    transform: translateZ(8px);
 }
 
-/* Boutons de veste */
+/* Boutons dorés 3D */
 .robot-buttons {
     position: absolute;
     left: 50%;
     top: 50%;
-    transform: translate(-50%, -20%);
+    transform: translate(-50%, -20%) translateZ(20px);
     display: flex;
     flex-direction: column;
-    gap: 8px;
-    z-index: 3;
+    gap: 10px;
+    z-index: 4;
 }
 
 .robot-buttons .button {
-    width: 8px;
-    height: 8px;
-    background: #fbbf24;
+    width: 10px;
+    height: 10px;
+    background: radial-gradient(circle at 30% 30%, #fbbf24, #f59e0b, #d97706);
     border-radius: 50%;
-    box-shadow: 0 0 8px rgba(251, 191, 36, 0.6);
+    box-shadow: 
+        0 4px 8px rgba(0, 0, 0, 0.4),
+        0 0 10px rgba(251, 191, 36, 0.3),
+        inset 0 2px 3px rgba(255, 255, 255, 0.4),
+        inset 0 -2px 3px rgba(0, 0, 0, 0.3);
 }
 
-/* Bras */
-.robot-arm {
-    width: 18px;
-    height: 60px;
-    background: linear-gradient(135deg, #cbd5e1 0%, #94a3b8 100%);
+.robot-buttons .button::before {
+    content: '';
     position: absolute;
-    top: 110px;
-    border-radius: 9px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    top: 20%;
+    left: 25%;
+    width: 35%;
+    height: 35%;
+    background: rgba(255, 255, 255, 0.6);
+    border-radius: 50%;
+    filter: blur(1px);
+}
+
+/* Bras robotiques 3D */
+.robot-arm {
+    width: 20px;
+    height: 65px;
+    background: linear-gradient(145deg, #cbd5e1, #94a3b8, #64748b);
+    position: absolute;
+    top: 115px;
+    border-radius: 10px;
+    transform-style: preserve-3d;
+    box-shadow: 
+        0 10px 20px rgba(0, 0, 0, 0.3),
+        inset 0 2px 5px rgba(255, 255, 255, 0.3),
+        inset 0 -2px 5px rgba(0, 0, 0, 0.2);
 }
 
 .left-arm {
-    left: 12px;
+    left: 15px;
     transform-origin: top center;
-    animation: arm-wave-left 3s ease-in-out infinite;
+    animation: arm-wave-left 4s ease-in-out infinite;
+    transform: translateZ(5px);
 }
 
 .right-arm {
-    right: 12px;
+    right: 15px;
     transform-origin: top center;
-    animation: arm-wave-right 3s ease-in-out infinite;
+    animation: arm-wave-right 4s ease-in-out infinite;
+    transform: translateZ(5px);
 }
 
 @keyframes arm-wave-left {
-    0%, 100% { transform: rotate(-10deg); }
-    50% { transform: rotate(-25deg); }
+    0%, 100% { 
+        transform: rotate(-12deg) translateZ(5px);
+    }
+    50% { 
+        transform: rotate(-28deg) translateZ(5px);
+    }
 }
 
 @keyframes arm-wave-right {
-    0%, 100% { transform: rotate(10deg); }
-    50% { transform: rotate(25deg); }
+    0%, 100% { 
+        transform: rotate(12deg) translateZ(5px);
+    }
+    50% { 
+        transform: rotate(28deg) translateZ(5px);
+    }
 }
 
+/* Mains robotiques 3D */
 .robot-hand {
-    width: 22px;
-    height: 22px;
-    background: linear-gradient(135deg, #cbd5e1 0%, #94a3b8 100%);
+    width: 26px;
+    height: 26px;
+    background: radial-gradient(circle at 40% 40%, #cbd5e1, #94a3b8);
     border-radius: 50%;
     position: absolute;
-    bottom: -10px;
+    bottom: -12px;
     left: 50%;
-    transform: translateX(-50%);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    transform: translateX(-50%) translateZ(8px);
+    box-shadow: 
+        0 8px 16px rgba(0, 0, 0, 0.3),
+        inset 0 3px 6px rgba(255, 255, 255, 0.4),
+        inset 0 -3px 6px rgba(0, 0, 0, 0.2);
+}
+
+.robot-hand::before {
+    content: '';
+    position: absolute;
+    top: 25%;
+    left: 30%;
+    width: 40%;
+    height: 40%;
+    background: rgba(255, 255, 255, 0.5);
+    border-radius: 50%;
+    filter: blur(3px);
 }
 
 /* ============================================
@@ -617,7 +784,7 @@
 }
 
 /* ============================================
-   MESSAGES (Bubbles)
+   MESSAGES
    ============================================ */
 .message {
     display: flex;
@@ -723,7 +890,7 @@
     display: block;
 }
 
-/* Typing Indicator */
+/* Typing Indicator (optimisé) */
 .typing-indicator {
     display: flex;
     gap: 6px;
@@ -754,7 +921,7 @@
 }
 
 /* ============================================
-   INPUT AREA (BLANC)
+   INPUT AREA (ALIGNEMENT CORRIGÉ)
    ============================================ */
 .chatbot-input-area {
     padding: 20px 30px 30px;
@@ -791,10 +958,11 @@
     box-shadow: var(--shadow-sm);
 }
 
+/* CORRECTION ALIGNEMENT */
 .input-container {
     display: flex;
     gap: 12px;
-    align-items: flex-end;
+    align-items: stretch; /* ✅ Alignement parfait */
     max-width: 900px;
     margin: 0 auto;
 }
@@ -802,6 +970,8 @@
 .input-wrapper {
     flex: 1;
     position: relative;
+    display: flex; /* ✅ Flexbox pour centrage */
+    align-items: center; /* ✅ Centrage vertical */
 }
 
 .chatbot-input {
@@ -860,9 +1030,10 @@
     transform: translateY(-50%) scale(1.2);
 }
 
+/* CORRECTION BOUTON ENVOI */
 .chatbot-send-btn {
     width: 56px;
-    height: 56px;
+    height: 56px; /* ✅ Même hauteur que min-height de input */
     border: none;
     background: var(--gradient-primary);
     border-radius: 50%;
@@ -875,6 +1046,7 @@
     transition: all var(--transition-fast);
     box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
     flex-shrink: 0;
+    align-self: flex-end; /* ✅ Alignement en bas */
 }
 
 .chatbot-send-btn:hover {
@@ -975,12 +1147,6 @@
 /* ============================================
    RESPONSIVE
    ============================================ */
-@media (max-width: 1024px) {
-    .conversations-sidebar {
-        width: 260px;
-    }
-}
-
 @media (max-width: 768px) {
     .conversations-sidebar {
         position: absolute;
@@ -1001,68 +1167,23 @@
         font-size: 32px;
     }
     
-    .welcome-subtitle {
-        font-size: 16px;
-    }
-    
     .welcome-features {
         grid-template-columns: 1fr;
     }
     
-    .welcome-suggestion-grid {
-        grid-template-columns: 1fr;
-    }
-    
-    .chatbot-input-area {
-        padding: 12px 16px 16px;
-    }
-    
-    .input-footer {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 8px;
-    }
-    
-    .header-status {
-        display: none;
-    }
-    
     .robot-3d {
-        width: 150px;
-        height: 180px;
+        width: 160px;
+        height: 200px;
     }
     
     .robot-head {
-        width: 80px;
-        height: 80px;
+        width: 90px;
+        height: 90px;
     }
     
     .robot-body {
-        width: 100px;
-        height: 70px;
-    }
-}
-
-@media (max-width: 480px) {
-    .chatbot-messages-content {
-        padding: 20px 16px;
-    }
-    
-    .welcome-screen {
-        padding: 40px 16px;
-    }
-    
-    .welcome-title {
-        font-size: 28px;
-    }
-    
-    .input-container {
-        gap: 8px;
-    }
-    
-    .chatbot-send-btn {
-        width: 48px;
-        height: 48px;
+        width: 110px;
+        height: 75px;
     }
 }
 
