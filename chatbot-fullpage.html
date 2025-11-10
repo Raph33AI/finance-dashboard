@@ -28,8 +28,6 @@
     
     <!-- Configuration Firebase -->
     <script src="assets/js/firebase-config.js"></script>
-    
-    <!-- Protection de la page -->
     <script src="assets/js/auth-guard.js"></script>
     
     <!-- Favicon -->
@@ -40,17 +38,12 @@
     <!-- Theme Script -->
     <script src="assets/js/theme.js"></script>
 
-    <!-- ============================================
-         ANIMATED BACKGROUND (Particles Canvas)
-         ============================================ -->
+    <!-- Particles Background -->
     <canvas id="particles-canvas" class="particles-background"></canvas>
 
     <div class='layout-wrapper'>
-        <!-- ============================================
-             SIDEBAR NAVIGATION (Ta sidebar originale)
-             ============================================ -->
+        <!-- SIDEBAR (Inchangée) -->
         <aside class='sidebar' id='sidebar'>
-            <!-- Header avec Logo 3D -->
             <div class="sidebar-header">
                 <div class="logo-container">
                     <div class="logo-3d">
@@ -62,20 +55,14 @@
                                 </linearGradient>
                             </defs>
                             <path d="M 20 80 L 30 70 L 40 75 L 50 60 L 60 65 L 70 45 L 80 50 L 90 30" 
-                                  stroke="url(#logoGradient)" 
-                                  stroke-width="4" 
-                                  fill="none" 
-                                  stroke-linecap="round" 
-                                  stroke-linejoin="round"/>
+                                  stroke="url(#logoGradient)" stroke-width="4" fill="none" 
+                                  stroke-linecap="round" stroke-linejoin="round"/>
                             <circle cx="30" cy="70" r="4" fill="url(#logoGradient)"/>
                             <circle cx="50" cy="60" r="4" fill="url(#logoGradient)"/>
                             <circle cx="70" cy="45" r="4" fill="url(#logoGradient)"/>
                             <circle cx="90" cy="30" r="5" fill="url(#logoGradient)"/>
-                            <path d="M 85 35 L 90 30 L 85 25" 
-                                  stroke="url(#logoGradient)" 
-                                  stroke-width="3" 
-                                  fill="none" 
-                                  stroke-linecap="round"/>
+                            <path d="M 85 35 L 90 30 L 85 25" stroke="url(#logoGradient)" 
+                                  stroke-width="3" fill="none" stroke-linecap="round"/>
                         </svg>
                     </div>
                     <div class="brand-text">
@@ -88,7 +75,6 @@
                 </button>
             </div>
             
-            <!-- Navigation -->
             <nav class="sidebar-nav">
                 <div class="nav-section">
                     <button class="nav-folder" data-tooltip="Home">
@@ -186,7 +172,6 @@
                     </div>
                 </div>
 
-                <!-- AI ASSISTANT -->
                 <div class='nav-section'>
                     <button class="nav-folder" data-tooltip="AI Assistant">
                         <i class="fas fa-robot"></i>
@@ -210,14 +195,12 @@
                 </div>
             </nav>
             
-            <!-- SIDEBAR FOOTER -->
             <div class="sidebar-footer">
                 <div class="sidebar-user-menu">
                     <div class="sidebar-user-trigger" id="sidebarUserTrigger">
                         <img data-user-photo 
                             src="https://ui-avatars.com/api/?name=User&background=2563eb&color=fff" 
-                            alt="Avatar" 
-                            class="sidebar-user-avatar">
+                            alt="Avatar" class="sidebar-user-avatar">
                         <div class="sidebar-user-info">
                             <span data-user-name class="sidebar-user-name">User</span>
                             <span data-user-plan class="sidebar-user-plan">Free Plan</span>
@@ -229,16 +212,13 @@
                         <div class="user-dropdown-header">
                             <img data-user-photo 
                                 src="https://ui-avatars.com/api/?name=User&background=2563eb&color=fff" 
-                                alt="Avatar" 
-                                class="user-dropdown-avatar">
+                                alt="Avatar" class="user-dropdown-avatar">
                             <div class="user-dropdown-details">
                                 <h4 data-user-name class="user-dropdown-name">User</h4>
                                 <p data-user-email class="user-dropdown-email">email@example.com</p>
                             </div>
                         </div>
-                        
                         <div class="user-dropdown-divider"></div>
-                        
                         <nav class="user-dropdown-links">
                             <a href="user-profile.html" class="user-dropdown-link">
                                 <i class="fas fa-user"></i>
@@ -253,9 +233,7 @@
                                 <span>Help</span>
                             </a>
                         </nav>
-                        
                         <div class="user-dropdown-divider"></div>
-                        
                         <button onclick="logout()" class="user-dropdown-logout">
                             <i class="fas fa-sign-out-alt"></i>
                             <span>Disconnect</span>
@@ -265,12 +243,10 @@
             </div>
         </aside>
 
-        <!-- ============================================
-             MAIN CONTENT AREA
-             ============================================ -->
+        <!-- MAIN CONTENT -->
         <div class='main-content chatbot-main-content'>
             
-            <!-- Header -->
+            <!-- Header (Aligné avec sidebar) -->
             <header class='top-header chatbot-top-header'>
                 <div class='header-left'>
                     <button class='mobile-toggle' id='mobileToggle'>
@@ -309,10 +285,7 @@
                             <i class="fas fa-chevron-left"></i>
                         </button>
                     </div>
-                    
-                    <div class="conversations-list" id="conversations-list">
-                        <!-- Populated dynamically -->
-                    </div>
+                    <div class="conversations-list" id="conversations-list"></div>
                 </aside>
 
                 <!-- Messages Area -->
@@ -320,39 +293,10 @@
                     <div class="chatbot-messages-wrapper">
                         <div class="chatbot-messages-content" id="chatbot-messages-content">
                             
-                            <!-- Welcome Screen -->
+                            <!-- Welcome Screen avec Robot 3D -->
                             <div class="welcome-screen" id="welcome-screen">
-                                <!-- Robot 3D -->
-                                <div class="robot-3d-container">
-                                    <div class="robot-3d">
-                                        <div class="robot-head">
-                                            <div class="robot-antenna"></div>
-                                            <div class="robot-eyes">
-                                                <div class="robot-eye left"></div>
-                                                <div class="robot-eye right"></div>
-                                            </div>
-                                            <div class="robot-mouth"></div>
-                                        </div>
-                                        
-                                        <div class="robot-body">
-                                            <div class="robot-tie"></div>
-                                            <div class="robot-lapel left-lapel"></div>
-                                            <div class="robot-lapel right-lapel"></div>
-                                            <div class="robot-buttons">
-                                                <div class="button"></div>
-                                                <div class="button"></div>
-                                                <div class="button"></div>
-                                            </div>
-                                        </div>
-                                        
-                                        <div class="robot-arm left-arm">
-                                            <div class="robot-hand"></div>
-                                        </div>
-                                        <div class="robot-arm right-arm">
-                                            <div class="robot-hand"></div>
-                                        </div>
-                                    </div>
-                                </div>
+                                <!-- ✅ ROBOT 3D ULTRA-RÉALISTE (THREE.JS) -->
+                                <div id="robot-3d-container" class="robot-3d-container-threejs"></div>
                                 
                                 <h2 class="welcome-title">Welcome to Alphy AI</h2>
                                 <p class="welcome-subtitle">Your elite financial analyst powered by real-time market data</p>
@@ -442,11 +386,29 @@
         </div>
     </div>
 
-    <!-- SCRIPTS -->
+<!-- ========================================
+         BIBLIOTHÈQUES 3D & ANIMATIONS
+         ======================================== -->
+    
+    <!-- Three.js (Core) -->
+    <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
+    
+    <!-- GSAP (Animations ultra-fluides) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.4/gsap.min.js"></script>
+    
+    <!-- ========================================
+         CHATBOT SCRIPTS (ORDRE IMPORTANT)
+         ======================================== -->
+    
+    <!-- Chart.js (Graphiques) -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    
+    <!-- Scripts communs -->
     <script src='assets/js/dark-mode.js'></script>
     <script src='assets/js/common.js'></script>
     <script src='assets/js/sidebar.js'></script>
+    
+    <!-- Chatbot Core -->
     <script src="assets/js/chatbot-config.js"></script>
     <script src="assets/js/chatbot-gemini.js"></script>
     <script src="assets/js/chatbot-analytics.js"></script>
@@ -454,7 +416,14 @@
     <script src="assets/js/chatbot-ipo-analyzer.js"></script>
     <script src="assets/js/chatbot-suggestions.js"></script>
     <script src="assets/js/chatbot-ai-engine.js"></script>
+    
+    <!-- ✅ ROBOT 3D (AVANT l'UI) -->
+    <script src="assets/js/chatbot-robot-3d.js"></script>
+    
+    <!-- Chatbot UI (Main) -->
     <script src="assets/js/chatbot-fullpage-ui.js"></script>
+    
+    <!-- Particles Background -->
     <script src="assets/js/chatbot-particles.js"></script>
 
 </body>
