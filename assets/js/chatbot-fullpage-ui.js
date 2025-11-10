@@ -1,5 +1,5 @@
 // ============================================
-// CHATBOT FULL PAGE UI - CONTROLLER
+// CHATBOT FULL PAGE UI - CONTROLLER (CORRECTED)
 // ============================================
 
 class ChatbotFullPageUI {
@@ -25,6 +25,9 @@ class ChatbotFullPageUI {
         try {
             console.log('🎨 Initializing Full Page UI...');
             
+            // Wait for DOM to be fully loaded
+            await new Promise(resolve => setTimeout(resolve, 100));
+            
             // Cache DOM elements
             this.cacheElements();
             
@@ -47,22 +50,15 @@ class ChatbotFullPageUI {
     }
 
     // ============================================
-    // CACHE DOM ELEMENTS
+    // CACHE DOM ELEMENTS (CORRECTED IDs)
     // ============================================
     cacheElements() {
         this.elements = {
-            // Sidebar
-            sidebar: document.getElementById('sidebar'),
-            sidebarToggle: document.getElementById('sidebar-toggle'),
-            mobileSidebarToggle: document.getElementById('mobile-sidebar-toggle'),
-            newChatBtn: document.getElementById('new-chat-btn'),
-            conversationsList: document.getElementById('conversations-list'),
-            
             // Main
-            messages: document.getElementById('fullpage-messages'),
+            messages: document.getElementById('chatbot-messages-content'),
             welcomeScreen: document.getElementById('welcome-screen'),
-            input: document.getElementById('fullpage-input'),
-            sendBtn: document.getElementById('fullpage-send-btn'),
+            input: document.getElementById('chatbot-input'),
+            sendBtn: document.getElementById('chatbot-send-btn'),
             inputClearBtn: document.getElementById('input-clear-btn'),
             inputSuggestions: document.getElementById('input-suggestions'),
             inputCounter: document.getElementById('input-counter'),
@@ -79,38 +75,30 @@ class ChatbotFullPageUI {
             statResponse: document.getElementById('stat-response'),
             statSuccess: document.getElementById('stat-success')
         };
+        
+        // Debug: Log found/missing elements
+        console.log('📦 Elements cached:');
+        for (const [key, element] of Object.entries(this.elements)) {
+            if (!element) {
+                console.warn(`⚠️ Element missing: ${key}`);
+            } else {
+                console.log(`✅ ${key}: found`);
+            }
+        }
     }
 
     // ============================================
     // ATTACH EVENT LISTENERS
     // ============================================
     attachEventListeners() {
-        // Sidebar toggles
-        if (this.elements.mobileSidebarToggle) {
-            this.elements.mobileSidebarToggle.addEventListener('click', () => {
-                this.toggleSidebar();
-            });
-        }
-        
-        if (this.elements.sidebarToggle) {
-            this.elements.sidebarToggle.addEventListener('click', () => {
-                this.toggleSidebar();
-            });
-        }
-        
-        // New chat
-        if (this.elements.newChatBtn) {
-            this.elements.newChatBtn.addEventListener('click', () => {
-                this.startNewChat();
-            });
-        }
-        
         // Welcome suggestions
         const welcomeSuggestions = document.querySelectorAll('.welcome-suggestion-btn');
         welcomeSuggestions.forEach(btn => {
             btn.addEventListener('click', () => {
                 const query = btn.dataset.query;
-                this.sendMessage(query);
+                if (query) {
+                    this.sendMessage(query);
+                }
             });
         });
         
@@ -139,10 +127,12 @@ class ChatbotFullPageUI {
         // Clear input
         if (this.elements.inputClearBtn) {
             this.elements.inputClearBtn.addEventListener('click', () => {
-                this.elements.input.value = '';
-                this.autoResizeTextarea();
-                this.updateCharCounter();
-                this.elements.input.focus();
+                if (this.elements.input) {
+                    this.elements.input.value = '';
+                    this.autoResizeTextarea();
+                    this.updateCharCounter();
+                    this.elements.input.focus();
+                }
             });
         }
         
@@ -161,6 +151,8 @@ class ChatbotFullPageUI {
                 this.hideStats();
             });
         }
+        
+        console.log('✅ Event listeners attached');
     }
 
     // ============================================
@@ -171,18 +163,24 @@ class ChatbotFullPageUI {
         if (typeof FinancialChatbotEngine !== 'undefined') {
             this.engine = new FinancialChatbotEngine(this.config);
             console.log('✅ Engine initialized');
+        } else {
+            console.warn('⚠️ FinancialChatbotEngine not found');
         }
         
         // Initialize charts
         if (typeof ChatbotCharts !== 'undefined') {
             this.charts = new ChatbotCharts(this.config);
             console.log('✅ Charts initialized');
+        } else {
+            console.warn('⚠️ ChatbotCharts not found');
         }
         
         // Initialize suggestions
         if (typeof ChatbotSuggestions !== 'undefined') {
             this.suggestions = new ChatbotSuggestions(this.config);
             console.log('✅ Suggestions initialized');
+        } else {
+            console.warn('⚠️ ChatbotSuggestions not found');
         }
     }
 
@@ -190,9 +188,20 @@ class ChatbotFullPageUI {
     // SEND MESSAGE
     // ============================================
     async sendMessage(messageText = null) {
+        // Guard: Check if input element exists
+        if (!this.elements.input) {
+            console.error('❌ Input element not found!');
+            return;
+        }
+        
         const message = messageText || this.elements.input.value.trim();
         
-        if (!message || this.isTyping) return;
+        if (!message || this.isTyping) {
+            console.log('⚠️ Message empty or already typing');
+            return;
+        }
+        
+        console.log('📤 Sending message:', message);
         
         // Hide welcome screen
         if (this.elements.welcomeScreen) {
@@ -217,6 +226,10 @@ class ChatbotFullPageUI {
             const startTime = performance.now();
             
             // Process message
+            if (!this.engine) {
+                throw new Error('Engine not initialized');
+            }
+            
             const response = await this.engine.processMessage(message);
             
             const responseTime = performance.now() - startTime;
@@ -249,7 +262,7 @@ class ChatbotFullPageUI {
             this.updateStats();
             
         } catch (error) {
-            console.error('Message processing error:', error);
+            console.error('❌ Message processing error:', error);
             this.hideTypingIndicator();
             this.addMessage('bot', '⚠️ Sorry, I encountered an error. Please try again.');
         }
@@ -259,6 +272,11 @@ class ChatbotFullPageUI {
     // ADD MESSAGE
     // ============================================
     addMessage(type, content) {
+        if (!this.elements.messages) {
+            console.error('❌ Messages container not found!');
+            return;
+        }
+        
         const messageDiv = document.createElement('div');
         messageDiv.className = `message ${type}-message`;
         
@@ -311,6 +329,8 @@ class ChatbotFullPageUI {
     // TYPING INDICATOR
     // ============================================
     showTypingIndicator() {
+        if (!this.elements.messages) return;
+        
         this.isTyping = true;
         
         const typingDiv = document.createElement('div');
@@ -356,6 +376,8 @@ class ChatbotFullPageUI {
     // SUGGESTIONS
     // ============================================
     showSuggestions(suggestions) {
+        if (!this.elements.inputSuggestions) return;
+        
         this.clearSuggestions();
         
         suggestions.forEach(suggestion => {
@@ -367,23 +389,25 @@ class ChatbotFullPageUI {
     }
 
     clearSuggestions() {
-        this.elements.inputSuggestions.innerHTML = '';
+        if (this.elements.inputSuggestions) {
+            this.elements.inputSuggestions.innerHTML = '';
+        }
     }
 
     // ============================================
     // CHARTS
     // ============================================
     async generateCharts(chartRequests) {
+        if (!this.elements.messages || !this.charts) return;
+        
         for (const request of chartRequests) {
             const chartContainer = document.createElement('div');
             chartContainer.className = 'chart-message';
             
             this.elements.messages.appendChild(chartContainer);
             
-            if (this.charts) {
-                await this.charts.createChart(request, chartContainer);
-                this.chartCount++;
-            }
+            await this.charts.createChart(request, chartContainer);
+            this.chartCount++;
             
             this.scrollToBottom();
         }
@@ -392,50 +416,28 @@ class ChatbotFullPageUI {
     // ============================================
     // UTILITIES
     // ============================================
-    toggleSidebar() {
-        this.elements.sidebar.classList.toggle('mobile-open');
-    }
-
-    startNewChat() {
-        if (confirm('Start a new conversation? Current chat will be saved.')) {
-            this.elements.messages.innerHTML = '';
-            
-            // Re-show welcome screen
-            if (this.elements.welcomeScreen) {
-                this.elements.welcomeScreen.style.display = 'block';
-            }
-            
-            this.messageCount = 0;
-            this.chartCount = 0;
-            
-            if (this.engine) {
-                this.engine.clearHistory();
-            }
-            
-            if (this.charts) {
-                this.charts.destroyAllCharts();
-            }
-            
-            this.clearSuggestions();
-        }
-    }
-
     autoResizeTextarea() {
+        if (!this.elements.input) return;
+        
         const textarea = this.elements.input;
         textarea.style.height = 'auto';
         textarea.style.height = Math.min(textarea.scrollHeight, 200) + 'px';
     }
 
     updateCharCounter() {
+        if (!this.elements.input || !this.elements.inputCounter) return;
+        
         const length = this.elements.input.value.length;
         this.elements.inputCounter.textContent = `${length}/2000`;
     }
 
     scrollToBottom() {
-        const wrapper = document.querySelector('.fullpage-messages-wrapper');
-        setTimeout(() => {
-            wrapper.scrollTop = wrapper.scrollHeight;
-        }, 100);
+        const wrapper = document.querySelector('.chatbot-messages-wrapper');
+        if (wrapper) {
+            setTimeout(() => {
+                wrapper.scrollTop = wrapper.scrollHeight;
+            }, 100);
+        }
     }
 
     updateStats() {
