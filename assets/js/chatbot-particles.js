@@ -1,15 +1,18 @@
 // ============================================
 // PARTICLES BACKGROUND - FULL SCREEN
+// VERSION CORRIGÉE
 // ============================================
 
 function initializeParticles() {
+    console.log('🎨 Initializing particles...');
+    
     const canvas = document.getElementById('particles-canvas');
     if (!canvas) {
         console.warn('⚠️ Particles canvas not found');
         return;
     }
     
-    const ctx = canvas.getContext('2d', { alpha: false });
+    const ctx = canvas.getContext('2d', { alpha: true }); // CORRECTION: alpha: true
     
     // Full viewport size
     function resizeCanvas() {
@@ -21,8 +24,8 @@ function initializeParticles() {
     
     // Optimized settings
     const particles = [];
-    const particleCount = 100;
-    const connectionDistance = 180;
+    const particleCount = 80; // CORRECTION: Réduit pour meilleures performances
+    const connectionDistance = 150;
     const colors = ['#667eea', '#764ba2', '#8b5cf6', '#6366f1'];
     
     class Particle {
@@ -33,9 +36,9 @@ function initializeParticles() {
         reset() {
             this.x = Math.random() * canvas.width;
             this.y = Math.random() * canvas.height;
-            this.vx = (Math.random() - 0.5) * 0.6;
-            this.vy = (Math.random() - 0.5) * 0.6;
-            this.radius = Math.random() * 2.5 + 1.5;
+            this.vx = (Math.random() - 0.5) * 0.5;
+            this.vy = (Math.random() - 0.5) * 0.5;
+            this.radius = Math.random() * 2 + 1;
             this.color = colors[Math.floor(Math.random() * colors.length)];
         }
         
@@ -51,7 +54,7 @@ function initializeParticles() {
             ctx.beginPath();
             ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
             ctx.fillStyle = this.color;
-            ctx.shadowBlur = 10;
+            ctx.shadowBlur = 8;
             ctx.shadowColor = this.color;
             ctx.fill();
             ctx.shadowBlur = 0;
@@ -76,13 +79,14 @@ function initializeParticles() {
         
         lastTime = currentTime - (deltaTime % frameTime);
         
-        // Gradient background
+        // Clear with transparency
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        
+        // Gradient background (subtle)
         const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
-        gradient.addColorStop(0, '#f8fafc');
-        gradient.addColorStop(0.3, '#eff6ff');
-        gradient.addColorStop(0.5, '#f1f5f9');
-        gradient.addColorStop(0.7, '#e8eef5');
-        gradient.addColorStop(1, '#f0f4f8');
+        gradient.addColorStop(0, 'rgba(248, 250, 252, 0.3)');
+        gradient.addColorStop(0.5, 'rgba(239, 246, 255, 0.3)');
+        gradient.addColorStop(1, 'rgba(241, 245, 249, 0.3)');
         ctx.fillStyle = gradient;
         ctx.fillRect(0, 0, canvas.width, canvas.height);
         
@@ -93,7 +97,7 @@ function initializeParticles() {
         }
         
         // Draw connections
-        ctx.lineWidth = 1.5;
+        ctx.lineWidth = 1;
         for (let i = 0; i < particles.length; i++) {
             for (let j = i + 1; j < particles.length; j++) {
                 const dx = particles[i].x - particles[j].x;
@@ -101,7 +105,7 @@ function initializeParticles() {
                 const distance = Math.sqrt(dx * dx + dy * dy);
                 
                 if (distance < connectionDistance) {
-                    const opacity = (1 - distance / connectionDistance) * 0.5;
+                    const opacity = (1 - distance / connectionDistance) * 0.4;
                     ctx.strokeStyle = `rgba(102, 126, 234, ${opacity})`;
                     ctx.beginPath();
                     ctx.moveTo(particles[i].x, particles[i].y);
@@ -124,7 +128,7 @@ function initializeParticles() {
         }, 250);
     });
     
-    console.log('✅ Particles initialized: 100 particles - FULL SCREEN');
+    console.log('✅ Particles initialized:', particleCount, 'particles - FULL SCREEN');
 }
 
 // Auto-initialize

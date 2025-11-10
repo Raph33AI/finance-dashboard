@@ -1,6 +1,5 @@
 // ============================================
-// CHATBOT FULLPAGE - CONVERSATION HANDLER
-// VERSION CORRIGÉE
+// CHATBOT FULLPAGE - TOUTES CORRECTIONS
 // ============================================
 
 class ChatbotFullPage {
@@ -71,87 +70,106 @@ class ChatbotFullPage {
     }
     
     attachEventListeners() {
+        console.log('📌 Attaching event listeners...');
+        
         // History Toggle
         if (this.elements.historyToggle) {
             this.elements.historyToggle.addEventListener('click', () => this.toggleHistory());
+            console.log('✅ History toggle attached');
         }
         
         // New Chat
         if (this.elements.newChat) {
             this.elements.newChat.addEventListener('click', () => this.startNewConversation());
+            console.log('✅ New chat attached');
         }
         
         // Clear History
         if (this.elements.clearHistory) {
             this.elements.clearHistory.addEventListener('click', () => this.clearAllHistory());
+            console.log('✅ Clear history attached');
         }
         
         // Search History
         if (this.elements.historySearch) {
             this.elements.historySearch.addEventListener('input', (e) => this.searchHistory(e.target.value));
+            console.log('✅ Search history attached');
         }
         
-        // Send Message - CORRIGÉ
+        // Send Message - CORRECTION: Utiliser mousedown pour éviter les conflits
         if (this.elements.btnSend) {
             this.elements.btnSend.addEventListener('click', (e) => {
                 e.preventDefault();
+                e.stopPropagation();
+                console.log('🖱️ Send button clicked');
                 this.sendMessage();
             });
+            console.log('✅ Send button attached');
         }
         
-        // Enter to send (Shift+Enter for new line) - CORRIGÉ
+        // Enter to send (Shift+Enter for new line)
         if (this.elements.chatInput) {
             this.elements.chatInput.addEventListener('keydown', (e) => {
                 if (e.key === 'Enter' && !e.shiftKey) {
                     e.preventDefault();
+                    console.log('⌨️ Enter pressed');
                     this.sendMessage();
                 }
             });
             
-            // Auto-resize textarea - CORRIGÉ
+            // Auto-resize textarea
             this.elements.chatInput.addEventListener('input', (e) => {
                 e.target.style.height = 'auto';
-                e.target.style.height = Math.min(e.target.scrollHeight, 200) + 'px';
+                const newHeight = Math.min(e.target.scrollHeight, 200);
+                e.target.style.height = newHeight + 'px';
             });
+            
+            console.log('✅ Input listeners attached');
         }
         
-        // Suggestion buttons
-        document.querySelectorAll('.suggestion-btn').forEach(btn => {
-            btn.addEventListener('click', () => {
-                const message = btn.dataset.message;
+        // Suggestion buttons - CORRECTION: Délégation d'événement
+        document.addEventListener('click', (e) => {
+            const suggestionBtn = e.target.closest('.suggestion-btn');
+            if (suggestionBtn) {
+                e.preventDefault();
+                const message = suggestionBtn.dataset.message || suggestionBtn.textContent.trim();
+                console.log('💡 Suggestion clicked:', message);
                 if (this.elements.chatInput) {
                     this.elements.chatInput.value = message;
                     this.sendMessage();
                 }
-            });
+            }
         });
+        console.log('✅ Suggestion buttons attached (delegation)');
         
-        // Attachment (Coming Soon)
+        // Attachment
         if (this.elements.btnAttachment) {
             this.elements.btnAttachment.addEventListener('click', () => {
-                this.showNotification('📎 File attachment feature coming soon!');
+                console.log('📎 Attachment clicked');
+                alert('📎 File attachment feature coming soon!');
             });
+            console.log('✅ Attachment button attached');
         }
         
-        console.log('✅ Event listeners attached');
+        console.log('✅ All event listeners attached');
     }
     
     toggleHistory() {
         if (!this.elements.historySidebar) return;
         
-        this.elements.historySidebar.classList.toggle('hidden');
+        const isHidden = this.elements.historySidebar.classList.toggle('hidden');
         
         // Update icon
         const icon = this.elements.historyToggle?.querySelector('i');
         if (icon) {
-            if (this.elements.historySidebar.classList.contains('hidden')) {
+            if (isHidden) {
                 icon.className = 'fas fa-history';
             } else {
                 icon.className = 'fas fa-times';
             }
         }
         
-        console.log('📜 History toggled');
+        console.log('📜 History toggled:', isHidden ? 'hidden' : 'visible');
     }
     
     startNewConversation() {
@@ -233,7 +251,8 @@ class ChatbotFullPage {
             this.hideTypingIndicator();
             
             // Add AI response
-            this.addMessage('assistant', response.text || response);
+            const responseText = response.text || response.message || response;
+            this.addMessage('assistant', responseText);
             
             // Handle charts if present
             if (response.chart) {
@@ -264,19 +283,23 @@ class ChatbotFullPage {
         
         const lowerMessage = message.toLowerCase();
         
-        if (lowerMessage.includes('hello') || lowerMessage.includes('hi')) {
+        if (lowerMessage.includes('hello') || lowerMessage.includes('hi') || lowerMessage.includes('bonjour')) {
             return { text: '👋 Hello! I\'m Alphy AI, your financial assistant. How can I help you today?' };
         }
         
         if (lowerMessage.includes('stock') || lowerMessage.includes('nvda') || lowerMessage.includes('aapl')) {
-            return { text: '📊 I can help you analyze stocks! Please make sure the AI engine is properly configured with a Gemini API key for real-time data.' };
+            return { text: '📊 I can help you analyze stocks! To access real-time data, please configure the Gemini API key in chatbot-config.js.' };
         }
         
         if (lowerMessage.includes('ipo')) {
             return { text: '🚀 I can analyze IPO opportunities! The full AI engine will provide detailed insights about recent and upcoming IPOs.' };
         }
         
-        return { text: `I received your message: "${message}". For full functionality, please configure the Gemini API key in chatbot-config.js.` };
+        if (lowerMessage.includes('help') || lowerMessage.includes('aide')) {
+            return { text: '💡 I can help you with:\n\n📈 Stock analysis\n🚀 IPO insights\n📊 Market data\n💰 Financial recommendations\n\nJust ask me anything!' };
+        }
+        
+        return { text: `I received your message: "${message}"\n\nFor full AI capabilities, please configure the Gemini API key in chatbot-config.js.` };
     }
     
     addMessage(role, content) {
@@ -296,7 +319,7 @@ class ChatbotFullPage {
         
         this.scrollToBottom();
         
-        console.log('💬 Message added:', role);
+        console.log('💬 Message added:', role, '-', content.substring(0, 50) + '...');
     }
     
     createMessageElement(data) {
@@ -315,7 +338,10 @@ class ChatbotFullPage {
         
         const bubble = document.createElement('div');
         bubble.className = 'message-bubble';
-        bubble.textContent = data.content;
+        
+        // Format text (preserve line breaks)
+        const formattedContent = data.content.replace(/\n/g, '<br>');
+        bubble.innerHTML = formattedContent;
         
         const time = document.createElement('div');
         time.className = 'message-time';
@@ -353,7 +379,7 @@ class ChatbotFullPage {
     
     renderChart(chartData) {
         console.log('📊 Chart data received:', chartData);
-        // TODO: Implement chart rendering
+        // TODO: Implement chart rendering with ChatbotCharts
     }
     
     saveCurrentConversation() {
@@ -583,11 +609,6 @@ class ChatbotFullPage {
         div.textContent = text;
         return div.innerHTML;
     }
-    
-    showNotification(message) {
-        console.log('📢', message);
-        alert(message);
-    }
 }
 
 // ============================================
@@ -596,7 +617,7 @@ class ChatbotFullPage {
 document.addEventListener('DOMContentLoaded', () => {
     try {
         window.chatbotFullPage = new ChatbotFullPage();
-        console.log('✅ ChatbotFullPage ready');
+        console.log('🎉 ChatbotFullPage ready!');
     } catch (error) {
         console.error('❌ Failed to initialize ChatbotFullPage:', error);
     }
