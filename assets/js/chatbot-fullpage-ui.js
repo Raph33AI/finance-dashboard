@@ -1,5 +1,6 @@
 // ============================================
 // CHATBOT FULLPAGE - CONVERSATION HANDLER
+// VERSION CORRIGÉE
 // ============================================
 
 class ChatbotFullPage {
@@ -22,6 +23,9 @@ class ChatbotFullPage {
             btnAttachment: document.getElementById('btnAttachment')
         };
         
+        // Vérifier que les éléments essentiels existent
+        this.checkRequiredElements();
+        
         // State
         this.currentConversationId = null;
         this.conversations = [];
@@ -40,103 +44,167 @@ class ChatbotFullPage {
         console.log('✅ Chatbot FullPage initialized');
     }
     
+    checkRequiredElements() {
+        const required = ['chatInput', 'btnSend', 'messagesContainer', 'chatWelcome'];
+        const missing = required.filter(id => !this.elements[id]);
+        
+        if (missing.length > 0) {
+            console.error('❌ Missing required elements:', missing);
+        }
+    }
+    
     initializeAI() {
         try {
             if (typeof FinancialChatbotEngine === 'undefined') {
-                console.error('❌ FinancialChatbotEngine not found');
+                console.warn('⚠️ FinancialChatbotEngine not found - using fallback');
+                this.aiEngine = null;
                 return;
             }
             
-            // Utiliser ChatbotConfig si disponible
             const config = typeof ChatbotConfig !== 'undefined' ? ChatbotConfig : {};
             this.aiEngine = new FinancialChatbotEngine(config);
             console.log('✅ AI Engine initialized');
         } catch (error) {
             console.error('❌ Error initializing AI:', error);
+            this.aiEngine = null;
         }
     }
     
     attachEventListeners() {
         // History Toggle
-        this.elements.historyToggle?.addEventListener('click', () => this.toggleHistory());
+        if (this.elements.historyToggle) {
+            this.elements.historyToggle.addEventListener('click', () => this.toggleHistory());
+        }
         
         // New Chat
-        this.elements.newChat?.addEventListener('click', () => this.startNewConversation());
+        if (this.elements.newChat) {
+            this.elements.newChat.addEventListener('click', () => this.startNewConversation());
+        }
         
         // Clear History
-        this.elements.clearHistory?.addEventListener('click', () => this.clearAllHistory());
+        if (this.elements.clearHistory) {
+            this.elements.clearHistory.addEventListener('click', () => this.clearAllHistory());
+        }
         
         // Search History
-        this.elements.historySearch?.addEventListener('input', (e) => this.searchHistory(e.target.value));
+        if (this.elements.historySearch) {
+            this.elements.historySearch.addEventListener('input', (e) => this.searchHistory(e.target.value));
+        }
         
-        // Send Message
-        this.elements.btnSend?.addEventListener('click', () => this.sendMessage());
-        
-        // Enter to send (Shift+Enter for new line)
-        this.elements.chatInput?.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter' && !e.shiftKey) {
+        // Send Message - CORRIGÉ
+        if (this.elements.btnSend) {
+            this.elements.btnSend.addEventListener('click', (e) => {
                 e.preventDefault();
                 this.sendMessage();
-            }
-        });
+            });
+        }
         
-        // Auto-resize textarea
-        this.elements.chatInput?.addEventListener('input', (e) => {
-            e.target.style.height = 'auto';
-            e.target.style.height = Math.min(e.target.scrollHeight, 200) + 'px';
-        });
+        // Enter to send (Shift+Enter for new line) - CORRIGÉ
+        if (this.elements.chatInput) {
+            this.elements.chatInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    this.sendMessage();
+                }
+            });
+            
+            // Auto-resize textarea - CORRIGÉ
+            this.elements.chatInput.addEventListener('input', (e) => {
+                e.target.style.height = 'auto';
+                e.target.style.height = Math.min(e.target.scrollHeight, 200) + 'px';
+            });
+        }
         
         // Suggestion buttons
         document.querySelectorAll('.suggestion-btn').forEach(btn => {
             btn.addEventListener('click', () => {
                 const message = btn.dataset.message;
-                this.elements.chatInput.value = message;
-                this.sendMessage();
+                if (this.elements.chatInput) {
+                    this.elements.chatInput.value = message;
+                    this.sendMessage();
+                }
             });
         });
         
         // Attachment (Coming Soon)
-        this.elements.btnAttachment?.addEventListener('click', () => {
-            alert('📎 File attachment feature coming soon!');
-        });
+        if (this.elements.btnAttachment) {
+            this.elements.btnAttachment.addEventListener('click', () => {
+                this.showNotification('📎 File attachment feature coming soon!');
+            });
+        }
+        
+        console.log('✅ Event listeners attached');
     }
     
     toggleHistory() {
-        this.elements.historySidebar?.classList.toggle('hidden');
+        if (!this.elements.historySidebar) return;
+        
+        this.elements.historySidebar.classList.toggle('hidden');
+        
+        // Update icon
         const icon = this.elements.historyToggle?.querySelector('i');
         if (icon) {
-            icon.classList.toggle('fa-history');
-            icon.classList.toggle('fa-times');
+            if (this.elements.historySidebar.classList.contains('hidden')) {
+                icon.className = 'fas fa-history';
+            } else {
+                icon.className = 'fas fa-times';
+            }
         }
+        
+        console.log('📜 History toggled');
     }
     
     startNewConversation() {
         if (this.messages.length > 0) {
-            // Save current conversation
             this.saveCurrentConversation();
         }
         
-        // Reset state
         this.currentConversationId = this.generateId();
         this.messages = [];
         
-        // Clear UI
-        this.elements.messagesContainer.innerHTML = '';
-        this.elements.chatWelcome?.classList.remove('hidden');
-        this.elements.chatInput.value = '';
+        if (this.elements.messagesContainer) {
+            this.elements.messagesContainer.innerHTML = '';
+        }
+        
+        if (this.elements.chatWelcome) {
+            this.elements.chatWelcome.classList.remove('hidden');
+        }
+        
+        if (this.elements.chatInput) {
+            this.elements.chatInput.value = '';
+            this.elements.chatInput.style.height = 'auto';
+        }
         
         console.log('✅ New conversation started:', this.currentConversationId);
     }
     
     async sendMessage() {
+        if (!this.elements.chatInput || !this.elements.btnSend) {
+            console.error('❌ Input elements not found');
+            return;
+        }
+        
         const message = this.elements.chatInput.value.trim();
-        if (!message || this.isProcessing) return;
+        
+        if (!message) {
+            console.log('⚠️ Empty message, ignoring');
+            return;
+        }
+        
+        if (this.isProcessing) {
+            console.log('⚠️ Already processing, ignoring');
+            return;
+        }
+        
+        console.log('📤 Sending message:', message);
         
         this.isProcessing = true;
         this.elements.btnSend.disabled = true;
         
         // Hide welcome screen
-        this.elements.chatWelcome?.classList.add('hidden');
+        if (this.elements.chatWelcome) {
+            this.elements.chatWelcome.classList.add('hidden');
+        }
         
         // Add user message
         this.addMessage('user', message);
@@ -149,23 +217,29 @@ class ChatbotFullPage {
         this.showTypingIndicator();
         
         try {
-            // Process with AI
-            if (this.aiEngine) {
-                const response = await this.aiEngine.processMessage(message);
-                
-                // Hide typing indicator
-                this.hideTypingIndicator();
-                
-                // Add AI response
-                this.addMessage('assistant', response.text);
-                
-                // Handle charts if present
-                if (response.chart) {
-                    this.renderChart(response.chart);
-                }
+            let response;
+            
+            // Process with AI if available
+            if (this.aiEngine && typeof this.aiEngine.processMessage === 'function') {
+                console.log('🤖 Processing with AI Engine...');
+                response = await this.aiEngine.processMessage(message);
             } else {
-                throw new Error('AI Engine not initialized');
+                // Fallback response
+                console.log('⚠️ Using fallback response');
+                response = await this.getFallbackResponse(message);
             }
+            
+            // Hide typing indicator
+            this.hideTypingIndicator();
+            
+            // Add AI response
+            this.addMessage('assistant', response.text || response);
+            
+            // Handle charts if present
+            if (response.chart) {
+                this.renderChart(response.chart);
+            }
+            
         } catch (error) {
             console.error('❌ Error processing message:', error);
             this.hideTypingIndicator();
@@ -173,14 +247,41 @@ class ChatbotFullPage {
         } finally {
             this.isProcessing = false;
             this.elements.btnSend.disabled = false;
-            this.elements.chatInput.focus();
+            
+            // Focus back on input
+            if (this.elements.chatInput) {
+                this.elements.chatInput.focus();
+            }
             
             // Save conversation
             this.saveCurrentConversation();
         }
     }
     
+    async getFallbackResponse(message) {
+        // Simulate AI delay
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        
+        const lowerMessage = message.toLowerCase();
+        
+        if (lowerMessage.includes('hello') || lowerMessage.includes('hi')) {
+            return { text: '👋 Hello! I\'m Alphy AI, your financial assistant. How can I help you today?' };
+        }
+        
+        if (lowerMessage.includes('stock') || lowerMessage.includes('nvda') || lowerMessage.includes('aapl')) {
+            return { text: '📊 I can help you analyze stocks! Please make sure the AI engine is properly configured with a Gemini API key for real-time data.' };
+        }
+        
+        if (lowerMessage.includes('ipo')) {
+            return { text: '🚀 I can analyze IPO opportunities! The full AI engine will provide detailed insights about recent and upcoming IPOs.' };
+        }
+        
+        return { text: `I received your message: "${message}". For full functionality, please configure the Gemini API key in chatbot-config.js.` };
+    }
+    
     addMessage(role, content) {
+        if (!this.elements.messagesContainer) return;
+        
         const messageData = {
             id: this.generateId(),
             role,
@@ -190,17 +291,18 @@ class ChatbotFullPage {
         
         this.messages.push(messageData);
         
-        // Create message element
         const messageEl = this.createMessageElement(messageData);
         this.elements.messagesContainer.appendChild(messageEl);
         
-        // Scroll to bottom
         this.scrollToBottom();
+        
+        console.log('💬 Message added:', role);
     }
     
     createMessageElement(data) {
         const div = document.createElement('div');
         div.className = `message ${data.role}`;
+        div.dataset.messageId = data.id;
         
         const avatar = document.createElement('div');
         avatar.className = 'message-avatar';
@@ -229,30 +331,36 @@ class ChatbotFullPage {
     }
     
     showTypingIndicator() {
-        this.elements.typingIndicator.style.display = 'flex';
-        this.scrollToBottom();
+        if (this.elements.typingIndicator) {
+            this.elements.typingIndicator.style.display = 'flex';
+            this.scrollToBottom();
+        }
     }
     
     hideTypingIndicator() {
-        this.elements.typingIndicator.style.display = 'none';
+        if (this.elements.typingIndicator) {
+            this.elements.typingIndicator.style.display = 'none';
+        }
     }
     
     scrollToBottom() {
+        if (!this.elements.messagesContainer) return;
+        
         setTimeout(() => {
             this.elements.messagesContainer.scrollTop = this.elements.messagesContainer.scrollHeight;
         }, 100);
     }
     
     renderChart(chartData) {
-        // TODO: Implement chart rendering with Chart.js
         console.log('📊 Chart data received:', chartData);
+        // TODO: Implement chart rendering
     }
     
     saveCurrentConversation() {
         if (this.messages.length === 0) return;
         
         const conversation = {
-            id: this.currentConversationId,
+            id: this.currentConversationId || this.generateId(),
             title: this.generateConversationTitle(),
             messages: this.messages,
             createdAt: this.messages[0].timestamp,
@@ -260,7 +368,6 @@ class ChatbotFullPage {
             messageCount: this.messages.length
         };
         
-        // Update or add conversation
         const index = this.conversations.findIndex(c => c.id === this.currentConversationId);
         if (index >= 0) {
             this.conversations[index] = conversation;
@@ -268,10 +375,7 @@ class ChatbotFullPage {
             this.conversations.unshift(conversation);
         }
         
-        // Save to localStorage
         this.saveToLocalStorage();
-        
-        // Update history UI
         this.renderHistory();
         
         console.log('💾 Conversation saved:', conversation.id);
@@ -331,8 +435,8 @@ class ChatbotFullPage {
         
         return `
             <div class="history-item ${isActive ? 'active' : ''}" data-id="${conversation.id}">
-                <div class="history-item-title">${conversation.title}</div>
-                <div class="history-item-preview">${preview}...</div>
+                <div class="history-item-title">${this.escapeHtml(conversation.title)}</div>
+                <div class="history-item-preview">${this.escapeHtml(preview)}...</div>
                 <div class="history-item-meta">
                     <span class="history-item-date">
                         <i class="fas fa-clock"></i>
@@ -348,22 +452,26 @@ class ChatbotFullPage {
         const conversation = this.conversations.find(c => c.id === id);
         if (!conversation) return;
         
-        // Save current if needed
         if (this.messages.length > 0 && this.currentConversationId !== id) {
             this.saveCurrentConversation();
         }
         
-        // Load conversation
         this.currentConversationId = id;
         this.messages = conversation.messages;
         
-        // Clear and render messages
-        this.elements.messagesContainer.innerHTML = '';
-        this.elements.chatWelcome?.classList.add('hidden');
+        if (this.elements.messagesContainer) {
+            this.elements.messagesContainer.innerHTML = '';
+        }
+        
+        if (this.elements.chatWelcome) {
+            this.elements.chatWelcome.classList.add('hidden');
+        }
         
         this.messages.forEach(msg => {
             const el = this.createMessageElement(msg);
-            this.elements.messagesContainer.appendChild(el);
+            if (this.elements.messagesContainer) {
+                this.elements.messagesContainer.appendChild(el);
+            }
         });
         
         this.scrollToBottom();
@@ -397,6 +505,14 @@ class ChatbotFullPage {
         this.elements.historyList.innerHTML = filtered
             .map(conv => this.createHistoryItem(conv))
             .join('');
+        
+        // Re-attach click handlers
+        this.elements.historyList.querySelectorAll('.history-item').forEach(item => {
+            item.addEventListener('click', () => {
+                const convId = item.dataset.id;
+                this.loadConversation(convId);
+            });
+        });
     }
     
     clearAllHistory() {
@@ -410,8 +526,14 @@ class ChatbotFullPage {
         
         localStorage.removeItem('chatbot_conversations');
         
-        this.elements.messagesContainer.innerHTML = '';
-        this.elements.chatWelcome?.classList.remove('hidden');
+        if (this.elements.messagesContainer) {
+            this.elements.messagesContainer.innerHTML = '';
+        }
+        
+        if (this.elements.chatWelcome) {
+            this.elements.chatWelcome.classList.remove('hidden');
+        }
+        
         this.renderHistory();
         
         console.log('✅ All history cleared');
@@ -455,12 +577,27 @@ class ChatbotFullPage {
             day: 'numeric' 
         });
     }
+    
+    escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+    
+    showNotification(message) {
+        console.log('📢', message);
+        alert(message);
+    }
 }
 
 // ============================================
 // AUTO-INITIALIZE
 // ============================================
 document.addEventListener('DOMContentLoaded', () => {
-    window.chatbotFullPage = new ChatbotFullPage();
-    console.log('✅ ChatbotFullPage ready');
+    try {
+        window.chatbotFullPage = new ChatbotFullPage();
+        console.log('✅ ChatbotFullPage ready');
+    } catch (error) {
+        console.error('❌ Failed to initialize ChatbotFullPage:', error);
+    }
 });
