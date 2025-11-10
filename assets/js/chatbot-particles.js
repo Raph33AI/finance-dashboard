@@ -1,33 +1,30 @@
 // ============================================
-// PARTICLES BACKGROUND - FULL SCREEN
-// VERSION CORRIGÉE
+// PARTICLES BACKGROUND (OPTIMIZED - 60 FPS)
 // ============================================
 
 function initializeParticles() {
-    console.log('🎨 Initializing particles...');
-    
     const canvas = document.getElementById('particles-canvas');
     if (!canvas) {
         console.warn('⚠️ Particles canvas not found');
         return;
     }
     
-    const ctx = canvas.getContext('2d', { alpha: true }); // CORRECTION: alpha: true
+    const ctx = canvas.getContext('2d', { alpha: true });
     
-    // Full viewport size
+    // Resize canvas to full viewport
     function resizeCanvas() {
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
-        console.log('📐 Canvas resized:', canvas.width, 'x', canvas.height);
     }
     resizeCanvas();
     
     // Optimized settings
     const particles = [];
-    const particleCount = 80; // CORRECTION: Réduit pour meilleures performances
+    const particleCount = 80; // Optimisé pour performance
     const connectionDistance = 150;
-    const colors = ['#667eea', '#764ba2', '#8b5cf6', '#6366f1'];
+    const colors = ['#667eea', '#764ba2', '#8b5cf6'];
     
+    // Particle class
     class Particle {
         constructor() {
             this.reset();
@@ -54,10 +51,7 @@ function initializeParticles() {
             ctx.beginPath();
             ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
             ctx.fillStyle = this.color;
-            ctx.shadowBlur = 8;
-            ctx.shadowColor = this.color;
             ctx.fill();
-            ctx.shadowBlur = 0;
         }
     }
     
@@ -66,7 +60,7 @@ function initializeParticles() {
         particles.push(new Particle());
     }
     
-    // Animation loop
+    // Optimized animation loop
     let lastTime = 0;
     const targetFPS = 60;
     const frameTime = 1000 / targetFPS;
@@ -79,14 +73,11 @@ function initializeParticles() {
         
         lastTime = currentTime - (deltaTime % frameTime);
         
-        // Clear with transparency
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        
-        // Gradient background (subtle)
+        // Clear with gradient
         const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
-        gradient.addColorStop(0, 'rgba(248, 250, 252, 0.3)');
-        gradient.addColorStop(0.5, 'rgba(239, 246, 255, 0.3)');
-        gradient.addColorStop(1, 'rgba(241, 245, 249, 0.3)');
+        gradient.addColorStop(0, '#f8fafc');
+        gradient.addColorStop(0.5, '#f1f5f9');
+        gradient.addColorStop(1, '#e2e8f0');
         ctx.fillStyle = gradient;
         ctx.fillRect(0, 0, canvas.width, canvas.height);
         
@@ -96,7 +87,7 @@ function initializeParticles() {
             particles[i].draw();
         }
         
-        // Draw connections
+        // Draw connections (optimized)
         ctx.lineWidth = 1;
         for (let i = 0; i < particles.length; i++) {
             for (let j = i + 1; j < particles.length; j++) {
@@ -128,7 +119,7 @@ function initializeParticles() {
         }, 250);
     });
     
-    console.log('✅ Particles initialized:', particleCount, 'particles - FULL SCREEN');
+    console.log('✅ Particles optimized: 60 FPS target');
 }
 
 // Auto-initialize
