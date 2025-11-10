@@ -19,7 +19,6 @@
     <link rel="stylesheet" href="assets/css/user-menu.css">
     
     <!-- Chatbot Styles -->
-    <link rel="stylesheet" href="assets/css/chatbot-futuristic.css">
     <link rel="stylesheet" href="assets/css/chatbot-fullpage.css">
 
     <!-- Firebase SDK -->
@@ -38,7 +37,7 @@
 </head>
 <body>
 
-    <!-- ⚡ THEME SCRIPT - DOIT ÊTRE CHARGÉ EN PREMIER -->
+    <!-- ⚡ THEME SCRIPT -->
     <script src="assets/js/theme.js"></script>
 
     <!-- ============================================
@@ -48,13 +47,12 @@
 
     <div class='layout-wrapper'>
         <!-- ============================================
-             SIDEBAR NAVIGATION (Ta sidebar existante)
+             SIDEBAR NAVIGATION
              ============================================ -->
         <aside class='sidebar' id='sidebar'>
             <!-- Header avec Logo 3D -->
             <div class="sidebar-header">
                 <div class="logo-container">
-                    <!-- Logo 3D SVG -->
                     <div class="logo-3d">
                         <svg class="logo-svg" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
                             <defs>
@@ -63,22 +61,16 @@
                                     <stop offset="100%" class="logo-gradient-2" />
                                 </linearGradient>
                             </defs>
-                            
-                            <!-- Graphique -->
                             <path d="M 20 80 L 30 70 L 40 75 L 50 60 L 60 65 L 70 45 L 80 50 L 90 30" 
                                   stroke="url(#logoGradient)" 
                                   stroke-width="4" 
                                   fill="none" 
                                   stroke-linecap="round" 
                                   stroke-linejoin="round"/>
-                            
-                            <!-- Points -->
                             <circle cx="30" cy="70" r="4" fill="url(#logoGradient)"/>
                             <circle cx="50" cy="60" r="4" fill="url(#logoGradient)"/>
                             <circle cx="70" cy="45" r="4" fill="url(#logoGradient)"/>
                             <circle cx="90" cy="30" r="5" fill="url(#logoGradient)"/>
-                            
-                            <!-- Flèche -->
                             <path d="M 85 35 L 90 30 L 85 25" 
                                   stroke="url(#logoGradient)" 
                                   stroke-width="3" 
@@ -86,15 +78,11 @@
                                   stroke-linecap="round"/>
                         </svg>
                     </div>
-                    
-                    <!-- Brand Text -->
                     <div class="brand-text">
                         <h2 class="brand-name">AlphaVault AI</h2>
                         <span class="brand-tagline">Investments</span>
                     </div>
                 </div>
-                
-                <!-- Toggle Button -->
                 <button class="sidebar-toggle" aria-label="Toggle Sidebar">
                     <i class="fas fa-angle-left"></i>
                 </button>
@@ -102,8 +90,6 @@
             
             <!-- Navigation -->
             <nav class="sidebar-nav">
-                
-                <!-- Home -->
                 <div class="nav-section">
                     <button class="nav-folder" data-tooltip="Home">
                         <i class="fas fa-home"></i>
@@ -118,7 +104,6 @@
                     </div>
                 </div>
                 
-                <!-- Budget -->
                 <div class='nav-section'>
                     <button class='nav-folder' data-tooltip="Budget">
                         <i class='fas fa-wallet'></i>
@@ -137,7 +122,6 @@
                     </div>
                 </div>
                 
-                <!-- Simulation -->
                 <div class='nav-section'>
                     <button class='nav-folder' data-tooltip="Simulation">
                         <i class='fas fa-calculator'></i>
@@ -164,7 +148,6 @@
                     </div>
                 </div>
                 
-                <!-- Stocks -->
                 <div class='nav-section'>
                     <button class="nav-folder" data-tooltip="Stocks">
                         <i class="fas fa-chart-line"></i>
@@ -203,7 +186,7 @@
                     </div>
                 </div>
 
-                <!-- ✅ NOUVELLE SECTION : AI ASSISTANT -->
+                <!-- AI ASSISTANT -->
                 <div class='nav-section'>
                     <button class="nav-folder" data-tooltip="AI Assistant">
                         <i class="fas fa-robot"></i>
@@ -215,23 +198,21 @@
                             <i class='fas fa-comments'></i>
                             <span>Alphy AI Chat</span>
                         </a>
-                        <a href='#' class='nav-link'>
+                        <a href='ai-analytics.html' class='nav-link'>
                             <i class='fas fa-chart-bar'></i>
                             <span>AI Analytics</span>
                         </a>
-                        <a href='#' class='nav-link'>
+                        <a href='ai-recommendations.html' class='nav-link'>
                             <i class='fas fa-lightbulb'></i>
                             <span>AI Recommendations</span>
                         </a>
                     </div>
                 </div>
-                
             </nav>
             
-            <!-- ===== SIDEBAR FOOTER - MENU UTILISATEUR ===== -->
+            <!-- SIDEBAR FOOTER -->
             <div class="sidebar-footer">
                 <div class="sidebar-user-menu">
-                    <!-- Trigger (élément cliquable) -->
                     <div class="sidebar-user-trigger" id="sidebarUserTrigger">
                         <img data-user-photo 
                             src="https://ui-avatars.com/api/?name=User&background=2563eb&color=fff" 
@@ -244,7 +225,6 @@
                         <i class="fas fa-chevron-up sidebar-user-arrow"></i>
                     </div>
                     
-                    <!-- Dropdown (s'ouvre vers le haut) -->
                     <div class="sidebar-user-dropdown" id="sidebarUserDropdown">
                         <div class="user-dropdown-header">
                             <img data-user-photo 
@@ -283,11 +263,10 @@
                     </div>
                 </div>
             </div>
-            <!-- ===== FIN SIDEBAR FOOTER ===== -->
         </aside>
 
         <!-- ============================================
-             MAIN CONTENT AREA (Chatbot Interface)
+             MAIN CONTENT AREA
              ============================================ -->
         <div class='main-content chatbot-main-content'>
             
@@ -307,6 +286,9 @@
                         <span class="status-dot"></span>
                         <span class="status-text">Real-Time Data</span>
                     </div>
+                    <button class="header-action-btn" id="new-chat-btn" title="New conversation">
+                        <i class="fas fa-plus"></i>
+                    </button>
                     <button class="header-action-btn" id="share-btn" title="Share conversation">
                         <i class="fas fa-share-alt"></i>
                     </button>
@@ -316,147 +298,196 @@
                 </div>
             </header>
 
-            <!-- Messages Container -->
-            <div class="chatbot-messages-wrapper">
-                <div class="chatbot-messages-content" id="chatbot-messages-content">
-                    
-                    <!-- Welcome Screen (shown when no messages) -->
-                    <div class="welcome-screen" id="welcome-screen">
-                        <div class="welcome-logo">
-                            <div class="logo-animation">🤖</div>
-                        </div>
-                        <h2 class="welcome-title">Welcome to Alphy AI</h2>
-                        <p class="welcome-subtitle">Your elite financial analyst powered by real-time market data</p>
-                        
-                        <div class="welcome-features">
-                            <div class="feature-card">
-                                <div class="feature-icon">📊</div>
-                                <div class="feature-title">Real-Time Analysis</div>
-                                <div class="feature-desc">Live market data from Finnhub & Twelve Data</div>
-                            </div>
-                            <div class="feature-card">
-                                <div class="feature-icon">🧠</div>
-                                <div class="feature-title">AI-Powered Insights</div>
-                                <div class="feature-desc">Advanced Gemini AI with 8192 token output</div>
-                            </div>
-                            <div class="feature-card">
-                                <div class="feature-icon">📈</div>
-                                <div class="feature-title">Technical Analysis</div>
-                                <div class="feature-desc">RSI, MACD, Bollinger Bands & more</div>
-                            </div>
-                            <div class="feature-card">
-                                <div class="feature-icon">🚀</div>
-                                <div class="feature-title">IPO Scoring</div>
-                                <div class="feature-desc">Advanced multi-criteria IPO evaluation</div>
-                            </div>
-                        </div>
-
-                        <div class="welcome-suggestions">
-                            <h3 class="suggestions-title">Try asking:</h3>
-                            <div class="welcome-suggestion-grid">
-                                <button class="welcome-suggestion-btn" data-query="Analyze NVDA stock performance over the last 5 years">
-                                    <span class="suggestion-icon">📈</span>
-                                    <span class="suggestion-text">Analyze NVDA stock performance over the last 5 years</span>
-                                </button>
-                                <button class="welcome-suggestion-btn" data-query="Show me the top 5 highest potential IPOs">
-                                    <span class="suggestion-icon">🚀</span>
-                                    <span class="suggestion-text">Show me the top 5 highest potential IPOs</span>
-                                </button>
-                                <button class="welcome-suggestion-btn" data-query="What's the market sentiment today?">
-                                    <span class="suggestion-icon">💰</span>
-                                    <span class="suggestion-text">What's the market sentiment today?</span>
-                                </button>
-                                <button class="welcome-suggestion-btn" data-query="Compare AAPL vs MSFT technical indicators">
-                                    <span class="suggestion-icon">📊</span>
-                                    <span class="suggestion-text">Compare AAPL vs MSFT technical indicators</span>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Messages will be added here dynamically -->
-                </div>
-            </div>
-
-            <!-- Input Area (Fixed at bottom) -->
-            <div class="chatbot-input-area">
-                <div class="input-suggestions" id="input-suggestions">
-                    <!-- Dynamic suggestions chips -->
-                </div>
+            <!-- Chat Layout avec Sidebar Historique -->
+            <div class="chat-layout">
                 
-                <div class="input-container">
-                    <div class="input-wrapper">
-                        <textarea 
-                            class="chatbot-input" 
-                            id="chatbot-input" 
-                            placeholder="Ask anything about stocks, IPOs, market trends, technical analysis..."
-                            rows="1"
-                            maxlength="2000"
-                        ></textarea>
-                        <button class="input-clear-btn" id="input-clear-btn" title="Clear input">
-                            <i class="fas fa-times"></i>
+                <!-- Conversations Sidebar -->
+                <aside class="conversations-sidebar" id="conversations-sidebar">
+                    <div class="conversations-header">
+                        <h3><i class="fas fa-history"></i> Conversations</h3>
+                        <button class="conversations-toggle" id="conversations-toggle">
+                            <i class="fas fa-chevron-left"></i>
                         </button>
                     </div>
-                    <button class="chatbot-send-btn" id="chatbot-send-btn" aria-label="Send message">
-                        <i class="fas fa-paper-plane"></i>
-                    </button>
-                </div>
-                
-                <div class="input-footer">
-                    <span class="input-hint">
-                        <i class="fas fa-lightbulb"></i>
-                        Pro tip: Be specific for best results (e.g., "NVDA evolution last 5 years with volatility analysis")
-                    </span>
-                    <span class="input-counter" id="input-counter">0/2000</span>
+                    
+                    <div class="conversations-list" id="conversations-list">
+                        <div class="conversation-group">
+                            <h4 class="group-title">Today</h4>
+                            <div class="conversation-item active" data-id="conv-1">
+                                <i class="fas fa-message"></i>
+                                <span class="conversation-title">NVDA Stock Analysis</span>
+                                <button class="conversation-delete" title="Delete">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="conversation-group">
+                            <h4 class="group-title">Yesterday</h4>
+                            <div class="conversation-item" data-id="conv-2">
+                                <i class="fas fa-message"></i>
+                                <span class="conversation-title">Market Overview</span>
+                                <button class="conversation-delete" title="Delete">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                            <div class="conversation-item" data-id="conv-3">
+                                <i class="fas fa-message"></i>
+                                <span class="conversation-title">IPO Analysis Request</span>
+                                <button class="conversation-delete" title="Delete">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="conversation-group">
+                            <h4 class="group-title">Last 7 Days</h4>
+                            <div class="conversation-item" data-id="conv-4">
+                                <i class="fas fa-message"></i>
+                                <span class="conversation-title">Portfolio Optimization</span>
+                                <button class="conversation-delete" title="Delete">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </aside>
+
+                <!-- Messages Area -->
+                <div class="chat-messages-area">
+                    <div class="chatbot-messages-wrapper">
+                        <div class="chatbot-messages-content" id="chatbot-messages-content">
+                            
+                            <!-- Welcome Screen -->
+                            <div class="welcome-screen" id="welcome-screen">
+                                <!-- Robot 3D CSS -->
+                                <div class="robot-3d-container">
+                                    <div class="robot-3d">
+                                        <!-- Tête -->
+                                        <div class="robot-head">
+                                            <div class="robot-antenna"></div>
+                                            <div class="robot-eyes">
+                                                <div class="robot-eye left"></div>
+                                                <div class="robot-eye right"></div>
+                                            </div>
+                                            <div class="robot-mouth"></div>
+                                        </div>
+                                        
+                                        <!-- Corps avec costume -->
+                                        <div class="robot-body">
+                                            <div class="robot-tie"></div>
+                                            <div class="robot-lapel left-lapel"></div>
+                                            <div class="robot-lapel right-lapel"></div>
+                                            <div class="robot-buttons">
+                                                <div class="button"></div>
+                                                <div class="button"></div>
+                                                <div class="button"></div>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Bras -->
+                                        <div class="robot-arm left-arm">
+                                            <div class="robot-hand"></div>
+                                        </div>
+                                        <div class="robot-arm right-arm">
+                                            <div class="robot-hand"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <h2 class="welcome-title">Welcome to Alphy AI</h2>
+                                <p class="welcome-subtitle">Your elite financial analyst powered by real-time market data</p>
+                                
+                                <div class="welcome-features">
+                                    <div class="feature-card">
+                                        <div class="feature-icon">📊</div>
+                                        <div class="feature-title">Real-Time Analysis</div>
+                                        <div class="feature-desc">Live market data from Finnhub & Twelve Data</div>
+                                    </div>
+                                    <div class="feature-card">
+                                        <div class="feature-icon">🧠</div>
+                                        <div class="feature-title">AI-Powered Insights</div>
+                                        <div class="feature-desc">Advanced Gemini AI with 8192 token output</div>
+                                    </div>
+                                    <div class="feature-card">
+                                        <div class="feature-icon">📈</div>
+                                        <div class="feature-title">Technical Analysis</div>
+                                        <div class="feature-desc">RSI, MACD, Bollinger Bands & more</div>
+                                    </div>
+                                    <div class="feature-card">
+                                        <div class="feature-icon">🚀</div>
+                                        <div class="feature-title">IPO Scoring</div>
+                                        <div class="feature-desc">Advanced multi-criteria IPO evaluation</div>
+                                    </div>
+                                </div>
+
+                                <div class="welcome-suggestions">
+                                    <h3 class="suggestions-title">Try asking:</h3>
+                                    <div class="welcome-suggestion-grid">
+                                        <button class="welcome-suggestion-btn" data-query="Analyze NVDA stock performance over the last 5 years">
+                                            <span class="suggestion-icon">📈</span>
+                                            <span class="suggestion-text">Analyze NVDA stock performance over the last 5 years</span>
+                                        </button>
+                                        <button class="welcome-suggestion-btn" data-query="Show me the top 5 highest potential IPOs">
+                                            <span class="suggestion-icon">🚀</span>
+                                            <span class="suggestion-text">Show me the top 5 highest potential IPOs</span>
+                                        </button>
+                                        <button class="welcome-suggestion-btn" data-query="What's the market sentiment today?">
+                                            <span class="suggestion-icon">💰</span>
+                                            <span class="suggestion-text">What's the market sentiment today?</span>
+                                        </button>
+                                        <button class="welcome-suggestion-btn" data-query="Compare AAPL vs MSFT technical indicators">
+                                            <span class="suggestion-icon">📊</span>
+                                            <span class="suggestion-text">Compare AAPL vs MSFT technical indicators</span>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <!-- Input Area -->
+                    <div class="chatbot-input-area">
+                        <div class="input-suggestions" id="input-suggestions"></div>
+                        
+                        <div class="input-container">
+                            <div class="input-wrapper">
+                                <textarea 
+                                    class="chatbot-input" 
+                                    id="chatbot-input" 
+                                    placeholder="Ask anything about stocks, IPOs, market trends, technical analysis..."
+                                    rows="1"
+                                    maxlength="2000"
+                                ></textarea>
+                                <button class="input-clear-btn" id="input-clear-btn" title="Clear input">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </div>
+                            <button class="chatbot-send-btn" id="chatbot-send-btn" aria-label="Send message">
+                                <i class="fas fa-paper-plane"></i>
+                            </button>
+                        </div>
+                        
+                        <div class="input-footer">
+                            <span class="input-hint">
+                                <i class="fas fa-lightbulb"></i>
+                                Pro tip: Be specific for best results
+                            </span>
+                            <span class="input-counter" id="input-counter">0/2000</span>
+                        </div>
+                    </div>
                 </div>
             </div>
 
         </div>
     </div>
 
-    <!-- ============================================
-         FLOATING STATS PANEL (Optional)
-         ============================================ -->
-    <div class="floating-stats" id="floating-stats">
-        <div class="stats-header">
-            <span class="stats-title">📊 Session Stats</span>
-            <button class="stats-close" id="stats-close">
-                <i class="fas fa-times"></i>
-            </button>
-        </div>
-        <div class="stats-body">
-            <div class="stat-item">
-                <span class="stat-label">Messages</span>
-                <span class="stat-value" id="stat-messages">0</span>
-            </div>
-            <div class="stat-item">
-                <span class="stat-label">Charts</span>
-                <span class="stat-value" id="stat-charts">0</span>
-            </div>
-            <div class="stat-item">
-                <span class="stat-label">Avg Response</span>
-                <span class="stat-value" id="stat-response">0ms</span>
-            </div>
-            <div class="stat-item">
-                <span class="stat-label">Success Rate</span>
-                <span class="stat-value" id="stat-success">100%</span>
-            </div>
-        </div>
-    </div>
-
-    <!-- ============================================
-         SCRIPTS (ORDRE IMPORTANT)
-         ============================================ -->
-    
-    <!-- Chart.js (Required for charts) -->
+    <!-- SCRIPTS -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-
-    <!-- Common Scripts -->
     <script src='assets/js/dark-mode.js'></script>
     <script src='assets/js/common.js'></script>
     <script src='assets/js/sidebar.js'></script>
-
-    <!-- Chatbot Scripts (ORDRE CRITIQUE) -->
     <script src="assets/js/chatbot-config.js"></script>
     <script src="assets/js/chatbot-gemini.js"></script>
     <script src="assets/js/chatbot-analytics.js"></script>
@@ -464,11 +495,7 @@
     <script src="assets/js/chatbot-ipo-analyzer.js"></script>
     <script src="assets/js/chatbot-suggestions.js"></script>
     <script src="assets/js/chatbot-ai-engine.js"></script>
-
-    <!-- Full Page UI Script -->
     <script src="assets/js/chatbot-fullpage-ui.js"></script>
-
-    <!-- Particles Background Script -->
     <script src="assets/js/chatbot-particles.js"></script>
 
 </body>

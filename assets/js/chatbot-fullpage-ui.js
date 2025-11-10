@@ -1,5 +1,5 @@
 // ============================================
-// CHATBOT FULL PAGE UI - CONTROLLER (CORRECTED)
+// CHATBOT FULL PAGE UI - WITH CONVERSATIONS HISTORY
 // ============================================
 
 class ChatbotFullPageUI {
@@ -15,29 +15,24 @@ class ChatbotFullPageUI {
         this.chartCount = 0;
         this.totalResponseTime = 0;
         
+        this.conversations = [];
+        this.currentConversationId = null;
+        
         this.init();
     }
 
-    // ============================================
-    // INITIALIZATION
-    // ============================================
     async init() {
         try {
             console.log('🎨 Initializing Full Page UI...');
             
-            // Wait for DOM to be fully loaded
             await new Promise(resolve => setTimeout(resolve, 100));
             
-            // Cache DOM elements
             this.cacheElements();
-            
-            // Attach event listeners
             this.attachEventListeners();
-            
-            // Initialize components
             await this.initializeComponents();
             
-            // Initialize particles
+            this.loadConversations();
+            
             if (typeof initializeParticles === 'function') {
                 initializeParticles();
             }
@@ -49,12 +44,8 @@ class ChatbotFullPageUI {
         }
     }
 
-    // ============================================
-    // CACHE DOM ELEMENTS (CORRECTED IDs)
-    // ============================================
     cacheElements() {
         this.elements = {
-            // Main
             messages: document.getElementById('chatbot-messages-content'),
             welcomeScreen: document.getElementById('welcome-screen'),
             input: document.getElementById('chatbot-input'),
@@ -63,33 +54,23 @@ class ChatbotFullPageUI {
             inputSuggestions: document.getElementById('input-suggestions'),
             inputCounter: document.getElementById('input-counter'),
             
-            // Header
+            newChatBtn: document.getElementById('new-chat-btn'),
             shareBtn: document.getElementById('share-btn'),
             settingsBtn: document.getElementById('settings-btn'),
             
-            // Stats
-            floatingStats: document.getElementById('floating-stats'),
-            statsClose: document.getElementById('stats-close'),
-            statMessages: document.getElementById('stat-messages'),
-            statCharts: document.getElementById('stat-charts'),
-            statResponse: document.getElementById('stat-response'),
-            statSuccess: document.getElementById('stat-success')
+            conversationsSidebar: document.getElementById('conversations-sidebar'),
+            conversationsToggle: document.getElementById('conversations-toggle'),
+            conversationsList: document.getElementById('conversations-list')
         };
         
-        // Debug: Log found/missing elements
-        console.log('📦 Elements cached:');
+        console.log('📦 Elements cached');
         for (const [key, element] of Object.entries(this.elements)) {
             if (!element) {
                 console.warn(`⚠️ Element missing: ${key}`);
-            } else {
-                console.log(`✅ ${key}: found`);
             }
         }
     }
 
-    // ============================================
-    // ATTACH EVENT LISTENERS
-    // ============================================
     attachEventListeners() {
         // Welcome suggestions
         const welcomeSuggestions = document.querySelectorAll('.welcome-suggestion-btn');
@@ -145,42 +126,217 @@ class ChatbotFullPageUI {
             });
         }
         
-        // Stats panel
-        if (this.elements.statsClose) {
-            this.elements.statsClose.addEventListener('click', () => {
-                this.hideStats();
+        // New chat button
+        if (this.elements.newChatBtn) {
+            this.elements.newChatBtn.addEventListener('click', () => {
+                this.startNewConversation();
+            });
+        }
+        
+        // Conversations toggle
+        if (this.elements.conversationsToggle) {
+            this.elements.conversationsToggle.addEventListener('click', () => {
+                this.toggleConversationsSidebar();
+            });
+        }
+        
+        // Conversations list delegation
+        if (this.elements.conversationsList) {
+            this.elements.conversationsList.addEventListener('click', (e) => {
+                const item = e.target.closest('.conversation-item');
+                const deleteBtn = e.target.closest('.conversation-delete');
+                
+                if (deleteBtn && item) {
+                    e.stopPropagation();
+                    this.deleteConversation(item.dataset.id);
+                } else if (item) {
+                    this.loadConversation(item.dataset.id);
+                }
             });
         }
         
         console.log('✅ Event listeners attached');
     }
 
-    // ============================================
-    // INITIALIZE COMPONENTS
-    // ============================================
     async initializeComponents() {
-        // Initialize engine
         if (typeof FinancialChatbotEngine !== 'undefined') {
             this.engine = new FinancialChatbotEngine(this.config);
             console.log('✅ Engine initialized');
-        } else {
-            console.warn('⚠️ FinancialChatbotEngine not found');
         }
         
-        // Initialize charts
         if (typeof ChatbotCharts !== 'undefined') {
             this.charts = new ChatbotCharts(this.config);
             console.log('✅ Charts initialized');
-        } else {
-            console.warn('⚠️ ChatbotCharts not found');
         }
         
-        // Initialize suggestions
         if (typeof ChatbotSuggestions !== 'undefined') {
             this.suggestions = new ChatbotSuggestions(this.config);
             console.log('✅ Suggestions initialized');
+        }
+    }
+
+    // ============================================
+    // CONVERSATIONS MANAGEMENT
+    // ============================================
+    loadConversations() {
+        const saved = localStorage.getItem('alphy_conversations');
+        if (saved) {
+            this.conversations = JSON.parse(saved);
+            console.log('✅ Conversations loaded:', this.conversations.length);
         } else {
-            console.warn('⚠️ ChatbotSuggestions not found');
+            this.conversations = [];
+        }
+        
+        if (this.conversations.length === 0) {
+            this.startNewConversation();
+        } else {
+            this.currentConversationId = this.conversations[0].id;
+        }
+        
+        this.renderConversations();
+    }
+
+    saveConversations() {
+        localStorage.setItem('alphy_conversations', JSON.stringify(this.conversations));
+    }
+
+    startNewConversation() {
+        const newConv = {
+            id: 'conv-' + Date.now(),
+            title: 'New Conversation',
+            messages: [],
+            createdAt: Date.now(),
+            updatedAt: Date.now()
+        };
+        
+        this.conversations.unshift(newConv);
+        this.currentConversationId = newConv.id;
+        
+        this.clearMessages();
+        this.showWelcomeScreen();
+        this.saveConversations();
+        this.renderConversations();
+        
+        console.log('✅ New conversation started:', newConv.id);
+    }
+
+    loadConversation(id) {
+        const conv = this.conversations.find(c => c.id === id);
+        if (!conv) return;
+        
+        this.currentConversationId = id;
+        this.clearMessages();
+        
+        if (conv.messages.length === 0) {
+            this.showWelcomeScreen();
+        } else {
+            this.hideWelcomeScreen();
+            conv.messages.forEach(msg => {
+                this.addMessage(msg.type, msg.content, false);
+            });
+        }
+        
+        this.renderConversations();
+        console.log('✅ Conversation loaded:', id);
+    }
+
+    deleteConversation(id) {
+        if (confirm('Delete this conversation?')) {
+            this.conversations = this.conversations.filter(c => c.id !== id);
+            
+            if (this.currentConversationId === id) {
+                if (this.conversations.length > 0) {
+                    this.loadConversation(this.conversations[0].id);
+                } else {
+                    this.startNewConversation();
+                }
+            }
+            
+            this.saveConversations();
+            this.renderConversations();
+            console.log('✅ Conversation deleted:', id);
+        }
+    }
+
+    getCurrentConversation() {
+        return this.conversations.find(c => c.id === this.currentConversationId);
+    }
+
+    updateConversationTitle(message) {
+        const conv = this.getCurrentConversation();
+        if (conv && conv.title === 'New Conversation') {
+            conv.title = message.substring(0, 50) + (message.length > 50 ? '...' : '');
+            this.saveConversations();
+            this.renderConversations();
+        }
+    }
+
+    renderConversations() {
+        if (!this.elements.conversationsList) return;
+        
+        const groups = {
+            today: [],
+            yesterday: [],
+            lastWeek: []
+        };
+        
+        const now = Date.now();
+        const oneDayMs = 86400000;
+        
+        this.conversations.forEach(conv => {
+            const age = now - conv.updatedAt;
+            
+            if (age < oneDayMs) {
+                groups.today.push(conv);
+            } else if (age < oneDayMs * 2) {
+                groups.yesterday.push(conv);
+            } else {
+                groups.lastWeek.push(conv);
+            }
+        });
+        
+        let html = '';
+        
+        if (groups.today.length > 0) {
+            html += `<div class="conversation-group">
+                <h4 class="group-title">Today</h4>
+                ${groups.today.map(c => this.renderConversationItem(c)).join('')}
+            </div>`;
+        }
+        
+        if (groups.yesterday.length > 0) {
+            html += `<div class="conversation-group">
+                <h4 class="group-title">Yesterday</h4>
+                ${groups.yesterday.map(c => this.renderConversationItem(c)).join('')}
+            </div>`;
+        }
+        
+        if (groups.lastWeek.length > 0) {
+            html += `<div class="conversation-group">
+                <h4 class="group-title">Last 7 Days</h4>
+                ${groups.lastWeek.map(c => this.renderConversationItem(c)).join('')}
+            </div>`;
+        }
+        
+        this.elements.conversationsList.innerHTML = html;
+    }
+
+    renderConversationItem(conv) {
+        const isActive = conv.id === this.currentConversationId;
+        return `
+            <div class="conversation-item ${isActive ? 'active' : ''}" data-id="${conv.id}">
+                <i class="fas fa-message"></i>
+                <span class="conversation-title">${conv.title}</span>
+                <button class="conversation-delete" title="Delete">
+                    <i class="fas fa-trash"></i>
+                </button>
+            </div>
+        `;
+    }
+
+    toggleConversationsSidebar() {
+        if (this.elements.conversationsSidebar) {
+            this.elements.conversationsSidebar.classList.toggle('mobile-open');
         }
     }
 
@@ -188,7 +344,6 @@ class ChatbotFullPageUI {
     // SEND MESSAGE
     // ============================================
     async sendMessage(messageText = null) {
-        // Guard: Check if input element exists
         if (!this.elements.input) {
             console.error('❌ Input element not found!');
             return;
@@ -197,35 +352,26 @@ class ChatbotFullPageUI {
         const message = messageText || this.elements.input.value.trim();
         
         if (!message || this.isTyping) {
-            console.log('⚠️ Message empty or already typing');
             return;
         }
         
         console.log('📤 Sending message:', message);
         
-        // Hide welcome screen
-        if (this.elements.welcomeScreen) {
-            this.elements.welcomeScreen.style.display = 'none';
-        }
+        this.hideWelcomeScreen();
         
-        // Clear input
         this.elements.input.value = '';
         this.autoResizeTextarea();
         this.updateCharCounter();
         
-        // Add user message
         this.addMessage('user', message);
+        this.updateConversationTitle(message);
         
-        // Clear suggestions
         this.clearSuggestions();
-        
-        // Show typing
         this.showTypingIndicator();
         
         try {
             const startTime = performance.now();
             
-            // Process message
             if (!this.engine) {
                 throw new Error('Engine not initialized');
             }
@@ -235,18 +381,14 @@ class ChatbotFullPageUI {
             const responseTime = performance.now() - startTime;
             this.totalResponseTime += responseTime;
             
-            // Hide typing
             this.hideTypingIndicator();
             
-            // Add AI response
             this.addMessage('bot', response.text);
             
-            // Generate charts
             if (response.chartRequests && response.chartRequests.length > 0) {
                 await this.generateCharts(response.chartRequests);
             }
             
-            // Show suggestions
             if (response.suggestions && response.suggestions.length > 0) {
                 this.showSuggestions(response.suggestions);
             } else if (this.suggestions) {
@@ -258,9 +400,6 @@ class ChatbotFullPageUI {
                 this.showSuggestions(contextualSuggestions);
             }
             
-            // Update stats
-            this.updateStats();
-            
         } catch (error) {
             console.error('❌ Message processing error:', error);
             this.hideTypingIndicator();
@@ -271,7 +410,7 @@ class ChatbotFullPageUI {
     // ============================================
     // ADD MESSAGE
     // ============================================
-    addMessage(type, content) {
+    addMessage(type, content, save = true) {
         if (!this.elements.messages) {
             console.error('❌ Messages container not found!');
             return;
@@ -312,11 +451,18 @@ class ChatbotFullPageUI {
         this.scrollToBottom();
         
         this.messageCount++;
+        
+        // Save to conversation
+        if (save) {
+            const conv = this.getCurrentConversation();
+            if (conv) {
+                conv.messages.push({ type, content, timestamp: Date.now() });
+                conv.updatedAt = Date.now();
+                this.saveConversations();
+            }
+        }
     }
 
-    // ============================================
-    // FORMAT MESSAGE
-    // ============================================
     formatMessage(text) {
         return text
             .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
@@ -325,9 +471,6 @@ class ChatbotFullPageUI {
             .replace(/\n/g, '<br>');
     }
 
-    // ============================================
-    // TYPING INDICATOR
-    // ============================================
     showTypingIndicator() {
         if (!this.elements.messages) return;
         
@@ -372,9 +515,6 @@ class ChatbotFullPageUI {
         }
     }
 
-    // ============================================
-    // SUGGESTIONS
-    // ============================================
     showSuggestions(suggestions) {
         if (!this.elements.inputSuggestions) return;
         
@@ -394,9 +534,6 @@ class ChatbotFullPageUI {
         }
     }
 
-    // ============================================
-    // CHARTS
-    // ============================================
     async generateCharts(chartRequests) {
         if (!this.elements.messages || !this.charts) return;
         
@@ -413,9 +550,25 @@ class ChatbotFullPageUI {
         }
     }
 
-    // ============================================
-    // UTILITIES
-    // ============================================
+    clearMessages() {
+        if (this.elements.messages) {
+            this.elements.messages.innerHTML = '';
+        }
+    }
+
+    showWelcomeScreen() {
+        const welcomeHTML = document.querySelector('.welcome-screen');
+        if (welcomeHTML) {
+            welcomeHTML.style.display = 'block';
+        }
+    }
+
+    hideWelcomeScreen() {
+        if (this.elements.welcomeScreen) {
+            this.elements.welcomeScreen.style.display = 'none';
+        }
+    }
+
     autoResizeTextarea() {
         if (!this.elements.input) return;
         
@@ -439,37 +592,10 @@ class ChatbotFullPageUI {
             }, 100);
         }
     }
-
-    updateStats() {
-        if (this.elements.statMessages) {
-            this.elements.statMessages.textContent = this.messageCount;
-        }
-        if (this.elements.statCharts) {
-            this.elements.statCharts.textContent = this.chartCount;
-        }
-        if (this.elements.statResponse) {
-            const avgResponse = this.messageCount > 0 
-                ? Math.round(this.totalResponseTime / this.messageCount)
-                : 0;
-            this.elements.statResponse.textContent = avgResponse + 'ms';
-        }
-    }
-
-    showStats() {
-        if (this.elements.floatingStats) {
-            this.elements.floatingStats.style.display = 'block';
-        }
-    }
-
-    hideStats() {
-        if (this.elements.floatingStats) {
-            this.elements.floatingStats.style.display = 'none';
-        }
-    }
 }
 
 // ============================================
-// INITIALIZE ON DOM READY
+// INITIALIZE
 // ============================================
 document.addEventListener('DOMContentLoaded', function() {
     console.log('🚀 Initializing Chatbot Full Page...');

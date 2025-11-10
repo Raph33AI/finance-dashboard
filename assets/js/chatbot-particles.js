@@ -1,33 +1,45 @@
 // ============================================
-// ANIMATED PARTICLES BACKGROUND
+// ANIMATED PARTICLES BACKGROUND (Enhanced)
 // ============================================
 
 function initializeParticles() {
     const canvas = document.getElementById('particles-canvas');
-    if (!canvas) return;
+    if (!canvas) {
+        console.warn('⚠️ Particles canvas not found');
+        return;
+    }
     
     const ctx = canvas.getContext('2d');
     
     // Set canvas size
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
+    function resizeCanvas() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+    }
+    resizeCanvas();
     
-    // Particle settings
+    // Particle settings (AUGMENTÉS pour plus de visibilité)
     const particles = [];
-    const particleCount = 80;
-    const connectionDistance = 150;
+    const particleCount = 120; // Augmenté de 80 à 120
+    const connectionDistance = 180; // Augmenté de 150 à 180
     
-    // Colors
-    const colors = ['#667eea', '#764ba2', '#00d9ff', '#b74dff'];
+    // Colors (plus vifs)
+    const colors = [
+        '#667eea',
+        '#764ba2',
+        '#5b21b6',
+        '#6366f1',
+        '#8b5cf6'
+    ];
     
     // Particle class
     class Particle {
         constructor() {
             this.x = Math.random() * canvas.width;
             this.y = Math.random() * canvas.height;
-            this.vx = (Math.random() - 0.5) * 0.5;
-            this.vy = (Math.random() - 0.5) * 0.5;
-            this.radius = Math.random() * 2 + 1;
+            this.vx = (Math.random() - 0.5) * 0.8; // Légèrement plus rapide
+            this.vy = (Math.random() - 0.5) * 0.8;
+            this.radius = Math.random() * 2.5 + 1.5; // Plus gros
             this.color = colors[Math.floor(Math.random() * colors.length)];
         }
         
@@ -45,8 +57,8 @@ function initializeParticles() {
             ctx.fillStyle = this.color;
             ctx.fill();
             
-            // Glow effect
-            ctx.shadowBlur = 10;
+            // Glow effect (plus fort)
+            ctx.shadowBlur = 15;
             ctx.shadowColor = this.color;
         }
     }
@@ -58,7 +70,14 @@ function initializeParticles() {
     
     // Animation loop
     function animate() {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        // Gradient background
+        const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+        gradient.addColorStop(0, '#f8fafc');
+        gradient.addColorStop(0.5, '#f1f5f9');
+        gradient.addColorStop(1, '#e2e8f0');
+        
+        ctx.fillStyle = gradient;
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
         
         // Update and draw particles
         particles.forEach(particle => {
@@ -66,7 +85,7 @@ function initializeParticles() {
             particle.draw();
         });
         
-        // Draw connections
+        // Draw connections (plus visibles)
         for (let i = 0; i < particles.length; i++) {
             for (let j = i + 1; j < particles.length; j++) {
                 const dx = particles[i].x - particles[j].x;
@@ -74,9 +93,9 @@ function initializeParticles() {
                 const distance = Math.sqrt(dx * dx + dy * dy);
                 
                 if (distance < connectionDistance) {
-                    const opacity = (1 - distance / connectionDistance) * 0.3;
+                    const opacity = (1 - distance / connectionDistance) * 0.5; // Plus opaque
                     ctx.strokeStyle = `rgba(102, 126, 234, ${opacity})`;
-                    ctx.lineWidth = 0.5;
+                    ctx.lineWidth = 1.5; // Plus épais
                     ctx.beginPath();
                     ctx.moveTo(particles[i].x, particles[i].y);
                     ctx.lineTo(particles[j].x, particles[j].y);
@@ -92,7 +111,15 @@ function initializeParticles() {
     
     // Resize handler
     window.addEventListener('resize', () => {
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
+        resizeCanvas();
     });
+    
+    console.log('✅ Particles initialized:', particleCount, 'particles');
+}
+
+// Auto-initialize
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initializeParticles);
+} else {
+    initializeParticles();
 }
