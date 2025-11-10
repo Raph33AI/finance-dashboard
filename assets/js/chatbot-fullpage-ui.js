@@ -1,6 +1,6 @@
 // ============================================
 // CHATBOT FULL PAGE UI - VERSION FINALE ✅
-// Avec bouton hamburger pour toggle sidebar
+// Flèche d'ouverture + Zone pleine largeur
 // ============================================
 
 class ChatbotFullPageUI {
@@ -32,7 +32,7 @@ class ChatbotFullPageUI {
             await new Promise(resolve => setTimeout(resolve, 100));
             
             this.cacheElements();
-            this.createHamburgerButton(); // ✅ Créer le bouton hamburger
+            this.createReopenButton(); // ✅ Créer le bouton de réouverture
             this.attachEventListeners();
             await this.initializeComponents();
             
@@ -70,34 +70,34 @@ class ChatbotFullPageUI {
             conversationsToggle: document.getElementById('conversations-toggle'),
             conversationsList: document.getElementById('conversations-list'),
             
-            headerLeft: document.querySelector('.header-left')
+            chatMessagesArea: document.querySelector('.chat-messages-area')
         };
         
         console.log('📦 Elements cached');
     }
 
-    // ✅ CRÉER LE BOUTON HAMBURGER DANS LE HEADER
-    createHamburgerButton() {
-        if (!this.elements.headerLeft) return;
+    // ✅ CRÉER LE BOUTON FLÈCHE DE RÉOUVERTURE
+    createReopenButton() {
+        if (!this.elements.chatMessagesArea) return;
         
-        const hamburger = document.createElement('button');
-        hamburger.className = 'sidebar-hamburger';
-        hamburger.id = 'sidebar-hamburger';
-        hamburger.setAttribute('aria-label', 'Toggle conversations sidebar');
-        hamburger.innerHTML = '<i class="fas fa-bars"></i>';
+        const reopenBtn = document.createElement('button');
+        reopenBtn.className = 'sidebar-reopen-btn';
+        reopenBtn.id = 'sidebar-reopen-btn';
+        reopenBtn.setAttribute('aria-label', 'Open conversations sidebar');
+        reopenBtn.innerHTML = '<i class="fas fa-chevron-right"></i>';
         
-        // Insérer en premier dans header-left
-        this.elements.headerLeft.insertBefore(hamburger, this.elements.headerLeft.firstChild);
+        // Ajouter au début de la zone de messages
+        this.elements.chatMessagesArea.insertBefore(reopenBtn, this.elements.chatMessagesArea.firstChild);
         
-        this.elements.hamburger = hamburger;
+        this.elements.reopenBtn = reopenBtn;
         
-        console.log('✅ Hamburger button created');
+        console.log('✅ Reopen button created');
     }
 
     attachEventListeners() {
-        // ✅ HAMBURGER BUTTON (Principal toggle)
-        if (this.elements.hamburger) {
-            this.elements.hamburger.addEventListener('click', () => {
+        // ✅ BOUTON RÉOUVERTURE (Flèche à gauche)
+        if (this.elements.reopenBtn) {
+            this.elements.reopenBtn.addEventListener('click', () => {
                 this.toggleConversationsSidebar();
             });
         }
@@ -163,7 +163,7 @@ class ChatbotFullPageUI {
             });
         }
         
-        // ✅ CONVERSATIONS TOGGLE (Dans la sidebar - optionnel)
+        // ✅ CONVERSATIONS TOGGLE (Bouton dans la sidebar)
         if (this.elements.conversationsToggle) {
             this.elements.conversationsToggle.addEventListener('click', () => {
                 this.toggleConversationsSidebar();
@@ -206,7 +206,7 @@ class ChatbotFullPageUI {
     }
 
     // ============================================
-    // ✅ GESTION SIDEBAR TOGGLE (AMÉLIORÉ)
+    // ✅ GESTION SIDEBAR TOGGLE
     // ============================================
     
     toggleConversationsSidebar() {
@@ -224,15 +224,6 @@ class ChatbotFullPageUI {
             this.elements.conversationsSidebar.classList.add('collapsed');
         } else {
             this.elements.conversationsSidebar.classList.remove('collapsed');
-        }
-        
-        // ✅ Update hamburger icon state
-        if (this.elements.hamburger) {
-            if (this.sidebarCollapsed) {
-                this.elements.hamburger.classList.remove('sidebar-open');
-            } else {
-                this.elements.hamburger.classList.add('sidebar-open');
-            }
         }
     }
     

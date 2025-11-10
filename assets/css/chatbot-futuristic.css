@@ -1,6 +1,6 @@
 /* ============================================
    CHATBOT FULL PAGE - VERSION FINALE CORRIGÉE
-   Toggle fonctionnel + Espacement optimisé ✅
+   Flèche d'ouverture + Zone de chat pleine largeur ✅
    ============================================ */
 
 :root {
@@ -70,47 +70,6 @@ body {
     box-shadow: var(--shadow-sm);
     position: relative;
     z-index: 15;
-}
-
-/* ✅ BOUTON HAMBURGER POUR TOGGLE SIDEBAR (Dans le header) */
-.header-left {
-    display: flex;
-    align-items: center;
-    gap: 16px;
-}
-
-.sidebar-hamburger {
-    width: 40px;
-    height: 40px;
-    border: none;
-    background: rgba(241, 245, 249, 0.8);
-    border-radius: var(--radius-sm);
-    color: var(--chatbot-text);
-    font-size: 18px;
-    cursor: pointer;
-    transition: all var(--transition-fast);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.sidebar-hamburger:hover {
-    background: #e2e8f0;
-    transform: scale(1.05);
-    box-shadow: var(--shadow-sm);
-}
-
-.sidebar-hamburger:active {
-    transform: scale(0.95);
-}
-
-.sidebar-hamburger i {
-    transition: transform var(--transition-smooth);
-}
-
-/* Rotation de l'icône quand la sidebar est ouverte */
-.sidebar-hamburger.sidebar-open i {
-    transform: rotate(90deg);
 }
 
 .header-status {
@@ -218,7 +177,7 @@ body {
     color: var(--neon-purple);
 }
 
-/* ✅ BOUTON TOGGLE (Dans la sidebar - optionnel) */
+/* ✅ BOUTON TOGGLE (Dans la sidebar) */
 .conversations-toggle {
     width: 32px;
     height: 32px;
@@ -249,8 +208,55 @@ body {
     transition: transform var(--transition-smooth);
 }
 
-.conversations-sidebar.collapsed .conversations-toggle i {
-    transform: rotate(180deg);
+/* ✅ BOUTON FLÈCHE D'OUVERTURE (Quand sidebar fermée) */
+.sidebar-reopen-btn {
+    position: fixed;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 40px;
+    height: 80px;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(20px) saturate(180%);
+    border: 1px solid var(--chatbot-border);
+    border-left: none;
+    border-radius: 0 var(--radius-md) var(--radius-md) 0;
+    color: var(--neon-purple);
+    font-size: 18px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 20;
+    box-shadow: 2px 0 12px rgba(0, 0, 0, 0.1);
+    transition: all var(--transition-smooth);
+    opacity: 0;
+    pointer-events: none;
+}
+
+/* ✅ Afficher uniquement quand sidebar fermée */
+.conversations-sidebar.collapsed ~ .chat-messages-area .sidebar-reopen-btn {
+    opacity: 1;
+    pointer-events: all;
+}
+
+.sidebar-reopen-btn:hover {
+    background: rgba(237, 233, 254, 0.95);
+    border-color: var(--neon-purple);
+    width: 50px;
+    box-shadow: 4px 0 16px rgba(118, 75, 162, 0.2);
+}
+
+.sidebar-reopen-btn:active {
+    transform: translateY(-50%) scale(0.95);
+}
+
+.sidebar-reopen-btn i {
+    transition: transform var(--transition-fast);
+}
+
+.sidebar-reopen-btn:hover i {
+    transform: translateX(4px);
 }
 
 .conversations-list {
@@ -381,7 +387,7 @@ body {
 }
 
 /* ============================================
-   CHAT MESSAGES AREA - AVEC AJUSTEMENT AUTO ✅
+   CHAT MESSAGES AREA - PLEINE LARGEUR QUAND SIDEBAR FERMÉE ✅
    ============================================ */
 .chat-messages-area {
     flex: 1;
@@ -390,7 +396,14 @@ body {
     background: rgba(255, 255, 255, 0.6);
     backdrop-filter: blur(10px);
     min-width: 0;
-    transition: margin-left var(--transition-smooth);
+    position: relative;
+    transition: all var(--transition-smooth);
+}
+
+/* ✅ QUAND SIDEBAR FERMÉE : Prendre toute la largeur */
+.conversations-sidebar.collapsed ~ .chat-messages-area {
+    width: 100%;
+    max-width: 100%;
 }
 
 .chatbot-messages-wrapper {
@@ -425,6 +438,13 @@ body {
     padding: 40px 20px;
     min-height: 100%;
     width: 100%;
+    transition: max-width var(--transition-smooth), padding var(--transition-smooth);
+}
+
+/* ✅ Quand sidebar fermée : agrandir la zone de contenu */
+.conversations-sidebar.collapsed ~ .chat-messages-area .chatbot-messages-content {
+    max-width: 1200px;
+    padding: 40px 60px;
 }
 
 /* ============================================
@@ -449,375 +469,14 @@ body {
 }
 
 /* ============================================
-   ✅ ROBOT 3D CONTAINER - MASQUÉ OU RÉDUIT
+   ✅ ROBOT 3D CONTAINER - MASQUÉ
    ============================================ */
 .robot-3d-container-threejs {
-    display: none !important; /* ✅ CACHÉ COMPLÈTEMENT */
+    display: none !important;
 }
-
-/* Si vous voulez le garder mais sans espace, décommentez ci-dessous et commentez la ligne au-dessus */
-/*
-.robot-3d-container-threejs {
-    margin: 0 auto 0;
-    width: 100%;
-    max-width: 300px;
-    height: 200px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-*/
 
 .robot-3d-container {
-    display: none !important; /* ✅ CACHÉ COMPLÈTEMENT */
-}
-
-/* Si vous voulez le garder (version CSS pure), décommentez : */
-/*
-.robot-3d-container {
-    margin: 0 auto 20px;
-    perspective: 1200px;
-    perspective-origin: center 60%;
-    width: 100%;
-    max-width: 200px;
-    display: flex;
-    justify-content: center;
-}
-*/
-
-.robot-3d {
-    width: 180px;
-    height: 220px;
-    position: relative;
-    transform-style: preserve-3d;
-    animation: robot-cinematic-float 5s ease-in-out infinite;
-    filter: drop-shadow(0 25px 50px rgba(0, 0, 0, 0.3));
-}
-
-@keyframes robot-cinematic-float {
-    0%, 100% { 
-        transform: translateY(0px) rotateY(-8deg) rotateX(3deg);
-    }
-    50% { 
-        transform: translateY(-20px) rotateY(8deg) rotateX(-3deg);
-    }
-}
-
-/* TÊTE */
-.robot-head {
-    width: 100px;
-    height: 100px;
-    background: linear-gradient(145deg, #f8fafc 0%, #e2e8f0 50%, #cbd5e1 100%);
-    border-radius: 25px;
-    margin: 0 auto 15px;
-    position: relative;
-    transform-style: preserve-3d;
-    box-shadow: 
-        0 20px 40px rgba(0, 0, 0, 0.3),
-        inset 0 -6px 15px rgba(0, 0, 0, 0.15),
-        inset 0 6px 15px rgba(255, 255, 255, 0.5);
-    transform: translateZ(25px);
-}
-
-.robot-head::before {
-    content: '';
-    position: absolute;
-    top: 12%;
-    left: 18%;
-    width: 35%;
-    height: 25%;
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.6), rgba(255, 255, 255, 0.1));
-    border-radius: 50%;
-    filter: blur(8px);
-    transform: translateZ(5px);
-}
-
-/* ANTENNE */
-.robot-antenna {
-    width: 5px;
-    height: 25px;
-    background: linear-gradient(to top, #64748b 0%, #94a3b8 50%, #cbd5e1 100%);
-    position: absolute;
-    top: -25px;
-    left: 50%;
-    transform: translateX(-50%);
-    border-radius: 3px;
-    box-shadow: 0 -6px 12px rgba(0, 0, 0, 0.25);
-}
-
-.robot-antenna::after {
-    content: '';
-    width: 14px;
-    height: 14px;
-    background: radial-gradient(circle at 35% 35%, #fef3c7, #fbbf24, #f59e0b, #d97706);
-    border-radius: 50%;
-    position: absolute;
-    top: -10px;
-    left: 50%;
-    transform: translateX(-50%);
-    box-shadow: 
-        0 0 20px #fbbf24,
-        0 0 40px rgba(251, 191, 36, 0.5),
-        inset 0 -2px 5px rgba(0, 0, 0, 0.4),
-        inset 0 2px 5px rgba(255, 255, 255, 0.5);
-    animation: antenna-led-pulse 2.5s ease-in-out infinite;
-}
-
-@keyframes antenna-led-pulse {
-    0%, 100% { 
-        opacity: 1; 
-        transform: translateX(-50%) scale(1);
-    }
-    50% { 
-        opacity: 0.85; 
-        transform: translateX(-50%) scale(1.15);
-    }
-}
-
-/* YEUX */
-.robot-eyes {
-    display: flex;
-    justify-content: space-around;
-    padding: 26px 24px 0;
-    transform: translateZ(12px);
-}
-
-.robot-eye {
-    width: 24px;
-    height: 24px;
-    background: radial-gradient(circle at 35% 35%, #c4b5fd 0%, #a78bfa 20%, #8b5cf6 40%, #7c3aed 60%, #6d28d9 100%);
-    border-radius: 50%;
-    position: relative;
-    box-shadow: 
-        0 0 18px #8b5cf6,
-        0 0 35px rgba(139, 92, 246, 0.6),
-        inset 0 3px 6px rgba(255, 255, 255, 0.4),
-        inset 0 -3px 6px rgba(0, 0, 0, 0.3);
-    animation: eye-hologram-glow 3.5s ease-in-out infinite;
-}
-
-.robot-eye::before {
-    content: '';
-    position: absolute;
-    top: 22%;
-    left: 28%;
-    width: 40%;
-    height: 40%;
-    background: radial-gradient(circle, rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0.2));
-    border-radius: 50%;
-    filter: blur(2px);
-}
-
-@keyframes eye-hologram-glow {
-    0%, 100% { 
-        box-shadow: 
-            0 0 18px #8b5cf6,
-            0 0 35px rgba(139, 92, 246, 0.6),
-            inset 0 3px 6px rgba(255, 255, 255, 0.4);
-    }
-    50% { 
-        box-shadow: 
-            0 0 25px #8b5cf6,
-            0 0 50px rgba(139, 92, 246, 0.8),
-            inset 0 3px 6px rgba(255, 255, 255, 0.6);
-    }
-}
-
-/* BOUCHE */
-.robot-mouth {
-    width: 52px;
-    height: 10px;
-    background: linear-gradient(to bottom, #0f172a, #020617);
-    border-radius: 0 0 26px 26px;
-    margin: 16px auto 0;
-    box-shadow: 
-        inset 0 3px 6px rgba(0, 0, 0, 0.5),
-        0 2px 4px rgba(0, 0, 0, 0.2);
-    transform: translateZ(6px);
-}
-
-/* CORPS */
-.robot-body {
-    width: 120px;
-    height: 85px;
-    background: linear-gradient(145deg, #1e293b 0%, #0f172a 50%, #020617 100%);
-    margin: 0 auto;
-    position: relative;
-    border-radius: 18px 18px 10px 10px;
-    transform-style: preserve-3d;
-    box-shadow: 
-        0 25px 50px rgba(0, 0, 0, 0.4),
-        inset 0 -4px 12px rgba(0, 0, 0, 0.3),
-        inset 0 4px 12px rgba(255, 255, 255, 0.06);
-    transform: translateZ(12px);
-}
-
-.robot-body::before {
-    content: '';
-    position: absolute;
-    top: 8%;
-    left: 12%;
-    width: 30%;
-    height: 40%;
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), transparent);
-    border-radius: 50%;
-    filter: blur(10px);
-}
-
-/* CRAVATE */
-.robot-tie {
-    width: 18px;
-    height: 50px;
-    background: linear-gradient(145deg, #dc2626 0%, #b91c1c 50%, #991b1b 100%);
-    position: absolute;
-    top: 0;
-    left: 50%;
-    transform: translateX(-50%) translateZ(18px);
-    clip-path: polygon(50% 0%, 0% 15%, 25% 100%, 75% 100%, 100% 15%);
-    box-shadow: 
-        0 10px 20px rgba(0, 0, 0, 0.35),
-        inset 0 2px 6px rgba(255, 255, 255, 0.2),
-        inset 0 -2px 6px rgba(0, 0, 0, 0.3);
-    z-index: 4;
-}
-
-.robot-tie::before {
-    content: '';
-    position: absolute;
-    top: 10%;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 16px;
-    height: 10px;
-    background: linear-gradient(145deg, #b91c1c, #7f1d1d);
-    border-radius: 3px;
-    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.4);
-}
-
-/* REVERS */
-.robot-lapel {
-    width: 44px;
-    height: 62px;
-    background: linear-gradient(145deg, #0f172a, #020617);
-    position: absolute;
-    top: 0;
-    box-shadow: inset 2px 2px 6px rgba(255, 255, 255, 0.05);
-}
-
-.left-lapel {
-    left: 0;
-    clip-path: polygon(0 0, 70% 0, 100% 100%, 0 100%);
-    transform: translateZ(8px);
-}
-
-.right-lapel {
-    right: 0;
-    clip-path: polygon(30% 0, 100% 0, 100% 100%, 0 100%);
-    transform: translateZ(8px);
-}
-
-/* BOUTONS */
-.robot-buttons {
-    position: absolute;
-    left: 50%;
-    top: 50%;
-    transform: translate(-50%, -20%) translateZ(20px);
-    display: flex;
-    flex-direction: column;
-    gap: 9px;
-    z-index: 5;
-}
-
-.robot-buttons .button {
-    width: 10px;
-    height: 10px;
-    background: radial-gradient(circle at 35% 35%, #fef3c7, #fbbf24, #f59e0b, #d97706);
-    border-radius: 50%;
-    box-shadow: 
-        0 4px 8px rgba(0, 0, 0, 0.4),
-        0 0 10px rgba(251, 191, 36, 0.3),
-        inset 0 2px 4px rgba(255, 255, 255, 0.4),
-        inset 0 -2px 4px rgba(0, 0, 0, 0.3);
-    position: relative;
-}
-
-.robot-buttons .button::before {
-    content: '';
-    position: absolute;
-    top: 20%;
-    left: 25%;
-    width: 35%;
-    height: 35%;
-    background: rgba(255, 255, 255, 0.6);
-    border-radius: 50%;
-    filter: blur(1px);
-}
-
-/* BRAS */
-.robot-arm {
-    width: 20px;
-    height: 62px;
-    background: linear-gradient(145deg, #e2e8f0 0%, #cbd5e1 30%, #94a3b8 70%, #64748b 100%);
-    position: absolute;
-    top: 115px;
-    border-radius: 10px;
-    transform-style: preserve-3d;
-    box-shadow: 
-        0 10px 20px rgba(0, 0, 0, 0.3),
-        inset 0 2px 6px rgba(255, 255, 255, 0.3),
-        inset 0 -2px 6px rgba(0, 0, 0, 0.2);
-}
-
-.left-arm {
-    left: 16px;
-    transform-origin: top center;
-    animation: arm-professional-left 4.5s ease-in-out infinite;
-    transform: translateZ(6px);
-}
-
-.right-arm {
-    right: 16px;
-    transform-origin: top center;
-    animation: arm-professional-right 4.5s ease-in-out infinite;
-    transform: translateZ(6px);
-}
-
-@keyframes arm-professional-left {
-    0%, 100% { transform: rotate(-12deg) translateZ(6px); }
-    50% { transform: rotate(-28deg) translateZ(6px); }
-}
-
-@keyframes arm-professional-right {
-    0%, 100% { transform: rotate(12deg) translateZ(6px); }
-    50% { transform: rotate(28deg) translateZ(6px); }
-}
-
-/* MAINS */
-.robot-hand {
-    width: 24px;
-    height: 24px;
-    background: radial-gradient(circle at 40% 40%, #f1f5f9, #cbd5e1, #94a3b8);
-    border-radius: 50%;
-    position: absolute;
-    bottom: -12px;
-    left: 50%;
-    transform: translateX(-50%) translateZ(8px);
-    box-shadow: 
-        0 8px 16px rgba(0, 0, 0, 0.3),
-        inset 0 3px 6px rgba(255, 255, 255, 0.4),
-        inset 0 -3px 6px rgba(0, 0, 0, 0.2);
-}
-
-.robot-hand::before {
-    content: '';
-    position: absolute;
-    top: 25%;
-    left: 30%;
-    width: 40%;
-    height: 40%;
-    background: radial-gradient(circle, rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0.2));
-    border-radius: 50%;
-    filter: blur(2px);
+    display: none !important;
 }
 
 /* ============================================
@@ -1136,6 +795,12 @@ body {
     align-items: flex-end;
     max-width: 900px;
     margin: 0 auto;
+    transition: max-width var(--transition-smooth);
+}
+
+/* ✅ Agrandir l'input quand sidebar fermée */
+.conversations-sidebar.collapsed ~ .chat-messages-area .input-container {
+    max-width: 1200px;
 }
 
 .input-wrapper {
@@ -1242,6 +907,12 @@ body {
     margin-left: auto;
     margin-right: auto;
     padding: 0 4px;
+    transition: max-width var(--transition-smooth);
+}
+
+/* ✅ Agrandir le footer quand sidebar fermée */
+.conversations-sidebar.collapsed ~ .chat-messages-area .input-footer {
+    max-width: 1200px;
 }
 
 .input-hint {
@@ -1329,6 +1000,11 @@ body {
     .welcome-features {
         grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
     }
+    
+    .conversations-sidebar.collapsed ~ .chat-messages-area .chatbot-messages-content {
+        max-width: 1000px;
+        padding: 40px 40px;
+    }
 }
 
 @media (max-width: 768px) {
@@ -1352,6 +1028,12 @@ body {
         transform: translateX(-100%);
     }
     
+    .sidebar-reopen-btn {
+        top: 150px;
+        height: 60px;
+        width: 32px;
+    }
+    
     .welcome-title {
         font-size: 28px;
     }
@@ -1371,6 +1053,11 @@ body {
     .chatbot-input-area {
         padding: 16px 20px 20px;
     }
+    
+    .conversations-sidebar.collapsed ~ .chat-messages-area .chatbot-messages-content {
+        max-width: 900px;
+        padding: 40px 20px;
+    }
 }
 
 @media (max-width: 480px) {
@@ -1382,9 +1069,9 @@ body {
         font-size: 24px;
     }
     
-    .sidebar-hamburger {
-        width: 36px;
-        height: 36px;
+    .sidebar-reopen-btn {
+        width: 28px;
+        height: 50px;
         font-size: 16px;
     }
 }
