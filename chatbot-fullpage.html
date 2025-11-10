@@ -3,41 +3,53 @@
 <head>
     <meta charset='UTF-8'>
     <meta name='viewport' content='width=device-width, initial-scale=1.0'>
-    <title>Company Insights - Finance Pro</title>
+    <title>Alphy AI Assistant - Finance Pro</title>
     
-    <!-- Font Awesome -->
+    <!-- Font Awesome pour les icônes -->
     <link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css'>
     
-    <!-- Highcharts -->
-    <script src='https://code.highcharts.com/highcharts.js'></script>
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     
-    <!-- Styles -->
+    <!-- Styles communs -->
     <link rel='stylesheet' href='assets/css/common.css'>
     <link rel='stylesheet' href='assets/css/sidebar.css'>
     <link rel="stylesheet" href="assets/css/user-menu.css">
-    <link rel="stylesheet" href="assets/css/chatbot-styles.css">
-    <link rel='stylesheet' href='assets/css/finnhub-pages.css'>
+    
+    <!-- Chatbot Styles -->
+    <link rel="stylesheet" href="assets/css/chatbot-futuristic.css">
+    <link rel="stylesheet" href="assets/css/chatbot-fullpage.css">
 
     <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
     
-    <!-- Configuration -->
-    <script src="assets/js/config.js"></script>
+    <!-- Configuration Firebase -->
     <script src="assets/js/firebase-config.js"></script>
     
-    <!-- Protection de la page -->
+    <!-- Protection de la page (AUTH GUARD) -->
     <script src="assets/js/auth-guard.js"></script>
+    
+    <!-- Favicon -->
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🤖</text></svg>">
 </head>
 <body>
 
-    <!-- Theme Script -->
+    <!-- ⚡ THEME SCRIPT - DOIT ÊTRE CHARGÉ EN PREMIER -->
     <script src="assets/js/theme.js"></script>
-    <script src="assets/js/theme-charts.js"></script>
+
+    <!-- ============================================
+         ANIMATED BACKGROUND (Particles Canvas)
+         ============================================ -->
+    <canvas id="particles-canvas" class="particles-background"></canvas>
 
     <div class='layout-wrapper'>
-        <!-- Sidebar Navigation -->
+        <!-- ============================================
+             SIDEBAR NAVIGATION (Ta sidebar existante)
+             ============================================ -->
         <aside class='sidebar' id='sidebar'>
             <!-- Header avec Logo 3D -->
             <div class="sidebar-header">
@@ -91,7 +103,7 @@
             <!-- Navigation -->
             <nav class="sidebar-nav">
                 
-                <!-- ✅ Ajout data-tooltip pour chaque folder -->
+                <!-- Home -->
                 <div class="nav-section">
                     <button class="nav-folder" data-tooltip="Home">
                         <i class="fas fa-home"></i>
@@ -106,8 +118,9 @@
                     </div>
                 </div>
                 
+                <!-- Budget -->
                 <div class='nav-section'>
-                    <button class='nav-folder'>
+                    <button class='nav-folder' data-tooltip="Budget">
                         <i class='fas fa-wallet'></i>
                         <span>Budget</span>
                         <i class='fas fa-chevron-down arrow'></i>
@@ -124,8 +137,9 @@
                     </div>
                 </div>
                 
+                <!-- Simulation -->
                 <div class='nav-section'>
-                    <button class='nav-folder'>
+                    <button class='nav-folder' data-tooltip="Simulation">
                         <i class='fas fa-calculator'></i>
                         <span>Simulation</span>
                         <i class='fas fa-chevron-down arrow'></i>
@@ -150,13 +164,14 @@
                     </div>
                 </div>
                 
+                <!-- Stocks -->
                 <div class='nav-section'>
                     <button class="nav-folder" data-tooltip="Stocks">
                         <i class="fas fa-chart-line"></i>
                         <span>Stocks</span>
                         <i class="fas fa-chevron-down arrow"></i>
                     </button>
-                    <div class='nav-submenu' style='display: block;'>
+                    <div class='nav-submenu'>
                         <a href='market-data.html' class='nav-link'>
                             <i class='fas fa-database'></i>
                             <span>Market Data</span>
@@ -173,7 +188,7 @@
                             <i class='fas fa-globe'></i>
                             <span>Market Intelligence</span>
                         </a>
-                        <a href='company-insights.html' class='nav-link active'>
+                        <a href='company-insights.html' class='nav-link'>
                             <i class='fas fa-building'></i>
                             <span>Company Insights</span>
                         </a>
@@ -196,7 +211,7 @@
                         <i class="fas fa-chevron-down arrow"></i>
                     </button>
                     <div class='nav-submenu' style='display: block;'>
-                        <a href='chatbot-fullpage.html' class='nav-link'>
+                        <a href='chatbot-fullpage.html' class='nav-link active'>
                             <i class='fas fa-comments'></i>
                             <span>Alphy AI Chat</span>
                         </a>
@@ -210,6 +225,7 @@
                         </a>
                     </div>
                 </div>
+                
             </nav>
             
             <!-- ===== SIDEBAR FOOTER - MENU UTILISATEUR ===== -->
@@ -269,209 +285,178 @@
             </div>
             <!-- ===== FIN SIDEBAR FOOTER ===== -->
         </aside>
-        
-        <!-- Sidebar Overlay (mobile) -->
-        <div class='sidebar-overlay' id='sidebarOverlay' aria-hidden='true'></div>
 
-        <!-- Main Content -->
-        <div class='main-content'>
-            <header class='top-header'>
+        <!-- ============================================
+             MAIN CONTENT AREA (Chatbot Interface)
+             ============================================ -->
+        <div class='main-content chatbot-main-content'>
+            
+            <!-- Header -->
+            <header class='top-header chatbot-top-header'>
                 <div class='header-left'>
                     <button class='mobile-toggle' id='mobileToggle'>
                         <i class='fas fa-bars'></i>
                     </button>
-                    <h1><i class='fas fa-building'></i> Company Insights</h1>
+                    <h1>
+                        <span class="title-icon">🤖</span>
+                        <span>Alphy - AI Financial Assistant</span>
+                    </h1>
                 </div>
                 <div class='header-right'>
-                    <span class='last-update'>
-                        <i class='fas fa-clock'></i>
-                        <span id='lastUpdate'>Loading...</span>
-                    </span>
+                    <div class="header-status">
+                        <span class="status-dot"></span>
+                        <span class="status-text">Real-Time Data</span>
+                    </div>
+                    <button class="header-action-btn" id="share-btn" title="Share conversation">
+                        <i class="fas fa-share-alt"></i>
+                    </button>
+                    <button class="header-action-btn" id="settings-btn" title="Settings">
+                        <i class="fas fa-cog"></i>
+                    </button>
                 </div>
             </header>
-            
-            <div class='container'>
-                <!-- Symbol Search -->
-                <div class='section'>
-                    <div class='toolbar'>
-                        <div class='toolbar-row'>
-                            <label><i class='fas fa-search'></i> Enter Symbol:</label>
-                            <input type='text' id='symbolInput' placeholder='AAPL, MSFT, TSLA...' 
-                                   style='padding: 12px 20px; border: 2px solid var(--border-color); border-radius: 12px; 
-                                          background: var(--card-bg); color: var(--text-primary); font-size: 1em; 
-                                          font-weight: 600; min-width: 250px; text-transform: uppercase;'>
-                            <button class='btn-primary' onclick='CompanyInsights.loadCompanyData()'>
-                                <i class='fas fa-search'></i> Search
-                            </button>
-                            
-                            <!-- Quick Access Buttons -->
-                            <div style='display: flex; gap: 10px; margin-left: 20px;'>
-                                <button class='btn-secondary' onclick='CompanyInsights.quickLoad("AAPL")' 
-                                        style='padding: 8px 16px; font-size: 0.9em;'>AAPL</button>
-                                <button class='btn-secondary' onclick='CompanyInsights.quickLoad("MSFT")' 
-                                        style='padding: 8px 16px; font-size: 0.9em;'>MSFT</button>
-                                <button class='btn-secondary' onclick='CompanyInsights.quickLoad("GOOGL")' 
-                                        style='padding: 8px 16px; font-size: 0.9em;'>GOOGL</button>
-                                <button class='btn-secondary' onclick='CompanyInsights.quickLoad("TSLA")' 
-                                        style='padding: 8px 16px; font-size: 0.9em;'>TSLA</button>
+
+            <!-- Messages Container -->
+            <div class="chatbot-messages-wrapper">
+                <div class="chatbot-messages-content" id="chatbot-messages-content">
+                    
+                    <!-- Welcome Screen (shown when no messages) -->
+                    <div class="welcome-screen" id="welcome-screen">
+                        <div class="welcome-logo">
+                            <div class="logo-animation">🤖</div>
+                        </div>
+                        <h2 class="welcome-title">Welcome to Alphy AI</h2>
+                        <p class="welcome-subtitle">Your elite financial analyst powered by real-time market data</p>
+                        
+                        <div class="welcome-features">
+                            <div class="feature-card">
+                                <div class="feature-icon">📊</div>
+                                <div class="feature-title">Real-Time Analysis</div>
+                                <div class="feature-desc">Live market data from Finnhub & Twelve Data</div>
+                            </div>
+                            <div class="feature-card">
+                                <div class="feature-icon">🧠</div>
+                                <div class="feature-title">AI-Powered Insights</div>
+                                <div class="feature-desc">Advanced Gemini AI with 8192 token output</div>
+                            </div>
+                            <div class="feature-card">
+                                <div class="feature-icon">📈</div>
+                                <div class="feature-title">Technical Analysis</div>
+                                <div class="feature-desc">RSI, MACD, Bollinger Bands & more</div>
+                            </div>
+                            <div class="feature-card">
+                                <div class="feature-icon">🚀</div>
+                                <div class="feature-title">IPO Scoring</div>
+                                <div class="feature-desc">Advanced multi-criteria IPO evaluation</div>
+                            </div>
+                        </div>
+
+                        <div class="welcome-suggestions">
+                            <h3 class="suggestions-title">Try asking:</h3>
+                            <div class="welcome-suggestion-grid">
+                                <button class="welcome-suggestion-btn" data-query="Analyze NVDA stock performance over the last 5 years">
+                                    <span class="suggestion-icon">📈</span>
+                                    <span class="suggestion-text">Analyze NVDA stock performance over the last 5 years</span>
+                                </button>
+                                <button class="welcome-suggestion-btn" data-query="Show me the top 5 highest potential IPOs">
+                                    <span class="suggestion-icon">🚀</span>
+                                    <span class="suggestion-text">Show me the top 5 highest potential IPOs</span>
+                                </button>
+                                <button class="welcome-suggestion-btn" data-query="What's the market sentiment today?">
+                                    <span class="suggestion-icon">💰</span>
+                                    <span class="suggestion-text">What's the market sentiment today?</span>
+                                </button>
+                                <button class="welcome-suggestion-btn" data-query="Compare AAPL vs MSFT technical indicators">
+                                    <span class="suggestion-icon">📊</span>
+                                    <span class="suggestion-text">Compare AAPL vs MSFT technical indicators</span>
+                                </button>
                             </div>
                         </div>
                     </div>
+
+                    <!-- Messages will be added here dynamically -->
                 </div>
+            </div>
 
-                <!-- Company Profile Card -->
-                <div id='companyProfileContainer'></div>
-
-                <!-- Sentiment & Impact Analysis -->
-                <div id='sentimentContainer'></div>
-
-                <!-- Sentiment Chart -->
-                <div class='section' id='sentimentChartSection' style='display: none;'>
-                    <h2 class='section-title'>
-                        <i class='fas fa-chart-line'></i> Sentiment Trend Analysis
-                    </h2>
-                    <div class='chart-wrapper'>
-                        <div id='sentimentTrendChart' class='chart' style='height: 350px;'></div>
+            <!-- Input Area (Fixed at bottom) -->
+            <div class="chatbot-input-area">
+                <div class="input-suggestions" id="input-suggestions">
+                    <!-- Dynamic suggestions chips -->
+                </div>
+                
+                <div class="input-container">
+                    <div class="input-wrapper">
+                        <textarea 
+                            class="chatbot-input" 
+                            id="chatbot-input" 
+                            placeholder="Ask anything about stocks, IPOs, market trends, technical analysis..."
+                            rows="1"
+                            maxlength="2000"
+                        ></textarea>
+                        <button class="input-clear-btn" id="input-clear-btn" title="Clear input">
+                            <i class="fas fa-times"></i>
+                        </button>
                     </div>
+                    <button class="chatbot-send-btn" id="chatbot-send-btn" aria-label="Send message">
+                        <i class="fas fa-paper-plane"></i>
+                    </button>
                 </div>
-
-                <!-- Company News -->
-                <div class='section' id='newsSection' style='display: none;'>
-                    <h2 class='section-title'>
-                        <i class='fas fa-newspaper'></i> Company News
-                    </h2>
-                    
-                    <div class='toolbar'>
-                        <div class='toolbar-row'>
-                            <label><i class='fas fa-calendar'></i> Time Period:</label>
-                            <select id='newsPeriod' onchange='CompanyInsights.loadCompanyNews(CompanyInsights.currentSymbol)'>
-                                <option value='7'>Last 7 Days</option>
-                                <option value='30' selected>Last 30 Days</option>
-                                <option value='60'>Last 60 Days</option>
-                                <option value='90'>Last 90 Days</option>
-                            </select>
-                            
-                            <button class='btn-success' onclick='CompanyInsights.exportNews()'>
-                                <i class='fas fa-download'></i> Export
-                            </button>
-                        </div>
-                    </div>
-                    
-                    <div id='companyNewsContainer' class='news-grid'></div>
+                
+                <div class="input-footer">
+                    <span class="input-hint">
+                        <i class="fas fa-lightbulb"></i>
+                        Pro tip: Be specific for best results (e.g., "NVDA evolution last 5 years with volatility analysis")
+                    </span>
+                    <span class="input-counter" id="input-counter">0/2000</span>
                 </div>
+            </div>
 
-                <!-- Peers -->
-                <div class='section' id='peersSection' style='display: none;'>
-                    <h2 class='section-title'>
-                        <i class='fas fa-link'></i> Similar Companies (Peers)
-                    </h2>
-                    <div id='peersContainer' class='peers-container'></div>
-                </div>
+        </div>
+    </div>
 
-                <!-- Basic Financials -->
-                <div id='financialsContainer'></div>
-
-                <footer>
-                    <p>
-                        <i class='fas fa-database'></i> Company Insights powered by <strong>FinnHub API</strong>
-                    </p>
-                </footer>
+    <!-- ============================================
+         FLOATING STATS PANEL (Optional)
+         ============================================ -->
+    <div class="floating-stats" id="floating-stats">
+        <div class="stats-header">
+            <span class="stats-title">📊 Session Stats</span>
+            <button class="stats-close" id="stats-close">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="stats-body">
+            <div class="stat-item">
+                <span class="stat-label">Messages</span>
+                <span class="stat-value" id="stat-messages">0</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-label">Charts</span>
+                <span class="stat-value" id="stat-charts">0</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-label">Avg Response</span>
+                <span class="stat-value" id="stat-response">0ms</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-label">Success Rate</span>
+                <span class="stat-value" id="stat-success">100%</span>
             </div>
         </div>
     </div>
 
-    <!-- Scripts -->
-    <script src='assets/js/common.js'></script>
-    <script src='assets/js/sidebar.js'></script>
-    <script src='assets/js/finnhub-client.js'></script>
-    <script src='assets/js/company-insights.js'></script>
-
     <!-- ============================================
-    ✅ FIX MENU UTILISATEUR - Force l'initialisation
-    ============================================ -->
-    <script>
-        /**
-         * Force l'initialisation du menu utilisateur
-         */
-        (function forceUserMenuInit() {
-            console.log('🔧 Force initializing user menu...');
-            
-            const initMenu = () => {
-                const trigger = document.getElementById('sidebarUserTrigger');
-                const dropdown = document.getElementById('sidebarUserDropdown');
-                
-                if (!trigger || !dropdown) {
-                    console.error('❌ User menu elements not found');
-                    return;
-                }
-                
-                // Supprimer tous les anciens event listeners
-                const newTrigger = trigger.cloneNode(true);
-                trigger.parentNode.replaceChild(newTrigger, trigger);
-                
-                const freshTrigger = document.getElementById('sidebarUserTrigger');
-                const freshDropdown = document.getElementById('sidebarUserDropdown');
-                
-                console.log('✅ Adding click event to trigger...');
-                
-                freshTrigger.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    
-                    console.log('👆 User menu trigger clicked!');
-                    
-                    const isActive = freshDropdown.classList.contains('active');
-                    
-                    if (isActive) {
-                        freshDropdown.classList.remove('active');
-                        console.log('🔽 Closing dropdown');
-                    } else {
-                        freshDropdown.classList.add('active');
-                        console.log('🔼 Opening dropdown');
-                    }
-                    
-                    const arrow = freshTrigger.querySelector('.sidebar-user-arrow');
-                    if (arrow) {
-                        arrow.style.transform = isActive ? 'rotate(0deg)' : 'rotate(180deg)';
-                        arrow.style.transition = 'transform 0.3s ease';
-                    }
-                });
-                
-                // Fermer si on clique ailleurs
-                document.addEventListener('click', function(e) {
-                    if (!freshTrigger.contains(e.target) && !freshDropdown.contains(e.target)) {
-                        freshDropdown.classList.remove('active');
-                        const arrow = freshTrigger.querySelector('.sidebar-user-arrow');
-                        if (arrow) {
-                            arrow.style.transform = 'rotate(0deg)';
-                        }
-                    }
-                });
-                
-                // Empêcher la fermeture si on clique dans le dropdown
-                freshDropdown.addEventListener('click', function(e) {
-                    e.stopPropagation();
-                });
-                
-                console.log('✅ User menu initialized successfully!');
-            };
-            
-            if (document.readyState === 'loading') {
-                document.addEventListener('DOMContentLoaded', initMenu);
-            } else {
-                setTimeout(initMenu, 100);
-            }
-        })();
-    </script>
-
-    <!-- ========================================
-         CHATBOT IA FINANCIER
-         ======================================== -->
+         SCRIPTS (ORDRE IMPORTANT)
+         ============================================ -->
     
-    <!-- Chart.js (requis pour les graphiques du chatbot) -->
+    <!-- Chart.js (Required for charts) -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 
-    <!-- Scripts du chatbot (ORDRE IMPORTANT) -->
+    <!-- Common Scripts -->
+    <script src='assets/js/dark-mode.js'></script>
+    <script src='assets/js/common.js'></script>
+    <script src='assets/js/sidebar.js'></script>
+
+    <!-- Chatbot Scripts (ORDRE CRITIQUE) -->
     <script src="assets/js/chatbot-config.js"></script>
     <script src="assets/js/chatbot-gemini.js"></script>
     <script src="assets/js/chatbot-analytics.js"></script>
@@ -479,42 +464,12 @@
     <script src="assets/js/chatbot-ipo-analyzer.js"></script>
     <script src="assets/js/chatbot-suggestions.js"></script>
     <script src="assets/js/chatbot-ai-engine.js"></script>
-    <script src="assets/js/chatbot-ui.js"></script>
 
-    <!-- Initialisation du chatbot -->
-    <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        console.log('🤖 Initialisation du chatbot FinanceGPT...');
-        
-        // Vérification que ChatbotConfig est chargé
-        if (typeof ChatbotConfig === 'undefined') {
-            console.error('❌ ChatbotConfig non défini !');
-            console.error('📁 Vérifiez que le fichier assets/js/chatbot-config.js existe');
-            return;
-        }
-        
-        console.log('✅ ChatbotConfig chargé');
-        
-        // Vérification que ChatbotUI est disponible
-        if (typeof ChatbotUI === 'undefined') {
-            console.error('❌ ChatbotUI non défini !');
-            console.error('📁 Vérifiez que le fichier assets/js/chatbot-ui.js existe');
-            return;
-        }
-        
-        console.log('✅ ChatbotUI chargé');
-        
-        // Initialisation du chatbot
-        try {
-            window.financialChatbot = new ChatbotUI(ChatbotConfig);
-            console.log('🎉 Chatbot FinanceGPT initialisé avec succès !');
-            console.log('💼 Cliquez sur le bouton flottant pour ouvrir le chatbot');
-        } catch (error) {
-            console.error('❌ Erreur lors de l\'initialisation du chatbot:', error);
-            console.error('📋 Détails:', error.message);
-        }
-    });
-    </script>
+    <!-- Full Page UI Script -->
+    <script src="assets/js/chatbot-fullpage-ui.js"></script>
+
+    <!-- Particles Background Script -->
+    <script src="assets/js/chatbot-particles.js"></script>
 
 </body>
 </html>
