@@ -1,6 +1,6 @@
 /* ============================================
    CHATBOT FULL PAGE - VERSION FINALE CORRIGÉE
-   Avec Toggle Conversations Fonctionnel ✅
+   Toggle fonctionnel + Espacement optimisé ✅
    ============================================ */
 
 :root {
@@ -68,6 +68,49 @@ body {
     backdrop-filter: blur(20px) saturate(180%) !important;
     border-bottom: 1px solid var(--chatbot-border) !important;
     box-shadow: var(--shadow-sm);
+    position: relative;
+    z-index: 15;
+}
+
+/* ✅ BOUTON HAMBURGER POUR TOGGLE SIDEBAR (Dans le header) */
+.header-left {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.sidebar-hamburger {
+    width: 40px;
+    height: 40px;
+    border: none;
+    background: rgba(241, 245, 249, 0.8);
+    border-radius: var(--radius-sm);
+    color: var(--chatbot-text);
+    font-size: 18px;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.sidebar-hamburger:hover {
+    background: #e2e8f0;
+    transform: scale(1.05);
+    box-shadow: var(--shadow-sm);
+}
+
+.sidebar-hamburger:active {
+    transform: scale(0.95);
+}
+
+.sidebar-hamburger i {
+    transition: transform var(--transition-smooth);
+}
+
+/* Rotation de l'icône quand la sidebar est ouverte */
+.sidebar-hamburger.sidebar-open i {
+    transform: rotate(90deg);
 }
 
 .header-status {
@@ -151,25 +194,6 @@ body {
     pointer-events: none;
 }
 
-/* ✅ OVERLAY MOBILE (optionnel, pour fermer en cliquant à côté) */
-.conversations-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    background: rgba(0, 0, 0, 0.5);
-    z-index: 9;
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity var(--transition-smooth);
-}
-
-.conversations-sidebar.mobile-open ~ .conversations-overlay {
-    opacity: 1;
-    pointer-events: all;
-}
-
 .conversations-header {
     padding: 20px;
     border-bottom: 1px solid var(--chatbot-border);
@@ -194,7 +218,7 @@ body {
     color: var(--neon-purple);
 }
 
-/* ✅ BOUTON TOGGLE AMÉLIORÉ */
+/* ✅ BOUTON TOGGLE (Dans la sidebar - optionnel) */
 .conversations-toggle {
     width: 32px;
     height: 32px;
@@ -221,31 +245,12 @@ body {
     transform: scale(0.95);
 }
 
-/* ✅ ROTATION DE L'ICÔNE QUAND FERMÉ */
 .conversations-toggle i {
     transition: transform var(--transition-smooth);
 }
 
-.conversations-sidebar.collapsed + .chat-messages-area .conversations-toggle i,
-.conversations-toggle.rotated i {
+.conversations-sidebar.collapsed .conversations-toggle i {
     transform: rotate(180deg);
-}
-
-/* ✅ EFFET RIPPLE AU CLIC */
-.conversations-toggle::after {
-    content: '';
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    background: rgba(102, 126, 234, 0.3);
-    border-radius: 50%;
-    transform: scale(0);
-    transition: transform 0.5s ease-out;
-}
-
-.conversations-toggle:active::after {
-    transform: scale(2);
-    opacity: 0;
 }
 
 .conversations-list {
@@ -388,11 +393,6 @@ body {
     transition: margin-left var(--transition-smooth);
 }
 
-/* ✅ QUAND SIDEBAR FERMÉE, PRENDRE TOUTE LA LARGEUR */
-.conversations-sidebar.collapsed ~ .chat-messages-area {
-    margin-left: 0;
-}
-
 .chatbot-messages-wrapper {
     flex: 1;
     overflow-y: auto;
@@ -428,7 +428,7 @@ body {
 }
 
 /* ============================================
-   WELCOME SCREEN
+   WELCOME SCREEN - ESPACEMENT OPTIMISÉ ✅
    ============================================ */
 .welcome-screen {
     text-align: center;
@@ -436,6 +436,11 @@ body {
     animation: fade-in-up 0.8s ease-out;
     width: 100%;
     max-width: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    padding-top: 0 !important;
+    margin-top: 0 !important;
 }
 
 @keyframes fade-in-up {
@@ -444,27 +449,41 @@ body {
 }
 
 /* ============================================
-   ROBOT 3D CONTAINER (TAILLE LIMITÉE)
+   ✅ ROBOT 3D CONTAINER - MASQUÉ OU RÉDUIT
    ============================================ */
 .robot-3d-container-threejs {
-    margin: 0 auto 30px;
+    display: none !important; /* ✅ CACHÉ COMPLÈTEMENT */
+}
+
+/* Si vous voulez le garder mais sans espace, décommentez ci-dessous et commentez la ligne au-dessus */
+/*
+.robot-3d-container-threejs {
+    margin: 0 auto 0;
     width: 100%;
-    max-width: 400px;
-    height: 350px;
+    max-width: 300px;
+    height: 200px;
     display: flex;
     justify-content: center;
     align-items: center;
 }
+*/
 
 .robot-3d-container {
-    margin: 0 auto 30px;
+    display: none !important; /* ✅ CACHÉ COMPLÈTEMENT */
+}
+
+/* Si vous voulez le garder (version CSS pure), décommentez : */
+/*
+.robot-3d-container {
+    margin: 0 auto 20px;
     perspective: 1200px;
     perspective-origin: center 60%;
     width: 100%;
-    max-width: 250px;
+    max-width: 200px;
     display: flex;
     justify-content: center;
 }
+*/
 
 .robot-3d {
     width: 180px;
@@ -802,12 +821,13 @@ body {
 }
 
 /* ============================================
-   WELCOME TITLE & SUBTITLE
+   WELCOME TITLE & SUBTITLE - REMONTÉ EN HAUT ✅
    ============================================ */
 .welcome-title {
     font-size: 42px;
     font-weight: 800;
     margin-bottom: 12px;
+    margin-top: 0 !important;
     background: var(--gradient-primary);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
@@ -820,6 +840,7 @@ body {
     font-size: 18px;
     color: var(--chatbot-text-secondary);
     margin-bottom: 40px;
+    margin-top: 0 !important;
     padding: 0 10px;
     word-wrap: break-word;
 }
@@ -1327,9 +1348,8 @@ body {
         pointer-events: all;
     }
     
-    /* Toujours afficher le bouton toggle sur mobile */
-    .conversations-toggle {
-        display: flex;
+    .conversations-sidebar.collapsed {
+        transform: translateX(-100%);
     }
     
     .welcome-title {
@@ -1358,12 +1378,13 @@ body {
         padding: 20px 16px;
     }
     
-    .robot-3d {
-        width: 140px;
-        height: 180px;
-    }
-    
     .welcome-title {
         font-size: 24px;
+    }
+    
+    .sidebar-hamburger {
+        width: 36px;
+        height: 36px;
+        font-size: 16px;
     }
 }

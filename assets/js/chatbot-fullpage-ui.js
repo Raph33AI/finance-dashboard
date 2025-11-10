@@ -1,5 +1,6 @@
 // ============================================
-// CHATBOT FULL PAGE UI - WITH AUTO-RESET & FUNCTIONAL TOGGLE ✅
+// CHATBOT FULL PAGE UI - VERSION FINALE ✅
+// Avec bouton hamburger pour toggle sidebar
 // ============================================
 
 class ChatbotFullPageUI {
@@ -31,6 +32,7 @@ class ChatbotFullPageUI {
             await new Promise(resolve => setTimeout(resolve, 100));
             
             this.cacheElements();
+            this.createHamburgerButton(); // ✅ Créer le bouton hamburger
             this.attachEventListeners();
             await this.initializeComponents();
             
@@ -66,13 +68,40 @@ class ChatbotFullPageUI {
             
             conversationsSidebar: document.getElementById('conversations-sidebar'),
             conversationsToggle: document.getElementById('conversations-toggle'),
-            conversationsList: document.getElementById('conversations-list')
+            conversationsList: document.getElementById('conversations-list'),
+            
+            headerLeft: document.querySelector('.header-left')
         };
         
         console.log('📦 Elements cached');
     }
 
+    // ✅ CRÉER LE BOUTON HAMBURGER DANS LE HEADER
+    createHamburgerButton() {
+        if (!this.elements.headerLeft) return;
+        
+        const hamburger = document.createElement('button');
+        hamburger.className = 'sidebar-hamburger';
+        hamburger.id = 'sidebar-hamburger';
+        hamburger.setAttribute('aria-label', 'Toggle conversations sidebar');
+        hamburger.innerHTML = '<i class="fas fa-bars"></i>';
+        
+        // Insérer en premier dans header-left
+        this.elements.headerLeft.insertBefore(hamburger, this.elements.headerLeft.firstChild);
+        
+        this.elements.hamburger = hamburger;
+        
+        console.log('✅ Hamburger button created');
+    }
+
     attachEventListeners() {
+        // ✅ HAMBURGER BUTTON (Principal toggle)
+        if (this.elements.hamburger) {
+            this.elements.hamburger.addEventListener('click', () => {
+                this.toggleConversationsSidebar();
+            });
+        }
+        
         // Welcome suggestions
         const welcomeSuggestions = document.querySelectorAll('.welcome-suggestion-btn');
         welcomeSuggestions.forEach(btn => {
@@ -134,7 +163,7 @@ class ChatbotFullPageUI {
             });
         }
         
-        // ✅ CONVERSATIONS TOGGLE (AMÉLIORÉ)
+        // ✅ CONVERSATIONS TOGGLE (Dans la sidebar - optionnel)
         if (this.elements.conversationsToggle) {
             this.elements.conversationsToggle.addEventListener('click', () => {
                 this.toggleConversationsSidebar();
@@ -177,7 +206,7 @@ class ChatbotFullPageUI {
     }
 
     // ============================================
-    // ✅ GESTION SIDEBAR TOGGLE (NOUVEAU)
+    // ✅ GESTION SIDEBAR TOGGLE (AMÉLIORÉ)
     // ============================================
     
     toggleConversationsSidebar() {
@@ -197,15 +226,12 @@ class ChatbotFullPageUI {
             this.elements.conversationsSidebar.classList.remove('collapsed');
         }
         
-        // ✅ Rotation de l'icône
-        if (this.elements.conversationsToggle) {
-            const icon = this.elements.conversationsToggle.querySelector('i');
-            if (icon) {
-                if (this.sidebarCollapsed) {
-                    icon.style.transform = 'rotate(180deg)';
-                } else {
-                    icon.style.transform = 'rotate(0deg)';
-                }
+        // ✅ Update hamburger icon state
+        if (this.elements.hamburger) {
+            if (this.sidebarCollapsed) {
+                this.elements.hamburger.classList.remove('sidebar-open');
+            } else {
+                this.elements.hamburger.classList.add('sidebar-open');
             }
         }
     }
@@ -283,7 +309,7 @@ class ChatbotFullPageUI {
         // Clear messages
         this.clearMessages();
         
-        // Show welcome screen with robot and features
+        // Show welcome screen
         this.showWelcomeScreen();
         
         // Show initial suggestions
