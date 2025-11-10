@@ -1,5 +1,5 @@
 // ============================================
-// PARTICLES BACKGROUND - FULL SCREEN VISIBLE
+// PARTICLES BACKGROUND - FULL SCREEN
 // ============================================
 
 function initializeParticles() {
@@ -15,17 +15,16 @@ function initializeParticles() {
     function resizeCanvas() {
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
-        console.log('📐 Canvas size:', canvas.width, 'x', canvas.height);
+        console.log('📐 Canvas resized:', canvas.width, 'x', canvas.height);
     }
     resizeCanvas();
     
-    // Enhanced settings for visibility
+    // Optimized settings
     const particles = [];
-    const particleCount = 100; // Increased for better coverage
+    const particleCount = 100;
     const connectionDistance = 180;
     const colors = ['#667eea', '#764ba2', '#8b5cf6', '#6366f1'];
     
-    // Particle class
     class Particle {
         constructor() {
             this.reset();
@@ -64,7 +63,7 @@ function initializeParticles() {
         particles.push(new Particle());
     }
     
-    // Optimized animation loop
+    // Animation loop
     let lastTime = 0;
     const targetFPS = 60;
     const frameTime = 1000 / targetFPS;
@@ -77,7 +76,7 @@ function initializeParticles() {
         
         lastTime = currentTime - (deltaTime % frameTime);
         
-        // Enhanced gradient background
+        // Gradient background
         const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
         gradient.addColorStop(0, '#f8fafc');
         gradient.addColorStop(0.3, '#eff6ff');
@@ -93,7 +92,7 @@ function initializeParticles() {
             particles[i].draw();
         }
         
-        // Draw connections (more visible)
+        // Draw connections
         ctx.lineWidth = 1.5;
         for (let i = 0; i < particles.length; i++) {
             for (let j = i + 1; j < particles.length; j++) {
@@ -125,7 +124,7 @@ function initializeParticles() {
         }, 250);
     });
     
-    console.log('✅ Particles initialized:', particleCount, 'particles - FULL SCREEN');
+    console.log('✅ Particles initialized: 100 particles - FULL SCREEN');
 }
 
 // Auto-initialize

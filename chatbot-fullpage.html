@@ -5,7 +5,7 @@
     <meta name='viewport' content='width=device-width, initial-scale=1.0'>
     <title>Alphy AI Assistant - Finance Pro</title>
     
-    <!-- Font Awesome pour les icônes -->
+    <!-- Font Awesome -->
     <link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css'>
     
     <!-- Fonts -->
@@ -19,7 +19,7 @@
     <link rel="stylesheet" href="assets/css/user-menu.css">
     
     <!-- Chatbot Styles -->
-    <link rel="stylesheet" href="assets/css/chatbot-futuristic.css">
+    <link rel="stylesheet" href="assets/css/chatbot-fullpage.css">
 
     <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
@@ -29,7 +29,7 @@
     <!-- Configuration Firebase -->
     <script src="assets/js/firebase-config.js"></script>
     
-    <!-- Protection de la page (AUTH GUARD) -->
+    <!-- Protection de la page -->
     <script src="assets/js/auth-guard.js"></script>
     
     <!-- Favicon -->
@@ -37,7 +37,7 @@
 </head>
 <body>
 
-    <!-- ⚡ THEME SCRIPT -->
+    <!-- Theme Script -->
     <script src="assets/js/theme.js"></script>
 
     <!-- ============================================
@@ -47,7 +47,7 @@
 
     <div class='layout-wrapper'>
         <!-- ============================================
-             SIDEBAR NAVIGATION
+             SIDEBAR NAVIGATION (Ta sidebar originale)
              ============================================ -->
         <aside class='sidebar' id='sidebar'>
             <!-- Header avec Logo 3D -->
@@ -298,7 +298,7 @@
                 </div>
             </header>
 
-            <!-- Chat Layout avec Sidebar Historique -->
+            <!-- Chat Layout -->
             <div class="chat-layout">
                 
                 <!-- Conversations Sidebar -->
@@ -311,45 +311,7 @@
                     </div>
                     
                     <div class="conversations-list" id="conversations-list">
-                        <div class="conversation-group">
-                            <h4 class="group-title">Today</h4>
-                            <div class="conversation-item active" data-id="conv-1">
-                                <i class="fas fa-message"></i>
-                                <span class="conversation-title">NVDA Stock Analysis</span>
-                                <button class="conversation-delete" title="Delete">
-                                    <i class="fas fa-trash"></i>
-                                </button>
-                            </div>
-                        </div>
-                        
-                        <div class="conversation-group">
-                            <h4 class="group-title">Yesterday</h4>
-                            <div class="conversation-item" data-id="conv-2">
-                                <i class="fas fa-message"></i>
-                                <span class="conversation-title">Market Overview</span>
-                                <button class="conversation-delete" title="Delete">
-                                    <i class="fas fa-trash"></i>
-                                </button>
-                            </div>
-                            <div class="conversation-item" data-id="conv-3">
-                                <i class="fas fa-message"></i>
-                                <span class="conversation-title">IPO Analysis Request</span>
-                                <button class="conversation-delete" title="Delete">
-                                    <i class="fas fa-trash"></i>
-                                </button>
-                            </div>
-                        </div>
-                        
-                        <div class="conversation-group">
-                            <h4 class="group-title">Last 7 Days</h4>
-                            <div class="conversation-item" data-id="conv-4">
-                                <i class="fas fa-message"></i>
-                                <span class="conversation-title">Portfolio Optimization</span>
-                                <button class="conversation-delete" title="Delete">
-                                    <i class="fas fa-trash"></i>
-                                </button>
-                            </div>
-                        </div>
+                        <!-- Populated dynamically -->
                     </div>
                 </aside>
 
@@ -360,10 +322,9 @@
                             
                             <!-- Welcome Screen -->
                             <div class="welcome-screen" id="welcome-screen">
-                                <!-- Robot 3D CSS -->
+                                <!-- Robot 3D -->
                                 <div class="robot-3d-container">
                                     <div class="robot-3d">
-                                        <!-- Tête -->
                                         <div class="robot-head">
                                             <div class="robot-antenna"></div>
                                             <div class="robot-eyes">
@@ -373,7 +334,6 @@
                                             <div class="robot-mouth"></div>
                                         </div>
                                         
-                                        <!-- Corps avec costume -->
                                         <div class="robot-body">
                                             <div class="robot-tie"></div>
                                             <div class="robot-lapel left-lapel"></div>
@@ -385,7 +345,6 @@
                                             </div>
                                         </div>
                                         
-                                        <!-- Bras -->
                                         <div class="robot-arm left-arm">
                                             <div class="robot-hand"></div>
                                         </div>
