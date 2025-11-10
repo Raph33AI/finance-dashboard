@@ -13,17 +13,20 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     
-    <!-- Styles -->
+    <!-- Styles communs -->
     <link rel='stylesheet' href='assets/css/common.css'>
     <link rel='stylesheet' href='assets/css/sidebar.css'>
     <link rel="stylesheet" href="assets/css/user-menu.css">
+    
+    <!-- Chatbot Styles -->
     <link rel="stylesheet" href="assets/css/chatbot-futuristic.css">
 
-    <!-- Firebase -->
+    <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
     
+    <!-- Configuration Firebase -->
     <script src="assets/js/firebase-config.js"></script>
     <script src="assets/js/auth-guard.js"></script>
     
@@ -32,19 +35,218 @@
 </head>
 <body>
 
+    <!-- Theme Script -->
     <script src="assets/js/theme.js"></script>
 
+    <!-- Particles Background -->
     <canvas id="particles-canvas" class="particles-background"></canvas>
 
     <div class='layout-wrapper'>
-        <!-- SIDEBAR (Votre sidebar existante, inchangée) -->
+        <!-- SIDEBAR (Inchangée) -->
         <aside class='sidebar' id='sidebar'>
-            <!-- ... votre sidebar complète ... -->
+            <div class="sidebar-header">
+                <div class="logo-container">
+                    <div class="logo-3d">
+                        <svg class="logo-svg" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                            <defs>
+                                <linearGradient id="logoGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                                    <stop offset="0%" class="logo-gradient-1" />
+                                    <stop offset="100%" class="logo-gradient-2" />
+                                </linearGradient>
+                            </defs>
+                            <path d="M 20 80 L 30 70 L 40 75 L 50 60 L 60 65 L 70 45 L 80 50 L 90 30" 
+                                  stroke="url(#logoGradient)" stroke-width="4" fill="none" 
+                                  stroke-linecap="round" stroke-linejoin="round"/>
+                            <circle cx="30" cy="70" r="4" fill="url(#logoGradient)"/>
+                            <circle cx="50" cy="60" r="4" fill="url(#logoGradient)"/>
+                            <circle cx="70" cy="45" r="4" fill="url(#logoGradient)"/>
+                            <circle cx="90" cy="30" r="5" fill="url(#logoGradient)"/>
+                            <path d="M 85 35 L 90 30 L 85 25" stroke="url(#logoGradient)" 
+                                  stroke-width="3" fill="none" stroke-linecap="round"/>
+                        </svg>
+                    </div>
+                    <div class="brand-text">
+                        <h2 class="brand-name">AlphaVault AI</h2>
+                        <span class="brand-tagline">Investments</span>
+                    </div>
+                </div>
+                <button class="sidebar-toggle" aria-label="Toggle Sidebar">
+                    <i class="fas fa-angle-left"></i>
+                </button>
+            </div>
+            
+            <nav class="sidebar-nav">
+                <div class="nav-section">
+                    <button class="nav-folder" data-tooltip="Home">
+                        <i class="fas fa-home"></i>
+                        <span>Home</span>
+                        <i class="fas fa-chevron-down arrow"></i>
+                    </button>
+                    <div class="nav-submenu">
+                        <a href="index.html" class="nav-link">
+                            <i class="fas fa-home"></i>
+                            <span>Overview</span>
+                        </a>
+                    </div>
+                </div>
+                
+                <div class='nav-section'>
+                    <button class='nav-folder' data-tooltip="Budget">
+                        <i class='fas fa-wallet'></i>
+                        <span>Budget</span>
+                        <i class='fas fa-chevron-down arrow'></i>
+                    </button>
+                    <div class='nav-submenu'>
+                        <a href='dashboard-financier.html' class='nav-link'>
+                            <i class='fas fa-home'></i>
+                            <span>Dashboard Budget</span>
+                        </a>
+                        <a href='investment-analytics.html' class='nav-link'>
+                            <i class='fas fa-chart-bar'></i>
+                            <span>Investment Analytics</span>
+                        </a>
+                    </div>
+                </div>
+                
+                <div class='nav-section'>
+                    <button class='nav-folder' data-tooltip="Simulation">
+                        <i class='fas fa-calculator'></i>
+                        <span>Simulation</span>
+                        <i class='fas fa-chevron-down arrow'></i>
+                    </button>
+                    <div class='nav-submenu'>
+                        <a href='monte-carlo.html' class='nav-link'>
+                            <i class='fas fa-dice'></i>
+                            <span>Monte Carlo</span>
+                        </a>
+                        <a href='portfolio-optimizer.html' class='nav-link'>
+                            <i class='fas fa-chart-pie'></i>
+                            <span>Markowitz</span>
+                        </a>
+                        <a href='risk-parity.html' class='nav-link'>
+                            <i class='fas fa-balance-scale'></i>
+                            <span>Risk Parity</span>
+                        </a>
+                        <a href='scenario-analysis.html' class='nav-link'>
+                            <i class='fas fa-flask'></i>
+                            <span>Scenarios</span>
+                        </a>
+                    </div>
+                </div>
+                
+                <div class='nav-section'>
+                    <button class="nav-folder" data-tooltip="Stocks">
+                        <i class="fas fa-chart-line"></i>
+                        <span>Stocks</span>
+                        <i class="fas fa-chevron-down arrow"></i>
+                    </button>
+                    <div class='nav-submenu'>
+                        <a href='market-data.html' class='nav-link'>
+                            <i class='fas fa-database'></i>
+                            <span>Market Data</span>
+                        </a>
+                        <a href='advanced-analysis.html' class='nav-link'>
+                            <i class='fas fa-brain'></i>
+                            <span>Advanced Analysis</span>
+                        </a>
+                        <a href='trend-prediction.html' class='nav-link'>
+                            <i class='fas fa-chart-line'></i>
+                            <span>Trend Prediction</span>
+                        </a>
+                        <a href='market-intelligence.html' class='nav-link'>
+                            <i class='fas fa-globe'></i>
+                            <span>Market Intelligence</span>
+                        </a>
+                        <a href='company-insights.html' class='nav-link'>
+                            <i class='fas fa-building'></i>
+                            <span>Company Insights</span>
+                        </a>
+                        <a href='analyst-coverage.html' class='nav-link'>
+                            <i class='fas fa-users'></i>
+                            <span>Analyst Coverage</span>
+                        </a>
+                        <a href='earnings-estimates.html' class='nav-link'>
+                            <i class='fas fa-coins'></i>
+                            <span>Earnings & Estimates</span>
+                        </a>
+                    </div>
+                </div>
+
+                <div class='nav-section'>
+                    <button class="nav-folder" data-tooltip="AI Assistant">
+                        <i class="fas fa-robot"></i>
+                        <span>AI Assistant</span>
+                        <i class="fas fa-chevron-down arrow"></i>
+                    </button>
+                    <div class='nav-submenu' style='display: block;'>
+                        <a href='chatbot-fullpage.html' class='nav-link active'>
+                            <i class='fas fa-comments'></i>
+                            <span>Alphy AI Chat</span>
+                        </a>
+                        <a href='ai-analytics.html' class='nav-link'>
+                            <i class='fas fa-chart-bar'></i>
+                            <span>AI Analytics</span>
+                        </a>
+                        <a href='ai-recommendations.html' class='nav-link'>
+                            <i class='fas fa-lightbulb'></i>
+                            <span>AI Recommendations</span>
+                        </a>
+                    </div>
+                </div>
+            </nav>
+            
+            <div class="sidebar-footer">
+                <div class="sidebar-user-menu">
+                    <div class="sidebar-user-trigger" id="sidebarUserTrigger">
+                        <img data-user-photo 
+                            src="https://ui-avatars.com/api/?name=User&background=2563eb&color=fff" 
+                            alt="Avatar" class="sidebar-user-avatar">
+                        <div class="sidebar-user-info">
+                            <span data-user-name class="sidebar-user-name">User</span>
+                            <span data-user-plan class="sidebar-user-plan">Free Plan</span>
+                        </div>
+                        <i class="fas fa-chevron-up sidebar-user-arrow"></i>
+                    </div>
+                    
+                    <div class="sidebar-user-dropdown" id="sidebarUserDropdown">
+                        <div class="user-dropdown-header">
+                            <img data-user-photo 
+                                src="https://ui-avatars.com/api/?name=User&background=2563eb&color=fff" 
+                                alt="Avatar" class="user-dropdown-avatar">
+                            <div class="user-dropdown-details">
+                                <h4 data-user-name class="user-dropdown-name">User</h4>
+                                <p data-user-email class="user-dropdown-email">email@example.com</p>
+                            </div>
+                        </div>
+                        <div class="user-dropdown-divider"></div>
+                        <nav class="user-dropdown-links">
+                            <a href="user-profile.html" class="user-dropdown-link">
+                                <i class="fas fa-user"></i>
+                                <span>My profile</span>
+                            </a>
+                            <a href="settings.html" class="user-dropdown-link">
+                                <i class="fas fa-cog"></i>
+                                <span>Settings</span>
+                            </a>
+                            <a href="#" class="user-dropdown-link">
+                                <i class="fas fa-question-circle"></i>
+                                <span>Help</span>
+                            </a>
+                        </nav>
+                        <div class="user-dropdown-divider"></div>
+                        <button onclick="logout()" class="user-dropdown-logout">
+                            <i class="fas fa-sign-out-alt"></i>
+                            <span>Disconnect</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
         </aside>
 
         <!-- MAIN CONTENT -->
         <div class='main-content chatbot-main-content'>
             
+            <!-- Header (Aligné avec sidebar) -->
             <header class='top-header chatbot-top-header'>
                 <div class='header-left'>
                     <button class='mobile-toggle' id='mobileToggle'>
@@ -93,10 +295,8 @@
                             
                             <!-- Welcome Screen avec Robot 3D -->
                             <div class="welcome-screen" id="welcome-screen">
-                                <!-- ✅ ROBOT 3D CONTAINER -->
-                                <div class="robot-3d-container-threejs">
-                                    <div id="robot-3d-container"></div>
-                                </div>
+                                <!-- ✅ ROBOT 3D ULTRA-RÉALISTE (THREE.JS) -->
+                                <div id="robot-3d-container" class="robot-3d-container-threejs"></div>
                                 
                                 <h2 class="welcome-title">Welcome to Alphy AI</h2>
                                 <p class="welcome-subtitle">Your elite financial analyst powered by real-time market data</p>
@@ -186,24 +386,14 @@
         </div>
     </div>
 
-    <!-- ========================================
-         BIBLIOTHÈQUES
-         ======================================== -->
-    
-    <!-- Three.js -->
+    <!-- ✅ THREE.JS LIBRARY -->
     <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
     
-    <!-- Chart.js -->
+    <!-- SCRIPTS -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-    
-    <!-- ========================================
-         SCRIPTS CHATBOT (ORDRE IMPORTANT)
-         ======================================== -->
-    
     <script src='assets/js/dark-mode.js'></script>
     <script src='assets/js/common.js'></script>
     <script src='assets/js/sidebar.js'></script>
-    
     <script src="assets/js/chatbot-config.js"></script>
     <script src="assets/js/chatbot-gemini.js"></script>
     <script src="assets/js/chatbot-analytics.js"></script>
@@ -212,13 +402,10 @@
     <script src="assets/js/chatbot-suggestions.js"></script>
     <script src="assets/js/chatbot-ai-engine.js"></script>
     
-    <!-- ✅ ROBOT 3D (AVANT UI) -->
+    <!-- ✅ ROBOT 3D (AVANT chatbot-fullpage-ui.js) -->
     <script src="assets/js/chatbot-robot-3d.js"></script>
     
-    <!-- UI (Main) -->
     <script src="assets/js/chatbot-fullpage-ui.js"></script>
-    
-    <!-- Particles -->
     <script src="assets/js/chatbot-particles.js"></script>
 
 </body>

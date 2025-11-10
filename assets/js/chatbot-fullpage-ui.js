@@ -1,5 +1,5 @@
 // ============================================
-// CHATBOT FULL PAGE UI - ✅ VERSION CORRIGÉE
+// CHATBOT FULL PAGE UI - WITH AUTO-RESET ON NEW CHAT
 // ============================================
 
 class ChatbotFullPageUI {
@@ -18,9 +18,6 @@ class ChatbotFullPageUI {
         this.conversations = [];
         this.currentConversationId = null;
         
-        // ✅ État de la sidebar
-        this.isSidebarOpen = true;
-        
         this.init();
     }
 
@@ -38,12 +35,6 @@ class ChatbotFullPageUI {
             
             if (typeof initializeParticles === 'function') {
                 initializeParticles();
-            }
-            
-            // ✅ Initialiser le robot 3D
-            if (typeof initRobot3D === 'function') {
-                console.log('🤖 Initializing 3D Robot...');
-                initRobot3D();
             }
             
             console.log('✅ Full Page UI initialized');
@@ -137,7 +128,7 @@ class ChatbotFullPageUI {
             });
         }
         
-        // ✅ CORRECTION : Conversations toggle
+        // Conversations toggle
         if (this.elements.conversationsToggle) {
             this.elements.conversationsToggle.addEventListener('click', () => {
                 this.toggleConversationsSidebar();
@@ -218,6 +209,7 @@ class ChatbotFullPageUI {
         this.conversations.unshift(newConv);
         this.currentConversationId = newConv.id;
         
+        // ✅ RÉINITIALISER COMPLÈTEMENT L'INTERFACE
         this.resetInterface();
         
         this.saveConversations();
@@ -226,26 +218,29 @@ class ChatbotFullPageUI {
         console.log('✅ New conversation started:', newConv.id);
     }
 
+    // ✅ NOUVELLE MÉTHODE : Réinitialiser complètement l'interface
     resetInterface() {
         console.log('🔄 Resetting interface...');
         
+        // Clear messages
         this.clearMessages();
+        
+        // Show welcome screen with robot and features
         this.showWelcomeScreen();
+        
+        // Show initial suggestions
         this.showInitialSuggestions();
         
+        // Clear input
         if (this.elements.input) {
             this.elements.input.value = '';
             this.autoResizeTextarea();
             this.updateCharCounter();
         }
         
+        // Reset counters
         this.messageCount = 0;
         this.chartCount = 0;
-        
-        // ✅ Réinitialiser le robot 3D
-        if (typeof resetRobot3D === 'function') {
-            resetRobot3D();
-        }
         
         console.log('✅ Interface reset complete');
     }
@@ -365,18 +360,9 @@ class ChatbotFullPageUI {
         `;
     }
 
-    // ✅ CORRECTION : Toggle sidebar avec classe 'closed'
     toggleConversationsSidebar() {
-        if (!this.elements.conversationsSidebar) return;
-        
-        this.isSidebarOpen = !this.isSidebarOpen;
-        
-        if (this.isSidebarOpen) {
-            this.elements.conversationsSidebar.classList.remove('closed');
-            console.log('📂 Sidebar opened');
-        } else {
-            this.elements.conversationsSidebar.classList.add('closed');
-            console.log('📁 Sidebar closed');
+        if (this.elements.conversationsSidebar) {
+            this.elements.conversationsSidebar.classList.toggle('mobile-open');
         }
     }
 
@@ -409,11 +395,6 @@ class ChatbotFullPageUI {
         this.clearSuggestions();
         this.showTypingIndicator();
         
-        // ✅ Animation robot "thinking"
-        if (typeof setRobotThinking === 'function') {
-            setRobotThinking(true);
-        }
-        
         try {
             const startTime = performance.now();
             
@@ -427,12 +408,6 @@ class ChatbotFullPageUI {
             this.totalResponseTime += responseTime;
             
             this.hideTypingIndicator();
-            
-            // ✅ Animation robot "talking"
-            if (typeof setRobotTalking === 'function') {
-                setRobotTalking(true);
-                setTimeout(() => setRobotTalking(false), 2000);
-            }
             
             this.addMessage('bot', response.text);
             
@@ -454,11 +429,6 @@ class ChatbotFullPageUI {
         } catch (error) {
             console.error('❌ Message processing error:', error);
             this.hideTypingIndicator();
-            
-            if (typeof setRobotThinking === 'function') {
-                setRobotThinking(false);
-            }
-            
             this.addMessage('bot', '⚠️ Sorry, I encountered an error. Please try again.');
         }
     }
@@ -565,12 +535,9 @@ class ChatbotFullPageUI {
         if (indicator) {
             indicator.remove();
         }
-        
-        if (typeof setRobotThinking === 'function') {
-            setRobotThinking(false);
-        }
     }
 
+    // ✅ AFFICHER LES SUGGESTIONS INITIALES
     showInitialSuggestions() {
         if (this.suggestions) {
             const initial = this.suggestions.getInitialSuggestions();
@@ -615,6 +582,7 @@ class ChatbotFullPageUI {
 
     clearMessages() {
         if (this.elements.messages) {
+            // ✅ IMPORTANT : Ne vider que les messages, pas le welcome screen
             const messages = this.elements.messages.querySelectorAll('.message, .chart-message, #typing-indicator');
             messages.forEach(msg => msg.remove());
         }
