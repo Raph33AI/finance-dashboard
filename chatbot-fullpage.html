@@ -15,7 +15,7 @@
     <link rel='stylesheet' href='assets/css/common.css'>
     <link rel='stylesheet' href='assets/css/sidebar.css'>
     <link rel="stylesheet" href="assets/css/user-menu.css">
-    <link rel='stylesheet' href='assets/css/chatbot-futuristic.css'>
+    <link rel='stylesheet' href='assets/css/chatbot-fullpage.css'>
 
     <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
@@ -258,7 +258,7 @@
         <!-- ========================================
              MAIN CHAT CONTENT
              ======================================== -->
-        <div class='main-content'>
+        <div class='main-content' id='mainContent'>
             <!-- Header -->
             <header class='chat-header'>
                 <div class='header-left'>
@@ -310,7 +310,6 @@
                     </div>
                     
                     <div class="history-list" id="historyList">
-                        <!-- Dynamically populated -->
                         <div class="history-empty">
                             <i class="fas fa-comments"></i>
                             <p>No conversations yet</p>
@@ -321,7 +320,7 @@
 
                 <!-- MAIN CHAT AREA -->
                 <div class="chat-main">
-                    <!-- Welcome Screen (shown when no messages) -->
+                    <!-- Welcome Screen -->
                     <div class="chat-welcome" id="chatWelcome">
                         <div class="welcome-content">
                             <div class="welcome-icon">
@@ -430,28 +429,39 @@
     </div>
 
     <!-- ========================================
-         SCRIPTS
+         SCRIPTS - ORDRE CRITIQUE
          ======================================== -->
     
     <!-- Particles Background -->
     <script src='assets/js/chatbot-particles.js'></script>
     
     <!-- Common Scripts -->
-    <script src='assets/js/dark-mode.js'></script>
     <script src='assets/js/common.js'></script>
     <script src='assets/js/sidebar.js'></script>
     
-    <!-- Chatbot Scripts (ORDRE IMPORTANT) -->
-    <script src="assets/js/chatbot-config.js"></script>
-    <script src="assets/js/chatbot-gemini.js"></script>
-    <script src="assets/js/chatbot-analytics.js"></script>
-    <script src="assets/js/chatbot-charts.js"></script>
-    <script src="assets/js/chatbot-ipo-analyzer.js"></script>
-    <script src="assets/js/chatbot-suggestions.js"></script>
-    <script src="assets/js/chatbot-ai-engine.js"></script>
+    <!-- Chatbot Scripts (SI DISPONIBLES - optionnel pour le moment) -->
+    <script>
+        // Charger les scripts chatbot seulement s'ils existent
+        const chatbotScripts = [
+            'assets/js/chatbot-config.js',
+            'assets/js/chatbot-gemini.js',
+            'assets/js/chatbot-analytics.js',
+            'assets/js/chatbot-charts.js',
+            'assets/js/chatbot-ipo-analyzer.js',
+            'assets/js/chatbot-suggestions.js',
+            'assets/js/chatbot-ai-engine.js'
+        ];
+        
+        chatbotScripts.forEach(src => {
+            const script = document.createElement('script');
+            script.src = src;
+            script.onerror = () => console.warn('⚠️ Script optionnel non chargé:', src);
+            document.body.appendChild(script);
+        });
+    </script>
     
-    <!-- Fullpage Chat Handler -->
-    <script src="assets/js/chatbot-fullpage-ui.js"></script>
+    <!-- Fullpage Chat Handler - DOIT ÊTRE EN DERNIER -->
+    <script src="assets/js/chatbot-fullpage.js"></script>
     
 </body>
 </html>
