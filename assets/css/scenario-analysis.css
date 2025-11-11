@@ -33,6 +33,92 @@ body.dark-mode,
 }
 
 /* ============================================
+   ✅ TITRES PRINCIPAUX - STYLE UNIFORME
+   ============================================ */
+
+/* Section Title (What is Scenario Analysis?, Step 1, etc.) */
+.section-title,
+h2.section-title,
+.main-section-title {
+    font-size: 1.8rem;
+    font-weight: 800;
+    background: linear-gradient(135deg, var(--ml-primary), var(--ml-secondary));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 25px;
+    position: relative;
+}
+
+.section-title i,
+h2.section-title i {
+    font-size: 2rem;
+    background: linear-gradient(135deg, var(--ml-primary), var(--ml-secondary));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: floatIcon 3s ease-in-out infinite;
+}
+
+@keyframes floatIcon {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-5px); }
+}
+
+/* Help Icon - Point d'interrogation NOIR ✅ */
+.help-icon {
+    width: 36px;
+    height: 36px;
+    background: linear-gradient(135deg, var(--ml-primary), var(--ml-secondary));
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 1.1rem;
+    font-weight: 800;
+    transition: var(--transition-bounce);
+    margin-left: auto;
+    flex-shrink: 0;
+    position: relative;
+    z-index: 100;
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+    border: none;
+    line-height: 1;
+}
+
+.help-icon::after {
+    content: '?';
+    color: #1f2937 !important; /* ✅ NOIR pour le point d'interrogation */
+    font-size: 1.1rem;
+    font-weight: 800;
+}
+
+body.dark-mode .help-icon::after {
+    color: #0f172a !important; /* ✅ NOIR FONCÉ en dark mode */
+}
+
+.help-icon:hover {
+    transform: scale(1.15) rotate(15deg);
+    box-shadow: 
+        0 8px 24px rgba(102, 126, 234, 0.5),
+        var(--glow-primary);
+}
+
+/* Card Title pour "What is Scenario Analysis?" */
+.info-card-title {
+    font-size: 1.6rem;
+    font-weight: 800;
+    color: var(--text-primary);
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+/* ============================================
    📊 PORTFOLIO INPUT - GLASSMORPHISM
    ============================================ */
 .portfolio-input {
@@ -94,11 +180,6 @@ body.dark-mode,
     font-size: 1.8rem;
     color: white;
     animation: floatIcon 3s ease-in-out infinite;
-}
-
-@keyframes floatIcon {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-5px); }
 }
 
 /* ============================================
@@ -580,7 +661,7 @@ body.dark-mode .result-card {
 }
 
 /* ============================================
-   📊 DETAILED TABLE - PREMIUM
+   ✅ DETAILED TABLE - ULTRA LISIBLE
    ============================================ */
 .detailed-table-container {
     background: linear-gradient(
@@ -594,6 +675,7 @@ body.dark-mode .result-card {
     padding: 30px;
     box-shadow: 0 12px 40px rgba(0, 0, 0, 0.12);
     overflow-x: auto;
+    margin-bottom: 30px;
 }
 
 body.dark-mode .detailed-table-container {
@@ -614,6 +696,7 @@ body.dark-mode .detailed-table-container {
     overflow: hidden;
 }
 
+/* ✅ HEADER - Gradient violet avec séparateurs blancs */
 .detailed-table thead {
     background: linear-gradient(135deg, var(--ml-primary), var(--ml-secondary));
     color: white;
@@ -626,8 +709,14 @@ body.dark-mode .detailed-table-container {
     font-size: 0.9rem;
     text-transform: uppercase;
     letter-spacing: 1px;
-    color: white;
+    color: white !important;
     white-space: nowrap;
+    border-right: 2px solid rgba(255, 255, 255, 0.2); /* ✅ Séparateur blanc entre colonnes */
+    position: relative;
+}
+
+.detailed-table th:last-child {
+    border-right: none;
 }
 
 .detailed-table th:first-child {
@@ -638,33 +727,55 @@ body.dark-mode .detailed-table-container {
     border-radius: 0 16px 0 0;
 }
 
+/* ✅ BODY - Lignes alternées avec séparateurs visibles */
 .detailed-table tbody tr {
     transition: var(--transition-smooth);
-    border-bottom: 1px solid var(--glass-border);
+    border-bottom: 2px solid var(--glass-border); /* ✅ Bordure horizontale plus visible */
+    background: rgba(255, 255, 255, 0.02);
+}
+
+/* ✅ Zebra striping (lignes alternées) */
+.detailed-table tbody tr:nth-child(even) {
+    background: rgba(102, 126, 234, 0.03); /* ✅ Fond légèrement coloré pour les lignes paires */
+}
+
+body.dark-mode .detailed-table tbody tr:nth-child(even) {
+    background: rgba(102, 126, 234, 0.08);
 }
 
 .detailed-table tbody tr:hover {
-    background: rgba(102, 126, 234, 0.08);
+    background: rgba(102, 126, 234, 0.12) !important; /* ✅ Hover plus prononcé */
     transform: scale(1.01);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
+    position: relative;
+    z-index: 10;
 }
 
+/* ✅ CELLULES - Séparateurs verticaux visibles */
 .detailed-table td {
     padding: 16px 18px;
     font-size: 0.95rem;
     color: var(--text-primary);
     font-weight: 600;
+    border-right: 1px solid rgba(102, 126, 234, 0.15); /* ✅ Séparateur vertical entre colonnes */
 }
 
+.detailed-table td:last-child {
+    border-right: none;
+}
+
+/* ✅ Première colonne (Scenario Name) */
 .detailed-table .scenario-name {
     font-weight: 800;
     background: linear-gradient(135deg, var(--ml-primary), var(--ml-secondary));
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
+    font-size: 1rem;
 }
 
+/* ✅ Badges colorés pour les valeurs */
 .detailed-table .return-positive {
-    color: white;
+    color: white !important;
     font-weight: 700;
     background: linear-gradient(135deg, var(--ml-success), #38f9d7);
     padding: 6px 14px;
@@ -674,7 +785,7 @@ body.dark-mode .detailed-table-container {
 }
 
 .detailed-table .return-negative {
-    color: white;
+    color: white !important;
     font-weight: 700;
     background: linear-gradient(135deg, var(--ml-danger), #fd7e14);
     padding: 6px 14px;
@@ -691,6 +802,19 @@ body.dark-mode .detailed-table-container {
     border-radius: 50px;
     display: inline-block;
     border: 2px solid rgba(102, 126, 234, 0.3);
+}
+
+/* ✅ Dernière ligne (pas de bordure bottom) */
+.detailed-table tbody tr:last-child {
+    border-bottom: none;
+}
+
+.detailed-table tbody tr:last-child td:first-child {
+    border-radius: 0 0 0 16px;
+}
+
+.detailed-table tbody tr:last-child td:last-child {
+    border-radius: 0 0 16px 0;
 }
 
 /* ============================================
@@ -869,7 +993,8 @@ body.dark-mode .chart-container {
         font-size: 0.85rem;
     }
     
-    .subsection-title {
+    .subsection-title,
+    .section-title {
         font-size: 1.2rem;
     }
 }
