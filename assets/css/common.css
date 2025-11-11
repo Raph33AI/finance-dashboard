@@ -1884,19 +1884,23 @@ body.dark-mode .particles-background {
    TRANSPARENCY FOR PARTICLES VISIBILITY
    ============================================ */
 
-/* Wrapper et conteneurs principaux : TRANSPARENTS */
+/* Wrapper principal : TRANSPARENT pour voir les particules */
 .layout-wrapper {
     position: relative;
     z-index: 1;
     background: transparent !important;
 }
 
+/* ZONE DE CONTENU PRINCIPALE : FOND BLANC OPAQUE */
 .main-content {
-    background: transparent !important;
+    background: rgba(248, 250, 252, 0.98) !important;
+    backdrop-filter: blur(10px);
 }
 
+/* Container intérieur : peut rester transparent */
 .container {
-    background: transparent !important;
+    background: transparent;
+    padding: 20px;
 }
 
 /* ============================================
