@@ -700,10 +700,10 @@ body.dark-mode .search-suggestions {
 }
 
 /* ============================================
-   🌈 ENSEMBLE PREDICTION - CORRECTION FINALE
+   🌈 ENSEMBLE PREDICTION - CORRECTION FINALE (TEXTE BLANC)
    ============================================ */
 .prediction-overview {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); /* ✅ Retour au gradient violet original */
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     background-size: 200% 200%;
     animation: gradientShift 8s ease infinite;
     border-radius: 28px;
@@ -741,7 +741,7 @@ body.dark-mode .search-suggestions {
 
 /* ✅ TITRE BLANC avec ombre portée */
 .prediction-overview .section-title {
-    color: white !important; /* ✅ Blanc pur */
+    color: white !important;
     margin-bottom: 35px;
     font-size: 2rem;
     text-shadow: 0 4px 24px rgba(0, 0, 0, 0.4);
@@ -751,14 +751,14 @@ body.dark-mode .search-suggestions {
 }
 
 .prediction-overview .section-title i {
-    color: white !important; /* ✅ Icône blanche */
+    color: white !important;
     filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.3));
 }
 
-/* ✅ BOUTON ? (HELP ICON) - BLANC dans Ensemble Prediction */
+/* ✅ BOUTON ? (HELP ICON) - BLANC */
 .prediction-overview .help-icon {
-    background: rgba(255, 255, 255, 0.2); /* ✅ Fond semi-transparent blanc */
-    color: white !important; /* ✅ Texte blanc */
+    background: rgba(255, 255, 255, 0.2);
+    color: white !important;
     border: 2px solid rgba(255, 255, 255, 0.4);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
