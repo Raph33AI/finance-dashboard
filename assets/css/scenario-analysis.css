@@ -33,7 +33,30 @@ body.dark-mode,
 }
 
 /* ============================================
-   ✅ TITRES PRINCIPAUX - STYLE UNIFORME
+   ✅ TITRE PRINCIPAL DE LA PAGE - SCENARIO ANALYSIS
+   ============================================ */
+.top-header h1 {
+    font-size: 1.8rem;
+    font-weight: 800;
+    background: linear-gradient(135deg, var(--ml-primary), var(--ml-secondary));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 0;
+}
+
+.top-header h1 i {
+    background: linear-gradient(135deg, var(--ml-primary), var(--ml-secondary));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    font-size: 2rem;
+}
+
+/* ============================================
+   ✅ TITRES DE SECTIONS
    ============================================ */
 
 /* Section Title (What is Scenario Analysis?, Step 1, etc.) */
@@ -65,46 +88,6 @@ h2.section-title i {
 @keyframes floatIcon {
     0%, 100% { transform: translateY(0); }
     50% { transform: translateY(-5px); }
-}
-
-/* Help Icon - Point d'interrogation NOIR ✅ */
-.help-icon {
-    width: 36px;
-    height: 36px;
-    background: linear-gradient(135deg, var(--ml-primary), var(--ml-secondary));
-    border-radius: 50%;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    font-size: 1.1rem;
-    font-weight: 800;
-    transition: var(--transition-bounce);
-    margin-left: auto;
-    flex-shrink: 0;
-    position: relative;
-    z-index: 100;
-    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
-    border: none;
-    line-height: 1;
-}
-
-.help-icon::after {
-    content: '?';
-    color: #1f2937 !important; /* ✅ NOIR pour le point d'interrogation */
-    font-size: 1.1rem;
-    font-weight: 800;
-}
-
-body.dark-mode .help-icon::after {
-    color: #0f172a !important; /* ✅ NOIR FONCÉ en dark mode */
-}
-
-.help-icon:hover {
-    transform: scale(1.15) rotate(15deg);
-    box-shadow: 
-        0 8px 24px rgba(102, 126, 234, 0.5),
-        var(--glow-primary);
 }
 
 /* Card Title pour "What is Scenario Analysis?" */
@@ -711,7 +694,7 @@ body.dark-mode .detailed-table-container {
     letter-spacing: 1px;
     color: white !important;
     white-space: nowrap;
-    border-right: 2px solid rgba(255, 255, 255, 0.2); /* ✅ Séparateur blanc entre colonnes */
+    border-right: 2px solid rgba(255, 255, 255, 0.2);
     position: relative;
 }
 
@@ -730,13 +713,12 @@ body.dark-mode .detailed-table-container {
 /* ✅ BODY - Lignes alternées avec séparateurs visibles */
 .detailed-table tbody tr {
     transition: var(--transition-smooth);
-    border-bottom: 2px solid var(--glass-border); /* ✅ Bordure horizontale plus visible */
+    border-bottom: 2px solid var(--glass-border);
     background: rgba(255, 255, 255, 0.02);
 }
 
-/* ✅ Zebra striping (lignes alternées) */
 .detailed-table tbody tr:nth-child(even) {
-    background: rgba(102, 126, 234, 0.03); /* ✅ Fond légèrement coloré pour les lignes paires */
+    background: rgba(102, 126, 234, 0.03);
 }
 
 body.dark-mode .detailed-table tbody tr:nth-child(even) {
@@ -744,7 +726,7 @@ body.dark-mode .detailed-table tbody tr:nth-child(even) {
 }
 
 .detailed-table tbody tr:hover {
-    background: rgba(102, 126, 234, 0.12) !important; /* ✅ Hover plus prononcé */
+    background: rgba(102, 126, 234, 0.12) !important;
     transform: scale(1.01);
     box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
     position: relative;
@@ -757,14 +739,13 @@ body.dark-mode .detailed-table tbody tr:nth-child(even) {
     font-size: 0.95rem;
     color: var(--text-primary);
     font-weight: 600;
-    border-right: 1px solid rgba(102, 126, 234, 0.15); /* ✅ Séparateur vertical entre colonnes */
+    border-right: 1px solid rgba(102, 126, 234, 0.15);
 }
 
 .detailed-table td:last-child {
     border-right: none;
 }
 
-/* ✅ Première colonne (Scenario Name) */
 .detailed-table .scenario-name {
     font-weight: 800;
     background: linear-gradient(135deg, var(--ml-primary), var(--ml-secondary));
@@ -773,7 +754,6 @@ body.dark-mode .detailed-table tbody tr:nth-child(even) {
     font-size: 1rem;
 }
 
-/* ✅ Badges colorés pour les valeurs */
 .detailed-table .return-positive {
     color: white !important;
     font-weight: 700;
@@ -804,7 +784,6 @@ body.dark-mode .detailed-table tbody tr:nth-child(even) {
     border: 2px solid rgba(102, 126, 234, 0.3);
 }
 
-/* ✅ Dernière ligne (pas de bordure bottom) */
 .detailed-table tbody tr:last-child {
     border-bottom: none;
 }
