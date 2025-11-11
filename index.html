@@ -11,33 +11,30 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     
-    <!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-         STYLESHEETS - ORDRE CRITIQUE
-         ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
-    
-    <!-- AnimXYZ CSS (AVANT les CSS custom) -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@animxyz/core@0.6.3/dist/animxyz.min.css">
-    
-    <!-- Custom Stylesheets -->
+    <!-- Stylesheets -->
     <link rel="stylesheet" href="assets/css/common.css">
     <link rel="stylesheet" href="assets/css/landing.css">
     
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
+    <!-- AOS Animation Library -->
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    
     <!-- Favicon -->
     <link rel="icon" type="image/svg+xml" href="assets/images/favicon.svg">
 </head>
 
-<body class="landing-page" xyz="fade">
+<body class="landing-page">
     
     <!-- ═══════════════════════════════════════════════════════════════
-         NAVIGATION - GLASSMORPHISM PREMIUM
+         NAVIGATION
          ═══════════════════════════════════════════════════════════════ -->
-    <nav class="landing-nav" id="landingNav" xyz="fade down duration-10">
+    <nav class="landing-nav" id="landingNav">
         <div class="nav-container">
             <div class="nav-brand">
                 <div class="brand-logo">
+                    <!-- Logo AlphaVault AI -->
                     <svg class="logo-svg" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" width="32" height="32">
                         <defs>
                             <linearGradient id="logoGradient" x1="0%" y1="0%" x2="100%" y2="100%">
@@ -45,16 +42,22 @@
                                 <stop offset="100%" style="stop-color:#8B5CF6;stop-opacity:1" />
                             </linearGradient>
                         </defs>
+                        
+                        <!-- Graphique montant -->
                         <path d="M 20 80 L 30 70 L 40 75 L 50 60 L 60 65 L 70 45 L 80 50 L 90 30" 
                               stroke="url(#logoGradient)" 
                               stroke-width="4" 
                               fill="none" 
                               stroke-linecap="round" 
                               stroke-linejoin="round"/>
+                        
+                        <!-- Points -->
                         <circle cx="30" cy="70" r="4" fill="url(#logoGradient)"/>
                         <circle cx="50" cy="60" r="4" fill="url(#logoGradient)"/>
                         <circle cx="70" cy="45" r="4" fill="url(#logoGradient)"/>
                         <circle cx="90" cy="30" r="5" fill="url(#logoGradient)"/>
+                        
+                        <!-- Flèche -->
                         <path d="M 85 35 L 90 30 L 85 25" 
                               stroke="url(#logoGradient)" 
                               stroke-width="3" 
@@ -65,12 +68,12 @@
                 <span class="brand-text">AlphaVault <strong>AI</strong></span>
             </div>
             
-            <div class="nav-menu" id="navMenu" xyz="fade left stagger-2">
-                <a href="#features" class="nav-link xyz-nested">Features</a>
-                <a href="#alphy-ai" class="nav-link xyz-nested">Alphy AI</a>
-                <a href="#solutions" class="nav-link xyz-nested">Solutions</a>
-                <a href="#tools" class="nav-link xyz-nested">Tools</a>
-                <a href="#pricing" class="nav-link xyz-nested">Pricing</a>
+            <div class="nav-menu" id="navMenu">
+                <a href="#features" class="nav-link">Features</a>
+                <a href="#alphy-ai" class="nav-link">Alphy AI</a>
+                <a href="#solutions" class="nav-link">Solutions</a>
+                <a href="#tools" class="nav-link">Tools</a>
+                <a href="#pricing" class="nav-link">Pricing</a>
             </div>
             
             <!-- CTA Navigation -->
@@ -192,34 +195,34 @@
             <div class="grid-pattern"></div>
         </div>
         
-        <div class="hero-container" xyz="fade up stagger-2">
-            <div class="hero-content xyz-nested">
-                <div class="announcement-badge">
+        <div class="hero-container">
+            <div class="hero-content">
+                <div class="announcement-badge" data-aos="fade-up">
                     <span class="badge-icon">✨</span>
                     <span class="badge-text">New: Alphy AI - Your IPO Expert</span>
                     <i class="fas fa-arrow-right"></i>
                 </div>
                 
-                <h1 class="hero-headline gsap-hero-title">
+                <h1 class="hero-headline" data-aos="fade-up" data-aos-delay="100">
                     Financial Intelligence
                     <span class="gradient-text-hero">Powered by AI</span>
                     for Smart Investors
                 </h1>
                 
-                <p class="hero-subheadline gsap-hero-subtitle">
+                <p class="hero-subheadline" data-aos="fade-up" data-aos-delay="200">
                     Transform your investment decisions with AlphaVault AI. 
                     IPO analysis, M&A screening, portfolio optimization and 
                     artificial intelligence dedicated to finance.
                 </p>
                 
-                <div class="hero-cta gsap-hero-cta">
+                <div class="hero-cta" data-aos="fade-up" data-aos-delay="300">
                     <button class="btn-hero-primary" id="heroGetStarted">
                         <i class="fas fa-rocket"></i>
                         <span>Start Free</span>
                     </button>
                 </div>
                 
-                <div class="social-proof gsap-social-proof">
+                <div class="social-proof" data-aos="fade-up" data-aos-delay="400">
                     <div class="proof-item">
                         <span class="proof-number">10,000+</span>
                         <span class="proof-label">Investors</span>
@@ -238,8 +241,8 @@
             </div>
             
             <!-- Hero Visual -->
-            <div class="hero-visual xyz-nested" xyz="fade left delay-2">
-                <div class="dashboard-mockup gsap-dashboard">
+            <div class="hero-visual" data-aos="fade-left" data-aos-delay="200">
+                <div class="dashboard-mockup">
                     <div class="browser-chrome">
                         <div class="chrome-dots">
                             <span class="dot red"></span>
@@ -254,7 +257,7 @@
                     
                     <div class="mockup-content">
                         <div class="mockup-stats-row">
-                            <div class="stat-card stat-primary gsap-stat-card">
+                            <div class="stat-card stat-primary">
                                 <div class="stat-header">
                                     <i class="fas fa-chart-line"></i>
                                     <span>Portfolio Value</span>
@@ -266,7 +269,7 @@
                                 </div>
                             </div>
                             
-                            <div class="stat-card gsap-stat-card">
+                            <div class="stat-card">
                                 <div class="stat-header">
                                     <i class="fas fa-brain"></i>
                                     <span>AI Confidence</span>
@@ -275,7 +278,7 @@
                                 <div class="stat-badge">High</div>
                             </div>
                             
-                            <div class="stat-card gsap-stat-card">
+                            <div class="stat-card">
                                 <div class="stat-header">
                                     <i class="fas fa-shield-alt"></i>
                                     <span>Risk Score</span>
@@ -355,19 +358,19 @@
     <!-- ═══════════════════════════════════════════════════════════════
          FEATURES SECTION
          ═══════════════════════════════════════════════════════════════ -->
-    <section class="features-section gsap-section" id="features">
+    <section class="features-section" id="features">
         <div class="container-fluid">
             <div class="section-header">
-                <span class="section-tag gsap-section-tag">Platform Features</span>
-                <h2 class="section-title gsap-section-title">Everything you need to excel in finance</h2>
-                <p class="section-description gsap-section-desc">
+                <span class="section-tag" data-aos="fade-up">Platform Features</span>
+                <h2 class="section-title" data-aos="fade-up" data-aos-delay="100">Everything you need to excel in finance</h2>
+                <p class="section-description" data-aos="fade-up" data-aos-delay="200">
                     Professional-grade tools for individual investors and finance professionals
                 </p>
             </div>
 
-            <div class="features-grid gsap-features-grid" xyz="fade up stagger-2">
+            <div class="features-grid">
                 <!-- Feature 1 -->
-                <div class="feature-card feature-highlight xyz-nested">
+                <div class="feature-card feature-highlight" data-aos="fade-up">
                     <div class="feature-header">
                         <div class="feature-icon">
                             <i class="fas fa-brain"></i>
@@ -400,7 +403,7 @@
                 </div>
 
                 <!-- Feature 2 -->
-                <div class="feature-card xyz-nested">
+                <div class="feature-card" data-aos="fade-up" data-aos-delay="100">
                     <div class="feature-header">
                         <div class="feature-icon">
                             <i class="fas fa-database"></i>
@@ -432,7 +435,7 @@
                 </div>
 
                 <!-- Feature 3 -->
-                <div class="feature-card xyz-nested">
+                <div class="feature-card" data-aos="fade-up" data-aos-delay="200">
                     <div class="feature-header">
                         <div class="feature-icon">
                             <i class="fas fa-chart-pie"></i>
@@ -464,7 +467,7 @@
                 </div>
 
                 <!-- Feature 4 -->
-                <div class="feature-card xyz-nested">
+                <div class="feature-card" data-aos="fade-up">
                     <div class="feature-header">
                         <div class="feature-icon">
                             <i class="fas fa-balance-scale"></i>
@@ -496,7 +499,7 @@
                 </div>
 
                 <!-- Feature 5 -->
-                <div class="feature-card xyz-nested">
+                <div class="feature-card" data-aos="fade-up" data-aos-delay="100">
                     <div class="feature-header">
                         <div class="feature-icon">
                             <i class="fas fa-dice"></i>
@@ -528,7 +531,7 @@
                 </div>
 
                 <!-- Feature 6 -->
-                <div class="feature-card xyz-nested">
+                <div class="feature-card" data-aos="fade-up" data-aos-delay="200">
                     <div class="feature-header">
                         <div class="feature-icon">
                             <i class="fas fa-project-diagram"></i>
@@ -560,7 +563,7 @@
                 </div>
 
                 <!-- Feature 7 -->
-                <div class="feature-card xyz-nested">
+                <div class="feature-card" data-aos="fade-up">
                     <div class="feature-header">
                         <div class="feature-icon">
                             <i class="fas fa-chart-line"></i>
@@ -592,7 +595,7 @@
                 </div>
 
                 <!-- Feature 8 -->
-                <div class="feature-card xyz-nested">
+                <div class="feature-card" data-aos="fade-up" data-aos-delay="100">
                     <div class="feature-header">
                         <div class="feature-icon">
                             <i class="fas fa-tachometer-alt"></i>
@@ -626,27 +629,714 @@
         </div>
     </section>
 
-    <!-- Continuez avec les autres sections exactement comme dans votre HTML original... -->
-    
-    <!-- Pour gagner de la place, je vais inclure uniquement les sections clés modifiées -->
-    <!-- Le reste reste IDENTIQUE à votre HTML original -->
+    <!-- ═══════════════════════════════════════════════════════════════
+         INTERACTIVE DEMO SECTION - AVEC EFFETS 3D
+         ═══════════════════════════════════════════════════════════════ -->
+    <section class="demo-interactive" id="demo">
+        <div class="container-fluid">
+            <div class="demo-wrapper">
+                <div class="demo-left" data-aos="fade-right">
+                    <span class="section-tag">Interactive Demo</span>
+                    <h2 class="demo-title">
+                        Find comparable companies in
+                        <span class="highlight-gradient">3 seconds</span>
+                    </h2>
+                    <p class="demo-description">
+                        Our AI engine analyzes millions of financial data points to 
+                        instantly suggest the most relevant companies for your analysis.
+                    </p>
+                    
+                    <div class="demo-stats-grid">
+                        <div class="demo-stat">
+                            <div class="demo-stat-icon">
+                                <i class="fas fa-bolt"></i>
+                            </div>
+                            <div class="demo-stat-content">
+                                <h4>20x Faster</h4>
+                                <p>Than traditional manual analysis</p>
+                            </div>
+                        </div>
+                        
+                        <div class="demo-stat">
+                            <div class="demo-stat-icon">
+                                <i class="fas fa-bullseye"></i>
+                            </div>
+                            <div class="demo-stat-content">
+                                <h4>110% More Accurate</h4>
+                                <p>With our AI relevancy algorithm</p>
+                            </div>
+                        </div>
+                        
+                        <div class="demo-stat">
+                            <div class="demo-stat-icon">
+                                <i class="fas fa-sync-alt"></i>
+                            </div>
+                            <div class="demo-stat-content">
+                                <h4>Real-time Data</h4>
+                                <p>Continuous updates from 100+ sources</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button class="btn-demo-cta" id="tryDemoBtn">
+                        <span>Try Interactive Demo</span>
+                        <i class="fas fa-arrow-right"></i>
+                    </button>
+                </div>
+                
+                <div class="demo-right" data-aos="fade-left">
+                    <div class="search-interface">
+                        <!-- Search Bar -->
+                        <div class="search-box-wrapper">
+                            <div class="search-box">
+                                <i class="fas fa-search"></i>
+                                <input 
+                                    type="text" 
+                                    placeholder="Search for a company..." 
+                                    value="Tesla Inc."
+                                    id="companySearch"
+                                    aria-label="Search for a company"
+                                >
+                                <div class="search-strength">
+                                    <div class="strength-bar high"></div>
+                                    <span class="strength-label">Strong</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Results -->
+                        <div class="search-results">
+                            <div class="results-header">
+                                <span>3 comparable companies found</span>
+                                <span class="results-time">0.3s</span>
+                            </div>
+                            
+                            <!-- Result Card 1 -->
+                            <div class="company-result-card highlight">
+                                <div class="company-result-header">
+                                    <div class="company-avatar">
+                                        <span>T</span>
+                                    </div>
+                                    <div class="company-details">
+                                        <h4>Tesla, Inc.</h4>
+                                        <p>NASDAQ: TSLA • Automotive</p>
+                                    </div>
+                                    <div class="relevancy-score">
+                                        <div class="score-circle">
+                                            <span class="score-value">98</span>
+                                        </div>
+                                        <span class="score-label">Relevancy</span>
+                                    </div>
+                                </div>
+                                <div class="company-metrics">
+                                    <div class="metric-item">
+                                        <span class="metric-label">Market Cap</span>
+                                        <span class="metric-value">$752.3B</span>
+                                    </div>
+                                    <div class="metric-item">
+                                        <span class="metric-label">Revenue</span>
+                                        <span class="metric-value">$96.8B</span>
+                                    </div>
+                                    <div class="metric-item">
+                                        <span class="metric-label">EV/EBITDA</span>
+                                        <span class="metric-value">34.2x</span>
+                                    </div>
+                                    <div class="metric-item">
+                                        <span class="metric-label">P/E Ratio</span>
+                                        <span class="metric-value">68.5</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Result Card 2 -->
+                            <div class="company-result-card">
+                                <div class="company-result-header">
+                                    <div class="company-avatar">
+                                        <span>L</span>
+                                    </div>
+                                    <div class="company-details">
+                                        <h4>Lucid Group, Inc.</h4>
+                                        <p>NASDAQ: LCID • Automotive</p>
+                                    </div>
+                                    <div class="relevancy-score">
+                                        <div class="score-circle">
+                                            <span class="score-value">94</span>
+                                        </div>
+                                        <span class="score-label">Relevancy</span>
+                                    </div>
+                                </div>
+                                <div class="company-metrics">
+                                    <div class="metric-item">
+                                        <span class="metric-label">Market Cap</span>
+                                        <span class="metric-value">$12.4B</span>
+                                    </div>
+                                    <div class="metric-item">
+                                        <span class="metric-label">Revenue</span>
+                                        <span class="metric-value">$608M</span>
+                                    </div>
+                                    <div class="metric-item">
+                                        <span class="metric-label">EV/EBITDA</span>
+                                        <span class="metric-value">—</span>
+                                    </div>
+                                    <div class="metric-item">
+                                        <span class="metric-label">P/E Ratio</span>
+                                        <span class="metric-value">—</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Result Card 3 -->
+                            <div class="company-result-card">
+                                <div class="company-result-header">
+                                    <div class="company-avatar">
+                                        <span>R</span>
+                                    </div>
+                                    <div class="company-details">
+                                        <h4>Rivian Automotive, Inc.</h4>
+                                        <p>NASDAQ: RIVN • Automotive</p>
+                                    </div>
+                                    <div class="relevancy-score">
+                                        <div class="score-circle">
+                                            <span class="score-value">92</span>
+                                        </div>
+                                        <span class="score-label">Relevancy</span>
+                                    </div>
+                                </div>
+                                <div class="company-metrics">
+                                    <div class="metric-item">
+                                        <span class="metric-label">Market Cap</span>
+                                        <span class="metric-value">$18.2B</span>
+                                    </div>
+                                    <div class="metric-item">
+                                        <span class="metric-label">Revenue</span>
+                                        <span class="metric-value">$4.4B</span>
+                                    </div>
+                                    <div class="metric-item">
+                                        <span class="metric-label">EV/EBITDA</span>
+                                        <span class="metric-value">—</span>
+                                    </div>
+                                    <div class="metric-item">
+                                        <span class="metric-label">P/E Ratio</span>
+                                        <span class="metric-value">—</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
 
     <!-- ═══════════════════════════════════════════════════════════════
-         SCRIPTS - ORDRE CRITIQUE POUR GSAP + API + ALPHY
+         ALPHY AI SECTION
+         ═══════════════════════════════════════════════════════════════ -->
+    <section class="alphy-ai-section" id="alphy-ai">
+        <div class="container-fluid">
+            <div class="alphy-wrapper">
+                <!-- Left: Alphy Presentation -->
+                <div class="alphy-content" data-aos="fade-right">
+                    <div class="alphy-badge">
+                        <i class="fas fa-sparkles"></i>
+                        <span>Powered by Advanced AI</span>
+                    </div>
+                    
+                    <h2 class="alphy-title">
+                        Meet <span class="gradient-text">Alphy AI</span>
+                        <br>Your Personal Financial Analyst
+                    </h2>
+                    
+                    <p class="alphy-description">
+                        Alphy is our specialized artificial intelligence, trained on millions 
+                        of financial data points. Expert in IPOs, M&A, financial instruments and 
+                        investment strategies, Alphy assists you 24/7 to make the best decisions.
+                    </p>
+
+                    <!-- Alphy Capabilities -->
+                    <div class="alphy-capabilities">
+                        <div class="capability-item">
+                            <div class="capability-icon">
+                                <i class="fas fa-rocket"></i>
+                            </div>
+                            <div class="capability-text">
+                                <h4>IPO Analysis</h4>
+                                <p>Detection and analysis of high-potential IPOs</p>
+                            </div>
+                        </div>
+
+                        <div class="capability-item">
+                            <div class="capability-icon">
+                                <i class="fas fa-chart-line"></i>
+                            </div>
+                            <div class="capability-text">
+                                <h4>Market Insights</h4>
+                                <p>Real-time analysis of market trends</p>
+                            </div>
+                        </div>
+
+                        <div class="capability-item">
+                            <div class="capability-icon">
+                                <i class="fas fa-lightbulb"></i>
+                            </div>
+                            <div class="capability-text">
+                                <h4>Smart Recommendations</h4>
+                                <p>Personalized advice based on your profile</p>
+                            </div>
+                        </div>
+
+                        <div class="capability-item">
+                            <div class="capability-icon">
+                                <i class="fas fa-shield-alt"></i>
+                            </div>
+                            <div class="capability-text">
+                                <h4>Risk Assessment</h4>
+                                <p>Intelligent risk evaluation</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button class="btn-alphy-cta" id="openAlphyChat">
+                        <span>Chat with Alphy</span>
+                        <i class="fas fa-comments"></i>
+                    </button>
+                </div>
+
+                <!-- Right: Alphy Chat Interface Preview -->
+                <div class="alphy-visual" data-aos="fade-left">
+                    <div class="alphy-chat-container">
+                        <div class="chat-header">
+                            <div class="chat-avatar">
+                                <div class="avatar-glow"></div>
+                                <i class="fas fa-robot"></i>
+                            </div>
+                            <div class="chat-header-text">
+                                <h4>Alphy AI</h4>
+                                <span class="status-online">
+                                    <span class="status-dot"></span>
+                                    Online
+                                </span>
+                            </div>
+                        </div>
+
+                        <div class="chat-messages">
+                            <div class="message ai-message">
+                                <div class="message-avatar">
+                                    <i class="fas fa-robot"></i>
+                                </div>
+                                <div class="message-content">
+                                    <p>👋 Hello! I'm Alphy, your AI assistant specialized in finance.</p>
+                                </div>
+                            </div>
+
+                            <div class="message ai-message">
+                                <div class="message-avatar">
+                                    <i class="fas fa-robot"></i>
+                                </div>
+                                <div class="message-content">
+                                    <p>📊 I detected <strong>3 promising IPOs</strong> this week:</p>
+                                    <div class="ipo-suggestion">
+                                        <div class="ipo-item">
+                                            <span class="ipo-symbol">TECH</span>
+                                            <span class="ipo-score">Score: 9.2/10</span>
+                                        </div>
+                                        <div class="ipo-item">
+                                            <span class="ipo-symbol">FINX</span>
+                                            <span class="ipo-score">Score: 8.7/10</span>
+                                        </div>
+                                        <div class="ipo-item">
+                                            <span class="ipo-symbol">BIOT</span>
+                                            <span class="ipo-score">Score: 8.5/10</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="message user-message">
+                                <div class="message-content">
+                                    <p>Analyze TECH for me 🚀</p>
+                                </div>
+                            </div>
+
+                            <div class="message ai-message typing">
+                                <div class="message-avatar">
+                                    <i class="fas fa-robot"></i>
+                                </div>
+                                <div class="message-content">
+                                    <div class="typing-indicator">
+                                        <span></span>
+                                        <span></span>
+                                        <span></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="chat-input-area">
+                            <input type="text" placeholder="Ask Alphy anything about finance..." class="chat-input" disabled>
+                            <button class="chat-send-btn" disabled>
+                                <i class="fas fa-paper-plane"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════════════════════════
+         SOLUTIONS SECTION
+         ═══════════════════════════════════════════════════════════════ -->
+    <section class="solutions-section" id="solutions">
+        <div class="container-fluid">
+            <div class="section-header">
+                <span class="section-tag" data-aos="fade-up">Solutions</span>
+                <h2 class="section-title" data-aos="fade-up" data-aos-delay="100">Built for everyone</h2>
+                <p class="section-description" data-aos="fade-up" data-aos-delay="200">
+                    Whether you're an individual investor or a finance professional
+                </p>
+            </div>
+
+            <div class="solutions-grid">
+                <!-- Solution 1: Individual Investors -->
+                <div class="solution-card" data-aos="zoom-in">
+                    <div class="solution-icon-wrapper">
+                        <div class="solution-icon">
+                            <i class="fas fa-user"></i>
+                        </div>
+                    </div>
+                    <h3>Individual Investors</h3>
+                    <p>
+                        Build and optimize your personal portfolio with AI-powered insights, 
+                        IPO detection, and risk management tools.
+                    </p>
+                    <div class="solution-features">
+                        <span class="feature-pill">Portfolio Builder</span>
+                        <span class="feature-pill">IPO Alerts</span>
+                        <span class="feature-pill">Risk Tools</span>
+                        <span class="feature-pill">AI Assistant</span>
+                    </div>
+                    <a href="#pricing" class="solution-link">
+                        <span>Start Free</span>
+                        <i class="fas fa-arrow-right"></i>
+                    </a>
+                </div>
+
+                <!-- Solution 2: Finance Professionals -->
+                <div class="solution-card" data-aos="zoom-in" data-aos-delay="100">
+                    <div class="solution-icon-wrapper">
+                        <div class="solution-icon">
+                            <i class="fas fa-briefcase"></i>
+                        </div>
+                    </div>
+                    <h3>Finance Professionals</h3>
+                    <p>
+                        Advanced tools for investment bankers, analysts, and asset managers. 
+                        M&A screening, DCF models, and institutional-grade analytics.
+                    </p>
+                    <div class="solution-features">
+                        <span class="feature-pill">M&A Screening</span>
+                        <span class="feature-pill">DCF Models</span>
+                        <span class="feature-pill">Quant Tools</span>
+                        <span class="feature-pill">API Access</span>
+                    </div>
+                    <a href="#pricing" class="solution-link">
+                        <span>Go Pro</span>
+                        <i class="fas fa-arrow-right"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════════════════════════
+         TOOLS SECTION - AVEC EFFETS 3D
+         ═══════════════════════════════════════════════════════════════ -->
+    <section class="tools-section" id="tools">
+        <div class="container-fluid">
+            <div class="section-header">
+                <span class="section-tag" data-aos="fade-up">Quantitative Tools</span>
+                <h2 class="section-title" data-aos="fade-up" data-aos-delay="100">Advanced algorithms for financial analysis</h2>
+            </div>
+
+            <div class="tools-grid-advanced">
+                <div class="tool-card-advanced" data-aos="fade-up">
+                    <div class="tool-icon-advanced">
+                        <i class="fas fa-calculator"></i>
+                    </div>
+                    <h4>Value at Risk (VaR)</h4>
+                    <p>Historical, parametric, and Monte Carlo VaR calculations with confidence intervals</p>
+                    <div class="tool-tags">
+                        <span>Risk</span>
+                        <span>Quantitative</span>
+                    </div>
+                </div>
+
+                <div class="tool-card-advanced" data-aos="fade-up" data-aos-delay="50">
+                    <div class="tool-icon-advanced">
+                        <i class="fas fa-project-diagram"></i>
+                    </div>
+                    <h4>Black-Litterman Model</h4>
+                    <p>Combine market equilibrium with investor views for optimal asset allocation</p>
+                    <div class="tool-tags">
+                        <span>Allocation</span>
+                        <span>Optimization</span>
+                    </div>
+                </div>
+
+                <div class="tool-card-advanced" data-aos="fade-up" data-aos-delay="100">
+                    <div class="tool-icon-advanced">
+                        <i class="fas fa-wave-square"></i>
+                    </div>
+                    <h4>Technical Analysis</h4>
+                    <p>RSI, MACD, Bollinger Bands, moving averages, and 50+ technical indicators</p>
+                    <div class="tool-tags">
+                        <span>Trading</span>
+                        <span>Indicators</span>
+                    </div>
+                </div>
+
+                <div class="tool-card-advanced" data-aos="fade-up" data-aos-delay="150">
+                    <div class="tool-icon-advanced">
+                        <i class="fas fa-robot"></i>
+                    </div>
+                    <h4>Machine Learning Models</h4>
+                    <p>LSTM, Random Forest, and regression models for predictive analytics</p>
+                    <div class="tool-tags">
+                        <span>AI</span>
+                        <span>Prediction</span>
+                    </div>
+                </div>
+
+                <div class="tool-card-advanced" data-aos="fade-up" data-aos-delay="200">
+                    <div class="tool-icon-advanced">
+                        <i class="fas fa-sitemap"></i>
+                    </div>
+                    <h4>Correlation Analysis</h4>
+                    <p>Dynamic correlation matrices and dependency structure analysis</p>
+                    <div class="tool-tags">
+                        <span>Statistics</span>
+                        <span>Analysis</span>
+                    </div>
+                </div>
+
+                <div class="tool-card-advanced" data-aos="fade-up" data-aos-delay="250">
+                    <div class="tool-icon-advanced">
+                        <i class="fas fa-chart-area"></i>
+                    </div>
+                    <h4>Backtesting Engine</h4>
+                    <p>Test strategies on historical data with comprehensive performance metrics</p>
+                    <div class="tool-tags">
+                        <span>Strategy</span>
+                        <span>Performance</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════════════════════════
+         PRICING SECTION - 3 OFFRES EN DOLLARS
+         ═══════════════════════════════════════════════════════════════ -->
+    <section class="pricing-section" id="pricing">
+        <div class="container-fluid">
+            <div class="section-header">
+                <span class="section-tag" data-aos="fade-up">Pricing</span>
+                <h2 class="section-title" data-aos="fade-up" data-aos-delay="100">Simple, transparent pricing</h2>
+                <p class="section-description" data-aos="fade-up" data-aos-delay="200">Start free, upgrade when you're ready</p>
+            </div>
+
+            <div class="pricing-grid-three">
+                <!-- Basic Tier -->
+                <div class="pricing-card" data-aos="fade-up">
+                    <div class="pricing-header">
+                        <h3>AlphaVault Basic</h3>
+                        <p>Perfect to get started</p>
+                    </div>
+                    <div class="pricing-price">
+                        <span class="currency">$</span>
+                        <span class="amount">0</span>
+                        <span class="period">/month</span>
+                    </div>
+                    <ul class="pricing-features">
+                        <li><i class="fas fa-check"></i> Access to basic market data</li>
+                        <li><i class="fas fa-check"></i> Portfolio tracking</li>
+                        <li><i class="fas fa-check"></i> Chat with Alphy AI (10 messages/day)</li>
+                        <li><i class="fas fa-check"></i> 10 analyses/month</li>
+                        <li class="disabled"><i class="fas fa-times"></i> Advanced IPO screening</li>
+                        <li class="disabled"><i class="fas fa-times"></i> Portfolio optimization</li>
+                        <li class="disabled"><i class="fas fa-times"></i> M&A tools</li>
+                        <li class="disabled"><i class="fas fa-times"></i> Real-time data</li>
+                    </ul>
+                    <button class="btn-pricing">Get Started Free</button>
+                </div>
+
+                <!-- Pro Tier -->
+                <div class="pricing-card featured" data-aos="fade-up" data-aos-delay="100">
+                    <div class="popular-badge">🔥 Most Popular</div>
+                    <div class="pricing-header">
+                        <h3>AlphaVault Pro</h3>
+                        <p>Full access to core features</p>
+                    </div>
+                    <div class="pricing-price">
+                        <span class="currency">$</span>
+                        <span class="amount">10</span>
+                        <span class="period">/month</span>
+                    </div>
+                    <ul class="pricing-features">
+                        <li><i class="fas fa-check"></i> <strong>Everything in Basic</strong></li>
+                        <li><i class="fas fa-check"></i> <strong>Unlimited</strong> analyses</li>
+                        <li><i class="fas fa-check"></i> Advanced IPO screening & alerts</li>
+                        <li><i class="fas fa-check"></i> Portfolio optimization (Markowitz)</li>
+                        <li><i class="fas fa-check"></i> Monte Carlo simulations</li>
+                        <li><i class="fas fa-check"></i> Real-time market data</li>
+                        <li><i class="fas fa-check"></i> <strong>Unlimited</strong> Alphy AI access</li>
+                        <li class="disabled"><i class="fas fa-times"></i> API Access</li>
+                        <li class="disabled"><i class="fas fa-times"></i> White-label reports</li>
+                    </ul>
+                    <button class="btn-pricing featured">Start 14-Day Free Trial</button>
+                    <p class="pricing-note">Same price as Spotify Premium ✨</p>
+                </div>
+
+                <!-- Platinum Tier -->
+                <div class="pricing-card platinum" data-aos="fade-up" data-aos-delay="200">
+                    <div class="platinum-badge">💎 Platinum</div>
+                    <div class="pricing-header">
+                        <h3>AlphaVault Platinum</h3>
+                        <p>For serious investors & professionals</p>
+                    </div>
+                    <div class="pricing-price">
+                        <span class="currency">$</span>
+                        <span class="amount">20</span>
+                        <span class="period">/month</span>
+                    </div>
+                    <ul class="pricing-features">
+                        <li><i class="fas fa-check"></i> <strong>Everything in Pro</strong></li>
+                        <li><i class="fas fa-check"></i> Advanced M&A screening tools</li>
+                        <li><i class="fas fa-check"></i> Black-Litterman optimization</li>
+                        <li><i class="fas fa-check"></i> Custom scenario builder</li>
+                        <li><i class="fas fa-check"></i> API Access (10,000 calls/month)</li>
+                        <li><i class="fas fa-check"></i> White-label reports & exports</li>
+                        <li><i class="fas fa-check"></i> Priority support (24/7)</li>
+                        <li><i class="fas fa-check"></i> Dedicated account manager</li>
+                        <li><i class="fas fa-check"></i> Custom integrations</li>
+                    </ul>
+                    <button class="btn-pricing platinum">Start 14-Day Free Trial</button>
+                    <p class="pricing-note">Professional-grade tools 🚀</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════════════════════════
+         CTA FINAL
+         ═══════════════════════════════════════════════════════════════ -->
+    <section class="cta-final">
+        <div class="container-fluid">
+            <div class="cta-content-wrapper">
+                <div class="cta-content" data-aos="zoom-in">
+                    <h2 class="cta-title">Ready to transform your investments?</h2>
+                    <p class="cta-subtitle">
+                        Join thousands of investors using AlphaVault AI
+                    </p>
+                    <div class="cta-buttons">
+                        <button class="btn-cta-primary" id="finalCTABtn">
+                            <span>Start Free Now</span>
+                            <i class="fas fa-arrow-right"></i>
+                        </button>
+                    </div>
+                    <p class="cta-note">No credit card required • Upgrade to Pro anytime for just $10/month</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════════════════════════
+         FOOTER
+         ═══════════════════════════════════════════════════════════════ -->
+    <footer class="landing-footer">
+        <div class="container-fluid">
+            <div class="footer-grid">
+                <div class="footer-col footer-brand-col">
+                    <div class="footer-brand">
+                        <div class="brand-logo">
+                            <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" width="32" height="32">
+                                <defs>
+                                    <linearGradient id="logoGradientFooter" x1="0%" y1="0%" x2="100%" y2="100%">
+                                        <stop offset="0%" style="stop-color:#3B82F6;stop-opacity:1" />
+                                        <stop offset="100%" style="stop-color:#8B5CF6;stop-opacity:1" />
+                                    </linearGradient>
+                                </defs>
+                                <path d="M 20 80 L 30 70 L 40 75 L 50 60 L 60 65 L 70 45 L 80 50 L 90 30" 
+                                      stroke="url(#logoGradientFooter)" 
+                                      stroke-width="4" 
+                                      fill="none"/>
+                            </svg>
+                        </div>
+                        <span class="brand-text">AlphaVault <strong>AI</strong></span>
+                    </div>
+                    <p class="footer-description">
+                        AI-powered financial intelligence platform for smart investors.
+                    </p>
+                    <div class="footer-social">
+                        <a href="#" aria-label="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
+                        <a href="#" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
+                        <a href="#" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#" aria-label="GitHub"><i class="fab fa-github"></i></a>
+                    </div>
+                </div>
+
+                <div class="footer-col">
+                    <h4>Product</h4>
+                    <ul>
+                        <li><a href="#features">Features</a></li>
+                        <li><a href="#alphy-ai">Alphy AI</a></li>
+                        <li><a href="dashboard-financier.html">Dashboard</a></li>
+                        <li><a href="#pricing">Pricing</a></li>
+                    </ul>
+                </div>
+
+                <div class="footer-col">
+                    <h4>Tools</h4>
+                    <ul>
+                        <li><a href="advanced-analysis.html">Advanced Analysis</a></li>
+                        <li><a href="monte-carlo.html">Monte Carlo</a></li>
+                        <li><a href="risk-parity.html">Risk Parity</a></li>
+                        <li><a href="scenario-analysis.html">Scenario Analysis</a></li>
+                        <li><a href="trend-prediction.html">Trend Prediction</a></li>
+                    </ul>
+                </div>
+
+                <div class="footer-col">
+                    <h4>Company</h4>
+                    <ul>
+                        <li><a href="#">About Us</a></li>
+                        <li><a href="#">Contact</a></li>
+                        <li><a href="#">Privacy Policy</a></li>
+                        <li><a href="#">Terms of Service</a></li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="footer-bottom">
+                <p>&copy; <span id="currentYear">2024</span> AlphaVault AI. All rights reserved.</p>
+                <div class="footer-bottom-links">
+                    <a href="#">Privacy</a>
+                    <a href="#">Terms</a>
+                    <a href="#">Security</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- ═══════════════════════════════════════════════════════════════
+         SCRIPTS - ORDRE CRITIQUE POUR API + ALPHY
          ═══════════════════════════════════════════════════════════════ -->
     
     <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     
-    <!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-         GSAP - ANIMATION LIBRARIES
-         ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
-    <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/TextPlugin.min.js"></script>
-    
-    <!-- AnimXYZ -->
-    <script src="https://cdn.jsdelivr.net/npm/@animxyz/core@0.6.3/dist/animxyz.min.js"></script>
+    <!-- AOS Animation -->
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
 
     <!-- Three.js (Optional) -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
@@ -659,13 +1349,19 @@
     <!-- Firebase Config -->
     <script src="assets/js/firebase-config.js"></script>
     
-    <!-- Config -->
+    <!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+         ✅ CONFIG - DOIT ÊTRE CHARGÉ EN PREMIER !
+         ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
     <script src="assets/js/config.js"></script>
     
-    <!-- API Client -->
+    <!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+         API CLIENT - APRÈS CONFIG, AVANT LE TICKER !
+         ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
     <script src="assets/js/api-client.js"></script>
     
-    <!-- Chatbot Alphy AI -->
+    <!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+         CHATBOT ALPHY AI - ORDRE CRITIQUE !
+         ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
     <script src="assets/js/chatbot-config.js"></script>
     <script src="assets/js/chatbot-gemini.js"></script>
     <script src="assets/js/chatbot-analytics.js"></script>
@@ -677,15 +1373,188 @@
     
     <!-- Application Scripts -->
     <script src="assets/js/common.js"></script>
-    
-    <!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-         LANDING.JS - AVEC GSAP INTÉGRÉ
-         ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
     <script src="assets/js/landing.js"></script>
     
-    <!-- Market Ticker -->
+    <!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+         MARKET TICKER - APRÈS CONFIG ET API CLIENT !
+         ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
     <script src="assets/js/landing-market-ticker.js"></script>
     
     <script src="assets/js/auth-system.js"></script>
+    
+    <!-- ═══════════════════════════════════════════════════════════════
+         INITIALISATION GLOBALE
+         ═══════════════════════════════════════════════════════════════ -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'color: #3B82F6; font-weight: bold; font-size: 14px;');
+            console.log('%c🚀 AlphaVault AI - Platform Initialization', 'color: #3B82F6; font-size: 18px; font-weight: bold;');
+            console.log('%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'color: #3B82F6; font-weight: bold; font-size: 14px;');
+            
+            // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+            // 1. AOS ANIMATIONS
+            // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+            console.log('%c🎨 Initializing AOS Animations...', 'color: #8B5CF6; font-weight: bold;');
+            AOS.init({
+                duration: 800,
+                easing: 'ease-out-cubic',
+                once: true,
+                offset: 50,
+                mirror: false
+            });
+            console.log('✅ AOS Animations initialized\n');
+
+            // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+            // 2. ANNÉE DYNAMIQUE
+            // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+            const yearElement = document.getElementById('currentYear');
+            if (yearElement) {
+                yearElement.textContent = new Date().getFullYear();
+                console.log('✅ Dynamic year updated\n');
+            }
+
+            // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+            // 3. VÉRIFIER CONFIG
+            // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+            console.log('%c⚙️  Checking Configuration...', 'color: #3B82F6; font-weight: bold;');
+            if (window.APP_CONFIG) {
+                console.log('%c✅ APP_CONFIG loaded successfully', 'color: #10b981; font-weight: bold;');
+                console.log('   📡 API Base URL:', window.APP_CONFIG.API_BASE_URL);
+                console.log('   ⏱️  Quote Cache:', window.APP_CONFIG.CACHE_DURATION.quote / 1000 / 60, 'minutes');
+            } else {
+                console.warn('%c⚠️  APP_CONFIG not found - using defaults', 'color: #f59e0b; font-weight: bold;');
+            }
+
+            // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+            // 4. VÉRIFIER API CLIENT
+            // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+            console.log('%c📡 Checking API Client...', 'color: #3B82F6; font-weight: bold;');
+            if (typeof window.FinanceAPIClient !== 'undefined') {
+                console.log('%c✅ FinanceAPIClient loaded successfully', 'color: #10b981; font-weight: bold;');
+                console.log('   📊 Market Ticker will use REAL-TIME API data\n');
+            } else {
+                console.error('%c❌ FinanceAPIClient NOT FOUND!', 'color: #ef4444; font-weight: bold;');
+                console.error('   📋 Make sure api-client.js is loaded correctly');
+                console.error('   📋 Check the file path: assets/js/api-client.js\n');
+            }
+
+            // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+            // 5. INITIALISER ALPHY AI CHATBOT
+            // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+            console.log('%c🤖 Initializing Alphy AI Chatbot...', 'color: #8B5CF6; font-weight: bold; font-size: 16px;');
+            
+            // Vérifier que tous les composants sont chargés
+            const chatbotChecks = {
+                'ChatbotConfig': typeof ChatbotConfig !== 'undefined',
+                'ChatbotUI': typeof ChatbotUI !== 'undefined',
+                'FinancialChatbotEngine': typeof FinancialChatbotEngine !== 'undefined',
+                'GeminiAIIntegration': typeof GeminiAIIntegration !== 'undefined'
+            };
+
+            console.log('📦 Chatbot Components Status:');
+            Object.entries(chatbotChecks).forEach(([name, loaded]) => {
+                const status = loaded ? '✅' : '❌';
+                const color = loaded ? '#10b981' : '#ef4444';
+                console.log(`%c   ${status} ${name}`, `color: ${color}; font-weight: bold;`);
+            });
+
+            // Initialiser le chatbot si tous les composants sont présents
+            if (chatbotChecks.ChatbotConfig && chatbotChecks.ChatbotUI) {
+                try {
+                    window.financialChatbot = new ChatbotUI(ChatbotConfig);
+                    console.log('%c✅ Alphy AI Chatbot initialized successfully!', 'color: #10b981; font-weight: bold; font-size: 14px;');
+                    console.log('   💬 Chatbot is ready to use');
+                    console.log('   🎯 Click the floating button in bottom-right to start chatting\n');
+                    
+                    // Vérifier que le chatbot a bien une méthode open
+                    if (typeof window.financialChatbot.open === 'function') {
+                        console.log('   ✅ chatbot.open() method available');
+                    } else {
+                        console.warn('   ⚠️ chatbot.open() method not found');
+                    }
+                    
+                } catch (error) {
+                    console.error('%c❌ Error initializing Alphy chatbot:', 'color: #ef4444; font-weight: bold;');
+                    console.error(error);
+                    console.error('📋 Stack trace:', error.stack);
+                }
+            } else {
+                console.error('%c❌ Chatbot initialization FAILED - Missing components', 'color: #ef4444; font-weight: bold;');
+                console.error('📋 Make sure all chatbot-*.js files are loaded in the correct order\n');
+            }
+
+            // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+            // 6. BOUTON "CHAT WITH ALPHY" - SECTION ALPHY AI
+            // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+            console.log('%c🔘 Setting up "Chat with Alphy" button...', 'color: #8B5CF6; font-weight: bold;');
+            
+            const openAlphyBtn = document.getElementById('openAlphyChat');
+            if (openAlphyBtn) {
+                console.log('   ✅ Button #openAlphyChat found');
+                
+                openAlphyBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    console.log('%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'color: #8B5CF6; font-weight: bold;');
+                    console.log('%c🔵 "Chat with Alphy" BUTTON CLICKED', 'color: #8B5CF6; font-weight: bold; font-size: 14px;');
+                    console.log('%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'color: #8B5CF6; font-weight: bold;');
+                    
+                    if (window.financialChatbot) {
+                        console.log('   ✅ Chatbot instance found');
+                        
+                        if (typeof window.financialChatbot.open === 'function') {
+                            console.log('   🚀 Opening chatbot...');
+                            try {
+                                window.financialChatbot.open();
+                                console.log('%c   ✅ Chatbot opened successfully!', 'color: #10b981; font-weight: bold;');
+                            } catch (error) {
+                                console.error('   ❌ Error opening chatbot:', error);
+                            }
+                        } else {
+                            console.error('   ❌ chatbot.open() method not available');
+                            console.error('   Available methods:', Object.keys(window.financialChatbot));
+                            alert('Chatbot interface error. Check console for details.');
+                        }
+                    } else {
+                        console.error('   ❌ window.financialChatbot is not defined');
+                        console.error('   The chatbot was not initialized properly');
+                        alert('Chatbot is not initialized. Please refresh the page.');
+                    }
+                });
+                
+                console.log('   ✅ Click listener added to button\n');
+            } else {
+                console.error('   ❌ Button #openAlphyChat NOT FOUND in DOM');
+                console.error('   Make sure the button exists in the HTML\n');
+            }
+
+            // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+            // 7. RÉSUMÉ FINAL
+            // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+            console.log('%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'color: #3B82F6; font-weight: bold; font-size: 14px;');
+            console.log('%c✨ AlphaVault AI - All Systems Ready!', 'color: #10b981; font-size: 18px; font-weight: bold;');
+            console.log('%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'color: #3B82F6; font-weight: bold; font-size: 14px;');
+            console.log('');
+            console.log('%cSystem Status:', 'font-weight: bold; font-size: 14px;');
+            console.log(`   ${window.APP_CONFIG ? '✅' : '❌'} Configuration`);
+            console.log(`   ${typeof window.FinanceAPIClient !== 'undefined' ? '✅' : '❌'} API Client (FinanceAPIClient)`);
+            console.log(`   ${typeof window.marketTicker !== 'undefined' ? '✅' : '❌'} Market Ticker`);
+            console.log(`   ${chatbotChecks.ChatbotUI ? '✅' : '❌'} Alphy AI Chatbot`);
+            console.log('');
+            console.log('%cRefresh Settings:', 'font-weight: bold; font-size: 14px;');
+            if (window.APP_CONFIG) {
+                console.log(`   ⏱️  Quote Cache: ${window.APP_CONFIG.CACHE_DURATION.quote / 1000 / 60} minutes`);
+            }
+            if (window.marketTicker) {
+                console.log(`   🔄 Ticker Refresh: ${window.marketTicker.updateInterval / 1000 / 60} minutes`);
+            }
+            console.log('');
+            console.log('%cHow to use:', 'font-weight: bold; font-size: 14px;');
+            console.log('   💬 Click the chat button (bottom-right) to talk with Alphy');
+            console.log('   📊 Market ticker updates automatically every hour');
+            console.log('   🎨 All animations are enabled');
+            console.log('');
+            console.log('%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'color: #3B82F6; font-weight: bold; font-size: 14px;');
+        });
+    </script>
 </body>
 </html>
