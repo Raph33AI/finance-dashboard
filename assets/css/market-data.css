@@ -375,7 +375,6 @@ button[onclick*="compare"]:hover i {
     color: white !important;
 }
 
-/* Variante Primary (si besoin) */
 .btn-add-to-compare.btn-primary,
 .comparison-actions .btn-primary {
     background: linear-gradient(135deg, var(--ml-primary), var(--ml-secondary));
@@ -1379,15 +1378,54 @@ body.dark-mode .search-suggestions {
 }
 
 /* ============================================
-   💼 PORTFOLIO MANAGEMENT - OPTIMISÉ ✅
+   💼 PORTFOLIO MANAGEMENT - ULTRA COMPACT ✅
    ============================================ */
+
+/* Suppression zone blanche totale */
+.main-content > .section:has(.simulation-management) {
+    padding-top: 0 !important;
+    margin-top: 0 !important;
+}
+
+.portfolio-section,
+.simulation-section {
+    margin-bottom: 15px !important;
+    padding-top: 0 !important;
+    margin-top: 0 !important;
+}
+
+.portfolio-section h2,
+.simulation-section h2,
+h2:has(+ .simulation-management) {
+    margin-top: 0 !important;
+    margin-bottom: 15px !important;
+    padding-top: 0 !important;
+}
+
+.section.portfolio-section,
+.section.simulation-section {
+    padding-top: 15px !important;
+    margin-top: 0 !important;
+}
+
+.card:has(.simulation-management) {
+    margin-top: 0 !important;
+    padding-top: 0 !important;
+}
+
+.card:has(.simulation-management) .card-body {
+    padding-top: 20px !important;
+}
+
+/* Container principal */
 .simulation-management {
     background: linear-gradient(135deg, var(--portfolio-gradient-start) 0%, var(--portfolio-gradient-end) 100%) !important;
     color: white !important;
-    padding: 25px 30px; /* ✅ CORRECTION : Réduction padding (était 30px) */
+    padding: 20px 25px !important;
     border-radius: 24px;
     box-shadow: 0 12px 40px var(--portfolio-shadow);
-    margin-bottom: 20px; /* ✅ CORRECTION : Réduction margin-bottom (était 25px) */
+    margin-top: 0 !important;
+    margin-bottom: 15px !important;
     position: relative;
     overflow: hidden;
 }
@@ -1407,7 +1445,7 @@ body.dark-mode .search-suggestions {
         rgba(255, 255, 255, 0.03) 20px
     );
     animation: moveStripes 20s linear infinite;
-    pointer-events: none; /* ✅ CORRECTION : Empêche l'interaction avec le pseudo-élément */
+    pointer-events: none;
 }
 
 @keyframes moveStripes {
@@ -1417,7 +1455,9 @@ body.dark-mode .search-suggestions {
 
 .simulation-management h3 {
     color: white !important;
-    margin-bottom: 20px; /* ✅ CORRECTION : Réduction margin (était 25px) */
+    margin-top: 0 !important;
+    margin-bottom: 15px !important;
+    padding-top: 0 !important;
     font-size: 1.6rem;
     font-weight: 800;
     position: relative;
@@ -1430,11 +1470,11 @@ body.dark-mode .search-suggestions {
 
 .current-simulation-display {
     background: rgba(255, 255, 255, 0.15) !important;
-    padding: 18px; /* ✅ CORRECTION : Réduction padding (était 20px) */
+    padding: 14px 16px !important;
     border-radius: 16px;
     text-align: center;
     backdrop-filter: blur(10px);
-    margin-bottom: 20px; /* ✅ CORRECTION : Réduction margin (était 25px) */
+    margin-bottom: 15px !important;
     position: relative;
     z-index: 1;
 }
@@ -1452,11 +1492,13 @@ body.dark-mode .search-suggestions {
 .toolbar-row {
     display: flex;
     align-items: center;
-    gap: 10px; /* ✅ CORRECTION : Réduction gap (était 12px) */
+    gap: 8px !important;
     flex-wrap: wrap;
     justify-content: center;
     position: relative;
     z-index: 1;
+    margin-top: 0 !important;
+    padding-top: 0 !important;
 }
 
 .simulation-management .btn,
@@ -1465,14 +1507,14 @@ body.dark-mode .search-suggestions {
 .simulation-management .btn-secondary,
 .simulation-management .btn-warning,
 .simulation-management .btn-info {
-    margin: 3px; /* ✅ CORRECTION : Réduction margin (était 5px) */
+    margin: 2px !important;
     transition: var(--transition-smooth);
     font-weight: 700;
     border: none;
     cursor: pointer;
-    padding: 12px 28px; /* ✅ CORRECTION : Réduction padding vertical (était 14px) */
+    padding: 10px 24px !important;
     border-radius: 16px;
-    font-size: 1rem;
+    font-size: 0.95rem !important;
     display: inline-flex;
     align-items: center;
     gap: 10px;
@@ -1533,10 +1575,10 @@ body.dark-mode .search-suggestions {
 .info-box-white-text {
     background: rgba(255, 255, 255, 0.1) !important;
     border-left: 4px solid white !important;
-    padding: 16px; /* ✅ CORRECTION : Réduction padding (était 20px) */
+    padding: 12px 14px !important;
     border-radius: 12px;
     backdrop-filter: blur(10px);
-    margin-top: 15px; /* ✅ CORRECTION : Réduction margin (était 20px) */
+    margin-top: 12px !important;
     position: relative;
     z-index: 1;
 }
@@ -1544,6 +1586,173 @@ body.dark-mode .search-suggestions {
 .info-box *,
 .info-box-white-text * {
     color: white !important;
+}
+
+/* ============================================
+   📂 PORTFOLIO ITEMS - ULTRA COMPACT
+   ============================================ */
+.simulations-info {
+    background: linear-gradient(135deg, var(--portfolio-gradient-start), var(--portfolio-gradient-end));
+    color: white !important;
+    padding: 14px 18px !important;
+    border-radius: 16px;
+    margin-bottom: 15px !important;
+    display: flex;
+    align-items: flex-start;
+    gap: 15px;
+}
+
+.simulations-info * {
+    color: white !important;
+}
+
+#portfoliosListContainer {
+    display: flex;
+    flex-direction: column;
+    gap: 10px !important;
+    margin-top: 0 !important;
+}
+
+.simulation-item {
+    background: white;
+    border: 2px solid #e5e7eb;
+    border-radius: 16px;
+    padding: 14px 16px !important;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    transition: var(--transition-smooth);
+    position: relative;
+    overflow: hidden;
+    margin-bottom: 0 !important;
+}
+
+.simulation-item::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left 0.5s;
+}
+
+.simulation-item:hover::before {
+    left: 100%;
+}
+
+.simulation-item:not(.active) {
+    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%) !important;
+    border: 2px solid #e5e7eb !important;
+}
+
+.simulation-item:not(.active):hover {
+    background: linear-gradient(135deg, #e0e7ff 0%, #c7d2fe 100%) !important;
+    border-color: var(--portfolio-gradient-start) !important;
+    transform: translateY(-4px);
+    box-shadow: 0 8px 24px rgba(102, 126, 234, 0.2);
+}
+
+.simulation-item:not(.active) .simulation-name,
+.simulation-item:not(.active) .simulation-meta {
+    color: #1f2937 !important;
+}
+
+.simulation-item:not(.active) .simulation-name i:first-child {
+    color: var(--portfolio-gradient-start) !important;
+}
+
+.simulation-item:not(.active) .simulation-meta i {
+    color: #9ca3af !important;
+}
+
+.simulation-item.active {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
+    border-color: var(--portfolio-gold) !important;
+    box-shadow: 0 12px 40px rgba(16, 185, 129, 0.4);
+}
+
+.simulation-item.active * {
+    color: white !important;
+}
+
+.simulation-item.active .simulation-name i:first-child {
+    color: var(--portfolio-gold) !important;
+}
+
+.simulation-info {
+    flex: 1;
+    cursor: pointer;
+    user-select: none;
+}
+
+.simulation-name {
+    font-size: 1.2rem;
+    font-weight: 800;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 8px;
+}
+
+.simulation-meta {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+    font-size: 0.9rem;
+}
+
+.simulation-actions {
+    display: flex;
+    gap: 10px;
+    position: relative;
+    z-index: 10;
+}
+
+.btn-sm {
+    padding: 10px 20px;
+    font-size: 0.9rem;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    font-weight: 700;
+    transition: var(--transition-smooth);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.simulation-item:not(.active) .btn-sm {
+    background: rgba(102, 126, 234, 0.1);
+    color: var(--portfolio-gradient-start);
+}
+
+.simulation-item:not(.active) .btn-sm:hover {
+    background: var(--portfolio-gradient-start);
+    color: white;
+    transform: scale(1.05);
+}
+
+.simulation-item:not(.active) .btn-danger {
+    background: rgba(239, 68, 68, 0.1);
+    color: var(--ml-danger);
+}
+
+.simulation-item:not(.active) .btn-danger:hover {
+    background: var(--ml-danger);
+    color: white;
+}
+
+.simulation-item.active .btn-sm {
+    background: rgba(255, 255, 255, 0.3);
+    color: white;
+}
+
+.simulation-item.active .btn-sm:hover {
+    background: rgba(255, 255, 255, 0.5);
+    transform: scale(1.05);
 }
 
 /* ============================================
@@ -1762,7 +1971,7 @@ body.dark-mode .search-suggestions {
 }
 
 /* ============================================
-   ✅ MODALS - STYLE ORIGINAL
+   ✅ MODALS - STYLE PREMIUM UNIFORME
    ============================================ */
 .modal {
     display: none;
@@ -1906,6 +2115,255 @@ body.dark-mode .modal-body {
 }
 
 /* ============================================
+   ✅ BOUTONS MODALS - STYLE PREMIUM
+   ============================================ */
+
+/* Bouton principal "Load Comparison" */
+.modal-body button[onclick*="loadComparison"],
+.modal-body .btn-load-comparison,
+button:has(i.fa-chart-line),
+.modal-footer .btn-primary,
+.modal button[type="submit"] {
+    padding: 14px 32px !important;
+    font-size: 1.1rem !important;
+    font-weight: 700 !important;
+    border: none !important;
+    border-radius: 16px !important;
+    background: linear-gradient(135deg, var(--ml-primary), var(--ml-secondary), var(--ml-accent)) !important;
+    background-size: 200% 200% !important;
+    color: white !important;
+    cursor: pointer !important;
+    position: relative !important;
+    overflow: hidden !important;
+    transition: var(--transition-smooth) !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 12px !important;
+    box-shadow: 
+        0 8px 24px rgba(102, 126, 234, 0.4),
+        0 0 20px rgba(118, 75, 162, 0.3) !important;
+    transform-style: preserve-3d !important;
+}
+
+.modal-body button[onclick*="loadComparison"]::before,
+.modal-body .btn-load-comparison::before,
+.modal-footer .btn-primary::before {
+    content: '' !important;
+    position: absolute !important;
+    top: -50% !important;
+    left: -50% !important;
+    width: 200% !important;
+    height: 200% !important;
+    background: linear-gradient(
+        45deg,
+        transparent,
+        rgba(255, 255, 255, 0.3),
+        transparent
+    ) !important;
+    transform: rotate(45deg) !important;
+    transition: all 0.6s !important;
+}
+
+.modal-body button[onclick*="loadComparison"]:hover,
+.modal-body .btn-load-comparison:hover,
+.modal-footer .btn-primary:hover {
+    transform: translateY(-4px) scale(1.02) !important;
+    box-shadow: 
+        0 16px 40px rgba(102, 126, 234, 0.5),
+        0 0 40px rgba(118, 75, 162, 0.4) !important;
+    animation: gradientShift 3s ease infinite !important;
+}
+
+.modal-body button[onclick*="loadComparison"]:hover::before,
+.modal-body .btn-load-comparison:hover::before {
+    left: 100% !important;
+}
+
+/* Bouton secondaire "Cancel" */
+.modal-body button[onclick*="closeModal"],
+.modal-body .btn-cancel,
+.modal-footer .btn-secondary,
+.modal-footer button:not(.btn-primary) {
+    padding: 14px 32px !important;
+    font-size: 1.1rem !important;
+    font-weight: 700 !important;
+    border: 2px solid rgba(102, 126, 234, 0.4) !important;
+    border-radius: 16px !important;
+    background: rgba(255, 255, 255, 0.05) !important;
+    backdrop-filter: blur(15px) saturate(180%) !important;
+    color: var(--text-primary) !important;
+    cursor: pointer !important;
+    transition: var(--transition-bounce) !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 10px !important;
+    position: relative !important;
+    overflow: hidden !important;
+    box-shadow: 
+        0 4px 16px rgba(0, 0, 0, 0.1),
+        inset 0 1px 0 rgba(255, 255, 255, 0.2) !important;
+}
+
+.modal-body button[onclick*="closeModal"]:hover,
+.modal-body .btn-cancel:hover,
+.modal-footer .btn-secondary:hover {
+    background: rgba(102, 126, 234, 0.15) !important;
+    border-color: var(--ml-primary) !important;
+    color: var(--ml-primary) !important;
+    transform: translateY(-3px) scale(1.02) !important;
+    box-shadow: 
+        0 8px 24px rgba(102, 126, 234, 0.25),
+        inset 0 1px 0 rgba(255, 255, 255, 0.3) !important;
+}
+
+/* Quick Presets - Style chips premium */
+.modal-body button[onclick*="preset"],
+.modal-body .preset-btn,
+button:has(i.fa-microchip),
+button:has(i.fa-bitcoin),
+button:has(i.fa-chart-pie) {
+    padding: 10px 20px !important;
+    font-size: 0.95rem !important;
+    font-weight: 700 !important;
+    border: 2px solid rgba(102, 126, 234, 0.4) !important;
+    border-radius: 50px !important;
+    background: rgba(255, 255, 255, 0.05) !important;
+    backdrop-filter: blur(10px) !important;
+    color: var(--text-primary) !important;
+    cursor: pointer !important;
+    transition: var(--transition-bounce) !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    position: relative !important;
+    overflow: hidden !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
+}
+
+.modal-body button[onclick*="preset"]::before,
+.modal-body .preset-btn::before {
+    content: '' !important;
+    position: absolute !important;
+    top: 50% !important;
+    left: 50% !important;
+    width: 0 !important;
+    height: 0 !important;
+    border-radius: 50% !important;
+    background: radial-gradient(circle, var(--ml-primary), transparent) !important;
+    transform: translate(-50%, -50%) !important;
+    transition: width 0.6s, height 0.6s !important;
+}
+
+.modal-body button[onclick*="preset"]:hover,
+.modal-body .preset-btn:hover {
+    background: linear-gradient(135deg, var(--ml-primary), var(--ml-secondary)) !important;
+    border-color: transparent !important;
+    color: white !important;
+    transform: translateY(-4px) scale(1.05) !important;
+    box-shadow: 
+        0 8px 24px rgba(102, 126, 234, 0.4),
+        var(--glow-primary) !important;
+}
+
+.modal-body button[onclick*="preset"]:hover::before,
+.modal-body .preset-btn:hover::before {
+    width: 300px !important;
+    height: 300px !important;
+}
+
+.modal-body button[onclick*="preset"]:hover i,
+.modal-body .preset-btn:hover i {
+    transform: scale(1.2) rotate(10deg) !important;
+    color: white !important;
+}
+
+/* Input dans modal */
+.modal-body input[type="text"],
+.modal-body input[type="number"] {
+    width: 100% !important;
+    padding: 16px 22px !important;
+    font-size: 1rem !important;
+    background: rgba(255, 255, 255, 0.05) !important;
+    border: 2px solid rgba(102, 126, 234, 0.3) !important;
+    border-radius: 16px !important;
+    color: var(--text-primary) !important;
+    transition: var(--transition-smooth) !important;
+    backdrop-filter: blur(10px) !important;
+    box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.05) !important;
+}
+
+.modal-body input[type="text"]:focus,
+.modal-body input[type="number"]:focus {
+    outline: none !important;
+    border-color: var(--ml-primary) !important;
+    background: rgba(255, 255, 255, 0.08) !important;
+    box-shadow: 
+        0 0 0 4px rgba(102, 126, 234, 0.1),
+        inset 0 2px 8px rgba(0, 0, 0, 0.05),
+        var(--glow-primary) !important;
+    transform: translateY(-2px) !important;
+}
+
+/* Message d'alerte dans modal */
+.modal-body .alert,
+.modal-body [class*="alert-"],
+.modal-body .warning-message {
+    background: linear-gradient(
+        135deg,
+        rgba(246, 211, 101, 0.15),
+        rgba(253, 160, 133, 0.1)
+    ) !important;
+    border-left: 4px solid var(--ml-warning) !important;
+    padding: 12px 18px !important;
+    border-radius: 12px !important;
+    backdrop-filter: blur(10px) !important;
+    font-size: 0.9rem !important;
+    color: var(--text-primary) !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 10px !important;
+    margin: 15px 0 !important;
+}
+
+.modal-body .alert i,
+.modal-body [class*="alert-"] i {
+    color: var(--ml-warning) !important;
+    font-size: 1.2rem !important;
+}
+
+/* Label dans modal */
+.modal-body label {
+    font-weight: 700 !important;
+    color: var(--text-primary) !important;
+    font-size: 1rem !important;
+    margin-bottom: 10px !important;
+    display: block !important;
+}
+
+/* Section "Quick Presets" */
+.modal-body .quick-presets-section,
+.modal-body > div:has(button[onclick*="preset"]) {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    gap: 10px !important;
+    align-items: center !important;
+    margin-top: 20px !important;
+    padding-top: 20px !important;
+    border-top: 2px solid var(--glass-border) !important;
+}
+
+.modal-body .quick-presets-section > span,
+.modal-body > div:has(button[onclick*="preset"]) > span {
+    font-weight: 700 !important;
+    background: linear-gradient(135deg, var(--ml-primary), var(--ml-secondary)) !important;
+    -webkit-background-clip: text !important;
+    -webkit-text-fill-color: transparent !important;
+    font-size: 1.05rem !important;
+}
+
+/* ============================================
    📋 FORMULAIRES DANS MODALS
    ============================================ */
 .form-group {
@@ -1922,8 +2380,6 @@ body.dark-mode .modal-body {
 }
 
 .form-input,
-.modal-body input[type="text"],
-.modal-body input[type="number"],
 .modal-body select,
 .modal-body textarea {
     width: 100%;
@@ -1937,7 +2393,6 @@ body.dark-mode .modal-body {
 }
 
 .form-input:focus,
-.modal-body input:focus,
 .modal-body select:focus,
 .modal-body textarea:focus {
     outline: none;
@@ -1983,172 +2438,6 @@ body.dark-mode .modal-body {
 
 .btn-cancel:hover {
     background: var(--background-tertiary);
-}
-
-/* ============================================
-   📂 PORTFOLIO ITEMS - FOND BLANC OPTIMISÉ
-   ============================================ */
-.simulations-info {
-    background: linear-gradient(135deg, var(--portfolio-gradient-start), var(--portfolio-gradient-end));
-    color: white !important;
-    padding: 18px 22px; /* ✅ CORRECTION : Réduction padding */
-    border-radius: 16px;
-    margin-bottom: 20px; /* ✅ CORRECTION : Réduction margin */
-    display: flex;
-    align-items: flex-start;
-    gap: 15px;
-}
-
-.simulations-info * {
-    color: white !important;
-}
-
-#portfoliosListContainer {
-    display: flex;
-    flex-direction: column;
-    gap: 12px; /* ✅ CORRECTION : Réduction gap (était 15px) */
-}
-
-.simulation-item {
-    background: white;
-    border: 2px solid #e5e7eb;
-    border-radius: 16px;
-    padding: 18px; /* ✅ CORRECTION : Réduction padding (était 20px) */
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 20px;
-    transition: var(--transition-smooth);
-    position: relative;
-    overflow: hidden;
-    margin-bottom: 0; /* ✅ CORRECTION : Suppression margin-bottom redondante */
-}
-
-.simulation-item::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-    transition: left 0.5s;
-}
-
-.simulation-item:hover::before {
-    left: 100%;
-}
-
-.simulation-item:not(.active) {
-    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%) !important;
-    border: 2px solid #e5e7eb !important;
-}
-
-.simulation-item:not(.active):hover {
-    background: linear-gradient(135deg, #e0e7ff 0%, #c7d2fe 100%) !important;
-    border-color: var(--portfolio-gradient-start) !important;
-    transform: translateY(-4px);
-    box-shadow: 0 8px 24px rgba(102, 126, 234, 0.2);
-}
-
-.simulation-item:not(.active) .simulation-name,
-.simulation-item:not(.active) .simulation-meta {
-    color: #1f2937 !important;
-}
-
-.simulation-item:not(.active) .simulation-name i:first-child {
-    color: var(--portfolio-gradient-start) !important;
-}
-
-.simulation-item:not(.active) .simulation-meta i {
-    color: #9ca3af !important;
-}
-
-.simulation-item.active {
-    background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
-    border-color: var(--portfolio-gold) !important;
-    box-shadow: 0 12px 40px rgba(16, 185, 129, 0.4);
-}
-
-.simulation-item.active * {
-    color: white !important;
-}
-
-.simulation-item.active .simulation-name i:first-child {
-    color: var(--portfolio-gold) !important;
-}
-
-.simulation-info {
-    flex: 1;
-    cursor: pointer;
-    user-select: none;
-}
-
-.simulation-name {
-    font-size: 1.2rem;
-    font-weight: 800;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    margin-bottom: 8px;
-}
-
-.simulation-meta {
-    display: flex;
-    gap: 20px;
-    flex-wrap: wrap;
-    font-size: 0.9rem;
-}
-
-.simulation-actions {
-    display: flex;
-    gap: 10px;
-    position: relative;
-    z-index: 10;
-}
-
-.btn-sm {
-    padding: 10px 20px;
-    font-size: 0.9rem;
-    border: none;
-    border-radius: 12px;
-    cursor: pointer;
-    font-weight: 700;
-    transition: var(--transition-smooth);
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-
-.simulation-item:not(.active) .btn-sm {
-    background: rgba(102, 126, 234, 0.1);
-    color: var(--portfolio-gradient-start);
-}
-
-.simulation-item:not(.active) .btn-sm:hover {
-    background: var(--portfolio-gradient-start);
-    color: white;
-    transform: scale(1.05);
-}
-
-.simulation-item:not(.active) .btn-danger {
-    background: rgba(239, 68, 68, 0.1);
-    color: var(--ml-danger);
-}
-
-.simulation-item:not(.active) .btn-danger:hover {
-    background: var(--ml-danger);
-    color: white;
-}
-
-.simulation-item.active .btn-sm {
-    background: rgba(255, 255, 255, 0.3);
-    color: white;
-}
-
-.simulation-item.active .btn-sm:hover {
-    background: rgba(255, 255, 255, 0.5);
-    transform: scale(1.05);
 }
 
 /* ============================================
@@ -2225,6 +2514,18 @@ body.dark-mode .simulation-item:not(.active):hover {
     border-color: var(--portfolio-gradient-start) !important;
 }
 
+body.dark-mode .modal-body button[onclick*="closeModal"],
+body.dark-mode .modal-body .btn-cancel {
+    background: rgba(15, 23, 42, 0.5) !important;
+    color: #e2e8f0 !important;
+}
+
+body.dark-mode .modal-body button[onclick*="closeModal"]:hover,
+body.dark-mode .modal-body .btn-cancel:hover {
+    background: rgba(102, 126, 234, 0.2) !important;
+    color: var(--ml-primary) !important;
+}
+
 /* ============================================
    📱 RESPONSIVE
    ============================================ */
@@ -2282,6 +2583,19 @@ body.dark-mode .simulation-item:not(.active):hover {
     .alert-actions {
         width: 100%;
         justify-content: flex-end;
+    }
+    
+    .modal-body button[onclick*="loadComparison"],
+    .modal-body button[onclick*="closeModal"],
+    .modal-footer .btn-primary,
+    .modal-footer .btn-secondary {
+        padding: 12px 24px !important;
+        font-size: 1rem !important;
+    }
+    
+    .modal-body button[onclick*="preset"] {
+        padding: 8px 16px !important;
+        font-size: 0.9rem !important;
     }
 }
 
