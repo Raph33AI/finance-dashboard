@@ -700,10 +700,10 @@ body.dark-mode .search-suggestions {
 }
 
 /* ============================================
-   ✅ CORRECTION 3 : ENSEMBLE PREDICTION - TITRE VISIBLE
+   🌈 ENSEMBLE PREDICTION - CORRECTION FINALE
    ============================================ */
 .prediction-overview {
-    background: linear-gradient(135deg, #4facfe 0%, #00f2fe 50%, #43e97b 100%); /* ✅ Couleur claire pour visibilité */
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); /* ✅ Retour au gradient violet original */
     background-size: 200% 200%;
     animation: gradientShift 8s ease infinite;
     border-radius: 28px;
@@ -711,8 +711,8 @@ body.dark-mode .search-suggestions {
     margin-top: 40px;
     margin-bottom: 40px;
     box-shadow: 
-        0 20px 60px rgba(79, 172, 254, 0.4),
-        0 0 80px rgba(0, 242, 254, 0.3);
+        0 20px 60px rgba(102, 126, 234, 0.4),
+        0 0 80px rgba(118, 75, 162, 0.3);
     position: relative;
     overflow: hidden;
 }
@@ -739,19 +739,37 @@ body.dark-mode .search-suggestions {
     100% { transform: translate(50px, 50px); }
 }
 
+/* ✅ TITRE BLANC avec ombre portée */
 .prediction-overview .section-title {
-    color: white; /* ✅ Titre blanc pour contraste */
+    color: white !important; /* ✅ Blanc pur */
     margin-bottom: 35px;
     font-size: 2rem;
-    text-shadow: 0 4px 24px rgba(0, 0, 0, 0.4); /* ✅ Ombre portée pour lisibilité */
+    text-shadow: 0 4px 24px rgba(0, 0, 0, 0.4);
     position: relative;
     z-index: 1;
     font-weight: 800;
 }
 
 .prediction-overview .section-title i {
-    color: white;
+    color: white !important; /* ✅ Icône blanche */
     filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.3));
+}
+
+/* ✅ BOUTON ? (HELP ICON) - BLANC dans Ensemble Prediction */
+.prediction-overview .help-icon {
+    background: rgba(255, 255, 255, 0.2); /* ✅ Fond semi-transparent blanc */
+    color: white !important; /* ✅ Texte blanc */
+    border: 2px solid rgba(255, 255, 255, 0.4);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.prediction-overview .help-icon:hover {
+    background: rgba(255, 255, 255, 0.3);
+    color: white !important;
+    transform: scale(1.15) rotate(15deg);
+    box-shadow: 
+        0 8px 24px rgba(255, 255, 255, 0.4),
+        0 0 20px rgba(255, 255, 255, 0.3);
 }
 
 .ensemble-cards {
