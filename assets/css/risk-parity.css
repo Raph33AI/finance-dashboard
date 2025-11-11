@@ -1,7 +1,7 @@
 /* ==============================================
    🎨 RISK-PARITY.CSS - ULTRA MODERN 3D VERSION
    Glassmorphism • 3D Effects • Premium Animations
-   VERSION FINALE - SANS AUCUN IMPACT SUR SIDEBAR/MODALS
+   VERSION FINALE COMPLÈTE AVEC TITRE DE PAGE
    ============================================== */
 
 /* ============================================
@@ -32,6 +32,47 @@
 body.dark-mode {
     --glass-bg: rgba(15, 23, 42, 0.7);
     --glass-border: rgba(148, 163, 184, 0.1);
+}
+
+/* ============================================
+   🎯 TITRE DE LA PAGE - HEADER PRINCIPAL
+   ============================================ */
+.top-header h1,
+.page-header h1,
+.main-content > h1:first-child {
+    font-size: 2rem !important;
+    font-weight: 800 !important;
+    background: linear-gradient(135deg, var(--ml-primary), var(--ml-secondary)) !important;
+    -webkit-background-clip: text !important;
+    -webkit-text-fill-color: transparent !important;
+    background-clip: text !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 15px !important;
+    margin-bottom: 30px !important;
+    text-shadow: 0 4px 24px rgba(102, 126, 234, 0.3);
+    animation: fadeInDown 0.6s ease-out;
+}
+
+.top-header h1 i,
+.page-header h1 i,
+.main-content > h1:first-child i {
+    background: linear-gradient(135deg, var(--ml-primary), var(--ml-secondary)) !important;
+    -webkit-background-clip: text !important;
+    -webkit-text-fill-color: transparent !important;
+    font-size: 2.2rem !important;
+    animation: floatIcon 3s ease-in-out infinite;
+}
+
+@keyframes fadeInDown {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 /* ============================================
@@ -956,6 +997,12 @@ body.dark-mode .comparison-table td {
    📱 RESPONSIVE DESIGN - MOBILE OPTIMIZED
    ============================================ */
 @media (max-width: 768px) {
+    .top-header h1,
+    .page-header h1,
+    .main-content > h1:first-child {
+        font-size: 1.6rem !important;
+    }
+    
     .asset-grid {
         grid-template-columns: 1fr;
         gap: 20px;
@@ -1119,5 +1166,5 @@ body.dark-mode .comparison-table td {
 
 /* ============================================
    🎯 FIN DU FICHIER - RISK PARITY PREMIUM 3D
-   VERSION FINALE - ZÉRO CONFLIT SIDEBAR/MODALS
+   VERSION FINALE COMPLÈTE AVEC TITRE DE PAGE
    ============================================ */
