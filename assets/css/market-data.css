@@ -284,6 +284,113 @@ body.dark-mode,
 }
 
 /* ============================================
+   ✅ BOUTON ADD TO COMPARE - FINALISÉ
+   ============================================ */
+.btn-add-to-compare,
+#addToCompareBtn,
+button[onclick*="compare"],
+.comparison-actions .btn,
+.comparison-actions button {
+    padding: 14px 28px;
+    font-size: 1rem;
+    font-weight: 700;
+    border: 2px solid rgba(102, 126, 234, 0.5);
+    border-radius: 16px;
+    background: linear-gradient(
+        135deg,
+        rgba(102, 126, 234, 0.1) 0%,
+        rgba(118, 75, 162, 0.05) 100%
+    );
+    backdrop-filter: blur(15px) saturate(180%);
+    color: var(--text-primary);
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    transition: var(--transition-bounce);
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    box-shadow: 
+        0 4px 16px rgba(102, 126, 234, 0.15),
+        inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    transform-style: preserve-3d;
+}
+
+.btn-add-to-compare::before,
+#addToCompareBtn::before,
+button[onclick*="compare"]::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: radial-gradient(
+        circle,
+        rgba(102, 126, 234, 0.3),
+        transparent
+    );
+    transform: translate(-50%, -50%);
+    transition: width 0.6s, height 0.6s;
+}
+
+.btn-add-to-compare:hover,
+#addToCompareBtn:hover,
+button[onclick*="compare"]:hover {
+    background: linear-gradient(135deg, var(--ml-primary), var(--ml-secondary));
+    border-color: transparent;
+    color: white !important;
+    transform: translateY(-6px) scale(1.05) rotateX(5deg);
+    box-shadow: 
+        0 12px 36px rgba(102, 126, 234, 0.4),
+        0 0 30px rgba(118, 75, 162, 0.3),
+        var(--glow-primary);
+}
+
+.btn-add-to-compare:hover::before,
+#addToCompareBtn:hover::before,
+button[onclick*="compare"]:hover::before {
+    width: 400px;
+    height: 400px;
+}
+
+.btn-add-to-compare:active,
+#addToCompareBtn:active,
+button[onclick*="compare"]:active {
+    transform: translateY(-2px) scale(1.02);
+}
+
+.btn-add-to-compare i,
+#addToCompareBtn i,
+button[onclick*="compare"] i {
+    font-size: 1.2rem;
+    transition: var(--transition-smooth);
+}
+
+.btn-add-to-compare:hover i,
+#addToCompareBtn:hover i,
+button[onclick*="compare"]:hover i {
+    transform: scale(1.2) rotate(10deg);
+    color: white !important;
+}
+
+/* Variante Primary (si besoin) */
+.btn-add-to-compare.btn-primary,
+.comparison-actions .btn-primary {
+    background: linear-gradient(135deg, var(--ml-primary), var(--ml-secondary));
+    border-color: transparent;
+    color: white;
+}
+
+.btn-add-to-compare.btn-primary:hover {
+    background: linear-gradient(135deg, var(--ml-secondary), var(--ml-accent));
+    box-shadow: 
+        0 16px 48px rgba(118, 75, 162, 0.5),
+        var(--glow-accent);
+}
+
+/* ============================================
    💡 SEARCH SUGGESTIONS - GLASSMORPHISM
    ============================================ */
 .search-suggestions {
@@ -458,7 +565,7 @@ body.dark-mode .search-suggestions {
 .period-btn {
     background: rgba(255, 255, 255, 0.05);
     backdrop-filter: blur(10px);
-    border: 2px solid rgba(102, 126, 234, 0.4); /* ✅ CORRECTION : Contour visible */
+    border: 2px solid rgba(102, 126, 234, 0.4);
     padding: 10px 20px;
     border-radius: 50px;
     cursor: pointer;
@@ -713,7 +820,6 @@ body.dark-mode .search-suggestions {
     margin-top: 6px;
 }
 
-/* ✅ CORRECTION : Alert status à côté du bouton delete */
 .alert-actions {
     display: flex;
     align-items: center;
@@ -830,7 +936,6 @@ body.dark-mode .search-suggestions {
     color: white;
 }
 
-/* ✅ COMPARISON CHART - GLASSMORPHISM */
 .comparison-chart {
     background: linear-gradient(
         135deg,
@@ -854,7 +959,6 @@ body.dark-mode .search-suggestions {
     -webkit-text-fill-color: transparent;
 }
 
-/* ✅ COMPARISON TABLE - PREMIUM STYLE */
 .comparison-table {
     background: linear-gradient(
         135deg,
@@ -1078,10 +1182,8 @@ body.dark-mode .search-suggestions {
 }
 
 /* ============================================
-   ✅ PRICE CHART ET SECTIONS TECHNIQUES - MISE EN FORME
+   ✅ PRICE CHART ET SECTIONS TECHNIQUES
    ============================================ */
-
-/* ✅ Section Price Chart */
 .price-chart-section {
     background: linear-gradient(
         135deg,
@@ -1108,7 +1210,6 @@ body.dark-mode .search-suggestions {
     gap: 15px;
 }
 
-/* ✅ Subsection Titles */
 .subsection-title {
     margin-bottom: 20px;
     margin-top: 30px;
@@ -1126,52 +1227,9 @@ body.dark-mode .search-suggestions {
     font-size: 1.5rem;
 }
 
-/* ✅ Technical Indicators Section */
-.technical-indicators-section {
-    background: linear-gradient(
-        135deg,
-        rgba(255, 255, 255, 0.05) 0%,
-        rgba(255, 255, 255, 0.02) 100%
-    );
-    backdrop-filter: blur(20px) saturate(180%);
-    border: 2px solid var(--glass-border);
-    border-radius: 24px;
-    padding: 35px;
-    margin-bottom: 30px;
-    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.12);
-}
-
-/* ✅ Oscillators Section */
-.oscillators-section {
-    background: linear-gradient(
-        135deg,
-        rgba(255, 255, 255, 0.05) 0%,
-        rgba(255, 255, 255, 0.02) 100%
-    );
-    backdrop-filter: blur(20px) saturate(180%);
-    border: 2px solid var(--glass-border);
-    border-radius: 24px;
-    padding: 35px;
-    margin-bottom: 30px;
-    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.12);
-}
-
-/* ✅ Volume Analysis Section */
-.volume-analysis-section {
-    background: linear-gradient(
-        135deg,
-        rgba(255, 255, 255, 0.05) 0%,
-        rgba(255, 255, 255, 0.02) 100%
-    );
-    backdrop-filter: blur(20px) saturate(180%);
-    border: 2px solid var(--glass-border);
-    border-radius: 24px;
-    padding: 35px;
-    margin-bottom: 30px;
-    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.12);
-}
-
-/* ✅ Support/Resistance Section */
+.technical-indicators-section,
+.oscillators-section,
+.volume-analysis-section,
 .support-resistance-section {
     background: linear-gradient(
         135deg,
@@ -1251,7 +1309,7 @@ body.dark-mode .search-suggestions {
 }
 
 /* ============================================
-   ✅ COMPANY PROFILE - ACCORDION AVEC CONTOUR
+   ✅ COMPANY PROFILE - ACCORDION
    ============================================ */
 .company-logo {
     display: none !important;
@@ -1263,7 +1321,7 @@ body.dark-mode .search-suggestions {
 
 .company-accordion {
     margin-bottom: 15px;
-    border: 2px solid rgba(102, 126, 234, 0.4); /* ✅ CORRECTION : Contour visible */
+    border: 2px solid rgba(102, 126, 234, 0.4);
     border-radius: 16px;
     overflow: hidden;
     background: rgba(255, 255, 255, 0.02);
@@ -1321,15 +1379,15 @@ body.dark-mode .search-suggestions {
 }
 
 /* ============================================
-   💼 PORTFOLIO MANAGEMENT - STYLE IDENTIQUE
+   💼 PORTFOLIO MANAGEMENT - OPTIMISÉ ✅
    ============================================ */
 .simulation-management {
     background: linear-gradient(135deg, var(--portfolio-gradient-start) 0%, var(--portfolio-gradient-end) 100%) !important;
     color: white !important;
-    padding: 30px;
+    padding: 25px 30px; /* ✅ CORRECTION : Réduction padding (était 30px) */
     border-radius: 24px;
     box-shadow: 0 12px 40px var(--portfolio-shadow);
-    margin-bottom: 25px;
+    margin-bottom: 20px; /* ✅ CORRECTION : Réduction margin-bottom (était 25px) */
     position: relative;
     overflow: hidden;
 }
@@ -1349,6 +1407,7 @@ body.dark-mode .search-suggestions {
         rgba(255, 255, 255, 0.03) 20px
     );
     animation: moveStripes 20s linear infinite;
+    pointer-events: none; /* ✅ CORRECTION : Empêche l'interaction avec le pseudo-élément */
 }
 
 @keyframes moveStripes {
@@ -1358,7 +1417,7 @@ body.dark-mode .search-suggestions {
 
 .simulation-management h3 {
     color: white !important;
-    margin-bottom: 25px;
+    margin-bottom: 20px; /* ✅ CORRECTION : Réduction margin (était 25px) */
     font-size: 1.6rem;
     font-weight: 800;
     position: relative;
@@ -1371,11 +1430,11 @@ body.dark-mode .search-suggestions {
 
 .current-simulation-display {
     background: rgba(255, 255, 255, 0.15) !important;
-    padding: 20px;
+    padding: 18px; /* ✅ CORRECTION : Réduction padding (était 20px) */
     border-radius: 16px;
     text-align: center;
     backdrop-filter: blur(10px);
-    margin-bottom: 25px;
+    margin-bottom: 20px; /* ✅ CORRECTION : Réduction margin (était 25px) */
     position: relative;
     z-index: 1;
 }
@@ -1393,7 +1452,7 @@ body.dark-mode .search-suggestions {
 .toolbar-row {
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 10px; /* ✅ CORRECTION : Réduction gap (était 12px) */
     flex-wrap: wrap;
     justify-content: center;
     position: relative;
@@ -1406,12 +1465,12 @@ body.dark-mode .search-suggestions {
 .simulation-management .btn-secondary,
 .simulation-management .btn-warning,
 .simulation-management .btn-info {
-    margin: 5px;
+    margin: 3px; /* ✅ CORRECTION : Réduction margin (était 5px) */
     transition: var(--transition-smooth);
     font-weight: 700;
     border: none;
     cursor: pointer;
-    padding: 14px 32px;
+    padding: 12px 28px; /* ✅ CORRECTION : Réduction padding vertical (était 14px) */
     border-radius: 16px;
     font-size: 1rem;
     display: inline-flex;
@@ -1474,10 +1533,10 @@ body.dark-mode .search-suggestions {
 .info-box-white-text {
     background: rgba(255, 255, 255, 0.1) !important;
     border-left: 4px solid white !important;
-    padding: 20px;
+    padding: 16px; /* ✅ CORRECTION : Réduction padding (était 20px) */
     border-radius: 12px;
     backdrop-filter: blur(10px);
-    margin-top: 20px;
+    margin-top: 15px; /* ✅ CORRECTION : Réduction margin (était 20px) */
     position: relative;
     z-index: 1;
 }
@@ -1927,14 +1986,14 @@ body.dark-mode .modal-body {
 }
 
 /* ============================================
-   📂 PORTFOLIO ITEMS - FOND BLANC POUR NON-ACTIFS
+   📂 PORTFOLIO ITEMS - FOND BLANC OPTIMISÉ
    ============================================ */
 .simulations-info {
     background: linear-gradient(135deg, var(--portfolio-gradient-start), var(--portfolio-gradient-end));
     color: white !important;
-    padding: 20px 25px;
+    padding: 18px 22px; /* ✅ CORRECTION : Réduction padding */
     border-radius: 16px;
-    margin-bottom: 25px;
+    margin-bottom: 20px; /* ✅ CORRECTION : Réduction margin */
     display: flex;
     align-items: flex-start;
     gap: 15px;
@@ -1947,14 +2006,14 @@ body.dark-mode .modal-body {
 #portfoliosListContainer {
     display: flex;
     flex-direction: column;
-    gap: 15px;
+    gap: 12px; /* ✅ CORRECTION : Réduction gap (était 15px) */
 }
 
 .simulation-item {
     background: white;
     border: 2px solid #e5e7eb;
     border-radius: 16px;
-    padding: 20px;
+    padding: 18px; /* ✅ CORRECTION : Réduction padding (était 20px) */
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -1962,7 +2021,7 @@ body.dark-mode .modal-body {
     transition: var(--transition-smooth);
     position: relative;
     overflow: hidden;
-    margin-bottom: 15px;
+    margin-bottom: 0; /* ✅ CORRECTION : Suppression margin-bottom redondante */
 }
 
 .simulation-item::before {
