@@ -1,7 +1,7 @@
 /* ==============================================
    🎨 PORTFOLIO-OPTIMIZER.CSS - ULTRA MODERN 3D VERSION
    Glassmorphism • 3D Effects • Premium Animations
-   VERSION FINALE - MODALS PROTÉGÉES + BOUTON REMOVE À DROITE
+   VERSION FINALE ULTRA-CORRIGÉE - MODALS + SIDEBAR PROTÉGÉES
    ============================================== */
 
 /* ============================================
@@ -35,65 +35,81 @@ body.dark-mode {
 }
 
 /* ============================================
-   🚫 PROTECTION TOTALE DES MODALS
+   🚫 PROTECTION MODALS - VERSION ULTRA-SÉLECTIVE
    ============================================ */
 .modal,
-.modal *,
-.modal-content,
-.modal-content *,
-.modal-header,
-.modal-header *,
-.modal-body,
-.modal-body *,
-.modal-footer,
-.modal-footer *,
-.modal-backdrop,
 .modal-dialog,
+.modal-content,
+.modal-header,
+.modal-body,
+.modal-footer,
 .modal-title,
-[class*="modal"],
-[class*="modal"] *,
-[class*="swal"],
-[class*="swal"] *,
+.modal-backdrop,
 .swal2-popup,
-.swal2-popup *,
 .swal2-container,
-.swal2-container *,
 .swal2-title,
+.swal2-html-container,
 .swal2-content,
 .swal2-actions,
 .swal2-confirm,
 .swal2-cancel,
 div[role="dialog"],
-div[role="dialog"] *,
-div[aria-modal="true"],
-div[aria-modal="true"] * {
-    all: revert !important;
+div[aria-modal="true"] {
     background: revert !important;
     border: revert !important;
     color: revert !important;
     font-family: revert !important;
     font-size: revert !important;
+    font-weight: revert !important;
     padding: revert !important;
     margin: revert !important;
     box-shadow: revert !important;
     transform: revert !important;
     transition: revert !important;
     animation: revert !important;
+    display: revert !important;
+    position: revert !important;
+    width: revert !important;
+    height: revert !important;
+    text-align: revert !important;
+    line-height: revert !important;
+}
+
+/* Protection éléments texte dans les modals */
+.modal h1, .modal h2, .modal h3, .modal h4, .modal h5, .modal h6,
+.modal p, .modal span, .modal div, .modal button,
+.swal2-popup h1, .swal2-popup h2, .swal2-popup h3, .swal2-popup h4,
+.swal2-popup p, .swal2-popup span, .swal2-popup div,
+div[role="dialog"] h1, div[role="dialog"] h2, div[role="dialog"] h3,
+div[role="dialog"] h4, div[role="dialog"] p, div[role="dialog"] span {
+    background: revert !important;
+    -webkit-background-clip: revert !important;
+    -webkit-text-fill-color: revert !important;
+    background-clip: revert !important;
+    color: revert !important;
+    font-size: revert !important;
+    font-weight: revert !important;
+    text-shadow: none !important;
+    display: revert !important;
+    align-items: revert !important;
+    gap: revert !important;
+    margin: revert !important;
+    padding: revert !important;
 }
 
 /* ============================================
    📑 TOUS LES TITRES - DESIGN UNIFORME
-   (Sauf dans les modals)
+   (Exclusion SIDEBAR + MODALS)
    ============================================ */
-.section-title,
-.card-title,
-.page-title,
-h1:not(.modal *, .swal2-popup *, [role="dialog"] *), 
-h2:not(.modal *, .swal2-popup *, [role="dialog"] *), 
-h3:not(.modal *, .swal2-popup *, [role="dialog"] *), 
-h4:not(.modal *, .swal2-popup *, [role="dialog"] *), 
-h5:not(.modal *, .swal2-popup *, [role="dialog"] *), 
-h6:not(.modal *, .swal2-popup *, [role="dialog"] *) {
+.main-content .section-title,
+.main-content .card-title,
+.main-content .page-title,
+.main-content h1:not(.modal *, .swal2-popup *, [role="dialog"] *, .sidebar *, .top-header *),
+.main-content h2:not(.modal *, .swal2-popup *, [role="dialog"] *, .sidebar *, .top-header *),
+.main-content h3:not(.modal *, .swal2-popup *, [role="dialog"] *, .sidebar *, .top-header *),
+.main-content h4:not(.modal *, .swal2-popup *, [role="dialog"] *, .sidebar *, .top-header *),
+.main-content h5:not(.modal *, .swal2-popup *, [role="dialog"] *, .sidebar *, .top-header *),
+.main-content h6:not(.modal *, .swal2-popup *, [role="dialog"] *, .sidebar *, .top-header *) {
     font-weight: 800 !important;
     background: linear-gradient(135deg, var(--ml-primary), var(--ml-secondary)) !important;
     -webkit-background-clip: text !important;
@@ -107,34 +123,34 @@ h6:not(.modal *, .swal2-popup *, [role="dialog"] *) {
 }
 
 /* Titre H1 - Page principale */
-h1:not(.modal *, .swal2-popup *, [role="dialog"] *) {
+.main-content h1:not(.modal *, .swal2-popup *, [role="dialog"] *, .sidebar *, .top-header *) {
     font-size: 2rem !important;
     margin-bottom: 30px !important;
 }
 
 /* Titre H2 - Sections principales */
-h2:not(.modal *, .swal2-popup *, [role="dialog"] *) {
+.main-content h2:not(.modal *, .swal2-popup *, [role="dialog"] *, .sidebar *, .top-header *) {
     font-size: 1.6rem !important;
     margin-bottom: 25px !important;
 }
 
 /* Titre H3 - Sous-sections */
-h3:not(.modal *, .swal2-popup *, [role="dialog"] *) {
+.main-content h3:not(.modal *, .swal2-popup *, [role="dialog"] *, .sidebar *, .top-header *) {
     font-size: 1.4rem !important;
 }
 
 /* Titre H4 - Cards */
-h4:not(.modal *, .swal2-popup *, [role="dialog"] *) {
+.main-content h4:not(.modal *, .swal2-popup *, [role="dialog"] *, .sidebar *, .top-header *) {
     font-size: 1.3rem !important;
 }
 
 /* Icônes dans les titres */
-h1:not(.modal *, .swal2-popup *, [role="dialog"] *) i, 
-h2:not(.modal *, .swal2-popup *, [role="dialog"] *) i, 
-h3:not(.modal *, .swal2-popup *, [role="dialog"] *) i, 
-h4:not(.modal *, .swal2-popup *, [role="dialog"] *) i,
-.section-title i,
-.card-title i {
+.main-content h1:not(.modal *, .swal2-popup *, [role="dialog"] *, .sidebar *, .top-header *) i,
+.main-content h2:not(.modal *, .swal2-popup *, [role="dialog"] *, .sidebar *, .top-header *) i,
+.main-content h3:not(.modal *, .swal2-popup *, [role="dialog"] *, .sidebar *, .top-header *) i,
+.main-content h4:not(.modal *, .swal2-popup *, [role="dialog"] *, .sidebar *, .top-header *) i,
+.main-content .section-title i,
+.main-content .card-title i {
     background: linear-gradient(135deg, var(--ml-primary), var(--ml-secondary)) !important;
     -webkit-background-clip: text !important;
     -webkit-text-fill-color: transparent !important;
@@ -1022,11 +1038,11 @@ body.dark-mode .allocation-table td {
         font-size: 0.9rem;
     }
     
-    h1 {
+    .main-content h1 {
         font-size: 1.6rem !important;
     }
     
-    h2 {
+    .main-content h2 {
         font-size: 1.3rem !important;
     }
     
@@ -1137,5 +1153,5 @@ body.dark-mode .allocation-table td {
 
 /* ============================================
    🎯 FIN DU FICHIER - PORTFOLIO OPTIMIZER PREMIUM 3D
-   VERSION FINALE PARFAITE
+   VERSION FINALE ULTRA-CORRIGÉE
    ============================================ */
