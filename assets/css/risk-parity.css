@@ -1,7 +1,7 @@
 /* ==============================================
    🎨 RISK-PARITY.CSS - ULTRA MODERN 3D VERSION
    Glassmorphism • 3D Effects • Premium Animations
-   VERSION FINALE COMPLÈTE ET CORRIGÉE
+   VERSION FINALE - SANS AUCUN IMPACT SUR SIDEBAR/MODALS
    ============================================== */
 
 /* ============================================
@@ -35,28 +35,12 @@ body.dark-mode {
 }
 
 /* ============================================
-   🚫 PROTECTION DES MODALS - NE PAS TOUCHER
+   📑 TITRES - CIBLAGE ULTRA-SPÉCIFIQUE
+   (Uniquement les sections de contenu principal)
    ============================================ */
-.modal,
-.modal-content,
-.modal-header,
-.modal-body,
-.modal-footer,
-.modal-backdrop,
-[class*="modal"],
-[class*="swal"],
-.swal2-popup,
-.swal2-container {
-    all: revert !important;
-}
-
-/* ============================================
-   📑 TOUS LES TITRES - DESIGN UNIFORME
-   ============================================ */
-.section-title,
-.card-title,
-.page-title,
-h1, h2, h3, h4, h5, h6 {
+.main-content .section-title,
+.main-content .card-title,
+.main-content .page-title {
     font-weight: 800 !important;
     background: linear-gradient(135deg, var(--ml-primary), var(--ml-secondary)) !important;
     -webkit-background-clip: text !important;
@@ -69,32 +53,39 @@ h1, h2, h3, h4, h5, h6 {
     text-shadow: 0 2px 20px rgba(102, 126, 234, 0.3);
 }
 
-/* Titre H1 - Page principale */
-h1 {
-    font-size: 2rem !important;
-    margin-bottom: 30px !important;
-}
-
-/* Titre H2 - Sections principales */
-h2 {
+/* Titres H2 dans main-content uniquement */
+.main-content > h2,
+.main-content .section > h2,
+.main-content .card > h2 {
     font-size: 1.6rem !important;
     margin-bottom: 25px !important;
+    font-weight: 800 !important;
+    background: linear-gradient(135deg, var(--ml-primary), var(--ml-secondary)) !important;
+    -webkit-background-clip: text !important;
+    -webkit-text-fill-color: transparent !important;
+    background-clip: text !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 12px !important;
 }
 
-/* Titre H3 - Sous-sections */
-h3 {
+/* Titres H3 dans main-content uniquement */
+.main-content > h3,
+.main-content .section > h3,
+.main-content .card > h3 {
     font-size: 1.4rem !important;
-}
-
-/* Titre H4 - Cards */
-h4 {
-    font-size: 1.3rem !important;
+    font-weight: 800 !important;
+    background: linear-gradient(135deg, var(--ml-primary), var(--ml-secondary)) !important;
+    -webkit-background-clip: text !important;
+    -webkit-text-fill-color: transparent !important;
+    background-clip: text !important;
 }
 
 /* Icônes dans les titres */
-h1 i, h2 i, h3 i, h4 i,
-.section-title i,
-.card-title i {
+.main-content .section-title i,
+.main-content .card-title i,
+.main-content > h2 i,
+.main-content > h3 i {
     background: linear-gradient(135deg, var(--ml-primary), var(--ml-secondary)) !important;
     -webkit-background-clip: text !important;
     -webkit-text-fill-color: transparent !important;
@@ -112,9 +103,7 @@ h1 i, h2 i, h3 i, h4 i,
    ============================================ */
 .info-box,
 .info-panel,
-.explanation-box,
-[class*="risk-parity-vs"],
-[class*="how-to-use"] {
+.explanation-box {
     background: linear-gradient(
         135deg,
         rgba(102, 126, 234, 0.12) 0%,
@@ -289,33 +278,27 @@ body.dark-mode .explanation-box {
 }
 
 /* ============================================
-   🎯 HEADER DE L'ASSET CARD - TITRE + BOUTON
+   🎯 ASSET CARD H4 - TITRE AVEC BOUTON
    ============================================ */
-.asset-card-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 20px;
-    position: relative;
-    z-index: 1;
-}
-
 .asset-card h4 {
     color: var(--ml-primary);
-    margin-bottom: 0 !important;
+    margin-bottom: 20px !important;
     font-size: 1.3rem;
     font-weight: 800;
     background: linear-gradient(135deg, var(--ml-primary), var(--ml-secondary));
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
-    display: inline-block;
-    flex: 1;
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    position: relative;
+    z-index: 1;
     text-shadow: 0 2px 20px rgba(102, 126, 234, 0.3);
 }
 
 /* ============================================
-   🗑️ BUTTON REMOVE - ALIGNÉ AU TITRE
+   🗑️ BUTTON REMOVE - POSITIONNÉ À DROITE
    ============================================ */
 .btn-remove {
     background: linear-gradient(135deg, #ff6b6b, #ee5a6f);
@@ -337,6 +320,7 @@ body.dark-mode .explanation-box {
     flex-shrink: 0;
     overflow: hidden;
     position: relative;
+    margin-left: auto;
 }
 
 .btn-remove::before {
@@ -1021,17 +1005,9 @@ body.dark-mode .comparison-table td {
         font-size: 0.9rem;
     }
     
-    h1 {
-        font-size: 1.6rem !important;
-    }
-    
-    h2 {
+    .main-content > h2,
+    .main-content .section > h2 {
         font-size: 1.3rem !important;
-    }
-    
-    .asset-card-header {
-        flex-direction: row;
-        gap: 10px;
     }
     
     .asset-card h4 {
@@ -1143,5 +1119,5 @@ body.dark-mode .comparison-table td {
 
 /* ============================================
    🎯 FIN DU FICHIER - RISK PARITY PREMIUM 3D
-   VERSION FINALE COMPLÈTE ET PARFAITE
+   VERSION FINALE - ZÉRO CONFLIT SIDEBAR/MODALS
    ============================================ */
