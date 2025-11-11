@@ -1,7 +1,7 @@
 /* ==============================================
    🎨 PORTFOLIO-OPTIMIZER.CSS - ULTRA MODERN 3D VERSION
    Glassmorphism • 3D Effects • Premium Animations
-   VERSION FINALE ULTRA-CORRIGÉE - MODALS + SIDEBAR PROTÉGÉES
+   VERSION FINALE - SANS AUCUN IMPACT SUR LES MODALS
    ============================================== */
 
 /* ============================================
@@ -35,81 +35,12 @@ body.dark-mode {
 }
 
 /* ============================================
-   🚫 PROTECTION MODALS - VERSION ULTRA-SÉLECTIVE
-   ============================================ */
-.modal,
-.modal-dialog,
-.modal-content,
-.modal-header,
-.modal-body,
-.modal-footer,
-.modal-title,
-.modal-backdrop,
-.swal2-popup,
-.swal2-container,
-.swal2-title,
-.swal2-html-container,
-.swal2-content,
-.swal2-actions,
-.swal2-confirm,
-.swal2-cancel,
-div[role="dialog"],
-div[aria-modal="true"] {
-    background: revert !important;
-    border: revert !important;
-    color: revert !important;
-    font-family: revert !important;
-    font-size: revert !important;
-    font-weight: revert !important;
-    padding: revert !important;
-    margin: revert !important;
-    box-shadow: revert !important;
-    transform: revert !important;
-    transition: revert !important;
-    animation: revert !important;
-    display: revert !important;
-    position: revert !important;
-    width: revert !important;
-    height: revert !important;
-    text-align: revert !important;
-    line-height: revert !important;
-}
-
-/* Protection éléments texte dans les modals */
-.modal h1, .modal h2, .modal h3, .modal h4, .modal h5, .modal h6,
-.modal p, .modal span, .modal div, .modal button,
-.swal2-popup h1, .swal2-popup h2, .swal2-popup h3, .swal2-popup h4,
-.swal2-popup p, .swal2-popup span, .swal2-popup div,
-div[role="dialog"] h1, div[role="dialog"] h2, div[role="dialog"] h3,
-div[role="dialog"] h4, div[role="dialog"] p, div[role="dialog"] span {
-    background: revert !important;
-    -webkit-background-clip: revert !important;
-    -webkit-text-fill-color: revert !important;
-    background-clip: revert !important;
-    color: revert !important;
-    font-size: revert !important;
-    font-weight: revert !important;
-    text-shadow: none !important;
-    display: revert !important;
-    align-items: revert !important;
-    gap: revert !important;
-    margin: revert !important;
-    padding: revert !important;
-}
-
-/* ============================================
-   📑 TOUS LES TITRES - DESIGN UNIFORME
-   (Exclusion SIDEBAR + MODALS)
+   📑 TITRES - CIBLAGE ULTRA-SPÉCIFIQUE
+   (Uniquement les sections de contenu principal)
    ============================================ */
 .main-content .section-title,
 .main-content .card-title,
-.main-content .page-title,
-.main-content h1:not(.modal *, .swal2-popup *, [role="dialog"] *, .sidebar *, .top-header *),
-.main-content h2:not(.modal *, .swal2-popup *, [role="dialog"] *, .sidebar *, .top-header *),
-.main-content h3:not(.modal *, .swal2-popup *, [role="dialog"] *, .sidebar *, .top-header *),
-.main-content h4:not(.modal *, .swal2-popup *, [role="dialog"] *, .sidebar *, .top-header *),
-.main-content h5:not(.modal *, .swal2-popup *, [role="dialog"] *, .sidebar *, .top-header *),
-.main-content h6:not(.modal *, .swal2-popup *, [role="dialog"] *, .sidebar *, .top-header *) {
+.main-content .page-title {
     font-weight: 800 !important;
     background: linear-gradient(135deg, var(--ml-primary), var(--ml-secondary)) !important;
     -webkit-background-clip: text !important;
@@ -122,35 +53,39 @@ div[role="dialog"] h4, div[role="dialog"] p, div[role="dialog"] span {
     text-shadow: 0 2px 20px rgba(102, 126, 234, 0.3);
 }
 
-/* Titre H1 - Page principale */
-.main-content h1:not(.modal *, .swal2-popup *, [role="dialog"] *, .sidebar *, .top-header *) {
-    font-size: 2rem !important;
-    margin-bottom: 30px !important;
-}
-
-/* Titre H2 - Sections principales */
-.main-content h2:not(.modal *, .swal2-popup *, [role="dialog"] *, .sidebar *, .top-header *) {
+/* Titres H2 dans main-content uniquement */
+.main-content > h2,
+.main-content .section > h2,
+.main-content .card > h2 {
     font-size: 1.6rem !important;
     margin-bottom: 25px !important;
+    font-weight: 800 !important;
+    background: linear-gradient(135deg, var(--ml-primary), var(--ml-secondary)) !important;
+    -webkit-background-clip: text !important;
+    -webkit-text-fill-color: transparent !important;
+    background-clip: text !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 12px !important;
 }
 
-/* Titre H3 - Sous-sections */
-.main-content h3:not(.modal *, .swal2-popup *, [role="dialog"] *, .sidebar *, .top-header *) {
+/* Titres H3 dans main-content uniquement */
+.main-content > h3,
+.main-content .section > h3,
+.main-content .card > h3 {
     font-size: 1.4rem !important;
-}
-
-/* Titre H4 - Cards */
-.main-content h4:not(.modal *, .swal2-popup *, [role="dialog"] *, .sidebar *, .top-header *) {
-    font-size: 1.3rem !important;
+    font-weight: 800 !important;
+    background: linear-gradient(135deg, var(--ml-primary), var(--ml-secondary)) !important;
+    -webkit-background-clip: text !important;
+    -webkit-text-fill-color: transparent !important;
+    background-clip: text !important;
 }
 
 /* Icônes dans les titres */
-.main-content h1:not(.modal *, .swal2-popup *, [role="dialog"] *, .sidebar *, .top-header *) i,
-.main-content h2:not(.modal *, .swal2-popup *, [role="dialog"] *, .sidebar *, .top-header *) i,
-.main-content h3:not(.modal *, .swal2-popup *, [role="dialog"] *, .sidebar *, .top-header *) i,
-.main-content h4:not(.modal *, .swal2-popup *, [role="dialog"] *, .sidebar *, .top-header *) i,
 .main-content .section-title i,
-.main-content .card-title i {
+.main-content .card-title i,
+.main-content > h2 i,
+.main-content > h3 i {
     background: linear-gradient(135deg, var(--ml-primary), var(--ml-secondary)) !important;
     -webkit-background-clip: text !important;
     -webkit-text-fill-color: transparent !important;
@@ -1038,11 +973,8 @@ body.dark-mode .allocation-table td {
         font-size: 0.9rem;
     }
     
-    .main-content h1 {
-        font-size: 1.6rem !important;
-    }
-    
-    .main-content h2 {
+    .main-content > h2,
+    .main-content .section > h2 {
         font-size: 1.3rem !important;
     }
     
@@ -1153,5 +1085,5 @@ body.dark-mode .allocation-table td {
 
 /* ============================================
    🎯 FIN DU FICHIER - PORTFOLIO OPTIMIZER PREMIUM 3D
-   VERSION FINALE ULTRA-CORRIGÉE
+   VERSION FINALE - ZÉRO CONFLIT MODALS
    ============================================ */
