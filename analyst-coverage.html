@@ -504,20 +504,28 @@
     <script>
     document.addEventListener('DOMContentLoaded', function() {
         setTimeout(() => {
-            console.log('🔍 PARTICLES DEBUG:');
-            const canvas = document.getElementById('particles-canvas');
-            if (canvas) {
-                const styles = window.getComputedStyle(canvas);
-                console.log('✅ Canvas trouvé');
-                console.log('📐 Position:', styles.position);
-                console.log('📊 Z-index:', styles.zIndex);
-                console.log('👁️ Opacity:', styles.opacity);
-                console.log('📏 Dimensions:', canvas.width, 'x', canvas.height);
-                console.log('🎨 Dark mode?', document.body.classList.contains('dark-mode'));
-            } else {
-                console.error('❌ Canvas introuvable!');
-            }
-        }, 500);
+            console.log('🔍 BACKGROUND DIAGNOSIS:');
+            
+            const elements = [
+                'body',
+                '.layout-wrapper',
+                '.main-content',
+                '.container',
+                '.section'
+            ];
+            
+            elements.forEach(selector => {
+                const el = document.querySelector(selector);
+                if (el) {
+                    const bg = window.getComputedStyle(el).background;
+                    console.log(`📦 ${selector}:`, bg.substring(0, 100) + '...');
+                }
+            });
+            
+            console.log('---');
+            console.log('🎨 Canvas background:', 
+                window.getComputedStyle(document.getElementById('particles-canvas')).background);
+        }, 1000);
     });
     </script>
 
