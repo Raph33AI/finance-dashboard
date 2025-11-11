@@ -1880,18 +1880,68 @@ body.dark-mode .particles-background {
     opacity: 0.3;
 }
 
-/* Ensure layout wrapper is above particles */
+/* ============================================
+   TRANSPARENCY FOR PARTICLES VISIBILITY
+   ============================================ */
+
+/* Wrapper et conteneurs principaux : TRANSPARENTS */
 .layout-wrapper {
     position: relative;
     z-index: 1;
+    background: transparent !important;
 }
 
-/* Ensure main content is transparent to see particles */
 .main-content {
     background: transparent !important;
 }
 
-/* Light mode gradient overlay (optional) */
+.container {
+    background: transparent !important;
+}
+
+/* ============================================
+   CONTENT AREAS : FOND BLANC OPAQUE
+   ============================================ */
+
+/* Sections : fond blanc avec légère ombre */
+.section {
+    background: rgba(255, 255, 255, 0.98) !important;
+    backdrop-filter: blur(10px);
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+/* Header : fond blanc opaque */
+.top-header {
+    background: rgba(255, 255, 255, 0.98) !important;
+    backdrop-filter: blur(20px);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+/* Cartes et wrappers : fond blanc */
+.card,
+.chart-wrapper,
+.toolbar {
+    background: #ffffff !important;
+}
+
+/* Dark mode adjustments */
+body.dark-mode .section {
+    background: rgba(30, 41, 59, 0.95) !important;
+}
+
+body.dark-mode .top-header {
+    background: rgba(15, 23, 42, 0.98) !important;
+    border-bottom-color: rgba(255, 255, 255, 0.1);
+}
+
+body.dark-mode .card,
+body.dark-mode .chart-wrapper,
+body.dark-mode .toolbar {
+    background: #1e293b !important;
+}
+
+/* Light mode gradient overlay (optional enhancement) */
 body:not(.dark-mode) .particles-background::after {
     content: '';
     position: absolute;
@@ -1905,45 +1955,6 @@ body:not(.dark-mode) .particles-background::after {
         rgba(255, 255, 255, 0.5) 100%
     );
     pointer-events: none;
-}
-
-/* ============================================
-   FIX PARTICLES BACKGROUND VISIBILITY
-   ============================================ */
-
-/* Forcer la transparence du wrapper principal */
-.layout-wrapper {
-    background: transparent !important;
-}
-
-/* Forcer la transparence du contenu principal */
-.main-content {
-    background: transparent !important;
-}
-
-/* Forcer la transparence du container */
-.container {
-    background: transparent !important;
-}
-
-/* Forcer la transparence des sections */
-.section {
-    background: rgba(255, 255, 255, 0.95) !important;
-    backdrop-filter: blur(10px);
-}
-
-/* Header avec légère transparence */
-.top-header {
-    background: rgba(255, 255, 255, 0.98) !important;
-    backdrop-filter: blur(20px);
-}
-
-/* Effet glassmorphism sur les cartes */
-.card,
-.chart-wrapper,
-.toolbar {
-    background: rgba(255, 255, 255, 0.9) !important;
-    backdrop-filter: blur(10px);
 }
 
 /* ============================================
