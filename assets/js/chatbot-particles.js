@@ -1,5 +1,6 @@
 // ============================================
-// PARTICLES BACKGROUND (OPTIMIZED - 60 FPS)
+// PARTICLES BACKGROUND (DARK/LIGHT MODE ADAPTIVE)
+// Version: 2.0 - 60 FPS Optimized
 // ============================================
 
 function initializeParticles() {
@@ -18,11 +19,19 @@ function initializeParticles() {
     }
     resizeCanvas();
     
+    // Detect dark mode
+    function isDarkMode() {
+        return document.body.classList.contains('dark-mode');
+    }
+    
     // Optimized settings
     const particles = [];
-    const particleCount = 80; // Optimisé pour performance
+    const particleCount = 80;
     const connectionDistance = 150;
-    const colors = ['#667eea', '#764ba2', '#8b5cf6'];
+    
+    // Colors adapted to theme
+    const lightColors = ['#667eea', '#764ba2', '#8b5cf6'];
+    const darkColors = ['#818cf8', '#a78bfa', '#c084fc'];
     
     // Particle class
     class Particle {
@@ -36,6 +45,11 @@ function initializeParticles() {
             this.vx = (Math.random() - 0.5) * 0.5;
             this.vy = (Math.random() - 0.5) * 0.5;
             this.radius = Math.random() * 2 + 1;
+            this.updateColor();
+        }
+        
+        updateColor() {
+            const colors = isDarkMode() ? darkColors : lightColors;
             this.color = colors[Math.floor(Math.random() * colors.length)];
         }
         
@@ -60,6 +74,25 @@ function initializeParticles() {
         particles.push(new Particle());
     }
     
+    // Get background gradient based on theme
+    function getBackgroundGradient() {
+        const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+        
+        if (isDarkMode()) {
+            // Dark mode: subtle dark gradient
+            gradient.addColorStop(0, '#0f172a');
+            gradient.addColorStop(0.5, '#1e293b');
+            gradient.addColorStop(1, '#334155');
+        } else {
+            // Light mode: soft light gradient
+            gradient.addColorStop(0, '#f8fafc');
+            gradient.addColorStop(0.5, '#f1f5f9');
+            gradient.addColorStop(1, '#e2e8f0');
+        }
+        
+        return gradient;
+    }
+    
     // Optimized animation loop
     let lastTime = 0;
     const targetFPS = 60;
@@ -73,12 +106,8 @@ function initializeParticles() {
         
         lastTime = currentTime - (deltaTime % frameTime);
         
-        // Clear with gradient
-        const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
-        gradient.addColorStop(0, '#f8fafc');
-        gradient.addColorStop(0.5, '#f1f5f9');
-        gradient.addColorStop(1, '#e2e8f0');
-        ctx.fillStyle = gradient;
+        // Clear with adaptive gradient
+        ctx.fillStyle = getBackgroundGradient();
         ctx.fillRect(0, 0, canvas.width, canvas.height);
         
         // Update and draw particles
@@ -89,6 +118,10 @@ function initializeParticles() {
         
         // Draw connections (optimized)
         ctx.lineWidth = 1;
+        const connectionColor = isDarkMode() 
+            ? 'rgba(129, 140, 248, OPACITY)' 
+            : 'rgba(102, 126, 234, OPACITY)';
+        
         for (let i = 0; i < particles.length; i++) {
             for (let j = i + 1; j < particles.length; j++) {
                 const dx = particles[i].x - particles[j].x;
@@ -97,7 +130,7 @@ function initializeParticles() {
                 
                 if (distance < connectionDistance) {
                     const opacity = (1 - distance / connectionDistance) * 0.4;
-                    ctx.strokeStyle = `rgba(102, 126, 234, ${opacity})`;
+                    ctx.strokeStyle = connectionColor.replace('OPACITY', opacity);
                     ctx.beginPath();
                     ctx.moveTo(particles[i].x, particles[i].y);
                     ctx.lineTo(particles[j].x, particles[j].y);
@@ -109,6 +142,17 @@ function initializeParticles() {
     
     requestAnimationFrame(animate);
     
+    // Listen to theme changes
+    const themeObserver = new MutationObserver(() => {
+        console.log('🎨 Theme changed, updating particles...');
+        particles.forEach(p => p.updateColor());
+    });
+    
+    themeObserver.observe(document.body, {
+        attributes: true,
+        attributeFilter: ['class']
+    });
+    
     // Debounced resize
     let resizeTimeout;
     window.addEventListener('resize', () => {
@@ -119,7 +163,8 @@ function initializeParticles() {
         }, 250);
     });
     
-    console.log('✅ Particles optimized: 60 FPS target');
+    console.log('✅ Particles initialized with theme support');
+    console.log('🎨 Current mode:', isDarkMode() ? 'DARK' : 'LIGHT');
 }
 
 // Auto-initialize

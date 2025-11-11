@@ -503,16 +503,21 @@
 
     <script>
     document.addEventListener('DOMContentLoaded', function() {
-        console.log('🔍 Particles Debug:');
-        const canvas = document.getElementById('particles-canvas');
-        if (canvas) {
-            console.log('✅ Canvas found');
-            console.log('📐 Canvas position:', window.getComputedStyle(canvas).position);
-            console.log('📊 Canvas z-index:', window.getComputedStyle(canvas).zIndex);
-            console.log('📏 Canvas size:', canvas.width, 'x', canvas.height);
-        } else {
-            console.error('❌ Canvas NOT found!');
-        }
+        setTimeout(() => {
+            console.log('🔍 PARTICLES DEBUG:');
+            const canvas = document.getElementById('particles-canvas');
+            if (canvas) {
+                const styles = window.getComputedStyle(canvas);
+                console.log('✅ Canvas trouvé');
+                console.log('📐 Position:', styles.position);
+                console.log('📊 Z-index:', styles.zIndex);
+                console.log('👁️ Opacity:', styles.opacity);
+                console.log('📏 Dimensions:', canvas.width, 'x', canvas.height);
+                console.log('🎨 Dark mode?', document.body.classList.contains('dark-mode'));
+            } else {
+                console.error('❌ Canvas introuvable!');
+            }
+        }, 500);
     });
     </script>
 
