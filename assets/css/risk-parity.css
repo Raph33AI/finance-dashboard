@@ -1,7 +1,7 @@
 /* ==============================================
    🎨 RISK-PARITY.CSS - ULTRA MODERN 3D VERSION
    Glassmorphism • 3D Effects • Premium Animations
-   VERSION PREMIUM COMPLÈTE
+   VERSION COMPLÈTE AVEC TOUTES LES CORRECTIONS
    ============================================== */
 
 /* ============================================
@@ -32,6 +32,164 @@
 body.dark-mode {
     --glass-bg: rgba(15, 23, 42, 0.7);
     --glass-border: rgba(148, 163, 184, 0.1);
+}
+
+/* ============================================
+   📑 TOUS LES TITRES - DESIGN UNIFORME
+   ============================================ */
+.section-title,
+.card-title,
+.page-title,
+h1, h2, h3, h4, h5, h6 {
+    font-weight: 800 !important;
+    background: linear-gradient(135deg, var(--ml-primary), var(--ml-secondary)) !important;
+    -webkit-background-clip: text !important;
+    -webkit-text-fill-color: transparent !important;
+    background-clip: text !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 12px !important;
+    margin-bottom: 20px !important;
+    text-shadow: 0 2px 20px rgba(102, 126, 234, 0.3);
+}
+
+/* Titre H1 - Page principale */
+h1 {
+    font-size: 2rem !important;
+    margin-bottom: 30px !important;
+}
+
+/* Titre H2 - Sections principales */
+h2 {
+    font-size: 1.6rem !important;
+    margin-bottom: 25px !important;
+}
+
+/* Titre H3 - Sous-sections */
+h3 {
+    font-size: 1.4rem !important;
+}
+
+/* Titre H4 - Cards */
+h4 {
+    font-size: 1.3rem !important;
+}
+
+/* Icônes dans les titres */
+h1 i, h2 i, h3 i, h4 i,
+.section-title i,
+.card-title i {
+    background: linear-gradient(135deg, var(--ml-primary), var(--ml-secondary)) !important;
+    -webkit-background-clip: text !important;
+    -webkit-text-fill-color: transparent !important;
+    font-size: 1.3em !important;
+    animation: floatIcon 3s ease-in-out infinite;
+}
+
+@keyframes floatIcon {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-5px); }
+}
+
+/* ============================================
+   📘 ONGLETS INFO - FOND STYLISÉ PREMIUM
+   ============================================ */
+.info-box,
+.info-panel,
+.explanation-box,
+[class*="risk-parity-vs"],
+[class*="how-to-use"] {
+    background: linear-gradient(
+        135deg,
+        rgba(102, 126, 234, 0.12) 0%,
+        rgba(118, 75, 162, 0.08) 50%,
+        rgba(240, 147, 251, 0.06) 100%
+    ) !important;
+    backdrop-filter: blur(25px) saturate(180%) !important;
+    border: 2px solid rgba(102, 126, 234, 0.3) !important;
+    border-left: 5px solid var(--ml-primary) !important;
+    border-radius: 20px !important;
+    padding: 28px 32px !important;
+    margin-bottom: 30px !important;
+    box-shadow: 
+        0 12px 40px rgba(102, 126, 234, 0.15),
+        inset 0 1px 0 rgba(255, 255, 255, 0.2) !important;
+    position: relative;
+    overflow: hidden;
+}
+
+.info-box::before,
+.info-panel::before,
+.explanation-box::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(
+        circle,
+        rgba(240, 147, 251, 0.08) 0%,
+        transparent 70%
+    );
+    animation: rotateBg 25s linear infinite;
+    pointer-events: none;
+}
+
+@keyframes rotateBg {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Titre des onglets info */
+.info-box h3,
+.info-box h4,
+.info-panel h3,
+.info-panel h4,
+.explanation-box h3,
+.explanation-box h4 {
+    color: var(--ml-primary) !important;
+    font-weight: 800 !important;
+    font-size: 1.2rem !important;
+    margin-bottom: 18px !important;
+    background: linear-gradient(135deg, var(--ml-primary), var(--ml-secondary)) !important;
+    -webkit-background-clip: text !important;
+    -webkit-text-fill-color: transparent !important;
+}
+
+/* Texte dans les onglets info */
+.info-box p,
+.info-panel p,
+.explanation-box p,
+.info-box li,
+.info-panel li,
+.explanation-box li {
+    color: var(--text-primary) !important;
+    font-weight: 600 !important;
+    line-height: 1.8 !important;
+    margin-bottom: 12px !important;
+    position: relative;
+    z-index: 1;
+}
+
+/* Labels en gras dans les onglets */
+.info-box strong,
+.info-panel strong,
+.explanation-box strong {
+    background: linear-gradient(135deg, var(--ml-primary), var(--ml-purple)) !important;
+    -webkit-background-clip: text !important;
+    -webkit-text-fill-color: transparent !important;
+    font-weight: 800 !important;
+}
+
+body.dark-mode .info-box,
+body.dark-mode .info-panel,
+body.dark-mode .explanation-box {
+    background: linear-gradient(
+        135deg,
+        rgba(102, 126, 234, 0.08) 0%,
+        rgba(15, 23, 42, 0.6) 100%
+    ) !important;
 }
 
 /* ============================================
@@ -85,11 +243,6 @@ body.dark-mode {
     pointer-events: none;
 }
 
-@keyframes rotateBg {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-}
-
 .asset-card::after {
     content: '';
     position: absolute;
@@ -128,9 +281,7 @@ body.dark-mode {
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
-    display: flex;
-    align-items: center;
-    gap: 12px;
+    display: inline-block;
     position: relative;
     z-index: 1;
     text-shadow: 0 2px 20px rgba(102, 126, 234, 0.3);
@@ -217,28 +368,43 @@ body.dark-mode .asset-input-group input {
 }
 
 /* ============================================
-   🗑️ BUTTON REMOVE - ANIMATED
+   🗑️ BUTTON REMOVE - REPOSITIONNÉ À DROITE
    ============================================ */
 .btn-remove {
-    float: right;
-    background: linear-gradient(135deg, var(--ml-danger), #fd7e14);
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background: linear-gradient(135deg, #ff6b6b, #ee5a6f);
     color: white;
-    border: none;
-    padding: 8px 16px;
+    border: 2px solid rgba(255, 107, 107, 0.3);
+    width: 40px;
+    height: 40px;
     border-radius: 12px;
     cursor: pointer;
-    font-weight: 700;
-    font-size: 0.85rem;
+    font-weight: 800;
+    font-size: 1.3rem;
     transition: var(--transition-bounce);
-    box-shadow: 0 4px 12px rgba(245, 87, 108, 0.3);
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    position: relative;
+    box-shadow: 
+        0 4px 12px rgba(255, 107, 107, 0.4),
+        0 0 20px rgba(238, 90, 111, 0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
     overflow: hidden;
-    z-index: 2;
 }
 
 .btn-remove::before {
+    content: '×';
+    position: absolute;
+    font-size: 2rem;
+    font-weight: 900;
+    line-height: 1;
+    color: white;
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.btn-remove::after {
     content: '';
     position: absolute;
     top: 50%;
@@ -251,21 +417,21 @@ body.dark-mode .asset-input-group input {
     transition: width 0.5s, height 0.5s;
 }
 
-.btn-remove:hover::before {
-    width: 300px;
-    height: 300px;
+.btn-remove:hover::after {
+    width: 100px;
+    height: 100px;
 }
 
 .btn-remove:hover {
-    background: linear-gradient(135deg, #dc3545, var(--ml-danger));
-    transform: translateY(-3px) scale(1.08) rotate(-2deg);
+    background: linear-gradient(135deg, #ff5252, #dc3545);
+    transform: translateY(-4px) scale(1.12) rotate(-5deg);
     box-shadow: 
-        0 8px 24px rgba(245, 87, 108, 0.5),
-        0 0 30px rgba(245, 87, 108, 0.3);
+        0 12px 32px rgba(255, 107, 107, 0.6),
+        0 0 40px rgba(238, 90, 111, 0.5);
 }
 
 .btn-remove:active {
-    transform: translateY(-1px) scale(1.02);
+    transform: translateY(-2px) scale(1.05) rotate(-3deg);
 }
 
 /* ============================================
@@ -281,12 +447,13 @@ body.dark-mode .asset-input-group input {
 }
 
 /* ============================================
-   🚀 BUTTON PRIMARY - HOLOGRAPHIC EFFECT
+   ⚖️ BUTTON PRIMARY - CALCULATE RISK PARITY
+   Style adapté au design global (violet/bleu)
    ============================================ */
 .btn-primary {
     flex: 1;
     min-width: 220px;
-    background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 50%, #1e40af 100%);
+    background: linear-gradient(135deg, var(--ml-primary) 0%, var(--ml-secondary) 50%, var(--ml-accent) 100%);
     background-size: 200% 200%;
     color: white;
     padding: 18px 40px;
@@ -297,8 +464,8 @@ body.dark-mode .asset-input-group input {
     cursor: pointer;
     transition: var(--transition-smooth);
     box-shadow: 
-        0 8px 24px rgba(37, 99, 235, 0.4),
-        0 0 40px rgba(29, 78, 216, 0.3);
+        0 8px 24px rgba(102, 126, 234, 0.5),
+        0 0 40px rgba(118, 75, 162, 0.4);
     text-transform: uppercase;
     letter-spacing: 1px;
     position: relative;
@@ -329,11 +496,11 @@ body.dark-mode .asset-input-group input {
 }
 
 .btn-primary:hover {
-    background: linear-gradient(135deg, #1d4ed8 0%, #1e40af 50%, #1e3a8a 100%);
+    background: linear-gradient(135deg, var(--ml-secondary) 0%, var(--ml-accent) 50%, var(--ml-primary) 100%);
     transform: translateY(-6px) scale(1.03) rotateX(5deg);
     box-shadow: 
-        0 16px 48px rgba(37, 99, 235, 0.6),
-        0 0 60px rgba(29, 78, 216, 0.5);
+        0 16px 48px rgba(102, 126, 234, 0.7),
+        0 0 80px rgba(118, 75, 162, 0.6);
     animation: gradientShift 3s ease infinite;
 }
 
@@ -345,12 +512,25 @@ body.dark-mode .asset-input-group input {
 .btn-primary:active {
     transform: translateY(-3px) scale(1.01);
     box-shadow: 
-        0 8px 24px rgba(37, 99, 235, 0.5),
-        0 0 40px rgba(29, 78, 216, 0.4);
+        0 8px 24px rgba(102, 126, 234, 0.6),
+        0 0 60px rgba(118, 75, 162, 0.5);
+}
+
+/* Icône dans le bouton Calculate */
+.btn-primary i {
+    margin-right: 10px;
+    font-size: 1.3rem;
+    animation: balance 2s ease-in-out infinite;
+}
+
+@keyframes balance {
+    0%, 100% { transform: rotate(-5deg); }
+    50% { transform: rotate(5deg); }
 }
 
 /* ============================================
-   🔄 BUTTON SECONDARY - GLASS EFFECT
+   🔄 BUTTON SECONDARY - RESET ALL
+   Style adapté (gris premium avec accents violets)
    ============================================ */
 .btn-secondary {
     flex: 1;
@@ -359,15 +539,15 @@ body.dark-mode .asset-input-group input {
     background-size: 200% 200%;
     color: white;
     padding: 18px 35px;
-    border: none;
+    border: 2px solid rgba(107, 114, 128, 0.3);
     border-radius: 16px;
     font-size: 1.05rem;
     font-weight: 700;
     cursor: pointer;
     transition: var(--transition-smooth);
     box-shadow: 
-        0 6px 20px rgba(107, 114, 128, 0.35),
-        0 0 30px rgba(75, 85, 99, 0.2);
+        0 6px 20px rgba(107, 114, 128, 0.4),
+        0 0 30px rgba(75, 85, 99, 0.3);
     text-transform: uppercase;
     letter-spacing: 0.8px;
     position: relative;
@@ -397,17 +577,30 @@ body.dark-mode .asset-input-group input {
 
 .btn-secondary:hover {
     background: linear-gradient(135deg, #4b5563 0%, #374151 50%, #1f2937 100%);
+    border-color: rgba(102, 126, 234, 0.4);
     transform: translateY(-6px) scale(1.03);
     box-shadow: 
-        0 12px 36px rgba(107, 114, 128, 0.5),
-        0 0 50px rgba(75, 85, 99, 0.3);
+        0 12px 36px rgba(107, 114, 128, 0.6),
+        0 0 50px rgba(102, 126, 234, 0.3);
 }
 
 .btn-secondary:active {
     transform: translateY(-3px) scale(1.01);
     box-shadow: 
-        0 6px 20px rgba(107, 114, 128, 0.4),
-        0 0 30px rgba(75, 85, 99, 0.25);
+        0 6px 20px rgba(107, 114, 128, 0.5),
+        0 0 40px rgba(102, 126, 234, 0.2);
+}
+
+/* Icône dans le bouton Reset */
+.btn-secondary i {
+    margin-right: 10px;
+    font-size: 1.2rem;
+    animation: rotate360 2s linear infinite;
+}
+
+@keyframes rotate360 {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
 }
 
 /* ============================================
@@ -415,28 +608,28 @@ body.dark-mode .asset-input-group input {
    ============================================ */
 body.dark-mode .btn-primary {
     box-shadow: 
-        0 8px 24px rgba(59, 130, 246, 0.5),
-        0 0 50px rgba(37, 99, 235, 0.4);
+        0 8px 24px rgba(102, 126, 234, 0.6),
+        0 0 60px rgba(118, 75, 162, 0.5);
 }
 
 body.dark-mode .btn-primary:hover {
     box-shadow: 
-        0 16px 48px rgba(59, 130, 246, 0.7),
-        0 0 80px rgba(37, 99, 235, 0.6);
+        0 16px 48px rgba(102, 126, 234, 0.8),
+        0 0 100px rgba(118, 75, 162, 0.7);
 }
 
 body.dark-mode .btn-secondary {
     background: linear-gradient(135deg, #374151 0%, #1f2937 50%, #111827 100%);
     box-shadow: 
-        0 6px 20px rgba(55, 65, 81, 0.5),
-        0 0 40px rgba(31, 41, 55, 0.3);
+        0 6px 20px rgba(55, 65, 81, 0.6),
+        0 0 40px rgba(31, 41, 55, 0.4);
 }
 
 body.dark-mode .btn-secondary:hover {
     background: linear-gradient(135deg, #1f2937 0%, #111827 50%, #030712 100%);
     box-shadow: 
-        0 12px 36px rgba(55, 65, 81, 0.7),
-        0 0 60px rgba(31, 41, 55, 0.5);
+        0 12px 36px rgba(55, 65, 81, 0.8),
+        0 0 70px rgba(102, 126, 234, 0.4);
 }
 
 /* ============================================
@@ -801,6 +994,14 @@ body.dark-mode .comparison-table td {
         padding: 12px;
         font-size: 0.9rem;
     }
+    
+    h1 {
+        font-size: 1.6rem !important;
+    }
+    
+    h2 {
+        font-size: 1.3rem !important;
+    }
 }
 
 @media (max-width: 480px) {
@@ -823,6 +1024,17 @@ body.dark-mode .comparison-table td {
         width: 180px;
         font-size: 1rem;
     }
+    
+    .btn-remove {
+        width: 36px;
+        height: 36px;
+        top: 15px;
+        right: 15px;
+    }
+    
+    .btn-remove::before {
+        font-size: 1.8rem;
+    }
 }
 
 /* ============================================
@@ -841,7 +1053,10 @@ body.dark-mode .comparison-table td {
 
 .asset-card,
 .stats-box,
-.chart-medium {
+.chart-medium,
+.info-box,
+.info-panel,
+.explanation-box {
     animation: fadeInUp 0.6s ease-out backwards;
 }
 
@@ -899,4 +1114,5 @@ body.dark-mode .comparison-table td {
 
 /* ============================================
    🎯 FIN DU FICHIER - RISK PARITY PREMIUM 3D
+   VERSION COMPLÈTE ET CORRIGÉE
    ============================================ */
