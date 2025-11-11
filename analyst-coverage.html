@@ -501,5 +501,20 @@
     });
     </script>
 
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log('🔍 Particles Debug:');
+        const canvas = document.getElementById('particles-canvas');
+        if (canvas) {
+            console.log('✅ Canvas found');
+            console.log('📐 Canvas position:', window.getComputedStyle(canvas).position);
+            console.log('📊 Canvas z-index:', window.getComputedStyle(canvas).zIndex);
+            console.log('📏 Canvas size:', canvas.width, 'x', canvas.height);
+        } else {
+            console.error('❌ Canvas NOT found!');
+        }
+    });
+    </script>
+
 </body>
 </html>
