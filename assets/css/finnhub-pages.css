@@ -545,6 +545,47 @@ body.dark-mode .stat-card {
 }
 
 /* ============================================
+   ✅✅✅ KEY FINANCIAL METRICS - TAILLE VRAIMENT RÉDUITE
+   ============================================ */
+.key-metrics,
+.financial-metrics,
+#keyMetrics,
+.key-metrics .stats-row,
+.financial-metrics .stats-row,
+#keyMetrics .stats-row {
+    font-size: 0.75rem;
+}
+
+.key-metrics .stat-card,
+.financial-metrics .stat-card,
+#keyMetrics .stat-card {
+    padding: 20px 15px;
+}
+
+.key-metrics .stat-card-value,
+.financial-metrics .stat-card-value,
+#keyMetrics .stat-card-value {
+    font-size: 1.5rem !important;
+    margin-bottom: 6px;
+}
+
+.key-metrics .stat-card-label,
+.financial-metrics .stat-card-label,
+#keyMetrics .stat-card-label {
+    font-size: 0.65rem !important;
+    letter-spacing: 0.8px;
+}
+
+.key-metrics .stat-card-icon,
+.financial-metrics .stat-card-icon,
+#keyMetrics .stat-card-icon {
+    width: 50px !important;
+    height: 50px !important;
+    font-size: 1.5rem !important;
+    margin-bottom: 15px;
+}
+
+/* ============================================
    ✅ NEWS GRID - 3 COLONNES FIXE
    ============================================ */
 .news-grid {
@@ -900,35 +941,6 @@ body.dark-mode .recommendation-card {
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
-}
-
-/* ============================================
-   ✅ KEY FINANCIAL METRICS - TAILLE RÉDUITE
-   ============================================ */
-.key-metrics,
-.financial-metrics,
-#keyMetrics {
-    font-size: 0.85rem;
-}
-
-.key-metrics .stat-card-value,
-.financial-metrics .stat-card-value,
-#keyMetrics .stat-card-value {
-    font-size: 2rem;
-}
-
-.key-metrics .stat-card-label,
-.financial-metrics .stat-card-label,
-#keyMetrics .stat-card-label {
-    font-size: 0.8rem;
-}
-
-.key-metrics .stat-card-icon,
-.financial-metrics .stat-card-icon,
-#keyMetrics .stat-card-icon {
-    width: 70px;
-    height: 70px;
-    font-size: 2rem;
 }
 
 /* ============================================
@@ -1387,6 +1399,13 @@ body.dark-mode .peer-badge {
     
     .news-summary {
         font-size: 0.85rem;
+    }
+    
+    /* Key Metrics mobile */
+    .key-metrics .stat-card-value,
+    .financial-metrics .stat-card-value,
+    #keyMetrics .stat-card-value {
+        font-size: 1.3rem !important;
     }
 }
 
