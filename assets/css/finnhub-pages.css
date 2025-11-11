@@ -1,7 +1,7 @@
 /* ============================================
    🎨 FINNHUB PAGES - ULTRA MODERN 3D VERSION
    Glassmorphism • 3D Effects • Premium Animations
-   VERSION FINALE ADAPTÉE
+   VERSION CORRIGÉE FINALE
    ============================================ */
 
 /* ============================================
@@ -47,6 +47,47 @@ body.dark-mode {
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
     backdrop-filter: blur(20px) saturate(180%);
     border-bottom: 1px solid var(--glass-border);
+}
+
+/* ============================================
+   ✅ TITRE DE LA PAGE PRINCIPALE - PREMIUM (SANS BARRE)
+   ============================================ */
+.top-header h1,
+.page-title,
+h1.page-title {
+    font-size: 2rem;
+    font-weight: 800;
+    background: linear-gradient(135deg, var(--ml-primary), var(--ml-secondary), var(--ml-accent));
+    background-size: 200% 200%;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin: 0 0 25px 0;
+    position: relative;
+    animation: gradientShift 8s ease infinite;
+}
+
+.top-header h1 i,
+.page-title i,
+h1.page-title i {
+    background: linear-gradient(135deg, var(--ml-primary), var(--ml-secondary));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    font-size: 2.2rem;
+    animation: floatIcon 3s ease-in-out infinite;
+}
+
+@keyframes floatIcon {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-5px); }
+}
+
+@keyframes gradientShift {
+    0%, 100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
 }
 
 /* ============================================
@@ -107,11 +148,6 @@ body.dark-mode {
     -webkit-text-fill-color: transparent;
     font-size: 2rem;
     animation: floatIcon 3s ease-in-out infinite;
-}
-
-@keyframes floatIcon {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-5px); }
 }
 
 /* ============================================
@@ -294,11 +330,6 @@ body.dark-mode #categoryFilter {
         0 12px 36px rgba(102, 126, 234, 0.5),
         var(--glow-primary);
     animation: gradientShift 3s ease infinite;
-}
-
-@keyframes gradientShift {
-    0%, 100% { background-position: 0% 50%; }
-    50% { background-position: 100% 50%; }
 }
 
 .btn-primary:active {
@@ -514,12 +545,12 @@ body.dark-mode .stat-card {
 }
 
 /* ============================================
-   📰 NEWS GRID
+   ✅ NEWS GRID - 3 COLONNES FIXE
    ============================================ */
 .news-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
-    gap: 35px;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 30px;
     margin-top: 40px;
 }
 
@@ -560,7 +591,7 @@ body.dark-mode .news-card {
    ============================================ */
 .news-image {
     width: 100%;
-    height: 240px;
+    height: 220px;
     object-fit: cover;
     background: linear-gradient(135deg, var(--ml-primary), var(--ml-secondary));
     position: relative;
@@ -591,14 +622,14 @@ body.dark-mode .news-card {
 
 .news-image-placeholder {
     width: 100%;
-    height: 240px;
+    height: 220px;
     background: linear-gradient(135deg, var(--ml-primary), var(--ml-secondary));
     background-size: 200% 200%;
     animation: gradientShift 8s ease infinite;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 4.5rem;
+    font-size: 3.5rem;
     color: white;
     position: relative;
     overflow: hidden;
@@ -627,7 +658,7 @@ body.dark-mode .news-card {
    📝 NEWS CONTENT
    ============================================ */
 .news-content {
-    padding: 30px;
+    padding: 25px;
     display: flex;
     flex-direction: column;
     flex: 1;
@@ -638,8 +669,8 @@ body.dark-mode .news-card {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 18px;
-    gap: 12px;
+    margin-bottom: 15px;
+    gap: 10px;
 }
 
 .news-source {
@@ -647,12 +678,12 @@ body.dark-mode .news-card {
     background-size: 200% 200%;
     animation: gradientShift 5s ease infinite;
     color: white;
-    padding: 8px 20px;
+    padding: 6px 16px;
     border-radius: 30px;
-    font-size: 0.75rem;
+    font-size: 0.7rem;
     font-weight: 800;
     text-transform: uppercase;
-    letter-spacing: 1px;
+    letter-spacing: 0.8px;
     box-shadow: 
         0 6px 18px rgba(102, 126, 234, 0.4),
         inset 0 1px 0 rgba(255, 255, 255, 0.3);
@@ -660,16 +691,16 @@ body.dark-mode .news-card {
 
 .news-date {
     color: var(--text-secondary);
-    font-size: 0.9rem;
+    font-size: 0.8rem;
     font-weight: 700;
     white-space: nowrap;
 }
 
 .news-headline {
-    font-size: 1.3rem;
+    font-size: 1.1rem;
     font-weight: 800;
-    margin-bottom: 15px;
-    line-height: 1.5;
+    margin-bottom: 12px;
+    line-height: 1.4;
     color: var(--text-primary);
     display: -webkit-box;
     -webkit-line-clamp: 2;
@@ -679,9 +710,9 @@ body.dark-mode .news-card {
 
 .news-summary {
     color: var(--text-secondary);
-    font-size: 1rem;
-    line-height: 1.7;
-    margin-bottom: 24px;
+    font-size: 0.9rem;
+    line-height: 1.6;
+    margin-bottom: 20px;
     flex: 1;
     display: -webkit-box;
     -webkit-line-clamp: 3;
@@ -694,7 +725,7 @@ body.dark-mode .news-card {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding-top: 24px;
+    padding-top: 20px;
     border-top: 2px solid var(--glass-border);
 }
 
@@ -705,15 +736,15 @@ body.dark-mode .news-card {
     background-clip: text;
     text-decoration: none;
     font-weight: 800;
-    font-size: 0.95rem;
+    font-size: 0.85rem;
     transition: all 0.3s ease;
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 8px;
 }
 
 .news-link:hover {
-    gap: 15px;
+    gap: 12px;
     text-decoration: underline;
 }
 
@@ -721,12 +752,12 @@ body.dark-mode .news-card {
    🎯 SENTIMENT BADGES - 3D PREMIUM
    ============================================ */
 .sentiment-badge {
-    padding: 10px 24px;
+    padding: 8px 18px;
     border-radius: 30px;
-    font-size: 0.8rem;
+    font-size: 0.75rem;
     font-weight: 900;
     text-transform: uppercase;
-    letter-spacing: 1.2px;
+    letter-spacing: 1px;
     box-shadow: 0 6px 18px rgba(0, 0, 0, 0.25);
     transition: var(--transition-smooth);
     border: 2px solid rgba(255, 255, 255, 0.2);
@@ -872,6 +903,35 @@ body.dark-mode .recommendation-card {
 }
 
 /* ============================================
+   ✅ KEY FINANCIAL METRICS - TAILLE RÉDUITE
+   ============================================ */
+.key-metrics,
+.financial-metrics,
+#keyMetrics {
+    font-size: 0.85rem;
+}
+
+.key-metrics .stat-card-value,
+.financial-metrics .stat-card-value,
+#keyMetrics .stat-card-value {
+    font-size: 2rem;
+}
+
+.key-metrics .stat-card-label,
+.financial-metrics .stat-card-label,
+#keyMetrics .stat-card-label {
+    font-size: 0.8rem;
+}
+
+.key-metrics .stat-card-icon,
+.financial-metrics .stat-card-icon,
+#keyMetrics .stat-card-icon {
+    width: 70px;
+    height: 70px;
+    font-size: 2rem;
+}
+
+/* ============================================
    📊 EARNINGS TABLE - PREMIUM GLASS
    ============================================ */
 .earnings-table {
@@ -946,6 +1006,45 @@ body.dark-mode .earnings-table {
 .earnings-inline {
     color: var(--text-secondary);
     font-weight: 800;
+}
+
+/* ============================================
+   ✅ UPCOMING EARNINGS CALENDAR - OPTIMISATION
+   ============================================ */
+.earnings-calendar,
+#earningsCalendar,
+.upcoming-earnings {
+    contain: layout style paint;
+    will-change: auto;
+}
+
+.earnings-calendar tbody,
+#earningsCalendar tbody,
+.upcoming-earnings tbody {
+    contain: layout style;
+}
+
+.earnings-calendar tr,
+#earningsCalendar tr,
+.upcoming-earnings tr {
+    contain: layout;
+    transform: translateZ(0);
+    backface-visibility: hidden;
+}
+
+/* Désactiver les animations lourdes sur le calendrier */
+.earnings-calendar tbody tr,
+#earningsCalendar tbody tr,
+.upcoming-earnings tbody tr {
+    transition: background-color 0.2s ease, transform 0.2s ease;
+}
+
+.earnings-calendar tbody tr:hover,
+#earningsCalendar tbody tr:hover,
+.upcoming-earnings tbody tr:hover {
+    background: rgba(102, 126, 234, 0.08);
+    transform: none;
+    box-shadow: none;
 }
 
 /* ============================================
@@ -1205,6 +1304,12 @@ body.dark-mode .peer-badge {
 /* ============================================
    📱 RESPONSIVE DESIGN
    ============================================ */
+@media (max-width: 1200px) {
+    .news-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
 @media (max-width: 768px) {
     .news-grid {
         grid-template-columns: 1fr;
@@ -1245,6 +1350,12 @@ body.dark-mode .peer-badge {
     .company-profile-card {
         padding: 35px 25px;
     }
+    
+    .top-header h1,
+    .page-title,
+    h1.page-title {
+        font-size: 1.6rem;
+    }
 }
 
 @media (max-width: 480px) {
@@ -1262,6 +1373,20 @@ body.dark-mode .peer-badge {
     
     .company-title h1 {
         font-size: 1.8rem;
+    }
+    
+    .top-header h1,
+    .page-title,
+    h1.page-title {
+        font-size: 1.4rem;
+    }
+    
+    .news-headline {
+        font-size: 1rem;
+    }
+    
+    .news-summary {
+        font-size: 0.85rem;
     }
 }
 
