@@ -1860,5 +1860,53 @@ body.dark-mode .dropdown-link:hover .dropdown-link-icon {
 }
 
 /* ============================================
+   PARTICLES BACKGROUND - GLOBAL STYLES
+   ============================================ */
+
+.particles-background {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: -1;
+    pointer-events: none;
+    opacity: 0.6;
+    transition: opacity 0.5s ease;
+}
+
+/* Dark mode support */
+body.dark-mode .particles-background {
+    opacity: 0.3;
+}
+
+/* Ensure layout wrapper is above particles */
+.layout-wrapper {
+    position: relative;
+    z-index: 1;
+}
+
+/* Ensure main content is transparent to see particles */
+.main-content {
+    background: transparent !important;
+}
+
+/* Light mode gradient overlay (optional) */
+body:not(.dark-mode) .particles-background::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: radial-gradient(
+        ellipse at top,
+        rgba(255, 255, 255, 0.1) 0%,
+        rgba(255, 255, 255, 0.5) 100%
+    );
+    pointer-events: none;
+}
+
+/* ============================================
    FIN DE COMMON.CSS
    ============================================ */
