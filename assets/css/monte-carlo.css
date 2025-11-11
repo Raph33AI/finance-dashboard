@@ -45,7 +45,7 @@ body.dark-mode .container {
 }
 
 /* ============================================
-   ✅ TITRE DE LA PAGE PRINCIPALE - PREMIUM
+   ✅ TITRE DE LA PAGE PRINCIPALE - PREMIUM (SANS BARRE)
    ============================================ */
 .top-header h1,
 .page-title {
@@ -73,19 +73,6 @@ body.dark-mode .container {
     animation: floatIcon 3s ease-in-out infinite;
 }
 
-.top-header h1::after,
-.page-title::after {
-    content: '';
-    position: absolute;
-    bottom: -8px;
-    left: 0;
-    width: 120px;
-    height: 4px;
-    background: linear-gradient(90deg, var(--ml-primary), var(--ml-secondary), transparent);
-    border-radius: 50px;
-    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
-}
-
 @keyframes floatIcon {
     0%, 100% { transform: translateY(0); }
     50% { transform: translateY(-5px); }
@@ -97,7 +84,7 @@ body.dark-mode .container {
 }
 
 /* ============================================
-   ✅ TITRE "SIMULATION RESULTS" - PREMIUM
+   ✅ TITRE "SIMULATION RESULTS" - ALIGNÉ À GAUCHE
    ============================================ */
 .results-title,
 h2.section-title,
@@ -110,38 +97,18 @@ h2.section-title,
     background-clip: text;
     display: flex;
     align-items: center;
-    gap: 15px;
+    gap: 12px;
     margin: 0 0 30px 0;
     position: relative;
-    padding-bottom: 15px;
-    border-bottom: 2px solid var(--glass-border);
 }
 
-.results-title::before,
-h2.section-title::before,
-.simulation-results-title::before {
-    content: '📊';
+.results-title i,
+h2.section-title i,
+.simulation-results-title i {
+    background: linear-gradient(135deg, var(--ml-primary), var(--ml-secondary));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
     font-size: 2rem;
-    filter: drop-shadow(0 4px 12px rgba(102, 126, 234, 0.3));
-    animation: pulse 2s ease-in-out infinite;
-}
-
-.results-title::after,
-h2.section-title::after,
-.simulation-results-title::after {
-    content: '';
-    position: absolute;
-    bottom: -2px;
-    left: 0;
-    width: 150px;
-    height: 2px;
-    background: linear-gradient(90deg, var(--ml-primary), var(--ml-secondary), transparent);
-    animation: slideRight 3s ease-in-out infinite;
-}
-
-@keyframes slideRight {
-    0%, 100% { transform: translateX(0); opacity: 1; }
-    50% { transform: translateX(200px); opacity: 0; }
 }
 
 @keyframes pulse {
