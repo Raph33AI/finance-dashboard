@@ -1,7 +1,7 @@
 /* ==============================================
    🎨 RISK-PARITY.CSS - ULTRA MODERN 3D VERSION
    Glassmorphism • 3D Effects • Premium Animations
-   VERSION COMPLÈTE AVEC TOUTES LES CORRECTIONS
+   VERSION FINALE COMPLÈTE ET CORRIGÉE
    ============================================== */
 
 /* ============================================
@@ -32,6 +32,22 @@
 body.dark-mode {
     --glass-bg: rgba(15, 23, 42, 0.7);
     --glass-border: rgba(148, 163, 184, 0.1);
+}
+
+/* ============================================
+   🚫 PROTECTION DES MODALS - NE PAS TOUCHER
+   ============================================ */
+.modal,
+.modal-content,
+.modal-header,
+.modal-body,
+.modal-footer,
+.modal-backdrop,
+[class*="modal"],
+[class*="swal"],
+.swal2-popup,
+.swal2-container {
+    all: revert !important;
 }
 
 /* ============================================
@@ -272,9 +288,21 @@ body.dark-mode .explanation-box {
     border-color: rgba(102, 126, 234, 0.4);
 }
 
+/* ============================================
+   🎯 HEADER DE L'ASSET CARD - TITRE + BOUTON
+   ============================================ */
+.asset-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    position: relative;
+    z-index: 1;
+}
+
 .asset-card h4 {
     color: var(--ml-primary);
-    margin-bottom: 20px;
+    margin-bottom: 0 !important;
     font-size: 1.3rem;
     font-weight: 800;
     background: linear-gradient(135deg, var(--ml-primary), var(--ml-secondary));
@@ -282,9 +310,74 @@ body.dark-mode .explanation-box {
     -webkit-text-fill-color: transparent;
     background-clip: text;
     display: inline-block;
-    position: relative;
-    z-index: 1;
+    flex: 1;
     text-shadow: 0 2px 20px rgba(102, 126, 234, 0.3);
+}
+
+/* ============================================
+   🗑️ BUTTON REMOVE - ALIGNÉ AU TITRE
+   ============================================ */
+.btn-remove {
+    background: linear-gradient(135deg, #ff6b6b, #ee5a6f);
+    color: white;
+    border: 2px solid rgba(255, 107, 107, 0.3);
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    cursor: pointer;
+    font-weight: 800;
+    font-size: 1.3rem;
+    transition: var(--transition-bounce);
+    box-shadow: 
+        0 4px 12px rgba(255, 107, 107, 0.4),
+        0 0 20px rgba(238, 90, 111, 0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    overflow: hidden;
+    position: relative;
+}
+
+.btn-remove::before {
+    content: '×';
+    position: absolute;
+    font-size: 2rem;
+    font-weight: 900;
+    line-height: 1;
+    color: white;
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    z-index: 1;
+}
+
+.btn-remove::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.3);
+    transform: translate(-50%, -50%);
+    transition: width 0.5s, height 0.5s;
+}
+
+.btn-remove:hover::after {
+    width: 100px;
+    height: 100px;
+}
+
+.btn-remove:hover {
+    background: linear-gradient(135deg, #ff5252, #dc3545);
+    transform: translateY(-4px) scale(1.12) rotate(-5deg);
+    box-shadow: 
+        0 12px 32px rgba(255, 107, 107, 0.6),
+        0 0 40px rgba(238, 90, 111, 0.5);
+}
+
+.btn-remove:active {
+    transform: translateY(-2px) scale(1.05) rotate(-3deg);
 }
 
 /* ============================================
@@ -365,73 +458,6 @@ body.dark-mode .asset-input-group input {
         rgba(118, 75, 162, 0.05) 100%
     );
     box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
-}
-
-/* ============================================
-   🗑️ BUTTON REMOVE - REPOSITIONNÉ À DROITE
-   ============================================ */
-.btn-remove {
-    position: absolute;
-    top: 20px;
-    right: 20px;
-    background: linear-gradient(135deg, #ff6b6b, #ee5a6f);
-    color: white;
-    border: 2px solid rgba(255, 107, 107, 0.3);
-    width: 40px;
-    height: 40px;
-    border-radius: 12px;
-    cursor: pointer;
-    font-weight: 800;
-    font-size: 1.3rem;
-    transition: var(--transition-bounce);
-    box-shadow: 
-        0 4px 12px rgba(255, 107, 107, 0.4),
-        0 0 20px rgba(238, 90, 111, 0.3);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 10;
-    overflow: hidden;
-}
-
-.btn-remove::before {
-    content: '×';
-    position: absolute;
-    font-size: 2rem;
-    font-weight: 900;
-    line-height: 1;
-    color: white;
-    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-}
-
-.btn-remove::after {
-    content: '';
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    width: 0;
-    height: 0;
-    border-radius: 50%;
-    background: rgba(255, 255, 255, 0.3);
-    transform: translate(-50%, -50%);
-    transition: width 0.5s, height 0.5s;
-}
-
-.btn-remove:hover::after {
-    width: 100px;
-    height: 100px;
-}
-
-.btn-remove:hover {
-    background: linear-gradient(135deg, #ff5252, #dc3545);
-    transform: translateY(-4px) scale(1.12) rotate(-5deg);
-    box-shadow: 
-        0 12px 32px rgba(255, 107, 107, 0.6),
-        0 0 40px rgba(238, 90, 111, 0.5);
-}
-
-.btn-remove:active {
-    transform: translateY(-2px) scale(1.05) rotate(-3deg);
 }
 
 /* ============================================
@@ -1002,13 +1028,27 @@ body.dark-mode .comparison-table td {
     h2 {
         font-size: 1.3rem !important;
     }
-}
-
-@media (max-width: 480px) {
+    
+    .asset-card-header {
+        flex-direction: row;
+        gap: 10px;
+    }
+    
     .asset-card h4 {
         font-size: 1.1rem;
     }
     
+    .btn-remove {
+        width: 36px;
+        height: 36px;
+    }
+    
+    .btn-remove::before {
+        font-size: 1.8rem;
+    }
+}
+
+@media (max-width: 480px) {
     .stat-item .value {
         font-size: 1.5rem;
     }
@@ -1021,19 +1061,8 @@ body.dark-mode .comparison-table td {
     }
     
     .asset-name-input {
-        width: 180px;
+        width: 150px;
         font-size: 1rem;
-    }
-    
-    .btn-remove {
-        width: 36px;
-        height: 36px;
-        top: 15px;
-        right: 15px;
-    }
-    
-    .btn-remove::before {
-        font-size: 1.8rem;
     }
 }
 
@@ -1114,5 +1143,5 @@ body.dark-mode .comparison-table td {
 
 /* ============================================
    🎯 FIN DU FICHIER - RISK PARITY PREMIUM 3D
-   VERSION COMPLÈTE ET CORRIGÉE
+   VERSION FINALE COMPLÈTE ET PARFAITE
    ============================================ */
