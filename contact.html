@@ -422,12 +422,96 @@
                 <a href="about.html" class="nav-link">About</a>
             </div>
             
+            <!-- CTA Navigation avec gestion authentification -->
             <div class="nav-cta">
-                <button class="btn-text" onclick="window.location.href='auth.html'">Log in</button>
-                <button class="btn-primary-nav" onclick="window.location.href='auth.html#signup'">
-                    Start Free
-                    <i class="fas fa-arrow-right"></i>
-                </button>
+                <!-- CTA pour utilisateurs non connectés -->
+                <div class="nav-cta-logged-out" id="navCtaLoggedOut">
+                    <button class="btn-text" onclick="window.location.href='auth.html'">Log in</button>
+                    <button class="btn-primary-nav" onclick="window.location.href='auth.html#signup'">
+                        Start Free
+                        <i class="fas fa-arrow-right"></i>
+                    </button>
+                </div>
+
+                <!-- CTA pour utilisateurs connectés -->
+                <div class="nav-cta-logged-in" id="navCtaLoggedIn" style="display: none;">
+                    <div class="user-profile-menu">
+                        <button class="user-profile-button" id="userProfileButton" aria-expanded="false" aria-haspopup="true">
+                            <div class="user-avatar-wrapper">
+                                <img src="https://ui-avatars.com/api/?name=User&background=3B82F6&color=fff&bold=true&size=96" 
+                                     alt="User Profile" 
+                                     class="user-avatar"
+                                     id="userAvatarImg">
+                                <span class="user-status-dot"></span>
+                            </div>
+                            <div class="user-info-text">
+                                <span class="user-display-name" id="userDisplayName">User</span>
+                                <span class="user-plan-badge" id="userPlanBadge">Free</span>
+                            </div>
+                            <i class="fas fa-chevron-down user-dropdown-icon"></i>
+                        </button>
+
+                        <!-- Dropdown Menu (SANS Notifications) -->
+                        <div class="user-dropdown-menu" id="userDropdownMenu" role="menu">
+                            <div class="dropdown-header">
+                                <div class="dropdown-user-card">
+                                    <img src="https://ui-avatars.com/api/?name=User&background=3B82F6&color=fff&bold=true&size=96" 
+                                         alt="User Profile"
+                                         id="dropdownAvatarImg">
+                                    <div class="dropdown-user-text">
+                                        <h4 id="dropdownUserName">User</h4>
+                                        <p id="dropdownUserEmail">user@alphavault.ai</p>
+                                    </div>
+                                </div>
+                                <div class="dropdown-plan-info">
+                                    <i class="fas fa-crown"></i>
+                                    <span id="dropdownUserPlan">Free</span>
+                                </div>
+                            </div>
+
+                            <div class="dropdown-divider"></div>
+
+                            <div class="dropdown-section">
+                                <a href="dashboard-financier.html" class="dropdown-link" role="menuitem">
+                                    <div class="dropdown-link-icon">
+                                        <i class="fas fa-tachometer-alt"></i>
+                                    </div>
+                                    <div class="dropdown-link-text">
+                                        <span class="dropdown-link-title">My Portfolio</span>
+                                        <span class="dropdown-link-desc">Manage investments</span>
+                                    </div>
+                                </a>
+                            </div>
+
+                            <div class="dropdown-divider"></div>
+
+                            <div class="dropdown-section">
+                                <a href="settings.html" class="dropdown-link" role="menuitem" id="settingsLink">
+                                    <div class="dropdown-link-icon">
+                                        <i class="fas fa-cog"></i>
+                                    </div>
+                                    <div class="dropdown-link-text">
+                                        <span class="dropdown-link-title">Settings</span>
+                                        <span class="dropdown-link-desc">Account preferences</span>
+                                    </div>
+                                </a>
+                            </div>
+
+                            <div class="dropdown-divider"></div>
+
+                            <div class="dropdown-section">
+                                <button class="dropdown-link dropdown-link-danger" role="menuitem" id="logoutButton">
+                                    <div class="dropdown-link-icon">
+                                        <i class="fas fa-sign-out-alt"></i>
+                                    </div>
+                                    <div class="dropdown-link-text">
+                                        <span class="dropdown-link-title">Log Out</span>
+                                    </div>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <button class="mobile-menu-btn" id="mobileMenuBtn">
@@ -595,6 +679,11 @@
         </div>
     </footer>
 
+    <!-- Scripts Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="assets/js/firebase-config.js"></script>
+
     <!-- Scripts -->
     <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
     <script src="assets/js/common.js"></script>
@@ -622,7 +711,79 @@
                 });
             }
 
-            // Contact Form Submission
+            // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+            // GESTION AUTHENTIFICATION
+            // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+            const navCtaLoggedOut = document.getElementById('navCtaLoggedOut');
+            const navCtaLoggedIn = document.getElementById('navCtaLoggedIn');
+            const userProfileButton = document.getElementById('userProfileButton');
+            const userDropdownMenu = document.getElementById('userDropdownMenu');
+            const logoutButton = document.getElementById('logoutButton');
+
+            // Vérifier l'état d'authentification Firebase
+            if (typeof firebase !== 'undefined' && firebase.auth) {
+                firebase.auth().onAuthStateChanged((user) => {
+                    if (user) {
+                        // Utilisateur connecté - Afficher le menu profil
+                        navCtaLoggedOut.style.display = 'none';
+                        navCtaLoggedIn.style.display = 'flex';
+
+                        // Mettre à jour les informations utilisateur
+                        const displayName = user.displayName || user.email?.split('@')[0] || 'User';
+                        document.getElementById('userDisplayName').textContent = displayName;
+                        document.getElementById('dropdownUserName').textContent = displayName;
+                        document.getElementById('dropdownUserEmail').textContent = user.email || '';
+
+                        // Avatar
+                        const avatarUrl = user.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(displayName)}&background=3B82F6&color=fff&bold=true&size=96`;
+                        document.getElementById('userAvatarImg').src = avatarUrl;
+                        document.getElementById('dropdownAvatarImg').src = avatarUrl;
+                    } else {
+                        // Utilisateur non connecté - Afficher les boutons
+                        navCtaLoggedOut.style.display = 'flex';
+                        navCtaLoggedIn.style.display = 'none';
+                    }
+                });
+            }
+
+            // Toggle dropdown menu
+            if (userProfileButton) {
+                userProfileButton.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    
+                    const isExpanded = userProfileButton.getAttribute('aria-expanded') === 'true';
+                    userProfileButton.setAttribute('aria-expanded', !isExpanded);
+                    userDropdownMenu.classList.toggle('active');
+                });
+            }
+
+            // Fermer le dropdown en cliquant ailleurs
+            document.addEventListener('click', (e) => {
+                if (!userDropdownMenu.contains(e.target) && !userProfileButton.contains(e.target)) {
+                    userDropdownMenu.classList.remove('active');
+                    userProfileButton.setAttribute('aria-expanded', 'false');
+                }
+            });
+
+            // Logout
+            if (logoutButton) {
+                logoutButton.addEventListener('click', () => {
+                    if (typeof firebase !== 'undefined' && firebase.auth) {
+                        firebase.auth().signOut()
+                            .then(() => {
+                                window.location.href = 'index.html';
+                            })
+                            .catch((error) => {
+                                console.error('Erreur lors de la déconnexion:', error);
+                            });
+                    }
+                });
+            }
+
+            // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+            // CONTACT FORM SUBMISSION
+            // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
             const contactForm = document.getElementById('contactForm');
             const successMessage = document.getElementById('successMessage');
 
