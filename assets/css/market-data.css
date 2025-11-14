@@ -1,7 +1,7 @@
 /* ==============================================
    🎨 MARKET-DATA.CSS - ULTRA MODERN 3D VERSION
    Glassmorphism • 3D Effects • Premium Animations
-   VERSION FINALE - SIDEBAR 100% PRÉSERVÉE
+   VERSION FINALE - SIDEBAR NON TOUCHÉE
    ============================================== */
 
 /* ============================================
@@ -59,46 +59,9 @@ body.dark-mode,
 }
 
 /* ============================================
-   🚫 EXCLUSION SIDEBAR - PROTECTION TOTALE
+   ✅ TITRE DE LA PAGE
    ============================================ */
-
-/* Exclure la sidebar de TOUS les styles de ce fichier */
-.sidebar,
-.sidebar *,
-.sidebar .nav-item,
-.sidebar .nav-link,
-.sidebar .menu-item,
-.sidebar a,
-.sidebar button,
-.sidebar .card,
-.sidebar .section,
-aside,
-aside *,
-nav.sidebar,
-nav.sidebar *,
-.side-menu,
-.side-menu * {
-    /* Réinitialisation pour garantir aucun style appliqué */
-    background: revert !important;
-    border: revert !important;
-    border-radius: revert !important;
-    box-shadow: revert !important;
-    backdrop-filter: none !important;
-    transform: none !important;
-    transition: revert !important;
-    padding: revert !important;
-    margin: revert !important;
-    color: revert !important;
-    font-weight: revert !important;
-    font-size: revert !important;
-    animation: none !important;
-}
-
-/* ============================================
-   ✅ TITRE DE LA PAGE (MAIN CONTENT UNIQUEMENT)
-   ============================================ */
-.main-content .top-header h1,
-.content .top-header h1 {
+.top-header h1 {
     font-size: 1.8rem;
     font-weight: 800;
     background: linear-gradient(135deg, var(--ml-primary), var(--ml-secondary));
@@ -111,8 +74,7 @@ nav.sidebar *,
     margin: 0;
 }
 
-.main-content .top-header h1 i,
-.content .top-header h1 i {
+.top-header h1 i {
     background: linear-gradient(135deg, var(--ml-primary), var(--ml-secondary));
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
@@ -120,12 +82,9 @@ nav.sidebar *,
 }
 
 /* ============================================
-   📦 CARDS - GLASSMORPHISM (MAIN CONTENT UNIQUEMENT)
+   📦 CARDS - GLASSMORPHISM
    ============================================ */
-.main-content .card,
-.content .card,
-.main-content .section,
-.content .section {
+.card {
     background: linear-gradient(
         135deg,
         rgba(255, 255, 255, 0.08) 0%,
@@ -143,23 +102,20 @@ nav.sidebar *,
     transform-style: preserve-3d;
 }
 
-.main-content .card:hover,
-.content .card:hover {
+.card:hover {
     transform: translateY(-4px);
     box-shadow: 
         0 20px 60px rgba(102, 126, 234, 0.2),
         0 0 40px rgba(118, 75, 162, 0.1);
 }
 
-.main-content .card-header,
-.content .card-header {
+.card-header {
     padding: 30px 35px;
     border-bottom: 2px solid var(--glass-border);
     position: relative;
 }
 
-.main-content .card-header::after,
-.content .card-header::after {
+.card-header::after {
     content: '';
     position: absolute;
     bottom: -2px;
@@ -175,8 +131,7 @@ nav.sidebar *,
     50% { transform: translateX(200px); opacity: 0; }
 }
 
-.main-content .card-title,
-.content .card-title {
+.card-title {
     margin: 0;
     font-size: 1.5rem;
     font-weight: 800;
@@ -188,8 +143,7 @@ nav.sidebar *,
     gap: 15px;
 }
 
-.main-content .card-title i,
-.content .card-title i {
+.card-title i {
     font-size: 1.8rem;
     animation: floatIcon 3s ease-in-out infinite;
 }
@@ -199,16 +153,14 @@ nav.sidebar *,
     50% { transform: translateY(-5px); }
 }
 
-.main-content .card-body,
-.content .card-body {
+.card-body {
     padding: 35px;
 }
 
 /* ============================================
    🔍 SEARCH PANEL - PREMIUM
    ============================================ */
-.main-content .search-panel,
-.content .search-panel {
+.search-panel {
     background: linear-gradient(
         135deg,
         rgba(102, 126, 234, 0.1) 0%,
@@ -218,8 +170,7 @@ nav.sidebar *,
     overflow: hidden;
 }
 
-.main-content .search-panel::before,
-.content .search-panel::before {
+.search-panel::before {
     content: '';
     position: absolute;
     top: -50%;
@@ -335,14 +286,11 @@ nav.sidebar *,
 /* ============================================
    ✅ BOUTON ADD TO COMPARE - FINALISÉ
    ============================================ */
-.main-content .btn-add-to-compare,
-.main-content #addToCompareBtn,
-.main-content button[onclick*="compare"],
-.main-content .comparison-actions .btn,
-.main-content .comparison-actions button,
-.content .btn-add-to-compare,
-.content #addToCompareBtn,
-.content button[onclick*="compare"] {
+.btn-add-to-compare,
+#addToCompareBtn,
+button[onclick*="compare"],
+.comparison-actions .btn,
+.comparison-actions button {
     padding: 14px 28px;
     font-size: 1rem;
     font-weight: 700;
@@ -368,11 +316,9 @@ nav.sidebar *,
     transform-style: preserve-3d;
 }
 
-.main-content .btn-add-to-compare::before,
-.main-content #addToCompareBtn::before,
-.main-content button[onclick*="compare"]::before,
-.content .btn-add-to-compare::before,
-.content #addToCompareBtn::before {
+.btn-add-to-compare::before,
+#addToCompareBtn::before,
+button[onclick*="compare"]::before {
     content: '';
     position: absolute;
     top: 50%;
@@ -389,11 +335,9 @@ nav.sidebar *,
     transition: width 0.6s, height 0.6s;
 }
 
-.main-content .btn-add-to-compare:hover,
-.main-content #addToCompareBtn:hover,
-.main-content button[onclick*="compare"]:hover,
-.content .btn-add-to-compare:hover,
-.content #addToCompareBtn:hover {
+.btn-add-to-compare:hover,
+#addToCompareBtn:hover,
+button[onclick*="compare"]:hover {
     background: linear-gradient(135deg, var(--ml-primary), var(--ml-secondary));
     border-color: transparent;
     color: white !important;
@@ -404,41 +348,41 @@ nav.sidebar *,
         var(--glow-primary);
 }
 
-.main-content .btn-add-to-compare:hover::before,
-.main-content #addToCompareBtn:hover::before,
-.main-content button[onclick*="compare"]:hover::before {
+.btn-add-to-compare:hover::before,
+#addToCompareBtn:hover::before,
+button[onclick*="compare"]:hover::before {
     width: 400px;
     height: 400px;
 }
 
-.main-content .btn-add-to-compare:active,
-.main-content #addToCompareBtn:active,
-.main-content button[onclick*="compare"]:active {
+.btn-add-to-compare:active,
+#addToCompareBtn:active,
+button[onclick*="compare"]:active {
     transform: translateY(-2px) scale(1.02);
 }
 
-.main-content .btn-add-to-compare i,
-.main-content #addToCompareBtn i,
-.main-content button[onclick*="compare"] i {
+.btn-add-to-compare i,
+#addToCompareBtn i,
+button[onclick*="compare"] i {
     font-size: 1.2rem;
     transition: var(--transition-smooth);
 }
 
-.main-content .btn-add-to-compare:hover i,
-.main-content #addToCompareBtn:hover i,
-.main-content button[onclick*="compare"]:hover i {
+.btn-add-to-compare:hover i,
+#addToCompareBtn:hover i,
+button[onclick*="compare"]:hover i {
     transform: scale(1.2) rotate(10deg);
     color: white !important;
 }
 
-.main-content .btn-add-to-compare.btn-primary,
-.main-content .comparison-actions .btn-primary {
+.btn-add-to-compare.btn-primary,
+.comparison-actions .btn-primary {
     background: linear-gradient(135deg, var(--ml-primary), var(--ml-secondary));
     border-color: transparent;
     color: white;
 }
 
-.main-content .btn-add-to-compare.btn-primary:hover {
+.btn-add-to-compare.btn-primary:hover {
     background: linear-gradient(135deg, var(--ml-secondary), var(--ml-accent));
     box-shadow: 
         0 16px 48px rgba(118, 75, 162, 0.5),
@@ -2538,8 +2482,8 @@ button:has(i.fa-chart-pie) {
 /* ============================================
    🌙 DARK MODE
    ============================================ */
-body.dark-mode .main-content .card,
-body.dark-mode .main-content .search-panel,
+body.dark-mode .card,
+body.dark-mode .search-panel,
 body.dark-mode .signals-section,
 body.dark-mode .price-chart-section,
 body.dark-mode .technical-indicators-section,
@@ -2586,8 +2530,7 @@ body.dark-mode .modal-body .btn-cancel:hover {
    📱 RESPONSIVE
    ============================================ */
 @media (max-width: 768px) {
-    .main-content .card-body,
-    .content .card-body {
+    .card-body {
         padding: 20px;
     }
     
@@ -2657,18 +2600,15 @@ body.dark-mode .modal-body .btn-cancel:hover {
 }
 
 @media (max-width: 480px) {
-    .main-content .card,
-    .content .card {
+    .card {
         margin-bottom: 20px;
     }
     
-    .main-content .card-header,
-    .content .card-header {
+    .card-header {
         padding: 20px;
     }
     
-    .main-content .card-body,
-    .content .card-body {
+    .card-body {
         padding: 15px;
     }
 }
@@ -2721,5 +2661,5 @@ body.modal-open {
 
 /* ============================================
    🎯 FIN DU FICHIER - ULTRA MODERN 3D CSS
-   SIDEBAR 100% PRÉSERVÉE ✅
+   SIDEBAR 100% INTACTE ✅
    ============================================ */
