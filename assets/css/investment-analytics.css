@@ -1,6 +1,6 @@
 /* ==============================================
-   🎨 INVESTMENT-ANALYTICS.CSS - OPTIMIZED VERSION
-   Performance optimisée • Design épuré • Blanc/Gris uniquement
+   🎨 INVESTMENT-ANALYTICS.CSS - PREMIUM ANIMATED VERSION
+   Performance optimisée • Animations élégantes • Design moderne
    ✅ MODALS 100% PRÉSERVÉES
    ============================================== */
 
@@ -19,8 +19,13 @@
     --glass-border: rgba(102, 126, 234, 0.2);
     --glass-shadow: rgba(0, 0, 0, 0.08);
     
+    --glow-primary: 0 0 20px rgba(102, 126, 234, 0.4);
+    --glow-success: 0 0 20px rgba(67, 233, 123, 0.4);
+    --glow-danger: 0 0 20px rgba(245, 87, 108, 0.4);
+    
     --transition-fast: all 0.2s ease;
-    --transition-smooth: all 0.3s ease;
+    --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-bounce: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
 }
 
 body.dark-mode {
@@ -29,7 +34,77 @@ body.dark-mode {
 }
 
 /* ============================================
-   📊 ANALYTICS SECTION - PERFORMANCE OPTIMISÉE
+   ✨ ANIMATIONS GLOBALES
+   ============================================ */
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes slideRight {
+    0%, 100% { 
+        transform: translateX(0); 
+        opacity: 1; 
+    }
+    50% { 
+        transform: translateX(200px); 
+        opacity: 0; 
+    }
+}
+
+@keyframes gradientShift {
+    0%, 100% { 
+        background-position: 0% 50%; 
+    }
+    50% { 
+        background-position: 100% 50%; 
+    }
+}
+
+@keyframes pulse {
+    0%, 100% { 
+        opacity: 1; 
+        transform: scale(1); 
+    }
+    50% { 
+        opacity: 0.85; 
+        transform: scale(1.05); 
+    }
+}
+
+@keyframes floatIcon {
+    0%, 100% { 
+        transform: translateY(0); 
+    }
+    50% { 
+        transform: translateY(-5px); 
+    }
+}
+
+@keyframes shimmer {
+    0% {
+        background-position: -1000px 0;
+    }
+    100% {
+        background-position: 1000px 0;
+    }
+}
+
+@keyframes spin {
+    to { 
+        transform: rotate(360deg); 
+    }
+}
+
+/* ============================================
+   📊 ANALYTICS SECTION - AVEC ANIMATIONS
    ============================================ */
 
 .analytics-section {
@@ -39,11 +114,13 @@ body.dark-mode {
     padding: 30px;
     margin-bottom: 30px;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
-    transition: var(--transition-fast);
+    transition: var(--transition-smooth);
+    animation: fadeInUp 0.6s ease-out backwards;
 }
 
 .analytics-section:hover {
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    box-shadow: 0 8px 24px rgba(102, 126, 234, 0.15);
+    transform: translateY(-2px);
 }
 
 body.dark-mode .analytics-section {
@@ -58,6 +135,18 @@ body.dark-mode .analytics-section {
     margin-bottom: 25px;
     padding-bottom: 15px;
     border-bottom: 2px solid #e2e8f0;
+    position: relative;
+}
+
+.section-header::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    width: 100px;
+    height: 2px;
+    background: linear-gradient(90deg, var(--ml-primary), transparent);
+    animation: slideRight 3s ease-in-out infinite;
 }
 
 body.dark-mode .section-header {
@@ -68,6 +157,7 @@ body.dark-mode .section-header {
     font-size: 1.5rem;
     font-weight: 700;
     background: linear-gradient(135deg, var(--ml-primary), var(--ml-secondary));
+    background-size: 200% 200%;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -75,13 +165,16 @@ body.dark-mode .section-header {
     align-items: center;
     gap: 12px;
     margin: 0;
+    animation: gradientShift 3s ease infinite;
 }
 
 .section-header h2 i {
     background: linear-gradient(135deg, var(--ml-primary), var(--ml-secondary));
+    background-size: 200% 200%;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     font-size: 1.3rem;
+    animation: floatIcon 3s ease-in-out infinite;
 }
 
 .header-actions {
@@ -96,16 +189,37 @@ body.dark-mode .section-header {
     border-radius: 10px;
     padding: 10px 15px;
     cursor: pointer;
-    transition: var(--transition-fast);
+    transition: var(--transition-smooth);
     color: var(--text-primary);
     font-size: 1rem;
+    position: relative;
+    overflow: hidden;
+}
+
+.btn-icon::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(102, 126, 234, 0.3), transparent);
+    transform: translate(-50%, -50%);
+    transition: width 0.5s, height 0.5s;
+}
+
+.btn-icon:hover::before {
+    width: 200px;
+    height: 200px;
 }
 
 .btn-icon:hover {
     background: var(--ml-primary);
     color: white;
     border-color: var(--ml-primary);
-    transform: translateY(-1px);
+    transform: translateY(-3px);
+    box-shadow: var(--glow-primary);
 }
 
 body.dark-mode .btn-icon {
@@ -128,7 +242,7 @@ body.dark-mode .btn-icon:hover {
 }
 
 /* ============================================
-   🎯 TITRE PRINCIPAL - FORMAT HARMONISÉ
+   🎯 TITRE PRINCIPAL - FORMAT HARMONISÉ + ANIMÉ
    ============================================ */
 
 .top-header h1,
@@ -136,6 +250,7 @@ body.dark-mode .btn-icon:hover {
     font-size: 1.5rem !important;
     font-weight: 700 !important;
     background: linear-gradient(135deg, var(--ml-primary), var(--ml-secondary)) !important;
+    background-size: 200% 200% !important;
     -webkit-background-clip: text !important;
     -webkit-text-fill-color: transparent !important;
     background-clip: text !important;
@@ -143,18 +258,21 @@ body.dark-mode .btn-icon:hover {
     align-items: center !important;
     gap: 12px !important;
     margin: 0 !important;
+    animation: gradientShift 3s ease infinite !important;
 }
 
 .top-header h1 i,
 #pageTitle i {
     background: linear-gradient(135deg, var(--ml-primary), var(--ml-secondary)) !important;
+    background-size: 200% 200% !important;
     -webkit-background-clip: text !important;
     -webkit-text-fill-color: transparent !important;
     font-size: 1.3rem !important;
+    animation: floatIcon 3s ease-in-out infinite !important;
 }
 
 /* ============================================
-   🎯 INFO BUTTON - OPTIMISÉ
+   🎯 INFO BUTTON - AVEC ANIMATIONS
    ============================================ */
 
 .chart-card {
@@ -163,11 +281,13 @@ body.dark-mode .btn-icon:hover {
     border-radius: 16px;
     padding: 20px;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
-    transition: var(--transition-fast);
+    transition: var(--transition-smooth);
+    animation: fadeInUp 0.6s ease-out backwards;
 }
 
 .chart-card:hover {
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    box-shadow: 0 8px 24px rgba(102, 126, 234, 0.15);
+    transform: translateY(-4px);
 }
 
 body.dark-mode .chart-card {
@@ -179,6 +299,7 @@ body.dark-mode .chart-card {
     font-size: 1.1rem;
     font-weight: 700;
     background: linear-gradient(135deg, var(--ml-primary), var(--ml-secondary));
+    background-size: 200% 200%;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     margin-bottom: 15px;
@@ -186,6 +307,7 @@ body.dark-mode .chart-card {
     align-items: center;
     gap: 10px;
     justify-content: space-between;
+    animation: gradientShift 3s ease infinite;
 }
 
 .btn-info {
@@ -201,7 +323,7 @@ body.dark-mode .chart-card {
     justify-content: center;
     font-size: 0.9rem;
     font-weight: 800;
-    transition: var(--transition-fast);
+    transition: var(--transition-bounce);
     flex-shrink: 0;
 }
 
@@ -209,7 +331,8 @@ body.dark-mode .chart-card {
     background: var(--ml-primary);
     color: white;
     border-color: var(--ml-primary);
-    transform: scale(1.1);
+    transform: scale(1.2) rotate(15deg);
+    box-shadow: var(--glow-primary);
 }
 
 body.dark-mode .btn-info {
@@ -415,7 +538,7 @@ body.dark-mode .btn-info:hover {
 }
 
 /* ============================================
-   💎 KPI GRID - OPTIMISÉ
+   💎 KPI GRID - AVEC ANIMATIONS PREMIUM
    ============================================ */
 
 .kpi-grid {
@@ -430,15 +553,42 @@ body.dark-mode .btn-info:hover {
     border-left: 4px solid var(--ml-primary);
     border-radius: 16px;
     padding: 25px;
-    transition: var(--transition-fast);
+    transition: var(--transition-smooth);
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    animation: fadeInUp 0.6s ease-out backwards;
+    position: relative;
+    overflow: hidden;
+}
+
+.kpi-card::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(102, 126, 234, 0.05) 0%, transparent 70%);
+    opacity: 0;
+    transition: opacity 0.5s, transform 0.5s;
+}
+
+.kpi-card:hover::before {
+    opacity: 1;
+    transform: scale(1.1);
 }
 
 .kpi-card:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+    transform: translateY(-6px);
+    box-shadow: 0 12px 28px rgba(102, 126, 234, 0.2);
     border-left-width: 5px;
 }
+
+.kpi-card:nth-child(1) { animation-delay: 0.1s; }
+.kpi-card:nth-child(2) { animation-delay: 0.2s; }
+.kpi-card:nth-child(3) { animation-delay: 0.3s; }
+.kpi-card:nth-child(4) { animation-delay: 0.4s; }
+.kpi-card:nth-child(5) { animation-delay: 0.5s; }
+.kpi-card:nth-child(6) { animation-delay: 0.6s; }
 
 body.dark-mode .kpi-card {
     background: #1e293b;
@@ -449,8 +599,16 @@ body.dark-mode .kpi-card {
     border-left-color: var(--ml-success);
 }
 
+.kpi-card.positive::before {
+    background: radial-gradient(circle, rgba(67, 233, 123, 0.05) 0%, transparent 70%);
+}
+
 .kpi-card.negative {
     border-left-color: var(--ml-danger);
+}
+
+.kpi-card.negative::before {
+    background: radial-gradient(circle, rgba(245, 87, 108, 0.05) 0%, transparent 70%);
 }
 
 .kpi-card.neutral {
@@ -482,6 +640,12 @@ body.dark-mode .kpi-card {
     background: rgba(102, 126, 234, 0.1);
     color: var(--ml-primary);
     font-size: 1.2rem;
+    transition: var(--transition-smooth);
+}
+
+.kpi-card:hover .kpi-icon {
+    transform: scale(1.15) rotate(-10deg);
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.3);
 }
 
 .kpi-card.positive .kpi-icon {
@@ -498,20 +662,24 @@ body.dark-mode .kpi-card {
     font-size: 2rem;
     font-weight: 800;
     background: linear-gradient(135deg, var(--ml-primary), var(--ml-secondary));
+    background-size: 200% 200%;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     margin-bottom: 8px;
     line-height: 1;
+    animation: gradientShift 3s ease infinite;
 }
 
 .kpi-card.positive .kpi-value {
     background: linear-gradient(135deg, var(--ml-success), #38f9d7);
+    background-size: 200% 200%;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
 }
 
 .kpi-card.negative .kpi-value {
     background: linear-gradient(135deg, var(--ml-danger), #fd7e14);
+    background-size: 200% 200%;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
 }
@@ -545,7 +713,7 @@ body.dark-mode .kpi-footer {
 }
 
 /* ============================================
-   🎚️ PERIOD SELECTOR - ULTRA RAPIDE
+   🎚️ PERIOD SELECTOR - AVEC ANIMATIONS
    ============================================ */
 
 .period-selector {
@@ -572,6 +740,23 @@ body.dark-mode .period-selector {
     font-size: 0.85rem;
     cursor: pointer;
     transition: var(--transition-fast);
+    position: relative;
+    overflow: hidden;
+}
+
+.period-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+    transition: left 0.5s;
+}
+
+.period-btn:hover::before {
+    left: 100%;
 }
 
 .period-btn:hover {
@@ -585,8 +770,10 @@ body.dark-mode .period-btn:hover {
 
 .period-btn.active {
     background: linear-gradient(135deg, var(--ml-primary), var(--ml-secondary));
+    background-size: 200% 200%;
     color: white;
-    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+    animation: gradientShift 3s ease infinite;
 }
 
 /* ============================================
@@ -610,23 +797,27 @@ body.dark-mode .period-btn:hover {
 }
 
 /* ============================================
-   📊 RISK METRICS TABLE - ESTHÉTIQUE AMÉLIORÉE
+   📊 RISK METRICS TABLE - PREMIUM ANIMÉ
    ============================================ */
 
 .risk-metrics-container {
     margin-top: 30px;
+    animation: fadeInUp 0.6s ease-out backwards;
+    animation-delay: 0.3s;
 }
 
 .risk-metrics-container h3 {
     font-size: 1.2rem;
     font-weight: 700;
     background: linear-gradient(135deg, var(--ml-primary), var(--ml-secondary));
+    background-size: 200% 200%;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     margin-bottom: 20px;
     display: flex;
     align-items: center;
     gap: 10px;
+    animation: gradientShift 3s ease infinite;
 }
 
 .table-responsive {
@@ -635,6 +826,11 @@ body.dark-mode .period-btn:hover {
     border: 1px solid #e2e8f0;
     background: #ffffff;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    transition: var(--transition-smooth);
+}
+
+.table-responsive:hover {
+    box-shadow: 0 8px 24px rgba(102, 126, 234, 0.12);
 }
 
 body.dark-mode .table-responsive {
@@ -650,7 +846,9 @@ body.dark-mode .table-responsive {
 
 .metrics-table thead {
     background: linear-gradient(135deg, var(--ml-primary), var(--ml-secondary));
+    background-size: 200% 200%;
     color: white;
+    animation: gradientShift 6s ease infinite;
 }
 
 .metrics-table th {
@@ -672,11 +870,8 @@ body.dark-mode .metrics-table tbody tr {
 }
 
 .metrics-table tbody tr:hover {
-    background: #f8fafc;
-}
-
-body.dark-mode .metrics-table tbody tr:hover {
-    background: #334155;
+    background: linear-gradient(90deg, rgba(102, 126, 234, 0.05), transparent);
+    transform: translateX(4px);
 }
 
 .metrics-table td {
@@ -694,6 +889,7 @@ body.dark-mode .metrics-table tbody tr:hover {
     font-weight: 700;
     font-size: 1.05rem;
     background: linear-gradient(135deg, var(--ml-primary), var(--ml-secondary));
+    background-size: 200% 200%;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
 }
@@ -714,7 +910,7 @@ body.dark-mode .metrics-table tbody tr:hover {
 }
 
 /* ============================================
-   🔗 CORRELATION MATRIX
+   🔗 CORRELATION MATRIX - ANIMÉ
    ============================================ */
 
 .correlation-container {
@@ -723,6 +919,11 @@ body.dark-mode .metrics-table tbody tr:hover {
     border-radius: 16px;
     padding: 20px;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    transition: var(--transition-smooth);
+}
+
+.correlation-container:hover {
+    box-shadow: 0 8px 24px rgba(102, 126, 234, 0.12);
 }
 
 body.dark-mode .correlation-container {
@@ -750,7 +951,7 @@ body.dark-mode .correlation-insights {
     padding: 12px;
     background: #ffffff;
     border-radius: 12px;
-    transition: var(--transition-fast);
+    transition: var(--transition-smooth);
 }
 
 body.dark-mode .insight-item {
@@ -762,8 +963,8 @@ body.dark-mode .insight-item {
 }
 
 .insight-item:hover {
-    transform: translateX(4px);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    transform: translateX(6px);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
 }
 
 .insight-icon {
@@ -775,6 +976,11 @@ body.dark-mode .insight-item {
     justify-content: center;
     flex-shrink: 0;
     font-size: 1rem;
+    transition: var(--transition-smooth);
+}
+
+.insight-item:hover .insight-icon {
+    transform: scale(1.15) rotate(-10deg);
 }
 
 .insight-icon.positive {
@@ -806,15 +1012,17 @@ body.dark-mode .insight-item {
 }
 
 /* ============================================
-   🤖 AI SECTION - FOND VIOLET CONSERVÉ
+   🤖 AI SECTION - FOND VIOLET ANIMÉ
    ============================================ */
 
 .ai-section {
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background-size: 200% 200%;
     border: none;
     position: relative;
     overflow: hidden;
-    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+    box-shadow: 0 8px 24px rgba(102, 126, 234, 0.3);
+    animation: gradientShift 8s ease infinite, fadeInUp 0.6s ease-out backwards;
 }
 
 .ai-section .section-header {
@@ -823,7 +1031,7 @@ body.dark-mode .insight-item {
 
 .ai-section .section-header h2 {
     color: white !important;
-    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    text-shadow: 0 2px 12px rgba(0, 0, 0, 0.3);
     background: none !important;
     -webkit-text-fill-color: white !important;
 }
@@ -832,6 +1040,7 @@ body.dark-mode .insight-item {
     color: #FFD700 !important;
     background: none !important;
     -webkit-text-fill-color: #FFD700 !important;
+    animation: pulse 2s ease-in-out infinite;
 }
 
 .ai-section .btn-primary {
@@ -844,7 +1053,8 @@ body.dark-mode .insight-item {
 .ai-section .btn-primary:hover {
     background: #FFD700;
     color: #333;
-    transform: translateY(-2px);
+    transform: translateY(-3px);
+    box-shadow: 0 8px 24px rgba(255, 215, 0, 0.4);
 }
 
 /* AI Loading */
@@ -866,10 +1076,6 @@ body.dark-mode .insight-item {
     border-top-color: #FFD700;
     border-radius: 50%;
     animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-    to { transform: rotate(360deg); }
 }
 
 .ai-loading p {
@@ -894,6 +1100,7 @@ body.dark-mode .insight-item {
     border-radius: 10px;
     width: 0%;
     transition: width 0.3s;
+    animation: shimmer 2s infinite;
 }
 
 /* AI Models Grid */
@@ -909,17 +1116,40 @@ body.dark-mode .insight-item {
     border-radius: 16px;
     padding: 25px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-    transition: var(--transition-fast);
+    transition: var(--transition-smooth);
     border-top: 4px solid var(--ml-primary);
+    animation: fadeInUp 0.6s ease-out backwards;
+    position: relative;
+    overflow: hidden;
 }
+
+.ai-model-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(102, 126, 234, 0.1), transparent);
+    transition: left 0.8s;
+}
+
+.ai-model-card:hover::before {
+    left: 100%;
+}
+
+.ai-model-card:nth-child(1) { animation-delay: 0.1s; }
+.ai-model-card:nth-child(2) { animation-delay: 0.2s; }
+.ai-model-card:nth-child(3) { animation-delay: 0.3s; }
+.ai-model-card:nth-child(4) { animation-delay: 0.4s; }
 
 body.dark-mode .ai-model-card {
     background: #1e293b;
 }
 
 .ai-model-card:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+    transform: translateY(-6px);
+    box-shadow: 0 12px 28px rgba(102, 126, 234, 0.25);
 }
 
 .model-header {
@@ -939,6 +1169,11 @@ body.dark-mode .ai-model-card {
     font-size: 1.3rem;
     color: white;
     flex-shrink: 0;
+    transition: var(--transition-smooth);
+}
+
+.ai-model-card:hover .model-icon {
+    transform: scale(1.15) rotate(-15deg);
 }
 
 .model-icon.optimizer {
@@ -1031,18 +1266,22 @@ body.dark-mode .result-item {
     font-size: 1.1rem;
     font-weight: 700;
     background: linear-gradient(135deg, var(--ml-primary), var(--ml-secondary));
+    background-size: 200% 200%;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
+    animation: gradientShift 3s ease infinite;
 }
 
 .result-value.positive {
     background: linear-gradient(135deg, var(--ml-success), #38f9d7);
+    background-size: 200% 200%;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
 }
 
 .result-value.negative {
     background: linear-gradient(135deg, var(--ml-danger), #fd7e14);
+    background-size: 200% 200%;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
 }
@@ -1055,6 +1294,8 @@ body.dark-mode .result-item {
     padding: 30px;
     margin-top: 30px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    animation: fadeInUp 0.6s ease-out backwards;
+    animation-delay: 0.2s;
 }
 
 .ai-recommendations h3 {
@@ -1071,6 +1312,7 @@ body.dark-mode .result-item {
 
 .ai-recommendations h3 i {
     color: #FFD700;
+    animation: pulse 2s ease-in-out infinite;
 }
 
 .recommendations-list {
@@ -1088,12 +1330,13 @@ body.dark-mode .result-item {
     border: 1px solid rgba(255, 255, 255, 0.2);
     border-left: 4px solid white;
     border-radius: 12px;
-    transition: var(--transition-fast);
+    transition: var(--transition-smooth);
 }
 
 .recommendation-item:hover {
-    transform: translateX(4px);
+    transform: translateX(6px);
     background: rgba(255, 255, 255, 0.15);
+    box-shadow: 0 4px 12px rgba(255, 255, 255, 0.2);
 }
 
 .recommendation-item.priority-high {
@@ -1118,6 +1361,11 @@ body.dark-mode .result-item {
     font-size: 1.2rem;
     flex-shrink: 0;
     background: rgba(255, 255, 255, 0.2);
+    transition: var(--transition-smooth);
+}
+
+.recommendation-item:hover .recommendation-icon {
+    transform: scale(1.15) rotate(-10deg);
 }
 
 .recommendation-item.priority-high .recommendation-icon {
@@ -1162,13 +1410,14 @@ body.dark-mode .result-item {
     font-size: 0.85rem;
     font-weight: 600;
     text-decoration: none;
-    transition: var(--transition-fast);
+    transition: var(--transition-smooth);
 }
 
 .recommendation-action:hover {
     background: #FFD700;
     color: #333;
-    transform: translateY(-1px);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(255, 215, 0, 0.4);
 }
 
 /* ============================================
@@ -1195,7 +1444,7 @@ body.dark-mode .result-item {
     color: var(--text-primary);
     font-weight: 500;
     cursor: pointer;
-    transition: var(--transition-fast);
+    transition: var(--transition-smooth);
 }
 
 body.dark-mode .benchmark-selector select {
@@ -1214,15 +1463,17 @@ body.dark-mode .benchmark-selector select {
 }
 
 /* ============================================
-   🏢 ASSET ALLOCATION SECTION - FOND VIOLET + TEXTE BLANC
+   🏢 ASSET ALLOCATION SECTION - FOND VIOLET ANIMÉ
    ============================================ */
 
 .asset-config-section {
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background-size: 200% 200%;
     color: white;
     position: relative;
     overflow: hidden;
-    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+    box-shadow: 0 8px 24px rgba(102, 126, 234, 0.3);
+    animation: gradientShift 8s ease infinite, fadeInUp 0.6s ease-out backwards;
 }
 
 .asset-config-section .section-header {
@@ -1231,9 +1482,13 @@ body.dark-mode .benchmark-selector select {
 
 .asset-config-section .section-header h2 {
     color: white !important;
-    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    text-shadow: 0 2px 12px rgba(0, 0, 0, 0.3);
     background: none !important;
     -webkit-text-fill-color: white !important;
+}
+
+.asset-config-section .section-header h2 i {
+    animation: floatIcon 3s ease-in-out infinite;
 }
 
 .asset-config-section .btn-icon {
@@ -1244,6 +1499,8 @@ body.dark-mode .benchmark-selector select {
 
 .asset-config-section .btn-icon:hover {
     background: rgba(255, 255, 255, 0.25);
+    transform: translateY(-3px);
+    box-shadow: 0 6px 20px rgba(255, 255, 255, 0.3);
 }
 
 .info-box {
@@ -1256,6 +1513,12 @@ body.dark-mode .benchmark-selector select {
     display: flex;
     align-items: flex-start;
     gap: 12px;
+    transition: var(--transition-smooth);
+}
+
+.info-box:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: translateX(4px);
 }
 
 .info-box i {
@@ -1284,12 +1547,13 @@ body.dark-mode .benchmark-selector select {
     border-radius: 12px;
     padding: 20px;
     text-align: center;
-    transition: var(--transition-fast);
+    transition: var(--transition-smooth);
 }
 
 .summary-item:hover {
     background: rgba(255, 255, 255, 0.2);
-    transform: translateY(-2px);
+    transform: translateY(-4px);
+    box-shadow: 0 6px 20px rgba(255, 255, 255, 0.2);
 }
 
 .summary-label {
@@ -1307,6 +1571,7 @@ body.dark-mode .benchmark-selector select {
     font-weight: 800;
     margin-bottom: 5px;
     color: #FFD700;
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
 }
 
 .summary-hint {
@@ -1343,11 +1608,13 @@ body.dark-mode .manager-header {
     font-size: 1.2rem;
     font-weight: 700;
     background: linear-gradient(135deg, var(--ml-primary), var(--ml-secondary));
+    background-size: 200% 200%;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     display: flex;
     align-items: center;
     gap: 10px;
+    animation: gradientShift 3s ease infinite;
 }
 
 .assets-list {
@@ -1365,7 +1632,7 @@ body.dark-mode .manager-header {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    transition: var(--transition-fast);
+    transition: var(--transition-smooth);
 }
 
 body.dark-mode .asset-item {
@@ -1374,8 +1641,8 @@ body.dark-mode .asset-item {
 }
 
 .asset-item:hover {
-    transform: translateX(4px);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    transform: translateX(6px);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
 }
 
 .asset-item.equity {
@@ -1419,6 +1686,11 @@ body.dark-mode .asset-item {
     font-size: 1.2rem;
     color: white;
     flex-shrink: 0;
+    transition: var(--transition-smooth);
+}
+
+.asset-item:hover .asset-icon {
+    transform: scale(1.15) rotate(-10deg);
 }
 
 .asset-icon.equity {
@@ -1484,17 +1756,19 @@ body.dark-mode .allocation-bar {
     height: 100%;
     background: linear-gradient(90deg, #667eea, #764ba2);
     border-radius: 10px;
-    transition: width 0.3s;
+    transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .allocation-percent {
     font-size: 1.1rem;
     font-weight: 700;
     background: linear-gradient(135deg, var(--ml-primary), var(--ml-secondary));
+    background-size: 200% 200%;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     min-width: 60px;
     text-align: right;
+    animation: gradientShift 3s ease infinite;
 }
 
 .asset-actions {
@@ -1511,7 +1785,7 @@ body.dark-mode .allocation-bar {
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    transition: var(--transition-fast);
+    transition: var(--transition-bounce);
     font-size: 0.9rem;
 }
 
@@ -1523,6 +1797,8 @@ body.dark-mode .allocation-bar {
 .asset-btn.edit:hover {
     background: var(--ml-primary);
     color: white;
+    transform: scale(1.2);
+    box-shadow: var(--glow-primary);
 }
 
 .asset-btn.delete {
@@ -1533,6 +1809,8 @@ body.dark-mode .allocation-bar {
 .asset-btn.delete:hover {
     background: var(--ml-danger);
     color: white;
+    transform: scale(1.2);
+    box-shadow: var(--glow-danger);
 }
 
 .assets-empty {
@@ -1545,6 +1823,7 @@ body.dark-mode .allocation-bar {
     font-size: 4rem;
     color: #e2e8f0;
     margin-bottom: 20px;
+    animation: pulse 2s ease-in-out infinite;
 }
 
 body.dark-mode .assets-empty i {
@@ -1699,11 +1978,12 @@ body.dark-mode .assets-empty i {
 }
 
 /* ============================================
-   🚀 MODERN BUTTONS - OPTIMISÉS + CENTRÉS
+   🚀 MODERN BUTTONS - ANIMÉS + CENTRÉS
    ============================================ */
 
 .btn-primary {
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background-size: 200% 200%;
     color: white;
     border: none;
     padding: 12px 24px;
@@ -1711,21 +1991,39 @@ body.dark-mode .assets-empty i {
     font-size: 14px;
     font-weight: 600;
     cursor: pointer;
-    transition: var(--transition-fast);
+    transition: var(--transition-smooth);
     box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
     display: inline-flex;
     align-items: center;
     justify-content: center;
     gap: 8px;
+    position: relative;
+    overflow: hidden;
+    animation: gradientShift 6s ease infinite;
+}
+
+.btn-primary::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+    transition: left 0.6s;
+}
+
+.btn-primary:hover::before {
+    left: 100%;
 }
 
 .btn-primary:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 16px rgba(102, 126, 234, 0.4);
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(102, 126, 234, 0.5);
 }
 
 .btn-primary:active {
-    transform: translateY(0);
+    transform: translateY(-1px);
 }
 
 .btn-primary i {
@@ -1741,7 +2039,7 @@ body.dark-mode .assets-empty i {
     font-size: 14px;
     font-weight: 500;
     cursor: pointer;
-    transition: var(--transition-fast);
+    transition: var(--transition-smooth);
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -1751,7 +2049,8 @@ body.dark-mode .assets-empty i {
 .btn-secondary:hover {
     background: #e2e8f0;
     border-color: #cbd5e1;
-    transform: translateY(-1px);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 }
 
 body.dark-mode .btn-secondary {
@@ -1803,18 +2102,21 @@ body.dark-mode .highcharts-grid-line {
 .dark-mode #pageTitle,
 .dark-mode .top-header h1 {
     background: linear-gradient(135deg, var(--ml-primary), var(--ml-secondary)) !important;
+    background-size: 200% 200% !important;
     -webkit-background-clip: text !important;
     -webkit-text-fill-color: transparent !important;
 }
 
 .dark-mode .chart-title {
     background: linear-gradient(135deg, var(--ml-primary), var(--ml-secondary)) !important;
+    background-size: 200% 200% !important;
     -webkit-background-clip: text !important;
     -webkit-text-fill-color: transparent !important;
 }
 
 .dark-mode .section-header h2 {
     background: linear-gradient(135deg, var(--ml-primary), var(--ml-secondary)) !important;
+    background-size: 200% 200% !important;
     -webkit-background-clip: text !important;
     -webkit-text-fill-color: transparent !important;
 }
@@ -1882,7 +2184,7 @@ body.dark-mode .highcharts-grid-line {
 }
 
 /* ============================================
-   🎯 SCROLLBAR CUSTOM
+   🎯 SCROLLBAR CUSTOM - PREMIUM
    ============================================ */
 
 .modal-info-content::-webkit-scrollbar,
@@ -1913,5 +2215,5 @@ body.dark-mode .modal-content::-webkit-scrollbar-track {
 }
 
 /* ============================================
-   🎬 FIN DU FICHIER - OPTIMIZED VERSION
+   🎬 FIN DU FICHIER - PREMIUM ANIMATED VERSION
    ============================================ */
