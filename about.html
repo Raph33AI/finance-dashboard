@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About Us - AlphaVault AI</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    
+    <link rel="stylesheet" href="assets/css/common.css">
+    <link rel="stylesheet" href="assets/css/landing.css">
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="icon" type="image/svg+xml" href="assets/images/favicon.svg">
+    
+    <style>
+        .page-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 120px 0 80px;
+            text-align: center;
+            color: white;
+        }
+        .page-header h1 {
+            font-size: 3rem;
+            font-weight: 800;
+            margin-bottom: 1rem;
+        }
+        .page-header p {
+            font-size: 1.25rem;
+            opacity: 0.95;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+        .content-section {
+            padding: 80px 0;
+        }
+        .content-section h2 {
+            font-size: 2.25rem;
+            font-weight: 700;
+            margin-bottom: 2rem;
+            color: var(--text-primary);
+        }
+        .content-section p {
+            font-size: 1.125rem;
+            line-height: 1.8;
+            color: var(--text-secondary);
+            margin-bottom: 1.5rem;
+        }
+        .team-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+        .team-member {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 2rem;
+            text-align: center;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+        }
+        .team-member:hover {
+            transform: translateY(-8px);
+        }
+        .team-member img {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            margin-bottom: 1rem;
+            border: 4px solid #3B82F6;
+        }
+        .team-member h3 {
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+        }
+        .team-member .role {
+            color: #3B82F6;
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+        .values-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+        .value-card {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 2rem;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        .value-card .icon {
+            font-size: 3rem;
+            color: #3B82F6;
+            margin-bottom: 1rem;
+        }
+        .value-card h3 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Navigation (même que index.html) -->
+    <nav class="landing-nav" id="landingNav">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <div class="brand-logo">
+                    <svg class="logo-svg" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" width="32" height="32">
+                        <defs>
+                            <linearGradient id="logoGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" style="stop-color:#3B82F6;stop-opacity:1" />
+                                <stop offset="100%" style="stop-color:#8B5CF6;stop-opacity:1" />
+                            </linearGradient>
+                        </defs>
+                        <path d="M 20 80 L 30 70 L 40 75 L 50 60 L 60 65 L 70 45 L 80 50 L 90 30" 
+                              stroke="url(#logoGradient)" stroke-width="4" fill="none"/>
+                        <circle cx="90" cy="30" r="5" fill="url(#logoGradient)"/>
+                    </svg>
+                </div>
+                <span class="brand-text">AlphaVault <strong>AI</strong></span>
+            </div>
+            
+            <div class="nav-menu" id="navMenu">
+                <a href="index.html" class="nav-link">Home</a>
+                <a href="index.html#features" class="nav-link">Features</a>
+                <a href="index.html#pricing" class="nav-link">Pricing</a>
+                <a href="contact.html" class="nav-link">Contact</a>
+            </div>
+            
+            <div class="nav-cta">
+                <button class="btn-text" onclick="window.location.href='auth.html'">Log in</button>
+                <button class="btn-primary-nav" onclick="window.location.href='auth.html#signup'">
+                    Start Free
+                    <i class="fas fa-arrow-right"></i>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Page Header -->
+    <section class="page-header">
+        <div class="container-fluid">
+            <h1>About AlphaVault AI</h1>
+            <p>We're building the future of AI-powered financial intelligence</p>
+        </div>
+    </section>
+
+    <!-- Mission Section -->
+    <section class="content-section">
+        <div class="container-fluid">
+            <h2>Our Mission</h2>
+            <p>
+                At AlphaVault AI, we believe that sophisticated financial analysis tools should be accessible to everyone, 
+                not just institutional investors. Our mission is to democratize financial intelligence by leveraging 
+                cutting-edge artificial intelligence and machine learning technologies.
+            </p>
+            <p>
+                We empower individual investors and finance professionals with the same institutional-grade tools used 
+                by Wall Street, but at a fraction of the cost. From IPO screening to portfolio optimization, Monte Carlo 
+                simulations to M&A analysis, we provide comprehensive solutions for modern investors.
+            </p>
+        </div>
+    </section>
+
+    <!-- Values Section -->
+    <section class="content-section" style="background: var(--bg-secondary);">
+        <div class="container-fluid">
+            <h2>Our Core Values</h2>
+            <div class="values-grid">
+                <div class="value-card">
+                    <div class="icon"><i class="fas fa-lightbulb"></i></div>
+                    <h3>Innovation</h3>
+                    <p>We continuously push the boundaries of what's possible in financial technology, integrating the latest AI research into practical tools.</p>
+                </div>
+                <div class="value-card">
+                    <div class="icon"><i class="fas fa-shield-alt"></i></div>
+                    <h3>Trust & Transparency</h3>
+                    <p>We prioritize data security and algorithmic transparency, ensuring you understand how our AI makes its recommendations.</p>
+                </div>
+                <div class="value-card">
+                    <div class="icon"><i class="fas fa-users"></i></div>
+                    <h3>Accessibility</h3>
+                    <p>Financial intelligence shouldn't be limited to the wealthy. We make professional-grade tools accessible to all investors.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Team Section -->
+    <section class="content-section">
+        <div class="container-fluid">
+            <h2>Meet the Team</h2>
+            <div class="team-grid">
+                <div class="team-member">
+                    <img src="https://ui-avatars.com/api/?name=John+Smith&background=3B82F6&color=fff&size=240" alt="John Smith">
+                    <h3>John Smith</h3>
+                    <p class="role">CEO & Co-Founder</p>
+                    <p>Former Goldman Sachs VP with 15+ years in quantitative finance</p>
+                </div>
+                <div class="team-member">
+                    <img src="https://ui-avatars.com/api/?name=Sarah+Chen&background=8B5CF6&color=fff&size=240" alt="Sarah Chen">
+                    <h3>Sarah Chen</h3>
+                    <p class="role">CTO & Co-Founder</p>
+                    <p>Ex-Google AI researcher specializing in financial ML models</p>
+                </div>
+                <div class="team-member">
+                    <img src="https://ui-avatars.com/api/?name=Michael+Brown&background=10B981&color=fff&size=240" alt="Michael Brown">
+                    <h3>Michael Brown</h3>
+                    <p class="role">Head of Product</p>
+                    <p>Product leader from Bloomberg Terminal with a passion for UX</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer (copier depuis index.html) -->
+    <footer class="landing-footer">
+        <div class="container-fluid">
+            <div class="footer-grid">
+                <div class="footer-col footer-brand-col">
+                    <div class="footer-brand">
+                        <div class="brand-logo">
+                            <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" width="32" height="32">
+                                <defs>
+                                    <linearGradient id="logoGradientFooter" x1="0%" y1="0%" x2="100%" y2="100%">
+                                        <stop offset="0%" style="stop-color:#3B82F6;stop-opacity:1" />
+                                        <stop offset="100%" style="stop-color:#8B5CF6;stop-opacity:1" />
+                                    </linearGradient>
+                                </defs>
+                                <path d="M 20 80 L 30 70 L 40 75 L 50 60 L 60 65 L 70 45 L 80 50 L 90 30" 
+                                      stroke="url(#logoGradientFooter)" stroke-width="4" fill="none"/>
+                            </svg>
+                        </div>
+                        <span class="brand-text">AlphaVault <strong>AI</strong></span>
+                    </div>
+                    <p class="footer-description">AI-powered financial intelligence platform for smart investors.</p>
+                </div>
+
+                <div class="footer-col">
+                    <h4>Company</h4>
+                    <ul>
+                        <li><a href="about.html">About Us</a></li>
+                        <li><a href="contact.html">Contact</a></li>
+                        <li><a href="privacy.html">Privacy Policy</a></li>
+                        <li><a href="terms.html">Terms of Service</a></li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="footer-bottom">
+                <p>&copy; <span id="currentYear">2024</span> AlphaVault AI. All rights reserved.</p>
+                <div class="footer-bottom-links">
+                    <a href="privacy.html">Privacy</a>
+                    <a href="terms.html">Terms</a>
+                    <a href="security.html">Security</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="assets/js/common.js"></script>
+    <script>
+        document.getElementById('currentYear').textContent = new Date().getFullYear();
+    </script>
+</body>
+</html>
