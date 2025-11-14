@@ -133,23 +133,12 @@
                                         <span class="dropdown-link-desc">Manage investments</span>
                                     </div>
                                 </a>
-
-                                <a href="#" class="dropdown-link" role="menuitem">
-                                    <div class="dropdown-link-icon">
-                                        <i class="fas fa-bell"></i>
-                                    </div>
-                                    <div class="dropdown-link-text">
-                                        <span class="dropdown-link-title">Notifications</span>
-                                        <span class="dropdown-link-desc">3 new alerts</span>
-                                    </div>
-                                    <span class="dropdown-notification-badge">3</span>
-                                </a>
                             </div>
 
                             <div class="dropdown-divider"></div>
 
                             <div class="dropdown-section">
-                                <a href="#" class="dropdown-link" role="menuitem" id="settingsLink">
+                                <a href="settings.html" class="dropdown-link" role="menuitem" id="settingsLink">
                                     <div class="dropdown-link-icon">
                                         <i class="fas fa-cog"></i>
                                     </div>
@@ -984,11 +973,11 @@
     </section>
 
     <!-- ═══════════════════════════════════════════════════════════════
-         SOLUTIONS SECTION
+         SOLUTIONS SECTION - ✅ CENTRÉ
          ═══════════════════════════════════════════════════════════════ -->
     <section class="solutions-section" id="solutions">
         <div class="container-fluid">
-            <div class="section-header">
+            <div class="section-header" style="text-align: center;">
                 <span class="section-tag" data-aos="fade-up">Solutions</span>
                 <h2 class="section-title" data-aos="fade-up" data-aos-delay="100">Built for everyone</h2>
                 <p class="section-description" data-aos="fade-up" data-aos-delay="200">
@@ -1135,11 +1124,11 @@
     </section>
 
     <!-- ═══════════════════════════════════════════════════════════════
-         PRICING SECTION - 3 OFFRES EN DOLLARS
+         PRICING SECTION - ✅ CENTRÉ
          ═══════════════════════════════════════════════════════════════ -->
     <section class="pricing-section" id="pricing">
         <div class="container-fluid">
-            <div class="section-header">
+            <div class="section-header" style="text-align: center;">
                 <span class="section-tag" data-aos="fade-up">Pricing</span>
                 <h2 class="section-title" data-aos="fade-up" data-aos-delay="100">Simple, transparent pricing</h2>
                 <p class="section-description" data-aos="fade-up" data-aos-delay="200">Start free, upgrade when you're ready</p>
@@ -1267,9 +1256,9 @@
                                     </linearGradient>
                                 </defs>
                                 <path d="M 20 80 L 30 70 L 40 75 L 50 60 L 60 65 L 70 45 L 80 50 L 90 30" 
-                                    stroke="url(#logoGradientFooter)" 
-                                    stroke-width="4" 
-                                    fill="none"/>
+                                      stroke="url(#logoGradientFooter)" 
+                                      stroke-width="4" 
+                                      fill="none"/>
                             </svg>
                         </div>
                         <span class="brand-text">AlphaVault <strong>AI</strong></span>
@@ -1349,19 +1338,13 @@
     <!-- Firebase Config -->
     <script src="assets/js/firebase-config.js"></script>
     
-    <!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-         ✅ CONFIG - DOIT ÊTRE CHARGÉ EN PREMIER !
-         ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
+    <!-- Config -->
     <script src="assets/js/config.js"></script>
     
-    <!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-         API CLIENT - APRÈS CONFIG, AVANT LE TICKER !
-         ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
+    <!-- API CLIENT -->
     <script src="assets/js/api-client.js"></script>
     
-    <!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-         CHATBOT ALPHY AI - ORDRE CRITIQUE !
-         ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
+    <!-- CHATBOT ALPHY AI -->
     <script src="assets/js/chatbot-config.js"></script>
     <script src="assets/js/chatbot-gemini.js"></script>
     <script src="assets/js/chatbot-analytics.js"></script>
@@ -1375,25 +1358,19 @@
     <script src="assets/js/common.js"></script>
     <script src="assets/js/landing.js"></script>
     
-    <!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-         MARKET TICKER - APRÈS CONFIG ET API CLIENT !
-         ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
+    <!-- MARKET TICKER -->
     <script src="assets/js/landing-market-ticker.js"></script>
     
     <script src="assets/js/auth-system.js"></script>
     
-    <!-- ═══════════════════════════════════════════════════════════════
-         INITIALISATION GLOBALE
-         ═══════════════════════════════════════════════════════════════ -->
+    <!-- INITIALISATION GLOBALE -->
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             console.log('%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'color: #3B82F6; font-weight: bold; font-size: 14px;');
             console.log('%c🚀 AlphaVault AI - Platform Initialization', 'color: #3B82F6; font-size: 18px; font-weight: bold;');
             console.log('%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'color: #3B82F6; font-weight: bold; font-size: 14px;');
             
-            // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-            // 1. AOS ANIMATIONS
-            // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+            // AOS ANIMATIONS
             console.log('%c🎨 Initializing AOS Animations...', 'color: #8B5CF6; font-weight: bold;');
             AOS.init({
                 duration: 800,
@@ -1404,18 +1381,14 @@
             });
             console.log('✅ AOS Animations initialized\n');
 
-            // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-            // 2. ANNÉE DYNAMIQUE
-            // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+            // ANNÉE DYNAMIQUE
             const yearElement = document.getElementById('currentYear');
             if (yearElement) {
                 yearElement.textContent = new Date().getFullYear();
                 console.log('✅ Dynamic year updated\n');
             }
 
-            // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-            // 3. VÉRIFIER CONFIG
-            // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+            // VÉRIFIER CONFIG
             console.log('%c⚙️  Checking Configuration...', 'color: #3B82F6; font-weight: bold;');
             if (window.APP_CONFIG) {
                 console.log('%c✅ APP_CONFIG loaded successfully', 'color: #10b981; font-weight: bold;');
@@ -1425,9 +1398,7 @@
                 console.warn('%c⚠️  APP_CONFIG not found - using defaults', 'color: #f59e0b; font-weight: bold;');
             }
 
-            // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-            // 4. VÉRIFIER API CLIENT
-            // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+            // VÉRIFIER API CLIENT
             console.log('%c📡 Checking API Client...', 'color: #3B82F6; font-weight: bold;');
             if (typeof window.FinanceAPIClient !== 'undefined') {
                 console.log('%c✅ FinanceAPIClient loaded successfully', 'color: #10b981; font-weight: bold;');
@@ -1438,12 +1409,9 @@
                 console.error('   📋 Check the file path: assets/js/api-client.js\n');
             }
 
-            // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-            // 5. INITIALISER ALPHY AI CHATBOT
-            // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+            // INITIALISER ALPHY AI CHATBOT
             console.log('%c🤖 Initializing Alphy AI Chatbot...', 'color: #8B5CF6; font-weight: bold; font-size: 16px;');
             
-            // Vérifier que tous les composants sont chargés
             const chatbotChecks = {
                 'ChatbotConfig': typeof ChatbotConfig !== 'undefined',
                 'ChatbotUI': typeof ChatbotUI !== 'undefined',
@@ -1458,7 +1426,6 @@
                 console.log(`%c   ${status} ${name}`, `color: ${color}; font-weight: bold;`);
             });
 
-            // Initialiser le chatbot si tous les composants sont présents
             if (chatbotChecks.ChatbotConfig && chatbotChecks.ChatbotUI) {
                 try {
                     window.financialChatbot = new ChatbotUI(ChatbotConfig);
@@ -1466,7 +1433,6 @@
                     console.log('   💬 Chatbot is ready to use');
                     console.log('   🎯 Click the floating button in bottom-right to start chatting\n');
                     
-                    // Vérifier que le chatbot a bien une méthode open
                     if (typeof window.financialChatbot.open === 'function') {
                         console.log('   ✅ chatbot.open() method available');
                     } else {
@@ -1483,9 +1449,7 @@
                 console.error('📋 Make sure all chatbot-*.js files are loaded in the correct order\n');
             }
 
-            // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-            // 6. BOUTON "CHAT WITH ALPHY" - SECTION ALPHY AI
-            // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+            // BOUTON "CHAT WITH ALPHY"
             console.log('%c🔘 Setting up "Chat with Alphy" button...', 'color: #8B5CF6; font-weight: bold;');
             
             const openAlphyBtn = document.getElementById('openAlphyChat');
@@ -1527,9 +1491,7 @@
                 console.error('   Make sure the button exists in the HTML\n');
             }
 
-            // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-            // 7. RÉSUMÉ FINAL
-            // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+            // RÉSUMÉ FINAL
             console.log('%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'color: #3B82F6; font-weight: bold; font-size: 14px;');
             console.log('%c✨ AlphaVault AI - All Systems Ready!', 'color: #10b981; font-size: 18px; font-weight: bold;');
             console.log('%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'color: #3B82F6; font-weight: bold; font-size: 14px;');
