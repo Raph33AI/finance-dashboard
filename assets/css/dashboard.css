@@ -1,6 +1,7 @@
 /* ==============================================
    DASHBOARD.CSS - ULTRA MODERN 3D GLASSMORPHISM
-   Violet Theme • Performance Optimized • GPU Accelerated
+   PERFORMANCE OPTIMIZED • NO LAG VERSION
+   Violet Theme • All Titles • All Table Rows
    Sidebar & Modals 100% Preserved
    ============================================== */
 
@@ -18,78 +19,49 @@
     
     --glass-bg: rgba(255, 255, 255, 0.08);
     --glass-border: rgba(255, 255, 255, 0.18);
-    --glass-shadow: rgba(102, 126, 234, 0.37);
+    --glass-shadow: rgba(102, 126, 234, 0.2);
     
-    --glow-primary: 0 0 20px rgba(102, 126, 234, 0.5);
-    --glow-success: 0 0 20px rgba(16, 185, 129, 0.5);
+    --glow-primary: 0 0 15px rgba(102, 126, 234, 0.4);
     
-    --transition-smooth: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-    --transition-bounce: all 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 body.dark-mode {
     --glass-bg: rgba(15, 23, 42, 0.7);
     --glass-border: rgba(148, 163, 184, 0.1);
-    --glass-shadow: rgba(102, 126, 234, 0.5);
+    --glass-shadow: rgba(102, 126, 234, 0.3);
 }
 
 /* ============================================
-   🎬 ANIMATIONS GLOBALES - GPU OPTIMIZED
+   🎯 TITRES GLOBAUX - TOUS EN VIOLET
+   ============================================ */
+h1, h2, h3, h4, h5, h6,
+.section-title,
+.card-title,
+.chart-title,
+.page-title,
+.toolbar h3,
+.chart-wrapper h3,
+.chart-wrapper h4 {
+    background: linear-gradient(135deg, var(--ml-primary), var(--ml-secondary));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    font-weight: 700;
+}
+
+/* ============================================
+   🎬 ANIMATIONS OPTIMISÉES (LÉGÈRES UNIQUEMENT)
    ============================================ */
 
-@keyframes floatIcon {
-    0%, 100% { 
-        transform: translateY(0) translateZ(0); 
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
     }
-    50% { 
-        transform: translateY(-8px) translateZ(0); 
-    }
-}
-
-@keyframes gradientShift {
-    0%, 100% { 
-        background-position: 0% 50%; 
-    }
-    50% { 
-        background-position: 100% 50%; 
-    }
-}
-
-@keyframes pulse {
-    0%, 100% { 
-        opacity: 1; 
-        transform: scale(1) translateZ(0); 
-    }
-    50% { 
-        opacity: 0.85; 
-        transform: scale(1.05) translateZ(0); 
-    }
-}
-
-@keyframes shimmer {
-    0% { 
-        background-position: -1000px 0; 
-    }
-    100% { 
-        background-position: 1000px 0; 
-    }
-}
-
-@keyframes rotate3d {
-    0% { 
-        transform: rotateY(0deg) translateZ(0); 
-    }
-    100% { 
-        transform: rotateY(360deg) translateZ(0); 
-    }
-}
-
-@keyframes moveStripes {
-    0% { 
-        transform: translate(0, 0); 
-    }
-    100% { 
-        transform: translate(50px, 50px); 
+    to {
+        opacity: 1;
+        transform: translateY(0);
     }
 }
 
@@ -99,30 +71,8 @@ body.dark-mode {
     }
 }
 
-@keyframes slideInFromLeft {
-    from {
-        opacity: 0;
-        transform: translateX(-30px) translateZ(0);
-    }
-    to {
-        opacity: 1;
-        transform: translateX(0) translateZ(0);
-    }
-}
-
-@keyframes fadeInUp {
-    from {
-        opacity: 0;
-        transform: translateY(30px) translateZ(0);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0) translateZ(0);
-    }
-}
-
 /* ============================================
-   📊 STATS GRID - GLASSMORPHISM 3D
+   📊 STATS GRID - GLASSMORPHISM OPTIMISÉ
    ============================================ */
 .stats-grid {
     display: grid;
@@ -131,15 +81,13 @@ body.dark-mode {
     padding: 30px;
     background: linear-gradient(
         135deg,
-        rgba(102, 126, 234, 0.05) 0%,
+        rgba(102, 126, 234, 0.04) 0%,
         rgba(118, 75, 162, 0.02) 100%
     );
-    background-size: 200% 200%;
-    animation: gradientShift 8s ease infinite;
-    backdrop-filter: blur(20px) saturate(180%);
+    backdrop-filter: blur(10px);
     border-radius: 28px;
     border: 1px solid var(--glass-border);
-    box-shadow: 0 8px 32px var(--glass-shadow);
+    box-shadow: 0 4px 16px var(--glass-shadow);
 }
 
 body.dark-mode .stats-grid {
@@ -152,59 +100,31 @@ body.dark-mode .stats-grid {
 
 .stat-card {
     background: rgba(255, 255, 255, 0.95);
-    backdrop-filter: blur(20px) saturate(180%);
+    backdrop-filter: blur(10px);
     padding: 24px;
     border-radius: 20px;
     box-shadow: 
-        0 8px 24px rgba(102, 126, 234, 0.12),
-        inset 0 1px 0 rgba(255, 255, 255, 0.6);
+        0 4px 12px rgba(102, 126, 234, 0.08),
+        inset 0 1px 0 rgba(255, 255, 255, 0.5);
     text-align: center;
     transition: var(--transition-smooth);
     border: 1px solid var(--glass-border);
     border-left: 4px solid var(--ml-primary);
-    transform-style: preserve-3d;
-    position: relative;
-    contain: layout style paint;
-    animation: fadeInUp 0.6s ease-out backwards;
+    transform: translateZ(0);
+    will-change: auto;
 }
-
-.stat-card:nth-child(1) { animation-delay: 0.1s; }
-.stat-card:nth-child(2) { animation-delay: 0.2s; }
-.stat-card:nth-child(3) { animation-delay: 0.3s; }
-.stat-card:nth-child(4) { animation-delay: 0.4s; }
 
 body.dark-mode .stat-card {
     background: rgba(30, 41, 59, 0.9);
 }
 
-.stat-card::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(
-        90deg,
-        transparent,
-        rgba(102, 126, 234, 0.1),
-        transparent
-    );
-    transition: left 0.6s;
-}
-
-.stat-card:hover::before {
-    left: 100%;
-}
-
 .stat-card:hover {
-    transform: translateY(-8px) rotateX(2deg) translateZ(0);
+    transform: translateY(-4px);
     box-shadow: 
-        0 16px 40px rgba(102, 126, 234, 0.25),
-        0 0 40px rgba(118, 75, 162, 0.15),
-        inset 0 1px 0 rgba(255, 255, 255, 0.6);
+        0 8px 20px rgba(102, 126, 234, 0.15),
+        0 0 30px rgba(118, 75, 162, 0.1),
+        inset 0 1px 0 rgba(255, 255, 255, 0.5);
     border-left-color: var(--ml-secondary);
-    will-change: transform;
 }
 
 .stat-card h3 {
@@ -224,8 +144,6 @@ body.dark-mode .stat-card {
     font-size: 2.2em;
     font-weight: 800;
     background: linear-gradient(135deg, var(--ml-primary), var(--ml-secondary));
-    background-size: 200% 200%;
-    animation: gradientShift 4s ease infinite;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -248,42 +166,20 @@ body.dark-mode .stat-card {
 }
 
 /* ============================================
-   🛠️ TOOLBAR - PREMIUM GLASS
+   🛠️ TOOLBAR - OPTIMISÉ
    ============================================ */
 .toolbar {
     background: linear-gradient(
         135deg,
-        rgba(102, 126, 234, 0.08) 0%,
-        rgba(118, 75, 162, 0.04) 100%
+        rgba(102, 126, 234, 0.06) 0%,
+        rgba(118, 75, 162, 0.03) 100%
     );
-    background-size: 200% 200%;
-    animation: gradientShift 6s ease infinite;
-    backdrop-filter: blur(25px) saturate(180%);
+    backdrop-filter: blur(10px);
     padding: 24px;
     border-radius: 20px;
     margin-bottom: 24px;
     border: 2px solid var(--glass-border);
-    box-shadow: 
-        0 8px 32px var(--glass-shadow),
-        inset 0 1px 0 rgba(255, 255, 255, 0.1);
-    position: relative;
-    overflow: hidden;
-}
-
-.toolbar::before {
-    content: '';
-    position: absolute;
-    top: -50%;
-    left: -50%;
-    width: 200%;
-    height: 200%;
-    background: radial-gradient(
-        circle,
-        rgba(102, 126, 234, 0.1) 0%,
-        transparent 70%
-    );
-    animation: rotate3d 20s linear infinite;
-    pointer-events: none;
+    box-shadow: 0 4px 16px var(--glass-shadow);
 }
 
 body.dark-mode .toolbar {
@@ -306,12 +202,6 @@ body.dark-mode .toolbar {
     display: flex;
     align-items: center;
     gap: 12px;
-    position: relative;
-    z-index: 1;
-}
-
-.toolbar h3 i {
-    animation: floatIcon 3s ease-in-out infinite;
 }
 
 .toolbar-row {
@@ -320,11 +210,7 @@ body.dark-mode .toolbar {
     align-items: center;
     flex-wrap: wrap;
     margin-bottom: 15px;
-    animation: slideInFromLeft 0.6s ease-out backwards;
 }
-
-.toolbar-row:nth-child(2) { animation-delay: 0.1s; }
-.toolbar-row:nth-child(3) { animation-delay: 0.2s; }
 
 .toolbar-row:last-child {
     margin-bottom: 0;
@@ -347,7 +233,7 @@ body.dark-mode .toolbar {
     border-radius: 12px;
     font-size: 0.95em;
     background: rgba(255, 255, 255, 0.05);
-    backdrop-filter: blur(10px);
+    backdrop-filter: blur(5px);
     color: var(--text-primary);
     transition: var(--transition-smooth);
     font-weight: 600;
@@ -359,13 +245,12 @@ body.dark-mode .toolbar {
     border-color: var(--ml-primary);
     background: rgba(255, 255, 255, 0.1);
     box-shadow: 
-        0 0 0 4px rgba(102, 126, 234, 0.1),
+        0 0 0 3px rgba(102, 126, 234, 0.1),
         var(--glow-primary);
-    transform: translateY(-2px) translateZ(0);
 }
 
 /* ============================================
-   🚀 BOUTONS - HOLOGRAPHIC PREMIUM
+   🚀 BOUTONS - OPTIMISÉS
    ============================================ */
 .btn-add,
 .btn-success,
@@ -382,8 +267,6 @@ body.dark-mode .toolbar {
     letter-spacing: 0.5px;
     position: relative;
     overflow: hidden;
-    transform: translateZ(0);
-    backface-visibility: hidden;
 }
 
 .btn-add::before,
@@ -393,134 +276,99 @@ body.dark-mode .toolbar {
     content: '';
     position: absolute;
     top: -50%;
-    left: -50%;
-    width: 200%;
+    left: -150%;
+    width: 100%;
     height: 200%;
     background: linear-gradient(
-        45deg,
+        90deg,
         transparent,
         rgba(255, 255, 255, 0.3),
         transparent
     );
-    transform: rotate(45deg);
-    transition: left 0.6s;
+    transition: left 0.5s;
 }
 
 .btn-add:hover::before,
 .btn-success:hover::before,
 .btn-primary:hover::before,
 .btn-secondary:hover::before {
-    left: 100%;
+    left: 150%;
 }
 
 /* Btn Primary - VIOLET */
 .btn-primary {
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    background-size: 200% 200%;
-    animation: gradientShift 3s ease infinite;
     color: white;
-    box-shadow: 
-        0 8px 24px rgba(102, 126, 234, 0.4),
-        0 0 20px rgba(118, 75, 162, 0.3);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
 }
 
 .btn-primary:hover {
     background: linear-gradient(135deg, #764ba2 0%, #8b5cf6 100%);
-    transform: translateY(-4px) scale(1.02) translateZ(0);
-    box-shadow: 
-        0 12px 36px rgba(102, 126, 234, 0.5),
-        0 0 40px rgba(118, 75, 162, 0.4);
-    will-change: transform;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
 }
 
 .btn-primary:active {
-    transform: translateY(-2px) scale(0.98) translateZ(0);
-    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+    transform: translateY(0);
 }
 
 /* Btn Secondary */
 .btn-secondary {
     background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%);
     color: white;
-    box-shadow: 
-        0 6px 20px rgba(107, 114, 128, 0.2),
-        0 0 15px rgba(75, 85, 99, 0.15);
+    box-shadow: 0 4px 12px rgba(107, 114, 128, 0.2);
 }
 
 .btn-secondary:hover {
     background: linear-gradient(135deg, #4b5563 0%, #374151 100%);
-    transform: translateY(-4px) scale(1.02) translateZ(0);
-    box-shadow: 
-        0 10px 30px rgba(107, 114, 128, 0.3),
-        0 0 30px rgba(75, 85, 99, 0.2);
-}
-
-.btn-secondary:active {
-    transform: translateY(-2px) scale(0.98) translateZ(0);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(107, 114, 128, 0.3);
 }
 
 /* Btn Success */
 .btn-success {
     background: linear-gradient(135deg, var(--ml-success), #059669);
-    background-size: 200% 200%;
-    animation: gradientShift 3s ease infinite;
     color: white;
-    box-shadow: 
-        0 8px 24px rgba(16, 185, 129, 0.3),
-        0 0 20px rgba(5, 150, 105, 0.2);
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
 }
 
 .btn-success:hover {
     background: linear-gradient(135deg, #059669 0%, #047857 100%);
-    transform: translateY(-4px) scale(1.02) translateZ(0);
-    box-shadow: 
-        0 12px 36px rgba(16, 185, 129, 0.4),
-        var(--glow-success);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
 }
 
 /* Btn Add - VIOLET */
 .btn-add {
     background: linear-gradient(135deg, var(--ml-primary), var(--ml-secondary));
-    background-size: 200% 200%;
-    animation: gradientShift 3s ease infinite;
     color: white;
     margin: 5px;
-    box-shadow: 
-        0 6px 20px rgba(102, 126, 234, 0.3),
-        0 0 15px rgba(118, 75, 162, 0.2);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.25);
 }
 
 .btn-add:hover {
     background: linear-gradient(135deg, var(--ml-secondary), var(--ml-accent));
-    transform: translateY(-3px) scale(1.05) translateZ(0);
-    box-shadow: 
-        0 10px 30px rgba(102, 126, 234, 0.4),
-        0 0 30px rgba(118, 75, 162, 0.3);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.35);
 }
 
 /* Dark Mode Buttons */
 body.dark-mode .btn-primary,
 body.dark-mode .btn-add {
-    box-shadow: 
-        0 8px 24px rgba(102, 126, 234, 0.5),
-        0 0 25px rgba(118, 75, 162, 0.4);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
 }
 
 body.dark-mode .btn-primary:hover,
 body.dark-mode .btn-add:hover {
-    box-shadow: 
-        0 12px 36px rgba(102, 126, 234, 0.6),
-        0 0 40px rgba(118, 75, 162, 0.5);
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.5);
 }
 
 body.dark-mode .btn-secondary {
     background: linear-gradient(135deg, #374151 0%, #1f2937 100%);
-    box-shadow: 0 6px 20px rgba(55, 65, 81, 0.3);
 }
 
 body.dark-mode .btn-secondary:hover {
     background: linear-gradient(135deg, #1f2937 0%, #111827 100%);
-    box-shadow: 0 10px 30px rgba(55, 65, 81, 0.5);
 }
 
 /* Total Months & Displays */
@@ -528,7 +376,6 @@ body.dark-mode .btn-secondary:hover {
     color: var(--text-primary);
     font-weight: 600;
     margin-left: 20px;
-    animation: fadeInUp 0.6s ease-out 0.3s backwards;
 }
 
 .total-months span {
@@ -538,7 +385,6 @@ body.dark-mode .btn-secondary:hover {
     background-clip: text;
     font-size: 1.2em;
     font-weight: 800;
-    animation: pulse 2s ease-in-out infinite;
 }
 
 .parameters-grid {
@@ -567,19 +413,16 @@ body.dark-mode .btn-secondary:hover {
 }
 
 /* ============================================
-   📋 TABLE - GLASSMORPHISM PREMIUM (TOUS LES MOIS VISIBLES)
+   📋 TABLE - OPTIMISÉ + TOUS LES MOIS VISIBLES
    ============================================ */
 .table-container {
     overflow-x: auto;
     max-height: 600px;
     overflow-y: auto;
     border-radius: 20px;
-    box-shadow: 
-        0 12px 40px var(--glass-shadow),
-        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    box-shadow: 0 4px 16px var(--glass-shadow);
     border: 2px solid var(--glass-border);
-    backdrop-filter: blur(10px);
-    animation: fadeInUp 0.6s ease-out 0.5s backwards;
+    backdrop-filter: blur(5px);
 }
 
 .data-table {
@@ -590,13 +433,11 @@ body.dark-mode .btn-secondary:hover {
 
 .data-table thead {
     background: linear-gradient(135deg, var(--ml-primary), var(--ml-secondary));
-    background-size: 200% 200%;
-    animation: gradientShift 5s ease infinite;
-    color: white !important;
+    color: white;
     position: sticky;
     top: 0;
     z-index: 10;
-    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
 }
 
 body.dark-mode .data-table thead {
@@ -612,7 +453,7 @@ body.dark-mode .data-table thead {
     font-size: 0.85em;
     text-transform: uppercase;
     letter-spacing: 0.5px;
-    color: white !important; /* ✅ CORRECTION: Texte blanc */
+    color: white !important;
 }
 
 .data-table th:first-child {
@@ -620,36 +461,47 @@ body.dark-mode .data-table thead {
     left: 0;
     z-index: 11;
     background: linear-gradient(135deg, var(--ml-primary), var(--ml-secondary));
-    box-shadow: 2px 0 8px rgba(102, 126, 234, 0.3);
-    color: white !important; /* ✅ CORRECTION: Texte blanc */
+    box-shadow: 2px 0 4px rgba(102, 126, 234, 0.2);
+    color: white !important;
 }
 
 body.dark-mode .data-table th:first-child {
     background: linear-gradient(135deg, #667eea, #764ba2);
 }
 
+/* ✅ CORRECTION CRITIQUE: TOUS LES MOIS VISIBLES */
 .data-table tbody tr {
     border-bottom: 1px solid var(--border-color);
-    transition: background 0.2s, transform 0.2s;
+    transition: background 0.2s;
+    /* PAS DE DISPLAY NONE ICI */
 }
 
 .data-table tbody tr:hover {
-    background: linear-gradient(90deg, rgba(102, 126, 234, 0.08), transparent);
-    transform: translateX(2px) translateZ(0);
+    background: linear-gradient(90deg, rgba(102, 126, 234, 0.06), transparent);
 }
 
-/* ✅ CORRECTION: Afficher TOUS les mois (pas seulement 1 sur 2) */
+/* ✅ Alternance de couleurs SANS masquer les lignes */
+.data-table tbody tr:nth-child(odd) {
+    background: rgba(255, 255, 255, 0.5);
+}
+
 .data-table tbody tr:nth-child(even) {
-    background: rgba(248, 250, 252, 0.5);
-    /* REMOVED: display: none ou visibility: hidden */
+    background: rgba(248, 250, 252, 0.8);
+    /* ✅ PAS DE DISPLAY NONE */
+    /* ✅ PAS DE VISIBILITY HIDDEN */
 }
 
-body.dark-mode .data-table tbody tr:nth-child(even) {
+body.dark-mode .data-table tbody tr:nth-child(odd) {
     background: rgba(30, 41, 59, 0.3);
 }
 
-.data-table tbody tr:nth-child(even):hover {
-    background: linear-gradient(90deg, rgba(102, 126, 234, 0.08), transparent);
+body.dark-mode .data-table tbody tr:nth-child(even) {
+    background: rgba(30, 41, 59, 0.5);
+}
+
+.data-table tbody tr:nth-child(even):hover,
+.data-table tbody tr:nth-child(odd):hover {
+    background: linear-gradient(90deg, rgba(102, 126, 234, 0.06), transparent);
 }
 
 .data-table td {
@@ -662,7 +514,7 @@ body.dark-mode .data-table tbody tr:nth-child(even) {
 .data-table td:first-child {
     position: sticky;
     left: 0;
-    background: var(--background-primary);
+    background: inherit;
     font-weight: 700;
     background: linear-gradient(135deg, var(--ml-primary), var(--ml-secondary));
     -webkit-background-clip: text;
@@ -670,14 +522,22 @@ body.dark-mode .data-table tbody tr:nth-child(even) {
     background-clip: text;
     z-index: 1;
     font-size: 0.85em;
-    box-shadow: 2px 0 8px rgba(0, 0, 0, 0.05);
+    box-shadow: 2px 0 4px rgba(0, 0, 0, 0.03);
 }
 
 .data-table tbody tr:nth-child(even) td:first-child {
-    background: rgba(248, 250, 252, 0.5);
+    background: rgba(248, 250, 252, 0.8);
+}
+
+.data-table tbody tr:nth-child(odd) td:first-child {
+    background: rgba(255, 255, 255, 0.5);
 }
 
 body.dark-mode .data-table tbody tr:nth-child(even) td:first-child {
+    background: rgba(30, 41, 59, 0.5);
+}
+
+body.dark-mode .data-table tbody tr:nth-child(odd) td:first-child {
     background: rgba(30, 41, 59, 0.3);
 }
 
@@ -693,7 +553,7 @@ body.dark-mode .data-table tbody tr:nth-child(even) td:first-child {
     font-size: 0.85em;
     text-align: right;
     background: rgba(255, 255, 255, 0.05);
-    backdrop-filter: blur(5px);
+    backdrop-filter: blur(3px);
     color: var(--text-primary);
     font-weight: 600;
     transition: var(--transition-smooth);
@@ -703,14 +563,11 @@ body.dark-mode .data-table tbody tr:nth-child(even) td:first-child {
     outline: none;
     border-color: var(--ml-primary);
     background: rgba(102, 126, 234, 0.08);
-    box-shadow: 
-        0 0 0 3px rgba(102, 126, 234, 0.1),
-        0 2px 8px rgba(102, 126, 234, 0.3);
-    transform: scale(1.05) translateZ(0);
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
 }
 
 .data-table .calculated {
-    background: linear-gradient(90deg, rgba(102, 126, 234, 0.08), transparent);
+    background: linear-gradient(90deg, rgba(102, 126, 234, 0.06), transparent);
     font-weight: 700;
     color: var(--text-primary);
     text-align: right;
@@ -720,13 +577,11 @@ body.dark-mode .data-table tbody tr:nth-child(even) td:first-child {
 }
 
 body.dark-mode .data-table .calculated {
-    background: linear-gradient(90deg, rgba(102, 126, 234, 0.15), transparent);
+    background: linear-gradient(90deg, rgba(102, 126, 234, 0.1), transparent);
 }
 
 .data-table .btn-delete {
     background: linear-gradient(135deg, var(--ml-danger), #dc2626);
-    background-size: 200% 200%;
-    animation: gradientShift 3s ease infinite;
     color: white;
     border: none;
     padding: 5px 10px;
@@ -735,31 +590,29 @@ body.dark-mode .data-table .calculated {
     font-size: 0.75em;
     font-weight: 700;
     transition: var(--transition-smooth);
-    box-shadow: 0 2px 8px rgba(239, 68, 68, 0.3);
+    box-shadow: 0 2px 6px rgba(239, 68, 68, 0.3);
 }
 
 .data-table .btn-delete:hover {
     background: linear-gradient(135deg, #dc2626, #b91c1c);
-    transform: scale(1.1) translateZ(0);
-    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.5);
+    transform: scale(1.05);
+    box-shadow: 0 3px 10px rgba(239, 68, 68, 0.4);
 }
 
 /* ============================================
-   📈 CHARTS - PREMIUM GLASS
+   📈 CHARTS - OPTIMISÉ
    ============================================ */
 .charts-container {
     padding: 30px;
     background: linear-gradient(
         135deg,
-        rgba(102, 126, 234, 0.05) 0%,
+        rgba(102, 126, 234, 0.04) 0%,
         rgba(118, 75, 162, 0.02) 100%
     );
-    background-size: 200% 200%;
-    animation: gradientShift 8s ease infinite;
-    backdrop-filter: blur(20px) saturate(180%);
+    backdrop-filter: blur(10px);
     border-radius: 28px;
     border: 1px solid var(--glass-border);
-    box-shadow: 0 8px 32px var(--glass-shadow);
+    box-shadow: 0 4px 16px var(--glass-shadow);
 }
 
 body.dark-mode .charts-container {
@@ -772,38 +625,15 @@ body.dark-mode .charts-container {
 
 .chart-wrapper {
     background: rgba(255, 255, 255, 0.95);
-    backdrop-filter: blur(20px) saturate(180%);
+    backdrop-filter: blur(10px);
     margin-bottom: 30px;
     border-radius: 20px;
     box-shadow: 
-        0 8px 24px rgba(102, 126, 234, 0.12),
+        0 4px 12px rgba(102, 126, 234, 0.08),
         inset 0 1px 0 rgba(255, 255, 255, 0.5);
     padding: 24px;
     border: 2px solid var(--glass-border);
-    transform-style: preserve-3d;
     transition: var(--transition-smooth);
-    animation: fadeInUp 0.6s ease-out backwards;
-    position: relative;
-    overflow: hidden;
-}
-
-.chart-wrapper:nth-child(1) { animation-delay: 0.1s; }
-.chart-wrapper:nth-child(2) { animation-delay: 0.2s; }
-
-.chart-wrapper::before {
-    content: '';
-    position: absolute;
-    top: -50%;
-    right: -50%;
-    width: 200%;
-    height: 200%;
-    background: radial-gradient(
-        circle,
-        rgba(102, 126, 234, 0.05) 0%,
-        transparent 70%
-    );
-    animation: rotate3d 25s linear infinite;
-    pointer-events: none;
 }
 
 body.dark-mode .chart-wrapper {
@@ -811,19 +641,18 @@ body.dark-mode .chart-wrapper {
 }
 
 .chart-wrapper:hover {
-    transform: translateY(-4px) rotateX(1deg) translateZ(0);
+    transform: translateY(-3px);
     box-shadow: 
-        0 12px 36px rgba(102, 126, 234, 0.2),
-        0 0 40px rgba(118, 75, 162, 0.12),
+        0 6px 18px rgba(102, 126, 234, 0.12),
+        0 0 30px rgba(118, 75, 162, 0.08),
         inset 0 1px 0 rgba(255, 255, 255, 0.5);
 }
 
-/* Titres des graphiques en VIOLET */
+/* ✅ Titres des graphiques en VIOLET */
 .chart-wrapper h3,
-.chart-wrapper h4 {
+.chart-wrapper h4,
+.chart-wrapper .chart-title {
     background: linear-gradient(135deg, var(--ml-primary), var(--ml-secondary));
-    background-size: 200% 200%;
-    animation: gradientShift 4s ease infinite;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -838,19 +667,17 @@ body.dark-mode .chart-wrapper {
 }
 
 /* ============================================
-   🎯 LOCAL FILTER - GLASS EFFECT
+   🎯 LOCAL FILTER - OPTIMISÉ
    ============================================ */
 .local-filter {
     margin: 18px 0;
     padding: 18px;
     background: linear-gradient(
         135deg,
-        rgba(102, 126, 234, 0.1) 0%,
-        rgba(118, 75, 162, 0.05) 100%
+        rgba(102, 126, 234, 0.06) 0%,
+        rgba(118, 75, 162, 0.03) 100%
     );
-    background-size: 200% 200%;
-    animation: gradientShift 6s ease infinite;
-    backdrop-filter: blur(15px) saturate(180%);
+    backdrop-filter: blur(10px);
     border-radius: 16px;
     display: flex;
     align-items: center;
@@ -858,14 +685,14 @@ body.dark-mode .chart-wrapper {
     flex-wrap: wrap;
     border: 2px solid var(--glass-border);
     border-left: 4px solid var(--ml-primary);
-    box-shadow: 0 4px 16px rgba(102, 126, 234, 0.15);
+    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.1);
 }
 
 body.dark-mode .local-filter {
     background: linear-gradient(
         135deg,
-        rgba(102, 126, 234, 0.15) 0%,
-        rgba(118, 75, 162, 0.08) 100%
+        rgba(102, 126, 234, 0.1) 0%,
+        rgba(118, 75, 162, 0.05) 100%
     );
 }
 
@@ -886,7 +713,7 @@ body.dark-mode .local-filter {
     min-width: 200px;
     cursor: pointer;
     background: rgba(255, 255, 255, 0.05);
-    backdrop-filter: blur(10px);
+    backdrop-filter: blur(5px);
     color: var(--text-primary);
     font-weight: 600;
     transition: var(--transition-smooth);
@@ -896,69 +723,40 @@ body.dark-mode .local-filter {
     outline: none;
     border-color: var(--ml-primary);
     background: rgba(255, 255, 255, 0.1);
-    box-shadow: 
-        0 0 0 4px rgba(102, 126, 234, 0.1),
-        var(--glow-primary);
-    transform: translateY(-2px) translateZ(0);
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
 }
 
 /* ============================================
-   🎪 SIMULATION MANAGEMENT - 3D PREMIUM
+   🎪 SIMULATION MANAGEMENT - OPTIMISÉ
    ============================================ */
 .simulation-management {
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    background-size: 200% 200%;
-    animation: gradientShift 5s ease infinite;
     color: white;
     padding: 28px;
     border-radius: 20px;
     box-shadow: 
-        0 12px 40px rgba(102, 126, 234, 0.5),
-        0 0 60px rgba(118, 75, 162, 0.4);
-    position: relative;
-    overflow: hidden;
-}
-
-.simulation-management::before {
-    content: '';
-    position: absolute;
-    top: -50%;
-    left: -50%;
-    width: 200%;
-    height: 200%;
-    background: repeating-linear-gradient(
-        45deg,
-        transparent,
-        transparent 10px,
-        rgba(255, 255, 255, 0.05) 10px,
-        rgba(255, 255, 255, 0.05) 20px
-    );
-    animation: moveStripes 20s linear infinite;
-    pointer-events: none;
+        0 6px 20px rgba(102, 126, 234, 0.4),
+        0 0 40px rgba(118, 75, 162, 0.3);
 }
 
 .simulation-management h3 {
     color: white !important;
     margin-bottom: 20px;
     font-weight: 800;
-    text-shadow: 0 2px 12px rgba(0, 0, 0, 0.3);
-    position: relative;
-    z-index: 1;
-    animation: floatIcon 3s ease-in-out infinite;
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    /* ✅ Supprimer -webkit-text-fill-color pour afficher blanc */
+    background: none;
+    -webkit-text-fill-color: white;
 }
 
 .current-simulation-display {
     background: rgba(255, 255, 255, 0.2);
-    backdrop-filter: blur(15px) saturate(180%);
+    backdrop-filter: blur(10px);
     padding: 18px;
     border-radius: 14px;
     text-align: center;
     border: 2px solid rgba(255, 255, 255, 0.3);
-    box-shadow: 
-        0 8px 24px rgba(0, 0, 0, 0.2),
-        inset 0 1px 0 rgba(255, 255, 255, 0.4);
-    position: relative;
-    z-index: 1;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
 .current-simulation-display .label {
@@ -972,8 +770,7 @@ body.dark-mode .local-filter {
     font-size: 1.3em;
     font-weight: 800;
     color: #ffd700;
-    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-    animation: pulse 2s ease-in-out infinite;
+    text-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
 }
 
 /* ============================================
@@ -1022,6 +819,9 @@ body.dark-mode .local-filter {
 .modal-header h2 {
     margin: 0;
     font-size: 1.5em;
+    color: white !important;
+    background: none;
+    -webkit-text-fill-color: white;
 }
 
 .modal-close {
@@ -1066,7 +866,7 @@ body.dark-mode .modal-footer {
 }
 
 /* ============================================
-   📋 SIMULATIONS LIST - GLASSMORPHISM 3D
+   📋 SIMULATIONS LIST - OPTIMISÉ
    ============================================ */
 
 #simulationsListContainer {
@@ -1081,7 +881,6 @@ body.dark-mode .modal-footer {
     padding: 50px;
     font-style: italic;
     font-size: 1.1em;
-    animation: fadeInUp 0.6s ease-out;
 }
 
 .simulation-item {
@@ -1094,23 +893,12 @@ body.dark-mode .modal-footer {
         rgba(245, 247, 250, 0.9) 0%,
         rgba(195, 207, 226, 0.7) 100%
     );
-    backdrop-filter: blur(20px) saturate(180%);
+    backdrop-filter: blur(10px);
     border-radius: 16px;
     transition: var(--transition-smooth);
     border: 2px solid var(--glass-border);
     cursor: pointer;
-    position: relative;
-    overflow: hidden;
-    transform-style: preserve-3d;
-    contain: layout style paint;
-    animation: slideInFromLeft 0.6s ease-out backwards;
 }
-
-.simulation-item:nth-child(1) { animation-delay: 0.1s; }
-.simulation-item:nth-child(2) { animation-delay: 0.2s; }
-.simulation-item:nth-child(3) { animation-delay: 0.3s; }
-.simulation-item:nth-child(4) { animation-delay: 0.4s; }
-.simulation-item:nth-child(5) { animation-delay: 0.5s; }
 
 body.dark-mode .simulation-item {
     background: linear-gradient(
@@ -1120,43 +908,21 @@ body.dark-mode .simulation-item {
     );
 }
 
-.simulation-item::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(
-        90deg,
-        transparent,
-        rgba(102, 126, 234, 0.15),
-        transparent
-    );
-    transition: left 0.5s;
-}
-
-.simulation-item:hover::before {
-    left: 100%;
-}
-
 .simulation-item:hover {
-    transform: translateY(-4px) rotateX(2deg) translateZ(0);
+    transform: translateY(-3px);
     box-shadow: 
-        0 12px 36px rgba(102, 126, 234, 0.25),
-        0 0 40px rgba(118, 75, 162, 0.15);
-    border-color: rgba(102, 126, 234, 0.5);
+        0 6px 18px rgba(102, 126, 234, 0.2),
+        0 0 30px rgba(118, 75, 162, 0.1);
+    border-color: rgba(102, 126, 234, 0.4);
 }
 
 .simulation-item.active {
     background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-    background-size: 200% 200%;
-    animation: gradientShift 4s ease infinite;
     color: white;
     border: 2px solid #ffd700;
     box-shadow: 
-        0 12px 40px rgba(16, 185, 129, 0.5),
-        0 0 60px rgba(16, 185, 129, 0.3);
+        0 6px 20px rgba(16, 185, 129, 0.4),
+        0 0 40px rgba(16, 185, 129, 0.2);
 }
 
 .simulation-info {
@@ -1174,12 +940,10 @@ body.dark-mode .simulation-item {
 
 .simulation-item.active .simulation-name {
     color: white;
-    animation: pulse 3s ease-in-out infinite;
 }
 
 .simulation-item.active .simulation-name i:first-child {
     color: #ffd700;
-    animation: floatIcon 2s ease-in-out infinite;
 }
 
 .simulation-date {
@@ -1202,7 +966,7 @@ body.dark-mode .simulation-item {
 
 .btn-icon {
     background: rgba(255, 255, 255, 0.95);
-    backdrop-filter: blur(10px);
+    backdrop-filter: blur(5px);
     border: 2px solid var(--glass-border);
     width: 40px;
     height: 40px;
@@ -1214,14 +978,13 @@ body.dark-mode .simulation-item {
     align-items: center;
     justify-content: center;
     font-size: 1.1em;
-    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.12);
-    transform: translateZ(0);
+    box-shadow: 0 2px 6px rgba(102, 126, 234, 0.1);
 }
 
 .btn-icon:hover {
     background: white;
-    transform: scale(1.15) rotate(5deg) translateZ(0);
-    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+    transform: scale(1.1);
+    box-shadow: 0 3px 10px rgba(102, 126, 234, 0.3);
 }
 
 .btn-icon.btn-danger {
@@ -1231,12 +994,12 @@ body.dark-mode .simulation-item {
 .btn-icon.btn-danger:hover {
     background: linear-gradient(135deg, #e74c3c, #c0392b);
     color: white;
-    box-shadow: 0 6px 20px rgba(231, 76, 60, 0.5);
+    box-shadow: 0 3px 10px rgba(231, 76, 60, 0.4);
 }
 
 .simulation-item.active .btn-icon {
     background: rgba(255, 255, 255, 0.3);
-    backdrop-filter: blur(10px);
+    backdrop-filter: blur(5px);
     color: white;
     border-color: rgba(255, 255, 255, 0.5);
 }
@@ -1349,15 +1112,9 @@ body.dark-mode .highcharts-legend-item text {
         animation-iteration-count: 1 !important;
         transition-duration: 0.01ms !important;
     }
-    
-    .simulation-management::before,
-    .toolbar::before,
-    .chart-wrapper::before {
-        animation: none;
-    }
 }
 
-/* GPU Acceleration for transformed elements */
+/* GPU Acceleration - Minimal */
 .stat-card,
 .chart-wrapper,
 .simulation-item,
@@ -1366,20 +1123,25 @@ body.dark-mode .highcharts-legend-item text {
 .btn-success,
 .btn-add {
     transform: translateZ(0);
-    backface-visibility: hidden;
+    will-change: auto;
 }
 
-/* Disable hover effects on touch devices for performance */
+/* Disable hover effects on touch devices */
 @media (hover: none) and (pointer: coarse) {
     .stat-card:hover,
     .chart-wrapper:hover,
-    .simulation-item:hover {
+    .simulation-item:hover,
+    .btn-primary:hover,
+    .btn-secondary:hover,
+    .btn-success:hover,
+    .btn-add:hover {
         transform: none;
+        box-shadow: inherit;
     }
 }
 
 /* ============================================
-   🎯 FIN DU FICHIER - ULTRA MODERN 3D CSS
-   Violet Theme • Performance Optimized • All Months Visible
+   🎯 FIN DU FICHIER - ULTRA OPTIMIZED VERSION
+   NO LAG • Violet Theme • All Titles • All Table Rows
    Sidebar & Modals 100% Preserved
    ============================================ */
