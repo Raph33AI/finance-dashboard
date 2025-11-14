@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="assets/css/common.css">
     <link rel="stylesheet" href="assets/css/landing.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
     
     <style>
         .page-header {
@@ -15,39 +16,242 @@
             padding: 120px 0 80px;
             text-align: center;
             color: white;
+            position: relative;
+            overflow: hidden;
         }
+        
+        .page-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                radial-gradient(circle at 20% 30%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 70%, rgba(139, 92, 246, 0.2) 0%, transparent 50%);
+            animation: pulse 8s ease-in-out infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+        
+        .page-header .container-fluid {
+            position: relative;
+            z-index: 1;
+        }
+        
         .page-header h1 {
             font-size: 3rem;
             font-weight: 800;
             margin-bottom: 1rem;
+            color: white;
+            text-shadow: 0 4px 24px rgba(0, 0, 0, 0.3);
         }
+        
+        .page-header p {
+            font-size: 1.25rem;
+            color: white;
+            opacity: 1;
+        }
+        
         .content-section {
             padding: 80px 0;
+            background: linear-gradient(180deg, #f8fafc 0%, #ffffff 100%);
         }
+        
+        body.dark-mode .content-section {
+            background: linear-gradient(180deg, #0f172a 0%, #1e293b 100%);
+        }
+        
         .security-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 2rem;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 2.5rem;
             margin-top: 3rem;
         }
+        
         .security-card {
-            background: var(--card-bg);
-            border-radius: 16px;
-            padding: 2rem;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(20px) saturate(180%);
+            border-radius: 24px;
+            padding: 2.5rem;
+            box-shadow: 
+                0 10px 40px rgba(0, 0, 0, 0.08),
+                0 0 0 1px rgba(255, 255, 255, 0.5),
+                inset 0 1px 0 rgba(255, 255, 255, 0.9);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
         }
+        
+        body.dark-mode .security-card {
+            background: rgba(30, 41, 59, 0.7);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .security-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, #3B82F6, #8B5CF6);
+            transform: scaleX(0);
+            transform-origin: left;
+            transition: transform 0.5s ease;
+        }
+        
+        .security-card:hover::before {
+            transform: scaleX(1);
+        }
+        
+        .security-card:hover {
+            transform: translateY(-12px) scale(1.02) rotateX(2deg);
+            box-shadow: 
+                0 20px 60px rgba(59, 130, 246, 0.2),
+                0 0 0 1px rgba(59, 130, 246, 0.3);
+        }
+        
         .security-card .icon {
-            font-size: 3rem;
-            color: #3B82F6;
-            margin-bottom: 1rem;
+            width: 80px;
+            height: 80px;
+            border-radius: 20px;
+            background: linear-gradient(135deg, #3B82F6, #8B5CF6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1.5rem;
+            box-shadow: 
+                0 10px 30px rgba(59, 130, 246, 0.3),
+                inset 0 -2px 8px rgba(0, 0, 0, 0.2);
+            transition: all 0.4s ease;
+            position: relative;
+            overflow: hidden;
         }
+        
+        .security-card .icon::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transform: translateX(-100%);
+            transition: transform 0.6s ease;
+        }
+        
+        .security-card:hover .icon::before {
+            transform: translateX(100%);
+        }
+        
+        .security-card:hover .icon {
+            transform: rotateY(360deg) scale(1.1);
+            box-shadow: 
+                0 15px 40px rgba(59, 130, 246, 0.4),
+                inset 0 -2px 8px rgba(0, 0, 0, 0.3);
+        }
+        
+        .security-card .icon i {
+            font-size: 2.5rem;
+            color: white;
+            position: relative;
+            z-index: 1;
+        }
+        
         .security-card h3 {
             font-size: 1.5rem;
+            font-weight: 700;
             margin-bottom: 1rem;
+            color: var(--text-primary);
         }
+        
         .security-card p {
             color: var(--text-secondary);
             line-height: 1.7;
+            font-size: 1.0625rem;
+        }
+        
+        .section-header-custom {
+            text-align: center;
+            margin-bottom: 4rem;
+        }
+        
+        .section-header-custom h2 {
+            font-size: 2.75rem;
+            font-weight: 800;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, #3B82F6, #8B5CF6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .section-header-custom p {
+            font-size: 1.25rem;
+            color: var(--text-secondary);
+            max-width: 700px;
+            margin: 0 auto;
+        }
+        
+        .disclosure-section {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 80px 0;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .disclosure-section::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+            animation: rotate 20s linear infinite;
+        }
+        
+        @keyframes rotate {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .disclosure-section .container-fluid {
+            position: relative;
+            z-index: 1;
+        }
+        
+        .disclosure-section h2 {
+            text-align: center;
+            margin-bottom: 2rem;
+            color: white;
+            font-size: 2.5rem;
+            font-weight: 800;
+            text-shadow: 0 4px 24px rgba(0, 0, 0, 0.3);
+        }
+        
+        .disclosure-section p {
+            text-align: center;
+            color: white;
+            font-size: 1.125rem;
+            line-height: 1.8;
+            max-width: 800px;
+            margin: 0 auto 1.5rem;
+        }
+        
+        .disclosure-section a {
+            color: #fbbf24;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        
+        .disclosure-section a:hover {
+            color: #f59e0b;
+            text-decoration: underline;
         }
     </style>
 </head>
@@ -91,61 +295,49 @@
     <!-- Security Overview -->
     <section class="content-section">
         <div class="container-fluid">
-            <h2 style="text-align: center; margin-bottom: 1rem;">Enterprise-Grade Security</h2>
-            <p style="text-align: center; max-width: 800px; margin: 0 auto 3rem; color: var(--text-secondary);">
-                We implement multiple layers of security to protect your financial data and ensure platform integrity.
-            </p>
+            <div class="section-header-custom" data-aos="fade-up">
+                <h2>Enterprise-Grade Security</h2>
+                <p>Multiple layers of security to protect your financial data and ensure platform integrity</p>
+            </div>
 
             <div class="security-grid">
-                <div class="security-card">
+                <div class="security-card" data-aos="fade-up" data-aos-delay="100">
                     <div class="icon"><i class="fas fa-lock"></i></div>
                     <h3>Data Encryption</h3>
                     <p>All data is encrypted using industry-standard 256-bit SSL/TLS in transit and AES-256 at rest, ensuring your information remains secure.</p>
                 </div>
 
-                <div class="security-card">
+                <div class="security-card" data-aos="fade-up" data-aos-delay="150">
                     <div class="icon"><i class="fas fa-user-shield"></i></div>
                     <h3>Multi-Factor Authentication</h3>
                     <p>Optional 2FA/MFA using authenticator apps (Google Authenticator, Authy) or SMS codes for enhanced account security.</p>
                 </div>
 
-                <div class="security-card">
-                    <div class="icon"><i class="fas fa-server"></i></div>
-                    <h3>Secure Infrastructure</h3>
-                    <p>Hosted on AWS with SOC 2 Type II compliance, redundant backups, and 99.9% uptime SLA.</p>
-                </div>
-
-                <div class="security-card">
+                <div class="security-card" data-aos="fade-up" data-aos-delay="200">
                     <div class="icon"><i class="fas fa-eye"></i></div>
                     <h3>24/7 Monitoring</h3>
                     <p>Real-time threat detection, intrusion prevention systems, and automated security alerts to protect against attacks.</p>
                 </div>
 
-                <div class="security-card">
+                <div class="security-card" data-aos="fade-up" data-aos-delay="250">
                     <div class="icon"><i class="fas fa-shield-virus"></i></div>
                     <h3>Penetration Testing</h3>
                     <p>Regular security audits and penetration tests by third-party experts to identify and fix vulnerabilities.</p>
                 </div>
 
-                <div class="security-card">
+                <div class="security-card" data-aos="fade-up" data-aos-delay="300">
                     <div class="icon"><i class="fas fa-database"></i></div>
                     <h3>Data Backups</h3>
                     <p>Automated daily backups with 30-day retention, geo-redundant storage, and disaster recovery plans.</p>
                 </div>
 
-                <div class="security-card">
+                <div class="security-card" data-aos="fade-up" data-aos-delay="350">
                     <div class="icon"><i class="fas fa-check-double"></i></div>
                     <h3>Compliance</h3>
                     <p>GDPR, SOC 2, and ISO 27001 compliant. We adhere to strict data protection regulations.</p>
                 </div>
 
-                <div class="security-card">
-                    <div class="icon"><i class="fas fa-users-cog"></i></div>
-                    <h3>Employee Training</h3>
-                    <p>All employees undergo security training and background checks. Access is granted on a need-to-know basis.</p>
-                </div>
-
-                <div class="security-card">
+                <div class="security-card" data-aos="fade-up" data-aos-delay="400">
                     <div class="icon"><i class="fas fa-file-contract"></i></div>
                     <h3>Privacy by Design</h3>
                     <p>Data minimization, anonymization, and privacy-first architecture. We never sell your data.</p>
@@ -155,15 +347,14 @@
     </section>
 
     <!-- Responsible Disclosure -->
-    <!-- Responsible Disclosure -->
-    <section class="content-section" style="background: var(--bg-secondary);">
-        <div class="container-fluid" style="max-width: 800px;">
-            <h2 style="text-align: center; margin-bottom: 2rem;">Responsible Disclosure</h2>
-            <p style="text-align: center;">
+    <section class="disclosure-section">
+        <div class="container-fluid" style="max-width: 900px;">
+            <h2 data-aos="fade-up">Responsible Disclosure</h2>
+            <p data-aos="fade-up" data-aos-delay="100">
                 If you discover a security vulnerability, please report it to us immediately at 
                 <strong>support@alphavault.ai</strong>. We appreciate responsible disclosure and will respond within 24 hours.
             </p>
-            <p style="text-align: center; margin-top: 2rem;">
+            <p data-aos="fade-up" data-aos-delay="200">
                 <strong>Bug Bounty Program:</strong> We offer rewards for critical vulnerabilities. 
                 <a href="contact.html">Contact us</a> for more details.
             </p>
@@ -184,8 +375,18 @@
         </div>
     </footer>
 
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
     <script>
-        document.getElementById('currentYear').textContent = new Date().getFullYear();
+        document.addEventListener('DOMContentLoaded', function() {
+            AOS.init({
+                duration: 800,
+                easing: 'ease-out-cubic',
+                once: true,
+                offset: 50
+            });
+            
+            document.getElementById('currentYear').textContent = new Date().getFullYear();
+        });
     </script>
 </body>
 </html>
