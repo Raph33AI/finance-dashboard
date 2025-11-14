@@ -1,76 +1,167 @@
 /* ==============================================
-   DASHBOARD.CSS - Modern Minimalist Design 2024
-   Blanc/Gris/Noir + Dark Mode Support
+   DASHBOARD.CSS - ULTRA MODERN 3D GLASSMORPHISM
+   Performance Optimized • GPU Accelerated
+   Sidebar & Modals 100% Preserved
    ============================================== */
 
-/* Stats Grid */
+/* ============================================
+   🌟 VARIABLES PERSONNALISÉES 3D
+   ============================================ */
+:root {
+    --ml-primary: #2563eb;
+    --ml-secondary: #1d4ed8;
+    --ml-accent: #3b82f6;
+    --ml-success: #10b981;
+    --ml-danger: #ef4444;
+    --ml-warning: #f59e0b;
+    
+    --glass-bg: rgba(255, 255, 255, 0.08);
+    --glass-border: rgba(255, 255, 255, 0.18);
+    --glass-shadow: rgba(31, 38, 135, 0.37);
+    
+    --glow-primary: 0 0 20px rgba(37, 99, 235, 0.5);
+    --glow-success: 0 0 20px rgba(16, 185, 129, 0.5);
+    
+    --transition-smooth: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-bounce: all 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+body.dark-mode {
+    --glass-bg: rgba(15, 23, 42, 0.7);
+    --glass-border: rgba(148, 163, 184, 0.1);
+}
+
+/* ============================================
+   📊 STATS GRID - GLASSMORPHISM 3D
+   ============================================ */
 .stats-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
     gap: 20px;
     padding: 30px;
-    background: var(--background-secondary);
-    border-radius: var(--radius-xl);
+    background: linear-gradient(
+        135deg,
+        rgba(37, 99, 235, 0.05) 0%,
+        rgba(29, 78, 216, 0.02) 100%
+    );
+    backdrop-filter: blur(20px) saturate(180%);
+    border-radius: 28px;
+    border: 1px solid var(--glass-border);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
 }
 
 body.dark-mode .stats-grid {
-    background: var(--background-primary);
+    background: linear-gradient(
+        135deg,
+        rgba(15, 23, 42, 0.5) 0%,
+        rgba(30, 41, 59, 0.3) 100%
+    );
 }
 
 .stat-card {
-    background: var(--background-primary);
-    padding: 20px;
-    border-radius: 15px;
-    box-shadow: var(--shadow-md);
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(20px) saturate(180%);
+    padding: 24px;
+    border-radius: 20px;
+    box-shadow: 
+        0 8px 24px rgba(0, 0, 0, 0.08),
+        inset 0 1px 0 rgba(255, 255, 255, 0.6);
     text-align: center;
-    transition: all 0.3s;
-    border: 1px solid var(--border-color);
-    border-left: 4px solid var(--primary-color);
+    transition: var(--transition-smooth);
+    border: 1px solid var(--glass-border);
+    border-left: 4px solid var(--ml-primary);
+    transform-style: preserve-3d;
+    position: relative;
+    contain: layout style paint;
+}
+
+body.dark-mode .stat-card {
+    background: rgba(30, 41, 59, 0.9);
 }
 
 .stat-card:hover {
-    transform: translateY(-5px);
-    box-shadow: var(--shadow-lg);
-    border-left-color: var(--primary-dark);
+    transform: translateY(-8px) rotateX(2deg);
+    box-shadow: 
+        0 16px 40px rgba(37, 99, 235, 0.2),
+        0 0 40px rgba(37, 99, 235, 0.1),
+        inset 0 1px 0 rgba(255, 255, 255, 0.6);
+    border-left-color: var(--ml-secondary);
+    will-change: transform;
 }
 
 .stat-card h3 {
     font-size: 0.9em;
     color: var(--text-secondary);
-    margin-bottom: 10px;
+    margin-bottom: 12px;
     text-transform: uppercase;
-    font-weight: 600;
-    letter-spacing: 0.05em;
+    font-weight: 700;
+    letter-spacing: 1.2px;
+    background: linear-gradient(135deg, var(--ml-primary), var(--ml-secondary));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
 }
 
 .stat-card .value {
-    font-size: 2em;
-    font-weight: bold;
-    color: var(--primary-color);
+    font-size: 2.2em;
+    font-weight: 800;
+    background: linear-gradient(135deg, var(--ml-primary), var(--ml-secondary));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 6px;
+    line-height: 1.2;
 }
 
 .stat-card.positive .value {
-    color: var(--success-color);
+    background: linear-gradient(135deg, var(--ml-success), #059669);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
 }
 
 .stat-card.negative .value {
-    color: var(--danger-color);
+    background: linear-gradient(135deg, var(--ml-danger), #dc2626);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
 }
 
-/* Toolbar */
+/* ============================================
+   🛠️ TOOLBAR - PREMIUM GLASS
+   ============================================ */
 .toolbar {
-    background: var(--background-secondary);
-    padding: 20px;
-    border-radius: var(--radius-lg);
-    margin-bottom: 20px;
-    border: 1px solid var(--border-color);
+    background: linear-gradient(
+        135deg,
+        rgba(255, 255, 255, 0.1) 0%,
+        rgba(255, 255, 255, 0.05) 100%
+    );
+    backdrop-filter: blur(25px) saturate(180%);
+    padding: 24px;
+    border-radius: 20px;
+    margin-bottom: 24px;
+    border: 2px solid var(--glass-border);
+    box-shadow: 
+        0 8px 32px rgba(0, 0, 0, 0.1),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    position: relative;
+}
+
+body.dark-mode .toolbar {
+    background: linear-gradient(
+        135deg,
+        rgba(15, 23, 42, 0.6) 0%,
+        rgba(30, 41, 59, 0.4) 100%
+    );
 }
 
 .toolbar h3 {
     color: var(--text-primary);
-    margin-bottom: 15px;
-    font-size: 1.125rem;
-    font-weight: 600;
+    margin-bottom: 18px;
+    font-size: 1.2rem;
+    font-weight: 700;
+    background: linear-gradient(135deg, var(--ml-primary), var(--ml-secondary));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    display: flex;
+    align-items: center;
+    gap: 12px;
 }
 
 .toolbar-row {
@@ -86,140 +177,187 @@ body.dark-mode .stats-grid {
 }
 
 .toolbar label {
-    font-weight: 600;
-    color: var(--text-primary);
-    font-size: 0.9em;
+    font-weight: 700;
+    background: linear-gradient(135deg, var(--ml-primary), var(--ml-secondary));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    font-size: 0.95em;
     min-width: 80px;
 }
 
 .toolbar input,
 .toolbar select {
-    padding: 10px;
-    border: 1px solid var(--border-color);
-    border-radius: var(--radius-md);
+    padding: 12px 18px;
+    border: 2px solid rgba(37, 99, 235, 0.3);
+    border-radius: 12px;
     font-size: 0.95em;
-    background: var(--background-primary);
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(10px);
     color: var(--text-primary);
-    transition: all var(--transition-base);
+    transition: var(--transition-smooth);
+    font-weight: 600;
 }
 
 .toolbar input:focus,
 .toolbar select:focus {
     outline: none;
-    border-color: var(--primary-color);
-    box-shadow: 0 0 0 3px rgb(37 99 235 / 0.1);
-}
-
-.btn-add {
-    background: var(--primary-color);
-    color: white;
-    padding: 10px 25px;
-    border: none;
-    border-radius: var(--radius-md);
-    font-size: 0.95em;
-    font-weight: 600;
-    cursor: pointer;
-    margin: 5px;
-    transition: all var(--transition-base);
-}
-
-.btn-add:hover {
-    background: var(--primary-dark);
+    border-color: var(--ml-primary);
+    background: rgba(255, 255, 255, 0.1);
+    box-shadow: 
+        0 0 0 4px rgba(37, 99, 235, 0.1),
+        var(--glow-primary);
     transform: translateY(-2px);
-    box-shadow: var(--shadow-md);
 }
 
-.btn-success {
-    background: var(--success-color);
-    color: white;
-    padding: 12px 30px;
+/* ============================================
+   🚀 BOUTONS - HOLOGRAPHIC PREMIUM
+   ============================================ */
+.btn-add,
+.btn-success,
+.btn-primary,
+.btn-secondary {
+    padding: 12px 28px;
     border: none;
-    border-radius: var(--radius-md);
-    font-size: 1em;
-    font-weight: 600;
+    border-radius: 14px;
+    font-size: 0.95em;
+    font-weight: 700;
     cursor: pointer;
-    transition: all var(--transition-base);
-}
-
-/* ==============================================
-   BOUTONS PRIMAIRES ET SECONDAIRES
-   ============================================== */
-
-.btn-primary {
-    background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
-    color: white;
-    padding: 12px 30px;
-    border: none;
-    border-radius: var(--radius-md);
-    font-size: 1em;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all var(--transition-base);
-    box-shadow: 0 2px 8px rgba(37, 99, 235, 0.2);
+    transition: var(--transition-smooth);
     text-transform: uppercase;
     letter-spacing: 0.5px;
+    position: relative;
+    overflow: hidden;
+    transform: translateZ(0);
+}
+
+.btn-add::before,
+.btn-success::before,
+.btn-primary::before,
+.btn-secondary::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: linear-gradient(
+        45deg,
+        transparent,
+        rgba(255, 255, 255, 0.3),
+        transparent
+    );
+    transform: rotate(45deg);
+    transition: left 0.6s;
+}
+
+.btn-add:hover::before,
+.btn-success:hover::before,
+.btn-primary:hover::before,
+.btn-secondary:hover::before {
+    left: 100%;
+}
+
+/* Btn Primary */
+.btn-primary {
+    background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+    background-size: 200% 200%;
+    color: white;
+    box-shadow: 
+        0 8px 24px rgba(37, 99, 235, 0.3),
+        0 0 20px rgba(29, 78, 216, 0.2);
 }
 
 .btn-primary:hover {
     background: linear-gradient(135deg, #1d4ed8 0%, #1e40af 100%);
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.4);
+    transform: translateY(-4px) scale(1.02);
+    box-shadow: 
+        0 12px 36px rgba(37, 99, 235, 0.4),
+        0 0 40px rgba(29, 78, 216, 0.3);
+    will-change: transform;
 }
 
 .btn-primary:active {
-    transform: translateY(0);
-    box-shadow: 0 2px 6px rgba(37, 99, 235, 0.3);
+    transform: translateY(-2px) scale(0.98);
+    box-shadow: 0 6px 20px rgba(37, 99, 235, 0.3);
 }
 
+/* Btn Secondary */
 .btn-secondary {
     background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%);
     color: white;
-    padding: 12px 25px;
-    border: none;
-    border-radius: var(--radius-md);
-    font-size: 0.95em;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all var(--transition-base);
-    box-shadow: 0 2px 8px rgba(107, 114, 128, 0.2);
+    box-shadow: 
+        0 6px 20px rgba(107, 114, 128, 0.2),
+        0 0 15px rgba(75, 85, 99, 0.15);
 }
 
 .btn-secondary:hover {
     background: linear-gradient(135deg, #4b5563 0%, #374151 100%);
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(107, 114, 128, 0.4);
+    transform: translateY(-4px) scale(1.02);
+    box-shadow: 
+        0 10px 30px rgba(107, 114, 128, 0.3),
+        0 0 30px rgba(75, 85, 99, 0.2);
 }
 
 .btn-secondary:active {
-    transform: translateY(0);
-    box-shadow: 0 2px 6px rgba(107, 114, 128, 0.3);
+    transform: translateY(-2px) scale(0.98);
 }
 
-/* Dark Mode Support */
+/* Btn Success */
+.btn-success {
+    background: linear-gradient(135deg, var(--ml-success), #059669);
+    background-size: 200% 200%;
+    color: white;
+    box-shadow: 
+        0 8px 24px rgba(16, 185, 129, 0.3),
+        0 0 20px rgba(5, 150, 105, 0.2);
+}
+
+.btn-success:hover {
+    background: linear-gradient(135deg, #059669 0%, #047857 100%);
+    transform: translateY(-4px) scale(1.02);
+    box-shadow: 
+        0 12px 36px rgba(16, 185, 129, 0.4),
+        var(--glow-success);
+}
+
+/* Btn Add */
+.btn-add {
+    background: linear-gradient(135deg, var(--ml-primary), var(--ml-secondary));
+    color: white;
+    margin: 5px;
+    box-shadow: 0 6px 20px rgba(37, 99, 235, 0.25);
+}
+
+.btn-add:hover {
+    background: linear-gradient(135deg, var(--ml-secondary), #1e40af);
+    transform: translateY(-3px) scale(1.05);
+    box-shadow: 0 10px 30px rgba(37, 99, 235, 0.35);
+}
+
+/* Dark Mode Buttons */
 body.dark-mode .btn-primary {
-    box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
+    box-shadow: 
+        0 8px 24px rgba(59, 130, 246, 0.4),
+        0 0 25px rgba(37, 99, 235, 0.3);
 }
 
 body.dark-mode .btn-primary:hover {
-    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.5);
+    box-shadow: 
+        0 12px 36px rgba(59, 130, 246, 0.5),
+        0 0 40px rgba(37, 99, 235, 0.4);
 }
 
 body.dark-mode .btn-secondary {
     background: linear-gradient(135deg, #374151 0%, #1f2937 100%);
-    box-shadow: 0 2px 8px rgba(55, 65, 81, 0.3);
+    box-shadow: 0 6px 20px rgba(55, 65, 81, 0.3);
 }
 
 body.dark-mode .btn-secondary:hover {
     background: linear-gradient(135deg, #1f2937 0%, #111827 100%);
-    box-shadow: 0 4px 12px rgba(55, 65, 81, 0.5);
+    box-shadow: 0 10px 30px rgba(55, 65, 81, 0.5);
 }
 
-.btn-success:hover {
-    background: #059669;
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-md);
-}
-
+/* Total Months & Displays */
 .total-months {
     color: var(--text-primary);
     font-weight: 600;
@@ -227,9 +365,11 @@ body.dark-mode .btn-secondary:hover {
 }
 
 .total-months span {
-    color: var(--primary-color);
-    font-size: 1.1em;
-    font-weight: 700;
+    background: linear-gradient(135deg, var(--ml-primary), var(--ml-secondary));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    font-size: 1.2em;
+    font-weight: 800;
 }
 
 .parameters-grid {
@@ -240,25 +380,34 @@ body.dark-mode .btn-secondary:hover {
 }
 
 .yield-display {
-    color: var(--primary-color);
-    font-weight: 600;
+    background: linear-gradient(135deg, var(--ml-primary), var(--ml-secondary));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    font-weight: 700;
     margin-left: 10px;
 }
 
 .inflation-status {
-    color: var(--accent-color);
-    font-weight: 600;
+    background: linear-gradient(135deg, var(--ml-accent), var(--ml-primary));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    font-weight: 700;
     margin-left: 15px;
 }
 
-/* Table Styles */
+/* ============================================
+   📋 TABLE - GLASSMORPHISM PREMIUM
+   ============================================ */
 .table-container {
     overflow-x: auto;
     max-height: 600px;
     overflow-y: auto;
-    border-radius: var(--radius-lg);
-    box-shadow: var(--shadow-md);
-    border: 1px solid var(--border-color);
+    border-radius: 20px;
+    box-shadow: 
+        0 12px 40px rgba(0, 0, 0, 0.1),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    border: 2px solid var(--glass-border);
+    backdrop-filter: blur(10px);
 }
 
 .data-table {
@@ -268,139 +417,199 @@ body.dark-mode .btn-secondary:hover {
 }
 
 .data-table thead {
-    background: var(--text-primary);
+    background: linear-gradient(135deg, var(--ml-primary), var(--ml-secondary));
     color: white;
     position: sticky;
     top: 0;
     z-index: 10;
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
 }
 
 body.dark-mode .data-table thead {
-    background: var(--primary-color);
+    background: linear-gradient(135deg, #1e3a8a, #1e40af);
 }
 
 .data-table th {
-    padding: 12px 8px;
+    padding: 14px 10px;
     text-align: left;
-    font-weight: 600;
+    font-weight: 700;
     white-space: nowrap;
-    border-right: 1px solid rgba(255,255,255,0.2);
+    border-right: 1px solid rgba(255, 255, 255, 0.2);
     font-size: 0.85em;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
 }
 
 .data-table th:first-child {
     position: sticky;
     left: 0;
     z-index: 11;
-    background: var(--text-primary);
+    background: linear-gradient(135deg, var(--ml-primary), var(--ml-secondary));
+    box-shadow: 2px 0 8px rgba(0, 0, 0, 0.1);
 }
 
 body.dark-mode .data-table th:first-child {
-    background: var(--primary-color);
+    background: linear-gradient(135deg, #1e3a8a, #1e40af);
 }
 
 .data-table tbody tr {
     border-bottom: 1px solid var(--border-color);
-    transition: background 0.2s;
+    transition: background 0.2s, transform 0.2s;
 }
 
 .data-table tbody tr:hover {
-    background: var(--background-secondary);
+    background: linear-gradient(90deg, rgba(37, 99, 235, 0.08), transparent);
+    transform: translateX(2px);
 }
 
 .data-table tbody tr:nth-child(even) {
-    background: var(--background-tertiary);
+    background: rgba(248, 250, 252, 0.5);
+}
+
+body.dark-mode .data-table tbody tr:nth-child(even) {
+    background: rgba(30, 41, 59, 0.3);
 }
 
 .data-table tbody tr:nth-child(even):hover {
-    background: var(--background-secondary);
+    background: linear-gradient(90deg, rgba(37, 99, 235, 0.08), transparent);
 }
 
 .data-table td {
-    padding: 6px 4px;
+    padding: 8px 6px;
     border-right: 1px solid var(--border-color);
     color: var(--text-primary);
+    font-weight: 500;
 }
 
 .data-table td:first-child {
     position: sticky;
     left: 0;
     background: var(--background-primary);
-    font-weight: 600;
-    color: var(--primary-color);
+    font-weight: 700;
+    background: linear-gradient(135deg, var(--ml-primary), var(--ml-secondary));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
     z-index: 1;
-    font-size: 0.8em;
+    font-size: 0.85em;
+    box-shadow: 2px 0 8px rgba(0, 0, 0, 0.05);
 }
 
 .data-table tbody tr:nth-child(even) td:first-child {
-    background: var(--background-tertiary);
+    background: rgba(248, 250, 252, 0.5);
+}
+
+body.dark-mode .data-table tbody tr:nth-child(even) td:first-child {
+    background: rgba(30, 41, 59, 0.3);
 }
 
 .data-table tbody tr:hover td:first-child {
-    background: var(--background-secondary);
+    background: rgba(37, 99, 235, 0.05);
 }
 
 .data-table input {
     width: 80px;
-    padding: 4px;
-    border: 1px solid var(--border-color);
-    border-radius: var(--radius-sm);
+    padding: 6px;
+    border: 2px solid rgba(37, 99, 235, 0.2);
+    border-radius: 8px;
     font-size: 0.85em;
     text-align: right;
-    background: var(--background-primary);
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(5px);
     color: var(--text-primary);
+    font-weight: 600;
+    transition: var(--transition-smooth);
 }
 
 .data-table input:focus {
     outline: none;
-    border-color: var(--primary-color);
-    background: rgba(37, 99, 235, 0.05);
+    border-color: var(--ml-primary);
+    background: rgba(37, 99, 235, 0.08);
+    box-shadow: 
+        0 0 0 3px rgba(37, 99, 235, 0.1),
+        0 2px 8px rgba(37, 99, 235, 0.2);
 }
 
 .data-table .calculated {
-    background: var(--background-tertiary);
-    font-weight: 600;
+    background: linear-gradient(90deg, rgba(37, 99, 235, 0.05), transparent);
+    font-weight: 700;
     color: var(--text-primary);
     text-align: right;
-    padding: 6px 8px;
+    padding: 8px 10px;
     font-size: 0.85em;
+    border-left: 2px solid rgba(37, 99, 235, 0.3);
 }
 
 body.dark-mode .data-table .calculated {
-    background: var(--background-secondary);
+    background: linear-gradient(90deg, rgba(59, 130, 246, 0.1), transparent);
 }
 
 .data-table .btn-delete {
-    background: var(--danger-color);
+    background: linear-gradient(135deg, var(--ml-danger), #dc2626);
     color: white;
     border: none;
-    padding: 3px 8px;
-    border-radius: var(--radius-sm);
+    padding: 5px 10px;
+    border-radius: 8px;
     cursor: pointer;
     font-size: 0.75em;
-    font-weight: 600;
-    transition: all var(--transition-base);
+    font-weight: 700;
+    transition: var(--transition-smooth);
+    box-shadow: 0 2px 8px rgba(239, 68, 68, 0.3);
 }
 
 .data-table .btn-delete:hover {
-    background: #dc2626;
-    transform: scale(1.05);
+    background: linear-gradient(135deg, #dc2626, #b91c1c);
+    transform: scale(1.1);
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
 }
 
-/* Charts Container */
+/* ============================================
+   📈 CHARTS - PREMIUM GLASS
+   ============================================ */
 .charts-container {
     padding: 30px;
-    background: var(--background-secondary);
-    border-radius: var(--radius-xl);
+    background: linear-gradient(
+        135deg,
+        rgba(37, 99, 235, 0.03) 0%,
+        rgba(29, 78, 216, 0.01) 100%
+    );
+    backdrop-filter: blur(20px) saturate(180%);
+    border-radius: 28px;
+    border: 1px solid var(--glass-border);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+}
+
+body.dark-mode .charts-container {
+    background: linear-gradient(
+        135deg,
+        rgba(15, 23, 42, 0.4) 0%,
+        rgba(30, 41, 59, 0.2) 100%
+    );
 }
 
 .chart-wrapper {
-    background: var(--background-primary);
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(20px) saturate(180%);
     margin-bottom: 30px;
-    border-radius: var(--radius-xl);
-    box-shadow: var(--shadow-sm);
-    padding: 20px;
-    border: 1px solid var(--border-color);
+    border-radius: 20px;
+    box-shadow: 
+        0 8px 24px rgba(0, 0, 0, 0.08),
+        inset 0 1px 0 rgba(255, 255, 255, 0.5);
+    padding: 24px;
+    border: 2px solid var(--glass-border);
+    transform-style: preserve-3d;
+    transition: var(--transition-smooth);
+}
+
+body.dark-mode .chart-wrapper {
+    background: rgba(30, 41, 59, 0.9);
+}
+
+.chart-wrapper:hover {
+    transform: translateY(-4px) rotateX(1deg);
+    box-shadow: 
+        0 12px 36px rgba(37, 99, 235, 0.15),
+        0 0 40px rgba(37, 99, 235, 0.08),
+        inset 0 1px 0 rgba(255, 255, 255, 0.5);
 }
 
 .grid-2 {
@@ -409,124 +618,146 @@ body.dark-mode .data-table .calculated {
     gap: 30px;
 }
 
+/* ============================================
+   🎯 LOCAL FILTER - GLASS EFFECT
+   ============================================ */
 .local-filter {
-    margin: 15px 0;
-    padding: 15px;
-    background: var(--background-secondary);
-    border-radius: var(--radius-lg);
+    margin: 18px 0;
+    padding: 18px;
+    background: linear-gradient(
+        135deg,
+        rgba(37, 99, 235, 0.08) 0%,
+        rgba(29, 78, 216, 0.03) 100%
+    );
+    backdrop-filter: blur(15px) saturate(180%);
+    border-radius: 16px;
     display: flex;
     align-items: center;
     gap: 15px;
     flex-wrap: wrap;
-    border: 1px solid var(--border-color);
-    border-left: 4px solid var(--primary-color);
+    border: 2px solid var(--glass-border);
+    border-left: 4px solid var(--ml-primary);
+    box-shadow: 0 4px 16px rgba(37, 99, 235, 0.1);
+}
+
+body.dark-mode .local-filter {
+    background: linear-gradient(
+        135deg,
+        rgba(59, 130, 246, 0.1) 0%,
+        rgba(37, 99, 235, 0.05) 100%
+    );
 }
 
 .local-filter label {
-    font-weight: 600;
-    color: var(--text-primary);
-    font-size: 0.9em;
+    font-weight: 700;
+    background: linear-gradient(135deg, var(--ml-primary), var(--ml-secondary));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    font-size: 0.95em;
 }
 
 .local-filter select {
-    padding: 8px 15px;
-    border: 1px solid var(--border-color);
-    border-radius: var(--radius-md);
-    font-size: 0.9em;
+    padding: 10px 18px;
+    border: 2px solid rgba(37, 99, 235, 0.3);
+    border-radius: 12px;
+    font-size: 0.95em;
     min-width: 200px;
     cursor: pointer;
-    background: var(--background-primary);
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(10px);
     color: var(--text-primary);
-    font-weight: 500;
-    transition: all var(--transition-base);
+    font-weight: 600;
+    transition: var(--transition-smooth);
 }
 
 .local-filter select:focus {
     outline: none;
-    border-color: var(--primary-color);
-    box-shadow: 0 0 0 3px rgb(37 99 235 / 0.1);
+    border-color: var(--ml-primary);
+    background: rgba(255, 255, 255, 0.1);
+    box-shadow: 
+        0 0 0 4px rgba(37, 99, 235, 0.1),
+        var(--glow-primary);
 }
 
-/* Highcharts Dark Mode Override */
-body.dark-mode .highcharts-background {
-    fill: var(--background-primary);
-}
-
-body.dark-mode .highcharts-title,
-body.dark-mode .highcharts-subtitle,
-body.dark-mode .highcharts-axis-labels text {
-    fill: var(--text-primary) !important;
-}
-
-body.dark-mode .highcharts-grid-line {
-    stroke: var(--border-color);
-}
-
-body.dark-mode .highcharts-legend-item text {
-    fill: var(--text-primary) !important;
-}
-
-/* Responsive */
-@media (max-width: 768px) {
-    .grid-2 {
-        grid-template-columns: 1fr;
-    }
-    
-    .parameters-grid {
-        grid-template-columns: 1fr;
-    }
-    
-    .toolbar-row {
-        flex-direction: column;
-        align-items: stretch;
-    }
-    
-    .stats-grid {
-        padding: 20px;
-        gap: 15px;
-    }
-}
-
-/* =============================================
-   SIMULATION MANAGEMENT
-   ============================================= */
-
+/* ============================================
+   🎪 SIMULATION MANAGEMENT - 3D PREMIUM
+   ============================================ */
 .simulation-management {
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background-size: 200% 200%;
     color: white;
-    padding: 25px;
-    border-radius: 15px;
-    box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+    padding: 28px;
+    border-radius: 20px;
+    box-shadow: 
+        0 12px 40px rgba(102, 126, 234, 0.4),
+        0 0 60px rgba(118, 75, 162, 0.3);
+    position: relative;
+    overflow: hidden;
+}
+
+.simulation-management::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: repeating-linear-gradient(
+        45deg,
+        transparent,
+        transparent 10px,
+        rgba(255, 255, 255, 0.05) 10px,
+        rgba(255, 255, 255, 0.05) 20px
+    );
+    animation: moveStripes 20s linear infinite;
+    pointer-events: none;
+}
+
+@keyframes moveStripes {
+    0% { transform: translate(0, 0); }
+    100% { transform: translate(50px, 50px); }
 }
 
 .simulation-management h3 {
-    color: white;
+    color: white !important;
     margin-bottom: 20px;
+    font-weight: 800;
+    text-shadow: 0 2px 12px rgba(0, 0, 0, 0.3);
+    position: relative;
+    z-index: 1;
 }
 
 .current-simulation-display {
-    background: rgba(255, 255, 255, 0.15);
-    padding: 15px;
-    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(15px) saturate(180%);
+    padding: 18px;
+    border-radius: 14px;
     text-align: center;
-    backdrop-filter: blur(10px);
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    box-shadow: 
+        0 8px 24px rgba(0, 0, 0, 0.2),
+        inset 0 1px 0 rgba(255, 255, 255, 0.4);
+    position: relative;
+    z-index: 1;
 }
 
 .current-simulation-display .label {
-    font-size: 0.9em;
-    opacity: 0.9;
+    font-size: 0.95em;
+    opacity: 0.95;
     margin-right: 10px;
+    font-weight: 600;
 }
 
 .current-simulation-display .value {
-    font-size: 1.2em;
-    font-weight: bold;
+    font-size: 1.3em;
+    font-weight: 800;
     color: #ffd700;
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
 }
 
-/* =============================================
-   MODAL
-   ============================================= */
+/* ============================================
+   ⚠️ MODAL - 100% PRESERVED (NO CHANGES)
+   ============================================ */
 
 .modal {
     display: none;
@@ -599,21 +830,36 @@ body.dark-mode .highcharts-legend-item text {
     gap: 10px;
 }
 
-/* =============================================
-   SIMULATIONS LIST
-   ============================================= */
+/* Dark Mode Support */
+body.dark-mode .modal-content {
+    background: var(--background-primary);
+    color: var(--text-primary);
+}
+
+body.dark-mode .modal-header {
+    background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%);
+}
+
+body.dark-mode .modal-footer {
+    background: var(--background-secondary);
+}
+
+/* ============================================
+   📋 SIMULATIONS LIST - GLASSMORPHISM 3D
+   ============================================ */
 
 #simulationsListContainer {
     display: flex;
     flex-direction: column;
-    gap: 15px;
+    gap: 16px;
 }
 
 .no-simulations {
     text-align: center;
     color: #999;
-    padding: 40px;
+    padding: 50px;
     font-style: italic;
+    font-size: 1.1em;
 }
 
 .simulation-item {
@@ -621,90 +867,28 @@ body.dark-mode .highcharts-legend-item text {
     justify-content: space-between;
     align-items: center;
     padding: 20px;
-    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-    border-radius: 12px;
-    transition: all 0.3s ease;
-    border: 2px solid transparent;
-}
-
-.simulation-item:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-}
-
-.simulation-item.active {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
-    border-color: #ffd700;
-}
-
-.simulation-info {
-    flex: 1;
-}
-
-.simulation-name {
-    font-weight: bold;
-    font-size: 1.1em;
-    display: block;
-    margin-bottom: 5px;
-}
-
-.simulation-item.active .simulation-name {
-    color: #ffd700;
-}
-
-.simulation-date {
-    font-size: 0.85em;
-    opacity: 0.7;
-}
-
-.simulation-actions {
-    display: flex;
-    gap: 8px;
-}
-
-.btn-icon {
-    background: rgba(255, 255, 255, 0.9);
-    border: none;
-    width: 36px;
-    height: 36px;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: all 0.2s;
-    color: #667eea;
-}
-
-.btn-icon:hover {
-    background: white;
-    transform: scale(1.1);
-}
-
-.btn-icon.btn-danger {
-    color: #e74c3c;
-}
-
-.btn-icon.btn-danger:hover {
-    background: #e74c3c;
-    color: white;
-}
-
-.simulation-item.active .btn-icon {
-    background: rgba(255, 255, 255, 0.3);
-    color: white;
-}
-
-.simulation-item.active .btn-icon:hover {
-    background: rgba(255, 255, 255, 0.5);
-}
-
-/* =============================================
-   SIMULATION ITEM - CLICKABLE
-   ============================================= */
-
-.simulation-item {
+    background: linear-gradient(
+        135deg,
+        rgba(245, 247, 250, 0.9) 0%,
+        rgba(195, 207, 226, 0.7) 100%
+    );
+    backdrop-filter: blur(20px) saturate(180%);
+    border-radius: 16px;
+    transition: var(--transition-smooth);
+    border: 2px solid var(--glass-border);
     cursor: pointer;
     position: relative;
     overflow: hidden;
+    transform-style: preserve-3d;
+    contain: layout style paint;
+}
+
+body.dark-mode .simulation-item {
+    background: linear-gradient(
+        135deg,
+        rgba(30, 41, 59, 0.8) 0%,
+        rgba(51, 65, 85, 0.6) 100%
+    );
 }
 
 .simulation-item::before {
@@ -714,12 +898,34 @@ body.dark-mode .highcharts-legend-item text {
     left: -100%;
     width: 100%;
     height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(37, 99, 235, 0.15),
+        transparent
+    );
     transition: left 0.5s;
 }
 
 .simulation-item:hover::before {
     left: 100%;
+}
+
+.simulation-item:hover {
+    transform: translateY(-4px) rotateX(2deg);
+    box-shadow: 
+        0 12px 36px rgba(37, 99, 235, 0.2),
+        0 0 40px rgba(37, 99, 235, 0.1);
+    border-color: rgba(37, 99, 235, 0.4);
+}
+
+.simulation-item.active {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: white;
+    border: 2px solid #ffd700;
+    box-shadow: 
+        0 12px 40px rgba(16, 185, 129, 0.5),
+        0 0 60px rgba(16, 185, 129, 0.3);
 }
 
 .simulation-info {
@@ -728,11 +934,11 @@ body.dark-mode .highcharts-legend-item text {
     user-select: none;
 }
 
-.simulation-item.active {
-    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-    color: white;
-    border-color: #ffd700;
-    box-shadow: 0 8px 20px rgba(16, 185, 129, 0.4);
+.simulation-name {
+    font-weight: 800;
+    font-size: 1.15em;
+    display: block;
+    margin-bottom: 6px;
 }
 
 .simulation-item.active .simulation-name {
@@ -743,12 +949,69 @@ body.dark-mode .highcharts-legend-item text {
     color: #ffd700;
 }
 
+.simulation-date {
+    font-size: 0.9em;
+    opacity: 0.75;
+    font-weight: 600;
+}
+
 .simulation-item.active .simulation-date {
-    color: rgba(255, 255, 255, 0.9);
+    color: rgba(255, 255, 255, 0.95);
     opacity: 1;
 }
 
-/* Animation de chargement */
+.simulation-actions {
+    display: flex;
+    gap: 10px;
+    position: relative;
+    z-index: 10;
+}
+
+.btn-icon {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    border: 2px solid var(--glass-border);
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: var(--transition-smooth);
+    color: #667eea;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1em;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.btn-icon:hover {
+    background: white;
+    transform: scale(1.15) rotate(5deg);
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.3);
+}
+
+.btn-icon.btn-danger {
+    color: #e74c3c;
+}
+
+.btn-icon.btn-danger:hover {
+    background: linear-gradient(135deg, #e74c3c, #c0392b);
+    color: white;
+    box-shadow: 0 6px 20px rgba(231, 76, 60, 0.4);
+}
+
+.simulation-item.active .btn-icon {
+    background: rgba(255, 255, 255, 0.3);
+    backdrop-filter: blur(10px);
+    color: white;
+    border-color: rgba(255, 255, 255, 0.5);
+}
+
+.simulation-item.active .btn-icon:hover {
+    background: rgba(255, 255, 255, 0.5);
+}
+
+/* Loading Animation */
 .simulation-item.loading {
     opacity: 0.6;
     pointer-events: none;
@@ -774,42 +1037,118 @@ body.dark-mode .highcharts-legend-item text {
     }
 }
 
-/* Effet de hover amélioré */
+/* Hover Effect for non-active */
 .simulation-item:not(.active):hover {
-    background: linear-gradient(135deg, #e0e7ff 0%, #c7d2fe 100%);
+    background: linear-gradient(
+        135deg,
+        rgba(224, 231, 255, 0.9) 0%,
+        rgba(199, 210, 254, 0.8) 100%
+    );
     border-color: #667eea;
 }
 
-/* Actions buttons - empêcher le trigger du parent */
-.simulation-actions {
-    position: relative;
-    z-index: 10;
-}
-
-/* Dark Mode Support */
-body.dark-mode .modal-content {
-    background: var(--background-primary);
-    color: var(--text-primary);
-}
-
-body.dark-mode .modal-header {
-    background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%);
-}
-
-body.dark-mode .modal-footer {
-    background: var(--background-secondary);
-}
-
-body.dark-mode .simulation-item {
-    background: var(--background-secondary);
-    color: var(--text-primary);
-}
-
 body.dark-mode .simulation-item:not(.active):hover {
-    background: var(--background-tertiary);
+    background: linear-gradient(
+        135deg,
+        rgba(51, 65, 85, 0.9) 0%,
+        rgba(71, 85, 105, 0.7) 100%
+    );
 }
 
-body.dark-mode .simulation-item.active {
-    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-    color: white;
+/* ============================================
+   🌙 DARK MODE - HIGHCHARTS OVERRIDE
+   ============================================ */
+body.dark-mode .highcharts-background {
+    fill: var(--background-primary);
 }
+
+body.dark-mode .highcharts-title,
+body.dark-mode .highcharts-subtitle,
+body.dark-mode .highcharts-axis-labels text {
+    fill: var(--text-primary) !important;
+}
+
+body.dark-mode .highcharts-grid-line {
+    stroke: var(--border-color);
+}
+
+body.dark-mode .highcharts-legend-item text {
+    fill: var(--text-primary) !important;
+}
+
+/* ============================================
+   📱 RESPONSIVE DESIGN
+   ============================================ */
+@media (max-width: 768px) {
+    .grid-2 {
+        grid-template-columns: 1fr;
+    }
+    
+    .parameters-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .toolbar-row {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .stats-grid {
+        padding: 20px;
+        gap: 15px;
+        grid-template-columns: 1fr;
+    }
+    
+    .charts-container {
+        padding: 20px;
+    }
+    
+    .chart-wrapper {
+        padding: 16px;
+    }
+}
+
+/* ============================================
+   ⚡ PERFORMANCE OPTIMIZATIONS
+   ============================================ */
+
+/* Reduce animations for users who prefer reduced motion */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+    
+    .simulation-management::before {
+        animation: none;
+    }
+}
+
+/* GPU Acceleration for transformed elements */
+.stat-card,
+.chart-wrapper,
+.simulation-item,
+.btn-primary,
+.btn-secondary,
+.btn-success,
+.btn-add {
+    transform: translateZ(0);
+    backface-visibility: hidden;
+}
+
+/* Disable hover effects on touch devices for performance */
+@media (hover: none) and (pointer: coarse) {
+    .stat-card:hover,
+    .chart-wrapper:hover,
+    .simulation-item:hover {
+        transform: none;
+    }
+}
+
+/* ============================================
+   🎯 FIN DU FICHIER - ULTRA MODERN 3D CSS
+   Performance Optimized • Sidebar & Modals Preserved
+   ============================================ */
