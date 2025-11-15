@@ -6364,3 +6364,796 @@ body.dark-mode .pricing-card.platinum {
         gap: 1.5rem;
     }
 }
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   📱 CORRECTIONS MOBILE - SANS TOUCHER AU DESIGN PC
+   Version: 1.0 - Optimisé pour smartphone
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   🔧 TABLET - 1024px et moins
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+
+@media (max-width: 1024px) {
+    /* Hero Dashboard Mockup - Prévenir le débordement */
+    .dashboard-mockup {
+        max-width: 100%;
+        margin: 0 auto;
+    }
+    
+    .mockup-stats-row {
+        grid-template-columns: 1fr;
+        gap: 0.75rem;
+    }
+    
+    .mockup-chart-area {
+        height: 180px;
+        padding: 1rem;
+    }
+    
+    /* Interactive Demo - Ajustement */
+    .search-interface {
+        max-width: 100%;
+    }
+    
+    .company-metrics {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 0.75rem;
+    }
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   📱 MOBILE - 768px et moins (CORRECTIONS PRINCIPALES)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+
+@media (max-width: 768px) {
+    
+    /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+       ✅ PROBLÈME 1 : Navigation Mobile (Sidebar)
+       ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+    
+    .nav-container {
+        padding: 0.875rem 1rem;
+    }
+    
+    /* Menu mobile - Toujours au-dessus de tout */
+    .nav-menu {
+        position: fixed;
+        top: 65px;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: var(--background-primary);
+        flex-direction: column;
+        align-items: stretch;
+        padding: 1.5rem;
+        box-shadow: var(--shadow-2xl);
+        transform: translateX(-100%);
+        transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        z-index: 9998;
+        overflow-y: auto;
+        border-right: 1px solid var(--border-color);
+    }
+    
+    body.dark-mode .nav-menu {
+        background: var(--background-secondary);
+    }
+    
+    /* Menu actif - Visible */
+    .nav-menu.active {
+        transform: translateX(0);
+    }
+    
+    /* Liens navigation mobile */
+    .nav-link {
+        width: 100%;
+        padding: 1rem 0;
+        border-bottom: 1px solid var(--border-color);
+        font-size: 1rem;
+    }
+    
+    .nav-link::after {
+        display: none;
+    }
+    
+    /* Bouton hamburger - Toujours visible */
+    .mobile-menu-btn {
+        display: flex;
+        z-index: 10000;
+        position: relative;
+    }
+    
+    /* Boutons CTA en mobile */
+    .nav-cta {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: var(--background-primary);
+        padding: 1rem;
+        border-top: 1px solid var(--border-color);
+        flex-direction: column;
+        gap: 0.75rem;
+        transform: translateY(100%);
+        transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        z-index: 9997;
+        box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.1);
+    }
+    
+    body.dark-mode .nav-cta {
+        background: var(--background-secondary);
+    }
+    
+    /* CTA visible quand menu actif */
+    .nav-menu.active ~ .nav-cta {
+        transform: translateY(0);
+    }
+    
+    .btn-text,
+    .btn-primary-nav {
+        width: 100%;
+        justify-content: center;
+        padding: 0.875rem 1.5rem;
+    }
+    
+    /* Overlay pour fermer le menu */
+    .nav-menu.active::before {
+        content: '';
+        position: fixed;
+        top: 65px;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: -1;
+    }
+    
+    /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+       ✅ PROBLÈME 2 : Menu Profil (Dropdown)
+       ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+    
+    /* Cacher le texte utilisateur sur mobile */
+    .user-info-text {
+        display: none;
+    }
+    
+    /* Bouton profil plus compact */
+    .user-profile-button {
+        padding: 0.5rem;
+        min-height: 48px;
+    }
+    
+    /* Dropdown en pleine largeur sur mobile */
+    .user-dropdown-menu {
+        position: fixed;
+        top: auto;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        width: 100%;
+        max-width: 100%;
+        min-width: auto;
+        border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+        max-height: 80vh;
+        overflow-y: auto;
+        transform: translateY(100%);
+        transform-origin: bottom center;
+    }
+    
+    .user-dropdown-menu.active {
+        transform: translateY(0);
+    }
+    
+    /* Header dropdown ajusté */
+    .dropdown-header {
+        padding: 1rem;
+    }
+    
+    .dropdown-user-card {
+        margin-bottom: 0.75rem;
+    }
+    
+    .dropdown-user-card img {
+        width: 48px;
+        height: 48px;
+    }
+    
+    .dropdown-user-text h4 {
+        font-size: 0.9375rem;
+    }
+    
+    /* Liens dropdown ajustés */
+    .dropdown-link {
+        padding: 0.75rem;
+    }
+    
+    .dropdown-link-icon {
+        width: 40px;
+        height: 40px;
+    }
+    
+    .dropdown-link-icon i {
+        font-size: 1rem;
+    }
+    
+    /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+       ✅ PROBLÈME 3 : Hero Section (Visuel tronqué)
+       ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+    
+    .hero {
+        padding: 5rem 1rem 3rem;
+        min-height: auto;
+    }
+    
+    .hero-container {
+        grid-template-columns: 1fr;
+        gap: 2rem;
+    }
+    
+    /* Mockup dashboard responsive */
+    .dashboard-mockup {
+        border-radius: var(--radius-lg);
+        max-width: 100%;
+        overflow-x: hidden;
+    }
+    
+    .mockup-content {
+        padding: 1rem;
+    }
+    
+    .mockup-stats-row {
+        grid-template-columns: 1fr;
+        gap: 0.75rem;
+    }
+    
+    .stat-card {
+        padding: 0.875rem;
+    }
+    
+    .stat-header {
+        font-size: 0.75rem;
+    }
+    
+    .stat-value {
+        font-size: 1.25rem;
+    }
+    
+    .stat-change,
+    .stat-badge {
+        font-size: 0.8125rem;
+    }
+    
+    .mockup-chart-area {
+        height: 150px;
+        padding: 0.875rem;
+    }
+    
+    .chart-canvas-wrapper {
+        height: 120px;
+    }
+    
+    /* Hero content ajusté */
+    .hero-headline {
+        font-size: clamp(1.875rem, 8vw, 2.25rem);
+        margin-bottom: 1rem;
+    }
+    
+    .hero-subheadline {
+        font-size: 1rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    .hero-cta {
+        flex-direction: column;
+        width: 100%;
+        gap: 0.75rem;
+    }
+    
+    .btn-hero-primary,
+    .btn-hero-secondary {
+        width: 100%;
+        justify-content: center;
+        padding: 0.875rem 1.5rem;
+    }
+    
+    .social-proof {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+        padding-top: 1.5rem;
+    }
+    
+    .proof-divider {
+        display: none;
+    }
+    
+    .proof-number {
+        font-size: 1.25rem;
+    }
+    
+    /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+       ✅ PROBLÈME 4 : Interactive Demo (Image tronquée)
+       ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+    
+    .demo-interactive {
+        padding: 4rem 1rem;
+    }
+    
+    .demo-wrapper {
+        grid-template-columns: 1fr;
+        gap: 2.5rem;
+    }
+    
+    .demo-left {
+        max-width: 100%;
+    }
+    
+    .demo-title {
+        font-size: clamp(1.75rem, 7vw, 2.25rem);
+    }
+    
+    .demo-description {
+        font-size: 1rem;
+    }
+    
+    .demo-stats-grid {
+        gap: 1rem;
+    }
+    
+    /* Search interface responsive */
+    .search-interface {
+        max-width: 100%;
+        border-radius: var(--radius-lg);
+    }
+    
+    .search-box-wrapper {
+        padding: 1rem;
+    }
+    
+    .search-box {
+        padding: 0.75rem 1rem;
+        flex-wrap: wrap;
+    }
+    
+    .search-box input {
+        font-size: 0.9375rem;
+        min-width: 0;
+    }
+    
+    .search-strength {
+        width: 100%;
+        margin-top: 0.5rem;
+        justify-content: flex-start;
+    }
+    
+    .search-results {
+        padding: 1rem;
+        max-height: 400px;
+    }
+    
+    /* Company result cards responsive */
+    .company-result-card {
+        padding: 1rem;
+    }
+    
+    .company-result-header {
+        flex-wrap: wrap;
+        gap: 0.75rem;
+    }
+    
+    .company-avatar {
+        width: 40px;
+        height: 40px;
+        font-size: 1.125rem;
+    }
+    
+    .company-details h4 {
+        font-size: 0.9375rem;
+    }
+    
+    .company-details p {
+        font-size: 0.8125rem;
+    }
+    
+    .relevancy-score {
+        width: 100%;
+        flex-direction: row;
+        justify-content: center;
+        margin-top: 0.75rem;
+    }
+    
+    .score-circle {
+        width: 48px;
+        height: 48px;
+    }
+    
+    .score-circle::before {
+        width: 38px;
+        height: 38px;
+    }
+    
+    .score-value {
+        font-size: 1rem;
+    }
+    
+    .company-metrics {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 0.75rem;
+    }
+    
+    .metric-label {
+        font-size: 0.6875rem;
+    }
+    
+    .metric-value {
+        font-size: 0.875rem;
+    }
+    
+    /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+       🎨 Sections générales
+       ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+    
+    .features-section,
+    .solutions-section,
+    .tools-section,
+    .pricing-section,
+    .alphy-ai-section,
+    .cta-final {
+        padding: 4rem 1rem;
+    }
+    
+    .section-header {
+        margin-bottom: 2.5rem;
+    }
+    
+    .section-title {
+        font-size: clamp(1.75rem, 7vw, 2.25rem);
+    }
+    
+    .section-description {
+        font-size: 1rem;
+    }
+    
+    /* Features grid */
+    .features-grid {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+    }
+    
+    .feature-card {
+        padding: 1.5rem;
+    }
+    
+    /* Solutions grid */
+    .solutions-grid {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+    }
+    
+    .solution-card {
+        padding: 2rem;
+    }
+    
+    /* Tools grid */
+    .tools-grid-advanced {
+        grid-template-columns: 1fr;
+        gap: 1.25rem;
+    }
+    
+    .tool-card-advanced {
+        padding: 1.5rem;
+    }
+    
+    /* Pricing grid */
+    .pricing-grid,
+    .pricing-grid-two,
+    .pricing-grid-three {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+        max-width: 100%;
+    }
+    
+    .pricing-card {
+        padding: 2rem 1.5rem;
+    }
+    
+    /* CTA Final */
+    .cta-title {
+        font-size: clamp(1.75rem, 7vw, 2.25rem);
+    }
+    
+    .cta-subtitle {
+        font-size: 1rem;
+    }
+    
+    .cta-buttons {
+        flex-direction: column;
+        width: 100%;
+    }
+    
+    .btn-cta-primary,
+    .btn-cta-secondary {
+        width: 100%;
+        justify-content: center;
+        padding: 1rem 1.75rem;
+    }
+    
+    /* Footer */
+    .landing-footer {
+        padding: 3rem 1rem 2rem;
+    }
+    
+    .footer-grid {
+        grid-template-columns: 1fr;
+        gap: 2rem;
+    }
+    
+    .footer-brand-col {
+        max-width: 100%;
+    }
+    
+    .footer-bottom {
+        flex-direction: column;
+        gap: 1rem;
+        text-align: center;
+    }
+    
+    .footer-bottom-links {
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+    
+    /* Market Ticker */
+    .ticker-item {
+        padding: 0.625rem 1rem;
+        gap: 0.75rem;
+        margin-right: 1rem;
+    }
+    
+    .ticker-symbol {
+        font-size: 0.8125rem;
+        min-width: 45px;
+    }
+    
+    .ticker-price {
+        font-size: 0.9375rem;
+    }
+    
+    .ticker-change {
+        font-size: 0.8125rem;
+        padding: 0.25rem 0.625rem;
+    }
+    
+    /* Alphy AI Section */
+    .alphy-wrapper {
+        grid-template-columns: 1fr;
+        gap: 2.5rem;
+    }
+    
+    .alphy-chat-container {
+        height: 500px;
+    }
+    
+    .message-content {
+        max-width: 85%;
+    }
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   📱 PETIT MOBILE - 480px et moins (CORRECTIONS FINALES)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+
+@media (max-width: 480px) {
+    
+    /* Typography ultra-compact */
+    .hero-headline {
+        font-size: 1.75rem;
+    }
+    
+    .section-title,
+    .demo-title,
+    .cta-title {
+        font-size: 1.625rem;
+    }
+    
+    /* Hero ajustements */
+    .hero {
+        padding: 4.5rem 0.875rem 2.5rem;
+    }
+    
+    .announcement-badge {
+        font-size: 0.8125rem;
+        padding: 0.5rem 0.875rem;
+    }
+    
+    .social-proof {
+        padding-top: 1.25rem;
+    }
+    
+    .proof-number {
+        font-size: 1.125rem;
+    }
+    
+    .proof-label {
+        font-size: 0.8125rem;
+    }
+    
+    /* Dashboard mockup ultra-compact */
+    .mockup-content {
+        padding: 0.875rem;
+    }
+    
+    .mockup-stats-row {
+        gap: 0.625rem;
+    }
+    
+    .stat-card {
+        padding: 0.75rem;
+    }
+    
+    .stat-value {
+        font-size: 1.125rem;
+    }
+    
+    .mockup-chart-area {
+        height: 130px;
+        padding: 0.75rem;
+    }
+    
+    /* Search interface ultra-compact */
+    .search-box {
+        padding: 0.625rem 0.875rem;
+    }
+    
+    .search-box i {
+        font-size: 1rem;
+    }
+    
+    .search-box input {
+        font-size: 0.875rem;
+    }
+    
+    .company-result-card {
+        padding: 0.875rem;
+    }
+    
+    .company-avatar {
+        width: 36px;
+        height: 36px;
+        font-size: 1rem;
+    }
+    
+    .company-metrics {
+        grid-template-columns: 1fr;
+        gap: 0.625rem;
+    }
+    
+    .metric-item {
+        padding-bottom: 0.5rem;
+        border-bottom: 1px solid var(--border-color);
+    }
+    
+    .metric-item:last-child {
+        border-bottom: none;
+        padding-bottom: 0;
+    }
+    
+    /* Sections padding ultra-compact */
+    .features-section,
+    .solutions-section,
+    .tools-section,
+    .pricing-section,
+    .demo-interactive,
+    .alphy-ai-section,
+    .cta-final {
+        padding: 3rem 0.875rem;
+    }
+    
+    .section-header {
+        margin-bottom: 2rem;
+    }
+    
+    /* Cards ultra-compact */
+    .feature-card,
+    .solution-card,
+    .tool-card-advanced {
+        padding: 1.25rem;
+    }
+    
+    .pricing-card {
+        padding: 1.75rem 1.25rem;
+    }
+    
+    /* Buttons ultra-compact */
+    .btn-hero-primary,
+    .btn-hero-secondary,
+    .btn-cta-primary,
+    .btn-cta-secondary,
+    .btn-demo-cta {
+        padding: 0.875rem 1.25rem;
+        font-size: 0.9375rem;
+    }
+    
+    /* Footer ultra-compact */
+    .landing-footer {
+        padding: 2.5rem 0.875rem 1.5rem;
+    }
+    
+    .footer-grid {
+        gap: 1.75rem;
+    }
+    
+    /* Alphy chat ultra-compact */
+    .alphy-chat-container {
+        height: 450px;
+    }
+    
+    .chat-header {
+        padding: 1.25rem;
+    }
+    
+    .chat-messages {
+        padding: 1.25rem;
+    }
+    
+    .message-avatar {
+        width: 32px;
+        height: 32px;
+        font-size: 0.875rem;
+    }
+    
+    .message-content {
+        max-width: 90%;
+        padding: 0.875rem 1rem;
+    }
+    
+    .message-content p {
+        font-size: 0.875rem;
+    }
+    
+    /* User dropdown en plein écran sur très petit mobile */
+    .user-dropdown-menu {
+        max-height: 90vh;
+    }
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   🔒 PROTECTION - Forcer certains styles critiques
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+
+@media (max-width: 768px) {
+    /* Empêcher tout débordement horizontal */
+    body,
+    html {
+        overflow-x: hidden;
+        max-width: 100vw;
+    }
+    
+    .hero-container,
+    .dashboard-mockup,
+    .search-interface,
+    .company-result-card,
+    .features-grid,
+    .solutions-grid,
+    .tools-grid-advanced {
+        max-width: 100%;
+        overflow-x: hidden;
+    }
+    
+    /* Images responsive */
+    img {
+        max-width: 100%;
+        height: auto;
+    }
+    
+    /* Tableau responsive */
+    table {
+        display: block;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   ✅ FIN DES CORRECTIONS MOBILE
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */

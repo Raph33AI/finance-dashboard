@@ -678,57 +678,121 @@ class NavigationManager {
 }
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-// 📱 MOBILE MENU MANAGER
+// 📱 MOBILE MENU MANAGER - VERSION COMPLÈTE MOBILE
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 class MobileMenuManager {
     constructor() {
+        console.log('📱 Mobile Menu Manager - Initialisation');
+        
         this.mobileMenuBtn = document.getElementById('mobileMenuBtn');
-        this.navMenu = document.getElementById('navMenu');
+        this.navMenu = document.querySelector('.nav-menu');
         this.navLinks = document.querySelectorAll('.nav-link');
+        
+        console.log('  ├─ Bouton hamburger:', this.mobileMenuBtn ? '✅' : '❌');
+        console.log('  ├─ Menu navigation:', this.navMenu ? '✅' : '❌');
+        console.log('  └─ Liens navigation:', this.navLinks.length);
+        
         this.init();
     }
 
     init() {
-        if (!this.mobileMenuBtn || !this.navMenu) return;
+        if (!this.mobileMenuBtn || !this.navMenu) {
+            console.warn('⚠️ Menu mobile non trouvé');
+            return;
+        }
 
-        this.mobileMenuBtn.addEventListener('click', () => {
+        console.log('✅ Initialisation des listeners...');
+
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        // 🍔 TOGGLE MENU AU CLIC SUR HAMBURGER
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        this.mobileMenuBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            console.log('🔘 Hamburger cliqué');
             this.toggleMenu();
         });
 
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        // 🔗 FERMER LE MENU AU CLIC SUR UN LIEN
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
         this.navLinks.forEach(link => {
             link.addEventListener('click', () => {
-                this.closeMenu();
+                if (window.innerWidth <= 768) {
+                    console.log('🔗 Clic sur lien navigation - Fermeture menu');
+                    this.closeMenu();
+                }
             });
         });
 
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        // 🎯 FERMER SI CLIC EN DEHORS
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
         document.addEventListener('click', (e) => {
-            if (!this.navMenu.contains(e.target) && !this.mobileMenuBtn.contains(e.target)) {
-                this.closeMenu();
+            if (this.navMenu.classList.contains('active')) {
+                if (!this.navMenu.contains(e.target) && !this.mobileMenuBtn.contains(e.target)) {
+                    console.log('🔒 Clic en dehors - Fermeture menu');
+                    this.closeMenu();
+                }
             }
         });
+
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        // 📏 FERMER AU RESIZE (passage desktop)
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        let resizeTimer;
+        window.addEventListener('resize', () => {
+            clearTimeout(resizeTimer);
+            resizeTimer = setTimeout(() => {
+                if (window.innerWidth > 768 && this.navMenu.classList.contains('active')) {
+                    console.log('🖥️ Passage en mode desktop - Fermeture menu');
+                    this.closeMenu();
+                }
+            }, 250);
+        });
+
+        console.log('✅ Mobile Menu Manager prêt');
     }
 
     toggleMenu() {
-        this.mobileMenuBtn.classList.toggle('active');
-        this.navMenu.classList.toggle('active');
+        const isActive = this.navMenu.classList.contains('active');
         
-        if (this.navMenu.classList.contains('active')) {
-            document.body.style.overflow = 'hidden';
+        console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+        console.log(isActive ? '❌ Fermeture du menu' : '✅ Ouverture du menu');
+        
+        if (isActive) {
+            this.closeMenu();
         } else {
-            document.body.style.overflow = '';
+            this.openMenu();
         }
+    }
+
+    openMenu() {
+        this.mobileMenuBtn.classList.add('active');
+        this.navMenu.classList.add('active');
+        
+        // Bloquer le scroll du body sur mobile
+        if (window.innerWidth <= 768) {
+            document.body.style.overflow = 'hidden';
+            console.log('🔒 Scroll bloqué');
+        }
+        
+        console.log('✅ Menu ouvert');
     }
 
     closeMenu() {
         this.mobileMenuBtn.classList.remove('active');
         this.navMenu.classList.remove('active');
+        
+        // Réactiver le scroll
         document.body.style.overflow = '';
+        
+        console.log('❌ Menu fermé');
     }
 }
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-// 👤 USER MENU MANAGER - VERSION RENFORCÉE AVEC DEBUG
+// 👤 USER MENU MANAGER - VERSION COMPLÈTE MOBILE + DEBUG
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 class UserMenuManager {
@@ -743,53 +807,43 @@ class UserMenuManager {
         this.settingsLink = document.getElementById('settingsLink');
         
         console.log('📦 Éléments trouvés:');
-        console.log('  ├─ Profile Button:', this.profileButton);
-        console.log('  ├─ Dropdown Menu:', this.dropdownMenu);
-        console.log('  ├─ Logout Button:', this.logoutButton);
-        console.log('  └─ Settings Link:', this.settingsLink);
+        console.log('  ├─ Profile Button:', this.profileButton ? '✅' : '❌');
+        console.log('  ├─ Dropdown Menu:', this.dropdownMenu ? '✅' : '❌');
+        console.log('  ├─ Logout Button:', this.logoutButton ? '✅' : '❌');
+        console.log('  └─ Settings Link:', this.settingsLink ? '✅' : '❌');
         
         this.init();
     }
 
     init() {
         if (!this.profileButton || !this.dropdownMenu) {
-            console.error('❌ Éléments manquants !');
-            console.error('  ├─ profileButton:', this.profileButton ? '✅ OK' : '❌ MANQUANT');
-            console.error('  └─ dropdownMenu:', this.dropdownMenu ? '✅ OK' : '❌ MANQUANT');
+            console.error('❌ Éléments manquants - UserMenu désactivé');
             return;
         }
 
-        console.log('✅ Tous les éléments trouvés - Configuration des événements...');
+        console.log('✅ Configuration des événements...');
 
         // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-        // MÉTHODE 1 : Click direct avec useCapture
+        // 🎯 MÉTHODE 1 : Click direct avec useCapture
         // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-        console.log('🎯 Ajout du listener MÉTHODE 1 (direct + capture)');
+        console.log('🎯 Listener MÉTHODE 1 (direct + capture)');
         this.profileButton.addEventListener('click', (e) => {
-            console.log('%c🔴 CLIC DÉTECTÉ - MÉTHODE 1', 'background: #ef4444; color: white; padding: 5px 10px; font-weight: bold;');
-            console.log('  ├─ Target:', e.target);
-            console.log('  ├─ CurrentTarget:', e.currentTarget);
-            console.log('  └─ TimeStamp:', e.timeStamp);
-            
+            console.log('%c🔴 CLIC DÉTECTÉ - MÉTHODE 1', 'background: #ef4444; color: white; padding: 5px; font-weight: bold;');
             e.preventDefault();
             e.stopPropagation();
             this.toggleDropdown();
-        }, true); // ✅ useCapture = true
+        }, true);
 
         // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-        // MÉTHODE 2 : Délégation d'événement sur le document
+        // 🎯 MÉTHODE 2 : Délégation sur document
         // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-        console.log('🎯 Ajout du listener MÉTHODE 2 (délégation document)');
+        console.log('🎯 Listener MÉTHODE 2 (délégation)');
         document.addEventListener('click', (e) => {
             const target = e.target;
             
-            // Si clic sur le bouton ou un de ses enfants
+            // Si clic sur le bouton ou ses enfants
             if (this.profileButton.contains(target)) {
-                console.log('%c🟢 CLIC DÉTECTÉ - MÉTHODE 2 (délégation)', 'background: #10b981; color: white; padding: 5px 10px; font-weight: bold;');
-                console.log('  ├─ Clicked element:', target);
-                console.log('  ├─ Profile button:', this.profileButton);
-                console.log('  └─ Contains check: TRUE');
-                
+                console.log('%c🟢 CLIC - MÉTHODE 2', 'background: #10b981; color: white; padding: 5px; font-weight: bold;');
                 e.preventDefault();
                 e.stopPropagation();
                 this.toggleDropdown();
@@ -799,25 +853,22 @@ class UserMenuManager {
             // Si clic en dehors, fermer
             if (!this.dropdownMenu.contains(target)) {
                 if (this.dropdownMenu.classList.contains('active')) {
-                    console.log('🔒 Clic en dehors - Fermeture du menu');
+                    console.log('🔒 Clic en dehors - Fermeture dropdown');
                     this.closeDropdown();
                 }
             }
         });
 
         // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-        // MÉTHODE 3 : Listener sur TOUS les enfants du bouton
+        // 🎯 MÉTHODE 3 : Listener sur enfants
         // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-        console.log('🎯 Ajout du listener MÉTHODE 3 (enfants du bouton)');
-        const allButtonChildren = this.profileButton.querySelectorAll('*');
-        console.log(`  └─ ${allButtonChildren.length} éléments enfants trouvés`);
+        console.log('🎯 Listener MÉTHODE 3 (enfants)');
+        const children = this.profileButton.querySelectorAll('*');
+        console.log(`  └─ ${children.length} enfants détectés`);
         
-        allButtonChildren.forEach((child, index) => {
+        children.forEach((child, index) => {
             child.addEventListener('click', (e) => {
-                console.log(`%c🟡 CLIC DÉTECTÉ - MÉTHODE 3 (enfant ${index})`, 'background: #f59e0b; color: white; padding: 5px 10px; font-weight: bold;');
-                console.log('  ├─ Enfant cliqué:', child);
-                console.log('  └─ Type:', child.tagName);
-                
+                console.log(`%c🟡 CLIC - MÉTHODE 3 (enfant ${index})`, 'background: #f59e0b; color: white; padding: 5px; font-weight: bold;');
                 e.preventDefault();
                 e.stopPropagation();
                 this.toggleDropdown();
@@ -825,29 +876,55 @@ class UserMenuManager {
         });
 
         // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-        // Bouton Déconnexion
+        // 🔓 BOUTON DÉCONNEXION
         // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
         if (this.logoutButton) {
             console.log('✅ Listener déconnexion ajouté');
-            this.logoutButton.addEventListener('click', () => {
-                console.log('🔓 Bouton déconnexion cliqué');
+            this.logoutButton.addEventListener('click', (e) => {
+                e.preventDefault();
+                console.log('🔓 Déconnexion demandée');
                 this.handleLogout();
             });
         }
 
         // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-        // Lien Paramètres
+        // ⚙️ LIEN PARAMÈTRES
         // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
         if (this.settingsLink) {
             console.log('✅ Listener paramètres ajouté');
             this.settingsLink.addEventListener('click', (e) => {
                 e.preventDefault();
-                console.log('🔧 Redirection vers les paramètres...');
+                console.log('⚙️ Redirection paramètres...');
                 window.location.href = 'settings.html';
             });
         }
 
-        console.log('%c✅ UserMenuManager initialisé avec succès !', 'color: #10b981; font-weight: bold;');
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        // 🔗 FERMER DROPDOWN AU CLIC SUR LIEN INTERNE
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        const dropdownLinks = this.dropdownMenu.querySelectorAll('.dropdown-link');
+        dropdownLinks.forEach(link => {
+            link.addEventListener('click', () => {
+                console.log('🔗 Clic sur lien dropdown - Fermeture');
+                this.closeDropdown();
+            });
+        });
+
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        // 📏 FERMER AU RESIZE (passage desktop)
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        let resizeTimer;
+        window.addEventListener('resize', () => {
+            clearTimeout(resizeTimer);
+            resizeTimer = setTimeout(() => {
+                if (window.innerWidth > 768 && this.dropdownMenu.classList.contains('active')) {
+                    console.log('🖥️ Passage desktop - Fermeture dropdown');
+                    this.closeDropdown();
+                }
+            }, 250);
+        });
+
+        console.log('%c✅ UserMenuManager prêt !', 'color: #10b981; font-weight: bold;');
         console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n');
     }
 
@@ -856,52 +933,59 @@ class UserMenuManager {
         console.log('%c🔵 toggleDropdown() APPELÉE', 'color: #8b5cf6; font-weight: bold; font-size: 14px;');
         
         const isExpanded = this.profileButton.getAttribute('aria-expanded') === 'true';
-        console.log('📊 État actuel du menu:', isExpanded ? '✅ OUVERT' : '❌ FERMÉ');
+        console.log('📊 État actuel:', isExpanded ? '✅ OUVERT' : '❌ FERMÉ');
         
         const newState = !isExpanded;
         console.log('🎯 Nouvel état:', newState ? '✅ OUVERT' : '❌ FERMÉ');
         
-        // Changer l'attribut aria-expanded
+        // Mettre à jour aria-expanded
         this.profileButton.setAttribute('aria-expanded', newState);
-        console.log('✅ aria-expanded mis à jour:', newState);
         
-        // Toggle la classe active
+        // Toggle classe active
         this.dropdownMenu.classList.toggle('active');
         console.log('✅ Classe "active" toggled');
-        console.log('📋 Classes du dropdown:', this.dropdownMenu.className);
         
-        // Animer le chevron
-        const chevron = this.profileButton.querySelector('.user-dropdown-icon');
-        if (chevron) {
-            const rotation = newState ? 'rotate(180deg)' : 'rotate(0deg)';
-            chevron.style.transform = rotation;
-            console.log('✅ Chevron rotaté:', rotation);
-        } else {
-            console.warn('⚠️ Chevron non trouvé');
+        // 📱 GESTION MOBILE - Bloquer scroll si ouvert
+        if (newState && window.innerWidth <= 768) {
+            document.body.style.overflow = 'hidden';
+            console.log('🔒 Scroll bloqué (mobile)');
+        } else if (!newState) {
+            document.body.style.overflow = '';
+            console.log('🔓 Scroll réactivé');
         }
         
-        // Vérification finale
-        const finalState = this.dropdownMenu.classList.contains('active');
-        console.log('%c🎉 RÉSULTAT FINAL:', 'font-weight: bold;', finalState ? '✅ MENU OUVERT' : '❌ MENU FERMÉ');
+        // Animer chevron
+        const chevron = this.profileButton.querySelector('.user-dropdown-icon');
+        if (chevron) {
+            chevron.style.transform = newState ? 'rotate(180deg)' : 'rotate(0deg)';
+            console.log('✅ Chevron:', newState ? '↑' : '↓');
+        }
+        
+        console.log('%c🎉 RÉSULTAT:', 'font-weight: bold;', 
+                    this.dropdownMenu.classList.contains('active') ? '✅ OUVERT' : '❌ FERMÉ');
         console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n');
     }
 
     closeDropdown() {
         if (!this.dropdownMenu.classList.contains('active')) {
-            console.log('ℹ️ Menu déjà fermé - Aucune action');
+            console.log('ℹ️ Dropdown déjà fermé');
             return;
         }
         
-        console.log('🔒 Fermeture du menu...');
+        console.log('🔒 Fermeture du dropdown...');
+        
         this.profileButton.setAttribute('aria-expanded', 'false');
         this.dropdownMenu.classList.remove('active');
+        
+        // Réactiver le scroll
+        document.body.style.overflow = '';
         
         const chevron = this.profileButton.querySelector('.user-dropdown-icon');
         if (chevron) {
             chevron.style.transform = 'rotate(0deg)';
         }
         
-        console.log('✅ Menu fermé');
+        console.log('✅ Dropdown fermé');
     }
 
     handleLogout() {
@@ -910,11 +994,11 @@ class UserMenuManager {
         if (typeof firebase !== 'undefined' && firebase.auth) {
             firebase.auth().signOut()
                 .then(() => {
-                    console.log('✅ Déconnexion réussie');
+                    console.log('✅ Déconnexion Firebase réussie');
                     window.location.href = 'index.html';
                 })
                 .catch((error) => {
-                    console.error('❌ Erreur lors de la déconnexion:', error);
+                    console.error('❌ Erreur Firebase:', error);
                 });
         } else {
             console.log('⚠️ Firebase non disponible - Redirection directe');
