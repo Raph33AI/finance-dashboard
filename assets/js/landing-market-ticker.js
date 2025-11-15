@@ -149,6 +149,7 @@
 
         /**
          * Render the ticker
+         * ✅ CORRECTION : Flèche gérée uniquement en CSS (::before)
          */
         render() {
             if (!this.tickerElement) {
@@ -170,14 +171,14 @@
                 this.quotes.forEach((quote, symbol) => {
                     const isPositive = quote.changePercent >= 0;
                     const changeClass = isPositive ? 'positive' : 'negative';
-                    const arrow = isPositive ? '▲' : '▼';
 
+                    // ✅ CORRECTION : Pas de flèche dans le HTML, uniquement le pourcentage
                     html += `
                         <div class="ticker-item">
                             <span class="ticker-symbol">${quote.symbol}</span>
                             <span class="ticker-price">$${quote.price.toFixed(2)}</span>
                             <span class="ticker-change ${changeClass}">
-                                ${arrow} ${Math.abs(quote.changePercent).toFixed(2)}%
+                                ${Math.abs(quote.changePercent).toFixed(2)}%
                             </span>
                         </div>
                     `;
