@@ -1101,3 +1101,6 @@ class FinanceAPIClient {
 if (typeof module !== 'undefined' && module.exports) {
     module.exports = FinanceAPIClient;
 }
+
+// ✅ AJOUTE CETTE LIGNE POUR LE NAVIGATEUR
+window.FinanceAPIClient = FinanceAPIClient;
