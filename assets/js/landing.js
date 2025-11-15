@@ -767,27 +767,30 @@ class MobileMenuManager {
         }
     }
 
-    openMenu() {
+   openMenu() {
         this.mobileMenuBtn.classList.add('active');
         this.navMenu.classList.add('active');
         
-        // Bloquer le scroll du body sur mobile
-        if (window.innerWidth <= 768) {
-            document.body.style.overflow = 'hidden';
-            console.log('🔒 Scroll bloqué');
-        }
+        // ✅ AJOUT : Bloquer le scroll du body
+        document.body.classList.add('menu-open');
+        document.body.style.overflow = 'hidden';
+        document.body.style.position = 'fixed';
+        document.body.style.width = '100%';
         
-        console.log('✅ Menu ouvert');
+        console.log('✅ Menu ouvert + scroll bloqué');
     }
 
     closeMenu() {
         this.mobileMenuBtn.classList.remove('active');
         this.navMenu.classList.remove('active');
         
-        // Réactiver le scroll
+        // ✅ AJOUT : Réactiver le scroll
+        document.body.classList.remove('menu-open');
         document.body.style.overflow = '';
+        document.body.style.position = '';
+        document.body.style.width = '';
         
-        console.log('❌ Menu fermé');
+        console.log('❌ Menu fermé + scroll réactivé');
     }
 }
 
@@ -933,24 +936,32 @@ class UserMenuManager {
         console.log('%c🔵 toggleDropdown() APPELÉE', 'color: #8b5cf6; font-weight: bold; font-size: 14px;');
         
         const isExpanded = this.profileButton.getAttribute('aria-expanded') === 'true';
-        console.log('📊 État actuel:', isExpanded ? '✅ OUVERT' : '❌ FERMÉ');
-        
         const newState = !isExpanded;
+        
+        console.log('📊 État actuel:', isExpanded ? '✅ OUVERT' : '❌ FERMÉ');
         console.log('🎯 Nouvel état:', newState ? '✅ OUVERT' : '❌ FERMÉ');
         
         // Mettre à jour aria-expanded
         this.profileButton.setAttribute('aria-expanded', newState);
         
         // Toggle classe active
-        this.dropdownMenu.classList.toggle('active');
-        console.log('✅ Classe "active" toggled');
-        
-        // 📱 GESTION MOBILE - Bloquer scroll si ouvert
-        if (newState && window.innerWidth <= 768) {
-            document.body.style.overflow = 'hidden';
-            console.log('🔒 Scroll bloqué (mobile)');
-        } else if (!newState) {
+        if (newState) {
+            this.dropdownMenu.classList.add('active');
+            
+            // ✅ BLOQUER LE SCROLL SUR MOBILE
+            if (window.innerWidth <= 768) {
+                document.body.style.overflow = 'hidden';
+                document.body.style.position = 'fixed';
+                document.body.style.width = '100%';
+                console.log('🔒 Scroll bloqué (mobile)');
+            }
+        } else {
+            this.dropdownMenu.classList.remove('active');
+            
+            // ✅ RÉACTIVER LE SCROLL
             document.body.style.overflow = '';
+            document.body.style.position = '';
+            document.body.style.width = '';
             console.log('🔓 Scroll réactivé');
         }
         
@@ -958,7 +969,6 @@ class UserMenuManager {
         const chevron = this.profileButton.querySelector('.user-dropdown-icon');
         if (chevron) {
             chevron.style.transform = newState ? 'rotate(180deg)' : 'rotate(0deg)';
-            console.log('✅ Chevron:', newState ? '↑' : '↓');
         }
         
         console.log('%c🎉 RÉSULTAT:', 'font-weight: bold;', 
@@ -977,15 +987,17 @@ class UserMenuManager {
         this.profileButton.setAttribute('aria-expanded', 'false');
         this.dropdownMenu.classList.remove('active');
         
-        // Réactiver le scroll
+        // ✅ RÉACTIVER LE SCROLL
         document.body.style.overflow = '';
+        document.body.style.position = '';
+        document.body.style.width = '';
         
         const chevron = this.profileButton.querySelector('.user-dropdown-icon');
         if (chevron) {
             chevron.style.transform = 'rotate(0deg)';
         }
         
-        console.log('✅ Dropdown fermé');
+        console.log('✅ Dropdown fermé + scroll réactivé');
     }
 
     handleLogout() {

@@ -7155,5 +7155,328 @@ body.dark-mode .pricing-card.platinum {
 }
 
 /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-   ✅ FIN DES CORRECTIONS MOBILE
+   🔧 CORRECTIONS CIBLÉES - 3 PROBLÈMES SPÉCIFIQUES
    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+
+@media (max-width: 768px) {
+    
+    /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+       ✅ PROBLÈME 1 : SIDEBAR MENU TROP PETITE
+       Solution : Menu en plein écran sur mobile
+       ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+    
+    .nav-menu {
+        position: fixed !important;
+        top: 65px !important;
+        left: 0 !important;
+        right: 0 !important;
+        bottom: 0 !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        height: calc(100vh - 65px) !important;
+        background: var(--background-primary) !important;
+        padding: 2rem 1.5rem !important;
+        transform: translateX(-100%) !important;
+        transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+        z-index: 9998 !important;
+        overflow-y: auto !important;
+        box-shadow: 2px 0 20px rgba(0, 0, 0, 0.2) !important;
+        border-right: 1px solid var(--border-color) !important;
+        flex-direction: column !important;
+        align-items: stretch !important;
+        gap: 0 !important;
+    }
+    
+    body.dark-mode .nav-menu {
+        background: var(--background-secondary) !important;
+        border-right: 1px solid rgba(255, 255, 255, 0.1) !important;
+    }
+    
+    /* Menu actif - Visible en plein écran */
+    .nav-menu.active {
+        transform: translateX(0) !important;
+    }
+    
+    /* Overlay sombre derrière le menu */
+    .nav-menu.active::before {
+        content: '';
+        position: fixed;
+        top: 65px;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: -1;
+        animation: fadeIn 0.3s ease;
+    }
+    
+    /* Liens du menu - Grande taille */
+    .nav-menu .nav-link {
+        display: block;
+        width: 100%;
+        padding: 1.25rem 0 !important;
+        font-size: 1.125rem !important;
+        font-weight: 500;
+        color: var(--text-primary);
+        border-bottom: 1px solid var(--border-color);
+        transition: all 0.2s ease;
+    }
+    
+    .nav-menu .nav-link:hover {
+        color: var(--primary-color);
+        padding-left: 0.5rem !important;
+        background: var(--background-tertiary);
+    }
+    
+    .nav-menu .nav-link:first-child {
+        border-top: 1px solid var(--border-color);
+    }
+    
+    /* Supprimer le trait animé sous les liens */
+    .nav-menu .nav-link::after {
+        display: none !important;
+    }
+    
+    /* CTA Buttons en bas du menu */
+    .nav-cta {
+        position: fixed !important;
+        bottom: 0 !important;
+        left: 0 !important;
+        right: 0 !important;
+        width: 100% !important;
+        background: var(--background-primary) !important;
+        padding: 1.25rem 1.5rem !important;
+        border-top: 1px solid var(--border-color) !important;
+        flex-direction: column !important;
+        gap: 0.875rem !important;
+        transform: translateY(100%) !important;
+        transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+        z-index: 9997 !important;
+        box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.1) !important;
+    }
+    
+    body.dark-mode .nav-cta {
+        background: var(--background-secondary) !important;
+        border-top: 1px solid rgba(255, 255, 255, 0.1) !important;
+    }
+    
+    /* CTA visible quand menu actif */
+    .nav-menu.active ~ .nav-cta {
+        transform: translateY(0) !important;
+    }
+    
+    .nav-cta .btn-text,
+    .nav-cta .btn-primary-nav {
+        width: 100%;
+        justify-content: center;
+        padding: 1rem 1.5rem;
+        font-size: 1rem;
+    }
+    
+    /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+       ✅ PROBLÈME 2 : CACHER LE GRAPHIQUE AAPL SUR MOBILE
+       Solution : display: none sur le mockup dashboard
+       ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+    
+    .hero-visual,
+    .dashboard-mockup {
+        display: none !important;
+    }
+    
+    /* Ajuster le hero content pour occuper toute la largeur */
+    .hero-content {
+        max-width: 100% !important;
+        width: 100% !important;
+    }
+    
+    .hero-container {
+        grid-template-columns: 1fr !important;
+        gap: 2rem !important;
+    }
+    
+    /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+       ✅ PROBLÈME 3 : MENU PROFIL MAL AFFICHÉ
+       Solution : Bottom sheet en plein écran sur mobile
+       ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+    
+    /* Cacher le texte du nom d'utilisateur sur mobile */
+    .user-info-text {
+        display: none !important;
+    }
+    
+    /* Bouton profil compact */
+    .user-profile-button {
+        padding: 0.5rem !important;
+        min-height: 48px !important;
+        min-width: 48px !important;
+    }
+    
+    /* Dropdown en bottom sheet - FORCER LA POSITION */
+    .user-dropdown-menu {
+        position: fixed !important;
+        top: auto !important;
+        bottom: 0 !important;
+        left: 0 !important;
+        right: 0 !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: auto !important;
+        margin: 0 !important;
+        border-radius: var(--radius-xl) var(--radius-xl) 0 0 !important;
+        max-height: 85vh !important;
+        overflow-y: auto !important;
+        transform: translateY(100%) !important;
+        transform-origin: bottom center !important;
+        transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+        z-index: 10000 !important;
+        box-shadow: 
+            0 -10px 40px rgba(0, 0, 0, 0.3),
+            0 -5px 20px rgba(0, 0, 0, 0.2) !important;
+    }
+    
+    /* Dropdown actif - Visible */
+    .user-dropdown-menu.active {
+        transform: translateY(0) !important;
+    }
+    
+    /* Overlay sombre derrière le dropdown */
+    .user-dropdown-menu.active::before {
+        content: '';
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.6);
+        z-index: -1;
+        animation: fadeIn 0.3s ease;
+    }
+    
+    /* Poignée visuelle en haut du dropdown (pour indiquer qu'on peut swiper) */
+    .user-dropdown-menu::after {
+        content: '';
+        position: absolute;
+        top: 12px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 40px;
+        height: 4px;
+        background: var(--border-color-hover);
+        border-radius: 9999px;
+        z-index: 1;
+    }
+    
+    /* Header du dropdown - Padding ajusté */
+    .dropdown-header {
+        padding: 1.5rem 1rem 1rem !important;
+        margin-top: 8px;
+    }
+    
+    /* User card dans le dropdown */
+    .dropdown-user-card {
+        margin-bottom: 1rem !important;
+    }
+    
+    .dropdown-user-card img {
+        width: 56px !important;
+        height: 56px !important;
+    }
+    
+    .dropdown-user-text h4 {
+        font-size: 1rem !important;
+    }
+    
+    .dropdown-user-text p {
+        font-size: 0.875rem !important;
+    }
+    
+    /* Sections du dropdown */
+    .dropdown-section {
+        padding: 0.5rem !important;
+    }
+    
+    /* Liens du dropdown */
+    .dropdown-link {
+        padding: 1rem 0.75rem !important;
+        border-radius: var(--radius-md) !important;
+        min-height: 60px;
+    }
+    
+    .dropdown-link-icon {
+        width: 44px !important;
+        height: 44px !important;
+        flex-shrink: 0;
+    }
+    
+    .dropdown-link-icon i {
+        font-size: 1.125rem !important;
+    }
+    
+    .dropdown-link-title {
+        font-size: 1rem !important;
+    }
+    
+    .dropdown-link-desc {
+        font-size: 0.875rem !important;
+    }
+    
+    /* Animation fade in */
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   📱 TRÈS PETIT MOBILE (iPhone SE, etc.)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+
+@media (max-width: 480px) {
+    
+    /* Menu profil - Hauteur maximale réduite */
+    .user-dropdown-menu {
+        max-height: 90vh !important;
+    }
+    
+    /* Liens menu principal - Légèrement plus petits */
+    .nav-menu .nav-link {
+        font-size: 1rem !important;
+        padding: 1rem 0 !important;
+    }
+    
+    /* Dropdown links - Ajustés */
+    .dropdown-link {
+        padding: 0.875rem 0.75rem !important;
+        min-height: 56px;
+    }
+    
+    .dropdown-link-icon {
+        width: 40px !important;
+        height: 40px !important;
+    }
+    
+    .dropdown-link-icon i {
+        font-size: 1rem !important;
+    }
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   🔒 PROTECTION - Empêcher tout débordement
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+
+@media (max-width: 768px) {
+    
+    /* Empêcher débordement horizontal */
+    body,
+    html {
+        overflow-x: hidden !important;
+        max-width: 100vw !important;
+    }
+    
+    /* Bloquer le scroll quand menu ouvert */
+    body.menu-open {
+        overflow: hidden !important;
+        position: fixed !important;
+        width: 100% !important;
+    }
+}
