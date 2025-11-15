@@ -7480,3 +7480,452 @@ body.dark-mode .pricing-card.platinum {
         width: 100% !important;
     }
 }
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   🔧 CORRECTIONS FINALES - MENU GRIS + MENU USER
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+
+@media (max-width: 768px) {
+    
+    /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+       ✅ CORRECTION 1 : MENU HAMBURGER - FOND BLANC
+       ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+    
+    .nav-menu {
+        /* Position et dimensions */
+        position: fixed !important;
+        top: 65px !important;
+        left: 0 !important;
+        right: 0 !important;
+        bottom: 0 !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        height: calc(100vh - 65px) !important;
+        
+        /* ✅ FOND BLANC (pas gris) */
+        background: #ffffff !important;
+        
+        /* Layout */
+        padding: 1.5rem 1rem !important;
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: stretch !important;
+        gap: 0 !important;
+        
+        /* Animation */
+        transform: translateX(-100%) !important;
+        transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+        
+        /* Z-index et overflow */
+        z-index: 9998 !important;
+        overflow-y: auto !important;
+        
+        /* Bordure et ombre */
+        border-right: 1px solid rgba(0, 0, 0, 0.08) !important;
+        box-shadow: 2px 0 20px rgba(0, 0, 0, 0.1) !important;
+    }
+    
+    /* Dark mode - Fond sombre */
+    body.dark-mode .nav-menu {
+        background: #1e293b !important;
+        border-right: 1px solid rgba(255, 255, 255, 0.1) !important;
+    }
+    
+    /* Menu actif - Visible */
+    .nav-menu.active {
+        transform: translateX(0) !important;
+    }
+    
+    /* Overlay sombre derrière le menu */
+    .nav-menu.active::before {
+        content: '';
+        position: fixed;
+        top: 65px;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: -1;
+        animation: fadeInOverlay 0.3s ease;
+    }
+    
+    @keyframes fadeInOverlay {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+    
+    /* Liens du menu - Bien visibles */
+    .nav-menu .nav-link {
+        display: block;
+        width: 100%;
+        padding: 1.25rem 1rem !important;
+        font-size: 1.125rem !important;
+        font-weight: 500;
+        color: #1e293b !important;
+        background: transparent !important;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.06) !important;
+        transition: all 0.2s ease;
+        text-decoration: none;
+    }
+    
+    body.dark-mode .nav-menu .nav-link {
+        color: #f8fafc !important;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+    }
+    
+    .nav-menu .nav-link:first-child {
+        border-top: 1px solid rgba(0, 0, 0, 0.06) !important;
+    }
+    
+    body.dark-mode .nav-menu .nav-link:first-child {
+        border-top: 1px solid rgba(255, 255, 255, 0.08) !important;
+    }
+    
+    .nav-menu .nav-link:hover {
+        background: rgba(59, 130, 246, 0.08) !important;
+        color: #3B82F6 !important;
+        padding-left: 1.5rem !important;
+    }
+    
+    body.dark-mode .nav-menu .nav-link:hover {
+        background: rgba(76, 138, 255, 0.15) !important;
+        color: #60a5fa !important;
+    }
+    
+    /* Supprimer le trait animé */
+    .nav-menu .nav-link::after {
+        display: none !important;
+    }
+    
+    /* CTA Buttons en bas - FOND BLANC */
+    .nav-cta {
+        position: fixed !important;
+        bottom: 0 !important;
+        left: 0 !important;
+        right: 0 !important;
+        width: 100% !important;
+        background: #ffffff !important;
+        padding: 1.25rem 1rem !important;
+        border-top: 1px solid rgba(0, 0, 0, 0.08) !important;
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 0.875rem !important;
+        transform: translateY(100%) !important;
+        transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+        z-index: 9997 !important;
+        box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.1) !important;
+    }
+    
+    body.dark-mode .nav-cta {
+        background: #1e293b !important;
+        border-top: 1px solid rgba(255, 255, 255, 0.1) !important;
+    }
+    
+    /* CTA visible quand menu actif */
+    .nav-menu.active ~ .nav-cta {
+        transform: translateY(0) !important;
+    }
+    
+    .nav-cta .btn-text,
+    .nav-cta .btn-primary-nav {
+        width: 100%;
+        justify-content: center;
+        padding: 1rem 1.5rem;
+        font-size: 1rem;
+    }
+    
+    /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+       ✅ CORRECTION 2 : MENU USER - BOTTOM SHEET DEPUIS LE BAS
+       ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+    
+    /* Cacher le texte utilisateur sur mobile */
+    .user-info-text {
+        display: none !important;
+    }
+    
+    /* Bouton profil compact */
+    .user-profile-button {
+        padding: 0.5rem !important;
+        min-height: 48px !important;
+        min-width: 48px !important;
+    }
+    
+    /* Dropdown en bottom sheet - POSITION FIXE EN BAS */
+    .user-dropdown-menu {
+        /* ✅ POSITION FIXE EN BAS DE L'ÉCRAN */
+        position: fixed !important;
+        top: auto !important;
+        bottom: 0 !important;
+        left: 0 !important;
+        right: 0 !important;
+        
+        /* Dimensions */
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: auto !important;
+        max-height: 85vh !important;
+        margin: 0 !important;
+        
+        /* Style */
+        background: #ffffff !important;
+        border-radius: 20px 20px 0 0 !important;
+        overflow-y: auto !important;
+        
+        /* Animation - PART DU BAS */
+        transform: translateY(100%) !important;
+        transform-origin: bottom center !important;
+        transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
+        
+        /* Z-index au-dessus de tout */
+        z-index: 10001 !important;
+        
+        /* Ombre prononcée */
+        box-shadow: 
+            0 -10px 40px rgba(0, 0, 0, 0.3),
+            0 -5px 20px rgba(0, 0, 0, 0.2) !important;
+    }
+    
+    body.dark-mode .user-dropdown-menu {
+        background: #1e293b !important;
+        box-shadow: 
+            0 -10px 40px rgba(0, 0, 0, 0.6),
+            0 -5px 20px rgba(0, 0, 0, 0.4) !important;
+    }
+    
+    /* Dropdown actif - REMONTE DEPUIS LE BAS */
+    .user-dropdown-menu.active {
+        transform: translateY(0) !important;
+    }
+    
+    /* ✅ OVERLAY SOMBRE DERRIÈRE - Z-INDEX CORRECT */
+    .user-dropdown-menu.active::before {
+        content: '';
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.6);
+        z-index: -1 !important;
+        animation: fadeInOverlay 0.3s ease;
+    }
+    
+    /* Poignée visuelle (pour indiquer qu'on peut fermer) */
+    .user-dropdown-menu::after {
+        content: '';
+        position: absolute;
+        top: 12px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 40px;
+        height: 4px;
+        background: rgba(0, 0, 0, 0.2);
+        border-radius: 9999px;
+        z-index: 2;
+    }
+    
+    body.dark-mode .user-dropdown-menu::after {
+        background: rgba(255, 255, 255, 0.3);
+    }
+    
+    /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+       ✅ CORRECTION 3 : CONTENU DU DROPDOWN - PADDING TOP
+       ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+    
+    /* Header du dropdown - Padding top pour éviter de cacher le texte */
+    .dropdown-header {
+        padding: 2rem 1rem 1rem !important;
+        margin-top: 0 !important;
+    }
+    
+    /* User card */
+    .dropdown-user-card {
+        margin-bottom: 1rem !important;
+    }
+    
+    .dropdown-user-card img {
+        width: 56px !important;
+        height: 56px !important;
+    }
+    
+    .dropdown-user-text h4 {
+        font-size: 1rem !important;
+        color: #1e293b !important;
+    }
+    
+    body.dark-mode .dropdown-user-text h4 {
+        color: #f8fafc !important;
+    }
+    
+    .dropdown-user-text p {
+        font-size: 0.875rem !important;
+        color: #64748b !important;
+    }
+    
+    body.dark-mode .dropdown-user-text p {
+        color: #94a3b8 !important;
+    }
+    
+    /* Plan info */
+    .dropdown-plan-info {
+        background: rgba(245, 158, 11, 0.1) !important;
+        border: 1px solid rgba(245, 158, 11, 0.3) !important;
+    }
+    
+    /* Divider */
+    .dropdown-divider {
+        background: rgba(0, 0, 0, 0.06) !important;
+    }
+    
+    body.dark-mode .dropdown-divider {
+        background: rgba(255, 255, 255, 0.1) !important;
+    }
+    
+    /* Sections */
+    .dropdown-section {
+        padding: 0.5rem !important;
+    }
+    
+    /* Liens du dropdown */
+    .dropdown-link {
+        padding: 1rem 0.75rem !important;
+        border-radius: 12px !important;
+        min-height: 64px;
+        background: transparent !important;
+        transition: all 0.2s ease;
+    }
+    
+    .dropdown-link:hover {
+        background: rgba(59, 130, 246, 0.08) !important;
+    }
+    
+    body.dark-mode .dropdown-link:hover {
+        background: rgba(76, 138, 255, 0.15) !important;
+    }
+    
+    .dropdown-link-icon {
+        width: 44px !important;
+        height: 44px !important;
+        background: rgba(59, 130, 246, 0.1) !important;
+        border-radius: 10px !important;
+    }
+    
+    body.dark-mode .dropdown-link-icon {
+        background: rgba(76, 138, 255, 0.15) !important;
+    }
+    
+    .dropdown-link-icon i {
+        font-size: 1.125rem !important;
+        color: #3B82F6 !important;
+    }
+    
+    body.dark-mode .dropdown-link-icon i {
+        color: #60a5fa !important;
+    }
+    
+    .dropdown-link:hover .dropdown-link-icon {
+        background: #3B82F6 !important;
+    }
+    
+    .dropdown-link:hover .dropdown-link-icon i {
+        color: #ffffff !important;
+    }
+    
+    .dropdown-link-title {
+        font-size: 1rem !important;
+        font-weight: 600;
+        color: #1e293b !important;
+    }
+    
+    body.dark-mode .dropdown-link-title {
+        color: #f8fafc !important;
+    }
+    
+    .dropdown-link-desc {
+        font-size: 0.875rem !important;
+        color: #64748b !important;
+    }
+    
+    body.dark-mode .dropdown-link-desc {
+        color: #94a3b8 !important;
+    }
+    
+    /* Lien danger (déconnexion) */
+    .dropdown-link-danger .dropdown-link-icon {
+        background: rgba(239, 68, 68, 0.1) !important;
+    }
+    
+    .dropdown-link-danger .dropdown-link-icon i {
+        color: #ef4444 !important;
+    }
+    
+    .dropdown-link-danger:hover .dropdown-link-icon {
+        background: #ef4444 !important;
+    }
+    
+    .dropdown-link-danger:hover .dropdown-link-icon i {
+        color: #ffffff !important;
+    }
+    
+    .dropdown-link-danger .dropdown-link-title {
+        color: #ef4444 !important;
+    }
+    
+    /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+       🔒 PROTECTION - SCROLL LOCK
+       ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+    
+    /* Bloquer le scroll quand un menu est ouvert */
+    body.menu-open {
+        overflow: hidden !important;
+        position: fixed !important;
+        width: 100% !important;
+        height: 100vh !important;
+    }
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   📱 TRÈS PETIT MOBILE
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+
+@media (max-width: 480px) {
+    
+    /* Menu user - Hauteur max réduite */
+    .user-dropdown-menu {
+        max-height: 90vh !important;
+    }
+    
+    /* Header dropdown - Padding réduit */
+    .dropdown-header {
+        padding: 1.75rem 1rem 0.875rem !important;
+    }
+    
+    /* Liens menu - Taille réduite */
+    .nav-menu .nav-link {
+        font-size: 1rem !important;
+        padding: 1rem 0.875rem !important;
+    }
+    
+    /* Liens dropdown - Ajustés */
+    .dropdown-link {
+        padding: 0.875rem 0.75rem !important;
+        min-height: 60px;
+    }
+    
+    .dropdown-link-icon {
+        width: 40px !important;
+        height: 40px !important;
+    }
+    
+    .dropdown-link-icon i {
+        font-size: 1rem !important;
+    }
+    
+    .dropdown-link-title {
+        font-size: 0.9375rem !important;
+    }
+    
+    .dropdown-link-desc {
+        font-size: 0.8125rem !important;
+    }
+}
