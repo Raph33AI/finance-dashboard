@@ -76,8 +76,10 @@
 
             // Initialize API Client
             try {
-                this.apiClient = new window.FinanceAPIClient();
-                console.log('✅ FinanceAPIClient initialized');
+                this.apiClient = new window.FinanceAPIClient({
+                    baseURL: 'https://finance-hub-api.raphnardone.workers.dev'
+                });
+                console.log('✅ FinanceAPIClient initialized with Finnhub Worker');
             } catch (error) {
                 console.error('%c❌ Failed to initialize API Client:', 'color: #ef4444; font-weight: bold;');
                 console.error(error);
@@ -117,22 +119,28 @@
 
         /**
          * Fetch quote for a single symbol
+         * ✅ CORRECTION : Utilise les propriétés transformées par FinanceAPIClient
          */
         async fetchQuote(symbol) {
             try {
                 const quote = await this.apiClient.getQuote(symbol);
                 
-                if (quote && quote.c) {
+                console.log(`   📦 Raw quote for ${symbol}:`, quote);
+                
+                // ✅ CORRECTION : Utiliser les propriétés transformées
+                if (quote && typeof quote.price === 'number') {
                     this.quotes.set(symbol, {
                         symbol: symbol,
-                        price: quote.c,        // Current price
-                        change: quote.d,       // Change
-                        changePercent: quote.dp, // Change percent
-                        previousClose: quote.pc  // Previous close
+                        price: quote.price,              // ✅ Propriété transformée
+                        change: quote.change || 0,       // ✅ Propriété transformée
+                        changePercent: quote.percentChange || 0, // ✅ Propriété transformée
+                        previousClose: quote.previousClose || 0  // ✅ Propriété transformée
                     });
-                    console.log(`   ✅ ${symbol}: $${quote.c.toFixed(2)} (${quote.dp > 0 ? '+' : ''}${quote.dp.toFixed(2)}%)`);
+                    
+                    const sign = quote.percentChange >= 0 ? '+' : '';
+                    console.log(`   ✅ ${symbol}: $${quote.price.toFixed(2)} (${sign}${(quote.percentChange || 0).toFixed(2)}%)`);
                 } else {
-                    console.warn(`   ⚠️ No data for ${symbol}`);
+                    console.warn(`   ⚠️ Invalid data for ${symbol}:`, quote);
                 }
             } catch (error) {
                 console.error(`   ❌ Error fetching ${symbol}:`, error.message);
