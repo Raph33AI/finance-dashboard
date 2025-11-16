@@ -4,7 +4,7 @@
    ═══════════════════════════════════════════════════════════════ */
 
 // ⚙️ CONFIGURATION
-const STRIPE_PUBLIC_KEY = 'pk_test_51SU1qwDyZbOa1SqoTiFoySvAQCaDmOEQdIuBrNnQR7dSLFavCQl8P7S4AeCs4NYU4Vi7QoVr2lhPSeUeTM9jRrS000CLtFxAa6'; // ⚠️ À REMPLACER
+const STRIPE_PUBLIC_KEY = '	pk_live_51SU1qnDxR6DPBfOfX6yJYr9Qzh40aNGrn1TSZxI5q0Q0m9hsgXmMQFq2TErynzuUKOivH4T3DJ1FjKy683WsqQAR00tAMRJGtk'; // ⚠️ À REMPLACER
 const WORKER_URL = 'https://finance-hub-api.raphnardone.workers.dev'; // ⚠️ À REMPLACER
 
 console.log('🔧 Checkout configuration:');
