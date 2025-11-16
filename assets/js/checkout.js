@@ -1,11 +1,12 @@
 /* ═══════════════════════════════════════════════════════════════
-   CHECKOUT.JS - VERSION CLOUDFLARE WORKERS + CODES PROMO
-   AlphaVault AI
+   CHECKOUT.JS - VERSION CLOUDFLARE WORKERS + CODES PROMO + STRIPE
+   AlphaVault AI v2.0
+   ✅ Délègue TOUTE la gestion au Worker (y compris codes FREE)
    ═══════════════════════════════════════════════════════════════ */
 
 // ⚙️ CONFIGURATION
-const STRIPE_PUBLIC_KEY = '	pk_live_51SU1qnDxR6DPBfOfX6yJYr9Qzh40aNGrn1TSZxI5q0Q0m9hsgXmMQFq2TErynzuUKOivH4T3DJ1FjKy683WsqQAR00tAMRJGtk'; // ⚠️ À REMPLACER
-const WORKER_URL = 'https://finance-hub-api.raphnardone.workers.dev'; // ⚠️ À REMPLACER
+const STRIPE_PUBLIC_KEY = 'pk_live_51SU1qnDxR6DPBfOfX6yJYr9Qzh40aNGrn1TSZxI5q0Q0m9hsgXmMQFq2TErynzuUKOivH4T3DJ1FjKy683WsqQAR00tAMRJGtk';
+const WORKER_URL = 'https://finance-hub-api.raphnardone.workers.dev';
 
 console.log('🔧 Checkout configuration:');
 console.log('   Stripe Public Key:', STRIPE_PUBLIC_KEY.substring(0, 20) + '...');
@@ -351,35 +352,14 @@ form.addEventListener('submit', async (event) => {
             console.log('   🎁 Valeur:', appliedPromo.type === 'percentage' ? `${appliedPromo.value}%` : 'FREE');
         }
         
-        // 3️⃣ CAS SPÉCIAL : Accès gratuit (pas de paiement Stripe)
-        if (appliedPromo && appliedPromo.type === 'free') {
-            console.log('3️⃣ Code promo FREE détecté - Activation directe...');
-            
-            // Mettre à jour directement Firebase
-            await firebase.firestore().collection('users').doc(user.uid).set({
-                plan: selectedPlan.name,
-                subscriptionStatus: 'active_free',
-                promoCode: appliedPromo.code,
-                subscriptionStart: new Date().toISOString(),
-                updatedAt: new Date().toISOString(),
-                email: email,
-                name: name
-            }, { merge: true });
-            
-            console.log('✅ Accès gratuit activé dans Firebase!');
-            
-            // Redirection vers la page de succès
-            window.location.href = `success.html?plan=${selectedPlan.name}&free=true`;
-            return;
-        }
-        
-        // 4️⃣ Appeler le Cloudflare Worker pour créer une session Stripe
-        console.log('4️⃣ Appel du Cloudflare Worker...');
+        // 3️⃣ Appeler le Cloudflare Worker (TOUJOURS, même pour les codes FREE)
+        console.log('3️⃣ Appel du Cloudflare Worker...');
         console.log('   📡 URL:', `${WORKER_URL}/create-checkout-session`);
         
         const requestBody = {
             plan: selectedPlan.name,
             email: email,
+            name: name,
             userId: user.uid,
             promoCode: appliedPromo ? appliedPromo.code : null
         };
@@ -409,13 +389,26 @@ form.addEventListener('submit', async (event) => {
             throw new Error(data.error);
         }
         
+        // 4️⃣ Vérifier si c'est un accès gratuit
+        if (data.free === true) {
+            console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+            console.log('🎉 ACCÈS GRATUIT ACTIVÉ');
+            console.log('   👤 Client Stripe ID:', data.customerId || 'N/A');
+            console.log('   💎 Plan:', selectedPlan.name);
+            console.log('   🎁 Code promo:', appliedPromo.code);
+            console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+            
+            // Redirection vers la page de succès
+            window.location.href = `success.html?plan=${selectedPlan.name}&free=true&customerId=${data.customerId || ''}`;
+            return;
+        }
+        
+        // 5️⃣ Sinon, rediriger vers Stripe Checkout (paiement normal)
         if (!data.sessionId) {
             throw new Error('Session ID manquant dans la réponse');
         }
         
         console.log('   ✅ Session Stripe créée:', data.sessionId);
-        
-        // 5️⃣ Rediriger vers Stripe Checkout
         console.log('5️⃣ Redirection vers Stripe Checkout...');
         
         const { error } = await stripe.redirectToCheckout({
