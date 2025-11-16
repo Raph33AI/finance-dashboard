@@ -1,5 +1,6 @@
 /* ═══════════════════════════════════════════════════════════════
    CHECKOUT PAGE - GLASSMORPHISM PREMIUM
+   AlphaVault AI - Version corrigée avec scroll fonctionnel
    ═══════════════════════════════════════════════════════════════ */
 
 :root {
@@ -19,7 +20,7 @@ body.dark-mode {
 }
 
 /* ═══════════════════════════════════════════════════════════════
-   CHECKOUT CONTAINER
+   CHECKOUT CONTAINER - ✅ CORRIGÉ POUR SCROLL
    ═══════════════════════════════════════════════════════════════ */
 
 .checkout-page {
@@ -28,11 +29,12 @@ body.dark-mode {
     background-size: 400% 400%;
     animation: gradientFlow 15s ease infinite;
     display: flex;
-    align-items: center;
+    align-items: flex-start;  /* ✅ flex-start au lieu de center */
     justify-content: center;
     padding: 40px 20px;
     position: relative;
-    overflow: hidden;
+    overflow-x: hidden;  /* ✅ Bloque scroll horizontal uniquement */
+    overflow-y: auto;    /* ✅ Autorise scroll vertical */
 }
 
 @keyframes gradientFlow {
@@ -40,10 +42,10 @@ body.dark-mode {
     50% { background-position: 100% 50%; }
 }
 
-/* Particles Background */
+/* Particles Background - ✅ Fixed pour ne pas bloquer le scroll */
 .checkout-page::before {
     content: '';
-    position: absolute;
+    position: fixed;  /* ✅ CHANGÉ de absolute à fixed */
     top: 0;
     left: 0;
     width: 100%;
@@ -54,6 +56,7 @@ body.dark-mode {
     background-size: 50px 50px;
     animation: particlesFloat 20s linear infinite;
     pointer-events: none;
+    z-index: 0;
 }
 
 @keyframes particlesFloat {
@@ -78,8 +81,10 @@ body.dark-mode {
         inset 0 1px 0 rgba(255, 255, 255, 0.5);
     padding: 60px;
     position: relative;
+    z-index: 1;  /* ✅ Passe au-dessus du background */
     animation: slideInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1);
     transform-style: preserve-3d;
+    margin: 20px auto;  /* ✅ Espacement pour le scroll */
 }
 
 @keyframes slideInUp {
@@ -307,6 +312,7 @@ body.dark-mode .plan-features li {
 .plan-features li i {
     color: var(--checkout-success);
     font-size: 1.1rem;
+    flex-shrink: 0;
 }
 
 /* ═══════════════════════════════════════════════════════════════
@@ -372,6 +378,7 @@ body.dark-mode .form-label {
     background: rgba(255, 255, 255, 0.8);
     transition: all 0.3s ease;
     outline: none;
+    box-sizing: border-box;
 }
 
 body.dark-mode .form-input {
@@ -536,24 +543,109 @@ body.dark-mode #card-element {
    ═══════════════════════════════════════════════════════════════ */
 
 @media (max-width: 768px) {
+    .checkout-page {
+        padding: 20px 10px;
+        align-items: flex-start;
+    }
+    
     .checkout-container {
         padding: 40px 24px;
+        border-radius: 20px;
+        margin: 10px auto;
     }
 
     .checkout-title {
         font-size: 2rem;
     }
 
+    .checkout-subtitle {
+        font-size: 1rem;
+    }
+
     .plan-selector {
         grid-template-columns: 1fr;
+        gap: 16px;
+    }
+
+    .plan-option {
+        padding: 24px 20px;
+    }
+
+    .plan-price .amount {
+        font-size: 2.5rem;
     }
 
     .checkout-form {
-        padding: 24px;
+        padding: 24px 16px;
+    }
+
+    .form-section-title {
+        font-size: 1.1rem;
+    }
+
+    .btn-checkout-submit {
+        font-size: 1.1rem;
+        padding: 18px;
     }
 
     .trust-signals {
         flex-direction: column;
         gap: 16px;
+        padding: 20px;
     }
+
+    .trust-item {
+        font-size: 0.9rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .checkout-container {
+        padding: 30px 16px;
+    }
+
+    .checkout-title {
+        font-size: 1.6rem;
+    }
+
+    .checkout-logo-text {
+        font-size: 1.4rem;
+    }
+
+    .plan-name {
+        font-size: 1.3rem;
+    }
+
+    .plan-price .amount {
+        font-size: 2rem;
+    }
+
+    .checkout-form {
+        padding: 20px 12px;
+    }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   DARK MODE ADJUSTMENTS
+   ═══════════════════════════════════════════════════════════════ */
+
+body.dark-mode .trust-signals {
+    background: rgba(16, 185, 129, 0.1);
+    border-color: rgba(16, 185, 129, 0.3);
+}
+
+body.dark-mode .trust-item {
+    color: #10b981;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   SMOOTH SCROLLING
+   ═══════════════════════════════════════════════════════════════ */
+
+html {
+    scroll-behavior: smooth;
+}
+
+* {
+    box-sizing: border-box;
 }
