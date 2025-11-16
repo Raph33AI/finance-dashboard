@@ -1,6 +1,6 @@
 /* ═══════════════════════════════════════════════════════════════
    CHECKOUT PAGE - GLASSMORPHISM PREMIUM + CODES PROMO
-   AlphaVault AI - VERSION CORRIGÉE (Spinner fixe)
+   AlphaVault AI - VERSION OPTIMISÉE (Performances améliorées)
    ═══════════════════════════════════════════════════════════════ */
 
 :root {
@@ -22,7 +22,29 @@ body.dark-mode {
 }
 
 /* ═══════════════════════════════════════════════════════════════
-   CHECKOUT CONTAINER - ✅ CORRIGÉ POUR SCROLL
+   ✅ OPTIMISATIONS PERFORMANCES
+   ═══════════════════════════════════════════════════════════════ */
+
+/* GPU Acceleration pour les éléments critiques */
+.checkout-page,
+.checkout-container,
+.plan-option,
+.btn-checkout-submit,
+.spinner {
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+    -webkit-perspective: 1000px;
+    perspective: 1000px;
+}
+
+/* Optimiser les rendus */
+* {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   CHECKOUT CONTAINER
    ═══════════════════════════════════════════════════════════════ */
 
 .checkout-page {
@@ -37,6 +59,9 @@ body.dark-mode {
     position: relative;
     overflow-x: hidden;
     overflow-y: auto;
+    /* ✅ GPU Acceleration */
+    transform: translateZ(0);
+    will-change: background-position;
 }
 
 @keyframes gradientFlow {
@@ -58,11 +83,14 @@ body.dark-mode {
     animation: particlesFloat 20s linear infinite;
     pointer-events: none;
     z-index: 0;
+    /* ✅ GPU Acceleration */
+    transform: translateZ(0);
+    will-change: transform;
 }
 
 @keyframes particlesFloat {
-    0% { transform: translateY(0); }
-    100% { transform: translateY(-50px); }
+    0% { transform: translateY(0) translateZ(0); }
+    100% { transform: translateY(-50px) translateZ(0); }
 }
 
 .checkout-container {
@@ -82,16 +110,18 @@ body.dark-mode {
     animation: slideInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1);
     transform-style: preserve-3d;
     margin: 20px auto;
+    /* ✅ GPU Acceleration */
+    will-change: transform, opacity;
 }
 
 @keyframes slideInUp {
     from {
         opacity: 0;
-        transform: translateY(40px) scale(0.95);
+        transform: translateY(40px) scale(0.95) translateZ(0);
     }
     to {
         opacity: 1;
-        transform: translateY(0) scale(1);
+        transform: translateY(0) scale(1) translateZ(0);
     }
 }
 
@@ -107,6 +137,8 @@ body.dark-mode {
     opacity: 0;
     z-index: -1;
     transition: opacity 0.4s ease;
+    /* ✅ GPU Acceleration */
+    will-change: opacity;
 }
 
 .checkout-container:hover::before {
@@ -184,9 +216,12 @@ body.dark-mode .checkout-subtitle {
     border-radius: 20px;
     padding: 32px 24px;
     cursor: pointer;
-    transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
     position: relative;
     overflow: hidden;
+    /* ✅ GPU Acceleration */
+    transform: translateZ(0);
+    will-change: transform, box-shadow;
 }
 
 body.dark-mode .plan-option {
@@ -201,31 +236,32 @@ body.dark-mode .plan-option {
     width: 100%;
     height: 4px;
     background: linear-gradient(90deg, var(--checkout-primary), var(--checkout-secondary));
-    transform: scaleX(0);
+    transform: scaleX(0) translateZ(0);
     transform-origin: left;
-    transition: transform 0.4s ease;
+    transition: transform 0.3s ease;
+    will-change: transform;
 }
 
 .plan-option:hover::before {
-    transform: scaleX(1);
+    transform: scaleX(1) translateZ(0);
 }
 
 .plan-option:hover {
-    transform: translateY(-8px) scale(1.02);
+    transform: translateY(-8px) scale(1.02) translateZ(0);
     box-shadow: 0 20px 40px rgba(59, 130, 246, 0.2);
 }
 
 .plan-option.selected {
     border-color: var(--checkout-primary);
     background: rgba(59, 130, 246, 0.1);
-    transform: scale(1.05);
+    transform: scale(1.05) translateZ(0);
     box-shadow: 
         0 20px 60px rgba(59, 130, 246, 0.3),
         0 0 0 4px rgba(59, 130, 246, 0.1);
 }
 
 .plan-option.selected::before {
-    transform: scaleX(1);
+    transform: scaleX(1) translateZ(0);
 }
 
 .plan-badge {
@@ -324,6 +360,8 @@ body.dark-mode .plan-features li {
     margin-bottom: 30px;
     border: 2px dashed rgba(139, 92, 246, 0.3);
     transition: all 0.3s ease;
+    /* ✅ GPU Acceleration */
+    transform: translateZ(0);
 }
 
 body.dark-mode .promo-section {
@@ -369,8 +407,10 @@ body.dark-mode .promo-title {
     font-weight: 600;
     text-transform: uppercase;
     background: rgba(255, 255, 255, 0.8);
-    transition: all 0.3s ease;
+    transition: all 0.2s ease;
     outline: none;
+    /* ✅ GPU Acceleration */
+    transform: translateZ(0);
 }
 
 body.dark-mode .promo-input {
@@ -382,7 +422,7 @@ body.dark-mode .promo-input {
 .promo-input:focus {
     border-color: var(--checkout-secondary);
     box-shadow: 0 0 0 4px rgba(139, 92, 246, 0.1);
-    transform: translateY(-2px);
+    transform: translateY(-2px) translateZ(0);
 }
 
 .promo-input::placeholder {
@@ -399,20 +439,22 @@ body.dark-mode .promo-input {
     font-size: 1rem;
     font-weight: 800;
     cursor: pointer;
-    transition: all 0.3s ease;
+    transition: all 0.2s ease;
     display: flex;
     align-items: center;
     gap: 8px;
     box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
+    /* ✅ GPU Acceleration */
+    transform: translateZ(0);
 }
 
 .btn-apply-promo:hover {
-    transform: translateY(-2px);
+    transform: translateY(-2px) translateZ(0);
     box-shadow: 0 8px 20px rgba(139, 92, 246, 0.4);
 }
 
 .btn-apply-promo:active {
-    transform: translateY(0);
+    transform: translateY(0) translateZ(0);
 }
 
 .btn-apply-promo:disabled {
@@ -436,11 +478,11 @@ body.dark-mode .promo-input {
 @keyframes slideDown {
     from {
         opacity: 0;
-        transform: translateY(-10px);
+        transform: translateY(-10px) translateZ(0);
     }
     to {
         opacity: 1;
-        transform: translateY(0);
+        transform: translateY(0) translateZ(0);
     }
 }
 
@@ -512,6 +554,8 @@ body.dark-mode .promo-input {
     padding: 32px;
     margin-bottom: 30px;
     border: 2px solid rgba(59, 130, 246, 0.2);
+    /* ✅ GPU Acceleration */
+    transform: translateZ(0);
 }
 
 body.dark-mode .price-summary {
@@ -620,11 +664,13 @@ body.dark-mode .summary-label-total {
     font-weight: 800;
     color: #d97706;
     animation: pulse 2s ease-in-out infinite;
+    /* ✅ GPU Acceleration */
+    will-change: transform;
 }
 
 @keyframes pulse {
-    0%, 100% { transform: scale(1); }
-    50% { transform: scale(1.02); }
+    0%, 100% { transform: scale(1) translateZ(0); }
+    50% { transform: scale(1.02) translateZ(0); }
 }
 
 .free-access-badge i {
@@ -641,6 +687,8 @@ body.dark-mode .summary-label-total {
     border-radius: 20px;
     padding: 40px;
     margin-bottom: 30px;
+    /* ✅ GPU Acceleration */
+    transform: translateZ(0);
 }
 
 body.dark-mode .checkout-form {
@@ -692,9 +740,11 @@ body.dark-mode .form-label {
     font-size: 1rem;
     font-weight: 500;
     background: rgba(255, 255, 255, 0.8);
-    transition: all 0.3s ease;
+    transition: all 0.2s ease;
     outline: none;
     box-sizing: border-box;
+    /* ✅ GPU Acceleration */
+    transform: translateZ(0);
 }
 
 body.dark-mode .form-input {
@@ -706,7 +756,7 @@ body.dark-mode .form-input {
 .form-input:focus {
     border-color: var(--checkout-primary);
     box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
-    transform: translateY(-2px);
+    transform: translateY(-2px) translateZ(0);
 }
 
 #card-element {
@@ -714,7 +764,9 @@ body.dark-mode .form-input {
     border: 2px solid rgba(203, 213, 225, 0.5);
     border-radius: 12px;
     background: rgba(255, 255, 255, 0.8);
-    transition: all 0.3s ease;
+    transition: all 0.2s ease;
+    /* ✅ GPU Acceleration */
+    transform: translateZ(0);
 }
 
 body.dark-mode #card-element {
@@ -755,7 +807,7 @@ body.dark-mode #card-element {
     border: none;
     border-radius: 16px;
     cursor: pointer;
-    transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
     box-shadow: 
         0 10px 30px rgba(59, 130, 246, 0.4),
         0 0 0 0 rgba(59, 130, 246, 0.5);
@@ -767,6 +819,8 @@ body.dark-mode #card-element {
     gap: 12px;
     /* ✅ EMPÊCHER TOUTE ROTATION DU BOUTON */
     transform-style: flat;
+    /* ✅ GPU Acceleration */
+    will-change: transform, box-shadow;
 }
 
 .btn-checkout-submit::before {
@@ -779,7 +833,7 @@ body.dark-mode #card-element {
     border-radius: 50%;
     background: rgba(255, 255, 255, 0.3);
     transform: translate(-50%, -50%);
-    transition: width 0.6s ease, height 0.6s ease;
+    transition: width 0.4s ease, height 0.4s ease;
 }
 
 .btn-checkout-submit:hover::before {
