@@ -1,6 +1,7 @@
 /* ═══════════════════════════════════════════════════════════════
    ACCESS CONTROL SYSTEM - AlphaVault AI
    VERSION 3.0 - CONFIGURATION COMPLÈTE DES PLANS
+   Redirection automatique vers checkout.html
    ═══════════════════════════════════════════════════════════════ */
 
 console.log('🔐 Access Control System v3.0 initialized');
@@ -344,7 +345,7 @@ function getPageRequiredLevel(pageName) {
 }
 
 // ═══════════════════════════════════════════════════════════════
-// AFFICHER UNE MODALE D'UPGRADE
+// ✅ AFFICHER UNE MODALE D'UPGRADE (REDIRECTION VERS CHECKOUT)
 // ═══════════════════════════════════════════════════════════════
 
 function showUpgradeModal(currentPlan, reason = 'insufficient') {
@@ -503,21 +504,28 @@ function showUpgradeModal(currentPlan, reason = 'insufficient') {
         document.getElementById('upgrade-modal-content').style.transform = 'scale(1)';
     }, 10);
     
-    // Event listeners
+    // ═══════════════════════════════════════════════════════════
+    // ✅✅✅ REDIRECTION VERS CHECKOUT.HTML ✅✅✅
+    // ═══════════════════════════════════════════════════════════
+    
     document.getElementById('btn-upgrade-now').addEventListener('click', () => {
-        window.location.href = 'pricing.html';
+        console.log('🛒 Redirecting to checkout page...');
+        window.location.href = 'checkout.html';
     });
     
     document.getElementById('btn-cancel-modal').addEventListener('click', () => {
+        console.log('🔙 User cancelled - redirecting to dashboard...');
         modal.style.opacity = '0';
         setTimeout(() => {
             modal.remove();
-            // Rediriger vers dashboard si l'utilisateur annule
             window.location.href = 'dashboard-financier.html';
         }, 300);
     });
     
+    // ═══════════════════════════════════════════════════════════
     // Empêcher la fermeture en cliquant à l'extérieur (animation de secousse)
+    // ═══════════════════════════════════════════════════════════
+    
     modal.addEventListener('click', (e) => {
         if (e.target === modal) {
             const content = document.getElementById('upgrade-modal-content');
@@ -528,7 +536,10 @@ function showUpgradeModal(currentPlan, reason = 'insufficient') {
         }
     });
     
+    // ═══════════════════════════════════════════════════════════
     // Effet hover sur les boutons
+    // ═══════════════════════════════════════════════════════════
+    
     const upgradeBtn = document.getElementById('btn-upgrade-now');
     upgradeBtn.addEventListener('mouseenter', () => {
         upgradeBtn.style.transform = 'scale(1.05) translateY(-2px)';
@@ -692,3 +703,4 @@ window.getPageRequiredLevel = getPageRequiredLevel;
 console.log('✅ Access Control System v3.0 ready');
 console.log('📊 Available plans:', Object.keys(ACCESS_LEVELS));
 console.log('🎟️ Promo codes supported: FREEPRO, FREEPLATINUM');
+console.log('🛒 Upgrade redirects to: checkout.html');
