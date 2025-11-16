@@ -1,7 +1,7 @@
 /* ═══════════════════════════════════════════════════════════════
    CHECKOUT.JS - VERSION CLOUDFLARE WORKERS + CODES PROMO + STRIPE
-   AlphaVault AI v2.0
-   ✅ Délègue TOUTE la gestion au Worker (y compris codes FREE)
+   AlphaVault AI v2.1
+   ✅ Détection du plan existant pour "Change Plan"
    ═══════════════════════════════════════════════════════════════ */
 
 // ⚙️ CONFIGURATION
@@ -49,13 +49,20 @@ const PROMO_CODES = {
     }
 };
 
-// État de l'application
+// ✅ NOUVEAU : État de l'application étendu
 let selectedPlan = {
     name: 'pro',
     price: 15
 };
 
 let appliedPromo = null;
+
+// ✅ NOUVEAU : Plan existant de l'utilisateur
+let userExistingPlan = {
+    hasPlan: false,
+    currentPlan: 'basic',
+    subscriptionStatus: 'inactive'
+};
 
 // Initialiser Stripe
 const stripe = Stripe(STRIPE_PUBLIC_KEY);
@@ -101,6 +108,99 @@ cardElement.on('change', function(event) {
         displayError.textContent = '';
     }
 });
+
+// ═══════════════════════════════════════════════════════════════
+// ✅ NOUVEAU : VÉRIFIER LE PLAN EXISTANT DE L'UTILISATEUR
+// ═══════════════════════════════════════════════════════════════
+
+async function checkExistingPlan(user) {
+    try {
+        console.log('🔍 Checking existing plan for user:', user.uid);
+        
+        const userDoc = await firebase.firestore().collection('users').doc(user.uid).get();
+        
+        if (userDoc.exists) {
+            const userData = userDoc.data();
+            const plan = userData?.plan || 'basic';
+            const status = userData?.subscriptionStatus || 'inactive';
+            
+            console.log('📊 Current plan:', plan);
+            console.log('📊 Subscription status:', status);
+            
+            // Déterminer si l'utilisateur a un plan actif
+            const hasActivePlan = ['active', 'active_free', 'trialing'].includes(status) && plan !== 'basic';
+            
+            userExistingPlan = {
+                hasPlan: hasActivePlan,
+                currentPlan: plan,
+                subscriptionStatus: status
+            };
+            
+            // Afficher le badge du plan actuel si applicable
+            if (hasActivePlan) {
+                displayCurrentPlanBadge(plan);
+            }
+            
+            // Adapter le header
+            updateHeaderForExistingUser(hasActivePlan);
+            
+            // Mettre à jour le bouton
+            updatePriceSummary();
+            
+            console.log('✅ Existing plan check complete:', userExistingPlan);
+        } else {
+            console.log('ℹ️ No existing user data found');
+        }
+    } catch (error) {
+        console.error('❌ Error checking existing plan:', error);
+    }
+}
+
+// ✅ NOUVEAU : Afficher le badge du plan actuel
+function displayCurrentPlanBadge(plan) {
+    const planName = plan === 'pro' ? 'Pro' : plan === 'platinum' ? 'Platinum' : 'Basic';
+    const planColor = plan === 'platinum' ? '#8B5CF6' : '#3B82F6';
+    
+    const badge = document.createElement('div');
+    badge.id = 'current-plan-badge';
+    badge.style.cssText = `
+        background: linear-gradient(135deg, ${planColor}, rgba(59, 130, 246, 0.8));
+        color: white;
+        padding: 12px 24px;
+        border-radius: 20px;
+        font-size: 0.95rem;
+        font-weight: 700;
+        text-align: center;
+        margin-bottom: 20px;
+        box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+    `;
+    badge.innerHTML = `
+        <i class="fas fa-crown"></i>
+        <span>Current Plan: ${planName}</span>
+    `;
+    
+    const header = document.querySelector('.checkout-header');
+    const title = header.querySelector('.checkout-title');
+    header.insertBefore(badge, title);
+}
+
+// ✅ NOUVEAU : Adapter le header pour utilisateur existant
+function updateHeaderForExistingUser(hasActivePlan) {
+    const title = document.querySelector('.checkout-title');
+    const subtitle = document.querySelector('.checkout-subtitle');
+    
+    if (hasActivePlan) {
+        title.textContent = 'Change Your Plan';
+        subtitle.textContent = 'Upgrade or downgrade anytime • Cancel anytime • Secure payment';
+    } else {
+        title.textContent = 'Start Your Premium Journey';
+        subtitle.textContent = '14-day free trial • Cancel anytime • Secure payment';
+    }
+}
 
 // ═══════════════════════════════════════════════════════════════
 // SÉLECTION DU PLAN
@@ -247,6 +347,9 @@ function updatePriceSummary() {
     document.getElementById('summaryPlanName').textContent = planName;
     document.getElementById('summaryOriginalPrice').textContent = `$${originalPrice.toFixed(2)}`;
     
+    // ✅ LOGIQUE DE TEXTE DU BOUTON
+    let buttonText = '';
+    
     // Si un code promo est appliqué
     if (appliedPromo) {
         if (appliedPromo.type === 'percentage') {
@@ -265,8 +368,12 @@ function updatePriceSummary() {
             
             document.getElementById('freeAccessBadge').classList.add('hidden');
             
-            // Mettre à jour le bouton de soumission
-            document.getElementById('submitButtonText').textContent = 'Start 14-Day Free Trial';
+            // ✅ ADAPTATION DU TEXTE DU BOUTON
+            if (userExistingPlan.hasPlan) {
+                buttonText = 'Change Plan';
+            } else {
+                buttonText = 'Start 14-Day Free Trial';
+            }
             
             // Afficher le groupe de carte de crédit
             document.getElementById('cardDetailsGroup').classList.remove('hidden');
@@ -281,8 +388,8 @@ function updatePriceSummary() {
             
             document.getElementById('freeAccessBadge').classList.remove('hidden');
             
-            // Mettre à jour le bouton de soumission
-            document.getElementById('submitButtonText').textContent = 'Activate Free Lifetime Access';
+            // ✅ TEXTE SPÉCIFIQUE POUR ACCÈS GRATUIT
+            buttonText = 'Activate Free Lifetime Access';
             
             // Cacher le groupe de carte de crédit
             document.getElementById('cardDetailsGroup').classList.add('hidden');
@@ -294,12 +401,19 @@ function updatePriceSummary() {
         document.getElementById('summaryFinalPrice').textContent = `$${originalPrice.toFixed(2)}`;
         document.getElementById('freeAccessBadge').classList.add('hidden');
         
-        // Réinitialiser le bouton
-        document.getElementById('submitButtonText').textContent = 'Start 14-Day Free Trial';
+        // ✅ ADAPTATION DU TEXTE SELON LE PLAN EXISTANT
+        if (userExistingPlan.hasPlan) {
+            buttonText = 'Change Plan';
+        } else {
+            buttonText = 'Start 14-Day Free Trial';
+        }
         
         // Afficher le groupe de carte de crédit
         document.getElementById('cardDetailsGroup').classList.remove('hidden');
     }
+    
+    // ✅ METTRE À JOUR LE TEXTE DU BOUTON
+    document.getElementById('submitButtonText').textContent = buttonText;
 }
 
 // Initialiser le récapitulatif
@@ -345,6 +459,7 @@ form.addEventListener('submit', async (event) => {
         console.log('   ✅ Nom:', name);
         console.log('   ✅ Plan sélectionné:', selectedPlan.name);
         console.log('   ✅ Prix original:', `$${selectedPlan.price}/mois`);
+        console.log('   📊 Plan existant:', userExistingPlan.hasPlan ? userExistingPlan.currentPlan : 'Aucun');
         
         if (appliedPromo) {
             console.log('   🎁 Code promo appliqué:', appliedPromo.code);
@@ -398,8 +513,8 @@ form.addEventListener('submit', async (event) => {
             console.log('   🎁 Code promo:', appliedPromo.code);
             console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
             
-            // Redirection vers la page de succès
-            window.location.href = `success.html?plan=${selectedPlan.name}&free=true&customerId=${data.customerId || ''}`;
+            // ✅ Redirection vers la page de succès SANS confettis
+            window.location.href = `success.html?plan=${selectedPlan.name}&free=true&noconfetti=true`;
             return;
         }
         
@@ -438,13 +553,16 @@ form.addEventListener('submit', async (event) => {
 });
 
 // ═══════════════════════════════════════════════════════════════
-// PRÉ-REMPLIR L'EMAIL SI CONNECTÉ
+// ✅ PRÉ-REMPLIR L'EMAIL ET VÉRIFIER LE PLAN EXISTANT
 // ═══════════════════════════════════════════════════════════════
 
-firebase.auth().onAuthStateChanged((user) => {
+firebase.auth().onAuthStateChanged(async (user) => {
     if (user) {
         console.log('✅ Utilisateur Firebase détecté:', user.email);
         document.getElementById('email').value = user.email;
+        
+        // ✅ VÉRIFIER LE PLAN EXISTANT
+        await checkExistingPlan(user);
     } else {
         console.warn('⚠️ Aucun utilisateur connecté');
     }
