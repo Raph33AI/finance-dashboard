@@ -742,7 +742,7 @@ body.dark-mode #card-element {
 }
 
 /* ═══════════════════════════════════════════════════════════════
-   ✅ BOUTON SUBMIT - VERSION CORRIGÉE (Spinner ne fait pas tourner le bouton)
+   ✅ BOUTON SUBMIT - VERSION FINALE (Bouton 100% FIXE)
    ═══════════════════════════════════════════════════════════════ */
 
 .btn-checkout-submit {
@@ -765,6 +765,8 @@ body.dark-mode #card-element {
     align-items: center;
     justify-content: center;
     gap: 12px;
+    /* ✅ EMPÊCHER TOUTE ROTATION DU BOUTON */
+    transform-style: flat;
 }
 
 .btn-checkout-submit::before {
@@ -785,33 +787,32 @@ body.dark-mode #card-element {
     height: 400px;
 }
 
-.btn-checkout-submit:hover {
+/* Effet hover UNIQUEMENT si pas en loading */
+.btn-checkout-submit:hover:not(.loading) {
     transform: translateY(-4px) scale(1.02);
     box-shadow: 
         0 20px 50px rgba(59, 130, 246, 0.5),
         0 0 0 8px rgba(59, 130, 246, 0.1);
 }
 
-/* ✅ CORRECTION CRITIQUE : Empêcher le bouton de bouger pendant le chargement */
+.btn-checkout-submit:active:not(.loading) {
+    transform: translateY(-2px) scale(0.98);
+}
+
+/* ✅ ÉTAT LOADING - BOUTON STRICTEMENT IMMOBILE */
 .btn-checkout-submit.loading {
     cursor: wait;
     pointer-events: none;
     opacity: 0.8;
-}
-
-.btn-checkout-submit.loading:hover {
+    /* ✅ FORCER LE BOUTON À RESTER FIXE */
     transform: none !important;
-    box-shadow: 0 10px 30px rgba(59, 130, 246, 0.4) !important;
-}
-
-.btn-checkout-submit:active {
-    transform: translateY(-2px) scale(0.98);
+    animation: none !important;
 }
 
 .btn-checkout-submit:disabled {
     opacity: 0.6;
     cursor: not-allowed;
-    transform: none;
+    transform: none !important;
 }
 
 /* Conteneur du texte du bouton */
@@ -820,48 +821,49 @@ body.dark-mode #card-element {
     align-items: center;
     justify-content: center;
     gap: 12px;
-    transition: opacity 0.3s ease, visibility 0.3s ease;
+    transition: opacity 0.3s ease;
     position: relative;
     z-index: 2;
+    /* ✅ AUCUNE TRANSFORMATION */
+    transform: none;
 }
 
 /* Masquer le texte pendant le chargement */
 .btn-checkout-submit.loading .btn-text {
     opacity: 0;
-    visibility: hidden;
 }
 
-/* ✅ SPINNER - VERSION CORRIGÉE */
+/* ✅ SPINNER - VERSION CORRIGÉE AVEC CENTRAGE ABSOLU */
 .btn-checkout-submit .spinner {
     position: absolute;
-    top: 50%;
-    left: 50%;
     width: 24px;
     height: 24px;
-    margin-top: -12px;
-    margin-left: -12px;
+    /* ✅ CENTRAGE SANS TRANSFORM (pour éviter conflits) */
+    top: calc(50% - 12px);
+    left: calc(50% - 12px);
     border: 3px solid rgba(255, 255, 255, 0.3);
     border-top-color: white;
     border-radius: 50%;
     opacity: 0;
-    visibility: hidden;
-    transition: opacity 0.3s ease, visibility 0.3s ease;
+    transition: opacity 0.3s ease;
     /* ✅ Animation appliquée UNIQUEMENT au spinner */
-    animation: spinLoader 1.2s linear infinite;
+    animation: spinnerRotate 1s linear infinite;
+    /* ✅ Forcer l'isolation du spinner */
+    will-change: transform;
+    transform-origin: center center;
 }
 
 /* Afficher le spinner pendant le chargement */
 .btn-checkout-submit.loading .spinner {
     opacity: 1;
-    visibility: visible;
 }
 
-/* ✅ Animation de rotation (appliquée au spinner uniquement) */
-@keyframes spinLoader {
-    0% {
+/* ✅ KEYFRAME DÉDIÉE POUR LE SPINNER (nom unique) */
+@keyframes spinnerRotate {
+    from {
         transform: rotate(0deg);
     }
-    100% {
+    to {
         transform: rotate(360deg);
     }
 }
