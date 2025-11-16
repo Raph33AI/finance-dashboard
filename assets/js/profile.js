@@ -1,5 +1,5 @@
 /* ============================================
-   PROFILE.JS - Gestion de la page profil
+   PROFILE.JS - Gestion de la page profil v2.0
    ============================================ */
 
 // Variables globales
@@ -14,8 +14,9 @@ document.addEventListener('DOMContentLoaded', () => {
     console.log('🚀 Initialisation de la page profil...');
     
     // Vérifier si Firebase est initialisé
-    if (!isFirebaseInitialized()) {
-        showToast('error', 'Erreur', 'Impossible de charger les données utilisateur');
+    if (typeof firebase === 'undefined') {
+        console.error('❌ Firebase non initialisé !');
+        showToast('error', 'Erreur', 'Impossible de charger Firebase');
         return;
     }
     
@@ -26,48 +27,76 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // ============================================
-// CHARGEMENT DES DONNÉES UTILISATEUR
+// ÉCOUTE DE L'ÉVÉNEMENT userDataLoaded
 // ============================================
 
-// Écouter l'événement quand les données sont chargées
+/**
+ * Écouter l'événement déclenché par firebase-config.js
+ * Cet événement contient toutes les données utilisateur
+ */
 window.addEventListener('userDataLoaded', (e) => {
     currentUserData = e.detail;
-    console.log('✅ Données utilisateur reçues:', currentUserData);
+    console.log('✅ Données utilisateur reçues depuis firebase-config.js:', currentUserData);
     
-    // Charger les données dans les champs
+    // Charger les données dans l'interface
     loadUserData(currentUserData);
 });
+
+// ============================================
+// CHARGEMENT DES DONNÉES UTILISATEUR
+// ============================================
 
 /**
  * Charger les données utilisateur dans les champs
  */
 function loadUserData(userData) {
-    // Informations personnelles
-    document.getElementById('firstName').value = userData.firstName || '';
-    document.getElementById('lastName').value = userData.lastName || '';
-    document.getElementById('company').value = userData.company || '';
-    document.getElementById('phone').value = userData.phone || '';
+    console.log('📝 Chargement des données dans les champs...');
     
-    // Badge de vérification email
-    if (userData.emailVerified) {
-        document.getElementById('verifiedBadge').style.display = 'inline-flex';
+    try {
+        // Informations personnelles
+        const firstNameInput = document.getElementById('firstName');
+        const lastNameInput = document.getElementById('lastName');
+        const companyInput = document.getElementById('company');
+        const phoneInput = document.getElementById('phone');
+        
+        if (firstNameInput) firstNameInput.value = userData.firstName || '';
+        if (lastNameInput) lastNameInput.value = userData.lastName || '';
+        if (companyInput) companyInput.value = userData.company || '';
+        if (phoneInput) phoneInput.value = userData.phone || '';
+        
+        // Badge de vérification email
+        const verifiedBadge = document.getElementById('verifiedBadge');
+        if (verifiedBadge && userData.emailVerified) {
+            verifiedBadge.style.display = 'inline-flex';
+        }
+        
+        // Statistiques
+        if (userData.createdAt) {
+            const memberSinceEl = document.getElementById('memberSince');
+            if (memberSinceEl) {
+                const createdDate = userData.createdAt.toDate ? userData.createdAt.toDate() : new Date(userData.createdAt);
+                memberSinceEl.textContent = formatDate(createdDate);
+            }
+        }
+        
+        if (userData.lastLoginAt) {
+            const lastLoginEl = document.getElementById('lastLogin');
+            if (lastLoginEl) {
+                const lastLoginDate = userData.lastLoginAt.toDate ? userData.lastLoginAt.toDate() : new Date(userData.lastLoginAt);
+                lastLoginEl.textContent = formatRelativeTime(lastLoginDate);
+            }
+        }
+        
+        // Compter les analyses et portfolios
+        if (userData.uid) {
+            loadUserStats(userData.uid);
+        }
+        
+        console.log('✅ Données chargées dans les champs');
+        
+    } catch (error) {
+        console.error('❌ Erreur lors du chargement des données:', error);
     }
-    
-    // Statistiques
-    if (userData.createdAt) {
-        const createdDate = userData.createdAt.toDate ? userData.createdAt.toDate() : new Date(userData.createdAt);
-        document.getElementById('memberSince').textContent = formatDate(createdDate);
-    }
-    
-    if (userData.lastLoginAt) {
-        const lastLoginDate = userData.lastLoginAt.toDate ? userData.lastLoginAt.toDate() : new Date(userData.lastLoginAt);
-        document.getElementById('lastLogin').textContent = formatRelativeTime(lastLoginDate);
-    }
-    
-    // Compter les analyses et portfolios (si disponible)
-    loadUserStats(userData.uid);
-    
-    console.log('✅ Données chargées dans les champs');
 }
 
 /**
@@ -75,28 +104,38 @@ function loadUserData(userData) {
  */
 async function loadUserStats(userId) {
     try {
-        // Compter les analyses (exemple)
-        const analysesSnapshot = await firebaseDb
+        // Compter les analyses
+        const analysesSnapshot = await firebase.firestore()
             .collection('users')
             .doc(userId)
             .collection('analyses')
             .get();
         
-        document.getElementById('analysesCount').textContent = analysesSnapshot.size;
+        const analysesCountEl = document.getElementById('analysesCount');
+        if (analysesCountEl) {
+            analysesCountEl.textContent = analysesSnapshot.size;
+        }
         
-        // Compter les portfolios (exemple)
-        const portfoliosSnapshot = await firebaseDb
+        // Compter les portfolios
+        const portfoliosSnapshot = await firebase.firestore()
             .collection('users')
             .doc(userId)
             .collection('portfolios')
             .get();
         
-        document.getElementById('portfoliosCount').textContent = portfoliosSnapshot.size;
+        const portfoliosCountEl = document.getElementById('portfoliosCount');
+        if (portfoliosCountEl) {
+            portfoliosCountEl.textContent = portfoliosSnapshot.size;
+        }
         
     } catch (error) {
         console.error('❌ Erreur lors du chargement des stats:', error);
-        document.getElementById('analysesCount').textContent = '—';
-        document.getElementById('portfoliosCount').textContent = '—';
+        
+        const analysesCountEl = document.getElementById('analysesCount');
+        const portfoliosCountEl = document.getElementById('portfoliosCount');
+        
+        if (analysesCountEl) analysesCountEl.textContent = '—';
+        if (portfoliosCountEl) portfoliosCountEl.textContent = '—';
     }
 }
 
@@ -232,7 +271,7 @@ async function handlePersonalInfoSubmit(e) {
     
     try {
         // Mettre à jour dans Firestore
-        await firebaseDb.collection('users').doc(currentUserData.uid).update({
+        await firebase.firestore().collection('users').doc(currentUserData.uid).update({
             firstName: firstName,
             lastName: lastName,
             company: company,
@@ -241,7 +280,7 @@ async function handlePersonalInfoSubmit(e) {
         });
         
         // Mettre à jour le displayName dans Auth
-        const user = getCurrentUser();
+        const user = firebase.auth().currentUser;
         if (user) {
             await user.updateProfile({
                 displayName: `${firstName} ${lastName}`
@@ -311,13 +350,13 @@ async function handleAvatarChange(e) {
         const downloadURL = await uploadTask.ref.getDownloadURL();
         
         // Mettre à jour Firestore
-        await firebaseDb.collection('users').doc(currentUserData.uid).update({
+        await firebase.firestore().collection('users').doc(currentUserData.uid).update({
             photoURL: downloadURL,
             updatedAt: firebase.firestore.FieldValue.serverTimestamp()
         });
         
         // Mettre à jour Auth
-        const user = getCurrentUser();
+        const user = firebase.auth().currentUser;
         if (user) {
             await user.updateProfile({
                 photoURL: downloadURL
@@ -364,7 +403,7 @@ async function handlePasswordChange(e) {
     }
     
     try {
-        const user = getCurrentUser();
+        const user = firebase.auth().currentUser;
         
         if (!user) {
             showToast('error', 'Erreur', 'Utilisateur non connecté');
@@ -434,7 +473,7 @@ async function handleDeleteAccount() {
     if (!doubleConfirmed) return;
     
     try {
-        const user = getCurrentUser();
+        const user = firebase.auth().currentUser;
         
         if (!user) {
             showToast('error', 'Erreur', 'Utilisateur non connecté');
@@ -444,7 +483,7 @@ async function handleDeleteAccount() {
         showToast('info', 'Suppression en cours...', 'Veuillez patienter');
         
         // Supprimer les données Firestore
-        await firebaseDb.collection('users').doc(user.uid).delete();
+        await firebase.firestore().collection('users').doc(user.uid).delete();
         
         // Supprimer le compte Auth
         await user.delete();
@@ -593,6 +632,37 @@ function removeToast(toast) {
     }, 300);
 }
 
+/**
+ * Traduire les codes d'erreur Firebase
+ */
+function getFirebaseErrorMessage(errorCode) {
+    if (typeof window.getFirebaseErrorMessage === 'function') {
+        return window.getFirebaseErrorMessage(errorCode);
+    }
+    
+    return `Erreur: ${errorCode}`;
+}
+
+/**
+ * Déconnexion
+ */
+async function logout() {
+    try {
+        console.log('🚪 Déconnexion...');
+        
+        await firebase.auth().signOut();
+        
+        console.log('✅ Déconnexion réussie');
+        
+        // Rediriger vers la page de connexion
+        window.location.href = 'login.html';
+        
+    } catch (error) {
+        console.error('❌ Erreur lors de la déconnexion:', error);
+        alert('Erreur lors de la déconnexion');
+    }
+}
+
 // Animation de sortie pour les toasts
 const style = document.createElement('style');
 style.textContent = `
@@ -609,4 +679,4 @@ style.textContent = `
 `;
 document.head.appendChild(style);
 
-console.log('✅ Script de profil chargé');
+console.log('✅ Script de profil chargé (v2.0)');

@@ -1,14 +1,11 @@
 /* ============================================
-   FIREBASE-CONFIG.JS - FinancePro
-   Configuration Firebase & Initialisation
+   FIREBASE-CONFIG.JS - FinancePro v2.0
+   Configuration Firebase & Gestion Utilisateur Complète
    ============================================ */
 
 // ============================================
 // CONFIGURATION FIREBASE
 // ============================================
-
-// ⚠️ IMPORTANT : Remplacer par vos propres clés Firebase
-// Obtenir ces clés sur : https://console.firebase.google.com/
 
 const firebaseConfig = {
   apiKey: "AIzaSyD9kQ3nyYbYMU--_PsMOtuqtMKlt3gmjRM",
@@ -71,10 +68,214 @@ microsoftProvider.setCustomParameters({
     prompt: 'select_account'
 });
 
-// Apple Provider (nécessite configuration additionnelle)
+// Apple Provider
 const appleProvider = new firebase.auth.OAuthProvider('apple.com');
 appleProvider.addScope('email');
 appleProvider.addScope('name');
+
+// ============================================
+// VARIABLES GLOBALES
+// ============================================
+
+window.currentUserData = null;
+
+// ============================================
+// OBSERVATEUR D'ÉTAT D'AUTHENTIFICATION AMÉLIORÉ
+// ============================================
+
+auth.onAuthStateChanged(async (user) => {
+    if (user) {
+        console.log('✅ Utilisateur connecté:', user.email);
+        console.log('🔑 UID:', user.uid);
+        
+        // ✅ CHARGER ET SYNCHRONISER LES DONNÉES FIRESTORE
+        await loadAndSyncUserData(user);
+        
+    } else {
+        console.log('ℹ️ Aucun utilisateur connecté');
+        
+        // Nettoyer les données
+        window.currentUserData = null;
+        localStorage.removeItem('financepro_user');
+        
+        // Déclencher un événement personnalisé
+        window.dispatchEvent(new CustomEvent('userLoggedOut'));
+    }
+});
+
+// ============================================
+// ✅ FONCTION PRINCIPALE : CHARGER ET SYNCHRONISER LES DONNÉES
+// ============================================
+
+/**
+ * Charger les données utilisateur depuis Firestore
+ * Créer le document s'il n'existe pas
+ * Synchroniser avec Firebase Auth
+ */
+async function loadAndSyncUserData(user) {
+    try {
+        console.log('📥 Chargement des données Firestore pour:', user.uid);
+        
+        // Référence au document utilisateur
+        const userDocRef = db.collection('users').doc(user.uid);
+        const userDoc = await userDocRef.get();
+        
+        let userData;
+        
+        if (userDoc.exists) {
+            // ✅ DOCUMENT EXISTE - Le charger
+            console.log('✅ Document utilisateur trouvé');
+            
+            const firestoreData = userDoc.data();
+            
+            userData = {
+                uid: user.uid,
+                email: user.email,
+                emailVerified: user.emailVerified,
+                photoURL: user.photoURL,
+                displayName: user.displayName,
+                ...firestoreData
+            };
+            
+            // Mettre à jour lastLoginAt
+            await userDocRef.update({
+                lastLoginAt: firebase.firestore.FieldValue.serverTimestamp(),
+                email: user.email, // Synchroniser l'email
+                emailVerified: user.emailVerified // Synchroniser la vérification
+            });
+            
+            console.log('✅ Document mis à jour (lastLoginAt)');
+            
+        } else {
+            // ❌ DOCUMENT N'EXISTE PAS - Le créer
+            console.warn('⚠️ Document utilisateur inexistant');
+            console.log('🆕 Création du document utilisateur...');
+            
+            // Créer les données initiales
+            const newUserData = {
+                email: user.email,
+                emailVerified: user.emailVerified,
+                photoURL: user.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.email)}&background=2563eb&color=fff`,
+                displayName: user.displayName || user.email.split('@')[0],
+                firstName: '',
+                lastName: '',
+                company: '',
+                phone: '',
+                plan: 'basic', // Plan gratuit par défaut
+                subscriptionStatus: 'inactive',
+                createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                lastLoginAt: firebase.firestore.FieldValue.serverTimestamp()
+            };
+            
+            // Créer le document dans Firestore
+            await userDocRef.set(newUserData);
+            
+            console.log('✅ Document utilisateur créé avec succès');
+            
+            userData = {
+                uid: user.uid,
+                ...newUserData
+            };
+        }
+        
+        // Stocker les données globalement
+        window.currentUserData = userData;
+        
+        // Stocker dans localStorage
+        localStorage.setItem('financepro_user', JSON.stringify(userData));
+        
+        // Mettre à jour l'interface utilisateur
+        updateGlobalUserInterface(userData);
+        
+        // ✅ DÉCLENCHER L'ÉVÉNEMENT POUR LES AUTRES SCRIPTS
+        window.dispatchEvent(new CustomEvent('userDataLoaded', { 
+            detail: userData 
+        }));
+        
+        window.dispatchEvent(new CustomEvent('userAuthenticated', { 
+            detail: userData 
+        }));
+        
+        console.log('✅ Données utilisateur chargées et synchronisées');
+        console.log('📊 Données:', userData);
+        
+    } catch (error) {
+        console.error('❌ Erreur lors du chargement des données:', error);
+        
+        // Créer des données minimales depuis Auth uniquement
+        const minimalUserData = {
+            uid: user.uid,
+            email: user.email,
+            emailVerified: user.emailVerified,
+            photoURL: user.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.email)}&background=2563eb&color=fff`,
+            displayName: user.displayName || user.email.split('@')[0],
+            firstName: '',
+            lastName: '',
+            plan: 'basic',
+            subscriptionStatus: 'inactive'
+        };
+        
+        window.currentUserData = minimalUserData;
+        localStorage.setItem('financepro_user', JSON.stringify(minimalUserData));
+        
+        updateGlobalUserInterface(minimalUserData);
+        
+        window.dispatchEvent(new CustomEvent('userDataLoaded', { 
+            detail: minimalUserData 
+        }));
+        
+        console.warn('⚠️ Données minimales chargées depuis Firebase Auth uniquement');
+    }
+}
+
+// ============================================
+// ✅ MISE À JOUR GLOBALE DE L'INTERFACE
+// ============================================
+
+/**
+ * Mettre à jour tous les éléments [data-user-*] sur la page
+ */
+function updateGlobalUserInterface(userData) {
+    console.log('🎨 Mise à jour de l\'interface utilisateur globale');
+    
+    try {
+        // Nom d'utilisateur
+        document.querySelectorAll('[data-user-name]').forEach(el => {
+            const name = userData.displayName || 
+                         `${userData.firstName || ''} ${userData.lastName || ''}`.trim() || 
+                         userData.email?.split('@')[0] || 
+                         'User';
+            el.textContent = name;
+        });
+        
+        // Email
+        document.querySelectorAll('[data-user-email]').forEach(el => {
+            el.textContent = userData.email || 'email@example.com';
+        });
+        
+        // Photo de profil
+        document.querySelectorAll('[data-user-photo]').forEach(img => {
+            const photoURL = userData.photoURL || 
+                            `https://ui-avatars.com/api/?name=${encodeURIComponent(userData.email || 'User')}&background=2563eb&color=fff`;
+            img.src = photoURL;
+        });
+        
+        // Plan d'abonnement
+        document.querySelectorAll('[data-user-plan]').forEach(el => {
+            const plan = userData.plan || 'basic';
+            el.textContent = capitalizeFirstLetter(plan);
+            
+            // Ajouter une classe pour le style
+            el.className = el.className.replace(/plan-\w+/g, '');
+            el.classList.add(`plan-${plan.toLowerCase()}`);
+        });
+        
+        console.log('✅ Interface globale mise à jour');
+        
+    } catch (error) {
+        console.error('❌ Erreur lors de la mise à jour de l\'interface:', error);
+    }
+}
 
 // ============================================
 // FONCTIONS UTILITAIRES FIREBASE
@@ -92,6 +293,13 @@ function isFirebaseInitialized() {
  */
 function getCurrentUser() {
     return auth.currentUser;
+}
+
+/**
+ * Obtenir les données utilisateur actuelles
+ */
+function getCurrentUserData() {
+    return window.currentUserData;
 }
 
 /**
@@ -126,41 +334,13 @@ async function refreshUserToken() {
     return null;
 }
 
-// ============================================
-// OBSERVATEUR D'ÉTAT D'AUTHENTIFICATION
-// ============================================
-
-auth.onAuthStateChanged((user) => {
-    if (user) {
-        console.log('✅ Utilisateur connecté:', user.email);
-        
-        // Stocker les informations utilisateur dans localStorage
-        const userData = {
-            uid: user.uid,
-            email: user.email,
-            displayName: user.displayName,
-            photoURL: user.photoURL,
-            emailVerified: user.emailVerified,
-            lastLoginAt: new Date().toISOString()
-        };
-        
-        localStorage.setItem('financepro_user', JSON.stringify(userData));
-        
-        // Déclencher un événement personnalisé
-        window.dispatchEvent(new CustomEvent('userAuthenticated', { 
-            detail: userData 
-        }));
-        
-    } else {
-        console.log('ℹ️ Aucun utilisateur connecté');
-        
-        // Nettoyer localStorage
-        localStorage.removeItem('financepro_user');
-        
-        // Déclencher un événement personnalisé
-        window.dispatchEvent(new CustomEvent('userLoggedOut'));
-    }
-});
+/**
+ * Capitaliser la première lettre
+ */
+function capitalizeFirstLetter(string) {
+    if (!string) return '';
+    return string.charAt(0).toUpperCase() + string.slice(1).toLowerCase();
+}
 
 // ============================================
 // GESTION DES ERREURS FIREBASE
@@ -194,6 +374,7 @@ function getFirebaseErrorMessage(errorCode) {
         'permission-denied': 'Permission refusée.',
         'unavailable': 'Service temporairement indisponible.',
         'unauthenticated': 'Authentification requise.',
+        'not-found': 'Document non trouvé.',
         
         // Erreur par défaut
         'default': 'Une erreur s\'est produite. Veuillez réessayer.'
@@ -215,7 +396,9 @@ window.appleProvider = appleProvider;
 window.getFirebaseErrorMessage = getFirebaseErrorMessage;
 window.isFirebaseInitialized = isFirebaseInitialized;
 window.getCurrentUser = getCurrentUser;
+window.getCurrentUserData = getCurrentUserData;
 window.getUserToken = getUserToken;
 window.refreshUserToken = refreshUserToken;
+window.loadAndSyncUserData = loadAndSyncUserData;
 
-console.log('✅ Configuration Firebase chargée');
+console.log('✅ Configuration Firebase chargée (v2.0 - Auto-sync)');
