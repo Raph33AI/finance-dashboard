@@ -23,14 +23,42 @@
     --glow-primary: 0 0 20px rgba(102, 126, 234, 0.5);
     --glow-success: 0 0 20px rgba(16, 185, 129, 0.5);
     
-    --transition-smooth: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-    --transition-bounce: all 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-bounce: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
 }
 
 body.dark-mode {
     --glass-bg: rgba(15, 23, 42, 0.7);
     --glass-border: rgba(148, 163, 184, 0.1);
     --glass-shadow: rgba(102, 126, 234, 0.5);
+}
+
+/* ============================================
+   ✅ OPTIMISATIONS PERFORMANCES GLOBALES
+   ============================================ */
+
+/* GPU Acceleration pour les éléments critiques */
+.stats-grid,
+.stat-card,
+.toolbar,
+.chart-wrapper,
+.simulation-item,
+.btn-primary,
+.btn-secondary,
+.btn-success,
+.btn-add,
+.data-table,
+.modal-content {
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+    -webkit-perspective: 1000px;
+    perspective: 1000px;
+}
+
+/* Optimiser les rendus */
+* {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
 }
 
 /* ============================================
@@ -176,6 +204,9 @@ h1, h2, h3, h4, h5, h6,
     border-radius: 28px;
     border: 1px solid var(--glass-border);
     box-shadow: 0 8px 32px var(--glass-shadow);
+    /* ✅ GPU Acceleration */
+    transform: translateZ(0);
+    will-change: background-position;
 }
 
 body.dark-mode .stats-grid {
@@ -200,7 +231,10 @@ body.dark-mode .stats-grid {
     border-left: 4px solid var(--ml-primary);
     transform-style: preserve-3d;
     position: relative;
+    /* ✅ Performance */
     contain: layout style paint;
+    transform: translateZ(0);
+    will-change: transform, box-shadow;
     animation: fadeInUp 0.6s ease-out backwards;
 }
 
@@ -226,7 +260,7 @@ body.dark-mode .stat-card {
         rgba(102, 126, 234, 0.1),
         transparent
     );
-    transition: left 0.6s;
+    transition: left 0.5s;
 }
 
 .stat-card:hover::before {
@@ -240,7 +274,6 @@ body.dark-mode .stat-card {
         0 0 40px rgba(118, 75, 162, 0.15),
         inset 0 1px 0 rgba(255, 255, 255, 0.6);
     border-left-color: var(--ml-secondary);
-    will-change: transform;
 }
 
 .stat-card h3 {
@@ -267,6 +300,7 @@ body.dark-mode .stat-card {
     background-clip: text;
     margin-bottom: 6px;
     line-height: 1.2;
+    will-change: background-position;
 }
 
 .stat-card.positive .value {
@@ -304,6 +338,9 @@ body.dark-mode .stat-card {
         inset 0 1px 0 rgba(255, 255, 255, 0.1);
     position: relative;
     overflow: hidden;
+    /* ✅ GPU Acceleration */
+    transform: translateZ(0);
+    will-change: background-position;
 }
 
 .toolbar::before {
@@ -320,6 +357,7 @@ body.dark-mode .stat-card {
     );
     animation: rotate3d 20s linear infinite;
     pointer-events: none;
+    will-change: transform;
 }
 
 body.dark-mode .toolbar {
@@ -348,6 +386,7 @@ body.dark-mode .toolbar {
 
 .toolbar h3 i {
     animation: floatIcon 3s ease-in-out infinite;
+    will-change: transform;
 }
 
 .toolbar-row {
@@ -387,6 +426,8 @@ body.dark-mode .toolbar {
     color: var(--text-primary);
     transition: var(--transition-smooth);
     font-weight: 600;
+    /* ✅ GPU Acceleration */
+    transform: translateZ(0);
 }
 
 .toolbar input:focus,
@@ -420,6 +461,7 @@ body.dark-mode .toolbar {
     overflow: hidden;
     transform: translateZ(0);
     backface-visibility: hidden;
+    will-change: transform, box-shadow;
 }
 
 .btn-add::before,
@@ -439,7 +481,7 @@ body.dark-mode .toolbar {
         transparent
     );
     transform: rotate(45deg);
-    transition: left 0.6s;
+    transition: left 0.5s;
 }
 
 .btn-add:hover::before,
@@ -466,7 +508,6 @@ body.dark-mode .toolbar {
     box-shadow: 
         0 12px 36px rgba(102, 126, 234, 0.5),
         0 0 40px rgba(118, 75, 162, 0.4);
-    will-change: transform;
 }
 
 .btn-primary:active {
@@ -575,6 +616,7 @@ body.dark-mode .btn-secondary:hover {
     font-size: 1.2em;
     font-weight: 800;
     animation: pulse 2s ease-in-out infinite;
+    will-change: transform, opacity;
 }
 
 .parameters-grid {
@@ -616,12 +658,17 @@ body.dark-mode .btn-secondary:hover {
     border: 2px solid var(--glass-border);
     backdrop-filter: blur(10px);
     animation: fadeInUp 0.6s ease-out 0.5s backwards;
+    /* ✅ GPU Acceleration */
+    transform: translateZ(0);
+    will-change: scroll-position;
 }
 
 .data-table {
     width: 100%;
     border-collapse: collapse;
     font-size: 0.85em;
+    /* ✅ Performance */
+    contain: layout style;
 }
 
 .data-table thead {
@@ -633,6 +680,7 @@ body.dark-mode .btn-secondary:hover {
     top: 0;
     z-index: 10;
     box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+    will-change: background-position;
 }
 
 body.dark-mode .data-table thead {
@@ -667,6 +715,8 @@ body.dark-mode .data-table th:first-child {
 .data-table tbody tr {
     border-bottom: 1px solid var(--border-color);
     transition: background 0.2s, transform 0.2s;
+    /* ✅ GPU Acceleration */
+    transform: translateZ(0);
 }
 
 .data-table tbody tr:hover {
@@ -732,6 +782,8 @@ body.dark-mode .data-table tbody tr:nth-child(even) td:first-child {
     color: var(--text-primary);
     font-weight: 600;
     transition: var(--transition-smooth);
+    /* ✅ GPU Acceleration */
+    transform: translateZ(0);
 }
 
 .data-table input:focus {
@@ -771,6 +823,8 @@ body.dark-mode .data-table .calculated {
     font-weight: 700;
     transition: var(--transition-smooth);
     box-shadow: 0 2px 8px rgba(239, 68, 68, 0.3);
+    /* ✅ GPU Acceleration */
+    transform: translateZ(0);
 }
 
 .data-table .btn-delete:hover {
@@ -795,6 +849,9 @@ body.dark-mode .data-table .calculated {
     border-radius: 28px;
     border: 1px solid var(--glass-border);
     box-shadow: 0 8px 32px var(--glass-shadow);
+    /* ✅ GPU Acceleration */
+    transform: translateZ(0);
+    will-change: background-position;
 }
 
 body.dark-mode .charts-container {
@@ -820,6 +877,10 @@ body.dark-mode .charts-container {
     animation: fadeInUp 0.6s ease-out backwards;
     position: relative;
     overflow: hidden;
+    /* ✅ Performance */
+    contain: layout style paint;
+    transform: translateZ(0);
+    will-change: transform, box-shadow;
 }
 
 .chart-wrapper:nth-child(1) { animation-delay: 0.1s; }
@@ -839,6 +900,7 @@ body.dark-mode .charts-container {
     );
     animation: rotate3d 25s linear infinite;
     pointer-events: none;
+    will-change: transform;
 }
 
 body.dark-mode .chart-wrapper {
@@ -865,6 +927,7 @@ body.dark-mode .chart-wrapper {
     background-clip: text;
     font-weight: 800 !important;
     margin-bottom: 15px;
+    will-change: background-position;
 }
 
 .grid-2 {
@@ -895,6 +958,9 @@ body.dark-mode .chart-wrapper {
     border: 2px solid var(--glass-border);
     border-left: 4px solid var(--ml-primary);
     box-shadow: 0 4px 16px rgba(102, 126, 234, 0.15);
+    /* ✅ GPU Acceleration */
+    transform: translateZ(0);
+    will-change: background-position;
 }
 
 body.dark-mode .local-filter {
@@ -926,6 +992,8 @@ body.dark-mode .local-filter {
     color: var(--text-primary);
     font-weight: 600;
     transition: var(--transition-smooth);
+    /* ✅ GPU Acceleration */
+    transform: translateZ(0);
 }
 
 .local-filter select:focus {
@@ -953,6 +1021,9 @@ body.dark-mode .local-filter {
         0 0 60px rgba(118, 75, 162, 0.4);
     position: relative;
     overflow: hidden;
+    /* ✅ GPU Acceleration */
+    transform: translateZ(0);
+    will-change: background-position;
 }
 
 .simulation-management::before {
@@ -971,6 +1042,7 @@ body.dark-mode .local-filter {
     );
     animation: moveStripes 20s linear infinite;
     pointer-events: none;
+    will-change: transform;
 }
 
 .simulation-management h3 {
@@ -1012,6 +1084,7 @@ body.dark-mode .local-filter {
     color: #ffd700;
     text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
     animation: pulse 2s ease-in-out infinite;
+    will-change: transform, opacity;
 }
 
 /* ============================================
@@ -1144,7 +1217,10 @@ body.dark-mode .modal-footer {
     position: relative;
     overflow: hidden;
     transform-style: preserve-3d;
+    /* ✅ Performance */
     contain: layout style paint;
+    transform: translateZ(0);
+    will-change: transform, box-shadow;
     animation: slideInFromLeft 0.6s ease-out backwards;
 }
 
@@ -1199,6 +1275,7 @@ body.dark-mode .simulation-item {
     box-shadow: 
         0 12px 40px rgba(16, 185, 129, 0.5),
         0 0 60px rgba(16, 185, 129, 0.3);
+    will-change: background-position;
 }
 
 .simulation-info {
@@ -1258,6 +1335,7 @@ body.dark-mode .simulation-item {
     font-size: 1.1em;
     box-shadow: 0 4px 12px rgba(102, 126, 234, 0.12);
     transform: translateZ(0);
+    will-change: transform, box-shadow;
 }
 
 .btn-icon:hover {
@@ -1397,18 +1475,6 @@ body.dark-mode .highcharts-legend-item text {
     .chart-wrapper::before {
         animation: none;
     }
-}
-
-/* GPU Acceleration for transformed elements */
-.stat-card,
-.chart-wrapper,
-.simulation-item,
-.btn-primary,
-.btn-secondary,
-.btn-success,
-.btn-add {
-    transform: translateZ(0);
-    backface-visibility: hidden;
 }
 
 /* Disable hover effects on touch devices for performance */
