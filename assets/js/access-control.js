@@ -1,6 +1,6 @@
 /* ═══════════════════════════════════════════════════════════════
    ACCESS CONTROL - Vérification des permissions par plan
-   AlphaVault AI - VERSION AMÉLIORÉE
+   AlphaVault AI - VERSION SÉCURISÉE CORRIGÉE
    ═══════════════════════════════════════════════════════════════ */
 
 console.log('🔐 Access Control System initialized');
@@ -20,7 +20,7 @@ const ACCESS_LEVELS = {
         pages: [
             'index.html',
             'dashboard-financier.html',
-            'investments-analytics.html' // ✅ Ajouté
+            'investments-analytics.html'
         ]
     },
     pro: {
@@ -40,18 +40,18 @@ const ACCESS_LEVELS = {
         pages: [
             'index.html',
             'dashboard-financier.html',
+            'investments-analytics.html',
             'advanced-analysis.html',
             'monte-carlo.html',
             'risk-parity.html',
             'scenario-analysis.html',
             'portfolio-optimizer.html',
-            'advanced-analysis.html',
             'market-data.html',
             'trend-prediction.html',
             'market-intelligence.html'
         ]
     },
-    // ✅ AJOUTÉ : Support des codes promo FREE (équivalent PRO)
+    // ✅ ACCÈS GRATUIT (équivalent PRO)
     active_free: {
         maxAnalyses: Infinity,
         features: [
@@ -69,12 +69,12 @@ const ACCESS_LEVELS = {
         pages: [
             'index.html',
             'dashboard-financier.html',
+            'investments-analytics.html',
             'advanced-analysis.html',
             'monte-carlo.html',
             'risk-parity.html',
             'scenario-analysis.html',
             'portfolio-optimizer.html',
-            'advanced-analysis.html',
             'market-data.html',
             'trend-prediction.html',
             'market-intelligence.html'
@@ -83,8 +83,49 @@ const ACCESS_LEVELS = {
     platinum: {
         maxAnalyses: Infinity,
         features: ['all'],
-        pages: ['all']
+        pages: ['all'] // ✅ Accès à TOUTES les pages
     }
+};
+
+// ═══════════════════════════════════════════════════════════════
+// ✅ NOUVEAU : DÉFINITION DES PAGES PUBLIQUES ET PROTÉGÉES
+// ═══════════════════════════════════════════════════════════════
+
+const PAGE_CATEGORIES = {
+    // Pages accessibles sans connexion
+    public: [
+        'index.html',
+        'login.html',
+        'register.html',
+        'forgot-password.html'
+    ],
+    
+    // Pages accessibles par tous les utilisateurs connectés (Basic+)
+    authenticated: [
+        'dashboard-financier.html',
+        'investments-analytics.html'
+    ],
+    
+    // Pages PRO uniquement (Basic bloqué)
+    pro: [
+        'advanced-analysis.html',
+        'monte-carlo.html',
+        'risk-parity.html',
+        'scenario-analysis.html',
+        'portfolio-optimizer.html',
+        'market-data.html',
+        'trend-prediction.html',
+        'market-intelligence.html'
+    ],
+    
+    // ✅ NOUVEAU : Pages PLATINUM uniquement
+    platinum: [
+        'ma-screening.html',          // M&A Screening
+        'api-access.html',            // API Access Dashboard
+        'white-label.html',           // White-label Reports
+        'priority-support.html',      // Support VIP
+        'advanced-api.html'           // API avancée
+    ]
 };
 
 // ═══════════════════════════════════════════════════════════════
@@ -95,6 +136,13 @@ async function checkPageAccess(pageName) {
     try {
         console.log(`🔍 Checking access for page: ${pageName}`);
         
+        // ✅ Vérifier si c'est une page publique
+        if (PAGE_CATEGORIES.public.includes(pageName)) {
+            console.log('🌐 Public page - access granted');
+            return true;
+        }
+        
+        // Vérifier l'authentification
         const user = firebase.auth().currentUser;
         
         if (!user) {
@@ -129,25 +177,54 @@ async function checkPageAccess(pageName) {
             return false;
         }
         
-        // ✅ DÉTERMINER LE NIVEAU D'ACCÈS (plan ou subscriptionStatus)
-        const effectiveLevel = subscriptionStatus === 'active_free' ? 'active_free' : userPlan;
+        // ✅ DÉTERMINER LE NIVEAU D'ACCÈS
+        let effectiveLevel;
+        
+        if (subscriptionStatus === 'active_free') {
+            // Utilisateur avec code promo FREE
+            effectiveLevel = userPlan; // ✅ Utiliser le plan réel (pro ou platinum)
+        } else {
+            effectiveLevel = userPlan;
+        }
         
         console.log(`🔑 Effective access level: ${effectiveLevel}`);
         
-        // Vérifier si l'utilisateur a accès
-        const allowedPages = ACCESS_LEVELS[effectiveLevel]?.pages || [];
+        // ✅ NOUVELLE LOGIQUE DE VÉRIFICATION
         
-        if (allowedPages.includes('all') || allowedPages.includes(pageName)) {
-            console.log('✅ Access granted');
-            
-            // ✅ SUPPRIMÉ : displayPlanBadge(effectiveLevel);
-            
-            return true;
-        } else {
-            console.warn('⛔ Access denied - Insufficient plan');
-            showUpgradeModal(userPlan, 'insufficient');
-            return false;
+        // 1️⃣ Pages PLATINUM ONLY
+        if (PAGE_CATEGORIES.platinum.includes(pageName)) {
+            if (effectiveLevel === 'platinum') {
+                console.log('✅ Access granted (Platinum page)');
+                return true;
+            } else {
+                console.warn('⛔ Access denied - Platinum plan required');
+                showUpgradeModal(effectiveLevel, 'platinum_required');
+                return false;
+            }
         }
+        
+        // 2️⃣ Pages PRO (accessible par Pro et Platinum)
+        if (PAGE_CATEGORIES.pro.includes(pageName)) {
+            if (effectiveLevel === 'pro' || effectiveLevel === 'platinum') {
+                console.log('✅ Access granted (Pro/Platinum page)');
+                return true;
+            } else {
+                console.warn('⛔ Access denied - Pro plan required');
+                showUpgradeModal(effectiveLevel, 'pro_required');
+                return false;
+            }
+        }
+        
+        // 3️⃣ Pages AUTHENTICATED (accessible par tous les utilisateurs connectés)
+        if (PAGE_CATEGORIES.authenticated.includes(pageName)) {
+            console.log('✅ Access granted (Authenticated page)');
+            return true;
+        }
+        
+        // 4️⃣ Page non référencée = BLOQUER PAR DÉFAUT (sécurité)
+        console.warn(`⚠️ Unknown page: ${pageName} - blocking access by default`);
+        showUpgradeModal(effectiveLevel, 'unknown_page');
+        return false;
         
     } catch (error) {
         console.error('❌ Error checking access:', error);
@@ -156,7 +233,7 @@ async function checkPageAccess(pageName) {
 }
 
 // ═══════════════════════════════════════════════════════════════
-// AFFICHER UNE MODALE D'UPGRADE (VERSION AMÉLIORÉE AVEC CSS INLINE)
+// AFFICHER UNE MODALE D'UPGRADE (VERSION AMÉLIORÉE)
 // ═══════════════════════════════════════════════════════════════
 
 function showUpgradeModal(currentPlan, reason = 'insufficient') {
@@ -168,19 +245,31 @@ function showUpgradeModal(currentPlan, reason = 'insufficient') {
         existingModal.remove();
     }
     
-    // Message selon la raison
+    // ✅ Messages personnalisés selon la raison
     const messages = {
-        insufficient: {
-            title: '🔒 Premium Feature',
-            description: 'This feature is only available in <strong>Pro</strong> or <strong>Platinum</strong> plans.'
+        pro_required: {
+            title: '🔒 Pro Feature',
+            description: 'This feature requires the <strong>Pro</strong> or <strong>Platinum</strong> plan.',
+            icon: '👑'
+        },
+        platinum_required: {
+            title: '💎 Platinum Exclusive',
+            description: 'This feature is exclusively available in the <strong>Platinum</strong> plan.',
+            icon: '💎'
         },
         expired: {
             title: '⏰ Subscription Expired',
-            description: 'Your subscription has expired. Renew now to regain access to premium features.'
+            description: 'Your subscription has expired. Renew now to regain access to premium features.',
+            icon: '⏰'
+        },
+        unknown_page: {
+            title: '🔒 Premium Access',
+            description: 'This page requires a premium subscription.',
+            icon: '🔐'
         }
     };
     
-    const msg = messages[reason] || messages.insufficient;
+    const msg = messages[reason] || messages.pro_required;
     
     // Créer une modale glassmorphism élégante avec CSS INLINE
     const modal = document.createElement('div');
@@ -214,7 +303,7 @@ function showUpgradeModal(currentPlan, reason = 'insufficient') {
             transition: transform 0.3s ease;
         " id="upgrade-modal-content">
             <div style="font-size: 72px; margin-bottom: 20px;">
-                ${reason === 'expired' ? '⏰' : '👑'}
+                ${msg.icon}
             </div>
             <h2 style="
                 color: white;
@@ -340,7 +429,7 @@ function redirectToLogin() {
 }
 
 // ═══════════════════════════════════════════════════════════════
-// INITIALISATION AUTOMATIQUE SUR CHAQUE PAGE
+// ✅ INITIALISATION AUTOMATIQUE AMÉLIORÉE
 // ═══════════════════════════════════════════════════════════════
 
 document.addEventListener('DOMContentLoaded', async function() {
@@ -348,17 +437,8 @@ document.addEventListener('DOMContentLoaded', async function() {
     
     console.log(`📄 Current page: ${currentPage}`);
     
-    // Liste des pages protégées (nécessitent Pro ou Platinum)
-    const protectedPages = [
-        'advanced-analysis.html',
-        'monte-carlo.html',
-        'risk-parity.html',
-        'scenario-analysis.html',
-        'trend-prediction.html',
-        'portfolio-optimizer.html'
-    ];
-    
-    if (protectedPages.includes(currentPage)) {
+    // ✅ Vérifier l'accès pour TOUTES les pages (sauf publiques)
+    if (!PAGE_CATEGORIES.public.includes(currentPage)) {
         console.log('🔒 Protected page detected - checking access...');
         
         // Attendre que Firebase soit prêt
@@ -380,7 +460,7 @@ document.addEventListener('DOMContentLoaded', async function() {
             }
         });
     } else {
-        console.log('🔓 Public page - no access check needed');
+        console.log('🌐 Public page - no access check needed');
     }
 });
 
@@ -408,7 +488,7 @@ async function hasFeature(featureName) {
     }
     
     // ✅ Déterminer le niveau effectif
-    const effectiveLevel = subscriptionStatus === 'active_free' ? 'active_free' : userPlan;
+    const effectiveLevel = subscriptionStatus === 'active_free' ? userPlan : userPlan;
     
     const allowedFeatures = ACCESS_LEVELS[effectiveLevel]?.features || [];
     
