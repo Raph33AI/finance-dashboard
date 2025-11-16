@@ -207,7 +207,6 @@
                 </p>
                 
                 <div class="hero-cta" data-aos="fade-up" data-aos-delay="300">
-                    <!-- ✅ CORRIGÉ : Redirection vers page de création de compte -->
                     <button class="btn-hero-primary" id="heroGetStarted">
                         <i class="fas fa-rocket"></i>
                         <span>Start Free</span>
@@ -1007,8 +1006,7 @@
                         <span class="feature-pill">Risk Tools</span>
                         <span class="feature-pill">AI Assistant</span>
                     </div>
-                    <!-- ✅ CORRIGÉ : Redirection vers page de création de compte -->
-                    <a href="#" class="solution-link" id="solutionStartFree">
+                    <a href="#pricing" class="solution-link">
                         <span>Start Free</span>
                         <i class="fas fa-arrow-right"></i>
                     </a>
@@ -1032,8 +1030,7 @@
                         <span class="feature-pill">Quant Tools</span>
                         <span class="feature-pill">API Access</span>
                     </div>
-                    <!-- ✅ CORRIGÉ : Redirection vers checkout -->
-                    <a href="checkout.html" class="solution-link">
+                    <a href="#pricing" class="solution-link">
                         <span>Go Pro</span>
                         <i class="fas fa-arrow-right"></i>
                     </a>
@@ -1161,8 +1158,7 @@
                         <li class="disabled"><i class="fas fa-times"></i> M&A tools</li>
                         <li class="disabled"><i class="fas fa-times"></i> Real-time data</li>
                     </ul>
-                    <!-- ✅ CORRIGÉ : Redirection vers page de création de compte -->
-                    <button class="btn-pricing" id="pricingGetStartedFree">
+                    <button class="btn-pricing" onclick="window.location.href='index.html'">
                         Get Started Free
                     </button>
                 </div>
@@ -1240,7 +1236,6 @@
                         Join thousands of investors using AlphaVault AI
                     </p>
                     <div class="cta-buttons">
-                        <!-- ✅ CORRIGÉ : Redirection vers page de création de compte -->
                         <button class="btn-cta-primary" id="finalCTABtn">
                             <span>Start Free Now</span>
                             <i class="fas fa-arrow-right"></i>
@@ -1357,6 +1352,18 @@
     <!-- API CLIENT -->
     <script src="assets/js/api-client.js"></script>
     
+    <!-- ✅ CHATBOT SCRIPTS COMMENTÉS (désactivé sur landing page) -->
+    <!--
+    <script src="assets/js/chatbot-config.js"></script>
+    <script src="assets/js/chatbot-gemini.js"></script>
+    <script src="assets/js/chatbot-analytics.js"></script>
+    <script src="assets/js/chatbot-charts.js"></script>
+    <script src="assets/js/chatbot-ipo-analyzer.js"></script>
+    <script src="assets/js/chatbot-suggestions.js"></script>
+    <script src="assets/js/chatbot-ai-engine.js"></script>
+    <script src="assets/js/chatbot-ui.js"></script>
+    -->
+    
     <!-- Application Scripts -->
     <script src="assets/js/common.js"></script>
     <script src="assets/js/landing.js"></script>
@@ -1366,95 +1373,14 @@
     
     <script src="assets/js/auth-system.js"></script>
     
-    <!-- ═══════════════════════════════════════════════════════════════
-         ✅ SCRIPT DE REDIRECTION DES BOUTONS
-         ═══════════════════════════════════════════════════════════════ -->
+    <!-- ✅ INITIALISATION GLOBALE - SANS CHATBOT -->
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             console.log('%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'color: #3B82F6; font-weight: bold; font-size: 14px;');
             console.log('%c🚀 AlphaVault AI - Platform Initialization', 'color: #3B82F6; font-size: 18px; font-weight: bold;');
             console.log('%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'color: #3B82F6; font-weight: bold; font-size: 14px;');
             
-            // ═══════════════════════════════════════════════════════════
-            // ✅ CONFIGURATION DES REDIRECTIONS
-            // ═══════════════════════════════════════════════════════════
-            
-            console.log('%c🔗 Setting up button redirections...', 'color: #8B5CF6; font-weight: bold;');
-            
-            /**
-             * Fonction pour ouvrir le formulaire de création de compte
-             * Vérifie si auth-system.js a une fonction dédiée, sinon redirige vers index.html
-             */
-            function openSignupForm() {
-                console.log('📝 Opening signup form...');
-                
-                // Si auth-system.js a exporté une fonction pour ouvrir le signup
-                if (typeof window.openSignupModal === 'function') {
-                    window.openSignupModal();
-                } 
-                // Sinon, rediriger vers index.html avec hash
-                else {
-                    window.location.href = 'index.html#signup';
-                }
-            }
-            
-            // ═══════════════════════════════════════════════════════════
-            // 1️⃣ BOUTON HERO "START FREE"
-            // ═══════════════════════════════════════════════════════════
-            const heroGetStarted = document.getElementById('heroGetStarted');
-            if (heroGetStarted) {
-                console.log('   ✅ Hero button found: #heroGetStarted');
-                heroGetStarted.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    console.log('🚀 Hero "Start Free" clicked → Opening signup');
-                    openSignupForm();
-                });
-            }
-            
-            // ═══════════════════════════════════════════════════════════
-            // 2️⃣ BOUTON SOLUTIONS "START FREE"
-            // ═══════════════════════════════════════════════════════════
-            const solutionStartFree = document.getElementById('solutionStartFree');
-            if (solutionStartFree) {
-                console.log('   ✅ Solution button found: #solutionStartFree');
-                solutionStartFree.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    console.log('🚀 Solution "Start Free" clicked → Opening signup');
-                    openSignupForm();
-                });
-            }
-            
-            // ═══════════════════════════════════════════════════════════
-            // 3️⃣ BOUTON PRICING "GET STARTED FREE"
-            // ═══════════════════════════════════════════════════════════
-            const pricingGetStartedFree = document.getElementById('pricingGetStartedFree');
-            if (pricingGetStartedFree) {
-                console.log('   ✅ Pricing button found: #pricingGetStartedFree');
-                pricingGetStartedFree.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    console.log('🚀 Pricing "Get Started Free" clicked → Opening signup');
-                    openSignupForm();
-                });
-            }
-            
-            // ═══════════════════════════════════════════════════════════
-            // 4️⃣ BOUTON CTA FINAL "START FREE NOW"
-            // ═══════════════════════════════════════════════════════════
-            const finalCTABtn = document.getElementById('finalCTABtn');
-            if (finalCTABtn) {
-                console.log('   ✅ Final CTA button found: #finalCTABtn');
-                finalCTABtn.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    console.log('🚀 Final CTA "Start Free Now" clicked → Opening signup');
-                    openSignupForm();
-                });
-            }
-            
-            console.log('%c✅ All button redirections configured successfully\n', 'color: #10b981; font-weight: bold;');
-            
-            // ═══════════════════════════════════════════════════════════
             // AOS ANIMATIONS
-            // ═══════════════════════════════════════════════════════════
             console.log('%c🎨 Initializing AOS Animations...', 'color: #8B5CF6; font-weight: bold;');
             AOS.init({
                 duration: 800,
@@ -1465,18 +1391,14 @@
             });
             console.log('✅ AOS Animations initialized\n');
 
-            // ═══════════════════════════════════════════════════════════
             // ANNÉE DYNAMIQUE
-            // ═══════════════════════════════════════════════════════════
             const yearElement = document.getElementById('currentYear');
             if (yearElement) {
                 yearElement.textContent = new Date().getFullYear();
                 console.log('✅ Dynamic year updated\n');
             }
 
-            // ═══════════════════════════════════════════════════════════
             // VÉRIFIER CONFIG
-            // ═══════════════════════════════════════════════════════════
             console.log('%c⚙️  Checking Configuration...', 'color: #3B82F6; font-weight: bold;');
             if (window.APP_CONFIG) {
                 console.log('%c✅ APP_CONFIG loaded successfully', 'color: #10b981; font-weight: bold;');
@@ -1486,9 +1408,7 @@
                 console.warn('%c⚠️  APP_CONFIG not found - using defaults', 'color: #f59e0b; font-weight: bold;');
             }
 
-            // ═══════════════════════════════════════════════════════════
             // VÉRIFIER API CLIENT
-            // ═══════════════════════════════════════════════════════════
             console.log('%c📡 Checking API Client...', 'color: #3B82F6; font-weight: bold;');
             if (typeof window.FinanceAPIClient !== 'undefined') {
                 console.log('%c✅ FinanceAPIClient loaded successfully', 'color: #10b981; font-weight: bold;');
@@ -1499,16 +1419,12 @@
                 console.error('   📋 Check the file path: assets/js/api-client.js\n');
             }
 
-            // ═══════════════════════════════════════════════════════════
-            // CHATBOT DÉSACTIVÉ SUR LANDING PAGE
-            // ═══════════════════════════════════════════════════════════
+            // ✅ CHATBOT DÉSACTIVÉ SUR LANDING PAGE
             console.log('%c🤖 Chatbot Configuration', 'color: #8B5CF6; font-weight: bold; font-size: 16px;');
             console.log('%c   🚫 Chatbot disabled on landing page', 'color: #f59e0b; font-weight: bold;');
             console.log('%c   ℹ️  Users will be redirected to chatbot-fullpage.html\n', 'color: #6b7280;');
 
-            // ═══════════════════════════════════════════════════════════
-            // BOUTON "CHAT WITH ALPHY" - Redirige vers page dédiée
-            // ═══════════════════════════════════════════════════════════
+            // ✅ BOUTON "CHAT WITH ALPHY" - Redirige vers page dédiée
             console.log('%c🔘 Setting up "Chat with Alphy" button...', 'color: #8B5CF6; font-weight: bold;');
             
             const openAlphyBtn = document.getElementById('openAlphyChat');
@@ -1526,25 +1442,29 @@
                 console.error('   ❌ Button #openAlphyChat NOT FOUND in DOM\n');
             }
 
-            // ═══════════════════════════════════════════════════════════
             // RÉSUMÉ FINAL
-            // ═══════════════════════════════════════════════════════════
             console.log('%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'color: #3B82F6; font-weight: bold; font-size: 14px;');
             console.log('%c✨ AlphaVault AI - All Systems Ready!', 'color: #10b981; font-size: 18px; font-weight: bold;');
             console.log('%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'color: #3B82F6; font-weight: bold; font-size: 14px;');
-            console.log('');
-            console.log('%cButton Redirections:', 'font-weight: bold; font-size: 14px;');
-            console.log(`   ${heroGetStarted ? '✅' : '❌'} Hero "Start Free" → Signup`);
-            console.log(`   ${solutionStartFree ? '✅' : '❌'} Solution "Start Free" → Signup`);
-            console.log(`   ${pricingGetStartedFree ? '✅' : '❌'} Pricing "Get Started Free" → Signup`);
-            console.log(`   ${finalCTABtn ? '✅' : '❌'} Final CTA "Start Free Now" → Signup`);
-            console.log(`   ✅ Solution "Go Pro" → checkout.html`);
             console.log('');
             console.log('%cSystem Status:', 'font-weight: bold; font-size: 14px;');
             console.log(`   ${window.APP_CONFIG ? '✅' : '❌'} Configuration`);
             console.log(`   ${typeof window.FinanceAPIClient !== 'undefined' ? '✅' : '❌'} API Client (FinanceAPIClient)`);
             console.log(`   ${typeof window.marketTicker !== 'undefined' ? '✅' : '❌'} Market Ticker`);
             console.log(`   🚫 Alphy AI Chatbot (disabled on landing page)`);
+            console.log('');
+            console.log('%cRefresh Settings:', 'font-weight: bold; font-size: 14px;');
+            if (window.APP_CONFIG) {
+                console.log(`   ⏱️  Quote Cache: ${window.APP_CONFIG.CACHE_DURATION.quote / 1000 / 60} minutes`);
+            }
+            if (window.marketTicker) {
+                console.log(`   🔄 Ticker Refresh: ${window.marketTicker.updateInterval / 1000 / 60} minutes`);
+            }
+            console.log('');
+            console.log('%cHow to use:', 'font-weight: bold; font-size: 14px;');
+            console.log('   💬 Click "Chat with Alphy" to access the full chatbot page');
+            console.log('   📊 Market ticker updates automatically every hour');
+            console.log('   🎨 All animations are enabled');
             console.log('');
             console.log('%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'color: #3B82F6; font-weight: bold; font-size: 14px;');
         });
