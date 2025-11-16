@@ -87,6 +87,79 @@
             </div>
         </div>
 
+        <!-- ✅ NOUVELLE SECTION : CODE PROMO -->
+        <div class="promo-section">
+            <h3 class="promo-title">
+                <i class="fas fa-tag"></i>
+                Have a promo code?
+            </h3>
+            
+            <div class="promo-input-wrapper">
+                <input 
+                    type="text" 
+                    id="promoCode" 
+                    class="promo-input" 
+                    placeholder="Enter your promo code"
+                    autocomplete="off"
+                >
+                <button type="button" class="btn-apply-promo" id="applyPromoBtn">
+                    <i class="fas fa-check"></i>
+                    Apply
+                </button>
+            </div>
+            
+            <!-- Message de validation/erreur -->
+            <div id="promoMessage" class="promo-message hidden"></div>
+            
+            <!-- Affichage de la réduction appliquée -->
+            <div id="promoApplied" class="promo-applied hidden">
+                <div class="promo-badge-success">
+                    <i class="fas fa-check-circle"></i>
+                    <span id="promoCodeName">CODE15</span> applied!
+                </div>
+                <button type="button" class="btn-remove-promo" id="removePromoBtn">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- ✅ NOUVELLE SECTION : RÉCAPITULATIF DES PRIX -->
+        <div class="price-summary">
+            <div class="summary-row">
+                <span class="summary-label">Selected Plan:</span>
+                <span class="summary-value" id="summaryPlanName">AlphaVault Pro</span>
+            </div>
+            
+            <div class="summary-row">
+                <span class="summary-label">Monthly Price:</span>
+                <span class="summary-value" id="summaryOriginalPrice">$15.00</span>
+            </div>
+            
+            <div class="summary-row discount-row hidden" id="discountRow">
+                <span class="summary-label">
+                    <i class="fas fa-tag"></i>
+                    Discount (<span id="discountPercent">15</span>%):
+                </span>
+                <span class="summary-value discount-value" id="discountAmount">-$2.25</span>
+            </div>
+            
+            <div class="summary-divider"></div>
+            
+            <div class="summary-row total-row">
+                <span class="summary-label-total">Total per month:</span>
+                <div class="summary-total-wrapper">
+                    <span class="summary-original-price hidden" id="originalPriceStriked">$15.00</span>
+                    <span class="summary-value-total" id="summaryFinalPrice">$15.00</span>
+                </div>
+            </div>
+            
+            <!-- Badge pour accès gratuit -->
+            <div class="free-access-badge hidden" id="freeAccessBadge">
+                <i class="fas fa-gift"></i>
+                <span>Free lifetime access included!</span>
+            </div>
+        </div>
+
         <!-- Checkout Form -->
         <form id="payment-form" class="checkout-form">
             <h3 class="form-section-title">
@@ -118,7 +191,7 @@
                 >
             </div>
 
-            <div class="form-group">
+            <div class="form-group" id="cardDetailsGroup">
                 <label for="card-element" class="form-label">Card Details</label>
                 <!-- Stripe Card Element sera inséré ici -->
                 <div id="card-element"></div>
@@ -128,7 +201,7 @@
             <button type="submit" class="btn-checkout-submit" id="submit-button">
                 <span class="btn-text">
                     <i class="fas fa-lock"></i>
-                    Start 14-Day Free Trial
+                    <span id="submitButtonText">Start 14-Day Free Trial</span>
                 </span>
                 <div class="spinner"></div>
             </button>

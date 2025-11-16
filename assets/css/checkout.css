@@ -1,12 +1,14 @@
 /* ═══════════════════════════════════════════════════════════════
-   CHECKOUT PAGE - GLASSMORPHISM PREMIUM
-   AlphaVault AI - Version corrigée avec scroll fonctionnel
+   CHECKOUT PAGE - GLASSMORPHISM PREMIUM + CODES PROMO
+   AlphaVault AI
    ═══════════════════════════════════════════════════════════════ */
 
 :root {
     --checkout-primary: #3B82F6;
     --checkout-secondary: #8B5CF6;
     --checkout-success: #10b981;
+    --checkout-danger: #ef4444;
+    --checkout-warning: #f59e0b;
     --checkout-bg-light: #f8fafc;
     --checkout-bg-dark: #0f172a;
     --glass-bg: rgba(255, 255, 255, 0.9);
@@ -29,12 +31,12 @@ body.dark-mode {
     background-size: 400% 400%;
     animation: gradientFlow 15s ease infinite;
     display: flex;
-    align-items: flex-start;  /* ✅ flex-start au lieu de center */
+    align-items: flex-start;
     justify-content: center;
     padding: 40px 20px;
     position: relative;
-    overflow-x: hidden;  /* ✅ Bloque scroll horizontal uniquement */
-    overflow-y: auto;    /* ✅ Autorise scroll vertical */
+    overflow-x: hidden;
+    overflow-y: auto;
 }
 
 @keyframes gradientFlow {
@@ -42,10 +44,9 @@ body.dark-mode {
     50% { background-position: 100% 50%; }
 }
 
-/* Particles Background - ✅ Fixed pour ne pas bloquer le scroll */
 .checkout-page::before {
     content: '';
-    position: fixed;  /* ✅ CHANGÉ de absolute à fixed */
+    position: fixed;
     top: 0;
     left: 0;
     width: 100%;
@@ -64,10 +65,6 @@ body.dark-mode {
     100% { transform: translateY(-50px); }
 }
 
-/* ═══════════════════════════════════════════════════════════════
-   CHECKOUT CARD - GLASSMORPHISM
-   ═══════════════════════════════════════════════════════════════ */
-
 .checkout-container {
     max-width: 900px;
     width: 100%;
@@ -81,10 +78,10 @@ body.dark-mode {
         inset 0 1px 0 rgba(255, 255, 255, 0.5);
     padding: 60px;
     position: relative;
-    z-index: 1;  /* ✅ Passe au-dessus du background */
+    z-index: 1;
     animation: slideInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1);
     transform-style: preserve-3d;
-    margin: 20px auto;  /* ✅ Espacement pour le scroll */
+    margin: 20px auto;
 }
 
 @keyframes slideInUp {
@@ -316,6 +313,325 @@ body.dark-mode .plan-features li {
 }
 
 /* ═══════════════════════════════════════════════════════════════
+   ✅ SECTION CODE PROMO
+   ═══════════════════════════════════════════════════════════════ */
+
+.promo-section {
+    background: rgba(255, 255, 255, 0.4);
+    backdrop-filter: blur(10px);
+    border-radius: 20px;
+    padding: 32px;
+    margin-bottom: 30px;
+    border: 2px dashed rgba(139, 92, 246, 0.3);
+    transition: all 0.3s ease;
+}
+
+body.dark-mode .promo-section {
+    background: rgba(30, 41, 59, 0.4);
+}
+
+.promo-section:hover {
+    border-color: rgba(139, 92, 246, 0.5);
+    box-shadow: 0 8px 24px rgba(139, 92, 246, 0.15);
+}
+
+.promo-title {
+    font-size: 1.2rem;
+    font-weight: 800;
+    color: #1e293b;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+body.dark-mode .promo-title {
+    color: #f1f5f9;
+}
+
+.promo-title i {
+    color: var(--checkout-secondary);
+    font-size: 1.3rem;
+}
+
+.promo-input-wrapper {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 12px;
+}
+
+.promo-input {
+    flex: 1;
+    padding: 14px 20px;
+    border: 2px solid rgba(203, 213, 225, 0.5);
+    border-radius: 12px;
+    font-size: 1rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    background: rgba(255, 255, 255, 0.8);
+    transition: all 0.3s ease;
+    outline: none;
+}
+
+body.dark-mode .promo-input {
+    background: rgba(15, 23, 42, 0.8);
+    border-color: rgba(100, 116, 139, 0.5);
+    color: #f1f5f9;
+}
+
+.promo-input:focus {
+    border-color: var(--checkout-secondary);
+    box-shadow: 0 0 0 4px rgba(139, 92, 246, 0.1);
+    transform: translateY(-2px);
+}
+
+.promo-input::placeholder {
+    text-transform: none;
+    font-weight: 500;
+}
+
+.btn-apply-promo {
+    padding: 14px 28px;
+    background: linear-gradient(135deg, var(--checkout-secondary), #6366f1);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-size: 1rem;
+    font-weight: 800;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
+}
+
+.btn-apply-promo:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(139, 92, 246, 0.4);
+}
+
+.btn-apply-promo:active {
+    transform: translateY(0);
+}
+
+.btn-apply-promo:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* Messages de validation */
+.promo-message {
+    padding: 12px 16px;
+    border-radius: 10px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    animation: slideDown 0.3s ease;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.promo-message.success {
+    background: rgba(16, 185, 129, 0.15);
+    border: 1px solid rgba(16, 185, 129, 0.3);
+    color: #047857;
+}
+
+.promo-message.error {
+    background: rgba(239, 68, 68, 0.15);
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    color: #dc2626;
+}
+
+.promo-message i {
+    font-size: 1.1rem;
+}
+
+/* Code promo appliqué */
+.promo-applied {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 20px;
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(5, 150, 105, 0.1));
+    border: 2px solid rgba(16, 185, 129, 0.3);
+    border-radius: 12px;
+    animation: slideDown 0.3s ease;
+}
+
+.promo-badge-success {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 1rem;
+    font-weight: 800;
+    color: #047857;
+}
+
+.promo-badge-success i {
+    font-size: 1.3rem;
+}
+
+.btn-remove-promo {
+    background: transparent;
+    border: none;
+    color: #dc2626;
+    font-size: 1.2rem;
+    cursor: pointer;
+    padding: 8px;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+}
+
+.btn-remove-promo:hover {
+    background: rgba(239, 68, 68, 0.1);
+    transform: scale(1.1);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   ✅ RÉCAPITULATIF DES PRIX
+   ═══════════════════════════════════════════════════════════════ */
+
+.price-summary {
+    background: rgba(255, 255, 255, 0.5);
+    backdrop-filter: blur(10px);
+    border-radius: 20px;
+    padding: 32px;
+    margin-bottom: 30px;
+    border: 2px solid rgba(59, 130, 246, 0.2);
+}
+
+body.dark-mode .price-summary {
+    background: rgba(30, 41, 59, 0.5);
+}
+
+.summary-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 0;
+    border-bottom: 1px solid rgba(203, 213, 225, 0.3);
+}
+
+body.dark-mode .summary-row {
+    border-bottom-color: rgba(100, 116, 139, 0.3);
+}
+
+.summary-row:last-child {
+    border-bottom: none;
+}
+
+.summary-label {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #475569;
+}
+
+body.dark-mode .summary-label {
+    color: #cbd5e1;
+}
+
+.summary-value {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #1e293b;
+}
+
+body.dark-mode .summary-value {
+    color: #f1f5f9;
+}
+
+.discount-row .summary-label {
+    color: var(--checkout-success);
+}
+
+.discount-value {
+    color: var(--checkout-success) !important;
+    font-weight: 800;
+}
+
+.summary-divider {
+    height: 2px;
+    background: linear-gradient(90deg, transparent, rgba(59, 130, 246, 0.3), transparent);
+    margin: 16px 0;
+}
+
+.total-row {
+    padding: 16px 0 0 0;
+}
+
+.summary-label-total {
+    font-size: 1.2rem;
+    font-weight: 800;
+    color: #1e293b;
+}
+
+body.dark-mode .summary-label-total {
+    color: #f1f5f9;
+}
+
+.summary-total-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 4px;
+}
+
+.summary-original-price {
+    font-size: 0.95rem;
+    color: #94a3b8;
+    text-decoration: line-through;
+    font-weight: 600;
+}
+
+.summary-value-total {
+    font-size: 2rem;
+    font-weight: 900;
+    background: linear-gradient(135deg, var(--checkout-primary), var(--checkout-secondary));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.free-access-badge {
+    margin-top: 16px;
+    padding: 16px;
+    background: linear-gradient(135deg, rgba(245, 158, 11, 0.15), rgba(239, 68, 68, 0.15));
+    border: 2px solid rgba(245, 158, 11, 0.4);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    font-size: 1.1rem;
+    font-weight: 800;
+    color: #d97706;
+    animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.02); }
+}
+
+.free-access-badge i {
+    font-size: 1.5rem;
+}
+
+/* ═══════════════════════════════════════════════════════════════
    CHECKOUT FORM
    ═══════════════════════════════════════════════════════════════ */
 
@@ -393,7 +709,6 @@ body.dark-mode .form-input {
     transform: translateY(-2px);
 }
 
-/* Stripe Elements Container */
 #card-element {
     padding: 16px 20px;
     border: 2px solid rgba(203, 213, 225, 0.5);
@@ -425,10 +740,6 @@ body.dark-mode #card-element {
 #card-errors i {
     font-size: 1rem;
 }
-
-/* ═══════════════════════════════════════════════════════════════
-   CHECKOUT CTA BUTTON
-   ═══════════════════════════════════════════════════════════════ */
 
 .btn-checkout-submit {
     width: 100%;
@@ -509,10 +820,6 @@ body.dark-mode #card-element {
     to { transform: rotate(360deg); }
 }
 
-/* ═══════════════════════════════════════════════════════════════
-   TRUST SIGNALS
-   ═══════════════════════════════════════════════════════════════ */
-
 .trust-signals {
     display: flex;
     align-items: center;
@@ -536,6 +843,14 @@ body.dark-mode #card-element {
 
 .trust-item i {
     font-size: 1.3rem;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   UTILITAIRES
+   ═══════════════════════════════════════════════════════════════ */
+
+.hidden {
+    display: none !important;
 }
 
 /* ═══════════════════════════════════════════════════════════════
@@ -573,6 +888,27 @@ body.dark-mode #card-element {
 
     .plan-price .amount {
         font-size: 2.5rem;
+    }
+
+    .promo-section {
+        padding: 24px 20px;
+    }
+
+    .promo-input-wrapper {
+        flex-direction: column;
+    }
+
+    .btn-apply-promo {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .price-summary {
+        padding: 24px 20px;
+    }
+
+    .summary-value-total {
+        font-size: 1.6rem;
     }
 
     .checkout-form {
@@ -625,10 +961,6 @@ body.dark-mode #card-element {
     }
 }
 
-/* ═══════════════════════════════════════════════════════════════
-   DARK MODE ADJUSTMENTS
-   ═══════════════════════════════════════════════════════════════ */
-
 body.dark-mode .trust-signals {
     background: rgba(16, 185, 129, 0.1);
     border-color: rgba(16, 185, 129, 0.3);
@@ -637,10 +969,6 @@ body.dark-mode .trust-signals {
 body.dark-mode .trust-item {
     color: #10b981;
 }
-
-/* ═══════════════════════════════════════════════════════════════
-   SMOOTH SCROLLING
-   ═══════════════════════════════════════════════════════════════ */
 
 html {
     scroll-behavior: smooth;
