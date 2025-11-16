@@ -68,25 +68,6 @@ h1, h2, h3, h4, h5, h6,
     background-clip: text;
 }
 
-/* Exception pour les titres dans simulation-management et modal (blanc) */
-.simulation-management h1,
-.simulation-management h2,
-.simulation-management h3,
-.simulation-management h4,
-.simulation-management h5,
-.simulation-management h6,
-.modal-header h1,
-.modal-header h2,
-.modal-header h3,
-.modal-header h4,
-.modal-header h5,
-.modal-header h6 {
-    color: white !important;
-    background: none !important;
-    -webkit-text-fill-color: white !important;
-    font-weight: 800 !important;
-}
-
 /* ============================================
    🎬 ANIMATIONS OPTIMISÉES (Légères uniquement)
    ============================================ */
