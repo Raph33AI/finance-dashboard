@@ -741,6 +741,10 @@ body.dark-mode #card-element {
     font-size: 1rem;
 }
 
+/* ═══════════════════════════════════════════════════════════════
+   BOUTON SUBMIT - SANS ANIMATION DE CHARGEMENT
+   ═══════════════════════════════════════════════════════════════ */
+
 .btn-checkout-submit {
     width: 100%;
     padding: 20px;
@@ -798,6 +802,8 @@ body.dark-mode #card-element {
     transform: none;
 }
 
+/* ✅ SPINNER DÉSACTIVÉ - Décommenter si besoin */
+/*
 .btn-checkout-submit .spinner {
     width: 20px;
     height: 20px;
@@ -819,6 +825,7 @@ body.dark-mode #card-element {
 @keyframes spin {
     to { transform: rotate(360deg); }
 }
+*/
 
 .trust-signals {
     display: flex;
