@@ -1,144 +1,164 @@
 /* ═══════════════════════════════════════════════════════════════
-   ACCESS CONTROL - Vérification des permissions par plan
-   AlphaVault AI - VERSION CORRIGÉE POUR PLANS GRATUITS
+   ACCESS CONTROL SYSTEM - AlphaVault AI
+   VERSION 3.0 - CONFIGURATION COMPLÈTE DES PLANS
    ═══════════════════════════════════════════════════════════════ */
 
-console.log('🔐 Access Control System initialized');
+console.log('🔐 Access Control System v3.0 initialized');
 
 // ═══════════════════════════════════════════════════════════════
-// DÉFINITION DES NIVEAUX D'ACCÈS
+// ✅ CONFIGURATION DES PLANS ET ACCÈS
 // ═══════════════════════════════════════════════════════════════
 
 const ACCESS_LEVELS = {
-    basic: {
-        maxAnalyses: 10,
-        features: [
-            'portfolio-tracking',
-            'basic-data',
-            'alphy-ai-limited',
-            'Portfolio-optimizer'
-        ],
-        pages: [
-            'index.html',
-            'dashboard-financier.html',
-            'investments-analytics.html',
-            'portfolio-optimizer.html'
-        ]
-    },
-    // ✅ AJOUT : Support explicite du plan 'free'
+    // ✅ PLAN GRATUIT / BASIC
     free: {
-        maxAnalyses: 10,
-        features: [
-            'portfolio-tracking',
-            'basic-data',
-            'alphy-ai-limited',
-            'Portfolio-optimizer'
-        ],
+        name: 'Free',
+        level: 0,
+        requiresActiveSubscription: false, // ✅ Pas besoin de vérifier le statut
         pages: [
-            'index.html',
             'dashboard-financier.html',
-            'investments-analytics.html',
+            'monte-carlo.html',
             'portfolio-optimizer.html'
+        ],
+        features: [
+            'portfolio-tracking',
+            'basic-data',
+            'monte-carlo-basic',
+            'portfolio-optimization-basic'
         ]
     },
+    
+    basic: {
+        name: 'Basic',
+        level: 0,
+        requiresActiveSubscription: false, // ✅ Pas besoin de vérifier le statut
+        pages: [
+            'dashboard-financier.html',
+            'monte-carlo.html',
+            'portfolio-optimizer.html'
+        ],
+        features: [
+            'portfolio-tracking',
+            'basic-data',
+            'monte-carlo-basic',
+            'portfolio-optimization-basic'
+        ]
+    },
+    
+    // ✅ PLAN PRO
     pro: {
-        maxAnalyses: Infinity,
-        features: [
-            'portfolio-tracking',
-            'basic-data',
-            'alphy-ai-unlimited',
-            'ipo-screening',
-            'portfolio-optimization',
-            'monte-carlo',
-            'real-time-data',
-            'risk-parity',
-            'scenario-analysis',
-            'trend-prediction'
-        ],
+        name: 'Pro',
+        level: 1,
+        requiresActiveSubscription: true, // ✅ Vérifier le statut pour les plans payants
         pages: [
-            'index.html',
+            // Pages Basic
             'dashboard-financier.html',
-            'investments-analytics.html',
-            'advanced-analysis.html',
             'monte-carlo.html',
+            'portfolio-optimizer.html',
+            // Pages Pro
+            'investments-analytics.html',
             'risk-parity.html',
             'scenario-analysis.html',
-            'portfolio-optimizer.html',
             'market-data.html',
             'trend-prediction.html',
             'market-intelligence.html'
-        ]
-    },
-    // ✅ ACCÈS GRATUIT (équivalent PRO)
-    active_free: {
-        maxAnalyses: Infinity,
+        ],
         features: [
-            'portfolio-tracking',
-            'basic-data',
-            'alphy-ai-unlimited',
-            'ipo-screening',
-            'portfolio-optimization',
-            'monte-carlo',
-            'real-time-data',
+            'all-basic',
+            'advanced-analytics',
             'risk-parity',
             'scenario-analysis',
-            'trend-prediction'
-        ],
+            'real-time-data',
+            'trend-prediction',
+            'market-intelligence'
+        ]
+    },
+    
+    // ✅ CODE PROMO : FREEPRO (équivalent PRO gratuit)
+    freepro: {
+        name: 'Free Pro',
+        level: 1,
+        requiresActiveSubscription: false, // ✅ Gratuit avec code promo
         pages: [
-            'index.html',
+            // Mêmes pages que Pro
             'dashboard-financier.html',
-            'investments-analytics.html',
-            'advanced-analysis.html',
             'monte-carlo.html',
+            'portfolio-optimizer.html',
+            'investments-analytics.html',
             'risk-parity.html',
             'scenario-analysis.html',
-            'portfolio-optimizer.html',
             'market-data.html',
             'trend-prediction.html',
             'market-intelligence.html'
+        ],
+        features: [
+            'all-basic',
+            'advanced-analytics',
+            'risk-parity',
+            'scenario-analysis',
+            'real-time-data',
+            'trend-prediction',
+            'market-intelligence'
         ]
     },
-    // ✅ PLATINUM = ACCÈS TOTAL
+    
+    // ✅ PLAN PLATINUM
     platinum: {
-        maxAnalyses: Infinity,
-        features: [
-            'all' // ✅ Accès à toutes les fonctionnalités
-        ],
-        pages: [
-            'all' // ✅ Accès à toutes les pages
-        ]
+        name: 'Platinum',
+        level: 2,
+        requiresActiveSubscription: true, // ✅ Vérifier le statut pour les plans payants
+        pages: ['all'], // ✅ Accès à TOUTES les pages
+        features: ['all']
+    },
+    
+    // ✅ CODE PROMO : FREEPLATINUM (équivalent PLATINUM gratuit)
+    freeplatinum: {
+        name: 'Free Platinum',
+        level: 2,
+        requiresActiveSubscription: false, // ✅ Gratuit avec code promo
+        pages: ['all'], // ✅ Accès à TOUTES les pages
+        features: ['all']
     }
 };
 
 // ═══════════════════════════════════════════════════════════════
-// ✅ DÉFINITION DES PAGES PUBLIQUES ET PROTÉGÉES
+// ✅ CATÉGORISATION DES PAGES
 // ═══════════════════════════════════════════════════════════════
 
 const PAGE_CATEGORIES = {
-    // Pages accessibles sans connexion
+    // Pages accessibles SANS connexion
     public: [
         'index.html',
-        'login.html',
-        'register.html',
-        'forgot-password.html',
-        'checkout.html',
-        'success.html',
-        'pricing.html',
         'about.html',
-        'contact.html'
+        'auth.html',
+        'checkout.html',
+        'contact.html',
+        'pricing.html',
+        'privacy.html',
+        'security.html',
+        'success.html',
+        'terms.html'
     ],
     
-    // Pages accessibles par tous les utilisateurs connectés (Basic+)
+    // Pages accessibles PAR TOUS les utilisateurs connectés (profil, paramètres)
     authenticated: [
+        'settings.html',
+        'user-profile.html',
+        'interactive-demo.html',
+        'netlify.html',
+        'chatbot-integration.html'
+    ],
+    
+    // Pages BASIC / FREE (niveau 0)
+    basic: [
         'dashboard-financier.html',
-        'investments-analytics.html',
+        'monte-carlo.html',
         'portfolio-optimizer.html'
     ],
     
-    // Pages PRO uniquement (Basic bloqué, Pro et Platinum OK)
+    // Pages PRO (niveau 1) - en PLUS de Basic
     pro: [
-        'advanced-analysis.html',
-        'monte-carlo.html',
+        'investments-analytics.html',
         'risk-parity.html',
         'scenario-analysis.html',
         'market-data.html',
@@ -146,35 +166,35 @@ const PAGE_CATEGORIES = {
         'market-intelligence.html'
     ],
     
-    // ✅ Pages PLATINUM uniquement (Platinum ONLY)
+    // Pages PLATINUM ONLY (niveau 2)
     platinum: [
-        'company-insights.html',      // ✅ Ajouté
-        'analyst-coverage.html',      // ✅ Ajouté
-        'earnings-estimates.html',    // ✅ Ajouté
-        'chatbot-fullpage.html',      // ✅ Ajouté
-        'ma-screening.html',          // M&A Screening
-        'api-access.html',            // API Access Dashboard
-        'white-label.html',           // White-label Reports
-        'priority-support.html',      // Support VIP
-        'advanced-api.html'           // API avancée
+        'advanced-analysis.html',
+        'analyst-coverage.html',
+        'chatbot-fullpage.html',
+        'company-insights.html',
+        'earnings-estimates.html'
     ]
 };
 
 // ═══════════════════════════════════════════════════════════════
-// ✅ VÉRIFIER L'ACCÈS À UNE PAGE (VERSION CORRIGÉE)
+// ✅ FONCTION PRINCIPALE : VÉRIFIER L'ACCÈS À UNE PAGE
 // ═══════════════════════════════════════════════════════════════
 
 async function checkPageAccess(pageName) {
     try {
         console.log(`🔍 Checking access for page: ${pageName}`);
         
-        // ✅ Vérifier si c'est une page publique
+        // ═══════════════════════════════════════════════════════════
+        // 1️⃣ VÉRIFIER SI PAGE PUBLIQUE
+        // ═══════════════════════════════════════════════════════════
         if (PAGE_CATEGORIES.public.includes(pageName)) {
             console.log('🌐 Public page - access granted');
             return true;
         }
         
-        // Vérifier l'authentification
+        // ═══════════════════════════════════════════════════════════
+        // 2️⃣ VÉRIFIER L'AUTHENTIFICATION
+        // ═══════════════════════════════════════════════════════════
         const user = firebase.auth().currentUser;
         
         if (!user) {
@@ -183,8 +203,13 @@ async function checkPageAccess(pageName) {
             return false;
         }
         
-        // Récupérer le plan de l'utilisateur depuis Firestore
-        const userDoc = await firebase.firestore().collection('users').doc(user.uid).get();
+        // ═══════════════════════════════════════════════════════════
+        // 3️⃣ RÉCUPÉRER LES DONNÉES UTILISATEUR
+        // ═══════════════════════════════════════════════════════════
+        const userDoc = await firebase.firestore()
+            .collection('users')
+            .doc(user.uid)
+            .get();
         
         if (!userDoc.exists) {
             console.error('❌ User document not found in Firestore');
@@ -193,110 +218,133 @@ async function checkPageAccess(pageName) {
         }
         
         const userData = userDoc.data();
-        const userPlan = userData?.plan || 'free';
-        const subscriptionStatus = userData?.subscriptionStatus || 'inactive';
+        let userPlan = (userData?.plan || 'free').toLowerCase();
+        const subscriptionStatus = (userData?.subscriptionStatus || 'inactive').toLowerCase();
+        const promoCode = (userData?.promoCode || '').toUpperCase();
         
         console.log(`👤 User: ${user.email}`);
-        console.log(`📊 Current plan: ${userPlan}`);
+        console.log(`📊 Original plan: ${userPlan}`);
         console.log(`📊 Subscription status: ${subscriptionStatus}`);
+        console.log(`🎟️ Promo code: ${promoCode || 'none'}`);
         
         // ═══════════════════════════════════════════════════════════
-        // ✅✅✅ CORRECTION MAJEURE : VÉRIFICATION DU STATUT ✅✅✅
+        // 4️⃣ GESTION DES CODES PROMO
         // ═══════════════════════════════════════════════════════════
+        if (promoCode === 'FREEPRO') {
+            userPlan = 'freepro';
+            console.log(`🎁 Promo code applied: FREEPRO → Plan upgraded to: freepro`);
+        } else if (promoCode === 'FREEPLATINUM') {
+            userPlan = 'freeplatinum';
+            console.log(`🎁 Promo code applied: FREEPLATINUM → Plan upgraded to: freeplatinum`);
+        }
         
-        const freePlans = ['free', 'basic']; // Plans gratuits
-        const paidPlans = ['pro', 'platinum']; // Plans payants
+        // ═══════════════════════════════════════════════════════════
+        // 5️⃣ VÉRIFIER LE STATUT D'ABONNEMENT (selon le plan)
+        // ═══════════════════════════════════════════════════════════
+        const planConfig = ACCESS_LEVELS[userPlan];
         
-        // ✅ PLAN GRATUIT : Accepter 'inactive' ou 'active'
-        if (freePlans.includes(userPlan)) {
-            console.log(`✅ Free plan detected (${userPlan}) - status check bypassed for basic access`);
+        if (!planConfig) {
+            console.error(`❌ Unknown plan: ${userPlan}`);
+            userPlan = 'free'; // Fallback vers plan gratuit
+        }
+        
+        // ✅ Vérifier si le plan nécessite un abonnement actif
+        if (planConfig.requiresActiveSubscription) {
+            const validStatuses = ['active', 'trialing'];
             
-            // Pour les plans gratuits, on accepte 'inactive' comme valide
-            // Pas besoin de vérifier le statut strict
-        } 
-        // ✅ PLANS PAYANTS : Vérifier strictement le statut
-        else if (paidPlans.includes(userPlan)) {
-            const validPaidStatuses = ['active', 'trialing', 'active_free'];
-            
-            if (!validPaidStatuses.includes(subscriptionStatus)) {
-                console.warn(`⚠️ Invalid subscription status for paid plan: ${subscriptionStatus}`);
+            if (!validStatuses.includes(subscriptionStatus)) {
+                console.warn(`⚠️ Plan "${userPlan}" requires active subscription but status is: ${subscriptionStatus}`);
                 showUpgradeModal(userPlan, 'expired');
                 return false;
             }
             
-            console.log(`✅ Paid plan status validated: ${subscriptionStatus}`);
+            console.log(`✅ Subscription status validated for paid plan`);
+        } else {
+            console.log(`✅ Plan "${userPlan}" does not require active subscription`);
         }
         
-        // ✅ DÉTERMINER LE NIVEAU D'ACCÈS
-        const effectiveLevel = subscriptionStatus === 'active_free' ? 'active_free' : userPlan;
-        
-        console.log(`🔑 Effective access level: ${effectiveLevel}`);
+        console.log(`🔑 Effective access level: ${userPlan} (level ${planConfig.level})`);
         
         // ═══════════════════════════════════════════════════════════
-        // ✅ NOUVELLE LOGIQUE DE VÉRIFICATION (ORDRE IMPORTANT)
+        // 6️⃣ VÉRIFIER L'ACCÈS À LA PAGE (LOGIQUE HIÉRARCHIQUE)
         // ═══════════════════════════════════════════════════════════
         
-        // 1️⃣ PLATINUM = ACCÈS TOTAL (PRIORITAIRE)
-        if (effectiveLevel === 'platinum') {
-            console.log('✅ Access granted (Platinum has full access to all pages)');
+        // ✅ PLATINUM / FREEPLATINUM = Accès à TOUTES les pages
+        if (userPlan === 'platinum' || userPlan === 'freeplatinum') {
+            console.log('✅ Access granted (Platinum - full access)');
             return true;
         }
         
-        // 2️⃣ Pages PLATINUM ONLY (bloquer non-Platinum)
-        if (PAGE_CATEGORIES.platinum.includes(pageName)) {
-            console.warn('⛔ Access denied - Platinum plan required');
-            showUpgradeModal(effectiveLevel, 'platinum_required');
-            return false;
-        }
-        
-        // 3️⃣ Pages PRO (accessible par Pro et active_free)
-        if (PAGE_CATEGORIES.pro.includes(pageName)) {
-            if (effectiveLevel === 'pro' || effectiveLevel === 'active_free') {
-                console.log('✅ Access granted (Pro page)');
-                return true;
-            } else {
-                console.warn('⛔ Access denied - Pro plan required');
-                showUpgradeModal(effectiveLevel, 'pro_required');
-                return false;
-            }
-        }
-        
-        // 4️⃣ Pages AUTHENTICATED (accessible par tous les utilisateurs connectés)
+        // ✅ Pages authentifiées (accessibles par TOUS les utilisateurs connectés)
         if (PAGE_CATEGORIES.authenticated.includes(pageName)) {
             console.log('✅ Access granted (Authenticated page)');
             return true;
         }
         
-        // 5️⃣ FALLBACK INTELLIGENT : Vérifier dans ACCESS_LEVELS
-        const userAccessPages = ACCESS_LEVELS[effectiveLevel]?.pages || [];
+        // ✅ Vérifier si la page est dans la liste d'accès du plan
+        const allowedPages = planConfig.pages || [];
         
-        if (userAccessPages.includes(pageName) || userAccessPages.includes('all')) {
-            console.log(`✅ Access granted (Found in ${effectiveLevel} access list)`);
+        if (allowedPages.includes('all') || allowedPages.includes(pageName)) {
+            console.log(`✅ Access granted (Page in ${userPlan} access list)`);
             return true;
         }
         
-        // 6️⃣ DERNIÈRE ÉTAPE : BLOQUER
-        console.warn(`⚠️ Access denied for ${pageName} - plan: ${effectiveLevel}`);
+        // ✅ LOGIQUE HIÉRARCHIQUE : Si niveau >= niveau requis
+        const pageLevel = getPageRequiredLevel(pageName);
+        
+        if (planConfig.level >= pageLevel) {
+            console.log(`✅ Access granted (Level ${planConfig.level} >= required ${pageLevel})`);
+            return true;
+        }
+        
+        // ❌ ACCÈS REFUSÉ
+        console.warn(`⛔ Access denied for ${pageName} - User plan: ${userPlan} (level ${planConfig.level})`);
         
         // Déterminer quel upgrade suggérer
-        if (effectiveLevel === 'basic' || effectiveLevel === 'free') {
-            showUpgradeModal(effectiveLevel, 'pro_required');
-        } else if (effectiveLevel === 'pro') {
-            showUpgradeModal(effectiveLevel, 'platinum_required');
+        if (pageLevel === 2) {
+            showUpgradeModal(userPlan, 'platinum_required');
+        } else if (pageLevel === 1) {
+            showUpgradeModal(userPlan, 'pro_required');
         } else {
-            showUpgradeModal(effectiveLevel, 'unknown_page');
+            showUpgradeModal(userPlan, 'insufficient');
         }
         
         return false;
         
     } catch (error) {
-        console.error('❌ Error checking access:', error);
+        console.error('❌ Error checking page access:', error);
         return false;
     }
 }
 
 // ═══════════════════════════════════════════════════════════════
-// AFFICHER UNE MODALE D'UPGRADE (VERSION PERSISTANTE)
+// ✅ DÉTERMINER LE NIVEAU REQUIS POUR UNE PAGE
+// ═══════════════════════════════════════════════════════════════
+
+function getPageRequiredLevel(pageName) {
+    if (PAGE_CATEGORIES.public.includes(pageName) || 
+        PAGE_CATEGORIES.authenticated.includes(pageName)) {
+        return 0;
+    }
+    
+    if (PAGE_CATEGORIES.basic.includes(pageName)) {
+        return 0; // Basic = niveau 0
+    }
+    
+    if (PAGE_CATEGORIES.pro.includes(pageName)) {
+        return 1; // Pro = niveau 1
+    }
+    
+    if (PAGE_CATEGORIES.platinum.includes(pageName)) {
+        return 2; // Platinum = niveau 2
+    }
+    
+    // Par défaut, considérer comme Basic
+    return 0;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// AFFICHER UNE MODALE D'UPGRADE
 // ═══════════════════════════════════════════════════════════════
 
 function showUpgradeModal(currentPlan, reason = 'insufficient') {
@@ -315,29 +363,33 @@ function showUpgradeModal(currentPlan, reason = 'insufficient') {
     const messages = {
         pro_required: {
             title: '🔒 Pro Feature',
-            description: 'This feature requires the <strong>Pro</strong> or <strong>Platinum</strong> plan.',
-            icon: '👑'
+            description: 'This page requires the <strong>Pro</strong> or <strong>Platinum</strong> plan.',
+            icon: '👑',
+            suggestedPlan: 'Pro'
         },
         platinum_required: {
             title: '💎 Platinum Exclusive',
-            description: 'This feature is exclusively available in the <strong>Platinum</strong> plan.',
-            icon: '💎'
+            description: 'This page is exclusively available with the <strong>Platinum</strong> plan.',
+            icon: '💎',
+            suggestedPlan: 'Platinum'
         },
         expired: {
             title: '⏰ Subscription Expired',
             description: 'Your subscription has expired. Renew now to regain access to premium features.',
-            icon: '⏰'
+            icon: '⏰',
+            suggestedPlan: currentPlan
         },
-        unknown_page: {
-            title: '🔒 Premium Access',
-            description: 'This page requires a premium subscription.',
-            icon: '🔐'
+        insufficient: {
+            title: '🔒 Premium Access Required',
+            description: 'Upgrade your plan to access this premium feature.',
+            icon: '🔐',
+            suggestedPlan: 'Pro'
         }
     };
     
-    const msg = messages[reason] || messages.pro_required;
+    const msg = messages[reason] || messages.insufficient;
     
-    // Créer une modale glassmorphism élégante avec CSS INLINE
+    // Créer une modale glassmorphism élégante
     const modal = document.createElement('div');
     modal.id = 'upgrade-modal-overlay';
     modal.style.cssText = `
@@ -403,6 +455,7 @@ function showUpgradeModal(currentPlan, reason = 'insufficient') {
                 gap: 16px;
                 justify-content: center;
                 margin-top: 32px;
+                flex-wrap: wrap;
             ">
                 <button id="btn-upgrade-now" style="
                     background: white;
@@ -422,7 +475,7 @@ function showUpgradeModal(currentPlan, reason = 'insufficient') {
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
                     </svg>
-                    Upgrade Now
+                    Upgrade to ${msg.suggestedPlan}
                 </button>
                 <button id="btn-cancel-modal" style="
                     background: rgba(255, 255, 255, 0.2);
@@ -452,21 +505,21 @@ function showUpgradeModal(currentPlan, reason = 'insufficient') {
     
     // Event listeners
     document.getElementById('btn-upgrade-now').addEventListener('click', () => {
-        window.location.href = 'checkout.html';
+        window.location.href = 'pricing.html';
     });
     
     document.getElementById('btn-cancel-modal').addEventListener('click', () => {
         modal.style.opacity = '0';
         setTimeout(() => {
             modal.remove();
+            // Rediriger vers dashboard si l'utilisateur annule
             window.location.href = 'dashboard-financier.html';
         }, 300);
     });
     
-    // ✅ Empêcher la fermeture en cliquant à l'extérieur
+    // Empêcher la fermeture en cliquant à l'extérieur (animation de secousse)
     modal.addEventListener('click', (e) => {
         if (e.target === modal) {
-            // Animation de "secousse" pour indiquer que la modal ne peut pas être fermée
             const content = document.getElementById('upgrade-modal-content');
             content.style.animation = 'shake 0.5s';
             setTimeout(() => {
@@ -496,11 +549,10 @@ function showUpgradeModal(currentPlan, reason = 'insufficient') {
 }
 
 // ═══════════════════════════════════════════════════════════════
-// ✅ MASQUER LE CONTENU DE LA PAGE
+// MASQUER LE CONTENU DE LA PAGE
 // ═══════════════════════════════════════════════════════════════
 
 function hidePageContent() {
-    // Créer un overlay de masquage si nécessaire
     if (!document.getElementById('page-content-blocker')) {
         const blocker = document.createElement('div');
         blocker.id = 'page-content-blocker';
@@ -517,7 +569,6 @@ function hidePageContent() {
         document.body.appendChild(blocker);
     }
     
-    // Désactiver le scroll
     document.body.style.overflow = 'hidden';
 }
 
@@ -527,15 +578,12 @@ function hidePageContent() {
 
 function redirectToLogin() {
     console.log('🔄 Redirecting to login...');
-    
-    // Sauvegarder la page demandée pour redirection après login
     sessionStorage.setItem('redirectAfterLogin', window.location.pathname);
-    
     window.location.href = 'index.html#login';
 }
 
 // ═══════════════════════════════════════════════════════════════
-// ✅ INITIALISATION AUTOMATIQUE (DOMContentLoaded)
+// INITIALISATION AUTOMATIQUE
 // ═══════════════════════════════════════════════════════════════
 
 document.addEventListener('DOMContentLoaded', async function() {
@@ -543,20 +591,18 @@ document.addEventListener('DOMContentLoaded', async function() {
     
     console.log(`📄 Current page: ${currentPage}`);
     
-    // ✅ Vérifier l'accès pour TOUTES les pages (sauf publiques)
+    // Vérifier l'accès pour les pages protégées
     if (!PAGE_CATEGORIES.public.includes(currentPage)) {
         console.log('🔒 Protected page detected - checking access...');
         
-        // Attendre que Firebase soit prêt
         firebase.auth().onAuthStateChanged(async (user) => {
             if (user) {
                 const hasAccess = await checkPageAccess(currentPage);
                 
                 if (!hasAccess) {
-                    console.warn('⛔ Access denied - modal displayed');
-                    // ✅ La modal reste ouverte jusqu'à ce que l'utilisateur clique sur un bouton
+                    console.warn('⛔ Access denied - upgrade modal displayed');
                 } else {
-                    console.log('✅ Access granted');
+                    console.log('✅ Access granted - page loaded successfully');
                 }
             } else {
                 console.warn('⚠️ User not logged in - redirecting to login');
@@ -569,7 +615,7 @@ document.addEventListener('DOMContentLoaded', async function() {
 });
 
 // ═══════════════════════════════════════════════════════════════
-// ✅ ANIMATION DE SECOUSSE (CSS dynamique)
+// ANIMATION DE SECOUSSE (CSS)
 // ═══════════════════════════════════════════════════════════════
 
 const style = document.createElement('style');
@@ -592,40 +638,41 @@ async function hasFeature(featureName) {
     if (!user) return false;
     
     try {
-        const userDoc = await firebase.firestore().collection('users').doc(user.uid).get();
+        const userDoc = await firebase.firestore()
+            .collection('users')
+            .doc(user.uid)
+            .get();
         
         if (!userDoc.exists) return false;
         
         const userData = userDoc.data();
-        const userPlan = userData?.plan || 'free';
-        const subscriptionStatus = userData?.subscriptionStatus || 'inactive';
+        let userPlan = (userData?.plan || 'free').toLowerCase();
+        const subscriptionStatus = (userData?.subscriptionStatus || 'inactive').toLowerCase();
+        const promoCode = (userData?.promoCode || '').toUpperCase();
         
-        // ═══════════════════════════════════════════════════════════
-        // ✅✅✅ CORRECTION : Vérification du statut par type de plan ✅✅✅
-        // ═══════════════════════════════════════════════════════════
+        // Appliquer les codes promo
+        if (promoCode === 'FREEPRO') {
+            userPlan = 'freepro';
+        } else if (promoCode === 'FREEPLATINUM') {
+            userPlan = 'freeplatinum';
+        }
         
-        const freePlans = ['free', 'basic'];
-        const paidPlans = ['pro', 'platinum'];
+        const planConfig = ACCESS_LEVELS[userPlan];
         
-        // Plan gratuit : accepter 'inactive'
-        if (freePlans.includes(userPlan)) {
-            // Pas de vérification stricte pour les plans gratuits
-        } 
-        // Plans payants : vérifier le statut
-        else if (paidPlans.includes(userPlan)) {
-            const validPaidStatuses = ['active', 'trialing', 'active_free'];
-            if (!validPaidStatuses.includes(subscriptionStatus)) {
+        if (!planConfig) return false;
+        
+        // Vérifier le statut si nécessaire
+        if (planConfig.requiresActiveSubscription) {
+            const validStatuses = ['active', 'trialing'];
+            if (!validStatuses.includes(subscriptionStatus)) {
                 return false;
             }
         }
         
-        // ✅ Déterminer le niveau effectif
-        const effectiveLevel = subscriptionStatus === 'active_free' ? 'active_free' : userPlan;
+        const allowedFeatures = planConfig.features || [];
         
-        const allowedFeatures = ACCESS_LEVELS[effectiveLevel]?.features || [];
-        
-        // ✅ Platinum a accès à tout
         return allowedFeatures.includes('all') || allowedFeatures.includes(featureName);
+        
     } catch (error) {
         console.error('Error checking feature:', error);
         return false;
@@ -640,5 +687,8 @@ window.hasFeature = hasFeature;
 window.checkPageAccess = checkPageAccess;
 window.ACCESS_LEVELS = ACCESS_LEVELS;
 window.PAGE_CATEGORIES = PAGE_CATEGORIES;
+window.getPageRequiredLevel = getPageRequiredLevel;
 
-console.log('✅ Access Control System ready');
+console.log('✅ Access Control System v3.0 ready');
+console.log('📊 Available plans:', Object.keys(ACCESS_LEVELS));
+console.log('🎟️ Promo codes supported: FREEPRO, FREEPLATINUM');
