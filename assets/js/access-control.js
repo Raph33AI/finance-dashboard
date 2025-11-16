@@ -1,597 +1,973 @@
-/* ═══════════════════════════════════════════════════════════════
-   ACCESS CONTROL - Vérification des permissions par plan
-   AlphaVault AI - VERSION CORRIGÉE AVEC FALLBACK INTELLIGENT
-   ═══════════════════════════════════════════════════════════════ */
+/**
+ * ========================================
+ * ACCESS CONTROL SYSTEM v2.1
+ * Système de contrôle d'accès basé sur les plans
+ * ========================================
+ * 
+ * CORRECTION MAJEURE v2.1:
+ * - Plan gratuit accepte les statuts 'active' ET 'inactive'
+ * - Plan gratuit a accès aux pages de base par défaut
+ * - Plans payants nécessitent subscriptionStatus = 'active'
+ */
 
-console.log('🔐 Access Control System initialized');
+// ========================================
+// CONFIGURATION
+// ========================================
 
-// ═══════════════════════════════════════════════════════════════
-// DÉFINITION DES NIVEAUX D'ACCÈS
-// ═══════════════════════════════════════════════════════════════
+const AccessControlConfig = {
+    plans: {
+        free: {
+            name: 'Gratuit',
+            displayName: 'Plan Gratuit',
+            level: 0,
+            color: '#6c757d',
+            icon: '🆓',
+            features: [
+                'Tableau de bord financier',
+                'Visualisation des données de base',
+                'Graphiques simples',
+                'Historique limité (30 jours)',
+                'Support communautaire'
+            ]
+        },
+        pro: {
+            name: 'Pro',
+            displayName: 'Plan Pro',
+            level: 1,
+            color: '#667eea',
+            icon: '⭐',
+            price: '29€/mois',
+            features: [
+                'Toutes les fonctionnalités Gratuit',
+                'Analyses avancées',
+                'Simulations Monte Carlo',
+                'Machine Learning basique',
+                'Historique illimité',
+                'Support prioritaire',
+                'Export des données'
+            ]
+        },
+        platinum: {
+            name: 'Platinum',
+            displayName: 'Plan Platinum',
+            level: 2,
+            color: '#ffd700',
+            icon: '💎',
+            price: '99€/mois',
+            features: [
+                'Toutes les fonctionnalités Pro',
+                'Risk Parity Advanced',
+                'ML Prédictif avancé',
+                'Optimisation de portefeuille',
+                'API personnalisée',
+                'Support dédié 24/7',
+                'Analyses personnalisées'
+            ]
+        }
+    },
 
-const ACCESS_LEVELS = {
-    basic: {
-        maxAnalyses: 10,
-        features: [
-            'portfolio-tracking',
-            'basic-data',
-            'alphy-ai-limited',
-            'Portfolio-optimizer'
-        ],
-        pages: [
-            'index.html',
-            'dashboard-financier.html',
-            'investments-analytics.html',
-            'portfolio-optimizer.html'
-        ]
+    pages: {
+        // ========================================
+        // PAGES PUBLIQUES (aucune restriction)
+        // ========================================
+        'index.html': { requiredPlans: [], public: true },
+        'landing.html': { requiredPlans: [], public: true },
+        'login.html': { requiredPlans: [], public: true },
+        'register.html': { requiredPlans: [], public: true },
+        'pricing.html': { requiredPlans: [], public: true },
+
+        // ========================================
+        // PAGES PLAN GRATUIT (niveau 0+)
+        // ========================================
+        'dashboard-financier.html': {
+            requiredPlans: ['free', 'pro', 'platinum'],
+            minLevel: 0,
+            description: 'Tableau de bord financier'
+        },
+        'analyst-coverage.html': {
+            requiredPlans: ['free', 'pro', 'platinum'],
+            minLevel: 0,
+            description: 'Couverture des analystes'
+        },
+        'trend-prediction.html': {
+            requiredPlans: ['free', 'pro', 'platinum'],
+            minLevel: 0,
+            description: 'Prédiction des tendances'
+        },
+
+        // ========================================
+        // PAGES PLAN PRO (niveau 1+)
+        // ========================================
+        'advanced-analysis.html': {
+            requiredPlans: ['pro', 'platinum'],
+            minLevel: 1,
+            description: 'Analyses avancées'
+        },
+        'monte-carlo.html': {
+            requiredPlans: ['pro', 'platinum'],
+            minLevel: 1,
+            description: 'Simulations Monte Carlo'
+        },
+        'ml-prediction.html': {
+            requiredPlans: ['pro', 'platinum'],
+            minLevel: 1,
+            description: 'Prédictions Machine Learning'
+        },
+
+        // ========================================
+        // PAGES PLAN PLATINUM (niveau 2)
+        // ========================================
+        'risk-parity.html': {
+            requiredPlans: ['platinum'],
+            minLevel: 2,
+            description: 'Risk Parity Advanced'
+        },
+        'portfolio-optimization.html': {
+            requiredPlans: ['platinum'],
+            minLevel: 2,
+            description: 'Optimisation de portefeuille'
+        },
+        'custom-api.html': {
+            requiredPlans: ['platinum'],
+            minLevel: 2,
+            description: 'API personnalisée'
+        }
     },
-    pro: {
-        maxAnalyses: Infinity,
-        features: [
-            'portfolio-tracking',
-            'basic-data',
-            'alphy-ai-unlimited',
-            'ipo-screening',
-            'portfolio-optimization',
-            'monte-carlo',
-            'real-time-data',
-            'risk-parity',
-            'scenario-analysis',
-            'trend-prediction'
-        ],
-        pages: [
-            'index.html',
-            'dashboard-financier.html',
-            'investments-analytics.html',
-            'advanced-analysis.html',
-            'monte-carlo.html',
-            'risk-parity.html',
-            'scenario-analysis.html',
-            'portfolio-optimizer.html',
-            'market-data.html',
-            'trend-prediction.html',
-            'market-intelligence.html'
-        ]
-    },
-    // ✅ ACCÈS GRATUIT (équivalent PRO)
-    active_free: {
-        maxAnalyses: Infinity,
-        features: [
-            'portfolio-tracking',
-            'basic-data',
-            'alphy-ai-unlimited',
-            'ipo-screening',
-            'portfolio-optimization',
-            'monte-carlo',
-            'real-time-data',
-            'risk-parity',
-            'scenario-analysis',
-            'trend-prediction'
-        ],
-        pages: [
-            'index.html',
-            'dashboard-financier.html',
-            'investments-analytics.html',
-            'advanced-analysis.html',
-            'monte-carlo.html',
-            'risk-parity.html',
-            'scenario-analysis.html',
-            'portfolio-optimizer.html',
-            'market-data.html',
-            'trend-prediction.html',
-            'market-intelligence.html'
-        ]
-    },
-    // ✅ PLATINUM = ACCÈS TOTAL
-    platinum: {
-        maxAnalyses: Infinity,
-        features: [
-            'all' // ✅ Accès à toutes les fonctionnalités
-        ],
-        pages: [
-            'all' // ✅ Accès à toutes les pages
-        ]
+
+    redirects: {
+        unauthorized: 'login.html',
+        insufficientPlan: 'pricing.html'
     }
 };
 
-// ═══════════════════════════════════════════════════════════════
-// ✅ DÉFINITION DES PAGES PUBLIQUES ET PROTÉGÉES
-// ═══════════════════════════════════════════════════════════════
+// ========================================
+// CLASSE PRINCIPALE
+// ========================================
 
-const PAGE_CATEGORIES = {
-    // Pages accessibles sans connexion
-    public: [
-        'index.html',
-        'login.html',
-        'register.html',
-        'forgot-password.html',
-        'checkout.html',
-        'success.html',
-        'pricing.html',
-        'about.html',
-        'contact.html'
-    ],
-    
-    // Pages accessibles par tous les utilisateurs connectés (Basic+)
-    authenticated: [
-        'dashboard-financier.html',
-        'investments-analytics.html',
-        'portfolio-optimizer.html'
-    ],
-    
-    // Pages PRO uniquement (Basic bloqué, Pro et Platinum OK)
-    pro: [
-        'advanced-analysis.html',
-        'monte-carlo.html',
-        'risk-parity.html',
-        'scenario-analysis.html',
-        'market-data.html',
-        'trend-prediction.html',
-        'market-intelligence.html'
-    ],
-    
-    // ✅ Pages PLATINUM uniquement (Platinum ONLY)
-    platinum: [
-        'company-insights.html',      // ✅ Ajouté
-        'analyst-coverage.html',      // ✅ Ajouté
-        'earnings-estimates.html',    // ✅ Ajouté
-        'chatbot-fullpage.html',      // ✅ Ajouté
-        'ma-screening.html',          // M&A Screening
-        'api-access.html',            // API Access Dashboard
-        'white-label.html',           // White-label Reports
-        'priority-support.html',      // Support VIP
-        'advanced-api.html'           // API avancée
-    ]
-};
-
-// ═══════════════════════════════════════════════════════════════
-// ✅ VÉRIFIER L'ACCÈS À UNE PAGE (VERSION CORRIGÉE)
-// ═══════════════════════════════════════════════════════════════
-
-async function checkPageAccess(pageName) {
-    try {
-        console.log(`🔍 Checking access for page: ${pageName}`);
+class AccessControl {
+    constructor(config) {
+        this.config = config;
+        this.currentUser = null;
+        this.currentPlan = null;
+        this.isInitialized = false;
         
-        // ✅ Vérifier si c'est une page publique
-        if (PAGE_CATEGORIES.public.includes(pageName)) {
-            console.log('🌐 Public page - access granted');
-            return true;
-        }
-        
-        // Vérifier l'authentification
-        const user = firebase.auth().currentUser;
-        
-        if (!user) {
-            console.warn('⚠️ User not logged in');
-            redirectToLogin();
-            return false;
-        }
-        
-        // Récupérer le plan de l'utilisateur depuis Firestore
-        const userDoc = await firebase.firestore().collection('users').doc(user.uid).get();
-        
-        if (!userDoc.exists) {
-            console.error('❌ User document not found in Firestore');
-            redirectToLogin();
-            return false;
-        }
-        
-        const userData = userDoc.data();
-        const userPlan = userData?.plan || 'basic';
-        const subscriptionStatus = userData?.subscriptionStatus || 'inactive';
-        
-        console.log(`👤 User: ${user.email}`);
-        console.log(`📊 Current plan: ${userPlan}`);
-        console.log(`📊 Subscription status: ${subscriptionStatus}`);
-        
-        // ✅ VÉRIFICATION DU STATUT D'ABONNEMENT
-        const validStatuses = ['active', 'active_free', 'trialing'];
-        
-        if (!validStatuses.includes(subscriptionStatus)) {
-            console.warn(`⚠️ Invalid subscription status: ${subscriptionStatus}`);
-            showUpgradeModal(userPlan, 'expired');
-            return false;
-        }
-        
-        // ✅ DÉTERMINER LE NIVEAU D'ACCÈS
-        const effectiveLevel = subscriptionStatus === 'active_free' ? userPlan : userPlan;
-        
-        console.log(`🔑 Effective access level: ${effectiveLevel}`);
-        
-        // ═══════════════════════════════════════════════════════════
-        // ✅ NOUVELLE LOGIQUE DE VÉRIFICATION (ORDRE IMPORTANT)
-        // ═══════════════════════════════════════════════════════════
-        
-        // 1️⃣ PLATINUM = ACCÈS TOTAL (PRIORITAIRE)
-        if (effectiveLevel === 'platinum') {
-            console.log('✅ Access granted (Platinum has full access to all pages)');
-            return true;
-        }
-        
-        // 2️⃣ Pages PLATINUM ONLY (bloquer non-Platinum)
-        if (PAGE_CATEGORIES.platinum.includes(pageName)) {
-            console.warn('⛔ Access denied - Platinum plan required');
-            showUpgradeModal(effectiveLevel, 'platinum_required');
-            return false;
-        }
-        
-        // 3️⃣ Pages PRO (accessible par Pro)
-        if (PAGE_CATEGORIES.pro.includes(pageName)) {
-            if (effectiveLevel === 'pro') {
-                console.log('✅ Access granted (Pro page)');
-                return true;
-            } else {
-                console.warn('⛔ Access denied - Pro plan required');
-                showUpgradeModal(effectiveLevel, 'pro_required');
-                return false;
-            }
-        }
-        
-        // 4️⃣ Pages AUTHENTICATED (accessible par tous les utilisateurs connectés)
-        if (PAGE_CATEGORIES.authenticated.includes(pageName)) {
-            console.log('✅ Access granted (Authenticated page)');
-            return true;
-        }
-        
-        // 5️⃣ FALLBACK INTELLIGENT : Vérifier dans ACCESS_LEVELS
-        const userAccessPages = ACCESS_LEVELS[effectiveLevel]?.pages || [];
-        
-        if (userAccessPages.includes(pageName) || userAccessPages.includes('all')) {
-            console.log(`✅ Access granted (Found in ${effectiveLevel} access list)`);
-            return true;
-        }
-        
-        // 6️⃣ DERNIÈRE ÉTAPE : BLOQUER
-        console.warn(`⚠️ Access denied for ${pageName} - plan: ${effectiveLevel}`);
-        
-        // Déterminer quel upgrade suggérer
-        if (effectiveLevel === 'basic') {
-            showUpgradeModal(effectiveLevel, 'pro_required');
-        } else if (effectiveLevel === 'pro') {
-            showUpgradeModal(effectiveLevel, 'platinum_required');
-        } else {
-            showUpgradeModal(effectiveLevel, 'unknown_page');
-        }
-        
-        return false;
-        
-    } catch (error) {
-        console.error('❌ Error checking access:', error);
-        return false;
+        console.log('🔐 Access Control System initialized');
+        this.init();
     }
-}
 
-// ═══════════════════════════════════════════════════════════════
-// AFFICHER UNE MODALE D'UPGRADE (VERSION PERSISTANTE)
-// ═══════════════════════════════════════════════════════════════
-
-function showUpgradeModal(currentPlan, reason = 'insufficient') {
-    console.log('🔔 Showing upgrade modal for plan:', currentPlan, '| Reason:', reason);
-    
-    // Supprimer le modal existant si présent
-    const existingModal = document.getElementById('upgrade-modal-overlay');
-    if (existingModal) {
-        existingModal.remove();
-    }
-    
-    // ✅ Masquer le contenu de la page
-    hidePageContent();
-    
-    // ✅ Messages personnalisés selon la raison
-    const messages = {
-        pro_required: {
-            title: '🔒 Pro Feature',
-            description: 'This feature requires the <strong>Pro</strong> or <strong>Platinum</strong> plan.',
-            icon: '👑'
-        },
-        platinum_required: {
-            title: '💎 Platinum Exclusive',
-            description: 'This feature is exclusively available in the <strong>Platinum</strong> plan.',
-            icon: '💎'
-        },
-        expired: {
-            title: '⏰ Subscription Expired',
-            description: 'Your subscription has expired. Renew now to regain access to premium features.',
-            icon: '⏰'
-        },
-        unknown_page: {
-            title: '🔒 Premium Access',
-            description: 'This page requires a premium subscription.',
-            icon: '🔐'
-        }
-    };
-    
-    const msg = messages[reason] || messages.pro_required;
-    
-    // Créer une modale glassmorphism élégante avec CSS INLINE
-    const modal = document.createElement('div');
-    modal.id = 'upgrade-modal-overlay';
-    modal.style.cssText = `
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: rgba(0, 0, 0, 0.85);
-        backdrop-filter: blur(12px);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        z-index: 99999;
-        opacity: 0;
-        transition: opacity 0.3s ease;
-    `;
-    
-    modal.innerHTML = `
-        <div style="
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border-radius: 24px;
-            padding: 48px;
-            max-width: 520px;
-            width: 90%;
-            text-align: center;
-            box-shadow: 0 24px 64px rgba(0, 0, 0, 0.4);
-            transform: scale(0.9);
-            transition: transform 0.3s ease;
-        " id="upgrade-modal-content">
-            <div style="font-size: 72px; margin-bottom: 20px;">
-                ${msg.icon}
-            </div>
-            <h2 style="
-                color: white;
-                font-size: 32px;
-                margin-bottom: 16px;
-                font-weight: 800;
-                letter-spacing: -0.5px;
-            ">${msg.title}</h2>
-            <p style="
-                color: rgba(255, 255, 255, 0.95);
-                font-size: 16px;
-                margin-bottom: 12px;
-                line-height: 1.6;
-            ">${msg.description}</p>
-            <p style="
-                margin-top: 20px;
-                font-size: 14px;
-                color: rgba(255, 255, 255, 0.8);
-                font-weight: 600;
-            ">
-                Your current plan: <span style="
-                    background: rgba(255, 255, 255, 0.25);
-                    padding: 4px 12px;
-                    border-radius: 12px;
-                    text-transform: uppercase;
-                    letter-spacing: 1px;
-                ">${currentPlan}</span>
-            </p>
-            <div style="
-                display: flex;
-                gap: 16px;
-                justify-content: center;
-                margin-top: 32px;
-            ">
-                <button id="btn-upgrade-now" style="
-                    background: white;
-                    color: #667eea;
-                    border: none;
-                    border-radius: 14px;
-                    padding: 16px 36px;
-                    font-size: 16px;
-                    font-weight: 700;
-                    cursor: pointer;
-                    transition: all 0.3s ease;
-                    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
-                    display: flex;
-                    align-items: center;
-                    gap: 8px;
-                ">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
-                    </svg>
-                    Upgrade Now
-                </button>
-                <button id="btn-cancel-modal" style="
-                    background: rgba(255, 255, 255, 0.2);
-                    color: white;
-                    border: 2px solid rgba(255, 255, 255, 0.4);
-                    border-radius: 14px;
-                    padding: 16px 36px;
-                    font-size: 16px;
-                    font-weight: 700;
-                    cursor: pointer;
-                    transition: all 0.3s ease;
-                    backdrop-filter: blur(10px);
-                ">
-                    Go Back
-                </button>
-            </div>
-        </div>
-    `;
-    
-    document.body.appendChild(modal);
-    
-    // Animation d'entrée
-    setTimeout(() => {
-        modal.style.opacity = '1';
-        document.getElementById('upgrade-modal-content').style.transform = 'scale(1)';
-    }, 10);
-    
-    // Event listeners
-    document.getElementById('btn-upgrade-now').addEventListener('click', () => {
-        window.location.href = 'checkout.html';
-    });
-    
-    document.getElementById('btn-cancel-modal').addEventListener('click', () => {
-        modal.style.opacity = '0';
-        setTimeout(() => {
-            modal.remove();
-            window.location.href = 'dashboard-financier.html';
-        }, 300);
-    });
-    
-    // ✅ Empêcher la fermeture en cliquant à l'extérieur
-    modal.addEventListener('click', (e) => {
-        if (e.target === modal) {
-            // Animation de "secousse" pour indiquer que la modal ne peut pas être fermée
-            const content = document.getElementById('upgrade-modal-content');
-            content.style.animation = 'shake 0.5s';
-            setTimeout(() => {
-                content.style.animation = '';
-            }, 500);
-        }
-    });
-    
-    // Effet hover sur les boutons
-    const upgradeBtn = document.getElementById('btn-upgrade-now');
-    upgradeBtn.addEventListener('mouseenter', () => {
-        upgradeBtn.style.transform = 'scale(1.05) translateY(-2px)';
-        upgradeBtn.style.boxShadow = '0 8px 28px rgba(0, 0, 0, 0.3)';
-    });
-    upgradeBtn.addEventListener('mouseleave', () => {
-        upgradeBtn.style.transform = 'scale(1) translateY(0)';
-        upgradeBtn.style.boxShadow = '0 6px 20px rgba(0, 0, 0, 0.2)';
-    });
-    
-    const cancelBtn = document.getElementById('btn-cancel-modal');
-    cancelBtn.addEventListener('mouseenter', () => {
-        cancelBtn.style.background = 'rgba(255, 255, 255, 0.3)';
-    });
-    cancelBtn.addEventListener('mouseleave', () => {
-        cancelBtn.style.background = 'rgba(255, 255, 255, 0.2)';
-    });
-}
-
-// ═══════════════════════════════════════════════════════════════
-// ✅ MASQUER LE CONTENU DE LA PAGE
-// ═══════════════════════════════════════════════════════════════
-
-function hidePageContent() {
-    // Créer un overlay de masquage si nécessaire
-    if (!document.getElementById('page-content-blocker')) {
-        const blocker = document.createElement('div');
-        blocker.id = 'page-content-blocker';
-        blocker.style.cssText = `
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.95);
-            z-index: 9998;
-            pointer-events: all;
-        `;
-        document.body.appendChild(blocker);
-    }
-    
-    // Désactiver le scroll
-    document.body.style.overflow = 'hidden';
-}
-
-// ═══════════════════════════════════════════════════════════════
-// REDIRIGER VERS LOGIN
-// ═══════════════════════════════════════════════════════════════
-
-function redirectToLogin() {
-    console.log('🔄 Redirecting to login...');
-    
-    // Sauvegarder la page demandée pour redirection après login
-    sessionStorage.setItem('redirectAfterLogin', window.location.pathname);
-    
-    window.location.href = 'index.html#login';
-}
-
-// ═══════════════════════════════════════════════════════════════
-// ✅ INITIALISATION AUTOMATIQUE (DOMContentLoaded)
-// ═══════════════════════════════════════════════════════════════
-
-document.addEventListener('DOMContentLoaded', async function() {
-    const currentPage = window.location.pathname.split('/').pop() || 'index.html';
-    
-    console.log(`📄 Current page: ${currentPage}`);
-    
-    // ✅ Vérifier l'accès pour TOUTES les pages (sauf publiques)
-    if (!PAGE_CATEGORIES.public.includes(currentPage)) {
-        console.log('🔒 Protected page detected - checking access...');
-        
-        // Attendre que Firebase soit prêt
-        firebase.auth().onAuthStateChanged(async (user) => {
-            if (user) {
-                const hasAccess = await checkPageAccess(currentPage);
-                
-                if (!hasAccess) {
-                    console.warn('⛔ Access denied - modal displayed');
-                    // ✅ La modal reste ouverte jusqu'à ce que l'utilisateur clique sur un bouton
+    /**
+     * Initialisation du système
+     */
+    async init() {
+        try {
+            // Attendre que Firebase soit prêt
+            await this.waitForFirebase();
+            
+            // Observer les changements d'authentification
+            firebase.auth().onAuthStateChanged(async (user) => {
+                if (user) {
+                    await this.onUserAuthenticated(user);
                 } else {
-                    console.log('✅ Access granted');
+                    this.onUserLoggedOut();
                 }
+            });
+
+            this.isInitialized = true;
+            console.log('✅ Access Control System ready');
+
+        } catch (error) {
+            console.error('❌ Access Control initialization error:', error);
+        }
+    }
+
+    /**
+     * Attendre que Firebase soit initialisé
+     */
+    waitForFirebase() {
+        return new Promise((resolve) => {
+            if (typeof firebase !== 'undefined' && firebase.auth) {
+                resolve();
             } else {
-                console.warn('⚠️ User not logged in - redirecting to login');
-                redirectToLogin();
+                const checkInterval = setInterval(() => {
+                    if (typeof firebase !== 'undefined' && firebase.auth) {
+                        clearInterval(checkInterval);
+                        resolve();
+                    }
+                }, 100);
             }
         });
-    } else {
-        console.log('🌐 Public page - no access check needed');
     }
-});
 
-// ═══════════════════════════════════════════════════════════════
-// ✅ ANIMATION DE SECOUSSE (CSS dynamique)
-// ═══════════════════════════════════════════════════════════════
+    /**
+     * Gestion de l'utilisateur authentifié
+     */
+    async onUserAuthenticated(user) {
+        try {
+            this.currentUser = user;
+            
+            // Charger les données utilisateur
+            const userData = await this.loadUserData(user.uid);
+            
+            if (userData) {
+                this.currentPlan = userData.plan || 'free';
+                
+                // Vérifier l'accès à la page actuelle
+                await this.checkCurrentPageAccess();
+            }
 
-const style = document.createElement('style');
-style.textContent = `
-    @keyframes shake {
-        0%, 100% { transform: scale(1) translateX(0); }
-        10%, 30%, 50%, 70%, 90% { transform: scale(1.02) translateX(-10px); }
-        20%, 40%, 60%, 80% { transform: scale(1.02) translateX(10px); }
+        } catch (error) {
+            console.error('❌ Error handling authenticated user:', error);
+        }
     }
-`;
-document.head.appendChild(style);
 
-// ═══════════════════════════════════════════════════════════════
-// FONCTION UTILITAIRE : VÉRIFIER SI UNE FEATURE EST DISPONIBLE
-// ═══════════════════════════════════════════════════════════════
+    /**
+     * Gestion de la déconnexion
+     */
+    onUserLoggedOut() {
+        this.currentUser = null;
+        this.currentPlan = null;
 
-async function hasFeature(featureName) {
-    const user = firebase.auth().currentUser;
-    
-    if (!user) return false;
-    
-    try {
-        const userDoc = await firebase.firestore().collection('users').doc(user.uid).get();
-        
-        if (!userDoc.exists) return false;
-        
-        const userData = userDoc.data();
-        const userPlan = userData?.plan || 'basic';
-        const subscriptionStatus = userData?.subscriptionStatus || 'inactive';
-        
-        // ✅ Vérifier le statut d'abonnement
-        const validStatuses = ['active', 'active_free', 'trialing'];
-        if (!validStatuses.includes(subscriptionStatus)) {
+        // Rediriger vers login si on est sur une page protégée
+        const currentPage = this.getCurrentPage();
+        const pageConfig = this.config.pages[currentPage];
+
+        if (pageConfig && !pageConfig.public) {
+            this.redirectToLogin();
+        }
+    }
+
+    /**
+     * Charger les données utilisateur depuis Firestore
+     */
+    async loadUserData(uid) {
+        try {
+            const userDoc = await firebase.firestore()
+                .collection('users')
+                .doc(uid)
+                .get();
+
+            if (userDoc.exists) {
+                return userDoc.data();
+            }
+            return null;
+
+        } catch (error) {
+            console.error('❌ Error loading user data:', error);
+            return null;
+        }
+    }
+
+    /**
+     * Obtenir le nom de la page actuelle
+     */
+    getCurrentPage() {
+        const path = window.location.pathname;
+        const page = path.split('/').pop() || 'index.html';
+        return page;
+    }
+
+    /**
+     * Vérifier l'accès à la page actuelle
+     */
+    async checkCurrentPageAccess() {
+        const currentPage = this.getCurrentPage();
+        console.log('📄 Current page:', currentPage);
+
+        const pageConfig = this.config.pages[currentPage];
+
+        if (!pageConfig) {
+            console.log('✅ Page not protected - access granted');
+            return true;
+        }
+
+        if (pageConfig.public) {
+            console.log('✅ Public page - access granted');
+            return true;
+        }
+
+        console.log('🔒 Protected page detected - checking access...');
+        const hasAccess = await this.checkPageAccess(currentPage);
+
+        if (!hasAccess) {
+            console.log('⛔ Access denied - modal displayed');
+        }
+
+        return hasAccess;
+    }
+
+    /**
+     * ✅ MÉTHODE CORRIGÉE : Vérifier l'accès à une page
+     */
+    async checkPageAccess(pageName) {
+        try {
+            console.log('🔍 Checking access for page:', pageName);
+
+            // Vérifier si la page est protégée
+            const pageConfig = this.config.pages[pageName];
+            if (!pageConfig || pageConfig.public) {
+                console.log('✅ Page not protected - access granted');
+                return true;
+            }
+
+            // Vérifier l'authentification
+            const user = firebase.auth().currentUser;
+            if (!user) {
+                console.warn('⚠️ No authenticated user');
+                this.redirectToLogin();
+                return false;
+            }
+
+            // Récupérer les données utilisateur
+            const userDoc = await firebase.firestore()
+                .collection('users')
+                .doc(user.uid)
+                .get();
+
+            if (!userDoc.exists) {
+                console.error('❌ User document not found');
+                this.redirectToLogin();
+                return false;
+            }
+
+            const userData = userDoc.data();
+            const currentPlan = userData.plan || 'free';
+            const subscriptionStatus = userData.subscriptionStatus || 'inactive';
+
+            console.log('👤 User:', user.email);
+            console.log('📊 Current plan:', currentPlan);
+            console.log('📊 Subscription status:', subscriptionStatus);
+
+            // ✅✅✅ CORRECTION MAJEURE : PLAN GRATUIT ✅✅✅
+            if (currentPlan === 'free') {
+                // Plan gratuit : vérifier uniquement si la page est accessible en gratuit
+                const requiredPlans = pageConfig.requiredPlans || [];
+                
+                if (requiredPlans.length === 0 || requiredPlans.includes('free')) {
+                    console.log('✅ Free plan - Access granted to free page');
+                    return true;
+                } else {
+                    console.log('⛔ Page requires premium plan');
+                    this.showUpgradeModal(currentPlan, 'feature_locked');
+                    return false;
+                }
+            }
+
+            // ✅✅✅ PLANS PAYANTS : VÉRIFIER LE STATUT ✅✅✅
+            if (currentPlan === 'pro' || currentPlan === 'platinum') {
+                // Pour les plans payants, vérifier le statut de souscription
+                if (subscriptionStatus !== 'active') {
+                    console.warn('⚠️ Invalid subscription status for paid plan:', subscriptionStatus);
+                    this.showUpgradeModal(currentPlan, 'expired');
+                    return false;
+                }
+            }
+
+            // Vérifier si le plan permet l'accès
+            const requiredPlans = pageConfig.requiredPlans || [];
+            const hasAccess = this.hasRequiredPlan(currentPlan, requiredPlans);
+
+            if (hasAccess) {
+                console.log('✅ Access granted');
+                return true;
+            } else {
+                console.log('⛔ Access denied - Insufficient plan');
+                this.showUpgradeModal(currentPlan, 'feature_locked');
+                return false;
+            }
+
+        } catch (error) {
+            console.error('❌ Error checking page access:', error);
             return false;
         }
+    }
+
+    /**
+     * Vérifier si le plan actuel permet l'accès
+     */
+    hasRequiredPlan(currentPlan, requiredPlans) {
+        if (!requiredPlans || requiredPlans.length === 0) {
+            return true;
+        }
+
+        // Vérifier si le plan actuel est dans la liste
+        if (requiredPlans.includes(currentPlan)) {
+            return true;
+        }
+
+        // Vérifier par niveau (un plan supérieur donne accès)
+        const currentLevel = this.config.plans[currentPlan]?.level || 0;
         
-        // ✅ Déterminer le niveau effectif
-        const effectiveLevel = subscriptionStatus === 'active_free' ? userPlan : userPlan;
-        
-        const allowedFeatures = ACCESS_LEVELS[effectiveLevel]?.features || [];
-        
-        // ✅ Platinum a accès à tout
-        return allowedFeatures.includes('all') || allowedFeatures.includes(featureName);
-    } catch (error) {
-        console.error('Error checking feature:', error);
+        for (const plan of requiredPlans) {
+            const requiredLevel = this.config.plans[plan]?.level || 0;
+            if (currentLevel >= requiredLevel) {
+                return true;
+            }
+        }
+
         return false;
+    }
+
+    /**
+     * Afficher le modal de mise à niveau
+     */
+    showUpgradeModal(currentPlan, reason = 'feature_locked') {
+        console.log('🔔 Showing upgrade modal for plan:', currentPlan, '| Reason:', reason);
+
+        // Supprimer le modal existant
+        const existingModal = document.getElementById('upgrade-modal');
+        if (existingModal) {
+            existingModal.remove();
+        }
+
+        // Déterminer le plan recommandé
+        const recommendedPlan = this.getRecommendedUpgrade(currentPlan);
+        const planConfig = this.config.plans[recommendedPlan];
+
+        // Créer le modal
+        const modal = this.createUpgradeModal(currentPlan, recommendedPlan, planConfig, reason);
+        document.body.appendChild(modal);
+
+        // Afficher avec animation
+        setTimeout(() => {
+            modal.classList.add('show');
+        }, 10);
+
+        // Gérer les événements
+        this.setupModalEvents(modal, currentPlan);
+    }
+
+    /**
+     * Obtenir le plan recommandé pour la mise à niveau
+     */
+    getRecommendedUpgrade(currentPlan) {
+        switch (currentPlan) {
+            case 'free':
+                return 'pro';
+            case 'pro':
+                return 'platinum';
+            default:
+                return 'pro';
+        }
+    }
+
+    /**
+     * Créer le HTML du modal
+     */
+    createUpgradeModal(currentPlan, recommendedPlan, planConfig, reason) {
+        const modal = document.createElement('div');
+        modal.id = 'upgrade-modal';
+        modal.className = 'access-control-modal';
+
+        const isDarkMode = document.body.classList.contains('dark-mode');
+
+        const reasonMessages = {
+            'feature_locked': {
+                icon: '🔒',
+                title: 'Fonctionnalité Premium',
+                message: 'Cette page est réservée aux abonnés Premium.'
+            },
+            'expired': {
+                icon: '⏰',
+                title: 'Abonnement Expiré',
+                message: 'Votre abonnement a expiré. Renouvelez pour continuer.'
+            },
+            'limit_reached': {
+                icon: '📊',
+                title: 'Limite Atteinte',
+                message: 'Vous avez atteint la limite de votre plan gratuit.'
+            }
+        };
+
+        const reasonData = reasonMessages[reason] || reasonMessages['feature_locked'];
+
+        modal.innerHTML = `
+            <div class="modal-backdrop" data-modal-close></div>
+            <div class="modal-content ${isDarkMode ? 'dark-mode' : ''}">
+                <!-- Header -->
+                <div class="modal-header">
+                    <div class="modal-icon">${reasonData.icon}</div>
+                    <h2 class="modal-title">${reasonData.title}</h2>
+                    <button class="modal-close" data-modal-close aria-label="Fermer">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+
+                <!-- Body -->
+                <div class="modal-body">
+                    <p class="modal-message">${reasonData.message}</p>
+
+                    <!-- Plan actuel -->
+                    <div class="current-plan-badge">
+                        <span class="badge-icon">${this.config.plans[currentPlan]?.icon || '📦'}</span>
+                        <span class="badge-text">Votre plan actuel : ${this.config.plans[currentPlan]?.displayName || 'Gratuit'}</span>
+                    </div>
+
+                    <!-- Plan recommandé -->
+                    <div class="recommended-plan" style="border-color: ${planConfig.color}">
+                        <div class="plan-header">
+                            <span class="plan-icon">${planConfig.icon}</span>
+                            <h3 class="plan-name">${planConfig.displayName}</h3>
+                            ${planConfig.price ? `<div class="plan-price">${planConfig.price}</div>` : ''}
+                        </div>
+
+                        <ul class="plan-features">
+                            ${planConfig.features.map(feature => `
+                                <li>
+                                    <i class="fas fa-check-circle" style="color: ${planConfig.color}"></i>
+                                    <span>${feature}</span>
+                                </li>
+                            `).join('')}
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Footer -->
+                <div class="modal-footer">
+                    <button class="btn-secondary" data-modal-close>
+                        <i class="fas fa-arrow-left"></i>
+                        Retour
+                    </button>
+                    <button class="btn-primary" data-upgrade-action style="background: ${planConfig.color}">
+                        <i class="fas fa-crown"></i>
+                        Passer à ${planConfig.displayName}
+                    </button>
+                </div>
+            </div>
+        `;
+
+        return modal;
+    }
+
+    /**
+     * Configurer les événements du modal
+     */
+    setupModalEvents(modal, currentPlan) {
+        // Boutons de fermeture
+        const closeButtons = modal.querySelectorAll('[data-modal-close]');
+        closeButtons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                this.closeModal(modal);
+            });
+        });
+
+        // Bouton de mise à niveau
+        const upgradeBtn = modal.querySelector('[data-upgrade-action]');
+        if (upgradeBtn) {
+            upgradeBtn.addEventListener('click', () => {
+                this.closeModal(modal);
+                this.redirectToPricing();
+            });
+        }
+
+        // Fermer avec Escape
+        const handleEscape = (e) => {
+            if (e.key === 'Escape') {
+                this.closeModal(modal);
+                document.removeEventListener('keydown', handleEscape);
+            }
+        };
+        document.addEventListener('keydown', handleEscape);
+    }
+
+    /**
+     * Fermer le modal
+     */
+    closeModal(modal) {
+        modal.classList.remove('show');
+        setTimeout(() => {
+            modal.remove();
+        }, 300);
+    }
+
+    /**
+     * Rediriger vers la page de tarification
+     */
+    redirectToPricing() {
+        console.log('📍 Redirecting to pricing page...');
+        window.location.href = 'pricing.html';
+    }
+
+    /**
+     * Rediriger vers la page de connexion
+     */
+    redirectToLogin() {
+        console.log('📍 Redirecting to login page...');
+        const currentPage = this.getCurrentPage();
+        window.location.href = `login.html?redirect=${encodeURIComponent(currentPage)}`;
+    }
+
+    /**
+     * Vérifier l'accès à une fonctionnalité spécifique
+     */
+    async checkFeatureAccess(featureName, requiredPlans = ['pro', 'platinum']) {
+        if (!this.currentUser) {
+            this.redirectToLogin();
+            return false;
+        }
+
+        const hasAccess = this.hasRequiredPlan(this.currentPlan, requiredPlans);
+
+        if (!hasAccess) {
+            this.showUpgradeModal(this.currentPlan, 'feature_locked');
+        }
+
+        return hasAccess;
+    }
+
+    /**
+     * Obtenir les informations du plan actuel
+     */
+    getCurrentPlanInfo() {
+        if (!this.currentPlan) {
+            return this.config.plans.free;
+        }
+        return this.config.plans[this.currentPlan] || this.config.plans.free;
+    }
+
+    /**
+     * Méthode publique pour vérifier l'accès
+     */
+    async hasAccess(requiredPlans) {
+        if (!this.currentUser) {
+            return false;
+        }
+
+        return this.hasRequiredPlan(this.currentPlan, requiredPlans);
     }
 }
 
-// ═══════════════════════════════════════════════════════════════
-// EXPOSER LES FONCTIONS GLOBALEMENT
-// ═══════════════════════════════════════════════════════════════
+// ========================================
+// STYLES CSS
+// ========================================
 
-window.hasFeature = hasFeature;
-window.checkPageAccess = checkPageAccess;
-window.ACCESS_LEVELS = ACCESS_LEVELS;
-window.PAGE_CATEGORIES = PAGE_CATEGORIES;
+const accessControlStyles = `
+<style>
+/* Modal Backdrop */
+.access-control-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 10000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
 
-console.log('✅ Access Control System ready');
+.access-control-modal.show {
+    opacity: 1;
+}
+
+.modal-backdrop {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(8px);
+}
+
+/* Modal Content */
+.modal-content {
+    position: relative;
+    background: #ffffff;
+    border-radius: 24px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    max-width: 600px;
+    width: 90%;
+    max-height: 90vh;
+    overflow-y: auto;
+    transform: translateY(20px);
+    transition: transform 0.3s ease;
+}
+
+.access-control-modal.show .modal-content {
+    transform: translateY(0);
+}
+
+.modal-content.dark-mode {
+    background: #1e293b;
+    color: #e2e8f0;
+}
+
+/* Header */
+.modal-header {
+    padding: 32px 32px 24px;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+    position: relative;
+}
+
+.modal-content.dark-mode .modal-header {
+    border-bottom-color: rgba(255, 255, 255, 0.1);
+}
+
+.modal-icon {
+    font-size: 3rem;
+    text-align: center;
+    margin-bottom: 16px;
+}
+
+.modal-title {
+    font-size: 1.75rem;
+    font-weight: 700;
+    text-align: center;
+    margin: 0;
+    color: #1e293b;
+}
+
+.modal-content.dark-mode .modal-title {
+    color: #e2e8f0;
+}
+
+.modal-close {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background: rgba(0, 0, 0, 0.05);
+    border: none;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    color: #64748b;
+}
+
+.modal-close:hover {
+    background: rgba(0, 0, 0, 0.1);
+    transform: rotate(90deg);
+}
+
+.modal-content.dark-mode .modal-close {
+    background: rgba(255, 255, 255, 0.05);
+    color: #cbd5e1;
+}
+
+.modal-content.dark-mode .modal-close:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+/* Body */
+.modal-body {
+    padding: 32px;
+}
+
+.modal-message {
+    font-size: 1.1rem;
+    text-align: center;
+    color: #64748b;
+    margin: 0 0 24px;
+    line-height: 1.6;
+}
+
+.modal-content.dark-mode .modal-message {
+    color: #94a3b8;
+}
+
+.current-plan-badge {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 12px 24px;
+    background: rgba(102, 126, 234, 0.1);
+    border-radius: 12px;
+    margin-bottom: 24px;
+    font-weight: 600;
+    color: #667eea;
+}
+
+.badge-icon {
+    font-size: 1.25rem;
+}
+
+/* Plan Recommandé */
+.recommended-plan {
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%);
+    border: 2px solid #667eea;
+    border-radius: 16px;
+    padding: 24px;
+    margin-top: 24px;
+}
+
+.plan-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 20px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.modal-content.dark-mode .plan-header {
+    border-bottom-color: rgba(255, 255, 255, 0.1);
+}
+
+.plan-icon {
+    font-size: 2rem;
+}
+
+.plan-name {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin: 0;
+    flex: 1;
+    color: #1e293b;
+}
+
+.modal-content.dark-mode .plan-name {
+    color: #e2e8f0;
+}
+
+.plan-price {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #667eea;
+}
+
+.plan-features {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.plan-features li {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 8px 0;
+    color: #475569;
+}
+
+.modal-content.dark-mode .plan-features li {
+    color: #cbd5e1;
+}
+
+.plan-features i {
+    margin-top: 2px;
+    font-size: 1.1rem;
+}
+
+/* Footer */
+.modal-footer {
+    padding: 24px 32px 32px;
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+}
+
+.btn-secondary,
+.btn-primary {
+    padding: 14px 28px;
+    border-radius: 12px;
+    font-size: 1rem;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.2s ease;
+}
+
+.btn-secondary {
+    background: rgba(0, 0, 0, 0.05);
+    color: #64748b;
+}
+
+.btn-secondary:hover {
+    background: rgba(0, 0, 0, 0.1);
+    transform: translateY(-2px);
+}
+
+.modal-content.dark-mode .btn-secondary {
+    background: rgba(255, 255, 255, 0.05);
+    color: #cbd5e1;
+}
+
+.modal-content.dark-mode .btn-secondary:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.btn-primary {
+    background: #667eea;
+    color: white;
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.5);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .modal-content {
+        max-width: 95%;
+        margin: 20px;
+    }
+
+    .modal-header,
+    .modal-body,
+    .modal-footer {
+        padding: 20px;
+    }
+
+    .modal-title {
+        font-size: 1.5rem;
+    }
+
+    .modal-footer {
+        flex-direction: column;
+    }
+
+    .btn-secondary,
+    .btn-primary {
+        width: 100%;
+        justify-content: center;
+    }
+}
+
+/* Animations */
+@keyframes slideInDown {
+    from {
+        opacity: 0;
+        transform: translateY(-50px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.access-control-modal.show .modal-content {
+    animation: slideInDown 0.3s ease;
+}
+</style>
+`;
+
+// Injecter les styles
+if (!document.getElementById('access-control-styles')) {
+    document.head.insertAdjacentHTML('beforeend', accessControlStyles);
+    const styleTag = document.head.lastElementChild;
+    styleTag.id = 'access-control-styles';
+}
+
+// ========================================
+// INITIALISATION GLOBALE
+// ========================================
+
+// Instance globale
+window.AccessControlSystem = new AccessControl(AccessControlConfig);
+
+// Export pour utilisation dans d'autres scripts
+if (typeof module !== 'undefined' && module.exports) {
+    module.exports = { AccessControl, AccessControlConfig };
+}
