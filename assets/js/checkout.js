@@ -450,6 +450,9 @@ form.addEventListener('submit', async (event) => {
     
     submitButton.disabled = true;
     submitButton.classList.add('loading');
+    // ✅ FORCER LE BOUTON À NE PAS BOUGER
+    submitButton.style.transform = 'none';
+    submitButton.style.animation = 'none';
     
     try {
         // 1️⃣ Vérifier l'authentification
