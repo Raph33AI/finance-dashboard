@@ -15,12 +15,15 @@ const ACCESS_LEVELS = {
         features: [
             'portfolio-tracking',
             'basic-data',
-            'alphy-ai-limited'
+            'alphy-ai-limited',
+            'Portfolio-optimizer'
         ],
         pages: [
             'index.html',
             'dashboard-financier.html',
-            'investments-analytics.html'
+            'investments-analytics.html',
+            'monte-carlo.html',
+            'portfolio-optimizer.html'
         ]
     },
     pro: {
@@ -233,7 +236,7 @@ async function checkPageAccess(pageName) {
 }
 
 // ═══════════════════════════════════════════════════════════════
-// AFFICHER UNE MODALE D'UPGRADE (VERSION AMÉLIORÉE)
+// AFFICHER UNE MODALE D'UPGRADE (VERSION PERSISTANTE)
 // ═══════════════════════════════════════════════════════════════
 
 function showUpgradeModal(currentPlan, reason = 'insufficient') {
@@ -244,6 +247,9 @@ function showUpgradeModal(currentPlan, reason = 'insufficient') {
     if (existingModal) {
         existingModal.remove();
     }
+    
+    // ✅ Masquer le contenu de la page
+    hidePageContent();
     
     // ✅ Messages personnalisés selon la raison
     const messages = {
@@ -391,8 +397,22 @@ function showUpgradeModal(currentPlan, reason = 'insufficient') {
     
     document.getElementById('btn-cancel-modal').addEventListener('click', () => {
         modal.style.opacity = '0';
-        setTimeout(() => modal.remove(), 300);
-        window.location.href = 'dashboard-financier.html';
+        setTimeout(() => {
+            modal.remove();
+            window.location.href = 'dashboard-financier.html';
+        }, 300);
+    });
+    
+    // ✅ NOUVEAU : Empêcher la fermeture en cliquant à l'extérieur
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) {
+            // Animation de "secousse" pour indiquer que la modal ne peut pas être fermée
+            const content = document.getElementById('upgrade-modal-content');
+            content.style.animation = 'shake 0.5s';
+            setTimeout(() => {
+                content.style.animation = '';
+            }, 500);
+        }
     });
     
     // Effet hover sur les boutons
@@ -416,6 +436,32 @@ function showUpgradeModal(currentPlan, reason = 'insufficient') {
 }
 
 // ═══════════════════════════════════════════════════════════════
+// ✅ NOUVEAU : MASQUER LE CONTENU DE LA PAGE
+// ═══════════════════════════════════════════════════════════════
+
+function hidePageContent() {
+    // Créer un overlay de masquage si nécessaire
+    if (!document.getElementById('page-content-blocker')) {
+        const blocker = document.createElement('div');
+        blocker.id = 'page-content-blocker';
+        blocker.style.cssText = `
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.95);
+            z-index: 9998;
+            pointer-events: all;
+        `;
+        document.body.appendChild(blocker);
+    }
+    
+    // Désactiver le scroll
+    document.body.style.overflow = 'hidden';
+}
+
+// ═══════════════════════════════════════════════════════════════
 // REDIRIGER VERS LOGIN
 // ═══════════════════════════════════════════════════════════════
 
@@ -429,7 +475,7 @@ function redirectToLogin() {
 }
 
 // ═══════════════════════════════════════════════════════════════
-// ✅ INITIALISATION AUTOMATIQUE AMÉLIORÉE
+// ✅ INITIALISATION AUTOMATIQUE AMÉLIORÉE (SANS REDIRECTION AUTO)
 // ═══════════════════════════════════════════════════════════════
 
 document.addEventListener('DOMContentLoaded', async function() {
@@ -447,12 +493,9 @@ document.addEventListener('DOMContentLoaded', async function() {
                 const hasAccess = await checkPageAccess(currentPage);
                 
                 if (!hasAccess) {
-                    console.warn('⛔ Access denied - redirecting in 3 seconds...');
-                    
-                    // Rediriger vers dashboard après 3 secondes
-                    setTimeout(() => {
-                        window.location.href = 'dashboard-financier.html';
-                    }, 3000);
+                    console.warn('⛔ Access denied - modal displayed (no auto-redirect)');
+                    // ✅ SUPPRIMÉ : Le setTimeout qui forçait la redirection
+                    // La modal reste ouverte jusqu'à ce que l'utilisateur clique sur un bouton
                 }
             } else {
                 console.warn('⚠️ User not logged in - redirecting to login');
@@ -463,6 +506,21 @@ document.addEventListener('DOMContentLoaded', async function() {
         console.log('🌐 Public page - no access check needed');
     }
 });
+
+// ═══════════════════════════════════════════════════════════════
+// ✅ AJOUT : ANIMATION DE SECOUSSE
+// ═══════════════════════════════════════════════════════════════
+
+// Ajouter dynamiquement l'animation CSS pour la secousse
+const style = document.createElement('style');
+style.textContent = `
+    @keyframes shake {
+        0%, 100% { transform: scale(1) translateX(0); }
+        10%, 30%, 50%, 70%, 90% { transform: scale(1.02) translateX(-10px); }
+        20%, 40%, 60%, 80% { transform: scale(1.02) translateX(10px); }
+    }
+`;
+document.head.appendChild(style);
 
 // ═══════════════════════════════════════════════════════════════
 // FONCTION UTILITAIRE : VÉRIFIER SI UNE FEATURE EST DISPONIBLE
