@@ -126,7 +126,6 @@ async function checkPageAccess(pageName) {
         }
         
         // ✅ DÉTERMINER LE NIVEAU D'ACCÈS (plan ou subscriptionStatus)
-        // Si subscriptionStatus = 'active_free', utiliser ce niveau au lieu du plan
         const effectiveLevel = subscriptionStatus === 'active_free' ? 'active_free' : userPlan;
         
         console.log(`🔑 Effective access level: ${effectiveLevel}`);
@@ -137,8 +136,7 @@ async function checkPageAccess(pageName) {
         if (allowedPages.includes('all') || allowedPages.includes(pageName)) {
             console.log('✅ Access granted');
             
-            // ✅ AFFICHER UN BADGE DE PLAN (optionnel)
-            displayPlanBadge(effectiveLevel);
+            // ✅ SUPPRIMÉ : displayPlanBadge(effectiveLevel);
             
             return true;
         } else {
@@ -322,54 +320,6 @@ function showUpgradeModal(currentPlan, reason = 'insufficient') {
     cancelBtn.addEventListener('mouseleave', () => {
         cancelBtn.style.background = 'rgba(255, 255, 255, 0.2)';
     });
-}
-
-// ═══════════════════════════════════════════════════════════════
-// ✅ AFFICHER UN BADGE DE PLAN (NOUVEAU)
-// ═══════════════════════════════════════════════════════════════
-
-function displayPlanBadge(plan) {
-    // Ne pas afficher pour le plan basic
-    if (plan === 'basic') return;
-    
-    // Supprimer le badge existant si présent
-    const existingBadge = document.getElementById('plan-badge');
-    if (existingBadge) {
-        existingBadge.remove();
-    }
-    
-    const badge = document.createElement('div');
-    badge.id = 'plan-badge';
-    badge.style.cssText = `
-        position: fixed;
-        top: 24px;
-        right: 24px;
-        background: linear-gradient(135deg, #667eea, #764ba2);
-        color: white;
-        padding: 10px 20px;
-        border-radius: 24px;
-        font-size: 13px;
-        font-weight: 700;
-        text-transform: uppercase;
-        letter-spacing: 1px;
-        box-shadow: 0 6px 20px rgba(102, 126, 234, 0.5);
-        z-index: 9998;
-        opacity: 0;
-        transform: translateX(100px);
-        transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
-        cursor: default;
-    `;
-    
-    const planLabel = plan === 'active_free' ? 'PRO (FREE)' : plan.toUpperCase();
-    badge.textContent = `${planLabel} PLAN`;
-    
-    document.body.appendChild(badge);
-    
-    // Animation d'entrée
-    setTimeout(() => {
-        badge.style.opacity = '1';
-        badge.style.transform = 'translateX(0)';
-    }, 300);
 }
 
 // ═══════════════════════════════════════════════════════════════
