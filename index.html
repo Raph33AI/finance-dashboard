@@ -2,18 +2,30 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <!-- ✅ VIEWPORT OPTIMISÉ MOBILE -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+    
     <meta name="description" content="AlphaVault AI - AI-powered financial analysis platform - IPO, M&A, Quantitative Finance">
     <meta name="keywords" content="finance, AI, IPO, portfolio optimization, AlphaVault, Alphy AI, investments">
+    
+    <!-- ✅ THEME COLOR MOBILE -->
+    <meta name="theme-color" content="#3B82F6">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    
     <title>AlphaVault AI - Financial Intelligence Powered by AI</title>
     
     <!-- Preconnect -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     
-    <!-- Stylesheets -->
+    <!-- ✅ STYLESHEETS - ORDRE CRITIQUE -->
     <link rel="stylesheet" href="assets/css/common.css">
     <link rel="stylesheet" href="assets/css/landing.css">
+    
+    <!-- ✅ NOUVEAU : CSS MOBILE FIX -->
+    <link rel="stylesheet" href="assets/css/landing-mobile-fix.css">
     
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -23,6 +35,11 @@
     
     <!-- Favicon -->
     <link rel="icon" type="image/svg+xml" href="assets/images/favicon.svg">
+    
+    <!-- ✅ PRÉCHARGEMENT SCRIPTS CRITIQUES -->
+    <link rel="preload" href="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js" as="script">
+    <link rel="preload" href="assets/js/landing.js" as="script">
+    <link rel="preload" href="assets/js/landing-mobile.js" as="script">
 </head>
 
 <body class="landing-page">
@@ -229,7 +246,7 @@
                 </div>
             </div>
             
-            <!-- Hero Visual -->
+            <!-- Hero Visual (Caché sur mobile via CSS) -->
             <div class="hero-visual" data-aos="fade-left" data-aos-delay="200">
                 <div class="dashboard-mockup">
                     <div class="browser-chrome">
@@ -619,7 +636,7 @@
     </section>
 
     <!-- ═══════════════════════════════════════════════════════════════
-         INTERACTIVE DEMO SECTION - AVEC EFFETS 3D
+         INTERACTIVE DEMO SECTION
          ═══════════════════════════════════════════════════════════════ -->
     <section class="demo-interactive" id="demo">
         <div class="container-fluid">
@@ -700,7 +717,7 @@
                                 <span class="results-time">0.3s</span>
                             </div>
                             
-                            <!-- Result Card 1 -->
+                            <!-- Result Cards (1-3) -->
                             <div class="company-result-card highlight">
                                 <div class="company-result-header">
                                     <div class="company-avatar">
@@ -737,7 +754,7 @@
                                 </div>
                             </div>
                             
-                            <!-- Result Card 2 -->
+                            <!-- Card 2 -->
                             <div class="company-result-card">
                                 <div class="company-result-header">
                                     <div class="company-avatar">
@@ -774,7 +791,7 @@
                                 </div>
                             </div>
                             
-                            <!-- Result Card 3 -->
+                            <!-- Card 3 -->
                             <div class="company-result-card">
                                 <div class="company-result-header">
                                     <div class="company-avatar">
@@ -973,7 +990,7 @@
     </section>
 
     <!-- ═══════════════════════════════════════════════════════════════
-         SOLUTIONS SECTION - ✅ CENTRÉ
+         SOLUTIONS SECTION
          ═══════════════════════════════════════════════════════════════ -->
     <section class="solutions-section" id="solutions">
         <div class="container-fluid">
@@ -986,7 +1003,7 @@
             </div>
 
             <div class="solutions-grid">
-                <!-- Solution 1: Individual Investors -->
+                <!-- Solution 1 -->
                 <div class="solution-card" data-aos="zoom-in">
                     <div class="solution-icon-wrapper">
                         <div class="solution-icon">
@@ -1010,7 +1027,7 @@
                     </a>
                 </div>
 
-                <!-- Solution 2: Finance Professionals -->
+                <!-- Solution 2 -->
                 <div class="solution-card" data-aos="zoom-in" data-aos-delay="100">
                     <div class="solution-icon-wrapper">
                         <div class="solution-icon">
@@ -1038,7 +1055,7 @@
     </section>
 
     <!-- ═══════════════════════════════════════════════════════════════
-         TOOLS SECTION - AVEC EFFETS 3D
+         TOOLS SECTION
          ═══════════════════════════════════════════════════════════════ -->
     <section class="tools-section" id="tools">
         <div class="container-fluid">
@@ -1124,7 +1141,7 @@
     </section>
 
     <!-- ═══════════════════════════════════════════════════════════════
-         PRICING SECTION - ✅ CENTRÉ
+         PRICING SECTION
          ═══════════════════════════════════════════════════════════════ -->
     <section class="pricing-section" id="pricing">
         <div class="container-fluid">
@@ -1318,7 +1335,7 @@
     </footer>
 
     <!-- ═══════════════════════════════════════════════════════════════
-         SCRIPTS - ORDRE CRITIQUE POUR API + ALPHY
+         SCRIPTS - ✅ VERSION OPTIMISÉE MOBILE
          ═══════════════════════════════════════════════════════════════ -->
     
     <!-- Chart.js -->
@@ -1327,8 +1344,18 @@
     <!-- AOS Animation -->
     <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
 
-    <!-- Three.js (Optional) -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <!-- ✅ Three.js (CHARGEMENT CONDITIONNEL - Desktop uniquement) -->
+    <script>
+        // Charger Three.js uniquement sur desktop
+        if (window.innerWidth > 768) {
+            console.log('🖥️ Desktop - Chargement Three.js');
+            const threeScript = document.createElement('script');
+            threeScript.src = 'https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js';
+            document.head.appendChild(threeScript);
+        } else {
+            console.log('📱 Mobile - Three.js ignoré (optimisation)');
+        }
+    </script>
     
     <!-- Firebase -->
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
@@ -1344,178 +1371,231 @@
     <!-- API CLIENT -->
     <script src="assets/js/api-client.js"></script>
     
-    <!-- CHATBOT ALPHY AI -->
-    <script src="assets/js/chatbot-config.js"></script>
-    <script src="assets/js/chatbot-gemini.js"></script>
-    <script src="assets/js/chatbot-analytics.js"></script>
-    <script src="assets/js/chatbot-charts.js"></script>
-    <script src="assets/js/chatbot-ipo-analyzer.js"></script>
-    <script src="assets/js/chatbot-suggestions.js"></script>
-    <script src="assets/js/chatbot-ai-engine.js"></script>
-    <script src="assets/js/chatbot-ui.js"></script>
+    <!-- ✅ CHATBOT ALPHY AI - CHARGEMENT CONDITIONNEL -->
+    <script>
+        // Charger chatbot uniquement si nécessaire
+        const chatbotScripts = [
+            'assets/js/chatbot-config.js',
+            'assets/js/chatbot-gemini.js',
+            'assets/js/chatbot-analytics.js',
+            'assets/js/chatbot-charts.js',
+            'assets/js/chatbot-ipo-analyzer.js',
+            'assets/js/chatbot-suggestions.js',
+            'assets/js/chatbot-ai-engine.js',
+            'assets/js/chatbot-ui.js'
+        ];
+
+        // Fonction de chargement séquentiel
+        function loadChatbotScripts(scripts, index = 0) {
+            if (index >= scripts.length) {
+                console.log('✅ Tous les scripts chatbot chargés');
+                return;
+            }
+
+            const script = document.createElement('script');
+            script.src = scripts[index];
+            script.onload = () => {
+                console.log(`✅ ${scripts[index]} chargé`);
+                loadChatbotScripts(scripts, index + 1);
+            };
+            script.onerror = () => {
+                console.error(`❌ Erreur chargement ${scripts[index]}`);
+                loadChatbotScripts(scripts, index + 1); // Continuer malgré l'erreur
+            };
+            document.body.appendChild(script);
+        }
+
+        // Charger les scripts chatbot
+        console.log('🤖 Chargement chatbot...');
+        loadChatbotScripts(chatbotScripts);
+    </script>
     
     <!-- Application Scripts -->
     <script src="assets/js/common.js"></script>
+    
+    <!-- ✅ LANDING.JS - VERSION CORRIGÉE -->
     <script src="assets/js/landing.js"></script>
+    
+    <!-- ✅ NOUVEAU : LANDING MOBILE (chargé après landing.js) -->
+    <script src="assets/js/landing-mobile.js"></script>
     
     <!-- MARKET TICKER -->
     <script src="assets/js/landing-market-ticker.js"></script>
     
     <script src="assets/js/auth-system.js"></script>
     
-    <!-- INITIALISATION GLOBALE -->
+    <!-- ═══════════════════════════════════════════════════════════════
+         INITIALISATION GLOBALE - VERSION OPTIMISÉE MOBILE
+         ═══════════════════════════════════════════════════════════════ -->
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             console.log('%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'color: #3B82F6; font-weight: bold; font-size: 14px;');
             console.log('%c🚀 AlphaVault AI - Platform Initialization', 'color: #3B82F6; font-size: 18px; font-weight: bold;');
             console.log('%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'color: #3B82F6; font-weight: bold; font-size: 14px;');
             
-            // AOS ANIMATIONS
+            // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+            // 📱 DÉTECTION DEVICE
+            // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+            const isMobile = window.innerWidth <= 768;
+            const isSmallMobile = window.innerWidth <= 480;
+            
+            console.log('📊 Device Info:');
+            console.log('  ├─ Type:', isMobile ? (isSmallMobile ? 'Small Mobile' : 'Mobile') : 'Desktop');
+            console.log('  ├─ Width:', window.innerWidth + 'px');
+            console.log('  ├─ Height:', window.innerHeight + 'px');
+            console.log('  └─ User Agent:', navigator.userAgent.includes('Mobile') ? 'Mobile' : 'Desktop');
+            console.log('');
+            
+            // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+            // 🎨 AOS ANIMATIONS
+            // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
             console.log('%c🎨 Initializing AOS Animations...', 'color: #8B5CF6; font-weight: bold;');
-            AOS.init({
-                duration: 800,
-                easing: 'ease-out-cubic',
-                once: true,
-                offset: 50,
-                mirror: false
-            });
-            console.log('✅ AOS Animations initialized\n');
+            
+            if (typeof AOS !== 'undefined') {
+                AOS.init({
+                    duration: isMobile ? 400 : 800, // Plus rapide sur mobile
+                    easing: 'ease-out-cubic',
+                    once: true,
+                    offset: isMobile ? 20 : 50, // Déclenchement plus tôt sur mobile
+                    mirror: false,
+                    disable: isSmallMobile ? true : false // Désactiver sur très petit écran
+                });
+                console.log('✅ AOS Animations initialized');
+                console.log(`  └─ Duration: ${isMobile ? '400ms' : '800ms'}`);
+            } else {
+                console.warn('⚠️ AOS library not loaded');
+            }
+            console.log('');
 
-            // ANNÉE DYNAMIQUE
+            // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+            // 📅 ANNÉE DYNAMIQUE
+            // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
             const yearElement = document.getElementById('currentYear');
             if (yearElement) {
                 yearElement.textContent = new Date().getFullYear();
                 console.log('✅ Dynamic year updated\n');
             }
 
-            // VÉRIFIER CONFIG
+            // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+            // ⚙️ CONFIGURATION
+            // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
             console.log('%c⚙️  Checking Configuration...', 'color: #3B82F6; font-weight: bold;');
             if (window.APP_CONFIG) {
-                console.log('%c✅ APP_CONFIG loaded successfully', 'color: #10b981; font-weight: bold;');
+                console.log('%c✅ APP_CONFIG loaded', 'color: #10b981; font-weight: bold;');
                 console.log('   📡 API Base URL:', window.APP_CONFIG.API_BASE_URL);
-                console.log('   ⏱️  Quote Cache:', window.APP_CONFIG.CACHE_DURATION.quote / 1000 / 60, 'minutes');
             } else {
-                console.warn('%c⚠️  APP_CONFIG not found - using defaults', 'color: #f59e0b; font-weight: bold;');
+                console.warn('%c⚠️  APP_CONFIG not found', 'color: #f59e0b; font-weight: bold;');
             }
+            console.log('');
 
-            // VÉRIFIER API CLIENT
+            // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+            // 📡 API CLIENT
+            // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
             console.log('%c📡 Checking API Client...', 'color: #3B82F6; font-weight: bold;');
             if (typeof window.FinanceAPIClient !== 'undefined') {
-                console.log('%c✅ FinanceAPIClient loaded successfully', 'color: #10b981; font-weight: bold;');
-                console.log('   📊 Market Ticker will use REAL-TIME API data\n');
+                console.log('%c✅ FinanceAPIClient loaded', 'color: #10b981; font-weight: bold;');
             } else {
                 console.error('%c❌ FinanceAPIClient NOT FOUND!', 'color: #ef4444; font-weight: bold;');
-                console.error('   📋 Make sure api-client.js is loaded correctly');
-                console.error('   📋 Check the file path: assets/js/api-client.js\n');
             }
+            console.log('');
 
-            // INITIALISER ALPHY AI CHATBOT
+            // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+            // 🤖 ALPHY AI CHATBOT
+            // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
             console.log('%c🤖 Initializing Alphy AI Chatbot...', 'color: #8B5CF6; font-weight: bold; font-size: 16px;');
             
-            const chatbotChecks = {
-                'ChatbotConfig': typeof ChatbotConfig !== 'undefined',
-                'ChatbotUI': typeof ChatbotUI !== 'undefined',
-                'FinancialChatbotEngine': typeof FinancialChatbotEngine !== 'undefined',
-                'GeminiAIIntegration': typeof GeminiAIIntegration !== 'undefined'
-            };
-
-            console.log('📦 Chatbot Components Status:');
-            Object.entries(chatbotChecks).forEach(([name, loaded]) => {
-                const status = loaded ? '✅' : '❌';
-                const color = loaded ? '#10b981' : '#ef4444';
-                console.log(`%c   ${status} ${name}`, `color: ${color}; font-weight: bold;`);
-            });
-
-            if (chatbotChecks.ChatbotConfig && chatbotChecks.ChatbotUI) {
-                try {
-                    window.financialChatbot = new ChatbotUI(ChatbotConfig);
-                    console.log('%c✅ Alphy AI Chatbot initialized successfully!', 'color: #10b981; font-weight: bold; font-size: 14px;');
-                    console.log('   💬 Chatbot is ready to use');
-                    console.log('   🎯 Click the floating button in bottom-right to start chatting\n');
-                    
-                    if (typeof window.financialChatbot.open === 'function') {
-                        console.log('   ✅ chatbot.open() method available');
-                    } else {
-                        console.warn('   ⚠️ chatbot.open() method not found');
-                    }
-                    
-                } catch (error) {
-                    console.error('%c❌ Error initializing Alphy chatbot:', 'color: #ef4444; font-weight: bold;');
-                    console.error(error);
-                    console.error('📋 Stack trace:', error.stack);
-                }
-            } else {
-                console.error('%c❌ Chatbot initialization FAILED - Missing components', 'color: #ef4444; font-weight: bold;');
-                console.error('📋 Make sure all chatbot-*.js files are loaded in the correct order\n');
-            }
-
-            // BOUTON "CHAT WITH ALPHY"
-            console.log('%c🔘 Setting up "Chat with Alphy" button...', 'color: #8B5CF6; font-weight: bold;');
+            // Attendre que tous les scripts soient chargés
+            let chatbotInitAttempts = 0;
+            const maxAttempts = 20; // 10 secondes max
             
-            const openAlphyBtn = document.getElementById('openAlphyChat');
-            if (openAlphyBtn) {
-                console.log('   ✅ Button #openAlphyChat found');
+            const initChatbot = setInterval(() => {
+                chatbotInitAttempts++;
                 
-                openAlphyBtn.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    console.log('%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'color: #8B5CF6; font-weight: bold;');
-                    console.log('%c🔵 "Chat with Alphy" BUTTON CLICKED', 'color: #8B5CF6; font-weight: bold; font-size: 14px;');
-                    console.log('%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'color: #8B5CF6; font-weight: bold;');
+                const chatbotReady = typeof ChatbotConfig !== 'undefined' && 
+                                   typeof ChatbotUI !== 'undefined';
+                
+                if (chatbotReady) {
+                    clearInterval(initChatbot);
                     
-                    if (window.financialChatbot) {
-                        console.log('   ✅ Chatbot instance found');
+                    console.log('📦 Chatbot Components:');
+                    console.log('   ✅ ChatbotConfig');
+                    console.log('   ✅ ChatbotUI');
+                    
+                    try {
+                        window.financialChatbot = new ChatbotUI(ChatbotConfig);
+                        console.log('%c✅ Alphy AI Chatbot initialized!', 'color: #10b981; font-weight: bold; font-size: 14px;');
+                        console.log('   💬 Chatbot ready to use');
                         
-                        if (typeof window.financialChatbot.open === 'function') {
-                            console.log('   🚀 Opening chatbot...');
-                            try {
-                                window.financialChatbot.open();
-                                console.log('%c   ✅ Chatbot opened successfully!', 'color: #10b981; font-weight: bold;');
-                            } catch (error) {
-                                console.error('   ❌ Error opening chatbot:', error);
-                            }
+                        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+                        // 🔘 BOUTON "CHAT WITH ALPHY"
+                        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+                        const openAlphyBtn = document.getElementById('openAlphyChat');
+                        if (openAlphyBtn) {
+                            console.log('   ✅ Button #openAlphyChat found');
+                            
+                            openAlphyBtn.addEventListener('click', function(e) {
+                                e.preventDefault();
+                                console.log('%c🔵 "Chat with Alphy" CLICKED', 'color: #8B5CF6; font-weight: bold;');
+                                
+                                if (window.financialChatbot && typeof window.financialChatbot.open === 'function') {
+                                    try {
+                                        window.financialChatbot.open();
+                                        console.log('%c   ✅ Chatbot opened!', 'color: #10b981; font-weight: bold;');
+                                    } catch (error) {
+                                        console.error('   ❌ Error opening chatbot:', error);
+                                    }
+                                } else {
+                                    console.error('   ❌ chatbot.open() not available');
+                                    alert('Chatbot error. Check console.');
+                                }
+                            });
+                            
+                            console.log('   ✅ Click listener added');
                         } else {
-                            console.error('   ❌ chatbot.open() method not available');
-                            console.error('   Available methods:', Object.keys(window.financialChatbot));
-                            alert('Chatbot interface error. Check console for details.');
+                            console.warn('   ⚠️ Button #openAlphyChat NOT FOUND');
                         }
-                    } else {
-                        console.error('   ❌ window.financialChatbot is not defined');
-                        console.error('   The chatbot was not initialized properly');
-                        alert('Chatbot is not initialized. Please refresh the page.');
+                        
+                    } catch (error) {
+                        console.error('%c❌ Chatbot init error:', 'color: #ef4444; font-weight: bold;');
+                        console.error(error);
                     }
-                });
-                
-                console.log('   ✅ Click listener added to button\n');
-            } else {
-                console.error('   ❌ Button #openAlphyChat NOT FOUND in DOM');
-                console.error('   Make sure the button exists in the HTML\n');
-            }
+                    
+                    console.log('');
+                    
+                } else if (chatbotInitAttempts >= maxAttempts) {
+                    clearInterval(initChatbot);
+                    console.error('%c❌ Chatbot init TIMEOUT', 'color: #ef4444; font-weight: bold;');
+                    console.error('   Chatbot scripts not loaded after 10 seconds');
+                    console.log('');
+                }
+            }, 500);
 
-            // RÉSUMÉ FINAL
-            console.log('%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'color: #3B82F6; font-weight: bold; font-size: 14px;');
-            console.log('%c✨ AlphaVault AI - All Systems Ready!', 'color: #10b981; font-size: 18px; font-weight: bold;');
-            console.log('%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'color: #3B82F6; font-weight: bold; font-size: 14px;');
-            console.log('');
-            console.log('%cSystem Status:', 'font-weight: bold; font-size: 14px;');
-            console.log(`   ${window.APP_CONFIG ? '✅' : '❌'} Configuration`);
-            console.log(`   ${typeof window.FinanceAPIClient !== 'undefined' ? '✅' : '❌'} API Client (FinanceAPIClient)`);
-            console.log(`   ${typeof window.marketTicker !== 'undefined' ? '✅' : '❌'} Market Ticker`);
-            console.log(`   ${chatbotChecks.ChatbotUI ? '✅' : '❌'} Alphy AI Chatbot`);
-            console.log('');
-            console.log('%cRefresh Settings:', 'font-weight: bold; font-size: 14px;');
-            if (window.APP_CONFIG) {
-                console.log(`   ⏱️  Quote Cache: ${window.APP_CONFIG.CACHE_DURATION.quote / 1000 / 60} minutes`);
-            }
-            if (window.marketTicker) {
-                console.log(`   🔄 Ticker Refresh: ${window.marketTicker.updateInterval / 1000 / 60} minutes`);
-            }
-            console.log('');
-            console.log('%cHow to use:', 'font-weight: bold; font-size: 14px;');
-            console.log('   💬 Click the chat button (bottom-right) to talk with Alphy');
-            console.log('   📊 Market ticker updates automatically every hour');
-            console.log('   🎨 All animations are enabled');
-            console.log('');
-            console.log('%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'color: #3B82F6; font-weight: bold; font-size: 14px;');
+            // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+            // ✅ RÉSUMÉ FINAL
+            // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+            setTimeout(() => {
+                console.log('%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'color: #3B82F6; font-weight: bold;');
+                console.log('%c✨ AlphaVault AI - All Systems Ready!', 'color: #10b981; font-size: 18px; font-weight: bold;');
+                console.log('%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'color: #3B82F6; font-weight: bold;');
+                console.log('');
+                console.log('%cSystem Status:', 'font-weight: bold; font-size: 14px;');
+                console.log(`   ${window.APP_CONFIG ? '✅' : '❌'} Configuration`);
+                console.log(`   ${typeof window.FinanceAPIClient !== 'undefined' ? '✅' : '❌'} API Client`);
+                console.log(`   ${typeof window.marketTicker !== 'undefined' ? '✅' : '❌'} Market Ticker`);
+                console.log(`   ${typeof window.financialChatbot !== 'undefined' ? '✅' : '❌'} Alphy AI Chatbot`);
+                console.log(`   ${typeof window.MobileApp !== 'undefined' ? '✅' : '❌'} Mobile Optimizations`);
+                console.log('');
+                console.log('%cDevice:', 'font-weight: bold; font-size: 14px;');
+                console.log(`   📱 Type: ${isMobile ? (isSmallMobile ? 'Small Mobile' : 'Mobile') : 'Desktop'}`);
+                console.log(`   📐 Resolution: ${window.innerWidth}x${window.innerHeight}`);
+                console.log('');
+                console.log('%cFeatures:', 'font-weight: bold; font-size: 14px;');
+                console.log(`   🎨 Animations: ${isMobile ? 'Optimized' : 'Full'}`);
+                console.log(`   🎮 Three.js: ${isMobile ? 'Disabled' : 'Enabled'}`);
+                console.log(`   ⚡ Performance: ${isMobile ? 'Mobile Mode' : 'Desktop Mode'}`);
+                console.log('');
+                console.log('%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'color: #3B82F6; font-weight: bold;');
+            }, 2000);
         });
     </script>
 </body>

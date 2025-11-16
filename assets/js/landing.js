@@ -1,6 +1,6 @@
 /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
    LANDING.JS - FinancePro Landing Page Premium 3D
-   Version COMPLÈTE avec Three.js Integration + DEBUG
+   Version COMPLÈTE avec Three.js Integration + MOBILE FIX
    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -60,11 +60,19 @@ function animateValue(element, start, end, duration) {
 }
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-// 🎨 THREE.JS - OBJETS 3D VOLUMÉTRIQUES
+// 🎨 THREE.JS - OBJETS 3D VOLUMÉTRIQUES - ✅ MOBILE FIX
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 class Landing3DObjects {
     constructor() {
+        // ✅ DÉSACTIVER SUR MOBILE
+        if (window.innerWidth <= 768) {
+            console.log('📱 Mobile détecté - Three.js désactivé pour performances');
+            this.scenes = [];
+            this.isThreeJsAvailable = false;
+            return;
+        }
+        
         this.scenes = [];
         this.isThreeJsAvailable = typeof THREE !== 'undefined';
         
@@ -678,342 +686,118 @@ class NavigationManager {
 }
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-// 📱 MOBILE MENU MANAGER - VERSION COMPLÈTE MOBILE
+// 📱 MOBILE MENU MANAGER - ✅ DESKTOP ONLY (Mobile géré par landing-mobile.js)
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 class MobileMenuManager {
     constructor() {
-        console.log('📱 Mobile Menu Manager - Initialisation');
-        
-        this.mobileMenuBtn = document.getElementById('mobileMenuBtn');
-        this.navMenu = document.querySelector('.nav-menu');
-        this.navLinks = document.querySelectorAll('.nav-link');
-        
-        console.log('  ├─ Bouton hamburger:', this.mobileMenuBtn ? '✅' : '❌');
-        console.log('  ├─ Menu navigation:', this.navMenu ? '✅' : '❌');
-        console.log('  └─ Liens navigation:', this.navLinks.length);
-        
-        this.init();
-    }
-
-    init() {
-        if (!this.mobileMenuBtn || !this.navMenu) {
-            console.warn('⚠️ Menu mobile non trouvé');
-            return;
+        // ✅ VÉRIFIER SI MOBILE
+        if (window.innerWidth <= 768) {
+            console.log('📱 Mobile - Menu géré par landing-mobile.js');
+            return; // Le fichier landing-mobile.js gère tout
         }
-
-        console.log('✅ Initialisation des listeners...');
-
-        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-        // 🍔 TOGGLE MENU AU CLIC SUR HAMBURGER
-        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-        this.mobileMenuBtn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            console.log('🔘 Hamburger cliqué');
-            this.toggleMenu();
-        });
-
-        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-        // 🔗 FERMER LE MENU AU CLIC SUR UN LIEN
-        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-        this.navLinks.forEach(link => {
-            link.addEventListener('click', () => {
-                if (window.innerWidth <= 768) {
-                    console.log('🔗 Clic sur lien navigation - Fermeture menu');
-                    this.closeMenu();
-                }
-            });
-        });
-
-        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-        // 🎯 FERMER SI CLIC EN DEHORS
-        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-        document.addEventListener('click', (e) => {
-            if (this.navMenu.classList.contains('active')) {
-                if (!this.navMenu.contains(e.target) && !this.mobileMenuBtn.contains(e.target)) {
-                    console.log('🔒 Clic en dehors - Fermeture menu');
-                    this.closeMenu();
-                }
-            }
-        });
-
-        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-        // 📏 FERMER AU RESIZE (passage desktop)
-        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-        let resizeTimer;
-        window.addEventListener('resize', () => {
-            clearTimeout(resizeTimer);
-            resizeTimer = setTimeout(() => {
-                if (window.innerWidth > 768 && this.navMenu.classList.contains('active')) {
-                    console.log('🖥️ Passage en mode desktop - Fermeture menu');
-                    this.closeMenu();
-                }
-            }, 250);
-        });
-
-        console.log('✅ Mobile Menu Manager prêt');
-    }
-
-    toggleMenu() {
-        const isActive = this.navMenu.classList.contains('active');
         
-        console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-        console.log(isActive ? '❌ Fermeture du menu' : '✅ Ouverture du menu');
-        
-        if (isActive) {
-            this.closeMenu();
-        } else {
-            this.openMenu();
-        }
-    }
-
-   openMenu() {
-        this.mobileMenuBtn.classList.add('active');
-        this.navMenu.classList.add('active');
-        
-        // ✅ AJOUT : Bloquer le scroll du body
-        document.body.classList.add('menu-open');
-        document.body.style.overflow = 'hidden';
-        document.body.style.position = 'fixed';
-        document.body.style.width = '100%';
-        
-        console.log('✅ Menu ouvert + scroll bloqué');
-    }
-
-    closeMenu() {
-        this.mobileMenuBtn.classList.remove('active');
-        this.navMenu.classList.remove('active');
-        
-        // ✅ AJOUT : Réactiver le scroll
-        document.body.classList.remove('menu-open');
-        document.body.style.overflow = '';
-        document.body.style.position = '';
-        document.body.style.width = '';
-        
-        console.log('❌ Menu fermé + scroll réactivé');
+        console.log('🖥️ Desktop - Menu standard');
+        // Pas de code nécessaire pour desktop (menu toujours visible)
     }
 }
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-// 👤 USER MENU MANAGER - VERSION COMPLÈTE MOBILE + DEBUG
+// 👤 USER MENU MANAGER - ✅ DESKTOP ONLY (Mobile géré par landing-mobile.js)
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 class UserMenuManager {
     constructor() {
-        console.log('%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'color: #3B82F6; font-weight: bold;');
-        console.log('%c🔍 UserMenuManager - Initialisation', 'color: #3B82F6; font-weight: bold;');
-        console.log('%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'color: #3B82F6; font-weight: bold;');
+        // ✅ VÉRIFIER SI MOBILE
+        if (window.innerWidth <= 768) {
+            console.log('📱 Mobile - User menu géré par landing-mobile.js');
+            return; // Le fichier landing-mobile.js gère tout
+        }
+        
+        console.log('🖥️ Desktop - User menu standard');
         
         this.profileButton = document.getElementById('userProfileButton');
         this.dropdownMenu = document.getElementById('userDropdownMenu');
         this.logoutButton = document.getElementById('logoutButton');
         this.settingsLink = document.getElementById('settingsLink');
         
-        console.log('📦 Éléments trouvés:');
-        console.log('  ├─ Profile Button:', this.profileButton ? '✅' : '❌');
-        console.log('  ├─ Dropdown Menu:', this.dropdownMenu ? '✅' : '❌');
-        console.log('  ├─ Logout Button:', this.logoutButton ? '✅' : '❌');
-        console.log('  └─ Settings Link:', this.settingsLink ? '✅' : '❌');
-        
         this.init();
     }
 
     init() {
         if (!this.profileButton || !this.dropdownMenu) {
-            console.error('❌ Éléments manquants - UserMenu désactivé');
+            console.warn('⚠️ Éléments user menu manquants');
             return;
         }
 
-        console.log('✅ Configuration des événements...');
-
-        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-        // 🎯 MÉTHODE 1 : Click direct avec useCapture
-        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-        console.log('🎯 Listener MÉTHODE 1 (direct + capture)');
+        // Version desktop simplifiée
         this.profileButton.addEventListener('click', (e) => {
-            console.log('%c🔴 CLIC DÉTECTÉ - MÉTHODE 1', 'background: #ef4444; color: white; padding: 5px; font-weight: bold;');
             e.preventDefault();
             e.stopPropagation();
             this.toggleDropdown();
-        }, true);
+        });
 
-        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-        // 🎯 MÉTHODE 2 : Délégation sur document
-        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-        console.log('🎯 Listener MÉTHODE 2 (délégation)');
         document.addEventListener('click', (e) => {
-            const target = e.target;
-            
-            // Si clic sur le bouton ou ses enfants
-            if (this.profileButton.contains(target)) {
-                console.log('%c🟢 CLIC - MÉTHODE 2', 'background: #10b981; color: white; padding: 5px; font-weight: bold;');
-                e.preventDefault();
-                e.stopPropagation();
-                this.toggleDropdown();
-                return;
-            }
-            
-            // Si clic en dehors, fermer
-            if (!this.dropdownMenu.contains(target)) {
-                if (this.dropdownMenu.classList.contains('active')) {
-                    console.log('🔒 Clic en dehors - Fermeture dropdown');
+            if (this.dropdownMenu.classList.contains('active')) {
+                if (!this.dropdownMenu.contains(e.target) && !this.profileButton.contains(e.target)) {
                     this.closeDropdown();
                 }
             }
         });
 
-        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-        // 🎯 MÉTHODE 3 : Listener sur enfants
-        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-        console.log('🎯 Listener MÉTHODE 3 (enfants)');
-        const children = this.profileButton.querySelectorAll('*');
-        console.log(`  └─ ${children.length} enfants détectés`);
-        
-        children.forEach((child, index) => {
-            child.addEventListener('click', (e) => {
-                console.log(`%c🟡 CLIC - MÉTHODE 3 (enfant ${index})`, 'background: #f59e0b; color: white; padding: 5px; font-weight: bold;');
-                e.preventDefault();
-                e.stopPropagation();
-                this.toggleDropdown();
-            });
-        });
-
-        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-        // 🔓 BOUTON DÉCONNEXION
-        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
         if (this.logoutButton) {
-            console.log('✅ Listener déconnexion ajouté');
             this.logoutButton.addEventListener('click', (e) => {
                 e.preventDefault();
-                console.log('🔓 Déconnexion demandée');
                 this.handleLogout();
             });
         }
 
-        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-        // ⚙️ LIEN PARAMÈTRES
-        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
         if (this.settingsLink) {
-            console.log('✅ Listener paramètres ajouté');
             this.settingsLink.addEventListener('click', (e) => {
                 e.preventDefault();
-                console.log('⚙️ Redirection paramètres...');
                 window.location.href = 'settings.html';
             });
         }
-
-        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-        // 🔗 FERMER DROPDOWN AU CLIC SUR LIEN INTERNE
-        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-        const dropdownLinks = this.dropdownMenu.querySelectorAll('.dropdown-link');
-        dropdownLinks.forEach(link => {
-            link.addEventListener('click', () => {
-                console.log('🔗 Clic sur lien dropdown - Fermeture');
-                this.closeDropdown();
-            });
-        });
-
-        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-        // 📏 FERMER AU RESIZE (passage desktop)
-        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-        let resizeTimer;
-        window.addEventListener('resize', () => {
-            clearTimeout(resizeTimer);
-            resizeTimer = setTimeout(() => {
-                if (window.innerWidth > 768 && this.dropdownMenu.classList.contains('active')) {
-                    console.log('🖥️ Passage desktop - Fermeture dropdown');
-                    this.closeDropdown();
-                }
-            }, 250);
-        });
-
-        console.log('%c✅ UserMenuManager prêt !', 'color: #10b981; font-weight: bold;');
-        console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n');
     }
 
     toggleDropdown() {
-        console.log('%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'color: #8b5cf6; font-weight: bold;');
-        console.log('%c🔵 toggleDropdown() APPELÉE', 'color: #8b5cf6; font-weight: bold; font-size: 14px;');
-        
         const isExpanded = this.profileButton.getAttribute('aria-expanded') === 'true';
         const newState = !isExpanded;
         
-        console.log('📊 État actuel:', isExpanded ? '✅ OUVERT' : '❌ FERMÉ');
-        console.log('🎯 Nouvel état:', newState ? '✅ OUVERT' : '❌ FERMÉ');
-        
-        // Mettre à jour aria-expanded
         this.profileButton.setAttribute('aria-expanded', newState);
         
-        // Toggle classe active
         if (newState) {
             this.dropdownMenu.classList.add('active');
-            
-            // ✅ BLOQUER LE SCROLL SUR MOBILE
-            if (window.innerWidth <= 768) {
-                document.body.style.overflow = 'hidden';
-                document.body.style.position = 'fixed';
-                document.body.style.width = '100%';
-                console.log('🔒 Scroll bloqué (mobile)');
-            }
         } else {
             this.dropdownMenu.classList.remove('active');
-            
-            // ✅ RÉACTIVER LE SCROLL
-            document.body.style.overflow = '';
-            document.body.style.position = '';
-            document.body.style.width = '';
-            console.log('🔓 Scroll réactivé');
         }
         
-        // Animer chevron
         const chevron = this.profileButton.querySelector('.user-dropdown-icon');
         if (chevron) {
             chevron.style.transform = newState ? 'rotate(180deg)' : 'rotate(0deg)';
         }
-        
-        console.log('%c🎉 RÉSULTAT:', 'font-weight: bold;', 
-                    this.dropdownMenu.classList.contains('active') ? '✅ OUVERT' : '❌ FERMÉ');
-        console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n');
     }
 
     closeDropdown() {
-        if (!this.dropdownMenu.classList.contains('active')) {
-            console.log('ℹ️ Dropdown déjà fermé');
-            return;
-        }
-        
-        console.log('🔒 Fermeture du dropdown...');
-        
         this.profileButton.setAttribute('aria-expanded', 'false');
         this.dropdownMenu.classList.remove('active');
-        
-        // ✅ RÉACTIVER LE SCROLL
-        document.body.style.overflow = '';
-        document.body.style.position = '';
-        document.body.style.width = '';
         
         const chevron = this.profileButton.querySelector('.user-dropdown-icon');
         if (chevron) {
             chevron.style.transform = 'rotate(0deg)';
         }
-        
-        console.log('✅ Dropdown fermé + scroll réactivé');
     }
 
     handleLogout() {
-        console.log('🔓 Déconnexion en cours...');
-        
         if (typeof firebase !== 'undefined' && firebase.auth) {
             firebase.auth().signOut()
                 .then(() => {
-                    console.log('✅ Déconnexion Firebase réussie');
                     window.location.href = 'index.html';
                 })
                 .catch((error) => {
                     console.error('❌ Erreur Firebase:', error);
                 });
         } else {
-            console.log('⚠️ Firebase non disponible - Redirection directe');
             window.location.href = 'index.html';
         }
     }
@@ -1077,7 +861,7 @@ class AuthStateManager {
 }
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-// 📊 GRAPHIQUE BOURSIER - VERSION SIMPLIFIÉE
+// 📊 GRAPHIQUE BOURSIER - VERSION OPTIMISÉE MOBILE
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 class HeroChartManager {
@@ -1440,11 +1224,17 @@ class NumberCounterManager {
 }
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-// 🎨 TILT EFFECT MANAGER
+// 🎨 TILT EFFECT MANAGER - ✅ DÉSACTIVÉ SUR MOBILE
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 class TiltEffectManager {
     constructor() {
+        // ✅ Désactiver sur mobile
+        if (window.innerWidth <= 768) {
+            console.log('📱 Mobile - Tilt effect désactivé');
+            return;
+        }
+        
         this.cards = document.querySelectorAll('.feature-card, .solution-card, .pricing-card');
         this.init();
     }
@@ -1596,7 +1386,7 @@ class LandingApp {
         console.log('%c🚀 FinancePro Landing - Initialisation...', 'color: #3B82F6; font-size: 14px; font-weight: bold;');
 
         try {
-            // Initialiser tous les managers
+            // ✅ Initialiser tous les managers
             this.managers.navigation = new NavigationManager();
             this.managers.mobileMenu = new MobileMenuManager();
             this.managers.userMenu = new UserMenuManager();
@@ -1610,6 +1400,13 @@ class LandingApp {
             this.managers.smoothScroll = new SmoothScrollManager();
             this.managers.cta = new CTAManager();
             this.managers.performance = new PerformanceMonitor();
+            
+            // ✅ Three.js seulement sur desktop
+            if (window.innerWidth > 768 && typeof THREE !== 'undefined') {
+                this.managers.landing3D = new Landing3DObjects();
+            } else {
+                console.log('📱 Mobile ou Three.js absent - Objets 3D désactivés');
+            }
 
             console.log('%c✅ Tous les modules chargés avec succès!', 'color: #10B981; font-size: 14px; font-weight: bold;');
             console.log('%c💎 Animations prêtes', 'color: #F59E0B; font-size: 12px;');
