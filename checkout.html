@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Secure Checkout - AlphaVault AI</title>
+    
+    <!-- Stylesheets -->
+    <link rel="stylesheet" href="assets/css/common.css">
+    <link rel="stylesheet" href="assets/css/checkout.css">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Stripe.js -->
+    <script src="https://js.stripe.com/v3/"></script>
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="assets/images/favicon.svg">
+</head>
+
+<body class="checkout-page">
+    <div class="checkout-container">
+        <!-- Header -->
+        <div class="checkout-header">
+            <div class="checkout-logo">
+                <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                    <defs>
+                        <linearGradient id="logoGradientCheckout" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" style="stop-color:#3B82F6;stop-opacity:1" />
+                            <stop offset="100%" style="stop-color:#8B5CF6;stop-opacity:1" />
+                        </linearGradient>
+                    </defs>
+                    <path d="M 20 80 L 30 70 L 40 75 L 50 60 L 60 65 L 70 45 L 80 50 L 90 30" 
+                          stroke="url(#logoGradientCheckout)" 
+                          stroke-width="4" 
+                          fill="none" 
+                          stroke-linecap="round"/>
+                    <circle cx="30" cy="70" r="4" fill="url(#logoGradientCheckout)"/>
+                    <circle cx="50" cy="60" r="4" fill="url(#logoGradientCheckout)"/>
+                    <circle cx="70" cy="45" r="4" fill="url(#logoGradientCheckout)"/>
+                    <circle cx="90" cy="30" r="5" fill="url(#logoGradientCheckout)"/>
+                </svg>
+                <span class="checkout-logo-text">AlphaVault AI</span>
+            </div>
+            
+            <h1 class="checkout-title">Start Your Premium Journey</h1>
+            <p class="checkout-subtitle">14-day free trial • Cancel anytime • Secure payment</p>
+        </div>
+
+        <!-- Plan Selector -->
+        <div class="plan-selector">
+            <!-- Pro Plan -->
+            <div class="plan-option selected" data-plan="pro" data-price="15">
+                <div class="plan-badge">🔥 Most Popular</div>
+                <h3 class="plan-name">AlphaVault Pro</h3>
+                <div class="plan-price">
+                    <span class="currency">$</span>
+                    <span class="amount">15</span>
+                    <span class="period">/month</span>
+                </div>
+                <ul class="plan-features">
+                    <li><i class="fas fa-check-circle"></i> Unlimited analyses</li>
+                    <li><i class="fas fa-check-circle"></i> IPO screening & alerts</li>
+                    <li><i class="fas fa-check-circle"></i> Portfolio optimization</li>
+                    <li><i class="fas fa-check-circle"></i> Monte Carlo simulations</li>
+                    <li><i class="fas fa-check-circle"></i> Unlimited Alphy AI</li>
+                </ul>
+            </div>
+
+            <!-- Platinum Plan -->
+            <div class="plan-option" data-plan="platinum" data-price="25">
+                <div class="plan-badge platinum">💎 Platinum</div>
+                <h3 class="plan-name">AlphaVault Platinum</h3>
+                <div class="plan-price">
+                    <span class="currency">$</span>
+                    <span class="amount">25</span>
+                    <span class="period">/month</span>
+                </div>
+                <ul class="plan-features">
+                    <li><i class="fas fa-check-circle"></i> Everything in Pro</li>
+                    <li><i class="fas fa-check-circle"></i> Advanced M&A screening</li>
+                    <li><i class="fas fa-check-circle"></i> API Access (10K calls/month)</li>
+                    <li><i class="fas fa-check-circle"></i> White-label reports</li>
+                    <li><i class="fas fa-check-circle"></i> Priority support 24/7</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Checkout Form -->
+        <form id="payment-form" class="checkout-form">
+            <h3 class="form-section-title">
+                <i class="fas fa-credit-card"></i>
+                Payment Information
+            </h3>
+
+            <div class="form-group">
+                <label for="email" class="form-label">Email Address</label>
+                <input 
+                    type="email" 
+                    id="email" 
+                    class="form-input" 
+                    placeholder="your@email.com"
+                    required
+                    autocomplete="email"
+                >
+            </div>
+
+            <div class="form-group">
+                <label for="name" class="form-label">Cardholder Name</label>
+                <input 
+                    type="text" 
+                    id="name" 
+                    class="form-input" 
+                    placeholder="John Doe"
+                    required
+                    autocomplete="name"
+                >
+            </div>
+
+            <div class="form-group">
+                <label for="card-element" class="form-label">Card Details</label>
+                <!-- Stripe Card Element sera inséré ici -->
+                <div id="card-element"></div>
+                <div id="card-errors" role="alert"></div>
+            </div>
+
+            <button type="submit" class="btn-checkout-submit" id="submit-button">
+                <span class="btn-text">
+                    <i class="fas fa-lock"></i>
+                    Start 14-Day Free Trial
+                </span>
+                <div class="spinner"></div>
+            </button>
+
+            <div class="trust-signals">
+                <div class="trust-item">
+                    <i class="fas fa-shield-alt"></i>
+                    <span>Secure SSL Payment</span>
+                </div>
+                <div class="trust-item">
+                    <i class="fas fa-undo"></i>
+                    <span>Cancel Anytime</span>
+                </div>
+                <div class="trust-item">
+                    <i class="fas fa-check-double"></i>
+                    <span>Powered by Stripe</span>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <!-- Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <script src="assets/js/firebase-config.js"></script>
+
+    <!-- Checkout Script -->
+    <script src="assets/js/checkout.js"></script>
+</body>
+</html>
