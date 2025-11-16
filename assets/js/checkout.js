@@ -120,6 +120,7 @@ async function checkExistingPlan(user) {
         const userDoc = await firebase.firestore().collection('users').doc(user.uid).get();
         
         if (userDoc.exists) {
+            // ✅ UTILISATEUR EXISTANT (a déjà un compte)
             const userData = userDoc.data();
             const plan = userData?.plan || 'basic';
             const status = userData?.subscriptionStatus || 'inactive';
@@ -127,32 +128,46 @@ async function checkExistingPlan(user) {
             console.log('📊 Current plan:', plan);
             console.log('📊 Subscription status:', status);
             
-            // Déterminer si l'utilisateur a un plan actif
-            const hasActivePlan = ['active', 'active_free', 'trialing'].includes(status) && plan !== 'basic';
-            
+            // ✅ CORRECTION : Utilisateur existant = toujours "Change Plan"
+            // Peu importe si Basic, Pro ou Platinum
             userExistingPlan = {
-                hasPlan: hasActivePlan,
+                hasPlan: true, // ✅ TRUE car le compte existe
                 currentPlan: plan,
                 subscriptionStatus: status
             };
             
-            // Afficher le badge du plan actuel si applicable
-            if (hasActivePlan) {
-                displayCurrentPlanBadge(plan);
-            }
+            // Afficher le badge du plan actuel
+            displayCurrentPlanBadge(plan);
             
-            // Adapter le header
-            updateHeaderForExistingUser(hasActivePlan);
+            // Adapter le header pour "Change Plan"
+            updateHeaderForExistingUser(true);
             
             // Mettre à jour le bouton
             updatePriceSummary();
             
-            console.log('✅ Existing plan check complete:', userExistingPlan);
+            console.log('✅ Existing user detected - showing "Change Plan"');
+            console.log('   Current plan:', plan);
+            console.log('   Status:', status);
         } else {
-            console.log('ℹ️ No existing user data found');
+            // ✅ NOUVEAU VISITEUR (pas de document Firestore)
+            console.log('ℹ️ New user - showing "Start Your Premium Journey"');
+            
+            userExistingPlan = {
+                hasPlan: false,
+                currentPlan: 'basic',
+                subscriptionStatus: 'inactive'
+            };
+            
+            // Garder le header par défaut (déjà défini dans le HTML)
         }
     } catch (error) {
         console.error('❌ Error checking existing plan:', error);
+        // En cas d'erreur, traiter comme nouveau visiteur
+        userExistingPlan = {
+            hasPlan: false,
+            currentPlan: 'basic',
+            subscriptionStatus: 'inactive'
+        };
     }
 }
 
