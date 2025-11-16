@@ -1,6 +1,6 @@
 /* ═══════════════════════════════════════════════════════════════
    ACCESS CONTROL - Vérification des permissions par plan
-   AlphaVault AI - VERSION SÉCURISÉE CORRIGÉE
+   AlphaVault AI - VERSION CORRIGÉE AVEC FALLBACK INTELLIGENT
    ═══════════════════════════════════════════════════════════════ */
 
 console.log('🔐 Access Control System initialized');
@@ -22,7 +22,6 @@ const ACCESS_LEVELS = {
             'index.html',
             'dashboard-financier.html',
             'investments-analytics.html',
-            'monte-carlo.html',
             'portfolio-optimizer.html'
         ]
     },
@@ -83,47 +82,20 @@ const ACCESS_LEVELS = {
             'market-intelligence.html'
         ]
     },
+    // ✅ PLATINUM = ACCÈS TOTAL
     platinum: {
         maxAnalyses: Infinity,
         features: [
-            'portfolio-tracking',
-            'basic-data',
-            'alphy-ai-unlimited',
-            'ipo-screening',
-            'portfolio-optimization',
-            'monte-carlo',
-            'real-time-data',
-            'risk-parity',
-            'scenario-analysis',
-            'trend-prediction',
-            'market-intelligence',
-            'company-insights',
-            'analyst-coverage',
-            'earnings-estimates',
-            'chatbot-fullpage'
+            'all' // ✅ Accès à toutes les fonctionnalités
         ],
         pages: [
-            'index.html',
-            'dashboard-financier.html',
-            'investments-analytics.html',
-            'advanced-analysis.html',
-            'monte-carlo.html',
-            'risk-parity.html',
-            'scenario-analysis.html',
-            'portfolio-optimizer.html',
-            'market-data.html',
-            'trend-prediction.html',
-            'market-intelligence.html',
-            'company-insights.html',
-            'analyst-coverage.html',
-            'earnings-estimates.html',
-            'chatbot-fullpage.html'
+            'all' // ✅ Accès à toutes les pages
         ]
     }
 };
 
 // ═══════════════════════════════════════════════════════════════
-// ✅ NOUVEAU : DÉFINITION DES PAGES PUBLIQUES ET PROTÉGÉES
+// ✅ DÉFINITION DES PAGES PUBLIQUES ET PROTÉGÉES
 // ═══════════════════════════════════════════════════════════════
 
 const PAGE_CATEGORIES = {
@@ -132,29 +104,38 @@ const PAGE_CATEGORIES = {
         'index.html',
         'login.html',
         'register.html',
-        'forgot-password.html'
+        'forgot-password.html',
+        'checkout.html',
+        'success.html',
+        'pricing.html',
+        'about.html',
+        'contact.html'
     ],
     
     // Pages accessibles par tous les utilisateurs connectés (Basic+)
     authenticated: [
         'dashboard-financier.html',
-        'investments-analytics.html'
+        'investments-analytics.html',
+        'portfolio-optimizer.html'
     ],
     
-    // Pages PRO uniquement (Basic bloqué)
+    // Pages PRO uniquement (Basic bloqué, Pro et Platinum OK)
     pro: [
         'advanced-analysis.html',
         'monte-carlo.html',
         'risk-parity.html',
         'scenario-analysis.html',
-        'portfolio-optimizer.html',
         'market-data.html',
         'trend-prediction.html',
         'market-intelligence.html'
     ],
     
-    // ✅ NOUVEAU : Pages PLATINUM uniquement
+    // ✅ Pages PLATINUM uniquement (Platinum ONLY)
     platinum: [
+        'company-insights.html',      // ✅ Ajouté
+        'analyst-coverage.html',      // ✅ Ajouté
+        'earnings-estimates.html',    // ✅ Ajouté
+        'chatbot-fullpage.html',      // ✅ Ajouté
         'ma-screening.html',          // M&A Screening
         'api-access.html',            // API Access Dashboard
         'white-label.html',           // White-label Reports
@@ -164,7 +145,7 @@ const PAGE_CATEGORIES = {
 };
 
 // ═══════════════════════════════════════════════════════════════
-// VÉRIFIER L'ACCÈS À UNE PAGE
+// ✅ VÉRIFIER L'ACCÈS À UNE PAGE (VERSION CORRIGÉE)
 // ═══════════════════════════════════════════════════════════════
 
 async function checkPageAccess(pageName) {
@@ -213,35 +194,31 @@ async function checkPageAccess(pageName) {
         }
         
         // ✅ DÉTERMINER LE NIVEAU D'ACCÈS
-        let effectiveLevel;
-        
-        if (subscriptionStatus === 'active_free') {
-            // Utilisateur avec code promo FREE
-            effectiveLevel = userPlan; // ✅ Utiliser le plan réel (pro ou platinum)
-        } else {
-            effectiveLevel = userPlan;
-        }
+        const effectiveLevel = subscriptionStatus === 'active_free' ? userPlan : userPlan;
         
         console.log(`🔑 Effective access level: ${effectiveLevel}`);
         
-        // ✅ NOUVELLE LOGIQUE DE VÉRIFICATION
+        // ═══════════════════════════════════════════════════════════
+        // ✅ NOUVELLE LOGIQUE DE VÉRIFICATION (ORDRE IMPORTANT)
+        // ═══════════════════════════════════════════════════════════
         
-        // 1️⃣ Pages PLATINUM ONLY
-        if (PAGE_CATEGORIES.platinum.includes(pageName)) {
-            if (effectiveLevel === 'platinum') {
-                console.log('✅ Access granted (Platinum page)');
-                return true;
-            } else {
-                console.warn('⛔ Access denied - Platinum plan required');
-                showUpgradeModal(effectiveLevel, 'platinum_required');
-                return false;
-            }
+        // 1️⃣ PLATINUM = ACCÈS TOTAL (PRIORITAIRE)
+        if (effectiveLevel === 'platinum') {
+            console.log('✅ Access granted (Platinum has full access to all pages)');
+            return true;
         }
         
-        // 2️⃣ Pages PRO (accessible par Pro et Platinum)
+        // 2️⃣ Pages PLATINUM ONLY (bloquer non-Platinum)
+        if (PAGE_CATEGORIES.platinum.includes(pageName)) {
+            console.warn('⛔ Access denied - Platinum plan required');
+            showUpgradeModal(effectiveLevel, 'platinum_required');
+            return false;
+        }
+        
+        // 3️⃣ Pages PRO (accessible par Pro)
         if (PAGE_CATEGORIES.pro.includes(pageName)) {
-            if (effectiveLevel === 'pro' || effectiveLevel === 'platinum') {
-                console.log('✅ Access granted (Pro/Platinum page)');
+            if (effectiveLevel === 'pro') {
+                console.log('✅ Access granted (Pro page)');
                 return true;
             } else {
                 console.warn('⛔ Access denied - Pro plan required');
@@ -250,15 +227,32 @@ async function checkPageAccess(pageName) {
             }
         }
         
-        // 3️⃣ Pages AUTHENTICATED (accessible par tous les utilisateurs connectés)
+        // 4️⃣ Pages AUTHENTICATED (accessible par tous les utilisateurs connectés)
         if (PAGE_CATEGORIES.authenticated.includes(pageName)) {
             console.log('✅ Access granted (Authenticated page)');
             return true;
         }
         
-        // 4️⃣ Page non référencée = BLOQUER PAR DÉFAUT (sécurité)
-        console.warn(`⚠️ Unknown page: ${pageName} - blocking access by default`);
-        showUpgradeModal(effectiveLevel, 'unknown_page');
+        // 5️⃣ FALLBACK INTELLIGENT : Vérifier dans ACCESS_LEVELS
+        const userAccessPages = ACCESS_LEVELS[effectiveLevel]?.pages || [];
+        
+        if (userAccessPages.includes(pageName) || userAccessPages.includes('all')) {
+            console.log(`✅ Access granted (Found in ${effectiveLevel} access list)`);
+            return true;
+        }
+        
+        // 6️⃣ DERNIÈRE ÉTAPE : BLOQUER
+        console.warn(`⚠️ Access denied for ${pageName} - plan: ${effectiveLevel}`);
+        
+        // Déterminer quel upgrade suggérer
+        if (effectiveLevel === 'basic') {
+            showUpgradeModal(effectiveLevel, 'pro_required');
+        } else if (effectiveLevel === 'pro') {
+            showUpgradeModal(effectiveLevel, 'platinum_required');
+        } else {
+            showUpgradeModal(effectiveLevel, 'unknown_page');
+        }
+        
         return false;
         
     } catch (error) {
@@ -435,7 +429,7 @@ function showUpgradeModal(currentPlan, reason = 'insufficient') {
         }, 300);
     });
     
-    // ✅ NOUVEAU : Empêcher la fermeture en cliquant à l'extérieur
+    // ✅ Empêcher la fermeture en cliquant à l'extérieur
     modal.addEventListener('click', (e) => {
         if (e.target === modal) {
             // Animation de "secousse" pour indiquer que la modal ne peut pas être fermée
@@ -468,7 +462,7 @@ function showUpgradeModal(currentPlan, reason = 'insufficient') {
 }
 
 // ═══════════════════════════════════════════════════════════════
-// ✅ NOUVEAU : MASQUER LE CONTENU DE LA PAGE
+// ✅ MASQUER LE CONTENU DE LA PAGE
 // ═══════════════════════════════════════════════════════════════
 
 function hidePageContent() {
@@ -507,7 +501,7 @@ function redirectToLogin() {
 }
 
 // ═══════════════════════════════════════════════════════════════
-// ✅ INITIALISATION AUTOMATIQUE AMÉLIORÉE (SANS REDIRECTION AUTO)
+// ✅ INITIALISATION AUTOMATIQUE (DOMContentLoaded)
 // ═══════════════════════════════════════════════════════════════
 
 document.addEventListener('DOMContentLoaded', async function() {
@@ -525,9 +519,10 @@ document.addEventListener('DOMContentLoaded', async function() {
                 const hasAccess = await checkPageAccess(currentPage);
                 
                 if (!hasAccess) {
-                    console.warn('⛔ Access denied - modal displayed (no auto-redirect)');
-                    // ✅ SUPPRIMÉ : Le setTimeout qui forçait la redirection
-                    // La modal reste ouverte jusqu'à ce que l'utilisateur clique sur un bouton
+                    console.warn('⛔ Access denied - modal displayed');
+                    // ✅ La modal reste ouverte jusqu'à ce que l'utilisateur clique sur un bouton
+                } else {
+                    console.log('✅ Access granted');
                 }
             } else {
                 console.warn('⚠️ User not logged in - redirecting to login');
@@ -540,10 +535,9 @@ document.addEventListener('DOMContentLoaded', async function() {
 });
 
 // ═══════════════════════════════════════════════════════════════
-// ✅ AJOUT : ANIMATION DE SECOUSSE
+// ✅ ANIMATION DE SECOUSSE (CSS dynamique)
 // ═══════════════════════════════════════════════════════════════
 
-// Ajouter dynamiquement l'animation CSS pour la secousse
 const style = document.createElement('style');
 style.textContent = `
     @keyframes shake {
@@ -563,30 +557,41 @@ async function hasFeature(featureName) {
     
     if (!user) return false;
     
-    const userDoc = await firebase.firestore().collection('users').doc(user.uid).get();
-    
-    if (!userDoc.exists) return false;
-    
-    const userData = userDoc.data();
-    const userPlan = userData?.plan || 'basic';
-    const subscriptionStatus = userData?.subscriptionStatus || 'inactive';
-    
-    // ✅ Vérifier le statut d'abonnement
-    const validStatuses = ['active', 'active_free', 'trialing'];
-    if (!validStatuses.includes(subscriptionStatus)) {
+    try {
+        const userDoc = await firebase.firestore().collection('users').doc(user.uid).get();
+        
+        if (!userDoc.exists) return false;
+        
+        const userData = userDoc.data();
+        const userPlan = userData?.plan || 'basic';
+        const subscriptionStatus = userData?.subscriptionStatus || 'inactive';
+        
+        // ✅ Vérifier le statut d'abonnement
+        const validStatuses = ['active', 'active_free', 'trialing'];
+        if (!validStatuses.includes(subscriptionStatus)) {
+            return false;
+        }
+        
+        // ✅ Déterminer le niveau effectif
+        const effectiveLevel = subscriptionStatus === 'active_free' ? userPlan : userPlan;
+        
+        const allowedFeatures = ACCESS_LEVELS[effectiveLevel]?.features || [];
+        
+        // ✅ Platinum a accès à tout
+        return allowedFeatures.includes('all') || allowedFeatures.includes(featureName);
+    } catch (error) {
+        console.error('Error checking feature:', error);
         return false;
     }
-    
-    // ✅ Déterminer le niveau effectif
-    const effectiveLevel = subscriptionStatus === 'active_free' ? userPlan : userPlan;
-    
-    const allowedFeatures = ACCESS_LEVELS[effectiveLevel]?.features || [];
-    
-    return allowedFeatures.includes('all') || allowedFeatures.includes(featureName);
 }
 
-// Exposer globalement pour utilisation dans d'autres scripts
+// ═══════════════════════════════════════════════════════════════
+// EXPOSER LES FONCTIONS GLOBALEMENT
+// ═══════════════════════════════════════════════════════════════
+
 window.hasFeature = hasFeature;
 window.checkPageAccess = checkPageAccess;
+window.ACCESS_LEVELS = ACCESS_LEVELS;
+window.PAGE_CATEGORIES = PAGE_CATEGORIES;
 
 console.log('✅ Access Control System ready');
