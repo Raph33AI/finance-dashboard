@@ -85,8 +85,40 @@ const ACCESS_LEVELS = {
     },
     platinum: {
         maxAnalyses: Infinity,
-        features: ['all'],
-        pages: ['all'] // ✅ Accès à TOUTES les pages
+        features: [
+            'portfolio-tracking',
+            'basic-data',
+            'alphy-ai-unlimited',
+            'ipo-screening',
+            'portfolio-optimization',
+            'monte-carlo',
+            'real-time-data',
+            'risk-parity',
+            'scenario-analysis',
+            'trend-prediction',
+            'market-intelligence',
+            'company-insights',
+            'analyst-coverage',
+            'earnings-estimates',
+            'chatbot-fullpage'
+        ],
+        pages: [
+            'index.html',
+            'dashboard-financier.html',
+            'investments-analytics.html',
+            'advanced-analysis.html',
+            'monte-carlo.html',
+            'risk-parity.html',
+            'scenario-analysis.html',
+            'portfolio-optimizer.html',
+            'market-data.html',
+            'trend-prediction.html',
+            'market-intelligence.html',
+            'company-insights.html',
+            'analyst-coverage.html',
+            'earnings-estimates.html',
+            'chatbot-fullpage.html'
+        ]
     }
 };
 
