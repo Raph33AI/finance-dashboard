@@ -1,5 +1,5 @@
 /* ============================================
-   AUTH-GUARD.JS - VERSION DEBUG
+   AUTH-GUARD.JS - VERSION DEBUG CORRIGÉE
    Protection des pages & Chargement des données
    ============================================ */
 
@@ -42,6 +42,7 @@
             console.log('📧 User email:', user.email);
             console.log('✅ Email vérifié?', user.emailVerified);
             console.log('👤 Display name:', user.displayName);
+            console.log('🖼️ Photo URL Google Auth:', user.photoURL);
             
             const userRef = firebase.firestore().collection('users').doc(user.uid);
             console.log('📍 Référence Firestore:', `users/${user.uid}`);
@@ -107,13 +108,19 @@
                     console.error('❌ Message:', updateError.message);
                 }
                 
-                // Récupérer les données
-                return {
+                // ✅ CORRECTION : Récupérer les données avec la vraie photo Google
+                const finalData = {
                     ...userData,
                     uid: user.uid,
                     email: user.email,
-                    emailVerified: user.emailVerified
+                    emailVerified: user.emailVerified,
+                    photoURL: user.photoURL || userData.photoURL  // ✅ Priorité à la photo Google
                 };
+                
+                console.log('📊 Données finales avec photo Google:', finalData);
+                console.log('🖼️ Photo finale qui sera utilisée:', finalData.photoURL);
+                
+                return finalData;
             }
             
         } catch (error) {
@@ -155,14 +162,16 @@
             console.log('✏️ Mis à jour:', el);
         });
         
-        // Mettre à jour la photo de profil
-        const photoURL = userData.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(fullName)}&background=2563eb&color=fff`;
-        console.log('🖼️ Photo URL:', photoURL);
+        // ✅ CORRECTION : Mettre à jour la photo de profil avec priorité à Firebase Auth
+        const currentUser = firebase.auth().currentUser;
+        const photoURL = currentUser?.photoURL || userData.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(fullName)}&background=2563eb&color=fff`;
+        console.log('🖼️ Photo URL finale appliquée:', photoURL);
+        
         const userPhotoElements = document.querySelectorAll('[data-user-photo]');
         console.log('🔍 Éléments [data-user-photo] trouvés:', userPhotoElements.length);
         userPhotoElements.forEach(el => {
             el.src = photoURL;
-            console.log('✏️ Mis à jour:', el);
+            console.log('✏️ Photo mise à jour:', el, 'src:', photoURL);
         });
         
         // Mettre à jour le plan
