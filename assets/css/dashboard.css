@@ -1,7 +1,7 @@
 /* ==============================================
-   DASHBOARD.CSS - ULTRA MODERN 3D GLASSMORPHISM
-   Violet Theme • Performance Optimized • GPU Accelerated
-   Sidebar & Modals 100% Preserved
+   DASHBOARD.CSS - ULTRA OPTIMIZED VERSION
+   Violet Theme • Maximum Performance • Smooth Scrolling
+   Animations lourdes supprimées • Sidebar & Modals préservés
    ============================================== */
 
 /* ============================================
@@ -23,8 +23,8 @@
     --glow-primary: 0 0 20px rgba(102, 126, 234, 0.5);
     --glow-success: 0 0 20px rgba(16, 185, 129, 0.5);
     
-    --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    --transition-bounce: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    --transition-smooth: all 0.25s ease;
+    --transition-bounce: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
 }
 
 body.dark-mode {
@@ -37,22 +37,13 @@ body.dark-mode {
    ✅ OPTIMISATIONS PERFORMANCES GLOBALES
    ============================================ */
 
-/* GPU Acceleration pour les éléments critiques */
-.stats-grid,
+/* GPU Acceleration pour éléments critiques uniquement */
 .stat-card,
-.toolbar,
 .chart-wrapper,
-.simulation-item,
-.btn-primary,
-.btn-secondary,
-.btn-success,
-.btn-add,
-.data-table,
-.modal-content {
+.simulation-item {
     -webkit-backface-visibility: hidden;
     backface-visibility: hidden;
-    -webkit-perspective: 1000px;
-    perspective: 1000px;
+    transform: translateZ(0);
 }
 
 /* Optimiser les rendus */
@@ -72,7 +63,6 @@ h1, h2, h3, h4, h5, h6,
 .subsection-title {
     font-weight: 800 !important;
     background: linear-gradient(135deg, var(--ml-primary), var(--ml-secondary));
-    background-size: 200% 200%;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -98,128 +88,76 @@ h1, h2, h3, h4, h5, h6,
 }
 
 /* ============================================
-   🎬 ANIMATIONS GLOBALES - GPU OPTIMIZED
+   🎬 ANIMATIONS OPTIMISÉES (Légères uniquement)
    ============================================ */
 
+/* ✅ Animation légère - Hover uniquement */
 @keyframes floatIcon {
     0%, 100% { 
-        transform: translateY(0) translateZ(0); 
+        transform: translateY(0); 
     }
     50% { 
-        transform: translateY(-8px) translateZ(0); 
+        transform: translateY(-5px); 
     }
 }
 
-@keyframes gradientShift {
-    0%, 100% { 
-        background-position: 0% 50%; 
-    }
-    50% { 
-        background-position: 100% 50%; 
-    }
-}
+/* ❌ SUPPRIMÉ : gradientShift (trop lourd) */
+/* ❌ SUPPRIMÉ : rotate3d (trop lourd) */
+/* ❌ SUPPRIMÉ : moveStripes (trop lourd) */
 
-@keyframes pulse {
-    0%, 100% { 
-        opacity: 1; 
-        transform: scale(1) translateZ(0); 
-    }
-    50% { 
-        opacity: 0.85; 
-        transform: scale(1.05) translateZ(0); 
-    }
-}
-
-@keyframes shimmer {
-    0% { 
-        background-position: -1000px 0; 
-    }
-    100% { 
-        background-position: 1000px 0; 
-    }
-}
-
-@keyframes rotate3d {
-    0% { 
-        transform: rotateY(0deg) translateZ(0); 
-    }
-    100% { 
-        transform: rotateY(360deg) translateZ(0); 
-    }
-}
-
-@keyframes moveStripes {
-    0% { 
-        transform: translate(0, 0); 
-    }
-    100% { 
-        transform: translate(50px, 50px); 
-    }
-}
-
+/* ✅ Animation légère - Spinner uniquement */
 @keyframes spin {
     to {
         transform: translate(-50%, -50%) rotate(360deg);
     }
 }
 
+/* ✅ Animation légère - Entrée uniquement (une fois) */
 @keyframes slideInFromLeft {
     from {
         opacity: 0;
-        transform: translateX(-30px) translateZ(0);
+        transform: translateX(-20px);
     }
     to {
         opacity: 1;
-        transform: translateX(0) translateZ(0);
+        transform: translateX(0);
     }
 }
 
 @keyframes fadeInUp {
     from {
         opacity: 0;
-        transform: translateY(30px) translateZ(0);
+        transform: translateY(20px);
     }
     to {
         opacity: 1;
-        transform: translateY(0) translateZ(0);
+        transform: translateY(0);
     }
 }
 
 /* ============================================
-   📊 STATS GRID - GLASSMORPHISM 3D
+   📊 STATS GRID - SIMPLIFIÉ
    ============================================ */
 .stats-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
     gap: 20px;
     padding: 30px;
-    background: linear-gradient(
-        135deg,
-        rgba(102, 126, 234, 0.05) 0%,
-        rgba(118, 75, 162, 0.02) 100%
-    );
-    background-size: 200% 200%;
-    animation: gradientShift 8s ease infinite;
-    backdrop-filter: blur(20px) saturate(180%);
+    /* ✅ Background statique (pas d'animation) */
+    background: rgba(102, 126, 234, 0.05);
+    backdrop-filter: blur(10px);
     border-radius: 28px;
     border: 1px solid var(--glass-border);
     box-shadow: 0 8px 32px var(--glass-shadow);
-    /* ✅ GPU Acceleration */
-    transform: translateZ(0);
-    will-change: background-position;
 }
 
 body.dark-mode .stats-grid {
-    background: linear-gradient(
-        135deg,
-        rgba(15, 23, 42, 0.5) 0%,
-        rgba(30, 41, 59, 0.3) 100%
-    );
+    background: rgba(15, 23, 42, 0.5);
 }
 
 .stat-card {
     background: rgba(255, 255, 255, 0.95);
-    backdrop-filter: blur(20px) saturate(180%);
+    backdrop-filter: blur(10px);
     padding: 24px;
     border-radius: 20px;
     box-shadow: 
@@ -229,49 +167,25 @@ body.dark-mode .stats-grid {
     transition: var(--transition-smooth);
     border: 1px solid var(--glass-border);
     border-left: 4px solid var(--ml-primary);
-    transform-style: preserve-3d;
     position: relative;
-    /* ✅ Performance */
-    contain: layout style paint;
-    transform: translateZ(0);
-    will-change: transform, box-shadow;
-    animation: fadeInUp 0.6s ease-out backwards;
+    animation: fadeInUp 0.4s ease-out backwards;
 }
 
-.stat-card:nth-child(1) { animation-delay: 0.1s; }
-.stat-card:nth-child(2) { animation-delay: 0.2s; }
-.stat-card:nth-child(3) { animation-delay: 0.3s; }
-.stat-card:nth-child(4) { animation-delay: 0.4s; }
+.stat-card:nth-child(1) { animation-delay: 0.05s; }
+.stat-card:nth-child(2) { animation-delay: 0.1s; }
+.stat-card:nth-child(3) { animation-delay: 0.15s; }
+.stat-card:nth-child(4) { animation-delay: 0.2s; }
 
 body.dark-mode .stat-card {
     background: rgba(30, 41, 59, 0.9);
 }
 
-.stat-card::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(
-        90deg,
-        transparent,
-        rgba(102, 126, 234, 0.1),
-        transparent
-    );
-    transition: left 0.5s;
-}
-
-.stat-card:hover::before {
-    left: 100%;
-}
+/* ❌ SUPPRIMÉ : ::before animation */
 
 .stat-card:hover {
-    transform: translateY(-8px) rotateX(2deg) translateZ(0);
+    transform: translateY(-6px);
     box-shadow: 
         0 16px 40px rgba(102, 126, 234, 0.25),
-        0 0 40px rgba(118, 75, 162, 0.15),
         inset 0 1px 0 rgba(255, 255, 255, 0.6);
     border-left-color: var(--ml-secondary);
 }
@@ -292,15 +206,13 @@ body.dark-mode .stat-card {
 .stat-card .value {
     font-size: 2.2em;
     font-weight: 800 !important;
+    /* ✅ Gradient statique (pas d'animation) */
     background: linear-gradient(135deg, var(--ml-primary), var(--ml-secondary));
-    background-size: 200% 200%;
-    animation: gradientShift 4s ease infinite;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
     margin-bottom: 6px;
     line-height: 1.2;
-    will-change: background-position;
 }
 
 .stat-card.positive .value {
@@ -318,17 +230,12 @@ body.dark-mode .stat-card {
 }
 
 /* ============================================
-   🛠️ TOOLBAR - PREMIUM GLASS
+   🛠️ TOOLBAR - SIMPLIFIÉ
    ============================================ */
 .toolbar {
-    background: linear-gradient(
-        135deg,
-        rgba(102, 126, 234, 0.08) 0%,
-        rgba(118, 75, 162, 0.04) 100%
-    );
-    background-size: 200% 200%;
-    animation: gradientShift 6s ease infinite;
-    backdrop-filter: blur(25px) saturate(180%);
+    /* ✅ Background statique */
+    background: rgba(102, 126, 234, 0.08);
+    backdrop-filter: blur(15px);
     padding: 24px;
     border-radius: 20px;
     margin-bottom: 24px;
@@ -337,35 +244,12 @@ body.dark-mode .stat-card {
         0 8px 32px var(--glass-shadow),
         inset 0 1px 0 rgba(255, 255, 255, 0.1);
     position: relative;
-    overflow: hidden;
-    /* ✅ GPU Acceleration */
-    transform: translateZ(0);
-    will-change: background-position;
 }
 
-.toolbar::before {
-    content: '';
-    position: absolute;
-    top: -50%;
-    left: -50%;
-    width: 200%;
-    height: 200%;
-    background: radial-gradient(
-        circle,
-        rgba(102, 126, 234, 0.1) 0%,
-        transparent 70%
-    );
-    animation: rotate3d 20s linear infinite;
-    pointer-events: none;
-    will-change: transform;
-}
+/* ❌ SUPPRIMÉ : ::before rotation 3D */
 
 body.dark-mode .toolbar {
-    background: linear-gradient(
-        135deg,
-        rgba(15, 23, 42, 0.6) 0%,
-        rgba(30, 41, 59, 0.4) 100%
-    );
+    background: rgba(15, 23, 42, 0.6);
 }
 
 .toolbar h3 {
@@ -380,14 +264,9 @@ body.dark-mode .toolbar {
     display: flex;
     align-items: center;
     gap: 12px;
-    position: relative;
-    z-index: 1;
 }
 
-.toolbar h3 i {
-    animation: floatIcon 3s ease-in-out infinite;
-    will-change: transform;
-}
+/* ❌ SUPPRIMÉ : Icon float animation */
 
 .toolbar-row {
     display: flex;
@@ -395,11 +274,11 @@ body.dark-mode .toolbar {
     align-items: center;
     flex-wrap: wrap;
     margin-bottom: 15px;
-    animation: slideInFromLeft 0.6s ease-out backwards;
+    animation: slideInFromLeft 0.4s ease-out backwards;
 }
 
-.toolbar-row:nth-child(2) { animation-delay: 0.1s; }
-.toolbar-row:nth-child(3) { animation-delay: 0.2s; }
+.toolbar-row:nth-child(2) { animation-delay: 0.05s; }
+.toolbar-row:nth-child(3) { animation-delay: 0.1s; }
 
 .toolbar-row:last-child {
     margin-bottom: 0;
@@ -422,12 +301,10 @@ body.dark-mode .toolbar {
     border-radius: 12px;
     font-size: 0.95em;
     background: rgba(255, 255, 255, 0.05);
-    backdrop-filter: blur(10px);
+    backdrop-filter: blur(5px);
     color: var(--text-primary);
     transition: var(--transition-smooth);
     font-weight: 600;
-    /* ✅ GPU Acceleration */
-    transform: translateZ(0);
 }
 
 .toolbar input:focus,
@@ -438,11 +315,11 @@ body.dark-mode .toolbar {
     box-shadow: 
         0 0 0 4px rgba(102, 126, 234, 0.1),
         var(--glow-primary);
-    transform: translateY(-2px) translateZ(0);
+    transform: translateY(-2px);
 }
 
 /* ============================================
-   🚀 BOUTONS - HOLOGRAPHIC PREMIUM
+   🚀 BOUTONS - OPTIMISÉS
    ============================================ */
 .btn-add,
 .btn-success,
@@ -459,43 +336,13 @@ body.dark-mode .toolbar {
     letter-spacing: 0.5px;
     position: relative;
     overflow: hidden;
-    transform: translateZ(0);
-    backface-visibility: hidden;
-    will-change: transform, box-shadow;
 }
 
-.btn-add::before,
-.btn-success::before,
-.btn-primary::before,
-.btn-secondary::before {
-    content: '';
-    position: absolute;
-    top: -50%;
-    left: -50%;
-    width: 200%;
-    height: 200%;
-    background: linear-gradient(
-        45deg,
-        transparent,
-        rgba(255, 255, 255, 0.3),
-        transparent
-    );
-    transform: rotate(45deg);
-    transition: left 0.5s;
-}
+/* ❌ SUPPRIMÉ : ::before shimmer effect */
 
-.btn-add:hover::before,
-.btn-success:hover::before,
-.btn-primary:hover::before,
-.btn-secondary:hover::before {
-    left: 100%;
-}
-
-/* Btn Primary - VIOLET */
+/* Btn Primary - VIOLET (statique) */
 .btn-primary {
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    background-size: 200% 200%;
-    animation: gradientShift 3s ease infinite;
     color: white;
     box-shadow: 
         0 8px 24px rgba(102, 126, 234, 0.4),
@@ -504,14 +351,14 @@ body.dark-mode .toolbar {
 
 .btn-primary:hover {
     background: linear-gradient(135deg, #764ba2 0%, #8b5cf6 100%);
-    transform: translateY(-4px) scale(1.02) translateZ(0);
+    transform: translateY(-3px) scale(1.02);
     box-shadow: 
         0 12px 36px rgba(102, 126, 234, 0.5),
         0 0 40px rgba(118, 75, 162, 0.4);
 }
 
 .btn-primary:active {
-    transform: translateY(-2px) scale(0.98) translateZ(0);
+    transform: translateY(-1px) scale(0.98);
     box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
 }
 
@@ -526,21 +373,19 @@ body.dark-mode .toolbar {
 
 .btn-secondary:hover {
     background: linear-gradient(135deg, #4b5563 0%, #374151 100%);
-    transform: translateY(-4px) scale(1.02) translateZ(0);
+    transform: translateY(-3px) scale(1.02);
     box-shadow: 
         0 10px 30px rgba(107, 114, 128, 0.3),
         0 0 30px rgba(75, 85, 99, 0.2);
 }
 
 .btn-secondary:active {
-    transform: translateY(-2px) scale(0.98) translateZ(0);
+    transform: translateY(-1px) scale(0.98);
 }
 
 /* Btn Success */
 .btn-success {
     background: linear-gradient(135deg, var(--ml-success), #059669);
-    background-size: 200% 200%;
-    animation: gradientShift 3s ease infinite;
     color: white;
     box-shadow: 
         0 8px 24px rgba(16, 185, 129, 0.3),
@@ -549,7 +394,7 @@ body.dark-mode .toolbar {
 
 .btn-success:hover {
     background: linear-gradient(135deg, #059669 0%, #047857 100%);
-    transform: translateY(-4px) scale(1.02) translateZ(0);
+    transform: translateY(-3px) scale(1.02);
     box-shadow: 
         0 12px 36px rgba(16, 185, 129, 0.4),
         var(--glow-success);
@@ -558,8 +403,6 @@ body.dark-mode .toolbar {
 /* Btn Add - VIOLET */
 .btn-add {
     background: linear-gradient(135deg, var(--ml-primary), var(--ml-secondary));
-    background-size: 200% 200%;
-    animation: gradientShift 3s ease infinite;
     color: white;
     margin: 5px;
     box-shadow: 
@@ -569,7 +412,7 @@ body.dark-mode .toolbar {
 
 .btn-add:hover {
     background: linear-gradient(135deg, var(--ml-secondary), var(--ml-accent));
-    transform: translateY(-3px) scale(1.05) translateZ(0);
+    transform: translateY(-2px) scale(1.03);
     box-shadow: 
         0 10px 30px rgba(102, 126, 234, 0.4),
         0 0 30px rgba(118, 75, 162, 0.3);
@@ -605,7 +448,7 @@ body.dark-mode .btn-secondary:hover {
     color: var(--text-primary);
     font-weight: 600;
     margin-left: 20px;
-    animation: fadeInUp 0.6s ease-out 0.3s backwards;
+    animation: fadeInUp 0.4s ease-out 0.15s backwards;
 }
 
 .total-months span {
@@ -615,8 +458,6 @@ body.dark-mode .btn-secondary:hover {
     background-clip: text;
     font-size: 1.2em;
     font-weight: 800;
-    animation: pulse 2s ease-in-out infinite;
-    will-change: transform, opacity;
 }
 
 .parameters-grid {
@@ -645,7 +486,7 @@ body.dark-mode .btn-secondary:hover {
 }
 
 /* ============================================
-   📋 TABLE - GLASSMORPHISM PREMIUM (TOUS LES MOIS VISIBLES)
+   📋 TABLE - ULTRA OPTIMISÉE
    ============================================ */
 .table-container {
     overflow-x: auto;
@@ -656,31 +497,24 @@ body.dark-mode .btn-secondary:hover {
         0 12px 40px var(--glass-shadow),
         inset 0 1px 0 rgba(255, 255, 255, 0.1);
     border: 2px solid var(--glass-border);
-    backdrop-filter: blur(10px);
-    animation: fadeInUp 0.6s ease-out 0.5s backwards;
-    /* ✅ GPU Acceleration */
-    transform: translateZ(0);
-    will-change: scroll-position;
+    backdrop-filter: blur(5px);
+    animation: fadeInUp 0.4s ease-out 0.2s backwards;
 }
 
 .data-table {
     width: 100%;
     border-collapse: collapse;
     font-size: 0.85em;
-    /* ✅ Performance */
-    contain: layout style;
 }
 
 .data-table thead {
+    /* ✅ Background statique (pas d'animation) */
     background: linear-gradient(135deg, var(--ml-primary), var(--ml-secondary));
-    background-size: 200% 200%;
-    animation: gradientShift 5s ease infinite;
     color: white !important;
     position: sticky;
     top: 0;
     z-index: 10;
     box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
-    will-change: background-position;
 }
 
 body.dark-mode .data-table thead {
@@ -714,17 +548,13 @@ body.dark-mode .data-table th:first-child {
 
 .data-table tbody tr {
     border-bottom: 1px solid var(--border-color);
-    transition: background 0.2s, transform 0.2s;
-    /* ✅ GPU Acceleration */
-    transform: translateZ(0);
+    transition: background 0.15s;
 }
 
 .data-table tbody tr:hover {
-    background: linear-gradient(90deg, rgba(102, 126, 234, 0.08), transparent);
-    transform: translateX(2px) translateZ(0);
+    background: rgba(102, 126, 234, 0.06);
 }
 
-/* ✅ CORRECTION: Afficher TOUS les mois (pas seulement 1 sur 2) */
 .data-table tbody tr:nth-child(even) {
     background: rgba(248, 250, 252, 0.5);
 }
@@ -734,7 +564,7 @@ body.dark-mode .data-table tbody tr:nth-child(even) {
 }
 
 .data-table tbody tr:nth-child(even):hover {
-    background: linear-gradient(90deg, rgba(102, 126, 234, 0.08), transparent);
+    background: rgba(102, 126, 234, 0.08);
 }
 
 .data-table td {
@@ -778,12 +608,10 @@ body.dark-mode .data-table tbody tr:nth-child(even) td:first-child {
     font-size: 0.85em;
     text-align: right;
     background: rgba(255, 255, 255, 0.05);
-    backdrop-filter: blur(5px);
+    backdrop-filter: blur(3px);
     color: var(--text-primary);
     font-weight: 600;
     transition: var(--transition-smooth);
-    /* ✅ GPU Acceleration */
-    transform: translateZ(0);
 }
 
 .data-table input:focus {
@@ -793,11 +621,11 @@ body.dark-mode .data-table tbody tr:nth-child(even) td:first-child {
     box-shadow: 
         0 0 0 3px rgba(102, 126, 234, 0.1),
         0 2px 8px rgba(102, 126, 234, 0.3);
-    transform: scale(1.05) translateZ(0);
+    transform: scale(1.03);
 }
 
 .data-table .calculated {
-    background: linear-gradient(90deg, rgba(102, 126, 234, 0.08), transparent);
+    background: rgba(102, 126, 234, 0.06);
     font-weight: 700;
     color: var(--text-primary);
     text-align: right;
@@ -807,13 +635,11 @@ body.dark-mode .data-table tbody tr:nth-child(even) td:first-child {
 }
 
 body.dark-mode .data-table .calculated {
-    background: linear-gradient(90deg, rgba(102, 126, 234, 0.15), transparent);
+    background: rgba(102, 126, 234, 0.12);
 }
 
 .data-table .btn-delete {
     background: linear-gradient(135deg, var(--ml-danger), #dc2626);
-    background-size: 200% 200%;
-    animation: gradientShift 3s ease infinite;
     color: white;
     border: none;
     padding: 5px 10px;
@@ -823,48 +649,34 @@ body.dark-mode .data-table .calculated {
     font-weight: 700;
     transition: var(--transition-smooth);
     box-shadow: 0 2px 8px rgba(239, 68, 68, 0.3);
-    /* ✅ GPU Acceleration */
-    transform: translateZ(0);
 }
 
 .data-table .btn-delete:hover {
     background: linear-gradient(135deg, #dc2626, #b91c1c);
-    transform: scale(1.1) translateZ(0);
+    transform: scale(1.08);
     box-shadow: 0 4px 12px rgba(239, 68, 68, 0.5);
 }
 
 /* ============================================
-   📈 CHARTS - PREMIUM GLASS
+   📈 CHARTS - OPTIMISÉS
    ============================================ */
 .charts-container {
     padding: 30px;
-    background: linear-gradient(
-        135deg,
-        rgba(102, 126, 234, 0.05) 0%,
-        rgba(118, 75, 162, 0.02) 100%
-    );
-    background-size: 200% 200%;
-    animation: gradientShift 8s ease infinite;
-    backdrop-filter: blur(20px) saturate(180%);
+    /* ✅ Background statique */
+    background: rgba(102, 126, 234, 0.05);
+    backdrop-filter: blur(10px);
     border-radius: 28px;
     border: 1px solid var(--glass-border);
     box-shadow: 0 8px 32px var(--glass-shadow);
-    /* ✅ GPU Acceleration */
-    transform: translateZ(0);
-    will-change: background-position;
 }
 
 body.dark-mode .charts-container {
-    background: linear-gradient(
-        135deg,
-        rgba(15, 23, 42, 0.4) 0%,
-        rgba(30, 41, 59, 0.2) 100%
-    );
+    background: rgba(15, 23, 42, 0.4);
 }
 
 .chart-wrapper {
     background: rgba(255, 255, 255, 0.95);
-    backdrop-filter: blur(20px) saturate(180%);
+    backdrop-filter: blur(10px);
     margin-bottom: 30px;
     border-radius: 20px;
     box-shadow: 
@@ -872,62 +684,36 @@ body.dark-mode .charts-container {
         inset 0 1px 0 rgba(255, 255, 255, 0.5);
     padding: 24px;
     border: 2px solid var(--glass-border);
-    transform-style: preserve-3d;
     transition: var(--transition-smooth);
-    animation: fadeInUp 0.6s ease-out backwards;
+    animation: fadeInUp 0.4s ease-out backwards;
     position: relative;
-    overflow: hidden;
-    /* ✅ Performance */
-    contain: layout style paint;
-    transform: translateZ(0);
-    will-change: transform, box-shadow;
 }
 
-.chart-wrapper:nth-child(1) { animation-delay: 0.1s; }
-.chart-wrapper:nth-child(2) { animation-delay: 0.2s; }
+.chart-wrapper:nth-child(1) { animation-delay: 0.05s; }
+.chart-wrapper:nth-child(2) { animation-delay: 0.1s; }
 
-.chart-wrapper::before {
-    content: '';
-    position: absolute;
-    top: -50%;
-    right: -50%;
-    width: 200%;
-    height: 200%;
-    background: radial-gradient(
-        circle,
-        rgba(102, 126, 234, 0.05) 0%,
-        transparent 70%
-    );
-    animation: rotate3d 25s linear infinite;
-    pointer-events: none;
-    will-change: transform;
-}
+/* ❌ SUPPRIMÉ : ::before rotation 3D */
 
 body.dark-mode .chart-wrapper {
     background: rgba(30, 41, 59, 0.9);
 }
 
 .chart-wrapper:hover {
-    transform: translateY(-4px) rotateX(1deg) translateZ(0);
+    transform: translateY(-3px);
     box-shadow: 
         0 12px 36px rgba(102, 126, 234, 0.2),
-        0 0 40px rgba(118, 75, 162, 0.12),
         inset 0 1px 0 rgba(255, 255, 255, 0.5);
 }
 
-/* ✅ Titres des graphiques en VIOLET et GRAS */
 .chart-wrapper h3,
 .chart-wrapper h4,
 .chart-wrapper h5 {
     background: linear-gradient(135deg, var(--ml-primary), var(--ml-secondary));
-    background-size: 200% 200%;
-    animation: gradientShift 4s ease infinite;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
     font-weight: 800 !important;
     margin-bottom: 15px;
-    will-change: background-position;
 }
 
 .grid-2 {
@@ -937,19 +723,14 @@ body.dark-mode .chart-wrapper {
 }
 
 /* ============================================
-   🎯 LOCAL FILTER - GLASS EFFECT
+   🎯 LOCAL FILTER - OPTIMISÉ
    ============================================ */
 .local-filter {
     margin: 18px 0;
     padding: 18px;
-    background: linear-gradient(
-        135deg,
-        rgba(102, 126, 234, 0.1) 0%,
-        rgba(118, 75, 162, 0.05) 100%
-    );
-    background-size: 200% 200%;
-    animation: gradientShift 6s ease infinite;
-    backdrop-filter: blur(15px) saturate(180%);
+    /* ✅ Background statique */
+    background: rgba(102, 126, 234, 0.08);
+    backdrop-filter: blur(10px);
     border-radius: 16px;
     display: flex;
     align-items: center;
@@ -958,17 +739,10 @@ body.dark-mode .chart-wrapper {
     border: 2px solid var(--glass-border);
     border-left: 4px solid var(--ml-primary);
     box-shadow: 0 4px 16px rgba(102, 126, 234, 0.15);
-    /* ✅ GPU Acceleration */
-    transform: translateZ(0);
-    will-change: background-position;
 }
 
 body.dark-mode .local-filter {
-    background: linear-gradient(
-        135deg,
-        rgba(102, 126, 234, 0.15) 0%,
-        rgba(118, 75, 162, 0.08) 100%
-    );
+    background: rgba(102, 126, 234, 0.12);
 }
 
 .local-filter label {
@@ -988,12 +762,10 @@ body.dark-mode .local-filter {
     min-width: 200px;
     cursor: pointer;
     background: rgba(255, 255, 255, 0.05);
-    backdrop-filter: blur(10px);
+    backdrop-filter: blur(5px);
     color: var(--text-primary);
     font-weight: 600;
     transition: var(--transition-smooth);
-    /* ✅ GPU Acceleration */
-    transform: translateZ(0);
 }
 
 .local-filter select:focus {
@@ -1003,16 +775,15 @@ body.dark-mode .local-filter {
     box-shadow: 
         0 0 0 4px rgba(102, 126, 234, 0.1),
         var(--glow-primary);
-    transform: translateY(-2px) translateZ(0);
+    transform: translateY(-2px);
 }
 
 /* ============================================
-   🎪 SIMULATION MANAGEMENT - 3D PREMIUM
+   🎪 SIMULATION MANAGEMENT - OPTIMISÉ
    ============================================ */
 .simulation-management {
+    /* ✅ Gradient statique (pas d'animation) */
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    background-size: 200% 200%;
-    animation: gradientShift 5s ease infinite;
     color: white;
     padding: 28px;
     border-radius: 20px;
@@ -1020,30 +791,9 @@ body.dark-mode .local-filter {
         0 12px 40px rgba(102, 126, 234, 0.5),
         0 0 60px rgba(118, 75, 162, 0.4);
     position: relative;
-    overflow: hidden;
-    /* ✅ GPU Acceleration */
-    transform: translateZ(0);
-    will-change: background-position;
 }
 
-.simulation-management::before {
-    content: '';
-    position: absolute;
-    top: -50%;
-    left: -50%;
-    width: 200%;
-    height: 200%;
-    background: repeating-linear-gradient(
-        45deg,
-        transparent,
-        transparent 10px,
-        rgba(255, 255, 255, 0.05) 10px,
-        rgba(255, 255, 255, 0.05) 20px
-    );
-    animation: moveStripes 20s linear infinite;
-    pointer-events: none;
-    will-change: transform;
-}
+/* ❌ SUPPRIMÉ : ::before stripes animation */
 
 .simulation-management h3 {
     color: white !important;
@@ -1052,14 +802,13 @@ body.dark-mode .local-filter {
     text-shadow: 0 2px 12px rgba(0, 0, 0, 0.3);
     position: relative;
     z-index: 1;
-    animation: floatIcon 3s ease-in-out infinite;
     background: none !important;
     -webkit-text-fill-color: white !important;
 }
 
 .current-simulation-display {
     background: rgba(255, 255, 255, 0.2);
-    backdrop-filter: blur(15px) saturate(180%);
+    backdrop-filter: blur(10px);
     padding: 18px;
     border-radius: 14px;
     text-align: center;
@@ -1083,12 +832,10 @@ body.dark-mode .local-filter {
     font-weight: 800;
     color: #ffd700;
     text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-    animation: pulse 2s ease-in-out infinite;
-    will-change: transform, opacity;
 }
 
 /* ============================================
-   ⚠️ MODAL - 100% PRESERVED (NO CHANGES)
+   ⚠️ MODAL - 100% PRESERVED
    ============================================ */
 
 .modal {
@@ -1181,7 +928,7 @@ body.dark-mode .modal-footer {
 }
 
 /* ============================================
-   📋 SIMULATIONS LIST - GLASSMORPHISM 3D
+   📋 SIMULATIONS LIST - OPTIMISÉE
    ============================================ */
 
 #simulationsListContainer {
@@ -1196,7 +943,7 @@ body.dark-mode .modal-footer {
     padding: 50px;
     font-style: italic;
     font-size: 1.1em;
-    animation: fadeInUp 0.6s ease-out;
+    animation: fadeInUp 0.4s ease-out;
 }
 
 .simulation-item {
@@ -1204,62 +951,31 @@ body.dark-mode .modal-footer {
     justify-content: space-between;
     align-items: center;
     padding: 20px;
-    background: linear-gradient(
-        135deg,
-        rgba(245, 247, 250, 0.9) 0%,
-        rgba(195, 207, 226, 0.7) 100%
-    );
-    backdrop-filter: blur(20px) saturate(180%);
+    /* ✅ Background statique */
+    background: rgba(245, 247, 250, 0.9);
+    backdrop-filter: blur(10px);
     border-radius: 16px;
     transition: var(--transition-smooth);
     border: 2px solid var(--glass-border);
     cursor: pointer;
     position: relative;
-    overflow: hidden;
-    transform-style: preserve-3d;
-    /* ✅ Performance */
-    contain: layout style paint;
-    transform: translateZ(0);
-    will-change: transform, box-shadow;
-    animation: slideInFromLeft 0.6s ease-out backwards;
+    animation: slideInFromLeft 0.4s ease-out backwards;
 }
 
-.simulation-item:nth-child(1) { animation-delay: 0.1s; }
-.simulation-item:nth-child(2) { animation-delay: 0.2s; }
-.simulation-item:nth-child(3) { animation-delay: 0.3s; }
-.simulation-item:nth-child(4) { animation-delay: 0.4s; }
-.simulation-item:nth-child(5) { animation-delay: 0.5s; }
+.simulation-item:nth-child(1) { animation-delay: 0.05s; }
+.simulation-item:nth-child(2) { animation-delay: 0.1s; }
+.simulation-item:nth-child(3) { animation-delay: 0.15s; }
+.simulation-item:nth-child(4) { animation-delay: 0.2s; }
+.simulation-item:nth-child(5) { animation-delay: 0.25s; }
 
 body.dark-mode .simulation-item {
-    background: linear-gradient(
-        135deg,
-        rgba(30, 41, 59, 0.8) 0%,
-        rgba(51, 65, 85, 0.6) 100%
-    );
+    background: rgba(30, 41, 59, 0.8);
 }
 
-.simulation-item::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(
-        90deg,
-        transparent,
-        rgba(102, 126, 234, 0.15),
-        transparent
-    );
-    transition: left 0.5s;
-}
-
-.simulation-item:hover::before {
-    left: 100%;
-}
+/* ❌ SUPPRIMÉ : ::before shimmer effect */
 
 .simulation-item:hover {
-    transform: translateY(-4px) rotateX(2deg) translateZ(0);
+    transform: translateY(-3px);
     box-shadow: 
         0 12px 36px rgba(102, 126, 234, 0.25),
         0 0 40px rgba(118, 75, 162, 0.15);
@@ -1267,15 +983,13 @@ body.dark-mode .simulation-item {
 }
 
 .simulation-item.active {
+    /* ✅ Gradient statique */
     background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-    background-size: 200% 200%;
-    animation: gradientShift 4s ease infinite;
     color: white;
     border: 2px solid #ffd700;
     box-shadow: 
         0 12px 40px rgba(16, 185, 129, 0.5),
         0 0 60px rgba(16, 185, 129, 0.3);
-    will-change: background-position;
 }
 
 .simulation-info {
@@ -1289,16 +1003,6 @@ body.dark-mode .simulation-item {
     font-size: 1.15em;
     display: block;
     margin-bottom: 6px;
-}
-
-.simulation-item.active .simulation-name {
-    color: white;
-    animation: pulse 3s ease-in-out infinite;
-}
-
-.simulation-item.active .simulation-name i:first-child {
-    color: #ffd700;
-    animation: floatIcon 2s ease-in-out infinite;
 }
 
 .simulation-date {
@@ -1321,7 +1025,7 @@ body.dark-mode .simulation-item {
 
 .btn-icon {
     background: rgba(255, 255, 255, 0.95);
-    backdrop-filter: blur(10px);
+    backdrop-filter: blur(5px);
     border: 2px solid var(--glass-border);
     width: 40px;
     height: 40px;
@@ -1334,13 +1038,11 @@ body.dark-mode .simulation-item {
     justify-content: center;
     font-size: 1.1em;
     box-shadow: 0 4px 12px rgba(102, 126, 234, 0.12);
-    transform: translateZ(0);
-    will-change: transform, box-shadow;
 }
 
 .btn-icon:hover {
     background: white;
-    transform: scale(1.15) rotate(5deg) translateZ(0);
+    transform: scale(1.12) rotate(5deg);
     box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
 }
 
@@ -1356,7 +1058,7 @@ body.dark-mode .simulation-item {
 
 .simulation-item.active .btn-icon {
     background: rgba(255, 255, 255, 0.3);
-    backdrop-filter: blur(10px);
+    backdrop-filter: blur(5px);
     color: white;
     border-color: rgba(255, 255, 255, 0.5);
 }
@@ -1387,20 +1089,12 @@ body.dark-mode .simulation-item {
 
 /* Hover Effect for non-active */
 .simulation-item:not(.active):hover {
-    background: linear-gradient(
-        135deg,
-        rgba(224, 231, 255, 0.9) 0%,
-        rgba(199, 210, 254, 0.8) 100%
-    );
+    background: rgba(224, 231, 255, 0.9);
     border-color: #667eea;
 }
 
 body.dark-mode .simulation-item:not(.active):hover {
-    background: linear-gradient(
-        135deg,
-        rgba(51, 65, 85, 0.9) 0%,
-        rgba(71, 85, 105, 0.7) 100%
-    );
+    background: rgba(51, 65, 85, 0.9);
 }
 
 /* ============================================
@@ -1457,7 +1151,7 @@ body.dark-mode .highcharts-legend-item text {
 }
 
 /* ============================================
-   ⚡ PERFORMANCE OPTIMIZATIONS
+   ⚡ PERFORMANCE OPTIMIZATIONS FINALES
    ============================================ */
 
 /* Reduce animations for users who prefer reduced motion */
@@ -1469,15 +1163,9 @@ body.dark-mode .highcharts-legend-item text {
         animation-iteration-count: 1 !important;
         transition-duration: 0.01ms !important;
     }
-    
-    .simulation-management::before,
-    .toolbar::before,
-    .chart-wrapper::before {
-        animation: none;
-    }
 }
 
-/* Disable hover effects on touch devices for performance */
+/* Disable hover effects on touch devices */
 @media (hover: none) and (pointer: coarse) {
     .stat-card:hover,
     .chart-wrapper:hover,
@@ -1486,9 +1174,27 @@ body.dark-mode .highcharts-legend-item text {
     }
 }
 
+/* ✅ Force simplification of rendering on low-end devices */
+@media (max-width: 1024px) {
+    .toolbar,
+    .stats-grid,
+    .charts-container,
+    .local-filter {
+        backdrop-filter: none;
+        background: rgba(255, 255, 255, 0.95);
+    }
+    
+    body.dark-mode .toolbar,
+    body.dark-mode .stats-grid,
+    body.dark-mode .charts-container,
+    body.dark-mode .local-filter {
+        background: rgba(15, 23, 42, 0.95);
+    }
+}
+
 /* ============================================
-   🎯 FIN DU FICHIER - ULTRA MODERN 3D CSS
-   Violet Theme • All Titles Bold & Violet
-   Performance Optimized • All Months Visible
+   🎯 FIN DU FICHIER - ULTRA OPTIMIZED VERSION
+   Violet Theme • Maximum Performance
+   Animations continues supprimées • Scroll fluide
    Sidebar & Modals 100% Preserved
    ============================================ */
