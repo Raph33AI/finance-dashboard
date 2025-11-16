@@ -91,10 +91,10 @@
                         <button class="user-profile-button" id="userProfileButton" aria-expanded="false" aria-haspopup="true">
                             <div class="user-avatar-wrapper">
                                 <img src="https://ui-avatars.com/api/?name=User&background=3B82F6&color=fff&bold=true&size=96" 
-                                    alt="User Profile" 
-                                    class="user-avatar"
-                                    data-user-photo
-                                    id="userAvatarImg">
+                                     alt="User Profile" 
+                                     class="user-avatar"
+                                     data-user-photo
+                                     id="userAvatarImg">
                                 <span class="user-status-dot"></span>
                             </div>
                             <div class="user-info-text">
@@ -109,9 +109,9 @@
                             <div class="dropdown-header">
                                 <div class="dropdown-user-card">
                                     <img src="https://ui-avatars.com/api/?name=User&background=3B82F6&color=fff&bold=true&size=96" 
-                                        alt="User Profile"
-                                        data-user-photo
-                                        id="dropdownAvatarImg">
+                                         alt="User Profile"
+                                         data-user-photo
+                                         id="dropdownAvatarImg">
                                     <div class="dropdown-user-text">
                                         <h4 data-user-name id="dropdownUserName">User</h4>
                                         <p data-user-email id="dropdownUserEmail">user@alphavault.ai</p>
@@ -1326,7 +1326,7 @@
     </footer>
 
     <!-- ═══════════════════════════════════════════════════════════════
-         SCRIPTS - ORDRE CRITIQUE POUR API + ALPHY
+         SCRIPTS - ORDRE CRITIQUE
          ═══════════════════════════════════════════════════════════════ -->
     
     <!-- Chart.js -->
@@ -1352,7 +1352,8 @@
     <!-- API CLIENT -->
     <script src="assets/js/api-client.js"></script>
     
-    <!-- CHATBOT ALPHY AI -->
+    <!-- ✅ CHATBOT SCRIPTS COMMENTÉS (désactivé sur landing page) -->
+    <!--
     <script src="assets/js/chatbot-config.js"></script>
     <script src="assets/js/chatbot-gemini.js"></script>
     <script src="assets/js/chatbot-analytics.js"></script>
@@ -1361,6 +1362,7 @@
     <script src="assets/js/chatbot-suggestions.js"></script>
     <script src="assets/js/chatbot-ai-engine.js"></script>
     <script src="assets/js/chatbot-ui.js"></script>
+    -->
     
     <!-- Application Scripts -->
     <script src="assets/js/common.js"></script>
@@ -1371,7 +1373,7 @@
     
     <script src="assets/js/auth-system.js"></script>
     
-    <!-- INITIALISATION GLOBALE -->
+    <!-- ✅ INITIALISATION GLOBALE - SANS CHATBOT -->
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             console.log('%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'color: #3B82F6; font-weight: bold; font-size: 14px;');
@@ -1417,47 +1419,12 @@
                 console.error('   📋 Check the file path: assets/js/api-client.js\n');
             }
 
-            // INITIALISER ALPHY AI CHATBOT
-            console.log('%c🤖 Initializing Alphy AI Chatbot...', 'color: #8B5CF6; font-weight: bold; font-size: 16px;');
-            
-            const chatbotChecks = {
-                'ChatbotConfig': typeof ChatbotConfig !== 'undefined',
-                'ChatbotUI': typeof ChatbotUI !== 'undefined',
-                'FinancialChatbotEngine': typeof FinancialChatbotEngine !== 'undefined',
-                'GeminiAIIntegration': typeof GeminiAIIntegration !== 'undefined'
-            };
+            // ✅ CHATBOT DÉSACTIVÉ SUR LANDING PAGE
+            console.log('%c🤖 Chatbot Configuration', 'color: #8B5CF6; font-weight: bold; font-size: 16px;');
+            console.log('%c   🚫 Chatbot disabled on landing page', 'color: #f59e0b; font-weight: bold;');
+            console.log('%c   ℹ️  Users will be redirected to chatbot-fullpage.html\n', 'color: #6b7280;');
 
-            console.log('📦 Chatbot Components Status:');
-            Object.entries(chatbotChecks).forEach(([name, loaded]) => {
-                const status = loaded ? '✅' : '❌';
-                const color = loaded ? '#10b981' : '#ef4444';
-                console.log(`%c   ${status} ${name}`, `color: ${color}; font-weight: bold;`);
-            });
-
-            if (chatbotChecks.ChatbotConfig && chatbotChecks.ChatbotUI) {
-                try {
-                    window.financialChatbot = new ChatbotUI(ChatbotConfig);
-                    console.log('%c✅ Alphy AI Chatbot initialized successfully!', 'color: #10b981; font-weight: bold; font-size: 14px;');
-                    console.log('   💬 Chatbot is ready to use');
-                    console.log('   🎯 Click the floating button in bottom-right to start chatting\n');
-                    
-                    if (typeof window.financialChatbot.open === 'function') {
-                        console.log('   ✅ chatbot.open() method available');
-                    } else {
-                        console.warn('   ⚠️ chatbot.open() method not found');
-                    }
-                    
-                } catch (error) {
-                    console.error('%c❌ Error initializing Alphy chatbot:', 'color: #ef4444; font-weight: bold;');
-                    console.error(error);
-                    console.error('📋 Stack trace:', error.stack);
-                }
-            } else {
-                console.error('%c❌ Chatbot initialization FAILED - Missing components', 'color: #ef4444; font-weight: bold;');
-                console.error('📋 Make sure all chatbot-*.js files are loaded in the correct order\n');
-            }
-
-            // BOUTON "CHAT WITH ALPHY"
+            // ✅ BOUTON "CHAT WITH ALPHY" - Redirige vers page dédiée
             console.log('%c🔘 Setting up "Chat with Alphy" button...', 'color: #8B5CF6; font-weight: bold;');
             
             const openAlphyBtn = document.getElementById('openAlphyChat');
@@ -1466,37 +1433,13 @@
                 
                 openAlphyBtn.addEventListener('click', function(e) {
                     e.preventDefault();
-                    console.log('%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'color: #8B5CF6; font-weight: bold;');
-                    console.log('%c🔵 "Chat with Alphy" BUTTON CLICKED', 'color: #8B5CF6; font-weight: bold; font-size: 14px;');
-                    console.log('%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'color: #8B5CF6; font-weight: bold;');
-                    
-                    if (window.financialChatbot) {
-                        console.log('   ✅ Chatbot instance found');
-                        
-                        if (typeof window.financialChatbot.open === 'function') {
-                            console.log('   🚀 Opening chatbot...');
-                            try {
-                                window.financialChatbot.open();
-                                console.log('%c   ✅ Chatbot opened successfully!', 'color: #10b981; font-weight: bold;');
-                            } catch (error) {
-                                console.error('   ❌ Error opening chatbot:', error);
-                            }
-                        } else {
-                            console.error('   ❌ chatbot.open() method not available');
-                            console.error('   Available methods:', Object.keys(window.financialChatbot));
-                            alert('Chatbot interface error. Check console for details.');
-                        }
-                    } else {
-                        console.error('   ❌ window.financialChatbot is not defined');
-                        console.error('   The chatbot was not initialized properly');
-                        alert('Chatbot is not initialized. Please refresh the page.');
-                    }
+                    console.log('%c🚀 Redirecting to full chatbot page...', 'color: #8B5CF6; font-weight: bold;');
+                    window.location.href = 'chatbot-fullpage.html';
                 });
                 
-                console.log('   ✅ Click listener added to button\n');
+                console.log('   ✅ Click listener added (redirects to chatbot-fullpage.html)\n');
             } else {
-                console.error('   ❌ Button #openAlphyChat NOT FOUND in DOM');
-                console.error('   Make sure the button exists in the HTML\n');
+                console.error('   ❌ Button #openAlphyChat NOT FOUND in DOM\n');
             }
 
             // RÉSUMÉ FINAL
@@ -1508,7 +1451,7 @@
             console.log(`   ${window.APP_CONFIG ? '✅' : '❌'} Configuration`);
             console.log(`   ${typeof window.FinanceAPIClient !== 'undefined' ? '✅' : '❌'} API Client (FinanceAPIClient)`);
             console.log(`   ${typeof window.marketTicker !== 'undefined' ? '✅' : '❌'} Market Ticker`);
-            console.log(`   ${chatbotChecks.ChatbotUI ? '✅' : '❌'} Alphy AI Chatbot`);
+            console.log(`   🚫 Alphy AI Chatbot (disabled on landing page)`);
             console.log('');
             console.log('%cRefresh Settings:', 'font-weight: bold; font-size: 14px;');
             if (window.APP_CONFIG) {
@@ -1519,7 +1462,7 @@
             }
             console.log('');
             console.log('%cHow to use:', 'font-weight: bold; font-size: 14px;');
-            console.log('   💬 Click the chat button (bottom-right) to talk with Alphy');
+            console.log('   💬 Click "Chat with Alphy" to access the full chatbot page');
             console.log('   📊 Market ticker updates automatically every hour');
             console.log('   🎨 All animations are enabled');
             console.log('');
