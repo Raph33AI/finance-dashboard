@@ -20,7 +20,7 @@ const ACCESS_LEVELS = {
         pages: [
             'index.html',
             'dashboard-financier.html',
-            'dashboard.html' // ✅ Ajouté
+            'investments-analytics.html' // ✅ Ajouté
         ]
     },
     pro: {
@@ -40,13 +40,15 @@ const ACCESS_LEVELS = {
         pages: [
             'index.html',
             'dashboard-financier.html',
-            'dashboard.html', // ✅ Ajouté
             'advanced-analysis.html',
             'monte-carlo.html',
             'risk-parity.html',
             'scenario-analysis.html',
+            'portfolio-optimizer.html',
+            'advanced-analysis.html',
+            'market-data.html',
             'trend-prediction.html',
-            'portfolio-optimizer.html'
+            'market-intelligence.html'
         ]
     },
     // ✅ AJOUTÉ : Support des codes promo FREE (équivalent PRO)
@@ -67,13 +69,15 @@ const ACCESS_LEVELS = {
         pages: [
             'index.html',
             'dashboard-financier.html',
-            'dashboard.html',
             'advanced-analysis.html',
             'monte-carlo.html',
             'risk-parity.html',
             'scenario-analysis.html',
+            'portfolio-optimizer.html',
+            'advanced-analysis.html',
+            'market-data.html',
             'trend-prediction.html',
-            'portfolio-optimizer.html'
+            'market-intelligence.html'
         ]
     },
     platinum: {
