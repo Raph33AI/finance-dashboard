@@ -1,6 +1,6 @@
 /* ═══════════════════════════════════════════════════════════════
    CHECKOUT PAGE - GLASSMORPHISM PREMIUM + CODES PROMO
-   AlphaVault AI - VERSION OPTIMISÉE (Performances améliorées)
+   AlphaVault AI - VERSION FOND BLANC CASSÉ PROFESSIONNEL
    ═══════════════════════════════════════════════════════════════ */
 
 :root {
@@ -44,14 +44,15 @@ body.dark-mode {
 }
 
 /* ═══════════════════════════════════════════════════════════════
-   CHECKOUT CONTAINER
+   CHECKOUT CONTAINER - FOND BLANC CASSÉ PROFESSIONNEL
    ═══════════════════════════════════════════════════════════════ */
 
 .checkout-page {
     min-height: 100vh;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+    /* ✅✅✅ FOND BLANC CASSÉ ÉLÉGANT ET PROFESSIONNEL */
+    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 50%, #e2e8f0 100%);
     background-size: 400% 400%;
-    animation: gradientFlow 15s ease infinite;
+    animation: subtleGradientFlow 20s ease infinite;
     display: flex;
     align-items: flex-start;
     justify-content: center;
@@ -64,11 +65,13 @@ body.dark-mode {
     will-change: background-position;
 }
 
-@keyframes gradientFlow {
+/* ✅ Animation très subtile pour le fond */
+@keyframes subtleGradientFlow {
     0%, 100% { background-position: 0% 50%; }
     50% { background-position: 100% 50%; }
 }
 
+/* ✅ Particules discrètes gris-bleu */
 .checkout-page::before {
     content: '';
     position: fixed;
@@ -77,8 +80,8 @@ body.dark-mode {
     width: 100%;
     height: 100%;
     background-image: 
-        radial-gradient(circle at 20% 50%, rgba(255, 255, 255, 0.1) 1px, transparent 1px),
-        radial-gradient(circle at 80% 80%, rgba(255, 255, 255, 0.1) 1px, transparent 1px);
+        radial-gradient(circle at 20% 50%, rgba(59, 130, 246, 0.03) 1px, transparent 1px),
+        radial-gradient(circle at 80% 80%, rgba(139, 92, 246, 0.03) 1px, transparent 1px);
     background-size: 50px 50px;
     animation: particlesFloat 20s linear infinite;
     pointer-events: none;
@@ -102,7 +105,7 @@ body.dark-mode {
     border: 2px solid var(--glass-border);
     box-shadow: 
         var(--shadow-premium),
-        0 0 80px rgba(139, 92, 246, 0.2),
+        0 0 80px rgba(139, 92, 246, 0.1),
         inset 0 1px 0 rgba(255, 255, 255, 0.5);
     padding: 60px;
     position: relative;
@@ -677,6 +680,23 @@ body.dark-mode .summary-label-total {
     font-size: 1.5rem;
 }
 
+/* Badge pour accès trial 14 jours */
+#trialAccessBadge {
+    background: linear-gradient(135deg, #10b981, #059669) !important;
+    color: white;
+    padding: 16px 24px;
+    border-radius: 16px;
+    margin-top: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    font-weight: 700;
+    font-size: 0.95rem;
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+    animation: pulse 2s ease-in-out infinite;
+}
+
 /* ═══════════════════════════════════════════════════════════════
    CHECKOUT FORM
    ═══════════════════════════════════════════════════════════════ */
@@ -1082,26 +1102,4 @@ html {
     .checkout-form {
         padding: 20px 12px;
     }
-}
-
-/* Badge pour accès trial 14 jours */
-#trialAccessBadge {
-    background: linear-gradient(135deg, #10b981, #059669) !important;
-    color: white;
-    padding: 16px 24px;
-    border-radius: 16px;
-    margin-top: 16px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 12px;
-    font-weight: 700;
-    font-size: 0.95rem;
-    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
-    animation: pulse 2s ease-in-out infinite;
-}
-
-@keyframes pulse {
-    0%, 100% { transform: scale(1); }
-    50% { transform: scale(1.02); }
 }
