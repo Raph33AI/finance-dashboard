@@ -1,10 +1,10 @@
 /* ═══════════════════════════════════════════════════════════════
    ACCESS CONTROL SYSTEM - AlphaVault AI
-   VERSION 3.0 - CONFIGURATION COMPLÈTE DES PLANS
+   VERSION 3.1 - SUPPORT DES CODES PROMO TRIAL
    Redirection automatique vers checkout.html
    ═══════════════════════════════════════════════════════════════ */
 
-console.log('🔐 Access Control System v3.0 initialized');
+console.log('🔐 Access Control System v3.1 initialized');
 
 // ═══════════════════════════════════════════════════════════════
 // ✅ CONFIGURATION DES PLANS ET ACCÈS
@@ -15,7 +15,7 @@ const ACCESS_LEVELS = {
     free: {
         name: 'Free',
         level: 0,
-        requiresActiveSubscription: false, // ✅ Pas besoin de vérifier le statut
+        requiresActiveSubscription: false,
         pages: [
             'dashboard-financier.html',
             'monte-carlo.html',
@@ -32,7 +32,7 @@ const ACCESS_LEVELS = {
     basic: {
         name: 'Basic',
         level: 0,
-        requiresActiveSubscription: false, // ✅ Pas besoin de vérifier le statut
+        requiresActiveSubscription: false,
         pages: [
             'dashboard-financier.html',
             'monte-carlo.html',
@@ -50,13 +50,11 @@ const ACCESS_LEVELS = {
     pro: {
         name: 'Pro',
         level: 1,
-        requiresActiveSubscription: true, // ✅ Vérifier le statut pour les plans payants
+        requiresActiveSubscription: true,
         pages: [
-            // Pages Basic
             'dashboard-financier.html',
             'monte-carlo.html',
             'portfolio-optimizer.html',
-            // Pages Pro
             'investments-analytics.html',
             'risk-parity.html',
             'scenario-analysis.html',
@@ -79,9 +77,8 @@ const ACCESS_LEVELS = {
     freepro: {
         name: 'Free Pro',
         level: 1,
-        requiresActiveSubscription: false, // ✅ Gratuit avec code promo
+        requiresActiveSubscription: false,
         pages: [
-            // Mêmes pages que Pro
             'dashboard-financier.html',
             'monte-carlo.html',
             'portfolio-optimizer.html',
@@ -107,8 +104,8 @@ const ACCESS_LEVELS = {
     platinum: {
         name: 'Platinum',
         level: 2,
-        requiresActiveSubscription: true, // ✅ Vérifier le statut pour les plans payants
-        pages: ['all'], // ✅ Accès à TOUTES les pages
+        requiresActiveSubscription: true,
+        pages: ['all'],
         features: ['all']
     },
     
@@ -116,8 +113,18 @@ const ACCESS_LEVELS = {
     freeplatinum: {
         name: 'Free Platinum',
         level: 2,
-        requiresActiveSubscription: false, // ✅ Gratuit avec code promo
-        pages: ['all'], // ✅ Accès à TOUTES les pages
+        requiresActiveSubscription: false,
+        pages: ['all'],
+        features: ['all']
+    },
+    
+    // ✅✅✅ NOUVEAU : TRIAL (14 jours gratuits)
+    trial: {
+        name: 'Trial',
+        level: 1, // Accès Pro par défaut (peut être étendu selon le plan trial)
+        requiresActiveSubscription: false, // Pas de vérification Stripe
+        requiresTrialValidation: true, // ✅ Vérifier trialEndsAt
+        pages: ['all'], // ✅ Accès à TOUTES les pages pendant le trial
         features: ['all']
     }
 };
@@ -127,7 +134,6 @@ const ACCESS_LEVELS = {
 // ═══════════════════════════════════════════════════════════════
 
 const PAGE_CATEGORIES = {
-    // Pages accessibles SANS connexion
     public: [
         'index.html',
         'about.html',
@@ -141,7 +147,6 @@ const PAGE_CATEGORIES = {
         'terms.html'
     ],
     
-    // Pages accessibles PAR TOUS les utilisateurs connectés (profil, paramètres)
     authenticated: [
         'settings.html',
         'user-profile.html',
@@ -150,14 +155,12 @@ const PAGE_CATEGORIES = {
         'chatbot-integration.html'
     ],
     
-    // Pages BASIC / FREE (niveau 0)
     basic: [
         'dashboard-financier.html',
         'monte-carlo.html',
         'portfolio-optimizer.html'
     ],
     
-    // Pages PRO (niveau 1) - en PLUS de Basic
     pro: [
         'investments-analytics.html',
         'risk-parity.html',
@@ -167,7 +170,6 @@ const PAGE_CATEGORIES = {
         'market-intelligence.html'
     ],
     
-    // Pages PLATINUM ONLY (niveau 2)
     platinum: [
         'advanced-analysis.html',
         'analyst-coverage.html',
@@ -222,16 +224,50 @@ async function checkPageAccess(pageName) {
         let userPlan = (userData?.plan || 'free').toLowerCase();
         const subscriptionStatus = (userData?.subscriptionStatus || 'inactive').toLowerCase();
         const promoCode = (userData?.promoCode || '').toUpperCase();
+        const trialEndsAt = userData?.trialEndsAt || null; // ✅ Date d'expiration du trial
         
         console.log(`👤 User: ${user.email}`);
         console.log(`📊 Original plan: ${userPlan}`);
         console.log(`📊 Subscription status: ${subscriptionStatus}`);
         console.log(`🎟️ Promo code: ${promoCode || 'none'}`);
+        console.log(`⏰ Trial ends at: ${trialEndsAt || 'N/A'}`);
         
         // ═══════════════════════════════════════════════════════════
-        // 4️⃣ GESTION DES CODES PROMO
+        // 4️⃣ GESTION DES CODES PROMO ET STATUT TRIAL
         // ═══════════════════════════════════════════════════════════
-        if (promoCode === 'FREEPRO') {
+        
+        // ✅✅✅ VÉRIFIER SI L'UTILISATEUR EST EN TRIAL
+        if (subscriptionStatus === 'trial' && trialEndsAt) {
+            const now = new Date();
+            const expirationDate = new Date(trialEndsAt);
+            
+            console.log(`📅 Trial check: Now = ${now.toISOString()}, Expires = ${expirationDate.toISOString()}`);
+            
+            if (now < expirationDate) {
+                // ✅ TRIAL ENCORE VALIDE
+                console.log(`✅ Trial still active (expires in ${Math.ceil((expirationDate - now) / (1000 * 60 * 60 * 24))} days)`);
+                
+                // Déterminer le niveau d'accès selon le plan trial
+                // Si le plan est "pro" ou "platinum", adapter le niveau
+                if (userPlan === 'platinum') {
+                    userPlan = 'trial'; // Accès full (niveau 2)
+                    ACCESS_LEVELS.trial.level = 2; // ✅ Accès Platinum
+                } else {
+                    userPlan = 'trial'; // Accès Pro (niveau 1) par défaut
+                    ACCESS_LEVELS.trial.level = 1;
+                }
+                
+                console.log(`🎁 Trial mode activated: ${userPlan} (level ${ACCESS_LEVELS.trial.level})`);
+                
+            } else {
+                // ❌ TRIAL EXPIRÉ
+                console.warn(`⏰ Trial expired on ${expirationDate.toLocaleDateString()}`);
+                showUpgradeModal(userPlan, 'trial_expired');
+                return false;
+            }
+        }
+        // ✅ Gestion des codes promo FREE
+        else if (promoCode === 'FREEPRO') {
             userPlan = 'freepro';
             console.log(`🎁 Promo code applied: FREEPRO → Plan upgraded to: freepro`);
         } else if (promoCode === 'FREEPLATINUM') {
@@ -246,7 +282,7 @@ async function checkPageAccess(pageName) {
         
         if (!planConfig) {
             console.error(`❌ Unknown plan: ${userPlan}`);
-            userPlan = 'free'; // Fallback vers plan gratuit
+            userPlan = 'free';
         }
         
         // ✅ Vérifier si le plan nécessite un abonnement actif
@@ -270,9 +306,16 @@ async function checkPageAccess(pageName) {
         // 6️⃣ VÉRIFIER L'ACCÈS À LA PAGE (LOGIQUE HIÉRARCHIQUE)
         // ═══════════════════════════════════════════════════════════
         
-        // ✅ PLATINUM / FREEPLATINUM = Accès à TOUTES les pages
-        if (userPlan === 'platinum' || userPlan === 'freeplatinum') {
-            console.log('✅ Access granted (Platinum - full access)');
+        // ✅ PLATINUM / FREEPLATINUM / TRIAL (niveau 2) = Accès à TOUTES les pages
+        if (userPlan === 'platinum' || userPlan === 'freeplatinum' || 
+            (userPlan === 'trial' && planConfig.level === 2)) {
+            console.log('✅ Access granted (Full access)');
+            return true;
+        }
+        
+        // ✅ TRIAL (niveau 1) = Accès Pro
+        if (userPlan === 'trial' && planConfig.level === 1) {
+            console.log('✅ Access granted (Trial - Pro level)');
             return true;
         }
         
@@ -329,18 +372,17 @@ function getPageRequiredLevel(pageName) {
     }
     
     if (PAGE_CATEGORIES.basic.includes(pageName)) {
-        return 0; // Basic = niveau 0
+        return 0;
     }
     
     if (PAGE_CATEGORIES.pro.includes(pageName)) {
-        return 1; // Pro = niveau 1
+        return 1;
     }
     
     if (PAGE_CATEGORIES.platinum.includes(pageName)) {
-        return 2; // Platinum = niveau 2
+        return 2;
     }
     
-    // Par défaut, considérer comme Basic
     return 0;
 }
 
@@ -351,16 +393,14 @@ function getPageRequiredLevel(pageName) {
 function showUpgradeModal(currentPlan, reason = 'insufficient') {
     console.log('🔔 Showing upgrade modal for plan:', currentPlan, '| Reason:', reason);
     
-    // Supprimer le modal existant si présent
     const existingModal = document.getElementById('upgrade-modal-overlay');
     if (existingModal) {
         existingModal.remove();
     }
     
-    // ✅ Masquer le contenu de la page
     hidePageContent();
     
-    // ✅ Messages personnalisés selon la raison
+    // ✅✅✅ NOUVEAU : Message spécifique pour trial expiré
     const messages = {
         pro_required: {
             title: '🔒 Pro Feature',
@@ -380,6 +420,12 @@ function showUpgradeModal(currentPlan, reason = 'insufficient') {
             icon: '⏰',
             suggestedPlan: currentPlan
         },
+        trial_expired: {
+            title: '⏰ Trial Expired',
+            description: 'Your 14-day free trial has ended. Upgrade now to continue enjoying premium features!',
+            icon: '⏰',
+            suggestedPlan: 'Pro'
+        },
         insufficient: {
             title: '🔒 Premium Access Required',
             description: 'Upgrade your plan to access this premium feature.',
@@ -390,7 +436,6 @@ function showUpgradeModal(currentPlan, reason = 'insufficient') {
     
     const msg = messages[reason] || messages.insufficient;
     
-    // Créer une modale glassmorphism élégante
     const modal = document.createElement('div');
     modal.id = 'upgrade-modal-overlay';
     modal.style.cssText = `
@@ -498,15 +543,10 @@ function showUpgradeModal(currentPlan, reason = 'insufficient') {
     
     document.body.appendChild(modal);
     
-    // Animation d'entrée
     setTimeout(() => {
         modal.style.opacity = '1';
         document.getElementById('upgrade-modal-content').style.transform = 'scale(1)';
     }, 10);
-    
-    // ═══════════════════════════════════════════════════════════
-    // ✅✅✅ REDIRECTION VERS CHECKOUT.HTML ✅✅✅
-    // ═══════════════════════════════════════════════════════════
     
     document.getElementById('btn-upgrade-now').addEventListener('click', () => {
         console.log('🛒 Redirecting to checkout page...');
@@ -522,10 +562,6 @@ function showUpgradeModal(currentPlan, reason = 'insufficient') {
         }, 300);
     });
     
-    // ═══════════════════════════════════════════════════════════
-    // Empêcher la fermeture en cliquant à l'extérieur (animation de secousse)
-    // ═══════════════════════════════════════════════════════════
-    
     modal.addEventListener('click', (e) => {
         if (e.target === modal) {
             const content = document.getElementById('upgrade-modal-content');
@@ -535,10 +571,6 @@ function showUpgradeModal(currentPlan, reason = 'insufficient') {
             }, 500);
         }
     });
-    
-    // ═══════════════════════════════════════════════════════════
-    // Effet hover sur les boutons
-    // ═══════════════════════════════════════════════════════════
     
     const upgradeBtn = document.getElementById('btn-upgrade-now');
     upgradeBtn.addEventListener('mouseenter', () => {
@@ -558,10 +590,6 @@ function showUpgradeModal(currentPlan, reason = 'insufficient') {
         cancelBtn.style.background = 'rgba(255, 255, 255, 0.2)';
     });
 }
-
-// ═══════════════════════════════════════════════════════════════
-// MASQUER LE CONTENU DE LA PAGE
-// ═══════════════════════════════════════════════════════════════
 
 function hidePageContent() {
     if (!document.getElementById('page-content-blocker')) {
@@ -583,26 +611,17 @@ function hidePageContent() {
     document.body.style.overflow = 'hidden';
 }
 
-// ═══════════════════════════════════════════════════════════════
-// REDIRIGER VERS LOGIN
-// ═══════════════════════════════════════════════════════════════
-
 function redirectToLogin() {
     console.log('🔄 Redirecting to login...');
     sessionStorage.setItem('redirectAfterLogin', window.location.pathname);
     window.location.href = 'index.html#login';
 }
 
-// ═══════════════════════════════════════════════════════════════
-// INITIALISATION AUTOMATIQUE
-// ═══════════════════════════════════════════════════════════════
-
 document.addEventListener('DOMContentLoaded', async function() {
     const currentPage = window.location.pathname.split('/').pop() || 'index.html';
     
     console.log(`📄 Current page: ${currentPage}`);
     
-    // Vérifier l'accès pour les pages protégées
     if (!PAGE_CATEGORIES.public.includes(currentPage)) {
         console.log('🔒 Protected page detected - checking access...');
         
@@ -625,10 +644,6 @@ document.addEventListener('DOMContentLoaded', async function() {
     }
 });
 
-// ═══════════════════════════════════════════════════════════════
-// ANIMATION DE SECOUSSE (CSS)
-// ═══════════════════════════════════════════════════════════════
-
 const style = document.createElement('style');
 style.textContent = `
     @keyframes shake {
@@ -638,10 +653,6 @@ style.textContent = `
     }
 `;
 document.head.appendChild(style);
-
-// ═══════════════════════════════════════════════════════════════
-// FONCTION UTILITAIRE : VÉRIFIER SI UNE FEATURE EST DISPONIBLE
-// ═══════════════════════════════════════════════════════════════
 
 async function hasFeature(featureName) {
     const user = firebase.auth().currentUser;
@@ -660,9 +671,20 @@ async function hasFeature(featureName) {
         let userPlan = (userData?.plan || 'free').toLowerCase();
         const subscriptionStatus = (userData?.subscriptionStatus || 'inactive').toLowerCase();
         const promoCode = (userData?.promoCode || '').toUpperCase();
+        const trialEndsAt = userData?.trialEndsAt || null;
         
-        // Appliquer les codes promo
-        if (promoCode === 'FREEPRO') {
+        // ✅ Vérifier si trial actif
+        if (subscriptionStatus === 'trial' && trialEndsAt) {
+            const now = new Date();
+            const expirationDate = new Date(trialEndsAt);
+            
+            if (now < expirationDate) {
+                userPlan = 'trial';
+            } else {
+                return false; // Trial expiré
+            }
+        }
+        else if (promoCode === 'FREEPRO') {
             userPlan = 'freepro';
         } else if (promoCode === 'FREEPLATINUM') {
             userPlan = 'freeplatinum';
@@ -672,7 +694,6 @@ async function hasFeature(featureName) {
         
         if (!planConfig) return false;
         
-        // Vérifier le statut si nécessaire
         if (planConfig.requiresActiveSubscription) {
             const validStatuses = ['active', 'trialing'];
             if (!validStatuses.includes(subscriptionStatus)) {
@@ -690,17 +711,14 @@ async function hasFeature(featureName) {
     }
 }
 
-// ═══════════════════════════════════════════════════════════════
-// EXPOSER LES FONCTIONS GLOBALEMENT
-// ═══════════════════════════════════════════════════════════════
-
 window.hasFeature = hasFeature;
 window.checkPageAccess = checkPageAccess;
 window.ACCESS_LEVELS = ACCESS_LEVELS;
 window.PAGE_CATEGORIES = PAGE_CATEGORIES;
 window.getPageRequiredLevel = getPageRequiredLevel;
 
-console.log('✅ Access Control System v3.0 ready');
+console.log('✅ Access Control System v3.1 ready');
 console.log('📊 Available plans:', Object.keys(ACCESS_LEVELS));
-console.log('🎟️ Promo codes supported: FREEPRO, FREEPLATINUM');
+console.log('🎟️ Promo codes supported: FREEPRO, FREEPLATINUM, FREE14DAYS, TRIAL14, TRYITFREE');
+console.log('⏰ Trial expiration check: enabled');
 console.log('🛒 Upgrade redirects to: checkout.html');
