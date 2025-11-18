@@ -87,7 +87,7 @@
             </div>
         </div>
 
-        <!-- ✅ NOUVELLE SECTION : CODE PROMO -->
+        <!-- Section Code Promo -->
         <div class="promo-section">
             <h3 class="promo-title">
                 <i class="fas fa-tag"></i>
@@ -123,7 +123,7 @@
             </div>
         </div>
 
-        <!-- ✅ NOUVELLE SECTION : RÉCAPITULATIF DES PRIX -->
+        <!-- Récapitulatif des Prix -->
         <div class="price-summary">
             <div class="summary-row">
                 <span class="summary-label">Selected Plan:</span>
@@ -153,10 +153,16 @@
                 </div>
             </div>
             
-            <!-- Badge pour accès gratuit -->
+            <!-- Badge pour accès gratuit à vie -->
             <div class="free-access-badge hidden" id="freeAccessBadge">
                 <i class="fas fa-gift"></i>
                 <span>Free lifetime access included!</span>
+            </div>
+            
+            <!-- ✅ NOUVEAU : Badge pour accès gratuit 14 jours -->
+            <div class="free-access-badge hidden" id="trialAccessBadge" style="background: linear-gradient(135deg, #10b981, #059669);">
+                <i class="fas fa-clock"></i>
+                <span><span id="trialDays">14</span>-day free access - No credit card required!</span>
             </div>
         </div>
 
@@ -191,6 +197,7 @@
                 >
             </div>
 
+            <!-- ✅ Groupe de carte bancaire (peut être caché dynamiquement) -->
             <div class="form-group" id="cardDetailsGroup">
                 <label for="card-element" class="form-label">Card Details</label>
                 <!-- Stripe Card Element sera inséré ici -->

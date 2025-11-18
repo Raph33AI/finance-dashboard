@@ -1083,3 +1083,25 @@ html {
         padding: 20px 12px;
     }
 }
+
+/* Badge pour accès trial 14 jours */
+#trialAccessBadge {
+    background: linear-gradient(135deg, #10b981, #059669) !important;
+    color: white;
+    padding: 16px 24px;
+    border-radius: 16px;
+    margin-top: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    font-weight: 700;
+    font-size: 0.95rem;
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+    animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.02); }
+}
