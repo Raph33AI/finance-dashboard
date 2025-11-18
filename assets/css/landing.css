@@ -7033,6 +7033,41 @@ body.dark-mode .pricing-card.platinum {
     }
 }
 
+/* ✅ Pricing Section Dividers */
+.pricing-section-divider {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 0;
+    margin: 16px 0 8px 0;
+    border-bottom: 2px solid rgba(59, 130, 246, 0.2);
+    font-size: 0.85rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: #3B82F6;
+}
+
+.pricing-section-divider.disabled {
+    color: #94a3b8;
+    border-bottom-color: rgba(148, 163, 184, 0.2);
+}
+
+.pricing-section-divider i {
+    font-size: 1rem;
+}
+
+/* ✅ Amélioration des badges */
+.popular-badge,
+.platinum-badge {
+    animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+}
+
 /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
    ✅ FIN DES CORRECTIONS MOBILE DÉFINITIVES
    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
