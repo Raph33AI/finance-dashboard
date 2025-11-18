@@ -3058,9 +3058,14 @@ input:checked + .toggle-slider:before {
     border-radius: var(--radius-2xl);
     padding: 2.5rem;
     transition: all var(--anim-3d-slow);
-    position: relative;
+    position: relative; /* ✅ OBLIGATOIRE pour centrer les badges */
     transform-style: preserve-3d;
     perspective: 1000px;
+    
+    /* ✅ AJOUT : Flexbox pour aligner le contenu verticalement */
+    display: flex;
+    flex-direction: column;
+    height: 100%;
 }
 
 .pricing-card:hover {
@@ -3105,6 +3110,8 @@ input:checked + .toggle-slider:before {
     letter-spacing: 0.05em;
     box-shadow: var(--shadow-3d-intense);
     animation: popularBounce 2s ease-in-out infinite;
+    text-align: center; /* ✅ AJOUT : Force le centrage du texte */
+    white-space: nowrap; /* ✅ AJOUT : Empêche le retour à la ligne */
 }
 
 @keyframes popularBounce {
@@ -3119,6 +3126,7 @@ input:checked + .toggle-slider:before {
 .pricing-header {
     text-align: center;
     margin-bottom: 2rem;
+    position: relative; /* ✅ Pour que les badges soient bien positionnés */
 }
 
 .pricing-header h3 {
@@ -3126,11 +3134,13 @@ input:checked + .toggle-slider:before {
     font-weight: 700;
     color: var(--text-primary);
     margin-bottom: 0.5rem;
+    text-align: center; /* ✅ AJOUT : Centrage du titre */
 }
 
 .pricing-header p {
     font-size: 1rem;
     color: var(--text-secondary);
+    text-align: center; /* ✅ AJOUT : Centrage de la description */
 }
 
 .pricing-price {
@@ -3168,16 +3178,18 @@ input:checked + .toggle-slider:before {
     list-style: none;
     padding: 0;
     margin: 0 0 2rem 0;
+    flex-grow: 1; /* ✅ AJOUT : Occupe l'espace disponible pour pousser le bouton en bas */
 }
 
 .pricing-features li {
     display: flex;
-    align-items: center;
+    align-items: center; /* ✅ IMPORTANT : Alignement vertical des icônes et texte */
     gap: 0.75rem;
     padding: 0.75rem 0;
     font-size: 1rem;
     color: var(--text-secondary);
     transition: transform var(--anim-3d-fast);
+    min-height: 44px; /* ✅ AJOUT : Hauteur minimale uniforme pour tous les items */
 }
 
 .pricing-features li:hover {
@@ -3191,7 +3203,9 @@ input:checked + .toggle-slider:before {
 
 .pricing-features i {
     font-size: 1.125rem;
-    flex-shrink: 0;
+    flex-shrink: 0; /* ✅ AJOUT : Empêche l'icône de rétrécir */
+    width: 20px; /* ✅ AJOUT : Largeur fixe pour aligner les icônes */
+    text-align: center; /* ✅ AJOUT : Centre l'icône dans sa zone */
 }
 
 .pricing-features .fa-check {
@@ -3215,6 +3229,10 @@ input:checked + .toggle-slider:before {
     transition: all var(--anim-3d-medium);
     position: relative;
     overflow: hidden;
+    min-height: 56px; /* ✅ AJOUT : Hauteur minimale uniforme */
+    display: flex; /* ✅ AJOUT : Pour centrer le texte */
+    align-items: center;
+    justify-content: center;
 }
 
 .btn-pricing::before {
@@ -6296,6 +6314,8 @@ body.dark-mode .market-ticker::after {
         0 10px 30px rgba(255, 215, 0, 0.4),
         0 5px 15px rgba(255, 165, 0, 0.3);
     animation: platinumShine 2s ease-in-out infinite;
+    text-align: center; /* ✅ AJOUT : Force le centrage du texte */
+    white-space: nowrap; /* ✅ AJOUT : Empêche le retour à la ligne */
 }
 
 @keyframes platinumShine {
@@ -7033,19 +7053,19 @@ body.dark-mode .pricing-card.platinum {
     }
 }
 
-/* ✅ Pricing Section Dividers */
 .pricing-section-divider {
     display: flex;
     align-items: center;
     gap: 8px;
-    padding: 12px 0;
-    margin: 16px 0 8px 0;
+    padding: 12px 0 8px 0; /* ✅ Padding uniforme */
+    margin: 20px 0 12px 0; /* ✅ Marges uniformes */
     border-bottom: 2px solid rgba(59, 130, 246, 0.2);
     font-size: 0.85rem;
     font-weight: 800;
     text-transform: uppercase;
     letter-spacing: 1px;
     color: #3B82F6;
+    width: 100%; /* ✅ AJOUT : Force la largeur à 100% */
 }
 
 .pricing-section-divider.disabled {
@@ -7055,6 +7075,9 @@ body.dark-mode .pricing-card.platinum {
 
 .pricing-section-divider i {
     font-size: 1rem;
+    flex-shrink: 0; /* ✅ AJOUT : Empêche l'icône de rétrécir */
+    width: 20px; /* ✅ AJOUT : Largeur fixe pour alignement */
+    text-align: center;
 }
 
 /* ✅ Amélioration des badges */
@@ -7068,13 +7091,13 @@ body.dark-mode .pricing-card.platinum {
     50% { transform: scale(1.05); }
 }
 
-/* ✅ ALIGNEMENT DES BOUTONS CTA DANS LES CARTES PRICING */
+/* ✅ WRAPPER POUR ALIGNER LES BOUTONS EN BAS */
 .pricing-cta-wrapper {
-    margin-top: auto; /* Pousse le bouton vers le bas */
-    padding-top: 24px;
+    margin-top: auto; /* ✅ Pousse le bouton vers le bas */
+    padding-top: 1.5rem;
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    gap: 0.75rem;
 }
 
 /* ✅ S'assurer que les cartes utilisent flexbox pour aligner les CTA */
