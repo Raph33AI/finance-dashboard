@@ -1,7 +1,8 @@
 /* ═══════════════════════════════════════════════════════════════
    CHECKOUT.JS - VERSION CLOUDFLARE WORKERS + CODES PROMO + STRIPE
    AlphaVault AI v2.2
-   ✅ Support des codes promo "14 jours gratuits sans CB"
+   ✅ Support des codes promo TRIAL (14 jours gratuits sans CB)
+   ✅ Mise à jour dynamique des features
    ═══════════════════════════════════════════════════════════════ */
 
 // ⚙️ CONFIGURATION
@@ -47,10 +48,10 @@ const PROMO_CODES = {
         plans: ['pro', 'platinum'],
         description: 'VIP lifetime access'
     },
-    // ✅ NOUVEAU : Code promo 14 jours gratuits SANS carte bancaire
+    // ✅ NOUVEAU : Code promo 14 jours gratuits SANS CB
     'FREE14DAYS': {
         type: 'trial',
-        duration: 14, // jours
+        duration: 14,
         plans: ['pro', 'platinum'],
         description: '14-day free trial - No credit card required'
     },
@@ -71,7 +72,7 @@ const PROMO_CODES = {
 // ✅ État de l'application étendu
 let selectedPlan = {
     name: 'pro',
-    price: 15
+    price: 10
 };
 
 let appliedPromo = null;
@@ -139,7 +140,6 @@ async function checkExistingPlan(user) {
         const userDoc = await firebase.firestore().collection('users').doc(user.uid).get();
         
         if (userDoc.exists) {
-            // ✅ UTILISATEUR EXISTANT (a déjà un compte)
             const userData = userDoc.data();
             const plan = userData?.plan || 'basic';
             const status = userData?.subscriptionStatus || 'inactive';
@@ -153,20 +153,14 @@ async function checkExistingPlan(user) {
                 subscriptionStatus: status
             };
             
-            // Afficher le badge du plan actuel
             displayCurrentPlanBadge(plan);
-            
-            // Adapter le header pour "Change Plan"
             updateHeaderForExistingUser(true);
-            
-            // Mettre à jour le bouton
             updatePriceSummary();
             
             console.log('✅ Existing user detected - showing "Change Plan"');
             console.log('   Current plan:', plan);
             console.log('   Status:', status);
         } else {
-            // ✅ NOUVEAU VISITEUR (pas de document Firestore)
             console.log('ℹ️ New user - showing "Start Your Premium Journey"');
             
             userExistingPlan = {
@@ -185,7 +179,6 @@ async function checkExistingPlan(user) {
     }
 }
 
-// ✅ Afficher le badge du plan actuel
 function displayCurrentPlanBadge(plan) {
     const planName = plan === 'pro' ? 'Pro' : plan === 'platinum' ? 'Platinum' : 'Basic';
     const planColor = plan === 'platinum' ? '#8B5CF6' : '#3B82F6';
@@ -217,7 +210,6 @@ function displayCurrentPlanBadge(plan) {
     header.insertBefore(badge, title);
 }
 
-// ✅ Adapter le header pour utilisateur existant
 function updateHeaderForExistingUser(hasActivePlan) {
     const title = document.querySelector('.checkout-title');
     const subtitle = document.querySelector('.checkout-subtitle');
@@ -250,20 +242,16 @@ planOptions.forEach(option => {
         };
         
         console.log('✅ Plan sélectionné:', selectedPlan);
-        
-        // Mettre à jour le récapitulatif
         updatePriceSummary();
     });
 });
 
-// Sélectionner Pro par défaut
 const defaultPlan = document.querySelector('[data-plan="pro"]');
 if (defaultPlan) {
     defaultPlan.classList.add('selected');
     console.log('✅ Default plan selected: Pro');
 }
 
-// Détecter le plan depuis l'URL
 const urlParams = new URLSearchParams(window.location.search);
 const urlPlan = urlParams.get('plan');
 
@@ -294,7 +282,6 @@ const promoMessage = document.getElementById('promoMessage');
 const promoApplied = document.getElementById('promoApplied');
 const removePromoBtn = document.getElementById('removePromoBtn');
 
-// Appliquer le code promo
 applyPromoBtn.addEventListener('click', function() {
     const code = promoInput.value.trim().toUpperCase();
     
@@ -305,7 +292,6 @@ applyPromoBtn.addEventListener('click', function() {
     
     console.log('🎁 Tentative d\'application du code:', code);
     
-    // Vérifier si le code existe
     const promo = PROMO_CODES[code];
     
     if (!promo) {
@@ -314,14 +300,12 @@ applyPromoBtn.addEventListener('click', function() {
         return;
     }
     
-    // Vérifier si le code est applicable au plan sélectionné
     if ((promo.type === 'free' || promo.type === 'trial') && !promo.plans.includes(selectedPlan.name)) {
         showPromoMessage(`This code is only valid for ${promo.plans.join(' or ')} plan`, 'error');
         console.warn('❌ Code non applicable à ce plan');
         return;
     }
     
-    // Appliquer le code
     appliedPromo = {
         code: code,
         ...promo
@@ -329,7 +313,6 @@ applyPromoBtn.addEventListener('click', function() {
     
     console.log('✅ Code promo appliqué:', appliedPromo);
     
-    // Afficher le badge de succès
     document.getElementById('promoCodeName').textContent = code;
     promoApplied.classList.remove('hidden');
     promoInput.value = '';
@@ -337,12 +320,9 @@ applyPromoBtn.addEventListener('click', function() {
     applyPromoBtn.disabled = true;
     
     showPromoMessage(`${promo.description}`, 'success');
-    
-    // Mettre à jour le récapitulatif
     updatePriceSummary();
 });
 
-// Supprimer le code promo
 removePromoBtn.addEventListener('click', function() {
     console.log('🗑️ Suppression du code promo');
     
@@ -355,7 +335,6 @@ removePromoBtn.addEventListener('click', function() {
     updatePriceSummary();
 });
 
-// Fonction pour afficher les messages de validation
 function showPromoMessage(message, type) {
     promoMessage.innerHTML = `
         <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'}"></i>
@@ -378,12 +357,8 @@ function updatePriceSummary() {
     
     let buttonText = '';
     
-    // Si un code promo est appliqué
     if (appliedPromo) {
         if (appliedPromo.type === 'percentage') {
-            // ═══════════════════════════════════════════════════════
-            // RÉDUCTION EN POURCENTAGE (ex: LAUNCH15)
-            // ═══════════════════════════════════════════════════════
             const discountAmount = (originalPrice * appliedPromo.value) / 100;
             const finalPrice = originalPrice - discountAmount;
             
@@ -405,13 +380,9 @@ function updatePriceSummary() {
                 buttonText = 'Start 14-Day Free Trial';
             }
             
-            // Afficher le groupe de carte de crédit
             document.getElementById('cardDetailsGroup').classList.remove('hidden');
             
         } else if (appliedPromo.type === 'free') {
-            // ═══════════════════════════════════════════════════════
-            // ACCÈS GRATUIT À VIE (ex: FREEPRO, VIPACCESS)
-            // ═══════════════════════════════════════════════════════
             document.getElementById('discountRow').classList.add('hidden');
             document.getElementById('originalPriceStriked').textContent = `$${originalPrice.toFixed(2)}`;
             document.getElementById('originalPriceStriked').classList.remove('hidden');
@@ -423,13 +394,9 @@ function updatePriceSummary() {
             
             buttonText = 'Activate Free Lifetime Access';
             
-            // Cacher le groupe de carte de crédit
             document.getElementById('cardDetailsGroup').classList.add('hidden');
             
         } else if (appliedPromo.type === 'trial') {
-            // ═══════════════════════════════════════════════════════
-            // ✅ NOUVEAU : ACCÈS GRATUIT 14 JOURS SANS CB (ex: FREE14DAYS)
-            // ═══════════════════════════════════════════════════════
             document.getElementById('discountRow').classList.add('hidden');
             document.getElementById('originalPriceStriked').textContent = `$${originalPrice.toFixed(2)}`;
             document.getElementById('originalPriceStriked').classList.remove('hidden');
@@ -439,19 +406,14 @@ function updatePriceSummary() {
             document.getElementById('freeAccessBadge').classList.add('hidden');
             document.getElementById('trialAccessBadge').classList.remove('hidden');
             
-            // Mettre à jour le texte du badge avec la durée
             const trialDays = appliedPromo.duration || 14;
             document.getElementById('trialDays').textContent = trialDays;
             
             buttonText = `Start ${trialDays}-Day Free Trial`;
             
-            // ✅ CACHER LE GROUPE DE CARTE DE CRÉDIT
             document.getElementById('cardDetailsGroup').classList.add('hidden');
         }
     } else {
-        // ═══════════════════════════════════════════════════════
-        // PAS DE CODE PROMO (paiement normal)
-        // ═══════════════════════════════════════════════════════
         document.getElementById('discountRow').classList.add('hidden');
         document.getElementById('originalPriceStriked').classList.add('hidden');
         document.getElementById('summaryFinalPrice').textContent = `$${originalPrice.toFixed(2)}`;
@@ -464,15 +426,12 @@ function updatePriceSummary() {
             buttonText = 'Start 14-Day Free Trial';
         }
         
-        // Afficher le groupe de carte de crédit
         document.getElementById('cardDetailsGroup').classList.remove('hidden');
     }
     
-    // ✅ METTRE À JOUR LE TEXTE DU BOUTON
     document.getElementById('submitButtonText').textContent = buttonText;
 }
 
-// Initialiser le récapitulatif
 updatePriceSummary();
 
 // ═══════════════════════════════════════════════════════════════
@@ -495,7 +454,6 @@ form.addEventListener('submit', async (event) => {
     submitButton.style.animation = 'none';
     
     try {
-        // 1️⃣ Vérifier l'authentification
         console.log('1️⃣ Vérification de l\'authentification...');
         
         const user = firebase.auth().currentUser;
@@ -507,7 +465,6 @@ form.addEventListener('submit', async (event) => {
         console.log('   ✅ Utilisateur authentifié:', user.email);
         console.log('   📧 User ID:', user.uid);
         
-        // 2️⃣ Récupérer les données du formulaire
         console.log('2️⃣ Récupération des données...');
         
         const email = document.getElementById('email').value;
@@ -522,10 +479,9 @@ form.addEventListener('submit', async (event) => {
         if (appliedPromo) {
             console.log('   🎁 Code promo appliqué:', appliedPromo.code);
             console.log('   🎁 Type:', appliedPromo.type);
-            console.log('   🎁 Valeur:', appliedPromo.type === 'percentage' ? `${appliedPromo.value}%` : appliedPromo.type === 'trial' ? `${appliedPromo.duration} jours` : 'LIFETIME FREE');
+            console.log('   🎁 Valeur:', appliedPromo.type === 'percentage' ? `${appliedPromo.value}%` : appliedPromo.type === 'trial' ? `${appliedPromo.duration} jours` : 'FREE');
         }
         
-        // 3️⃣ Appeler le Cloudflare Worker
         console.log('3️⃣ Appel du Cloudflare Worker...');
         console.log('   📡 URL:', `${WORKER_URL}/create-checkout-session`);
         
@@ -535,8 +491,8 @@ form.addEventListener('submit', async (event) => {
             name: name,
             userId: user.uid,
             promoCode: appliedPromo ? appliedPromo.code : null,
-            promoType: appliedPromo ? appliedPromo.type : null, // ✅ IMPORTANT pour le Worker
-            promoDuration: appliedPromo?.duration || null // ✅ Durée du trial en jours
+            promoType: appliedPromo ? appliedPromo.type : null,
+            promoDuration: appliedPromo?.duration || null
         };
         
         console.log('   📦 Body:', JSON.stringify(requestBody, null, 2));
@@ -564,12 +520,10 @@ form.addEventListener('submit', async (event) => {
             throw new Error(data.error);
         }
         
-        // 4️⃣ Vérifier si c'est un accès gratuit (lifetime OU trial)
         if (data.free === true) {
             console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
             
             if (data.trial === true) {
-                // ✅ ACCÈS GRATUIT 14 JOURS
                 console.log('🎉 ACCÈS GRATUIT 14 JOURS ACTIVÉ (SANS CB)');
                 console.log('   👤 User ID:', user.uid);
                 console.log('   💎 Plan:', selectedPlan.name);
@@ -578,10 +532,8 @@ form.addEventListener('submit', async (event) => {
                 console.log('   📅 Expire le:', data.expiresAt || 'N/A');
                 console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
                 
-                // Redirection vers success avec paramètre trial
                 window.location.href = `success.html?plan=${selectedPlan.name}&trial=true&days=${appliedPromo.duration}&noconfetti=true`;
             } else {
-                // ✅ ACCÈS GRATUIT À VIE
                 console.log('🎉 ACCÈS GRATUIT À VIE ACTIVÉ');
                 console.log('   👤 Client Stripe ID:', data.customerId || 'N/A');
                 console.log('   💎 Plan:', selectedPlan.name);
@@ -594,7 +546,6 @@ form.addEventListener('submit', async (event) => {
             return;
         }
         
-        // 5️⃣ Sinon, rediriger vers Stripe Checkout (paiement normal)
         if (!data.sessionId) {
             throw new Error('Session ID manquant dans la réponse');
         }

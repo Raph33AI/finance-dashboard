@@ -50,7 +50,7 @@
 
         <!-- Plan Selector -->
         <div class="plan-selector">
-            <!-- Pro Plan -->
+            <!-- ✅ PRO PLAN - Fonctionnalités mises à jour -->
             <div class="plan-option selected" data-plan="pro" data-price="10">
                 <div class="plan-badge">🔥 Most Popular</div>
                 <h3 class="plan-name">AlphaVault Pro</h3>
@@ -60,15 +60,26 @@
                     <span class="period">/month</span>
                 </div>
                 <ul class="plan-features">
-                    <li><i class="fas fa-check-circle"></i> Unlimited analyses</li>
-                    <li><i class="fas fa-check-circle"></i> IPO screening & alerts</li>
-                    <li><i class="fas fa-check-circle"></i> Portfolio optimization</li>
-                    <li><i class="fas fa-check-circle"></i> Monte Carlo simulations</li>
-                    <li><i class="fas fa-check-circle"></i> Unlimited Alphy AI</li>
+                    <!-- ✅ Pages Basic incluses -->
+                    <li><i class="fas fa-check-circle"></i> Financial Dashboard</li>
+                    <li><i class="fas fa-check-circle"></i> Monte Carlo Simulations</li>
+                    <li><i class="fas fa-check-circle"></i> Portfolio Optimizer</li>
+                    
+                    <!-- ✅ Pages Pro exclusives -->
+                    <li><i class="fas fa-check-circle"></i> Investment Analytics</li>
+                    <li><i class="fas fa-check-circle"></i> Risk Parity Optimization</li>
+                    <li><i class="fas fa-check-circle"></i> Scenario Analysis</li>
+                    <li><i class="fas fa-check-circle"></i> Real-Time Market Data</li>
+                    <li><i class="fas fa-check-circle"></i> Trend Prediction AI</li>
+                    <li><i class="fas fa-check-circle"></i> Market Intelligence</li>
+                    
+                    <!-- ✅ Fonctionnalités supplémentaires -->
+                    <li><i class="fas fa-check-circle"></i> Unlimited Alphy AI Chatbot</li>
+                    <li><i class="fas fa-check-circle"></i> Advanced Analytics Tools</li>
                 </ul>
             </div>
 
-            <!-- Platinum Plan -->
+            <!-- ✅ PLATINUM PLAN - Fonctionnalités mises à jour -->
             <div class="plan-option" data-plan="platinum" data-price="20">
                 <div class="plan-badge platinum">💎 Platinum</div>
                 <h3 class="plan-name">AlphaVault Platinum</h3>
@@ -78,16 +89,27 @@
                     <span class="period">/month</span>
                 </div>
                 <ul class="plan-features">
-                    <li><i class="fas fa-check-circle"></i> Everything in Pro</li>
-                    <li><i class="fas fa-check-circle"></i> Advanced M&A screening</li>
+                    <!-- ✅ Tout ce qui est dans Pro -->
+                    <li><i class="fas fa-check-circle"></i> Everything in Pro Plan</li>
+                    
+                    <!-- ✅ Pages Platinum exclusives -->
+                    <li><i class="fas fa-check-circle"></i> Advanced Analysis Tools</li>
+                    <li><i class="fas fa-check-circle"></i> Analyst Coverage & Ratings</li>
+                    <li><i class="fas fa-check-circle"></i> Full-Page AI Chatbot</li>
+                    <li><i class="fas fa-check-circle"></i> Company Deep Insights</li>
+                    <li><i class="fas fa-check-circle"></i> Earnings & Estimates Reports</li>
+                    
+                    <!-- ✅ Fonctionnalités Platinum exclusives -->
+                    <li><i class="fas fa-check-circle"></i> Advanced M&A Screening</li>
                     <li><i class="fas fa-check-circle"></i> API Access (10K calls/month)</li>
-                    <li><i class="fas fa-check-circle"></i> White-label reports</li>
-                    <li><i class="fas fa-check-circle"></i> Priority support 24/7</li>
+                    <li><i class="fas fa-check-circle"></i> White-Label Reports</li>
+                    <li><i class="fas fa-check-circle"></i> Priority Support 24/7</li>
+                    <li><i class="fas fa-check-circle"></i> Custom Alerts & Notifications</li>
                 </ul>
             </div>
         </div>
 
-        <!-- Section Code Promo -->
+        <!-- ✅ Section Code Promo -->
         <div class="promo-section">
             <h3 class="promo-title">
                 <i class="fas fa-tag"></i>
@@ -99,13 +121,25 @@
                     type="text" 
                     id="promoCode" 
                     class="promo-input" 
-                    placeholder="Enter your promo code"
+                    placeholder="Enter your promo code (e.g., FREE14DAYS)"
                     autocomplete="off"
                 >
                 <button type="button" class="btn-apply-promo" id="applyPromoBtn">
                     <i class="fas fa-check"></i>
                     Apply
                 </button>
+            </div>
+            
+            <!-- ✅ Codes disponibles (info discrète) -->
+            <div style="margin-top: 12px; padding: 12px; background: rgba(59, 130, 246, 0.05); border-radius: 10px; border: 1px dashed rgba(59, 130, 246, 0.2);">
+                <p style="font-size: 0.85rem; color: #64748b; margin: 0; font-weight: 600;">
+                    <i class="fas fa-info-circle" style="color: #3B82F6;"></i>
+                    Available codes: 
+                    <span style="color: #3B82F6; font-weight: 700;">FREE14DAYS</span> (14-day trial, no CC), 
+                    <span style="color: #8B5CF6; font-weight: 700;">LAUNCH15</span> (15% off), 
+                    <span style="color: #10b981; font-weight: 700;">FREEPRO</span> (lifetime Pro), 
+                    <span style="color: #f59e0b; font-weight: 700;">FREEPLATINUM</span> (lifetime Platinum)
+                </p>
             </div>
             
             <!-- Message de validation/erreur -->
@@ -123,7 +157,7 @@
             </div>
         </div>
 
-        <!-- Récapitulatif des Prix -->
+        <!-- ✅ Récapitulatif des Prix -->
         <div class="price-summary">
             <div class="summary-row">
                 <span class="summary-label">Selected Plan:</span>
@@ -140,7 +174,7 @@
                     <i class="fas fa-tag"></i>
                     Discount (<span id="discountPercent">15</span>%):
                 </span>
-                <span class="summary-value discount-value" id="discountAmount">-$2.25</span>
+                <span class="summary-value discount-value" id="discountAmount">-$1.50</span>
             </div>
             
             <div class="summary-divider"></div>
@@ -159,8 +193,8 @@
                 <span>Free lifetime access included!</span>
             </div>
             
-            <!-- ✅ NOUVEAU : Badge pour accès gratuit 14 jours -->
-            <div class="free-access-badge hidden" id="trialAccessBadge" style="background: linear-gradient(135deg, #10b981, #059669);">
+            <!-- ✅ Badge pour accès trial 14 jours -->
+            <div class="free-access-badge hidden" id="trialAccessBadge" style="background: linear-gradient(135deg, #10b981, #059669); border-color: rgba(16, 185, 129, 0.4);">
                 <i class="fas fa-clock"></i>
                 <span><span id="trialDays">14</span>-day free access - No credit card required!</span>
             </div>
@@ -228,6 +262,142 @@
                 </div>
             </div>
         </form>
+        
+        <!-- ✅ Section informative - Comparatif des Plans -->
+        <div style="margin-top: 40px; padding: 32px; background: rgba(255, 255, 255, 0.5); backdrop-filter: blur(10px); border-radius: 20px; border: 2px solid rgba(59, 130, 246, 0.2);">
+            <h3 style="font-size: 1.4rem; font-weight: 800; color: #1e293b; margin-bottom: 24px; text-align: center;">
+                <i class="fas fa-table" style="color: #3B82F6; margin-right: 10px;"></i>
+                Plans Comparison - Access Summary
+            </h3>
+            
+            <div style="overflow-x: auto;">
+                <table style="width: 100%; border-collapse: collapse; background: white; border-radius: 12px; overflow: hidden;">
+                    <thead>
+                        <tr style="background: linear-gradient(135deg, #3B82F6, #8B5CF6);">
+                            <th style="padding: 16px; text-align: left; color: white; font-weight: 800; font-size: 0.95rem;">Feature</th>
+                            <th style="padding: 16px; text-align: center; color: white; font-weight: 800; font-size: 0.95rem;">Basic</th>
+                            <th style="padding: 16px; text-align: center; color: white; font-weight: 800; font-size: 0.95rem;">Pro</th>
+                            <th style="padding: 16px; text-align: center; color: white; font-weight: 800; font-size: 0.95rem;">Platinum</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Pages Access -->
+                        <tr style="border-bottom: 1px solid #e2e8f0;">
+                            <td style="padding: 14px; font-weight: 600; color: #334155;">Financial Dashboard</td>
+                            <td style="padding: 14px; text-align: center;"><i class="fas fa-check-circle" style="color: #10b981; font-size: 1.2rem;"></i></td>
+                            <td style="padding: 14px; text-align: center;"><i class="fas fa-check-circle" style="color: #10b981; font-size: 1.2rem;"></i></td>
+                            <td style="padding: 14px; text-align: center;"><i class="fas fa-check-circle" style="color: #10b981; font-size: 1.2rem;"></i></td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid #e2e8f0;">
+                            <td style="padding: 14px; font-weight: 600; color: #334155;">Monte Carlo Simulations</td>
+                            <td style="padding: 14px; text-align: center;"><i class="fas fa-check-circle" style="color: #10b981; font-size: 1.2rem;"></i></td>
+                            <td style="padding: 14px; text-align: center;"><i class="fas fa-check-circle" style="color: #10b981; font-size: 1.2rem;"></i></td>
+                            <td style="padding: 14px; text-align: center;"><i class="fas fa-check-circle" style="color: #10b981; font-size: 1.2rem;"></i></td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid #e2e8f0;">
+                            <td style="padding: 14px; font-weight: 600; color: #334155;">Portfolio Optimizer</td>
+                            <td style="padding: 14px; text-align: center;"><i class="fas fa-check-circle" style="color: #10b981; font-size: 1.2rem;"></i></td>
+                            <td style="padding: 14px; text-align: center;"><i class="fas fa-check-circle" style="color: #10b981; font-size: 1.2rem;"></i></td>
+                            <td style="padding: 14px; text-align: center;"><i class="fas fa-check-circle" style="color: #10b981; font-size: 1.2rem;"></i></td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid #e2e8f0; background: rgba(59, 130, 246, 0.05);">
+                            <td style="padding: 14px; font-weight: 600; color: #334155;">Investment Analytics</td>
+                            <td style="padding: 14px; text-align: center;"><i class="fas fa-times-circle" style="color: #ef4444; font-size: 1.2rem;"></i></td>
+                            <td style="padding: 14px; text-align: center;"><i class="fas fa-check-circle" style="color: #10b981; font-size: 1.2rem;"></i></td>
+                            <td style="padding: 14px; text-align: center;"><i class="fas fa-check-circle" style="color: #10b981; font-size: 1.2rem;"></i></td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid #e2e8f0; background: rgba(59, 130, 246, 0.05);">
+                            <td style="padding: 14px; font-weight: 600; color: #334155;">Risk Parity Optimization</td>
+                            <td style="padding: 14px; text-align: center;"><i class="fas fa-times-circle" style="color: #ef4444; font-size: 1.2rem;"></i></td>
+                            <td style="padding: 14px; text-align: center;"><i class="fas fa-check-circle" style="color: #10b981; font-size: 1.2rem;"></i></td>
+                            <td style="padding: 14px; text-align: center;"><i class="fas fa-check-circle" style="color: #10b981; font-size: 1.2rem;"></i></td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid #e2e8f0; background: rgba(59, 130, 246, 0.05);">
+                            <td style="padding: 14px; font-weight: 600; color: #334155;">Scenario Analysis</td>
+                            <td style="padding: 14px; text-align: center;"><i class="fas fa-times-circle" style="color: #ef4444; font-size: 1.2rem;"></i></td>
+                            <td style="padding: 14px; text-align: center;"><i class="fas fa-check-circle" style="color: #10b981; font-size: 1.2rem;"></i></td>
+                            <td style="padding: 14px; text-align: center;"><i class="fas fa-check-circle" style="color: #10b981; font-size: 1.2rem;"></i></td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid #e2e8f0; background: rgba(59, 130, 246, 0.05);">
+                            <td style="padding: 14px; font-weight: 600; color: #334155;">Real-Time Market Data</td>
+                            <td style="padding: 14px; text-align: center;"><i class="fas fa-times-circle" style="color: #ef4444; font-size: 1.2rem;"></i></td>
+                            <td style="padding: 14px; text-align: center;"><i class="fas fa-check-circle" style="color: #10b981; font-size: 1.2rem;"></i></td>
+                            <td style="padding: 14px; text-align: center;"><i class="fas fa-check-circle" style="color: #10b981; font-size: 1.2rem;"></i></td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid #e2e8f0; background: rgba(59, 130, 246, 0.05);">
+                            <td style="padding: 14px; font-weight: 600; color: #334155;">Trend Prediction AI</td>
+                            <td style="padding: 14px; text-align: center;"><i class="fas fa-times-circle" style="color: #ef4444; font-size: 1.2rem;"></i></td>
+                            <td style="padding: 14px; text-align: center;"><i class="fas fa-check-circle" style="color: #10b981; font-size: 1.2rem;"></i></td>
+                            <td style="padding: 14px; text-align: center;"><i class="fas fa-check-circle" style="color: #10b981; font-size: 1.2rem;"></i></td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid #e2e8f0; background: rgba(59, 130, 246, 0.05);">
+                            <td style="padding: 14px; font-weight: 600; color: #334155;">Market Intelligence</td>
+                            <td style="padding: 14px; text-align: center;"><i class="fas fa-times-circle" style="color: #ef4444; font-size: 1.2rem;"></i></td>
+                            <td style="padding: 14px; text-align: center;"><i class="fas fa-check-circle" style="color: #10b981; font-size: 1.2rem;"></i></td>
+                            <td style="padding: 14px; text-align: center;"><i class="fas fa-check-circle" style="color: #10b981; font-size: 1.2rem;"></i></td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid #e2e8f0; background: rgba(139, 92, 246, 0.05);">
+                            <td style="padding: 14px; font-weight: 600; color: #334155;">Advanced Analysis Tools</td>
+                            <td style="padding: 14px; text-align: center;"><i class="fas fa-times-circle" style="color: #ef4444; font-size: 1.2rem;"></i></td>
+                            <td style="padding: 14px; text-align: center;"><i class="fas fa-times-circle" style="color: #ef4444; font-size: 1.2rem;"></i></td>
+                            <td style="padding: 14px; text-align: center;"><i class="fas fa-check-circle" style="color: #10b981; font-size: 1.2rem;"></i></td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid #e2e8f0; background: rgba(139, 92, 246, 0.05);">
+                            <td style="padding: 14px; font-weight: 600; color: #334155;">Analyst Coverage & Ratings</td>
+                            <td style="padding: 14px; text-align: center;"><i class="fas fa-times-circle" style="color: #ef4444; font-size: 1.2rem;"></i></td>
+                            <td style="padding: 14px; text-align: center;"><i class="fas fa-times-circle" style="color: #ef4444; font-size: 1.2rem;"></i></td>
+                            <td style="padding: 14px; text-align: center;"><i class="fas fa-check-circle" style="color: #10b981; font-size: 1.2rem;"></i></td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid #e2e8f0; background: rgba(139, 92, 246, 0.05);">
+                            <td style="padding: 14px; font-weight: 600; color: #334155;">Company Deep Insights</td>
+                            <td style="padding: 14px; text-align: center;"><i class="fas fa-times-circle" style="color: #ef4444; font-size: 1.2rem;"></i></td>
+                            <td style="padding: 14px; text-align: center;"><i class="fas fa-times-circle" style="color: #ef4444; font-size: 1.2rem;"></i></td>
+                            <td style="padding: 14px; text-align: center;"><i class="fas fa-check-circle" style="color: #10b981; font-size: 1.2rem;"></i></td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid #e2e8f0; background: rgba(139, 92, 246, 0.05);">
+                            <td style="padding: 14px; font-weight: 600; color: #334155;">Earnings & Estimates Reports</td>
+                            <td style="padding: 14px; text-align: center;"><i class="fas fa-times-circle" style="color: #ef4444; font-size: 1.2rem;"></i></td>
+                            <td style="padding: 14px; text-align: center;"><i class="fas fa-times-circle" style="color: #ef4444; font-size: 1.2rem;"></i></td>
+                            <td style="padding: 14px; text-align: center;"><i class="fas fa-check-circle" style="color: #10b981; font-size: 1.2rem;"></i></td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid #e2e8f0; background: rgba(139, 92, 246, 0.05);">
+                            <td style="padding: 14px; font-weight: 600; color: #334155;">Advanced M&A Screening</td>
+                            <td style="padding: 14px; text-align: center;"><i class="fas fa-times-circle" style="color: #ef4444; font-size: 1.2rem;"></i></td>
+                            <td style="padding: 14px; text-align: center;"><i class="fas fa-times-circle" style="color: #ef4444; font-size: 1.2rem;"></i></td>
+                            <td style="padding: 14px; text-align: center;"><i class="fas fa-check-circle" style="color: #10b981; font-size: 1.2rem;"></i></td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid #e2e8f0; background: rgba(139, 92, 246, 0.05);">
+                            <td style="padding: 14px; font-weight: 600; color: #334155;">API Access (10K calls/month)</td>
+                            <td style="padding: 14px; text-align: center;"><i class="fas fa-times-circle" style="color: #ef4444; font-size: 1.2rem;"></i></td>
+                            <td style="padding: 14px; text-align: center;"><i class="fas fa-times-circle" style="color: #ef4444; font-size: 1.2rem;"></i></td>
+                            <td style="padding: 14px; text-align: center;"><i class="fas fa-check-circle" style="color: #10b981; font-size: 1.2rem;"></i></td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid #e2e8f0; background: rgba(139, 92, 246, 0.05);">
+                            <td style="padding: 14px; font-weight: 600; color: #334155;">White-Label Reports</td>
+                            <td style="padding: 14px; text-align: center;"><i class="fas fa-times-circle" style="color: #ef4444; font-size: 1.2rem;"></i></td>
+                            <td style="padding: 14px; text-align: center;"><i class="fas fa-times-circle" style="color: #ef4444; font-size: 1.2rem;"></i></td>
+                            <td style="padding: 14px; text-align: center;"><i class="fas fa-check-circle" style="color: #10b981; font-size: 1.2rem;"></i></td>
+                        </tr>
+                        <tr style="background: rgba(139, 92, 246, 0.05);">
+                            <td style="padding: 14px; font-weight: 600; color: #334155;">Priority Support 24/7</td>
+                            <td style="padding: 14px; text-align: center;"><i class="fas fa-times-circle" style="color: #ef4444; font-size: 1.2rem;"></i></td>
+                            <td style="padding: 14px; text-align: center;"><i class="fas fa-times-circle" style="color: #ef4444; font-size: 1.2rem;"></i></td>
+                            <td style="padding: 14px; text-align: center;"><i class="fas fa-check-circle" style="color: #10b981; font-size: 1.2rem;"></i></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            
+            <!-- ✅ Légende -->
+            <div style="margin-top: 20px; padding: 16px; background: rgba(59, 130, 246, 0.05); border-radius: 12px; border-left: 4px solid #3B82F6;">
+                <p style="font-size: 0.9rem; color: #475569; margin: 0; font-weight: 600; line-height: 1.6;">
+                    <i class="fas fa-info-circle" style="color: #3B82F6;"></i>
+                    <strong>Note:</strong> All plans include access to <strong>Settings</strong>, <strong>User Profile</strong>, and <strong>Interactive Demo</strong>. 
+                    The <strong>Pro plan</strong> includes all Basic features plus 6 advanced tools. 
+                    The <strong>Platinum plan</strong> unlocks all features with priority support and API access.
+                </p>
+            </div>
+        </div>
     </div>
 
     <!-- Firebase -->
