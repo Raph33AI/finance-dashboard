@@ -1126,7 +1126,7 @@
     </section>
 
     <!-- ═══════════════════════════════════════════════════════════════
-     PRICING SECTION - ✅ MIS À JOUR SELON ACCESS-CONTROL.JS
+     PRICING SECTION - ✅ VERSION FINALE CORRIGÉE
      ═══════════════════════════════════════════════════════════════ -->
     <section class="pricing-section" id="pricing">
         <div class="container-fluid">
@@ -1137,7 +1137,7 @@
             </div>
 
             <div class="pricing-grid-three">
-                <!-- ✅ BASIC TIER - Accès limité aux pages essentielles -->
+                <!-- ✅ BASIC TIER -->
                 <div class="pricing-card" data-aos="fade-up">
                     <div class="pricing-header">
                         <h3>AlphaVault Basic</h3>
@@ -1187,15 +1187,17 @@
                         <li class="disabled"><i class="fas fa-times"></i> Trend Prediction AI</li>
                         <li class="disabled"><i class="fas fa-times"></i> Advanced Analysis Tools</li>
                         <li class="disabled"><i class="fas fa-times"></i> Analyst Coverage</li>
-                        <li class="disabled"><i class="fas fa-times"></i> API Access</li>
                     </ul>
                     
-                    <button class="btn-pricing" onclick="window.location.href='index.html'">
-                        Get Started Free
-                    </button>
+                    <!-- ✅ Bouton CTA avec classe spécifique pour alignement -->
+                    <div class="pricing-cta-wrapper">
+                        <button class="btn-pricing" onclick="window.location.href='index.html'">
+                            Get Started Free
+                        </button>
+                    </div>
                 </div>
 
-                <!-- ✅ PRO TIER - Accès Basic + 6 pages Pro -->
+                <!-- ✅ PRO TIER -->
                 <div class="pricing-card featured" data-aos="fade-up" data-aos-delay="100">
                     <div class="popular-badge">🔥 Most Popular</div>
                     <div class="pricing-header">
@@ -1252,17 +1254,19 @@
                         <li class="disabled"><i class="fas fa-times"></i> Company Deep Insights</li>
                         <li class="disabled"><i class="fas fa-times"></i> Earnings & Estimates</li>
                         <li class="disabled"><i class="fas fa-times"></i> M&A Screening</li>
-                        <li class="disabled"><i class="fas fa-times"></i> API Access</li>
                         <li class="disabled"><i class="fas fa-times"></i> White-Label Reports</li>
                     </ul>
                     
-                    <button class="btn-pricing featured" onclick="window.location.href='checkout.html?plan=pro'">
-                        Start 14-Day Free Trial
-                    </button>
-                    <p class="pricing-note">Same price as Spotify Premium ✨</p>
+                    <!-- ✅ Bouton CTA avec classe spécifique pour alignement -->
+                    <div class="pricing-cta-wrapper">
+                        <button class="btn-pricing featured" onclick="window.location.href='checkout.html?plan=pro'">
+                            Start 14-Day Free Trial
+                        </button>
+                        <p class="pricing-note">Same price as Spotify Premium ✨</p>
+                    </div>
                 </div>
 
-                <!-- ✅ PLATINUM TIER - Accès à TOUTES les pages -->
+                <!-- ✅ PLATINUM TIER - FEATURES CORRIGÉES -->
                 <div class="pricing-card platinum" data-aos="fade-up" data-aos-delay="200">
                     <div class="platinum-badge">💎 Platinum</div>
                     <div class="pricing-header">
@@ -1290,7 +1294,7 @@
                         <li><i class="fas fa-check"></i> <strong>All Current & Future Pages</strong></li>
                     </ul>
                     
-                    <!-- ✅ Section: Premium Features -->
+                    <!-- ✅ Section: Premium Features (CORRIGÉE - sans API, sans Dedicated Account Manager, sans Custom integrations, sans Custom scenario builder) -->
                     <div class="pricing-section-divider">
                         <i class="fas fa-crown"></i>
                         <span>Premium Features</span>
@@ -1299,24 +1303,23 @@
                         <li><i class="fas fa-check"></i> All Pro features</li>
                         <li><i class="fas fa-check"></i> Advanced M&A screening tools</li>
                         <li><i class="fas fa-check"></i> Black-Litterman optimization</li>
-                        <li><i class="fas fa-check"></i> Custom scenario builder</li>
-                        <li><i class="fas fa-check"></i> API Access (10,000 calls/month)</li>
                         <li><i class="fas fa-check"></i> White-label reports & exports</li>
                         <li><i class="fas fa-check"></i> Priority support (24/7)</li>
-                        <li><i class="fas fa-check"></i> Dedicated account manager</li>
-                        <li><i class="fas fa-check"></i> Custom integrations</li>
                         <li><i class="fas fa-check"></i> Advanced AI models</li>
                         <li><i class="fas fa-check"></i> Institutional-grade analytics</li>
                     </ul>
                     
-                    <button class="btn-pricing platinum" onclick="window.location.href='checkout.html?plan=platinum'">
-                        Start 14-Day Free Trial
-                    </button>
-                    <p class="pricing-note">Professional-grade tools 🚀</p>
+                    <!-- ✅ Bouton CTA avec classe spécifique pour alignement -->
+                    <div class="pricing-cta-wrapper">
+                        <button class="btn-pricing platinum" onclick="window.location.href='checkout.html?plan=platinum'">
+                            Start 14-Day Free Trial
+                        </button>
+                        <p class="pricing-note">Professional-grade tools 🚀</p>
+                    </div>
                 </div>
             </div>
             
-            <!-- ✅ TABLEAU COMPARATIF DÉTAILLÉ -->
+            <!-- ✅ TABLEAU COMPARATIF DÉTAILLÉ - LIGNE API ACCESS SUPPRIMÉE -->
             <div style="margin-top: 80px; padding: 48px; background: rgba(255, 255, 255, 0.5); backdrop-filter: blur(10px); border-radius: 24px; border: 2px solid rgba(59, 130, 246, 0.2);" data-aos="fade-up">
                 <h3 style="font-size: 1.8rem; font-weight: 800; color: #1e293b; margin-bottom: 32px; text-align: center;">
                     <i class="fas fa-table" style="color: #3B82F6; margin-right: 12px;"></i>
@@ -1477,17 +1480,6 @@
                                 <td style="padding: 16px 20px; text-align: center;"><i class="fas fa-check-circle" style="color: #10b981; font-size: 1.3rem;"></i></td>
                             </tr>
                             <tr style="border-bottom: 1px solid #e2e8f0;">
-                                <td style="padding: 16px 20px; font-weight: 600; color: #334155;">API Access</td>
-                                <td style="padding: 16px 20px; text-align: center;"><i class="fas fa-times-circle" style="color: #ef4444; font-size: 1.3rem;"></i></td>
-                                <td style="padding: 16px 20px; text-align: center;"><i class="fas fa-times-circle" style="color: #ef4444; font-size: 1.3rem;"></i></td>
-                                <td style="padding: 16px 20px; text-align: center;">
-                                    <div style="display: flex; flex-direction: column; align-items: center; gap: 4px;">
-                                        <i class="fas fa-check-circle" style="color: #10b981; font-size: 1.3rem;"></i>
-                                        <span style="font-size: 0.75rem; color: #64748b;">10K calls/mo</span>
-                                    </div>
-                                </td>
-                            </tr>
-                            <tr style="border-bottom: 1px solid #e2e8f0;">
                                 <td style="padding: 16px 20px; font-weight: 600; color: #334155;">White-Label Reports</td>
                                 <td style="padding: 16px 20px; text-align: center;"><i class="fas fa-times-circle" style="color: #ef4444; font-size: 1.3rem;"></i></td>
                                 <td style="padding: 16px 20px; text-align: center;"><i class="fas fa-times-circle" style="color: #ef4444; font-size: 1.3rem;"></i></td>
@@ -1530,7 +1522,7 @@
                         <i class="fas fa-info-circle" style="color: #3B82F6; margin-right: 8px;"></i>
                         <strong>Note:</strong> All plans include access to <strong>Settings</strong>, <strong>User Profile</strong>, and <strong>Interactive Demo</strong>. 
                         The <strong>Pro plan</strong> unlocks 6 additional advanced pages (9 total). 
-                        The <strong>Platinum plan</strong> provides full access to all 14+ pages including 5 exclusive professional tools, plus API access and premium support.
+                        The <strong>Platinum plan</strong> provides full access to all 14+ pages including 5 exclusive professional tools plus premium support and white-label reports.
                     </p>
                 </div>
             </div>
