@@ -1155,7 +1155,7 @@ body.dark-mode .gradient-orb {
 }
 
 .btn-hero-primary:hover {
-    transform: translateY(-6px) scale(1.05); /* ✅ Élévation + zoom, sans translateZ */
+    transform: scale(1.05); /* ✅ UNIQUEMENT un zoom de 5% */
     box-shadow: var(--shadow-3d-hover);
 }
 
@@ -1220,9 +1220,9 @@ body.dark-mode .gradient-orb {
 }
 
 .btn-hero-secondary:hover {
+    transform: scale(1.05); /* ✅ UNIQUEMENT un zoom de 5% */
     background: var(--background-tertiary);
     border-color: var(--primary-color);
-    transform: translateY(-4px); /* ✅ Élévation simple, sans translateZ */
     box-shadow: var(--shadow-3d-purple-glow);
 }
 
@@ -1326,7 +1326,7 @@ body.dark-mode .gradient-orb {
 }
 
 .dashboard-mockup:hover {
-    transform: translateY(-15px); /* ✅ Élévation simple, sans rotation */
+    transform: scale(1.01); /* ✅ UNIQUEMENT un zoom très léger de 1% */
     box-shadow: var(--shadow-3d-card-hover);
 }
 
@@ -1423,7 +1423,7 @@ body.dark-mode .gradient-orb {
 }
 
 .stat-card:hover {
-    transform: translateY(-8px); /* ✅ Élévation simple, sans rotation */
+    transform: scale(1.02); /* ✅ UNIQUEMENT un zoom de 2% */
     box-shadow: var(--shadow-3d-card);
     border-color: var(--primary-color);
 }
@@ -1462,8 +1462,9 @@ body.dark-mode .gradient-orb {
     box-shadow: var(--shadow-3d-intense);
 }
 
-.stat-card.stat-primary::before {
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%);
+.stat-card.stat-primary:hover {
+    transform: scale(1.02); /* ✅ UNIQUEMENT un zoom de 2% */
+    box-shadow: var(--shadow-3d-hover);
 }
 
 .stat-card.stat-primary:hover {
@@ -1823,7 +1824,7 @@ body.dark-mode .section-tag {
 }
 
 .feature-card:hover {
-    transform: translateY(-8px); /* ✅ Élévation simple, sans rotation */
+    transform: scale(1.02); /* ✅ UNIQUEMENT un zoom de 2% */
     box-shadow: var(--shadow-3d-card-hover);
     border-color: var(--primary-color);
 }
@@ -1889,7 +1890,7 @@ body.dark-mode .section-tag {
 }
 
 .feature-highlight:hover {
-    transform: translateY(-10px) scale(1.02); /* ✅ Élévation + léger zoom, sans rotation */
+    transform: scale(1.02); /* ✅ UNIQUEMENT un zoom de 2% */
     box-shadow: var(--shadow-3d-hover);
 }
 
@@ -2248,7 +2249,7 @@ body.dark-mode .demo-interactive {
 }
 
 .btn-demo-cta:hover {
-    transform: translateY(-5px) scale(1.05);
+    transform: scale(1.05); /* ✅ UNIQUEMENT un zoom de 5% */
     box-shadow: 
         0 20px 50px rgba(255, 255, 255, 0.3),
         0 10px 25px rgba(255, 255, 255, 0.2);
@@ -2337,7 +2338,7 @@ body.dark-mode .search-interface {
 .search-box:focus-within {
     border-color: var(--primary-color);
     box-shadow: var(--shadow-3d-card);
-    transform: translateY(-3px); /* ✅ OK, pas de rotation ici */
+    transform: scale(1.01); /* ✅ UNIQUEMENT un zoom très léger de 1% */
 }
 
 .search-box:focus-within::before {
@@ -2477,9 +2478,9 @@ body.dark-mode .search-box:focus-within {
 }
 
 .company-result-card:hover {
+    transform: scale(1.02); /* ✅ UNIQUEMENT un zoom de 2% */
     border-color: var(--primary-color);
     box-shadow: var(--shadow-3d-card);
-    transform: translateX(8px); /* ✅ Glissement horizontal, sans translateZ */
 }
 
 .company-result-card:hover::before {
@@ -2678,7 +2679,7 @@ body.dark-mode .company-result-card.highlight {
 }
 
 .solution-card:hover {
-    transform: translateY(-8px); /* ✅ Élévation simple, sans rotation */
+    transform: scale(1.02); /* ✅ UNIQUEMENT un zoom de 2% */
     box-shadow: var(--shadow-3d-card-hover);
 }
 
@@ -2834,7 +2835,7 @@ body.dark-mode .solution-card:hover .feature-pill {
 }
 
 .tool-card-advanced:hover {
-    transform: translateY(-6px); /* ✅ Élévation simple, sans translateZ */
+    transform: scale(1.02); /* ✅ UNIQUEMENT un zoom de 2% */
     box-shadow: var(--shadow-3d-card);
     border-color: var(--primary-color);
 }
@@ -3044,8 +3045,8 @@ input:checked + .toggle-slider:before {
 }
 
 .pricing-card:hover {
-    transform: translateY(-8px); /* ✅ Élévation simple, sans rotation 3D */
-    box-shadow: var(--shadow-3d-card-hover);
+    transform: scale(1.02); /* ✅ UNIQUEMENT un zoom de 2% */
+    box-shadow: var(--shadow-3d-card-hover); /* Ombre légèrement plus prononcée */
     border-color: var(--primary-color);
 }
 
@@ -3067,7 +3068,7 @@ input:checked + .toggle-slider:before {
 }
 
 .pricing-card.featured:hover {
-    transform: translateY(-10px) scale(1.02); /* ✅ Élévation + léger zoom, sans rotation */
+    transform: scale(1.02); /* ✅ UNIQUEMENT un zoom de 2% */
     box-shadow: var(--shadow-3d-hover);
 }
 
@@ -3085,7 +3086,7 @@ body.dark-mode .pricing-card.platinum {
 }
 
 .pricing-card.platinum:hover {
-    transform: translateY(-10px) scale(1.02); /* ✅ Élévation + léger zoom, sans rotation */
+    transform: scale(1.02); /* ✅ UNIQUEMENT un zoom de 2% */
     box-shadow: 
         0 30px 80px -15px rgba(255, 215, 0, 0.5),
         0 15px 40px -10px rgba(255, 165, 0, 0.4);
@@ -3392,8 +3393,8 @@ body.dark-mode .pricing-card.platinum {
 }
 
 .btn-pricing:hover {
+    transform: scale(1.02); /* ✅ UNIQUEMENT un zoom de 2% */
     background: rgba(37, 99, 235, 0.05);
-    transform: translateY(-3px);
     box-shadow: var(--shadow-3d-card);
 }
 
@@ -3418,8 +3419,8 @@ body.dark-mode .btn-pricing:hover {
 }
 
 .btn-pricing.featured:hover {
+    transform: scale(1.02); /* ✅ UNIQUEMENT un zoom de 2% */
     box-shadow: var(--shadow-3d-hover);
-    transform: translateY(-4px) scale(1.02);
 }
 
 /* ✅ BOUTON PLATINUM */
@@ -3434,11 +3435,11 @@ body.dark-mode .btn-pricing:hover {
 }
 
 .btn-pricing.platinum:hover {
+    transform: scale(1.02); /* ✅ UNIQUEMENT un zoom de 2% */
     background: linear-gradient(135deg, #FFA500 0%, #FFD700 100%);
     box-shadow: 
         0 12px 35px rgba(255, 215, 0, 0.6),
         0 6px 18px rgba(255, 165, 0, 0.5);
-    transform: translateY(-4px) scale(1.02);
 }
 
 .pricing-note {
@@ -3692,7 +3693,7 @@ body.dark-mode .market-ticker {
 }
 
 .btn-alphy-cta:hover {
-    transform: translateY(-4px) scale(1.02);
+    transform: scale(1.02); /* ✅ UNIQUEMENT un zoom de 2% */
     box-shadow: var(--shadow-3d-hover);
 }
 
@@ -4076,7 +4077,7 @@ body.dark-mode .market-ticker {
 }
 
 .btn-cta-primary:hover {
-    transform: translateY(-6px) scale(1.05); /* ✅ Élévation + zoom, sans translateZ */
+    transform: scale(1.05); /* ✅ UNIQUEMENT un zoom de 5% */
     box-shadow: 
         0 30px 80px rgba(0, 0, 0, 0.4),
         0 15px 40px rgba(0, 0, 0, 0.3),
@@ -4140,8 +4141,8 @@ body.dark-mode .market-ticker {
 }
 
 .btn-cta-secondary:hover {
+    transform: scale(1.05); /* ✅ UNIQUEMENT un zoom de 5% */
     background: rgba(255, 255, 255, 0.1);
-    transform: translateY(-4px); /* ✅ Élévation simple, sans translateZ */
     box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
 }
 
