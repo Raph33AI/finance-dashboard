@@ -2951,7 +2951,8 @@ body.dark-mode .tool-icon-advanced {
 }
 
 /* ============================================
-   PRICING SECTION - EFFET 3D PREMIUM
+   💰 PRICING SECTION - VERSION CORRIGÉE
+   Alignement parfait des titres
    ============================================ */
 
 .pricing-section {
@@ -3043,26 +3044,52 @@ input:checked + .toggle-slider:before {
     transform: translateX(24px);
 }
 
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   🎯 GRILLES DE PRICING - 2 ET 3 COLONNES
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+
 .pricing-grid {
     max-width: 1200px;
     margin: 0 auto;
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
     gap: 2rem;
+    align-items: stretch; /* ✅ Toutes les cartes ont la même hauteur */
 }
 
-/* 🎯 PRICING CARDS - EFFET 3D FLIP */
+.pricing-grid-two {
+    max-width: 1000px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 2rem;
+    align-items: stretch; /* ✅ Toutes les cartes ont la même hauteur */
+}
+
+.pricing-grid-three {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2rem;
+    align-items: stretch; /* ✅ Toutes les cartes ont la même hauteur */
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   💳 PRICING CARDS - STRUCTURE FLEXBOX
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+
 .pricing-card {
     background: var(--background-primary);
     border: 2px solid var(--border-color);
     border-radius: var(--radius-2xl);
     padding: 2.5rem;
     transition: all var(--anim-3d-slow);
-    position: relative; /* ✅ OBLIGATOIRE pour centrer les badges */
+    position: relative;
     transform-style: preserve-3d;
     perspective: 1000px;
     
-    /* ✅ AJOUT : Flexbox pour aligner le contenu verticalement */
+    /* ✅ FLEXBOX POUR ALIGNER LE CONTENU */
     display: flex;
     flex-direction: column;
     height: 100%;
@@ -3095,6 +3122,31 @@ input:checked + .toggle-slider:before {
     box-shadow: var(--shadow-3d-hover);
 }
 
+/* Platinum Card */
+.pricing-card.platinum {
+    border-color: #FFD700;
+    background: linear-gradient(135deg, rgba(255, 215, 0, 0.05) 0%, rgba(255, 165, 0, 0.05) 100%);
+    box-shadow: 
+        0 20px 60px -10px rgba(255, 215, 0, 0.3),
+        0 10px 30px -5px rgba(255, 165, 0, 0.2);
+}
+
+body.dark-mode .pricing-card.platinum {
+    background: linear-gradient(135deg, rgba(255, 215, 0, 0.1) 0%, rgba(255, 165, 0, 0.1) 100%);
+}
+
+.pricing-card.platinum:hover {
+    transform: translateY(-15px) rotateX(3deg) translateZ(40px) scale(1.02);
+    box-shadow: 
+        0 30px 80px -15px rgba(255, 215, 0, 0.5),
+        0 15px 40px -10px rgba(255, 165, 0, 0.4);
+    border-color: #FFA500;
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   🏷️ BADGES - POPULAR & PLATINUM
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+
 .popular-badge {
     position: absolute;
     top: -14px;
@@ -3110,8 +3162,10 @@ input:checked + .toggle-slider:before {
     letter-spacing: 0.05em;
     box-shadow: var(--shadow-3d-intense);
     animation: popularBounce 2s ease-in-out infinite;
-    text-align: center; /* ✅ AJOUT : Force le centrage du texte */
-    white-space: nowrap; /* ✅ AJOUT : Empêche le retour à la ligne */
+    text-align: center;
+    white-space: nowrap;
+    z-index: 10; /* ✅ Au-dessus du contenu */
+    pointer-events: none; /* ✅ N'interfère pas avec le layout */
 }
 
 @keyframes popularBounce {
@@ -3123,55 +3177,112 @@ input:checked + .toggle-slider:before {
     }
 }
 
-.pricing-header {
+.platinum-badge {
+    position: absolute;
+    top: -14px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+    color: #000;
+    padding: 0.5rem 1.5rem;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    box-shadow: 
+        0 10px 30px rgba(255, 215, 0, 0.4),
+        0 5px 15px rgba(255, 165, 0, 0.3);
+    animation: platinumShine 2s ease-in-out infinite;
     text-align: center;
-    margin-bottom: 2rem;
+    white-space: nowrap;
+    z-index: 10; /* ✅ Au-dessus du contenu */
+    pointer-events: none; /* ✅ N'interfère pas avec le layout */
+}
+
+@keyframes platinumShine {
+    0%, 100% {
+        transform: translateX(-50%) translateY(0);
+        box-shadow: 
+            0 10px 30px rgba(255, 215, 0, 0.4),
+            0 5px 15px rgba(255, 165, 0, 0.3);
+    }
+    50% {
+        transform: translateX(-50%) translateY(-3px);
+        box-shadow: 
+            0 15px 40px rgba(255, 215, 0, 0.6),
+            0 8px 20px rgba(255, 165, 0, 0.5);
+    }
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   📝 PRICING HEADER - ALIGNEMENT PARFAIT DES TITRES
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+
+.pricing-header {
     position: relative;
     
-    /* ✅ AJOUT : Hauteur minimale fixe pour aligner tous les headers */
-    min-height: 90px;
+    /* ✅ HAUTEUR FIXE POUR ALIGNEMENT PARFAIT */
+    height: 110px; /* Espace pour badge + titre + description */
     
-    /* ✅ AJOUT : Flexbox pour centrage vertical */
+    /* ✅ FLEXBOX POUR CENTRAGE VERTICAL */
     display: flex;
     flex-direction: column;
-    justify-content: center;
+    justify-content: flex-end; /* Aligne le contenu en bas */
     align-items: center;
     gap: 0.5rem;
+    
+    /* ✅ MARGE BOTTOM FIXE */
+    margin-bottom: 2rem;
+    
+    /* ✅ PADDING TOP pour compenser les badges */
+    padding-top: 20px;
 }
 
 .pricing-header h3 {
     font-size: 1.5rem;
     font-weight: 700;
     color: var(--text-primary);
-    margin: 0; /* ✅ IMPORTANT : Supprimer toutes les marges par défaut */
+    
+    /* ✅ SUPPRIMER TOUTES LES MARGES */
+    margin: 0;
     padding: 0;
+    
+    /* ✅ HAUTEUR FIXE */
+    height: 2rem;
+    line-height: 2rem;
+    
+    /* ✅ CENTRAGE */
     text-align: center;
-    
-    /* ✅ AJOUT : Hauteur de ligne fixe pour cohérence */
-    line-height: 1.3;
-    
-    /* ✅ AJOUT : Hauteur minimale pour le titre */
-    min-height: 2rem;
-    
-    /* ✅ AJOUT : Flexbox pour centrage parfait */
     display: flex;
     align-items: center;
     justify-content: center;
+    width: 100%;
 }
 
 .pricing-header p {
     font-size: 1rem;
     color: var(--text-secondary);
-    margin: 0; /* ✅ IMPORTANT : Supprimer toutes les marges */
+    
+    /* ✅ SUPPRIMER TOUTES LES MARGES */
+    margin: 0;
     padding: 0;
+    
+    /* ✅ HAUTEUR FIXE */
+    height: 1.5rem;
+    line-height: 1.5rem;
+    
+    /* ✅ CENTRAGE */
     text-align: center;
-    
-    /* ✅ AJOUT : Hauteur de ligne fixe */
-    line-height: 1.5;
-    
-    /* ✅ AJOUT : Hauteur minimale pour la description */
-    min-height: 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
 }
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   💵 PRICING PRICE
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
 .pricing-price {
     text-align: center;
@@ -3204,22 +3315,30 @@ input:checked + .toggle-slider:before {
     margin-left: 0.5rem;
 }
 
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   📋 PRICING FEATURES LIST
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+
 .pricing-features {
     list-style: none;
     padding: 0;
     margin: 0 0 2rem 0;
-    flex-grow: 1; /* ✅ AJOUT : Occupe l'espace disponible pour pousser le bouton en bas */
+    
+    /* ✅ OCCUPE L'ESPACE DISPONIBLE */
+    flex-grow: 1;
 }
 
 .pricing-features li {
     display: flex;
-    align-items: center; /* ✅ IMPORTANT : Alignement vertical des icônes et texte */
+    align-items: center;
     gap: 0.75rem;
     padding: 0.75rem 0;
     font-size: 1rem;
     color: var(--text-secondary);
     transition: transform var(--anim-3d-fast);
-    min-height: 44px; /* ✅ AJOUT : Hauteur minimale uniforme pour tous les items */
+    
+    /* ✅ HAUTEUR MINIMALE UNIFORME */
+    min-height: 44px;
 }
 
 .pricing-features li:hover {
@@ -3233,9 +3352,11 @@ input:checked + .toggle-slider:before {
 
 .pricing-features i {
     font-size: 1.125rem;
-    flex-shrink: 0; /* ✅ AJOUT : Empêche l'icône de rétrécir */
-    width: 20px; /* ✅ AJOUT : Largeur fixe pour aligner les icônes */
-    text-align: center; /* ✅ AJOUT : Centre l'icône dans sa zone */
+    flex-shrink: 0;
+    
+    /* ✅ LARGEUR FIXE POUR ALIGNEMENT */
+    width: 20px;
+    text-align: center;
 }
 
 .pricing-features .fa-check {
@@ -3244,6 +3365,50 @@ input:checked + .toggle-slider:before {
 
 .pricing-features .fa-times {
     color: var(--border-color-hover);
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   🏷️ SECTION DIVIDERS
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+
+.pricing-section-divider {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 0;
+    margin: 16px 0 8px 0;
+    border-bottom: 2px solid rgba(59, 130, 246, 0.2);
+    font-size: 0.85rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: #3B82F6;
+    width: 100%;
+}
+
+.pricing-section-divider.disabled {
+    color: #94a3b8;
+    border-bottom-color: rgba(148, 163, 184, 0.2);
+}
+
+.pricing-section-divider i {
+    font-size: 1rem;
+    flex-shrink: 0;
+    width: 20px;
+    text-align: center;
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   🎯 PRICING CTA - ALIGNÉ EN BAS
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+
+.pricing-cta-wrapper {
+    /* ✅ POUSSE LE BOUTON VERS LE BAS */
+    margin-top: auto;
+    padding-top: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
 }
 
 .btn-pricing {
@@ -3259,8 +3424,10 @@ input:checked + .toggle-slider:before {
     transition: all var(--anim-3d-medium);
     position: relative;
     overflow: hidden;
-    min-height: 56px; /* ✅ AJOUT : Hauteur minimale uniforme */
-    display: flex; /* ✅ AJOUT : Pour centrer le texte */
+    
+    /* ✅ HAUTEUR MINIMALE UNIFORME */
+    min-height: 56px;
+    display: flex;
     align-items: center;
     justify-content: center;
 }
@@ -3302,6 +3469,117 @@ body.dark-mode .btn-pricing:hover {
 .btn-pricing.featured:hover {
     box-shadow: var(--shadow-3d-hover);
     transform: translateY(-4px) scale(1.02);
+}
+
+.btn-pricing.platinum {
+    background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+    color: #000;
+    font-weight: 700;
+    border: none;
+    box-shadow: 
+        0 8px 25px rgba(255, 215, 0, 0.4),
+        0 4px 12px rgba(255, 165, 0, 0.3);
+}
+
+.btn-pricing.platinum::before {
+    background: linear-gradient(135deg, #FFA500 0%, #FFD700 100%);
+}
+
+.btn-pricing.platinum:hover {
+    background: linear-gradient(135deg, #FFA500 0%, #FFD700 100%);
+    box-shadow: 
+        0 12px 35px rgba(255, 215, 0, 0.6),
+        0 6px 18px rgba(255, 165, 0, 0.5);
+}
+
+.pricing-note {
+    text-align: center;
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    margin-top: 1rem;
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   📱 RESPONSIVE - MOBILE
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+
+@media (max-width: 1024px) {
+    .pricing-grid-three {
+        grid-template-columns: 1fr;
+        max-width: 500px;
+    }
+    
+    .pricing-grid-two {
+        grid-template-columns: 1fr;
+        max-width: 500px;
+    }
+}
+
+@media (max-width: 768px) {
+    .pricing-section {
+        padding: 4rem 1rem;
+    }
+    
+    .pricing-grid,
+    .pricing-grid-two,
+    .pricing-grid-three {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+    }
+    
+    .pricing-card {
+        padding: 2rem 1.5rem;
+    }
+    
+    /* ✅ Ajuster la hauteur du header sur mobile */
+    .pricing-header {
+        height: 100px;
+        padding-top: 16px;
+    }
+    
+    .pricing-header h3 {
+        font-size: 1.375rem;
+        height: 1.875rem;
+        line-height: 1.875rem;
+    }
+    
+    .pricing-header p {
+        font-size: 0.9375rem;
+        height: 1.375rem;
+        line-height: 1.375rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .pricing-card {
+        padding: 1.75rem 1.25rem;
+    }
+    
+    /* ✅ Ajuster encore plus sur très petit mobile */
+    .pricing-header {
+        height: 95px;
+        padding-top: 14px;
+    }
+    
+    .pricing-header h3 {
+        font-size: 1.25rem;
+        height: 1.75rem;
+        line-height: 1.75rem;
+    }
+    
+    .pricing-header p {
+        font-size: 0.875rem;
+        height: 1.25rem;
+        line-height: 1.25rem;
+    }
+    
+    .amount {
+        font-size: 3rem;
+    }
+    
+    .currency {
+        font-size: 1.5rem;
+    }
 }
 
 /* ============================================
