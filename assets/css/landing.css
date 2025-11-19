@@ -3099,7 +3099,7 @@ input:checked + .toggle-slider:before {
     position: absolute;
     top: -14px;
     left: 50%;
-    transform: translateX(-50%);
+    transform: translateX(-50%); /* ✅ Centrage horizontal parfait */
     background: linear-gradient(135deg, var(--primary-color) 0%, var(--accent-color) 100%);
     color: white;
     padding: 0.5rem 1.5rem;
@@ -3110,8 +3110,16 @@ input:checked + .toggle-slider:before {
     letter-spacing: 0.05em;
     box-shadow: var(--shadow-3d-intense);
     animation: popularBounce 2s ease-in-out infinite;
-    text-align: center; /* ✅ AJOUT : Force le centrage du texte */
-    white-space: nowrap; /* ✅ AJOUT : Empêche le retour à la ligne */
+    
+    /* ✅ CENTRAGE DU TEXTE À L'INTÉRIEUR */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    white-space: nowrap;
+    
+    /* ✅ PROTECTION MOBILE */
+    min-width: fit-content;
 }
 
 @keyframes popularBounce {
@@ -3216,8 +3224,21 @@ input:checked + .toggle-slider:before {
     color: var(--border-color-hover);
 }
 
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   💰 BOUTONS PRICING - CENTRAGE PARFAIT
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+
 .btn-pricing {
+    /* ✅ LARGEUR 100% POUR OCCUPER TOUT L'ESPACE */
     width: 100%;
+    
+    /* ✅ CENTRAGE DU TEXTE ET ICÔNES */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    
+    /* Style visuel */
     background: var(--background-primary);
     color: var(--primary-color);
     border: 2px solid var(--primary-color);
@@ -3229,10 +3250,10 @@ input:checked + .toggle-slider:before {
     transition: all var(--anim-3d-medium);
     position: relative;
     overflow: hidden;
-    min-height: 56px; /* ✅ AJOUT : Hauteur minimale uniforme */
-    display: flex; /* ✅ AJOUT : Pour centrer le texte */
-    align-items: center;
-    justify-content: center;
+    min-height: 56px;
+    
+    /* ✅ CENTRAGE PARFAIT DU CONTENU */
+    gap: 0.5rem; /* Espace entre texte et icône */
 }
 
 .btn-pricing::before {
@@ -3258,6 +3279,7 @@ body.dark-mode .btn-pricing:hover {
     background: rgba(59, 130, 246, 0.1);
 }
 
+/* ✅ BOUTON FEATURED (Most Popular) */
 .btn-pricing.featured {
     background: linear-gradient(135deg, var(--primary-color) 0%, var(--accent-color) 100%);
     color: white;
@@ -3272,6 +3294,24 @@ body.dark-mode .btn-pricing:hover {
 .btn-pricing.featured:hover {
     box-shadow: var(--shadow-3d-hover);
     transform: translateY(-4px) scale(1.02);
+}
+
+/* ✅ BOUTON PLATINUM */
+.btn-pricing.platinum {
+    background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+    color: #000;
+    font-weight: 700;
+    border: none;
+    box-shadow: 
+        0 8px 25px rgba(255, 215, 0, 0.4),
+        0 4px 12px rgba(255, 165, 0, 0.3);
+}
+
+.btn-pricing.platinum:hover {
+    background: linear-gradient(135deg, #FFA500 0%, #FFD700 100%);
+    box-shadow: 
+        0 12px 35px rgba(255, 215, 0, 0.6),
+        0 6px 18px rgba(255, 165, 0, 0.5);
 }
 
 /* ============================================
@@ -6301,7 +6341,7 @@ body.dark-mode .market-ticker::after {
     position: absolute;
     top: -14px;
     left: 50%;
-    transform: translateX(-50%);
+    transform: translateX(-50%); /* ✅ Centrage horizontal parfait */
     background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
     color: #000;
     padding: 0.5rem 1.5rem;
@@ -6314,8 +6354,16 @@ body.dark-mode .market-ticker::after {
         0 10px 30px rgba(255, 215, 0, 0.4),
         0 5px 15px rgba(255, 165, 0, 0.3);
     animation: platinumShine 2s ease-in-out infinite;
-    text-align: center; /* ✅ AJOUT : Force le centrage du texte */
-    white-space: nowrap; /* ✅ AJOUT : Empêche le retour à la ligne */
+    
+    /* ✅ CENTRAGE DU TEXTE À L'INTÉRIEUR */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    white-space: nowrap;
+    
+    /* ✅ PROTECTION MOBILE */
+    min-width: fit-content;
 }
 
 @keyframes platinumShine {
@@ -7091,20 +7139,35 @@ body.dark-mode .pricing-card.platinum {
     50% { transform: scale(1.05); }
 }
 
-/* ✅ WRAPPER POUR ALIGNER LES BOUTONS EN BAS */
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   💰 WRAPPER CTA - ALIGNEMENT PARFAIT
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+
 .pricing-cta-wrapper {
     margin-top: auto; /* ✅ Pousse le bouton vers le bas */
     padding-top: 1.5rem;
     display: flex;
     flex-direction: column;
+    align-items: center; /* ✅ CENTRAGE HORIZONTAL DU BOUTON */
+    justify-content: center; /* ✅ CENTRAGE VERTICAL */
     gap: 0.75rem;
+    width: 100%; /* ✅ Occupe toute la largeur */
 }
 
-/* ✅ S'assurer que les cartes utilisent flexbox pour aligner les CTA */
 .pricing-card {
+    /* ✅ Flexbox pour aligner le contenu verticalement */
     display: flex;
     flex-direction: column;
     height: 100%; /* Force toutes les cartes à avoir la même hauteur */
+    
+    background: var(--background-primary);
+    border: 2px solid var(--border-color);
+    border-radius: var(--radius-2xl);
+    padding: 2.5rem;
+    transition: all var(--anim-3d-slow);
+    position: relative;
+    transform-style: preserve-3d;
+    perspective: 1000px;
 }
 
 /* ✅ Les features lists doivent occuper l'espace disponible */
