@@ -2660,6 +2660,493 @@ body.modal-open {
 }
 
 /* ============================================
-   🎯 FIN DU FICHIER - ULTRA MODERN 3D CSS
-   SIDEBAR 100% INTACTE ✅
+   🔔 PRICE ALERT MODAL - CORRECTION COMPLÈTE
+   ============================================ */
+
+/* Modal spécifique pour les alertes de prix */
+#priceAlertModal .modal-content {
+    max-width: 600px !important;
+}
+
+#priceAlertModal .modal-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+}
+
+#priceAlertModal .modal-body {
+    padding: 35px 40px !important;
+}
+
+/* Formulaire d'alerte */
+.alert-form,
+#priceAlertForm {
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
+}
+
+/* Groupes de formulaire dans modal alerte */
+.alert-form .form-group,
+#priceAlertForm .form-group,
+#priceAlertModal .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 0 !important;
+}
+
+.alert-form .form-group label,
+#priceAlertForm .form-group label,
+#priceAlertModal .form-group label {
+    font-weight: 700;
+    font-size: 1rem;
+    color: var(--text-primary);
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+body.dark-mode .alert-form .form-group label,
+body.dark-mode #priceAlertForm .form-group label,
+body.dark-mode #priceAlertModal .form-group label {
+    color: #e2e8f0;
+}
+
+/* Inputs dans le modal d'alerte */
+.alert-form input[type="text"],
+.alert-form input[type="number"],
+.alert-form select,
+.alert-form textarea,
+#priceAlertForm input[type="text"],
+#priceAlertForm input[type="number"],
+#priceAlertForm select,
+#priceAlertForm textarea,
+#priceAlertModal input[type="text"],
+#priceAlertModal input[type="number"],
+#priceAlertModal select,
+#priceAlertModal textarea {
+    width: 100% !important;
+    padding: 14px 18px !important;
+    font-size: 1rem !important;
+    background: rgba(255, 255, 255, 0.05) !important;
+    border: 2px solid rgba(102, 126, 234, 0.3) !important;
+    border-radius: 12px !important;
+    color: var(--text-primary) !important;
+    transition: var(--transition-smooth) !important;
+    backdrop-filter: blur(10px) !important;
+    box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.05) !important;
+    font-family: inherit !important;
+}
+
+body.dark-mode .alert-form input[type="text"],
+body.dark-mode .alert-form input[type="number"],
+body.dark-mode .alert-form select,
+body.dark-mode .alert-form textarea,
+body.dark-mode #priceAlertForm input[type="text"],
+body.dark-mode #priceAlertForm input[type="number"],
+body.dark-mode #priceAlertForm select,
+body.dark-mode #priceAlertForm textarea,
+body.dark-mode #priceAlertModal input,
+body.dark-mode #priceAlertModal select,
+body.dark-mode #priceAlertModal textarea {
+    background: rgba(15, 23, 42, 0.5) !important;
+    border-color: rgba(148, 163, 184, 0.3) !important;
+    color: #e2e8f0 !important;
+}
+
+.alert-form input:focus,
+.alert-form select:focus,
+.alert-form textarea:focus,
+#priceAlertForm input:focus,
+#priceAlertForm select:focus,
+#priceAlertForm textarea:focus,
+#priceAlertModal input:focus,
+#priceAlertModal select:focus,
+#priceAlertModal textarea:focus {
+    outline: none !important;
+    border-color: var(--ml-primary) !important;
+    background: rgba(255, 255, 255, 0.08) !important;
+    box-shadow: 
+        0 0 0 4px rgba(102, 126, 234, 0.15),
+        inset 0 2px 8px rgba(0, 0, 0, 0.05),
+        var(--glow-primary) !important;
+    transform: translateY(-2px) !important;
+}
+
+body.dark-mode .alert-form input:focus,
+body.dark-mode .alert-form select:focus,
+body.dark-mode .alert-form textarea:focus,
+body.dark-mode #priceAlertForm input:focus,
+body.dark-mode #priceAlertForm select:focus,
+body.dark-mode #priceAlertForm textarea:focus,
+body.dark-mode #priceAlertModal input:focus,
+body.dark-mode #priceAlertModal select:focus,
+body.dark-mode #priceAlertModal textarea:focus {
+    background: rgba(15, 23, 42, 0.7) !important;
+}
+
+/* Placeholder styling */
+.alert-form input::placeholder,
+.alert-form textarea::placeholder,
+#priceAlertForm input::placeholder,
+#priceAlertForm textarea::placeholder,
+#priceAlertModal input::placeholder,
+#priceAlertModal textarea::placeholder {
+    color: var(--text-secondary) !important;
+    opacity: 0.6;
+}
+
+body.dark-mode .alert-form input::placeholder,
+body.dark-mode .alert-form textarea::placeholder,
+body.dark-mode #priceAlertForm input::placeholder,
+body.dark-mode #priceAlertForm textarea::placeholder,
+body.dark-mode #priceAlertModal input::placeholder,
+body.dark-mode #priceAlertModal textarea::placeholder {
+    color: #94a3b8 !important;
+}
+
+/* Select spécifique */
+.alert-form select,
+#priceAlertForm select,
+#priceAlertModal select {
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23667eea' d='M6 9L1 4h10z'/%3E%3C/svg%3E") !important;
+    background-repeat: no-repeat !important;
+    background-position: right 16px center !important;
+    background-size: 12px !important;
+    padding-right: 45px !important;
+    cursor: pointer !important;
+}
+
+body.dark-mode .alert-form select,
+body.dark-mode #priceAlertForm select,
+body.dark-mode #priceAlertModal select {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23a5b4fc' d='M6 9L1 4h10z'/%3E%3C/svg%3E") !important;
+}
+
+/* Textarea */
+.alert-form textarea,
+#priceAlertForm textarea,
+#priceAlertModal textarea {
+    min-height: 100px !important;
+    resize: vertical !important;
+    font-family: inherit !important;
+    line-height: 1.6 !important;
+}
+
+/* Actions du formulaire */
+.alert-form .form-actions,
+#priceAlertForm .form-actions,
+#priceAlertModal .form-actions {
+    display: flex !important;
+    gap: 12px !important;
+    margin-top: 30px !important;
+    padding-top: 25px !important;
+    border-top: 2px solid var(--glass-border) !important;
+}
+
+/* Bouton Create Alert */
+.alert-form button[type="submit"],
+.alert-form .btn-create-alert,
+#priceAlertForm button[type="submit"],
+#priceAlertModal button[onclick*="createAlert"],
+#priceAlertModal .btn-primary,
+button:has(.fa-bell) {
+    flex: 1 !important;
+    padding: 16px 32px !important;
+    font-size: 1.1rem !important;
+    font-weight: 700 !important;
+    border: none !important;
+    border-radius: 16px !important;
+    background: linear-gradient(135deg, var(--ml-primary), var(--ml-secondary), var(--ml-accent)) !important;
+    background-size: 200% 200% !important;
+    color: white !important;
+    cursor: pointer !important;
+    position: relative !important;
+    overflow: hidden !important;
+    transition: var(--transition-smooth) !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 12px !important;
+    box-shadow: 
+        0 8px 24px rgba(102, 126, 234, 0.4),
+        0 0 20px rgba(118, 75, 162, 0.3) !important;
+    transform-style: preserve-3d !important;
+}
+
+.alert-form button[type="submit"]::before,
+#priceAlertForm button[type="submit"]::before,
+#priceAlertModal button[onclick*="createAlert"]::before {
+    content: '' !important;
+    position: absolute !important;
+    top: -50% !important;
+    left: -50% !important;
+    width: 200% !important;
+    height: 200% !important;
+    background: linear-gradient(
+        45deg,
+        transparent,
+        rgba(255, 255, 255, 0.3),
+        transparent
+    ) !important;
+    transform: rotate(45deg) !important;
+    transition: all 0.6s !important;
+}
+
+.alert-form button[type="submit"]:hover,
+#priceAlertForm button[type="submit"]:hover,
+#priceAlertModal button[onclick*="createAlert"]:hover {
+    transform: translateY(-4px) scale(1.02) !important;
+    box-shadow: 
+        0 16px 40px rgba(102, 126, 234, 0.5),
+        0 0 40px rgba(118, 75, 162, 0.4) !important;
+    animation: gradientShift 3s ease infinite !important;
+}
+
+.alert-form button[type="submit"]:hover::before,
+#priceAlertForm button[type="submit"]:hover::before,
+#priceAlertModal button[onclick*="createAlert"]:hover::before {
+    left: 100% !important;
+}
+
+/* Bouton Cancel dans alert modal */
+.alert-form .btn-cancel,
+#priceAlertForm .btn-cancel,
+#priceAlertModal button[onclick*="closeModal"],
+#priceAlertModal .btn-secondary {
+    flex: 1 !important;
+    padding: 16px 32px !important;
+    font-size: 1.1rem !important;
+    font-weight: 700 !important;
+    border: 2px solid rgba(102, 126, 234, 0.4) !important;
+    border-radius: 16px !important;
+    background: rgba(255, 255, 255, 0.05) !important;
+    backdrop-filter: blur(15px) saturate(180%) !important;
+    color: var(--text-primary) !important;
+    cursor: pointer !important;
+    transition: var(--transition-bounce) !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 10px !important;
+    box-shadow: 
+        0 4px 16px rgba(0, 0, 0, 0.1),
+        inset 0 1px 0 rgba(255, 255, 255, 0.2) !important;
+}
+
+.alert-form .btn-cancel:hover,
+#priceAlertForm .btn-cancel:hover,
+#priceAlertModal button[onclick*="closeModal"]:hover,
+#priceAlertModal .btn-secondary:hover {
+    background: rgba(102, 126, 234, 0.15) !important;
+    border-color: var(--ml-primary) !important;
+    color: var(--ml-primary) !important;
+    transform: translateY(-3px) scale(1.02) !important;
+    box-shadow: 
+        0 8px 24px rgba(102, 126, 234, 0.25),
+        inset 0 1px 0 rgba(255, 255, 255, 0.3) !important;
+}
+
+/* Icônes dans les labels */
+.alert-form .form-group label i,
+#priceAlertForm .form-group label i,
+#priceAlertModal .form-group label i {
+    background: linear-gradient(135deg, var(--ml-primary), var(--ml-secondary));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    font-size: 1.1rem;
+}
+
+/* Helper text */
+.alert-form .helper-text,
+#priceAlertForm .helper-text,
+#priceAlertModal .helper-text {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    margin-top: 6px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+body.dark-mode .alert-form .helper-text,
+body.dark-mode #priceAlertForm .helper-text,
+body.dark-mode #priceAlertModal .helper-text {
+    color: #94a3b8;
+}
+
+.alert-form .helper-text i,
+#priceAlertForm .helper-text i,
+#priceAlertModal .helper-text i {
+    color: var(--ml-primary);
+    font-size: 0.9rem;
+}
+
+/* Input avec icône */
+.alert-form .input-with-icon,
+#priceAlertForm .input-with-icon,
+#priceAlertModal .input-with-icon {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.alert-form .input-with-icon i,
+#priceAlertForm .input-with-icon i,
+#priceAlertModal .input-with-icon i {
+    position: absolute;
+    left: 18px;
+    color: var(--ml-primary);
+    font-size: 1.1rem;
+    pointer-events: none;
+}
+
+.alert-form .input-with-icon input,
+#priceAlertForm .input-with-icon input,
+#priceAlertModal .input-with-icon input {
+    padding-left: 50px !important;
+}
+
+/* Messages de validation */
+.alert-form .error-message,
+.alert-form .success-message,
+#priceAlertForm .error-message,
+#priceAlertForm .success-message,
+#priceAlertModal .error-message,
+#priceAlertModal .success-message {
+    padding: 12px 16px;
+    border-radius: 12px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 15px;
+    animation: slideInDown 0.3s ease;
+}
+
+@keyframes slideInDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.alert-form .error-message,
+#priceAlertForm .error-message,
+#priceAlertModal .error-message {
+    background: linear-gradient(135deg, rgba(245, 87, 108, 0.15), rgba(253, 126, 20, 0.1));
+    border-left: 4px solid var(--ml-danger);
+    color: var(--ml-danger);
+}
+
+.alert-form .success-message,
+#priceAlertForm .success-message,
+#priceAlertModal .success-message {
+    background: linear-gradient(135deg, rgba(67, 233, 123, 0.15), rgba(56, 249, 215, 0.1));
+    border-left: 4px solid var(--ml-success);
+    color: var(--ml-success);
+}
+
+/* Loading state */
+.alert-form button[type="submit"]:disabled,
+#priceAlertForm button[type="submit"]:disabled,
+#priceAlertModal button[onclick*="createAlert"]:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
+.alert-form button[type="submit"]:disabled::after,
+#priceAlertForm button[type="submit"]:disabled::after,
+#priceAlertModal button[onclick*="createAlert"]:disabled::after {
+    content: '';
+    width: 16px;
+    height: 16px;
+    border: 2px solid white;
+    border-top-color: transparent;
+    border-radius: 50%;
+    animation: spin 0.6s linear infinite;
+    margin-left: 10px;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* Responsive pour mobile */
+@media (max-width: 768px) {
+    #priceAlertModal .modal-content {
+        max-width: 100% !important;
+    }
+    
+    #priceAlertModal .modal-body {
+        padding: 25px 20px !important;
+    }
+    
+    .alert-form .form-actions,
+    #priceAlertForm .form-actions,
+    #priceAlertModal .form-actions {
+        flex-direction: column;
+    }
+    
+    .alert-form button,
+    #priceAlertForm button,
+    #priceAlertModal button {
+        width: 100% !important;
+    }
+    
+    .alert-form input,
+    .alert-form select,
+    .alert-form textarea,
+    #priceAlertForm input,
+    #priceAlertForm select,
+    #priceAlertForm textarea,
+    #priceAlertModal input,
+    #priceAlertModal select,
+    #priceAlertModal textarea {
+        font-size: 16px !important; /* Évite le zoom sur mobile */
+    }
+}
+
+/* ============================================
+   🔔 BOUTON "CREATE PRICE ALERT" (Header)
+   ============================================ */
+.alerts-header button,
+button[onclick*="showCreateAlert"],
+.btn-create-price-alert,
+button:has(i.fa-plus):has(i.fa-bell) {
+    padding: 14px 28px !important;
+    font-size: 1rem !important;
+    font-weight: 700 !important;
+    border: none !important;
+    border-radius: 16px !important;
+    background: linear-gradient(135deg, var(--ml-primary), var(--ml-secondary)) !important;
+    color: white !important;
+    cursor: pointer !important;
+    transition: var(--transition-bounce) !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 10px !important;
+    box-shadow: 
+        0 8px 24px rgba(102, 126, 234, 0.4),
+        0 0 20px rgba(118, 75, 162, 0.3) !important;
+}
+
+.alerts-header button:hover,
+button[onclick*="showCreateAlert"]:hover,
+.btn-create-price-alert:hover {
+    transform: translateY(-4px) scale(1.05) !important;
+    box-shadow: 
+        0 12px 36px rgba(102, 126, 234, 0.5),
+        0 0 40px rgba(118, 75, 162, 0.4) !important;
+}
+
+/* ============================================
+   🎯 FIN CORRECTION PRICE ALERT MODAL
    ============================================ */
