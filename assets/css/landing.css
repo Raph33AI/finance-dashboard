@@ -2951,8 +2951,8 @@ body.dark-mode .tool-icon-advanced {
 }
 
 /* ============================================
-   💰 PRICING SECTION - VERSION DÉFINITIVE
-   ✅ Badges parfaitement centrés
+   💰 PRICING SECTION - VERSION FINALE
+   ✅ Badges positionnés sur le pricing-header
    ============================================ */
 
 .pricing-section {
@@ -3076,7 +3076,7 @@ input:checked + .toggle-slider:before {
 }
 
 /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-   💳 PRICING CARDS
+   💳 PRICING CARDS - ✅ PAS DE POSITION RELATIVE ICI
    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
 .pricing-card {
@@ -3085,7 +3085,8 @@ input:checked + .toggle-slider:before {
     border-radius: var(--radius-2xl);
     padding: 2.5rem;
     transition: all var(--anim-3d-slow);
-    position: relative;
+    
+    /* ✅ PAS de position: relative pour que les badges ne soient pas positionnés par rapport à la card */
     transform-style: preserve-3d;
     perspective: 1000px;
     display: flex;
@@ -3141,16 +3142,47 @@ body.dark-mode .pricing-card.platinum {
 }
 
 /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-   🏷️ BADGES - ✅ CENTRAGE PARFAIT GARANTI
+   📝 PRICING HEADER - ✅ CONTENEUR DE RÉFÉRENCE POUR LES BADGES
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+
+.pricing-header {
+    /* ✅ POSITION RELATIVE = Les badges seront centrés par rapport à ce conteneur */
+    position: relative;
+    padding-top: 30px;
+    margin-bottom: 2rem;
+    text-align: center;
+}
+
+.pricing-header h3 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin: 0 0 0.5rem 0;
+    padding: 0;
+    line-height: 1.2;
+    text-align: center;
+}
+
+.pricing-header p {
+    font-size: 1rem;
+    color: var(--text-secondary);
+    margin: 0;
+    padding: 0;
+    line-height: 1.5;
+    text-align: center;
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   🏷️ BADGES - ✅ POSITIONNÉS PAR RAPPORT AU PRICING-HEADER
    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
 .popular-badge,
 .platinum-badge {
-    /* ✅ CENTRAGE HORIZONTAL PARFAIT */
+    /* ✅ POSITION ABSOLUE par rapport au .pricing-header (son parent) */
     position: absolute;
-    top: -16px;
-    left: 50%;
-    transform: translateX(-50%);
+    top: -24px; /* Au-dessus du header */
+    left: 50%; /* Centre horizontal */
+    transform: translateX(-50%); /* Décalage pour centrage parfait */
     
     /* ✅ DIMENSIONS */
     width: auto;
@@ -3170,8 +3202,6 @@ body.dark-mode .pricing-card.platinum {
     letter-spacing: 0.05em;
     line-height: 1;
     white-space: nowrap;
-    
-    /* ✅ Z-INDEX */
     z-index: 10;
     pointer-events: none;
 }
@@ -3214,36 +3244,6 @@ body.dark-mode .pricing-card.platinum {
             0 15px 40px rgba(255, 215, 0, 0.6),
             0 8px 20px rgba(255, 165, 0, 0.5);
     }
-}
-
-/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-   📝 PRICING HEADER - ✅ TITRES CENTRÉS
-   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
-
-.pricing-header {
-    position: relative;
-    padding-top: 30px;
-    margin-bottom: 2rem;
-    text-align: center;
-}
-
-.pricing-header h3 {
-    font-size: 1.5rem;
-    font-weight: 700;
-    color: var(--text-primary);
-    margin: 0 0 0.5rem 0;
-    padding: 0;
-    line-height: 1.2;
-    text-align: center;
-}
-
-.pricing-header p {
-    font-size: 1rem;
-    color: var(--text-secondary);
-    margin: 0;
-    padding: 0;
-    line-height: 1.5;
-    text-align: center;
 }
 
 /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -3505,7 +3505,7 @@ body.dark-mode .btn-pricing:hover {
         height: 32px;
         padding: 0 1.5rem;
         font-size: 0.7rem;
-        top: -14px;
+        top: -20px;
     }
 }
 
@@ -3539,7 +3539,7 @@ body.dark-mode .btn-pricing:hover {
         height: 30px;
         padding: 0 1.25rem;
         font-size: 0.65rem;
-        top: -12px;
+        top: -18px;
     }
 }
 
