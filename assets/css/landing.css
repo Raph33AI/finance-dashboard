@@ -2951,8 +2951,9 @@ body.dark-mode .tool-icon-advanced {
 }
 
 /* ============================================
-   💰 PRICING SECTION - VERSION CORRIGÉE
-   ✅ Alignement parfait des titres et badges
+   💰 PRICING SECTION - VERSION FINALE CORRIGÉE
+   ✅ Adaptée à votre structure HTML
+   ✅ Badges à l'extérieur du pricing-header
    ============================================ */
 
 .pricing-section {
@@ -3045,7 +3046,7 @@ input:checked + .toggle-slider:before {
 }
 
 /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-   🎯 GRILLES DE PRICING - 2 ET 3 COLONNES
+   🎯 GRILLES DE PRICING
    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
 .pricing-grid {
@@ -3054,7 +3055,7 @@ input:checked + .toggle-slider:before {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
     gap: 2rem;
-    align-items: start; /* ✅ CORRECTION : align-items: start au lieu de stretch */
+    align-items: start;
 }
 
 .pricing-grid-two {
@@ -3063,7 +3064,7 @@ input:checked + .toggle-slider:before {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     gap: 2rem;
-    align-items: start; /* ✅ CORRECTION */
+    align-items: start;
 }
 
 .pricing-grid-three {
@@ -3072,11 +3073,11 @@ input:checked + .toggle-slider:before {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     gap: 2rem;
-    align-items: start; /* ✅ CORRECTION */
+    align-items: start;
 }
 
 /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-   💳 PRICING CARDS - STRUCTURE FLEXBOX
+   💳 PRICING CARDS
    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
 .pricing-card {
@@ -3089,10 +3090,13 @@ input:checked + .toggle-slider:before {
     transform-style: preserve-3d;
     perspective: 1000px;
     
-    /* ✅ FLEXBOX POUR ALIGNER LE CONTENU */
+    /* ✅ FLEXBOX */
     display: flex;
     flex-direction: column;
     height: 100%;
+    
+    /* ✅ OVERFLOW VISIBLE pour les badges qui dépassent */
+    overflow: visible;
 }
 
 .pricing-card:hover {
@@ -3144,22 +3148,22 @@ body.dark-mode .pricing-card.platinum {
 }
 
 /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-   🏷️ BADGES - POPULAR & PLATINUM
-   ✅ CORRECTION ALIGNEMENT - HAUTEURS FIXES IDENTIQUES
+   🏷️ BADGES - POSITION ABSOLUE PAR RAPPORT À LA CARTE
+   ✅ ADAPTÉE À VOTRE STRUCTURE HTML
    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
 .popular-badge,
 .platinum-badge {
+    /* ✅ Position absolue par rapport à .pricing-card */
     position: absolute;
-    top: -14px;
+    top: -14px; /* Dépasse légèrement en haut */
     left: 50%;
     transform: translateX(-50%);
     
-    /* ✅ HAUTEUR FIXE IDENTIQUE POUR LES DEUX BADGES */
+    /* ✅ Style */
     height: 32px;
     padding: 0 1.5rem;
     
-    /* ✅ FLEXBOX POUR CENTRER LE TEXTE VERTICALEMENT */
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -3217,27 +3221,27 @@ body.dark-mode .pricing-card.platinum {
 }
 
 /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-   📝 PRICING HEADER - ✅ ALIGNEMENT PARFAIT DES TITRES
+   📝 PRICING HEADER - ✅ ALIGNEMENT PARFAIT
    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
 .pricing-header {
     position: relative;
     
-    /* ✅ HAUTEUR FIXE (pas min-height) pour forcer l'alignement */
-    height: 130px;
+    /* ✅ PADDING TOP pour compenser le badge qui dépasse */
+    padding-top: 30px;
     
-    /* ✅ FLEXBOX POUR ALIGNEMENT VERTICAL */
+    /* ✅ HAUTEUR MINIMALE FIXE pour aligner tous les titres */
+    min-height: 120px;
+    
+    /* ✅ FLEXBOX pour alignement vertical */
     display: flex;
     flex-direction: column;
-    justify-content: flex-end; /* Aligne le contenu en bas */
+    justify-content: flex-end;
     align-items: center;
     gap: 0.5rem;
     
-    /* ✅ MARGE BOTTOM FIXE */
+    /* ✅ MARGE BOTTOM */
     margin-bottom: 2rem;
-    
-    /* ✅ PADDING TOP augmenté pour les badges */
-    padding-top: 40px;
 }
 
 .pricing-header h3 {
@@ -3245,19 +3249,13 @@ body.dark-mode .pricing-card.platinum {
     font-weight: 700;
     color: var(--text-primary);
     
-    /* ✅ SUPPRIMER TOUTES LES MARGES */
+    /* ✅ SUPPRIMER MARGES */
     margin: 0 !important;
     padding: 0 !important;
     
-    /* ✅ HAUTEUR FIXE */
-    height: 2rem;
+    /* ✅ HAUTEUR ET CENTRAGE */
     line-height: 2rem;
-    
-    /* ✅ CENTRAGE */
     text-align: center;
-    display: flex;
-    align-items: center;
-    justify-content: center;
     width: 100%;
 }
 
@@ -3265,19 +3263,13 @@ body.dark-mode .pricing-card.platinum {
     font-size: 1rem;
     color: var(--text-secondary);
     
-    /* ✅ SUPPRIMER TOUTES LES MARGES */
+    /* ✅ SUPPRIMER MARGES */
     margin: 0 !important;
     padding: 0 !important;
     
-    /* ✅ HAUTEUR FIXE */
-    height: 1.5rem;
+    /* ✅ HAUTEUR ET CENTRAGE */
     line-height: 1.5rem;
-    
-    /* ✅ CENTRAGE */
     text-align: center;
-    display: flex;
-    align-items: center;
-    justify-content: center;
     width: 100%;
 }
 
@@ -3324,8 +3316,6 @@ body.dark-mode .pricing-card.platinum {
     list-style: none;
     padding: 0;
     margin: 0 0 2rem 0;
-    
-    /* ✅ OCCUPE L'ESPACE DISPONIBLE */
     flex-grow: 1;
 }
 
@@ -3337,8 +3327,6 @@ body.dark-mode .pricing-card.platinum {
     font-size: 1rem;
     color: var(--text-secondary);
     transition: transform var(--anim-3d-fast);
-    
-    /* ✅ HAUTEUR MINIMALE UNIFORME */
     min-height: 44px;
 }
 
@@ -3354,8 +3342,6 @@ body.dark-mode .pricing-card.platinum {
 .pricing-features i {
     font-size: 1.125rem;
     flex-shrink: 0;
-    
-    /* ✅ LARGEUR FIXE POUR ALIGNEMENT */
     width: 20px;
     text-align: center;
 }
@@ -3404,7 +3390,6 @@ body.dark-mode .pricing-card.platinum {
    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
 .pricing-cta-wrapper {
-    /* ✅ POUSSE LE BOUTON VERS LE BAS */
     margin-top: auto;
     padding-top: 1.5rem;
     display: flex;
@@ -3425,8 +3410,6 @@ body.dark-mode .pricing-card.platinum {
     transition: all var(--anim-3d-medium);
     position: relative;
     overflow: hidden;
-    
-    /* ✅ HAUTEUR MINIMALE UNIFORME */
     min-height: 56px;
     display: flex;
     align-items: center;
@@ -3532,22 +3515,26 @@ body.dark-mode .btn-pricing:hover {
         padding: 2rem 1.5rem;
     }
     
-    /* ✅ Ajuster la hauteur du header sur mobile */
     .pricing-header {
-        height: 110px;
-        padding-top: 32px;
+        min-height: 110px;
+        padding-top: 26px;
     }
     
     .pricing-header h3 {
         font-size: 1.375rem;
-        height: 1.875rem;
         line-height: 1.875rem;
     }
     
     .pricing-header p {
         font-size: 0.9375rem;
-        height: 1.375rem;
         line-height: 1.375rem;
+    }
+    
+    .popular-badge,
+    .platinum-badge {
+        height: 28px;
+        padding: 0 1.25rem;
+        font-size: 0.7rem;
     }
 }
 
@@ -3556,21 +3543,18 @@ body.dark-mode .btn-pricing:hover {
         padding: 1.75rem 1.25rem;
     }
     
-    /* ✅ Ajuster encore plus sur très petit mobile */
     .pricing-header {
-        height: 100px;
-        padding-top: 28px;
+        min-height: 100px;
+        padding-top: 24px;
     }
     
     .pricing-header h3 {
         font-size: 1.25rem;
-        height: 1.75rem;
         line-height: 1.75rem;
     }
     
     .pricing-header p {
         font-size: 0.875rem;
-        height: 1.25rem;
         line-height: 1.25rem;
     }
     
@@ -3580,6 +3564,13 @@ body.dark-mode .btn-pricing:hover {
     
     .currency {
         font-size: 1.5rem;
+    }
+    
+    .popular-badge,
+    .platinum-badge {
+        height: 26px;
+        padding: 0 1rem;
+        font-size: 0.65rem;
     }
 }
 
