@@ -2951,8 +2951,8 @@ body.dark-mode .tool-icon-advanced {
 }
 
 /* ============================================
-   💰 PRICING SECTION - VERSION FINALE CORRIGÉE
-   ✅ Badges centrés au-dessus de leurs titres
+   💰 PRICING SECTION - VERSION DÉFINITIVE
+   ✅ Badges parfaitement centrés
    ============================================ */
 
 .pricing-section {
@@ -3088,7 +3088,6 @@ input:checked + .toggle-slider:before {
     position: relative;
     transform-style: preserve-3d;
     perspective: 1000px;
-    
     display: flex;
     flex-direction: column;
     height: 100%;
@@ -3142,25 +3141,28 @@ body.dark-mode .pricing-card.platinum {
 }
 
 /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-   🏷️ BADGES - ✅ AUTO-WIDTH POUR CENTRAGE PARFAIT
+   🏷️ BADGES - ✅ CENTRAGE PARFAIT GARANTI
    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
 .popular-badge,
 .platinum-badge {
+    /* ✅ CENTRAGE HORIZONTAL PARFAIT */
     position: absolute;
     top: -16px;
     left: 50%;
     transform: translateX(-50%);
     
-    /* ✅ PAS de largeur fixe - s'adapte au contenu */
+    /* ✅ DIMENSIONS */
     width: auto;
     height: 36px;
-    padding: 0 1.75rem; /* Padding généreux */
+    padding: 0 1.75rem;
     
+    /* ✅ LAYOUT */
     display: inline-flex;
     align-items: center;
     justify-content: center;
     
+    /* ✅ STYLE */
     border-radius: 9999px;
     font-size: 0.75rem;
     font-weight: 700;
@@ -3168,6 +3170,8 @@ body.dark-mode .pricing-card.platinum {
     letter-spacing: 0.05em;
     line-height: 1;
     white-space: nowrap;
+    
+    /* ✅ Z-INDEX */
     z-index: 10;
     pointer-events: none;
 }
@@ -3213,31 +3217,7 @@ body.dark-mode .pricing-card.platinum {
 }
 
 /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-   📱 RESPONSIVE - BADGES
-   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
-
-@media (max-width: 768px) {
-    .popular-badge,
-    .platinum-badge {
-        height: 32px;
-        padding: 0 1.5rem;
-        font-size: 0.7rem;
-        top: -14px;
-    }
-}
-
-@media (max-width: 480px) {
-    .popular-badge,
-    .platinum-badge {
-        height: 30px;
-        padding: 0 1.25rem;
-        font-size: 0.65rem;
-        top: -12px;
-    }
-}
-
-/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-   📝 PRICING HEADER
+   📝 PRICING HEADER - ✅ TITRES CENTRÉS
    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
 .pricing-header {
@@ -3254,6 +3234,7 @@ body.dark-mode .pricing-card.platinum {
     margin: 0 0 0.5rem 0;
     padding: 0;
     line-height: 1.2;
+    text-align: center;
 }
 
 .pricing-header p {
@@ -3262,6 +3243,7 @@ body.dark-mode .pricing-card.platinum {
     margin: 0;
     padding: 0;
     line-height: 1.5;
+    text-align: center;
 }
 
 /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -3377,7 +3359,7 @@ body.dark-mode .pricing-card.platinum {
 }
 
 /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-   🎯 PRICING CTA - ALIGNÉ EN BAS
+   🎯 PRICING CTA
    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
 .pricing-cta-wrapper {
@@ -3475,7 +3457,7 @@ body.dark-mode .btn-pricing:hover {
 }
 
 /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-   📱 RESPONSIVE - MOBILE
+   📱 RESPONSIVE
    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
 @media (max-width: 1024px) {
@@ -3520,8 +3502,8 @@ body.dark-mode .btn-pricing:hover {
     
     .popular-badge,
     .platinum-badge {
-        width: 160px;
         height: 32px;
+        padding: 0 1.5rem;
         font-size: 0.7rem;
         top: -14px;
     }
@@ -3554,8 +3536,8 @@ body.dark-mode .btn-pricing:hover {
     
     .popular-badge,
     .platinum-badge {
-        width: 140px;
         height: 30px;
+        padding: 0 1.25rem;
         font-size: 0.65rem;
         top: -12px;
     }
