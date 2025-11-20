@@ -3142,7 +3142,7 @@ body.dark-mode .pricing-card.platinum {
 }
 
 /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-   🏷️ BADGES - ✅ LARGEUR FIXE IDENTIQUE = CENTRAGE PARFAIT
+   🏷️ BADGES - ✅ AUTO-WIDTH POUR CENTRAGE PARFAIT
    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
 .popular-badge,
@@ -3152,10 +3152,10 @@ body.dark-mode .pricing-card.platinum {
     left: 50%;
     transform: translateX(-50%);
     
-    /* ✅ LARGEUR FIXE IDENTIQUE pour centrage parfait */
-    width: 180px;
+    /* ✅ PAS de largeur fixe - s'adapte au contenu */
+    width: auto;
     height: 36px;
-    padding: 0 1rem;
+    padding: 0 1.75rem; /* Padding généreux */
     
     display: inline-flex;
     align-items: center;
@@ -3209,6 +3209,30 @@ body.dark-mode .pricing-card.platinum {
         box-shadow: 
             0 15px 40px rgba(255, 215, 0, 0.6),
             0 8px 20px rgba(255, 165, 0, 0.5);
+    }
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   📱 RESPONSIVE - BADGES
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+
+@media (max-width: 768px) {
+    .popular-badge,
+    .platinum-badge {
+        height: 32px;
+        padding: 0 1.5rem;
+        font-size: 0.7rem;
+        top: -14px;
+    }
+}
+
+@media (max-width: 480px) {
+    .popular-badge,
+    .platinum-badge {
+        height: 30px;
+        padding: 0 1.25rem;
+        font-size: 0.65rem;
+        top: -12px;
     }
 }
 
