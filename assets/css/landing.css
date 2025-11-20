@@ -2952,8 +2952,8 @@ body.dark-mode .tool-icon-advanced {
 
 /* ============================================
    💰 PRICING SECTION - VERSION FINALE CORRIGÉE
-   ✅ Adaptée à votre structure HTML
-   ✅ Badges à l'extérieur du pricing-header
+   ✅ Badges parfaitement alignés
+   ✅ Titres à la même hauteur
    ============================================ */
 
 .pricing-section {
@@ -3077,26 +3077,25 @@ input:checked + .toggle-slider:before {
 }
 
 /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-   💳 PRICING CARDS
+   💳 PRICING CARDS - ✅ PADDING TOP UNIFORME
    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
 .pricing-card {
     background: var(--background-primary);
     border: 2px solid var(--border-color);
     border-radius: var(--radius-2xl);
-    padding: 2.5rem;
     transition: all var(--anim-3d-slow);
     position: relative;
     transform-style: preserve-3d;
     perspective: 1000px;
     
-    /* ✅ FLEXBOX */
     display: flex;
     flex-direction: column;
     height: 100%;
-    
-    /* ✅ OVERFLOW VISIBLE pour les badges qui dépassent */
     overflow: visible;
+    
+    /* ✅ PADDING UNIFORME POUR TOUTES LES CARTES */
+    padding: 3.5rem 2.5rem 2.5rem 2.5rem; /* Extra padding-top pour badges */
 }
 
 .pricing-card:hover {
@@ -3108,7 +3107,6 @@ input:checked + .toggle-slider:before {
 .pricing-card.featured {
     border-color: var(--primary-color);
     box-shadow: var(--shadow-3d-card);
-    position: relative;
 }
 
 .pricing-card.featured::before {
@@ -3126,7 +3124,6 @@ input:checked + .toggle-slider:before {
     box-shadow: var(--shadow-3d-hover);
 }
 
-/* Platinum Card */
 .pricing-card.platinum {
     border-color: #FFD700;
     background: linear-gradient(135deg, rgba(255, 215, 0, 0.05) 0%, rgba(255, 165, 0, 0.05) 100%);
@@ -3148,36 +3145,37 @@ body.dark-mode .pricing-card.platinum {
 }
 
 /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-   🏷️ BADGES - POSITION ABSOLUE PAR RAPPORT À LA CARTE
-   ✅ ADAPTÉE À VOTRE STRUCTURE HTML
+   🏷️ BADGES - ✅ DIMENSIONS STRICTEMENT IDENTIQUES
    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
 .popular-badge,
 .platinum-badge {
-    /* ✅ Position absolue par rapport à .pricing-card */
+    /* ✅ POSITION ABSOLUE - IDENTIQUE */
     position: absolute;
-    top: -14px; /* Dépasse légèrement en haut */
+    top: -16px;
     left: 50%;
     transform: translateX(-50%);
     
-    /* ✅ Style */
-    height: 32px;
-    padding: 0 1.5rem;
+    /* ✅ DIMENSIONS FIXES IDENTIQUES */
+    height: 36px;
+    min-width: 150px;
+    padding: 0 1.75rem;
     
+    /* ✅ FLEXBOX CENTRAGE */
     display: inline-flex;
     align-items: center;
     justify-content: center;
     
+    /* ✅ STYLE */
     border-radius: 9999px;
     font-size: 0.75rem;
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.05em;
-    text-align: center;
+    line-height: 1;
     white-space: nowrap;
     z-index: 10;
     pointer-events: none;
-    line-height: 1;
 }
 
 .popular-badge {
@@ -3221,39 +3219,31 @@ body.dark-mode .pricing-card.platinum {
 }
 
 /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-   📝 PRICING HEADER - ✅ ALIGNEMENT PARFAIT
+   📝 PRICING HEADER - ✅ HAUTEUR FIXE IDENTIQUE
    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
 .pricing-header {
-    position: relative;
+    /* ✅ HAUTEUR FIXE pour aligner tous les titres */
+    height: 90px;
     
-    /* ✅ PADDING TOP pour compenser le badge qui dépasse */
-    padding-top: 30px;
-    
-    /* ✅ HAUTEUR MINIMALE FIXE pour aligner tous les titres */
-    min-height: 120px;
-    
-    /* ✅ FLEXBOX pour alignement vertical */
+    /* ✅ FLEXBOX */
     display: flex;
     flex-direction: column;
-    justify-content: flex-end;
+    justify-content: center;
     align-items: center;
     gap: 0.5rem;
     
-    /* ✅ MARGE BOTTOM */
+    /* ✅ MARGES */
     margin-bottom: 2rem;
+    padding: 0;
 }
 
 .pricing-header h3 {
     font-size: 1.5rem;
     font-weight: 700;
     color: var(--text-primary);
-    
-    /* ✅ SUPPRIMER MARGES */
     margin: 0 !important;
     padding: 0 !important;
-    
-    /* ✅ HAUTEUR ET CENTRAGE */
     line-height: 2rem;
     text-align: center;
     width: 100%;
@@ -3262,12 +3252,8 @@ body.dark-mode .pricing-card.platinum {
 .pricing-header p {
     font-size: 1rem;
     color: var(--text-secondary);
-    
-    /* ✅ SUPPRIMER MARGES */
     margin: 0 !important;
     padding: 0 !important;
-    
-    /* ✅ HAUTEUR ET CENTRAGE */
     line-height: 1.5rem;
     text-align: center;
     width: 100%;
@@ -3480,7 +3466,7 @@ body.dark-mode .btn-pricing:hover {
     text-align: center;
     font-size: 0.875rem;
     color: var(--text-secondary);
-    margin-top: 1rem;
+    margin: 0;
 }
 
 /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -3512,12 +3498,11 @@ body.dark-mode .btn-pricing:hover {
     }
     
     .pricing-card {
-        padding: 2rem 1.5rem;
+        padding: 3rem 1.5rem 2rem 1.5rem;
     }
     
     .pricing-header {
-        min-height: 110px;
-        padding-top: 26px;
+        height: 80px;
     }
     
     .pricing-header h3 {
@@ -3532,20 +3517,21 @@ body.dark-mode .btn-pricing:hover {
     
     .popular-badge,
     .platinum-badge {
-        height: 28px;
-        padding: 0 1.25rem;
+        height: 32px;
+        min-width: 130px;
+        padding: 0 1.5rem;
         font-size: 0.7rem;
+        top: -14px;
     }
 }
 
 @media (max-width: 480px) {
     .pricing-card {
-        padding: 1.75rem 1.25rem;
+        padding: 2.75rem 1.25rem 1.75rem 1.25rem;
     }
     
     .pricing-header {
-        min-height: 100px;
-        padding-top: 24px;
+        height: 75px;
     }
     
     .pricing-header h3 {
@@ -3568,9 +3554,11 @@ body.dark-mode .btn-pricing:hover {
     
     .popular-badge,
     .platinum-badge {
-        height: 26px;
-        padding: 0 1rem;
+        height: 30px;
+        min-width: 120px;
+        padding: 0 1.25rem;
         font-size: 0.65rem;
+        top: -12px;
     }
 }
 
