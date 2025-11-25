@@ -10,7 +10,7 @@ let currentSettings = {
     timezone: 'America/New_York',
     currency: 'USD',
     
-    // ❌ APPEARANCE SUPPRIMÉ
+    // APPEARANCE SUPPRIMÉ
     
     // Notifications
     weeklyNewsletter: true,
@@ -27,7 +27,7 @@ let currentSettings = {
 // INITIALISATION
 // ============================================
 
-document.addEventListener('DOMContentLoaded', () =&gt; {
+document.addEventListener('DOMContentLoaded', function() {
     console.log('🚀 Initialisation de la page paramètres...');
     
     if (!isFirebaseInitialized()) {
@@ -40,7 +40,7 @@ document.addEventListener('DOMContentLoaded', () =&gt; {
     console.log('✅ Page paramètres initialisée');
 });
 
-window.addEventListener('userDataLoaded', (e) =&gt; {
+window.addEventListener('userDataLoaded', function(e) {
     currentUserData = e.detail;
     console.log('✅ Données utilisateur reçues:', currentUserData);
     loadSettings();
@@ -114,7 +114,7 @@ function applySettingsToUI() {
     document.getElementById('timezone').value = currentSettings.timezone || 'America/New_York';
     document.getElementById('currency').value = currentSettings.currency || 'USD';
     
-    // ❌ APPEARANCE SUPPRIMÉ (pas de thème ici)
+    // APPEARANCE SUPPRIMÉ (pas de thème ici)
     
     // Notifications
     document.getElementById('weeklyNewsletter').checked = currentSettings.weeklyNewsletter !== false;
@@ -136,24 +136,50 @@ function applySettingsToUI() {
 function initializeEventListeners() {
     // Navigation entre tabs
     const tabButtons = document.querySelectorAll('.settings-nav-item');
-    tabButtons.forEach(button =&gt; {
-        button.addEventListener('click', () =&gt; {
+    tabButtons.forEach(function(button) {
+        button.addEventListener('click', function() {
             switchTab(button.dataset.tab);
         });
     });
     
-    // ❌ THEME SELECTOR SUPPRIMÉ
+    // THEME SELECTOR SUPPRIMÉ
     
     // Boutons de sauvegarde
-    document.getElementById('saveGeneralSettings')?.addEventListener('click', saveGeneralSettings);
-    document.getElementById('saveNotificationSettings')?.addEventListener('click', saveNotificationSettings);
-    document.getElementById('savePrivacySettings')?.addEventListener('click', savePrivacySettings);
+    const saveGeneralBtn = document.getElementById('saveGeneralSettings');
+    if (saveGeneralBtn) {
+        saveGeneralBtn.addEventListener('click', saveGeneralSettings);
+    }
+    
+    const saveNotifBtn = document.getElementById('saveNotificationSettings');
+    if (saveNotifBtn) {
+        saveNotifBtn.addEventListener('click', saveNotificationSettings);
+    }
+    
+    const savePrivacyBtn = document.getElementById('savePrivacySettings');
+    if (savePrivacyBtn) {
+        savePrivacyBtn.addEventListener('click', savePrivacySettings);
+    }
     
     // Boutons d'action data
-    document.getElementById('exportDataBtn')?.addEventListener('click', exportUserData);
-    document.getElementById('clearCacheBtn')?.addEventListener('click', clearCache);
-    document.getElementById('deleteAllAnalyses')?.addEventListener('click', deleteAllAnalyses);
-    document.getElementById('deleteAllPortfolios')?.addEventListener('click', deleteAllPortfolios);
+    const exportBtn = document.getElementById('exportDataBtn');
+    if (exportBtn) {
+        exportBtn.addEventListener('click', exportUserData);
+    }
+    
+    const clearBtn = document.getElementById('clearCacheBtn');
+    if (clearBtn) {
+        clearBtn.addEventListener('click', clearCache);
+    }
+    
+    const deleteAnalysesBtn = document.getElementById('deleteAllAnalyses');
+    if (deleteAnalysesBtn) {
+        deleteAnalysesBtn.addEventListener('click', deleteAllAnalyses);
+    }
+    
+    const deletePortfoliosBtn = document.getElementById('deleteAllPortfolios');
+    if (deletePortfoliosBtn) {
+        deletePortfoliosBtn.addEventListener('click', deleteAllPortfolios);
+    }
 }
 
 // ============================================
@@ -161,15 +187,22 @@ function initializeEventListeners() {
 // ============================================
 
 function switchTab(tabName) {
-    document.querySelectorAll('.settings-nav-item').forEach(btn =&gt; {
+    document.querySelectorAll('.settings-nav-item').forEach(function(btn) {
         btn.classList.remove('active');
     });
-    document.querySelectorAll('.settings-tab').forEach(tab =&gt; {
+    document.querySelectorAll('.settings-tab').forEach(function(tab) {
         tab.classList.remove('active');
     });
     
-    document.querySelector(`[data-tab="${tabName}"]`).classList.add('active');
-    document.getElementById(`tab-${tabName}`).classList.add('active');
+    const activeNavBtn = document.querySelector('[data-tab="' + tabName + '"]');
+    if (activeNavBtn) {
+        activeNavBtn.classList.add('active');
+    }
+    
+    const activeTab = document.getElementById('tab-' + tabName);
+    if (activeTab) {
+        activeTab.classList.add('active');
+    }
     
     console.log('📑 Onglet changé:', tabName);
 }
@@ -252,7 +285,7 @@ async function exportUserData() {
         const url = URL.createObjectURL(dataBlob);
         const link = document.createElement('a');
         link.href = url;
-        link.download = `alphavault-export-${Date.now()}.json`;
+        link.download = 'alphavault-export-' + Date.now() + '.json';
         link.click();
         
         showToast('success', 'Succès !', 'Vos données ont été exportées');
@@ -275,7 +308,7 @@ function clearCache() {
         const essentialKeys = ['financepro_user', 'financepro_theme', 'financepro_settings'];
         const allKeys = Object.keys(localStorage);
         
-        allKeys.forEach(key =&gt; {
+        allKeys.forEach(function(key) {
             if (!essentialKeys.includes(key)) {
                 localStorage.removeItem(key);
             }
@@ -339,7 +372,7 @@ function showToast(type, title, message) {
     if (!toastContainer) return;
     
     const toast = document.createElement('div');
-    toast.className = `toast ${type}`;
+    toast.className = 'toast ' + type;
     
     let iconClass = 'fa-info-circle';
     switch(type) {
@@ -354,34 +387,32 @@ function showToast(type, title, message) {
             break;
     }
     
-    toast.innerHTML = `
-        
-            
-        
-        
-            ${title}
-            ${message}
-        
-        
-            
-        
-    `;
+    toast.innerHTML = '' +
+        '<i></i>' +
+        '' +
+        '' +
+        '' + title + '' +
+        '' + message + '' +
+        '' +
+        '' +
+        '<i></i>' +
+        '';
     
     toastContainer.appendChild(toast);
     
     const closeBtn = toast.querySelector('.toast-close');
-    closeBtn.addEventListener('click', () =&gt; {
+    closeBtn.addEventListener('click', function() {
         removeToast(toast);
     });
     
-    setTimeout(() =&gt; {
+    setTimeout(function() {
         removeToast(toast);
     }, 5000);
 }
 
 function removeToast(toast) {
     toast.style.animation = 'slideOutRight 0.3s ease forwards';
-    setTimeout(() =&gt; {
+    setTimeout(function() {
         if (toast.parentNode) {
             toast.parentNode.removeChild(toast);
         }
