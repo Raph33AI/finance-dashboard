@@ -10,6 +10,8 @@ let currentSettings = {
     timezone: 'America/New_York',
     currency: 'USD',
     
+    // ❌ APPEARANCE SUPPRIMÉ
+    
     // Notifications
     weeklyNewsletter: true,
     priceAlerts: true,
@@ -70,15 +72,6 @@ async function loadSettings() {
             console.log('⚠ Paramètres inexistants, création avec valeurs par défaut...');
             await settingsRef.set(currentSettings);
             console.log('✅ Paramètres créés avec succès');
-            
-            // ✅ AUTO-ABONNEMENT NEWSLETTER
-            if (currentUserData.email) {
-                await syncNewsletterSubscription(
-                    currentUserData.email,
-                    currentUserData.displayName || currentUserData.email.split('@')[0],
-                    true
-                );
-            }
         } else {
             const data = settingsDoc.data();
             currentSettings = { ...currentSettings, ...data };
@@ -121,6 +114,8 @@ function applySettingsToUI() {
     document.getElementById('timezone').value = currentSettings.timezone || 'America/New_York';
     document.getElementById('currency').value = currentSettings.currency || 'USD';
     
+    // ❌ APPEARANCE SUPPRIMÉ (pas de thème ici)
+    
     // Notifications
     document.getElementById('weeklyNewsletter').checked = currentSettings.weeklyNewsletter !== false;
     document.getElementById('priceAlerts').checked = currentSettings.priceAlerts !== false;
@@ -146,6 +141,8 @@ function initializeEventListeners() {
             switchTab(button.dataset.tab);
         });
     });
+    
+    // ❌ THEME SELECTOR SUPPRIMÉ
     
     // Boutons de sauvegarde
     document.getElementById('saveGeneralSettings')?.addEventListener('click', saveGeneralSettings);
@@ -191,23 +188,11 @@ async function saveGeneralSettings() {
 }
 
 async function saveNotificationSettings() {
-    const previousNewsletterState = currentSettings.weeklyNewsletter;
-    
     currentSettings.weeklyNewsletter = document.getElementById('weeklyNewsletter').checked;
     currentSettings.priceAlerts = document.getElementById('priceAlerts').checked;
     currentSettings.featureUpdates = document.getElementById('featureUpdates').checked;
     
     await saveSettings();
-    
-    // ✅ SYNCHRONISATION CLOUDFLARE KV
-    if (currentUserData &amp;&amp; currentUserData.email &amp;&amp; previousNewsletterState !== currentSettings.weeklyNewsletter) {
-        await syncNewsletterSubscription(
-            currentUserData.email,
-            currentUserData.displayName || currentUserData.email.split('@')[0],
-            currentSettings.weeklyNewsletter
-        );
-    }
-    
     showToast('success', 'Succès !', 'Préférences de notifications sauvegardées');
 }
 
@@ -239,39 +224,6 @@ async function saveSettings() {
     } catch (error) {
         console.error('❌ Erreur lors de la sauvegarde:', error);
         showToast('error', 'Erreur', 'Impossible de sauvegarder vos paramètres');
-    }
-}
-
-// ============================================
-// 🆕 SYNCHRONISATION NEWSLETTER CLOUDFLARE
-// ============================================
-
-async function syncNewsletterSubscription(email, name, isEnabled) {
-    try {
-        console.log(`🔄 Syncing newsletter for ${email}: ${isEnabled ? 'ENABLED' : 'DISABLED'}`);
-        
-        const response = await fetch('https://newsletter-worker.raphnardone.workers.dev/sync-subscriber', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                email: email,
-                name: name,
-                weeklyNewsletter: isEnabled
-            })
-        });
-        
-        const result = await response.json();
-        
-        if (response.ok) {
-            console.log(`✅ Newsletter sync successful: ${result.action}`);
-        } else {
-            console.error('❌ Newsletter sync failed:', result.error);
-        }
-        
-    } catch (error) {
-        console.error('❌ Error syncing newsletter subscription:', error);
     }
 }
 
@@ -404,14 +356,14 @@ function showToast(type, title, message) {
     
     toast.innerHTML = `
         
-            <i></i>
+            
         
         
             ${title}
             ${message}
         
         
-            <i></i>
+            
         
     `;
     
@@ -436,4 +388,4 @@ function removeToast(toast) {
     }, 300);
 }
 
-console.log('✅ Script de paramètres chargé (avec synchronisation newsletter)');
+console.log('✅ Script de paramètres chargé (sans Appearance)');
