@@ -1,6 +1,6 @@
 /* ============================================
    SETTINGS.JS - Gestion de la page paramètres
-   ✨ VERSION CORRIGÉE - Syntaxe validée
+   Version ultra-propre sans erreurs de syntaxe
    ============================================ */
 
 // Variables globales
@@ -32,7 +32,6 @@ document.addEventListener('DOMContentLoaded', function() {
         loadDefaultSettings();
     } catch (error) {
         console.error('❌ Erreur initialisation:', error);
-        showToast('error', 'Erreur', 'Erreur lors de l\'initialisation');
     }
 });
 
@@ -78,23 +77,18 @@ async function loadSettings() {
         }
         
         if (!isFirebaseInitialized()) {
-            console.warn('⚠ Firebase non disponible, utilisation localStorage');
+            console.warn('⚠ Firebase non disponible');
             loadDefaultSettings();
             return;
         }
         
-        const settingsRef = firebaseDb
-            .collection('users')
-            .doc(currentUserData.uid)
-            .collection('settings')
-            .doc('preferences');
-        
+        const settingsRef = firebaseDb.collection('users').doc(currentUserData.uid).collection('settings').doc('preferences');
         const settingsDoc = await settingsRef.get();
         
         if (!settingsDoc.exists) {
-            console.log('⚠ Paramètres inexistants, création avec valeurs par défaut...');
+            console.log('⚠ Création des paramètres par défaut...');
             await settingsRef.set(currentSettings);
-            console.log('✅ Paramètres créés avec succès');
+            console.log('✅ Paramètres créés');
             
             if (currentSettings.weeklyNewsletter) {
                 syncNewsletterSubscription(true).catch(function(err) {
@@ -103,22 +97,25 @@ async function loadSettings() {
             }
         } else {
             const data = settingsDoc.data();
-            currentSettings = Object.assign({}, currentSettings, data);
-            console.log('✅ Paramètres chargés:', currentSettings);
+            currentSettings = {
+                language: data.language || currentSettings.language,
+                timezone: data.timezone || currentSettings.timezone,
+                currency: data.currency || currentSettings.currency,
+                weeklyNewsletter: data.weeklyNewsletter !== undefined ? data.weeklyNewsletter : currentSettings.weeklyNewsletter,
+                priceAlerts: data.priceAlerts !== undefined ? data.priceAlerts : currentSettings.priceAlerts,
+                featureUpdates: data.featureUpdates !== undefined ? data.featureUpdates : currentSettings.featureUpdates,
+                publicProfile: data.publicProfile !== undefined ? data.publicProfile : currentSettings.publicProfile,
+                publicAnalyses: data.publicAnalyses !== undefined ? data.publicAnalyses : currentSettings.publicAnalyses,
+                analytics: data.analytics !== undefined ? data.analytics : currentSettings.analytics
+            };
+            console.log('✅ Paramètres chargés');
         }
         
         applySettingsToUI();
         
     } catch (error) {
-        console.error('❌ Erreur lors du chargement des paramètres:', error);
-        
-        if (error.code === 'permission-denied') {
-            console.log('⚠ Permissions refusées, utilisation des valeurs par défaut');
-            loadDefaultSettings();
-        } else {
-            showToast('error', 'Erreur', 'Impossible de charger vos paramètres');
-            loadDefaultSettings();
-        }
+        console.error('❌ Erreur chargement paramètres:', error);
+        loadDefaultSettings();
     }
 }
 
@@ -128,18 +125,29 @@ function loadDefaultSettings() {
     try {
         const savedSettings = localStorage.getItem('financepro_settings');
         if (savedSettings) {
-            currentSettings = Object.assign({}, currentSettings, JSON.parse(savedSettings));
+            const parsed = JSON.parse(savedSettings);
+            currentSettings = {
+                language: parsed.language || currentSettings.language,
+                timezone: parsed.timezone || currentSettings.timezone,
+                currency: parsed.currency || currentSettings.currency,
+                weeklyNewsletter: parsed.weeklyNewsletter !== undefined ? parsed.weeklyNewsletter : currentSettings.weeklyNewsletter,
+                priceAlerts: parsed.priceAlerts !== undefined ? parsed.priceAlerts : currentSettings.priceAlerts,
+                featureUpdates: parsed.featureUpdates !== undefined ? parsed.featureUpdates : currentSettings.featureUpdates,
+                publicProfile: parsed.publicProfile !== undefined ? parsed.publicProfile : currentSettings.publicProfile,
+                publicAnalyses: parsed.publicAnalyses !== undefined ? parsed.publicAnalyses : currentSettings.publicAnalyses,
+                analytics: parsed.analytics !== undefined ? parsed.analytics : currentSettings.analytics
+            };
             console.log('✅ Paramètres chargés depuis localStorage');
         }
     } catch (e) {
-        console.warn('⚠ Erreur lors du parsing localStorage:', e);
+        console.warn('⚠ Erreur parsing localStorage:', e);
     }
     
     applySettingsToUI();
 }
 
 function applySettingsToUI() {
-    console.log('🎨 Application des paramètres à l\'interface...');
+    console.log('🎨 Application des paramètres...');
     
     try {
         const langEl = document.getElementById('language');
@@ -166,7 +174,7 @@ function applySettingsToUI() {
         if (analysesEl) analysesEl.checked = currentSettings.publicAnalyses === true;
         if (analyticsEl) analyticsEl.checked = currentSettings.analytics !== false;
         
-        console.log('✅ Interface mise à jour avec les paramètres');
+        console.log('✅ Interface mise à jour');
         
     } catch (error) {
         console.error('❌ Erreur application UI:', error);
@@ -182,15 +190,15 @@ function initializeEventListeners() {
     
     try {
         const tabButtons = document.querySelectorAll('.settings-nav-item');
-        console.log('📑 ' + tabButtons.length + ' onglets trouvés');
+        console.log('📑 Onglets trouvés: ' + tabButtons.length);
         
-        tabButtons.forEach(function(button) {
-            button.addEventListener('click', function() {
-                const tabName = button.dataset.tab;
-                console.log('🖱 Clic sur onglet:', tabName);
+        for (let i = 0; i &lt; tabButtons.length; i++) {
+            tabButtons[i].addEventListener('click', function() {
+                const tabName = this.dataset.tab;
+                console.log('🖱 Clic onglet: ' + tabName);
                 switchTab(tabName);
             });
-        });
+        }
         
         const saveGeneralBtn = document.getElementById('saveGeneralSettings');
         const saveNotifBtn = document.getElementById('saveNotificationSettings');
@@ -198,33 +206,33 @@ function initializeEventListeners() {
         
         if (saveGeneralBtn) {
             saveGeneralBtn.addEventListener('click', saveGeneralSettings);
-            console.log('✅ Bouton General Settings lié');
+            console.log('✅ Bouton General lié');
         }
         
         if (saveNotifBtn) {
             saveNotifBtn.addEventListener('click', saveNotificationSettings);
-            console.log('✅ Bouton Notification Settings lié');
+            console.log('✅ Bouton Notifications lié');
         }
         
         if (savePrivacyBtn) {
             savePrivacyBtn.addEventListener('click', savePrivacySettings);
-            console.log('✅ Bouton Privacy Settings lié');
+            console.log('✅ Bouton Privacy lié');
         }
         
         const exportBtn = document.getElementById('exportDataBtn');
-        const clearCacheBtn = document.getElementById('clearCacheBtn');
-        const deleteAnalysesBtn = document.getElementById('deleteAllAnalyses');
-        const deletePortfoliosBtn = document.getElementById('deleteAllPortfolios');
+        const clearBtn = document.getElementById('clearCacheBtn');
+        const delAnalysesBtn = document.getElementById('deleteAllAnalyses');
+        const delPortfoliosBtn = document.getElementById('deleteAllPortfolios');
         
         if (exportBtn) exportBtn.addEventListener('click', exportUserData);
-        if (clearCacheBtn) clearCacheBtn.addEventListener('click', clearCache);
-        if (deleteAnalysesBtn) deleteAnalysesBtn.addEventListener('click', deleteAllAnalyses);
-        if (deletePortfoliosBtn) deletePortfoliosBtn.addEventListener('click', deleteAllPortfolios);
+        if (clearBtn) clearBtn.addEventListener('click', clearCache);
+        if (delAnalysesBtn) delAnalysesBtn.addEventListener('click', deleteAllAnalyses);
+        if (delPortfoliosBtn) delPortfoliosBtn.addEventListener('click', deleteAllPortfolios);
         
-        console.log('✅ Tous les event listeners initialisés');
+        console.log('✅ Event listeners OK');
         
     } catch (error) {
-        console.error('❌ Erreur lors de l\'initialisation des listeners:', error);
+        console.error('❌ Erreur init listeners:', error);
     }
 }
 
@@ -234,30 +242,27 @@ function initializeEventListeners() {
 
 function switchTab(tabName) {
     try {
-        console.log('📑 Changement vers onglet:', tabName);
+        console.log('📑 Switch vers: ' + tabName);
         
-        document.querySelectorAll('.settings-nav-item').forEach(function(btn) {
-            btn.classList.remove('active');
-        });
-        document.querySelectorAll('.settings-tab').forEach(function(tab) {
-            tab.classList.remove('active');
-        });
+        const allNavItems = document.querySelectorAll('.settings-nav-item');
+        for (let i = 0; i &lt; allNavItems.length; i++) {
+            allNavItems[i].classList.remove('active');
+        }
+        
+        const allTabs = document.querySelectorAll('.settings-tab');
+        for (let i = 0; i &lt; allTabs.length; i++) {
+            allTabs[i].classList.remove('active');
+        }
         
         const navItem = document.querySelector('[data-tab="' + tabName + '"]');
         const tabContent = document.getElementById('tab-' + tabName);
         
         if (navItem) {
             navItem.classList.add('active');
-            console.log('✅ Nav item activé');
-        } else {
-            console.warn('⚠ Nav item non trouvé:', tabName);
         }
         
         if (tabContent) {
             tabContent.classList.add('active');
-            console.log('✅ Tab content activé');
-        } else {
-            console.warn('⚠ Tab content non trouvé:', 'tab-' + tabName);
         }
         
     } catch (error) {
@@ -266,7 +271,7 @@ function switchTab(tabName) {
 }
 
 // ============================================
-// SAUVEGARDE DES PARAMÈTRES
+// SAUVEGARDE
 // ============================================
 
 async function saveGeneralSettings() {
@@ -280,7 +285,7 @@ async function saveGeneralSettings() {
         if (currEl) currentSettings.currency = currEl.value;
         
         await saveSettings();
-        showToast('success', 'Succès !', 'Paramètres généraux sauvegardés');
+        showToast('success', 'Succès', 'Paramètres généraux sauvegardés');
     } catch (error) {
         console.error('❌ Erreur saveGeneral:', error);
         showToast('error', 'Erreur', 'Impossible de sauvegarder');
@@ -293,29 +298,27 @@ async function saveNotificationSettings() {
         const priceEl = document.getElementById('priceAlerts');
         const featEl = document.getElementById('featureUpdates');
         
-        const weeklyNewsletterChecked = newsEl ? newsEl.checked : false;
-        const priceAlertsChecked = priceEl ? priceEl.checked : false;
-        const featureUpdatesChecked = featEl ? featEl.checked : false;
+        const newsChecked = newsEl ? newsEl.checked : false;
+        const priceChecked = priceEl ? priceEl.checked : false;
+        const featChecked = featEl ? featEl.checked : false;
         
-        currentSettings.weeklyNewsletter = weeklyNewsletterChecked;
-        currentSettings.priceAlerts = priceAlertsChecked;
-        currentSettings.featureUpdates = featureUpdatesChecked;
+        currentSettings.weeklyNewsletter = newsChecked;
+        currentSettings.priceAlerts = priceChecked;
+        currentSettings.featureUpdates = featChecked;
         
         await saveSettings();
         
-        console.log('📧 Tentative de synchronisation newsletter...');
+        console.log('📧 Sync newsletter...');
         try {
-            await syncNewsletterSubscription(weeklyNewsletterChecked);
+            await syncNewsletterSubscription(newsChecked);
+            showToast('success', 'Succès', 'Notifications sauvegardées');
         } catch (syncError) {
-            console.warn('⚠ Synchronisation newsletter échouée:', syncError);
-            showToast('warning', 'Attention', 'Paramètres sauvegardés, mais synchronisation newsletter échouée');
-            return;
+            console.warn('⚠ Sync échouée:', syncError);
+            showToast('warning', 'Attention', 'Sauvegardé mais sync newsletter échouée');
         }
         
-        showToast('success', 'Succès !', 'Préférences de notifications sauvegardées');
-        
     } catch (error) {
-        console.error('❌ Erreur saveNotification:', error);
+        console.error('❌ Erreur saveNotif:', error);
         showToast('error', 'Erreur', 'Impossible de sauvegarder');
     }
 }
@@ -331,7 +334,7 @@ async function savePrivacySettings() {
         if (analyticsEl) currentSettings.analytics = analyticsEl.checked;
         
         await saveSettings();
-        showToast('success', 'Succès !', 'Paramètres de confidentialité sauvegardés');
+        showToast('success', 'Succès', 'Paramètres de confidentialité sauvegardés');
     } catch (error) {
         console.error('❌ Erreur savePrivacy:', error);
         showToast('error', 'Erreur', 'Impossible de sauvegarder');
@@ -341,23 +344,15 @@ async function savePrivacySettings() {
 async function saveSettings() {
     try {
         localStorage.setItem('financepro_settings', JSON.stringify(currentSettings));
-        console.log('✅ Sauvegarde localStorage OK');
+        console.log('✅ localStorage OK');
         
         if (currentUserData &amp;&amp; isFirebaseInitialized()) {
-            const settingsRef = firebaseDb
-                .collection('users')
-                .doc(currentUserData.uid)
-                .collection('settings')
-                .doc('preferences');
-            
-            await settingsRef.set(currentSettings, { merge: true });
-            console.log('✅ Sauvegarde Firestore OK');
-        } else {
-            console.warn('⚠ Firebase non disponible, sauvegarde uniquement en local');
+            const ref = firebaseDb.collection('users').doc(currentUserData.uid).collection('settings').doc('preferences');
+            await ref.set(currentSettings, { merge: true });
+            console.log('✅ Firestore OK');
         }
-        
     } catch (error) {
-        console.error('❌ Erreur lors de la sauvegarde:', error);
+        console.error('❌ Erreur save:', error);
         throw error;
     }
 }
@@ -368,15 +363,15 @@ async function saveSettings() {
 
 async function syncNewsletterSubscription(isSubscribed) {
     if (!currentUserData || !currentUserData.email) {
-        console.warn('⚠ Impossible de synchroniser : pas d\'email utilisateur');
-        throw new Error('No user email available');
+        console.warn('⚠ Pas d\'email');
+        throw new Error('No email');
     }
     
-    console.log('📧 Synchronisation newsletter: ' + (isSubscribed ? 'INSCRIPTION' : 'DÉSINSCRIPTION'));
+    console.log('📧 Sync: ' + (isSubscribed ? 'INSCRIPTION' : 'DÉSINSCRIPTION'));
     
     try {
         if (isSubscribed) {
-            const response = await fetch(NEWSLETTER_WORKER_URL + '/subscribe', {
+            const res = await fetch(NEWSLETTER_WORKER_URL + '/subscribe', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -385,40 +380,36 @@ async function syncNewsletterSubscription(isSubscribed) {
                 })
             });
             
-            if (!response.ok) {
-                const error = await response.json();
-                
-                if (error.error === 'Already subscribed') {
-                    console.log('✅ Déjà inscrit à la newsletter');
+            if (!res.ok) {
+                const err = await res.json();
+                if (err.error === 'Already subscribed') {
+                    console.log('✅ Déjà inscrit');
                     return;
                 }
-                
-                throw new Error(error.error || 'Erreur lors de l\'inscription');
+                throw new Error(err.error || 'Erreur inscription');
             }
             
-            const result = await response.json();
-            console.log('✅ Inscription newsletter réussie:', result);
+            const result = await res.json();
+            console.log('✅ Inscription OK:', result);
             
         } else {
-            const response = await fetch(NEWSLETTER_WORKER_URL + '/unsubscribe?email=' + encodeURIComponent(currentUserData.email), {
-                method: 'GET'
-            });
+            const res = await fetch(NEWSLETTER_WORKER_URL + '/unsubscribe?email=' + encodeURIComponent(currentUserData.email));
             
-            if (!response.ok) {
-                throw new Error('Erreur lors de la désinscription');
+            if (!res.ok) {
+                throw new Error('Erreur désinscription');
             }
             
-            console.log('✅ Désinscription newsletter réussie');
+            console.log('✅ Désinscription OK');
         }
         
     } catch (error) {
-        console.error('❌ Erreur synchronisation newsletter:', error);
+        console.error('❌ Erreur sync:', error);
         throw error;
     }
 }
 
 // ============================================
-// GESTION DES DONNÉES
+// GESTION DONNÉES
 // ============================================
 
 async function exportUserData() {
@@ -428,159 +419,134 @@ async function exportUserData() {
     }
     
     try {
-        showToast('info', 'Export en cours...', 'Préparation de vos données');
-        
-        const exportData = {
+        const data = {
             user: currentUserData,
             settings: currentSettings,
             exportDate: new Date().toISOString()
         };
         
-        const dataStr = JSON.stringify(exportData, null, 2);
-        const dataBlob = new Blob([dataStr], { type: 'application/json' });
-        
-        const url = URL.createObjectURL(dataBlob);
+        const str = JSON.stringify(data, null, 2);
+        const blob = new Blob([str], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
         const link = document.createElement('a');
         link.href = url;
         link.download = 'alphavault-export-' + Date.now() + '.json';
         link.click();
         
-        showToast('success', 'Succès !', 'Vos données ont été exportées');
-        
+        showToast('success', 'Succès', 'Données exportées');
     } catch (error) {
-        console.error('❌ Erreur lors de l\'export:', error);
-        showToast('error', 'Erreur', 'Impossible d\'exporter vos données');
+        console.error('❌ Erreur export:', error);
+        showToast('error', 'Erreur', 'Export impossible');
     }
 }
 
 function clearCache() {
-    const confirmed = confirm('Êtes-vous sûr de vouloir vider le cache ?\n\nCette action supprimera toutes les données temporaires.');
-    
-    if (!confirmed) return;
+    if (!confirm('Vider le cache ?\n\nCela supprimera les données temporaires.')) {
+        return;
+    }
     
     try {
-        const essentialKeys = ['financepro_user', 'financepro_theme', 'financepro_settings'];
-        const allKeys = Object.keys(localStorage);
+        const keep = ['financepro_user', 'financepro_theme', 'financepro_settings'];
+        const all = Object.keys(localStorage);
         
-        allKeys.forEach(function(key) {
-            if (essentialKeys.indexOf(key) === -1) {
-                localStorage.removeItem(key);
+        for (let i = 0; i &lt; all.length; i++) {
+            let shouldDelete = true;
+            for (let j = 0; j &lt; keep.length; j++) {
+                if (all[i] === keep[j]) {
+                    shouldDelete = false;
+                    break;
+                }
             }
-        });
+            if (shouldDelete) {
+                localStorage.removeItem(all[i]);
+            }
+        }
         
-        showToast('success', 'Succès !', 'Cache vidé avec succès');
-        
+        showToast('success', 'Succès', 'Cache vidé');
     } catch (error) {
-        console.error('❌ Erreur lors du vidage du cache:', error);
+        console.error('❌ Erreur clear:', error);
         showToast('error', 'Erreur', 'Impossible de vider le cache');
     }
 }
 
 async function deleteAllAnalyses() {
-    const confirmed = confirm('⚠ ATTENTION ⚠\n\nÊtes-vous sûr de vouloir supprimer TOUTES vos analyses ?\n\nCette action est IRRÉVERSIBLE !');
-    
-    if (!confirmed) return;
-    
-    showToast('info', 'Suppression...', 'Suppression de vos analyses en cours');
+    if (!confirm('ATTENTION\n\nSupprimer TOUTES vos analyses ?\n\nCette action est IRRÉVERSIBLE !')) {
+        return;
+    }
     
     try {
         if (!currentUserData || !isFirebaseInitialized()) {
             throw new Error('Firebase non disponible');
         }
         
-        const analysesRef = firebaseDb
-            .collection('users')
-            .doc(currentUserData.uid)
-            .collection('analyses');
-        
-        const snapshot = await analysesRef.get();
-        
+        const ref = firebaseDb.collection('users').doc(currentUserData.uid).collection('analyses');
+        const snap = await ref.get();
         const batch = firebaseDb.batch();
-        snapshot.docs.forEach(function(doc) {
-            batch.delete(doc.ref);
-        });
+        
+        for (let i = 0; i &lt; snap.docs.length; i++) {
+            batch.delete(snap.docs[i].ref);
+        }
         
         await batch.commit();
-        
-        showToast('success', 'Succès !', snapshot.size + ' analyses supprimées');
-        
+        showToast('success', 'Succès', snap.size + ' analyses supprimées');
     } catch (error) {
         console.error('❌ Erreur:', error);
-        showToast('error', 'Erreur', 'Impossible de supprimer les analyses');
+        showToast('error', 'Erreur', 'Suppression impossible');
     }
 }
 
 async function deleteAllPortfolios() {
-    const confirmed = confirm('⚠ ATTENTION ⚠\n\nÊtes-vous sûr de vouloir supprimer TOUS vos portfolios ?\n\nCette action est IRRÉVERSIBLE !');
-    
-    if (!confirmed) return;
-    
-    showToast('info', 'Suppression...', 'Suppression de vos portfolios en cours');
+    if (!confirm('ATTENTION\n\nSupprimer TOUS vos portfolios ?\n\nCette action est IRRÉVERSIBLE !')) {
+        return;
+    }
     
     try {
         if (!currentUserData || !isFirebaseInitialized()) {
             throw new Error('Firebase non disponible');
         }
         
-        const portfoliosRef = firebaseDb
-            .collection('users')
-            .doc(currentUserData.uid)
-            .collection('portfolios');
-        
-        const snapshot = await portfoliosRef.get();
-        
+        const ref = firebaseDb.collection('users').doc(currentUserData.uid).collection('portfolios');
+        const snap = await ref.get();
         const batch = firebaseDb.batch();
-        snapshot.docs.forEach(function(doc) {
-            batch.delete(doc.ref);
-        });
+        
+        for (let i = 0; i &lt; snap.docs.length; i++) {
+            batch.delete(snap.docs[i].ref);
+        }
         
         await batch.commit();
-        
-        showToast('success', 'Succès !', snapshot.size + ' portfolios supprimés');
-        
+        showToast('success', 'Succès', snap.size + ' portfolios supprimés');
     } catch (error) {
         console.error('❌ Erreur:', error);
-        showToast('error', 'Erreur', 'Impossible de supprimer les portfolios');
+        showToast('error', 'Erreur', 'Suppression impossible');
     }
 }
 
 // ============================================
-// UTILITAIRES
+// TOAST
 // ============================================
 
 function showToast(type, title, message) {
-    const toastContainer = document.getElementById('toastContainer');
+    const container = document.getElementById('toastContainer');
     
-    if (!toastContainer) {
-        console.warn('⚠ Toast container not found');
-        console.log('[' + type.toUpperCase() + '] ' + title + ': ' + message);
+    if (!container) {
+        console.log('[' + type + '] ' + title + ': ' + message);
         return;
     }
     
     const toast = document.createElement('div');
     toast.className = 'toast ' + type;
     
-    let iconClass = 'fa-info-circle';
-    switch(type) {
-        case 'success':
-            iconClass = 'fa-check-circle';
-            break;
-        case 'error':
-            iconClass = 'fa-times-circle';
-            break;
-        case 'warning':
-            iconClass = 'fa-exclamation-triangle';
-            break;
-    }
+    let icon = 'fa-info-circle';
+    if (type === 'success') icon = 'fa-check-circle';
+    if (type === 'error') icon = 'fa-times-circle';
+    if (type === 'warning') icon = 'fa-exclamation-triangle';
     
     toast.innerHTML = '<i></i>' +
-        '' +
         '' + title + '' +
         '' + message + '' +
-        '' +
         '<i></i>';
     
-    toastContainer.appendChild(toast);
+    container.appendChild(toast);
     
     const closeBtn = toast.querySelector('.toast-close');
     if (closeBtn) {
@@ -596,7 +562,6 @@ function showToast(type, title, message) {
 
 function removeToast(toast) {
     if (!toast || !toast.parentNode) return;
-    
     toast.style.animation = 'slideOutRight 0.3s ease forwards';
     setTimeout(function() {
         if (toast.parentNode) {
@@ -605,4 +570,4 @@ function removeToast(toast) {
     }, 300);
 }
 
-console.log('✅ Script de paramètres chargé (VERSION FINALE CORRIGÉE)');
+console.log('✅ Settings.js chargé (VERSION PROPRE)');
