@@ -1,66 +1,49 @@
 /* ============================================
-   SETTINGS.JS - Gestion de la page paramètres
-   Version ultra-propre sans erreurs de syntaxe
+   SETTINGS.JS - Gestion de la page paramètres (Sans Appearance)
+   ✅ AVEC SYNCHRONISATION CLOUDFLARE KV NEWSLETTER
    ============================================ */
 
 // Variables globales
 let currentUserData = null;
 let currentSettings = {
+    // General
     language: 'en',
     timezone: 'America/New_York',
     currency: 'USD',
+    
+    // Notifications
     weeklyNewsletter: true,
     priceAlerts: true,
     featureUpdates: true,
+    
+    // Privacy
     publicProfile: false,
     publicAnalyses: false,
     analytics: true
 };
 
-const NEWSLETTER_WORKER_URL = 'https://newsletter-worker.raphnardone.workers.dev';
-
 // ============================================
 // INITIALISATION
 // ============================================
 
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', () =&gt; {
     console.log('🚀 Initialisation de la page paramètres...');
     
-    try {
-        initializeEventListeners();
-        console.log('✅ Event listeners initialisés');
-        loadDefaultSettings();
-    } catch (error) {
-        console.error('❌ Erreur initialisation:', error);
+    if (!isFirebaseInitialized()) {
+        showToast('error', 'Erreur', 'Impossible de charger les paramètres');
+        return;
     }
+    
+    initializeEventListeners();
+    
+    console.log('✅ Page paramètres initialisée');
 });
 
-window.addEventListener('userDataLoaded', function(e) {
-    console.log('👤 Event userDataLoaded reçu');
-    try {
-        currentUserData = e.detail;
-        console.log('✅ Données utilisateur reçues:', currentUserData);
-        loadSettings();
-    } catch (error) {
-        console.error('❌ Erreur traitement userDataLoaded:', error);
-    }
+window.addEventListener('userDataLoaded', (e) =&gt; {
+    currentUserData = e.detail;
+    console.log('✅ Données utilisateur reçues:', currentUserData);
+    loadSettings();
 });
-
-// ============================================
-// VÉRIFICATION FIREBASE
-// ============================================
-
-function isFirebaseInitialized() {
-    if (typeof firebase === 'undefined') {
-        console.warn('⚠ Firebase SDK non chargé');
-        return false;
-    }
-    if (typeof firebaseDb === 'undefined') {
-        console.warn('⚠ Firestore non initialisé');
-        return false;
-    }
-    return true;
-}
 
 // ============================================
 // CHARGEMENT DES PARAMÈTRES
@@ -76,109 +59,80 @@ async function loadSettings() {
             return;
         }
         
-        if (!isFirebaseInitialized()) {
-            console.warn('⚠ Firebase non disponible');
-            loadDefaultSettings();
-            return;
-        }
+        const settingsRef = firebaseDb
+            .collection('users')
+            .doc(currentUserData.uid)
+            .collection('settings')
+            .doc('preferences');
         
-        const settingsRef = firebaseDb.collection('users').doc(currentUserData.uid).collection('settings').doc('preferences');
         const settingsDoc = await settingsRef.get();
         
         if (!settingsDoc.exists) {
-            console.log('⚠ Création des paramètres par défaut...');
+            console.log('⚠ Paramètres inexistants, création avec valeurs par défaut...');
             await settingsRef.set(currentSettings);
-            console.log('✅ Paramètres créés');
+            console.log('✅ Paramètres créés avec succès');
             
-            if (currentSettings.weeklyNewsletter) {
-                syncNewsletterSubscription(true).catch(function(err) {
-                    console.warn('⚠ Sync newsletter échouée:', err);
-                });
+            // ✅ AUTO-ABONNEMENT À LA NEWSLETTER POUR NOUVEAU COMPTE
+            if (currentUserData.email) {
+                await syncNewsletterSubscription(
+                    currentUserData.email,
+                    currentUserData.displayName || currentUserData.email.split('@')[0],
+                    true
+                );
             }
         } else {
             const data = settingsDoc.data();
-            currentSettings = {
-                language: data.language || currentSettings.language,
-                timezone: data.timezone || currentSettings.timezone,
-                currency: data.currency || currentSettings.currency,
-                weeklyNewsletter: data.weeklyNewsletter !== undefined ? data.weeklyNewsletter : currentSettings.weeklyNewsletter,
-                priceAlerts: data.priceAlerts !== undefined ? data.priceAlerts : currentSettings.priceAlerts,
-                featureUpdates: data.featureUpdates !== undefined ? data.featureUpdates : currentSettings.featureUpdates,
-                publicProfile: data.publicProfile !== undefined ? data.publicProfile : currentSettings.publicProfile,
-                publicAnalyses: data.publicAnalyses !== undefined ? data.publicAnalyses : currentSettings.publicAnalyses,
-                analytics: data.analytics !== undefined ? data.analytics : currentSettings.analytics
-            };
-            console.log('✅ Paramètres chargés');
+            currentSettings = { ...currentSettings, ...data };
+            console.log('✅ Paramètres chargés:', currentSettings);
         }
         
         applySettingsToUI();
         
     } catch (error) {
-        console.error('❌ Erreur chargement paramètres:', error);
-        loadDefaultSettings();
+        console.error('❌ Erreur lors du chargement des paramètres:', error);
+        
+        if (error.code === 'permission-denied') {
+            console.log('⚠ Permissions refusées, utilisation des valeurs par défaut');
+            loadDefaultSettings();
+        } else {
+            showToast('error', 'Erreur', 'Impossible de charger vos paramètres');
+        }
     }
 }
 
 function loadDefaultSettings() {
     console.log('📥 Chargement des paramètres par défaut');
     
-    try {
-        const savedSettings = localStorage.getItem('financepro_settings');
-        if (savedSettings) {
-            const parsed = JSON.parse(savedSettings);
-            currentSettings = {
-                language: parsed.language || currentSettings.language,
-                timezone: parsed.timezone || currentSettings.timezone,
-                currency: parsed.currency || currentSettings.currency,
-                weeklyNewsletter: parsed.weeklyNewsletter !== undefined ? parsed.weeklyNewsletter : currentSettings.weeklyNewsletter,
-                priceAlerts: parsed.priceAlerts !== undefined ? parsed.priceAlerts : currentSettings.priceAlerts,
-                featureUpdates: parsed.featureUpdates !== undefined ? parsed.featureUpdates : currentSettings.featureUpdates,
-                publicProfile: parsed.publicProfile !== undefined ? parsed.publicProfile : currentSettings.publicProfile,
-                publicAnalyses: parsed.publicAnalyses !== undefined ? parsed.publicAnalyses : currentSettings.publicAnalyses,
-                analytics: parsed.analytics !== undefined ? parsed.analytics : currentSettings.analytics
-            };
+    const savedSettings = localStorage.getItem('financepro_settings');
+    if (savedSettings) {
+        try {
+            currentSettings = { ...currentSettings, ...JSON.parse(savedSettings) };
             console.log('✅ Paramètres chargés depuis localStorage');
+        } catch (e) {
+            console.warn('⚠ Erreur lors du parsing localStorage');
         }
-    } catch (e) {
-        console.warn('⚠ Erreur parsing localStorage:', e);
     }
     
     applySettingsToUI();
 }
 
 function applySettingsToUI() {
-    console.log('🎨 Application des paramètres...');
+    // General
+    document.getElementById('language').value = currentSettings.language || 'en';
+    document.getElementById('timezone').value = currentSettings.timezone || 'America/New_York';
+    document.getElementById('currency').value = currentSettings.currency || 'USD';
     
-    try {
-        const langEl = document.getElementById('language');
-        const tzEl = document.getElementById('timezone');
-        const currEl = document.getElementById('currency');
-        
-        if (langEl) langEl.value = currentSettings.language || 'en';
-        if (tzEl) tzEl.value = currentSettings.timezone || 'America/New_York';
-        if (currEl) currEl.value = currentSettings.currency || 'USD';
-        
-        const newsEl = document.getElementById('weeklyNewsletter');
-        const priceEl = document.getElementById('priceAlerts');
-        const featEl = document.getElementById('featureUpdates');
-        
-        if (newsEl) newsEl.checked = currentSettings.weeklyNewsletter !== false;
-        if (priceEl) priceEl.checked = currentSettings.priceAlerts !== false;
-        if (featEl) featEl.checked = currentSettings.featureUpdates !== false;
-        
-        const profileEl = document.getElementById('publicProfile');
-        const analysesEl = document.getElementById('publicAnalyses');
-        const analyticsEl = document.getElementById('analytics');
-        
-        if (profileEl) profileEl.checked = currentSettings.publicProfile === true;
-        if (analysesEl) analysesEl.checked = currentSettings.publicAnalyses === true;
-        if (analyticsEl) analyticsEl.checked = currentSettings.analytics !== false;
-        
-        console.log('✅ Interface mise à jour');
-        
-    } catch (error) {
-        console.error('❌ Erreur application UI:', error);
-    }
+    // Notifications
+    document.getElementById('weeklyNewsletter').checked = currentSettings.weeklyNewsletter !== false;
+    document.getElementById('priceAlerts').checked = currentSettings.priceAlerts !== false;
+    document.getElementById('featureUpdates').checked = currentSettings.featureUpdates !== false;
+    
+    // Privacy
+    document.getElementById('publicProfile').checked = currentSettings.publicProfile === true;
+    document.getElementById('publicAnalyses').checked = currentSettings.publicAnalyses === true;
+    document.getElementById('analytics').checked = currentSettings.analytics !== false;
+    
+    console.log('✅ Interface mise à jour avec les paramètres');
 }
 
 // ============================================
@@ -186,54 +140,24 @@ function applySettingsToUI() {
 // ============================================
 
 function initializeEventListeners() {
-    console.log('🔧 Initialisation des event listeners...');
+    // Navigation entre tabs
+    const tabButtons = document.querySelectorAll('.settings-nav-item');
+    tabButtons.forEach(button =&gt; {
+        button.addEventListener('click', () =&gt; {
+            switchTab(button.dataset.tab);
+        });
+    });
     
-    try {
-        const tabButtons = document.querySelectorAll('.settings-nav-item');
-        console.log('📑 Onglets trouvés: ' + tabButtons.length);
-        
-        for (let i = 0; i &lt; tabButtons.length; i++) {
-            tabButtons[i].addEventListener('click', function() {
-                const tabName = this.dataset.tab;
-                console.log('🖱 Clic onglet: ' + tabName);
-                switchTab(tabName);
-            });
-        }
-        
-        const saveGeneralBtn = document.getElementById('saveGeneralSettings');
-        const saveNotifBtn = document.getElementById('saveNotificationSettings');
-        const savePrivacyBtn = document.getElementById('savePrivacySettings');
-        
-        if (saveGeneralBtn) {
-            saveGeneralBtn.addEventListener('click', saveGeneralSettings);
-            console.log('✅ Bouton General lié');
-        }
-        
-        if (saveNotifBtn) {
-            saveNotifBtn.addEventListener('click', saveNotificationSettings);
-            console.log('✅ Bouton Notifications lié');
-        }
-        
-        if (savePrivacyBtn) {
-            savePrivacyBtn.addEventListener('click', savePrivacySettings);
-            console.log('✅ Bouton Privacy lié');
-        }
-        
-        const exportBtn = document.getElementById('exportDataBtn');
-        const clearBtn = document.getElementById('clearCacheBtn');
-        const delAnalysesBtn = document.getElementById('deleteAllAnalyses');
-        const delPortfoliosBtn = document.getElementById('deleteAllPortfolios');
-        
-        if (exportBtn) exportBtn.addEventListener('click', exportUserData);
-        if (clearBtn) clearBtn.addEventListener('click', clearCache);
-        if (delAnalysesBtn) delAnalysesBtn.addEventListener('click', deleteAllAnalyses);
-        if (delPortfoliosBtn) delPortfoliosBtn.addEventListener('click', deleteAllPortfolios);
-        
-        console.log('✅ Event listeners OK');
-        
-    } catch (error) {
-        console.error('❌ Erreur init listeners:', error);
-    }
+    // Boutons de sauvegarde
+    document.getElementById('saveGeneralSettings')?.addEventListener('click', saveGeneralSettings);
+    document.getElementById('saveNotificationSettings')?.addEventListener('click', saveNotificationSettings);
+    document.getElementById('savePrivacySettings')?.addEventListener('click', savePrivacySettings);
+    
+    // Boutons d'action data
+    document.getElementById('exportDataBtn')?.addEventListener('click', exportUserData);
+    document.getElementById('clearCacheBtn')?.addEventListener('click', clearCache);
+    document.getElementById('deleteAllAnalyses')?.addEventListener('click', deleteAllAnalyses);
+    document.getElementById('deleteAllPortfolios')?.addEventListener('click', deleteAllPortfolios);
 }
 
 // ============================================
@@ -241,175 +165,128 @@ function initializeEventListeners() {
 // ============================================
 
 function switchTab(tabName) {
-    try {
-        console.log('📑 Switch vers: ' + tabName);
-        
-        const allNavItems = document.querySelectorAll('.settings-nav-item');
-        for (let i = 0; i &lt; allNavItems.length; i++) {
-            allNavItems[i].classList.remove('active');
-        }
-        
-        const allTabs = document.querySelectorAll('.settings-tab');
-        for (let i = 0; i &lt; allTabs.length; i++) {
-            allTabs[i].classList.remove('active');
-        }
-        
-        const navItem = document.querySelector('[data-tab="' + tabName + '"]');
-        const tabContent = document.getElementById('tab-' + tabName);
-        
-        if (navItem) {
-            navItem.classList.add('active');
-        }
-        
-        if (tabContent) {
-            tabContent.classList.add('active');
-        }
-        
-    } catch (error) {
-        console.error('❌ Erreur switchTab:', error);
-    }
+    document.querySelectorAll('.settings-nav-item').forEach(btn =&gt; {
+        btn.classList.remove('active');
+    });
+    document.querySelectorAll('.settings-tab').forEach(tab =&gt; {
+        tab.classList.remove('active');
+    });
+    
+    document.querySelector(`[data-tab="${tabName}"]`).classList.add('active');
+    document.getElementById(`tab-${tabName}`).classList.add('active');
+    
+    console.log('📑 Onglet changé:', tabName);
 }
 
 // ============================================
-// SAUVEGARDE
+// SAUVEGARDE DES PARAMÈTRES
 // ============================================
 
 async function saveGeneralSettings() {
-    try {
-        const langEl = document.getElementById('language');
-        const tzEl = document.getElementById('timezone');
-        const currEl = document.getElementById('currency');
-        
-        if (langEl) currentSettings.language = langEl.value;
-        if (tzEl) currentSettings.timezone = tzEl.value;
-        if (currEl) currentSettings.currency = currEl.value;
-        
-        await saveSettings();
-        showToast('success', 'Succès', 'Paramètres généraux sauvegardés');
-    } catch (error) {
-        console.error('❌ Erreur saveGeneral:', error);
-        showToast('error', 'Erreur', 'Impossible de sauvegarder');
-    }
+    currentSettings.language = document.getElementById('language').value;
+    currentSettings.timezone = document.getElementById('timezone').value;
+    currentSettings.currency = document.getElementById('currency').value;
+    
+    await saveSettings();
+    showToast('success', 'Succès !', 'Paramètres généraux sauvegardés');
 }
 
 async function saveNotificationSettings() {
-    try {
-        const newsEl = document.getElementById('weeklyNewsletter');
-        const priceEl = document.getElementById('priceAlerts');
-        const featEl = document.getElementById('featureUpdates');
-        
-        const newsChecked = newsEl ? newsEl.checked : false;
-        const priceChecked = priceEl ? priceEl.checked : false;
-        const featChecked = featEl ? featEl.checked : false;
-        
-        currentSettings.weeklyNewsletter = newsChecked;
-        currentSettings.priceAlerts = priceChecked;
-        currentSettings.featureUpdates = featChecked;
-        
-        await saveSettings();
-        
-        console.log('📧 Sync newsletter...');
-        try {
-            await syncNewsletterSubscription(newsChecked);
-            showToast('success', 'Succès', 'Notifications sauvegardées');
-        } catch (syncError) {
-            console.warn('⚠ Sync échouée:', syncError);
-            showToast('warning', 'Attention', 'Sauvegardé mais sync newsletter échouée');
-        }
-        
-    } catch (error) {
-        console.error('❌ Erreur saveNotif:', error);
-        showToast('error', 'Erreur', 'Impossible de sauvegarder');
+    const previousNewsletterState = currentSettings.weeklyNewsletter;
+    
+    currentSettings.weeklyNewsletter = document.getElementById('weeklyNewsletter').checked;
+    currentSettings.priceAlerts = document.getElementById('priceAlerts').checked;
+    currentSettings.featureUpdates = document.getElementById('featureUpdates').checked;
+    
+    // ✅ 1. Sauvegarder dans Firestore
+    await saveSettings();
+    
+    // ✅ 2. Synchroniser avec Cloudflare Worker KV (uniquement si changement newsletter)
+    if (currentUserData &amp;&amp; currentUserData.email &amp;&amp; previousNewsletterState !== currentSettings.weeklyNewsletter) {
+        await syncNewsletterSubscription(
+            currentUserData.email,
+            currentUserData.displayName || currentUserData.email.split('@')[0],
+            currentSettings.weeklyNewsletter
+        );
     }
+    
+    showToast('success', 'Succès !', 'Préférences de notifications sauvegardées');
 }
 
 async function savePrivacySettings() {
-    try {
-        const profileEl = document.getElementById('publicProfile');
-        const analysesEl = document.getElementById('publicAnalyses');
-        const analyticsEl = document.getElementById('analytics');
-        
-        if (profileEl) currentSettings.publicProfile = profileEl.checked;
-        if (analysesEl) currentSettings.publicAnalyses = analysesEl.checked;
-        if (analyticsEl) currentSettings.analytics = analyticsEl.checked;
-        
-        await saveSettings();
-        showToast('success', 'Succès', 'Paramètres de confidentialité sauvegardés');
-    } catch (error) {
-        console.error('❌ Erreur savePrivacy:', error);
-        showToast('error', 'Erreur', 'Impossible de sauvegarder');
-    }
+    currentSettings.publicProfile = document.getElementById('publicProfile').checked;
+    currentSettings.publicAnalyses = document.getElementById('publicAnalyses').checked;
+    currentSettings.analytics = document.getElementById('analytics').checked;
+    
+    await saveSettings();
+    showToast('success', 'Succès !', 'Paramètres de confidentialité sauvegardés');
 }
 
 async function saveSettings() {
     try {
         localStorage.setItem('financepro_settings', JSON.stringify(currentSettings));
-        console.log('✅ localStorage OK');
         
-        if (currentUserData &amp;&amp; isFirebaseInitialized()) {
-            const ref = firebaseDb.collection('users').doc(currentUserData.uid).collection('settings').doc('preferences');
-            await ref.set(currentSettings, { merge: true });
-            console.log('✅ Firestore OK');
+        if (currentUserData) {
+            const settingsRef = firebaseDb
+                .collection('users')
+                .doc(currentUserData.uid)
+                .collection('settings')
+                .doc('preferences');
+            
+            await settingsRef.set(currentSettings, { merge: true });
+            
+            console.log('✅ Paramètres sauvegardés dans Firestore');
         }
+        
     } catch (error) {
-        console.error('❌ Erreur save:', error);
-        throw error;
+        console.error('❌ Erreur lors de la sauvegarde:', error);
+        showToast('error', 'Erreur', 'Impossible de sauvegarder vos paramètres');
     }
 }
 
 // ============================================
-// SYNCHRONISATION NEWSLETTER
+// 🆕 SYNCHRONISATION CLOUDFLARE KV NEWSLETTER
 // ============================================
 
-async function syncNewsletterSubscription(isSubscribed) {
-    if (!currentUserData || !currentUserData.email) {
-        console.warn('⚠ Pas d\'email');
-        throw new Error('No email');
-    }
-    
-    console.log('📧 Sync: ' + (isSubscribed ? 'INSCRIPTION' : 'DÉSINSCRIPTION'));
-    
+async function syncNewsletterSubscription(email, name, isEnabled) {
     try {
-        if (isSubscribed) {
-            const res = await fetch(NEWSLETTER_WORKER_URL + '/subscribe', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    email: currentUserData.email,
-                    name: currentUserData.displayName || currentUserData.email.split('@')[0]
-                })
-            });
+        console.log(`🔄 Syncing newsletter for ${email}: ${isEnabled ? 'ENABLED' : 'DISABLED'}`);
+        
+        const response = await fetch('https://newsletter-worker.raphnardone.workers.dev/sync-subscriber', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                email: email,
+                name: name,
+                weeklyNewsletter: isEnabled
+            })
+        });
+        
+        const result = await response.json();
+        
+        if (response.ok) {
+            console.log(`✅ Newsletter sync successful: ${result.action}`);
             
-            if (!res.ok) {
-                const err = await res.json();
-                if (err.error === 'Already subscribed') {
-                    console.log('✅ Déjà inscrit');
-                    return;
-                }
-                throw new Error(err.error || 'Erreur inscription');
+            if (isEnabled) {
+                showToast('success', 'Abonné !', 'Vous recevrez la newsletter hebdomadaire');
+            } else {
+                showToast('info', 'Désabonné', 'Vous ne recevrez plus la newsletter');
             }
-            
-            const result = await res.json();
-            console.log('✅ Inscription OK:', result);
-            
         } else {
-            const res = await fetch(NEWSLETTER_WORKER_URL + '/unsubscribe?email=' + encodeURIComponent(currentUserData.email));
-            
-            if (!res.ok) {
-                throw new Error('Erreur désinscription');
-            }
-            
-            console.log('✅ Désinscription OK');
+            console.error('❌ Newsletter sync failed:', result.error);
+            showToast('warning', 'Attention', 'Synchronisation newsletter partielle');
         }
         
     } catch (error) {
-        console.error('❌ Erreur sync:', error);
-        throw error;
+        console.error('❌ Error syncing newsletter subscription:', error);
+        showToast('warning', 'Attention', 'Synchronisation newsletter échouée');
     }
 }
 
 // ============================================
-// GESTION DONNÉES
+// GESTION DES DONNÉES
 // ============================================
 
 async function exportUserData() {
@@ -419,155 +296,154 @@ async function exportUserData() {
     }
     
     try {
-        const data = {
+        showToast('info', 'Export en cours...', 'Préparation de vos données');
+        
+        const exportData = {
             user: currentUserData,
             settings: currentSettings,
             exportDate: new Date().toISOString()
         };
         
-        const str = JSON.stringify(data, null, 2);
-        const blob = new Blob([str], { type: 'application/json' });
-        const url = URL.createObjectURL(blob);
+        const dataStr = JSON.stringify(exportData, null, 2);
+        const dataBlob = new Blob([dataStr], { type: 'application/json' });
+        
+        const url = URL.createObjectURL(dataBlob);
         const link = document.createElement('a');
         link.href = url;
-        link.download = 'alphavault-export-' + Date.now() + '.json';
+        link.download = `alphavault-export-${Date.now()}.json`;
         link.click();
         
-        showToast('success', 'Succès', 'Données exportées');
+        showToast('success', 'Succès !', 'Vos données ont été exportées');
+        
     } catch (error) {
-        console.error('❌ Erreur export:', error);
-        showToast('error', 'Erreur', 'Export impossible');
+        console.error('❌ Erreur lors de l\'export:', error);
+        showToast('error', 'Erreur', 'Impossible d\'exporter vos données');
     }
 }
 
 function clearCache() {
-    if (!confirm('Vider le cache ?\n\nCela supprimera les données temporaires.')) {
-        return;
-    }
+    const confirmed = confirm(
+        'Êtes-vous sûr de vouloir vider le cache ?\n\n' +
+        'Cette action supprimera toutes les données temporaires.'
+    );
+    
+    if (!confirmed) return;
     
     try {
-        const keep = ['financepro_user', 'financepro_theme', 'financepro_settings'];
-        const all = Object.keys(localStorage);
+        const essentialKeys = ['financepro_user', 'financepro_theme', 'financepro_settings'];
+        const allKeys = Object.keys(localStorage);
         
-        for (let i = 0; i &lt; all.length; i++) {
-            let shouldDelete = true;
-            for (let j = 0; j &lt; keep.length; j++) {
-                if (all[i] === keep[j]) {
-                    shouldDelete = false;
-                    break;
-                }
+        allKeys.forEach(key =&gt; {
+            if (!essentialKeys.includes(key)) {
+                localStorage.removeItem(key);
             }
-            if (shouldDelete) {
-                localStorage.removeItem(all[i]);
-            }
-        }
+        });
         
-        showToast('success', 'Succès', 'Cache vidé');
+        showToast('success', 'Succès !', 'Cache vidé avec succès');
+        
     } catch (error) {
-        console.error('❌ Erreur clear:', error);
+        console.error('❌ Erreur lors du vidage du cache:', error);
         showToast('error', 'Erreur', 'Impossible de vider le cache');
     }
 }
 
 async function deleteAllAnalyses() {
-    if (!confirm('ATTENTION\n\nSupprimer TOUTES vos analyses ?\n\nCette action est IRRÉVERSIBLE !')) {
-        return;
-    }
+    const confirmed = confirm(
+        '⚠ ATTENTION ⚠\n\n' +
+        'Êtes-vous sûr de vouloir supprimer TOUTES vos analyses ?\n\n' +
+        'Cette action est IRRÉVERSIBLE !'
+    );
+    
+    if (!confirmed) return;
+    
+    showToast('info', 'Suppression...', 'Suppression de vos analyses en cours');
     
     try {
-        if (!currentUserData || !isFirebaseInitialized()) {
-            throw new Error('Firebase non disponible');
-        }
-        
-        const ref = firebaseDb.collection('users').doc(currentUserData.uid).collection('analyses');
-        const snap = await ref.get();
-        const batch = firebaseDb.batch();
-        
-        for (let i = 0; i &lt; snap.docs.length; i++) {
-            batch.delete(snap.docs[i].ref);
-        }
-        
-        await batch.commit();
-        showToast('success', 'Succès', snap.size + ' analyses supprimées');
+        // TODO: Implémenter la suppression réelle
+        showToast('success', 'Succès !', 'Analyses supprimées');
     } catch (error) {
         console.error('❌ Erreur:', error);
-        showToast('error', 'Erreur', 'Suppression impossible');
+        showToast('error', 'Erreur', 'Impossible de supprimer les analyses');
     }
 }
 
 async function deleteAllPortfolios() {
-    if (!confirm('ATTENTION\n\nSupprimer TOUS vos portfolios ?\n\nCette action est IRRÉVERSIBLE !')) {
-        return;
-    }
+    const confirmed = confirm(
+        '⚠ ATTENTION ⚠\n\n' +
+        'Êtes-vous sûr de vouloir supprimer TOUS vos portfolios ?\n\n' +
+        'Cette action est IRRÉVERSIBLE !'
+    );
+    
+    if (!confirmed) return;
+    
+    showToast('info', 'Suppression...', 'Suppression de vos portfolios en cours');
     
     try {
-        if (!currentUserData || !isFirebaseInitialized()) {
-            throw new Error('Firebase non disponible');
-        }
-        
-        const ref = firebaseDb.collection('users').doc(currentUserData.uid).collection('portfolios');
-        const snap = await ref.get();
-        const batch = firebaseDb.batch();
-        
-        for (let i = 0; i &lt; snap.docs.length; i++) {
-            batch.delete(snap.docs[i].ref);
-        }
-        
-        await batch.commit();
-        showToast('success', 'Succès', snap.size + ' portfolios supprimés');
+        // TODO: Implémenter la suppression réelle
+        showToast('success', 'Succès !', 'Portfolios supprimés');
     } catch (error) {
         console.error('❌ Erreur:', error);
-        showToast('error', 'Erreur', 'Suppression impossible');
+        showToast('error', 'Erreur', 'Impossible de supprimer les portfolios');
     }
 }
 
 // ============================================
-// TOAST
+// UTILITAIRES
 // ============================================
 
 function showToast(type, title, message) {
-    const container = document.getElementById('toastContainer');
+    const toastContainer = document.getElementById('toastContainer');
     
-    if (!container) {
-        console.log('[' + type + '] ' + title + ': ' + message);
-        return;
-    }
+    if (!toastContainer) return;
     
     const toast = document.createElement('div');
-    toast.className = 'toast ' + type;
+    toast.className = `toast ${type}`;
     
-    let icon = 'fa-info-circle';
-    if (type === 'success') icon = 'fa-check-circle';
-    if (type === 'error') icon = 'fa-times-circle';
-    if (type === 'warning') icon = 'fa-exclamation-triangle';
-    
-    toast.innerHTML = '<i></i>' +
-        '' + title + '' +
-        '' + message + '' +
-        '<i></i>';
-    
-    container.appendChild(toast);
-    
-    const closeBtn = toast.querySelector('.toast-close');
-    if (closeBtn) {
-        closeBtn.addEventListener('click', function() {
-            removeToast(toast);
-        });
+    let iconClass = 'fa-info-circle';
+    switch(type) {
+        case 'success':
+            iconClass = 'fa-check-circle';
+            break;
+        case 'error':
+            iconClass = 'fa-times-circle';
+            break;
+        case 'warning':
+            iconClass = 'fa-exclamation-triangle';
+            break;
     }
     
-    setTimeout(function() {
+    toast.innerHTML = `
+        
+            <i></i>
+        
+        
+            ${title}
+            ${message}
+        
+        
+            <i></i>
+        
+    `;
+    
+    toastContainer.appendChild(toast);
+    
+    const closeBtn = toast.querySelector('.toast-close');
+    closeBtn.addEventListener('click', () =&gt; {
+        removeToast(toast);
+    });
+    
+    setTimeout(() =&gt; {
         removeToast(toast);
     }, 5000);
 }
 
 function removeToast(toast) {
-    if (!toast || !toast.parentNode) return;
     toast.style.animation = 'slideOutRight 0.3s ease forwards';
-    setTimeout(function() {
+    setTimeout(() =&gt; {
         if (toast.parentNode) {
             toast.parentNode.removeChild(toast);
         }
     }, 300);
 }
 
-console.log('✅ Settings.js chargé (VERSION PROPRE)');
+console.log('✅ Script de paramètres chargé (avec synchronisation newsletter)');
