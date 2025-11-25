@@ -460,13 +460,13 @@ function showUpgradeModal(currentPlan, reason = 'insufficient') {
                 ${msg.icon}
             
             ${msg.title}
-            ${msg.description}
+            <p>${msg.description}</p>
             
-                Your current plan: ${currentPlan}
+                <p>Your current plan: <strong>${currentPlan}</strong></p>
             
             
                 
-                    
+                    <i></i>
                     Upgrade to ${msg.suggestedPlan}
                 
                 
@@ -478,50 +478,50 @@ function showUpgradeModal(currentPlan, reason = 'insufficient') {
     
     document.body.appendChild(modal);
     
-    setTimeout(() =&gt; {
+    setTimeout(function() {
         modal.style.opacity = '1';
         document.getElementById('upgrade-modal-content').style.transform = 'scale(1)';
     }, 10);
     
-    document.getElementById('btn-upgrade-now').addEventListener('click', () =&gt; {
+    document.getElementById('btn-upgrade-now').addEventListener('click', function() {
         console.log('🛒 Redirecting to checkout page...');
         window.location.href = 'checkout.html';
     });
     
-    document.getElementById('btn-cancel-modal').addEventListener('click', () =&gt; {
+    document.getElementById('btn-cancel-modal').addEventListener('click', function() {
         console.log('🔙 User cancelled - redirecting to dashboard...');
         modal.style.opacity = '0';
-        setTimeout(() =&gt; {
+        setTimeout(function() {
             modal.remove();
             window.location.href = 'dashboard-financier.html';
         }, 300);
     });
     
-    modal.addEventListener('click', (e) =&gt; {
+    modal.addEventListener('click', function(e) {
         if (e.target === modal) {
             const content = document.getElementById('upgrade-modal-content');
             content.style.animation = 'shake 0.5s';
-            setTimeout(() =&gt; {
+            setTimeout(function() {
                 content.style.animation = '';
             }, 500);
         }
     });
     
     const upgradeBtn = document.getElementById('btn-upgrade-now');
-    upgradeBtn.addEventListener('mouseenter', () =&gt; {
+    upgradeBtn.addEventListener('mouseenter', function() {
         upgradeBtn.style.transform = 'scale(1.05) translateY(-2px)';
         upgradeBtn.style.boxShadow = '0 8px 28px rgba(0, 0, 0, 0.3)';
     });
-    upgradeBtn.addEventListener('mouseleave', () =&gt; {
+    upgradeBtn.addEventListener('mouseleave', function() {
         upgradeBtn.style.transform = 'scale(1) translateY(0)';
         upgradeBtn.style.boxShadow = '0 6px 20px rgba(0, 0, 0, 0.2)';
     });
     
     const cancelBtn = document.getElementById('btn-cancel-modal');
-    cancelBtn.addEventListener('mouseenter', () =&gt; {
+    cancelBtn.addEventListener('mouseenter', function() {
         cancelBtn.style.background = 'rgba(255, 255, 255, 0.3)';
     });
-    cancelBtn.addEventListener('mouseleave', () =&gt; {
+    cancelBtn.addEventListener('mouseleave', function() {
         cancelBtn.style.background = 'rgba(255, 255, 255, 0.2)';
     });
 }
@@ -560,7 +560,7 @@ document.addEventListener('DOMContentLoaded', async function() {
     if (!PAGE_CATEGORIES.public.includes(currentPage)) {
         console.log('🔒 Protected page detected - checking access...');
         
-        firebase.auth().onAuthStateChanged(async (user) =&gt; {
+        firebase.auth().onAuthStateChanged(async function(user) {
             if (user) {
                 const hasAccess = await checkPageAccess(currentPage);
                 
