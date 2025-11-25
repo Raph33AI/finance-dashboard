@@ -1,52 +1,42 @@
 /* ============================================
    SETTINGS.JS - Gestion de la page paramètres
-   ✨ VERSION SAFE avec gestion d'erreurs renforcée
+   ✨ VERSION CORRIGÉE - Syntaxe validée
    ============================================ */
 
 // Variables globales
 let currentUserData = null;
 let currentSettings = {
-    // General
     language: 'en',
     timezone: 'America/New_York',
     currency: 'USD',
-    
-    // Notifications
     weeklyNewsletter: true,
     priceAlerts: true,
     featureUpdates: true,
-    
-    // Privacy
     publicProfile: false,
     publicAnalyses: false,
     analytics: true
 };
 
-// 🆕 URL DU WORKER CLOUDFLARE
 const NEWSLETTER_WORKER_URL = 'https://newsletter-worker.raphnardone.workers.dev';
 
 // ============================================
 // INITIALISATION
 // ============================================
 
-document.addEventListener('DOMContentLoaded', () =&gt; {
+document.addEventListener('DOMContentLoaded', function() {
     console.log('🚀 Initialisation de la page paramètres...');
     
     try {
         initializeEventListeners();
         console.log('✅ Event listeners initialisés');
-        
-        // Charger les paramètres par défaut en attendant Firebase
         loadDefaultSettings();
-        
     } catch (error) {
         console.error('❌ Erreur initialisation:', error);
         showToast('error', 'Erreur', 'Erreur lors de l\'initialisation');
     }
 });
 
-// Écouter l'événement userDataLoaded
-window.addEventListener('userDataLoaded', (e) =&gt; {
+window.addEventListener('userDataLoaded', function(e) {
     console.log('👤 Event userDataLoaded reçu');
     try {
         currentUserData = e.detail;
@@ -66,12 +56,10 @@ function isFirebaseInitialized() {
         console.warn('⚠ Firebase SDK non chargé');
         return false;
     }
-    
     if (typeof firebaseDb === 'undefined') {
         console.warn('⚠ Firestore non initialisé');
         return false;
     }
-    
     return true;
 }
 
@@ -108,15 +96,14 @@ async function loadSettings() {
             await settingsRef.set(currentSettings);
             console.log('✅ Paramètres créés avec succès');
             
-            // 🆕 Synchroniser avec le Worker (sans bloquer si erreur)
             if (currentSettings.weeklyNewsletter) {
-                syncNewsletterSubscription(true).catch(err =&gt; {
+                syncNewsletterSubscription(true).catch(function(err) {
                     console.warn('⚠ Sync newsletter échouée:', err);
                 });
             }
         } else {
             const data = settingsDoc.data();
-            currentSettings = { ...currentSettings, ...data };
+            currentSettings = Object.assign({}, currentSettings, data);
             console.log('✅ Paramètres chargés:', currentSettings);
         }
         
@@ -141,7 +128,7 @@ function loadDefaultSettings() {
     try {
         const savedSettings = localStorage.getItem('financepro_settings');
         if (savedSettings) {
-            currentSettings = { ...currentSettings, ...JSON.parse(savedSettings) };
+            currentSettings = Object.assign({}, currentSettings, JSON.parse(savedSettings));
             console.log('✅ Paramètres chargés depuis localStorage');
         }
     } catch (e) {
@@ -155,7 +142,6 @@ function applySettingsToUI() {
     console.log('🎨 Application des paramètres à l\'interface...');
     
     try {
-        // General
         const langEl = document.getElementById('language');
         const tzEl = document.getElementById('timezone');
         const currEl = document.getElementById('currency');
@@ -164,7 +150,6 @@ function applySettingsToUI() {
         if (tzEl) tzEl.value = currentSettings.timezone || 'America/New_York';
         if (currEl) currEl.value = currentSettings.currency || 'USD';
         
-        // Notifications
         const newsEl = document.getElementById('weeklyNewsletter');
         const priceEl = document.getElementById('priceAlerts');
         const featEl = document.getElementById('featureUpdates');
@@ -173,7 +158,6 @@ function applySettingsToUI() {
         if (priceEl) priceEl.checked = currentSettings.priceAlerts !== false;
         if (featEl) featEl.checked = currentSettings.featureUpdates !== false;
         
-        // Privacy
         const profileEl = document.getElementById('publicProfile');
         const analysesEl = document.getElementById('publicAnalyses');
         const analyticsEl = document.getElementById('analytics');
@@ -197,19 +181,17 @@ function initializeEventListeners() {
     console.log('🔧 Initialisation des event listeners...');
     
     try {
-        // Navigation entre tabs
         const tabButtons = document.querySelectorAll('.settings-nav-item');
-        console.log(`📑 ${tabButtons.length} onglets trouvés`);
+        console.log('📑 ' + tabButtons.length + ' onglets trouvés');
         
-        tabButtons.forEach(button =&gt; {
-            button.addEventListener('click', () =&gt; {
+        tabButtons.forEach(function(button) {
+            button.addEventListener('click', function() {
                 const tabName = button.dataset.tab;
                 console.log('🖱 Clic sur onglet:', tabName);
                 switchTab(tabName);
             });
         });
         
-        // Boutons de sauvegarde
         const saveGeneralBtn = document.getElementById('saveGeneralSettings');
         const saveNotifBtn = document.getElementById('saveNotificationSettings');
         const savePrivacyBtn = document.getElementById('savePrivacySettings');
@@ -229,7 +211,6 @@ function initializeEventListeners() {
             console.log('✅ Bouton Privacy Settings lié');
         }
         
-        // Boutons d'action data
         const exportBtn = document.getElementById('exportDataBtn');
         const clearCacheBtn = document.getElementById('clearCacheBtn');
         const deleteAnalysesBtn = document.getElementById('deleteAllAnalyses');
@@ -255,17 +236,15 @@ function switchTab(tabName) {
     try {
         console.log('📑 Changement vers onglet:', tabName);
         
-        // Retirer toutes les classes active
-        document.querySelectorAll('.settings-nav-item').forEach(btn =&gt; {
+        document.querySelectorAll('.settings-nav-item').forEach(function(btn) {
             btn.classList.remove('active');
         });
-        document.querySelectorAll('.settings-tab').forEach(tab =&gt; {
+        document.querySelectorAll('.settings-tab').forEach(function(tab) {
             tab.classList.remove('active');
         });
         
-        // Ajouter active au nouvel onglet
-        const navItem = document.querySelector(`[data-tab="${tabName}"]`);
-        const tabContent = document.getElementById(`tab-${tabName}`);
+        const navItem = document.querySelector('[data-tab="' + tabName + '"]');
+        const tabContent = document.getElementById('tab-' + tabName);
         
         if (navItem) {
             navItem.classList.add('active');
@@ -278,7 +257,7 @@ function switchTab(tabName) {
             tabContent.classList.add('active');
             console.log('✅ Tab content activé');
         } else {
-            console.warn('⚠ Tab content non trouvé:', `tab-${tabName}`);
+            console.warn('⚠ Tab content non trouvé:', 'tab-' + tabName);
         }
         
     } catch (error) {
@@ -324,7 +303,6 @@ async function saveNotificationSettings() {
         
         await saveSettings();
         
-        // 🆕 SYNCHRONISER AVEC LE WORKER (sans bloquer si erreur)
         console.log('📧 Tentative de synchronisation newsletter...');
         try {
             await syncNewsletterSubscription(weeklyNewsletterChecked);
@@ -362,11 +340,9 @@ async function savePrivacySettings() {
 
 async function saveSettings() {
     try {
-        // Toujours sauvegarder dans localStorage
         localStorage.setItem('financepro_settings', JSON.stringify(currentSettings));
         console.log('✅ Sauvegarde localStorage OK');
         
-        // Tenter Firebase si disponible
         if (currentUserData &amp;&amp; isFirebaseInitialized()) {
             const settingsRef = firebaseDb
                 .collection('users')
@@ -387,7 +363,7 @@ async function saveSettings() {
 }
 
 // ============================================
-// 🆕 SYNCHRONISATION NEWSLETTER CLOUDFLARE WORKER
+// SYNCHRONISATION NEWSLETTER
 // ============================================
 
 async function syncNewsletterSubscription(isSubscribed) {
@@ -396,12 +372,11 @@ async function syncNewsletterSubscription(isSubscribed) {
         throw new Error('No user email available');
     }
     
-    console.log(`📧 Synchronisation newsletter: ${isSubscribed ? 'INSCRIPTION' : 'DÉSINSCRIPTION'}`);
+    console.log('📧 Synchronisation newsletter: ' + (isSubscribed ? 'INSCRIPTION' : 'DÉSINSCRIPTION'));
     
     try {
         if (isSubscribed) {
-            // ✅ INSCRIPTION
-            const response = await fetch(`${NEWSLETTER_WORKER_URL}/subscribe`, {
+            const response = await fetch(NEWSLETTER_WORKER_URL + '/subscribe', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -425,8 +400,7 @@ async function syncNewsletterSubscription(isSubscribed) {
             console.log('✅ Inscription newsletter réussie:', result);
             
         } else {
-            // ❌ DÉSINSCRIPTION
-            const response = await fetch(`${NEWSLETTER_WORKER_URL}/unsubscribe?email=${encodeURIComponent(currentUserData.email)}`, {
+            const response = await fetch(NEWSLETTER_WORKER_URL + '/unsubscribe?email=' + encodeURIComponent(currentUserData.email), {
                 method: 'GET'
             });
             
@@ -468,7 +442,7 @@ async function exportUserData() {
         const url = URL.createObjectURL(dataBlob);
         const link = document.createElement('a');
         link.href = url;
-        link.download = `alphavault-export-${Date.now()}.json`;
+        link.download = 'alphavault-export-' + Date.now() + '.json';
         link.click();
         
         showToast('success', 'Succès !', 'Vos données ont été exportées');
@@ -480,10 +454,7 @@ async function exportUserData() {
 }
 
 function clearCache() {
-    const confirmed = confirm(
-        'Êtes-vous sûr de vouloir vider le cache ?\n\n' +
-        'Cette action supprimera toutes les données temporaires.'
-    );
+    const confirmed = confirm('Êtes-vous sûr de vouloir vider le cache ?\n\nCette action supprimera toutes les données temporaires.');
     
     if (!confirmed) return;
     
@@ -491,8 +462,8 @@ function clearCache() {
         const essentialKeys = ['financepro_user', 'financepro_theme', 'financepro_settings'];
         const allKeys = Object.keys(localStorage);
         
-        allKeys.forEach(key =&gt; {
-            if (!essentialKeys.includes(key)) {
+        allKeys.forEach(function(key) {
+            if (essentialKeys.indexOf(key) === -1) {
                 localStorage.removeItem(key);
             }
         });
@@ -506,11 +477,7 @@ function clearCache() {
 }
 
 async function deleteAllAnalyses() {
-    const confirmed = confirm(
-        '⚠ ATTENTION ⚠\n\n' +
-        'Êtes-vous sûr de vouloir supprimer TOUTES vos analyses ?\n\n' +
-        'Cette action est IRRÉVERSIBLE !'
-    );
+    const confirmed = confirm('⚠ ATTENTION ⚠\n\nÊtes-vous sûr de vouloir supprimer TOUTES vos analyses ?\n\nCette action est IRRÉVERSIBLE !');
     
     if (!confirmed) return;
     
@@ -529,13 +496,13 @@ async function deleteAllAnalyses() {
         const snapshot = await analysesRef.get();
         
         const batch = firebaseDb.batch();
-        snapshot.docs.forEach((doc) =&gt; {
+        snapshot.docs.forEach(function(doc) {
             batch.delete(doc.ref);
         });
         
         await batch.commit();
         
-        showToast('success', 'Succès !', `${snapshot.size} analyses supprimées`);
+        showToast('success', 'Succès !', snapshot.size + ' analyses supprimées');
         
     } catch (error) {
         console.error('❌ Erreur:', error);
@@ -544,11 +511,7 @@ async function deleteAllAnalyses() {
 }
 
 async function deleteAllPortfolios() {
-    const confirmed = confirm(
-        '⚠ ATTENTION ⚠\n\n' +
-        'Êtes-vous sûr de vouloir supprimer TOUS vos portfolios ?\n\n' +
-        'Cette action est IRRÉVERSIBLE !'
-    );
+    const confirmed = confirm('⚠ ATTENTION ⚠\n\nÊtes-vous sûr de vouloir supprimer TOUS vos portfolios ?\n\nCette action est IRRÉVERSIBLE !');
     
     if (!confirmed) return;
     
@@ -567,13 +530,13 @@ async function deleteAllPortfolios() {
         const snapshot = await portfoliosRef.get();
         
         const batch = firebaseDb.batch();
-        snapshot.docs.forEach((doc) =&gt; {
+        snapshot.docs.forEach(function(doc) {
             batch.delete(doc.ref);
         });
         
         await batch.commit();
         
-        showToast('success', 'Succès !', `${snapshot.size} portfolios supprimés`);
+        showToast('success', 'Succès !', snapshot.size + ' portfolios supprimés');
         
     } catch (error) {
         console.error('❌ Erreur:', error);
@@ -590,12 +553,12 @@ function showToast(type, title, message) {
     
     if (!toastContainer) {
         console.warn('⚠ Toast container not found');
-        console.log(`[${type.toUpperCase()}] ${title}: ${message}`);
+        console.log('[' + type.toUpperCase() + '] ' + title + ': ' + message);
         return;
     }
     
     const toast = document.createElement('div');
-    toast.className = `toast ${type}`;
+    toast.className = 'toast ' + type;
     
     let iconClass = 'fa-info-circle';
     switch(type) {
@@ -610,29 +573,23 @@ function showToast(type, title, message) {
             break;
     }
     
-    toast.innerHTML = `
-        
-            <i></i>
-        
-        
-            ${title}
-            ${message}
-        
-        
-            <i></i>
-        
-    `;
+    toast.innerHTML = '<i></i>' +
+        '' +
+        '' + title + '' +
+        '' + message + '' +
+        '' +
+        '<i></i>';
     
     toastContainer.appendChild(toast);
     
     const closeBtn = toast.querySelector('.toast-close');
     if (closeBtn) {
-        closeBtn.addEventListener('click', () =&gt; {
+        closeBtn.addEventListener('click', function() {
             removeToast(toast);
         });
     }
     
-    setTimeout(() =&gt; {
+    setTimeout(function() {
         removeToast(toast);
     }, 5000);
 }
@@ -641,11 +598,11 @@ function removeToast(toast) {
     if (!toast || !toast.parentNode) return;
     
     toast.style.animation = 'slideOutRight 0.3s ease forwards';
-    setTimeout(() =&gt; {
+    setTimeout(function() {
         if (toast.parentNode) {
             toast.parentNode.removeChild(toast);
         }
     }, 300);
 }
 
-console.log('✅ Script de paramètres chargé (VERSION SAFE avec DEBUG)');
+console.log('✅ Script de paramètres chargé (VERSION FINALE CORRIGÉE)');
