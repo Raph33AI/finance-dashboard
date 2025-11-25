@@ -1,5 +1,6 @@
 /* ============================================
    SETTINGS.JS - Gestion de la page paramètres (Sans Appearance)
+   ✨ VERSION AVEC SYNCHRONISATION NEWSLETTER CLOUDFLARE
    ============================================ */
 
 // Variables globales
@@ -23,11 +24,14 @@ let currentSettings = {
     analytics: true
 };
 
+// 🆕 URL DU WORKER CLOUDFLARE
+const NEWSLETTER_WORKER_URL = 'https://newsletter-worker.raphnardone.workers.dev';
+
 // ============================================
 // INITIALISATION
 // ============================================
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', () =&gt; {
     console.log('🚀 Initialisation de la page paramètres...');
     
     if (!isFirebaseInitialized()) {
@@ -40,7 +44,7 @@ document.addEventListener('DOMContentLoaded', () => {
     console.log('✅ Page paramètres initialisée');
 });
 
-window.addEventListener('userDataLoaded', (e) => {
+window.addEventListener('userDataLoaded', (e) =&gt; {
     currentUserData = e.detail;
     console.log('✅ Données utilisateur reçues:', currentUserData);
     loadSettings();
@@ -55,7 +59,7 @@ async function loadSettings() {
         console.log('📥 Chargement des paramètres...');
         
         if (!currentUserData) {
-            console.warn('⚠️ Pas de données utilisateur disponibles');
+            console.warn('⚠ Pas de données utilisateur disponibles');
             loadDefaultSettings();
             return;
         }
@@ -69,9 +73,14 @@ async function loadSettings() {
         const settingsDoc = await settingsRef.get();
         
         if (!settingsDoc.exists) {
-            console.log('⚠️ Paramètres inexistants, création avec valeurs par défaut...');
+            console.log('⚠ Paramètres inexistants, création avec valeurs par défaut...');
             await settingsRef.set(currentSettings);
             console.log('✅ Paramètres créés avec succès');
+            
+            // 🆕 Synchroniser avec le Worker lors de la première création
+            if (currentSettings.weeklyNewsletter) {
+                await syncNewsletterSubscription(true);
+            }
         } else {
             const data = settingsDoc.data();
             currentSettings = { ...currentSettings, ...data };
@@ -84,7 +93,7 @@ async function loadSettings() {
         console.error('❌ Erreur lors du chargement des paramètres:', error);
         
         if (error.code === 'permission-denied') {
-            console.log('⚠️ Permissions refusées, utilisation des valeurs par défaut');
+            console.log('⚠ Permissions refusées, utilisation des valeurs par défaut');
             loadDefaultSettings();
         } else {
             showToast('error', 'Erreur', 'Impossible de charger vos paramètres');
@@ -101,7 +110,7 @@ function loadDefaultSettings() {
             currentSettings = { ...currentSettings, ...JSON.parse(savedSettings) };
             console.log('✅ Paramètres chargés depuis localStorage');
         } catch (e) {
-            console.warn('⚠️ Erreur lors du parsing localStorage');
+            console.warn('⚠ Erreur lors du parsing localStorage');
         }
     }
     
@@ -136,8 +145,8 @@ function applySettingsToUI() {
 function initializeEventListeners() {
     // Navigation entre tabs
     const tabButtons = document.querySelectorAll('.settings-nav-item');
-    tabButtons.forEach(button => {
-        button.addEventListener('click', () => {
+    tabButtons.forEach(button =&gt; {
+        button.addEventListener('click', () =&gt; {
             switchTab(button.dataset.tab);
         });
     });
@@ -161,10 +170,10 @@ function initializeEventListeners() {
 // ============================================
 
 function switchTab(tabName) {
-    document.querySelectorAll('.settings-nav-item').forEach(btn => {
+    document.querySelectorAll('.settings-nav-item').forEach(btn =&gt; {
         btn.classList.remove('active');
     });
-    document.querySelectorAll('.settings-tab').forEach(tab => {
+    document.querySelectorAll('.settings-tab').forEach(tab =&gt; {
         tab.classList.remove('active');
     });
     
@@ -187,12 +196,22 @@ async function saveGeneralSettings() {
     showToast('success', 'Succès !', 'Paramètres généraux sauvegardés');
 }
 
+// 🆕 FONCTION MODIFIÉE - Sauvegarde avec synchronisation Worker
 async function saveNotificationSettings() {
-    currentSettings.weeklyNewsletter = document.getElementById('weeklyNewsletter').checked;
-    currentSettings.priceAlerts = document.getElementById('priceAlerts').checked;
-    currentSettings.featureUpdates = document.getElementById('featureUpdates').checked;
+    const weeklyNewsletterChecked = document.getElementById('weeklyNewsletter').checked;
+    const priceAlertsChecked = document.getElementById('priceAlerts').checked;
+    const featureUpdatesChecked = document.getElementById('featureUpdates').checked;
+    
+    // Sauvegarder dans Firestore
+    currentSettings.weeklyNewsletter = weeklyNewsletterChecked;
+    currentSettings.priceAlerts = priceAlertsChecked;
+    currentSettings.featureUpdates = featureUpdatesChecked;
     
     await saveSettings();
+    
+    // 🆕 SYNCHRONISER AVEC LE WORKER CLOUDFLARE
+    await syncNewsletterSubscription(weeklyNewsletterChecked);
+    
     showToast('success', 'Succès !', 'Préférences de notifications sauvegardées');
 }
 
@@ -224,6 +243,73 @@ async function saveSettings() {
     } catch (error) {
         console.error('❌ Erreur lors de la sauvegarde:', error);
         showToast('error', 'Erreur', 'Impossible de sauvegarder vos paramètres');
+    }
+}
+
+// ============================================
+// 🆕 SYNCHRONISATION NEWSLETTER CLOUDFLARE WORKER
+// ============================================
+
+/**
+ * 🔄 Synchronise l'abonnement newsletter avec le Worker Cloudflare
+ * @param {boolean} isSubscribed - true pour s'inscrire, false pour se désinscrire
+ */
+async function syncNewsletterSubscription(isSubscribed) {
+    if (!currentUserData || !currentUserData.email) {
+        console.warn('⚠ Impossible de synchroniser : pas d\'email utilisateur');
+        return;
+    }
+    
+    try {
+        if (isSubscribed) {
+            // ✅ INSCRIPTION À LA NEWSLETTER
+            console.log('📧 Inscription à la newsletter Worker...');
+            
+            const response = await fetch(`${NEWSLETTER_WORKER_URL}/subscribe`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    email: currentUserData.email,
+                    name: currentUserData.displayName || currentUserData.email.split('@')[0]
+                })
+            });
+            
+            if (!response.ok) {
+                const error = await response.json();
+                
+                // Si déjà inscrit, c'est OK
+                if (error.error === 'Already subscribed') {
+                    console.log('✅ Déjà inscrit à la newsletter');
+                    return;
+                }
+                
+                throw new Error(error.error || 'Erreur lors de l\'inscription');
+            }
+            
+            const result = await response.json();
+            console.log('✅ Inscription newsletter réussie:', result);
+            
+        } else {
+            // ❌ DÉSINSCRIPTION DE LA NEWSLETTER
+            console.log('📧 Désinscription de la newsletter Worker...');
+            
+            const response = await fetch(`${NEWSLETTER_WORKER_URL}/unsubscribe?email=${encodeURIComponent(currentUserData.email)}`, {
+                method: 'GET'
+            });
+            
+            if (!response.ok) {
+                const errorText = await response.text();
+                throw new Error(`Erreur lors de la désinscription: ${errorText}`);
+            }
+            
+            console.log('✅ Désinscription newsletter réussie');
+        }
+        
+    } catch (error) {
+        console.error('❌ Erreur synchronisation newsletter:', error);
+        showToast('warning', 'Attention', 'Paramètres sauvegardés, mais synchronisation newsletter échouée. Veuillez réessayer.');
     }
 }
 
@@ -275,7 +361,7 @@ function clearCache() {
         const essentialKeys = ['financepro_user', 'financepro_theme', 'financepro_settings'];
         const allKeys = Object.keys(localStorage);
         
-        allKeys.forEach(key => {
+        allKeys.forEach(key =&gt; {
             if (!essentialKeys.includes(key)) {
                 localStorage.removeItem(key);
             }
@@ -291,7 +377,7 @@ function clearCache() {
 
 async function deleteAllAnalyses() {
     const confirmed = confirm(
-        '⚠️ ATTENTION ⚠️\n\n' +
+        '⚠ ATTENTION ⚠\n\n' +
         'Êtes-vous sûr de vouloir supprimer TOUTES vos analyses ?\n\n' +
         'Cette action est IRRÉVERSIBLE !'
     );
@@ -301,8 +387,26 @@ async function deleteAllAnalyses() {
     showToast('info', 'Suppression...', 'Suppression de vos analyses en cours');
     
     try {
-        // TODO: Implémenter la suppression réelle
-        showToast('success', 'Succès !', 'Analyses supprimées');
+        if (!currentUserData) {
+            throw new Error('Utilisateur non connecté');
+        }
+        
+        const analysesRef = firebaseDb
+            .collection('users')
+            .doc(currentUserData.uid)
+            .collection('analyses');
+        
+        const snapshot = await analysesRef.get();
+        
+        const batch = firebaseDb.batch();
+        snapshot.docs.forEach((doc) =&gt; {
+            batch.delete(doc.ref);
+        });
+        
+        await batch.commit();
+        
+        showToast('success', 'Succès !', `${snapshot.size} analyses supprimées`);
+        
     } catch (error) {
         console.error('❌ Erreur:', error);
         showToast('error', 'Erreur', 'Impossible de supprimer les analyses');
@@ -311,7 +415,7 @@ async function deleteAllAnalyses() {
 
 async function deleteAllPortfolios() {
     const confirmed = confirm(
-        '⚠️ ATTENTION ⚠️\n\n' +
+        '⚠ ATTENTION ⚠\n\n' +
         'Êtes-vous sûr de vouloir supprimer TOUS vos portfolios ?\n\n' +
         'Cette action est IRRÉVERSIBLE !'
     );
@@ -321,8 +425,26 @@ async function deleteAllPortfolios() {
     showToast('info', 'Suppression...', 'Suppression de vos portfolios en cours');
     
     try {
-        // TODO: Implémenter la suppression réelle
-        showToast('success', 'Succès !', 'Portfolios supprimés');
+        if (!currentUserData) {
+            throw new Error('Utilisateur non connecté');
+        }
+        
+        const portfoliosRef = firebaseDb
+            .collection('users')
+            .doc(currentUserData.uid)
+            .collection('portfolios');
+        
+        const snapshot = await portfoliosRef.get();
+        
+        const batch = firebaseDb.batch();
+        snapshot.docs.forEach((doc) =&gt; {
+            batch.delete(doc.ref);
+        });
+        
+        await batch.commit();
+        
+        showToast('success', 'Succès !', `${snapshot.size} portfolios supprimés`);
+        
     } catch (error) {
         console.error('❌ Erreur:', error);
         showToast('error', 'Erreur', 'Impossible de supprimer les portfolios');
@@ -336,7 +458,10 @@ async function deleteAllPortfolios() {
 function showToast(type, title, message) {
     const toastContainer = document.getElementById('toastContainer');
     
-    if (!toastContainer) return;
+    if (!toastContainer) {
+        console.warn('⚠ Toast container not found');
+        return;
+    }
     
     const toast = document.createElement('div');
     toast.className = `toast ${type}`;
@@ -355,37 +480,55 @@ function showToast(type, title, message) {
     }
     
     toast.innerHTML = `
-        <div class="toast-icon">
-            <i class="fas ${iconClass}"></i>
-        </div>
-        <div class="toast-content">
-            <div class="toast-title">${title}</div>
-            <div class="toast-message">${message}</div>
-        </div>
-        <button class="toast-close">
-            <i class="fas fa-times"></i>
-        </button>
+        
+            <i></i>
+        
+        
+            ${title}
+            ${message}
+        
+        
+            <i></i>
+        
     `;
     
     toastContainer.appendChild(toast);
     
     const closeBtn = toast.querySelector('.toast-close');
-    closeBtn.addEventListener('click', () => {
+    closeBtn.addEventListener('click', () =&gt; {
         removeToast(toast);
     });
     
-    setTimeout(() => {
+    setTimeout(() =&gt; {
         removeToast(toast);
     }, 5000);
 }
 
 function removeToast(toast) {
     toast.style.animation = 'slideOutRight 0.3s ease forwards';
-    setTimeout(() => {
+    setTimeout(() =&gt; {
         if (toast.parentNode) {
             toast.parentNode.removeChild(toast);
         }
     }, 300);
 }
 
-console.log('✅ Script de paramètres chargé (sans Appearance)');
+// ============================================
+// VÉRIFICATION FIREBASE
+// ============================================
+
+function isFirebaseInitialized() {
+    if (typeof firebase === 'undefined') {
+        console.error('❌ Firebase SDK non chargé');
+        return false;
+    }
+    
+    if (typeof firebaseDb === 'undefined') {
+        console.error('❌ Firestore non initialisé');
+        return false;
+    }
+    
+    return true;
+}
+
+console.log('✅ Script de paramètres chargé (avec synchronisation Newsletter Cloudflare)');
