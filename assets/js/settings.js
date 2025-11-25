@@ -1,6 +1,5 @@
 /* ============================================
    SETTINGS.JS - Gestion de la page paramètres (Sans Appearance)
-   ✅ AVEC SYNCHRONISATION CLOUDFLARE KV NEWSLETTER
    ============================================ */
 
 // Variables globales
@@ -72,7 +71,7 @@ async function loadSettings() {
             await settingsRef.set(currentSettings);
             console.log('✅ Paramètres créés avec succès');
             
-            // ✅ AUTO-ABONNEMENT À LA NEWSLETTER POUR NOUVEAU COMPTE
+            // ✅ AUTO-ABONNEMENT NEWSLETTER
             if (currentUserData.email) {
                 await syncNewsletterSubscription(
                     currentUserData.email,
@@ -198,10 +197,9 @@ async function saveNotificationSettings() {
     currentSettings.priceAlerts = document.getElementById('priceAlerts').checked;
     currentSettings.featureUpdates = document.getElementById('featureUpdates').checked;
     
-    // ✅ 1. Sauvegarder dans Firestore
     await saveSettings();
     
-    // ✅ 2. Synchroniser avec Cloudflare Worker KV (uniquement si changement newsletter)
+    // ✅ SYNCHRONISATION CLOUDFLARE KV
     if (currentUserData &amp;&amp; currentUserData.email &amp;&amp; previousNewsletterState !== currentSettings.weeklyNewsletter) {
         await syncNewsletterSubscription(
             currentUserData.email,
@@ -245,7 +243,7 @@ async function saveSettings() {
 }
 
 // ============================================
-// 🆕 SYNCHRONISATION CLOUDFLARE KV NEWSLETTER
+// 🆕 SYNCHRONISATION NEWSLETTER CLOUDFLARE
 // ============================================
 
 async function syncNewsletterSubscription(email, name, isEnabled) {
@@ -268,20 +266,12 @@ async function syncNewsletterSubscription(email, name, isEnabled) {
         
         if (response.ok) {
             console.log(`✅ Newsletter sync successful: ${result.action}`);
-            
-            if (isEnabled) {
-                showToast('success', 'Abonné !', 'Vous recevrez la newsletter hebdomadaire');
-            } else {
-                showToast('info', 'Désabonné', 'Vous ne recevrez plus la newsletter');
-            }
         } else {
             console.error('❌ Newsletter sync failed:', result.error);
-            showToast('warning', 'Attention', 'Synchronisation newsletter partielle');
         }
         
     } catch (error) {
         console.error('❌ Error syncing newsletter subscription:', error);
-        showToast('warning', 'Attention', 'Synchronisation newsletter échouée');
     }
 }
 
