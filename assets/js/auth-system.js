@@ -1,8 +1,7 @@
 /* ═══════════════════════════════════════════════════════════════
    AUTH-SYSTEM.JS - FinancePro Navigation Authentication
-   VERSION 2.0 - PLAN BASIC PAR DÉFAUT + EMAIL DE BIENVENUE
-   ✅ Création de compte → plan "basic" + status "active"
-   ✅ Email de confirmation automatique (via Cloudflare Worker)
+   Gestion du menu profil utilisateur dans la navigation
+   Compatible avec firebase-config.js, auth.js, profile.js
    ═══════════════════════════════════════════════════════════════ */
 
 // ============================================
@@ -17,7 +16,7 @@ let userProfileData = null;
 // ============================================
 
 document.addEventListener('DOMContentLoaded', () =&gt; {
-    console.log('🚀 Initializing navigation auth system v2.0...');
+    console.log('🚀 Initializing navigation auth system...');
     
     // Vérifier que Firebase est bien initialisé
     if (typeof firebase === 'undefined' || typeof firebaseAuth === 'undefined') {
@@ -31,7 +30,7 @@ document.addEventListener('DOMContentLoaded', () =&gt; {
     // Écouter les changements d'état d'authentification
     initializeAuthStateListener();
     
-    console.log('✅ Navigation auth system v2.0 initialized');
+    console.log('✅ Navigation auth system initialized');
 });
 
 // ============================================
@@ -46,14 +45,6 @@ function initializeAuthStateListener() {
         if (user) {
             console.log('✅ User authenticated:', user.email);
             currentUser = user;
-            
-            // ✅ VÉRIFIER SI C'EST UNE NOUVELLE INSCRIPTION
-            const isNewUser = await checkIfNewUser(user.uid);
-            
-            if (isNewUser) {
-                console.log('🆕 New user detected - initializing account...');
-                await initializeNewUserAccount(user);
-            }
             
             // Charger les données du profil depuis Firestore
             await loadUserProfileData(user.uid);
@@ -82,151 +73,6 @@ function initializeAuthStateListener() {
 }
 
 // ============================================
-// ✅ NOUVEAU : VÉRIFIER SI NOUVEL UTILISATEUR
-// ============================================
-
-/**
- * Vérifier si l'utilisateur vient de s'inscrire
- */
-async function checkIfNewUser(uid) {
-    try {
-        const userDoc = await firebaseDb.collection('users').doc(uid).get();
-        
-        if (!userDoc.exists) {
-            console.log('📝 User document does not exist - this is a new user');
-            return true;
-        }
-        
-        const userData = userDoc.data();
-        
-        // Si le document existe mais n'a pas de plan défini, c'est un nouveau compte
-        if (!userData.plan || !userData.subscriptionStatus) {
-            console.log('📝 User document incomplete - initializing...');
-            return true;
-        }
-        
-        return false;
-        
-    } catch (error) {
-        console.error('❌ Error checking new user status:', error);
-        return false;
-    }
-}
-
-// ============================================
-// ✅ NOUVEAU : INITIALISER UN NOUVEAU COMPTE
-// ============================================
-
-/**
- * Initialiser un nouveau compte utilisateur avec plan BASIC par défaut
- */
-async function initializeNewUserAccount(user) {
-    try {
-        console.log('🔧 Initializing new user account...');
-        
-        // ✅ DONNÉES PAR DÉFAUT POUR NOUVEAU COMPTE
-        const defaultUserData = {
-            // Informations de base
-            email: user.email,
-            firstName: user.displayName?.split(' ')[0] || '',
-            lastName: user.displayName?.split(' ')[1] || '',
-            photoURL: user.photoURL || null,
-            
-            // ✅ PLAN ET ABONNEMENT (VALEURS CORRIGÉES)
-            plan: 'basic',                    // ✅ Plan BASIC par défaut
-            subscriptionStatus: 'active',     // ✅ Statut ACTIF (accès aux pages basic)
-            subscriptionPlan: 'basic',        // ✅ Cohérence avec "plan"
-            
-            // Dates
-            createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-            lastLogin: firebase.firestore.FieldValue.serverTimestamp(),
-            
-            // Codes promo et trial
-            promoCode: null,
-            trialEndsAt: null,
-            
-            // Préférences
-            emailNotifications: true,
-            newsletter: true
-        };
-        
-        // ✅ CRÉER LE DOCUMENT FIRESTORE
-        await firebaseDb.collection('users').doc(user.uid).set(defaultUserData, { merge: true });
-        
-        console.log('✅ User document created in Firestore');
-        console.log('📊 Default plan: basic');
-        console.log('🔔 Subscription status: active');
-        
-        // ✅ ENVOYER L'EMAIL DE BIENVENUE (via Cloudflare Worker)
-        await sendWelcomeEmail(user.email, defaultUserData.firstName || 'User');
-        
-        // ✅ MESSAGE DE CONFIRMATION À L'UTILISATEUR
-        showNotification('success', 'Welcome!', 'Your account has been created successfully. You now have access to Basic features!');
-        
-        return defaultUserData;
-        
-    } catch (error) {
-        console.error('❌ Error initializing new user account:', error);
-        
-        // ✅ FALLBACK : Créer au moins un document minimal
-        try {
-            await firebaseDb.collection('users').doc(user.uid).set({
-                email: user.email,
-                plan: 'basic',
-                subscriptionStatus: 'active',
-                createdAt: firebase.firestore.FieldValue.serverTimestamp()
-            }, { merge: true });
-            
-            console.log('✅ Minimal user document created (fallback)');
-        } catch (fallbackError) {
-            console.error('❌ Fallback user creation failed:', fallbackError);
-        }
-        
-        return null;
-    }
-}
-
-// ============================================
-// ✅ NOUVEAU : ENVOYER L'EMAIL DE BIENVENUE
-// ============================================
-
-/**
- * Envoyer un email de bienvenue via le Cloudflare Worker
- */
-async function sendWelcomeEmail(email, firstName) {
-    try {
-        console.log('📧 Sending welcome email to:', email);
-        
-        // ✅ URL DE TON CLOUDFLARE WORKER (à remplacer)
-        const workerURL = 'https://finance-hub-api.raphnardone.workers.dev';
-        
-        const response = await fetch(workerURL, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                email: email,
-                firstName: firstName
-            })
-        });
-        
-        if (response.ok) {
-            console.log('✅ Welcome email sent successfully');
-            return true;
-        } else {
-            const errorData = await response.json();
-            console.warn('⚠ Welcome email failed:', errorData);
-            return false;
-        }
-        
-    } catch (error) {
-        console.error('❌ Error sending welcome email:', error);
-        return false;
-    }
-}
-
-// ============================================
 // LOAD USER PROFILE DATA
 // ============================================
 
@@ -240,10 +86,8 @@ async function loadUserProfileData(uid) {
         if (userDoc.exists) {
             userProfileData = userDoc.data();
             console.log('✅ User profile loaded from Firestore');
-            console.log('📊 User plan:', userProfileData.plan);
-            console.log('🔔 Subscription status:', userProfileData.subscriptionStatus);
         } else {
-            console.warn('⚠ User profile not found in Firestore');
+            console.warn('⚠ User profile not found in Firestore, using Firebase Auth data');
             
             // Créer un profil basique si inexistant
             userProfileData = {
@@ -251,8 +95,7 @@ async function loadUserProfileData(uid) {
                 lastName: currentUser.displayName?.split(' ')[1] || '',
                 email: currentUser.email,
                 photoURL: currentUser.photoURL || null,
-                plan: 'basic',
-                subscriptionStatus: 'active'
+                plan: 'free'
             };
         }
     } catch (error) {
@@ -264,8 +107,7 @@ async function loadUserProfileData(uid) {
             lastName: currentUser.displayName?.split(' ')[1] || '',
             email: currentUser.email,
             photoURL: currentUser.photoURL || null,
-            plan: 'basic',
-            subscriptionStatus: 'active'
+            plan: 'free'
         };
     }
 }
@@ -287,12 +129,22 @@ function updateNavigationUI(isAuthenticated) {
     }
     
     if (isAuthenticated) {
+        // Masquer les boutons Login/Signup
         navCtaLoggedOut.style.display = 'none';
+        
+        // Afficher le menu profil
         navCtaLoggedIn.style.display = 'flex';
+        
+        // Ajouter la classe au body pour le CSS
         document.body.classList.add('user-authenticated');
     } else {
+        // Afficher les boutons Login/Signup
         navCtaLoggedOut.style.display = 'flex';
+        
+        // Masquer le menu profil
         navCtaLoggedIn.style.display = 'none';
+        
+        // Retirer la classe du body
         document.body.classList.remove('user-authenticated');
     }
 }
@@ -307,17 +159,21 @@ function updateNavigationUI(isAuthenticated) {
 function updateUserProfileDisplay() {
     if (!currentUser || !userProfileData) return;
     
+    // Nom complet
     const fullName = `${userProfileData.firstName || ''} ${userProfileData.lastName || ''}`.trim() 
                      || currentUser.displayName 
                      || 'User';
     
+    // Email
     const email = userProfileData.email || currentUser.email;
     
+    // Photo de profil
     const photoURL = userProfileData.photoURL 
                      || currentUser.photoURL 
                      || generateAvatarURL(fullName);
     
-    const plan = formatPlanName(userProfileData.plan || 'basic');
+    // Plan
+    const plan = formatPlanName(userProfileData.plan || 'free');
     
     // === Mettre à jour le bouton profil ===
     
@@ -371,6 +227,7 @@ function updateUserProfileDisplay() {
  * Initialiser les event listeners du menu profil
  */
 function initializeProfileMenuListeners() {
+    // Bouton du profil (toggle dropdown)
     const userProfileButton = document.getElementById('userProfileButton');
     const userDropdownMenu = document.getElementById('userDropdownMenu');
     
@@ -380,12 +237,14 @@ function initializeProfileMenuListeners() {
             toggleProfileDropdown();
         });
         
+        // Fermer le dropdown en cliquant en dehors
         document.addEventListener('click', (e) =&gt; {
             if (!userProfileButton.contains(e.target) &amp;&amp; !userDropdownMenu.contains(e.target)) {
                 closeProfileDropdown();
             }
         });
         
+        // Fermer avec la touche Escape
         document.addEventListener('keydown', (e) =&gt; {
             if (e.key === 'Escape' &amp;&amp; userDropdownMenu.classList.contains('active')) {
                 closeProfileDropdown();
@@ -394,11 +253,13 @@ function initializeProfileMenuListeners() {
         });
     }
     
+    // Bouton Logout
     const logoutButton = document.getElementById('logoutButton');
     if (logoutButton) {
         logoutButton.addEventListener('click', handleLogout);
     }
     
+    // Bouton Settings
     const settingsLink = document.getElementById('settingsLink');
     if (settingsLink) {
         settingsLink.addEventListener('click', (e) =&gt; {
@@ -407,6 +268,7 @@ function initializeProfileMenuListeners() {
         });
     }
     
+    // Boutons Login/Signup dans la nav
     const loginBtn = document.getElementById('loginBtn');
     const signupBtn = document.getElementById('signupBtn');
     
@@ -427,6 +289,9 @@ function initializeProfileMenuListeners() {
 // DROPDOWN TOGGLE FUNCTIONS
 // ============================================
 
+/**
+ * Toggle du dropdown
+ */
 function toggleProfileDropdown() {
     const userProfileButton = document.getElementById('userProfileButton');
     const userDropdownMenu = document.getElementById('userDropdownMenu');
@@ -442,6 +307,9 @@ function toggleProfileDropdown() {
     }
 }
 
+/**
+ * Ouvrir le dropdown
+ */
 function openProfileDropdown() {
     const userProfileButton = document.getElementById('userProfileButton');
     const userDropdownMenu = document.getElementById('userDropdownMenu');
@@ -452,6 +320,9 @@ function openProfileDropdown() {
     userDropdownMenu.classList.add('active');
 }
 
+/**
+ * Fermer le dropdown
+ */
 function closeProfileDropdown() {
     const userProfileButton = document.getElementById('userProfileButton');
     const userDropdownMenu = document.getElementById('userDropdownMenu');
@@ -466,17 +337,24 @@ function closeProfileDropdown() {
 // LOGOUT HANDLER
 // ============================================
 
+/**
+ * Gérer la déconnexion
+ */
 async function handleLogout() {
     console.log('🔐 Logout initiated...');
     
+    // Fermer le dropdown
     closeProfileDropdown();
     
     try {
+        // Déconnexion Firebase
         await firebaseAuth.signOut();
         console.log('✅ Logout successful');
         
+        // Message de confirmation
         showNotification('success', 'Logged out successfully', 'You have been logged out.');
         
+        // Rediriger vers la page d'accueil après 1 seconde
         setTimeout(() =&gt; {
             window.location.href = 'index.html';
         }, 1000);
@@ -491,14 +369,19 @@ async function handleLogout() {
 // SETTINGS HANDLER
 // ============================================
 
+/**
+ * Gérer l'accès aux paramètres
+ */
 function handleSettings() {
     console.log('⚙ Settings clicked');
     closeProfileDropdown();
     
-    const profilePageExists = true;
+    // Rediriger vers la page de profil si elle existe
+    // Sinon afficher une notification
+    const profilePageExists = true; // Change selon ton setup
     
     if (profilePageExists) {
-        window.location.href = 'settings.html';
+        window.location.href = 'profile.html';
     } else {
         showNotification('info', 'Settings', 'Settings page coming soon!');
     }
@@ -508,27 +391,37 @@ function handleSettings() {
 // UTILITY FUNCTIONS
 // ============================================
 
+/**
+ * Générer une URL d'avatar avec UI Avatars
+ */
 function generateAvatarURL(name) {
     const encodedName = encodeURIComponent(name);
     return `https://ui-avatars.com/api/?name=${encodedName}&amp;background=3B82F6&amp;color=fff&amp;bold=true&amp;size=128`;
 }
 
+/**
+ * Formater le nom du plan
+ */
 function formatPlanName(plan) {
     const planNames = {
         'free': 'Free',
-        'basic': 'Basic',
-        'pro': 'Pro',
-        'platinum': 'Platinum',
-        'trial': 'Trial'
+        'starter': 'Starter',
+        'professional': 'Professional',
+        'enterprise': 'Enterprise'
     };
     
-    return planNames[plan.toLowerCase()] || 'Basic';
+    return planNames[plan.toLowerCase()] || 'Free';
 }
 
+/**
+ * Afficher une notification toast
+ */
 function showNotification(type, title, message) {
+    // Créer l'élément de notification
     const notification = document.createElement('div');
     notification.className = `toast-notification ${type}`;
     
+    // Icône selon le type
     let iconClass = 'fa-info-circle';
     switch(type) {
         case 'success':
@@ -544,19 +437,20 @@ function showNotification(type, title, message) {
     
     notification.innerHTML = `
         
-            <i></i>
             
-                <strong>${title}</strong>: ${message}
-            
+            ${title}: ${message}
         
     `;
     
+    // Ajouter au body
     document.body.appendChild(notification);
     
+    // Afficher avec animation
     setTimeout(() =&gt; {
         notification.classList.add('show');
     }, 10);
     
+    // Retirer après 4 secondes
     setTimeout(() =&gt; {
         notification.classList.remove('show');
         setTimeout(() =&gt; {
@@ -568,7 +462,7 @@ function showNotification(type, title, message) {
 }
 
 // ============================================
-// PUBLIC API
+// PUBLIC API (accessible globalement)
 // ============================================
 
 window.authSystem = {
@@ -585,6 +479,4 @@ window.authSystem = {
     }
 };
 
-console.log('✅ Auth system v2.0 script loaded');
-console.log('🆕 New users will be assigned plan: basic (status: active)');
-console.log('📧 Welcome emails enabled (via Cloudflare Worker)');
+console.log('✅ Auth system script loaded');
