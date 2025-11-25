@@ -1,6 +1,6 @@
 /* ============================================
-   SETTINGS.JS - Gestion de la page paramètres (Sans Appearance)
-   ✨ VERSION AVEC SYNCHRONISATION NEWSLETTER CLOUDFLARE
+   SETTINGS.JS - Gestion de la page paramètres
+   ✨ VERSION SAFE avec gestion d'erreurs renforcée
    ============================================ */
 
 // Variables globales
@@ -10,8 +10,6 @@ let currentSettings = {
     language: 'en',
     timezone: 'America/New_York',
     currency: 'USD',
-    
-    // ❌ APPEARANCE SUPPRIMÉ
     
     // Notifications
     weeklyNewsletter: true,
@@ -34,21 +32,48 @@ const NEWSLETTER_WORKER_URL = 'https://newsletter-worker.raphnardone.workers.dev
 document.addEventListener('DOMContentLoaded', () =&gt; {
     console.log('🚀 Initialisation de la page paramètres...');
     
-    if (!isFirebaseInitialized()) {
-        showToast('error', 'Erreur', 'Impossible de charger les paramètres');
-        return;
+    try {
+        initializeEventListeners();
+        console.log('✅ Event listeners initialisés');
+        
+        // Charger les paramètres par défaut en attendant Firebase
+        loadDefaultSettings();
+        
+    } catch (error) {
+        console.error('❌ Erreur initialisation:', error);
+        showToast('error', 'Erreur', 'Erreur lors de l\'initialisation');
     }
-    
-    initializeEventListeners();
-    
-    console.log('✅ Page paramètres initialisée');
 });
 
+// Écouter l'événement userDataLoaded
 window.addEventListener('userDataLoaded', (e) =&gt; {
-    currentUserData = e.detail;
-    console.log('✅ Données utilisateur reçues:', currentUserData);
-    loadSettings();
+    console.log('👤 Event userDataLoaded reçu');
+    try {
+        currentUserData = e.detail;
+        console.log('✅ Données utilisateur reçues:', currentUserData);
+        loadSettings();
+    } catch (error) {
+        console.error('❌ Erreur traitement userDataLoaded:', error);
+    }
 });
+
+// ============================================
+// VÉRIFICATION FIREBASE
+// ============================================
+
+function isFirebaseInitialized() {
+    if (typeof firebase === 'undefined') {
+        console.warn('⚠ Firebase SDK non chargé');
+        return false;
+    }
+    
+    if (typeof firebaseDb === 'undefined') {
+        console.warn('⚠ Firestore non initialisé');
+        return false;
+    }
+    
+    return true;
+}
 
 // ============================================
 // CHARGEMENT DES PARAMÈTRES
@@ -60,6 +85,12 @@ async function loadSettings() {
         
         if (!currentUserData) {
             console.warn('⚠ Pas de données utilisateur disponibles');
+            loadDefaultSettings();
+            return;
+        }
+        
+        if (!isFirebaseInitialized()) {
+            console.warn('⚠ Firebase non disponible, utilisation localStorage');
             loadDefaultSettings();
             return;
         }
@@ -77,9 +108,11 @@ async function loadSettings() {
             await settingsRef.set(currentSettings);
             console.log('✅ Paramètres créés avec succès');
             
-            // 🆕 Synchroniser avec le Worker lors de la première création
+            // 🆕 Synchroniser avec le Worker (sans bloquer si erreur)
             if (currentSettings.weeklyNewsletter) {
-                await syncNewsletterSubscription(true);
+                syncNewsletterSubscription(true).catch(err =&gt; {
+                    console.warn('⚠ Sync newsletter échouée:', err);
+                });
             }
         } else {
             const data = settingsDoc.data();
@@ -97,6 +130,7 @@ async function loadSettings() {
             loadDefaultSettings();
         } else {
             showToast('error', 'Erreur', 'Impossible de charger vos paramètres');
+            loadDefaultSettings();
         }
     }
 }
@@ -104,38 +138,55 @@ async function loadSettings() {
 function loadDefaultSettings() {
     console.log('📥 Chargement des paramètres par défaut');
     
-    const savedSettings = localStorage.getItem('financepro_settings');
-    if (savedSettings) {
-        try {
+    try {
+        const savedSettings = localStorage.getItem('financepro_settings');
+        if (savedSettings) {
             currentSettings = { ...currentSettings, ...JSON.parse(savedSettings) };
             console.log('✅ Paramètres chargés depuis localStorage');
-        } catch (e) {
-            console.warn('⚠ Erreur lors du parsing localStorage');
         }
+    } catch (e) {
+        console.warn('⚠ Erreur lors du parsing localStorage:', e);
     }
     
     applySettingsToUI();
 }
 
 function applySettingsToUI() {
-    // General
-    document.getElementById('language').value = currentSettings.language || 'en';
-    document.getElementById('timezone').value = currentSettings.timezone || 'America/New_York';
-    document.getElementById('currency').value = currentSettings.currency || 'USD';
+    console.log('🎨 Application des paramètres à l\'interface...');
     
-    // ❌ APPEARANCE SUPPRIMÉ (pas de thème ici)
-    
-    // Notifications
-    document.getElementById('weeklyNewsletter').checked = currentSettings.weeklyNewsletter !== false;
-    document.getElementById('priceAlerts').checked = currentSettings.priceAlerts !== false;
-    document.getElementById('featureUpdates').checked = currentSettings.featureUpdates !== false;
-    
-    // Privacy
-    document.getElementById('publicProfile').checked = currentSettings.publicProfile === true;
-    document.getElementById('publicAnalyses').checked = currentSettings.publicAnalyses === true;
-    document.getElementById('analytics').checked = currentSettings.analytics !== false;
-    
-    console.log('✅ Interface mise à jour avec les paramètres');
+    try {
+        // General
+        const langEl = document.getElementById('language');
+        const tzEl = document.getElementById('timezone');
+        const currEl = document.getElementById('currency');
+        
+        if (langEl) langEl.value = currentSettings.language || 'en';
+        if (tzEl) tzEl.value = currentSettings.timezone || 'America/New_York';
+        if (currEl) currEl.value = currentSettings.currency || 'USD';
+        
+        // Notifications
+        const newsEl = document.getElementById('weeklyNewsletter');
+        const priceEl = document.getElementById('priceAlerts');
+        const featEl = document.getElementById('featureUpdates');
+        
+        if (newsEl) newsEl.checked = currentSettings.weeklyNewsletter !== false;
+        if (priceEl) priceEl.checked = currentSettings.priceAlerts !== false;
+        if (featEl) featEl.checked = currentSettings.featureUpdates !== false;
+        
+        // Privacy
+        const profileEl = document.getElementById('publicProfile');
+        const analysesEl = document.getElementById('publicAnalyses');
+        const analyticsEl = document.getElementById('analytics');
+        
+        if (profileEl) profileEl.checked = currentSettings.publicProfile === true;
+        if (analysesEl) analysesEl.checked = currentSettings.publicAnalyses === true;
+        if (analyticsEl) analyticsEl.checked = currentSettings.analytics !== false;
+        
+        console.log('✅ Interface mise à jour avec les paramètres');
+        
+    } catch (error) {
+        console.error('❌ Erreur application UI:', error);
+    }
 }
 
 // ============================================
@@ -143,26 +194,57 @@ function applySettingsToUI() {
 // ============================================
 
 function initializeEventListeners() {
-    // Navigation entre tabs
-    const tabButtons = document.querySelectorAll('.settings-nav-item');
-    tabButtons.forEach(button =&gt; {
-        button.addEventListener('click', () =&gt; {
-            switchTab(button.dataset.tab);
+    console.log('🔧 Initialisation des event listeners...');
+    
+    try {
+        // Navigation entre tabs
+        const tabButtons = document.querySelectorAll('.settings-nav-item');
+        console.log(`📑 ${tabButtons.length} onglets trouvés`);
+        
+        tabButtons.forEach(button =&gt; {
+            button.addEventListener('click', () =&gt; {
+                const tabName = button.dataset.tab;
+                console.log('🖱 Clic sur onglet:', tabName);
+                switchTab(tabName);
+            });
         });
-    });
-    
-    // ❌ THEME SELECTOR SUPPRIMÉ
-    
-    // Boutons de sauvegarde
-    document.getElementById('saveGeneralSettings')?.addEventListener('click', saveGeneralSettings);
-    document.getElementById('saveNotificationSettings')?.addEventListener('click', saveNotificationSettings);
-    document.getElementById('savePrivacySettings')?.addEventListener('click', savePrivacySettings);
-    
-    // Boutons d'action data
-    document.getElementById('exportDataBtn')?.addEventListener('click', exportUserData);
-    document.getElementById('clearCacheBtn')?.addEventListener('click', clearCache);
-    document.getElementById('deleteAllAnalyses')?.addEventListener('click', deleteAllAnalyses);
-    document.getElementById('deleteAllPortfolios')?.addEventListener('click', deleteAllPortfolios);
+        
+        // Boutons de sauvegarde
+        const saveGeneralBtn = document.getElementById('saveGeneralSettings');
+        const saveNotifBtn = document.getElementById('saveNotificationSettings');
+        const savePrivacyBtn = document.getElementById('savePrivacySettings');
+        
+        if (saveGeneralBtn) {
+            saveGeneralBtn.addEventListener('click', saveGeneralSettings);
+            console.log('✅ Bouton General Settings lié');
+        }
+        
+        if (saveNotifBtn) {
+            saveNotifBtn.addEventListener('click', saveNotificationSettings);
+            console.log('✅ Bouton Notification Settings lié');
+        }
+        
+        if (savePrivacyBtn) {
+            savePrivacyBtn.addEventListener('click', savePrivacySettings);
+            console.log('✅ Bouton Privacy Settings lié');
+        }
+        
+        // Boutons d'action data
+        const exportBtn = document.getElementById('exportDataBtn');
+        const clearCacheBtn = document.getElementById('clearCacheBtn');
+        const deleteAnalysesBtn = document.getElementById('deleteAllAnalyses');
+        const deletePortfoliosBtn = document.getElementById('deleteAllPortfolios');
+        
+        if (exportBtn) exportBtn.addEventListener('click', exportUserData);
+        if (clearCacheBtn) clearCacheBtn.addEventListener('click', clearCache);
+        if (deleteAnalysesBtn) deleteAnalysesBtn.addEventListener('click', deleteAllAnalyses);
+        if (deletePortfoliosBtn) deletePortfoliosBtn.addEventListener('click', deleteAllPortfolios);
+        
+        console.log('✅ Tous les event listeners initialisés');
+        
+    } catch (error) {
+        console.error('❌ Erreur lors de l\'initialisation des listeners:', error);
+    }
 }
 
 // ============================================
@@ -170,17 +252,38 @@ function initializeEventListeners() {
 // ============================================
 
 function switchTab(tabName) {
-    document.querySelectorAll('.settings-nav-item').forEach(btn =&gt; {
-        btn.classList.remove('active');
-    });
-    document.querySelectorAll('.settings-tab').forEach(tab =&gt; {
-        tab.classList.remove('active');
-    });
-    
-    document.querySelector(`[data-tab="${tabName}"]`).classList.add('active');
-    document.getElementById(`tab-${tabName}`).classList.add('active');
-    
-    console.log('📑 Onglet changé:', tabName);
+    try {
+        console.log('📑 Changement vers onglet:', tabName);
+        
+        // Retirer toutes les classes active
+        document.querySelectorAll('.settings-nav-item').forEach(btn =&gt; {
+            btn.classList.remove('active');
+        });
+        document.querySelectorAll('.settings-tab').forEach(tab =&gt; {
+            tab.classList.remove('active');
+        });
+        
+        // Ajouter active au nouvel onglet
+        const navItem = document.querySelector(`[data-tab="${tabName}"]`);
+        const tabContent = document.getElementById(`tab-${tabName}`);
+        
+        if (navItem) {
+            navItem.classList.add('active');
+            console.log('✅ Nav item activé');
+        } else {
+            console.warn('⚠ Nav item non trouvé:', tabName);
+        }
+        
+        if (tabContent) {
+            tabContent.classList.add('active');
+            console.log('✅ Tab content activé');
+        } else {
+            console.warn('⚠ Tab content non trouvé:', `tab-${tabName}`);
+        }
+        
+    } catch (error) {
+        console.error('❌ Erreur switchTab:', error);
+    }
 }
 
 // ============================================
@@ -188,47 +291,83 @@ function switchTab(tabName) {
 // ============================================
 
 async function saveGeneralSettings() {
-    currentSettings.language = document.getElementById('language').value;
-    currentSettings.timezone = document.getElementById('timezone').value;
-    currentSettings.currency = document.getElementById('currency').value;
-    
-    await saveSettings();
-    showToast('success', 'Succès !', 'Paramètres généraux sauvegardés');
+    try {
+        const langEl = document.getElementById('language');
+        const tzEl = document.getElementById('timezone');
+        const currEl = document.getElementById('currency');
+        
+        if (langEl) currentSettings.language = langEl.value;
+        if (tzEl) currentSettings.timezone = tzEl.value;
+        if (currEl) currentSettings.currency = currEl.value;
+        
+        await saveSettings();
+        showToast('success', 'Succès !', 'Paramètres généraux sauvegardés');
+    } catch (error) {
+        console.error('❌ Erreur saveGeneral:', error);
+        showToast('error', 'Erreur', 'Impossible de sauvegarder');
+    }
 }
 
-// 🆕 FONCTION MODIFIÉE - Sauvegarde avec synchronisation Worker
 async function saveNotificationSettings() {
-    const weeklyNewsletterChecked = document.getElementById('weeklyNewsletter').checked;
-    const priceAlertsChecked = document.getElementById('priceAlerts').checked;
-    const featureUpdatesChecked = document.getElementById('featureUpdates').checked;
-    
-    // Sauvegarder dans Firestore
-    currentSettings.weeklyNewsletter = weeklyNewsletterChecked;
-    currentSettings.priceAlerts = priceAlertsChecked;
-    currentSettings.featureUpdates = featureUpdatesChecked;
-    
-    await saveSettings();
-    
-    // 🆕 SYNCHRONISER AVEC LE WORKER CLOUDFLARE
-    await syncNewsletterSubscription(weeklyNewsletterChecked);
-    
-    showToast('success', 'Succès !', 'Préférences de notifications sauvegardées');
+    try {
+        const newsEl = document.getElementById('weeklyNewsletter');
+        const priceEl = document.getElementById('priceAlerts');
+        const featEl = document.getElementById('featureUpdates');
+        
+        const weeklyNewsletterChecked = newsEl ? newsEl.checked : false;
+        const priceAlertsChecked = priceEl ? priceEl.checked : false;
+        const featureUpdatesChecked = featEl ? featEl.checked : false;
+        
+        currentSettings.weeklyNewsletter = weeklyNewsletterChecked;
+        currentSettings.priceAlerts = priceAlertsChecked;
+        currentSettings.featureUpdates = featureUpdatesChecked;
+        
+        await saveSettings();
+        
+        // 🆕 SYNCHRONISER AVEC LE WORKER (sans bloquer si erreur)
+        console.log('📧 Tentative de synchronisation newsletter...');
+        try {
+            await syncNewsletterSubscription(weeklyNewsletterChecked);
+        } catch (syncError) {
+            console.warn('⚠ Synchronisation newsletter échouée:', syncError);
+            showToast('warning', 'Attention', 'Paramètres sauvegardés, mais synchronisation newsletter échouée');
+            return;
+        }
+        
+        showToast('success', 'Succès !', 'Préférences de notifications sauvegardées');
+        
+    } catch (error) {
+        console.error('❌ Erreur saveNotification:', error);
+        showToast('error', 'Erreur', 'Impossible de sauvegarder');
+    }
 }
 
 async function savePrivacySettings() {
-    currentSettings.publicProfile = document.getElementById('publicProfile').checked;
-    currentSettings.publicAnalyses = document.getElementById('publicAnalyses').checked;
-    currentSettings.analytics = document.getElementById('analytics').checked;
-    
-    await saveSettings();
-    showToast('success', 'Succès !', 'Paramètres de confidentialité sauvegardés');
+    try {
+        const profileEl = document.getElementById('publicProfile');
+        const analysesEl = document.getElementById('publicAnalyses');
+        const analyticsEl = document.getElementById('analytics');
+        
+        if (profileEl) currentSettings.publicProfile = profileEl.checked;
+        if (analysesEl) currentSettings.publicAnalyses = analysesEl.checked;
+        if (analyticsEl) currentSettings.analytics = analyticsEl.checked;
+        
+        await saveSettings();
+        showToast('success', 'Succès !', 'Paramètres de confidentialité sauvegardés');
+    } catch (error) {
+        console.error('❌ Erreur savePrivacy:', error);
+        showToast('error', 'Erreur', 'Impossible de sauvegarder');
+    }
 }
 
 async function saveSettings() {
     try {
+        // Toujours sauvegarder dans localStorage
         localStorage.setItem('financepro_settings', JSON.stringify(currentSettings));
+        console.log('✅ Sauvegarde localStorage OK');
         
-        if (currentUserData) {
+        // Tenter Firebase si disponible
+        if (currentUserData &amp;&amp; isFirebaseInitialized()) {
             const settingsRef = firebaseDb
                 .collection('users')
                 .doc(currentUserData.uid)
@@ -236,13 +375,14 @@ async function saveSettings() {
                 .doc('preferences');
             
             await settingsRef.set(currentSettings, { merge: true });
-            
-            console.log('✅ Paramètres sauvegardés dans Firestore');
+            console.log('✅ Sauvegarde Firestore OK');
+        } else {
+            console.warn('⚠ Firebase non disponible, sauvegarde uniquement en local');
         }
         
     } catch (error) {
         console.error('❌ Erreur lors de la sauvegarde:', error);
-        showToast('error', 'Erreur', 'Impossible de sauvegarder vos paramètres');
+        throw error;
     }
 }
 
@@ -250,26 +390,20 @@ async function saveSettings() {
 // 🆕 SYNCHRONISATION NEWSLETTER CLOUDFLARE WORKER
 // ============================================
 
-/**
- * 🔄 Synchronise l'abonnement newsletter avec le Worker Cloudflare
- * @param {boolean} isSubscribed - true pour s'inscrire, false pour se désinscrire
- */
 async function syncNewsletterSubscription(isSubscribed) {
     if (!currentUserData || !currentUserData.email) {
         console.warn('⚠ Impossible de synchroniser : pas d\'email utilisateur');
-        return;
+        throw new Error('No user email available');
     }
+    
+    console.log(`📧 Synchronisation newsletter: ${isSubscribed ? 'INSCRIPTION' : 'DÉSINSCRIPTION'}`);
     
     try {
         if (isSubscribed) {
-            // ✅ INSCRIPTION À LA NEWSLETTER
-            console.log('📧 Inscription à la newsletter Worker...');
-            
+            // ✅ INSCRIPTION
             const response = await fetch(`${NEWSLETTER_WORKER_URL}/subscribe`, {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     email: currentUserData.email,
                     name: currentUserData.displayName || currentUserData.email.split('@')[0]
@@ -279,7 +413,6 @@ async function syncNewsletterSubscription(isSubscribed) {
             if (!response.ok) {
                 const error = await response.json();
                 
-                // Si déjà inscrit, c'est OK
                 if (error.error === 'Already subscribed') {
                     console.log('✅ Déjà inscrit à la newsletter');
                     return;
@@ -292,16 +425,13 @@ async function syncNewsletterSubscription(isSubscribed) {
             console.log('✅ Inscription newsletter réussie:', result);
             
         } else {
-            // ❌ DÉSINSCRIPTION DE LA NEWSLETTER
-            console.log('📧 Désinscription de la newsletter Worker...');
-            
+            // ❌ DÉSINSCRIPTION
             const response = await fetch(`${NEWSLETTER_WORKER_URL}/unsubscribe?email=${encodeURIComponent(currentUserData.email)}`, {
                 method: 'GET'
             });
             
             if (!response.ok) {
-                const errorText = await response.text();
-                throw new Error(`Erreur lors de la désinscription: ${errorText}`);
+                throw new Error('Erreur lors de la désinscription');
             }
             
             console.log('✅ Désinscription newsletter réussie');
@@ -309,7 +439,7 @@ async function syncNewsletterSubscription(isSubscribed) {
         
     } catch (error) {
         console.error('❌ Erreur synchronisation newsletter:', error);
-        showToast('warning', 'Attention', 'Paramètres sauvegardés, mais synchronisation newsletter échouée. Veuillez réessayer.');
+        throw error;
     }
 }
 
@@ -387,8 +517,8 @@ async function deleteAllAnalyses() {
     showToast('info', 'Suppression...', 'Suppression de vos analyses en cours');
     
     try {
-        if (!currentUserData) {
-            throw new Error('Utilisateur non connecté');
+        if (!currentUserData || !isFirebaseInitialized()) {
+            throw new Error('Firebase non disponible');
         }
         
         const analysesRef = firebaseDb
@@ -425,8 +555,8 @@ async function deleteAllPortfolios() {
     showToast('info', 'Suppression...', 'Suppression de vos portfolios en cours');
     
     try {
-        if (!currentUserData) {
-            throw new Error('Utilisateur non connecté');
+        if (!currentUserData || !isFirebaseInitialized()) {
+            throw new Error('Firebase non disponible');
         }
         
         const portfoliosRef = firebaseDb
@@ -460,6 +590,7 @@ function showToast(type, title, message) {
     
     if (!toastContainer) {
         console.warn('⚠ Toast container not found');
+        console.log(`[${type.toUpperCase()}] ${title}: ${message}`);
         return;
     }
     
@@ -495,9 +626,11 @@ function showToast(type, title, message) {
     toastContainer.appendChild(toast);
     
     const closeBtn = toast.querySelector('.toast-close');
-    closeBtn.addEventListener('click', () =&gt; {
-        removeToast(toast);
-    });
+    if (closeBtn) {
+        closeBtn.addEventListener('click', () =&gt; {
+            removeToast(toast);
+        });
+    }
     
     setTimeout(() =&gt; {
         removeToast(toast);
@@ -505,6 +638,8 @@ function showToast(type, title, message) {
 }
 
 function removeToast(toast) {
+    if (!toast || !toast.parentNode) return;
+    
     toast.style.animation = 'slideOutRight 0.3s ease forwards';
     setTimeout(() =&gt; {
         if (toast.parentNode) {
@@ -513,22 +648,4 @@ function removeToast(toast) {
     }, 300);
 }
 
-// ============================================
-// VÉRIFICATION FIREBASE
-// ============================================
-
-function isFirebaseInitialized() {
-    if (typeof firebase === 'undefined') {
-        console.error('❌ Firebase SDK non chargé');
-        return false;
-    }
-    
-    if (typeof firebaseDb === 'undefined') {
-        console.error('❌ Firestore non initialisé');
-        return false;
-    }
-    
-    return true;
-}
-
-console.log('✅ Script de paramètres chargé (avec synchronisation Newsletter Cloudflare)');
+console.log('✅ Script de paramètres chargé (VERSION SAFE avec DEBUG)');
