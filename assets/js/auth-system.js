@@ -198,7 +198,7 @@ async function sendWelcomeEmail(email, firstName) {
         console.log('📧 Sending welcome email to:', email);
         
         // ✅ URL DE TON CLOUDFLARE WORKER (à remplacer)
-        const workerURL = 'https://YOUR_WORKER_URL.workers.dev/send-welcome-email';
+        const workerURL = 'https://finance-hub-api.raphnardone.workers.dev';
         
         const response = await fetch(workerURL, {
             method: 'POST',
