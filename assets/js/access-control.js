@@ -229,13 +229,13 @@ async function checkPageAccess(pageName) {
         // 4 - GESTION DES CODES PROMO ET STATUT TRIAL
         
         // VÉRIFIER SI L'UTILISATEUR EST EN TRIAL
-        if (subscriptionStatus === 'trial' &amp;&amp; trialEndsAt) {
+        if (subscriptionStatus === 'trial' && trialEndsAt) {
             const now = new Date();
             const expirationDate = new Date(trialEndsAt);
             
             console.log('📅 Trial check: Now = ' + now.toISOString() + ', Expires = ' + expirationDate.toISOString());
             
-            if (now &lt; expirationDate) {
+            if (now < expirationDate) {
                 // TRIAL ENCORE VALIDE
                 const daysLeft = Math.ceil((expirationDate - now) / (1000 * 60 * 60 * 24));
                 console.log('✅ Trial still active (expires in ' + daysLeft + ' days)');
@@ -294,13 +294,13 @@ async function checkPageAccess(pageName) {
         // 6 - VÉRIFIER L'ACCÈS À LA PAGE (LOGIQUE HIÉRARCHIQUE)
         
         // PLATINUM / FREEPLATINUM / TRIAL (niveau 2) = Accès à TOUTES les pages
-        if (userPlan === 'platinum' || userPlan === 'freeplatinum' || (userPlan === 'trial' &amp;&amp; planConfig.level === 2)) {
+        if (userPlan === 'platinum' || userPlan === 'freeplatinum' || (userPlan === 'trial' && planConfig.level === 2)) {
             console.log('✅ Access granted (Full access)');
             return true;
         }
         
         // TRIAL (niveau 1) = Accès Pro
-        if (userPlan === 'trial' &amp;&amp; planConfig.level === 1) {
+        if (userPlan === 'trial' && planConfig.level === 1) {
             console.log('✅ Access granted (Trial - Pro level)');
             return true;
         }
@@ -322,7 +322,7 @@ async function checkPageAccess(pageName) {
         // LOGIQUE HIÉRARCHIQUE : Si niveau &gt;= niveau requis
         const pageLevel = getPageRequiredLevel(pageName);
         
-        if (planConfig.level &gt;= pageLevel) {
+        if (planConfig.level >= pageLevel) {
             console.log('✅ Access granted (Level ' + planConfig.level + ' &gt;= required ' + pageLevel + ')');
             return true;
         }
@@ -559,11 +559,11 @@ async function hasFeature(featureName) {
         const trialEndsAt = userData.trialEndsAt || null;
         
         // Vérifier si trial actif
-        if (subscriptionStatus === 'trial' &amp;&amp; trialEndsAt) {
+        if (subscriptionStatus === 'trial' && trialEndsAt) {
             const now = new Date();
             const expirationDate = new Date(trialEndsAt);
             
-            if (now &lt; expirationDate) {
+            if (now < expirationDate) {
                 userPlan = 'trial';
             } else {
                 return false;
