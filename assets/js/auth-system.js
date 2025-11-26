@@ -15,7 +15,7 @@ let userProfileData = null;
 // INITIALIZATION
 // ============================================
 
-document.addEventListener('DOMContentLoaded', () =&gt; {
+document.addEventListener('DOMContentLoaded', () => {
     console.log('🚀 Initializing navigation auth system...');
     
     // Vérifier que Firebase est bien initialisé
@@ -41,7 +41,7 @@ document.addEventListener('DOMContentLoaded', () =&gt; {
  * Écouter les changements d'état d'authentification Firebase
  */
 function initializeAuthStateListener() {
-    firebaseAuth.onAuthStateChanged(async (user) =&gt; {
+    firebaseAuth.onAuthStateChanged(async (user) => {
         if (user) {
             console.log('✅ User authenticated:', user.email);
             currentUser = user;
@@ -231,22 +231,22 @@ function initializeProfileMenuListeners() {
     const userProfileButton = document.getElementById('userProfileButton');
     const userDropdownMenu = document.getElementById('userDropdownMenu');
     
-    if (userProfileButton &amp;&amp; userDropdownMenu) {
-        userProfileButton.addEventListener('click', (e) =&gt; {
+    if (userProfileButton && userDropdownMenu) {
+        userProfileButton.addEventListener('click', (e) => {
             e.stopPropagation();
             toggleProfileDropdown();
         });
         
         // Fermer le dropdown en cliquant en dehors
-        document.addEventListener('click', (e) =&gt; {
-            if (!userProfileButton.contains(e.target) &amp;&amp; !userDropdownMenu.contains(e.target)) {
+        document.addEventListener('click', (e) => {
+            if (!userProfileButton.contains(e.target) && !userDropdownMenu.contains(e.target)) {
                 closeProfileDropdown();
             }
         });
         
         // Fermer avec la touche Escape
-        document.addEventListener('keydown', (e) =&gt; {
-            if (e.key === 'Escape' &amp;&amp; userDropdownMenu.classList.contains('active')) {
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && userDropdownMenu.classList.contains('active')) {
                 closeProfileDropdown();
                 userProfileButton.focus();
             }
@@ -262,7 +262,7 @@ function initializeProfileMenuListeners() {
     // Bouton Settings
     const settingsLink = document.getElementById('settingsLink');
     if (settingsLink) {
-        settingsLink.addEventListener('click', (e) =&gt; {
+        settingsLink.addEventListener('click', (e) => {
             e.preventDefault();
             handleSettings();
         });
@@ -273,13 +273,13 @@ function initializeProfileMenuListeners() {
     const signupBtn = document.getElementById('signupBtn');
     
     if (loginBtn) {
-        loginBtn.addEventListener('click', () =&gt; {
+        loginBtn.addEventListener('click', () => {
             window.location.href = 'auth.html';
         });
     }
     
     if (signupBtn) {
-        signupBtn.addEventListener('click', () =&gt; {
+        signupBtn.addEventListener('click', () => {
             window.location.href = 'auth.html?mode=signup';
         });
     }
@@ -355,7 +355,7 @@ async function handleLogout() {
         showNotification('success', 'Logged out successfully', 'You have been logged out.');
         
         // Rediriger vers la page d'accueil après 1 seconde
-        setTimeout(() =&gt; {
+        setTimeout(() => {
             window.location.href = 'index.html';
         }, 1000);
         
@@ -446,14 +446,14 @@ function showNotification(type, title, message) {
     document.body.appendChild(notification);
     
     // Afficher avec animation
-    setTimeout(() =&gt; {
+    setTimeout(() => {
         notification.classList.add('show');
     }, 10);
     
     // Retirer après 4 secondes
-    setTimeout(() =&gt; {
+    setTimeout(() => {
         notification.classList.remove('show');
-        setTimeout(() =&gt; {
+        setTimeout(() => {
             if (notification.parentNode) {
                 notification.parentNode.removeChild(notification);
             }
@@ -466,11 +466,11 @@ function showNotification(type, title, message) {
 // ============================================
 
 window.authSystem = {
-    getCurrentUser: () =&gt; currentUser,
-    getUserProfile: () =&gt; userProfileData,
+    getCurrentUser: () => currentUser,
+    getUserProfile: () => userProfileData,
     logout: handleLogout,
-    isAuthenticated: () =&gt; currentUser !== null,
-    refreshProfile: async () =&gt; {
+    isAuthenticated: () => currentUser !== null,
+    refreshProfile: async () => {
         if (currentUser) {
             await loadUserProfileData(currentUser.uid);
             updateUserProfileDisplay();
