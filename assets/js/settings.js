@@ -1,6 +1,10 @@
 /* ============================================
-   SETTINGS.JS - Gestion de la page paramètres (Sans Appearance)
+   SETTINGS.JS - Gestion des paramètres utilisateur
+   ✅ SYNCHRONISATION NEWSLETTER CLOUDFLARE KV
    ============================================ */
+
+// Configuration
+const NEWSLETTER_WORKER_URL = 'https://newsletter-worker.raphnardone.workers.dev';
 
 // Variables globales
 let currentUserData = null;
@@ -10,10 +14,8 @@ let currentSettings = {
     timezone: 'America/New_York',
     currency: 'USD',
     
-    // APPEARANCE SUPPRIMÉ
-    
     // Notifications
-    weeklyNewsletter: true,
+    weeklyNewsletter: true,  // ✅ ACTIVÉ PAR DÉFAUT
     priceAlerts: true,
     featureUpdates: true,
     
@@ -36,7 +38,6 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     initializeEventListeners();
-    
     console.log('✅ Page paramètres initialisée');
 });
 
@@ -55,7 +56,7 @@ async function loadSettings() {
         console.log('📥 Chargement des paramètres...');
         
         if (!currentUserData) {
-            console.warn('⚠ Pas de données utilisateur disponibles');
+            console.warn('⚠  Pas de données utilisateur disponibles');
             loadDefaultSettings();
             return;
         }
@@ -69,7 +70,7 @@ async function loadSettings() {
         const settingsDoc = await settingsRef.get();
         
         if (!settingsDoc.exists) {
-            console.log('⚠ Paramètres inexistants, création avec valeurs par défaut...');
+            console.log('⚠  Paramètres inexistants, création avec valeurs par défaut...');
             await settingsRef.set(currentSettings);
             console.log('✅ Paramètres créés avec succès');
         } else {
@@ -78,13 +79,16 @@ async function loadSettings() {
             console.log('✅ Paramètres chargés:', currentSettings);
         }
         
+        // ✅ SYNCHRONISER AVEC CLOUDFLARE KV
+        await synchronizeNewsletterSubscription();
+        
         applySettingsToUI();
         
     } catch (error) {
         console.error('❌ Erreur lors du chargement des paramètres:', error);
         
         if (error.code === 'permission-denied') {
-            console.log('⚠ Permissions refusées, utilisation des valeurs par défaut');
+            console.log('⚠  Permissions refusées, utilisation des valeurs par défaut');
             loadDefaultSettings();
         } else {
             showToast('error', 'Erreur', 'Impossible de charger vos paramètres');
@@ -101,7 +105,7 @@ function loadDefaultSettings() {
             currentSettings = { ...currentSettings, ...JSON.parse(savedSettings) };
             console.log('✅ Paramètres chargés depuis localStorage');
         } catch (e) {
-            console.warn('⚠ Erreur lors du parsing localStorage');
+            console.warn('⚠  Erreur lors du parsing localStorage');
         }
     }
     
@@ -113,8 +117,6 @@ function applySettingsToUI() {
     document.getElementById('language').value = currentSettings.language || 'en';
     document.getElementById('timezone').value = currentSettings.timezone || 'America/New_York';
     document.getElementById('currency').value = currentSettings.currency || 'USD';
-    
-    // APPEARANCE SUPPRIMÉ (pas de thème ici)
     
     // Notifications
     document.getElementById('weeklyNewsletter').checked = currentSettings.weeklyNewsletter !== false;
@@ -130,6 +132,117 @@ function applySettingsToUI() {
 }
 
 // ============================================
+// 🆕 SYNCHRONISATION NEWSLETTER CLOUDFLARE
+// ============================================
+
+async function synchronizeNewsletterSubscription() {
+    if (!currentUserData || !currentUserData.email) {
+        console.warn('⚠  Pas d\'email utilisateur disponible pour la synchronisation');
+        return;
+    }
+    
+    try {
+        console.log('🔄 Vérification statut newsletter Cloudflare...');
+        
+        // Vérifier le statut actuel dans le KV
+        const statusResponse = await fetch(`${NEWSLETTER_WORKER_URL}/check-subscription`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                email: currentUserData.email
+            })
+        });
+        
+        if (!statusResponse.ok) {
+            throw new Error('Impossible de vérifier le statut d\'abonnement');
+        }
+        
+        const statusData = await statusResponse.json();
+        const isSubscribedInKV = statusData.subscribed === true;
+        const wantsNewsletter = currentSettings.weeklyNewsletter !== false;
+        
+        console.log('📊 Statut synchronisation:');
+        console.log('   - Firestore weeklyNewsletter:', wantsNewsletter);
+        console.log('   - Cloudflare KV subscribed:', isSubscribedInKV);
+        
+        // 🔄 SYNCHRONISER
+        if (wantsNewsletter && !isSubscribedInKV) {
+            // ✅ L'utilisateur veut recevoir des emails MAIS n'est pas dans le KV → SUBSCRIBE
+            console.log('➕ Inscription automatique à la newsletter...');
+            await subscribeToNewsletter(currentUserData.email, currentUserData.displayName);
+            
+        } else if (!wantsNewsletter && isSubscribedInKV) {
+            // ❌ L'utilisateur NE veut PAS recevoir d'emails MAIS est dans le KV → UNSUBSCRIBE
+            console.log('➖ Désinscription automatique de la newsletter...');
+            await unsubscribeFromNewsletter(currentUserData.email);
+            
+        } else if (wantsNewsletter && isSubscribedInKV) {
+            console.log('✅ Déjà inscrit et activé - aucune action nécessaire');
+            
+        } else {
+            console.log('ℹ  Non inscrit par choix - aucune action nécessaire');
+        }
+        
+    } catch (error) {
+        console.error('❌ Erreur synchronisation newsletter:', error);
+        showToast('warning', 'Attention', 'La synchronisation de la newsletter a échoué. Vos paramètres locaux sont sauvegardés.');
+    }
+}
+
+async function subscribeToNewsletter(email, name) {
+    try {
+        const response = await fetch(`${NEWSLETTER_WORKER_URL}/subscribe`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                email: email,
+                name: name || email.split('@')[0]
+            })
+        });
+        
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.error || 'Subscription failed');
+        }
+        
+        const data = await response.json();
+        console.log('✅ Inscription newsletter réussie:', data);
+        showToast('success', 'Succès !', 'Vous êtes maintenant inscrit à la newsletter hebdomadaire');
+        
+        return true;
+        
+    } catch (error) {
+        console.error('❌ Erreur inscription newsletter:', error);
+        throw error;
+    }
+}
+
+async function unsubscribeFromNewsletter(email) {
+    try {
+        const response = await fetch(`${NEWSLETTER_WORKER_URL}/unsubscribe?email=${encodeURIComponent(email)}`, {
+            method: 'GET'
+        });
+        
+        if (!response.ok) {
+            throw new Error('Unsubscription failed');
+        }
+        
+        console.log('✅ Désinscription newsletter réussie');
+        showToast('info', 'Désinscription', 'Vous ne recevrez plus la newsletter hebdomadaire');
+        
+        return true;
+        
+    } catch (error) {
+        console.error('❌ Erreur désinscription newsletter:', error);
+        throw error;
+    }
+}
+
+// ============================================
 // GESTIONNAIRES D'ÉVÉNEMENTS
 // ============================================
 
@@ -141,8 +254,6 @@ function initializeEventListeners() {
             switchTab(button.dataset.tab);
         });
     });
-    
-    // THEME SELECTOR SUPPRIMÉ
     
     // Boutons de sauvegarde
     const saveGeneralBtn = document.getElementById('saveGeneralSettings');
@@ -221,11 +332,27 @@ async function saveGeneralSettings() {
 }
 
 async function saveNotificationSettings() {
+    const previousNewsletterState = currentSettings.weeklyNewsletter;
+    
     currentSettings.weeklyNewsletter = document.getElementById('weeklyNewsletter').checked;
     currentSettings.priceAlerts = document.getElementById('priceAlerts').checked;
     currentSettings.featureUpdates = document.getElementById('featureUpdates').checked;
     
     await saveSettings();
+    
+    // ✅ SYNCHRONISER AVEC CLOUDFLARE SI CHANGEMENT
+    if (currentSettings.weeklyNewsletter !== previousNewsletterState) {
+        console.log('📧 Changement préférence newsletter détecté, synchronisation...');
+        
+        if (currentSettings.weeklyNewsletter) {
+            // L'utilisateur active la newsletter
+            await subscribeToNewsletter(currentUserData.email, currentUserData.displayName);
+        } else {
+            // L'utilisateur désactive la newsletter
+            await unsubscribeFromNewsletter(currentUserData.email);
+        }
+    }
+    
     showToast('success', 'Succès !', 'Préférences de notifications sauvegardées');
 }
 
@@ -240,8 +367,10 @@ async function savePrivacySettings() {
 
 async function saveSettings() {
     try {
+        // Sauvegarde localStorage
         localStorage.setItem('financepro_settings', JSON.stringify(currentSettings));
         
+        // Sauvegarde Firestore
         if (currentUserData) {
             const settingsRef = firebaseDb
                 .collection('users')
@@ -324,7 +453,7 @@ function clearCache() {
 
 async function deleteAllAnalyses() {
     const confirmed = confirm(
-        '⚠ ATTENTION ⚠\n\n' +
+        '⚠  ATTENTION ⚠ \n\n' +
         'Êtes-vous sûr de vouloir supprimer TOUTES vos analyses ?\n\n' +
         'Cette action est IRRÉVERSIBLE !'
     );
@@ -344,7 +473,7 @@ async function deleteAllAnalyses() {
 
 async function deleteAllPortfolios() {
     const confirmed = confirm(
-        '⚠ ATTENTION ⚠\n\n' +
+        '⚠  ATTENTION ⚠ \n\n' +
         'Êtes-vous sûr de vouloir supprimer TOUS vos portfolios ?\n\n' +
         'Cette action est IRRÉVERSIBLE !'
     );
@@ -369,7 +498,10 @@ async function deleteAllPortfolios() {
 function showToast(type, title, message) {
     const toastContainer = document.getElementById('toastContainer');
     
-    if (!toastContainer) return;
+    if (!toastContainer) {
+        console.log(`[${type.toUpperCase()}] ${title}: ${message}`);
+        return;
+    }
     
     const toast = document.createElement('div');
     toast.className = 'toast ' + type;
@@ -387,16 +519,18 @@ function showToast(type, title, message) {
             break;
     }
     
-    toast.innerHTML = '' +
-        '<i></i>' +
-        '' +
-        '' +
-        '' + title + '' +
-        '' + message + '' +
-        '' +
-        '' +
-        '<i></i>' +
-        '';
+    toast.innerHTML = `
+        
+            <i></i>
+        
+        
+            ${title}
+            ${message}
+        
+        
+            <i></i>
+        
+    `;
     
     toastContainer.appendChild(toast);
     
@@ -419,4 +553,9 @@ function removeToast(toast) {
     }, 300);
 }
 
-console.log('✅ Script de paramètres chargé (sans Appearance)');
+function isFirebaseInitialized() {
+    return typeof firebase !== 'undefined' && 
+           typeof firebaseDb !== 'undefined';
+}
+
+console.log('✅ Script de paramètres chargé avec synchronisation newsletter');
