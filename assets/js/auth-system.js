@@ -1,6 +1,6 @@
 /* ═══════════════════════════════════════════════════════════════
    AUTH-SYSTEM.JS - FinancePro Navigation Authentication
-   Gestion du menu profil utilisateur dans la navigation
+   VERSION 2.0 - CORRECTION GESTION UTILISATEURS SANS ABONNEMENT
    Compatible avec firebase-config.js, auth.js, profile.js
    ═══════════════════════════════════════════════════════════════ */
 
@@ -16,7 +16,7 @@ let userProfileData = null;
 // ============================================
 
 document.addEventListener('DOMContentLoaded', () => {
-    console.log('🚀 Initializing navigation auth system...');
+    console.log('🚀 Initializing navigation auth system v2.0...');
     
     // Vérifier que Firebase est bien initialisé
     if (typeof firebase === 'undefined' || typeof firebaseAuth === 'undefined') {
@@ -84,30 +84,53 @@ async function loadUserProfileData(uid) {
         const userDoc = await firebaseDb.collection('users').doc(uid).get();
         
         if (userDoc.exists) {
-            userProfileData = userDoc.data();
-            console.log('✅ User profile loaded from Firestore');
-        } else {
-            console.warn('⚠ User profile not found in Firestore, using Firebase Auth data');
+            const firestoreData = userDoc.data();
+            userProfileData = firestoreData;
             
-            // Créer un profil basique si inexistant
+            // ✅ CORRECTION : Vérifier si l'utilisateur a un plan défini
+            if (!firestoreData.plan || firestoreData.plan === '') {
+                console.warn('⚠ User has no subscription plan - setting to "none"');
+                userProfileData.plan = 'none';
+                userProfileData.subscriptionStatus = 'none';
+            }
+            
+            console.log('✅ User profile loaded from Firestore');
+            console.log('📊 Plan: ' + userProfileData.plan);
+            console.log('📊 Status: ' + (userProfileData.subscriptionStatus || 'none'));
+            
+        } else {
+            console.warn('⚠ User document not found in Firestore - creating default profile with NO subscription');
+            
+            // ✅ CORRECTION : Créer un profil avec plan 'none' (pas d'abonnement)
             userProfileData = {
                 firstName: currentUser.displayName?.split(' ')[0] || 'User',
                 lastName: currentUser.displayName?.split(' ')[1] || '',
                 email: currentUser.email,
                 photoURL: currentUser.photoURL || null,
-                plan: 'free'
+                plan: 'none',  // ✅ CHANGÉ DE 'free' À 'none'
+                subscriptionStatus: 'none',  // ✅ AJOUTÉ
+                createdAt: new Date().toISOString()
             };
+            
+            // Créer le document Firestore
+            try {
+                await firebaseDb.collection('users').doc(uid).set(userProfileData);
+                console.log('✅ User profile created in Firestore with plan "none"');
+            } catch (error) {
+                console.error('❌ Error creating user profile:', error);
+            }
         }
     } catch (error) {
         console.error('❌ Error loading user profile:', error);
         
-        // Fallback sur les données Firebase Auth
+        // ✅ CORRECTION : Fallback avec plan 'none'
         userProfileData = {
             firstName: currentUser.displayName?.split(' ')[0] || 'User',
             lastName: currentUser.displayName?.split(' ')[1] || '',
             email: currentUser.email,
             photoURL: currentUser.photoURL || null,
-            plan: 'free'
+            plan: 'none',  // ✅ CHANGÉ DE 'free' À 'none'
+            subscriptionStatus: 'none'  // ✅ AJOUTÉ
         };
     }
 }
@@ -172,8 +195,9 @@ function updateUserProfileDisplay() {
                      || currentUser.photoURL 
                      || generateAvatarURL(fullName);
     
-    // Plan
-    const plan = formatPlanName(userProfileData.plan || 'free');
+    // ✅ CORRECTION : Afficher un message clair si pas d'abonnement
+    const userPlan = userProfileData.plan || 'none';
+    const plan = formatPlanName(userPlan);
     
     // === Mettre à jour le bouton profil ===
     
@@ -191,6 +215,12 @@ function updateUserProfileDisplay() {
     const userPlanBadge = document.getElementById('userPlanBadge');
     if (userPlanBadge) {
         userPlanBadge.textContent = plan;
+        
+        // ✅ AJOUT : Style visuel différent pour "No Plan"
+        if (userPlan === 'none') {
+            userPlanBadge.style.background = 'linear-gradient(135deg, #6c757d, #495057)';
+            userPlanBadge.style.color = '#fff';
+        }
     }
     
     // === Mettre à jour le dropdown ===
@@ -214,6 +244,12 @@ function updateUserProfileDisplay() {
     const dropdownUserPlan = document.getElementById('dropdownUserPlan');
     if (dropdownUserPlan) {
         dropdownUserPlan.textContent = plan;
+        
+        // ✅ AJOUT : Style visuel différent pour "No Plan"
+        if (userPlan === 'none') {
+            dropdownUserPlan.style.background = 'linear-gradient(135deg, #6c757d, #495057)';
+            dropdownUserPlan.style.color = '#fff';
+        }
     }
     
     console.log('✅ User profile display updated');
@@ -400,17 +436,24 @@ function generateAvatarURL(name) {
 }
 
 /**
- * Formater le nom du plan
+ * ✅ CORRECTION : Formater le nom du plan avec gestion "No Plan"
  */
 function formatPlanName(plan) {
     const planNames = {
+        'none': 'No Plan',  // ✅ AJOUTÉ
         'free': 'Free',
+        'basic': 'Basic',
         'starter': 'Starter',
+        'pro': 'Pro',
         'professional': 'Professional',
-        'enterprise': 'Enterprise'
+        'platinum': 'Platinum',
+        'enterprise': 'Enterprise',
+        'trial': 'Trial',
+        'freepro': 'Free Pro',
+        'freeplatinum': 'Free Platinum'
     };
     
-    return planNames[plan.toLowerCase()] || 'Free';
+    return planNames[plan.toLowerCase()] || 'No Plan';  // ✅ CHANGÉ de 'Free' à 'No Plan'
 }
 
 /**
@@ -437,8 +480,8 @@ function showNotification(type, title, message) {
     
     notification.innerHTML = `
         
-            
-            ${title}: ${message}
+            <i></i>
+            <strong>${title}:</strong> ${message}
         
     `;
     
@@ -479,4 +522,4 @@ window.authSystem = {
     }
 };
 
-console.log('✅ Auth system script loaded');
+console.log('✅ Auth system script v2.0 loaded');
