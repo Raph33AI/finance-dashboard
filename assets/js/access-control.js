@@ -1,10 +1,10 @@
 /* ═══════════════════════════════════════════════════════════════
    ACCESS CONTROL SYSTEM - AlphaVault AI
-   VERSION 4.1 - CORRECTION PLAN FREE + INACTIVE
+   VERSION 4.2 - MODALE DÉDIÉE POUR UTILISATEURS SANS PLAN
    Redirection automatique vers checkout.html
    ═══════════════════════════════════════════════════════════════ */
 
-console.log('🔐 Access Control System v4.1 initialized');
+console.log('🔐 Access Control System v4.2 initialized');
 
 // ═══════════════════════════════════════════════════════════════
 // CONFIGURATION DES PLANS ET ACCÈS
@@ -25,8 +25,8 @@ const ACCESS_LEVELS = {
     free: {
         name: 'Free',
         level: 0,
-        requiresActiveSubscription: true,  // ✅ CHANGÉ À TRUE
-        requiresExplicitActivation: true,  // ✅ NOUVEAU : Nécessite activation explicite
+        requiresActiveSubscription: true,
+        requiresExplicitActivation: true,
         pages: [
             'dashboard-financier.html',
             'monte-carlo.html',
@@ -411,7 +411,7 @@ function getPageRequiredLevel(pageName) {
 }
 
 // ═══════════════════════════════════════════════════════════════
-// AFFICHER UNE MODALE D'UPGRADE (REDIRECTION VERS CHECKOUT)
+// ✅ MODALE D'UPGRADE DÉDIÉE (DESIGN PREMIUM)
 // ═══════════════════════════════════════════════════════════════
 
 function showUpgradeModal(currentPlan, reason) {
@@ -419,13 +419,16 @@ function showUpgradeModal(currentPlan, reason) {
     
     console.log('🔔 Showing upgrade modal for plan: ' + currentPlan + ' | Reason: ' + reason);
     
+    // Supprimer toute modale existante
     const existingModal = document.getElementById('upgrade-modal-overlay');
     if (existingModal) {
         existingModal.remove();
     }
     
+    // Bloquer le contenu de la page
     hidePageContent();
     
+    // ✅ Messages personnalisés selon la raison
     const messages = {
         no_subscription: {
             title: '🚀 Welcome to AlphaVault AI!',
@@ -433,6 +436,7 @@ function showUpgradeModal(currentPlan, reason) {
             icon: '🎯',
             suggestedPlan: 'Pro',
             ctaText: 'Choose Your Plan',
+            ctaColor: 'linear-gradient(135deg, #3b82f6, #8b5cf6)',
             urgent: true
         },
         basic_required: {
@@ -440,68 +444,99 @@ function showUpgradeModal(currentPlan, reason) {
             description: 'This page requires at least a Basic subscription plan.',
             icon: '📊',
             suggestedPlan: 'Basic',
-            ctaText: 'Upgrade to Basic'
+            ctaText: 'Upgrade to Basic',
+            ctaColor: 'linear-gradient(135deg, #10b981, #059669)'
         },
         pro_required: {
             title: '🔒 Pro Feature',
             description: 'This page requires the Pro or Platinum plan.',
             icon: '👑',
             suggestedPlan: 'Pro',
-            ctaText: 'Upgrade to Pro'
+            ctaText: 'Upgrade to Pro',
+            ctaColor: 'linear-gradient(135deg, #3b82f6, #2563eb)'
         },
         platinum_required: {
             title: '💎 Platinum Exclusive',
             description: 'This page is exclusively available with the Platinum plan.',
             icon: '💎',
             suggestedPlan: 'Platinum',
-            ctaText: 'Upgrade to Platinum'
+            ctaText: 'Upgrade to Platinum',
+            ctaColor: 'linear-gradient(135deg, #8b5cf6, #7c3aed)'
         },
         expired: {
             title: '⏰ Subscription Expired',
             description: 'Your subscription has expired. Renew now to regain access to premium features.',
             icon: '⏰',
             suggestedPlan: currentPlan,
-            ctaText: 'Renew Subscription'
+            ctaText: 'Renew Subscription',
+            ctaColor: 'linear-gradient(135deg, #f59e0b, #d97706)'
         },
         trial_expired: {
             title: '⏰ Trial Expired',
             description: 'Your 14-day free trial has ended. Upgrade now to continue enjoying premium features!',
             icon: '⏰',
             suggestedPlan: 'Pro',
-            ctaText: 'Subscribe Now'
+            ctaText: 'Subscribe Now',
+            ctaColor: 'linear-gradient(135deg, #ef4444, #dc2626)'
         },
         insufficient: {
             title: '🔒 Premium Access Required',
             description: 'Upgrade your plan to access this premium feature.',
             icon: '🔐',
             suggestedPlan: 'Pro',
-            ctaText: 'View Plans'
+            ctaText: 'View Plans',
+            ctaColor: 'linear-gradient(135deg, #3b82f6, #8b5cf6)'
         }
     };
     
     const msg = messages[reason] || messages.insufficient;
     
+    // Affichage du plan actuel
     const currentPlanDisplay = (currentPlan === 'none' || currentPlan === 'free') 
         ? 'No Active Plan' 
-        : currentPlan;
+        : '' + currentPlan.charAt(0).toUpperCase() + currentPlan.slice(1) + '';
     
+    // ✅ Création de la modale avec design premium
     const modal = document.createElement('div');
     modal.id = 'upgrade-modal-overlay';
-    modal.style.cssText = 'position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(12px); display: flex; align-items: center; justify-content: center; z-index: 99999; opacity: 0; transition: opacity 0.3s ease;';
+    modal.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.85);
+        backdrop-filter: blur(12px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 99999;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    `;
     
     modal.innerHTML = `
         
             ${msg.icon}
+            
             ${msg.title}
+            
             <p>${msg.description}</p>
             
-                <p>Your current plan: ${currentPlanDisplay}</p>
+            
+                <p>
+                    Your current plan: ${currentPlanDisplay}
+                </p>
+            
             
             
                 
+                    <i></i>
                     ${msg.ctaText}
                 
                 
+                
+                    <i></i>
                     Go Back
                 
             
@@ -510,16 +545,19 @@ function showUpgradeModal(currentPlan, reason) {
     
     document.body.appendChild(modal);
     
+    // Animation d'apparition
     setTimeout(function() {
         modal.style.opacity = '1';
         document.getElementById('upgrade-modal-content').style.transform = 'scale(1)';
     }, 10);
     
+    // ✅ ÉVÉNEMENT : BOUTON UPGRADE (REDIRECTION VERS CHECKOUT)
     document.getElementById('btn-upgrade-now').addEventListener('click', function() {
         console.log('🛒 Redirecting to checkout page...');
         window.location.href = 'checkout.html';
     });
     
+    // ✅ ÉVÉNEMENT : BOUTON GO BACK (REDIRECTION VERS INDEX)
     document.getElementById('btn-cancel-modal').addEventListener('click', function() {
         console.log('🔙 User cancelled - redirecting to public page...');
         modal.style.opacity = '0';
@@ -529,6 +567,7 @@ function showUpgradeModal(currentPlan, reason) {
         }, 300);
     });
     
+    // Effet shake si l'utilisateur clique en dehors de la modale
     modal.addEventListener('click', function(e) {
         if (e.target === modal) {
             const content = document.getElementById('upgrade-modal-content');
@@ -539,6 +578,7 @@ function showUpgradeModal(currentPlan, reason) {
         }
     });
     
+    // Effets hover sur le bouton upgrade
     const upgradeBtn = document.getElementById('btn-upgrade-now');
     upgradeBtn.addEventListener('mouseenter', function() {
         upgradeBtn.style.transform = 'scale(1.05) translateY(-2px)';
@@ -549,6 +589,7 @@ function showUpgradeModal(currentPlan, reason) {
         upgradeBtn.style.boxShadow = '0 6px 20px rgba(0, 0, 0, 0.2)';
     });
     
+    // Effets hover sur le bouton cancel
     const cancelBtn = document.getElementById('btn-cancel-modal');
     cancelBtn.addEventListener('mouseenter', function() {
         cancelBtn.style.background = 'rgba(255, 255, 255, 0.3)';
@@ -557,6 +598,10 @@ function showUpgradeModal(currentPlan, reason) {
         cancelBtn.style.background = 'rgba(255, 255, 255, 0.2)';
     });
 }
+
+// ═══════════════════════════════════════════════════════════════
+// BLOQUER LE CONTENU DE LA PAGE
+// ═══════════════════════════════════════════════════════════════
 
 function hidePageContent() {
     if (!document.getElementById('page-content-blocker')) {
@@ -569,11 +614,19 @@ function hidePageContent() {
     document.body.style.overflow = 'hidden';
 }
 
+// ═══════════════════════════════════════════════════════════════
+// REDIRECTION VERS LOGIN
+// ═══════════════════════════════════════════════════════════════
+
 function redirectToLogin() {
     console.log('🔄 Redirecting to login...');
     sessionStorage.setItem('redirectAfterLogin', window.location.pathname);
     window.location.href = 'index.html#login';
 }
+
+// ═══════════════════════════════════════════════════════════════
+// INITIALISATION AU CHARGEMENT DE LA PAGE
+// ═══════════════════════════════════════════════════════════════
 
 document.addEventListener('DOMContentLoaded', async function() {
     const currentPage = window.location.pathname.split('/').pop() || 'index.html';
@@ -602,9 +655,28 @@ document.addEventListener('DOMContentLoaded', async function() {
     }
 });
 
+// ═══════════════════════════════════════════════════════════════
+// ANIMATIONS CSS
+// ═══════════════════════════════════════════════════════════════
+
 const style = document.createElement('style');
-style.textContent = '@keyframes shake { 0%, 100% { transform: scale(1) translateX(0); } 10%, 30%, 50%, 70%, 90% { transform: scale(1.02) translateX(-10px); } 20%, 40%, 60%, 80% { transform: scale(1.02) translateX(10px); } } @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }';
+style.textContent = `
+    @keyframes shake {
+        0%, 100% { transform: scale(1) translateX(0); }
+        10%, 30%, 50%, 70%, 90% { transform: scale(1.02) translateX(-10px); }
+        20%, 40%, 60%, 80% { transform: scale(1.02) translateX(10px); }
+    }
+    
+    @keyframes bounce {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-10px); }
+    }
+`;
 document.head.appendChild(style);
+
+// ═══════════════════════════════════════════════════════════════
+// FONCTION HELPER : VÉRIFIER SI L'UTILISATEUR A UNE FEATURE
+// ═══════════════════════════════════════════════════════════════
 
 async function hasFeature(featureName) {
     const user = firebase.auth().currentUser;
@@ -672,15 +744,24 @@ async function hasFeature(featureName) {
     }
 }
 
+// ═══════════════════════════════════════════════════════════════
+// API PUBLIQUE
+// ═══════════════════════════════════════════════════════════════
+
 window.hasFeature = hasFeature;
 window.checkPageAccess = checkPageAccess;
 window.ACCESS_LEVELS = ACCESS_LEVELS;
 window.PAGE_CATEGORIES = PAGE_CATEGORIES;
 window.getPageRequiredLevel = getPageRequiredLevel;
 
-console.log('✅ Access Control System v4.1 ready');
+// ═══════════════════════════════════════════════════════════════
+// LOGS DE DÉMARRAGE
+// ═══════════════════════════════════════════════════════════════
+
+console.log('✅ Access Control System v4.2 ready');
 console.log('📊 Available plans:', Object.keys(ACCESS_LEVELS));
 console.log('🎟 Promo codes supported: FREEPRO, FREEPLATINUM, FREE14DAYS, TRIAL14, TRYITFREE');
 console.log('⏰ Trial expiration check: enabled');
 console.log('🛒 Upgrade redirects to: checkout.html');
 console.log('🚫 Plan "free" with "inactive" status: BLOCKED');
+console.log('✨ Dedicated modal for users without subscription: ENABLED');
