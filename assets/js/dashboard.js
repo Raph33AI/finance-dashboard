@@ -183,7 +183,7 @@ const Dashboard = (function() {
             investment: 0,
             monthlyGain: 0,
             cumulatedGains: 0, 
-            pee: row.pee || 0  // ✅ CHAMP CRITIQUE : Initialiser à 0 si absent
+            pee: 0
         }));
     }
     
