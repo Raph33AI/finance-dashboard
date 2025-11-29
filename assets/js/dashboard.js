@@ -169,21 +169,21 @@ const Dashboard = (function() {
         const today = new Date();
         const startYear = today.getFullYear();
         const startMonth = today.getMonth() + 1;
-        const months = generateMonths(startYear, startMonth, 300);
+        const months = generateMonths(startYear, startMonth, 12);
         
         allData = months.map(month => ({
             month: month,
-            salary: 3000, 
-            misc: 100,
-            rent: 800, 
-            food: 300, 
-            fixCosts: 150, 
-            others: 200, 
-            loan: 300,
-            investment: 500,
+            salary: 0, 
+            misc: 0,
+            rent: 0, 
+            food: 0, 
+            fixCosts: 0, 
+            others: 0, 
+            loan: 0,
+            investment: 0,
             monthlyGain: 0,
             cumulatedGains: 0, 
-            peeLoreal: 0
+            pee: 0
         }));
     }
     
@@ -211,7 +211,7 @@ const Dashboard = (function() {
             
             row.totalPortfolio = cumulatedInvestment + 
                                 (row.cumulatedGains || 0) + 
-                                (row.peeLoreal || 0);
+                                (row.pee || 0);
             
             row.roi = cumulatedInvestment > 0 ? 
                       ((row.cumulatedGains || 0) / cumulatedInvestment * 100) : 0;
@@ -336,7 +336,7 @@ const Dashboard = (function() {
             investment: 500,
             monthlyGain: 0,
             cumulatedGains: 0, 
-            peeLoreal: 0
+            pee: 0
         }));
         
         allData = newRows.concat(allData);
@@ -365,12 +365,12 @@ const Dashboard = (function() {
         const newMonths = generateMonths(year, month, count);
         const newRows = newMonths.map(month => ({
             month: month,
-            salary: 3000, misc: 100,
-            rent: 800, food: 300, fixCosts: 150, others: 200, loan: 300,
-            investment: 500,
+            salary: 0, misc: 0,
+            rent: 0, food: 0, fixCosts: 0, others: 0, loan: 0,
+            investment: 0,
             monthlyGain: 0,
             cumulatedGains: 0, 
-            peeLoreal: 0
+            pee: 0
         }));
         
         allData = allData.concat(newRows);
@@ -621,7 +621,7 @@ const Dashboard = (function() {
                 <td><input type='number' step='0.01' value='${row.investment}' onchange='Dashboard.updateValue(${index}, "investment", this.value)'></td>
                 <td class='calculated' style='background: #D4D9F0;'>${row.monthlyGain.toFixed(2)}</td>
                 <td class='calculated'>${row.cumulatedGains.toFixed(0)}</td>
-                <td><input type='number' step='0.01' value='${row.peeLoreal}' onchange='Dashboard.updateValue(${index}, "peeLoreal", this.value)'></td>
+                <td><input type='number' step='0.01' value='${row.pee}' onchange='Dashboard.updateValue(${index}, "pee", this.value)'></td>
                 <td class='calculated'>${row.cumulatedInvestment.toFixed(0)}</td>
                 <td class='calculated'>${row.totalPortfolio.toFixed(0)}</td>
                 <td class='calculated'>${row.roi.toFixed(2)}%</td>
@@ -671,7 +671,7 @@ const Dashboard = (function() {
             'Others (Shopping; Restaurant)': 'others',
             'Investment': 'investment', 
             'Loan (Studies; rental investment)': 'loan',
-            "PEE L'OREAL": 'peeLoreal'
+            "Others": 'pee'
         };
         
         const field = fieldMap[category];
@@ -1034,7 +1034,7 @@ const Dashboard = (function() {
         const months = allData.map(d => d.month);
         const cumInv = allData.map(d => d.cumulatedInvestment);
         const gains = allData.map(d => d.cumulatedGains);
-        const pee = allData.map(d => d.peeLoreal);
+        const pee = allData.map(d => d.pee);
         const portfolio = allData.map(d => d.totalPortfolio);
         
         const portfolioReal = showInflation ? 
