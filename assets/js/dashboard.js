@@ -1057,7 +1057,7 @@ const Dashboard = (function() {
                 lineWidth: 2
             },
             {
-                name: "PEE L'Oreal",
+                name: "Investment - Others",
                 data: pee,
                 color: '#9D5CE6',
                 lineWidth: 2
