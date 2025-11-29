@@ -830,7 +830,7 @@ const Dashboard = (function() {
                     color: '#2649B2', 
                     type: 'area', 
                     fillColor: { 
-                        linearGradient: [0, 0, 0, 300], 
+                        linearGradient: [0, 0, 0, 12], 
                         stops: [
                             [0, 'rgba(38,73,178,0.3)'], 
                             [1, 'rgba(38,73,178,0.05)']
@@ -959,7 +959,7 @@ const Dashboard = (function() {
             data: savingsData,
             color: '#2649B2',
             fillColor: {
-                linearGradient: [0, 0, 0, 300],
+                linearGradient: [0, 0, 0, 12],
                 stops: [
                     [0, 'rgba(38,73,178,0.5)'],
                     [1, 'rgba(38,73,178,0.1)']
@@ -975,7 +975,7 @@ const Dashboard = (function() {
                 color: '#9D5CE6',
                 dashStyle: 'Dash',
                 fillColor: {
-                    linearGradient: [0, 0, 0, 300],
+                    linearGradient: [0, 0, 0, 12],
                     stops: [
                         [0, 'rgba(157,92,230,0.3)'],
                         [1, 'rgba(157,92,230,0.05)']
@@ -1173,7 +1173,7 @@ const Dashboard = (function() {
                 data: roi,
                 color: '#4A74F3',
                 fillColor: {
-                    linearGradient: [0, 0, 0, 300],
+                    linearGradient: [0, 0, 0, 12],
                     stops: [
                         [0, 'rgba(74,116,243,0.4)'],
                         [1, 'rgba(74,116,243,0.05)']
