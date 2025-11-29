@@ -637,8 +637,9 @@ const Dashboard = (function() {
     function updateValue(index, field, value) {
         allData[index][field] = parseFloat(value) || 0;
         
-        if (field === 'investment') {
-            recalculateGains();
+        // ✅ CORRECTION : Gérer aussi le champ 'pee'
+        if (field === 'investment' || field === 'pee') {
+            recalculateGains();  // Recalcul complet pour investissements
         } else {
             calculateAll();
             renderTable();
@@ -691,12 +692,16 @@ const Dashboard = (function() {
             }
         });
         
-        if (field === 'investment') {
+        // ✅ CORRECTION MAJEURE : Recalcul approprié selon le champ
+        if (field === 'investment' || field === 'pee') {
+            // Pour les investissements, recalcul complet des gains
             recalculateGains();
         } else {
+            // Pour les autres champs, recalcul simple + sauvegarde
             calculateAll();
             renderTable();
             autoSave();
+            updateAllCharts();
         }
         
         window.FinanceDashboard.showNotification(
