@@ -331,9 +331,9 @@ const Dashboard = (function() {
         const newMonths = generateMonths(year, month, count);
         const newRows = newMonths.map(month => ({
             month: month,
-            salary: 3000, misc: 100,
-            rent: 800, food: 300, fixCosts: 150, others: 200, loan: 300,
-            investment: 500,
+            salary: 0, misc: 0,
+            rent: 0, food: 0, fixCosts: 0, others: 0, loan: 0,
+            investment: 0,
             monthlyGain: 0,
             cumulatedGains: 0, 
             pee: 0
@@ -575,7 +575,7 @@ const Dashboard = (function() {
      * Réinitialise aux valeurs par défaut
      */
     function resetToDefault() {
-        if (confirm('Reset all data to default 300 months?')) {
+        if (confirm('Reset all data to default 12 months?')) {
             localStorage.removeItem('financialDataDynamic');
             localStorage.removeItem('monthlyEstYield');
             localStorage.removeItem('inflationRate');
