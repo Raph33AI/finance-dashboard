@@ -671,7 +671,7 @@ const Dashboard = (function() {
             'Others (Shopping; Restaurant)': 'others',
             'Investment': 'investment', 
             'Loan (Studies; rental investment)': 'loan',
-            "Others": 'pee'
+            "Investment - Others": 'pee'
         };
         
         const field = fieldMap[category];
