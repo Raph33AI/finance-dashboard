@@ -451,23 +451,22 @@ async function handlePasswordChange(e) {
 async function handleDeleteAccount() {
     // Confirmation
     const confirmed = confirm(
-        '⚠️ ATTENTION ⚠️\n\n' +
-        'Êtes-vous absolument sûr de vouloir supprimer votre compte ?\n\n' +
-        'Cette action est IRRÉVERSIBLE et entraînera :\n' +
-        '• Suppression de toutes vos données\n' +
-        '• Suppression de tous vos portfolios\n' +
-        '• Suppression de toutes vos analyses\n' +
-        '• Perte définitive de votre historique\n\n' +
-        'Tapez OK pour confirmer la suppression.'
+        '⚠️ CAREFUL ⚠️\n\n' +
+        'Are you sure you want to delete your account ?\n\n' +
+        'This action is irreversible and will generate :\n' +
+        '• Deletion of all your data\n' +
+        '• Deletion of all your portfolios\n' +
+        '• Deletion of all your analyses\n' +
+        '• Definitive loss of your history\n\n' +
+        'Press OK to validate the deletion.'
     );
     
     if (!confirmed) return;
     
     // Double confirmation
     const doubleConfirmed = confirm(
-        '🔴 DERNIÈRE CONFIRMATION 🔴\n\n' +
-        'Voulez-vous VRAIMENT supprimer votre compte ?\n\n' +
-        'Il n\'y a aucun retour en arrière possible !'
+        '🔴 LAST CONFIRMATION 🔴\n\n' +
+        'Do you REALLY want to delete your account ?\n\n'
     );
     
     if (!doubleConfirmed) return;
@@ -476,11 +475,11 @@ async function handleDeleteAccount() {
         const user = firebase.auth().currentUser;
         
         if (!user) {
-            showToast('error', 'Erreur', 'Utilisateur non connecté');
+            showToast('error', 'Error', 'User not connected');
             return;
         }
         
-        showToast('info', 'Suppression en cours...', 'Veuillez patienter');
+        showToast('info', 'Deletion on going...', 'Please wait');
         
         // Supprimer les données Firestore
         await firebase.firestore().collection('users').doc(user.uid).delete();
@@ -488,9 +487,9 @@ async function handleDeleteAccount() {
         // Supprimer le compte Auth
         await user.delete();
         
-        showToast('success', 'Compte supprimé', 'Votre compte a été définitivement supprimé');
+        showToast('success', 'Account deleted', 'Your account has definitely been deleted');
         
-        console.log('✅ Compte supprimé');
+        console.log('✅ Account deleted');
         
         // Rediriger vers la page d'accueil
         setTimeout(() => {
