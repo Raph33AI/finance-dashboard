@@ -10,8 +10,8 @@ const ChatbotConfig = {
     api: {
         gemini: {
             apiKey: 'AIzaSyDWbJhZm4hUls0t7qkwmDwrAZCJTLXXztU',
-            endpoint: 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent',
-            model: 'gemini-1.5-flash',
+            endpoint: 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent',
+            model: 'gemini-2.5-flash',
             
             // ✅ AMÉLIORATION 1: Paramètres optimisés pour la conversation
             maxOutputTokens: 8192, // Maintenu pour flexibilité
