@@ -515,32 +515,91 @@ function showUpgradeModal(currentPlan, reason) {
         transition: opacity 0.3s ease;
     `;
     
-    modal.innerHTML = `
-        
-            ${msg.icon}
-            
-            ${msg.title}
-            
-            <p>${msg.description}</p>
-            
-            
-                <p>
-                    Your current plan: ${currentPlanDisplay}
-                </p>
-            
-            
-            
-                
-                    <i></i>
-                    ${msg.ctaText}
-                
-                
-                
-                    <i></i>
+        modal.innerHTML = `
+        <div style="
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 24px;
+            padding: 48px;
+            max-width: 520px;
+            width: 90%;
+            text-align: center;
+            box-shadow: 0 24px 64px rgba(0, 0, 0, 0.4);
+            transform: scale(0.9);
+            transition: transform 0.3s ease;
+        " id="upgrade-modal-content">
+            <div style="font-size: 72px; margin-bottom: 20px;">
+                ${msg.icon}
+            </div>
+            <h2 style="
+                color: white;
+                font-size: 32px;
+                margin-bottom: 16px;
+                font-weight: 800;
+                letter-spacing: -0.5px;
+            ">${msg.title}</h2>
+            <p style="
+                color: rgba(255, 255, 255, 0.95);
+                font-size: 16px;
+                margin-bottom: 12px;
+                line-height: 1.6;
+            ">${msg.description}</p>
+            <p style="
+                margin-top: 20px;
+                font-size: 14px;
+                color: rgba(255, 255, 255, 0.8);
+                font-weight: 600;
+            ">
+                Your current plan: <span style="
+                    background: rgba(255, 255, 255, 0.25);
+                    padding: 4px 12px;
+                    border-radius: 12px;
+                    text-transform: uppercase;
+                    letter-spacing: 1px;
+                ">${currentPlan}</span>
+            </p>
+            <div style="
+                display: flex;
+                gap: 16px;
+                justify-content: center;
+                margin-top: 32px;
+                flex-wrap: wrap;
+            ">
+                <button id="btn-upgrade-now" style="
+                    background: white;
+                    color: #667eea;
+                    border: none;
+                    border-radius: 14px;
+                    padding: 16px 36px;
+                    font-size: 16px;
+                    font-weight: 700;
+                    cursor: pointer;
+                    transition: all 0.3s ease;
+                    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                ">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
+                    </svg>
+                    Upgrade to ${msg.suggestedPlan}
+                </button>
+                <button id="btn-cancel-modal" style="
+                    background: rgba(255, 255, 255, 0.2);
+                    color: white;
+                    border: 2px solid rgba(255, 255, 255, 0.4);
+                    border-radius: 14px;
+                    padding: 16px 36px;
+                    font-size: 16px;
+                    font-weight: 700;
+                    cursor: pointer;
+                    transition: all 0.3s ease;
+                    backdrop-filter: blur(10px);
+                ">
                     Go Back
-                
-            
-        
+                </button>
+            </div>
+        </div>
     `;
     
     document.body.appendChild(modal);
