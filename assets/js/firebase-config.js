@@ -11,7 +11,7 @@
 
 const firebaseConfig = {
   apiKey: "AIzaSyD9kQ3nyYbYMU--_PsMOtuqtMKlt3gmjRM",
-  authDomain: "financepro-220ba.firebaseapp.com",
+  authDomain: "alphavault-ai.com",
   projectId: "financepro-220ba",
   storageBucket: "financepro-220ba.firebasestorage.app",
   messagingSenderId: "917725259549",
