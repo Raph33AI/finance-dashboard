@@ -9,7 +9,7 @@ const ChatbotConfig = {
     // ============================================
     api: {
         gemini: {
-            apiKey: 'AIzaSyDWbJhZm4hUls0t7qkwmDwrAZCJTLXXztU',
+            apiKey: 'AIzaSyBjk3MlxNGc6PACd7QfawlgxTtbS3NtbzE',
             endpoint: 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent',
             model: 'gemini-2.5-flash',
             
