@@ -1,6 +1,7 @@
 /* ============================================
    FIREBASE-CONFIG.JS - FinancePro v2.0
    Configuration Firebase & Gestion Utilisateur Complète
+   ✅ INSCRIPTION AUTOMATIQUE À LA NEWSLETTER
    ============================================ */
 
 // ============================================
@@ -92,7 +93,7 @@ auth.onAuthStateChanged(async (user) => {
         await loadAndSyncUserData(user);
         
     } else {
-        console.log('ℹ️ Aucun utilisateur connecté');
+        console.log('ℹ Aucun utilisateur connecté');
         
         // Nettoyer les données
         window.currentUserData = null;
@@ -121,6 +122,7 @@ async function loadAndSyncUserData(user) {
         const userDoc = await userDocRef.get();
         
         let userData;
+        let isNewUser = false;
         
         if (userDoc.exists) {
             // ✅ DOCUMENT EXISTE - Le charger
@@ -148,8 +150,10 @@ async function loadAndSyncUserData(user) {
             
         } else {
             // ❌ DOCUMENT N'EXISTE PAS - Le créer
-            console.warn('⚠️ Document utilisateur inexistant');
+            console.warn('⚠ Document utilisateur inexistant');
             console.log('🆕 Création du document utilisateur...');
+            
+            isNewUser = true;
             
             // Créer les données initiales
             const newUserData = {
@@ -163,6 +167,8 @@ async function loadAndSyncUserData(user) {
                 phone: '',
                 plan: 'basic', // Plan gratuit par défaut
                 subscriptionStatus: 'inactive',
+                weeklyNewsletter: true, // ✅ NEWSLETTER ACTIVÉE PAR DÉFAUT
+                newsletterSubscribedAt: new Date().toISOString(), // ✅ DATE D'INSCRIPTION
                 createdAt: firebase.firestore.FieldValue.serverTimestamp(),
                 lastLoginAt: firebase.firestore.FieldValue.serverTimestamp()
             };
@@ -176,6 +182,10 @@ async function loadAndSyncUserData(user) {
                 uid: user.uid,
                 ...newUserData
             };
+            
+            // ✅ INSCRIPTION AUTOMATIQUE À LA NEWSLETTER
+            console.log('📧 Inscription automatique à la newsletter...');
+            await subscribeToNewsletter(user.email, user.displayName || user.email.split('@')[0]);
         }
         
         // Stocker les données globalement
@@ -198,6 +208,10 @@ async function loadAndSyncUserData(user) {
         
         console.log('✅ Données utilisateur chargées et synchronisées');
         console.log('📊 Données:', userData);
+        
+        if (isNewUser) {
+            console.log('🎉 Nouvel utilisateur créé et inscrit à la newsletter !');
+        }
         
     } catch (error) {
         console.error('❌ Erreur lors du chargement des données:', error);
@@ -224,7 +238,53 @@ async function loadAndSyncUserData(user) {
             detail: minimalUserData 
         }));
         
-        console.warn('⚠️ Données minimales chargées depuis Firebase Auth uniquement');
+        console.warn('⚠ Données minimales chargées depuis Firebase Auth uniquement');
+    }
+}
+
+// ============================================
+// ✅ INSCRIPTION AUTOMATIQUE À LA NEWSLETTER
+// ============================================
+
+/**
+ * Inscrire un utilisateur à la newsletter via le Worker Cloudflare
+ */
+async function subscribeToNewsletter(email, userName = '') {
+    try {
+        console.log('📧 Inscription automatique à la newsletter pour:', email);
+        
+        const response = await fetch('https://newsletter-worker.raphnardone.workers.dev/subscribe', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                email: email,
+                name: userName || email.split('@')[0],
+                source: 'auto_signup', // Indique que c'est une inscription automatique
+                timestamp: new Date().toISOString()
+            })
+        });
+
+        if (!response.ok) {
+            console.warn('⚠ Réponse Worker non-OK:', response.status);
+            return false;
+        }
+
+        const data = await response.json();
+        
+        if (data.success) {
+            console.log('✅ Inscription newsletter réussie dans le KV Cloudflare');
+            return true;
+        } else {
+            console.warn('⚠ Inscription newsletter échouée:', data.error || 'Erreur inconnue');
+            return false;
+        }
+        
+    } catch (error) {
+        console.error('❌ Erreur inscription newsletter:', error);
+        // Ne pas bloquer la création du compte si la newsletter échoue
+        return false;
     }
 }
 
@@ -400,5 +460,6 @@ window.getCurrentUserData = getCurrentUserData;
 window.getUserToken = getUserToken;
 window.refreshUserToken = refreshUserToken;
 window.loadAndSyncUserData = loadAndSyncUserData;
+window.subscribeToNewsletter = subscribeToNewsletter; // ✅ EXPORT
 
-console.log('✅ Configuration Firebase chargée (v2.0 - Auto-sync)');
+console.log('✅ Configuration Firebase chargée (v2.0 - Auto-sync + Newsletter)');

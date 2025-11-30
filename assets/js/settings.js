@@ -1,6 +1,6 @@
 /* ============================================
    SETTINGS.JS - Gestion des paramètres utilisateur
-   ✅ SYNCHRONISATION NEWSLETTER CLOUDFLARE KV
+   ✅ SYNCHRONISATION NEWSLETTER SIMPLIFIÉE (Firestore = Source de vérité)
    ============================================ */
 
 // Configuration
@@ -56,7 +56,7 @@ async function loadSettings() {
         console.log('📥 Chargement des paramètres...');
         
         if (!currentUserData) {
-            console.warn('⚠  Pas de données utilisateur disponibles');
+            console.warn('⚠ Pas de données utilisateur disponibles');
             loadDefaultSettings();
             return;
         }
@@ -70,7 +70,7 @@ async function loadSettings() {
         const settingsDoc = await settingsRef.get();
         
         if (!settingsDoc.exists) {
-            console.log('⚠  Paramètres inexistants, création avec valeurs par défaut...');
+            console.log('⚠ Paramètres inexistants, création avec valeurs par défaut...');
             await settingsRef.set(currentSettings);
             console.log('✅ Paramètres créés avec succès');
         } else {
@@ -79,7 +79,7 @@ async function loadSettings() {
             console.log('✅ Paramètres chargés:', currentSettings);
         }
         
-        // ✅ SYNCHRONISER AVEC CLOUDFLARE KV
+        // ✅ SYNCHRONISER AVEC CLOUDFLARE KV (Firestore = source de vérité)
         await synchronizeNewsletterSubscription();
         
         applySettingsToUI();
@@ -88,7 +88,7 @@ async function loadSettings() {
         console.error('❌ Erreur lors du chargement des paramètres:', error);
         
         if (error.code === 'permission-denied') {
-            console.log('⚠  Permissions refusées, utilisation des valeurs par défaut');
+            console.log('⚠ Permissions refusées, utilisation des valeurs par défaut');
             loadDefaultSettings();
         } else {
             showToast('error', 'Erreur', 'Impossible de charger vos paramètres');
@@ -105,7 +105,7 @@ function loadDefaultSettings() {
             currentSettings = { ...currentSettings, ...JSON.parse(savedSettings) };
             console.log('✅ Paramètres chargés depuis localStorage');
         } catch (e) {
-            console.warn('⚠  Erreur lors du parsing localStorage');
+            console.warn('⚠ Erreur lors du parsing localStorage');
         }
     }
     
@@ -132,67 +132,65 @@ function applySettingsToUI() {
 }
 
 // ============================================
-// 🆕 SYNCHRONISATION NEWSLETTER CLOUDFLARE
+// 🆕 SYNCHRONISATION NEWSLETTER CLOUDFLARE (SIMPLIFIÉE)
 // ============================================
 
 async function synchronizeNewsletterSubscription() {
-    if (!currentUserData || !currentUserData.email) {
-        console.warn('⚠  Pas d\'email utilisateur disponible pour la synchronisation');
+    if (!currentUserData || !currentUserData.uid) {
+        console.warn('⚠ Aucun utilisateur connecté pour la synchronisation');
         return;
     }
-    
+
     try {
-        console.log('🔄 Vérification statut newsletter Cloudflare...');
+        console.log('🔄 Synchronisation newsletter avec Firestore...');
         
-        // Vérifier le statut actuel dans le KV
-        const statusResponse = await fetch(`${NEWSLETTER_WORKER_URL}/check-subscription`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                email: currentUserData.email
-            })
-        });
+        const userRef = db.collection('users').doc(currentUserData.uid);
+        const doc = await userRef.get();
         
-        if (!statusResponse.ok) {
-            throw new Error('Impossible de vérifier le statut d\'abonnement');
+        if (!doc.exists) {
+            console.warn('⚠ Document utilisateur introuvable');
+            return;
         }
         
-        const statusData = await statusResponse.json();
-        const isSubscribedInKV = statusData.subscribed === true;
-        const wantsNewsletter = currentSettings.weeklyNewsletter !== false;
+        const userData = doc.data();
+        const isSubscribed = userData.weeklyNewsletter === true;
         
-        console.log('📊 Statut synchronisation:');
-        console.log('   - Firestore weeklyNewsletter:', wantsNewsletter);
-        console.log('   - Cloudflare KV subscribed:', isSubscribedInKV);
+        console.log('📊 Statut newsletter (Firestore):', isSubscribed ? 'Abonné ✅' : 'Non abonné ❌');
         
-        // 🔄 SYNCHRONISER
-        if (wantsNewsletter && !isSubscribedInKV) {
-            // ✅ L'utilisateur veut recevoir des emails MAIS n'est pas dans le KV → SUBSCRIBE
-            console.log('➕ Inscription automatique à la newsletter...');
-            await subscribeToNewsletter(currentUserData.email, currentUserData.displayName);
+        // Mettre à jour le toggle sur la page
+        const newsletterToggle = document.getElementById('weeklyNewsletter');
+        if (newsletterToggle) {
+            newsletterToggle.checked = isSubscribed;
+        }
+        
+        // ✅ INSCRIPTION MANQUANTE - RATTRAPAGE
+        if (isSubscribed && !userData.newsletterSubscribedAt) {
+            console.log('⚠ Inscription manquante détectée - envoi au Worker...');
             
-        } else if (!wantsNewsletter && isSubscribedInKV) {
-            // ❌ L'utilisateur NE veut PAS recevoir d'emails MAIS est dans le KV → UNSUBSCRIBE
-            console.log('➖ Désinscription automatique de la newsletter...');
-            await unsubscribeFromNewsletter(currentUserData.email);
+            const subscribed = await subscribeToNewsletter(currentUserData.email, currentUserData.displayName);
             
-        } else if (wantsNewsletter && isSubscribedInKV) {
-            console.log('✅ Déjà inscrit et activé - aucune action nécessaire');
-            
-        } else {
-            console.log('ℹ  Non inscrit par choix - aucune action nécessaire');
+            if (subscribed) {
+                // Mettre à jour Firestore avec la date
+                await userRef.update({
+                    newsletterSubscribedAt: new Date().toISOString()
+                });
+                
+                console.log('✅ Inscription newsletter rattrapée');
+            }
+        } else if (isSubscribed && userData.newsletterSubscribedAt) {
+            console.log('✅ Utilisateur déjà abonné (depuis', userData.newsletterSubscribedAt, ')');
         }
         
     } catch (error) {
         console.error('❌ Erreur synchronisation newsletter:', error);
-        showToast('warning', 'Attention', 'La synchronisation de la newsletter a échoué. Vos paramètres locaux sont sauvegardés.');
+        // Ne pas bloquer l'expérience utilisateur
     }
 }
 
 async function subscribeToNewsletter(email, name) {
     try {
+        console.log('📧 Inscription à la newsletter:', email);
+        
         const response = await fetch(`${NEWSLETTER_WORKER_URL}/subscribe`, {
             method: 'POST',
             headers: {
@@ -200,13 +198,16 @@ async function subscribeToNewsletter(email, name) {
             },
             body: JSON.stringify({
                 email: email,
-                name: name || email.split('@')[0]
+                name: name || email.split('@')[0],
+                source: 'settings_sync',
+                timestamp: new Date().toISOString()
             })
         });
         
         if (!response.ok) {
             const errorData = await response.json();
-            throw new Error(errorData.error || 'Subscription failed');
+            console.warn('⚠ Erreur Worker:', errorData);
+            return false;
         }
         
         const data = await response.json();
@@ -217,18 +218,21 @@ async function subscribeToNewsletter(email, name) {
         
     } catch (error) {
         console.error('❌ Erreur inscription newsletter:', error);
-        throw error;
+        return false;
     }
 }
 
 async function unsubscribeFromNewsletter(email) {
     try {
+        console.log('📧 Désinscription de la newsletter:', email);
+        
         const response = await fetch(`${NEWSLETTER_WORKER_URL}/unsubscribe?email=${encodeURIComponent(email)}`, {
             method: 'GET'
         });
         
         if (!response.ok) {
-            throw new Error('Unsubscription failed');
+            console.warn('⚠ Erreur lors de la désinscription');
+            return false;
         }
         
         console.log('✅ Désinscription newsletter réussie');
@@ -238,7 +242,7 @@ async function unsubscribeFromNewsletter(email) {
         
     } catch (error) {
         console.error('❌ Erreur désinscription newsletter:', error);
-        throw error;
+        return false;
     }
 }
 
@@ -346,10 +350,24 @@ async function saveNotificationSettings() {
         
         if (currentSettings.weeklyNewsletter) {
             // L'utilisateur active la newsletter
-            await subscribeToNewsletter(currentUserData.email, currentUserData.displayName);
+            const subscribed = await subscribeToNewsletter(currentUserData.email, currentUserData.displayName);
+            
+            if (subscribed) {
+                // Mettre à jour la date d'inscription
+                const userRef = db.collection('users').doc(currentUserData.uid);
+                await userRef.update({
+                    newsletterSubscribedAt: new Date().toISOString()
+                });
+            }
         } else {
             // L'utilisateur désactive la newsletter
             await unsubscribeFromNewsletter(currentUserData.email);
+            
+            // Supprimer la date d'inscription
+            const userRef = db.collection('users').doc(currentUserData.uid);
+            await userRef.update({
+                newsletterSubscribedAt: firebase.firestore.FieldValue.delete()
+            });
         }
     }
     
@@ -379,6 +397,12 @@ async function saveSettings() {
                 .doc('preferences');
             
             await settingsRef.set(currentSettings, { merge: true });
+            
+            // ✅ AUSSI METTRE À JOUR LE DOCUMENT UTILISATEUR PRINCIPAL
+            const userRef = firebaseDb.collection('users').doc(currentUserData.uid);
+            await userRef.update({
+                weeklyNewsletter: currentSettings.weeklyNewsletter
+            });
             
             console.log('✅ Paramètres sauvegardés dans Firestore');
         }
@@ -453,7 +477,7 @@ function clearCache() {
 
 async function deleteAllAnalyses() {
     const confirmed = confirm(
-        '⚠  ATTENTION ⚠ \n\n' +
+        '⚠ ATTENTION ⚠\n\n' +
         'Êtes-vous sûr de vouloir supprimer TOUTES vos analyses ?\n\n' +
         'Cette action est IRRÉVERSIBLE !'
     );
@@ -473,7 +497,7 @@ async function deleteAllAnalyses() {
 
 async function deleteAllPortfolios() {
     const confirmed = confirm(
-        '⚠  ATTENTION ⚠ \n\n' +
+        '⚠ ATTENTION ⚠\n\n' +
         'Êtes-vous sûr de vouloir supprimer TOUS vos portfolios ?\n\n' +
         'Cette action est IRRÉVERSIBLE !'
     );
@@ -498,6 +522,7 @@ async function deleteAllPortfolios() {
 function showToast(type, title, message) {
     const toastContainer = document.getElementById('toastContainer');
     
+    // ✅ VÉRIFICATION SI L'ÉLÉMENT EXISTE
     if (!toastContainer) {
         console.log(`[${type.toUpperCase()}] ${title}: ${message}`);
         return;
@@ -558,4 +583,4 @@ function isFirebaseInitialized() {
            typeof firebaseDb !== 'undefined';
 }
 
-console.log('✅ Script de paramètres chargé avec synchronisation newsletter');
+console.log('✅ Script de paramètres chargé avec synchronisation newsletter (Firestore = vérité)');
