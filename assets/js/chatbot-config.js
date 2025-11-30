@@ -7,7 +7,7 @@ const ChatbotConfig = {
     api: {
         // ✅ WORKER CLOUDFLARE EXISTANT (Finnhub + Twelve Data)
         worker: {
-            baseUrl: 'https://raphnardone.workers.dev', // Ton worker existant
+            baseUrl: 'https://finance-hub-api.raphnardone.workers.dev', // Ton worker existant
             endpoints: {
                 finnhub: '/api/finnhub',
                 twelvedata: '/api/twelvedata'
