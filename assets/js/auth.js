@@ -1,7 +1,10 @@
 /* ============================================
    AUTH.JS - FinancePro Authentication
    Complete authentication management
-   🎯 VERSION OPTIMISÉE : Redirection checkout pour nouveaux comptes
+   🎯 VERSION OPTIMISÉE ET CORRIGÉE
+   ✅ Redirection checkout pour nouveaux comptes
+   ✅ Gestion robuste des erreurs
+   ✅ Toast container auto-créé
    ============================================ */
 
 // ============================================
@@ -253,7 +256,7 @@ async function handleEmailLogin(e) {
 
 /**
  * Handle email signup
- * ✅ MODIFIÉ : Redirection vers checkout pour nouveaux comptes
+ * ✅ VERSION CORRIGÉE : Gestion robuste des erreurs + Redirection checkout
  */
 async function handleEmailSignup(e) {
     e.preventDefault();
@@ -305,24 +308,42 @@ async function handleEmailSignup(e) {
     isProcessing = true;
     
     try {
-        // Create account
+        console.log('🔐 Création du compte pour:', email);
+        
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        // ÉTAPE 1 : Créer le compte Firebase
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
         const userCredential = await firebaseAuth.createUserWithEmailAndPassword(email, password);
         const user = userCredential.user;
         
-        console.log('✅ Account created:', user.email);
+        console.log('✅ Compte Firebase créé:', user.email);
         
-        // Update profile
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        // ÉTAPE 2 : Mettre à jour le profil
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
         await user.updateProfile({
             displayName: `${firstName} ${lastName}`
         });
+        console.log('✅ Profil mis à jour');
         
-        // Send verification email
-        await user.sendEmailVerification({
-            url: window.location.origin + '/dashboard-financier.html',
-            handleCodeInApp: true
-        });
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        // ÉTAPE 3 : Envoyer email de vérification (OPTIONNEL)
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        try {
+            await user.sendEmailVerification({
+                url: window.location.origin + '/dashboard-financier.html',
+                handleCodeInApp: false // ✅ Évite l'erreur de domaine
+            });
+            console.log('✅ Email de vérification envoyé');
+        } catch (emailError) {
+            // ⚠ On continue même si l'email échoue
+            console.warn('⚠ Email de vérification non envoyé:', emailError.code);
+            console.warn('   → Le compte est quand même créé, pas de blocage');
+        }
         
-        // Create user profile in Firestore
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        // ÉTAPE 4 : Créer le profil Firestore
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
         await createUserProfile(user.uid, {
             firstName,
             lastName,
@@ -330,40 +351,58 @@ async function handleEmailSignup(e) {
             company,
             createdAt: firebase.firestore.FieldValue.serverTimestamp(),
             emailVerified: false,
-            plan: 'free', // Plan will be updated after checkout
-            trialEndsAt: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000), // 14 days
+            plan: 'free', // Sera mis à jour après le checkout
+            trialEndsAt: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000), // 14 jours
             metadata: {
                 signupMethod: 'email',
                 userAgent: navigator.userAgent,
                 language: navigator.language
             }
         });
-        
-        // Log login
-        await logUserLogin(user.uid, 'email_signup');
+        console.log('✅ Profil Firestore créé');
         
         // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-        // ✅ NOUVEAU : Stockage des informations pour le checkout
+        // ÉTAPE 5 : Logger la connexion
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        await logUserLogin(user.uid, 'email_signup');
+        console.log('✅ Login enregistré');
+        
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        // ÉTAPE 6 : Stocker les informations pour le checkout
         // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
         sessionStorage.setItem('isNewUser', 'true');
         sessionStorage.setItem('userEmail', email);
         sessionStorage.setItem('userDisplayName', `${firstName} ${lastName}`);
         sessionStorage.setItem('userId', user.uid);
+        sessionStorage.setItem('signupTimestamp', Date.now().toString());
         
-        console.log('🎉 New account created - Redirecting to checkout...');
+        console.log('%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'color: #10b981; font-weight: bold;');
+        console.log('%c🎉 COMPTE CRÉÉ AVEC SUCCÈS !', 'color: #10b981; font-weight: bold; font-size: 16px;');
+        console.log('%c📧 Email:', 'color: #3b82f6;', email);
+        console.log('%c👤 Nom:', 'color: #3b82f6;', `${firstName} ${lastName}`);
+        console.log('%c🆔 UID:', 'color: #3b82f6;', user.uid);
+        console.log('%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'color: #10b981; font-weight: bold;');
         
-        // Show success message
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        // ÉTAPE 7 : Message de succès
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
         showToast('success', 'Account created!', 'Choose your plan to get started.');
         
         // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-        // ✅ REDIRECTION VERS CHECKOUT (au lieu de dashboard)
+        // ÉTAPE 8 : REDIRECTION VERS CHECKOUT
         // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        console.log('%c🚀 Redirection vers checkout dans 1.5s...', 'color: #f59e0b; font-weight: bold;');
+        
         setTimeout(() => {
+            console.log('%c➡  REDIRECTION EN COURS...', 'background: #3b82f6; color: white; padding: 8px; font-weight: bold;');
             window.location.href = 'checkout.html';
         }, 1500);
         
     } catch (error) {
-        console.error('❌ Signup error:', error);
+        console.error('%c❌ ERREUR CRÉATION DE COMPTE', 'background: #ef4444; color: white; padding: 5px; font-weight: bold;');
+        console.error('Code:', error.code);
+        console.error('Message:', error.message);
+        console.error('Détails complets:', error);
         
         const errorMessage = getFirebaseErrorMessage(error.code);
         showToast('error', 'Signup error', errorMessage);
@@ -446,6 +485,7 @@ async function handleSocialLogin(providerType) {
             sessionStorage.setItem('userDisplayName', user.displayName || user.email);
             sessionStorage.setItem('userId', user.uid);
             sessionStorage.setItem('userPhotoURL', user.photoURL || '');
+            sessionStorage.setItem('signupTimestamp', Date.now().toString());
             
             console.log('🎉 New account via', providerName, '- Redirecting to checkout...');
         }
@@ -465,10 +505,10 @@ async function handleSocialLogin(providerType) {
         // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
         setTimeout(() => {
             if (isNewUser) {
-                // Nouveau compte → Checkout
+                console.log('%c➡  REDIRECTION VERS CHECKOUT (nouveau compte)', 'background: #3b82f6; color: white; padding: 8px; font-weight: bold;');
                 window.location.href = 'checkout.html';
             } else {
-                // Compte existant → Dashboard
+                console.log('%c➡  REDIRECTION VERS DASHBOARD (compte existant)', 'background: #3b82f6; color: white; padding: 8px; font-weight: bold;');
                 window.location.href = 'dashboard-financier.html';
             }
         }, 1500);
@@ -762,53 +802,107 @@ function setButtonLoading(buttonId, isLoading) {
 
 /**
  * Show toast notification
+ * ✅ VERSION CORRIGÉE : Création automatique du conteneur
  */
 function showToast(type, title, message) {
-    const toastContainer = document.getElementById('toastContainer');
+    let toastContainer = document.getElementById('toastContainer');
     
-    if (!toastContainer) return;
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    // ✅ CRÉER LE CONTENEUR S'IL N'EXISTE PAS
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    if (!toastContainer) {
+        console.log('📦 Création du conteneur de toasts...');
+        toastContainer = document.createElement('div');
+        toastContainer.id = 'toastContainer';
+        toastContainer.className = 'toast-container';
+        toastContainer.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 99999;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            pointer-events: none;
+        `;
+        document.body.appendChild(toastContainer);
+        console.log('✅ Conteneur de toasts créé');
+    }
     
-    // Create toast element
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    // CRÉER LE TOAST
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
     const toast = document.createElement('div');
     toast.className = `toast ${type}`;
+    toast.style.cssText = `
+        background: white;
+        border-radius: 12px;
+        padding: 16px 20px;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        min-width: 320px;
+        max-width: 480px;
+        pointer-events: auto;
+        animation: slideInRight 0.3s ease forwards;
+        border-left: 4px solid;
+    `;
     
-    // Icon based on type
+    // Couleur selon le type
     let iconClass = 'fa-info-circle';
+    let borderColor = '#3b82f6';
+    
     switch(type) {
         case 'success':
             iconClass = 'fa-check-circle';
+            borderColor = '#10b981';
             break;
         case 'error':
             iconClass = 'fa-times-circle';
+            borderColor = '#ef4444';
             break;
         case 'warning':
             iconClass = 'fa-exclamation-triangle';
+            borderColor = '#f59e0b';
             break;
     }
+    
+    toast.style.borderLeftColor = borderColor;
     
     toast.innerHTML = `
         
             <i></i>
         
         
-            ${title}
-            ${message}
+            
+                ${title}
+            
+            
+                ${message}
+            
         
         
             <i></i>
         
     `;
     
-    // Add to container
+    // Ajouter au conteneur
     toastContainer.appendChild(toast);
     
-    // Close handler
-    const closeBtn = toast.querySelector('.toast-close');
-    closeBtn.addEventListener('click', () => {
-        removeToast(toast);
-    });
+    console.log(`📢 Toast affiché: [${type.toUpperCase()}] ${title} - ${message}`);
     
-    // Auto-remove after 5 seconds
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    // GESTION DE LA FERMETURE
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    const closeBtn = toast.querySelector('.toast-close');
+    if (closeBtn) {
+        closeBtn.addEventListener('click', () => {
+            removeToast(toast);
+        });
+    }
+    
+    // Auto-suppression après 5 secondes
     setTimeout(() => {
         removeToast(toast);
     }, 5000);
@@ -818,6 +912,8 @@ function showToast(type, title, message) {
  * Remove toast notification
  */
 function removeToast(toast) {
+    if (!toast || !toast.parentNode) return;
+    
     toast.style.animation = 'slideOutRight 0.3s ease forwards';
     setTimeout(() => {
         if (toast.parentNode) {
@@ -826,9 +922,22 @@ function removeToast(toast) {
     }, 300);
 }
 
-// Exit animation
-const style = document.createElement('style');
-style.textContent = `
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// ANIMATIONS CSS
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+const toastStyles = document.createElement('style');
+toastStyles.textContent = `
+    @keyframes slideInRight {
+        from {
+            transform: translateX(100%);
+            opacity: 0;
+        }
+        to {
+            transform: translateX(0);
+            opacity: 1;
+        }
+    }
+    
     @keyframes slideOutRight {
         from {
             transform: translateX(0);
@@ -839,8 +948,12 @@ style.textContent = `
             opacity: 0;
         }
     }
+    
+    .toast-close:hover {
+        color: #1e293b !important;
+    }
 `;
-document.head.appendChild(style);
+document.head.appendChild(toastStyles);
 
 // ============================================
 // GLOBAL EVENT LISTENERS
@@ -856,4 +969,4 @@ window.addEventListener('userAuthenticated', (e) => {
     console.log('✅ User authenticated:', e.detail);
 });
 
-console.log('✅ Authentication script loaded - Version optimisée checkout');
+console.log('✅ Authentication script loaded - Version optimisée checkout + Gestion robuste des erreurs');
