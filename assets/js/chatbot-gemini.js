@@ -7,13 +7,14 @@ class GeminiAI {
     constructor(config) {
         this.config = config;
         this.apiKey = config.api.gemini.apiKey;
-        this.endpoint = config.api.gemini.endpoint;
         
-        // ✅ AMÉLIORATION 1: Historique conversationnel étendu (10 → 20 messages)
+        // ✅ UTILISE L'ENDPOINT DU CONFIG (ne pas reconstruire)
+        this.endpoint = config.api.gemini.endpoint;
+        this.model = config.api.gemini.model;
+        
         this.conversationHistory = [];
         this.maxHistorySize = 20;
         
-        // ✅ AMÉLIORATION 2: Contexte utilisateur persistant
         this.userContext = {
             preferredStocks: [],
             investmentGoals: null,
@@ -25,6 +26,10 @@ class GeminiAI {
         this.totalTokens = 0;
         this.lastRequestTime = 0;
         this.minRequestInterval = 1000;
+        
+        console.log(`🤖 Gemini AI initialized`);
+        console.log(`📡 Model: ${this.model}`);
+        console.log(`📡 Endpoint: ${this.endpoint}`);
         
         this.initializeSystemPrompt();
     }
