@@ -1,6 +1,7 @@
 /* ============================================
    AUTH.JS - FinancePro Authentication
    Complete authentication management
+   🎯 VERSION OPTIMISÉE : Redirection checkout pour nouveaux comptes
    ============================================ */
 
 // ============================================
@@ -252,6 +253,7 @@ async function handleEmailLogin(e) {
 
 /**
  * Handle email signup
+ * ✅ MODIFIÉ : Redirection vers checkout pour nouveaux comptes
  */
 async function handleEmailSignup(e) {
     e.preventDefault();
@@ -328,7 +330,7 @@ async function handleEmailSignup(e) {
             company,
             createdAt: firebase.firestore.FieldValue.serverTimestamp(),
             emailVerified: false,
-            plan: 'free',
+            plan: 'free', // Plan will be updated after checkout
             trialEndsAt: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000), // 14 days
             metadata: {
                 signupMethod: 'email',
@@ -340,13 +342,25 @@ async function handleEmailSignup(e) {
         // Log login
         await logUserLogin(user.uid, 'email_signup');
         
-        // Show success message
-        showToast('success', 'Account created!', 'A verification email has been sent.');
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        // ✅ NOUVEAU : Stockage des informations pour le checkout
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        sessionStorage.setItem('isNewUser', 'true');
+        sessionStorage.setItem('userEmail', email);
+        sessionStorage.setItem('userDisplayName', `${firstName} ${lastName}`);
+        sessionStorage.setItem('userId', user.uid);
         
-        // Redirect to dashboard
+        console.log('🎉 New account created - Redirecting to checkout...');
+        
+        // Show success message
+        showToast('success', 'Account created!', 'Choose your plan to get started.');
+        
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        // ✅ REDIRECTION VERS CHECKOUT (au lieu de dashboard)
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
         setTimeout(() => {
-            window.location.href = 'dashboard-financier.html';
-        }, 2000);
+            window.location.href = 'checkout.html';
+        }, 1500);
         
     } catch (error) {
         console.error('❌ Signup error:', error);
@@ -372,6 +386,7 @@ async function handleEmailSignup(e) {
 
 /**
  * Handle social login (Google, Apple, Microsoft)
+ * ✅ MODIFIÉ : Redirection checkout pour nouveaux comptes uniquement
  */
 async function handleSocialLogin(providerType) {
     if (isProcessing) return;
@@ -401,6 +416,7 @@ async function handleSocialLogin(providerType) {
         const isNewUser = result.additionalUserInfo.isNewUser;
         
         console.log('✅ Login successful with', providerName, ':', user.email);
+        console.log('📊 Is new user:', isNewUser);
         
         // If new user, create profile
         if (isNewUser) {
@@ -413,7 +429,7 @@ async function handleSocialLogin(providerType) {
                 photoURL: user.photoURL,
                 createdAt: firebase.firestore.FieldValue.serverTimestamp(),
                 emailVerified: user.emailVerified,
-                plan: 'free',
+                plan: 'free', // Plan will be updated after checkout
                 trialEndsAt: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000),
                 metadata: {
                     signupMethod: providerType,
@@ -421,18 +437,41 @@ async function handleSocialLogin(providerType) {
                     language: navigator.language
                 }
             });
+            
+            // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+            // ✅ NOUVEAU : Stockage des informations pour le checkout
+            // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+            sessionStorage.setItem('isNewUser', 'true');
+            sessionStorage.setItem('userEmail', user.email);
+            sessionStorage.setItem('userDisplayName', user.displayName || user.email);
+            sessionStorage.setItem('userId', user.uid);
+            sessionStorage.setItem('userPhotoURL', user.photoURL || '');
+            
+            console.log('🎉 New account via', providerName, '- Redirecting to checkout...');
         }
         
         // Log login
         await logUserLogin(user.uid, providerType);
         
-        // Success message
-        showToast('success', 'Login successful!', `Welcome ${user.displayName || user.email}`);
+        // Success message (différent selon nouveau/existant)
+        const successMessage = isNewUser 
+            ? 'Choose your plan to get started.' 
+            : `Welcome back ${user.displayName || user.email}`;
         
-        // Redirect
+        showToast('success', 'Login successful!', successMessage);
+        
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        // ✅ REDIRECTION CONDITIONNELLE
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
         setTimeout(() => {
-            window.location.href = 'dashboard-financier.html';
-        }, 1000);
+            if (isNewUser) {
+                // Nouveau compte → Checkout
+                window.location.href = 'checkout.html';
+            } else {
+                // Compte existant → Dashboard
+                window.location.href = 'dashboard-financier.html';
+            }
+        }, 1500);
         
     } catch (error) {
         console.error(`❌ Login error with ${providerName}:`, error);
@@ -559,7 +598,7 @@ function checkAuthState() {
     const user = getCurrentUser();
     
     if (user) {
-        console.log('ℹ️ User already logged in:', user.email);
+        console.log('ℹ User already logged in:', user.email);
         
         // Show notification
         showToast('info', 'Already logged in', 'You are already logged in. Redirecting...');
@@ -748,16 +787,16 @@ function showToast(type, title, message) {
     }
     
     toast.innerHTML = `
-        <div class="toast-icon">
-            <i class="fas ${iconClass}"></i>
-        </div>
-        <div class="toast-content">
-            <div class="toast-title">${title}</div>
-            <div class="toast-message">${message}</div>
-        </div>
-        <button class="toast-close">
-            <i class="fas fa-times"></i>
-        </button>
+        
+            <i></i>
+        
+        
+            ${title}
+            ${message}
+        
+        
+            <i></i>
+        
     `;
     
     // Add to container
@@ -809,7 +848,7 @@ document.head.appendChild(style);
 
 // Detect logout
 window.addEventListener('userLoggedOut', () => {
-    console.log('ℹ️ User logged out');
+    console.log('ℹ User logged out');
 });
 
 // Detect authentication
@@ -817,4 +856,4 @@ window.addEventListener('userAuthenticated', (e) => {
     console.log('✅ User authenticated:', e.detail);
 });
 
-console.log('✅ Authentication script loaded');
+console.log('✅ Authentication script loaded - Version optimisée checkout');
