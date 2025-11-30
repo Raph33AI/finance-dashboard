@@ -201,7 +201,7 @@ const Dashboard = (function() {
             row.totalExpenses = (row.rent || 0) + (row.food || 0) + 
                                 (row.fixCosts || 0) + (row.others || 0) + 
                                 (row.loan || 0);
-            row.savings = row.totalIncome - row.totalExpenses;
+            row.savings = row.totalIncome - row.totalExpenses - (row.investment || 0);
             
             cumulatedSavings += row.savings;
             row.cumulatedSavings = cumulatedSavings;
