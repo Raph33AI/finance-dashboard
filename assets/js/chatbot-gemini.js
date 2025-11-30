@@ -6,11 +6,11 @@
 class GeminiAI {
     constructor(config) {
         this.config = config;
-        this.apiKey = config.api.gemini.apiKey;
         
-        // ✅ UTILISE L'ENDPOINT DU CONFIG (ne pas reconstruire)
-        this.endpoint = config.api.gemini.endpoint;
-        this.model = config.api.gemini.model;
+        // ✅ CORRECTION : Utiliser workerUrl
+        this.workerUrl = config.api.gemini.workerUrl;
+        this.model = config.api.gemini.model || 'gemini-1.5-flash';
+        this.apiKey = null; // Plus besoin (dans le Worker)
         
         this.conversationHistory = [];
         this.maxHistorySize = 20;
@@ -29,13 +29,12 @@ class GeminiAI {
         
         console.log(`🤖 Gemini AI initialized`);
         console.log(`📡 Model: ${this.model}`);
-        console.log(`📡 Endpoint: ${this.endpoint}`);
+        console.log(`📡 Worker URL: ${this.workerUrl}`);
         
         this.initializeSystemPrompt();
     }
 
     initializeSystemPrompt() {
-        // ✅ AMÉLIORATION 3: Prompt conversationnel flexible (au lieu de template rigide)
         this.systemPrompt = `You are **Alphy**, an ELITE AI Financial Expert with deep knowledge across ALL financial domains.
 
 **🎯 YOUR CORE IDENTITY:**
@@ -181,19 +180,18 @@ Examples:
 
     async generateResponse(userMessage, context = {}) {
         try {
-            if (!this.apiKey || this.apiKey === 'YOUR_GEMINI_API_KEY_HERE') {
-                throw new Error('Gemini API key not configured');
+            // ✅ CORRECTION : Vérifier workerUrl
+            if (!this.workerUrl) {
+                throw new Error('Gemini Worker URL not configured. Please check chatbot-config.js');
             }
 
             await this.enforceRateLimit();
             
-            // ✅ AMÉLIORATION 4: Prompt adaptatif selon le contexte
             const enhancedPrompt = this.buildAdaptivePrompt(userMessage, context);
             
             const response = await this.makeGeminiRequest(enhancedPrompt);
             const processedResponse = this.processResponse(response);
 
-            // ✅ AMÉLIORATION 5: Mise à jour enrichie de l'historique
             this.updateConversationHistory(userMessage, processedResponse, context);
             this.trackUsage(response);
 
@@ -205,17 +203,14 @@ Examples:
         }
     }
 
-    // ✅ AMÉLIORATION 6: Construction adaptative du prompt (pas toujours tout charger)
     buildAdaptivePrompt(userMessage, context) {
         let prompt = this.systemPrompt + '\n\n';
 
-        // ✅ Injection intelligente de l'historique conversationnel
         if (this.conversationHistory.length > 0) {
             prompt += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`;
             prompt += `**📜 CONVERSATION HISTORY (for context):**\n`;
             prompt += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n`;
             
-            // Garder les 5 derniers échanges pour le contexte
             const recentHistory = this.conversationHistory.slice(-5);
             recentHistory.forEach((entry, index) => {
                 prompt += `**[${index + 1}] User:** ${entry.user}\n`;
@@ -223,12 +218,10 @@ Examples:
             });
         }
 
-        // ✅ Contexte utilisateur persistant
         if (this.userContext.preferredStocks.length > 0) {
             prompt += `**User's Watchlist:** ${this.userContext.preferredStocks.join(', ')}\n\n`;
         }
 
-        // ✅ Injection conditionnelle des données de marché (seulement si pertinent)
         const needsStockData = this.detectNeedsStockData(userMessage, context);
         
         if (needsStockData && context.stockData) {
@@ -243,12 +236,10 @@ Examples:
             prompt += this.formatTechnicalContext(context.technicalIndicators);
         }
 
-        // ✅ Données de marché général (seulement si demandé)
         if (context.marketData && this.detectNeedsMarketOverview(userMessage)) {
             prompt += this.formatMarketContext(context.marketData);
         }
 
-        // ✅ Données IPO (seulement si demandé)
         if (context.ipoData && userMessage.toLowerCase().includes('ipo')) {
             prompt += this.formatIPOContext(context.ipoData);
         }
@@ -257,7 +248,6 @@ Examples:
         prompt += `**👤 USER'S CURRENT QUESTION:**\n`;
         prompt += `"${userMessage}"\n\n`;
         
-        // ✅ Instructions contextuelles
         if (needsStockData && context.timeSeriesData) {
             prompt += `*You have access to complete market data above. Use exact numbers and calculate precise metrics.*\n\n`;
         } else if (!needsStockData) {
@@ -269,16 +259,13 @@ Examples:
         return prompt;
     }
 
-    // ✅ AMÉLIORATION 7: Détection intelligente du besoin de données
     detectNeedsStockData(message, context) {
         const lowerMessage = message.toLowerCase();
         
-        // Si un symbole est mentionné OU disponible dans le contexte
         if (context.entities && context.entities.symbols && context.entities.symbols.length > 0) {
             return true;
         }
         
-        // Mots-clés nécessitant des données de marché
         const stockKeywords = [
             'stock', 'share', 'price', 'analyze', 'analysis', 'chart', 'performance',
             'evolution', 'historical', 'trend', 'technical', 'fundamental',
@@ -295,7 +282,6 @@ Examples:
         return marketKeywords.some(kw => lowerMessage.includes(kw));
     }
 
-    // ✅ AMÉLIORATION 8: Formatage optimisé des données (plus concis)
     formatStockDataContext(stockData) {
         const stock = stockData;
         let context = `**📊 REAL-TIME DATA - ${stock.symbol}**\n`;
@@ -366,7 +352,7 @@ Examples:
 
     async makeGeminiRequest(prompt) {
         const requestBody = {
-            model: this.config.api.gemini.model,
+            model: this.model,
             contents: [{
                 parts: [{
                     text: prompt
@@ -381,12 +367,10 @@ Examples:
             safetySettings: this.config.api.gemini.safetySettings
         };
 
-        // ✅ APPEL VIA LE WORKER CLOUDFLARE GEMINI
-        const workerUrl = this.config.api.gemini.workerUrl;
+        // ✅ APPEL VIA LE WORKER CLOUDFLARE
+        console.log(`📡 Calling Gemini via Worker: ${this.workerUrl}`);
 
-        console.log(`📡 Calling Gemini via Worker: ${workerUrl}`);
-
-        const response = await fetch(workerUrl, {
+        const response = await fetch(this.workerUrl, {
             method: 'POST',
             headers: { 
                 'Content-Type': 'application/json'
@@ -444,7 +428,6 @@ Examples:
         return requests;
     }
 
-    // ✅ AMÉLIORATION 10: Historique conversationnel enrichi
     updateConversationHistory(userMessage, assistantResponse, context) {
         const entry = {
             user: userMessage,
@@ -456,19 +439,16 @@ Examples:
         
         this.conversationHistory.push(entry);
 
-        // Garder les 20 derniers messages
         if (this.conversationHistory.length > this.maxHistorySize) {
             this.conversationHistory.shift();
         }
         
-        // ✅ Mettre à jour le contexte utilisateur
         if (entry.symbols.length > 0) {
             entry.symbols.forEach(symbol => {
                 if (!this.userContext.preferredStocks.includes(symbol)) {
                     this.userContext.preferredStocks.push(symbol);
                 }
             });
-            // Garder seulement les 10 derniers symboles
             if (this.userContext.preferredStocks.length > 10) {
                 this.userContext.preferredStocks = this.userContext.preferredStocks.slice(-10);
             }
@@ -493,8 +473,32 @@ Examples:
     }
 
     handleError(error) {
+        let errorMessage = '⚠ **I encountered an error.**\n\n';
+        
+        if (error.message.includes('Worker URL not configured')) {
+            errorMessage += '❌ **Configuration Error**: Gemini Worker URL is missing.\n\n';
+            errorMessage += '**Please check chatbot-config.js:**\n';
+            errorMessage += '- Verify `api.gemini.workerUrl` is set\n';
+            errorMessage += '- It should look like: `https://gemini-ai-proxy.YOUR-USERNAME.workers.dev/api/gemini`\n';
+        } else if (error.message.includes('404')) {
+            errorMessage += '❌ **Worker Error 404**: The Gemini Worker was not found.\n\n';
+            errorMessage += '**Possible fixes:**\n';
+            errorMessage += '1. Check the Worker URL in chatbot-config.js\n';
+            errorMessage += '2. Verify the Worker is deployed on Cloudflare\n';
+            errorMessage += '3. Test the Worker endpoint directly\n';
+        } else if (error.message.includes('403')) {
+            errorMessage += '❌ **Worker Error 403**: Access denied.\n\n';
+            errorMessage += '**Possible fixes:**\n';
+            errorMessage += '1. Check that GEMINI_API_KEY is set in Worker environment variables\n';
+            errorMessage += '2. Verify your Gemini API key is valid\n';
+            errorMessage += '3. Check Worker CORS settings\n';
+        } else {
+            errorMessage += `**Error:** ${error.message}\n\n`;
+            errorMessage += 'Please try again or contact support.';
+        }
+        
         return {
-            text: `⚠ **I encountered an error:** ${error.message}\n\nPlease try rephrasing your question or check your API configuration.`,
+            text: errorMessage,
             error: true,
             chartRequests: []
         };
