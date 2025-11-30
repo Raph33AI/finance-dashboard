@@ -210,6 +210,7 @@ const Dashboard = (function() {
             row.cumulatedInvestment = cumulatedInvestment;
             
             row.totalPortfolio = cumulatedInvestment + 
+                                cumulatedSavings +
                                 (row.cumulatedGains || 0) + 
                                 (row.pee || 0);
             
@@ -925,17 +926,18 @@ const Dashboard = (function() {
                 pointFormat: '<b>{point.name}</b>: {point.y:,.0f} EUR ({point.percentage:.1f}%)' 
             },
             series: [{
-                name: 'Amount',
-                data: [
-                    { name: 'Rent', y: row.rent },
-                    { name: 'Food', y: row.food },
-                    { name: 'Fix Costs', y: row.fixCosts },
-                    { name: 'Others', y: row.others },
-                    { name: 'Loan', y: row.loan }
-                ],
+            name: 'Amount',
+            data: [
+                { name: 'Rent', y: row.rent },
+                { name: 'Food', y: row.food },
+                { name: 'Fix Costs', y: row.fixCosts },
+                { name: 'Others', y: row.others },
+                { name: 'Loan', y: row.loan },
+                { name: 'Monthly Investment', y: row.investment },     // ✅ AJOUTER
+            ],
                 colorByPoint: true
             }],
-            colors: ['#5B2C6F', '#6C3483', '#8E44AD', '#9D5CE6', '#C39BD3'],
+            colors: ['#5B2C6F', '#6C3483', '#8E44AD', '#9D5CE6', '#C39BD3', '#4A74F3'],  // ✅ Ajouter 1 couleur
             plotOptions: {
                 pie: {
                     dataLabels: {
@@ -1204,7 +1206,7 @@ const Dashboard = (function() {
         
         const needsAmount = row.rent + row.food + row.fixCosts + row.loan;
         const wantsAmount = row.others;
-        const savingsAmount = row.investment + row.savings;
+        const savingsAmount = row.savings + (row.investment || 0);  // ✅ CORRECTION
         const total = row.totalIncome;
         
         const needsPercent = total > 0 ? (needsAmount / total * 100) : 0;
