@@ -1,11 +1,12 @@
 /* ═══════════════════════════════════════════════════════════════
    CHECKOUT.JS - VERSION CLOUDFLARE WORKERS + CODES PROMO + STRIPE
-   AlphaVault AI v2.2
+   AlphaVault AI v2.4
    ✅ Support des codes promo TRIAL (14 jours gratuits sans CB)
-   ✅ Mise à jour dynamique des features
+   ✅ Support des 3 plans : BASIC (gratuit) + PRO + PLATINUM
+   ✅ Plan Basic : 100% gratuit sans carte bancaire
    ═══════════════════════════════════════════════════════════════ */
 
-// ⚙️ CONFIGURATION
+// ⚙ CONFIGURATION
 const STRIPE_PUBLIC_KEY = 'pk_live_51SU1qnDxR6DPBfOfX6yJYr9Qzh40aNGrn1TSZxI5q0Q0m9hsgXmMQFq2TErynzuUKOivH4T3DJ1FjKy683WsqQAR00tAMRJGtk';
 const WORKER_URL = 'https://finance-hub-api.raphnardone.workers.dev';
 
@@ -21,18 +22,22 @@ const PROMO_CODES = {
     'LAUNCH15': {
         type: 'percentage',
         value: 15,
-        description: '15% off for early adopters'
+        description: '15% off for early adopters',
+        plans: ['pro', 'platinum'] // ✅ Pas applicable au plan Basic gratuit
     },
     'WELCOME15': {
         type: 'percentage',
         value: 15,
-        description: '15% welcome discount'
+        description: '15% welcome discount',
+        plans: ['pro', 'platinum']
     },
     'SAVE15': {
         type: 'percentage',
         value: 15,
-        description: '15% savings'
+        description: '15% savings',
+        plans: ['pro', 'platinum']
     },
+    // ✅ CODES PROMO FREE (seulement Pro et Platinum)
     'FREEPRO': {
         type: 'free',
         plans: ['pro'],
@@ -48,7 +53,7 @@ const PROMO_CODES = {
         plans: ['pro', 'platinum'],
         description: 'VIP lifetime access'
     },
-    // ✅ NOUVEAU : Code promo 14 jours gratuits SANS CB
+    // ✅ CODES PROMO TRIAL 14 JOURS (seulement Pro et Platinum)
     'FREE14DAYS': {
         type: 'trial',
         duration: 14,
@@ -71,8 +76,8 @@ const PROMO_CODES = {
 
 // ✅ État de l'application étendu
 let selectedPlan = {
-    name: 'pro',
-    price: 10
+    name: 'basic',
+    price: 0 // ✅ Plan Basic gratuit
 };
 
 let appliedPromo = null;
@@ -122,8 +127,8 @@ console.log('✅ Stripe card element mounted');
 cardElement.on('change', function(event) {
     const displayError = document.getElementById('card-errors');
     if (event.error) {
-        displayError.innerHTML = `<i class="fas fa-exclamation-circle"></i> ${event.error.message}`;
-        console.warn('⚠️ Card validation error:', event.error.message);
+        displayError.innerHTML = `<i></i> ${event.error.message}`;
+        console.warn('⚠ Card validation error:', event.error.message);
     } else {
         displayError.textContent = '';
     }
@@ -161,7 +166,7 @@ async function checkExistingPlan(user) {
             console.log('   Current plan:', plan);
             console.log('   Status:', status);
         } else {
-            console.log('ℹ️ New user - showing "Start Your Premium Journey"');
+            console.log('ℹ New user - showing "Start Your Premium Journey"');
             
             userExistingPlan = {
                 hasPlan: false,
@@ -180,8 +185,26 @@ async function checkExistingPlan(user) {
 }
 
 function displayCurrentPlanBadge(plan) {
-    const planName = plan === 'pro' ? 'Pro' : plan === 'platinum' ? 'Platinum' : 'Basic';
-    const planColor = plan === 'platinum' ? '#8B5CF6' : '#3B82F6';
+    // ✅ Gestion des 3 plans
+    let planName, planColor;
+    
+    switch(plan) {
+        case 'basic':
+            planName = 'Basic';
+            planColor = '#06b6d4'; // Cyan
+            break;
+        case 'pro':
+            planName = 'Pro';
+            planColor = '#3B82F6'; // Blue
+            break;
+        case 'platinum':
+            planName = 'Platinum';
+            planColor = '#8B5CF6'; // Purple
+            break;
+        default:
+            planName = 'Basic';
+            planColor = '#06b6d4';
+    }
     
     const badge = document.createElement('div');
     badge.id = 'current-plan-badge';
@@ -201,8 +224,8 @@ function displayCurrentPlanBadge(plan) {
         gap: 10px;
     `;
     badge.innerHTML = `
-        <i class="fas fa-crown"></i>
-        <span>Current Plan: ${planName}</span>
+        <i></i>
+        Current Plan: ${planName}
     `;
     
     const header = document.querySelector('.checkout-header');
@@ -219,7 +242,7 @@ function updateHeaderForExistingUser(hasActivePlan) {
         subtitle.textContent = 'Upgrade or downgrade anytime • Cancel anytime • Secure payment';
     } else {
         title.textContent = 'Start Your Premium Journey';
-        subtitle.textContent = '14-day free trial • Cancel anytime • Secure payment';
+        subtitle.textContent = 'Free Basic plan • Upgrade anytime • Secure payment';
     }
 }
 
@@ -233,39 +256,60 @@ planOptions.forEach(option => {
     option.addEventListener('click', function() {
         console.log('📦 Plan clicked:', this.dataset.plan);
         
+        // Retirer la sélection de tous les plans
         planOptions.forEach(opt => opt.classList.remove('selected'));
+        
+        // Ajouter la sélection au plan cliqué
         this.classList.add('selected');
         
+        // ✅ Plan Basic = prix 0
+        const planName = this.dataset.plan;
+        const planPrice = planName === 'basic' ? 0 : parseFloat(this.dataset.price);
+        
         selectedPlan = {
-            name: this.dataset.plan,
-            price: parseFloat(this.dataset.price)
+            name: planName,
+            price: planPrice
         };
         
         console.log('✅ Plan sélectionné:', selectedPlan);
+        
+        // ✅ Retirer le code promo si on passe au plan Basic
+        if (planName === 'basic' && appliedPromo) {
+            console.log('ℹ Plan Basic sélectionné - Retrait du code promo');
+            removePromoCode();
+        }
+        
         updatePriceSummary();
     });
 });
 
-const defaultPlan = document.querySelector('[data-plan="pro"]');
+// ✅ Plan par défaut : BASIC
+const defaultPlan = document.querySelector('[data-plan="basic"]');
 if (defaultPlan) {
     defaultPlan.classList.add('selected');
-    console.log('✅ Default plan selected: Pro');
+    console.log('✅ Default plan selected: Basic (Free)');
 }
 
+// ✅ Vérifier si un plan est passé en paramètre URL
 const urlParams = new URLSearchParams(window.location.search);
 const urlPlan = urlParams.get('plan');
 
-if (urlPlan && (urlPlan === 'pro' || urlPlan === 'platinum')) {
+if (urlPlan && ['basic', 'pro', 'platinum'].includes(urlPlan)) {
     console.log('🔗 Plan détecté dans URL:', urlPlan);
     
     const targetPlan = document.querySelector(`[data-plan="${urlPlan}"]`);
     if (targetPlan) {
+        // Retirer la sélection par défaut
         planOptions.forEach(opt => opt.classList.remove('selected'));
+        
+        // Sélectionner le plan de l'URL
         targetPlan.classList.add('selected');
+        
+        const planPrice = urlPlan === 'basic' ? 0 : parseFloat(targetPlan.dataset.price);
         
         selectedPlan = {
             name: urlPlan,
-            price: parseFloat(targetPlan.dataset.price)
+            price: planPrice
         };
         
         console.log('✅ Plan auto-sélectionné depuis URL:', selectedPlan);
@@ -290,6 +334,13 @@ applyPromoBtn.addEventListener('click', function() {
         return;
     }
     
+    // ✅ Bloquer les codes promo pour le plan Basic
+    if (selectedPlan.name === 'basic') {
+        showPromoMessage('Promo codes are not applicable to the free Basic plan', 'error');
+        console.warn('❌ Code promo non applicable au plan Basic gratuit');
+        return;
+    }
+    
     console.log('🎁 Tentative d\'application du code:', code);
     
     const promo = PROMO_CODES[code];
@@ -300,7 +351,8 @@ applyPromoBtn.addEventListener('click', function() {
         return;
     }
     
-    if ((promo.type === 'free' || promo.type === 'trial') && !promo.plans.includes(selectedPlan.name)) {
+    // Vérifier si le code est applicable au plan sélectionné
+    if (!promo.plans.includes(selectedPlan.name)) {
         showPromoMessage(`This code is only valid for ${promo.plans.join(' or ')} plan`, 'error');
         console.warn('❌ Code non applicable à ce plan');
         return;
@@ -324,7 +376,11 @@ applyPromoBtn.addEventListener('click', function() {
 });
 
 removePromoBtn.addEventListener('click', function() {
-    console.log('🗑️ Suppression du code promo');
+    removePromoCode();
+});
+
+function removePromoCode() {
+    console.log('🗑 Suppression du code promo');
     
     appliedPromo = null;
     promoApplied.classList.add('hidden');
@@ -333,11 +389,11 @@ removePromoBtn.addEventListener('click', function() {
     promoMessage.classList.add('hidden');
     
     updatePriceSummary();
-});
+}
 
 function showPromoMessage(message, type) {
     promoMessage.innerHTML = `
-        <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'}"></i>
+        <i></i>
         ${message}
     `;
     promoMessage.className = `promo-message ${type}`;
@@ -345,17 +401,75 @@ function showPromoMessage(message, type) {
 }
 
 // ═══════════════════════════════════════════════════════════════
-// MISE À JOUR DU RÉCAPITULATIF DES PRIX
+// ✅ MISE À JOUR DU RÉCAPITULATIF DES PRIX
 // ═══════════════════════════════════════════════════════════════
 
 function updatePriceSummary() {
-    const planName = selectedPlan.name === 'pro' ? 'AlphaVault Pro' : 'AlphaVault Platinum';
+    // ✅ Gestion des 3 plans
+    let planName;
+    
+    switch(selectedPlan.name) {
+        case 'basic':
+            planName = 'AlphaVault Basic';
+            break;
+        case 'pro':
+            planName = 'AlphaVault Pro';
+            break;
+        case 'platinum':
+            planName = 'AlphaVault Platinum';
+            break;
+        default:
+            planName = 'AlphaVault Basic';
+    }
+    
     const originalPrice = selectedPlan.price;
     
     document.getElementById('summaryPlanName').textContent = planName;
-    document.getElementById('summaryOriginalPrice').textContent = `$${originalPrice.toFixed(2)}`;
+    document.getElementById('summaryOriginalPrice').textContent = originalPrice === 0 ? 'FREE' : `$${originalPrice.toFixed(2)}`;
     
     let buttonText = '';
+    
+    // ═══════════════════════════════════════════════════════════════
+    // ✅ CAS SPÉCIAL : PLAN BASIC (GRATUIT)
+    // ═══════════════════════════════════════════════════════════════
+    if (selectedPlan.name === 'basic') {
+        document.getElementById('discountRow').classList.add('hidden');
+        document.getElementById('originalPriceStriked').classList.add('hidden');
+        document.getElementById('summaryFinalPrice').textContent = 'FREE';
+        document.getElementById('freeAccessBadge').classList.remove('hidden');
+        document.getElementById('trialAccessBadge').classList.add('hidden');
+        
+        // ✅ MASQUER LA SECTION CARTE BANCAIRE
+        document.getElementById('cardDetailsGroup').classList.add('hidden');
+        
+        // ✅ Masquer la section code promo pour le plan Basic
+        const promoSection = document.querySelector('.promo-section');
+        if (promoSection) {
+            promoSection.style.display = 'none';
+        }
+        
+        // Texte du bouton
+        if (userExistingPlan.hasPlan && userExistingPlan.currentPlan !== 'basic') {
+            buttonText = 'Downgrade to Basic (Free)';
+        } else if (userExistingPlan.currentPlan === 'basic') {
+            buttonText = 'Already on Basic Plan';
+        } else {
+            buttonText = 'Activate Free Basic Plan';
+        }
+        
+        document.getElementById('submitButtonText').textContent = buttonText;
+        return;
+    }
+    
+    // ═══════════════════════════════════════════════════════════════
+    // PLANS PAYANTS (PRO ET PLATINUM)
+    // ═══════════════════════════════════════════════════════════════
+    
+    // ✅ Afficher la section code promo
+    const promoSection = document.querySelector('.promo-section');
+    if (promoSection) {
+        promoSection.style.display = 'block';
+    }
     
     if (appliedPromo) {
         if (appliedPromo.type === 'percentage') {
@@ -394,6 +508,7 @@ function updatePriceSummary() {
             
             buttonText = 'Activate Free Lifetime Access';
             
+            // ✅ Masquer les détails de carte pour accès gratuit
             document.getElementById('cardDetailsGroup').classList.add('hidden');
             
         } else if (appliedPromo.type === 'trial') {
@@ -411,9 +526,11 @@ function updatePriceSummary() {
             
             buttonText = `Start ${trialDays}-Day Free Trial`;
             
+            // ✅ Masquer les détails de carte pour trial sans CB
             document.getElementById('cardDetailsGroup').classList.add('hidden');
         }
     } else {
+        // Aucun code promo appliqué
         document.getElementById('discountRow').classList.add('hidden');
         document.getElementById('originalPriceStriked').classList.add('hidden');
         document.getElementById('summaryFinalPrice').textContent = `$${originalPrice.toFixed(2)}`;
@@ -426,16 +543,18 @@ function updatePriceSummary() {
             buttonText = 'Start 14-Day Free Trial';
         }
         
+        // ✅ Afficher les détails de carte
         document.getElementById('cardDetailsGroup').classList.remove('hidden');
     }
     
     document.getElementById('submitButtonText').textContent = buttonText;
 }
 
+// Mise à jour initiale du récapitulatif
 updatePriceSummary();
 
 // ═══════════════════════════════════════════════════════════════
-// SOUMISSION DU FORMULAIRE
+// ✅ SOUMISSION DU FORMULAIRE
 // ═══════════════════════════════════════════════════════════════
 
 const form = document.getElementById('payment-form');
@@ -454,7 +573,7 @@ form.addEventListener('submit', async (event) => {
     submitButton.style.animation = 'none';
     
     try {
-        console.log('1️⃣ Vérification de l\'authentification...');
+        console.log('1⃣ Vérification de l\'authentification...');
         
         const user = firebase.auth().currentUser;
         
@@ -465,7 +584,7 @@ form.addEventListener('submit', async (event) => {
         console.log('   ✅ Utilisateur authentifié:', user.email);
         console.log('   📧 User ID:', user.uid);
         
-        console.log('2️⃣ Récupération des données...');
+        console.log('2⃣ Récupération des données...');
         
         const email = document.getElementById('email').value;
         const name = document.getElementById('name').value;
@@ -473,8 +592,37 @@ form.addEventListener('submit', async (event) => {
         console.log('   ✅ Email:', email);
         console.log('   ✅ Nom:', name);
         console.log('   ✅ Plan sélectionné:', selectedPlan.name);
-        console.log('   ✅ Prix original:', `$${selectedPlan.price}/mois`);
+        console.log('   ✅ Prix original:', selectedPlan.price === 0 ? 'FREE' : `$${selectedPlan.price}/mois`);
         console.log('   📊 Plan existant:', userExistingPlan.hasPlan ? userExistingPlan.currentPlan : 'Aucun');
+        
+        // ═══════════════════════════════════════════════════════════════
+        // ✅ CAS SPÉCIAL : PLAN BASIC GRATUIT
+        // ═══════════════════════════════════════════════════════════════
+        if (selectedPlan.name === 'basic') {
+            console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+            console.log('🎉 ACTIVATION DU PLAN BASIC GRATUIT');
+            console.log('   👤 User ID:', user.uid);
+            console.log('   💎 Plan: Basic (FREE)');
+            console.log('   📧 Email:', email);
+            console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+            
+            // Mettre à jour Firestore directement
+            await firebase.firestore().collection('users').doc(user.uid).set({
+                plan: 'basic',
+                subscriptionStatus: 'active',
+                updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+            }, { merge: true });
+            
+            console.log('✅ Plan Basic activé dans Firestore');
+            
+            // Redirection vers la page de succès
+            window.location.href = 'success.html?plan=basic&amp;free=true&amp;noconfetti=true';
+            return;
+        }
+        
+        // ═══════════════════════════════════════════════════════════════
+        // PLANS PAYANTS (PRO ET PLATINUM)
+        // ═══════════════════════════════════════════════════════════════
         
         if (appliedPromo) {
             console.log('   🎁 Code promo appliqué:', appliedPromo.code);
@@ -482,7 +630,7 @@ form.addEventListener('submit', async (event) => {
             console.log('   🎁 Valeur:', appliedPromo.type === 'percentage' ? `${appliedPromo.value}%` : appliedPromo.type === 'trial' ? `${appliedPromo.duration} jours` : 'FREE');
         }
         
-        console.log('3️⃣ Appel du Cloudflare Worker...');
+        console.log('3⃣ Appel du Cloudflare Worker...');
         console.log('   📡 URL:', `${WORKER_URL}/create-checkout-session`);
         
         const requestBody = {
@@ -520,6 +668,7 @@ form.addEventListener('submit', async (event) => {
             throw new Error(data.error);
         }
         
+        // ✅ Gestion de l'accès gratuit (FREE ou TRIAL)
         if (data.free === true) {
             console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
             
@@ -528,11 +677,11 @@ form.addEventListener('submit', async (event) => {
                 console.log('   👤 User ID:', user.uid);
                 console.log('   💎 Plan:', selectedPlan.name);
                 console.log('   🎁 Code promo:', appliedPromo.code);
-                console.log('   ⏱️ Durée:', appliedPromo.duration, 'jours');
+                console.log('   ⏱ Durée:', appliedPromo.duration, 'jours');
                 console.log('   📅 Expire le:', data.expiresAt || 'N/A');
                 console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
                 
-                window.location.href = `success.html?plan=${selectedPlan.name}&trial=true&days=${appliedPromo.duration}&noconfetti=true`;
+                window.location.href = `success.html?plan=${selectedPlan.name}&amp;trial=true&amp;days=${appliedPromo.duration}&amp;noconfetti=true`;
             } else {
                 console.log('🎉 ACCÈS GRATUIT À VIE ACTIVÉ');
                 console.log('   👤 Client Stripe ID:', data.customerId || 'N/A');
@@ -540,7 +689,7 @@ form.addEventListener('submit', async (event) => {
                 console.log('   🎁 Code promo:', appliedPromo.code);
                 console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
                 
-                window.location.href = `success.html?plan=${selectedPlan.name}&free=true&noconfetti=true`;
+                window.location.href = `success.html?plan=${selectedPlan.name}&amp;free=true&amp;noconfetti=true`;
             }
             
             return;
@@ -551,7 +700,7 @@ form.addEventListener('submit', async (event) => {
         }
         
         console.log('   ✅ Session Stripe créée:', data.sessionId);
-        console.log('5️⃣ Redirection vers Stripe Checkout...');
+        console.log('5⃣ Redirection vers Stripe Checkout...');
         
         const { error } = await stripe.redirectToCheckout({
             sessionId: data.sessionId,
@@ -572,7 +721,7 @@ form.addEventListener('submit', async (event) => {
         console.error('Stack:', error.stack);
         
         const errorDisplay = document.getElementById('card-errors');
-        errorDisplay.innerHTML = `<i class="fas fa-exclamation-circle"></i> ${error.message}`;
+        errorDisplay.innerHTML = `<i></i> ${error.message}`;
         
         submitButton.disabled = false;
         submitButton.classList.remove('loading');
@@ -590,8 +739,8 @@ firebase.auth().onAuthStateChanged(async (user) => {
         
         await checkExistingPlan(user);
     } else {
-        console.warn('⚠️ Aucun utilisateur connecté');
+        console.warn('⚠ Aucun utilisateur connecté');
     }
 });
 
-console.log('✅ Checkout script loaded successfully');
+console.log('✅ Checkout script loaded successfully - Plan Basic GRATUIT + Pro + Platinum');
