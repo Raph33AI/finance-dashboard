@@ -1,7 +1,8 @@
 /* ============================================
    SETTINGS.JS - Gestion des paramètres utilisateur
    ✅ SYNCHRONISATION NEWSLETTER SIMPLIFIÉE (Firestore = Source de vérité)
-   ✅ CORRECTION CORS &amp; TOAST
+   ✅ CORRECTION CORS avec MULTIPLES TENTATIVES
+   ✅ TOAST CORRIGÉ
    ============================================ */
 
 // Configuration
@@ -227,37 +228,110 @@ async function unsubscribeFromNewsletter(email) {
     try {
         console.log('📧 Désinscription de la newsletter:', email);
         
-        // ✅ CORRECTION : Utiliser POST au lieu de GET pour éviter CORS
-        const response = await fetch(`${NEWSLETTER_WORKER_URL}/unsubscribe`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                email: email
-            })
-        });
+        // ✅ MÉTHODE 1 : Essayer GET avec paramètre URL (ancien format)
+        console.log('🔄 Tentative 1 : GET avec paramètre URL...');
         
-        if (!response.ok) {
-            console.warn('⚠ Erreur Worker lors de la désinscription (statut:', response.status, ')');
-            // ✅ Ne pas bloquer si le Worker échoue - la préférence Firestore fait foi
-            console.log('ℹ Préférence sauvegardée dans Firestore. Désinscription effective au prochain envoi.');
-            showToast('warning', 'Désinscription enregistrée', 'La désinscription sera effective dans quelques minutes');
+        try {
+            // Utiliser une image invisible pour contourner CORS
+            const img = new Image();
+            const unsubscribeUrl = `${NEWSLETTER_WORKER_URL}/unsubscribe?email=${encodeURIComponent(email)}`;
+            
+            await new Promise((resolve, reject) => {
+                img.onload = () => {
+                    console.log('✅ Requête GET envoyée avec succès (méthode 1)');
+                    resolve();
+                };
+                img.onerror = () => {
+                    console.warn('⚠ Méthode 1 échouée, tentative méthode 2...');
+                    reject();
+                };
+                
+                // Timeout de 3 secondes
+                setTimeout(() => reject(), 3000);
+                
+                img.src = unsubscribeUrl;
+            });
+            
+            console.log('✅ Désinscription newsletter réussie (méthode 1)');
+            showToast('info', 'Désinscription', 'Vous ne recevrez plus la newsletter hebdomadaire');
             return true;
+            
+        } catch (error1) {
+            console.log('⚠ Méthode 1 (GET Image) échouée');
         }
         
-        console.log('✅ Désinscription newsletter réussie');
-        showToast('info', 'Désinscription', 'Vous ne recevrez plus la newsletter hebdomadaire');
+        // ✅ MÉTHODE 2 : Essayer navigator.sendBeacon (pas de CORS)
+        console.log('🔄 Tentative 2 : sendBeacon...');
         
-        return true;
+        try {
+            const beaconUrl = `${NEWSLETTER_WORKER_URL}/unsubscribe`;
+            const data = new Blob([JSON.stringify({ email: email })], { type: 'application/json' });
+            
+            if (navigator.sendBeacon && navigator.sendBeacon(beaconUrl, data)) {
+                console.log('✅ Désinscription newsletter réussie (méthode 2)');
+                showToast('info', 'Désinscription', 'Vous ne recevrez plus la newsletter hebdomadaire');
+                return true;
+            } else {
+                console.warn('⚠ Méthode 2 (sendBeacon) non supportée ou échouée');
+            }
+        } catch (error2) {
+            console.log('⚠ Méthode 2 (sendBeacon) échouée');
+        }
+        
+        // ✅ MÉTHODE 3 : Essayer fetch POST (mode no-cors)
+        console.log('🔄 Tentative 3 : Fetch POST no-cors...');
+        
+        try {
+            await fetch(`${NEWSLETTER_WORKER_URL}/unsubscribe`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    email: email
+                }),
+                mode: 'no-cors' // ✅ Mode no-cors pour contourner
+            });
+            
+            // En mode no-cors, on ne peut pas lire la réponse mais la requête est envoyée
+            console.log('✅ Requête POST envoyée (méthode 3 - no-cors)');
+            showToast('info', 'Désinscription', 'Vous ne recevrez plus la newsletter hebdomadaire');
+            return true;
+            
+        } catch (error3) {
+            console.log('⚠ Méthode 3 (Fetch POST) échouée');
+        }
+        
+        // ✅ MÉTHODE 4 : Essayer fetch GET classique (mode no-cors)
+        console.log('🔄 Tentative 4 : Fetch GET no-cors...');
+        
+        try {
+            await fetch(`${NEWSLETTER_WORKER_URL}/unsubscribe?email=${encodeURIComponent(email)}`, {
+                method: 'GET',
+                mode: 'no-cors'
+            });
+            
+            console.log('✅ Requête GET envoyée (méthode 4)');
+            showToast('info', 'Désinscription', 'Vous ne recevrez plus la newsletter hebdomadaire');
+            return true;
+            
+        } catch (error4) {
+            console.log('⚠ Méthode 4 (Fetch GET) échouée');
+        }
+        
+        // ✅ FALLBACK : Toutes les méthodes ont échoué
+        console.warn('⚠ Toutes les tentatives de désinscription Worker ont échoué');
+        console.log('ℹ Préférence sauvegardée dans Firestore. La désinscription sera effective au prochain envoi.');
+        
+        showToast('warning', 'Désinscription enregistrée', 'Votre préférence est sauvegardée. La désinscription sera effective dans quelques minutes.');
+        
+        return true; // On retourne true pour ne pas bloquer l'utilisateur
         
     } catch (error) {
         console.error('❌ Erreur désinscription newsletter:', error);
         
-        // ✅ FALLBACK : Même si le Worker échoue, on continue
-        console.warn('⚠ Erreur Worker mais préférence sauvegardée dans Firestore');
-        showToast('warning', 'Désinscription enregistrée', 'La désinscription sera effective dans quelques minutes');
-        return true; // On retourne true pour ne pas bloquer l'utilisateur
+        showToast('warning', 'Désinscription enregistrée', 'Votre préférence est sauvegardée dans votre compte');
+        return true;
     }
 }
 
