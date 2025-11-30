@@ -1,21 +1,23 @@
 // ============================================
 // ADVANCED FINANCIAL ANALYTICS
-// Real Market Data Integration
+// Version Worker - Finance Hub API
 // ============================================
 
 class FinancialAnalytics {
     constructor(config) {
         this.config = config;
-        this.finnhubApiKey = config.api.finnhub.apiKey;
-        this.finnhubEndpoint = config.api.finnhub.endpoint;
-        this.twelveDataApiKey = config.api.twelveData.apiKey;
-        this.twelveDataEndpoint = config.api.twelveData.endpoint;
+        
+        // ✅ CORRECTION : Utiliser le Worker au lieu des clés API directes
+        this.workerBaseUrl = config.api.worker.baseUrl;
         
         this.cache = new Map();
         this.cacheTimeout = 60000; // 1 minute cache
         
         this.requestTimestamps = [];
         this.maxRequestsPerMinute = 30;
+        
+        console.log('📊 FinancialAnalytics initialized');
+        console.log('🌐 Worker URL:', this.workerBaseUrl);
     }
 
     // ============================================
@@ -32,7 +34,7 @@ class FinancialAnalytics {
                 return cached;
             }
 
-            // Fetch from Finnhub
+            // ✅ Fetch via Worker (Finnhub endpoints)
             const [quote, profile, metrics] = await Promise.all([
                 this.getQuote(symbol),
                 this.getCompanyProfile(symbol),
@@ -40,7 +42,7 @@ class FinancialAnalytics {
             ]);
 
             if (!quote || quote.c === 0) {
-                console.warn(`⚠️ No quote data for ${symbol}`);
+                console.warn(`⚠ No quote data for ${symbol}`);
                 return null;
             }
 
@@ -89,7 +91,7 @@ class FinancialAnalytics {
                     priceToSales: metrics.psTTM
                 } : null,
                 timestamp: Date.now(),
-                dataSource: 'Finnhub Real-Time'
+                dataSource: 'Finnhub via Worker'
             };
 
             this.saveToCache(cacheKey, stockData);
@@ -114,6 +116,7 @@ class FinancialAnalytics {
             const cached = this.getFromCache(cacheKey);
             if (cached) return cached;
 
+            // ✅ Fetch major indices via Worker
             const [sp500, nasdaq, dow] = await Promise.all([
                 this.getQuote('SPY'),
                 this.getQuote('QQQ'),
@@ -125,7 +128,7 @@ class FinancialAnalytics {
                 nasdaq: this.formatIndexData(nasdaq, 'NASDAQ', 'QQQ'),
                 dow: this.formatIndexData(dow, 'Dow Jones', 'DIA'),
                 timestamp: Date.now(),
-                dataSource: 'Finnhub Real-Time'
+                dataSource: 'Finnhub via Worker'
             };
 
             this.saveToCache(cacheKey, overview);
@@ -158,51 +161,69 @@ class FinancialAnalytics {
 
             const limitedSize = Math.min(outputsize, 5000);
 
-            if (!this.twelveDataApiKey || this.twelveDataApiKey === 'TA_CLE_TWELVE_DATA_ICI') {
-                console.warn('   ⚠️ Twelve Data API key not configured');
-                console.log('   ℹ️  Add your key in chatbot-config.js');
-                console.log('   ℹ️  Get free key at: https://twelvedata.com/');
-                return this.generateMockTimeSeries(symbol, limitedSize);
-            }
-
-            const url = `${this.twelveDataEndpoint}/time_series?symbol=${symbol}&interval=${interval}&outputsize=${limitedSize}&apikey=${this.twelveDataApiKey}`;
+            // ✅ CORRECTION : Appel via Worker (pas besoin de vérifier la clé API)
+            const url = `${this.workerBaseUrl}/api/time-series?symbol=${symbol}&interval=${interval}&outputsize=${limitedSize}`;
             
-            console.log(`   📡 Calling API...`);
-            console.log(`   URL: ${url.substring(0, 80)}...`);
+            console.log(`   📡 Calling Worker API...`);
+            console.log(`   URL: ${url}`);
             
             const response = await fetch(url);
+            
+            if (!response.ok) {
+                console.warn(`   ⚠ Worker API error: ${response.status}`);
+                return this.generateMockTimeSeries(symbol, limitedSize);
+            }
+            
             const data = await response.json();
 
-            console.log(`   📥 API Response:`, {
-                status: data.status,
+            console.log(`   📥 Worker Response:`, {
+                hasData: !!data.data,
                 hasValues: !!data.values,
-                valueCount: data.values?.length || 0,
-                message: data.message
+                dataCount: data.data?.length || data.values?.length || 0
             });
 
-            if (data.status === 'error' || !data.values) {
-                console.warn(`   ⚠️ API Error: ${data.message || 'No values'}`);
-                if (data.code === 429) {
-                    console.warn('   ⚠️ Rate limit exceeded - using mock data');
-                }
+            // ✅ Le Worker peut retourner soit data.data (transformé) soit data.values (raw)
+            let values = data.data || data.values;
+            
+            if (!values || values.length === 0) {
+                console.warn(`   ⚠ No time series data from Worker`);
                 return this.generateMockTimeSeries(symbol, limitedSize);
             }
 
+            // ✅ Transformer les données si nécessaire
             const timeSeries = {
                 symbol: symbol,
                 interval: interval,
-                data: data.values.map(item => ({
-                    datetime: item.datetime,
-                    timestamp: new Date(item.datetime).getTime(),
-                    open: parseFloat(item.open),
-                    high: parseFloat(item.high),
-                    low: parseFloat(item.low),
-                    close: parseFloat(item.close),
-                    volume: parseInt(item.volume || 0)
-                })).reverse(),
+                data: values.map(item => {
+                    // Si les données sont déjà transformées (ont un timestamp)
+                    if (item.timestamp) {
+                        return item;
+                    }
+                    // Sinon, transformer depuis le format raw Twelve Data
+                    return {
+                        datetime: item.datetime,
+                        timestamp: new Date(item.datetime).getTime(),
+                        open: parseFloat(item.open),
+                        high: parseFloat(item.high),
+                        low: parseFloat(item.low),
+                        close: parseFloat(item.close),
+                        volume: parseInt(item.volume || 0)
+                    };
+                }),
                 timestamp: Date.now(),
-                dataSource: 'Twelve Data Real-Time'
+                dataSource: 'Twelve Data via Worker'
             };
+
+            // ✅ S'assurer que les données sont dans le bon ordre (les plus anciennes en premier)
+            if (timeSeries.data.length > 1) {
+                const firstTimestamp = timeSeries.data[0].timestamp;
+                const lastTimestamp = timeSeries.data[timeSeries.data.length - 1].timestamp;
+                
+                // Si les données sont dans l'ordre inverse, les inverser
+                if (firstTimestamp > lastTimestamp) {
+                    timeSeries.data.reverse();
+                }
+            }
 
             this.saveToCache(cacheKey, timeSeries);
             
@@ -224,28 +245,31 @@ class FinancialAnalytics {
     }
 
     // ============================================
-    // FINNHUB API CALLS
+    // WORKER API CALLS (Finnhub endpoints)
     // ============================================
     async getQuote(symbol) {
-        if (!this.finnhubApiKey || this.finnhubApiKey === 'TA_CLE_FINNHUB_ICI') {
-            console.warn(`⚠️ Finnhub API key not configured`);
-            return null;
-        }
-
         try {
             await this.enforceRateLimit();
             
-            const url = `${this.finnhubEndpoint}/quote?symbol=${symbol}&token=${this.finnhubApiKey}`;
+            // ✅ CORRECTION : Appel via Worker
+            const url = `${this.workerBaseUrl}/api/quote?symbol=${symbol}`;
             const response = await fetch(url);
             
             if (!response.ok) {
-                throw new Error(`Finnhub API error: ${response.status}`);
+                console.error(`Worker API error for quote ${symbol}: ${response.status}`);
+                return null;
             }
             
             const data = await response.json();
+            
+            // ✅ Le Worker peut retourner directement les données ou les wrapper
+            // Si le Worker retourne { c, pc, h, l, o, v, t }, c'est bon
+            // Si le Worker retourne { data: { c, pc, ... } }, extraire data
+            const quote = data.c !== undefined ? data : data.data;
+            
             this.trackRequest();
             
-            return data;
+            return quote;
             
         } catch (error) {
             console.error(`Quote error for ${symbol}:`, error);
@@ -254,21 +278,20 @@ class FinancialAnalytics {
     }
 
     async getCompanyProfile(symbol) {
-        if (!this.finnhubApiKey || this.finnhubApiKey === 'TA_CLE_FINNHUB_ICI') {
-            return null;
-        }
-
         try {
             await this.enforceRateLimit();
             
-            const url = `${this.finnhubEndpoint}/stock/profile2?symbol=${symbol}&token=${this.finnhubApiKey}`;
+            // ✅ CORRECTION : Appel via Worker Finnhub
+            const url = `${this.workerBaseUrl}/api/finnhub/company-profile?symbol=${symbol}`;
             const response = await fetch(url);
             
             if (!response.ok) {
-                throw new Error(`Finnhub API error: ${response.status}`);
+                console.error(`Worker API error for profile ${symbol}: ${response.status}`);
+                return null;
             }
             
             const data = await response.json();
+            
             this.trackRequest();
             
             return data;
@@ -280,23 +303,23 @@ class FinancialAnalytics {
     }
 
     async getBasicFinancials(symbol) {
-        if (!this.finnhubApiKey || this.finnhubApiKey === 'TA_CLE_FINNHUB_ICI') {
-            return null;
-        }
-
         try {
             await this.enforceRateLimit();
             
-            const url = `${this.finnhubEndpoint}/stock/metric?symbol=${symbol}&metric=all&token=${this.finnhubApiKey}`;
+            // ✅ CORRECTION : Appel via Worker Finnhub
+            const url = `${this.workerBaseUrl}/api/finnhub/basic-financials?symbol=${symbol}&metric=all`;
             const response = await fetch(url);
             
             if (!response.ok) {
-                throw new Error(`Finnhub API error: ${response.status}`);
+                console.error(`Worker API error for financials ${symbol}: ${response.status}`);
+                return null;
             }
             
             const data = await response.json();
+            
             this.trackRequest();
             
+            // Le Worker Finnhub retourne { metric: {...} }
             return data?.metric || null;
             
         } catch (error) {
@@ -375,7 +398,7 @@ class FinancialAnalytics {
     // MOCK DATA (FALLBACK UNIQUEMENT)
     // ============================================
     generateMockTimeSeries(symbol, count) {
-        console.warn(`⚠️ Generating mock time series for ${symbol}`);
+        console.warn(`⚠ Generating mock time series for ${symbol}`);
         
         const data = [];
         let basePrice = 100 + Math.random() * 100;
