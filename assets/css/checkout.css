@@ -1,6 +1,7 @@
 /* ═══════════════════════════════════════════════════════════════
    CHECKOUT PAGE - GLASSMORPHISM PREMIUM + CODES PROMO
    AlphaVault AI - VERSION FOND BLANC CASSÉ PROFESSIONNEL
+   ✅ AVEC PLAN BASIC + PRO + PLATINUM
    ═══════════════════════════════════════════════════════════════ */
 
 :root {
@@ -267,9 +268,12 @@ body.dark-mode .plan-option {
     transform: scaleX(1) translateZ(0);
 }
 
+/* ═══════════════════════════════════════════════════════════════
+   ✅ PLAN BADGES - BASIC + PRO + PLATINUM
+   ═══════════════════════════════════════════════════════════════ */
+
 .plan-badge {
     display: inline-block;
-    background: linear-gradient(135deg, #f59e0b, #ef4444);
     color: white;
     font-size: 0.75rem;
     font-weight: 800;
@@ -278,9 +282,21 @@ body.dark-mode .plan-option {
     padding: 6px 14px;
     border-radius: 20px;
     margin-bottom: 16px;
+}
+
+/* ✅ PLAN BASIC - Bleu clair / Cyan */
+.plan-badge.basic {
+    background: linear-gradient(135deg, #06b6d4, #0891b2);
+    box-shadow: 0 4px 12px rgba(6, 182, 212, 0.4);
+}
+
+/* ✅ PLAN PRO - Orange / Rouge (style par défaut) */
+.plan-badge.pro {
+    background: linear-gradient(135deg, #f59e0b, #ef4444);
     box-shadow: 0 4px 12px rgba(245, 158, 11, 0.4);
 }
 
+/* ✅ PLAN PLATINUM - Violet / Indigo */
 .plan-badge.platinum {
     background: linear-gradient(135deg, #8B5CF6, #6366f1);
     box-shadow: 0 4px 12px rgba(139, 92, 246, 0.4);
