@@ -126,7 +126,7 @@ const Dashboard = (function() {
         
         // Fallback sur localStorage si pas chargé depuis cloud
         if (!loadedFromCloud) {
-            console.log('⚠ Loading from localStorage (fallback)');
+            console.log('⚠️ Loading from localStorage (fallback)');
             const saved = localStorage.getItem('financialDataDynamic');
             const savedYield = localStorage.getItem('monthlyEstYield');
             const savedInflation = localStorage.getItem('inflationRate');
@@ -190,22 +190,18 @@ const Dashboard = (function() {
     // ========== CALCULS ==========
     
     /**
-     * ✅ CORRECTION FINALE : Calcule tous les indicateurs financiers
+     * Calcule tous les indicateurs financiers
      */
     function calculateAll() {
         let cumulatedSavings = 0;
         let cumulatedInvestment = 0;
-        let cumulatedPEE = 0;
         
         allData.forEach(row => {
-            // Calcul des totaux
             row.totalIncome = (row.salary || 0) + (row.misc || 0);
             row.totalExpenses = (row.rent || 0) + (row.food || 0) + 
                                 (row.fixCosts || 0) + (row.others || 0) + 
                                 (row.loan || 0);
-            
-            // ✅ Épargne pure (sans investissements)
-            row.savings = row.totalIncome - row.totalExpenses - (row.investment || 0) - (row.pee || 0);
+            row.savings = row.totalIncome - row.totalExpenses;
             
             cumulatedSavings += row.savings;
             row.cumulatedSavings = cumulatedSavings;
@@ -213,15 +209,9 @@ const Dashboard = (function() {
             cumulatedInvestment += (row.investment || 0);
             row.cumulatedInvestment = cumulatedInvestment;
             
-            cumulatedPEE += (row.pee || 0);
-            row.cumulatedPEE = cumulatedPEE;
-            
-            // ✅ CORRECTION MAJEURE : Portfolio total inclut TOUT le patrimoine
-            // Total Portfolio = Investissements + Gains + Épargne Pure + PEE
             row.totalPortfolio = cumulatedInvestment + 
                                 (row.cumulatedGains || 0) + 
-                                cumulatedSavings +
-                                cumulatedPEE;
+                                (row.pee || 0);
             
             row.roi = cumulatedInvestment > 0 ? 
                       ((row.cumulatedGains || 0) / cumulatedInvestment * 100) : 0;
@@ -617,25 +607,25 @@ const Dashboard = (function() {
         allData.forEach((row, index) => {
             const tr = document.createElement('tr');
             tr.innerHTML = `
-                ${row.month}
-                
-                
-                ${row.totalIncome.toFixed(0)}
-                
-                
-                
-                
-                
-                ${row.totalExpenses.toFixed(0)}
-                ${row.savings.toFixed(0)}
-                
-                ${row.monthlyGain.toFixed(2)}
-                ${row.cumulatedGains.toFixed(0)}
-                
-                ${row.cumulatedInvestment.toFixed(0)}
-                ${row.totalPortfolio.toFixed(0)}
-                ${row.roi.toFixed(2)}%
-                X
+                <td>${row.month}</td>
+                <td><input type='number' step='0.01' value='${row.salary}' onchange='Dashboard.updateValue(${index}, "salary", this.value)'></td>
+                <td><input type='number' step='0.01' value='${row.misc}' onchange='Dashboard.updateValue(${index}, "misc", this.value)'></td>
+                <td class='calculated'>${row.totalIncome.toFixed(0)}</td>
+                <td><input type='number' step='0.01' value='${row.rent}' onchange='Dashboard.updateValue(${index}, "rent", this.value)'></td>
+                <td><input type='number' step='0.01' value='${row.food}' onchange='Dashboard.updateValue(${index}, "food", this.value)'></td>
+                <td><input type='number' step='0.01' value='${row.fixCosts}' onchange='Dashboard.updateValue(${index}, "fixCosts", this.value)'></td>
+                <td><input type='number' step='0.01' value='${row.others}' onchange='Dashboard.updateValue(${index}, "others", this.value)'></td>
+                <td><input type='number' step='0.01' value='${row.loan}' onchange='Dashboard.updateValue(${index}, "loan", this.value)'></td>
+                <td class='calculated'>${row.totalExpenses.toFixed(0)}</td>
+                <td class='calculated' style='color: ${row.savings >= 0 ? "#2649B2" : "#C39BD3"};'>${row.savings.toFixed(0)}</td>
+                <td><input type='number' step='0.01' value='${row.investment}' onchange='Dashboard.updateValue(${index}, "investment", this.value)'></td>
+                <td class='calculated' style='background: #D4D9F0;'>${row.monthlyGain.toFixed(2)}</td>
+                <td class='calculated'>${row.cumulatedGains.toFixed(0)}</td>
+                <td><input type='number' step='0.01' value='${row.pee}' onchange='Dashboard.updateValue(${index}, "pee", this.value)'></td>
+                <td class='calculated'>${row.cumulatedInvestment.toFixed(0)}</td>
+                <td class='calculated'>${row.totalPortfolio.toFixed(0)}</td>
+                <td class='calculated'>${row.roi.toFixed(2)}%</td>
+                <td><button class='btn-delete' onclick='Dashboard.deleteRow(${index})'>X</button></td>
             `;
             tbody.appendChild(tr);
         });
@@ -647,8 +637,9 @@ const Dashboard = (function() {
     function updateValue(index, field, value) {
         allData[index][field] = parseFloat(value) || 0;
         
+        // ✅ CORRECTION : Gérer aussi le champ 'pee'
         if (field === 'investment' || field === 'pee') {
-            recalculateGains();
+            recalculateGains();  // Recalcul complet pour investissements
         } else {
             calculateAll();
             renderTable();
@@ -701,9 +692,12 @@ const Dashboard = (function() {
             }
         });
         
+        // ✅ CORRECTION MAJEURE : Recalcul approprié selon le champ
         if (field === 'investment' || field === 'pee') {
+            // Pour les investissements, recalcul complet des gains
             recalculateGains();
         } else {
+            // Pour les autres champs, recalcul simple + sauvegarde
             calculateAll();
             renderTable();
             autoSave();
@@ -726,26 +720,26 @@ const Dashboard = (function() {
         const monthName = currentRow.month;
         
         const html = `
-            
-                <strong>Monthly Income (${monthName})</strong>
-                ${currentRow.totalIncome.toLocaleString()} EUR
-            
-            
-                <strong>Monthly Expenses (${monthName})</strong>
-                ${currentRow.totalExpenses.toLocaleString()} EUR
-            
-            
-                <strong>Total Savings (${monthName})</strong>
-                ${currentRow.cumulatedSavings.toLocaleString()} EUR
-            
-            
-                <strong>Total Portfolio (${monthName})</strong>
-                ${currentRow.totalPortfolio.toLocaleString()} EUR
-            
-            
-                <strong>ROI (${monthName})</strong>
-                ${currentRow.roi.toFixed(1)}%
-            
+            <div class='stat-card'>
+                <h3>Monthly Income (${monthName})</h3>
+                <div class='value'>${currentRow.totalIncome.toLocaleString()} EUR</div>
+            </div>
+            <div class='stat-card'>
+                <h3>Monthly Expenses (${monthName})</h3>
+                <div class='value'>${currentRow.totalExpenses.toLocaleString()} EUR</div>
+            </div>
+            <div class='stat-card positive'>
+                <h3>Total Savings (${monthName})</h3>
+                <div class='value'>${currentRow.cumulatedSavings.toLocaleString()} EUR</div>
+            </div>
+            <div class='stat-card positive'>
+                <h3>Total Portfolio (${monthName})</h3>
+                <div class='value'>${currentRow.totalPortfolio.toLocaleString()} EUR</div>
+            </div>
+            <div class='stat-card ${currentRow.roi > 0 ? 'positive' : 'negative'}'>
+                <h3>ROI (${monthName})</h3>
+                <div class='value'>${currentRow.roi.toFixed(1)}%</div>
+            </div>
         `;
         
         const container = document.getElementById('statsContainer');
@@ -836,7 +830,7 @@ const Dashboard = (function() {
                     lineWidth: 2 
                 },
                 { 
-                    name: 'Monthly Savings (Net)', 
+                    name: 'Monthly Savings', 
                     data: savingsValues, 
                     color: '#2649B2', 
                     type: 'area', 
@@ -880,7 +874,7 @@ const Dashboard = (function() {
                 } 
             },
             tooltip: { 
-                pointFormat: '{point.name}: <b>{point.y:,.0f} EUR</b> ({point.percentage:.1f}%)' 
+                pointFormat: '<b>{point.name}</b>: {point.y:,.0f} EUR ({point.percentage:.1f}%)' 
             },
             series: [{
                 name: 'Amount',
@@ -907,7 +901,7 @@ const Dashboard = (function() {
     }
     
     /**
-     * ✅ Graphique 3 : MONEY ALLOCATION (Dépenses + Investissements)
+     * Graphique 3 : Répartition des Dépenses
      */
     function updateChart3() {
         const monthIndex = parseInt(document.getElementById('expenseMonthFilter')?.value || 0);
@@ -921,27 +915,27 @@ const Dashboard = (function() {
                 backgroundColor: 'transparent' 
             },
             title: { 
-                text: row.month + ' - Money Allocation', 
+                text: row.month, 
                 style: { 
                     color: '#6C3483', 
                     fontWeight: 'bold' 
                 } 
             },
             tooltip: { 
-                pointFormat: '{point.name}: <b>{point.y:,.0f} EUR</b> ({point.percentage:.1f}%)' 
+                pointFormat: '<b>{point.name}</b>: {point.y:,.0f} EUR ({point.percentage:.1f}%)' 
             },
             series: [{
                 name: 'Amount',
                 data: [
-                    { name: 'Rent', y: row.rent, color: '#5B2C6F' },
-                    { name: 'Food', y: row.food, color: '#6C3483' },
-                    { name: 'Fix Costs', y: row.fixCosts, color: '#8E44AD' },
-                    { name: 'Others', y: row.others, color: '#9D5CE6' },
-                    { name: 'Loan', y: row.loan, color: '#C39BD3' },
-                    { name: 'Monthly Investment', y: row.investment, color: '#4A74F3' },
-                    { name: 'Investment - Others', y: row.pee, color: '#6C8BE0' }
-                ]
+                    { name: 'Rent', y: row.rent },
+                    { name: 'Food', y: row.food },
+                    { name: 'Fix Costs', y: row.fixCosts },
+                    { name: 'Others', y: row.others },
+                    { name: 'Loan', y: row.loan }
+                ],
+                colorByPoint: true
             }],
+            colors: ['#5B2C6F', '#6C3483', '#8E44AD', '#9D5CE6', '#C39BD3'],
             plotOptions: {
                 pie: {
                     dataLabels: {
@@ -1039,14 +1033,13 @@ const Dashboard = (function() {
     }
     
     /**
-     * ✅ Graphique 5 : Portefeuille TOTAL (Investissements + Gains + Épargne + PEE)
+     * Graphique 5 : Portefeuille d'Investissement
      */
     function createChart5() {
         const months = allData.map(d => d.month);
         const cumInv = allData.map(d => d.cumulatedInvestment);
         const gains = allData.map(d => d.cumulatedGains);
-        const cumSavings = allData.map(d => d.cumulatedSavings);
-        const cumPEE = allData.map(d => d.cumulatedPEE || 0);
+        const pee = allData.map(d => d.pee);
         const portfolio = allData.map(d => d.totalPortfolio);
         
         const portfolioReal = showInflation ? 
@@ -1069,14 +1062,8 @@ const Dashboard = (function() {
                 lineWidth: 2
             },
             {
-                name: 'Cumulated Savings (Pure)',
-                data: cumSavings,
-                color: '#34C759',
-                lineWidth: 2
-            },
-            {
-                name: "Cumulated PEE",
-                data: cumPEE,
+                name: "Investment - Others",
+                data: pee,
                 color: '#9D5CE6',
                 lineWidth: 2
             },
@@ -1207,7 +1194,7 @@ const Dashboard = (function() {
     }
     
     /**
-     * ✅ Graphique 7 : BUDGET ALLOCATION (50/30/20 avec Savings = Épargne + Investissements)
+     * Graphique 7 : Allocation Budgétaire (50/30/20)
      */
     function updateChart7() {
         const monthIndex = parseInt(document.getElementById('budgetMonthFilter')?.value || 0);
@@ -1217,10 +1204,7 @@ const Dashboard = (function() {
         
         const needsAmount = row.rent + row.food + row.fixCosts + row.loan;
         const wantsAmount = row.others;
-        
-        // ✅ CORRECTION : Savings = Épargne pure + Investissements
-        const savingsAmount = row.savings + (row.investment || 0) + (row.pee || 0);
-        
+        const savingsAmount = row.investment + row.savings;
         const total = row.totalIncome;
         
         const needsPercent = total > 0 ? (needsAmount / total * 100) : 0;
@@ -1233,7 +1217,7 @@ const Dashboard = (function() {
                 backgroundColor: 'transparent' 
             },
             title: {
-                text: row.month + ' - 50/30/20 Rule - Total: ' + total.toLocaleString() + ' EUR',
+                text: row.month + ' - Total: ' + total.toLocaleString() + ' EUR',
                 style: {
                     color: '#2649B2',
                     fontWeight: 'bold'
@@ -1241,14 +1225,14 @@ const Dashboard = (function() {
             },
             tooltip: {
                 useHTML: true,
-                pointFormat: '<b>{point.name}</b><br>Amount: {point.amount:,.0f} EUR<br>Percentage: {point.percentage:.1f}%'
+                pointFormat: '<b>{point.name}</b><br/>Amount: <b>{point.amount:,.0f} EUR</b><br/>Percentage: <b>{point.percentage:.1f}%</b>'
             },
             plotOptions: {
                 pie: {
                     innerSize: '60%',
                     dataLabels: {
                         enabled: true,
-                        format: '<b>{point.name}</b><br>{point.percentage:.1f}%<br>{point.amount:,.0f} EUR',
+                        format: '<b>{point.name}</b><br/>{point.percentage:.1f}%<br/>{point.amount:,.0f} EUR',
                         style: { color: '#2649B2' }
                     },
                     borderWidth: 2,
@@ -1259,19 +1243,19 @@ const Dashboard = (function() {
                 name: 'Budget',
                 data: [
                     {
-                        name: 'Needs (50%)',
+                        name: 'Needs',
                         y: needsPercent,
                         amount: needsAmount,
                         color: '#6C3483'
                     },
                     {
-                        name: 'Wants (30%)',
+                        name: 'Wants',
                         y: wantsPercent,
                         amount: wantsAmount,
                         color: '#9D5CE6'
                     },
                     {
-                        name: 'Savings (20%)',
+                        name: 'Savings',
                         y: savingsPercent,
                         amount: savingsAmount,
                         color: '#2649B2'
@@ -1338,7 +1322,7 @@ const Dashboard = (function() {
     };
 })();
 
-// ========== EXPOSITION GLOBALE DU DASHBOARD ==========
+// ========== EXPOSITION GLOBALE DU DASHBOARD (✅ LIGNE CRITIQUE AJOUTÉE) ==========
 window.Dashboard = Dashboard;
 
 // Initialisation au chargement de la page
@@ -1378,4 +1362,4 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
-console.log('✅ Dashboard script loaded - Cloud version with complete patrimony tracking');
+console.log('✅ Dashboard script loaded - Cloud version');
