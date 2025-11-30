@@ -4,18 +4,28 @@
 // ============================================
 
 const ChatbotConfig = {
-    // ============================================
-    // API CONFIGURATION
-    // ============================================
     api: {
+        // ✅ WORKER CLOUDFLARE EXISTANT (Finnhub + Twelve Data)
+        worker: {
+            baseUrl: 'https://raphnardone.workers.dev', // Ton worker existant
+            endpoints: {
+                finnhub: '/api/finnhub',
+                twelvedata: '/api/twelvedata'
+            }
+        },
+        
+        // ✅ NOUVEAU WORKER GEMINI
         gemini: {
-            apiKey: 'AIzaSyBjk3MlxNGc6PACd7QfawlgxTtbS3NtbzE',
-            endpoint: 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent',
-            model: 'gemini-2.5-flash',
+            // Clé API (vide, sécurisée dans le Worker)
+            apiKey: '',
             
-            // ✅ AMÉLIORATION 1: Paramètres optimisés pour la conversation
-            maxOutputTokens: 8192, // Maintenu pour flexibilité
-            temperature: 0.9, // ↑ Plus créatif (était 0.85)
+            // URL du Worker Gemini
+            workerUrl: 'https://gemini-ai-proxy.raphnardone.workers.dev/api/gemini',
+            
+            // Configuration du modèle
+            model: 'gemini-2.5-flash',
+            maxOutputTokens: 8192,
+            temperature: 0.9,
             topK: 40,
             topP: 0.95,
             
@@ -28,13 +38,15 @@ const ChatbotConfig = {
         },
         
         finnhub: {
-            apiKey: 'd45qhbpr01qieo4rfq9gd45qhbpr01qieo4rfqa0',
+            // Utilise le worker existant
+            apiKey: '',
             endpoint: 'https://finnhub.io/api/v1',
             websocket: 'wss://ws.finnhub.io'
         },
         
         twelveData: {
-            apiKey: '57e3c785fda7424d97ab195f22263765',
+            // Utilise le worker existant
+            apiKey: '',
             endpoint: 'https://api.twelvedata.com'
         }
     },

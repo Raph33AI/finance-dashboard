@@ -366,35 +366,45 @@ Examples:
 
     async makeGeminiRequest(prompt) {
         const requestBody = {
+            model: this.config.api.gemini.model,
             contents: [{
                 parts: [{
                     text: prompt
                 }]
             }],
             generationConfig: {
-                // ✅ AMÉLIORATION 9: Paramètres optimisés pour la conversation
-                temperature: 0.9, // ↑ Plus créatif (was 0.85)
-                topK: 40,
-                topP: 0.95,
-                maxOutputTokens: 8192 // Maintenu pour les réponses longues si nécessaire
+                temperature: this.config.api.gemini.temperature,
+                topK: this.config.api.gemini.topK,
+                topP: this.config.api.gemini.topP,
+                maxOutputTokens: this.config.api.gemini.maxOutputTokens
             },
             safetySettings: this.config.api.gemini.safetySettings
         };
 
-        const response = await fetch(
-            `${this.endpoint}?key=${this.apiKey}`,
-            {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(requestBody)
-            }
-        );
+        // ✅ APPEL VIA LE WORKER CLOUDFLARE GEMINI
+        const workerUrl = this.config.api.gemini.workerUrl;
+
+        console.log(`📡 Calling Gemini via Worker: ${workerUrl}`);
+
+        const response = await fetch(workerUrl, {
+            method: 'POST',
+            headers: { 
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(requestBody)
+        });
 
         if (!response.ok) {
-            throw new Error(`Gemini API Error: ${response.status}`);
+            const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
+            console.error('❌ Worker Response:', errorData);
+            throw new Error(`Worker Error: ${response.status} - ${errorData.error || 'Unknown error'}`);
         }
 
-        return await response.json();
+        const data = await response.json();
+        
+        console.log('✅ Gemini response received via Worker');
+        
+        return data;
     }
 
     processResponse(apiResponse) {
