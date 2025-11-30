@@ -1,5 +1,6 @@
 // ============================================
-// GEMINI AI - ULTRA-ADVANCED FINANCIAL ANALYST
+// GEMINI AI - CONVERSATIONAL FINANCIAL EXPERT
+// Version Ultra-Performante & Conversationnelle
 // ============================================
 
 class GeminiAI {
@@ -7,8 +8,19 @@ class GeminiAI {
         this.config = config;
         this.apiKey = config.api.gemini.apiKey;
         this.endpoint = config.api.gemini.endpoint;
+        
+        // ✅ AMÉLIORATION 1: Historique conversationnel étendu (10 → 20 messages)
         this.conversationHistory = [];
-        this.maxHistorySize = 10;
+        this.maxHistorySize = 20;
+        
+        // ✅ AMÉLIORATION 2: Contexte utilisateur persistant
+        this.userContext = {
+            preferredStocks: [],
+            investmentGoals: null,
+            riskTolerance: null,
+            conversationTopic: null
+        };
+        
         this.requestCount = 0;
         this.totalTokens = 0;
         this.lastRequestTime = 0;
@@ -18,407 +30,147 @@ class GeminiAI {
     }
 
     initializeSystemPrompt() {
-        this.systemPrompt = `You are an ELITE Financial AI Analyst with access to comprehensive real-time market data.
-
-**🎯 YOUR MISSION:**
-Provide INSTITUTIONAL-GRADE financial analysis covering ALL aspects relevant to investment decisions.
-
-**📊 COMPREHENSIVE ANALYSIS FRAMEWORK:**
-
-**1. PRICE & PERFORMANCE ANALYSIS**
-   - Current price vs historical ranges
-   - Intraday movements and patterns
-   - Volume analysis and liquidity
-   - Price momentum and velocity
-   - Gap analysis (up/down gaps)
-   - Price consolidation patterns
-
-**2. TECHNICAL ANALYSIS (Advanced)**
-   
-   A. Moving Averages:
-   - SMA (20, 50, 200 days)
-   - EMA (12, 26 days)
-   - Golden Cross / Death Cross signals
-   - Price position relative to MAs
-   
-   B. Momentum Indicators:
-   - RSI (Relative Strength Index)
-   - MACD (Moving Average Convergence Divergence)
-   - Stochastic Oscillator
-   - Rate of Change (ROC)
-   
-   C. Volatility Indicators:
-   - Bollinger Bands (position & width)
-   - Average True Range (ATR)
-   - Historical volatility
-   - Implied vs realized volatility
-   
-   D. Volume Analysis:
-   - Volume trends
-   - Volume price confirmation
-   - On-Balance Volume (OBV)
-   - Accumulation/Distribution
-   
-   E. Chart Patterns:
-   - Support/Resistance levels
-   - Trend lines (uptrend/downtrend)
-   - Breakout/Breakdown levels
-   - Head & Shoulders, Double Top/Bottom
-   - Flags, Pennants, Triangles
-
-**3. FUNDAMENTAL ANALYSIS (Deep Dive)**
-   
-   A. Valuation Metrics:
-   - P/E Ratio (trailing & forward)
-   - PEG Ratio (P/E to Growth)
-   - Price/Book ratio
-   - Price/Sales ratio
-   - EV/EBITDA
-   - Dividend Yield
-   
-   B. Profitability:
-   - Net Profit Margin
-   - Operating Margin
-   - Gross Margin
-   - Return on Equity (ROE)
-   - Return on Assets (ROA)
-   - Return on Invested Capital (ROIC)
-   
-   C. Growth Metrics:
-   - Revenue growth (YoY, QoQ)
-   - EPS growth trend
-   - Book value growth
-   - Cash flow growth
-   
-   D. Financial Health:
-   - Debt/Equity ratio
-   - Current Ratio
-   - Quick Ratio
-   - Interest Coverage
-   - Free Cash Flow
-   - Cash position
-
-**4. RISK ANALYSIS (Comprehensive)**
-   
-   A. Volatility Metrics:
-   - Annualized volatility
-   - Beta (vs market)
-   - Standard deviation
-   - Coefficient of variation
-   
-   B. Downside Risk:
-   - Maximum Drawdown
-   - Value at Risk (VaR)
-   - Sortino Ratio
-   - Downside Deviation
-   
-   C. Risk-Adjusted Returns:
-   - Sharpe Ratio
-   - Treynor Ratio
-   - Information Ratio
-   - Calmar Ratio
-
-**5. MARKET CONTEXT & SENTIMENT**
-   - Sector performance comparison
-   - Market indices correlation
-   - Relative strength vs sector
-   - Market cap classification
-   - Industry trends and drivers
-   - Competitive positioning
-
-**6. STATISTICAL ANALYSIS**
-   - Mean reversion patterns
-   - Distribution analysis (skewness, kurtosis)
-   - Correlation with market/sector
-   - Seasonality patterns
-   - Historical percentile ranking
-
-**7. SCENARIO ANALYSIS**
-   - Bull case valuation
-   - Base case valuation
-   - Bear case valuation
-   - Breakeven analysis
-   - Sensitivity analysis
-
-**8. INVESTMENT RECOMMENDATIONS**
-   - Buy/Sell/Hold rating with confidence
-   - Time horizon (short/medium/long)
-   - Entry price targets
-   - Stop-loss levels
-   - Take-profit targets
-   - Position sizing recommendations
-   - Risk/reward ratio
-   - Investment thesis summary
-
-**📋 MANDATORY RESPONSE STRUCTURE:**
-
-\`\`\`
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-📊 **[SYMBOL] | [COMPANY NAME]** 
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-**📌 EXECUTIVE SUMMARY**
-[2-3 sentence investment thesis with key numbers]
-
-**💹 CURRENT MARKET DATA** (Real-Time)
-• **Price:** $[EXACT] | **Change:** [±]$[EXACT] ([±][EXACT]%)
-• **Volume:** [EXACT] | **Avg Volume:** [EXACT] ([Above/Below] avg by X%)
-• **Day Range:** $[LOW] - $[HIGH]
-• **52-Week Range:** $[LOW] - $[HIGH]
-• **Position in 52W Range:** [X]% (Near [High/Low/Middle])
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-**📈 HISTORICAL PERFORMANCE**
-**Period Analyzed:** [TIMEFRAME] ([X] trading days)
-**Date Range:** [START] to [END]
-
-**Price Evolution:**
-• Starting Price: $[EXACT]
-• Ending Price: $[EXACT]
-• **Total Return:** [EXACT]% ([Gain/Loss] of $[EXACT])
-• **Annualized Return:** [EXACT]%
-• Period High: $[EXACT] (on [DATE])
-• Period Low: $[EXACT] (on [DATE])
-• **Max Gain from Low:** [EXACT]%
-
-**Performance Quartiles:**
-• 25th Percentile: $[PRICE]
-• Median: $[PRICE]
-• 75th Percentile: $[PRICE]
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-**🔬 TECHNICAL ANALYSIS**
-
-**A. Moving Averages**
-| MA Period | Value | Price vs MA | Signal |
-|-----------|-------|-------------|--------|
-| SMA-20    | $[X]  | [±X]%       | [Bull/Bear] |
-| SMA-50    | $[X]  | [±X]%       | [Bull/Bear] |
-| SMA-200   | $[X]  | [±X]%       | [Bull/Bear] |
-
-**MA Configuration:** [Golden Cross/Death Cross/Bullish/Bearish/Neutral]
-**Interpretation:** [Detailed analysis of MA positioning]
-
-**B. Momentum Indicators**
-• **RSI (14):** [VALUE]
-  → Status: [Overbought >70 / Oversold <30 / Neutral]
-  → Signal: [Specific trading signal]
-  → Divergence: [Bullish/Bearish/None]
-
-• **MACD:** [If calculated]
-  → MACD Line: [VALUE]
-  → Signal Line: [VALUE]
-  → Histogram: [VALUE]
-  → Crossover: [Bullish/Bearish/None]
-
-**C. Volatility Analysis**
-• **Annualized Volatility:** [X]%
-  → Classification: [Very High >50% / High 30-50% / Medium 15-30% / Low <15%]
-  → vs Market Volatility: [Higher/Lower by X%]
-
-• **Beta:** [VALUE]
-  → Interpretation: [X]% more/less volatile than market
-
-• **Maximum Drawdown:** [X]%
-  → Occurred: [DATE RANGE]
-  → Current Drawdown: [X]% from peak
-
-• **Bollinger Bands:** [If calculated]
-  → Upper: $[X] | Middle: $[X] | Lower: $[X]
-  → Position: [Near upper/middle/lower band]
-  → Band Width: [Expanding/Contracting - Volatility signal]
-
-**D. Volume Analysis**
-• Average Volume (30d): [X] shares
-• Recent Volume Trend: [Increasing/Decreasing/Stable]
-• Volume Confirmation: [Yes/No - Price moves confirmed by volume]
-• Unusual Volume Days: [List significant spikes with dates]
-
-**E. Support & Resistance**
-**Key Support Levels:**
-  1. $[PRICE] (Strong) - [Tested X times]
-  2. $[PRICE] (Moderate)
-  3. $[PRICE] (Weak)
-
-**Key Resistance Levels:**
-  1. $[PRICE] (Strong) - [Tested X times]
-  2. $[PRICE] (Moderate)
-  3. $[PRICE] (Weak)
-
-**F. Trend Analysis**
-• **Primary Trend:** [Strong Uptrend/Uptrend/Sideways/Downtrend/Strong Downtrend]
-• **Trend Strength:** [Strong/Moderate/Weak]
-• **Trend Duration:** [X] days
-• **Reversal Signals:** [Yes/No - If yes, explain]
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-**💰 FUNDAMENTAL ANALYSIS**
-
-**A. Valuation Metrics**
-| Metric | Value | Industry Avg | Assessment |
-|--------|-------|--------------|------------|
-| P/E Ratio | [X] | [X] | [Over/Under/Fair] |
-| PEG Ratio | [X] | [X] | [Assessment] |
-| P/B Ratio | [X] | [X] | [Assessment] |
-| P/S Ratio | [X] | [X] | [Assessment] |
-| Div Yield | [X]% | [X]% | [Assessment] |
-
-**Valuation Summary:** [Overvalued/Fairly Valued/Undervalued]
-**Reasoning:** [Detailed explanation with comparisons]
-
-**B. Profitability Metrics**
-• **Net Profit Margin:** [X]%
-  → Industry Average: [X]%
-  → Trend: [Improving/Stable/Declining]
-
-• **Operating Margin:** [X]%
-  → Quality: [Excellent >20% / Good 10-20% / Fair 5-10% / Weak <5%]
-
-• **ROE (Return on Equity):** [X]%
-  → Assessment: [Excellent >20% / Good 15-20% / Average 10-15% / Below Average <10%]
-
-• **ROA (Return on Assets):** [X]%
-  → Efficiency: [High/Medium/Low]
-
-**C. Growth Analysis**
-• **Revenue Growth (YoY):** [X]%
-• **EPS Growth (YoY):** [X]%
-• **Growth Sustainability:** [High/Medium/Low]
-• **Growth Drivers:** [List 2-3 key drivers]
-
-**D. Financial Health**
-• **Debt/Equity Ratio:** [X]
-  → Status: [Conservative <0.5 / Moderate 0.5-1.5 / Leveraged >1.5]
-
-• **Current Ratio:** [X]
-  → Liquidity: [Strong >2 / Adequate 1-2 / Weak <1]
-
-• **Free Cash Flow:** $[X]M
-  → Trend: [Positive/Negative growth]
-
-• **Cash Position:** $[X]M
-  → Runway: [X] months of operations
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-**⚠️ RISK ASSESSMENT**
-
-**A. Risk Level: [HIGH / MEDIUM-HIGH / MEDIUM / MEDIUM-LOW / LOW]**
-
-**Risk Factors:**
-⚠️ **Volatility Risk:** [ANALYSIS]
-⚠️ **Valuation Risk:** [ANALYSIS]
-⚠️ **Sector Risk:** [ANALYSIS]
-⚠️ **Liquidity Risk:** [ANALYSIS]
-⚠️ **Fundamental Risk:** [ANALYSIS]
-
-**B. Risk Metrics**
-• **Sharpe Ratio:** [X] → Risk-adjusted return: [Excellent >2 / Good 1-2 / Fair 0-1 / Poor <0]
-• **Sortino Ratio:** [X] → Downside risk-adjusted return
-• **Max Drawdown:** [X]% → Worst historical decline
-• **Value at Risk (95%):** [X]% → Expected max loss (95% confidence)
-
-**C. Downside Protection**
-• **Distance to Support:** [X]% ($[PRICE])
-• **Stop-Loss Recommendation:** $[PRICE] ([X]% below current)
-• **Risk/Reward Ratio:** 1:[X] (Risk $1 to potentially gain $[X])
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-**💡 KEY INSIGHTS & CATALYSTS**
-
-**Bullish Factors:**
-✅ [Factor 1 with data]
-✅ [Factor 2 with data]
-✅ [Factor 3 with data]
-
-**Bearish Factors:**
-❌ [Factor 1 with data]
-❌ [Factor 2 with data]
-❌ [Factor 3 with data]
-
-**Upcoming Catalysts:**
-📅 [Event 1 - Date if known]
-📅 [Event 2 - Date if known]
-📅 [Event 3 - Date if known]
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-**🎯 INVESTMENT RECOMMENDATION**
-
-**RATING: [STRONG BUY / BUY / HOLD / SELL / STRONG SELL]**
-**CONFIDENCE LEVEL: [HIGH / MEDIUM / LOW]**
-**TIME HORIZON: [Short-term (0-3M) / Medium-term (3-12M) / Long-term (1Y+)]**
-
-**Investment Thesis:**
-[3-4 paragraphs explaining:
-1. Why this rating based on technical + fundamental analysis
-2. Key value drivers and risks
-3. Expected catalysts and timeline
-4. Comparison to alternatives]
-
-**Price Targets:**
-• **Bull Case (30% probability):** $[PRICE] → Upside: [X]%
-• **Base Case (50% probability):** $[PRICE] → Upside: [X]%
-• **Bear Case (20% probability):** $[PRICE] → Downside: [X]%
-
-**Action Plan:**
-
-FOR BUYERS:
-• **Ideal Entry Zone:** $[PRICE1] - $[PRICE2]
-• **Current Price Assessment:** [Good entry / Wait for pullback / Slightly expensive]
-• **Position Size:** [X]% of portfolio (based on risk level)
-• **Stop Loss:** $[PRICE] ([X]% risk per trade)
-• **Take Profit Levels:**
-  - TP1 (30%): $[PRICE] → Take [X]% off
-  - TP2 (50%): $[PRICE] → Take [X]% off
-  - TP3 (20%): $[PRICE] → Hold remainder
-
-FOR CURRENT HOLDERS:
-• **Action:** [Hold / Add / Trim / Sell]
-• **Reasoning:** [Explanation]
-• **Exit Strategy:** [If any]
-
-FOR DIFFERENT INVESTOR TYPES:
-
-**Conservative Investors:**
-[Specific recommendation with risk considerations]
-
-**Growth Investors:**
-[Specific recommendation with growth focus]
-
-**Value Investors:**
-[Specific recommendation with valuation focus]
-
-**Day/Swing Traders:**
-[Specific recommendation with technical setup]
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-**📌 DISCLAIMER & DATA SOURCE**
-• Analysis Date: [TIMESTAMP]
-• Data Source: [Finnhub/Twelve Data] Real-Time
-• Historical Data: [X] data points from [START] to [END]
-• This analysis is for educational purposes only. Always do your own research.
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-\`\`\`
-
-**CRITICAL RULES:**
-
-1. ✅ **USE ONLY EXACT DATA PROVIDED** - Never estimate or invent numbers
-2. ✅ **CALCULATE ALL METRICS** from time series when provided
-3. ✅ **BE SPECIFIC** - Give exact price levels, not ranges like "around $100"
-4. ✅ **EXPLAIN REASONING** - Every metric should have interpretation
-5. ✅ **ACTIONABLE** - Provide clear entry/exit points, not vague advice
-6. ✅ **COMPREHENSIVE** - Cover ALL sections even if data is limited
-7. ✅ **HONEST** - If data is missing for a section, state "Data not available for [X]"
-8. ✅ **COMPARATIVE** - Always compare to industry/sector/market when possible
-
-**NOW ANALYZE THE USER'S QUERY USING THE DATA PROVIDED:**
+        // ✅ AMÉLIORATION 3: Prompt conversationnel flexible (au lieu de template rigide)
+        this.systemPrompt = `You are **Alphy**, an ELITE AI Financial Expert with deep knowledge across ALL financial domains.
+
+**🎯 YOUR CORE IDENTITY:**
+- **Expertise:** Markets, stocks, IPOs, technical analysis, fundamental analysis, macroeconomics, trading strategies, portfolio management, risk analysis, derivatives, crypto, commodities, forex, M&A, corporate finance, quantitative finance
+- **Personality:** Professional yet approachable, precise, insightful, proactive
+- **Communication Style:** Clear, conversational, adapts complexity to user's level
+- **Capabilities:** Real-time data analysis, multi-timeframe analysis, comprehensive research, scenario modeling
+
+**📊 YOUR KNOWLEDGE AREAS (Comprehensive):**
+
+**1. EQUITY MARKETS**
+- Stock valuation (DCF, comparables, multiples)
+- Technical analysis (chart patterns, indicators, volume analysis)
+- Fundamental analysis (financials, ratios, growth metrics)
+- Sector rotation & industry analysis
+- Equity derivatives (options, futures)
+
+**2. IPO & NEW LISTINGS**
+- IPO evaluation frameworks
+- Lockup period analysis
+- Pre/post-IPO valuation
+- SPAC vs traditional IPO
+- IPO allocation strategies
+
+**3. MACROECONOMICS & MARKETS**
+- Interest rates & Fed policy impact
+- Inflation analysis & hedging
+- Economic indicators interpretation
+- Global market correlations
+- Currency impacts on stocks
+
+**4. TECHNICAL ANALYSIS (Advanced)**
+- Moving averages (SMA, EMA, VWMA)
+- Momentum indicators (RSI, MACD, Stochastic)
+- Volatility (Bollinger Bands, ATR, VIX)
+- Volume analysis (OBV, A/D line)
+- Chart patterns (H&S, flags, triangles, etc.)
+- Support/resistance levels
+- Fibonacci retracements
+- Candlestick patterns
+
+**5. RISK MANAGEMENT**
+- Portfolio diversification
+- Position sizing
+- Stop-loss strategies
+- Risk-adjusted returns (Sharpe, Sortino, Treynor)
+- Value at Risk (VaR)
+- Maximum drawdown analysis
+- Correlation analysis
+
+**6. TRADING STRATEGIES**
+- Day trading, swing trading, position trading
+- Momentum, mean reversion, breakout strategies
+- Pairs trading & arbitrage
+- Options strategies (covered calls, spreads, straddles)
+- Algorithmic trading concepts
+
+**7. FIXED INCOME & BONDS**
+- Bond pricing & yields
+- Duration & convexity
+- Credit analysis
+- Yield curve interpretation
+
+**8. ALTERNATIVE INVESTMENTS**
+- Cryptocurrency fundamentals
+- Commodities (gold, oil, metals)
+- Real estate investment
+- Private equity basics
+
+**🎨 RESPONSE PHILOSOPHY:**
+
+**✅ DO:**
+- **Adapt to context:** Simple question = concise answer, complex question = detailed analysis
+- **Be conversational:** Natural dialogue, not robotic templates
+- **Use real data:** When context provides market data, reference exact numbers
+- **Provide actionable insights:** Not just theory, but practical applications
+- **Ask clarifying questions:** If query is vague, ask for specifics
+- **Remember context:** Reference previous conversation when relevant
+- **Explain complexity:** Break down difficult concepts with examples
+- **Suggest next steps:** Proactively offer related analysis or follow-up questions
+
+**❌ DON'T:**
+- Force a rigid structure when not needed
+- Overwhelm with data for simple questions
+- Invent numbers if data isn't provided
+- Give financial advice (say "this is educational, not advice")
+- Use jargon without explanation
+
+**📋 RESPONSE FRAMEWORK (Flexible, not mandatory):**
+
+**For SIMPLE QUESTIONS:**
+Direct, concise answer (2-4 paragraphs max) + optional follow-up suggestions
+
+**For ANALYTICAL REQUESTS:**
+1. **Quick Summary** (2-3 sentences with key takeaway)
+2. **Core Analysis** (detailed examination with data)
+3. **Key Metrics** (if relevant: valuation, technical levels, ratios)
+4. **Insights & Implications** (what it means for investors)
+5. **Actionable Recommendations** (entry/exit levels, risk considerations)
+6. **Related Considerations** (risks, catalysts, alternatives)
+
+**For CONVERSATIONAL QUERIES:**
+Natural dialogue response, building on previous context
+
+**📊 WHEN YOU HAVE MARKET DATA:**
+
+If context includes:
+- **Real-time quote:** Reference exact price, change%, volume
+- **Historical data:** Calculate returns, volatility, trends
+- **Technical indicators:** Interpret RSI, MACD, moving averages with specific signals
+- **Fundamentals:** Analyze P/E, growth, margins with industry context
+- **Multiple timeframes:** Compare short-term vs long-term trends
+
+**Always:**
+- Use exact numbers from provided data
+- Calculate metrics when possible (returns, volatility, ratios)
+- Provide specific price levels for support/resistance
+- Give concrete trading ranges, not vague "around $X"
+
+**🎯 CHART GENERATION:**
+
+When analysis would benefit from visualization, add at the end:
+\`[CHART_REQUEST: type="line|candlestick|bar", symbol="SYMBOL", data="1d|1w|1M|3M|1y|5y", indicators="sma|ema|rsi|macd|volume"]\`
+
+Examples:
+- \`[CHART_REQUEST: type="line", symbol="NVDA", data="1y", indicators="sma,rsi"]\`
+- \`[CHART_REQUEST: type="candlestick", symbol="AAPL", data="3M", indicators="volume,macd"]\`
+
+**⚖ LEGAL DISCLAIMER (include when giving recommendations):**
+"*This analysis is for educational purposes only and should not be considered financial advice. Always do your own research and consult a licensed financial advisor before making investment decisions.*"
+
+**🧠 REMEMBER:**
+- You're having a CONVERSATION, not filling out a form
+- Quality over quantity - concise beats verbose
+- Adapt your depth to the user's question
+- Be proactive - suggest relevant follow-ups
+- Build on previous messages in the conversation
+- Make finance accessible and engaging
+
+**NOW, RESPOND TO THE USER'S QUERY BELOW:**
 `;
     }
 
@@ -429,174 +181,174 @@ FOR DIFFERENT INVESTOR TYPES:
             }
 
             await this.enforceRateLimit();
-            const enhancedPrompt = this.buildEnhancedPrompt(userMessage, context);
+            
+            // ✅ AMÉLIORATION 4: Prompt adaptatif selon le contexte
+            const enhancedPrompt = this.buildAdaptivePrompt(userMessage, context);
+            
             const response = await this.makeGeminiRequest(enhancedPrompt);
             const processedResponse = this.processResponse(response);
 
-            this.updateHistory(userMessage, processedResponse);
+            // ✅ AMÉLIORATION 5: Mise à jour enrichie de l'historique
+            this.updateConversationHistory(userMessage, processedResponse, context);
             this.trackUsage(response);
 
             return processedResponse;
 
         } catch (error) {
-            console.error('Gemini AI Error:', error);
+            console.error('❌ Gemini AI Error:', error);
             return this.handleError(error);
         }
     }
 
-    buildEnhancedPrompt(userMessage, context) {
+    // ✅ AMÉLIORATION 6: Construction adaptative du prompt (pas toujours tout charger)
+    buildAdaptivePrompt(userMessage, context) {
         let prompt = this.systemPrompt + '\n\n';
 
-        prompt += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`;
-        prompt += `**COMPREHENSIVE DATA PACKAGE FOR ANALYSIS**\n`;
-        prompt += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n`;
-
-        // ✅ CURRENT QUOTE
-        if (context.stockData) {
-            const stock = context.stockData;
-            prompt += `**📊 REAL-TIME MARKET DATA - ${stock.symbol}**\n`;
-            prompt += `Company: ${stock.profile?.name || stock.symbol}\n`;
-            prompt += `Industry: ${stock.profile?.industry || 'N/A'}\n`;
-            prompt += `Sector: ${stock.profile?.sector || 'N/A'}\n`;
-            prompt += `Exchange: ${stock.profile?.exchange || 'N/A'}\n`;
-            prompt += `Country: ${stock.profile?.country || 'N/A'}\n\n`;
-            
-            if (stock.quote) {
-                prompt += `Current Quote:\n`;
-                prompt += `• Price: $${stock.quote.current}\n`;
-                prompt += `• Change: ${stock.quote.change >= 0 ? '+' : ''}$${stock.quote.change} (${stock.quote.changePercent}%)\n`;
-                prompt += `• Open: $${stock.quote.open}\n`;
-                prompt += `• High: $${stock.quote.high}\n`;
-                prompt += `• Low: $${stock.quote.low}\n`;
-                prompt += `• Previous Close: $${stock.quote.previousClose}\n`;
-                prompt += `• Volume: ${this.formatNumber(stock.quote.volume)}\n\n`;
-            }
-            
-            if (stock.metrics) {
-                prompt += `Fundamental Metrics:\n`;
-                prompt += `• P/E Ratio: ${stock.metrics.peRatio || 'N/A'}\n`;
-                prompt += `• EPS: $${stock.metrics.eps || 'N/A'}\n`;
-                prompt += `• Market Cap: $${this.formatNumber(stock.profile?.marketCap)}M\n`;
-                prompt += `• 52-Week High: $${stock.metrics.week52High || 'N/A'}\n`;
-                prompt += `• 52-Week Low: $${stock.metrics.week52Low || 'N/A'}\n`;
-                prompt += `• Beta: ${stock.metrics.beta || 'N/A'}\n`;
-                prompt += `• Revenue Growth (YoY): ${stock.metrics.revenueGrowth || 'N/A'}%\n`;
-                prompt += `• Profit Margin: ${stock.metrics.profitMargin || 'N/A'}%\n`;
-                prompt += `• ROE: ${stock.metrics.roe || 'N/A'}%\n`;
-                prompt += `• ROA: ${stock.metrics.roa || 'N/A'}%\n`;
-                prompt += `• Debt/Equity: ${stock.metrics.debtToEquity || 'N/A'}\n`;
-                prompt += `• Current Ratio: ${stock.metrics.currentRatio || 'N/A'}\n`;
-                prompt += `• Price/Book: ${stock.metrics.priceToBook || 'N/A'}\n`;
-                prompt += `• Price/Sales: ${stock.metrics.priceToSales || 'N/A'}\n`;
-                prompt += `• Dividend Yield: ${stock.metrics.dividendYield || 'N/A'}%\n\n`;
-            }
-        }
-
-        // ✅ HISTORICAL DATA
-        if (context.timeSeriesData && context.historicalStats) {
-            const ts = context.timeSeriesData;
-            const stats = context.historicalStats;
-            
-            prompt += `**📈 HISTORICAL PRICE DATA**\n`;
-            prompt += `Period: ${stats.period}\n`;
-            prompt += `Data Points: ${stats.dataPoints} trading days\n`;
-            prompt += `Date Range: ${ts.data[0]?.datetime} to ${ts.data[ts.data.length - 1]?.datetime}\n\n`;
-            
-            prompt += `Performance Summary:\n`;
-            prompt += `• Starting Price: $${stats.firstPrice}\n`;
-            prompt += `• Ending Price: $${stats.lastPrice}\n`;
-            prompt += `• Total Return: ${stats.totalReturn}%\n`;
-            prompt += `• Annualized Return: ${stats.annualizedReturn}%\n`;
-            prompt += `• Period High: $${stats.maxPrice}\n`;
-            prompt += `• Period Low: $${stats.minPrice}\n`;
-            prompt += `• Price Range: $${(stats.maxPrice - stats.minPrice).toFixed(2)}\n`;
-            prompt += `• Volatility (Annualized): ${stats.volatility}%\n\n`;
-            
-            // Sample data points
-            prompt += `Price Samples (every ${Math.floor(ts.data.length / 10)} days):\n`;
-            for (let i = 0; i < ts.data.length; i += Math.floor(ts.data.length / 10)) {
-                const point = ts.data[i];
-                prompt += `• ${point.datetime}: $${point.close} (Vol: ${this.formatNumber(point.volume)})\n`;
-            }
-            prompt += `\n`;
-        }
-
-        // ✅ TECHNICAL INDICATORS
-        if (context.technicalIndicators) {
-            const tech = context.technicalIndicators;
-            
-            prompt += `**🔬 CALCULATED TECHNICAL INDICATORS**\n\n`;
-            
-            prompt += `Moving Averages:\n`;
-            prompt += `• SMA-20: $${tech.movingAverages.sma20 || 'N/A'} (Price ${tech.movingAverages.priceVsSMA20 || 'N/A'}% vs MA)\n`;
-            prompt += `• SMA-50: $${tech.movingAverages.sma50 || 'N/A'} (Price ${tech.movingAverages.priceVsSMA50 || 'N/A'}% vs MA)\n`;
-            prompt += `• SMA-200: $${tech.movingAverages.sma200 || 'N/A'} (Price ${tech.movingAverages.priceVsSMA200 || 'N/A'}% vs MA)\n\n`;
-            
-            prompt += `Momentum:\n`;
-            prompt += `• RSI (14): ${tech.momentum.rsi || 'N/A'} → ${tech.momentum.rsiSignal}\n`;
-            if (tech.momentum.macd) {
-                prompt += `• MACD: ${tech.momentum.macd.value} (Signal: ${tech.momentum.macd.signal}, Histogram: ${tech.momentum.macd.histogram})\n`;
-            }
-            prompt += `\n`;
-            
-            prompt += `Volatility:\n`;
-            prompt += `• Annualized: ${tech.volatility.annualized}% (${tech.volatility.level})\n`;
-            prompt += `• Max Drawdown: ${tech.volatility.maxDrawdown}%\n`;
-            if (tech.volatility.sharpeRatio) {
-                prompt += `• Sharpe Ratio: ${tech.volatility.sharpeRatio}\n`;
-            }
-            prompt += `\n`;
-            
-            prompt += `Volume:\n`;
-            prompt += `• Average Volume: ${tech.volume?.average || 'N/A'}\n`;
-            prompt += `• Volume Trend: ${tech.volume?.trend || 'N/A'}\n\n`;
-            
-            prompt += `Support Levels: ${tech.levels.support.length > 0 ? '$' + tech.levels.support.join(', $') : 'None identified'}\n`;
-            prompt += `Resistance Levels: ${tech.levels.resistance.length > 0 ? '$' + tech.levels.resistance.join(', $') : 'None identified'}\n\n`;
-            
-            prompt += `Trend Analysis:\n`;
-            prompt += `• Direction: ${tech.trend.direction}\n`;
-            prompt += `• Strength: ${tech.trend.strength}\n`;
-            prompt += `• Duration: ${tech.trend.duration || 'N/A'} days\n\n`;
-        }
-
-        // ✅ MARKET CONTEXT
-        if (context.marketData) {
-            const market = context.marketData;
-            prompt += `**🌐 MARKET CONTEXT**\n`;
-            if (market.sp500) {
-                prompt += `• S&P 500: $${market.sp500.price} (${market.sp500.changePercent}%)\n`;
-            }
-            if (market.nasdaq) {
-                prompt += `• NASDAQ: $${market.nasdaq.price} (${market.nasdaq.changePercent}%)\n`;
-            }
-            if (market.dow) {
-                prompt += `• Dow Jones: $${market.dow.price} (${market.dow.changePercent}%)\n`;
-            }
-            prompt += `\n`;
-        }
-
-        prompt += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n`;
-
-        // Recent conversation
+        // ✅ Injection intelligente de l'historique conversationnel
         if (this.conversationHistory.length > 0) {
-            prompt += `**Recent Conversation:**\n`;
-            this.conversationHistory.slice(-1).forEach(entry => {
-                prompt += `User: ${entry.user}\n`;
-                prompt += `Assistant: ${entry.assistant.substring(0, 200)}...\n\n`;
+            prompt += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`;
+            prompt += `**📜 CONVERSATION HISTORY (for context):**\n`;
+            prompt += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n`;
+            
+            // Garder les 5 derniers échanges pour le contexte
+            const recentHistory = this.conversationHistory.slice(-5);
+            recentHistory.forEach((entry, index) => {
+                prompt += `**[${index + 1}] User:** ${entry.user}\n`;
+                prompt += `**[${index + 1}] Alphy:** ${entry.assistant.substring(0, 300)}${entry.assistant.length > 300 ? '...' : ''}\n\n`;
             });
         }
 
-        prompt += `**USER QUERY:** ${userMessage}\n\n`;
+        // ✅ Contexte utilisateur persistant
+        if (this.userContext.preferredStocks.length > 0) {
+            prompt += `**User's Watchlist:** ${this.userContext.preferredStocks.join(', ')}\n\n`;
+        }
+
+        // ✅ Injection conditionnelle des données de marché (seulement si pertinent)
+        const needsStockData = this.detectNeedsStockData(userMessage, context);
         
-        if (context.technicalIndicators && context.timeSeriesData) {
-            prompt += `**IMPORTANT:** You have complete data package with ${context.timeSeriesData.data.length} data points and full technical analysis.\n`;
-            prompt += `Provide COMPREHENSIVE analysis following the complete structure.\n\n`;
+        if (needsStockData && context.stockData) {
+            prompt += this.formatStockDataContext(context.stockData);
+        }
+
+        if (needsStockData && context.timeSeriesData) {
+            prompt += this.formatTimeSeriesContext(context.timeSeriesData, context.historicalStats);
+        }
+
+        if (needsStockData && context.technicalIndicators) {
+            prompt += this.formatTechnicalContext(context.technicalIndicators);
+        }
+
+        // ✅ Données de marché général (seulement si demandé)
+        if (context.marketData && this.detectNeedsMarketOverview(userMessage)) {
+            prompt += this.formatMarketContext(context.marketData);
+        }
+
+        // ✅ Données IPO (seulement si demandé)
+        if (context.ipoData && userMessage.toLowerCase().includes('ipo')) {
+            prompt += this.formatIPOContext(context.ipoData);
+        }
+
+        prompt += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n`;
+        prompt += `**👤 USER'S CURRENT QUESTION:**\n`;
+        prompt += `"${userMessage}"\n\n`;
+        
+        // ✅ Instructions contextuelles
+        if (needsStockData && context.timeSeriesData) {
+            prompt += `*You have access to complete market data above. Use exact numbers and calculate precise metrics.*\n\n`;
+        } else if (!needsStockData) {
+            prompt += `*This appears to be a general finance question. Provide a clear, conversational explanation.*\n\n`;
         }
         
-        prompt += `**YOUR INSTITUTIONAL-GRADE ANALYSIS:**\n`;
+        prompt += `**🤖 YOUR RESPONSE:**\n`;
 
         return prompt;
+    }
+
+    // ✅ AMÉLIORATION 7: Détection intelligente du besoin de données
+    detectNeedsStockData(message, context) {
+        const lowerMessage = message.toLowerCase();
+        
+        // Si un symbole est mentionné OU disponible dans le contexte
+        if (context.entities && context.entities.symbols && context.entities.symbols.length > 0) {
+            return true;
+        }
+        
+        // Mots-clés nécessitant des données de marché
+        const stockKeywords = [
+            'stock', 'share', 'price', 'analyze', 'analysis', 'chart', 'performance',
+            'evolution', 'historical', 'trend', 'technical', 'fundamental',
+            'buy', 'sell', 'hold', 'invest', 'valuation', 'p/e', 'eps',
+            'volatility', 'risk', 'return', 'dividend'
+        ];
+        
+        return stockKeywords.some(kw => lowerMessage.includes(kw));
+    }
+
+    detectNeedsMarketOverview(message) {
+        const lowerMessage = message.toLowerCase();
+        const marketKeywords = ['market', 'indices', 'dow', 'nasdaq', 's&p', 'sp500', 'market today', 'market overview'];
+        return marketKeywords.some(kw => lowerMessage.includes(kw));
+    }
+
+    // ✅ AMÉLIORATION 8: Formatage optimisé des données (plus concis)
+    formatStockDataContext(stockData) {
+        const stock = stockData;
+        let context = `**📊 REAL-TIME DATA - ${stock.symbol}**\n`;
+        if (stock.profile?.name) context += `Company: ${stock.profile.name}\n`;
+        
+        if (stock.quote) {
+            context += `Price: $${stock.quote.current} (${stock.quote.changePercent >= 0 ? '+' : ''}${stock.quote.changePercent}%)\n`;
+            context += `Range: $${stock.quote.low} - $${stock.quote.high} | Volume: ${this.formatNumber(stock.quote.volume)}\n`;
+        }
+        
+        if (stock.metrics) {
+            context += `P/E: ${stock.metrics.peRatio || 'N/A'} | EPS: $${stock.metrics.eps || 'N/A'} | Beta: ${stock.metrics.beta || 'N/A'}\n`;
+            context += `52W: $${stock.metrics.week52Low} - $${stock.metrics.week52High}\n`;
+        }
+        
+        context += `\n`;
+        return context;
+    }
+
+    formatTimeSeriesContext(timeSeriesData, historicalStats) {
+        if (!timeSeriesData || !historicalStats) return '';
+        
+        let context = `**📈 HISTORICAL PERFORMANCE (${historicalStats.period})**\n`;
+        context += `Return: ${historicalStats.totalReturn}% (${historicalStats.annualizedReturn}% annualized)\n`;
+        context += `Range: $${historicalStats.minPrice} - $${historicalStats.maxPrice}\n`;
+        context += `Volatility: ${historicalStats.volatility}% | Data Points: ${historicalStats.dataPoints}\n\n`;
+        return context;
+    }
+
+    formatTechnicalContext(tech) {
+        let context = `**🔬 TECHNICAL INDICATORS**\n`;
+        context += `RSI: ${tech.momentum.rsi} (${tech.momentum.rsiSignal}) | Trend: ${tech.trend.direction}\n`;
+        context += `SMA-20: $${tech.movingAverages.sma20} | SMA-50: $${tech.movingAverages.sma50}\n`;
+        context += `Volatility: ${tech.volatility.annualized}% (${tech.volatility.level})\n`;
+        if (tech.levels.support.length > 0) {
+            context += `Support: $${tech.levels.support.join(', $')} | Resistance: $${tech.levels.resistance.join(', $')}\n`;
+        }
+        context += `\n`;
+        return context;
+    }
+
+    formatMarketContext(marketData) {
+        let context = `**🌐 MARKET SNAPSHOT**\n`;
+        if (marketData.sp500) context += `S&P 500: $${marketData.sp500.price} (${marketData.sp500.changePercent}%)\n`;
+        if (marketData.nasdaq) context += `NASDAQ: $${marketData.nasdaq.price} (${marketData.nasdaq.changePercent}%)\n`;
+        context += `\n`;
+        return context;
+    }
+
+    formatIPOContext(ipoData) {
+        let context = `**💰 RECENT IPOs**\n`;
+        if (ipoData && ipoData.length > 0) {
+            ipoData.slice(0, 3).forEach(ipo => {
+                context += `• ${ipo.symbol} - ${ipo.name} (Score: ${ipo.score}/100)\n`;
+            });
+        }
+        context += `\n`;
+        return context;
     }
 
     formatNumber(num) {
@@ -615,10 +367,11 @@ FOR DIFFERENT INVESTOR TYPES:
                 }]
             }],
             generationConfig: {
-                temperature: this.config.api.gemini.temperature,
-                topK: this.config.api.gemini.topK,
-                topP: this.config.api.gemini.topP,
-                maxOutputTokens: this.config.api.gemini.maxOutputTokens
+                // ✅ AMÉLIORATION 9: Paramètres optimisés pour la conversation
+                temperature: 0.9, // ↑ Plus créatif (was 0.85)
+                topK: 40,
+                topP: 0.95,
+                maxOutputTokens: 8192 // Maintenu pour les réponses longues si nécessaire
             },
             safetySettings: this.config.api.gemini.safetySettings
         };
@@ -642,7 +395,7 @@ FOR DIFFERENT INVESTOR TYPES:
     processResponse(apiResponse) {
         try {
             const candidate = apiResponse.candidates?.[0];
-            if (!candidate) throw new Error('No response');
+            if (!candidate) throw new Error('No response from Gemini');
             
             const text = candidate.content?.parts?.[0]?.text || '';
             const chartRequests = this.extractChartRequests(text);
@@ -655,12 +408,12 @@ FOR DIFFERENT INVESTOR TYPES:
                 blocked: false
             };
         } catch (error) {
-            throw new Error('Failed to process AI response');
+            throw new Error('Failed to process AI response: ' + error.message);
         }
     }
 
     extractChartRequests(text) {
-        const chartRegex = /\[CHART_REQUEST:\s*type="([^"]+)",\s*symbol="([^"]+)",\s*data="([^"]+)"\]/g;
+        const chartRegex = /\[CHART_REQUEST:\s*type="([^"]+)",\s*symbol="([^"]+)",\s*data="([^"]+)"(?:,\s*indicators="([^"]+)")?\]/g;
         const requests = [];
         let match;
 
@@ -668,22 +421,42 @@ FOR DIFFERENT INVESTOR TYPES:
             requests.push({
                 type: match[1],
                 symbol: match[2],
-                data: match[3]
+                data: match[3],
+                indicators: match[4] ? match[4].split(',') : []
             });
         }
 
         return requests;
     }
 
-    updateHistory(userMessage, assistantResponse) {
-        this.conversationHistory.push({
+    // ✅ AMÉLIORATION 10: Historique conversationnel enrichi
+    updateConversationHistory(userMessage, assistantResponse, context) {
+        const entry = {
             user: userMessage,
             assistant: assistantResponse.text,
-            timestamp: Date.now()
-        });
+            timestamp: Date.now(),
+            symbols: context.entities?.symbols || [],
+            intent: context.intent?.type || 'GENERAL'
+        };
+        
+        this.conversationHistory.push(entry);
 
+        // Garder les 20 derniers messages
         if (this.conversationHistory.length > this.maxHistorySize) {
             this.conversationHistory.shift();
+        }
+        
+        // ✅ Mettre à jour le contexte utilisateur
+        if (entry.symbols.length > 0) {
+            entry.symbols.forEach(symbol => {
+                if (!this.userContext.preferredStocks.includes(symbol)) {
+                    this.userContext.preferredStocks.push(symbol);
+                }
+            });
+            // Garder seulement les 10 derniers symboles
+            if (this.userContext.preferredStocks.length > 10) {
+                this.userContext.preferredStocks = this.userContext.preferredStocks.slice(-10);
+            }
         }
     }
 
@@ -701,11 +474,12 @@ FOR DIFFERENT INVESTOR TYPES:
         if (response.usageMetadata) {
             this.totalTokens += (response.usageMetadata.totalTokenCount || 0);
         }
+        console.log(`📊 Gemini Stats: ${this.requestCount} requests | ${this.totalTokens} tokens`);
     }
 
     handleError(error) {
         return {
-            text: `⚠️ **Error:** ${error.message}`,
+            text: `⚠ **I encountered an error:** ${error.message}\n\nPlease try rephrasing your question or check your API configuration.`,
             error: true,
             chartRequests: []
         };
@@ -713,13 +487,21 @@ FOR DIFFERENT INVESTOR TYPES:
 
     clearHistory() {
         this.conversationHistory = [];
+        this.userContext = {
+            preferredStocks: [],
+            investmentGoals: null,
+            riskTolerance: null,
+            conversationTopic: null
+        };
+        console.log('🗑 Conversation history cleared');
     }
 
     getStats() {
         return {
             requestCount: this.requestCount,
             totalTokens: this.totalTokens,
-            historySize: this.conversationHistory.length
+            historySize: this.conversationHistory.length,
+            watchlistSize: this.userContext.preferredStocks.length
         };
     }
 }

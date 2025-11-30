@@ -1,6 +1,6 @@
 // ============================================
 // FINANCIAL CHATBOT - CONFIGURATION
-// Ultra-Premium Settings & API Keys
+// Version Conversationnelle Ultra-Performante
 // ============================================
 
 const ChatbotConfig = {
@@ -9,43 +9,31 @@ const ChatbotConfig = {
     // ============================================
     api: {
         gemini: {
-            // ✅ TA CLÉ GEMINI
             apiKey: 'AIzaSyDWbJhZm4hUls0t7qkwmDwrAZCJTLXXztU',
-            endpoint: 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent',
-            model: 'gemini-2.5-flash',
-            maxOutputTokens: 8192,
-            temperature: 0.85,
+            endpoint: 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-exp:generateContent',
+            model: 'gemini-2.5-flash-exp',
+            
+            // ✅ AMÉLIORATION 1: Paramètres optimisés pour la conversation
+            maxOutputTokens: 8192, // Maintenu pour flexibilité
+            temperature: 0.9, // ↑ Plus créatif (était 0.85)
             topK: 40,
             topP: 0.95,
+            
             safetySettings: [
-                {
-                    category: 'HARM_CATEGORY_HARASSMENT',
-                    threshold: 'BLOCK_MEDIUM_AND_ABOVE'
-                },
-                {
-                    category: 'HARM_CATEGORY_HATE_SPEECH',
-                    threshold: 'BLOCK_MEDIUM_AND_ABOVE'
-                },
-                {
-                    category: 'HARM_CATEGORY_SEXUALLY_EXPLICIT',
-                    threshold: 'BLOCK_MEDIUM_AND_ABOVE'
-                },
-                {
-                    category: 'HARM_CATEGORY_DANGEROUS_CONTENT',
-                    threshold: 'BLOCK_MEDIUM_AND_ABOVE'
-                }
+                { category: 'HARM_CATEGORY_HARASSMENT', threshold: 'BLOCK_MEDIUM_AND_ABOVE' },
+                { category: 'HARM_CATEGORY_HATE_SPEECH', threshold: 'BLOCK_MEDIUM_AND_ABOVE' },
+                { category: 'HARM_CATEGORY_SEXUALLY_EXPLICIT', threshold: 'BLOCK_MEDIUM_AND_ABOVE' },
+                { category: 'HARM_CATEGORY_DANGEROUS_CONTENT', threshold: 'BLOCK_MEDIUM_AND_ABOVE' }
             ]
         },
         
         finnhub: {
-            // ✅ METS TA VRAIE CLÉ FINNHUB ICI
             apiKey: 'd45qhbpr01qieo4rfq9gd45qhbpr01qieo4rfqa0',
             endpoint: 'https://finnhub.io/api/v1',
             websocket: 'wss://ws.finnhub.io'
         },
         
         twelveData: {
-            // ✅ METS TA VRAIE CLÉ TWELVE DATA ICI
             apiKey: '57e3c785fda7424d97ab195f22263765',
             endpoint: 'https://api.twelvedata.com'
         }
@@ -55,16 +43,23 @@ const ChatbotConfig = {
     // CHATBOT BEHAVIOR
     // ============================================
     behavior: {
-        typingDelay: 1500,
-        responseDelay: 300,
+        typingDelay: 1200, // ↓ Réduit pour réactivité (était 1500)
+        responseDelay: 200, // ↓ Réduit (était 300)
         maxMessageLength: 2000,
-        maxHistorySize: 50,
+        
+        // ✅ AMÉLIORATION 2: Historique étendu
+        maxHistorySize: 100, // ↑ Augmenté (était 50)
+        conversationMemorySize: 20, // Nouveaux messages gardés en mémoire pour contexte
+        
         showSuggestions: true,
-        suggestionsDelay: 500,
+        suggestionsDelay: 400, // ↓ Réduit (était 500)
         maxSuggestions: 4,
+        
+        // ✅ AMÉLIORATION 3: Génération automatique de graphiques intelligente
         autoGenerateCharts: true,
-        chartAnimationDuration: 750,
-        inputDebounce: 300,
+        chartAnimationDuration: 600, // ↓ Plus rapide (était 750)
+        
+        inputDebounce: 200, // ↓ Réduit (était 300)
         virtualScrollThreshold: 100,
         enableLazyLoading: true,
         enableWebWorkers: false,
@@ -82,13 +77,15 @@ const ChatbotConfig = {
         userAvatar: '👤',
         enableAnimations: true,
         enableParticles: false,
-        particleCount: 0,
         position: 'bottom-right',
         width: 420,
         height: 650,
         mobileBreakpoint: 768,
-        welcomeMessage: "Hello! 👋 I'm Alphy, your AI Financial Assistant with real-time market data. How can I help you today?",
-        placeholderText: "Ask me anything about finance, stocks, IPOs...",
+        
+        // ✅ AMÉLIORATION 4: Message d'accueil conversationnel
+        welcomeMessage: "👋 **Hi! I'm Alphy**, your AI Financial Expert.\n\nI can help you with:\n• 📊 Stock analysis & recommendations\n• 💰 IPO evaluation & research\n• 📈 Technical & fundamental analysis\n• 🌐 Market insights & trends\n• 💡 Financial education\n\n**Ask me anything about finance!**",
+        
+        placeholderText: "Ask me anything about stocks, markets, IPOs...",
         showTimestamps: true,
         timestampFormat: 'HH:mm'
     },
@@ -106,7 +103,12 @@ const ChatbotConfig = {
         realTimeAlerts: false,
         exportConversation: true,
         voiceInput: false,
-        multiLanguage: false
+        multiLanguage: false,
+        
+        // ✅ AMÉLIORATION 5: Nouvelles fonctionnalités conversationnelles
+        contextualMemory: true, // Mémoire des conversations précédentes
+        smartSuggestions: true, // Suggestions basées sur le contexte
+        adaptiveResponses: true // Réponses adaptées au niveau de l'utilisateur
     },
 
     // ============================================
@@ -143,7 +145,7 @@ const ChatbotConfig = {
             text: 'rgba(255, 255, 255, 0.8)'
         },
         animation: {
-            duration: 750,
+            duration: 600, // ↓ Plus rapide (était 750)
             easing: 'easeInOutQuart'
         },
         enableZoom: true,
@@ -179,11 +181,11 @@ const ChatbotConfig = {
     // ============================================
     localization: {
         defaultLanguage: 'en',
-        supportedLanguages: ['en', 'fr'],
+        supportedLanguages: ['en'],
         translations: {
             en: {
-                welcome: "Hello! 👋 I'm Alphy, your AI Financial Assistant with real-time market data.",
-                placeholder: "Ask me anything about finance, stocks, IPOs...",
+                welcome: "👋 Hi! I'm Alphy, your AI Financial Expert. Ask me anything!",
+                placeholder: "Ask me anything about stocks, markets, IPOs...",
                 send: "Send",
                 typing: "Alphy is typing...",
                 error: "Oops! Something went wrong.",
@@ -191,17 +193,6 @@ const ChatbotConfig = {
                 clear: "Clear",
                 export: "Export",
                 close: "Close"
-            },
-            fr: {
-                welcome: "Bonjour ! 👋 Je suis Alphy, votre Assistant Financier IA avec données en temps réel.",
-                placeholder: "Posez-moi des questions sur la finance, actions, IPO...",
-                send: "Envoyer",
-                typing: "Alphy écrit...",
-                error: "Oups ! Une erreur s'est produite.",
-                retry: "Réessayer",
-                clear: "Effacer",
-                export: "Exporter",
-                close: "Fermer"
             }
         }
     },
@@ -210,30 +201,33 @@ const ChatbotConfig = {
     // SUGGESTIONS TEMPLATES
     // ============================================
     suggestions: {
+        // ✅ AMÉLIORATION 6: Suggestions variées et engageantes
         initial: [
-            "📈 Analyze NVDA stock",
-            "💰 Market overview today",
-            "📊 Show trending IPOs",
-            "🎯 AAPL technical analysis"
+            "📈 Analyze NVDA stock performance",
+            "💰 What's happening in the market today?",
+            "📊 Show me top performing IPOs",
+            "🎯 Explain the P/E ratio",
+            "💡 Best tech stocks to watch",
+            "🔍 Compare AAPL vs MSFT"
         ],
         followUp: {
             ipo: [
-                "Show detailed analysis",
-                "Compare with sector",
-                "Risk assessment",
-                "Price history"
+                "Show detailed IPO analysis",
+                "Compare with industry peers",
+                "Risk assessment for this IPO",
+                "Historical IPO performance"
             ],
             stock: [
-                "Show technical indicators",
-                "Earnings data",
-                "Analyst ratings",
-                "Compare with competitors"
+                "Technical indicators analysis",
+                "Fundamental metrics breakdown",
+                "Compare with competitors",
+                "Price targets and recommendations"
             ],
             market: [
-                "Sector performance",
-                "Top gainers today",
-                "Economic indicators",
-                "Market sentiment"
+                "Sector performance breakdown",
+                "Top gainers and losers",
+                "Economic indicators impact",
+                "Market sentiment analysis"
             ]
         }
     },
@@ -245,7 +239,7 @@ const ChatbotConfig = {
         lazyLoadImages: true,
         lazyLoadCharts: true,
         enableCache: true,
-        cacheExpiration: 300000,
+        cacheExpiration: 300000, // 5 minutes
         compressMessages: false,
         useWebWorkers: false,
         maxWorkers: 2,
@@ -265,11 +259,11 @@ const ChatbotConfig = {
         showUserFriendlyMessages: true,
         logErrors: true,
         messages: {
-            network: "Network error. Please check your connection.",
-            apiKey: "API key is missing or invalid.",
-            rateLimit: "Rate limit exceeded. Please wait.",
-            timeout: "Request timeout. Please try again.",
-            unknown: "An unexpected error occurred."
+            network: "⚠ Network error. Please check your connection.",
+            apiKey: "⚠ API key is missing or invalid. Please configure your API keys.",
+            rateLimit: "⚠ Rate limit exceeded. Please wait a moment.",
+            timeout: "⚠ Request timeout. Please try again.",
+            unknown: "⚠ An unexpected error occurred. Please try rephrasing your question."
         }
     },
 

@@ -4,20 +4,27 @@
       "name": "Initial Public Offering",
       "definition": "The process by which a private company offers shares to the public for the first time",
       "example": "When a company 'goes public', it conducts an IPO to raise capital from public investors",
-      "related": ["Stock", "Market Cap", "Underwriter"]
+      "related": ["Stock", "Market Cap", "Underwriter"],
+      "keywords": ["going public", "public offering", "listing"]
     },
     "P/E Ratio": {
       "name": "Price-to-Earnings Ratio",
       "definition": "A valuation metric that compares a company's stock price to its earnings per share",
       "formula": "P/E = Stock Price / Earnings Per Share",
-      "interpretation": "Higher P/E may indicate overvaluation or high growth expectations. Lower P/E may indicate undervaluation or low growth",
+      "interpretation": "Higher P/E may indicate overvaluation or high growth expectations. Lower P/E may indicate undervaluation or low growth. Industry average comparison is crucial.",
+      "ranges": {
+        "undervalued": "< 15",
+        "fairly_valued": "15-25",
+        "overvalued": "> 25 (or >industry average)"
+      },
       "related": ["EPS", "Valuation", "PEG Ratio"]
     },
     "EPS": {
       "name": "Earnings Per Share",
       "definition": "A company's net profit divided by the number of outstanding shares",
       "formula": "EPS = Net Income / Outstanding Shares",
-      "importance": "Key indicator of company profitability on a per-share basis",
+      "importance": "Key indicator of company profitability on a per-share basis. Used in P/E ratio calculation.",
+      "types": ["Basic EPS", "Diluted EPS", "Adjusted EPS"],
       "related": ["P/E Ratio", "Dividends", "Net Income"]
     },
     "Market Cap": {
@@ -29,53 +36,82 @@
         "Large Cap": "$10-200 billion",
         "Mid Cap": "$2-10 billion",
         "Small Cap": "$300 million - $2 billion",
-        "Micro Cap": "< $300 million"
+        "Micro Cap": "< $300 million",
+        "Nano Cap": "< $50 million"
       },
-      "related": ["Stock Price", "Outstanding Shares"]
+      "investment_characteristics": {
+        "Large Cap": "Lower risk, stable growth, often pay dividends",
+        "Mid Cap": "Moderate risk, good growth potential",
+        "Small Cap": "Higher risk, higher growth potential, volatile"
+      },
+      "related": ["Stock Price", "Outstanding Shares", "Enterprise Value"]
     },
     "ROE": {
       "name": "Return on Equity",
       "definition": "Measure of profitability that shows how much profit a company generates with shareholders' equity",
       "formula": "ROE = Net Income / Shareholders' Equity × 100%",
-      "interpretation": "Higher ROE indicates better efficiency in generating returns",
-      "related": ["ROA", "ROI", "Net Income"]
+      "interpretation": "Higher ROE indicates better efficiency in generating returns. Above 15% is generally considered good.",
+      "benchmarks": {
+        "excellent": "> 20%",
+        "good": "15-20%",
+        "average": "10-15%",
+        "below_average": "< 10%"
+      },
+      "related": ["ROA", "ROI", "Net Income", "DuPont Analysis"]
     },
     "Dividend Yield": {
       "name": "Dividend Yield",
       "definition": "Annual dividend payment as a percentage of stock price",
       "formula": "Dividend Yield = Annual Dividend per Share / Stock Price × 100%",
-      "interpretation": "Higher yield may indicate good income investment, but verify sustainability",
-      "related": ["Dividends", "Payout Ratio"]
+      "interpretation": "Higher yield may indicate good income investment, but verify sustainability. Very high yields (>8%) can signal distress.",
+      "typical_ranges": {
+        "growth_stocks": "0-2%",
+        "balanced": "2-4%",
+        "income_stocks": "4-6%",
+        "high_yield": "> 6% (verify sustainability)"
+      },
+      "related": ["Dividends", "Payout Ratio", "Dividend Growth Rate"]
     },
     "Beta": {
       "name": "Beta Coefficient",
-      "definition": "Measure of a stock's volatility compared to the overall market",
+      "definition": "Measure of a stock's volatility compared to the overall market (S&P 500)",
       "interpretation": {
-        "> 1": "More volatile than market",
-        "= 1": "Moves with market",
-        "< 1": "Less volatile than market",
-        "< 0": "Inverse correlation to market"
+        "> 1": "More volatile than market (aggressive stock)",
+        "= 1": "Moves in line with market",
+        "0 to 1": "Less volatile than market (defensive stock)",
+        "< 0": "Inverse correlation to market (rare, e.g., gold stocks)",
+        "> 2": "Extremely volatile"
       },
-      "related": ["Volatility", "Risk", "Alpha"]
+      "examples": {
+        "tech_growth": "1.3-1.8",
+        "utilities": "0.3-0.7",
+        "consumer_staples": "0.5-0.9"
+      },
+      "related": ["Volatility", "Risk", "Alpha", "Sharpe Ratio"]
     },
     "EBITDA": {
       "name": "Earnings Before Interest, Taxes, Depreciation, and Amortization",
-      "definition": "Measure of company's operating performance",
+      "definition": "Measure of company's operating performance before accounting and financing decisions",
       "formula": "EBITDA = Revenue - Operating Expenses (excluding interest, taxes, depreciation, amortization)",
-      "use_case": "Compare profitability between companies and industries",
-      "related": ["Operating Income", "Net Income", "Cash Flow"]
+      "use_case": "Compare profitability between companies and industries, especially capital-intensive ones",
+      "pros": ["Removes impact of financing decisions", "Good for M&A valuation"],
+      "cons": ["Ignores capital expenditures", "Can overstate cash flow"],
+      "related": ["Operating Income", "Net Income", "Free Cash Flow", "EV/EBITDA"]
     },
     "RSI": {
       "name": "Relative Strength Index",
       "definition": "Momentum indicator measuring speed and magnitude of price changes",
       "range": "0 to 100",
       "interpretation": {
-        "> 70": "Overbought - potential sell signal",
+        "> 70": "Overbought - potential sell signal or take profit",
+        "50-70": "Bullish momentum",
+        "30-50": "Bearish momentum",
         "< 30": "Oversold - potential buy signal",
-        "50": "Neutral"
+        "Divergence": "Price makes new high but RSI doesn't = bearish. Price makes new low but RSI doesn't = bullish"
       },
-      "period": "Typically 14 days",
-      "related": ["MACD", "Momentum", "Technical Analysis"]
+      "period": "Typically 14 days (can be adjusted for different timeframes)",
+      "best_use": "Range-bound markets. Less reliable in strong trending markets.",
+      "related": ["MACD", "Stochastic Oscillator", "Momentum", "Technical Analysis"]
     },
     "MACD": {
       "name": "Moving Average Convergence Divergence",
@@ -83,207 +119,224 @@
       "components": {
         "MACD Line": "12-day EMA - 26-day EMA",
         "Signal Line": "9-day EMA of MACD line",
-        "Histogram": "MACD line - Signal line"
+        "Histogram": "MACD line - Signal line (shows distance between lines)"
       },
       "signals": {
-        "Bullish": "MACD crosses above signal line",
-        "Bearish": "MACD crosses below signal line"
+        "Bullish Crossover": "MACD crosses above signal line (buy signal)",
+        "Bearish Crossover": "MACD crosses below signal line (sell signal)",
+        "Zero Line Cross": "MACD crosses above/below zero (momentum shift)",
+        "Divergence": "Price makes new high/low but MACD doesn't (reversal warning)"
       },
-      "related": ["RSI", "Moving Averages", "Technical Analysis"]
+      "best_use": "Trending markets. Combine with support/resistance for confirmation.",
+      "related": ["RSI", "Moving Averages", "Technical Analysis", "Trend Following"]
+    },
+    "Free Cash Flow": {
+      "name": "Free Cash Flow (FCF)",
+      "definition": "Cash generated after capital expenditures, available for distribution to investors",
+      "formula": "FCF = Operating Cash Flow - Capital Expenditures",
+      "importance": "Most accurate measure of company's financial health. Used in DCF valuation.",
+      "interpretation": {
+        "Positive & Growing": "Strong financial health, can pay dividends, reduce debt, invest",
+        "Negative": "May indicate growth phase (CapEx heavy) or financial stress"
+      },
+      "related": ["Operating Cash Flow", "EBITDA", "DCF Valuation"]
+    },
+    "PEG Ratio": {
+      "name": "Price/Earnings to Growth Ratio",
+      "definition": "P/E ratio adjusted for earnings growth rate",
+      "formula": "PEG = P/E Ratio / EPS Growth Rate",
+      "interpretation": {
+        "< 1": "Potentially undervalued (stock is cheap relative to growth)",
+        "= 1": "Fairly valued",
+        "> 1": "Potentially overvalued (paying premium for growth)",
+        "> 2": "Significantly overvalued"
+      },
+      "best_use": "Comparing growth stocks. More reliable than P/E alone for high-growth companies.",
+      "related": ["P/E Ratio", "EPS Growth", "Growth Investing"]
     }
   },
   
   "market_indices": {
     "S&P 500": {
       "name": "Standard & Poor's 500",
-      "description": "Stock market index tracking 500 largest U.S. publicly traded companies",
-      "symbol": "SPY (ETF)",
-      "weight_method": "Market-cap weighted",
-      "sectors": ["Technology", "Healthcare", "Financials", "Consumer", "Industrials"]
+      "description": "Stock market index tracking 500 largest U.S. publicly traded companies by market cap",
+      "symbol": "SPY (ETF), ^GSPC (Index)",
+      "weight_method": "Market-cap weighted (largest companies have most influence)",
+      "sectors": ["Technology (28%)", "Healthcare (13%)", "Financials (11%)", "Consumer Discretionary (10%)", "Communication Services (9%)"],
+      "characteristics": "Most watched U.S. equity index. Considered benchmark for U.S. stock market and economy.",
+      "top_holdings": ["Apple", "Microsoft", "Amazon", "NVIDIA", "Alphabet"],
+      "historical_return": "~10% annualized (long-term average)"
     },
     "NASDAQ": {
       "name": "NASDAQ Composite",
-      "description": "Index of all stocks listed on NASDAQ exchange, heavy in technology",
-      "symbol": "QQQ (ETF)",
-      "characteristics": "Tech-heavy, growth-oriented",
-      "notable_companies": ["Apple", "Microsoft", "Amazon", "Alphabet", "Meta"]
+      "description": "Index of all stocks listed on NASDAQ exchange, heavily weighted towards technology",
+      "symbol": "QQQ (ETF - tracks NASDAQ-100), ^IXIC (Composite Index)",
+      "characteristics": "Tech-heavy, growth-oriented, more volatile than S&P 500",
+      "sector_weight": "Technology ~50%, Consumer Services ~20%",
+      "notable_companies": ["Apple", "Microsoft", "Amazon", "Alphabet", "Meta", "Tesla", "NVIDIA"],
+      "best_for": "Investors seeking growth and tech exposure. Higher risk/reward than S&P 500."
     },
     "Dow Jones": {
-      "name": "Dow Jones Industrial Average",
+      "name": "Dow Jones Industrial Average (DJIA)",
       "description": "Price-weighted index of 30 prominent U.S. companies",
-      "symbol": "DIA (ETF)",
-      "weight_method": "Price-weighted",
-      "history": "Oldest U.S. market index (since 1896)"
+      "symbol": "DIA (ETF), ^DJI (Index)",
+      "weight_method": "Price-weighted (higher-priced stocks have more influence, regardless of market cap)",
+      "history": "Oldest U.S. market index (since 1896). Originally tracked industrial companies.",
+      "characteristics": "Blue-chip stocks, less tech-focused than NASDAQ, more stable than NASDAQ",
+      "criticism": "Only 30 stocks, price-weighting is outdated methodology",
+      "components": ["Apple", "Microsoft", "UnitedHealth", "Goldman Sachs", "Home Depot"]
+    },
+    "Russell 2000": {
+      "name": "Russell 2000 Index",
+      "description": "Small-cap stock market index of 2000 smallest U.S. companies",
+      "symbol": "IWM (ETF)",
+      "characteristics": "Small-cap indicator, more volatile, domestic-focused (less international exposure)",
+      "best_for": "Gauging small-cap performance and U.S. economic health. Higher growth potential but higher risk."
     },
     "VIX": {
-      "name": "Volatility Index",
-      "description": "Measure of market's expectation of 30-day volatility",
+      "name": "Volatility Index (CBOE)",
       "nickname": "Fear Index",
+      "description": "Measure of market's expectation of 30-day volatility based on S&P 500 options",
       "interpretation": {
-        "< 12": "Low volatility",
+        "< 12": "Low volatility (complacency)",
         "12-20": "Normal volatility",
-        "20-30": "Elevated volatility",
-        "> 30": "High volatility/fear"
-      }
+        "20-30": "Elevated volatility (uncertainty)",
+        "30-40": "High volatility (fear)",
+        "> 40": "Extreme volatility (panic)"
+      },
+      "trading": "Can trade VIX futures and options (VXX, UVXY ETFs)",
+      "use_case": "Hedge against market downturns, gauge market sentiment"
     }
   },
   
   "investment_strategies": {
     "Value Investing": {
       "description": "Strategy of selecting stocks trading below their intrinsic value",
-      "key_metrics": ["P/E Ratio", "P/B Ratio", "Dividend Yield"],
-      "famous_investors": ["Warren Buffett", "Benjamin Graham"],
-      "approach": "Buy undervalued stocks with strong fundamentals and hold long-term"
+      "key_metrics": ["Low P/E Ratio", "Low P/B Ratio", "High Dividend Yield", "Strong FCF"],
+      "famous_investors": ["Warren Buffett", "Benjamin Graham", "Charlie Munger"],
+      "approach": "Buy undervalued stocks with strong fundamentals and hold long-term (years)",
+      "best_for": "Patient investors seeking margin of safety and steady returns",
+      "sectors": "Often found in Financials, Utilities, Consumer Staples, Energy",
+      "risks": ["Value trap (cheap for a reason)", "Long wait for revaluation"]
     },
     "Growth Investing": {
       "description": "Investing in companies expected to grow at above-average rate",
-      "key_metrics": ["Revenue Growth", "EPS Growth", "Forward P/E"],
-      "characteristics": "Higher P/E ratios, reinvest earnings, focus on future potential",
-      "sectors": ["Technology", "Healthcare", "Consumer Discretionary"]
+      "key_metrics": ["High Revenue Growth", "High EPS Growth", "Expanding Margins", "TAM Expansion"],
+      "characteristics": "Higher P/E ratios, reinvest earnings (low/no dividends), focus on future potential",
+      "sectors": ["Technology", "Healthcare (Biotech)", "Consumer Discretionary (E-commerce)"],
+      "famous_investors": ["Peter Lynch", "Cathie Wood", "Philip Fisher"],
+      "best_for": "Investors willing to accept volatility for higher long-term returns",
+      "risks": ["High valuations vulnerable to corrections", "Growth disappointment"]
     },
     "Dividend Investing": {
-      "description": "Focus on stocks that pay regular, sustainable dividends",
-      "key_metrics": ["Dividend Yield", "Payout Ratio", "Dividend Growth Rate"],
-      "benefits": ["Regular income", "Lower volatility", "Compounding returns"],
-      "target_companies": "Mature, profitable companies with stable cash flows"
+      "description": "Focus on stocks that pay regular, sustainable, and growing dividends",
+      "key_metrics": ["Dividend Yield (3-6% ideal)", "Payout Ratio (<60% sustainable)", "Dividend Growth Rate", "Years of Consecutive Increases"],
+      "benefits": ["Regular income stream", "Lower volatility", "Compounding returns", "Tax advantages (qualified dividends)"],
+      "target_companies": "Mature, profitable companies with stable cash flows (Dividend Aristocrats)",
+      "best_for": "Income-focused investors, retirees, conservative portfolios",
+      "risks": ["Dividend cuts during recessions", "May underperform in bull markets"]
     },
     "Momentum Trading": {
-      "description": "Strategy based on continuing trends in stock prices",
-      "indicators": ["RSI", "MACD", "Moving Averages"],
-      "timeframe": "Short to medium term",
-      "risk": "Higher risk, requires active management"
-    }
-  },
-  
-  "sectors": {
-    "Technology": {
-      "description": "Companies producing software, hardware, semiconductors, and IT services",
-      "characteristics": "High growth, innovation-driven, higher volatility",
-      "examples": ["Apple", "Microsoft", "NVIDIA", "Google"],
-      "trends": ["AI", "Cloud Computing", "Cybersecurity", "5G"]
+      "description": "Strategy based on continuing trends in stock prices ('the trend is your friend')",
+      "indicators": ["RSI", "MACD", "Moving Averages", "Volume", "Relative Strength"],
+      "timeframe": "Short to medium term (days to months)",
+      "approach": "Buy stocks showing upward momentum, sell when momentum fades",
+      "best_for": "Active traders comfortable with technical analysis",
+      "risks": ["Higher risk", "Requires active management", "Can reverse quickly", "Higher transaction costs"]
     },
-    "Healthcare": {
-      "description": "Pharmaceuticals, biotech, medical devices, healthcare services",
-      "characteristics": "Defensive sector, driven by demographics and innovation",
-      "examples": ["Johnson & Johnson", "Pfizer", "UnitedHealth"],
-      "trends": ["Biotech", "Personalized Medicine", "Digital Health"]
-    },
-    "Financials": {
-      "description": "Banks, insurance, asset management, fintech",
-      "characteristics": "Interest rate sensitive, economic cycle dependent",
-      "examples": ["JPMorgan", "Berkshire Hathaway", "Visa"],
-      "trends": ["Digital Banking", "Blockchain", "RegTech"]
-    },
-    "Consumer Discretionary": {
-      "description": "Non-essential goods and services",
-      "characteristics": "Economic cycle sensitive, driven by consumer confidence",
-      "examples": ["Amazon", "Tesla", "Nike", "Starbucks"],
-      "sub_sectors": ["Retail", "Automotive", "Entertainment", "Restaurants"]
-    },
-    "Energy": {
-      "description": "Oil, gas, renewable energy companies",
-      "characteristics": "Commodity price dependent, cyclical",
-      "examples": ["ExxonMobil", "Chevron", "NextEra Energy"],
-      "trends": ["Renewable Energy", "Electric Vehicles", "Energy Storage"]
-    }
-  },
-  
-  "ipo_evaluation_criteria": {
-    "Company Fundamentals": {
-      "factors": [
-        "Revenue growth trajectory",
-        "Path to profitability",
-        "Unit economics",
-        "Cash burn rate",
-        "Competitive advantages"
-      ]
-    },
-    "Market Opportunity": {
-      "factors": [
-        "Total addressable market (TAM)",
-        "Market growth rate",
-        "Competitive landscape",
-        "Market share potential",
-        "Barriers to entry"
-      ]
-    },
-    "Management Team": {
-      "factors": [
-        "Track record of executives",
-        "Industry experience",
-        "Corporate governance",
-        "Insider ownership",
-        "Board composition"
-      ]
-    },
-    "Valuation": {
-      "factors": [
-        "IPO pricing vs comparables",
-        "Price-to-sales ratio",
-        "Growth-adjusted multiples",
-        "Post-money valuation",
-        "Dilution from offering"
-      ]
-    },
-    "Red Flags": {
-      "warnings": [
-        "Unprofitable with no clear path to profitability",
-        "Declining revenue or growth rate",
-        "High customer concentration",
-        "Significant insider selling",
-        "Complex corporate structure",
-        "Pending litigation",
-        "Regulatory uncertainties"
-      ]
+    "Index Investing (Passive)": {
+      "description": "Invest in index funds (ETFs or mutual funds) that track market indices",
+      "benefits": ["Low fees (0.03-0.20%)", "Diversification", "Tax efficient", "Matches market returns"],
+      "popular_funds": ["VOO (S&P 500)", "VTI (Total US Market)", "QQQ (NASDAQ-100)", "VT (Total World)"],
+      "approach": "Buy and hold, regular contributions (dollar-cost averaging)",
+      "best_for": "Long-term investors (10+ years), beginners, hands-off approach",
+      "supporting_research": "Beats 80-90% of active managers over 15+ years"
     }
   },
   
   "risk_management": {
     "Diversification": {
-      "principle": "Don't put all eggs in one basket",
+      "principle": "Don't put all eggs in one basket - reduce unsystematic risk",
       "strategies": [
-        "Spread investments across sectors",
-        "Mix of growth and value stocks",
-        "Geographic diversification",
-        "Asset class diversification"
-      ]
+        "Spread across 15-30 individual stocks (or use index funds)",
+        "Mix sectors (Tech, Healthcare, Finance, Consumer, Energy, etc.)",
+        "Geographic diversification (US + International)",
+        "Asset class diversification (Stocks + Bonds + Real Estate + Commodities)",
+        "Market cap diversification (Large + Mid + Small cap)"
+      ],
+      "benefits": "Reduces portfolio volatility and risk of catastrophic loss",
+      "limits": "Cannot eliminate systematic (market) risk"
     },
     "Position Sizing": {
-      "guideline": "Limit single position to 5-10% of portfolio",
-      "rationale": "Minimize impact of individual stock failures"
+      "guideline": "Limit single position to 5-10% of portfolio (3-5% for speculative)",
+      "rationale": "Minimize impact of individual stock failures while allowing winners to compound",
+      "formula": "Position Size = (Portfolio Value × Risk %) / (Entry Price - Stop Loss Price)",
+      "example": "$100k portfolio, 2% risk, $50 entry, $45 stop = $4k position (80 shares)"
     },
     "Stop Loss": {
-      "definition": "Predetermined price level to exit losing position",
-      "typical_range": "7-10% below purchase price",
-      "purpose": "Limit downside risk"
+      "definition": "Predetermined price level to automatically exit losing position",
+      "types": ["Fixed % (7-10% below purchase)", "ATR-based (2x ATR)", "Support level", "Trailing stop (follows price up)"],
+      "purpose": "Limit downside risk, remove emotion from selling decision",
+      "caution": "Can be triggered by short-term volatility. Use wider stops for volatile stocks."
     },
-    "Rebalancing": {
-      "frequency": "Quarterly or annually",
-      "purpose": "Maintain target asset allocation",
-      "trigger": "When allocation drifts >5% from target"
+    "Risk/Reward Ratio": {
+      "definition": "Ratio of potential profit to potential loss",
+      "formula": "R/R = (Target Price - Entry Price) / (Entry Price - Stop Loss)",
+      "guideline": "Minimum 2:1 (risk $1 to potentially make $2). Professional traders often use 3:1.",
+      "example": "Entry $50, Target $56, Stop $48 → R/R = 6/2 = 3:1 (good trade setup)"
+    },
+    "Portfolio Rebalancing": {
+      "frequency": "Quarterly or annually (or when allocation drifts >5% from target)",
+      "purpose": "Maintain target asset allocation, take profits from winners, buy dips in laggards",
+      "method": "Sell overweight positions, buy underweight positions to restore targets",
+      "tax_consideration": "Use new contributions to rebalance in taxable accounts to avoid capital gains"
     }
+  },
+  
+  "trading_terminology": {
+    "Bull Market": "Sustained uptrend in prices (typically 20%+ gain from lows). Characterized by optimism and economic expansion.",
+    "Bear Market": "Sustained downtrend in prices (typically 20%+ decline from highs). Characterized by pessimism and economic contraction.",
+    "Correction": "Short-term decline of 10-20% from recent highs. Normal part of bull markets.",
+    "Market Order": "Order to buy/sell immediately at current market price. Guarantees execution but not price.",
+    "Limit Order": "Order to buy/sell at specified price or better. Guarantees price but not execution.",
+    "Stop-Loss Order": "Order that becomes market order when stock hits specified price. Used to limit losses.",
+    "Bid-Ask Spread": "Difference between highest buy price (bid) and lowest sell price (ask). Narrower = more liquid.",
+    "Volume": "Number of shares traded. High volume confirms price moves. Low volume = less conviction.",
+    "Market Cap": "Total value of company (Share Price × Shares Outstanding). Determines size classification.",
+    "Float": "Number of shares available for public trading (excludes insider holdings). Low float = more volatile.",
+    "Short Selling": "Borrowing shares to sell, hoping to buy back cheaper. Profits from price declines. Unlimited risk.",
+    "Margin": "Borrowing money from broker to buy stocks. Amplifies gains AND losses. Margin call = forced selling.",
+    "Options": "Contracts giving right (not obligation) to buy (call) or sell (put) at specified price. Used for hedging or speculation.",
+    "Earnings Season": "Period when public companies report quarterly results (Jan, Apr, Jul, Oct). High volatility.",
+    "Ex-Dividend Date": "Date you must own stock to receive dividend. Stock typically drops by dividend amount.",
+    "Stock Split": "Increases shares outstanding, lowers price (e.g., 2-for-1). No change in total value.",
+    "Reverse Split": "Decreases shares, increases price. Often bearish signal (trying to avoid delisting)."
   },
   
   "faq": [
     {
       "question": "What is the best time to invest in an IPO?",
-      "answer": "There's no universally 'best' time. Many experts suggest waiting 3-6 months after IPO for price stabilization and more financial data. The lockup period expiration (typically 180 days) often creates volatility. Research the company thoroughly and invest based on fundamentals, not hype."
+      "answer": "Most experts suggest waiting 3-6 months after IPO for several reasons:\n\n1. **Lockup Expiration** (typically 180 days): Insiders can sell, often causing price drops\n2. **Price Stabilization**: Initial hype fades, price finds fair value\n3. **More Data**: 1-2 quarterly earnings reports provide better insight\n4. **Lower Volatility**: Post-lockup period usually less volatile\n\n**Exception:** If you have high conviction based on fundamentals and the IPO prices reasonably (not at high end of range), buying on day 1 can work for long-term holds.\n\n**Best Practice:** Research thoroughly, don't chase hype, use limit orders (IPOs can spike/crash), only invest what you can afford to lose."
     },
     {
       "question": "How do I evaluate if a stock is overvalued or undervalued?",
-      "answer": "Compare multiple metrics: P/E ratio vs industry average, PEG ratio (P/E divided by growth rate), Price-to-Book ratio, and DCF (Discounted Cash Flow) analysis. Also consider qualitative factors like competitive advantages, management quality, and industry trends."
+      "answer": "Use multiple methods for comprehensive valuation:\n\n**1. Relative Valuation (Comparables)**\n• P/E ratio vs industry average (lower = potentially undervalued)\n• PEG ratio < 1 (undervalued), > 2 (overvalued)\n• Price-to-Book < 1 (undervalued for asset-heavy businesses)\n• EV/EBITDA vs peers\n\n**2. Absolute Valuation**\n• DCF (Discounted Cash Flow) analysis - complex but most accurate\n• Compare current price to DCF-derived intrinsic value\n\n**3. Growth Considerations**\n• High P/E can be justified if growth is high (check PEG)\n• Compare revenue/earnings growth to valuation multiples\n\n**4. Qualitative Factors**\n• Competitive advantages (moat)\n• Management quality and capital allocation\n• Industry trends and tailwinds\n• Regulatory environment\n\n**Red Flags:**\n• P/E >30 with slowing growth\n• Declining margins despite revenue growth\n• High debt + low cash flow\n• Negative FCF for mature companies\n\n**Remember:** Price ≠ Value. A $500 stock can be cheap, a $10 stock can be expensive."
     },
     {
       "question": "What's the difference between market cap and enterprise value?",
-      "answer": "Market Cap = Share Price × Shares Outstanding. Enterprise Value = Market Cap + Debt - Cash. EV gives a more complete picture of company value as it accounts for debt and cash, making it better for comparing companies with different capital structures."
+      "answer": "**Market Cap = Share Price × Shares Outstanding**\n• Represents equity value only\n• What you'd pay to buy all shares\n• Ignores debt and cash\n\n**Enterprise Value (EV) = Market Cap + Debt - Cash**\n• Represents total company value (equity + debt)\n• What you'd pay to acquire the entire business\n• More accurate for comparing companies\n\n**Why EV Matters:**\n\n1. **Debt Consideration:** Company A and B both have $10B market cap, but A has $5B debt and B has $0 debt. B is cheaper (lower EV).\n\n2. **Cash Consideration:** Company C has $10B market cap and $3B cash. True EV is only $7B (you get $3B cash with purchase).\n\n3. **Better for Comparisons:** EV/EBITDA is better than P/E for comparing companies with different capital structures.\n\n**When to Use:**\n• **Market Cap:** Simple comparisons, size classification, index weighting\n• **Enterprise Value:** M&A analysis, valuation across industries, comparing companies with different leverage"
     },
     {
       "question": "Should I invest in dividend stocks or growth stocks?",
-      "answer": "It depends on your goals. Dividend stocks provide regular income and lower volatility, suitable for income-focused or conservative investors. Growth stocks offer higher potential returns but more volatility, better for long-term capital appreciation. A balanced portfolio often includes both."
+      "answer": "Depends on your **goals, age, risk tolerance, and tax situation:**\n\n**DIVIDEND STOCKS**\n\n**Pros:**\n• Regular income stream (3-6% yields typical)\n• Lower volatility (defensive)\n• Tax-advantaged (qualified dividends taxed at 0-20%)\n• Compounding through DRIP (dividend reinvestment)\n• Better in bear markets/recessions\n\n**Cons:**\n• Lower growth potential\n• Can underperform in bull markets\n• Dividend cuts during crises\n• Less tax-efficient in taxable accounts\n\n**Best For:** Retirees, income-focused investors, conservative portfolios, high tax brackets (vs bonds)\n\n**Examples:** JNJ, KO, PG, VZ, T\n\n---\n\n**GROWTH STOCKS**\n\n**Pros:**\n• Higher potential returns (20%+ annually possible)\n• Benefit from compounding (no dividend tax drag)\n• Ride long-term secular trends (tech, innovation)\n• Tax-efficient (control when to realize gains)\n\n**Cons:**\n• Higher volatility (50% drawdowns possible)\n• No income stream\n• More risk of permanent loss\n• Harder to value (future growth uncertain)\n\n**Best For:** Young investors (long time horizon), growth-focused portfolios, high risk tolerance\n\n**Examples:** NVDA, TSLA, AMZN, META, GOOGL\n\n---\n\n**BALANCED APPROACH (Recommended for Most):**\n• **Under 40:** 80% growth, 20% dividend\n• **40-55:** 60% growth, 40% dividend\n• **55-65:** 40% growth, 60% dividend\n• **Retired:** 20% growth, 80% dividend/bonds\n\n**Or:** Use index funds (VOO, VTI) that include both (~1.5% yield + 7% growth = 8.5% total return historically)"
     },
     {
       "question": "How much of my portfolio should be in IPOs?",
-      "answer": "IPOs are higher risk. Most financial advisors recommend limiting IPO exposure to 5-10% of your portfolio. Prioritize established companies and diversification. Only invest in IPOs you've thoroughly researched and understand."
+      "answer": "**Conservative Recommendation: 5-10% maximum**\n\nHere's why:\n\n**HIGH RISK FACTORS:**\n1. **Volatility:** 50-80% swings in first year common\n2. **Limited Data:** No long-term track record\n3. **Lockup Expirations:** Insider selling at 180 days causes drops\n4. **Hype Premium:** Often overpriced at IPO (investors overpay)\n5. **Failure Rate:** ~60% of IPOs trade below offer price after 3 years\n\n**ALLOCATION FRAMEWORK:**\n\n**Conservative Investor (Low Risk Tolerance):**\n• **0-3% in IPOs**\n• Focus: Profitable companies, proven business models\n• Examples: Established tech (when they IPO), consumer brands\n\n**Moderate Investor (Medium Risk Tolerance):**\n• **5-8% in IPOs**\n• Mix: Some growth stories, some profitable IPOs\n• Diversify across 3-5 IPOs (don't concentrate)\n\n**Aggressive Investor (High Risk Tolerance, Young):**\n• **10-15% in IPOs**\n• Focus: High-growth potential, disruptive companies\n• Accept higher volatility for potential outsized returns\n\n**BEST PRACTICES:**\n1. **Never chase day-1 hype** - wait for lockup, earnings data\n2. **Diversify across sectors** - don't put all in one industry\n3. **Only invest what you can afford to lose** - IPOs can go to zero\n4. **Research deeply** - read S-1 filing, understand business model\n5. **Have an exit plan** - know when to cut losses or take profits\n\n**Historical Context:**\n• Best-performing IPOs (GOOGL, AMZN, NFLX) = life-changing returns\n• Worst-performing (WeWork, Theranos) = total losses\n• **Average:** Slightly underperforms market in first 3 years\n\n**Conclusion:** IPOs should be a **small, speculative portion** of a diversified portfolio, not the core."
+    },
+    {
+      "question": "What's a good Sharpe Ratio?",
+      "answer": "**Sharpe Ratio** measures risk-adjusted returns: (Return - Risk-Free Rate) / Standard Deviation\n\n**Interpretation:**\n• **< 0:** Losing money (worse than risk-free rate)\n• **0-1:** Subpar (not enough return for the risk taken)\n• **1-2:** Good (acceptable risk-adjusted returns)\n• **2-3:** Very Good (strong risk-adjusted performance)\n• **> 3:** Excellent (exceptional risk-adjusted returns, rare)\n\n**Context:**\n• S&P 500 long-term: ~0.4-0.5 (decent)\n• Top hedge funds: 1.0-1.5\n• Warren Buffett (lifetime): ~0.8\n• High-frequency trading firms: 2.0+\n\n**Limitations:**\n• Assumes normal distribution (fails for fat-tail events)\n• Penalizes upside volatility same as downside\n• Historical metric (past ≠ future)\n\n**Better Alternative for Investors: Sortino Ratio** (only penalizes downside volatility)"
     }
   ]
 }
