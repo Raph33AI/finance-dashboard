@@ -1,14 +1,12 @@
 // ============================================
-// ADVANCED FINANCIAL ANALYTICS v4.0 - FULL FINNHUB EDITION
-// Tous les endpoints gratuits de Finnhub intégrés
-// Compatible avec ChatbotConfig &amp; Worker Cloudflare
+// ADVANCED FINANCIAL ANALYTICS v4.1
+// Compatible avec Worker finance-hub-api v8.4.0
 // ============================================
 
 class FinancialAnalytics {
     constructor(config) {
         this.config = config;
         
-        // ✅ Configuration Worker URL (multi-sources)
         this.workerBaseUrl = 
             config?.api?.worker?.baseUrl ||
             config?.API_BASE_URL ||
@@ -17,18 +15,17 @@ class FinancialAnalytics {
             'https://finance-hub-api.raphnardone.workers.dev';
         
         this.cache = new Map();
-        this.cacheTimeout = 60000; // 1 minute cache
+        this.cacheTimeout = 60000;
         
         this.requestTimestamps = [];
         this.maxRequestsPerMinute = 30;
         
-        console.log('📊 FinancialAnalytics v4.0 - FULL FINNHUB EDITION');
+        console.log('📊 FinancialAnalytics v4.1 - Compatible Worker v8.4.0');
         console.log('🌐 Worker URL:', this.workerBaseUrl);
-        console.log('✅ Available endpoints: Quote, Profile, Financials, News, Sentiment, Recommendations, Earnings, IPO, Peers, Price Target, Upgrades/Downgrades');
     }
 
     // ============================================
-    // CORE STOCK DATA (Quote + Profile + Metrics)
+    // STOCK DATA (Quote + Profile + Metrics)
     // ============================================
     
     async getStockData(symbol) {
@@ -45,7 +42,6 @@ class FinancialAnalytics {
 
             console.log(`   📡 Calling multiple APIs...`);
             
-            // ✅ Parallel fetch : Quote (Twelve Data) + Profile (Finnhub) + Financials (Finnhub)
             const [quote, profile, metrics] = await Promise.all([
                 this.getQuote(symbol),
                 this.getCompanyProfile(symbol),
@@ -131,11 +127,6 @@ class FinancialAnalytics {
     // NEWS ENDPOINTS
     // ============================================
     
-    /**
-     * Get Market News by Category
-     * @param {string} category - general, forex, crypto, merger
-     * @returns {Array} News articles
-     */
     async getMarketNews(category = 'general') {
         try {
             console.log(`📰 Fetching market news: ${category}`);
@@ -144,7 +135,8 @@ class FinancialAnalytics {
             const cached = this.getFromCache(cacheKey);
             if (cached) return cached;
 
-            const url = `${this.workerBaseUrl}/api/news?category=${category}`;
+            // ✅ CORRECTION : Utiliser l'endpoint Worker existant
+            const url = `${this.workerBaseUrl}/api/finnhub/market-news?category=${category}`;
             const response = await fetch(url);
             
             if (!response.ok) {
@@ -179,13 +171,6 @@ class FinancialAnalytics {
         }
     }
 
-    /**
-     * Get Company-Specific News
-     * @param {string} symbol - Stock symbol
-     * @param {string} from - Start date (YYYY-MM-DD)
-     * @param {string} to - End date (YYYY-MM-DD)
-     * @returns {Array} News articles
-     */
     async getCompanyNews(symbol, from = null, to = null) {
         try {
             if (!to) {
@@ -203,7 +188,8 @@ class FinancialAnalytics {
             const cached = this.getFromCache(cacheKey);
             if (cached) return cached;
 
-            const url = `${this.workerBaseUrl}/api/company-news?symbol=${symbol}&amp;from=${from}&amp;to=${to}`;
+            // ✅ CORRECTION : Utiliser l'endpoint Worker existant
+            const url = `${this.workerBaseUrl}/api/finnhub/company-news?symbol=${symbol}&amp;from=${from}&amp;to=${to}`;
             const response = await fetch(url);
             
             if (!response.ok) {
@@ -238,16 +224,10 @@ class FinancialAnalytics {
         }
     }
 
-    /**
-     * Analyze News Sentiment (Custom AI Analysis)
-     * @param {string} symbol - Stock symbol
-     * @returns {Object} Sentiment analysis
-     */
     async analyzeNewsImpact(symbol) {
         try {
             console.log(`🤖 Analyzing news sentiment for ${symbol}`);
             
-            // Fetch recent news
             const news = await this.getCompanyNews(symbol);
             
             if (news.length === 0) {
@@ -259,7 +239,6 @@ class FinancialAnalytics {
                 };
             }
             
-            // Simple sentiment analysis
             const positiveWords = ['gain', 'profit', 'growth', 'surge', 'rally', 'bullish', 'upgrade', 'strong', 'positive', 'beat', 'outperform', 'rise', 'jump', 'soar', 'record', 'high', 'success', 'boost'];
             const negativeWords = ['loss', 'decline', 'fall', 'drop', 'bearish', 'downgrade', 'weak', 'negative', 'miss', 'underperform', 'plunge', 'crash', 'sink', 'concern', 'risk', 'warning'];
             
@@ -330,11 +309,6 @@ class FinancialAnalytics {
     // ANALYST RECOMMENDATIONS
     // ============================================
     
-    /**
-     * Get Analyst Recommendations
-     * @param {string} symbol - Stock symbol
-     * @returns {Array} Recommendation trends
-     */
     async getRecommendationTrends(symbol) {
         try {
             console.log(`👥 Fetching analyst recommendations for ${symbol}`);
@@ -343,7 +317,8 @@ class FinancialAnalytics {
             const cached = this.getFromCache(cacheKey);
             if (cached) return cached;
 
-            const url = `${this.workerBaseUrl}/api/recommendation-trends?symbol=${symbol}`;
+            // ✅ CORRECTION : Utiliser l'endpoint Worker existant
+            const url = `${this.workerBaseUrl}/api/finnhub/recommendation?symbol=${symbol}`;
             const response = await fetch(url);
             
             if (!response.ok) {
@@ -365,93 +340,20 @@ class FinancialAnalytics {
         }
     }
 
-    /**
-     * Get Price Target
-     * @param {string} symbol - Stock symbol
-     * @returns {Object} Price target data
-     */
     async getPriceTarget(symbol) {
-        try {
-            console.log(`🎯 Fetching price target for ${symbol}`);
-            
-            const cacheKey = `price_target_${symbol}`;
-            const cached = this.getFromCache(cacheKey);
-            if (cached) return cached;
-
-            const url = `${this.workerBaseUrl}/api/price-target?symbol=${symbol}`;
-            const response = await fetch(url);
-            
-            if (!response.ok) {
-                console.error(`Price target API error: ${response.status}`);
-                return null;
-            }
-            
-            const data = await response.json();
-            
-            this.saveToCache(cacheKey, data);
-            
-            console.log(`✅ Price target loaded: $${data.targetMean}`);
-            return data;
-            
-        } catch (error) {
-            console.error('Price target error:', error);
-            return null;
-        }
+        console.warn(`⚠ Price target endpoint not available in Worker (Premium Finnhub feature)`);
+        return null;
     }
 
-    /**
-     * Get Upgrade/Downgrade History
-     * @param {string} symbol - Stock symbol (optional)
-     * @param {string} from - Start date (optional)
-     * @param {string} to - End date (optional)
-     * @returns {Array} Upgrade/downgrade events
-     */
     async getUpgradeDowngrade(symbol = null, from = null, to = null) {
-        try {
-            console.log(`📊 Fetching upgrade/downgrade data`);
-            
-            const params = new URLSearchParams();
-            if (symbol) params.append('symbol', symbol);
-            if (from) params.append('from', from);
-            if (to) params.append('to', to);
-            
-            const cacheKey = `upgrades_${symbol || 'all'}_${from || ''}_${to || ''}`;
-            const cached = this.getFromCache(cacheKey);
-            if (cached) return cached;
-
-            const url = `${this.workerBaseUrl}/api/upgrade-downgrade?${params.toString()}`;
-            const response = await fetch(url);
-            
-            if (!response.ok) {
-                console.error(`Upgrade/downgrade API error: ${response.status}`);
-                return [];
-            }
-            
-            const data = await response.json();
-            const changes = Array.isArray(data) ? data : (data.data || []);
-            
-            this.saveToCache(cacheKey, changes);
-            
-            console.log(`✅ Loaded ${changes.length} upgrade/downgrade events`);
-            return changes;
-            
-        } catch (error) {
-            console.error('Upgrade/downgrade error:', error);
-            return [];
-        }
+        console.warn(`⚠ Upgrade/downgrade endpoint not available in Worker (Premium Finnhub feature)`);
+        return [];
     }
 
     // ============================================
     // EARNINGS &amp; FINANCIALS
     // ============================================
     
-    /**
-     * Get Earnings Calendar
-     * @param {string} from - Start date (YYYY-MM-DD)
-     * @param {string} to - End date (YYYY-MM-DD)
-     * @param {string} symbol - Stock symbol (optional)
-     * @returns {Array} Earnings events
-     */
     async getEarningsCalendar(from = null, to = null, symbol = null) {
         try {
             if (!to) {
@@ -472,7 +374,8 @@ class FinancialAnalytics {
             const cached = this.getFromCache(cacheKey);
             if (cached) return cached;
 
-            const url = `${this.workerBaseUrl}/api/earnings-calendar?${params.toString()}`;
+            // ✅ CORRECTION : Utiliser l'endpoint Worker existant
+            const url = `${this.workerBaseUrl}/api/finnhub/earnings-calendar?${params.toString()}`;
             const response = await fetch(url);
             
             if (!response.ok) {
@@ -494,11 +397,6 @@ class FinancialAnalytics {
         }
     }
 
-    /**
-     * Get Historical Earnings
-     * @param {string} symbol - Stock symbol
-     * @returns {Array} Historical earnings
-     */
     async getEarnings(symbol) {
         try {
             console.log(`💰 Fetching historical earnings for ${symbol}`);
@@ -507,7 +405,8 @@ class FinancialAnalytics {
             const cached = this.getFromCache(cacheKey);
             if (cached) return cached;
 
-            const url = `${this.workerBaseUrl}/api/earnings-surprises?symbol=${symbol}`;
+            // ✅ CORRECTION : Utiliser l'endpoint Worker existant
+            const url = `${this.workerBaseUrl}/api/finnhub/earnings?symbol=${symbol}`;
             const response = await fetch(url);
             
             if (!response.ok) {
@@ -529,132 +428,25 @@ class FinancialAnalytics {
         }
     }
 
-    /**
-     * Get Revenue Estimates
-     * @param {string} symbol - Stock symbol
-     * @param {string} freq - Frequency (quarterly or annual)
-     * @returns {Array} Revenue estimates
-     */
     async getRevenueEstimates(symbol, freq = 'quarterly') {
-        try {
-            console.log(`💵 Fetching revenue estimates for ${symbol} (${freq})`);
-            
-            const cacheKey = `revenue_${symbol}_${freq}`;
-            const cached = this.getFromCache(cacheKey);
-            if (cached) return cached;
-
-            const url = `${this.workerBaseUrl}/api/revenue-estimates?symbol=${symbol}&amp;freq=${freq}`;
-            const response = await fetch(url);
-            
-            if (!response.ok) {
-                console.error(`Revenue estimates API error: ${response.status}`);
-                return [];
-            }
-            
-            const data = await response.json();
-            const estimates = Array.isArray(data) ? data : (data.data || []);
-            
-            this.saveToCache(cacheKey, estimates);
-            
-            console.log(`✅ Loaded ${estimates.length} revenue estimates`);
-            return estimates;
-            
-        } catch (error) {
-            console.error('Revenue estimates error:', error);
-            return [];
-        }
+        console.warn(`⚠ Revenue estimates endpoint not available in Worker (Premium Finnhub feature)`);
+        return [];
     }
 
-    /**
-     * Get EPS Estimates
-     * @param {string} symbol - Stock symbol
-     * @param {string} freq - Frequency (quarterly or annual)
-     * @returns {Array} EPS estimates
-     */
     async getEPSEstimates(symbol, freq = 'quarterly') {
-        try {
-            console.log(`📊 Fetching EPS estimates for ${symbol} (${freq})`);
-            
-            const cacheKey = `eps_${symbol}_${freq}`;
-            const cached = this.getFromCache(cacheKey);
-            if (cached) return cached;
-
-            const url = `${this.workerBaseUrl}/api/eps-estimates?symbol=${symbol}&amp;freq=${freq}`;
-            const response = await fetch(url);
-            
-            if (!response.ok) {
-                console.error(`EPS estimates API error: ${response.status}`);
-                return [];
-            }
-            
-            const data = await response.json();
-            const estimates = Array.isArray(data) ? data : (data.data || []);
-            
-            this.saveToCache(cacheKey, estimates);
-            
-            console.log(`✅ Loaded ${estimates.length} EPS estimates`);
-            return estimates;
-            
-        } catch (error) {
-            console.error('EPS estimates error:', error);
-            return [];
-        }
+        console.warn(`⚠ EPS estimates endpoint not available in Worker (Premium Finnhub feature)`);
+        return [];
     }
 
     // ============================================
     // IPO &amp; PEERS
     // ============================================
     
-    /**
-     * Get IPO Calendar
-     * @param {string} from - Start date (YYYY-MM-DD)
-     * @param {string} to - End date (YYYY-MM-DD)
-     * @returns {Array} IPO events
-     */
     async getIPOCalendar(from = null, to = null) {
-        try {
-            if (!to) {
-                to = new Date().toISOString().split('T')[0];
-            }
-            if (!from) {
-                const fromDate = new Date();
-                fromDate.setDate(fromDate.getDate() - 30);
-                from = fromDate.toISOString().split('T')[0];
-            }
-            
-            console.log(`🚀 Fetching IPO calendar (${from} to ${to})`);
-            
-            const cacheKey = `ipo_calendar_${from}_${to}`;
-            const cached = this.getFromCache(cacheKey);
-            if (cached) return cached;
-
-            const url = `${this.workerBaseUrl}/api/ipo-calendar?from=${from}&amp;to=${to}`;
-            const response = await fetch(url);
-            
-            if (!response.ok) {
-                console.error(`IPO calendar API error: ${response.status}`);
-                return [];
-            }
-            
-            const data = await response.json();
-            const ipos = data.ipoCalendar || data.data || [];
-            
-            this.saveToCache(cacheKey, ipos);
-            
-            console.log(`✅ Loaded ${ipos.length} IPO events`);
-            return ipos;
-            
-        } catch (error) {
-            console.error('IPO calendar error:', error);
-            return [];
-        }
+        console.warn(`⚠ IPO calendar endpoint not available in Worker (Premium Finnhub feature)`);
+        return [];
     }
 
-    /**
-     * Get Company Peers
-     * @param {string} symbol - Stock symbol
-     * @returns {Array} Peer symbols
-     */
     async getPeers(symbol) {
         try {
             console.log(`🔗 Fetching peers for ${symbol}`);
@@ -663,7 +455,8 @@ class FinancialAnalytics {
             const cached = this.getFromCache(cacheKey);
             if (cached) return cached;
 
-            const url = `${this.workerBaseUrl}/api/peers?symbol=${symbol}`;
+            // ✅ CORRECTION : Utiliser l'endpoint Worker existant
+            const url = `${this.workerBaseUrl}/api/finnhub/peers?symbol=${symbol}`;
             const response = await fetch(url);
             
             if (!response.ok) {
@@ -949,10 +742,6 @@ class FinancialAnalytics {
         this.cache.clear();
     }
 
-    // ============================================
-    // MOCK DATA (FALLBACK UNIQUEMENT)
-    // ============================================
-    
     generateMockTimeSeries(symbol, count) {
         console.warn(`⚠ Generating mock time series for ${symbol}`);
         
@@ -993,9 +782,6 @@ class FinancialAnalytics {
     }
 }
 
-// ============================================
-// EXPORT
-// ============================================
 if (typeof module !== 'undefined' && module.exports) {
     module.exports = FinancialAnalytics;
 }
