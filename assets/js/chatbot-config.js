@@ -1,16 +1,22 @@
 // ============================================
 // FINANCIAL CHATBOT - CONFIGURATION
-// Version Conversationnelle Ultra-Performante
+// Version Conversationnelle Ultra-Performante v3.0
 // ============================================
 
 const ChatbotConfig = {
     api: {
         // ✅ WORKER CLOUDFLARE EXISTANT (Finnhub + Twelve Data)
         worker: {
-            baseUrl: 'https://finance-hub-api.raphnardone.workers.dev', // Ton worker existant
+            baseUrl: 'https://finance-hub-api.raphnardone.workers.dev',
             endpoints: {
                 finnhub: '/api/finnhub',
-                twelvedata: '/api/twelvedata'
+                twelvedata: '/api/twelvedata',
+                // ✅ AJOUT : Endpoints directs pour compatibilité
+                quote: '/api/quote',
+                timeSeries: '/api/time-series',
+                profile: '/api/profile',
+                companyProfile: '/api/finnhub/company-profile',
+                basicFinancials: '/api/finnhub/basic-financials'
             }
         },
         
@@ -55,23 +61,21 @@ const ChatbotConfig = {
     // CHATBOT BEHAVIOR
     // ============================================
     behavior: {
-        typingDelay: 1200, // ↓ Réduit pour réactivité (était 1500)
-        responseDelay: 200, // ↓ Réduit (était 300)
+        typingDelay: 1200,
+        responseDelay: 200,
         maxMessageLength: 2000,
         
-        // ✅ AMÉLIORATION 2: Historique étendu
-        maxHistorySize: 100, // ↑ Augmenté (était 50)
-        conversationMemorySize: 20, // Nouveaux messages gardés en mémoire pour contexte
+        maxHistorySize: 100,
+        conversationMemorySize: 20,
         
         showSuggestions: true,
-        suggestionsDelay: 400, // ↓ Réduit (était 500)
+        suggestionsDelay: 400,
         maxSuggestions: 4,
         
-        // ✅ AMÉLIORATION 3: Génération automatique de graphiques intelligente
         autoGenerateCharts: true,
-        chartAnimationDuration: 600, // ↓ Plus rapide (était 750)
+        chartAnimationDuration: 600,
         
-        inputDebounce: 200, // ↓ Réduit (était 300)
+        inputDebounce: 200,
         virtualScrollThreshold: 100,
         enableLazyLoading: true,
         enableWebWorkers: false,
@@ -94,7 +98,6 @@ const ChatbotConfig = {
         height: 650,
         mobileBreakpoint: 768,
         
-        // ✅ AMÉLIORATION 4: Message d'accueil conversationnel
         welcomeMessage: "👋 **Hi! I'm Alphy**, your AI Financial Expert.\n\nI can help you with:\n• 📊 Stock analysis & recommendations\n• 💰 IPO evaluation & research\n• 📈 Technical & fundamental analysis\n• 🌐 Market insights & trends\n• 💡 Financial education\n\n**Ask me anything about finance!**",
         
         placeholderText: "Ask me anything about stocks, markets, IPOs...",
@@ -117,10 +120,9 @@ const ChatbotConfig = {
         voiceInput: false,
         multiLanguage: false,
         
-        // ✅ AMÉLIORATION 5: Nouvelles fonctionnalités conversationnelles
-        contextualMemory: true, // Mémoire des conversations précédentes
-        smartSuggestions: true, // Suggestions basées sur le contexte
-        adaptiveResponses: true // Réponses adaptées au niveau de l'utilisateur
+        contextualMemory: true,
+        smartSuggestions: true,
+        adaptiveResponses: true
     },
 
     // ============================================
@@ -157,7 +159,7 @@ const ChatbotConfig = {
             text: 'rgba(255, 255, 255, 0.8)'
         },
         animation: {
-            duration: 600, // ↓ Plus rapide (était 750)
+            duration: 600,
             easing: 'easeInOutQuart'
         },
         enableZoom: true,
@@ -213,7 +215,6 @@ const ChatbotConfig = {
     // SUGGESTIONS TEMPLATES
     // ============================================
     suggestions: {
-        // ✅ AMÉLIORATION 6: Suggestions variées et engageantes
         initial: [
             "📈 Analyze NVDA stock performance",
             "💰 What's happening in the market today?",
@@ -251,7 +252,7 @@ const ChatbotConfig = {
         lazyLoadImages: true,
         lazyLoadCharts: true,
         enableCache: true,
-        cacheExpiration: 300000, // 5 minutes
+        cacheExpiration: 300000,
         compressMessages: false,
         useWebWorkers: false,
         maxWorkers: 2,
@@ -283,16 +284,19 @@ const ChatbotConfig = {
     // DEVELOPMENT
     // ============================================
     development: {
-        debugMode: false,
+        debugMode: true, // ✅ ACTIVÉ pour diagnostic
         mockApiResponses: false,
-        showPerformanceMetrics: false,
+        showPerformanceMetrics: true, // ✅ ACTIVÉ pour diagnostic
         enableHotReload: false
     }
 };
 
 // ============================================
-// EXPORT
+// EXPORT & GLOBAL AVAILABILITY
 // ============================================
 if (typeof module !== 'undefined' && module.exports) {
     module.exports = ChatbotConfig;
 }
+
+// ✅ RENDRE DISPONIBLE GLOBALEMENT
+window.ChatbotConfig = ChatbotConfig;
