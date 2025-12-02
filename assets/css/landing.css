@@ -7656,8 +7656,8 @@ body.dark-mode .tech-card:hover {
 .centered-logo {
     display: block;
     margin: 0 auto 24px auto;
-    width: 70px; /* ✅ Légèrement plus grand */
-    height: 70px;
+    width: 80px; /* ✅ Légèrement plus grand */
+    height: 80px;
     transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
     filter: drop-shadow(0 4px 12px rgba(37, 99, 235, 0.2));
     position: relative;
