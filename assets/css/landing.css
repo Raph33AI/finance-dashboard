@@ -7416,6 +7416,90 @@ body.dark-mode .pricing-card.platinum {
     50% { transform: scale(1.05); }
 }
 
+.tech-infra {
+padding: 120px 20px;
+text-align: center;
+}
+
+.tech-infra .section-title {
+font-size: 2.6rem;
+margin-bottom: 15px;
+}
+
+.tech-infra .section-subtitle {
+max-width: 850px;
+margin: 0 auto 70px;
+opacity: 0.85;
+}
+
+.tech-infra-grid {
+display: grid;
+grid-template-columns: repeat(auto-fit, minmax(330px, 1fr));
+gap: 40px;
+}
+
+.infra-card {
+padding: 40px;
+border-radius: 18px;
+background: rgba(255,255,255,0.05);
+border: 1px solid rgba(255,255,255,0.1);
+backdrop-filter: blur(12px);
+text-align: left;
+transition: 0.25s ease;
+}
+
+.infra-card:hover {
+transform: translateY(-6px);
+border-color: rgba(255,255,255,0.25);
+}
+
+.infra-header {
+display: flex;
+align-items: center;
+gap: 15px;
+margin-bottom: 25px;
+}
+
+.infra-logo {
+width: 42px;
+height: 42px;
+object-fit: contain;
+}
+
+.infra-card h3 {
+font-size: 1.4rem;
+margin: 0;
+}
+
+.infra-points {
+list-style: none;
+padding: 0;
+margin: 0;
+}
+
+.infra-points li {
+margin-bottom: 12px;
+font-size: 0.95rem;
+line-height: 1.45;
+opacity: 0.85;
+}
+
+.infra-points li strong {
+color: #fff;
+opacity: 1;
+}
+
+.infra-footer {
+margin-top: 60px;
+font-size: 0.95rem;
+opacity: 0.8;
+display: flex;
+justify-content: center;
+align-items: center;
+gap: 10px;
+}
+
+
 /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
    ✅ FIN DES CORRECTIONS MOBILE DÉFINITIVES
    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
