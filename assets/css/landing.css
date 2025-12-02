@@ -7422,11 +7422,9 @@ padding: 120px 0;
 background: #f8fafc;
 }
 
-.tech-container {
-width: 90%;
-max-width: 1250px;
-margin: auto;
-text-align: left;
+/* CENTER CONTENT */
+.centered {
+text-align: center;
 }
 
 /* BADGE BLEU */
@@ -7441,13 +7439,13 @@ color: #2563eb;
 background: rgba(37, 99, 235, 0.12);
 border-radius: 30px;
 text-transform: uppercase;
-backdrop-filter: blur(6px);
 border: 1px solid rgba(37, 99, 235, 0.22);
+backdrop-filter: blur(6px);
 }
 
-/* TITRE */
+/* TITRE + GRADIENT */
 .tech-title {
-font-size: 2.5rem;
+font-size: 2.6rem;
 line-height: 1.2;
 font-weight: 800;
 margin-bottom: 16px;
@@ -7463,8 +7461,8 @@ background: linear-gradient(90deg, #2563eb, #4f46e5);
 .tech-subtitle {
 font-size: 1.15rem;
 color: #475569;
-max-width: 720px;
-margin-bottom: 50px;
+max-width: 740px;
+margin: 0 auto 50px auto;
 }
 
 /* GRID */
@@ -7472,32 +7470,41 @@ margin-bottom: 50px;
 display: grid;
 grid-template-columns: repeat(3, 1fr);
 gap: 35px;
+justify-items: center;
 }
 
-/* CARDS */
+/* GLASS CARD STYLE */
 .tech-card {
-background: #ffffff;
-padding: 28px;
+width: 100%;
+max-width: 420px;
+background: rgba(255, 255, 255, 0.65);
 border-radius: 22px;
-box-shadow: 0 8px 30px rgba(0,0,0,0.06);
-border: 1px solid #e5e9f2;
-transition: 0.3s ease;
+padding: 28px;
+border: 1px solid rgba(255, 255, 255, 0.45);
+backdrop-filter: blur(16px) saturate(180%);
+-webkit-backdrop-filter: blur(16px) saturate(180%);
+transition: transform 0.35s ease, box-shadow 0.35s ease;
+box-shadow: 0 6px 20px rgba(0,0,0,0.06);
 }
 
+/* HOVER EFFECT */
 .tech-card:hover {
-transform: translateY(-6px);
-box-shadow: 0 12px 40px rgba(0,0,0,0.08);
+transform: translateY(-10px);
+box-shadow: 0 20px 40px rgba(0,0,0,0.12);
+border: 1px solid rgba(255,255,255,0.7);
 }
 
-/* LOGOS */
-.tech-logo {
+/* LOGOS CENTRES */
+.tech-logo,
+.centered-logo {
+display: block;
+margin: 0 auto 20px auto;
 width: 60px;
-margin-bottom: 18px;
 }
 
 /* CARD TITLES */
 .tech-card-title {
-font-size: 1.4rem;
+font-size: 1.35rem;
 font-weight: 700;
 margin-bottom: 14px;
 }
@@ -7517,9 +7524,10 @@ padding: 0;
 
 .tech-points li {
 margin-bottom: 10px;
-padding-left: 20px;
+padding-left: 14px;
 position: relative;
 font-size: 0.95rem;
+text-align: left; /* pour une meilleure lisibilité */
 color: #1e293b;
 }
 
@@ -7537,6 +7545,7 @@ font-weight: 900;
 grid-template-columns: 1fr;
 }
 }
+
 
 
 /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
