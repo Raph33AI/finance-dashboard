@@ -7416,137 +7416,438 @@ body.dark-mode .pricing-card.platinum {
     50% { transform: scale(1.05); }
 }
 
-/* SECTION CONTAINER */
+/* ============================================
+   TECHNOLOGY & DATA INFRASTRUCTURE - VERSION 3D PREMIUM
+   ============================================ */
+
 .tech-infra-lux {
-padding: 120px 0;
-background: #f8fafc;
+    padding: 120px 0;
+    background: linear-gradient(180deg, #f8fafc 0%, #ffffff 100%);
+    position: relative;
+    overflow: hidden;
+}
+
+body.dark-mode .tech-infra-lux {
+    background: linear-gradient(180deg, var(--background-secondary) 0%, var(--background-primary) 100%);
+}
+
+/* ✨ EFFET GLOW DE FOND */
+.tech-infra-lux::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 800px;
+    height: 800px;
+    background: radial-gradient(circle, rgba(37, 99, 235, 0.08) 0%, transparent 70%);
+    transform: translate(-50%, -50%);
+    animation: pulse 6s ease-in-out infinite;
+    pointer-events: none;
 }
 
 /* CENTER CONTENT */
 .centered {
-text-align: center;
+    text-align: center;
 }
 
-/* BADGE BLEU */
+/* 🏷 BADGE BLEU - EFFET FLOTTANT */
 .tech-section-label {
-display: inline-block;
-padding: 6px 18px;
-margin-bottom: 18px;
-font-size: 0.78rem;
-font-weight: 700;
-letter-spacing: 0.08em;
-color: #2563eb;
-background: rgba(37, 99, 235, 0.12);
-border-radius: 30px;
-text-transform: uppercase;
-border: 1px solid rgba(37, 99, 235, 0.22);
-backdrop-filter: blur(6px);
+    display: inline-block;
+    padding: 8px 20px;
+    margin-bottom: 18px;
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    color: #2563eb;
+    background: rgba(37, 99, 235, 0.12);
+    border-radius: 30px;
+    text-transform: uppercase;
+    border: 1px solid rgba(37, 99, 235, 0.22);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    box-shadow: 0 4px 15px rgba(37, 99, 235, 0.2);
+    animation: tagFloat 3s ease-in-out infinite;
+    transition: all var(--anim-3d-fast);
 }
 
-/* TITRE + GRADIENT */
+.tech-section-label:hover {
+    transform: translateY(-3px) scale(1.05);
+    box-shadow: 0 8px 25px rgba(37, 99, 235, 0.35);
+}
+
+body.dark-mode .tech-section-label {
+    background: rgba(59, 130, 246, 0.15);
+    border-color: rgba(59, 130, 246, 0.3);
+}
+
+@keyframes tagFloat {
+    0%, 100% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-5px);
+    }
+}
+
+/* 🎨 TITRE + GRADIENT */
 .tech-title {
-font-size: 2.6rem;
-line-height: 1.2;
-font-weight: 800;
-margin-bottom: 16px;
+    font-size: 2.6rem;
+    line-height: 1.2;
+    font-weight: 800;
+    margin-bottom: 16px;
+    letter-spacing: -0.02em;
+    animation: fadeInUp 0.8s ease-out;
 }
 
 .gradient-text {
-background: linear-gradient(90deg, #2563eb, #4f46e5);
--webkit-background-clip: text;
--webkit-text-fill-color: transparent;
+    background: linear-gradient(135deg, #2563eb 0%, #4f46e5 50%, #8b5cf6 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    background-size: 200% 200%;
+    animation: gradientShift 5s ease-in-out infinite;
+    filter: drop-shadow(0 4px 12px rgba(37, 99, 235, 0.3));
 }
 
-/* SOUS TITRE */
+@keyframes gradientShift {
+    0%, 100% {
+        background-position: 0% 50%;
+    }
+    50% {
+        background-position: 100% 50%;
+    }
+}
+
+/* 📝 SOUS TITRE */
 .tech-subtitle {
-font-size: 1.15rem;
-color: #475569;
-max-width: 740px;
-margin: 0 auto 50px auto;
+    font-size: 1.15rem;
+    color: #475569;
+    max-width: 740px;
+    margin: 0 auto 50px auto;
+    line-height: 1.7;
+    animation: fadeInUp 0.8s ease-out 0.2s both;
 }
 
-/* GRID */
+body.dark-mode .tech-subtitle {
+    color: var(--text-secondary);
+}
+
+/* 📐 GRID - ✅ RAPPROCHÉE */
 .tech-grid {
-display: grid;
-grid-template-columns: repeat(3, 1fr);
-gap: 35px;
-justify-items: center;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px; /* ✅ RÉDUIT de 35px à 20px */
+    justify-items: center;
+    position: relative;
+    z-index: 1;
+    max-width: 1400px;
+    margin: 0 auto;
+    perspective: 2000px; /* ✅ PERSPECTIVE 3D */
 }
 
-/* GLASS CARD STYLE */
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   💎 GLASS CARD - EFFET 3D ULTRA-PREMIUM
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+
 .tech-card {
-width: 100%;
-max-width: 420px;
-background: rgba(255, 255, 255, 0.65);
-border-radius: 22px;
-padding: 28px;
-border: 1px solid rgba(255, 255, 255, 0.45);
-backdrop-filter: blur(16px) saturate(180%);
--webkit-backdrop-filter: blur(16px) saturate(180%);
-transition: transform 0.35s ease, box-shadow 0.35s ease;
-box-shadow: 0 6px 20px rgba(0,0,0,0.06);
+    width: 100%;
+    max-width: 420px;
+    background: rgba(255, 255, 255, 0.75); /* ✅ Plus opaque */
+    border-radius: 24px; /* ✅ Plus arrondi */
+    padding: 32px;
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1); /* ✅ Transition plus fluide */
+    box-shadow: 
+        0 10px 30px rgba(0, 0, 0, 0.08),
+        0 4px 12px rgba(0, 0, 0, 0.04); /* ✅ Double ombre */
+    position: relative;
+    overflow: hidden;
+    transform-style: preserve-3d; /* ✅ EFFET 3D */
 }
 
-/* HOVER EFFECT */
+/* ✨ OVERLAY GRADIENT AU HOVER */
+.tech-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(37, 99, 235, 0.05) 0%, rgba(79, 70, 229, 0.05) 100%);
+    border-radius: 24px;
+    opacity: 0;
+    transition: opacity 0.4s ease;
+    z-index: 0;
+}
+
+/* 🌟 BORDURE LUMINEUSE AU HOVER */
+.tech-card::after {
+    content: '';
+    position: absolute;
+    inset: -2px;
+    background: linear-gradient(135deg, #2563eb 0%, #4f46e5 50%, #8b5cf6 100%);
+    border-radius: 24px;
+    opacity: 0;
+    z-index: -1;
+    transition: opacity 0.4s ease;
+}
+
+body.dark-mode .tech-card {
+    background: rgba(30, 41, 59, 0.8);
+    border-color: rgba(255, 255, 255, 0.1);
+    box-shadow: 
+        0 10px 30px rgba(0, 0, 0, 0.4),
+        0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+/* 🎯 HOVER EFFECT - EFFET 3D SPECTACULAIRE */
 .tech-card:hover {
-transform: translateY(-10px);
-box-shadow: 0 20px 40px rgba(0,0,0,0.12);
-border: 1px solid rgba(255,255,255,0.7);
+    transform: translateY(-15px) translateZ(40px) rotateX(3deg) scale(1.02);
+    box-shadow: 
+        0 25px 60px rgba(0, 0, 0, 0.15),
+        0 10px 30px rgba(37, 99, 235, 0.2),
+        0 0 40px rgba(79, 70, 229, 0.15); /* ✅ Triple ombre + glow */
+    border-color: rgba(37, 99, 235, 0.3);
 }
 
-/* LOGOS CENTRES */
+.tech-card:hover::before {
+    opacity: 1;
+}
+
+.tech-card:hover::after {
+    opacity: 0.15;
+}
+
+body.dark-mode .tech-card:hover {
+    box-shadow: 
+        0 30px 70px rgba(0, 0, 0, 0.6),
+        0 15px 40px rgba(59, 130, 246, 0.3),
+        0 0 50px rgba(76, 138, 255, 0.2);
+}
+
+/* 🎭 ANIMATION D'APPARITION EN CASCADE */
+.tech-card:nth-child(1) {
+    animation: techCardSlideIn 0.6s ease-out 0.1s both;
+}
+
+.tech-card:nth-child(2) {
+    animation: techCardSlideIn 0.6s ease-out 0.2s both;
+}
+
+.tech-card:nth-child(3) {
+    animation: techCardSlideIn 0.6s ease-out 0.3s both;
+}
+
+@keyframes techCardSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(40px) translateZ(-50px) rotateX(-10deg);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) translateZ(0) rotateX(0deg);
+    }
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   🎨 LOGOS - EFFET 3D ROTATION
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+
 .tech-logo,
 .centered-logo {
-display: block;
-margin: 0 auto 20px auto;
-width: 60px;
+    display: block;
+    margin: 0 auto 24px auto;
+    width: 70px; /* ✅ Légèrement plus grand */
+    height: 70px;
+    transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    filter: drop-shadow(0 4px 12px rgba(37, 99, 235, 0.2));
+    position: relative;
+    z-index: 1;
 }
 
-/* CARD TITLES */
+.tech-card:hover .tech-logo,
+.tech-card:hover .centered-logo {
+    transform: scale(1.2) rotate(-8deg) translateZ(30px); /* ✅ ROTATION 3D */
+    filter: drop-shadow(0 8px 24px rgba(37, 99, 235, 0.4));
+    animation: logoFloat 2s ease-in-out infinite;
+}
+
+@keyframes logoFloat {
+    0%, 100% {
+        transform: scale(1.2) rotate(-8deg) translateZ(30px) translateY(0);
+    }
+    50% {
+        transform: scale(1.25) rotate(-10deg) translateZ(35px) translateY(-5px);
+    }
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   📝 CARD TITLES
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+
 .tech-card-title {
-font-size: 1.35rem;
-font-weight: 700;
-margin-bottom: 14px;
+    font-size: 1.4rem;
+    font-weight: 700;
+    margin-bottom: 14px;
+    color: var(--text-primary);
+    letter-spacing: -0.01em;
+    position: relative;
+    z-index: 1;
+    transition: color 0.3s ease;
 }
 
-/* CARD TEXT */
+.tech-card:hover .tech-card-title {
+    color: #2563eb;
+}
+
+body.dark-mode .tech-card:hover .tech-card-title {
+    color: #60a5fa;
+}
+
+/* 📄 CARD TEXT */
 .tech-card-text {
-font-size: 1rem;
-color: #475569;
-margin-bottom: 18px;
+    font-size: 1rem;
+    color: #475569;
+    margin-bottom: 20px;
+    line-height: 1.7;
+    position: relative;
+    z-index: 1;
 }
 
-/* POINTS LIST */
+body.dark-mode .tech-card-text {
+    color: var(--text-secondary);
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   ✅ POINTS LIST - EFFET SLIDE AU HOVER
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+
 .tech-points {
-list-style: none;
-padding: 0;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    position: relative;
+    z-index: 1;
 }
 
 .tech-points li {
-margin-bottom: 10px;
-padding-left: 14px;
-position: relative;
-font-size: 0.95rem;
-text-align: left; /* pour une meilleure lisibilité */
-color: #1e293b;
+    margin-bottom: 12px;
+    padding-left: 24px;
+    position: relative;
+    font-size: 0.95rem;
+    text-align: left;
+    color: #1e293b;
+    line-height: 1.6;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
+body.dark-mode .tech-points li {
+    color: var(--text-primary);
+}
+
+/* 🎯 BULLET POINT ANIMÉ */
 .tech-points li::before {
-content: "•";
-position: absolute;
-left: 0;
-color: #2563eb;
-font-weight: 900;
+    content: "•";
+    position: absolute;
+    left: 0;
+    color: #2563eb;
+    font-weight: 900;
+    font-size: 1.2rem;
+    transition: all 0.3s ease;
 }
 
-/* RESPONSIVE */
+.tech-card:hover .tech-points li {
+    transform: translateX(6px); /* ✅ SLIDE À DROITE */
+}
+
+.tech-card:hover .tech-points li::before {
+    color: #4f46e5;
+    transform: scale(1.3) rotate(180deg); /* ✅ ROTATION DU BULLET */
+}
+
+/* ✨ EFFET STAGGER (décalage) pour chaque point */
+.tech-card:hover .tech-points li:nth-child(1) {
+    transition-delay: 0.05s;
+}
+
+.tech-card:hover .tech-points li:nth-child(2) {
+    transition-delay: 0.1s;
+}
+
+.tech-card:hover .tech-points li:nth-child(3) {
+    transition-delay: 0.15s;
+}
+
+.tech-card:hover .tech-points li:nth-child(4) {
+    transition-delay: 0.2s;
+}
+
+.tech-card:hover .tech-points li:nth-child(5) {
+    transition-delay: 0.25s;
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   📱 RESPONSIVE - MOBILE
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+
+@media (max-width: 1200px) {
+    .tech-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 18px;
+    }
+}
+
 @media (max-width: 950px) {
-.tech-grid {
-grid-template-columns: 1fr;
-}
+    .tech-grid {
+        grid-template-columns: 1fr;
+        gap: 24px;
+    }
+    
+    .tech-card {
+        max-width: 100%;
+    }
 }
 
+@media (max-width: 768px) {
+    .tech-infra-lux {
+        padding: 80px 20px;
+    }
+    
+    .tech-title {
+        font-size: 2rem;
+    }
+    
+    .tech-subtitle {
+        font-size: 1rem;
+    }
+    
+    .tech-card {
+        padding: 24px;
+    }
+    
+    .tech-card:hover {
+        transform: translateY(-8px) scale(1.01); /* ✅ Effet réduit sur mobile */
+    }
+}
 
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   ♿ ACCESSIBILITY - REDUCED MOTION
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+
+@media (prefers-reduced-motion: reduce) {
+    .tech-card,
+    .tech-logo,
+    .centered-logo,
+    .tech-points li,
+    .tech-section-label,
+    .gradient-text {
+        animation: none !important;
+        transition-duration: 0.01ms !important;
+    }
+    
+    .tech-card:hover {
+        transform: translateY(-5px); /* ✅ Mouvement minimal */
+    }
+}
 
 /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
    ✅ FIN DES CORRECTIONS MOBILE DÉFINITIVES
