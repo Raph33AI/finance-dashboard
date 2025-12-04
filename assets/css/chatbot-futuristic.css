@@ -1363,3 +1363,177 @@ body.dark-mode .metrics-comparison-table tr.even {
 body.dark-mode .metrics-comparison-table tr:hover {
     background: rgba(99, 102, 241, 0.1);
 }
+
+/* ============================================
+   CHART STYLES - v4.0 ULTRA-PREMIUM
+   ============================================ */
+
+.chart-container {
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 16px;
+    padding: 24px;
+    margin: 20px 0;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+    backdrop-filter: blur(10px);
+}
+
+body.dark-mode .chart-container {
+    background: rgba(30, 41, 59, 0.95);
+}
+
+.chart-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 16px;
+    border-bottom: 2px solid rgba(102, 126, 234, 0.2);
+}
+
+.chart-title-wrapper {
+    flex: 1;
+}
+
+.chart-title {
+    font-size: 18px;
+    font-weight: 800;
+    color: #1e293b;
+    display: block;
+    margin-bottom: 4px;
+}
+
+body.dark-mode .chart-title {
+    color: #f1f5f9;
+}
+
+.chart-description {
+    font-size: 13px;
+    color: #64748b;
+    font-weight: 500;
+}
+
+.chart-canvas-wrapper {
+    position: relative;
+    height: 400px;
+    width: 100%;
+}
+
+.chart-btn {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+.chart-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+}
+
+.chart-btn i {
+    margin-right: 6px;
+}
+
+/* Risk Metrics Dashboard */
+.risk-metrics-dashboard,
+.fundamentals-dashboard {
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 16px;
+    padding: 24px;
+    margin: 20px 0;
+}
+
+body.dark-mode .risk-metrics-dashboard,
+body.dark-mode .fundamentals-dashboard {
+    background: rgba(30, 41, 59, 0.95);
+}
+
+.risk-metrics-grid,
+.fundamentals-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+    margin-top: 20px;
+}
+
+.risk-metric-card,
+.fundamental-card {
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%);
+    border: 2px solid rgba(102, 126, 234, 0.2);
+    border-radius: 12px;
+    padding: 20px;
+    text-align: center;
+    transition: all 0.3s ease;
+}
+
+.risk-metric-card:hover,
+.fundamental-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 24px rgba(102, 126, 234, 0.2);
+    border-color: rgba(102, 126, 234, 0.4);
+}
+
+.metric-label {
+    font-size: 13px;
+    font-weight: 600;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 8px;
+}
+
+.metric-value {
+    font-size: 28px;
+    font-weight: 900;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 4px;
+}
+
+.metric-sublabel {
+    font-size: 11px;
+    color: #94a3b8;
+    font-weight: 500;
+}
+
+/* Chart Error */
+.chart-error {
+    background: rgba(239, 68, 68, 0.1);
+    border: 2px solid rgba(239, 68, 68, 0.3);
+    border-radius: 12px;
+    padding: 24px;
+    text-align: center;
+    color: #ef4444;
+    font-weight: 600;
+}
+
+.chart-error i {
+    font-size: 32px;
+    margin-bottom: 12px;
+    display: block;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .chart-canvas-wrapper {
+        height: 300px;
+    }
+    
+    .risk-metrics-grid,
+    .fundamentals-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .chart-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+    }
+}
