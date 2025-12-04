@@ -1,6 +1,7 @@
 // ============================================
-// FINANCIAL CHATBOT - AI ENGINE v4.0
-// Version Ultra-Complète avec TOUS les endpoints Finnhub
+// FINANCIAL CHATBOT - AI ENGINE v5.0 ULTRA
+// ✅ Comparaison Multi-Stocks + Analyse Historique Enrichie
+// ✅ Cartes Interactives + Tableaux Professionnels
 // ============================================
 
 class FinancialChatbotEngine {
@@ -58,8 +59,8 @@ class FinancialChatbotEngine {
                 console.log('✅ Charts initialized');
             }
 
-            console.log('🚀 Conversational Financial AI v4.0 ready!');
-            console.log('📊 Endpoints: Quote, Profile, Financials, News, Sentiment, Recommendations, Earnings, IPO, Peers, Price Target, Upgrades/Downgrades');
+            console.log('🚀 Conversational Financial AI v5.0 ready!');
+            console.log('📊 NEW: Multi-Stock Comparison + Enhanced Historical Analysis + Interactive Cards');
             
         } catch (error) {
             console.error('❌ Engine initialization error:', error);
@@ -82,29 +83,38 @@ class FinancialChatbotEngine {
                 return cachedResponse;
             }
 
-            // ✅ Analyse du message
+            // ✅ Analyse du message (avec détection comparaison)
             const analysis = this.analyzeMessage(userMessage);
             
             console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
             console.log('💬 Processing:', userMessage.substring(0, 60) + '...');
             console.log('🎯 Detected:', analysis.type);
             console.log('📊 Symbols:', analysis.symbols);
+            if (analysis.isComparison) {
+                console.log('⚖ COMPARISON MODE: ', analysis.comparisonSymbols.join(' vs '));
+            }
             console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
 
             // ✅ Construction de contexte ULTRA-COMPLET
             const context = await this.buildSmartContext(userMessage, analysis);
 
             // ✅ Construction du prompt enrichi pour Gemini
-            const enrichedPrompt = this.buildEnhancedPrompt(userMessage, context);
+            const enrichedPrompt = this.buildEnhancedPrompt(userMessage, context, analysis);
 
             // ✅ Génération de réponse (Gemini avec contexte enrichi)
             const response = await this.geminiAI.generateResponse(enrichedPrompt, context);
+            
+            // ✅ NOUVEAU : Enrichir la réponse avec cartes visuelles
+            response.visualCards = await this.generateVisualCards(context, analysis);
+            
+            // ✅ NOUVEAU : Générer graphiques de comparaison si pertinent
+            response.chartRequests = await this.generateChartRequests(context, analysis);
             
             // ✅ Enrichissement de la réponse
             response.suggestions = this.generateSmartSuggestions(analysis, context);
             response.processingTime = performance.now() - startTime;
 
-            // ✅ Sauvegarde cache &amp; métriques
+            // ✅ Sauvegarde cache & métriques
             this.cacheResponse(userMessage, response);
             this.updateMetrics(true, response.processingTime);
             this.updateConversationContext(analysis);
@@ -120,6 +130,7 @@ class FinancialChatbotEngine {
             return {
                 text: `⚠ **I encountered an error:** ${error.message}\n\nPlease try again or rephrase your question.`,
                 error: true,
+                visualCards: [],
                 chartRequests: [],
                 suggestions: this.config.suggestions.initial
             };
@@ -127,13 +138,17 @@ class FinancialChatbotEngine {
     }
 
     // ============================================
-    // ANALYSE COMPLÈTE DU MESSAGE
+    // ANALYSE COMPLÈTE DU MESSAGE (AVEC COMPARAISON)
     // ============================================
     analyzeMessage(message) {
         const lowerMessage = message.toLowerCase();
         
         // ✅ Extraction symboles (méthodes combinées)
         const symbols = this.extractSymbols(message);
+        
+        // ✅ NOUVEAU : Détection de comparaison
+        const isComparison = this.detectComparisonIntent(message);
+        const comparisonSymbols = isComparison ? this.extractComparisonSymbols(message) : [];
         
         // ✅ Extraction timeframes
         const timeframes = this.extractTimeframes(message);
@@ -142,40 +157,52 @@ class FinancialChatbotEngine {
         let type = 'CONVERSATIONAL'; // Par défaut
         const intents = [];
         
+        // ✅ NOUVEAU : Priorité à la comparaison
+        if (isComparison && comparisonSymbols.length >= 2) {
+            type = 'STOCK_COMPARISON';
+            intents.push('COMPARISON');
+        }
+        
         // Ordre de priorité dans la détection
         if (this.detectIPOIntent(message)) {
-            type = 'IPO_QUERY';
+            type = symbols.length > 0 ? type : 'IPO_QUERY';
             intents.push('IPO');
         }
         
         if (this.detectAnalystIntent(message)) {
-            type = symbols.length > 0 ? 'ANALYST_QUERY' : type;
+            type = symbols.length > 0 && type === 'CONVERSATIONAL' ? 'ANALYST_QUERY' : type;
             intents.push('ANALYST');
         }
         
         if (this.detectEarningsIntent(message)) {
-            type = symbols.length > 0 ? 'EARNINGS_QUERY' : type;
+            type = symbols.length > 0 && type === 'CONVERSATIONAL' ? 'EARNINGS_QUERY' : type;
             intents.push('EARNINGS');
         }
         
         if (this.detectSentimentIntent(message)) {
-            type = symbols.length > 0 ? 'SENTIMENT_QUERY' : type;
+            type = symbols.length > 0 && type === 'CONVERSATIONAL' ? 'SENTIMENT_QUERY' : type;
             intents.push('SENTIMENT');
         }
         
         if (this.detectPeersIntent(message)) {
-            type = symbols.length > 0 ? 'PEERS_QUERY' : type;
+            type = symbols.length > 0 && type === 'CONVERSATIONAL' ? 'PEERS_QUERY' : type;
             intents.push('PEERS');
         }
         
         if (this.detectMarketNewsIntent(message)) {
-            type = 'MARKET_NEWS_QUERY';
+            type = type === 'CONVERSATIONAL' ? 'MARKET_NEWS_QUERY' : type;
             intents.push('MARKET_NEWS');
         }
         
         if (this.detectEarningsCalendarIntent(message)) {
-            type = 'EARNINGS_CALENDAR_QUERY';
+            type = type === 'CONVERSATIONAL' ? 'EARNINGS_CALENDAR_QUERY' : type;
             intents.push('EARNINGS_CALENDAR');
+        }
+        
+        // ✅ NOUVEAU : Détection analyse historique
+        if (this.detectHistoricalIntent(message)) {
+            type = symbols.length > 0 && type === 'CONVERSATIONAL' ? 'HISTORICAL_ANALYSIS' : type;
+            intents.push('HISTORICAL');
         }
         
         if (symbols.length > 0 || /\b(stock|share|ticker|analyze|price|chart|performance)\b/i.test(message)) {
@@ -185,7 +212,7 @@ class FinancialChatbotEngine {
             intents.push('STOCK');
         }
         
-        if (/\b(market|indices|dow|nasdaq|s&amp;p|sp500)\b/i.test(message)) {
+        if (/\b(market|indices|dow|nasdaq|s&p|sp500)\b/i.test(message)) {
             if (type === 'CONVERSATIONAL') {
                 type = 'MARKET_QUERY';
             }
@@ -202,15 +229,37 @@ class FinancialChatbotEngine {
         return {
             type,
             intents,
-            symbols,
+            symbols: isComparison ? comparisonSymbols : symbols,
             timeframes,
-            needsData: symbols.length > 0 || intents.length > 0
+            isComparison,
+            comparisonSymbols,
+            needsData: symbols.length > 0 || intents.length > 0 || isComparison
         };
     }
 
     // ============================================
     // NOUVEAUX DÉTECTEURS D'INTENT
     // ============================================
+    
+    detectComparisonIntent(message) {
+        const keywords = [
+            'compare', 'vs', 'versus', 'against', 'comparison', 
+            'difference between', 'better than', 'which is better',
+            'compare with', 'compare to'
+        ];
+        const messageLower = message.toLowerCase();
+        return keywords.some(keyword => messageLower.includes(keyword));
+    }
+    
+    detectHistoricalIntent(message) {
+        const keywords = [
+            'history', 'historical', 'evolution', 'performance over',
+            'last 5 years', 'past years', 'over the years', 'trend',
+            'since', 'how has', 'performed in'
+        ];
+        const messageLower = message.toLowerCase();
+        return keywords.some(keyword => messageLower.includes(keyword));
+    }
     
     detectMarketNewsIntent(message) {
         const keywords = ['market news', 'news today', 'latest news', 'market update', 'what\'s happening', 'market sentiment', 'top news'];
@@ -301,6 +350,32 @@ class FinancialChatbotEngine {
         
         return Array.from(symbols);
     }
+    
+    // ✅ NOUVEAU : Extraction symboles pour comparaison
+    extractComparisonSymbols(message) {
+        const symbols = this.extractSymbols(message);
+        
+        // Si on a déjà 2+ symboles, c'est bon
+        if (symbols.length >= 2) {
+            return symbols.slice(0, 4); // Max 4 symboles pour comparaison
+        }
+        
+        // Sinon, chercher des patterns spécifiques
+        const patterns = [
+            /compare\s+([A-Z]{1,5})\s+(?:with|vs|versus|and|to)\s+([A-Z]{1,5})/i,
+            /([A-Z]{1,5})\s+(?:vs|versus)\s+([A-Z]{1,5})/i,
+            /([A-Z]{1,5})\s+and\s+([A-Z]{1,5})/i
+        ];
+        
+        for (const pattern of patterns) {
+            const match = message.match(pattern);
+            if (match) {
+                return [match[1], match[2]];
+            }
+        }
+        
+        return symbols;
+    }
 
     extractTimeframes(message) {
         const timeframePatterns = {
@@ -346,13 +421,22 @@ class FinancialChatbotEngine {
             },
             intent: { 
                 type: analysis.type,
-                intents: analysis.intents
+                intents: analysis.intents,
+                isComparison: analysis.isComparison
             }
         };
 
         // ✅ Si pas besoin de données
         if (!analysis.needsData) {
             console.log('   ⚡ No market data needed - conversational query');
+            return context;
+        }
+
+        // ✅ NOUVEAU : COMPARAISON MULTI-STOCKS
+        if (analysis.isComparison && analysis.comparisonSymbols.length >= 2) {
+            console.log(`\n⚖ ═══ LOADING COMPARISON DATA ═══`);
+            context.comparisonData = await this.loadComparisonData(analysis.comparisonSymbols, analysis.timeframes[0]);
+            console.log(`═══════════════════════════════════════════\n`);
             return context;
         }
 
@@ -503,7 +587,8 @@ class FinancialChatbotEngine {
                 }
 
                 // ✅ 11. DONNÉES HISTORIQUES (si pertinent)
-                const needsHistory = /\b(history|historical|evolution|performance|trend|chart|volatility|return)\b/i.test(message);
+                const needsHistory = analysis.intents.includes('HISTORICAL') || 
+                                     /\b(history|historical|evolution|performance|trend|chart|volatility|return)\b/i.test(message);
                 
                 if (needsHistory && this.analytics) {
                     const timeframe = analysis.timeframes[0] || this.conversationContext.lastTimeframe || '1y';
@@ -584,13 +669,125 @@ class FinancialChatbotEngine {
 
         return context;
     }
+    
+    // ============================================
+    // ✅ NOUVEAU : CHARGEMENT DONNÉES DE COMPARAISON
+    // ============================================
+    
+    async loadComparisonData(symbols, timeframe = '1y') {
+        const comparisonData = {
+            symbols: symbols,
+            stocksData: [],
+            timeSeries: [],
+            keyMetricsComparison: null
+        };
+        
+        try {
+            // Charger données pour chaque symbole en parallèle
+            const promises = symbols.map(async symbol => {
+                const [stockData, timeSeries] = await Promise.all([
+                    this.analytics.getStockData(symbol).catch(() => null),
+                    this.analytics.getTimeSeries(symbol, '1day', this.getOutputSize(timeframe)).catch(() => null)
+                ]);
+                
+                return { symbol, stockData, timeSeries };
+            });
+            
+            const results = await Promise.all(promises);
+            
+            results.forEach(result => {
+                if (result.stockData) {
+                    comparisonData.stocksData.push({
+                        symbol: result.symbol,
+                        ...result.stockData
+                    });
+                    console.log(`   ✅ ${result.symbol}: $${result.stockData.quote.current} (${result.stockData.quote.changePercent}%)`);
+                }
+                
+                if (result.timeSeries) {
+                    comparisonData.timeSeries.push({
+                        symbol: result.symbol,
+                        data: result.timeSeries.data
+                    });
+                }
+            });
+            
+            // Construire tableau comparatif des métriques clés
+            comparisonData.keyMetricsComparison = this.buildMetricsComparisonTable(comparisonData.stocksData);
+            
+        } catch (error) {
+            console.error('   ❌ Error loading comparison data:', error);
+        }
+        
+        return comparisonData;
+    }
+    
+    // ============================================
+    // ✅ NOUVEAU : TABLEAU COMPARATIF DES MÉTRIQUES
+    // ============================================
+    
+    buildMetricsComparisonTable(stocksData) {
+        if (!stocksData || stocksData.length === 0) return null;
+        
+        const metrics = [
+            { key: 'quote.current', label: 'Current Price', format: (v) => `$${v?.toFixed(2) || 'N/A'}` },
+            { key: 'quote.changePercent', label: 'Change %', format: (v) => `${v > 0 ? '+' : ''}${v?.toFixed(2) || 'N/A'}%` },
+            { key: 'profile.marketCap', label: 'Market Cap', format: (v) => `$${v || 'N/A'}B` },
+            { key: 'metrics.peRatio', label: 'P/E Ratio', format: (v) => v || 'N/A' },
+            { key: 'metrics.eps', label: 'EPS (TTM)', format: (v) => `$${v || 'N/A'}` },
+            { key: 'metrics.dividendYield', label: 'Dividend Yield', format: (v) => `${v || 'N/A'}%` },
+            { key: 'metrics.beta', label: 'Beta', format: (v) => v || 'N/A' },
+            { key: 'metrics.roe', label: 'ROE', format: (v) => `${v || 'N/A'}%` },
+            { key: 'metrics.profitMargin', label: 'Profit Margin', format: (v) => `${v || 'N/A'}%` }
+        ];
+        
+        const table = {
+            headers: ['Metric', ...stocksData.map(s => s.symbol)],
+            rows: []
+        };
+        
+        metrics.forEach(metric => {
+            const row = [metric.label];
+            
+            stocksData.forEach(stock => {
+                const value = this.getNestedValue(stock, metric.key);
+                row.push(metric.format(value));
+            });
+            
+            table.rows.push(row);
+        });
+        
+        return table;
+    }
+    
+    getNestedValue(obj, path) {
+        return path.split('.').reduce((current, key) => current?.[key], obj);
+    }
 
     // ============================================
     // CONSTRUCTION PROMPT ENRICHI POUR GEMINI
     // ============================================
     
-    buildEnhancedPrompt(message, context) {
+    buildEnhancedPrompt(message, context, analysis) {
         let prompt = `You are Alphy, an expert AI financial analyst with access to comprehensive real-time data. Answer this question professionally and concisely:\n\n**User Question:** "${message}"\n\n`;
+
+        // ✅ NOUVEAU : MODE COMPARAISON
+        if (context.comparisonData && context.comparisonData.stocksData.length >= 2) {
+            prompt += this.buildComparisonPrompt(context.comparisonData);
+            
+            // Instructions finales pour comparaison
+            prompt += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`;
+            prompt += `📝 **Your Task:**\n`;
+            prompt += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n`;
+            prompt += `Provide a **detailed side-by-side comparison** in 3-4 well-structured paragraphs:\n\n`;
+            prompt += `1. **Performance Comparison**: Compare price performance, volatility, and returns\n`;
+            prompt += `2. **Fundamental Analysis**: Compare valuation metrics (P/E, market cap, profitability)\n`;
+            prompt += `3. **Investment Perspective**: Which stock is better for growth vs value investors?\n`;
+            prompt += `4. **Risk Assessment**: Compare risk profiles and market positions\n\n`;
+            prompt += `Use **specific numbers** from the data above. Be objective and data-driven.\n`;
+            
+            return prompt;
+        }
 
         // ✅ DONNÉES DE BASE (Stock)
         if (context.stockData) {
@@ -663,7 +860,7 @@ class FinancialChatbotEngine {
             prompt += `\n`;
         }
 
-        // ✅ REVENUE &amp; EPS ESTIMATES
+        // ✅ REVENUE & EPS ESTIMATES
         if (context.revenueEstimates && context.revenueEstimates.length > 0) {
             prompt += `**Revenue Estimates (Quarterly):**\n`;
             context.revenueEstimates.slice(0, 2).forEach(est => {
@@ -800,7 +997,7 @@ class FinancialChatbotEngine {
             prompt += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n`;
             
             if (market.sp500) {
-                prompt += `• **S&amp;P 500 (SPY):** $${market.sp500.price} (${market.sp500.changePercent > 0 ? '+' : ''}${market.sp500.changePercent}%)\n`;
+                prompt += `• **S&P 500 (SPY):** $${market.sp500.price} (${market.sp500.changePercent > 0 ? '+' : ''}${market.sp500.changePercent}%)\n`;
             }
             if (market.nasdaq) {
                 prompt += `• **NASDAQ (QQQ):** $${market.nasdaq.price} (${market.nasdaq.changePercent > 0 ? '+' : ''}${market.nasdaq.changePercent}%)\n`;
@@ -823,6 +1020,199 @@ class FinancialChatbotEngine {
         prompt += `Use **specific numbers** from the data above. Be concise but thorough. Write in a professional yet accessible tone.\n`;
 
         return prompt;
+    }
+    
+    // ============================================
+    // ✅ NOUVEAU : PROMPT POUR COMPARAISON
+    // ============================================
+    
+    buildComparisonPrompt(comparisonData) {
+        let prompt = `\n⚖ ════════════════════════════════════════\n`;
+        prompt += `   MULTI-STOCK COMPARISON ANALYSIS\n`;
+        prompt += `════════════════════════════════════════\n\n`;
+        
+        // Vue d'ensemble
+        prompt += `**Comparing:** ${comparisonData.symbols.join(' vs ')}\n\n`;
+        
+        // Données individuelles pour chaque stock
+        comparisonData.stocksData.forEach((stock, index) => {
+            prompt += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`;
+            prompt += `📊 **${index + 1}. ${stock.symbol}** - ${stock.profile?.name || stock.symbol}\n`;
+            prompt += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n`;
+            
+            prompt += `**Price Performance:**\n`;
+            prompt += `• Current: $${stock.quote.current} (${stock.quote.changePercent > 0 ? '+' : ''}${stock.quote.changePercent}%)\n`;
+            prompt += `• Day Range: $${stock.quote.low} - $${stock.quote.high}\n`;
+            prompt += `• 52W Range: $${stock.metrics?.week52Low || 'N/A'} - $${stock.metrics?.week52High || 'N/A'}\n\n`;
+            
+            prompt += `**Company Fundamentals:**\n`;
+            prompt += `• Industry: ${stock.profile?.industry || 'N/A'}\n`;
+            prompt += `• Market Cap: $${stock.profile?.marketCap || 'N/A'}B\n`;
+            prompt += `• P/E Ratio: ${stock.metrics?.peRatio || 'N/A'}\n`;
+            prompt += `• EPS: $${stock.metrics?.eps || 'N/A'}\n`;
+            prompt += `• ROE: ${stock.metrics?.roe || 'N/A'}%\n`;
+            prompt += `• Profit Margin: ${stock.metrics?.profitMargin || 'N/A'}%\n`;
+            prompt += `• Beta: ${stock.metrics?.beta || 'N/A'}\n`;
+            prompt += `• Dividend Yield: ${stock.metrics?.dividendYield || 'N/A'}%\n\n`;
+        });
+        
+        // Tableau comparatif
+        if (comparisonData.keyMetricsComparison) {
+            prompt += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`;
+            prompt += `📊 **Side-by-Side Metrics Comparison**\n`;
+            prompt += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n`;
+            
+            const table = comparisonData.keyMetricsComparison;
+            
+            // Header
+            prompt += `| ${table.headers.join(' | ')} |\n`;
+            prompt += `|${table.headers.map(() => '---').join('|')}|\n`;
+            
+            // Rows
+            table.rows.forEach(row => {
+                prompt += `| ${row.join(' | ')} |\n`;
+            });
+            
+            prompt += `\n`;
+        }
+        
+        // Stats de performance historique (si disponibles)
+        if (comparisonData.timeSeries && comparisonData.timeSeries.length > 0) {
+            prompt += `**Historical Performance Comparison:**\n`;
+            comparisonData.timeSeries.forEach(series => {
+                if (series.data && series.data.length > 0) {
+                    const firstPrice = series.data[0].close;
+                    const lastPrice = series.data[series.data.length - 1].close;
+                    const totalReturn = ((lastPrice - firstPrice) / firstPrice * 100).toFixed(2);
+                    prompt += `• **${series.symbol}**: ${totalReturn > 0 ? '+' : ''}${totalReturn}% total return (${series.data.length} days)\n`;
+                }
+            });
+            prompt += `\n`;
+        }
+        
+        return prompt;
+    }
+
+    // ============================================
+    // ✅ NOUVEAU : GÉNÉRATION CARTES VISUELLES
+    // ============================================
+    
+    async generateVisualCards(context, analysis) {
+        const cards = [];
+        
+        // Carte pour stock individuel
+        if (context.stockData && !analysis.isComparison) {
+            const stock = context.stockData;
+            
+            // Carte de prix actuel
+            cards.push({
+                type: 'metric',
+                title: 'Current Price',
+                value: `$${stock.quote.current}`,
+                change: `${stock.quote.changePercent > 0 ? '+' : ''}${stock.quote.changePercent}%`,
+                trend: stock.quote.changePercent > 0 ? 'up' : 'down',
+                icon: '💰'
+            });
+            
+            // Carte Market Cap
+            if (stock.profile?.marketCap) {
+                cards.push({
+                    type: 'metric',
+                    title: 'Market Cap',
+                    value: `$${stock.profile.marketCap}B`,
+                    icon: '🏢'
+                });
+            }
+            
+            // Carte P/E Ratio
+            if (stock.metrics?.peRatio) {
+                cards.push({
+                    type: 'metric',
+                    title: 'P/E Ratio',
+                    value: stock.metrics.peRatio,
+                    icon: '📊'
+                });
+            }
+            
+            // Carte de consensus analystes
+            if (context.analystRecommendations) {
+                cards.push({
+                    type: 'metric',
+                    title: 'Analyst Consensus',
+                    value: context.analystRecommendations.consensus,
+                    subtitle: `${context.analystRecommendations.total} analysts`,
+                    icon: '👥'
+                });
+            }
+            
+            // Carte de sentiment
+            if (context.sentiment) {
+                cards.push({
+                    type: 'metric',
+                    title: 'News Sentiment',
+                    value: context.sentiment.overallSentiment.label,
+                    subtitle: `Score: ${context.sentiment.overallSentiment.sentiment.toFixed(2)}`,
+                    icon: '💭'
+                });
+            }
+        }
+        
+        // Cartes pour comparaison multi-stocks
+        if (context.comparisonData && context.comparisonData.stocksData.length >= 2) {
+            context.comparisonData.stocksData.forEach(stock => {
+                cards.push({
+                    type: 'comparison-card',
+                    symbol: stock.symbol,
+                    name: stock.profile?.name || stock.symbol,
+                    price: `$${stock.quote.current}`,
+                    change: `${stock.quote.changePercent > 0 ? '+' : ''}${stock.quote.changePercent}%`,
+                    trend: stock.quote.changePercent > 0 ? 'up' : 'down',
+                    marketCap: `$${stock.profile?.marketCap || 'N/A'}B`,
+                    peRatio: stock.metrics?.peRatio || 'N/A'
+                });
+            });
+        }
+        
+        return cards;
+    }
+    
+    // ============================================
+    // ✅ NOUVEAU : GÉNÉRATION REQUÊTES DE GRAPHIQUES
+    // ============================================
+    
+    async generateChartRequests(context, analysis) {
+        const chartRequests = [];
+        
+        // Graphique de comparaison pour multi-stocks
+        if (context.comparisonData && context.comparisonData.timeSeries && context.comparisonData.timeSeries.length >= 2) {
+            chartRequests.push({
+                type: 'comparison',
+                symbols: context.comparisonData.symbols,
+                timeSeriesData: context.comparisonData.timeSeries,
+                timeframe: analysis.timeframes[0] || '1y'
+            });
+        }
+        
+        // Graphique historique pour stock individuel
+        if (context.timeSeriesData && !analysis.isComparison) {
+            chartRequests.push({
+                type: 'line',
+                symbol: analysis.symbols[0],
+                data: context.timeSeriesData,
+                indicators: analysis.intents.includes('HISTORICAL') ? ['sma'] : [],
+                timeframe: analysis.timeframes[0] || '1y'
+            });
+        }
+        
+        // Tableau de comparaison des métriques
+        if (context.comparisonData && context.comparisonData.keyMetricsComparison) {
+            chartRequests.push({
+                type: 'metrics-table',
+                data: context.comparisonData.keyMetricsComparison
+            });
+        }
+        
+        return chartRequests;
     }
 
     // ============================================
@@ -1095,6 +1485,18 @@ class FinancialChatbotEngine {
     generateSmartSuggestions(analysis, context) {
         const suggestions = [];
         
+        // Suggestions pour comparaison
+        if (analysis.isComparison && analysis.comparisonSymbols.length >= 2) {
+            const symbols = analysis.comparisonSymbols;
+            suggestions.push(
+                `Historical performance: ${symbols.join(' vs ')}`,
+                `Technical analysis: ${symbols[0]}`,
+                `${symbols[0]} analyst ratings`,
+                `${symbols[1]} fundamentals`
+            );
+            return suggestions.slice(0, 4);
+        }
+        
         if (analysis.symbols.length > 0) {
             const symbol = analysis.symbols[0];
             
@@ -1297,4 +1699,4 @@ if (typeof module !== 'undefined' && module.exports) {
     module.exports = FinancialChatbotEngine;
 }
 
-window.FinancialChatbotEngine = FinancialChatbotEngine;
+window.FinancialChatbotEngine = FinancialChatbotEngine; 
