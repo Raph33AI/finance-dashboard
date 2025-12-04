@@ -1,6 +1,7 @@
 // ============================================
-// CHATBOT CHARTS v2.0 - PREMIUM VISUALIZATIONS
-// ✅ Multi-Stock Comparison + Metrics Tables + Overlay Charts
+// CHATBOT CHARTS v3.0 - PREMIUM VISUALIZATIONS
+// Multi-Stock Comparison + Metrics Tables + Overlay Charts
+// FIX: Chart.js date adapter error resolved
 // ============================================
 
 class ChatbotCharts {
@@ -11,7 +12,7 @@ class ChatbotCharts {
         
         // Check if Chart.js is loaded
         if (typeof Chart === 'undefined') {
-            console.warn('⚠ Chart.js not loaded. Charts will not be available.');
+            console.warn('Chart.js not loaded. Charts will not be available.');
             this.chartsAvailable = false;
         } else {
             this.chartsAvailable = true;
@@ -45,7 +46,7 @@ class ChatbotCharts {
             // Generate unique ID
             const chartId = `chart-${++this.chartCounter}`;
             
-            // ✅ NOUVEAU : Gérer les différents types de visualisations
+            // Handle different visualization types
             if (type === 'comparison' && symbols && timeSeriesData) {
                 return await this.createComparisonChart(chartId, symbols, timeSeriesData, container, chartRequest);
             }
@@ -54,7 +55,7 @@ class ChatbotCharts {
                 return this.createMetricsTable(chartId, data, container);
             }
             
-            // ✅ Graphiques standards
+            // Standard charts
             const displayType = type === 'candlestick' ? 'line' : type;
             
             // Create chart container HTML
@@ -101,13 +102,13 @@ class ChatbotCharts {
     }
 
     // ============================================
-    // ✅ NOUVEAU : GRAPHIQUE DE COMPARAISON MULTI-STOCKS
+    // FIX: GRAPHIQUE DE COMPARAISON (sans date adapter)
     // ============================================
     async createComparisonChart(chartId, symbols, timeSeriesData, container, chartRequest) {
         try {
-            console.log(`📊 Creating comparison chart for: ${symbols.join(' vs ')}`);
+            console.log(`Creating comparison chart for: ${symbols.join(' vs ')}`);
             
-            // Créer le HTML du conteneur
+            // Create HTML container
             const chartHTML = this.createComparisonChartHTML(chartId, symbols);
             container.innerHTML = chartHTML;
             
@@ -117,7 +118,7 @@ class ChatbotCharts {
                 throw new Error('Canvas element not found');
             }
             
-            // Préparer les données pour l'overlay
+            // Prepare datasets for overlay
             const datasets = [];
             const colors = [
                 '#667eea', // Primary (purple)
@@ -128,15 +129,24 @@ class ChatbotCharts {
                 '#06b6d4'  // Info (cyan)
             ];
             
+            // FIX: Find common labels (dates) and normalize data
+            let commonLabels = [];
+            if (timeSeriesData.length > 0 && timeSeriesData[0].data) {
+                // Use first series dates as labels (formatted)
+                commonLabels = timeSeriesData[0].data.map(d => {
+                    const date = new Date(d.datetime);
+                    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+                });
+            }
+            
             timeSeriesData.forEach((series, index) => {
                 if (!series.data || series.data.length === 0) return;
                 
-                // Normaliser les données à 100 pour comparaison équitable
+                // Normalize data to 100 for fair comparison
                 const firstPrice = series.data[0].close;
-                const normalizedData = series.data.map(d => ({
-                    x: d.datetime,
-                    y: ((d.close / firstPrice) * 100).toFixed(2)
-                }));
+                const normalizedData = series.data.map(d => {
+                    return ((d.close / firstPrice) * 100).toFixed(2);
+                });
                 
                 datasets.push({
                     label: series.symbol,
@@ -154,10 +164,13 @@ class ChatbotCharts {
                 });
             });
             
-            // Configuration du graphique
+            // FIX: Chart configuration without time scale
             const chartConfig = {
                 type: 'line',
-                data: { datasets: datasets },
+                data: { 
+                    labels: commonLabels,
+                    datasets: datasets 
+                },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
@@ -201,10 +214,7 @@ class ChatbotCharts {
                             displayColors: true,
                             callbacks: {
                                 title: (context) => {
-                                    if (context[0] && context[0].raw && context[0].raw.x) {
-                                        return new Date(context[0].raw.x).toLocaleDateString();
-                                    }
-                                    return '';
+                                    return context[0].label || '';
                                 },
                                 label: (context) => {
                                     return `${context.dataset.label}: ${context.parsed.y}`;
@@ -214,21 +224,16 @@ class ChatbotCharts {
                     },
                     scales: {
                         x: {
-                            type: 'time',
-                            time: {
-                                unit: 'day',
-                                displayFormats: {
-                                    day: 'MMM dd'
-                                }
-                            },
                             grid: {
                                 color: this.config.charts.colors.grid,
                                 drawBorder: false
                             },
                             ticks: {
                                 color: this.config.charts.colors.text,
-                                maxRotation: 0,
-                                autoSkipPadding: 20
+                                maxRotation: 45,
+                                minRotation: 0,
+                                autoSkipPadding: 20,
+                                maxTicksLimit: 10
                             }
                         },
                         y: {
@@ -263,7 +268,7 @@ class ChatbotCharts {
             // Add export button functionality
             this.addExportButton(chartId, chart, symbols.join('_vs_'));
             
-            console.log(`✅ Comparison chart created: ${chartId}`);
+            console.log(`Comparison chart created: ${chartId}`);
             
             return chartId;
             
@@ -275,18 +280,18 @@ class ChatbotCharts {
     }
 
     // ============================================
-    // ✅ NOUVEAU : TABLEAU DE MÉTRIQUES COMPARATIVES
+    // TABLEAU DE MÉTRIQUES COMPARATIVES
     // ============================================
     createMetricsTable(tableId, tableData, container) {
         try {
-            console.log(`📊 Creating metrics comparison table`);
+            console.log(`Creating metrics comparison table`);
             
             const tableHTML = `
                 <div class="metrics-table-container" id="${tableId}">
                     <div class="metrics-table-header">
-                        <h3 class="metrics-table-title">📊 Key Metrics Comparison</h3>
+                        <h3 class="metrics-table-title">Key Metrics Comparison</h3>
                         <button class="chart-btn" data-action="export-table" data-table="${tableId}">
-                            📥 Export
+                            Export
                         </button>
                     </div>
                     <div class="metrics-table-wrapper">
@@ -322,7 +327,7 @@ class ChatbotCharts {
                 });
             }
             
-            console.log(`✅ Metrics table created: ${tableId}`);
+            console.log(`Metrics table created: ${tableId}`);
             
             return tableId;
             
@@ -343,7 +348,7 @@ class ChatbotCharts {
                     <span class="chart-title">${symbol} - ${type.toUpperCase()} Chart</span>
                     <div class="chart-actions">
                         <button class="chart-btn" data-action="export" data-chart="${chartId}">
-                            📥 Export
+                            Export
                         </button>
                     </div>
                 </div>
@@ -354,15 +359,14 @@ class ChatbotCharts {
         `;
     }
     
-    // ✅ NOUVEAU : HTML pour graphique de comparaison
     createComparisonChartHTML(chartId, symbols) {
         return `
             <div class="chart-container comparison-chart">
                 <div class="chart-header">
-                    <span class="chart-title">⚖ ${symbols.join(' vs ')} - Performance Comparison</span>
+                    <span class="chart-title">${symbols.join(' vs ')} - Performance Comparison</span>
                     <div class="chart-actions">
                         <button class="chart-btn" data-action="export" data-chart="${chartId}">
-                            📥 Export
+                            Export
                         </button>
                     </div>
                 </div>
@@ -416,7 +420,7 @@ class ChatbotCharts {
             pointHoverBorderWidth: 2
         }];
 
-        // ✅ AJOUTER INDICATEURS TECHNIQUES SI DEMANDÉS
+        // Add technical indicators if requested
         if (indicators && indicators.includes('sma') && data.values.length > 0) {
             const sma20 = this.calculateSMA(data.values, 20);
             datasets.push({
@@ -627,19 +631,22 @@ class ChatbotCharts {
     // FETCH LINE DATA - AVEC VRAIES DONNÉES
     // ============================================
     async fetchLineData(symbol, period, timeSeriesData = null) {
-        console.log(`📊 Fetching line data for ${symbol}, period: ${period}`);
+        console.log(`Fetching line data for ${symbol}, period: ${period}`);
         
-        // ✅ SI DONNÉES DÉJÀ FOURNIES, LES UTILISER
+        // If data already provided, use it
         if (timeSeriesData && timeSeriesData.data && timeSeriesData.data.length > 0) {
-            console.log(`✅ Using provided time series data: ${timeSeriesData.data.length} points`);
+            console.log(`Using provided time series data: ${timeSeriesData.data.length} points`);
             
             return {
-                labels: timeSeriesData.data.map(d => d.datetime),
+                labels: timeSeriesData.data.map(d => {
+                    const date = new Date(d.datetime);
+                    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+                }),
                 values: timeSeriesData.data.map(d => d.close)
             };
         }
         
-        // ✅ SI ANALYTICS DISPONIBLE, UTILISER VRAIES DONNÉES
+        // Try to fetch real data if analytics available
         if (window.financialChatbotFullPage && window.financialChatbotFullPage.engine && window.financialChatbotFullPage.engine.analytics) {
             try {
                 const analytics = window.financialChatbotFullPage.engine.analytics;
@@ -648,20 +655,23 @@ class ChatbotCharts {
                 const timeSeries = await analytics.getTimeSeries(symbol, '1day', outputsize);
                 
                 if (timeSeries && timeSeries.data && timeSeries.data.length > 0) {
-                    console.log(`✅ Real data loaded: ${timeSeries.data.length} points`);
+                    console.log(`Real data loaded: ${timeSeries.data.length} points`);
                     
                     return {
-                        labels: timeSeries.data.map(d => d.datetime),
+                        labels: timeSeries.data.map(d => {
+                            const date = new Date(d.datetime);
+                            return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+                        }),
                         values: timeSeries.data.map(d => d.close)
                     };
                 }
             } catch (error) {
-                console.warn('⚠ Could not fetch real data, using mock:', error);
+                console.warn('Could not fetch real data, using mock:', error);
             }
         }
         
-        // ✅ FALLBACK: Mock data
-        console.warn(`⚠ Using mock data for ${symbol}`);
+        // Fallback: Mock data
+        console.warn(`Using mock data for ${symbol}`);
         const dataPoints = this.getDataPointsCount(period);
         const now = Date.now();
         const interval = this.getIntervalMillis(period);
@@ -672,7 +682,8 @@ class ChatbotCharts {
         
         for (let i = 0; i < dataPoints; i++) {
             const timestamp = now - (dataPoints - i) * interval;
-            labels.push(new Date(timestamp).toLocaleDateString());
+            const date = new Date(timestamp);
+            labels.push(date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }));
             
             basePrice += (Math.random() - 0.5) * 5;
             values.push(parseFloat(basePrice.toFixed(2)));
@@ -694,7 +705,7 @@ class ChatbotCharts {
         for (let i = 0; i < dataPoints; i++) {
             const timestamp = now - (dataPoints - i) * interval;
             const date = new Date(timestamp);
-            labels.push(date.toLocaleDateString());
+            labels.push(date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }));
             
             const open = basePrice;
             const close = open + (Math.random() - 0.5) * 10;
@@ -781,7 +792,6 @@ class ChatbotCharts {
         }
     }
     
-    // ✅ NOUVEAU : Export tableau en CSV
     exportTableAsCSV(tableData, filename) {
         let csvContent = '';
         
@@ -816,15 +826,15 @@ class ChatbotCharts {
             '1M': 30,
             '3M': 90,
             '6M': 180,
-            '1y': 365,
-            '2y': 730,
-            '5y': 1825,
-            '10y': 3650,
+            '1y': 100,
+            '2y': 200,
+            '5y': 250,
+            '10y': 500,
             'ytd': 250,
-            'max': 5000,
+            'max': 500,
             'ipo': 60
         };
-        return counts[period] || 365;
+        return counts[period] || 100;
     }
 
     getIntervalMillis(period) {
@@ -835,7 +845,9 @@ class ChatbotCharts {
             '3m': 86400000,
             '6m': 86400000,
             '1y': 86400000,
-            '2y': 86400000,
+            '2y': 86400000 * 2,
+            '5y': 86400000 * 5,
+            '10y': 86400000 * 10,
             'ytd': 86400000,
             'ipo': 86400000
         };

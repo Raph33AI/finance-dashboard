@@ -1,6 +1,7 @@
 // ============================================
-// CHATBOT FULL PAGE UI v2.0 - VERSION ULTRA ✅
-// ✅ Visual Cards + Metrics Tables + Comparison Charts
+// CHATBOT FULL PAGE UI v3.0 - VERSION WALL STREET PRO
+// Visual Cards + Metrics Tables + Comparison Charts
+// No emojis version
 // ============================================
 
 class ChatbotFullPageUI {
@@ -26,7 +27,7 @@ class ChatbotFullPageUI {
 
     async init() {
         try {
-            console.log('🎨 Initializing Full Page UI v2.0...');
+            console.log('Initializing Full Page UI v3.0...');
             
             await new Promise(resolve => setTimeout(resolve, 100));
             
@@ -42,10 +43,10 @@ class ChatbotFullPageUI {
                 initializeParticles();
             }
             
-            console.log('✅ Full Page UI v2.0 initialized (with Visual Cards & Comparison Charts)');
+            console.log('Full Page UI v3.0 initialized (Wall Street Pro)');
             
         } catch (error) {
-            console.error('❌ Full Page UI initialization error:', error);
+            console.error('Full Page UI initialization error:', error);
         }
     }
 
@@ -70,7 +71,7 @@ class ChatbotFullPageUI {
             chatMessagesArea: document.querySelector('.chat-messages-area')
         };
         
-        console.log('📦 Elements cached');
+        console.log('Elements cached');
     }
 
     createReopenButton() {
@@ -85,7 +86,7 @@ class ChatbotFullPageUI {
         this.elements.chatMessagesArea.insertBefore(reopenBtn, this.elements.chatMessagesArea.firstChild);
         this.elements.reopenBtn = reopenBtn;
         
-        console.log('✅ Reopen button created');
+        console.log('Reopen button created');
     }
 
     attachEventListeners() {
@@ -170,23 +171,23 @@ class ChatbotFullPageUI {
             });
         }
         
-        console.log('✅ Event listeners attached');
+        console.log('Event listeners attached');
     }
 
     async initializeComponents() {
         if (typeof FinancialChatbotEngine !== 'undefined') {
             this.engine = new FinancialChatbotEngine(this.config);
-            console.log('✅ Engine initialized');
+            console.log('Engine initialized');
         }
         
         if (typeof ChatbotCharts !== 'undefined') {
             this.charts = new ChatbotCharts(this.config);
-            console.log('✅ Charts initialized');
+            console.log('Charts initialized');
         }
         
         if (typeof ChatbotSuggestions !== 'undefined') {
             this.suggestions = new ChatbotSuggestions(this.config);
-            console.log('✅ Suggestions initialized');
+            console.log('Suggestions initialized');
         }
     }
 
@@ -199,7 +200,7 @@ class ChatbotFullPageUI {
         this.applySidebarState();
         this.saveSidebarState();
         
-        console.log(`📂 Sidebar ${this.sidebarCollapsed ? 'closed' : 'opened'}`);
+        console.log(`Sidebar ${this.sidebarCollapsed ? 'closed' : 'opened'}`);
     }
     
     applySidebarState() {
@@ -216,7 +217,7 @@ class ChatbotFullPageUI {
         try {
             localStorage.setItem('alphy_sidebar_collapsed', JSON.stringify(this.sidebarCollapsed));
         } catch (e) {
-            console.warn('⚠ Could not save sidebar state:', e);
+            console.warn('Could not save sidebar state:', e);
         }
     }
     
@@ -225,7 +226,7 @@ class ChatbotFullPageUI {
             const saved = localStorage.getItem('alphy_sidebar_collapsed');
             return saved ? JSON.parse(saved) : false;
         } catch (e) {
-            console.warn('⚠ Could not load sidebar state:', e);
+            console.warn('Could not load sidebar state:', e);
             return false;
         }
     }
@@ -237,7 +238,7 @@ class ChatbotFullPageUI {
         const saved = localStorage.getItem('alphy_conversations');
         if (saved) {
             this.conversations = JSON.parse(saved);
-            console.log('✅ Conversations loaded:', this.conversations.length);
+            console.log('Conversations loaded:', this.conversations.length);
         } else {
             this.conversations = [];
         }
@@ -256,7 +257,7 @@ class ChatbotFullPageUI {
     }
 
     startNewConversation() {
-        console.log('🆕 Starting new conversation...');
+        console.log('Starting new conversation...');
         
         const newConv = {
             id: 'conv-' + Date.now(),
@@ -274,11 +275,11 @@ class ChatbotFullPageUI {
         this.saveConversations();
         this.renderConversations();
         
-        console.log('✅ New conversation started:', newConv.id);
+        console.log('New conversation started:', newConv.id);
     }
 
     resetInterface() {
-        console.log('🔄 Resetting interface...');
+        console.log('Resetting interface...');
         
         this.clearMessages();
         this.showWelcomeScreen();
@@ -293,7 +294,7 @@ class ChatbotFullPageUI {
         this.messageCount = 0;
         this.chartCount = 0;
         
-        console.log('✅ Interface reset complete');
+        console.log('Interface reset complete');
     }
 
     loadConversation(id) {
@@ -314,7 +315,7 @@ class ChatbotFullPageUI {
         }
         
         this.renderConversations();
-        console.log('✅ Conversation loaded:', id);
+        console.log('Conversation loaded:', id);
     }
 
     deleteConversation(id) {
@@ -331,7 +332,7 @@ class ChatbotFullPageUI {
             
             this.saveConversations();
             this.renderConversations();
-            console.log('✅ Conversation deleted:', id);
+            console.log('Conversation deleted:', id);
         }
     }
 
@@ -422,7 +423,7 @@ class ChatbotFullPageUI {
     // ============================================
     async sendMessage(messageText = null) {
         if (!this.elements.input) {
-            console.error('❌ Input element not found!');
+            console.error('Input element not found!');
             return;
         }
         
@@ -432,7 +433,7 @@ class ChatbotFullPageUI {
             return;
         }
         
-        console.log('📤 Sending message:', message);
+        console.log('Sending message:', message);
         
         this.hideWelcomeScreen();
         
@@ -462,12 +463,12 @@ class ChatbotFullPageUI {
             
             this.addMessage('bot', response.text);
             
-            // ✅ NOUVEAU : Afficher cartes visuelles
+            // Render visual cards
             if (response.visualCards && response.visualCards.length > 0) {
                 await this.renderVisualCards(response.visualCards);
             }
             
-            // ✅ Générer graphiques
+            // Generate charts
             if (response.chartRequests && response.chartRequests.length > 0) {
                 await this.generateCharts(response.chartRequests);
             }
@@ -484,15 +485,15 @@ class ChatbotFullPageUI {
             }
             
         } catch (error) {
-            console.error('❌ Message processing error:', error);
+            console.error('Message processing error:', error);
             this.hideTypingIndicator();
-            this.addMessage('bot', '⚠ Sorry, I encountered an error. Please try again.');
+            this.addMessage('bot', 'Sorry, I encountered an error. Please try again.');
         }
     }
 
     addMessage(type, content, save = true) {
         if (!this.elements.messages) {
-            console.error('❌ Messages container not found!');
+            console.error('Messages container not found!');
             return;
         }
         
@@ -501,7 +502,7 @@ class ChatbotFullPageUI {
         
         const avatar = document.createElement('div');
         avatar.className = `message-avatar ${type}-avatar`;
-        avatar.textContent = type === 'user' ? '👤' : '🤖';
+        avatar.innerHTML = type === 'user' ? '<i class="fas fa-user"></i>' : '<i class="fas fa-robot"></i>';
         
         const contentDiv = document.createElement('div');
         contentDiv.className = 'message-content';
@@ -561,7 +562,7 @@ class ChatbotFullPageUI {
         
         const avatar = document.createElement('div');
         avatar.className = 'message-avatar bot-avatar';
-        avatar.textContent = '🤖';
+        avatar.innerHTML = '<i class="fas fa-robot"></i>';
         
         const contentDiv = document.createElement('div');
         contentDiv.className = 'message-content';
@@ -595,18 +596,18 @@ class ChatbotFullPageUI {
     }
 
     // ============================================
-    // ✅ NOUVEAU : RENDU DES CARTES VISUELLES
+    // RENDU DES CARTES VISUELLES
     // ============================================
     
     async renderVisualCards(cards) {
         if (!this.elements.messages || !cards || cards.length === 0) return;
         
-        console.log(`🎨 Rendering ${cards.length} visual cards`);
+        console.log(`Rendering ${cards.length} visual cards`);
         
         const cardsContainer = document.createElement('div');
         cardsContainer.className = 'visual-cards-container';
         
-        // Cartes de métriques individuelles
+        // Metric cards
         const metricCards = cards.filter(c => c.type === 'metric');
         if (metricCards.length > 0) {
             const metricsGrid = document.createElement('div');
@@ -620,7 +621,7 @@ class ChatbotFullPageUI {
             cardsContainer.appendChild(metricsGrid);
         }
         
-        // Cartes de comparaison
+        // Comparison cards
         const comparisonCards = cards.filter(c => c.type === 'comparison-card');
         if (comparisonCards.length > 0) {
             const comparisonGrid = document.createElement('div');
@@ -643,7 +644,7 @@ class ChatbotFullPageUI {
         cardDiv.className = `metric-card ${card.trend ? `trend-${card.trend}` : ''}`;
         
         cardDiv.innerHTML = `
-            <div class="metric-card-icon">${card.icon || '📊'}</div>
+            <div class="metric-card-icon">${card.icon || '<i class="fas fa-chart-line"></i>'}</div>
             <div class="metric-card-content">
                 <div class="metric-card-title">${card.title}</div>
                 <div class="metric-card-value">${card.value}</div>
@@ -733,7 +734,7 @@ class ChatbotFullPageUI {
     showWelcomeScreen() {
         if (this.elements.welcomeScreen) {
             this.elements.welcomeScreen.style.display = 'block';
-            console.log('👋 Welcome screen shown');
+            console.log('Welcome screen shown');
         }
     }
 
@@ -772,17 +773,17 @@ class ChatbotFullPageUI {
 // INITIALIZE
 // ============================================
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('🚀 Initializing Chatbot Full Page v2.0...');
+    console.log('Initializing Chatbot Full Page v3.0...');
     
     if (typeof ChatbotConfig === 'undefined') {
-        console.error('❌ ChatbotConfig not defined!');
+        console.error('ChatbotConfig not defined!');
         return;
     }
     
     try {
         window.financialChatbotFullPage = new ChatbotFullPageUI(ChatbotConfig);
-        console.log('✅ Chatbot Full Page v2.0 ready! (Visual Cards + Comparison + Tables)');
+        console.log('Chatbot Full Page v3.0 ready! (Wall Street Pro Edition)');
     } catch (error) {
-        console.error('❌ Initialization error:', error);
+        console.error('Initialization error:', error);
     }
 });
