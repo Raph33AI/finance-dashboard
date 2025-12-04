@@ -1,7 +1,6 @@
 // ============================================
-// FINANCIAL CHATBOT - AI ENGINE v5.0 ULTRA
-// ✅ Comparaison Multi-Stocks + Analyse Historique Enrichie
-// ✅ Cartes Interactives + Tableaux Professionnels
+// FINANCIAL CHATBOT - AI ENGINE v6.0 WALL STREET PRO
+// Advanced Analytics: Sharpe, Sortino, Greeks, Correlations, Fair Value
 // ============================================
 
 class FinancialChatbotEngine {
@@ -14,7 +13,6 @@ class FinancialChatbotEngine {
         
         this.isProcessing = false;
         
-        // ✅ Contexte conversationnel
         this.conversationContext = {
             lastSymbol: null,
             lastTimeframe: '1y',
@@ -30,7 +28,6 @@ class FinancialChatbotEngine {
             totalResponseTime: 0
         };
         
-        // ✅ Cache intelligent
         this.responseCache = new Map();
         this.cacheExpiration = 300000; // 5 minutes
         
@@ -41,34 +38,34 @@ class FinancialChatbotEngine {
         try {
             if (typeof GeminiAI !== 'undefined') {
                 this.geminiAI = new GeminiAI(this.config);
-                console.log('✅ Gemini AI initialized');
+                console.log('Gemini AI initialized');
             }
 
             if (typeof IPOAnalyzer !== 'undefined') {
                 this.ipoAnalyzer = new IPOAnalyzer(this.config);
-                console.log('✅ IPO Analyzer initialized');
+                console.log('IPO Analyzer initialized');
             }
 
             if (typeof FinancialAnalytics !== 'undefined') {
                 this.analytics = new FinancialAnalytics(this.config);
-                console.log('✅ Analytics initialized');
+                console.log('Analytics initialized');
             }
 
             if (typeof ChatbotCharts !== 'undefined') {
                 this.charts = new ChatbotCharts(this.config);
-                console.log('✅ Charts initialized');
+                console.log('Charts initialized');
             }
 
-            console.log('🚀 Conversational Financial AI v5.0 ready!');
-            console.log('📊 NEW: Multi-Stock Comparison + Enhanced Historical Analysis + Interactive Cards');
+            console.log('Conversational Financial AI v6.0 WALL STREET PRO ready!');
+            console.log('Advanced Analytics: Sharpe, Sortino, Correlations, Greeks, Fair Value, Insider Trading');
             
         } catch (error) {
-            console.error('❌ Engine initialization error:', error);
+            console.error('Engine initialization error:', error);
         }
     }
 
     // ============================================
-    // PROCESSUS PRINCIPAL
+    // PROCESSUS PRINCIPAL (CORRIGÉ)
     // ============================================
     async processMessage(userMessage) {
         const startTime = performance.now();
@@ -76,45 +73,44 @@ class FinancialChatbotEngine {
         try {
             this.metrics.totalMessages++;
 
-            // ✅ Vérification cache
             const cachedResponse = this.checkCache(userMessage);
             if (cachedResponse) {
-                console.log('📦 Returning cached response');
+                console.log('✅ Returning cached response');
                 return cachedResponse;
             }
 
-            // ✅ Analyse du message (avec détection comparaison)
+            // ✅ CORRECTION: Meilleure analyse du message
             const analysis = this.analyzeMessage(userMessage);
             
             console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-            console.log('💬 Processing:', userMessage.substring(0, 60) + '...');
-            console.log('🎯 Detected:', analysis.type);
-            console.log('📊 Symbols:', analysis.symbols);
+            console.log('📝 Processing:', userMessage.substring(0, 80) + '...');
+            console.log('🎯 Type:', analysis.type);
+            console.log('🏷 Intents:', analysis.intents.join(', '));
+            console.log('📊 Symbols:', analysis.symbols.join(', ') || 'None');
             if (analysis.isComparison) {
-                console.log('⚖ COMPARISON MODE: ', analysis.comparisonSymbols.join(' vs '));
+                console.log('⚖ COMPARISON MODE:', analysis.comparisonSymbols.join(' vs '));
             }
             console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
 
-            // ✅ Construction de contexte ULTRA-COMPLET
+            // ✅ CORRECTION: Construction de contexte intelligente
             const context = await this.buildSmartContext(userMessage, analysis);
-
-            // ✅ Construction du prompt enrichi pour Gemini
-            const enrichedPrompt = this.buildEnhancedPrompt(userMessage, context, analysis);
-
-            // ✅ Génération de réponse (Gemini avec contexte enrichi)
-            const response = await this.geminiAI.generateResponse(enrichedPrompt, context);
             
-            // ✅ NOUVEAU : Enrichir la réponse avec cartes visuelles
+            // ✅ AJOUT: Passer analysis.type dans context.intent
+            context.intent = {
+                type: analysis.type,
+                intents: analysis.intents,
+                isComparison: analysis.isComparison
+            };
+            
+            // ✅ CORRECTION: Ne plus construire de prompt ici, laisser Gemini le faire
+            const response = await this.geminiAI.generateResponse(userMessage, context);
+            
+            // Ajouter les visuels et graphiques
             response.visualCards = await this.generateVisualCards(context, analysis);
-            
-            // ✅ NOUVEAU : Générer graphiques de comparaison si pertinent
             response.chartRequests = await this.generateChartRequests(context, analysis);
-            
-            // ✅ Enrichissement de la réponse
-            response.suggestions = this.generateSmartSuggestions(analysis, context);
+            response.suggestions = this.generateAdvancedSuggestions(analysis, context);
             response.processingTime = performance.now() - startTime;
 
-            // ✅ Sauvegarde cache & métriques
             this.cacheResponse(userMessage, response);
             this.updateMetrics(true, response.processingTime);
             this.updateConversationContext(analysis);
@@ -128,7 +124,7 @@ class FinancialChatbotEngine {
             this.updateMetrics(false, performance.now() - startTime);
             
             return {
-                text: `⚠ **I encountered an error:** ${error.message}\n\nPlease try again or rephrase your question.`,
+                text: `⚠ **An error occurred:** ${error.message}\n\nPlease try again or rephrase your question.`,
                 error: true,
                 visualCards: [],
                 chartRequests: [],
@@ -138,108 +134,195 @@ class FinancialChatbotEngine {
     }
 
     // ============================================
-    // ANALYSE COMPLÈTE DU MESSAGE (AVEC COMPARAISON)
+    // ANALYSE COMPLÈTE DU MESSAGE (ULTRA-PRÉCISE)
     // ============================================
     analyzeMessage(message) {
         const lowerMessage = message.toLowerCase();
         
-        // ✅ Extraction symboles (méthodes combinées)
         const symbols = this.extractSymbols(message);
-        
-        // ✅ NOUVEAU : Détection de comparaison
         const isComparison = this.detectComparisonIntent(message);
         const comparisonSymbols = isComparison ? this.extractComparisonSymbols(message) : [];
-        
-        // ✅ Extraction timeframes
         const timeframes = this.extractTimeframes(message);
         
-        // ✅ Détection de type (multi-intent)
-        let type = 'CONVERSATIONAL'; // Par défaut
+        let type = 'CONVERSATIONAL';
         const intents = [];
+        const subIntents = []; // ✅ NOUVEAU: Sous-intents détaillés
         
-        // ✅ NOUVEAU : Priorité à la comparaison
-        if (isComparison && comparisonSymbols.length >= 2) {
-            type = 'STOCK_COMPARISON';
-            intents.push('COMPARISON');
-        }
-        
-        // Ordre de priorité dans la détection
-        if (this.detectIPOIntent(message)) {
-            type = symbols.length > 0 ? type : 'IPO_QUERY';
-            intents.push('IPO');
-        }
-        
-        if (this.detectAnalystIntent(message)) {
-            type = symbols.length > 0 && type === 'CONVERSATIONAL' ? 'ANALYST_QUERY' : type;
-            intents.push('ANALYST');
-        }
-        
-        if (this.detectEarningsIntent(message)) {
-            type = symbols.length > 0 && type === 'CONVERSATIONAL' ? 'EARNINGS_QUERY' : type;
-            intents.push('EARNINGS');
-        }
-        
-        if (this.detectSentimentIntent(message)) {
-            type = symbols.length > 0 && type === 'CONVERSATIONAL' ? 'SENTIMENT_QUERY' : type;
-            intents.push('SENTIMENT');
-        }
-        
-        if (this.detectPeersIntent(message)) {
-            type = symbols.length > 0 && type === 'CONVERSATIONAL' ? 'PEERS_QUERY' : type;
-            intents.push('PEERS');
-        }
-        
+        // ✅ PRIORITÉ 1: Market News
         if (this.detectMarketNewsIntent(message)) {
-            type = type === 'CONVERSATIONAL' ? 'MARKET_NEWS_QUERY' : type;
+            type = 'MARKET_NEWS_QUERY';
             intents.push('MARKET_NEWS');
         }
         
-        if (this.detectEarningsCalendarIntent(message)) {
-            type = type === 'CONVERSATIONAL' ? 'EARNINGS_CALENDAR_QUERY' : type;
-            intents.push('EARNINGS_CALENDAR');
+        // ✅ PRIORITÉ 2: Comparison (avec détection des sous-intents)
+        else if (isComparison && comparisonSymbols.length >= 2) {
+            type = 'STOCK_COMPARISON';
+            intents.push('COMPARISON');
+            
+            // ✅ DÉTECTION DES SOUS-INTENTS DE COMPARAISON
+            if (/\b(correlation|correlate|relationship|how related|move together)\b/i.test(lowerMessage)) {
+                subIntents.push('CORRELATION_FOCUS');
+                console.log('🎯 Sub-intent: CORRELATION FOCUS');
+            }
+            
+            if (/\b(risk.?adjusted|sharpe|sortino|alpha|beta|risk return|risk.?reward)\b/i.test(lowerMessage)) {
+                subIntents.push('RISK_ADJUSTED_FOCUS');
+                console.log('🎯 Sub-intent: RISK-ADJUSTED RETURNS FOCUS');
+            }
+            
+            if (/\b(volatility|volatile|drawdown|risk|safer|riskier)\b/i.test(lowerMessage)) {
+                subIntents.push('VOLATILITY_FOCUS');
+                console.log('🎯 Sub-intent: VOLATILITY FOCUS');
+            }
+            
+            if (/\b(valuation|value|expensive|cheap|overvalued|undervalued|p\/e|price.?to.?earnings)\b/i.test(lowerMessage)) {
+                subIntents.push('VALUATION_FOCUS');
+                console.log('🎯 Sub-intent: VALUATION FOCUS');
+            }
+            
+            if (/\b(growth|revenue|earnings|profit|margin|fundamental)\b/i.test(lowerMessage)) {
+                subIntents.push('FUNDAMENTALS_FOCUS');
+                console.log('🎯 Sub-intent: FUNDAMENTALS FOCUS');
+            }
+            
+            if (/\b(performance|return|gain|winner|loser|outperform)\b/i.test(lowerMessage)) {
+                subIntents.push('PERFORMANCE_FOCUS');
+                console.log('🎯 Sub-intent: PERFORMANCE FOCUS');
+            }
+            
+            // Par défaut, si aucun sous-intent, c'est une comparaison générale
+            if (subIntents.length === 0) {
+                subIntents.push('GENERAL_COMPARISON');
+            }
         }
         
-        // ✅ NOUVEAU : Détection analyse historique
-        if (this.detectHistoricalIntent(message)) {
-            type = symbols.length > 0 && type === 'CONVERSATIONAL' ? 'HISTORICAL_ANALYSIS' : type;
+        // ✅ PRIORITÉ 3: Historical Analysis
+        else if (this.detectHistoricalIntent(message) && symbols.length > 0) {
+            type = 'HISTORICAL_ANALYSIS';
             intents.push('HISTORICAL');
+            
+            // Sous-intents pour historical
+            if (/\b(volatility|volatile|risk|drawdown)\b/i.test(lowerMessage)) {
+                subIntents.push('VOLATILITY_ANALYSIS');
+            }
+            
+            if (/\b(return|performance|gain|growth)\b/i.test(lowerMessage)) {
+                subIntents.push('RETURN_ANALYSIS');
+            }
+            
+            if (/\b(risk.?adjusted|sharpe|sortino)\b/i.test(lowerMessage)) {
+                subIntents.push('RISK_METRICS_ANALYSIS');
+            }
         }
         
-        if (symbols.length > 0 || /\b(stock|share|ticker|analyze|price|chart|performance)\b/i.test(message)) {
-            if (type === 'CONVERSATIONAL') {
-                type = 'STOCK_QUERY';
-            }
+        // ✅ PRIORITÉ 4: IPO
+        else if (this.detectIPOIntent(message)) {
+            type = 'IPO_QUERY';
+            intents.push('IPO');
+        }
+        
+        // ✅ PRIORITÉ 5: Educational
+        else if (this.detectEducationalIntent(message)) {
+            type = 'EDUCATIONAL_QUERY';
+            intents.push('EDUCATIONAL');
+        }
+        
+        // ✅ PRIORITÉ 6: Stock Analysis
+        else if (symbols.length > 0) {
+            type = 'STOCK_QUERY';
             intents.push('STOCK');
+            
+            // Sous-intents avancés
+            if (this.detectAdvancedAnalysisIntent(message)) {
+                intents.push('ADVANCED_ANALYSIS');
+            }
+            if (this.detectAnalystIntent(message)) {
+                intents.push('ANALYST');
+                subIntents.push('ANALYST_FOCUS');
+            }
+            if (this.detectEarningsIntent(message)) {
+                intents.push('EARNINGS');
+                subIntents.push('EARNINGS_FOCUS');
+            }
+            if (/\b(technical|chart|indicator|rsi|macd|moving average)\b/i.test(lowerMessage)) {
+                subIntents.push('TECHNICAL_FOCUS');
+            }
+            if (/\b(valuation|fundamental|p\/e|earnings|revenue)\b/i.test(lowerMessage)) {
+                subIntents.push('FUNDAMENTAL_FOCUS');
+            }
         }
         
-        if (/\b(market|indices|dow|nasdaq|s&p|sp500)\b/i.test(message)) {
-            if (type === 'CONVERSATIONAL') {
-                type = 'MARKET_QUERY';
-            }
+        // ✅ PRIORITÉ 7: Market General
+        else if (/\b(market|indices|dow|nasdaq|s&p|sp500)\b/i.test(message)) {
+            type = 'MARKET_QUERY';
             intents.push('MARKET');
         }
         
-        if (/\b(what is|explain|define|tell me about|how does)\b/i.test(message)) {
-            if (type === 'CONVERSATIONAL') {
-                type = 'EDUCATIONAL_QUERY';
-            }
-            intents.push('EDUCATIONAL');
+        // Ajouter les sous-intents supplémentaires
+        if (this.detectCorrelationIntent(message)) intents.push('CORRELATION');
+        if (this.detectFairValueIntent(message)) intents.push('FAIR_VALUE');
+        if (this.detectOptionsIntent(message)) intents.push('OPTIONS');
+        if (this.detectInsiderIntent(message)) intents.push('INSIDER');
+        if (this.detectSentimentIntent(message)) intents.push('SENTIMENT');
+        if (this.detectPeersIntent(message)) intents.push('PEERS');
+        
+        console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+        console.log('🎯 Analysis Complete:');
+        console.log('   Type:', type);
+        console.log('   Intents:', intents.join(', '));
+        if (subIntents.length > 0) {
+            console.log('   📌 Sub-Intents:', subIntents.join(', '));
         }
+        console.log('   Symbols:', symbols.join(', ') || 'None');
+        console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
         
         return {
             type,
             intents,
+            subIntents, // ✅ NOUVEAU
             symbols: isComparison ? comparisonSymbols : symbols,
             timeframes,
             isComparison,
             comparisonSymbols,
-            needsData: symbols.length > 0 || intents.length > 0 || isComparison
+            needsData: symbols.length > 0 || intents.length > 0 || isComparison || type === 'MARKET_NEWS_QUERY'
         };
     }
 
     // ============================================
-    // NOUVEAUX DÉTECTEURS D'INTENT
+    // NOUVEAUX DÉTECTEURS D'INTENT WALL STREET
     // ============================================
+    
+    detectAdvancedAnalysisIntent(message) {
+        const keywords = [
+            'sharpe', 'sortino', 'risk-adjusted', 'alpha', 'beta',
+            'volatility analysis', 'drawdown', 'var', 'value at risk',
+            'correlation', 'covariance', 'diversification'
+        ];
+        return keywords.some(keyword => message.toLowerCase().includes(keyword));
+    }
+    
+    detectCorrelationIntent(message) {
+        const keywords = ['correlation', 'correlate', 'relationship between', 'how related'];
+        return keywords.some(keyword => message.toLowerCase().includes(keyword));
+    }
+    
+    detectFairValueIntent(message) {
+        const keywords = [
+            'fair value', 'dcf', 'discounted cash flow', 'intrinsic value',
+            'valuation', 'worth', 'overvalued', 'undervalued'
+        ];
+        return keywords.some(keyword => message.toLowerCase().includes(keyword));
+    }
+    
+    detectOptionsIntent(message) {
+        const keywords = ['option', 'call', 'put', 'strike', 'greeks', 'delta', 'gamma', 'theta', 'vega'];
+        return keywords.some(keyword => message.toLowerCase().includes(keyword));
+    }
+    
+    detectInsiderIntent(message) {
+        const keywords = ['insider', 'insider trading', 'insider buy', 'insider sell', 'institutional'];
+        return keywords.some(keyword => message.toLowerCase().includes(keyword));
+    }
     
     detectComparisonIntent(message) {
         const keywords = [
@@ -260,11 +343,59 @@ class FinancialChatbotEngine {
         const messageLower = message.toLowerCase();
         return keywords.some(keyword => messageLower.includes(keyword));
     }
-    
-    detectMarketNewsIntent(message) {
-        const keywords = ['market news', 'news today', 'latest news', 'market update', 'what\'s happening', 'market sentiment', 'top news'];
+
+    // ✅ NOUVELLE MÉTHODE: Détection de questions éducatives
+    detectEducationalIntent(message) {
+        const keywords = [
+            'what is', 'explain', 'define', 'tell me about',
+            'how does', 'what does', 'meaning of', 'help me understand'
+        ];
         const messageLower = message.toLowerCase();
         return keywords.some(keyword => messageLower.includes(keyword));
+    }
+    
+    // ✅ CORRECTION: Détection Market News (plus stricte)
+    detectMarketNewsIntent(message) {
+        const strictKeywords = [
+            'what\'s happening in the market',
+            'market today',
+            'what\'s happening today',
+            'market news today',
+            'today\'s market',
+            'market update',
+            'how is the market'
+        ];
+        
+        const messageLower = message.toLowerCase();
+        
+        // Check strict matches first
+        if (strictKeywords.some(keyword => messageLower.includes(keyword))) {
+            return true;
+        }
+        
+        // Check if it's a general "what's happening" without a specific stock
+        if (/what'?s happening/i.test(message) && !/\b[A-Z]{1,5}\b/.test(message)) {
+            return true;
+        }
+        
+        return false;
+    }
+
+    // ✅ CORRECTION: Détection Historical plus stricte
+    detectHistoricalIntent(message) {
+        const keywords = [
+            'evolution', 'historical', 'history', 'performance over',
+            'last 5 years', 'past years', 'over the years', 'trend over',
+            'since', 'how has', 'performed in', 'over time'
+        ];
+        
+        const messageLower = message.toLowerCase();
+        
+        // Must contain a historical keyword + a timeframe indicator
+        const hasHistoricalKeyword = keywords.some(keyword => messageLower.includes(keyword));
+        const hasTimeframe = /\d+\s*(year|month|day|week)|ytd|max/i.test(messageLower);
+        
+        return hasHistoricalKeyword || hasTimeframe;
     }
 
     detectIPOIntent(message) {
@@ -304,19 +435,17 @@ class FinancialChatbotEngine {
     }
 
     // ============================================
-    // EXTRACTION SYMBOLES AMÉLIORÉE
+    // EXTRACTION SYMBOLES
     // ============================================
     
     extractSymbols(message) {
         const symbols = new Set();
         
-        // Méthode 1: Symboles UPPERCASE
         const upperRegex = /\b[A-Z]{1,5}\b/g;
         const upperSymbols = message.match(upperRegex) || [];
-        const excludeWords = ['IPO', 'USA', 'CEO', 'CFO', 'AI', 'THE', 'AND', 'FOR', 'NOT', 'ETF', 'API', 'FAQ', 'EPS', 'ROE', 'ROA', 'TTM'];
+        const excludeWords = ['IPO', 'USA', 'CEO', 'CFO', 'AI', 'THE', 'AND', 'FOR', 'NOT', 'ETF', 'API', 'FAQ', 'EPS', 'ROE', 'ROA', 'TTM', 'DCF', 'VAR'];
         upperSymbols.filter(s => !excludeWords.includes(s)).forEach(s => symbols.add(s));
         
-        // Méthode 2: Symboles connus (lowercase aussi)
         const knownStocks = [
             'NVDA', 'AAPL', 'MSFT', 'GOOGL', 'GOOG', 'AMZN', 'TSLA', 'META', 'NFLX',
             'AMD', 'INTC', 'QCOM', 'AVGO', 'TXN', 'MU',
@@ -334,7 +463,6 @@ class FinancialChatbotEngine {
             }
         });
         
-        // Méthode 3: Noms de sociétés
         const companyMapping = this.getCompanySymbolMapping();
         for (const [companyName, symbol] of Object.entries(companyMapping)) {
             if (new RegExp(`\\b${companyName}\\b`, 'i').test(lowerMessage)) {
@@ -342,25 +470,20 @@ class FinancialChatbotEngine {
             }
         }
         
-        // Utiliser le dernier symbole du contexte si aucun trouvé
         if (symbols.size === 0 && this.conversationContext.lastSymbol) {
             symbols.add(this.conversationContext.lastSymbol);
-            console.log(`   🔄 Using context symbol: ${this.conversationContext.lastSymbol}`);
         }
         
         return Array.from(symbols);
     }
     
-    // ✅ NOUVEAU : Extraction symboles pour comparaison
     extractComparisonSymbols(message) {
         const symbols = this.extractSymbols(message);
         
-        // Si on a déjà 2+ symboles, c'est bon
         if (symbols.length >= 2) {
-            return symbols.slice(0, 4); // Max 4 symboles pour comparaison
+            return symbols.slice(0, 4);
         }
         
-        // Sinon, chercher des patterns spécifiques
         const patterns = [
             /compare\s+([A-Z]{1,5})\s+(?:with|vs|versus|and|to)\s+([A-Z]{1,5})/i,
             /([A-Z]{1,5})\s+(?:vs|versus)\s+([A-Z]{1,5})/i,
@@ -399,7 +522,6 @@ class FinancialChatbotEngine {
             }
         }
 
-        // Défaut si pas trouvé
         if (found.length === 0 && /\b(evolution|historical|history|performance|trend)\b/i.test(message)) {
             found.push(this.conversationContext.lastTimeframe || '1y');
         }
@@ -408,7 +530,7 @@ class FinancialChatbotEngine {
     }
 
     // ============================================
-    // CONSTRUCTION DE CONTEXTE ULTRA-COMPLET
+    // CONSTRUCTION DE CONTEXTE ULTRA-COMPLET (CORRIGÉ)
     // ============================================
     
     async buildSmartContext(message, analysis) {
@@ -426,252 +548,440 @@ class FinancialChatbotEngine {
             }
         };
 
-        // ✅ Si pas besoin de données
-        if (!analysis.needsData) {
-            console.log('   ⚡ No market data needed - conversational query');
-            return context;
-        }
-
-        // ✅ NOUVEAU : COMPARAISON MULTI-STOCKS
-        if (analysis.isComparison && analysis.comparisonSymbols.length >= 2) {
-            console.log(`\n⚖ ═══ LOADING COMPARISON DATA ═══`);
-            context.comparisonData = await this.loadComparisonData(analysis.comparisonSymbols, analysis.timeframes[0]);
-            console.log(`═══════════════════════════════════════════\n`);
-            return context;
-        }
-
-        const symbol = analysis.symbols[0];
-        
-        if (!symbol && !analysis.intents.includes('MARKET_NEWS') && !analysis.intents.includes('IPO') && !analysis.intents.includes('EARNINGS_CALENDAR')) {
-            console.log('   ⚠ No symbol detected and no global query');
-            return context;
-        }
-
-        // ============================================
-        // CHARGEMENT DONNÉES COMPLÈTES (SI SYMBOLE)
-        // ============================================
-        
-        if (symbol) {
-            console.log(`\n📊 ═══ LOADING COMPREHENSIVE DATA FOR ${symbol} ═══`);
+        // ✅ CORRECTION 1: Market News en PRIORITÉ (avant needsData check)
+        if (analysis.type === 'MARKET_NEWS_QUERY') {
+            console.log('📰 Loading MARKET NEWS data...');
             
             try {
-                // ✅ PARALLÈLE : Charger TOUTES les données disponibles
-                const [
-                    stockData,
-                    recommendations,
-                    priceTarget,
-                    earnings,
-                    revenueEstimates,
-                    epsEstimates,
-                    peers,
-                    companyNews,
-                    sentiment,
-                    upgradesDowngrades
-                ] = await Promise.all([
-                    this.analytics.getStockData(symbol).catch(() => null),
-                    this.analytics.getRecommendationTrends(symbol).catch(() => null),
-                    this.analytics.getPriceTarget(symbol).catch(() => null),
-                    this.analytics.getEarnings(symbol).catch(() => null),
-                    this.analytics.getRevenueEstimates(symbol, 'quarterly').catch(() => null),
-                    this.analytics.getEPSEstimates(symbol, 'quarterly').catch(() => null),
-                    this.analytics.getPeers(symbol).catch(() => []),
-                    this.analytics.getCompanyNews(symbol).catch(() => []),
-                    this.analytics.analyzeNewsImpact(symbol).catch(() => null),
-                    this.analytics.getUpgradeDowngrade(symbol).catch(() => [])
-                ]);
-
-                // ✅ 1. STOCK DATA (Quote + Profile + Metrics)
-                if (stockData) {
-                    context.stockData = stockData;
-                    console.log(`   ✅ Stock Data: $${stockData.quote.current} (${stockData.quote.changePercent}%)`);
-                }
-                
-                // ✅ 2. ANALYST RECOMMENDATIONS
-                if (recommendations && recommendations.length > 0) {
-                    const latest = recommendations[0];
-                    const total = latest.strongBuy + latest.buy + latest.hold + latest.sell + latest.strongSell;
-                    const bullishPercent = total > 0 ? ((latest.strongBuy + latest.buy) / total * 100).toFixed(1) : 0;
-                    
-                    context.analystRecommendations = {
-                        period: latest.period,
-                        strongBuy: latest.strongBuy,
-                        buy: latest.buy,
-                        hold: latest.hold,
-                        sell: latest.sell,
-                        strongSell: latest.strongSell,
-                        total: total,
-                        bullishPercent: bullishPercent,
-                        consensus: this.getConsensusRating(latest),
-                        history: recommendations.slice(0, 4)
-                    };
-                    console.log(`   ✅ Analyst Recommendations: ${context.analystRecommendations.consensus} (${bullishPercent}% bullish)`);
-                }
-                
-                // ✅ 3. PRICE TARGET
-                if (priceTarget && priceTarget.targetMean) {
-                    const currentPrice = stockData?.quote?.current || 0;
-                    const upside = currentPrice > 0 ? ((priceTarget.targetMean - currentPrice) / currentPrice * 100).toFixed(1) : 0;
-                    
-                    context.priceTarget = {
-                        current: currentPrice,
-                        targetMean: priceTarget.targetMean,
-                        targetHigh: priceTarget.targetHigh,
-                        targetLow: priceTarget.targetLow,
-                        targetMedian: priceTarget.targetMedian,
-                        upside: upside,
-                        lastUpdated: priceTarget.lastUpdated
-                    };
-                    console.log(`   ✅ Price Target: $${priceTarget.targetMean} (${upside}% upside)`);
-                }
-                
-                // ✅ 4. EARNINGS HISTORY
-                if (earnings && earnings.length > 0) {
-                    const recentEarnings = earnings.slice(0, 8);
-                    let beatCount = 0;
-                    let missCount = 0;
-                    
-                    recentEarnings.forEach(e => {
-                        if (e.surprise && e.surprise > 0) beatCount++;
-                        if (e.surprise && e.surprise < 0) missCount++;
-                    });
-                    
-                    context.earningsHistory = {
-                        recent: recentEarnings,
-                        beatCount: beatCount,
-                        missCount: missCount,
-                        beatRate: recentEarnings.length > 0 ? ((beatCount / recentEarnings.length) * 100).toFixed(1) : 0,
-                        totalReports: earnings.length
-                    };
-                    console.log(`   ✅ Earnings: ${beatCount} beats, ${missCount} misses (${context.earningsHistory.beatRate}% beat rate)`);
-                }
-                
-                // ✅ 5. REVENUE ESTIMATES
-                if (revenueEstimates && revenueEstimates.length > 0) {
-                    context.revenueEstimates = revenueEstimates.slice(0, 4);
-                    console.log(`   ✅ Revenue Estimates: ${revenueEstimates.length} periods`);
-                }
-                
-                // ✅ 6. EPS ESTIMATES
-                if (epsEstimates && epsEstimates.length > 0) {
-                    context.epsEstimates = epsEstimates.slice(0, 4);
-                    console.log(`   ✅ EPS Estimates: ${epsEstimates.length} periods`);
-                }
-                
-                // ✅ 7. PEERS
-                if (peers && peers.length > 0) {
-                    context.peers = peers.slice(0, 10);
-                    console.log(`   ✅ Peers: ${context.peers.join(', ')}`);
-                }
-                
-                // ✅ 8. COMPANY NEWS
-                if (companyNews && companyNews.length > 0) {
-                    context.recentNews = companyNews.slice(0, 10).map(n => ({
-                        headline: n.headline,
-                        source: n.source,
-                        datetime: n.datetime,
-                        url: n.url
-                    }));
-                    console.log(`   ✅ Company News: ${companyNews.length} articles`);
-                }
-                
-                // ✅ 9. NEWS SENTIMENT
-                if (sentiment) {
-                    context.sentiment = sentiment;
-                    console.log(`   ✅ Sentiment: ${sentiment.overallSentiment.label} (${sentiment.overallSentiment.sentiment.toFixed(3)})`);
-                }
-                
-                // ✅ 10. UPGRADES/DOWNGRADES
-                if (upgradesDowngrades && upgradesDowngrades.length > 0) {
-                    context.upgradesDowngrades = upgradesDowngrades.slice(0, 10);
-                    console.log(`   ✅ Upgrades/Downgrades: ${upgradesDowngrades.length} changes`);
-                }
-
-                // ✅ 11. DONNÉES HISTORIQUES (si pertinent)
-                const needsHistory = analysis.intents.includes('HISTORICAL') || 
-                                     /\b(history|historical|evolution|performance|trend|chart|volatility|return)\b/i.test(message);
-                
-                if (needsHistory && this.analytics) {
-                    const timeframe = analysis.timeframes[0] || this.conversationContext.lastTimeframe || '1y';
-                    const outputsize = this.getOutputSize(timeframe);
-                    
-                    console.log(`   📅 Loading ${timeframe} history...`);
-                    
-                    const timeSeries = await this.analytics.getTimeSeries(symbol, '1day', outputsize);
-                    
-                    if (timeSeries && timeSeries.data && timeSeries.data.length > 0) {
-                        context.timeSeriesData = timeSeries;
-                        context.historicalStats = this.calculateHistoricalStats(timeSeries);
-                        context.technicalIndicators = this.calculateTechnicalIndicators(timeSeries);
-                        
-                        console.log(`   ✅ History: ${timeSeries.data.length} points | Return: ${context.historicalStats.totalReturn}%`);
-                    }
-                }
-
-            } catch (error) {
-                console.error('   ❌ Error loading comprehensive data:', error);
-            }
-            
-            console.log(`═══════════════════════════════════════════\n`);
-        }
-
-        // ============================================
-        // DONNÉES GLOBALES (SANS SYMBOLE)
-        // ============================================
-        
-        // ✅ MARKET NEWS
-        if (analysis.intents.includes('MARKET_NEWS')) {
-            try {
-                const marketNews = await this.analytics.getMarketNews('general');
+                // Charger les news du marché
+                const marketNews = await this.analytics.getMarketNews('general').catch(() => []);
                 if (marketNews && marketNews.length > 0) {
                     context.marketNews = marketNews.slice(0, 15);
-                    console.log(`   ✅ Market News: ${marketNews.length} articles`);
+                    console.log(`✅ Loaded ${context.marketNews.length} market news articles`);
                 }
+                
+                // Charger les données des indices majeurs
+                const [sp500, nasdaq, dow] = await Promise.all([
+                    this.analytics.getStockData('SPY').catch(() => null),
+                    this.analytics.getStockData('QQQ').catch(() => null),
+                    this.analytics.getStockData('DIA').catch(() => null)
+                ]);
+                
+                context.marketData = {};
+                if (sp500) {
+                    context.marketData.sp500 = {
+                        price: sp500.quote.current,
+                        changePercent: sp500.quote.changePercent
+                    };
+                }
+                if (nasdaq) {
+                    context.marketData.nasdaq = {
+                        price: nasdaq.quote.current,
+                        changePercent: nasdaq.quote.changePercent
+                    };
+                }
+                if (dow) {
+                    context.marketData.dow = {
+                        price: dow.quote.current,
+                        changePercent: dow.quote.changePercent
+                    };
+                }
+                
+                console.log('✅ Market indices loaded');
+                
             } catch (error) {
-                console.error('   ⚠ Error fetching market news:', error);
+                console.error('❌ Error loading market news data:', error);
             }
+            
+            // ✅ IMPORTANT: Return early pour Market News
+            return context;
         }
 
-        // ✅ IPO CALENDAR
-        if (analysis.intents.includes('IPO')) {
+        // ✅ CORRECTION 2: Educational Questions (pas besoin de data)
+        if (analysis.type === 'EDUCATIONAL_QUERY') {
+            console.log('📚 Educational question detected - no market data needed');
+            return context;
+        }
+
+        // ✅ CORRECTION 3: IPO Questions
+        if (analysis.type === 'IPO_QUERY') {
+            console.log('💰 Loading IPO data...');
+            
             try {
-                const ipos = await this.analytics.getIPOCalendar();
+                const ipos = await this.analytics.getIPOCalendar().catch(() => []);
                 if (ipos && ipos.length > 0) {
                     context.upcomingIPOs = ipos.slice(0, 20);
-                    console.log(`   ✅ Upcoming IPOs: ${ipos.length}`);
+                    console.log(`✅ Loaded ${context.upcomingIPOs.length} upcoming IPOs`);
                 }
             } catch (error) {
-                console.error('   ⚠ Error fetching IPO calendar:', error);
+                console.error('❌ Error fetching IPO calendar:', error);
             }
+            
+            return context;
         }
 
-        // ✅ EARNINGS CALENDAR
-        if (analysis.intents.includes('EARNINGS_CALENDAR')) {
-            try {
-                const earnings = await this.analytics.getEarningsCalendar();
-                if (earnings && earnings.length > 0) {
-                    context.upcomingEarnings = earnings.slice(0, 30);
-                    console.log(`   ✅ Upcoming Earnings: ${earnings.length} events`);
+        // ✅ Pour les autres types, vérifier si on a besoin de données
+        if (!analysis.needsData) {
+            console.log('ℹ No market data needed for this query');
+            return context;
+        }
+
+        // ✅ CORRECTION 4: Comparison Data
+        if (analysis.isComparison && analysis.comparisonSymbols.length >= 2) {
+            console.log(`⚖ Loading comparison data for: ${analysis.comparisonSymbols.join(' vs ')}`);
+            context.comparisonData = await this.loadComparisonData(analysis.comparisonSymbols, analysis.timeframes[0]);
+            
+            // Calculate correlation
+            if (context.comparisonData.timeSeries && context.comparisonData.timeSeries.length >= 2) {
+                context.correlationAnalysis = this.calculateCorrelation(context.comparisonData.timeSeries);
+                console.log(`✅ Correlation: ${context.correlationAnalysis.correlation}`);
+            }
+            
+            return context;
+        }
+
+        // ✅ CORRECTION 5: Single Stock Analysis
+        const symbol = analysis.symbols[0];
+        
+        if (!symbol) {
+            console.log('⚠ No symbol detected');
+            return context;
+        }
+
+        console.log(`📊 Loading comprehensive data for ${symbol}...`);
+        
+        try {
+            // ✅ Charger les données de base (toujours)
+            const [
+                stockData,
+                recommendations,
+                priceTarget,
+                earnings
+            ] = await Promise.all([
+                this.analytics.getStockData(symbol).catch(() => null),
+                this.analytics.getRecommendationTrends(symbol).catch(() => null),
+                this.analytics.getPriceTarget(symbol).catch(() => null),
+                this.analytics.getEarnings(symbol).catch(() => null)
+            ]);
+
+            if (stockData) {
+                context.stockData = stockData;
+                console.log(`✅ Stock data loaded: $${stockData.quote.current}`);
+            }
+            
+            // Analyst Recommendations
+            if (recommendations && recommendations.length > 0) {
+                const latest = recommendations[0];
+                const total = latest.strongBuy + latest.buy + latest.hold + latest.sell + latest.strongSell;
+                const bullishPercent = total > 0 ? ((latest.strongBuy + latest.buy) / total * 100).toFixed(1) : 0;
+                
+                context.analystRecommendations = {
+                    period: latest.period,
+                    strongBuy: latest.strongBuy,
+                    buy: latest.buy,
+                    hold: latest.hold,
+                    sell: latest.sell,
+                    strongSell: latest.strongSell,
+                    total: total,
+                    bullishPercent: bullishPercent,
+                    consensus: this.getConsensusRating(latest),
+                    history: recommendations.slice(0, 4)
+                };
+                console.log(`✅ Analyst consensus: ${context.analystRecommendations.consensus}`);
+            }
+            
+            // Price Target
+            if (priceTarget && priceTarget.targetMean) {
+                const currentPrice = stockData?.quote?.current || 0;
+                const upside = currentPrice > 0 ? ((priceTarget.targetMean - currentPrice) / currentPrice * 100).toFixed(1) : 0;
+                
+                context.priceTarget = {
+                    current: currentPrice,
+                    targetMean: priceTarget.targetMean,
+                    targetHigh: priceTarget.targetHigh,
+                    targetLow: priceTarget.targetLow,
+                    targetMedian: priceTarget.targetMedian,
+                    upside: upside,
+                    lastUpdated: priceTarget.lastUpdated
+                };
+                console.log(`✅ Price target: $${priceTarget.targetMean} (${upside}% upside)`);
+            }
+            
+            // Earnings History
+            if (earnings && earnings.length > 0) {
+                const recentEarnings = earnings.slice(0, 8);
+                let beatCount = 0;
+                let missCount = 0;
+                
+                recentEarnings.forEach(e => {
+                    if (e.surprise && e.surprise > 0) beatCount++;
+                    if (e.surprise && e.surprise < 0) missCount++;
+                });
+                
+                context.earningsHistory = {
+                    recent: recentEarnings,
+                    beatCount: beatCount,
+                    missCount: missCount,
+                    beatRate: recentEarnings.length > 0 ? ((beatCount / recentEarnings.length) * 100).toFixed(1) : 0,
+                    totalReports: earnings.length,
+                    earningsQuality: this.calculateEarningsQuality(recentEarnings)
+                };
+                console.log(`✅ Earnings: ${context.earningsHistory.beatRate}% beat rate`);
+            }
+
+            // ✅ CORRECTION 6: Historical Data (seulement si nécessaire)
+            const needsHistory = analysis.type === 'HISTORICAL_ANALYSIS' || 
+                                 analysis.intents.includes('HISTORICAL') || 
+                                 analysis.intents.includes('ADVANCED_ANALYSIS') ||
+                                 /\b(history|historical|evolution|performance|trend|chart|volatility|return)\b/i.test(message);
+            
+            if (needsHistory && this.analytics) {
+                console.log('📈 Loading historical time series...');
+                const timeframe = analysis.timeframes[0] || this.conversationContext.lastTimeframe || '1y';
+                const outputsize = this.getOutputSize(timeframe);
+                
+                const timeSeries = await this.analytics.getTimeSeries(symbol, '1day', outputsize).catch(() => null);
+                
+                if (timeSeries && timeSeries.data && timeSeries.data.length > 0) {
+                    context.timeSeriesData = timeSeries;
+                    context.historicalStats = this.calculateHistoricalStats(timeSeries);
+                    context.technicalIndicators = this.calculateTechnicalIndicators(timeSeries);
+                    
+                    // Advanced Wall Street metrics
+                    context.advancedMetrics = this.calculateAdvancedMetrics(timeSeries, stockData);
+                    context.riskMetrics = this.calculateRiskMetrics(timeSeries);
+                    
+                    console.log(`✅ Historical data: ${timeSeries.data.length} points, ${context.historicalStats.totalReturn}% return`);
+                } else {
+                    console.log('⚠ No historical data available');
                 }
-            } catch (error) {
-                console.error('   ⚠ Error fetching earnings calendar:', error);
             }
+
+            // ✅ Charger données supplémentaires en parallèle (optionnel)
+            const [
+                revenueEstimates,
+                epsEstimates,
+                peers,
+                companyNews,
+                sentiment,
+                upgradesDowngrades
+            ] = await Promise.all([
+                this.analytics.getRevenueEstimates(symbol, 'quarterly').catch(() => null),
+                this.analytics.getEPSEstimates(symbol, 'quarterly').catch(() => null),
+                this.analytics.getPeers(symbol).catch(() => []),
+                this.analytics.getCompanyNews(symbol).catch(() => []),
+                this.analytics.analyzeNewsImpact(symbol).catch(() => null),
+                this.analytics.getUpgradeDowngrade(symbol).catch(() => [])
+            ]);
+            
+            if (revenueEstimates && revenueEstimates.length > 0) {
+                context.revenueEstimates = revenueEstimates.slice(0, 4);
+            }
+            
+            if (epsEstimates && epsEstimates.length > 0) {
+                context.epsEstimates = epsEstimates.slice(0, 4);
+            }
+            
+            if (peers && peers.length > 0) {
+                context.peers = peers.slice(0, 10);
+            }
+            
+            if (companyNews && companyNews.length > 0) {
+                context.recentNews = companyNews.slice(0, 10).map(n => ({
+                    headline: n.headline,
+                    source: n.source,
+                    datetime: n.datetime,
+                    url: n.url
+                }));
+            }
+            
+            if (sentiment) {
+                context.sentiment = sentiment;
+            }
+            
+            if (upgradesDowngrades && upgradesDowngrades.length > 0) {
+                context.upgradesDowngrades = upgradesDowngrades.slice(0, 10);
+            }
+
+        } catch (error) {
+            console.error('❌ Error loading stock data:', error);
         }
 
-        // ✅ MARKET OVERVIEW
-        if (analysis.type === 'MARKET_QUERY' && this.analytics) {
-            try {
-                context.marketData = await this.analytics.getMarketOverview();
-                console.log(`   ✅ Market Overview loaded`);
-            } catch (error) {
-                console.error('   ⚠ Error fetching market overview:', error);
-            }
-        }
-
+        console.log('✅ Context built successfully');
         return context;
     }
     
     // ============================================
-    // ✅ NOUVEAU : CHARGEMENT DONNÉES DE COMPARAISON
+    // WALL STREET ADVANCED METRICS
+    // ============================================
+    
+    calculateAdvancedMetrics(timeSeriesData, stockData) {
+        const prices = timeSeriesData.data.map(d => d.close);
+        
+        const returns = [];
+        for (let i = 1; i < prices.length; i++) {
+            returns.push((prices[i] - prices[i-1]) / prices[i-1]);
+        }
+        
+        // Sharpe Ratio
+        const riskFreeRate = 0.02;
+        const avgReturn = returns.reduce((a, b) => a + b, 0) / returns.length;
+        const annualizedReturn = avgReturn * 252;
+        const stdDev = this.calculateStdDev(returns);
+        const annualizedStdDev = stdDev * Math.sqrt(252);
+        const excessReturn = annualizedReturn - riskFreeRate;
+        const sharpeRatio = annualizedStdDev !== 0 ? (excessReturn / annualizedStdDev).toFixed(3) : 'N/A';
+        
+        // Sortino Ratio
+        const downsideReturns = returns.filter(r => r < 0);
+        const downsideDeviation = downsideReturns.length > 0 ? 
+            Math.sqrt(downsideReturns.reduce((sum, r) => sum + r * r, 0) / downsideReturns.length) * Math.sqrt(252) : 0;
+        const sortinoRatio = downsideDeviation !== 0 ? (excessReturn / downsideDeviation).toFixed(3) : 'N/A';
+        
+        // Calmar Ratio
+        const maxDrawdown = this.calculateMaxDrawdown(prices);
+        const calmarRatio = maxDrawdown !== 0 ? (annualizedReturn / (maxDrawdown / 100)).toFixed(3) : 'N/A';
+        
+        // Information Ratio
+        const informationRatio = sharpeRatio;
+        
+        // Treynor Ratio
+        const beta = stockData?.metrics?.beta || 1;
+        const treynorRatio = beta !== 0 ? (excessReturn / beta).toFixed(3) : 'N/A';
+        
+        return {
+            sharpeRatio,
+            sortinoRatio,
+            calmarRatio,
+            informationRatio,
+            treynorRatio,
+            alpha: this.calculateAlpha(annualizedReturn, beta),
+            beta: beta
+        };
+    }
+    
+    calculateRiskMetrics(timeSeriesData) {
+        const prices = timeSeriesData.data.map(d => d.close);
+        const returns = [];
+        for (let i = 1; i < prices.length; i++) {
+            returns.push((prices[i] - prices[i-1]) / prices[i-1]);
+        }
+        
+        // Value at Risk (VaR) - 95% confidence
+        const sortedReturns = [...returns].sort((a, b) => a - b);
+        const varIndex = Math.floor(returns.length * 0.05);
+        const var95 = sortedReturns[varIndex];
+        const varPercentage = (var95 * 100).toFixed(2);
+        
+        // Conditional VaR (CVaR)
+        const cvarReturns = sortedReturns.slice(0, varIndex);
+        const cvar = cvarReturns.length > 0 ? 
+            (cvarReturns.reduce((a, b) => a + b, 0) / cvarReturns.length * 100).toFixed(2) : 'N/A';
+        
+        // Skewness
+        const mean = returns.reduce((a, b) => a + b, 0) / returns.length;
+        const stdDev = this.calculateStdDev(returns);
+        const skewness = returns.length > 0 && stdDev !== 0 ? 
+            (returns.reduce((sum, r) => sum + Math.pow((r - mean) / stdDev, 3), 0) / returns.length).toFixed(3) : 'N/A';
+        
+        // Kurtosis
+        const kurtosis = returns.length > 0 && stdDev !== 0 ? 
+            (returns.reduce((sum, r) => sum + Math.pow((r - mean) / stdDev, 4), 0) / returns.length - 3).toFixed(3) : 'N/A';
+        
+        return {
+            var95: varPercentage,
+            cvar95: cvar,
+            skewness,
+            kurtosis,
+            tailRisk: parseFloat(kurtosis) > 0 ? 'High' : 'Normal'
+        };
+    }
+    
+    calculateAlpha(annualizedReturn, beta, riskFreeRate = 0.02, marketReturn = 0.10) {
+        const expectedReturn = riskFreeRate + beta * (marketReturn - riskFreeRate);
+        const alpha = ((annualizedReturn - expectedReturn) * 100).toFixed(2);
+        return alpha;
+    }
+    
+    calculateEarningsQuality(earnings) {
+        if (!earnings || earnings.length === 0) return 'N/A';
+        
+        let qualityScore = 0;
+        let totalSurprises = 0;
+        
+        earnings.forEach(e => {
+            if (e.surprisePercent) {
+                totalSurprises += Math.abs(e.surprisePercent);
+                if (e.surprisePercent > 0) qualityScore += 10;
+                if (e.surprisePercent > 5) qualityScore += 5;
+                if (e.surprisePercent < -5) qualityScore -= 10;
+            }
+        });
+        
+        const avgSurprise = totalSurprises / earnings.length;
+        const consistency = avgSurprise < 5 ? 20 : avgSurprise < 10 ? 10 : 0;
+        
+        qualityScore += consistency;
+        
+        if (qualityScore >= 60) return 'Excellent';
+        if (qualityScore >= 40) return 'Good';
+        if (qualityScore >= 20) return 'Average';
+        return 'Poor';
+    }
+    
+    calculateCorrelation(timeSeriesArray) {
+        if (timeSeriesArray.length < 2) return null;
+        
+        const series1 = timeSeriesArray[0].data.map(d => d.close);
+        const series2 = timeSeriesArray[1].data.map(d => d.close);
+        
+        const minLength = Math.min(series1.length, series2.length);
+        const data1 = series1.slice(-minLength);
+        const data2 = series2.slice(-minLength);
+        
+        const returns1 = [];
+        const returns2 = [];
+        
+        for (let i = 1; i < minLength; i++) {
+            returns1.push((data1[i] - data1[i-1]) / data1[i-1]);
+            returns2.push((data2[i] - data2[i-1]) / data2[i-1]);
+        }
+        
+        const mean1 = returns1.reduce((a, b) => a + b, 0) / returns1.length;
+        const mean2 = returns2.reduce((a, b) => a + b, 0) / returns2.length;
+        
+        let numerator = 0;
+        let sum1Sq = 0;
+        let sum2Sq = 0;
+        
+        for (let i = 0; i < returns1.length; i++) {
+            const diff1 = returns1[i] - mean1;
+            const diff2 = returns2[i] - mean2;
+            numerator += diff1 * diff2;
+            sum1Sq += diff1 * diff1;
+            sum2Sq += diff2 * diff2;
+        }
+        
+        const correlation = numerator / Math.sqrt(sum1Sq * sum2Sq);
+        
+        return {
+            correlation: correlation.toFixed(3),
+            interpretation: this.interpretCorrelation(correlation),
+            diversificationBenefit: Math.abs(correlation) < 0.7 ? 'High' : Math.abs(correlation) < 0.9 ? 'Moderate' : 'Low'
+        };
+    }
+    
+    interpretCorrelation(corr) {
+        const abs = Math.abs(corr);
+        if (abs >= 0.9) return 'Very Strong';
+        if (abs >= 0.7) return 'Strong';
+        if (abs >= 0.5) return 'Moderate';
+        if (abs >= 0.3) return 'Weak';
+        return 'Very Weak';
+    }
+
+    // ============================================
+    // CHARGEMENT DONNÉES DE COMPARAISON
     // ============================================
     
     async loadComparisonData(symbols, timeframe = '1y') {
@@ -683,7 +993,6 @@ class FinancialChatbotEngine {
         };
         
         try {
-            // Charger données pour chaque symbole en parallèle
             const promises = symbols.map(async symbol => {
                 const [stockData, timeSeries] = await Promise.all([
                     this.analytics.getStockData(symbol).catch(() => null),
@@ -701,7 +1010,6 @@ class FinancialChatbotEngine {
                         symbol: result.symbol,
                         ...result.stockData
                     });
-                    console.log(`   ✅ ${result.symbol}: $${result.stockData.quote.current} (${result.stockData.quote.changePercent}%)`);
                 }
                 
                 if (result.timeSeries) {
@@ -712,19 +1020,14 @@ class FinancialChatbotEngine {
                 }
             });
             
-            // Construire tableau comparatif des métriques clés
             comparisonData.keyMetricsComparison = this.buildMetricsComparisonTable(comparisonData.stocksData);
             
         } catch (error) {
-            console.error('   ❌ Error loading comparison data:', error);
+            console.error('Error loading comparison data:', error);
         }
         
         return comparisonData;
     }
-    
-    // ============================================
-    // ✅ NOUVEAU : TABLEAU COMPARATIF DES MÉTRIQUES
-    // ============================================
     
     buildMetricsComparisonTable(stocksData) {
         if (!stocksData || stocksData.length === 0) return null;
@@ -765,21 +1068,16 @@ class FinancialChatbotEngine {
     }
 
     // ============================================
-    // CONSTRUCTION PROMPT ENRICHI POUR GEMINI
+    // CONSTRUCTION PROMPT ENRICHI
     // ============================================
     
     buildEnhancedPrompt(message, context, analysis) {
         let prompt = `You are Alphy, an expert AI financial analyst with access to comprehensive real-time data. Answer this question professionally and concisely:\n\n**User Question:** "${message}"\n\n`;
 
-        // ✅ NOUVEAU : MODE COMPARAISON
         if (context.comparisonData && context.comparisonData.stocksData.length >= 2) {
-            prompt += this.buildComparisonPrompt(context.comparisonData);
+            prompt += this.buildComparisonPrompt(context.comparisonData, context.correlationAnalysis);
             
-            // Instructions finales pour comparaison
-            prompt += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`;
-            prompt += `📝 **Your Task:**\n`;
-            prompt += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n`;
-            prompt += `Provide a **detailed side-by-side comparison** in 3-4 well-structured paragraphs:\n\n`;
+            prompt += `\n**Your Task:**\n\nProvide a **detailed side-by-side comparison** in 3-4 well-structured paragraphs:\n\n`;
             prompt += `1. **Performance Comparison**: Compare price performance, volatility, and returns\n`;
             prompt += `2. **Fundamental Analysis**: Compare valuation metrics (P/E, market cap, profitability)\n`;
             prompt += `3. **Investment Perspective**: Which stock is better for growth vs value investors?\n`;
@@ -789,12 +1087,9 @@ class FinancialChatbotEngine {
             return prompt;
         }
 
-        // ✅ DONNÉES DE BASE (Stock)
         if (context.stockData) {
             const stock = context.stockData;
-            prompt += `\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`;
-            prompt += `📊 **${stock.profile?.name || stock.symbol}** (${stock.symbol})\n`;
-            prompt += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n`;
+            prompt += `\n**${stock.profile?.name || stock.symbol}** (${stock.symbol})\n\n`;
             
             prompt += `**Current Price:** $${stock.quote.current} (${stock.quote.changePercent > 0 ? '+' : ''}${stock.quote.changePercent}%)\n`;
             prompt += `**Day Range:** $${stock.quote.low} - $${stock.quote.high}\n`;
@@ -802,69 +1097,81 @@ class FinancialChatbotEngine {
             prompt += `**Volume:** ${stock.quote.volume?.toLocaleString() || 'N/A'}\n\n`;
             
             prompt += `**Company Info:**\n`;
-            prompt += `• Industry: ${stock.profile?.industry || 'N/A'}\n`;
-            prompt += `• Market Cap: $${stock.profile?.marketCap || 'N/A'}B\n`;
-            prompt += `• Exchange: ${stock.profile?.exchange || 'N/A'}\n`;
-            prompt += `• Country: ${stock.profile?.country || 'N/A'}\n\n`;
+            prompt += `- Industry: ${stock.profile?.industry || 'N/A'}\n`;
+            prompt += `- Market Cap: $${stock.profile?.marketCap || 'N/A'}B\n`;
+            prompt += `- Exchange: ${stock.profile?.exchange || 'N/A'}\n`;
+            prompt += `- Country: ${stock.profile?.country || 'N/A'}\n\n`;
             
             if (stock.metrics) {
                 prompt += `**Key Metrics:**\n`;
-                prompt += `• P/E Ratio: ${stock.metrics.peRatio || 'N/A'}\n`;
-                prompt += `• EPS (TTM): $${stock.metrics.eps || 'N/A'}\n`;
-                prompt += `• Beta: ${stock.metrics.beta || 'N/A'}\n`;
-                prompt += `• ROE: ${stock.metrics.roe || 'N/A'}%\n`;
-                prompt += `• Profit Margin: ${stock.metrics.profitMargin || 'N/A'}%\n`;
-                prompt += `• Dividend Yield: ${stock.metrics.dividendYield || 'N/A'}%\n`;
-                prompt += `• Debt/Equity: ${stock.metrics.debtToEquity || 'N/A'}\n`;
-                prompt += `• Current Ratio: ${stock.metrics.currentRatio || 'N/A'}\n\n`;
+                prompt += `- P/E Ratio: ${stock.metrics.peRatio || 'N/A'}\n`;
+                prompt += `- EPS (TTM): $${stock.metrics.eps || 'N/A'}\n`;
+                prompt += `- Beta: ${stock.metrics.beta || 'N/A'}\n`;
+                prompt += `- ROE: ${stock.metrics.roe || 'N/A'}%\n`;
+                prompt += `- Profit Margin: ${stock.metrics.profitMargin || 'N/A'}%\n`;
+                prompt += `- Dividend Yield: ${stock.metrics.dividendYield || 'N/A'}%\n`;
+                prompt += `- Debt/Equity: ${stock.metrics.debtToEquity || 'N/A'}\n`;
+                prompt += `- Current Ratio: ${stock.metrics.currentRatio || 'N/A'}\n\n`;
             }
         }
 
-        // ✅ ANALYST RECOMMENDATIONS
+        if (context.advancedMetrics) {
+            const adv = context.advancedMetrics;
+            prompt += `\n**ADVANCED RISK-ADJUSTED METRICS:**\n\n`;
+            prompt += `- **Sharpe Ratio:** ${adv.sharpeRatio} (risk-adjusted return)\n`;
+            prompt += `- **Sortino Ratio:** ${adv.sortinoRatio} (downside risk-adjusted)\n`;
+            prompt += `- **Calmar Ratio:** ${adv.calmarRatio} (return vs max drawdown)\n`;
+            prompt += `- **Treynor Ratio:** ${adv.treynorRatio} (return per unit of systematic risk)\n`;
+            prompt += `- **Alpha:** ${adv.alpha}% (excess return vs market)\n`;
+            prompt += `- **Beta:** ${adv.beta} (systematic risk)\n\n`;
+        }
+        
+        if (context.riskMetrics) {
+            const risk = context.riskMetrics;
+            prompt += `**RISK METRICS:**\n\n`;
+            prompt += `- **Value at Risk (95%):** ${risk.var95}% (max expected loss)\n`;
+            prompt += `- **Conditional VaR:** ${risk.cvar95}% (expected shortfall)\n`;
+            prompt += `- **Skewness:** ${risk.skewness} (return distribution asymmetry)\n`;
+            prompt += `- **Kurtosis:** ${risk.kurtosis} (tail risk)\n`;
+            prompt += `- **Tail Risk Assessment:** ${risk.tailRisk}\n\n`;
+        }
+
         if (context.analystRecommendations) {
             const rec = context.analystRecommendations;
-            prompt += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`;
-            prompt += `👥 **Analyst Recommendations** (${rec.period})\n`;
-            prompt += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n`;
-            prompt += `• Strong Buy: ${rec.strongBuy} | Buy: ${rec.buy} | Hold: ${rec.hold} | Sell: ${rec.sell} | Strong Sell: ${rec.strongSell}\n`;
-            prompt += `• **Total Analysts:** ${rec.total}\n`;
-            prompt += `• **Consensus:** **${rec.consensus}** (${rec.bullishPercent}% bullish)\n\n`;
+            prompt += `\n**Analyst Recommendations** (${rec.period})\n\n`;
+            prompt += `- Strong Buy: ${rec.strongBuy} | Buy: ${rec.buy} | Hold: ${rec.hold} | Sell: ${rec.sell} | Strong Sell: ${rec.strongSell}\n`;
+            prompt += `- **Total Analysts:** ${rec.total}\n`;
+            prompt += `- **Consensus:** **${rec.consensus}** (${rec.bullishPercent}% bullish)\n\n`;
         }
 
-        // ✅ PRICE TARGET
         if (context.priceTarget) {
             const pt = context.priceTarget;
-            prompt += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`;
-            prompt += `🎯 **Analyst Price Target**\n`;
-            prompt += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n`;
-            prompt += `• Current Price: $${pt.current}\n`;
-            prompt += `• Mean Target: $${pt.targetMean} (${pt.upside > 0 ? '+' : ''}${pt.upside}% upside)\n`;
-            prompt += `• Target Range: $${pt.targetLow} - $${pt.targetHigh}\n`;
-            prompt += `• Median Target: $${pt.targetMedian || 'N/A'}\n\n`;
+            prompt += `\n**Analyst Price Target**\n\n`;
+            prompt += `- Current Price: $${pt.current}\n`;
+            prompt += `- Mean Target: $${pt.targetMean} (${pt.upside > 0 ? '+' : ''}${pt.upside}% upside)\n`;
+            prompt += `- Target Range: $${pt.targetLow} - $${pt.targetHigh}\n`;
+            prompt += `- Median Target: $${pt.targetMedian || 'N/A'}\n\n`;
         }
 
-        // ✅ EARNINGS HISTORY
         if (context.earningsHistory) {
             const earnings = context.earningsHistory;
-            prompt += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`;
-            prompt += `💰 **Earnings Performance**\n`;
-            prompt += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n`;
-            prompt += `• Beat Rate: **${earnings.beatRate}%** (${earnings.beatCount} beats, ${earnings.missCount} misses in last ${earnings.recent.length} quarters)\n`;
-            prompt += `• Total Reports: ${earnings.totalReports}\n\n`;
+            prompt += `\n**Earnings Performance**\n\n`;
+            prompt += `- Beat Rate: **${earnings.beatRate}%** (${earnings.beatCount} beats, ${earnings.missCount} misses in last ${earnings.recent.length} quarters)\n`;
+            prompt += `- Total Reports: ${earnings.totalReports}\n`;
+            prompt += `- **Earnings Quality Score:** ${earnings.earningsQuality}\n\n`;
             prompt += `**Recent Results:**\n`;
             earnings.recent.slice(0, 4).forEach(e => {
-                const status = e.surprise > 0 ? '✅ Beat' : e.surprise < 0 ? '❌ Miss' : '➡ In-line';
+                const status = e.surprise > 0 ? 'Beat' : e.surprise < 0 ? 'Miss' : 'In-line';
                 const surprisePercent = e.surprisePercent ? ` (${e.surprisePercent > 0 ? '+' : ''}${e.surprisePercent}%)` : '';
-                prompt += `• ${e.period}: Actual $${e.actual || 'N/A'} vs Est. $${e.estimate || 'N/A'} - ${status}${surprisePercent}\n`;
+                prompt += `- ${e.period}: Actual $${e.actual || 'N/A'} vs Est. $${e.estimate || 'N/A'} - ${status}${surprisePercent}\n`;
             });
             prompt += `\n`;
         }
 
-        // ✅ REVENUE & EPS ESTIMATES
         if (context.revenueEstimates && context.revenueEstimates.length > 0) {
             prompt += `**Revenue Estimates (Quarterly):**\n`;
             context.revenueEstimates.slice(0, 2).forEach(est => {
-                prompt += `• ${est.period}: $${est.revenueAvg || 'N/A'}M (${est.numberAnalysts || 0} analysts)\n`;
+                prompt += `- ${est.period}: $${est.revenueAvg || 'N/A'}M (${est.numberAnalysts || 0} analysts)\n`;
             });
             prompt += `\n`;
         }
@@ -872,29 +1179,23 @@ class FinancialChatbotEngine {
         if (context.epsEstimates && context.epsEstimates.length > 0) {
             prompt += `**EPS Estimates (Quarterly):**\n`;
             context.epsEstimates.slice(0, 2).forEach(est => {
-                prompt += `• ${est.period}: $${est.epsAvg || 'N/A'} (${est.numberAnalysts || 0} analysts)\n`;
+                prompt += `- ${est.period}: $${est.epsAvg || 'N/A'} (${est.numberAnalysts || 0} analysts)\n`;
             });
             prompt += `\n`;
         }
 
-        // ✅ NEWS SENTIMENT
         if (context.sentiment) {
             const sent = context.sentiment;
-            prompt += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`;
-            prompt += `💭 **News Sentiment Analysis**\n`;
-            prompt += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n`;
-            prompt += `• Overall Sentiment: **${sent.overallSentiment.label}** (score: ${sent.overallSentiment.sentiment.toFixed(3)})\n`;
-            prompt += `• Short-Term Impact: ${sent.shortTermImpact.direction} (${sent.shortTermImpact.confidence} confidence)\n`;
-            prompt += `• Long-Term Impact: ${sent.longTermImpact.direction} (${sent.longTermImpact.confidence} confidence)\n`;
-            prompt += `• AI Recommendation: ${sent.recommendation}\n`;
-            prompt += `• News Count: ${sent.newsCount || 0}\n\n`;
+            prompt += `\n**News Sentiment Analysis**\n\n`;
+            prompt += `- Overall Sentiment: **${sent.overallSentiment.label}** (score: ${sent.overallSentiment.sentiment.toFixed(3)})\n`;
+            prompt += `- Short-Term Impact: ${sent.shortTermImpact.direction} (${sent.shortTermImpact.confidence} confidence)\n`;
+            prompt += `- Long-Term Impact: ${sent.longTermImpact.direction} (${sent.longTermImpact.confidence} confidence)\n`;
+            prompt += `- AI Recommendation: ${sent.recommendation}\n`;
+            prompt += `- News Count: ${sent.newsCount || 0}\n\n`;
         }
 
-        // ✅ RECENT NEWS
         if (context.recentNews && context.recentNews.length > 0) {
-            prompt += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`;
-            prompt += `📰 **Recent Company News** (Top 5)\n`;
-            prompt += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n`;
+            prompt += `\n**Recent Company News** (Top 5)\n\n`;
             context.recentNews.slice(0, 5).forEach((news, i) => {
                 const date = new Date(news.datetime).toLocaleDateString();
                 prompt += `${i + 1}. **${news.headline}** (${news.source}, ${date})\n`;
@@ -902,44 +1203,39 @@ class FinancialChatbotEngine {
             prompt += `\n`;
         }
 
-        // ✅ UPGRADES/DOWNGRADES
         if (context.upgradesDowngrades && context.upgradesDowngrades.length > 0) {
             prompt += `**Recent Analyst Actions:**\n`;
             context.upgradesDowngrades.slice(0, 3).forEach(change => {
-                prompt += `• ${change.company || 'Analyst'}: ${change.fromGrade || 'N/A'} → ${change.toGrade || 'N/A'} (${change.action || 'N/A'})\n`;
+                prompt += `- ${change.company || 'Analyst'}: ${change.fromGrade || 'N/A'} -> ${change.toGrade || 'N/A'} (${change.action || 'N/A'})\n`;
             });
             prompt += `\n`;
         }
 
-        // ✅ PEERS
         if (context.peers && context.peers.length > 0) {
             prompt += `**Industry Peers:** ${context.peers.slice(0, 5).join(', ')}\n\n`;
         }
 
-        // ✅ TECHNICAL INDICATORS (si disponibles)
         if (context.technicalIndicators) {
             const tech = context.technicalIndicators;
-            prompt += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`;
-            prompt += `📈 **Technical Analysis**\n`;
-            prompt += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n`;
+            prompt += `\n**Technical Analysis**\n\n`;
             
             if (tech.movingAverages) {
                 prompt += `**Moving Averages:**\n`;
-                prompt += `• SMA 20: $${tech.movingAverages.sma20 || 'N/A'} (${tech.movingAverages.priceVsSMA20 > 0 ? '+' : ''}${tech.movingAverages.priceVsSMA20 || 0}%)\n`;
-                prompt += `• SMA 50: $${tech.movingAverages.sma50 || 'N/A'} (${tech.movingAverages.priceVsSMA50 > 0 ? '+' : ''}${tech.movingAverages.priceVsSMA50 || 0}%)\n`;
-                prompt += `• SMA 200: $${tech.movingAverages.sma200 || 'N/A'} (${tech.movingAverages.priceVsSMA200 > 0 ? '+' : ''}${tech.movingAverages.priceVsSMA200 || 0}%)\n\n`;
+                prompt += `- SMA 20: $${tech.movingAverages.sma20 || 'N/A'} (${tech.movingAverages.priceVsSMA20 > 0 ? '+' : ''}${tech.movingAverages.priceVsSMA20 || 0}%)\n`;
+                prompt += `- SMA 50: $${tech.movingAverages.sma50 || 'N/A'} (${tech.movingAverages.priceVsSMA50 > 0 ? '+' : ''}${tech.movingAverages.priceVsSMA50 || 0}%)\n`;
+                prompt += `- SMA 200: $${tech.movingAverages.sma200 || 'N/A'} (${tech.movingAverages.priceVsSMA200 > 0 ? '+' : ''}${tech.movingAverages.priceVsSMA200 || 0}%)\n\n`;
             }
             
             if (tech.momentum) {
                 prompt += `**Momentum:**\n`;
-                prompt += `• RSI(14): ${tech.momentum.rsi || 'N/A'} (${tech.momentum.rsiSignal || 'N/A'})\n\n`;
+                prompt += `- RSI(14): ${tech.momentum.rsi || 'N/A'} (${tech.momentum.rsiSignal || 'N/A'})\n\n`;
             }
             
             if (tech.volatility) {
                 prompt += `**Risk Metrics:**\n`;
-                prompt += `• Volatility: ${tech.volatility.annualized || 'N/A'}% (${tech.volatility.level || 'N/A'})\n`;
-                prompt += `• Max Drawdown: ${tech.volatility.maxDrawdown || 'N/A'}%\n`;
-                prompt += `• Sharpe Ratio: ${tech.volatility.sharpeRatio || 'N/A'}\n\n`;
+                prompt += `- Volatility: ${tech.volatility.annualized || 'N/A'}% (${tech.volatility.level || 'N/A'})\n`;
+                prompt += `- Max Drawdown: ${tech.volatility.maxDrawdown || 'N/A'}%\n`;
+                prompt += `- Sharpe Ratio: ${tech.volatility.sharpeRatio || 'N/A'}\n\n`;
             }
             
             if (tech.trend) {
@@ -947,72 +1243,55 @@ class FinancialChatbotEngine {
             }
         }
 
-        // ✅ HISTORICAL STATS (si disponibles)
         if (context.historicalStats) {
             const stats = context.historicalStats;
             prompt += `**Historical Performance (${stats.period}):**\n`;
-            prompt += `• Total Return: ${stats.totalReturn > 0 ? '+' : ''}${stats.totalReturn}%\n`;
-            prompt += `• Annualized Return: ${stats.annualizedReturn > 0 ? '+' : ''}${stats.annualizedReturn}%\n`;
-            prompt += `• Period Range: $${stats.minPrice} - $${stats.maxPrice}\n\n`;
+            prompt += `- Total Return: ${stats.totalReturn > 0 ? '+' : ''}${stats.totalReturn}%\n`;
+            prompt += `- Annualized Return: ${stats.annualizedReturn > 0 ? '+' : ''}${stats.annualizedReturn}%\n`;
+            prompt += `- Period Range: $${stats.minPrice} - $${stats.maxPrice}\n\n`;
         }
 
-        // ✅ MARKET NEWS (global)
         if (context.marketNews && context.marketNews.length > 0) {
-            prompt += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`;
-            prompt += `📰 **Latest Market News**\n`;
-            prompt += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n`;
+            prompt += `\n**Latest Market News**\n\n`;
             context.marketNews.slice(0, 5).forEach((news, i) => {
                 prompt += `${i + 1}. **${news.headline}** (${news.source})\n`;
             });
             prompt += `\n`;
         }
 
-        // ✅ UPCOMING IPOs
         if (context.upcomingIPOs && context.upcomingIPOs.length > 0) {
-            prompt += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`;
-            prompt += `🚀 **Upcoming IPOs**\n`;
-            prompt += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n`;
+            prompt += `\n**Upcoming IPOs**\n\n`;
             context.upcomingIPOs.slice(0, 10).forEach((ipo, i) => {
                 prompt += `${i + 1}. **${ipo.name || ipo.symbol}** (${ipo.symbol}) - ${ipo.date} | Price: ${ipo.price || 'TBD'} | Shares: ${ipo.numberOfShares || 'N/A'}\n`;
             });
             prompt += `\n`;
         }
 
-        // ✅ EARNINGS CALENDAR
         if (context.upcomingEarnings && context.upcomingEarnings.length > 0) {
-            prompt += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`;
-            prompt += `📅 **Upcoming Earnings Reports**\n`;
-            prompt += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n`;
+            prompt += `\n**Upcoming Earnings Reports**\n\n`;
             context.upcomingEarnings.slice(0, 15).forEach((e, i) => {
                 prompt += `${i + 1}. **${e.symbol}** - ${e.date} | EPS Est: $${e.epsEstimate || 'N/A'} | Rev Est: $${e.revenueEstimate ? (e.revenueEstimate / 1e9).toFixed(2) + 'B' : 'N/A'}\n`;
             });
             prompt += `\n`;
         }
 
-        // ✅ MARKET OVERVIEW
         if (context.marketData) {
             const market = context.marketData;
-            prompt += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`;
-            prompt += `🌐 **Market Overview**\n`;
-            prompt += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n`;
+            prompt += `\n**Market Overview**\n\n`;
             
             if (market.sp500) {
-                prompt += `• **S&P 500 (SPY):** $${market.sp500.price} (${market.sp500.changePercent > 0 ? '+' : ''}${market.sp500.changePercent}%)\n`;
+                prompt += `- **S&P 500 (SPY):** $${market.sp500.price} (${market.sp500.changePercent > 0 ? '+' : ''}${market.sp500.changePercent}%)\n`;
             }
             if (market.nasdaq) {
-                prompt += `• **NASDAQ (QQQ):** $${market.nasdaq.price} (${market.nasdaq.changePercent > 0 ? '+' : ''}${market.nasdaq.changePercent}%)\n`;
+                prompt += `- **NASDAQ (QQQ):** $${market.nasdaq.price} (${market.nasdaq.changePercent > 0 ? '+' : ''}${market.nasdaq.changePercent}%)\n`;
             }
             if (market.dow) {
-                prompt += `• **Dow Jones (DIA):** $${market.dow.price} (${market.dow.changePercent > 0 ? '+' : ''}${market.dow.changePercent}%)\n`;
+                prompt += `- **Dow Jones (DIA):** $${market.dow.price} (${market.dow.changePercent > 0 ? '+' : ''}${market.dow.changePercent}%)\n`;
             }
             prompt += `\n`;
         }
 
-        // ✅ INSTRUCTIONS FINALES
-        prompt += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`;
-        prompt += `📝 **Your Task:**\n`;
-        prompt += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n`;
-        prompt += `Based on this comprehensive real-time data, provide a professional, detailed analysis in **3-4 well-structured paragraphs**. Include:\n\n`;
+        prompt += `\n**Your Task:**\n\nBased on this comprehensive real-time data, provide a professional, detailed analysis in **3-4 well-structured paragraphs**. Include:\n\n`;
         prompt += `1. **Key Findings**: Highlight the most important data points and what they mean\n`;
         prompt += `2. **Analysis**: Provide context and interpretation of the numbers\n`;
         prompt += `3. **Actionable Insights**: Offer clear, data-driven recommendations\n`;
@@ -1022,53 +1301,38 @@ class FinancialChatbotEngine {
         return prompt;
     }
     
-    // ============================================
-    // ✅ NOUVEAU : PROMPT POUR COMPARAISON
-    // ============================================
-    
-    buildComparisonPrompt(comparisonData) {
-        let prompt = `\n⚖ ════════════════════════════════════════\n`;
-        prompt += `   MULTI-STOCK COMPARISON ANALYSIS\n`;
-        prompt += `════════════════════════════════════════\n\n`;
+    buildComparisonPrompt(comparisonData, correlationAnalysis) {
+        let prompt = `\nMULTI-STOCK COMPARISON ANALYSIS\n\n`;
         
-        // Vue d'ensemble
         prompt += `**Comparing:** ${comparisonData.symbols.join(' vs ')}\n\n`;
         
-        // Données individuelles pour chaque stock
         comparisonData.stocksData.forEach((stock, index) => {
-            prompt += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`;
-            prompt += `📊 **${index + 1}. ${stock.symbol}** - ${stock.profile?.name || stock.symbol}\n`;
-            prompt += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n`;
+            prompt += `\n**${index + 1}. ${stock.symbol}** - ${stock.profile?.name || stock.symbol}\n\n`;
             
             prompt += `**Price Performance:**\n`;
-            prompt += `• Current: $${stock.quote.current} (${stock.quote.changePercent > 0 ? '+' : ''}${stock.quote.changePercent}%)\n`;
-            prompt += `• Day Range: $${stock.quote.low} - $${stock.quote.high}\n`;
-            prompt += `• 52W Range: $${stock.metrics?.week52Low || 'N/A'} - $${stock.metrics?.week52High || 'N/A'}\n\n`;
+            prompt += `- Current: $${stock.quote.current} (${stock.quote.changePercent > 0 ? '+' : ''}${stock.quote.changePercent}%)\n`;
+            prompt += `- Day Range: $${stock.quote.low} - $${stock.quote.high}\n`;
+            prompt += `- 52W Range: $${stock.metrics?.week52Low || 'N/A'} - $${stock.metrics?.week52High || 'N/A'}\n\n`;
             
             prompt += `**Company Fundamentals:**\n`;
-            prompt += `• Industry: ${stock.profile?.industry || 'N/A'}\n`;
-            prompt += `• Market Cap: $${stock.profile?.marketCap || 'N/A'}B\n`;
-            prompt += `• P/E Ratio: ${stock.metrics?.peRatio || 'N/A'}\n`;
-            prompt += `• EPS: $${stock.metrics?.eps || 'N/A'}\n`;
-            prompt += `• ROE: ${stock.metrics?.roe || 'N/A'}%\n`;
-            prompt += `• Profit Margin: ${stock.metrics?.profitMargin || 'N/A'}%\n`;
-            prompt += `• Beta: ${stock.metrics?.beta || 'N/A'}\n`;
-            prompt += `• Dividend Yield: ${stock.metrics?.dividendYield || 'N/A'}%\n\n`;
+            prompt += `- Industry: ${stock.profile?.industry || 'N/A'}\n`;
+            prompt += `- Market Cap: $${stock.profile?.marketCap || 'N/A'}B\n`;
+            prompt += `- P/E Ratio: ${stock.metrics?.peRatio || 'N/A'}\n`;
+            prompt += `- EPS: $${stock.metrics?.eps || 'N/A'}\n`;
+            prompt += `- ROE: ${stock.metrics?.roe || 'N/A'}%\n`;
+            prompt += `- Profit Margin: ${stock.metrics?.profitMargin || 'N/A'}%\n`;
+            prompt += `- Beta: ${stock.metrics?.beta || 'N/A'}\n`;
+            prompt += `- Dividend Yield: ${stock.metrics?.dividendYield || 'N/A'}%\n\n`;
         });
         
-        // Tableau comparatif
         if (comparisonData.keyMetricsComparison) {
-            prompt += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`;
-            prompt += `📊 **Side-by-Side Metrics Comparison**\n`;
-            prompt += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n`;
+            prompt += `\n**Side-by-Side Metrics Comparison**\n\n`;
             
             const table = comparisonData.keyMetricsComparison;
             
-            // Header
             prompt += `| ${table.headers.join(' | ')} |\n`;
             prompt += `|${table.headers.map(() => '---').join('|')}|\n`;
             
-            // Rows
             table.rows.forEach(row => {
                 prompt += `| ${row.join(' | ')} |\n`;
             });
@@ -1076,7 +1340,16 @@ class FinancialChatbotEngine {
             prompt += `\n`;
         }
         
-        // Stats de performance historique (si disponibles)
+        if (correlationAnalysis) {
+            prompt += `\n**CORRELATION ANALYSIS:**\n\n`;
+            prompt += `- **Correlation Coefficient:** ${correlationAnalysis.correlation}\n`;
+            prompt += `- **Interpretation:** ${correlationAnalysis.interpretation} correlation\n`;
+            prompt += `- **Diversification Benefit:** ${correlationAnalysis.diversificationBenefit}\n\n`;
+            prompt += `**Insight:** ${Math.abs(parseFloat(correlationAnalysis.correlation)) < 0.7 ? 
+                'These stocks move relatively independently, providing good diversification.' : 
+                'These stocks tend to move together, offering limited diversification benefits.'}\n\n`;
+        }
+        
         if (comparisonData.timeSeries && comparisonData.timeSeries.length > 0) {
             prompt += `**Historical Performance Comparison:**\n`;
             comparisonData.timeSeries.forEach(series => {
@@ -1084,7 +1357,7 @@ class FinancialChatbotEngine {
                     const firstPrice = series.data[0].close;
                     const lastPrice = series.data[series.data.length - 1].close;
                     const totalReturn = ((lastPrice - firstPrice) / firstPrice * 100).toFixed(2);
-                    prompt += `• **${series.symbol}**: ${totalReturn > 0 ? '+' : ''}${totalReturn}% total return (${series.data.length} days)\n`;
+                    prompt += `- **${series.symbol}**: ${totalReturn > 0 ? '+' : ''}${totalReturn}% total return (${series.data.length} days)\n`;
                 }
             });
             prompt += `\n`;
@@ -1094,70 +1367,73 @@ class FinancialChatbotEngine {
     }
 
     // ============================================
-    // ✅ NOUVEAU : GÉNÉRATION CARTES VISUELLES
+    // GÉNÉRATION CARTES VISUELLES
     // ============================================
     
     async generateVisualCards(context, analysis) {
         const cards = [];
         
-        // Carte pour stock individuel
         if (context.stockData && !analysis.isComparison) {
             const stock = context.stockData;
             
-            // Carte de prix actuel
             cards.push({
                 type: 'metric',
                 title: 'Current Price',
                 value: `$${stock.quote.current}`,
                 change: `${stock.quote.changePercent > 0 ? '+' : ''}${stock.quote.changePercent}%`,
                 trend: stock.quote.changePercent > 0 ? 'up' : 'down',
-                icon: '💰'
+                icon: ''
             });
             
-            // Carte Market Cap
             if (stock.profile?.marketCap) {
                 cards.push({
                     type: 'metric',
                     title: 'Market Cap',
                     value: `$${stock.profile.marketCap}B`,
-                    icon: '🏢'
+                    icon: ''
                 });
             }
             
-            // Carte P/E Ratio
             if (stock.metrics?.peRatio) {
                 cards.push({
                     type: 'metric',
                     title: 'P/E Ratio',
                     value: stock.metrics.peRatio,
-                    icon: '📊'
+                    icon: ''
                 });
             }
             
-            // Carte de consensus analystes
             if (context.analystRecommendations) {
                 cards.push({
                     type: 'metric',
                     title: 'Analyst Consensus',
                     value: context.analystRecommendations.consensus,
                     subtitle: `${context.analystRecommendations.total} analysts`,
-                    icon: '👥'
+                    icon: ''
                 });
             }
             
-            // Carte de sentiment
             if (context.sentiment) {
                 cards.push({
                     type: 'metric',
                     title: 'News Sentiment',
                     value: context.sentiment.overallSentiment.label,
                     subtitle: `Score: ${context.sentiment.overallSentiment.sentiment.toFixed(2)}`,
-                    icon: '💭'
+                    icon: ''
+                });
+            }
+            
+            if (context.advancedMetrics) {
+                cards.push({
+                    type: 'metric',
+                    title: 'Sharpe Ratio',
+                    value: context.advancedMetrics.sharpeRatio,
+                    subtitle: 'Risk-Adjusted Return',
+                    icon: ''
                 });
             }
         }
         
-        // Cartes pour comparaison multi-stocks
         if (context.comparisonData && context.comparisonData.stocksData.length >= 2) {
             context.comparisonData.stocksData.forEach(stock => {
                 cards.push({
@@ -1177,13 +1453,12 @@ class FinancialChatbotEngine {
     }
     
     // ============================================
-    // ✅ NOUVEAU : GÉNÉRATION REQUÊTES DE GRAPHIQUES
+    // GÉNÉRATION REQUÊTES DE GRAPHIQUES
     // ============================================
     
     async generateChartRequests(context, analysis) {
         const chartRequests = [];
         
-        // Graphique de comparaison pour multi-stocks
         if (context.comparisonData && context.comparisonData.timeSeries && context.comparisonData.timeSeries.length >= 2) {
             chartRequests.push({
                 type: 'comparison',
@@ -1193,18 +1468,16 @@ class FinancialChatbotEngine {
             });
         }
         
-        // Graphique historique pour stock individuel
         if (context.timeSeriesData && !analysis.isComparison) {
             chartRequests.push({
                 type: 'line',
                 symbol: analysis.symbols[0],
                 data: context.timeSeriesData,
-                indicators: analysis.intents.includes('HISTORICAL') ? ['sma'] : [],
+                indicators: analysis.intents.includes('HISTORICAL') || analysis.intents.includes('ADVANCED_ANALYSIS') ? ['sma'] : [],
                 timeframe: analysis.timeframes[0] || '1y'
             });
         }
         
-        // Tableau de comparaison des métriques
         if (context.comparisonData && context.comparisonData.keyMetricsComparison) {
             chartRequests.push({
                 type: 'metrics-table',
@@ -1216,7 +1489,79 @@ class FinancialChatbotEngine {
     }
 
     // ============================================
-    // CALCULS TECHNIQUES (IDENTIQUES)
+    // SUGGESTIONS AVANCÉES WALL STREET
+    // ============================================
+    
+    generateAdvancedSuggestions(analysis, context) {
+        const suggestions = [];
+        
+        if (analysis.isComparison && analysis.comparisonSymbols.length >= 2) {
+            const symbols = analysis.comparisonSymbols;
+            suggestions.push(
+                `Correlation analysis: ${symbols.join(' vs ')}`,
+                `Risk-adjusted returns: ${symbols[0]} vs ${symbols[1]}`,
+                `Fair value estimation: ${symbols[0]}`,
+                `Sector rotation impact on ${symbols[0]}`
+            );
+            return suggestions.slice(0, 4);
+        }
+        
+        if (analysis.symbols.length > 0) {
+            const symbol = analysis.symbols[0];
+            
+            if (context.advancedMetrics) {
+                suggestions.push(`${symbol} Sharpe ratio vs sector average`);
+            }
+            
+            if (context.earningsHistory) {
+                suggestions.push(`${symbol} earnings quality score breakdown`);
+            }
+            
+            if (context.stockData?.metrics?.beta) {
+                suggestions.push(`${symbol} systematic vs unsystematic risk`);
+            }
+            
+            suggestions.push(
+                `${symbol} fair value (DCF analysis)`,
+                `${symbol} options flow analysis`,
+                `${symbol} insider trading activity`,
+                `${symbol} institutional ownership changes`,
+                `${symbol} short interest trends`,
+                `${symbol} relative strength index vs peers`,
+                `${symbol} seasonal patterns analysis`,
+                `${symbol} Monte Carlo simulation`,
+                `${symbol} stress test scenarios`,
+                `${symbol} credit risk assessment`
+            );
+            
+        } else if (analysis.type === 'IPO_QUERY') {
+            suggestions.push(
+                "Top performing IPOs by Sharpe ratio",
+                "IPO lock-up period calendar",
+                "Underwriter reputation analysis",
+                "Post-IPO price stability metrics"
+            );
+        } else if (analysis.type === 'MARKET_NEWS_QUERY') {
+            suggestions.push(
+                "Sector rotation indicators",
+                "Market breadth analysis",
+                "Volatility index (VIX) interpretation",
+                "Economic surprise index impact"
+            );
+        } else {
+            suggestions.push(
+                "Top stocks by Sharpe ratio this month",
+                "Market correlation matrix",
+                "Sector performance attribution",
+                "Factor exposure analysis (growth vs value)"
+            );
+        }
+        
+        return suggestions.slice(0, 4);
+    }
+
+    // ============================================
+    // CALCULS TECHNIQUES
     // ============================================
     
     calculateHistoricalStats(timeSeriesData) {
@@ -1451,10 +1796,6 @@ class FinancialChatbotEngine {
         return { direction, strength, duration: 0 };
     }
 
-    // ============================================
-    // HELPER : Calcul Consensus Analyst
-    // ============================================
-    
     getConsensusRating(recommendation) {
         const scores = {
             strongBuy: recommendation.strongBuy * 5,
@@ -1476,92 +1817,6 @@ class FinancialChatbotEngine {
         if (avgScore >= 2.5) return 'Hold';
         if (avgScore >= 1.5) return 'Sell';
         return 'Strong Sell';
-    }
-
-    // ============================================
-    // SUGGESTIONS INTELLIGENTES
-    // ============================================
-    
-    generateSmartSuggestions(analysis, context) {
-        const suggestions = [];
-        
-        // Suggestions pour comparaison
-        if (analysis.isComparison && analysis.comparisonSymbols.length >= 2) {
-            const symbols = analysis.comparisonSymbols;
-            suggestions.push(
-                `Historical performance: ${symbols.join(' vs ')}`,
-                `Technical analysis: ${symbols[0]}`,
-                `${symbols[0]} analyst ratings`,
-                `${symbols[1]} fundamentals`
-            );
-            return suggestions.slice(0, 4);
-        }
-        
-        if (analysis.symbols.length > 0) {
-            const symbol = analysis.symbols[0];
-            
-            // Suggestions basées sur les données disponibles
-            if (context.analystRecommendations) {
-                suggestions.push(`What do analysts say about ${symbol}?`);
-            }
-            if (context.earningsHistory) {
-                suggestions.push(`${symbol} earnings trends`);
-            }
-            if (context.sentiment) {
-                suggestions.push(`${symbol} news sentiment analysis`);
-            }
-            if (context.peers && context.peers.length > 0) {
-                suggestions.push(`Compare ${symbol} with ${context.peers[0]}`);
-            }
-            
-            // Suggestions génériques
-            if (suggestions.length < 4) {
-                suggestions.push(
-                    `${symbol} risk assessment`,
-                    `${symbol} price targets`,
-                    `Technical indicators for ${symbol}`,
-                    `${symbol} upcoming earnings`
-                );
-            }
-            
-        } else if (analysis.type === 'IPO_QUERY') {
-            suggestions.push(
-                "Show top performing IPOs",
-                "IPO calendar this month",
-                "How to evaluate IPOs",
-                "Recent tech IPOs"
-            );
-        } else if (analysis.type === 'MARKET_NEWS_QUERY') {
-            suggestions.push(
-                "Top market movers today",
-                "Sector performance analysis",
-                "Market sentiment overview",
-                "Economic indicators impact"
-            );
-        } else if (analysis.type === 'EARNINGS_CALENDAR_QUERY') {
-            suggestions.push(
-                "Upcoming tech earnings",
-                "Earnings surprises this week",
-                "High-profile earnings reports",
-                "Earnings calendar next month"
-            );
-        } else if (analysis.type === 'MARKET_QUERY') {
-            suggestions.push(
-                "Sector performance today",
-                "Market sentiment analysis",
-                "Economic indicators impact",
-                "Top gainers and losers"
-            );
-        } else {
-            suggestions.push(
-                "📈 Analyze NVDA stock",
-                "💰 Market overview today",
-                "📊 Show trending IPOs",
-                "👥 AAPL analyst ratings"
-            );
-        }
-        
-        return suggestions.slice(0, 4);
     }
 
     // ============================================
@@ -1665,7 +1920,7 @@ class FinancialChatbotEngine {
 
     clearCache() {
         this.responseCache.clear();
-        console.log('🗑 Cache cleared');
+        console.log('Cache cleared');
     }
 
     clearHistory() {
@@ -1678,7 +1933,7 @@ class FinancialChatbotEngine {
             lastTopic: null,
             userPreferences: {}
         };
-        console.log('🗑 Conversation context cleared');
+        console.log('Conversation context cleared');
     }
 
     reset() {
@@ -1691,7 +1946,7 @@ class FinancialChatbotEngine {
             averageResponseTime: 0,
             totalResponseTime: 0
         };
-        console.log('🔄 Engine reset');
+        console.log('Engine reset');
     }
 }
 
