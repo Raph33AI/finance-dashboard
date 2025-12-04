@@ -1,16 +1,16 @@
 // ============================================
 // GEMINI AI - CONVERSATIONAL FINANCIAL EXPERT
-// Version Ultra-Performante & Conversationnelle
+// Version Ultra-Performante & Conversationnelle v3.5
+// ✅ CORRECTION: Few-Shot Examples + Prompts Ciblés
 // ============================================
 
 class GeminiAI {
     constructor(config) {
         this.config = config;
         
-        // ✅ CORRECTION : Utiliser workerUrl
         this.workerUrl = config.api.gemini.workerUrl;
-        this.model = config.api.gemini.model || 'gemini-1.5-flash';
-        this.apiKey = null; // Plus besoin (dans le Worker)
+        this.model = config.api.gemini.model || 'gemini-2.5-flash';
+        this.apiKey = null;
         
         this.conversationHistory = [];
         this.maxHistorySize = 20;
@@ -27,7 +27,7 @@ class GeminiAI {
         this.lastRequestTime = 0;
         this.minRequestInterval = 1000;
         
-        console.log(`🤖 Gemini AI initialized`);
+        console.log(`🤖 Gemini AI initialized (v3.5 - Few-Shot Enhanced)`);
         console.log(`📡 Model: ${this.model}`);
         console.log(`📡 Worker URL: ${this.workerUrl}`);
         
@@ -35,159 +35,162 @@ class GeminiAI {
     }
 
     initializeSystemPrompt() {
-        this.systemPrompt = `You are **Alphy**, an ELITE AI Financial Expert with deep knowledge across ALL financial domains.
+        this.systemPrompt = `You are **Alphy**, an ELITE AI Financial Expert specializing in clear, actionable market insights.
 
-**🎯 YOUR CORE IDENTITY:**
-- **Expertise:** Markets, stocks, IPOs, technical analysis, fundamental analysis, macroeconomics, trading strategies, portfolio management, risk analysis, derivatives, crypto, commodities, forex, M&A, corporate finance, quantitative finance
-- **Personality:** Professional yet approachable, precise, insightful, proactive
-- **Communication Style:** Clear, conversational, adapts complexity to user's level
-- **Capabilities:** Real-time data analysis, multi-timeframe analysis, comprehensive research, scenario modeling
+**🎯 YOUR CORE MISSION:**
+Provide **precise, data-driven financial analysis** in a professional yet conversational tone. Always reference specific numbers from provided data and structure responses for maximum clarity.
 
-**📊 YOUR KNOWLEDGE AREAS (Comprehensive):**
+**📐 RESPONSE RULES:**
 
-**1. EQUITY MARKETS**
-- Stock valuation (DCF, comparables, multiples)
-- Technical analysis (chart patterns, indicators, volume analysis)
-- Fundamental analysis (financials, ratios, growth metrics)
-- Sector rotation & industry analysis
-- Equity derivatives (options, futures)
+**1⃣ FOR MARKET NEWS QUESTIONS** (e.g., "What's happening in the market today?"):
+- **Structure:**
+  • **Market Overview** (2-3 sentences): Current indices performance (S&P, NASDAQ, Dow)
+  • **Key Drivers** (1-2 sentences): Main factors moving markets today
+  • **Top Stories** (3-4 bullet points): Most impactful news headlines
+  • **Investor Sentiment** (1 sentence): Overall market mood (bullish/bearish/neutral)
+- **Length:** 3-4 short paragraphs
+- **Tone:** News anchor style (factual, timely, digestible)
 
-**2. IPO & NEW LISTINGS**
-- IPO evaluation frameworks
-- Lockup period analysis
-- Pre/post-IPO valuation
-- SPAC vs traditional IPO
-- IPO allocation strategies
+**2⃣ FOR STOCK ANALYSIS** (e.g., "Analyze NVDA stock"):
+- **Structure:**
+  • **Current Status** (price, change%, volume)
+  • **Key Metrics** (P/E, market cap, 52W range)
+  • **Technical Picture** (trend, RSI, support/resistance)
+  • **Fundamental Snapshot** (earnings quality, analyst consensus)
+  • **Investment Perspective** (risks, catalysts, recommendation)
+- **Length:** 4-5 paragraphs
+- **Tone:** Analyst report style (objective, detailed, actionable)
 
-**3. MACROECONOMICS & MARKETS**
-- Interest rates & Fed policy impact
-- Inflation analysis & hedging
-- Economic indicators interpretation
-- Global market correlations
-- Currency impacts on stocks
+**3⃣ FOR STOCK COMPARISONS** (e.g., "Compare AAPL vs MSFT"):
+- **Structure:**
+  • **Performance Comparison** (returns, volatility)
+  • **Valuation Metrics** (P/E, PEG, margins)
+  • **Strengths/Weaknesses** (each stock)
+  • **Which to Choose?** (growth vs value, risk profiles)
+- **Length:** 4-5 paragraphs
+- **Tone:** Side-by-side analysis (balanced, comparative)
 
-**4. TECHNICAL ANALYSIS (Advanced)**
-- Moving averages (SMA, EMA, VWMA)
-- Momentum indicators (RSI, MACD, Stochastic)
-- Volatility (Bollinger Bands, ATR, VIX)
-- Volume analysis (OBV, A/D line)
-- Chart patterns (H&S, flags, triangles, etc.)
-- Support/resistance levels
-- Fibonacci retracements
-- Candlestick patterns
+**4⃣ FOR HISTORICAL PERFORMANCE** (e.g., "NVDA evolution over 5 years"):
+- **Structure:**
+  • **Total Return** (exact % with annualized)
+  • **Volatility Analysis** (risk-adjusted metrics)
+  • **Major Milestones** (peaks, crashes, recoveries)
+  • **Risk Metrics** (max drawdown, Sharpe ratio)
+- **Length:** 3-4 paragraphs
+- **Tone:** Historical review (data-heavy, context-rich)
 
-**5. RISK MANAGEMENT**
-- Portfolio diversification
-- Position sizing
-- Stop-loss strategies
-- Risk-adjusted returns (Sharpe, Sortino, Treynor)
-- Value at Risk (VaR)
-- Maximum drawdown analysis
-- Correlation analysis
+**5⃣ FOR IPO QUESTIONS** (e.g., "Top performing IPOs"):
+- **Structure:**
+  • **IPO Landscape** (recent trends, market conditions)
+  • **Top Performers** (list with returns)
+  • **Quality Indicators** (score, fundamentals)
+  • **Investment Considerations** (risks, lockup periods)
+- **Length:** 3-4 paragraphs
+- **Tone:** IPO specialist (cautiously optimistic, risk-aware)
 
-**6. TRADING STRATEGIES**
-- Day trading, swing trading, position trading
-- Momentum, mean reversion, breakout strategies
-- Pairs trading & arbitrage
-- Options strategies (covered calls, spreads, straddles)
-- Algorithmic trading concepts
+**6⃣ FOR EDUCATIONAL QUESTIONS** (e.g., "Explain P/E ratio"):
+- **Structure:**
+  • **Simple Definition** (what it is)
+  • **How to Calculate** (formula with example)
+  • **Interpretation** (high vs low, industry context)
+  • **Limitations** (when it misleads)
+- **Length:** 2-3 paragraphs
+- **Tone:** Teacher style (clear, example-rich, beginner-friendly)
 
-**7. FIXED INCOME & BONDS**
-- Bond pricing & yields
-- Duration & convexity
-- Credit analysis
-- Yield curve interpretation
+**✅ CRITICAL REQUIREMENTS:**
 
-**8. ALTERNATIVE INVESTMENTS**
-- Cryptocurrency fundamentals
-- Commodities (gold, oil, metals)
-- Real estate investment
-- Private equity basics
+- **Use exact numbers** from provided data (don't say "around $150", say "$152.34")
+- **Calculate metrics** when raw data is provided (returns, volatility, ratios)
+- **Reference timestamps** for time-sensitive data ("as of today", "in the last quarter")
+- **Provide specific levels** for technical analysis ($145 support, not "mid-140s")
+- **Add disclaimer** for investment recommendations
 
-**🎨 RESPONSE PHILOSOPHY:**
+**❌ NEVER:**
+- Give vague numbers ("around", "approximately") when exact data exists
+- Overwhelm simple questions with excessive technical jargon
+- Invent data if not provided (say "data not available")
+- Provide financial advice (always say "for educational purposes only")
 
-**✅ DO:**
-- **Adapt to context:** Simple question = concise answer, complex question = detailed analysis
-- **Be conversational:** Natural dialogue, not robotic templates
-- **Use real data:** When context provides market data, reference exact numbers
-- **Provide actionable insights:** Not just theory, but practical applications
-- **Ask clarifying questions:** If query is vague, ask for specifics
-- **Remember context:** Reference previous conversation when relevant
-- **Explain complexity:** Break down difficult concepts with examples
-- **Suggest next steps:** Proactively offer related analysis or follow-up questions
+**📊 FEW-SHOT EXAMPLES:**
 
-**❌ DON'T:**
-- Force a rigid structure when not needed
-- Overwhelm with data for simple questions
-- Invent numbers if data isn't provided
-- Give financial advice (say "this is educational, not advice")
-- Use jargon without explanation
+**Example 1: Market News Question**
+**User:** "What's happening in the market today?"
+**Alphy:** "📊 **Market Overview**
 
-**📋 RESPONSE FRAMEWORK (Flexible, not mandatory):**
+The U.S. stock market is showing mixed performance today, with the **S&P 500** up **0.8%** at **4,520**, the **NASDAQ** gaining **1.2%** to **14,150**, while the **Dow Jones** is slightly down **0.2%** at **35,100**. Volume is above average, indicating active investor participation.
 
-**For SIMPLE QUESTIONS:**
-Direct, concise answer (2-4 paragraphs max) + optional follow-up suggestions
+**Key Drivers:**
 
-**For ANALYTICAL REQUESTS:**
-1. **Quick Summary** (2-3 sentences with key takeaway)
-2. **Core Analysis** (detailed examination with data)
-3. **Key Metrics** (if relevant: valuation, technical levels, ratios)
-4. **Insights & Implications** (what it means for investors)
-5. **Actionable Recommendations** (entry/exit levels, risk considerations)
-6. **Related Considerations** (risks, catalysts, alternatives)
+Today's market sentiment is heavily influenced by anticipation of the upcoming **inflation report** scheduled for Friday. Investors are positioning cautiously, with a noticeable shift from an "oversold to overbought" state, suggesting recent upward momentum may face consolidation. Additionally, **tech stocks** are outperforming on renewed AI optimism.
 
-**For CONVERSATIONAL QUERIES:**
-Natural dialogue response, building on previous context
+**Top Stories:**
+• **Fed Policy Watch**: Markets pricing in 65% chance of rate hold next month
+• **Tech Earnings Beat**: Major semiconductor companies reporting strong Q3 results
+• **Energy Sector Weakness**: Oil prices down 3% on demand concerns
+• **Treasury Yields**: 10-year yield steady at 4.25%, easing financial conditions
 
-**📊 WHEN YOU HAVE MARKET DATA:**
+**Investor Sentiment:** Cautiously optimistic. While short-term momentum is positive, traders are monitoring inflation data closely before making large commitments."
 
-If context includes:
-- **Real-time quote:** Reference exact price, change%, volume
-- **Historical data:** Calculate returns, volatility, trends
-- **Technical indicators:** Interpret RSI, MACD, moving averages with specific signals
-- **Fundamentals:** Analyze P/E, growth, margins with industry context
-- **Multiple timeframes:** Compare short-term vs long-term trends
+---
 
-**Always:**
-- Use exact numbers from provided data
-- Calculate metrics when possible (returns, volatility, ratios)
-- Provide specific price levels for support/resistance
-- Give concrete trading ranges, not vague "around $X"
+**Example 2: Stock Analysis Question**
+**User:** "Analyze NVDA stock"
+**Alphy:** "📊 **NVIDIA (NVDA) Analysis**
 
-**🎯 CHART GENERATION:**
+**Current Status:**
+NVDA is trading at **$485.72**, down **1.4%** today with volume at **42.5M shares** (above the 30-day average of 38M). The stock is **8.2% below its 52-week high** of $528.50 and **156% above its 52-week low** of $189.40.
 
-When analysis would benefit from visualization, add at the end:
-\`[CHART_REQUEST: type="line|candlestick|bar", symbol="SYMBOL", data="1d|1w|1M|3M|1y|5y", indicators="sma|ema|rsi|macd|volume"]\`
+**Valuation Metrics:**
+With a **market cap of $1.21 trillion**, NVDA trades at a **P/E ratio of 65.3** (premium to sector average of 28), **EPS of $7.44 (TTM)**, and a **profit margin of 48.5%**. The stock has a **beta of 1.68**, indicating higher volatility than the broader market.
 
-Examples:
-- \`[CHART_REQUEST: type="line", symbol="NVDA", data="1y", indicators="sma,rsi"]\`
-- \`[CHART_REQUEST: type="candlestick", symbol="AAPL", data="3M", indicators="volume,macd"]\`
+**Technical Picture:**
+NVDA is in a **strong uptrend** with the price above both the **SMA-50 ($465)** and **SMA-200 ($425)**. The **RSI at 58** suggests neutral momentum (not overbought/oversold). Key support at **$470**, resistance at **$500**. Max drawdown from peak: **12.3%**.
 
-**⚖ LEGAL DISCLAIMER (include when giving recommendations):**
-"*This analysis is for educational purposes only and should not be considered financial advice. Always do your own research and consult a licensed financial advisor before making investment decisions.*"
+**Fundamental Snapshot:**
+NVDA has beaten earnings estimates in **7 out of 8 recent quarters** (87.5% beat rate), with an **"Excellent" earnings quality score**. Analyst consensus is **Strong Buy** (78% bullish, 28 out of 36 analysts recommend buy/strong buy). Mean price target: **$545** (**+12% upside**).
 
-**🧠 REMEMBER:**
-- You're having a CONVERSATION, not filling out a form
-- Quality over quantity - concise beats verbose
-- Adapt your depth to the user's question
-- Be proactive - suggest relevant follow-ups
-- Build on previous messages in the conversation
-- Make finance accessible and engaging
+**Investment Perspective:**
+NVDA remains a **high-conviction growth play** driven by AI demand. However, the premium valuation (P/E 65+) requires continued strong execution. **Risks**: Regulatory scrutiny, China exposure, valuation compression. **Catalysts**: Data center growth, new chip launches. Best for **growth-oriented investors** comfortable with volatility.
 
-**NOW, RESPOND TO THE USER'S QUERY BELOW:**
+*This analysis is for educational purposes only and should not be considered financial advice.*"
+
+---
+
+**Example 3: Comparison Question**
+**User:** "Compare AAPL vs MSFT"
+**Alphy:** "📊 **AAPL vs MSFT Comparison**
+
+**Performance:**
+Over the past year, **MSFT** outperformed with **+32.5% total return** vs **AAPL's +18.2%**. However, MSFT showed higher volatility (**28% annualized**) compared to AAPL (**22%**). The correlation between the two is **0.78** (strong positive), offering limited diversification benefits.
+
+**Valuation:**
+**AAPL** trades at a **P/E of 29.5** (market cap $2.95T), while **MSFT** commands a **P/E of 33.8** (market cap $2.82T). MSFT has stronger profit margins (**42.1%** vs AAPL's **25.3%**) and higher ROE (**43.5%** vs **147%** - AAPL benefits from buybacks). Both have fortress balance sheets.
+
+**Strengths:**
+**AAPL**: Ecosystem lock-in, services growth, capital returns ($90B buyback), dividend yield 0.5%
+**MSFT**: Cloud leadership (Azure), AI integration, enterprise dominance, dividend yield 0.8%
+
+**Which to Choose?**
+For **growth investors**, MSFT offers higher upside via AI/cloud expansion but with more volatility. For **value/income investors**, AAPL provides steadier returns, lower valuation, and a mature business model. Risk-averse investors may prefer AAPL's stability; aggressive investors may favor MSFT's innovation premium.
+
+*Both are high-quality holdings. Diversification across both could capture complementary strengths.*"
+
+---
+
+**NOW, RESPOND TO THE USER'S QUERY WITH THE SAME PRECISION AND STRUCTURE.**
 `;
     }
 
     async generateResponse(userMessage, context = {}) {
         try {
-            // ✅ CORRECTION : Vérifier workerUrl
             if (!this.workerUrl) {
                 throw new Error('Gemini Worker URL not configured. Please check chatbot-config.js');
             }
 
             await this.enforceRateLimit();
             
-            const enhancedPrompt = this.buildAdaptivePrompt(userMessage, context);
+            // ✅ CORRECTION: Utiliser la nouvelle méthode ciblée
+            const enhancedPrompt = this.buildTargetedPrompt(userMessage, context);
             
             const response = await this.makeGeminiRequest(enhancedPrompt);
             const processedResponse = this.processResponse(response);
@@ -203,145 +206,529 @@ Examples:
         }
     }
 
-    buildAdaptivePrompt(userMessage, context) {
+    // ✅ NOUVELLE MÉTHODE: Prompts ultra-ciblés selon le type de question
+    buildTargetedPrompt(userMessage, context) {
         let prompt = this.systemPrompt + '\n\n';
 
-        if (this.conversationHistory.length > 0) {
-            prompt += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`;
-            prompt += `**📜 CONVERSATION HISTORY (for context):**\n`;
-            prompt += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n`;
-            
-            const recentHistory = this.conversationHistory.slice(-5);
-            recentHistory.forEach((entry, index) => {
-                prompt += `**[${index + 1}] User:** ${entry.user}\n`;
-                prompt += `**[${index + 1}] Alphy:** ${entry.assistant.substring(0, 300)}${entry.assistant.length > 300 ? '...' : ''}\n\n`;
-            });
-        }
-
-        if (this.userContext.preferredStocks.length > 0) {
-            prompt += `**User's Watchlist:** ${this.userContext.preferredStocks.join(', ')}\n\n`;
-        }
-
-        const needsStockData = this.detectNeedsStockData(userMessage, context);
+        // Détecter le type de question
+        const questionType = this.detectQuestionType(userMessage, context);
         
-        if (needsStockData && context.stockData) {
-            prompt += this.formatStockDataContext(context.stockData);
-        }
+        console.log(`🎯 Question Type Detected: ${questionType}`);
 
-        if (needsStockData && context.timeSeriesData) {
-            prompt += this.formatTimeSeriesContext(context.timeSeriesData, context.historicalStats);
+        // ✅ PROMPTS SPÉCIALISÉS PAR TYPE
+        switch (questionType) {
+            case 'MARKET_NEWS':
+                prompt += this.buildMarketNewsPrompt(userMessage, context);
+                break;
+                
+            case 'STOCK_ANALYSIS':
+                prompt += this.buildStockAnalysisPrompt(userMessage, context);
+                break;
+                
+            case 'STOCK_COMPARISON':
+                prompt += this.buildComparisonPrompt(userMessage, context);
+                break;
+                
+            case 'HISTORICAL_PERFORMANCE':
+                prompt += this.buildHistoricalPrompt(userMessage, context);
+                break;
+                
+            case 'IPO_ANALYSIS':
+                prompt += this.buildIPOPrompt(userMessage, context);
+                break;
+                
+            case 'EDUCATIONAL':
+                prompt += this.buildEducationalPrompt(userMessage, context);
+                break;
+                
+            default:
+                prompt += this.buildGeneralPrompt(userMessage, context);
         }
-
-        if (needsStockData && context.technicalIndicators) {
-            prompt += this.formatTechnicalContext(context.technicalIndicators);
-        }
-
-        if (context.marketData && this.detectNeedsMarketOverview(userMessage)) {
-            prompt += this.formatMarketContext(context.marketData);
-        }
-
-        if (context.ipoData && userMessage.toLowerCase().includes('ipo')) {
-            prompt += this.formatIPOContext(context.ipoData);
-        }
-
-        prompt += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n`;
-        prompt += `**👤 USER'S CURRENT QUESTION:**\n`;
-        prompt += `"${userMessage}"\n\n`;
-        
-        if (needsStockData && context.timeSeriesData) {
-            prompt += `*You have access to complete market data above. Use exact numbers and calculate precise metrics.*\n\n`;
-        } else if (!needsStockData) {
-            prompt += `*This appears to be a general finance question. Provide a clear, conversational explanation.*\n\n`;
-        }
-        
-        prompt += `**🤖 YOUR RESPONSE:**\n`;
 
         return prompt;
     }
 
-    detectNeedsStockData(message, context) {
-        const lowerMessage = message.toLowerCase();
+    // ✅ Détection précise du type de question
+    detectQuestionType(message, context) {
+        const lower = message.toLowerCase();
         
-        if (context.entities && context.entities.symbols && context.entities.symbols.length > 0) {
-            return true;
+        // Market News
+        if (/what'?s happening|market today|market news|today'?s market|market update|market sentiment/i.test(lower)) {
+            return 'MARKET_NEWS';
         }
         
-        const stockKeywords = [
-            'stock', 'share', 'price', 'analyze', 'analysis', 'chart', 'performance',
-            'evolution', 'historical', 'trend', 'technical', 'fundamental',
-            'buy', 'sell', 'hold', 'invest', 'valuation', 'p/e', 'eps',
-            'volatility', 'risk', 'return', 'dividend'
-        ];
-        
-        return stockKeywords.some(kw => lowerMessage.includes(kw));
-    }
-
-    detectNeedsMarketOverview(message) {
-        const lowerMessage = message.toLowerCase();
-        const marketKeywords = ['market', 'indices', 'dow', 'nasdaq', 's&p', 'sp500', 'market today', 'market overview'];
-        return marketKeywords.some(kw => lowerMessage.includes(kw));
-    }
-
-    formatStockDataContext(stockData) {
-        const stock = stockData;
-        let context = `**📊 REAL-TIME DATA - ${stock.symbol}**\n`;
-        if (stock.profile?.name) context += `Company: ${stock.profile.name}\n`;
-        
-        if (stock.quote) {
-            context += `Price: $${stock.quote.current} (${stock.quote.changePercent >= 0 ? '+' : ''}${stock.quote.changePercent}%)\n`;
-            context += `Range: $${stock.quote.low} - $${stock.quote.high} | Volume: ${this.formatNumber(stock.quote.volume)}\n`;
+        // Comparison
+        if (context.intent?.isComparison || /compare|vs|versus/i.test(lower)) {
+            return 'STOCK_COMPARISON';
         }
         
-        if (stock.metrics) {
-            context += `P/E: ${stock.metrics.peRatio || 'N/A'} | EPS: $${stock.metrics.eps || 'N/A'} | Beta: ${stock.metrics.beta || 'N/A'}\n`;
-            context += `52W: $${stock.metrics.week52Low} - $${stock.metrics.week52High}\n`;
+        // Historical
+        if (/evolution|historical|history|performance over|last.*years?|past.*years?|trend|since/i.test(lower)) {
+            return 'HISTORICAL_PERFORMANCE';
         }
         
-        context += `\n`;
-        return context;
-    }
-
-    formatTimeSeriesContext(timeSeriesData, historicalStats) {
-        if (!timeSeriesData || !historicalStats) return '';
-        
-        let context = `**📈 HISTORICAL PERFORMANCE (${historicalStats.period})**\n`;
-        context += `Return: ${historicalStats.totalReturn}% (${historicalStats.annualizedReturn}% annualized)\n`;
-        context += `Range: $${historicalStats.minPrice} - $${historicalStats.maxPrice}\n`;
-        context += `Volatility: ${historicalStats.volatility}% | Data Points: ${historicalStats.dataPoints}\n\n`;
-        return context;
-    }
-
-    formatTechnicalContext(tech) {
-        let context = `**🔬 TECHNICAL INDICATORS**\n`;
-        context += `RSI: ${tech.momentum.rsi} (${tech.momentum.rsiSignal}) | Trend: ${tech.trend.direction}\n`;
-        context += `SMA-20: $${tech.movingAverages.sma20} | SMA-50: $${tech.movingAverages.sma50}\n`;
-        context += `Volatility: ${tech.volatility.annualized}% (${tech.volatility.level})\n`;
-        if (tech.levels.support.length > 0) {
-            context += `Support: $${tech.levels.support.join(', $')} | Resistance: $${tech.levels.resistance.join(', $')}\n`;
+        // IPO
+        if (/ipo|initial public offering|upcoming ipo|recent ipo|top.*ipo/i.test(lower)) {
+            return 'IPO_ANALYSIS';
         }
-        context += `\n`;
-        return context;
+        
+        // Educational
+        if (/what is|explain|define|tell me about|how does.*work|what does.*mean/i.test(lower)) {
+            return 'EDUCATIONAL';
+        }
+        
+        // Stock Analysis (si un symbole est détecté)
+        if (context.detectedEntities?.symbols?.length > 0 || /analyze|analysis|stock|share/i.test(lower)) {
+            return 'STOCK_ANALYSIS';
+        }
+        
+        return 'GENERAL';
     }
 
-    formatMarketContext(marketData) {
-        let context = `**🌐 MARKET SNAPSHOT**\n`;
-        if (marketData.sp500) context += `S&P 500: $${marketData.sp500.price} (${marketData.sp500.changePercent}%)\n`;
-        if (marketData.nasdaq) context += `NASDAQ: $${marketData.nasdaq.price} (${marketData.nasdaq.changePercent}%)\n`;
-        context += `\n`;
-        return context;
-    }
-
-    formatIPOContext(ipoData) {
-        let context = `**💰 RECENT IPOs**\n`;
-        if (ipoData && ipoData.length > 0) {
-            ipoData.slice(0, 3).forEach(ipo => {
-                context += `• ${ipo.symbol} - ${ipo.name} (Score: ${ipo.score}/100)\n`;
+    // ✅ PROMPT SPÉCIALISÉ: Market News
+    buildMarketNewsPrompt(userMessage, context) {
+        let prompt = `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`;
+        prompt += `**📰 MARKET NEWS REQUEST**\n`;
+        prompt += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n`;
+        
+        // Market Data
+        if (context.marketData) {
+            prompt += `**📊 CURRENT MARKET SNAPSHOT:**\n\n`;
+            if (context.marketData.sp500) {
+                prompt += `- **S&P 500 (SPY):** $${context.marketData.sp500.price} (${context.marketData.sp500.changePercent > 0 ? '+' : ''}${context.marketData.sp500.changePercent}%)\n`;
+            }
+            if (context.marketData.nasdaq) {
+                prompt += `- **NASDAQ (QQQ):** $${context.marketData.nasdaq.price} (${context.marketData.nasdaq.changePercent > 0 ? '+' : ''}${context.marketData.nasdaq.changePercent}%)\n`;
+            }
+            if (context.marketData.dow) {
+                prompt += `- **Dow Jones (DIA):** $${context.marketData.dow.price} (${context.marketData.dow.changePercent > 0 ? '+' : ''}${context.marketData.dow.changePercent}%)\n`;
+            }
+            prompt += `\n`;
+        }
+        
+        // Top News Headlines
+        if (context.marketNews && context.marketNews.length > 0) {
+            prompt += `**📰 TOP MARKET NEWS (Last 24H):**\n\n`;
+            context.marketNews.slice(0, 8).forEach((news, i) => {
+                const time = new Date(news.datetime).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+                prompt += `${i + 1}. **${news.headline}** (${news.source}, ${time})\n`;
             });
+            prompt += `\n`;
         }
-        context += `\n`;
-        return context;
+        
+        prompt += `**👤 USER QUESTION:** "${userMessage}"\n\n`;
+        
+        prompt += `**🎯 YOUR TASK:**\n\n`;
+        prompt += `Provide a **professional market update** following this structure:\n\n`;
+        prompt += `1. **Market Overview** (2-3 sentences):\n`;
+        prompt += `   - Current indices performance with exact numbers\n`;
+        prompt += `   - Overall market direction (up/down/mixed)\n\n`;
+        prompt += `2. **Key Drivers** (1-2 sentences):\n`;
+        prompt += `   - Main factors moving markets today\n`;
+        prompt += `   - Upcoming events investors are watching\n\n`;
+        prompt += `3. **Top Stories** (3-4 bullet points):\n`;
+        prompt += `   - Most impactful news from the headlines above\n`;
+        prompt += `   - Brief context for each story\n\n`;
+        prompt += `4. **Investor Sentiment** (1 sentence):\n`;
+        prompt += `   - Overall market mood (bullish/bearish/cautious)\n\n`;
+        prompt += `**Length:** 3-4 short, digestible paragraphs\n`;
+        prompt += `**Tone:** News anchor style (factual, timely, professional)\n`;
+        prompt += `**Use exact numbers** from the market data above.\n\n`;
+        prompt += `**🤖 YOUR RESPONSE:**\n`;
+        
+        return prompt;
     }
 
+    // ✅ PROMPT SPÉCIALISÉ: Stock Analysis
+    buildStockAnalysisPrompt(userMessage, context) {
+        let prompt = `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`;
+        prompt += `**📊 STOCK ANALYSIS REQUEST**\n`;
+        prompt += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n`;
+        
+        if (context.stockData) {
+            const stock = context.stockData;
+            prompt += `**${stock.profile?.name || stock.symbol}** (${stock.symbol})\n\n`;
+            
+            // Prix actuel
+            prompt += `**Current Price:** $${stock.quote.current} (${stock.quote.changePercent > 0 ? '+' : ''}${stock.quote.changePercent}%)\n`;
+            prompt += `**Day Range:** $${stock.quote.low} - $${stock.quote.high} | **Volume:** ${this.formatNumber(stock.quote.volume)}\n`;
+            prompt += `**52-Week Range:** $${stock.metrics?.week52Low || 'N/A'} - $${stock.metrics?.week52High || 'N/A'}\n\n`;
+            
+            // Métriques clés
+            if (stock.metrics) {
+                prompt += `**Key Metrics:**\n`;
+                prompt += `- Market Cap: $${stock.profile?.marketCap || 'N/A'}B | P/E: ${stock.metrics.peRatio || 'N/A'} | EPS: $${stock.metrics.eps || 'N/A'}\n`;
+                prompt += `- Beta: ${stock.metrics.beta || 'N/A'} | ROE: ${stock.metrics.roe || 'N/A'}% | Profit Margin: ${stock.metrics.profitMargin || 'N/A'}%\n\n`;
+            }
+            
+            // Technique
+            if (context.technicalIndicators) {
+                const tech = context.technicalIndicators;
+                prompt += `**Technical Indicators:**\n`;
+                prompt += `- RSI(14): ${tech.momentum.rsi} (${tech.momentum.rsiSignal}) | Trend: ${tech.trend.direction}\n`;
+                prompt += `- SMA-20: $${tech.movingAverages.sma20} | SMA-50: $${tech.movingAverages.sma50}\n`;
+                if (tech.levels.support.length > 0) {
+                    prompt += `- Support: $${tech.levels.support.join(', $')} | Resistance: $${tech.levels.resistance.join(', $')}\n`;
+                }
+                prompt += `\n`;
+            }
+            
+            // Analystes
+            if (context.analystRecommendations) {
+                const rec = context.analystRecommendations;
+                prompt += `**Analyst Consensus:**\n`;
+                prompt += `- **${rec.consensus}** (${rec.bullishPercent}% bullish)\n`;
+                prompt += `- Strong Buy: ${rec.strongBuy} | Buy: ${rec.buy} | Hold: ${rec.hold} | Sell: ${rec.sell} | Strong Sell: ${rec.strongSell}\n\n`;
+            }
+            
+            if (context.priceTarget) {
+                const pt = context.priceTarget;
+                prompt += `**Price Target:** Mean $${pt.targetMean} (**${pt.upside > 0 ? '+' : ''}${pt.upside}% upside**) | Range: $${pt.targetLow} - $${pt.targetHigh}\n\n`;
+            }
+            
+            // Earnings
+            if (context.earningsHistory) {
+                const earn = context.earningsHistory;
+                prompt += `**Earnings:** Beat rate ${earn.beatRate}% (${earn.beatCount}/${earn.recent.length} beats) | Quality: **${earn.earningsQuality}**\n\n`;
+            }
+        }
+        
+        prompt += `**👤 USER QUESTION:** "${userMessage}"\n\n`;
+        
+        prompt += `**🎯 YOUR TASK:**\n\n`;
+        prompt += `Provide a **comprehensive stock analysis** with this structure:\n\n`;
+        prompt += `1. **Current Status** (price, volume, range)\n`;
+        prompt += `2. **Valuation Metrics** (P/E, market cap, margins)\n`;
+        prompt += `3. **Technical Picture** (trend, RSI, support/resistance levels)\n`;
+        prompt += `4. **Analyst View** (consensus, price targets)\n`;
+        prompt += `5. **Investment Perspective** (risks, catalysts, who should buy)\n\n`;
+        prompt += `**Length:** 4-5 paragraphs | **Tone:** Analyst report\n`;
+        prompt += `**Use exact numbers** from the data above. End with disclaimer.\n\n`;
+        prompt += `**🤖 YOUR RESPONSE:**\n`;
+        
+        return prompt;
+    }
+
+    // ✅ PROMPT SPÉCIALISÉ: Stock Comparison
+    buildComparisonPrompt(userMessage, context) {
+        let prompt = `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`;
+        prompt += `**⚖ STOCK COMPARISON REQUEST**\n`;
+        prompt += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n`;
+        
+        if (context.comparisonData && context.comparisonData.stocksData.length >= 2) {
+            prompt += `**Comparing:** ${context.comparisonData.symbols.join(' vs ')}\n\n`;
+            
+            // Tableau comparatif
+            context.comparisonData.stocksData.forEach((stock, index) => {
+                prompt += `**${index + 1}. ${stock.symbol}** - ${stock.profile?.name || stock.symbol}\n`;
+                prompt += `- Price: $${stock.quote.current} (${stock.quote.changePercent > 0 ? '+' : ''}${stock.quote.changePercent}%)\n`;
+                prompt += `- Market Cap: $${stock.profile?.marketCap || 'N/A'}B | P/E: ${stock.metrics?.peRatio || 'N/A'}\n`;
+                prompt += `- Beta: ${stock.metrics?.beta || 'N/A'} | ROE: ${stock.metrics?.roe || 'N/A'}%\n`;
+                prompt += `- Profit Margin: ${stock.metrics?.profitMargin || 'N/A'}%\n\n`;
+            });
+            
+            // Performance historique
+            if (context.comparisonData.timeSeries && context.comparisonData.timeSeries.length > 0) {
+                prompt += `**Historical Performance:**\n`;
+                context.comparisonData.timeSeries.forEach(series => {
+                    if (series.data && series.data.length > 0) {
+                        const firstPrice = series.data[0].close;
+                        const lastPrice = series.data[series.data.length - 1].close;
+                        const totalReturn = ((lastPrice - firstPrice) / firstPrice * 100).toFixed(2);
+                        prompt += `- **${series.symbol}**: ${totalReturn > 0 ? '+' : ''}${totalReturn}% (${series.data.length} days)\n`;
+                    }
+                });
+                prompt += `\n`;
+            }
+            
+            // Corrélation
+            if (context.correlationAnalysis) {
+                prompt += `**Correlation Analysis:**\n`;
+                prompt += `- Correlation: ${context.correlationAnalysis.correlation} (${context.correlationAnalysis.interpretation})\n`;
+                prompt += `- Diversification Benefit: ${context.correlationAnalysis.diversificationBenefit}\n\n`;
+            }
+            
+            // Tableau metrics
+            if (context.comparisonData.keyMetricsComparison) {
+                prompt += `**Metrics Comparison Table:**\n\n`;
+                const table = context.comparisonData.keyMetricsComparison;
+                prompt += `| ${table.headers.join(' | ')} |\n`;
+                prompt += `|${table.headers.map(() => '---').join('|')}|\n`;
+                table.rows.forEach(row => {
+                    prompt += `| ${row.join(' | ')} |\n`;
+                });
+                prompt += `\n`;
+            }
+        }
+        
+        prompt += `**👤 USER QUESTION:** "${userMessage}"\n\n`;
+        
+        prompt += `**🎯 YOUR TASK:**\n\n`;
+        prompt += `Provide a **detailed side-by-side comparison** with this structure:\n\n`;
+        prompt += `1. **Performance Comparison**:\n`;
+        prompt += `   - Historical returns (exact % from data)\n`;
+        prompt += `   - Volatility comparison (which is riskier?)\n`;
+        prompt += `   - Correlation insight (diversification potential)\n\n`;
+        prompt += `2. **Valuation Analysis**:\n`;
+        prompt += `   - P/E ratio comparison (which is cheaper?)\n`;
+        prompt += `   - Profitability metrics (margins, ROE)\n`;
+        prompt += `   - Market cap and scale differences\n\n`;
+        prompt += `3. **Strengths & Weaknesses**:\n`;
+        prompt += `   - Key advantages of each stock\n`;
+        prompt += `   - Main risks for each\n\n`;
+        prompt += `4. **Investment Recommendation**:\n`;
+        prompt += `   - Which for growth investors?\n`;
+        prompt += `   - Which for value investors?\n`;
+        prompt += `   - Risk profile comparison\n\n`;
+        prompt += `**Length:** 4-5 paragraphs | **Tone:** Balanced, comparative analysis\n`;
+        prompt += `**Use exact numbers** from the tables above. Be objective.\n\n`;
+        prompt += `**🤖 YOUR RESPONSE:**\n`;
+        
+        return prompt;
+    }
+
+    // ✅ PROMPT SPÉCIALISÉ: Historical Performance
+    buildHistoricalPrompt(userMessage, context) {
+        let prompt = `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`;
+        prompt += `**📈 HISTORICAL PERFORMANCE REQUEST**\n`;
+        prompt += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n`;
+        
+        if (context.stockData) {
+            const stock = context.stockData;
+            prompt += `**Stock:** ${stock.symbol} - ${stock.profile?.name || stock.symbol}\n`;
+            prompt += `**Current Price:** $${stock.quote.current}\n\n`;
+        }
+        
+        if (context.historicalStats) {
+            const stats = context.historicalStats;
+            prompt += `**Historical Performance (${stats.period}):**\n\n`;
+            prompt += `- **Total Return:** ${stats.totalReturn > 0 ? '+' : ''}${stats.totalReturn}%\n`;
+            prompt += `- **Annualized Return:** ${stats.annualizedReturn > 0 ? '+' : ''}${stats.annualizedReturn}%\n`;
+            prompt += `- **Period Range:** $${stats.minPrice} (low) - $${stats.maxPrice} (high)\n`;
+            prompt += `- **Volatility:** ${stats.volatility}% annualized\n`;
+            prompt += `- **Data Points:** ${stats.dataPoints} trading days\n\n`;
+        }
+        
+        if (context.technicalIndicators) {
+            const tech = context.technicalIndicators;
+            
+            if (tech.volatility) {
+                prompt += `**Risk Metrics:**\n`;
+                prompt += `- **Max Drawdown:** ${tech.volatility.maxDrawdown}% (worst decline from peak)\n`;
+                prompt += `- **Current Drawdown:** ${tech.volatility.currentDrawdown}%\n`;
+                prompt += `- **Sharpe Ratio:** ${tech.volatility.sharpeRatio} (risk-adjusted return)\n`;
+                prompt += `- **Volatility Level:** ${tech.volatility.level}\n\n`;
+            }
+            
+            if (tech.trend) {
+                prompt += `**Trend Analysis:**\n`;
+                prompt += `- **Direction:** ${tech.trend.direction}\n`;
+                prompt += `- **Strength:** ${tech.trend.strength}\n\n`;
+            }
+        }
+        
+        if (context.advancedMetrics) {
+            const adv = context.advancedMetrics;
+            prompt += `**Advanced Risk-Adjusted Metrics:**\n`;
+            prompt += `- **Sharpe Ratio:** ${adv.sharpeRatio} (return per unit of risk)\n`;
+            prompt += `- **Sortino Ratio:** ${adv.sortinoRatio} (downside risk-adjusted)\n`;
+            prompt += `- **Calmar Ratio:** ${adv.calmarRatio} (return vs max drawdown)\n`;
+            prompt += `- **Alpha:** ${adv.alpha}% (excess return vs market)\n`;
+            prompt += `- **Beta:** ${adv.beta} (market sensitivity)\n\n`;
+        }
+        
+        if (context.timeSeriesData && context.timeSeriesData.data) {
+            const data = context.timeSeriesData.data;
+            const recent = data.slice(-5);
+            prompt += `**Recent Price Action (Last 5 Days):**\n`;
+            recent.forEach((day, i) => {
+                const date = new Date(day.datetime).toLocaleDateString();
+                const change = i > 0 ? ((day.close - recent[i-1].close) / recent[i-1].close * 100).toFixed(2) : '0.00';
+                prompt += `- ${date}: $${day.close} (${change > 0 ? '+' : ''}${change}%)\n`;
+            });
+            prompt += `\n`;
+        }
+        
+        prompt += `**👤 USER QUESTION:** "${userMessage}"\n\n`;
+        
+        prompt += `**🎯 YOUR TASK:**\n\n`;
+        prompt += `Provide a **comprehensive historical analysis** with this structure:\n\n`;
+        prompt += `1. **Total Return Summary**:\n`;
+        prompt += `   - Exact total and annualized returns from the data\n`;
+        prompt += `   - How it compares to market averages\n\n`;
+        prompt += `2. **Volatility & Risk Analysis**:\n`;
+        prompt += `   - Volatility level interpretation\n`;
+        prompt += `   - Max drawdown context (how bad was the worst decline?)\n`;
+        prompt += `   - Risk-adjusted metrics (Sharpe, Sortino)\n\n`;
+        prompt += `3. **Major Milestones**:\n`;
+        prompt += `   - Price range journey (low to high)\n`;
+        prompt += `   - Notable trends or reversals\n\n`;
+        prompt += `4. **Investment Perspective**:\n`;
+        prompt += `   - What this history tells us about the stock\n`;
+        prompt += `   - Risk/reward profile based on historical data\n\n`;
+        prompt += `**Length:** 3-4 paragraphs | **Tone:** Historical review (data-heavy)\n`;
+        prompt += `**Use exact numbers** from the metrics above.\n\n`;
+        prompt += `**🤖 YOUR RESPONSE:**\n`;
+        
+        return prompt;
+    }
+
+    // ✅ PROMPT SPÉCIALISÉ: IPO Analysis
+    buildIPOPrompt(userMessage, context) {
+        let prompt = `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`;
+        prompt += `**💰 IPO ANALYSIS REQUEST**\n`;
+        prompt += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n`;
+        
+        if (context.upcomingIPOs && context.upcomingIPOs.length > 0) {
+            prompt += `**Upcoming IPOs (Next 30 Days):**\n\n`;
+            context.upcomingIPOs.slice(0, 10).forEach((ipo, i) => {
+                prompt += `${i + 1}. **${ipo.name || ipo.symbol}** (${ipo.symbol})\n`;
+                prompt += `   - Date: ${ipo.date}\n`;
+                prompt += `   - Price Range: ${ipo.price || 'TBD'}\n`;
+                prompt += `   - Shares: ${ipo.numberOfShares ? this.formatNumber(ipo.numberOfShares) : 'N/A'}\n`;
+                prompt += `   - Exchange: ${ipo.exchange || 'N/A'}\n\n`;
+            });
+        } else {
+            prompt += `**No upcoming IPO data available in context.**\n\n`;
+        }
+        
+        if (context.ipoAnalysis) {
+            prompt += `**Recent IPO Performance Analysis:**\n\n`;
+            if (context.ipoAnalysis.topPerformers) {
+                prompt += `**Top Performers:**\n`;
+                context.ipoAnalysis.topPerformers.slice(0, 5).forEach((ipo, i) => {
+                    prompt += `${i + 1}. ${ipo.symbol}: ${ipo.return > 0 ? '+' : ''}${ipo.return}% | Score: ${ipo.score}/100\n`;
+                });
+                prompt += `\n`;
+            }
+        }
+        
+        prompt += `**👤 USER QUESTION:** "${userMessage}"\n\n`;
+        
+        prompt += `**🎯 YOUR TASK:**\n\n`;
+        prompt += `Provide an **IPO market analysis** with this structure:\n\n`;
+        prompt += `1. **IPO Landscape** (1-2 sentences):\n`;
+        prompt += `   - Current IPO market conditions\n`;
+        prompt += `   - Recent trends (hot/cold market)\n\n`;
+        prompt += `2. **Upcoming Highlights** (if data available):\n`;
+        prompt += `   - Most notable upcoming IPOs\n`;
+        prompt += `   - Key dates and price ranges\n\n`;
+        prompt += `3. **Quality Assessment**:\n`;
+        prompt += `   - What makes a good IPO investment?\n`;
+        prompt += `   - Red flags to watch for\n\n`;
+        prompt += `4. **Investment Considerations**:\n`;
+        prompt += `   - Lock-up period risks\n`;
+        prompt += `   - Valuation concerns\n`;
+        prompt += `   - Historical IPO performance patterns\n\n`;
+        prompt += `**Length:** 3-4 paragraphs | **Tone:** IPO specialist (cautious, educational)\n`;
+        prompt += `If specific IPO data is missing, provide general IPO investment guidance.\n\n`;
+        prompt += `**🤖 YOUR RESPONSE:**\n`;
+        
+        return prompt;
+    }
+
+    // ✅ PROMPT SPÉCIALISÉ: Educational Questions
+    buildEducationalPrompt(userMessage, context) {
+        let prompt = `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`;
+        prompt += `**📚 EDUCATIONAL FINANCE QUESTION**\n`;
+        prompt += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n`;
+        
+        // Détecter le concept demandé
+        const concept = this.extractFinancialConcept(userMessage);
+        if (concept) {
+            prompt += `**Detected Concept:** ${concept}\n\n`;
+        }
+        
+        prompt += `**👤 USER QUESTION:** "${userMessage}"\n\n`;
+        
+        prompt += `**🎯 YOUR TASK:**\n\n`;
+        prompt += `Provide a **clear educational explanation** with this structure:\n\n`;
+        prompt += `1. **Simple Definition** (1-2 sentences):\n`;
+        prompt += `   - What is it in plain English?\n`;
+        prompt += `   - Why does it matter to investors?\n\n`;
+        prompt += `2. **How to Calculate/Use It**:\n`;
+        prompt += `   - Formula (if applicable)\n`;
+        prompt += `   - Step-by-step example with numbers\n\n`;
+        prompt += `3. **Interpretation Guide**:\n`;
+        prompt += `   - What values are "good" vs "bad"?\n`;
+        prompt += `   - Industry context (tech vs banks, etc.)\n\n`;
+        prompt += `4. **Practical Application**:\n`;
+        prompt += `   - How investors use this metric\n`;
+        prompt += `   - Common mistakes to avoid\n\n`;
+        prompt += `5. **Limitations** (1 sentence):\n`;
+        prompt += `   - When this metric can be misleading\n\n`;
+        prompt += `**Length:** 2-3 short paragraphs | **Tone:** Teacher (clear, example-rich)\n`;
+        prompt += `**Avoid jargon** unless you explain it. Use concrete examples.\n\n`;
+        prompt += `**🤖 YOUR RESPONSE:**\n`;
+        
+        return prompt;
+    }
+
+    // ✅ Extraction de concept financier pour questions éducatives
+    extractFinancialConcept(message) {
+        const lower = message.toLowerCase();
+        
+        const concepts = {
+            'p/e ratio': /\bp\/e\b|price.?to.?earnings|pe ratio/i,
+            'EPS': /\beps\b|earnings per share/i,
+            'dividend yield': /dividend yield|dividend/i,
+            'market cap': /market cap|market capitalization/i,
+            'beta': /\bbeta\b/i,
+            'ROE': /\broe\b|return on equity/i,
+            'profit margin': /profit margin|net margin/i,
+            'debt-to-equity': /debt.?to.?equity|leverage/i,
+            'free cash flow': /free cash flow|fcf/i,
+            'EBITDA': /ebitda/i,
+            'PEG ratio': /peg ratio/i,
+            'short selling': /short sell|shorting/i,
+            'options': /option trading|call|put option/i,
+            'RSI': /\brsi\b|relative strength/i,
+            'moving average': /moving average|sma|ema/i,
+            'support/resistance': /support|resistance/i,
+            'bull market': /bull market|bullish/i,
+            'bear market': /bear market|bearish/i,
+            'IPO': /\bipo\b|initial public offering/i,
+            'stock split': /stock split/i
+        };
+        
+        for (const [concept, pattern] of Object.entries(concepts)) {
+            if (pattern.test(lower)) {
+                return concept;
+            }
+        }
+        
+        return null;
+    }
+
+    // ✅ PROMPT SPÉCIALISÉ: Comparison (sera dans Partie 3)
+    buildComparisonPrompt(userMessage, context) {
+        // Sera fourni dans la partie 3
+        return this.buildGeneralPrompt(userMessage, context);
+    }
+
+    buildHistoricalPrompt(userMessage, context) {
+        // Sera fourni dans la partie 3
+        return this.buildGeneralPrompt(userMessage, context);
+    }
+
+    buildIPOPrompt(userMessage, context) {
+        // Sera fourni dans la partie 3
+        return this.buildGeneralPrompt(userMessage, context);
+    }
+
+    buildEducationalPrompt(userMessage, context) {
+        // Sera fourni dans la partie 3
+        return this.buildGeneralPrompt(userMessage, context);
+    }
+
+    buildGeneralPrompt(userMessage, context) {
+        let prompt = `**👤 USER QUESTION:** "${userMessage}"\n\n`;
+        prompt += `**🤖 YOUR RESPONSE:** (Provide a clear, professional answer)\n`;
+        return prompt;
+    }
+
+    // ===== MÉTHODES UTILITAIRES (identiques) =====
+    
     formatNumber(num) {
         if (!num) return 'N/A';
         if (num >= 1000000000) return (num / 1000000000).toFixed(2) + 'B';
@@ -367,7 +754,6 @@ Examples:
             safetySettings: this.config.api.gemini.safetySettings
         };
 
-        // ✅ APPEL VIA LE WORKER CLOUDFLARE
         console.log(`📡 Calling Gemini via Worker: ${this.workerUrl}`);
 
         const response = await fetch(this.workerUrl, {
@@ -433,7 +819,7 @@ Examples:
             user: userMessage,
             assistant: assistantResponse.text,
             timestamp: Date.now(),
-            symbols: context.entities?.symbols || [],
+            symbols: context.detectedEntities?.symbols || [],
             intent: context.intent?.type || 'GENERAL'
         };
         
@@ -479,22 +865,12 @@ Examples:
             errorMessage += '❌ **Configuration Error**: Gemini Worker URL is missing.\n\n';
             errorMessage += '**Please check chatbot-config.js:**\n';
             errorMessage += '- Verify `api.gemini.workerUrl` is set\n';
-            errorMessage += '- It should look like: `https://gemini-ai-proxy.YOUR-USERNAME.workers.dev/api/gemini`\n';
         } else if (error.message.includes('404')) {
             errorMessage += '❌ **Worker Error 404**: The Gemini Worker was not found.\n\n';
-            errorMessage += '**Possible fixes:**\n';
-            errorMessage += '1. Check the Worker URL in chatbot-config.js\n';
-            errorMessage += '2. Verify the Worker is deployed on Cloudflare\n';
-            errorMessage += '3. Test the Worker endpoint directly\n';
         } else if (error.message.includes('403')) {
-            errorMessage += '❌ **Worker Error 403**: Access denied.\n\n';
-            errorMessage += '**Possible fixes:**\n';
-            errorMessage += '1. Check that GEMINI_API_KEY is set in Worker environment variables\n';
-            errorMessage += '2. Verify your Gemini API key is valid\n';
-            errorMessage += '3. Check Worker CORS settings\n';
+            errorMessage += '❌ **Worker Error 403**: Access denied. Check GEMINI_API_KEY.\n\n';
         } else {
             errorMessage += `**Error:** ${error.message}\n\n`;
-            errorMessage += 'Please try again or contact support.';
         }
         
         return {
@@ -528,3 +904,5 @@ Examples:
 if (typeof module !== 'undefined' && module.exports) {
     module.exports = GeminiAI;
 }
+
+window.GeminiAI = GeminiAI;

@@ -65,7 +65,7 @@ class FinancialChatbotEngine {
     }
 
     // ============================================
-    // PROCESSUS PRINCIPAL
+    // PROCESSUS PRINCIPAL (CORRIGÉ)
     // ============================================
     async processMessage(userMessage) {
         const startTime = performance.now();
@@ -75,23 +75,37 @@ class FinancialChatbotEngine {
 
             const cachedResponse = this.checkCache(userMessage);
             if (cachedResponse) {
-                console.log('Returning cached response');
+                console.log('✅ Returning cached response');
                 return cachedResponse;
             }
 
+            // ✅ CORRECTION: Meilleure analyse du message
             const analysis = this.analyzeMessage(userMessage);
             
-            console.log('Processing:', userMessage.substring(0, 60) + '...');
-            console.log('Detected:', analysis.type);
-            console.log('Symbols:', analysis.symbols);
+            console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+            console.log('📝 Processing:', userMessage.substring(0, 80) + '...');
+            console.log('🎯 Type:', analysis.type);
+            console.log('🏷 Intents:', analysis.intents.join(', '));
+            console.log('📊 Symbols:', analysis.symbols.join(', ') || 'None');
             if (analysis.isComparison) {
-                console.log('COMPARISON MODE:', analysis.comparisonSymbols.join(' vs '));
+                console.log('⚖ COMPARISON MODE:', analysis.comparisonSymbols.join(' vs '));
             }
+            console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
 
+            // ✅ CORRECTION: Construction de contexte intelligente
             const context = await this.buildSmartContext(userMessage, analysis);
-            const enrichedPrompt = this.buildEnhancedPrompt(userMessage, context, analysis);
-            const response = await this.geminiAI.generateResponse(enrichedPrompt, context);
             
+            // ✅ AJOUT: Passer analysis.type dans context.intent
+            context.intent = {
+                type: analysis.type,
+                intents: analysis.intents,
+                isComparison: analysis.isComparison
+            };
+            
+            // ✅ CORRECTION: Ne plus construire de prompt ici, laisser Gemini le faire
+            const response = await this.geminiAI.generateResponse(userMessage, context);
+            
+            // Ajouter les visuels et graphiques
             response.visualCards = await this.generateVisualCards(context, analysis);
             response.chartRequests = await this.generateChartRequests(context, analysis);
             response.suggestions = this.generateAdvancedSuggestions(analysis, context);
@@ -101,16 +115,16 @@ class FinancialChatbotEngine {
             this.updateMetrics(true, response.processingTime);
             this.updateConversationContext(analysis);
 
-            console.log(`Response generated in ${response.processingTime.toFixed(0)}ms`);
+            console.log(`✅ Response generated in ${response.processingTime.toFixed(0)}ms`);
 
             return response;
 
         } catch (error) {
-            console.error('Message processing error:', error);
+            console.error('❌ Message processing error:', error);
             this.updateMetrics(false, performance.now() - startTime);
             
             return {
-                text: `An error occurred: ${error.message}\n\nPlease try again or rephrase your question.`,
+                text: `⚠ **An error occurred:** ${error.message}\n\nPlease try again or rephrase your question.`,
                 error: true,
                 visualCards: [],
                 chartRequests: [],
@@ -120,7 +134,7 @@ class FinancialChatbotEngine {
     }
 
     // ============================================
-    // ANALYSE COMPLÈTE DU MESSAGE
+    // ANALYSE COMPLÈTE DU MESSAGE (CORRIGÉE)
     // ============================================
     analyzeMessage(message) {
         const lowerMessage = message.toLowerCase();
@@ -133,93 +147,74 @@ class FinancialChatbotEngine {
         let type = 'CONVERSATIONAL';
         const intents = [];
         
-        if (isComparison && comparisonSymbols.length >= 2) {
+        // ✅ PRIORITÉ 1: Market News (AVANT tout le reste)
+        if (this.detectMarketNewsIntent(message)) {
+            type = 'MARKET_NEWS_QUERY';
+            intents.push('MARKET_NEWS');
+            console.log('🎯 Detected: MARKET NEWS question');
+        }
+        
+        // ✅ PRIORITÉ 2: Comparison
+        else if (isComparison && comparisonSymbols.length >= 2) {
             type = 'STOCK_COMPARISON';
             intents.push('COMPARISON');
+            console.log('🎯 Detected: STOCK COMPARISON');
         }
         
-        // Advanced intents detection
-        if (this.detectAdvancedAnalysisIntent(message)) {
-            type = symbols.length > 0 && type === 'CONVERSATIONAL' ? 'ADVANCED_ANALYSIS' : type;
-            intents.push('ADVANCED_ANALYSIS');
-        }
-        
-        if (this.detectCorrelationIntent(message)) {
-            intents.push('CORRELATION');
-        }
-        
-        if (this.detectFairValueIntent(message)) {
-            intents.push('FAIR_VALUE');
-        }
-        
-        if (this.detectOptionsIntent(message)) {
-            intents.push('OPTIONS');
-        }
-        
-        if (this.detectInsiderIntent(message)) {
-            intents.push('INSIDER');
-        }
-        
-        if (this.detectIPOIntent(message)) {
-            type = symbols.length > 0 ? type : 'IPO_QUERY';
-            intents.push('IPO');
-        }
-        
-        if (this.detectAnalystIntent(message)) {
-            type = symbols.length > 0 && type === 'CONVERSATIONAL' ? 'ANALYST_QUERY' : type;
-            intents.push('ANALYST');
-        }
-        
-        if (this.detectEarningsIntent(message)) {
-            type = symbols.length > 0 && type === 'CONVERSATIONAL' ? 'EARNINGS_QUERY' : type;
-            intents.push('EARNINGS');
-        }
-        
-        if (this.detectSentimentIntent(message)) {
-            type = symbols.length > 0 && type === 'CONVERSATIONAL' ? 'SENTIMENT_QUERY' : type;
-            intents.push('SENTIMENT');
-        }
-        
-        if (this.detectPeersIntent(message)) {
-            type = symbols.length > 0 && type === 'CONVERSATIONAL' ? 'PEERS_QUERY' : type;
-            intents.push('PEERS');
-        }
-        
-        if (this.detectMarketNewsIntent(message)) {
-            type = type === 'CONVERSATIONAL' ? 'MARKET_NEWS_QUERY' : type;
-            intents.push('MARKET_NEWS');
-        }
-        
-        if (this.detectEarningsCalendarIntent(message)) {
-            type = type === 'CONVERSATIONAL' ? 'EARNINGS_CALENDAR_QUERY' : type;
-            intents.push('EARNINGS_CALENDAR');
-        }
-        
-        if (this.detectHistoricalIntent(message)) {
-            type = symbols.length > 0 && type === 'CONVERSATIONAL' ? 'HISTORICAL_ANALYSIS' : type;
+        // ✅ PRIORITÉ 3: Historical Analysis
+        else if (this.detectHistoricalIntent(message) && symbols.length > 0) {
+            type = 'HISTORICAL_ANALYSIS';
             intents.push('HISTORICAL');
+            console.log('🎯 Detected: HISTORICAL ANALYSIS');
         }
         
-        if (symbols.length > 0 || /\b(stock|share|ticker|analyze|price|chart|performance)\b/i.test(message)) {
-            if (type === 'CONVERSATIONAL') {
-                type = 'STOCK_QUERY';
-            }
-            intents.push('STOCK');
+        // ✅ PRIORITÉ 4: IPO
+        else if (this.detectIPOIntent(message)) {
+            type = 'IPO_QUERY';
+            intents.push('IPO');
+            console.log('🎯 Detected: IPO question');
         }
         
-        if (/\b(market|indices|dow|nasdaq|s&p|sp500)\b/i.test(message)) {
-            if (type === 'CONVERSATIONAL') {
-                type = 'MARKET_QUERY';
-            }
-            intents.push('MARKET');
-        }
-        
-        if (/\b(what is|explain|define|tell me about|how does)\b/i.test(message)) {
-            if (type === 'CONVERSATIONAL') {
-                type = 'EDUCATIONAL_QUERY';
-            }
+        // ✅ PRIORITÉ 5: Educational
+        else if (this.detectEducationalIntent(message)) {
+            type = 'EDUCATIONAL_QUERY';
             intents.push('EDUCATIONAL');
+            console.log('🎯 Detected: EDUCATIONAL question');
         }
+        
+        // ✅ PRIORITÉ 6: Stock Analysis (avec symbole)
+        else if (symbols.length > 0) {
+            type = 'STOCK_QUERY';
+            intents.push('STOCK');
+            
+            // Sous-intents avancés
+            if (this.detectAdvancedAnalysisIntent(message)) {
+                intents.push('ADVANCED_ANALYSIS');
+            }
+            if (this.detectAnalystIntent(message)) {
+                intents.push('ANALYST');
+            }
+            if (this.detectEarningsIntent(message)) {
+                intents.push('EARNINGS');
+            }
+            
+            console.log('🎯 Detected: STOCK ANALYSIS');
+        }
+        
+        // ✅ PRIORITÉ 7: Market General
+        else if (/\b(market|indices|dow|nasdaq|s&p|sp500)\b/i.test(message)) {
+            type = 'MARKET_QUERY';
+            intents.push('MARKET');
+            console.log('🎯 Detected: MARKET GENERAL question');
+        }
+        
+        // Ajouter les sous-intents supplémentaires
+        if (this.detectCorrelationIntent(message)) intents.push('CORRELATION');
+        if (this.detectFairValueIntent(message)) intents.push('FAIR_VALUE');
+        if (this.detectOptionsIntent(message)) intents.push('OPTIONS');
+        if (this.detectInsiderIntent(message)) intents.push('INSIDER');
+        if (this.detectSentimentIntent(message)) intents.push('SENTIMENT');
+        if (this.detectPeersIntent(message)) intents.push('PEERS');
         
         return {
             type,
@@ -228,7 +223,7 @@ class FinancialChatbotEngine {
             timeframes,
             isComparison,
             comparisonSymbols,
-            needsData: symbols.length > 0 || intents.length > 0 || isComparison
+            needsData: symbols.length > 0 || intents.length > 0 || isComparison || type === 'MARKET_NEWS_QUERY'
         };
     }
 
@@ -287,11 +282,59 @@ class FinancialChatbotEngine {
         const messageLower = message.toLowerCase();
         return keywords.some(keyword => messageLower.includes(keyword));
     }
-    
-    detectMarketNewsIntent(message) {
-        const keywords = ['market news', 'news today', 'latest news', 'market update', 'what\'s happening', 'market sentiment', 'top news'];
+
+    // ✅ NOUVELLE MÉTHODE: Détection de questions éducatives
+    detectEducationalIntent(message) {
+        const keywords = [
+            'what is', 'explain', 'define', 'tell me about',
+            'how does', 'what does', 'meaning of', 'help me understand'
+        ];
         const messageLower = message.toLowerCase();
         return keywords.some(keyword => messageLower.includes(keyword));
+    }
+    
+    // ✅ CORRECTION: Détection Market News (plus stricte)
+    detectMarketNewsIntent(message) {
+        const strictKeywords = [
+            'what\'s happening in the market',
+            'market today',
+            'what\'s happening today',
+            'market news today',
+            'today\'s market',
+            'market update',
+            'how is the market'
+        ];
+        
+        const messageLower = message.toLowerCase();
+        
+        // Check strict matches first
+        if (strictKeywords.some(keyword => messageLower.includes(keyword))) {
+            return true;
+        }
+        
+        // Check if it's a general "what's happening" without a specific stock
+        if (/what'?s happening/i.test(message) && !/\b[A-Z]{1,5}\b/.test(message)) {
+            return true;
+        }
+        
+        return false;
+    }
+
+    // ✅ CORRECTION: Détection Historical plus stricte
+    detectHistoricalIntent(message) {
+        const keywords = [
+            'evolution', 'historical', 'history', 'performance over',
+            'last 5 years', 'past years', 'over the years', 'trend over',
+            'since', 'how has', 'performed in', 'over time'
+        ];
+        
+        const messageLower = message.toLowerCase();
+        
+        // Must contain a historical keyword + a timeframe indicator
+        const hasHistoricalKeyword = keywords.some(keyword => messageLower.includes(keyword));
+        const hasTimeframe = /\d+\s*(year|month|day|week)|ytd|max/i.test(messageLower);
+        
+        return hasHistoricalKeyword || hasTimeframe;
     }
 
     detectIPOIntent(message) {
@@ -426,7 +469,7 @@ class FinancialChatbotEngine {
     }
 
     // ============================================
-    // CONSTRUCTION DE CONTEXTE ULTRA-COMPLET
+    // CONSTRUCTION DE CONTEXTE ULTRA-COMPLET (CORRIGÉ)
     // ============================================
     
     async buildSmartContext(message, analysis) {
@@ -444,210 +487,266 @@ class FinancialChatbotEngine {
             }
         };
 
-        if (!analysis.needsData) {
-            return context;
-        }
-
-        if (analysis.isComparison && analysis.comparisonSymbols.length >= 2) {
-            context.comparisonData = await this.loadComparisonData(analysis.comparisonSymbols, analysis.timeframes[0]);
-            
-            // Calculate advanced correlation metrics
-            if (context.comparisonData.timeSeries && context.comparisonData.timeSeries.length >= 2) {
-                context.correlationAnalysis = this.calculateCorrelation(context.comparisonData.timeSeries);
-            }
-            
-            return context;
-        }
-
-        const symbol = analysis.symbols[0];
-        
-        if (!symbol && !analysis.intents.includes('MARKET_NEWS') && !analysis.intents.includes('IPO') && !analysis.intents.includes('EARNINGS_CALENDAR')) {
-            return context;
-        }
-
-        if (symbol) {
-            console.log(`Loading comprehensive data for ${symbol}`);
+        // ✅ CORRECTION 1: Market News en PRIORITÉ (avant needsData check)
+        if (analysis.type === 'MARKET_NEWS_QUERY') {
+            console.log('📰 Loading MARKET NEWS data...');
             
             try {
-                const [
-                    stockData,
-                    recommendations,
-                    priceTarget,
-                    earnings,
-                    revenueEstimates,
-                    epsEstimates,
-                    peers,
-                    companyNews,
-                    sentiment,
-                    upgradesDowngrades
-                ] = await Promise.all([
-                    this.analytics.getStockData(symbol).catch(() => null),
-                    this.analytics.getRecommendationTrends(symbol).catch(() => null),
-                    this.analytics.getPriceTarget(symbol).catch(() => null),
-                    this.analytics.getEarnings(symbol).catch(() => null),
-                    this.analytics.getRevenueEstimates(symbol, 'quarterly').catch(() => null),
-                    this.analytics.getEPSEstimates(symbol, 'quarterly').catch(() => null),
-                    this.analytics.getPeers(symbol).catch(() => []),
-                    this.analytics.getCompanyNews(symbol).catch(() => []),
-                    this.analytics.analyzeNewsImpact(symbol).catch(() => null),
-                    this.analytics.getUpgradeDowngrade(symbol).catch(() => [])
-                ]);
-
-                if (stockData) {
-                    context.stockData = stockData;
-                }
-                
-                if (recommendations && recommendations.length > 0) {
-                    const latest = recommendations[0];
-                    const total = latest.strongBuy + latest.buy + latest.hold + latest.sell + latest.strongSell;
-                    const bullishPercent = total > 0 ? ((latest.strongBuy + latest.buy) / total * 100).toFixed(1) : 0;
-                    
-                    context.analystRecommendations = {
-                        period: latest.period,
-                        strongBuy: latest.strongBuy,
-                        buy: latest.buy,
-                        hold: latest.hold,
-                        sell: latest.sell,
-                        strongSell: latest.strongSell,
-                        total: total,
-                        bullishPercent: bullishPercent,
-                        consensus: this.getConsensusRating(latest),
-                        history: recommendations.slice(0, 4)
-                    };
-                }
-                
-                if (priceTarget && priceTarget.targetMean) {
-                    const currentPrice = stockData?.quote?.current || 0;
-                    const upside = currentPrice > 0 ? ((priceTarget.targetMean - currentPrice) / currentPrice * 100).toFixed(1) : 0;
-                    
-                    context.priceTarget = {
-                        current: currentPrice,
-                        targetMean: priceTarget.targetMean,
-                        targetHigh: priceTarget.targetHigh,
-                        targetLow: priceTarget.targetLow,
-                        targetMedian: priceTarget.targetMedian,
-                        upside: upside,
-                        lastUpdated: priceTarget.lastUpdated
-                    };
-                }
-                
-                if (earnings && earnings.length > 0) {
-                    const recentEarnings = earnings.slice(0, 8);
-                    let beatCount = 0;
-                    let missCount = 0;
-                    
-                    recentEarnings.forEach(e => {
-                        if (e.surprise && e.surprise > 0) beatCount++;
-                        if (e.surprise && e.surprise < 0) missCount++;
-                    });
-                    
-                    context.earningsHistory = {
-                        recent: recentEarnings,
-                        beatCount: beatCount,
-                        missCount: missCount,
-                        beatRate: recentEarnings.length > 0 ? ((beatCount / recentEarnings.length) * 100).toFixed(1) : 0,
-                        totalReports: earnings.length,
-                        earningsQuality: this.calculateEarningsQuality(recentEarnings)
-                    };
-                }
-                
-                if (revenueEstimates && revenueEstimates.length > 0) {
-                    context.revenueEstimates = revenueEstimates.slice(0, 4);
-                }
-                
-                if (epsEstimates && epsEstimates.length > 0) {
-                    context.epsEstimates = epsEstimates.slice(0, 4);
-                }
-                
-                if (peers && peers.length > 0) {
-                    context.peers = peers.slice(0, 10);
-                }
-                
-                if (companyNews && companyNews.length > 0) {
-                    context.recentNews = companyNews.slice(0, 10).map(n => ({
-                        headline: n.headline,
-                        source: n.source,
-                        datetime: n.datetime,
-                        url: n.url
-                    }));
-                }
-                
-                if (sentiment) {
-                    context.sentiment = sentiment;
-                }
-                
-                if (upgradesDowngrades && upgradesDowngrades.length > 0) {
-                    context.upgradesDowngrades = upgradesDowngrades.slice(0, 10);
-                }
-
-                const needsHistory = analysis.intents.includes('HISTORICAL') || 
-                                     analysis.intents.includes('ADVANCED_ANALYSIS') ||
-                                     /\b(history|historical|evolution|performance|trend|chart|volatility|return)\b/i.test(message);
-                
-                if (needsHistory && this.analytics) {
-                    const timeframe = analysis.timeframes[0] || this.conversationContext.lastTimeframe || '1y';
-                    const outputsize = this.getOutputSize(timeframe);
-                    
-                    const timeSeries = await this.analytics.getTimeSeries(symbol, '1day', outputsize);
-                    
-                    if (timeSeries && timeSeries.data && timeSeries.data.length > 0) {
-                        context.timeSeriesData = timeSeries;
-                        context.historicalStats = this.calculateHistoricalStats(timeSeries);
-                        context.technicalIndicators = this.calculateTechnicalIndicators(timeSeries);
-                        
-                        // Advanced Wall Street metrics
-                        context.advancedMetrics = this.calculateAdvancedMetrics(timeSeries, stockData);
-                        context.riskMetrics = this.calculateRiskMetrics(timeSeries);
-                    }
-                }
-
-            } catch (error) {
-                console.error('Error loading comprehensive data:', error);
-            }
-        }
-
-        // Market data loading
-        if (analysis.intents.includes('MARKET_NEWS')) {
-            try {
-                const marketNews = await this.analytics.getMarketNews('general');
+                // Charger les news du marché
+                const marketNews = await this.analytics.getMarketNews('general').catch(() => []);
                 if (marketNews && marketNews.length > 0) {
                     context.marketNews = marketNews.slice(0, 15);
+                    console.log(`✅ Loaded ${context.marketNews.length} market news articles`);
                 }
+                
+                // Charger les données des indices majeurs
+                const [sp500, nasdaq, dow] = await Promise.all([
+                    this.analytics.getStockData('SPY').catch(() => null),
+                    this.analytics.getStockData('QQQ').catch(() => null),
+                    this.analytics.getStockData('DIA').catch(() => null)
+                ]);
+                
+                context.marketData = {};
+                if (sp500) {
+                    context.marketData.sp500 = {
+                        price: sp500.quote.current,
+                        changePercent: sp500.quote.changePercent
+                    };
+                }
+                if (nasdaq) {
+                    context.marketData.nasdaq = {
+                        price: nasdaq.quote.current,
+                        changePercent: nasdaq.quote.changePercent
+                    };
+                }
+                if (dow) {
+                    context.marketData.dow = {
+                        price: dow.quote.current,
+                        changePercent: dow.quote.changePercent
+                    };
+                }
+                
+                console.log('✅ Market indices loaded');
+                
             } catch (error) {
-                console.error('Error fetching market news:', error);
+                console.error('❌ Error loading market news data:', error);
             }
+            
+            // ✅ IMPORTANT: Return early pour Market News
+            return context;
         }
 
-        if (analysis.intents.includes('IPO')) {
+        // ✅ CORRECTION 2: Educational Questions (pas besoin de data)
+        if (analysis.type === 'EDUCATIONAL_QUERY') {
+            console.log('📚 Educational question detected - no market data needed');
+            return context;
+        }
+
+        // ✅ CORRECTION 3: IPO Questions
+        if (analysis.type === 'IPO_QUERY') {
+            console.log('💰 Loading IPO data...');
+            
             try {
-                const ipos = await this.analytics.getIPOCalendar();
+                const ipos = await this.analytics.getIPOCalendar().catch(() => []);
                 if (ipos && ipos.length > 0) {
                     context.upcomingIPOs = ipos.slice(0, 20);
+                    console.log(`✅ Loaded ${context.upcomingIPOs.length} upcoming IPOs`);
                 }
             } catch (error) {
-                console.error('Error fetching IPO calendar:', error);
+                console.error('❌ Error fetching IPO calendar:', error);
             }
+            
+            return context;
         }
 
-        if (analysis.intents.includes('EARNINGS_CALENDAR')) {
-            try {
-                const earnings = await this.analytics.getEarningsCalendar();
-                if (earnings && earnings.length > 0) {
-                    context.upcomingEarnings = earnings.slice(0, 30);
+        // ✅ Pour les autres types, vérifier si on a besoin de données
+        if (!analysis.needsData) {
+            console.log('ℹ No market data needed for this query');
+            return context;
+        }
+
+        // ✅ CORRECTION 4: Comparison Data
+        if (analysis.isComparison && analysis.comparisonSymbols.length >= 2) {
+            console.log(`⚖ Loading comparison data for: ${analysis.comparisonSymbols.join(' vs ')}`);
+            context.comparisonData = await this.loadComparisonData(analysis.comparisonSymbols, analysis.timeframes[0]);
+            
+            // Calculate correlation
+            if (context.comparisonData.timeSeries && context.comparisonData.timeSeries.length >= 2) {
+                context.correlationAnalysis = this.calculateCorrelation(context.comparisonData.timeSeries);
+                console.log(`✅ Correlation: ${context.correlationAnalysis.correlation}`);
+            }
+            
+            return context;
+        }
+
+        // ✅ CORRECTION 5: Single Stock Analysis
+        const symbol = analysis.symbols[0];
+        
+        if (!symbol) {
+            console.log('⚠ No symbol detected');
+            return context;
+        }
+
+        console.log(`📊 Loading comprehensive data for ${symbol}...`);
+        
+        try {
+            // ✅ Charger les données de base (toujours)
+            const [
+                stockData,
+                recommendations,
+                priceTarget,
+                earnings
+            ] = await Promise.all([
+                this.analytics.getStockData(symbol).catch(() => null),
+                this.analytics.getRecommendationTrends(symbol).catch(() => null),
+                this.analytics.getPriceTarget(symbol).catch(() => null),
+                this.analytics.getEarnings(symbol).catch(() => null)
+            ]);
+
+            if (stockData) {
+                context.stockData = stockData;
+                console.log(`✅ Stock data loaded: $${stockData.quote.current}`);
+            }
+            
+            // Analyst Recommendations
+            if (recommendations && recommendations.length > 0) {
+                const latest = recommendations[0];
+                const total = latest.strongBuy + latest.buy + latest.hold + latest.sell + latest.strongSell;
+                const bullishPercent = total > 0 ? ((latest.strongBuy + latest.buy) / total * 100).toFixed(1) : 0;
+                
+                context.analystRecommendations = {
+                    period: latest.period,
+                    strongBuy: latest.strongBuy,
+                    buy: latest.buy,
+                    hold: latest.hold,
+                    sell: latest.sell,
+                    strongSell: latest.strongSell,
+                    total: total,
+                    bullishPercent: bullishPercent,
+                    consensus: this.getConsensusRating(latest),
+                    history: recommendations.slice(0, 4)
+                };
+                console.log(`✅ Analyst consensus: ${context.analystRecommendations.consensus}`);
+            }
+            
+            // Price Target
+            if (priceTarget && priceTarget.targetMean) {
+                const currentPrice = stockData?.quote?.current || 0;
+                const upside = currentPrice > 0 ? ((priceTarget.targetMean - currentPrice) / currentPrice * 100).toFixed(1) : 0;
+                
+                context.priceTarget = {
+                    current: currentPrice,
+                    targetMean: priceTarget.targetMean,
+                    targetHigh: priceTarget.targetHigh,
+                    targetLow: priceTarget.targetLow,
+                    targetMedian: priceTarget.targetMedian,
+                    upside: upside,
+                    lastUpdated: priceTarget.lastUpdated
+                };
+                console.log(`✅ Price target: $${priceTarget.targetMean} (${upside}% upside)`);
+            }
+            
+            // Earnings History
+            if (earnings && earnings.length > 0) {
+                const recentEarnings = earnings.slice(0, 8);
+                let beatCount = 0;
+                let missCount = 0;
+                
+                recentEarnings.forEach(e => {
+                    if (e.surprise && e.surprise > 0) beatCount++;
+                    if (e.surprise && e.surprise < 0) missCount++;
+                });
+                
+                context.earningsHistory = {
+                    recent: recentEarnings,
+                    beatCount: beatCount,
+                    missCount: missCount,
+                    beatRate: recentEarnings.length > 0 ? ((beatCount / recentEarnings.length) * 100).toFixed(1) : 0,
+                    totalReports: earnings.length,
+                    earningsQuality: this.calculateEarningsQuality(recentEarnings)
+                };
+                console.log(`✅ Earnings: ${context.earningsHistory.beatRate}% beat rate`);
+            }
+
+            // ✅ CORRECTION 6: Historical Data (seulement si nécessaire)
+            const needsHistory = analysis.type === 'HISTORICAL_ANALYSIS' || 
+                                 analysis.intents.includes('HISTORICAL') || 
+                                 analysis.intents.includes('ADVANCED_ANALYSIS') ||
+                                 /\b(history|historical|evolution|performance|trend|chart|volatility|return)\b/i.test(message);
+            
+            if (needsHistory && this.analytics) {
+                console.log('📈 Loading historical time series...');
+                const timeframe = analysis.timeframes[0] || this.conversationContext.lastTimeframe || '1y';
+                const outputsize = this.getOutputSize(timeframe);
+                
+                const timeSeries = await this.analytics.getTimeSeries(symbol, '1day', outputsize).catch(() => null);
+                
+                if (timeSeries && timeSeries.data && timeSeries.data.length > 0) {
+                    context.timeSeriesData = timeSeries;
+                    context.historicalStats = this.calculateHistoricalStats(timeSeries);
+                    context.technicalIndicators = this.calculateTechnicalIndicators(timeSeries);
+                    
+                    // Advanced Wall Street metrics
+                    context.advancedMetrics = this.calculateAdvancedMetrics(timeSeries, stockData);
+                    context.riskMetrics = this.calculateRiskMetrics(timeSeries);
+                    
+                    console.log(`✅ Historical data: ${timeSeries.data.length} points, ${context.historicalStats.totalReturn}% return`);
+                } else {
+                    console.log('⚠ No historical data available');
                 }
-            } catch (error) {
-                console.error('Error fetching earnings calendar:', error);
             }
+
+            // ✅ Charger données supplémentaires en parallèle (optionnel)
+            const [
+                revenueEstimates,
+                epsEstimates,
+                peers,
+                companyNews,
+                sentiment,
+                upgradesDowngrades
+            ] = await Promise.all([
+                this.analytics.getRevenueEstimates(symbol, 'quarterly').catch(() => null),
+                this.analytics.getEPSEstimates(symbol, 'quarterly').catch(() => null),
+                this.analytics.getPeers(symbol).catch(() => []),
+                this.analytics.getCompanyNews(symbol).catch(() => []),
+                this.analytics.analyzeNewsImpact(symbol).catch(() => null),
+                this.analytics.getUpgradeDowngrade(symbol).catch(() => [])
+            ]);
+            
+            if (revenueEstimates && revenueEstimates.length > 0) {
+                context.revenueEstimates = revenueEstimates.slice(0, 4);
+            }
+            
+            if (epsEstimates && epsEstimates.length > 0) {
+                context.epsEstimates = epsEstimates.slice(0, 4);
+            }
+            
+            if (peers && peers.length > 0) {
+                context.peers = peers.slice(0, 10);
+            }
+            
+            if (companyNews && companyNews.length > 0) {
+                context.recentNews = companyNews.slice(0, 10).map(n => ({
+                    headline: n.headline,
+                    source: n.source,
+                    datetime: n.datetime,
+                    url: n.url
+                }));
+            }
+            
+            if (sentiment) {
+                context.sentiment = sentiment;
+            }
+            
+            if (upgradesDowngrades && upgradesDowngrades.length > 0) {
+                context.upgradesDowngrades = upgradesDowngrades.slice(0, 10);
+            }
+
+        } catch (error) {
+            console.error('❌ Error loading stock data:', error);
         }
 
-        if (analysis.type === 'MARKET_QUERY' && this.analytics) {
-            try {
-                context.marketData = await this.analytics.getMarketOverview();
-            } catch (error) {
-                console.error('Error fetching market overview:', error);
-            }
-        }
-
+        console.log('✅ Context built successfully');
         return context;
     }
     
