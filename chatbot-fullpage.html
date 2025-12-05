@@ -3,7 +3,7 @@
 <head>
     <meta charset='UTF-8'>
     <meta name='viewport' content='width=device-width, initial-scale=1.0'>
-    <title>Alphy - AI Financial Assistant</title>
+    <title>Alphy AI Assistant</title>
     
     <!-- Font Awesome -->
     <link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css'>
@@ -17,13 +17,11 @@
     <link rel='stylesheet' href='assets/css/common.css'>
     <link rel='stylesheet' href='assets/css/sidebar.css'>
     <link rel="stylesheet" href="assets/css/user-menu.css">
+    <!-- ✅ FAVICON DYNAMIQUE - ICI -->
+    <script src="assets/js/favicon-dynamic.js"></script>
     
     <!-- Chatbot Styles -->
     <link rel="stylesheet" href="assets/css/chatbot-futuristic.css">
-    <link rel="stylesheet" href="assets/css/chatbot-modals.css">
-    
-    <!-- Favicon Dynamique -->
-    <script src="assets/js/favicon-dynamic.js"></script>
 
     <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
@@ -33,6 +31,8 @@
     <!-- Configuration Firebase -->
     <script src="assets/js/firebase-config.js"></script>
     <script src="assets/js/auth-guard.js"></script>
+
+    <!-- ✅ ACCESS CONTROL - VÉRIFICATION DU PLAN -->
     <script src="assets/js/access-control.js"></script>
     
     <!-- Favicon -->
@@ -47,7 +47,7 @@
     <canvas id="particles-canvas" class="particles-background"></canvas>
 
     <div class='layout-wrapper'>
-        <!-- SIDEBAR -->
+        <!-- SIDEBAR (Inchangée) -->
         <aside class='sidebar' id='sidebar'>
             <div class="sidebar-header">
                 <div class="logo-container">
@@ -243,7 +243,7 @@
         <!-- MAIN CONTENT -->
         <div class='main-content chatbot-main-content'>
             
-            <!-- Header -->
+            <!-- Header (Aligné avec sidebar) -->
             <header class='top-header chatbot-top-header'>
                 <div class='header-left'>
                     <button class='mobile-toggle' id='mobileToggle'>
@@ -292,7 +292,7 @@
                             
                             <!-- Welcome Screen avec Robot 3D -->
                             <div class="welcome-screen" id="welcome-screen">
-                                <!-- Robot 3D Container -->
+                                <!-- ✅ ROBOT 3D ULTRA-RÉALISTE (THREE.JS) -->
                                 <div id="robot-3d-container" class="robot-3d-container-threejs"></div>
                                 
                                 <h2 class="welcome-title">Welcome to Alphy AI</h2>
@@ -383,404 +383,14 @@
         </div>
     </div>
 
-    <!-- MODALS -->
-    
-    <!-- Share Modal -->
-    <div class="chatbot-modal" id="share-modal">
-        <div class="modal-overlay"></div>
-        <div class="modal-container">
-            <div class="modal-header">
-                <h2 class="modal-title">
-                    <i class="fas fa-share-alt"></i>
-                    Share Conversation
-                </h2>
-                <button class="modal-close" data-modal="share-modal">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
-            
-            <div class="modal-body">
-                <div class="share-options">
-                    
-                    <button class="share-option" id="share-pdf">
-                        <div class="share-icon">
-                            <i class="fas fa-file-pdf"></i>
-                        </div>
-                        <div class="share-content">
-                            <h3>Export to PDF</h3>
-                            <p>Download conversation as professional PDF report</p>
-                        </div>
-                        <i class="fas fa-chevron-right"></i>
-                    </button>
-                    
-                    <button class="share-option" id="share-link">
-                        <div class="share-icon">
-                            <i class="fas fa-link"></i>
-                        </div>
-                        <div class="share-content">
-                            <h3>Copy Shareable Link</h3>
-                            <p>Generate a secure link to share this conversation</p>
-                        </div>
-                        <i class="fas fa-chevron-right"></i>
-                    </button>
-                    
-                    <button class="share-option" id="share-markdown">
-                        <div class="share-icon">
-                            <i class="fas fa-file-code"></i>
-                        </div>
-                        <div class="share-content">
-                            <h3>Export as Markdown</h3>
-                            <p>Download conversation in text format (.md)</p>
-                        </div>
-                        <i class="fas fa-chevron-right"></i>
-                    </button>
-                    
-                    <button class="share-option" id="share-email">
-                        <div class="share-icon">
-                            <i class="fas fa-envelope"></i>
-                        </div>
-                        <div class="share-content">
-                            <h3>Send via Email</h3>
-                            <p>Email this conversation to yourself or a colleague</p>
-                        </div>
-                        <i class="fas fa-chevron-right"></i>
-                    </button>
-                    
-                    <button class="share-option" id="share-summary">
-                        <div class="share-icon">
-                            <i class="fas fa-chart-line"></i>
-                        </div>
-                        <div class="share-content">
-                            <h3>Generate Analysis Summary</h3>
-                            <p>Create a shareable executive summary of the analysis</p>
-                        </div>
-                        <i class="fas fa-chevron-right"></i>
-                    </button>
-                    
-                </div>
-            </div>
-            
-            <div class="modal-footer">
-                <button class="btn-secondary" data-modal="share-modal">Cancel</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Settings Modal -->
-    <div class="chatbot-modal" id="settings-modal">
-        <div class="modal-overlay"></div>
-        <div class="modal-container modal-large">
-            <div class="modal-header">
-                <h2 class="modal-title">
-                    <i class="fas fa-cog"></i>
-                    Settings
-                </h2>
-                <button class="modal-close" data-modal="settings-modal">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
-            
-            <div class="modal-body">
-                <!-- Tabs Navigation -->
-                <div class="settings-tabs">
-                    <button class="settings-tab active" data-tab="ai-settings">
-                        <i class="fas fa-brain"></i>
-                        AI Settings
-                    </button>
-                    <button class="settings-tab" data-tab="display">
-                        <i class="fas fa-paint-brush"></i>
-                        Display
-                    </button>
-                    <button class="settings-tab" data-tab="notifications">
-                        <i class="fas fa-bell"></i>
-                        Notifications
-                    </button>
-                    <button class="settings-tab" data-tab="data">
-                        <i class="fas fa-database"></i>
-                        Data
-                    </button>
-                    <button class="settings-tab" data-tab="shortcuts">
-                        <i class="fas fa-keyboard"></i>
-                        Shortcuts
-                    </button>
-                </div>
-                
-                <!-- Tab Content -->
-                <div class="settings-content">
-                    
-                    <!-- AI Settings Tab -->
-                    <div class="settings-panel active" data-panel="ai-settings">
-                        <h3 class="panel-title">AI Configuration</h3>
-                        
-                        <div class="setting-group">
-                            <label class="setting-label">
-                                <span>AI Model</span>
-                                <span class="setting-badge">Pro</span>
-                            </label>
-                            <select class="setting-select" id="ai-model">
-                                <option value="gemini-pro">Gemini Pro (Recommended)</option>
-                                <option value="gemini-ultra" disabled>Gemini Ultra (Platinum only)</option>
-                            </select>
-                            <p class="setting-description">Choose the AI model for analysis</p>
-                        </div>
-                        
-                        <div class="setting-group">
-                            <label class="setting-label">
-                                <span>Response Creativity</span>
-                                <span class="setting-value" id="temperature-value">0.85</span>
-                            </label>
-                            <input type="range" class="setting-range" id="temperature" min="0" max="1" step="0.05" value="0.85">
-                            <p class="setting-description">Higher values = more creative responses</p>
-                        </div>
-                        
-                        <div class="setting-group">
-                            <label class="setting-label">
-                                <span>Max Response Length</span>
-                                <span class="setting-value" id="max-tokens-value">8192</span>
-                            </label>
-                            <select class="setting-select" id="max-tokens">
-                                <option value="2048">2048 tokens (Short)</option>
-                                <option value="4096">4096 tokens (Medium)</option>
-                                <option value="8192" selected>8192 tokens (Long)</option>
-                            </select>
-                            <p class="setting-description">Maximum length of AI responses</p>
-                        </div>
-                        
-                        <div class="setting-group">
-                            <label class="setting-label">
-                                <span>Default Timeframe</span>
-                            </label>
-                            <select class="setting-select" id="default-timeframe">
-                                <option value="1d">1 Day</option>
-                                <option value="1w">1 Week</option>
-                                <option value="1m">1 Month</option>
-                                <option value="3m">3 Months</option>
-                                <option value="1y" selected>1 Year</option>
-                                <option value="5y">5 Years</option>
-                            </select>
-                            <p class="setting-description">Default period for stock analysis</p>
-                        </div>
-                    </div>
-                    
-                    <!-- Display Tab -->
-                    <div class="settings-panel" data-panel="display">
-                        <h3 class="panel-title">Display Preferences</h3>
-                        
-                        <div class="setting-group">
-                            <label class="setting-label">
-                                <span>Theme</span>
-                            </label>
-                            <div class="setting-toggle-group">
-                                <button class="setting-toggle-btn active" data-theme="auto">
-                                    <i class="fas fa-magic"></i> Auto
-                                </button>
-                                <button class="setting-toggle-btn" data-theme="light">
-                                    <i class="fas fa-sun"></i> Light
-                                </button>
-                                <button class="setting-toggle-btn" data-theme="dark">
-                                    <i class="fas fa-moon"></i> Dark
-                                </button>
-                            </div>
-                        </div>
-                        
-                        <div class="setting-group">
-                            <label class="setting-label">
-                                <span>Font Size</span>
-                                <span class="setting-value" id="font-size-value">16px</span>
-                            </label>
-                            <input type="range" class="setting-range" id="font-size" min="12" max="20" step="1" value="16">
-                            <p class="setting-description">Adjust message text size</p>
-                        </div>
-                        
-                        <div class="setting-group">
-                            <div class="setting-checkbox">
-                                <input type="checkbox" id="enable-animations" checked>
-                                <label for="enable-animations">
-                                    <span class="checkbox-icon"></span>
-                                    <span>Enable Animations</span>
-                                </label>
-                            </div>
-                            <p class="setting-description">3D effects, particles, and transitions</p>
-                        </div>
-                        
-                        <div class="setting-group">
-                            <div class="setting-checkbox">
-                                <input type="checkbox" id="show-robot" checked>
-                                <label for="show-robot">
-                                    <span class="checkbox-icon"></span>
-                                    <span>Show 3D Robot</span>
-                                </label>
-                            </div>
-                            <p class="setting-description">Display animated 3D robot on welcome screen</p>
-                        </div>
-                        
-                        <div class="setting-group">
-                            <div class="setting-checkbox">
-                                <input type="checkbox" id="compact-mode">
-                                <label for="compact-mode">
-                                    <span class="checkbox-icon"></span>
-                                    <span>Compact Mode</span>
-                                </label>
-                            </div>
-                            <p class="setting-description">Reduce spacing for more content</p>
-                        </div>
-                    </div>
-                    
-                    <!-- Notifications Tab -->
-                    <div class="settings-panel" data-panel="notifications">
-                        <h3 class="panel-title">Notification Preferences</h3>
-                        
-                        <div class="setting-group">
-                            <div class="setting-checkbox">
-                                <input type="checkbox" id="enable-sound" checked>
-                                <label for="enable-sound">
-                                    <span class="checkbox-icon"></span>
-                                    <span>Sound Notifications</span>
-                                </label>
-                            </div>
-                            <p class="setting-description">Play sound when receiving messages</p>
-                        </div>
-                        
-                        <div class="setting-group">
-                            <div class="setting-checkbox">
-                                <input type="checkbox" id="email-alerts">
-                                <label for="email-alerts">
-                                    <span class="checkbox-icon"></span>
-                                    <span>Email Alerts</span>
-                                </label>
-                            </div>
-                            <p class="setting-description">Receive email for important market events</p>
-                        </div>
-                        
-                        <div class="setting-group">
-                            <label class="setting-label">
-                                <span>Alert Frequency</span>
-                            </label>
-                            <select class="setting-select" id="alert-frequency">
-                                <option value="realtime">Real-time</option>
-                                <option value="hourly">Hourly digest</option>
-                                <option value="daily" selected>Daily digest</option>
-                                <option value="weekly">Weekly digest</option>
-                            </select>
-                        </div>
-                    </div>
-                    
-                    <!-- Data Tab -->
-                    <div class="settings-panel" data-panel="data">
-                        <h3 class="panel-title">Data Management</h3>
-                        
-                        <div class="setting-group">
-                            <label class="setting-label">
-                                <span>Conversation Storage</span>
-                            </label>
-                            <div class="setting-info">
-                                <i class="fas fa-info-circle"></i>
-                                <span>You have <strong id="conversations-count">0</strong> saved conversations</span>
-                            </div>
-                        </div>
-                        
-                        <div class="setting-group">
-                            <button class="btn-danger-outline" id="clear-history">
-                                <i class="fas fa-trash-alt"></i>
-                                Clear All Conversations
-                            </button>
-                            <p class="setting-description">This action cannot be undone</p>
-                        </div>
-                        
-                        <div class="setting-group">
-                            <button class="btn-primary-outline" id="export-data">
-                                <i class="fas fa-download"></i>
-                                Export All Data
-                            </button>
-                            <p class="setting-description">Download all conversations as JSON</p>
-                        </div>
-                        
-                        <div class="setting-group">
-                            <div class="setting-checkbox">
-                                <input type="checkbox" id="auto-save" checked>
-                                <label for="auto-save">
-                                    <span class="checkbox-icon"></span>
-                                    <span>Auto-save Conversations</span>
-                                </label>
-                            </div>
-                            <p class="setting-description">Automatically save chats to Firebase</p>
-                        </div>
-                    </div>
-                    
-                    <!-- Shortcuts Tab -->
-                    <div class="settings-panel" data-panel="shortcuts">
-                        <h3 class="panel-title">Keyboard Shortcuts</h3>
-                        
-                        <div class="shortcuts-list">
-                            <div class="shortcut-item">
-                                <span class="shortcut-desc">Send message</span>
-                                <div class="shortcut-keys">
-                                    <kbd>Ctrl</kbd> + <kbd>Enter</kbd>
-                                </div>
-                            </div>
-                            <div class="shortcut-item">
-                                <span class="shortcut-desc">New conversation</span>
-                                <div class="shortcut-keys">
-                                    <kbd>Ctrl</kbd> + <kbd>N</kbd>
-                                </div>
-                            </div>
-                            <div class="shortcut-item">
-                                <span class="shortcut-desc">Clear input</span>
-                                <div class="shortcut-keys">
-                                    <kbd>Esc</kbd>
-                                </div>
-                            </div>
-                            <div class="shortcut-item">
-                                <span class="shortcut-desc">Focus input</span>
-                                <div class="shortcut-keys">
-                                    <kbd>/</kbd>
-                                </div>
-                            </div>
-                            <div class="shortcut-item">
-                                <span class="shortcut-desc">Toggle dark mode</span>
-                                <div class="shortcut-keys">
-                                    <kbd>Ctrl</kbd> + <kbd>D</kbd>
-                                </div>
-                            </div>
-                            <div class="shortcut-item">
-                                <span class="shortcut-desc">Open settings</span>
-                                <div class="shortcut-keys">
-                                    <kbd>Ctrl</kbd> + <kbd>,</kbd>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                </div>
-            </div>
-            
-            <div class="modal-footer">
-                <button class="btn-secondary" data-modal="settings-modal">Cancel</button>
-                <button class="btn-primary" id="save-settings">
-                    <i class="fas fa-save"></i>
-                    Save Settings
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Toast Notifications Container -->
-    <div class="toast-container" id="toast-container"></div>
-
-    <!-- SCRIPTS -->
-    
-    <!-- THREE.JS Library -->
+    <!-- ✅ THREE.JS LIBRARY -->
     <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
     
-    <!-- Chart.js -->
+    <!-- SCRIPTS -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-    
-    <!-- Core Scripts -->
     <script src='assets/js/dark-mode.js'></script>
     <script src='assets/js/common.js'></script>
     <script src='assets/js/sidebar.js'></script>
-    
-    <!-- Chatbot Scripts (ORDER MATTERS!) -->
     <script src="assets/js/chatbot-config.js"></script>
     <script src="assets/js/chatbot-gemini.js"></script>
     <script src="assets/js/chatbot-analytics.js"></script>
@@ -788,13 +398,20 @@
     <script src="assets/js/chatbot-ipo-analyzer.js"></script>
     <script src="assets/js/chatbot-suggestions.js"></script>
     <script src="assets/js/chatbot-ai-engine.js"></script>
+    
+    <!-- ✅ ROBOT 3D (AVANT chatbot-fullpage-ui.js) -->
     <script src="assets/js/chatbot-robot-3d.js"></script>
+    
     <script src="assets/js/chatbot-fullpage-ui.js"></script>
     <script src="assets/js/chatbot-particles.js"></script>
-    <script src="assets/js/chatbot-modals.js"></script>
 
-    <!-- User Menu Fix -->
+    <!-- ============================================
+    ✅ FIX MENU UTILISATEUR - Force l'initialisation
+    ============================================ -->
     <script>
+        /**
+         * Force l'initialisation du menu utilisateur
+         */
         (function forceUserMenuInit() {
             console.log('🔧 Force initializing user menu...');
             
@@ -807,6 +424,7 @@
                     return;
                 }
                 
+                // Supprimer tous les anciens event listeners
                 const newTrigger = trigger.cloneNode(true);
                 trigger.parentNode.replaceChild(newTrigger, trigger);
                 
@@ -838,6 +456,7 @@
                     }
                 });
                 
+                // Fermer si on clique ailleurs
                 document.addEventListener('click', function(e) {
                     if (!freshTrigger.contains(e.target) && !freshDropdown.contains(e.target)) {
                         freshDropdown.classList.remove('active');
@@ -848,6 +467,7 @@
                     }
                 });
                 
+                // Empêcher la fermeture si on clique dans le dropdown
                 freshDropdown.addEventListener('click', function(e) {
                     e.stopPropagation();
                 });
