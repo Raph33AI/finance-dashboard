@@ -610,38 +610,80 @@
     <script src="assets/js/chatbot-ui.js"></script>
     <script src="assets/js/chatbot-particles.js"></script>
 
-    <!-- Initialisation du chatbot -->
+    <!-- ✅ INITIALISATION DU CHATBOT AVEC VÉRIFICATION D'ACCÈS -->
     <script>
     document.addEventListener('DOMContentLoaded', function() {
-        console.log('🤖 Initialisation du chatbot FinanceGPT...');
+        console.log('🤖 Vérification des accès avant initialisation du chatbot...');
         
-        // Vérification que ChatbotConfig est chargé
-        if (typeof ChatbotConfig === 'undefined') {
-            console.error('❌ ChatbotConfig non défini !');
-            console.error('📁 Vérifiez que le fichier assets/js/chatbot-config.js existe');
-            return;
-        }
+        // ✅ ATTENDRE QUE LE SYSTÈME D'ACCESS CONTROL SOIT PRÊT
+        const initChatbotWhenReady = () => {
+            // Vérifier si l'accès a été refusé
+            const accessDenied = sessionStorage.getItem('accessDenied') === 'true';
+            
+            if (accessDenied) {
+                console.log('⛔ Accès refusé - Le chatbot ne sera pas initialisé');
+                return;
+            }
+            
+            // Vérifier que ChatbotConfig est chargé
+            if (typeof ChatbotConfig === 'undefined') {
+                console.error('❌ ChatbotConfig non défini !');
+                console.error('📁 Vérifiez que le fichier assets/js/chatbot-config.js existe');
+                return;
+            }
+            
+            console.log('✅ ChatbotConfig chargé');
+            
+            // Vérifier que ChatbotUI est disponible
+            if (typeof ChatbotUI === 'undefined') {
+                console.error('❌ ChatbotUI non défini !');
+                console.error('📁 Vérifiez que le fichier assets/js/chatbot-ui.js existe');
+                return;
+            }
+            
+            console.log('✅ ChatbotUI chargé');
+            
+            // Initialisation du chatbot
+            try {
+                window.financialChatbot = new ChatbotUI(ChatbotConfig);
+                console.log('🎉 Chatbot FinanceGPT initialisé avec succès !');
+                console.log('💼 Cliquez sur le bouton flottant pour ouvrir le chatbot');
+            } catch (error) {
+                console.error('❌ Erreur lors de l\'initialisation du chatbot:', error);
+                console.error('📋 Détails:', error.message);
+            }
+        };
         
-        console.log('✅ ChatbotConfig chargé');
-        
-        // Vérification que ChatbotUI est disponible
-        if (typeof ChatbotUI === 'undefined') {
-            console.error('❌ ChatbotUI non défini !');
-            console.error('📁 Vérifiez que le fichier assets/js/chatbot-ui.js existe');
-            return;
-        }
-        
-        console.log('✅ ChatbotUI chargé');
-        
-        // Initialisation du chatbot
-        try {
-            window.financialChatbot = new ChatbotUI(ChatbotConfig);
-            console.log('🎉 Chatbot FinanceGPT initialisé avec succès !');
-            console.log('💼 Cliquez sur le bouton flottant pour ouvrir le chatbot');
-        } catch (error) {
-            console.error('❌ Erreur lors de l\'initialisation du chatbot:', error);
-            console.error('📋 Détails:', error.message);
-        }
+        // Attendre un peu pour laisser access-control.js faire son travail
+        setTimeout(initChatbotWhenReady, 500);
+    });
+    </script>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        setTimeout(() => {
+            console.log('🔍 BACKGROUND DIAGNOSIS:');
+            
+            const elements = [
+                'body',
+                '.layout-wrapper',
+                '.main-content',
+                '.container',
+                '.section'
+            ];
+            
+            elements.forEach(selector => {
+                const el = document.querySelector(selector);
+                if (el) {
+                    const bg = window.getComputedStyle(el).background;
+                    console.log(`📦 ${selector}:`, bg.substring(0, 100) + '...');
+                }
+            });
+            
+            console.log('---');
+            console.log('🎨 Canvas background:', 
+                window.getComputedStyle(document.getElementById('particles-canvas')).background);
+        }, 1000);
     });
     </script>
 
