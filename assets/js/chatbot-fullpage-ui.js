@@ -1,6 +1,7 @@
 // ============================================
-// CHATBOT FULL PAGE UI v3.1 - VERSION WALL STREET PRO
-// ✅ NOUVEAU: Sauvegarde et restauration des graphiques
+// CHATBOT FULL PAGE UI v3.2 - VERSION WALL STREET PRO
+// ✅ NOUVEAU v3.2: Photo de profil utilisateur Firebase
+// ✅ v3.1: Sauvegarde et restauration des graphiques
 // Visual Cards + Metrics Tables + Comparison Charts
 // No emojis version
 // ============================================
@@ -21,7 +22,7 @@ class ChatbotFullPageUI {
         this.conversations = [];
         this.currentConversationId = null;
         
-        // ✅ NOUVEAU: Clés de stockage
+        // Clés de stockage
         this.conversationsKey = 'alphy_conversations';
         this.chartsDataKey = 'alphy_charts_data';
         
@@ -32,7 +33,7 @@ class ChatbotFullPageUI {
 
     async init() {
         try {
-            console.log('Initializing Full Page UI v3.1 (with chart persistence)...');
+            console.log('Initializing Full Page UI v3.2 (with user profile photo)...');
             
             await new Promise(resolve => setTimeout(resolve, 100));
             
@@ -48,12 +49,72 @@ class ChatbotFullPageUI {
                 initializeParticles();
             }
             
-            console.log('Full Page UI v3.1 initialized (Wall Street Pro + Chart Persistence)');
+            console.log('Full Page UI v3.2 initialized successfully');
             
         } catch (error) {
             console.error('Full Page UI initialization error:', error);
         }
     }
+
+    // ============================================
+    // USER PROFILE PHOTO MANAGEMENT (NEW v3.2)
+    // ============================================
+    
+    /**
+     * Récupère la photo de profil de l'utilisateur Firebase
+     * @returns {string} URL de la photo ou avatar par défaut
+     */
+    getUserProfilePhoto() {
+        try {
+            // Vérifier si Firebase Auth est disponible
+            if (typeof firebase !== 'undefined' && firebase.auth && firebase.auth().currentUser) {
+                const user = firebase.auth().currentUser;
+                
+                // 1. Photo Firebase (priorité 1)
+                if (user.photoURL) {
+                    console.log('User photo found (Firebase):', user.photoURL);
+                    return user.photoURL;
+                }
+                
+                // 2. Photo Firestore/localStorage (priorité 2)
+                const firestorePhoto = localStorage.getItem('userPhotoURL');
+                if (firestorePhoto && firestorePhoto !== 'null' && firestorePhoto !== 'undefined') {
+                    console.log('User photo found (localStorage):', firestorePhoto);
+                    return firestorePhoto;
+                }
+                
+                // 3. Avatar généré avec initiales (priorité 3)
+                const userName = user.displayName || user.email || 'User';
+                const defaultAvatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(userName)}&background=667eea&color=fff&bold=true&size=128`;
+                console.log('Using generated avatar for:', userName);
+                return defaultAvatar;
+            }
+            
+            // Fallback si Firebase non disponible
+            console.warn('Firebase Auth not available - using default avatar');
+            return 'https://ui-avatars.com/api/?name=User&background=667eea&color=fff&bold=true&size=128';
+            
+        } catch (error) {
+            console.error('Error getting user profile photo:', error);
+            return 'https://ui-avatars.com/api/?name=User&background=667eea&color=fff&bold=true&size=128';
+        }
+    }
+
+    /**
+     * Génère le HTML de l'avatar utilisateur avec photo
+     * @returns {string} HTML de l'avatar
+     */
+    getUserAvatarHTML() {
+        const photoURL = this.getUserProfilePhoto();
+        return `<img src="${photoURL}" 
+                     alt="User Avatar" 
+                     class="user-avatar-img"
+                     onerror="this.onerror=null; this.src='https://ui-avatars.com/api/?name=User&background=667eea&color=fff&bold=true&size=128';">`;
+    }
+
+    // ============================================
+    // ELEMENTS CACHING
+    // ============================================
 
     cacheElements() {
         this.elements = {
@@ -197,7 +258,7 @@ class ChatbotFullPageUI {
     }
 
     // ============================================
-    // GESTION SIDEBAR TOGGLE
+    // SIDEBAR TOGGLE MANAGEMENT
     // ============================================
     
     toggleConversationsSidebar() {
@@ -239,6 +300,7 @@ class ChatbotFullPageUI {
     // ============================================
     // CONVERSATIONS MANAGEMENT
     // ============================================
+    
     loadConversations() {
         const saved = localStorage.getItem(this.conversationsKey);
         if (saved) {
@@ -252,7 +314,6 @@ class ChatbotFullPageUI {
             this.startNewConversation();
         } else {
             this.currentConversationId = this.conversations[0].id;
-            // ✅ NOUVEAU: Restaurer la dernière conversation
             this.loadConversation(this.currentConversationId);
         }
         
@@ -289,7 +350,6 @@ class ChatbotFullPageUI {
     resetInterface() {
         console.log('Resetting interface...');
         
-        // ✅ NOUVEAU: Nettoyer les graphiques avant de réinitialiser
         if (this.charts) {
             this.charts.destroyAllCharts();
         }
@@ -318,7 +378,6 @@ class ChatbotFullPageUI {
         
         this.currentConversationId = id;
         
-        // ✅ NOUVEAU: Nettoyer les graphiques actuels
         if (this.charts) {
             this.charts.destroyAllCharts();
         }
@@ -331,16 +390,13 @@ class ChatbotFullPageUI {
         } else {
             this.hideWelcomeScreen();
             
-            // Restaurer les messages
             for (const msg of conv.messages) {
                 this.addMessage(msg.type, msg.content, false);
                 
-                // ✅ NOUVEAU: Restaurer les graphiques associés au message
                 if (msg.chartRequests && msg.chartRequests.length > 0) {
                     await this.restoreCharts(msg.chartRequests);
                 }
                 
-                // ✅ NOUVEAU: Restaurer les cartes visuelles
                 if (msg.visualCards && msg.visualCards.length > 0) {
                     await this.renderVisualCards(msg.visualCards);
                 }
@@ -452,8 +508,9 @@ class ChatbotFullPageUI {
     }
 
     // ============================================
-    // ✅ SEND MESSAGE (AVEC SAUVEGARDE DES GRAPHIQUES)
+    // SEND MESSAGE (WITH CHART PERSISTENCE)
     // ============================================
+    
     async sendMessage(messageText = null) {
         if (!this.elements.input) {
             console.error('Input element not found!');
@@ -494,29 +551,17 @@ class ChatbotFullPageUI {
             
             this.hideTypingIndicator();
             
-            // ✅ NOUVEAU: Créer un objet message complet avec toutes les données
-            const botMessageData = {
-                type: 'bot',
-                content: response.text,
-                timestamp: Date.now(),
-                chartRequests: response.chartRequests || null,
-                visualCards: response.visualCards || null
-            };
-            
-            // Ajouter le message texte
             this.addMessage('bot', response.text);
             
-            // Render visual cards
             if (response.visualCards && response.visualCards.length > 0) {
                 await this.renderVisualCards(response.visualCards);
             }
             
-            // Generate charts
             if (response.chartRequests && response.chartRequests.length > 0) {
                 await this.generateCharts(response.chartRequests);
             }
             
-            // ✅ NOUVEAU: Mettre à jour le dernier message avec les données complètes
+            // Update last message with complete data
             const conv = this.getCurrentConversation();
             if (conv && conv.messages.length > 0) {
                 const lastMsg = conv.messages[conv.messages.length - 1];
@@ -545,6 +590,10 @@ class ChatbotFullPageUI {
         }
     }
 
+    // ============================================
+    // ADD MESSAGE (WITH USER PROFILE PHOTO - v3.2)
+    // ============================================
+    
     addMessage(type, content, save = true) {
         if (!this.elements.messages) {
             console.error('Messages container not found!');
@@ -556,7 +605,13 @@ class ChatbotFullPageUI {
         
         const avatar = document.createElement('div');
         avatar.className = `message-avatar ${type}-avatar`;
-        avatar.innerHTML = type === 'user' ? '<i class="fas fa-user"></i>' : '<i class="fas fa-robot"></i>';
+        
+        // NEW v3.2: User profile photo for user messages
+        if (type === 'user') {
+            avatar.innerHTML = this.getUserAvatarHTML();
+        } else {
+            avatar.innerHTML = '<i class="fas fa-robot"></i>';
+        }
         
         const contentDiv = document.createElement('div');
         contentDiv.className = 'message-content';
@@ -654,7 +709,7 @@ class ChatbotFullPageUI {
     }
 
     // ============================================
-    // RENDU DES CARTES VISUELLES
+    // VISUAL CARDS RENDERING
     // ============================================
     
     async renderVisualCards(cards) {
@@ -665,7 +720,6 @@ class ChatbotFullPageUI {
         const cardsContainer = document.createElement('div');
         cardsContainer.className = 'visual-cards-container';
         
-        // Metric cards
         const metricCards = cards.filter(c => c.type === 'metric');
         if (metricCards.length > 0) {
             const metricsGrid = document.createElement('div');
@@ -679,7 +733,6 @@ class ChatbotFullPageUI {
             cardsContainer.appendChild(metricsGrid);
         }
         
-        // Comparison cards
         const comparisonCards = cards.filter(c => c.type === 'comparison-card');
         if (comparisonCards.length > 0) {
             const comparisonGrid = document.createElement('div');
@@ -740,6 +793,10 @@ class ChatbotFullPageUI {
         return cardDiv;
     }
 
+    // ============================================
+    // SUGGESTIONS
+    // ============================================
+
     showInitialSuggestions() {
         if (this.suggestions) {
             const initial = this.suggestions.getInitialSuggestions();
@@ -767,8 +824,9 @@ class ChatbotFullPageUI {
     }
 
     // ============================================
-    // ✅ GENERATE CHARTS (AVEC SAUVEGARDE)
+    // CHARTS GENERATION (WITH PERSISTENCE)
     // ============================================
+    
     async generateCharts(chartRequests) {
         if (!this.elements.messages || !this.charts) return;
         
@@ -778,7 +836,6 @@ class ChatbotFullPageUI {
             const chartContainer = document.createElement('div');
             chartContainer.className = 'chart-message';
             
-            // ✅ Ajouter un identifiant unique au container
             const containerId = `chart-container-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
             chartContainer.setAttribute('data-chart-container', containerId);
             
@@ -786,7 +843,6 @@ class ChatbotFullPageUI {
             
             const chartId = await this.charts.createChart(request, chartContainer);
             
-            // ✅ NOUVEAU: Sauvegarder les données du graphique
             if (chartId) {
                 this.charts.chartDataStore.set(chartId, {
                     chartRequest: request,
@@ -801,9 +857,6 @@ class ChatbotFullPageUI {
         console.log('Charts generated successfully');
     }
 
-    // ============================================
-    // ✅ RESTORE CHARTS (NOUVEAU)
-    // ============================================
     async restoreCharts(chartRequests) {
         if (!chartRequests || chartRequests.length === 0 || !this.charts) {
             return;
@@ -815,7 +868,6 @@ class ChatbotFullPageUI {
             const chartContainer = document.createElement('div');
             chartContainer.className = 'chart-message';
             
-            // Ajouter un identifiant unique
             const containerId = `chart-container-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
             chartContainer.setAttribute('data-chart-container', containerId);
             
@@ -841,6 +893,10 @@ class ChatbotFullPageUI {
         
         console.log('Charts restoration complete');
     }
+
+    // ============================================
+    // UTILITY METHODS
+    // ============================================
 
     clearMessages() {
         if (this.elements.messages) {
@@ -888,10 +944,10 @@ class ChatbotFullPageUI {
 }
 
 // ============================================
-// INITIALIZE
+// INITIALIZATION
 // ============================================
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('Initializing Chatbot Full Page v3.1 (with chart persistence)...');
+    console.log('Initializing Chatbot Full Page v3.2...');
     
     if (typeof ChatbotConfig === 'undefined') {
         console.error('ChatbotConfig not defined!');
@@ -900,7 +956,7 @@ document.addEventListener('DOMContentLoaded', function() {
     
     try {
         window.financialChatbotFullPage = new ChatbotFullPageUI(ChatbotConfig);
-        console.log('Chatbot Full Page v3.1 ready! (Wall Street Pro + Chart Persistence)');
+        console.log('Chatbot Full Page v3.2 ready! (Wall Street Pro + User Photo)');
     } catch (error) {
         console.error('Initialization error:', error);
     }
