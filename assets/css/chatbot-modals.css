@@ -1,8 +1,40 @@
 /* ============================================
-   🔥 CHATBOT MODALS - GLASSMORPHISM WHITE
+   🔥 CHATBOT MODALS - GLASSMORPHISM PREMIUM
+   Design harmonisé avec chatbot-futuristic.css
    ============================================ */
 
-/* Modal Base */
+/* ============================================
+   VARIABLES (Héritées du design principal)
+   ============================================ */
+:root {
+    --chatbot-text: #1a202c;
+    --chatbot-text-secondary: #64748b;
+    --chatbot-border: #e2e8f0;
+    
+    --gradient-primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    
+    --neon-blue: #667eea;
+    --neon-purple: #764ba2;
+    
+    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.1);
+    --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+    --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
+    --shadow-xl: 0 30px 80px rgba(0, 0, 0, 0.15);
+    
+    --radius-sm: 8px;
+    --radius-md: 12px;
+    --radius-lg: 16px;
+    --radius-xl: 24px;
+    
+    --transition-fast: 200ms ease;
+    --transition-base: 300ms ease;
+    --transition-smooth: 400ms cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-bounce: 400ms cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* ============================================
+   MODAL BASE - GLASSMORPHISM
+   ============================================ */
 .chatbot-modal {
     position: fixed;
     top: 0;
@@ -15,13 +47,13 @@
     justify-content: center;
     padding: 20px;
     opacity: 0;
-    transition: opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: opacity var(--transition-smooth);
 }
 
 .chatbot-modal.active {
     display: flex;
     opacity: 1;
-    animation: modalFadeIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    animation: modalFadeIn var(--transition-smooth);
 }
 
 @keyframes modalFadeIn {
@@ -35,6 +67,9 @@
     }
 }
 
+/* ============================================
+   MODAL OVERLAY - BLUR PREMIUM
+   ============================================ */
 .modal-overlay {
     position: absolute;
     top: 0;
@@ -44,20 +79,23 @@
     background: rgba(15, 23, 42, 0.6);
     backdrop-filter: blur(20px) saturate(150%);
     cursor: pointer;
-    transition: backdrop-filter 0.4s ease;
+    transition: backdrop-filter var(--transition-smooth);
 }
 
 body.dark-mode .modal-overlay {
     background: rgba(0, 0, 0, 0.75);
 }
 
+/* ============================================
+   MODAL CONTAINER - GLASSMORPHISM WHITE
+   ============================================ */
 .modal-container {
     position: relative;
     background: rgba(255, 255, 255, 0.98);
     backdrop-filter: blur(40px) saturate(180%);
-    border-radius: 24px;
+    border-radius: var(--radius-xl);
     box-shadow: 
-        0 30px 80px rgba(0, 0, 0, 0.15),
+        var(--shadow-xl),
         0 0 0 1px rgba(255, 255, 255, 0.8),
         inset 0 1px 0 rgba(255, 255, 255, 1);
     max-width: 600px;
@@ -65,17 +103,29 @@ body.dark-mode .modal-overlay {
     max-height: 90vh;
     overflow: hidden;
     transform: scale(0.85) translateY(30px);
-    transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    transition: transform var(--transition-bounce);
 }
 
 .chatbot-modal.active .modal-container {
     transform: scale(1) translateY(0);
+    animation: modalSlideUp var(--transition-bounce);
+}
+
+@keyframes modalSlideUp {
+    0% { 
+        transform: scale(0.85) translateY(30px);
+        opacity: 0;
+    }
+    100% { 
+        transform: scale(1) translateY(0);
+        opacity: 1;
+    }
 }
 
 body.dark-mode .modal-container {
     background: rgba(15, 23, 42, 0.95);
     box-shadow: 
-        0 30px 80px rgba(0, 0, 0, 0.5),
+        var(--shadow-xl),
         0 0 0 1px rgba(255, 255, 255, 0.1),
         inset 0 1px 0 rgba(255, 255, 255, 0.05);
 }
@@ -84,10 +134,12 @@ body.dark-mode .modal-container {
     max-width: 900px;
 }
 
-/* Modal Header - Glassmorphism Premium */
+/* ============================================
+   MODAL HEADER - GRADIENT TOP BORDER
+   ============================================ */
 .modal-header {
     padding: 36px 36px 28px;
-    border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+    border-bottom: 1px solid var(--chatbot-border);
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -98,6 +150,7 @@ body.dark-mode .modal-container {
     position: relative;
 }
 
+/* Ligne gradient en haut */
 .modal-header::before {
     content: '';
     position: absolute;
@@ -105,7 +158,7 @@ body.dark-mode .modal-container {
     left: 0;
     right: 0;
     height: 4px;
-    background: linear-gradient(90deg, #667eea, #764ba2, #f093fb);
+    background: var(--gradient-primary);
     opacity: 0.8;
 }
 
@@ -116,6 +169,9 @@ body.dark-mode .modal-header {
     border-bottom-color: rgba(255, 255, 255, 0.08);
 }
 
+/* ============================================
+   MODAL TITLE - GRADIENT TEXT
+   ============================================ */
 .modal-title {
     font-size: 1.75rem;
     font-weight: 800;
@@ -123,7 +179,7 @@ body.dark-mode .modal-header {
     display: flex;
     align-items: center;
     gap: 14px;
-    color: #0f172a;
+    color: var(--chatbot-text);
     letter-spacing: -0.02em;
 }
 
@@ -133,26 +189,31 @@ body.dark-mode .modal-title {
 
 .modal-title i {
     font-size: 1.6rem;
-    background: linear-gradient(135deg, #667eea, #764ba2);
+    background: var(--gradient-primary);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
+    filter: drop-shadow(0 2px 4px rgba(102, 126, 234, 0.3));
 }
 
+/* ============================================
+   MODAL CLOSE BUTTON - 3D HOVER
+   ============================================ */
 .modal-close {
     width: 44px;
     height: 44px;
-    border-radius: 14px;
+    border-radius: var(--radius-md);
     border: none;
-    background: rgba(0, 0, 0, 0.05);
-    color: #475569;
+    background: rgba(241, 245, 249, 0.8);
+    color: var(--chatbot-text-secondary);
     cursor: pointer;
     font-size: 1.3rem;
-    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    transition: all var(--transition-bounce);
     display: flex;
     align-items: center;
     justify-content: center;
     backdrop-filter: blur(10px);
+    box-shadow: var(--shadow-sm);
 }
 
 body.dark-mode .modal-close {
@@ -164,20 +225,29 @@ body.dark-mode .modal-close {
     background: rgba(239, 68, 68, 0.15);
     color: #ef4444;
     transform: scale(1.1) rotate(90deg);
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
 }
 
-/* Modal Body - Clean White */
+.modal-close:active {
+    transform: scale(0.95) rotate(90deg);
+}
+
+/* ============================================
+   MODAL BODY - SCROLL PREMIUM
+   ============================================ */
 .modal-body {
     padding: 36px;
     overflow-y: auto;
     max-height: calc(90vh - 220px);
     background: rgba(255, 255, 255, 0.6);
+    backdrop-filter: blur(10px);
 }
 
 body.dark-mode .modal-body {
     background: rgba(15, 23, 42, 0.4);
 }
 
+/* Scrollbar personnalisé */
 .modal-body::-webkit-scrollbar {
     width: 10px;
 }
@@ -188,14 +258,21 @@ body.dark-mode .modal-body {
 }
 
 .modal-body::-webkit-scrollbar-thumb {
-    background: linear-gradient(135deg, #667eea, #764ba2);
+    background: var(--gradient-primary);
     border-radius: 10px;
+    transition: background var(--transition-fast);
 }
 
-/* Modal Footer */
+.modal-body::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(135deg, #5568d3, #6b4593);
+}
+
+/* ============================================
+   MODAL FOOTER - GLASSMORPHISM
+   ============================================ */
 .modal-footer {
     padding: 24px 36px;
-    border-top: 1px solid rgba(0, 0, 0, 0.06);
+    border-top: 1px solid var(--chatbot-border);
     display: flex;
     gap: 14px;
     justify-content: flex-end;
@@ -211,7 +288,6 @@ body.dark-mode .modal-footer {
 /* ============================================
    📤 SHARE OPTIONS - PREMIUM CARDS
    ============================================ */
-
 .share-options {
     display: flex;
     flex-direction: column;
@@ -228,10 +304,10 @@ body.dark-mode .modal-footer {
     border: 2px solid rgba(102, 126, 234, 0.15);
     border-radius: 18px;
     cursor: pointer;
-    transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+    transition: all var(--transition-bounce);
     text-align: left;
     box-shadow: 
-        0 4px 12px rgba(0, 0, 0, 0.04),
+        var(--shadow-sm),
         inset 0 1px 0 rgba(255, 255, 255, 0.8);
 }
 
@@ -242,7 +318,7 @@ body.dark-mode .share-option {
 
 .share-option:hover {
     transform: translateY(-6px) translateX(4px);
-    border-color: #667eea;
+    border-color: var(--neon-blue);
     box-shadow: 
         0 12px 32px rgba(102, 126, 234, 0.25),
         0 0 0 1px rgba(102, 126, 234, 0.5),
@@ -254,11 +330,12 @@ body.dark-mode .share-option:hover {
     background: rgba(30, 41, 59, 0.85);
 }
 
+/* Icon avec gradient */
 .share-icon {
     width: 60px;
     height: 60px;
-    border-radius: 16px;
-    background: linear-gradient(135deg, #667eea, #764ba2);
+    border-radius: var(--radius-lg);
+    background: var(--gradient-primary);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -266,11 +343,12 @@ body.dark-mode .share-option:hover {
     color: white;
     flex-shrink: 0;
     box-shadow: 0 8px 20px rgba(102, 126, 234, 0.35);
-    transition: transform 0.3s ease;
+    transition: transform var(--transition-base);
 }
 
 .share-option:hover .share-icon {
     transform: scale(1.12) rotate(-8deg);
+    box-shadow: 0 12px 28px rgba(102, 126, 234, 0.45);
 }
 
 .share-content {
@@ -281,7 +359,7 @@ body.dark-mode .share-option:hover {
     font-size: 1.15rem;
     font-weight: 700;
     margin: 0 0 6px 0;
-    color: #0f172a;
+    color: var(--chatbot-text);
     letter-spacing: -0.01em;
 }
 
@@ -291,15 +369,15 @@ body.dark-mode .share-content h3 {
 
 .share-content p {
     font-size: 0.9rem;
-    color: #64748b;
+    color: var(--chatbot-text-secondary);
     margin: 0;
     line-height: 1.5;
 }
 
 .share-option > .fa-chevron-right {
-    color: #667eea;
+    color: var(--neon-blue);
     font-size: 1.3rem;
-    transition: transform 0.3s ease;
+    transition: transform var(--transition-base);
     opacity: 0.6;
 }
 
@@ -311,12 +389,11 @@ body.dark-mode .share-content h3 {
 /* ============================================
    ⚙ SETTINGS TABS - MODERN PILLS
    ============================================ */
-
 .settings-tabs {
     display: flex;
     gap: 10px;
     padding: 0 0 24px 0;
-    border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+    border-bottom: 1px solid var(--chatbot-border);
     overflow-x: auto;
     scrollbar-width: none;
 }
@@ -331,19 +408,20 @@ body.dark-mode .settings-tabs {
 
 .settings-tab {
     padding: 14px 22px;
-    background: rgba(0, 0, 0, 0.03);
+    background: rgba(241, 245, 249, 0.8);
     border: none;
-    border-radius: 14px;
+    border-radius: var(--radius-md);
     font-size: 0.95rem;
     font-weight: 600;
-    color: #64748b;
+    color: var(--chatbot-text-secondary);
     cursor: pointer;
-    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    transition: all var(--transition-bounce);
     display: flex;
     align-items: center;
     gap: 10px;
     white-space: nowrap;
     backdrop-filter: blur(10px);
+    box-shadow: var(--shadow-sm);
 }
 
 body.dark-mode .settings-tab {
@@ -352,12 +430,13 @@ body.dark-mode .settings-tab {
 
 .settings-tab:hover {
     background: rgba(102, 126, 234, 0.12);
-    color: #667eea;
+    color: var(--neon-blue);
     transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
 }
 
 .settings-tab.active {
-    background: linear-gradient(135deg, #667eea, #764ba2);
+    background: var(--gradient-primary);
     color: white;
     box-shadow: 0 6px 18px rgba(102, 126, 234, 0.4);
     transform: translateY(-2px);
@@ -367,7 +446,9 @@ body.dark-mode .settings-tab {
     font-size: 1.05rem;
 }
 
-/* Settings Content */
+/* ============================================
+   SETTINGS CONTENT - ANIMATIONS
+   ============================================ */
 .settings-content {
     padding-top: 28px;
 }
@@ -378,7 +459,7 @@ body.dark-mode .settings-tab {
 
 .settings-panel.active {
     display: block;
-    animation: panelFadeIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    animation: panelFadeIn var(--transition-smooth);
 }
 
 @keyframes panelFadeIn {
@@ -396,15 +477,23 @@ body.dark-mode .settings-tab {
     font-size: 1.4rem;
     font-weight: 800;
     margin: 0 0 28px 0;
-    color: #0f172a;
+    color: var(--chatbot-text);
     letter-spacing: -0.02em;
+    background: var(--gradient-primary);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
 }
 
 body.dark-mode .panel-title {
-    color: #f8fafc;
+    background: linear-gradient(135deg, #818cf8, #a78bfa);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
 }
 
-/* Setting Group */
+/* ============================================
+   SETTING GROUP - ESPACEMENT
+   ============================================ */
 .setting-group {
     margin-bottom: 32px;
 }
@@ -414,7 +503,7 @@ body.dark-mode .panel-title {
     align-items: center;
     justify-content: space-between;
     font-weight: 700;
-    color: #1e293b;
+    color: var(--chatbot-text);
     margin-bottom: 14px;
     font-size: 0.98rem;
 }
@@ -423,11 +512,12 @@ body.dark-mode .setting-label {
     color: #f1f5f9;
 }
 
+/* Badge Premium */
 .setting-badge {
     padding: 5px 12px;
     background: linear-gradient(135deg, #f59e0b, #f97316);
     color: white;
-    border-radius: 8px;
+    border-radius: var(--radius-sm);
     font-size: 0.75rem;
     font-weight: 800;
     text-transform: uppercase;
@@ -438,24 +528,28 @@ body.dark-mode .setting-label {
 .setting-value {
     padding: 5px 14px;
     background: rgba(102, 126, 234, 0.12);
-    color: #667eea;
-    border-radius: 8px;
+    color: var(--neon-blue);
+    border-radius: var(--radius-sm);
     font-size: 0.88rem;
     font-weight: 700;
 }
 
+/* ============================================
+   SELECT - GLASSMORPHISM
+   ============================================ */
 .setting-select {
     width: 100%;
     padding: 16px 18px;
     background: rgba(255, 255, 255, 0.8);
     backdrop-filter: blur(10px);
-    border: 2px solid rgba(0, 0, 0, 0.08);
-    border-radius: 14px;
+    border: 2px solid var(--chatbot-border);
+    border-radius: var(--radius-md);
     font-size: 0.95rem;
     font-weight: 600;
-    color: #1e293b;
+    color: var(--chatbot-text);
     cursor: pointer;
-    transition: all 0.3s ease;
+    transition: all var(--transition-base);
+    box-shadow: var(--shadow-sm);
 }
 
 body.dark-mode .setting-select {
@@ -466,16 +560,25 @@ body.dark-mode .setting-select {
 
 .setting-select:focus {
     outline: none;
-    border-color: #667eea;
+    border-color: var(--neon-blue);
     box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.15);
     background: rgba(255, 255, 255, 0.95);
 }
 
+.setting-select:hover {
+    border-color: var(--neon-purple);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+/* ============================================
+   RANGE SLIDER - GRADIENT
+   ============================================ */
 .setting-range {
     width: 100%;
     height: 8px;
     border-radius: 4px;
-    background: linear-gradient(to right, #667eea, #764ba2);
+    background: var(--gradient-primary);
     outline: none;
     -webkit-appearance: none;
     cursor: pointer;
@@ -487,32 +590,40 @@ body.dark-mode .setting-select {
     height: 24px;
     border-radius: 50%;
     background: white;
-    border: 4px solid #667eea;
+    border: 4px solid var(--neon-blue);
     cursor: pointer;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    transition: all var(--transition-bounce);
 }
 
 .setting-range::-webkit-slider-thumb:hover {
     transform: scale(1.25);
     box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+    border-color: var(--neon-purple);
+}
+
+.setting-range::-webkit-slider-thumb:active {
+    transform: scale(1.1);
 }
 
 .setting-description {
     margin: 10px 0 0 0;
     font-size: 0.88rem;
-    color: #64748b;
+    color: var(--chatbot-text-secondary);
     line-height: 1.6;
 }
 
-/* Toggle Group */
+/* ============================================
+   TOGGLE GROUP - SEGMENTED CONTROL
+   ============================================ */
 .setting-toggle-group {
     display: flex;
     gap: 10px;
-    background: rgba(0, 0, 0, 0.03);
+    background: rgba(241, 245, 249, 0.8);
     padding: 8px;
-    border-radius: 14px;
+    border-radius: var(--radius-md);
     backdrop-filter: blur(10px);
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05);
 }
 
 body.dark-mode .setting-toggle-group {
@@ -527,9 +638,9 @@ body.dark-mode .setting-toggle-group {
     border-radius: 10px;
     font-size: 0.92rem;
     font-weight: 600;
-    color: #64748b;
+    color: var(--chatbot-text-secondary);
     cursor: pointer;
-    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    transition: all var(--transition-bounce);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -538,16 +649,19 @@ body.dark-mode .setting-toggle-group {
 
 .setting-toggle-btn:hover {
     background: rgba(102, 126, 234, 0.12);
-    color: #667eea;
+    color: var(--neon-blue);
 }
 
 .setting-toggle-btn.active {
-    background: linear-gradient(135deg, #667eea, #764ba2);
+    background: var(--gradient-primary);
     color: white;
     box-shadow: 0 6px 18px rgba(102, 126, 234, 0.35);
+    transform: translateY(-2px);
 }
 
-/* Checkbox - Modern Style */
+/* ============================================
+   CHECKBOX - MODERN STYLE
+   ============================================ */
 .setting-checkbox {
     display: flex;
     align-items: center;
@@ -563,9 +677,9 @@ body.dark-mode .setting-toggle-group {
     gap: 14px;
     cursor: pointer;
     font-weight: 600;
-    color: #1e293b;
+    color: var(--chatbot-text);
     font-size: 0.98rem;
-    transition: color 0.3s ease;
+    transition: color var(--transition-base);
 }
 
 body.dark-mode .setting-checkbox label {
@@ -575,15 +689,16 @@ body.dark-mode .setting-checkbox label {
 .checkbox-icon {
     width: 28px;
     height: 28px;
-    border-radius: 8px;
-    border: 2px solid rgba(0, 0, 0, 0.15);
+    border-radius: var(--radius-sm);
+    border: 2px solid var(--chatbot-border);
     background: rgba(255, 255, 255, 0.8);
     backdrop-filter: blur(10px);
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    transition: all var(--transition-bounce);
     position: relative;
+    box-shadow: var(--shadow-sm);
 }
 
 body.dark-mode .checkbox-icon {
@@ -592,9 +707,10 @@ body.dark-mode .checkbox-icon {
 }
 
 .setting-checkbox input:checked + label .checkbox-icon {
-    background: linear-gradient(135deg, #667eea, #764ba2);
-    border-color: #667eea;
+    background: var(--gradient-primary);
+    border-color: var(--neon-blue);
     transform: scale(1.1);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
 }
 
 .setting-checkbox input:checked + label .checkbox-icon::after {
@@ -604,7 +720,14 @@ body.dark-mode .checkbox-icon {
     font-weight: 900;
 }
 
-/* Info Box */
+.setting-checkbox:hover .checkbox-icon {
+    border-color: var(--neon-purple);
+    transform: scale(1.05);
+}
+
+/* ============================================
+   INFO BOX - GRADIENT BORDER
+   ============================================ */
 .setting-info {
     display: flex;
     align-items: center;
@@ -613,9 +736,10 @@ body.dark-mode .checkbox-icon {
     background: rgba(59, 130, 246, 0.08);
     backdrop-filter: blur(10px);
     border-left: 4px solid #3b82f6;
-    border-radius: 14px;
+    border-radius: var(--radius-md);
     color: #1e40af;
     font-size: 0.95rem;
+    box-shadow: var(--shadow-sm);
 }
 
 body.dark-mode .setting-info {
@@ -627,7 +751,9 @@ body.dark-mode .setting-info {
     font-size: 1.3rem;
 }
 
-/* Shortcuts List */
+/* ============================================
+   SHORTCUTS LIST - HOVER EFFECTS
+   ============================================ */
 .shortcuts-list {
     display: flex;
     flex-direction: column;
@@ -641,9 +767,10 @@ body.dark-mode .setting-info {
     padding: 18px 20px;
     background: rgba(255, 255, 255, 0.6);
     backdrop-filter: blur(10px);
-    border-radius: 14px;
-    transition: all 0.3s ease;
+    border-radius: var(--radius-md);
+    transition: all var(--transition-base);
     border: 1px solid rgba(0, 0, 0, 0.05);
+    box-shadow: var(--shadow-sm);
 }
 
 body.dark-mode .shortcut-item {
@@ -655,11 +782,12 @@ body.dark-mode .shortcut-item {
     background: rgba(102, 126, 234, 0.08);
     transform: translateX(6px);
     border-color: rgba(102, 126, 234, 0.2);
+    box-shadow: var(--shadow-md);
 }
 
 .shortcut-desc {
     font-weight: 600;
-    color: #1e293b;
+    color: var(--chatbot-text);
 }
 
 body.dark-mode .shortcut-desc {
@@ -671,20 +799,21 @@ body.dark-mode .shortcut-desc {
     gap: 6px;
     align-items: center;
     font-size: 0.88rem;
-    color: #64748b;
+    color: var(--chatbot-text-secondary);
 }
 
 .shortcut-keys kbd {
     padding: 7px 12px;
     background: white;
-    border: 2px solid rgba(0, 0, 0, 0.08);
-    border-radius: 8px;
+    border: 2px solid var(--chatbot-border);
+    border-radius: var(--radius-sm);
     font-family: 'Inter', monospace;
     font-weight: 700;
-    color: #1e293b;
+    color: var(--chatbot-text);
     box-shadow: 0 3px 8px rgba(0, 0, 0, 0.08);
     min-width: 32px;
     text-align: center;
+    transition: all var(--transition-fast);
 }
 
 body.dark-mode .shortcut-keys kbd {
@@ -693,20 +822,26 @@ body.dark-mode .shortcut-keys kbd {
     color: #f1f5f9;
 }
 
-/* ============================================
-   🎨 BUTTONS - PREMIUM STYLE
-   ============================================ */
+.shortcut-item:hover .shortcut-keys kbd {
+    background: var(--gradient-primary);
+    border-color: var(--neon-blue);
+    color: white;
+    transform: scale(1.05);
+}
 
+/* ============================================
+   🎨 BUTTONS - PREMIUM GRADIENT
+   ============================================ */
 .btn-primary,
 .btn-secondary,
 .btn-primary-outline,
 .btn-danger-outline {
     padding: 14px 28px;
-    border-radius: 14px;
+    border-radius: var(--radius-md);
     font-size: 0.98rem;
     font-weight: 700;
     cursor: pointer;
-    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    transition: all var(--transition-bounce);
     display: inline-flex;
     align-items: center;
     gap: 10px;
@@ -715,7 +850,7 @@ body.dark-mode .shortcut-keys kbd {
 }
 
 .btn-primary {
-    background: linear-gradient(135deg, #667eea, #764ba2);
+    background: var(--gradient-primary);
     color: white;
     box-shadow: 0 6px 18px rgba(102, 126, 234, 0.35);
 }
@@ -725,9 +860,16 @@ body.dark-mode .shortcut-keys kbd {
     box-shadow: 0 10px 28px rgba(102, 126, 234, 0.45);
 }
 
+.btn-primary:active {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
 .btn-secondary {
-    background: rgba(0, 0, 0, 0.05);
-    color: #1e293b;
+    background: rgba(241, 245, 249, 0.8);
+    color: var(--chatbot-text);
+    backdrop-filter: blur(10px);
+    box-shadow: var(--shadow-sm);
 }
 
 body.dark-mode .btn-secondary {
@@ -736,19 +878,25 @@ body.dark-mode .btn-secondary {
 }
 
 .btn-secondary:hover {
-    background: rgba(0, 0, 0, 0.1);
+    background: #e2e8f0;
     transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+body.dark-mode .btn-secondary:hover {
+    background: rgba(255, 255, 255, 0.15);
 }
 
 .btn-primary-outline {
     background: transparent;
-    color: #667eea;
-    border: 2px solid #667eea;
+    color: var(--neon-blue);
+    border: 2px solid var(--neon-blue);
 }
 
 .btn-primary-outline:hover {
     background: rgba(102, 126, 234, 0.12);
     transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
 }
 
 .btn-danger-outline {
@@ -760,12 +908,12 @@ body.dark-mode .btn-secondary {
 .btn-danger-outline:hover {
     background: rgba(239, 68, 68, 0.12);
     transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.2);
 }
 
 /* ============================================
-   🍞 TOAST NOTIFICATIONS
+   🍞 TOAST NOTIFICATIONS - GLASSMORPHISM
    ============================================ */
-
 .toast-container {
     position: fixed;
     top: 24px;
@@ -781,7 +929,7 @@ body.dark-mode .btn-secondary {
     padding: 18px 24px;
     background: rgba(255, 255, 255, 0.95);
     backdrop-filter: blur(30px) saturate(180%);
-    border-radius: 16px;
+    border-radius: var(--radius-lg);
     box-shadow: 
         0 12px 32px rgba(0, 0, 0, 0.15),
         0 0 0 1px rgba(255, 255, 255, 0.8);
@@ -789,7 +937,7 @@ body.dark-mode .btn-secondary {
     align-items: center;
     gap: 14px;
     min-width: 320px;
-    animation: toastSlideIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    animation: toastSlideIn var(--transition-bounce);
     border-left: 4px solid;
     pointer-events: auto;
 }
@@ -844,7 +992,7 @@ body.dark-mode .toast {
 
 .toast-title {
     font-weight: 700;
-    color: #0f172a;
+    color: var(--chatbot-text);
     margin-bottom: 4px;
     font-size: 0.98rem;
 }
@@ -855,14 +1003,13 @@ body.dark-mode .toast-title {
 
 .toast-message {
     font-size: 0.88rem;
-    color: #64748b;
+    color: var(--chatbot-text-secondary);
     line-height: 1.5;
 }
 
 /* ============================================
-   📱 RESPONSIVE
+   📱 RESPONSIVE - MOBILE ADAPTÉ
    ============================================ */
-
 @media (max-width: 768px) {
     .modal-container {
         max-width: 100%;
@@ -929,13 +1076,49 @@ body.dark-mode .toast-title {
     }
 }
 
-/* No Animations Mode */
+@media (max-width: 480px) {
+    .modal-container {
+        border-radius: var(--radius-lg);
+    }
+    
+    .modal-header {
+        padding: 20px;
+    }
+    
+    .modal-body {
+        padding: 20px;
+    }
+    
+    .modal-title {
+        font-size: 1.25rem;
+        gap: 10px;
+    }
+    
+    .share-option {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .share-icon {
+        width: 64px;
+        height: 64px;
+    }
+}
+
+/* ============================================
+   ACCESSIBILITY - NO ANIMATIONS MODE
+   ============================================ */
+body.no-animations .chatbot-modal,
+body.no-animations .modal-container,
+body.no-animations .toast,
 body.no-animations * {
     animation: none !important;
     transition: none !important;
 }
 
-/* Compact Mode */
+/* ============================================
+   COMPACT MODE - ESPACEMENT RÉDUIT
+   ============================================ */
 body.compact-mode .modal-body {
     padding: 24px;
 }
@@ -946,4 +1129,12 @@ body.compact-mode .setting-group {
 
 body.compact-mode .share-option {
     padding: 16px 18px;
+}
+
+body.compact-mode .modal-header {
+    padding: 24px;
+}
+
+body.compact-mode .modal-footer {
+    padding: 16px 24px;
 }
