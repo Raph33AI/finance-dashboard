@@ -1,6 +1,6 @@
 // ============================================
 // CHATBOT FULL PAGE UI v3.2 - VERSION WALL STREET PRO
-// ✅ NOUVEAU v3.2: Photo de profil utilisateur Firebase
+// ✅ NOUVEAU v3.2: Photo de profil utilisateur Firebase (LOGIQUE LANDING.JS)
 // ✅ v3.1: Sauvegarde et restauration des graphiques
 // Visual Cards + Metrics Tables + Comparison Charts
 // No emojis version
@@ -57,46 +57,52 @@ class ChatbotFullPageUI {
     }
 
     // ============================================
-    // USER PROFILE PHOTO MANAGEMENT (NEW v3.2)
+    // USER PROFILE PHOTO MANAGEMENT (NEW v3.2 - LOGIQUE LANDING.JS)
     // ============================================
     
     /**
      * Récupère la photo de profil de l'utilisateur Firebase
+     * UTILISE EXACTEMENT LA MÊME LOGIQUE QUE LANDING.JS
      * @returns {string} URL de la photo ou avatar par défaut
      */
     getUserProfilePhoto() {
         try {
+            console.log('Getting user profile photo...');
+            
             // Vérifier si Firebase Auth est disponible
-            if (typeof firebase !== 'undefined' && firebase.auth && firebase.auth().currentUser) {
-                const user = firebase.auth().currentUser;
-                
-                // 1. Photo Firebase (priorité 1)
-                if (user.photoURL) {
-                    console.log('User photo found (Firebase):', user.photoURL);
-                    return user.photoURL;
-                }
-                
-                // 2. Photo Firestore/localStorage (priorité 2)
-                const firestorePhoto = localStorage.getItem('userPhotoURL');
-                if (firestorePhoto && firestorePhoto !== 'null' && firestorePhoto !== 'undefined') {
-                    console.log('User photo found (localStorage):', firestorePhoto);
-                    return firestorePhoto;
-                }
-                
-                // 3. Avatar généré avec initiales (priorité 3)
-                const userName = user.displayName || user.email || 'User';
-                const defaultAvatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(userName)}&background=667eea&color=fff&bold=true&size=128`;
-                console.log('Using generated avatar for:', userName);
-                return defaultAvatar;
+            if (typeof firebase === 'undefined' || !firebase.auth) {
+                console.warn('Firebase Auth not available');
+                return 'https://ui-avatars.com/api/?name=User&background=3B82F6&color=fff&bold=true&size=128';
             }
             
-            // Fallback si Firebase non disponible
-            console.warn('Firebase Auth not available - using default avatar');
-            return 'https://ui-avatars.com/api/?name=User&background=667eea&color=fff&bold=true&size=128';
+            // Récupérer l'utilisateur actuel
+            const user = firebase.auth().currentUser;
+            
+            if (!user) {
+                console.warn('No user logged in');
+                return 'https://ui-avatars.com/api/?name=User&background=3B82F6&color=fff&bold=true&size=128';
+            }
+            
+            console.log('User found:', user.email);
+            
+            // MÊME LOGIQUE QUE LANDING.JS
+            const displayName = user.displayName || user.email?.split('@')[0] || 'User';
+            console.log('Display name:', displayName);
+            
+            // Si photoURL existe, l'utiliser (priorité 1)
+            if (user.photoURL) {
+                console.log('Using Firebase photoURL:', user.photoURL);
+                return user.photoURL;
+            }
+            
+            // Sinon, générer un avatar avec ui-avatars.com (MÊMES PARAMÈTRES QUE LANDING.JS)
+            const avatarUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(displayName)}&background=3B82F6&color=fff&bold=true&size=128`;
+            console.log('Generated avatar URL:', avatarUrl);
+            return avatarUrl;
             
         } catch (error) {
             console.error('Error getting user profile photo:', error);
-            return 'https://ui-avatars.com/api/?name=User&background=667eea&color=fff&bold=true&size=128';
+            return 'https://ui-avatars.com/api/?name=User&background=3B82F6&color=fff&bold=true&size=128';
         }
     }
 
@@ -109,7 +115,7 @@ class ChatbotFullPageUI {
         return `<img src="${photoURL}" 
                      alt="User Avatar" 
                      class="user-avatar-img"
-                     onerror="this.onerror=null; this.src='https://ui-avatars.com/api/?name=User&background=667eea&color=fff&bold=true&size=128';">`;
+                     onerror="this.onerror=null; this.src='https://ui-avatars.com/api/?name=User&background=3B82F6&color=fff&bold=true&size=128';">`;
     }
 
     // ============================================
@@ -606,7 +612,7 @@ class ChatbotFullPageUI {
         const avatar = document.createElement('div');
         avatar.className = `message-avatar ${type}-avatar`;
         
-        // NEW v3.2: User profile photo for user messages
+        // NEW v3.2: User profile photo for user messages (LOGIQUE LANDING.JS)
         if (type === 'user') {
             avatar.innerHTML = this.getUserAvatarHTML();
         } else {
