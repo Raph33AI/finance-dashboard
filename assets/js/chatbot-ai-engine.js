@@ -1,5 +1,6 @@
 // ============================================
-// FINANCIAL CHATBOT - AI ENGINE v6.0 WALL STREET PRO
+// FINANCIAL CHATBOT - AI ENGINE v6.1 WALL STREET PRO
+// ✅ CORRECTION: Optimisation appels API + Génération graphiques
 // Advanced Analytics: Sharpe, Sortino, Greeks, Correlations, Fair Value
 // ULTRA-OPTIMIZED CHART GENERATION SYSTEM
 // ============================================
@@ -57,8 +58,8 @@ class FinancialChatbotEngine {
                 console.log('✅ Charts initialized');
             }
 
-            console.log('🎉 Conversational Financial AI v6.0 WALL STREET PRO ready!');
-            console.log('📊 Advanced Analytics: Sharpe, Sortino, Correlations, Greeks, Fair Value, Insider Trading');
+            console.log('🎉 Conversational Financial AI v6.1 WALL STREET PRO ready!');
+            console.log('📊 Advanced Analytics: Sharpe, Sortino, Correlations, Greeks, Fair Value');
             console.log('📈 Ultra-Optimized Chart Generation System');
             
         } catch (error) {
@@ -349,7 +350,6 @@ class FinancialChatbotEngine {
         
         const messageLower = message.toLowerCase();
         
-        // Must contain a historical keyword + a timeframe indicator
         const hasHistoricalKeyword = keywords.some(keyword => messageLower.includes(keyword));
         const hasTimeframe = /\d+\s*(year|month|day|week)|ytd|max/i.test(messageLower);
         
@@ -378,12 +378,10 @@ class FinancialChatbotEngine {
         
         const messageLower = message.toLowerCase();
         
-        // Check strict matches first
         if (strictKeywords.some(keyword => messageLower.includes(keyword))) {
             return true;
         }
         
-        // Check if it's a general "what's happening" without a specific stock
         if (/what'?s happening/i.test(message) && !/\b[A-Z]{1,5}\b/.test(message)) {
             return true;
         }
@@ -638,7 +636,6 @@ class FinancialChatbotEngine {
             return context;
         }
 
-        // Vérifier si on a besoin de données
         if (!analysis.needsData) {
             console.log('ℹ No market data needed for this query');
             return context;
@@ -649,7 +646,6 @@ class FinancialChatbotEngine {
             console.log(`⚖ Loading comparison data for: ${analysis.comparisonSymbols.join(' vs ')}`);
             context.comparisonData = await this.loadComparisonData(analysis.comparisonSymbols, analysis.timeframes[0]);
             
-            // Ajouter les métriques au contexte racine pour accès facile
             if (context.comparisonData.advancedMetrics) {
                 context.advancedMetrics = context.comparisonData.advancedMetrics;
             }
@@ -660,7 +656,6 @@ class FinancialChatbotEngine {
                 context.historicalStats = context.comparisonData.historicalStats;
             }
             
-            // Calculate correlation
             if (context.comparisonData.timeSeries && context.comparisonData.timeSeries.length >= 2) {
                 context.correlationAnalysis = this.calculateCorrelation(context.comparisonData.timeSeries);
                 console.log(`✅ Correlation: ${context.correlationAnalysis.correlation}`);
@@ -680,7 +675,6 @@ class FinancialChatbotEngine {
         console.log(`📊 Loading comprehensive data for ${symbol}...`);
         
         try {
-            // Charger les données de base
             const [
                 stockData,
                 recommendations,
@@ -698,7 +692,6 @@ class FinancialChatbotEngine {
                 console.log(`✅ Stock data loaded: $${stockData.quote.current}`);
             }
             
-            // Analyst Recommendations
             if (recommendations && recommendations.length > 0) {
                 const latest = recommendations[0];
                 const total = latest.strongBuy + latest.buy + latest.hold + latest.sell + latest.strongSell;
@@ -719,7 +712,6 @@ class FinancialChatbotEngine {
                 console.log(`✅ Analyst consensus: ${context.analystRecommendations.consensus}`);
             }
             
-            // Price Target
             if (priceTarget && priceTarget.targetMean) {
                 const currentPrice = stockData?.quote?.current || 0;
                 const upside = currentPrice > 0 ? ((priceTarget.targetMean - currentPrice) / currentPrice * 100).toFixed(1) : 0;
@@ -736,7 +728,6 @@ class FinancialChatbotEngine {
                 console.log(`✅ Price target: $${priceTarget.targetMean} (${upside}% upside)`);
             }
             
-            // Earnings History
             if (earnings && earnings.length > 0) {
                 const recentEarnings = earnings.slice(0, 8);
                 let beatCount = 0;
@@ -758,7 +749,6 @@ class FinancialChatbotEngine {
                 console.log(`✅ Earnings: ${context.earningsHistory.beatRate}% beat rate`);
             }
 
-            // Historical Data (seulement si nécessaire)
             const needsHistory = analysis.type === 'HISTORICAL_ANALYSIS' || 
                                  analysis.intents.includes('HISTORICAL') || 
                                  analysis.intents.includes('ADVANCED_ANALYSIS') ||
@@ -776,7 +766,6 @@ class FinancialChatbotEngine {
                     context.historicalStats = this.calculateHistoricalStats(timeSeries);
                     context.technicalIndicators = this.calculateTechnicalIndicators(timeSeries);
                     
-                    // Advanced Wall Street metrics
                     context.advancedMetrics = this.calculateAdvancedMetrics(timeSeries, stockData);
                     context.riskMetrics = this.calculateRiskMetrics(timeSeries);
                     
@@ -786,7 +775,6 @@ class FinancialChatbotEngine {
                 }
             }
 
-            // Charger données supplémentaires en parallèle
             const [
                 revenueEstimates,
                 epsEstimates,
@@ -864,7 +852,6 @@ class FinancialChatbotEngine {
                     this.analytics.getTimeSeries(symbol, '1day', this.getOutputSize(timeframe)).catch(() => null)
                 ]);
                 
-                // Calculer les métriques avancées pour chaque symbole
                 let advancedMetrics = null;
                 let riskMetrics = null;
                 let historicalStats = null;
@@ -966,201 +953,9 @@ class FinancialChatbotEngine {
         return path.split('.').reduce((current, key) => current?.[key], obj);
     }
 
-    // ============================================
-    // WALL STREET ADVANCED METRICS
-    // ============================================
-    
-    calculateAdvancedMetrics(timeSeriesData, stockData) {
-        const prices = timeSeriesData.data.map(d => d.close);
-        
-        const returns = [];
-        for (let i = 1; i < prices.length; i++) {
-            returns.push((prices[i] - prices[i-1]) / prices[i-1]);
-        }
-        
-        // Sharpe Ratio
-        const riskFreeRate = 0.02;
-        const avgReturn = returns.reduce((a, b) => a + b, 0) / returns.length;
-        const annualizedReturn = avgReturn * 252;
-        const stdDev = this.calculateStdDev(returns);
-        const annualizedStdDev = stdDev * Math.sqrt(252);
-        const excessReturn = annualizedReturn - riskFreeRate;
-        const sharpeRatio = annualizedStdDev !== 0 ? (excessReturn / annualizedStdDev).toFixed(3) : 'N/A';
-        
-        // Sortino Ratio
-        const downsideReturns = returns.filter(r => r < 0);
-        const downsideDeviation = downsideReturns.length > 0 ? 
-            Math.sqrt(downsideReturns.reduce((sum, r) => sum + r * r, 0) / downsideReturns.length) * Math.sqrt(252) : 0;
-        const sortinoRatio = downsideDeviation !== 0 ? (excessReturn / downsideDeviation).toFixed(3) : 'N/A';
-        
-        // Calmar Ratio
-        const maxDrawdown = this.calculateMaxDrawdown(prices);
-        const calmarRatio = maxDrawdown !== 0 ? (annualizedReturn / (maxDrawdown / 100)).toFixed(3) : 'N/A';
-        
-        // Information Ratio
-        const informationRatio = sharpeRatio;
-        
-        // Treynor Ratio
-        const beta = stockData?.metrics?.beta || 1;
-        const treynorRatio = beta !== 0 ? (excessReturn / beta).toFixed(3) : 'N/A';
-        
-        return {
-            sharpeRatio,
-            sortinoRatio,
-            calmarRatio,
-            informationRatio,
-            treynorRatio,
-            alpha: this.calculateAlpha(annualizedReturn, beta),
-            beta: beta
-        };
-    }
-    
-    calculateRiskMetrics(timeSeriesData) {
-        const prices = timeSeriesData.data.map(d => d.close);
-        const returns = [];
-        for (let i = 1; i < prices.length; i++) {
-            returns.push((prices[i] - prices[i-1]) / prices[i-1]);
-        }
-        
-        // Value at Risk (VaR) - 95% confidence
-        const sortedReturns = [...returns].sort((a, b) => a - b);
-        const varIndex = Math.floor(returns.length * 0.05);
-        const var95 = sortedReturns[varIndex];
-        const varPercentage = (var95 * 100).toFixed(2);
-        
-        // Conditional VaR (CVaR)
-        const cvarReturns = sortedReturns.slice(0, varIndex);
-        const cvar = cvarReturns.length > 0 ? 
-            (cvarReturns.reduce((a, b) => a + b, 0) / cvarReturns.length * 100).toFixed(2) : 'N/A';
-        
-        // Skewness
-        const mean = returns.reduce((a, b) => a + b, 0) / returns.length;
-        const stdDev = this.calculateStdDev(returns);
-        const skewness = returns.length > 0 && stdDev !== 0 ? 
-            (returns.reduce((sum, r) => sum + Math.pow((r - mean) / stdDev, 3), 0) / returns.length).toFixed(3) : 'N/A';
-        
-        // Kurtosis
-        const kurtosis = returns.length > 0 && stdDev !== 0 ? 
-            (returns.reduce((sum, r) => sum + Math.pow((r - mean) / stdDev, 4), 0) / returns.length - 3).toFixed(3) : 'N/A';
-        
-        return {
-            var95: varPercentage,
-            cvar95: cvar,
-            skewness,
-            kurtosis,
-            tailRisk: parseFloat(kurtosis) > 0 ? 'High' : 'Normal'
-        };
-    }
-    
-    calculateAlpha(annualizedReturn, beta, riskFreeRate = 0.02, marketReturn = 0.10) {
-        const expectedReturn = riskFreeRate + beta * (marketReturn - riskFreeRate);
-        const alpha = ((annualizedReturn - expectedReturn) * 100).toFixed(2);
-        return alpha;
-    }
-    
-    calculateEarningsQuality(earnings) {
-        if (!earnings || earnings.length === 0) return 'N/A';
-        
-        let qualityScore = 0;
-        let totalSurprises = 0;
-        
-        earnings.forEach(e => {
-            if (e.surprisePercent) {
-                totalSurprises += Math.abs(e.surprisePercent);
-                if (e.surprisePercent > 0) qualityScore += 10;
-                if (e.surprisePercent > 5) qualityScore += 5;
-                if (e.surprisePercent < -5) qualityScore -= 10;
-            }
-        });
-        
-        const avgSurprise = totalSurprises / earnings.length;
-        const consistency = avgSurprise < 5 ? 20 : avgSurprise < 10 ? 10 : 0;
-        
-        qualityScore += consistency;
-        
-        if (qualityScore >= 60) return 'Excellent';
-        if (qualityScore >= 40) return 'Good';
-        if (qualityScore >= 20) return 'Average';
-        return 'Poor';
-    }
-    
-    calculateCorrelation(timeSeriesArray) {
-        if (timeSeriesArray.length < 2) return null;
-        
-        const series1 = timeSeriesArray[0].data.map(d => d.close);
-        const series2 = timeSeriesArray[1].data.map(d => d.close);
-        
-        const minLength = Math.min(series1.length, series2.length);
-        const data1 = series1.slice(-minLength);
-        const data2 = series2.slice(-minLength);
-        
-        const returns1 = [];
-        const returns2 = [];
-        
-        for (let i = 1; i < minLength; i++) {
-            returns1.push((data1[i] - data1[i-1]) / data1[i-1]);
-            returns2.push((data2[i] - data2[i-1]) / data2[i-1]);
-        }
-        
-        const mean1 = returns1.reduce((a, b) => a + b, 0) / returns1.length;
-        const mean2 = returns2.reduce((a, b) => a + b, 0) / returns2.length;
-        
-        let numerator = 0;
-        let sum1Sq = 0;
-        let sum2Sq = 0;
-        
-        for (let i = 0; i < returns1.length; i++) {
-            const diff1 = returns1[i] - mean1;
-            const diff2 = returns2[i] - mean2;
-            numerator += diff1 * diff2;
-            sum1Sq += diff1 * diff1;
-            sum2Sq += diff2 * diff2;
-        }
-        
-        const correlation = numerator / Math.sqrt(sum1Sq * sum2Sq);
-        
-        return {
-            correlation: correlation.toFixed(3),
-            interpretation: this.interpretCorrelation(correlation),
-            diversificationBenefit: Math.abs(correlation) < 0.7 ? 'High' : Math.abs(correlation) < 0.9 ? 'Moderate' : 'Low'
-        };
-    }
-    
-    interpretCorrelation(corr) {
-        const abs = Math.abs(corr);
-        if (abs >= 0.9) return 'Very Strong';
-        if (abs >= 0.7) return 'Strong';
-        if (abs >= 0.5) return 'Moderate';
-        if (abs >= 0.3) return 'Weak';
-        return 'Very Weak';
-    }
-
-    getConsensusRating(recommendation) {
-        const scores = {
-            strongBuy: recommendation.strongBuy * 5,
-            buy: recommendation.buy * 4,
-            hold: recommendation.hold * 3,
-            sell: recommendation.sell * 2,
-            strongSell: recommendation.strongSell * 1
-        };
-
-        const totalScore = scores.strongBuy + scores.buy + scores.hold + scores.sell + scores.strongSell;
-        const totalAnalysts = recommendation.strongBuy + recommendation.buy + recommendation.hold + recommendation.sell + recommendation.strongSell;
-
-        if (totalAnalysts === 0) return 'N/A';
-
-        const avgScore = totalScore / totalAnalysts;
-
-        if (avgScore >= 4.5) return 'Strong Buy';
-        if (avgScore >= 3.5) return 'Buy';
-        if (avgScore >= 2.5) return 'Hold';
-        if (avgScore >= 1.5) return 'Sell';
-        return 'Strong Sell';
-    }
-
-    // ============================================
+    // ════════════════════════════════════════════════════════════
     // GÉNÉRATION INTELLIGENTE DE GRAPHIQUES (ULTRA-OPTIMISÉE)
-    // ============================================
+    // ════════════════════════════════════════════════════════════
 
     async generateChartRequests(context, analysis) {
         const chartRequests = [];
@@ -1172,21 +967,14 @@ class FinancialChatbotEngine {
         console.log('   Sub-Intents:', analysis.subIntents?.join(', ') || 'None');
         console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
         
-        // ════════════════════════════════════════════════════════════
         // PRIORITÉ 1: COMPARAISONS (avec sous-intents)
-        // ════════════════════════════════════════════════════════════
-        
         if (analysis.isComparison && context.comparisonData) {
             const { symbols, stocksData, timeSeries } = context.comparisonData;
             const subIntents = analysis.subIntents || [];
             
-            // ──────────────────────────────────────────────────────
-            // 1.A - CORRELATION FOCUS
-            // ──────────────────────────────────────────────────────
             if (subIntents.includes('CORRELATION_FOCUS') && timeSeries?.length >= 2) {
                 console.log('📈 Adding CORRELATION charts');
                 
-                // Graphique 1: Scatter Plot de Corrélation
                 chartRequests.push({
                     type: 'scatter-correlation',
                     title: `${symbols[0]} vs ${symbols[1]} - Correlation Analysis`,
@@ -1196,7 +984,6 @@ class FinancialChatbotEngine {
                     description: 'Daily returns scatter plot with regression line'
                 });
                 
-                // Graphique 2: Performance Normalisée (base 100)
                 chartRequests.push({
                     type: 'normalized-comparison',
                     title: `${symbols.join(' vs ')} - Normalized Performance (Base 100)`,
@@ -1206,7 +993,6 @@ class FinancialChatbotEngine {
                     description: 'Price movements normalized to show relative performance'
                 });
                 
-                // Graphique 3: Rolling Correlation (30 jours)
                 chartRequests.push({
                     type: 'rolling-correlation',
                     title: `${symbols[0]}-${symbols[1]} Rolling 30-Day Correlation`,
@@ -1217,13 +1003,9 @@ class FinancialChatbotEngine {
                 });
             }
             
-            // ──────────────────────────────────────────────────────
-            // 1.B - RISK-ADJUSTED RETURNS FOCUS
-            // ──────────────────────────────────────────────────────
             else if (subIntents.includes('RISK_ADJUSTED_FOCUS') && stocksData?.length >= 2) {
                 console.log('📊 Adding RISK-ADJUSTED RETURNS charts');
                 
-                // Graphique 1: Bar Chart - Sharpe, Sortino, Calmar
                 chartRequests.push({
                     type: 'risk-metrics-comparison',
                     title: `${symbols.join(' vs ')} - Risk-Adjusted Returns Comparison`,
@@ -1239,7 +1021,6 @@ class FinancialChatbotEngine {
                     description: 'Higher is better for all metrics'
                 });
                 
-                // Graphique 2: Return vs Risk Scatter
                 chartRequests.push({
                     type: 'return-vs-risk-scatter',
                     title: `${symbols.join(' vs ')} - Return vs Risk Profile`,
@@ -1253,7 +1034,6 @@ class FinancialChatbotEngine {
                     description: 'Top-right quadrant = High return, Low risk (ideal)'
                 });
                 
-                // Graphique 3: Alpha & Beta Comparison
                 chartRequests.push({
                     type: 'alpha-beta-chart',
                     title: `${symbols.join(' vs ')} - Alpha & Beta Analysis`,
@@ -1270,13 +1050,9 @@ class FinancialChatbotEngine {
                 });
             }
             
-            // ──────────────────────────────────────────────────────
-            // 1.C - VOLATILITY FOCUS
-            // ──────────────────────────────────────────────────────
             else if (subIntents.includes('VOLATILITY_FOCUS') && timeSeries?.length >= 2) {
                 console.log('📉 Adding VOLATILITY charts');
                 
-                // Graphique 1: Rolling Volatility Comparison (30-day)
                 chartRequests.push({
                     type: 'rolling-volatility',
                     title: `${symbols.join(' vs ')} - Rolling 30-Day Volatility`,
@@ -1286,7 +1062,6 @@ class FinancialChatbotEngine {
                     description: 'Lower is less risky'
                 });
                 
-                // Graphique 2: Drawdown Comparison
                 chartRequests.push({
                     type: 'drawdown-comparison',
                     title: `${symbols.join(' vs ')} - Maximum Drawdown Analysis`,
@@ -1295,7 +1070,6 @@ class FinancialChatbotEngine {
                     description: 'Depth and duration of price declines from peaks'
                 });
                 
-                // Graphique 3: VaR Comparison
                 chartRequests.push({
                     type: 'var-comparison',
                     title: `${symbols.join(' vs ')} - Value at Risk (95% Confidence)`,
@@ -1309,13 +1083,9 @@ class FinancialChatbotEngine {
                 });
             }
             
-            // ──────────────────────────────────────────────────────
-            // 1.D - VALUATION FOCUS
-            // ──────────────────────────────────────────────────────
             else if (subIntents.includes('VALUATION_FOCUS') && stocksData?.length >= 2) {
                 console.log('💰 Adding VALUATION charts');
                 
-                // Graphique 1: Valuation Multiples Comparison
                 chartRequests.push({
                     type: 'valuation-multiples',
                     title: `${symbols.join(' vs ')} - Valuation Multiples Comparison`,
@@ -1330,7 +1100,6 @@ class FinancialChatbotEngine {
                     description: 'Lower multiples may indicate undervaluation'
                 });
                 
-                // Graphique 2: Price to Fair Value
                 chartRequests.push({
                     type: 'price-to-fair-value',
                     title: `${symbols.join(' vs ')} - Current Price vs Analyst Fair Value`,
@@ -1345,13 +1114,9 @@ class FinancialChatbotEngine {
                 });
             }
             
-            // ──────────────────────────────────────────────────────
-            // 1.E - FUNDAMENTALS FOCUS
-            // ──────────────────────────────────────────────────────
             else if (subIntents.includes('FUNDAMENTALS_FOCUS') && stocksData?.length >= 2) {
                 console.log('📋 Adding FUNDAMENTALS charts');
                 
-                // Graphique 1: Profitability Metrics
                 chartRequests.push({
                     type: 'profitability-comparison',
                     title: `${symbols.join(' vs ')} - Profitability Metrics`,
@@ -1366,7 +1131,6 @@ class FinancialChatbotEngine {
                     description: 'Higher percentages indicate better profitability'
                 });
                 
-                // Graphique 2: Growth Metrics (Revenue, EPS)
                 chartRequests.push({
                     type: 'growth-comparison',
                     title: `${symbols.join(' vs ')} - Growth Metrics`,
@@ -1381,13 +1145,9 @@ class FinancialChatbotEngine {
                 });
             }
             
-            // ──────────────────────────────────────────────────────
-            // 1.F - PERFORMANCE FOCUS (ou comparaison générale)
-            // ──────────────────────────────────────────────────────
             else {
                 console.log('📊 Adding GENERAL COMPARISON charts');
                 
-                // Graphique 1: Prix Normalisés (TOUJOURS pour comparaison)
                 if (timeSeries?.length >= 2) {
                     chartRequests.push({
                         type: 'normalized-comparison',
@@ -1399,7 +1159,6 @@ class FinancialChatbotEngine {
                     });
                 }
                 
-                // Graphique 2: Table de Comparaison des Métriques Clés
                 if (context.comparisonData.keyMetricsComparison) {
                     chartRequests.push({
                         type: 'metrics-table',
@@ -1409,7 +1168,6 @@ class FinancialChatbotEngine {
                     });
                 }
                 
-                // Graphique 3: Returns Comparison (Bar Chart)
                 if (timeSeries?.length >= 2) {
                     chartRequests.push({
                         type: 'returns-bar-chart',
@@ -1431,17 +1189,13 @@ class FinancialChatbotEngine {
             }
         }
         
-        // ════════════════════════════════════════════════════════════
         // PRIORITÉ 2: ANALYSE HISTORIQUE (stock unique)
-        // ════════════════════════════════════════════════════════════
-        
         else if (analysis.type === 'HISTORICAL_ANALYSIS' && context.timeSeriesData) {
             const symbol = analysis.symbols[0];
             const subIntents = analysis.subIntents || [];
             
             console.log(`📈 Adding HISTORICAL ANALYSIS charts for ${symbol}`);
             
-            // Graphique Principal: Candlestick ou Line Chart avec indicateurs
             chartRequests.push({
                 type: 'candlestick-with-indicators',
                 symbol: symbol,
@@ -1452,7 +1206,6 @@ class FinancialChatbotEngine {
                 description: 'Price action with key technical indicators'
             });
             
-            // Sous-intent: VOLATILITY_ANALYSIS
             if (subIntents.includes('VOLATILITY_ANALYSIS')) {
                 chartRequests.push({
                     type: 'volatility-chart',
@@ -1471,7 +1224,6 @@ class FinancialChatbotEngine {
                 });
             }
             
-            // Sous-intent: RETURN_ANALYSIS
             if (subIntents.includes('RETURN_ANALYSIS')) {
                 chartRequests.push({
                     type: 'cumulative-returns',
@@ -1490,7 +1242,6 @@ class FinancialChatbotEngine {
                 });
             }
             
-            // Sous-intent: RISK_METRICS_ANALYSIS
             if (subIntents.includes('RISK_METRICS_ANALYSIS') && context.advancedMetrics) {
                 chartRequests.push({
                     type: 'risk-metrics-dashboard',
@@ -1503,17 +1254,13 @@ class FinancialChatbotEngine {
             }
         }
         
-        // ════════════════════════════════════════════════════════════
         // PRIORITÉ 3: ANALYSE DE STOCK UNIQUE (autre que historical)
-        // ════════════════════════════════════════════════════════════
-        
         else if (analysis.symbols.length > 0 && context.stockData) {
             const symbol = analysis.symbols[0];
             const subIntents = analysis.subIntents || [];
             
             console.log(`📊 Adding STOCK ANALYSIS charts for ${symbol}`);
             
-            // Sous-intent: TECHNICAL_FOCUS
             if (subIntents.includes('TECHNICAL_FOCUS') && context.timeSeriesData) {
                 chartRequests.push({
                     type: 'technical-analysis',
@@ -1525,7 +1272,6 @@ class FinancialChatbotEngine {
                 });
             }
             
-            // Sous-intent: ANALYST_FOCUS
             else if (subIntents.includes('ANALYST_FOCUS') && context.analystRecommendations) {
                 chartRequests.push({
                     type: 'analyst-recommendations',
@@ -1547,7 +1293,6 @@ class FinancialChatbotEngine {
                 }
             }
             
-            // Sous-intent: EARNINGS_FOCUS
             else if (subIntents.includes('EARNINGS_FOCUS') && context.earningsHistory) {
                 chartRequests.push({
                     type: 'earnings-surprises',
@@ -1567,7 +1312,6 @@ class FinancialChatbotEngine {
                 });
             }
             
-            // Sous-intent: FUNDAMENTAL_FOCUS
             else if (subIntents.includes('FUNDAMENTAL_FOCUS') && context.stockData.metrics) {
                 chartRequests.push({
                     type: 'fundamentals-dashboard',
@@ -1578,7 +1322,6 @@ class FinancialChatbotEngine {
                 });
             }
             
-            // Default: Graphique de prix si données disponibles
             else if (context.timeSeriesData) {
                 chartRequests.push({
                     type: 'line',
@@ -1592,10 +1335,7 @@ class FinancialChatbotEngine {
             }
         }
         
-        // ════════════════════════════════════════════════════════════
         // PRIORITÉ 4: MARKET NEWS / IPO (pas de graphiques généralement)
-        // ════════════════════════════════════════════════════════════
-        
         else if (analysis.type === 'MARKET_NEWS_QUERY' && context.marketData) {
             console.log('📰 Market news query - adding market indices chart');
             
@@ -1775,7 +1515,7 @@ class FinancialChatbotEngine {
     }
 
     // ============================================
-    // CALCULS TECHNIQUES
+    // CALCULS TECHNIQUES (Continuation dans prochain message...)
     // ============================================
     
     calculateHistoricalStats(timeSeriesData) {
@@ -2010,6 +1750,189 @@ class FinancialChatbotEngine {
         return { direction, strength, duration: 0 };
     }
 
+    // ============================================
+    // WALL STREET ADVANCED METRICS
+    // ============================================
+    
+    calculateAdvancedMetrics(timeSeriesData, stockData) {
+        const prices = timeSeriesData.data.map(d => d.close);
+        
+        const returns = [];
+        for (let i = 1; i < prices.length; i++) {
+            returns.push((prices[i] - prices[i-1]) / prices[i-1]);
+        }
+        
+        const riskFreeRate = 0.02;
+        const avgReturn = returns.reduce((a, b) => a + b, 0) / returns.length;
+        const annualizedReturn = avgReturn * 252;
+        const stdDev = this.calculateStdDev(returns);
+        const annualizedStdDev = stdDev * Math.sqrt(252);
+        const excessReturn = annualizedReturn - riskFreeRate;
+        const sharpeRatio = annualizedStdDev !== 0 ? (excessReturn / annualizedStdDev).toFixed(3) : 'N/A';
+        
+        const downsideReturns = returns.filter(r => r < 0);
+        const downsideDeviation = downsideReturns.length > 0 ? 
+            Math.sqrt(downsideReturns.reduce((sum, r) => sum + r * r, 0) / downsideReturns.length) * Math.sqrt(252) : 0;
+        const sortinoRatio = downsideDeviation !== 0 ? (excessReturn / downsideDeviation).toFixed(3) : 'N/A';
+        
+        const maxDrawdown = this.calculateMaxDrawdown(prices);
+        const calmarRatio = maxDrawdown !== 0 ? (annualizedReturn / (maxDrawdown / 100)).toFixed(3) : 'N/A';
+        
+        const informationRatio = sharpeRatio;
+        
+        const beta = stockData?.metrics?.beta || 1;
+        const treynorRatio = beta !== 0 ? (excessReturn / beta).toFixed(3) : 'N/A';
+        
+        return {
+            sharpeRatio,
+            sortinoRatio,
+            calmarRatio,
+            informationRatio,
+            treynorRatio,
+            alpha: this.calculateAlpha(annualizedReturn, beta),
+            beta: beta
+        };
+    }
+    
+    calculateRiskMetrics(timeSeriesData) {
+        const prices = timeSeriesData.data.map(d => d.close);
+        const returns = [];
+        for (let i = 1; i < prices.length; i++) {
+            returns.push((prices[i] - prices[i-1]) / prices[i-1]);
+        }
+        
+        const sortedReturns = [...returns].sort((a, b) => a - b);
+        const varIndex = Math.floor(returns.length * 0.05);
+        const var95 = sortedReturns[varIndex];
+        const varPercentage = (var95 * 100).toFixed(2);
+        
+        const cvarReturns = sortedReturns.slice(0, varIndex);
+        const cvar = cvarReturns.length > 0 ? 
+            (cvarReturns.reduce((a, b) => a + b, 0) / cvarReturns.length * 100).toFixed(2) : 'N/A';
+        
+        const mean = returns.reduce((a, b) => a + b, 0) / returns.length;
+        const stdDev = this.calculateStdDev(returns);
+        const skewness = returns.length > 0 && stdDev !== 0 ? 
+            (returns.reduce((sum, r) => sum + Math.pow((r - mean) / stdDev, 3), 0) / returns.length).toFixed(3) : 'N/A';
+        
+        const kurtosis = returns.length > 0 && stdDev !== 0 ? 
+            (returns.reduce((sum, r) => sum + Math.pow((r - mean) / stdDev, 4), 0) / returns.length - 3).toFixed(3) : 'N/A';
+        
+        return {
+            var95: varPercentage,
+            cvar95: cvar,
+            skewness,
+            kurtosis,
+            tailRisk: parseFloat(kurtosis) > 0 ? 'High' : 'Normal'
+        };
+    }
+    
+    calculateAlpha(annualizedReturn, beta, riskFreeRate = 0.02, marketReturn = 0.10) {
+        const expectedReturn = riskFreeRate + beta * (marketReturn - riskFreeRate);
+        const alpha = ((annualizedReturn - expectedReturn) * 100).toFixed(2);
+        return alpha;
+    }
+    
+    calculateEarningsQuality(earnings) {
+        if (!earnings || earnings.length === 0) return 'N/A';
+        
+        let qualityScore = 0;
+        let totalSurprises = 0;
+        
+        earnings.forEach(e => {
+            if (e.surprisePercent) {
+                totalSurprises += Math.abs(e.surprisePercent);
+                if (e.surprisePercent > 0) qualityScore += 10;
+                if (e.surprisePercent > 5) qualityScore += 5;
+                if (e.surprisePercent < -5) qualityScore -= 10;
+            }
+        });
+        
+        const avgSurprise = totalSurprises / earnings.length;
+        const consistency = avgSurprise < 5 ? 20 : avgSurprise < 10 ? 10 : 0;
+        
+        qualityScore += consistency;
+        
+        if (qualityScore >= 60) return 'Excellent';
+        if (qualityScore >= 40) return 'Good';
+        if (qualityScore >= 20) return 'Average';
+        return 'Poor';
+    }
+    
+    calculateCorrelation(timeSeriesArray) {
+        if (timeSeriesArray.length < 2) return null;
+        
+        const series1 = timeSeriesArray[0].data.map(d => d.close);
+        const series2 = timeSeriesArray[1].data.map(d => d.close);
+        
+        const minLength = Math.min(series1.length, series2.length);
+        const data1 = series1.slice(-minLength);
+        const data2 = series2.slice(-minLength);
+        
+        const returns1 = [];
+        const returns2 = [];
+        
+        for (let i = 1; i < minLength; i++) {
+            returns1.push((data1[i] - data1[i-1]) / data1[i-1]);
+            returns2.push((data2[i] - data2[i-1]) / data2[i-1]);
+        }
+        
+        const mean1 = returns1.reduce((a, b) => a + b, 0) / returns1.length;
+        const mean2 = returns2.reduce((a, b) => a + b, 0) / returns2.length;
+        
+        let numerator = 0;
+        let sum1Sq = 0;
+        let sum2Sq = 0;
+        
+        for (let i = 0; i < returns1.length; i++) {
+            const diff1 = returns1[i] - mean1;
+            const diff2 = returns2[i] - mean2;
+            numerator += diff1 * diff2;
+            sum1Sq += diff1 * diff1;
+            sum2Sq += diff2 * diff2;
+        }
+        
+        const correlation = numerator / Math.sqrt(sum1Sq * sum2Sq);
+        
+        return {
+            correlation: correlation.toFixed(3),
+            interpretation: this.interpretCorrelation(correlation),
+            diversificationBenefit: Math.abs(correlation) < 0.7 ? 'High' : Math.abs(correlation) < 0.9 ? 'Moderate' : 'Low'
+        };
+    }
+    
+    interpretCorrelation(corr) {
+        const abs = Math.abs(corr);
+        if (abs >= 0.9) return 'Very Strong';
+        if (abs >= 0.7) return 'Strong';
+        if (abs >= 0.5) return 'Moderate';
+        if (abs >= 0.3) return 'Weak';
+        return 'Very Weak';
+    }
+
+    getConsensusRating(recommendation) {
+        const scores = {
+            strongBuy: recommendation.strongBuy * 5,
+            buy: recommendation.buy * 4,
+            hold: recommendation.hold * 3,
+            sell: recommendation.sell * 2,
+            strongSell: recommendation.strongSell * 1
+        };
+
+        const totalScore = scores.strongBuy + scores.buy + scores.hold + scores.sell + scores.strongSell;
+        const totalAnalysts = recommendation.strongBuy + recommendation.buy + recommendation.hold + recommendation.sell + recommendation.strongSell;
+
+        if (totalAnalysts === 0) return 'N/A';
+
+        const avgScore = totalScore / totalAnalysts;
+
+        if (avgScore >= 4.5) return 'Strong Buy';
+        if (avgScore >= 3.5) return 'Buy';
+        if (avgScore >= 2.5) return 'Hold';
+        if (avgScore >= 1.5) return 'Sell';
+        return 'Strong Sell';
+    }
+
     getOutputSize(timeframe) {
         const sizes = {
             '1d': 24, '1w': 7, '1M': 30, '3M': 90, '6M': 180,
@@ -2123,7 +2046,8 @@ if (typeof module !== 'undefined' && module.exports) {
 
 window.FinancialChatbotEngine = FinancialChatbotEngine;
 
-console.log('🚀 Financial Chatbot AI Engine v6.0 WALL STREET PRO loaded successfully!');
+console.log('🚀 Financial Chatbot AI Engine v6.1 WALL STREET PRO loaded successfully!');
 console.log('📊 Ultra-Optimized Chart Generation System active');
 console.log('🎯 Context-Aware Chart Requests with Sub-Intent Detection');
 console.log('⚡ Advanced Metrics: Sharpe, Sortino, Alpha, Beta, Correlation, VaR');
+console.log('✅ API Calls Optimized - No Duplicates');

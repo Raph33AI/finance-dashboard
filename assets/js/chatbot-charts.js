@@ -1,5 +1,6 @@
 // ============================================
-// CHATBOT CHARTS v4.0 - ULTRA-PREMIUM VISUALIZATIONS
+// CHATBOT CHARTS v4.1 - ULTRA-PREMIUM VISUALIZATIONS
+// ✅ CORRECTION: Couleurs adaptatives dark/light mode
 // 25+ Chart Types: Correlation, Risk Metrics, Volatility, Valuation, etc.
 // Context-Aware Rendering with Advanced Financial Analytics
 // ============================================
@@ -17,19 +18,61 @@ class ChatbotCharts {
         } else {
             this.chartsAvailable = true;
             this.configureChartDefaults();
-            console.log('✅ ChatbotCharts v4.0 initialized - 25+ chart types available');
+            console.log('✅ ChatbotCharts v4.1 initialized - 25+ chart types available');
+            console.log('🎨 Adaptive colors for dark/light mode enabled');
         }
     }
 
     // ============================================
-    // CONFIGURE CHART DEFAULTS
+    // ✅ CONFIGURE CHART DEFAULTS (CORRECTION MAJEURE)
     // ============================================
     configureChartDefaults() {
-        Chart.defaults.color = this.config.charts.colors.text;
-        Chart.defaults.borderColor = this.config.charts.colors.grid;
+        const colors = this.getAdaptiveColors();
+        
+        Chart.defaults.color = colors.text;
+        Chart.defaults.borderColor = colors.grid;
         Chart.defaults.font.family = "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
         Chart.defaults.animation.duration = this.config.charts.animation.duration;
         Chart.defaults.animation.easing = this.config.charts.animation.easing;
+        
+        console.log('🎨 Chart.js defaults configured:');
+        console.log('   Text color:', Chart.defaults.color);
+        console.log('   Grid color:', Chart.defaults.borderColor);
+    }
+    
+    // ✅ NOUVELLE MÉTHODE: Obtenir couleurs adaptatives
+    getAdaptiveColors() {
+        if (this.config.charts.colors.getColors) {
+            return this.config.charts.colors.getColors();
+        }
+        
+        const isDarkMode = document.body.classList.contains('dark-mode');
+        
+        if (isDarkMode) {
+            return {
+                primary: '#667eea',
+                secondary: '#764ba2',
+                success: '#38ef7d',
+                danger: '#f45c43',
+                warning: '#ffbe0b',
+                info: '#00d9ff',
+                grid: 'rgba(255, 255, 255, 0.1)',
+                text: 'rgba(255, 255, 255, 0.9)',
+                background: 'rgba(15, 23, 42, 0.95)'
+            };
+        } else {
+            return {
+                primary: '#667eea',
+                secondary: '#764ba2',
+                success: '#10b981',
+                danger: '#ef4444',
+                warning: '#f59e0b',
+                info: '#06b6d4',
+                grid: 'rgba(0, 0, 0, 0.08)',
+                text: 'rgba(30, 41, 59, 0.9)',
+                background: 'rgba(255, 255, 255, 0.98)'
+            };
+        }
     }
 
     // ============================================
@@ -46,12 +89,9 @@ class ChatbotCharts {
             
             console.log(`📊 Creating chart: ${type}`);
             
-            // Generate unique ID
-            const chartId = `chart-${++this.chartCounter}`;
+            this.configureChartDefaults();
             
-            // ═══════════════════════════════════════════════════
-            // DISPATCH TO SPECIALIZED RENDERERS
-            // ═══════════════════════════════════════════════════
+            const chartId = `chart-${++this.chartCounter}`;
             
             // COMPARISON CHARTS
             if (type === 'normalized-comparison' || type === 'comparison') {
@@ -176,7 +216,6 @@ class ChatbotCharts {
                 return await this.createStandardChart(chartId, chartRequest, container);
             }
             
-            // Unknown type
             throw new Error(`Unknown chart type: ${type}`);
 
         } catch (error) {
@@ -190,16 +229,18 @@ class ChatbotCharts {
     }
 
     // ============================================
-    // CHART COLORS PALETTE
+    // ✅ CHART COLORS PALETTE (CORRECTION)
     // ============================================
     getColorPalette() {
+        const colors = this.getAdaptiveColors();
+        
         return {
-            primary: '#667eea',
-            secondary: '#f093fb',
-            success: '#10b981',
-            warning: '#f59e0b',
-            danger: '#ef4444',
-            info: '#06b6d4',
+            primary: colors.primary,
+            secondary: colors.secondary,
+            success: colors.success,
+            warning: colors.warning,
+            danger: colors.danger,
+            info: colors.info,
             purple: '#8b5cf6',
             pink: '#ec4899',
             indigo: '#6366f1',
@@ -233,20 +274,16 @@ class ChatbotCharts {
     // COMPARISON CHARTS
     // ════════════════════════════════════════════════════════════
 
-    // ──────────────────────────────────────────────────────
-    // 1. NORMALIZED COMPARISON (Prix normalisés base 100)
-    // ──────────────────────────────────────────────────────
     async createNormalizedComparisonChart(chartId, chartRequest, container) {
         const { symbols, timeSeries, title, description } = chartRequest;
+        const adaptiveColors = this.getAdaptiveColors();
         
-        // Create HTML
         const chartHTML = this.createChartHTML(chartId, title || `${symbols.join(' vs ')} - Performance Comparison`, description);
         container.innerHTML = chartHTML;
         
         const canvas = container.querySelector(`#${chartId}`);
         if (!canvas) throw new Error('Canvas not found');
         
-        // Prepare normalized datasets
         const datasets = [];
         const colors = this.getColorArray(symbols.length);
         
@@ -289,14 +326,14 @@ class ChatbotCharts {
                         display: true,
                         text: title || 'Performance Comparison (Normalized to 100)',
                         font: { size: 16, weight: 'bold' },
-                        color: this.config.charts.colors.text,
+                        color: adaptiveColors.text,
                         padding: 20
                     },
                     legend: {
                         display: true,
                         position: 'top',
                         labels: {
-                            color: this.config.charts.colors.text,
+                            color: adaptiveColors.text,
                             usePointStyle: true,
                             padding: 15,
                             font: { size: 13, weight: '600' }
@@ -315,8 +352,22 @@ class ChatbotCharts {
                         title: {
                             display: true,
                             text: 'Normalized Performance (Base = 100)',
-                            color: this.config.charts.colors.text,
+                            color: adaptiveColors.text,
                             font: { size: 12, weight: '600' }
+                        },
+                        ticks: {
+                            color: adaptiveColors.text
+                        },
+                        grid: {
+                            color: adaptiveColors.grid
+                        }
+                    },
+                    x: {
+                        ticks: {
+                            color: adaptiveColors.text
+                        },
+                        grid: {
+                            color: adaptiveColors.grid
                         }
                     }
                 }
@@ -329,11 +380,9 @@ class ChatbotCharts {
         return chartId;
     }
 
-    // ──────────────────────────────────────────────────────
-    // 2. SCATTER CORRELATION (Correlation avec régression)
-    // ──────────────────────────────────────────────────────
     async createScatterCorrelationChart(chartId, chartRequest, container) {
         const { symbols, timeSeries, correlationData, title, description } = chartRequest;
+        const adaptiveColors = this.getAdaptiveColors();
         
         const chartHTML = this.createChartHTML(chartId, title || `${symbols[0]} vs ${symbols[1]} - Correlation`, description);
         container.innerHTML = chartHTML;
@@ -341,11 +390,9 @@ class ChatbotCharts {
         const canvas = container.querySelector(`#${chartId}`);
         if (!canvas) throw new Error('Canvas not found');
         
-        // Calculate daily returns
         const returns1 = this.calculateReturns(timeSeries[0].data.map(d => d.close));
         const returns2 = this.calculateReturns(timeSeries[1].data.map(d => d.close));
         
-        // Create scatter points
         const scatterData = returns1.map((r1, i) => ({
             x: (r1 * 100).toFixed(3),
             y: (returns2[i] * 100).toFixed(3)
@@ -370,7 +417,7 @@ class ChatbotCharts {
                         display: true,
                         text: `Correlation: ${correlationData?.correlation || 'N/A'} (${correlationData?.interpretation || 'N/A'})`,
                         font: { size: 16, weight: 'bold' },
-                        color: this.config.charts.colors.text,
+                        color: adaptiveColors.text,
                         padding: 20
                     },
                     legend: { display: false },
@@ -385,16 +432,28 @@ class ChatbotCharts {
                         title: {
                             display: true,
                             text: `${symbols[0]} Daily Return (%)`,
-                            color: this.config.charts.colors.text,
+                            color: adaptiveColors.text,
                             font: { size: 12, weight: '600' }
+                        },
+                        ticks: {
+                            color: adaptiveColors.text
+                        },
+                        grid: {
+                            color: adaptiveColors.grid
                         }
                     },
                     y: {
                         title: {
                             display: true,
                             text: `${symbols[1]} Daily Return (%)`,
-                            color: this.config.charts.colors.text,
+                            color: adaptiveColors.text,
                             font: { size: 12, weight: '600' }
+                        },
+                        ticks: {
+                            color: adaptiveColors.text
+                        },
+                        grid: {
+                            color: adaptiveColors.grid
                         }
                     }
                 }
@@ -407,11 +466,9 @@ class ChatbotCharts {
         return chartId;
     }
 
-    // ──────────────────────────────────────────────────────
-    // 3. ROLLING CORRELATION (30-day rolling)
-    // ──────────────────────────────────────────────────────
     async createRollingCorrelationChart(chartId, chartRequest, container) {
         const { symbols, timeSeries, window = 30, title, description } = chartRequest;
+        const adaptiveColors = this.getAdaptiveColors();
         
         const chartHTML = this.createChartHTML(chartId, title || `${symbols[0]}-${symbols[1]} Rolling Correlation`, description);
         container.innerHTML = chartHTML;
@@ -450,7 +507,8 @@ class ChatbotCharts {
                     title: {
                         display: true,
                         text: title || `Rolling ${window}-Day Correlation`,
-                        font: { size: 16, weight: 'bold' }
+                        font: { size: 16, weight: 'bold' },
+                        color: adaptiveColors.text
                     },
                     legend: { display: false }
                 },
@@ -461,7 +519,22 @@ class ChatbotCharts {
                         title: {
                             display: true,
                             text: 'Correlation Coefficient',
-                            font: { size: 12, weight: '600' }
+                            font: { size: 12, weight: '600' },
+                            color: adaptiveColors.text
+                        },
+                        ticks: {
+                            color: adaptiveColors.text
+                        },
+                        grid: {
+                            color: adaptiveColors.grid
+                        }
+                    },
+                    x: {
+                        ticks: {
+                            color: adaptiveColors.text
+                        },
+                        grid: {
+                            color: adaptiveColors.grid
                         }
                     }
                 }
@@ -474,11 +547,9 @@ class ChatbotCharts {
         return chartId;
     }
 
-    // ──────────────────────────────────────────────────────
-    // 4. RETURNS BAR CHART (Total returns comparison)
-    // ──────────────────────────────────────────────────────
     async createReturnsBarChart(chartId, chartRequest, container) {
         const { symbols, data, title, description } = chartRequest;
+        const adaptiveColors = this.getAdaptiveColors();
         
         const chartHTML = this.createChartHTML(chartId, title || `${symbols.join(' vs ')} - Total Returns`, description);
         container.innerHTML = chartHTML;
@@ -507,7 +578,8 @@ class ChatbotCharts {
                     title: {
                         display: true,
                         text: title || 'Total Returns Comparison',
-                        font: { size: 16, weight: 'bold' }
+                        font: { size: 16, weight: 'bold' },
+                        color: adaptiveColors.text
                     },
                     legend: { display: false },
                     tooltip: {
@@ -521,10 +593,23 @@ class ChatbotCharts {
                         title: {
                             display: true,
                             text: 'Total Return (%)',
-                            font: { size: 12, weight: '600' }
+                            font: { size: 12, weight: '600' },
+                            color: adaptiveColors.text
                         },
                         ticks: {
-                            callback: (value) => `${value}%`
+                            callback: (value) => `${value}%`,
+                            color: adaptiveColors.text
+                        },
+                        grid: {
+                            color: adaptiveColors.grid
+                        }
+                    },
+                    x: {
+                        ticks: {
+                            color: adaptiveColors.text
+                        },
+                        grid: {
+                            color: adaptiveColors.grid
                         }
                     }
                 }
@@ -541,11 +626,9 @@ class ChatbotCharts {
     // RISK-ADJUSTED CHARTS
     // ════════════════════════════════════════════════════════════
 
-    // ──────────────────────────────────────────────────────
-    // 5. RISK METRICS COMPARISON (Sharpe, Sortino, Calmar, Treynor)
-    // ──────────────────────────────────────────────────────
     async createRiskMetricsComparisonChart(chartId, chartRequest, container) {
         const { symbols, data, metrics, title, description } = chartRequest;
+        const adaptiveColors = this.getAdaptiveColors();
         
         const chartHTML = this.createChartHTML(chartId, title || 'Risk-Adjusted Returns Comparison', description);
         container.innerHTML = chartHTML;
@@ -555,7 +638,6 @@ class ChatbotCharts {
         
         const colors = this.getColorArray(symbols.length);
         
-        // Prepare datasets for grouped bar chart
         const datasets = [];
         const metricLabels = {
             sharpe: 'Sharpe Ratio',
@@ -592,13 +674,14 @@ class ChatbotCharts {
                     title: {
                         display: true,
                         text: title || 'Risk-Adjusted Returns Comparison',
-                        font: { size: 16, weight: 'bold' }
+                        font: { size: 16, weight: 'bold' },
+                        color: adaptiveColors.text
                     },
                     legend: {
                         display: true,
                         position: 'top',
                         labels: {
-                            color: this.config.charts.colors.text,
+                            color: adaptiveColors.text,
                             usePointStyle: true,
                             padding: 15
                         }
@@ -615,7 +698,22 @@ class ChatbotCharts {
                         title: {
                             display: true,
                             text: 'Ratio Value (Higher is Better)',
-                            font: { size: 12, weight: '600' }
+                            font: { size: 12, weight: '600' },
+                            color: adaptiveColors.text
+                        },
+                        ticks: {
+                            color: adaptiveColors.text
+                        },
+                        grid: {
+                            color: adaptiveColors.grid
+                        }
+                    },
+                    x: {
+                        ticks: {
+                            color: adaptiveColors.text
+                        },
+                        grid: {
+                            color: adaptiveColors.grid
                         }
                     }
                 }
@@ -628,11 +726,9 @@ class ChatbotCharts {
         return chartId;
     }
 
-    // ──────────────────────────────────────────────────────
-    // 6. RETURN VS RISK SCATTER (Efficient Frontier style)
-    // ──────────────────────────────────────────────────────
     async createReturnVsRiskScatter(chartId, chartRequest, container) {
         const { symbols, data, title, description } = chartRequest;
+        const adaptiveColors = this.getAdaptiveColors();
         
         const chartHTML = this.createChartHTML(chartId, title || 'Return vs Risk Profile', description);
         container.innerHTML = chartHTML;
@@ -663,13 +759,14 @@ class ChatbotCharts {
                     title: {
                         display: true,
                         text: title || 'Return vs Risk Profile',
-                        font: { size: 16, weight: 'bold' }
+                        font: { size: 16, weight: 'bold' },
+                        color: adaptiveColors.text
                     },
                     legend: {
                         display: true,
                         position: 'right',
                         labels: {
-                            color: this.config.charts.colors.text,
+                            color: adaptiveColors.text,
                             usePointStyle: true,
                             padding: 10
                         }
@@ -693,14 +790,28 @@ class ChatbotCharts {
                         title: {
                             display: true,
                             text: 'Volatility / Risk (%)',
-                            font: { size: 12, weight: '600' }
+                            font: { size: 12, weight: '600' },
+                            color: adaptiveColors.text
+                        },
+                        ticks: {
+                            color: adaptiveColors.text
+                        },
+                        grid: {
+                            color: adaptiveColors.grid
                         }
                     },
                     y: {
                         title: {
                             display: true,
                             text: 'Annualized Return (%)',
-                            font: { size: 12, weight: '600' }
+                            font: { size: 12, weight: '600' },
+                            color: adaptiveColors.text
+                        },
+                        ticks: {
+                            color: adaptiveColors.text
+                        },
+                        grid: {
+                            color: adaptiveColors.grid
                         }
                     }
                 }
@@ -713,11 +824,9 @@ class ChatbotCharts {
         return chartId;
     }
 
-    // ──────────────────────────────────────────────────────
-    // 7. ALPHA & BETA CHART
-    // ──────────────────────────────────────────────────────
     async createAlphaBetaChart(chartId, chartRequest, container) {
         const { symbols, data, title, description } = chartRequest;
+        const adaptiveColors = this.getAdaptiveColors();
         
         const chartHTML = this.createChartHTML(chartId, title || 'Alpha & Beta Analysis', description);
         container.innerHTML = chartHTML;
@@ -756,11 +865,15 @@ class ChatbotCharts {
                     title: {
                         display: true,
                         text: title || 'Alpha & Beta Analysis',
-                        font: { size: 16, weight: 'bold' }
+                        font: { size: 16, weight: 'bold' },
+                        color: adaptiveColors.text
                     },
                     legend: {
                         display: true,
-                        position: 'top'
+                        position: 'top',
+                        labels: {
+                            color: adaptiveColors.text
+                        }
                     },
                     tooltip: {
                         callbacks: {
@@ -782,7 +895,14 @@ class ChatbotCharts {
                         title: {
                             display: true,
                             text: 'Alpha (%)',
-                            font: { size: 12, weight: '600' }
+                            font: { size: 12, weight: '600' },
+                            color: adaptiveColors.text
+                        },
+                        ticks: {
+                            color: adaptiveColors.text
+                        },
+                        grid: {
+                            color: adaptiveColors.grid
                         }
                     },
                     y1: {
@@ -792,10 +912,22 @@ class ChatbotCharts {
                         title: {
                             display: true,
                             text: 'Beta',
-                            font: { size: 12, weight: '600' }
+                            font: { size: 12, weight: '600' },
+                            color: adaptiveColors.text
                         },
                         grid: {
                             drawOnChartArea: false
+                        },
+                        ticks: {
+                            color: adaptiveColors.text
+                        }
+                    },
+                    x: {
+                        ticks: {
+                            color: adaptiveColors.text
+                        },
+                        grid: {
+                            color: adaptiveColors.grid
                         }
                     }
                 }
@@ -812,11 +944,9 @@ class ChatbotCharts {
     // VOLATILITY CHARTS
     // ════════════════════════════════════════════════════════════
 
-    // ──────────────────────────────────────────────────────
-    // 8. ROLLING VOLATILITY (30-day rolling)
-    // ──────────────────────────────────────────────────────
     async createRollingVolatilityChart(chartId, chartRequest, container) {
         const { symbols, timeSeries, window = 30, title, description } = chartRequest;
+        const adaptiveColors = this.getAdaptiveColors();
         
         const chartHTML = this.createChartHTML(chartId, title || 'Rolling Volatility Comparison', description);
         container.innerHTML = chartHTML;
@@ -861,11 +991,15 @@ class ChatbotCharts {
                     title: {
                         display: true,
                         text: title || `Rolling ${window}-Day Volatility`,
-                        font: { size: 16, weight: 'bold' }
+                        font: { size: 16, weight: 'bold' },
+                        color: adaptiveColors.text
                     },
                     legend: {
                         display: true,
-                        position: 'top'
+                        position: 'top',
+                        labels: {
+                            color: adaptiveColors.text
+                        }
                     }
                 },
                 scales: {
@@ -874,10 +1008,23 @@ class ChatbotCharts {
                         title: {
                             display: true,
                             text: 'Annualized Volatility (%)',
-                            font: { size: 12, weight: '600' }
+                            font: { size: 12, weight: '600' },
+                            color: adaptiveColors.text
                         },
                         ticks: {
-                            callback: (value) => `${value.toFixed(1)}%`
+                            callback: (value) => `${value.toFixed(1)}%`,
+                            color: adaptiveColors.text
+                        },
+                        grid: {
+                            color: adaptiveColors.grid
+                        }
+                    },
+                    x: {
+                        ticks: {
+                            color: adaptiveColors.text
+                        },
+                        grid: {
+                            color: adaptiveColors.grid
                         }
                     }
                 }
@@ -890,11 +1037,9 @@ class ChatbotCharts {
         return chartId;
     }
 
-    // ──────────────────────────────────────────────────────
-    // 9. DRAWDOWN CHART (Maximum drawdown analysis)
-    // ──────────────────────────────────────────────────────
     async createDrawdownChart(chartId, chartRequest, container) {
         const { symbol, symbols, timeSeries, title, description } = chartRequest;
+        const adaptiveColors = this.getAdaptiveColors();
         
         const chartHTML = this.createChartHTML(chartId, title || 'Drawdown Analysis', description);
         container.innerHTML = chartHTML;
@@ -908,9 +1053,8 @@ class ChatbotCharts {
         let commonLabels = [];
         
         if (timeSeries && timeSeries.length > 0) {
-            // Multiple stocks comparison
             timeSeries.forEach((series, index) => {
-                const drawdowns = this.calculateDrawdowns(series.data.map(d => d.close));
+                const drawdowns = this.calculateDrawdown(series.data.map(d => d.close));
                 
                 if (index === 0) {
                     commonLabels = series.data.map(d => {
@@ -932,8 +1076,7 @@ class ChatbotCharts {
                 });
             });
         } else if (chartRequest.data && chartRequest.data.data) {
-            // Single stock
-            const drawdowns = this.calculateDrawdowns(chartRequest.data.data.map(d => d.close));
+            const drawdowns = this.calculateDrawdown(chartRequest.data.data.map(d => d.close));
             commonLabels = chartRequest.data.data.map(d => {
                 const date = new Date(d.datetime);
                 return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
@@ -960,11 +1103,15 @@ class ChatbotCharts {
                     title: {
                         display: true,
                         text: title || 'Drawdown from Peak',
-                        font: { size: 16, weight: 'bold' }
+                        font: { size: 16, weight: 'bold' },
+                        color: adaptiveColors.text
                     },
                     legend: {
                         display: datasets.length > 1,
-                        position: 'top'
+                        position: 'top',
+                        labels: {
+                            color: adaptiveColors.text
+                        }
                     },
                     tooltip: {
                         callbacks: {
@@ -978,10 +1125,23 @@ class ChatbotCharts {
                         title: {
                             display: true,
                             text: 'Drawdown (%)',
-                            font: { size: 12, weight: '600' }
+                            font: { size: 12, weight: '600' },
+                            color: adaptiveColors.text
                         },
                         ticks: {
-                            callback: (value) => `${value.toFixed(0)}%`
+                            callback: (value) => `${value.toFixed(0)}%`,
+                            color: adaptiveColors.text
+                        },
+                        grid: {
+                            color: adaptiveColors.grid
+                        }
+                    },
+                    x: {
+                        ticks: {
+                            color: adaptiveColors.text
+                        },
+                        grid: {
+                            color: adaptiveColors.grid
                         }
                     }
                 }
@@ -994,11 +1154,9 @@ class ChatbotCharts {
         return chartId;
     }
 
-    // ──────────────────────────────────────────────────────
-    // 10. VAR COMPARISON (Value at Risk 95%)
-    // ──────────────────────────────────────────────────────
     async createVaRComparisonChart(chartId, chartRequest, container) {
         const { symbols, data, title, description } = chartRequest;
+        const adaptiveColors = this.getAdaptiveColors();
         
         const chartHTML = this.createChartHTML(chartId, title || 'Value at Risk Comparison', description);
         container.innerHTML = chartHTML;
@@ -1035,11 +1193,15 @@ class ChatbotCharts {
                     title: {
                         display: true,
                         text: title || 'Value at Risk (95% Confidence)',
-                        font: { size: 16, weight: 'bold' }
+                        font: { size: 16, weight: 'bold' },
+                        color: adaptiveColors.text
                     },
                     legend: {
                         display: true,
-                        position: 'top'
+                        position: 'top',
+                        labels: {
+                            color: adaptiveColors.text
+                        }
                     },
                     tooltip: {
                         callbacks: {
@@ -1052,10 +1214,23 @@ class ChatbotCharts {
                         title: {
                             display: true,
                             text: 'Expected Loss (%)',
-                            font: { size: 12, weight: '600' }
+                            font: { size: 12, weight: '600' },
+                            color: adaptiveColors.text
                         },
                         ticks: {
-                            callback: (value) => `${value.toFixed(1)}%`
+                            callback: (value) => `${value.toFixed(1)}%`,
+                            color: adaptiveColors.text
+                        },
+                        grid: {
+                            color: adaptiveColors.grid
+                        }
+                    },
+                    x: {
+                        ticks: {
+                            color: adaptiveColors.text
+                        },
+                        grid: {
+                            color: adaptiveColors.grid
                         }
                     }
                 }
@@ -1068,11 +1243,9 @@ class ChatbotCharts {
         return chartId;
     }
 
-    // ──────────────────────────────────────────────────────
-    // 11. VOLATILITY CHART (Single stock, 30-day rolling)
-    // ──────────────────────────────────────────────────────
     async createVolatilityChart(chartId, chartRequest, container) {
         const { symbol, data, title, description } = chartRequest;
+        const adaptiveColors = this.getAdaptiveColors();
         
         const chartHTML = this.createChartHTML(chartId, title || `${symbol} - Historical Volatility`, description);
         container.innerHTML = chartHTML;
@@ -1109,7 +1282,8 @@ class ChatbotCharts {
                     title: {
                         display: true,
                         text: title || `${symbol} - 30-Day Rolling Volatility`,
-                        font: { size: 16, weight: 'bold' }
+                        font: { size: 16, weight: 'bold' },
+                        color: adaptiveColors.text
                     },
                     legend: { display: false }
                 },
@@ -1119,10 +1293,23 @@ class ChatbotCharts {
                         title: {
                             display: true,
                             text: 'Annualized Volatility (%)',
-                            font: { size: 12, weight: '600' }
+                            font: { size: 12, weight: '600' },
+                            color: adaptiveColors.text
                         },
                         ticks: {
-                            callback: (value) => `${value.toFixed(1)}%`
+                            callback: (value) => `${value.toFixed(1)}%`,
+                            color: adaptiveColors.text
+                        },
+                        grid: {
+                            color: adaptiveColors.grid
+                        }
+                    },
+                    x: {
+                        ticks: {
+                            color: adaptiveColors.text
+                        },
+                        grid: {
+                            color: adaptiveColors.grid
                         }
                     }
                 }
@@ -1139,11 +1326,9 @@ class ChatbotCharts {
     // VALUATION CHARTS
     // ════════════════════════════════════════════════════════════
 
-    // ──────────────────────────────────────────────────────
-    // 12. VALUATION MULTIPLES (P/E, P/B, P/S, PEG)
-    // ──────────────────────────────────────────────────────
     async createValuationMultiplesChart(chartId, chartRequest, container) {
         const { symbols, data, title, description } = chartRequest;
+        const adaptiveColors = this.getAdaptiveColors();
         
         const chartHTML = this.createChartHTML(chartId, title || 'Valuation Multiples Comparison', description);
         container.innerHTML = chartHTML;
@@ -1198,11 +1383,15 @@ class ChatbotCharts {
                     title: {
                         display: true,
                         text: title || 'Valuation Multiples Comparison',
-                        font: { size: 16, weight: 'bold' }
+                        font: { size: 16, weight: 'bold' },
+                        color: adaptiveColors.text
                     },
                     legend: {
                         display: true,
-                        position: 'top'
+                        position: 'top',
+                        labels: {
+                            color: adaptiveColors.text
+                        }
                     }
                 },
                 scales: {
@@ -1211,7 +1400,22 @@ class ChatbotCharts {
                         title: {
                             display: true,
                             text: 'Multiple Value',
-                            font: { size: 12, weight: '600' }
+                            font: { size: 12, weight: '600' },
+                            color: adaptiveColors.text
+                        },
+                        ticks: {
+                            color: adaptiveColors.text
+                        },
+                        grid: {
+                            color: adaptiveColors.grid
+                        }
+                    },
+                    x: {
+                        ticks: {
+                            color: adaptiveColors.text
+                        },
+                        grid: {
+                            color: adaptiveColors.grid
                         }
                     }
                 }
@@ -1224,11 +1428,9 @@ class ChatbotCharts {
         return chartId;
     }
 
-    // ──────────────────────────────────────────────────────
-    // 13. PRICE TO FAIR VALUE
-    // ──────────────────────────────────────────────────────
     async createPriceToFairValueChart(chartId, chartRequest, container) {
         const { symbols, data, title, description } = chartRequest;
+        const adaptiveColors = this.getAdaptiveColors();
         
         const chartHTML = this.createChartHTML(chartId, title || 'Current Price vs Fair Value', description);
         container.innerHTML = chartHTML;
@@ -1265,11 +1467,15 @@ class ChatbotCharts {
                     title: {
                         display: true,
                         text: title || 'Current Price vs Fair Value',
-                        font: { size: 16, weight: 'bold' }
+                        font: { size: 16, weight: 'bold' },
+                        color: adaptiveColors.text
                     },
                     legend: {
                         display: true,
-                        position: 'top'
+                        position: 'top',
+                        labels: {
+                            color: adaptiveColors.text
+                        }
                     },
                     tooltip: {
                         callbacks: {
@@ -1286,10 +1492,23 @@ class ChatbotCharts {
                         title: {
                             display: true,
                             text: 'Price ($)',
-                            font: { size: 12, weight: '600' }
+                            font: { size: 12, weight: '600' },
+                            color: adaptiveColors.text
                         },
                         ticks: {
-                            callback: (value) => `$${value.toFixed(2)}`
+                            callback: (value) => `$${value.toFixed(2)}`,
+                            color: adaptiveColors.text
+                        },
+                        grid: {
+                            color: adaptiveColors.grid
+                        }
+                    },
+                    x: {
+                        ticks: {
+                            color: adaptiveColors.text
+                        },
+                        grid: {
+                            color: adaptiveColors.grid
                         }
                     }
                 }
@@ -1306,11 +1525,9 @@ class ChatbotCharts {
     // FUNDAMENTALS CHARTS
     // ════════════════════════════════════════════════════════════
 
-    // ──────────────────────────────────────────────────────
-    // 14. PROFITABILITY COMPARISON (ROE, ROA, Margins)
-    // ──────────────────────────────────────────────────────
     async createProfitabilityComparisonChart(chartId, chartRequest, container) {
         const { symbols, data, title, description } = chartRequest;
+        const adaptiveColors = this.getAdaptiveColors();
         
         const chartHTML = this.createChartHTML(chartId, title || 'Profitability Metrics Comparison', description);
         container.innerHTML = chartHTML;
@@ -1365,11 +1582,15 @@ class ChatbotCharts {
                     title: {
                         display: true,
                         text: title || 'Profitability Metrics Comparison',
-                        font: { size: 16, weight: 'bold' }
+                        font: { size: 16, weight: 'bold' },
+                        color: adaptiveColors.text
                     },
                     legend: {
                         display: true,
-                        position: 'top'
+                        position: 'top',
+                        labels: {
+                            color: adaptiveColors.text
+                        }
                     }
                 },
                 scales: {
@@ -1378,10 +1599,23 @@ class ChatbotCharts {
                         title: {
                             display: true,
                             text: 'Percentage (%)',
-                            font: { size: 12, weight: '600' }
+                            font: { size: 12, weight: '600' },
+                            color: adaptiveColors.text
                         },
                         ticks: {
-                            callback: (value) => `${value}%`
+                            callback: (value) => `${value}%`,
+                            color: adaptiveColors.text
+                        },
+                        grid: {
+                            color: adaptiveColors.grid
+                        }
+                    },
+                    x: {
+                        ticks: {
+                            color: adaptiveColors.text
+                        },
+                        grid: {
+                            color: adaptiveColors.grid
                         }
                     }
                 }
@@ -1394,11 +1628,9 @@ class ChatbotCharts {
         return chartId;
     }
 
-    // ──────────────────────────────────────────────────────
-    // 15. GROWTH COMPARISON (Revenue, EPS, Earnings)
-    // ──────────────────────────────────────────────────────
     async createGrowthComparisonChart(chartId, chartRequest, container) {
         const { symbols, data, title, description } = chartRequest;
+        const adaptiveColors = this.getAdaptiveColors();
         
         const chartHTML = this.createChartHTML(chartId, title || 'Growth Metrics Comparison', description);
         container.innerHTML = chartHTML;
@@ -1445,11 +1677,15 @@ class ChatbotCharts {
                     title: {
                         display: true,
                         text: title || 'Growth Metrics Comparison',
-                        font: { size: 16, weight: 'bold' }
+                        font: { size: 16, weight: 'bold' },
+                        color: adaptiveColors.text
                     },
                     legend: {
                         display: true,
-                        position: 'top'
+                        position: 'top',
+                        labels: {
+                            color: adaptiveColors.text
+                        }
                     }
                 },
                 scales: {
@@ -1457,10 +1693,23 @@ class ChatbotCharts {
                         title: {
                             display: true,
                             text: 'Year-over-Year Growth (%)',
-                            font: { size: 12, weight: '600' }
+                            font: { size: 12, weight: '600' },
+                            color: adaptiveColors.text
                         },
                         ticks: {
-                            callback: (value) => `${value}%`
+                            callback: (value) => `${value}%`,
+                            color: adaptiveColors.text
+                        },
+                        grid: {
+                            color: adaptiveColors.grid
+                        }
+                    },
+                    x: {
+                        ticks: {
+                            color: adaptiveColors.text
+                        },
+                        grid: {
+                            color: adaptiveColors.grid
                         }
                     }
                 }
@@ -1473,9 +1722,226 @@ class ChatbotCharts {
         return chartId;
     }
 
-    // ──────────────────────────────────────────────────────
-    // 20. RISK METRICS DASHBOARD (Single Stock)
-    // ──────────────────────────────────────────────────────
+    async createFundamentalsDashboard(chartId, chartRequest, container) {
+        const { symbol, metrics, title, description } = chartRequest;
+        
+        const dashboardHTML = `
+            <div class="fundamentals-dashboard" id="${chartId}">
+                <div class="chart-header">
+                    <h3 class="chart-title">${title || `${symbol} - Fundamental Metrics`}</h3>
+                    ${description ? `<p class="chart-description">${description}</p>` : ''}
+                </div>
+                <div class="fundamentals-grid">
+                    <div class="fundamental-card">
+                        <div class="metric-label">P/E Ratio</div>
+                        <div class="metric-value">${metrics.peRatio || 'N/A'}</div>
+                    </div>
+                    <div class="fundamental-card">
+                        <div class="metric-label">EPS (TTM)</div>
+                        <div class="metric-value">$${metrics.eps || 'N/A'}</div>
+                    </div>
+                    <div class="fundamental-card">
+                        <div class="metric-label">Market Cap</div>
+                        <div class="metric-value">$${metrics.marketCap || 'N/A'}B</div>
+                    </div>
+                    <div class="fundamental-card">
+                        <div class="metric-label">ROE</div>
+                        <div class="metric-value">${metrics.roe || 'N/A'}%</div>
+                    </div>
+                    <div class="fundamental-card">
+                        <div class="metric-label">ROA</div>
+                        <div class="metric-value">${metrics.roa || 'N/A'}%</div>
+                    </div>
+                    <div class="fundamental-card">
+                        <div class="metric-label">Profit Margin</div>
+                        <div class="metric-value">${metrics.profitMargin || 'N/A'}%</div>
+                    </div>
+                    <div class="fundamental-card">
+                        <div class="metric-label">Debt/Equity</div>
+                        <div class="metric-value">${metrics.debtToEquity || 'N/A'}</div>
+                    </div>
+                    <div class="fundamental-card">
+                        <div class="metric-label">Current Ratio</div>
+                        <div class="metric-value">${metrics.currentRatio || 'N/A'}</div>
+                    </div>
+                    <div class="fundamental-card">
+                        <div class="metric-label">Beta</div>
+                        <div class="metric-value">${metrics.beta || 'N/A'}</div>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        container.innerHTML = dashboardHTML;
+        
+        return chartId;
+    }
+
+    // ════════════════════════════════════════════════════════════
+    // HISTORICAL ANALYSIS CHARTS
+    // ════════════════════════════════════════════════════════════
+
+    async createCandlestickWithIndicators(chartId, chartRequest, container) {
+        return await this.createStandardChart(chartId, chartRequest, container);
+    }
+
+    async createCumulativeReturnsChart(chartId, chartRequest, container) {
+        const { symbol, data, title, description } = chartRequest;
+        const adaptiveColors = this.getAdaptiveColors();
+        
+        const chartHTML = this.createChartHTML(chartId, title || `${symbol} - Cumulative Returns`, description);
+        container.innerHTML = chartHTML;
+        
+        const canvas = container.querySelector(`#${chartId}`);
+        if (!canvas) throw new Error('Canvas not found');
+        
+        const prices = data.data.map(d => d.close);
+        const initialPrice = prices[0];
+        const cumulativeReturns = prices.map(p => ((p / initialPrice - 1) * 100).toFixed(2));
+        
+        const labels = data.data.map(d => {
+            const date = new Date(d.datetime);
+            return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+        });
+        
+        const chart = new Chart(canvas, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Cumulative Return (%)',
+                    data: cumulativeReturns,
+                    borderColor: this.getColorPalette().success,
+                    backgroundColor: this.hexToRgba(this.getColorPalette().success, 0.1),
+                    borderWidth: 2,
+                    tension: 0.4,
+                    fill: true,
+                    pointRadius: 0,
+                    pointHoverRadius: 5
+                }]
+            },
+            options: this.getCommonOptions({
+                plugins: {
+                    title: {
+                        display: true,
+                        text: title || `${symbol} - Cumulative Returns`,
+                        font: { size: 16, weight: 'bold' },
+                        color: adaptiveColors.text
+                    },
+                    legend: { display: false }
+                },
+                scales: {
+                    y: {
+                        title: {
+                            display: true,
+                            text: 'Cumulative Return (%)',
+                            font: { size: 12, weight: '600' },
+                            color: adaptiveColors.text
+                        },
+                        ticks: {
+                            callback: (value) => `${value}%`,
+                            color: adaptiveColors.text
+                        },
+                        grid: {
+                            color: adaptiveColors.grid
+                        }
+                    },
+                    x: {
+                        ticks: {
+                            color: adaptiveColors.text
+                        },
+                        grid: {
+                            color: adaptiveColors.grid
+                        }
+                    }
+                }
+            })
+        });
+        
+        this.activeCharts.set(chartId, chart);
+        this.addExportButton(chartId, chart, `${symbol}_cumulative_returns`);
+        
+        return chartId;
+    }
+
+    async createReturnsDistributionChart(chartId, chartRequest, container) {
+        const { symbol, data, title, description } = chartRequest;
+        const adaptiveColors = this.getAdaptiveColors();
+        
+        const chartHTML = this.createChartHTML(chartId, title || `${symbol} - Returns Distribution`, description);
+        container.innerHTML = chartHTML;
+        
+        const canvas = container.querySelector(`#${chartId}`);
+        if (!canvas) throw new Error('Canvas not found');
+        
+        const returns = this.calculateReturns(data.data.map(d => d.close));
+        const returnsPercent = returns.map(r => r * 100);
+        
+        const histogram = this.createHistogram(returnsPercent, 30);
+        
+        const chart = new Chart(canvas, {
+            type: 'bar',
+            data: {
+                labels: histogram.bins,
+                datasets: [{
+                    label: 'Frequency',
+                    data: histogram.counts,
+                    backgroundColor: this.hexToRgba(this.getColorPalette().primary, 0.7),
+                    borderColor: this.getColorPalette().primary,
+                    borderWidth: 1
+                }]
+            },
+            options: this.getCommonOptions({
+                plugins: {
+                    title: {
+                        display: true,
+                        text: title || `${symbol} - Daily Returns Distribution`,
+                        font: { size: 16, weight: 'bold' },
+                        color: adaptiveColors.text
+                    },
+                    legend: { display: false }
+                },
+                scales: {
+                    y: {
+                        title: {
+                            display: true,
+                            text: 'Frequency',
+                            font: { size: 12, weight: '600' },
+                            color: adaptiveColors.text
+                        },
+                        ticks: {
+                            color: adaptiveColors.text
+                        },
+                        grid: {
+                            color: adaptiveColors.grid
+                        }
+                    },
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'Daily Return Range (%)',
+                            font: { size: 12, weight: '600' },
+                            color: adaptiveColors.text
+                        },
+                        ticks: {
+                            color: adaptiveColors.text,
+                            maxRotation: 45,
+                            minRotation: 45
+                        },
+                        grid: {
+                            color: adaptiveColors.grid
+                        }
+                    }
+                }
+            })
+        });
+        
+        this.activeCharts.set(chartId, chart);
+        this.addExportButton(chartId, chart, `${symbol}_returns_distribution`);
+        
+        return chartId;
+    }
+
     async createRiskMetricsDashboard(chartId, chartRequest, container) {
         const { symbol, metrics, riskMetrics, title, description } = chartRequest;
         
@@ -1544,11 +2010,9 @@ class ChatbotCharts {
     // ANALYST & EARNINGS CHARTS
     // ════════════════════════════════════════════════════════════
 
-    // ──────────────────────────────────────────────────────
-    // 21. ANALYST RECOMMENDATIONS (Pie or Bar)
-    // ──────────────────────────────────────────────────────
     async createAnalystRecommendationsChart(chartId, chartRequest, container) {
         const { symbol, data, title, description } = chartRequest;
+        const adaptiveColors = this.getAdaptiveColors();
         
         const chartHTML = this.createChartHTML(chartId, title || `${symbol} - Analyst Recommendations`, description);
         container.innerHTML = chartHTML;
@@ -1592,14 +2056,14 @@ class ChatbotCharts {
                         display: true,
                         text: `${title || 'Analyst Recommendations'} - ${data.consensus || 'N/A'} (${data.total || 0} analysts)`,
                         font: { size: 16, weight: 'bold' },
-                        color: this.config.charts.colors.text,
+                        color: adaptiveColors.text,
                         padding: 20
                     },
                     legend: {
                         display: true,
                         position: 'right',
                         labels: {
-                            color: this.config.charts.colors.text,
+                            color: adaptiveColors.text,
                             usePointStyle: true,
                             padding: 15,
                             font: { size: 12, weight: '600' }
@@ -1624,11 +2088,9 @@ class ChatbotCharts {
         return chartId;
     }
 
-    // ──────────────────────────────────────────────────────
-    // 22. PRICE TARGET CHART
-    // ──────────────────────────────────────────────────────
     async createPriceTargetChart(chartId, chartRequest, container) {
         const { symbol, currentPrice, priceTarget, title, description } = chartRequest;
+        const adaptiveColors = this.getAdaptiveColors();
         
         const chartHTML = this.createChartHTML(chartId, title || `${symbol} - Price Target Analysis`, description);
         container.innerHTML = chartHTML;
@@ -1669,6 +2131,7 @@ class ChatbotCharts {
                         display: true,
                         text: `${title || 'Price Target Analysis'} - ${priceTarget.upside || 'N/A'}% upside`,
                         font: { size: 16, weight: 'bold' },
+                        color: adaptiveColors.text,
                         padding: 20
                     },
                     legend: { display: false },
@@ -1683,11 +2146,24 @@ class ChatbotCharts {
                         title: {
                             display: true,
                             text: 'Price ($)',
-                            font: { size: 12, weight: '600' }
+                            font: { size: 12, weight: '600' },
+                            color: adaptiveColors.text
                         },
                         beginAtZero: false,
                         ticks: {
-                            callback: (value) => `$${value.toFixed(2)}`
+                            callback: (value) => `$${value.toFixed(2)}`,
+                            color: adaptiveColors.text
+                        },
+                        grid: {
+                            color: adaptiveColors.grid
+                        }
+                    },
+                    x: {
+                        ticks: {
+                            color: adaptiveColors.text
+                        },
+                        grid: {
+                            color: adaptiveColors.grid
                         }
                     }
                 }
@@ -1700,11 +2176,9 @@ class ChatbotCharts {
         return chartId;
     }
 
-    // ──────────────────────────────────────────────────────
-    // 23. EARNINGS SURPRISES
-    // ──────────────────────────────────────────────────────
     async createEarningsSurprisesChart(chartId, chartRequest, container) {
         const { symbol, data, title, description } = chartRequest;
+        const adaptiveColors = this.getAdaptiveColors();
         
         const chartHTML = this.createChartHTML(chartId, title || `${symbol} - Earnings Surprises`, description);
         container.innerHTML = chartHTML;
@@ -1760,12 +2234,17 @@ class ChatbotCharts {
                         display: true,
                         text: title || `${symbol} - Earnings Surprise History`,
                         font: { size: 16, weight: 'bold' },
+                        color: adaptiveColors.text,
                         padding: 20
                     },
                     legend: {
                         display: true,
                         position: 'top',
-                        labels: { usePointStyle: true, padding: 15 }
+                        labels: { 
+                            usePointStyle: true, 
+                            padding: 15,
+                            color: adaptiveColors.text
+                        }
                     }
                 },
                 scales: {
@@ -1775,10 +2254,15 @@ class ChatbotCharts {
                         title: {
                             display: true,
                             text: 'EPS ($)',
-                            font: { size: 12, weight: '600' }
+                            font: { size: 12, weight: '600' },
+                            color: adaptiveColors.text
                         },
                         ticks: {
-                            callback: (value) => `$${value.toFixed(2)}`
+                            callback: (value) => `$${value.toFixed(2)}`,
+                            color: adaptiveColors.text
+                        },
+                        grid: {
+                            color: adaptiveColors.grid
                         }
                     },
                     y1: {
@@ -1787,13 +2271,23 @@ class ChatbotCharts {
                         title: {
                             display: true,
                             text: 'Surprise (%)',
-                            font: { size: 12, weight: '600' }
+                            font: { size: 12, weight: '600' },
+                            color: adaptiveColors.text
                         },
                         grid: {
                             drawOnChartArea: false
                         },
                         ticks: {
-                            callback: (value) => `${value}%`
+                            callback: (value) => `${value}%`,
+                            color: adaptiveColors.text
+                        }
+                    },
+                    x: {
+                        ticks: {
+                            color: adaptiveColors.text
+                        },
+                        grid: {
+                            color: adaptiveColors.grid
                         }
                     }
                 }
@@ -1806,11 +2300,9 @@ class ChatbotCharts {
         return chartId;
     }
 
-    // ──────────────────────────────────────────────────────
-    // 24. EARNINGS BEAT RATE (Pie Chart)
-    // ──────────────────────────────────────────────────────
     async createEarningsBeatRateChart(chartId, chartRequest, container) {
         const { symbol, beatCount, missCount, title, description } = chartRequest;
+        const adaptiveColors = this.getAdaptiveColors();
         
         const chartHTML = this.createChartHTML(chartId, title || `${symbol} - Earnings Beat Rate`, description);
         container.innerHTML = chartHTML;
@@ -1843,14 +2335,14 @@ class ChatbotCharts {
                         display: true,
                         text: `${title || 'Earnings Beat Rate'} - ${beatRate}% beat rate`,
                         font: { size: 16, weight: 'bold' },
-                        color: this.config.charts.colors.text,
+                        color: adaptiveColors.text,
                         padding: 20
                     },
                     legend: {
                         display: true,
                         position: 'right',
                         labels: {
-                            color: this.config.charts.colors.text,
+                            color: adaptiveColors.text,
                             usePointStyle: true,
                             padding: 15,
                             font: { size: 12, weight: '600' }
@@ -1878,21 +2370,13 @@ class ChatbotCharts {
     // TECHNICAL ANALYSIS & MARKET CHARTS
     // ════════════════════════════════════════════════════════════
 
-    // ──────────────────────────────────────────────────────
-    // 25. TECHNICAL ANALYSIS (Price + RSI + Volume)
-    // ──────────────────────────────────────────────────────
     async createTechnicalAnalysisChart(chartId, chartRequest, container) {
-        const { symbol, data, indicators = [], title, description } = chartRequest;
-        
-        // For simplicity, use the candlestick with indicators method
-        return await this.createCandlestickWithIndicators(chartId, chartRequest, container);
+        return await this.createStandardChart(chartId, chartRequest, container);
     }
 
-    // ──────────────────────────────────────────────────────
-    // 26. MARKET INDICES
-    // ──────────────────────────────────────────────────────
     async createMarketIndicesChart(chartId, chartRequest, container) {
         const { data, title, description } = chartRequest;
+        const adaptiveColors = this.getAdaptiveColors();
         
         const chartHTML = this.createChartHTML(chartId, title || 'Major Market Indices - Today\'s Performance', description);
         container.innerHTML = chartHTML;
@@ -1951,12 +2435,17 @@ class ChatbotCharts {
                         display: true,
                         text: title || 'Major Market Indices - Today\'s Performance',
                         font: { size: 16, weight: 'bold' },
+                        color: adaptiveColors.text,
                         padding: 20
                     },
                     legend: {
                         display: true,
                         position: 'top',
-                        labels: { usePointStyle: true, padding: 15 }
+                        labels: { 
+                            usePointStyle: true, 
+                            padding: 15,
+                            color: adaptiveColors.text
+                        }
                     }
                 },
                 scales: {
@@ -1966,7 +2455,14 @@ class ChatbotCharts {
                         title: {
                             display: true,
                             text: 'Price',
-                            font: { size: 12, weight: '600' }
+                            font: { size: 12, weight: '600' },
+                            color: adaptiveColors.text
+                        },
+                        ticks: {
+                            color: adaptiveColors.text
+                        },
+                        grid: {
+                            color: adaptiveColors.grid
                         }
                     },
                     y1: {
@@ -1975,13 +2471,23 @@ class ChatbotCharts {
                         title: {
                             display: true,
                             text: 'Change (%)',
-                            font: { size: 12, weight: '600' }
+                            font: { size: 12, weight: '600' },
+                            color: adaptiveColors.text
                         },
                         grid: {
                             drawOnChartArea: false
                         },
                         ticks: {
-                            callback: (value) => `${value.toFixed(2)}%`
+                            callback: (value) => `${value.toFixed(2)}%`,
+                            color: adaptiveColors.text
+                        }
+                    },
+                    x: {
+                        ticks: {
+                            color: adaptiveColors.text
+                        },
+                        grid: {
+                            color: adaptiveColors.grid
                         }
                     }
                 }
@@ -2025,69 +2531,6 @@ class ChatbotCharts {
         
         return chartId;
     }
-
-    // ════════════════════════════════════════════════════════════
-    // METRICS TABLE (Already exists but kept here)
-    // ════════════════════════════════════════════════════════════
-
-    createMetricsTable(tableId, tableData, container) {
-        try {
-            console.log(`Creating metrics comparison table`);
-            
-            const tableHTML = `
-                <div class="metrics-table-container" id="${tableId}">
-                    <div class="metrics-table-header">
-                        <h3 class="metrics-table-title">Key Metrics Comparison</h3>
-                        <button class="chart-btn" data-action="export-table" data-table="${tableId}">
-                            Export
-                        </button>
-                    </div>
-                    <div class="metrics-table-wrapper">
-                        <table class="metrics-comparison-table">
-                            <thead>
-                                <tr>
-                                    ${tableData.headers.map(header => `<th>${header}</th>`).join('')}
-                                </tr>
-                            </thead>
-                            <tbody>
-                                ${tableData.rows.map((row, index) => `
-                                    <tr class="${index % 2 === 0 ? 'even' : 'odd'}">
-                                        ${row.map((cell, cellIndex) => `
-                                            <td class="${cellIndex === 0 ? 'metric-label' : 'metric-value'}">
-                                                ${cell}
-                                            </td>
-                                        `).join('')}
-                                    </tr>
-                                `).join('')}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            `;
-            
-            container.innerHTML = tableHTML;
-            
-            const exportBtn = container.querySelector(`[data-action="export-table"]`);
-            if (exportBtn) {
-                exportBtn.addEventListener('click', () => {
-                    this.exportTableAsCSV(tableData, 'metrics_comparison.csv');
-                });
-            }
-            
-            console.log(`Metrics table created: ${tableId}`);
-            
-            return tableId;
-            
-        } catch (error) {
-            console.error('Metrics table creation error:', error);
-            container.innerHTML = `<div class="error-message">Failed to create metrics table: ${error.message}</div>`;
-            return null;
-        }
-    }
-
-    // ════════════════════════════════════════════════════════════
-    // HELPER METHODS - DATA FETCHING
-    // ════════════════════════════════════════════════════════════
 
     async fetchLineData(symbol, period, timeSeriesData = null) {
         console.log(`Fetching line data for ${symbol}, period: ${period}`);
@@ -2156,10 +2599,6 @@ class ChatbotCharts {
         return this.fetchLineData(symbol, period);
     }
 
-    // ════════════════════════════════════════════════════════════
-    // CHART RENDERING (Standard)
-    // ════════════════════════════════════════════════════════════
-
     renderChart(canvas, type, data, indicators = []) {
         const ctx = canvas.getContext('2d');
         
@@ -2182,17 +2621,19 @@ class ChatbotCharts {
     }
 
     getLineConfig(data, indicators = []) {
+        const colors = this.getAdaptiveColors();
+        
         const datasets = [{
             label: 'Price',
             data: data.values,
-            borderColor: this.config.charts.colors.primary,
-            backgroundColor: this.hexToRgba(this.config.charts.colors.primary, 0.1),
+            borderColor: colors.primary,
+            backgroundColor: this.hexToRgba(colors.primary, 0.1),
             borderWidth: 2,
             tension: 0.4,
             fill: true,
             pointRadius: 0,
             pointHoverRadius: 5,
-            pointHoverBackgroundColor: this.config.charts.colors.primary,
+            pointHoverBackgroundColor: colors.primary,
             pointHoverBorderColor: '#fff',
             pointHoverBorderWidth: 2
         }];
@@ -2217,7 +2658,7 @@ class ChatbotCharts {
             datasets.push({
                 label: 'SMA 50',
                 data: sma50,
-                borderColor: '#10b981',
+                borderColor: colors.success,
                 backgroundColor: 'transparent',
                 borderWidth: 1.5,
                 tension: 0.4,
@@ -2239,7 +2680,7 @@ class ChatbotCharts {
                         display: indicators && indicators.length > 0,
                         position: 'top',
                         labels: {
-                            color: this.config.charts.colors.text,
+                            color: colors.text,
                             usePointStyle: true,
                             padding: 15
                         }
@@ -2248,7 +2689,7 @@ class ChatbotCharts {
                         mode: 'index',
                         intersect: false,
                         backgroundColor: 'rgba(0, 0, 0, 0.8)',
-                        borderColor: this.config.charts.colors.primary,
+                        borderColor: colors.primary,
                         borderWidth: 1,
                         titleColor: '#fff',
                         bodyColor: '#fff',
@@ -2265,7 +2706,19 @@ class ChatbotCharts {
                     y: {
                         beginAtZero: false,
                         ticks: {
-                            callback: (value) => '$' + value.toFixed(2)
+                            callback: (value) => '$' + value.toFixed(2),
+                            color: colors.text
+                        },
+                        grid: {
+                            color: colors.grid
+                        }
+                    },
+                    x: {
+                        ticks: {
+                            color: colors.text
+                        },
+                        grid: {
+                            color: colors.grid
                         }
                     }
                 }
@@ -2274,6 +2727,8 @@ class ChatbotCharts {
     }
 
     getAreaConfig(data) {
+        const colors = this.getAdaptiveColors();
+        
         return {
             type: 'line',
             data: {
@@ -2281,8 +2736,8 @@ class ChatbotCharts {
                 datasets: [{
                     label: 'Price',
                     data: data.values,
-                    borderColor: this.config.charts.colors.primary,
-                    backgroundColor: this.hexToRgba(this.config.charts.colors.primary, 0.3),
+                    borderColor: colors.primary,
+                    backgroundColor: this.hexToRgba(colors.primary, 0.3),
                     borderWidth: 2,
                     tension: 0.4,
                     fill: true,
@@ -2295,7 +2750,7 @@ class ChatbotCharts {
                     legend: { display: false },
                     tooltip: {
                         backgroundColor: 'rgba(0, 0, 0, 0.8)',
-                        borderColor: this.config.charts.colors.primary,
+                        borderColor: colors.primary,
                         borderWidth: 1,
                         callbacks: {
                             label: (context) => `Price: $${context.parsed.y.toFixed(2)}`
@@ -2306,7 +2761,19 @@ class ChatbotCharts {
                     y: {
                         beginAtZero: false,
                         ticks: {
-                            callback: (value) => '$' + value.toFixed(2)
+                            callback: (value) => '$' + value.toFixed(2),
+                            color: colors.text
+                        },
+                        grid: {
+                            color: colors.grid
+                        }
+                    },
+                    x: {
+                        ticks: {
+                            color: colors.text
+                        },
+                        grid: {
+                            color: colors.grid
                         }
                     }
                 }
@@ -2315,6 +2782,8 @@ class ChatbotCharts {
     }
 
     getBarConfig(data) {
+        const colors = this.getAdaptiveColors();
+        
         return {
             type: 'bar',
             data: {
@@ -2322,8 +2791,8 @@ class ChatbotCharts {
                 datasets: [{
                     label: 'Volume',
                     data: data.values,
-                    backgroundColor: this.hexToRgba(this.config.charts.colors.primary, 0.7),
-                    borderColor: this.config.charts.colors.primary,
+                    backgroundColor: this.hexToRgba(colors.primary, 0.7),
+                    borderColor: colors.primary,
                     borderWidth: 1
                 }]
             },
@@ -2332,7 +2801,7 @@ class ChatbotCharts {
                     legend: { display: false },
                     tooltip: {
                         backgroundColor: 'rgba(0, 0, 0, 0.8)',
-                        borderColor: this.config.charts.colors.primary,
+                        borderColor: colors.primary,
                         borderWidth: 1
                     }
                 }
@@ -2341,10 +2810,12 @@ class ChatbotCharts {
     }
 
     // ════════════════════════════════════════════════════════════
-    // COMMON CHART OPTIONS
+    // ✅ COMMON CHART OPTIONS (AVEC COULEURS ADAPTATIVES)
     // ════════════════════════════════════════════════════════════
 
     getCommonOptions(customOptions = {}) {
+        const colors = this.getAdaptiveColors();
+        
         const baseOptions = {
             responsive: true,
             maintainAspectRatio: false,
@@ -2354,14 +2825,17 @@ class ChatbotCharts {
             },
             plugins: {
                 legend: {
-                    display: false
+                    display: false,
+                    labels: {
+                        color: colors.text
+                    }
                 },
                 tooltip: {
                     enabled: true,
                     backgroundColor: 'rgba(0, 0, 0, 0.8)',
                     titleColor: '#fff',
                     bodyColor: '#fff',
-                    borderColor: this.config.charts.colors.primary,
+                    borderColor: colors.primary,
                     borderWidth: 1,
                     padding: 12,
                     cornerRadius: 8
@@ -2370,11 +2844,11 @@ class ChatbotCharts {
             scales: {
                 x: {
                     grid: {
-                        color: this.config.charts.colors.grid,
+                        color: colors.grid,
                         drawBorder: false
                     },
                     ticks: {
-                        color: this.config.charts.colors.text,
+                        color: colors.text,
                         maxRotation: 45,
                         minRotation: 0,
                         autoSkipPadding: 20
@@ -2382,11 +2856,11 @@ class ChatbotCharts {
                 },
                 y: {
                     grid: {
-                        color: this.config.charts.colors.grid,
+                        color: colors.grid,
                         drawBorder: false
                     },
                     ticks: {
-                        color: this.config.charts.colors.text
+                        color: colors.text
                     }
                 }
             }
@@ -2421,12 +2895,68 @@ class ChatbotCharts {
     }
 
     // ════════════════════════════════════════════════════════════
-    // CALCULATION METHODS - FINANCIAL ANALYTICS
+    // METRICS TABLE
     // ════════════════════════════════════════════════════════════
 
-    // ──────────────────────────────────────────────────────
-    // Calculate Returns (Daily)
-    // ──────────────────────────────────────────────────────
+    createMetricsTable(tableId, tableData, container) {
+        try {
+            console.log(`Creating metrics comparison table`);
+            
+            const tableHTML = `
+                <div class="metrics-table-container" id="${tableId}">
+                    <div class="metrics-table-header">
+                        <h3 class="metrics-table-title">Key Metrics Comparison</h3>
+                        <button class="chart-btn" data-action="export-table" data-table="${tableId}">
+                            Export
+                        </button>
+                    </div>
+                    <div class="metrics-table-wrapper">
+                        <table class="metrics-comparison-table">
+                            <thead>
+                                <tr>
+                                    ${tableData.headers.map(header => `<th>${header}</th>`).join('')}
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${tableData.rows.map((row, index) => `
+                                    <tr class="${index % 2 === 0 ? 'even' : 'odd'}">
+                                        ${row.map((cell, cellIndex) => `
+                                            <td class="${cellIndex === 0 ? 'metric-label' : 'metric-value'}">
+                                                ${cell}
+                                            </td>
+                                        `).join('')}
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            `;
+            
+            container.innerHTML = tableHTML;
+            
+            const exportBtn = container.querySelector(`[data-action="export-table"]`);
+            if (exportBtn) {
+                exportBtn.addEventListener('click', () => {
+                    this.exportTableAsCSV(tableData, 'metrics_comparison.csv');
+                });
+            }
+            
+            console.log(`Metrics table created: ${tableId}`);
+            
+            return tableId;
+            
+        } catch (error) {
+            console.error('Metrics table creation error:', error);
+            container.innerHTML = `<div class="error-message">Failed to create metrics table: ${error.message}</div>`;
+            return null;
+        }
+    }
+
+    // ════════════════════════════════════════════════════════════
+    // CALCULATION METHODS
+    // ════════════════════════════════════════════════════════════
+
     calculateReturns(prices) {
         const returns = [];
         for (let i = 1; i < prices.length; i++) {
@@ -2436,9 +2966,6 @@ class ChatbotCharts {
         return returns;
     }
 
-    // ──────────────────────────────────────────────────────
-    // Calculate SMA (Simple Moving Average)
-    // ──────────────────────────────────────────────────────
     calculateSMA(data, period) {
         const sma = [];
         for (let i = 0; i < data.length; i++) {
@@ -2452,30 +2979,6 @@ class ChatbotCharts {
         return sma;
     }
 
-    // ──────────────────────────────────────────────────────
-    // Calculate EMA (Exponential Moving Average)
-    // ──────────────────────────────────────────────────────
-    calculateEMA(data, period) {
-        const ema = [];
-        const multiplier = 2 / (period + 1);
-        
-        let sum = 0;
-        for (let i = 0; i < period; i++) {
-            sum += data[i];
-            ema.push(null);
-        }
-        ema[period - 1] = sum / period;
-        
-        for (let i = period; i < data.length; i++) {
-            ema.push((data[i] - ema[i - 1]) * multiplier + ema[i - 1]);
-        }
-        
-        return ema;
-    }
-
-    // ──────────────────────────────────────────────────────
-    // Calculate Rolling Correlation
-    // ──────────────────────────────────────────────────────
     calculateRollingCorrelation(returns1, returns2, window) {
         const rollingCorr = [];
         
@@ -2505,9 +3008,6 @@ class ChatbotCharts {
         return rollingCorr;
     }
 
-    // ──────────────────────────────────────────────────────
-    // Calculate Rolling Volatility
-    // ──────────────────────────────────────────────────────
     calculateRollingVolatility(returns, window) {
         const rollingVol = [];
         
@@ -2524,9 +3024,6 @@ class ChatbotCharts {
         return rollingVol;
     }
 
-    // ──────────────────────────────────────────────────────
-    // Calculate Drawdown
-    // ──────────────────────────────────────────────────────
     calculateDrawdown(prices) {
         const drawdowns = [];
         let peak = prices[0];
@@ -2542,9 +3039,6 @@ class ChatbotCharts {
         return drawdowns;
     }
 
-    // ──────────────────────────────────────────────────────
-    // Calculate Standard Deviation
-    // ──────────────────────────────────────────────────────
     calculateStdDev(data) {
         const mean = data.reduce((a, b) => a + b, 0) / data.length;
         const squaredDiffs = data.map(value => Math.pow(value - mean, 2));
@@ -2552,9 +3046,6 @@ class ChatbotCharts {
         return Math.sqrt(variance);
     }
 
-    // ──────────────────────────────────────────────────────
-    // Create Histogram (for returns distribution)
-    // ──────────────────────────────────────────────────────
     createHistogram(data, numBins = 30) {
         const min = Math.min(...data);
         const max = Math.max(...data);
@@ -2599,15 +3090,12 @@ class ChatbotCharts {
     exportTableAsCSV(tableData, filename) {
         let csvContent = '';
         
-        // Headers
         csvContent += tableData.headers.join(',') + '\n';
         
-        // Rows
         tableData.rows.forEach(row => {
             csvContent += row.join(',') + '\n';
         });
         
-        // Create blob and download
         const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
         const link = document.createElement('a');
         const url = URL.createObjectURL(blob);
@@ -2646,24 +3134,23 @@ class ChatbotCharts {
 
     getIntervalMillis(period) {
         const intervals = {
-            '1d': 3600000,       // 1 hour
-            '1w': 86400000,      // 1 day
-            '1M': 86400000,      // 1 day
-            '3M': 86400000,      // 1 day
-            '6M': 86400000,      // 1 day
-            '1y': 86400000,      // 1 day
-            '2y': 86400000 * 2,  // 2 days
-            '5y': 86400000 * 5,  // 5 days
-            '10y': 86400000 * 10, // 10 days
-            'ytd': 86400000,     // 1 day
-            'max': 86400000,     // 1 day
-            'ipo': 86400000      // 1 day
+            '1d': 3600000,
+            '1w': 86400000,
+            '1M': 86400000,
+            '3M': 86400000,
+            '6M': 86400000,
+            '1y': 86400000,
+            '2y': 86400000 * 2,
+            '5y': 86400000 * 5,
+            '10y': 86400000 * 10,
+            'ytd': 86400000,
+            'max': 86400000,
+            'ipo': 86400000
         };
         return intervals[period] || 86400000;
     }
 
     hexToRgba(hex, alpha) {
-        // Handle shorthand hex
         if (hex.length === 4) {
             hex = '#' + hex[1] + hex[1] + hex[2] + hex[2] + hex[3] + hex[3];
         }
@@ -2730,58 +3217,12 @@ class ChatbotCharts {
         return this.activeCharts.has(chartId);
     }
 
-    // ════════════════════════════════════════════════════════════
-    // DEBUG & DIAGNOSTICS
-    // ════════════════════════════════════════════════════════════
-
-    logChartTypes() {
-        console.log('📊 Available Chart Types:');
-        console.log('   COMPARISON:');
-        console.log('     - normalized-comparison');
-        console.log('     - scatter-correlation');
-        console.log('     - rolling-correlation');
-        console.log('     - returns-bar-chart');
-        console.log('   RISK-ADJUSTED:');
-        console.log('     - risk-metrics-comparison');
-        console.log('     - return-vs-risk-scatter');
-        console.log('     - alpha-beta-chart');
-        console.log('   VOLATILITY:');
-        console.log('     - rolling-volatility');
-        console.log('     - drawdown-comparison');
-        console.log('     - var-comparison');
-        console.log('     - volatility-chart');
-        console.log('   VALUATION:');
-        console.log('     - valuation-multiples');
-        console.log('     - price-to-fair-value');
-        console.log('   FUNDAMENTALS:');
-        console.log('     - profitability-comparison');
-        console.log('     - growth-comparison');
-        console.log('     - fundamentals-dashboard');
-        console.log('   HISTORICAL:');
-        console.log('     - candlestick-with-indicators');
-        console.log('     - cumulative-returns');
-        console.log('     - returns-distribution');
-        console.log('     - risk-metrics-dashboard');
-        console.log('   ANALYST & EARNINGS:');
-        console.log('     - analyst-recommendations');
-        console.log('     - price-target-chart');
-        console.log('     - earnings-surprises');
-        console.log('     - earnings-beat-rate');
-        console.log('   TECHNICAL:');
-        console.log('     - technical-analysis');
-        console.log('   MARKET:');
-        console.log('     - market-indices');
-        console.log('   OTHER:');
-        console.log('     - metrics-table');
-        console.log('     - line, bar, area');
-    }
-
     getStats() {
         return {
             totalCharts: this.activeCharts.size,
             chartIds: Array.from(this.activeCharts.keys()),
             chartsAvailable: this.chartsAvailable,
-            version: '4.0 - Ultra-Premium'
+            version: '4.1 - Adaptive Colors'
         };
     }
 }
@@ -2796,8 +3237,7 @@ if (typeof module !== 'undefined' && module.exports) {
 
 window.ChatbotCharts = ChatbotCharts;
 
-console.log('✅ ChatbotCharts v4.0 - Ultra-Premium Visualizations loaded successfully!');
+console.log('✅ ChatbotCharts v4.1 loaded successfully!');
+console.log('🎨 Adaptive colors for dark/light mode enabled');
 console.log('📊 25+ Chart Types Available');
-console.log('🎨 Context-Aware Rendering with Advanced Financial Analytics');
-console.log('⚡ Correlation, Risk Metrics, Volatility, Valuation, Fundamentals, Earnings, Technical Analysis');
 console.log('🚀 Ready for Wall Street-grade visualizations');

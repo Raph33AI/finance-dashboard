@@ -1,7 +1,7 @@
 // ============================================
 // GEMINI AI - CONVERSATIONAL FINANCIAL EXPERT
-// Version Ultra-Performante & Conversationnelle v3.5
-// ✅ CORRECTION: Few-Shot Examples + Prompts Ciblés
+// Version Ultra-Performante & Conversationnelle v3.6
+// ✅ CORRECTION: HTML décodé + Few-Shot Examples + Prompts Ciblés
 // ============================================
 
 class GeminiAI {
@@ -27,7 +27,7 @@ class GeminiAI {
         this.lastRequestTime = 0;
         this.minRequestInterval = 1000;
         
-        console.log(`🤖 Gemini AI initialized (v3.5 - Few-Shot Enhanced)`);
+        console.log(`🤖 Gemini AI initialized (v3.6 - HTML Fixed + Few-Shot Enhanced)`);
         console.log(`📡 Model: ${this.model}`);
         console.log(`📡 Worker URL: ${this.workerUrl}`);
         
@@ -189,7 +189,6 @@ For **growth investors**, MSFT offers higher upside via AI/cloud expansion but w
 
             await this.enforceRateLimit();
             
-            // ✅ CORRECTION: Utiliser la nouvelle méthode ciblée
             const enhancedPrompt = this.buildTargetedPrompt(userMessage, context);
             
             const response = await this.makeGeminiRequest(enhancedPrompt);
@@ -210,12 +209,10 @@ For **growth investors**, MSFT offers higher upside via AI/cloud expansion but w
     buildTargetedPrompt(userMessage, context) {
         let prompt = this.systemPrompt + '\n\n';
 
-        // Détecter le type de question
         const questionType = this.detectQuestionType(userMessage, context);
         
         console.log(`🎯 Question Type Detected: ${questionType}`);
 
-        // ✅ PROMPTS SPÉCIALISÉS PAR TYPE
         switch (questionType) {
             case 'MARKET_NEWS':
                 prompt += this.buildMarketNewsPrompt(userMessage, context);
@@ -248,36 +245,29 @@ For **growth investors**, MSFT offers higher upside via AI/cloud expansion but w
         return prompt;
     }
 
-    // ✅ Détection précise du type de question
     detectQuestionType(message, context) {
         const lower = message.toLowerCase();
         
-        // Market News
         if (/what'?s happening|market today|market news|today'?s market|market update|market sentiment/i.test(lower)) {
             return 'MARKET_NEWS';
         }
         
-        // Comparison
         if (context.intent?.isComparison || /compare|vs|versus/i.test(lower)) {
             return 'STOCK_COMPARISON';
         }
         
-        // Historical
         if (/evolution|historical|history|performance over|last.*years?|past.*years?|trend|since/i.test(lower)) {
             return 'HISTORICAL_PERFORMANCE';
         }
         
-        // IPO
         if (/ipo|initial public offering|upcoming ipo|recent ipo|top.*ipo/i.test(lower)) {
             return 'IPO_ANALYSIS';
         }
         
-        // Educational
         if (/what is|explain|define|tell me about|how does.*work|what does.*mean/i.test(lower)) {
             return 'EDUCATIONAL';
         }
         
-        // Stock Analysis (si un symbole est détecté)
         if (context.detectedEntities?.symbols?.length > 0 || /analyze|analysis|stock|share/i.test(lower)) {
             return 'STOCK_ANALYSIS';
         }
@@ -291,7 +281,6 @@ For **growth investors**, MSFT offers higher upside via AI/cloud expansion but w
         prompt += `**📰 MARKET NEWS REQUEST**\n`;
         prompt += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n`;
         
-        // Market Data
         if (context.marketData) {
             prompt += `**📊 CURRENT MARKET SNAPSHOT:**\n\n`;
             if (context.marketData.sp500) {
@@ -306,7 +295,6 @@ For **growth investors**, MSFT offers higher upside via AI/cloud expansion but w
             prompt += `\n`;
         }
         
-        // Top News Headlines
         if (context.marketNews && context.marketNews.length > 0) {
             prompt += `**📰 TOP MARKET NEWS (Last 24H):**\n\n`;
             context.marketNews.slice(0, 8).forEach((news, i) => {
@@ -349,19 +337,16 @@ For **growth investors**, MSFT offers higher upside via AI/cloud expansion but w
             const stock = context.stockData;
             prompt += `**${stock.profile?.name || stock.symbol}** (${stock.symbol})\n\n`;
             
-            // Prix actuel
             prompt += `**Current Price:** $${stock.quote.current} (${stock.quote.changePercent > 0 ? '+' : ''}${stock.quote.changePercent}%)\n`;
             prompt += `**Day Range:** $${stock.quote.low} - $${stock.quote.high} | **Volume:** ${this.formatNumber(stock.quote.volume)}\n`;
             prompt += `**52-Week Range:** $${stock.metrics?.week52Low || 'N/A'} - $${stock.metrics?.week52High || 'N/A'}\n\n`;
             
-            // Métriques clés
             if (stock.metrics) {
                 prompt += `**Key Metrics:**\n`;
                 prompt += `- Market Cap: $${stock.profile?.marketCap || 'N/A'}B | P/E: ${stock.metrics.peRatio || 'N/A'} | EPS: $${stock.metrics.eps || 'N/A'}\n`;
                 prompt += `- Beta: ${stock.metrics.beta || 'N/A'} | ROE: ${stock.metrics.roe || 'N/A'}% | Profit Margin: ${stock.metrics.profitMargin || 'N/A'}%\n\n`;
             }
             
-            // Technique
             if (context.technicalIndicators) {
                 const tech = context.technicalIndicators;
                 prompt += `**Technical Indicators:**\n`;
@@ -373,7 +358,6 @@ For **growth investors**, MSFT offers higher upside via AI/cloud expansion but w
                 prompt += `\n`;
             }
             
-            // Analystes
             if (context.analystRecommendations) {
                 const rec = context.analystRecommendations;
                 prompt += `**Analyst Consensus:**\n`;
@@ -386,7 +370,6 @@ For **growth investors**, MSFT offers higher upside via AI/cloud expansion but w
                 prompt += `**Price Target:** Mean $${pt.targetMean} (**${pt.upside > 0 ? '+' : ''}${pt.upside}% upside**) | Range: $${pt.targetLow} - $${pt.targetHigh}\n\n`;
             }
             
-            // Earnings
             if (context.earningsHistory) {
                 const earn = context.earningsHistory;
                 prompt += `**Earnings:** Beat rate ${earn.beatRate}% (${earn.beatCount}/${earn.recent.length} beats) | Quality: **${earn.earningsQuality}**\n\n`;
@@ -416,10 +399,11 @@ For **growth investors**, MSFT offers higher upside via AI/cloud expansion but w
         prompt += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n`;
         
         if (context.comparisonData && context.comparisonData.stocksData.length >= 2) {
-            prompt += `**Comparing:** ${context.comparisonData.symbols.join(' vs ')}\n\n`;
+            const { symbols, stocksData, timeSeries } = context.comparisonData;
             
-            // Tableau comparatif
-            context.comparisonData.stocksData.forEach((stock, index) => {
+            prompt += `**Comparing:** ${symbols.join(' vs ')}\n\n`;
+            
+            stocksData.forEach((stock, index) => {
                 prompt += `**${index + 1}. ${stock.symbol}** - ${stock.profile?.name || stock.symbol}\n`;
                 prompt += `- Price: $${stock.quote.current} (${stock.quote.changePercent > 0 ? '+' : ''}${stock.quote.changePercent}%)\n`;
                 prompt += `- Market Cap: $${stock.profile?.marketCap || 'N/A'}B | P/E: ${stock.metrics?.peRatio || 'N/A'}\n`;
@@ -427,10 +411,9 @@ For **growth investors**, MSFT offers higher upside via AI/cloud expansion but w
                 prompt += `- Profit Margin: ${stock.metrics?.profitMargin || 'N/A'}%\n\n`;
             });
             
-            // Performance historique
-            if (context.comparisonData.timeSeries && context.comparisonData.timeSeries.length > 0) {
+            if (timeSeries && timeSeries.length > 0) {
                 prompt += `**Historical Performance:**\n`;
-                context.comparisonData.timeSeries.forEach(series => {
+                timeSeries.forEach(series => {
                     if (series.data && series.data.length > 0) {
                         const firstPrice = series.data[0].close;
                         const lastPrice = series.data[series.data.length - 1].close;
@@ -441,14 +424,12 @@ For **growth investors**, MSFT offers higher upside via AI/cloud expansion but w
                 prompt += `\n`;
             }
             
-            // Corrélation
             if (context.correlationAnalysis) {
                 prompt += `**Correlation Analysis:**\n`;
                 prompt += `- Correlation: ${context.correlationAnalysis.correlation} (${context.correlationAnalysis.interpretation})\n`;
                 prompt += `- Diversification Benefit: ${context.correlationAnalysis.diversificationBenefit}\n\n`;
             }
             
-            // Tableau metrics
             if (context.comparisonData.keyMetricsComparison) {
                 prompt += `**Metrics Comparison Table:**\n\n`;
                 const table = context.comparisonData.keyMetricsComparison;
@@ -633,7 +614,6 @@ For **growth investors**, MSFT offers higher upside via AI/cloud expansion but w
         prompt += `**📚 EDUCATIONAL FINANCE QUESTION**\n`;
         prompt += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n`;
         
-        // Détecter le concept demandé
         const concept = this.extractFinancialConcept(userMessage);
         if (concept) {
             prompt += `**Detected Concept:** ${concept}\n\n`;
@@ -664,7 +644,6 @@ For **growth investors**, MSFT offers higher upside via AI/cloud expansion but w
         return prompt;
     }
 
-    // ✅ Extraction de concept financier pour questions éducatives
     extractFinancialConcept(message) {
         const lower = message.toLowerCase();
         
@@ -700,34 +679,13 @@ For **growth investors**, MSFT offers higher upside via AI/cloud expansion but w
         return null;
     }
 
-    // ✅ PROMPT SPÉCIALISÉ: Comparison (sera dans Partie 3)
-    buildComparisonPrompt(userMessage, context) {
-        // Sera fourni dans la partie 3
-        return this.buildGeneralPrompt(userMessage, context);
-    }
-
-    buildHistoricalPrompt(userMessage, context) {
-        // Sera fourni dans la partie 3
-        return this.buildGeneralPrompt(userMessage, context);
-    }
-
-    buildIPOPrompt(userMessage, context) {
-        // Sera fourni dans la partie 3
-        return this.buildGeneralPrompt(userMessage, context);
-    }
-
-    buildEducationalPrompt(userMessage, context) {
-        // Sera fourni dans la partie 3
-        return this.buildGeneralPrompt(userMessage, context);
-    }
-
     buildGeneralPrompt(userMessage, context) {
         let prompt = `**👤 USER QUESTION:** "${userMessage}"\n\n`;
         prompt += `**🤖 YOUR RESPONSE:** (Provide a clear, professional answer)\n`;
         return prompt;
     }
 
-    // ===== MÉTHODES UTILITAIRES (identiques) =====
+    // ===== MÉTHODES UTILITAIRES =====
     
     formatNumber(num) {
         if (!num) return 'N/A';
@@ -906,3 +864,8 @@ if (typeof module !== 'undefined' && module.exports) {
 }
 
 window.GeminiAI = GeminiAI;
+
+console.log('✅ GeminiAI v3.6 loaded successfully!');
+console.log('🔧 HTML encoding fixed');
+console.log('🎯 Few-shot examples optimized');
+console.log('📊 8192 tokens output enabled');

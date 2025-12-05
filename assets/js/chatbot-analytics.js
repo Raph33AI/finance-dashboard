@@ -1,6 +1,7 @@
 // ============================================
-// ADVANCED FINANCIAL ANALYTICS v4.1
+// ADVANCED FINANCIAL ANALYTICS v4.2
 // Compatible avec Worker finance-hub-api v8.4.0
+// ✅ OPTIMISATION: Cache amélioré + Rate limiting
 // ============================================
 
 class FinancialAnalytics {
@@ -15,12 +16,12 @@ class FinancialAnalytics {
             'https://finance-hub-api.raphnardone.workers.dev';
         
         this.cache = new Map();
-        this.cacheTimeout = 60000;
+        this.cacheTimeout = 60000; // 1 minute
         
         this.requestTimestamps = [];
         this.maxRequestsPerMinute = 30;
         
-        console.log('📊 FinancialAnalytics v4.1 - Compatible Worker v8.4.0');
+        console.log('📊 FinancialAnalytics v4.2 - Compatible Worker v8.4.0');
         console.log('🌐 Worker URL:', this.workerBaseUrl);
     }
 
@@ -135,7 +136,6 @@ class FinancialAnalytics {
             const cached = this.getFromCache(cacheKey);
             if (cached) return cached;
 
-            // ✅ CORRECTION : Utiliser l'endpoint Worker existant
             const url = `${this.workerBaseUrl}/api/finnhub/market-news?category=${category}`;
             const response = await fetch(url);
             
@@ -188,8 +188,7 @@ class FinancialAnalytics {
             const cached = this.getFromCache(cacheKey);
             if (cached) return cached;
 
-            // ✅ CORRECTION : Utiliser l'endpoint Worker existant
-            const url = `${this.workerBaseUrl}/api/finnhub/company-news?symbol=${symbol}&amp;from=${from}&amp;to=${to}`;
+            const url = `${this.workerBaseUrl}/api/finnhub/company-news?symbol=${symbol}&from=${from}&to=${to}`;
             const response = await fetch(url);
             
             if (!response.ok) {
@@ -317,7 +316,6 @@ class FinancialAnalytics {
             const cached = this.getFromCache(cacheKey);
             if (cached) return cached;
 
-            // ✅ CORRECTION : Utiliser l'endpoint Worker existant
             const url = `${this.workerBaseUrl}/api/finnhub/recommendation?symbol=${symbol}`;
             const response = await fetch(url);
             
@@ -351,7 +349,7 @@ class FinancialAnalytics {
     }
 
     // ============================================
-    // EARNINGS &amp; FINANCIALS
+    // EARNINGS & FINANCIALS
     // ============================================
     
     async getEarningsCalendar(from = null, to = null, symbol = null) {
@@ -374,7 +372,6 @@ class FinancialAnalytics {
             const cached = this.getFromCache(cacheKey);
             if (cached) return cached;
 
-            // ✅ CORRECTION : Utiliser l'endpoint Worker existant
             const url = `${this.workerBaseUrl}/api/finnhub/earnings-calendar?${params.toString()}`;
             const response = await fetch(url);
             
@@ -405,7 +402,6 @@ class FinancialAnalytics {
             const cached = this.getFromCache(cacheKey);
             if (cached) return cached;
 
-            // ✅ CORRECTION : Utiliser l'endpoint Worker existant
             const url = `${this.workerBaseUrl}/api/finnhub/earnings?symbol=${symbol}`;
             const response = await fetch(url);
             
@@ -439,7 +435,7 @@ class FinancialAnalytics {
     }
 
     // ============================================
-    // IPO &amp; PEERS
+    // IPO & PEERS
     // ============================================
     
     async getIPOCalendar(from = null, to = null) {
@@ -455,7 +451,6 @@ class FinancialAnalytics {
             const cached = this.getFromCache(cacheKey);
             if (cached) return cached;
 
-            // ✅ CORRECTION : Utiliser l'endpoint Worker existant
             const url = `${this.workerBaseUrl}/api/finnhub/peers?symbol=${symbol}`;
             const response = await fetch(url);
             
@@ -479,7 +474,7 @@ class FinancialAnalytics {
     }
 
     // ============================================
-    // TIME SERIES &amp; MARKET DATA
+    // TIME SERIES & MARKET DATA
     // ============================================
     
     async getTimeSeries(symbol, interval = '1day', outputsize = 30) {
@@ -498,7 +493,7 @@ class FinancialAnalytics {
 
             const limitedSize = Math.min(outputsize, 5000);
 
-            const url = `${this.workerBaseUrl}/api/time-series?symbol=${symbol}&amp;interval=${interval}&amp;outputsize=${limitedSize}`;
+            const url = `${this.workerBaseUrl}/api/time-series?symbol=${symbol}&interval=${interval}&outputsize=${limitedSize}`;
             
             console.log(`   📡 Calling API...`);
             
@@ -578,7 +573,7 @@ class FinancialAnalytics {
             ]);
 
             const overview = {
-                sp500: this.formatIndexData(sp500, 'S&amp;P 500', 'SPY'),
+                sp500: this.formatIndexData(sp500, 'S&P 500', 'SPY'),
                 nasdaq: this.formatIndexData(nasdaq, 'NASDAQ', 'QQQ'),
                 dow: this.formatIndexData(dow, 'Dow Jones', 'DIA'),
                 timestamp: Date.now(),
@@ -652,7 +647,7 @@ class FinancialAnalytics {
         try {
             await this.enforceRateLimit();
             
-            const url = `${this.workerBaseUrl}/api/finnhub/basic-financials?symbol=${symbol}&amp;metric=all`;
+            const url = `${this.workerBaseUrl}/api/finnhub/basic-financials?symbol=${symbol}&metric=all`;
             const response = await fetch(url);
             
             if (!response.ok) {
@@ -740,6 +735,7 @@ class FinancialAnalytics {
 
     clearCache() {
         this.cache.clear();
+        console.log('✅ Cache cleared');
     }
 
     generateMockTimeSeries(symbol, count) {
@@ -780,10 +776,78 @@ class FinancialAnalytics {
             dataSource: 'Mock Data (Fallback)'
         };
     }
+
+    // ============================================
+    // SEARCH SYMBOL
+    // ============================================
+    
+    async searchSymbol(query) {
+        try {
+            console.log(`🔍 Searching for: ${query}`);
+            
+            const cacheKey = `search_${query.toUpperCase()}`;
+            const cached = this.getFromCache(cacheKey);
+            if (cached) return { data: cached };
+
+            await this.enforceRateLimit();
+            
+            const url = `${this.workerBaseUrl}/api/search?query=${encodeURIComponent(query)}`;
+            const response = await fetch(url);
+            
+            if (!response.ok) {
+                console.error(`Search API error: ${response.status}`);
+                return { data: [] };
+            }
+            
+            const data = await response.json();
+            const results = data.result || data.data || [];
+            
+            this.trackRequest();
+            this.saveToCache(cacheKey, results);
+            
+            console.log(`✅ Found ${results.length} results for "${query}"`);
+            return { data: results };
+            
+        } catch (error) {
+            console.error('Search error:', error);
+            return { data: [] };
+        }
+    }
+
+    // ============================================
+    // UTILITY METHODS
+    // ============================================
+    
+    getStats() {
+        return {
+            cacheSize: this.cache.size,
+            requestsInLastMinute: this.requestTimestamps.length,
+            maxRequestsPerMinute: this.maxRequestsPerMinute,
+            remainingRequests: this.maxRequestsPerMinute - this.requestTimestamps.length,
+            workerUrl: this.workerBaseUrl
+        };
+    }
+
+    logStats() {
+        const stats = this.getStats();
+        console.log('📊 FinancialAnalytics Stats:');
+        console.log(`   Cache size: ${stats.cacheSize} entries`);
+        console.log(`   Requests (last 60s): ${stats.requestsInLastMinute}/${stats.maxRequestsPerMinute}`);
+        console.log(`   Remaining: ${stats.remainingRequests} requests`);
+        console.log(`   Worker URL: ${stats.workerUrl}`);
+    }
 }
+
+// ============================================
+// EXPORT & GLOBAL AVAILABILITY
+// ============================================
 
 if (typeof module !== 'undefined' && module.exports) {
     module.exports = FinancialAnalytics;
 }
 
 window.FinancialAnalytics = FinancialAnalytics;
+
+console.log('✅ FinancialAnalytics v4.2 loaded successfully!');
+console.log('📊 Compatible with Worker finance-hub-api v8.4.0');
+console.log('🚀 Cache optimized + Rate limiting enabled');

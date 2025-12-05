@@ -1,6 +1,7 @@
 // ============================================
 // FINANCIAL CHATBOT - CONFIGURATION
-// Version Conversationnelle Ultra-Performante v3.0
+// Version Conversationnelle Ultra-Performante v3.1
+// ✅ CORRECTION: Détection thème dark/light pour couleurs de graphiques
 // ============================================
 
 const ChatbotConfig = {
@@ -11,7 +12,7 @@ const ChatbotConfig = {
             endpoints: {
                 finnhub: '/api/finnhub',
                 twelvedata: '/api/twelvedata',
-                // ✅ AJOUT : Endpoints directs pour compatibilité
+                // ✅ Endpoints directs pour compatibilité
                 quote: '/api/quote',
                 timeSeries: '/api/time-series',
                 profile: '/api/profile',
@@ -20,15 +21,10 @@ const ChatbotConfig = {
             }
         },
         
-        // ✅ NOUVEAU WORKER GEMINI
+        // ✅ WORKER GEMINI
         gemini: {
-            // Clé API (vide, sécurisée dans le Worker)
             apiKey: '',
-            
-            // URL du Worker Gemini
             workerUrl: 'https://gemini-ai-proxy.raphnardone.workers.dev/api/gemini',
-            
-            // Configuration du modèle
             model: 'gemini-2.5-flash',
             maxOutputTokens: 8192,
             temperature: 0.9,
@@ -44,14 +40,12 @@ const ChatbotConfig = {
         },
         
         finnhub: {
-            // Utilise le worker existant
             apiKey: '',
             endpoint: 'https://finnhub.io/api/v1',
             websocket: 'wss://ws.finnhub.io'
         },
         
         twelveData: {
-            // Utilise le worker existant
             apiKey: '',
             endpoint: 'https://api.twelvedata.com'
         }
@@ -144,20 +138,56 @@ const ChatbotConfig = {
     },
 
     // ============================================
-    // CHART SETTINGS
+    // CHART SETTINGS (✅ CORRECTION MAJEURE)
     // ============================================
     charts: {
         defaultType: 'line',
+        
+        // ✅ CORRECTION: Couleurs adaptatives selon le thème
         colors: {
+            // Fonction pour obtenir les couleurs selon le thème
+            getColors: function() {
+                const isDarkMode = document.body.classList.contains('dark-mode');
+                
+                if (isDarkMode) {
+                    return {
+                        primary: '#667eea',
+                        secondary: '#764ba2',
+                        success: '#38ef7d',
+                        danger: '#f45c43',
+                        warning: '#ffbe0b',
+                        info: '#00d9ff',
+                        grid: 'rgba(255, 255, 255, 0.1)',
+                        text: 'rgba(255, 255, 255, 0.9)', // Blanc en dark mode
+                        background: 'rgba(15, 23, 42, 0.95)'
+                    };
+                } else {
+                    return {
+                        primary: '#667eea',
+                        secondary: '#764ba2',
+                        success: '#10b981',
+                        danger: '#ef4444',
+                        warning: '#f59e0b',
+                        info: '#06b6d4',
+                        grid: 'rgba(0, 0, 0, 0.08)',
+                        text: 'rgba(30, 41, 59, 0.9)', // ✅ NOIR en light mode
+                        background: 'rgba(255, 255, 255, 0.98)'
+                    };
+                }
+            },
+            
+            // ✅ Valeurs par défaut (light mode) pour compatibilité
             primary: '#667eea',
             secondary: '#764ba2',
-            success: '#38ef7d',
-            danger: '#f45c43',
-            warning: '#ffbe0b',
-            info: '#00d9ff',
-            grid: 'rgba(255, 255, 255, 0.1)',
-            text: 'rgba(255, 255, 255, 0.8)'
+            success: '#10b981',
+            danger: '#ef4444',
+            warning: '#f59e0b',
+            info: '#06b6d4',
+            grid: 'rgba(0, 0, 0, 0.08)',
+            text: 'rgba(30, 41, 59, 0.9)', // ✅ PAR DÉFAUT: NOIR (light mode)
+            background: 'rgba(255, 255, 255, 0.98)'
         },
+        
         animation: {
             duration: 600,
             easing: 'easeInOutQuart'
@@ -252,7 +282,7 @@ const ChatbotConfig = {
         lazyLoadImages: true,
         lazyLoadCharts: true,
         enableCache: true,
-        cacheExpiration: 300000,
+        cacheExpiration: 300000, // 5 minutes
         compressMessages: false,
         useWebWorkers: false,
         maxWorkers: 2,
@@ -284,12 +314,52 @@ const ChatbotConfig = {
     // DEVELOPMENT
     // ============================================
     development: {
-        debugMode: true, // ✅ ACTIVÉ pour diagnostic
+        debugMode: true,
         mockApiResponses: false,
-        showPerformanceMetrics: true, // ✅ ACTIVÉ pour diagnostic
+        showPerformanceMetrics: true,
         enableHotReload: false
     }
 };
+
+// ============================================
+// ✅ HELPER: Détection thème et mise à jour couleurs
+// ============================================
+ChatbotConfig.updateChartColors = function() {
+    const colors = this.charts.colors.getColors();
+    
+    // Mettre à jour les couleurs dans l'objet
+    Object.assign(this.charts.colors, colors);
+    
+    console.log('🎨 Chart colors updated for theme:', document.body.classList.contains('dark-mode') ? 'DARK' : 'LIGHT');
+    console.log('   Text color:', this.charts.colors.text);
+    console.log('   Grid color:', this.charts.colors.grid);
+    
+    return colors;
+};
+
+// ✅ Observer les changements de thème
+if (typeof window !== 'undefined') {
+    const observer = new MutationObserver(() => {
+        ChatbotConfig.updateChartColors();
+        
+        // ✅ Rafraîchir Chart.js defaults si disponible
+        if (typeof Chart !== 'undefined') {
+            Chart.defaults.color = ChatbotConfig.charts.colors.text;
+            Chart.defaults.borderColor = ChatbotConfig.charts.colors.grid;
+            console.log('✅ Chart.js defaults updated');
+        }
+    });
+    
+    observer.observe(document.body, {
+        attributes: true,
+        attributeFilter: ['class']
+    });
+    
+    // ✅ Initialisation au chargement
+    document.addEventListener('DOMContentLoaded', () => {
+        ChatbotConfig.updateChartColors();
+    });
+}
 
 // ============================================
 // EXPORT & GLOBAL AVAILABILITY
@@ -298,5 +368,6 @@ if (typeof module !== 'undefined' && module.exports) {
     module.exports = ChatbotConfig;
 }
 
-// ✅ RENDRE DISPONIBLE GLOBALEMENT
 window.ChatbotConfig = ChatbotConfig;
+
+console.log('✅ ChatbotConfig v3.1 loaded - Adaptive Chart Colors enabled');
