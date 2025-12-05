@@ -1,6 +1,6 @@
 // ============================================
-// CHATBOT UI - PREMIUM INTERFACE
-// Complete User Interface Management
+// CHATBOT UI v2.0 - PREMIUM INTERFACE
+// ✅ AVEC SAUVEGARDE/RESTAURATION DES GRAPHIQUES
 // ============================================
 
 class ChatbotUI {
@@ -17,6 +17,11 @@ class ChatbotUI {
         this.isOpen = false;
         this.isTyping = false;
         this.messageCount = 0;
+        
+        // ✅ NOUVEAU: Stockage des messages et graphiques
+        this.conversationHistory = [];
+        this.conversationKey = 'alphyai_conversation';
+        this.chartsDataKey = 'alphyai_charts_data';
         
         // Debounce timer
         this.inputDebounceTimer = null;
@@ -47,11 +52,14 @@ class ChatbotUI {
             // Initialize components
             await this.initializeComponents();
             
-            // Show welcome message
-            this.showWelcomeMessage();
+            // ✅ NOUVEAU: Restaurer la conversation sauvegardée
+            await this.restoreConversation();
             
-            // Show initial suggestions
-            this.showInitialSuggestions();
+            // Show welcome message (seulement si aucune conversation restaurée)
+            if (this.conversationHistory.length === 0) {
+                this.showWelcomeMessage();
+                this.showInitialSuggestions();
+            }
             
             console.log('✅ Chatbot UI initialized successfully');
             
@@ -90,7 +98,7 @@ class ChatbotUI {
                     </div>
                     <div class="chatbot-header-actions">
                         <button class="chatbot-header-btn" id="clear-chat" aria-label="Clear chat" title="Clear chat">
-                            🗑️
+                            🗑
                         </button>
                         <button class="chatbot-header-btn" id="minimize-chat" aria-label="Minimize" title="Minimize">
                             ➖
@@ -181,7 +189,7 @@ class ChatbotUI {
             this.elements.toggleBtn = newToggleBtn;
             
             this.elements.toggleBtn.addEventListener('click', (e) => {
-                console.log('🖱️ TOGGLE BUTTON CLICKED!');
+                console.log('🖱 TOGGLE BUTTON CLICKED!');
                 e.preventDefault();
                 e.stopPropagation();
                 this.toggleChat();
@@ -190,14 +198,14 @@ class ChatbotUI {
             console.log('✅ Toggle button listener attached');
         }
         
-        // ✅ MINIMIZE BUTTON - CORRIGÉ
+        // Minimize button
         if (this.elements.minimizeBtn) {
             const newMinimizeBtn = this.elements.minimizeBtn.cloneNode(true);
             this.elements.minimizeBtn.parentNode.replaceChild(newMinimizeBtn, this.elements.minimizeBtn);
             this.elements.minimizeBtn = newMinimizeBtn;
             
             this.elements.minimizeBtn.addEventListener('click', (e) => {
-                console.log('🖱️ MINIMIZE CLICKED');
+                console.log('🖱 MINIMIZE CLICKED');
                 e.preventDefault();
                 e.stopPropagation();
                 this.toggleChat();
@@ -206,14 +214,14 @@ class ChatbotUI {
             console.log('✅ Minimize button listener attached');
         }
         
-        // ✅ CLEAR BUTTON - CORRIGÉ
+        // Clear button
         if (this.elements.clearBtn) {
             const newClearBtn = this.elements.clearBtn.cloneNode(true);
             this.elements.clearBtn.parentNode.replaceChild(newClearBtn, this.elements.clearBtn);
             this.elements.clearBtn = newClearBtn;
             
             this.elements.clearBtn.addEventListener('click', (e) => {
-                console.log('🖱️ CLEAR CLICKED');
+                console.log('🖱 CLEAR CLICKED');
                 e.preventDefault();
                 e.stopPropagation();
                 this.clearChat();
@@ -225,7 +233,7 @@ class ChatbotUI {
         // Send button
         if (this.elements.sendBtn) {
             this.elements.sendBtn.addEventListener('click', (e) => {
-                console.log('🖱️ SEND CLICKED');
+                console.log('🖱 SEND CLICKED');
                 e.preventDefault();
                 e.stopPropagation();
                 this.sendMessage();
@@ -252,7 +260,7 @@ class ChatbotUI {
         if (this.elements.suggestions) {
             this.elements.suggestions.addEventListener('click', (e) => {
                 if (e.target.classList.contains('suggestion-chip')) {
-                    console.log('🖱️ SUGGESTION CLICKED');
+                    console.log('🖱 SUGGESTION CLICKED');
                     this.onSuggestionClick(e.target.textContent);
                 }
             });
@@ -273,7 +281,7 @@ class ChatbotUI {
             this.engine = new FinancialChatbotEngine(this.config);
             console.log('✅ Engine initialized');
         } else {
-            console.warn('⚠️ FinancialChatbotEngine not available');
+            console.warn('⚠ FinancialChatbotEngine not available');
         }
         
         // Initialize charts
@@ -281,7 +289,7 @@ class ChatbotUI {
             this.charts = new ChatbotCharts(this.config);
             console.log('✅ Charts initialized');
         } else {
-            console.warn('⚠️ ChatbotCharts not available');
+            console.warn('⚠ ChatbotCharts not available');
         }
         
         // Initialize suggestions
@@ -289,7 +297,7 @@ class ChatbotUI {
             this.suggestions = new ChatbotSuggestions(this.config);
             console.log('✅ Suggestions initialized');
         } else {
-            console.warn('⚠️ ChatbotSuggestions not available');
+            console.warn('⚠ ChatbotSuggestions not available');
         }
     }
 
@@ -373,7 +381,7 @@ class ChatbotUI {
             this.hideTypingIndicator();
             
             // Add AI response to UI
-            this.addMessage('bot', response.text);
+            this.addMessage('bot', response.text, response.chartRequests);
             
             // Generate charts if requested
             if (response.chartRequests && response.chartRequests.length > 0) {
@@ -395,14 +403,14 @@ class ChatbotUI {
         } catch (error) {
             console.error('Message processing error:', error);
             this.hideTypingIndicator();
-            this.addMessage('bot', '⚠️ Sorry, I encountered an error. Please try again.');
+            this.addMessage('bot', '⚠ Sorry, I encountered an error. Please try again.');
         }
     }
 
     // ============================================
-    // ADD MESSAGE
+    // ✅ ADD MESSAGE (AVEC SAUVEGARDE)
     // ============================================
-    addMessage(type, content) {
+    addMessage(type, content, chartRequests = null) {
         const messageDiv = document.createElement('div');
         messageDiv.className = `message ${type}-message fade-in`;
         
@@ -440,6 +448,16 @@ class ChatbotUI {
         this.scrollToBottom();
         
         this.messageCount++;
+        
+        // ✅ NOUVEAU: Sauvegarder dans l'historique
+        this.conversationHistory.push({
+            type: type,
+            content: content,
+            timestamp: Date.now(),
+            chartRequests: chartRequests || null
+        });
+        
+        this.saveConversation();
     }
 
     // ============================================
@@ -535,21 +553,34 @@ class ChatbotUI {
     }
 
     // ============================================
-    // CHARTS
+    // ✅ CHARTS (AVEC SAUVEGARDE DES MÉTADONNÉES)
     // ============================================
     async generateCharts(chartRequests) {
         for (const request of chartRequests) {
             const chartContainer = document.createElement('div');
             chartContainer.className = 'chart-message';
             
+            // ✅ IMPORTANT: Ajouter un attribut data pour identifier le conteneur
+            const chartId = `chart-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+            chartContainer.setAttribute('data-chart-container', chartId);
+            
             this.elements.messages.appendChild(chartContainer);
             
             if (this.charts) {
-                await this.charts.createChart(request, chartContainer);
+                const createdChartId = await this.charts.createChart(request, chartContainer);
+                
+                // ✅ NOUVEAU: Sauvegarder les données du graphique
+                this.charts.chartDataStore.set(createdChartId, {
+                    chartRequest: request,
+                    containerId: chartId
+                });
             }
             
             this.scrollToBottom();
         }
+        
+        // ✅ Sauvegarder les données des graphiques
+        this.saveChartsData();
     }
 
     // ============================================
@@ -562,24 +593,237 @@ class ChatbotUI {
     }
 
     // ============================================
-    // CLEAR CHAT
+    // ✅ CLEAR CHAT (AVEC NETTOYAGE COMPLET)
     // ============================================
     clearChat() {
         if (confirm('Clear all messages?')) {
+            // Nettoyer le DOM
             this.elements.messages.innerHTML = '';
             this.messageCount = 0;
             
+            // Nettoyer l'historique
+            this.conversationHistory = [];
+            
+            // Nettoyer le localStorage
+            localStorage.removeItem(this.conversationKey);
+            localStorage.removeItem(this.chartsDataKey);
+            
+            // Nettoyer l'engine
             if (this.engine) {
                 this.engine.clearHistory();
             }
             
+            // Détruire tous les graphiques
             if (this.charts) {
                 this.charts.destroyAllCharts();
+                this.charts.chartDataStore.clear();
             }
             
+            console.log('✅ Chat cleared completely');
+            
+            // Afficher le message de bienvenue
             this.showWelcomeMessage();
             this.showInitialSuggestions();
         }
+    }
+
+    // ════════════════════════════════════════════════════════════
+    // ✅ SAUVEGARDE & RESTAURATION (NOUVEAU)
+    // ════════════════════════════════════════════════════════════
+
+    /**
+     * Sauvegarde la conversation dans localStorage
+     */
+    saveConversation() {
+        try {
+            const data = {
+                history: this.conversationHistory,
+                timestamp: Date.now(),
+                version: '2.0'
+            };
+            
+            localStorage.setItem(this.conversationKey, JSON.stringify(data));
+            console.log(`💾 Conversation saved (${this.conversationHistory.length} messages)`);
+            
+        } catch (error) {
+            console.error('❌ Error saving conversation:', error);
+        }
+    }
+
+    /**
+     * Sauvegarde les données des graphiques
+     */
+    saveChartsData() {
+        if (!this.charts) return;
+        
+        try {
+            const chartsData = this.charts.exportChartsData();
+            localStorage.setItem(this.chartsDataKey, JSON.stringify(chartsData));
+            console.log(`💾 Charts data saved (${Object.keys(chartsData).length} charts)`);
+            
+        } catch (error) {
+            console.error('❌ Error saving charts data:', error);
+        }
+    }
+
+    /**
+     * Restaure la conversation depuis localStorage
+     */
+    async restoreConversation() {
+        try {
+            console.log('🔄 Attempting to restore conversation...');
+            
+            // Charger les données de conversation
+            const savedData = localStorage.getItem(this.conversationKey);
+            
+            if (!savedData) {
+                console.log('ℹ No saved conversation found');
+                return;
+            }
+            
+            const data = JSON.parse(savedData);
+            
+            if (!data.history || !Array.isArray(data.history)) {
+                console.warn('⚠ Invalid conversation data');
+                return;
+            }
+            
+            console.log(`📥 Restoring ${data.history.length} messages...`);
+            
+            // Restaurer les messages
+            for (const msg of data.history) {
+                await this.restoreMessage(msg);
+            }
+            
+            // Restaurer les graphiques
+            await this.restoreCharts();
+            
+            console.log('✅ Conversation restored successfully');
+            
+        } catch (error) {
+            console.error('❌ Error restoring conversation:', error);
+            // En cas d'erreur, nettoyer les données corrompues
+            localStorage.removeItem(this.conversationKey);
+            localStorage.removeItem(this.chartsDataKey);
+        }
+    }
+
+    /**
+     * Restaure un message individuel
+     */
+    async restoreMessage(msg) {
+        const messageDiv = document.createElement('div');
+        messageDiv.className = `message ${msg.type}-message`;
+        
+        const avatar = document.createElement('div');
+        avatar.className = `message-avatar ${msg.type}-avatar`;
+        avatar.textContent = msg.type === 'user' ? this.config.ui.userAvatar : this.config.ui.botAvatar;
+        
+        const contentDiv = document.createElement('div');
+        contentDiv.className = 'message-content';
+        
+        const bubble = document.createElement('div');
+        bubble.className = 'message-bubble';
+        
+        const text = document.createElement('div');
+        text.className = 'message-text';
+        text.innerHTML = this.formatMessage(msg.content);
+        
+        bubble.appendChild(text);
+        
+        if (this.config.ui.showTimestamps && msg.timestamp) {
+            const time = document.createElement('span');
+            time.className = 'message-time';
+            const date = new Date(msg.timestamp);
+            time.textContent = date.toLocaleTimeString('en-US', { 
+                hour: '2-digit', 
+                minute: '2-digit' 
+            });
+            bubble.appendChild(time);
+        }
+        
+        contentDiv.appendChild(bubble);
+        messageDiv.appendChild(avatar);
+        messageDiv.appendChild(contentDiv);
+        
+        this.elements.messages.appendChild(messageDiv);
+        
+        // Restaurer l'historique
+        this.conversationHistory.push(msg);
+        this.messageCount++;
+        
+        // Si le message contient des graphiques, les restaurer après
+        if (msg.chartRequests && msg.chartRequests.length > 0) {
+            // Les graphiques seront restaurés par restoreCharts()
+        }
+    }
+
+    /**
+     * Restaure tous les graphiques
+     */
+    async restoreCharts() {
+        if (!this.charts) {
+            console.warn('⚠ Charts component not available');
+            return;
+        }
+        
+        try {
+            console.log('📊 Attempting to restore charts...');
+            
+            // Charger les données des graphiques
+            const savedChartsData = localStorage.getItem(this.chartsDataKey);
+            
+            if (!savedChartsData) {
+                console.log('ℹ No saved charts data found');
+                return;
+            }
+            
+            const chartsData = JSON.parse(savedChartsData);
+            
+            // Importer les données dans le composant Charts
+            this.charts.importChartsData(chartsData);
+            
+            console.log(`📥 Imported data for ${Object.keys(chartsData).length} charts`);
+            
+            // Parcourir l'historique pour restaurer les graphiques
+            for (const msg of this.conversationHistory) {
+                if (msg.chartRequests && msg.chartRequests.length > 0) {
+                    await this.restoreChartsForMessage(msg.chartRequests);
+                }
+            }
+            
+            console.log('✅ Charts restored successfully');
+            
+        } catch (error) {
+            console.error('❌ Error restoring charts:', error);
+        }
+    }
+
+    /**
+     * Restaure les graphiques d'un message spécifique
+     */
+    async restoreChartsForMessage(chartRequests) {
+        for (const request of chartRequests) {
+            const chartContainer = document.createElement('div');
+            chartContainer.className = 'chart-message';
+            
+            // Ajouter l'attribut data pour identifier le conteneur
+            const chartId = `chart-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+            chartContainer.setAttribute('data-chart-container', chartId);
+            
+            this.elements.messages.appendChild(chartContainer);
+            
+            if (this.charts) {
+                try {
+                    await this.charts.createChart(request, chartContainer);
+                    console.log(`✅ Chart restored: ${request.type}`);
+                } catch (error) {
+                    console.error(`❌ Failed to restore chart:`, error);
+                }
+            }
+        }
+        
+        this.scrollToBottom();
     }
 
     // ============================================
@@ -604,10 +848,16 @@ class ChatbotUI {
     // DESTROY
     // ============================================
     destroy() {
+        // Sauvegarder avant destruction
+        this.saveConversation();
+        this.saveChartsData();
+        
+        // Nettoyer les graphiques
         if (this.charts) {
             this.charts.destroyAllCharts();
         }
         
+        // Supprimer le container
         if (this.elements.container) {
             this.elements.container.remove();
         }
@@ -620,3 +870,5 @@ class ChatbotUI {
 if (typeof module !== 'undefined' && module.exports) {
     module.exports = ChatbotUI;
 }
+
+console.log('✅ ChatbotUI v2.0 loaded - With Conversation Persistence!');

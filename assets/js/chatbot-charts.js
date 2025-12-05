@@ -1,6 +1,7 @@
 // ============================================
-// CHATBOT CHARTS v4.1 - ULTRA-PREMIUM VISUALIZATIONS
+// CHATBOT CHARTS v4.2 - ULTRA-PREMIUM VISUALIZATIONS
 // ✅ CORRECTION: Couleurs adaptatives dark/light mode
+// ✅ NOUVEAU: Sauvegarde et restauration des graphiques
 // 25+ Chart Types: Correlation, Risk Metrics, Volatility, Valuation, etc.
 // Context-Aware Rendering with Advanced Financial Analytics
 // ============================================
@@ -11,6 +12,9 @@ class ChatbotCharts {
         this.activeCharts = new Map();
         this.chartCounter = 0;
         
+        // ✅ NOUVEAU: Stockage des données de graphiques pour restauration
+        this.chartDataStore = new Map(); // { chartId: { chartRequest, containerId } }
+        
         // Check if Chart.js is loaded
         if (typeof Chart === 'undefined') {
             console.warn('❌ Chart.js not loaded. Charts will not be available.');
@@ -18,8 +22,9 @@ class ChatbotCharts {
         } else {
             this.chartsAvailable = true;
             this.configureChartDefaults();
-            console.log('✅ ChatbotCharts v4.1 initialized - 25+ chart types available');
+            console.log('✅ ChatbotCharts v4.2 initialized - 25+ chart types available');
             console.log('🎨 Adaptive colors for dark/light mode enabled');
+            console.log('💾 Chart persistence enabled');
         }
     }
 
@@ -92,6 +97,12 @@ class ChatbotCharts {
             this.configureChartDefaults();
             
             const chartId = `chart-${++this.chartCounter}`;
+            
+            // ✅ NOUVEAU: Sauvegarder les données du graphique pour restauration
+            this.chartDataStore.set(chartId, {
+                chartRequest: chartRequest,
+                containerId: container.getAttribute('data-chart-container') || null
+            });
             
             // COMPARISON CHARTS
             if (type === 'normalized-comparison' || type === 'comparison') {
@@ -3184,6 +3195,48 @@ class ChatbotCharts {
     }
 
     // ════════════════════════════════════════════════════════════
+    // ✅ EXPORT/IMPORT POUR SAUVEGARDE (NOUVEAU)
+    // ════════════════════════════════════════════════════════════
+
+    /**
+     * Exporte les données des graphiques pour sauvegarde
+     * @returns {Object} Données sérialisées des graphiques
+     */
+    exportChartsData() {
+        const data = {};
+        
+        this.chartDataStore.forEach((value, chartId) => {
+            data[chartId] = {
+                chartRequest: value.chartRequest,
+                containerId: value.containerId
+            };
+        });
+        
+        console.log(`📦 Exported data for ${Object.keys(data).length} charts`);
+        return data;
+    }
+
+    /**
+     * Importe les données des graphiques depuis une sauvegarde
+     * @param {Object} data - Données sérialisées des graphiques
+     */
+    importChartsData(data) {
+        if (!data || typeof data !== 'object') {
+            console.warn('⚠ Invalid chart data for import');
+            return;
+        }
+        
+        Object.entries(data).forEach(([chartId, value]) => {
+            this.chartDataStore.set(chartId, {
+                chartRequest: value.chartRequest,
+                containerId: value.containerId || null
+            });
+        });
+        
+        console.log(`📥 Imported data for ${Object.keys(data).length} charts`);
+    }
+
+    // ════════════════════════════════════════════════════════════
     // CLEANUP & LIFECYCLE
     // ════════════════════════════════════════════════════════════
 
@@ -3222,7 +3275,7 @@ class ChatbotCharts {
             totalCharts: this.activeCharts.size,
             chartIds: Array.from(this.activeCharts.keys()),
             chartsAvailable: this.chartsAvailable,
-            version: '4.1 - Adaptive Colors'
+            version: '4.2 - Adaptive Colors + Persistence'
         };
     }
 }
@@ -3237,7 +3290,8 @@ if (typeof module !== 'undefined' && module.exports) {
 
 window.ChatbotCharts = ChatbotCharts;
 
-console.log('✅ ChatbotCharts v4.1 loaded successfully!');
+console.log('✅ ChatbotCharts v4.2 loaded successfully!');
 console.log('🎨 Adaptive colors for dark/light mode enabled');
+console.log('💾 Chart persistence enabled');
 console.log('📊 25+ Chart Types Available');
 console.log('🚀 Ready for Wall Street-grade visualizations');
