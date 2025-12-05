@@ -289,12 +289,6 @@
                         </button>
                         <h1>Monte Carlo Simulation</h1> <!-- N'oubliez pas de changer ce titre pour chaque page -->
                     </div>
-                    <div class='header-right'>
-                        <span class='last-update'>
-                            <i class='fas fa-clock'></i>
-                            <span id='lastUpdate'>Loading...</span>
-                        </span>
-                    </div>
                 </div> <!-- ✅ FIN DU NOUVEAU WRAPPER -->
             </header>
             
@@ -593,38 +587,6 @@
     <script src='assets/js/sidebar.js'></script>
     <script src='assets/js/monte-carlo.js'></script>
 
-    <!-- ✅ AJOUT : Mise à jour de l'heure en temps réel -->
-    <script>
-    /**
-     * Met à jour l'heure de dernière mise à jour en temps réel
-     */
-    function updateLastUpdateTime() {
-        const lastUpdateElement = document.getElementById('lastUpdate');
-        if (lastUpdateElement) {
-            const now = new Date();
-            const timeString = now.toLocaleTimeString('en-US', {
-                hour: '2-digit',
-                minute: '2-digit',
-                second: '2-digit',
-                hour12: false
-            });
-            const dateString = now.toLocaleDateString('en-US', {
-                year: 'numeric',
-                month: 'short',
-                day: 'numeric'
-            });
-            
-            lastUpdateElement.textContent = `${dateString} ${timeString}`;
-        }
-    }
-
-    // Mettre à jour immédiatement au chargement
-    document.addEventListener('DOMContentLoaded', function() {
-        updateLastUpdateTime();
-        // Mettre à jour toutes les secondes
-        setInterval(updateLastUpdateTime, 1000);
-    });
-    </script>
     <!-- ========================================
          CHATBOT IA FINANCIER
          ======================================== -->
