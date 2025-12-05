@@ -1,487 +1,719 @@
-<!DOCTYPE html>
-<html lang='en'>
-<head>
-    <meta charset='UTF-8'>
-    <meta name='viewport' content='width=device-width, initial-scale=1.0'>
-    <title>Alphy AI Assistant</title>
+/**
+ * ============================================
+ * 🤖 CHATBOT FULLPAGE UI - ULTRA-PREMIUM
+ * ============================================
+ * Gestion complète de l'interface du chatbot
+ * - Conversations multiples
+ * - Intégration AI Gemini
+ * - Graphiques interactifs
+ * - Export/Partage
+ * - Animations 3D
+ * ============================================
+ */
+
+class ChatbotFullpageUI {
+    constructor() {
+        console.log('🤖 Initializing ChatbotFullpageUI...');
+        
+        // DOM Elements
+        this.messagesContent = document.getElementById('chatbot-messages-content');
+        this.inputField = document.getElementById('chatbot-input');
+        this.sendBtn = document.getElementById('chatbot-send-btn');
+        this.newChatBtn = document.getElementById('new-chat-btn');
+        this.conversationsList = document.getElementById('conversations-list');
+        this.conversationsSidebar = document.getElementById('conversations-sidebar');
+        this.conversationsToggle = document.getElementById('conversations-toggle');
+        this.welcomeScreen = document.getElementById('welcome-screen');
+        this.inputSuggestions = document.getElementById('input-suggestions');
+        this.inputCounter = document.getElementById('input-counter');
+        this.inputClearBtn = document.getElementById('input-clear-btn');
+        
+        // State
+        this.conversations = [];
+        this.currentConversationId = null;
+        this.isProcessing = false;
+        this.messageIdCounter = 0;
+        
+        // AI Engine
+        this.aiEngine = null;
+        
+        // Initialize
+        this.init();
+    }
     
-    <!-- Font Awesome -->
-    <link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css'>
-    
-    <!-- Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    
-    <!-- Styles communs -->
-    <link rel='stylesheet' href='assets/css/common.css'>
-    <link rel='stylesheet' href='assets/css/sidebar.css'>
-    <link rel="stylesheet" href="assets/css/user-menu.css">
-    <!-- ✅ FAVICON DYNAMIQUE - ICI -->
-    <script src="assets/js/favicon-dynamic.js"></script>
-    
-    <!-- Chatbot Styles -->
-    <link rel="stylesheet" href="assets/css/chatbot-futuristic.css">
-
-    <!-- Firebase SDK -->
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
-    
-    <!-- Configuration Firebase -->
-    <script src="assets/js/firebase-config.js"></script>
-    <script src="assets/js/auth-guard.js"></script>
-
-    <!-- ✅ ACCESS CONTROL - VÉRIFICATION DU PLAN -->
-    <script src="assets/js/access-control.js"></script>
-    
-    <!-- Favicon -->
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🤖</text></svg>">
-</head>
-<body>
-
-    <!-- Theme Script -->
-    <script src="assets/js/theme.js"></script>
-
-    <!-- Particles Background -->
-    <canvas id="particles-canvas" class="particles-background"></canvas>
-
-    <div class='layout-wrapper'>
-        <!-- SIDEBAR (Inchangée) -->
-        <aside class='sidebar' id='sidebar'>
-            <div class="sidebar-header">
-                <div class="logo-container">
-                    <div class="logo-3d">
-                        <svg class="logo-svg" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-                            <defs>
-                                <linearGradient id="logoGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                                    <stop offset="0%" class="logo-gradient-1" />
-                                    <stop offset="100%" class="logo-gradient-2" />
-                                </linearGradient>
-                            </defs>
-                            <path d="M 20 80 L 30 70 L 40 75 L 50 60 L 60 65 L 70 45 L 80 50 L 90 30" 
-                                  stroke="url(#logoGradient)" stroke-width="4" fill="none" 
-                                  stroke-linecap="round" stroke-linejoin="round"/>
-                            <circle cx="30" cy="70" r="4" fill="url(#logoGradient)"/>
-                            <circle cx="50" cy="60" r="4" fill="url(#logoGradient)"/>
-                            <circle cx="70" cy="45" r="4" fill="url(#logoGradient)"/>
-                            <circle cx="90" cy="30" r="5" fill="url(#logoGradient)"/>
-                            <path d="M 85 35 L 90 30 L 85 25" stroke="url(#logoGradient)" 
-                                  stroke-width="3" fill="none" stroke-linecap="round"/>
-                        </svg>
-                    </div>
-                    <div class="brand-text">
-                        <h2 class="brand-name">AlphaVault AI</h2>
-                        <span class="brand-tagline">Investments</span>
-                    </div>
-                </div>
-                <button class="sidebar-toggle" aria-label="Toggle Sidebar">
-                    <i class="fas fa-angle-left"></i>
-                </button>
-            </div>
-            
-            <nav class="sidebar-nav">
-                <div class="nav-section">
-                    <button class="nav-folder" data-tooltip="Home">
-                        <i class="fas fa-home"></i>
-                        <span>Home</span>
-                        <i class="fas fa-chevron-down arrow"></i>
-                    </button>
-                    <div class="nav-submenu">
-                        <a href="index.html" class="nav-link">
-                            <i class="fas fa-home"></i>
-                            <span>Overview</span>
-                        </a>
-                    </div>
-                </div>
-                
-                <div class='nav-section'>
-                    <button class='nav-folder' data-tooltip="Budget">
-                        <i class='fas fa-wallet'></i>
-                        <span>Budget</span>
-                        <i class='fas fa-chevron-down arrow'></i>
-                    </button>
-                    <div class='nav-submenu'>
-                        <a href='dashboard-financier.html' class='nav-link'>
-                            <i class='fas fa-home'></i>
-                            <span>Dashboard Budget</span>
-                        </a>
-                        <a href='investment-analytics.html' class='nav-link'>
-                            <i class='fas fa-chart-bar'></i>
-                            <span>Investment Analytics</span>
-                        </a>
-                    </div>
-                </div>
-                
-                <div class='nav-section'>
-                    <button class='nav-folder' data-tooltip="Simulation">
-                        <i class='fas fa-calculator'></i>
-                        <span>Simulation</span>
-                        <i class='fas fa-chevron-down arrow'></i>
-                    </button>
-                    <div class='nav-submenu'>
-                        <a href='monte-carlo.html' class='nav-link'>
-                            <i class='fas fa-dice'></i>
-                            <span>Monte Carlo</span>
-                        </a>
-                        <a href='portfolio-optimizer.html' class='nav-link'>
-                            <i class='fas fa-chart-pie'></i>
-                            <span>Markowitz</span>
-                        </a>
-                        <a href='risk-parity.html' class='nav-link'>
-                            <i class='fas fa-balance-scale'></i>
-                            <span>Risk Parity</span>
-                        </a>
-                        <a href='scenario-analysis.html' class='nav-link'>
-                            <i class='fas fa-flask'></i>
-                            <span>Scenarios</span>
-                        </a>
-                    </div>
-                </div>
-                
-                <div class='nav-section'>
-                    <button class="nav-folder" data-tooltip="Stocks">
-                        <i class="fas fa-chart-line"></i>
-                        <span>Stocks</span>
-                        <i class="fas fa-chevron-down arrow"></i>
-                    </button>
-                    <div class='nav-submenu'>
-                        <a href='market-data.html' class='nav-link'>
-                            <i class='fas fa-database'></i>
-                            <span>Market Data</span>
-                        </a>
-                        <a href='advanced-analysis.html' class='nav-link'>
-                            <i class='fas fa-brain'></i>
-                            <span>Advanced Analysis</span>
-                        </a>
-                        <a href='trend-prediction.html' class='nav-link'>
-                            <i class='fas fa-chart-line'></i>
-                            <span>Trend Prediction</span>
-                        </a>
-                        <a href='market-intelligence.html' class='nav-link'>
-                            <i class='fas fa-globe'></i>
-                            <span>Market Intelligence</span>
-                        </a>
-                        <a href='company-insights.html' class='nav-link'>
-                            <i class='fas fa-building'></i>
-                            <span>Company Insights</span>
-                        </a>
-                        <a href='analyst-coverage.html' class='nav-link'>
-                            <i class='fas fa-users'></i>
-                            <span>Analyst Coverage</span>
-                        </a>
-                        <a href='earnings-estimates.html' class='nav-link'>
-                            <i class='fas fa-coins'></i>
-                            <span>Earnings & Estimates</span>
-                        </a>
-                    </div>
-                </div>
-
-                <div class='nav-section'>
-                    <button class="nav-folder" data-tooltip="AI Assistant">
-                        <i class="fas fa-robot"></i>
-                        <span>AI Assistant</span>
-                        <i class="fas fa-chevron-down arrow"></i>
-                    </button>
-                    <div class='nav-submenu' style='display: block;'>
-                        <a href='chatbot-fullpage.html' class='nav-link active'>
-                            <i class='fas fa-comments'></i>
-                            <span>Alphy AI Chat</span>
-                        </a>
-                    </div>
-                </div>
-            </nav>
-            
-            <div class="sidebar-footer">
-                <div class="sidebar-user-menu">
-                    <div class="sidebar-user-trigger" id="sidebarUserTrigger">
-                        <img data-user-photo 
-                            src="https://ui-avatars.com/api/?name=User&background=2563eb&color=fff" 
-                            alt="Avatar" class="sidebar-user-avatar">
-                        <div class="sidebar-user-info">
-                            <span data-user-name class="sidebar-user-name">User</span>
-                            <span data-user-plan class="sidebar-user-plan">Free Plan</span>
-                        </div>
-                        <i class="fas fa-chevron-up sidebar-user-arrow"></i>
-                    </div>
-                    
-                    <div class="sidebar-user-dropdown" id="sidebarUserDropdown">
-                        <div class="user-dropdown-header">
-                            <img data-user-photo 
-                                src="https://ui-avatars.com/api/?name=User&background=2563eb&color=fff" 
-                                alt="Avatar" class="user-dropdown-avatar">
-                            <div class="user-dropdown-details">
-                                <h4 data-user-name class="user-dropdown-name">User</h4>
-                                <p data-user-email class="user-dropdown-email">email@example.com</p>
-                            </div>
-                        </div>
-                        <div class="user-dropdown-divider"></div>
-                        <nav class="user-dropdown-links">
-                            <a href="user-profile.html" class="user-dropdown-link">
-                                <i class="fas fa-user"></i>
-                                <span>My profile</span>
-                            </a>
-                            <a href="settings.html" class="user-dropdown-link">
-                                <i class="fas fa-cog"></i>
-                                <span>Settings</span>
-                            </a>
-                            <a href="#" class="user-dropdown-link">
-                                <i class="fas fa-question-circle"></i>
-                                <span>Help</span>
-                            </a>
-                        </nav>
-                        <div class="user-dropdown-divider"></div>
-                        <button onclick="logout()" class="user-dropdown-logout">
-                            <i class="fas fa-sign-out-alt"></i>
-                            <span>Disconnect</span>
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </aside>
-
-        <!-- MAIN CONTENT -->
-        <div class='main-content chatbot-main-content'>
-            
-            <!-- Header (Aligné avec sidebar) -->
-            <header class='top-header chatbot-top-header'>
-                <div class='header-left'>
-                    <button class='mobile-toggle' id='mobileToggle'>
-                        <i class='fas fa-bars'></i>
-                    </button>
-                    <h1>
-                        <span class="title-icon">🤖</span>
-                        <span>Alphy - AI Financial Assistant</span>
-                    </h1>
-                </div>
-                <div class='header-right'>
-                    <div class="header-status">
-                        <span class="status-dot"></span>
-                        <span class="status-text">Real-Time Data</span>
-                    </div>
-                    <button class="header-action-btn" id="new-chat-btn" title="New conversation">
-                        <i class="fas fa-plus"></i>
-                    </button>
-                    <button class="header-action-btn" id="share-btn" title="Share conversation">
-                        <i class="fas fa-share-alt"></i>
-                    </button>
-                    <button class="header-action-btn" id="settings-btn" title="Settings">
-                        <i class="fas fa-cog"></i>
-                    </button>
-                </div>
-            </header>
-
-            <!-- Chat Layout -->
-            <div class="chat-layout">
-                
-                <!-- Conversations Sidebar -->
-                <aside class="conversations-sidebar" id="conversations-sidebar">
-                    <div class="conversations-header">
-                        <h3><i class="fas fa-history"></i> Conversations</h3>
-                        <button class="conversations-toggle" id="conversations-toggle">
-                            <i class="fas fa-chevron-left"></i>
-                        </button>
-                    </div>
-                    <div class="conversations-list" id="conversations-list"></div>
-                </aside>
-
-                <!-- Messages Area -->
-                <div class="chat-messages-area">
-                    <div class="chatbot-messages-wrapper">
-                        <div class="chatbot-messages-content" id="chatbot-messages-content">
-                            
-                            <!-- Welcome Screen avec Robot 3D -->
-                            <div class="welcome-screen" id="welcome-screen">
-                                <!-- ✅ ROBOT 3D ULTRA-RÉALISTE (THREE.JS) -->
-                                <div id="robot-3d-container" class="robot-3d-container-threejs"></div>
-                                
-                                <h2 class="welcome-title">Welcome to Alphy AI</h2>
-                                <p class="welcome-subtitle">Your elite financial analyst powered by real-time market data</p>
-                                
-                                <div class="welcome-features">
-                                    <div class="feature-card">
-                                        <div class="feature-icon">📊</div>
-                                        <div class="feature-title">Real-Time Analysis</div>
-                                        <div class="feature-desc">Live market data from Finnhub & Twelve Data</div>
-                                    </div>
-                                    <div class="feature-card">
-                                        <div class="feature-icon">🧠</div>
-                                        <div class="feature-title">AI-Powered Insights</div>
-                                        <div class="feature-desc">Advanced Gemini AI with 8192 token output</div>
-                                    </div>
-                                    <div class="feature-card">
-                                        <div class="feature-icon">📈</div>
-                                        <div class="feature-title">Technical Analysis</div>
-                                        <div class="feature-desc">RSI, MACD, Bollinger Bands & more</div>
-                                    </div>
-                                    <div class="feature-card">
-                                        <div class="feature-icon">🚀</div>
-                                        <div class="feature-title">IPO Scoring</div>
-                                        <div class="feature-desc">Advanced multi-criteria IPO evaluation</div>
-                                    </div>
-                                </div>
-
-                                <div class="welcome-suggestions">
-                                    <h3 class="suggestions-title">Try asking:</h3>
-                                    <div class="welcome-suggestion-grid">
-                                        <button class="welcome-suggestion-btn" data-query="Analyze NVDA stock performance over the last 5 years">
-                                            <span class="suggestion-icon">📈</span>
-                                            <span class="suggestion-text">Analyze NVDA stock performance over the last 5 years</span>
-                                        </button>
-                                        <button class="welcome-suggestion-btn" data-query="Show me the top 5 highest potential IPOs">
-                                            <span class="suggestion-icon">🚀</span>
-                                            <span class="suggestion-text">Show me the top 5 highest potential IPOs</span>
-                                        </button>
-                                        <button class="welcome-suggestion-btn" data-query="What's the market sentiment today?">
-                                            <span class="suggestion-icon">💰</span>
-                                            <span class="suggestion-text">What's the market sentiment today?</span>
-                                        </button>
-                                        <button class="welcome-suggestion-btn" data-query="Compare AAPL vs MSFT technical indicators">
-                                            <span class="suggestion-icon">📊</span>
-                                            <span class="suggestion-text">Compare AAPL vs MSFT technical indicators</span>
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-
-                        </div>
-                    </div>
-
-                    <!-- Input Area -->
-                    <div class="chatbot-input-area">
-                        <div class="input-suggestions" id="input-suggestions"></div>
-                        
-                        <div class="input-container">
-                            <div class="input-wrapper">
-                                <textarea 
-                                    class="chatbot-input" 
-                                    id="chatbot-input" 
-                                    placeholder="Ask anything about stocks, IPOs, market trends, technical analysis..."
-                                    rows="1"
-                                    maxlength="2000"
-                                ></textarea>
-                                <button class="input-clear-btn" id="input-clear-btn" title="Clear input">
-                                    <i class="fas fa-times"></i>
-                                </button>
-                            </div>
-                            <button class="chatbot-send-btn" id="chatbot-send-btn" aria-label="Send message">
-                                <i class="fas fa-paper-plane"></i>
-                            </button>
-                        </div>
-                        
-                        <div class="input-footer">
-                            <span class="input-hint">
-                                <i class="fas fa-lightbulb"></i>
-                                Pro tip: Be specific for best results
-                            </span>
-                            <span class="input-counter" id="input-counter">0/2000</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-        </div>
-    </div>
-
-    <!-- ✅ THREE.JS LIBRARY -->
-    <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
-    
-    <!-- SCRIPTS -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-    <script src='assets/js/dark-mode.js'></script>
-    <script src='assets/js/common.js'></script>
-    <script src='assets/js/sidebar.js'></script>
-    <script src="assets/js/chatbot-config.js"></script>
-    <script src="assets/js/chatbot-gemini.js"></script>
-    <script src="assets/js/chatbot-analytics.js"></script>
-    <script src="assets/js/chatbot-charts.js"></script>
-    <script src="assets/js/chatbot-ipo-analyzer.js"></script>
-    <script src="assets/js/chatbot-suggestions.js"></script>
-    <script src="assets/js/chatbot-ai-engine.js"></script>
-    
-    <!-- ✅ ROBOT 3D (AVANT chatbot-fullpage-ui.js) -->
-    <script src="assets/js/chatbot-robot-3d.js"></script>
-    
-    <script src="assets/js/chatbot-fullpage-ui.js"></script>
-    <script src="assets/js/chatbot-particles.js"></script>
-
-    <!-- ============================================
-    ✅ FIX MENU UTILISATEUR - Force l'initialisation
-    ============================================ -->
-    <script>
-        /**
-         * Force l'initialisation du menu utilisateur
-         */
-        (function forceUserMenuInit() {
-            console.log('🔧 Force initializing user menu...');
-            
-            const initMenu = () => {
-                const trigger = document.getElementById('sidebarUserTrigger');
-                const dropdown = document.getElementById('sidebarUserDropdown');
-                
-                if (!trigger || !dropdown) {
-                    console.error('❌ User menu elements not found');
-                    return;
-                }
-                
-                // Supprimer tous les anciens event listeners
-                const newTrigger = trigger.cloneNode(true);
-                trigger.parentNode.replaceChild(newTrigger, trigger);
-                
-                const freshTrigger = document.getElementById('sidebarUserTrigger');
-                const freshDropdown = document.getElementById('sidebarUserDropdown');
-                
-                console.log('✅ Adding click event to trigger...');
-                
-                freshTrigger.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    
-                    console.log('👆 User menu trigger clicked!');
-                    
-                    const isActive = freshDropdown.classList.contains('active');
-                    
-                    if (isActive) {
-                        freshDropdown.classList.remove('active');
-                        console.log('🔽 Closing dropdown');
-                    } else {
-                        freshDropdown.classList.add('active');
-                        console.log('🔼 Opening dropdown');
-                    }
-                    
-                    const arrow = freshTrigger.querySelector('.sidebar-user-arrow');
-                    if (arrow) {
-                        arrow.style.transform = isActive ? 'rotate(0deg)' : 'rotate(180deg)';
-                        arrow.style.transition = 'transform 0.3s ease';
-                    }
-                });
-                
-                // Fermer si on clique ailleurs
-                document.addEventListener('click', function(e) {
-                    if (!freshTrigger.contains(e.target) && !freshDropdown.contains(e.target)) {
-                        freshDropdown.classList.remove('active');
-                        const arrow = freshTrigger.querySelector('.sidebar-user-arrow');
-                        if (arrow) {
-                            arrow.style.transform = 'rotate(0deg)';
-                        }
-                    }
-                });
-                
-                // Empêcher la fermeture si on clique dans le dropdown
-                freshDropdown.addEventListener('click', function(e) {
-                    e.stopPropagation();
-                });
-                
-                console.log('✅ User menu initialized successfully!');
-            };
-            
-            if (document.readyState === 'loading') {
-                document.addEventListener('DOMContentLoaded', initMenu);
+    async init() {
+        try {
+            // Load AI Engine
+            if (typeof FinancialChatbotEngine !== 'undefined') {
+                this.aiEngine = new FinancialChatbotEngine();
+                console.log('✅ AI Engine loaded');
             } else {
-                setTimeout(initMenu, 100);
+                console.warn('⚠ AI Engine not found');
             }
-        })();
-    </script>
+            
+            // Load saved conversations
+            this.loadConversations();
+            
+            // Setup event listeners
+            this.setupEventListeners();
+            
+            // Setup welcome suggestions
+            this.setupWelcomeSuggestions();
+            
+            // Setup auto-resize textarea
+            this.setupAutoResize();
+            
+            // Focus input
+            this.inputField?.focus();
+            
+            console.log('✅ ChatbotFullpageUI initialized successfully');
+        } catch (error) {
+            console.error('❌ Initialization error:', error);
+        }
+    }
+    
+    // ============================================
+    // EVENT LISTENERS
+    // ============================================
+    
+    setupEventListeners() {
+        // Send message
+        this.sendBtn?.addEventListener('click', () => this.handleSendMessage());
+        
+        // Enter to send (Ctrl+Enter for new line)
+        this.inputField?.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey && !e.ctrlKey) {
+                e.preventDefault();
+                this.handleSendMessage();
+            }
+            if (e.key === 'Enter' && e.ctrlKey) {
+                this.handleSendMessage();
+            }
+        });
+        
+        // Input counter
+        this.inputField?.addEventListener('input', () => {
+            const length = this.inputField.value.length;
+            if (this.inputCounter) {
+                this.inputCounter.textContent = `${length}/2000`;
+                this.inputCounter.style.color = length > 1800 ? '#ef4444' : '';
+            }
+            
+            // Show/hide clear button
+            if (this.inputClearBtn) {
+                this.inputClearBtn.style.display = length > 0 ? 'flex' : 'none';
+            }
+        });
+        
+        // Clear input
+        this.inputClearBtn?.addEventListener('click', () => {
+            this.inputField.value = '';
+            this.inputField.dispatchEvent(new Event('input'));
+            this.inputField.focus();
+        });
+        
+        // New chat
+        this.newChatBtn?.addEventListener('click', () => this.createNewConversation());
+        
+        // Toggle conversations sidebar
+        this.conversationsToggle?.addEventListener('click', () => {
+            this.conversationsSidebar?.classList.toggle('collapsed');
+            const icon = this.conversationsToggle.querySelector('i');
+            if (icon) {
+                icon.className = this.conversationsSidebar.classList.contains('collapsed') 
+                    ? 'fas fa-chevron-right' 
+                    : 'fas fa-chevron-left';
+            }
+        });
+        
+        // ESC to clear input
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && document.activeElement === this.inputField) {
+                this.inputField.value = '';
+                this.inputField.dispatchEvent(new Event('input'));
+            }
+            
+            // / to focus input
+            if (e.key === '/' && document.activeElement !== this.inputField) {
+                e.preventDefault();
+                this.inputField?.focus();
+            }
+            
+            // Ctrl+N for new chat
+            if (e.ctrlKey && e.key === 'n') {
+                e.preventDefault();
+                this.createNewConversation();
+            }
+        });
+    }
+    
+    setupWelcomeSuggestions() {
+        const suggestionBtns = document.querySelectorAll('.welcome-suggestion-btn');
+        suggestionBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const query = btn.dataset.query;
+                if (query) {
+                    this.inputField.value = query;
+                    this.handleSendMessage();
+                }
+            });
+        });
+    }
+    
+    setupAutoResize() {
+        if (!this.inputField) return;
+        
+        this.inputField.addEventListener('input', () => {
+            this.inputField.style.height = 'auto';
+            const newHeight = Math.min(this.inputField.scrollHeight, 150);
+            this.inputField.style.height = newHeight + 'px';
+        });
+    }
+    
+    // ============================================
+    // CONVERSATION MANAGEMENT
+    // ============================================
+    
+    createNewConversation() {
+        const conversationId = this.generateConversationId();
+        const conversation = {
+            id: conversationId,
+            title: 'New Conversation',
+            messages: [],
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString()
+        };
+        
+        this.conversations.unshift(conversation);
+        this.currentConversationId = conversationId;
+        
+        // Clear messages
+        this.clearMessages();
+        
+        // Show welcome screen
+        if (this.welcomeScreen) {
+            this.welcomeScreen.style.display = 'block';
+        }
+        
+        // Update UI
+        this.updateConversationsList();
+        this.saveConversations();
+        
+        // Focus input
+        this.inputField?.focus();
+        
+        console.log('✅ New conversation created:', conversationId);
+    }
+    
+    loadConversations() {
+        try {
+            const saved = localStorage.getItem('chatbotConversations');
+            if (saved) {
+                this.conversations = JSON.parse(saved);
+                console.log(`📚 Loaded ${this.conversations.length} conversations`);
+            }
+            
+            // Create first conversation if none exist
+            if (this.conversations.length === 0) {
+                this.createNewConversation();
+            } else {
+                // Load most recent
+                this.currentConversationId = this.conversations[0].id;
+                this.loadConversationMessages(this.currentConversationId);
+            }
+            
+            this.updateConversationsList();
+        } catch (error) {
+            console.error('❌ Error loading conversations:', error);
+            this.createNewConversation();
+        }
+    }
+    
+    saveConversations() {
+        try {
+            localStorage.setItem('chatbotConversations', JSON.stringify(this.conversations));
+            console.log('💾 Conversations saved');
+        } catch (error) {
+            console.error('❌ Error saving conversations:', error);
+        }
+    }
+    
+    getCurrentConversation() {
+        return this.conversations.find(c => c.id === this.currentConversationId);
+    }
+    
+    updateConversationTitle(conversationId, title) {
+        const conversation = this.conversations.find(c => c.id === conversationId);
+        if (conversation) {
+            conversation.title = title;
+            conversation.updatedAt = new Date().toISOString();
+            this.updateConversationsList();
+            this.saveConversations();
+        }
+    }
+    
+    deleteConversation(conversationId) {
+        if (confirm('Delete this conversation?')) {
+            this.conversations = this.conversations.filter(c => c.id !== conversationId);
+            
+            if (this.currentConversationId === conversationId) {
+                if (this.conversations.length > 0) {
+                    this.switchConversation(this.conversations[0].id);
+                } else {
+                    this.createNewConversation();
+                }
+            }
+            
+            this.updateConversationsList();
+            this.saveConversations();
+        }
+    }
+    
+    switchConversation(conversationId) {
+        this.currentConversationId = conversationId;
+        this.loadConversationMessages(conversationId);
+        this.updateConversationsList();
+        
+        // Update active state
+        document.querySelectorAll('.conversation-item').forEach(item => {
+            item.classList.toggle('active', item.dataset.conversationId === conversationId);
+        });
+    }
+    
+    loadConversationMessages(conversationId) {
+        const conversation = this.conversations.find(c => c.id === conversationId);
+        if (!conversation) return;
+        
+        // Clear current messages
+        this.clearMessages();
+        
+        // Hide welcome screen if there are messages
+        if (conversation.messages.length > 0 && this.welcomeScreen) {
+            this.welcomeScreen.style.display = 'none';
+        }
+        
+        // Load messages
+        conversation.messages.forEach(msg => {
+            this.displayMessage(msg.text, msg.role, false, msg.hasChart);
+        });
+        
+        // Scroll to bottom
+        this.scrollToBottom();
+    }
+    
+    updateConversationsList() {
+        if (!this.conversationsList) return;
+        
+        this.conversationsList.innerHTML = '';
+        
+        if (this.conversations.length === 0) {
+            this.conversationsList.innerHTML = `
+                <div class="conversations-empty">
+                    <i class="fas fa-comments"></i>
+                    <p>No conversations yet</p>
+                </div>
+            `;
+            return;
+        }
+        
+        this.conversations.forEach(conversation => {
+            const item = document.createElement('div');
+            item.className = 'conversation-item';
+            item.dataset.conversationId = conversation.id;
+            
+            if (conversation.id === this.currentConversationId) {
+                item.classList.add('active');
+            }
+            
+            const date = new Date(conversation.updatedAt);
+            const timeAgo = this.getTimeAgo(date);
+            
+            item.innerHTML = `
+                <div class="conversation-icon">
+                    <i class="fas fa-comment-dots"></i>
+                </div>
+                <div class="conversation-details">
+                    <h4 class="conversation-title">${this.escapeHtml(conversation.title)}</h4>
+                    <p class="conversation-preview">${conversation.messages.length} messages</p>
+                    <span class="conversation-time">${timeAgo}</span>
+                </div>
+                <div class="conversation-actions">
+                    <button class="conversation-action-btn delete-btn" title="Delete">
+                        <i class="fas fa-trash-alt"></i>
+                    </button>
+                </div>
+            `;
+            
+            // Click to switch
+            item.addEventListener('click', (e) => {
+                if (!e.target.closest('.conversation-actions')) {
+                    this.switchConversation(conversation.id);
+                }
+            });
+            
+            // Delete button
+            const deleteBtn = item.querySelector('.delete-btn');
+            deleteBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                this.deleteConversation(conversation.id);
+            });
+            
+            this.conversationsList.appendChild(item);
+        });
+    }
+    
+    // ============================================
+    // MESSAGE HANDLING
+    // ============================================
+    
+    async handleSendMessage() {
+        const message = this.inputField.value.trim();
+        
+        if (!message || this.isProcessing) return;
+        
+        // Hide welcome screen
+        if (this.welcomeScreen) {
+            this.welcomeScreen.style.display = 'none';
+        }
+        
+        // Display user message
+        this.displayMessage(message, 'user');
+        
+        // Save to conversation
+        this.addMessageToConversation(message, 'user');
+        
+        // Update conversation title if first message
+        const conversation = this.getCurrentConversation();
+        if (conversation && conversation.messages.length === 1) {
+            const title = message.slice(0, 50) + (message.length > 50 ? '...' : '');
+            this.updateConversationTitle(conversation.id, title);
+        }
+        
+        // Clear input
+        this.inputField.value = '';
+        this.inputField.style.height = 'auto';
+        this.inputField.dispatchEvent(new Event('input'));
+        
+        // Process with AI
+        this.isProcessing = true;
+        this.updateSendButton(true);
+        
+        try {
+            await this.processAIResponse(message);
+        } catch (error) {
+            console.error('❌ Error processing message:', error);
+            this.displayMessage('Sorry, I encountered an error. Please try again.', 'assistant', true);
+        } finally {
+            this.isProcessing = false;
+            this.updateSendButton(false);
+            this.inputField?.focus();
+        }
+    }
+    
+    async processAIResponse(userMessage) {
+        // Show typing indicator
+        const typingId = this.showTypingIndicator();
+        
+        try {
+            if (!this.aiEngine) {
+                throw new Error('AI Engine not available');
+            }
+            
+            // Get conversation context
+            const conversation = this.getCurrentConversation();
+            const context = conversation ? conversation.messages.slice(-5) : [];
+            
+            // Process with AI
+            const response = await this.aiEngine.processMessage(userMessage, context);
+            
+            // Remove typing indicator
+            this.removeTypingIndicator(typingId);
+            
+            // Display response
+            if (response.text) {
+                this.displayMessage(response.text, 'assistant', false, response.hasChart);
+                this.addMessageToConversation(response.text, 'assistant', response.hasChart);
+            }
+            
+        } catch (error) {
+            console.error('❌ AI processing error:', error);
+            this.removeTypingIndicator(typingId);
+            
+            const errorMessage = error.message || 'Sorry, I encountered an error processing your request.';
+            this.displayMessage(errorMessage, 'assistant', true);
+            this.addMessageToConversation(errorMessage, 'assistant');
+        }
+    }
+    
+    displayMessage(text, role, isError = false, hasChart = false) {
+        const messageContainer = document.createElement('div');
+        messageContainer.className = `chatbot-message ${role}-message`;
+        if (isError) messageContainer.classList.add('error-message');
+        
+        const avatar = document.createElement('div');
+        avatar.className = 'message-avatar';
+        
+        if (role === 'user') {
+            // Get user photo from Firebase or default
+            const userPhoto = document.querySelector('[data-user-photo]')?.src || 
+                            'https://ui-avatars.com/api/?name=User&background=667eea&color=fff';
+            avatar.innerHTML = `<img src="${userPhoto}" alt="User">`;
+        } else {
+            avatar.innerHTML = `
+                <div class="ai-avatar">
+                    <i class="fas fa-robot"></i>
+                </div>
+            `;
+        }
+        
+        const messageContent = document.createElement('div');
+        messageContent.className = 'message-content';
+        
+        const messageText = document.createElement('div');
+        messageText.className = 'message-text';
+        
+        // Format text with markdown-like styling
+        messageText.innerHTML = this.formatMessageText(text);
+        
+        const messageTime = document.createElement('div');
+        messageTime.className = 'message-time';
+        messageTime.textContent = new Date().toLocaleTimeString('en-US', { 
+            hour: '2-digit', 
+            minute: '2-digit' 
+        });
+        
+        messageContent.appendChild(messageText);
+        messageContent.appendChild(messageTime);
+        
+        messageContainer.appendChild(avatar);
+        messageContainer.appendChild(messageContent);
+        
+        // Insert before typing indicator or append
+        const typingIndicator = this.messagesContent.querySelector('.typing-indicator-container');
+        if (typingIndicator) {
+            this.messagesContent.insertBefore(messageContainer, typingIndicator);
+        } else {
+            this.messagesContent.appendChild(messageContainer);
+        }
+        
+        // Animate in
+        requestAnimationFrame(() => {
+            messageContainer.style.opacity = '0';
+            messageContainer.style.transform = 'translateY(20px)';
+            requestAnimationFrame(() => {
+                messageContainer.style.transition = 'all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)';
+                messageContainer.style.opacity = '1';
+                messageContainer.style.transform = 'translateY(0)';
+            });
+        });
+        
+        this.scrollToBottom();
+    }
+    
+    formatMessageText(text) {
+        // Escape HTML
+        let formatted = this.escapeHtml(text);
+        
+        // Bold **text**
+        formatted = formatted.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+        
+        // Italic *text*
+        formatted = formatted.replace(/\*(.+?)\*/g, '<em>$1</em>');
+        
+        // Code `code`
+        formatted = formatted.replace(/`(.+?)`/g, '<code>$1</code>');
+        
+        // Links [text](url)
+        formatted = formatted.replace(/\[(.+?)\]\((.+?)\)/g, '<a href="$2" target="_blank" rel="noopener">$1</a>');
+        
+        // Line breaks
+        formatted = formatted.replace(/\n/g, '<br>');
+        
+        // Lists
+        formatted = formatted.replace(/^- (.+)$/gm, '<li>$1</li>');
+        formatted = formatted.replace(/(<li>.*<\/li>)/s, '<ul>$1</ul>');
+        
+        // Numbers with $ sign
+        formatted = formatted.replace(/\$(\d+(?:\.\d{2})?)/g, '<span class="money-value">$$$1</span>');
+        
+        // Percentages
+        formatted = formatted.replace(/(\d+(?:\.\d+)?%)/g, '<span class="percent-value">$1</span>');
+        
+        return formatted;
+    }
+    
+    showTypingIndicator() {
+        const typingId = `typing-${Date.now()}`;
+        const typingContainer = document.createElement('div');
+        typingContainer.className = 'typing-indicator-container';
+        typingContainer.id = typingId;
+        
+        typingContainer.innerHTML = `
+            <div class="message-avatar">
+                <div class="ai-avatar">
+                    <i class="fas fa-robot"></i>
+                </div>
+            </div>
+            <div class="typing-indicator">
+                <div class="typing-dot"></div>
+                <div class="typing-dot"></div>
+                <div class="typing-dot"></div>
+            </div>
+        `;
+        
+        this.messagesContent.appendChild(typingContainer);
+        this.scrollToBottom();
+        
+        return typingId;
+    }
+    
+    removeTypingIndicator(typingId) {
+        const indicator = document.getElementById(typingId);
+        if (indicator) {
+            indicator.style.opacity = '0';
+            setTimeout(() => indicator.remove(), 300);
+        }
+    }
+    
+    addMessageToConversation(text, role, hasChart = false) {
+        const conversation = this.getCurrentConversation();
+        if (!conversation) return;
+        
+        conversation.messages.push({
+            id: this.generateMessageId(),
+            text,
+            role,
+            hasChart,
+            timestamp: new Date().toISOString()
+        });
+        
+        conversation.updatedAt = new Date().toISOString();
+        this.saveConversations();
+    }
+    
+    clearMessages() {
+        const messages = this.messagesContent.querySelectorAll('.chatbot-message, .typing-indicator-container');
+        messages.forEach(msg => msg.remove());
+    }
+    
+    // ============================================
+    // UI UPDATES
+    // ============================================
+    
+    updateSendButton(isProcessing) {
+        if (!this.sendBtn) return;
+        
+        const icon = this.sendBtn.querySelector('i');
+        if (isProcessing) {
+            this.sendBtn.disabled = true;
+            this.sendBtn.classList.add('processing');
+            if (icon) {
+                icon.className = 'fas fa-spinner fa-spin';
+            }
+        } else {
+            this.sendBtn.disabled = false;
+            this.sendBtn.classList.remove('processing');
+            if (icon) {
+                icon.className = 'fas fa-paper-plane';
+            }
+        }
+    }
+    
+    scrollToBottom(smooth = true) {
+        if (!this.messagesContent) return;
+        
+        requestAnimationFrame(() => {
+            this.messagesContent.scrollTo({
+                top: this.messagesContent.scrollHeight,
+                behavior: smooth ? 'smooth' : 'auto'
+            });
+        });
+    }
+    
+    // ============================================
+    // HELPERS
+    // ============================================
+    
+    generateConversationId() {
+        return `conv_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    }
+    
+    generateMessageId() {
+        return `msg_${Date.now()}_${this.messageIdCounter++}`;
+    }
+    
+    escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+    
+    getTimeAgo(date) {
+        const seconds = Math.floor((new Date() - date) / 1000);
+        
+        if (seconds < 60) return 'Just now';
+        if (seconds < 3600) return `${Math.floor(seconds / 60)}m ago`;
+        if (seconds < 86400) return `${Math.floor(seconds / 3600)}h ago`;
+        if (seconds < 604800) return `${Math.floor(seconds / 86400)}d ago`;
+        
+        return date.toLocaleDateString();
+    }
+    
+    // ============================================
+    // PUBLIC API
+    // ============================================
+    
+    sendMessage(message) {
+        this.inputField.value = message;
+        this.handleSendMessage();
+    }
+    
+    clearCurrentConversation() {
+        const conversation = this.getCurrentConversation();
+        if (conversation && confirm('Clear all messages in this conversation?')) {
+            conversation.messages = [];
+            this.clearMessages();
+            if (this.welcomeScreen) {
+                this.welcomeScreen.style.display = 'block';
+            }
+            this.saveConversations();
+        }
+    }
+}
 
-</body>
-</html>
+// ============================================
+// INITIALIZATION
+// ============================================
+
+let chatbotUI = null;
+
+document.addEventListener('DOMContentLoaded', () => {
+    console.log('🚀 Initializing Chatbot UI...');
+    
+    // Wait for AI Engine to be ready
+    const initUI = () => {
+        try {
+            chatbotUI = new ChatbotFullpageUI();
+            window.chatbotUI = chatbotUI; // Expose globally
+            console.log('✅ Chatbot UI ready');
+        } catch (error) {
+            console.error('❌ Failed to initialize Chatbot UI:', error);
+        }
+    };
+    
+    // Check if AI Engine is loaded
+    if (typeof FinancialChatbotEngine !== 'undefined') {
+        initUI();
+    } else {
+        // Wait a bit for other scripts to load
+        setTimeout(initUI, 500);
+    }
+});
+
+// ============================================
+// EXPORT
+// ============================================
+
+if (typeof module !== 'undefined' && module.exports) {
+    module.exports = ChatbotFullpageUI;
+}
