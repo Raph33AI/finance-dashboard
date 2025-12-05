@@ -1,6 +1,7 @@
 // ============================================
-// CHATBOT UI v2.0 - PREMIUM INTERFACE
-// ✅ AVEC SAUVEGARDE/RESTAURATION DES GRAPHIQUES
+// CHATBOT UI v2.1 - PREMIUM INTERFACE
+// ✅ NOUVEAU v2.1: Photo de profil utilisateur Firebase (LOGIQUE LANDING.JS)
+// ✅ v2.0: AVEC SAUVEGARDE/RESTAURATION DES GRAPHIQUES
 // ============================================
 
 class ChatbotUI {
@@ -18,7 +19,7 @@ class ChatbotUI {
         this.isTyping = false;
         this.messageCount = 0;
         
-        // ✅ NOUVEAU: Stockage des messages et graphiques
+        // Storage des messages et graphiques
         this.conversationHistory = [];
         this.conversationKey = 'alphyai_conversation';
         this.chartsDataKey = 'alphyai_charts_data';
@@ -31,11 +32,74 @@ class ChatbotUI {
     }
 
     // ============================================
+    // USER PROFILE PHOTO MANAGEMENT (NEW v2.1 - LOGIQUE LANDING.JS)
+    // ============================================
+    
+    /**
+     * Récupère la photo de profil de l'utilisateur Firebase
+     * UTILISE EXACTEMENT LA MÊME LOGIQUE QUE LANDING.JS
+     * @returns {string} URL de la photo ou avatar par défaut
+     */
+    getUserProfilePhoto() {
+        try {
+            console.log('Getting user profile photo...');
+            
+            // Vérifier si Firebase Auth est disponible
+            if (typeof firebase === 'undefined' || !firebase.auth) {
+                console.warn('Firebase Auth not available');
+                return 'https://ui-avatars.com/api/?name=User&background=3B82F6&color=fff&bold=true&size=128';
+            }
+            
+            // Récupérer l'utilisateur actuel
+            const user = firebase.auth().currentUser;
+            
+            if (!user) {
+                console.warn('No user logged in');
+                return 'https://ui-avatars.com/api/?name=User&background=3B82F6&color=fff&bold=true&size=128';
+            }
+            
+            console.log('User found:', user.email);
+            
+            // MÊME LOGIQUE QUE LANDING.JS
+            const displayName = user.displayName || user.email?.split('@')[0] || 'User';
+            console.log('Display name:', displayName);
+            
+            // Si photoURL existe, l'utiliser (priorité 1)
+            if (user.photoURL) {
+                console.log('Using Firebase photoURL:', user.photoURL);
+                return user.photoURL;
+            }
+            
+            // Sinon, générer un avatar avec ui-avatars.com (MÊMES PARAMÈTRES QUE LANDING.JS)
+            const avatarUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(displayName)}&background=3B82F6&color=fff&bold=true&size=128`;
+            console.log('Generated avatar URL:', avatarUrl);
+            return avatarUrl;
+            
+        } catch (error) {
+            console.error('Error getting user profile photo:', error);
+            return 'https://ui-avatars.com/api/?name=User&background=3B82F6&color=fff&bold=true&size=128';
+        }
+    }
+
+    /**
+     * Génère le HTML de l'avatar utilisateur avec photo
+     * @returns {string} HTML de l'avatar
+     */
+    getUserAvatarHTML() {
+        const photoURL = this.getUserProfilePhoto();
+        return `<img src="${photoURL}" 
+                     alt="User Avatar" 
+                     class="user-avatar-img"
+                     onerror="this.onerror=null; this.src='https://ui-avatars.com/api/?name=User&background=3B82F6&color=fff&bold=true&size=128';"
+                     style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">`;
+    }
+
+    // ============================================
     // INITIALIZATION
     // ============================================
     async init() {
         try {
-            console.log('🎨 Création de l\'interface UI...');
+            console.log('🎨 Création de l\'interface UI v2.1...');
             
             // Create UI structure
             this.createUI();
@@ -52,7 +116,7 @@ class ChatbotUI {
             // Initialize components
             await this.initializeComponents();
             
-            // ✅ NOUVEAU: Restaurer la conversation sauvegardée
+            // Restaurer la conversation sauvegardée
             await this.restoreConversation();
             
             // Show welcome message (seulement si aucune conversation restaurée)
@@ -61,7 +125,7 @@ class ChatbotUI {
                 this.showInitialSuggestions();
             }
             
-            console.log('✅ Chatbot UI initialized successfully');
+            console.log('✅ Chatbot UI v2.1 initialized successfully');
             
         } catch (error) {
             console.error('❌ UI initialization error:', error);
@@ -408,7 +472,7 @@ class ChatbotUI {
     }
 
     // ============================================
-    // ✅ ADD MESSAGE (AVEC SAUVEGARDE)
+    // ADD MESSAGE (WITH USER PROFILE PHOTO - v2.1)
     // ============================================
     addMessage(type, content, chartRequests = null) {
         const messageDiv = document.createElement('div');
@@ -416,7 +480,13 @@ class ChatbotUI {
         
         const avatar = document.createElement('div');
         avatar.className = `message-avatar ${type}-avatar`;
-        avatar.textContent = type === 'user' ? this.config.ui.userAvatar : this.config.ui.botAvatar;
+        
+        // NEW v2.1: User profile photo for user messages (LOGIQUE LANDING.JS)
+        if (type === 'user') {
+            avatar.innerHTML = this.getUserAvatarHTML();
+        } else {
+            avatar.textContent = this.config.ui.botAvatar;
+        }
         
         const contentDiv = document.createElement('div');
         contentDiv.className = 'message-content';
@@ -449,7 +519,7 @@ class ChatbotUI {
         
         this.messageCount++;
         
-        // ✅ NOUVEAU: Sauvegarder dans l'historique
+        // Sauvegarder dans l'historique
         this.conversationHistory.push({
             type: type,
             content: content,
@@ -553,14 +623,13 @@ class ChatbotUI {
     }
 
     // ============================================
-    // ✅ CHARTS (AVEC SAUVEGARDE DES MÉTADONNÉES)
+    // CHARTS (AVEC SAUVEGARDE DES MÉTADONNÉES)
     // ============================================
     async generateCharts(chartRequests) {
         for (const request of chartRequests) {
             const chartContainer = document.createElement('div');
             chartContainer.className = 'chart-message';
             
-            // ✅ IMPORTANT: Ajouter un attribut data pour identifier le conteneur
             const chartId = `chart-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
             chartContainer.setAttribute('data-chart-container', chartId);
             
@@ -569,7 +638,6 @@ class ChatbotUI {
             if (this.charts) {
                 const createdChartId = await this.charts.createChart(request, chartContainer);
                 
-                // ✅ NOUVEAU: Sauvegarder les données du graphique
                 this.charts.chartDataStore.set(createdChartId, {
                     chartRequest: request,
                     containerId: chartId
@@ -579,7 +647,6 @@ class ChatbotUI {
             this.scrollToBottom();
         }
         
-        // ✅ Sauvegarder les données des graphiques
         this.saveChartsData();
     }
 
@@ -593,7 +660,7 @@ class ChatbotUI {
     }
 
     // ============================================
-    // ✅ CLEAR CHAT (AVEC NETTOYAGE COMPLET)
+    // CLEAR CHAT (AVEC NETTOYAGE COMPLET)
     // ============================================
     clearChat() {
         if (confirm('Clear all messages?')) {
@@ -628,7 +695,7 @@ class ChatbotUI {
     }
 
     // ════════════════════════════════════════════════════════════
-    // ✅ SAUVEGARDE & RESTAURATION (NOUVEAU)
+    // SAUVEGARDE & RESTAURATION
     // ════════════════════════════════════════════════════════════
 
     /**
@@ -639,7 +706,7 @@ class ChatbotUI {
             const data = {
                 history: this.conversationHistory,
                 timestamp: Date.now(),
-                version: '2.0'
+                version: '2.1'
             };
             
             localStorage.setItem(this.conversationKey, JSON.stringify(data));
@@ -673,7 +740,6 @@ class ChatbotUI {
         try {
             console.log('🔄 Attempting to restore conversation...');
             
-            // Charger les données de conversation
             const savedData = localStorage.getItem(this.conversationKey);
             
             if (!savedData) {
@@ -702,14 +768,13 @@ class ChatbotUI {
             
         } catch (error) {
             console.error('❌ Error restoring conversation:', error);
-            // En cas d'erreur, nettoyer les données corrompues
             localStorage.removeItem(this.conversationKey);
             localStorage.removeItem(this.chartsDataKey);
         }
     }
 
     /**
-     * Restaure un message individuel
+     * Restaure un message individuel (WITH USER PHOTO - v2.1)
      */
     async restoreMessage(msg) {
         const messageDiv = document.createElement('div');
@@ -717,7 +782,13 @@ class ChatbotUI {
         
         const avatar = document.createElement('div');
         avatar.className = `message-avatar ${msg.type}-avatar`;
-        avatar.textContent = msg.type === 'user' ? this.config.ui.userAvatar : this.config.ui.botAvatar;
+        
+        // NEW v2.1: User profile photo for user messages (LOGIQUE LANDING.JS)
+        if (msg.type === 'user') {
+            avatar.innerHTML = this.getUserAvatarHTML();
+        } else {
+            avatar.textContent = this.config.ui.botAvatar;
+        }
         
         const contentDiv = document.createElement('div');
         contentDiv.className = 'message-content';
@@ -751,11 +822,6 @@ class ChatbotUI {
         // Restaurer l'historique
         this.conversationHistory.push(msg);
         this.messageCount++;
-        
-        // Si le message contient des graphiques, les restaurer après
-        if (msg.chartRequests && msg.chartRequests.length > 0) {
-            // Les graphiques seront restaurés par restoreCharts()
-        }
     }
 
     /**
@@ -770,7 +836,6 @@ class ChatbotUI {
         try {
             console.log('📊 Attempting to restore charts...');
             
-            // Charger les données des graphiques
             const savedChartsData = localStorage.getItem(this.chartsDataKey);
             
             if (!savedChartsData) {
@@ -780,12 +845,10 @@ class ChatbotUI {
             
             const chartsData = JSON.parse(savedChartsData);
             
-            // Importer les données dans le composant Charts
             this.charts.importChartsData(chartsData);
             
             console.log(`📥 Imported data for ${Object.keys(chartsData).length} charts`);
             
-            // Parcourir l'historique pour restaurer les graphiques
             for (const msg of this.conversationHistory) {
                 if (msg.chartRequests && msg.chartRequests.length > 0) {
                     await this.restoreChartsForMessage(msg.chartRequests);
@@ -807,7 +870,6 @@ class ChatbotUI {
             const chartContainer = document.createElement('div');
             chartContainer.className = 'chart-message';
             
-            // Ajouter l'attribut data pour identifier le conteneur
             const chartId = `chart-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
             chartContainer.setAttribute('data-chart-container', chartId);
             
@@ -871,4 +933,4 @@ if (typeof module !== 'undefined' && module.exports) {
     module.exports = ChatbotUI;
 }
 
-console.log('✅ ChatbotUI v2.0 loaded - With Conversation Persistence!');
+console.log('✅ ChatbotUI v2.1 loaded - With User Photo + Conversation Persistence!');
