@@ -1,10 +1,10 @@
 /* ============================================
    CHATBOT MODALS - SHARE & SETTINGS
-   Version 4.0 - FIREBASE EDITION + PDF PREMIUM
-   ✅ PDF Export avec GRAPHIQUES (html2canvas + jsPDF)
-   ✅ Formatage Ultra-Professionnel
-   ✅ Capture automatique des Charts
-   ✅ Firebase Integration
+   Version 5.0 - FIREBASE + PDF PREMIUM avec GRAPHIQUES
+   ✅ Détection robuste des graphiques Chart.js
+   ✅ Attente du rendu complet (animation.onComplete)
+   ✅ Capture haute résolution (html2canvas scale: 3)
+   ✅ Formatage PDF professionnel avec graphiques
    ============================================ */
 
 class ChatbotModals {
@@ -154,7 +154,7 @@ class ChatbotModals {
                 </div>
             </div>
 
-            <!-- SETTINGS MODAL -->
+            <!-- SETTINGS MODAL (Inchangé) -->
             <div class="chatbot-modal" id="settings-modal">
                 <div class="modal-overlay"></div>
                 <div class="modal-content modal-content-large">
@@ -525,28 +525,30 @@ class ChatbotModals {
     }
 
     /**
-     * Exporter la conversation
+     * ✅ EXPORT CONVERSATION
      */
     async exportConversation(format) {
         console.log(`📥 Exporting conversation as ${format.toUpperCase()}...`);
         
         this.showLoading(true);
         
-        const messages = await this.getConversationMessagesWithCharts();
         const timestamp = new Date().toISOString().slice(0, 10);
         const filename = `alphy-ai-conversation-${timestamp}`;
         
         try {
-            switch (format) {
-                case 'txt':
+            if (format === 'pdf') {
+                // PDF nécessite la capture des graphiques
+                const messages = await this.getConversationMessagesWithCharts();
+                await this.downloadPDFFile(messages, filename);
+            } else {
+                // TXT et JSON n'ont pas besoin des graphiques
+                const messages = this.getConversationMessages();
+                
+                if (format === 'txt') {
                     await this.downloadTextFile(messages, filename);
-                    break;
-                case 'json':
+                } else if (format === 'json') {
                     await this.downloadJSONFile(messages, filename);
-                    break;
-                case 'pdf':
-                    await this.downloadPDFFile(messages, filename);
-                    break;
+                }
             }
             
             this.showSuccessMessage(`${format.toUpperCase()} exported successfully!`);
@@ -560,11 +562,123 @@ class ChatbotModals {
     }
 
     /**
-     * ✅ ULTRA-OPTIMIZED PDF EXPORT WITH CHARTS
+     * ✅ GET MESSAGES WITH CHART IMAGES (ULTRA-ROBUSTE)
+     */
+    async getConversationMessagesWithCharts() {
+        const messagesContainer = document.getElementById('chatbot-messages-content');
+        const messages = [];
+        
+        if (!messagesContainer) {
+            console.error('❌ Messages container not found');
+            return messages;
+        }
+        
+        const messageElements = messagesContainer.querySelectorAll('.message');
+        console.log(`📊 Found ${messageElements.length} messages to process`);
+        
+        for (let i = 0; i < messageElements.length; i++) {
+            const msg = messageElements[i];
+            const isUser = msg.classList.contains('user-message');
+            const text = msg.querySelector('.message-text')?.textContent || '';
+            const time = msg.querySelector('.message-time')?.textContent || '';
+            
+            const messageData = {
+                role: isUser ? 'user' : 'assistant',
+                content: text.trim(),
+                timestamp: time,
+                chartImage: null
+            };
+            
+            // ✅ DÉTECTER ET CAPTURER LES GRAPHIQUES (3 MÉTHODES)
+            
+            // Méthode 1: Canvas direct
+            let chartElement = msg.querySelector('canvas');
+            
+            // Méthode 2: Conteneur de graphique
+            if (!chartElement) {
+                const chartContainer = msg.querySelector('.chart-container, .message-chart, [class*="chart"]');
+                if (chartContainer) {
+                    chartElement = chartContainer.querySelector('canvas') || chartContainer;
+                }
+            }
+            
+            // Méthode 3: ID contenant "chart"
+            if (!chartElement) {
+                chartElement = msg.querySelector('[id*="chart"], [id*="Chart"]');
+            }
+            
+            if (chartElement && typeof html2canvas !== 'undefined') {
+                try {
+                    console.log(`📊 Message ${i + 1}: Chart detected, capturing...`);
+                    
+                    // ✅ ATTENDRE LE RENDU COMPLET (important pour Chart.js)
+                    await this.waitForChartRender(chartElement);
+                    
+                    // ✅ CAPTURER AVEC HAUTE RÉSOLUTION
+                    const canvas = await html2canvas(chartElement, {
+                        backgroundColor: '#ffffff',
+                        scale: 3, // ✅ Haute résolution
+                        logging: false,
+                        useCORS: true,
+                        allowTaint: true,
+                        windowWidth: chartElement.scrollWidth,
+                        windowHeight: chartElement.scrollHeight
+                    });
+                    
+                    messageData.chartImage = canvas.toDataURL('image/png', 1.0); // Qualité max
+                    console.log(`✅ Message ${i + 1}: Chart captured successfully (${canvas.width}x${canvas.height})`);
+                } catch (error) {
+                    console.error(`❌ Message ${i + 1}: Chart capture failed:`, error);
+                }
+            }
+            
+            messages.push(messageData);
+        }
+        
+        const chartsCount = messages.filter(m => m.chartImage).length;
+        console.log(`✅ Processed ${messages.length} messages (${chartsCount} with charts)`);
+        return messages;
+    }
+
+    /**
+     * ✅ ATTENDRE LE RENDU COMPLET DU GRAPHIQUE
+     */
+    waitForChartRender(element) {
+        return new Promise((resolve) => {
+            // Si c'est un canvas Chart.js
+            if (element.tagName === 'CANVAS' && typeof Chart !== 'undefined') {
+                const chartInstance = Chart.getChart(element);
+                
+                if (chartInstance) {
+                    // Si le graphique a des animations en cours, attendre la fin
+                    if (chartInstance.options.animation && chartInstance.options.animation.duration > 0) {
+                        console.log('⏳ Waiting for Chart.js animation to complete...');
+                        
+                        // Attendre la fin de l'animation
+                        setTimeout(() => {
+                            resolve();
+                        }, chartInstance.options.animation.duration + 100);
+                    } else {
+                        // Pas d'animation, on peut capturer immédiatement
+                        resolve();
+                    }
+                } else {
+                    // Pas d'instance Chart.js, capturer directement
+                    resolve();
+                }
+            } else {
+                // Pas un canvas Chart.js, petit délai de sécurité
+                setTimeout(resolve, 100);
+            }
+        });
+    }
+
+    /**
+     * ✅ DOWNLOAD PDF WITH CHARTS (ULTRA-OPTIMIZED)
      */
     async downloadPDFFile(messages, filename) {
         if (typeof window.jspdf === 'undefined') {
-            throw new Error('jsPDF library not loaded');
+            throw new Error('jsPDF library not loaded. Please include: <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>');
         }
         
         const { jsPDF } = window.jspdf;
@@ -689,9 +803,15 @@ class ChatbotModals {
                 checkNewPage(250);
                 
                 const imgWidth = maxWidth - 40;
-                const imgHeight = 200;
+                const imgHeight = 220; // Hauteur augmentée pour meilleure visibilité
                 
                 try {
+                    // ✅ BORDURE AUTOUR DU GRAPHIQUE
+                    doc.setDrawColor(200, 200, 200);
+                    doc.setLineWidth(1);
+                    doc.roundedRect(margin + 20 - 2, yPos - 2, imgWidth + 4, imgHeight + 4, 3, 3, 'S');
+                    
+                    // ✅ AJOUTER L'IMAGE
                     doc.addImage(
                         msg.chartImage,
                         'PNG',
@@ -703,11 +823,11 @@ class ChatbotModals {
                         'FAST'
                     );
                     
-                    yPos += imgHeight + 20;
+                    yPos += imgHeight + 25;
                     
-                    console.log(`✅ Chart added for message ${i + 1}`);
+                    console.log(`✅ Chart added to PDF for message ${i + 1}`);
                 } catch (error) {
-                    console.error(`❌ Failed to add chart for message ${i + 1}:`, error);
+                    console.error(`❌ Failed to add chart to PDF for message ${i + 1}:`, error);
                 }
             }
             
@@ -758,62 +878,7 @@ class ChatbotModals {
     }
 
     /**
-     * ✅ GET MESSAGES WITH CHART IMAGES
-     */
-    async getConversationMessagesWithCharts() {
-        const messagesContainer = document.getElementById('chatbot-messages-content');
-        const messages = [];
-        
-        if (!messagesContainer) {
-            console.error('❌ Messages container not found');
-            return messages;
-        }
-        
-        const messageElements = messagesContainer.querySelectorAll('.message');
-        
-        for (const msg of messageElements) {
-            const isUser = msg.classList.contains('user-message');
-            const text = msg.querySelector('.message-text')?.textContent || '';
-            const time = msg.querySelector('.message-time')?.textContent || '';
-            
-            const messageData = {
-                role: isUser ? 'user' : 'assistant',
-                content: text.trim(),
-                timestamp: time,
-                chartImage: null
-            };
-            
-            // ✅ DETECT AND CAPTURE CHARTS
-            const chartElement = msg.querySelector('canvas, .chart-container, [id*="chart"]');
-            
-            if (chartElement && typeof html2canvas !== 'undefined') {
-                try {
-                    console.log(`📊 Capturing chart for message...`);
-                    
-                    const canvas = await html2canvas(chartElement, {
-                        backgroundColor: '#ffffff',
-                        scale: 2,
-                        logging: false,
-                        useCORS: true,
-                        allowTaint: true
-                    });
-                    
-                    messageData.chartImage = canvas.toDataURL('image/png');
-                    console.log(`✅ Chart captured successfully`);
-                } catch (error) {
-                    console.error('❌ Chart capture failed:', error);
-                }
-            }
-            
-            messages.push(messageData);
-        }
-        
-        console.log(`📚 Processed ${messages.length} messages`);
-        return messages;
-    }
-
-    /**
-     * LEGACY: Get messages without charts (for TXT/JSON export)
+     * GET MESSAGES (WITHOUT CHARTS - FOR TXT/JSON)
      */
     getConversationMessages() {
         const messagesContainer = document.getElementById('chatbot-messages-content');
@@ -835,7 +900,7 @@ class ChatbotModals {
     }
 
     /**
-     * Prendre une capture d'écran
+     * TAKE SCREENSHOT
      */
     async takeScreenshot(mode = 'full') {
         console.log(`📸 Taking ${mode} screenshot...`);
@@ -899,7 +964,7 @@ class ChatbotModals {
     }
 
     /**
-     * Télécharger en TXT
+     * DOWNLOAD TEXT FILE
      */
     async downloadTextFile(messages, filename) {
         let content = `ALPHY AI - FINANCIAL ASSISTANT CONVERSATION\n`;
@@ -923,12 +988,12 @@ class ChatbotModals {
     }
 
     /**
-     * Télécharger en JSON
+     * DOWNLOAD JSON FILE
      */
     async downloadJSONFile(messages, filename) {
         const data = {
             platform: 'Alphy AI - Financial Assistant',
-            version: '4.0',
+            version: '5.0',
             exportDate: new Date().toISOString(),
             totalMessages: messages.length,
             messages: messages.map(msg => ({
@@ -947,7 +1012,7 @@ class ChatbotModals {
     }
 
     /**
-     * Télécharger un fichier
+     * DOWNLOAD FILE
      */
     downloadFile(content, filename, mimeType) {
         const blob = new Blob([content], { type: mimeType });
@@ -1025,7 +1090,7 @@ class ChatbotModals {
     }
 
     /**
-     * ✅ FIREBASE: Sauvegarder les paramètres
+     * ✅ FIREBASE: SAVE SETTINGS
      */
     async saveSettings() {
         if (!this.currentUser) {
@@ -1065,7 +1130,7 @@ class ChatbotModals {
     }
 
     /**
-     * ✅ FIREBASE: Charger les paramètres
+     * ✅ FIREBASE: LOAD SETTINGS
      */
     async loadSettings() {
         if (!this.currentUser) {
@@ -1106,7 +1171,7 @@ class ChatbotModals {
     }
 
     /**
-     * ✅ FIREBASE: Réinitialiser les paramètres
+     * ✅ FIREBASE: RESET SETTINGS
      */
     async resetSettings() {
         if (!confirm('Are you sure you want to reset all settings to defaults?')) {
@@ -1135,7 +1200,7 @@ class ChatbotModals {
     }
 
     /**
-     * ✅ FIREBASE: Effacer toutes les données
+     * ✅ FIREBASE: CLEAR ALL DATA
      */
     async clearAllData() {
         if (!confirm('⚠ This will delete ALL your conversations and settings from Firebase. This action cannot be undone. Are you sure?')) {
@@ -1177,7 +1242,7 @@ class ChatbotModals {
     }
 
     /**
-     * ✅ FIREBASE: Sauvegarder une conversation
+     * ✅ FIREBASE: SAVE CONVERSATION
      */
     async saveConversation(messages, conversationId = null) {
         if (!this.currentUser) {
@@ -1213,7 +1278,7 @@ class ChatbotModals {
     }
 
     /**
-     * ✅ FIREBASE: Charger les conversations
+     * ✅ FIREBASE: LOAD CONVERSATIONS
      */
     async loadConversations() {
         if (!this.currentUser) {
