@@ -2325,17 +2325,924 @@
         </div>
     </div>
 
-    <!-- MODALS DÉJÀ EXISTANTS (CONSERVÉS) -->
-    <!-- Modal Stochastic - DÉJÀ INCLUS DANS PARTIE 1 -->
-    <!-- Modal Williams - DÉJÀ INCLUS DANS PARTIE 1 -->
-    <!-- Modal ADX - DÉJÀ INCLUS DANS PARTIE 1 -->
-    <!-- Modal SAR - DÉJÀ INCLUS DANS PARTIE 1 -->
-    <!-- Modal OBV - DÉJÀ INCLUS DANS PARTIE 1 -->
-    <!-- Modal ATR - DÉJÀ INCLUS DANS PARTIE 1 -->
-    <!-- Modal Fibonacci - DÉJÀ INCLUS DANS PARTIE 1 -->
-    <!-- Modal Pivots - DÉJÀ INCLUS DANS PARTIE 1 -->
-    <!-- Modal VWAP - DÉJÀ INCLUS DANS PARTIE 1 -->
-    <!-- Modal Ichimoku - DÉJÀ INCLUS DANS PARTIE 1 -->
+    <!-- ============================================
+         📊 MODALS ORIGINAUX (CONSERVÉS)
+         ============================================ -->
+
+    <!-- Modal Ichimoku -->
+    <div id='modalIchimoku' class='modal'>
+        <div class='modal-content'>
+            <div class='modal-header'>
+                <h2>☁ Ichimoku Cloud</h2>
+                <span class='close-modal' onclick='closeModal("modalIchimoku")'>&times;</span>
+            </div>
+            <div class='modal-body'>
+                <h3>What is Ichimoku Cloud?</h3>
+                <p>The <span class='key-term'>Ichimoku Kinko Hyo</span> (equilibrium chart at a glance) is a comprehensive indicator that defines support/resistance, identifies trend direction, gauges momentum, and provides trading signals.</p>
+                
+                <h3>Components</h3>
+                <ul>
+                    <li><strong>Tenkan-sen (Conversion Line):</strong> (9-period high + 9-period low) / 2</li>
+                    <li><strong>Kijun-sen (Base Line):</strong> (26-period high + 26-period low) / 2</li>
+                    <li><strong>Senkou Span A (Leading Span A):</strong> (Tenkan-sen + Kijun-sen) / 2, plotted 26 periods ahead</li>
+                    <li><strong>Senkou Span B (Leading Span B):</strong> (52-period high + 52-period low) / 2, plotted 26 periods ahead</li>
+                    <li><strong>Chikou Span (Lagging Span):</strong> Current closing price plotted 26 periods back</li>
+                    <li><strong>Kumo (Cloud):</strong> Area between Senkou Span A and B</li>
+                </ul>
+                
+                <h3>Mathematical Calculation</h3>
+                <div class='formula-box'>
+                    <strong>Tenkan-sen (Conversion Line):</strong><br>
+                    Tenkan = (Highest High + Lowest Low) / 2 over last 9 periods<br><br>
+                    
+                    <strong>Kijun-sen (Base Line):</strong><br>
+                    Kijun = (Highest High + Lowest Low) / 2 over last 26 periods<br><br>
+                    
+                    <strong>Senkou Span A (Leading Span A):</strong><br>
+                    Span A = (Tenkan + Kijun) / 2, plotted 26 periods ahead<br><br>
+                    
+                    <strong>Senkou Span B (Leading Span B):</strong><br>
+                    Span B = (Highest High + Lowest Low) / 2 over last 52 periods, plotted 26 periods ahead<br><br>
+                    
+                    <strong>Chikou Span (Lagging Span):</strong><br>
+                    Chikou = Current Close, plotted 26 periods back
+                </div>
+                
+                <h3>How to Interpret</h3>
+                <ul>
+                    <li><strong>Price above Cloud:</strong> Bullish trend (buy zone) - cloud acts as support</li>
+                    <li><strong>Price below Cloud:</strong> Bearish trend (sell zone) - cloud acts as resistance</li>
+                    <li><strong>Price in Cloud:</strong> Consolidation/ranging market - no clear trend</li>
+                    <li><strong>Tenkan crosses above Kijun:</strong> Bullish signal (TK cross or golden cross)</li>
+                    <li><strong>Tenkan crosses below Kijun:</strong> Bearish signal (death cross)</li>
+                    <li><strong>Green Cloud (Span A > Span B):</strong> Bullish support zone</li>
+                    <li><strong>Red Cloud (Span A < Span B):</strong> Bearish resistance zone</li>
+                    <li><strong>Thick Cloud:</strong> Strong support/resistance</li>
+                    <li><strong>Thin Cloud:</strong> Weak support/resistance (easier to break)</li>
+                </ul>
+                
+                <h3>Advanced Trading Signals</h3>
+                <ul>
+                    <li><strong>Strong Buy:</strong> Price above cloud + Tenkan above Kijun + Chikou above price (26 periods ago)</li>
+                    <li><strong>Strong Sell:</strong> Price below cloud + Tenkan below Kijun + Chikou below price (26 periods ago)</li>
+                    <li><strong>Cloud Breakout:</strong> Price breaking through cloud = strong momentum signal</li>
+                    <li><strong>Kumo Twist:</strong> Span A crosses Span B = potential trend reversal ahead</li>
+                </ul>
+                
+                <div class='tip-box'>
+                    💡 <strong>Pro Tip:</strong> Ichimoku works best on daily charts and in trending markets. The cloud provides future support/resistance levels since it's plotted 26 periods ahead. Avoid using it in choppy, sideways markets.
+                </div>
+                
+                <div class='warning-box'>
+                    ⚠ <strong>Warning:</strong> Ichimoku can generate false signals in ranging markets. Always wait for price to be clearly above or below the cloud before taking positions.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Stochastic -->
+    <div id='modalStochastic' class='modal'>
+        <div class='modal-content'>
+            <div class='modal-header'>
+                <h2>📈 Stochastic Oscillator</h2>
+                <span class='close-modal' onclick='closeModal("modalStochastic")'>&times;</span>
+            </div>
+            <div class='modal-body'>
+                <h3>What is the Stochastic Oscillator?</h3>
+                <p>The <span class='key-term'>Stochastic Oscillator</span> is a momentum indicator developed by George Lane that compares a particular closing price to a range of prices over a certain period. It shows where the current price stands relative to recent highs and lows.</p>
+                
+                <h3>Mathematical Calculation</h3>
+                <div class='formula-box'>
+                    <strong>Default Period: 14</strong><br><br>
+                    
+                    <strong>Step 1: Calculate %K (Fast Stochastic)</strong><br>
+                    %K = [(Current Close - Lowest Low) / (Highest High - Lowest Low)] × 100<br><br>
+                    
+                    Where:<br>
+                    - Current Close = Most recent closing price<br>
+                    - Lowest Low = Lowest low over the last 14 periods<br>
+                    - Highest High = Highest high over the last 14 periods<br><br>
+                    
+                    <strong>Step 2: Calculate %D (Slow Stochastic)</strong><br>
+                    %D = 3-period Simple Moving Average of %K<br><br>
+                    
+                    <strong>Range:</strong> 0 to 100
+                </div>
+                
+                <h3>How to Interpret</h3>
+                <ul>
+                    <li><strong>%K above 80:</strong> Overbought zone - potential sell signal (price near recent highs)</li>
+                    <li><strong>%K below 20:</strong> Oversold zone - potential buy signal (price near recent lows)</li>
+                    <li><strong>%K crosses above %D:</strong> Bullish signal - momentum shifting up</li>
+                    <li><strong>%K crosses below %D:</strong> Bearish signal - momentum shifting down</li>
+                    <li><strong>%K and %D both above 80:</strong> Strong overbought condition</li>
+                    <li><strong>%K and %D both below 20:</strong> Strong oversold condition</li>
+                </ul>
+                
+                <h3>Trading Strategies</h3>
+                <ul>
+                    <li><strong>Overbought/Oversold:</strong> Sell when %K crosses below 80, buy when %K crosses above 20</li>
+                    <li><strong>Crossover:</strong> Buy when %K crosses above %D (especially below 20), sell when crosses below</li>
+                    <li><strong>Divergence:</strong> Price makes new high but Stochastic doesn't = bearish divergence (reversal)</li>
+                    <li><strong>Bull/Bear Setup:</strong> Wait for both lines to be in extreme zones before trading</li>
+                </ul>
+                
+                <div class='warning-box'>
+                    ⚠ <strong>Warning:</strong> In strong trends, Stochastic can remain overbought (>80) or oversold (<20) for extended periods. Don't blindly sell just because it's overbought in a strong uptrend!
+                </div>
+                
+                <div class='tip-box'>
+                    💡 <strong>Pro Tip:</strong> Combine Stochastic with trend indicators like ADX. Only take overbought signals in downtrends and oversold signals in uptrends. This dramatically reduces false signals.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Williams -->
+    <div id='modalWilliams' class='modal'>
+        <div class='modal-content'>
+            <div class='modal-header'>
+                <h2>📉 Williams %R</h2>
+                <span class='close-modal' onclick='closeModal("modalWilliams")'>&times;</span>
+            </div>
+            <div class='modal-body'>
+                <h3>What is Williams %R?</h3>
+                <p>The <span class='key-term'>Williams %R</span> (Williams Percent Range) is a momentum indicator developed by Larry Williams that measures overbought/oversold levels. It's essentially an inverted Stochastic Oscillator, ranging from 0 to -100.</p>
+                
+                <h3>Mathematical Calculation</h3>
+                <div class='formula-box'>
+                    <strong>Default Period: 14</strong><br><br>
+                    
+                    <strong>Formula:</strong><br>
+                    Williams %R = [(Highest High - Close) / (Highest High - Lowest Low)] × -100<br><br>
+                    
+                    Where:<br>
+                    - Highest High = Highest high over the last 14 periods<br>
+                    - Lowest Low = Lowest low over the last 14 periods<br>
+                    - Close = Most recent closing price<br><br>
+                    
+                    <strong>Range:</strong> 0 to -100 (inverted scale)
+                </div>
+                
+                <h3>How to Interpret</h3>
+                <ul>
+                    <li><strong>-20 to 0:</strong> OVERBOUGHT zone - price near recent highs, consider selling</li>
+                    <li><strong>-80 to -100:</strong> OVERSOLD zone - price near recent lows, consider buying</li>
+                    <li><strong>-50:</strong> Centerline - neutral zone (equilibrium)</li>
+                    <li><strong>Williams %R crossing above -80:</strong> Bullish signal - exiting oversold</li>
+                    <li><strong>Williams %R crossing below -20:</strong> Bearish signal - exiting overbought</li>
+                </ul>
+                
+                <h3>Trading Strategies</h3>
+                <ul>
+                    <li><strong>Overbought Exit:</strong> Sell when Williams %R crosses below -20 from above</li>
+                    <li><strong>Oversold Entry:</strong> Buy when Williams %R crosses above -80 from below</li>
+                    <li><strong>Divergence:</strong> Price makes new low but Williams %R makes higher low = bullish reversal</li>
+                    <li><strong>Failure Swing:</strong> Williams %R fails to reach -20 in uptrend = weakness</li>
+                </ul>
+                
+                <h3>Williams %R vs Stochastic</h3>
+                <ul>
+                    <li><strong>Similarity:</strong> Both measure position within recent range</li>
+                    <li><strong>Difference:</strong> Williams %R is inverted (0 to -100 vs 0 to 100)</li>
+                    <li><strong>Advantage:</strong> Williams %R has no smoothing, more responsive to price changes</li>
+                    <li><strong>Disadvantage:</strong> More sensitive = more false signals</li>
+                </ul>
+                
+                <div class='tip-box'>
+                    💡 <strong>Pro Tip:</strong> Use Williams %R for short-term trading (scalping, day trading). For longer timeframes, Stochastic with %D smoothing is more reliable. Combine with volume analysis for best results.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal ADX -->
+    <div id='modalADX' class='modal'>
+        <div class='modal-content'>
+            <div class='modal-header'>
+                <h2>💪 ADX - Average Directional Index</h2>
+                <span class='close-modal' onclick='closeModal("modalADX")'>&times;</span>
+            </div>
+            <div class='modal-body'>
+                <h3>What is ADX?</h3>
+                <p>The <span class='key-term'>Average Directional Index (ADX)</span> is a trend strength indicator developed by J. Welles Wilder. It measures the strength of a trend, regardless of direction. ADX does NOT tell you if the trend is up or down, only HOW STRONG it is.</p>
+                
+                <h3>Components</h3>
+                <ul>
+                    <li><strong>ADX Line:</strong> Trend strength (0-100) - the main indicator</li>
+                    <li><strong>+DI (Plus Directional Indicator):</strong> Upward movement strength</li>
+                    <li><strong>-DI (Minus Directional Indicator):</strong> Downward movement strength</li>
+                </ul>
+                
+                <h3>Mathematical Calculation</h3>
+                <div class='formula-box'>
+                    <strong>Default Period: 14</strong><br><br>
+                    
+                    <strong>Step 1: Calculate True Range (TR)</strong><br>
+                    TR = MAX of:<br>
+                    - (High - Low)<br>
+                    - |High - Previous Close|<br>
+                    - |Low - Previous Close|<br><br>
+                    
+                    <strong>Step 2: Calculate Directional Movement (+DM, -DM)</strong><br>
+                    +DM = High - Previous High (if positive and > -DM, else 0)<br>
+                    -DM = Previous Low - Low (if positive and > +DM, else 0)<br><br>
+                    
+                    <strong>Step 3: Calculate Smoothed TR, +DM, -DM</strong><br>
+                    Smoothed TR₁₄ = Sum of first 14 TR / 14<br>
+                    Smoothed TR = (Previous Smoothed TR × 13 + Current TR) / 14<br><br>
+                    
+                    <strong>Step 4: Calculate +DI and -DI</strong><br>
+                    +DI₁₄ = (Smoothed +DM₁₄ / Smoothed TR₁₄) × 100<br>
+                    -DI₁₄ = (Smoothed -DM₁₄ / Smoothed TR₁₄) × 100<br><br>
+                    
+                    <strong>Step 5: Calculate DX (Directional Index)</strong><br>
+                    DX = (|+DI₁₄ - -DI₁₄| / |+DI₁₄ + -DI₁₄|) × 100<br><br>
+                    
+                    <strong>Step 6: Calculate ADX</strong><br>
+                    ADX = 14-period Smoothed Average of DX
+                </div>
+                
+                <h3>How to Interpret</h3>
+                <ul>
+                    <li><strong>ADX < 20:</strong> WEAK TREND or NO TREND - ranging market, avoid trend-following strategies</li>
+                    <li><strong>ADX 20-25:</strong> Trend is developing - watch for confirmation</li>
+                    <li><strong>ADX > 25:</strong> STRONG TREND - good for trend-following strategies</li>
+                    <li><strong>ADX > 40:</strong> VERY STRONG TREND - powerful directional movement</li>
+                    <li><strong>ADX > 50:</strong> EXTREMELY STRONG TREND - rare, exceptional trend strength</li>
+                    <li><strong>ADX rising:</strong> Trend strengthening (regardless of direction)</li>
+                    <li><strong>ADX falling:</strong> Trend weakening (consolidation likely)</li>
+                </ul>
+                
+                <h3>Trading with +DI and -DI</h3>
+                <ul>
+                    <li><strong>+DI above -DI + ADX > 25:</strong> STRONG UPTREND - go long</li>
+                    <li><strong>-DI above +DI + ADX > 25:</strong> STRONG DOWNTREND - go short</li>
+                    <li><strong>+DI crosses above -DI:</strong> Potential uptrend starting (wait for ADX > 20)</li>
+                    <li><strong>-DI crosses above +DI:</strong> Potential downtrend starting</li>
+                    <li><strong>Both DI lines below 20:</strong> Very weak trend, choppy market</li>
+                </ul>
+                
+                <h3>Trading Strategies</h3>
+                <ul>
+                    <li><strong>Trend Confirmation:</strong> Only trade in direction when ADX > 25</li>
+                    <li><strong>Avoid Whipsaws:</strong> Stay out when ADX < 20 (use range-trading strategies instead)</li>
+                    <li><strong>Peak ADX:</strong> When ADX peaks and starts falling = trend exhaustion, prepare for reversal</li>
+                    <li><strong>ADX + MA:</strong> Combine with moving averages (ADX > 25 + price above 200 SMA = strong uptrend)</li>
+                </ul>
+                
+                <div class='tip-box'>
+                    💡 <strong>Pro Tip:</strong> ADX is a LAGGING indicator - it confirms trends after they've started. Use it to filter trades: only take trend-following setups when ADX > 25, and only take mean-reversion setups when ADX < 20.
+                </div>
+                
+                <div class='warning-box'>
+                    ⚠ <strong>Warning:</strong> ADX does NOT tell you trend direction! Always look at +DI/-DI or price action to determine if trend is up or down. A high ADX (>40) can occur in both strong uptrends AND downtrends.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal SAR -->
+    <div id='modalSAR' class='modal'>
+        <div class='modal-content'>
+            <div class='modal-header'>
+                <h2>🎯 Parabolic SAR</h2>
+                <span class='close-modal' onclick='closeModal("modalSAR")'>&times;</span>
+            </div>
+            <div class='modal-body'>
+                <h3>What is Parabolic SAR?</h3>
+                <p>The <span class='key-term'>Parabolic SAR</span> (Stop And Reverse) is a trend-following indicator developed by J. Welles Wilder. It provides entry/exit points and trailing stop levels. The "dots" appear below price in uptrends and above price in downtrends.</p>
+                
+                <h3>Mathematical Calculation</h3>
+                <div class='formula-box'>
+                    <strong>Default Settings:</strong><br>
+                    - AF (Acceleration Factor) Start: 0.02<br>
+                    - AF Maximum: 0.20<br>
+                    - AF Increment: 0.02<br><br>
+                    
+                    <strong>Formula:</strong><br>
+                    SAR(today) = SAR(yesterday) + AF × [EP - SAR(yesterday)]<br><br>
+                    
+                    Where:<br>
+                    - SAR = Stop And Reverse point<br>
+                    - AF = Acceleration Factor (starts at 0.02, increases by 0.02 each time EP is updated, max 0.20)<br>
+                    - EP = Extreme Point (highest high in uptrend, lowest low in downtrend)<br><br>
+                    
+                    <strong>Uptrend Rules:</strong><br>
+                    - SAR is below price<br>
+                    - If price touches SAR, switch to downtrend<br>
+                    - Each period, if new high is made, increase AF by 0.02 (max 0.20)<br><br>
+                    
+                    <strong>Downtrend Rules:</strong><br>
+                    - SAR is above price<br>
+                    - If price touches SAR, switch to uptrend<br>
+                    - Each period, if new low is made, increase AF by 0.02 (max 0.20)
+                </div>
+                
+                <h3>How to Interpret</h3>
+                <ul>
+                    <li><strong>Dots below price:</strong> UPTREND - stay long, dots act as trailing stop</li>
+                    <li><strong>Dots above price:</strong> DOWNTREND - stay short, dots act as resistance</li>
+                    <li><strong>Dots flip from below to above:</strong> SELL SIGNAL - trend reversal to downtrend</li>
+                    <li><strong>Dots flip from above to below:</strong> BUY SIGNAL - trend reversal to uptrend</li>
+                    <li><strong>Dots accelerating (getting closer to price):</strong> Trend is strengthening</li>
+                    <li><strong>Dots far from price:</strong> Strong, established trend</li>
+                </ul>
+                
+                <h3>Trading Strategies</h3>
+                <ul>
+                    <li><strong>Trend Following:</strong> Buy when dots flip below, sell when flip above</li>
+                    <li><strong>Trailing Stop:</strong> Use SAR dots as dynamic stop-loss levels</li>
+                    <li><strong>Exit Strategy:</strong> Exit long when price touches SAR from above</li>
+                    <li><strong>SAR + ADX:</strong> Only trade SAR signals when ADX > 25 (strong trend)</li>
+                    <li><strong>SAR + MA:</strong> Confirm SAR buy signal when price is above 200 SMA</li>
+                </ul>
+                
+                <h3>Acceleration Factor (AF) Explained</h3>
+                <ul>
+                    <li><strong>Start Value (0.02):</strong> Conservative initial step</li>
+                    <li><strong>Increment (0.02):</strong> Each new extreme point increases sensitivity</li>
+                    <li><strong>Max Value (0.20):</strong> Prevents SAR from moving too fast</li>
+                    <li><strong>Effect:</strong> SAR accelerates as trend continues (parabolic curve)</li>
+                    <li><strong>Customization:</strong> Lower max AF (0.10) = slower, fewer signals; Higher (0.30) = faster, more signals</li>
+                </ul>
+                
+                <div class='warning-box'>
+                    ⚠ <strong>Warning:</strong> Parabolic SAR generates MANY false signals in sideways, choppy markets. It's designed for trending markets only. Expect whipsaws when ADX < 20.
+                </div>
+                
+                <div class='tip-box'>
+                    💡 <strong>Pro Tip:</strong> Combine SAR with trend strength indicators like ADX. Only take SAR signals when ADX > 25. In ranging markets, ignore SAR completely and use oscillators like RSI instead. SAR works BEST on daily charts in strong trends.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal OBV -->
+    <div id='modalOBV' class='modal'>
+        <div class='modal-content'>
+            <div class='modal-header'>
+                <h2>📊 On-Balance Volume (OBV)</h2>
+                <span class='close-modal' onclick='closeModal("modalOBV")'>&times;</span>
+            </div>
+            <div class='modal-body'>
+                <h3>What is OBV?</h3>
+                <p>The <span class='key-term'>On-Balance Volume</span> is a cumulative volume-based indicator developed by Joe Granville that measures buying and selling pressure. The theory is that volume precedes price - smart money shows up in volume before moving price.</p>
+                
+                <h3>Mathematical Calculation</h3>
+                <div class='formula-box'>
+                    <strong>Formula (Simple yet Powerful):</strong><br><br>
+                    
+                    If Close(today) > Close(yesterday):<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;OBV(today) = OBV(yesterday) + Volume(today)<br><br>
+                    
+                    If Close(today) < Close(yesterday):<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;OBV(today) = OBV(yesterday) - Volume(today)<br><br>
+                    
+                    If Close(today) = Close(yesterday):<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;OBV(today) = OBV(yesterday)<br><br>
+                    
+                    Starting Value: OBV(1) = Volume(1)
+                </div>
+                
+                <h3>How to Interpret</h3>
+                <ul>
+                    <li><strong>OBV rising + Price rising:</strong> HEALTHY UPTREND - strong buying pressure confirms price move</li>
+                    <li><strong>OBV falling + Price falling:</strong> HEALTHY DOWNTREND - strong selling pressure confirms move</li>
+                    <li><strong>OBV rising + Price falling:</strong> BULLISH DIVERGENCE - accumulation happening, reversal up likely</li>
+                    <li><strong>OBV falling + Price rising:</strong> BEARISH DIVERGENCE - distribution happening, reversal down likely</li>
+                    <li><strong>OBV breaking resistance:</strong> Price likely to follow (volume leading price)</li>
+                    <li><strong>OBV flat during price rise:</strong> Weak uptrend, lacks volume support</li>
+                </ul>
+                
+                <h3>Divergence Signals (Most Powerful Use)</h3>
+                <ul>
+                    <li><strong>Bullish Divergence Example:</strong>
+                        <ul>
+                            <li>Price: Makes lower low (e.g., $100 → $95 → $90)</li>
+                            <li>OBV: Makes higher low (accumulation despite falling price)</li>
+                            <li>Signal: Smart money buying = bullish reversal coming</li>
+                        </ul>
+                    </li>
+                    <li><strong>Bearish Divergence Example:</strong>
+                        <ul>
+                            <li>Price: Makes higher high (e.g., $100 → $110 → $115)</li>
+                            <li>OBV: Makes lower high (distribution despite rising price)</li>
+                            <li>Signal: Smart money selling = bearish reversal coming</li>
+                        </ul>
+                    </li>
+                </ul>
+                
+                <h3>Trading Strategies</h3>
+                <ul>
+                    <li><strong>Trend Confirmation:</strong> Only take long trades when OBV is rising, short when falling</li>
+                    <li><strong>Breakout Confirmation:</strong> Wait for both price AND OBV to break resistance</li>
+                    <li><strong>Divergence Trading:</strong> Enter reversal trades when divergence appears at key levels</li>
+                    <li><strong>Volume Thrust:</strong> Strong OBV spike + price breakout = high probability move</li>
+                </ul>
+                
+                <h3>OBV vs Price - The 4 Scenarios</h3>
+                <div class='formula-box'>
+                    <strong>Scenario 1:</strong> Price ↑ + OBV ↑ = ✅ Strong Uptrend (Trade with trend)<br>
+                    <strong>Scenario 2:</strong> Price ↓ + OBV ↓ = ✅ Strong Downtrend (Trade with trend)<br>
+                    <strong>Scenario 3:</strong> Price ↑ + OBV ↓ = ⚠ Bearish Divergence (Prepare to sell)<br>
+                    <strong>Scenario 4:</strong> Price ↓ + OBV ↑ = ⚠ Bullish Divergence (Prepare to buy)
+                </div>
+                
+                <div class='tip-box'>
+                    💡 <strong>Pro Tip:</strong> OBV is one of the BEST leading indicators. When OBV diverges from price, trust the volume - it usually precedes price reversal by days or weeks. Draw trendlines on BOTH price and OBV to spot divergences early. OBV works exceptionally well on stocks with high trading volume.
+                </div>
+                
+                <div class='warning-box'>
+                    ⚠ <strong>Warning:</strong> OBV doesn't work well on low-volume stocks or during low-volume periods (e.g., holidays). Always check if volume is significant before trusting OBV signals. Use with other confirmation indicators.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal ATR -->
+    <div id='modalATR' class='modal'>
+        <div class='modal-content'>
+            <div class='modal-header'>
+                <h2>📏 Average True Range (ATR)</h2>
+                <span class='close-modal' onclick='closeModal("modalATR")'>&times;</span>
+            </div>
+            <div class='modal-body'>
+                <h3>What is ATR?</h3>
+                <p>The <span class='key-term'>Average True Range</span> is a volatility indicator developed by J. Welles Wilder. It measures market volatility by decomposing the entire range of price movement for a period. ATR does NOT indicate trend direction, only volatility.</p>
+                
+                <h3>Mathematical Calculation</h3>
+                <div class='formula-box'>
+                    <strong>Default Period: 14</strong><br><br>
+                    
+                    <strong>Step 1: Calculate True Range (TR)</strong><br>
+                    TR = MAX of:<br>
+                    - (High - Low) = Current period's range<br>
+                    - |High - Previous Close| = Gap up scenario<br>
+                    - |Low - Previous Close| = Gap down scenario<br><br>
+                    
+                    <strong>Why 3 values?</strong><br>
+                    Simple High-Low misses gaps. TR captures the FULL volatility including overnight moves.<br><br>
+                    
+                    <strong>Step 2: Calculate ATR (14-period)</strong><br>
+                    First ATR = (Sum of first 14 TR) / 14<br><br>
+                    
+                    Subsequent ATR = [(Previous ATR × 13) + Current TR] / 14<br>
+                    (Smoothed moving average - Wilder's method)
+                </div>
+                
+                <h3>How to Interpret</h3>
+                <ul>
+                    <li><strong>High ATR:</strong> HIGH VOLATILITY - larger price swings, wider stops needed</li>
+                    <li><strong>Low ATR:</strong> LOW VOLATILITY - smaller movements, tighter stops possible</li>
+                    <li><strong>Rising ATR:</strong> Volatility INCREASING - expect bigger moves (breakout or breakdown)</li>
+                    <li><strong>Falling ATR:</strong> Volatility DECREASING - consolidation, range-bound</li>
+                    <li><strong>ATR spike:</strong> Panic or excitement - extreme volatility event</li>
+                    <li><strong>ATR plateau:</strong> Volatility stabilizing at new level</li>
+                </ul>
+                
+                <h3>Practical Applications (Why ATR Matters)</h3>
+                
+                <h4>1. Stop Loss Placement</h4>
+                <ul>
+                    <li><strong>Conservative:</strong> Stop = Entry ± (2 × ATR)</li>
+                    <li><strong>Standard:</strong> Stop = Entry ± (1.5 × ATR)</li>
+                    <li><strong>Aggressive:</strong> Stop = Entry ± (1 × ATR)</li>
+                    <li><strong>Logic:</strong> ATR-based stops adapt to market conditions (wider in volatile markets)</li>
+                </ul>
+                
+                <h4>2. Position Sizing</h4>
+                <div class='formula-box'>
+                    Position Size = (Account Risk $) / (ATR × Multiplier)<br><br>
+                    
+                    Example:<br>
+                    - Account: $100,000<br>
+                    - Risk per trade: 1% = $1,000<br>
+                    - ATR: $2.50<br>
+                    - Stop: 2× ATR = $5.00<br>
+                    - Position Size: $1,000 / $5.00 = 200 shares
+                </div>
+                
+                <h4>3. Profit Targets</h4>
+                <ul>
+                    <li><strong>Conservative Target:</strong> Entry + (2 × ATR)</li>
+                    <li><strong>Aggressive Target:</strong> Entry + (3 × ATR)</li>
+                    <li><strong>Swing Trade:</strong> Entry + (5 × ATR)</li>
+                </ul>
+                
+                <h4>4. Breakout Confirmation</h4>
+                <ul>
+                    <li>Low ATR + tight consolidation = volatility squeeze</li>
+                    <li>ATR starting to rise = breakout likely imminent</li>
+                    <li>ATR spike on breakout = confirmation of strong move</li>
+                </ul>
+                
+                <h3>ATR Across Different Markets</h3>
+                <ul>
+                    <li><strong>Stocks:</strong> ATR varies widely (compare ATR to price, not absolute values)</li>
+                    <li><strong>Forex:</strong> ATR in pips - use for stop placement</li>
+                    <li><strong>Crypto:</strong> Extremely high ATR - very volatile</li>
+                    <li><strong>Indices:</strong> Lower ATR than individual stocks</li>
+                </ul>
+                
+                <h3>Trading Strategies</h3>
+                <ul>
+                    <li><strong>Chandelier Exit:</strong> Stop = Highest High - (3 × ATR) in uptrends</li>
+                    <li><strong>Volatility Breakout:</strong> Buy when price moves > 1 ATR from open</li>
+                    <li><strong>Mean Reversion:</strong> Fade moves > 2.5 ATR from moving average</li>
+                    <li><strong>Turtle Trading:</strong> Position size based on ATR (risk parity)</li>
+                </ul>
+                
+                <div class='tip-box'>
+                    💡 <strong>Pro Tip:</strong> NEVER use fixed dollar/point stops! Always use ATR-based stops that adapt to market volatility. A $1 stop might be too tight in a volatile stock (ATR = $3) but too wide in a stable stock (ATR = $0.50). Professional traders ALWAYS consider ATR for risk management.
+                </div>
+                
+                <div class='warning-box'>
+                    ⚠ <strong>Warning:</strong> ATR is NOT directional! High ATR doesn't mean "buy" or "sell", it just means volatility. Also, ATR is a LAGGING indicator - it measures past volatility, not future. Use it for risk management, not trade signals.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Fibonacci -->
+    <div id='modalFibonacci' class='modal'>
+        <div class='modal-content'>
+            <div class='modal-header'>
+                <h2>🌀 Fibonacci Retracements</h2>
+                <span class='close-modal' onclick='closeModal("modalFibonacci")'>&times;</span>
+            </div>
+            <div class='modal-body'>
+                <h3>What are Fibonacci Retracements?</h3>
+                <p><span class='key-term'>Fibonacci Retracements</span> are horizontal lines that indicate potential support and resistance levels based on the Fibonacci sequence discovered by mathematician Leonardo Fibonacci. Traders use these levels to identify where price might reverse during a pullback.</p>
+                
+                <h3>The Fibonacci Sequence & Golden Ratio</h3>
+                <div class='formula-box'>
+                    <strong>Fibonacci Sequence:</strong><br>
+                    0, 1, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144, 233...<br>
+                    (Each number = sum of previous two)<br><br>
+                    
+                    <strong>Golden Ratio (φ):</strong><br>
+                    φ = 1.618 (phi)<br>
+                    Appears throughout nature, art, architecture<br><br>
+                    
+                    <strong>Key Ratios Used in Trading:</strong><br>
+                    - 0.236 = 23.6% (Square root of 0.618)<br>
+                    - 0.382 = 38.2% (1 - 0.618)<br>
+                    - 0.500 = 50.0% (Not Fibonacci, but psychological level)<br>
+                    - 0.618 = 61.8% (THE Golden Ratio)<br>
+                    - 0.786 = 78.6% (Square root of 0.618)
+                </div>
+                
+                <h3>How to Calculate Fibonacci Levels</h3>
+                <div class='formula-box'>
+                    <strong>For an Uptrend (Swing Low to Swing High):</strong><br>
+                    Fibonacci Level = High - [(High - Low) × Fibonacci Ratio]<br><br>
+                    
+                    Example:<br>
+                    - Swing Low: $100<br>
+                    - Swing High: $150<br>
+                    - Range: $50<br><br>
+                    
+                    Levels:<br>
+                    - 0%: $150 (High)<br>
+                    - 23.6%: $150 - ($50 × 0.236) = $138.20<br>
+                    - 38.2%: $150 - ($50 × 0.382) = $130.90<br>
+                    - 50.0%: $150 - ($50 × 0.500) = $125.00<br>
+                    - 61.8%: $150 - ($50 × 0.618) = $119.10 ⭐<br>
+                    - 78.6%: $150 - ($50 × 0.786) = $110.70<br>
+                    - 100%: $100 (Low)
+                </div>
+                
+                <h3>Key Levels Explained</h3>
+                <ul>
+                    <li><strong>23.6% Retracement:</strong> SHALLOW pullback - very strong trend, minor profit-taking</li>
+                    <li><strong>38.2% Retracement:</strong> MODERATE pullback - common in strong trends, good entry point</li>
+                    <li><strong>50.0% Retracement:</strong> PSYCHOLOGICAL level - not true Fibonacci, but widely watched</li>
+                    <li><strong>61.8% Retracement (Golden Ratio):</strong> MOST IMPORTANT - deepest pullback in healthy trend</li>
+                    <li><strong>78.6% Retracement:</strong> VERY DEEP - last chance before trend fails</li>
+                    <li><strong>100% Retracement:</strong> Complete reversal - original move negated</li>
+                </ul>
+                
+                <h3>How to Use Fibonacci Retracements</h3>
+                <ul>
+                    <li><strong>Uptrend Strategy:</strong>
+                        <ul>
+                            <li>Wait for pullback to Fib level (38.2%, 50%, or 61.8%)</li>
+                            <li>Look for reversal confirmation (candlestick pattern, volume, RSI oversold)</li>
+                            <li>Enter long at Fib support</li>
+                            <li>Stop below next Fib level</li>
+                            <li>Target: New high or Fib extension</li>
+                        </ul>
+                    </li>
+                    <li><strong>Downtrend Strategy:</strong>
+                        <ul>
+                            <li>Wait for rally to Fib level</li>
+                            <li>Look for reversal confirmation</li>
+                            <li>Enter short at Fib resistance</li>
+                        </ul>
+                    </li>
+                </ul>
+                
+                <h3>Fibonacci Extensions (Targets)</h3>
+                <div class='formula-box'>
+                    Used to project price targets BEYOND the original move:<br><br>
+                    
+                    - 127.2% Extension (1.272)<br>
+                    - 161.8% Extension (1.618) ⭐ Most common target<br>
+                    - 200.0% Extension<br>
+                    - 261.8% Extension (2.618)<br><br>
+                    
+                    Calculation (Uptrend):<br>
+                    Extension = High + [(High - Low) × Extension Ratio]
+                </div>
+                
+                <h3>Confluence (Multiple Confirmations)</h3>
+                <ul>
+                    <li>Fib level + Previous support/resistance = STRONGER</li>
+                    <li>Fib level + Moving average (50, 200 SMA) = STRONGER</li>
+                    <li>Fib level + Volume profile POC = STRONGER</li>
+                    <li>Fib level + Round number ($100, $50) = STRONGER</li>
+                    <li>Multiple Fib levels from different swings = STRONGEST</li>
+                </ul>
+                
+                <div class='tip-box'>
+                    💡 <strong>Pro Tip:</strong> The 61.8% level is the MOST RELIABLE Fibonacci retracement. If price breaks below 61.8% support in an uptrend, the trend is likely over. Combine Fibonacci with other indicators - NEVER trade Fib levels alone! Look for confluence, candlestick patterns, and volume confirmation.
+                </div>
+                
+                <div class='warning-box'>
+                    ⚠ <strong>Warning:</strong> Fibonacci is a SELF-FULFILLING PROPHECY - it works because millions of traders watch it. Levels are ZONES, not exact prices (allow ±1% tolerance). Don't force Fibonacci on every move - use only on clear, significant swings.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Pivots -->
+    <div id='modalPivots' class='modal'>
+        <div class='modal-content'>
+            <div class='modal-header'>
+                <h2>🎯 Pivot Points</h2>
+                <span class='close-modal' onclick='closeModal("modalPivots")'>&times;</span>
+            </div>
+            <div class='modal-body'>
+                <h3>What are Pivot Points?</h3>
+                <p><span class='key-term'>Pivot Points</span> are technical indicators used by floor traders to determine potential support and resistance levels for the current trading day. They are calculated using the previous period's high, low, and close prices.</p>
+                
+                <h3>1. Standard Pivot Points (Classic)</h3>
+                <div class='formula-box'>
+                    <strong>Pivot Point (P):</strong><br>
+                    P = (High + Low + Close) / 3<br><br>
+                    
+                    <strong>Resistance Levels:</strong><br>
+                    R1 = (2 × P) - Low<br>
+                    R2 = P + (High - Low)<br>
+                    R3 = High + 2 × (P - Low)<br><br>
+                    
+                    <strong>Support Levels:</strong><br>
+                    S1 = (2 × P) - High<br>
+                    S2 = P - (High - Low)<br>
+                    S3 = Low - 2 × (High - P)<br><br>
+                    
+                    <strong>Example:</strong><br>
+                    Yesterday: High = $110, Low = $100, Close = $108<br>
+                    P = ($110 + $100 + $108) / 3 = $106<br>
+                    R1 = (2 × $106) - $100 = $112<br>
+                    S1 = (2 × $106) - $110 = $102
+                </div>
+                
+                <h3>2. Fibonacci Pivot Points</h3>
+                <div class='formula-box'>
+                    <strong>Pivot Point (P):</strong><br>
+                    P = (High + Low + Close) / 3<br><br>
+                    
+                    <strong>Resistance Levels (using Fib ratios):</strong><br>
+                    R1 = P + [(High - Low) × 0.382]<br>
+                    R2 = P + [(High - Low) × 0.618]<br>
+                    R3 = P + [(High - Low) × 1.000]<br><br>
+                    
+                    <strong>Support Levels:</strong><br>
+                    S1 = P - [(High - Low) × 0.382]<br>
+                    S2 = P - [(High - Low) × 0.618]<br>
+                    S3 = P - [(High - Low) × 1.000]
+                </div>
+                
+                <h3>3. Camarilla Pivot Points</h3>
+                <div class='formula-box'>
+                    <strong>Formula (Tighter levels for day trading):</strong><br>
+                    Range = High - Low<br><br>
+                    
+                    R4 = Close + (Range × 1.1 / 2)<br>
+                    R3 = Close + (Range × 1.1 / 4)<br>
+                    R2 = Close + (Range × 1.1 / 6)<br>
+                    R1 = Close + (Range × 1.1 / 12)<br><br>
+                    
+                    S1 = Close - (Range × 1.1 / 12)<br>
+                    S2 = Close - (Range × 1.1 / 6)<br>
+                    S3 = Close - (Range × 1.1 / 4)<br>
+                    S4 = Close - (Range × 1.1 / 2)<br><br>
+                    
+                    <strong>Note:</strong> Camarilla uses CLOSE price heavily, creating tighter clusters
+                </div>
+                
+                <h3>How to Interpret Pivot Points</h3>
+                <ul>
+                    <li><strong>P (Pivot Point):</strong> FAIR VALUE - equilibrium level, most important</li>
+                    <li><strong>Price above P:</strong> Bullish sentiment for the day</li>
+                    <li><strong>Price below P:</strong> Bearish sentiment for the day</li>
+                    <li><strong>R1, R2, R3:</strong> Resistance levels - potential sell zones</li>
+                    <li><strong>S1, S2, S3:</strong> Support levels - potential buy zones</li>
+                    <li><strong>R3/S3:</strong> Extreme levels - rarely reached, strong breakout if broken</li>
+                </ul>
+                
+                <h3>Trading Strategies</h3>
+                
+                <h4>Strategy 1: Pivot Point Bounce (Day Trading)</h4>
+                <ul>
+                    <li>Wait for price to approach S1 or R1</li>
+                    <li>Look for reversal signal (candlestick pattern, RSI divergence)</li>
+                    <li>Enter at support (S1) for long, resistance (R1) for short</li>
+                    <li>Target: Return to pivot (P)</li>
+                    <li>Stop: Below S2 (long) or above R2 (short)</li>
+                </ul>
+                
+                <h4>Strategy 2: Pivot Point Breakout</h4>
+                <ul>
+                    <li>If price breaks ABOVE R1 with volume → go long</li>
+                    <li>Target: R2, then R3</li>
+                    <li>Stop: Below R1 (now support)</li>
+                    <li>Reverse logic for breakdown below S1</li>
+                </ul>
+                
+                <h4>Strategy 3: Opening Range (First Hour)</h4>
+                <ul>
+                    <li>If market opens above P → bullish bias (look for longs at S1)</li>
+                    <li>If market opens below P → bearish bias (look for shorts at R1)</li>
+                    <li>First hour of trading establishes daily tone</li>
+                </ul>
+                
+                <h3>Which Pivot Type to Use?</h3>
+                <ul>
+                    <li><strong>Standard Pivots:</strong> Most popular, widely watched, good for all timeframes</li>
+                    <li><strong>Fibonacci Pivots:</strong> Better for trending markets, wider levels</li>
+                    <li><strong>Camarilla Pivots:</strong> Best for day trading, scalping (tighter levels)</li>
+                    <li><strong>Recommendation:</strong> Use Standard for swing trading, Camarilla for day trading</li>
+                </ul>
+                
+                <h3>Timeframes</h3>
+                <ul>
+                    <li><strong>Daily Pivots:</strong> Calculated from yesterday's H/L/C - for day traders</li>
+                    <li><strong>Weekly Pivots:</strong> Calculated from last week's H/L/C - for swing traders</li>
+                    <li><strong>Monthly Pivots:</strong> Calculated from last month's H/L/C - for position traders</li>
+                    <li><strong>Yearly Pivots:</strong> Major institutional levels</li>
+                </ul>
+                
+                <div class='tip-box'>
+                    💡 <strong>Pro Tip:</strong> Pivot Points are MOST effective in ranging markets. When ADX < 20, pivots act as excellent support/resistance. In strong trends (ADX > 30), price often blows through all pivot levels. Combine pivots with Volume Profile's POC for ultimate confluence zones. Floor traders used these for DECADES before computers!
+                </div>
+                
+                <div class='warning-box'>
+                    ⚠ <strong>Warning:</strong> Pivot points are based on PREVIOUS day's data - they don't predict the future, they show where traders are likely to react. On high-impact news days (earnings, Fed announcements), pivots become less reliable. Always check economic calendar!
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal VWAP -->
+    <div id='modalVWAP' class='modal'>
+        <div class='modal-content'>
+            <div class='modal-header'>
+                <h2>⚖ VWAP - Volume Weighted Average Price</h2>
+                <span class='close-modal' onclick='closeModal("modalVWAP")'>&times;</span>
+            </div>
+            <div class='modal-body'>
+                <h3>What is VWAP?</h3>
+                <p>The <span class='key-term'>Volume Weighted Average Price</span> is a trading benchmark that represents the average price a security has traded at throughout the day, based on both volume AND price. It's the "fair value" price where most institutional trading occurred.</p>
+                
+                <h3>Mathematical Calculation</h3>
+                <div class='formula-box'>
+                    <strong>Formula:</strong><br>
+                    VWAP = Σ(Typical Price × Volume) / Σ(Volume)<br><br>
+                    
+                    Where:<br>
+                    Typical Price = (High + Low + Close) / 3<br><br>
+                    
+                    <strong>Step-by-Step Calculation:</strong><br><br>
+                    
+                    For each period (e.g., 1-minute bar):<br>
+                    1. Calculate Typical Price = (H + L + C) / 3<br>
+                    2. Calculate TP × Volume<br>
+                    3. Keep running total of (TP × Volume)<br>
+                    4. Keep running total of Volume<br>
+                    5. VWAP = Cumulative (TP × Volume) / Cumulative Volume<br><br>
+                    
+                    <strong>Example (first 3 minutes of trading):</strong><br>
+                    Min 1: TP = $100, Vol = 1000 → TP×Vol = $100,000<br>
+                    Min 2: TP = $101, Vol = 1500 → TP×Vol = $151,500<br>
+                    Min 3: TP = $99, Vol = 2000 → TP×Vol = $198,000<br><br>
+                    
+                    Cumulative TP×Vol = $449,500<br>
+                    Cumulative Volume = 4,500<br>
+                    VWAP = $449,500 / 4,500 = $99.89
+                </div>
+                
+                <h3>How to Interpret</h3>
+                <ul>
+                    <li><strong>Price above VWAP:</strong> BULLISH - buyers in control, institutional support</li>
+                    <li><strong>Price below VWAP:</strong> BEARISH - sellers in control, institutional resistance</li>
+                    <li><strong>Price at VWAP:</strong> FAIR VALUE - equilibrium, maximum liquidity point</li>
+                    <li><strong>Price touching VWAP:</strong> Support in uptrends, resistance in downtrends</li>
+                    <li><strong>VWAP slope up:</strong> Bullish accumulation</li>
+                    <li><strong>VWAP slope down:</strong> Bearish distribution</li>
+                </ul>
+                
+                <h3>VWAP Standard Deviation Bands</h3>
+                <div class='formula-box'>
+                    <strong>Standard Deviation (σ) of VWAP:</strong><br>
+                    σ = √[Σ(Volume × (Price - VWAP)²) / Σ(Volume)]<br><br>
+                    
+                    <strong>Bands:</strong><br>
+                    Upper Band 1 = VWAP + 1σ<br>
+                    Upper Band 2 = VWAP + 2σ<br>
+                    Upper Band 3 = VWAP + 3σ<br><br>
+                    
+                    Lower Band 1 = VWAP - 1σ<br>
+                    Lower Band 2 = VWAP - 2σ<br>
+                    Lower Band 3 = VWAP - 3σ<br><br>
+                    
+                    <strong>Interpretation:</strong><br>
+                    - Price at ±1σ: Normal range (68% of price action)<br>
+                    - Price at ±2σ: Overbought/Oversold (95% of price action)<br>
+                    - Price at ±3σ: EXTREME - mean reversion likely (99.7%)
+                </div>
+                
+                <h3>Why Institutions Use VWAP</h3>
+                <ul>
+                    <li><strong>Benchmark:</strong> Institutional traders must beat VWAP to show good execution</li>
+                    <li><strong>Large Orders:</strong> Algo trading spreads orders to achieve VWAP price</li>
+                    <li><strong>Performance:</strong> Buying below VWAP = good fill, above = poor fill</li>
+                    <li><strong>Transparency:</strong> Shows if you're overpaying or getting a deal</li>
+                </ul>
+                
+                <h3>Trading Strategies</h3>
+                
+                <h4>Strategy 1: VWAP Fade (Mean Reversion)</h4>
+                <ul>
+                    <li>When price reaches +2σ band → SHORT (overbought)</li>
+                    <li>When price reaches -2σ band → LONG (oversold)</li>
+                    <li>Target: Return to VWAP</li>
+                    <li>Stop: Beyond +3σ or -3σ</li>
+                    <li>Best in ranging markets</li>
+                </ul>
+                
+                <h4>Strategy 2: VWAP Breakout (Trend Following)</h4>
+                <ul>
+                    <li>Wait for price to consolidate near VWAP</li>
+                    <li>If price breaks ABOVE VWAP with volume → LONG</li>
+                    <li>VWAP becomes support</li>
+                    <li>Target: +1σ, then +2σ</li>
+                    <li>Stop: Back below VWAP</li>
+                </ul>
+                
+                <h4>Strategy 3: VWAP Pullback (Best Setup)</h4>
+                <ul>
+                    <li>Uptrend: Price above VWAP, pulls back to VWAP, bounces → BUY</li>
+                    <li>Downtrend: Price below VWAP, rallies to VWAP, rejects → SELL</li>
+                    <li>VWAP acts as dynamic support/resistance</li>
+                    <li>High probability when combined with 15-min/1-hour trend</li>
+                </ul>
+                
+                <h4>Strategy 4: Opening Range + VWAP</h4>
+                <ul>
+                    <li>First 30 minutes: If price opens ABOVE VWAP → bullish bias</li>
+                    <li>Look for long entries when price dips to VWAP</li>
+                    <li>Reverse for opens below VWAP (bearish bias)</li>
+                </ul>
+                
+                <h3>VWAP vs Moving Averages</h3>
+                <ul>
+                    <li><strong>Moving Average:</strong> Based on TIME (equally weights each period)</li>
+                    <li><strong>VWAP:</strong> Based on VOLUME (weights periods with high volume more heavily)</li>
+                    <li><strong>Reset:</strong> VWAP resets daily (starts fresh each day at market open)</li>
+                    <li><strong>Intraday Use:</strong> VWAP is for DAY TRADING, MA is for swing trading</li>
+                </ul>
+                
+                <h3>Best Timeframes & Markets</h3>
+                <ul>
+                    <li><strong>Timeframe:</strong> Works on ALL intraday charts (1-min, 5-min, 15-min)</li>
+                    <li><strong>Best for:</strong> Stocks, futures, forex with HIGH VOLUME</li>
+                    <li><strong>Avoid:</strong> Low-volume stocks, after-hours trading, illiquid markets</li>
+                    <li><strong>Reset Period:</strong> Daily VWAP is standard (resets at market open)</li>
+                </ul>
+                
+                <div class='tip-box'>
+                    💡 <strong>Pro Tip:</strong> VWAP is the KING of intraday trading indicators. Institutions move billions using VWAP algos, creating self-fulfilling support/resistance. Watch the first touch of VWAP after a strong move - it often bounces. If VWAP is sloping up all day, stay LONG. Volume Profile's POC + VWAP confluence = strongest intraday level.
+                </div>
+                
+                <div class='warning-box'>
+                    ⚠ <strong>Warning:</strong> VWAP is ONLY for intraday trading - it resets every day. Don't use VWAP for swing trading or position trading (use moving averages instead). On low-volume days or during lunch hours (11:30am-1:30pm EST), VWAP becomes less reliable. Always check if volume is significant.
+                </div>
+            </div>
+        </div>
+    </div>
 
     <!-- ============================================
          📜 SCRIPTS FINAUX
