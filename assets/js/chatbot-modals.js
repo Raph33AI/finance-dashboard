@@ -1,6 +1,10 @@
 /* ============================================
    CHATBOT MODALS - SHARE & SETTINGS
-   Version 1.0 - Premium Modals System
+   Version 2.0 - ULTRA ADVANCED EDITION
+   ✅ PDF Export (jsPDF)
+   ✅ Screenshot (html2canvas)
+   ✅ Advanced sharing options
+   ✅ Settings without particles/animations toggles
    ============================================ */
 
 class ChatbotModals {
@@ -10,11 +14,11 @@ class ChatbotModals {
     }
 
     init() {
-        console.log('🎭 Initializing Chatbot Modals...');
+        console.log('🎭 Initializing Advanced Chatbot Modals...');
         this.createModalsHTML();
         this.attachEventListeners();
         this.loadSettings();
-        console.log('✅ Modals initialized successfully!');
+        console.log('✅ Advanced Modals initialized successfully!');
     }
 
     /**
@@ -25,7 +29,7 @@ class ChatbotModals {
         modalsContainer.id = 'chatbot-modals-container';
         modalsContainer.innerHTML = `
             <!-- ========================================
-                 SHARE MODAL
+                 SHARE MODAL - ADVANCED VERSION
                  ======================================== -->
             <div class="chatbot-modal" id="share-modal">
                 <div class="modal-overlay"></div>
@@ -102,17 +106,38 @@ class ChatbotModals {
                             </div>
                         </div>
                         
+                        <!-- Screenshot Options -->
+                        <div class="screenshot-options" id="screenshot-options" style="display: none;">
+                            <h3 class="export-format-title">Screenshot Options</h3>
+                            <div class="export-format-buttons">
+                                <button class="export-format-btn" id="screenshot-full">
+                                    <i class="fas fa-expand"></i>
+                                    <span>Full Conversation</span>
+                                </button>
+                                <button class="export-format-btn" id="screenshot-visible">
+                                    <i class="fas fa-desktop"></i>
+                                    <span>Visible Area</span>
+                                </button>
+                            </div>
+                        </div>
+                        
                         <!-- Success Message -->
                         <div class="share-success-message" id="share-success-message" style="display: none;">
                             <i class="fas fa-check-circle"></i>
                             <span>Link copied to clipboard!</span>
+                        </div>
+                        
+                        <!-- Loading Indicator -->
+                        <div class="export-loading" id="export-loading" style="display: none;">
+                            <div class="loading-spinner"></div>
+                            <span>Generating export...</span>
                         </div>
                     </div>
                 </div>
             </div>
 
             <!-- ========================================
-                 SETTINGS MODAL
+                 SETTINGS MODAL - WITHOUT PARTICLES/ANIMATIONS
                  ======================================== -->
             <div class="chatbot-modal" id="settings-modal">
                 <div class="modal-overlay"></div>
@@ -200,6 +225,17 @@ class ChatbotModals {
                                         <option value="large">Large</option>
                                     </select>
                                 </div>
+                                
+                                <div class="setting-item">
+                                    <div class="setting-info">
+                                        <div class="setting-label">Enter key behavior</div>
+                                        <div class="setting-desc">Choose what happens when you press Enter</div>
+                                    </div>
+                                    <select class="setting-select" id="enter-behavior-select">
+                                        <option value="send" selected>Send message</option>
+                                        <option value="newline">New line (Ctrl+Enter to send)</option>
+                                    </select>
+                                </div>
                             </div>
                             
                             <!-- Appearance Tab -->
@@ -229,33 +265,22 @@ class ChatbotModals {
                                 
                                 <div class="setting-item">
                                     <div class="setting-info">
-                                        <div class="setting-label">Particle effects</div>
-                                        <div class="setting-desc">Enable animated background particles</div>
-                                    </div>
-                                    <label class="setting-toggle">
-                                        <input type="checkbox" id="particles-toggle" checked>
-                                        <span class="toggle-slider"></span>
-                                    </label>
-                                </div>
-                                
-                                <div class="setting-item">
-                                    <div class="setting-info">
-                                        <div class="setting-label">Animations</div>
-                                        <div class="setting-desc">Enable smooth transitions and effects</div>
-                                    </div>
-                                    <label class="setting-toggle">
-                                        <input type="checkbox" id="animations-toggle" checked>
-                                        <span class="toggle-slider"></span>
-                                    </label>
-                                </div>
-                                
-                                <div class="setting-item">
-                                    <div class="setting-info">
                                         <div class="setting-label">Compact mode</div>
                                         <div class="setting-desc">Reduce spacing for more content</div>
                                     </div>
                                     <label class="setting-toggle">
                                         <input type="checkbox" id="compact-mode-toggle">
+                                        <span class="toggle-slider"></span>
+                                    </label>
+                                </div>
+                                
+                                <div class="setting-item">
+                                    <div class="setting-info">
+                                        <div class="setting-label">Show avatars</div>
+                                        <div class="setting-desc">Display profile pictures in messages</div>
+                                    </div>
+                                    <label class="setting-toggle">
+                                        <input type="checkbox" id="show-avatars-toggle" checked>
                                         <span class="toggle-slider"></span>
                                     </label>
                                 </div>
@@ -392,15 +417,21 @@ class ChatbotModals {
         document.getElementById('share-link-btn')?.addEventListener('click', () => this.shareViaLink());
         document.getElementById('share-email-btn')?.addEventListener('click', () => this.shareViaEmail());
         document.getElementById('share-export-btn')?.addEventListener('click', () => this.showExportOptions());
-        document.getElementById('share-screenshot-btn')?.addEventListener('click', () => this.takeScreenshot());
+        document.getElementById('share-screenshot-btn')?.addEventListener('click', () => this.showScreenshotOptions());
         
         // Export formats
         document.querySelectorAll('.export-format-btn').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 const format = e.currentTarget.dataset.format;
-                this.exportConversation(format);
+                if (format) {
+                    this.exportConversation(format);
+                }
             });
         });
+        
+        // Screenshot options
+        document.getElementById('screenshot-full')?.addEventListener('click', () => this.takeScreenshot('full'));
+        document.getElementById('screenshot-visible')?.addEventListener('click', () => this.takeScreenshot('visible'));
         
         // Settings tabs
         document.querySelectorAll('.settings-tab').forEach(tab => {
@@ -439,9 +470,11 @@ class ChatbotModals {
             modal.classList.remove('active');
             document.body.style.overflow = '';
             
-            // Reset export selector
+            // Reset selectors
             const exportSelector = document.getElementById('export-format-selector');
+            const screenshotOptions = document.getElementById('screenshot-options');
             if (exportSelector) exportSelector.style.display = 'none';
+            if (screenshotOptions) screenshotOptions.style.display = 'none';
             
             console.log(`📕 Modal closed: ${modalId}`);
         }
@@ -488,6 +521,10 @@ class ChatbotModals {
      */
     showExportOptions() {
         const exportSelector = document.getElementById('export-format-selector');
+        const screenshotOptions = document.getElementById('screenshot-options');
+        
+        if (screenshotOptions) screenshotOptions.style.display = 'none';
+        
         if (exportSelector) {
             exportSelector.style.display = 'block';
             exportSelector.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
@@ -495,36 +532,121 @@ class ChatbotModals {
     }
 
     /**
+     * Afficher les options de screenshot
+     */
+    showScreenshotOptions() {
+        const exportSelector = document.getElementById('export-format-selector');
+        const screenshotOptions = document.getElementById('screenshot-options');
+        
+        if (exportSelector) exportSelector.style.display = 'none';
+        
+        if (screenshotOptions) {
+            screenshotOptions.style.display = 'block';
+            screenshotOptions.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+    }
+
+    /**
      * Exporter la conversation
      */
-    exportConversation(format) {
+    async exportConversation(format) {
         console.log(`📥 Exporting conversation as ${format.toUpperCase()}...`);
+        
+        this.showLoading(true);
         
         const messages = this.getConversationMessages();
         const timestamp = new Date().toISOString().slice(0, 10);
         const filename = `alphy-ai-conversation-${timestamp}`;
         
-        switch (format) {
-            case 'txt':
-                this.downloadTextFile(messages, filename);
-                break;
-            case 'json':
-                this.downloadJSONFile(messages, filename);
-                break;
-            case 'pdf':
-                this.showSuccessMessage('PDF export coming soon!');
-                break;
+        try {
+            switch (format) {
+                case 'txt':
+                    await this.downloadTextFile(messages, filename);
+                    break;
+                case 'json':
+                    await this.downloadJSONFile(messages, filename);
+                    break;
+                case 'pdf':
+                    await this.downloadPDFFile(messages, filename);
+                    break;
+            }
+            
+            this.showSuccessMessage(`${format.toUpperCase()} exported successfully!`);
+            setTimeout(() => this.closeModal('share-modal'), 1500);
+        } catch (error) {
+            console.error('❌ Export error:', error);
+            this.showSuccessMessage('Export failed. Please try again.', true);
+        } finally {
+            this.showLoading(false);
         }
-        
-        this.closeModal('share-modal');
     }
 
     /**
      * Prendre une capture d'écran
      */
-    takeScreenshot() {
-        this.showSuccessMessage('Screenshot feature coming soon!');
-        console.log('📸 Taking screenshot...');
+    async takeScreenshot(mode = 'full') {
+        console.log(`📸 Taking ${mode} screenshot...`);
+        
+        this.showLoading(true);
+        
+        try {
+            if (typeof html2canvas === 'undefined') {
+                throw new Error('html2canvas library not loaded');
+            }
+            
+            const container = document.getElementById('chatbot-messages-content');
+            
+            if (!container) {
+                throw new Error('Messages container not found');
+            }
+            
+            // Temporarily hide scrollbar
+            const originalOverflow = container.style.overflow;
+            container.style.overflow = 'visible';
+            
+            // Options for html2canvas
+            const options = {
+                backgroundColor: '#ffffff',
+                scale: 2,
+                logging: false,
+                useCORS: true,
+                allowTaint: true
+            };
+            
+            if (mode === 'visible') {
+                options.height = window.innerHeight;
+                options.windowHeight = window.innerHeight;
+            }
+            
+            const canvas = await html2canvas(container, options);
+            
+            // Restore scrollbar
+            container.style.overflow = originalOverflow;
+            
+            // Download image
+            const timestamp = new Date().toISOString().slice(0, 10);
+            const filename = `alphy-ai-screenshot-${timestamp}.png`;
+            
+            canvas.toBlob((blob) => {
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = filename;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+                
+                this.showSuccessMessage('Screenshot saved successfully!');
+                setTimeout(() => this.closeModal('share-modal'), 1500);
+            });
+            
+        } catch (error) {
+            console.error('❌ Screenshot error:', error);
+            this.showSuccessMessage('Screenshot failed. Please try again.', true);
+        } finally {
+            this.showLoading(false);
+        }
     }
 
     /**
@@ -541,7 +663,7 @@ class ChatbotModals {
             
             messages.push({
                 role: isUser ? 'user' : 'assistant',
-                content: text,
+                content: text.trim(),
                 timestamp: time
             });
         });
@@ -552,14 +674,23 @@ class ChatbotModals {
     /**
      * Télécharger en TXT
      */
-    downloadTextFile(messages, filename) {
-        let content = `Alphy AI Conversation\n${'='.repeat(50)}\n\n`;
+    async downloadTextFile(messages, filename) {
+        let content = `ALPHY AI - FINANCIAL ASSISTANT CONVERSATION\n`;
+        content += `${'='.repeat(60)}\n`;
+        content += `Export Date: ${new Date().toLocaleString()}\n`;
+        content += `Total Messages: ${messages.length}\n`;
+        content += `${'='.repeat(60)}\n\n`;
         
-        messages.forEach(msg => {
-            content += `${msg.role.toUpperCase()}: ${msg.content}\n`;
+        messages.forEach((msg, index) => {
+            content += `[${index + 1}] ${msg.role.toUpperCase()}\n`;
+            content += `${'-'.repeat(60)}\n`;
+            content += `${msg.content}\n`;
             if (msg.timestamp) content += `Time: ${msg.timestamp}\n`;
-            content += '\n';
+            content += `\n`;
         });
+        
+        content += `\n${'='.repeat(60)}\n`;
+        content += `Generated by AlphaVault AI - https://alphavault-ai.com\n`;
         
         this.downloadFile(content, `${filename}.txt`, 'text/plain');
     }
@@ -567,15 +698,133 @@ class ChatbotModals {
     /**
      * Télécharger en JSON
      */
-    downloadJSONFile(messages, filename) {
+    async downloadJSONFile(messages, filename) {
         const data = {
-            platform: 'Alphy AI',
+            platform: 'Alphy AI - Financial Assistant',
+            version: '2.0',
             exportDate: new Date().toISOString(),
-            messages: messages
+            totalMessages: messages.length,
+            messages: messages,
+            metadata: {
+                url: window.location.href,
+                userAgent: navigator.userAgent
+            }
         };
         
         const content = JSON.stringify(data, null, 2);
         this.downloadFile(content, `${filename}.json`, 'application/json');
+    }
+
+    /**
+     * ✅ NOUVEAU : Télécharger en PDF (avec jsPDF)
+     */
+    async downloadPDFFile(messages, filename) {
+        if (typeof window.jspdf === 'undefined') {
+            throw new Error('jsPDF library not loaded');
+        }
+        
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
+        
+        // Configuration
+        const pageWidth = doc.internal.pageSize.getWidth();
+        const pageHeight = doc.internal.pageSize.getHeight();
+        const margin = 20;
+        const maxWidth = pageWidth - 2 * margin;
+        let yPosition = margin;
+        
+        // Header
+        doc.setFontSize(20);
+        doc.setFont('helvetica', 'bold');
+        doc.text('Alphy AI Conversation', margin, yPosition);
+        
+        yPosition += 10;
+        doc.setFontSize(10);
+        doc.setFont('helvetica', 'normal');
+        doc.setTextColor(100, 100, 100);
+        doc.text(`Export Date: ${new Date().toLocaleString()}`, margin, yPosition);
+        
+        yPosition += 5;
+        doc.text(`Total Messages: ${messages.length}`, margin, yPosition);
+        
+        yPosition += 10;
+        doc.setDrawColor(102, 126, 234);
+        doc.setLineWidth(0.5);
+        doc.line(margin, yPosition, pageWidth - margin, yPosition);
+        
+        yPosition += 10;
+        
+        // Messages
+        messages.forEach((msg, index) => {
+            // Check if we need a new page
+            if (yPosition > pageHeight - 40) {
+                doc.addPage();
+                yPosition = margin;
+            }
+            
+            // Role header
+            doc.setFontSize(12);
+            doc.setFont('helvetica', 'bold');
+            
+            if (msg.role === 'user') {
+                doc.setTextColor(59, 130, 246);
+                doc.text(`👤 USER`, margin, yPosition);
+            } else {
+                doc.setTextColor(102, 126, 234);
+                doc.text(`🤖 ASSISTANT`, margin, yPosition);
+            }
+            
+            yPosition += 7;
+            
+            // Message content
+            doc.setFontSize(10);
+            doc.setFont('helvetica', 'normal');
+            doc.setTextColor(0, 0, 0);
+            
+            const lines = doc.splitTextToSize(msg.content, maxWidth);
+            lines.forEach(line => {
+                if (yPosition > pageHeight - 20) {
+                    doc.addPage();
+                    yPosition = margin;
+                }
+                doc.text(line, margin, yPosition);
+                yPosition += 5;
+            });
+            
+            // Timestamp
+            if (msg.timestamp) {
+                doc.setFontSize(8);
+                doc.setTextColor(150, 150, 150);
+                doc.text(`Time: ${msg.timestamp}`, margin, yPosition);
+                yPosition += 5;
+            }
+            
+            yPosition += 5;
+            
+            // Separator line
+            doc.setDrawColor(220, 220, 220);
+            doc.setLineWidth(0.2);
+            doc.line(margin, yPosition, pageWidth - margin, yPosition);
+            
+            yPosition += 7;
+        });
+        
+        // Footer on last page
+        const totalPages = doc.internal.getNumberOfPages();
+        for (let i = 1; i <= totalPages; i++) {
+            doc.setPage(i);
+            doc.setFontSize(8);
+            doc.setTextColor(150, 150, 150);
+            doc.text(
+                `Page ${i} of ${totalPages} | Generated by AlphaVault AI`,
+                pageWidth / 2,
+                pageHeight - 10,
+                { align: 'center' }
+            );
+        }
+        
+        // Save PDF
+        doc.save(`${filename}.pdf`);
     }
 
     /**
@@ -591,8 +840,6 @@ class ChatbotModals {
         a.click();
         document.body.removeChild(a);
         URL.revokeObjectURL(url);
-        
-        this.showSuccessMessage(`Downloaded: ${filename}`);
     }
 
     /**
@@ -603,14 +850,34 @@ class ChatbotModals {
     }
 
     /**
+     * Afficher/masquer le loading
+     */
+    showLoading(show) {
+        const loading = document.getElementById('export-loading');
+        if (loading) {
+            loading.style.display = show ? 'flex' : 'none';
+        }
+    }
+
+    /**
      * Afficher un message de succès
      */
     showSuccessMessage(message, isError = false) {
         const successMsg = document.getElementById('share-success-message');
         if (successMsg) {
-            successMsg.textContent = message;
+            const icon = successMsg.querySelector('i');
+            const text = successMsg.querySelector('span');
+            
+            if (icon) {
+                icon.className = isError ? 'fas fa-exclamation-circle' : 'fas fa-check-circle';
+            }
+            if (text) {
+                text.textContent = message;
+            }
+            
             successMsg.style.display = 'flex';
             successMsg.style.background = isError ? 'rgba(239, 68, 68, 0.1)' : 'rgba(16, 185, 129, 0.1)';
+            successMsg.style.borderColor = isError ? 'rgba(239, 68, 68, 0.3)' : 'rgba(16, 185, 129, 0.3)';
             successMsg.style.color = isError ? '#dc2626' : '#059669';
             
             setTimeout(() => {
@@ -666,9 +933,9 @@ class ChatbotModals {
             autoSave: document.getElementById('auto-save-toggle')?.checked,
             timestamps: document.getElementById('timestamps-toggle')?.checked,
             fontSize: document.getElementById('font-size-select')?.value,
-            particles: document.getElementById('particles-toggle')?.checked,
-            animations: document.getElementById('animations-toggle')?.checked,
+            enterBehavior: document.getElementById('enter-behavior-select')?.value,
             compactMode: document.getElementById('compact-mode-toggle')?.checked,
+            showAvatars: document.getElementById('show-avatars-toggle')?.checked,
             desktopNotifications: document.getElementById('desktop-notifications-toggle')?.checked,
             soundAlerts: document.getElementById('sound-alerts-toggle')?.checked,
             emailDigest: document.getElementById('email-digest-toggle')?.checked,
@@ -678,7 +945,10 @@ class ChatbotModals {
         
         localStorage.setItem('alphyAISettings', JSON.stringify(settings));
         this.showSuccessMessage('Settings saved successfully!');
-        this.closeModal('settings-modal');
+        
+        setTimeout(() => {
+            this.closeModal('settings-modal');
+        }, 1000);
         
         console.log('💾 Settings saved:', settings);
     }
@@ -696,13 +966,13 @@ class ChatbotModals {
             // Apply settings
             if (settings.language) document.getElementById('language-select').value = settings.language;
             if (settings.fontSize) document.getElementById('font-size-select').value = settings.fontSize;
+            if (settings.enterBehavior) document.getElementById('enter-behavior-select').value = settings.enterBehavior;
             
             // Toggles
             document.getElementById('auto-save-toggle').checked = settings.autoSave ?? true;
             document.getElementById('timestamps-toggle').checked = settings.timestamps ?? true;
-            document.getElementById('particles-toggle').checked = settings.particles ?? true;
-            document.getElementById('animations-toggle').checked = settings.animations ?? true;
             document.getElementById('compact-mode-toggle').checked = settings.compactMode ?? false;
+            document.getElementById('show-avatars-toggle').checked = settings.showAvatars ?? true;
             document.getElementById('desktop-notifications-toggle').checked = settings.desktopNotifications ?? false;
             document.getElementById('sound-alerts-toggle').checked = settings.soundAlerts ?? true;
             document.getElementById('email-digest-toggle').checked = settings.emailDigest ?? false;
@@ -721,7 +991,10 @@ class ChatbotModals {
     resetSettings() {
         if (confirm('Are you sure you want to reset all settings to defaults?')) {
             localStorage.removeItem('alphyAISettings');
-            location.reload();
+            this.showSuccessMessage('Settings reset successfully!');
+            setTimeout(() => {
+                location.reload();
+            }, 1000);
             console.log('🔄 Settings reset to defaults');
         }
     }
@@ -733,7 +1006,10 @@ class ChatbotModals {
         if (confirm('⚠ This will delete ALL your conversations and settings. This action cannot be undone. Are you sure?')) {
             localStorage.clear();
             sessionStorage.clear();
-            location.reload();
+            this.showSuccessMessage('All data cleared!');
+            setTimeout(() => {
+                location.reload();
+            }, 1500);
             console.log('🗑 All data cleared');
         }
     }
