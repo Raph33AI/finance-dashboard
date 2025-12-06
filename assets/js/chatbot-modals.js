@@ -677,7 +677,7 @@ class ChatbotModals {
     }
 
     /**
-     * ✅ DOWNLOAD PDF WITH CHARTS (CORRIGÉ POUR PLUSIEURS GRAPHIQUES)
+     * ✅ DOWNLOAD PDF WITH ULTRA-PROFESSIONAL TEXT FORMATTING
      */
     async downloadPDFFile(messages, filename) {
         if (typeof window.jspdf === 'undefined') {
@@ -761,38 +761,102 @@ class ChatbotModals {
                 doc.text(`🤖 ASSISTANT`, margin + 12, yPos);
             }
             
-            yPos += headerHeight;
+            yPos += headerHeight + 5;
             
-            // Message content
-            doc.setFontSize(10);
-            doc.setFont('helvetica', 'normal');
-            doc.setTextColor(30, 30, 30);
-            
+            // ==================== MESSAGE CONTENT (FORMATÉ PROFESSIONNELLEMENT) ====================
             const contentMargin = margin + 15;
             const contentWidth = maxWidth - 30;
             
-            const paragraphs = msg.content.split('\n').filter(p => p.trim());
+            // ✅ DÉTECTION ET FORMATAGE DES SECTIONS
+            const content = msg.content;
             
-            for (let pIndex = 0; pIndex < paragraphs.length; pIndex++) {
-                checkNewPage(40);
-                
-                const paragraph = paragraphs[pIndex].trim();
-                const lines = doc.splitTextToSize(paragraph, contentWidth);
-                
-                for (const line of lines) {
-                    if (checkNewPage(15)) {}
-                    doc.text(line, contentMargin, yPos);
-                    yPos += 15;
-                }
-                
-                if (pIndex < paragraphs.length - 1) {
-                    yPos += 8;
-                }
+            // Regex pour détecter les titres de section (texte se terminant par ":")
+            const sectionRegex = /^(.+?):(.*?)(?=\n[A-Z][^:]+:|$)/gs;
+            const sections = [];
+            
+            let match;
+            let lastIndex = 0;
+            
+            while ((match = sectionRegex.exec(content)) !== null) {
+                sections.push({
+                    title: match[1].trim(),
+                    content: match[2].trim()
+                });
+                lastIndex = match.index + match[0].length;
             }
             
-            yPos += 15;
+            // Si aucune section détectée, traiter comme texte brut
+            if (sections.length === 0) {
+                sections.push({
+                    title: null,
+                    content: content
+                });
+            }
             
-            // ==================== CHART IMAGES (PLUSIEURS POSSIBLES) ====================
+            // ✅ RENDU DES SECTIONS
+            for (let sIndex = 0; sIndex < sections.length; sIndex++) {
+                const section = sections[sIndex];
+                
+                checkNewPage(50);
+                
+                // TITRE DE SECTION (si présent)
+                if (section.title) {
+                    doc.setFontSize(12);
+                    doc.setFont('helvetica', 'bold');
+                    doc.setTextColor(102, 126, 234);
+                    
+                    const titleLines = doc.splitTextToSize(section.title + ':', contentWidth);
+                    
+                    for (const line of titleLines) {
+                        if (checkNewPage(18)) {}
+                        doc.text(line, contentMargin, yPos);
+                        yPos += 18;
+                    }
+                    
+                    yPos += 5; // Espace après le titre
+                }
+                
+                // CONTENU DE LA SECTION
+                doc.setFontSize(10);
+                doc.setFont('helvetica', 'normal');
+                doc.setTextColor(30, 30, 30);
+                
+                // Séparer en phrases (pour meilleure lisibilité)
+                const sentences = section.content.split(/(?<=[.!?])\s+/).filter(s => s.trim());
+                
+                let currentParagraph = '';
+                
+                for (let sentIndex = 0; sentIndex < sentences.length; sentIndex++) {
+                    const sentence = sentences[sentIndex].trim();
+                    
+                    // Construire un paragraphe de 2-3 phrases max
+                    currentParagraph += sentence + ' ';
+                    
+                    // Créer un nouveau paragraphe tous les 2-3 phrases OU si c'est la dernière phrase
+                    const shouldBreak = (sentIndex + 1) % 3 === 0 || sentIndex === sentences.length - 1;
+                    
+                    if (shouldBreak && currentParagraph.trim()) {
+                        checkNewPage(40);
+                        
+                        const lines = doc.splitTextToSize(currentParagraph.trim(), contentWidth);
+                        
+                        for (const line of lines) {
+                            if (checkNewPage(14)) {}
+                            doc.text(line, contentMargin, yPos);
+                            yPos += 14;
+                        }
+                        
+                        yPos += 8; // Espace entre paragraphes
+                        currentParagraph = '';
+                    }
+                }
+                
+                yPos += 10; // Espace après la section
+            }
+            
+            yPos += 5;
+            
+            // ==================== CHART IMAGES ====================
             if (msg.chartImages && msg.chartImages.length > 0) {
                 console.log(`📊 Adding ${msg.chartImages.length} charts for message ${i + 1}`);
                 
@@ -820,7 +884,7 @@ class ChatbotModals {
                             'FAST'
                         );
                         
-                        yPos += imgHeight + 20;
+                        yPos += imgHeight + 25;
                         
                         console.log(`✅ Chart ${chartIndex + 1}/${msg.chartImages.length} added to PDF`);
                     } catch (error) {
@@ -838,7 +902,7 @@ class ChatbotModals {
                 yPos += 15;
             }
             
-            yPos += 10;
+            yPos += 15;
             
             // Separator
             if (i < messages.length - 1) {
@@ -869,7 +933,7 @@ class ChatbotModals {
         }
         
         doc.save(`${filename}.pdf`);
-        console.log('✅ PDF with charts generated successfully!');
+        console.log('✅ PDF with professional formatting generated successfully!');
     }
 
     /**
