@@ -2994,14 +2994,14 @@
 // console.log('✅ Market Data script loaded - OPTIMIZED with Rate Limiting & Cache - COMPLETE VERSION');
 
 /* ==============================================
-   MARKET-DATA.JS v6.0 - OPTIMIZED FOR HYBRID API
+   MARKET-DATA.JS v7.0 - QUOTES ONLY (FINNHUB)
+   NO HISTORICAL DATA - REAL-TIME QUOTES ONLY
    Compatible avec api-client.js v5.0
-   Rate Limiting + Smart Caching + Progressive Loading
    ============================================== */
 
-// ========== RATE LIMITER (CONSERVÉ) ==========
+// ========== RATE LIMITER ==========
 class RateLimiter {
-    constructor(maxRequests = 8, windowMs = 60000) {
+    constructor(maxRequests = 50, windowMs = 60000) {
         this.maxRequests = maxRequests;
         this.windowMs = windowMs;
         this.queue = [];
@@ -3086,7 +3086,7 @@ class RateLimiter {
     }
 }
 
-// ========== CACHE OPTIMISÉ (CONSERVÉ) ==========
+// ========== CACHE OPTIMISÉ ==========
 class OptimizedCache {
     constructor() {
         this.prefix = 'md_cache_';
@@ -3161,10 +3161,8 @@ const MarketData = {
     
     // Current State
     currentSymbol: '',
-    currentPeriod: '1M',
-    stockData: null,
+    currentQuote: null,
     profileData: null,
-    statisticsData: null,
     logoUrl: '',
     
     // Search functionality
@@ -3178,22 +3176,7 @@ const MarketData = {
     notificationPermission: false,
     lastWatchlistRefresh: 0,
     
-    // Comparison
-    comparisonSymbols: [],
-    comparisonData: {},
-    comparisonColors: ['#1e5eeb', '#10b981', '#f59e0b', '#8b5cf6', '#ef4444'],
-    
-    // Charts instances
-    charts: {
-        price: null,
-        rsi: null,
-        macd: null,
-        comparison: null,
-        sector: null,
-        heatmap: null
-    },
-    
-    // ========== DONNÉES MARKET (OPTIMISÉES) ==========
+    // Market Data
     allStocks: [],
     filteredStocks: [],
     currentPage: 1,
@@ -3201,9 +3184,9 @@ const MarketData = {
     sortColumn: 'symbol',
     sortDirection: 'asc',
     loadedStocksCount: 0,
-    totalStocksToLoad: 30, // ✅ Charger seulement 30 stocks au démarrage au lieu de 100
+    totalStocksToLoad: 30,
     
-    // ✅ INDICES MAJEURS CORRIGÉS (ETFs au lieu de symboles Yahoo)
+    // ✅ INDICES MAJEURS (ETFs)
     majorIndices: [
         { symbol: 'SPY', name: 'S&P 500 ETF', icon: 'chart-line', htmlId: 'sp500' },
         { symbol: 'QQQ', name: 'NASDAQ ETF', icon: 'microchip', htmlId: 'nasdaq' },
@@ -3211,14 +3194,14 @@ const MarketData = {
         { symbol: 'VIXY', name: 'VIX ETF', icon: 'bolt', htmlId: 'vix' }
     ],
     
-    // ✅ STOCKS PAR DÉFAUT (RÉDUIT À 30 POUR DÉMARRAGE RAPIDE)
+    // ✅ STOCKS PAR DÉFAUT (30 stocks)
     defaultStocks: [
         'AAPL', 'MSFT', 'GOOGL', 'AMZN', 'NVDA', 'TSLA', 'META', 'BRK.B', 'V', 'JNJ',
         'WMT', 'JPM', 'MA', 'PG', 'UNH', 'DIS', 'HD', 'BAC', 'XOM', 'ADBE',
         'CSCO', 'PFE', 'VZ', 'KO', 'CRM', 'NFLX', 'INTC', 'PEP', 'TMO', 'ABT'
     ],
     
-    // ✅ STOCKS ADDITIONNELS (CHARGÉS PROGRESSIVEMENT)
+    // ✅ STOCKS ADDITIONNELS
     additionalStocks: [
         'COST', 'AVGO', 'ACN', 'CMCSA', 'NKE', 'MRK', 'DHR', 'TXN', 'LIN', 'NEE',
         'AMD', 'ORCL', 'CVX', 'PM', 'MDT', 'UNP', 'RTX', 'HON', 'QCOM', 'UPS',
@@ -3243,7 +3226,7 @@ const MarketData = {
     
     async init() {
         try {
-            console.log('🚀 Initializing Market Data v6.0 - Hybrid API Optimized...');
+            console.log('🚀 Initializing Market Data v7.0 - Quotes Only (Finnhub)...');
             
             this.rateLimiter = new RateLimiter(8, 60000);
             this.optimizedCache = new OptimizedCache();
@@ -3268,12 +3251,15 @@ const MarketData = {
             this.setupTableListeners();
             this.startCacheMonitoring();
             
-            await this.loadCurrentPortfolio();
+            // ✅ NE PAS charger la watchlist automatiquement
+            // await this.loadCurrentPortfolio();
+            this.loadWatchlistFromStorage();
+            this.loadAlertsFromStorage();
             
             this.requestNotificationPermission();
             this.startWatchlistAutoRefresh();
             
-            // ========== CHARGEMENT INITIAL OPTIMISÉ ==========
+            // ========== CHARGEMENT INITIAL ==========
             console.log('🌍 Step 1: Loading Market Overview (ETFs)...');
             await this.refreshMarketOverview();
             
@@ -3290,14 +3276,6 @@ const MarketData = {
             await this.loadHeatMap();
             
             console.log('✅ All market data sections initialized');
-            
-            // Auto-load default symbol
-            setTimeout(() => {
-                console.log('🔍 Auto-loading default symbol: AAPL');
-                this.loadSymbol('AAPL');
-            }, 500);
-            
-            console.log('✅ Market Data v6.0 initialized');
             
         } catch (error) {
             console.error('Initialization error:', error);
@@ -3346,7 +3324,7 @@ const MarketData = {
         });
     },
     
-    // ========== MARKET OVERVIEW (CORRIGÉ AVEC ETFs) ==========
+    // ========== MARKET OVERVIEW ==========
     
     async refreshMarketOverview() {
         console.log('🌍 Refreshing Market Overview with ETFs...');
@@ -3430,7 +3408,7 @@ const MarketData = {
         if (elements.new52wHighs) elements.new52wHighs.textContent = stats.new52wHighs;
     },
     
-    // ========== LOAD INITIAL STOCKS (OPTIMISÉ - 30 STOCKS) ==========
+    // ========== LOAD INITIAL STOCKS ==========
     
     async loadInitialStocks() {
         console.log('📊 Loading initial 30 stocks...');
@@ -3454,7 +3432,7 @@ const MarketData = {
             this.allStocks = [];
             this.loadedStocksCount = 0;
             
-            // Charger par batch de 5 stocks (au lieu de 10)
+            // Charger par batch de 5 stocks
             const batchSize = 5;
             const stocksToLoad = this.defaultStocks.slice(0, this.totalStocksToLoad);
             
@@ -3482,8 +3460,8 @@ const MarketData = {
                             change: quote.change || 0,
                             changePercent: quote.percentChange || 0,
                             volume: quote.volume || 0,
-                            marketCap: quote.marketCap || 0,
-                            pe: quote.pe || 0,
+                            marketCap: this.calculateMarketCap(quote.price, quote.volume),
+                            pe: 0,
                             sector: this.getSectorForSymbol(symbol)
                         };
                         
@@ -3516,8 +3494,6 @@ const MarketData = {
             
             if (this.allStocks.length > 0) {
                 this.showNotification(`✅ Loaded ${this.allStocks.length} stocks`, 'success');
-                
-                // Afficher le bouton "Load More" si des stocks additionnels disponibles
                 this.showLoadMoreButton();
             } else {
                 this.showNotification('❌ Failed to load stocks', 'error');
@@ -3534,6 +3510,12 @@ const MarketData = {
             `;
             this.showNotification('❌ Error loading stocks', 'error');
         }
+    },
+    
+    calculateMarketCap(price, volume) {
+        // Estimation simplifiée : price * volume * 10
+        if (!price || !volume) return 0;
+        return price * volume * 10;
     },
     
     showLoadMoreButton() {
@@ -3572,7 +3554,7 @@ const MarketData = {
             `;
         }
         
-        const batchSize = 20; // Charger 20 stocks supplémentaires
+        const batchSize = 20;
         const nextBatch = this.additionalStocks.slice(0, batchSize);
         
         console.log(`📦 Loading ${nextBatch.length} additional stocks...`);
@@ -3596,8 +3578,8 @@ const MarketData = {
                         change: quote.change || 0,
                         changePercent: quote.percentChange || 0,
                         volume: quote.volume || 0,
-                        marketCap: quote.marketCap || 0,
-                        pe: quote.pe || 0,
+                        marketCap: this.calculateMarketCap(quote.price, quote.volume),
+                        pe: 0,
                         sector: this.getSectorForSymbol(symbol)
                     };
                     
@@ -3618,7 +3600,6 @@ const MarketData = {
             this.renderStocksTable();
         }
         
-        // Retirer les stocks chargés de la liste additionalStocks
         this.additionalStocks = this.additionalStocks.slice(batchSize);
         
         if (this.additionalStocks.length === 0) {
@@ -3658,24 +3639,20 @@ const MarketData = {
         
         if (!tbody) return;
         
-        // Calculer pagination
         const totalStocks = this.filteredStocks.length;
         const totalPages = Math.ceil(totalStocks / this.pageSize);
         const startIndex = (this.currentPage - 1) * this.pageSize;
         const endIndex = Math.min(startIndex + this.pageSize, totalStocks);
         const currentPageStocks = this.filteredStocks.slice(startIndex, endIndex);
         
-        // Mettre à jour compteur
         if (stockCount) {
             stockCount.textContent = `(${totalStocks} stocks)`;
         }
         
-        // Mettre à jour pagination
         if (pageInfo) {
             pageInfo.textContent = `Page ${this.currentPage} of ${totalPages}`;
         }
         
-        // Rendre le tableau
         if (currentPageStocks.length === 0) {
             tbody.innerHTML = `
                 <tr>
@@ -3694,23 +3671,19 @@ const MarketData = {
             
             return `
                 <tr class='${rowClass}'>
-                    <td>${this.escapeHtml(stock.symbol)}</td>
+                    <td><strong>${this.escapeHtml(stock.symbol)}</strong></td>
                     <td class='stock-name-cell' title='${this.escapeHtml(stock.name)}'>${this.escapeHtml(stock.name)}</td>
                     <td class='stock-price'>${this.formatCurrency(stock.price)}</td>
                     <td class='stock-change-${changeClass}'>${stock.change >= 0 ? '+' : ''}${this.formatCurrency(stock.change)}</td>
-                    <td class='stock-change-${changeClass}'>${stock.changePercent >= 0 ? '+' : ''}${stock.changePercent.toFixed(2)}%</td>
+                    <td class='stock-change-${changeClass}'><strong>${stock.changePercent >= 0 ? '+' : ''}${stock.changePercent.toFixed(2)}%</strong></td>
                     <td>${this.formatVolume(stock.volume)}</td>
                     <td>${this.formatLargeNumber(stock.marketCap)}</td>
-                    <td>${stock.pe > 0 ? stock.pe.toFixed(2) : 'N/A'}</td>
-                    <td>
-                        <div class='sparkline-container' id='sparkline-${stock.symbol}'>
-                            <canvas width='100' height='40'></canvas>
-                        </div>
-                    </td>
+                    <td>N/A</td>
+                    <td><em style="color: #94a3b8; font-size: 0.85rem;">Real-time only</em></td>
                     <td>
                         <div class='stock-actions'>
-                            <button class='btn-table-action btn-view' onclick='MarketData.loadSymbol("${stock.symbol}")' title='Analyze'>
-                                <i class='fas fa-chart-line'></i>
+                            <button class='btn-table-action btn-view' onclick='MarketData.viewStock("${stock.symbol}")' title='View Details'>
+                                <i class='fas fa-eye'></i>
                             </button>
                             <button class='btn-table-action btn-watchlist' onclick='MarketData.quickAddToWatchlist("${stock.symbol}", "${this.escapeHtml(stock.name)}")' title='Add to Watchlist'>
                                 <i class='fas fa-star'></i>
@@ -3720,52 +3693,40 @@ const MarketData = {
                 </tr>
             `;
         }).join('');
-        
-        // Charger sparklines
-        setTimeout(() => {
-            currentPageStocks.forEach(stock => {
-                this.renderSparkline(stock.symbol);
-            });
-        }, 100);
     },
-
-    renderSparkline(symbol) {
-        const container = document.getElementById(`sparkline-${symbol}`);
-        if (!container) return;
+    
+    viewStock(symbol) {
+        this.showNotification(`📊 ${symbol} - Real-time quote view (historical charts removed)`, 'info');
+        // Afficher une modal avec les détails du quote
+        this.loadSymbolQuote(symbol);
+    },
+    
+    async loadSymbolQuote(symbol) {
+        console.log(`📊 Loading quote for: ${symbol}`);
         
-        const canvas = container.querySelector('canvas');
-        if (!canvas) return;
-        
-        const ctx = canvas.getContext('2d');
-        const width = 100;
-        const height = 40;
-        
-        // Données simulées (7 derniers jours)
-        const data = Array.from({ length: 7 }, () => Math.random() * 20 + 80);
-        
-        const max = Math.max(...data);
-        const min = Math.min(...data);
-        const range = max - min || 1;
-        
-        ctx.clearRect(0, 0, width, height);
-        
-        // Couleur selon tendance
-        const isPositive = data[data.length - 1] > data[0];
-        ctx.strokeStyle = isPositive ? '#10b981' : '#ef4444';
-        ctx.lineWidth = 2;
-        
-        ctx.beginPath();
-        data.forEach((value, index) => {
-            const x = (index / (data.length - 1)) * width;
-            const y = height - ((value - min) / range) * height;
+        try {
+            const quote = await this.apiRequest(() => this.apiClient.getQuote(symbol), 'high');
+            const profile = await this.apiRequest(() => this.apiClient.getProfile(symbol), 'normal');
             
-            if (index === 0) {
-                ctx.moveTo(x, y);
-            } else {
-                ctx.lineTo(x, y);
-            }
-        });
-        ctx.stroke();
+            this.currentSymbol = symbol;
+            this.currentQuote = quote;
+            this.profileData = profile;
+            
+            // Afficher un résumé dans une notification
+            const summary = `
+                ${symbol} - ${quote.name}
+                Price: ${this.formatCurrency(quote.price)}
+                Change: ${quote.changePercent >= 0 ? '+' : ''}${quote.changePercent.toFixed(2)}%
+                Volume: ${this.formatVolume(quote.volume)}
+            `;
+            
+            console.log(summary);
+            this.showNotification(`✅ ${symbol} quote loaded`, 'success');
+            
+        } catch (error) {
+            console.error('Error loading quote:', error);
+            this.showNotification(`Failed to load ${symbol}`, 'error');
+        }
     },
     
     quickAddToWatchlist(symbol, name) {
@@ -3792,7 +3753,6 @@ const MarketData = {
     // ========== TABLE CONTROLS ==========
     
     setupTableListeners() {
-        // Sort listeners
         const headers = document.querySelectorAll('.stocks-table th[data-sort]');
         headers.forEach(header => {
             header.addEventListener('click', () => {
@@ -3826,7 +3786,6 @@ const MarketData = {
             }
         });
         
-        // Mettre à jour les indicateurs de tri
         document.querySelectorAll('.stocks-table th').forEach(th => {
             th.classList.remove('sorted-asc', 'sorted-desc');
         });
@@ -3862,7 +3821,7 @@ const MarketData = {
     },
     
     exportToCSV() {
-        const headers = ['Symbol', 'Name', 'Price', 'Change', 'Change %', 'Volume', 'Market Cap', 'P/E'];
+        const headers = ['Symbol', 'Name', 'Price', 'Change', 'Change %', 'Volume', 'Market Cap'];
         const rows = this.filteredStocks.map(stock => [
             stock.symbol,
             stock.name,
@@ -3870,8 +3829,7 @@ const MarketData = {
             stock.change,
             stock.changePercent,
             stock.volume,
-            stock.marketCap,
-            stock.pe
+            stock.marketCap
         ]);
         
         const csv = [
@@ -3906,21 +3864,16 @@ const MarketData = {
         const search = (document.getElementById('filterSearch')?.value || '').toLowerCase();
         const sector = document.getElementById('filterSector')?.value || '';
         const marketCap = document.getElementById('filterMarketCap')?.value || '';
-        const performance = document.getElementById('filterPerformance')?.value || '';
-        const pe = document.getElementById('filterPE')?.value || '';
         
         this.filteredStocks = this.allStocks.filter(stock => {
-            // Search
             if (search && !stock.symbol.toLowerCase().includes(search) && !stock.name.toLowerCase().includes(search)) {
                 return false;
             }
             
-            // Sector
             if (sector && stock.sector !== sector) {
                 return false;
             }
             
-            // Market Cap
             if (marketCap) {
                 const cap = stock.marketCap;
                 if (marketCap === 'mega' && cap < 200e9) return false;
@@ -3928,19 +3881,6 @@ const MarketData = {
                 if (marketCap === 'mid' && (cap < 2e9 || cap >= 10e9)) return false;
                 if (marketCap === 'small' && (cap < 300e6 || cap >= 2e9)) return false;
                 if (marketCap === 'micro' && cap >= 300e6) return false;
-            }
-            
-            // Performance (simulation)
-            if (performance) {
-                // TODO: Implémenter avec vraies données historiques
-            }
-            
-            // P/E Ratio
-            if (pe) {
-                const peValue = stock.pe;
-                if (pe === 'low' && peValue >= 15) return false;
-                if (pe === 'moderate' && (peValue < 15 || peValue > 25)) return false;
-                if (pe === 'high' && peValue <= 25) return false;
             }
             
             return true;
@@ -3952,13 +3892,12 @@ const MarketData = {
         this.showNotification(`✅ ${this.filteredStocks.length} stocks match filters`, 'success');
     },
     
-    // ========== TOP MOVERS (AVEC TIMEOUT) ==========
+    // ========== TOP MOVERS ==========
     
     async loadTopMovers() {
         console.log('🔥 Loading Top Movers...');
         
         try {
-            // Attendre avec timeout max de 30 secondes
             const maxWaitTime = 30000;
             const startTime = Date.now();
             
@@ -3969,13 +3908,9 @@ const MarketData = {
                     return;
                 }
                 
-                console.log(`⏳ Waiting for allStocks... (${this.allStocks.length} stocks loaded)`);
                 await new Promise(resolve => setTimeout(resolve, 1000));
             }
             
-            console.log(`✅ allStocks ready with ${this.allStocks.length} stocks`);
-            
-            // Trier par performance
             const sorted = [...this.allStocks].sort((a, b) => b.changePercent - a.changePercent);
             
             const topGainers = sorted.slice(0, 10);
@@ -4024,7 +3959,7 @@ const MarketData = {
             const changeClass = stock.change >= 0 ? 'positive' : 'negative';
             
             return `
-                <div class='mover-item' onclick='MarketData.loadSymbol("${stock.symbol}")'>
+                <div class='mover-item' onclick='MarketData.viewStock("${stock.symbol}")'>
                     <div class='mover-info'>
                         <div class='mover-symbol'>${this.escapeHtml(stock.symbol)}</div>
                         <div class='mover-name'>${this.escapeHtml(stock.name)}</div>
@@ -4040,26 +3975,23 @@ const MarketData = {
         }).join('');
     },
     
-    // ========== SECTOR PERFORMANCE (AVEC TIMEOUT) ==========
+    // ========== SECTOR PERFORMANCE ==========
     
     async loadSectorPerformance() {
         console.log('📈 Loading Sector Performance...');
         
         try {
-            // Attendre avec timeout
             const maxWaitTime = 30000;
             const startTime = Date.now();
             
             while (this.allStocks.length === 0) {
                 if (Date.now() - startTime > maxWaitTime) {
                     console.error('❌ Timeout waiting for allStocks');
-                    this.showNotification('Sector performance: data not available', 'warning');
                     return;
                 }
                 await new Promise(resolve => setTimeout(resolve, 1000));
             }
             
-            // Calculer performance moyenne par secteur
             const sectorPerformance = {};
             
             Object.keys(this.sectors).forEach(sector => {
@@ -4071,7 +4003,11 @@ const MarketData = {
                 }
             });
             
-            this.createSectorChart(sectorPerformance);
+            if (typeof Highcharts !== 'undefined') {
+                this.createSectorChart(sectorPerformance);
+            } else {
+                console.warn('⚠ Highcharts not loaded');
+            }
             
             console.log('✅ Sector Performance loaded');
             
@@ -4087,115 +4023,73 @@ const MarketData = {
         const sectors = Object.keys(sectorPerformance);
         const performances = Object.values(sectorPerformance);
         
-        if (this.charts.sector) {
-            this.charts.sector.destroy();
-        }
-        
-        this.charts.sector = Highcharts.chart('sectorChart', {
+        Highcharts.chart('sectorChart', {
             chart: {
                 type: 'bar',
                 backgroundColor: 'transparent',
-                height: 400,
-                style: {
-                    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif'
-                }
+                height: 400
             },
-            title: {
-                text: null
-            },
+            title: { text: null },
             xAxis: {
                 categories: sectors,
-                labels: {
-                    style: {
-                        color: '#64748b',
-                        fontWeight: '600',
-                        fontSize: '14px'
-                    }
-                },
-                gridLineWidth: 0
+                labels: { style: { color: '#64748b', fontWeight: '600' } }
             },
             yAxis: {
-                title: {
-                    text: 'Performance (%)',
-                    style: {
-                        color: '#64748b',
-                        fontWeight: '700'
-                    }
-                },
-                labels: {
-                    format: '{value}%',
-                    style: {
-                        color: '#64748b'
-                    }
-                },
-                gridLineColor: 'rgba(100, 116, 139, 0.1)'
+                title: { text: 'Performance (%)', style: { color: '#64748b' } },
+                labels: { format: '{value}%', style: { color: '#64748b' } }
             },
-            legend: {
-                enabled: false
-            },
+            legend: { enabled: false },
             plotOptions: {
                 bar: {
                     borderRadius: 8,
                     dataLabels: {
                         enabled: true,
                         format: '{y:.2f}%',
-                        style: {
-                            fontWeight: '700',
-                            fontSize: '12px'
-                        }
+                        style: { fontWeight: '700' }
                     },
                     colorByPoint: true
                 }
             },
             colors: performances.map(perf => perf >= 0 ? '#10b981' : '#ef4444'),
-            series: [{
-                name: 'Performance',
-                data: performances
-            }],
-            credits: {
-                enabled: false
-            }
+            series: [{ name: 'Performance', data: performances }],
+            credits: { enabled: false }
         });
     },
     
-    // ========== HEAT MAP (AVEC TIMEOUT) ==========
+    // ========== HEAT MAP ==========
     
     async loadHeatMap() {
         console.log('🗺 Loading Heat Map...');
         
         try {
-            // Attendre avec timeout
             const maxWaitTime = 30000;
             const startTime = Date.now();
             
             while (this.allStocks.length === 0) {
                 if (Date.now() - startTime > maxWaitTime) {
                     console.error('❌ Timeout waiting for allStocks');
-                    this.showNotification('Heat map: data not available', 'warning');
                     return;
                 }
                 await new Promise(resolve => setTimeout(resolve, 1000));
             }
             
-            // Préparer les données pour le treemap
             const heatmapData = [];
             
             Object.entries(this.sectors).forEach(([sector, symbols]) => {
                 const sectorStocks = this.allStocks.filter(stock => symbols.includes(stock.symbol));
                 
                 sectorStocks.forEach(stock => {
-                    if (stock.marketCap > 0) { // Filtrer les valeurs invalides
+                    if (stock.marketCap > 0) {
                         heatmapData.push({
                             name: stock.symbol,
                             value: stock.marketCap,
-                            colorValue: stock.changePercent,
-                            sector: sector
+                            colorValue: stock.changePercent
                         });
                     }
                 });
             });
             
-            if (heatmapData.length > 0) {
+            if (heatmapData.length > 0 && typeof Highcharts !== 'undefined') {
                 this.createHeatMapChart(heatmapData);
                 console.log(`✅ Heat Map loaded with ${heatmapData.length} stocks`);
             } else {
@@ -4211,25 +4105,17 @@ const MarketData = {
         const container = document.getElementById('heatMapChart');
         if (!container) return;
         
-        if (this.charts.heatmap) {
-            this.charts.heatmap.destroy();
-        }
-        
-        this.charts.heatmap = Highcharts.chart('heatMapChart', {
+        Highcharts.chart('heatMapChart', {
             chart: {
                 type: 'treemap',
                 backgroundColor: 'transparent',
                 height: 600
             },
-            title: {
-                text: null
-            },
+            title: { text: null },
             colorAxis: {
                 minColor: '#ef4444',
                 maxColor: '#10b981',
-                labels: {
-                    format: '{value}%'
-                }
+                labels: { format: '{value}%' }
             },
             tooltip: {
                 pointFormat: '<b>{point.name}</b><br/>Market Cap: ${point.value:,.0f}<br/>Change: {point.colorValue:.2f}%'
@@ -4237,676 +4123,46 @@ const MarketData = {
             series: [{
                 type: 'treemap',
                 layoutAlgorithm: 'squarified',
-                data: data.map(item => ({
-                    name: item.name,
-                    value: item.value,
-                    colorValue: item.colorValue
-                })),
+                data: data,
                 dataLabels: {
                     enabled: true,
                     format: '{point.name}',
-                    style: {
-                        fontSize: '12px',
-                        fontWeight: '700',
-                        textOutline: '2px rgba(0, 0, 0, 0.5)'
-                    }
+                    style: { fontSize: '12px', fontWeight: '700', textOutline: '2px rgba(0, 0, 0, 0.5)' }
                 },
                 levels: [{
                     level: 1,
-                    dataLabels: {
-                        enabled: true
-                    },
+                    dataLabels: { enabled: true },
                     borderWidth: 3,
                     borderColor: 'rgba(255, 255, 255, 0.3)'
                 }]
             }],
-            credits: {
-                enabled: false
-            }
-        });
-    },
-
-    // ========== STOCK LOADING (CONSERVÉ) ==========
-    
-    async loadSymbol(symbol) {
-        if (!symbol) {
-            this.showNotification('Please enter a stock symbol', 'error');
-            return;
-        }
-        
-        symbol = symbol.toUpperCase().trim();
-        this.currentSymbol = symbol;
-        
-        // Mettre à jour l'input
-        const input = document.getElementById('symbolInput');
-        if (input) {
-            input.value = symbol;
-        }
-        
-        console.log(`📊 Loading stock: ${symbol}`);
-        
-        try {
-            this.showLoading(true);
-            
-            // Charger toutes les données en parallèle avec priorité haute
-            const [quote, timeSeries, profile] = await Promise.all([
-                this.apiRequest(() => this.apiClient.getQuote(symbol), 'high'),
-                this.apiRequest(() => this.apiClient.getTimeSeries(symbol, '1day', 365), 'high'),
-                this.apiRequest(() => this.apiClient.getProfile(symbol), 'normal')
-            ]);
-            
-            this.stockData = timeSeries;
-            this.profileData = profile;
-            
-            // Charger le logo
-            await this.loadStockLogo(symbol);
-            
-            // Mettre à jour l'interface
-            this.updateStockHeader(quote, profile);
-            this.createPriceChart();
-            this.createTechnicalIndicators();
-            
-            this.showLoading(false);
-            this.updateLastUpdate();
-            
-            console.log(`✅ Stock ${symbol} loaded successfully`);
-            this.showNotification(`✅ ${symbol} loaded successfully`, 'success');
-            
-        } catch (error) {
-            console.error('Error loading stock:', error);
-            this.showLoading(false);
-            this.showNotification(`Failed to load ${symbol}: ${error.message}`, 'error');
-        }
-    },
-    
-    async loadStockLogo(symbol) {
-        try {
-            const cached = this.optimizedCache.get(`logo_${symbol}`);
-            if (cached) {
-                this.logoUrl = cached;
-                return;
-            }
-            
-            // Essayer différentes sources de logos
-            const logoSources = [
-                `https://logo.clearbit.com/${symbol.toLowerCase()}.com`,
-                `https://financialmodelingprep.com/image-stock/${symbol}.png`,
-                `https://storage.googleapis.com/iex/api/logos/${symbol}.png`
-            ];
-            
-            for (const url of logoSources) {
-                try {
-                    const response = await fetch(url, { method: 'HEAD' });
-                    if (response.ok) {
-                        this.logoUrl = url;
-                        this.optimizedCache.set(`logo_${symbol}`, url, this.optimizedCache.staticTTL);
-                        return;
-                    }
-                } catch (e) {
-                    continue;
-                }
-            }
-            
-            // Fallback: icône par défaut
-            this.logoUrl = '';
-            
-        } catch (error) {
-            console.warn('Logo loading error:', error);
-            this.logoUrl = '';
-        }
-    },
-    
-    updateStockHeader(quote, profile) {
-        const header = document.getElementById('stockHeader');
-        if (!header) return;
-        
-        const changeClass = quote.change >= 0 ? 'positive' : 'negative';
-        const changeIcon = quote.change >= 0 ? '▲' : '▼';
-        
-        header.innerHTML = `
-            <div class='stock-header-main'>
-                ${this.logoUrl ? `<img src='${this.logoUrl}' alt='${quote.symbol}' class='stock-logo' onerror='this.style.display="none"'>` : ''}
-                <div class='stock-header-info'>
-                    <h1 class='stock-symbol'>${quote.symbol}</h1>
-                    <p class='stock-name'>${this.escapeHtml(profile?.name || quote.name || quote.symbol)}</p>
-                    ${profile?.sector ? `<span class='stock-sector'>${this.escapeHtml(profile.sector)}</span>` : ''}
-                </div>
-            </div>
-            <div class='stock-header-price'>
-                <div class='stock-price-main'>${this.formatCurrency(quote.price)}</div>
-                <div class='stock-price-change ${changeClass}'>
-                    ${changeIcon} ${quote.change >= 0 ? '+' : ''}${this.formatCurrency(quote.change)} 
-                    (${quote.percentChange >= 0 ? '+' : ''}${quote.percentChange.toFixed(2)}%)
-                </div>
-            </div>
-        `;
-    },
-    
-    // ========== PRICE CHART ==========
-    
-    createPriceChart() {
-        if (!this.stockData || !this.stockData.data) {
-            console.error('No stock data available for chart');
-            return;
-        }
-        
-        const data = this.stockData.data;
-        
-        // Préparer les données OHLC et Volume
-        const ohlcData = data.map(d => [
-            new Date(d.datetime).getTime(),
-            d.open,
-            d.high,
-            d.low,
-            d.close
-        ]);
-        
-        const volumeData = data.map(d => [
-            new Date(d.datetime).getTime(),
-            d.volume
-        ]);
-        
-        // Calculer SMA 20 et 50
-        const sma20 = this.calculateSMA(data.map(d => d.close), 20);
-        const sma50 = this.calculateSMA(data.map(d => d.close), 50);
-        
-        const sma20Data = data.slice(19).map((d, i) => [
-            new Date(d.datetime).getTime(),
-            sma20[i]
-        ]);
-        
-        const sma50Data = data.slice(49).map((d, i) => [
-            new Date(d.datetime).getTime(),
-            sma50[i]
-        ]);
-        
-        if (this.charts.price) {
-            this.charts.price.destroy();
-        }
-        
-        this.charts.price = Highcharts.stockChart('priceChart', {
-            chart: {
-                backgroundColor: 'transparent',
-                height: 600
-            },
-            title: {
-                text: `${this.currentSymbol} - Stock Price & Volume`,
-                style: {
-                    color: '#1e293b',
-                    fontWeight: '800',
-                    fontSize: '20px'
-                }
-            },
-            rangeSelector: {
-                enabled: true,
-                selected: 1,
-                buttons: [{
-                    type: 'week',
-                    count: 1,
-                    text: '1W'
-                }, {
-                    type: 'month',
-                    count: 1,
-                    text: '1M'
-                }, {
-                    type: 'month',
-                    count: 3,
-                    text: '3M'
-                }, {
-                    type: 'month',
-                    count: 6,
-                    text: '6M'
-                }, {
-                    type: 'ytd',
-                    text: 'YTD'
-                }, {
-                    type: 'year',
-                    count: 1,
-                    text: '1Y'
-                }, {
-                    type: 'all',
-                    text: 'All'
-                }],
-                buttonTheme: {
-                    fill: 'transparent',
-                    stroke: 'var(--ml-primary)',
-                    style: {
-                        color: 'var(--ml-primary)',
-                        fontWeight: '700'
-                    },
-                    states: {
-                        select: {
-                            fill: 'var(--ml-primary)',
-                            style: {
-                                color: 'white'
-                            }
-                        }
-                    }
-                }
-            },
-            navigator: {
-                enabled: true,
-                height: 50,
-                maskFill: 'rgba(102, 126, 234, 0.15)',
-                outlineColor: 'var(--ml-primary)',
-                series: {
-                    color: 'var(--ml-primary)',
-                    lineWidth: 2
-                }
-            },
-            scrollbar: {
-                enabled: false
-            },
-            yAxis: [{
-                labels: {
-                    align: 'left',
-                    style: { color: '#64748b' }
-                },
-                height: '75%',
-                resize: {
-                    enabled: true
-                },
-                gridLineColor: 'rgba(100, 116, 139, 0.1)'
-            }, {
-                labels: {
-                    align: 'left',
-                    style: { color: '#64748b' }
-                },
-                top: '80%',
-                height: '20%',
-                offset: 0,
-                gridLineColor: 'rgba(100, 116, 139, 0.1)'
-            }],
-            tooltip: {
-                shared: true,
-                split: false,
-                backgroundColor: 'rgba(255, 255, 255, 0.98)',
-                borderColor: 'var(--ml-primary)',
-                borderRadius: 12,
-                shadow: true,
-                useHTML: true,
-                formatter: function() {
-                    let s = '<div style="font-size: 13px; font-weight: 700;">' + 
-                            Highcharts.dateFormat('%A, %b %e, %Y', this.x) + '</div>';
-                    
-                    this.points.forEach(point => {
-                        if (point.series.name === 'OHLC') {
-                            s += '<div style="margin-top: 8px;">';
-                            s += `<div><b>Open:</b> ${MarketData.formatCurrency(point.point.open)}</div>`;
-                            s += `<div><b>High:</b> <span style="color: #10b981;">${MarketData.formatCurrency(point.point.high)}</span></div>`;
-                            s += `<div><b>Low:</b> <span style="color: #ef4444;">${MarketData.formatCurrency(point.point.low)}</span></div>`;
-                            s += `<div><b>Close:</b> <b>${MarketData.formatCurrency(point.point.close)}</b></div>`;
-                            s += '</div>';
-                        } else if (point.series.name !== 'Volume') {
-                            s += `<div style="margin-top: 4px;"><span style="color:${point.color}">\u25CF</span> ${point.series.name}: <b>${MarketData.formatCurrency(point.y)}</b></div>`;
-                        } else {
-                            s += `<div style="margin-top: 4px;"><span style="color:${point.color}">\u25CF</span> Volume: <b>${MarketData.formatVolume(point.y)}</b></div>`;
-                        }
-                    });
-                    
-                    return s;
-                }
-            },
-            plotOptions: {
-                candlestick: {
-                    color: '#ef4444',
-                    upColor: '#10b981',
-                    lineColor: '#ef4444',
-                    upLineColor: '#10b981'
-                },
-                series: {
-                    dataGrouping: {
-                        enabled: false
-                    }
-                }
-            },
-            series: [{
-                type: 'candlestick',
-                name: 'OHLC',
-                data: ohlcData,
-                id: 'ohlc',
-                zIndex: 2
-            }, {
-                type: 'line',
-                name: 'SMA 20',
-                data: sma20Data,
-                color: '#f59e0b',
-                lineWidth: 2,
-                marker: {
-                    enabled: false
-                },
-                zIndex: 1
-            }, {
-                type: 'line',
-                name: 'SMA 50',
-                data: sma50Data,
-                color: '#8b5cf6',
-                lineWidth: 2,
-                marker: {
-                    enabled: false
-                },
-                zIndex: 1
-            }, {
-                type: 'column',
-                name: 'Volume',
-                data: volumeData,
-                yAxis: 1,
-                color: 'rgba(59, 130, 246, 0.5)',
-                borderColor: 'transparent'
-            }],
-            credits: {
-                enabled: false
-            }
+            credits: { enabled: false }
         });
     },
     
-    createTechnicalIndicators() {
-        if (!this.stockData || !this.stockData.data) return;
-        
-        const data = this.stockData.data;
-        const closes = data.map(d => d.close);
-        
-        // Calculer RSI
-        const rsi = this.calculateRSI(closes, 14);
-        const rsiData = data.slice(14).map((d, i) => [
-            new Date(d.datetime).getTime(),
-            rsi[i]
-        ]);
-        
-        // RSI Chart
-        if (this.charts.rsi) {
-            this.charts.rsi.destroy();
-        }
-        
-        this.charts.rsi = Highcharts.chart('rsiChart', {
-            chart: {
-                backgroundColor: 'transparent',
-                height: 300
-            },
-            title: {
-                text: 'RSI (14)',
-                style: {
-                    color: '#1e293b',
-                    fontWeight: '800',
-                    fontSize: '16px'
-                }
-            },
-            xAxis: {
-                type: 'datetime',
-                labels: {
-                    style: { color: '#64748b' }
-                },
-                gridLineColor: 'rgba(100, 116, 139, 0.1)'
-            },
-            yAxis: {
-                title: {
-                    text: 'RSI',
-                    style: { color: '#64748b', fontWeight: '700' }
-                },
-                min: 0,
-                max: 100,
-                plotLines: [{
-                    value: 70,
-                    color: '#ef4444',
-                    width: 2,
-                    dashStyle: 'Dash',
-                    label: {
-                        text: 'Overbought (70)',
-                        style: { color: '#ef4444', fontWeight: '700' }
-                    }
-                }, {
-                    value: 30,
-                    color: '#10b981',
-                    width: 2,
-                    dashStyle: 'Dash',
-                    label: {
-                        text: 'Oversold (30)',
-                        style: { color: '#10b981', fontWeight: '700' }
-                    }
-                }],
-                gridLineColor: 'rgba(100, 116, 139, 0.1)'
-            },
-            legend: {
-                enabled: false
-            },
-            series: [{
-                name: 'RSI',
-                data: rsiData,
-                color: '#8b5cf6',
-                lineWidth: 2,
-                marker: {
-                    enabled: false,
-                    radius: 3
-                },
-                zones: [{
-                    value: 30,
-                    color: '#10b981'
-                }, {
-                    value: 70,
-                    color: '#8b5cf6'
-                }, {
-                    color: '#ef4444'
-                }]
-            }],
-            tooltip: {
-                shared: true,
-                backgroundColor: 'rgba(255, 255, 255, 0.98)',
-                borderColor: '#8b5cf6',
-                borderRadius: 12,
-                pointFormat: '<b>RSI:</b> {point.y:.2f}'
-            },
-            credits: {
-                enabled: false
-            }
-        });
-        
-        // Calculer MACD
-        const macd = this.calculateMACD(closes);
-        const macdData = data.slice(33).map((d, i) => [
-            new Date(d.datetime).getTime(),
-            macd.macdLine[i]
-        ]);
-        const signalData = data.slice(33).map((d, i) => [
-            new Date(d.datetime).getTime(),
-            macd.signalLine[i]
-        ]);
-        const histogramData = data.slice(33).map((d, i) => [
-            new Date(d.datetime).getTime(),
-            macd.histogram[i]
-        ]);
-        
-        // MACD Chart
-        if (this.charts.macd) {
-            this.charts.macd.destroy();
-        }
-        
-        this.charts.macd = Highcharts.chart('macdChart', {
-            chart: {
-                backgroundColor: 'transparent',
-                height: 300
-            },
-            title: {
-                text: 'MACD (12, 26, 9)',
-                style: {
-                    color: '#1e293b',
-                    fontWeight: '800',
-                    fontSize: '16px'
-                }
-            },
-            xAxis: {
-                type: 'datetime',
-                labels: {
-                    style: { color: '#64748b' }
-                },
-                gridLineColor: 'rgba(100, 116, 139, 0.1)'
-            },
-            yAxis: {
-                title: {
-                    text: 'MACD',
-                    style: { color: '#64748b', fontWeight: '700' }
-                },
-                plotLines: [{
-                    value: 0,
-                    color: '#64748b',
-                    width: 1,
-                    dashStyle: 'Dash'
-                }],
-                gridLineColor: 'rgba(100, 116, 139, 0.1)'
-            },
-            legend: {
-                enabled: true,
-                align: 'center',
-                verticalAlign: 'bottom',
-                itemStyle: {
-                    color: '#1e293b',
-                    fontWeight: '600'
-                }
-            },
-            series: [{
-                type: 'line',
-                name: 'MACD',
-                data: macdData,
-                color: '#3b82f6',
-                lineWidth: 2,
-                marker: {
-                    enabled: false
-                }
-            }, {
-                type: 'line',
-                name: 'Signal',
-                data: signalData,
-                color: '#f59e0b',
-                lineWidth: 2,
-                marker: {
-                    enabled: false
-                }
-            }, {
-                type: 'column',
-                name: 'Histogram',
-                data: histogramData,
-                color: 'rgba(16, 185, 129, 0.5)',
-                borderColor: 'transparent',
-                negativeColor: 'rgba(239, 68, 68, 0.5)'
-            }],
-            tooltip: {
-                shared: true,
-                backgroundColor: 'rgba(255, 255, 255, 0.98)',
-                borderColor: '#3b82f6',
-                borderRadius: 12
-            },
-            credits: {
-                enabled: false
-            }
-        });
-    },
+    // ========== WATCHLIST & ALERTS ==========
     
-    // ========== TECHNICAL INDICATORS CALCULATIONS ==========
-    
-    calculateSMA(data, period) {
-        const sma = [];
-        for (let i = period - 1; i < data.length; i++) {
-            const sum = data.slice(i - period + 1, i + 1).reduce((a, b) => a + b, 0);
-            sma.push(sum / period);
-        }
-        return sma;
-    },
-    
-    calculateRSI(data, period = 14) {
-        const rsi = [];
-        let gains = 0;
-        let losses = 0;
-        
-        // Calcul initial
-        for (let i = 1; i <= period; i++) {
-            const change = data[i] - data[i - 1];
-            if (change > 0) {
-                gains += change;
-            } else {
-                losses -= change;
-            }
-        }
-        
-        let avgGain = gains / period;
-        let avgLoss = losses / period;
-        
-        rsi.push(100 - (100 / (1 + avgGain / avgLoss)));
-        
-        // RSI pour le reste
-        for (let i = period + 1; i < data.length; i++) {
-            const change = data[i] - data[i - 1];
-            const gain = change > 0 ? change : 0;
-            const loss = change < 0 ? -change : 0;
-            
-            avgGain = (avgGain * (period - 1) + gain) / period;
-            avgLoss = (avgLoss * (period - 1) + loss) / period;
-            
-            rsi.push(100 - (100 / (1 + avgGain / avgLoss)));
-        }
-        
-        return rsi;
-    },
-    
-    calculateMACD(data, fastPeriod = 12, slowPeriod = 26, signalPeriod = 9) {
-        const emaFast = this.calculateEMA(data, fastPeriod);
-        const emaSlow = this.calculateEMA(data, slowPeriod);
-        
-        const macdLine = [];
-        for (let i = 0; i < emaFast.length; i++) {
-            if (emaSlow[i] !== undefined) {
-                macdLine.push(emaFast[i] - emaSlow[i]);
-            }
-        }
-        
-        const signalLine = this.calculateEMA(macdLine, signalPeriod);
-        
-        const histogram = [];
-        for (let i = 0; i < macdLine.length; i++) {
-            if (signalLine[i] !== undefined) {
-                histogram.push(macdLine[i] - signalLine[i]);
-            }
-        }
-        
-        return { macdLine, signalLine, histogram };
-    },
-    
-    calculateEMA(data, period) {
-        const ema = [];
-        const multiplier = 2 / (period + 1);
-        
-        // Première valeur = SMA
-        let sum = 0;
-        for (let i = 0; i < period; i++) {
-            sum += data[i];
-        }
-        ema.push(sum / period);
-        
-        // EMA pour le reste
-        for (let i = period; i < data.length; i++) {
-            ema.push((data[i] - ema[ema.length - 1]) * multiplier + ema[ema.length - 1]);
-        }
-        
-        return ema;
-    },
-    
-    // ========== WATCHLIST & ALERTS (CONSERVÉS) ==========
-    
-    async loadCurrentPortfolio() {
+    loadWatchlistFromStorage() {
         try {
             const saved = localStorage.getItem('market_watchlist');
             if (saved) {
                 this.watchlist = JSON.parse(saved);
                 this.renderWatchlist();
-                await this.refreshWatchlist();
             }
-            
+        } catch (error) {
+            console.error('Error loading watchlist:', error);
+        }
+    },
+    
+    loadAlertsFromStorage() {
+        try {
             const savedAlerts = localStorage.getItem('market_alerts');
             if (savedAlerts) {
                 this.alerts = JSON.parse(savedAlerts);
                 this.renderAlerts();
             }
-            
         } catch (error) {
-            console.error('Error loading portfolio:', error);
+            console.error('Error loading alerts:', error);
         }
     },
     
@@ -4980,7 +4236,7 @@ const MarketData = {
         
         container.innerHTML = this.watchlist.map(item => `
             <div class='watchlist-item' id='watchlist-${item.symbol}'>
-                <div class='watchlist-info' onclick='MarketData.loadSymbol("${item.symbol}")'>
+                <div class='watchlist-info' onclick='MarketData.viewStock("${item.symbol}")'>
                     <div class='watchlist-symbol'>${item.symbol}</div>
                     <div class='watchlist-name'>${this.escapeHtml(item.name)}</div>
                 </div>
@@ -5035,7 +4291,6 @@ const MarketData = {
                 changeEl.textContent = `${quote.percentChange >= 0 ? '+' : ''}${quote.percentChange.toFixed(2)}%`;
             }
             
-            // Vérifier les alertes
             this.checkAlertsForSymbol(symbol, quote.price);
             
         } catch (error) {
@@ -5044,7 +4299,6 @@ const MarketData = {
     },
     
     startWatchlistAutoRefresh() {
-        // Rafraîchir toutes les 2 minutes
         this.watchlistRefreshInterval = setInterval(() => {
             this.refreshWatchlist();
         }, 120000);
@@ -5058,12 +4312,6 @@ const MarketData = {
             return;
         }
         
-        // Afficher le modal de création d'alerte
-        this.showAlertModal(symbol);
-    },
-    
-    showAlertModal(symbol) {
-        // Implémenter le modal personnalisé ici
         const price = prompt(`Enter target price for ${symbol}:`);
         if (!price || isNaN(parseFloat(price))) return;
         
@@ -5169,39 +4417,8 @@ const MarketData = {
     // ========== EVENT LISTENERS ==========
     
     setupEventListeners() {
-        // Bouton recherche
-        const searchBtn = document.getElementById('searchBtn');
-        if (searchBtn) {
-            searchBtn.addEventListener('click', () => {
-                const input = document.getElementById('symbolInput');
-                if (input) {
-                    this.loadSymbol(input.value);
-                }
-            });
-        }
-        
-        // Enter key sur input
-        const symbolInput = document.getElementById('symbolInput');
-        if (symbolInput) {
-            symbolInput.addEventListener('keypress', (e) => {
-                if (e.key === 'Enter') {
-                    this.loadSymbol(e.target.value);
-                }
-            });
-        }
-        
-        // Boutons de période
-        document.querySelectorAll('.period-btn').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                document.querySelectorAll('.period-btn').forEach(b => b.classList.remove('active'));
-                e.target.classList.add('active');
-                this.currentPeriod = e.target.dataset.period;
-                this.refreshChartsForPeriod(this.currentPeriod);
-            });
-        });
-        
         // Filter inputs with debounce
-        ['filterSearch', 'filterSector', 'filterMarketCap', 'filterPerformance', 'filterPE'].forEach(filterId => {
+        ['filterSearch', 'filterSector', 'filterMarketCap'].forEach(filterId => {
             const filterEl = document.getElementById(filterId);
             if (filterEl) {
                 filterEl.addEventListener('input', this.debounce(() => this.applyFilters(), 500));
@@ -5227,11 +4444,6 @@ const MarketData = {
             }, 300);
         });
         
-        searchInput.addEventListener('keydown', (e) => {
-            this.handleSearchNavigation(e);
-        });
-        
-        // Fermer les suggestions en cliquant ailleurs
         document.addEventListener('click', (e) => {
             if (!e.target.closest('.search-container')) {
                 this.hideSearchSuggestions();
@@ -5260,7 +4472,7 @@ const MarketData = {
         
         container.innerHTML = suggestions.map((stock, index) => `
             <div class='search-suggestion-item ${index === this.selectedSuggestionIndex ? 'selected' : ''}' 
-                 onclick='MarketData.loadSymbol("${stock.symbol}")'>
+                 onclick='MarketData.viewStock("${stock.symbol}")'>
                 <div class='suggestion-symbol'>${stock.symbol}</div>
                 <div class='suggestion-name'>${this.escapeHtml(stock.name)}</div>
             </div>
@@ -5286,80 +4498,6 @@ const MarketData = {
                 stock.name.toLowerCase().includes(query)
             )
             .slice(0, 10);
-    },
-    
-    handleSearchNavigation(e) {
-        const container = document.getElementById('searchSuggestions');
-        if (!container || container.style.display === 'none') return;
-        
-        const items = container.querySelectorAll('.search-suggestion-item');
-        if (items.length === 0) return;
-        
-        if (e.key === 'ArrowDown') {
-            e.preventDefault();
-            this.selectedSuggestionIndex = Math.min(this.selectedSuggestionIndex + 1, items.length - 1);
-            this.updateSuggestionSelection(items);
-        } else if (e.key === 'ArrowUp') {
-            e.preventDefault();
-            this.selectedSuggestionIndex = Math.max(this.selectedSuggestionIndex - 1, -1);
-            this.updateSuggestionSelection(items);
-        } else if (e.key === 'Enter' && this.selectedSuggestionIndex >= 0) {
-            e.preventDefault();
-            const symbol = items[this.selectedSuggestionIndex].querySelector('.suggestion-symbol').textContent;
-            this.loadSymbol(symbol);
-            this.hideSearchSuggestions();
-        } else if (e.key === 'Escape') {
-            this.hideSearchSuggestions();
-        }
-    },
-    
-    updateSuggestionSelection(items) {
-        items.forEach((item, index) => {
-            item.classList.toggle('selected', index === this.selectedSuggestionIndex);
-        });
-        
-        if (this.selectedSuggestionIndex >= 0) {
-            items[this.selectedSuggestionIndex].scrollIntoView({ block: 'nearest' });
-        }
-    },
-    
-    async refreshChartsForPeriod(period) {
-        if (!this.currentSymbol) return;
-        
-        console.log(`📊 Refreshing charts for period: ${period}`);
-        
-        const periodMap = {
-            '1D': { interval: '5min', outputsize: 78 },
-            '1W': { interval: '30min', outputsize: 200 },
-            '1M': { interval: '1day', outputsize: 30 },
-            '3M': { interval: '1day', outputsize: 90 },
-            '6M': { interval: '1day', outputsize: 180 },
-            '1Y': { interval: '1day', outputsize: 365 },
-            'YTD': { interval: '1day', outputsize: 365 },
-            'MAX': { interval: '1week', outputsize: 520 }
-        };
-        
-        const params = periodMap[period] || periodMap['1M'];
-        
-        try {
-            this.showLoading(true);
-            
-            const timeSeries = await this.apiRequest(
-                () => this.apiClient.getTimeSeries(this.currentSymbol, params.interval, params.outputsize),
-                'high'
-            );
-            
-            this.stockData = timeSeries;
-            this.createPriceChart();
-            this.createTechnicalIndicators();
-            
-            this.showLoading(false);
-            
-        } catch (error) {
-            console.error('Error refreshing charts:', error);
-            this.showLoading(false);
-            this.showNotification('Failed to refresh charts', 'error');
-        }
     },
     
     // ========== AUTO-SAVE ==========
@@ -5468,7 +4606,6 @@ const MarketData = {
     },
     
     showNotification(message, type = 'info') {
-        // Utiliser le système de notifications existant
         if (window.showNotification) {
             window.showNotification(message, type);
         } else {
@@ -5485,4 +4622,4 @@ document.addEventListener('DOMContentLoaded', () => {
 // ========== GLOBAL EXPORT ==========
 window.MarketData = MarketData;
 
-console.log('📊 market-data.js v6.0 loaded - Hybrid API Optimized');
+console.log('📊 market-data.js v7.0 loaded - Quotes Only (Finnhub)');
