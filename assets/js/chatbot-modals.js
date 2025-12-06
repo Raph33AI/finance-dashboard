@@ -1,9 +1,10 @@
 /* ============================================
    CHATBOT MODALS - SHARE & SETTINGS
-   Version 6.0 - CHARTS DETECTION FIXED
-   ✅ Détection des graphiques HORS des .message
-   ✅ Capture globale de la zone de conversation
-   ✅ Association intelligente messages/graphiques
+   Version 7.1 - CORRECTED
+   ✅ Email avec PDF en pièce jointe automatique
+   ✅ Mode compact fonctionnel
+   ✅ Desktop notifications supprimé
+   ✅ Onglet Privacy complètement supprimé
    ============================================ */
 
 class ChatbotModals {
@@ -83,7 +84,7 @@ class ChatbotModals {
                                 </div>
                                 <div class="share-option-content">
                                     <div class="share-option-title">Email</div>
-                                    <div class="share-option-desc">Send via email</div>
+                                    <div class="share-option-desc">Send via email (PDF attached)</div>
                                 </div>
                             </button>
                             
@@ -147,7 +148,7 @@ class ChatbotModals {
                         
                         <div class="export-loading" id="export-loading" style="display: none;">
                             <div class="loading-spinner"></div>
-                            <span>Generating PDF with charts...</span>
+                            <span>Generating professional PDF...</span>
                         </div>
                     </div>
                 </div>
@@ -180,10 +181,6 @@ class ChatbotModals {
                             <button class="settings-tab" data-tab="notifications">
                                 <i class="fas fa-bell"></i>
                                 <span>Notifications</span>
-                            </button>
-                            <button class="settings-tab" data-tab="privacy">
-                                <i class="fas fa-shield-alt"></i>
-                                <span>Privacy</span>
                             </button>
                         </div>
                         
@@ -305,17 +302,6 @@ class ChatbotModals {
                                 
                                 <div class="setting-item">
                                     <div class="setting-info">
-                                        <div class="setting-label">Desktop notifications</div>
-                                        <div class="setting-desc">Receive notifications on your desktop</div>
-                                    </div>
-                                    <label class="setting-toggle">
-                                        <input type="checkbox" id="desktop-notifications-toggle">
-                                        <span class="toggle-slider"></span>
-                                    </label>
-                                </div>
-                                
-                                <div class="setting-item">
-                                    <div class="setting-info">
                                         <div class="setting-label">Sound alerts</div>
                                         <div class="setting-desc">Play sound when receiving messages</div>
                                     </div>
@@ -334,44 +320,6 @@ class ChatbotModals {
                                         <input type="checkbox" id="email-digest-toggle">
                                         <span class="toggle-slider"></span>
                                     </label>
-                                </div>
-                            </div>
-                            
-                            <!-- Privacy Tab -->
-                            <div class="settings-panel" data-panel="privacy">
-                                <h3 class="settings-panel-title">Privacy & Data</h3>
-                                
-                                <div class="setting-item">
-                                    <div class="setting-info">
-                                        <div class="setting-label">Save conversation history</div>
-                                        <div class="setting-desc">Store your chat history in Firebase Cloud</div>
-                                    </div>
-                                    <label class="setting-toggle">
-                                        <input type="checkbox" id="save-history-toggle" checked>
-                                        <span class="toggle-slider"></span>
-                                    </label>
-                                </div>
-                                
-                                <div class="setting-item">
-                                    <div class="setting-info">
-                                        <div class="setting-label">Analytics & tracking</div>
-                                        <div class="setting-desc">Help improve our service with usage data</div>
-                                    </div>
-                                    <label class="setting-toggle">
-                                        <input type="checkbox" id="analytics-toggle" checked>
-                                        <span class="toggle-slider"></span>
-                                    </label>
-                                </div>
-                                
-                                <div class="setting-item setting-item-danger">
-                                    <div class="setting-info">
-                                        <div class="setting-label">Clear all data</div>
-                                        <div class="setting-desc">Delete all conversations and settings from Firebase</div>
-                                    </div>
-                                    <button class="setting-danger-btn" id="clear-data-btn">
-                                        <i class="fas fa-trash-alt"></i>
-                                        Clear Data
-                                    </button>
                                 </div>
                             </div>
                         </div>
@@ -441,10 +389,14 @@ class ChatbotModals {
         
         document.getElementById('save-settings-btn')?.addEventListener('click', () => this.saveSettings());
         document.getElementById('reset-settings-btn')?.addEventListener('click', () => this.resetSettings());
-        document.getElementById('clear-data-btn')?.addEventListener('click', () => this.clearAllData());
         
         document.querySelectorAll('.theme-option').forEach(btn => {
             btn.addEventListener('click', (e) => this.changeTheme(e.currentTarget));
+        });
+
+        // ✅ MODE COMPACT - Event Listener
+        document.getElementById('compact-mode-toggle')?.addEventListener('change', (e) => {
+            this.toggleCompactMode(e.target.checked);
         });
     }
 
@@ -492,11 +444,51 @@ class ChatbotModals {
         }
     }
 
-    shareViaEmail() {
-        const subject = encodeURIComponent('Check out this Alphy AI conversation');
-        const body = encodeURIComponent(`I wanted to share this interesting conversation with Alphy AI:\n\n${window.location.href}`);
-        window.location.href = `mailto:?subject=${subject}&body=${body}`;
-        console.log('📧 Opening email client...');
+    /**
+     * ✅ SHARE VIA EMAIL - AVEC PDF EN PIÈCE JOINTE AUTOMATIQUE
+     */
+    async shareViaEmail() {
+        console.log('📧 Preparing email with PDF attachment...');
+        
+        this.showLoading(true);
+        
+        try {
+            // 1. Générer le PDF automatiquement
+            const timestamp = new Date().toISOString().slice(0, 10);
+            const filename = `alphavault-ai-conversation-${timestamp}`;
+            
+            const messages = await this.getConversationMessagesWithVisuals();
+            await this.downloadPDFFile(messages, filename);
+            
+            this.showLoading(false);
+            
+            // 2. Attendre un peu que le téléchargement démarre
+            await new Promise(resolve => setTimeout(resolve, 500));
+            
+            // 3. Ouvrir le client email
+            const subject = encodeURIComponent('AlphaVault AI - Financial Conversation');
+            const body = encodeURIComponent(
+                `Hi,\n\n` +
+                `I'm sharing this conversation from AlphaVault AI.\n\n` +
+                `📎 A PDF file has been automatically downloaded to your Downloads folder.\n` +
+                `Please attach the file "${filename}.pdf" to this email before sending.\n\n` +
+                `Best regards,\n` +
+                `AlphaVault AI\n\n` +
+                `---\n` +
+                `${window.location.href}`
+            );
+            
+            window.location.href = `mailto:?subject=${subject}&body=${body}`;
+            
+            this.showSuccessMessage('PDF downloaded! Please attach it to the email.');
+            
+            console.log('✅ PDF downloaded and email client opened');
+            
+        } catch (error) {
+            console.error('❌ Email share error:', error);
+            this.showSuccessMessage('Failed to prepare email. Please try exporting manually.', true);
+            this.showLoading(false);
+        }
     }
 
     showExportOptions() {
@@ -532,15 +524,13 @@ class ChatbotModals {
         this.showLoading(true);
         
         const timestamp = new Date().toISOString().slice(0, 10);
-        const filename = `alphy-ai-conversation-${timestamp}`;
+        const filename = `alphavault-ai-conversation-${timestamp}`;
         
         try {
             if (format === 'pdf') {
-                // PDF nécessite la capture des graphiques
-                const messages = await this.getConversationMessagesWithCharts();
+                const messages = await this.getConversationMessagesWithVisuals();
                 await this.downloadPDFFile(messages, filename);
             } else {
-                // TXT et JSON n'ont pas besoin des graphiques
                 const messages = this.getConversationMessages();
                 
                 if (format === 'txt') {
@@ -561,9 +551,9 @@ class ChatbotModals {
     }
 
     /**
-     * ✅ GET MESSAGES WITH CHART IMAGES (VERSION CORRIGÉE - RECHERCHE GLOBALE)
+     * ✅ GET MESSAGES WITH ALL VISUAL ELEMENTS (CHARTS + TABLES)
      */
-    async getConversationMessagesWithCharts() {
+    async getConversationMessagesWithVisuals() {
         const messagesContainer = document.getElementById('chatbot-messages-content');
         const messages = [];
         
@@ -572,15 +562,18 @@ class ChatbotModals {
             return messages;
         }
         
-        // 1. Récupérer les messages texte
         const messageElements = messagesContainer.querySelectorAll('.message');
         console.log(`📊 Found ${messageElements.length} messages to process`);
         
-        // 2. Récupérer TOUS les canvas dans le container (pas seulement dans .message)
+        // Récupérer TOUS les canvas
         const allCanvases = messagesContainer.querySelectorAll('canvas');
-        console.log(`📊 Found ${allCanvases.length} total canvas elements in container`);
+        console.log(`📊 Found ${allCanvases.length} canvas elements`);
         
-        // 3. Créer les données de messages
+        // Récupérer TOUS les tableaux de métriques
+        const allMetricTables = messagesContainer.querySelectorAll('.visual-card, .metric-card, [class*="comparison"]');
+        console.log(`📊 Found ${allMetricTables.length} visual elements`);
+        
+        // Créer les messages
         for (let i = 0; i < messageElements.length; i++) {
             const msg = messageElements[i];
             const isUser = msg.classList.contains('user-message');
@@ -590,32 +583,30 @@ class ChatbotModals {
             
             messages.push({
                 role: isUser ? 'user' : 'assistant',
-                content: text.trim(),
+                content: this.cleanText(text.trim()),
                 timestamp: time,
-                chartImages: [] // ✅ Plusieurs graphiques possibles
+                visualImages: []
             });
         }
         
-        // 4. Capturer TOUS les canvas et les associer aux messages
-        const chartImages = [];
+        // Capturer TOUS les visuels
+        const visualImages = [];
         
+        // 1. Capturer les canvas (graphiques Chart.js)
         for (let i = 0; i < allCanvases.length; i++) {
             const canvas = allCanvases[i];
             
             try {
-                // Vérifier si visible
                 const rect = canvas.getBoundingClientRect();
                 if (rect.width === 0 || rect.height === 0) {
-                    console.warn(`  ⚠  Canvas ${i + 1} invisible (${rect.width}x${rect.height}), skip`);
+                    console.warn(`  ⚠  Canvas ${i + 1} invisible, skip`);
                     continue;
                 }
                 
                 console.log(`📊 Canvas ${i + 1}/${allCanvases.length}: Capturing...`);
                 
-                // Attendre le rendu
                 await this.waitForChartRender(canvas);
                 
-                // Capturer
                 const capturedCanvas = await html2canvas(canvas, {
                     backgroundColor: '#ffffff',
                     scale: 3,
@@ -626,34 +617,78 @@ class ChatbotModals {
                     windowHeight: canvas.scrollHeight || canvas.height || 400
                 });
                 
-                const imageData = capturedCanvas.toDataURL('image/png', 1.0);
-                chartImages.push(imageData);
+                visualImages.push({
+                    type: 'chart',
+                    data: capturedCanvas.toDataURL('image/png', 1.0)
+                });
                 
                 console.log(`✅ Canvas ${i + 1}: Captured (${capturedCanvas.width}x${capturedCanvas.height})`);
             } catch (error) {
-                console.error(`❌ Canvas ${i + 1}: Capture failed:`, error);
+                console.error(`❌ Canvas ${i + 1}: Failed:`, error);
             }
         }
         
-        // 5. Associer les graphiques au dernier message assistant (bot)
-        if (chartImages.length > 0) {
-            // Trouver le dernier message bot
+        // 2. Capturer les tableaux de métriques (visual-card)
+        for (let i = 0; i < allMetricTables.length; i++) {
+            const table = allMetricTables[i];
+            
+            try {
+                const rect = table.getBoundingClientRect();
+                if (rect.width === 0 || rect.height === 0) {
+                    console.warn(`  ⚠  Visual element ${i + 1} invisible, skip`);
+                    continue;
+                }
+                
+                console.log(`📊 Visual element ${i + 1}/${allMetricTables.length}: Capturing...`);
+                
+                const capturedCanvas = await html2canvas(table, {
+                    backgroundColor: '#ffffff',
+                    scale: 3,
+                    logging: false,
+                    useCORS: true,
+                    allowTaint: true
+                });
+                
+                visualImages.push({
+                    type: 'table',
+                    data: capturedCanvas.toDataURL('image/png', 1.0)
+                });
+                
+                console.log(`✅ Visual element ${i + 1}: Captured (${capturedCanvas.width}x${capturedCanvas.height})`);
+            } catch (error) {
+                console.error(`❌ Visual element ${i + 1}: Failed:`, error);
+            }
+        }
+        
+        // Associer les visuels au dernier message assistant
+        if (visualImages.length > 0) {
             for (let i = messages.length - 1; i >= 0; i--) {
                 if (messages[i].role === 'assistant') {
-                    messages[i].chartImages = chartImages;
-                    console.log(`✅ ${chartImages.length} charts associated to message ${i + 1}`);
+                    messages[i].visualImages = visualImages;
+                    console.log(`✅ ${visualImages.length} visuals associated to message ${i + 1}`);
                     break;
                 }
             }
         }
         
-        const totalCharts = chartImages.length;
-        console.log(`✅ Processed ${messages.length} messages (${totalCharts} charts captured)`);
+        console.log(`✅ Processed ${messages.length} messages (${visualImages.length} visuals captured)`);
         return messages;
     }
 
     /**
-     * ✅ ATTENDRE LE RENDU COMPLET DU GRAPHIQUE
+     * ✅ CLEAN TEXT (Remove emojis and special characters)
+     */
+    cleanText(text) {
+        return text
+            .replace(/[📊🎯📈💰🚀💼🔍✅❌⚠📉📋🎨🔧💡]/g, '')
+            .replace(/[\u0000-\u001F\u007F-\u009F]/g, '')
+            .replace(/[Ø=ÜüÝýÊê]/g, '')
+            .replace(/\s+/g, ' ')
+            .trim();
+    }
+
+    /**
+     * ✅ WAIT FOR CHART RENDER
      */
     waitForChartRender(element) {
         return new Promise((resolve) => {
@@ -677,7 +712,34 @@ class ChatbotModals {
     }
 
     /**
-     * ✅ DOWNLOAD PDF WITH ULTRA-PROFESSIONAL TEXT FORMATTING
+     * ✅ ALPHAVAULT AI LOGO (SVG en Base64)
+     */
+    getAlphaVaultLogo() {
+        const svg = `
+        <svg width="60" height="60" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+                <linearGradient id="logoGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" style="stop-color:#667eea;stop-opacity:1" />
+                    <stop offset="100%" style="stop-color:#764ba2;stop-opacity:1" />
+                </linearGradient>
+            </defs>
+            <path d="M 15 85 L 25 75 L 35 78 L 50 55 L 65 60 L 80 35 L 95 30" 
+                  stroke="url(#logoGrad)" stroke-width="5" fill="none" 
+                  stroke-linecap="round" stroke-linejoin="round"/>
+            <circle cx="25" cy="75" r="5" fill="url(#logoGrad)"/>
+            <circle cx="50" cy="55" r="5" fill="url(#logoGrad)"/>
+            <circle cx="80" cy="35" r="5" fill="url(#logoGrad)"/>
+            <circle cx="95" cy="30" r="6" fill="url(#logoGrad)"/>
+            <path d="M 90 35 L 95 30 L 90 25" stroke="url(#logoGrad)" 
+                  stroke-width="4" fill="none" stroke-linecap="round"/>
+        </svg>
+        `;
+        
+        return 'data:image/svg+xml;base64,' + btoa(svg);
+    }
+
+    /**
+     * ✅ DOWNLOAD PDF WITH LOGO & PROFESSIONAL FORMATTING
      */
     async downloadPDFFile(messages, filename) {
         if (typeof window.jspdf === 'undefined') {
@@ -706,14 +768,21 @@ class ChatbotModals {
             return false;
         };
         
-        // ==================== HEADER ====================
+        // ==================== HEADER WITH LOGO ====================
+        try {
+            const logoDataUrl = this.getAlphaVaultLogo();
+            doc.addImage(logoDataUrl, 'SVG', margin, yPos - 5, 40, 40);
+        } catch (error) {
+            console.warn('Logo not added:', error);
+        }
+        
         doc.setFontSize(28);
         doc.setFont('helvetica', 'bold');
         doc.setTextColor(102, 126, 234);
-        doc.text('Alphy AI Conversation', margin, yPos);
-        yPos += 30;
+        doc.text('AlphaVault AI Conversation', margin + 50, yPos + 15);
+        yPos += 45;
         
-        doc.setFontSize(11);
+        doc.setFontSize(10);
         doc.setFont('helvetica', 'normal');
         doc.setTextColor(100, 100, 100);
         doc.text(`Export Date: ${new Date().toLocaleString('en-US', { 
@@ -723,15 +792,15 @@ class ChatbotModals {
             hour: '2-digit', 
             minute: '2-digit' 
         })}`, margin, yPos);
-        yPos += 18;
+        yPos += 16;
         
         doc.text(`Total Messages: ${messages.length}`, margin, yPos);
-        yPos += 25;
+        yPos += 22;
         
         doc.setDrawColor(102, 126, 234);
         doc.setLineWidth(2);
         doc.line(margin, yPos, pageWidth - margin, yPos);
-        yPos += 35;
+        yPos += 30;
         
         // ==================== MESSAGES ====================
         for (let i = 0; i < messages.length; i++) {
@@ -740,52 +809,41 @@ class ChatbotModals {
             checkNewPage(120);
             
             const isUser = msg.role === 'user';
-            const headerHeight = 28;
+            const headerHeight = 26;
             
-            // Message header
             if (isUser) {
                 doc.setFillColor(59, 130, 246);
             } else {
                 doc.setFillColor(102, 126, 234);
             }
             
-            doc.roundedRect(margin, yPos - 18, maxWidth, headerHeight, 4, 4, 'F');
+            doc.roundedRect(margin, yPos - 16, maxWidth, headerHeight, 4, 4, 'F');
             
-            doc.setFontSize(13);
+            doc.setFontSize(12);
             doc.setFont('helvetica', 'bold');
             doc.setTextColor(255, 255, 255);
             
-            if (isUser) {
-                doc.text(`👤 USER`, margin + 12, yPos);
-            } else {
-                doc.text(`🤖 ASSISTANT`, margin + 12, yPos);
-            }
+            doc.text(isUser ? 'USER' : 'ASSISTANT', margin + 12, yPos);
             
-            yPos += headerHeight + 5;
+            yPos += headerHeight + 3;
             
-            // ==================== MESSAGE CONTENT (FORMATÉ PROFESSIONNELLEMENT) ====================
-            const contentMargin = margin + 15;
-            const contentWidth = maxWidth - 30;
+            // ==================== MESSAGE CONTENT ====================
+            const contentMargin = margin + 12;
+            const contentWidth = maxWidth - 24;
             
-            // ✅ DÉTECTION ET FORMATAGE DES SECTIONS
             const content = msg.content;
             
-            // Regex pour détecter les titres de section (texte se terminant par ":")
             const sectionRegex = /^(.+?):(.*?)(?=\n[A-Z][^:]+:|$)/gs;
             const sections = [];
             
             let match;
-            let lastIndex = 0;
-            
             while ((match = sectionRegex.exec(content)) !== null) {
                 sections.push({
                     title: match[1].trim(),
                     content: match[2].trim()
                 });
-                lastIndex = match.index + match[0].length;
             }
             
-            // Si aucune section détectée, traiter comme texte brut
             if (sections.length === 0) {
                 sections.push({
                     title: null,
@@ -793,90 +851,81 @@ class ChatbotModals {
                 });
             }
             
-            // ✅ RENDU DES SECTIONS
             for (let sIndex = 0; sIndex < sections.length; sIndex++) {
                 const section = sections[sIndex];
                 
-                checkNewPage(50);
+                checkNewPage(40);
                 
-                // TITRE DE SECTION (si présent)
                 if (section.title) {
-                    doc.setFontSize(12);
+                    doc.setFontSize(11);
                     doc.setFont('helvetica', 'bold');
                     doc.setTextColor(102, 126, 234);
                     
                     const titleLines = doc.splitTextToSize(section.title + ':', contentWidth);
                     
                     for (const line of titleLines) {
-                        if (checkNewPage(18)) {}
+                        if (checkNewPage(16)) {}
                         doc.text(line, contentMargin, yPos);
-                        yPos += 18;
+                        yPos += 16;
                     }
                     
-                    yPos += 5; // Espace après le titre
+                    yPos += 4;
                 }
                 
-                // CONTENU DE LA SECTION
-                doc.setFontSize(10);
+                doc.setFontSize(9.5);
                 doc.setFont('helvetica', 'normal');
                 doc.setTextColor(30, 30, 30);
                 
-                // Séparer en phrases (pour meilleure lisibilité)
                 const sentences = section.content.split(/(?<=[.!?])\s+/).filter(s => s.trim());
                 
                 let currentParagraph = '';
                 
                 for (let sentIndex = 0; sentIndex < sentences.length; sentIndex++) {
                     const sentence = sentences[sentIndex].trim();
-                    
-                    // Construire un paragraphe de 2-3 phrases max
                     currentParagraph += sentence + ' ';
                     
-                    // Créer un nouveau paragraphe tous les 2-3 phrases OU si c'est la dernière phrase
                     const shouldBreak = (sentIndex + 1) % 3 === 0 || sentIndex === sentences.length - 1;
                     
                     if (shouldBreak && currentParagraph.trim()) {
-                        checkNewPage(40);
+                        checkNewPage(35);
                         
                         const lines = doc.splitTextToSize(currentParagraph.trim(), contentWidth);
                         
                         for (const line of lines) {
-                            if (checkNewPage(14)) {}
+                            if (checkNewPage(13)) {}
                             doc.text(line, contentMargin, yPos);
-                            yPos += 14;
+                            yPos += 13;
                         }
                         
-                        yPos += 8; // Espace entre paragraphes
+                        yPos += 7;
                         currentParagraph = '';
                     }
                 }
                 
-                yPos += 10; // Espace après la section
+                yPos += 8;
             }
             
-            yPos += 5;
+            yPos += 3;
             
-            // ==================== CHART IMAGES ====================
-            if (msg.chartImages && msg.chartImages.length > 0) {
-                console.log(`📊 Adding ${msg.chartImages.length} charts for message ${i + 1}`);
+            // ==================== VISUAL ELEMENTS ====================
+            if (msg.visualImages && msg.visualImages.length > 0) {
+                console.log(`📊 Adding ${msg.visualImages.length} visuals for message ${i + 1}`);
                 
-                for (let chartIndex = 0; chartIndex < msg.chartImages.length; chartIndex++) {
-                    checkNewPage(250);
+                for (let vIndex = 0; vIndex < msg.visualImages.length; vIndex++) {
+                    checkNewPage(230);
                     
-                    const imgWidth = maxWidth - 40;
-                    const imgHeight = 200;
+                    const imgWidth = maxWidth - 30;
+                    const imgHeight = 180;
                     
                     try {
-                        // Bordure
                         doc.setDrawColor(200, 200, 200);
-                        doc.setLineWidth(1);
-                        doc.roundedRect(margin + 20 - 2, yPos - 2, imgWidth + 4, imgHeight + 4, 3, 3, 'S');
+                        doc.setLineWidth(0.5);
+                        doc.roundedRect(margin + 15 - 1, yPos - 1, imgWidth + 2, imgHeight + 2, 2, 2, 'S');
                         
-                        // Image
                         doc.addImage(
-                            msg.chartImages[chartIndex],
+                            msg.visualImages[vIndex].data,
                             'PNG',
-                            margin + 20,
+                            margin + 15,
                             yPos,
                             imgWidth,
                             imgHeight,
@@ -884,32 +933,30 @@ class ChatbotModals {
                             'FAST'
                         );
                         
-                        yPos += imgHeight + 25;
+                        yPos += imgHeight + 18;
                         
-                        console.log(`✅ Chart ${chartIndex + 1}/${msg.chartImages.length} added to PDF`);
+                        console.log(`✅ Visual ${vIndex + 1}/${msg.visualImages.length} added`);
                     } catch (error) {
-                        console.error(`❌ Failed to add chart ${chartIndex + 1}:`, error);
+                        console.error(`❌ Failed to add visual ${vIndex + 1}:`, error);
                     }
                 }
             }
             
-            // Timestamp
             if (msg.timestamp) {
-                doc.setFontSize(8);
-                doc.setTextColor(150, 150, 150);
+                doc.setFontSize(7.5);
+                doc.setTextColor(140, 140, 140);
                 doc.setFont('helvetica', 'italic');
                 doc.text(`Time: ${msg.timestamp}`, contentMargin, yPos);
-                yPos += 15;
+                yPos += 13;
             }
             
-            yPos += 15;
+            yPos += 12;
             
-            // Separator
             if (i < messages.length - 1) {
                 doc.setDrawColor(220, 220, 220);
-                doc.setLineWidth(0.5);
+                doc.setLineWidth(0.3);
                 doc.line(margin, yPos, pageWidth - margin, yPos);
-                yPos += 25;
+                yPos += 22;
             }
         }
         
@@ -920,24 +967,24 @@ class ChatbotModals {
             doc.setPage(i);
             
             doc.setDrawColor(220, 220, 220);
-            doc.setLineWidth(0.5);
-            doc.line(margin, pageHeight - 35, pageWidth - margin, pageHeight - 35);
+            doc.setLineWidth(0.3);
+            doc.line(margin, pageHeight - 32, pageWidth - margin, pageHeight - 32);
             
-            doc.setFontSize(8);
+            doc.setFontSize(7.5);
             doc.setFont('helvetica', 'normal');
-            doc.setTextColor(150, 150, 150);
+            doc.setTextColor(140, 140, 140);
             
             const footerText = `Page ${i} of ${totalPages} | Generated by AlphaVault AI - alphavault-ai.com`;
             const textWidth = doc.getTextWidth(footerText);
-            doc.text(footerText, (pageWidth - textWidth) / 2, pageHeight - 18);
+            doc.text(footerText, (pageWidth - textWidth) / 2, pageHeight - 16);
         }
         
         doc.save(`${filename}.pdf`);
-        console.log('✅ PDF with professional formatting generated successfully!');
+        console.log('✅ Professional PDF generated successfully!');
     }
 
     /**
-     * GET MESSAGES (WITHOUT CHARTS - FOR TXT/JSON)
+     * GET MESSAGES (TEXT ONLY)
      */
     getConversationMessages() {
         const messagesContainer = document.getElementById('chatbot-messages-content');
@@ -950,7 +997,7 @@ class ChatbotModals {
             
             messages.push({
                 role: isUser ? 'user' : 'assistant',
-                content: text.trim(),
+                content: this.cleanText(text.trim()),
                 timestamp: time
             });
         });
@@ -998,7 +1045,7 @@ class ChatbotModals {
             container.style.overflow = originalOverflow;
             
             const timestamp = new Date().toISOString().slice(0, 10);
-            const filename = `alphy-ai-screenshot-${timestamp}.png`;
+            const filename = `alphavault-ai-screenshot-${timestamp}.png`;
             
             canvas.toBlob((blob) => {
                 const url = URL.createObjectURL(blob);
@@ -1026,7 +1073,7 @@ class ChatbotModals {
      * DOWNLOAD TEXT FILE
      */
     async downloadTextFile(messages, filename) {
-        let content = `ALPHY AI - FINANCIAL ASSISTANT CONVERSATION\n`;
+        let content = `ALPHAVAULT AI - FINANCIAL ASSISTANT CONVERSATION\n`;
         content += `${'='.repeat(70)}\n`;
         content += `Export Date: ${new Date().toLocaleString()}\n`;
         content += `Total Messages: ${messages.length}\n`;
@@ -1051,8 +1098,8 @@ class ChatbotModals {
      */
     async downloadJSONFile(messages, filename) {
         const data = {
-            platform: 'Alphy AI - Financial Assistant',
-            version: '6.0',
+            platform: 'AlphaVault AI - Financial Assistant',
+            version: '7.1',
             exportDate: new Date().toISOString(),
             totalMessages: messages.length,
             messages: messages.map(msg => ({
@@ -1149,8 +1196,63 @@ class ChatbotModals {
     }
 
     /**
-     * ✅ FIREBASE: SAVE SETTINGS
+     * ✅ TOGGLE COMPACT MODE - FONCTIONNALITÉ COMPLÈTE
      */
+    toggleCompactMode(enabled) {
+        const chatbotContainer = document.querySelector('.chatbot-container') || 
+                                 document.querySelector('#chatbot-window') ||
+                                 document.querySelector('.chatbot-messages');
+        
+        if (!chatbotContainer) {
+            console.warn('⚠ Chatbot container not found for compact mode');
+            return;
+        }
+        
+        if (enabled) {
+            chatbotContainer.classList.add('compact-mode');
+            console.log('✅ Compact mode enabled');
+        } else {
+            chatbotContainer.classList.remove('compact-mode');
+            console.log('✅ Compact mode disabled');
+        }
+        
+        // Ajouter les styles CSS si nécessaire
+        if (!document.getElementById('compact-mode-styles')) {
+            const style = document.createElement('style');
+            style.id = 'compact-mode-styles';
+            style.textContent = `
+                .compact-mode .message {
+                    padding: 8px 12px !important;
+                    margin-bottom: 8px !important;
+                }
+                
+                .compact-mode .message-text {
+                    font-size: 13px !important;
+                    line-height: 1.4 !important;
+                }
+                
+                .compact-mode .message-time {
+                    font-size: 10px !important;
+                    margin-top: 4px !important;
+                }
+                
+                .compact-mode .message-avatar {
+                    width: 28px !important;
+                    height: 28px !important;
+                }
+                
+                .compact-mode .chatbot-header {
+                    padding: 12px 16px !important;
+                }
+                
+                .compact-mode .chatbot-input-container {
+                    padding: 10px !important;
+                }
+            `;
+            document.head.appendChild(style);
+        }
+    }
+
     async saveSettings() {
         if (!this.currentUser) {
             this.showSuccessMessage('Please login to save settings', true);
@@ -1165,16 +1267,16 @@ class ChatbotModals {
             enterBehavior: document.getElementById('enter-behavior-select')?.value,
             compactMode: document.getElementById('compact-mode-toggle')?.checked,
             showAvatars: document.getElementById('show-avatars-toggle')?.checked,
-            desktopNotifications: document.getElementById('desktop-notifications-toggle')?.checked,
             soundAlerts: document.getElementById('sound-alerts-toggle')?.checked,
             emailDigest: document.getElementById('email-digest-toggle')?.checked,
-            saveHistory: document.getElementById('save-history-toggle')?.checked,
-            analytics: document.getElementById('analytics-toggle')?.checked,
             updatedAt: firebase.firestore.FieldValue.serverTimestamp()
         };
         
         try {
             await this.db.collection('users').doc(this.currentUser.uid).collection('settings').doc('chatbot').set(settings);
+            
+            // ✅ Appliquer le mode compact immédiatement
+            this.toggleCompactMode(settings.compactMode);
             
             this.showSuccessMessage('Settings saved to Firebase!');
             console.log('💾 Settings saved to Firebase:', settings);
@@ -1188,9 +1290,6 @@ class ChatbotModals {
         }
     }
 
-    /**
-     * ✅ FIREBASE: LOAD SETTINGS
-     */
     async loadSettings() {
         if (!this.currentUser) {
             console.log('⚠ No user logged in, using defaults');
@@ -1215,11 +1314,11 @@ class ChatbotModals {
             document.getElementById('timestamps-toggle').checked = settings.timestamps ?? true;
             document.getElementById('compact-mode-toggle').checked = settings.compactMode ?? false;
             document.getElementById('show-avatars-toggle').checked = settings.showAvatars ?? true;
-            document.getElementById('desktop-notifications-toggle').checked = settings.desktopNotifications ?? false;
             document.getElementById('sound-alerts-toggle').checked = settings.soundAlerts ?? true;
             document.getElementById('email-digest-toggle').checked = settings.emailDigest ?? false;
-            document.getElementById('save-history-toggle').checked = settings.saveHistory ?? true;
-            document.getElementById('analytics-toggle').checked = settings.analytics ?? true;
+            
+            // ✅ Appliquer le mode compact au chargement
+            this.toggleCompactMode(settings.compactMode ?? false);
             
             console.log('⚙ Settings loaded from Firebase');
         } catch (error) {
@@ -1227,9 +1326,6 @@ class ChatbotModals {
         }
     }
 
-    /**
-     * ✅ FIREBASE: RESET SETTINGS
-     */
     async resetSettings() {
         if (!confirm('Are you sure you want to reset all settings to defaults?')) {
             return;
@@ -1256,49 +1352,6 @@ class ChatbotModals {
         }
     }
 
-    /**
-     * ✅ FIREBASE: CLEAR ALL DATA
-     */
-    async clearAllData() {
-        if (!confirm('⚠ This will delete ALL your conversations and settings from Firebase. This action cannot be undone. Are you sure?')) {
-            return;
-        }
-        
-        if (!this.currentUser) {
-            this.showSuccessMessage('Please login to clear data', true);
-            return;
-        }
-        
-        try {
-            const batch = this.db.batch();
-            
-            const settingsRef = this.db.collection('users').doc(this.currentUser.uid).collection('settings').doc('chatbot');
-            batch.delete(settingsRef);
-            
-            const conversationsSnapshot = await this.db.collection('users').doc(this.currentUser.uid).collection('conversations').get();
-            
-            conversationsSnapshot.forEach(doc => {
-                batch.delete(doc.ref);
-            });
-            
-            await batch.commit();
-            
-            this.showSuccessMessage('All data cleared from Firebase!');
-            
-            setTimeout(() => {
-                location.reload();
-            }, 1500);
-            
-            console.log('🗑 All data cleared from Firebase');
-        } catch (error) {
-            console.error('❌ Firebase clear error:', error);
-            this.showSuccessMessage('Failed to clear data', true);
-        }
-    }
-
-    /**
-     * ✅ FIREBASE: SAVE CONVERSATION
-     */
     async saveConversation(messages, conversationId = null) {
         if (!this.currentUser) {
             console.log('⚠ No user logged in, cannot save conversation');
@@ -1306,8 +1359,8 @@ class ChatbotModals {
         }
         
         const settings = await this.getSettings();
-        if (!settings.saveHistory) {
-            console.log('ℹ Save history disabled in settings');
+        if (!settings.autoSave) {
+            console.log('ℹ Auto-save disabled in settings');
             return null;
         }
         
@@ -1332,9 +1385,6 @@ class ChatbotModals {
         }
     }
 
-    /**
-     * ✅ FIREBASE: LOAD CONVERSATIONS
-     */
     async loadConversations() {
         if (!this.currentUser) {
             console.log('⚠ No user logged in, cannot load conversations');
@@ -1365,19 +1415,16 @@ class ChatbotModals {
         }
     }
 
-    /**
-     * Helper: Get current settings
-     */
     async getSettings() {
         if (!this.currentUser) {
-            return { saveHistory: false };
+            return { autoSave: false };
         }
         
         try {
             const doc = await this.db.collection('users').doc(this.currentUser.uid).collection('settings').doc('chatbot').get();
-            return doc.exists ? doc.data() : { saveHistory: true };
+            return doc.exists ? doc.data() : { autoSave: true };
         } catch (error) {
-            return { saveHistory: false };
+            return { autoSave: false };
         }
     }
 }
