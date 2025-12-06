@@ -1,24 +1,57 @@
 /* ============================================
    CHATBOT MODALS - SHARE & SETTINGS
-   Version 2.0 - ULTRA ADVANCED EDITION
-   ✅ PDF Export (jsPDF)
+   Version 3.0 - FIREBASE EDITION
+   ✅ PDF Export (jsPDF) - FORMATAGE AMÉLIORÉ
    ✅ Screenshot (html2canvas)
-   ✅ Advanced sharing options
-   ✅ Settings without particles/animations toggles
+   ✅ Firebase Integration pour Settings
+   ✅ Firebase Integration pour Conversations
+   ✅ Sans localStorage - 100% Cloud
    ============================================ */
 
 class ChatbotModals {
     constructor() {
         this.modals = {};
+        this.db = null;
+        this.currentUser = null;
         this.init();
     }
 
-    init() {
-        console.log('🎭 Initializing Advanced Chatbot Modals...');
+    async init() {
+        console.log('🎭 Initializing Advanced Chatbot Modals (Firebase Edition)...');
+        
+        // Wait for Firebase Auth
+        await this.waitForAuth();
+        
         this.createModalsHTML();
         this.attachEventListeners();
-        this.loadSettings();
+        await this.loadSettings();
+        
         console.log('✅ Advanced Modals initialized successfully!');
+    }
+
+    /**
+     * Attendre que Firebase Auth soit prêt
+     */
+    waitForAuth() {
+        return new Promise((resolve) => {
+            if (typeof firebase === 'undefined') {
+                console.error('❌ Firebase not loaded!');
+                resolve();
+                return;
+            }
+            
+            this.db = firebase.firestore();
+            
+            firebase.auth().onAuthStateChanged((user) => {
+                if (user) {
+                    this.currentUser = user;
+                    console.log('✅ User authenticated:', user.email);
+                } else {
+                    console.log('⚠ No user authenticated');
+                }
+                resolve();
+            });
+        });
     }
 
     /**
@@ -28,9 +61,7 @@ class ChatbotModals {
         const modalsContainer = document.createElement('div');
         modalsContainer.id = 'chatbot-modals-container';
         modalsContainer.innerHTML = `
-            <!-- ========================================
-                 SHARE MODAL - ADVANCED VERSION
-                 ======================================== -->
+            <!-- SHARE MODAL -->
             <div class="chatbot-modal" id="share-modal">
                 <div class="modal-overlay"></div>
                 <div class="modal-content">
@@ -87,7 +118,6 @@ class ChatbotModals {
                             </button>
                         </div>
                         
-                        <!-- Export Format Selection (Hidden by default) -->
                         <div class="export-format-selector" id="export-format-selector" style="display: none;">
                             <h3 class="export-format-title">Choose Export Format</h3>
                             <div class="export-format-buttons">
@@ -106,7 +136,6 @@ class ChatbotModals {
                             </div>
                         </div>
                         
-                        <!-- Screenshot Options -->
                         <div class="screenshot-options" id="screenshot-options" style="display: none;">
                             <h3 class="export-format-title">Screenshot Options</h3>
                             <div class="export-format-buttons">
@@ -121,13 +150,11 @@ class ChatbotModals {
                             </div>
                         </div>
                         
-                        <!-- Success Message -->
                         <div class="share-success-message" id="share-success-message" style="display: none;">
                             <i class="fas fa-check-circle"></i>
                             <span>Link copied to clipboard!</span>
                         </div>
                         
-                        <!-- Loading Indicator -->
                         <div class="export-loading" id="export-loading" style="display: none;">
                             <div class="loading-spinner"></div>
                             <span>Generating export...</span>
@@ -136,9 +163,7 @@ class ChatbotModals {
                 </div>
             </div>
 
-            <!-- ========================================
-                 SETTINGS MODAL - WITHOUT PARTICLES/ANIMATIONS
-                 ======================================== -->
+            <!-- SETTINGS MODAL -->
             <div class="chatbot-modal" id="settings-modal">
                 <div class="modal-overlay"></div>
                 <div class="modal-content modal-content-large">
@@ -153,7 +178,6 @@ class ChatbotModals {
                     </div>
                     
                     <div class="modal-body">
-                        <!-- Settings Tabs -->
                         <div class="settings-tabs">
                             <button class="settings-tab active" data-tab="general">
                                 <i class="fas fa-sliders-h"></i>
@@ -173,7 +197,6 @@ class ChatbotModals {
                             </button>
                         </div>
                         
-                        <!-- Settings Content -->
                         <div class="settings-content">
                             <!-- General Tab -->
                             <div class="settings-panel active" data-panel="general">
@@ -195,7 +218,7 @@ class ChatbotModals {
                                 <div class="setting-item">
                                     <div class="setting-info">
                                         <div class="setting-label">Auto-save conversations</div>
-                                        <div class="setting-desc">Automatically save your chat history</div>
+                                        <div class="setting-desc">Automatically save your chat history to Firebase</div>
                                     </div>
                                     <label class="setting-toggle">
                                         <input type="checkbox" id="auto-save-toggle" checked>
@@ -331,7 +354,7 @@ class ChatbotModals {
                                 <div class="setting-item">
                                     <div class="setting-info">
                                         <div class="setting-label">Save conversation history</div>
-                                        <div class="setting-desc">Store your chat history locally</div>
+                                        <div class="setting-desc">Store your chat history in Firebase Cloud</div>
                                     </div>
                                     <label class="setting-toggle">
                                         <input type="checkbox" id="save-history-toggle" checked>
@@ -353,7 +376,7 @@ class ChatbotModals {
                                 <div class="setting-item setting-item-danger">
                                     <div class="setting-info">
                                         <div class="setting-label">Clear all data</div>
-                                        <div class="setting-desc">Delete all conversations and settings</div>
+                                        <div class="setting-desc">Delete all conversations and settings from Firebase</div>
                                     </div>
                                     <button class="setting-danger-btn" id="clear-data-btn">
                                         <i class="fas fa-trash-alt"></i>
@@ -363,7 +386,6 @@ class ChatbotModals {
                             </div>
                         </div>
                         
-                        <!-- Settings Footer -->
                         <div class="settings-footer">
                             <button class="settings-reset-btn" id="reset-settings-btn">
                                 <i class="fas fa-undo"></i>
@@ -386,11 +408,9 @@ class ChatbotModals {
      * Attache les event listeners
      */
     attachEventListeners() {
-        // Open modals
         document.getElementById('share-btn')?.addEventListener('click', () => this.openModal('share-modal'));
         document.getElementById('settings-btn')?.addEventListener('click', () => this.openModal('settings-modal'));
         
-        // Close modals
         document.querySelectorAll('.modal-close').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 const modalId = e.currentTarget.dataset.modal;
@@ -398,7 +418,6 @@ class ChatbotModals {
             });
         });
         
-        // Close on overlay click
         document.querySelectorAll('.modal-overlay').forEach(overlay => {
             overlay.addEventListener('click', (e) => {
                 const modal = e.currentTarget.closest('.chatbot-modal');
@@ -406,20 +425,17 @@ class ChatbotModals {
             });
         });
         
-        // Close on ESC key
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape') {
                 this.closeAllModals();
             }
         });
         
-        // Share options
         document.getElementById('share-link-btn')?.addEventListener('click', () => this.shareViaLink());
         document.getElementById('share-email-btn')?.addEventListener('click', () => this.shareViaEmail());
         document.getElementById('share-export-btn')?.addEventListener('click', () => this.showExportOptions());
         document.getElementById('share-screenshot-btn')?.addEventListener('click', () => this.showScreenshotOptions());
         
-        // Export formats
         document.querySelectorAll('.export-format-btn').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 const format = e.currentTarget.dataset.format;
@@ -429,29 +445,22 @@ class ChatbotModals {
             });
         });
         
-        // Screenshot options
         document.getElementById('screenshot-full')?.addEventListener('click', () => this.takeScreenshot('full'));
         document.getElementById('screenshot-visible')?.addEventListener('click', () => this.takeScreenshot('visible'));
         
-        // Settings tabs
         document.querySelectorAll('.settings-tab').forEach(tab => {
             tab.addEventListener('click', (e) => this.switchTab(e.currentTarget));
         });
         
-        // Settings actions
         document.getElementById('save-settings-btn')?.addEventListener('click', () => this.saveSettings());
         document.getElementById('reset-settings-btn')?.addEventListener('click', () => this.resetSettings());
         document.getElementById('clear-data-btn')?.addEventListener('click', () => this.clearAllData());
         
-        // Theme selector
         document.querySelectorAll('.theme-option').forEach(btn => {
             btn.addEventListener('click', (e) => this.changeTheme(e.currentTarget));
         });
     }
 
-    /**
-     * Ouvrir un modal
-     */
     openModal(modalId) {
         const modal = document.getElementById(modalId);
         if (modal) {
@@ -461,16 +470,12 @@ class ChatbotModals {
         }
     }
 
-    /**
-     * Fermer un modal
-     */
     closeModal(modalId) {
         const modal = document.getElementById(modalId);
         if (modal) {
             modal.classList.remove('active');
             document.body.style.overflow = '';
             
-            // Reset selectors
             const exportSelector = document.getElementById('export-format-selector');
             const screenshotOptions = document.getElementById('screenshot-options');
             if (exportSelector) exportSelector.style.display = 'none';
@@ -480,18 +485,12 @@ class ChatbotModals {
         }
     }
 
-    /**
-     * Fermer tous les modals
-     */
     closeAllModals() {
         document.querySelectorAll('.chatbot-modal.active').forEach(modal => {
             this.closeModal(modal.id);
         });
     }
 
-    /**
-     * Partager via lien
-     */
     async shareViaLink() {
         const conversationId = this.generateConversationId();
         const shareUrl = `${window.location.origin}/shared/${conversationId}`;
@@ -506,9 +505,6 @@ class ChatbotModals {
         }
     }
 
-    /**
-     * Partager via email
-     */
     shareViaEmail() {
         const subject = encodeURIComponent('Check out this Alphy AI conversation');
         const body = encodeURIComponent(`I wanted to share this interesting conversation with Alphy AI:\n\n${window.location.href}`);
@@ -516,9 +512,6 @@ class ChatbotModals {
         console.log('📧 Opening email client...');
     }
 
-    /**
-     * Afficher les options d'export
-     */
     showExportOptions() {
         const exportSelector = document.getElementById('export-format-selector');
         const screenshotOptions = document.getElementById('screenshot-options');
@@ -531,9 +524,6 @@ class ChatbotModals {
         }
     }
 
-    /**
-     * Afficher les options de screenshot
-     */
     showScreenshotOptions() {
         const exportSelector = document.getElementById('export-format-selector');
         const screenshotOptions = document.getElementById('screenshot-options');
@@ -582,6 +572,191 @@ class ChatbotModals {
     }
 
     /**
+     * ✅ NOUVEAU : Export PDF ULTRA-OPTIMISÉ
+     */
+    async downloadPDFFile(messages, filename) {
+        if (typeof window.jspdf === 'undefined') {
+            throw new Error('jsPDF library not loaded');
+        }
+        
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF({
+            unit: 'pt',
+            format: 'a4'
+        });
+        
+        // Page dimensions
+        const pageWidth = doc.internal.pageSize.getWidth();
+        const pageHeight = doc.internal.pageSize.getHeight();
+        const margin = 40;
+        const maxWidth = pageWidth - 2 * margin;
+        let yPos = margin;
+        
+        // Helper function to add new page if needed
+        const checkNewPage = (requiredSpace = 60) => {
+            if (yPos + requiredSpace > pageHeight - margin) {
+                doc.addPage();
+                yPos = margin;
+                return true;
+            }
+            return false;
+        };
+        
+        // Helper function for text wrapping
+        const addWrappedText = (text, x, y, maxW, lineHeight, options = {}) => {
+            const lines = doc.splitTextToSize(text, maxW);
+            let currentY = y;
+            
+            lines.forEach((line, index) => {
+                if (checkNewPage(lineHeight)) {
+                    currentY = margin;
+                }
+                
+                doc.text(line, x, currentY, options);
+                currentY += lineHeight;
+            });
+            
+            return currentY;
+        };
+        
+        // ==================== HEADER ====================
+        doc.setFontSize(24);
+        doc.setFont('helvetica', 'bold');
+        doc.setTextColor(102, 126, 234);
+        doc.text('Alphy AI Conversation', margin, yPos);
+        
+        yPos += 20;
+        
+        // Subtitle
+        doc.setFontSize(11);
+        doc.setFont('helvetica', 'normal');
+        doc.setTextColor(100, 100, 100);
+        doc.text(`Export Date: ${new Date().toLocaleString('en-US', { 
+            year: 'numeric', 
+            month: '2-digit', 
+            day: '2-digit', 
+            hour: '2-digit', 
+            minute: '2-digit' 
+        })}`, margin, yPos);
+        
+        yPos += 15;
+        doc.text(`Total Messages: ${messages.length}`, margin, yPos);
+        
+        yPos += 20;
+        
+        // Separator line
+        doc.setDrawColor(102, 126, 234);
+        doc.setLineWidth(1.5);
+        doc.line(margin, yPos, pageWidth - margin, yPos);
+        
+        yPos += 30;
+        
+        // ==================== MESSAGES ====================
+        messages.forEach((msg, index) => {
+            checkNewPage(100);
+            
+            // Message header background
+            const headerHeight = 25;
+            const isUser = msg.role === 'user';
+            
+            // Background color
+            if (isUser) {
+                doc.setFillColor(59, 130, 246, 0.1);
+            } else {
+                doc.setFillColor(102, 126, 234, 0.1);
+            }
+            
+            doc.roundedRect(margin, yPos - 15, maxWidth, headerHeight, 3, 3, 'F');
+            
+            // Role icon and text
+            doc.setFontSize(12);
+            doc.setFont('helvetica', 'bold');
+            
+            if (isUser) {
+                doc.setTextColor(59, 130, 246);
+                doc.text(`👤 USER`, margin + 10, yPos);
+            } else {
+                doc.setTextColor(102, 126, 234);
+                doc.text(`🤖 ASSISTANT`, margin + 10, yPos);
+            }
+            
+            yPos += headerHeight + 5;
+            
+            // Message content
+            doc.setFontSize(10);
+            doc.setFont('helvetica', 'normal');
+            doc.setTextColor(30, 30, 30);
+            
+            // Split content into paragraphs
+            const paragraphs = msg.content.split('\n').filter(p => p.trim());
+            
+            paragraphs.forEach((paragraph, pIndex) => {
+                checkNewPage(40);
+                
+                const lines = doc.splitTextToSize(paragraph.trim(), maxWidth - 20);
+                
+                lines.forEach(line => {
+                    if (checkNewPage(14)) {
+                        // Continue on new page
+                    }
+                    doc.text(line, margin + 10, yPos);
+                    yPos += 14;
+                });
+                
+                // Add space between paragraphs
+                if (pIndex < paragraphs.length - 1) {
+                    yPos += 6;
+                }
+            });
+            
+            yPos += 10;
+            
+            // Timestamp
+            if (msg.timestamp) {
+                doc.setFontSize(8);
+                doc.setTextColor(150, 150, 150);
+                doc.text(`Time: ${msg.timestamp}`, margin + 10, yPos);
+                yPos += 12;
+            }
+            
+            yPos += 10;
+            
+            // Separator line between messages
+            if (index < messages.length - 1) {
+                doc.setDrawColor(220, 220, 220);
+                doc.setLineWidth(0.5);
+                doc.line(margin, yPos, pageWidth - margin, yPos);
+                yPos += 20;
+            }
+        });
+        
+        // ==================== FOOTER ON ALL PAGES ====================
+        const totalPages = doc.internal.getNumberOfPages();
+        
+        for (let i = 1; i <= totalPages; i++) {
+            doc.setPage(i);
+            
+            // Footer line
+            doc.setDrawColor(220, 220, 220);
+            doc.setLineWidth(0.5);
+            doc.line(margin, pageHeight - 30, pageWidth - margin, pageHeight - 30);
+            
+            // Footer text
+            doc.setFontSize(8);
+            doc.setFont('helvetica', 'normal');
+            doc.setTextColor(150, 150, 150);
+            
+            const footerText = `Page ${i} of ${totalPages} | Generated by AlphaVault AI - alphavault-ai.com`;
+            const textWidth = doc.getTextWidth(footerText);
+            doc.text(footerText, (pageWidth - textWidth) / 2, pageHeight - 15);
+        }
+        
+        // Save PDF
+        doc.save(`${filename}.pdf`);
+        console.log('✅ PDF generated successfully!');
+    }
+
+    /**
      * Prendre une capture d'écran
      */
     async takeScreenshot(mode = 'full') {
@@ -600,11 +775,9 @@ class ChatbotModals {
                 throw new Error('Messages container not found');
             }
             
-            // Temporarily hide scrollbar
             const originalOverflow = container.style.overflow;
             container.style.overflow = 'visible';
             
-            // Options for html2canvas
             const options = {
                 backgroundColor: '#ffffff',
                 scale: 2,
@@ -620,10 +793,8 @@ class ChatbotModals {
             
             const canvas = await html2canvas(container, options);
             
-            // Restore scrollbar
             container.style.overflow = originalOverflow;
             
-            // Download image
             const timestamp = new Date().toISOString().slice(0, 10);
             const filename = `alphy-ai-screenshot-${timestamp}.png`;
             
@@ -676,20 +847,20 @@ class ChatbotModals {
      */
     async downloadTextFile(messages, filename) {
         let content = `ALPHY AI - FINANCIAL ASSISTANT CONVERSATION\n`;
-        content += `${'='.repeat(60)}\n`;
+        content += `${'='.repeat(70)}\n`;
         content += `Export Date: ${new Date().toLocaleString()}\n`;
         content += `Total Messages: ${messages.length}\n`;
-        content += `${'='.repeat(60)}\n\n`;
+        content += `${'='.repeat(70)}\n\n`;
         
         messages.forEach((msg, index) => {
             content += `[${index + 1}] ${msg.role.toUpperCase()}\n`;
-            content += `${'-'.repeat(60)}\n`;
+            content += `${'-'.repeat(70)}\n`;
             content += `${msg.content}\n`;
             if (msg.timestamp) content += `Time: ${msg.timestamp}\n`;
             content += `\n`;
         });
         
-        content += `\n${'='.repeat(60)}\n`;
+        content += `\n${'='.repeat(70)}\n`;
         content += `Generated by AlphaVault AI - https://alphavault-ai.com\n`;
         
         this.downloadFile(content, `${filename}.txt`, 'text/plain');
@@ -701,7 +872,7 @@ class ChatbotModals {
     async downloadJSONFile(messages, filename) {
         const data = {
             platform: 'Alphy AI - Financial Assistant',
-            version: '2.0',
+            version: '3.0',
             exportDate: new Date().toISOString(),
             totalMessages: messages.length,
             messages: messages,
@@ -713,118 +884,6 @@ class ChatbotModals {
         
         const content = JSON.stringify(data, null, 2);
         this.downloadFile(content, `${filename}.json`, 'application/json');
-    }
-
-    /**
-     * ✅ NOUVEAU : Télécharger en PDF (avec jsPDF)
-     */
-    async downloadPDFFile(messages, filename) {
-        if (typeof window.jspdf === 'undefined') {
-            throw new Error('jsPDF library not loaded');
-        }
-        
-        const { jsPDF } = window.jspdf;
-        const doc = new jsPDF();
-        
-        // Configuration
-        const pageWidth = doc.internal.pageSize.getWidth();
-        const pageHeight = doc.internal.pageSize.getHeight();
-        const margin = 20;
-        const maxWidth = pageWidth - 2 * margin;
-        let yPosition = margin;
-        
-        // Header
-        doc.setFontSize(20);
-        doc.setFont('helvetica', 'bold');
-        doc.text('Alphy AI Conversation', margin, yPosition);
-        
-        yPosition += 10;
-        doc.setFontSize(10);
-        doc.setFont('helvetica', 'normal');
-        doc.setTextColor(100, 100, 100);
-        doc.text(`Export Date: ${new Date().toLocaleString()}`, margin, yPosition);
-        
-        yPosition += 5;
-        doc.text(`Total Messages: ${messages.length}`, margin, yPosition);
-        
-        yPosition += 10;
-        doc.setDrawColor(102, 126, 234);
-        doc.setLineWidth(0.5);
-        doc.line(margin, yPosition, pageWidth - margin, yPosition);
-        
-        yPosition += 10;
-        
-        // Messages
-        messages.forEach((msg, index) => {
-            // Check if we need a new page
-            if (yPosition > pageHeight - 40) {
-                doc.addPage();
-                yPosition = margin;
-            }
-            
-            // Role header
-            doc.setFontSize(12);
-            doc.setFont('helvetica', 'bold');
-            
-            if (msg.role === 'user') {
-                doc.setTextColor(59, 130, 246);
-                doc.text(`👤 USER`, margin, yPosition);
-            } else {
-                doc.setTextColor(102, 126, 234);
-                doc.text(`🤖 ASSISTANT`, margin, yPosition);
-            }
-            
-            yPosition += 7;
-            
-            // Message content
-            doc.setFontSize(10);
-            doc.setFont('helvetica', 'normal');
-            doc.setTextColor(0, 0, 0);
-            
-            const lines = doc.splitTextToSize(msg.content, maxWidth);
-            lines.forEach(line => {
-                if (yPosition > pageHeight - 20) {
-                    doc.addPage();
-                    yPosition = margin;
-                }
-                doc.text(line, margin, yPosition);
-                yPosition += 5;
-            });
-            
-            // Timestamp
-            if (msg.timestamp) {
-                doc.setFontSize(8);
-                doc.setTextColor(150, 150, 150);
-                doc.text(`Time: ${msg.timestamp}`, margin, yPosition);
-                yPosition += 5;
-            }
-            
-            yPosition += 5;
-            
-            // Separator line
-            doc.setDrawColor(220, 220, 220);
-            doc.setLineWidth(0.2);
-            doc.line(margin, yPosition, pageWidth - margin, yPosition);
-            
-            yPosition += 7;
-        });
-        
-        // Footer on last page
-        const totalPages = doc.internal.getNumberOfPages();
-        for (let i = 1; i <= totalPages; i++) {
-            doc.setPage(i);
-            doc.setFontSize(8);
-            doc.setTextColor(150, 150, 150);
-            doc.text(
-                `Page ${i} of ${totalPages} | Generated by AlphaVault AI`,
-                pageWidth / 2,
-                pageHeight - 10,
-                { align: 'center' }
-            );
-        }
-        
-        // Save PDF
-        doc.save(`${filename}.pdf`);
     }
 
     /**
@@ -842,16 +901,10 @@ class ChatbotModals {
         URL.revokeObjectURL(url);
     }
 
-    /**
-     * Générer un ID de conversation
-     */
     generateConversationId() {
         return 'conv_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
     }
 
-    /**
-     * Afficher/masquer le loading
-     */
     showLoading(show) {
         const loading = document.getElementById('export-loading');
         if (loading) {
@@ -859,9 +912,6 @@ class ChatbotModals {
         }
     }
 
-    /**
-     * Afficher un message de succès
-     */
     showSuccessMessage(message, isError = false) {
         const successMsg = document.getElementById('share-success-message');
         if (successMsg) {
@@ -886,37 +936,27 @@ class ChatbotModals {
         }
     }
 
-    /**
-     * Changer de tab dans les settings
-     */
     switchTab(tabElement) {
         const targetTab = tabElement.dataset.tab;
         
-        // Update tabs
         document.querySelectorAll('.settings-tab').forEach(t => t.classList.remove('active'));
         tabElement.classList.add('active');
         
-        // Update panels
         document.querySelectorAll('.settings-panel').forEach(p => p.classList.remove('active'));
         document.querySelector(`[data-panel="${targetTab}"]`)?.classList.add('active');
     }
 
-    /**
-     * Changer le thème
-     */
     changeTheme(themeBtn) {
         const theme = themeBtn.dataset.theme;
         
         document.querySelectorAll('.theme-option').forEach(btn => btn.classList.remove('active'));
         themeBtn.classList.add('active');
         
-        // Apply theme
         if (theme === 'dark') {
             document.body.classList.add('dark-mode');
         } else if (theme === 'light') {
             document.body.classList.remove('dark-mode');
         } else {
-            // Auto mode based on system preference
             const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
             document.body.classList.toggle('dark-mode', prefersDark);
         }
@@ -925,9 +965,14 @@ class ChatbotModals {
     }
 
     /**
-     * Sauvegarder les paramètres
+     * ✅ FIREBASE: Sauvegarder les paramètres
      */
-    saveSettings() {
+    async saveSettings() {
+        if (!this.currentUser) {
+            this.showSuccessMessage('Please login to save settings', true);
+            return;
+        }
+        
         const settings = {
             language: document.getElementById('language-select')?.value,
             autoSave: document.getElementById('auto-save-toggle')?.checked,
@@ -940,30 +985,45 @@ class ChatbotModals {
             soundAlerts: document.getElementById('sound-alerts-toggle')?.checked,
             emailDigest: document.getElementById('email-digest-toggle')?.checked,
             saveHistory: document.getElementById('save-history-toggle')?.checked,
-            analytics: document.getElementById('analytics-toggle')?.checked
+            analytics: document.getElementById('analytics-toggle')?.checked,
+            updatedAt: firebase.firestore.FieldValue.serverTimestamp()
         };
         
-        localStorage.setItem('alphyAISettings', JSON.stringify(settings));
-        this.showSuccessMessage('Settings saved successfully!');
-        
-        setTimeout(() => {
-            this.closeModal('settings-modal');
-        }, 1000);
-        
-        console.log('💾 Settings saved:', settings);
+        try {
+            await this.db.collection('users').doc(this.currentUser.uid).collection('settings').doc('chatbot').set(settings);
+            
+            this.showSuccessMessage('Settings saved to Firebase!');
+            console.log('💾 Settings saved to Firebase:', settings);
+            
+            setTimeout(() => {
+                this.closeModal('settings-modal');
+            }, 1000);
+        } catch (error) {
+            console.error('❌ Firebase save error:', error);
+            this.showSuccessMessage('Failed to save settings', true);
+        }
     }
 
     /**
-     * Charger les paramètres
+     * ✅ FIREBASE: Charger les paramètres
      */
-    loadSettings() {
-        const savedSettings = localStorage.getItem('alphyAISettings');
-        if (!savedSettings) return;
+    async loadSettings() {
+        if (!this.currentUser) {
+            console.log('⚠ No user logged in, using defaults');
+            return;
+        }
         
         try {
-            const settings = JSON.parse(savedSettings);
+            const doc = await this.db.collection('users').doc(this.currentUser.uid).collection('settings').doc('chatbot').get();
             
-            // Apply settings
+            if (!doc.exists) {
+                console.log('ℹ No settings found in Firebase, using defaults');
+                return;
+            }
+            
+            const settings = doc.data();
+            
+            // Apply settings to UI
             if (settings.language) document.getElementById('language-select').value = settings.language;
             if (settings.fontSize) document.getElementById('font-size-select').value = settings.fontSize;
             if (settings.enterBehavior) document.getElementById('enter-behavior-select').value = settings.enterBehavior;
@@ -979,38 +1039,166 @@ class ChatbotModals {
             document.getElementById('save-history-toggle').checked = settings.saveHistory ?? true;
             document.getElementById('analytics-toggle').checked = settings.analytics ?? true;
             
-            console.log('⚙ Settings loaded');
-        } catch (err) {
-            console.error('❌ Failed to load settings:', err);
+            console.log('⚙ Settings loaded from Firebase');
+        } catch (error) {
+            console.error('❌ Firebase load error:', error);
         }
     }
 
     /**
-     * Réinitialiser les paramètres
+     * ✅ FIREBASE: Réinitialiser les paramètres
      */
-    resetSettings() {
-        if (confirm('Are you sure you want to reset all settings to defaults?')) {
-            localStorage.removeItem('alphyAISettings');
+    async resetSettings() {
+        if (!confirm('Are you sure you want to reset all settings to defaults?')) {
+            return;
+        }
+        
+        if (!this.currentUser) {
+            this.showSuccessMessage('Please login to reset settings', true);
+            return;
+        }
+        
+        try {
+            await this.db.collection('users').doc(this.currentUser.uid).collection('settings').doc('chatbot').delete();
+            
             this.showSuccessMessage('Settings reset successfully!');
+            
             setTimeout(() => {
                 location.reload();
             }, 1000);
-            console.log('🔄 Settings reset to defaults');
+            
+            console.log('🔄 Settings reset in Firebase');
+        } catch (error) {
+            console.error('❌ Firebase reset error:', error);
+            this.showSuccessMessage('Failed to reset settings', true);
         }
     }
 
     /**
-     * Effacer toutes les données
+     * ✅ FIREBASE: Effacer toutes les données
      */
-    clearAllData() {
-        if (confirm('⚠ This will delete ALL your conversations and settings. This action cannot be undone. Are you sure?')) {
-            localStorage.clear();
-            sessionStorage.clear();
-            this.showSuccessMessage('All data cleared!');
+    async clearAllData() {
+        if (!confirm('⚠ This will delete ALL your conversations and settings from Firebase. This action cannot be undone. Are you sure?')) {
+            return;
+        }
+        
+        if (!this.currentUser) {
+            this.showSuccessMessage('Please login to clear data', true);
+            return;
+        }
+        
+        try {
+            const batch = this.db.batch();
+            
+            // Delete settings
+            const settingsRef = this.db.collection('users').doc(this.currentUser.uid).collection('settings').doc('chatbot');
+            batch.delete(settingsRef);
+            
+            // Delete conversations
+            const conversationsSnapshot = await this.db.collection('users').doc(this.currentUser.uid).collection('conversations').get();
+            
+            conversationsSnapshot.forEach(doc => {
+                batch.delete(doc.ref);
+            });
+            
+            await batch.commit();
+            
+            this.showSuccessMessage('All data cleared from Firebase!');
+            
             setTimeout(() => {
                 location.reload();
             }, 1500);
-            console.log('🗑 All data cleared');
+            
+            console.log('🗑 All data cleared from Firebase');
+        } catch (error) {
+            console.error('❌ Firebase clear error:', error);
+            this.showSuccessMessage('Failed to clear data', true);
+        }
+    }
+
+    /**
+     * ✅ FIREBASE: Sauvegarder une conversation
+     * Cette fonction peut être appelée depuis chatbot-fullpage-ui.js
+     */
+    async saveConversation(messages, conversationId = null) {
+        if (!this.currentUser) {
+            console.log('⚠ No user logged in, cannot save conversation');
+            return null;
+        }
+        
+        const settings = await this.getSettings();
+        if (!settings.saveHistory) {
+            console.log('ℹ Save history disabled in settings');
+            return null;
+        }
+        
+        try {
+            const id = conversationId || this.generateConversationId();
+            
+            const conversationData = {
+                id: id,
+                messages: messages,
+                createdAt: conversationId ? firebase.firestore.FieldValue.serverTimestamp() : firebase.firestore.Timestamp.now(),
+                updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+                messageCount: messages.length
+            };
+            
+            await this.db.collection('users').doc(this.currentUser.uid).collection('conversations').doc(id).set(conversationData);
+            
+            console.log('💾 Conversation saved to Firebase:', id);
+            return id;
+        } catch (error) {
+            console.error('❌ Firebase conversation save error:', error);
+            return null;
+        }
+    }
+
+    /**
+     * ✅ FIREBASE: Charger les conversations
+     */
+    async loadConversations() {
+        if (!this.currentUser) {
+            console.log('⚠ No user logged in, cannot load conversations');
+            return [];
+        }
+        
+        try {
+            const snapshot = await this.db.collection('users')
+                .doc(this.currentUser.uid)
+                .collection('conversations')
+                .orderBy('updatedAt', 'desc')
+                .limit(50)
+                .get();
+            
+            const conversations = [];
+            snapshot.forEach(doc => {
+                conversations.push({
+                    id: doc.id,
+                    ...doc.data()
+                });
+            });
+            
+            console.log(`📚 Loaded ${conversations.length} conversations from Firebase`);
+            return conversations;
+        } catch (error) {
+            console.error('❌ Firebase conversations load error:', error);
+            return [];
+        }
+    }
+
+    /**
+     * Helper: Get current settings
+     */
+    async getSettings() {
+        if (!this.currentUser) {
+            return { saveHistory: false };
+        }
+        
+        try {
+            const doc = await this.db.collection('users').doc(this.currentUser.uid).collection('settings').doc('chatbot').get();
+            return doc.exists ? doc.data() : { saveHistory: true };
+        } catch (error) {
+            return { saveHistory: false };
         }
     }
 }
