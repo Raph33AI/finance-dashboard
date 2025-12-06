@@ -3,11 +3,11 @@
 <head>
     <meta charset='UTF-8'>
     <meta name='viewport' content='width=device-width, initial-scale=1.0'>
-    <meta name='description' content='Professional Market Data Dashboard - Real-time global market overview, advanced screener, live stocks table with sparklines'>
+    <meta name='description' content='Professional Market Data Dashboard - Real-time global market overview, advanced screener, live stocks table'>
     <meta name='author' content='Raphael NARDONE'>
     <meta name='theme-color' content='#2563eb'>
     
-    <title>Market Data - Wall Street Pro</title>
+    <title>Market Data - AlphaVault AI</title>
     
     <!-- Preconnect -->
     <link rel='preconnect' href='https://code.highcharts.com'>
@@ -15,17 +15,11 @@
     
     <!-- Highcharts -->
     <script src='https://code.highcharts.com/stock/highstock.js' defer></script>
-    <script src='https://code.highcharts.com/stock/indicators/indicators-all.js' defer></script>
-    <script src='https://code.highcharts.com/stock/modules/drag-panes.js' defer></script>
-    <script src='https://code.highcharts.com/modules/annotations-advanced.js' defer></script>
-    <script src='https://code.highcharts.com/modules/price-indicator.js' defer></script>
-    <script src='https://code.highcharts.com/modules/full-screen.js' defer></script>
-    <script src='https://code.highcharts.com/modules/stock-tools.js' defer></script>
+    <script src='https://code.highcharts.com/modules/heatmap.js' defer></script>
+    <script src='https://code.highcharts.com/modules/treemap.js' defer></script>
     <script src='https://code.highcharts.com/modules/exporting.js' defer></script>
     <script src='https://code.highcharts.com/modules/export-data.js' defer></script>
     <script src='https://code.highcharts.com/modules/accessibility.js' defer></script>
-    <script src='https://code.highcharts.com/modules/heatmap.js' defer></script>
-    <script src='https://code.highcharts.com/modules/treemap.js' defer></script>
     
     <!-- Font Awesome -->
     <link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css'>
@@ -287,14 +281,18 @@
                             <i class='fas fa-database'></i>
                             <span class='cache-badge-mini' id='cacheBadgeMini'>0</span>
                         </button>
+                        <span id='lastUpdate' style='font-size: 0.85rem; color: var(--text-secondary); margin-left: 10px;'>
+                            Last update: --
+                        </span>
                     </div>
                 </div>
             </header>
             
             <div class='container'>
                 <div class='content'>
+                    
                     <!-- ============================================
-                         🌍 MARKET OVERVIEW HERO (NOUVEAU)
+                         🌍 MARKET OVERVIEW HERO
                          ============================================ -->
                     <section class='market-overview-hero card'>
                         <div class='card-header'>
@@ -313,8 +311,8 @@
                                         <i class='fas fa-chart-line'></i>
                                     </div>
                                     <div class='index-info'>
-                                        <div class='index-name'>S&P 500</div>
-                                        <div class='index-symbol'>^GSPC</div>
+                                        <div class='index-name'>S&P 500 ETF</div>
+                                        <div class='index-symbol'>SPY</div>
                                     </div>
                                     <div class='index-data'>
                                         <div class='index-price'>--</div>
@@ -327,8 +325,8 @@
                                         <i class='fas fa-microchip'></i>
                                     </div>
                                     <div class='index-info'>
-                                        <div class='index-name'>NASDAQ</div>
-                                        <div class='index-symbol'>^IXIC</div>
+                                        <div class='index-name'>NASDAQ ETF</div>
+                                        <div class='index-symbol'>QQQ</div>
                                     </div>
                                     <div class='index-data'>
                                         <div class='index-price'>--</div>
@@ -341,8 +339,8 @@
                                         <i class='fas fa-landmark'></i>
                                     </div>
                                     <div class='index-info'>
-                                        <div class='index-name'>Dow Jones</div>
-                                        <div class='index-symbol'>^DJI</div>
+                                        <div class='index-name'>Dow Jones ETF</div>
+                                        <div class='index-symbol'>DIA</div>
                                     </div>
                                     <div class='index-data'>
                                         <div class='index-price'>--</div>
@@ -355,8 +353,8 @@
                                         <i class='fas fa-bolt'></i>
                                     </div>
                                     <div class='index-info'>
-                                        <div class='index-name'>VIX (Fear)</div>
-                                        <div class='index-symbol'>^VIX</div>
+                                        <div class='index-name'>VIX ETF (Fear)</div>
+                                        <div class='index-symbol'>VIXY</div>
                                     </div>
                                     <div class='index-data'>
                                         <div class='index-price'>--</div>
@@ -369,29 +367,29 @@
                                 <div class='market-stat-card'>
                                     <i class='fas fa-chart-bar'></i>
                                     <div class='stat-label'>Total Volume</div>
-                                    <div class='stat-value' id='totalVolume'>--</div>
+                                    <div class='stat-value' id='totalVolume'>12.5B</div>
                                 </div>
                                 <div class='market-stat-card'>
                                     <i class='fas fa-arrow-trend-up'></i>
                                     <div class='stat-label'>Advancing</div>
-                                    <div class='stat-value' id='advancingStocks'>--</div>
+                                    <div class='stat-value' id='advancingStocks'>2,847</div>
                                 </div>
                                 <div class='market-stat-card'>
                                     <i class='fas fa-arrow-trend-down'></i>
                                     <div class='stat-label'>Declining</div>
-                                    <div class='stat-value' id='decliningStocks'>--</div>
+                                    <div class='stat-value' id='decliningStocks'>1,253</div>
                                 </div>
                                 <div class='market-stat-card'>
                                     <i class='fas fa-fire'></i>
                                     <div class='stat-label'>52W Highs</div>
-                                    <div class='stat-value' id='new52wHighs'>--</div>
+                                    <div class='stat-value' id='new52wHighs'>342</div>
                                 </div>
                             </div>
                         </div>
                     </section>
                     
                     <!-- ============================================
-                         🔍 ADVANCED MARKET SCREENER (NOUVEAU)
+                         🔍 ADVANCED MARKET SCREENER
                          ============================================ -->
                     <section class='market-screener card'>
                         <div class='card-header'>
@@ -436,28 +434,6 @@
                                 </div>
                                 
                                 <div class='filter-group'>
-                                    <label><i class='fas fa-chart-line'></i> Performance</label>
-                                    <select id='filterPerformance' class='filter-select'>
-                                        <option value=''>All</option>
-                                        <option value='1d'>1 Day</option>
-                                        <option value='1w'>1 Week</option>
-                                        <option value='1m'>1 Month</option>
-                                        <option value='3m'>3 Months</option>
-                                        <option value='ytd'>YTD</option>
-                                    </select>
-                                </div>
-                                
-                                <div class='filter-group'>
-                                    <label><i class='fas fa-percentage'></i> P/E Ratio</label>
-                                    <select id='filterPE' class='filter-select'>
-                                        <option value=''>All</option>
-                                        <option value='low'>Low (< 15)</option>
-                                        <option value='moderate'>Moderate (15-25)</option>
-                                        <option value='high'>High (> 25)</option>
-                                    </select>
-                                </div>
-                                
-                                <div class='filter-group'>
                                     <button class='btn-apply-filters' onclick='MarketData.applyFilters()'>
                                         <i class='fas fa-check'></i> Apply Filters
                                     </button>
@@ -467,7 +443,7 @@
                     </section>
                     
                     <!-- ============================================
-                         📊 LIVE STOCKS TABLE (NOUVEAU)
+                         📊 LIVE STOCKS TABLE
                          ============================================ -->
                     <section class='live-stocks-table card'>
                         <div class='card-header'>
@@ -528,7 +504,7 @@
                     </section>
                     
                     <!-- ============================================
-                         🔥 TOP MOVERS (NOUVEAU)
+                         🔥 TOP MOVERS
                          ============================================ -->
                     <section class='top-movers card'>
                         <div class='card-header'>
@@ -576,7 +552,7 @@
                     </section>
                     
                     <!-- ============================================
-                         📈 SECTOR PERFORMANCE (NOUVEAU)
+                         📈 SECTOR PERFORMANCE
                          ============================================ -->
                     <section class='sector-performance card'>
                         <div class='card-header'>
@@ -591,7 +567,7 @@
                     </section>
                     
                     <!-- ============================================
-                         🗺 HEAT MAP (NOUVEAU)
+                         🗺 HEAT MAP
                          ============================================ -->
                     <section class='heat-map card'>
                         <div class='card-header'>
@@ -606,7 +582,7 @@
                     </section>
 
                     <!-- ============================================
-                         💼 PORTFOLIO MANAGEMENT (CONSERVÉ)
+                         💼 PORTFOLIO MANAGEMENT
                          ============================================ -->
                     <section class='card portfolio-management-section'>
                         <div class='card-header'>
@@ -628,17 +604,8 @@
                                     <button class='btn btn-success' onclick='PortfolioManager.createNewPortfolio()'>
                                         <i class='fas fa-plus-circle'></i> New Portfolio
                                     </button>
-                                    <button class='btn btn-primary' onclick='MarketData.saveCurrentPortfolio()'>
-                                        <i class='fas fa-cloud-upload-alt'></i> Save Current
-                                    </button>
                                     <button class='btn btn-secondary' onclick='openPortfoliosModal()'>
                                         <i class='fas fa-list'></i> Manage Portfolios
-                                    </button>
-                                    <button class='btn btn-secondary' onclick='MarketData.exportPortfolioJSON()'>
-                                        <i class='fas fa-file-export'></i> Export JSON
-                                    </button>
-                                    <button class='btn btn-secondary' onclick='MarketData.importPortfolioJSON()'>
-                                        <i class='fas fa-file-import'></i> Import JSON
                                     </button>
                                     
                                     <div style='width: 100%; height: 1px; background: rgba(255,255,255,0.2); margin: 5px 0;'></div>
@@ -654,116 +621,16 @@
                             
                             <div class='info-box info-box-white-text' style='margin-top: 1rem; margin-bottom: 0;'>
                                 <h4><i class='fas fa-info-circle'></i> How it works</h4>
-                                <p>Create multiple portfolios to organize your watchlists, alerts, and stock comparisons. All portfolios are automatically saved to the cloud and accessible from any device.</p>
+                                <p>Create multiple portfolios to organize your watchlists and alerts. All portfolios are automatically saved to the cloud and accessible from any device.</p>
                                 <p style='margin-top: 0.5rem; margin-bottom: 0; font-size: 0.9em; opacity: 0.9;'>
-                                    <i class='fas fa-database'></i> <strong>Cache System:</strong> Data is cached locally to reduce API calls. Rate limit: 8 requests/minute.
+                                    <i class='fas fa-database'></i> <strong>Cache System:</strong> Data is cached locally to reduce API calls. Rate limit: 60 requests/minute (Finnhub free tier).
                                 </p>
-                            </div>
-                        </div>
-                    </section>
-
-                    <!-- ============================================
-                         🔍 SEARCH PANEL (CONSERVÉ)
-                         ============================================ -->
-                    <section class='search-panel card'>
-                        <div class='card-header'>
-                            <h2 class='card-title'>
-                                <i class='fas fa-search'></i> Search Stock for Analysis
-                            </h2>
-                            <button class='help-icon' onclick='openModal("modalSearchHelp")'>?</button>
-                        </div>
-                        
-                        <div class='card-body'>
-                            <div class='search-container'>
-                                <div class='search-input-wrapper'>
-                                    <input type='text' id='symbolInput' class='form-input'
-                                        placeholder='Search by symbol or company name (e.g., AAPL, Apple, Tesla)...'
-                                        autocomplete='off' value='AAPL'>
-                                    <button class='btn btn-primary btn-search' onclick='MarketData.searchStock()'>
-                                        <i class='fas fa-chart-area'></i> Analyze Stock
-                                    </button>
-                                    
-                                    <div class='search-suggestions' id='searchSuggestions'></div>
-                                </div>
-                                
-                                <div class='popular-stocks'>
-                                    <span class='quick-label'>Popular Stocks:</span>
-                                    <button class='symbol-chip' onclick='MarketData.loadSymbol("AAPL")'>
-                                        <i class='fab fa-apple'></i> AAPL
-                                    </button>
-                                    <button class='symbol-chip' onclick='MarketData.loadSymbol("MSFT")'>
-                                        <i class='fab fa-microsoft'></i> MSFT
-                                    </button>
-                                    <button class='symbol-chip' onclick='MarketData.loadSymbol("GOOGL")'>
-                                        <i class='fab fa-google'></i> GOOGL
-                                    </button>
-                                    <button class='symbol-chip' onclick='MarketData.loadSymbol("TSLA")'>
-                                        <i class='fas fa-car'></i> TSLA
-                                    </button>
-                                    <button class='symbol-chip' onclick='MarketData.loadSymbol("BTC-USD")'>
-                                        <i class='fab fa-bitcoin'></i> BTC-USD
-                                    </button>
-                                    <button class='symbol-chip' onclick='MarketData.loadSymbol("^GSPC")'>
-                                        <i class='fas fa-chart-line'></i> S&P 500
-                                    </button>
-                                </div>
-                                
-                                <div class='time-period-selector'>
-                                    <label>Time Period:</label>
-                                    <button class='period-btn active' data-period='1M' onclick='MarketData.changePeriod("1M")'>1M</button>
-                                    <button class='period-btn' data-period='3M' onclick='MarketData.changePeriod("3M")'>3M</button>
-                                    <button class='period-btn' data-period='6M' onclick='MarketData.changePeriod("6M")'>6M</button>
-                                    <button class='period-btn' data-period='1Y' onclick='MarketData.changePeriod("1Y")'>1Y</button>
-                                    <button class='period-btn' data-period='5Y' onclick='MarketData.changePeriod("5Y")'>5Y</button>
-                                    <button class='period-btn' data-period='MAX' onclick='MarketData.changePeriod("MAX")'>MAX</button>
-                                </div>
-                            </div>
-                        </div>
-                    </section>
-
-                    <!-- ============================================
-                         📊 STOCK COMPARISON (CONSERVÉ)
-                         ============================================ -->
-                    <section class='comparison-section card'>
-                        <div class='card-header comparison-header'>
-                            <h2 class='card-title'>
-                                <i class='fas fa-chart-bar'></i> Stock Comparison
-                            </h2>
-                            <div class='comparison-actions'>
-                                <button class='btn btn-primary btn-compare' onclick='MarketData.openComparisonModal()'>
-                                    <i class='fas fa-plus'></i> Add Stocks to Compare
-                                </button>
-                                <button class='btn btn-danger btn-clear-comparison' onclick='MarketData.clearComparison()'>
-                                    <i class='fas fa-trash'></i> Clear All
-                                </button>
-                            </div>
-                        </div>
-                        
-                        <div class='card-body'>
-                            <div id='comparisonContainer' class='comparison-container hidden'>
-                                <div class='comparison-stocks' id='comparisonStocks'></div>
-                                
-                                <div class='comparison-chart-wrapper'>
-                                    <h3 class='subsection-title'>Performance Comparison (Normalized to 100)</h3>
-                                    <div id='comparisonChart' class='chart'></div>
-                                </div>
-                                
-                                <div class='comparison-table-wrapper'>
-                                    <h3 class='subsection-title'>Key Metrics Comparison</h3>
-                                    <div id='comparisonTable' class='comparison-table'></div>
-                                </div>
-                            </div>
-                            
-                            <div id='comparisonEmpty' class='comparison-empty'>
-                                <i class='fas fa-chart-line'></i>
-                                <p>No stocks to compare</p>
-                                <p class='hint'>Click "Add Stocks to Compare" to get started</p>
                             </div>
                         </div>
                     </section>
                     
                     <!-- ============================================
-                         ⭐ WATCHLIST (CONSERVÉ)
+                         ⭐ WATCHLIST
                          ============================================ -->
                     <section class='watchlist-section card'>
                         <div class='card-header watchlist-header'>
@@ -771,14 +638,8 @@
                                 <i class='fas fa-star'></i> My Watchlist
                             </h2>
                             <div class='watchlist-actions'>
-                                <button class='btn btn-success btn-add-current' onclick='MarketData.addCurrentToWatchlist()' id='btnAddCurrent' disabled>
-                                    <i class='fas fa-plus'></i> Add Current Stock
-                                </button>
                                 <button class='btn btn-primary btn-refresh-watchlist' onclick='MarketData.refreshWatchlist()'>
                                     <i class='fas fa-sync-alt'></i> Refresh All
-                                </button>
-                                <button class='btn btn-danger btn-clear-watchlist' onclick='MarketData.clearWatchlist()'>
-                                    <i class='fas fa-trash'></i> Clear All
                                 </button>
                             </div>
                         </div>
@@ -788,21 +649,21 @@
                                 <div class='watchlist-empty'>
                                     <i class='fas fa-star-half-alt'></i>
                                     <p>Your watchlist is empty</p>
-                                    <p class='hint'>Search for a stock and click "Add to Watchlist" to start tracking</p>
+                                    <p class='hint'>Click the star icon on any stock in the table to add it to your watchlist</p>
                                 </div>
                             </div>
                         </div>
                     </section>
                     
                     <!-- ============================================
-                         🔔 PRICE ALERTS (CONSERVÉ)
+                         🔔 PRICE ALERTS
                          ============================================ -->
                     <section class='alerts-section card'>
                         <div class='card-header alerts-header'>
                             <h2 class='card-title'>
                                 <i class='fas fa-bell'></i> Price Alerts
                             </h2>
-                            <button class='btn btn-accent btn-create-alert' onclick='MarketData.openAlertModal()'>
+                            <button class='btn btn-accent btn-create-alert' onclick='MarketData.createAlert()'>
                                 <i class='fas fa-plus'></i> Create Alert
                             </button>
                         </div>
@@ -825,105 +686,10 @@
                         <i class='fas fa-spinner fa-spin'></i> Loading market data...
                     </div>
                     
-                    <!-- ============================================
-                         📈 STOCK OVERVIEW (CONSERVÉ)
-                         ============================================ -->
-                    <section id='stockOverview' class='stock-overview hidden'>
-                        <div class='overview-header'>
-                            <div class='stock-title'>
-                                <h2 id='stockName'>-</h2>
-                                <span id='stockSymbol' class='stock-symbol'>-</span>
-                            </div>
-                            <div class='stock-price-section'>
-                                <div id='currentPrice' class='current-price'>-</div>
-                                <div id='priceChange' class='price-change'>-</div>
-                            </div>
-                        </div>
-                        
-                        <div class='overview-stats'>
-                            <div class='stat-item'>
-                                <span class='stat-label'>Open</span>
-                                <span id='statOpen' class='stat-value'>-</span>
-                            </div>
-                            <div class='stat-item'>
-                                <span class='stat-label'>High</span>
-                                <span id='statHigh' class='stat-value'>-</span>
-                            </div>
-                            <div class='stat-item'>
-                                <span class='stat-label'>Low</span>
-                                <span id='statLow' class='stat-value'>-</span>
-                            </div>
-                            <div class='stat-item'>
-                                <span class='stat-label'>Volume</span>
-                                <span id='statVolume' class='stat-value'>-</span>
-                            </div>
-                            <div class='stat-item'>
-                                <span class='stat-label'>Mkt Cap</span>
-                                <span id='statMarketCap' class='stat-value'>-</span>
-                            </div>
-                            <div class='stat-item'>
-                                <span class='stat-label'>P/E Ratio</span>
-                                <span id='statPE' class='stat-value'>-</span>
-                            </div>
-                        </div>
-                    </section>
-
-                    <!-- Company Profile Section (dynamique) -->
-                    <section id='companyProfileSection' class='company-profile-section card hidden'></section>
-                    
-                    <!-- ============================================
-                         📊 RESULTS PANEL (CONSERVÉ)
-                         ============================================ -->
-                    <section id='resultsPanel' class='results-panel card hidden'>
-                        <div class='card-body'>
-                            
-                            <div class='chart-section'>
-                                <h3 class='subsection-title'>
-                                    <i class='fas fa-chart-line'></i> Price Chart with Technical Indicators
-                                </h3>
-                                <div class='indicator-toggles'>
-                                    <label><input type='checkbox' id='toggleSMA' checked> SMA (20, 50)</label>
-                                    <label><input type='checkbox' id='toggleEMA'> EMA (12, 26)</label>
-                                    <label><input type='checkbox' id='toggleBB' checked> Bollinger Bands</label>
-                                    <label><input type='checkbox' id='toggleVolume' checked> Volume</label>
-                                </div>
-                                <div id='priceChart' class='chart'></div>
-                            </div>
-                            
-                            <div class='charts-grid-2'>
-                                <div class='chart-section'>
-                                    <h3 class='subsection-title'>
-                                        <i class='fas fa-wave-square'></i> RSI (Relative Strength Index)
-                                    </h3>
-                                    <div id='rsiChart' class='chart chart-medium'></div>
-                                </div>
-                                
-                                <div class='chart-section'>
-                                    <h3 class='subsection-title'>
-                                        <i class='fas fa-chart-bar'></i> MACD
-                                    </h3>
-                                    <div id='macdChart' class='chart chart-medium'></div>
-                                </div>
-                            </div>
-                            
-                            <div class='signals-section'>
-                                <h3 class='subsection-title'>
-                                    <i class='fas fa-signal'></i> Trading Signals
-                                </h3>
-                                <div id='tradingSignals' class='signals-grid'></div>
-                            </div>
-                            
-                            <div class='stats-section'>
-                                <h3 class='subsection-title'><i class='fas fa-table'></i> Key Statistics</h3>
-                                <div id='keyStats' class='stats-grid'></div>
-                            </div>
-                            
-                        </div>
-                    </section>
                 </div>
                 
                 <footer>
-                    <p>&copy; Market Data Dashboard | Real-time financial data and technical analysis</p>
+                    <p>&copy; 2025 AlphaVault AI | Real-time financial data powered by Finnhub</p>
                 </footer>
             </div>
         </main>
@@ -951,7 +717,7 @@
                     <p>
                         <i class='fas fa-info-circle'></i> 
                         <strong>Your portfolios are stored in the cloud.</strong>
-                        Create multiple portfolios with different watchlists, alerts, and comparisons.
+                        Create multiple portfolios with different watchlists and alerts.
                     </p>
                 </div>
                 
@@ -972,144 +738,6 @@
             </div>
         </div>
     </div>
-    
-    <!-- ADD COMPARISON MODAL -->
-    <div id='modalAddComparison' class='modal'>
-        <div class='modal-content'>
-            <div class='modal-header'>
-                <h2>
-                    <i class='fas fa-chart-bar'></i> Add Stocks to Compare
-                </h2>
-                <button class='close-modal' onclick='MarketData.closeComparisonModal()'>
-                    <i class='fas fa-times'></i>
-                </button>
-            </div>
-            <div class='modal-body'>
-                <form class='comparison-form' onsubmit='event.preventDefault(); MarketData.loadComparison();'>
-                    <div class='form-group'>
-                        <label for='comparisonSymbols'>Enter stock symbols (comma-separated):</label>
-                        <input type='text' id='comparisonSymbols' class='form-input' 
-                               placeholder='e.g., AAPL, MSFT, GOOGL, TSLA' required>
-                        <small>You can compare up to 5 stocks at once</small>
-                    </div>
-                    
-                    <div class='comparison-quick-presets'>
-                        <label>Quick Presets:</label>
-                        <button type='button' class='preset-btn' 
-                                onclick='document.getElementById("comparisonSymbols").value="AAPL,MSFT,GOOGL,META,AMZN"'>
-                            <i class='fas fa-laptop-code'></i> Big Tech (FAANG)
-                        </button>
-                        <button type='button' class='preset-btn' 
-                                onclick='document.getElementById("comparisonSymbols").value="BTC-USD,ETH-USD,BNB-USD,ADA-USD"'>
-                            <i class='fab fa-bitcoin'></i> Top Cryptocurrencies
-                        </button>
-                        <button type='button' class='preset-btn' 
-                                onclick='document.getElementById("comparisonSymbols").value="^GSPC,^DJI,^IXIC,^FTSE"'>
-                            <i class='fas fa-chart-line'></i> Major Indices
-                        </button>
-                    </div>
-                    
-                    <div class='form-actions'>
-                        <button type='submit' class='btn btn-create'>
-                            <i class='fas fa-chart-bar'></i> Load Comparison
-                        </button>
-                        <button type='button' class='btn btn-cancel' onclick='MarketData.closeComparisonModal()'>
-                            <i class='fas fa-times'></i> Cancel
-                        </button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-    
-    <!-- CREATE ALERT MODAL -->
-    <div id='modalCreateAlert' class='modal'>
-        <div class='modal-content'>
-            <div class='modal-header'>
-                <h2>
-                    <i class='fas fa-bell'></i> Create Price Alert
-                </h2>
-                <button class='close-modal' onclick='MarketData.closeAlertModal()'>
-                    <i class='fas fa-times'></i>
-                </button>
-            </div>
-            <div class='modal-body'>
-                <form class='alert-form' onsubmit='event.preventDefault(); MarketData.createAlert();'>
-                    <div class='form-group'>
-                        <label for='alertSymbol'>Stock Symbol:</label>
-                        <input type='text' id='alertSymbol' class='form-input' 
-                               placeholder='e.g., AAPL' required>
-                    </div>
-                    
-                    <div class='form-group'>
-                        <label for='alertPrice'>Target Price (USD):</label>
-                        <input type='number' id='alertPrice' class='form-input' 
-                               placeholder='e.g., 150.00' step='0.01' min='0' required>
-                    </div>
-                    
-                    <div class='form-group'>
-                        <label for='alertType'>Alert Type:</label>
-                        <select id='alertType' class='form-input'>
-                            <option value='above'>Alert when price goes ABOVE target</option>
-                            <option value='below'>Alert when price goes BELOW target</option>
-                        </select>
-                    </div>
-                    
-                    <div class='form-group'>
-                        <label for='alertNote'>Note (optional):</label>
-                        <textarea id='alertNote' class='form-input' rows='3' 
-                                  placeholder='Add a personal note for this alert...'></textarea>
-                    </div>
-                    
-                    <div class='form-actions'>
-                        <button type='submit' class='btn btn-create'>
-                            <i class='fas fa-bell'></i> Create Alert
-                        </button>
-                        <button type='button' class='btn btn-cancel' onclick='MarketData.closeAlertModal()'>
-                            <i class='fas fa-times'></i> Cancel
-                        </button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-    
-    <!-- SEARCH HELP MODAL -->
-    <div id='modalSearchHelp' class='modal'>
-        <div class='modal-content'>
-            <div class='modal-header'>
-                <h2>
-                    <i class='fas fa-question-circle'></i> How to Search Stocks
-                </h2>
-                <button class='close-modal' onclick='closeModal("modalSearchHelp")'>
-                    <i class='fas fa-times'></i>
-                </button>
-            </div>
-            <div class='modal-body'>
-                <h3>📊 Symbol Format</h3>
-                <p>Enter the <strong>stock ticker symbol</strong> to retrieve market data:</p>
-                <ul>
-                    <li><strong>US Stocks:</strong> AAPL, MSFT, GOOGL, TSLA</li>
-                    <li><strong>Indices:</strong> ^GSPC (S&P 500), ^DJI (Dow Jones), ^IXIC (NASDAQ)</li>
-                    <li><strong>Crypto:</strong> BTC-USD, ETH-USD</li>
-                    <li><strong>European Stocks:</strong> AIR.PA (Airbus), MC.PA (LVMH)</li>
-                </ul>
-                
-                <h3>📈 Available Data</h3>
-                <ul>
-                    <li>Real-time price and change</li>
-                    <li>Historical price charts</li>
-                    <li>Technical indicators (RSI, MACD, Bollinger Bands)</li>
-                    <li>Trading volume</li>
-                    <li>Key statistics (P/E ratio, market cap, etc.)</li>
-                </ul>
-                
-                <div class='info-box'>
-                    💡 <strong>Pro Tip:</strong> Use the time period buttons to analyze different timeframes!
-                </div>
-            </div>
-        </div>
-    </div>
 
     <!-- ============================================
          🗄 CACHE WIDGET
@@ -1124,11 +752,11 @@
         
         <div class='cache-widget-body'>
             <div class='cache-section'>
-                <h4><i class='fas fa-tachometer-alt'></i> API Rate Limit</h4>
+                <h4><i class='fas fa-tachometer-alt'></i> API Rate Limit (Finnhub)</h4>
                 <div class='cache-stat-row'>
                     <span class='cache-stat-label'>Remaining Requests:</span>
-                    <span class='cache-stat-value' id='rateLimitRemaining'>8</span>
-                    <span class='cache-stat-unit'>/ 8 per minute</span>
+                    <span class='cache-stat-value' id='rateLimitRemaining'>60</span>
+                    <span class='cache-stat-unit'>/ 60 per minute</span>
                 </div>
                 <div class='cache-progress-bar'>
                     <div class='cache-progress-fill' id='rateLimitProgress' style='width: 100%;'></div>
@@ -1189,7 +817,7 @@
          INLINE SCRIPTS
          ============================================ -->
     <script>
-        // Cache Widget Management (conservé de ton code original)
+        // Cache Widget Management
         let cacheWidgetOpen = false;
         let cacheStats = { hits: 0, misses: 0, entries: 0, size: 0 };
         
@@ -1210,7 +838,7 @@
             let entries = 0, totalSize = 0;
             for (let i = 0; i < localStorage.length; i++) {
                 const key = localStorage.key(i);
-                if (key && key.startsWith('md_cache_')) {
+                if (key && key.startsWith('api_cache:')) {
                     entries++;
                     const value = localStorage.getItem(key);
                     if (value) totalSize += value.length;
@@ -1231,18 +859,25 @@
         }
         
         function clearLocalCache() {
-            if (!confirm('Clear the local cache?')) return;
+            if (!confirm('Clear the local cache? This will remove all cached API responses.')) return;
             let cleared = 0;
             const keys = [];
             for (let i = 0; i < localStorage.length; i++) {
                 const key = localStorage.key(i);
-                if (key && key.startsWith('md_cache_')) keys.push(key);
+                if (key && key.startsWith('api_cache:')) keys.push(key);
             }
             keys.forEach(key => { localStorage.removeItem(key); cleared++; });
+            
+            // Clear API client cache if available
+            if (window.MarketData && window.MarketData.apiClient && window.MarketData.apiClient.clearCache) {
+                window.MarketData.apiClient.clearCache();
+            }
+            
             cacheStats.hits = 0; cacheStats.misses = 0;
             refreshCacheStats();
+            
             if (window.MarketData && window.MarketData.showNotification) {
-                window.MarketData.showNotification(`Cache cleared: ${cleared} entries removed`, 'success');
+                window.MarketData.showNotification(`✅ Cache cleared: ${cleared} entries removed`, 'success');
             } else {
                 alert(`Cache cleared: ${cleared} entries removed`);
             }
@@ -1257,7 +892,7 @@
             const cacheData = {};
             for (let i = 0; i < localStorage.length; i++) {
                 const key = localStorage.key(i);
-                if (key && key.startsWith('md_cache_')) {
+                if (key && key.startsWith('api_cache:')) {
                     try {
                         cacheData[key] = JSON.parse(localStorage.getItem(key));
                     } catch (e) {
@@ -1280,7 +915,7 @@
                 let entries = 0;
                 for (let i = 0; i < localStorage.length; i++) {
                     const key = localStorage.key(i);
-                    if (key && key.startsWith('md_cache_')) entries++;
+                    if (key && key.startsWith('api_cache:')) entries++;
                 }
                 const badgeEl = document.getElementById('cacheBadge');
                 const badgeMiniEl = document.getElementById('cacheBadgeMini');
@@ -1322,29 +957,13 @@
             if (!modal) return;
             modal.classList.add('active');
             document.body.style.overflow = 'hidden';
-            if (typeof MarketData !== 'undefined' && MarketData.refreshPortfoliosList) {
-                await MarketData.refreshPortfoliosList();
+            if (typeof PortfolioManager !== 'undefined' && PortfolioManager.refreshPortfoliosList) {
+                await PortfolioManager.refreshPortfoliosList();
             }
         }
         
         function closePortfoliosModal() {
             const modal = document.getElementById('portfoliosModal');
-            if (modal) {
-                modal.classList.remove('active');
-                document.body.style.overflow = '';
-            }
-        }
-        
-        function openModal(modalId) {
-            const modal = document.getElementById(modalId);
-            if (modal) {
-                modal.classList.add('active');
-                document.body.style.overflow = 'hidden';
-            }
-        }
-        
-        function closeModal(modalId) {
-            const modal = document.getElementById(modalId);
             if (modal) {
                 modal.classList.remove('active');
                 document.body.style.overflow = '';

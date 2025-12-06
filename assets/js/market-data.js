@@ -2994,14 +2994,16 @@
 // console.log('✅ Market Data script loaded - OPTIMIZED with Rate Limiting & Cache - COMPLETE VERSION');
 
 /* ==============================================
-   MARKET-DATA.JS v7.0 - QUOTES ONLY (FINNHUB)
-   NO HISTORICAL DATA - REAL-TIME QUOTES ONLY
-   Compatible avec api-client.js v5.0
+   MARKET-DATA.JS v8.0 - FINNHUB PURE (API CLIENT)
+   ✅ Utilise uniquement api-client.js (Finnhub via Worker)
+   ✅ Chargement parallèle ultra-rapide
+   ✅ 60 req/min (gratuit) | Pas de limite API key
+   ✅ Stock Comparison & Search Analysis SUPPRIMÉS
    ============================================== */
 
-// ========== RATE LIMITER ==========
+// ========== RATE LIMITER OPTIMISÉ FINNHUB ==========
 class RateLimiter {
-    constructor(maxRequests = 50, windowMs = 60000) {
+    constructor(maxRequests = 60, windowMs = 60000) { // 60 req/min (Finnhub gratuit)
         this.maxRequests = maxRequests;
         this.windowMs = windowMs;
         this.queue = [];
@@ -3011,13 +3013,7 @@ class RateLimiter {
     
     async execute(fn, priority = 'normal') {
         return new Promise((resolve, reject) => {
-            this.queue.push({
-                fn,
-                priority,
-                resolve,
-                reject,
-                timestamp: Date.now()
-            });
+            this.queue.push({ fn, priority, resolve, reject, timestamp: Date.now() });
             
             this.queue.sort((a, b) => {
                 const priorities = { high: 3, normal: 2, low: 1 };
@@ -3041,34 +3037,34 @@ class RateLimiter {
                 const oldestRequest = Math.min(...this.requestTimes);
                 const waitTime = this.windowMs - (now - oldestRequest) + 100;
                 
-                console.log(`⏳ Rate limit reached. Waiting ${Math.ceil(waitTime/1000)}s...`);
-                
-                if (window.cacheWidget) {
-                    window.cacheWidget.updateQueueStatus(this.queue.length, waitTime);
-                }
-                
+                console.log(`⏳ Rate limit: waiting ${Math.ceil(waitTime/1000)}s...`);
                 await this.sleep(waitTime);
                 continue;
             }
             
-            const item = this.queue.shift();
-            this.requestTimes.push(Date.now());
+            // ✅ TRAITER PLUSIEURS REQUÊTES EN PARALLÈLE (10 à la fois)
+            const batchSize = Math.min(
+                this.maxRequests - this.requestTimes.length,
+                this.queue.length,
+                10 // Nombre de requêtes simultanées
+            );
             
-            try {
-                const result = await item.fn();
-                item.resolve(result);
-            } catch (error) {
-                item.reject(error);
-            }
+            const batch = this.queue.splice(0, batchSize);
+            this.requestTimes.push(...Array(batchSize).fill(Date.now()));
             
-            await this.sleep(100);
+            await Promise.all(batch.map(async (item) => {
+                try {
+                    const result = await item.fn();
+                    item.resolve(result);
+                } catch (error) {
+                    item.reject(error);
+                }
+            }));
+            
+            await this.sleep(100); // Petit délai entre batches
         }
         
         this.processing = false;
-        
-        if (window.cacheWidget) {
-            window.cacheWidget.updateQueueStatus(0, 0);
-        }
     }
     
     sleep(ms) {
@@ -3086,95 +3082,23 @@ class RateLimiter {
     }
 }
 
-// ========== CACHE OPTIMISÉ ==========
-class OptimizedCache {
-    constructor() {
-        this.prefix = 'md_cache_';
-        this.staticTTL = 24 * 60 * 60 * 1000;
-        this.dynamicTTL = 5 * 60 * 1000;
-    }
-    
-    set(key, data, ttl = null) {
-        try {
-            const cacheData = {
-                data,
-                timestamp: Date.now(),
-                ttl: ttl || this.dynamicTTL
-            };
-            localStorage.setItem(this.prefix + key, JSON.stringify(cacheData));
-            return true;
-        } catch (error) {
-            console.warn('Cache storage error:', error);
-            return false;
-        }
-    }
-    
-    get(key) {
-        try {
-            const cached = localStorage.getItem(this.prefix + key);
-            if (!cached) return null;
-            
-            const cacheData = JSON.parse(cached);
-            const now = Date.now();
-            
-            if (now - cacheData.timestamp > cacheData.ttl) {
-                this.delete(key);
-                return null;
-            }
-            
-            return cacheData.data;
-        } catch (error) {
-            console.warn('Cache retrieval error:', error);
-            return null;
-        }
-    }
-    
-    delete(key) {
-        localStorage.removeItem(this.prefix + key);
-    }
-    
-    clear() {
-        Object.keys(localStorage)
-            .filter(key => key.startsWith(this.prefix))
-            .forEach(key => localStorage.removeItem(key));
-    }
-    
-    getAge(key) {
-        try {
-            const cached = localStorage.getItem(this.prefix + key);
-            if (!cached) return null;
-            
-            const cacheData = JSON.parse(cached);
-            return Date.now() - cacheData.timestamp;
-        } catch {
-            return null;
-        }
-    }
-}
-
 // ========== MAIN MARKET DATA OBJECT ==========
 const MarketData = {
-    // API Client
+    // ✅ API CLIENT (FINNHUB VIA WORKER)
     apiClient: null,
     rateLimiter: null,
-    optimizedCache: null,
     
     // Current State
     currentSymbol: '',
     currentQuote: null,
     profileData: null,
-    logoUrl: '',
-    
-    // Search functionality
-    selectedSuggestionIndex: -1,
-    searchTimeout: null,
     
     // Watchlist & Alerts
     watchlist: [],
     alerts: [],
     watchlistRefreshInterval: null,
-    notificationPermission: false,
     lastWatchlistRefresh: 0,
+    notificationPermission: false,
     
     // Market Data
     allStocks: [],
@@ -3183,8 +3107,6 @@ const MarketData = {
     pageSize: 100,
     sortColumn: 'symbol',
     sortDirection: 'asc',
-    loadedStocksCount: 0,
-    totalStocksToLoad: 30,
     
     // ✅ INDICES MAJEURS (ETFs)
     majorIndices: [
@@ -3194,7 +3116,7 @@ const MarketData = {
         { symbol: 'VIXY', name: 'VIX ETF', icon: 'bolt', htmlId: 'vix' }
     ],
     
-    // ✅ STOCKS PAR DÉFAUT (30 stocks)
+    // ✅ TOP 30 STOCKS
     defaultStocks: [
         'AAPL', 'MSFT', 'GOOGL', 'AMZN', 'NVDA', 'TSLA', 'META', 'BRK.B', 'V', 'JNJ',
         'WMT', 'JPM', 'MA', 'PG', 'UNH', 'DIS', 'HD', 'BAC', 'XOM', 'ADBE',
@@ -3205,41 +3127,37 @@ const MarketData = {
     additionalStocks: [
         'COST', 'AVGO', 'ACN', 'CMCSA', 'NKE', 'MRK', 'DHR', 'TXN', 'LIN', 'NEE',
         'AMD', 'ORCL', 'CVX', 'PM', 'MDT', 'UNP', 'RTX', 'HON', 'QCOM', 'UPS',
-        'LOW', 'AMGN', 'SBUX', 'BMY', 'LMT', 'IBM', 'SPGI', 'CAT', 'GE', 'AXP',
-        'BA', 'GS', 'BLK', 'GILD', 'BKNG', 'DE', 'MMM', 'ADP', 'TGT', 'ISRG',
-        'MDLZ', 'CVS', 'CI', 'ZTS', 'SYK', 'MO', 'PYPL', 'NOW', 'REGN', 'DUK',
-        'CB', 'TJX', 'PLD', 'USB', 'BDX', 'SO', 'SCHW', 'SLB', 'EL', 'PNC',
-        'CL', 'ITW', 'MMC', 'NSC', 'BSX', 'EOG', 'GM', 'F', 'COIN', 'UBER'
+        'LOW', 'AMGN', 'SBUX', 'BMY', 'LMT', 'IBM', 'SPGI', 'CAT', 'GE', 'AXP'
     ],
     
     // Secteurs
     sectors: {
         'Technology': ['AAPL', 'MSFT', 'GOOGL', 'NVDA', 'META', 'ADBE', 'CSCO', 'INTC', 'AMD', 'ORCL'],
-        'Healthcare': ['JNJ', 'UNH', 'PFE', 'ABT', 'TMO', 'MRK', 'DHR', 'BMY', 'AMGN', 'GILD'],
-        'Financial': ['JPM', 'BAC', 'WFC', 'GS', 'MS', 'C', 'AXP', 'BLK', 'USB', 'PNC'],
-        'Consumer': ['AMZN', 'WMT', 'HD', 'COST', 'NKE', 'SBUX', 'TGT', 'LOW', 'TJX', 'BKNG'],
-        'Energy': ['XOM', 'CVX', 'COP', 'SLB', 'EOG', 'MPC', 'PSX', 'VLO', 'KMI', 'OXY'],
-        'Industrial': ['BA', 'CAT', 'GE', 'HON', 'UNP', 'RTX', 'LMT', 'MMM', 'DE', 'NSC']
+        'Healthcare': ['JNJ', 'UNH', 'PFE', 'ABT', 'TMO', 'MRK', 'DHR'],
+        'Financial': ['JPM', 'BAC', 'V', 'MA'],
+        'Consumer': ['AMZN', 'WMT', 'HD', 'COST', 'NKE', 'DIS'],
+        'Energy': ['XOM', 'CVX'],
+        'Industrial': ['HON', 'UNP', 'RTX']
     },
     
     // ========== INITIALIZATION ==========
     
     async init() {
         try {
-            console.log('🚀 Initializing Market Data v7.0 - Quotes Only (Finnhub)...');
+            console.log('🚀 Market Data v8.0 - Finnhub Pure (API Client)');
             
-            this.rateLimiter = new RateLimiter(8, 60000);
-            this.optimizedCache = new OptimizedCache();
+            // ✅ CRÉER LE RATE LIMITER (60 req/min)
+            this.rateLimiter = new RateLimiter(60, 60000);
             
+            // ✅ ATTENDRE L'AUTHENTIFICATION
             await this.waitForAuth();
             
+            // ✅ CRÉER L'API CLIENT (utilise votre api-client.js)
             this.apiClient = new FinanceAPIClient({
-                baseURL: APP_CONFIG.API_BASE_URL,
-                cacheDuration: APP_CONFIG.CACHE_DURATION || 300000,
-                maxRetries: APP_CONFIG.MAX_RETRIES || 2,
-                onLoadingChange: (isLoading) => {
-                    this.showLoading(isLoading);
-                }
+                baseURL: APP_CONFIG?.API_BASE_URL || 'https://finance-hub-api.raphnardone.workers.dev',
+                cacheDuration: 300000, // 5 minutes
+                maxRetries: 2,
+                onLoadingChange: (isLoading) => this.showLoading(isLoading)
             });
             
             window.apiClient = this.apiClient;
@@ -3247,59 +3165,38 @@ const MarketData = {
             
             this.updateLastUpdate();
             this.setupEventListeners();
-            this.setupSearchListeners();
             this.setupTableListeners();
             this.startCacheMonitoring();
             
-            // ✅ NE PAS charger la watchlist automatiquement
-            // await this.loadCurrentPortfolio();
+            // ✅ CHARGER LA WATCHLIST
             this.loadWatchlistFromStorage();
             this.loadAlertsFromStorage();
-            
             this.requestNotificationPermission();
             this.startWatchlistAutoRefresh();
             
-            // ========== CHARGEMENT INITIAL ==========
-            console.log('🌍 Step 1: Loading Market Overview (ETFs)...');
+            // ========== CHARGEMENT PARALLÈLE ULTRA-RAPIDE ==========
+            console.log('⚡ Step 1: Loading Market Overview (4 ETFs)...');
             await this.refreshMarketOverview();
             
-            console.log('📊 Step 2: Loading Initial Stocks (30 stocks)...');
-            await this.loadInitialStocks();
+            console.log('⚡ Step 2: Loading 30 Stocks (parallel)...');
+            await this.loadInitialStocksParallel();
             
-            console.log('🔥 Step 3: Loading Top Movers...');
+            console.log('⚡ Step 3: Loading Top Movers...');
             await this.loadTopMovers();
             
-            console.log('📈 Step 4: Loading Sector Performance...');
+            console.log('⚡ Step 4: Loading Sector Performance...');
             await this.loadSectorPerformance();
             
-            console.log('🗺 Step 5: Loading Heat Map...');
+            console.log('⚡ Step 5: Loading Heat Map...');
             await this.loadHeatMap();
             
-            console.log('✅ All market data sections initialized');
+            console.log('✅ All market data loaded!');
+            this.showNotification('✅ Market data loaded successfully', 'success');
             
         } catch (error) {
-            console.error('Initialization error:', error);
-            this.showNotification('Failed to initialize application', 'error');
+            console.error('❌ Initialization error:', error);
+            this.showNotification('Failed to initialize', 'error');
         }
-    },
-    
-    startCacheMonitoring() {
-        setInterval(() => {
-            if (window.cacheWidget) {
-                const remaining = this.rateLimiter.getRemainingRequests();
-                const queueLength = this.rateLimiter.getQueueLength();
-                
-                window.cacheWidget.updateRateLimitStatus(remaining, 8);
-                
-                if (queueLength > 0) {
-                    window.cacheWidget.updateQueueStatus(queueLength, 0);
-                }
-            }
-        }, 1000);
-    },
-    
-    async apiRequest(fn, priority = 'normal') {
-        return await this.rateLimiter.execute(fn, priority);
     },
     
     async waitForAuth() {
@@ -3324,37 +3221,44 @@ const MarketData = {
         });
     },
     
-    // ========== MARKET OVERVIEW ==========
+    startCacheMonitoring() {
+        setInterval(() => {
+            if (window.cacheWidget) {
+                const remaining = this.rateLimiter.getRemainingRequests();
+                const queueLength = this.rateLimiter.getQueueLength();
+                
+                window.cacheWidget.updateRateLimitStatus(remaining, 60);
+                
+                if (queueLength > 0) {
+                    window.cacheWidget.updateQueueStatus(queueLength, 0);
+                }
+            }
+        }, 1000);
+    },
+    
+    // ========== MARKET OVERVIEW (PARALLEL) ==========
     
     async refreshMarketOverview() {
-        console.log('🌍 Refreshing Market Overview with ETFs...');
+        console.log('⚡ Refreshing Market Overview (parallel)...');
         
         try {
-            const promises = this.majorIndices.map(async (index) => {
-                try {
-                    const quote = await this.apiRequest(() => this.apiClient.getQuote(index.symbol), 'high');
-                    return { ...index, quote };
-                } catch (error) {
-                    console.error(`Error loading ${index.symbol}:`, error.message);
-                    return { ...index, quote: null };
-                }
-            });
+            const promises = this.majorIndices.map(index => 
+                this.rateLimiter.execute(async () => {
+                    try {
+                        const quote = await this.apiClient.getQuote(index.symbol);
+                        return { ...index, quote };
+                    } catch (error) {
+                        console.error(`Error loading ${index.symbol}:`, error.message);
+                        return { ...index, quote: null };
+                    }
+                }, 'high')
+            );
             
             const results = await Promise.all(promises);
             
-            results.forEach((result) => {
-                this.updateIndexCard(result);
-            });
+            results.forEach(result => this.updateIndexCard(result));
             
-            // Mettre à jour les stats globales (simulation)
-            this.updateMarketStats({
-                totalVolume: '12.5B',
-                advancing: '2,847',
-                declining: '1,253',
-                new52wHighs: '342'
-            });
-            
-            this.showNotification('✅ Market overview refreshed', 'success');
+            console.log('✅ Market Overview loaded');
             
         } catch (error) {
             console.error('Error refreshing market overview:', error);
@@ -3391,27 +3295,13 @@ const MarketData = {
             changeEl.textContent = `${change >= 0 ? '+' : ''}${changePercent.toFixed(2)}%`;
         }
         
-        console.log(`✅ Updated index card: ${indexData.symbol} (${indexData.htmlId})`);
+        console.log(`✅ ${indexData.symbol} updated`);
     },
     
-    updateMarketStats(stats) {
-        const elements = {
-            totalVolume: document.getElementById('totalVolume'),
-            advancingStocks: document.getElementById('advancingStocks'),
-            decliningStocks: document.getElementById('decliningStocks'),
-            new52wHighs: document.getElementById('new52wHighs')
-        };
-        
-        if (elements.totalVolume) elements.totalVolume.textContent = stats.totalVolume;
-        if (elements.advancingStocks) elements.advancingStocks.textContent = stats.advancing;
-        if (elements.decliningStocks) elements.decliningStocks.textContent = stats.declining;
-        if (elements.new52wHighs) elements.new52wHighs.textContent = stats.new52wHighs;
-    },
+    // ========== LOAD INITIAL STOCKS (PARALLEL ULTRA-RAPIDE) ==========
     
-    // ========== LOAD INITIAL STOCKS ==========
-    
-    async loadInitialStocks() {
-        console.log('📊 Loading initial 30 stocks...');
+    async loadInitialStocksParallel() {
+        console.log('⚡ Loading 30 stocks in parallel...');
         
         const tbody = document.getElementById('stocksTableBody');
         if (!tbody) {
@@ -3423,84 +3313,56 @@ const MarketData = {
             <tr class='loading-row'>
                 <td colspan='10' style='text-align: center; padding: 60px;'>
                     <i class='fas fa-spinner fa-spin' style='font-size: 2rem; color: var(--ml-primary);'></i>
-                    <p style='margin-top: 20px;'>Loading market data...</p>
+                    <p style='margin-top: 20px;'>Loading 30 stocks...</p>
                 </td>
             </tr>
         `;
         
         try {
-            this.allStocks = [];
-            this.loadedStocksCount = 0;
-            
-            // Charger par batch de 5 stocks
-            const batchSize = 5;
-            const stocksToLoad = this.defaultStocks.slice(0, this.totalStocksToLoad);
-            
-            for (let i = 0; i < stocksToLoad.length; i += batchSize) {
-                const batch = stocksToLoad.slice(i, i + batchSize);
-                
-                console.log(`📦 Loading batch ${Math.floor(i/batchSize) + 1}/${Math.ceil(stocksToLoad.length/batchSize)}: ${batch.join(', ')}...`);
-                
-                const batchPromises = batch.map(async (symbol) => {
+            const promises = this.defaultStocks.map(symbol => 
+                this.rateLimiter.execute(async () => {
                     try {
-                        // Vérifier le cache d'abord
-                        const cached = this.optimizedCache.get(`stock_${symbol}`);
-                        if (cached && this.optimizedCache.getAge(`stock_${symbol}`) < 300000) {
-                            console.log(`✅ ${symbol} from cache`);
-                            return cached;
-                        }
+                        // ✅ UTILISER API CLIENT (getQuote + getProfile en parallèle)
+                        const [quote, profile] = await Promise.all([
+                            this.apiClient.getQuote(symbol),
+                            this.apiClient.getProfile(symbol).catch(() => null)
+                        ]);
                         
-                        // Appel API avec rate limiting
-                        const quote = await this.apiRequest(() => this.apiClient.getQuote(symbol), 'normal');
-                        
-                        const stockData = {
+                        return {
                             symbol: symbol,
-                            name: quote.name || symbol,
+                            name: profile?.name || quote.name || symbol,
                             price: quote.price || 0,
                             change: quote.change || 0,
                             changePercent: quote.percentChange || 0,
                             volume: quote.volume || 0,
-                            marketCap: this.calculateMarketCap(quote.price, quote.volume),
+                            marketCap: profile?.marketCapitalization ? profile.marketCapitalization * 1e6 : 0,
                             pe: 0,
-                            sector: this.getSectorForSymbol(symbol)
+                            sector: profile?.sector || this.getSectorForSymbol(symbol)
                         };
                         
-                        // Sauvegarder en cache
-                        this.optimizedCache.set(`stock_${symbol}`, stockData, 300000);
-                        
-                        console.log(`✅ ${symbol} loaded`);
-                        return stockData;
-                        
                     } catch (error) {
-                        console.error(`❌ Error loading ${symbol}:`, error.message);
+                        console.error(`❌ ${symbol}:`, error.message);
                         return null;
                     }
-                });
-                
-                const batchResults = await Promise.all(batchPromises);
-                const validResults = batchResults.filter(stock => stock !== null);
-                
-                this.allStocks.push(...validResults);
-                this.loadedStocksCount += validResults.length;
-                
-                // Afficher progressivement
-                this.filteredStocks = [...this.allStocks];
-                this.renderStocksTable();
-                
-                console.log(`✅ Progress: ${this.loadedStocksCount}/${stocksToLoad.length} stocks loaded`);
-            }
+                }, 'normal')
+            );
             
-            console.log(`✅ Initial load complete: ${this.loadedStocksCount} stocks`);
+            const results = await Promise.all(promises);
+            this.allStocks = results.filter(stock => stock !== null);
+            this.filteredStocks = [...this.allStocks];
             
-            if (this.allStocks.length > 0) {
-                this.showNotification(`✅ Loaded ${this.allStocks.length} stocks`, 'success');
+            this.renderStocksTable();
+            
+            console.log(`✅ ${this.allStocks.length}/30 stocks loaded`);
+            this.showNotification(`✅ Loaded ${this.allStocks.length} stocks`, 'success');
+            
+            // Afficher le bouton "Load More"
+            if (this.additionalStocks.length > 0) {
                 this.showLoadMoreButton();
-            } else {
-                this.showNotification('❌ Failed to load stocks', 'error');
             }
             
         } catch (error) {
-            console.error('❌ Critical error loading stocks:', error);
+            console.error('❌ Error loading stocks:', error);
             tbody.innerHTML = `
                 <tr>
                     <td colspan='10' style='text-align: center; padding: 40px; color: var(--ml-danger);'>
@@ -3508,14 +3370,7 @@ const MarketData = {
                     </td>
                 </tr>
             `;
-            this.showNotification('❌ Error loading stocks', 'error');
         }
-    },
-    
-    calculateMarketCap(price, volume) {
-        // Estimation simplifiée : price * volume * 10
-        if (!price || !volume) return 0;
-        return price * volume * 10;
     },
     
     showLoadMoreButton() {
@@ -3554,54 +3409,45 @@ const MarketData = {
             `;
         }
         
-        const batchSize = 20;
-        const nextBatch = this.additionalStocks.slice(0, batchSize);
+        const nextBatch = this.additionalStocks.splice(0, 20);
         
-        console.log(`📦 Loading ${nextBatch.length} additional stocks...`);
+        console.log(`⚡ Loading ${nextBatch.length} more stocks...`);
         
-        for (let i = 0; i < nextBatch.length; i += 5) {
-            const batch = nextBatch.slice(i, i + 5);
-            
-            const batchPromises = batch.map(async (symbol) => {
+        const promises = nextBatch.map(symbol =>
+            this.rateLimiter.execute(async () => {
                 try {
-                    const cached = this.optimizedCache.get(`stock_${symbol}`);
-                    if (cached && this.optimizedCache.getAge(`stock_${symbol}`) < 300000) {
-                        return cached;
-                    }
+                    const [quote, profile] = await Promise.all([
+                        this.apiClient.getQuote(symbol),
+                        this.apiClient.getProfile(symbol).catch(() => null)
+                    ]);
                     
-                    const quote = await this.apiRequest(() => this.apiClient.getQuote(symbol), 'normal');
-                    
-                    const stockData = {
+                    return {
                         symbol: symbol,
-                        name: quote.name || symbol,
+                        name: profile?.name || quote.name || symbol,
                         price: quote.price || 0,
                         change: quote.change || 0,
                         changePercent: quote.percentChange || 0,
                         volume: quote.volume || 0,
-                        marketCap: this.calculateMarketCap(quote.price, quote.volume),
+                        marketCap: profile?.marketCapitalization ? profile.marketCapitalization * 1e6 : 0,
                         pe: 0,
-                        sector: this.getSectorForSymbol(symbol)
+                        sector: profile?.sector || this.getSectorForSymbol(symbol)
                     };
                     
-                    this.optimizedCache.set(`stock_${symbol}`, stockData, 300000);
-                    return stockData;
-                    
                 } catch (error) {
-                    console.error(`❌ Error loading ${symbol}:`, error.message);
+                    console.error(`❌ ${symbol}:`, error.message);
                     return null;
                 }
-            });
-            
-            const batchResults = await Promise.all(batchPromises);
-            const validResults = batchResults.filter(stock => stock !== null);
-            
-            this.allStocks.push(...validResults);
-            this.filteredStocks = [...this.allStocks];
-            this.renderStocksTable();
-        }
+            }, 'normal')
+        );
         
-        this.additionalStocks = this.additionalStocks.slice(batchSize);
+        const results = await Promise.all(promises);
+        const validResults = results.filter(stock => stock !== null);
         
+        this.allStocks.push(...validResults);
+        this.filteredStocks = [...this.allStocks];
+        this.renderStocksTable();
+        
+        // Mettre à jour le bouton
         if (this.additionalStocks.length === 0) {
             if (loadMoreBtn) {
                 loadMoreBtn.innerHTML = `
@@ -3620,14 +3466,12 @@ const MarketData = {
             }
         }
         
-        this.showNotification(`✅ Loaded ${nextBatch.length} more stocks`, 'success');
+        this.showNotification(`✅ Loaded ${validResults.length} more stocks`, 'success');
     },
     
     getSectorForSymbol(symbol) {
         for (const [sector, symbols] of Object.entries(this.sectors)) {
-            if (symbols.includes(symbol)) {
-                return sector;
-            }
+            if (symbols.includes(symbol)) return sector;
         }
         return 'Other';
     },
@@ -3658,7 +3502,7 @@ const MarketData = {
                 <tr>
                     <td colspan='10' style='text-align: center; padding: 40px;'>
                         <i class='fas fa-search' style='font-size: 2rem; opacity: 0.3;'></i>
-                        <p style='margin-top: 15px; color: var(--text-secondary);'>No stocks found</p>
+                        <p style='margin-top: 15px; color: #94a3b8;'>No stocks found</p>
                     </td>
                 </tr>
             `;
@@ -3667,10 +3511,9 @@ const MarketData = {
         
         tbody.innerHTML = currentPageStocks.map(stock => {
             const changeClass = stock.change >= 0 ? 'positive' : 'negative';
-            const rowClass = stock.change >= 0 ? 'positive' : 'negative';
             
             return `
-                <tr class='${rowClass}'>
+                <tr>
                     <td><strong>${this.escapeHtml(stock.symbol)}</strong></td>
                     <td class='stock-name-cell' title='${this.escapeHtml(stock.name)}'>${this.escapeHtml(stock.name)}</td>
                     <td class='stock-price'>${this.formatCurrency(stock.price)}</td>
@@ -3679,7 +3522,7 @@ const MarketData = {
                     <td>${this.formatVolume(stock.volume)}</td>
                     <td>${this.formatLargeNumber(stock.marketCap)}</td>
                     <td>N/A</td>
-                    <td><em style="color: #94a3b8; font-size: 0.85rem;">Real-time only</em></td>
+                    <td><em style="color: #94a3b8; font-size: 0.85rem;">Real-time</em></td>
                     <td>
                         <div class='stock-actions'>
                             <button class='btn-table-action btn-view' onclick='MarketData.viewStock("${stock.symbol}")' title='View Details'>
@@ -3696,8 +3539,7 @@ const MarketData = {
     },
     
     viewStock(symbol) {
-        this.showNotification(`📊 ${symbol} - Real-time quote view (historical charts removed)`, 'info');
-        // Afficher une modal avec les détails du quote
+        this.showNotification(`📊 Loading ${symbol}...`, 'info');
         this.loadSymbolQuote(symbol);
     },
     
@@ -3705,20 +3547,19 @@ const MarketData = {
         console.log(`📊 Loading quote for: ${symbol}`);
         
         try {
-            const quote = await this.apiRequest(() => this.apiClient.getQuote(symbol), 'high');
-            const profile = await this.apiRequest(() => this.apiClient.getProfile(symbol), 'normal');
+            const quote = await this.rateLimiter.execute(() => 
+                this.apiClient.getQuote(symbol), 'high'
+            );
+            
+            const profile = await this.rateLimiter.execute(() =>
+                this.apiClient.getProfile(symbol), 'normal'
+            );
             
             this.currentSymbol = symbol;
             this.currentQuote = quote;
             this.profileData = profile;
             
-            // Afficher un résumé dans une notification
-            const summary = `
-                ${symbol} - ${quote.name}
-                Price: ${this.formatCurrency(quote.price)}
-                Change: ${quote.changePercent >= 0 ? '+' : ''}${quote.changePercent.toFixed(2)}%
-                Volume: ${this.formatVolume(quote.volume)}
-            `;
+            const summary = `${symbol} - ${profile?.name || quote.name}\nPrice: ${this.formatCurrency(quote.price)}\nChange: ${quote.percentChange >= 0 ? '+' : ''}${quote.percentChange.toFixed(2)}%\nVolume: ${this.formatVolume(quote.volume)}`;
             
             console.log(summary);
             this.showNotification(`✅ ${symbol} quote loaded`, 'success');
@@ -3743,7 +3584,6 @@ const MarketData = {
         
         this.watchlist.push(watchlistItem);
         this.saveWatchlistToStorage();
-        this.autoSave();
         this.renderWatchlist();
         this.refreshSingleWatchlistItem(symbol);
         
@@ -3851,7 +3691,7 @@ const MarketData = {
     // ========== SCREENER FILTERS ==========
     
     resetFilters() {
-        const filterIds = ['filterSearch', 'filterSector', 'filterMarketCap', 'filterPerformance', 'filterPE'];
+        const filterIds = ['filterSearch', 'filterSector', 'filterMarketCap'];
         filterIds.forEach(id => {
             const el = document.getElementById(id);
             if (el) el.value = '';
@@ -3897,52 +3737,32 @@ const MarketData = {
     async loadTopMovers() {
         console.log('🔥 Loading Top Movers...');
         
-        try {
-            const maxWaitTime = 30000;
-            const startTime = Date.now();
-            
-            while (this.allStocks.length === 0) {
-                if (Date.now() - startTime > maxWaitTime) {
-                    console.error('❌ Timeout waiting for allStocks to load');
-                    this.renderMoversError('Timeout: stocks data not loaded');
-                    return;
-                }
-                
-                await new Promise(resolve => setTimeout(resolve, 1000));
-            }
-            
-            const sorted = [...this.allStocks].sort((a, b) => b.changePercent - a.changePercent);
-            
-            const topGainers = sorted.slice(0, 10);
-            const topLosers = sorted.slice(-10).reverse();
-            const mostActive = [...this.allStocks].sort((a, b) => b.volume - a.volume).slice(0, 10);
-            
-            this.renderMovers('topGainers', topGainers, 'positive');
-            this.renderMovers('topLosers', topLosers, 'negative');
-            this.renderMovers('mostActive', mostActive, 'active');
-            
-            console.log('✅ Top Movers loaded');
-            
-        } catch (error) {
-            console.error('❌ Error loading top movers:', error);
-            this.renderMoversError(error.message);
+        const maxWait = 10000;
+        const startTime = Date.now();
+        
+        while (this.allStocks.length === 0 && Date.now() - startTime < maxWait) {
+            await new Promise(resolve => setTimeout(resolve, 500));
         }
+        
+        if (this.allStocks.length === 0) {
+            console.error('❌ No stocks data available');
+            return;
+        }
+        
+        const sorted = [...this.allStocks].sort((a, b) => b.changePercent - a.changePercent);
+        
+        const topGainers = sorted.slice(0, 10);
+        const topLosers = sorted.slice(-10).reverse();
+        const mostActive = [...this.allStocks].sort((a, b) => b.volume - a.volume).slice(0, 10);
+        
+        this.renderMovers('topGainers', topGainers);
+        this.renderMovers('topLosers', topLosers);
+        this.renderMovers('mostActive', mostActive);
+        
+        console.log('✅ Top Movers loaded');
     },
     
-    renderMoversError(message) {
-        ['topGainers', 'topLosers', 'mostActive'].forEach(containerId => {
-            const container = document.getElementById(containerId);
-            if (container) {
-                container.innerHTML = `
-                    <div class='movers-loading' style='color: var(--ml-danger);'>
-                        <i class='fas fa-exclamation-triangle'></i> ${message}
-                    </div>
-                `;
-            }
-        });
-    },
-    
-    renderMovers(containerId, stocks, type) {
+    renderMovers(containerId, stocks) {
         const container = document.getElementById(containerId);
         if (!container) return;
         
@@ -3980,40 +3800,24 @@ const MarketData = {
     async loadSectorPerformance() {
         console.log('📈 Loading Sector Performance...');
         
-        try {
-            const maxWaitTime = 30000;
-            const startTime = Date.now();
+        if (this.allStocks.length === 0) return;
+        
+        const sectorPerformance = {};
+        
+        Object.keys(this.sectors).forEach(sector => {
+            const sectorStocks = this.allStocks.filter(stock => stock.sector === sector);
             
-            while (this.allStocks.length === 0) {
-                if (Date.now() - startTime > maxWaitTime) {
-                    console.error('❌ Timeout waiting for allStocks');
-                    return;
-                }
-                await new Promise(resolve => setTimeout(resolve, 1000));
+            if (sectorStocks.length > 0) {
+                const avgPerformance = sectorStocks.reduce((sum, stock) => sum + stock.changePercent, 0) / sectorStocks.length;
+                sectorPerformance[sector] = avgPerformance;
             }
-            
-            const sectorPerformance = {};
-            
-            Object.keys(this.sectors).forEach(sector => {
-                const sectorStocks = this.allStocks.filter(stock => stock.sector === sector);
-                
-                if (sectorStocks.length > 0) {
-                    const avgPerformance = sectorStocks.reduce((sum, stock) => sum + stock.changePercent, 0) / sectorStocks.length;
-                    sectorPerformance[sector] = avgPerformance;
-                }
-            });
-            
-            if (typeof Highcharts !== 'undefined') {
-                this.createSectorChart(sectorPerformance);
-            } else {
-                console.warn('⚠ Highcharts not loaded');
-            }
-            
-            console.log('✅ Sector Performance loaded');
-            
-        } catch (error) {
-            console.error('❌ Error loading sector performance:', error);
+        });
+        
+        if (typeof Highcharts !== 'undefined') {
+            this.createSectorChart(sectorPerformance);
         }
+        
+        console.log('✅ Sector Performance loaded');
     },
     
     createSectorChart(sectorPerformance) {
@@ -4024,11 +3828,7 @@ const MarketData = {
         const performances = Object.values(sectorPerformance);
         
         Highcharts.chart('sectorChart', {
-            chart: {
-                type: 'bar',
-                backgroundColor: 'transparent',
-                height: 400
-            },
+            chart: { type: 'bar', backgroundColor: 'transparent', height: 400 },
             title: { text: null },
             xAxis: {
                 categories: sectors,
@@ -4042,11 +3842,7 @@ const MarketData = {
             plotOptions: {
                 bar: {
                     borderRadius: 8,
-                    dataLabels: {
-                        enabled: true,
-                        format: '{y:.2f}%',
-                        style: { fontWeight: '700' }
-                    },
+                    dataLabels: { enabled: true, format: '{y:.2f}%', style: { fontWeight: '700' } },
                     colorByPoint: true
                 }
             },
@@ -4061,43 +3857,19 @@ const MarketData = {
     async loadHeatMap() {
         console.log('🗺 Loading Heat Map...');
         
-        try {
-            const maxWaitTime = 30000;
-            const startTime = Date.now();
-            
-            while (this.allStocks.length === 0) {
-                if (Date.now() - startTime > maxWaitTime) {
-                    console.error('❌ Timeout waiting for allStocks');
-                    return;
-                }
-                await new Promise(resolve => setTimeout(resolve, 1000));
-            }
-            
-            const heatmapData = [];
-            
-            Object.entries(this.sectors).forEach(([sector, symbols]) => {
-                const sectorStocks = this.allStocks.filter(stock => symbols.includes(stock.symbol));
-                
-                sectorStocks.forEach(stock => {
-                    if (stock.marketCap > 0) {
-                        heatmapData.push({
-                            name: stock.symbol,
-                            value: stock.marketCap,
-                            colorValue: stock.changePercent
-                        });
-                    }
-                });
-            });
-            
-            if (heatmapData.length > 0 && typeof Highcharts !== 'undefined') {
-                this.createHeatMapChart(heatmapData);
-                console.log(`✅ Heat Map loaded with ${heatmapData.length} stocks`);
-            } else {
-                console.warn('⚠ No valid data for heat map');
-            }
-            
-        } catch (error) {
-            console.error('❌ Error loading heat map:', error);
+        if (this.allStocks.length === 0) return;
+        
+        const heatmapData = this.allStocks
+            .filter(stock => stock.marketCap > 0)
+            .map(stock => ({
+                name: stock.symbol,
+                value: stock.marketCap,
+                colorValue: stock.changePercent
+            }));
+        
+        if (heatmapData.length > 0 && typeof Highcharts !== 'undefined') {
+            this.createHeatMapChart(heatmapData);
+            console.log(`✅ Heat Map: ${heatmapData.length} stocks`);
         }
     },
     
@@ -4106,11 +3878,7 @@ const MarketData = {
         if (!container) return;
         
         Highcharts.chart('heatMapChart', {
-            chart: {
-                type: 'treemap',
-                backgroundColor: 'transparent',
-                height: 600
-            },
+            chart: { type: 'treemap', backgroundColor: 'transparent', height: 600 },
             title: { text: null },
             colorAxis: {
                 minColor: '#ef4444',
@@ -4182,43 +3950,6 @@ const MarketData = {
         }
     },
     
-    addToWatchlist() {
-        const symbol = this.currentSymbol;
-        
-        if (!symbol) {
-            this.showNotification('Please select a stock first', 'error');
-            return;
-        }
-        
-        if (this.watchlist.some(item => item.symbol === symbol)) {
-            this.showNotification(`${symbol} is already in your watchlist`, 'info');
-            return;
-        }
-        
-        const watchlistItem = {
-            symbol: symbol,
-            name: this.profileData?.name || symbol,
-            addedAt: Date.now()
-        };
-        
-        this.watchlist.push(watchlistItem);
-        this.saveWatchlistToStorage();
-        this.autoSave();
-        this.renderWatchlist();
-        this.refreshSingleWatchlistItem(symbol);
-        
-        this.showNotification(`✅ ${symbol} added to watchlist`, 'success');
-    },
-    
-    removeFromWatchlist(symbol) {
-        this.watchlist = this.watchlist.filter(item => item.symbol !== symbol);
-        this.saveWatchlistToStorage();
-        this.autoSave();
-        this.renderWatchlist();
-        
-        this.showNotification(`${symbol} removed from watchlist`, 'info');
-    },
-    
     renderWatchlist() {
         const container = document.getElementById('watchlistContainer');
         if (!container) return;
@@ -4273,7 +4004,9 @@ const MarketData = {
     
     async refreshSingleWatchlistItem(symbol) {
         try {
-            const quote = await this.apiRequest(() => this.apiClient.getQuote(symbol), 'low');
+            const quote = await this.rateLimiter.execute(() => 
+                this.apiClient.getQuote(symbol), 'low'
+            );
             
             const itemEl = document.getElementById(`watchlist-${symbol}`);
             if (!itemEl) return;
@@ -4298,10 +4031,17 @@ const MarketData = {
         }
     },
     
+    removeFromWatchlist(symbol) {
+        this.watchlist = this.watchlist.filter(item => item.symbol !== symbol);
+        this.saveWatchlistToStorage();
+        this.renderWatchlist();
+        this.showNotification(`${symbol} removed from watchlist`, 'info');
+    },
+    
     startWatchlistAutoRefresh() {
         this.watchlistRefreshInterval = setInterval(() => {
             this.refreshWatchlist();
-        }, 120000);
+        }, 120000); // Toutes les 2 minutes
     },
     
     createAlert() {
@@ -4337,7 +4077,6 @@ const MarketData = {
         this.alerts = this.alerts.filter(alert => alert.id !== alertId);
         this.saveAlertsToStorage();
         this.renderAlerts();
-        
         this.showNotification('Alert removed', 'info');
     },
     
@@ -4417,118 +4156,12 @@ const MarketData = {
     // ========== EVENT LISTENERS ==========
     
     setupEventListeners() {
-        // Filter inputs with debounce
         ['filterSearch', 'filterSector', 'filterMarketCap'].forEach(filterId => {
             const filterEl = document.getElementById(filterId);
             if (filterEl) {
                 filterEl.addEventListener('input', this.debounce(() => this.applyFilters(), 500));
             }
         });
-    },
-    
-    setupSearchListeners() {
-        const searchInput = document.getElementById('symbolInput');
-        if (!searchInput) return;
-        
-        searchInput.addEventListener('input', (e) => {
-            clearTimeout(this.searchTimeout);
-            
-            const query = e.target.value.trim();
-            if (query.length < 1) {
-                this.hideSearchSuggestions();
-                return;
-            }
-            
-            this.searchTimeout = setTimeout(() => {
-                this.showSearchSuggestions(query);
-            }, 300);
-        });
-        
-        document.addEventListener('click', (e) => {
-            if (!e.target.closest('.search-container')) {
-                this.hideSearchSuggestions();
-            }
-        });
-    },
-    
-    showSearchSuggestions(query) {
-        const suggestions = this.searchStocks(query);
-        
-        if (suggestions.length === 0) {
-            this.hideSearchSuggestions();
-            return;
-        }
-        
-        let container = document.getElementById('searchSuggestions');
-        if (!container) {
-            container = document.createElement('div');
-            container.id = 'searchSuggestions';
-            container.className = 'search-suggestions';
-            const searchContainer = document.querySelector('.search-input-wrapper');
-            if (searchContainer) {
-                searchContainer.appendChild(container);
-            }
-        }
-        
-        container.innerHTML = suggestions.map((stock, index) => `
-            <div class='search-suggestion-item ${index === this.selectedSuggestionIndex ? 'selected' : ''}' 
-                 onclick='MarketData.viewStock("${stock.symbol}")'>
-                <div class='suggestion-symbol'>${stock.symbol}</div>
-                <div class='suggestion-name'>${this.escapeHtml(stock.name)}</div>
-            </div>
-        `).join('');
-        
-        container.style.display = 'block';
-    },
-    
-    hideSearchSuggestions() {
-        const container = document.getElementById('searchSuggestions');
-        if (container) {
-            container.style.display = 'none';
-        }
-        this.selectedSuggestionIndex = -1;
-    },
-    
-    searchStocks(query) {
-        query = query.toLowerCase();
-        
-        return this.allStocks
-            .filter(stock => 
-                stock.symbol.toLowerCase().includes(query) || 
-                stock.name.toLowerCase().includes(query)
-            )
-            .slice(0, 10);
-    },
-    
-    // ========== AUTO-SAVE ==========
-    
-    async autoSave() {
-        if (!firebase || !firebase.auth || !firebase.firestore) {
-            console.warn('⚠ Firebase not available for auto-save');
-            return;
-        }
-        
-        const user = firebase.auth().currentUser;
-        if (!user) {
-            console.warn('⚠ User not authenticated for auto-save');
-            return;
-        }
-        
-        try {
-            const db = firebase.firestore();
-            const docRef = db.collection('users').doc(user.uid).collection('market-data').doc('portfolio');
-            
-            await docRef.set({
-                watchlist: this.watchlist,
-                alerts: this.alerts,
-                lastUpdate: firebase.firestore.FieldValue.serverTimestamp()
-            }, { merge: true });
-            
-            console.log('✅ Portfolio auto-saved');
-            
-        } catch (error) {
-            console.error('Auto-save error:', error);
-        }
     },
     
     // ========== HELPER FUNCTIONS ==========
@@ -4603,6 +4236,15 @@ const MarketData = {
             const now = new Date();
             element.textContent = `Last update: ${now.toLocaleTimeString()}`;
         }
+        
+        // Auto-update toutes les 30 secondes
+        setInterval(() => {
+            const element = document.getElementById('lastUpdate');
+            if (element) {
+                const now = new Date();
+                element.textContent = `Last update: ${now.toLocaleTimeString()}`;
+            }
+        }, 30000);
     },
     
     showNotification(message, type = 'info') {
@@ -4622,4 +4264,4 @@ document.addEventListener('DOMContentLoaded', () => {
 // ========== GLOBAL EXPORT ==========
 window.MarketData = MarketData;
 
-console.log('📊 market-data.js v7.0 loaded - Quotes Only (Finnhub)');
+console.log('📊 market-data.js v8.0 loaded - Finnhub Pure (API Client)');
