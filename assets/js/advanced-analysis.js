@@ -6009,65 +6009,30 @@ const AdvancedAnalysis = {
     },
 
     displaySingleHorizon(horizon, data, currentPrice) {
-        console.log(`📊 Displaying ${horizon} horizon:`, data);
-        
         // Recommendation Badge
         const recEl = document.getElementById(`recommendation${horizon}`);
-        if (recEl) {
-            const recClass = this.getRecommendationClass(data.recommendation);
-            recEl.innerHTML = `<div class='ai-rec-badge ${recClass}'>${data.recommendation}</div>`;
-        }
+        const recClass = this.getRecommendationClass(data.recommendation);
+        recEl.innerHTML = `<div class='ai-rec-badge ${recClass}'>${data.recommendation}</div>`;
         
         // Target Price
-        const targetEl = document.getElementById(`target${horizon}`);
-        if (targetEl) {
-            targetEl.textContent = this.formatCurrency(data.targetPrice);
-        }
+        document.getElementById(`target${horizon}`).textContent = this.formatCurrency(data.targetPrice);
         
         // Upside/Downside
         const upsideEl = document.getElementById(`upside${horizon}`);
-        if (upsideEl) {
-            const upsideText = `${data.upside >= 0 ? '+' : ''}${data.upside.toFixed(1)}%`;
-            const upsideColor = data.upside >= 0 ? '#10b981' : '#ef4444';
-            upsideEl.innerHTML = `<span style="color: ${upsideColor}; font-weight: 700;">${upsideText}</span>`;
-        }
+        const upsideText = `${data.upside >= 0 ? '+' : ''}${data.upside.toFixed(1)}%`;
+        const upsideClass = data.upside >= 0 ? 'positive' : 'negative';
+        upsideEl.innerHTML = `<span style="color: ${data.upside >= 0 ? '#10b981' : '#ef4444'}; font-weight: 700;">${upsideText}</span>`;
         
-        // ✅ CORRECTION - Confidence Bar (la partie problématique)
-        const confBarContainer = document.getElementById(`confidence${horizon}`);
-        if (confBarContainer) {
-            // S'assurer que la structure HTML existe
-            let confFill = confBarContainer.querySelector('.ai-confidence-fill');
-            
-            if (!confFill) {
-                // Si la barre n'existe pas, la créer
-                confBarContainer.innerHTML = `<div class="ai-confidence-fill"></div>`;
-                confFill = confBarContainer.querySelector('.ai-confidence-fill');
-            }
-            
-            if (confFill) {
-                const recClass = this.getRecommendationClass(data.recommendation);
-                
-                // Appliquer la largeur et la classe
-                confFill.style.width = data.confidence + '%';
-                confFill.className = `ai-confidence-fill ${recClass}`;
-                
-                console.log(`✅ Confidence bar ${horizon}: ${data.confidence}% (class: ${recClass})`);
-            } else {
-                console.error(`❌ Failed to create confidence fill for ${horizon}`);
-            }
-        } else {
-            console.error(`❌ Confidence bar container not found: confidence${horizon}`);
-        }
+        // Confidence Bar
+        const confEl = document.getElementById(`confidence${horizon}`);
+        confEl.style.width = data.confidence + '%';
+        confEl.className = `ai-confidence-fill ${recClass}`;
         
         // Key Drivers
         const driversEl = document.getElementById(`drivers${horizon}`);
-        if (driversEl) {
-            driversEl.innerHTML = data.drivers.map(driver => 
-                `<div class='ai-driver-item'><i class='fas fa-check-circle'></i> ${driver}</div>`
-            ).join('');
-        }
-        
-        console.log(`✅ ${horizon} horizon displayed successfully`);
+        driversEl.innerHTML = data.drivers.map(driver => 
+            `<div class='ai-driver-item'><i class='fas fa-check-circle'></i> ${driver}</div>`
+        ).join('');
     },
 
     getRecommendationClass(recommendation) {
