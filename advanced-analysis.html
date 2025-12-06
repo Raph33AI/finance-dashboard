@@ -3,7 +3,7 @@
 <head>
     <meta charset='UTF-8'>
     <meta name='viewport' content='width=device-width, initial-scale=1.0'>
-    <title>Advanced Analysis</title>
+    <title>Advanced Analysis - Portfolio & Alerts</title>
     
     <!-- Highcharts -->
     <script src='https://code.highcharts.com/stock/highstock.js'></script>
@@ -19,7 +19,8 @@
     <link rel="stylesheet" href="assets/css/user-menu.css">
     <link rel="stylesheet" href="assets/css/chatbot-styles.css">
     <link rel='stylesheet' href='assets/css/advanced-analysis.css'>
-    <!-- ✅ FAVICON DYNAMIQUE - ICI -->
+    
+    <!-- ✅ FAVICON DYNAMIQUE -->
     <script src="assets/js/favicon-dynamic.js"></script>
 
     <!-- Firebase SDK -->
@@ -33,19 +34,19 @@
     <!-- Protection de la page (AUTH GUARD) -->
     <script src="assets/js/auth-guard.js"></script>
 
-    <!-- ✅ ACCESS CONTROL - VÉRIFICATION DU PLAN -->
+    <!-- ✅ ACCESS CONTROL -->
     <script src="assets/js/access-control.js"></script>
     
 </head>
 <body>
 
-    <!-- ⚡ THEME SCRIPT - DOIT ÊTRE CHARGÉ EN PREMIER -->
+    <!-- ⚡ THEME SCRIPT -->
     <script src="assets/js/theme.js"></script>
 
     <!-- Particles Background -->
     <canvas id="particles-canvas" class="particles-background"></canvas>
 
-    <!-- 🎨 THEME CHARTS - POUR LES GRAPHIQUES -->
+    <!-- 🎨 THEME CHARTS -->
     <script src="assets/js/theme-charts.js"></script>
 
     <div class='layout-wrapper'>
@@ -53,12 +54,10 @@
         <!-- ============================================
              SIDEBAR NAVIGATION
              ============================================ -->
-        <!-- Sidebar Navigation -->
         <aside class='sidebar' id='sidebar'>
             <!-- Header avec Logo 3D -->
             <div class="sidebar-header">
                 <div class="logo-container">
-                    <!-- Logo 3D SVG -->
                     <div class="logo-3d">
                         <svg class="logo-svg" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
                             <defs>
@@ -67,22 +66,16 @@
                                     <stop offset="100%" class="logo-gradient-2" />
                                 </linearGradient>
                             </defs>
-                            
-                            <!-- Graphique -->
                             <path d="M 20 80 L 30 70 L 40 75 L 50 60 L 60 65 L 70 45 L 80 50 L 90 30" 
                                   stroke="url(#logoGradient)" 
                                   stroke-width="4" 
                                   fill="none" 
                                   stroke-linecap="round" 
                                   stroke-linejoin="round"/>
-                            
-                            <!-- Points -->
                             <circle cx="30" cy="70" r="4" fill="url(#logoGradient)"/>
                             <circle cx="50" cy="60" r="4" fill="url(#logoGradient)"/>
                             <circle cx="70" cy="45" r="4" fill="url(#logoGradient)"/>
                             <circle cx="90" cy="30" r="5" fill="url(#logoGradient)"/>
-                            
-                            <!-- Flèche -->
                             <path d="M 85 35 L 90 30 L 85 25" 
                                   stroke="url(#logoGradient)" 
                                   stroke-width="3" 
@@ -90,15 +83,11 @@
                                   stroke-linecap="round"/>
                         </svg>
                     </div>
-                    
-                    <!-- Brand Text -->
                     <div class="brand-text">
                         <h2 class="brand-name">AlphaVault AI</h2>
                         <span class="brand-tagline">Investments</span>
                     </div>
                 </div>
-                
-                <!-- Toggle Button -->
                 <button class="sidebar-toggle" aria-label="Toggle Sidebar">
                     <i class="fas fa-angle-left"></i>
                 </button>
@@ -106,8 +95,6 @@
             
             <!-- Navigation -->
             <nav class="sidebar-nav">
-                
-                <!-- ✅ Ajout data-tooltip pour chaque folder -->
                 <div class="nav-section">
                     <button class="nav-folder" data-tooltip="Home">
                         <i class="fas fa-home"></i>
@@ -204,7 +191,6 @@
                     </div>
                 </div>
 
-                <!-- ✅ NOUVELLE SECTION : AI ASSISTANT -->
                 <div class='nav-section'>
                     <button class="nav-folder" data-tooltip="AI Assistant">
                         <i class="fas fa-robot"></i>
@@ -220,10 +206,9 @@
                 </div>
             </nav>
             
-            <!-- SIDEBAR FOOTER - MENU UTILISATEUR -->
+            <!-- SIDEBAR FOOTER -->
             <div class="sidebar-footer">
                 <div class="sidebar-user-menu">
-                    <!-- Trigger (élément cliquable) -->
                     <div class="sidebar-user-trigger" id="sidebarUserTrigger">
                         <img data-user-photo 
                             src="https://ui-avatars.com/api/?name=User&background=2563eb&color=fff" 
@@ -236,7 +221,6 @@
                         <i class="fas fa-chevron-up sidebar-user-arrow"></i>
                     </div>
                     
-                    <!-- Dropdown (s'ouvre vers le haut) -->
                     <div class="sidebar-user-dropdown" id="sidebarUserDropdown">
                         <div class="user-dropdown-header">
                             <img data-user-photo 
@@ -275,10 +259,8 @@
                     </div>
                 </div>
             </div>
-            <!-- FIN SIDEBAR FOOTER -->
         </aside>
         
-        <!-- Sidebar Overlay (mobile) -->
         <div class='sidebar-overlay' id='sidebarOverlay' aria-hidden='true'></div>
         
         <!-- ============================================
@@ -292,18 +274,124 @@
                         <button class='mobile-toggle' id='mobileToggle'>
                             <i class='fas fa-bars'></i>
                         </button>
-                        <h1></i> Advanced Technical Analysis</h1>
+                        <h1><i class="fas fa-brain"></i> Advanced Technical Analysis</h1>
                     </div>
                 </div>
             </header>
             
             <!-- Container -->
             <div class='container'>
-                <!-- Main Content -->
                 <div class='content'>
                     
                     <!-- ============================================
-                         SEARCH PANEL
+                         🆕 PORTFOLIO MANAGEMENT SECTION
+                         ============================================ -->
+                    <div class='portfolio-management-section'>
+                        <h2 class='section-title'>
+                            <i class='fas fa-briefcase'></i> Portfolio Management
+                            <span class='help-icon' onclick='openPortfolioHelp()'>?</span>
+                        </h2>
+                        
+                        <div class='portfolio-toolbar'>
+                            <div class='portfolio-selector'>
+                                <label>
+                                    <i class='fas fa-folder-open'></i> Active Portfolio:
+                                </label>
+                                <select id='portfolioSelect' class='portfolio-dropdown'>
+                                    <option value=''>Loading portfolios...</option>
+                                </select>
+                            </div>
+                            
+                            <div class='portfolio-actions'>
+                                <button class='btn-portfolio-action' onclick='PortfolioManager.openCreateModal()'>
+                                    <i class='fas fa-plus'></i> New Portfolio
+                                </button>
+                                <button class='btn-portfolio-action' onclick='PortfolioManager.openManageModal()'>
+                                    <i class='fas fa-cog'></i> Manage
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- ============================================
+                         🆕 WATCHLIST SECTION
+                         ============================================ -->
+                    <div class='watchlist-section'>
+                        <h2 class='section-title'>
+                            <i class='fas fa-star'></i> Watchlist
+                            <span class='help-icon' onclick='openWatchlistHelp()'>?</span>
+                        </h2>
+                        
+                        <div class='watchlist-toolbar'>
+                            <div class='watchlist-search'>
+                                <input type='text' 
+                                       id='watchlistSearchInput' 
+                                       placeholder='Add stock to watchlist (e.g., AAPL)...'
+                                       autocomplete='off'>
+                                <button class='btn-add-watchlist' onclick='WatchlistManager.addFromInput()'>
+                                    <i class='fas fa-plus'></i> Add
+                                </button>
+                            </div>
+                            
+                            <div class='watchlist-filters'>
+                                <button class='filter-btn active' data-filter='all' onclick='WatchlistManager.filterWatchlist("all")'>
+                                    All
+                                </button>
+                                <button class='filter-btn' data-filter='gainers' onclick='WatchlistManager.filterWatchlist("gainers")'>
+                                    <i class='fas fa-arrow-up'></i> Gainers
+                                </button>
+                                <button class='filter-btn' data-filter='losers' onclick='WatchlistManager.filterWatchlist("losers")'>
+                                    <i class='fas fa-arrow-down'></i> Losers
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div id='watchlistContainer' class='watchlist-container'>
+                            <div class='watchlist-empty'>
+                                <i class='fas fa-star'></i>
+                                <p>No stocks in watchlist</p>
+                                <small>Add stocks to track them in real-time</small>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- ============================================
+                         🆕 PRICE ALERTS SECTION
+                         ============================================ -->
+                    <div class='price-alerts-section'>
+                        <h2 class='section-title'>
+                            <i class='fas fa-bell'></i> Price Alerts
+                            <span class='help-icon' onclick='openAlertsHelp()'>?</span>
+                        </h2>
+                        
+                        <div class='alerts-toolbar'>
+                            <button class='btn-create-alert' onclick='AlertsManager.openCreateModal()'>
+                                <i class='fas fa-plus'></i> Create New Alert
+                            </button>
+                            
+                            <div class='alerts-stats'>
+                                <div class='stat-badge'>
+                                    <span id='activeAlertsCount'>0</span>
+                                    <small>Active</small>
+                                </div>
+                                <div class='stat-badge'>
+                                    <span id='triggeredAlertsCount'>0</span>
+                                    <small>Triggered</small>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div id='alertsContainer' class='alerts-container'>
+                            <div class='alerts-empty'>
+                                <i class='fas fa-bell-slash'></i>
+                                <p>No active price alerts</p>
+                                <small>Create alerts to get notified when prices reach your targets</small>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- ============================================
+                         SEARCH PANEL (ORIGINAL)
                          ============================================ -->
                     <div class='search-panel'>
                         <h2 class='panel-title'>
@@ -312,7 +400,6 @@
                         </h2>
                         
                         <div class='search-container'>
-                            <!-- Search Input + Button -->
                             <div class='search-input-wrapper'>
                                 <input type='text' 
                                        id='symbolInput' 
@@ -322,12 +409,9 @@
                                 <button class='btn-analyze' onclick='AdvancedAnalysis.analyzeStock()'>
                                     <i class='fas fa-chart-area'></i> Analyze Stock
                                 </button>
-                                
-                                <!-- Suggestions dropdown (hidden by default) -->
                                 <div class='search-suggestions' id='searchSuggestions'></div>
                             </div>
                             
-                            <!-- Popular Stocks -->
                             <div class='popular-stocks'>
                                 <span class='quick-label'>Popular Stocks:</span>
                                 <button class='symbol-chip' onclick='AdvancedAnalysis.loadSymbol("AAPL")'>
@@ -356,7 +440,6 @@
                                 </button>
                             </div>
                             
-                            <!-- Period Selection -->
                             <div class='prediction-settings'>
                                 <div class='setting-group'>
                                     <label>Analysis Period:</label>
@@ -413,7 +496,7 @@
                             </div>
                             
                             <div class='signals-breakdown' id='signalsBreakdown'>
-                                <!-- Sera rempli dynamiquement -->
+                                <!-- Rempli dynamiquement -->
                             </div>
                         </div>
                         
@@ -559,7 +642,81 @@
     </div>
     
     <!-- ============================================
-         MODALS - COMPLETE WITH ALL INDICATORS
+         🆕 MODALS POUR LES NOUVELLES FONCTIONNALITÉS
+         ============================================ -->
+    
+    <!-- Modal: Create Portfolio -->
+    <div id='modalCreatePortfolio' class='modal'>
+        <div class='modal-content modal-small'>
+            <div class='modal-header'>
+                <h2><i class='fas fa-folder-plus'></i> Create New Portfolio</h2>
+                <span class='close-modal' onclick='closeModal("modalCreatePortfolio")'>&times;</span>
+            </div>
+            <div class='modal-body'>
+                <div class='form-group'>
+                    <label>Portfolio Name</label>
+                    <input type='text' id='newPortfolioName' placeholder='e.g., Tech Stocks, Dividend Portfolio...' class='form-input'>
+                </div>
+                <div class='modal-actions'>
+                    <button class='btn-cancel' onclick='closeModal("modalCreatePortfolio")'>Cancel</button>
+                    <button class='btn-confirm' onclick='PortfolioManager.createPortfolio()'>
+                        <i class='fas fa-check'></i> Create
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal: Manage Portfolios -->
+    <div id='modalManagePortfolios' class='modal'>
+        <div class='modal-content'>
+            <div class='modal-header'>
+                <h2><i class='fas fa-cog'></i> Manage Portfolios</h2>
+                <span class='close-modal' onclick='closeModal("modalManagePortfolios")'>&times;</span>
+            </div>
+            <div class='modal-body'>
+                <div id='portfoliosListManage' class='portfolios-manage-list'>
+                    <!-- Rempli dynamiquement -->
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal: Create Price Alert -->
+    <div id='modalCreateAlert' class='modal'>
+        <div class='modal-content modal-small'>
+            <div class='modal-header'>
+                <h2><i class='fas fa-bell'></i> Create Price Alert</h2>
+                <span class='close-modal' onclick='closeModal("modalCreateAlert")'>&times;</span>
+            </div>
+            <div class='modal-body'>
+                <div class='form-group'>
+                    <label>Stock Symbol</label>
+                    <input type='text' id='alertSymbol' placeholder='e.g., AAPL' class='form-input' style='text-transform: uppercase;'>
+                </div>
+                <div class='form-group'>
+                    <label>Alert Condition</label>
+                    <select id='alertCondition' class='form-input'>
+                        <option value='above'>Price goes above</option>
+                        <option value='below'>Price goes below</option>
+                    </select>
+                </div>
+                <div class='form-group'>
+                    <label>Target Price ($)</label>
+                    <input type='number' id='alertTargetPrice' placeholder='e.g., 150.00' class='form-input' step='0.01'>
+                </div>
+                <div class='modal-actions'>
+                    <button class='btn-cancel' onclick='closeModal("modalCreateAlert")'>Cancel</button>
+                    <button class='btn-confirm' onclick='AlertsManager.createAlert()'>
+                        <i class='fas fa-check'></i> Create Alert
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- ============================================
+         MODALS ORIGINAUX - COMPLETE WITH ALL INDICATORS
          ============================================ -->
 
     <!-- Modal Introduction -->
@@ -597,7 +754,7 @@
                 </ol>
                 
                 <div class='warning-box'>
-                    ⚠️ <strong>Important:</strong> Technical analysis should be used in conjunction with fundamental analysis and risk management. No indicator is 100% accurate.
+                    ⚠ <strong>Important:</strong> Technical analysis should be used in conjunction with fundamental analysis and risk management. No indicator is 100% accurate.
                 </div>
             </div>
         </div>
@@ -646,7 +803,7 @@
     <div id='modalIchimoku' class='modal'>
         <div class='modal-content'>
             <div class='modal-header'>
-                <h2>☁️ Ichimoku Cloud</h2>
+                <h2>☁ Ichimoku Cloud</h2>
                 <span class='close-modal' onclick='closeModal("modalIchimoku")'>&times;</span>
             </div>
             <div class='modal-body'>
@@ -674,14 +831,6 @@
                     <li><strong>Red Cloud (Span A < Span B):</strong> Bearish resistance</li>
                 </ul>
                 
-                <h3>Trading Strategy</h3>
-                <ol>
-                    <li>Look for price breakouts above/below the cloud</li>
-                    <li>Wait for Tenkan/Kijun crossover confirmation</li>
-                    <li>Use thick parts of cloud as strong support/resistance</li>
-                    <li>Chikou Span above price = additional bullish confirmation</li>
-                </ol>
-                
                 <div class='tip-box'>
                     💡 <strong>Pro Tip:</strong> Ichimoku works best on daily charts and in trending markets. Avoid using it in choppy, sideways markets.
                 </div>
@@ -698,7 +847,7 @@
             </div>
             <div class='modal-body'>
                 <h3>What is the Stochastic Oscillator?</h3>
-                <p>The <span class='key-term'>Stochastic Oscillator</span> is a momentum indicator that compares a particular closing price to a range of prices over a certain period, showing the location of the close relative to the high-low range.</p>
+                <p>The <span class='key-term'>Stochastic Oscillator</span> is a momentum indicator that compares a particular closing price to a range of prices over a certain period.</p>
                 
                 <h3>Calculation</h3>
                 <div class='formula-box'>
@@ -713,22 +862,10 @@
                     <li><strong>Below 20:</strong> Oversold zone - potential buy signal</li>
                     <li><strong>%K crosses above %D:</strong> Bullish signal</li>
                     <li><strong>%K crosses below %D:</strong> Bearish signal</li>
-                    <li><strong>Divergence:</strong> Price makes new high/low but Stochastic doesn't = reversal warning</li>
                 </ul>
                 
-                <h3>Trading Signals</h3>
-                <ol>
-                    <li><strong>Basic:</strong> Buy when < 20, sell when > 80</li>
-                    <li><strong>Crossover:</strong> Buy when %K crosses above %D in oversold zone</li>
-                    <li><strong>Divergence:</strong> Bullish divergence in oversold = strong buy, bearish divergence in overbought = strong sell</li>
-                </ol>
-                
                 <div class='warning-box'>
-                    ⚠️ <strong>Warning:</strong> In strong trends, Stochastic can remain overbought/oversold for extended periods. Use with trend indicators like ADX.
-                </div>
-                
-                <div class='tip-box'>
-                    💡 <strong>Pro Tip:</strong> Most effective in ranging markets. Combine with support/resistance levels for best results.
+                    ⚠ <strong>Warning:</strong> In strong trends, Stochastic can remain overbought/oversold for extended periods.
                 </div>
             </div>
         </div>
@@ -743,7 +880,7 @@
             </div>
             <div class='modal-body'>
                 <h3>What is Williams %R?</h3>
-                <p>The <span class='key-term'>Williams %R</span> is a momentum indicator that measures overbought/oversold levels, similar to Stochastic but inverted (ranging from 0 to -100).</p>
+                <p>The <span class='key-term'>Williams %R</span> is a momentum indicator that measures overbought/oversold levels, ranging from 0 to -100.</p>
                 
                 <h3>Calculation</h3>
                 <div class='formula-box'>
@@ -756,29 +893,7 @@
                     <li><strong>-20 to 0:</strong> Overbought zone - consider selling</li>
                     <li><strong>-80 to -100:</strong> Oversold zone - consider buying</li>
                     <li><strong>-50:</strong> Centerline (neutral zone)</li>
-                    <li><strong>Crosses above -80:</strong> Bullish momentum building</li>
-                    <li><strong>Crosses below -20:</strong> Bearish momentum building</li>
                 </ul>
-                
-                <h3>Trading Strategy</h3>
-                <ol>
-                    <li><strong>Reversal Trading:</strong> Buy when Williams %R rises from oversold zone (-80+)</li>
-                    <li><strong>Trend Following:</strong> In uptrend, buy dips to -40 to -80 zone</li>
-                    <li><strong>Failure Swings:</strong> %R fails to reach overbought/oversold = trend strength</li>
-                    <li><strong>Divergence:</strong> Price makes new high but Williams %R doesn't = bearish divergence</li>
-                </ol>
-                
-                <h3>Differences from Stochastic</h3>
-                <ul>
-                    <li>Williams %R is more volatile and sensitive</li>
-                    <li>Better for short-term trading</li>
-                    <li>No smoothing (%D line)</li>
-                    <li>Inverted scale (negative values)</li>
-                </ul>
-                
-                <div class='tip-box'>
-                    💡 <strong>Pro Tip:</strong> Use multiple timeframes - oversold on daily + weekly charts provides strongest buy signals.
-                </div>
             </div>
         </div>
     </div>
@@ -792,47 +907,23 @@
             </div>
             <div class='modal-body'>
                 <h3>What is ADX?</h3>
-                <p>The <span class='key-term'>Average Directional Index (ADX)</span> measures the strength of a trend, regardless of direction. It's a non-directional indicator that quantifies trend strength on a scale from 0 to 100.</p>
+                <p>The <span class='key-term'>Average Directional Index (ADX)</span> measures the strength of a trend, regardless of direction.</p>
                 
                 <h3>Components</h3>
                 <ul>
                     <li><strong>ADX Line:</strong> Trend strength (0-100)</li>
-                    <li><strong>+DI (Plus Directional Indicator):</strong> Upward movement strength</li>
-                    <li><strong>-DI (Minus Directional Indicator):</strong> Downward movement strength</li>
+                    <li><strong>+DI:</strong> Upward movement strength</li>
+                    <li><strong>-DI:</strong> Downward movement strength</li>
                 </ul>
-                
-                <h3>Calculation</h3>
-                <div class='formula-box'>
-                    1. Calculate +DM and -DM (directional movements)<br>
-                    2. Smooth with 14-period average<br>
-                    3. Calculate DX = (|+DI - -DI| / |+DI + -DI|) × 100<br>
-                    4. ADX = 14-period smoothed average of DX
-                </div>
                 
                 <h3>How to Interpret</h3>
                 <ul>
-                    <li><strong>ADX < 20:</strong> Weak trend, ranging market (avoid trend-following strategies)</li>
-                    <li><strong>ADX 20-25:</strong> Developing trend</li>
-                    <li><strong>ADX > 25:</strong> Strong trend (good for trend-following)</li>
+                    <li><strong>ADX < 20:</strong> Weak trend, ranging market</li>
+                    <li><strong>ADX > 25:</strong> Strong trend</li>
                     <li><strong>ADX > 40:</strong> Very strong trend</li>
-                    <li><strong>ADX > 50:</strong> Extremely strong trend (rare)</li>
+                    <li><strong>+DI above -DI + ADX > 25:</strong> Strong uptrend</li>
+                    <li><strong>-DI above +DI + ADX > 25:</strong> Strong downtrend</li>
                 </ul>
-                
-                <h3>Trading with +DI and -DI</h3>
-                <ul>
-                    <li><strong>+DI above -DI + ADX > 25:</strong> Strong uptrend - stay long</li>
-                    <li><strong>-DI above +DI + ADX > 25:</strong> Strong downtrend - stay short</li>
-                    <li><strong>+DI crosses above -DI:</strong> Potential buy signal</li>
-                    <li><strong>-DI crosses above +DI:</strong> Potential sell signal</li>
-                </ul>
-                
-                <div class='warning-box'>
-                    ⚠️ <strong>Important:</strong> ADX does NOT indicate trend direction, only strength. Use +DI/-DI for direction.
-                </div>
-                
-                <div class='tip-box'>
-                    💡 <strong>Pro Tip:</strong> When ADX is rising, use trend-following strategies. When ADX is falling below 25, use range-bound strategies.
-                </div>
             </div>
         </div>
     </div>
@@ -846,41 +937,17 @@
             </div>
             <div class='modal-body'>
                 <h3>What is Parabolic SAR?</h3>
-                <p>The <span class='key-term'>Parabolic SAR</span> (Stop And Reverse) is a trend-following indicator that provides entry/exit points and trailing stop-loss levels. The dots appear above or below price to indicate trend direction.</p>
-                
-                <h3>How it Works</h3>
-                <p>The SAR dots "follow" price action, accelerating as the trend develops. When price crosses the SAR, the indicator "flips" to the other side, signaling a potential trend reversal.</p>
-                
-                <h3>Calculation</h3>
-                <div class='formula-box'>
-                    SAR = Prior SAR + AF × (EP - Prior SAR)<br><br>
-                    AF = Acceleration Factor (starts at 0.02, increases by 0.02 each new extreme, max 0.20)<br>
-                    EP = Extreme Point (highest high in uptrend, lowest low in downtrend)
-                </div>
+                <p>The <span class='key-term'>Parabolic SAR</span> (Stop And Reverse) is a trend-following indicator that provides entry/exit points.</p>
                 
                 <h3>How to Interpret</h3>
                 <ul>
                     <li><strong>Dots below price:</strong> Uptrend - stay long</li>
                     <li><strong>Dots above price:</strong> Downtrend - stay short</li>
-                    <li><strong>Dots flip:</strong> Potential trend reversal - close position and reverse</li>
-                    <li><strong>Dots accelerating away from price:</strong> Strong trend</li>
-                    <li><strong>Dots close to price:</strong> Trend losing momentum</li>
+                    <li><strong>Dots flip:</strong> Potential trend reversal</li>
                 </ul>
                 
-                <h3>Trading Strategy</h3>
-                <ol>
-                    <li><strong>Trend Following:</strong> Buy when SAR flips below price, sell when it flips above</li>
-                    <li><strong>Stop Loss:</strong> Use SAR dots as trailing stop-loss levels</li>
-                    <li><strong>Confirmation:</strong> Combine with trend indicators (ADX, Moving Averages)</li>
-                    <li><strong>Exit:</strong> Exit when SAR flips, regardless of profit/loss</li>
-                </ol>
-                
                 <div class='warning-box'>
-                    ⚠️ <strong>Warning:</strong> Parabolic SAR generates many false signals in sideways/choppy markets. Best used in strong trending markets.
-                </div>
-                
-                <div class='tip-box'>
-                    💡 <strong>Pro Tip:</strong> Adjust AF parameters for different volatility - lower AF (0.01 max 0.10) for less sensitive signals.
+                    ⚠ <strong>Warning:</strong> Parabolic SAR generates many false signals in sideways markets.
                 </div>
             </div>
         </div>
@@ -895,41 +962,15 @@
             </div>
             <div class='modal-body'>
                 <h3>What is OBV?</h3>
-                <p>The <span class='key-term'>On-Balance Volume</span> is a cumulative momentum indicator that uses volume flow to predict changes in stock price. The premise is that volume precedes price movement.</p>
-                
-                <h3>Calculation</h3>
-                <div class='formula-box'>
-                    If Close > Prior Close: OBV = Prior OBV + Volume<br>
-                    If Close < Prior Close: OBV = Prior OBV - Volume<br>
-                    If Close = Prior Close: OBV = Prior OBV
-                </div>
+                <p>The <span class='key-term'>On-Balance Volume</span> uses volume flow to predict changes in stock price.</p>
                 
                 <h3>How to Interpret</h3>
                 <ul>
-                    <li><strong>OBV rising + Price rising:</strong> Healthy uptrend (volume confirms price)</li>
-                    <li><strong>OBV falling + Price falling:</strong> Healthy downtrend (volume confirms price)</li>
-                    <li><strong>OBV rising + Price falling:</strong> Bullish divergence - potential reversal up</li>
-                    <li><strong>OBV falling + Price rising:</strong> Bearish divergence - potential reversal down</li>
+                    <li><strong>OBV rising + Price rising:</strong> Healthy uptrend</li>
+                    <li><strong>OBV falling + Price falling:</strong> Healthy downtrend</li>
+                    <li><strong>OBV rising + Price falling:</strong> Bullish divergence</li>
+                    <li><strong>OBV falling + Price rising:</strong> Bearish divergence</li>
                 </ul>
-                
-                <h3>Key Signals</h3>
-                <ul>
-                    <li><strong>Trend Confirmation:</strong> OBV moving in same direction as price = strong trend</li>
-                    <li><strong>Divergence:</strong> OBV moving opposite to price = warning sign</li>
-                    <li><strong>Breakout Confirmation:</strong> OBV breaking to new high/low confirms price breakout</li>
-                    <li><strong>Support/Resistance:</strong> OBV can have its own S/R levels</li>
-                </ul>
-                
-                <h3>Trading Examples</h3>
-                <ol>
-                    <li><strong>Accumulation:</strong> Price flat but OBV rising = smart money buying, breakout likely</li>
-                    <li><strong>Distribution:</strong> Price flat but OBV falling = smart money selling, breakdown likely</li>
-                    <li><strong>Trend Weakness:</strong> New price high but OBV doesn't confirm = weak trend</li>
-                </ol>
-                
-                <div class='tip-box'>
-                    💡 <strong>Pro Tip:</strong> OBV works best on liquid stocks with high volume. Use 20-day moving average of OBV to smooth signals.
-                </div>
             </div>
         </div>
     </div>
@@ -943,47 +984,21 @@
             </div>
             <div class='modal-body'>
                 <h3>What is ATR?</h3>
-                <p>The <span class='key-term'>Average True Range</span> measures market volatility by calculating the average range between high and low prices over a period. Higher ATR = higher volatility.</p>
-                
-                <h3>Calculation</h3>
-                <div class='formula-box'>
-                    True Range = MAX of:<br>
-                    1. Current High - Current Low<br>
-                    2. |Current High - Previous Close|<br>
-                    3. |Current Low - Previous Close|<br><br>
-                    ATR = 14-period moving average of True Range
-                </div>
+                <p>The <span class='key-term'>Average True Range</span> measures market volatility.</p>
                 
                 <h3>How to Interpret</h3>
                 <ul>
-                    <li><strong>High ATR:</strong> High volatility - larger price swings expected</li>
-                    <li><strong>Low ATR:</strong> Low volatility - smaller price movements</li>
-                    <li><strong>Rising ATR:</strong> Increasing volatility, potential breakout</li>
-                    <li><strong>Falling ATR:</strong> Decreasing volatility, consolidation</li>
+                    <li><strong>High ATR:</strong> High volatility - larger price swings</li>
+                    <li><strong>Low ATR:</strong> Low volatility - smaller movements</li>
+                    <li><strong>Rising ATR:</strong> Increasing volatility</li>
                 </ul>
                 
                 <h3>Practical Applications</h3>
                 <ul>
-                    <li><strong>Stop Loss Placement:</strong> Set stops at 2-3× ATR from entry</li>
-                    <li><strong>Position Sizing:</strong> Risk same $ amount → smaller position in high ATR stocks</li>
-                    <li><strong>Profit Targets:</strong> Target 2-3× ATR for realistic profit goals</li>
-                    <li><strong>Breakout Confirmation:</strong> Breakout with rising ATR = stronger signal</li>
+                    <li>Set stops at 2-3× ATR from entry</li>
+                    <li>Adjust position sizing based on ATR</li>
+                    <li>Target 2-3× ATR for profit goals</li>
                 </ul>
-                
-                <h3>ATR-Based Stop Loss Example</h3>
-                <div class='formula-box'>
-                    If Stock = $100, ATR = $3<br>
-                    Long Stop Loss = $100 - (2 × $3) = $94<br>
-                    Short Stop Loss = $100 + (2 × $3) = $106
-                </div>
-                
-                <div class='warning-box'>
-                    ⚠️ <strong>Note:</strong> ATR does NOT indicate trend direction, only volatility. Use with trend indicators.
-                </div>
-                
-                <div class='tip-box'>
-                    💡 <strong>Pro Tip:</strong> Compare current ATR to historical ATR. If current ATR is 1.5× above average, expect increased volatility and widen stops.
-                </div>
             </div>
         </div>
     </div>
@@ -997,40 +1012,19 @@
             </div>
             <div class='modal-body'>
                 <h3>What are Fibonacci Retracements?</h3>
-                <p><span class='key-term'>Fibonacci Retracements</span> are horizontal lines that indicate potential support/resistance levels based on the Fibonacci sequence. These levels represent key percentages where price might reverse or pause.</p>
+                <p><span class='key-term'>Fibonacci Retracements</span> are horizontal lines that indicate potential support/resistance levels.</p>
                 
                 <h3>Key Levels</h3>
                 <ul>
-                    <li><strong>0%:</strong> Recent high (or low in downtrend)</li>
                     <li><strong>23.6%:</strong> Shallow retracement</li>
                     <li><strong>38.2%:</strong> Moderate retracement</li>
-                    <li><strong>50%:</strong> Psychological midpoint (not Fibonacci, but widely watched)</li>
-                    <li><strong>61.8%:</strong> The "Golden Ratio" - most important level</li>
+                    <li><strong>50%:</strong> Psychological midpoint</li>
+                    <li><strong>61.8%:</strong> The "Golden Ratio" - most important</li>
                     <li><strong>78.6%:</strong> Deep retracement</li>
-                    <li><strong>100%:</strong> Recent low (or high in downtrend)</li>
                 </ul>
-                
-                <h3>How to Use</h3>
-                <ol>
-                    <li><strong>Identify Trend:</strong> Find significant high and low points</li>
-                    <li><strong>Draw Levels:</strong> In uptrend, draw from low to high. In downtrend, high to low</li>
-                    <li><strong>Watch for Bounces:</strong> Price often finds support/resistance at these levels</li>
-                    <li><strong>Entry Points:</strong> Buy dips at Fib levels in uptrend, sell rallies in downtrend</li>
-                </ol>
-                
-                <h3>Trading Strategy</h3>
-                <ul>
-                    <li><strong>Strong Trend:</strong> Expect retracements to 38.2% or 50%</li>
-                    <li><strong>Normal Correction:</strong> 50% to 61.8% retracement is common</li>
-                    <li><strong>Deep Pullback:</strong> 78.6% level is last support before trend reversal</li>
-                    <li><strong>Break of 100%:</strong> Trend likely reversing</li>
-                </ul>
-                
-                <h3>The Golden Ratio (61.8%)</h3>
-                <p>The <span class='key-term'>61.8% level</span> is the most reliable. Price often bounces here, and if it breaks, the trend may be over.</p>
                 
                 <div class='tip-box'>
-                    💡 <strong>Pro Tip:</strong> Combine Fibonacci with other indicators (trend lines, moving averages, volume) for confirmation before entering trades.
+                    💡 <strong>Pro Tip:</strong> Combine Fibonacci with other indicators for confirmation.
                 </div>
             </div>
         </div>
@@ -1045,48 +1039,21 @@
             </div>
             <div class='modal-body'>
                 <h3>What are Pivot Points?</h3>
-                <p><span class='key-term'>Pivot Points</span> are technical indicators used to determine potential support and resistance levels for the current trading day, based on the previous day's high, low, and close.</p>
+                <p><span class='key-term'>Pivot Points</span> are technical indicators used to determine potential support and resistance levels.</p>
                 
                 <h3>Standard Pivot Points</h3>
                 <div class='formula-box'>
                     Pivot (P) = (High + Low + Close) / 3<br>
                     R1 = (2 × P) - Low<br>
-                    R2 = P + (High - Low)<br>
-                    R3 = High + 2 × (P - Low)<br>
-                    S1 = (2 × P) - High<br>
-                    S2 = P - (High - Low)<br>
-                    S3 = Low - 2 × (High - P)
+                    S1 = (2 × P) - High
                 </div>
-                
-                <h3>Fibonacci Pivot Points</h3>
-                <p>Uses Fibonacci ratios (38.2%, 61.8%, 100%) instead of fixed multipliers for more "natural" support/resistance levels.</p>
-                
-                <h3>Camarilla Pivot Points</h3>
-                <p>Developed for intraday trading, Camarilla pivots have 4 resistance and 4 support levels, with tighter spacing for precise entries/exits.</p>
                 
                 <h3>How to Interpret</h3>
                 <ul>
-                    <li><strong>P (Pivot):</strong> Fair value - price above = bullish, below = bearish</li>
-                    <li><strong>R1, R2, R3:</strong> Resistance levels (profit targets when long)</li>
-                    <li><strong>S1, S2, S3:</strong> Support levels (profit targets when short)</li>
-                    <li><strong>Break of R3/S3:</strong> Strong trend - expect continuation</li>
+                    <li><strong>P (Pivot):</strong> Fair value</li>
+                    <li><strong>R1, R2, R3:</strong> Resistance levels</li>
+                    <li><strong>S1, S2, S3:</strong> Support levels</li>
                 </ul>
-                
-                <h3>Trading Strategies</h3>
-                <ol>
-                    <li><strong>Range Trading:</strong> Buy at S1/S2, sell at R1/R2</li>
-                    <li><strong>Breakout Trading:</strong> Buy break above R1, sell break below S1</li>
-                    <li><strong>Trend Continuation:</strong> In uptrend, buy dips to Pivot or S1</li>
-                    <li><strong>Reversal:</strong> Watch for rejection at R2/R3 or S2/S3</li>
-                </ol>
-                
-                <div class='warning-box'>
-                    ⚠️ <strong>Important:</strong> Pivot Points are most effective in liquid markets and work best for intraday/swing trading.
-                </div>
-                
-                <div class='tip-box'>
-                    💡 <strong>Pro Tip:</strong> When multiple pivot methods (Standard, Fibonacci, Camarilla) align at same price level, that level becomes very strong S/R.
-                </div>
             </div>
         </div>
     </div>
@@ -1095,76 +1062,47 @@
     <div id='modalVWAP' class='modal'>
         <div class='modal-content'>
             <div class='modal-header'>
-                <h2>⚖️ VWAP - Volume Weighted Average Price</h2>
+                <h2>⚖ VWAP - Volume Weighted Average Price</h2>
                 <span class='close-modal' onclick='closeModal("modalVWAP")'>&times;</span>
             </div>
             <div class='modal-body'>
                 <h3>What is VWAP?</h3>
-                <p>The <span class='key-term'>Volume Weighted Average Price</span> is the average price weighted by volume. It represents the "fair value" price where most institutional trading occurred.</p>
-                
-                <h3>Calculation</h3>
-                <div class='formula-box'>
-                    VWAP = Σ(Price × Volume) / Σ(Volume)<br><br>
-                    Where Price = (High + Low + Close) / 3<br>
-                    Cumulative calculation from market open
-                </div>
+                <p>The <span class='key-term'>Volume Weighted Average Price</span> represents the "fair value" price where most institutional trading occurred.</p>
                 
                 <h3>How to Interpret</h3>
                 <ul>
-                    <li><strong>Price above VWAP:</strong> Bullish - buyers in control, institutional support</li>
-                    <li><strong>Price below VWAP:</strong> Bearish - sellers in control, institutional resistance</li>
-                    <li><strong>Price at VWAP:</strong> Fair value - equilibrium between buyers and sellers</li>
-                    <li><strong>VWAP acts as magnet:</strong> Price tends to revert to VWAP</li>
+                    <li><strong>Price above VWAP:</strong> Bullish - institutional support</li>
+                    <li><strong>Price below VWAP:</strong> Bearish - institutional resistance</li>
+                    <li><strong>Price at VWAP:</strong> Fair value</li>
                 </ul>
                 
                 <h3>Standard Deviation Bands</h3>
                 <ul>
                     <li><strong>+1 SD:</strong> Normal upper range</li>
-                    <li><strong>+2 SD:</strong> Overbought - expect pullback to VWAP</li>
+                    <li><strong>+2 SD:</strong> Overbought</li>
                     <li><strong>-1 SD:</strong> Normal lower range</li>
-                    <li><strong>-2 SD:</strong> Oversold - expect bounce to VWAP</li>
+                    <li><strong>-2 SD:</strong> Oversold</li>
                 </ul>
-                
-                <h3>Trading Strategies</h3>
-                <ol>
-                    <li><strong>Mean Reversion:</strong> Buy at -2 SD, sell at +2 SD, target VWAP</li>
-                    <li><strong>Trend Following:</strong> In uptrend, buy dips to VWAP</li>
-                    <li><strong>Institutional Level:</strong> Large orders often placed near VWAP</li>
-                    <li><strong>End-of-Day:</strong> If close above VWAP = bullish, below = bearish</li>
-                </ol>
-                
-                <h3>Why Institutions Use VWAP</h3>
-                <p>Institutional traders use VWAP as a benchmark:</p>
-                <ul>
-                    <li>Buy orders executed below VWAP = good fill</li>
-                    <li>Sell orders executed above VWAP = good fill</li>
-                    <li>Algorithms target VWAP to minimize market impact</li>
-                </ul>
-                
-                <div class='warning-box'>
-                    ⚠️ <strong>Note:</strong> VWAP resets daily at market open. For multi-day analysis, use Anchored VWAP or Moving VWAP.
-                </div>
-                
-                <div class='tip-box'>
-                    💡 <strong>Pro Tip:</strong> VWAP is most powerful in first 2 hours of trading when institutional volume is highest. Watch for VWAP reclaims/rejections.
-                </div>
             </div>
         </div>
     </div>
-
+    
     <!-- ============================================
-         📜 SCRIPTS - ✅ ORDRE CORRIGÉ ET CRUCIAL
+         📜 SCRIPTS
          ============================================ -->
     
-    <!-- Core Scripts - ORDRE CRUCIAL -->
-    <script src='assets/js/config.js'></script>  <!-- ✅ EN PREMIER -->
-    <script src='assets/js/api-client.js'></script>  <!-- ✅ AVANT advanced-analysis.js -->
+    <!-- Core Scripts -->
+    <script src='assets/js/config.js'></script>
+    <script src='assets/js/api-client.js'></script>
     <script src='assets/js/dark-mode.js'></script>
     <script src='assets/js/common.js'></script>
     <script src='assets/js/sidebar.js'></script>
     
-    <!-- Advanced Analysis Script (DOIT ÊTRE APRÈS api-client.js) -->
+    <!-- Advanced Analysis Script -->
     <script src='assets/js/advanced-analysis.js'></script>
+    
+    <!-- 🆕 NOUVEAU SCRIPT : Portfolio, Watchlist & Alerts Manager -->
+    <script src='assets/js/portfolio-watchlist-alerts.js'></script>
     
     <!-- Modal Functions -->
     <script>
@@ -1184,7 +1122,6 @@
         }
     }
 
-    // Close modal on outside click
     window.addEventListener('click', (event) => {
         if (event.target.classList.contains('modal')) {
             event.target.classList.remove('active');
@@ -1192,7 +1129,6 @@
         }
     });
 
-    // Close modal on ESC key
     document.addEventListener('keydown', (event) => {
         if (event.key === 'Escape') {
             document.querySelectorAll('.modal.active').forEach(modal => {
@@ -1201,15 +1137,23 @@
             document.body.style.overflow = 'auto';
         }
     });
-    </script>
-    <!-- ========================================
-         CHATBOT IA FINANCIER
-         ======================================== -->
     
-    <!-- Chart.js (requis pour les graphiques du chatbot) -->
+    // Helper functions pour les modaux des nouvelles fonctionnalités
+    function openPortfolioHelp() {
+        alert('Portfolio Management Help:\n\n- Create multiple portfolios to organize your stocks\n- Each portfolio has its own watchlist and alerts\n- Switch between portfolios using the dropdown\n- All data is saved in real-time to Firebase');
+    }
+    
+    function openWatchlistHelp() {
+        alert('Watchlist Help:\n\n- Add stocks to track them in real-time\n- Click on a stock card to analyze it\n- Remove stocks by clicking the trash icon\n- Filter by gainers/losers\n- All changes sync automatically to Firebase');
+    }
+    
+    function openAlertsHelp() {
+        alert('Price Alerts Help:\n\n- Create alerts to get notified when prices reach your targets\n- Choose "above" or "below" conditions\n- Toggle alerts on/off without deleting them\n- Alerts are checked automatically every 60 seconds\n- All alerts are saved to Firebase');
+    }
+    </script>
+    
+    <!-- Chatbot Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-
-    <!-- Scripts du chatbot (ORDRE IMPORTANT) -->
     <script src="assets/js/chatbot-config.js"></script>
     <script src="assets/js/chatbot-gemini.js"></script>
     <script src="assets/js/chatbot-analytics.js"></script>
@@ -1220,80 +1164,51 @@
     <script src="assets/js/chatbot-ui.js"></script>
     <script src="assets/js/chatbot-particles.js"></script>
 
-    <!-- ✅ INITIALISATION DU CHATBOT AVEC VÉRIFICATION D'ACCÈS -->
     <script>
     document.addEventListener('DOMContentLoaded', function() {
-        console.log('🤖 Vérification des accès avant initialisation du chatbot...');
-        
-        // ✅ ATTENDRE QUE LE SYSTÈME D'ACCESS CONTROL SOIT PRÊT
         const initChatbotWhenReady = () => {
-            // Vérifier si l'accès a été refusé
             const accessDenied = sessionStorage.getItem('accessDenied') === 'true';
+            if (accessDenied) return;
             
-            if (accessDenied) {
-                console.log('⛔ Accès refusé - Le chatbot ne sera pas initialisé');
-                return;
-            }
+            if (typeof ChatbotConfig === 'undefined' || typeof ChatbotUI === 'undefined') return;
             
-            // Vérifier que ChatbotConfig est chargé
-            if (typeof ChatbotConfig === 'undefined') {
-                console.error('❌ ChatbotConfig non défini !');
-                console.error('📁 Vérifiez que le fichier assets/js/chatbot-config.js existe');
-                return;
-            }
-            
-            console.log('✅ ChatbotConfig chargé');
-            
-            // Vérifier que ChatbotUI est disponible
-            if (typeof ChatbotUI === 'undefined') {
-                console.error('❌ ChatbotUI non défini !');
-                console.error('📁 Vérifiez que le fichier assets/js/chatbot-ui.js existe');
-                return;
-            }
-            
-            console.log('✅ ChatbotUI chargé');
-            
-            // Initialisation du chatbot
             try {
                 window.financialChatbot = new ChatbotUI(ChatbotConfig);
-                console.log('🎉 Chatbot FinanceGPT initialisé avec succès !');
-                console.log('💼 Cliquez sur le bouton flottant pour ouvrir le chatbot');
+                console.log('🎉 Chatbot FinanceGPT initialized');
             } catch (error) {
-                console.error('❌ Erreur lors de l\'initialisation du chatbot:', error);
-                console.error('📋 Détails:', error.message);
+                console.error('❌ Chatbot initialization error:', error);
             }
         };
         
-        // Attendre un peu pour laisser access-control.js faire son travail
         setTimeout(initChatbotWhenReady, 500);
     });
     </script>
 
+    <!-- Sidebar User Menu -->
     <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        setTimeout(() => {
-            console.log('🔍 BACKGROUND DIAGNOSIS:');
+    document.addEventListener('DOMContentLoaded', () => {
+        const sidebarUserTrigger = document.getElementById('sidebarUserTrigger');
+        const sidebarUserDropdown = document.getElementById('sidebarUserDropdown');
+        
+        if (sidebarUserTrigger && sidebarUserDropdown) {
+            sidebarUserTrigger.addEventListener('click', (e) => {
+                e.stopPropagation();
+                sidebarUserTrigger.classList.toggle('active');
+                sidebarUserDropdown.classList.toggle('active');
+            });
             
-            const elements = [
-                'body',
-                '.layout-wrapper',
-                '.main-content',
-                '.container',
-                '.section'
-            ];
-            
-            elements.forEach(selector => {
-                const el = document.querySelector(selector);
-                if (el) {
-                    const bg = window.getComputedStyle(el).background;
-                    console.log(`📦 ${selector}:`, bg.substring(0, 100) + '...');
+            document.addEventListener('click', (e) => {
+                if (!sidebarUserDropdown.contains(e.target) && 
+                    !sidebarUserTrigger.contains(e.target)) {
+                    sidebarUserTrigger.classList.remove('active');
+                    sidebarUserDropdown.classList.remove('active');
                 }
             });
             
-            console.log('---');
-            console.log('🎨 Canvas background:', 
-                window.getComputedStyle(document.getElementById('particles-canvas')).background);
-        }, 1000);
+            sidebarUserDropdown.addEventListener('click', (e) => {
+                e.stopPropagation();
+            });
+        }
     });
     </script>
 
