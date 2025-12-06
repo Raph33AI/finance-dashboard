@@ -1,11 +1,10 @@
 /* ============================================
    CHATBOT MODALS - SHARE & SETTINGS
-   Version 3.0 - FIREBASE EDITION
-   ✅ PDF Export (jsPDF) - FORMATAGE AMÉLIORÉ
-   ✅ Screenshot (html2canvas)
-   ✅ Firebase Integration pour Settings
-   ✅ Firebase Integration pour Conversations
-   ✅ Sans localStorage - 100% Cloud
+   Version 4.0 - FIREBASE EDITION + PDF PREMIUM
+   ✅ PDF Export avec GRAPHIQUES (html2canvas + jsPDF)
+   ✅ Formatage Ultra-Professionnel
+   ✅ Capture automatique des Charts
+   ✅ Firebase Integration
    ============================================ */
 
 class ChatbotModals {
@@ -19,9 +18,7 @@ class ChatbotModals {
     async init() {
         console.log('🎭 Initializing Advanced Chatbot Modals (Firebase Edition)...');
         
-        // Wait for Firebase Auth
         await this.waitForAuth();
-        
         this.createModalsHTML();
         this.attachEventListeners();
         await this.loadSettings();
@@ -29,9 +26,6 @@ class ChatbotModals {
         console.log('✅ Advanced Modals initialized successfully!');
     }
 
-    /**
-     * Attendre que Firebase Auth soit prêt
-     */
     waitForAuth() {
         return new Promise((resolve) => {
             if (typeof firebase === 'undefined') {
@@ -54,9 +48,6 @@ class ChatbotModals {
         });
     }
 
-    /**
-     * Crée le HTML des modals
-     */
     createModalsHTML() {
         const modalsContainer = document.createElement('div');
         modalsContainer.id = 'chatbot-modals-container';
@@ -157,7 +148,7 @@ class ChatbotModals {
                         
                         <div class="export-loading" id="export-loading" style="display: none;">
                             <div class="loading-spinner"></div>
-                            <span>Generating export...</span>
+                            <span>Generating PDF with charts...</span>
                         </div>
                     </div>
                 </div>
@@ -404,9 +395,6 @@ class ChatbotModals {
         document.body.appendChild(modalsContainer);
     }
 
-    /**
-     * Attache les event listeners
-     */
     attachEventListeners() {
         document.getElementById('share-btn')?.addEventListener('click', () => this.openModal('share-modal'));
         document.getElementById('settings-btn')?.addEventListener('click', () => this.openModal('settings-modal'));
@@ -544,7 +532,7 @@ class ChatbotModals {
         
         this.showLoading(true);
         
-        const messages = this.getConversationMessages();
+        const messages = await this.getConversationMessagesWithCharts();
         const timestamp = new Date().toISOString().slice(0, 10);
         const filename = `alphy-ai-conversation-${timestamp}`;
         
@@ -572,7 +560,7 @@ class ChatbotModals {
     }
 
     /**
-     * ✅ NOUVEAU : Export PDF ULTRA-OPTIMISÉ
+     * ✅ ULTRA-OPTIMIZED PDF EXPORT WITH CHARTS
      */
     async downloadPDFFile(messages, filename) {
         if (typeof window.jspdf === 'undefined') {
@@ -582,7 +570,8 @@ class ChatbotModals {
         const { jsPDF } = window.jspdf;
         const doc = new jsPDF({
             unit: 'pt',
-            format: 'a4'
+            format: 'a4',
+            compress: true
         });
         
         // Page dimensions
@@ -592,9 +581,9 @@ class ChatbotModals {
         const maxWidth = pageWidth - 2 * margin;
         let yPos = margin;
         
-        // Helper function to add new page if needed
+        // Helper: Check if new page is needed
         const checkNewPage = (requiredSpace = 60) => {
-            if (yPos + requiredSpace > pageHeight - margin) {
+            if (yPos + requiredSpace > pageHeight - margin - 40) {
                 doc.addPage();
                 yPos = margin;
                 return true;
@@ -602,30 +591,12 @@ class ChatbotModals {
             return false;
         };
         
-        // Helper function for text wrapping
-        const addWrappedText = (text, x, y, maxW, lineHeight, options = {}) => {
-            const lines = doc.splitTextToSize(text, maxW);
-            let currentY = y;
-            
-            lines.forEach((line, index) => {
-                if (checkNewPage(lineHeight)) {
-                    currentY = margin;
-                }
-                
-                doc.text(line, x, currentY, options);
-                currentY += lineHeight;
-            });
-            
-            return currentY;
-        };
-        
         // ==================== HEADER ====================
-        doc.setFontSize(24);
+        doc.setFontSize(28);
         doc.setFont('helvetica', 'bold');
         doc.setTextColor(102, 126, 234);
         doc.text('Alphy AI Conversation', margin, yPos);
-        
-        yPos += 20;
+        yPos += 30;
         
         // Subtitle
         doc.setFontSize(11);
@@ -638,97 +609,127 @@ class ChatbotModals {
             hour: '2-digit', 
             minute: '2-digit' 
         })}`, margin, yPos);
+        yPos += 18;
         
-        yPos += 15;
         doc.text(`Total Messages: ${messages.length}`, margin, yPos);
+        yPos += 25;
         
-        yPos += 20;
-        
-        // Separator line
+        // Separator
         doc.setDrawColor(102, 126, 234);
-        doc.setLineWidth(1.5);
+        doc.setLineWidth(2);
         doc.line(margin, yPos, pageWidth - margin, yPos);
-        
-        yPos += 30;
+        yPos += 35;
         
         // ==================== MESSAGES ====================
-        messages.forEach((msg, index) => {
-            checkNewPage(100);
+        for (let i = 0; i < messages.length; i++) {
+            const msg = messages[i];
+            
+            checkNewPage(120);
+            
+            const isUser = msg.role === 'user';
+            const headerHeight = 28;
             
             // Message header background
-            const headerHeight = 25;
-            const isUser = msg.role === 'user';
-            
-            // Background color
             if (isUser) {
-                doc.setFillColor(59, 130, 246, 0.1);
+                doc.setFillColor(59, 130, 246);
             } else {
-                doc.setFillColor(102, 126, 234, 0.1);
+                doc.setFillColor(102, 126, 234);
             }
             
-            doc.roundedRect(margin, yPos - 15, maxWidth, headerHeight, 3, 3, 'F');
+            doc.roundedRect(margin, yPos - 18, maxWidth, headerHeight, 4, 4, 'F');
             
             // Role icon and text
-            doc.setFontSize(12);
+            doc.setFontSize(13);
             doc.setFont('helvetica', 'bold');
+            doc.setTextColor(255, 255, 255);
             
             if (isUser) {
-                doc.setTextColor(59, 130, 246);
-                doc.text(`👤 USER`, margin + 10, yPos);
+                doc.text(`👤 USER`, margin + 12, yPos);
             } else {
-                doc.setTextColor(102, 126, 234);
-                doc.text(`🤖 ASSISTANT`, margin + 10, yPos);
+                doc.text(`🤖 ASSISTANT`, margin + 12, yPos);
             }
             
-            yPos += headerHeight + 5;
+            yPos += headerHeight;
             
             // Message content
             doc.setFontSize(10);
             doc.setFont('helvetica', 'normal');
             doc.setTextColor(30, 30, 30);
             
+            const contentMargin = margin + 15;
+            const contentWidth = maxWidth - 30;
+            
             // Split content into paragraphs
             const paragraphs = msg.content.split('\n').filter(p => p.trim());
             
-            paragraphs.forEach((paragraph, pIndex) => {
+            for (let pIndex = 0; pIndex < paragraphs.length; pIndex++) {
                 checkNewPage(40);
                 
-                const lines = doc.splitTextToSize(paragraph.trim(), maxWidth - 20);
+                const paragraph = paragraphs[pIndex].trim();
+                const lines = doc.splitTextToSize(paragraph, contentWidth);
                 
-                lines.forEach(line => {
-                    if (checkNewPage(14)) {
+                for (const line of lines) {
+                    if (checkNewPage(15)) {
                         // Continue on new page
                     }
-                    doc.text(line, margin + 10, yPos);
-                    yPos += 14;
-                });
-                
-                // Add space between paragraphs
-                if (pIndex < paragraphs.length - 1) {
-                    yPos += 6;
+                    doc.text(line, contentMargin, yPos);
+                    yPos += 15;
                 }
-            });
+                
+                // Space between paragraphs
+                if (pIndex < paragraphs.length - 1) {
+                    yPos += 8;
+                }
+            }
             
-            yPos += 10;
+            yPos += 15;
+            
+            // ==================== CHART IMAGE ====================
+            if (msg.chartImage) {
+                checkNewPage(250);
+                
+                const imgWidth = maxWidth - 40;
+                const imgHeight = 200;
+                
+                try {
+                    doc.addImage(
+                        msg.chartImage,
+                        'PNG',
+                        margin + 20,
+                        yPos,
+                        imgWidth,
+                        imgHeight,
+                        undefined,
+                        'FAST'
+                    );
+                    
+                    yPos += imgHeight + 20;
+                    
+                    console.log(`✅ Chart added for message ${i + 1}`);
+                } catch (error) {
+                    console.error(`❌ Failed to add chart for message ${i + 1}:`, error);
+                }
+            }
             
             // Timestamp
             if (msg.timestamp) {
                 doc.setFontSize(8);
                 doc.setTextColor(150, 150, 150);
-                doc.text(`Time: ${msg.timestamp}`, margin + 10, yPos);
-                yPos += 12;
+                doc.setFont('helvetica', 'italic');
+                doc.text(`Time: ${msg.timestamp}`, contentMargin, yPos);
+                yPos += 15;
             }
             
             yPos += 10;
             
-            // Separator line between messages
-            if (index < messages.length - 1) {
+            // Separator between messages
+            if (i < messages.length - 1) {
                 doc.setDrawColor(220, 220, 220);
                 doc.setLineWidth(0.5);
                 doc.line(margin, yPos, pageWidth - margin, yPos);
-                yPos += 20;
+                yPos += 25;
             }
-        });
+        }
         
         // ==================== FOOTER ON ALL PAGES ====================
         const totalPages = doc.internal.getNumberOfPages();
@@ -739,7 +740,7 @@ class ChatbotModals {
             // Footer line
             doc.setDrawColor(220, 220, 220);
             doc.setLineWidth(0.5);
-            doc.line(margin, pageHeight - 30, pageWidth - margin, pageHeight - 30);
+            doc.line(margin, pageHeight - 35, pageWidth - margin, pageHeight - 35);
             
             // Footer text
             doc.setFontSize(8);
@@ -748,12 +749,89 @@ class ChatbotModals {
             
             const footerText = `Page ${i} of ${totalPages} | Generated by AlphaVault AI - alphavault-ai.com`;
             const textWidth = doc.getTextWidth(footerText);
-            doc.text(footerText, (pageWidth - textWidth) / 2, pageHeight - 15);
+            doc.text(footerText, (pageWidth - textWidth) / 2, pageHeight - 18);
         }
         
         // Save PDF
         doc.save(`${filename}.pdf`);
-        console.log('✅ PDF generated successfully!');
+        console.log('✅ PDF with charts generated successfully!');
+    }
+
+    /**
+     * ✅ GET MESSAGES WITH CHART IMAGES
+     */
+    async getConversationMessagesWithCharts() {
+        const messagesContainer = document.getElementById('chatbot-messages-content');
+        const messages = [];
+        
+        if (!messagesContainer) {
+            console.error('❌ Messages container not found');
+            return messages;
+        }
+        
+        const messageElements = messagesContainer.querySelectorAll('.message');
+        
+        for (const msg of messageElements) {
+            const isUser = msg.classList.contains('user-message');
+            const text = msg.querySelector('.message-text')?.textContent || '';
+            const time = msg.querySelector('.message-time')?.textContent || '';
+            
+            const messageData = {
+                role: isUser ? 'user' : 'assistant',
+                content: text.trim(),
+                timestamp: time,
+                chartImage: null
+            };
+            
+            // ✅ DETECT AND CAPTURE CHARTS
+            const chartElement = msg.querySelector('canvas, .chart-container, [id*="chart"]');
+            
+            if (chartElement && typeof html2canvas !== 'undefined') {
+                try {
+                    console.log(`📊 Capturing chart for message...`);
+                    
+                    const canvas = await html2canvas(chartElement, {
+                        backgroundColor: '#ffffff',
+                        scale: 2,
+                        logging: false,
+                        useCORS: true,
+                        allowTaint: true
+                    });
+                    
+                    messageData.chartImage = canvas.toDataURL('image/png');
+                    console.log(`✅ Chart captured successfully`);
+                } catch (error) {
+                    console.error('❌ Chart capture failed:', error);
+                }
+            }
+            
+            messages.push(messageData);
+        }
+        
+        console.log(`📚 Processed ${messages.length} messages`);
+        return messages;
+    }
+
+    /**
+     * LEGACY: Get messages without charts (for TXT/JSON export)
+     */
+    getConversationMessages() {
+        const messagesContainer = document.getElementById('chatbot-messages-content');
+        const messages = [];
+        
+        messagesContainer?.querySelectorAll('.message').forEach(msg => {
+            const isUser = msg.classList.contains('user-message');
+            const text = msg.querySelector('.message-text')?.textContent || '';
+            const time = msg.querySelector('.message-time')?.textContent || '';
+            
+            messages.push({
+                role: isUser ? 'user' : 'assistant',
+                content: text.trim(),
+                timestamp: time
+            });
+        });
+        
+        return messages;
     }
 
     /**
@@ -821,28 +899,6 @@ class ChatbotModals {
     }
 
     /**
-     * Récupérer les messages de la conversation
-     */
-    getConversationMessages() {
-        const messagesContainer = document.getElementById('chatbot-messages-content');
-        const messages = [];
-        
-        messagesContainer.querySelectorAll('.message').forEach(msg => {
-            const isUser = msg.classList.contains('user-message');
-            const text = msg.querySelector('.message-text')?.textContent || '';
-            const time = msg.querySelector('.message-time')?.textContent || '';
-            
-            messages.push({
-                role: isUser ? 'user' : 'assistant',
-                content: text.trim(),
-                timestamp: time
-            });
-        });
-        
-        return messages;
-    }
-
-    /**
      * Télécharger en TXT
      */
     async downloadTextFile(messages, filename) {
@@ -872,10 +928,14 @@ class ChatbotModals {
     async downloadJSONFile(messages, filename) {
         const data = {
             platform: 'Alphy AI - Financial Assistant',
-            version: '3.0',
+            version: '4.0',
             exportDate: new Date().toISOString(),
             totalMessages: messages.length,
-            messages: messages,
+            messages: messages.map(msg => ({
+                role: msg.role,
+                content: msg.content,
+                timestamp: msg.timestamp
+            })),
             metadata: {
                 url: window.location.href,
                 userAgent: navigator.userAgent
@@ -1118,7 +1178,6 @@ class ChatbotModals {
 
     /**
      * ✅ FIREBASE: Sauvegarder une conversation
-     * Cette fonction peut être appelée depuis chatbot-fullpage-ui.js
      */
     async saveConversation(messages, conversationId = null) {
         if (!this.currentUser) {
