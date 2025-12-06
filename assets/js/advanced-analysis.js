@@ -5033,9 +5033,9 @@ const AdvancedAnalysis = {
         }
         
         // Divergences
-        const rsi = this.calculateRSI(prices);
-        const macdData = this.calculateMACD(prices);
-        const divergences = this.findDivergences(prices, rsi, macdData);
+        // ✅ Réutilise le 'rsi' déjà calculé au début de collectAllTechnicalSignals()
+        const macdDataForDiv = this.calculateMACD(prices);
+        const divergences = this.findDivergences(prices, rsi, macdDataForDiv);
         
         if (divergences.length > 0) {
             const divSignal = divergences[0].signal === 'bullish' ? 2 : -2;
