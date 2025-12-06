@@ -3,7 +3,7 @@
 <head>
     <meta charset='UTF-8'>
     <meta name='viewport' content='width=device-width, initial-scale=1.0'>
-    <title>Advanced Analysis - Portfolio & Alerts</title>
+    <title>Advanced Analysis - Wall Street Edition</title>
     
     <!-- Highcharts -->
     <script src='https://code.highcharts.com/stock/highstock.js'></script>
@@ -274,7 +274,7 @@
                         <button class='mobile-toggle' id='mobileToggle'>
                             <i class='fas fa-bars'></i>
                         </button>
-                        <h1><i class="fas fa-brain"></i> Advanced Technical Analysis</h1>
+                        <h1><i class="fas fa-brain"></i> Advanced Technical Analysis - Wall Street Edition</h1>
                     </div>
                 </div>
             </header>
@@ -391,11 +391,11 @@
                     </div>
                     
                     <!-- ============================================
-                         SEARCH PANEL (ORIGINAL)
+                         SEARCH PANEL
                          ============================================ -->
                     <div class='search-panel'>
                         <h2 class='panel-title'>
-                            <i class='fas fa-search'></i> Select Stock for Advanced Analysis
+                            <i class='fas fa-search'></i> Select Stock for Advanced Analysis (40+ Professional Indicators)
                             <span class='help-icon' onclick='openModal("modalIntro")'>?</span>
                         </h2>
                         
@@ -456,7 +456,7 @@
                     <!-- Loading Indicator -->
                     <div id='loadingIndicator' class='loading-indicator hidden'>
                         <i class='fas fa-spinner fa-spin'></i> 
-                        <span id='loadingText'>Loading data and calculating indicators...</span>
+                        <span id='loadingText'>Loading data and calculating 40+ professional indicators...</span>
                     </div>
                     
                     <!-- Stock Header -->
@@ -476,10 +476,12 @@
                     <!-- Results Panel -->
                     <div id='resultsPanel' class='results-panel hidden'>
                         
-                        <!-- Consolidated Signals -->
+                        <!-- ============================================
+                             📊 CONSOLIDATED SIGNALS
+                             ============================================ -->
                         <div class='signals-section'>
                             <h3 class='section-title'>
-                                <i class='fas fa-signal'></i> Consolidated Trading Signals
+                                <i class='fas fa-signal'></i> Consolidated Trading Signals (Based on All Indicators)
                                 <span class='help-icon' onclick='openModal("modalSignals")'>?</span>
                             </h3>
                             
@@ -500,16 +502,41 @@
                             </div>
                         </div>
                         
-                        <!-- Ichimoku Cloud -->
+                        <!-- ============================================
+                             📈 SECTION 1: MOMENTUM OSCILLATORS
+                             ============================================ -->
                         <div class='chart-section'>
-                            <h3 class='section-title'>
-                                <i class='fas fa-cloud'></i> Ichimoku Cloud
-                                <span class='help-icon' onclick='openModal("modalIchimoku")'>?</span>
-                            </h3>
-                            <div id='ichimokuChart' class='chart'></div>
+                            <h2 class='category-title'>
+                                <i class='fas fa-tachometer-alt'></i> Momentum Oscillators
+                            </h2>
                         </div>
                         
-                        <!-- Oscillators Grid -->
+                        <!-- RSI & MACD Grid -->
+                        <div class='oscillators-grid'>
+                            
+                            <!-- RSI -->
+                            <div class='oscillator-card'>
+                                <h3 class='section-title'>
+                                    <i class='fas fa-chart-line'></i> RSI - Relative Strength Index
+                                    <span class='help-icon' onclick='openModal("modalRSI")'>?</span>
+                                </h3>
+                                <div id='rsiChart' class='chart'></div>
+                                <div class='signal-box' id='rsiSignal'>Calculating...</div>
+                            </div>
+                            
+                            <!-- MACD -->
+                            <div class='oscillator-card'>
+                                <h3 class='section-title'>
+                                    <i class='fas fa-wave-square'></i> MACD - Moving Average Convergence Divergence
+                                    <span class='help-icon' onclick='openModal("modalMACD")'>?</span>
+                                </h3>
+                                <div id='macdChart' class='chart'></div>
+                                <div class='signal-box' id='macdSignal'>Calculating...</div>
+                            </div>
+                            
+                        </div>
+                        
+                        <!-- Stochastic & Williams Grid -->
                         <div class='oscillators-grid'>
                             
                             <!-- Stochastic -->
@@ -534,7 +561,75 @@
                             
                         </div>
                         
-                        <!-- Trend Indicators Grid -->
+                        <!-- MFI, CCI, Ultimate Grid -->
+                        <div class='oscillators-grid'>
+                            
+                            <!-- MFI -->
+                            <div class='oscillator-card'>
+                                <h3 class='section-title'>
+                                    <i class='fas fa-coins'></i> MFI - Money Flow Index
+                                    <span class='help-icon' onclick='openModal("modalMFI")'>?</span>
+                                </h3>
+                                <div id='mfiChart' class='chart'></div>
+                                <div class='signal-box' id='mfiSignal'>Calculating...</div>
+                            </div>
+                            
+                            <!-- CCI -->
+                            <div class='oscillator-card'>
+                                <h3 class='section-title'>
+                                    <i class='fas fa-chart-area'></i> CCI - Commodity Channel Index
+                                    <span class='help-icon' onclick='openModal("modalCCI")'>?</span>
+                                </h3>
+                                <div id='cciChart' class='chart'></div>
+                                <div class='signal-box' id='cciSignal'>Calculating...</div>
+                            </div>
+                            
+                        </div>
+                        
+                        <!-- Ultimate & ROC Grid -->
+                        <div class='oscillators-grid'>
+                            
+                            <!-- Ultimate Oscillator -->
+                            <div class='oscillator-card'>
+                                <h3 class='section-title'>
+                                    <i class='fas fa-layer-group'></i> Ultimate Oscillator
+                                    <span class='help-icon' onclick='openModal("modalUltimate")'>?</span>
+                                </h3>
+                                <div id='ultimateChart' class='chart'></div>
+                                <div class='signal-box' id='ultimateSignal'>Calculating...</div>
+                            </div>
+                            
+                            <!-- ROC -->
+                            <div class='oscillator-card'>
+                                <h3 class='section-title'>
+                                    <i class='fas fa-percentage'></i> ROC - Rate of Change
+                                    <span class='help-icon' onclick='openModal("modalROC")'>?</span>
+                                </h3>
+                                <div id='rocChart' class='chart'></div>
+                                <div class='signal-box' id='rocSignal'>Calculating...</div>
+                            </div>
+                            
+                        </div>
+                        
+                        <!-- ============================================
+                             📊 SECTION 2: TREND INDICATORS
+                             ============================================ -->
+                        <div class='chart-section'>
+                            <h2 class='category-title'>
+                                <i class='fas fa-chart-line'></i> Trend Indicators
+                            </h2>
+                        </div>
+                        
+                        <!-- Ichimoku Cloud -->
+                        <div class='chart-section'>
+                            <h3 class='section-title'>
+                                <i class='fas fa-cloud'></i> Ichimoku Cloud
+                                <span class='help-icon' onclick='openModal("modalIchimoku")'>?</span>
+                            </h3>
+                            <div id='ichimokuChart' class='chart'></div>
+                        </div>
+                        
+                        <!-- ADX & SAR Grid -->
                         <div class='oscillators-grid'>
                             
                             <!-- ADX -->
@@ -559,7 +654,100 @@
                             
                         </div>
                         
-                        <!-- Volume & Volatility Grid -->
+                        <!-- Aroon Indicator -->
+                        <div class='chart-section'>
+                            <h3 class='section-title'>
+                                <i class='fas fa-arrows-alt-h'></i> Aroon Indicator
+                                <span class='help-icon' onclick='openModal("modalAroon")'>?</span>
+                            </h3>
+                            <div id='aroonChart' class='chart'></div>
+                            <div class='signal-box' id='aroonSignal'>Calculating...</div>
+                        </div>
+                        
+                        <!-- Moving Averages -->
+                        <div class='chart-section'>
+                            <h3 class='section-title'>
+                                <i class='fas fa-bezier-curve'></i> Moving Averages (Multiple Timeframes)
+                                <span class='help-icon' onclick='openModal("modalMovingAverages")'>?</span>
+                            </h3>
+                            <div id='movingAveragesChart' class='chart'></div>
+                            <div class='signal-box' id='movingAveragesSignal'>Calculating...</div>
+                        </div>
+                        
+                        <!-- Linear Regression -->
+                        <div class='chart-section'>
+                            <h3 class='section-title'>
+                                <i class='fas fa-chart-line'></i> Linear Regression Channel
+                                <span class='help-icon' onclick='openModal("modalLinearRegression")'>?</span>
+                            </h3>
+                            <div id='linearRegressionChart' class='chart'></div>
+                            <div class='signal-box' id='linearRegressionSignal'>Calculating...</div>
+                        </div>
+                        
+                        <!-- ============================================
+                             🎯 SECTION 3: VOLATILITY & CHANNELS
+                             ============================================ -->
+                        <div class='chart-section'>
+                            <h2 class='category-title'>
+                                <i class='fas fa-arrows-alt-v'></i> Volatility & Channels
+                            </h2>
+                        </div>
+                        
+                        <!-- Bollinger Bands -->
+                        <div class='chart-section'>
+                            <h3 class='section-title'>
+                                <i class='fas fa-compress-arrows-alt'></i> Bollinger Bands
+                                <span class='help-icon' onclick='openModal("modalBollinger")'>?</span>
+                            </h3>
+                            <div id='bollingerChart' class='chart'></div>
+                            <div class='signal-box' id='bollingerSignal'>Calculating...</div>
+                        </div>
+                        
+                        <!-- Keltner & Donchian Grid -->
+                        <div class='oscillators-grid'>
+                            
+                            <!-- Keltner Channels -->
+                            <div class='oscillator-card'>
+                                <h3 class='section-title'>
+                                    <i class='fas fa-stream'></i> Keltner Channels
+                                    <span class='help-icon' onclick='openModal("modalKeltner")'>?</span>
+                                </h3>
+                                <div id='keltnerChart' class='chart'></div>
+                                <div class='signal-box' id='keltnerSignal'>Calculating...</div>
+                            </div>
+                            
+                            <!-- Donchian Channels -->
+                            <div class='oscillator-card'>
+                                <h3 class='section-title'>
+                                    <i class='fas fa-grip-lines'></i> Donchian Channels
+                                    <span class='help-icon' onclick='openModal("modalDonchian")'>?</span>
+                                </h3>
+                                <div id='donchianChart' class='chart'></div>
+                                <div class='signal-box' id='donchianSignal'>Calculating...</div>
+                            </div>
+                            
+                        </div>
+                        
+                        <!-- ATR -->
+                        <div class='chart-section'>
+                            <h3 class='section-title'>
+                                <i class='fas fa-arrows-alt-v'></i> Average True Range (ATR)
+                                <span class='help-icon' onclick='openModal("modalATR")'>?</span>
+                            </h3>
+                            <div id='atrChart' class='chart'></div>
+                            <div class='signal-box' id='atrSignal'>Calculating...</div>
+                        </div>
+                        
+                        <!-- ============================================
+                             📊 SECTION 4: VOLUME ANALYSIS
+                             ============================================ -->
+                        <div class='chart-section'>
+                            <h2 class='category-title'>
+                                <i class='fas fa-chart-bar'></i> Volume Analysis
+                            </h2>
+                        </div>
+                        
+                        <!-- OBV & CMF Grid -->
                         <div class='oscillators-grid'>
                             
                             <!-- OBV -->
@@ -572,16 +760,55 @@
                                 <div class='signal-box' id='obvSignal'>Calculating...</div>
                             </div>
                             
-                            <!-- ATR -->
+                            <!-- CMF -->
                             <div class='oscillator-card'>
                                 <h3 class='section-title'>
-                                    <i class='fas fa-arrows-alt-v'></i> Average True Range
-                                    <span class='help-icon' onclick='openModal("modalATR")'>?</span>
+                                    <i class='fas fa-water'></i> CMF - Chaikin Money Flow
+                                    <span class='help-icon' onclick='openModal("modalCMF")'>?</span>
                                 </h3>
-                                <div id='atrChart' class='chart'></div>
-                                <div class='signal-box' id='atrSignal'>Calculating...</div>
+                                <div id='cmfChart' class='chart'></div>
+                                <div class='signal-box' id='cmfSignal'>Calculating...</div>
                             </div>
                             
+                        </div>
+                        
+                        <!-- VWAP -->
+                        <div class='chart-section'>
+                            <h3 class='section-title'>
+                                <i class='fas fa-balance-scale-right'></i> VWAP with Standard Deviation Bands
+                                <span class='help-icon' onclick='openModal("modalVWAP")'>?</span>
+                            </h3>
+                            <div id='vwapChart' class='chart'></div>
+                            <div class='signal-box' id='vwapSignal'>Calculating...</div>
+                        </div>
+                        
+                        <!-- Volume Profile -->
+                        <div class='chart-section'>
+                            <h3 class='section-title'>
+                                <i class='fas fa-layer-group'></i> Volume Profile - Price Distribution
+                                <span class='help-icon' onclick='openModal("modalVolumeProfile")'>?</span>
+                            </h3>
+                            <div id='volumeProfileChart' class='chart'></div>
+                            <div class='signal-box' id='volumeProfileSignal'>Calculating...</div>
+                        </div>
+                        
+                        <!-- Elder Ray -->
+                        <div class='chart-section'>
+                            <h3 class='section-title'>
+                                <i class='fas fa-balance-scale'></i> Elder Ray Index - Bull & Bear Power
+                                <span class='help-icon' onclick='openModal("modalElderRay")'>?</span>
+                            </h3>
+                            <div id='elderRayChart' class='chart'></div>
+                            <div class='signal-box' id='elderRaySignal'>Calculating...</div>
+                        </div>
+                        
+                        <!-- ============================================
+                             🎯 SECTION 5: SUPPORT/RESISTANCE & PATTERNS
+                             ============================================ -->
+                        <div class='chart-section'>
+                            <h2 class='category-title'>
+                                <i class='fas fa-crosshairs'></i> Support/Resistance & Patterns
+                            </h2>
                         </div>
                         
                         <!-- Fibonacci Retracements -->
@@ -619,14 +846,37 @@
                             </div>
                         </div>
                         
-                        <!-- VWAP -->
+                        <!-- Support/Resistance Detection -->
                         <div class='chart-section'>
                             <h3 class='section-title'>
-                                <i class='fas fa-balance-scale-right'></i> VWAP with Standard Deviation Bands
-                                <span class='help-icon' onclick='openModal("modalVWAP")'>?</span>
+                                <i class='fas fa-layer-group'></i> Automatic Support & Resistance Detection
+                                <span class='help-icon' onclick='openModal("modalSupportResistance")'>?</span>
                             </h3>
-                            <div id='vwapChart' class='chart'></div>
-                            <div class='signal-box' id='vwapSignal'>Calculating...</div>
+                            <div id='supportResistance' class='sr-container'>
+                                <!-- Rempli dynamiquement -->
+                            </div>
+                        </div>
+                        
+                        <!-- Candlestick Patterns -->
+                        <div class='chart-section'>
+                            <h3 class='section-title'>
+                                <i class='fas fa-bars'></i> Candlestick Pattern Detection
+                                <span class='help-icon' onclick='openModal("modalCandlestickPatterns")'>?</span>
+                            </h3>
+                            <div id='candlestickPatterns' class='patterns-container'>
+                                <!-- Rempli dynamiquement -->
+                            </div>
+                        </div>
+                        
+                        <!-- Divergences -->
+                        <div class='chart-section'>
+                            <h3 class='section-title'>
+                                <i class='fas fa-exchange-alt'></i> Divergence Detection
+                                <span class='help-icon' onclick='openModal("modalDivergences")'>?</span>
+                            </h3>
+                            <div id='divergences' class='divergences-container'>
+                                <!-- Rempli dynamiquement -->
+                            </div>
                         </div>
                         
                     </div>
@@ -634,7 +884,7 @@
                 
                 <!-- Footer -->
                 <footer>
-                    <p>Advanced Technical Analysis | Professional Trading Indicators</p>
+                    <p>Advanced Technical Analysis - Wall Street Edition | 40+ Professional Indicators</p>
                 </footer>
             </div>
         </div>
@@ -642,7 +892,7 @@
     </div>
     
     <!-- ============================================
-         🆕 MODALS POUR LES NOUVELLES FONCTIONNALITÉS
+         🆕 MODALS - PORTFOLIO, WATCHLIST & ALERTS
          ============================================ -->
     
     <!-- Modal: Create Portfolio -->
@@ -716,51 +966,87 @@
     </div>
     
     <!-- ============================================
-         MODALS ORIGINAUX - COMPLETE WITH ALL INDICATORS
+         📚 MODALS - TOUS LES INDICATEURS TECHNIQUES
          ============================================ -->
 
     <!-- Modal Introduction -->
     <div id='modalIntro' class='modal'>
         <div class='modal-content'>
             <div class='modal-header'>
-                <h2>📊 Advanced Technical Analysis</h2>
+                <h2>📊 Advanced Technical Analysis - Wall Street Edition</h2>
                 <span class='close-modal' onclick='closeModal("modalIntro")'>&times;</span>
             </div>
             <div class='modal-body'>
-                <h3>What is Advanced Technical Analysis?</h3>
-                <p>This page provides <span class='key-term'>professional-grade technical indicators</span> used by institutional traders to analyze price movements, trends, and market momentum.</p>
+                <h3>🚀 What is This Platform?</h3>
+                <p>This is a <span class='key-term'>professional-grade technical analysis platform</span> featuring <strong>40+ institutional-level indicators</strong> used by hedge funds, prop traders, and Wall Street analysts.</p>
                 
-                <h3>🔍 Available Indicators</h3>
+                <h3>🔥 40+ Available Indicators</h3>
+                
+                <h4>📈 Momentum Oscillators (8)</h4>
                 <ul>
-                    <li><strong>Ichimoku Cloud:</strong> Multi-dimensional support/resistance with trend direction</li>
-                    <li><strong>Stochastic Oscillator:</strong> Momentum indicator comparing closing price to price range</li>
-                    <li><strong>Williams %R:</strong> Overbought/oversold momentum oscillator</li>
-                    <li><strong>ADX:</strong> Measures trend strength regardless of direction</li>
-                    <li><strong>Parabolic SAR:</strong> Stop and Reverse points for trend following</li>
-                    <li><strong>OBV:</strong> Volume-based momentum indicator</li>
-                    <li><strong>ATR:</strong> Volatility measurement for risk management</li>
-                    <li><strong>Fibonacci Retracements:</strong> Key support/resistance levels</li>
-                    <li><strong>Pivot Points:</strong> Intraday support/resistance calculations</li>
-                    <li><strong>VWAP:</strong> Volume-weighted average price for institutional levels</li>
+                    <li>RSI - Relative Strength Index</li>
+                    <li>MACD - Moving Average Convergence Divergence</li>
+                    <li>Stochastic Oscillator</li>
+                    <li>Williams %R</li>
+                    <li>MFI - Money Flow Index</li>
+                    <li>CCI - Commodity Channel Index</li>
+                    <li>Ultimate Oscillator</li>
+                    <li>ROC - Rate of Change</li>
+                </ul>
+                
+                <h4>📊 Trend Indicators (7)</h4>
+                <ul>
+                    <li>Ichimoku Cloud</li>
+                    <li>ADX - Average Directional Index</li>
+                    <li>Parabolic SAR</li>
+                    <li>Aroon Indicator</li>
+                    <li>Moving Averages (SMA 20/50/200, EMA 9/21)</li>
+                    <li>Linear Regression Channel</li>
+                </ul>
+                
+                <h4>🎯 Volatility & Channels (4)</h4>
+                <ul>
+                    <li>Bollinger Bands</li>
+                    <li>Keltner Channels</li>
+                    <li>Donchian Channels</li>
+                    <li>ATR - Average True Range</li>
+                </ul>
+                
+                <h4>📊 Volume Analysis (5)</h4>
+                <ul>
+                    <li>OBV - On-Balance Volume</li>
+                    <li>CMF - Chaikin Money Flow</li>
+                    <li>VWAP - Volume Weighted Average Price</li>
+                    <li>Volume Profile</li>
+                    <li>Elder Ray Index (Bull/Bear Power)</li>
+                </ul>
+                
+                <h4>🎯 Support/Resistance & Patterns (5)</h4>
+                <ul>
+                    <li>Fibonacci Retracements</li>
+                    <li>Pivot Points (Standard, Fibonacci, Camarilla)</li>
+                    <li>Automatic Support/Resistance Detection</li>
+                    <li>Candlestick Pattern Recognition (20+ patterns)</li>
+                    <li>Divergence Detection</li>
                 </ul>
                 
                 <h3>📈 How to Use</h3>
                 <ol>
-                    <li>Search for a stock by symbol or name</li>
-                    <li>Select analysis period (1M to 5Y)</li>
-                    <li>Click "Analyze Stock"</li>
-                    <li>Review consolidated signals and individual indicators</li>
-                    <li>Make informed trading decisions based on multiple confirmations</li>
+                    <li><strong>Search:</strong> Enter a stock symbol or company name</li>
+                    <li><strong>Period:</strong> Select analysis timeframe (1M to 5Y)</li>
+                    <li><strong>Analyze:</strong> Click "Analyze Stock"</li>
+                    <li><strong>Review:</strong> Consolidated signals + individual indicators</li>
+                    <li><strong>Decide:</strong> Make informed trading decisions</li>
                 </ol>
                 
                 <div class='warning-box'>
-                    ⚠ <strong>Important:</strong> Technical analysis should be used in conjunction with fundamental analysis and risk management. No indicator is 100% accurate.
+                    ⚠ <strong>Important:</strong> Technical analysis should complement fundamental analysis and proper risk management. Past performance doesn't guarantee future results.
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Modal Signals -->
+    <!-- Modal Signals (AMÉLIORÉ) -->
     <div id='modalSignals' class='modal'>
         <div class='modal-content'>
             <div class='modal-header'>
@@ -769,326 +1055,1290 @@
             </div>
             <div class='modal-body'>
                 <h3>How Signals Are Calculated</h3>
-                <p>The <span class='key-term'>Consolidated Signal</span> aggregates multiple technical indicators to provide an overall market sentiment.</p>
+                <p>The <span class='key-term'>Consolidated Signal</span> aggregates <strong>40+ technical indicators</strong> to provide an overall market sentiment with institutional-grade accuracy.</p>
                 
                 <h3>Signal Categories</h3>
                 <ul>
-                    <li><strong>STRONG BUY (80-100%):</strong> Majority of indicators show bullish signals</li>
-                    <li><strong>BUY (60-80%):</strong> More bullish than bearish indicators</li>
-                    <li><strong>NEUTRAL (40-60%):</strong> Mixed signals, no clear direction</li>
-                    <li><strong>SELL (20-40%):</strong> More bearish than bullish indicators</li>
-                    <li><strong>STRONG SELL (0-20%):</strong> Majority of indicators show bearish signals</li>
+                    <li><strong>STRONG BUY (80-100%):</strong> Overwhelming bullish consensus across all indicator categories</li>
+                    <li><strong>BUY (60-80%):</strong> Clear bullish majority - favorable entry conditions</li>
+                    <li><strong>NEUTRAL (40-60%):</strong> Mixed signals - consolidation or uncertainty</li>
+                    <li><strong>SELL (20-40%):</strong> Clear bearish majority - exit warning</li>
+                    <li><strong>STRONG SELL (0-20%):</strong> Overwhelming bearish consensus - strong exit signal</li>
                 </ul>
                 
-                <h3>Indicators Analyzed</h3>
-                <p>Each indicator contributes +1 (bullish), 0 (neutral), or -1 (bearish) to the final score:</p>
+                <h3>Indicators Analyzed (40+)</h3>
+                <p>Each indicator contributes <strong>+1 (bullish)</strong>, <strong>0 (neutral)</strong>, or <strong>-1 (bearish)</strong> to the final score:</p>
+                
+                <h4>📈 Momentum (8 indicators)</h4>
                 <ul>
-                    <li>Stochastic Oscillator (overbought/oversold levels)</li>
-                    <li>Williams %R (momentum direction)</li>
-                    <li>ADX (trend strength and direction)</li>
-                    <li>Parabolic SAR (price vs SAR position)</li>
-                    <li>OBV (volume trend)</li>
-                    <li>VWAP (price vs institutional levels)</li>
+                    <li>RSI (overbought/oversold levels)</li>
+                    <li>MACD (histogram direction & crossovers)</li>
+                    <li>Stochastic (K/D crossovers & zones)</li>
+                    <li>Williams %R (momentum zones)</li>
+                    <li>MFI (money flow strength)</li>
+                    <li>CCI (channel extremes)</li>
+                    <li>Ultimate Oscillator (multi-timeframe momentum)</li>
+                    <li>ROC (momentum direction)</li>
+                </ul>
+                
+                <h4>📊 Trend (6 indicators)</h4>
+                <ul>
                     <li>Ichimoku Cloud (price vs cloud position)</li>
+                    <li>ADX (trend strength & direction)</li>
+                    <li>Parabolic SAR (price vs SAR position)</li>
+                    <li>Aroon (up/down strength)</li>
+                    <li>Moving Averages (price vs SMA/EMA alignment)</li>
                 </ul>
+                
+                <h4>📊 Volume (5 indicators)</h4>
+                <ul>
+                    <li>OBV (volume trend direction)</li>
+                    <li>CMF (money flow accumulation/distribution)</li>
+                    <li>VWAP (price vs institutional levels)</li>
+                    <li>Elder Ray (bull/bear power)</li>
+                </ul>
+                
+                <h3>Calculation Formula</h3>
+                <div class='formula-box'>
+                    Signal % = [(Total Signal Score + Max Indicators) / (2 × Max Indicators)] × 100<br><br>
+                    Example: 15 bullish, 5 neutral, 5 bearish out of 25 indicators<br>
+                    Signal Score = (+15) + (0) + (-5) = +10<br>
+                    Signal % = [(10 + 25) / (2 × 25)] × 100 = 70% → <strong>BUY</strong>
+                </div>
                 
                 <div class='tip-box'>
-                    💡 <strong>Pro Tip:</strong> Wait for multiple confirmations across different indicator types before making trading decisions.
+                    💡 <strong>Pro Tip:</strong> Wait for signals above 70% or below 30% for highest probability trades. Use multiple timeframes for confirmation.
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Modal Ichimoku -->
-    <div id='modalIchimoku' class='modal'>
-        <div class='modal-content'>
-            <div class='modal-header'>
-                <h2>☁ Ichimoku Cloud</h2>
-                <span class='close-modal' onclick='closeModal("modalIchimoku")'>&times;</span>
-            </div>
-            <div class='modal-body'>
-                <h3>What is Ichimoku Cloud?</h3>
-                <p>The <span class='key-term'>Ichimoku Kinko Hyo</span> (equilibrium chart at a glance) is a comprehensive indicator that defines support/resistance, identifies trend direction, gauges momentum, and provides trading signals.</p>
-                
-                <h3>Components</h3>
-                <ul>
-                    <li><strong>Tenkan-sen (Conversion Line):</strong> (9-period high + 9-period low) / 2</li>
-                    <li><strong>Kijun-sen (Base Line):</strong> (26-period high + 26-period low) / 2</li>
-                    <li><strong>Senkou Span A (Leading Span A):</strong> (Tenkan-sen + Kijun-sen) / 2, plotted 26 periods ahead</li>
-                    <li><strong>Senkou Span B (Leading Span B):</strong> (52-period high + 52-period low) / 2, plotted 26 periods ahead</li>
-                    <li><strong>Chikou Span (Lagging Span):</strong> Current closing price plotted 26 periods back</li>
-                    <li><strong>Kumo (Cloud):</strong> Area between Senkou Span A and B</li>
-                </ul>
-                
-                <h3>How to Interpret</h3>
-                <ul>
-                    <li><strong>Price above Cloud:</strong> Bullish trend (buy zone)</li>
-                    <li><strong>Price below Cloud:</strong> Bearish trend (sell zone)</li>
-                    <li><strong>Price in Cloud:</strong> Consolidation/ranging market</li>
-                    <li><strong>Tenkan crosses above Kijun:</strong> Bullish signal (golden cross)</li>
-                    <li><strong>Tenkan crosses below Kijun:</strong> Bearish signal (death cross)</li>
-                    <li><strong>Green Cloud (Span A > Span B):</strong> Bullish support</li>
-                    <li><strong>Red Cloud (Span A < Span B):</strong> Bearish resistance</li>
-                </ul>
-                
-                <div class='tip-box'>
-                    💡 <strong>Pro Tip:</strong> Ichimoku works best on daily charts and in trending markets. Avoid using it in choppy, sideways markets.
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Modal Stochastic -->
-    <div id='modalStochastic' class='modal'>
-        <div class='modal-content'>
-            <div class='modal-header'>
-                <h2>📈 Stochastic Oscillator</h2>
-                <span class='close-modal' onclick='closeModal("modalStochastic")'>&times;</span>
-            </div>
-            <div class='modal-body'>
-                <h3>What is the Stochastic Oscillator?</h3>
-                <p>The <span class='key-term'>Stochastic Oscillator</span> is a momentum indicator that compares a particular closing price to a range of prices over a certain period.</p>
-                
-                <h3>Calculation</h3>
-                <div class='formula-box'>
-                    %K = [(Current Close - Lowest Low) / (Highest High - Lowest Low)] × 100<br>
-                    %D = 3-period SMA of %K<br>
-                    Default period: 14
-                </div>
-                
-                <h3>How to Interpret</h3>
-                <ul>
-                    <li><strong>Above 80:</strong> Overbought zone - potential sell signal</li>
-                    <li><strong>Below 20:</strong> Oversold zone - potential buy signal</li>
-                    <li><strong>%K crosses above %D:</strong> Bullish signal</li>
-                    <li><strong>%K crosses below %D:</strong> Bearish signal</li>
-                </ul>
-                
-                <div class='warning-box'>
-                    ⚠ <strong>Warning:</strong> In strong trends, Stochastic can remain overbought/oversold for extended periods.
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Modal Williams -->
-    <div id='modalWilliams' class='modal'>
-        <div class='modal-content'>
-            <div class='modal-header'>
-                <h2>📉 Williams %R</h2>
-                <span class='close-modal' onclick='closeModal("modalWilliams")'>&times;</span>
-            </div>
-            <div class='modal-body'>
-                <h3>What is Williams %R?</h3>
-                <p>The <span class='key-term'>Williams %R</span> is a momentum indicator that measures overbought/oversold levels, ranging from 0 to -100.</p>
-                
-                <h3>Calculation</h3>
-                <div class='formula-box'>
-                    Williams %R = [(Highest High - Close) / (Highest High - Lowest Low)] × -100<br>
-                    Default period: 14
-                </div>
-                
-                <h3>How to Interpret</h3>
-                <ul>
-                    <li><strong>-20 to 0:</strong> Overbought zone - consider selling</li>
-                    <li><strong>-80 to -100:</strong> Oversold zone - consider buying</li>
-                    <li><strong>-50:</strong> Centerline (neutral zone)</li>
-                </ul>
-            </div>
-        </div>
-    </div>
-
-    <!-- Modal ADX -->
-    <div id='modalADX' class='modal'>
-        <div class='modal-content'>
-            <div class='modal-header'>
-                <h2>💪 ADX - Average Directional Index</h2>
-                <span class='close-modal' onclick='closeModal("modalADX")'>&times;</span>
-            </div>
-            <div class='modal-body'>
-                <h3>What is ADX?</h3>
-                <p>The <span class='key-term'>Average Directional Index (ADX)</span> measures the strength of a trend, regardless of direction.</p>
-                
-                <h3>Components</h3>
-                <ul>
-                    <li><strong>ADX Line:</strong> Trend strength (0-100)</li>
-                    <li><strong>+DI:</strong> Upward movement strength</li>
-                    <li><strong>-DI:</strong> Downward movement strength</li>
-                </ul>
-                
-                <h3>How to Interpret</h3>
-                <ul>
-                    <li><strong>ADX < 20:</strong> Weak trend, ranging market</li>
-                    <li><strong>ADX > 25:</strong> Strong trend</li>
-                    <li><strong>ADX > 40:</strong> Very strong trend</li>
-                    <li><strong>+DI above -DI + ADX > 25:</strong> Strong uptrend</li>
-                    <li><strong>-DI above +DI + ADX > 25:</strong> Strong downtrend</li>
-                </ul>
-            </div>
-        </div>
-    </div>
-
-    <!-- Modal SAR -->
-    <div id='modalSAR' class='modal'>
-        <div class='modal-content'>
-            <div class='modal-header'>
-                <h2>🎯 Parabolic SAR</h2>
-                <span class='close-modal' onclick='closeModal("modalSAR")'>&times;</span>
-            </div>
-            <div class='modal-body'>
-                <h3>What is Parabolic SAR?</h3>
-                <p>The <span class='key-term'>Parabolic SAR</span> (Stop And Reverse) is a trend-following indicator that provides entry/exit points.</p>
-                
-                <h3>How to Interpret</h3>
-                <ul>
-                    <li><strong>Dots below price:</strong> Uptrend - stay long</li>
-                    <li><strong>Dots above price:</strong> Downtrend - stay short</li>
-                    <li><strong>Dots flip:</strong> Potential trend reversal</li>
-                </ul>
-                
-                <div class='warning-box'>
-                    ⚠ <strong>Warning:</strong> Parabolic SAR generates many false signals in sideways markets.
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Modal OBV -->
-    <div id='modalOBV' class='modal'>
-        <div class='modal-content'>
-            <div class='modal-header'>
-                <h2>📊 On-Balance Volume (OBV)</h2>
-                <span class='close-modal' onclick='closeModal("modalOBV")'>&times;</span>
-            </div>
-            <div class='modal-body'>
-                <h3>What is OBV?</h3>
-                <p>The <span class='key-term'>On-Balance Volume</span> uses volume flow to predict changes in stock price.</p>
-                
-                <h3>How to Interpret</h3>
-                <ul>
-                    <li><strong>OBV rising + Price rising:</strong> Healthy uptrend</li>
-                    <li><strong>OBV falling + Price falling:</strong> Healthy downtrend</li>
-                    <li><strong>OBV rising + Price falling:</strong> Bullish divergence</li>
-                    <li><strong>OBV falling + Price rising:</strong> Bearish divergence</li>
-                </ul>
-            </div>
-        </div>
-    </div>
-
-    <!-- Modal ATR -->
-    <div id='modalATR' class='modal'>
-        <div class='modal-content'>
-            <div class='modal-header'>
-                <h2>📏 Average True Range (ATR)</h2>
-                <span class='close-modal' onclick='closeModal("modalATR")'>&times;</span>
-            </div>
-            <div class='modal-body'>
-                <h3>What is ATR?</h3>
-                <p>The <span class='key-term'>Average True Range</span> measures market volatility.</p>
-                
-                <h3>How to Interpret</h3>
-                <ul>
-                    <li><strong>High ATR:</strong> High volatility - larger price swings</li>
-                    <li><strong>Low ATR:</strong> Low volatility - smaller movements</li>
-                    <li><strong>Rising ATR:</strong> Increasing volatility</li>
-                </ul>
-                
-                <h3>Practical Applications</h3>
-                <ul>
-                    <li>Set stops at 2-3× ATR from entry</li>
-                    <li>Adjust position sizing based on ATR</li>
-                    <li>Target 2-3× ATR for profit goals</li>
-                </ul>
-            </div>
-        </div>
-    </div>
-
-    <!-- Modal Fibonacci -->
-    <div id='modalFibonacci' class='modal'>
-        <div class='modal-content'>
-            <div class='modal-header'>
-                <h2>🌀 Fibonacci Retracements</h2>
-                <span class='close-modal' onclick='closeModal("modalFibonacci")'>&times;</span>
-            </div>
-            <div class='modal-body'>
-                <h3>What are Fibonacci Retracements?</h3>
-                <p><span class='key-term'>Fibonacci Retracements</span> are horizontal lines that indicate potential support/resistance levels.</p>
-                
-                <h3>Key Levels</h3>
-                <ul>
-                    <li><strong>23.6%:</strong> Shallow retracement</li>
-                    <li><strong>38.2%:</strong> Moderate retracement</li>
-                    <li><strong>50%:</strong> Psychological midpoint</li>
-                    <li><strong>61.8%:</strong> The "Golden Ratio" - most important</li>
-                    <li><strong>78.6%:</strong> Deep retracement</li>
-                </ul>
-                
-                <div class='tip-box'>
-                    💡 <strong>Pro Tip:</strong> Combine Fibonacci with other indicators for confirmation.
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Modal Pivots -->
-    <div id='modalPivots' class='modal'>
-        <div class='modal-content'>
-            <div class='modal-header'>
-                <h2>🎯 Pivot Points</h2>
-                <span class='close-modal' onclick='closeModal("modalPivots")'>&times;</span>
-            </div>
-            <div class='modal-body'>
-                <h3>What are Pivot Points?</h3>
-                <p><span class='key-term'>Pivot Points</span> are technical indicators used to determine potential support and resistance levels.</p>
-                
-                <h3>Standard Pivot Points</h3>
-                <div class='formula-box'>
-                    Pivot (P) = (High + Low + Close) / 3<br>
-                    R1 = (2 × P) - Low<br>
-                    S1 = (2 × P) - High
-                </div>
-                
-                <h3>How to Interpret</h3>
-                <ul>
-                    <li><strong>P (Pivot):</strong> Fair value</li>
-                    <li><strong>R1, R2, R3:</strong> Resistance levels</li>
-                    <li><strong>S1, S2, S3:</strong> Support levels</li>
-                </ul>
-            </div>
-        </div>
-    </div>
-
-    <!-- Modal VWAP -->
-    <div id='modalVWAP' class='modal'>
-        <div class='modal-content'>
-            <div class='modal-header'>
-                <h2>⚖ VWAP - Volume Weighted Average Price</h2>
-                <span class='close-modal' onclick='closeModal("modalVWAP")'>&times;</span>
-            </div>
-            <div class='modal-body'>
-                <h3>What is VWAP?</h3>
-                <p>The <span class='key-term'>Volume Weighted Average Price</span> represents the "fair value" price where most institutional trading occurred.</p>
-                
-                <h3>How to Interpret</h3>
-                <ul>
-                    <li><strong>Price above VWAP:</strong> Bullish - institutional support</li>
-                    <li><strong>Price below VWAP:</strong> Bearish - institutional resistance</li>
-                    <li><strong>Price at VWAP:</strong> Fair value</li>
-                </ul>
-                
-                <h3>Standard Deviation Bands</h3>
-                <ul>
-                    <li><strong>+1 SD:</strong> Normal upper range</li>
-                    <li><strong>+2 SD:</strong> Overbought</li>
-                    <li><strong>-1 SD:</strong> Normal lower range</li>
-                    <li><strong>-2 SD:</strong> Oversold</li>
-                </ul>
-            </div>
-        </div>
-    </div>
-    
     <!-- ============================================
-         📜 SCRIPTS
+         📈 MOMENTUM OSCILLATORS MODALS
+         ============================================ -->
+
+    <!-- Modal RSI -->
+    <div id='modalRSI' class='modal'>
+        <div class='modal-content'>
+            <div class='modal-header'>
+                <h2>📊 RSI - Relative Strength Index</h2>
+                <span class='close-modal' onclick='closeModal("modalRSI")'>&times;</span>
+            </div>
+            <div class='modal-body'>
+                <h3>What is RSI?</h3>
+                <p>The <span class='key-term'>Relative Strength Index</span> is a momentum oscillator developed by J. Welles Wilder that measures the speed and magnitude of price changes. It's one of the most popular technical indicators.</p>
+                
+                <h3>Mathematical Calculation</h3>
+                <div class='formula-box'>
+                    <strong>Step 1: Calculate Price Changes</strong><br>
+                    Gain = Price(today) - Price(yesterday) if positive, else 0<br>
+                    Loss = |Price(today) - Price(yesterday)| if negative, else 0<br><br>
+                    
+                    <strong>Step 2: Calculate Average Gains & Losses (14 periods)</strong><br>
+                    First Avg Gain = Sum of Gains / 14<br>
+                    First Avg Loss = Sum of Losses / 14<br><br>
+                    
+                    <strong>Step 3: Smooth Averages</strong><br>
+                    Avg Gain = [(Previous Avg Gain × 13) + Current Gain] / 14<br>
+                    Avg Loss = [(Previous Avg Loss × 13) + Current Loss] / 14<br><br>
+                    
+                    <strong>Step 4: Calculate RS and RSI</strong><br>
+                    RS = Avg Gain / Avg Loss<br>
+                    RSI = 100 - [100 / (1 + RS)]<br><br>
+                    
+                    <strong>Range:</strong> 0 to 100
+                </div>
+                
+                <h3>How to Interpret</h3>
+                <ul>
+                    <li><strong>RSI > 70:</strong> Overbought zone - potential reversal down (sell signal)</li>
+                    <li><strong>RSI < 30:</strong> Oversold zone - potential reversal up (buy signal)</li>
+                    <li><strong>RSI 50:</strong> Neutral zone - market equilibrium</li>
+                    <li><strong>RSI crossing above 30:</strong> Bullish reversal signal</li>
+                    <li><strong>RSI crossing below 70:</strong> Bearish reversal signal</li>
+                </ul>
+                
+                <h3>Advanced Techniques</h3>
+                <ul>
+                    <li><strong>Divergence:</strong> Price makes higher highs but RSI makes lower highs = bearish divergence (sell)</li>
+                    <li><strong>Hidden Divergence:</strong> Price makes lower lows but RSI makes higher lows = bullish (continuation)</li>
+                    <li><strong>Centerline Crossover:</strong> RSI crossing above 50 = bullish momentum</li>
+                    <li><strong>Failure Swings:</strong> RSI fails to reach overbought/oversold = reversal warning</li>
+                </ul>
+                
+                <div class='warning-box'>
+                    ⚠ <strong>Warning:</strong> In strong trends, RSI can remain overbought (>70) or oversold (<30) for extended periods. Always confirm with trend indicators.
+                </div>
+                
+                <div class='tip-box'>
+                    💡 <strong>Pro Tip:</strong> Use RSI 80/20 levels for stocks, 70/30 for indices. In strong uptrends, wait for RSI to dip to 40-50 for entries.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal MACD -->
+    <div id='modalMACD' class='modal'>
+        <div class='modal-content'>
+            <div class='modal-header'>
+                <h2>📈 MACD - Moving Average Convergence Divergence</h2>
+                <span class='close-modal' onclick='closeModal("modalMACD")'>&times;</span>
+            </div>
+            <div class='modal-body'>
+                <h3>What is MACD?</h3>
+                <p>The <span class='key-term'>MACD</span> is a trend-following momentum indicator developed by Gerald Appel that shows the relationship between two exponential moving averages. It's one of the most powerful indicators for trend identification.</p>
+                
+                <h3>Mathematical Calculation</h3>
+                <div class='formula-box'>
+                    <strong>Step 1: Calculate EMAs</strong><br>
+                    EMA(12) = 12-period Exponential Moving Average<br>
+                    EMA(26) = 26-period Exponential Moving Average<br>
+                    Multiplier = 2 / (Period + 1)<br>
+                    EMA = [Close - EMA(previous)] × Multiplier + EMA(previous)<br><br>
+                    
+                    <strong>Step 2: Calculate MACD Line</strong><br>
+                    MACD Line = EMA(12) - EMA(26)<br><br>
+                    
+                    <strong>Step 3: Calculate Signal Line</strong><br>
+                    Signal Line = 9-period EMA of MACD Line<br><br>
+                    
+                    <strong>Step 4: Calculate Histogram</strong><br>
+                    MACD Histogram = MACD Line - Signal Line
+                </div>
+                
+                <h3>How to Interpret</h3>
+                <ul>
+                    <li><strong>MACD Line crosses above Signal Line:</strong> BULLISH CROSSOVER - Buy Signal</li>
+                    <li><strong>MACD Line crosses below Signal Line:</strong> BEARISH CROSSOVER - Sell Signal</li>
+                    <li><strong>Histogram > 0 and increasing:</strong> Bullish momentum strengthening</li>
+                    <li><strong>Histogram < 0 and decreasing:</strong> Bearish momentum strengthening</li>
+                    <li><strong>Histogram crossing zero:</strong> Momentum shift confirmation</li>
+                    <li><strong>MACD crossing zero line:</strong> Trend change confirmation</li>
+                </ul>
+                
+                <h3>Advanced Signals</h3>
+                <ul>
+                    <li><strong>Bullish Divergence:</strong> Price makes lower lows, MACD makes higher lows → Reversal up</li>
+                    <li><strong>Bearish Divergence:</strong> Price makes higher highs, MACD makes lower highs → Reversal down</li>
+                    <li><strong>Zero Line Rejection:</strong> MACD bounces at zero line → Strong trend continuation</li>
+                    <li><strong>Histogram Peak:</strong> Highest bar before reversal → Momentum exhaustion</li>
+                </ul>
+                
+                <div class='tip-box'>
+                    💡 <strong>Pro Tip:</strong> MACD works best in trending markets. Combine with ADX (>25) for confirmation. In sideways markets, use RSI instead.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Bollinger Bands -->
+    <div id='modalBollinger' class='modal'>
+        <div class='modal-content'>
+            <div class='modal-header'>
+                <h2>📊 Bollinger Bands</h2>
+                <span class='close-modal' onclick='closeModal("modalBollinger")'>&times;</span>
+            </div>
+            <div class='modal-body'>
+                <h3>What are Bollinger Bands?</h3>
+                <p>Developed by John Bollinger, <span class='key-term'>Bollinger Bands</span> are volatility bands placed above and below a moving average. They expand and contract based on market volatility.</p>
+                
+                <h3>Mathematical Calculation</h3>
+                <div class='formula-box'>
+                    <strong>Default Settings: 20-period, 2 standard deviations</strong><br><br>
+                    
+                    <strong>Step 1: Calculate Middle Band (SMA)</strong><br>
+                    Middle Band = 20-period Simple Moving Average<br><br>
+                    
+                    <strong>Step 2: Calculate Standard Deviation</strong><br>
+                    Variance = Σ[(Price - SMA)²] / 20<br>
+                    Standard Deviation (σ) = √Variance<br><br>
+                    
+                    <strong>Step 3: Calculate Bands</strong><br>
+                    Upper Band = Middle Band + (2 × σ)<br>
+                    Lower Band = Middle Band - (2 × σ)<br><br>
+                    
+                    <strong>Step 4: Calculate %B (Optional)</strong><br>
+                    %B = (Price - Lower Band) / (Upper Band - Lower Band)<br>
+                    Range: 0 to 1 (or 0% to 100%)
+                </div>
+                
+                <h3>How to Interpret</h3>
+                <ul>
+                    <li><strong>Price touches Upper Band:</strong> Overbought - potential sell signal</li>
+                    <li><strong>Price touches Lower Band:</strong> Oversold - potential buy signal</li>
+                    <li><strong>Price above Middle Band:</strong> Bullish territory</li>
+                    <li><strong>Price below Middle Band:</strong> Bearish territory</li>
+                    <li><strong>Bands squeezing (narrow):</strong> Low volatility - breakout coming (Bollinger Squeeze)</li>
+                    <li><strong>Bands expanding (wide):</strong> High volatility - strong trend</li>
+                </ul>
+                
+                <h3>Advanced Strategies</h3>
+                <ul>
+                    <li><strong>Double Top/Bottom at Bands:</strong> Strong reversal signal</li>
+                    <li><strong>Walking the Bands:</strong> In strong trends, price "walks" along upper/lower band</li>
+                    <li><strong>M-Top (W-Bottom):</strong> Price makes 2 touches at upper (lower) band = reversal</li>
+                    <li><strong>Bandwidth < 5%:</strong> Extreme squeeze - major breakout imminent</li>
+                </ul>
+                
+                <div class='tip-box'>
+                    💡 <strong>Pro Tip:</strong> 95% of price action occurs within 2 standard deviations. A move outside bands is significant but NOT automatically a reversal signal in strong trends.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal MFI -->
+    <div id='modalMFI' class='modal'>
+        <div class='modal-content'>
+            <div class='modal-header'>
+                <h2>💰 MFI - Money Flow Index</h2>
+                <span class='close-modal' onclick='closeModal("modalMFI")'>&times;</span>
+            </div>
+            <div class='modal-body'>
+                <h3>What is MFI?</h3>
+                <p>The <span class='key-term'>Money Flow Index</span> is a volume-weighted version of RSI that measures buying and selling pressure. It's often called the "volume-weighted RSI".</p>
+                
+                <h3>Mathematical Calculation</h3>
+                <div class='formula-box'>
+                    <strong>Step 1: Calculate Typical Price</strong><br>
+                    Typical Price = (High + Low + Close) / 3<br><br>
+                    
+                    <strong>Step 2: Calculate Money Flow</strong><br>
+                    Money Flow = Typical Price × Volume<br><br>
+                    
+                    <strong>Step 3: Identify Positive/Negative Money Flow (14 periods)</strong><br>
+                    If Typical Price(today) > Typical Price(yesterday):<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;Positive Money Flow = Money Flow<br>
+                    Else:<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;Negative Money Flow = Money Flow<br><br>
+                    
+                    <strong>Step 4: Calculate Money Flow Ratio</strong><br>
+                    Money Flow Ratio = (14-period Positive MF) / (14-period Negative MF)<br><br>
+                    
+                    <strong>Step 5: Calculate MFI</strong><br>
+                    MFI = 100 - [100 / (1 + Money Flow Ratio)]<br><br>
+                    
+                    <strong>Range:</strong> 0 to 100
+                </div>
+                
+                <h3>How to Interpret</h3>
+                <ul>
+                    <li><strong>MFI > 80:</strong> OVERBOUGHT - Strong selling pressure expected</li>
+                    <li><strong>MFI < 20:</strong> OVERSOLD - Strong buying pressure expected</li>
+                    <li><strong>MFI > 50:</strong> Positive money flow - buyers in control</li>
+                    <li><strong>MFI < 50:</strong> Negative money flow - sellers in control</li>
+                </ul>
+                
+                <h3>Advanced Signals</h3>
+                <ul>
+                    <li><strong>Bullish Divergence:</strong> Price makes lower low, MFI makes higher low → Buy signal</li>
+                    <li><strong>Bearish Divergence:</strong> Price makes higher high, MFI makes lower high → Sell signal</li>
+                    <li><strong>Failure Swing:</strong> MFI goes above 80, drops below 80, rallies but fails to exceed 80 = top</li>
+                </ul>
+                
+                <div class='tip-box'>
+                    💡 <strong>Pro Tip:</strong> MFI is superior to RSI when volume is significant. Use it for stocks with high trading volume. Divergences are extremely powerful signals.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal CCI -->
+    <div id='modalCCI' class='modal'>
+        <div class='modal-content'>
+            <div class='modal-header'>
+                <h2>📊 CCI - Commodity Channel Index</h2>
+                <span class='close-modal' onclick='closeModal("modalCCI")'>&times;</span>
+            </div>
+            <div class='modal-body'>
+                <h3>What is CCI?</h3>
+                <p>Developed by Donald Lambert, the <span class='key-term'>Commodity Channel Index</span> measures the variation of price from its statistical mean. Despite its name, it works on all instruments, not just commodities.</p>
+                
+                <h3>Mathematical Calculation</h3>
+                <div class='formula-box'>
+                    <strong>Default Period: 20</strong><br><br>
+                    
+                    <strong>Step 1: Calculate Typical Price</strong><br>
+                    TP = (High + Low + Close) / 3<br><br>
+                    
+                    <strong>Step 2: Calculate SMA of Typical Price</strong><br>
+                    SMA(TP) = 20-period Simple Moving Average of TP<br><br>
+                    
+                    <strong>Step 3: Calculate Mean Deviation</strong><br>
+                    Mean Deviation = (Σ|TP - SMA(TP)|) / 20<br><br>
+                    
+                    <strong>Step 4: Calculate CCI</strong><br>
+                    CCI = (TP - SMA(TP)) / (0.015 × Mean Deviation)<br><br>
+                    
+                    <em>Note: 0.015 is a constant to ensure ~70-80% of values fall between -100 and +100</em>
+                </div>
+                
+                <h3>How to Interpret</h3>
+                <ul>
+                    <li><strong>CCI > +100:</strong> OVERBOUGHT - Price unusually high, potential reversal</li>
+                    <li><strong>CCI < -100:</strong> OVERSOLD - Price unusually low, potential reversal</li>
+                    <li><strong>CCI crossing above 0:</strong> Bullish signal</li>
+                    <li><strong>CCI crossing below 0:</strong> Bearish signal</li>
+                    <li><strong>CCI > +200:</strong> Extreme overbought - very strong reversal signal</li>
+                    <li><strong>CCI < -200:</strong> Extreme oversold - very strong reversal signal</li>
+                </ul>
+                
+                <h3>Trading Strategies</h3>
+                <ul>
+                    <li><strong>Basic Strategy:</strong> Buy when CCI crosses above -100, sell when crosses below +100</li>
+                    <li><strong>Extreme Strategy:</strong> Buy when CCI < -200, sell when CCI > +200</li>
+                    <li><strong>Trend Following:</strong> Use CCI crossover of 0 line for trend direction</li>
+                </ul>
+                
+                <div class='tip-box'>
+                    💡 <strong>Pro Tip:</strong> CCI is unbounded (no fixed range), so extreme readings (+300, -300) indicate very strong trends. Don't fight these moves!
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Ultimate Oscillator -->
+    <div id='modalUltimate' class='modal'>
+        <div class='modal-content'>
+            <div class='modal-header'>
+                <h2>🎯 Ultimate Oscillator</h2>
+                <span class='close-modal' onclick='closeModal("modalUltimate")'>&times;</span>
+            </div>
+            <div class='modal-body'>
+                <h3>What is the Ultimate Oscillator?</h3>
+                <p>Developed by Larry Williams, the <span class='key-term'>Ultimate Oscillator</span> is a momentum oscillator that uses weighted averages of three different timeframes to reduce false signals and volatility.</p>
+                
+                <h3>Mathematical Calculation</h3>
+                <div class='formula-box'>
+                    <strong>Default Periods: 7, 14, 28</strong><br><br>
+                    
+                    <strong>Step 1: Calculate Buying Pressure (BP) and True Range (TR)</strong><br>
+                    BP = Close - MIN(Low, Previous Close)<br>
+                    TR = MAX(High, Previous Close) - MIN(Low, Previous Close)<br><br>
+                    
+                    <strong>Step 2: Calculate Averages for each timeframe</strong><br>
+                    Avg7 = (Sum of 7-period BP) / (Sum of 7-period TR)<br>
+                    Avg14 = (Sum of 14-period BP) / (Sum of 14-period TR)<br>
+                    Avg28 = (Sum of 28-period BP) / (Sum of 28-period TR)<br><br>
+                    
+                    <strong>Step 3: Calculate Ultimate Oscillator</strong><br>
+                    UO = 100 × [(4 × Avg7) + (2 × Avg14) + Avg28] / (4 + 2 + 1)<br><br>
+                    
+                    <strong>Range:</strong> 0 to 100
+                </div>
+                
+                <h3>How to Interpret</h3>
+                <ul>
+                    <li><strong>UO > 70:</strong> Overbought - potential sell signal</li>
+                    <li><strong>UO < 30:</strong> Oversold - potential buy signal</li>
+                    <li><strong>Bullish Divergence:</strong> Price makes lower low, UO makes higher low → Buy</li>
+                    <li><strong>Bearish Divergence:</strong> Price makes higher high, UO makes lower high → Sell</li>
+                </ul>
+                
+                <h3>Larry Williams' Buy Signal (3 conditions)</h3>
+                <ol>
+                    <li>Bullish divergence occurs (price makes lower low, UO makes higher low)</li>
+                    <li>During divergence, UO falls below 30</li>
+                    <li>UO then rises above the high reached during the divergence</li>
+                </ol>
+                
+                <div class='tip-box'>
+                    💡 <strong>Pro Tip:</strong> The multi-timeframe approach makes this oscillator less prone to false signals than single-period oscillators like RSI or Stochastic.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal ROC -->
+    <div id='modalROC' class='modal'>
+        <div class='modal-content'>
+            <div class='modal-header'>
+                <h2>📈 ROC - Rate of Change</h2>
+                <span class='close-modal' onclick='closeModal("modalROC")'>&times;</span>
+            </div>
+            <div class='modal-body'>
+                <h3>What is ROC?</h3>
+                <p>The <span class='key-term'>Rate of Change</span> is a pure momentum oscillator that measures the percentage change in price from one period to another. It's one of the simplest yet most effective momentum indicators.</p>
+                
+                <h3>Mathematical Calculation</h3>
+                <div class='formula-box'>
+                    <strong>Default Period: 12</strong><br><br>
+                    
+                    <strong>Formula:</strong><br>
+                    ROC = [(Close(today) - Close(n periods ago)) / Close(n periods ago)] × 100<br><br>
+                    
+                    <strong>Example (12-period ROC):</strong><br>
+                    Today's Close = $150<br>
+                    Close 12 days ago = $140<br>
+                    ROC = [($150 - $140) / $140] × 100 = 7.14%<br><br>
+                    
+                    <strong>Range:</strong> Unbounded (typically -50% to +50%)
+                </div>
+                
+                <h3>How to Interpret</h3>
+                <ul>
+                    <li><strong>ROC > 0:</strong> Positive momentum - price trending up</li>
+                    <li><strong>ROC < 0:</strong> Negative momentum - price trending down</li>
+                    <li><strong>ROC crossing above 0:</strong> Bullish momentum shift - Buy signal</li>
+                    <li><strong>ROC crossing below 0:</strong> Bearish momentum shift - Sell signal</li>
+                    <li><strong>ROC > +10%:</strong> Strong upward momentum</li>
+                    <li><strong>ROC < -10%:</strong> Strong downward momentum</li>
+                </ul>
+                
+                <h3>Advanced Applications</h3>
+                <ul>
+                    <li><strong>Divergence:</strong> Price makes new high but ROC doesn't → Bearish divergence</li>
+                    <li><strong>Overbought/Oversold:</strong> Extreme ROC values (>+15%, <-15%) suggest reversal</li>
+                    <li><strong>Trend Confirmation:</strong> Sustained positive ROC confirms uptrend</li>
+                    <li><strong>Momentum Comparison:</strong> Compare ROC across multiple stocks for relative strength</li>
+                </ul>
+                
+                <div class='tip-box'>
+                    💡 <strong>Pro Tip:</strong> ROC is excellent for comparing momentum across different stocks. Use 9-period for short-term, 25-period for medium-term analysis.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Aroon -->
+    <div id='modalAroon' class='modal'>
+        <div class='modal-content'>
+            <div class='modal-header'>
+                <h2>📊 Aroon Indicator</h2>
+                <span class='close-modal' onclick='closeModal("modalAroon")'>&times;</span>
+            </div>
+            <div class='modal-body'>
+                <h3>What is the Aroon Indicator?</h3>
+                <p>Developed by Tushar Chande, the <span class='key-term'>Aroon Indicator</span> (Sanskrit for "dawn's early light") identifies when trends are likely to begin and measures trend strength.</p>
+                
+                <h3>Mathematical Calculation</h3>
+                <div class='formula-box'>
+                    <strong>Default Period: 25</strong><br><br>
+                    
+                    <strong>Aroon Up Formula:</strong><br>
+                    Aroon Up = [(25 - Periods Since 25-period High) / 25] × 100<br><br>
+                    
+                    <strong>Aroon Down Formula:</strong><br>
+                    Aroon Down = [(25 - Periods Since 25-period Low) / 25] × 100<br><br>
+                    
+                    <strong>Example:</strong><br>
+                    25-period high occurred 3 days ago:<br>
+                    Aroon Up = [(25 - 3) / 25] × 100 = 88%<br><br>
+                    
+                    25-period low occurred 15 days ago:<br>
+                    Aroon Down = [(25 - 15) / 25] × 100 = 40%<br><br>
+                    
+                    <strong>Range:</strong> 0 to 100 (for both indicators)
+                </div>
+                
+                <h3>How to Interpret</h3>
+                <ul>
+                    <li><strong>Aroon Up > 70 & Aroon Down < 30:</strong> STRONG UPTREND</li>
+                    <li><strong>Aroon Down > 70 & Aroon Up < 30:</strong> STRONG DOWNTREND</li>
+                    <li><strong>Aroon Up crosses above Aroon Down:</strong> Bullish signal - uptrend starting</li>
+                    <li><strong>Aroon Down crosses above Aroon Up:</strong> Bearish signal - downtrend starting</li>
+                    <li><strong>Both indicators below 50:</strong> Consolidation - no clear trend</li>
+                    <li><strong>Aroon Up = 100:</strong> New 25-period high TODAY (very strong)</li>
+                    <li><strong>Aroon Down = 100:</strong> New 25-period low TODAY (very weak)</li>
+                </ul>
+                
+                <h3>Aroon Oscillator (Optional)</h3>
+                <div class='formula-box'>
+                    Aroon Oscillator = Aroon Up - Aroon Down<br>
+                    Range: -100 to +100<br><br>
+                    > +50: Strong uptrend<br>
+                    < -50: Strong downtrend
+                </div>
+                
+                <div class='tip-box'>
+                    💡 <strong>Pro Tip:</strong> Aroon is excellent for identifying the START of new trends. Use it before ADX, which only confirms existing trends.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================
+         📊 VOLATILITY & CHANNELS MODALS
+         ============================================ -->
+
+    <!-- Modal Keltner Channels -->
+    <div id='modalKeltner' class='modal'>
+        <div class='modal-content'>
+            <div class='modal-header'>
+                <h2>📊 Keltner Channels</h2>
+                <span class='close-modal' onclick='closeModal("modalKeltner")'>&times;</span>
+            </div>
+            <div class='modal-body'>
+                <h3>What are Keltner Channels?</h3>
+                <p>Developed by Chester Keltner, <span class='key-term'>Keltner Channels</span> are volatility-based envelopes set above and below an exponential moving average. Unlike Bollinger Bands, they use ATR instead of standard deviation.</p>
+                
+                <h3>Mathematical Calculation</h3>
+                <div class='formula-box'>
+                    <strong>Default Settings: 20-period EMA, 2× ATR</strong><br><br>
+                    
+                    <strong>Step 1: Calculate Middle Line</strong><br>
+                    Middle Line = 20-period EMA of Close<br><br>
+                    
+                    <strong>Step 2: Calculate ATR</strong><br>
+                    TR = MAX[(High - Low), |High - Previous Close|, |Low - Previous Close|]<br>
+                    ATR(14) = 14-period Average of True Range<br><br>
+                    
+                    <strong>Step 3: Calculate Channels</strong><br>
+                    Upper Channel = EMA + (2 × ATR)<br>
+                    Lower Channel = EMA - (2 × ATR)<br>
+                </div>
+                
+                <h3>How to Interpret</h3>
+                <ul>
+                    <li><strong>Price touches Upper Channel:</strong> Overbought - potential resistance</li>
+                    <li><strong>Price touches Lower Channel:</strong> Oversold - potential support</li>
+                    <li><strong>Price above Middle Line:</strong> Bullish trend</li>
+                    <li><strong>Price below Middle Line:</strong> Bearish trend</li>
+                    <li><strong>Breakout above Upper Channel:</strong> Very strong bullish signal (continuation likely)</li>
+                    <li><strong>Breakdown below Lower Channel:</strong> Very strong bearish signal</li>
+                </ul>
+                
+                <h3>Keltner vs Bollinger Bands</h3>
+                <ul>
+                    <li><strong>Keltner:</strong> Uses ATR (actual volatility) - smoother, less reactive</li>
+                    <li><strong>Bollinger:</strong> Uses Std Dev (statistical) - more reactive to price spikes</li>
+                    <li><strong>Strategy:</strong> When Bollinger Bands expand outside Keltner Channels = extreme volatility</li>
+                </ul>
+                
+                <div class='tip-box'>
+                    💡 <strong>Pro Tip:</strong> Use Keltner Channels for trend-following strategies. When price consistently stays above upper channel, it's a strong uptrend - don't fight it!
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Donchian Channels -->
+    <div id='modalDonchian' class='modal'>
+        <div class='modal-content'>
+            <div class='modal-header'>
+                <h2>📈 Donchian Channels</h2>
+                <span class='close-modal' onclick='closeModal("modalDonchian")'>&times;</span>
+            </div>
+            <div class='modal-body'>
+                <h3>What are Donchian Channels?</h3>
+                <p>Developed by Richard Donchian, <span class='key-term'>Donchian Channels</span> are formed by the highest high and lowest low over a specified period. Used by the famous Turtle Traders.</p>
+                
+                <h3>Mathematical Calculation</h3>
+                <div class='formula-box'>
+                    <strong>Default Period: 20</strong><br><br>
+                    
+                    <strong>Upper Channel:</strong><br>
+                    Highest High over the last 20 periods<br><br>
+                    
+                    <strong>Lower Channel:</strong><br>
+                    Lowest Low over the last 20 periods<br><br>
+                    
+                    <strong>Middle Line (optional):</strong><br>
+                    (Upper Channel + Lower Channel) / 2
+                </div>
+                
+                <h3>How to Interpret</h3>
+                <ul>
+                    <li><strong>Price breaks above Upper Channel:</strong> BREAKOUT - Strong buy signal (new 20-period high)</li>
+                    <li><strong>Price breaks below Lower Channel:</strong> BREAKDOWN - Strong sell signal (new 20-period low)</li>
+                    <li><strong>Price near Upper Channel:</strong> Strong uptrend - resistance level</li>
+                    <li><strong>Price near Lower Channel:</strong> Strong downtrend - support level</li>
+                    <li><strong>Narrow channel:</strong> Low volatility - breakout imminent</li>
+                    <li><strong>Wide channel:</strong> High volatility - strong trending market</li>
+                </ul>
+                
+                <h3>Turtle Trading Rules</h3>
+                <ul>
+                    <li><strong>System 1 (Aggressive):</strong> Enter long on 20-day high breakout, exit on 10-day low</li>
+                    <li><strong>System 2 (Conservative):</strong> Enter long on 55-day high breakout, exit on 20-day low</li>
+                    <li><strong>Principle:</strong> "Trade the breakouts" - follow new highs/lows</li>
+                </ul>
+                
+                <div class='tip-box'>
+                    💡 <strong>Pro Tip:</strong> Donchian Channels are THE indicator for breakout trading. When price makes a new 20-period high, it's a powerful momentum signal. This is how the Turtles made millions!
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================
+         📊 VOLUME ANALYSIS MODALS
+         ============================================ -->
+
+    <!-- Modal CMF -->
+    <div id='modalCMF' class='modal'>
+        <div class='modal-content'>
+            <div class='modal-header'>
+                <h2>💧 CMF - Chaikin Money Flow</h2>
+                <span class='close-modal' onclick='closeModal("modalCMF")'>&times;</span>
+            </div>
+            <div class='modal-body'>
+                <h3>What is Chaikin Money Flow?</h3>
+                <p>Developed by Marc Chaikin, <span class='key-term'>CMF</span> measures the amount of Money Flow Volume over a specific period. It identifies buying and selling pressure.</p>
+                
+                <h3>Mathematical Calculation</h3>
+                <div class='formula-box'>
+                    <strong>Default Period: 20</strong><br><br>
+                    
+                    <strong>Step 1: Calculate Money Flow Multiplier</strong><br>
+                    MFM = [(Close - Low) - (High - Close)] / (High - Low)<br>
+                    Range: -1 to +1<br><br>
+                    
+                    <strong>Step 2: Calculate Money Flow Volume</strong><br>
+                    MFV = MFM × Volume<br><br>
+                    
+                    <strong>Step 3: Calculate CMF</strong><br>
+                    CMF = (20-period Sum of MFV) / (20-period Sum of Volume)<br><br>
+                    
+                    <strong>Range:</strong> -1 to +1 (or -100% to +100%)
+                </div>
+                
+                <h3>How to Interpret</h3>
+                <ul>
+                    <li><strong>CMF > +0.05:</strong> STRONG BUYING PRESSURE - Accumulation phase</li>
+                    <li><strong>CMF < -0.05:</strong> STRONG SELLING PRESSURE - Distribution phase</li>
+                    <li><strong>CMF > 0:</strong> Buyers in control (positive money flow)</li>
+                    <li><strong>CMF < 0:</strong> Sellers in control (negative money flow)</li>
+                    <li><strong>CMF crossing above 0:</strong> Bullish signal - accumulation starting</li>
+                    <li><strong>CMF crossing below 0:</strong> Bearish signal - distribution starting</li>
+                </ul>
+                
+                <h3>Advanced Signals</h3>
+                <ul>
+                    <li><strong>Bullish Divergence:</strong> Price makes lower low, CMF makes higher low → Reversal up</li>
+                    <li><strong>Bearish Divergence:</strong> Price makes higher high, CMF makes lower high → Reversal down</li>
+                    <li><strong>CMF + Price Confirmation:</strong> Rising price + rising CMF = strong uptrend</li>
+                </ul>
+                
+                <div class='tip-box'>
+                    💡 <strong>Pro Tip:</strong> CMF is more reliable than OBV because it considers WHERE the price closes within the range, not just up/down. Use it to confirm trends and spot institutional accumulation/distribution.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Volume Profile -->
+    <div id='modalVolumeProfile' class='modal'>
+        <div class='modal-content'>
+            <div class='modal-header'>
+                <h2>📊 Volume Profile - Price Distribution</h2>
+                <span class='close-modal' onclick='closeModal("modalVolumeProfile")'>&times;</span>
+            </div>
+            <div class='modal-body'>
+                <h3>What is Volume Profile?</h3>
+                <p><span class='key-term'>Volume Profile</span> is an advanced charting tool that displays trading activity over a specified time period at specified price levels. It shows WHERE the most volume traded.</p>
+                
+                <h3>Key Components</h3>
+                <ul>
+                    <li><strong>POC (Point of Control):</strong> Price level with HIGHEST traded volume - peak of histogram</li>
+                    <li><strong>Value Area (VA):</strong> Price range where 70% of volume traded</li>
+                    <li><strong>VAH (Value Area High):</strong> Upper boundary of value area</li>
+                    <li><strong>VAL (Value Area Low):</strong> Lower boundary of value area</li>
+                    <li><strong>HVN (High Volume Node):</strong> Price levels with significant volume - strong support/resistance</li>
+                    <li><strong>LVN (Low Volume Node):</strong> Price levels with little volume - price moves through quickly</li>
+                </ul>
+                
+                <h3>How to Interpret</h3>
+                <ul>
+                    <li><strong>Price at POC:</strong> FAIR VALUE - maximum acceptance, high liquidity</li>
+                    <li><strong>Price above VA:</strong> BULLISH - buyers in control</li>
+                    <li><strong>Price below VA:</strong> BEARISH - sellers in control</li>
+                    <li><strong>Price approaching POC:</strong> Expect support/resistance</li>
+                    <li><strong>Price in LVN:</strong> Fast movement expected (low liquidity)</li>
+                    <li><strong>Price in HVN:</strong> Consolidation expected (high liquidity)</li>
+                </ul>
+                
+                <h3>Trading Strategies</h3>
+                <ul>
+                    <li><strong>Mean Reversion:</strong> When price moves far from POC, expect return to POC</li>
+                    <li><strong>Breakout Trading:</strong> Price breaking above VAH or below VAL = strong signal</li>
+                    <li><strong>Support/Resistance:</strong> Use HVN levels as support/resistance zones</li>
+                    <li><strong>Trend Confirmation:</strong> POC rising = uptrend, POC falling = downtrend</li>
+                </ul>
+                
+                <div class='tip-box'>
+                    💡 <strong>Pro Tip:</strong> Volume Profile is used by institutional traders to identify fair value. The POC acts like a magnet - price often returns to it. HVN levels are STRONG support/resistance.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Elder Ray -->
+    <div id='modalElderRay' class='modal'>
+        <div class='modal-content'>
+            <div class='modal-header'>
+                <h2>⚖ Elder Ray Index - Bull & Bear Power</h2>
+                <span class='close-modal' onclick='closeModal("modalElderRay")'>&times;</span>
+            </div>
+            <div class='modal-body'>
+                <h3>What is the Elder Ray Index?</h3>
+                <p>Developed by Dr. Alexander Elder, this indicator measures the <span class='key-term'>power of bulls and bears</span> in the market by comparing price extremes to an exponential moving average.</p>
+                
+                <h3>Mathematical Calculation</h3>
+                <div class='formula-box'>
+                    <strong>Default: 13-period EMA</strong><br><br>
+                    
+                    <strong>Bull Power Formula:</strong><br>
+                    Bull Power = High - EMA(13)<br><br>
+                    
+                    <strong>Bear Power Formula:</strong><br>
+                    Bear Power = Low - EMA(13)<br><br>
+                    
+                    <strong>Interpretation:</strong><br>
+                    Bull Power > 0: Bulls pushing above average<br>
+                    Bear Power < 0: Bears pushing below average
+                </div>
+                
+                <h3>How to Interpret</h3>
+                <ul>
+                    <li><strong>Both Bull & Bear Power > 0:</strong> STRONG BULLS - Uptrend (Buy)</li>
+                    <li><strong>Both Bull & Bear Power < 0:</strong> STRONG BEARS - Downtrend (Sell)</li>
+                    <li><strong>Bull Power > 0, Bear Power < 0:</strong> Mixed signals - consolidation</li>
+                    <li><strong>Bull Power rising:</strong> Bulls gaining strength</li>
+                    <li><strong>Bear Power falling:</strong> Bears gaining strength</li>
+                </ul>
+                
+                <h3>Dr. Elder's Trading Rules</h3>
+                <ul>
+                    <li><strong>Buy Signal:</strong> EMA rising + Bear Power negative but rising + Bull Power positive</li>
+                    <li><strong>Sell Signal:</strong> EMA falling + Bull Power positive but falling + Bear Power negative</li>
+                    <li><strong>Strongest Buy:</strong> Bear Power turns positive (both indicators > 0)</li>
+                    <li><strong>Strongest Sell:</strong> Bull Power turns negative (both indicators < 0)</li>
+                </ul>
+                
+                <h3>Divergence Signals</h3>
+                <ul>
+                    <li><strong>Bullish Divergence:</strong> Price makes lower low, Bear Power makes higher low → Reversal up</li>
+                    <li><strong>Bearish Divergence:</strong> Price makes higher high, Bull Power makes lower high → Reversal down</li>
+                </ul>
+                
+                <div class='tip-box'>
+                    💡 <strong>Pro Tip:</strong> Elder Ray is best used WITH trend indicators. In uptrends, wait for Bear Power to become less negative for entries. In downtrends, wait for Bull Power to weaken for shorts.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================
+         📊 TREND INDICATORS MODALS (RESTANTS)
+         ============================================ -->
+
+    <!-- Modal Moving Averages -->
+    <div id='modalMovingAverages' class='modal'>
+        <div class='modal-content'>
+            <div class='modal-header'>
+                <h2>📈 Moving Averages - Multiple Timeframes</h2>
+                <span class='close-modal' onclick='closeModal("modalMovingAverages")'>&times;</span>
+            </div>
+            <div class='modal-body'>
+                <h3>What are Moving Averages?</h3>
+                <p><span class='key-term'>Moving Averages</span> smooth price data to identify trend direction. They are the foundation of technical analysis and used by 90% of traders worldwide.</p>
+                
+                <h3>Types of Moving Averages</h3>
+                
+                <h4>1. Simple Moving Average (SMA)</h4>
+                <div class='formula-box'>
+                    <strong>Formula:</strong><br>
+                    SMA = (P₁ + P₂ + P₃ + ... + Pₙ) / n<br><br>
+                    
+                    <strong>Example (5-day SMA):</strong><br>
+                    Prices: 100, 102, 101, 103, 105<br>
+                    SMA = (100 + 102 + 101 + 103 + 105) / 5 = 102.2
+                </div>
+                
+                <h4>2. Exponential Moving Average (EMA)</h4>
+                <div class='formula-box'>
+                    <strong>Formula:</strong><br>
+                    Multiplier = 2 / (Period + 1)<br>
+                    EMA = [Close - EMA(previous)] × Multiplier + EMA(previous)<br><br>
+                    
+                    <strong>Characteristics:</strong><br>
+                    - Gives MORE weight to recent prices<br>
+                    - More responsive to price changes than SMA<br>
+                    - Preferred for short-term trading
+                </div>
+                
+                <h3>Common Periods Used</h3>
+                <ul>
+                    <li><strong>SMA 20:</strong> Short-term trend (1 month)</li>
+                    <li><strong>SMA 50:</strong> Medium-term trend (2.5 months)</li>
+                    <li><strong>SMA 200:</strong> Long-term trend (10 months) - "Line in the sand"</li>
+                    <li><strong>EMA 9:</strong> Very short-term momentum</li>
+                    <li><strong>EMA 21:</strong> Short-term trend with more responsiveness</li>
+                </ul>
+                
+                <h3>How to Interpret</h3>
+                <ul>
+                    <li><strong>Price above MA:</strong> Uptrend - bullish</li>
+                    <li><strong>Price below MA:</strong> Downtrend - bearish</li>
+                    <li><strong>MA sloping up:</strong> Trend is up</li>
+                    <li><strong>MA sloping down:</strong> Trend is down</li>
+                    <li><strong>MA flat:</strong> Consolidation/ranging</li>
+                </ul>
+                
+                <h3>🌟 Golden Cross & Death Cross</h3>
+                <div class='formula-box'>
+                    <strong>Golden Cross (BULLISH):</strong><br>
+                    SMA 50 crosses ABOVE SMA 200<br>
+                    → Major buy signal, start of long-term uptrend<br><br>
+                    
+                    <strong>Death Cross (BEARISH):</strong><br>
+                    SMA 50 crosses BELOW SMA 200<br>
+                    → Major sell signal, start of long-term downtrend
+                </div>
+                
+                <h3>Perfect MA Alignment (Strongest Signal)</h3>
+                <ul>
+                    <li><strong>Bullish Alignment:</strong> Price > EMA 9 > EMA 21 > SMA 50 > SMA 200</li>
+                    <li><strong>Bearish Alignment:</strong> Price < EMA 9 < EMA 21 < SMA 50 < SMA 200</li>
+                </ul>
+                
+                <h3>Trading Strategies</h3>
+                <ul>
+                    <li><strong>Support/Resistance:</strong> MAs act as dynamic support in uptrends, resistance in downtrends</li>
+                    <li><strong>Pullback Entry:</strong> In uptrend, buy when price pulls back to SMA 20 or SMA 50</li>
+                    <li><strong>Crossover:</strong> Buy when fast MA crosses above slow MA</li>
+                    <li><strong>200 SMA Rule:</strong> Only buy when price is above SMA 200 (stay on right side of trend)</li>
+                </ul>
+                
+                <div class='tip-box'>
+                    💡 <strong>Pro Tip:</strong> The SMA 200 is watched by EVERY institutional trader. When price breaks above/below it, expect massive volume. Golden/Death crosses are among the most reliable signals in all of technical analysis.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Linear Regression -->
+    <div id='modalLinearRegression' class='modal'>
+        <div class='modal-content'>
+            <div class='modal-header'>
+                <h2>📉 Linear Regression Channel</h2>
+                <span class='close-modal' onclick='closeModal("modalLinearRegression")'>&times;</span>
+            </div>
+            <div class='modal-body'>
+                <h3>What is Linear Regression?</h3>
+                <p><span class='key-term'>Linear Regression</span> is a statistical tool that finds the best-fit line through price data. It identifies the dominant trend and potential support/resistance levels.</p>
+                
+                <h3>Mathematical Calculation</h3>
+                <div class='formula-box'>
+                    <strong>Default Period: 100</strong><br><br>
+                    
+                    <strong>Step 1: Linear Regression Formula (Least Squares Method)</strong><br>
+                    For data points (x, y), find the line y = mx + b where:<br><br>
+                    
+                    Slope (m) = [n(Σxy) - (Σx)(Σy)] / [n(Σx²) - (Σx)²]<br>
+                    Intercept (b) = [Σy - m(Σx)] / n<br><br>
+                    
+                    Where:<br>
+                    - x = period number (0, 1, 2, ...)<br>
+                    - y = closing price<br>
+                    - n = number of periods<br><br>
+                    
+                    <strong>Step 2: Calculate Standard Deviation</strong><br>
+                    For each point, calculate deviation from regression line<br>
+                    Standard Deviation (σ) = √[Σ(Price - Regression)² / n]<br><br>
+                    
+                    <strong>Step 3: Draw Channel</strong><br>
+                    Upper Channel = Regression Line + (2 × σ)<br>
+                    Middle Line = Regression Line<br>
+                    Lower Channel = Regression Line - (2 × σ)
+                </div>
+                
+                <h3>How to Interpret</h3>
+                <ul>
+                    <li><strong>Positive Slope:</strong> UPTREND - slope > 0.5 is strong</li>
+                    <li><strong>Negative Slope:</strong> DOWNTREND - slope < -0.5 is strong</li>
+                    <li><strong>Near-Zero Slope:</strong> SIDEWAYS - no clear trend</li>
+                    <li><strong>Price above Middle Line:</strong> Bullish bias</li>
+                    <li><strong>Price below Middle Line:</strong> Bearish bias</li>
+                </ul>
+                
+                <h3>Channel Trading</h3>
+                <ul>
+                    <li><strong>Price at Upper Channel:</strong> Overbought - potential sell/short</li>
+                    <li><strong>Price at Lower Channel:</strong> Oversold - potential buy/cover</li>
+                    <li><strong>Price breaking above Upper Channel:</strong> Very strong momentum - breakout</li>
+                    <li><strong>Price breaking below Lower Channel:</strong> Very weak - breakdown</li>
+                    <li><strong>Channel narrowing:</strong> Volatility decreasing</li>
+                    <li><strong>Channel widening:</strong> Volatility increasing</li>
+                </ul>
+                
+                <h3>Advanced Applications</h3>
+                <ul>
+                    <li><strong>Trend Strength:</strong> Steeper slope = stronger trend</li>
+                    <li><strong>Mean Reversion:</strong> When price deviates from line, expect return to mean</li>
+                    <li><strong>Breakout Confirmation:</strong> Wait for price to break channel AND slope to change</li>
+                    <li><strong>Multi-Timeframe:</strong> Use on daily + weekly for best accuracy</li>
+                </ul>
+                
+                <div class='tip-box'>
+                    💡 <strong>Pro Tip:</strong> Linear regression is OBJECTIVE - it removes emotion. The slope tells you the trend direction mathematically. Use 100-period for swing trading, 50-period for day trading.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================
+         🎯 PATTERN DETECTION MODALS
+         ============================================ -->
+
+    <!-- Modal Support/Resistance -->
+    <div id='modalSupportResistance' class='modal'>
+        <div class='modal-content'>
+            <div class='modal-header'>
+                <h2>🎯 Automatic Support & Resistance Detection</h2>
+                <span class='close-modal' onclick='closeModal("modalSupportResistance")'>&times;</span>
+            </div>
+            <div class='modal-body'>
+                <h3>What is Support & Resistance?</h3>
+                <p><span class='key-term'>Support and Resistance</span> are price levels where buying/selling pressure is historically concentrated. They are the most fundamental concepts in technical analysis.</p>
+                
+                <h3>Support (Floor)</h3>
+                <ul>
+                    <li><strong>Definition:</strong> Price level where demand is strong enough to prevent further decline</li>
+                    <li><strong>Psychology:</strong> Buyers see value at this level and step in</li>
+                    <li><strong>Behavior:</strong> Price bounces up from support</li>
+                    <li><strong>Break Below:</strong> Becomes resistance (role reversal)</li>
+                </ul>
+                
+                <h3>Resistance (Ceiling)</h3>
+                <ul>
+                    <li><strong>Definition:</strong> Price level where selling pressure is strong enough to prevent further rise</li>
+                    <li><strong>Psychology:</strong> Sellers see price as expensive and take profits</li>
+                    <li><strong>Behavior:</strong> Price bounces down from resistance</li>
+                    <li><strong>Break Above:</strong> Becomes support (role reversal)</li>
+                </ul>
+                
+                <h3>How Our Algorithm Detects Levels</h3>
+                <div class='formula-box'>
+                    <strong>Method: Swing High/Low Detection</strong><br><br>
+                    
+                    <strong>Step 1: Find Swing Highs (Resistance)</strong><br>
+                    A high where:<br>
+                    - High(i) > High(i-1) AND High(i) > High(i-2)<br>
+                    - High(i) > High(i+1) AND High(i) > High(i+2)<br><br>
+                    
+                    <strong>Step 2: Find Swing Lows (Support)</strong><br>
+                    A low where:<br>
+                    - Low(i) < Low(i-1) AND Low(i) < Low(i-2)<br>
+                    - Low(i) < Low(i+1) AND Low(i) < Low(i+2)<br><br>
+                    
+                    <strong>Step 3: Cluster Similar Levels</strong><br>
+                    Group levels within 2% of each other<br>
+                    Take average of cluster as final level
+                </div>
+                
+                <h3>Strength of Levels</h3>
+                <ul>
+                    <li><strong>Number of Touches:</strong> More touches = stronger level</li>
+                    <li><strong>Volume:</strong> High volume at level = stronger</li>
+                    <li><strong>Time:</strong> Older levels are often stronger</li>
+                    <li><strong>Round Numbers:</strong> $100, $150, $200 are psychological levels</li>
+                </ul>
+                
+                <h3>How to Trade S/R</h3>
+                <ul>
+                    <li><strong>Buy at Support:</strong> When price approaches support in uptrend</li>
+                    <li><strong>Sell at Resistance:</strong> When price approaches resistance in downtrend</li>
+                    <li><strong>Breakout Trading:</strong> Buy when price breaks above resistance with volume</li>
+                    <li><strong>Breakdown Trading:</strong> Sell when price breaks below support with volume</li>
+                    <li><strong>Role Reversal:</strong> Old resistance becomes new support (and vice versa)</li>
+                </ul>
+                
+                <h3>Confirmation Signals</h3>
+                <ul>
+                    <li>Wait for price to CLOSE above resistance (not just touch)</li>
+                    <li>Look for increased volume on breakout</li>
+                    <li>Use candlestick patterns at levels for confirmation</li>
+                    <li>Check multiple timeframes for level confluence</li>
+                </ul>
+                
+                <div class='warning-box'>
+                    ⚠ <strong>Warning:</strong> S/R levels are ZONES, not exact prices. Allow 0.5-1% flexibility. False breakouts are common - wait for confirmation.
+                </div>
+                
+                <div class='tip-box'>
+                    💡 <strong>Pro Tip:</strong> The best trades happen at the CONFLUENCE of multiple S/R levels (e.g., daily support + weekly support + 200 SMA). Stack your levels for highest probability!
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Candlestick Patterns -->
+    <div id='modalCandlestickPatterns' class='modal'>
+        <div class='modal-content'>
+            <div class='modal-header'>
+                <h2>🕯 Candlestick Pattern Recognition</h2>
+                <span class='close-modal' onclick='closeModal("modalCandlestickPatterns")'>&times;</span>
+            </div>
+            <div class='modal-body'>
+                <h3>What are Candlestick Patterns?</h3>
+                <p><span class='key-term'>Candlestick Patterns</span> are formations created by one or more candlesticks that indicate potential reversals or continuations. Developed in 18th century Japan by rice trader Homma Munehisa.</p>
+                
+                <h3>Candlestick Anatomy</h3>
+                <div class='formula-box'>
+                    <strong>Components:</strong><br>
+                    - <strong>Body:</strong> Range between Open and Close<br>
+                    - <strong>Upper Shadow:</strong> High - max(Open, Close)<br>
+                    - <strong>Lower Shadow:</strong> min(Open, Close) - Low<br>
+                    - <strong>Green/White:</strong> Close > Open (Bullish)<br>
+                    - <strong>Red/Black:</strong> Close < Open (Bearish)
+                </div>
+                
+                <h3>🟢 Bullish Reversal Patterns (20+ Detected)</h3>
+                
+                <h4>1. Hammer</h4>
+                <ul>
+                    <li><strong>Structure:</strong> Small body at top, long lower shadow (2x body), tiny upper shadow</li>
+                    <li><strong>Location:</strong> Must appear at bottom of downtrend</li>
+                    <li><strong>Meaning:</strong> Sellers pushed down, buyers pushed back up - reversal</li>
+                    <li><strong>Confirmation:</strong> Next candle closes above hammer</li>
+                </ul>
+                
+                <h4>2. Inverted Hammer</h4>
+                <ul>
+                    <li><strong>Structure:</strong> Small body at bottom, long upper shadow, tiny lower shadow</li>
+                    <li><strong>Meaning:</strong> Buyers tried to push up, failed, but pressure is building</li>
+                </ul>
+                
+                <h4>3. Bullish Engulfing</h4>
+                <ul>
+                    <li><strong>Structure:</strong> Small red candle followed by large green candle that engulfs it</li>
+                    <li><strong>Meaning:</strong> Strong shift from bearish to bullish sentiment</li>
+                    <li><strong>Strength:</strong> Larger the green candle, stronger the signal</li>
+                </ul>
+                
+                <h4>4. Morning Star (3-candle pattern)</h4>
+                <ul>
+                    <li><strong>Candle 1:</strong> Long red candle (downtrend)</li>
+                    <li><strong>Candle 2:</strong> Small body (indecision) - gaps down</li>
+                    <li><strong>Candle 3:</strong> Long green candle closing above midpoint of candle 1</li>
+                    <li><strong>Signal:</strong> VERY STRONG reversal (one of the best patterns)</li>
+                </ul>
+                
+                <h4>5. Piercing Line</h4>
+                <ul>
+                    <li><strong>Structure:</strong> Red candle followed by green candle that opens below low and closes above 50% of red body</li>
+                    <li><strong>Strength:</strong> The deeper into red candle it penetrates, the stronger</li>
+                </ul>
+                
+                <h3>🔴 Bearish Reversal Patterns</h3>
+                
+                <h4>1. Hanging Man</h4>
+                <ul>
+                    <li><strong>Structure:</strong> Identical to hammer but appears at TOP of uptrend</li>
+                    <li><strong>Meaning:</strong> Sellers are starting to appear</li>
+                </ul>
+                
+                <h4>2. Shooting Star</h4>
+                <ul>
+                    <li><strong>Structure:</strong> Small body at bottom, long upper shadow</li>
+                    <li><strong>Location:</strong> Top of uptrend</li>
+                    <li><strong>Meaning:</strong> Buyers tried to push higher but failed - reversal</li>
+                </ul>
+                
+                <h4>3. Bearish Engulfing</h4>
+                <ul>
+                    <li><strong>Structure:</strong> Small green candle followed by large red candle that engulfs it</li>
+                    <li><strong>Meaning:</strong> Strong shift from bullish to bearish</li>
+                </ul>
+                
+                <h4>4. Evening Star</h4>
+                <ul>
+                    <li><strong>Opposite of Morning Star</strong></li>
+                    <li><strong>Signal:</strong> VERY STRONG bearish reversal</li>
+                </ul>
+                
+                <h4>5. Dark Cloud Cover</h4>
+                <ul>
+                    <li><strong>Structure:</strong> Green candle followed by red candle that opens above high and closes below 50% of green body</li>
+                </ul>
+                
+                <h3>⚪ Indecision Patterns</h3>
+                
+                <h4>Doji</h4>
+                <ul>
+                    <li><strong>Structure:</strong> Open = Close (tiny/no body)</li>
+                    <li><strong>Meaning:</strong> Perfect balance between buyers/sellers</li>
+                    <li><strong>Context:</strong> At top of trend = reversal warning, at bottom = potential reversal</li>
+                    <li><strong>Types:</strong> Long-legged Doji, Dragonfly Doji, Gravestone Doji</li>
+                </ul>
+                
+                <h3>Pattern Strength Factors</h3>
+                <ul>
+                    <li><strong>Volume:</strong> Higher volume = stronger signal</li>
+                    <li><strong>Trend Context:</strong> Patterns work best at trend extremes</li>
+                    <li><strong>Support/Resistance:</strong> Patterns at S/R levels are most powerful</li>
+                    <li><strong>Confirmation:</strong> Wait for next candle to confirm direction</li>
+                </ul>
+                
+                <div class='warning-box'>
+                    ⚠ <strong>Warning:</strong> NEVER trade candlestick patterns in isolation. Always combine with:
+                    - Trend analysis (is there a trend to reverse?)
+                    - Support/Resistance levels
+                    - Volume confirmation
+                    - Other technical indicators
+                </div>
+                
+                <div class='tip-box'>
+                    💡 <strong>Pro Tip:</strong> The most reliable patterns are:
+                    1. Morning Star / Evening Star (reversal)
+                    2. Bullish/Bearish Engulfing (reversal)
+                    3. Hammer at support / Shooting Star at resistance
+                    
+                    Learn these 5 patterns FIRST before others!
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Divergences -->
+    <div id='modalDivergences' class='modal'>
+        <div class='modal-content'>
+            <div class='modal-header'>
+                <h2>🔄 Divergence Detection</h2>
+                <span class='close-modal' onclick='closeModal("modalDivergences")'>&times;</span>
+            </div>
+            <div class='modal-body'>
+                <h3>What are Divergences?</h3>
+                <p><span class='key-term'>Divergences</span> occur when price and an indicator (like RSI or MACD) move in opposite directions. They are among the MOST POWERFUL reversal signals in technical analysis.</p>
+                
+                <h3>Types of Divergences</h3>
+                
+                <h4>🟢 Regular Bullish Divergence (Reversal Signal)</h4>
+                <div class='formula-box'>
+                    <strong>Pattern:</strong><br>
+                    - Price: Lower Low (LL)<br>
+                    - Indicator: Higher Low (HL)<br><br>
+                    
+                    <strong>Meaning:</strong><br>
+                    Price is making new lows, but momentum is weakening<br>
+                    → Downtrend is losing steam<br>
+                    → POTENTIAL REVERSAL UP<br><br>
+                    
+                    <strong>Action:</strong> Look for BUY opportunities<br>
+                    <strong>Best Indicators:</strong> RSI, MACD, Stochastic
+                </div>
+                
+                <h4>🔴 Regular Bearish Divergence (Reversal Signal)</h4>
+                <div class='formula-box'>
+                    <strong>Pattern:</strong><br>
+                    - Price: Higher High (HH)<br>
+                    - Indicator: Lower High (LH)<br><br>
+                    
+                    <strong>Meaning:</strong><br>
+                    Price is making new highs, but momentum is weakening<br>
+                    → Uptrend is losing steam<br>
+                    → POTENTIAL REVERSAL DOWN<br><br>
+                    
+                    <strong>Action:</strong> Look for SELL opportunities
+                </div>
+                
+                <h4>🟢 Hidden Bullish Divergence (Continuation Signal)</h4>
+                <div class='formula-box'>
+                    <strong>Pattern:</strong><br>
+                    - Price: Higher Low (HL)<br>
+                    - Indicator: Lower Low (LL)<br><br>
+                    
+                    <strong>Meaning:</strong><br>
+                    Price pullback is shallow, but indicator shows strength<br>
+                    → Uptrend will CONTINUE<br><br>
+                    
+                    <strong>Action:</strong> Buy the dip in uptrend
+                </div>
+                
+                <h4>🔴 Hidden Bearish Divergence (Continuation Signal)</h4>
+                <div class='formula-box'>
+                    <strong>Pattern:</strong><br>
+                    - Price: Lower High (LH)<br>
+                    - Indicator: Higher High (HH)<br><br>
+                    
+                    <strong>Meaning:</strong><br>
+                    Price rally is weak, but indicator shows weakness persists<br>
+                    → Downtrend will CONTINUE<br><br>
+                    
+                    <strong>Action:</strong> Sell the rally in downtrend
+                </div>
+                
+                <h3>How to Identify Divergences</h3>
+                <ol>
+                    <li><strong>Identify Clear Trend:</strong> Need at least 2 swing highs/lows</li>
+                    <li><strong>Connect Price Swings:</strong> Draw trendline connecting swing points</li>
+                    <li><strong>Connect Indicator Swings:</strong> Draw trendline on same timepoints</li>
+                    <li><strong>Compare Slopes:</strong> If lines diverge (opposite slopes) = divergence</li>
+                </ol>
+                
+                <h3>Best Indicators for Divergences</h3>
+                <ul>
+                    <li><strong>RSI:</strong> Most reliable, clear swings</li>
+                    <li><strong>MACD Histogram:</strong> Very visual, easy to spot</li>
+                    <li><strong>Stochastic:</strong> Good for short-term divergences</li>
+                    <li><strong>MFI:</strong> Adds volume component</li>
+                    <li><strong>OBV:</strong> Volume-based divergences are powerful</li>
+                </ul>
+                
+                <h3>Confirmation Checklist</h3>
+                <ul>
+                    <li>✅ Clear uptrend/downtrend exists</li>
+                    <li>✅ At least 2 swing points visible</li>
+                    <li>✅ Indicator makes clear opposite move</li>
+                    <li>✅ Divergence at key support/resistance level</li>
+                    <li>✅ Volume decreasing on price move (shows weakness)</li>
+                    <li>✅ Candlestick reversal pattern appears</li>
+                </ul>
+                
+                <h3>Trading Divergences</h3>
+                <ul>
+                    <li><strong>Entry:</strong> When price breaks trendline in direction of divergence</li>
+                    <li><strong>Stop Loss:</strong> Beyond the swing high/low that created divergence</li>
+                    <li><strong>Target:</strong> Previous swing point or key S/R level</li>
+                    <li><strong>Confirmation:</strong> Wait for price to reverse (don't trade the divergence alone)</li>
+                </ul>
+                
+                <h3>Common Mistakes</h3>
+                <ul>
+                    <li>❌ Trading divergences in strong trends (wait for trend exhaustion)</li>
+                    <li>❌ Using too short timeframes (divergences work best on daily charts)</li>
+                    <li>❌ Not waiting for confirmation (price must actually reverse)</li>
+                    <li>❌ Ignoring the broader trend context</li>
+                </ul>
+                
+                <div class='warning-box'>
+                    ⚠ <strong>Critical Rule:</strong> Divergences predict potential reversals but don't guarantee them. ALWAYS wait for:
+                    1. Price to break the trendline
+                    2. Candlestick confirmation pattern
+                    3. Volume spike in reversal direction
+                    
+                    Never enter on divergence alone!
+                </div>
+                
+                <div class='tip-box'>
+                    💡 <strong>Pro Tip:</strong> The STRONGEST divergences occur:
+                    - At key S/R levels
+                    - On multiple indicators simultaneously (RSI + MACD)
+                    - On higher timeframes (daily > hourly)
+                    - With decreasing volume (shows trend exhaustion)
+                    
+                    When all 4 align, you have a HIGH PROBABILITY reversal!
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODALS DÉJÀ EXISTANTS (CONSERVÉS) -->
+    <!-- Modal Stochastic - DÉJÀ INCLUS DANS PARTIE 1 -->
+    <!-- Modal Williams - DÉJÀ INCLUS DANS PARTIE 1 -->
+    <!-- Modal ADX - DÉJÀ INCLUS DANS PARTIE 1 -->
+    <!-- Modal SAR - DÉJÀ INCLUS DANS PARTIE 1 -->
+    <!-- Modal OBV - DÉJÀ INCLUS DANS PARTIE 1 -->
+    <!-- Modal ATR - DÉJÀ INCLUS DANS PARTIE 1 -->
+    <!-- Modal Fibonacci - DÉJÀ INCLUS DANS PARTIE 1 -->
+    <!-- Modal Pivots - DÉJÀ INCLUS DANS PARTIE 1 -->
+    <!-- Modal VWAP - DÉJÀ INCLUS DANS PARTIE 1 -->
+    <!-- Modal Ichimoku - DÉJÀ INCLUS DANS PARTIE 1 -->
+
+    <!-- ============================================
+         📜 SCRIPTS FINAUX
          ============================================ -->
     
     <!-- Core Scripts -->
@@ -1098,14 +2348,18 @@
     <script src='assets/js/common.js'></script>
     <script src='assets/js/sidebar.js'></script>
     
-    <!-- Advanced Analysis Script -->
+    <!-- Advanced Analysis Script (WALL STREET EDITION) -->
     <script src='assets/js/advanced-analysis.js'></script>
     
-    <!-- 🆕 NOUVEAU SCRIPT : Portfolio, Watchlist & Alerts Manager -->
+    <!-- 🆕 Portfolio, Watchlist & Alerts Manager -->
     <script src='assets/js/portfolio-watchlist-alerts.js'></script>
     
     <!-- Modal Functions -->
     <script>
+    // ============================================
+    // MODAL MANAGEMENT FUNCTIONS
+    // ============================================
+    
     function openModal(modalId) {
         const modal = document.getElementById(modalId);
         if (modal) {
@@ -1122,6 +2376,7 @@
         }
     }
 
+    // Close modal when clicking outside
     window.addEventListener('click', (event) => {
         if (event.target.classList.contains('modal')) {
             event.target.classList.remove('active');
@@ -1129,6 +2384,7 @@
         }
     });
 
+    // Close modal with Escape key
     document.addEventListener('keydown', (event) => {
         if (event.key === 'Escape') {
             document.querySelectorAll('.modal.active').forEach(modal => {
@@ -1138,17 +2394,113 @@
         }
     });
     
-    // Helper functions pour les modaux des nouvelles fonctionnalités
+    // ============================================
+    // HELPER FUNCTIONS FOR NEW FEATURES
+    // ============================================
+    
     function openPortfolioHelp() {
-        alert('Portfolio Management Help:\n\n- Create multiple portfolios to organize your stocks\n- Each portfolio has its own watchlist and alerts\n- Switch between portfolios using the dropdown\n- All data is saved in real-time to Firebase');
+        const helpText = `
+📁 PORTFOLIO MANAGEMENT HELP
+
+✨ Features:
+• Create multiple portfolios to organize your stocks
+• Each portfolio can track different strategies (e.g., "Growth Stocks", "Dividend Portfolio", "Tech Sector")
+• Switch between portfolios using the dropdown
+• All data is automatically saved to Firebase in real-time
+
+🎯 How to Use:
+1. Click "New Portfolio" to create a portfolio
+2. Give it a meaningful name
+3. Select it from the dropdown to make it active
+4. Add stocks to your watchlist - they'll be saved to this portfolio
+5. Create price alerts - they're portfolio-specific
+
+💾 Data Sync:
+• All portfolios sync across devices
+• Automatic backup to Firebase
+• Never lose your tracking data
+
+⚙ Management:
+• Click "Manage" to rename or delete portfolios
+• You can have unlimited portfolios
+• Default portfolio is created automatically
+        `;
+        alert(helpText);
     }
     
     function openWatchlistHelp() {
-        alert('Watchlist Help:\n\n- Add stocks to track them in real-time\n- Click on a stock card to analyze it\n- Remove stocks by clicking the trash icon\n- Filter by gainers/losers\n- All changes sync automatically to Firebase');
+        const helpText = `
+⭐ WATCHLIST HELP
+
+✨ Features:
+• Track multiple stocks in real-time
+• See live price changes and percentage moves
+• Filter by gainers/losers
+• One-click analysis of any stock
+
+🎯 How to Use:
+1. Type a stock symbol (e.g., AAPL) in the search box
+2. Click "Add" or press Enter
+3. Stock appears in your watchlist with live data
+4. Click on a stock card to analyze it with all 40+ indicators
+5. Remove stocks by clicking the trash icon
+
+📊 Features:
+• Real-time price updates
+• Color-coded gains (green) and losses (red)
+• Quick filters: All / Gainers / Losers
+• Automatic sync to Firebase
+• Portfolio-specific (each portfolio has its own watchlist)
+
+💡 Pro Tips:
+• Add stocks BEFORE market opens to track opening moves
+• Use "Gainers" filter to spot momentum stocks
+• Watchlist persists across sessions
+• Maximum 50 stocks per watchlist (performance)
+        `;
+        alert(helpText);
     }
     
     function openAlertsHelp() {
-        alert('Price Alerts Help:\n\n- Create alerts to get notified when prices reach your targets\n- Choose "above" or "below" conditions\n- Toggle alerts on/off without deleting them\n- Alerts are checked automatically every 60 seconds\n- All alerts are saved to Firebase');
+        const helpText = `
+🔔 PRICE ALERTS HELP
+
+✨ Features:
+• Get notified when stocks reach your target prices
+• Set "above" or "below" conditions
+• Toggle alerts on/off without deleting
+• Alerts check automatically every 60 seconds
+
+🎯 How to Use:
+1. Click "Create New Alert"
+2. Enter stock symbol (e.g., TSLA)
+3. Choose condition: "Price goes above" or "Price goes below"
+4. Enter target price (e.g., 250.00)
+5. Click "Create Alert"
+
+📊 Alert Types:
+• ABOVE alerts: Trigger when price crosses above target
+• BELOW alerts: Trigger when price crosses below target
+
+🔔 Notifications:
+• Browser notification when alert triggers
+• Email notification (if enabled in settings)
+• Sound alert (can be disabled)
+• Alert status changes to "Triggered"
+
+⚙ Management:
+• Toggle alerts on/off with switch
+• Delete alerts individually
+• View triggered vs active count
+• Alerts are portfolio-specific
+
+💡 Pro Tips:
+• Set alerts at key support/resistance levels
+• Use with Fibonacci retracement levels
+• Create both buy (below) and sell (above) alerts
+• Review triggered alerts regularly for opportunities
+        `;
+        alert(helpText);
     }
     </script>
     
@@ -1164,6 +2516,7 @@
     <script src="assets/js/chatbot-ui.js"></script>
     <script src="assets/js/chatbot-particles.js"></script>
 
+    <!-- Chatbot Initialization -->
     <script>
     document.addEventListener('DOMContentLoaded', function() {
         const initChatbotWhenReady = () => {
@@ -1174,7 +2527,7 @@
             
             try {
                 window.financialChatbot = new ChatbotUI(ChatbotConfig);
-                console.log('🎉 Chatbot FinanceGPT initialized');
+                console.log('🎉 Chatbot FinanceGPT initialized successfully');
             } catch (error) {
                 console.error('❌ Chatbot initialization error:', error);
             }
@@ -1211,6 +2564,246 @@
         }
     });
     </script>
+
+    <!-- ============================================
+         🎨 CUSTOM STYLING FOR NEW INDICATORS
+         ============================================ -->
+    <style>
+    /* Category Title Styling */
+    .category-title {
+        font-size: 1.5rem;
+        font-weight: 800;
+        color: var(--text-primary);
+        margin: 3rem 0 1.5rem 0;
+        padding: 1rem 1.5rem;
+        background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+        border-radius: 12px;
+        color: white;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    .category-title i {
+        font-size: 1.8rem;
+    }
+
+    /* Formula Box Styling */
+    .formula-box {
+        background: linear-gradient(135deg, #f6f8fb 0%, #e9ecef 100%);
+        border-left: 4px solid var(--primary-color);
+        padding: 1.5rem;
+        margin: 1rem 0;
+        border-radius: 8px;
+        font-family: 'Courier New', monospace;
+        font-size: 0.95rem;
+        line-height: 1.8;
+        overflow-x: auto;
+    }
+
+    body.dark-mode .formula-box {
+        background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+        color: #e2e8f0;
+    }
+
+    .formula-box strong {
+        color: var(--primary-color);
+        display: block;
+        margin-bottom: 0.5rem;
+    }
+
+    /* Key Term Styling */
+    .key-term {
+        color: var(--primary-color);
+        font-weight: 700;
+        background: rgba(38, 73, 178, 0.1);
+        padding: 2px 8px;
+        border-radius: 4px;
+    }
+
+    body.dark-mode .key-term {
+        background: rgba(74, 116, 243, 0.2);
+        color: var(--secondary-color);
+    }
+
+    /* Tip Box Styling */
+    .tip-box {
+        background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+        border-left: 4px solid #10b981;
+        padding: 1rem 1.5rem;
+        margin: 1.5rem 0;
+        border-radius: 8px;
+        font-size: 0.95rem;
+    }
+
+    body.dark-mode .tip-box {
+        background: linear-gradient(135deg, #064e3b 0%, #065f46 100%);
+        color: #d1fae5;
+    }
+
+    .tip-box strong {
+        color: #059669;
+    }
+
+    body.dark-mode .tip-box strong {
+        color: #34d399;
+    }
+
+    /* Warning Box Styling */
+    .warning-box {
+        background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+        border-left: 4px solid #f59e0b;
+        padding: 1rem 1.5rem;
+        margin: 1.5rem 0;
+        border-radius: 8px;
+        font-size: 0.95rem;
+    }
+
+    body.dark-mode .warning-box {
+        background: linear-gradient(135deg, #78350f 0%, #92400e 100%);
+        color: #fef3c7;
+    }
+
+    .warning-box strong {
+        color: #d97706;
+    }
+
+    body.dark-mode .warning-box strong {
+        color: #fbbf24;
+    }
+
+    /* Support/Resistance Grid */
+    .sr-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 2rem;
+        margin-top: 1.5rem;
+    }
+
+    .sr-column h4 {
+        font-size: 1.2rem;
+        font-weight: 700;
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .sr-column ul {
+        list-style: none;
+        padding: 0;
+    }
+
+    .sr-column li {
+        background: var(--card-background);
+        padding: 0.75rem 1rem;
+        margin-bottom: 0.5rem;
+        border-radius: 8px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+
+    .sr-column li:hover {
+        transform: translateX(5px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    .distance {
+        font-size: 0.9rem;
+        font-weight: 500;
+        opacity: 0.8;
+    }
+
+    /* Pattern & Divergence Containers */
+    .patterns-container,
+    .divergences-container {
+        margin-top: 1.5rem;
+    }
+
+    .patterns-container table {
+        width: 100%;
+        border-collapse: collapse;
+        background: var(--card-background);
+        border-radius: 12px;
+        overflow: hidden;
+    }
+
+    .patterns-container th,
+    .patterns-container td {
+        padding: 1rem;
+        text-align: left;
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    .patterns-container th {
+        background: var(--primary-color);
+        color: white;
+        font-weight: 700;
+    }
+
+    .strength-badge {
+        display: inline-block;
+        padding: 0.25rem 0.75rem;
+        border-radius: 12px;
+        font-size: 0.85rem;
+        font-weight: 700;
+        text-transform: uppercase;
+    }
+
+    .strength-badge.very-strong {
+        background: #10b981;
+        color: white;
+    }
+
+    .strength-badge.strong {
+        background: #3b82f6;
+        color: white;
+    }
+
+    .strength-badge.medium {
+        background: #f59e0b;
+        color: white;
+    }
+
+    .divergence-item {
+        background: var(--card-background);
+        padding: 1rem 1.5rem;
+        margin-bottom: 1rem;
+        border-radius: 12px;
+        border-left: 4px solid var(--border-color);
+        transition: all 0.3s ease;
+    }
+
+    .divergence-item:hover {
+        transform: translateX(5px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    .divergence-item.bullish {
+        border-left-color: var(--success-color);
+        background: linear-gradient(90deg, rgba(16, 185, 129, 0.05) 0%, var(--card-background) 100%);
+    }
+
+    .divergence-item.bearish {
+        border-left-color: var(--danger-color);
+        background: linear-gradient(90deg, rgba(220, 53, 69, 0.05) 0%, var(--card-background) 100%);
+    }
+
+    .divergence-item strong {
+        font-size: 1.1rem;
+        display: block;
+        margin-bottom: 0.5rem;
+    }
+
+    .divergence-item p {
+        margin: 0;
+        opacity: 0.9;
+    }
+    </style>
 
 </body>
 </html>
