@@ -969,8 +969,9 @@
 // });
 
 // ============================================
-// CHATBOT FULL PAGE UI v4.0 - VERSION FIREBASE + WALL STREET PRO
-// ✅ NOUVEAU v4.0: Firebase Integration (Cloud Storage)
+// CHATBOT FULL PAGE UI v4.1 - VERSION FIREBASE + WALL STREET PRO
+// ✅ NOUVEAU v4.1: Firebase Serialization Fix (Nested Arrays)
+// ✅ v4.0: Firebase Integration (Cloud Storage)
 // ✅ v3.2: Photo de profil utilisateur Firebase (LOGIQUE LANDING.JS)
 // ✅ v3.1: Sauvegarde et restauration des graphiques
 // Visual Cards + Metrics Tables + Comparison Charts
@@ -1009,7 +1010,7 @@ class ChatbotFullPageUI {
 
     async init() {
         try {
-            console.log('🚀 Initializing Full Page UI v4.0 (Firebase + User Photo)...');
+            console.log('🚀 Initializing Full Page UI v4.1 (Firebase + Serialization Fix)...');
             
             // ✅ FIREBASE: Attendre l'initialisation
             await this.waitForFirebase();
@@ -1030,7 +1031,7 @@ class ChatbotFullPageUI {
                 initializeParticles();
             }
             
-            console.log('✅ Full Page UI v4.0 initialized successfully');
+            console.log('✅ Full Page UI v4.1 initialized successfully');
             
         } catch (error) {
             console.error('❌ Full Page UI initialization error:', error);
@@ -1340,7 +1341,7 @@ class ChatbotFullPageUI {
     }
 
     /**
-     * ✅ FIREBASE: Charger depuis Firebase
+     * ✅ FIREBASE: Charger depuis Firebase (avec désérialisation - v4.1)
      */
     async loadConversationsFromFirebase() {
         if (!this.firebaseReady || !this.currentUser) return;
@@ -1357,10 +1358,45 @@ class ChatbotFullPageUI {
             
             snapshot.forEach(doc => {
                 const data = doc.data();
+                
+                // ✅ v4.1: Désérialiser les messages
+                const deserializedMessages = (data.messages || []).map(msg => {
+                    const deserializedMsg = {
+                        type: msg.type,
+                        content: msg.content,
+                        timestamp: msg.timestamp
+                    };
+                    
+                    // Désérialiser chartRequests et visualCards depuis JSON strings
+                    if (msg.chartRequests) {
+                        try {
+                            deserializedMsg.chartRequests = typeof msg.chartRequests === 'string' 
+                                ? JSON.parse(msg.chartRequests) 
+                                : msg.chartRequests;
+                        } catch (e) {
+                            console.warn('Failed to parse chartRequests:', e);
+                            deserializedMsg.chartRequests = null;
+                        }
+                    }
+                    
+                    if (msg.visualCards) {
+                        try {
+                            deserializedMsg.visualCards = typeof msg.visualCards === 'string'
+                                ? JSON.parse(msg.visualCards)
+                                : msg.visualCards;
+                        } catch (e) {
+                            console.warn('Failed to parse visualCards:', e);
+                            deserializedMsg.visualCards = null;
+                        }
+                    }
+                    
+                    return deserializedMsg;
+                });
+                
                 this.conversations.push({
                     id: doc.id,
                     title: data.title || 'New Conversation',
-                    messages: data.messages || [],
+                    messages: deserializedMessages, // ✅ Messages désérialisés
                     createdAt: data.createdAt?.toMillis ? data.createdAt.toMillis() : Date.now(),
                     updatedAt: data.updatedAt?.toMillis ? data.updatedAt.toMillis() : Date.now()
                 });
@@ -1398,7 +1434,7 @@ class ChatbotFullPageUI {
     }
 
     /**
-     * ✅ FIREBASE: Sauvegarder dans Firebase
+     * ✅ FIREBASE: Sauvegarder dans Firebase (avec sérialisation - v4.1)
      */
     async saveConversationsToFirebase() {
         if (!this.firebaseReady || !this.currentUser) return;
@@ -1412,10 +1448,30 @@ class ChatbotFullPageUI {
                 .collection('conversations')
                 .doc(conv.id);
             
+            // ✅ v4.1: Sérialiser les messages pour éviter "nested arrays"
+            const serializedMessages = conv.messages.map(msg => {
+                const serializedMsg = {
+                    type: msg.type,
+                    content: msg.content,
+                    timestamp: msg.timestamp
+                };
+                
+                // Sérialiser chartRequests et visualCards en JSON strings
+                if (msg.chartRequests) {
+                    serializedMsg.chartRequests = JSON.stringify(msg.chartRequests);
+                }
+                
+                if (msg.visualCards) {
+                    serializedMsg.visualCards = JSON.stringify(msg.visualCards);
+                }
+                
+                return serializedMsg;
+            });
+            
             await docRef.set({
                 id: conv.id,
                 title: conv.title,
-                messages: conv.messages,
+                messages: serializedMessages, // ✅ Messages sérialisés
                 createdAt: firebase.firestore.Timestamp.fromMillis(conv.createdAt),
                 updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
                 messageCount: conv.messages.length
@@ -2093,7 +2149,7 @@ class ChatbotFullPageUI {
 // INITIALIZATION
 // ============================================
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('🚀 Initializing Chatbot Full Page v4.0 (Firebase Edition)...');
+    console.log('🚀 Initializing Chatbot Full Page v4.1 (Firebase + Serialization Fix)...');
     
     if (typeof ChatbotConfig === 'undefined') {
         console.error('❌ ChatbotConfig not defined!');
@@ -2102,7 +2158,7 @@ document.addEventListener('DOMContentLoaded', function() {
     
     try {
         window.financialChatbotFullPage = new ChatbotFullPageUI(ChatbotConfig);
-        console.log('✅ Chatbot Full Page v4.0 ready! (Firebase + Wall Street Pro + User Photo)');
+        console.log('✅ Chatbot Full Page v4.1 ready! (Firebase + Wall Street Pro + User Photo)');
     } catch (error) {
         console.error('❌ Initialization error:', error);
     }
