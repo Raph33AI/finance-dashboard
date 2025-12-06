@@ -1,10 +1,9 @@
 /* ============================================
    CHATBOT MODALS - SHARE & SETTINGS
-   Version 5.0 - FIREBASE + PDF PREMIUM avec GRAPHIQUES
-   ✅ Détection robuste des graphiques Chart.js
-   ✅ Attente du rendu complet (animation.onComplete)
-   ✅ Capture haute résolution (html2canvas scale: 3)
-   ✅ Formatage PDF professionnel avec graphiques
+   Version 6.0 - CHARTS DETECTION FIXED
+   ✅ Détection des graphiques HORS des .message
+   ✅ Capture globale de la zone de conversation
+   ✅ Association intelligente messages/graphiques
    ============================================ */
 
 class ChatbotModals {
@@ -154,7 +153,7 @@ class ChatbotModals {
                 </div>
             </div>
 
-            <!-- SETTINGS MODAL (Inchangé) -->
+            <!-- SETTINGS MODAL -->
             <div class="chatbot-modal" id="settings-modal">
                 <div class="modal-overlay"></div>
                 <div class="modal-content modal-content-large">
@@ -562,7 +561,7 @@ class ChatbotModals {
     }
 
     /**
-     * ✅ GET MESSAGES WITH CHART IMAGES (ULTRA-ROBUSTE)
+     * ✅ GET MESSAGES WITH CHART IMAGES (VERSION CORRIGÉE - RECHERCHE GLOBALE)
      */
     async getConversationMessagesWithCharts() {
         const messagesContainer = document.getElementById('chatbot-messages-content');
@@ -573,70 +572,83 @@ class ChatbotModals {
             return messages;
         }
         
+        // 1. Récupérer les messages texte
         const messageElements = messagesContainer.querySelectorAll('.message');
         console.log(`📊 Found ${messageElements.length} messages to process`);
         
+        // 2. Récupérer TOUS les canvas dans le container (pas seulement dans .message)
+        const allCanvases = messagesContainer.querySelectorAll('canvas');
+        console.log(`📊 Found ${allCanvases.length} total canvas elements in container`);
+        
+        // 3. Créer les données de messages
         for (let i = 0; i < messageElements.length; i++) {
             const msg = messageElements[i];
             const isUser = msg.classList.contains('user-message');
-            const text = msg.querySelector('.message-text')?.textContent || '';
+            const textElement = msg.querySelector('.message-text');
+            const text = textElement?.textContent || textElement?.innerText || '';
             const time = msg.querySelector('.message-time')?.textContent || '';
             
-            const messageData = {
+            messages.push({
                 role: isUser ? 'user' : 'assistant',
                 content: text.trim(),
                 timestamp: time,
-                chartImage: null
-            };
-            
-            // ✅ DÉTECTER ET CAPTURER LES GRAPHIQUES (3 MÉTHODES)
-            
-            // Méthode 1: Canvas direct
-            let chartElement = msg.querySelector('canvas');
-            
-            // Méthode 2: Conteneur de graphique
-            if (!chartElement) {
-                const chartContainer = msg.querySelector('.chart-container, .message-chart, [class*="chart"]');
-                if (chartContainer) {
-                    chartElement = chartContainer.querySelector('canvas') || chartContainer;
-                }
-            }
-            
-            // Méthode 3: ID contenant "chart"
-            if (!chartElement) {
-                chartElement = msg.querySelector('[id*="chart"], [id*="Chart"]');
-            }
-            
-            if (chartElement && typeof html2canvas !== 'undefined') {
-                try {
-                    console.log(`📊 Message ${i + 1}: Chart detected, capturing...`);
-                    
-                    // ✅ ATTENDRE LE RENDU COMPLET (important pour Chart.js)
-                    await this.waitForChartRender(chartElement);
-                    
-                    // ✅ CAPTURER AVEC HAUTE RÉSOLUTION
-                    const canvas = await html2canvas(chartElement, {
-                        backgroundColor: '#ffffff',
-                        scale: 3, // ✅ Haute résolution
-                        logging: false,
-                        useCORS: true,
-                        allowTaint: true,
-                        windowWidth: chartElement.scrollWidth,
-                        windowHeight: chartElement.scrollHeight
-                    });
-                    
-                    messageData.chartImage = canvas.toDataURL('image/png', 1.0); // Qualité max
-                    console.log(`✅ Message ${i + 1}: Chart captured successfully (${canvas.width}x${canvas.height})`);
-                } catch (error) {
-                    console.error(`❌ Message ${i + 1}: Chart capture failed:`, error);
-                }
-            }
-            
-            messages.push(messageData);
+                chartImages: [] // ✅ Plusieurs graphiques possibles
+            });
         }
         
-        const chartsCount = messages.filter(m => m.chartImage).length;
-        console.log(`✅ Processed ${messages.length} messages (${chartsCount} with charts)`);
+        // 4. Capturer TOUS les canvas et les associer aux messages
+        const chartImages = [];
+        
+        for (let i = 0; i < allCanvases.length; i++) {
+            const canvas = allCanvases[i];
+            
+            try {
+                // Vérifier si visible
+                const rect = canvas.getBoundingClientRect();
+                if (rect.width === 0 || rect.height === 0) {
+                    console.warn(`  ⚠  Canvas ${i + 1} invisible (${rect.width}x${rect.height}), skip`);
+                    continue;
+                }
+                
+                console.log(`📊 Canvas ${i + 1}/${allCanvases.length}: Capturing...`);
+                
+                // Attendre le rendu
+                await this.waitForChartRender(canvas);
+                
+                // Capturer
+                const capturedCanvas = await html2canvas(canvas, {
+                    backgroundColor: '#ffffff',
+                    scale: 3,
+                    logging: false,
+                    useCORS: true,
+                    allowTaint: true,
+                    windowWidth: canvas.scrollWidth || canvas.width || 800,
+                    windowHeight: canvas.scrollHeight || canvas.height || 400
+                });
+                
+                const imageData = capturedCanvas.toDataURL('image/png', 1.0);
+                chartImages.push(imageData);
+                
+                console.log(`✅ Canvas ${i + 1}: Captured (${capturedCanvas.width}x${capturedCanvas.height})`);
+            } catch (error) {
+                console.error(`❌ Canvas ${i + 1}: Capture failed:`, error);
+            }
+        }
+        
+        // 5. Associer les graphiques au dernier message assistant (bot)
+        if (chartImages.length > 0) {
+            // Trouver le dernier message bot
+            for (let i = messages.length - 1; i >= 0; i--) {
+                if (messages[i].role === 'assistant') {
+                    messages[i].chartImages = chartImages;
+                    console.log(`✅ ${chartImages.length} charts associated to message ${i + 1}`);
+                    break;
+                }
+            }
+        }
+        
+        const totalCharts = chartImages.length;
+        console.log(`✅ Processed ${messages.length} messages (${totalCharts} charts captured)`);
         return messages;
     }
 
@@ -645,40 +657,31 @@ class ChatbotModals {
      */
     waitForChartRender(element) {
         return new Promise((resolve) => {
-            // Si c'est un canvas Chart.js
             if (element.tagName === 'CANVAS' && typeof Chart !== 'undefined') {
                 const chartInstance = Chart.getChart(element);
                 
                 if (chartInstance) {
-                    // Si le graphique a des animations en cours, attendre la fin
                     if (chartInstance.options.animation && chartInstance.options.animation.duration > 0) {
-                        console.log('⏳ Waiting for Chart.js animation to complete...');
-                        
-                        // Attendre la fin de l'animation
-                        setTimeout(() => {
-                            resolve();
-                        }, chartInstance.options.animation.duration + 100);
+                        console.log('⏳ Waiting for Chart.js animation...');
+                        setTimeout(() => resolve(), chartInstance.options.animation.duration + 100);
                     } else {
-                        // Pas d'animation, on peut capturer immédiatement
                         resolve();
                     }
                 } else {
-                    // Pas d'instance Chart.js, capturer directement
                     resolve();
                 }
             } else {
-                // Pas un canvas Chart.js, petit délai de sécurité
                 setTimeout(resolve, 100);
             }
         });
     }
 
     /**
-     * ✅ DOWNLOAD PDF WITH CHARTS (ULTRA-OPTIMIZED)
+     * ✅ DOWNLOAD PDF WITH CHARTS (CORRIGÉ POUR PLUSIEURS GRAPHIQUES)
      */
     async downloadPDFFile(messages, filename) {
         if (typeof window.jspdf === 'undefined') {
-            throw new Error('jsPDF library not loaded. Please include: <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>');
+            throw new Error('jsPDF library not loaded');
         }
         
         const { jsPDF } = window.jspdf;
@@ -688,14 +691,12 @@ class ChatbotModals {
             compress: true
         });
         
-        // Page dimensions
         const pageWidth = doc.internal.pageSize.getWidth();
         const pageHeight = doc.internal.pageSize.getHeight();
         const margin = 40;
         const maxWidth = pageWidth - 2 * margin;
         let yPos = margin;
         
-        // Helper: Check if new page is needed
         const checkNewPage = (requiredSpace = 60) => {
             if (yPos + requiredSpace > pageHeight - margin - 40) {
                 doc.addPage();
@@ -712,7 +713,6 @@ class ChatbotModals {
         doc.text('Alphy AI Conversation', margin, yPos);
         yPos += 30;
         
-        // Subtitle
         doc.setFontSize(11);
         doc.setFont('helvetica', 'normal');
         doc.setTextColor(100, 100, 100);
@@ -728,7 +728,6 @@ class ChatbotModals {
         doc.text(`Total Messages: ${messages.length}`, margin, yPos);
         yPos += 25;
         
-        // Separator
         doc.setDrawColor(102, 126, 234);
         doc.setLineWidth(2);
         doc.line(margin, yPos, pageWidth - margin, yPos);
@@ -743,7 +742,7 @@ class ChatbotModals {
             const isUser = msg.role === 'user';
             const headerHeight = 28;
             
-            // Message header background
+            // Message header
             if (isUser) {
                 doc.setFillColor(59, 130, 246);
             } else {
@@ -752,7 +751,6 @@ class ChatbotModals {
             
             doc.roundedRect(margin, yPos - 18, maxWidth, headerHeight, 4, 4, 'F');
             
-            // Role icon and text
             doc.setFontSize(13);
             doc.setFont('helvetica', 'bold');
             doc.setTextColor(255, 255, 255);
@@ -773,7 +771,6 @@ class ChatbotModals {
             const contentMargin = margin + 15;
             const contentWidth = maxWidth - 30;
             
-            // Split content into paragraphs
             const paragraphs = msg.content.split('\n').filter(p => p.trim());
             
             for (let pIndex = 0; pIndex < paragraphs.length; pIndex++) {
@@ -783,14 +780,11 @@ class ChatbotModals {
                 const lines = doc.splitTextToSize(paragraph, contentWidth);
                 
                 for (const line of lines) {
-                    if (checkNewPage(15)) {
-                        // Continue on new page
-                    }
+                    if (checkNewPage(15)) {}
                     doc.text(line, contentMargin, yPos);
                     yPos += 15;
                 }
                 
-                // Space between paragraphs
                 if (pIndex < paragraphs.length - 1) {
                     yPos += 8;
                 }
@@ -798,36 +792,40 @@ class ChatbotModals {
             
             yPos += 15;
             
-            // ==================== CHART IMAGE ====================
-            if (msg.chartImage) {
-                checkNewPage(250);
+            // ==================== CHART IMAGES (PLUSIEURS POSSIBLES) ====================
+            if (msg.chartImages && msg.chartImages.length > 0) {
+                console.log(`📊 Adding ${msg.chartImages.length} charts for message ${i + 1}`);
                 
-                const imgWidth = maxWidth - 40;
-                const imgHeight = 220; // Hauteur augmentée pour meilleure visibilité
-                
-                try {
-                    // ✅ BORDURE AUTOUR DU GRAPHIQUE
-                    doc.setDrawColor(200, 200, 200);
-                    doc.setLineWidth(1);
-                    doc.roundedRect(margin + 20 - 2, yPos - 2, imgWidth + 4, imgHeight + 4, 3, 3, 'S');
+                for (let chartIndex = 0; chartIndex < msg.chartImages.length; chartIndex++) {
+                    checkNewPage(250);
                     
-                    // ✅ AJOUTER L'IMAGE
-                    doc.addImage(
-                        msg.chartImage,
-                        'PNG',
-                        margin + 20,
-                        yPos,
-                        imgWidth,
-                        imgHeight,
-                        undefined,
-                        'FAST'
-                    );
+                    const imgWidth = maxWidth - 40;
+                    const imgHeight = 200;
                     
-                    yPos += imgHeight + 25;
-                    
-                    console.log(`✅ Chart added to PDF for message ${i + 1}`);
-                } catch (error) {
-                    console.error(`❌ Failed to add chart to PDF for message ${i + 1}:`, error);
+                    try {
+                        // Bordure
+                        doc.setDrawColor(200, 200, 200);
+                        doc.setLineWidth(1);
+                        doc.roundedRect(margin + 20 - 2, yPos - 2, imgWidth + 4, imgHeight + 4, 3, 3, 'S');
+                        
+                        // Image
+                        doc.addImage(
+                            msg.chartImages[chartIndex],
+                            'PNG',
+                            margin + 20,
+                            yPos,
+                            imgWidth,
+                            imgHeight,
+                            undefined,
+                            'FAST'
+                        );
+                        
+                        yPos += imgHeight + 20;
+                        
+                        console.log(`✅ Chart ${chartIndex + 1}/${msg.chartImages.length} added to PDF`);
+                    } catch (error) {
+                        console.error(`❌ Failed to add chart ${chartIndex + 1}:`, error);
+                    }
                 }
             }
             
@@ -842,7 +840,7 @@ class ChatbotModals {
             
             yPos += 10;
             
-            // Separator between messages
+            // Separator
             if (i < messages.length - 1) {
                 doc.setDrawColor(220, 220, 220);
                 doc.setLineWidth(0.5);
@@ -851,18 +849,16 @@ class ChatbotModals {
             }
         }
         
-        // ==================== FOOTER ON ALL PAGES ====================
+        // ==================== FOOTER ====================
         const totalPages = doc.internal.getNumberOfPages();
         
         for (let i = 1; i <= totalPages; i++) {
             doc.setPage(i);
             
-            // Footer line
             doc.setDrawColor(220, 220, 220);
             doc.setLineWidth(0.5);
             doc.line(margin, pageHeight - 35, pageWidth - margin, pageHeight - 35);
             
-            // Footer text
             doc.setFontSize(8);
             doc.setFont('helvetica', 'normal');
             doc.setTextColor(150, 150, 150);
@@ -872,7 +868,6 @@ class ChatbotModals {
             doc.text(footerText, (pageWidth - textWidth) / 2, pageHeight - 18);
         }
         
-        // Save PDF
         doc.save(`${filename}.pdf`);
         console.log('✅ PDF with charts generated successfully!');
     }
@@ -993,7 +988,7 @@ class ChatbotModals {
     async downloadJSONFile(messages, filename) {
         const data = {
             platform: 'Alphy AI - Financial Assistant',
-            version: '5.0',
+            version: '6.0',
             exportDate: new Date().toISOString(),
             totalMessages: messages.length,
             messages: messages.map(msg => ({
@@ -1148,12 +1143,10 @@ class ChatbotModals {
             
             const settings = doc.data();
             
-            // Apply settings to UI
             if (settings.language) document.getElementById('language-select').value = settings.language;
             if (settings.fontSize) document.getElementById('font-size-select').value = settings.fontSize;
             if (settings.enterBehavior) document.getElementById('enter-behavior-select').value = settings.enterBehavior;
             
-            // Toggles
             document.getElementById('auto-save-toggle').checked = settings.autoSave ?? true;
             document.getElementById('timestamps-toggle').checked = settings.timestamps ?? true;
             document.getElementById('compact-mode-toggle').checked = settings.compactMode ?? false;
@@ -1215,11 +1208,9 @@ class ChatbotModals {
         try {
             const batch = this.db.batch();
             
-            // Delete settings
             const settingsRef = this.db.collection('users').doc(this.currentUser.uid).collection('settings').doc('chatbot');
             batch.delete(settingsRef);
             
-            // Delete conversations
             const conversationsSnapshot = await this.db.collection('users').doc(this.currentUser.uid).collection('conversations').get();
             
             conversationsSnapshot.forEach(doc => {
