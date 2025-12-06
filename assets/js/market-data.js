@@ -2994,8 +2994,9 @@
 // console.log('✅ Market Data script loaded - OPTIMIZED with Rate Limiting & Cache - COMPLETE VERSION');
 
 /* ==============================================
-   MARKET-DATA.JS - WALL STREET PRO VERSION
-   Rate Limiting + Cache + Nouvelles Fonctionnalités
+   MARKET-DATA.JS v6.0 - OPTIMIZED FOR HYBRID API
+   Compatible avec api-client.js v5.0
+   Rate Limiting + Smart Caching + Progressive Loading
    ============================================== */
 
 // ========== RATE LIMITER (CONSERVÉ) ==========
@@ -3192,27 +3193,33 @@ const MarketData = {
         heatmap: null
     },
     
-    // ========== NOUVEAU : DONNÉES MARKET ==========
+    // ========== DONNÉES MARKET (OPTIMISÉES) ==========
     allStocks: [],
     filteredStocks: [],
     currentPage: 1,
     pageSize: 100,
     sortColumn: 'symbol',
     sortDirection: 'asc',
-
-    // ✅ Indices majeurs avec mapping HTML correct
+    loadedStocksCount: 0,
+    totalStocksToLoad: 30, // ✅ Charger seulement 30 stocks au démarrage au lieu de 100
+    
+    // ✅ INDICES MAJEURS CORRIGÉS (ETFs au lieu de symboles Yahoo)
     majorIndices: [
-        { symbol: '^GSPC', name: 'S&P 500', icon: 'chart-line', htmlId: 'sp500' },
-        { symbol: '^IXIC', name: 'NASDAQ', icon: 'microchip', htmlId: 'nasdaq' },
-        { symbol: '^DJI', name: 'Dow Jones', icon: 'landmark', htmlId: 'dow' },
-        { symbol: '^VIX', name: 'VIX (Fear)', icon: 'bolt', htmlId: 'vix' }
+        { symbol: 'SPY', name: 'S&P 500 ETF', icon: 'chart-line', htmlId: 'sp500' },
+        { symbol: 'QQQ', name: 'NASDAQ ETF', icon: 'microchip', htmlId: 'nasdaq' },
+        { symbol: 'DIA', name: 'Dow Jones ETF', icon: 'landmark', htmlId: 'dow' },
+        { symbol: 'VIXY', name: 'VIX ETF', icon: 'bolt', htmlId: 'vix' }
     ],
     
-    // Stocks par défaut (top 100 US)
+    // ✅ STOCKS PAR DÉFAUT (RÉDUIT À 30 POUR DÉMARRAGE RAPIDE)
     defaultStocks: [
         'AAPL', 'MSFT', 'GOOGL', 'AMZN', 'NVDA', 'TSLA', 'META', 'BRK.B', 'V', 'JNJ',
         'WMT', 'JPM', 'MA', 'PG', 'UNH', 'DIS', 'HD', 'BAC', 'XOM', 'ADBE',
-        'CSCO', 'PFE', 'VZ', 'KO', 'CRM', 'NFLX', 'INTC', 'PEP', 'TMO', 'ABT',
+        'CSCO', 'PFE', 'VZ', 'KO', 'CRM', 'NFLX', 'INTC', 'PEP', 'TMO', 'ABT'
+    ],
+    
+    // ✅ STOCKS ADDITIONNELS (CHARGÉS PROGRESSIVEMENT)
+    additionalStocks: [
         'COST', 'AVGO', 'ACN', 'CMCSA', 'NKE', 'MRK', 'DHR', 'TXN', 'LIN', 'NEE',
         'AMD', 'ORCL', 'CVX', 'PM', 'MDT', 'UNP', 'RTX', 'HON', 'QCOM', 'UPS',
         'LOW', 'AMGN', 'SBUX', 'BMY', 'LMT', 'IBM', 'SPGI', 'CAT', 'GE', 'AXP',
@@ -3236,7 +3243,7 @@ const MarketData = {
     
     async init() {
         try {
-            console.log('🚀 Initializing Market Data - Wall Street Pro...');
+            console.log('🚀 Initializing Market Data v6.0 - Hybrid API Optimized...');
             
             this.rateLimiter = new RateLimiter(8, 60000);
             this.optimizedCache = new OptimizedCache();
@@ -3266,31 +3273,31 @@ const MarketData = {
             this.requestNotificationPermission();
             this.startWatchlistAutoRefresh();
             
-            // ========== NOUVEAU : CHARGEMENT INITIAL ==========
-            console.log('🌍 Step 1: Loading Market Overview...');
+            // ========== CHARGEMENT INITIAL OPTIMISÉ ==========
+            console.log('🌍 Step 1: Loading Market Overview (ETFs)...');
             await this.refreshMarketOverview();
-
-            console.log('📊 Step 2: Loading All Stocks...');
-            await this.loadAllStocks();
-
+            
+            console.log('📊 Step 2: Loading Initial Stocks (30 stocks)...');
+            await this.loadInitialStocks();
+            
             console.log('🔥 Step 3: Loading Top Movers...');
             await this.loadTopMovers();
-
+            
             console.log('📈 Step 4: Loading Sector Performance...');
             await this.loadSectorPerformance();
-
+            
             console.log('🗺 Step 5: Loading Heat Map...');
             await this.loadHeatMap();
-
+            
             console.log('✅ All market data sections initialized');
-
+            
             // Auto-load default symbol
             setTimeout(() => {
                 console.log('🔍 Auto-loading default symbol: AAPL');
                 this.loadSymbol('AAPL');
             }, 500);
-
-            console.log('✅ Market Data - Wall Street Pro initialized');
+            
+            console.log('✅ Market Data v6.0 initialized');
             
         } catch (error) {
             console.error('Initialization error:', error);
@@ -3339,10 +3346,10 @@ const MarketData = {
         });
     },
     
-    // ========== NOUVEAU : MARKET OVERVIEW ==========
+    // ========== MARKET OVERVIEW (CORRIGÉ AVEC ETFs) ==========
     
     async refreshMarketOverview() {
-        console.log('🌍 Refreshing Market Overview...');
+        console.log('🌍 Refreshing Market Overview with ETFs...');
         
         try {
             const promises = this.majorIndices.map(async (index) => {
@@ -3350,7 +3357,7 @@ const MarketData = {
                     const quote = await this.apiRequest(() => this.apiClient.getQuote(index.symbol), 'high');
                     return { ...index, quote };
                 } catch (error) {
-                    console.error(`Error loading ${index.symbol}:`, error);
+                    console.error(`Error loading ${index.symbol}:`, error.message);
                     return { ...index, quote: null };
                 }
             });
@@ -3378,7 +3385,6 @@ const MarketData = {
     },
     
     updateIndexCard(indexData) {
-        // ✅ Utiliser le htmlId au lieu de transformer le symbol
         const card = document.getElementById(`index-${indexData.htmlId}`);
         if (!card) {
             console.warn(`❌ Index card not found: index-${indexData.htmlId}`);
@@ -3424,10 +3430,10 @@ const MarketData = {
         if (elements.new52wHighs) elements.new52wHighs.textContent = stats.new52wHighs;
     },
     
-    // ========== NOUVEAU : LOAD ALL STOCKS ==========
+    // ========== LOAD INITIAL STOCKS (OPTIMISÉ - 30 STOCKS) ==========
     
-    async loadAllStocks() {
-        console.log('📊 Loading all stocks data...');
+    async loadInitialStocks() {
+        console.log('📊 Loading initial 30 stocks...');
         
         const tbody = document.getElementById('stocksTableBody');
         if (!tbody) {
@@ -3439,34 +3445,30 @@ const MarketData = {
             <tr class='loading-row'>
                 <td colspan='10' style='text-align: center; padding: 60px;'>
                     <i class='fas fa-spinner fa-spin' style='font-size: 2rem; color: var(--ml-primary);'></i>
-                    <p style='margin-top: 20px;'>Loading stocks data...</p>
+                    <p style='margin-top: 20px;'>Loading market data...</p>
                 </td>
             </tr>
         `;
         
         try {
             this.allStocks = [];
-            let loadedCount = 0;
-            let errorCount = 0;
+            this.loadedStocksCount = 0;
             
-            // Charger les 100 premières actions par batch de 10
-            const batchSize = 10;
-            const totalBatches = Math.ceil(this.defaultStocks.length / batchSize);
+            // Charger par batch de 5 stocks (au lieu de 10)
+            const batchSize = 5;
+            const stocksToLoad = this.defaultStocks.slice(0, this.totalStocksToLoad);
             
-            console.log(`📦 Loading ${this.defaultStocks.length} stocks in ${totalBatches} batches of ${batchSize}...`);
-            
-            for (let i = 0; i < this.defaultStocks.length; i += batchSize) {
-                const batchNumber = Math.floor(i / batchSize) + 1;
-                const batch = this.defaultStocks.slice(i, i + batchSize);
+            for (let i = 0; i < stocksToLoad.length; i += batchSize) {
+                const batch = stocksToLoad.slice(i, i + batchSize);
                 
-                console.log(`📦 Batch ${batchNumber}/${totalBatches}: Loading ${batch.join(', ')}...`);
+                console.log(`📦 Loading batch ${Math.floor(i/batchSize) + 1}/${Math.ceil(stocksToLoad.length/batchSize)}: ${batch.join(', ')}...`);
                 
                 const batchPromises = batch.map(async (symbol) => {
                     try {
                         // Vérifier le cache d'abord
                         const cached = this.optimizedCache.get(`stock_${symbol}`);
                         if (cached && this.optimizedCache.getAge(`stock_${symbol}`) < 300000) {
-                            console.log(`✅ Loaded ${symbol} from cache`);
+                            console.log(`✅ ${symbol} from cache`);
                             return cached;
                         }
                         
@@ -3488,13 +3490,12 @@ const MarketData = {
                         // Sauvegarder en cache
                         this.optimizedCache.set(`stock_${symbol}`, stockData, 300000);
                         
-                        console.log(`✅ Loaded ${symbol} from API`);
+                        console.log(`✅ ${symbol} loaded`);
                         return stockData;
                         
                     } catch (error) {
                         console.error(`❌ Error loading ${symbol}:`, error.message);
-                        errorCount++;
-                        return null; // Ne pas bloquer tout le batch
+                        return null;
                     }
                 });
                 
@@ -3502,33 +3503,24 @@ const MarketData = {
                 const validResults = batchResults.filter(stock => stock !== null);
                 
                 this.allStocks.push(...validResults);
-                loadedCount += validResults.length;
-                
-                console.log(`✅ Batch ${batchNumber}/${totalBatches} complete: ${validResults.length}/${batch.length} stocks loaded`);
+                this.loadedStocksCount += validResults.length;
                 
                 // Afficher progressivement
                 this.filteredStocks = [...this.allStocks];
                 this.renderStocksTable();
                 
-                // Petite pause entre les batches
-                if (i + batchSize < this.defaultStocks.length) {
-                    await new Promise(resolve => setTimeout(resolve, 500));
-                }
+                console.log(`✅ Progress: ${this.loadedStocksCount}/${stocksToLoad.length} stocks loaded`);
             }
             
-            console.log(`✅ Stock loading complete: ${loadedCount}/${this.defaultStocks.length} loaded, ${errorCount} errors`);
+            console.log(`✅ Initial load complete: ${this.loadedStocksCount} stocks`);
             
-            if (this.allStocks.length === 0) {
-                tbody.innerHTML = `
-                    <tr>
-                        <td colspan='10' style='text-align: center; padding: 40px; color: var(--ml-danger);'>
-                            <i class='fas fa-exclamation-triangle'></i> Failed to load stocks. Please refresh the page.
-                        </td>
-                    </tr>
-                `;
-                this.showNotification('❌ Failed to load stocks', 'error');
+            if (this.allStocks.length > 0) {
+                this.showNotification(`✅ Loaded ${this.allStocks.length} stocks`, 'success');
+                
+                // Afficher le bouton "Load More" si des stocks additionnels disponibles
+                this.showLoadMoreButton();
             } else {
-                this.showNotification(`✅ Loaded ${loadedCount} stocks successfully`, 'success');
+                this.showNotification('❌ Failed to load stocks', 'error');
             }
             
         } catch (error) {
@@ -3542,6 +3534,112 @@ const MarketData = {
             `;
             this.showNotification('❌ Error loading stocks', 'error');
         }
+    },
+    
+    showLoadMoreButton() {
+        const container = document.querySelector('.live-stocks-table .card-body');
+        if (!container) return;
+        
+        let loadMoreBtn = document.getElementById('loadMoreStocksBtn');
+        
+        if (!loadMoreBtn) {
+            loadMoreBtn = document.createElement('div');
+            loadMoreBtn.id = 'loadMoreStocksBtn';
+            loadMoreBtn.className = 'load-more-container';
+            loadMoreBtn.style.cssText = 'text-align: center; padding: 20px; margin-top: 20px;';
+            loadMoreBtn.innerHTML = `
+                <button class='btn btn-primary' onclick='MarketData.loadMoreStocks()' style='padding: 12px 32px; font-size: 1.1rem;'>
+                    <i class='fas fa-plus-circle'></i> Load More Stocks (${this.additionalStocks.length} remaining)
+                </button>
+            `;
+            
+            const pagination = document.getElementById('tablePagination');
+            if (pagination) {
+                pagination.parentNode.insertBefore(loadMoreBtn, pagination);
+            } else {
+                container.appendChild(loadMoreBtn);
+            }
+        }
+    },
+    
+    async loadMoreStocks() {
+        const loadMoreBtn = document.getElementById('loadMoreStocksBtn');
+        if (loadMoreBtn) {
+            loadMoreBtn.innerHTML = `
+                <button class='btn btn-secondary' disabled style='padding: 12px 32px;'>
+                    <i class='fas fa-spinner fa-spin'></i> Loading...
+                </button>
+            `;
+        }
+        
+        const batchSize = 20; // Charger 20 stocks supplémentaires
+        const nextBatch = this.additionalStocks.slice(0, batchSize);
+        
+        console.log(`📦 Loading ${nextBatch.length} additional stocks...`);
+        
+        for (let i = 0; i < nextBatch.length; i += 5) {
+            const batch = nextBatch.slice(i, i + 5);
+            
+            const batchPromises = batch.map(async (symbol) => {
+                try {
+                    const cached = this.optimizedCache.get(`stock_${symbol}`);
+                    if (cached && this.optimizedCache.getAge(`stock_${symbol}`) < 300000) {
+                        return cached;
+                    }
+                    
+                    const quote = await this.apiRequest(() => this.apiClient.getQuote(symbol), 'normal');
+                    
+                    const stockData = {
+                        symbol: symbol,
+                        name: quote.name || symbol,
+                        price: quote.price || 0,
+                        change: quote.change || 0,
+                        changePercent: quote.percentChange || 0,
+                        volume: quote.volume || 0,
+                        marketCap: quote.marketCap || 0,
+                        pe: quote.pe || 0,
+                        sector: this.getSectorForSymbol(symbol)
+                    };
+                    
+                    this.optimizedCache.set(`stock_${symbol}`, stockData, 300000);
+                    return stockData;
+                    
+                } catch (error) {
+                    console.error(`❌ Error loading ${symbol}:`, error.message);
+                    return null;
+                }
+            });
+            
+            const batchResults = await Promise.all(batchPromises);
+            const validResults = batchResults.filter(stock => stock !== null);
+            
+            this.allStocks.push(...validResults);
+            this.filteredStocks = [...this.allStocks];
+            this.renderStocksTable();
+        }
+        
+        // Retirer les stocks chargés de la liste additionalStocks
+        this.additionalStocks = this.additionalStocks.slice(batchSize);
+        
+        if (this.additionalStocks.length === 0) {
+            if (loadMoreBtn) {
+                loadMoreBtn.innerHTML = `
+                    <button class='btn btn-success' disabled style='padding: 12px 32px;'>
+                        <i class='fas fa-check-circle'></i> All Stocks Loaded
+                    </button>
+                `;
+            }
+        } else {
+            if (loadMoreBtn) {
+                loadMoreBtn.innerHTML = `
+                    <button class='btn btn-primary' onclick='MarketData.loadMoreStocks()' style='padding: 12px 32px; font-size: 1.1rem;'>
+                        <i class='fas fa-plus-circle'></i> Load More Stocks (${this.additionalStocks.length} remaining)
+                    </button>
+                `;
+            }
+        }
+        
+        this.showNotification(`✅ Loaded ${nextBatch.length} more stocks`, 'success');
     },
     
     getSectorForSymbol(symbol) {
@@ -3623,7 +3721,7 @@ const MarketData = {
             `;
         }).join('');
         
-        // Charger sparklines (à implémenter avec une lib légère)
+        // Charger sparklines
         setTimeout(() => {
             currentPageStocks.forEach(stock => {
                 this.renderSparkline(stock.symbol);
@@ -3691,7 +3789,7 @@ const MarketData = {
         this.showNotification(`✅ ${symbol} added to watchlist`, 'success');
     },
     
-    // ========== NOUVEAU : TABLE CONTROLS ==========
+    // ========== TABLE CONTROLS ==========
     
     setupTableListeners() {
         // Sort listeners
@@ -3792,24 +3890,24 @@ const MarketData = {
         this.showNotification('✅ CSV exported successfully', 'success');
     },
     
-    // ========== NOUVEAU : SCREENER FILTERS ==========
+    // ========== SCREENER FILTERS ==========
     
     resetFilters() {
-        document.getElementById('filterSearch').value = '';
-        document.getElementById('filterSector').value = '';
-        document.getElementById('filterMarketCap').value = '';
-        document.getElementById('filterPerformance').value = '';
-        document.getElementById('filterPE').value = '';
+        const filterIds = ['filterSearch', 'filterSector', 'filterMarketCap', 'filterPerformance', 'filterPE'];
+        filterIds.forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.value = '';
+        });
         
         this.applyFilters();
     },
     
     applyFilters() {
-        const search = document.getElementById('filterSearch').value.toLowerCase();
-        const sector = document.getElementById('filterSector').value;
-        const marketCap = document.getElementById('filterMarketCap').value;
-        const performance = document.getElementById('filterPerformance').value;
-        const pe = document.getElementById('filterPE').value;
+        const search = (document.getElementById('filterSearch')?.value || '').toLowerCase();
+        const sector = document.getElementById('filterSector')?.value || '';
+        const marketCap = document.getElementById('filterMarketCap')?.value || '';
+        const performance = document.getElementById('filterPerformance')?.value || '';
+        const pe = document.getElementById('filterPE')?.value || '';
         
         this.filteredStocks = this.allStocks.filter(stock => {
             // Search
@@ -3854,14 +3952,14 @@ const MarketData = {
         this.showNotification(`✅ ${this.filteredStocks.length} stocks match filters`, 'success');
     },
     
-    // ========== NOUVEAU : TOP MOVERS ==========
+    // ========== TOP MOVERS (AVEC TIMEOUT) ==========
     
     async loadTopMovers() {
         console.log('🔥 Loading Top Movers...');
         
         try {
-            // ✅ Attendre avec timeout max de 30 secondes
-            const maxWaitTime = 30000; // 30 secondes
+            // Attendre avec timeout max de 30 secondes
+            const maxWaitTime = 30000;
             const startTime = Date.now();
             
             while (this.allStocks.length === 0) {
@@ -3895,7 +3993,7 @@ const MarketData = {
             this.renderMoversError(error.message);
         }
     },
-
+    
     renderMoversError(message) {
         ['topGainers', 'topLosers', 'mostActive'].forEach(containerId => {
             const container = document.getElementById(containerId);
@@ -3942,13 +4040,13 @@ const MarketData = {
         }).join('');
     },
     
-    // ========== NOUVEAU : SECTOR PERFORMANCE ==========
+    // ========== SECTOR PERFORMANCE (AVEC TIMEOUT) ==========
     
     async loadSectorPerformance() {
         console.log('📈 Loading Sector Performance...');
         
         try {
-            // ✅ Attendre avec timeout
+            // Attendre avec timeout
             const maxWaitTime = 30000;
             const startTime = Date.now();
             
@@ -4060,13 +4158,13 @@ const MarketData = {
         });
     },
     
-    // ========== NOUVEAU : HEAT MAP ==========
+    // ========== HEAT MAP (AVEC TIMEOUT) ==========
     
     async loadHeatMap() {
         console.log('🗺 Loading Heat Map...');
         
         try {
-            // ✅ Attendre avec timeout
+            // Attendre avec timeout
             const maxWaitTime = 30000;
             const startTime = Date.now();
             
@@ -4168,228 +4266,7 @@ const MarketData = {
         });
     },
 
-    // ========== NOUVEAU : STOCK COMPARISON ==========
-    
-    addToComparison() {
-        const symbol = this.currentSymbol;
-        
-        if (!symbol) {
-            this.showNotification('Please select a stock first', 'error');
-            return;
-        }
-        
-        if (this.comparisonSymbols.includes(symbol)) {
-            this.showNotification(`${symbol} is already in comparison`, 'info');
-            return;
-        }
-        
-        if (this.comparisonSymbols.length >= 5) {
-            this.showNotification('Maximum 5 stocks for comparison', 'warning');
-            return;
-        }
-        
-        this.comparisonSymbols.push(symbol);
-        this.comparisonData[symbol] = {
-            name: this.profileData?.name || symbol,
-            data: this.stockData?.data || []
-        };
-        
-        this.renderComparisonList();
-        this.updateComparisonChart();
-        
-        this.showNotification(`✅ ${symbol} added to comparison`, 'success');
-    },
-    
-    removeFromComparison(symbol) {
-        this.comparisonSymbols = this.comparisonSymbols.filter(s => s !== symbol);
-        delete this.comparisonData[symbol];
-        
-        this.renderComparisonList();
-        this.updateComparisonChart();
-        
-        this.showNotification(`${symbol} removed from comparison`, 'info');
-    },
-    
-    clearComparison() {
-        this.comparisonSymbols = [];
-        this.comparisonData = {};
-        
-        this.renderComparisonList();
-        this.updateComparisonChart();
-        
-        this.showNotification('Comparison cleared', 'info');
-    },
-    
-    renderComparisonList() {
-        const container = document.getElementById('comparisonList');
-        if (!container) return;
-        
-        if (this.comparisonSymbols.length === 0) {
-            container.innerHTML = `
-                <div class='comparison-empty'>
-                    <i class='fas fa-chart-line' style='font-size: 2rem; opacity: 0.3;'></i>
-                    <p>Add stocks to compare performance</p>
-                </div>
-            `;
-            return;
-        }
-        
-        container.innerHTML = this.comparisonSymbols.map((symbol, index) => {
-            const color = this.comparisonColors[index];
-            const data = this.comparisonData[symbol];
-            
-            return `
-                <div class='comparison-item'>
-                    <div class='comparison-color' style='background: ${color};'></div>
-                    <div class='comparison-info'>
-                        <div class='comparison-symbol'>${symbol}</div>
-                        <div class='comparison-name'>${this.escapeHtml(data.name)}</div>
-                    </div>
-                    <button class='btn-remove-comparison' onclick='MarketData.removeFromComparison("${symbol}")' title='Remove'>
-                        <i class='fas fa-times'></i>
-                    </button>
-                </div>
-            `;
-        }).join('');
-    },
-    
-    updateComparisonChart() {
-        if (this.comparisonSymbols.length === 0) {
-            if (this.charts.comparison) {
-                this.charts.comparison.destroy();
-                this.charts.comparison = null;
-            }
-            return;
-        }
-        
-        const series = this.comparisonSymbols.map((symbol, index) => {
-            const data = this.comparisonData[symbol]?.data || [];
-            
-            // Normaliser à 100 pour comparer les performances
-            const firstPrice = data[0]?.close || 100;
-            
-            return {
-                name: symbol,
-                data: data.map(d => ({
-                    x: new Date(d.datetime).getTime(),
-                    y: ((d.close / firstPrice) * 100)
-                })),
-                color: this.comparisonColors[index],
-                lineWidth: 3,
-                marker: {
-                    enabled: false,
-                    radius: 4
-                }
-            };
-        });
-        
-        if (this.charts.comparison) {
-            this.charts.comparison.destroy();
-        }
-        
-        this.charts.comparison = Highcharts.stockChart('comparisonChart', {
-            chart: {
-                backgroundColor: 'transparent',
-                height: 500
-            },
-            title: {
-                text: 'Normalized Performance Comparison',
-                style: {
-                    color: '#1e293b',
-                    fontWeight: '800',
-                    fontSize: '18px'
-                }
-            },
-            xAxis: {
-                type: 'datetime',
-                labels: {
-                    style: { color: '#64748b' }
-                },
-                gridLineColor: 'rgba(100, 116, 139, 0.1)'
-            },
-            yAxis: {
-                title: {
-                    text: 'Performance (Base 100)',
-                    style: { color: '#64748b', fontWeight: '700' }
-                },
-                labels: {
-                    format: '{value}',
-                    style: { color: '#64748b' }
-                },
-                gridLineColor: 'rgba(100, 116, 139, 0.1)'
-            },
-            legend: {
-                enabled: true,
-                align: 'center',
-                verticalAlign: 'bottom',
-                itemStyle: {
-                    color: '#1e293b',
-                    fontWeight: '600'
-                }
-            },
-            rangeSelector: {
-                enabled: true,
-                selected: 1,
-                buttons: [{
-                    type: 'month',
-                    count: 1,
-                    text: '1M'
-                }, {
-                    type: 'month',
-                    count: 3,
-                    text: '3M'
-                }, {
-                    type: 'month',
-                    count: 6,
-                    text: '6M'
-                }, {
-                    type: 'ytd',
-                    text: 'YTD'
-                }, {
-                    type: 'year',
-                    count: 1,
-                    text: '1Y'
-                }, {
-                    type: 'all',
-                    text: 'All'
-                }],
-                buttonTheme: {
-                    fill: 'transparent',
-                    stroke: 'var(--ml-primary)',
-                    style: {
-                        color: 'var(--ml-primary)',
-                        fontWeight: '700'
-                    },
-                    states: {
-                        select: {
-                            fill: 'var(--ml-primary)',
-                            style: {
-                                color: 'white'
-                            }
-                        }
-                    }
-                }
-            },
-            tooltip: {
-                shared: true,
-                crosshairs: true,
-                backgroundColor: 'rgba(255, 255, 255, 0.98)',
-                borderColor: 'var(--ml-primary)',
-                borderRadius: 12,
-                shadow: true,
-                style: {
-                    fontSize: '13px'
-                },
-                pointFormat: '<span style="color:{series.color}">\u25CF</span> {series.name}: <b>{point.y:.2f}</b><br/>'
-            },
-            series: series,
-            credits: {
-                enabled: false
-            }
-        });
-    },
-    
-    // ========== MAIN STOCK LOADING ==========
+    // ========== STOCK LOADING (CONSERVÉ) ==========
     
     async loadSymbol(symbol) {
         if (!symbol) {
@@ -4412,23 +4289,20 @@ const MarketData = {
             this.showLoading(true);
             
             // Charger toutes les données en parallèle avec priorité haute
-            const [quote, timeSeries, profile, statistics] = await Promise.all([
+            const [quote, timeSeries, profile] = await Promise.all([
                 this.apiRequest(() => this.apiClient.getQuote(symbol), 'high'),
                 this.apiRequest(() => this.apiClient.getTimeSeries(symbol, '1day', 365), 'high'),
-                this.apiRequest(() => this.apiClient.getProfile(symbol), 'normal'),
-                this.apiRequest(() => this.apiClient.getStatistics(symbol), 'normal')
+                this.apiRequest(() => this.apiClient.getProfile(symbol), 'normal')
             ]);
             
             this.stockData = timeSeries;
             this.profileData = profile;
-            this.statisticsData = statistics;
             
             // Charger le logo
             await this.loadStockLogo(symbol);
             
             // Mettre à jour l'interface
             this.updateStockHeader(quote, profile);
-            this.updateStockMetrics(quote, statistics);
             this.createPriceChart();
             this.createTechnicalIndicators();
             
@@ -4508,39 +4382,7 @@ const MarketData = {
         `;
     },
     
-    updateStockMetrics(quote, statistics) {
-        const metricsContainer = document.getElementById('stockMetrics');
-        if (!metricsContainer) return;
-        
-        const metrics = [
-            { label: 'Open', value: this.formatCurrency(quote.open), icon: 'door-open' },
-            { label: 'High', value: this.formatCurrency(quote.high), icon: 'arrow-up', class: 'positive' },
-            { label: 'Low', value: this.formatCurrency(quote.low), icon: 'arrow-down', class: 'negative' },
-            { label: 'Volume', value: this.formatVolume(quote.volume), icon: 'chart-bar' },
-            { label: 'Avg Volume', value: this.formatVolume(statistics?.avgVolume || 0), icon: 'chart-area' },
-            { label: 'Market Cap', value: this.formatLargeNumber(quote.marketCap), icon: 'building' },
-            { label: 'P/E Ratio', value: quote.pe > 0 ? quote.pe.toFixed(2) : 'N/A', icon: 'percent' },
-            { label: '52W High', value: this.formatCurrency(statistics?.high52w || 0), icon: 'mountain', class: 'positive' },
-            { label: '52W Low', value: this.formatCurrency(statistics?.low52w || 0), icon: 'valley', class: 'negative' },
-            { label: 'Beta', value: statistics?.beta ? statistics.beta.toFixed(2) : 'N/A', icon: 'wave-square' },
-            { label: 'Dividend', value: statistics?.dividend ? `${statistics.dividend.toFixed(2)}%` : 'N/A', icon: 'coins' },
-            { label: 'EPS', value: statistics?.eps ? this.formatCurrency(statistics.eps) : 'N/A', icon: 'dollar-sign' }
-        ];
-        
-        metricsContainer.innerHTML = metrics.map(metric => `
-            <div class='metric-card ${metric.class || ''}'>
-                <div class='metric-icon'>
-                    <i class='fas fa-${metric.icon}'></i>
-                </div>
-                <div class='metric-content'>
-                    <div class='metric-label'>${metric.label}</div>
-                    <div class='metric-value'>${metric.value}</div>
-                </div>
-            </div>
-        `).join('');
-    },
-    
-    // ========== CHARTS CREATION ==========
+    // ========== PRICE CHART ==========
     
     createPriceChart() {
         if (!this.stockData || !this.stockData.data) {
@@ -5046,7 +4888,7 @@ const MarketData = {
         return ema;
     },
     
-    // ========== WATCHLIST & ALERTS ==========
+    // ========== WATCHLIST & ALERTS (CONSERVÉS) ==========
     
     async loadCurrentPortfolio() {
         try {
@@ -5190,7 +5032,7 @@ const MarketData = {
             if (changeEl) {
                 const changeClass = quote.change >= 0 ? 'positive' : 'negative';
                 changeEl.className = `watchlist-change ${changeClass}`;
-                changeEl.textContent = `${quote.changePercent >= 0 ? '+' : ''}${quote.changePercent.toFixed(2)}%`;
+                changeEl.textContent = `${quote.percentChange >= 0 ? '+' : ''}${quote.percentChange.toFixed(2)}%`;
             }
             
             // Vérifier les alertes
@@ -5207,8 +5049,6 @@ const MarketData = {
             this.refreshWatchlist();
         }, 120000);
     },
-    
-    // ========== ALERTS ==========
     
     createAlert() {
         const symbol = this.currentSymbol;
@@ -5360,34 +5200,6 @@ const MarketData = {
             });
         });
         
-        // Refresh buttons
-        const refreshMarketBtn = document.getElementById('refreshMarket');
-        if (refreshMarketBtn) {
-            refreshMarketBtn.addEventListener('click', () => this.refreshMarketOverview());
-        }
-        
-        const refreshWatchlistBtn = document.getElementById('refreshWatchlist');
-        if (refreshWatchlistBtn) {
-            refreshWatchlistBtn.addEventListener('click', () => this.refreshWatchlist());
-        }
-        
-        // Export button
-        const exportBtn = document.getElementById('exportCSV');
-        if (exportBtn) {
-            exportBtn.addEventListener('click', () => this.exportToCSV());
-        }
-        
-        // Filter buttons
-        const resetFiltersBtn = document.getElementById('resetFilters');
-        if (resetFiltersBtn) {
-            resetFiltersBtn.addEventListener('click', () => this.resetFilters());
-        }
-        
-        const applyFiltersBtn = document.getElementById('applyFilters');
-        if (applyFiltersBtn) {
-            applyFiltersBtn.addEventListener('click', () => this.applyFilters());
-        }
-        
         // Filter inputs with debounce
         ['filterSearch', 'filterSector', 'filterMarketCap', 'filterPerformance', 'filterPE'].forEach(filterId => {
             const filterEl = document.getElementById(filterId);
@@ -5395,22 +5207,6 @@ const MarketData = {
                 filterEl.addEventListener('input', this.debounce(() => this.applyFilters(), 500));
             }
         });
-        
-        // Pagination
-        const prevPageBtn = document.getElementById('prevPage');
-        if (prevPageBtn) {
-            prevPageBtn.addEventListener('click', () => this.previousPage());
-        }
-        
-        const nextPageBtn = document.getElementById('nextPage');
-        if (nextPageBtn) {
-            nextPageBtn.addEventListener('click', () => this.nextPage());
-        }
-        
-        const pageSizeSelect = document.getElementById('pageSize');
-        if (pageSizeSelect) {
-            pageSizeSelect.addEventListener('change', (e) => this.changePageSize(e.target.value));
-        }
     },
     
     setupSearchListeners() {
@@ -5456,7 +5252,10 @@ const MarketData = {
             container = document.createElement('div');
             container.id = 'searchSuggestions';
             container.className = 'search-suggestions';
-            document.querySelector('.search-container').appendChild(container);
+            const searchContainer = document.querySelector('.search-input-wrapper');
+            if (searchContainer) {
+                searchContainer.appendChild(container);
+            }
         }
         
         container.innerHTML = suggestions.map((stock, index) => `
@@ -5686,4 +5485,4 @@ document.addEventListener('DOMContentLoaded', () => {
 // ========== GLOBAL EXPORT ==========
 window.MarketData = MarketData;
 
-console.log('📊 market-data.js loaded - Wall Street Pro Version');
+console.log('📊 market-data.js v6.0 loaded - Hybrid API Optimized');
