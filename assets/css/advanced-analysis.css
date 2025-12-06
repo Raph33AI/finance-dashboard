@@ -3357,3 +3357,1169 @@ body.dark-mode .divergence-item.bearish {
 /* ============================================
    ✅ FIN DES NOUVEAUX STYLES - WALL STREET EDITION
    ============================================ */
+
+   /* ============================================
+   🤖 ALPHY AI RECOMMENDATION ENGINE
+   Wall Street Grade Multi-Horizon Analysis
+   VERSION ULTRA-PREMIUM 3D
+   ============================================ */
+
+/* ============================================
+   🌟 AI RECOMMENDATION SECTION - CONTAINER PRINCIPAL
+   ============================================ */
+.ai-recommendation-section {
+    background: linear-gradient(
+        135deg,
+        rgba(102, 126, 234, 0.08) 0%,
+        rgba(118, 75, 162, 0.04) 50%,
+        rgba(240, 147, 251, 0.06) 100%
+    );
+    backdrop-filter: blur(30px) saturate(200%);
+    border: 3px solid var(--glass-border);
+    border-radius: 32px;
+    padding: 45px;
+    margin-bottom: 40px;
+    box-shadow: 
+        0 20px 80px rgba(102, 126, 234, 0.3),
+        0 0 120px rgba(118, 75, 162, 0.2),
+        inset 0 2px 0 rgba(255, 255, 255, 0.15);
+    position: relative;
+    overflow: hidden;
+    animation: fadeInUp 0.8s ease-out;
+}
+
+.ai-recommendation-section::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(
+        circle at 30% 50%,
+        rgba(102, 126, 234, 0.12) 0%,
+        transparent 50%
+    ),
+    radial-gradient(
+        circle at 70% 50%,
+        rgba(240, 147, 251, 0.1) 0%,
+        transparent 50%
+    );
+    animation: rotateBg 30s linear infinite;
+    pointer-events: none;
+}
+
+.ai-recommendation-section::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: repeating-linear-gradient(
+        90deg,
+        transparent,
+        rgba(255, 255, 255, 0.02) 1px,
+        transparent 2px,
+        transparent 40px
+    );
+    pointer-events: none;
+}
+
+/* ============================================
+   🎯 AI HEADER - LOGO + TITRE
+   ============================================ */
+.ai-header {
+    display: flex;
+    align-items: center;
+    gap: 30px;
+    margin-bottom: 40px;
+    position: relative;
+    z-index: 1;
+}
+
+.ai-logo-container {
+    position: relative;
+    flex-shrink: 0;
+}
+
+.ai-logo-ring {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--ml-primary), var(--ml-secondary), var(--ml-accent));
+    background-size: 200% 200%;
+    animation: gradientShift 6s ease infinite;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 
+        0 12px 40px rgba(102, 126, 234, 0.5),
+        0 0 60px rgba(118, 75, 162, 0.4),
+        inset 0 2px 8px rgba(255, 255, 255, 0.3);
+    position: relative;
+}
+
+.ai-logo-ring::before {
+    content: '';
+    position: absolute;
+    inset: -4px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--ml-accent), var(--ml-primary));
+    z-index: -1;
+    opacity: 0.6;
+    animation: pulse 3s ease-in-out infinite;
+}
+
+.ai-logo-core {
+    width: 70px;
+    height: 70px;
+    background: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: inset 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.ai-logo-core i {
+    font-size: 2.5rem;
+    background: linear-gradient(135deg, var(--ml-primary), var(--ml-secondary));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: floatIcon 4s ease-in-out infinite;
+}
+
+.ai-header-text {
+    flex: 1;
+}
+
+.ai-title {
+    margin: 0 0 12px 0;
+    font-size: 2rem;
+    font-weight: 900;
+    color: var(--text-primary);
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    line-height: 1.2;
+}
+
+.ai-badge {
+    display: inline-block;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    background: linear-gradient(135deg, var(--ml-primary), var(--ml-secondary));
+    color: white;
+    padding: 4px 12px;
+    border-radius: 6px;
+    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+}
+
+.ai-subtitle {
+    margin: 0;
+    font-size: 1.05rem;
+    color: var(--text-secondary);
+    font-weight: 600;
+    line-height: 1.6;
+}
+
+.ai-indicators-count {
+    color: var(--ml-primary);
+    font-weight: 700;
+}
+
+/* ============================================
+   📊 AI SCORE CONTAINER
+   ============================================ */
+.ai-score-container {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 30px;
+    margin-bottom: 40px;
+    position: relative;
+    z-index: 1;
+}
+
+.ai-score-card {
+    background: linear-gradient(
+        135deg,
+        rgba(255, 255, 255, 0.1) 0%,
+        rgba(255, 255, 255, 0.05) 100%
+    );
+    backdrop-filter: blur(20px) saturate(180%);
+    border: 2px solid var(--glass-border);
+    border-radius: 24px;
+    padding: 35px;
+    box-shadow: 
+        0 12px 40px rgba(0, 0, 0, 0.15),
+        inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    position: relative;
+    overflow: hidden;
+}
+
+.ai-score-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+    transition: left 0.8s;
+}
+
+.ai-score-card:hover::before {
+    left: 100%;
+}
+
+.ai-score-label {
+    font-size: 0.95rem;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--text-secondary);
+    margin-bottom: 16px;
+}
+
+.ai-score-value {
+    font-size: 4rem;
+    font-weight: 900;
+    margin-bottom: 20px;
+    line-height: 1;
+    text-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+}
+
+.ai-score-value.very-bullish {
+    background: linear-gradient(135deg, var(--ml-success), #38f9d7);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.ai-score-value.bullish {
+    background: linear-gradient(135deg, #20c997, #4ade80);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.ai-score-value.moderately-bullish {
+    background: linear-gradient(135deg, #3b82f6, #60a5fa);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.ai-score-value.neutral {
+    background: linear-gradient(135deg, var(--ml-warning), #fda085);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.ai-score-value.moderately-bearish {
+    background: linear-gradient(135deg, #f59e0b, #fb923c);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.ai-score-value.bearish {
+    background: linear-gradient(135deg, #ef4444, #f87171);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.ai-score-value.very-bearish {
+    background: linear-gradient(135deg, var(--ml-danger), #fd7e14);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.ai-score-bar {
+    height: 20px;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 50px;
+    overflow: hidden;
+    margin-bottom: 16px;
+    box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.2);
+}
+
+.ai-score-fill {
+    height: 100%;
+    border-radius: 50px;
+    transition: width 1.5s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
+}
+
+.ai-score-fill.very-bullish {
+    background: linear-gradient(90deg, var(--ml-success), #38f9d7);
+}
+
+.ai-score-fill.bullish {
+    background: linear-gradient(90deg, #20c997, #4ade80);
+}
+
+.ai-score-fill.moderately-bullish {
+    background: linear-gradient(90deg, #3b82f6, #60a5fa);
+}
+
+.ai-score-fill.neutral {
+    background: linear-gradient(90deg, var(--ml-warning), #fda085);
+}
+
+.ai-score-fill.moderately-bearish {
+    background: linear-gradient(90deg, #f59e0b, #fb923c);
+}
+
+.ai-score-fill.bearish {
+    background: linear-gradient(90deg, #ef4444, #f87171);
+}
+
+.ai-score-fill.very-bearish {
+    background: linear-gradient(90deg, var(--ml-danger), #fd7e14);
+}
+
+.ai-score-rating {
+    font-size: 1.5rem;
+    font-weight: 800;
+    text-align: center;
+    padding: 12px;
+    border-radius: 12px;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+}
+
+/* ============================================
+   📈 QUICK STATS - SIGNAUX RAPIDES
+   ============================================ */
+.ai-quick-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+}
+
+.ai-stat-item {
+    background: rgba(255, 255, 255, 0.03);
+    backdrop-filter: blur(10px);
+    border: 2px solid var(--glass-border);
+    border-radius: 16px;
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    transition: var(--transition-smooth);
+}
+
+.ai-stat-item:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+    border-color: rgba(102, 126, 234, 0.4);
+}
+
+.ai-stat-icon {
+    width: 50px;
+    height: 50px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    color: white;
+    flex-shrink: 0;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+}
+
+.ai-stat-icon.bullish {
+    background: linear-gradient(135deg, var(--ml-success), #38f9d7);
+}
+
+.ai-stat-icon.neutral {
+    background: linear-gradient(135deg, #6c757d, #adb5bd);
+}
+
+.ai-stat-icon.bearish {
+    background: linear-gradient(135deg, var(--ml-danger), #fd7e14);
+}
+
+.ai-stat-content {
+    flex: 1;
+}
+
+.ai-stat-value {
+    font-size: 2rem;
+    font-weight: 900;
+    background: linear-gradient(135deg, var(--ml-primary), var(--ml-secondary));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    line-height: 1;
+    margin-bottom: 6px;
+}
+
+.ai-stat-label {
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--text-secondary);
+}
+
+/* ============================================
+   🎯 MULTI-HORIZON RECOMMENDATIONS GRID
+   ============================================ */
+.ai-horizons-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 28px;
+    margin-bottom: 40px;
+    position: relative;
+    z-index: 1;
+}
+
+.ai-horizon-card {
+    background: linear-gradient(
+        135deg,
+        rgba(255, 255, 255, 0.08) 0%,
+        rgba(255, 255, 255, 0.03) 100%
+    );
+    backdrop-filter: blur(25px) saturate(180%);
+    border: 2px solid var(--glass-border);
+    border-radius: 24px;
+    padding: 30px;
+    box-shadow: 
+        0 12px 40px rgba(0, 0, 0, 0.12),
+        inset 0 1px 0 rgba(255, 255, 255, 0.15);
+    transition: var(--transition-smooth);
+    transform-style: preserve-3d;
+    position: relative;
+    overflow: hidden;
+}
+
+.ai-horizon-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, var(--ml-primary), var(--ml-secondary), var(--ml-accent));
+    border-radius: 24px 24px 0 0;
+}
+
+.ai-horizon-card:hover {
+    transform: translateY(-12px) rotateX(3deg);
+    box-shadow: 
+        0 28px 80px rgba(102, 126, 234, 0.3),
+        0 0 80px rgba(118, 75, 162, 0.2);
+    border-color: rgba(102, 126, 234, 0.5);
+}
+
+.ai-horizon-header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 24px;
+    padding-bottom: 20px;
+    border-bottom: 2px solid var(--glass-border);
+}
+
+.ai-horizon-icon {
+    width: 56px;
+    height: 56px;
+    border-radius: 14px;
+    background: linear-gradient(135deg, var(--ml-primary), var(--ml-secondary));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.8rem;
+    color: white;
+    box-shadow: 
+        0 6px 20px rgba(102, 126, 234, 0.4),
+        inset 0 1px 0 rgba(255, 255, 255, 0.3);
+    flex-shrink: 0;
+}
+
+.ai-horizon-title h3 {
+    margin: 0 0 6px 0;
+    font-size: 1.4rem;
+    font-weight: 800;
+    background: linear-gradient(135deg, var(--ml-primary), var(--ml-secondary));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.ai-horizon-title p {
+    margin: 0;
+    font-size: 0.95rem;
+    color: var(--text-secondary);
+    font-weight: 600;
+}
+
+.ai-horizon-recommendation {
+    margin-bottom: 28px;
+}
+
+.ai-rec-badge {
+    display: inline-block;
+    padding: 14px 28px;
+    border-radius: 12px;
+    font-size: 1.3rem;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: white;
+    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.2);
+    text-align: center;
+    width: 100%;
+}
+
+.ai-rec-badge.strong-buy {
+    background: linear-gradient(135deg, var(--ml-success), #38f9d7);
+    box-shadow: 0 6px 24px rgba(67, 233, 123, 0.5);
+}
+
+.ai-rec-badge.buy {
+    background: linear-gradient(135deg, #20c997, #4ade80);
+    box-shadow: 0 6px 24px rgba(32, 201, 151, 0.4);
+}
+
+.ai-rec-badge.accumulate {
+    background: linear-gradient(135deg, #3b82f6, #60a5fa);
+    box-shadow: 0 6px 24px rgba(59, 130, 246, 0.4);
+}
+
+.ai-rec-badge.hold {
+    background: linear-gradient(135deg, var(--ml-warning), #fda085);
+    box-shadow: 0 6px 24px rgba(246, 211, 101, 0.4);
+}
+
+.ai-rec-badge.reduce {
+    background: linear-gradient(135deg, #f59e0b, #fb923c);
+    box-shadow: 0 6px 24px rgba(245, 158, 11, 0.4);
+}
+
+.ai-rec-badge.sell {
+    background: linear-gradient(135deg, #ef4444, #f87171);
+    box-shadow: 0 6px 24px rgba(239, 68, 68, 0.4);
+}
+
+.ai-rec-badge.strong-sell {
+    background: linear-gradient(135deg, var(--ml-danger), #fd7e14);
+    box-shadow: 0 6px 24px rgba(245, 87, 108, 0.5);
+}
+
+.ai-horizon-details {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    margin-bottom: 24px;
+}
+
+.ai-detail-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 16px;
+    background: rgba(255, 255, 255, 0.03);
+    backdrop-filter: blur(10px);
+    border-radius: 10px;
+    border-left: 3px solid var(--ml-primary);
+}
+
+.ai-detail-label {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.ai-detail-value {
+    font-size: 1.2rem;
+    font-weight: 800;
+    background: linear-gradient(135deg, var(--ml-primary), var(--ml-secondary));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.ai-confidence-bar {
+    width: 120px;
+    height: 12px;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 50px;
+    overflow: hidden;
+    box-shadow: inset 0 1px 4px rgba(0, 0, 0, 0.2);
+}
+
+.ai-confidence-fill {
+    height: 100%;
+    border-radius: 50px;
+    transition: width 1.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.ai-horizon-drivers {
+    padding-top: 20px;
+    border-top: 2px solid var(--glass-border);
+}
+
+.ai-drivers-label {
+    font-size: 0.95rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--text-secondary);
+    margin-bottom: 14px;
+}
+
+.ai-drivers-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.ai-driver-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 0.95rem;
+    color: var(--text-primary);
+    padding: 10px;
+    background: rgba(102, 126, 234, 0.05);
+    border-radius: 8px;
+    transition: var(--transition-smooth);
+}
+
+.ai-driver-item:hover {
+    background: rgba(102, 126, 234, 0.1);
+    transform: translateX(6px);
+}
+
+.ai-driver-item i {
+    color: var(--ml-success);
+    font-size: 1.1rem;
+}
+
+/* ============================================
+   ⚖ RISK/REWARD SECTION
+   ============================================ */
+.ai-risk-reward-section {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+    gap: 28px;
+    margin-bottom: 40px;
+    position: relative;
+    z-index: 1;
+}
+
+.ai-risk-card,
+.ai-reward-card {
+    background: linear-gradient(
+        135deg,
+        rgba(255, 255, 255, 0.08) 0%,
+        rgba(255, 255, 255, 0.03) 100%
+    );
+    backdrop-filter: blur(25px) saturate(180%);
+    border: 2px solid var(--glass-border);
+    border-radius: 24px;
+    padding: 32px;
+    box-shadow: 
+        0 12px 40px rgba(0, 0, 0, 0.12),
+        inset 0 1px 0 rgba(255, 255, 255, 0.15);
+    transition: var(--transition-smooth);
+}
+
+.ai-risk-card:hover,
+.ai-reward-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 
+        0 20px 60px rgba(0, 0, 0, 0.2),
+        0 0 60px rgba(102, 126, 234, 0.15);
+}
+
+.ai-risk-header,
+.ai-reward-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 24px;
+    padding-bottom: 18px;
+    border-bottom: 2px solid var(--glass-border);
+}
+
+.ai-risk-header i {
+    font-size: 2rem;
+    color: var(--ml-danger);
+    filter: drop-shadow(0 2px 8px rgba(245, 87, 108, 0.4));
+}
+
+.ai-reward-header i {
+    font-size: 2rem;
+    color: var(--ml-success);
+    filter: drop-shadow(0 2px 8px rgba(67, 233, 123, 0.4));
+}
+
+.ai-risk-header h3,
+.ai-reward-header h3 {
+    margin: 0;
+    font-size: 1.5rem;
+    font-weight: 800;
+    background: linear-gradient(135deg, var(--ml-primary), var(--ml-secondary));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.ai-risk-level,
+.ai-reward-level {
+    margin-bottom: 24px;
+}
+
+.ai-risk-badge,
+.ai-reward-badge {
+    display: inline-block;
+    padding: 12px 24px;
+    border-radius: 10px;
+    font-size: 1.15rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    color: white;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+}
+
+/* Risk Badges */
+.ai-risk-badge.very-high-risk {
+    background: linear-gradient(135deg, #dc3545, #fd7e14);
+}
+
+.ai-risk-badge.high-risk {
+    background: linear-gradient(135deg, #ef4444, #f87171);
+}
+
+.ai-risk-badge.elevated-risk {
+    background: linear-gradient(135deg, #f59e0b, #fb923c);
+}
+
+.ai-risk-badge.moderate-risk {
+    background: linear-gradient(135deg, #f6d365, #fda085);
+}
+
+.ai-risk-badge.low-risk {
+    background: linear-gradient(135deg, #3b82f6, #60a5fa);
+}
+
+.ai-risk-badge.very-low-risk {
+    background: linear-gradient(135deg, #20c997, #4ade80);
+}
+
+/* Reward Badges */
+.ai-reward-badge.exceptional-reward {
+    background: linear-gradient(135deg, var(--ml-success), #38f9d7);
+}
+
+.ai-reward-badge.very-high-reward {
+    background: linear-gradient(135deg, #20c997, #4ade80);
+}
+
+.ai-reward-badge.high-reward {
+    background: linear-gradient(135deg, #3b82f6, #60a5fa);
+}
+
+.ai-reward-badge.attractive-reward {
+    background: linear-gradient(135deg, #8b5cf6, #a78bfa);
+}
+
+.ai-reward-badge.moderate-reward {
+    background: linear-gradient(135deg, #f6d365, #fda085);
+}
+
+.ai-reward-badge.low-reward {
+    background: linear-gradient(135deg, #6c757d, #adb5bd);
+}
+
+.ai-reward-badge.minimal-reward {
+    background: linear-gradient(135deg, #475569, #64748b);
+}
+
+.ai-risk-factors,
+.ai-reward-factors {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.ai-factor-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 14px 16px;
+    background: rgba(255, 255, 255, 0.03);
+    backdrop-filter: blur(10px);
+    border-radius: 10px;
+    border-left: 4px solid transparent;
+    transition: var(--transition-smooth);
+    font-size: 0.95rem;
+    line-height: 1.6;
+}
+
+.ai-factor-item:hover {
+    background: rgba(102, 126, 234, 0.08);
+    transform: translateX(8px);
+}
+
+.ai-factor-item i {
+    margin-top: 2px;
+    font-size: 1.2rem;
+}
+
+.ai-factor-item.high {
+    border-left-color: var(--ml-danger);
+}
+
+.ai-factor-item.medium {
+    border-left-color: var(--ml-warning);
+}
+
+.ai-factor-item.low {
+    border-left-color: #3b82f6;
+}
+
+.ai-factor-item.very-high {
+    border-left-color: var(--ml-success);
+}
+
+.ai-factor-item.loading {
+    justify-content: center;
+    color: var(--text-secondary);
+}
+
+/* ============================================
+   📝 PROFESSIONAL SUMMARY
+   ============================================ */
+.ai-professional-summary {
+    background: linear-gradient(
+        135deg,
+        rgba(255, 255, 255, 0.08) 0%,
+        rgba(255, 255, 255, 0.03) 100%
+    );
+    backdrop-filter: blur(25px) saturate(180%);
+    border: 2px solid var(--glass-border);
+    border-radius: 24px;
+    padding: 35px;
+    margin-bottom: 32px;
+    box-shadow: 
+        0 12px 40px rgba(0, 0, 0, 0.12),
+        inset 0 1px 0 rgba(255, 255, 255, 0.15);
+    position: relative;
+    z-index: 1;
+}
+
+.ai-summary-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    margin-bottom: 28px;
+    padding-bottom: 20px;
+    border-bottom: 3px solid var(--ml-primary);
+    flex-wrap: wrap;
+}
+
+.ai-summary-header i {
+    font-size: 2rem;
+    color: var(--ml-primary);
+    filter: drop-shadow(0 2px 8px rgba(102, 126, 234, 0.4));
+}
+
+.ai-summary-header h3 {
+    margin: 0;
+    font-size: 1.7rem;
+    font-weight: 800;
+    background: linear-gradient(135deg, var(--ml-primary), var(--ml-secondary));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    flex: 1;
+}
+
+.ai-summary-meta {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.ai-summary-date {
+    font-size: 0.95rem;
+    color: var(--text-secondary);
+    font-weight: 600;
+}
+
+.ai-summary-badge {
+    background: linear-gradient(135deg, var(--ml-primary), var(--ml-secondary));
+    color: white;
+    padding: 6px 14px;
+    border-radius: 8px;
+    font-size: 0.8rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+}
+
+.ai-summary-content {
+    font-size: 1.05rem;
+    line-height: 1.9;
+    color: var(--text-primary);
+}
+
+.ai-summary-content p {
+    margin-bottom: 1.5rem;
+}
+
+.ai-summary-content strong {
+    font-weight: 800;
+    background: linear-gradient(135deg, var(--ml-primary), var(--ml-secondary));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.ai-summary-content hr {
+    border: none;
+    border-top: 2px solid var(--glass-border);
+    margin: 2rem 0;
+}
+
+.ai-summary-loading {
+    text-align: center;
+    padding: 40px 20px;
+    color: var(--text-secondary);
+}
+
+.ai-summary-loading i {
+    font-size: 3rem;
+    background: linear-gradient(135deg, var(--ml-primary), var(--ml-secondary));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 20px;
+    display: block;
+    animation: spin 2s linear infinite;
+}
+
+.ai-summary-loading p {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin: 0;
+}
+
+/* ============================================
+   ⚠ AI DISCLAIMER
+   ============================================ */
+.ai-disclaimer {
+    background: linear-gradient(135deg, rgba(245, 158, 11, 0.1), rgba(253, 126, 20, 0.05));
+    border: 2px solid rgba(245, 158, 11, 0.3);
+    border-radius: 16px;
+    padding: 20px 24px;
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    font-size: 0.9rem;
+    line-height: 1.7;
+    color: var(--text-secondary);
+    position: relative;
+    z-index: 1;
+}
+
+.ai-disclaimer i {
+    font-size: 1.5rem;
+    color: var(--ml-warning);
+    margin-top: 2px;
+    flex-shrink: 0;
+}
+
+.ai-disclaimer strong {
+    color: var(--ml-warning);
+    font-weight: 800;
+}
+
+/* ============================================
+   📱 RESPONSIVE DESIGN - AI RECOMMENDATION
+   ============================================ */
+@media (max-width: 1024px) {
+    .ai-score-container {
+        grid-template-columns: 1fr;
+    }
+    
+    .ai-quick-stats {
+        grid-template-columns: 1fr;
+    }
+    
+    .ai-horizons-grid {
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    }
+    
+    .ai-risk-reward-section {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 768px) {
+    .ai-recommendation-section {
+        padding: 30px 20px;
+    }
+    
+    .ai-header {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .ai-logo-ring {
+        width: 80px;
+        height: 80px;
+    }
+    
+    .ai-logo-core {
+        width: 56px;
+        height: 56px;
+    }
+    
+    .ai-logo-core i {
+        font-size: 2rem;
+    }
+    
+    .ai-title {
+        font-size: 1.6rem;
+    }
+    
+    .ai-score-value {
+        font-size: 3rem;
+    }
+    
+    .ai-horizons-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .ai-summary-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .ai-summary-meta {
+        width: 100%;
+        justify-content: space-between;
+    }
+}
+
+@media (max-width: 480px) {
+    .ai-recommendation-section {
+        padding: 25px 16px;
+    }
+    
+    .ai-score-card,
+    .ai-risk-card,
+    .ai-reward-card,
+    .ai-professional-summary {
+        padding: 24px 18px;
+    }
+    
+    .ai-title {
+        font-size: 1.4rem;
+    }
+    
+    .ai-score-value {
+        font-size: 2.5rem;
+    }
+    
+    .ai-horizon-card {
+        padding: 24px 18px;
+    }
+    
+    .ai-rec-badge {
+        font-size: 1.1rem;
+        padding: 12px 20px;
+    }
+    
+    .ai-summary-header h3 {
+        font-size: 1.4rem;
+    }
+    
+    .ai-summary-content {
+        font-size: 1rem;
+    }
+    
+    .ai-disclaimer {
+        flex-direction: column;
+        padding: 16px 18px;
+    }
+}
+
+/* ============================================
+   🌙 DARK MODE - AI RECOMMENDATION
+   ============================================ */
+body.dark-mode .ai-recommendation-section {
+    background: linear-gradient(
+        135deg,
+        rgba(102, 126, 234, 0.05) 0%,
+        rgba(15, 23, 42, 0.5) 50%,
+        rgba(240, 147, 251, 0.04) 100%
+    );
+}
+
+body.dark-mode .ai-score-card,
+body.dark-mode .ai-horizon-card,
+body.dark-mode .ai-risk-card,
+body.dark-mode .ai-reward-card,
+body.dark-mode .ai-professional-summary {
+    background: linear-gradient(
+        135deg,
+        rgba(15, 23, 42, 0.6) 0%,
+        rgba(30, 41, 59, 0.4) 100%
+    );
+}
+
+body.dark-mode .ai-logo-core {
+    background: rgba(15, 23, 42, 0.8);
+}
+
+/* ============================================
+   ✨ ANIMATIONS SPÉCIFIQUES AI
+   ============================================ */
+@keyframes aiPulse {
+    0%, 100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+    50% {
+        transform: scale(1.05);
+        opacity: 0.9;
+    }
+}
+
+.ai-logo-ring {
+    animation: aiPulse 4s ease-in-out infinite;
+}
+
+@keyframes aiGlow {
+    0%, 100% {
+        box-shadow: 
+            0 12px 40px rgba(102, 126, 234, 0.4),
+            0 0 60px rgba(118, 75, 162, 0.3);
+    }
+    50% {
+        box-shadow: 
+            0 12px 40px rgba(102, 126, 234, 0.6),
+            0 0 80px rgba(118, 75, 162, 0.5);
+    }
+}
+
+.ai-score-card:hover {
+    animation: aiGlow 2s ease-in-out infinite;
+}
+
+/* Animations d'apparition en cascade */
+.ai-horizon-card:nth-child(1) { animation: fadeInUp 0.6s ease-out 0.1s backwards; }
+.ai-horizon-card:nth-child(2) { animation: fadeInUp 0.6s ease-out 0.2s backwards; }
+.ai-horizon-card:nth-child(3) { animation: fadeInUp 0.6s ease-out 0.3s backwards; }
+.ai-horizon-card:nth-child(4) { animation: fadeInUp 0.6s ease-out 0.4s backwards; }
+
+/* ============================================
+   🎯 FIN DU CSS - ALPHY AI RECOMMENDATION ENGINE
+   ============================================ */

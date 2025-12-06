@@ -1,2269 +1,3 @@
-// /* ==============================================
-//    ADVANCED-ANALYSIS.JS - COMPLETE & CORRECTED
-//    ✅ Twelve Data API + RateLimiter + OptimizedCache
-//    ============================================== */
-
-// // ========== RATE LIMITER (COPIÉ DE MARKET DATA) ==========
-// class RateLimiter {
-//     constructor(maxRequests = 8, windowMs = 60000) {
-//         this.maxRequests = maxRequests;
-//         this.windowMs = windowMs;
-//         this.queue = [];
-//         this.requestTimes = [];
-//         this.processing = false;
-//     }
-    
-//     async execute(fn, priority = 'normal') {
-//         return new Promise((resolve, reject) => {
-//             this.queue.push({
-//                 fn,
-//                 priority,
-//                 resolve,
-//                 reject,
-//                 timestamp: Date.now()
-//             });
-            
-//             this.queue.sort((a, b) => {
-//                 const priorities = { high: 3, normal: 2, low: 1 };
-//                 return (priorities[b.priority] || 2) - (priorities[a.priority] || 2);
-//             });
-            
-//             this.processQueue();
-//         });
-//     }
-    
-//     async processQueue() {
-//         if (this.processing || this.queue.length === 0) return;
-        
-//         this.processing = true;
-        
-//         while (this.queue.length > 0) {
-//             const now = Date.now();
-//             this.requestTimes = this.requestTimes.filter(time => now - time < this.windowMs);
-            
-//             if (this.requestTimes.length >= this.maxRequests) {
-//                 const oldestRequest = Math.min(...this.requestTimes);
-//                 const waitTime = this.windowMs - (now - oldestRequest) + 100;
-                
-//                 console.log(`⏳ Rate limit reached. Waiting ${Math.ceil(waitTime/1000)}s...`);
-                
-//                 if (window.cacheWidget) {
-//                     window.cacheWidget.updateQueueStatus(this.queue.length, waitTime);
-//                 }
-                
-//                 await this.sleep(waitTime);
-//                 continue;
-//             }
-            
-//             const item = this.queue.shift();
-//             this.requestTimes.push(Date.now());
-            
-//             try {
-//                 const result = await item.fn();
-//                 item.resolve(result);
-//             } catch (error) {
-//                 item.reject(error);
-//             }
-            
-//             await this.sleep(100);
-//         }
-        
-//         this.processing = false;
-        
-//         if (window.cacheWidget) {
-//             window.cacheWidget.updateQueueStatus(0, 0);
-//         }
-//     }
-    
-//     sleep(ms) {
-//         return new Promise(resolve => setTimeout(resolve, ms));
-//     }
-    
-//     getRemainingRequests() {
-//         const now = Date.now();
-//         this.requestTimes = this.requestTimes.filter(time => now - time < this.windowMs);
-//         return this.maxRequests - this.requestTimes.length;
-//     }
-    
-//     getQueueLength() {
-//         return this.queue.length;
-//     }
-// }
-
-// // ========== OPTIMIZED CACHE (COPIÉ DE MARKET DATA) ==========
-// class OptimizedCache {
-//     constructor() {
-//         this.prefix = 'aa_cache_'; // Advanced Analysis cache
-//         this.staticTTL = 24 * 60 * 60 * 1000; // 24h
-//         this.dynamicTTL = 5 * 60 * 1000; // 5min
-//     }
-    
-//     set(key, data, ttl = null) {
-//         try {
-//             const cacheData = {
-//                 data,
-//                 timestamp: Date.now(),
-//                 ttl: ttl || this.dynamicTTL
-//             };
-//             localStorage.setItem(this.prefix + key, JSON.stringify(cacheData));
-//             return true;
-//         } catch (error) {
-//             console.warn('Cache storage error:', error);
-//             return false;
-//         }
-//     }
-    
-//     get(key) {
-//         try {
-//             const cached = localStorage.getItem(this.prefix + key);
-//             if (!cached) return null;
-            
-//             const cacheData = JSON.parse(cached);
-//             const now = Date.now();
-            
-//             if (now - cacheData.timestamp > cacheData.ttl) {
-//                 this.delete(key);
-//                 return null;
-//             }
-            
-//             return cacheData.data;
-//         } catch (error) {
-//             console.warn('Cache retrieval error:', error);
-//             return null;
-//         }
-//     }
-    
-//     delete(key) {
-//         localStorage.removeItem(this.prefix + key);
-//     }
-    
-//     clear() {
-//         Object.keys(localStorage)
-//             .filter(key => key.startsWith(this.prefix))
-//             .forEach(key => localStorage.removeItem(key));
-//     }
-    
-//     getAge(key) {
-//         try {
-//             const cached = localStorage.getItem(this.prefix + key);
-//             if (!cached) return null;
-            
-//             const cacheData = JSON.parse(cached);
-//             return Date.now() - cacheData.timestamp;
-//         } catch {
-//             return null;
-//         }
-//     }
-// }
-
-// // ========== MAIN OBJECT ==========
-// const AdvancedAnalysis = {
-//     // ✅ NOUVEAUX : API Client et Rate Limiter
-//     apiClient: null,
-//     rateLimiter: null,
-//     optimizedCache: null,
-    
-//     // Existing properties
-//     currentSymbol: 'AAPL',
-//     currentPeriod: '6M',
-//     stockData: null,
-//     selectedSuggestionIndex: -1,
-//     searchTimeout: null,
-    
-//     charts: {
-//         ichimoku: null,
-//         stochastic: null,
-//         williams: null,
-//         adx: null,
-//         sar: null,
-//         obv: null,
-//         atr: null,
-//         fibonacci: null,
-//         vwap: null
-//     },
-    
-//     colors: {
-//         primary: '#2649B2',
-//         secondary: '#4A74F3',
-//         tertiary: '#8E7DE3',
-//         purple: '#9D5CE6',
-//         lightBlue: '#6C8BE0',
-//         success: '#28a745',
-//         danger: '#dc3545',
-//         warning: '#ffc107'
-//     },
-    
-//     // ============================================
-//     // ✅ INITIALIZATION (MODIFIÉE)
-//     // ============================================
-    
-//     async init() {
-//         console.log('🚀 Advanced Analysis - Initializing with Twelve Data API...');
-        
-//         // ✅ Initialiser le rate limiter (8 req/min)
-//         this.rateLimiter = new RateLimiter(8, 60000);
-//         this.optimizedCache = new OptimizedCache();
-        
-//         // ✅ Attendre que l'utilisateur soit authentifié
-//         await this.waitForAuth();
-        
-//         // ✅ Initialiser le client API
-//         this.apiClient = new FinanceAPIClient({
-//             baseURL: APP_CONFIG.API_BASE_URL,
-//             cacheDuration: APP_CONFIG.CACHE_DURATION || 300000,
-//             maxRetries: APP_CONFIG.MAX_RETRIES || 2,
-//             onLoadingChange: (isLoading) => {
-//                 this.showLoading(isLoading);
-//             }
-//         });
-        
-//         // Rendre accessible globalement
-//         window.apiClient = this.apiClient;
-//         window.rateLimiter = this.rateLimiter;
-        
-//         this.updateLastUpdate();
-//         this.setupEventListeners();
-//         this.startCacheMonitoring();
-        
-//         // Auto-load default symbol
-//         setTimeout(() => {
-//             this.loadSymbol(this.currentSymbol);
-//         }, 500);
-        
-//         console.log('✅ Advanced Analysis initialized with rate limiting');
-//     },
-    
-//     // ✅ NOUVEAU : Wait for Auth
-//     async waitForAuth() {
-//         return new Promise((resolve) => {
-//             if (!firebase || !firebase.auth) {
-//                 console.warn('⚠️ Firebase not available');
-//                 resolve();
-//                 return;
-//             }
-            
-//             const unsubscribe = firebase.auth().onAuthStateChanged((user) => {
-//                 if (user) {
-//                     console.log('✅ User authenticated for Advanced Analysis');
-//                     unsubscribe();
-//                     resolve();
-//                 }
-//             });
-            
-//             setTimeout(() => {
-//                 resolve();
-//             }, 3000);
-//         });
-//     },
-    
-//     // ✅ NOUVEAU : Cache Monitoring
-//     startCacheMonitoring() {
-//         setInterval(() => {
-//             if (window.cacheWidget) {
-//                 const remaining = this.rateLimiter.getRemainingRequests();
-//                 const queueLength = this.rateLimiter.getQueueLength();
-                
-//                 window.cacheWidget.updateRateLimitStatus(remaining, 8);
-                
-//                 if (queueLength > 0) {
-//                     window.cacheWidget.updateQueueStatus(queueLength, 0);
-//                 }
-//             }
-//         }, 1000);
-//     },
-    
-//     // ✅ NOUVEAU : API Request avec Rate Limiting
-//     async apiRequest(fn, priority = 'normal') {
-//         return await this.rateLimiter.execute(fn, priority);
-//     },
-    
-//     setupEventListeners() {
-//         const input = document.getElementById('symbolInput');
-//         if (input) {
-//             input.addEventListener('input', (e) => {
-//                 this.handleSearch(e.target.value);
-//             });
-            
-//             input.addEventListener('keydown', (e) => {
-//                 if (e.key === 'Enter') {
-//                     e.preventDefault();
-//                     if (this.selectedSuggestionIndex >= 0) {
-//                         const suggestions = document.querySelectorAll('.suggestion-item');
-//                         if (suggestions[this.selectedSuggestionIndex]) {
-//                             const symbol = suggestions[this.selectedSuggestionIndex].dataset.symbol;
-//                             this.selectSuggestion(symbol);
-//                         }
-//                     } else {
-//                         this.analyzeStock();
-//                     }
-//                 } else if (e.key === 'ArrowDown') {
-//                     e.preventDefault();
-//                     this.navigateSuggestions('down');
-//                 } else if (e.key === 'ArrowUp') {
-//                     e.preventDefault();
-//                     this.navigateSuggestions('up');
-//                 } else if (e.key === 'Escape') {
-//                     this.hideSuggestions();
-//                 }
-//             });
-            
-//             input.addEventListener('focus', (e) => {
-//                 if (e.target.value.trim().length > 0) {
-//                     this.handleSearch(e.target.value);
-//                 }
-//             });
-//         }
-        
-//         document.addEventListener('click', (e) => {
-//             if (!e.target.closest('.search-input-wrapper')) {
-//                 this.hideSuggestions();
-//             }
-//         });
-//     },
-    
-//     // ============================================
-//     // ✅ SEARCH - MODIFIÉ POUR TWELVE DATA
-//     // ============================================
-    
-//     handleSearch(query) {
-//         const trimmedQuery = query.trim();
-        
-//         if (trimmedQuery.length === 0) {
-//             this.hideSuggestions();
-//             return;
-//         }
-        
-//         clearTimeout(this.searchTimeout);
-        
-//         this.searchTimeout = setTimeout(() => {
-//             this.searchSymbols(trimmedQuery);
-//         }, 500);
-//     },
-    
-//     async searchSymbols(query) {
-//         console.log('🔍 Searching for:', query);
-        
-//         const container = document.getElementById('searchSuggestions');
-//         container.innerHTML = '<div class="suggestion-loading"><i class="fas fa-spinner fa-spin"></i> Searching...</div>';
-//         container.classList.add('active');
-        
-//         try {
-//             const results = await this.apiRequest(() => this.apiClient.searchSymbol(query), 'low');
-            
-//             if (results.data && results.data.length > 0) {
-//                 this.displaySearchResults(results.data, query);
-//             } else {
-//                 this.displayNoResults();
-//             }
-            
-//         } catch (error) {
-//             console.error('Search failed:', error);
-//             this.displaySearchError();
-//         }
-//     },
-    
-//     displaySearchResults(quotes, query) {
-//         const container = document.getElementById('searchSuggestions');
-        
-//         const stocks = [];
-//         const etfs = [];
-//         const crypto = [];
-//         const indices = [];
-//         const other = [];
-        
-//         quotes.forEach(quote => {
-//             const type = (quote.instrument_type || 'Common Stock').toLowerCase();
-            
-//             if (type.includes('stock') || type.includes('equity')) {
-//                 stocks.push(quote);
-//             } else if (type.includes('etf')) {
-//                 etfs.push(quote);
-//             } else if (type.includes('crypto') || type.includes('digital currency')) {
-//                 crypto.push(quote);
-//             } else if (type.includes('index')) {
-//                 indices.push(quote);
-//             } else {
-//                 other.push(quote);
-//             }
-//         });
-        
-//         let html = '';
-//         if (stocks.length > 0) html += this.buildCategoryHTML('Stocks', stocks, query);
-//         if (etfs.length > 0) html += this.buildCategoryHTML('ETFs', etfs, query);
-//         if (crypto.length > 0) html += this.buildCategoryHTML('Cryptocurrencies', crypto, query);
-//         if (indices.length > 0) html += this.buildCategoryHTML('Indices', indices, query);
-//         if (other.length > 0) html += this.buildCategoryHTML('Other', other, query);
-        
-//         if (html === '') {
-//             this.displayNoResults();
-//         } else {
-//             container.innerHTML = html;
-//             container.classList.add('active');
-//             this.selectedSuggestionIndex = -1;
-            
-//             container.querySelectorAll('.suggestion-item').forEach((item) => {
-//                 item.addEventListener('click', () => {
-//                     this.selectSuggestion(item.dataset.symbol);
-//                 });
-//             });
-//         }
-//     },
-    
-//     buildCategoryHTML(categoryName, items, query) {
-//         const iconMap = {
-//             'Stocks': 'chart-line',
-//             'ETFs': 'layer-group',
-//             'Cryptocurrencies': 'coins',
-//             'Indices': 'chart-bar',
-//             'Other': 'folder'
-//         };
-        
-//         const sectorMap = {
-//             'Stocks': 'tech',
-//             'ETFs': 'etf',
-//             'Cryptocurrencies': 'crypto',
-//             'Indices': 'finance',
-//             'Other': 'industrial'
-//         };
-        
-//         let html = `<div class="suggestion-category">
-//             <i class="fas fa-${iconMap[categoryName] || 'folder'}"></i> ${categoryName}
-//         </div>`;
-        
-//         items.slice(0, 10).forEach(item => {
-//             const highlightedSymbol = this.highlightMatch(item.symbol, query);
-//             const highlightedName = this.highlightMatch(item.instrument_name, query);
-            
-//             html += `
-//                 <div class="suggestion-item" data-symbol="${this.escapeHtml(item.symbol)}">
-//                     <div class="suggestion-icon ${sectorMap[categoryName] || 'tech'}">
-//                         ${this.escapeHtml(item.symbol.substring(0, 2))}
-//                     </div>
-//                     <div class="suggestion-info">
-//                         <div class="suggestion-symbol">${highlightedSymbol}</div>
-//                         <div class="suggestion-name">${highlightedName}</div>
-//                     </div>
-//                     ${item.exchange ? `<div class="suggestion-exchange">${this.escapeHtml(item.exchange)}</div>` : ''}
-//                 </div>
-//             `;
-//         });
-        
-//         return html;
-//     },
-    
-//     highlightMatch(text, query) {
-//         if (!text || !query) return this.escapeHtml(text);
-//         const escapedText = this.escapeHtml(text);
-//         const escapedQuery = this.escapeHtml(query);
-//         const regex = new RegExp(`(${escapedQuery})`, 'gi');
-//         return escapedText.replace(regex, '<span class="suggestion-match">$1</span>');
-//     },
-    
-//     escapeHtml(text) {
-//         if (!text) return '';
-//         const div = document.createElement('div');
-//         div.textContent = text;
-//         return div.innerHTML;
-//     },
-    
-//     displayNoResults() {
-//         const container = document.getElementById('searchSuggestions');
-//         container.innerHTML = `
-//             <div class="no-results">
-//                 <i class="fas fa-search"></i>
-//                 <p><strong>No results found</strong></p>
-//                 <p>Try searching by ticker symbol or company name</p>
-//             </div>
-//         `;
-//         container.classList.add('active');
-//     },
-    
-//     displaySearchError() {
-//         const container = document.getElementById('searchSuggestions');
-//         container.innerHTML = `
-//             <div class="no-results">
-//                 <i class="fas fa-exclamation-triangle"></i>
-//                 <p><strong>Search temporarily unavailable</strong></p>
-//                 <p>Please enter a ticker symbol directly</p>
-//             </div>
-//         `;
-//         container.classList.add('active');
-//     },
-    
-//     selectSuggestion(symbol) {
-//         document.getElementById('symbolInput').value = symbol;
-//         this.hideSuggestions();
-//         this.loadSymbol(symbol);
-//     },
-    
-//     hideSuggestions() {
-//         const container = document.getElementById('searchSuggestions');
-//         container.classList.remove('active');
-//         this.selectedSuggestionIndex = -1;
-//     },
-    
-//     navigateSuggestions(direction) {
-//         const suggestions = document.querySelectorAll('.suggestion-item');
-//         if (suggestions.length === 0) return;
-        
-//         if (this.selectedSuggestionIndex >= 0) {
-//             suggestions[this.selectedSuggestionIndex].classList.remove('selected');
-//         }
-        
-//         if (direction === 'down') {
-//             this.selectedSuggestionIndex = (this.selectedSuggestionIndex + 1) % suggestions.length;
-//         } else {
-//             this.selectedSuggestionIndex = this.selectedSuggestionIndex <= 0 
-//                 ? suggestions.length - 1 
-//                 : this.selectedSuggestionIndex - 1;
-//         }
-        
-//         suggestions[this.selectedSuggestionIndex].classList.add('selected');
-//         suggestions[this.selectedSuggestionIndex].scrollIntoView({ block: 'nearest', behavior: 'smooth' });
-//     },
-    
-//     // ============================================
-//     // ✅ LOAD SYMBOL - MODIFIÉ POUR TWELVE DATA
-//     // ============================================
-    
-//     analyzeStock() {
-//         const symbol = document.getElementById('symbolInput').value.trim().toUpperCase();
-//         if (symbol) {
-//             this.loadSymbol(symbol);
-//         }
-//     },
-    
-//     async loadSymbol(symbol) {
-//         this.currentSymbol = symbol;
-//         document.getElementById('symbolInput').value = symbol;
-//         this.hideSuggestions();
-        
-//         this.showLoading(true);
-//         this.hideResults();
-        
-//         try {
-//             console.log(`📊 Loading ${symbol} with Twelve Data API...`);
-            
-//             // ✅ Charger les données avec rate limiting (priorité haute)
-//             const [quote, timeSeries] = await Promise.all([
-//                 this.apiRequest(() => this.apiClient.getQuote(symbol), 'high'),
-//                 this.apiRequest(() => this.getTimeSeriesForPeriod(symbol, this.currentPeriod), 'high')
-//             ]);
-            
-//             if (!quote || !timeSeries) {
-//                 throw new Error('Failed to load stock data');
-//             }
-            
-//             this.stockData = {
-//                 symbol: quote.symbol,
-//                 prices: timeSeries.data,
-//                 currency: 'USD',
-//                 quote: quote
-//             };
-            
-//             console.log('✅ Data loaded successfully');
-            
-//             this.displayStockHeader();
-//             this.updateAllIndicators();
-//             this.showLoading(false);
-            
-//         } catch (error) {
-//             console.error('Error loading stock data:', error);
-//             console.log('Using demo data as fallback...');
-//             this.stockData = this.generateDemoData(symbol);
-//             this.displayStockHeader();
-//             this.updateAllIndicators();
-//             this.showLoading(false);
-//         }
-//     },
-    
-//     // ✅ NOUVEAU : Get Time Series avec les bons paramètres
-//     async getTimeSeriesForPeriod(symbol, period) {
-//         const periodMap = {
-//             '1M': { interval: '1day', outputsize: 30 },
-//             '3M': { interval: '1day', outputsize: 90 },
-//             '6M': { interval: '1day', outputsize: 180 },
-//             '1Y': { interval: '1day', outputsize: 252 },
-//             '5Y': { interval: '1week', outputsize: 260 }
-//         };
-        
-//         const config = periodMap[period] || periodMap['6M'];
-//         return await this.apiClient.getTimeSeries(symbol, config.interval, config.outputsize);
-//     },
-
-// // ============================================
-//     // ✅ CHANGE PERIOD - CORRIGÉ
-//     // ============================================
-    
-//     changePeriod(period) {
-//         this.currentPeriod = period;
-        
-//         // ✅ Enlever la classe active de TOUS les boutons
-//         document.querySelectorAll('.horizon-btn').forEach(btn => {
-//             btn.classList.remove('active');
-//         });
-        
-//         // Ajouter la classe active au bouton sélectionné
-//         const selectedBtn = document.querySelector(`[data-period="${period}"]`);
-//         if (selectedBtn) {
-//             selectedBtn.classList.add('active');
-//         }
-        
-//         if (this.currentSymbol) {
-//             this.loadSymbol(this.currentSymbol);
-//         }
-//     },
-    
-//     displayStockHeader() {
-//         const quote = this.stockData.quote;
-        
-//         if (!quote || Object.keys(quote).length === 0) {
-//             if (this.stockData.prices && this.stockData.prices.length > 0) {
-//                 const lastPrice = this.stockData.prices[this.stockData.prices.length - 1];
-//                 const prevPrice = this.stockData.prices[this.stockData.prices.length - 2] || lastPrice;
-                
-//                 this.stockData.quote = {
-//                     name: this.currentSymbol,
-//                     symbol: this.currentSymbol,
-//                     price: lastPrice.close,
-//                     change: lastPrice.close - prevPrice.close,
-//                     percentChange: ((lastPrice.close - prevPrice.close) / prevPrice.close) * 100
-//                 };
-//             }
-//         }
-        
-//         const displayQuote = this.stockData.quote;
-        
-//         document.getElementById('stockSymbol').textContent = displayQuote.symbol || this.currentSymbol;
-//         document.getElementById('stockName').textContent = displayQuote.name || this.currentSymbol;
-        
-//         const price = displayQuote.price !== undefined && displayQuote.price !== null ? displayQuote.price : 0;
-//         const change = displayQuote.change !== undefined && displayQuote.change !== null ? displayQuote.change : 0;
-//         const changePercent = displayQuote.percentChange !== undefined && displayQuote.percentChange !== null ? displayQuote.percentChange : 0;
-        
-//         document.getElementById('currentPrice').textContent = this.formatCurrency(price);
-        
-//         const changeEl = document.getElementById('priceChange');
-//         const changeText = `${change >= 0 ? '+' : ''}${this.formatCurrency(change)} (${change >= 0 ? '+' : ''}${changePercent.toFixed(2)}%)`;
-//         changeEl.textContent = changeText;
-//         changeEl.className = change >= 0 ? 'change positive' : 'change negative';
-        
-//         document.getElementById('stockHeader').classList.remove('hidden');
-//     },
-    
-//     // ============================================
-//     // UPDATE ALL INDICATORS
-//     // ============================================
-    
-//     updateAllIndicators() {
-//         console.log('📊 Updating all indicators...');
-        
-//         const resultsPanel = document.getElementById('resultsPanel');
-//         if (resultsPanel.classList.contains('hidden')) {
-//             resultsPanel.classList.remove('hidden');
-//         }
-        
-//         this.updateIchimokuChart();
-//         this.updateStochasticChart();
-//         this.updateWilliamsChart();
-//         this.updateADXChart();
-//         this.updateSARChart();
-//         this.updateOBVChart();
-//         this.updateATRChart();
-//         this.updateFibonacciChart();
-//         this.createPivotPoints();
-//         this.updateVWAPChart();
-//         this.generateConsolidatedSignals();
-        
-//         console.log('✅ All indicators updated');
-//     },
-    
-//     // ============================================
-//     // ICHIMOKU CLOUD
-//     // ============================================
-    
-//     updateIchimokuChart() {
-//         const prices = this.stockData.prices;
-//         const ichimoku = this.calculateIchimoku(prices);
-//         const ohlc = prices.map(p => [p.timestamp, p.open, p.high, p.low, p.close]);
-        
-//         if (this.charts.ichimoku) {
-//             this.charts.ichimoku.series[0].setData(ohlc, false);
-//             this.charts.ichimoku.series[1].setData(ichimoku.tenkan, false);
-//             this.charts.ichimoku.series[2].setData(ichimoku.kijun, false);
-//             this.charts.ichimoku.series[3].setData(ichimoku.spanA, false);
-//             this.charts.ichimoku.series[4].setData(ichimoku.spanB, false);
-//             this.charts.ichimoku.series[5].setData(ichimoku.cloud, false);
-//             this.charts.ichimoku.series[6].setData(ichimoku.chikou, false);
-//             this.charts.ichimoku.setTitle({ text: `${this.currentSymbol} - Ichimoku Cloud` });
-//             this.charts.ichimoku.redraw();
-//         } else {
-//             this.charts.ichimoku = Highcharts.stockChart('ichimokuChart', {
-//                 chart: { height: 600, borderRadius: 15 },
-//                 title: {
-//                     text: `${this.currentSymbol} - Ichimoku Cloud`,
-//                     style: { color: this.colors.primary, fontWeight: 'bold' }
-//                 },
-//                 rangeSelector: { enabled: false },
-//                 navigator: { enabled: true },
-//                 xAxis: { type: 'datetime', crosshair: true },
-//                 yAxis: { title: { text: 'Price' }, opposite: true },
-//                 tooltip: { split: false, shared: true, borderRadius: 10 },
-//                 plotOptions: { series: { marker: { enabled: false } } },
-//                 series: [
-//                     {
-//                         type: 'candlestick',
-//                         name: this.currentSymbol,
-//                         data: ohlc,
-//                         color: this.colors.danger,
-//                         upColor: this.colors.success,
-//                         zIndex: 3
-//                     },
-//                     {
-//                         type: 'line',
-//                         name: 'Tenkan-sen',
-//                         data: ichimoku.tenkan,
-//                         color: this.colors.danger,
-//                         lineWidth: 2,
-//                         zIndex: 2
-//                     },
-//                     {
-//                         type: 'line',
-//                         name: 'Kijun-sen',
-//                         data: ichimoku.kijun,
-//                         color: this.colors.primary,
-//                         lineWidth: 2,
-//                         zIndex: 2
-//                     },
-//                     {
-//                         type: 'line',
-//                         name: 'Senkou Span A',
-//                         data: ichimoku.spanA,
-//                         color: this.colors.success,
-//                         lineWidth: 1,
-//                         zIndex: 1
-//                     },
-//                     {
-//                         type: 'line',
-//                         name: 'Senkou Span B',
-//                         data: ichimoku.spanB,
-//                         color: this.colors.danger,
-//                         lineWidth: 1,
-//                         zIndex: 1
-//                     },
-//                     {
-//                         type: 'arearange',
-//                         name: 'Kumo (Cloud)',
-//                         data: ichimoku.cloud,
-//                         fillOpacity: 0.3,
-//                         lineWidth: 0,
-//                         color: this.colors.success,
-//                         negativeColor: this.colors.danger,
-//                         zIndex: 0
-//                     },
-//                     {
-//                         type: 'line',
-//                         name: 'Chikou Span',
-//                         data: ichimoku.chikou,
-//                         color: this.colors.purple,
-//                         lineWidth: 1,
-//                         dashStyle: 'Dot',
-//                         zIndex: 2
-//                     }
-//                 ],
-//                 credits: { enabled: false }
-//             });
-//         }
-//     },
-    
-//     calculateIchimoku(prices) {
-//         const tenkanPeriod = 9;
-//         const kijunPeriod = 26;
-//         const senkouPeriod = 52;
-//         const displacement = 26;
-        
-//         const tenkan = [];
-//         const kijun = [];
-//         const spanA = [];
-//         const spanB = [];
-//         const chikou = [];
-//         const cloud = [];
-        
-//         for (let i = tenkanPeriod - 1; i < prices.length; i++) {
-//             const slice = prices.slice(i - tenkanPeriod + 1, i + 1);
-//             const high = Math.max(...slice.map(p => p.high));
-//             const low = Math.min(...slice.map(p => p.low));
-//             tenkan.push([prices[i].timestamp, (high + low) / 2]);
-//         }
-        
-//         for (let i = kijunPeriod - 1; i < prices.length; i++) {
-//             const slice = prices.slice(i - kijunPeriod + 1, i + 1);
-//             const high = Math.max(...slice.map(p => p.high));
-//             const low = Math.min(...slice.map(p => p.low));
-//             kijun.push([prices[i].timestamp, (high + low) / 2]);
-//         }
-        
-//         for (let i = 0; i < prices.length; i++) {
-//             if (i < tenkanPeriod - 1 || i < kijunPeriod - 1) continue;
-            
-//             const tenkanValue = tenkan[i - tenkanPeriod + 1]?.[1];
-//             const kijunValue = kijun[i - kijunPeriod + 1]?.[1];
-            
-//             if (tenkanValue && kijunValue) {
-//                 const futureIndex = i + displacement;
-//                 if (futureIndex < prices.length) {
-//                     spanA.push([prices[futureIndex].timestamp, (tenkanValue + kijunValue) / 2]);
-//                 }
-//             }
-//         }
-        
-//         for (let i = senkouPeriod - 1; i < prices.length; i++) {
-//             const slice = prices.slice(i - senkouPeriod + 1, i + 1);
-//             const high = Math.max(...slice.map(p => p.high));
-//             const low = Math.min(...slice.map(p => p.low));
-            
-//             const futureIndex = i + displacement;
-//             if (futureIndex < prices.length) {
-//                 spanB.push([prices[futureIndex].timestamp, (high + low) / 2]);
-//             }
-//         }
-        
-//         for (let i = displacement; i < prices.length; i++) {
-//             chikou.push([prices[i - displacement].timestamp, prices[i].close]);
-//         }
-        
-//         const minLength = Math.min(spanA.length, spanB.length);
-//         for (let i = 0; i < minLength; i++) {
-//             cloud.push([
-//                 spanA[i][0],
-//                 Math.min(spanA[i][1], spanB[i][1]),
-//                 Math.max(spanA[i][1], spanB[i][1])
-//             ]);
-//         }
-        
-//         return { tenkan, kijun, spanA, spanB, chikou, cloud };
-//     },
-    
-//     // ============================================
-//     // STOCHASTIC OSCILLATOR
-//     // ============================================
-    
-//     updateStochasticChart() {
-//         const prices = this.stockData.prices;
-//         const stochastic = this.calculateStochastic(prices);
-        
-//         if (this.charts.stochastic) {
-//             this.charts.stochastic.series[0].setData(stochastic.k, false);
-//             this.charts.stochastic.series[1].setData(stochastic.d, false);
-//             this.charts.stochastic.redraw();
-//         } else {
-//             this.charts.stochastic = Highcharts.chart('stochasticChart', {
-//                 chart: { borderRadius: 15, height: 400 },
-//                 title: {
-//                     text: 'Stochastic Oscillator',
-//                     style: { color: this.colors.primary, fontWeight: 'bold' }
-//                 },
-//                 xAxis: { type: 'datetime', crosshair: true },
-//                 yAxis: {
-//                     title: { text: 'Stochastic' },
-//                     plotLines: [
-//                         {
-//                             value: 80,
-//                             color: this.colors.danger,
-//                             dashStyle: 'ShortDash',
-//                             width: 2,
-//                             label: { text: 'Overbought (80)', align: 'right', style: { color: this.colors.danger } }
-//                         },
-//                         {
-//                             value: 20,
-//                             color: this.colors.success,
-//                             dashStyle: 'ShortDash',
-//                             width: 2,
-//                             label: { text: 'Oversold (20)', align: 'right', style: { color: this.colors.success } }
-//                         }
-//                     ],
-//                     min: 0,
-//                     max: 100
-//                 },
-//                 tooltip: { borderRadius: 10, shared: true },
-//                 series: [
-//                     {
-//                         type: 'line',
-//                         name: '%K (Fast)',
-//                         data: stochastic.k,
-//                         color: this.colors.primary,
-//                         lineWidth: 2
-//                     },
-//                     {
-//                         type: 'line',
-//                         name: '%D (Slow)',
-//                         data: stochastic.d,
-//                         color: this.colors.danger,
-//                         lineWidth: 2
-//                     }
-//                 ],
-//                 credits: { enabled: false }
-//             });
-//         }
-        
-//         this.displayStochasticSignal(stochastic);
-//     },
-    
-//     calculateStochastic(prices, kPeriod = 14, dPeriod = 3) {
-//         const k = [];
-//         const d = [];
-        
-//         for (let i = kPeriod - 1; i < prices.length; i++) {
-//             const slice = prices.slice(i - kPeriod + 1, i + 1);
-//             const high = Math.max(...slice.map(p => p.high));
-//             const low = Math.min(...slice.map(p => p.low));
-//             const close = prices[i].close;
-            
-//             const kValue = ((close - low) / (high - low)) * 100;
-//             k.push([prices[i].timestamp, kValue]);
-//         }
-        
-//         for (let i = dPeriod - 1; i < k.length; i++) {
-//             const slice = k.slice(i - dPeriod + 1, i + 1);
-//             const avg = slice.reduce((sum, item) => sum + item[1], 0) / dPeriod;
-//             d.push([k[i][0], avg]);
-//         }
-        
-//         return { k, d };
-//     },
-    
-//     displayStochasticSignal(stochastic) {
-//         if (!stochastic.k.length || !stochastic.d.length) {
-//             document.getElementById('stochasticSignal').textContent = 'Not enough data';
-//             return;
-//         }
-        
-//         const lastK = stochastic.k[stochastic.k.length - 1][1];
-//         const lastD = stochastic.d[stochastic.d.length - 1][1];
-        
-//         let signal = 'neutral';
-//         let text = `%K: ${lastK.toFixed(2)}, %D: ${lastD.toFixed(2)} - `;
-        
-//         if (lastK > 80) {
-//             signal = 'bearish';
-//             text += 'Overbought - Potential Sell Signal';
-//         } else if (lastK < 20) {
-//             signal = 'bullish';
-//             text += 'Oversold - Potential Buy Signal';
-//         } else if (lastK > lastD && stochastic.k[stochastic.k.length - 2][1] <= stochastic.d[stochastic.d.length - 2][1]) {
-//             signal = 'bullish';
-//             text += 'Bullish Crossover';
-//         } else if (lastK < lastD && stochastic.k[stochastic.k.length - 2][1] >= stochastic.d[stochastic.d.length - 2][1]) {
-//             signal = 'bearish';
-//             text += 'Bearish Crossover';
-//         } else {
-//             text += 'Neutral';
-//         }
-        
-//         const signalBox = document.getElementById('stochasticSignal');
-//         signalBox.className = `signal-box ${signal}`;
-//         signalBox.textContent = text;
-//     },
-    
-//     // ============================================
-//     // WILLIAMS %R
-//     // ============================================
-    
-//     updateWilliamsChart() {
-//         const prices = this.stockData.prices;
-//         const williams = this.calculateWilliams(prices);
-        
-//         if (this.charts.williams) {
-//             this.charts.williams.series[0].setData(williams, true);
-//         } else {
-//             this.charts.williams = Highcharts.chart('williamsChart', {
-//                 chart: { borderRadius: 15, height: 400 },
-//                 title: {
-//                     text: 'Williams %R',
-//                     style: { color: this.colors.primary, fontWeight: 'bold' }
-//                 },
-//                 xAxis: { type: 'datetime', crosshair: true },
-//                 yAxis: {
-//                     title: { text: 'Williams %R' },
-//                     plotLines: [
-//                         {
-//                             value: -20,
-//                             color: this.colors.danger,
-//                             dashStyle: 'ShortDash',
-//                             width: 2,
-//                             label: { text: 'Overbought (-20)', align: 'right', style: { color: this.colors.danger } }
-//                         },
-//                         {
-//                             value: -80,
-//                             color: this.colors.success,
-//                             dashStyle: 'ShortDash',
-//                             width: 2,
-//                             label: { text: 'Oversold (-80)', align: 'right', style: { color: this.colors.success } }
-//                         }
-//                     ],
-//                     min: -100,
-//                     max: 0
-//                 },
-//                 tooltip: { borderRadius: 10 },
-//                 series: [
-//                     {
-//                         type: 'area',
-//                         name: 'Williams %R',
-//                         data: williams,
-//                         color: this.colors.secondary,
-//                         fillOpacity: 0.3,
-//                         lineWidth: 2
-//                     }
-//                 ],
-//                 credits: { enabled: false }
-//             });
-//         }
-        
-//         this.displayWilliamsSignal(williams);
-//     },
-    
-//     calculateWilliams(prices, period = 14) {
-//         const williams = [];
-        
-//         for (let i = period - 1; i < prices.length; i++) {
-//             const slice = prices.slice(i - period + 1, i + 1);
-//             const high = Math.max(...slice.map(p => p.high));
-//             const low = Math.min(...slice.map(p => p.low));
-//             const close = prices[i].close;
-            
-//             const value = ((high - close) / (high - low)) * -100;
-//             williams.push([prices[i].timestamp, value]);
-//         }
-        
-//         return williams;
-//     },
-    
-//     displayWilliamsSignal(williams) {
-//         if (!williams.length) {
-//             document.getElementById('williamsSignal').textContent = 'Not enough data';
-//             return;
-//         }
-        
-//         const lastValue = williams[williams.length - 1][1];
-        
-//         let signal = 'neutral';
-//         let text = `Williams %R: ${lastValue.toFixed(2)} - `;
-        
-//         if (lastValue > -20) {
-//             signal = 'bearish';
-//             text += 'Overbought - Potential Sell Signal';
-//         } else if (lastValue < -80) {
-//             signal = 'bullish';
-//             text += 'Oversold - Potential Buy Signal';
-//         } else {
-//             text += 'Neutral Zone';
-//         }
-        
-//         const signalBox = document.getElementById('williamsSignal');
-//         signalBox.className = `signal-box ${signal}`;
-//         signalBox.textContent = text;
-//     },
-
-//     // ============================================
-//     // ADX
-//     // ============================================
-    
-//     updateADXChart() {
-//         const prices = this.stockData.prices;
-//         const adxData = this.calculateADX(prices);
-        
-//         if (!adxData.adx.length || !adxData.plusDI.length || !adxData.minusDI.length) {
-//             console.warn('ADX calculation returned empty data');
-//             const signalBox = document.getElementById('adxSignal');
-//             if (signalBox) {
-//                 signalBox.className = 'signal-box neutral';
-//                 signalBox.textContent = 'Not enough data for ADX (need 6+ months)';
-//             }
-//             return;
-//         }
-        
-//         if (this.charts.adx) {
-//             this.charts.adx.series[0].setData(adxData.adx, false);
-//             this.charts.adx.series[1].setData(adxData.plusDI, false);
-//             this.charts.adx.series[2].setData(adxData.minusDI, false);
-//             this.charts.adx.redraw();
-//         } else {
-//             this.charts.adx = Highcharts.chart('adxChart', {
-//                 chart: { borderRadius: 15, height: 400 },
-//                 title: {
-//                     text: 'ADX - Trend Strength',
-//                     style: { color: this.colors.primary, fontWeight: 'bold' }
-//                 },
-//                 xAxis: { type: 'datetime', crosshair: true },
-//                 yAxis: {
-//                     title: { text: 'ADX Value' },
-//                     plotLines: [
-//                         {
-//                             value: 25,
-//                             color: this.colors.success,
-//                             dashStyle: 'ShortDash',
-//                             width: 2,
-//                             label: { text: 'Strong Trend (25)', align: 'right', style: { color: this.colors.success } }
-//                         },
-//                         {
-//                             value: 20,
-//                             color: this.colors.warning,
-//                             dashStyle: 'Dot',
-//                             width: 1,
-//                             label: { text: 'Weak Trend (20)', align: 'right' }
-//                         }
-//                     ],
-//                     min: 0,
-//                     max: 100
-//                 },
-//                 tooltip: { borderRadius: 10, shared: true },
-//                 series: [
-//                     {
-//                         type: 'line',
-//                         name: 'ADX',
-//                         data: adxData.adx,
-//                         color: this.colors.primary,
-//                         lineWidth: 3
-//                     },
-//                     {
-//                         type: 'line',
-//                         name: '+DI',
-//                         data: adxData.plusDI,
-//                         color: this.colors.success,
-//                         lineWidth: 2
-//                     },
-//                     {
-//                         type: 'line',
-//                         name: '-DI',
-//                         data: adxData.minusDI,
-//                         color: this.colors.danger,
-//                         lineWidth: 2
-//                     }
-//                 ],
-//                 credits: { enabled: false }
-//             });
-//         }
-        
-//         this.displayADXSignal(adxData);
-//     },
-    
-//     calculateADX(prices, period = 14) {
-//         if (prices.length < period + 2) {
-//             console.warn('Not enough data for ADX calculation');
-//             return { adx: [], plusDI: [], minusDI: [] };
-//         }
-        
-//         const trueRange = [];
-//         const plusDM = [];
-//         const minusDM = [];
-        
-//         for (let i = 1; i < prices.length; i++) {
-//             const high = prices[i].high;
-//             const low = prices[i].low;
-//             const prevClose = prices[i - 1].close;
-            
-//             const tr = Math.max(
-//                 high - low,
-//                 Math.abs(high - prevClose),
-//                 Math.abs(low - prevClose)
-//             );
-//             trueRange.push(tr);
-            
-//             const highDiff = high - prices[i - 1].high;
-//             const lowDiff = prices[i - 1].low - low;
-            
-//             plusDM.push(highDiff > lowDiff && highDiff > 0 ? highDiff : 0);
-//             minusDM.push(lowDiff > highDiff && lowDiff > 0 ? lowDiff : 0);
-//         }
-        
-//         const smoothTR = this.smoothArray(trueRange, period);
-//         const smoothPlusDM = this.smoothArray(plusDM, period);
-//         const smoothMinusDM = this.smoothArray(minusDM, period);
-        
-//         const plusDI = [];
-//         const minusDI = [];
-//         const dxValues = [];
-        
-//         const maxIndex = Math.min(smoothTR.length, prices.length - period - 1);
-        
-//         for (let i = 0; i < maxIndex; i++) {
-//             if (smoothTR[i] === 0) continue;
-            
-//             const plusDIValue = (smoothPlusDM[i] / smoothTR[i]) * 100;
-//             const minusDIValue = (smoothMinusDM[i] / smoothTR[i]) * 100;
-            
-//             const timestamp = prices[i + period + 1].timestamp;
-//             plusDI.push([timestamp, plusDIValue]);
-//             minusDI.push([timestamp, minusDIValue]);
-            
-//             const sum = plusDIValue + minusDIValue;
-//             if (sum > 0) {
-//                 const dx = (Math.abs(plusDIValue - minusDIValue) / sum) * 100;
-//                 dxValues.push(dx);
-//             }
-//         }
-        
-//         if (dxValues.length < period) {
-//             console.warn('Not enough DX values for ADX calculation');
-//             return { adx: [], plusDI, minusDI };
-//         }
-        
-//         const adxSmoothed = this.smoothArray(dxValues, period);
-//         const adxArray = [];
-        
-//         const adxMaxIndex = Math.min(adxSmoothed.length, prices.length - period * 2 - 1);
-        
-//         for (let i = 0; i < adxMaxIndex; i++) {
-//             const timestamp = prices[i + period * 2 + 1].timestamp;
-//             adxArray.push([timestamp, adxSmoothed[i]]);
-//         }
-        
-//         return { adx: adxArray, plusDI, minusDI };
-//     },
-    
-//     smoothArray(arr, period) {
-//         if (arr.length < period) return [];
-        
-//         const result = [];
-//         let sum = 0;
-        
-//         for (let i = 0; i < period; i++) {
-//             sum += arr[i];
-//         }
-//         result.push(sum / period);
-        
-//         for (let i = period; i < arr.length; i++) {
-//             const smoothed = (result[result.length - 1] * (period - 1) + arr[i]) / period;
-//             result.push(smoothed);
-//         }
-        
-//         return result;
-//     },
-    
-//     displayADXSignal(adxData) {
-//         if (!adxData.adx.length || !adxData.plusDI.length || !adxData.minusDI.length) {
-//             const signalBox = document.getElementById('adxSignal');
-//             signalBox.className = 'signal-box neutral';
-//             signalBox.textContent = 'Not enough data for ADX calculation';
-//             return;
-//         }
-        
-//         const lastADX = adxData.adx[adxData.adx.length - 1][1];
-//         const lastPlusDI = adxData.plusDI[adxData.plusDI.length - 1][1];
-//         const lastMinusDI = adxData.minusDI[adxData.minusDI.length - 1][1];
-        
-//         let signal = 'neutral';
-//         let text = `ADX: ${lastADX.toFixed(2)} - `;
-        
-//         if (lastADX > 25) {
-//             if (lastPlusDI > lastMinusDI) {
-//                 signal = 'bullish';
-//                 text += 'Strong Uptrend';
-//             } else {
-//                 signal = 'bearish';
-//                 text += 'Strong Downtrend';
-//             }
-//         } else if (lastADX > 20) {
-//             text += 'Developing Trend';
-//         } else {
-//             text += 'Weak/No Trend (Ranging Market)';
-//         }
-        
-//         const signalBox = document.getElementById('adxSignal');
-//         signalBox.className = `signal-box ${signal}`;
-//         signalBox.textContent = text;
-//     },
-    
-//     // ============================================
-//     // PARABOLIC SAR
-//     // ============================================
-    
-//     updateSARChart() {
-//         const prices = this.stockData.prices;
-//         const sar = this.calculateSAR(prices);
-//         const ohlc = prices.map(p => [p.timestamp, p.open, p.high, p.low, p.close]);
-        
-//         if (this.charts.sar) {
-//             this.charts.sar.series[0].setData(ohlc, false);
-//             this.charts.sar.series[1].setData(sar, false);
-//             this.charts.sar.redraw();
-//         } else {
-//             this.charts.sar = Highcharts.stockChart('sarChart', {
-//                 chart: { borderRadius: 15, height: 400 },
-//                 title: {
-//                     text: 'Parabolic SAR',
-//                     style: { color: this.colors.primary, fontWeight: 'bold' }
-//                 },
-//                 rangeSelector: { enabled: false },
-//                 navigator: { enabled: false },
-//                 xAxis: { type: 'datetime', crosshair: true },
-//                 yAxis: { title: { text: 'Price' } },
-//                 tooltip: { borderRadius: 10, shared: true },
-//                 series: [
-//                     {
-//                         type: 'candlestick',
-//                         name: this.currentSymbol,
-//                         data: ohlc,
-//                         color: this.colors.danger,
-//                         upColor: this.colors.success
-//                     },
-//                     {
-//                         type: 'scatter',
-//                         name: 'Parabolic SAR',
-//                         data: sar,
-//                         color: this.colors.purple,
-//                         marker: { radius: 3, symbol: 'circle' }
-//                     }
-//                 ],
-//                 credits: { enabled: false }
-//             });
-//         }
-        
-//         this.displaySARSignal(sar, prices);
-//     },
-    
-//     calculateSAR(prices, af = 0.02, maxAF = 0.2) {
-//         const sar = [];
-//         let isUptrend = true;
-//         let currentSAR = prices[0].low;
-//         let ep = prices[0].high;
-//         let currentAF = af;
-        
-//         for (let i = 1; i < prices.length; i++) {
-//             const price = prices[i];
-//             currentSAR = currentSAR + currentAF * (ep - currentSAR);
-            
-//             if (isUptrend) {
-//                 if (price.low < currentSAR) {
-//                     isUptrend = false;
-//                     currentSAR = ep;
-//                     ep = price.low;
-//                     currentAF = af;
-//                 } else {
-//                     if (price.high > ep) {
-//                         ep = price.high;
-//                         currentAF = Math.min(currentAF + af, maxAF);
-//                     }
-//                 }
-//             } else {
-//                 if (price.high > currentSAR) {
-//                     isUptrend = true;
-//                     currentSAR = ep;
-//                     ep = price.high;
-//                     currentAF = af;
-//                 } else {
-//                     if (price.low < ep) {
-//                         ep = price.low;
-//                         currentAF = Math.min(currentAF + af, maxAF);
-//                     }
-//                 }
-//             }
-            
-//             sar.push([price.timestamp, currentSAR]);
-//         }
-        
-//         return sar;
-//     },
-    
-//     displaySARSignal(sar, prices) {
-//         if (!sar.length) {
-//             document.getElementById('sarSignal').textContent = 'Not enough data';
-//             return;
-//         }
-        
-//         const lastPrice = prices[prices.length - 1].close;
-//         const lastSAR = sar[sar.length - 1][1];
-        
-//         const signal = lastPrice > lastSAR ? 'bullish' : 'bearish';
-//         const text = lastPrice > lastSAR 
-//             ? `Price above SAR - Uptrend (Hold Long)` 
-//             : `Price below SAR - Downtrend (Hold Short)`;
-        
-//         const signalBox = document.getElementById('sarSignal');
-//         signalBox.className = `signal-box ${signal}`;
-//         signalBox.textContent = text;
-//     },
-    
-//     // ============================================
-//     // OBV
-//     // ============================================
-    
-//     updateOBVChart() {
-//         const prices = this.stockData.prices;
-//         const obv = this.calculateOBV(prices);
-        
-//         if (this.charts.obv) {
-//             this.charts.obv.series[0].setData(obv, true);
-//         } else {
-//             this.charts.obv = Highcharts.chart('obvChart', {
-//                 chart: { borderRadius: 15, height: 400 },
-//                 title: {
-//                     text: 'On-Balance Volume (OBV)',
-//                     style: { color: this.colors.primary, fontWeight: 'bold' }
-//                 },
-//                 xAxis: { type: 'datetime', crosshair: true },
-//                 yAxis: { title: { text: 'OBV' } },
-//                 tooltip: { borderRadius: 10, valueDecimals: 0 },
-//                 series: [
-//                     {
-//                         type: 'area',
-//                         name: 'OBV',
-//                         data: obv,
-//                         color: this.colors.secondary,
-//                         fillOpacity: 0.3,
-//                         lineWidth: 2
-//                     }
-//                 ],
-//                 credits: { enabled: false }
-//             });
-//         }
-        
-//         this.displayOBVSignal(obv, prices);
-//     },
-    
-//     calculateOBV(prices) {
-//         const obv = [];
-//         let currentOBV = 0;
-        
-//         obv.push([prices[0].timestamp, currentOBV]);
-        
-//         for (let i = 1; i < prices.length; i++) {
-//             if (prices[i].close > prices[i - 1].close) {
-//                 currentOBV += prices[i].volume;
-//             } else if (prices[i].close < prices[i - 1].close) {
-//                 currentOBV -= prices[i].volume;
-//             }
-            
-//             obv.push([prices[i].timestamp, currentOBV]);
-//         }
-        
-//         return obv;
-//     },
-    
-//     displayOBVSignal(obv, prices) {
-//         if (obv.length < 20) {
-//             document.getElementById('obvSignal').textContent = 'Not enough data';
-//             return;
-//         }
-        
-//         const recentPrices = prices.slice(-20);
-//         const recentOBV = obv.slice(-20);
-        
-//         const priceChange = recentPrices[recentPrices.length - 1].close - recentPrices[0].close;
-//         const obvChange = recentOBV[recentOBV.length - 1][1] - recentOBV[0][1];
-        
-//         let signal = 'neutral';
-//         let text = '';
-        
-//         if (priceChange > 0 && obvChange > 0) {
-//             signal = 'bullish';
-//             text = 'Price ↑ + OBV ↑ - Strong Uptrend';
-//         } else if (priceChange < 0 && obvChange < 0) {
-//             signal = 'bearish';
-//             text = 'Price ↓ + OBV ↓ - Strong Downtrend';
-//         } else if (priceChange > 0 && obvChange < 0) {
-//             signal = 'bearish';
-//             text = 'Bearish Divergence - Weakness in Uptrend';
-//         } else if (priceChange < 0 && obvChange > 0) {
-//             signal = 'bullish';
-//             text = 'Bullish Divergence - Weakness in Downtrend';
-//         } else {
-//             text = 'No Clear Signal';
-//         }
-        
-//         const signalBox = document.getElementById('obvSignal');
-//         signalBox.className = `signal-box ${signal}`;
-//         signalBox.textContent = text;
-//     },
-    
-//     // ============================================
-//     // ATR
-//     // ============================================
-    
-//     updateATRChart() {
-//         const prices = this.stockData.prices;
-//         const atr = this.calculateATR(prices);
-        
-//         if (this.charts.atr) {
-//             this.charts.atr.series[0].setData(atr, true);
-//         } else {
-//             this.charts.atr = Highcharts.chart('atrChart', {
-//                 chart: { borderRadius: 15, height: 400 },
-//                 title: {
-//                     text: 'Average True Range (ATR)',
-//                     style: { color: this.colors.primary, fontWeight: 'bold' }
-//                 },
-//                 xAxis: { type: 'datetime', crosshair: true },
-//                 yAxis: { title: { text: 'ATR Value' } },
-//                 tooltip: { borderRadius: 10, valueDecimals: 2 },
-//                 series: [
-//                     {
-//                         type: 'line',
-//                         name: 'ATR',
-//                         data: atr,
-//                         color: this.colors.tertiary,
-//                         lineWidth: 2
-//                     }
-//                 ],
-//                 credits: { enabled: false }
-//             });
-//         }
-        
-//         this.displayATRSignal(atr);
-//     },
-    
-//     calculateATR(prices, period = 14) {
-//         const trueRange = [];
-        
-//         for (let i = 1; i < prices.length; i++) {
-//             const high = prices[i].high;
-//             const low = prices[i].low;
-//             const prevClose = prices[i - 1].close;
-            
-//             const tr = Math.max(
-//                 high - low,
-//                 Math.abs(high - prevClose),
-//                 Math.abs(low - prevClose)
-//             );
-            
-//             trueRange.push(tr);
-//         }
-        
-//         const atr = [];
-//         let sum = 0;
-        
-//         for (let i = 0; i < period && i < trueRange.length; i++) {
-//             sum += trueRange[i];
-//         }
-        
-//         if (period < prices.length) {
-//             atr.push([prices[period].timestamp, sum / period]);
-//         }
-        
-//         for (let i = period; i < trueRange.length; i++) {
-//             const smoothed = (atr[atr.length - 1][1] * (period - 1) + trueRange[i]) / period;
-//             const priceIndex = i + 1;
-            
-//             if (priceIndex < prices.length) {
-//                 atr.push([prices[priceIndex].timestamp, smoothed]);
-//             }
-//         }
-        
-//         return atr;
-//     },
-
-//     displayATRSignal(atr) {
-//         if (!atr.length || atr.length < 20) {
-//             const signalBox = document.getElementById('atrSignal');
-//             signalBox.className = 'signal-box neutral';
-//             signalBox.textContent = 'Not enough data for ATR calculation';
-//             return;
-//         }
-        
-//         const lastATR = atr[atr.length - 1][1];
-//         const avgATR = atr.slice(-20).reduce((sum, item) => sum + item[1], 0) / 20;
-        
-//         let signal = 'neutral';
-//         let text = `Current ATR: ${lastATR.toFixed(2)} - `;
-        
-//         if (lastATR > avgATR * 1.5) {
-//             signal = 'neutral';
-//             text += 'High Volatility (Use Wider Stops)';
-//         } else if (lastATR < avgATR * 0.7) {
-//             signal = 'neutral';
-//             text += 'Low Volatility (Potential Breakout Coming)';
-//         } else {
-//             text += 'Normal Volatility';
-//         }
-        
-//         const signalBox = document.getElementById('atrSignal');
-//         signalBox.className = `signal-box ${signal}`;
-//         signalBox.textContent = text;
-//     },
-
-// // ============================================
-//     // FIBONACCI RETRACEMENTS
-//     // ============================================
-    
-//     updateFibonacciChart() {
-//         const prices = this.stockData.prices;
-//         const fibonacci = this.calculateFibonacci(prices);
-//         const ohlc = prices.map(p => [p.timestamp, p.open, p.high, p.low, p.close]);
-        
-//         if (this.charts.fibonacci) {
-//             this.charts.fibonacci.series[0].setData(ohlc, false);
-//             this.charts.fibonacci.yAxis[0].update({
-//                 plotLines: fibonacci.levels.map(level => ({
-//                     value: level.price,
-//                     color: this.getColorForFibLevel(level.ratio),
-//                     dashStyle: 'Dash',
-//                     width: 2,
-//                     label: {
-//                         text: `${level.name} (${this.formatCurrency(level.price)})`,
-//                         align: 'right',
-//                         style: {
-//                             color: this.getColorForFibLevel(level.ratio),
-//                             fontWeight: level.ratio === 0.618 ? 'bold' : 'normal'
-//                         }
-//                     },
-//                     zIndex: 5
-//                 }))
-//             }, false);
-//             this.charts.fibonacci.redraw();
-//         } else {
-//             this.charts.fibonacci = Highcharts.stockChart('fibonacciChart', {
-//                 chart: { borderRadius: 15, height: 600 },
-//                 title: {
-//                     text: 'Fibonacci Retracements',
-//                     style: { color: this.colors.primary, fontWeight: 'bold' }
-//                 },
-//                 rangeSelector: { enabled: false },
-//                 navigator: { enabled: false },
-//                 xAxis: { type: 'datetime', crosshair: true },
-//                 yAxis: {
-//                     title: { text: 'Price' },
-//                     plotLines: fibonacci.levels.map(level => ({
-//                         value: level.price,
-//                         color: this.getColorForFibLevel(level.ratio),
-//                         dashStyle: 'Dash',
-//                         width: 2,
-//                         label: {
-//                             text: `${level.name} (${this.formatCurrency(level.price)})`,
-//                             align: 'right',
-//                             style: {
-//                                 color: this.getColorForFibLevel(level.ratio),
-//                                 fontWeight: level.ratio === 0.618 ? 'bold' : 'normal'
-//                             }
-//                         },
-//                         zIndex: 5
-//                     }))
-//                 },
-//                 tooltip: { borderRadius: 10, shared: true },
-//                 series: [
-//                     {
-//                         type: 'candlestick',
-//                         name: this.currentSymbol,
-//                         data: ohlc,
-//                         color: this.colors.danger,
-//                         upColor: this.colors.success,
-//                         zIndex: 2
-//                     }
-//                 ],
-//                 credits: { enabled: false }
-//             });
-//         }
-        
-//         this.displayFibonacciLevels(fibonacci);
-//     },
-    
-//     calculateFibonacci(prices) {
-//         const high = Math.max(...prices.map(p => p.high));
-//         const low = Math.min(...prices.map(p => p.low));
-//         const diff = high - low;
-        
-//         const ratios = [
-//             { ratio: 0, name: '0% (High)' },
-//             { ratio: 0.236, name: '23.6%' },
-//             { ratio: 0.382, name: '38.2%' },
-//             { ratio: 0.5, name: '50%' },
-//             { ratio: 0.618, name: '61.8% (Golden)' },
-//             { ratio: 0.786, name: '78.6%' },
-//             { ratio: 1, name: '100% (Low)' }
-//         ];
-        
-//         const levels = ratios.map(r => ({
-//             ratio: r.ratio,
-//             name: r.name,
-//             price: high - (diff * r.ratio)
-//         }));
-        
-//         return { high, low, levels };
-//     },
-    
-//     getColorForFibLevel(ratio) {
-//         if (ratio === 0.618) return this.colors.danger;
-//         if (ratio === 0 || ratio === 1) return this.colors.primary;
-//         return this.colors.lightBlue;
-//     },
-    
-//     displayFibonacciLevels(fibonacci) {
-//         const currentPrice = this.stockData.prices[this.stockData.prices.length - 1].close;
-        
-//         const tableHTML = `
-//             <table>
-//                 <thead>
-//                     <tr>
-//                         <th>Level</th>
-//                         <th>Price</th>
-//                         <th>Distance from Current</th>
-//                         <th>Type</th>
-//                     </tr>
-//                 </thead>
-//                 <tbody>
-//                     ${fibonacci.levels.map(level => {
-//                         const distance = ((level.price - currentPrice) / currentPrice) * 100;
-//                         const distanceText = `${distance >= 0 ? '+' : ''}${distance.toFixed(2)}%`;
-//                         const type = level.price > currentPrice ? 'Resistance' : 'Support';
-                        
-//                         return `
-//                             <tr>
-//                                 <td class='level-name'>${level.name}</td>
-//                                 <td class='level-price'>${this.formatCurrency(level.price)}</td>
-//                                 <td style='color: ${distance >= 0 ? this.colors.danger : this.colors.success}'>${distanceText}</td>
-//                                 <td style='color: ${type === 'Resistance' ? this.colors.danger : this.colors.success}'>${type}</td>
-//                             </tr>
-//                         `;
-//                     }).join('')}
-//                 </tbody>
-//             </table>
-//         `;
-        
-//         document.getElementById('fibonacciLevels').innerHTML = tableHTML;
-//     },
-    
-//     // ============================================
-//     // PIVOT POINTS
-//     // ============================================
-    
-//     createPivotPoints() {
-//         const prices = this.stockData.prices;
-//         const lastPrice = prices[prices.length - 1];
-//         const prevPrice = prices[prices.length - 2];
-        
-//         const high = prevPrice.high;
-//         const low = prevPrice.low;
-//         const close = prevPrice.close;
-        
-//         const standard = this.calculateStandardPivots(high, low, close);
-//         this.displayPivotCard('pivotStandard', standard, lastPrice.close);
-        
-//         const fibonacci = this.calculateFibonacciPivots(high, low, close);
-//         this.displayPivotCard('pivotFibonacci', fibonacci, lastPrice.close);
-        
-//         const camarilla = this.calculateCamarillaPivots(high, low, close);
-//         this.displayPivotCard('pivotCamarilla', camarilla, lastPrice.close);
-//     },
-    
-//     calculateStandardPivots(high, low, close) {
-//         const pivot = (high + low + close) / 3;
-        
-//         return {
-//             R3: high + 2 * (pivot - low),
-//             R2: pivot + (high - low),
-//             R1: 2 * pivot - low,
-//             P: pivot,
-//             S1: 2 * pivot - high,
-//             S2: pivot - (high - low),
-//             S3: low - 2 * (high - pivot)
-//         };
-//     },
-    
-//     calculateFibonacciPivots(high, low, close) {
-//         const pivot = (high + low + close) / 3;
-//         const range = high - low;
-        
-//         return {
-//             R3: pivot + range * 1.000,
-//             R2: pivot + range * 0.618,
-//             R1: pivot + range * 0.382,
-//             P: pivot,
-//             S1: pivot - range * 0.382,
-//             S2: pivot - range * 0.618,
-//             S3: pivot - range * 1.000
-//         };
-//     },
-    
-//     calculateCamarillaPivots(high, low, close) {
-//         const range = high - low;
-        
-//         return {
-//             R4: close + range * 1.1 / 2,
-//             R3: close + range * 1.1 / 4,
-//             R2: close + range * 1.1 / 6,
-//             R1: close + range * 1.1 / 12,
-//             P: close,
-//             S1: close - range * 1.1 / 12,
-//             S2: close - range * 1.1 / 6,
-//             S3: close - range * 1.1 / 4,
-//             S4: close - range * 1.1 / 2
-//         };
-//     },
-    
-//     displayPivotCard(elementId, pivots, currentPrice) {
-//         const container = document.getElementById(elementId);
-//         if (!container) return;
-        
-//         const valuesContainer = container.querySelector('.pivot-values');
-//         if (!valuesContainer) return;
-        
-//         const entries = Object.entries(pivots).sort((a, b) => b[1] - a[1]);
-        
-//         const html = entries.map(([label, value]) => {
-//             let className = 'pivot-level';
-//             if (label.startsWith('R')) className += ' resistance';
-//             else if (label.startsWith('S')) className += ' support';
-//             else className += ' pivot';
-            
-//             const distance = ((value - currentPrice) / currentPrice) * 100;
-//             const distanceText = `${distance >= 0 ? '+' : ''}${distance.toFixed(2)}%`;
-            
-//             return `
-//                 <div class='${className}'>
-//                     <span class='pivot-label'>${label}</span>
-//                     <span class='pivot-value'><strong>${this.formatCurrency(value)}</strong> <small>(${distanceText})</small></span>
-//                 </div>
-//             `;
-//         }).join('');
-        
-//         valuesContainer.innerHTML = html;
-//     },
-    
-//     // ============================================
-//     // VWAP (Volume Weighted Average Price)
-//     // ============================================
-    
-//     updateVWAPChart() {
-//         const prices = this.stockData.prices;
-//         const vwap = this.calculateVWAP(prices);
-//         const ohlc = prices.map(p => [p.timestamp, p.open, p.high, p.low, p.close]);
-        
-//         if (this.charts.vwap) {
-//             this.charts.vwap.series[0].setData(ohlc, false);
-//             this.charts.vwap.series[1].setData(vwap.vwap, false);
-//             this.charts.vwap.series[2].setData(vwap.upperBand1, false);
-//             this.charts.vwap.series[3].setData(vwap.upperBand2, false);
-//             this.charts.vwap.series[4].setData(vwap.lowerBand1, false);
-//             this.charts.vwap.series[5].setData(vwap.lowerBand2, false);
-//             this.charts.vwap.redraw();
-//         } else {
-//             this.charts.vwap = Highcharts.stockChart('vwapChart', {
-//                 chart: { borderRadius: 15, height: 600 },
-//                 title: {
-//                     text: 'VWAP with Standard Deviation Bands',
-//                     style: { color: this.colors.primary, fontWeight: 'bold' }
-//                 },
-//                 rangeSelector: { enabled: false },
-//                 navigator: { enabled: true },
-//                 xAxis: { type: 'datetime', crosshair: true },
-//                 yAxis: { title: { text: 'Price' } },
-//                 tooltip: { borderRadius: 10, shared: true },
-//                 series: [
-//                     {
-//                         type: 'candlestick',
-//                         name: this.currentSymbol,
-//                         data: ohlc,
-//                         color: this.colors.danger,
-//                         upColor: this.colors.success,
-//                         zIndex: 2
-//                     },
-//                     {
-//                         type: 'line',
-//                         name: 'VWAP',
-//                         data: vwap.vwap,
-//                         color: this.colors.primary,
-//                         lineWidth: 3,
-//                         zIndex: 3
-//                     },
-//                     {
-//                         type: 'line',
-//                         name: 'Upper Band (+1 SD)',
-//                         data: vwap.upperBand1,
-//                         color: this.colors.danger,
-//                         lineWidth: 1,
-//                         dashStyle: 'Dash',
-//                         zIndex: 1
-//                     },
-//                     {
-//                         type: 'line',
-//                         name: 'Upper Band (+2 SD)',
-//                         data: vwap.upperBand2,
-//                         color: this.colors.danger,
-//                         lineWidth: 1,
-//                         dashStyle: 'Dot',
-//                         zIndex: 1
-//                     },
-//                     {
-//                         type: 'line',
-//                         name: 'Lower Band (-1 SD)',
-//                         data: vwap.lowerBand1,
-//                         color: this.colors.success,
-//                         lineWidth: 1,
-//                         dashStyle: 'Dash',
-//                         zIndex: 1
-//                     },
-//                     {
-//                         type: 'line',
-//                         name: 'Lower Band (-2 SD)',
-//                         data: vwap.lowerBand2,
-//                         color: this.colors.success,
-//                         lineWidth: 1,
-//                         dashStyle: 'Dot',
-//                         zIndex: 1
-//                     }
-//                 ],
-//                 credits: { enabled: false }
-//             });
-//         }
-        
-//         this.displayVWAPSignal(vwap, prices);
-//     },
-    
-//     calculateVWAP(prices) {
-//         const vwapArray = [];
-//         const upperBand1 = [];
-//         const upperBand2 = [];
-//         const lowerBand1 = [];
-//         const lowerBand2 = [];
-        
-//         let cumulativeTPV = 0;
-//         let cumulativeVolume = 0;
-//         const squaredDiffs = [];
-        
-//         for (let i = 0; i < prices.length; i++) {
-//             const typical = (prices[i].high + prices[i].low + prices[i].close) / 3;
-//             const tpv = typical * prices[i].volume;
-            
-//             cumulativeTPV += tpv;
-//             cumulativeVolume += prices[i].volume;
-            
-//             const vwapValue = cumulativeTPV / cumulativeVolume;
-//             vwapArray.push([prices[i].timestamp, vwapValue]);
-            
-//             squaredDiffs.push(Math.pow(typical - vwapValue, 2) * prices[i].volume);
-//             const variance = squaredDiffs.reduce((a, b) => a + b, 0) / cumulativeVolume;
-//             const stdDev = Math.sqrt(variance);
-            
-//             upperBand1.push([prices[i].timestamp, vwapValue + stdDev]);
-//             upperBand2.push([prices[i].timestamp, vwapValue + 2 * stdDev]);
-//             lowerBand1.push([prices[i].timestamp, vwapValue - stdDev]);
-//             lowerBand2.push([prices[i].timestamp, vwapValue - 2 * stdDev]);
-//         }
-        
-//         return { vwap: vwapArray, upperBand1, upperBand2, lowerBand1, lowerBand2 };
-//     },
-    
-//     displayVWAPSignal(vwap, prices) {
-//         if (!vwap.vwap.length) {
-//             document.getElementById('vwapSignal').textContent = 'Not enough data';
-//             return;
-//         }
-        
-//         const lastPrice = prices[prices.length - 1].close;
-//         const lastVWAP = vwap.vwap[vwap.vwap.length - 1][1];
-//         const lastUpper1 = vwap.upperBand1[vwap.upperBand1.length - 1][1];
-//         const lastLower1 = vwap.lowerBand1[vwap.lowerBand1.length - 1][1];
-        
-//         let signal = 'neutral';
-//         let text = `Price: ${this.formatCurrency(lastPrice)}, VWAP: ${this.formatCurrency(lastVWAP)} - `;
-        
-//         if (lastPrice > lastVWAP) {
-//             signal = 'bullish';
-//             text += 'Price above VWAP - Bullish (Institutional Support)';
-//         } else if (lastPrice < lastVWAP) {
-//             signal = 'bearish';
-//             text += 'Price below VWAP - Bearish (Institutional Resistance)';
-//         } else {
-//             text += 'Price at VWAP - Fair Value';
-//         }
-        
-//         if (lastPrice > lastUpper1) {
-//             text += ' | Overbought (Above +1 SD)';
-//         } else if (lastPrice < lastLower1) {
-//             text += ' | Oversold (Below -1 SD)';
-//         }
-        
-//         const signalBox = document.getElementById('vwapSignal');
-//         signalBox.className = `signal-box ${signal}`;
-//         signalBox.textContent = text;
-//     },
-
-//     // ============================================
-//     // CONSOLIDATED TRADING SIGNALS
-//     // ============================================
-    
-//     generateConsolidatedSignals() {
-//         const prices = this.stockData.prices;
-//         const signals = [];
-        
-//         // Calculate all indicators
-//         const stochastic = this.calculateStochastic(prices);
-//         const williams = this.calculateWilliams(prices);
-//         const adxData = this.calculateADX(prices);
-//         const sar = this.calculateSAR(prices);
-//         const obv = this.calculateOBV(prices);
-//         const vwap = this.calculateVWAP(prices);
-//         const ichimoku = this.calculateIchimoku(prices);
-        
-//         // Stochastic
-//         if (stochastic.k.length > 0) {
-//             const lastK = stochastic.k[stochastic.k.length - 1][1];
-//             let stochasticSignal = 0;
-//             if (lastK < 20) stochasticSignal = 1;
-//             else if (lastK > 80) stochasticSignal = -1;
-//             signals.push({ name: 'Stochastic', value: lastK.toFixed(2), signal: stochasticSignal });
-//         }
-        
-//         // Williams %R
-//         if (williams.length > 0) {
-//             const lastWilliams = williams[williams.length - 1][1];
-//             let williamsSignal = 0;
-//             if (lastWilliams < -80) williamsSignal = 1;
-//             else if (lastWilliams > -20) williamsSignal = -1;
-//             signals.push({ name: 'Williams %R', value: lastWilliams.toFixed(2), signal: williamsSignal });
-//         }
-        
-//         // ADX
-//         let adxSignal = 0;
-//         let adxValue = 'N/A';
-//         if (adxData.adx.length > 0 && adxData.plusDI.length > 0 && adxData.minusDI.length > 0) {
-//             const lastADX = adxData.adx[adxData.adx.length - 1][1];
-//             const lastPlusDI = adxData.plusDI[adxData.plusDI.length - 1][1];
-//             const lastMinusDI = adxData.minusDI[adxData.minusDI.length - 1][1];
-//             adxValue = lastADX.toFixed(2);
-//             if (lastADX > 25) {
-//                 if (lastPlusDI > lastMinusDI) adxSignal = 1;
-//                 else adxSignal = -1;
-//             }
-//         }
-//         signals.push({ name: 'ADX', value: adxValue, signal: adxSignal });
-        
-//         // Parabolic SAR
-//         if (sar.length > 0) {
-//             const lastPrice = prices[prices.length - 1].close;
-//             const lastSAR = sar[sar.length - 1][1];
-//             const sarSignal = lastPrice > lastSAR ? 1 : -1;
-//             signals.push({ name: 'Parabolic SAR', value: this.formatCurrency(lastSAR), signal: sarSignal });
-//         }
-        
-//         // OBV
-//         if (obv.length >= 20) {
-//             const recentOBV = obv.slice(-20);
-//             const obvTrend = recentOBV[recentOBV.length - 1][1] - recentOBV[0][1];
-//             const obvSignal = obvTrend > 0 ? 1 : obvTrend < 0 ? -1 : 0;
-//             signals.push({ name: 'OBV', value: obvTrend > 0 ? 'Rising' : obvTrend < 0 ? 'Falling' : 'Flat', signal: obvSignal });
-//         }
-        
-//         // VWAP
-//         if (vwap.vwap.length > 0) {
-//             const lastPrice = prices[prices.length - 1].close;
-//             const lastVWAP = vwap.vwap[vwap.vwap.length - 1][1];
-//             const vwapSignal = lastPrice > lastVWAP ? 1 : lastPrice < lastVWAP ? -1 : 0;
-//             signals.push({ name: 'VWAP', value: this.formatCurrency(lastVWAP), signal: vwapSignal });
-//         }
-        
-//         // Ichimoku Cloud
-//         if (ichimoku.spanA.length > 0 && ichimoku.spanB.length > 0) {
-//             const lastPrice = prices[prices.length - 1].close;
-//             const lastCloudTop = Math.max(
-//                 ichimoku.spanA[ichimoku.spanA.length - 1]?.[1] || 0,
-//                 ichimoku.spanB[ichimoku.spanB.length - 1]?.[1] || 0
-//             );
-//             const lastCloudBottom = Math.min(
-//                 ichimoku.spanA[ichimoku.spanA.length - 1]?.[1] || Infinity,
-//                 ichimoku.spanB[ichimoku.spanB.length - 1]?.[1] || Infinity
-//             );
-            
-//             let ichimokuSignal = 0;
-//             let ichimokuValue = 'In Cloud';
-            
-//             if (lastPrice > lastCloudTop) {
-//                 ichimokuSignal = 1;
-//                 ichimokuValue = 'Above Cloud';
-//             } else if (lastPrice < lastCloudBottom) {
-//                 ichimokuSignal = -1;
-//                 ichimokuValue = 'Below Cloud';
-//             }
-            
-//             signals.push({ name: 'Ichimoku Cloud', value: ichimokuValue, signal: ichimokuSignal });
-//         }
-        
-//         // Calculate consolidated signal
-//         if (signals.length > 0) {
-//             const totalSignal = signals.reduce((sum, s) => sum + s.signal, 0);
-//             const maxSignal = signals.length;
-//             const signalPercentage = ((totalSignal + maxSignal) / (2 * maxSignal)) * 100;
-            
-//             this.displayConsolidatedSignals(signals, signalPercentage);
-//         }
-//     },
-    
-//     displayConsolidatedSignals(signals, signalPercentage) {
-//         const gaugeValue = document.getElementById('gaugeValue');
-//         const gaugeFill = document.getElementById('gaugeFill');
-        
-//         let signalText = '';
-//         let signalClass = '';
-        
-//         if (signalPercentage >= 80) {
-//             signalText = 'STRONG BUY';
-//             signalClass = 'strong-buy';
-//         } else if (signalPercentage >= 60) {
-//             signalText = 'BUY';
-//             signalClass = 'buy';
-//         } else if (signalPercentage >= 40) {
-//             signalText = 'NEUTRAL';
-//             signalClass = 'neutral';
-//         } else if (signalPercentage >= 20) {
-//             signalText = 'SELL';
-//             signalClass = 'sell';
-//         } else {
-//             signalText = 'STRONG SELL';
-//             signalClass = 'strong-sell';
-//         }
-        
-//         gaugeValue.textContent = signalText;
-//         gaugeValue.className = `gauge-value ${signalClass}`;
-//         gaugeFill.style.width = `${signalPercentage}%`;
-        
-//         const breakdown = document.getElementById('signalsBreakdown');
-//         breakdown.innerHTML = signals.map(s => {
-//             let badgeClass = 'neutral';
-//             let badgeText = 'NEUTRAL';
-            
-//             if (s.signal > 0) {
-//                 badgeClass = 'buy';
-//                 badgeText = 'BUY';
-//             } else if (s.signal < 0) {
-//                 badgeClass = 'sell';
-//                 badgeText = 'SELL';
-//             }
-            
-//             return `
-//                 <div class='signal-row'>
-//                     <span class='signal-indicator-name'>${s.name}</span>
-//                     <span class='signal-indicator-value'>${s.value}</span>
-//                     <span class='signal-badge ${badgeClass}'>${badgeText}</span>
-//                 </div>
-//             `;
-//         }).join('');
-//     },
-    
-//     // ============================================
-//     // UTILITY FUNCTIONS
-//     // ============================================
-    
-//     generateDemoData(symbol) {
-//         console.log('📊 Generating demo data for', symbol);
-//         const days = 365;
-//         const prices = [];
-//         let price = 100;
-        
-//         for (let i = 0; i < days; i++) {
-//             const change = (Math.random() - 0.5) * 4;
-//             price = price * (1 + change / 100);
-            
-//             const timestamp = Date.now() - (days - i) * 24 * 60 * 60 * 1000;
-//             prices.push({
-//                 timestamp: timestamp,
-//                 open: price * (1 + (Math.random() - 0.5) * 0.01),
-//                 high: price * (1 + Math.random() * 0.02),
-//                 low: price * (1 - Math.random() * 0.02),
-//                 close: price,
-//                 volume: Math.floor(Math.random() * 10000000)
-//             });
-//         }
-        
-//         return {
-//             symbol: symbol,
-//             prices: prices,
-//             currency: 'USD',
-//             quote: {
-//                 name: symbol + ' Inc.',
-//                 symbol: symbol,
-//                 price: price,
-//                 change: price - 100,
-//                 percentChange: ((price - 100) / 100) * 100
-//             }
-//         };
-//     },
-    
-//     formatCurrency(value) {
-//         if (!value && value !== 0) return 'N/A';
-//         return new Intl.NumberFormat('en-US', {
-//             style: 'currency',
-//             currency: this.stockData?.currency || 'USD',
-//             minimumFractionDigits: 2,
-//             maximumFractionDigits: 2
-//         }).format(value);
-//     },
-    
-//     showLoading(show) {
-//         const loader = document.getElementById('loadingIndicator');
-//         if (loader) {
-//             if (show) {
-//                 loader.classList.remove('hidden');
-//             } else {
-//                 loader.classList.add('hidden');
-//             }
-//         }
-//     },
-    
-//     hideResults() {
-//         document.getElementById('resultsPanel').classList.add('hidden');
-//     },
-    
-//     updateLastUpdate() {
-//         const now = new Date();
-//         const formatted = now.toLocaleString('fr-FR', {
-//             day: '2-digit',
-//             month: '2-digit',
-//             year: 'numeric',
-//             hour: '2-digit',
-//             minute: '2-digit'
-//         });
-        
-//         const updateElement = document.getElementById('lastUpdate');
-//         if (updateElement) {
-//             updateElement.textContent = `Last update: ${formatted}`;
-//         }
-//     }
-// };
-
-// // ============================================
-// // INITIALIZE ON DOM LOADED
-// // ============================================
-
-// document.addEventListener('DOMContentLoaded', () => {
-//     console.log('🚀 Advanced Analysis - Initializing...');
-//     AdvancedAnalysis.init();
-// });
-
-// // ============================================
-// // SIDEBAR USER MENU - Toggle
-// // ============================================
-
-// document.addEventListener('DOMContentLoaded', () => {
-//     const sidebarUserTrigger = document.getElementById('sidebarUserTrigger');
-//     const sidebarUserDropdown = document.getElementById('sidebarUserDropdown');
-    
-//     if (sidebarUserTrigger && sidebarUserDropdown) {
-//         // Toggle dropdown au clic
-//         sidebarUserTrigger.addEventListener('click', (e) => {
-//             e.stopPropagation();
-            
-//             // Toggle classes
-//             sidebarUserTrigger.classList.toggle('active');
-//             sidebarUserDropdown.classList.toggle('active');
-//         });
-        
-//         // Fermer le dropdown si on clique ailleurs
-//         document.addEventListener('click', (e) => {
-//             if (!sidebarUserDropdown.contains(e.target) && 
-//                 !sidebarUserTrigger.contains(e.target)) {
-//                 sidebarUserTrigger.classList.remove('active');
-//                 sidebarUserDropdown.classList.remove('active');
-//             }
-//         });
-        
-//         // Empêcher la fermeture si on clique dans le dropdown
-//         sidebarUserDropdown.addEventListener('click', (e) => {
-//             e.stopPropagation();
-//         });
-//     }
-// });
-
-// console.log('✅ Advanced Analysis script loaded - COMPLETE VERSION with Twelve Data API');
-
 /* ==============================================
    ADVANCED-ANALYSIS.JS - WALL STREET EDITION
    ✅ 40+ Technical Indicators
@@ -2969,6 +703,7 @@ const AdvancedAnalysis = {
         
         // Signaux consolidés
         this.generateConsolidatedSignals();
+        this.generateAIRecommendation();
         
         console.log('✅ All indicators updated (40+ indicators)');
     },
@@ -6717,6 +4452,1710 @@ const AdvancedAnalysis = {
             
             this.displayConsolidatedSignals(signals, signalPercentage);
         }
+    },
+
+    // ============================================
+    // 🤖 ALPHY AI RECOMMENDATION ENGINE
+    // Wall Street Grade Multi-Horizon Analysis
+    // ============================================
+
+    generateAIRecommendation() {
+        console.log('🤖 Alphy AI - Generating institutional-grade recommendation...');
+        
+        const prices = this.stockData.prices;
+        const currentPrice = prices[prices.length - 1].close;
+        
+        // ✅ ÉTAPE 1 : Collecter tous les signaux techniques
+        const technicalSignals = this.collectAllTechnicalSignals(prices);
+        
+        // ✅ ÉTAPE 2 : Calculer l'AI Confidence Score global
+        const aiScore = this.calculateAIConfidenceScore(technicalSignals);
+        
+        // ✅ ÉTAPE 3 : Générer les recommandations multi-horizons
+        const horizonRecommendations = this.generateHorizonRecommendations(
+            prices, 
+            currentPrice, 
+            technicalSignals, 
+            aiScore
+        );
+        
+        // ✅ ÉTAPE 4 : Analyser le Risk/Reward
+        const riskReward = this.analyzeRiskReward(prices, technicalSignals);
+        
+        // ✅ ÉTAPE 5 : Générer le rapport professionnel
+        const professionalSummary = this.generateProfessionalSummary(
+            aiScore,
+            horizonRecommendations,
+            riskReward,
+            technicalSignals
+        );
+        
+        // ✅ ÉTAPE 6 : Afficher tous les résultats
+        this.displayAIRecommendation(aiScore, technicalSignals);
+        this.displayHorizonRecommendations(horizonRecommendations, currentPrice);
+        this.displayRiskReward(riskReward);
+        this.displayProfessionalSummary(professionalSummary);
+        
+        console.log('✅ Alphy AI Recommendation generated successfully');
+    },
+
+    // ============================================
+    // 📊 COLLECTE DE TOUS LES SIGNAUX TECHNIQUES
+    // ============================================
+
+    collectAllTechnicalSignals(prices) {
+        const signals = {
+            momentum: [],      // RSI, Stochastic, Williams, MFI, CCI, Ultimate, ROC
+            trend: [],         // MACD, ADX, Aroon, Moving Averages, SAR, Ichimoku
+            volatility: [],    // Bollinger, Keltner, Donchian, ATR
+            volume: [],        // OBV, CMF, MFI, Volume Profile
+            price: [],         // Support/Resistance, Fibonacci, Pivot Points, VWAP
+            patterns: []       // Candlestick Patterns, Divergences
+        };
+        
+        // === MOMENTUM INDICATORS ===
+        
+        // RSI
+        const rsi = this.calculateRSI(prices);
+        if (rsi.length > 0) {
+            const lastRSI = rsi[rsi.length - 1][1];
+            let strength = 0;
+            if (lastRSI < 30) strength = 2;
+            else if (lastRSI < 40) strength = 1;
+            else if (lastRSI > 70) strength = -2;
+            else if (lastRSI > 60) strength = -1;
+            
+            signals.momentum.push({
+                name: 'RSI',
+                value: lastRSI,
+                signal: strength,
+                weight: 1.2,
+                timeframe: 'short'
+            });
+        }
+        
+        // Stochastic
+        const stochastic = this.calculateStochastic(prices);
+        if (stochastic.k.length > 0) {
+            const lastK = stochastic.k[stochastic.k.length - 1][1];
+            const lastD = stochastic.d[stochastic.d.length - 1][1];
+            let strength = 0;
+            if (lastK < 20) strength = 2;
+            else if (lastK > 80) strength = -2;
+            else if (lastK > lastD) strength = 1;
+            else if (lastK < lastD) strength = -1;
+            
+            signals.momentum.push({
+                name: 'Stochastic',
+                value: lastK,
+                signal: strength,
+                weight: 1.0,
+                timeframe: 'short'
+            });
+        }
+        
+        // Williams %R
+        const williams = this.calculateWilliams(prices);
+        if (williams.length > 0) {
+            const lastW = williams[williams.length - 1][1];
+            let strength = 0;
+            if (lastW < -80) strength = 2;
+            else if (lastW > -20) strength = -2;
+            
+            signals.momentum.push({
+                name: 'Williams %R',
+                value: lastW,
+                signal: strength,
+                weight: 0.9,
+                timeframe: 'short'
+            });
+        }
+        
+        // MFI
+        const mfi = this.calculateMFI(prices);
+        if (mfi.length > 0) {
+            const lastMFI = mfi[mfi.length - 1][1];
+            let strength = 0;
+            if (lastMFI < 20) strength = 2;
+            else if (lastMFI > 80) strength = -2;
+            
+            signals.momentum.push({
+                name: 'MFI',
+                value: lastMFI,
+                signal: strength,
+                weight: 1.1,
+                timeframe: 'short'
+            });
+        }
+        
+        // CCI
+        const cci = this.calculateCCI(prices);
+        if (cci.length > 0) {
+            const lastCCI = cci[cci.length - 1][1];
+            let strength = 0;
+            if (lastCCI < -100) strength = 2;
+            else if (lastCCI > 100) strength = -2;
+            
+            signals.momentum.push({
+                name: 'CCI',
+                value: lastCCI,
+                signal: strength,
+                weight: 1.0,
+                timeframe: 'short'
+            });
+        }
+        
+        // Ultimate Oscillator
+        const ultimate = this.calculateUltimateOscillator(prices);
+        if (ultimate.length > 0) {
+            const lastUO = ultimate[ultimate.length - 1][1];
+            let strength = 0;
+            if (lastUO < 30) strength = 2;
+            else if (lastUO > 70) strength = -2;
+            
+            signals.momentum.push({
+                name: 'Ultimate Oscillator',
+                value: lastUO,
+                signal: strength,
+                weight: 1.0,
+                timeframe: 'medium'
+            });
+        }
+        
+        // ROC
+        const roc = this.calculateROC(prices);
+        if (roc.length > 0) {
+            const lastROC = roc[roc.length - 1][1];
+            let strength = 0;
+            if (lastROC > 5) strength = 2;
+            else if (lastROC > 2) strength = 1;
+            else if (lastROC < -5) strength = -2;
+            else if (lastROC < -2) strength = -1;
+            
+            signals.momentum.push({
+                name: 'ROC',
+                value: lastROC,
+                signal: strength,
+                weight: 1.0,
+                timeframe: 'short'
+            });
+        }
+        
+        // === TREND INDICATORS ===
+        
+        // MACD
+        const macd = this.calculateMACD(prices);
+        if (macd.histogram.length > 0) {
+            const lastHist = macd.histogram[macd.histogram.length - 1][1];
+            const prevHist = macd.histogram[macd.histogram.length - 2]?.[1] || 0;
+            let strength = 0;
+            
+            if (lastHist > 0 && prevHist <= 0) strength = 2; // Bullish crossover
+            else if (lastHist < 0 && prevHist >= 0) strength = -2; // Bearish crossover
+            else if (lastHist > 0) strength = 1;
+            else if (lastHist < 0) strength = -1;
+            
+            signals.trend.push({
+                name: 'MACD',
+                value: lastHist,
+                signal: strength,
+                weight: 1.5,
+                timeframe: 'medium'
+            });
+        }
+        
+        // ADX
+        const adxData = this.calculateADX(prices);
+        if (adxData.adx.length > 0) {
+            const lastADX = adxData.adx[adxData.adx.length - 1][1];
+            const lastPlusDI = adxData.plusDI[adxData.plusDI.length - 1][1];
+            const lastMinusDI = adxData.minusDI[adxData.minusDI.length - 1][1];
+            
+            let strength = 0;
+            if (lastADX > 25) {
+                if (lastPlusDI > lastMinusDI) strength = 2;
+                else strength = -2;
+            } else if (lastADX > 20) {
+                if (lastPlusDI > lastMinusDI) strength = 1;
+                else strength = -1;
+            }
+            
+            signals.trend.push({
+                name: 'ADX',
+                value: lastADX,
+                signal: strength,
+                weight: 1.3,
+                timeframe: 'medium'
+            });
+        }
+        
+        // Aroon
+        const aroon = this.calculateAroon(prices);
+        if (aroon.up.length > 0) {
+            const lastUp = aroon.up[aroon.up.length - 1][1];
+            const lastDown = aroon.down[aroon.down.length - 1][1];
+            
+            let strength = 0;
+            if (lastUp > 70 && lastDown < 30) strength = 2;
+            else if (lastDown > 70 && lastUp < 30) strength = -2;
+            else if (lastUp > lastDown) strength = 1;
+            else strength = -1;
+            
+            signals.trend.push({
+                name: 'Aroon',
+                value: lastUp - lastDown,
+                signal: strength,
+                weight: 1.1,
+                timeframe: 'medium'
+            });
+        }
+        
+        // Moving Averages
+        const mas = this.calculateMultipleMovingAverages(prices);
+        if (mas.sma20.length > 0 && mas.sma50.length > 0) {
+            const currentPrice = prices[prices.length - 1].close;
+            const lastSMA20 = mas.sma20[mas.sma20.length - 1][1];
+            const lastSMA50 = mas.sma50[mas.sma50.length - 1][1];
+            const lastSMA200 = mas.sma200.length > 0 ? mas.sma200[mas.sma200.length - 1][1] : null;
+            
+            let strength = 0;
+            
+            // Golden Cross / Death Cross
+            const prevSMA50 = mas.sma50[mas.sma50.length - 2]?.[1];
+            const prevSMA200 = mas.sma200.length > 1 ? mas.sma200[mas.sma200.length - 2][1] : null;
+            
+            if (lastSMA200 && prevSMA200) {
+                if (lastSMA50 > lastSMA200 && prevSMA50 <= prevSMA200) strength = 3; // Golden Cross
+                else if (lastSMA50 < lastSMA200 && prevSMA50 >= prevSMA200) strength = -3; // Death Cross
+            }
+            
+            if (strength === 0) {
+                if (currentPrice > lastSMA20 && lastSMA20 > lastSMA50) strength = 2;
+                else if (currentPrice < lastSMA20 && lastSMA20 < lastSMA50) strength = -2;
+                else if (currentPrice > lastSMA20) strength = 1;
+                else strength = -1;
+            }
+            
+            signals.trend.push({
+                name: 'Moving Averages',
+                value: currentPrice - lastSMA20,
+                signal: strength,
+                weight: 1.4,
+                timeframe: 'long'
+            });
+        }
+        
+        // Parabolic SAR
+        const sar = this.calculateSAR(prices);
+        if (sar.length > 0) {
+            const currentPrice = prices[prices.length - 1].close;
+            const lastSAR = sar[sar.length - 1][1];
+            
+            const strength = currentPrice > lastSAR ? 1 : -1;
+            
+            signals.trend.push({
+                name: 'Parabolic SAR',
+                value: currentPrice - lastSAR,
+                signal: strength,
+                weight: 1.0,
+                timeframe: 'short'
+            });
+        }
+        
+        // Ichimoku Cloud
+        const ichimoku = this.calculateIchimoku(prices);
+        if (ichimoku.spanA.length > 0 && ichimoku.spanB.length > 0) {
+            const currentPrice = prices[prices.length - 1].close;
+            const lastCloudTop = Math.max(
+                ichimoku.spanA[ichimoku.spanA.length - 1]?.[1] || 0,
+                ichimoku.spanB[ichimoku.spanB.length - 1]?.[1] || 0
+            );
+            const lastCloudBottom = Math.min(
+                ichimoku.spanA[ichimoku.spanA.length - 1]?.[1] || Infinity,
+                ichimoku.spanB[ichimoku.spanB.length - 1]?.[1] || Infinity
+            );
+            
+            let strength = 0;
+            if (currentPrice > lastCloudTop) strength = 2;
+            else if (currentPrice < lastCloudBottom) strength = -2;
+            
+            signals.trend.push({
+                name: 'Ichimoku Cloud',
+                value: currentPrice - (lastCloudTop + lastCloudBottom) / 2,
+                signal: strength,
+                weight: 1.3,
+                timeframe: 'long'
+            });
+        }
+        
+        // === VOLATILITY INDICATORS ===
+        
+        // Bollinger Bands
+        const bollinger = this.calculateBollingerBands(prices);
+        if (bollinger.upper.length > 0) {
+            const currentPrice = prices[prices.length - 1].close;
+            const lastUpper = bollinger.upper[bollinger.upper.length - 1][1];
+            const lastMiddle = bollinger.middle[bollinger.middle.length - 1][1];
+            const lastLower = bollinger.lower[bollinger.lower.length - 1][1];
+            
+            let strength = 0;
+            if (currentPrice < lastLower) strength = 2;
+            else if (currentPrice > lastUpper) strength = -2;
+            else if (currentPrice > lastMiddle) strength = 1;
+            else strength = -1;
+            
+            const bandwidth = ((lastUpper - lastLower) / lastMiddle) * 100;
+            
+            signals.volatility.push({
+                name: 'Bollinger Bands',
+                value: bandwidth,
+                signal: strength,
+                weight: 1.2,
+                timeframe: 'short'
+            });
+        }
+        
+        // Keltner Channels
+        const keltner = this.calculateKeltnerChannels(prices);
+        if (keltner.upper.length > 0) {
+            const currentPrice = prices[prices.length - 1].close;
+            const lastUpper = keltner.upper[keltner.upper.length - 1][1];
+            const lastMiddle = keltner.middle[keltner.middle.length - 1][1];
+            const lastLower = keltner.lower[keltner.lower.length - 1][1];
+            
+            let strength = 0;
+            if (currentPrice < lastLower) strength = 2;
+            else if (currentPrice > lastUpper) strength = -1;
+            else if (currentPrice > lastMiddle) strength = 1;
+            else strength = -1;
+            
+            signals.volatility.push({
+                name: 'Keltner Channels',
+                value: currentPrice - lastMiddle,
+                signal: strength,
+                weight: 1.0,
+                timeframe: 'short'
+            });
+        }
+        
+        // Donchian Channels
+        const donchian = this.calculateDonchianChannels(prices);
+        if (donchian.upper.length > 0) {
+            const currentPrice = prices[prices.length - 1].close;
+            const lastUpper = donchian.upper[donchian.upper.length - 1][1];
+            const lastLower = donchian.lower[donchian.lower.length - 1][1];
+            
+            let strength = 0;
+            if (currentPrice >= lastUpper) strength = 2; // Breakout
+            else if (currentPrice <= lastLower) strength = -2; // Breakdown
+            
+            signals.volatility.push({
+                name: 'Donchian Channels',
+                value: currentPrice - (lastUpper + lastLower) / 2,
+                signal: strength,
+                weight: 1.1,
+                timeframe: 'medium'
+            });
+        }
+        
+        // ATR
+        const atr = this.calculateATR(prices);
+        if (atr.length > 20) {
+            const lastATR = atr[atr.length - 1][1];
+            const avgATR = atr.slice(-20).reduce((sum, item) => sum + item[1], 0) / 20;
+            
+            const volatilityLevel = lastATR / avgATR;
+            
+            signals.volatility.push({
+                name: 'ATR',
+                value: lastATR,
+                signal: 0, // Neutral indicator
+                weight: 0.8,
+                timeframe: 'short',
+                metadata: { volatilityLevel }
+            });
+        }
+        
+        // === VOLUME INDICATORS ===
+        
+        // OBV
+        const obv = this.calculateOBV(prices);
+        if (obv.length >= 20) {
+            const recentOBV = obv.slice(-20);
+            const obvChange = recentOBV[recentOBV.length - 1][1] - recentOBV[0][1];
+            const priceChange = prices[prices.length - 1].close - prices[prices.length - 20].close;
+            
+            let strength = 0;
+            if (priceChange > 0 && obvChange > 0) strength = 2;
+            else if (priceChange < 0 && obvChange < 0) strength = -2;
+            else if (priceChange > 0 && obvChange < 0) strength = -1; // Bearish divergence
+            else if (priceChange < 0 && obvChange > 0) strength = 1; // Bullish divergence
+            
+            signals.volume.push({
+                name: 'OBV',
+                value: obvChange,
+                signal: strength,
+                weight: 1.1,
+                timeframe: 'medium'
+            });
+        }
+        
+        // CMF
+        const cmf = this.calculateCMF(prices);
+        if (cmf.length > 0) {
+            const lastCMF = cmf[cmf.length - 1][1];
+            
+            let strength = 0;
+            if (lastCMF > 0.05) strength = 2;
+            else if (lastCMF < -0.05) strength = -2;
+            else if (lastCMF > 0) strength = 1;
+            else strength = -1;
+            
+            signals.volume.push({
+                name: 'CMF',
+                value: lastCMF,
+                signal: strength,
+                weight: 1.2,
+                timeframe: 'medium'
+            });
+        }
+        
+        // Volume Profile
+        const volumeProfile = this.calculateVolumeProfile(prices);
+        const currentPrice = prices[prices.length - 1].close;
+        const poc = volumeProfile.poc;
+        const vah = volumeProfile.valueAreaHigh;
+        const val = volumeProfile.valueAreaLow;
+        
+        let vpStrength = 0;
+        if (currentPrice > vah) vpStrength = 1;
+        else if (currentPrice < val) vpStrength = -1;
+        
+        signals.volume.push({
+            name: 'Volume Profile',
+            value: currentPrice - poc,
+            signal: vpStrength,
+            weight: 1.0,
+            timeframe: 'medium',
+            metadata: { poc, vah, val }
+        });
+        
+        // === PRICE LEVEL INDICATORS ===
+        
+        // VWAP
+        const vwap = this.calculateVWAP(prices);
+        if (vwap.vwap.length > 0) {
+            const lastVWAP = vwap.vwap[vwap.vwap.length - 1][1];
+            
+            const strength = currentPrice > lastVWAP ? 1 : -1;
+            
+            signals.price.push({
+                name: 'VWAP',
+                value: currentPrice - lastVWAP,
+                signal: strength,
+                weight: 1.1,
+                timeframe: 'short'
+            });
+        }
+        
+        // Support/Resistance
+        const srLevels = this.findSupportResistanceLevels(prices);
+        const nearestSupport = srLevels.support.length > 0 
+            ? srLevels.support.reduce((prev, curr) => 
+                (Math.abs(curr - currentPrice) < Math.abs(prev - currentPrice) ? curr : prev))
+            : currentPrice * 0.95;
+        const nearestResistance = srLevels.resistance.length > 0
+            ? srLevels.resistance.reduce((prev, curr) => 
+                (Math.abs(curr - currentPrice) < Math.abs(prev - currentPrice) ? curr : prev))
+            : currentPrice * 1.05;
+        
+        signals.price.push({
+            name: 'Support/Resistance',
+            value: 0,
+            signal: 0,
+            weight: 1.0,
+            timeframe: 'long',
+            metadata: { 
+                nearestSupport, 
+                nearestResistance,
+                distanceToSupport: ((currentPrice - nearestSupport) / currentPrice) * 100,
+                distanceToResistance: ((nearestResistance - currentPrice) / currentPrice) * 100
+            }
+        });
+        
+        // Fibonacci
+        const fibonacci = this.calculateFibonacci(prices);
+        const fib618 = fibonacci.levels.find(l => l.ratio === 0.618);
+        
+        if (fib618) {
+            let fibSignal = 0;
+            if (currentPrice < fib618.price) fibSignal = 1; // Below golden ratio = support
+            else fibSignal = -1; // Above golden ratio = resistance
+            
+            signals.price.push({
+                name: 'Fibonacci 61.8%',
+                value: currentPrice - fib618.price,
+                signal: fibSignal,
+                weight: 0.9,
+                timeframe: 'long'
+            });
+        }
+        
+        // === PATTERN INDICATORS ===
+        
+        // Candlestick Patterns
+        const patterns = this.findCandlestickPatterns(prices);
+        const recentPatterns = patterns.slice(-5);
+        
+        const patternScore = recentPatterns.reduce((score, p) => {
+            let value = 0;
+            if (p.signal === 'bullish') {
+                if (p.strength === 'very strong') value = 3;
+                else if (p.strength === 'strong') value = 2;
+                else value = 1;
+            } else if (p.signal === 'bearish') {
+                if (p.strength === 'very strong') value = -3;
+                else if (p.strength === 'strong') value = -2;
+                else value = -1;
+            }
+            return score + value;
+        }, 0);
+        
+        if (recentPatterns.length > 0) {
+            signals.patterns.push({
+                name: 'Candlestick Patterns',
+                value: recentPatterns.length,
+                signal: Math.sign(patternScore),
+                weight: 1.0,
+                timeframe: 'short',
+                metadata: { patterns: recentPatterns, score: patternScore }
+            });
+        }
+        
+        // Divergences
+        const rsi = this.calculateRSI(prices);
+        const macdData = this.calculateMACD(prices);
+        const divergences = this.findDivergences(prices, rsi, macdData);
+        
+        if (divergences.length > 0) {
+            const divSignal = divergences[0].signal === 'bullish' ? 2 : -2;
+            
+            signals.patterns.push({
+                name: 'Divergences',
+                value: divergences.length,
+                signal: divSignal,
+                weight: 1.3,
+                timeframe: 'medium',
+                metadata: { divergences }
+            });
+        }
+        
+        // Linear Regression
+        const regression = this.calculateLinearRegression(prices);
+        const slope = regression.slope;
+        
+        let trendStrength = 0;
+        if (Math.abs(slope) > 1) trendStrength = slope > 0 ? 2 : -2;
+        else if (Math.abs(slope) > 0.3) trendStrength = slope > 0 ? 1 : -1;
+        
+        signals.trend.push({
+            name: 'Linear Regression',
+            value: slope,
+            signal: trendStrength,
+            weight: 1.2,
+            timeframe: 'long'
+        });
+        
+        // Elder Ray
+        const elderRay = this.calculateElderRay(prices);
+        if (elderRay.bullPower.length > 0) {
+            const lastBull = elderRay.bullPower[elderRay.bullPower.length - 1][1];
+            const lastBear = elderRay.bearPower[elderRay.bearPower.length - 1][1];
+            
+            let strength = 0;
+            if (lastBull > 0 && lastBear > 0) strength = 2;
+            else if (lastBull < 0 && lastBear < 0) strength = -2;
+            
+            signals.trend.push({
+                name: 'Elder Ray',
+                value: lastBull - lastBear,
+                signal: strength,
+                weight: 1.0,
+                timeframe: 'medium'
+            });
+        }
+        
+        return signals;
+    },
+
+    // ============================================
+    // 🎯 AI CONFIDENCE SCORE CALCULATION
+    // Algorithme sophistiqué de scoring multi-facteurs
+    // ============================================
+
+    calculateAIConfidenceScore(signals) {
+        let totalScore = 0;
+        let totalWeight = 0;
+        
+        let bullishSignals = 0;
+        let neutralSignals = 0;
+        let bearishSignals = 0;
+        
+        // Parcourir toutes les catégories de signaux
+        Object.values(signals).forEach(category => {
+            category.forEach(indicator => {
+                const weightedSignal = indicator.signal * indicator.weight;
+                totalScore += weightedSignal;
+                totalWeight += Math.abs(indicator.weight);
+                
+                if (indicator.signal > 0) bullishSignals++;
+                else if (indicator.signal < 0) bearishSignals++;
+                else neutralSignals++;
+            });
+        });
+        
+        // Normaliser le score entre 0 et 100
+        const normalizedScore = ((totalScore / totalWeight) + 1) * 50;
+        const finalScore = Math.max(0, Math.min(100, normalizedScore));
+        
+        // Déterminer le rating
+        let rating = '';
+        if (finalScore >= 85) rating = 'EXTREMELY BULLISH';
+        else if (finalScore >= 70) rating = 'VERY BULLISH';
+        else if (finalScore >= 60) rating = 'BULLISH';
+        else if (finalScore >= 55) rating = 'MODERATELY BULLISH';
+        else if (finalScore >= 45) rating = 'NEUTRAL';
+        else if (finalScore >= 40) rating = 'MODERATELY BEARISH';
+        else if (finalScore >= 30) rating = 'BEARISH';
+        else if (finalScore >= 15) rating = 'VERY BEARISH';
+        else rating = 'EXTREMELY BEARISH';
+        
+        return {
+            score: finalScore,
+            rating,
+            bullishSignals,
+            neutralSignals,
+            bearishSignals,
+            totalIndicators: bullishSignals + neutralSignals + bearishSignals
+        };
+    },
+
+    // ============================================
+    // 📈 MULTI-HORIZON RECOMMENDATIONS
+    // Différenciation Short/Medium/Long Term
+    // ============================================
+
+    generateHorizonRecommendations(prices, currentPrice, signals, aiScore) {
+        const horizons = {
+            '1y': this.generateHorizonRecommendation(prices, currentPrice, signals, 'short', 1, aiScore),
+            '2y': this.generateHorizonRecommendation(prices, currentPrice, signals, 'medium', 2, aiScore),
+            '5y': this.generateHorizonRecommendation(prices, currentPrice, signals, 'long', 5, aiScore),
+            '10y': this.generateHorizonRecommendation(prices, currentPrice, signals, 'strategic', 10, aiScore)
+        };
+        
+        return horizons;
+    },
+
+    generateHorizonRecommendation(prices, currentPrice, signals, timeframe, years, aiScore) {
+        // Filtrer les signaux pertinents pour cet horizon
+        const relevantSignals = this.filterSignalsByTimeframe(signals, timeframe);
+        
+        // Calculer le score pondéré pour cet horizon
+        let horizonScore = 0;
+        let totalWeight = 0;
+        
+        Object.values(relevantSignals).forEach(category => {
+            category.forEach(indicator => {
+                horizonScore += indicator.signal * indicator.weight;
+                totalWeight += Math.abs(indicator.weight);
+            });
+        });
+        
+        const normalizedHorizonScore = ((horizonScore / totalWeight) + 1) * 50;
+        
+        // Déterminer la recommandation
+        let recommendation = '';
+        let confidence = 0;
+        
+        if (normalizedHorizonScore >= 70) {
+            recommendation = 'STRONG BUY';
+            confidence = Math.min(95, 70 + (normalizedHorizonScore - 70) * 0.8);
+        } else if (normalizedHorizonScore >= 60) {
+            recommendation = 'BUY';
+            confidence = 60 + (normalizedHorizonScore - 60);
+        } else if (normalizedHorizonScore >= 55) {
+            recommendation = 'ACCUMULATE';
+            confidence = 55 + (normalizedHorizonScore - 55);
+        } else if (normalizedHorizonScore >= 45) {
+            recommendation = 'HOLD';
+            confidence = 45 + Math.abs(normalizedHorizonScore - 50) * 0.5;
+        } else if (normalizedHorizonScore >= 40) {
+            recommendation = 'REDUCE';
+            confidence = 40 + (45 - normalizedHorizonScore);
+        } else if (normalizedHorizonScore >= 30) {
+            recommendation = 'SELL';
+            confidence = 50 + (40 - normalizedHorizonScore);
+        } else {
+            recommendation = 'STRONG SELL';
+            confidence = Math.min(95, 60 + (30 - normalizedHorizonScore) * 0.8);
+        }
+        
+        // Calculer le prix cible
+        const targetPrice = this.calculateTargetPrice(prices, currentPrice, normalizedHorizonScore, years, signals);
+        
+        // Calculer l'upside/downside
+        const upside = ((targetPrice - currentPrice) / currentPrice) * 100;
+        
+        // Identifier les drivers clés
+        const drivers = this.identifyKeyDrivers(relevantSignals, timeframe, years);
+        
+        return {
+            recommendation,
+            confidence: Math.round(confidence),
+            targetPrice,
+            upside,
+            drivers,
+            score: normalizedHorizonScore
+        };
+    },
+
+    filterSignalsByTimeframe(signals, timeframe) {
+        const filtered = {
+            momentum: [],
+            trend: [],
+            volatility: [],
+            volume: [],
+            price: [],
+            patterns: []
+        };
+        
+        const timeframeMap = {
+            'short': ['short'],
+            'medium': ['short', 'medium'],
+            'long': ['short', 'medium', 'long'],
+            'strategic': ['medium', 'long']
+        };
+        
+        const relevantTimeframes = timeframeMap[timeframe] || ['short', 'medium', 'long'];
+        
+        Object.entries(signals).forEach(([category, indicators]) => {
+            filtered[category] = indicators.filter(ind => 
+                relevantTimeframes.includes(ind.timeframe)
+            );
+        });
+        
+        return filtered;
+    },
+
+    // ============================================
+    // 💰 TARGET PRICE CALCULATION
+    // Méthodologie quantitative multi-facteurs
+    // ============================================
+
+    calculateTargetPrice(prices, currentPrice, score, years, signals) {
+        // Méthode 1 : Basée sur le momentum historique
+        const historicalGrowth = this.calculateHistoricalGrowth(prices);
+        const momentumAdjusted = historicalGrowth * (score / 50); // Ajusté par le score
+        
+        // Méthode 2 : Basée sur la volatilité (ATR)
+        const atr = this.calculateATR(prices);
+        const avgATR = atr.length > 20 
+            ? atr.slice(-20).reduce((sum, item) => sum + item[1], 0) / 20
+            : currentPrice * 0.02;
+        
+        const volatilityTarget = currentPrice + (avgATR * years * 252 * (score - 50) / 100);
+        
+        // Méthode 3 : Basée sur la régression linéaire
+        const regression = this.calculateLinearRegression(prices);
+        const regressionTarget = currentPrice + (regression.slope * years * 252);
+        
+        // Méthode 4 : Basée sur les niveaux de support/résistance
+        const srSignal = signals.price.find(s => s.name === 'Support/Resistance');
+        let srTarget = currentPrice;
+        
+        if (srSignal && srSignal.metadata) {
+            if (score > 50) {
+                srTarget = srSignal.metadata.nearestResistance * (1 + (years * 0.1));
+            } else {
+                srTarget = srSignal.metadata.nearestSupport * (1 - (years * 0.05));
+            }
+        }
+        
+        // Méthode 5 : Basée sur le Volume Profile POC
+        const vpSignal = signals.volume.find(s => s.name === 'Volume Profile');
+        let vpTarget = currentPrice;
+        
+        if (vpSignal && vpSignal.metadata) {
+            const poc = vpSignal.metadata.poc;
+            if (score > 50) {
+                vpTarget = Math.max(currentPrice, vpSignal.metadata.vah) * (1 + (years * 0.08));
+            } else {
+                vpTarget = Math.min(currentPrice, vpSignal.metadata.val) * (1 - (years * 0.06));
+            }
+        }
+        
+        // Combinaison pondérée des 5 méthodes
+        const weights = {
+            momentum: 0.25,
+            volatility: 0.20,
+            regression: 0.25,
+            sr: 0.15,
+            vp: 0.15
+        };
+        
+        const combinedTarget = 
+            (momentumAdjusted * weights.momentum) +
+            (volatilityTarget * weights.volatility) +
+            (regressionTarget * weights.regression) +
+            (srTarget * weights.sr) +
+            (vpTarget * weights.vp);
+        
+        // Appliquer une marge de sécurité conservative
+        const conservativeAdjustment = score > 50 ? 0.95 : 1.05;
+        
+        return combinedTarget * conservativeAdjustment;
+    },
+
+    calculateHistoricalGrowth(prices) {
+        if (prices.length < 2) return 0;
+        
+        const startPrice = prices[0].close;
+        const endPrice = prices[prices.length - 1].close;
+        const days = prices.length;
+        
+        const totalReturn = (endPrice - startPrice) / startPrice;
+        const annualizedReturn = Math.pow(1 + totalReturn, 365 / days) - 1;
+        
+        return prices[0].close * (1 + annualizedReturn);
+    },
+
+    // ============================================
+    // 🔑 KEY DRIVERS IDENTIFICATION
+    // Identification des facteurs clés par horizon
+    // ============================================
+
+    identifyKeyDrivers(signals, timeframe, years) {
+        const drivers = [];
+        
+        // Collecter tous les signaux avec leur force
+        const allSignals = [];
+        Object.entries(signals).forEach(([category, indicators]) => {
+            indicators.forEach(ind => {
+                allSignals.push({
+                    category,
+                    name: ind.name,
+                    signal: ind.signal,
+                    weight: ind.weight,
+                    strength: Math.abs(ind.signal * ind.weight)
+                });
+            });
+        });
+        
+        // Trier par force décroissante
+        allSignals.sort((a, b) => b.strength - a.strength);
+        
+        // Sélectionner les 3-5 drivers les plus importants
+        const topDrivers = allSignals.slice(0, timeframe === 'short' ? 3 : 5);
+        
+        topDrivers.forEach(driver => {
+            let description = '';
+            
+            // Générer une description professionnelle
+            if (driver.signal > 0) {
+                if (driver.category === 'momentum') {
+                    description = `Positive momentum confirmed by ${driver.name}`;
+                } else if (driver.category === 'trend') {
+                    description = `Uptrend validated by ${driver.name}`;
+                } else if (driver.category === 'volume') {
+                    description = `Strong accumulation detected via ${driver.name}`;
+                } else if (driver.category === 'price') {
+                    description = `Price above key ${driver.name} level`;
+                } else {
+                    description = `Bullish ${driver.name} signal`;
+                }
+            } else if (driver.signal < 0) {
+                if (driver.category === 'momentum') {
+                    description = `Negative momentum indicated by ${driver.name}`;
+                } else if (driver.category === 'trend') {
+                    description = `Downtrend confirmed by ${driver.name}`;
+                } else if (driver.category === 'volume') {
+                    description = `Distribution phase detected via ${driver.name}`;
+                } else if (driver.category === 'price') {
+                    description = `Price below key ${driver.name} level`;
+                } else {
+                    description = `Bearish ${driver.name} signal`;
+                }
+            }
+            
+            drivers.push(description);
+        });
+        
+        // Ajouter des drivers spécifiques à l'horizon temporel
+        if (timeframe === 'strategic' && years >= 10) {
+            drivers.push('Long-term secular trend analysis');
+            drivers.push('Macro-economic positioning');
+        } else if (timeframe === 'long' && years >= 5) {
+            drivers.push('Multi-year trend structure');
+        }
+        
+        return drivers;
+    },
+
+    // ============================================
+    // ⚖ RISK/REWARD ANALYSIS
+    // Analyse professionnelle des risques et opportunités
+    // ============================================
+
+    analyzeRiskReward(prices, signals) {
+        const currentPrice = prices[prices.length - 1].close;
+        
+        // === RISK ASSESSMENT ===
+        const riskFactors = [];
+        let riskLevel = 'MODERATE';
+        let riskScore = 50;
+        
+        // 1. Volatility Risk (ATR)
+        const atr = this.calculateATR(prices);
+        if (atr.length > 20) {
+            const lastATR = atr[atr.length - 1][1];
+            const avgATR = atr.slice(-20).reduce((sum, item) => sum + item[1], 0) / 20;
+            const volatilityRatio = lastATR / avgATR;
+            
+            if (volatilityRatio > 1.5) {
+                riskFactors.push({
+                    factor: 'High Volatility',
+                    description: `Current volatility ${((volatilityRatio - 1) * 100).toFixed(0)}% above average`,
+                    severity: 'high',
+                    impact: 15
+                });
+                riskScore += 15;
+            } else if (volatilityRatio < 0.7) {
+                riskFactors.push({
+                    factor: 'Low Volatility',
+                    description: 'Volatility compression may lead to sharp moves',
+                    severity: 'medium',
+                    impact: 5
+                });
+                riskScore += 5;
+            }
+        }
+        
+        // 2. Trend Weakness Risk
+        const adxData = this.calculateADX(prices);
+        if (adxData.adx.length > 0) {
+            const lastADX = adxData.adx[adxData.adx.length - 1][1];
+            
+            if (lastADX < 20) {
+                riskFactors.push({
+                    factor: 'Weak Trend',
+                    description: `ADX at ${lastADX.toFixed(1)} indicates ranging market`,
+                    severity: 'medium',
+                    impact: 10
+                });
+                riskScore += 10;
+            }
+        }
+        
+        // 3. Overbought/Oversold Risk
+        const rsi = this.calculateRSI(prices);
+        if (rsi.length > 0) {
+            const lastRSI = rsi[rsi.length - 1][1];
+            
+            if (lastRSI > 75) {
+                riskFactors.push({
+                    factor: 'Extreme Overbought',
+                    description: `RSI at ${lastRSI.toFixed(1)} signals potential reversal`,
+                    severity: 'high',
+                    impact: 15
+                });
+                riskScore += 15;
+            } else if (lastRSI < 25) {
+                riskFactors.push({
+                    factor: 'Extreme Oversold',
+                    description: `RSI at ${lastRSI.toFixed(1)} signals capitulation risk`,
+                    severity: 'high',
+                    impact: 15
+                });
+                riskScore += 15;
+            }
+        }
+        
+        // 4. Divergence Risk
+        const macdData = this.calculateMACD(prices);
+        const divergences = this.findDivergences(prices, rsi, macdData);
+        
+        if (divergences.length > 0) {
+            const divType = divergences[0].signal === 'bullish' ? 'Bullish' : 'Bearish';
+            riskFactors.push({
+                factor: `${divType} Divergence Detected`,
+                description: divergences[0].description,
+                severity: 'medium',
+                impact: 10
+            });
+            riskScore += 10;
+        }
+        
+        // 5. Support/Resistance Proximity Risk
+        const srSignal = signals.price.find(s => s.name === 'Support/Resistance');
+        if (srSignal && srSignal.metadata) {
+            const distToSupport = srSignal.metadata.distanceToSupport;
+            const distToResistance = srSignal.metadata.distanceToResistance;
+            
+            if (distToSupport < 2) {
+                riskFactors.push({
+                    factor: 'Near Support Level',
+                    description: `Price only ${distToSupport.toFixed(1)}% above key support`,
+                    severity: 'high',
+                    impact: 12
+                });
+                riskScore += 12;
+            }
+            
+            if (distToResistance < 2) {
+                riskFactors.push({
+                    factor: 'Near Resistance Level',
+                    description: `Price only ${distToResistance.toFixed(1)}% below key resistance`,
+                    severity: 'medium',
+                    impact: 8
+                });
+                riskScore += 8;
+            }
+        }
+        
+        // 6. Volume Concern
+        const obvSignals = signals.volume.filter(s => s.name === 'OBV' || s.name === 'CMF');
+        const negativeVolumeSignals = obvSignals.filter(s => s.signal < 0).length;
+        
+        if (negativeVolumeSignals >= 2) {
+            riskFactors.push({
+                factor: 'Weak Volume Support',
+                description: 'Multiple volume indicators show distribution',
+                severity: 'medium',
+                impact: 10
+            });
+            riskScore += 10;
+        }
+        
+        // 7. Multiple Bearish Indicators
+        const bearishMomentum = signals.momentum.filter(s => s.signal < 0).length;
+        const bearishTrend = signals.trend.filter(s => s.signal < 0).length;
+        
+        if (bearishMomentum >= 4 || bearishTrend >= 4) {
+            riskFactors.push({
+                factor: 'Multiple Bearish Signals',
+                description: `${bearishMomentum + bearishTrend} negative technical indicators`,
+                severity: 'high',
+                impact: 15
+            });
+            riskScore += 15;
+        }
+        
+        // Déterminer le niveau de risque global
+        if (riskScore >= 75) {
+            riskLevel = 'VERY HIGH';
+        } else if (riskScore >= 65) {
+            riskLevel = 'HIGH';
+        } else if (riskScore >= 55) {
+            riskLevel = 'ELEVATED';
+        } else if (riskScore >= 45) {
+            riskLevel = 'MODERATE';
+        } else if (riskScore >= 35) {
+            riskLevel = 'LOW';
+        } else {
+            riskLevel = 'VERY LOW';
+        }
+        
+        // === REWARD ASSESSMENT ===
+        const rewardFactors = [];
+        let rewardLevel = 'MODERATE';
+        let rewardScore = 50;
+        
+        // 1. Strong Uptrend Opportunity
+        const bullishTrend = signals.trend.filter(s => s.signal > 0).length;
+        if (bullishTrend >= 5) {
+            rewardFactors.push({
+                factor: 'Strong Uptrend Confirmed',
+                description: `${bullishTrend} trend indicators show bullish alignment`,
+                potential: 'high',
+                impact: 20
+            });
+            rewardScore += 20;
+        }
+        
+        // 2. Oversold Bounce Potential
+        if (rsi.length > 0) {
+            const lastRSI = rsi[rsi.length - 1][1];
+            if (lastRSI < 35) {
+                rewardFactors.push({
+                    factor: 'Oversold Reversal Setup',
+                    description: `RSI at ${lastRSI.toFixed(1)} presents mean-reversion opportunity`,
+                    potential: 'high',
+                    impact: 18
+                });
+                rewardScore += 18;
+            }
+        }
+        
+        // 3. Breakout Potential
+        const donchian = this.calculateDonchianChannels(prices);
+        if (donchian.upper.length > 0) {
+            const lastUpper = donchian.upper[donchian.upper.length - 1][1];
+            const distanceToBreakout = ((lastUpper - currentPrice) / currentPrice) * 100;
+            
+            if (distanceToBreakout < 3 && distanceToBreakout > 0) {
+                rewardFactors.push({
+                    factor: 'Breakout Proximity',
+                    description: `Price ${distanceToBreakout.toFixed(1)}% from 20-period high breakout`,
+                    potential: 'very high',
+                    impact: 25
+                });
+                rewardScore += 25;
+            }
+        }
+        
+        // 4. Golden Cross / Bullish MA Alignment
+        const mas = this.calculateMultipleMovingAverages(prices);
+        if (mas.sma20.length > 0 && mas.sma50.length > 0 && mas.sma200.length > 1) {
+            const lastSMA50 = mas.sma50[mas.sma50.length - 1][1];
+            const lastSMA200 = mas.sma200[mas.sma200.length - 1][1];
+            const prevSMA50 = mas.sma50[mas.sma50.length - 2][1];
+            const prevSMA200 = mas.sma200[mas.sma200.length - 2][1];
+            
+            // Golden Cross
+            if (lastSMA50 > lastSMA200 && prevSMA50 <= prevSMA200) {
+                rewardFactors.push({
+                    factor: 'Golden Cross Formation',
+                    description: 'SMA50 crossed above SMA200 - Major bullish signal',
+                    potential: 'very high',
+                    impact: 30
+                });
+                rewardScore += 30;
+            }
+            
+            // Bullish alignment
+            if (currentPrice > mas.sma20[mas.sma20.length - 1][1] &&
+                mas.sma20[mas.sma20.length - 1][1] > lastSMA50 &&
+                lastSMA50 > lastSMA200) {
+                rewardFactors.push({
+                    factor: 'Perfect MA Alignment',
+                    description: 'All moving averages in bullish order',
+                    potential: 'high',
+                    impact: 20
+                });
+                rewardScore += 20;
+            }
+        }
+        
+        // 5. Volume Accumulation
+        const cmfSignal = signals.volume.find(s => s.name === 'CMF');
+        if (cmfSignal && cmfSignal.value > 0.1) {
+            rewardFactors.push({
+                factor: 'Strong Accumulation',
+                description: `CMF at ${cmfSignal.value.toFixed(3)} shows institutional buying`,
+                potential: 'high',
+                impact: 18
+            });
+            rewardScore += 18;
+        }
+        
+        // 6. Bullish Candlestick Patterns
+        const patterns = this.findCandlestickPatterns(prices);
+        const recentBullishPatterns = patterns.filter(p => 
+            p.signal === 'bullish' && 
+            (prices.length - 1 - p.index) < 5
+        );
+        
+        if (recentBullishPatterns.length >= 2) {
+            rewardFactors.push({
+                factor: 'Multiple Bullish Patterns',
+                description: `${recentBullishPatterns.length} bullish reversal patterns detected`,
+                potential: 'medium',
+                impact: 15
+            });
+            rewardScore += 15;
+        }
+        
+        // 7. Bullish Divergence
+        if (divergences.length > 0 && divergences[0].signal === 'bullish') {
+            rewardFactors.push({
+                factor: 'Bullish Divergence',
+                description: 'Price making lower lows while indicators strengthen',
+                potential: 'high',
+                impact: 20
+            });
+            rewardScore += 20;
+        }
+        
+        // 8. Strong Momentum Confirmation
+        const bullishMomentum = signals.momentum.filter(s => s.signal > 0).length;
+        if (bullishMomentum >= 5) {
+            rewardFactors.push({
+                factor: 'Momentum Convergence',
+                description: `${bullishMomentum} momentum indicators confirm strength`,
+                potential: 'high',
+                impact: 18
+            });
+            rewardScore += 18;
+        }
+        
+        // Déterminer le niveau de récompense global
+        if (rewardScore >= 85) {
+            rewardLevel = 'EXCEPTIONAL';
+        } else if (rewardScore >= 75) {
+            rewardLevel = 'VERY HIGH';
+        } else if (rewardScore >= 65) {
+            rewardLevel = 'HIGH';
+        } else if (rewardScore >= 55) {
+            rewardLevel = 'ATTRACTIVE';
+        } else if (rewardScore >= 45) {
+            rewardLevel = 'MODERATE';
+        } else if (rewardScore >= 35) {
+            rewardLevel = 'LOW';
+        } else {
+            rewardLevel = 'MINIMAL';
+        }
+        
+        // Calculer le ratio Risk/Reward
+        const rrRatio = rewardScore / Math.max(riskScore, 1);
+        
+        return {
+            risk: {
+                level: riskLevel,
+                score: Math.min(100, riskScore),
+                factors: riskFactors
+            },
+            reward: {
+                level: rewardLevel,
+                score: Math.min(100, rewardScore),
+                factors: rewardFactors
+            },
+            rrRatio: rrRatio.toFixed(2)
+        };
+    },
+
+    // ============================================
+    // 📋 PROFESSIONAL ANALYST SUMMARY
+    // Rapport de style Wall Street/Goldman Sachs
+    // ============================================
+
+    generateProfessionalSummary(aiScore, horizons, riskReward, signals) {
+        const currentDate = new Date().toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+        });
+        
+        const symbol = this.currentSymbol;
+        const currentPrice = this.formatCurrency(this.stockData.prices[this.stockData.prices.length - 1].close);
+        
+        // === EXECUTIVE SUMMARY ===
+        let executiveSummary = '';
+        
+        if (aiScore.score >= 70) {
+            executiveSummary = `We maintain a BULLISH outlook on ${symbol} with an AI Confidence Score of ${aiScore.score.toFixed(0)}/100. `;
+            executiveSummary += `Our proprietary multi-indicator analysis, incorporating ${aiScore.totalIndicators} technical signals, `;
+            executiveSummary += `suggests strong upside potential across multiple time horizons. `;
+        } else if (aiScore.score >= 55) {
+            executiveSummary = `We adopt a MODERATELY BULLISH stance on ${symbol} with an AI Confidence Score of ${aiScore.score.toFixed(0)}/100. `;
+            executiveSummary += `Technical indicators show constructive setup with ${aiScore.bullishSignals} bullish signals, `;
+            executiveSummary += `though some caution is warranted given ${aiScore.bearishSignals} contrary indicators. `;
+        } else if (aiScore.score >= 45) {
+            executiveSummary = `We recommend a NEUTRAL/HOLD position on ${symbol} with an AI Confidence Score of ${aiScore.score.toFixed(0)}/100. `;
+            executiveSummary += `The technical picture remains mixed with balanced signals (${aiScore.bullishSignals} bullish vs ${aiScore.bearishSignals} bearish). `;
+            executiveSummary += `We advise waiting for clearer directional conviction before initiating new positions. `;
+        } else if (aiScore.score >= 30) {
+            executiveSummary = `We maintain a BEARISH view on ${symbol} with an AI Confidence Score of ${aiScore.score.toFixed(0)}/100. `;
+            executiveSummary += `Our technical analysis reveals ${aiScore.bearishSignals} negative signals across momentum, trend, and volume indicators. `;
+            executiveSummary += `We recommend defensive positioning or outright short exposure. `;
+        } else {
+            executiveSummary = `We hold a STRONGLY BEARISH outlook on ${symbol} with an AI Confidence Score of ${aiScore.score.toFixed(0)}/100. `;
+            executiveSummary += `Technical deterioration is evident across ${aiScore.totalIndicators} indicators. `;
+            executiveSummary += `We strongly recommend profit-taking or establishing short positions. `;
+        }
+        
+        // === TECHNICAL THESIS ===
+        let technicalThesis = '';
+        
+        // Trend Analysis
+        const trendSignals = signals.trend;
+        const bullishTrends = trendSignals.filter(s => s.signal > 0).length;
+        const bearishTrends = trendSignals.filter(s => s.signal < 0).length;
+        
+        technicalThesis += `**Trend Structure:** `;
+        if (bullishTrends > bearishTrends) {
+            technicalThesis += `The primary trend remains intact with ${bullishTrends}/${trendSignals.length} trend indicators confirming upward bias. `;
+            
+            const maSignal = trendSignals.find(s => s.name === 'Moving Averages');
+            if (maSignal && maSignal.signal >= 2) {
+                technicalThesis += `Moving average alignment is particularly constructive. `;
+            }
+            
+            const adxSignal = trendSignals.find(s => s.name === 'ADX');
+            if (adxSignal && adxSignal.value !== 'N/A' && parseFloat(adxSignal.value) > 25) {
+                technicalThesis += `ADX above 25 confirms strong trend strength. `;
+            }
+        } else if (bearishTrends > bullishTrends) {
+            technicalThesis += `The trend structure has deteriorated with ${bearishTrends}/${trendSignals.length} indicators showing negative bias. `;
+            technicalThesis += `We advise respecting the downtrend until clear reversal signals emerge. `;
+        } else {
+            technicalThesis += `Trend indicators are mixed, suggesting a consolidation or transition phase. `;
+        }
+        
+        // Momentum Analysis
+        const momentumSignals = signals.momentum;
+        const extremeOversold = momentumSignals.filter(s => s.signal >= 2).length;
+        const extremeOverbought = momentumSignals.filter(s => s.signal <= -2).length;
+        
+        technicalThesis += `\n\n**Momentum Profile:** `;
+        if (extremeOversold >= 2) {
+            technicalThesis += `Multiple oscillators (${extremeOversold} indicators) show extreme oversold readings, `;
+            technicalThesis += `suggesting strong mean-reversion potential. `;
+        } else if (extremeOverbought >= 2) {
+            technicalThesis += `Momentum indicators (${extremeOverbought} readings) signal overbought conditions, `;
+            technicalThesis += `warranting caution on longs and consideration of profit-taking. `;
+        } else {
+            const bullishMomentum = momentumSignals.filter(s => s.signal > 0).length;
+            if (bullishMomentum > momentumSignals.length / 2) {
+                technicalThesis += `Momentum remains constructive with ${bullishMomentum}/${momentumSignals.length} positive readings. `;
+            } else {
+                technicalThesis += `Momentum has weakened, with mixed signals across oscillators. `;
+            }
+        }
+        
+        // Volume Analysis
+        const volumeSignals = signals.volume;
+        const accumulation = volumeSignals.filter(s => s.signal > 0).length;
+        const distribution = volumeSignals.filter(s => s.signal < 0).length;
+        
+        technicalThesis += `\n\n**Volume Dynamics:** `;
+        if (accumulation > distribution) {
+            technicalThesis += `Volume analysis confirms institutional accumulation, `;
+            
+            const cmfSignal = volumeSignals.find(s => s.name === 'CMF');
+            if (cmfSignal && cmfSignal.value > 0.05) {
+                technicalThesis += `with Chaikin Money Flow at +${cmfSignal.value.toFixed(3)} signaling strong buying pressure. `;
+            } else {
+                technicalThesis += `supporting our constructive view. `;
+            }
+        } else if (distribution > accumulation) {
+            technicalThesis += `Volume patterns suggest distribution, with ${distribution}/${volumeSignals.length} indicators negative. `;
+            technicalThesis += `This raises concerns about demand sustainability. `;
+        } else {
+            technicalThesis += `Volume signals are balanced, providing no clear directional edge. `;
+        }
+        
+        // === RISK CONSIDERATIONS ===
+        let riskSection = `**Risk Assessment (${riskReward.risk.level}):** `;
+        
+        if (riskReward.risk.factors.length > 0) {
+            riskSection += `We identify ${riskReward.risk.factors.length} key risk factor(s): `;
+            riskReward.risk.factors.slice(0, 3).forEach((risk, idx) => {
+                riskSection += `(${idx + 1}) ${risk.description}. `;
+            });
+        } else {
+            riskSection += `Risk profile appears benign with no major technical warning signals. `;
+        }
+        
+        // === REWARD POTENTIAL ===
+        let rewardSection = `\n\n**Upside Catalysts (${riskReward.reward.level}):** `;
+        
+        if (riskReward.reward.factors.length > 0) {
+            rewardSection += `We see ${riskReward.reward.factors.length} positive catalyst(s): `;
+            riskReward.reward.factors.slice(0, 3).forEach((reward, idx) => {
+                rewardSection += `(${idx + 1}) ${reward.description}. `;
+            });
+        } else {
+            rewardSection += `Limited upside catalysts identified in current technical setup. `;
+        }
+        
+        // === INVESTMENT HORIZON GUIDANCE ===
+        let horizonGuidance = `\n\n**Multi-Horizon Recommendations:**\n`;
+        
+        horizonGuidance += `• **1-Year Target:** ${this.formatCurrency(horizons['1y'].targetPrice)} `;
+        horizonGuidance += `(${horizons['1y'].upside >= 0 ? '+' : ''}${horizons['1y'].upside.toFixed(1)}%) - `;
+        horizonGuidance += `**${horizons['1y'].recommendation}** (${horizons['1y'].confidence}% conviction)\n`;
+        
+        horizonGuidance += `• **2-Year Target:** ${this.formatCurrency(horizons['2y'].targetPrice)} `;
+        horizonGuidance += `(${horizons['2y'].upside >= 0 ? '+' : ''}${horizons['2y'].upside.toFixed(1)}%) - `;
+        horizonGuidance += `**${horizons['2y'].recommendation}** (${horizons['2y'].confidence}% conviction)\n`;
+        
+        horizonGuidance += `• **5-Year Target:** ${this.formatCurrency(horizons['5y'].targetPrice)} `;
+        horizonGuidance += `(${horizons['5y'].upside >= 0 ? '+' : ''}${horizons['5y'].upside.toFixed(1)}%) - `;
+        horizonGuidance += `**${horizons['5y'].recommendation}** (${horizons['5y'].confidence}% conviction)\n`;
+        
+        horizonGuidance += `• **10-Year Target:** ${this.formatCurrency(horizons['10y'].targetPrice)} `;
+        horizonGuidance += `(${horizons['10y'].upside >= 0 ? '+' : ''}${horizons['10y'].upside.toFixed(1)}%) - `;
+        horizonGuidance += `**${horizons['10y'].recommendation}** (${horizons['10y'].confidence}% conviction)`;
+        
+        // === CONCLUSION ===
+        let conclusion = `\n\n**Investment Conclusion:** `;
+        
+        const avgUpside = (horizons['1y'].upside + horizons['2y'].upside + horizons['5y'].upside + horizons['10y'].upside) / 4;
+        const rrRatio = parseFloat(riskReward.rrRatio);
+        
+        if (rrRatio > 2.0 && avgUpside > 15) {
+            conclusion += `${symbol} presents an ATTRACTIVE risk/reward profile (R/R: ${riskReward.rrRatio}x) `;
+            conclusion += `with significant upside potential across all time horizons. `;
+            conclusion += `We recommend INITIATING or ADDING to positions on weakness. `;
+        } else if (rrRatio > 1.5 && avgUpside > 5) {
+            conclusion += `${symbol} offers a FAVORABLE setup (R/R: ${riskReward.rrRatio}x) `;
+            conclusion += `suitable for patient investors with medium-term horizons. `;
+            conclusion += `We recommend ACCUMULATING on pullbacks to support levels. `;
+        } else if (rrRatio > 1.0) {
+            conclusion += `${symbol} shows BALANCED risk/reward (R/R: ${riskReward.rrRatio}x). `;
+            conclusion += `We recommend HOLDING existing positions while monitoring for improved entry points. `;
+        } else {
+            conclusion += `${symbol} exhibits UNFAVORABLE risk/reward (R/R: ${riskReward.rrRatio}x). `;
+            conclusion += `We recommend REDUCING exposure or EXITING positions. `;
+        }
+        
+        // === ASSEMBLER LE RAPPORT COMPLET ===
+        const fullReport = `
+    **ALPHY AI INSTITUTIONAL RESEARCH**
+    **${symbol} - Technical Analysis Report**
+    **Date:** ${currentDate} | **Current Price:** ${currentPrice}
+    **AI Confidence Score:** ${aiScore.score.toFixed(0)}/100 (${aiScore.rating})
+
+    ---
+
+    **EXECUTIVE SUMMARY**
+
+    ${executiveSummary}
+
+    ---
+
+    **TECHNICAL ANALYSIS**
+
+    ${technicalThesis}
+
+    ---
+
+    **RISK/REWARD FRAMEWORK**
+
+    ${riskSection}
+
+    ${rewardSection}
+
+    **Risk/Reward Ratio:** ${riskReward.rrRatio}x
+
+    ---
+
+    **PRICE TARGETS & RECOMMENDATIONS**
+
+    ${horizonGuidance}
+
+    ---
+
+    ${conclusion}
+
+    ---
+
+    **Methodology Note:** This analysis synthesizes ${aiScore.totalIndicators} proprietary technical indicators across momentum, trend, volatility, volume, and price action dimensions. Our AI-powered engine weights signals by statistical significance and time horizon relevance to generate institutional-grade recommendations.
+
+    **Disclaimer:** This report is for informational purposes only and does not constitute investment advice. Technical analysis has inherent limitations. Past performance does not guarantee future results. Consult a licensed financial advisor before making investment decisions.
+        `.trim();
+        
+        return fullReport;
+    },
+
+    // ============================================
+    // 🎨 UI DISPLAY FUNCTIONS
+    // Affichage professionnel des résultats
+    // ============================================
+
+    displayAIRecommendation(aiScore, signals) {
+        // AI Score Value
+        document.getElementById('aiScoreValue').textContent = aiScore.score.toFixed(0) + '/100';
+        
+        // AI Score Rating
+        const ratingEl = document.getElementById('aiScoreRating');
+        ratingEl.textContent = aiScore.rating;
+        
+        // Apply color class
+        let scoreClass = '';
+        if (aiScore.score >= 70) scoreClass = 'very-bullish';
+        else if (aiScore.score >= 60) scoreClass = 'bullish';
+        else if (aiScore.score >= 55) scoreClass = 'moderately-bullish';
+        else if (aiScore.score >= 45) scoreClass = 'neutral';
+        else if (aiScore.score >= 40) scoreClass = 'moderately-bearish';
+        else if (aiScore.score >= 30) scoreClass = 'bearish';
+        else scoreClass = 'very-bearish';
+        
+        ratingEl.className = `ai-score-rating ${scoreClass}`;
+        
+        // AI Score Fill Bar
+        const fillEl = document.getElementById('aiScoreFill');
+        fillEl.style.width = aiScore.score + '%';
+        fillEl.className = `ai-score-fill ${scoreClass}`;
+        
+        // Signal Counts
+        document.getElementById('bullishSignals').textContent = aiScore.bullishSignals;
+        document.getElementById('neutralSignals').textContent = aiScore.neutralSignals;
+        document.getElementById('bearishSignals').textContent = aiScore.bearishSignals;
+    },
+
+    displayHorizonRecommendations(horizons, currentPrice) {
+        // 1 Year
+        this.displaySingleHorizon('1y', horizons['1y'], currentPrice);
+        
+        // 2 Years
+        this.displaySingleHorizon('2y', horizons['2y'], currentPrice);
+        
+        // 5 Years
+        this.displaySingleHorizon('5y', horizons['5y'], currentPrice);
+        
+        // 10 Years
+        this.displaySingleHorizon('10y', horizons['10y'], currentPrice);
+    },
+
+    displaySingleHorizon(horizon, data, currentPrice) {
+        // Recommendation Badge
+        const recEl = document.getElementById(`recommendation${horizon}`);
+        const recClass = this.getRecommendationClass(data.recommendation);
+        recEl.innerHTML = `<div class='ai-rec-badge ${recClass}'>${data.recommendation}</div>`;
+        
+        // Target Price
+        document.getElementById(`target${horizon}`).textContent = this.formatCurrency(data.targetPrice);
+        
+        // Upside/Downside
+        const upsideEl = document.getElementById(`upside${horizon}`);
+        const upsideText = `${data.upside >= 0 ? '+' : ''}${data.upside.toFixed(1)}%`;
+        const upsideClass = data.upside >= 0 ? 'positive' : 'negative';
+        upsideEl.innerHTML = `<span style="color: ${data.upside >= 0 ? '#10b981' : '#ef4444'}; font-weight: 700;">${upsideText}</span>`;
+        
+        // Confidence Bar
+        const confEl = document.getElementById(`confidence${horizon}`);
+        confEl.style.width = data.confidence + '%';
+        confEl.className = `ai-confidence-fill ${recClass}`;
+        
+        // Key Drivers
+        const driversEl = document.getElementById(`drivers${horizon}`);
+        driversEl.innerHTML = data.drivers.map(driver => 
+            `<div class='ai-driver-item'><i class='fas fa-check-circle'></i> ${driver}</div>`
+        ).join('');
+    },
+
+    getRecommendationClass(recommendation) {
+        const map = {
+            'STRONG BUY': 'strong-buy',
+            'BUY': 'buy',
+            'ACCUMULATE': 'accumulate',
+            'HOLD': 'hold',
+            'REDUCE': 'reduce',
+            'SELL': 'sell',
+            'STRONG SELL': 'strong-sell'
+        };
+        
+        return map[recommendation] || 'neutral';
+    },
+
+    displayRiskReward(riskReward) {
+        // Risk Level
+        const riskEl = document.getElementById('aiRiskLevel');
+        const riskClass = this.getRiskClass(riskReward.risk.level);
+        riskEl.innerHTML = `<div class='ai-risk-badge ${riskClass}'>${riskReward.risk.level} (${riskReward.risk.score}/100)</div>`;
+        
+        // Risk Factors
+        const riskFactorsEl = document.getElementById('aiRiskFactors');
+        if (riskReward.risk.factors.length > 0) {
+            riskFactorsEl.innerHTML = riskReward.risk.factors.map(risk => {
+                const icon = this.getSeverityIcon(risk.severity);
+                return `
+                    <div class='ai-factor-item ${risk.severity}'>
+                        ${icon} <strong>${risk.factor}:</strong> ${risk.description}
+                    </div>
+                `;
+            }).join('');
+        } else {
+            riskFactorsEl.innerHTML = `<div class='ai-factor-item low'><i class='fas fa-check-circle'></i> No significant risk factors identified</div>`;
+        }
+        
+        // Reward Level
+        const rewardEl = document.getElementById('aiRewardLevel');
+        const rewardClass = this.getRewardClass(riskReward.reward.level);
+        rewardEl.innerHTML = `<div class='ai-reward-badge ${rewardClass}'>${riskReward.reward.level} (${riskReward.reward.score}/100)</div>`;
+        
+        // Reward Factors
+        const rewardFactorsEl = document.getElementById('aiRewardFactors');
+        if (riskReward.reward.factors.length > 0) {
+            rewardFactorsEl.innerHTML = riskReward.reward.factors.map(reward => {
+                const icon = this.getPotentialIcon(reward.potential);
+                return `
+                    <div class='ai-factor-item ${reward.potential}'>
+                        ${icon} <strong>${reward.factor}:</strong> ${reward.description}
+                    </div>
+                `;
+            }).join('');
+        } else {
+            rewardFactorsEl.innerHTML = `<div class='ai-factor-item low'><i class='fas fa-info-circle'></i> Limited upside catalysts at current levels</div>`;
+        }
+    },
+
+    getRiskClass(level) {
+        const map = {
+            'VERY HIGH': 'very-high-risk',
+            'HIGH': 'high-risk',
+            'ELEVATED': 'elevated-risk',
+            'MODERATE': 'moderate-risk',
+            'LOW': 'low-risk',
+            'VERY LOW': 'very-low-risk'
+        };
+        return map[level] || 'moderate-risk';
+    },
+
+    getRewardClass(level) {
+        const map = {
+            'EXCEPTIONAL': 'exceptional-reward',
+            'VERY HIGH': 'very-high-reward',
+            'HIGH': 'high-reward',
+            'ATTRACTIVE': 'attractive-reward',
+            'MODERATE': 'moderate-reward',
+            'LOW': 'low-reward',
+            'MINIMAL': 'minimal-reward'
+        };
+        return map[level] || 'moderate-reward';
+    },
+
+    getSeverityIcon(severity) {
+        const map = {
+            'high': '<i class="fas fa-exclamation-triangle" style="color: #ef4444;"></i>',
+            'medium': '<i class="fas fa-exclamation-circle" style="color: #f59e0b;"></i>',
+            'low': '<i class="fas fa-info-circle" style="color: #3b82f6;"></i>'
+        };
+        return map[severity] || '<i class="fas fa-info-circle"></i>';
+    },
+
+    getPotentialIcon(potential) {
+        const map = {
+            'very high': '<i class="fas fa-rocket" style="color: #10b981;"></i>',
+            'high': '<i class="fas fa-arrow-up" style="color: #10b981;"></i>',
+            'medium': '<i class="fas fa-arrow-right" style="color: #3b82f6;"></i>',
+            'low': '<i class="fas fa-minus" style="color: #6b7280;"></i>'
+        };
+        return map[potential] || '<i class="fas fa-arrow-up"></i>';
+    },
+
+    displayProfessionalSummary(summary) {
+        const summaryEl = document.getElementById('aiSummaryContent');
+        const dateEl = document.getElementById('aiSummaryDate');
+        
+        // Update date
+        dateEl.textContent = new Date().toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+        });
+        
+        // Convert markdown-style formatting to HTML
+        let htmlSummary = summary
+            .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+            .replace(/\n\n/g, '</p><p>')
+            .replace(/\n/g, '<br>')
+            .replace(/^(.+)$/gm, '<p>$1</p>')
+            .replace(/<p><\/p>/g, '')
+            .replace(/---/g, '<hr style="margin: 20px 0; border: none; border-top: 2px solid rgba(0,0,0,0.1);">');
+        
+        summaryEl.innerHTML = htmlSummary;
     },
     
     displayConsolidatedSignals(signals, signalPercentage) {
