@@ -1,1097 +1,747 @@
-/**
- * ============================================
- * 🔥 CHATBOT MODALS - SHARE & SETTINGS
- * Version Corrigée & Fonctionnelle 100%
- * ============================================
- */
+/* ============================================
+   CHATBOT MODALS - SHARE & SETTINGS
+   Version 1.0 - Premium Modals System
+   ============================================ */
 
 class ChatbotModals {
     constructor() {
-        this.shareModal = document.getElementById('share-modal');
-        this.settingsModal = document.getElementById('settings-modal');
-        this.toastContainer = this.getOrCreateToastContainer();
-        this.chatbotInstance = null;
-        
-        // Default settings
-        this.defaultSettings = {
-            aiModel: 'gemini-1.5-pro',
-            temperature: 0.7,
-            maxTokens: 4096,
-            defaultTimeframe: '1d',
-            theme: 'auto',
-            fontSize: 15,
-            enableAnimations: true,
-            showRobot: false,
-            compactMode: false,
-            enableSound: true,
-            emailAlerts: false,
-            autoSave: true,
-            alertFrequency: 'daily'
-        };
-        
+        this.modals = {};
         this.init();
     }
-    
+
     init() {
-        console.log('🎯 Initializing Chatbot Modals...');
-        
-        // Attendre que le chatbot soit initialisé
-        this.waitForChatbot();
-        
-        // Event Listeners
-        this.setupShareButton();
-        this.setupSettingsButton();
-        this.setupModalClosing();
-        this.setupShareActions();
-        this.setupSettingsTabs();
-        this.setupSettingsControls();
+        console.log('🎭 Initializing Chatbot Modals...');
+        this.createModalsHTML();
+        this.attachEventListeners();
         this.loadSettings();
-        
-        console.log('✅ Chatbot Modals initialized');
+        console.log('✅ Modals initialized successfully!');
     }
-    
-    // ============================================
-    // CHATBOT INTEGRATION (CORRIGÉ)
-    // ============================================
-    
-    waitForChatbot() {
-        const checkChatbot = () => {
-            // Chercher l'instance du chatbot (plusieurs possibilités)
-            this.chatbotInstance = window.financialChatbot 
-                                || window.chatbotFullpage 
-                                || window.chatbotUI 
-                                || window.chatbot 
-                                || null;
-            
-            if (this.chatbotInstance) {
-                console.log('✅ Chatbot instance found:', this.chatbotInstance);
-                this.applyAISettings(); // Appliquer les settings immédiatement
-            } else {
-                console.log('⏳ Waiting for chatbot instance...');
-                setTimeout(checkChatbot, 500);
+
+    /**
+     * Crée le HTML des modals
+     */
+    createModalsHTML() {
+        const modalsContainer = document.createElement('div');
+        modalsContainer.id = 'chatbot-modals-container';
+        modalsContainer.innerHTML = `
+            <!-- ========================================
+                 SHARE MODAL
+                 ======================================== -->
+            <div class="chatbot-modal" id="share-modal">
+                <div class="modal-overlay"></div>
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h2 class="modal-title">
+                            <i class="fas fa-share-alt"></i>
+                            Share Conversation
+                        </h2>
+                        <button class="modal-close" data-modal="share-modal">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    
+                    <div class="modal-body">
+                        <div class="share-options">
+                            <button class="share-option-btn" id="share-link-btn">
+                                <div class="share-option-icon">
+                                    <i class="fas fa-link"></i>
+                                </div>
+                                <div class="share-option-content">
+                                    <div class="share-option-title">Copy Link</div>
+                                    <div class="share-option-desc">Share via shareable link</div>
+                                </div>
+                            </button>
+                            
+                            <button class="share-option-btn" id="share-email-btn">
+                                <div class="share-option-icon">
+                                    <i class="fas fa-envelope"></i>
+                                </div>
+                                <div class="share-option-content">
+                                    <div class="share-option-title">Email</div>
+                                    <div class="share-option-desc">Send via email</div>
+                                </div>
+                            </button>
+                            
+                            <button class="share-option-btn" id="share-export-btn">
+                                <div class="share-option-icon">
+                                    <i class="fas fa-download"></i>
+                                </div>
+                                <div class="share-option-content">
+                                    <div class="share-option-title">Export</div>
+                                    <div class="share-option-desc">Download as PDF or TXT</div>
+                                </div>
+                            </button>
+                            
+                            <button class="share-option-btn" id="share-screenshot-btn">
+                                <div class="share-option-icon">
+                                    <i class="fas fa-camera"></i>
+                                </div>
+                                <div class="share-option-content">
+                                    <div class="share-option-title">Screenshot</div>
+                                    <div class="share-option-desc">Capture as image</div>
+                                </div>
+                            </button>
+                        </div>
+                        
+                        <!-- Export Format Selection (Hidden by default) -->
+                        <div class="export-format-selector" id="export-format-selector" style="display: none;">
+                            <h3 class="export-format-title">Choose Export Format</h3>
+                            <div class="export-format-buttons">
+                                <button class="export-format-btn" data-format="pdf">
+                                    <i class="fas fa-file-pdf"></i>
+                                    <span>PDF Document</span>
+                                </button>
+                                <button class="export-format-btn" data-format="txt">
+                                    <i class="fas fa-file-alt"></i>
+                                    <span>Text File</span>
+                                </button>
+                                <button class="export-format-btn" data-format="json">
+                                    <i class="fas fa-code"></i>
+                                    <span>JSON Data</span>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- Success Message -->
+                        <div class="share-success-message" id="share-success-message" style="display: none;">
+                            <i class="fas fa-check-circle"></i>
+                            <span>Link copied to clipboard!</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ========================================
+                 SETTINGS MODAL
+                 ======================================== -->
+            <div class="chatbot-modal" id="settings-modal">
+                <div class="modal-overlay"></div>
+                <div class="modal-content modal-content-large">
+                    <div class="modal-header">
+                        <h2 class="modal-title">
+                            <i class="fas fa-cog"></i>
+                            Settings
+                        </h2>
+                        <button class="modal-close" data-modal="settings-modal">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    
+                    <div class="modal-body">
+                        <!-- Settings Tabs -->
+                        <div class="settings-tabs">
+                            <button class="settings-tab active" data-tab="general">
+                                <i class="fas fa-sliders-h"></i>
+                                <span>General</span>
+                            </button>
+                            <button class="settings-tab" data-tab="appearance">
+                                <i class="fas fa-palette"></i>
+                                <span>Appearance</span>
+                            </button>
+                            <button class="settings-tab" data-tab="notifications">
+                                <i class="fas fa-bell"></i>
+                                <span>Notifications</span>
+                            </button>
+                            <button class="settings-tab" data-tab="privacy">
+                                <i class="fas fa-shield-alt"></i>
+                                <span>Privacy</span>
+                            </button>
+                        </div>
+                        
+                        <!-- Settings Content -->
+                        <div class="settings-content">
+                            <!-- General Tab -->
+                            <div class="settings-panel active" data-panel="general">
+                                <h3 class="settings-panel-title">General Settings</h3>
+                                
+                                <div class="setting-item">
+                                    <div class="setting-info">
+                                        <div class="setting-label">Language</div>
+                                        <div class="setting-desc">Choose your preferred language</div>
+                                    </div>
+                                    <select class="setting-select" id="language-select">
+                                        <option value="en">English</option>
+                                        <option value="fr">Français</option>
+                                        <option value="es">Español</option>
+                                        <option value="de">Deutsch</option>
+                                    </select>
+                                </div>
+                                
+                                <div class="setting-item">
+                                    <div class="setting-info">
+                                        <div class="setting-label">Auto-save conversations</div>
+                                        <div class="setting-desc">Automatically save your chat history</div>
+                                    </div>
+                                    <label class="setting-toggle">
+                                        <input type="checkbox" id="auto-save-toggle" checked>
+                                        <span class="toggle-slider"></span>
+                                    </label>
+                                </div>
+                                
+                                <div class="setting-item">
+                                    <div class="setting-info">
+                                        <div class="setting-label">Show timestamps</div>
+                                        <div class="setting-desc">Display time for each message</div>
+                                    </div>
+                                    <label class="setting-toggle">
+                                        <input type="checkbox" id="timestamps-toggle" checked>
+                                        <span class="toggle-slider"></span>
+                                    </label>
+                                </div>
+                                
+                                <div class="setting-item">
+                                    <div class="setting-info">
+                                        <div class="setting-label">Message font size</div>
+                                        <div class="setting-desc">Adjust text size for better readability</div>
+                                    </div>
+                                    <select class="setting-select" id="font-size-select">
+                                        <option value="small">Small</option>
+                                        <option value="medium" selected>Medium</option>
+                                        <option value="large">Large</option>
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <!-- Appearance Tab -->
+                            <div class="settings-panel" data-panel="appearance">
+                                <h3 class="settings-panel-title">Appearance</h3>
+                                
+                                <div class="setting-item">
+                                    <div class="setting-info">
+                                        <div class="setting-label">Theme</div>
+                                        <div class="setting-desc">Choose light or dark mode</div>
+                                    </div>
+                                    <div class="theme-selector">
+                                        <button class="theme-option active" data-theme="light">
+                                            <i class="fas fa-sun"></i>
+                                            <span>Light</span>
+                                        </button>
+                                        <button class="theme-option" data-theme="dark">
+                                            <i class="fas fa-moon"></i>
+                                            <span>Dark</span>
+                                        </button>
+                                        <button class="theme-option" data-theme="auto">
+                                            <i class="fas fa-adjust"></i>
+                                            <span>Auto</span>
+                                        </button>
+                                    </div>
+                                </div>
+                                
+                                <div class="setting-item">
+                                    <div class="setting-info">
+                                        <div class="setting-label">Particle effects</div>
+                                        <div class="setting-desc">Enable animated background particles</div>
+                                    </div>
+                                    <label class="setting-toggle">
+                                        <input type="checkbox" id="particles-toggle" checked>
+                                        <span class="toggle-slider"></span>
+                                    </label>
+                                </div>
+                                
+                                <div class="setting-item">
+                                    <div class="setting-info">
+                                        <div class="setting-label">Animations</div>
+                                        <div class="setting-desc">Enable smooth transitions and effects</div>
+                                    </div>
+                                    <label class="setting-toggle">
+                                        <input type="checkbox" id="animations-toggle" checked>
+                                        <span class="toggle-slider"></span>
+                                    </label>
+                                </div>
+                                
+                                <div class="setting-item">
+                                    <div class="setting-info">
+                                        <div class="setting-label">Compact mode</div>
+                                        <div class="setting-desc">Reduce spacing for more content</div>
+                                    </div>
+                                    <label class="setting-toggle">
+                                        <input type="checkbox" id="compact-mode-toggle">
+                                        <span class="toggle-slider"></span>
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            <!-- Notifications Tab -->
+                            <div class="settings-panel" data-panel="notifications">
+                                <h3 class="settings-panel-title">Notifications</h3>
+                                
+                                <div class="setting-item">
+                                    <div class="setting-info">
+                                        <div class="setting-label">Desktop notifications</div>
+                                        <div class="setting-desc">Receive notifications on your desktop</div>
+                                    </div>
+                                    <label class="setting-toggle">
+                                        <input type="checkbox" id="desktop-notifications-toggle">
+                                        <span class="toggle-slider"></span>
+                                    </label>
+                                </div>
+                                
+                                <div class="setting-item">
+                                    <div class="setting-info">
+                                        <div class="setting-label">Sound alerts</div>
+                                        <div class="setting-desc">Play sound when receiving messages</div>
+                                    </div>
+                                    <label class="setting-toggle">
+                                        <input type="checkbox" id="sound-alerts-toggle" checked>
+                                        <span class="toggle-slider"></span>
+                                    </label>
+                                </div>
+                                
+                                <div class="setting-item">
+                                    <div class="setting-info">
+                                        <div class="setting-label">Email digest</div>
+                                        <div class="setting-desc">Receive daily summary via email</div>
+                                    </div>
+                                    <label class="setting-toggle">
+                                        <input type="checkbox" id="email-digest-toggle">
+                                        <span class="toggle-slider"></span>
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            <!-- Privacy Tab -->
+                            <div class="settings-panel" data-panel="privacy">
+                                <h3 class="settings-panel-title">Privacy & Data</h3>
+                                
+                                <div class="setting-item">
+                                    <div class="setting-info">
+                                        <div class="setting-label">Save conversation history</div>
+                                        <div class="setting-desc">Store your chat history locally</div>
+                                    </div>
+                                    <label class="setting-toggle">
+                                        <input type="checkbox" id="save-history-toggle" checked>
+                                        <span class="toggle-slider"></span>
+                                    </label>
+                                </div>
+                                
+                                <div class="setting-item">
+                                    <div class="setting-info">
+                                        <div class="setting-label">Analytics & tracking</div>
+                                        <div class="setting-desc">Help improve our service with usage data</div>
+                                    </div>
+                                    <label class="setting-toggle">
+                                        <input type="checkbox" id="analytics-toggle" checked>
+                                        <span class="toggle-slider"></span>
+                                    </label>
+                                </div>
+                                
+                                <div class="setting-item setting-item-danger">
+                                    <div class="setting-info">
+                                        <div class="setting-label">Clear all data</div>
+                                        <div class="setting-desc">Delete all conversations and settings</div>
+                                    </div>
+                                    <button class="setting-danger-btn" id="clear-data-btn">
+                                        <i class="fas fa-trash-alt"></i>
+                                        Clear Data
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Settings Footer -->
+                        <div class="settings-footer">
+                            <button class="settings-reset-btn" id="reset-settings-btn">
+                                <i class="fas fa-undo"></i>
+                                Reset to Defaults
+                            </button>
+                            <button class="settings-save-btn" id="save-settings-btn">
+                                <i class="fas fa-check"></i>
+                                Save Changes
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        document.body.appendChild(modalsContainer);
+    }
+
+    /**
+     * Attache les event listeners
+     */
+    attachEventListeners() {
+        // Open modals
+        document.getElementById('share-btn')?.addEventListener('click', () => this.openModal('share-modal'));
+        document.getElementById('settings-btn')?.addEventListener('click', () => this.openModal('settings-modal'));
+        
+        // Close modals
+        document.querySelectorAll('.modal-close').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const modalId = e.currentTarget.dataset.modal;
+                this.closeModal(modalId);
+            });
+        });
+        
+        // Close on overlay click
+        document.querySelectorAll('.modal-overlay').forEach(overlay => {
+            overlay.addEventListener('click', (e) => {
+                const modal = e.currentTarget.closest('.chatbot-modal');
+                this.closeModal(modal.id);
+            });
+        });
+        
+        // Close on ESC key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                this.closeAllModals();
             }
-        };
+        });
         
-        checkChatbot();
+        // Share options
+        document.getElementById('share-link-btn')?.addEventListener('click', () => this.shareViaLink());
+        document.getElementById('share-email-btn')?.addEventListener('click', () => this.shareViaEmail());
+        document.getElementById('share-export-btn')?.addEventListener('click', () => this.showExportOptions());
+        document.getElementById('share-screenshot-btn')?.addEventListener('click', () => this.takeScreenshot());
+        
+        // Export formats
+        document.querySelectorAll('.export-format-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const format = e.currentTarget.dataset.format;
+                this.exportConversation(format);
+            });
+        });
+        
+        // Settings tabs
+        document.querySelectorAll('.settings-tab').forEach(tab => {
+            tab.addEventListener('click', (e) => this.switchTab(e.currentTarget));
+        });
+        
+        // Settings actions
+        document.getElementById('save-settings-btn')?.addEventListener('click', () => this.saveSettings());
+        document.getElementById('reset-settings-btn')?.addEventListener('click', () => this.resetSettings());
+        document.getElementById('clear-data-btn')?.addEventListener('click', () => this.clearAllData());
+        
+        // Theme selector
+        document.querySelectorAll('.theme-option').forEach(btn => {
+            btn.addEventListener('click', (e) => this.changeTheme(e.currentTarget));
+        });
     }
-    
-    // ============================================
-    // TOAST CONTAINER (CREATE IF NOT EXISTS)
-    // ============================================
-    
-    getOrCreateToastContainer() {
-        let container = document.getElementById('toast-container');
-        if (!container) {
-            container = document.createElement('div');
-            container.id = 'toast-container';
-            container.className = 'toast-container';
-            document.body.appendChild(container);
-        }
-        return container;
-    }
-    
-    // ============================================
-    // MODAL MANAGEMENT
-    // ============================================
-    
+
+    /**
+     * Ouvrir un modal
+     */
     openModal(modalId) {
         const modal = document.getElementById(modalId);
         if (modal) {
             modal.classList.add('active');
             document.body.style.overflow = 'hidden';
-            console.log(`📂 Modal opened: ${modalId}`);
-        } else {
-            console.warn(`⚠ Modal not found: ${modalId}`);
+            console.log(`📖 Modal opened: ${modalId}`);
         }
     }
-    
+
+    /**
+     * Fermer un modal
+     */
     closeModal(modalId) {
         const modal = document.getElementById(modalId);
         if (modal) {
             modal.classList.remove('active');
             document.body.style.overflow = '';
-            console.log(`📁 Modal closed: ${modalId}`);
+            
+            // Reset export selector
+            const exportSelector = document.getElementById('export-format-selector');
+            if (exportSelector) exportSelector.style.display = 'none';
+            
+            console.log(`📕 Modal closed: ${modalId}`);
         }
     }
-    
-    setupShareButton() {
-        const shareBtn = document.getElementById('share-btn');
-        if (shareBtn) {
-            shareBtn.addEventListener('click', () => {
-                this.openModal('share-modal');
-            });
-        }
-    }
-    
-    setupSettingsButton() {
-        const settingsBtn = document.getElementById('settings-btn');
-        if (settingsBtn) {
-            settingsBtn.addEventListener('click', () => {
-                this.openModal('settings-modal');
-            });
-        }
-    }
-    
-    setupModalClosing() {
-        // Close buttons
-        document.querySelectorAll('.modal-close').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                const modal = e.target.closest('.chatbot-modal');
-                if (modal) {
-                    this.closeModal(modal.id);
-                }
-            });
-        });
-        
-        // Click on overlay
-        document.querySelectorAll('.modal-overlay').forEach(overlay => {
-            overlay.addEventListener('click', () => {
-                const modal = overlay.closest('.chatbot-modal');
-                if (modal) {
-                    this.closeModal(modal.id);
-                }
-            });
-        });
-        
-        // ESC key
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape') {
-                if (this.shareModal?.classList.contains('active')) {
-                    this.closeModal('share-modal');
-                }
-                if (this.settingsModal?.classList.contains('active')) {
-                    this.closeModal('settings-modal');
-                }
-            }
+
+    /**
+     * Fermer tous les modals
+     */
+    closeAllModals() {
+        document.querySelectorAll('.chatbot-modal.active').forEach(modal => {
+            this.closeModal(modal.id);
         });
     }
-    
-    // ============================================
-    // SHARE ACTIONS (100% FONCTIONNEL)
-    // ============================================
-    
-    setupShareActions() {
-        // Export PDF
-        document.getElementById('share-pdf')?.addEventListener('click', () => {
-            this.exportToPDF();
-        });
+
+    /**
+     * Partager via lien
+     */
+    async shareViaLink() {
+        const conversationId = this.generateConversationId();
+        const shareUrl = `${window.location.origin}/shared/${conversationId}`;
         
-        // Copy Link
-        document.getElementById('share-link')?.addEventListener('click', () => {
-            this.copyShareLink();
-        });
-        
-        // Export Markdown
-        document.getElementById('share-markdown')?.addEventListener('click', () => {
-            this.exportToMarkdown();
-        });
-        
-        // Email
-        document.getElementById('share-email')?.addEventListener('click', () => {
-            this.shareViaEmail();
-        });
-        
-        // Share Summary
-        document.getElementById('share-summary')?.addEventListener('click', () => {
-            this.generateSummary();
-        });
-    }
-    
-    async exportToPDF() {
         try {
-            this.showToast('Generating PDF...', 'info');
-            
-            const messages = this.getConversationMessages();
-            
-            if (messages.length === 0) {
-                this.showToast('No messages to export', 'error');
-                return;
-            }
-            
-            // Charger html2pdf dynamiquement
-            if (typeof html2pdf === 'undefined') {
-                await this.loadScript('https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js');
-            }
-            
-            const htmlContent = this.createPDFContent(messages);
-            
-            const opt = {
-                margin: [10, 10, 10, 10],
-                filename: `alphavault-conversation-${new Date().toISOString().slice(0,10)}.pdf`,
-                image: { type: 'jpeg', quality: 0.98 },
-                html2canvas: { scale: 2, useCORS: true },
-                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-            };
-            
-            await html2pdf().set(opt).from(htmlContent).save();
-            
-            this.showToast('PDF exported successfully!', 'success');
-            this.closeModal('share-modal');
-            
-        } catch (error) {
-            console.error('❌ PDF export error:', error);
-            this.showToast('Failed to export PDF', 'error');
+            await navigator.clipboard.writeText(shareUrl);
+            this.showSuccessMessage('Link copied to clipboard!');
+            console.log('🔗 Share link copied:', shareUrl);
+        } catch (err) {
+            console.error('❌ Failed to copy link:', err);
+            this.showSuccessMessage('Failed to copy link', true);
         }
     }
-    
-    createPDFContent(messages) {
-        const container = document.createElement('div');
-        container.style.cssText = `
-            padding: 20px;
-            font-family: 'Inter', Arial, sans-serif;
-            max-width: 800px;
-        `;
-        
-        const header = `
-            <div style="margin-bottom: 30px;">
-                <h1 style="color: #667eea; font-size: 28px; font-weight: 800; margin: 0 0 10px 0;">
-                    AlphaVault AI Conversation
-                </h1>
-                <p style="color: #64748b; margin: 0 0 20px 0; font-size: 14px;">
-                    📅 ${new Date().toLocaleString('en-US', { dateStyle: 'full', timeStyle: 'short' })}
-                </p>
-                <hr style="border: none; border-top: 2px solid #e2e8f0; margin: 20px 0;">
-            </div>
-        `;
-        container.innerHTML = header;
-        
-        messages.forEach((msg, index) => {
-            const msgDiv = document.createElement('div');
-            msgDiv.style.cssText = `
-                margin-bottom: 20px;
-                padding: 15px;
-                background-color: ${msg.role === 'user' ? '#f1f5f9' : '#ffffff'};
-                border-left: 4px solid ${msg.role === 'user' ? '#667eea' : '#10b981'};
-                border-radius: 8px;
-                page-break-inside: avoid;
-            `;
-            
-            const role = msg.role === 'user' ? '👤 You' : '🤖 Alphy AI';
-            msgDiv.innerHTML = `
-                <strong style="color: #1e293b; font-size: 14px; display: block; margin-bottom: 8px;">
-                    ${role}
-                </strong>
-                <p style="color: #475569; margin: 0; line-height: 1.6; font-size: 13px;">
-                    ${msg.text}
-                </p>
-            `;
-            
-            container.appendChild(msgDiv);
-        });
-        
-        // Footer
-        const footer = document.createElement('div');
-        footer.style.cssText = `
-            margin-top: 40px;
-            padding-top: 20px;
-            border-top: 2px solid #e2e8f0;
-            text-align: center;
-            color: #94a3b8;
-            font-size: 12px;
-        `;
-        footer.innerHTML = `
-            <p>Generated by AlphaVault AI • ${messages.length} messages</p>
-            <p style="margin-top: 5px;">© ${new Date().getFullYear()} AlphaVault AI. All rights reserved.</p>
-        `;
-        container.appendChild(footer);
-        
-        return container;
-    }
-    
-    async copyShareLink() {
-        try {
-            const messages = this.getConversationMessages();
-            
-            if (messages.length === 0) {
-                this.showToast('No messages to share', 'error');
-                return;
-            }
-            
-            const conversationId = this.getCurrentConversationId();
-            
-            // Option 1 : Lien local (si Firebase non configuré)
-            const shareLink = `${window.location.origin}/shared/${conversationId}`;
-            
-            // Option 2 : Encoder la conversation dans l'URL (pour partage direct)
-            const encodedConversation = btoa(JSON.stringify(messages.slice(0, 5))); // Limiter pour URL
-            const directLink = `${window.location.origin}?conversation=${encodedConversation}`;
-            
-            await navigator.clipboard.writeText(shareLink);
-            this.showToast('Share link copied to clipboard!', 'success');
-            this.closeModal('share-modal');
-            
-            console.log('📋 Share link:', shareLink);
-            console.log('📋 Direct link:', directLink);
-            
-        } catch (error) {
-            console.error('❌ Copy link error:', error);
-            this.showToast('Failed to copy link', 'error');
-        }
-    }
-    
-    exportToMarkdown() {
-        try {
-            const messages = this.getConversationMessages();
-            
-            if (messages.length === 0) {
-                this.showToast('No messages to export', 'error');
-                return;
-            }
-            
-            let markdown = `# AlphaVault AI Conversation\n\n`;
-            markdown += `**Date**: ${new Date().toLocaleString()}\n\n`;
-            markdown += `**Total Messages**: ${messages.length}\n\n`;
-            markdown += `---\n\n`;
-            
-            messages.forEach((msg, index) => {
-                const role = msg.role === 'user' ? '👤 **You**' : '🤖 **Alphy AI**';
-                markdown += `### ${role}\n\n${msg.text}\n\n---\n\n`;
-            });
-            
-            markdown += `\n*Generated by AlphaVault AI on ${new Date().toLocaleString()}*\n`;
-            
-            this.downloadFile('alphavault-conversation.md', markdown, 'text/markdown');
-            this.showToast('Markdown exported successfully!', 'success');
-            this.closeModal('share-modal');
-            
-        } catch (error) {
-            console.error('❌ Markdown export error:', error);
-            this.showToast('Failed to export Markdown', 'error');
-        }
-    }
-    
+
+    /**
+     * Partager via email
+     */
     shareViaEmail() {
-        try {
-            const messages = this.getConversationMessages();
-            
-            if (messages.length === 0) {
-                this.showToast('No messages to share', 'error');
-                return;
-            }
-            
-            const subject = encodeURIComponent('AlphaVault AI Conversation - ' + new Date().toLocaleDateString());
-            const body = encodeURIComponent(this.formatMessagesForEmail(messages));
-            
-            const mailtoLink = `mailto:?subject=${subject}&body=${body}`;
-            
-            // Check if body is too long (some email clients have limits)
-            if (mailtoLink.length > 2000) {
-                this.showToast('Conversation too long for email. Try Export instead.', 'error');
-                return;
-            }
-            
-            window.location.href = mailtoLink;
-            this.showToast('Opening email client...', 'info');
-            this.closeModal('share-modal');
-            
-        } catch (error) {
-            console.error('❌ Email share error:', error);
-            this.showToast('Failed to open email client', 'error');
+        const subject = encodeURIComponent('Check out this Alphy AI conversation');
+        const body = encodeURIComponent(`I wanted to share this interesting conversation with Alphy AI:\n\n${window.location.href}`);
+        window.location.href = `mailto:?subject=${subject}&body=${body}`;
+        console.log('📧 Opening email client...');
+    }
+
+    /**
+     * Afficher les options d'export
+     */
+    showExportOptions() {
+        const exportSelector = document.getElementById('export-format-selector');
+        if (exportSelector) {
+            exportSelector.style.display = 'block';
+            exportSelector.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
         }
     }
-    
-    async generateSummary() {
-        try {
-            const messages = this.getConversationMessages();
-            
-            if (messages.length === 0) {
-                this.showToast('No messages to summarize', 'error');
-                return;
-            }
-            
-            this.showToast('Generating AI summary...', 'info');
-            this.closeModal('share-modal');
-            
-            await this.delay(1000);
-            
-            const summary = this.createAdvancedSummary(messages);
-            this.downloadFile('conversation-summary.txt', summary, 'text/plain');
-            
-            this.showToast('Summary generated successfully!', 'success');
-            
-        } catch (error) {
-            console.error('❌ Summary generation error:', error);
-            this.showToast('Failed to generate summary', 'error');
+
+    /**
+     * Exporter la conversation
+     */
+    exportConversation(format) {
+        console.log(`📥 Exporting conversation as ${format.toUpperCase()}...`);
+        
+        const messages = this.getConversationMessages();
+        const timestamp = new Date().toISOString().slice(0, 10);
+        const filename = `alphy-ai-conversation-${timestamp}`;
+        
+        switch (format) {
+            case 'txt':
+                this.downloadTextFile(messages, filename);
+                break;
+            case 'json':
+                this.downloadJSONFile(messages, filename);
+                break;
+            case 'pdf':
+                this.showSuccessMessage('PDF export coming soon!');
+                break;
         }
+        
+        this.closeModal('share-modal');
     }
-    
-    createAdvancedSummary(messages) {
-        const userMessages = messages.filter(m => m.role === 'user');
-        const assistantMessages = messages.filter(m => m.role === 'assistant');
-        
-        let summary = `╔═══════════════════════════════════════════════════════════╗\n`;
-        summary += `║        AlphaVault AI - Conversation Summary            ║\n`;
-        summary += `╚═══════════════════════════════════════════════════════════╝\n\n`;
-        
-        summary += `📅 Date: ${new Date().toLocaleString()}\n`;
-        summary += `💬 Total Messages: ${messages.length}\n`;
-        summary += `👤 Your Questions: ${userMessages.length}\n`;
-        summary += `🤖 AI Responses: ${assistantMessages.length}\n\n`;
-        
-        summary += `═══════════════════════════════════════════════════════════\n\n`;
-        
-        // Extract topics
-        const topics = this.extractTopics(messages);
-        summary += `📊 Topics Discussed:\n`;
-        topics.forEach((topic, i) => {
-            summary += `   ${i + 1}. ${topic}\n`;
-        });
-        summary += `\n`;
-        
-        // Key questions
-        summary += `═══════════════════════════════════════════════════════════\n\n`;
-        summary += `❓ Key Questions Asked:\n\n`;
-        userMessages.slice(0, 5).forEach((msg, i) => {
-            const preview = msg.text.length > 100 ? msg.text.substring(0, 100) + '...' : msg.text;
-            summary += `${i + 1}. ${preview}\n\n`;
-        });
-        
-        // Key insights
-        summary += `═══════════════════════════════════════════════════════════\n\n`;
-        summary += `💡 Key Insights from AI:\n\n`;
-        assistantMessages.slice(0, 3).forEach((msg, i) => {
-            const preview = msg.text.length > 200 ? msg.text.substring(0, 200) + '...' : msg.text;
-            summary += `${i + 1}. ${preview}\n\n`;
-        });
-        
-        summary += `═══════════════════════════════════════════════════════════\n\n`;
-        summary += `Generated by AlphaVault AI\n`;
-        summary += `© ${new Date().getFullYear()} AlphaVault AI. All rights reserved.\n`;
-        
-        return summary;
+
+    /**
+     * Prendre une capture d'écran
+     */
+    takeScreenshot() {
+        this.showSuccessMessage('Screenshot feature coming soon!');
+        console.log('📸 Taking screenshot...');
     }
-    
-    extractTopics(messages) {
-        const topics = new Set();
-        const keywords = {
-            'Stock Analysis': ['stock', 'share', 'equity', 'ticker', 'quote'],
-            'IPO Analysis': ['ipo', 'initial public offering', 'newly listed'],
-            'Market Overview': ['market', 'index', 'dow', 's&p', 'nasdaq'],
-            'Technical Analysis': ['technical', 'rsi', 'macd', 'chart', 'indicator'],
-            'Fundamental Analysis': ['fundamental', 'p/e', 'eps', 'revenue', 'earnings'],
-            'Portfolio Management': ['portfolio', 'allocation', 'diversification'],
-            'Risk Analysis': ['risk', 'volatility', 'var', 'sharpe'],
-            'Economic Data': ['economy', 'gdp', 'inflation', 'fed', 'interest rate']
-        };
+
+    /**
+     * Récupérer les messages de la conversation
+     */
+    getConversationMessages() {
+        const messagesContainer = document.getElementById('chatbot-messages-content');
+        const messages = [];
+        
+        messagesContainer.querySelectorAll('.message').forEach(msg => {
+            const isUser = msg.classList.contains('user-message');
+            const text = msg.querySelector('.message-text')?.textContent || '';
+            const time = msg.querySelector('.message-time')?.textContent || '';
+            
+            messages.push({
+                role: isUser ? 'user' : 'assistant',
+                content: text,
+                timestamp: time
+            });
+        });
+        
+        return messages;
+    }
+
+    /**
+     * Télécharger en TXT
+     */
+    downloadTextFile(messages, filename) {
+        let content = `Alphy AI Conversation\n${'='.repeat(50)}\n\n`;
         
         messages.forEach(msg => {
-            const text = msg.text.toLowerCase();
-            Object.entries(keywords).forEach(([topic, words]) => {
-                if (words.some(word => text.includes(word))) {
-                    topics.add(topic);
-                }
-            });
+            content += `${msg.role.toUpperCase()}: ${msg.content}\n`;
+            if (msg.timestamp) content += `Time: ${msg.timestamp}\n`;
+            content += '\n';
         });
         
-        return topics.size > 0 ? Array.from(topics) : ['General Finance'];
+        this.downloadFile(content, `${filename}.txt`, 'text/plain');
     }
-    
-    // ============================================
-    // SETTINGS TABS
-    // ============================================
-    
-    setupSettingsTabs() {
-        const tabs = document.querySelectorAll('.settings-tab');
-        const panels = document.querySelectorAll('.settings-panel');
-        
-        tabs.forEach(tab => {
-            tab.addEventListener('click', () => {
-                const targetPanel = tab.dataset.tab;
-                
-                tabs.forEach(t => t.classList.remove('active'));
-                panels.forEach(p => p.classList.remove('active'));
-                
-                tab.classList.add('active');
-                const panel = document.querySelector(`[data-panel="${targetPanel}"]`);
-                if (panel) {
-                    panel.classList.add('active');
-                }
-            });
-        });
-    }
-    
-    // ============================================
-    // SETTINGS CONTROLS (100% FONCTIONNEL)
-    // ============================================
-    
-    setupSettingsControls() {
-        // AI Model
-        const aiModelSelect = document.getElementById('ai-model');
-        aiModelSelect?.addEventListener('change', (e) => {
-            this.updateSetting('aiModel', e.target.value);
-            this.applyAISettings();
-        });
-        
-        // Temperature
-        const tempSlider = document.getElementById('temperature');
-        const tempValue = document.getElementById('temperature-value');
-        tempSlider?.addEventListener('input', (e) => {
-            const value = parseFloat(e.target.value);
-            if (tempValue) tempValue.textContent = value.toFixed(1);
-            this.updateSetting('temperature', value);
-            this.applyAISettings();
-        });
-        
-        // Max Tokens
-        const tokensSelect = document.getElementById('max-tokens');
-        const tokensValue = document.getElementById('max-tokens-value');
-        tokensSelect?.addEventListener('change', (e) => {
-            const value = parseInt(e.target.value);
-            if (tokensValue) tokensValue.textContent = value;
-            this.updateSetting('maxTokens', value);
-            this.applyAISettings();
-        });
-        
-        // Default Timeframe
-        const timeframeSelect = document.getElementById('default-timeframe');
-        timeframeSelect?.addEventListener('change', (e) => {
-            this.updateSetting('defaultTimeframe', e.target.value);
-        });
-        
-        // Theme Toggle Buttons
-        document.querySelectorAll('[data-theme]').forEach(btn => {
-            btn.addEventListener('click', () => {
-                const theme = btn.dataset.theme;
-                document.querySelectorAll('[data-theme]').forEach(b => b.classList.remove('active'));
-                btn.classList.add('active');
-                this.updateSetting('theme', theme);
-                this.applyTheme(theme);
-            });
-        });
-        
-        // Font Size
-        const fontSlider = document.getElementById('font-size');
-        const fontValue = document.getElementById('font-size-value');
-        fontSlider?.addEventListener('input', (e) => {
-            const value = parseInt(e.target.value);
-            if (fontValue) fontValue.textContent = `${value}px`;
-            this.updateSetting('fontSize', value);
-            this.applyFontSize(value);
-        });
-        
-        // Checkboxes
-        this.setupCheckbox('enable-animations', 'enableAnimations', this.toggleAnimations.bind(this));
-        this.setupCheckbox('show-robot', 'showRobot', this.toggleRobot.bind(this));
-        this.setupCheckbox('compact-mode', 'compactMode', this.toggleCompactMode.bind(this));
-        this.setupCheckbox('enable-sound', 'enableSound');
-        this.setupCheckbox('email-alerts', 'emailAlerts');
-        this.setupCheckbox('auto-save', 'autoSave');
-        
-        // Alert Frequency
-        const alertFreqSelect = document.getElementById('alert-frequency');
-        alertFreqSelect?.addEventListener('change', (e) => {
-            this.updateSetting('alertFrequency', e.target.value);
-        });
-        
-        // Data Management Buttons
-        document.getElementById('clear-history')?.addEventListener('click', () => {
-            this.clearHistory();
-        });
-        
-        document.getElementById('export-data')?.addEventListener('click', () => {
-            this.exportAllData();
-        });
-        
-        // Save Settings Button
-        document.getElementById('save-settings')?.addEventListener('click', () => {
-            this.saveSettings();
-        });
-        
-        // Reset Settings Button
-        document.getElementById('reset-settings')?.addEventListener('click', () => {
-            this.resetSettings();
-        });
-    }
-    
-    setupCheckbox(elementId, settingKey, callback = null) {
-        const checkbox = document.getElementById(elementId);
-        if (checkbox) {
-            checkbox.addEventListener('change', (e) => {
-                this.updateSetting(settingKey, e.target.checked);
-                if (callback) {
-                    callback(e.target.checked);
-                }
-            });
-        }
-    }
-    
-    // ============================================
-    // SETTINGS STORAGE
-    // ============================================
-    
-    loadSettings() {
-        const savedSettings = localStorage.getItem('chatbotSettings');
-        const settings = savedSettings ? JSON.parse(savedSettings) : this.defaultSettings;
-        
-        // Merge with defaults (pour nouvelles options)
-        const mergedSettings = { ...this.defaultSettings, ...settings };
-        localStorage.setItem('chatbotSettings', JSON.stringify(mergedSettings));
-        
-        // Apply to UI
-        this.applySettingsToUI(mergedSettings);
-        
-        // Apply to chatbot
-        this.applyTheme(mergedSettings.theme);
-        this.applyFontSize(mergedSettings.fontSize);
-        this.toggleAnimations(mergedSettings.enableAnimations);
-        this.toggleCompactMode(mergedSettings.compactMode);
-        this.toggleRobot(mergedSettings.showRobot);
-        this.applyAISettings();
-        
-        // Update conversation count
-        this.updateConversationCount();
-        
-        console.log('✅ Settings loaded and applied:', mergedSettings);
-    }
-    
-    applySettingsToUI(settings) {
-        // AI Model
-        const aiModelSelect = document.getElementById('ai-model');
-        if (aiModelSelect && settings.aiModel) {
-            aiModelSelect.value = settings.aiModel;
-        }
-        
-        // Temperature
-        const tempSlider = document.getElementById('temperature');
-        const tempValue = document.getElementById('temperature-value');
-        if (tempSlider && settings.temperature !== undefined) {
-            tempSlider.value = settings.temperature;
-            if (tempValue) tempValue.textContent = settings.temperature.toFixed(1);
-        }
-        
-        // Max Tokens
-        const tokensSelect = document.getElementById('max-tokens');
-        const tokensValue = document.getElementById('max-tokens-value');
-        if (tokensSelect && settings.maxTokens) {
-            tokensSelect.value = settings.maxTokens;
-            if (tokensValue) tokensValue.textContent = settings.maxTokens;
-        }
-        
-        // Default Timeframe
-        const timeframeSelect = document.getElementById('default-timeframe');
-        if (timeframeSelect && settings.defaultTimeframe) {
-            timeframeSelect.value = settings.defaultTimeframe;
-        }
-        
-        // Font Size
-        const fontSlider = document.getElementById('font-size');
-        const fontValue = document.getElementById('font-size-value');
-        if (fontSlider && settings.fontSize) {
-            fontSlider.value = settings.fontSize;
-            if (fontValue) fontValue.textContent = `${settings.fontSize}px`;
-        }
-        
-        // Theme
-        if (settings.theme) {
-            document.querySelectorAll('[data-theme]').forEach(btn => {
-                btn.classList.toggle('active', btn.dataset.theme === settings.theme);
-            });
-        }
-        
-        // Alert Frequency
-        const alertFreqSelect = document.getElementById('alert-frequency');
-        if (alertFreqSelect && settings.alertFrequency) {
-            alertFreqSelect.value = settings.alertFrequency;
-        }
-        
-        // Checkboxes
-        const checkboxes = {
-            'enable-animations': settings.enableAnimations,
-            'show-robot': settings.showRobot,
-            'compact-mode': settings.compactMode,
-            'enable-sound': settings.enableSound,
-            'email-alerts': settings.emailAlerts,
-            'auto-save': settings.autoSave
+
+    /**
+     * Télécharger en JSON
+     */
+    downloadJSONFile(messages, filename) {
+        const data = {
+            platform: 'Alphy AI',
+            exportDate: new Date().toISOString(),
+            messages: messages
         };
         
-        Object.entries(checkboxes).forEach(([id, checked]) => {
-            const checkbox = document.getElementById(id);
-            if (checkbox) {
-                checkbox.checked = checked;
-            }
-        });
+        const content = JSON.stringify(data, null, 2);
+        this.downloadFile(content, `${filename}.json`, 'application/json');
     }
-    
-    updateSetting(key, value) {
-        const settings = JSON.parse(localStorage.getItem('chatbotSettings') || '{}');
-        settings[key] = value;
-        localStorage.setItem('chatbotSettings', JSON.stringify(settings));
-        console.log(`✅ Setting updated: ${key} = ${value}`);
+
+    /**
+     * Télécharger un fichier
+     */
+    downloadFile(content, filename, mimeType) {
+        const blob = new Blob([content], { type: mimeType });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        
+        this.showSuccessMessage(`Downloaded: ${filename}`);
     }
-    
-    saveSettings() {
-        this.showToast('Settings saved successfully!', 'success');
-        this.closeModal('settings-modal');
+
+    /**
+     * Générer un ID de conversation
+     */
+    generateConversationId() {
+        return 'conv_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
     }
-    
-    resetSettings() {
-        if (confirm('Reset all settings to default values?')) {
-            localStorage.setItem('chatbotSettings', JSON.stringify(this.defaultSettings));
-            this.loadSettings();
-            this.showToast('Settings reset to defaults', 'success');
+
+    /**
+     * Afficher un message de succès
+     */
+    showSuccessMessage(message, isError = false) {
+        const successMsg = document.getElementById('share-success-message');
+        if (successMsg) {
+            successMsg.textContent = message;
+            successMsg.style.display = 'flex';
+            successMsg.style.background = isError ? 'rgba(239, 68, 68, 0.1)' : 'rgba(16, 185, 129, 0.1)';
+            successMsg.style.color = isError ? '#dc2626' : '#059669';
+            
+            setTimeout(() => {
+                successMsg.style.display = 'none';
+            }, 3000);
         }
     }
-    
-    // ============================================
-    // APPLY SETTINGS (CORRIGÉ)
-    // ============================================
-    
-    applyTheme(theme) {
+
+    /**
+     * Changer de tab dans les settings
+     */
+    switchTab(tabElement) {
+        const targetTab = tabElement.dataset.tab;
+        
+        // Update tabs
+        document.querySelectorAll('.settings-tab').forEach(t => t.classList.remove('active'));
+        tabElement.classList.add('active');
+        
+        // Update panels
+        document.querySelectorAll('.settings-panel').forEach(p => p.classList.remove('active'));
+        document.querySelector(`[data-panel="${targetTab}"]`)?.classList.add('active');
+    }
+
+    /**
+     * Changer le thème
+     */
+    changeTheme(themeBtn) {
+        const theme = themeBtn.dataset.theme;
+        
+        document.querySelectorAll('.theme-option').forEach(btn => btn.classList.remove('active'));
+        themeBtn.classList.add('active');
+        
+        // Apply theme
         if (theme === 'dark') {
             document.body.classList.add('dark-mode');
         } else if (theme === 'light') {
             document.body.classList.remove('dark-mode');
         } else {
-            // Auto - based on system preference
+            // Auto mode based on system preference
             const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
             document.body.classList.toggle('dark-mode', prefersDark);
         }
-        console.log(`🎨 Theme applied: ${theme}`);
+        
+        console.log(`🎨 Theme changed to: ${theme}`);
     }
-    
-    applyFontSize(size) {
-        document.documentElement.style.setProperty('--message-font-size', `${size}px`);
-        
-        // Apply to all message texts
-        document.querySelectorAll('.message-text, .message-bubble').forEach(el => {
-            el.style.fontSize = `${size}px`;
-        });
-        
-        console.log(`📏 Font size applied: ${size}px`);
-    }
-    
-    toggleAnimations(enabled) {
-        document.body.classList.toggle('no-animations', !enabled);
-        console.log(`✨ Animations ${enabled ? 'enabled' : 'disabled'}`);
-    }
-    
-    toggleCompactMode(enabled) {
-        document.body.classList.toggle('compact-mode', enabled);
-        console.log(`📦 Compact mode ${enabled ? 'enabled' : 'disabled'}`);
-    }
-    
-    toggleRobot(enabled) {
-        const robotContainers = [
-            document.getElementById('robot-3d-container'),
-            document.querySelector('.robot-3d-container'),
-            document.querySelector('.robot-3d-container-threejs')
-        ];
-        
-        robotContainers.forEach(container => {
-            if (container) {
-                container.style.display = enabled ? 'block' : 'none';
-            }
-        });
-        
-        console.log(`🤖 Robot ${enabled ? 'shown' : 'hidden'}`);
-    }
-    
-    applyAISettings() {
-        const settings = JSON.parse(localStorage.getItem('chatbotSettings') || '{}');
-        
-        if (!this.chatbotInstance) {
-            console.warn('⚠ Chatbot instance not ready yet');
-            return;
-        }
-        
-        // Différentes structures possibles
-        const gemini = this.chatbotInstance.geminiIntegration 
-                    || this.chatbotInstance.aiEngine 
-                    || this.chatbotInstance.gemini 
-                    || this.chatbotInstance;
-        
-        if (gemini) {
-            if (settings.temperature !== undefined) {
-                gemini.temperature = settings.temperature;
-                console.log(`🌡 Temperature set to: ${settings.temperature}`);
-            }
-            
-            if (settings.maxTokens) {
-                gemini.maxOutputTokens = settings.maxTokens;
-                console.log(`📊 Max tokens set to: ${settings.maxTokens}`);
-            }
-            
-            if (settings.aiModel) {
-                gemini.modelName = settings.aiModel;
-                console.log(`🤖 AI Model set to: ${settings.aiModel}`);
-            }
-            
-            console.log('✅ AI settings applied to chatbot instance');
-        } else {
-            console.warn('⚠ Could not find Gemini integration in chatbot instance');
-        }
-    }
-    
-    // ============================================
-    // DATA MANAGEMENT
-    // ============================================
-    
-    clearHistory() {
-        if (confirm('⚠ Are you sure you want to delete ALL conversations?\n\nThis action cannot be undone!')) {
-            // Clear localStorage
-            localStorage.removeItem('chatbotConversations');
-            localStorage.removeItem('chatbotCurrentConversation');
-            
-            // Clear visible messages
-            const messagesContainer = document.querySelector('.chatbot-messages-content') 
-                                   || document.getElementById('chatbot-messages-content');
-            
-            if (messagesContainer) {
-                messagesContainer.innerHTML = '';
-            }
-            
-            // Clear conversation list if exists
-            const conversationsList = document.querySelector('.conversations-list');
-            if (conversationsList) {
-                conversationsList.innerHTML = '<p style="text-align: center; color: #94a3b8; padding: 20px;">No conversations yet</p>';
-            }
-            
-            this.showToast('All conversations deleted', 'success');
-            this.updateConversationCount();
-            
-            // Reload chatbot welcome screen
-            if (this.chatbotInstance && typeof this.chatbotInstance.showWelcomeScreen === 'function') {
-                this.chatbotInstance.showWelcomeScreen();
-            }
-        }
-    }
-    
-    exportAllData() {
-        try {
-            const data = {
-                conversations: JSON.parse(localStorage.getItem('chatbotConversations') || '[]'),
-                settings: JSON.parse(localStorage.getItem('chatbotSettings') || '{}'),
-                currentConversation: JSON.parse(localStorage.getItem('chatbotCurrentConversation') || 'null'),
-                exportDate: new Date().toISOString(),
-                version: '1.0.0'
-            };
-            
-            const json = JSON.stringify(data, null, 2);
-            this.downloadFile('alphavault-ai-data.json', json, 'application/json');
-            this.showToast('Data exported successfully!', 'success');
-            
-            console.log('📦 Exported data:', data);
-            
-        } catch (error) {
-            console.error('❌ Export error:', error);
-            this.showToast('Failed to export data', 'error');
-        }
-    }
-    
-    updateConversationCount() {
-        const conversations = JSON.parse(localStorage.getItem('chatbotConversations') || '[]');
-        const countEl = document.getElementById('conversations-count');
-        if (countEl) {
-            countEl.textContent = conversations.length;
-        }
-    }
-    
-    // ============================================
-    // HELPERS (CORRIGÉ)
-    // ============================================
-    
-    getConversationMessages() {
-        const messagesContainer = document.querySelector('.chatbot-messages-content') 
-                               || document.getElementById('chatbot-messages-content');
-        
-        if (!messagesContainer) {
-            console.warn('⚠ Messages container not found');
-            return [];
-        }
-        
-        const messages = [];
-        
-        // Essayer différents sélecteurs
-        const messageElements = messagesContainer.querySelectorAll('.message, .chatbot-message, [class*="message"]');
-        
-        messageElements.forEach(msg => {
-            // Déterminer si c'est un message user ou bot
-            const isUser = msg.classList.contains('user-message') 
-                        || msg.classList.contains('user') 
-                        || msg.querySelector('.user-avatar');
-            
-            // Trouver le texte du message
-            const textEl = msg.querySelector('.message-text') 
-                        || msg.querySelector('.message-content') 
-                        || msg.querySelector('.message-bubble') 
-                        || msg;
-            
-            if (textEl && textEl.textContent.trim()) {
-                messages.push({
-                    role: isUser ? 'user' : 'assistant',
-                    text: textEl.textContent.trim()
-                });
-            }
-        });
-        
-        console.log(`📨 Retrieved ${messages.length} messages`);
-        return messages;
-    }
-    
-    getCurrentConversationId() {
-        return Date.now().toString(36) + Math.random().toString(36).substr(2, 9);
-    }
-    
-    formatMessagesForEmail(messages) {
-        let text = '═══════════════════════════════════════════\n';
-        text += '     AlphaVault AI Conversation\n';
-        text += '═══════════════════════════════════════════\n\n';
-        text += `Date: ${new Date().toLocaleString()}\n`;
-        text += `Total Messages: ${messages.length}\n\n`;
-        text += '-------------------------------------------\n\n';
-        
-        messages.forEach((msg, index) => {
-            const role = msg.role === 'user' ? 'YOU' : 'ALPHY AI';
-            text += `[${role}]:\n${msg.text}\n\n`;
-            if (index < messages.length - 1) {
-                text += '---\n\n';
-            }
-        });
-        
-        text += '\n═══════════════════════════════════════════\n';
-        text += 'Generated by AlphaVault AI\n';
-        text += `© ${new Date().getFullYear()} AlphaVault AI\n`;
-        
-        return text;
-    }
-    
-    downloadFile(filename, content, mimeType = 'text/plain') {
-        try {
-            const blob = new Blob([content], { type: mimeType });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = filename;
-            a.style.display = 'none';
-            document.body.appendChild(a);
-            a.click();
-            
-            // Cleanup
-            setTimeout(() => {
-                document.body.removeChild(a);
-                URL.revokeObjectURL(url);
-            }, 100);
-            
-            console.log(`💾 File downloaded: ${filename}`);
-            
-        } catch (error) {
-            console.error('❌ Download error:', error);
-            throw error;
-        }
-    }
-    
-    showToast(message, type = 'info') {
-        const toast = document.createElement('div');
-        toast.className = `toast ${type}`;
-        
-        const icons = {
-            success: '✓',
-            error: '✕',
-            info: 'ⓘ'
+
+    /**
+     * Sauvegarder les paramètres
+     */
+    saveSettings() {
+        const settings = {
+            language: document.getElementById('language-select')?.value,
+            autoSave: document.getElementById('auto-save-toggle')?.checked,
+            timestamps: document.getElementById('timestamps-toggle')?.checked,
+            fontSize: document.getElementById('font-size-select')?.value,
+            particles: document.getElementById('particles-toggle')?.checked,
+            animations: document.getElementById('animations-toggle')?.checked,
+            compactMode: document.getElementById('compact-mode-toggle')?.checked,
+            desktopNotifications: document.getElementById('desktop-notifications-toggle')?.checked,
+            soundAlerts: document.getElementById('sound-alerts-toggle')?.checked,
+            emailDigest: document.getElementById('email-digest-toggle')?.checked,
+            saveHistory: document.getElementById('save-history-toggle')?.checked,
+            analytics: document.getElementById('analytics-toggle')?.checked
         };
         
-        const icon = icons[type] || 'ⓘ';
+        localStorage.setItem('alphyAISettings', JSON.stringify(settings));
+        this.showSuccessMessage('Settings saved successfully!');
+        this.closeModal('settings-modal');
         
-        toast.innerHTML = `
-            <div class="toast-icon">${icon}</div>
-            <div class="toast-content">
-                <div class="toast-title">${this.getToastTitle(type)}</div>
-                <div class="toast-message">${message}</div>
-            </div>
-        `;
+        console.log('💾 Settings saved:', settings);
+    }
+
+    /**
+     * Charger les paramètres
+     */
+    loadSettings() {
+        const savedSettings = localStorage.getItem('alphyAISettings');
+        if (!savedSettings) return;
         
-        this.toastContainer.appendChild(toast);
-        
-        // Auto-remove after 4 seconds
-        setTimeout(() => {
-            toast.style.animation = 'toastSlideIn 0.3s ease reverse';
-            setTimeout(() => {
-                if (toast.parentNode) {
-                    toast.remove();
-                }
-            }, 300);
-        }, 4000);
-    }
-    
-    getToastTitle(type) {
-        const titles = {
-            success: 'Success',
-            error: 'Error',
-            info: 'Information'
-        };
-        return titles[type] || 'Notification';
-    }
-    
-    delay(ms) {
-        return new Promise(resolve => setTimeout(resolve, ms));
-    }
-    
-    async loadScript(src) {
-        return new Promise((resolve, reject) => {
-            // Check if already loaded
-            if (document.querySelector(`script[src="${src}"]`)) {
-                resolve();
-                return;
-            }
+        try {
+            const settings = JSON.parse(savedSettings);
             
-            const script = document.createElement('script');
-            script.src = src;
-            script.onload = () => {
-                console.log(`✅ Script loaded: ${src}`);
-                resolve();
-            };
-            script.onerror = () => {
-                console.error(`❌ Failed to load script: ${src}`);
-                reject(new Error(`Failed to load ${src}`));
-            };
-            document.head.appendChild(script);
-        });
+            // Apply settings
+            if (settings.language) document.getElementById('language-select').value = settings.language;
+            if (settings.fontSize) document.getElementById('font-size-select').value = settings.fontSize;
+            
+            // Toggles
+            document.getElementById('auto-save-toggle').checked = settings.autoSave ?? true;
+            document.getElementById('timestamps-toggle').checked = settings.timestamps ?? true;
+            document.getElementById('particles-toggle').checked = settings.particles ?? true;
+            document.getElementById('animations-toggle').checked = settings.animations ?? true;
+            document.getElementById('compact-mode-toggle').checked = settings.compactMode ?? false;
+            document.getElementById('desktop-notifications-toggle').checked = settings.desktopNotifications ?? false;
+            document.getElementById('sound-alerts-toggle').checked = settings.soundAlerts ?? true;
+            document.getElementById('email-digest-toggle').checked = settings.emailDigest ?? false;
+            document.getElementById('save-history-toggle').checked = settings.saveHistory ?? true;
+            document.getElementById('analytics-toggle').checked = settings.analytics ?? true;
+            
+            console.log('⚙ Settings loaded');
+        } catch (err) {
+            console.error('❌ Failed to load settings:', err);
+        }
+    }
+
+    /**
+     * Réinitialiser les paramètres
+     */
+    resetSettings() {
+        if (confirm('Are you sure you want to reset all settings to defaults?')) {
+            localStorage.removeItem('alphyAISettings');
+            location.reload();
+            console.log('🔄 Settings reset to defaults');
+        }
+    }
+
+    /**
+     * Effacer toutes les données
+     */
+    clearAllData() {
+        if (confirm('⚠ This will delete ALL your conversations and settings. This action cannot be undone. Are you sure?')) {
+            localStorage.clear();
+            sessionStorage.clear();
+            location.reload();
+            console.log('🗑 All data cleared');
+        }
     }
 }
 
 // ============================================
 // INITIALIZATION
 // ============================================
-
 document.addEventListener('DOMContentLoaded', () => {
-    console.log('🚀 Initializing Chatbot Modals System...');
-    
     window.chatbotModals = new ChatbotModals();
-    
-    console.log('✅ Chatbot Modals System ready');
-    
-    // ============================================
-    // KEYBOARD SHORTCUTS
-    // ============================================
-    
-    document.addEventListener('keydown', (e) => {
-        // Ctrl+, pour Settings
-        if (e.ctrlKey && e.key === ',') {
-            e.preventDefault();
-            window.chatbotModals.openModal('settings-modal');
-            console.log('⌨ Settings opened via keyboard shortcut');
-        }
-        
-        // Ctrl+D pour Dark Mode Toggle
-        if (e.ctrlKey && e.key === 'd') {
-            e.preventDefault();
-            const isDark = document.body.classList.toggle('dark-mode');
-            window.chatbotModals.updateSetting('theme', isDark ? 'dark' : 'light');
-            window.chatbotModals.showToast(`Dark mode ${isDark ? 'enabled' : 'disabled'}`, 'info');
-            console.log(`🎨 Dark mode ${isDark ? 'enabled' : 'disabled'} via keyboard`);
-        }
-        
-        // Ctrl+Shift+E pour Export/Share
-        if (e.ctrlKey && e.shiftKey && e.key === 'E') {
-            e.preventDefault();
-            window.chatbotModals.openModal('share-modal');
-            console.log('⌨ Share modal opened via keyboard shortcut');
-        }
-        
-        // Ctrl+Shift+C pour Clear History
-        if (e.ctrlKey && e.shiftKey && e.key === 'C') {
-            e.preventDefault();
-            window.chatbotModals.clearHistory();
-        }
-    });
 });
