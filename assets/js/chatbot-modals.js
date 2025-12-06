@@ -1,9 +1,10 @@
 /* ============================================
    CHATBOT MODALS - SHARE & SETTINGS
-   Version 6.0 - CHARTS DETECTION FIXED
-   ✅ Détection des graphiques HORS des .message
-   ✅ Capture globale de la zone de conversation
-   ✅ Association intelligente messages/graphiques
+   Version 7.0 - ULTRA PROFESSIONAL PDF
+   ✅ Logo AlphaVault AI
+   ✅ Nettoyage des caractères spéciaux
+   ✅ Capture de TOUS les éléments visuels
+   ✅ Formatage professionnel
    ============================================ */
 
 class ChatbotModals {
@@ -147,7 +148,7 @@ class ChatbotModals {
                         
                         <div class="export-loading" id="export-loading" style="display: none;">
                             <div class="loading-spinner"></div>
-                            <span>Generating PDF with charts...</span>
+                            <span>Generating professional PDF...</span>
                         </div>
                     </div>
                 </div>
@@ -532,15 +533,13 @@ class ChatbotModals {
         this.showLoading(true);
         
         const timestamp = new Date().toISOString().slice(0, 10);
-        const filename = `alphy-ai-conversation-${timestamp}`;
+        const filename = `alphavault-ai-conversation-${timestamp}`;
         
         try {
             if (format === 'pdf') {
-                // PDF nécessite la capture des graphiques
-                const messages = await this.getConversationMessagesWithCharts();
+                const messages = await this.getConversationMessagesWithVisuals();
                 await this.downloadPDFFile(messages, filename);
             } else {
-                // TXT et JSON n'ont pas besoin des graphiques
                 const messages = this.getConversationMessages();
                 
                 if (format === 'txt') {
@@ -561,9 +560,9 @@ class ChatbotModals {
     }
 
     /**
-     * ✅ GET MESSAGES WITH CHART IMAGES (VERSION CORRIGÉE - RECHERCHE GLOBALE)
+     * ✅ GET MESSAGES WITH ALL VISUAL ELEMENTS (CHARTS + TABLES)
      */
-    async getConversationMessagesWithCharts() {
+    async getConversationMessagesWithVisuals() {
         const messagesContainer = document.getElementById('chatbot-messages-content');
         const messages = [];
         
@@ -572,15 +571,18 @@ class ChatbotModals {
             return messages;
         }
         
-        // 1. Récupérer les messages texte
         const messageElements = messagesContainer.querySelectorAll('.message');
         console.log(`📊 Found ${messageElements.length} messages to process`);
         
-        // 2. Récupérer TOUS les canvas dans le container (pas seulement dans .message)
+        // Récupérer TOUS les canvas
         const allCanvases = messagesContainer.querySelectorAll('canvas');
-        console.log(`📊 Found ${allCanvases.length} total canvas elements in container`);
+        console.log(`📊 Found ${allCanvases.length} canvas elements`);
         
-        // 3. Créer les données de messages
+        // Récupérer TOUS les tableaux de métriques
+        const allMetricTables = messagesContainer.querySelectorAll('.visual-card, .metric-card, [class*="comparison"]');
+        console.log(`📊 Found ${allMetricTables.length} visual elements`);
+        
+        // Créer les messages
         for (let i = 0; i < messageElements.length; i++) {
             const msg = messageElements[i];
             const isUser = msg.classList.contains('user-message');
@@ -590,32 +592,30 @@ class ChatbotModals {
             
             messages.push({
                 role: isUser ? 'user' : 'assistant',
-                content: text.trim(),
+                content: this.cleanText(text.trim()), // ✅ NETTOYAGE DU TEXTE
                 timestamp: time,
-                chartImages: [] // ✅ Plusieurs graphiques possibles
+                visualImages: []
             });
         }
         
-        // 4. Capturer TOUS les canvas et les associer aux messages
-        const chartImages = [];
+        // Capturer TOUS les visuels
+        const visualImages = [];
         
+        // 1. Capturer les canvas (graphiques Chart.js)
         for (let i = 0; i < allCanvases.length; i++) {
             const canvas = allCanvases[i];
             
             try {
-                // Vérifier si visible
                 const rect = canvas.getBoundingClientRect();
                 if (rect.width === 0 || rect.height === 0) {
-                    console.warn(`  ⚠  Canvas ${i + 1} invisible (${rect.width}x${rect.height}), skip`);
+                    console.warn(`  ⚠  Canvas ${i + 1} invisible, skip`);
                     continue;
                 }
                 
                 console.log(`📊 Canvas ${i + 1}/${allCanvases.length}: Capturing...`);
                 
-                // Attendre le rendu
                 await this.waitForChartRender(canvas);
                 
-                // Capturer
                 const capturedCanvas = await html2canvas(canvas, {
                     backgroundColor: '#ffffff',
                     scale: 3,
@@ -626,34 +626,82 @@ class ChatbotModals {
                     windowHeight: canvas.scrollHeight || canvas.height || 400
                 });
                 
-                const imageData = capturedCanvas.toDataURL('image/png', 1.0);
-                chartImages.push(imageData);
+                visualImages.push({
+                    type: 'chart',
+                    data: capturedCanvas.toDataURL('image/png', 1.0)
+                });
                 
                 console.log(`✅ Canvas ${i + 1}: Captured (${capturedCanvas.width}x${capturedCanvas.height})`);
             } catch (error) {
-                console.error(`❌ Canvas ${i + 1}: Capture failed:`, error);
+                console.error(`❌ Canvas ${i + 1}: Failed:`, error);
             }
         }
         
-        // 5. Associer les graphiques au dernier message assistant (bot)
-        if (chartImages.length > 0) {
-            // Trouver le dernier message bot
+        // 2. Capturer les tableaux de métriques (visual-card)
+        for (let i = 0; i < allMetricTables.length; i++) {
+            const table = allMetricTables[i];
+            
+            try {
+                const rect = table.getBoundingClientRect();
+                if (rect.width === 0 || rect.height === 0) {
+                    console.warn(`  ⚠  Visual element ${i + 1} invisible, skip`);
+                    continue;
+                }
+                
+                console.log(`📊 Visual element ${i + 1}/${allMetricTables.length}: Capturing...`);
+                
+                const capturedCanvas = await html2canvas(table, {
+                    backgroundColor: '#ffffff',
+                    scale: 3,
+                    logging: false,
+                    useCORS: true,
+                    allowTaint: true
+                });
+                
+                visualImages.push({
+                    type: 'table',
+                    data: capturedCanvas.toDataURL('image/png', 1.0)
+                });
+                
+                console.log(`✅ Visual element ${i + 1}: Captured (${capturedCanvas.width}x${capturedCanvas.height})`);
+            } catch (error) {
+                console.error(`❌ Visual element ${i + 1}: Failed:`, error);
+            }
+        }
+        
+        // Associer les visuels au dernier message assistant
+        if (visualImages.length > 0) {
             for (let i = messages.length - 1; i >= 0; i--) {
                 if (messages[i].role === 'assistant') {
-                    messages[i].chartImages = chartImages;
-                    console.log(`✅ ${chartImages.length} charts associated to message ${i + 1}`);
+                    messages[i].visualImages = visualImages;
+                    console.log(`✅ ${visualImages.length} visuals associated to message ${i + 1}`);
                     break;
                 }
             }
         }
         
-        const totalCharts = chartImages.length;
-        console.log(`✅ Processed ${messages.length} messages (${totalCharts} charts captured)`);
+        console.log(`✅ Processed ${messages.length} messages (${visualImages.length} visuals captured)`);
         return messages;
     }
 
     /**
-     * ✅ ATTENDRE LE RENDU COMPLET DU GRAPHIQUE
+     * ✅ CLEAN TEXT (Remove emojis and special characters)
+     */
+    cleanText(text) {
+        return text
+            // Supprimer les emojis problématiques
+            .replace(/[📊🎯📈💰🚀💼🔍✅❌⚠📉📋🎨🔧💡]/g, '')
+            // Supprimer les caractères de contrôle Unicode
+            .replace(/[\u0000-\u001F\u007F-\u009F]/g, '')
+            // Supprimer les symboles bizarre type Ø=Üd
+            .replace(/[Ø=ÜüÝýÊê]/g, '')
+            // Nettoyer les espaces multiples
+            .replace(/\s+/g, ' ')
+            .trim();
+    }
+
+    /**
+     * ✅ WAIT FOR CHART RENDER
      */
     waitForChartRender(element) {
         return new Promise((resolve) => {
@@ -677,7 +725,38 @@ class ChatbotModals {
     }
 
     /**
-     * ✅ DOWNLOAD PDF WITH ULTRA-PROFESSIONAL TEXT FORMATTING
+     * ✅ ALPHAVAULT AI LOGO (SVG en Base64)
+     */
+    getAlphaVaultLogo() {
+        // Logo AlphaVault AI (graphique de tendance haussière)
+        const svg = `
+        <svg width="60" height="60" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+                <linearGradient id="logoGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" style="stop-color:#667eea;stop-opacity:1" />
+                    <stop offset="100%" style="stop-color:#764ba2;stop-opacity:1" />
+                </linearGradient>
+            </defs>
+            <!-- Ligne de tendance -->
+            <path d="M 15 85 L 25 75 L 35 78 L 50 55 L 65 60 L 80 35 L 95 30" 
+                  stroke="url(#logoGrad)" stroke-width="5" fill="none" 
+                  stroke-linecap="round" stroke-linejoin="round"/>
+            <!-- Points -->
+            <circle cx="25" cy="75" r="5" fill="url(#logoGrad)"/>
+            <circle cx="50" cy="55" r="5" fill="url(#logoGrad)"/>
+            <circle cx="80" cy="35" r="5" fill="url(#logoGrad)"/>
+            <circle cx="95" cy="30" r="6" fill="url(#logoGrad)"/>
+            <!-- Flèche -->
+            <path d="M 90 35 L 95 30 L 90 25" stroke="url(#logoGrad)" 
+                  stroke-width="4" fill="none" stroke-linecap="round"/>
+        </svg>
+        `;
+        
+        return 'data:image/svg+xml;base64,' + btoa(svg);
+    }
+
+    /**
+     * ✅ DOWNLOAD PDF WITH LOGO & PROFESSIONAL FORMATTING
      */
     async downloadPDFFile(messages, filename) {
         if (typeof window.jspdf === 'undefined') {
@@ -706,14 +785,21 @@ class ChatbotModals {
             return false;
         };
         
-        // ==================== HEADER ====================
+        // ==================== HEADER WITH LOGO ====================
+        try {
+            const logoDataUrl = this.getAlphaVaultLogo();
+            doc.addImage(logoDataUrl, 'SVG', margin, yPos - 5, 40, 40);
+        } catch (error) {
+            console.warn('Logo not added:', error);
+        }
+        
         doc.setFontSize(28);
         doc.setFont('helvetica', 'bold');
         doc.setTextColor(102, 126, 234);
-        doc.text('Alphy AI Conversation', margin, yPos);
-        yPos += 30;
+        doc.text('AlphaVault AI Conversation', margin + 50, yPos + 15);
+        yPos += 45;
         
-        doc.setFontSize(11);
+        doc.setFontSize(10);
         doc.setFont('helvetica', 'normal');
         doc.setTextColor(100, 100, 100);
         doc.text(`Export Date: ${new Date().toLocaleString('en-US', { 
@@ -723,15 +809,15 @@ class ChatbotModals {
             hour: '2-digit', 
             minute: '2-digit' 
         })}`, margin, yPos);
-        yPos += 18;
+        yPos += 16;
         
         doc.text(`Total Messages: ${messages.length}`, margin, yPos);
-        yPos += 25;
+        yPos += 22;
         
         doc.setDrawColor(102, 126, 234);
         doc.setLineWidth(2);
         doc.line(margin, yPos, pageWidth - margin, yPos);
-        yPos += 35;
+        yPos += 30;
         
         // ==================== MESSAGES ====================
         for (let i = 0; i < messages.length; i++) {
@@ -740,7 +826,7 @@ class ChatbotModals {
             checkNewPage(120);
             
             const isUser = msg.role === 'user';
-            const headerHeight = 28;
+            const headerHeight = 26;
             
             // Message header
             if (isUser) {
@@ -749,43 +835,34 @@ class ChatbotModals {
                 doc.setFillColor(102, 126, 234);
             }
             
-            doc.roundedRect(margin, yPos - 18, maxWidth, headerHeight, 4, 4, 'F');
+            doc.roundedRect(margin, yPos - 16, maxWidth, headerHeight, 4, 4, 'F');
             
-            doc.setFontSize(13);
+            doc.setFontSize(12);
             doc.setFont('helvetica', 'bold');
             doc.setTextColor(255, 255, 255);
             
-            if (isUser) {
-                doc.text(`👤 USER`, margin + 12, yPos);
-            } else {
-                doc.text(`🤖 ASSISTANT`, margin + 12, yPos);
-            }
+            doc.text(isUser ? 'USER' : 'ASSISTANT', margin + 12, yPos);
             
-            yPos += headerHeight + 5;
+            yPos += headerHeight + 3;
             
-            // ==================== MESSAGE CONTENT (FORMATÉ PROFESSIONNELLEMENT) ====================
-            const contentMargin = margin + 15;
-            const contentWidth = maxWidth - 30;
+            // ==================== MESSAGE CONTENT (FORMATTED) ====================
+            const contentMargin = margin + 12;
+            const contentWidth = maxWidth - 24;
             
-            // ✅ DÉTECTION ET FORMATAGE DES SECTIONS
             const content = msg.content;
             
-            // Regex pour détecter les titres de section (texte se terminant par ":")
+            // Détecter les sections
             const sectionRegex = /^(.+?):(.*?)(?=\n[A-Z][^:]+:|$)/gs;
             const sections = [];
             
             let match;
-            let lastIndex = 0;
-            
             while ((match = sectionRegex.exec(content)) !== null) {
                 sections.push({
                     title: match[1].trim(),
                     content: match[2].trim()
                 });
-                lastIndex = match.index + match[0].length;
             }
             
-            // Si aucune section détectée, traiter comme texte brut
             if (sections.length === 0) {
                 sections.push({
                     title: null,
@@ -793,90 +870,84 @@ class ChatbotModals {
                 });
             }
             
-            // ✅ RENDU DES SECTIONS
+            // Render sections
             for (let sIndex = 0; sIndex < sections.length; sIndex++) {
                 const section = sections[sIndex];
                 
-                checkNewPage(50);
+                checkNewPage(40);
                 
-                // TITRE DE SECTION (si présent)
+                // Section title
                 if (section.title) {
-                    doc.setFontSize(12);
+                    doc.setFontSize(11);
                     doc.setFont('helvetica', 'bold');
                     doc.setTextColor(102, 126, 234);
                     
                     const titleLines = doc.splitTextToSize(section.title + ':', contentWidth);
                     
                     for (const line of titleLines) {
-                        if (checkNewPage(18)) {}
+                        if (checkNewPage(16)) {}
                         doc.text(line, contentMargin, yPos);
-                        yPos += 18;
+                        yPos += 16;
                     }
                     
-                    yPos += 5; // Espace après le titre
+                    yPos += 4;
                 }
                 
-                // CONTENU DE LA SECTION
-                doc.setFontSize(10);
+                // Section content
+                doc.setFontSize(9.5);
                 doc.setFont('helvetica', 'normal');
                 doc.setTextColor(30, 30, 30);
                 
-                // Séparer en phrases (pour meilleure lisibilité)
                 const sentences = section.content.split(/(?<=[.!?])\s+/).filter(s => s.trim());
                 
                 let currentParagraph = '';
                 
                 for (let sentIndex = 0; sentIndex < sentences.length; sentIndex++) {
                     const sentence = sentences[sentIndex].trim();
-                    
-                    // Construire un paragraphe de 2-3 phrases max
                     currentParagraph += sentence + ' ';
                     
-                    // Créer un nouveau paragraphe tous les 2-3 phrases OU si c'est la dernière phrase
                     const shouldBreak = (sentIndex + 1) % 3 === 0 || sentIndex === sentences.length - 1;
                     
                     if (shouldBreak && currentParagraph.trim()) {
-                        checkNewPage(40);
+                        checkNewPage(35);
                         
                         const lines = doc.splitTextToSize(currentParagraph.trim(), contentWidth);
                         
                         for (const line of lines) {
-                            if (checkNewPage(14)) {}
+                            if (checkNewPage(13)) {}
                             doc.text(line, contentMargin, yPos);
-                            yPos += 14;
+                            yPos += 13;
                         }
                         
-                        yPos += 8; // Espace entre paragraphes
+                        yPos += 7;
                         currentParagraph = '';
                     }
                 }
                 
-                yPos += 10; // Espace après la section
+                yPos += 8;
             }
             
-            yPos += 5;
+            yPos += 3;
             
-            // ==================== CHART IMAGES ====================
-            if (msg.chartImages && msg.chartImages.length > 0) {
-                console.log(`📊 Adding ${msg.chartImages.length} charts for message ${i + 1}`);
+            // ==================== VISUAL ELEMENTS ====================
+            if (msg.visualImages && msg.visualImages.length > 0) {
+                console.log(`📊 Adding ${msg.visualImages.length} visuals for message ${i + 1}`);
                 
-                for (let chartIndex = 0; chartIndex < msg.chartImages.length; chartIndex++) {
-                    checkNewPage(250);
+                for (let vIndex = 0; vIndex < msg.visualImages.length; vIndex++) {
+                    checkNewPage(230);
                     
-                    const imgWidth = maxWidth - 40;
-                    const imgHeight = 200;
+                    const imgWidth = maxWidth - 30;
+                    const imgHeight = 180;
                     
                     try {
-                        // Bordure
                         doc.setDrawColor(200, 200, 200);
-                        doc.setLineWidth(1);
-                        doc.roundedRect(margin + 20 - 2, yPos - 2, imgWidth + 4, imgHeight + 4, 3, 3, 'S');
+                        doc.setLineWidth(0.5);
+                        doc.roundedRect(margin + 15 - 1, yPos - 1, imgWidth + 2, imgHeight + 2, 2, 2, 'S');
                         
-                        // Image
                         doc.addImage(
-                            msg.chartImages[chartIndex],
+                            msg.visualImages[vIndex].data,
                             'PNG',
-                            margin + 20,
+                            margin + 15,
                             yPos,
                             imgWidth,
                             imgHeight,
@@ -884,32 +955,32 @@ class ChatbotModals {
                             'FAST'
                         );
                         
-                        yPos += imgHeight + 25;
+                        yPos += imgHeight + 18;
                         
-                        console.log(`✅ Chart ${chartIndex + 1}/${msg.chartImages.length} added to PDF`);
+                        console.log(`✅ Visual ${vIndex + 1}/${msg.visualImages.length} added`);
                     } catch (error) {
-                        console.error(`❌ Failed to add chart ${chartIndex + 1}:`, error);
+                        console.error(`❌ Failed to add visual ${vIndex + 1}:`, error);
                     }
                 }
             }
             
             // Timestamp
             if (msg.timestamp) {
-                doc.setFontSize(8);
-                doc.setTextColor(150, 150, 150);
+                doc.setFontSize(7.5);
+                doc.setTextColor(140, 140, 140);
                 doc.setFont('helvetica', 'italic');
                 doc.text(`Time: ${msg.timestamp}`, contentMargin, yPos);
-                yPos += 15;
+                yPos += 13;
             }
             
-            yPos += 15;
+            yPos += 12;
             
             // Separator
             if (i < messages.length - 1) {
                 doc.setDrawColor(220, 220, 220);
-                doc.setLineWidth(0.5);
+                doc.setLineWidth(0.3);
                 doc.line(margin, yPos, pageWidth - margin, yPos);
-                yPos += 25;
+                yPos += 22;
             }
         }
         
@@ -920,24 +991,24 @@ class ChatbotModals {
             doc.setPage(i);
             
             doc.setDrawColor(220, 220, 220);
-            doc.setLineWidth(0.5);
-            doc.line(margin, pageHeight - 35, pageWidth - margin, pageHeight - 35);
+            doc.setLineWidth(0.3);
+            doc.line(margin, pageHeight - 32, pageWidth - margin, pageHeight - 32);
             
-            doc.setFontSize(8);
+            doc.setFontSize(7.5);
             doc.setFont('helvetica', 'normal');
-            doc.setTextColor(150, 150, 150);
+            doc.setTextColor(140, 140, 140);
             
             const footerText = `Page ${i} of ${totalPages} | Generated by AlphaVault AI - alphavault-ai.com`;
             const textWidth = doc.getTextWidth(footerText);
-            doc.text(footerText, (pageWidth - textWidth) / 2, pageHeight - 18);
+            doc.text(footerText, (pageWidth - textWidth) / 2, pageHeight - 16);
         }
         
         doc.save(`${filename}.pdf`);
-        console.log('✅ PDF with professional formatting generated successfully!');
+        console.log('✅ Professional PDF generated successfully!');
     }
 
     /**
-     * GET MESSAGES (WITHOUT CHARTS - FOR TXT/JSON)
+     * GET MESSAGES (TEXT ONLY)
      */
     getConversationMessages() {
         const messagesContainer = document.getElementById('chatbot-messages-content');
@@ -950,7 +1021,7 @@ class ChatbotModals {
             
             messages.push({
                 role: isUser ? 'user' : 'assistant',
-                content: text.trim(),
+                content: this.cleanText(text.trim()),
                 timestamp: time
             });
         });
@@ -998,7 +1069,7 @@ class ChatbotModals {
             container.style.overflow = originalOverflow;
             
             const timestamp = new Date().toISOString().slice(0, 10);
-            const filename = `alphy-ai-screenshot-${timestamp}.png`;
+            const filename = `alphavault-ai-screenshot-${timestamp}.png`;
             
             canvas.toBlob((blob) => {
                 const url = URL.createObjectURL(blob);
@@ -1026,7 +1097,7 @@ class ChatbotModals {
      * DOWNLOAD TEXT FILE
      */
     async downloadTextFile(messages, filename) {
-        let content = `ALPHY AI - FINANCIAL ASSISTANT CONVERSATION\n`;
+        let content = `ALPHAVAULT AI - FINANCIAL ASSISTANT CONVERSATION\n`;
         content += `${'='.repeat(70)}\n`;
         content += `Export Date: ${new Date().toLocaleString()}\n`;
         content += `Total Messages: ${messages.length}\n`;
@@ -1051,8 +1122,8 @@ class ChatbotModals {
      */
     async downloadJSONFile(messages, filename) {
         const data = {
-            platform: 'Alphy AI - Financial Assistant',
-            version: '6.0',
+            platform: 'AlphaVault AI - Financial Assistant',
+            version: '7.0',
             exportDate: new Date().toISOString(),
             totalMessages: messages.length,
             messages: messages.map(msg => ({
@@ -1148,9 +1219,6 @@ class ChatbotModals {
         console.log(`🎨 Theme changed to: ${theme}`);
     }
 
-    /**
-     * ✅ FIREBASE: SAVE SETTINGS
-     */
     async saveSettings() {
         if (!this.currentUser) {
             this.showSuccessMessage('Please login to save settings', true);
@@ -1188,9 +1256,6 @@ class ChatbotModals {
         }
     }
 
-    /**
-     * ✅ FIREBASE: LOAD SETTINGS
-     */
     async loadSettings() {
         if (!this.currentUser) {
             console.log('⚠ No user logged in, using defaults');
@@ -1227,9 +1292,6 @@ class ChatbotModals {
         }
     }
 
-    /**
-     * ✅ FIREBASE: RESET SETTINGS
-     */
     async resetSettings() {
         if (!confirm('Are you sure you want to reset all settings to defaults?')) {
             return;
@@ -1256,9 +1318,6 @@ class ChatbotModals {
         }
     }
 
-    /**
-     * ✅ FIREBASE: CLEAR ALL DATA
-     */
     async clearAllData() {
         if (!confirm('⚠ This will delete ALL your conversations and settings from Firebase. This action cannot be undone. Are you sure?')) {
             return;
@@ -1296,9 +1355,6 @@ class ChatbotModals {
         }
     }
 
-    /**
-     * ✅ FIREBASE: SAVE CONVERSATION
-     */
     async saveConversation(messages, conversationId = null) {
         if (!this.currentUser) {
             console.log('⚠ No user logged in, cannot save conversation');
@@ -1332,9 +1388,6 @@ class ChatbotModals {
         }
     }
 
-    /**
-     * ✅ FIREBASE: LOAD CONVERSATIONS
-     */
     async loadConversations() {
         if (!this.currentUser) {
             console.log('⚠ No user logged in, cannot load conversations');
@@ -1365,9 +1418,6 @@ class ChatbotModals {
         }
     }
 
-    /**
-     * Helper: Get current settings
-     */
     async getSettings() {
         if (!this.currentUser) {
             return { saveHistory: false };
