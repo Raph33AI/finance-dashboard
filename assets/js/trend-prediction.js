@@ -1779,50 +1779,6 @@ Object.assign(TrendPrediction, {
             credits: { enabled: false }
         });
         
-        // 3. Error Evolution Chart
-        const errorSeries = Object.keys(this.backtestResults).map(modelName => {
-            const result = this.backtestResults[modelName];
-            return {
-                name: this.models[modelName].name,
-                data: result.errors || [],
-                color: this.getModelColor(modelName),
-                lineWidth: 2
-            };
-        });
-        
-        Highcharts.chart('backtestErrorChart', {
-            chart: {
-                height: 450,
-                borderRadius: 15
-            },
-            title: {
-                text: 'Prediction Error Evolution',
-                style: { color: this.colors.primary, fontWeight: 'bold' }
-            },
-            subtitle: {
-                text: 'MAPE (Mean Absolute Percentage Error) over time',
-                style: { color: '#64748b' }
-            },
-            xAxis: {
-                title: { text: 'Backtest Period' }
-            },
-            yAxis: {
-                title: { text: 'Error (%)' },
-                min: 0
-            },
-            tooltip: {
-                valueSuffix: '%',
-                borderRadius: 10
-            },
-            legend: {
-                enabled: true,
-                align: 'center',
-                verticalAlign: 'bottom'
-            },
-            series: errorSeries,
-            credits: { enabled: false }
-        });
-        
         // 4. Update Backtesting Metrics
         if (this.backtestResults.linear) {
             const avgAccuracy = Object.values(this.backtestResults)
