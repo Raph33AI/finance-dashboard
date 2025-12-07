@@ -1,10 +1,9 @@
 /* ==============================================
-   📈 TREND-PREDICTION.JS - ML STOCK PREDICTION
-   Version ULTRA-ENRICHIE avec Advanced Analytics
-   Twelve Data API + Rate Limiting + Cache Optimisé
+   TREND-PREDICTION.JS - ML STOCK PREDICTION
+   Version avec Twelve Data API + Rate Limiting + Cache Optimisé
    ============================================== */
 
-// ========== RATE LIMITER ==========
+// ========== RATE LIMITER (IDENTIQUE À MARKET DATA) ==========
 class RateLimiter {
     constructor(maxRequests = 8, windowMs = 60000) {
         this.maxRequests = maxRequests;
@@ -91,12 +90,12 @@ class RateLimiter {
     }
 }
 
-// ========== CACHE OPTIMISÉ ==========
+// ========== CACHE OPTIMISÉ (IDENTIQUE À MARKET DATA) ==========
 class OptimizedCache {
     constructor() {
-        this.prefix = 'tp_cache_';
-        this.staticTTL = 24 * 60 * 60 * 1000;
-        this.dynamicTTL = 5 * 60 * 1000;
+        this.prefix = 'tp_cache_'; // trend prediction cache
+        this.staticTTL = 24 * 60 * 60 * 1000; // 24h
+        this.dynamicTTL = 5 * 60 * 1000; // 5min
     }
     
     set(key, data, ttl = null) {
@@ -202,29 +201,27 @@ const TrendPrediction = {
     
     async init() {
         try {
-            console.log('🤖 Initializing ML Trend Prediction with Advanced Analytics...');
+            console.log('🤖 Initializing ML Trend Prediction with Rate Limiting...');
             
+            // Initialiser le rate limiter (8 req/min)
             this.rateLimiter = new RateLimiter(8, 60000);
             this.optimizedCache = new OptimizedCache();
             
+            // Attendre l'authentification
             await this.waitForAuth();
             
-            // Vérifier si apiClient existe déjà globalement
-            if (window.apiClient) {
-                this.apiClient = window.apiClient;
-                console.log('✅ Using existing API client');
-            } else {
-                this.apiClient = new FinanceAPIClient({
-                    baseURL: APP_CONFIG.API_BASE_URL,
-                    cacheDuration: APP_CONFIG.CACHE_DURATION || 300000,
-                    maxRetries: APP_CONFIG.MAX_RETRIES || 2,
-                    onLoadingChange: (isLoading) => {
-                        this.showLoading(isLoading);
-                    }
-                });
-                window.apiClient = this.apiClient;
-            }
+            // Initialiser le client API
+            this.apiClient = new FinanceAPIClient({
+                baseURL: APP_CONFIG.API_BASE_URL,
+                cacheDuration: APP_CONFIG.CACHE_DURATION || 300000,
+                maxRetries: APP_CONFIG.MAX_RETRIES || 2,
+                onLoadingChange: (isLoading) => {
+                    this.showLoading(isLoading);
+                }
+            });
             
+            // Rendre accessible globalement
+            window.apiClient = this.apiClient;
             window.rateLimiter = this.rateLimiter;
             
             this.updateLastUpdate();
@@ -232,11 +229,12 @@ const TrendPrediction = {
             this.setupSearchListeners();
             this.startCacheMonitoring();
             
+            // Auto-load default symbol
             setTimeout(() => {
                 this.loadSymbol(this.currentSymbol);
             }, 500);
             
-            console.log('✅ ML Trend Prediction initialized successfully');
+            console.log('✅ ML Trend Prediction initialized with rate limiting');
             
         } catch (error) {
             console.error('Initialization error:', error);
@@ -339,10 +337,9 @@ const TrendPrediction = {
                 this.hideSuggestions();
             }
         });
-    }
-};
-
-// ============================================
+    },
+    
+    // ============================================
     // SEARCH WITH TWELVE DATA API
     // ============================================
     
@@ -367,6 +364,7 @@ const TrendPrediction = {
         const container = document.getElementById('searchSuggestions');
         if (!container) return;
         
+        // Vérifier le cache
         const cacheKey = `search_${query.toUpperCase()}`;
         const cached = this.optimizedCache.get(cacheKey);
         
@@ -586,6 +584,10 @@ const TrendPrediction = {
         try {
             console.log(`📊 Loading ${symbol} with Twelve Data API...`);
             
+            // Charger depuis le cache d'abord
+            const cachedQuote = this.optimizedCache.get(`quote_${symbol}`);
+            
+            // Données critiques avec rate limiting
             const [quote, timeSeries] = await Promise.all([
                 this.apiRequest(() => this.apiClient.getQuote(symbol), 'high'),
                 this.apiRequest(() => this.getTimeSeriesForPeriod(symbol, this.trainingPeriod), 'high')
@@ -602,6 +604,7 @@ const TrendPrediction = {
                 currency: 'USD'
             };
             
+            // Cache le quote
             this.optimizedCache.set(`quote_${symbol}`, quote, 60000);
             
             if (window.cacheWidget) {
@@ -612,11 +615,6 @@ const TrendPrediction = {
             
             await this.trainAllModels();
             this.displayResults();
-            
-            // Générer les analytics avancées
-            if (window.AdvancedAnalytics) {
-                await window.AdvancedAnalytics.generateAnalytics(symbol);
-            }
             
             this.showLoading(false);
             
@@ -639,6 +637,7 @@ const TrendPrediction = {
         
         const config = periodMap[period] || periodMap['6M'];
         
+        // Vérifier le cache
         const cacheKey = `timeseries_${symbol}_${period}`;
         const cached = this.optimizedCache.get(cacheKey);
         
@@ -652,6 +651,7 @@ const TrendPrediction = {
         
         const data = await this.apiClient.getTimeSeries(symbol, config.interval, config.outputsize);
         
+        // Cache pour 5 minutes
         this.optimizedCache.set(cacheKey, data, 5 * 60 * 1000);
         
         if (window.cacheWidget) {
@@ -739,11 +739,16 @@ const TrendPrediction = {
     
     sleep(ms) {
         return new Promise(resolve => setTimeout(resolve, ms));
-    },
-    
-    // ============================================
-    // ML MODELS IMPLEMENTATION
-    // ============================================
+    }
+};
+
+// ========== CONTINUATION DE TREND-PREDICTION.JS ==========
+
+// ============================================
+// LINEAR REGRESSION
+// ============================================
+
+Object.assign(TrendPrediction, {
     
     async trainLinearRegression(prices) {
         const n = prices.length;
@@ -779,6 +784,10 @@ const TrendPrediction = {
             params: { slope, intercept }
         };
     },
+    
+    // ============================================
+    // POLYNOMIAL REGRESSION
+    // ============================================
     
     async trainPolynomialRegression(prices, degree = 3) {
         const n = prices.length;
@@ -827,6 +836,10 @@ const TrendPrediction = {
         };
     },
     
+    // ============================================
+    // EXPONENTIAL SMOOTHING
+    // ============================================
+    
     async trainExponentialSmoothing(prices, alpha = 0.3, beta = 0.1) {
         const n = prices.length;
         
@@ -862,6 +875,10 @@ const TrendPrediction = {
             params: { alpha, beta, level, trend }
         };
     },
+    
+    // ============================================
+    // K-NEAREST NEIGHBORS
+    // ============================================
     
     async trainKNN(prices, k = 5, lookback = 5) {
         const n = prices.length;
@@ -927,6 +944,10 @@ const TrendPrediction = {
         }
         return Math.sqrt(sum);
     },
+    
+    // ============================================
+    // NEURAL NETWORK
+    // ============================================
     
     async trainNeuralNetwork(prices, lookback = 10) {
         const learningRate = 0.01;
@@ -1034,6 +1055,10 @@ const TrendPrediction = {
         );
     },
     
+    // ============================================
+    // ARIMA
+    // ============================================
+    
     async trainARIMA(prices, p = 5, d = 1, q = 2) {
         let diffPrices = prices;
         for (let i = 0; i < d; i++) {
@@ -1108,8 +1133,8 @@ const TrendPrediction = {
             rmse: rmse,
             params: { p, d, q, arCoeffs }
         };
-    }
-
+    },
+    
     // ============================================
     // HELPER FUNCTIONS FOR ML
     // ============================================
@@ -1196,11 +1221,17 @@ const TrendPrediction = {
             sum += Math.pow(actual[i] - predicted[i], 2);
         }
         return Math.sqrt(sum / actual.length);
-    },
+    }
     
-    // ============================================
-    // DISPLAY FUNCTIONS
-    // ============================================
+});
+
+// ========== CONTINUATION ET FIN DE TREND-PREDICTION.JS ==========
+
+// ============================================
+// DISPLAY FUNCTIONS
+// ============================================
+
+Object.assign(TrendPrediction, {
     
     displayStockHeader() {
         const quote = this.stockData.quote;
@@ -1311,6 +1342,10 @@ const TrendPrediction = {
         
         document.getElementById('resultsPanel').classList.remove('hidden');
     },
+    
+    // ============================================
+    // COMPARISON CHART
+    // ============================================
     
     createComparisonChart() {
         const prices = this.stockData.prices;
@@ -1425,9 +1460,14 @@ const TrendPrediction = {
         });
     },
     
+    // ============================================
+    // PERFORMANCE CHARTS
+    // ============================================
+    
     createPerformanceCharts() {
         const models = Object.entries(this.models).filter(([_, m]) => m !== null);
         
+        // Accuracy Chart
         const accuracyData = models.map(([name, model]) => ({
             name: model.name,
             y: model.r2 * 100,
@@ -1491,6 +1531,7 @@ const TrendPrediction = {
             credits: { enabled: false }
         });
         
+        // Error Chart
         const errorData = models.map(([name, model]) => ({
             name: model.name,
             y: model.rmse,
@@ -1554,6 +1595,10 @@ const TrendPrediction = {
         });
     },
     
+    // ============================================
+    // PERFORMANCE TABLE
+    // ============================================
+    
     createPerformanceTable() {
         const models = Object.entries(this.models).filter(([_, m]) => m !== null);
         models.sort((a, b) => b[1].r2 - a[1].r2);
@@ -1597,9 +1642,14 @@ const TrendPrediction = {
         document.getElementById('performanceTable').innerHTML = tableHTML;
     },
     
+    // ============================================
+    // ENSEMBLE PREDICTION
+    // ============================================
+    
     displayEnsemblePrediction() {
         const models = Object.values(this.models).filter(m => m !== null);
         
+        // Weighted average based on R² scores
         let sumWeightedPrediction = 0;
         let sumWeights = 0;
         
@@ -1611,6 +1661,7 @@ const TrendPrediction = {
         
         const ensemblePrediction = sumWeightedPrediction / sumWeights;
         
+        // Calculate confidence range
         const predictions = models.map(m => m.finalPrediction);
         const mean = predictions.reduce((a, b) => a + b) / predictions.length;
         const variance = predictions.reduce((sum, p) => sum + Math.pow(p - mean, 2), 0) / predictions.length;
@@ -1625,6 +1676,7 @@ const TrendPrediction = {
         const change = ensemblePrediction - currentPrice;
         const changePercent = (change / currentPrice) * 100;
         
+        // Update UI
         document.getElementById('ensemblePrice').textContent = this.formatCurrency(ensemblePrediction);
         
         const changeEl = document.getElementById('ensembleChange');
@@ -1633,6 +1685,7 @@ const TrendPrediction = {
         
         document.getElementById('ensembleRange').textContent = `${this.formatCurrency(lower)} - ${this.formatCurrency(upper)}`;
         
+        // Trading Signal
         let signal = 'HOLD';
         let signalClass = 'neutral';
         let strength = 'Moderate';
@@ -1663,6 +1716,10 @@ const TrendPrediction = {
         
         document.getElementById('ensembleAccuracy').textContent = (avgAccuracy * 100).toFixed(1) + '%';
     },
+    
+    // ============================================
+    // RECOMMENDATION
+    // ============================================
     
     displayRecommendation() {
         const models = Object.values(this.models).filter(m => m !== null);
@@ -1848,84 +1905,23 @@ const TrendPrediction = {
     },
     
     showNotification(message, type = 'info') {
-        console.log(`[${type.toUpperCase()}]`, message);
-        
-        const notification = document.createElement('div');
-        notification.style.cssText = `
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            padding: 16px 24px;
-            background: ${type === 'success' ? 'linear-gradient(135deg, #43e97b, #38f9d7)' : 
-                         type === 'error' ? 'linear-gradient(135deg, #f5576c, #fd7e14)' : 
-                         type === 'warning' ? 'linear-gradient(135deg, #f6d365, #fda085)' : 
-                         'linear-gradient(135deg, #667eea, #764ba2)'};
-            color: white;
-            border-radius: 12px;
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
-            z-index: 10001;
-            font-weight: 600;
-            animation: slideInRight 0.3s ease;
-            max-width: 400px;
-        `;
-        
-        const icon = type === 'success' ? 'check' : 
-                    type === 'error' ? 'times' : 
-                    type === 'warning' ? 'exclamation-triangle' : 'info';
-        
-        notification.innerHTML = `<i class='fas fa-${icon}-circle'></i> ${message}`;
-        
-        document.body.appendChild(notification);
-        
-        setTimeout(() => {
-            notification.style.animation = 'slideOutRight 0.3s ease';
-            setTimeout(() => notification.remove(), 300);
-        }, 3000);
+        if (window.FinanceDashboard && window.FinanceDashboard.showNotification) {
+            window.FinanceDashboard.showNotification(message, type);
+        } else {
+            console.log(`[${type.toUpperCase()}]`, message);
+        }
     }
     
-}; // ✅ FIN DE L'OBJET TrendPrediction
-
-// ========== EXPOSITION GLOBALE ==========
-window.TrendPrediction = TrendPrediction;
+});
 
 // ========== INITIALIZE WHEN DOM IS LOADED ==========
+
 document.addEventListener('DOMContentLoaded', () => {
     console.log('🤖 ML Trend Prediction - Starting initialization...');
     TrendPrediction.init();
 });
 
-// ========== STYLES POUR LES ANIMATIONS DE NOTIFICATION ==========
-if (!document.getElementById('notificationStyles')) {
-    const style = document.createElement('style');
-    style.id = 'notificationStyles';
-    style.textContent = `
-        @keyframes slideInRight {
-            from {
-                opacity: 0;
-                transform: translateX(100px);
-            }
-            to {
-                opacity: 1;
-                transform: translateX(0);
-            }
-        }
-        
-        @keyframes slideOutRight {
-            from {
-                opacity: 1;
-                transform: translateX(0);
-            }
-            to {
-                opacity: 0;
-                transform: translateX(100px);
-            }
-        }
-    `;
-    document.head.appendChild(style);
-}
+// ========== EXPOSITION GLOBALE ==========
+window.TrendPrediction = TrendPrediction;
 
-console.log('✅ ML Trend Prediction script loaded - COMPLETE VERSION with Advanced Analytics');
-
-/* ==============================================
-   📊 FIN DU FICHIER TREND-PREDICTION.JS
-   ============================================== */
+console.log('✅ ML Trend Prediction script loaded - COMPLETE VERSION with Twelve Data API + Rate Limiting + Cache');
