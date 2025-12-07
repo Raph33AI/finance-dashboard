@@ -5,6 +5,7 @@
    ✅ 4 stratégies
    ✅ Nouveaux graphiques (Tornado, HeatMap, Correlation, Frontier)
    ✅ COMPARAISON DE SCÉNARIOS
+   ✅ CHARGEMENT DE SCÉNARIOS
    ============================================== */
 
 const MonteCarlo = (function() {
@@ -190,7 +191,7 @@ const MonteCarlo = (function() {
         
         return { sharpeRatio, sortinoRatio, skewness, kurtosis };
     }
-    
+
     // ========== FIREBASE ==========
     
     function initFirebase() {
@@ -307,20 +308,118 @@ const MonteCarlo = (function() {
                 <div class="scenario-checkbox">
                     <input type="checkbox" id="scenario-${s.id}" value="${s.id}" class="scenario-select-checkbox">
                 </div>
-                <div class="scenario-info">
+                <div class="scenario-info" onclick="MonteCarlo.loadScenario('${s.id}')" style="cursor: pointer; flex-grow: 1;">
                     <h4>${s.name}</h4>
                     <p>${s.date || 'No date'}</p>
                     <p style="font-size: 0.85rem; color: var(--ml-primary); font-weight: 600;">
                         Median: ${window.FinanceDashboard.formatNumber(s.medianResult || 0, 0)} EUR
                     </p>
+                    <p style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 4px;">
+                        ${s.params?.distribution || 'N/A'} • ${s.params?.strategy || 'N/A'} • ${s.params?.years || 0}y
+                    </p>
                 </div>
                 <div class="scenario-actions">
-                    <button onclick="MonteCarlo.deleteScenario('${s.id}')" title="Delete">
+                    <button onclick="event.stopPropagation(); MonteCarlo.loadScenario('${s.id}')" title="Load parameters">
+                        <i class="fas fa-download"></i>
+                    </button>
+                    <button onclick="event.stopPropagation(); MonteCarlo.deleteScenario('${s.id}')" title="Delete">
                         <i class="fas fa-trash"></i>
                     </button>
                 </div>
             </div>
         `).join('');
+    }
+    
+    // ========== SCENARIO LOADING ==========
+    
+    function loadScenario(scenarioId) {
+        const scenario = savedScenariosData.find(s => s.id === scenarioId);
+        if (!scenario || !scenario.params) {
+            window.FinanceDashboard.showNotification('Scenario not found', 'error');
+            return;
+        }
+        
+        const params = scenario.params;
+        
+        // Load basic parameters
+        if (params.monthlyInvestment !== undefined) {
+            document.getElementById('monthlyInvestment').value = params.monthlyInvestment;
+        }
+        if (params.lumpSumAmount !== undefined) {
+            const elem = document.getElementById('lumpSumAmount');
+            if (elem) elem.value = params.lumpSumAmount;
+        }
+        if (params.monthlyYield !== undefined) {
+            document.getElementById('monthlyYield').value = params.monthlyYield * 100;
+        }
+        if (params.volatility !== undefined) {
+            document.getElementById('volatility').value = params.volatility * 100;
+        }
+        if (params.years !== undefined) {
+            document.getElementById('years').value = params.years;
+        }
+        if (params.simulations !== undefined) {
+            document.getElementById('simulations').value = params.simulations;
+        }
+        if (params.targetValue !== undefined) {
+            document.getElementById('targetValue').value = params.targetValue;
+        }
+        if (params.inflationRate !== undefined) {
+            document.getElementById('inflationRateMC').value = params.inflationRate;
+        }
+        if (params.showInflation !== undefined) {
+            document.getElementById('showInflationMC').checked = params.showInflation;
+        }
+        
+        // Load distribution
+        if (params.distribution) {
+            document.querySelectorAll('input[name="distribution"]').forEach(radio => {
+                radio.checked = radio.value === params.distribution;
+            });
+        }
+        
+        // Load strategy
+        if (params.strategy) {
+            document.querySelectorAll('input[name="strategy"]').forEach(radio => {
+                radio.checked = radio.value === params.strategy;
+            });
+        }
+        
+        // Update UI fields based on strategy/distribution
+        updateStrategyFields();
+        updateDistributionFields();
+        
+        // Load strategy-specific parameters
+        if (params.withdrawalRate !== undefined) {
+            const elem = document.getElementById('withdrawalRate');
+            if (elem) elem.value = params.withdrawalRate * 100;
+        }
+        if (params.withdrawalStartYear !== undefined) {
+            const elem = document.getElementById('withdrawalStartYear');
+            if (elem) elem.value = params.withdrawalStartYear;
+        }
+        
+        // Load distribution-specific parameters
+        if (params.degreesOfFreedom !== undefined) {
+            const elem = document.getElementById('degreesOfFreedom');
+            if (elem) elem.value = params.degreesOfFreedom;
+        }
+        if (params.jumpIntensity !== undefined) {
+            const elem = document.getElementById('jumpIntensity');
+            if (elem) elem.value = params.jumpIntensity;
+        }
+        if (params.jumpMagnitude !== undefined) {
+            const elem = document.getElementById('jumpMagnitude');
+            if (elem) elem.value = params.jumpMagnitude;
+        }
+        
+        window.FinanceDashboard.showNotification(`"${scenario.name}" loaded!`, 'success');
+        
+        // Scroll to parameters panel
+        const paramsPanel = document.querySelector('.params-panel');
+        if (paramsPanel) {
+            paramsPanel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
     }
     
     // ========== SCENARIO COMPARISON ==========
@@ -359,15 +458,6 @@ const MonteCarlo = (function() {
         
         // Couleurs pour chaque scénario
         const colors = ['#667eea', '#f5576c', '#43e97b', '#f6d365', '#764ba2'];
-        
-        // Créer des séries pour le graphique
-        const series = scenarios.map((scenario, index) => {
-            return {
-                name: scenario.name,
-                data: [scenario.medianResult || 0],
-                color: colors[index % colors.length]
-            };
-        });
         
         // Créer le graphique de comparaison
         Highcharts.chart('comparisonChartContainer', {
@@ -459,11 +549,11 @@ const MonteCarlo = (function() {
                         </div>
                         <div class="comparison-value-item" style="border-left-color: ${colors[index % colors.length]};">
                             <span class="comparison-value-name">Monthly Yield:</span>
-                            <span class="comparison-value-number">${(params.monthlyYield || 0).toFixed(2)}%</span>
+                            <span class="comparison-value-number">${((params.monthlyYield || 0) * 100).toFixed(2)}%</span>
                         </div>
                         <div class="comparison-value-item" style="border-left-color: ${colors[index % colors.length]};">
                             <span class="comparison-value-name">Volatility:</span>
-                            <span class="comparison-value-number">${(params.volatility || 0).toFixed(1)}%</span>
+                            <span class="comparison-value-number">${((params.volatility || 0) * 100).toFixed(1)}%</span>
                         </div>
                         <div class="comparison-value-item" style="border-left-color: ${colors[index % colors.length]};">
                             <span class="comparison-value-name">Time Horizon:</span>
@@ -538,7 +628,7 @@ const MonteCarlo = (function() {
                     y += 5;
                     doc.text(`Distribution: ${params.distribution || 'N/A'}`, 25, y);
                     y += 5;
-                    doc.text(`Volatility: ${(params.volatility || 0).toFixed(1)}%`, 25, y);
+                    doc.text(`Volatility: ${((params.volatility || 0) * 100).toFixed(1)}%`, 25, y);
                     y += 10;
                 });
                 
@@ -624,7 +714,7 @@ const MonteCarlo = (function() {
     function clearScenarios() {
         clearAllScenarios();
     }
-    
+
     // ========== PARAMETERS ==========
     
     function getSimulationParams() {
@@ -751,7 +841,7 @@ const MonteCarlo = (function() {
         }, 100);
     }
     
-    // ========== SIMULATIONS (SUITE) ==========
+    // ========== SIMULATIONS EXECUTION ==========
     
     function executeDCASimulation(params, totalMonths, monthlyVolatility) {
         const allSimulations = [];
@@ -928,7 +1018,7 @@ const MonteCarlo = (function() {
             comparison: true
         };
     }
-    
+
     // ========== DISPLAY RESULTS ==========
     
     function displayResults(results, params) {
@@ -1233,7 +1323,7 @@ const MonteCarlo = (function() {
             </div>
         `;
     }
-    
+
     // ========== CHARTS ==========
     
     function createChart1(allSimulations, totalMonths, params) {
@@ -1440,6 +1530,99 @@ const MonteCarlo = (function() {
             `;
         }
     }
+    
+    function createChart4(allSimulations, totalMonths) {
+        if (!allSimulations || allSimulations.length === 0) return;
+        
+        const scenarios = [
+            { name: 'Crisis (-40%)', shock: -0.40, color: '#8b0000' },
+            { name: 'Recession (-20%)', shock: -0.20, color: '#f5576c' },
+            { name: 'Normal (0%)', shock: 0, color: '#667eea' },
+            { name: 'Bull (+20%)', shock: 0.20, color: '#43e97b' }
+        ];
+        
+        const categories = scenarios.map(s => s.name);
+        const data = scenarios.map(scenario => {
+            const stressedValues = allSimulations.map(sim => {
+                const finalValue = sim[totalMonths] || sim[sim.length - 1] || 0;
+                return finalValue * (1 + scenario.shock);
+            });
+            return {
+                y: percentile(stressedValues, 50),
+                color: scenario.color
+            };
+        });
+        
+        Highcharts.chart('chart4', {
+            chart: { type: 'column', backgroundColor: 'transparent' },
+            title: { text: '⚡ Stress Testing', style: { color: '#667eea', fontWeight: 'bold' } },
+            xAxis: { categories: categories },
+            yAxis: { title: { text: 'Median (EUR)' } },
+            series: [{ 
+                name: 'Portfolio', 
+                data: data, 
+                borderRadius: 5,
+                dataLabels: {
+                    enabled: true,
+                    formatter: function() {
+                        return window.FinanceDashboard.formatNumber(this.y / 1000, 0) + 'k';
+                    }
+                }
+            }],
+            legend: { enabled: false },
+            credits: { enabled: false }
+        });
+    }
+    
+    function createChart5(monthsToTarget, targetValue) {
+        if (!monthsToTarget || monthsToTarget.length === 0) return;
+        
+        const validMonths = monthsToTarget.filter(m => m < 1000);
+        
+        if (validMonths.length === 0) {
+            const chartDiv = document.getElementById('chart5');
+            if (chartDiv) {
+                chartDiv.innerHTML = '<p style="text-align: center; padding: 40px; color: var(--text-secondary);">Target not reached</p>';
+            }
+            return;
+        }
+        
+        const min = Math.min(...validMonths);
+        const max = Math.max(...validMonths);
+        const binWidth = Math.max(1, Math.ceil((max - min) / 20));
+        const bins = [];
+        
+        for (let i = min; i <= max; i += binWidth) {
+            bins.push({ x: i, y: 0 });
+        }
+        
+        validMonths.forEach(m => {
+            const binIndex = Math.min(Math.floor((m - min) / binWidth), bins.length - 1);
+            if (bins[binIndex]) bins[binIndex].y++;
+        });
+        
+        const medianTime = percentile(validMonths, 50);
+        const successRate = (validMonths.length / monthsToTarget.length * 100).toFixed(1);
+        
+        Highcharts.chart('chart5', {
+            chart: { type: 'column', backgroundColor: 'transparent' },
+            title: { 
+                text: `⏱ Time to ${window.FinanceDashboard.formatNumber(targetValue, 0)} EUR`, 
+                style: { color: '#667eea', fontWeight: 'bold' } 
+            },
+            subtitle: {
+                text: `Success: ${successRate}% | Median: ${(medianTime/12).toFixed(1)} years`,
+                style: { color: '#764ba2' }
+            },
+            xAxis: { title: { text: 'Months' } },
+            yAxis: { title: { text: 'Frequency' } },
+            series: [{ name: 'Distribution', data: bins, color: '#667eea', borderRadius: 5 }],
+            legend: { enabled: false },
+            credits: { enabled: false }
+        });
+    }
+
+    // ========== ADVANCED CHARTS ==========
     
     function createTornadoDiagram(params, totalMonths) {
         const baseParams = {...params, simulations: 500};
@@ -1660,97 +1843,6 @@ const MonteCarlo = (function() {
         });
     }
     
-    function createChart4(allSimulations, totalMonths) {
-        if (!allSimulations || allSimulations.length === 0) return;
-        
-        const scenarios = [
-            { name: 'Crisis (-40%)', shock: -0.40, color: '#8b0000' },
-            { name: 'Recession (-20%)', shock: -0.20, color: '#f5576c' },
-            { name: 'Normal (0%)', shock: 0, color: '#667eea' },
-            { name: 'Bull (+20%)', shock: 0.20, color: '#43e97b' }
-        ];
-        
-        const categories = scenarios.map(s => s.name);
-        const data = scenarios.map(scenario => {
-            const stressedValues = allSimulations.map(sim => {
-                const finalValue = sim[totalMonths] || sim[sim.length - 1] || 0;
-                return finalValue * (1 + scenario.shock);
-            });
-            return {
-                y: percentile(stressedValues, 50),
-                color: scenario.color
-            };
-        });
-        
-        Highcharts.chart('chart4', {
-            chart: { type: 'column', backgroundColor: 'transparent' },
-            title: { text: '⚡ Stress Testing', style: { color: '#667eea', fontWeight: 'bold' } },
-            xAxis: { categories: categories },
-            yAxis: { title: { text: 'Median (EUR)' } },
-            series: [{ 
-                name: 'Portfolio', 
-                data: data, 
-                borderRadius: 5,
-                dataLabels: {
-                    enabled: true,
-                    formatter: function() {
-                        return window.FinanceDashboard.formatNumber(this.y / 1000, 0) + 'k';
-                    }
-                }
-            }],
-            legend: { enabled: false },
-            credits: { enabled: false }
-        });
-    }
-    
-    function createChart5(monthsToTarget, targetValue) {
-        if (!monthsToTarget || monthsToTarget.length === 0) return;
-        
-        const validMonths = monthsToTarget.filter(m => m < 1000);
-        
-        if (validMonths.length === 0) {
-            const chartDiv = document.getElementById('chart5');
-            if (chartDiv) {
-                chartDiv.innerHTML = '<p style="text-align: center; padding: 40px; color: var(--text-secondary);">Target not reached</p>';
-            }
-            return;
-        }
-        
-        const min = Math.min(...validMonths);
-        const max = Math.max(...validMonths);
-        const binWidth = Math.max(1, Math.ceil((max - min) / 20));
-        const bins = [];
-        
-        for (let i = min; i <= max; i += binWidth) {
-            bins.push({ x: i, y: 0 });
-        }
-        
-        validMonths.forEach(m => {
-            const binIndex = Math.min(Math.floor((m - min) / binWidth), bins.length - 1);
-            if (bins[binIndex]) bins[binIndex].y++;
-        });
-        
-        const medianTime = percentile(validMonths, 50);
-        const successRate = (validMonths.length / monthsToTarget.length * 100).toFixed(1);
-        
-        Highcharts.chart('chart5', {
-            chart: { type: 'column', backgroundColor: 'transparent' },
-            title: { 
-                text: `⏱ Time to ${window.FinanceDashboard.formatNumber(targetValue, 0)} EUR`, 
-                style: { color: '#667eea', fontWeight: 'bold' } 
-            },
-            subtitle: {
-                text: `Success: ${successRate}% | Median: ${(medianTime/12).toFixed(1)} years`,
-                style: { color: '#764ba2' }
-            },
-            xAxis: { title: { text: 'Months' } },
-            yAxis: { title: { text: 'Frequency' } },
-            series: [{ name: 'Distribution', data: bins, color: '#667eea', borderRadius: 5 }],
-            legend: { enabled: false },
-            credits: { enabled: false }
-        });
-    }
-    
     function createRollingSharpe(allReturns) {
         if (!allReturns || allReturns.length === 0) return;
         
@@ -1871,7 +1963,7 @@ const MonteCarlo = (function() {
             window.FinanceDashboard.showNotification('Export failed', 'error');
         }
     }
-    
+
     // ========== INIT ==========
     
     function init() {
@@ -1887,7 +1979,7 @@ const MonteCarlo = (function() {
         updateDistributionFields();
         initFirebase();
         
-        console.log('✅ Monte Carlo Ultra initialized with Scenario Comparison');
+        console.log('✅ Monte Carlo Ultra initialized with Scenario Comparison & Loading');
     }
     
     if (document.readyState === 'loading') {
@@ -1900,6 +1992,7 @@ const MonteCarlo = (function() {
     return {
         runSimulation,
         loadTemplate,
+        loadScenario,
         saveCurrentScenario,
         deleteScenario,
         clearScenarios,
@@ -1944,4 +2037,4 @@ document.addEventListener('keydown', function(event) {
     }
 });
 
-console.log('✅ Monte Carlo Ultra-Complete with Scenario Comparison loaded!');
+console.log('✅ Monte Carlo Ultra-Complete with Scenario Comparison & Loading loaded!');

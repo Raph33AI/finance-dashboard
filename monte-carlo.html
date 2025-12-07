@@ -246,7 +246,10 @@
                         <button class='mobile-toggle' id='mobileToggle'>
                             <i class='fas fa-bars'></i>
                         </button>
-                        <h1><i class="fas fa-dice"></i> Monte Carlo Simulation</h1>
+                        <h1>
+                            <i class="fas fa-dice"></i> Monte Carlo Simulation
+                            <span class='help-icon help-icon-small' onclick='openModal("modalMCIntro")' title='What is Monte Carlo?'>?</span>
+                        </h1>
                     </div>
                 </div>
             </header>
@@ -258,6 +261,7 @@
                     <div class='quick-templates'>
                         <h2 class='section-title'>
                             <i class="fas fa-rocket"></i> Quick Start Templates
+                            <span class='help-icon help-icon-small' onclick='openModal("modalTemplates")' title='Learn about templates'>?</span>
                         </h2>
                         <div class='templates-grid'>
                             <button class='template-btn template-conservative' onclick='MonteCarlo.loadTemplate("conservative")'>
@@ -292,6 +296,7 @@
                     <div class='scenario-manager'>
                         <h2 class='section-title'>
                             <i class="fas fa-save"></i> Scenario Manager
+                            <span class='help-icon help-icon-small' onclick='openModal("modalScenarios")' title='How to manage scenarios'>?</span>
                         </h2>
                         <div class='scenario-controls'>
                             <button class='btn-scenario' onclick='MonteCarlo.saveCurrentScenario()'>
@@ -317,6 +322,7 @@
                         <div class='advanced-section'>
                             <h3 class='advanced-section-title'>
                                 <i class="fas fa-chart-area"></i> Return Distribution Model
+                                <span class='help-icon help-icon-small' onclick='openModal("modalDistribution")' title='Distribution models explained'>?</span>
                             </h3>
                             <div class='distribution-grid'>
                                 <label class='radio-card'>
@@ -398,7 +404,10 @@
                         <!-- Parameters Grid -->
                         <div class='params-grid'>
                             <div class='param-group'>
-                                <label for='monthlyInvestment'>Monthly Investment (EUR)</label>
+                                <label for='monthlyInvestment'>
+                                    Monthly Investment (EUR)
+                                    <span class='help-icon help-icon-small' onclick='openModal("modalMCInvest")' title='What is DCA?'>?</span>
+                                </label>
                                 <input type='number' id='monthlyInvestment' value='200' step='10'>
                                 <div class='hint'>DCA amount</div>
                             </div>
@@ -422,13 +431,19 @@
                             </div>
                             
                             <div class='param-group'>
-                                <label for='monthlyYield'>Est. Monthly Yield (%)</label>
+                                <label for='monthlyYield'>
+                                    Est. Monthly Yield (%)
+                                    <span class='help-icon help-icon-small' onclick='openModal("modalMCYield")' title='How to estimate yield?'>?</span>
+                                </label>
                                 <input type='number' id='monthlyYield' value='0.67' step='0.01'>
                                 <div class='hint'>Expected return</div>
                             </div>
                             
                             <div class='param-group'>
-                                <label for='volatility'>Volatility (%)</label>
+                                <label for='volatility'>
+                                    Volatility (%)
+                                    <span class='help-icon help-icon-small' onclick='openModal("modalMCVol")' title='Understanding volatility'>?</span>
+                                </label>
                                 <input type='number' id='volatility' value='15' step='0.5'>
                                 <div class='hint'>Annual std dev</div>
                             </div>
@@ -458,7 +473,10 @@
                             </div>
                             
                             <div class='param-group'>
-                                <label for='simulations'>Number of Simulations</label>
+                                <label for='simulations'>
+                                    Number of Simulations
+                                    <span class='help-icon help-icon-small' onclick='openModal("modalMCSim")' title='How many simulations?'>?</span>
+                                </label>
                                 <input type='number' id='simulations' value='1000' step='100' min='100' max='50000'>
                                 <div class='hint'>Max: 50,000</div>
                             </div>
@@ -512,6 +530,7 @@
                         
                         <h2 class='section-title'>
                             <i class="fas fa-chart-bar"></i> Simulation Results
+                            <span class='help-icon help-icon-small' onclick='openModal("modalMCResults")' title='How to read results?'>?</span>
                         </h2>
                         
                         <!-- Stats -->
@@ -521,6 +540,7 @@
                         <!-- Advanced Risk -->
                         <h3 class='subsection-title'>
                             <i class="fas fa-shield-alt"></i> Advanced Risk Metrics
+                            <span class='help-icon help-icon-small' onclick='openModal("modalAdvancedRisk")' title='Advanced metrics explained'>?</span>
                         </h3>
                         <div id='advancedRiskMetrics' class='stats-grid'></div>
                         
@@ -543,6 +563,7 @@
                         <!-- Max Drawdown -->
                         <h3 class='subsection-title'>
                             <i class="fas fa-arrow-down"></i> Maximum Drawdown
+                            <span class='help-icon help-icon-small' onclick='openModal("modalDrawdown")' title='What is drawdown?'>?</span>
                         </h3>
                         <div id='drawdownStats' class='stats-grid'></div>
                         <div id='chartDrawdown' class='chart'></div>
@@ -550,18 +571,21 @@
                         <!-- Risk Analysis -->
                         <h3 class='subsection-title'>
                             <i class="fas fa-exclamation-triangle"></i> Risk Analysis
+                            <span class='help-icon help-icon-small' onclick='openModal("modalMCRisk")' title='Risk metrics explained'>?</span>
                         </h3>
                         <div id='riskAnalysis' class='stats-grid'></div>
                         
                         <!-- Tornado Diagram -->
                         <h3 class='subsection-title'>
                             <i class="fas fa-wind"></i> Sensitivity Analysis (Tornado)
+                            <span class='help-icon help-icon-small' onclick='openModal("modalTornado")' title='What is a tornado diagram?'>?</span>
                         </h3>
                         <div id='chartTornado' class='chart'></div>
                         
                         <!-- Heat Map -->
                         <h3 class='subsection-title'>
                             <i class="fas fa-th"></i> 2D Parameter Heat Map
+                            <span class='help-icon help-icon-small' onclick='openModal("modalHeatMap")' title='How to read heat map?'>?</span>
                         </h3>
                         <div id='chartHeatMap' class='chart'></div>
                         
@@ -775,11 +799,19 @@
                 <p>The Scenario Manager lets you:</p>
                 
                 <ul>
-                    <li><strong>Save</strong> up to 5 different simulation scenarios in Firebase</li>
-                    <li><strong>Compare</strong> them side-by-side in interactive charts</li>
+                    <li><strong>Save</strong> up to 10 different simulation scenarios in Firebase</li>
+                    <li><strong>Load</strong> saved scenarios to restore all parameters</li>
+                    <li><strong>Compare</strong> 2-5 scenarios side-by-side in interactive charts</li>
                     <li><strong>Name</strong> each scenario for easy reference</li>
                     <li><strong>Delete</strong> unwanted scenarios</li>
                 </ul>
+                
+                <h3>How to Load a Scenario</h3>
+                <ol>
+                    <li>Click the <strong>"Load"</strong> button on any saved scenario card</li>
+                    <li>All parameters (distribution, strategy, values) will be restored</li>
+                    <li>Click <strong>"Run Simulation"</strong> to reproduce the exact same results</li>
+                </ol>
                 
                 <h3>How to Compare Scenarios</h3>
                 <ol>
