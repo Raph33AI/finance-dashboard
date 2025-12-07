@@ -2041,24 +2041,29 @@ Object.assign(TrendPrediction, {
         
         const consensusScore = avgCorrelation * 100;
         
-        // Créer une jauge pour le consensus
+        // Créer une jauge pour le consensus (VERSION PREMIUM)
         Highcharts.chart('consensusGauge', {
             chart: {
                 type: 'solidgauge',
-                height: 250
+                height: 280,
+                backgroundColor: 'transparent'
             },
             title: null,
             pane: {
-                center: ['50%', '85%'],
-                size: '140%',
+                center: ['50%', '75%'],
+                size: '110%',
                 startAngle: -90,
                 endAngle: 90,
-                background: {
-                    backgroundColor: '#f1f5f9',
+                background: [{
+                    backgroundColor: 'rgba(241, 245, 249, 0.3)',
                     innerRadius: '60%',
                     outerRadius: '100%',
-                    shape: 'arc'
-                }
+                    shape: 'arc',
+                    borderWidth: 0
+                }]
+            },
+            exporting: {
+                enabled: false
             },
             tooltip: {
                 enabled: false
@@ -2067,30 +2072,35 @@ Object.assign(TrendPrediction, {
                 min: 0,
                 max: 100,
                 stops: [
-                    [0.3, '#ef4444'],
-                    [0.6, '#f59e0b'],
-                    [0.9, '#10b981']
+                    [0.1, '#ef4444'],   // Rouge
+                    [0.3, '#f59e0b'],   // Orange
+                    [0.5, '#fbbf24'],   // Jaune
+                    [0.7, '#84cc16'],   // Vert clair
+                    [0.9, '#22c55e']    // Vert
                 ],
                 lineWidth: 0,
                 tickWidth: 0,
                 minorTickInterval: null,
                 tickAmount: 2,
-                title: {
-                    y: -70,
-                    text: consensusScore.toFixed(0) + '%',
-                    style: {
-                        fontSize: '2rem',
-                        fontWeight: 'bold'
-                    }
-                },
                 labels: {
-                    y: 16
+                    y: 20,
+                    style: {
+                        fontSize: '14px',
+                        fontWeight: '600',
+                        color: '#64748b'
+                    }
                 }
             },
             plotOptions: {
                 solidgauge: {
                     dataLabels: {
-                        enabled: false
+                        y: -30,
+                        borderWidth: 0,
+                        useHTML: true,
+                        format: '<div style="text-align:center">' +
+                            '<span style="font-size:2.5rem;font-weight:800;background:linear-gradient(135deg, #667eea, #764ba2);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">{y:.0f}%</span><br/>' +
+                            '<span style="font-size:0.9rem;color:#64748b;font-weight:600;margin-top:8px;display:block;">Model Consensus</span>' +
+                            '</div>'
                     },
                     linecap: 'round',
                     stickyTracking: false,
@@ -2100,12 +2110,8 @@ Object.assign(TrendPrediction, {
             series: [{
                 name: 'Consensus',
                 data: [consensusScore],
-                dataLabels: {
-                    format: '<div style="text-align:center">' +
-                        '<span style="font-size:1.5rem;font-weight:bold">{y:.0f}%</span><br/>' +
-                        '<span style="font-size:0.8rem;opacity:0.6">Consensus</span>' +
-                        '</div>'
-                }
+                innerRadius: '60%',
+                radius: '100%'
             }],
             credits: { enabled: false }
         });
