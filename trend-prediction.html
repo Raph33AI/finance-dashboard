@@ -3,11 +3,11 @@
 <head>
     <meta charset='UTF-8'>
     <meta name='viewport' content='width=device-width, initial-scale=1.0'>
-    <meta name='description' content='ML Trend Prediction - Wall Street-grade machine learning stock forecasting'>
+    <meta name='description' content='ML Trend Prediction - Machine learning stock price forecasting with multiple AI models'>
     <meta name='author' content='Raphael NARDONE'>
     <meta name='theme-color' content='#2649B2'>
     
-    <title>ML Trend Prediction - AlphaVault AI</title>
+    <title>ML Trend Prediction</title>
     
     <!-- Preconnect pour optimisation -->
     <link rel='preconnect' href='https://code.highcharts.com'>
@@ -29,428 +29,7 @@
     <link rel="stylesheet" href="assets/css/chatbot-styles.css">
     <link rel='stylesheet' href='assets/css/cache-widget.css'>
     <link rel='stylesheet' href='assets/css/trend-prediction.css'>
-    
-    <!-- ✅ NOUVEAU : CSS pour Watchlist & Portfolio -->
-    <style>
-        /* ============================================
-           📊 WATCHLIST & PORTFOLIO MANAGEMENT SECTION
-           ============================================ */
-        .portfolio-watchlist-section {
-            background: linear-gradient(135deg, rgba(102, 126, 234, 0.08) 0%, rgba(118, 75, 162, 0.05) 100%);
-            backdrop-filter: blur(30px) saturate(180%);
-            border: 2px solid var(--glass-border);
-            border-radius: 28px;
-            padding: 40px;
-            margin-bottom: 40px;
-            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.12);
-        }
-        
-        .portfolio-watchlist-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 30px;
-            padding-bottom: 20px;
-            border-bottom: 2px solid var(--glass-border);
-        }
-        
-        .portfolio-selector {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-        
-        .portfolio-selector select {
-            padding: 12px 20px;
-            border: 2px solid rgba(102, 126, 234, 0.4);
-            border-radius: 12px;
-            background: rgba(255, 255, 255, 0.02);
-            backdrop-filter: blur(10px);
-            color: var(--text-primary);
-            font-weight: 600;
-            cursor: pointer;
-            transition: var(--transition-smooth);
-        }
-        
-        .portfolio-selector select:focus {
-            outline: none;
-            border-color: var(--ml-primary);
-            box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
-        }
-        
-        .portfolio-actions {
-            display: flex;
-            gap: 10px;
-        }
-        
-        .btn-portfolio {
-            padding: 10px 20px;
-            border: 2px solid rgba(102, 126, 234, 0.4);
-            border-radius: 12px;
-            background: rgba(255, 255, 255, 0.02);
-            color: var(--text-primary);
-            font-weight: 600;
-            cursor: pointer;
-            transition: var(--transition-smooth);
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-        }
-        
-        .btn-portfolio:hover {
-            background: linear-gradient(135deg, var(--ml-primary), var(--ml-secondary));
-            border-color: transparent;
-            color: white;
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.3);
-        }
-        
-        .watchlist-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-            gap: 16px;
-            margin-top: 20px;
-        }
-        
-        .watchlist-stock-card {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(20px);
-            border: 2px solid var(--glass-border);
-            border-radius: 16px;
-            padding: 20px;
-            cursor: pointer;
-            transition: var(--transition-smooth);
-            position: relative;
-        }
-        
-        body.dark-mode .watchlist-stock-card {
-            background: rgba(15, 23, 42, 0.9);
-        }
-        
-        .watchlist-stock-card:hover {
-            transform: translateY(-6px);
-            box-shadow: 0 12px 36px rgba(102, 126, 234, 0.25);
-            border-color: var(--ml-primary);
-        }
-        
-        .watchlist-stock-symbol {
-            font-size: 1.3rem;
-            font-weight: 800;
-            background: linear-gradient(135deg, var(--ml-primary), var(--ml-secondary));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            margin-bottom: 8px;
-        }
-        
-        .watchlist-stock-price {
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: var(--text-primary);
-            margin-bottom: 6px;
-        }
-        
-        .watchlist-stock-change {
-            font-size: 0.95rem;
-            font-weight: 600;
-            padding: 4px 10px;
-            border-radius: 20px;
-            display: inline-block;
-        }
-        
-        .watchlist-stock-change.positive {
-            background: linear-gradient(135deg, var(--ml-success), #38f9d7);
-            color: white;
-        }
-        
-        .watchlist-stock-change.negative {
-            background: linear-gradient(135deg, var(--ml-danger), #fd7e14);
-            color: white;
-        }
-        
-        .watchlist-remove-btn {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            background: rgba(245, 87, 108, 0.1);
-            border: none;
-            border-radius: 50%;
-            width: 28px;
-            height: 28px;
-            cursor: pointer;
-            color: var(--ml-danger);
-            transition: var(--transition-smooth);
-            opacity: 0;
-        }
-        
-        .watchlist-stock-card:hover .watchlist-remove-btn {
-            opacity: 1;
-        }
-        
-        .watchlist-remove-btn:hover {
-            background: var(--ml-danger);
-            color: white;
-            transform: scale(1.1);
-        }
-        
-        .watchlist-add-section {
-            margin-top: 20px;
-            padding: 20px;
-            background: rgba(102, 126, 234, 0.05);
-            border: 2px dashed rgba(102, 126, 234, 0.3);
-            border-radius: 16px;
-            display: flex;
-            gap: 12px;
-            align-items: center;
-        }
-        
-        .watchlist-add-input {
-            flex: 1;
-            padding: 12px 20px;
-            border: 2px solid rgba(102, 126, 234, 0.4);
-            border-radius: 12px;
-            background: rgba(255, 255, 255, 0.02);
-            color: var(--text-primary);
-            font-weight: 600;
-        }
-        
-        .watchlist-add-input:focus {
-            outline: none;
-            border-color: var(--ml-primary);
-            box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
-        }
-        
-        .btn-add-watchlist {
-            padding: 12px 28px;
-            background: linear-gradient(135deg, var(--ml-primary), var(--ml-secondary));
-            border: none;
-            border-radius: 12px;
-            color: white;
-            font-weight: 700;
-            cursor: pointer;
-            transition: var(--transition-smooth);
-            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
-        }
-        
-        .btn-add-watchlist:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 24px rgba(102, 126, 234, 0.5);
-        }
-        
-        .watchlist-empty {
-            text-align: center;
-            padding: 60px 20px;
-            color: var(--text-secondary);
-        }
-        
-        .watchlist-empty i {
-            font-size: 4rem;
-            opacity: 0.3;
-            margin-bottom: 20px;
-            display: block;
-        }
-        
-        /* ============================================
-           📈 MULTI-STOCK COMPARISON SECTION
-           ============================================ */
-        .multi-stock-comparison {
-            background: linear-gradient(135deg, rgba(240, 147, 251, 0.1) 0%, rgba(102, 126, 234, 0.05) 100%);
-            backdrop-filter: blur(30px) saturate(180%);
-            border: 2px solid var(--glass-border);
-            border-radius: 28px;
-            padding: 40px;
-            margin-bottom: 40px;
-            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.12);
-        }
-        
-        .stock-selector-chips {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 12px;
-            margin-bottom: 25px;
-        }
-        
-        .stock-chip {
-            padding: 10px 20px;
-            border: 2px solid rgba(102, 126, 234, 0.3);
-            border-radius: 50px;
-            background: rgba(255, 255, 255, 0.05);
-            color: var(--text-primary);
-            font-weight: 600;
-            cursor: pointer;
-            transition: var(--transition-smooth);
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-        }
-        
-        .stock-chip.selected {
-            background: linear-gradient(135deg, var(--ml-primary), var(--ml-secondary));
-            border-color: transparent;
-            color: white;
-            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
-        }
-        
-        .stock-chip:hover:not(.selected) {
-            border-color: var(--ml-primary);
-            transform: translateY(-2px);
-        }
-        
-        .stock-chip .remove-chip {
-            margin-left: 6px;
-            cursor: pointer;
-            opacity: 0.7;
-        }
-        
-        .stock-chip .remove-chip:hover {
-            opacity: 1;
-        }
-        
-        .comparison-chart-container {
-            margin-top: 30px;
-            min-height: 500px;
-        }
-        
-        .comparison-metrics-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 20px;
-            margin-top: 30px;
-        }
-        
-        .comparison-metric-card {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(20px);
-            border: 2px solid var(--glass-border);
-            border-radius: 16px;
-            padding: 24px;
-            transition: var(--transition-smooth);
-        }
-        
-        body.dark-mode .comparison-metric-card {
-            background: rgba(15, 23, 42, 0.9);
-        }
-        
-        .comparison-metric-card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 8px 24px rgba(102, 126, 234, 0.2);
-        }
-        
-        /* ============================================
-           🎲 MONTE CARLO SIMULATION SECTION
-           ============================================ */
-        .monte-carlo-section {
-            background: linear-gradient(135deg, rgba(67, 233, 123, 0.08) 0%, rgba(56, 249, 215, 0.05) 100%);
-            backdrop-filter: blur(30px) saturate(180%);
-            border: 2px solid var(--glass-border);
-            border-radius: 28px;
-            padding: 40px;
-            margin-bottom: 40px;
-            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.12);
-        }
-        
-        .simulation-controls {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 20px;
-            margin-bottom: 30px;
-        }
-        
-        .simulation-control-group label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 700;
-            color: var(--text-primary);
-        }
-        
-        .simulation-control-group input,
-        .simulation-control-group select {
-            width: 100%;
-            padding: 10px 16px;
-            border: 2px solid rgba(67, 233, 123, 0.3);
-            border-radius: 12px;
-            background: rgba(255, 255, 255, 0.02);
-            color: var(--text-primary);
-            font-weight: 600;
-        }
-        
-        .btn-run-simulation {
-            padding: 14px 32px;
-            background: linear-gradient(135deg, var(--ml-success), #38f9d7);
-            border: none;
-            border-radius: 12px;
-            color: white;
-            font-weight: 700;
-            cursor: pointer;
-            transition: var(--transition-smooth);
-            box-shadow: 0 6px 20px rgba(67, 233, 123, 0.3);
-            width: 100%;
-            margin-top: 20px;
-        }
-        
-        .btn-run-simulation:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 10px 30px rgba(67, 233, 123, 0.5);
-        }
-        
-        .simulation-results {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-            gap: 16px;
-            margin-top: 30px;
-        }
-        
-        .simulation-stat {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(20px);
-            border: 2px solid var(--glass-border);
-            border-radius: 16px;
-            padding: 20px;
-            text-align: center;
-        }
-        
-        body.dark-mode .simulation-stat {
-            background: rgba(15, 23, 42, 0.9);
-        }
-        
-        .simulation-stat-label {
-            font-size: 0.85rem;
-            color: var(--text-secondary);
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            margin-bottom: 8px;
-            font-weight: 600;
-        }
-        
-        .simulation-stat-value {
-            font-size: 1.8rem;
-            font-weight: 800;
-            background: linear-gradient(135deg, var(--ml-success), #38f9d7);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-        
-        /* Responsive */
-        @media (max-width: 768px) {
-            .portfolio-watchlist-header {
-                flex-direction: column;
-                gap: 15px;
-            }
-            
-            .watchlist-grid {
-                grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-            }
-            
-            .stock-selector-chips {
-                flex-direction: column;
-            }
-            
-            .simulation-controls {
-                grid-template-columns: 1fr;
-            }
-        }
-    </style>
-    
-    <!-- Favicon Dynamique -->
+    <!-- ✅ FAVICON DYNAMIQUE - ICI -->
     <script src="assets/js/favicon-dynamic.js"></script>
     
     <!-- Firebase SDK -->
@@ -461,21 +40,25 @@
     <!-- Configuration Firebase -->
     <script src="assets/js/firebase-config.js"></script>
     
-    <!-- Protection de la page -->
+    <!-- Protection de la page (AUTH GUARD) -->
     <script src="assets/js/auth-guard.js"></script>
+
+    <!-- ✅ ACCESS CONTROL - VÉRIFICATION DU PLAN -->
     <script src="assets/js/access-control.js"></script>
 </head>
 <body>
 
-    <!-- Theme Script -->
+    <!-- ⚡ THEME SCRIPT - DOIT ÊTRE CHARGÉ EN PREMIER -->
     <script src="assets/js/theme.js"></script>
+
+    <!-- 🎨 THEME CHARTS - POUR LES GRAPHIQUES -->
     <script src="assets/js/theme-charts.js"></script>
 
     <!-- Particles Background -->
     <canvas id="particles-canvas" class="particles-background"></canvas>
 
     <div class='layout-wrapper'>
-
+        
         <!-- ============================================
              SIDEBAR NAVIGATION
              ============================================ -->
@@ -532,6 +115,7 @@
             <!-- Navigation -->
             <nav class="sidebar-nav">
                 
+                <!-- ✅ Ajout data-tooltip pour chaque folder -->
                 <div class="nav-section">
                     <button class="nav-folder" data-tooltip="Home">
                         <i class="fas fa-home"></i>
@@ -628,6 +212,7 @@
                     </div>
                 </div>
 
+                <!-- ✅ NOUVELLE SECTION : AI ASSISTANT -->
                 <div class='nav-section'>
                     <button class="nav-folder" data-tooltip="AI Assistant">
                         <i class="fas fa-robot"></i>
@@ -643,9 +228,10 @@
                 </div>
             </nav>
             
-            <!-- Sidebar Footer - Menu Utilisateur -->
+            <!-- ===== SIDEBAR FOOTER - MENU UTILISATEUR ===== -->
             <div class="sidebar-footer">
                 <div class="sidebar-user-menu">
+                    <!-- Trigger (élément cliquable) -->
                     <div class="sidebar-user-trigger" id="sidebarUserTrigger">
                         <img data-user-photo 
                             src="https://ui-avatars.com/api/?name=User&background=2563eb&color=fff" 
@@ -658,6 +244,7 @@
                         <i class="fas fa-chevron-up sidebar-user-arrow"></i>
                     </div>
                     
+                    <!-- Dropdown (s'ouvre vers le haut) -->
                     <div class="sidebar-user-dropdown" id="sidebarUserDropdown">
                         <div class="user-dropdown-header">
                             <img data-user-photo 
@@ -696,6 +283,7 @@
                     </div>
                 </div>
             </div>
+            <!-- ===== FIN SIDEBAR FOOTER ===== -->
         </aside>
         
         <!-- Sidebar Overlay (mobile) -->
@@ -712,9 +300,10 @@
                         <button class='mobile-toggle' id='mobileToggle' aria-label='Toggle navigation menu' aria-expanded='false'>
                             <i class='fas fa-bars' aria-hidden='true'></i>
                         </button>
-                        <h1><i class="fas fa-robot"></i> ML Trend Prediction</h1>
+                        <h1></i> Machine Learning Trend Prediction</h1>
                     </div>
                     <div class='header-right'>
+                        <!-- ✅ NOUVEAU : Bouton de contrôle du cache -->
                         <button class='btn-icon-header' onclick='toggleCacheWidget()' aria-label='Toggle cache widget' title='View cache statistics'>
                             <i class='fas fa-database' aria-hidden='true'></i>
                             <span class='cache-badge-mini' id='cacheBadgeMini'>0</span>
@@ -728,188 +317,7 @@
                 <!-- Main Content -->
                 <div class='content'>
                     
-                    <!-- ============================================
-                         ✨ NOUVELLE SECTION : WATCHLIST & PORTFOLIO
-                         ============================================ -->
-                    <section class='portfolio-watchlist-section' aria-labelledby='portfolio-watchlist-title'>
-                        <div class='portfolio-watchlist-header'>
-                            <div>
-                                <h2 class='section-title' id='portfolio-watchlist-title'>
-                                    <i class='fas fa-star'></i> My Watchlist & Portfolio
-                                </h2>
-                            </div>
-                            <div class='portfolio-actions'>
-                                <div class='portfolio-selector'>
-                                    <label for='portfolioSelect' style='font-weight: 600; margin-right: 10px;'>Portfolio:</label>
-                                    <select id='portfolioSelect'>
-                                        <option value=''>Loading...</option>
-                                    </select>
-                                </div>
-                                <button class='btn-portfolio' onclick='PortfolioManager.openCreateModal()'>
-                                    <i class='fas fa-plus'></i> New
-                                </button>
-                                <button class='btn-portfolio' onclick='PortfolioManager.openManageModal()'>
-                                    <i class='fas fa-cog'></i> Manage
-                                </button>
-                            </div>
-                        </div>
-                        
-                        <!-- Filtres Watchlist -->
-                        <div style='display: flex; gap: 10px; margin-bottom: 20px;'>
-                            <button class='filter-btn active' data-filter='all' onclick='WatchlistManager.filterWatchlist("all")'>
-                                <i class='fas fa-list'></i> All
-                            </button>
-                            <button class='filter-btn' data-filter='gainers' onclick='WatchlistManager.filterWatchlist("gainers")'>
-                                <i class='fas fa-arrow-up'></i> Gainers
-                            </button>
-                            <button class='filter-btn' data-filter='losers' onclick='WatchlistManager.filterWatchlist("losers")'>
-                                <i class='fas fa-arrow-down'></i> Losers
-                            </button>
-                        </div>
-                        
-                        <!-- Grille Watchlist -->
-                        <div id='watchlistContainer' class='watchlist-grid'>
-                            <div class='watchlist-empty'>
-                                <i class='fas fa-star'></i>
-                                <p><strong>No stocks in your watchlist</strong></p>
-                                <p>Add stocks below to track them in real-time</p>
-                            </div>
-                        </div>
-                        
-                        <!-- Ajouter à la Watchlist -->
-                        <div class='watchlist-add-section'>
-                            <input type='text' 
-                                   id='watchlistSearchInput' 
-                                   class='watchlist-add-input' 
-                                   placeholder='Enter stock symbol (e.g., AAPL, TSLA)...'
-                                   onkeypress='if(event.key === "Enter") WatchlistManager.addFromInput()'>
-                            <button class='btn-add-watchlist' onclick='WatchlistManager.addFromInput()'>
-                                <i class='fas fa-plus'></i> Add to Watchlist
-                            </button>
-                        </div>
-                    </section>
-                    
-                    <!-- ============================================
-                         ✨ NOUVELLE SECTION : MULTI-STOCK COMPARISON
-                         ============================================ -->
-                    <section class='multi-stock-comparison' aria-labelledby='multi-stock-title'>
-                        <div class='card-header'>
-                            <h2 class='card-title' id='multi-stock-title'>
-                                <i class='fas fa-layer-group'></i> Multi-Stock Prediction Comparison
-                            </h2>
-                            <button class='help-icon' onclick='openModal("modalMultiStock")'>?</button>
-                        </div>
-                        
-                        <div class='card-body'>
-                            <p style='margin-bottom: 20px; color: var(--text-secondary);'>
-                                <i class='fas fa-info-circle'></i> Select up to 5 stocks to compare their ML predictions side-by-side
-                            </p>
-                            
-                            <!-- Chips de sélection de stocks -->
-                            <div class='stock-selector-chips' id='stockSelectorChips'>
-                                <div class='stock-chip' onclick='toggleStockSelection("AAPL")'>
-                                    <i class='fab fa-apple'></i> AAPL
-                                </div>
-                                <div class='stock-chip' onclick='toggleStockSelection("MSFT")'>
-                                    <i class='fab fa-microsoft'></i> MSFT
-                                </div>
-                                <div class='stock-chip' onclick='toggleStockSelection("GOOGL")'>
-                                    <i class='fab fa-google'></i> GOOGL
-                                </div>
-                                <div class='stock-chip' onclick='toggleStockSelection("AMZN")'>
-                                    <i class='fab fa-amazon'></i> AMZN
-                                </div>
-                                <div class='stock-chip' onclick='toggleStockSelection("TSLA")'>
-                                    <i class='fas fa-car'></i> TSLA
-                                </div>
-                                <div class='stock-chip' onclick='toggleStockSelection("NVDA")'>
-                                    <i class='fas fa-microchip'></i> NVDA
-                                </div>
-                                <div class='stock-chip' onclick='toggleStockSelection("META")'>
-                                    <i class='fab fa-meta'></i> META
-                                </div>
-                            </div>
-                            
-                            <button class='btn btn-primary' 
-                                    id='btnCompareStocks' 
-                                    onclick='runMultiStockComparison()' 
-                                    disabled 
-                                    style='width: 100%; margin-bottom: 25px;'>
-                                <i class='fas fa-chart-line'></i> Compare Selected Stocks
-                            </button>
-                            
-                            <!-- Conteneur du graphique de comparaison -->
-                            <div id='multiStockChartContainer' class='comparison-chart-container hidden'>
-                                <div id='multiStockChart' style='min-height: 500px;'></div>
-                            </div>
-                            
-                            <!-- Grille de métriques de comparaison -->
-                            <div id='comparisonMetricsGrid' class='comparison-metrics-grid hidden'>
-                                <!-- Sera rempli dynamiquement -->
-                            </div>
-                        </div>
-                    </section>
-                    
-                    <!-- ============================================
-                         ✨ NOUVELLE SECTION : MONTE CARLO SIMULATION
-                         ============================================ -->
-                    <section class='monte-carlo-section' aria-labelledby='monte-carlo-title'>
-                        <div class='card-header'>
-                            <h2 class='card-title' id='monte-carlo-title'>
-                                <i class='fas fa-dice'></i> Monte Carlo Price Simulation
-                            </h2>
-                            <button class='help-icon' onclick='openModal("modalMonteCarlo")'>?</button>
-                        </div>
-                        
-                        <div class='card-body'>
-                            <p style='margin-bottom: 25px; color: var(--text-secondary);'>
-                                <i class='fas fa-info-circle'></i> Run thousands of probabilistic scenarios to estimate future price ranges
-                            </p>
-                            
-                            <!-- Contrôles de simulation -->
-                            <div class='simulation-controls'>
-                                <div class='simulation-control-group'>
-                                    <label for='mcSimulations'>Number of Simulations</label>
-                                    <select id='mcSimulations'>
-                                        <option value='1000'>1,000</option>
-                                        <option value='5000'>5,000</option>
-                                        <option value='10000' selected>10,000</option>
-                                        <option value='50000'>50,000</option>
-                                    </select>
-                                </div>
-                                
-                                <div class='simulation-control-group'>
-                                    <label for='mcTimeHorizon'>Time Horizon (days)</label>
-                                    <input type='number' id='mcTimeHorizon' value='30' min='7' max='365'>
-                                </div>
-                                
-                                <div class='simulation-control-group'>
-                                    <label for='mcConfidence'>Confidence Level</label>
-                                    <select id='mcConfidence'>
-                                        <option value='90'>90%</option>
-                                        <option value='95' selected>95%</option>
-                                        <option value='99'>99%</option>
-                                    </select>
-                                </div>
-                            </div>
-                            
-                            <button class='btn-run-simulation' onclick='runMonteCarloSimulation()'>
-                                <i class='fas fa-play'></i> Run Monte Carlo Simulation
-                            </button>
-                            
-                            <!-- Résultats de simulation -->
-                            <div id='monteCarloResults' class='simulation-results hidden'>
-                                <!-- Sera rempli dynamiquement -->
-                            </div>
-                            
-                            <!-- Graphique de distribution -->
-                            <div id='monteCarloChartContainer' class='hidden' style='margin-top: 30px;'>
-                                <div id='monteCarloChart' style='min-height: 400px;'></div>
-                            </div>
-                        </div>
-                    </section>
-                    
-                    <!-- Search Panel (ORIGINAL) -->
+                    <!-- Search Panel -->
                     <section class='search-panel card' aria-labelledby='search-title'>
                         <div class='card-header'>
                             <h2 class='card-title' id='search-title'>
@@ -938,7 +346,7 @@
                                 </div>
                                 
                                 <span id='search-instructions' class='sr-only'>Type to search for stocks. Use arrow keys to navigate suggestions, Enter to select.</span>
-
+                                
                                 <div class='popular-stocks'>
                                     <span class='quick-label'>Popular Stocks:</span>
                                     <button class='symbol-chip' onclick='TrendPrediction.loadSymbol("AAPL")' aria-label='Load Apple stock'>
@@ -1074,99 +482,7 @@
                         </section>
                         
                         <!-- ============================================
-                             ✨ NOUVELLE SECTION : BACKTESTING & ACCURACY TRACKER
-                             ============================================ -->
-                        <section class='card' style='margin-bottom: 40px;' aria-labelledby='backtesting-title'>
-                            <div class='card-header'>
-                                <h3 class='card-title' id='backtesting-title'>
-                                    <i class='fas fa-history'></i> Historical Accuracy Tracker
-                                </h3>
-                                <button class='help-icon' onclick='openModal("modalBacktesting")'>?</button>
-                            </div>
-                            <div class='card-body'>
-                                <p style='margin-bottom: 20px; color: var(--text-secondary);'>
-                                    <i class='fas fa-info-circle'></i> Track how accurate our ML predictions have been over time
-                                </p>
-                                <div id='backtestingChart' style='min-height: 350px;'></div>
-                                
-                                <div style='display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-top: 25px;'>
-                                    <div class='metric'>
-                                        <span>7-Day Accuracy</span>
-                                        <strong id='accuracy7d'>-</strong>
-                                    </div>
-                                    <div class='metric'>
-                                        <span>30-Day Accuracy</span>
-                                        <strong id='accuracy30d'>-</strong>
-                                    </div>
-                                    <div class='metric'>
-                                        <span>Overall MAPE</span>
-                                        <strong id='overallMAPE'>-</strong>
-                                    </div>
-                                    <div class='metric'>
-                                        <span>Win Rate</span>
-                                        <strong id='winRate'>-</strong>
-                                    </div>
-                                </div>
-                            </div>
-                        </section>
-                        
-                        <!-- ============================================
-                             ✨ NOUVELLE SECTION : FEATURE IMPORTANCE
-                             ============================================ -->
-                        <section class='card' style='margin-bottom: 40px;' aria-labelledby='feature-importance-title'>
-                            <div class='card-header'>
-                                <h3 class='card-title' id='feature-importance-title'>
-                                    <i class='fas fa-sliders-h'></i> Feature Importance Analysis
-                                </h3>
-                                <button class='help-icon' onclick='openModal("modalFeatures")'>?</button>
-                            </div>
-                            <div class='card-body'>
-                                <p style='margin-bottom: 20px; color: var(--text-secondary);'>
-                                    <i class='fas fa-info-circle'></i> Which factors influence the prediction the most?
-                                </p>
-                                <div id='featureImportanceChart' style='min-height: 400px;'></div>
-                            </div>
-                        </section>
-                        
-                        <!-- ============================================
-                             ✨ NOUVELLE SECTION : SENTIMENT ANALYSIS
-                             ============================================ -->
-                        <section class='card' style='margin-bottom: 40px;' aria-labelledby='sentiment-title'>
-                            <div class='card-header'>
-                                <h3 class='card-title' id='sentiment-title'>
-                                    <i class='fas fa-comments'></i> Market Sentiment Analysis
-                                </h3>
-                                <button class='help-icon' onclick='openModal("modalSentiment")'>?</button>
-                            </div>
-                            <div class='card-body'>
-                                <p style='margin-bottom: 20px; color: var(--text-secondary);'>
-                                    <i class='fas fa-info-circle'></i> AI-powered sentiment from news and social media
-                                </p>
-                                
-                                <div style='display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-bottom: 25px;'>
-                                    <div class='metric'>
-                                        <span>News Sentiment</span>
-                                        <strong id='newsSentiment' style='font-size: 2.5rem;'>-</strong>
-                                        <div id='newsSentimentLabel' style='font-size: 0.9rem; margin-top: 8px;'>-</div>
-                                    </div>
-                                    <div class='metric'>
-                                        <span>Social Media Buzz</span>
-                                        <strong id='socialSentiment' style='font-size: 2.5rem;'>-</strong>
-                                        <div id='socialSentimentLabel' style='font-size: 0.9rem; margin-top: 8px;'>-</div>
-                                    </div>
-                                    <div class='metric'>
-                                        <span>Analyst Consensus</span>
-                                        <strong id='analystSentiment' style='font-size: 2.5rem;'>-</strong>
-                                        <div id='analystSentimentLabel' style='font-size: 0.9rem; margin-top: 8px;'>-</div>
-                                    </div>
-                                </div>
-                                
-                                <div id='sentimentTimelineChart' style='min-height: 300px;'></div>
-                            </div>
-                        </section>
-                        
-                        <!-- ============================================
-                             COMPARISON CHART (ORIGINAL)
+                             COMPARISON CHART
                              ============================================ -->
                         <section class='chart-section card' aria-labelledby='comparison-chart-title'>
                             <div class='card-header'>
@@ -1180,7 +496,7 @@
                         </section>
                         
                         <!-- ============================================
-                             INDIVIDUAL MODELS (ORIGINAL)
+                             INDIVIDUAL MODELS
                              ============================================ -->
                         <section class='models-section' aria-labelledby='models-title'>
                             <h3 class='section-title' id='models-title'>
@@ -1289,7 +605,7 @@
                         </section>
                         
                         <!-- ============================================
-                             PERFORMANCE COMPARISON (ORIGINAL)
+                             PERFORMANCE COMPARISON
                              ============================================ -->
                         <section class='performance-section card' aria-labelledby='performance-title'>
                             <div class='card-header'>
@@ -1308,7 +624,7 @@
                         </section>
                         
                         <!-- ============================================
-                             RECOMMENDATION (ORIGINAL)
+                             RECOMMENDATION
                              ============================================ -->
                         <section class='recommendation-section' aria-labelledby='recommendation-main-title'>
                             <h3 class='section-title' id='recommendation-main-title'>
@@ -1349,13 +665,13 @@
                 
                 <!-- Footer -->
                 <footer role='contentinfo'>
-                    <p>&copy; AlphaVault AI - ML Trend Prediction | Powered by Advanced AI Algorithms</p>
+                    <p>&copy; ML Trend Prediction | Powered by Advanced AI Algorithms</p>
                 </footer>
             </div>
         </main>
         
     </div>
-
+    
     <!-- ============================================
          🗄 CACHE MONITORING WIDGET
          ============================================ -->
@@ -1506,208 +822,6 @@
         </div>
     </div>
     
-    <!-- ✨ NOUVEAU Modal Multi-Stock -->
-    <div id='modalMultiStock' class='modal' role='dialog' aria-labelledby='multistock-modal-title' aria-modal='true'>
-        <div class='modal-content'>
-            <div class='modal-header'>
-                <h2 id='multistock-modal-title'>📊 Multi-Stock Comparison</h2>
-                <button class='close-modal' onclick='closeModal("modalMultiStock")' aria-label='Close dialog'>
-                    <i class='fas fa-times'></i>
-                </button>
-            </div>
-            <div class='modal-body'>
-                <h3>🔍 What is Multi-Stock Comparison?</h3>
-                <p>Compare ML predictions for multiple stocks simultaneously to identify relative opportunities and diversification strategies.</p>
-                
-                <h3>📈 Key Features</h3>
-                <ul>
-                    <li><strong>Side-by-Side Analysis:</strong> View predictions for up to 5 stocks at once</li>
-                    <li><strong>Relative Performance:</strong> Compare expected returns across different securities</li>
-                    <li><strong>Correlation Insights:</strong> Understand how stocks move together</li>
-                    <li><strong>Risk-Adjusted Returns:</strong> Evaluate predictions relative to volatility</li>
-                </ul>
-                
-                <h3>💡 Use Cases</h3>
-                <ul>
-                    <li>Portfolio rebalancing decisions</li>
-                    <li>Sector rotation strategies</li>
-                    <li>Pairs trading opportunities</li>
-                    <li>Diversification optimization</li>
-                </ul>
-                
-                <div class='tip-box'>
-                    💡 <strong>Pro Tip:</strong> Select stocks from different sectors to identify cross-market opportunities.
-                </div>
-            </div>
-        </div>
-    </div>
-    
-    <!-- ✨ NOUVEAU Modal Monte Carlo -->
-    <div id='modalMonteCarlo' class='modal' role='dialog' aria-labelledby='montecarlo-modal-title' aria-modal='true'>
-        <div class='modal-content'>
-            <div class='modal-header'>
-                <h2 id='montecarlo-modal-title'>🎲 Monte Carlo Simulation</h2>
-                <button class='close-modal' onclick='closeModal("modalMonteCarlo")' aria-label='Close dialog'>
-                    <i class='fas fa-times'></i>
-                </button>
-            </div>
-            <div class='modal-body'>
-                <h3>🎯 What is Monte Carlo Simulation?</h3>
-                <p><span class='key-term'>Monte Carlo simulation</span> is a probabilistic technique that runs thousands of scenarios to estimate the range of possible future outcomes.</p>
-                
-                <h3>📊 How It Works</h3>
-                <ol>
-                    <li><strong>Historical Analysis:</strong> Calculate historical returns and volatility</li>
-                    <li><strong>Random Sampling:</strong> Generate thousands of possible price paths</li>
-                    <li><strong>Statistical Aggregation:</strong> Analyze the distribution of outcomes</li>
-                    <li><strong>Confidence Intervals:</strong> Determine probability ranges</li>
-                </ol>
-                
-                <div class='formula-box'>
-                    <strong>Key Outputs:</strong><br>
-                    • Expected Value (Mean)<br>
-                    • Standard Deviation (Risk)<br>
-                    • Percentile Ranges (5th, 25th, 75th, 95th)<br>
-                    • Probability of Profit/Loss
-                </div>
-                
-                <h3>⚙ Parameters</h3>
-                <ul>
-                    <li><strong>Simulations:</strong> More simulations = higher accuracy (10,000 recommended)</li>
-                    <li><strong>Time Horizon:</strong> Number of days to simulate forward</li>
-                    <li><strong>Confidence Level:</strong> Probability threshold for ranges (95% standard)</li>
-                </ul>
-                
-                <div class='tip-box'>
-                    💡 <strong>Pro Tip:</strong> Use Monte Carlo for risk assessment and position sizing decisions.
-                </div>
-            </div>
-        </div>
-    </div>
-    
-    <!-- ✨ NOUVEAU Modal Backtesting -->
-    <div id='modalBacktesting' class='modal' role='dialog' aria-labelledby='backtesting-modal-title' aria-modal='true'>
-        <div class='modal-content'>
-            <div class='modal-header'>
-                <h2 id='backtesting-modal-title'>📈 Historical Accuracy Tracker</h2>
-                <button class='close-modal' onclick='closeModal("modalBacktesting")' aria-label='Close dialog'>
-                    <i class='fas fa-times'></i>
-                </button>
-            </div>
-            <div class='modal-body'>
-                <h3>🔍 What is Backtesting?</h3>
-                <p><span class='key-term'>Backtesting</span> measures how accurate our ML predictions have been by comparing past forecasts with actual outcomes.</p>
-                
-                <h3>📊 Accuracy Metrics</h3>
-                <ul>
-                    <li><strong>MAPE (Mean Absolute Percentage Error):</strong> Average prediction error as a percentage</li>
-                    <li><strong>Win Rate:</strong> Percentage of predictions where direction was correct</li>
-                    <li><strong>R² Score:</strong> How well predictions explain actual price movements</li>
-                    <li><strong>Sharpe Ratio:</strong> Risk-adjusted performance of predictions</li>
-                </ul>
-                
-                <div class='formula-box'>
-                    <strong>MAPE Formula:</strong><br>
-                    MAPE = (1/n) × Σ |Actual - Predicted| / Actual × 100%<br>
-                    <em>Lower is better (< 10% is excellent)</em>
-                </div>
-                
-                <h3>💡 Interpretation</h3>
-                <ul>
-                    <li><strong>Accuracy > 80%:</strong> High confidence in predictions</li>
-                    <li><strong>Accuracy 60-80%:</strong> Moderate reliability</li>
-                    <li><strong>Accuracy < 60%:</strong> Use with caution, market regime may have changed</li>
-                </ul>
-                
-                <div class='warning-box'>
-                    ⚠ <strong>Note:</strong> Past accuracy does not guarantee future performance. Market conditions change.
-                </div>
-            </div>
-        </div>
-    </div>
-    
-    <!-- ✨ NOUVEAU Modal Feature Importance -->
-    <div id='modalFeatures' class='modal' role='dialog' aria-labelledby='features-modal-title' aria-modal='true'>
-        <div class='modal-content'>
-            <div class='modal-header'>
-                <h2 id='features-modal-title'>🎯 Feature Importance Analysis</h2>
-                <button class='close-modal' onclick='closeModal("modalFeatures")' aria-label='Close dialog'>
-                    <i class='fas fa-times'></i>
-                </button>
-            </div>
-            <div class='modal-body'>
-                <h3>🧠 What is Feature Importance?</h3>
-                <p><span class='key-term'>Feature importance</span> shows which factors (features) have the most impact on the ML model's predictions.</p>
-                
-                <h3>📊 Key Features Analyzed</h3>
-                <ul>
-                    <li><strong>Historical Price Trends:</strong> Recent price movements and patterns</li>
-                    <li><strong>Volume Patterns:</strong> Trading volume trends and spikes</li>
-                    <li><strong>Volatility:</strong> Price fluctuation intensity</li>
-                    <li><strong>Moving Averages:</strong> Short-term vs long-term trends</li>
-                    <li><strong>Market Sentiment:</strong> News and social media indicators</li>
-                    <li><strong>Technical Indicators:</strong> RSI, MACD, Bollinger Bands</li>
-                </ul>
-                
-                <h3>💡 How to Use</h3>
-                <ul>
-                    <li><strong>High Importance (>70%):</strong> Key driver of predictions - monitor closely</li>
-                    <li><strong>Medium Importance (30-70%):</strong> Supporting factors</li>
-                    <li><strong>Low Importance (<30%):</strong> Minimal impact on current predictions</li>
-                </ul>
-                
-                <div class='tip-box'>
-                    💡 <strong>Pro Tip:</strong> If sentiment has high importance, focus on news monitoring. If technicals dominate, use chart analysis.
-                </div>
-            </div>
-        </div>
-    </div>
-    
-    <!-- ✨ NOUVEAU Modal Sentiment -->
-    <div id='modalSentiment' class='modal' role='dialog' aria-labelledby='sentiment-modal-title' aria-modal='true'>
-        <div class='modal-content'>
-            <div class='modal-header'>
-                <h2 id='sentiment-modal-title'>💬 Market Sentiment Analysis</h2>
-                <button class='close-modal' onclick='closeModal("modalSentiment")' aria-label='Close dialog'>
-                    <i class='fas fa-times'></i>
-                </button>
-            </div>
-            <div class='modal-body'>
-                <h3>🤖 AI-Powered Sentiment Analysis</h3>
-                <p>Our <span class='key-term'>sentiment engine</span> uses natural language processing (NLP) to analyze thousands of news articles, social media posts, and analyst reports.</p>
-                
-                <h3>📊 Data Sources</h3>
-                <ul>
-                    <li><strong>News Sentiment:</strong> Financial news from WSJ, Bloomberg, Reuters, CNBC</li>
-                    <li><strong>Social Media:</strong> Twitter/X, Reddit, StockTwits discussions</li>
-                    <li><strong>Analyst Ratings:</strong> Buy/Sell/Hold recommendations from major brokers</li>
-                </ul>
-                
-                <h3>🎯 Sentiment Scoring</h3>
-                <div class='formula-box'>
-                    <strong>Score Range:</strong> -100 (Very Bearish) to +100 (Very Bullish)<br><br>
-                    <strong>Interpretation:</strong><br>
-                    • +75 to +100: Extremely Bullish 🚀<br>
-                    • +25 to +75: Bullish 📈<br>
-                    • -25 to +25: Neutral ➡<br>
-                    • -75 to -25: Bearish 📉<br>
-                    • -100 to -75: Extremely Bearish 🔻
-                </div>
-                
-                <h3>💡 Trading Signals</h3>
-                <ul>
-                    <li><strong>Sentiment Divergence:</strong> When sentiment contradicts price (contrarian opportunity)</li>
-                    <li><strong>Sentiment Confirmation:</strong> When sentiment aligns with trend (momentum play)</li>
-                    <li><strong>Sentiment Reversal:</strong> Rapid sentiment change (potential turning point)</li>
-                </ul>
-                
-                <div class='warning-box'>
-                    ⚠ <strong>Caution:</strong> Extreme sentiment can indicate over-extension. Use with technical analysis.
-                </div>
-            </div>
-        </div>
-    </div>
-    
     <!-- ============================================
          INLINE STYLES FOR CORRECTIONS
          ============================================ -->
@@ -1770,22 +884,12 @@
             border-radius: 5px;
         }
         
-        body.dark-mode .formula-box {
-            background: rgba(102, 126, 234, 0.1);
-            border-left-color: #667eea;
-        }
-        
         .tip-box {
             background: #d4edda;
             border-left: 4px solid #28a745;
             padding: 15px 20px;
             margin: 15px 0;
             border-radius: 5px;
-        }
-        
-        body.dark-mode .tip-box {
-            background: rgba(67, 233, 123, 0.1);
-            border-left-color: #43e97b;
         }
         
         .warning-box {
@@ -1796,70 +900,12 @@
             border-radius: 5px;
         }
         
-        body.dark-mode .warning-box {
-            background: rgba(255, 193, 7, 0.1);
-            border-left-color: #f6d365;
-        }
-        
         .key-term {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
             font-weight: 700;
-        }
-        
-        /* Filter buttons */
-        .filter-btn {
-            padding: 8px 16px;
-            border: 2px solid rgba(102, 126, 234, 0.3);
-            border-radius: 20px;
-            background: rgba(255, 255, 255, 0.05);
-            color: var(--text-primary);
-            font-weight: 600;
-            cursor: pointer;
-            transition: var(--transition-smooth);
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-        }
-        
-        .filter-btn:hover {
-            border-color: var(--ml-primary);
-            transform: translateY(-2px);
-        }
-        
-        .filter-btn.active {
-            background: linear-gradient(135deg, var(--ml-primary), var(--ml-secondary));
-            border-color: transparent;
-            color: white;
-        }
-        
-        /* Cache activity entries */
-        .cache-activity-entry {
-            padding: 8px 12px;
-            background: rgba(102, 126, 234, 0.05);
-            border-radius: 8px;
-            margin-bottom: 6px;
-            font-size: 0.85rem;
-            display: flex;
-            gap: 8px;
-            align-items: center;
-        }
-        
-        .cache-activity-time {
-            color: var(--text-secondary);
-            font-weight: 600;
-            min-width: 70px;
-        }
-        
-        .cache-activity-icon {
-            font-size: 1.1rem;
-        }
-        
-        .cache-activity-text {
-            flex: 1;
-            color: var(--text-primary);
         }
     </style>
     
@@ -1868,7 +914,247 @@
          ============================================ -->
     
     <!-- ✅ Cache Widget Script (VERSION CORRIGÉE) -->
-    <script src="assets/js/cache-widget-manager.js"></script>
+    <script>
+        /**
+         * 🗄 Cache Widget Management (VERSION CORRIGÉE)
+         */
+        let cacheWidgetOpen = false;
+        let cacheStats = {
+            hits: 0,
+            misses: 0,
+            entries: 0,
+            size: 0
+        };
+        
+        function toggleCacheWidget() {
+            const widget = document.getElementById('cacheWidget');
+            if (!widget) return;
+            
+            cacheWidgetOpen = !cacheWidgetOpen;
+            
+            if (cacheWidgetOpen) {
+                widget.classList.add('active');
+                refreshCacheStats();
+            } else {
+                widget.classList.remove('active');
+            }
+        }
+        
+        function refreshCacheStats() {
+            console.log('🔄 Refreshing cache stats...');
+            
+            let entries = 0;
+            let totalSize = 0;
+            
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                if (key && key.startsWith('tp_cache_')) {
+                    entries++;
+                    const value = localStorage.getItem(key);
+                    if (value) {
+                        totalSize += value.length;
+                    }
+                }
+            }
+            
+            cacheStats.entries = entries;
+            cacheStats.size = totalSize;
+            
+            const entriesEl = document.getElementById('cacheEntriesCount');
+            const sizeEl = document.getElementById('cacheSize');
+            const hitRateEl = document.getElementById('cacheHitRate');
+            const badgeEl = document.getElementById('cacheBadge');
+            const badgeMiniEl = document.getElementById('cacheBadgeMini');
+            
+            if (entriesEl) entriesEl.textContent = entries;
+            if (sizeEl) sizeEl.textContent = (totalSize / 1024).toFixed(2) + ' KB';
+            if (badgeEl) badgeEl.textContent = entries;
+            if (badgeMiniEl) badgeMiniEl.textContent = entries;
+            
+            const total = cacheStats.hits + cacheStats.misses;
+            if (total > 0 && hitRateEl) {
+                const hitRate = (cacheStats.hits / total * 100).toFixed(1);
+                hitRateEl.textContent = hitRate + '%';
+            }
+            
+            console.log('✅ Cache stats refreshed:', cacheStats);
+        }
+        
+        function clearLocalCache() {
+            if (!confirm('Are you sure you want to clear the local cache? This will remove all cached stock data.')) {
+                return;
+            }
+            
+            console.log('🗑 Clearing local cache...');
+            
+            let cleared = 0;
+            const keys = [];
+            
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                if (key && key.startsWith('tp_cache_')) {
+                    keys.push(key);
+                }
+            }
+            
+            keys.forEach(key => {
+                localStorage.removeItem(key);
+                cleared++;
+            });
+            
+            cacheStats.hits = 0;
+            cacheStats.misses = 0;
+            
+            console.log(`✅ Cleared ${cleared} cache entries`);
+            
+            refreshCacheStats();
+            
+            if (window.TrendPrediction && window.TrendPrediction.showNotification) {
+                window.TrendPrediction.showNotification(`Cache cleared: ${cleared} entries removed`, 'success');
+            } else {
+                alert(`Cache cleared: ${cleared} entries removed`);
+            }
+        }
+        
+        function exportCacheData() {
+            console.log('📤 Exporting cache data...');
+            
+            const cacheData = {};
+            
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                if (key && key.startsWith('tp_cache_')) {
+                    try {
+                        const value = localStorage.getItem(key);
+                        cacheData[key] = JSON.parse(value);
+                    } catch (e) {
+                        cacheData[key] = localStorage.getItem(key);
+                    }
+                }
+            }
+            
+            const exportObj = {
+                exportDate: new Date().toISOString(),
+                stats: cacheStats,
+                data: cacheData
+            };
+            
+            const json = JSON.stringify(exportObj, null, 2);
+            const blob = new Blob([json], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `trend_cache_export_${new Date().toISOString().split('T')[0]}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+            
+            console.log('✅ Cache data exported');
+            
+            if (window.TrendPrediction && window.TrendPrediction.showNotification) {
+                window.TrendPrediction.showNotification('Cache data exported successfully!', 'success');
+            }
+        }
+        
+        setInterval(() => {
+            if (cacheWidgetOpen) {
+                refreshCacheStats();
+            } else {
+                let entries = 0;
+                for (let i = 0; i < localStorage.length; i++) {
+                    const key = localStorage.key(i);
+                    if (key && key.startsWith('tp_cache_')) {
+                        entries++;
+                    }
+                }
+                const badgeEl = document.getElementById('cacheBadge');
+                const badgeMiniEl = document.getElementById('cacheBadgeMini');
+                if (badgeEl) badgeEl.textContent = entries;
+                if (badgeMiniEl) badgeMiniEl.textContent = entries;
+            }
+        }, 5000);
+        
+        window.cacheWidget = {
+            updateRateLimitStatus: function(remaining, max) {
+                const remainingEl = document.getElementById('rateLimitRemaining');
+                const progressEl = document.getElementById('rateLimitProgress');
+                
+                if (remainingEl) {
+                    remainingEl.textContent = remaining;
+                }
+                
+                if (progressEl) {
+                    const percentage = (remaining / max) * 100;
+                    progressEl.style.width = percentage + '%';
+                    
+                    if (percentage > 50) {
+                        progressEl.style.background = 'linear-gradient(90deg, #10b981, #059669)';
+                    } else if (percentage > 25) {
+                        progressEl.style.background = 'linear-gradient(90deg, #f59e0b, #d97706)';
+                    } else {
+                        progressEl.style.background = 'linear-gradient(90deg, #ef4444, #dc2626)';
+                    }
+                }
+            },
+            
+            updateQueueStatus: function(length, waitTime) {
+                const queueEl = document.getElementById('queueLength');
+                
+                if (queueEl) {
+                    queueEl.textContent = length;
+                    
+                    if (length > 0) {
+                        queueEl.style.color = '#ef4444';
+                        queueEl.style.fontWeight = '700';
+                    } else {
+                        queueEl.style.color = '';
+                        queueEl.style.fontWeight = '';
+                    }
+                }
+            },
+            
+            // ✅ FONCTION CORRIGÉE
+            logActivity: function(type, symbol, fromCache) {
+                const activityEl = document.getElementById('cacheActivity');
+                if (!activityEl) return;
+                
+                const now = new Date().toLocaleTimeString('fr-FR');
+                const icon = fromCache ? '💾' : '🌐';
+                const source = fromCache ? 'Cache' : 'API';
+                
+                const entry = document.createElement('div');
+                entry.className = 'cache-activity-entry';
+                entry.innerHTML = `
+                    <span class='cache-activity-time'>${now}</span>
+                    <span class='cache-activity-icon'>${icon}</span>
+                    <span class='cache-activity-text'>${type} ${symbol} from ${source}</span>
+                `;
+                
+                // ✅ CORRECTION : Utiliser querySelector au lieu de firstChild.classList
+                const emptyState = activityEl.querySelector('.cache-empty-state');
+                if (emptyState) {
+                    activityEl.innerHTML = '';
+                }
+                
+                activityEl.insertBefore(entry, activityEl.firstChild);
+                
+                // Garder seulement les 10 dernières
+                while (activityEl.children.length > 10) {
+                    activityEl.removeChild(activityEl.lastChild);
+                }
+                
+                // Mettre à jour les stats
+                if (fromCache) {
+                    cacheStats.hits++;
+                } else {
+                    cacheStats.misses++;
+                }
+            }
+        };
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            refreshCacheStats();
+        });
+    </script>
     
     <!-- Modal Management Script -->
     <script>
@@ -1914,20 +1200,8 @@
     <script src='assets/js/common.js'></script>
     <script src='assets/js/sidebar.js'></script>
     
-    <!-- ✅ Portfolio & Watchlist Manager -->
-    <script src='assets/js/portfolio-watchlist-alerts.js'></script>
-    
     <!-- ✅ Trend Prediction Script (VERSION CORRIGÉE AVEC TWELVE DATA) -->
     <script src='assets/js/trend-prediction.js'></script>
-    
-    <!-- ✨ NOUVEAU : Multi-Stock Comparison Script -->
-    <script src='assets/js/multi-stock-comparison.js'></script>
-    
-    <!-- ✨ NOUVEAU : Monte Carlo Simulation Script -->
-    <script src='assets/js/monte-carlo-simulation.js'></script>
-    
-    <!-- ✨ NOUVEAU : Advanced Analytics Script -->
-    <script src='assets/js/advanced-analytics.js'></script>
     
     <!-- ============================================
          ✅ FIX MENU UTILISATEUR - Force l'initialisation
@@ -2000,7 +1274,6 @@
             }
         })();
     </script>
-    
     <!-- ========================================
          CHATBOT IA FINANCIER
          ======================================== -->
@@ -2024,7 +1297,9 @@
     document.addEventListener('DOMContentLoaded', function() {
         console.log('🤖 Vérification des accès avant initialisation du chatbot...');
         
+        // ✅ ATTENDRE QUE LE SYSTÈME D'ACCESS CONTROL SOIT PRÊT
         const initChatbotWhenReady = () => {
+            // Vérifier si l'accès a été refusé
             const accessDenied = sessionStorage.getItem('accessDenied') === 'true';
             
             if (accessDenied) {
@@ -2032,29 +1307,65 @@
                 return;
             }
             
+            // Vérifier que ChatbotConfig est chargé
             if (typeof ChatbotConfig === 'undefined') {
                 console.error('❌ ChatbotConfig non défini !');
+                console.error('📁 Vérifiez que le fichier assets/js/chatbot-config.js existe');
                 return;
             }
             
             console.log('✅ ChatbotConfig chargé');
             
+            // Vérifier que ChatbotUI est disponible
             if (typeof ChatbotUI === 'undefined') {
                 console.error('❌ ChatbotUI non défini !');
+                console.error('📁 Vérifiez que le fichier assets/js/chatbot-ui.js existe');
                 return;
             }
             
             console.log('✅ ChatbotUI chargé');
             
+            // Initialisation du chatbot
             try {
                 window.financialChatbot = new ChatbotUI(ChatbotConfig);
                 console.log('🎉 Chatbot FinanceGPT initialisé avec succès !');
+                console.log('💼 Cliquez sur le bouton flottant pour ouvrir le chatbot');
             } catch (error) {
                 console.error('❌ Erreur lors de l\'initialisation du chatbot:', error);
+                console.error('📋 Détails:', error.message);
             }
         };
         
+        // Attendre un peu pour laisser access-control.js faire son travail
         setTimeout(initChatbotWhenReady, 500);
+    });
+    </script>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        setTimeout(() => {
+            console.log('🔍 BACKGROUND DIAGNOSIS:');
+            
+            const elements = [
+                'body',
+                '.layout-wrapper',
+                '.main-content',
+                '.container',
+                '.section'
+            ];
+            
+            elements.forEach(selector => {
+                const el = document.querySelector(selector);
+                if (el) {
+                    const bg = window.getComputedStyle(el).background;
+                    console.log(`📦 ${selector}:`, bg.substring(0, 100) + '...');
+                }
+            });
+            
+            console.log('---');
+            console.log('🎨 Canvas background:', 
+                window.getComputedStyle(document.getElementById('particles-canvas')).background);
+        }, 1000);
     });
     </script>
 
