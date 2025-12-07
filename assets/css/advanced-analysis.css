@@ -3609,6 +3609,52 @@ body.dark-mode .ai-confidence-bar {
     background: rgba(255, 255, 255, 0.05);
 }
 
+/* ============================================
+   🎨 AI SCORE FILL - COULEURS (AJOUT)
+   ============================================ */
+
+.ai-score-fill {
+    height: 100%;
+    border-radius: 50px;
+    transition: width 1s ease;
+}
+
+/* Couleurs identiques aux confidence bars */
+.ai-score-fill.very-bullish {
+    background: linear-gradient(90deg, #10b981, #38f9d7);
+    box-shadow: 0 0 8px rgba(16, 185, 129, 0.4);
+}
+
+.ai-score-fill.bullish {
+    background: linear-gradient(90deg, #20c997, #4ade80);
+    box-shadow: 0 0 8px rgba(32, 201, 151, 0.4);
+}
+
+.ai-score-fill.moderately-bullish {
+    background: linear-gradient(90deg, #3b82f6, #60a5fa);
+    box-shadow: 0 0 8px rgba(59, 130, 246, 0.4);
+}
+
+.ai-score-fill.neutral {
+    background: linear-gradient(90deg, #f6d365, #fda085);
+    box-shadow: 0 0 8px rgba(246, 211, 101, 0.4);
+}
+
+.ai-score-fill.moderately-bearish {
+    background: linear-gradient(90deg, #f59e0b, #fb923c);
+    box-shadow: 0 0 8px rgba(245, 158, 11, 0.4);
+}
+
+.ai-score-fill.bearish {
+    background: linear-gradient(90deg, #ef4444, #f87171);
+    box-shadow: 0 0 8px rgba(239, 68, 68, 0.4);
+}
+
+.ai-score-fill.very-bearish {
+    background: linear-gradient(90deg, #dc3545, #fd7e14);
+    box-shadow: 0 0 8px rgba(220, 53, 69, 0.4);
+}
+
 .ai-score-bar {
     height: 16px;
     background: rgba(0, 0, 0, 0.1);
