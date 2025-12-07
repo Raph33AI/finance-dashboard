@@ -1,6 +1,8 @@
 /* ==============================================
-   🎨 MONTE-CARLO.CSS - ULTRA PROFESSIONAL VERSION
-   Toutes les nouvelles fonctionnalités intégrées
+   🎨 MONTE-CARLO.CSS - VERSION ULTRA-PROFESSIONNELLE
+   ✅ Fond violet tournant supprimé
+   ✅ Design propre et moderne
+   ✅ Optimisé pour performances
    ============================================== */
 
 /* ============================================
@@ -107,26 +109,25 @@ body.dark-mode .container {
 }
 
 /* ============================================
-   🚀 QUICK TEMPLATES - NOUVEAU
+   🚀 QUICK TEMPLATES
    ============================================ */
 .quick-templates {
-    background: linear-gradient(135deg, rgba(102, 126, 234, 0.08) 0%, rgba(118, 75, 162, 0.04) 100%);
-    backdrop-filter: blur(20px) saturate(180%);
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
     border: 2px solid var(--glass-border);
     padding: 35px;
     border-radius: 24px;
     margin-bottom: 35px;
-    position: relative;
-    overflow: hidden;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
 }
 
 body.dark-mode .quick-templates {
-    background: linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(15, 23, 42, 0.5) 100%);
+    background: rgba(15, 23, 42, 0.95);
 }
 
 .templates-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
     gap: 20px;
     margin-top: 25px;
 }
@@ -222,19 +223,20 @@ body.dark-mode .template-btn {
 }
 
 /* ============================================
-   💾 SCENARIO MANAGER - NOUVEAU
+   💾 SCENARIO MANAGER
    ============================================ */
 .scenario-manager {
-    background: linear-gradient(135deg, rgba(118, 75, 162, 0.08) 0%, rgba(102, 126, 234, 0.04) 100%);
-    backdrop-filter: blur(20px) saturate(180%);
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
     border: 2px solid var(--glass-border);
     padding: 35px;
     border-radius: 24px;
     margin-bottom: 35px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
 }
 
 body.dark-mode .scenario-manager {
-    background: linear-gradient(135deg, rgba(118, 75, 162, 0.05) 0%, rgba(15, 23, 42, 0.5) 100%);
+    background: rgba(15, 23, 42, 0.95);
 }
 
 .scenario-controls {
@@ -328,39 +330,29 @@ body.dark-mode .saved-scenario-card {
 }
 
 /* ============================================
-   📋 PARAMS PANEL
+   📋 PARAMS PANEL (SANS FOND VIOLET)
    ============================================ */
 .params-panel {
-    background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.05) 100%);
-    backdrop-filter: blur(30px) saturate(180%);
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
     border: 2px solid var(--glass-border);
     padding: 40px;
     border-radius: 24px;
     margin-bottom: 40px;
-    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.12), 0 0 60px rgba(102, 126, 234, 0.15);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.1);
     position: relative;
-    overflow: hidden;
-}
-
-.params-panel::before {
-    content: '';
-    position: absolute;
-    top: -50%;
-    left: -50%;
-    width: 200%;
-    height: 200%;
-    background: radial-gradient(circle, rgba(102, 126, 234, 0.1) 0%, transparent 70%);
-    animation: rotateBg 20s linear infinite;
-    pointer-events: none;
-}
-
-@keyframes rotateBg {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
 }
 
 body.dark-mode .params-panel {
-    background: linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(15, 23, 42, 0.5) 100%);
+    background: rgba(15, 23, 42, 0.95);
+}
+
+/* SUPPRESSION DU FOND VIOLET TOURNANT */
+.params-panel::before,
+.results-panel::before,
+.quick-templates::before,
+.scenario-manager::before {
+    display: none !important;
 }
 
 /* ============================================
@@ -382,7 +374,7 @@ body.dark-mode .params-panel {
 }
 
 /* ============================================
-   📊 ADVANCED SECTION - NOUVEAU
+   📊 ADVANCED SECTION
    ============================================ */
 .advanced-section {
     background: rgba(255, 255, 255, 0.5);
@@ -413,11 +405,11 @@ body.dark-mode .advanced-section {
 }
 
 /* ============================================
-   📊 DISTRIBUTION GRID - NOUVEAU
+   📊 DISTRIBUTION GRID
    ============================================ */
 .distribution-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
     gap: 18px;
 }
 
@@ -481,11 +473,11 @@ body.dark-mode .radio-card-content {
 }
 
 /* ============================================
-   🔄 STRATEGY TOGGLE - NOUVEAU
+   🔄 STRATEGY TOGGLE
    ============================================ */
 .strategy-toggle {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
     gap: 15px;
 }
 
@@ -661,7 +653,7 @@ body.dark-mode .param-group input {
 }
 
 /* ============================================
-   🔄 ADVANCED TOGGLES - NOUVEAU
+   🔄 ADVANCED TOGGLES
    ============================================ */
 .advanced-toggles {
     background: linear-gradient(135deg, rgba(102, 126, 234, 0.12) 0%, rgba(118, 75, 162, 0.08) 100%);
@@ -763,7 +755,7 @@ body.dark-mode .advanced-toggles {
 }
 
 /* ============================================
-   📊 SIMULATION PROGRESS - NOUVEAU
+   📊 SIMULATION PROGRESS
    ============================================ */
 .simulation-progress {
     margin-top: 25px;
@@ -807,34 +799,21 @@ body.dark-mode .advanced-toggles {
 }
 
 /* ============================================
-   📊 RESULTS PANEL
+   📊 RESULTS PANEL (SANS FOND VIOLET)
    ============================================ */
 .results-panel {
     background: rgba(255, 255, 255, 0.95);
-    backdrop-filter: blur(30px) saturate(180%);
+    backdrop-filter: blur(10px);
     padding: 40px;
     border-radius: 24px;
-    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.6);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.1);
     margin-bottom: 40px;
     border: 2px solid var(--glass-border);
     position: relative;
-    overflow: hidden;
-}
-
-.results-panel::before {
-    content: '';
-    position: absolute;
-    top: -50%;
-    right: -50%;
-    width: 200%;
-    height: 200%;
-    background: radial-gradient(circle, rgba(240, 147, 251, 0.1) 0%, transparent 70%);
-    animation: rotateBg 25s linear infinite reverse;
-    pointer-events: none;
 }
 
 body.dark-mode .results-panel {
-    background: rgba(15, 23, 42, 0.9);
+    background: rgba(15, 23, 42, 0.95);
 }
 
 .results-panel.hidden {
@@ -842,7 +821,7 @@ body.dark-mode .results-panel {
 }
 
 /* ============================================
-   📤 EXPORT CONTROLS - NOUVEAU
+   📤 EXPORT CONTROLS
    ============================================ */
 .export-controls {
     display: flex;
@@ -1013,121 +992,115 @@ body.dark-mode .chart-medium {
 }
 
 /* ============================================
-   📐 FORMULA BOX
+   📐 MODAL STYLES (CORRIGÉ)
    ============================================ */
-.formula-box {
-    background: linear-gradient(135deg, rgba(102, 126, 234, 0.15) 0%, rgba(118, 75, 162, 0.1) 100%);
-    backdrop-filter: blur(20px) saturate(180%);
-    padding: 28px;
-    border-radius: 16px;
-    margin: 25px 0;
-    border: 2px solid var(--glass-border);
-    border-left: 6px solid var(--ml-secondary);
-    font-family: 'Courier New', monospace;
-    font-size: 1.15rem;
-    color: var(--ml-primary);
-    font-weight: 700;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.3);
-    position: relative;
-    overflow: hidden;
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 10000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0);
+    justify-content: center;
+    align-items: center;
+    transition: background-color 0.3s ease;
 }
 
-body.dark-mode .formula-box {
-    background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(15, 23, 42, 0.6) 100%);
-    color: var(--ml-accent);
+.modal.active {
+    background-color: rgba(0, 0, 0, 0.7);
 }
 
-/* ============================================
-   📚 EXAMPLE BOX
-   ============================================ */
-.example-box {
-    background: linear-gradient(135deg, rgba(118, 75, 162, 0.12) 0%, rgba(102, 126, 234, 0.08) 100%);
-    backdrop-filter: blur(20px) saturate(180%);
-    padding: 28px;
-    border-radius: 16px;
-    margin: 25px 0;
-    border: 2px solid var(--glass-border);
-    border-left: 6px solid #4A74F3;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.3);
-    transition: var(--transition-smooth);
+.modal-content {
+    background: white;
+    border-radius: 20px;
+    max-width: 700px;
+    max-height: 85vh;
+    overflow-y: auto;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    opacity: 0;
+    transform: scale(0.8) translateY(-50px);
+    transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    padding: 30px;
 }
 
-.example-box:hover {
-    transform: translateX(4px);
-    box-shadow: 0 12px 36px rgba(74, 116, 243, 0.2);
+.modal.active .modal-content {
+    opacity: 1;
+    transform: scale(1) translateY(0);
 }
 
-body.dark-mode .example-box {
-    background: linear-gradient(135deg, rgba(118, 75, 162, 0.08) 0%, rgba(15, 23, 42, 0.6) 100%);
+body.dark-mode .modal-content {
+    background: #1e293b;
 }
 
-/* ============================================
-   💡 TIP BOX
-   ============================================ */
-.tip-box {
-    background: linear-gradient(135deg, #4A74F3 0%, #6C8BE0 100%);
-    background-size: 200% 200%;
-    color: white;
-    padding: 20px 28px;
-    border-radius: 14px;
-    margin: 25px 0;
-    font-weight: 600;
-    box-shadow: 0 8px 24px rgba(74, 116, 243, 0.4), 0 0 40px rgba(108, 139, 224, 0.2);
-    border: 2px solid rgba(255, 255, 255, 0.2);
-    backdrop-filter: blur(10px);
-    position: relative;
-    overflow: hidden;
-    transition: var(--transition-smooth);
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    border-bottom: 2px solid var(--glass-border);
 }
 
-.tip-box:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 12px 36px rgba(74, 116, 243, 0.5), 0 0 60px rgba(108, 139, 224, 0.3);
-    animation: gradientShift 3s ease infinite;
-}
-
-/* ============================================
-   ⚠ WARNING BOX
-   ============================================ */
-.warning-box {
-    background: linear-gradient(135deg, #9D5CE6 0%, #C39BD3 100%);
-    background-size: 200% 200%;
-    color: white;
-    padding: 20px 28px;
-    border-radius: 14px;
-    margin: 25px 0;
-    font-weight: 600;
-    box-shadow: 0 8px 24px rgba(157, 92, 230, 0.4), 0 0 40px rgba(195, 155, 211, 0.2);
-    border: 2px solid rgba(255, 255, 255, 0.2);
-    backdrop-filter: blur(10px);
-    transition: var(--transition-smooth);
-}
-
-.warning-box:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 12px 36px rgba(157, 92, 230, 0.5), 0 0 60px rgba(195, 155, 211, 0.3);
-}
-
-/* ============================================
-   🔑 KEY TERM
-   ============================================ */
-.key-term {
-    background: linear-gradient(135deg, var(--ml-primary), #4A74F3);
-    color: white;
-    padding: 4px 12px;
-    border-radius: 6px;
+.modal-header h2 {
+    font-size: 1.6rem;
     font-weight: 800;
-    white-space: nowrap;
-    display: inline-block;
-    box-shadow: 0 4px 12px rgba(74, 116, 243, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.3);
-    transition: var(--transition-smooth);
-    font-size: 0.95em;
-    letter-spacing: 0.3px;
+    background: linear-gradient(135deg, var(--ml-primary), var(--ml-secondary));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin: 0;
 }
 
-.key-term:hover {
-    transform: translateY(-2px) scale(1.05);
-    box-shadow: 0 6px 20px rgba(74, 116, 243, 0.5);
+.close-modal {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: var(--transition-smooth);
+    line-height: 1;
+    padding: 0 10px;
+}
+
+.close-modal:hover {
+    color: var(--ml-danger);
+    transform: rotate(90deg) scale(1.2);
+}
+
+.modal-body {
+    color: var(--text-primary);
+    line-height: 1.8;
+}
+
+.modal-body h3 {
+    font-size: 1.3rem;
+    font-weight: 800;
+    color: var(--ml-primary);
+    margin-top: 25px;
+    margin-bottom: 15px;
+}
+
+.modal-body h4 {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--ml-secondary);
+    margin-top: 20px;
+    margin-bottom: 10px;
+}
+
+.modal-body p {
+    margin-bottom: 15px;
+}
+
+.modal-body ul,
+.modal-body ol {
+    margin-left: 25px;
+    margin-bottom: 15px;
+}
+
+.modal-body li {
+    margin-bottom: 8px;
 }
 
 /* ============================================
@@ -1253,14 +1226,6 @@ body.dark-mode .example-box {
         font-size: 1.3rem;
     }
     
-    .formula-box,
-    .example-box,
-    .tip-box,
-    .warning-box {
-        padding: 18px 20px;
-        font-size: 0.95rem;
-    }
-    
     .top-header h1 {
         font-size: 1.4rem;
     }
@@ -1269,45 +1234,3 @@ body.dark-mode .example-box {
 /* ============================================
    🎯 FIN DU FICHIER CSS
    ============================================ */
-
-   /* ============================================
-   CORRECTION MODAL - Transition fluide
-   ============================================ */
-.modal {
-    display: none;
-    position: fixed;
-    z-index: 10000;
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0);
-    justify-content: center;
-    align-items: center;
-    transition: background-color 0.3s ease;
-}
-
-.modal.active {
-    background-color: rgba(0, 0, 0, 0.7);
-}
-
-.modal-content {
-    background: white;
-    border-radius: 20px;
-    max-width: 700px;
-    max-height: 85vh;
-    overflow-y: auto;
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-    opacity: 0;
-    transform: scale(0.8) translateY(-50px);
-    transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-}
-
-.modal.active .modal-content {
-    opacity: 1;
-    transform: scale(1) translateY(0);
-}
-
-body.dark-mode .modal-content {
-    background: #1e293b;
-}

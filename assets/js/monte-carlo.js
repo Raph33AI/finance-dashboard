@@ -1,25 +1,25 @@
 /* ==============================================
-   MONTE-CARLO.JS - VERSION OPTIMISÉE & CORRIGÉE
-   ✅ Performances optimisées
-   ✅ Firebase integration pour scénarios
-   ✅ Tous les bugs corrigés
+   MONTE-CARLO.JS - VERSION ULTRA-COMPLÈTE
+   ✅ 50,000 simulations max
+   ✅ 6 distributions
+   ✅ 4 stratégies
+   ✅ Nouveaux graphiques (Tornado, HeatMap, Correlation, Frontier)
    ============================================== */
 
 const MonteCarlo = (function() {
     'use strict';
     
-    // ========== VARIABLES PRIVÉES ==========
     let simulationResults = null;
     let currentUser = null;
     
-    // ========== TEMPLATES PRÉDÉFINIS ==========
+    // ========== TEMPLATES ==========
     const TEMPLATES = {
         conservative: {
             monthlyInvestment: 500,
             monthlyYield: 0.4,
             volatility: 8,
             years: 25,
-            simulations: 1000,
+            simulations: 2000,
             targetValue: 150000,
             inflationRate: 2.5,
             distribution: 'normal',
@@ -30,7 +30,7 @@ const MonteCarlo = (function() {
             monthlyYield: 0.58,
             volatility: 12,
             years: 25,
-            simulations: 1000,
+            simulations: 2000,
             targetValue: 100000,
             inflationRate: 2.5,
             distribution: 'normal',
@@ -41,38 +41,42 @@ const MonteCarlo = (function() {
             monthlyYield: 0.83,
             volatility: 18,
             years: 25,
-            simulations: 1000,
+            simulations: 2000,
             targetValue: 100000,
             inflationRate: 2.5,
-            distribution: 'normal',
-            strategy: 'dca'
+            distribution: 'studentt',
+            strategy: 'dca',
+            degreesOfFreedom: 5
         },
         retirement: {
             monthlyInvestment: 400,
             monthlyYield: 0.5,
             volatility: 10,
             years: 30,
-            simulations: 1000,
+            simulations: 2000,
             targetValue: 500000,
             inflationRate: 2.5,
             distribution: 'normal',
-            strategy: 'dca'
+            strategy: 'withdrawal',
+            withdrawalRate: 4,
+            withdrawalStartYear: 20
         },
         crypto: {
             monthlyInvestment: 100,
             monthlyYield: 1.5,
             volatility: 60,
             years: 10,
-            simulations: 1000,
+            simulations: 3000,
             targetValue: 50000,
             inflationRate: 2.5,
-            distribution: 'studentt',
+            distribution: 'jump',
             strategy: 'dca',
-            degreesOfFreedom: 3
+            jumpIntensity: 0.3,
+            jumpMagnitude: -15
         }
     };
     
-    // ========== FONCTIONS UTILITAIRES ==========
+    // ========== RANDOM GENERATORS ==========
     
     function randomNormal(mean = 0, stdDev = 1) {
         let u1 = Math.random();
@@ -88,6 +92,47 @@ const MonteCarlo = (function() {
         const tValue = normalSample / Math.sqrt(chiSquared / df);
         return mean + tValue * scale;
     }
+    
+    function randomLogNormal(mean, stdDev) {
+        const normalSample = randomNormal(mean, stdDev);
+        return Math.exp(normalSample);
+    }
+    
+    function randomJumpDiffusion(mean, stdDev, lambda, jumpMean) {
+        const normalReturn = randomNormal(mean, stdDev);
+        const jumpOccurs = Math.random() < (lambda / 12);
+        const jump = jumpOccurs ? (jumpMean / 100) : 0;
+        return normalReturn + jump;
+    }
+    
+    function randomRegimeSwitching(currentRegime, mean, stdDev) {
+        const transitionProb = 0.05;
+        let regime = currentRegime;
+        if (Math.random() < transitionProb) {
+            regime = regime === 'bull' ? 'bear' : 'bull';
+        }
+        
+        const regimeParams = {
+            bull: { mean: mean * 1.5, stdDev: stdDev * 0.8 },
+            bear: { mean: mean * -0.5, stdDev: stdDev * 1.5 }
+        };
+        
+        const params = regimeParams[regime];
+        return {
+            return: randomNormal(params.mean, params.stdDev),
+            regime: regime
+        };
+    }
+    
+    function randomGARCH(prevReturn, prevVolatility, omega, alpha, beta, mean, baseStdDev) {
+        const newVolatility = Math.sqrt(omega + alpha * Math.pow(prevReturn - mean, 2) + beta * Math.pow(prevVolatility, 2));
+        return {
+            return: randomNormal(mean, newVolatility),
+            volatility: newVolatility
+        };
+    }
+    
+    // ========== UTILITY FUNCTIONS ==========
     
     function percentile(arr, p) {
         if (!arr || arr.length === 0) return 0;
@@ -109,13 +154,9 @@ const MonteCarlo = (function() {
         let peak = path[0];
         
         for (let i = 1; i < path.length; i++) {
-            if (path[i] > peak) {
-                peak = path[i];
-            }
+            if (path[i] > peak) peak = path[i];
             const drawdown = (peak - path[i]) / peak;
-            if (drawdown > maxDD) {
-                maxDD = drawdown;
-            }
+            if (drawdown > maxDD) maxDD = drawdown;
         }
         
         return maxDD;
@@ -123,12 +164,7 @@ const MonteCarlo = (function() {
     
     function calculateAdvancedMetrics(returns, riskFreeRate = 0.02) {
         if (!returns || returns.length === 0) {
-            return {
-                sharpeRatio: 0,
-                sortinoRatio: 0,
-                skewness: 0,
-                kurtosis: 0
-            };
+            return { sharpeRatio: 0, sortinoRatio: 0, skewness: 0, kurtosis: 0 };
         }
         
         const avgReturn = returns.reduce((sum, r) => sum + r, 0) / returns.length;
@@ -153,7 +189,7 @@ const MonteCarlo = (function() {
         return { sharpeRatio, sortinoRatio, skewness, kurtosis };
     }
     
-    // ========== FIREBASE FUNCTIONS ==========
+    // ========== FIREBASE ==========
     
     function initFirebase() {
         firebase.auth().onAuthStateChanged(user => {
@@ -181,21 +217,18 @@ const MonteCarlo = (function() {
             
             const scenarios = [];
             snapshot.forEach(doc => {
-                scenarios.push({
-                    id: doc.id,
-                    ...doc.data()
-                });
+                scenarios.push({ id: doc.id, ...doc.data() });
             });
             
             updateSavedScenariosList(scenarios);
         } catch (error) {
-            console.error('Error loading scenarios:', error);
+            console.error('Load scenarios error:', error);
         }
     }
     
     async function saveScenarioToFirebase(scenarioData) {
         if (!currentUser) {
-            window.FinanceDashboard.showNotification('Please login to save scenarios', 'warning');
+            window.FinanceDashboard.showNotification('Please login to save', 'warning');
             return;
         }
         
@@ -210,10 +243,10 @@ const MonteCarlo = (function() {
                 });
             
             loadScenariosFromFirebase();
-            window.FinanceDashboard.showNotification('Scenario saved successfully!', 'success');
+            window.FinanceDashboard.showNotification('Scenario saved!', 'success');
         } catch (error) {
-            console.error('Error saving scenario:', error);
-            window.FinanceDashboard.showNotification('Failed to save scenario', 'error');
+            console.error('Save error:', error);
+            window.FinanceDashboard.showNotification('Save failed', 'error');
         }
     }
     
@@ -229,17 +262,15 @@ const MonteCarlo = (function() {
                 .delete();
             
             loadScenariosFromFirebase();
-            window.FinanceDashboard.showNotification('Scenario deleted', 'info');
+            window.FinanceDashboard.showNotification('Deleted', 'info');
         } catch (error) {
-            console.error('Error deleting scenario:', error);
-            window.FinanceDashboard.showNotification('Failed to delete scenario', 'error');
+            console.error('Delete error:', error);
         }
     }
     
     async function clearAllScenarios() {
         if (!currentUser) return;
-        
-        if (!confirm('Are you sure you want to delete all saved scenarios?')) return;
+        if (!confirm('Delete all scenarios?')) return;
         
         try {
             const snapshot = await firebase.firestore()
@@ -249,16 +280,13 @@ const MonteCarlo = (function() {
                 .get();
             
             const batch = firebase.firestore().batch();
-            snapshot.forEach(doc => {
-                batch.delete(doc.ref);
-            });
-            
+            snapshot.forEach(doc => batch.delete(doc.ref));
             await batch.commit();
+            
             loadScenariosFromFirebase();
-            window.FinanceDashboard.showNotification('All scenarios deleted', 'info');
+            window.FinanceDashboard.showNotification('All deleted', 'info');
         } catch (error) {
-            console.error('Error clearing scenarios:', error);
-            window.FinanceDashboard.showNotification('Failed to clear scenarios', 'error');
+            console.error('Clear error:', error);
         }
     }
     
@@ -267,21 +295,18 @@ const MonteCarlo = (function() {
         if (!container) return;
         
         if (!scenarios || scenarios.length === 0) {
-            container.innerHTML = '<p style="text-align: center; color: var(--text-secondary); padding: 20px;">No saved scenarios. Run a simulation and save it!</p>';
+            container.innerHTML = '<p style="text-align: center; color: var(--text-secondary); padding: 20px;">No saved scenarios</p>';
             return;
         }
         
-        container.innerHTML = scenarios.map(scenario => `
+        container.innerHTML = scenarios.map(s => `
             <div class="saved-scenario-card">
                 <div class="scenario-info">
-                    <h4>${scenario.name}</h4>
-                    <p>${scenario.date || 'No date'}</p>
+                    <h4>${s.name}</h4>
+                    <p>${s.date || 'No date'}</p>
                 </div>
                 <div class="scenario-actions">
-                    <button onclick="MonteCarlo.loadScenario('${scenario.id}')" title="Load">
-                        <i class="fas fa-folder-open"></i>
-                    </button>
-                    <button onclick="MonteCarlo.deleteScenario('${scenario.id}')" title="Delete">
+                    <button onclick="MonteCarlo.deleteScenario('${s.id}')" title="Delete">
                         <i class="fas fa-trash"></i>
                     </button>
                 </div>
@@ -317,52 +342,53 @@ const MonteCarlo = (function() {
         if (template.degreesOfFreedom) {
             document.getElementById('degreesOfFreedom').value = template.degreesOfFreedom;
         }
+        if (template.withdrawalRate) {
+            document.getElementById('withdrawalRate').value = template.withdrawalRate;
+        }
+        if (template.withdrawalStartYear) {
+            document.getElementById('withdrawalStartYear').value = template.withdrawalStartYear;
+        }
+        if (template.jumpIntensity) {
+            document.getElementById('jumpIntensity').value = template.jumpIntensity;
+        }
+        if (template.jumpMagnitude) {
+            document.getElementById('jumpMagnitude').value = template.jumpMagnitude;
+        }
         
-        window.FinanceDashboard.showNotification(`Template "${templateName}" loaded!`, 'success');
+        window.FinanceDashboard.showNotification(`"${templateName}" loaded!`, 'success');
     }
     
     // ========== SCENARIO MANAGEMENT ==========
     
     function saveCurrentScenario() {
         if (!simulationResults) {
-            window.FinanceDashboard.showNotification('Run a simulation first!', 'warning');
+            window.FinanceDashboard.showNotification('Run simulation first', 'warning');
             return;
         }
         
-        const name = prompt('Enter a name for this scenario:', `Scenario ${new Date().toLocaleDateString()}`);
+        const name = prompt('Scenario name:', `Scenario ${new Date().toLocaleDateString()}`);
         if (!name) return;
         
         const params = getSimulationParams();
         const median = percentile(simulationResults.finalValues, 50);
         
-        const scenarioData = {
+        saveScenarioToFirebase({
             name: name,
             date: new Date().toLocaleString(),
             params: params,
             medianResult: median
-        };
-        
-        saveScenarioToFirebase(scenarioData);
+        });
     }
     
     function deleteScenario(scenarioId) {
         deleteScenarioFromFirebase(scenarioId);
     }
     
-    function loadScenario(scenarioId) {
-        // Future implementation: load and apply scenario parameters
-        window.FinanceDashboard.showNotification('Load scenario feature coming soon!', 'info');
-    }
-    
-    function compareScenarios() {
-        window.FinanceDashboard.showNotification('Compare scenarios feature coming soon!', 'info');
-    }
-    
     function clearScenarios() {
         clearAllScenarios();
     }
     
-    // ========== PARAMETER HANDLING ==========
+    // ========== PARAMETERS ==========
     
     function getSimulationParams() {
         const strategy = document.querySelector('input[name="strategy"]:checked')?.value || 'dca';
@@ -374,51 +400,77 @@ const MonteCarlo = (function() {
             monthlyYield: parseFloat(document.getElementById('monthlyYield').value) / 100 || 0,
             volatility: parseFloat(document.getElementById('volatility').value) / 100 || 0,
             years: parseInt(document.getElementById('years').value) || 1,
-            simulations: Math.min(parseInt(document.getElementById('simulations').value) || 1000, 5000),
+            simulations: Math.min(parseInt(document.getElementById('simulations').value) || 1000, 50000),
             targetValue: parseFloat(document.getElementById('targetValue').value) || 0,
             inflationRate: parseFloat(document.getElementById('inflationRateMC').value) || 2.5,
             showInflation: document.getElementById('showInflationMC').checked,
             distribution: distribution,
             strategy: strategy,
-            degreesOfFreedom: parseInt(document.getElementById('degreesOfFreedom')?.value) || 5
+            degreesOfFreedom: parseInt(document.getElementById('degreesOfFreedom')?.value) || 5,
+            jumpIntensity: parseFloat(document.getElementById('jumpIntensity')?.value) || 0.1,
+            jumpMagnitude: parseFloat(document.getElementById('jumpMagnitude')?.value) || -10,
+            withdrawalRate: parseFloat(document.getElementById('withdrawalRate')?.value) / 100 || 0.04,
+            withdrawalStartYear: parseInt(document.getElementById('withdrawalStartYear')?.value) || 15
         };
     }
     
     function updateStrategyFields() {
         const strategy = document.querySelector('input[name="strategy"]:checked')?.value || 'dca';
-        const lumpSumGroup = document.getElementById('lumpSumGroup');
         
-        if (lumpSumGroup) {
-            lumpSumGroup.style.display = (strategy === 'lumpsum') ? 'block' : 'none';
+        const lumpSumGroup = document.getElementById('lumpSumGroup');
+        const withdrawalRateGroup = document.getElementById('withdrawalRateGroup');
+        const withdrawalStartGroup = document.getElementById('withdrawalStartGroup');
+        
+        if (lumpSumGroup) lumpSumGroup.style.display = 'none';
+        if (withdrawalRateGroup) withdrawalRateGroup.style.display = 'none';
+        if (withdrawalStartGroup) withdrawalStartGroup.style.display = 'none';
+        
+        if (strategy === 'lumpsum' || strategy === 'compare') {
+            if (lumpSumGroup) lumpSumGroup.style.display = 'block';
+        }
+        
+        if (strategy === 'withdrawal') {
+            if (withdrawalRateGroup) withdrawalRateGroup.style.display = 'block';
+            if (withdrawalStartGroup) withdrawalStartGroup.style.display = 'block';
         }
     }
     
     function updateDistributionFields() {
         const distribution = document.querySelector('input[name="distribution"]:checked')?.value || 'normal';
-        const dfGroup = document.getElementById('degreesOfFreedomGroup');
         
-        if (dfGroup) {
-            dfGroup.style.display = (distribution === 'studentt') ? 'block' : 'none';
+        const dfGroup = document.getElementById('degreesOfFreedomGroup');
+        const jumpIntensityGroup = document.getElementById('jumpIntensityGroup');
+        const jumpMagnitudeGroup = document.getElementById('jumpMagnitudeGroup');
+        
+        if (dfGroup) dfGroup.style.display = 'none';
+        if (jumpIntensityGroup) jumpIntensityGroup.style.display = 'none';
+        if (jumpMagnitudeGroup) jumpMagnitudeGroup.style.display = 'none';
+        
+        if (distribution === 'studentt') {
+            if (dfGroup) dfGroup.style.display = 'block';
+        }
+        
+        if (distribution === 'jump') {
+            if (jumpIntensityGroup) jumpIntensityGroup.style.display = 'block';
+            if (jumpMagnitudeGroup) jumpMagnitudeGroup.style.display = 'block';
         }
     }
     
-    // ========== SIMULATION PRINCIPALE ==========
+    // ========== MAIN SIMULATION ==========
     
     function runSimulation() {
         const params = getSimulationParams();
         
-        // Validation
         if (params.monthlyInvestment <= 0 && params.strategy === 'dca') {
-            alert('Monthly investment must be greater than 0!');
+            alert('Monthly investment must be > 0');
             return;
         }
         
         if (params.simulations < 100) {
-            alert('Number of simulations must be at least 100!');
+            alert('Min 100 simulations');
             return;
         }
         
-        // Afficher la progression
         const progressBar = document.getElementById('simulationProgress');
         const progressFill = document.getElementById('progressFill');
         const progressText = document.getElementById('progressText');
@@ -426,36 +478,43 @@ const MonteCarlo = (function() {
         if (progressBar) {
             progressBar.style.display = 'block';
             if (progressFill) progressFill.style.width = '0%';
-            if (progressText) progressText.textContent = 'Initializing...';
+            if (progressText) progressText.textContent = 'Starting...';
         }
         
-        // Simuler de manière asynchrone
         setTimeout(() => {
             try {
                 const totalMonths = params.years * 12;
                 const monthlyVolatility = params.volatility / Math.sqrt(12);
                 
-                // Exécuter la simulation
-                const results = executeDCASimulation(params, totalMonths, monthlyVolatility);
+                let results;
+                if (params.strategy === 'compare') {
+                    results = executeComparisonSimulation(params, totalMonths, monthlyVolatility);
+                } else if (params.strategy === 'withdrawal') {
+                    results = executeWithdrawalSimulation(params, totalMonths, monthlyVolatility);
+                } else if (params.strategy === 'lumpsum') {
+                    results = executeLumpSumSimulation(params, totalMonths, monthlyVolatility);
+                } else {
+                    results = executeDCASimulation(params, totalMonths, monthlyVolatility);
+                }
                 
-                if (progressText) progressText.textContent = 'Analyzing results...';
+                if (progressText) progressText.textContent = 'Analyzing...';
                 if (progressFill) progressFill.style.width = '90%';
                 
                 setTimeout(() => {
                     displayResults(results, params);
                     if (progressBar) progressBar.style.display = 'none';
-                    window.FinanceDashboard.showNotification('Simulation completed!', 'success');
+                    window.FinanceDashboard.showNotification('Simulation complete!', 'success');
                 }, 200);
                 
             } catch (error) {
                 console.error('Simulation error:', error);
                 if (progressBar) progressBar.style.display = 'none';
-                window.FinanceDashboard.showNotification('Simulation failed: ' + error.message, 'error');
+                window.FinanceDashboard.showNotification('Error: ' + error.message, 'error');
             }
         }, 100);
     }
     
-    // ========== SIMULATION DCA ==========
+    // ========== SIMULATIONS (SUITE) ==========
     
     function executeDCASimulation(params, totalMonths, monthlyVolatility) {
         const allSimulations = [];
@@ -464,30 +523,46 @@ const MonteCarlo = (function() {
         const maxDrawdowns = [];
         const allReturns = [];
         
-        const updateInterval = Math.floor(params.simulations / 10);
+        const updateInterval = Math.max(Math.floor(params.simulations / 20), 1);
+        
+        let currentRegime = 'bull';
+        let prevVolatility = monthlyVolatility;
         
         for (let sim = 0; sim < params.simulations; sim++) {
-            let portfolio = params.strategy === 'lumpsum' ? params.lumpSumAmount : 0;
-            const path = [portfolio];
+            let portfolio = 0;
+            const path = [0];
             const returns = [];
             
             for (let month = 0; month < totalMonths; month++) {
                 let randomReturn;
                 
-                if (params.distribution === 'studentt') {
-                    randomReturn = randomStudentT(params.degreesOfFreedom, params.monthlyYield, monthlyVolatility);
-                } else {
-                    randomReturn = randomNormal(params.monthlyYield, monthlyVolatility);
+                switch (params.distribution) {
+                    case 'studentt':
+                        randomReturn = randomStudentT(params.degreesOfFreedom, params.monthlyYield, monthlyVolatility);
+                        break;
+                    case 'lognormal':
+                        randomReturn = randomLogNormal(params.monthlyYield, monthlyVolatility) - 1;
+                        break;
+                    case 'jump':
+                        randomReturn = randomJumpDiffusion(params.monthlyYield, monthlyVolatility, params.jumpIntensity, params.jumpMagnitude);
+                        break;
+                    case 'regime':
+                        const regimeResult = randomRegimeSwitching(currentRegime, params.monthlyYield, monthlyVolatility);
+                        randomReturn = regimeResult.return;
+                        currentRegime = regimeResult.regime;
+                        break;
+                    case 'garch':
+                        const prevReturn = returns.length > 0 ? returns[returns.length - 1] : params.monthlyYield;
+                        const garchResult = randomGARCH(prevReturn, prevVolatility, 0.00001, 0.1, 0.85, params.monthlyYield, monthlyVolatility);
+                        randomReturn = garchResult.return;
+                        prevVolatility = garchResult.volatility;
+                        break;
+                    default: // normal
+                        randomReturn = randomNormal(params.monthlyYield, monthlyVolatility);
                 }
                 
                 returns.push(randomReturn);
-                
-                if (params.strategy === 'lumpsum') {
-                    portfolio = portfolio * (1 + randomReturn);
-                } else {
-                    portfolio = portfolio * (1 + randomReturn) + params.monthlyInvestment;
-                }
-                
+                portfolio = portfolio * (1 + randomReturn) + params.monthlyInvestment;
                 path.push(portfolio);
                 
                 if (portfolio >= params.targetValue && monthsToTarget.length === sim) {
@@ -506,7 +581,6 @@ const MonteCarlo = (function() {
             const mdd = calculateMaxDrawdown(path);
             maxDrawdowns.push(mdd);
             
-            // Mise à jour de la progression
             if (sim % updateInterval === 0) {
                 const progress = Math.floor((sim / params.simulations) * 100);
                 const progressFill = document.getElementById('progressFill');
@@ -516,16 +590,109 @@ const MonteCarlo = (function() {
             }
         }
         
+        return { allSimulations, finalValues, monthsToTarget, maxDrawdowns, allReturns };
+    }
+    
+    function executeLumpSumSimulation(params, totalMonths, monthlyVolatility) {
+        const allSimulations = [];
+        const finalValues = [];
+        const monthsToTarget = [];
+        const maxDrawdowns = [];
+        const allReturns = [];
+        
+        for (let sim = 0; sim < params.simulations; sim++) {
+            let portfolio = params.lumpSumAmount;
+            const path = [portfolio];
+            const returns = [];
+            
+            for (let month = 0; month < totalMonths; month++) {
+                const randomReturn = randomNormal(params.monthlyYield, monthlyVolatility);
+                returns.push(randomReturn);
+                portfolio = portfolio * (1 + randomReturn);
+                path.push(portfolio);
+                
+                if (portfolio >= params.targetValue && monthsToTarget.length === sim) {
+                    monthsToTarget.push(month + 1);
+                }
+            }
+            
+            if (monthsToTarget.length === sim) {
+                monthsToTarget.push(totalMonths + 1);
+            }
+            
+            allSimulations.push(path);
+            finalValues.push(portfolio);
+            allReturns.push(returns);
+            maxDrawdowns.push(calculateMaxDrawdown(path));
+        }
+        
+        return { allSimulations, finalValues, monthsToTarget, maxDrawdowns, allReturns };
+    }
+    
+    function executeWithdrawalSimulation(params, totalMonths, monthlyVolatility) {
+        const allSimulations = [];
+        const finalValues = [];
+        const depletionCount = [];
+        const maxDrawdowns = [];
+        const allReturns = [];
+        
+        const withdrawalStartMonth = params.withdrawalStartYear * 12;
+        
+        for (let sim = 0; sim < params.simulations; sim++) {
+            let portfolio = 0;
+            const path = [0];
+            const returns = [];
+            let initialWithdrawalPortfolio = 0;
+            let monthlyWithdrawal = 0;
+            
+            for (let month = 0; month < totalMonths; month++) {
+                const randomReturn = randomNormal(params.monthlyYield, monthlyVolatility);
+                returns.push(randomReturn);
+                
+                if (month < withdrawalStartMonth) {
+                    portfolio = portfolio * (1 + randomReturn) + params.monthlyInvestment;
+                } else {
+                    if (month === withdrawalStartMonth) {
+                        initialWithdrawalPortfolio = portfolio;
+                        monthlyWithdrawal = (initialWithdrawalPortfolio * params.withdrawalRate) / 12;
+                    }
+                    portfolio = portfolio * (1 + randomReturn) - monthlyWithdrawal;
+                    if (portfolio <= 0) portfolio = 0;
+                }
+                
+                path.push(portfolio);
+            }
+            
+            allSimulations.push(path);
+            finalValues.push(portfolio);
+            allReturns.push(returns);
+            depletionCount.push(portfolio <= 0 ? 1 : 0);
+            maxDrawdowns.push(calculateMaxDrawdown(path));
+        }
+        
         return {
             allSimulations,
             finalValues,
-            monthsToTarget,
+            monthsToTarget: [],
             maxDrawdowns,
-            allReturns
+            allReturns,
+            depletionCount,
+            withdrawalStartMonth
         };
     }
     
-    // ========== AFFICHAGE DES RÉSULTATS ==========
+    function executeComparisonSimulation(params, totalMonths, monthlyVolatility) {
+        const dcaResults = executeDCASimulation(params, totalMonths, monthlyVolatility);
+        const lsResults = executeLumpSumSimulation(params, totalMonths, monthlyVolatility);
+        
+        return {
+            dca: dcaResults,
+            lumpsum: lsResults,
+            comparison: true
+        };
+    }
+    
+    // ========== DISPLAY RESULTS ==========
     
     function displayResults(results, params) {
         simulationResults = results;
@@ -538,10 +705,23 @@ const MonteCarlo = (function() {
             }, 100);
         }
         
+        if (results.comparison) {
+            displayComparisonResults(results, params);
+            return;
+        }
+        
+        if (params.strategy === 'withdrawal') {
+            displayWithdrawalResults(results, params);
+            return;
+        }
+        
+        displayStandardResults(results, params);
+    }
+    
+    function displayStandardResults(results, params) {
         const { allSimulations, finalValues, monthsToTarget, maxDrawdowns, allReturns } = results;
         const totalMonths = params.years * 12;
         
-        // Statistiques
         const median = percentile(finalValues, 50);
         const p10 = percentile(finalValues, 10);
         const p90 = percentile(finalValues, 90);
@@ -552,15 +732,181 @@ const MonteCarlo = (function() {
         displayMainStats(median, avgFinal, p10, p90, best, worst, params);
         displayAdvancedRiskMetrics(finalValues, maxDrawdowns, allReturns, params, totalMonths);
         
-        // Graphiques
         createChart1(allSimulations, totalMonths, params);
         createChart2(finalValues, params, totalMonths);
         createChart3(finalValues, params.targetValue);
         createDrawdownAnalysis(maxDrawdowns, allSimulations);
         createRiskAnalysis(finalValues, totalMonths, params.monthlyInvestment, params.strategy, params.lumpSumAmount);
+        createTornadoDiagram(params, totalMonths);
+        createHeatMap(params, totalMonths);
+        createCorrelationMatrix(allReturns, finalValues, maxDrawdowns);
+        createEfficientFrontier(params, totalMonths);
         createChart4(allSimulations, totalMonths);
         createChart5(monthsToTarget, params.targetValue);
         createRollingSharpe(allReturns);
+        
+        document.getElementById('strategyComparisonSection').style.display = 'none';
+        document.getElementById('withdrawalAnalysisSection').style.display = 'none';
+    }
+    
+    function displayComparisonResults(results, params) {
+        const { dca, lumpsum } = results;
+        const totalMonths = params.years * 12;
+        
+        const dcaMedian = percentile(dca.finalValues, 50);
+        const dcaP10 = percentile(dca.finalValues, 10);
+        const dcaP90 = percentile(dca.finalValues, 90);
+        
+        displayMainStats(dcaMedian, dca.finalValues.reduce((a,b) => a+b, 0) / dca.finalValues.length, 
+                        dcaP10, dcaP90, Math.max(...dca.finalValues), Math.min(...dca.finalValues), params);
+        
+        displayAdvancedRiskMetrics(dca.finalValues, dca.maxDrawdowns, dca.allReturns, params, totalMonths);
+        
+        createChart1(dca.allSimulations, totalMonths, params);
+        createChart2(dca.finalValues, params, totalMonths);
+        createChart3(dca.finalValues, params.targetValue);
+        createDrawdownAnalysis(dca.maxDrawdowns, dca.allSimulations);
+        createRiskAnalysis(dca.finalValues, totalMonths, params.monthlyInvestment, params.strategy, params.lumpSumAmount);
+        
+        const strategySection = document.getElementById('strategyComparisonSection');
+        if (strategySection) {
+            strategySection.style.display = 'block';
+            
+            const dcaMedianPath = [];
+            const lsMedianPath = [];
+            
+            for (let m = 0; m <= totalMonths; m++) {
+                const dcaValues = dca.allSimulations.map(sim => sim[m]);
+                const lsValues = lumpsum.allSimulations.map(sim => sim[m]);
+                dcaMedianPath.push(percentile(dcaValues, 50));
+                lsMedianPath.push(percentile(lsValues, 50));
+            }
+            
+            Highcharts.chart('chartStrategyComparison', {
+                chart: { type: 'line', backgroundColor: 'transparent' },
+                title: { text: '💰 DCA vs Lump Sum', style: { color: '#667eea', fontWeight: 'bold' } },
+                xAxis: { title: { text: 'Months' } },
+                yAxis: { title: { text: 'Portfolio (EUR)' } },
+                series: [
+                    { name: 'DCA', data: dcaMedianPath, color: '#667eea', lineWidth: 3 },
+                    { name: 'Lump Sum', data: lsMedianPath, color: '#f5576c', lineWidth: 3, dashStyle: 'Dash' }
+                ],
+                credits: { enabled: false }
+            });
+            
+            const lsMedian = percentile(lumpsum.finalValues, 50);
+            const dcaWins = dca.finalValues.filter((v, i) => v > lumpsum.finalValues[i]).length;
+            const winRate = (dcaWins / dca.finalValues.length * 100).toFixed(1);
+            
+            const statsContainer = document.getElementById('strategyComparisonStats');
+            if (statsContainer) {
+                statsContainer.innerHTML = `
+                    <div class="stat-box">
+                        <div class="label">DCA Median</div>
+                        <div class="value">${window.FinanceDashboard.formatNumber(dcaMedian, 0)} EUR</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="label">Lump Sum Median</div>
+                        <div class="value">${window.FinanceDashboard.formatNumber(lsMedian, 0)} EUR</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="label">DCA Win Rate</div>
+                        <div class="value">${winRate}%</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="label">Difference</div>
+                        <div class="value">${window.FinanceDashboard.formatNumber(lsMedian - dcaMedian, 0)} EUR</div>
+                    </div>
+                `;
+            }
+        }
+        
+        document.getElementById('withdrawalAnalysisSection').style.display = 'none';
+    }
+    
+    function displayWithdrawalResults(results, params) {
+        const { allSimulations, finalValues, depletionCount, maxDrawdowns, withdrawalStartMonth } = results;
+        const totalMonths = params.years * 12;
+        
+        const median = percentile(finalValues, 50);
+        const p10 = percentile(finalValues, 10);
+        const p90 = percentile(finalValues, 90);
+        const depletionRate = (depletionCount.reduce((a,b) => a+b, 0) / depletionCount.length * 100).toFixed(1);
+        
+        displayMainStats(median, finalValues.reduce((a,b) => a+b, 0) / finalValues.length, 
+                        p10, p90, Math.max(...finalValues), Math.min(...finalValues), params);
+        
+        displayAdvancedRiskMetrics(finalValues, maxDrawdowns, results.allReturns, params, totalMonths);
+        
+        createChart1(allSimulations, totalMonths, params);
+        createChart2(finalValues, params, totalMonths);
+        createChart3(finalValues, params.targetValue);
+        createDrawdownAnalysis(maxDrawdowns, allSimulations);
+        
+        const withdrawalSection = document.getElementById('withdrawalAnalysisSection');
+        if (withdrawalSection) {
+            withdrawalSection.style.display = 'block';
+            
+            const medianPath = [];
+            const p10Path = [];
+            const p90Path = [];
+            
+            for (let m = 0; m <= totalMonths; m++) {
+                const values = allSimulations.map(sim => sim[m]);
+                medianPath.push(percentile(values, 50));
+                p10Path.push(percentile(values, 10));
+                p90Path.push(percentile(values, 90));
+            }
+            
+            Highcharts.chart('chartWithdrawal', {
+                chart: { type: 'area', backgroundColor: 'transparent' },
+                title: { text: '🏖 Retirement Plan', style: { color: '#764ba2', fontWeight: 'bold' } },
+                xAxis: { 
+                    title: { text: 'Months' },
+                    plotLines: [{
+                        color: '#f5576c',
+                        width: 2,
+                        value: withdrawalStartMonth,
+                        dashStyle: 'Dash',
+                        label: { text: 'Withdrawal Starts', style: { color: '#f5576c' } }
+                    }]
+                },
+                yAxis: { title: { text: 'Portfolio (EUR)' } },
+                series: [
+                    { name: 'P90', data: p90Path, color: '#43e97b', fillOpacity: 0.2 },
+                    { name: 'Median', data: medianPath, color: '#667eea', lineWidth: 3 },
+                    { name: 'P10', data: p10Path, color: '#f5576c', fillOpacity: 0.2 }
+                ],
+                credits: { enabled: false }
+            });
+            
+            const portfolioAtWithdrawal = percentile(allSimulations.map(sim => sim[withdrawalStartMonth]), 50);
+            const monthlyWithdrawal = (portfolioAtWithdrawal * params.withdrawalRate) / 12;
+            
+            const statsContainer = document.getElementById('withdrawalStats');
+            if (statsContainer) {
+                statsContainer.innerHTML = `
+                    <div class="stat-box">
+                        <div class="label">Accumulation Period</div>
+                        <div class="value">${params.withdrawalStartYear} years</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="label">Portfolio at Retirement</div>
+                        <div class="value">${window.FinanceDashboard.formatNumber(portfolioAtWithdrawal, 0)} EUR</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="label">Monthly Withdrawal</div>
+                        <div class="value">${window.FinanceDashboard.formatNumber(monthlyWithdrawal, 0)} EUR</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="label">Depletion Risk</div>
+                        <div class="value" style="color: ${parseFloat(depletionRate) > 10 ? '#f5576c' : '#43e97b'}">${depletionRate}%</div>
+                    </div>
+                `;
+            }
+        }
+        
+        document.getElementById('strategyComparisonSection').style.display = 'none';
     }
     
     function displayMainStats(median, avgFinal, p10, p90, best, worst, params) {
@@ -574,21 +920,21 @@ const MonteCarlo = (function() {
         
         statsContainer.innerHTML = `
             <div class="stat-box">
-                <div class="label">Median (50th Percentile)</div>
+                <div class="label">Median (P50)</div>
                 <div class="value">${window.FinanceDashboard.formatNumber(median, 0)} EUR</div>
                 ${params.showInflation ? `<div style="font-size: 0.9em; color: #9D5CE6; margin-top: 5px;">Real: ${window.FinanceDashboard.formatNumber(medianReal, 0)} EUR</div>` : ''}
             </div>
             <div class="stat-box">
-                <div class="label">Average Final Value</div>
+                <div class="label">Average</div>
                 <div class="value">${window.FinanceDashboard.formatNumber(avgFinal, 0)} EUR</div>
                 ${params.showInflation ? `<div style="font-size: 0.9em; color: #9D5CE6; margin-top: 5px;">Real: ${window.FinanceDashboard.formatNumber(avgFinalReal, 0)} EUR</div>` : ''}
             </div>
             <div class="stat-box">
-                <div class="label">10th Percentile</div>
+                <div class="label">P10 (Pessimistic)</div>
                 <div class="value">${window.FinanceDashboard.formatNumber(p10, 0)} EUR</div>
             </div>
             <div class="stat-box">
-                <div class="label">90th Percentile</div>
+                <div class="label">P90 (Optimistic)</div>
                 <div class="value">${window.FinanceDashboard.formatNumber(p90, 0)} EUR</div>
             </div>
             <div class="stat-box">
@@ -629,7 +975,7 @@ const MonteCarlo = (function() {
                 <div class="value">${window.FinanceDashboard.formatNumber(cvar, 0)} EUR</div>
             </div>
             <div class="stat-box">
-                <div class="label">Median Max Drawdown</div>
+                <div class="label">Median MDD</div>
                 <div class="value" style="color: #f5576c;">${(medianMDD * 100).toFixed(1)}%</div>
             </div>
             <div class="stat-box">
@@ -651,13 +997,10 @@ const MonteCarlo = (function() {
         `;
     }
     
-    // ========== GRAPHIQUES ==========
+    // ========== CHARTS ==========
     
     function createChart1(allSimulations, totalMonths, params) {
-        if (!allSimulations || allSimulations.length === 0) {
-            console.error('No simulation data for chart1');
-            return;
-        }
+        if (!allSimulations || allSimulations.length === 0) return;
         
         const months = Array.from({length: totalMonths + 1}, (_, i) => i);
         
@@ -676,16 +1019,15 @@ const MonteCarlo = (function() {
             return percentile(values, 90);
         });
         
-        // Seulement 10 simulations en arrière-plan pour optimiser
         const samplePaths = [];
-        const sampleCount = Math.min(10, allSimulations.length);
+        const sampleCount = Math.min(5, allSimulations.length);
         const step = Math.floor(allSimulations.length / sampleCount);
         
         for (let i = 0; i < allSimulations.length && samplePaths.length < sampleCount; i += step) {
             samplePaths.push({
                 name: 'Simulation',
                 data: allSimulations[i],
-                color: 'rgba(102, 126, 234, 0.1)',
+                color: 'rgba(102, 126, 234, 0.05)',
                 lineWidth: 1,
                 enableMouseTracking: false,
                 showInLegend: false
@@ -694,17 +1036,16 @@ const MonteCarlo = (function() {
         
         const series = [
             ...samplePaths,
-            { name: 'P90', data: p90Path, color: '#43e97b', lineWidth: 2, dashStyle: 'Dash' },
+            { name: 'P90', data: p90Path, color: '#43e97b', lineWidth: 2 },
             { name: 'Median', data: medianPath, color: '#667eea', lineWidth: 3 },
-            { name: 'P10', data: p10Path, color: '#f5576c', lineWidth: 2, dashStyle: 'Dash' }
+            { name: 'P10', data: p10Path, color: '#f5576c', lineWidth: 2 }
         ];
         
         Highcharts.chart('chart1', {
-            chart: { type: 'line', backgroundColor: 'transparent', zoomType: 'x' },
+            chart: { type: 'line', backgroundColor: 'transparent' },
             title: { text: '📊 Portfolio Evolution', style: { color: '#667eea', fontWeight: 'bold' } },
-            xAxis: { title: { text: 'Months' }, crosshair: true },
-            yAxis: { title: { text: 'Portfolio Value (EUR)' } },
-            tooltip: { shared: true, valueDecimals: 0, valueSuffix: ' EUR' },
+            xAxis: { title: { text: 'Months' } },
+            yAxis: { title: { text: 'Value (EUR)' } },
             series: series,
             plotOptions: { line: { marker: { enabled: false } } },
             credits: { enabled: false }
@@ -733,16 +1074,14 @@ const MonteCarlo = (function() {
         
         Highcharts.chart('chart2', {
             chart: { type: 'column', backgroundColor: 'transparent' },
-            title: { text: '📈 Distribution of Returns', style: { color: '#667eea', fontWeight: 'bold' } },
+            title: { text: '📈 Return Distribution', style: { color: '#667eea', fontWeight: 'bold' } },
             xAxis: { 
                 title: { text: 'Final Value (EUR)' },
                 labels: { formatter: function() { return window.FinanceDashboard.formatNumber(this.value, 0); } }
             },
             yAxis: { title: { text: 'Frequency' } },
-            tooltip: { pointFormat: 'Value: <b>{point.x:,.0f} EUR</b><br/>Count: <b>{point.y}</b>' },
             series: [{ name: 'Distribution', data: bins, color: '#667eea', borderRadius: 5 }],
             legend: { enabled: false },
-            plotOptions: { column: { pointPadding: 0, groupPadding: 0, borderWidth: 0 } },
             credits: { enabled: false }
         });
     }
@@ -755,22 +1094,18 @@ const MonteCarlo = (function() {
         
         Highcharts.chart('chart3', {
             chart: { type: 'pie', backgroundColor: 'transparent' },
-            title: { text: `🎯 Success Rate: ${successRate}%`, style: { color: '#667eea', fontWeight: 'bold' } },
-            tooltip: { pointFormat: '<b>{point.name}</b>: {point.percentage:.1f}%' },
+            title: { text: `🎯 Success: ${successRate}%`, style: { color: '#667eea', fontWeight: 'bold' } },
             plotOptions: { 
                 pie: { 
                     innerSize: '65%',
-                    dataLabels: { 
-                        format: '<b>{point.name}</b><br/>{point.percentage:.1f}%',
-                        style: { fontWeight: 'bold' }
-                    }
+                    dataLabels: { format: '<b>{point.name}</b><br/>{point.percentage:.1f}%' }
                 }
             },
             series: [{
                 name: 'Probability',
                 data: [
-                    { name: 'Above Target ✓', y: aboveTarget, color: '#43e97b', sliced: true },
-                    { name: 'Below Target', y: finalValues.length - aboveTarget, color: '#f5576c' }
+                    { name: 'Above ✓', y: aboveTarget, color: '#43e97b', sliced: true },
+                    { name: 'Below', y: finalValues.length - aboveTarget, color: '#f5576c' }
                 ]
             }],
             credits: { enabled: false }
@@ -781,34 +1116,27 @@ const MonteCarlo = (function() {
         if (!maxDrawdowns || maxDrawdowns.length === 0) return;
         
         const container = document.getElementById('drawdownStats');
-        if (!container) return;
+        if (container) {
+            const medianMDD = percentile(maxDrawdowns, 50);
+            const p90MDD = percentile(maxDrawdowns, 90);
+            const avgMDD = maxDrawdowns.reduce((a,b) => a+b, 0) / maxDrawdowns.length;
+            
+            container.innerHTML = `
+                <div class="stat-box">
+                    <div class="label">Median MDD</div>
+                    <div class="value" style="color: #f5576c;">${(medianMDD * 100).toFixed(1)}%</div>
+                </div>
+                <div class="stat-box">
+                    <div class="label">Average MDD</div>
+                    <div class="value" style="color: #f5576c;">${(avgMDD * 100).toFixed(1)}%</div>
+                </div>
+                <div class="stat-box">
+                    <div class="label">P90 MDD</div>
+                    <div class="value" style="color: #f5576c;">${(p90MDD * 100).toFixed(1)}%</div>
+                </div>
+            `;
+        }
         
-        const medianMDD = percentile(maxDrawdowns, 50);
-        const p10MDD = percentile(maxDrawdowns, 10);
-        const p90MDD = percentile(maxDrawdowns, 90);
-        const worstMDD = Math.max(...maxDrawdowns);
-        const avgMDD = maxDrawdowns.reduce((a,b) => a+b, 0) / maxDrawdowns.length;
-        
-        container.innerHTML = `
-            <div class="stat-box">
-                <div class="label">Median Max Drawdown</div>
-                <div class="value" style="color: #f5576c;">${(medianMDD * 100).toFixed(1)}%</div>
-            </div>
-            <div class="stat-box">
-                <div class="label">Average Drawdown</div>
-                <div class="value" style="color: #f5576c;">${(avgMDD * 100).toFixed(1)}%</div>
-            </div>
-            <div class="stat-box">
-                <div class="label">Best Case (P10)</div>
-                <div class="value" style="color: #43e97b;">${(p10MDD * 100).toFixed(1)}%</div>
-            </div>
-            <div class="stat-box">
-                <div class="label">Worst Case (P90)</div>
-                <div class="value" style="color: #f5576c;">${(p90MDD * 100).toFixed(1)}%</div>
-            </div>
-        `;
-        
-        // Histogramme
         const min = Math.min(...maxDrawdowns);
         const max = Math.max(...maxDrawdowns);
         const binWidth = (max - min) / 25;
@@ -827,7 +1155,7 @@ const MonteCarlo = (function() {
             chart: { type: 'column', backgroundColor: 'transparent' },
             title: { text: '📉 Drawdown Distribution', style: { color: '#f5576c', fontWeight: 'bold' } },
             xAxis: { 
-                title: { text: 'Maximum Drawdown (%)' },
+                title: { text: 'MDD (%)' },
                 labels: { formatter: function() { return this.value.toFixed(1) + '%'; } }
             },
             yAxis: { title: { text: 'Frequency' } },
@@ -848,8 +1176,6 @@ const MonteCarlo = (function() {
         const medianReturn = totalInvested > 0 ?
             ((percentile(finalValues, 50) - totalInvested) / totalInvested * 100).toFixed(1) : 0;
         const var5 = percentile(finalValues, 5);
-        const var5Return = totalInvested > 0 ?
-            ((var5 - totalInvested) / totalInvested * 100).toFixed(1) : 0;
         
         const container = document.getElementById('riskAnalysis');
         if (container) {
@@ -859,7 +1185,7 @@ const MonteCarlo = (function() {
                     <div class='value'>${window.FinanceDashboard.formatNumber(totalInvested, 0)} EUR</div>
                 </div>
                 <div class='stat-box'>
-                    <div class='label'>Average Return</div>
+                    <div class='label'>Avg Return</div>
                     <div class='value' style='color: ${parseFloat(avgReturn) >= 0 ? "#43e97b" : "#f5576c"}'>${avgReturn}%</div>
                 </div>
                 <div class='stat-box'>
@@ -874,12 +1200,227 @@ const MonteCarlo = (function() {
                     <div class='label'>VaR (5%)</div>
                     <div class='value'>${window.FinanceDashboard.formatNumber(var5, 0)} EUR</div>
                 </div>
-                <div class='stat-box'>
-                    <div class='label'>VaR Return (5%)</div>
-                    <div class='value' style='color: ${parseFloat(var5Return) >= 0 ? "#43e97b" : "#f5576c"}'>${var5Return}%</div>
-                </div>
             `;
         }
+    }
+    
+    function createTornadoDiagram(params, totalMonths) {
+        const baseParams = {...params, simulations: 500};
+        const baseMedian = percentile(executeDCASimulation(baseParams, totalMonths, baseParams.volatility / Math.sqrt(12)).finalValues, 50);
+        
+        const sensitivity = [];
+        const parameterNames = {
+            monthlyInvestment: 'Monthly Investment',
+            monthlyYield: 'Monthly Yield',
+            volatility: 'Volatility',
+            years: 'Time Horizon'
+        };
+        
+        for (const [paramName, displayName] of Object.entries(parameterNames)) {
+            const paramsPlus = {...baseParams};
+            const paramsMinus = {...baseParams};
+            
+            if (paramName === 'monthlyYield' || paramName === 'volatility') {
+                paramsPlus[paramName] = baseParams[paramName] * 1.1;
+                paramsMinus[paramName] = baseParams[paramName] * 0.9;
+            } else {
+                paramsPlus[paramName] = Math.round(baseParams[paramName] * 1.1);
+                paramsMinus[paramName] = Math.max(1, Math.round(baseParams[paramName] * 0.9));
+            }
+            
+            const medianPlus = percentile(executeDCASimulation(paramsPlus, paramsPlus.years * 12, paramsPlus.volatility / Math.sqrt(12)).finalValues, 50);
+            const medianMinus = percentile(executeDCASimulation(paramsMinus, paramsMinus.years * 12, paramsMinus.volatility / Math.sqrt(12)).finalValues, 50);
+            
+            const impact = Math.abs(medianPlus - medianMinus);
+            sensitivity.push({
+                name: displayName,
+                low: medianMinus - baseMedian,
+                high: medianPlus - baseMedian,
+                impact: impact
+            });
+        }
+        
+        sensitivity.sort((a, b) => b.impact - a.impact);
+        
+        const categories = sensitivity.map(s => s.name);
+        const lowData = sensitivity.map(s => s.low);
+        const highData = sensitivity.map(s => s.high);
+        
+        Highcharts.chart('chartTornado', {
+            chart: { type: 'bar', backgroundColor: 'transparent' },
+            title: { text: '🌪 Sensitivity Analysis', style: { color: '#667eea', fontWeight: 'bold' } },
+            xAxis: [{ categories: categories, reversed: false }, { opposite: true, reversed: false, categories: categories, linkedTo: 0 }],
+            yAxis: { title: { text: 'Impact (EUR)' } },
+            plotOptions: { series: { stacking: 'normal', borderRadius: 5 } },
+            series: [
+                { name: 'Decrease (-10%)', data: lowData, color: '#f5576c' },
+                { name: 'Increase (+10%)', data: highData, color: '#43e97b' }
+            ],
+            credits: { enabled: false }
+        });
+    }
+    
+    function createHeatMap(params, totalMonths) {
+        const yields = [0.3, 0.5, 0.67, 0.83, 1.0, 1.2];
+        const volatilities = [8, 12, 15, 18, 22, 25];
+        const data = [];
+        
+        for (let i = 0; i < yields.length; i++) {
+            for (let j = 0; j < volatilities.length; j++) {
+                const testParams = {
+                    ...params,
+                    monthlyYield: yields[i] / 100,
+                    volatility: volatilities[j] / 100,
+                    simulations: 300
+                };
+                
+                const results = executeDCASimulation(testParams, testParams.years * 12, testParams.volatility / Math.sqrt(12));
+                const median = percentile(results.finalValues, 50);
+                
+                data.push([i, j, median]);
+            }
+        }
+        
+        Highcharts.chart('chartHeatMap', {
+            chart: { type: 'heatmap', backgroundColor: 'transparent' },
+            title: { text: '🌡 Parameter Heat Map', style: { color: '#667eea', fontWeight: 'bold' } },
+            xAxis: {
+                categories: yields.map(y => (y * 12).toFixed(1) + '%'),
+                title: { text: 'Annual Return' }
+            },
+            yAxis: {
+                categories: volatilities.map(v => v + '%'),
+                title: { text: 'Volatility' }
+            },
+            colorAxis: {
+                min: Math.min(...data.map(d => d[2])),
+                max: Math.max(...data.map(d => d[2])),
+                stops: [
+                    [0, '#f5576c'],
+                    [0.5, '#f6d365'],
+                    [1, '#43e97b']
+                ]
+            },
+            series: [{
+                name: 'Portfolio',
+                borderWidth: 1,
+                data: data,
+                dataLabels: {
+                    enabled: true,
+                    formatter: function() {
+                        return window.FinanceDashboard.formatNumber(this.point.value / 1000, 0) + 'k';
+                    }
+                }
+            }],
+            credits: { enabled: false }
+        });
+    }
+    
+    function createCorrelationMatrix(allReturns, finalValues, maxDrawdowns) {
+        const flatReturns = allReturns.flat();
+        const avgReturn = flatReturns.reduce((a,b) => a+b, 0) / flatReturns.length;
+        
+        const volatilities = allReturns.map(returns => {
+            const avg = returns.reduce((a,b) => a+b, 0) / returns.length;
+            return Math.sqrt(returns.reduce((sum, r) => sum + Math.pow(r - avg, 2), 0) / returns.length);
+        });
+        
+        const sharpes = allReturns.map((returns, i) => {
+            const avg = returns.reduce((a,b) => a+b, 0) / returns.length;
+            const std = Math.sqrt(returns.reduce((sum, r) => sum + Math.pow(r - avg, 2), 0) / returns.length);
+            return std !== 0 ? avg / std : 0;
+        });
+        
+        function correlation(arr1, arr2) {
+            const n = arr1.length;
+            const mean1 = arr1.reduce((a,b) => a+b, 0) / n;
+            const mean2 = arr2.reduce((a,b) => a+b, 0) / n;
+            
+            let num = 0;
+            let den1 = 0;
+            let den2 = 0;
+            
+            for (let i = 0; i < n; i++) {
+                num += (arr1[i] - mean1) * (arr2[i] - mean2);
+                den1 += Math.pow(arr1[i] - mean1, 2);
+                den2 += Math.pow(arr2[i] - mean2, 2);
+            }
+            
+            return den1 === 0 || den2 === 0 ? 0 : num / Math.sqrt(den1 * den2);
+        }
+        
+        const metrics = ['Final Value', 'Max Drawdown', 'Volatility', 'Sharpe'];
+        const arrays = [finalValues, maxDrawdowns, volatilities, sharpes];
+        const data = [];
+        
+        for (let i = 0; i < metrics.length; i++) {
+            for (let j = 0; j < metrics.length; j++) {
+                const corr = i === j ? 1 : correlation(arrays[i], arrays[j]);
+                data.push([i, j, corr]);
+            }
+        }
+        
+        Highcharts.chart('chartCorrelation', {
+            chart: { type: 'heatmap', backgroundColor: 'transparent' },
+            title: { text: '📊 Correlation Matrix', style: { color: '#667eea', fontWeight: 'bold' } },
+            xAxis: { categories: metrics },
+            yAxis: { categories: metrics },
+            colorAxis: {
+                min: -1,
+                max: 1,
+                stops: [
+                    [0, '#f5576c'],
+                    [0.5, '#ffffff'],
+                    [1, '#43e97b']
+                ]
+            },
+            series: [{
+                name: 'Correlation',
+                borderWidth: 1,
+                data: data,
+                dataLabels: {
+                    enabled: true,
+                    formatter: function() {
+                        return this.point.value.toFixed(2);
+                    }
+                }
+            }],
+            credits: { enabled: false }
+        });
+    }
+    
+    function createEfficientFrontier(params, totalMonths) {
+        const frontierData = [];
+        
+        for (let vol = 5; vol <= 30; vol += 2) {
+            const testParams = {
+                ...params,
+                volatility: vol / 100,
+                simulations: 300
+            };
+            
+            const results = executeDCASimulation(testParams, totalMonths, testParams.volatility / Math.sqrt(12));
+            const median = percentile(results.finalValues, 50);
+            const totalInvested = testParams.monthlyInvestment * totalMonths;
+            const annualReturn = totalInvested > 0 ? 
+                ((median / totalInvested) - 1) / testParams.years * 100 : 0;
+            
+            frontierData.push([vol, annualReturn]);
+        }
+        
+        Highcharts.chart('chartFrontier', {
+            chart: { type: 'scatter', backgroundColor: 'transparent' },
+            title: { text: '📈 Risk-Return Frontier', style: { color: '#667eea', fontWeight: 'bold' } },
+            xAxis: { title: { text: 'Volatility (%)' } },
+            yAxis: { title: { text: 'Annual Return (%)' } },
+            series: [{
+                name: 'Efficient Frontier',
+                data: frontierData,
+                color: '#667eea',
+                marker: { radius: 6 }
+            }],
+            credits: { enabled: false }
+        });
     }
     
     function createChart4(allSimulations, totalMonths) {
@@ -888,7 +1429,6 @@ const MonteCarlo = (function() {
         const scenarios = [
             { name: 'Crisis (-40%)', shock: -0.40, color: '#8b0000' },
             { name: 'Recession (-20%)', shock: -0.20, color: '#f5576c' },
-            { name: 'Correction (-10%)', shock: -0.10, color: '#ffa500' },
             { name: 'Normal (0%)', shock: 0, color: '#667eea' },
             { name: 'Bull (+20%)', shock: 0.20, color: '#43e97b' }
         ];
@@ -908,9 +1448,8 @@ const MonteCarlo = (function() {
         Highcharts.chart('chart4', {
             chart: { type: 'column', backgroundColor: 'transparent' },
             title: { text: '⚡ Stress Testing', style: { color: '#667eea', fontWeight: 'bold' } },
-            xAxis: { categories: categories, labels: { rotation: -15, style: { fontSize: '11px' } } },
-            yAxis: { title: { text: 'Median Value (EUR)' } },
-            tooltip: { valueDecimals: 0, valueSuffix: ' EUR' },
+            xAxis: { categories: categories },
+            yAxis: { title: { text: 'Median (EUR)' } },
             series: [{ 
                 name: 'Portfolio', 
                 data: data, 
@@ -935,7 +1474,7 @@ const MonteCarlo = (function() {
         if (validMonths.length === 0) {
             const chartDiv = document.getElementById('chart5');
             if (chartDiv) {
-                chartDiv.innerHTML = '<p style="text-align: center; padding: 40px; color: var(--text-secondary);">Target not reached in any simulation</p>';
+                chartDiv.innerHTML = '<p style="text-align: center; padding: 40px; color: var(--text-secondary);">Target not reached</p>';
             }
             return;
         }
@@ -964,19 +1503,10 @@ const MonteCarlo = (function() {
                 style: { color: '#667eea', fontWeight: 'bold' } 
             },
             subtitle: {
-                text: `Success: ${successRate}% | Median: ${medianTime.toFixed(0)} months (${(medianTime/12).toFixed(1)} years)`,
+                text: `Success: ${successRate}% | Median: ${(medianTime/12).toFixed(1)} years`,
                 style: { color: '#764ba2' }
             },
-            xAxis: { 
-                title: { text: 'Months' },
-                plotLines: [{
-                    color: '#667eea',
-                    width: 2,
-                    value: medianTime,
-                    dashStyle: 'Dash',
-                    label: { text: 'Median', style: { color: '#667eea' } }
-                }]
-            },
+            xAxis: { title: { text: 'Months' } },
             yAxis: { title: { text: 'Frequency' } },
             series: [{ name: 'Distribution', data: bins, color: '#667eea', borderRadius: 5 }],
             legend: { enabled: false },
@@ -1019,25 +1549,16 @@ const MonteCarlo = (function() {
         
         Highcharts.chart('chartRollingSharpe', {
             chart: { type: 'line', backgroundColor: 'transparent' },
-            title: { text: '📈 Rolling Sharpe Ratio', style: { color: '#667eea', fontWeight: 'bold' } },
+            title: { text: '📈 Rolling Sharpe', style: { color: '#667eea', fontWeight: 'bold' } },
             xAxis: { title: { text: 'Month' }, categories: months },
-            yAxis: { 
-                title: { text: 'Sharpe Ratio' },
-                plotLines: [{
-                    value: 0,
-                    color: '#f5576c',
-                    width: 1,
-                    dashStyle: 'Dash'
-                }]
-            },
-            tooltip: { valueDecimals: 2 },
+            yAxis: { title: { text: 'Sharpe Ratio' } },
             series: [{ name: 'Median Sharpe', data: medianSharpes, color: '#667eea', lineWidth: 2 }],
             plotOptions: { line: { marker: { enabled: false } } },
             credits: { enabled: false }
         });
     }
     
-    // ========== EXPORT FUNCTIONS ==========
+    // ========== EXPORT ==========
     
     function exportPDF() {
         window.FinanceDashboard.showNotification('Generating PDF...', 'info');
@@ -1047,27 +1568,25 @@ const MonteCarlo = (function() {
                 const { jsPDF } = window.jspdf;
                 const doc = new jsPDF('p', 'mm', 'a4');
                 
-                // Cover page
                 doc.setFillColor(102, 126, 234);
                 doc.rect(0, 0, 210, 297, 'F');
                 doc.setTextColor(255, 255, 255);
-                doc.setFontSize(32);
+                doc.setFontSize(28);
                 doc.text('Monte Carlo Report', 105, 100, { align: 'center' });
-                doc.setFontSize(14);
+                doc.setFontSize(12);
                 doc.text(new Date().toLocaleDateString(), 105, 120, { align: 'center' });
                 
-                // Summary page
                 doc.addPage();
                 doc.setTextColor(0, 0, 0);
-                doc.setFontSize(18);
-                doc.text('Executive Summary', 20, 20);
+                doc.setFontSize(16);
+                doc.text('Summary', 20, 20);
                 
                 const params = getSimulationParams();
-                doc.setFontSize(11);
+                doc.setFontSize(10);
                 let y = 35;
-                doc.text(`Monthly Investment: ${params.monthlyInvestment} EUR`, 20, y);
+                doc.text(`Investment: ${params.monthlyInvestment} EUR/month`, 20, y);
                 y += 7;
-                doc.text(`Expected Yield: ${(params.monthlyYield * 100).toFixed(2)}%/month`, 20, y);
+                doc.text(`Yield: ${(params.monthlyYield * 100).toFixed(2)}%`, 20, y);
                 y += 7;
                 doc.text(`Volatility: ${(params.volatility * 100).toFixed(1)}%`, 20, y);
                 y += 7;
@@ -1076,70 +1595,62 @@ const MonteCarlo = (function() {
                 if (simulationResults) {
                     y += 12;
                     const median = percentile(simulationResults.finalValues, 50);
-                    doc.text(`Median Result: ${window.FinanceDashboard.formatNumber(median, 0)} EUR`, 20, y);
+                    doc.text(`Median: ${window.FinanceDashboard.formatNumber(median, 0)} EUR`, 20, y);
                 }
                 
-                doc.save('MonteCarlo_Report_' + new Date().toISOString().split('T')[0] + '.pdf');
-                window.FinanceDashboard.showNotification('PDF generated!', 'success');
+                doc.save('MonteCarlo_' + new Date().toISOString().split('T')[0] + '.pdf');
+                window.FinanceDashboard.showNotification('PDF ready!', 'success');
             } catch (error) {
                 console.error('PDF error:', error);
-                window.FinanceDashboard.showNotification('PDF generation failed', 'error');
+                window.FinanceDashboard.showNotification('PDF failed', 'error');
             }
         }, 300);
     }
     
     function exportExcel() {
         if (!simulationResults) {
-            window.FinanceDashboard.showNotification('No results to export', 'warning');
+            window.FinanceDashboard.showNotification('No results', 'warning');
             return;
         }
         
         try {
-            let csv = 'Monte Carlo Simulation Results\n';
+            let csv = 'Monte Carlo Results\n';
             csv += 'Generated: ' + new Date().toLocaleString() + '\n\n';
             csv += 'Simulation,Final Value (EUR)\n';
             
-            for (let i = 0; i < Math.min(100, simulationResults.finalValues.length); i++) {
+            for (let i = 0; i < Math.min(1000, simulationResults.finalValues.length); i++) {
                 csv += (i + 1) + ',' + simulationResults.finalValues[i].toFixed(2) + '\n';
             }
             
-            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const blob = new Blob([csv], { type: 'text/csv' });
             const link = document.createElement('a');
-            const url = URL.createObjectURL(blob);
-            link.setAttribute('href', url);
-            link.setAttribute('download', 'MonteCarlo_Data_' + new Date().toISOString().split('T')[0] + '.csv');
-            link.style.visibility = 'hidden';
-            document.body.appendChild(link);
+            link.href = URL.createObjectURL(blob);
+            link.download = 'MonteCarlo_' + new Date().toISOString().split('T')[0] + '.csv';
             link.click();
-            document.body.removeChild(link);
             
-            window.FinanceDashboard.showNotification('CSV exported!', 'success');
+            window.FinanceDashboard.showNotification('CSV ready!', 'success');
         } catch (error) {
             console.error('CSV error:', error);
             window.FinanceDashboard.showNotification('Export failed', 'error');
         }
     }
     
-    // ========== INITIALISATION ==========
+    // ========== INIT ==========
     
     function init() {
-        const strategyRadios = document.querySelectorAll('input[name="strategy"]');
-        strategyRadios.forEach(radio => {
+        document.querySelectorAll('input[name="strategy"]').forEach(radio => {
             radio.addEventListener('change', updateStrategyFields);
         });
         
-        const distributionRadios = document.querySelectorAll('input[name="distribution"]');
-        distributionRadios.forEach(radio => {
+        document.querySelectorAll('input[name="distribution"]').forEach(radio => {
             radio.addEventListener('change', updateDistributionFields);
         });
         
         updateStrategyFields();
         updateDistributionFields();
-        
-        // Initialiser Firebase
         initFirebase();
         
-        console.log('✅ Monte Carlo initialized');
+        console.log('✅ Monte Carlo Ultra initialized');
     }
     
     if (document.readyState === 'loading') {
@@ -1148,14 +1659,12 @@ const MonteCarlo = (function() {
         init();
     }
     
-    // ========== EXPORTS PUBLICS ==========
+    // ========== PUBLIC API ==========
     return {
         runSimulation,
         loadTemplate,
         saveCurrentScenario,
         deleteScenario,
-        loadScenario,
-        compareScenarios,
         clearScenarios,
         exportPDF,
         exportExcel
@@ -1167,7 +1676,6 @@ function openModal(modalId) {
     const modal = document.getElementById(modalId);
     if (modal) {
         modal.style.display = 'flex';
-        // Force reflow
         modal.offsetHeight;
         modal.classList.add('active');
     }
@@ -1183,14 +1691,12 @@ function closeModal(modalId) {
     }
 }
 
-// Fermer en cliquant en dehors
 window.addEventListener('click', function(event) {
     if (event.target.classList.contains('modal') && event.target.classList.contains('active')) {
         closeModal(event.target.id);
     }
 });
 
-// Fermer avec Escape
 document.addEventListener('keydown', function(event) {
     if (event.key === 'Escape') {
         document.querySelectorAll('.modal.active').forEach(modal => {
@@ -1199,4 +1705,4 @@ document.addEventListener('keydown', function(event) {
     }
 });
 
-console.log('✅ Monte Carlo module loaded successfully!');
+console.log('✅ Monte Carlo Ultra-Complete loaded!');
