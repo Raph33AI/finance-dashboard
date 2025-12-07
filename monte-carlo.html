@@ -449,19 +449,28 @@
                             </div>
                             
                             <div class='param-group' id='degreesOfFreedomGroup' style='display: none;'>
-                                <label for='degreesOfFreedom'>Student-t DF</label>
+                                <label for='degreesOfFreedom'>
+                                    Student-t DF
+                                    <span class='help-icon help-icon-small' onclick='openModal("modalStudentDF")' title='What is Degrees of Freedom?'>?</span>
+                                </label>
                                 <input type='number' id='degreesOfFreedom' value='5' step='1' min='2' max='30'>
                                 <div class='hint'>2-10 recommended</div>
                             </div>
-                            
+
                             <div class='param-group' id='jumpIntensityGroup' style='display: none;'>
-                                <label for='jumpIntensity'>Jump Intensity (λ)</label>
+                                <label for='jumpIntensity'>
+                                    Jump Intensity (λ)
+                                    <span class='help-icon help-icon-small' onclick='openModal("modalJumpIntensity")' title='What is Jump Intensity?'>?</span>
+                                </label>
                                 <input type='number' id='jumpIntensity' value='0.1' step='0.01' min='0' max='1'>
                                 <div class='hint'>Jumps/year</div>
                             </div>
-                            
+
                             <div class='param-group' id='jumpMagnitudeGroup' style='display: none;'>
-                                <label for='jumpMagnitude'>Jump Magnitude (%)</label>
+                                <label for='jumpMagnitude'>
+                                    Jump Magnitude (%)
+                                    <span class='help-icon help-icon-small' onclick='openModal("modalJumpMagnitude")' title='What is Jump Magnitude?'>?</span>
+                                </label>
                                 <input type='number' id='jumpMagnitude' value='-10' step='1'>
                                 <div class='hint'>Average jump size</div>
                             </div>
@@ -960,6 +969,429 @@
                 
                 <div class='tip-box' style='background: linear-gradient(135deg, #4A74F3 0%, #6C8BE0 100%); color: white; padding: 20px; border-radius: 14px; margin: 20px 0;'>
                     💡 <strong>Sweet Spot:</strong> 1,000-2,000 simulations offers the best balance between accuracy and speed for most use cases.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Student-t Degrees of Freedom -->
+    <div id='modalStudentDF' class='modal'>
+        <div class='modal-content'>
+            <div class='modal-header'>
+                <h2>📊 Student-t Degrees of Freedom (DF)</h2>
+                <span class='close-modal' onclick='closeModal("modalStudentDF")'>&times;</span>
+            </div>
+            <div class='modal-body'>
+                <h3>What Is It?</h3>
+                <p>The <span class='key-term' style='background: linear-gradient(135deg, #667eea, #4A74F3); color: white; padding: 4px 12px; border-radius: 6px;'>Degrees of Freedom (DF)</span> is a parameter that controls the "thickness" of the tails in the Student-t distribution.</p>
+                
+                <h3>Why Student-t Instead of Normal?</h3>
+                <p>Real financial markets have <strong>fat tails</strong> (more extreme events than the normal distribution predicts):</p>
+                <ul>
+                    <li>Normal distribution underestimates crashes (2008, COVID-19)</li>
+                    <li>Student-t distribution captures extreme moves better</li>
+                    <li>More realistic for equity and crypto markets</li>
+                </ul>
+                
+                <div class='formula-box' style='background: linear-gradient(135deg, rgba(102, 126, 234, 0.15) 0%, rgba(118, 75, 162, 0.1) 100%); padding: 28px; border-radius: 16px; margin: 25px 0; border-left: 6px solid #764ba2;'>
+                    <strong>Key Rule:</strong><br>
+                    Lower DF = Fatter tails = More extreme events<br>
+                    Higher DF → Normal distribution (DF ≥ 30)
+                </div>
+                
+                <h3>Common DF Values & Their Meaning</h3>
+                
+                <h4>DF = 2-3 (Extreme Fat Tails)</h4>
+                <ul>
+                    <li>Extremely heavy tails</li>
+                    <li>Use for: Cryptocurrencies, emerging markets</li>
+                    <li>Frequent large swings (±20% moves common)</li>
+                    <li>⚠ High uncertainty</li>
+                </ul>
+                
+                <h4>DF = 4-6 (Moderate Fat Tails) ⭐ RECOMMENDED</h4>
+                <ul>
+                    <li>Good balance for stocks</li>
+                    <li>Use for: Equities, ETFs, moderate portfolios</li>
+                    <li>Captures 2008-style crashes without being too extreme</li>
+                    <li>✅ Default choice for most simulations</li>
+                </ul>
+                
+                <h4>DF = 7-10 (Slightly Fat Tails)</h4>
+                <ul>
+                    <li>Closer to normal but still realistic</li>
+                    <li>Use for: Diversified portfolios, blue-chip stocks</li>
+                    <li>Conservative approach</li>
+                </ul>
+                
+                <h4>DF = 30+ (Essentially Normal)</h4>
+                <ul>
+                    <li>Behaves like a normal distribution</li>
+                    <li>Use for: Bonds, cash-heavy portfolios</li>
+                    <li>Underestimates tail risk</li>
+                </ul>
+                
+                <h3>Visual Comparison</h3>
+                <div class='example-box' style='background: linear-gradient(135deg, rgba(118, 75, 162, 0.12) 0%, rgba(102, 126, 234, 0.08) 100%); padding: 20px; border-radius: 16px; margin: 15px 0;'>
+                    <strong>Example:</strong><br>
+                    <strong>Normal Distribution:</strong> 99.7% of returns within ±3 standard deviations<br>
+                    <strong>Student-t (DF=5):</strong> More returns beyond ±3σ (captures Black Swans)<br><br>
+                    <strong>Real Impact:</strong> Student-t predicts a -30% crash every 10 years, while Normal might say "once in 100 years"
+                </div>
+                
+                <h3>How to Choose DF</h3>
+                <ol>
+                    <li><strong>For stocks/ETFs:</strong> Use DF = 5 (default)</li>
+                    <li><strong>For crypto:</strong> Use DF = 3</li>
+                    <li><strong>For bonds:</strong> Use DF = 10-15 or Normal</li>
+                    <li><strong>For diversified portfolios:</strong> Use DF = 6-8</li>
+                </ol>
+                
+                <h3>Technical Note</h3>
+                <p>The Student-t distribution was discovered by William Sealy Gosset (pen name "Student") in 1908 while working at Guinness Brewery. It's one of the most important distributions in statistics!</p>
+                
+                <div class='tip-box' style='background: linear-gradient(135deg, #4A74F3 0%, #6C8BE0 100%); color: white; padding: 20px; border-radius: 14px; margin: 20px 0;'>
+                    💡 <strong>Pro Tip:</strong> When in doubt, use DF = 5. It's the sweet spot between realism and stability for most financial assets.
+                </div>
+                
+                <h3>Warning Signs You Need Student-t</h3>
+                <ul>
+                    <li>Your asset has experienced sudden crashes</li>
+                    <li>Historical returns show outliers beyond ±3σ</li>
+                    <li>You want to stress-test for tail risk</li>
+                    <li>You're investing in volatile sectors (tech, energy, crypto)</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal: Jump Intensity -->
+    <div id='modalJumpIntensity' class='modal'>
+        <div class='modal-content'>
+            <div class='modal-header'>
+                <h2>⚡ Jump Intensity (λ) Explained</h2>
+                <span class='close-modal' onclick='closeModal("modalJumpIntensity")'>&times;</span>
+            </div>
+            <div class='modal-body'>
+                <h3>What Is It?</h3>
+                <p>The <span class='key-term' style='background: linear-gradient(135deg, #667eea, #4A74F3); color: white; padding: 4px 12px; border-radius: 6px;'>Jump Intensity (λ)</span> is the <strong>average number of sudden jumps (crashes or spikes) per year</strong> in the Jump Diffusion model.</p>
+                
+                <h3>The Jump Diffusion Model (Merton 1976)</h3>
+                <p>Financial assets don't move smoothly. They experience:</p>
+                <ul>
+                    <li><strong>Normal drift:</strong> Gradual day-to-day movements</li>
+                    <li><strong>Jumps:</strong> Sudden large moves (crashes, flash rallies)</li>
+                </ul>
+                
+                <div class='formula-box' style='background: linear-gradient(135deg, rgba(102, 126, 234, 0.15) 0%, rgba(118, 75, 162, 0.1) 100%); padding: 28px; border-radius: 16px; margin: 25px 0; border-left: 6px solid #764ba2; font-family: monospace; font-size: 1.05rem;'>
+                    <strong>Model Formula:</strong><br>
+                    dS = μS dt + σS dW + J dN<br><br>
+                    Where:<br>
+                    • μS dt = Normal drift<br>
+                    • σS dW = Normal volatility<br>
+                    • J dN = Jump component<br>
+                    • λ (lambda) = Jump frequency<br>
+                    • J = Jump magnitude
+                </div>
+                
+                <h3>What Does λ Mean?</h3>
+                
+                <h4>λ = 0.1 (Low Jump Frequency)</h4>
+                <ul>
+                    <li>Meaning: <strong>1 jump every 10 years</strong> on average</li>
+                    <li>Use for: Stable markets, blue-chip stocks</li>
+                    <li>Example: Large-cap indices (S&P 500)</li>
+                </ul>
+                
+                <h4>λ = 0.2-0.3 (Moderate) ⭐ RECOMMENDED</h4>
+                <ul>
+                    <li>Meaning: <strong>1 jump every 3-5 years</strong></li>
+                    <li>Use for: General equities, growth stocks</li>
+                    <li>Realistic for most markets</li>
+                    <li>Captures occasional crashes (2008, 2020, etc.)</li>
+                </ul>
+                
+                <h4>λ = 0.5-0.7 (High Jump Frequency)</h4>
+                <ul>
+                    <li>Meaning: <strong>1 jump every 1.5-2 years</strong></li>
+                    <li>Use for: Small-caps, emerging markets</li>
+                    <li>Volatile sectors (biotech, energy)</li>
+                </ul>
+                
+                <h4>λ = 1.0+ (Extreme Volatility)</h4>
+                <ul>
+                    <li>Meaning: <strong>≥ 1 jump per year</strong></li>
+                    <li>Use for: Cryptocurrencies, penny stocks</li>
+                    <li>⚠ Very high uncertainty</li>
+                </ul>
+                
+                <h3>Real-World Examples</h3>
+                <div class='example-box' style='background: linear-gradient(135deg, rgba(118, 75, 162, 0.12) 0%, rgba(102, 126, 234, 0.08) 100%); padding: 20px; border-radius: 16px; margin: 15px 0;'>
+                    <strong>Historical Jumps (S&P 500):</strong><br>
+                    • 1987: Black Monday (-20% in one day)<br>
+                    • 2008: Lehman collapse (-9% in one day)<br>
+                    • 2020: COVID crash (-12% in one day)<br>
+                    • 2020: Recovery rally (+9% in one day)<br><br>
+                    <strong>Analysis:</strong> ~4 major jumps in 35 years → λ ≈ 0.11
+                </div>
+                
+                <h3>How Jumps Are Simulated</h3>
+                <p>In each month of simulation:</p>
+                <ol>
+                    <li>Calculate probability of jump: P = λ / 12 (monthly)</li>
+                    <li>Roll a random number (0 to 1)</li>
+                    <li>If random &lt; P, a jump occurs</li>
+                    <li>Add the jump magnitude to that month's return</li>
+                </ol>
+                
+                <div class='formula-box' style='background: linear-gradient(135deg, rgba(102, 126, 234, 0.15) 0%, rgba(118, 75, 162, 0.1) 100%); padding: 20px; border-radius: 12px; margin: 15px 0; font-family: monospace;'>
+                    <strong>Example Calculation:</strong><br>
+                    λ = 0.3 (3 jumps per 10 years)<br>
+                    Monthly probability = 0.3 / 12 = 0.025 = 2.5%<br><br>
+                    Result: Each month has a 2.5% chance of experiencing a jump
+                </div>
+                
+                <h3>Choosing the Right λ</h3>
+                <table style='width: 100%; border-collapse: collapse; margin: 20px 0;'>
+                    <tr style='background: linear-gradient(135deg, #667eea, #764ba2); color: white;'>
+                        <th style='padding: 12px; text-align: left; border-radius: 8px 0 0 0;'>Asset Type</th>
+                        <th style='padding: 12px; text-align: center; border-radius: 0 8px 0 0;'>Recommended λ</th>
+                    </tr>
+                    <tr style='background: rgba(102, 126, 234, 0.1);'>
+                        <td style='padding: 10px; border-bottom: 1px solid rgba(0,0,0,0.1);'>Government Bonds</td>
+                        <td style='padding: 10px; text-align: center; border-bottom: 1px solid rgba(0,0,0,0.1);'>0.05 - 0.1</td>
+                    </tr>
+                    <tr>
+                        <td style='padding: 10px; border-bottom: 1px solid rgba(0,0,0,0.1);'>Large-Cap Stocks</td>
+                        <td style='padding: 10px; text-align: center; border-bottom: 1px solid rgba(0,0,0,0.1);'>0.1 - 0.2</td>
+                    </tr>
+                    <tr style='background: rgba(102, 126, 234, 0.1);'>
+                        <td style='padding: 10px; border-bottom: 1px solid rgba(0,0,0,0.1);'>Growth Stocks</td>
+                        <td style='padding: 10px; text-align: center; border-bottom: 1px solid rgba(0,0,0,0.1);'>0.2 - 0.4</td>
+                    </tr>
+                    <tr>
+                        <td style='padding: 10px; border-bottom: 1px solid rgba(0,0,0,0.1);'>Small-Caps / EM</td>
+                        <td style='padding: 10px; text-align: center; border-bottom: 1px solid rgba(0,0,0,0.1);'>0.4 - 0.7</td>
+                    </tr>
+                    <tr style='background: rgba(102, 126, 234, 0.1);'>
+                        <td style='padding: 10px; border-radius: 0 0 0 8px;'>Cryptocurrencies</td>
+                        <td style='padding: 10px; text-align: center; border-radius: 0 0 8px 0;'>0.8 - 2.0</td>
+                    </tr>
+                </table>
+                
+                <div class='tip-box' style='background: linear-gradient(135deg, #4A74F3 0%, #6C8BE0 100%); color: white; padding: 20px; border-radius: 14px; margin: 20px 0;'>
+                    💡 <strong>Pro Tip:</strong> Start with λ = 0.3 for stocks. If your asset has experienced more frequent crashes historically, increase to 0.5. For very stable assets, decrease to 0.1.
+                </div>
+                
+                <h3>Combined with Jump Magnitude</h3>
+                <p>Jump Intensity (λ) and Jump Magnitude work together:</p>
+                <ul>
+                    <li><strong>High λ + Small magnitude:</strong> Frequent small jumps</li>
+                    <li><strong>Low λ + Large magnitude:</strong> Rare but severe crashes (⚠ most realistic)</li>
+                    <li><strong>High λ + Large magnitude:</strong> Extremely volatile (crypto-like)</li>
+                </ul>
+                
+                <div class='warning-box' style='background: linear-gradient(135deg, #9D5CE6 0%, #C39BD3 100%); color: white; padding: 20px; border-radius: 14px; margin: 20px 0;'>
+                    ⚠ <strong>Warning:</strong> Setting λ too high (&gt; 1.0) with large negative jumps can result in unrealistically pessimistic scenarios. Calibrate based on historical data.
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal: Jump Magnitude -->
+    <div id='modalJumpMagnitude' class='modal'>
+        <div class='modal-content'>
+            <div class='modal-header'>
+                <h2>📉 Jump Magnitude (%) Explained</h2>
+                <span class='close-modal' onclick='closeModal("modalJumpMagnitude")'>&times;</span>
+            </div>
+            <div class='modal-body'>
+                <h3>What Is It?</h3>
+                <p>The <span class='key-term' style='background: linear-gradient(135deg, #667eea, #4A74F3); color: white; padding: 4px 12px; border-radius: 6px;'>Jump Magnitude</span> is the <strong>average size of sudden moves</strong> (in percentage) when a jump occurs in the Jump Diffusion model.</p>
+                
+                <h3>Understanding the Parameter</h3>
+                <ul>
+                    <li><strong>Negative value:</strong> Average jump is a crash (down move)</li>
+                    <li><strong>Positive value:</strong> Average jump is a spike (up move)</li>
+                    <li><strong>Zero:</strong> Jumps can be up or down equally</li>
+                </ul>
+                
+                <div class='formula-box' style='background: linear-gradient(135deg, rgba(102, 126, 234, 0.15) 0%, rgba(118, 75, 162, 0.1) 100%); padding: 28px; border-radius: 16px; margin: 25px 0; border-left: 6px solid #764ba2;'>
+                    <strong>How It Works:</strong><br>
+                    When a jump occurs (determined by λ):<br>
+                    1. The jump size is drawn from a distribution<br>
+                    2. The average of this distribution = Jump Magnitude<br>
+                    3. Example: -10% means average crash of 10%
+                </div>
+                
+                <h3>Common Jump Magnitude Values</h3>
+                
+                <h4>-5% to -8% (Moderate Corrections)</h4>
+                <ul>
+                    <li>Use for: Stable stocks, diversified portfolios</li>
+                    <li>Represents: Standard market corrections</li>
+                    <li>Real example: Tech selloffs, profit-taking</li>
+                </ul>
+                
+                <h4>-10% to -15% (Significant Crashes) ⭐ RECOMMENDED</h4>
+                <ul>
+                    <li>Use for: General equities, growth stocks</li>
+                    <li>Represents: Major market events</li>
+                    <li>Real examples:</li>
+                    <ul>
+                        <li>2020 COVID initial drop: -12%</li>
+                        <li>2008 Lehman: -9%</li>
+                        <li>Flash crashes: -10% to -15%</li>
+                    </ul>
+                </ul>
+                
+                <h4>-20% to -30% (Severe Crashes)</h4>
+                <ul>
+                    <li>Use for: High-risk assets, emerging markets</li>
+                    <li>Represents: Black Swan events</li>
+                    <li>Real example: 1987 Black Monday (-20%)</li>
+                </ul>
+                
+                <h4>-40%+ (Catastrophic Events)</h4>
+                <ul>
+                    <li>Use for: Cryptocurrencies, extremely volatile assets</li>
+                    <li>Represents: Wipeout scenarios</li>
+                    <li>Real examples: Crypto crashes (BTC -50% days)</li>
+                </ul>
+                
+                <h3>Positive Jumps (Rally Spikes)</h3>
+                <p>You can also model <strong>positive jumps</strong> for sudden rallies:</p>
+                
+                <h4>+5% to +10% (Strong Rallies)</h4>
+                <ul>
+                    <li>Use for: Growth stocks, tech sector</li>
+                    <li>Real examples:</li>
+                    <ul>
+                        <li>2020 vaccine rally: +9%</li>
+                        <li>Fed pivot rallies: +5% to +8%</li>
+                    </ul>
+                </ul>
+                
+                <h4>+15%+ (Extreme Bull Moves)</h4>
+                <ul>
+                    <li>Use for: Meme stocks, crypto</li>
+                    <li>Real examples: GME (+100% days), crypto pumps</li>
+                </ul>
+                
+                <h3>Historical Market Jumps</h3>
+                <div class='example-box' style='background: linear-gradient(135deg, rgba(118, 75, 162, 0.12) 0%, rgba(102, 126, 234, 0.08) 100%); padding: 20px; border-radius: 16px; margin: 15px 0;'>
+                    <strong>S&P 500 Largest Single-Day Moves (Since 1950):</strong><br><br>
+                    <strong>Crashes (Negative):</strong><br>
+                    • Oct 1987: <span style='color: #f5576c; font-weight: 800;'>-20.5%</span> (Black Monday)<br>
+                    • Oct 2008: <span style='color: #f5576c; font-weight: 800;'>-9.0%</span> (Financial Crisis)<br>
+                    • Mar 2020: <span style='color: #f5576c; font-weight: 800;'>-12.0%</span> (COVID)<br><br>
+                    <strong>Rallies (Positive):</strong><br>
+                    • Oct 2008: <span style='color: #43e97b; font-weight: 800;'>+11.6%</span> (Bear rally)<br>
+                    • Mar 2020: <span style='color: #43e97b; font-weight: 800;'>+9.4%</span> (Recovery)<br>
+                    • Mar 2009: <span style='color: #43e97b; font-weight: 800;'>+10.8%</span> (Bottom)<br><br>
+                    <strong>Average crash magnitude: -10% to -12%</strong>
+                </div>
+                
+                <h3>Asymmetric Jumps (Realistic Approach)</h3>
+                <p>Markets tend to:</p>
+                <ul>
+                    <li><strong>Crash faster than they rally</strong> ("Stairs up, elevator down")</li>
+                    <li><strong>Have larger negative jumps than positive</strong></li>
+                    <li>This is called <strong>negative skewness</strong></li>
+                </ul>
+                
+                <div class='tip-box' style='background: linear-gradient(135deg, #4A74F3 0%, #6C8BE0 100%); color: white; padding: 20px; border-radius: 14px; margin: 20px 0;'>
+                    💡 <strong>Pro Tip:</strong> For equities, use <strong>-10% to -15%</strong> jump magnitude. This captures realistic crash scenarios without being overly pessimistic.
+                </div>
+                
+                <h3>Calibrating Jump Magnitude</h3>
+                
+                <h4>Method 1: Historical Data</h4>
+                <ol>
+                    <li>Find the 5 largest down days for your asset</li>
+                    <li>Calculate the average of these moves</li>
+                    <li>Use this as your Jump Magnitude</li>
+                </ol>
+                
+                <h4>Method 2: Stress Scenario</h4>
+                <ol>
+                    <li>Ask: "What's a realistic worst-case single-day drop?"</li>
+                    <li>For stocks: -10% to -15%</li>
+                    <li>For crypto: -30% to -50%</li>
+                    <li>For bonds: -2% to -5%</li>
+                </ol>
+                
+                <h3>Combined with Jump Intensity</h3>
+                <table style='width: 100%; border-collapse: collapse; margin: 20px 0;'>
+                    <tr style='background: linear-gradient(135deg, #667eea, #764ba2); color: white;'>
+                        <th style='padding: 12px; text-align: left;'>Jump Intensity (λ)</th>
+                        <th style='padding: 12px; text-align: center;'>Jump Magnitude</th>
+                        <th style='padding: 12px; text-align: right;'>Scenario</th>
+                    </tr>
+                    <tr style='background: rgba(102, 126, 234, 0.1);'>
+                        <td style='padding: 10px; border-bottom: 1px solid rgba(0,0,0,0.1);'>Low (0.1)</td>
+                        <td style='padding: 10px; text-align: center; border-bottom: 1px solid rgba(0,0,0,0.1);'>Large (-20%)</td>
+                        <td style='padding: 10px; text-align: right; border-bottom: 1px solid rgba(0,0,0,0.1);'>Rare catastrophes</td>
+                    </tr>
+                    <tr>
+                        <td style='padding: 10px; border-bottom: 1px solid rgba(0,0,0,0.1);'>Moderate (0.3)</td>
+                        <td style='padding: 10px; text-align: center; border-bottom: 1px solid rgba(0,0,0,0.1);'>Moderate (-10%)</td>
+                        <td style='padding: 10px; text-align: right; border-bottom: 1px solid rgba(0,0,0,0.1);'>⭐ Realistic (stocks)</td>
+                    </tr>
+                    <tr style='background: rgba(102, 126, 234, 0.1);'>
+                        <td style='padding: 10px; border-bottom: 1px solid rgba(0,0,0,0.1);'>High (0.7)</td>
+                        <td style='padding: 10px; text-align: center; border-bottom: 1px solid rgba(0,0,0,0.1);'>Small (-5%)</td>
+                        <td style='padding: 10px; text-align: right; border-bottom: 1px solid rgba(0,0,0,0.1);'>Frequent corrections</td>
+                    </tr>
+                    <tr>
+                        <td style='padding: 10px;'>Very High (1.5)</td>
+                        <td style='padding: 10px; text-align: center;'>Very Large (-40%)</td>
+                        <td style='padding: 10px; text-align: right;'>Crypto chaos</td>
+                    </tr>
+                </table>
+                
+                <h3>Advanced: Variable Jump Magnitude</h3>
+                <p>In reality, not all jumps are the same size. The model assumes:</p>
+                <ul>
+                    <li>Jump size follows a <strong>normal distribution</strong></li>
+                    <li>Your input is the <strong>mean</strong> of this distribution</li>
+                    <li>Actual jumps vary around this mean</li>
+                </ul>
+                
+                <div class='formula-box' style='background: linear-gradient(135deg, rgba(102, 126, 234, 0.15) 0%, rgba(118, 75, 162, 0.1) 100%); padding: 20px; border-radius: 12px; margin: 15px 0; font-family: monospace;'>
+                    <strong>Example:</strong><br>
+                    Jump Magnitude = -10%<br>
+                    Standard Deviation = 5%<br><br>
+                    Possible jump outcomes:<br>
+                    • 68% of jumps: -15% to -5%<br>
+                    • 95% of jumps: -20% to 0%<br>
+                    • Occasional extreme: -25% or worse
+                </div>
+                
+                <h3>Recommended Settings by Asset Class</h3>
+                <ul>
+                    <li><strong>S&P 500 / Large-Cap ETFs:</strong> -10% (realistic crashes)</li>
+                    <li><strong>Tech / Growth Stocks:</strong> -12% to -15% (higher volatility)</li>
+                    <li><strong>Small-Caps:</strong> -15% to -20% (wild swings)</li>
+                    <li><strong>Emerging Markets:</strong> -20% to -25% (geopolitical risk)</li>
+                    <li><strong>Bitcoin / Crypto:</strong> -30% to -50% (extreme moves)</li>
+                    <li><strong>Bonds:</strong> -3% to -5% (stable, low jumps)</li>
+                </ul>
+                
+                <div class='warning-box' style='background: linear-gradient(135deg, #9D5CE6 0%, #C39BD3 100%); color: white; padding: 20px; border-radius: 14px; margin: 20px 0;'>
+                    ⚠ <strong>Important:</strong> Jump Magnitude is applied to the <strong>monthly return</strong>, not the portfolio value. A -10% jump means that month's return drops by an additional 10 percentage points.
+                </div>
+                
+                <h3>Testing Your Settings</h3>
+                <p>After running the simulation, check:</p>
+                <ol>
+                    <li><strong>Maximum Drawdown:</strong> Does it match historical crashes?</li>
+                    <li><strong>Worst Case scenario:</strong> Is it realistic or too extreme?</li>
+                    <li><strong>Frequency of large drops:</strong> Compare to actual market history</li>
+                </ol>
+                
+                <div class='tip-box' style='background: linear-gradient(135deg, #4A74F3 0%, #6C8BE0 100%); color: white; padding: 20px; border-radius: 14px; margin: 20px 0;'>
+                    💡 <strong>Final Tip:</strong> Conservative approach: Use λ = 0.3 and Jump Magnitude = -10% for stocks. This captures the risk of a significant crash every 3-4 years, similar to real market behavior.
                 </div>
             </div>
         </div>
