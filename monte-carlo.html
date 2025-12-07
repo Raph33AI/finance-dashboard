@@ -592,26 +592,35 @@
                         <!-- Correlation Matrix -->
                         <h3 class='subsection-title'>
                             <i class="fas fa-table"></i> Metrics Correlation Matrix
+                            <span class='help-icon help-icon-small' onclick='openModal("modalCorrelation")' title='How to read correlation?'>?</span>
                         </h3>
                         <div id='chartCorrelation' class='chart'></div>
-                        
+
                         <!-- Efficient Frontier -->
                         <h3 class='subsection-title'>
                             <i class="fas fa-chart-scatter"></i> Risk-Return Efficient Frontier
+                            <span class='help-icon help-icon-small' onclick='openModal("modalFrontier")' title='What is efficient frontier?'>?</span>
                         </h3>
                         <div id='chartFrontier' class='chart'></div>
-                        
+
                         <!-- Stress Testing -->
-                        <h3 class='subsection-title'>Stress Testing</h3>
+                        <h3 class='subsection-title'>
+                            Stress Testing
+                            <span class='help-icon help-icon-small' onclick='openModal("modalStressTesting")' title='What is stress testing?'>?</span>
+                        </h3>
                         <div id='chart4' class='chart'></div>
-                        
+
                         <!-- Time to Target -->
-                        <h3 class='subsection-title'>Time to Target</h3>
+                        <h3 class='subsection-title'>
+                            Time to Target
+                            <span class='help-icon help-icon-small' onclick='openModal("modalTimeToTarget")' title='Understanding time to target'>?</span>
+                        </h3>
                         <div id='chart5' class='chart'></div>
-                        
+
                         <!-- Rolling Sharpe -->
                         <h3 class='subsection-title'>
                             <i class="fas fa-clock"></i> Rolling Sharpe Ratio
+                            <span class='help-icon help-icon-small' onclick='openModal("modalRollingSharpe")' title='What is rolling Sharpe?'>?</span>
                         </h3>
                         <div id='chartRollingSharpe' class='chart'></div>
                         
@@ -1157,6 +1166,318 @@
                 <div class='tip-box' style='background: linear-gradient(135deg, #4A74F3 0%, #6C8BE0 100%); color: white; padding: 20px; border-radius: 14px; margin: 20px 0;'>
                     💡 <strong>Insight:</strong> The heat map often shows diminishing returns at very high volatility levels. There's a sweet spot!
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Correlation Matrix -->
+    <div id='modalCorrelation' class='modal'>
+        <div class='modal-content'>
+            <div class='modal-header'>
+                <h2>📊 Correlation Matrix Explained</h2>
+                <span class='close-modal' onclick='closeModal("modalCorrelation")'>&times;</span>
+            </div>
+            <div class='modal-body'>
+                <h3>What Is It?</h3>
+                <p>A <strong>correlation matrix</strong> shows how different metrics are related to each other. Values range from -1 to +1.</p>
+                
+                <h3>How to Read It</h3>
+                <ul>
+                    <li><strong>+1 (Green):</strong> Perfect positive correlation. When one goes up, the other goes up.</li>
+                    <li><strong>0 (White):</strong> No correlation. Metrics are independent.</li>
+                    <li><strong>-1 (Red):</strong> Perfect negative correlation. When one goes up, the other goes down.</li>
+                </ul>
+                
+                <h3>Metrics Analyzed</h3>
+                <ul>
+                    <li><strong>Final Value:</strong> Your portfolio at the end of the simulation</li>
+                    <li><strong>Max Drawdown:</strong> Largest peak-to-trough decline</li>
+                    <li><strong>Volatility:</strong> How much returns fluctuate</li>
+                    <li><strong>Sharpe Ratio:</strong> Risk-adjusted return</li>
+                </ul>
+                
+                <div class='example-box' style='background: linear-gradient(135deg, rgba(118, 75, 162, 0.12) 0%, rgba(102, 126, 234, 0.08) 100%); padding: 20px; border-radius: 16px; margin: 15px 0;'>
+                    <strong>Example Interpretation:</strong><br>
+                    If <strong>Volatility</strong> and <strong>Max Drawdown</strong> show +0.85, it means high volatility usually leads to larger drawdowns.
+                </div>
+                
+                <h3>Why It's Useful</h3>
+                <ul>
+                    <li>Identify hidden relationships between risk metrics</li>
+                    <li>Understand which factors move together</li>
+                    <li>Validate your risk management assumptions</li>
+                </ul>
+                
+                <div class='tip-box' style='background: linear-gradient(135deg, #4A74F3 0%, #6C8BE0 100%); color: white; padding: 20px; border-radius: 14px; margin: 20px 0;'>
+                    💡 <strong>Pro Tip:</strong> Look for unexpected correlations. If Final Value and Max Drawdown have low correlation, your strategy might be well-balanced!
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal: Efficient Frontier -->
+    <div id='modalFrontier' class='modal'>
+        <div class='modal-content'>
+            <div class='modal-header'>
+                <h2>📈 Efficient Frontier Explained</h2>
+                <span class='close-modal' onclick='closeModal("modalFrontier")'>&times;</span>
+            </div>
+            <div class='modal-body'>
+                <h3>What Is It?</h3>
+                <p>The <strong>Efficient Frontier</strong> is a curve showing the best possible return for each level of risk (volatility).</p>
+                
+                <h3>Key Concept</h3>
+                <p>Invented by Harry Markowitz (Nobel Prize 1990), the Efficient Frontier represents portfolios that offer:</p>
+                <ul>
+                    <li>Maximum return for a given level of risk</li>
+                    <li>Minimum risk for a given level of return</li>
+                </ul>
+                
+                <div class='formula-box' style='background: linear-gradient(135deg, rgba(102, 126, 234, 0.15) 0%, rgba(118, 75, 162, 0.1) 100%); padding: 20px; border-radius: 12px; margin: 15px 0; font-family: monospace;'>
+                    <strong>Modern Portfolio Theory:</strong><br>
+                    Optimal Portfolio = Max(Return) / Risk<br>
+                    Subject to: Risk ≤ Risk_Tolerance
+                </div>
+                
+                <h3>How to Read the Chart</h3>
+                <ul>
+                    <li><strong>X-axis:</strong> Volatility (Risk) in %</li>
+                    <li><strong>Y-axis:</strong> Annual Return in %</li>
+                    <li><strong>The Curve:</strong> Points on the curve are "efficient" (optimal risk/return)</li>
+                    <li><strong>Below the Curve:</strong> Suboptimal portfolios (can do better)</li>
+                </ul>
+                
+                <h3>The Sweet Spot</h3>
+                <div class='example-box' style='background: linear-gradient(135deg, rgba(118, 75, 162, 0.12) 0%, rgba(102, 126, 234, 0.08) 100%); padding: 20px; border-radius: 16px; margin: 15px 0;'>
+                    <strong>Look for the "elbow" of the curve:</strong><br>
+                    This is where you get the most return for the least additional risk. Beyond this point, you take much more risk for diminishing returns.
+                </div>
+                
+                <h3>Practical Use</h3>
+                <ul>
+                    <li>Find your <strong>risk tolerance</strong> on the X-axis</li>
+                    <li>Read the corresponding <strong>expected return</strong> on the Y-axis</li>
+                    <li>Portfolios to the right = higher risk, higher potential return</li>
+                    <li>Portfolios to the left = lower risk, lower return</li>
+                </ul>
+                
+                <div class='warning-box' style='background: linear-gradient(135deg, #9D5CE6 0%, #C39BD3 100%); color: white; padding: 20px; border-radius: 14px; margin: 20px 0;'>
+                    ⚠ <strong>Important:</strong> The frontier is based on historical data and assumptions. Real markets can behave differently, especially during crises.
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal: Stress Testing -->
+    <div id='modalStressTesting' class='modal'>
+        <div class='modal-content'>
+            <div class='modal-header'>
+                <h2>⚡ Stress Testing Explained</h2>
+                <span class='close-modal' onclick='closeModal("modalStressTesting")'>&times;</span>
+            </div>
+            <div class='modal-body'>
+                <h3>What Is It?</h3>
+                <p><strong>Stress testing</strong> simulates how your portfolio would perform under extreme market conditions (crashes, recessions, bull markets).</p>
+                
+                <h3>The 4 Scenarios</h3>
+                
+                <h4>1⃣ Crisis (-40%)</h4>
+                <p>Severe market crash (like 2008 Financial Crisis or COVID-19 initial shock).</p>
+                <ul>
+                    <li>Your portfolio value drops by 40%</li>
+                    <li>Tests worst-case resilience</li>
+                    <li>Historical example: S&P 500 fell 57% in 2008-2009</li>
+                </ul>
+                
+                <h4>2⃣ Recession (-20%)</h4>
+                <p>Moderate economic downturn (typical recession).</p>
+                <ul>
+                    <li>Portfolio value drops by 20%</li>
+                    <li>More common than severe crises</li>
+                    <li>Historical example: 2022 bear market (-25%)</li>
+                </ul>
+                
+                <h4>3⃣ Normal (0%)</h4>
+                <p>Baseline scenario with no additional shock.</p>
+                <ul>
+                    <li>Your expected median outcome</li>
+                    <li>Reference point for comparison</li>
+                </ul>
+                
+                <h4>4⃣ Bull Market (+20%)</h4>
+                <p>Strong economic growth (like 2020-2021 recovery).</p>
+                <ul>
+                    <li>Portfolio value increases by 20%</li>
+                    <li>Upside potential scenario</li>
+                    <li>Historical example: 2019 (+31%), 2021 (+27%)</li>
+                </ul>
+                
+                <h3>How to Use It</h3>
+                <div class='example-box' style='background: linear-gradient(135deg, rgba(118, 75, 162, 0.12) 0%, rgba(102, 126, 234, 0.08) 100%); padding: 20px; border-radius: 16px; margin: 15px 0;'>
+                    <strong>Ask yourself:</strong><br>
+                    - Can I afford to lose 40% in a crisis?<br>
+                    - Will the Crisis scenario still meet my minimum needs?<br>
+                    - Am I psychologically prepared for the worst case?
+                </div>
+                
+                <h3>Why It Matters</h3>
+                <ul>
+                    <li><strong>Risk Management:</strong> Know your downside before it happens</li>
+                    <li><strong>Peace of Mind:</strong> Reduce panic-selling during crashes</li>
+                    <li><strong>Strategic Planning:</strong> Adjust asset allocation if stress results are unacceptable</li>
+                </ul>
+                
+                <div class='tip-box' style='background: linear-gradient(135deg, #4A74F3 0%, #6C8BE0 100%); color: white; padding: 20px; border-radius: 14px; margin: 20px 0;'>
+                    💡 <strong>Pro Tip:</strong> If the "Crisis" scenario still leaves you with an acceptable portfolio value, your strategy is robust!
+                </div>
+                
+                <h3>Regulatory Use</h3>
+                <p>Banks and institutions are required by law (Basel III, Dodd-Frank) to perform stress tests to ensure financial stability. You're using the same professional techniques!</p>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal: Time to Target -->
+    <div id='modalTimeToTarget' class='modal'>
+        <div class='modal-content'>
+            <div class='modal-header'>
+                <h2>⏱ Time to Target Explained</h2>
+                <span class='close-modal' onclick='closeModal("modalTimeToTarget")'>&times;</span>
+            </div>
+            <div class='modal-body'>
+                <h3>What Is It?</h3>
+                <p>This chart shows <strong>how long it takes</strong> (in months/years) to reach your target portfolio value across all simulations.</p>
+                
+                <h3>How to Read It</h3>
+                <ul>
+                    <li><strong>X-axis:</strong> Number of months</li>
+                    <li><strong>Y-axis:</strong> Frequency (how many simulations)</li>
+                    <li><strong>Peak of the curve:</strong> Most likely time to reach your goal</li>
+                    <li><strong>Subtitle shows:</strong> Success rate & median time</li>
+                </ul>
+                
+                <h3>Key Metrics</h3>
+                
+                <h4>Success Rate</h4>
+                <p>Percentage of simulations that reached the target within the time horizon.</p>
+                <div class='example-box' style='background: linear-gradient(135deg, rgba(118, 75, 162, 0.12) 0%, rgba(102, 126, 234, 0.08) 100%); padding: 20px; border-radius: 16px; margin: 15px 0;'>
+                    <strong>Example:</strong><br>
+                    Success Rate: 85% means 850 out of 1,000 simulations reached your target. 150 simulations did not.
+                </div>
+                
+                <h4>Median Time</h4>
+                <p>The middle value: 50% of successful simulations reached the target faster, 50% slower.</p>
+                
+                <h3>Interpreting the Shape</h3>
+                <ul>
+                    <li><strong>Narrow peak:</strong> Predictable timeline (low uncertainty)</li>
+                    <li><strong>Wide spread:</strong> High uncertainty (depends heavily on market conditions)</li>
+                    <li><strong>Skewed right:</strong> Some simulations take much longer (tail risk)</li>
+                </ul>
+                
+                <h3>What If Target Is Not Reached?</h3>
+                <p>If many simulations don't reach your target, you can:</p>
+                <ul>
+                    <li>Increase monthly investment amount</li>
+                    <li>Extend time horizon</li>
+                    <li>Lower target value</li>
+                    <li>Accept higher risk (higher expected return)</li>
+                </ul>
+                
+                <div class='tip-box' style='background: linear-gradient(135deg, #4A74F3 0%, #6C8BE0 100%); color: white; padding: 20px; border-radius: 14px; margin: 20px 0;'>
+                    💡 <strong>Pro Tip:</strong> If the median time is much shorter than your time horizon, you might be able to reduce risk (lower volatility) and still reach your goal!
+                </div>
+                
+                <h3>Real-World Example</h3>
+                <div class='formula-box' style='background: linear-gradient(135deg, rgba(102, 126, 234, 0.15) 0%, rgba(118, 75, 162, 0.1) 100%); padding: 20px; border-radius: 12px; margin: 15px 0;'>
+                    <strong>Scenario:</strong><br>
+                    Target: 100,000 EUR<br>
+                    Median time: 18.5 years<br>
+                    Success: 92%<br><br>
+                    <strong>Interpretation:</strong> You have a 92% chance of reaching 100k, most likely in about 18-19 years.
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal: Rolling Sharpe -->
+    <div id='modalRollingSharpe' class='modal'>
+        <div class='modal-content'>
+            <div class='modal-header'>
+                <h2>📈 Rolling Sharpe Ratio Explained</h2>
+                <span class='close-modal' onclick='closeModal("modalRollingSharpe")'>&times;</span>
+            </div>
+            <div class='modal-body'>
+                <h3>What Is Sharpe Ratio?</h3>
+                <p>The <strong>Sharpe Ratio</strong> measures risk-adjusted return. It answers: "How much return am I getting per unit of risk?"</p>
+                
+                <div class='formula-box' style='background: linear-gradient(135deg, rgba(102, 126, 234, 0.15) 0%, rgba(118, 75, 162, 0.1) 100%); padding: 28px; border-radius: 16px; margin: 25px 0; border-left: 6px solid #764ba2; font-family: monospace; font-size: 1.15rem;'>
+                    <strong>Formula:</strong><br>
+                    Sharpe Ratio = (Return - Risk-Free Rate) / Volatility<br><br>
+                    <strong>Simplified:</strong><br>
+                    Sharpe = Reward / Risk
+                </div>
+                
+                <h3>Sharpe Ratio Scale</h3>
+                <ul>
+                    <li><strong>&lt; 0:</strong> Losing money (bad)</li>
+                    <li><strong>0 to 1:</strong> Suboptimal (could do better)</li>
+                    <li><strong>1 to 2:</strong> Good risk-adjusted returns</li>
+                    <li><strong>2 to 3:</strong> Excellent (top-tier funds)</li>
+                    <li><strong>&gt; 3:</strong> Outstanding (rare, verify if sustainable)</li>
+                </ul>
+                
+                <h3>What Is "Rolling" Sharpe?</h3>
+                <p>Instead of calculating one Sharpe Ratio for the entire period, we calculate it over <strong>moving 12-month windows</strong>.</p>
+                
+                <h4>Why Rolling?</h4>
+                <ul>
+                    <li>Shows how risk-adjusted performance <strong>changes over time</strong></li>
+                    <li>Reveals periods of strong vs. weak performance</li>
+                    <li>Helps identify trends and regime changes</li>
+                </ul>
+                
+                <h3>How to Read the Chart</h3>
+                <ul>
+                    <li><strong>X-axis:</strong> Month number</li>
+                    <li><strong>Y-axis:</strong> Sharpe Ratio</li>
+                    <li><strong>Line going up:</strong> Improving risk-adjusted returns</li>
+                    <li><strong>Line going down:</strong> Deteriorating performance (more risk for same return)</li>
+                </ul>
+                
+                <div class='example-box' style='background: linear-gradient(135deg, rgba(118, 75, 162, 0.12) 0%, rgba(102, 126, 234, 0.08) 100%); padding: 20px; border-radius: 16px; margin: 15px 0;'>
+                    <strong>Interpretation Example:</strong><br>
+                    If Rolling Sharpe drops from 1.8 to 0.5 around month 120, it means your strategy experienced a rough patch (market downturn) where risk was high but returns were low.
+                </div>
+                
+                <h3>What to Look For</h3>
+                <ul>
+                    <li><strong>Stable line around 1-2:</strong> Consistently good risk management</li>
+                    <li><strong>Volatile line:</strong> Performance varies significantly (market-dependent)</li>
+                    <li><strong>Downward trend:</strong> May indicate strategy decay or regime change</li>
+                    <li><strong>Recovery after dips:</strong> Resilient strategy</li>
+                </ul>
+                
+                <h3>Professional Use</h3>
+                <p>Hedge funds and institutional investors use rolling Sharpe Ratio to:</p>
+                <ul>
+                    <li>Monitor strategy performance in real-time</li>
+                    <li>Identify when to rebalance portfolios</li>
+                    <li>Compare different investment strategies</li>
+                    <li>Communicate risk-adjusted returns to clients</li>
+                </ul>
+                
+                <div class='tip-box' style='background: linear-gradient(135deg, #4A74F3 0%, #6C8BE0 100%); color: white; padding: 20px; border-radius: 14px; margin: 20px 0;'>
+                    💡 <strong>Pro Tip:</strong> A strategy with a consistently high Rolling Sharpe (>1.5) across all market conditions is likely to be more robust than one with occasional spikes to 3+ but frequent drops below 0.5.
+                </div>
+                
+                <h3>Limitations</h3>
+                <ul>
+                    <li>Assumes returns are normally distributed (not always true)</li>
+                    <li>Doesn't capture tail risk (extreme events)</li>
+                    <li>Sensitive to the chosen time window (12 months in our case)</li>
+                    <li>Historical metric (past performance ≠ future results)</li>
+                </ul>
             </div>
         </div>
     </div>
