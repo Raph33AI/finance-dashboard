@@ -18,6 +18,7 @@
     <script src='https://code.highcharts.com/highcharts-more.js' defer></script>
     <script src='https://code.highcharts.com/modules/exporting.js' defer></script>
     <script src='https://code.highcharts.com/modules/accessibility.js' defer></script>
+    <script src='https://code.highcharts.com/modules/heatmap.js' defer></script>
     
     <!-- Font Awesome -->
     <link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css' integrity='sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==' crossorigin='anonymous' referrerpolicy='no-referrer'>
@@ -29,7 +30,7 @@
     <link rel="stylesheet" href="assets/css/chatbot-styles.css">
     <link rel='stylesheet' href='assets/css/cache-widget.css'>
     <link rel='stylesheet' href='assets/css/trend-prediction.css'>
-    <!-- ✅ FAVICON DYNAMIQUE - ICI -->
+    <!-- ✅ FAVICON DYNAMIQUE -->
     <script src="assets/js/favicon-dynamic.js"></script>
     
     <!-- Firebase SDK -->
@@ -43,15 +44,15 @@
     <!-- Protection de la page (AUTH GUARD) -->
     <script src="assets/js/auth-guard.js"></script>
 
-    <!-- ✅ ACCESS CONTROL - VÉRIFICATION DU PLAN -->
+    <!-- ✅ ACCESS CONTROL -->
     <script src="assets/js/access-control.js"></script>
 </head>
 <body>
 
-    <!-- ⚡ THEME SCRIPT - DOIT ÊTRE CHARGÉ EN PREMIER -->
+    <!-- ⚡ THEME SCRIPT -->
     <script src="assets/js/theme.js"></script>
 
-    <!-- 🎨 THEME CHARTS - POUR LES GRAPHIQUES -->
+    <!-- 🎨 THEME CHARTS -->
     <script src="assets/js/theme-charts.js"></script>
 
     <!-- Particles Background -->
@@ -115,7 +116,6 @@
             <!-- Navigation -->
             <nav class="sidebar-nav">
                 
-                <!-- ✅ Ajout data-tooltip pour chaque folder -->
                 <div class="nav-section">
                     <button class="nav-folder" data-tooltip="Home">
                         <i class="fas fa-home"></i>
@@ -283,7 +283,6 @@
                     </div>
                 </div>
             </div>
-            <!-- ===== FIN SIDEBAR FOOTER ===== -->
         </aside>
         
         <!-- Sidebar Overlay (mobile) -->
@@ -300,10 +299,10 @@
                         <button class='mobile-toggle' id='mobileToggle' aria-label='Toggle navigation menu' aria-expanded='false'>
                             <i class='fas fa-bars' aria-hidden='true'></i>
                         </button>
-                        <h1></i> Machine Learning Trend Prediction</h1>
+                        <h1><i class="fas fa-brain"></i> Machine Learning Trend Prediction</h1>
                     </div>
                     <div class='header-right'>
-                        <!-- ✅ NOUVEAU : Bouton de contrôle du cache -->
+                        <!-- ✅ Bouton de contrôle du cache -->
                         <button class='btn-icon-header' onclick='toggleCacheWidget()' aria-label='Toggle cache widget' title='View cache statistics'>
                             <i class='fas fa-database' aria-hidden='true'></i>
                             <span class='cache-badge-mini' id='cacheBadgeMini'>0</span>
@@ -482,6 +481,85 @@
                         </section>
                         
                         <!-- ============================================
+                             ✨ NOUVEAU : BACKTESTING SECTION
+                             ============================================ -->
+                        <section class='backtesting-section card' aria-labelledby='backtesting-title'>
+                            <div class='card-header'>
+                                <h3 class='card-title' id='backtesting-title'>
+                                    <i class='fas fa-history' aria-hidden='true'></i> Backtesting & Accuracy Analysis
+                                </h3>
+                                <button class='help-icon' onclick='openModal("modalBacktesting")' aria-label='Help about backtesting'>?</button>
+                            </div>
+                            <div class='card-body'>
+                                <!-- Tabs pour navigation -->
+                                <div class='backtesting-tabs'>
+                                    <button class='tab-btn active' data-tab='historical-accuracy' onclick='TrendPrediction.switchBacktestTab(this)'>
+                                        <i class='fas fa-chart-bar'></i> Historical Accuracy
+                                    </button>
+                                    <button class='tab-btn' data-tab='prediction-vs-actual' onclick='TrendPrediction.switchBacktestTab(this)'>
+                                        <i class='fas fa-crosshairs'></i> Predictions vs Actual
+                                    </button>
+                                    <button class='tab-btn' data-tab='error-evolution' onclick='TrendPrediction.switchBacktestTab(this)'>
+                                        <i class='fas fa-chart-line'></i> Error Evolution
+                                    </button>
+                                </div>
+                                
+                                <!-- Tab Content -->
+                                <div class='backtesting-content'>
+                                    <div id='tab-historical-accuracy' class='tab-panel active'>
+                                        <div id='backtestAccuracyChart' class='chart chart-large' role='img' aria-label='Historical accuracy chart'></div>
+                                    </div>
+                                    <div id='tab-prediction-vs-actual' class='tab-panel'>
+                                        <div id='backtestComparisonChart' class='chart chart-large' role='img' aria-label='Predictions vs actual prices'></div>
+                                    </div>
+                                    <div id='tab-error-evolution' class='tab-panel'>
+                                        <div id='backtestErrorChart' class='chart chart-large' role='img' aria-label='Error evolution over time'></div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Backtesting Metrics -->
+                                <div class='backtesting-metrics'>
+                                    <div class='metric-card'>
+                                        <div class='metric-icon'>
+                                            <i class='fas fa-bullseye'></i>
+                                        </div>
+                                        <div class='metric-content'>
+                                            <span class='metric-label'>Average Accuracy (7d)</span>
+                                            <span class='metric-value' id='backtest7dAccuracy'>-</span>
+                                        </div>
+                                    </div>
+                                    <div class='metric-card'>
+                                        <div class='metric-icon'>
+                                            <i class='fas fa-percentage'></i>
+                                        </div>
+                                        <div class='metric-content'>
+                                            <span class='metric-label'>MAPE (Mean Error)</span>
+                                            <span class='metric-value' id='backtestMAPE'>-</span>
+                                        </div>
+                                    </div>
+                                    <div class='metric-card'>
+                                        <div class='metric-icon'>
+                                            <i class='fas fa-trophy'></i>
+                                        </div>
+                                        <div class='metric-content'>
+                                            <span class='metric-label'>Best Model</span>
+                                            <span class='metric-value' id='backtestBestModel'>-</span>
+                                        </div>
+                                    </div>
+                                    <div class='metric-card'>
+                                        <div class='metric-icon'>
+                                            <i class='fas fa-check-circle'></i>
+                                        </div>
+                                        <div class='metric-content'>
+                                            <span class='metric-label'>Direction Accuracy</span>
+                                            <span class='metric-value' id='backtestDirectionAccuracy'>-</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
+                        
+                        <!-- ============================================
                              COMPARISON CHART
                              ============================================ -->
                         <section class='chart-section card' aria-labelledby='comparison-chart-title'>
@@ -489,9 +567,34 @@
                                 <h3 class='card-title' id='comparison-chart-title'>
                                     <i class='fas fa-layer-group' aria-hidden='true'></i> Model Comparison Chart
                                 </h3>
+                                <!-- ✅ NOUVEAU : Export button -->
+                                <button class='btn-export' onclick='TrendPrediction.exportPredictions()' title='Export predictions'>
+                                    <i class='fas fa-download'></i> Export
+                                </button>
                             </div>
                             <div class='card-body'>
                                 <div id='comparisonChart' class='chart chart-large' role='img' aria-labelledby='comparison-chart-title'></div>
+                            </div>
+                        </section>
+                        
+                        <!-- ============================================
+                             ✨ NOUVEAU : MULTI-HORIZON COMPARISON
+                             ============================================ -->
+                        <section class='multi-horizon-section card' aria-labelledby='multi-horizon-title'>
+                            <div class='card-header'>
+                                <h3 class='card-title' id='multi-horizon-title'>
+                                    <i class='fas fa-expand-arrows-alt' aria-hidden='true'></i> Multi-Horizon Predictions
+                                </h3>
+                                <button class='help-icon' onclick='openModal("modalMultiHorizon")' aria-label='Help about multi-horizon'>?</button>
+                            </div>
+                            <div class='card-body'>
+                                <div id='multiHorizonChart' class='chart chart-large' role='img' aria-label='Multi-horizon predictions chart'></div>
+                                <div class='horizon-legend'>
+                                    <div class='legend-item'><span class='dot h7'></span> 7 Days</div>
+                                    <div class='legend-item'><span class='dot h15'></span> 15 Days</div>
+                                    <div class='legend-item'><span class='dot h30'></span> 30 Days</div>
+                                    <div class='legend-item'><span class='dot h60'></span> 60 Days</div>
+                                </div>
                             </div>
                         </section>
                         
@@ -620,6 +723,28 @@
                                 </div>
                                 
                                 <div class='performance-table' id='performanceTable' role='region' aria-label='Performance metrics table'></div>
+                            </div>
+                        </section>
+                        
+                        <!-- ============================================
+                             ✨ NOUVEAU : MODEL CORRELATION HEATMAP
+                             ============================================ -->
+                        <section class='correlation-section card' aria-labelledby='correlation-title'>
+                            <div class='card-header'>
+                                <h3 class='card-title' id='correlation-title'>
+                                    <i class='fas fa-th' aria-hidden='true'></i> Model Correlation & Consensus
+                                </h3>
+                                <button class='help-icon' onclick='openModal("modalCorrelation")' aria-label='Help about correlation'>?</button>
+                            </div>
+                            <div class='card-body'>
+                                <div class='correlation-grid'>
+                                    <div id='correlationHeatmap' class='chart chart-medium' role='img' aria-label='Model correlation heatmap'></div>
+                                    <div class='consensus-gauge'>
+                                        <h4>Consensus Score</h4>
+                                        <div id='consensusGauge' class='gauge-container'></div>
+                                        <p class='gauge-description' id='consensusDescription'>-</p>
+                                    </div>
+                                </div>
                             </div>
                         </section>
                         
@@ -822,101 +947,108 @@
         </div>
     </div>
     
-    <!-- ============================================
-         INLINE STYLES FOR CORRECTIONS
-         ============================================ -->
-    <style>
-        /* Screen reader only class */
-        .sr-only {
-            position: absolute;
-            width: 1px;
-            height: 1px;
-            padding: 0;
-            margin: -1px;
-            overflow: hidden;
-            clip: rect(0, 0, 0, 0);
-            white-space: nowrap;
-            border-width: 0;
-        }
-        
-        /* Badge cache mini dans header */
-        .cache-badge-mini {
-            position: absolute;
-            top: -5px;
-            right: -5px;
-            background: var(--danger-color);
-            color: white;
-            font-size: 0.625rem;
-            font-weight: 600;
-            padding: 2px 5px;
-            border-radius: 10px;
-            min-width: 18px;
-            text-align: center;
-        }
-        
-        .btn-icon-header {
-            position: relative;
-            background: var(--background-secondary);
-            border: 1px solid var(--border-color);
-            color: var(--text-primary);
-            width: 40px;
-            height: 40px;
-            border-radius: var(--radius-md);
-            cursor: pointer;
-            transition: all var(--transition-base);
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-        }
-        
-        .btn-icon-header:hover {
-            background: var(--primary-color);
-            color: white;
-            transform: translateY(-2px);
-        }
-        
-        /* Styles pour les modals */
-        .formula-box {
-            background: #f8f9fa;
-            border-left: 4px solid #2649B2;
-            padding: 15px 20px;
-            margin: 15px 0;
-            border-radius: 5px;
-        }
-        
-        .tip-box {
-            background: #d4edda;
-            border-left: 4px solid #28a745;
-            padding: 15px 20px;
-            margin: 15px 0;
-            border-radius: 5px;
-        }
-        
-        .warning-box {
-            background: #fff3cd;
-            border-left: 4px solid #ffc107;
-            padding: 15px 20px;
-            margin: 15px 0;
-            border-radius: 5px;
-        }
-        
-        .key-term {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            font-weight: 700;
-        }
-    </style>
+    <!-- ✨ NOUVEAU : Modal Backtesting -->
+    <div id='modalBacktesting' class='modal' role='dialog' aria-labelledby='backtesting-modal-title' aria-modal='true'>
+        <div class='modal-content'>
+            <div class='modal-header'>
+                <h2 id='backtesting-modal-title'>📈 Backtesting & Accuracy Analysis</h2>
+                <button class='close-modal' onclick='closeModal("modalBacktesting")' aria-label='Close dialog'>
+                    <i class='fas fa-times'></i>
+                </button>
+            </div>
+            <div class='modal-body'>
+                <h3>What is Backtesting?</h3>
+                <p><span class='key-term'>Backtesting</span> evaluates how well our models would have performed in the past by comparing historical predictions with actual price movements.</p>
+                
+                <h3>How It Works</h3>
+                <p>We train models on historical data, then test their predictions against real prices that occurred afterward. This reveals true model accuracy.</p>
+                
+                <div class='formula-box'>
+                    <strong>Key Metrics:</strong><br>
+                    • <strong>MAPE:</strong> Mean Absolute Percentage Error<br>
+                    • <strong>Direction Accuracy:</strong> % of correct up/down predictions<br>
+                    • <strong>R² Score:</strong> Model fit quality (0-100%)
+                </div>
+                
+                <h3>Why It Matters</h3>
+                <p>Backtesting helps you understand which models are most reliable for your investment decisions and identify consistent performers.</p>
+                
+                <div class='tip-box'>
+                    💡 <strong>Pro Tip:</strong> Models with >70% direction accuracy and low MAPE are generally more trustworthy.
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- ✨ NOUVEAU : Modal Multi-Horizon -->
+    <div id='modalMultiHorizon' class='modal' role='dialog' aria-labelledby='multi-horizon-modal-title' aria-modal='true'>
+        <div class='modal-content'>
+            <div class='modal-header'>
+                <h2 id='multi-horizon-modal-title'>🎯 Multi-Horizon Predictions</h2>
+                <button class='close-modal' onclick='closeModal("modalMultiHorizon")' aria-label='Close dialog'>
+                    <i class='fas fa-times'></i>
+                </button>
+            </div>
+            <div class='modal-body'>
+                <h3>What are Multi-Horizon Predictions?</h3>
+                <p>Instead of showing a single timeframe, we display <span class='key-term'>simultaneous predictions</span> for 7, 15, 30, and 60 days ahead.</p>
+                
+                <h3>Fan Chart Visualization</h3>
+                <p>The "fan" shape represents increasing uncertainty over time—short-term predictions are more confident than long-term ones.</p>
+                
+                <div class='formula-box'>
+                    <strong>Interpretation:</strong><br>
+                    • <strong>Tight fan:</strong> High confidence across all horizons<br>
+                    • <strong>Wide fan:</strong> Greater uncertainty in longer timeframes<br>
+                    • <strong>Converging lines:</strong> Strong consensus between horizons
+                </div>
+                
+                <div class='tip-box'>
+                    💡 <strong>Pro Tip:</strong> Use multi-horizon to plan entry/exit points at different investment durations.
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- ✨ NOUVEAU : Modal Correlation -->
+    <div id='modalCorrelation' class='modal' role='dialog' aria-labelledby='correlation-modal-title' aria-modal='true'>
+        <div class='modal-content'>
+            <div class='modal-header'>
+                <h2 id='correlation-modal-title'>🔗 Model Correlation & Consensus</h2>
+                <button class='close-modal' onclick='closeModal("modalCorrelation")' aria-label='Close dialog'>
+                    <i class='fas fa-times'></i>
+                </button>
+            </div>
+            <div class='modal-body'>
+                <h3>What is Model Correlation?</h3>
+                <p>The heatmap shows how similar the predictions from different models are. High correlation means <span class='key-term'>strong agreement</span>.</p>
+                
+                <h3>Consensus Score</h3>
+                <p>A single metric (0-100%) indicating overall agreement between all models. Higher scores = more reliable predictions.</p>
+                
+                <div class='formula-box'>
+                    <strong>Color Guide:</strong><br>
+                    • <strong>Dark Blue:</strong> High correlation (>0.8)<br>
+                    • <strong>Light Blue:</strong> Moderate correlation (0.5-0.8)<br>
+                    • <strong>White/Yellow:</strong> Low correlation (<0.5)
+                </div>
+                
+                <h3>How to Use</h3>
+                <p>When consensus is high (>80%), you can trust the ensemble prediction more confidently. Low consensus suggests mixed signals—proceed with caution.</p>
+                
+                <div class='tip-box'>
+                    💡 <strong>Pro Tip:</strong> Divergent models often signal market uncertainty or upcoming volatility.
+                </div>
+            </div>
+        </div>
+    </div>
     
     <!-- ============================================
-         📜 SCRIPTS - ORDRE IMPORTANT
+         📜 CACHE WIDGET SCRIPT
          ============================================ -->
-    
-    <!-- ✅ Cache Widget Script (VERSION CORRIGÉE) -->
     <script>
         /**
-         * 🗄 Cache Widget Management (VERSION CORRIGÉE)
+         * 🗄 Cache Widget Management
          */
         let cacheWidgetOpen = false;
         let cacheStats = {
@@ -1112,7 +1244,6 @@
                 }
             },
             
-            // ✅ FONCTION CORRIGÉE
             logActivity: function(type, symbol, fromCache) {
                 const activityEl = document.getElementById('cacheActivity');
                 if (!activityEl) return;
@@ -1129,7 +1260,6 @@
                     <span class='cache-activity-text'>${type} ${symbol} from ${source}</span>
                 `;
                 
-                // ✅ CORRECTION : Utiliser querySelector au lieu de firstChild.classList
                 const emptyState = activityEl.querySelector('.cache-empty-state');
                 if (emptyState) {
                     activityEl.innerHTML = '';
@@ -1137,12 +1267,10 @@
                 
                 activityEl.insertBefore(entry, activityEl.firstChild);
                 
-                // Garder seulement les 10 dernières
                 while (activityEl.children.length > 10) {
                     activityEl.removeChild(activityEl.lastChild);
                 }
                 
-                // Mettre à jour les stats
                 if (fromCache) {
                     cacheStats.hits++;
                 } else {
@@ -1200,11 +1328,11 @@
     <script src='assets/js/common.js'></script>
     <script src='assets/js/sidebar.js'></script>
     
-    <!-- ✅ Trend Prediction Script (VERSION CORRIGÉE AVEC TWELVE DATA) -->
+    <!-- ✅ Trend Prediction Script (VERSION AMÉLIORÉE AVEC BACKTESTING) -->
     <script src='assets/js/trend-prediction.js'></script>
     
     <!-- ============================================
-         ✅ FIX MENU UTILISATEUR - Force l'initialisation
+         ✅ FIX MENU UTILISATEUR
          ============================================ -->
     <script>
         (function forceUserMenuInit() {
@@ -1274,6 +1402,7 @@
             }
         })();
     </script>
+    
     <!-- ========================================
          CHATBOT IA FINANCIER
          ======================================== -->
@@ -1292,14 +1421,12 @@
     <script src="assets/js/chatbot-ui.js"></script>
     <script src="assets/js/chatbot-particles.js"></script>
 
-    <!-- ✅ INITIALISATION DU CHATBOT AVEC VÉRIFICATION D'ACCÈS -->
+    <!-- ✅ INITIALISATION DU CHATBOT -->
     <script>
     document.addEventListener('DOMContentLoaded', function() {
         console.log('🤖 Vérification des accès avant initialisation du chatbot...');
         
-        // ✅ ATTENDRE QUE LE SYSTÈME D'ACCESS CONTROL SOIT PRÊT
         const initChatbotWhenReady = () => {
-            // Vérifier si l'accès a été refusé
             const accessDenied = sessionStorage.getItem('accessDenied') === 'true';
             
             if (accessDenied) {
@@ -1307,65 +1434,29 @@
                 return;
             }
             
-            // Vérifier que ChatbotConfig est chargé
             if (typeof ChatbotConfig === 'undefined') {
                 console.error('❌ ChatbotConfig non défini !');
-                console.error('📁 Vérifiez que le fichier assets/js/chatbot-config.js existe');
                 return;
             }
             
             console.log('✅ ChatbotConfig chargé');
             
-            // Vérifier que ChatbotUI est disponible
             if (typeof ChatbotUI === 'undefined') {
                 console.error('❌ ChatbotUI non défini !');
-                console.error('📁 Vérifiez que le fichier assets/js/chatbot-ui.js existe');
                 return;
             }
             
             console.log('✅ ChatbotUI chargé');
             
-            // Initialisation du chatbot
             try {
                 window.financialChatbot = new ChatbotUI(ChatbotConfig);
                 console.log('🎉 Chatbot FinanceGPT initialisé avec succès !');
-                console.log('💼 Cliquez sur le bouton flottant pour ouvrir le chatbot');
             } catch (error) {
                 console.error('❌ Erreur lors de l\'initialisation du chatbot:', error);
-                console.error('📋 Détails:', error.message);
             }
         };
         
-        // Attendre un peu pour laisser access-control.js faire son travail
         setTimeout(initChatbotWhenReady, 500);
-    });
-    </script>
-
-    <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        setTimeout(() => {
-            console.log('🔍 BACKGROUND DIAGNOSIS:');
-            
-            const elements = [
-                'body',
-                '.layout-wrapper',
-                '.main-content',
-                '.container',
-                '.section'
-            ];
-            
-            elements.forEach(selector => {
-                const el = document.querySelector(selector);
-                if (el) {
-                    const bg = window.getComputedStyle(el).background;
-                    console.log(`📦 ${selector}:`, bg.substring(0, 100) + '...');
-                }
-            });
-            
-            console.log('---');
-            console.log('🎨 Canvas background:', 
-                window.getComputedStyle(document.getElementById('particles-canvas')).background);
-        }, 1000);
     });
     </script>
 
