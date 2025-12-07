@@ -3,11 +3,18 @@
 <head>
     <meta charset='UTF-8'>
     <meta name='viewport' content='width=device-width, initial-scale=1.0'>
-    <title>Monte Carlo Simulation</title>
+    <title>Monte Carlo Simulation - Advanced Analytics</title>
     
     <!-- Highcharts -->
     <script src='https://code.highcharts.com/highcharts.js'></script>
+    <script src='https://code.highcharts.com/highcharts-3d.js'></script>
+    <script src='https://code.highcharts.com/modules/heatmap.js'></script>
     <script src='https://code.highcharts.com/modules/exporting.js'></script>
+    <script src='https://code.highcharts.com/modules/export-data.js'></script>
+    
+    <!-- jsPDF pour export PDF -->
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js'></script>
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js'></script>
     
     <!-- Font Awesome -->
     <link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css'>
@@ -18,10 +25,10 @@
     <link rel="stylesheet" href="assets/css/user-menu.css">
     <link rel="stylesheet" href="assets/css/chatbot-styles.css">
     <link rel='stylesheet' href='assets/css/monte-carlo.css'>
-    <!-- ✅ FAVICON DYNAMIQUE - ICI -->
+    
+    <!-- Favicon Dynamique -->
     <script src="assets/js/favicon-dynamic.js"></script>
 
-    <!-- ===== AJOUTE CES LIGNES (FIREBASE) ===== -->
     <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
@@ -30,19 +37,14 @@
     <!-- Configuration Firebase -->
     <script src="assets/js/firebase-config.js"></script>
     
-    <!-- Protection de la page (AUTH GUARD) -->
+    <!-- Protection de la page -->
     <script src="assets/js/auth-guard.js"></script>
-
-    <!-- ✅ ACCESS CONTROL - VÉRIFICATION DU PLAN -->
     <script src="assets/js/access-control.js"></script>
-    <!-- ===== FIN DES AJOUTS ===== -->
 </head>
 <body>
 
-    <!-- ⚡ THEME SCRIPT - DOIT ÊTRE CHARGÉ EN PREMIER -->
+    <!-- Theme Script -->
     <script src="assets/js/theme.js"></script>
-
-    <!-- 🎨 THEME CHARTS - POUR LES GRAPHIQUES -->
     <script src="assets/js/theme-charts.js"></script>
 
     <!-- Particles Background -->
@@ -50,13 +52,10 @@
 
     <div class='layout-wrapper'>
         
-        <!-- Sidebar Navigation - VERSION CORRIGÉE -->
         <!-- Sidebar Navigation -->
         <aside class='sidebar' id='sidebar'>
-            <!-- Header avec Logo 3D -->
             <div class="sidebar-header">
                 <div class="logo-container">
-                    <!-- Logo 3D SVG -->
                     <div class="logo-3d">
                         <svg class="logo-svg" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
                             <defs>
@@ -65,47 +64,28 @@
                                     <stop offset="100%" class="logo-gradient-2" />
                                 </linearGradient>
                             </defs>
-                            
-                            <!-- Graphique -->
                             <path d="M 20 80 L 30 70 L 40 75 L 50 60 L 60 65 L 70 45 L 80 50 L 90 30" 
-                                  stroke="url(#logoGradient)" 
-                                  stroke-width="4" 
-                                  fill="none" 
-                                  stroke-linecap="round" 
-                                  stroke-linejoin="round"/>
-                            
-                            <!-- Points -->
+                                  stroke="url(#logoGradient)" stroke-width="4" fill="none" 
+                                  stroke-linecap="round" stroke-linejoin="round"/>
                             <circle cx="30" cy="70" r="4" fill="url(#logoGradient)"/>
                             <circle cx="50" cy="60" r="4" fill="url(#logoGradient)"/>
                             <circle cx="70" cy="45" r="4" fill="url(#logoGradient)"/>
                             <circle cx="90" cy="30" r="5" fill="url(#logoGradient)"/>
-                            
-                            <!-- Flèche -->
-                            <path d="M 85 35 L 90 30 L 85 25" 
-                                  stroke="url(#logoGradient)" 
-                                  stroke-width="3" 
-                                  fill="none" 
-                                  stroke-linecap="round"/>
+                            <path d="M 85 35 L 90 30 L 85 25" stroke="url(#logoGradient)" 
+                                  stroke-width="3" fill="none" stroke-linecap="round"/>
                         </svg>
                     </div>
-                    
-                    <!-- Brand Text -->
                     <div class="brand-text">
                         <h2 class="brand-name">AlphaVault AI</h2>
                         <span class="brand-tagline">Investments</span>
                     </div>
                 </div>
-                
-                <!-- Toggle Button -->
                 <button class="sidebar-toggle" aria-label="Toggle Sidebar">
                     <i class="fas fa-angle-left"></i>
                 </button>
             </div>
             
-            <!-- Navigation -->
             <nav class="sidebar-nav">
-                
-                <!-- ✅ Ajout data-tooltip pour chaque folder -->
                 <div class="nav-section">
                     <button class="nav-folder" data-tooltip="Home">
                         <i class="fas fa-home"></i>
@@ -171,10 +151,6 @@
                         <i class="fas fa-chevron-down arrow"></i>
                     </button>
                     <div class='nav-submenu' style='display: block;'>
-                        <!-- <a href='market-data.html' class='nav-link'>
-                            <i class='fas fa-database'></i>
-                            <span>Market Data</span>
-                        </a> -->
                         <a href='advanced-analysis.html' class='nav-link'>
                             <i class='fas fa-brain'></i>
                             <span>Advanced Analysis</span>
@@ -202,7 +178,6 @@
                     </div>
                 </div>
 
-                <!-- ✅ NOUVELLE SECTION : AI ASSISTANT -->
                 <div class='nav-section'>
                     <button class="nav-folder" data-tooltip="AI Assistant">
                         <i class="fas fa-robot"></i>
@@ -218,15 +193,12 @@
                 </div>
             </nav>
             
-            <!-- ===== SIDEBAR FOOTER - MENU UTILISATEUR ===== -->
             <div class="sidebar-footer">
                 <div class="sidebar-user-menu">
-                    <!-- Trigger (élément cliquable) -->
                     <div class="sidebar-user-trigger" id="sidebarUserTrigger">
                         <img data-user-photo 
                             src="https://ui-avatars.com/api/?name=User&background=2563eb&color=fff" 
-                            alt="Avatar" 
-                            class="sidebar-user-avatar">
+                            alt="Avatar" class="sidebar-user-avatar">
                         <div class="sidebar-user-info">
                             <span data-user-name class="sidebar-user-name">User</span>
                             <span data-user-plan class="sidebar-user-plan">Free Plan</span>
@@ -234,13 +206,11 @@
                         <i class="fas fa-chevron-up sidebar-user-arrow"></i>
                     </div>
                     
-                    <!-- Dropdown (s'ouvre vers le haut) -->
                     <div class="sidebar-user-dropdown" id="sidebarUserDropdown">
                         <div class="user-dropdown-header">
                             <img data-user-photo 
                                 src="https://ui-avatars.com/api/?name=User&background=2563eb&color=fff" 
-                                alt="Avatar" 
-                                class="user-dropdown-avatar">
+                                alt="Avatar" class="user-dropdown-avatar">
                             <div class="user-dropdown-details">
                                 <h4 data-user-name class="user-dropdown-name">User</h4>
                                 <p data-user-email class="user-dropdown-email">email@example.com</p>
@@ -273,36 +243,165 @@
                     </div>
                 </div>
             </div>
-            <!-- ===== FIN SIDEBAR FOOTER ===== -->
         </aside>
         
-        <!-- ============================================
-             MAIN CONTENT AREA
-             ============================================ -->
+        <!-- Main Content -->
         <div class='main-content'>
             <!-- Top Header -->
             <header class='top-header'>
-                <div class="header-content-wrapper"> <!-- ✅ NOUVEAU WRAPPER -->
+                <div class="header-content-wrapper">
                     <div class='header-left'>
                         <button class='mobile-toggle' id='mobileToggle'>
                             <i class='fas fa-bars'></i>
                         </button>
-                        <h1>Monte Carlo Simulation</h1> <!-- N'oubliez pas de changer ce titre pour chaque page -->
+                        <h1><i class="fas fa-dice"></i> Monte Carlo Simulation</h1>
                     </div>
-                </div> <!-- ✅ FIN DU NOUVEAU WRAPPER -->
+                </div>
             </header>
             
             <!-- Container -->
             <div class='container'>
                 <!-- Main Content -->
                 <div class='content'>
+                    
+                    <!-- ============================================
+                         QUICK TEMPLATES - NOUVEAU
+                         ============================================ -->
+                    <div class='quick-templates'>
+                        <h2 class='section-title'>
+                            <i class="fas fa-rocket"></i> Quick Start Templates
+                            <span class='help-icon' onclick='openModal("modalTemplates")'>?</span>
+                        </h2>
+                        <div class='templates-grid'>
+                            <button class='template-btn template-conservative' onclick='MonteCarlo.loadTemplate("conservative")'>
+                                <i class="fas fa-shield-alt"></i>
+                                <span class='template-name'>Conservative</span>
+                                <span class='template-desc'>Low risk • Stable growth</span>
+                            </button>
+                            <button class='template-btn template-balanced' onclick='MonteCarlo.loadTemplate("balanced")'>
+                                <i class="fas fa-balance-scale"></i>
+                                <span class='template-name'>Balanced</span>
+                                <span class='template-desc'>Medium risk • Diversified</span>
+                            </button>
+                            <button class='template-btn template-aggressive' onclick='MonteCarlo.loadTemplate("aggressive")'>
+                                <i class="fas fa-chart-line"></i>
+                                <span class='template-name'>Aggressive</span>
+                                <span class='template-desc'>High risk • Max growth</span>
+                            </button>
+                            <button class='template-btn template-retirement' onclick='MonteCarlo.loadTemplate("retirement")'>
+                                <i class="fas fa-umbrella-beach"></i>
+                                <span class='template-name'>Retirement</span>
+                                <span class='template-desc'>Long-term • Withdrawal phase</span>
+                            </button>
+                            <button class='template-btn template-crypto' onclick='MonteCarlo.loadTemplate("crypto")'>
+                                <i class="fab fa-bitcoin"></i>
+                                <span class='template-name'>Crypto</span>
+                                <span class='template-desc'>Very high volatility</span>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- ============================================
+                         SCENARIO MANAGER - NOUVEAU
+                         ============================================ -->
+                    <div class='scenario-manager'>
+                        <h2 class='section-title'>
+                            <i class="fas fa-save"></i> Scenario Manager
+                            <span class='help-icon' onclick='openModal("modalScenarios")'>?</span>
+                        </h2>
+                        <div class='scenario-controls'>
+                            <button class='btn-scenario' onclick='MonteCarlo.saveCurrentScenario()'>
+                                <i class="fas fa-save"></i> Save Current Scenario
+                            </button>
+                            <button class='btn-scenario' onclick='MonteCarlo.compareScenarios()'>
+                                <i class="fas fa-code-compare"></i> Compare Scenarios
+                            </button>
+                            <button class='btn-scenario' onclick='MonteCarlo.clearScenarios()'>
+                                <i class="fas fa-trash"></i> Clear All
+                            </button>
+                        </div>
+                        <div id='savedScenariosList' class='saved-scenarios-list'></div>
+                    </div>
+                    
                     <!-- Parameters Panel -->
                     <div class='params-panel'>
                         <h2 class='panel-title'>
-                            Simulation Parameters 
+                            <i class="fas fa-sliders-h"></i> Advanced Simulation Parameters 
                             <span class='help-icon' onclick='openModal("modalMCIntro")'>?</span>
                         </h2>
                         
+                        <!-- ============================================
+                             DISTRIBUTION MODEL - NOUVEAU
+                             ============================================ -->
+                        <div class='advanced-section'>
+                            <h3 class='advanced-section-title'>
+                                <i class="fas fa-chart-area"></i> Return Distribution Model
+                                <span class='help-icon help-icon-small' onclick='openModal("modalDistribution")'>?</span>
+                            </h3>
+                            <div class='distribution-grid'>
+                                <label class='radio-card'>
+                                    <input type='radio' name='distribution' value='normal' checked>
+                                    <div class='radio-card-content'>
+                                        <i class="fas fa-chart-line"></i>
+                                        <span class='radio-title'>Normal (Gaussian)</span>
+                                        <span class='radio-desc'>Standard bell curve</span>
+                                    </div>
+                                </label>
+                                <label class='radio-card'>
+                                    <input type='radio' name='distribution' value='studentt'>
+                                    <div class='radio-card-content'>
+                                        <i class="fas fa-exclamation-triangle"></i>
+                                        <span class='radio-title'>Student-t</span>
+                                        <span class='radio-desc'>Fat tails (crashes)</span>
+                                    </div>
+                                </label>
+                                <label class='radio-card'>
+                                    <input type='radio' name='distribution' value='jump'>
+                                    <div class='radio-card-content'>
+                                        <i class="fas fa-bolt"></i>
+                                        <span class='radio-title'>Jump Diffusion</span>
+                                        <span class='radio-desc'>Sudden market shocks</span>
+                                    </div>
+                                </label>
+                                <label class='radio-card'>
+                                    <input type='radio' name='distribution' value='regime'>
+                                    <div class='radio-card-content'>
+                                        <i class="fas fa-random"></i>
+                                        <span class='radio-title'>Regime Switching</span>
+                                        <span class='radio-desc'>Bull/Bear cycles</span>
+                                    </div>
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <!-- ============================================
+                             STRATEGY MODE - NOUVEAU
+                             ============================================ -->
+                        <div class='advanced-section'>
+                            <h3 class='advanced-section-title'>
+                                <i class="fas fa-project-diagram"></i> Investment Strategy
+                            </h3>
+                            <div class='strategy-toggle'>
+                                <label class='toggle-option'>
+                                    <input type='radio' name='strategy' value='dca' checked>
+                                    <span>Dollar-Cost Averaging (DCA)</span>
+                                </label>
+                                <label class='toggle-option'>
+                                    <input type='radio' name='strategy' value='lumpsum'>
+                                    <span>Lump Sum Investment</span>
+                                </label>
+                                <label class='toggle-option'>
+                                    <input type='radio' name='strategy' value='compare'>
+                                    <span>Compare Both</span>
+                                </label>
+                                <label class='toggle-option'>
+                                    <input type='radio' name='strategy' value='withdrawal'>
+                                    <span>Retirement Withdrawal</span>
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <!-- Core Parameters Grid -->
                         <div class='params-grid'>
                             <div class='param-group'>
                                 <label for='monthlyInvestment'>
@@ -313,13 +412,37 @@
                                 <div class='hint'>Amount invested each month</div>
                             </div>
                             
+                            <div class='param-group' id='lumpSumGroup' style='display: none;'>
+                                <label for='lumpSumAmount'>
+                                    Lump Sum Amount (EUR)
+                                </label>
+                                <input type='number' id='lumpSumAmount' value='60000' step='1000'>
+                                <div class='hint'>One-time investment amount</div>
+                            </div>
+                            
+                            <div class='param-group' id='withdrawalRateGroup' style='display: none;'>
+                                <label for='withdrawalRate'>
+                                    Annual Withdrawal Rate (%)
+                                </label>
+                                <input type='number' id='withdrawalRate' value='4' step='0.1'>
+                                <div class='hint'>Retirement withdrawal (e.g., 4% rule)</div>
+                            </div>
+                            
+                            <div class='param-group' id='withdrawalStartGroup' style='display: none;'>
+                                <label for='withdrawalStartYear'>
+                                    Withdrawal Start Year
+                                </label>
+                                <input type='number' id='withdrawalStartYear' value='15' step='1' min='1'>
+                                <div class='hint'>When to start withdrawals</div>
+                            </div>
+                            
                             <div class='param-group'>
                                 <label for='monthlyYield'>
                                     Est. Monthly Yield (%) 
                                     <span class='help-icon help-icon-small' onclick='openModal("modalMCYield")'>?</span>
                                 </label>
                                 <input type='number' id='monthlyYield' value='0.67' step='0.01'>
-                                <div class='hint'>Expected monthly return (e.g., 0.67 = 0.67%)</div>
+                                <div class='hint'>Expected monthly return</div>
                             </div>
                             
                             <div class='param-group'>
@@ -328,7 +451,31 @@
                                     <span class='help-icon help-icon-small' onclick='openModal("modalMCVol")'>?</span>
                                 </label>
                                 <input type='number' id='volatility' value='15' step='0.5'>
-                                <div class='hint'>Market volatility (e.g., 15 = 15%)</div>
+                                <div class='hint'>Annual volatility</div>
+                            </div>
+                            
+                            <div class='param-group' id='degreesOfFreedomGroup' style='display: none;'>
+                                <label for='degreesOfFreedom'>
+                                    Student-t Degrees of Freedom
+                                </label>
+                                <input type='number' id='degreesOfFreedom' value='5' step='1' min='2'>
+                                <div class='hint'>Lower = fatter tails (2-10)</div>
+                            </div>
+                            
+                            <div class='param-group' id='jumpIntensityGroup' style='display: none;'>
+                                <label for='jumpIntensity'>
+                                    Jump Intensity (λ)
+                                </label>
+                                <input type='number' id='jumpIntensity' value='0.1' step='0.01'>
+                                <div class='hint'>Expected jumps per year</div>
+                            </div>
+                            
+                            <div class='param-group' id='jumpMagnitudeGroup' style='display: none;'>
+                                <label for='jumpMagnitude'>
+                                    Jump Magnitude (%)
+                                </label>
+                                <input type='number' id='jumpMagnitude' value='-10' step='1'>
+                                <div class='hint'>Average jump size</div>
                             </div>
                             
                             <div class='param-group'>
@@ -342,46 +489,97 @@
                                     Number of Simulations 
                                     <span class='help-icon help-icon-small' onclick='openModal("modalMCSim")'>?</span>
                                 </label>
-                                <input type='number' id='simulations' value='1000' step='100' min='100'>
+                                <input type='number' id='simulations' value='1000' step='100' min='100' max='10000'>
                                 <div class='hint'>More = more accurate (slower)</div>
                             </div>
                             
                             <div class='param-group'>
                                 <label for='targetValue'>Target Portfolio Value (EUR)</label>
                                 <input type='number' id='targetValue' value='100000' step='1000'>
-                                <div class='hint'>Goal to reach (for time analysis)</div>
+                                <div class='hint'>Goal to reach</div>
                             </div>
                             
                             <div class='param-group'>
                                 <label for='inflationRateMC'>Annual Inflation Rate (%)</label>
                                 <input type='number' id='inflationRateMC' value='2.5' step='0.1'>
-                                <div class='hint'>Expected annual inflation (e.g., 2.5%)</div>
+                                <div class='hint'>Expected annual inflation</div>
                             </div>
                         </div>
                         
-                        <div class='inflation-toggle'>
-                            <label>
+                        <!-- Advanced Options -->
+                        <div class='advanced-toggles'>
+                            <label class='toggle-checkbox'>
                                 <input type='checkbox' id='showInflationMC'>
-                                Show Inflation-Adjusted Values (Real Returns)
+                                <span>Show Inflation-Adjusted Values (Real Returns)</span>
+                            </label>
+                            <label class='toggle-checkbox'>
+                                <input type='checkbox' id='enableGARCH'>
+                                <span>Enable GARCH Volatility (Time-Varying)</span>
+                            </label>
+                            <label class='toggle-checkbox'>
+                                <input type='checkbox' id='showConfidenceCone'>
+                                <span>Display Confidence Cone (3D Visualization)</span>
                             </label>
                         </div>
                         
-                        <button class='btn-simulate' onclick='MonteCarlo.runSimulation()'>Run Simulation</button>
+                        <button class='btn-simulate' onclick='MonteCarlo.runSimulation()'>
+                            <i class="fas fa-play"></i> Run Advanced Simulation
+                        </button>
+                        
+                        <!-- Progress Bar - NOUVEAU -->
+                        <div id='simulationProgress' class='simulation-progress' style='display: none;'>
+                            <div class='progress-bar'>
+                                <div class='progress-fill' id='progressFill'></div>
+                            </div>
+                            <div class='progress-text' id='progressText'>Initializing...</div>
+                        </div>
                     </div>
                     
                     <!-- Results Panel -->
                     <div id='resultsPanel' class='results-panel hidden'>
+                        
+                        <!-- Export Controls - NOUVEAU -->
+                        <div class='export-controls'>
+                            <button class='btn-export' onclick='MonteCarlo.exportPDF()'>
+                                <i class="fas fa-file-pdf"></i> Export Full Report (PDF)
+                            </button>
+                            <button class='btn-export' onclick='MonteCarlo.exportExcel()'>
+                                <i class="fas fa-file-excel"></i> Export Data (CSV)
+                            </button>
+                            <button class='btn-export' onclick='MonteCarlo.shareResults()'>
+                                <i class="fas fa-share-alt"></i> Share Results
+                            </button>
+                        </div>
+                        
                         <h2 class='section-title'>
-                            Simulation Results 
+                            <i class="fas fa-chart-bar"></i> Simulation Results 
                             <span class='help-icon' onclick='openModal("modalMCResults")'>?</span>
                         </h2>
                         
+                        <!-- Summary Stats -->
                         <h3 class='subsection-title'>Final Portfolio Value</h3>
                         <div id='statsContainer' class='stats-grid'></div>
                         
+                        <!-- Advanced Risk Metrics - NOUVEAU -->
+                        <h3 class='subsection-title'>
+                            <i class="fas fa-shield-alt"></i> Advanced Risk Metrics
+                            <span class='help-icon' onclick='openModal("modalAdvancedRisk")'>?</span>
+                        </h3>
+                        <div id='advancedRiskMetrics' class='stats-grid'></div>
+                        
+                        <!-- Confidence Cone Chart - NOUVEAU -->
+                        <div id='confidenceConeSection' style='display: none;'>
+                            <h3 class='subsection-title'>
+                                <i class="fas fa-project-diagram"></i> Confidence Cone Projection
+                            </h3>
+                            <div id='chartConfidenceCone' class='chart'></div>
+                        </div>
+                        
+                        <!-- Portfolio Evolution -->
                         <h3 class='subsection-title'>Portfolio Evolution Over Time</h3>
                         <div id='chart1' class='chart'></div>
                         
+                        <!-- Distribution Charts -->
                         <div class='charts-grid-2'>
                             <div>
                                 <h3 class='subsection-title'>Distribution of Final Returns</h3>
@@ -393,23 +591,72 @@
                             </div>
                         </div>
                         
+                        <!-- Maximum Drawdown - NOUVEAU -->
                         <h3 class='subsection-title'>
-                            Risk Analysis 
+                            <i class="fas fa-arrow-down"></i> Maximum Drawdown Analysis
+                            <span class='help-icon' onclick='openModal("modalDrawdown")'>?</span>
+                        </h3>
+                        <div id='drawdownStats' class='stats-grid'></div>
+                        <div id='chartDrawdown' class='chart'></div>
+                        
+                        <!-- Risk Analysis -->
+                        <h3 class='subsection-title'>
+                            <i class="fas fa-exclamation-triangle"></i> Risk Analysis 
                             <span class='help-icon' onclick='openModal("modalMCRisk")'>?</span>
                         </h3>
                         <div id='riskAnalysis' class='stats-grid'></div>
                         
+                        <!-- Tornado Diagram - NOUVEAU -->
+                        <h3 class='subsection-title'>
+                            <i class="fas fa-wind"></i> Sensitivity Analysis (Tornado Diagram)
+                            <span class='help-icon' onclick='openModal("modalTornado")'>?</span>
+                        </h3>
+                        <div id='chartTornado' class='chart'></div>
+                        
+                        <!-- Heat Map 2D - NOUVEAU -->
+                        <h3 class='subsection-title'>
+                            <i class="fas fa-th"></i> 2D Parameter Heat Map
+                            <span class='help-icon' onclick='openModal("modalHeatMap")'>?</span>
+                        </h3>
+                        <div id='chartHeatMap' class='chart'></div>
+                        
+                        <!-- Rolling Window Analysis - NOUVEAU -->
+                        <h3 class='subsection-title'>
+                            <i class="fas fa-clock"></i> Rolling Sharpe Ratio (12-Month Window)
+                        </h3>
+                        <div id='chartRollingSharpe' class='chart'></div>
+                        
+                        <!-- Stress Testing -->
                         <h3 class='subsection-title'>Stress Testing Scenarios</h3>
                         <div id='chart4' class='chart'></div>
                         
+                        <!-- Time to Target -->
                         <h3 class='subsection-title'>Time to Target</h3>
                         <div id='chart5' class='chart'></div>
+                        
+                        <!-- Strategy Comparison - NOUVEAU -->
+                        <div id='strategyComparisonSection' style='display: none;'>
+                            <h3 class='subsection-title'>
+                                <i class="fas fa-code-compare"></i> Strategy Comparison: DCA vs Lump Sum
+                            </h3>
+                            <div id='chartStrategyComparison' class='chart'></div>
+                            <div id='strategyComparisonStats' class='stats-grid'></div>
+                        </div>
+                        
+                        <!-- Withdrawal Analysis - NOUVEAU -->
+                        <div id='withdrawalAnalysisSection' style='display: none;'>
+                            <h3 class='subsection-title'>
+                                <i class="fas fa-piggy-bank"></i> Retirement Withdrawal Analysis
+                            </h3>
+                            <div id='chartWithdrawal' class='chart'></div>
+                            <div id='withdrawalStats' class='stats-grid'></div>
+                        </div>
                     </div>
                 </div>
                 
                 <!-- Footer -->
                 <footer>
-                    <p>Monte Carlo Simulation | Generated with advanced stochastic modeling</p>
+                    <p>Monte Carlo Advanced Analytics | Powered by AlphaVault AI © 2025</p>
                 </footer>
             </div>
         </div>
@@ -417,47 +664,327 @@
     </div>
     
     <!-- ============================================
-         MODALS
+         MODALS (tous les modals existants + nouveaux)
          ============================================ -->
+    
+    <!-- Modal: Introduction -->
     <div id='modalMCIntro' class='modal'>
         <div class='modal-content'>
             <div class='modal-header'>
-                <h2>🎲 What is Monte Carlo Simulation?</h2>
+                <h2>🎲 Advanced Monte Carlo Simulation</h2>
                 <span class='close-modal' onclick='closeModal("modalMCIntro")'>&times;</span>
             </div>
             <div class='modal-body'>
-                <h3>📊 Purpose</h3>
-                <p>Monte Carlo simulation uses <strong>random sampling</strong> to model the uncertainty in investment returns. Instead of a single projection, it generates <strong>thousands of possible scenarios</strong> to show the range of potential outcomes.</p>
+                <h3>📊 What's New in This Version?</h3>
+                <p>This <strong>ultra-advanced</strong> Monte Carlo simulation includes professional-grade features:</p>
                 
-                <h3>⚙️ How It Works</h3>
-                <ol>
-                    <li><strong>Random Returns:</strong> Each month, the simulation generates a random return based on your expected yield and volatility</li>
-                    <li><strong>Compounding:</strong> Returns accumulate over time with monthly investments added</li>
-                    <li><strong>Repetition:</strong> This process repeats 1,000+ times to create a distribution of outcomes</li>
-                    <li><strong>Analysis:</strong> Statistical analysis reveals probabilities (e.g., 90% chance of reaching X amount)</li>
-                </ol>
-                
-                <div class='formula-box'>
-                    <strong>Formula (each month):</strong><br>
-                    Portfolio<sub>month</sub> = Portfolio<sub>previous</sub> × (1 + Return<sub>random</sub>) + MonthlyInvestment<br><br>
-                    Return<sub>random</sub> ~ Normal(µ, σ)
-                </div>
-                
-                <h3>✅ Key Advantages</h3>
                 <ul>
-                    <li><strong>Realistic:</strong> Captures market volatility and uncertainty</li>
-                    <li><strong>Probabilistic:</strong> Shows likelihood of outcomes (not just one forecast)</li>
-                    <li><strong>Risk-aware:</strong> Identifies worst-case and best-case scenarios</li>
-                    <li><strong>Actionable:</strong> Helps adjust strategy based on confidence levels</li>
+                    <li><strong>Alternative Distributions:</strong> Normal, Student-t, Jump Diffusion, Regime Switching</li>
+                    <li><strong>GARCH Volatility:</strong> Time-varying volatility modeling</li>
+                    <li><strong>Advanced Metrics:</strong> CVaR, Maximum Drawdown, Sortino Ratio, etc.</li>
+                    <li><strong>Sensitivity Analysis:</strong> Tornado diagrams, 2D heat maps</li>
+                    <li><strong>Strategy Comparison:</strong> DCA vs Lump Sum vs Withdrawal</li>
+                    <li><strong>Quick Templates:</strong> Pre-configured scenarios</li>
+                    <li><strong>Scenario Management:</strong> Save and compare multiple simulations</li>
+                    <li><strong>Professional Exports:</strong> PDF reports, CSV data</li>
                 </ul>
                 
                 <div class='tip-box'>
-                    💡 <strong>Pro Tip:</strong> The median (50th percentile) is more reliable than the average for long-term projections, as it's less affected by extreme outliers.
+                    💡 <strong>Pro Tip:</strong> Start with a Quick Template, then customize parameters for your specific needs!
                 </div>
             </div>
         </div>
     </div>
     
+    <!-- Modal: Templates -->
+    <div id='modalTemplates' class='modal'>
+        <div class='modal-content'>
+            <div class='modal-header'>
+                <h2>🚀 Quick Start Templates</h2>
+                <span class='close-modal' onclick='closeModal("modalTemplates")'>&times;</span>
+            </div>
+            <div class='modal-body'>
+                <h3>Available Templates</h3>
+                
+                <h4>🛡 Conservative</h4>
+                <ul>
+                    <li>Monthly Investment: 500 EUR</li>
+                    <li>Expected Yield: 0.4% monthly (≈5% annual)</li>
+                    <li>Volatility: 8% (low risk)</li>
+                    <li>Ideal for: Risk-averse investors, near retirement</li>
+                </ul>
+                
+                <h4>⚖ Balanced</h4>
+                <ul>
+                    <li>Monthly Investment: 300 EUR</li>
+                    <li>Expected Yield: 0.58% monthly (≈7% annual)</li>
+                    <li>Volatility: 12% (moderate risk)</li>
+                    <li>Ideal for: Diversified 60/40 portfolio</li>
+                </ul>
+                
+                <h4>📈 Aggressive</h4>
+                <ul>
+                    <li>Monthly Investment: 200 EUR</li>
+                    <li>Expected Yield: 0.83% monthly (≈10% annual)</li>
+                    <li>Volatility: 18% (high risk)</li>
+                    <li>Ideal for: Long-term growth, young investors</li>
+                </ul>
+                
+                <h4>🏖 Retirement</h4>
+                <ul>
+                    <li>Accumulation: 15 years @ 400 EUR/month</li>
+                    <li>Withdrawal: 4% annual rule</li>
+                    <li>Volatility: 10%</li>
+                    <li>Ideal for: Retirement planning</li>
+                </ul>
+                
+                <h4>₿ Crypto</h4>
+                <ul>
+                    <li>Monthly Investment: 100 EUR</li>
+                    <li>Expected Yield: 1.5% monthly (≈20% annual)</li>
+                    <li>Volatility: 60% (extreme risk)</li>
+                    <li>Distribution: Jump Diffusion</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal: Distribution Models -->
+    <div id='modalDistribution' class='modal'>
+        <div class='modal-content'>
+            <div class='modal-header'>
+                <h2>📊 Distribution Models Explained</h2>
+                <span class='close-modal' onclick='closeModal("modalDistribution")'>&times;</span>
+            </div>
+            <div class='modal-body'>
+                <h3>Why Different Distributions?</h3>
+                <p>Real markets don't follow perfect bell curves. Advanced models capture <strong>fat tails</strong> (crashes), <strong>jumps</strong> (sudden shocks), and <strong>regime changes</strong> (bull/bear cycles).</p>
+                
+                <h4>1⃣ Normal (Gaussian)</h4>
+                <p>Classic assumption: returns are symmetrically distributed around the mean.</p>
+                <ul>
+                    <li>✅ Simple, widely used</li>
+                    <li>❌ Underestimates extreme events (2008 crash, COVID)</li>
+                </ul>
+                
+                <h4>2⃣ Student-t</h4>
+                <p>Heavier tails → captures rare but severe crashes.</p>
+                <ul>
+                    <li>Parameter: Degrees of freedom (df). Lower df = fatter tails.</li>
+                    <li>✅ More realistic for equities</li>
+                    <li>Recommended df: 5-10</li>
+                </ul>
+                
+                <h4>3⃣ Jump Diffusion (Merton Model)</h4>
+                <p>Combines smooth drift + sudden jumps (e.g., market crashes).</p>
+                <ul>
+                    <li>Parameters: Jump intensity (λ), jump magnitude</li>
+                    <li>✅ Models flash crashes, circuit breakers</li>
+                </ul>
+                
+                <h4>4⃣ Regime Switching</h4>
+                <p>Markets alternate between <strong>bull</strong> (high return, low vol) and <strong>bear</strong> (low/negative return, high vol).</p>
+                <ul>
+                    <li>✅ Captures economic cycles</li>
+                    <li>Uses Markov chain for state transitions</li>
+                </ul>
+                
+                <div class='tip-box'>
+                    💡 <strong>Recommendation:</strong> Use Student-t for stocks, Jump Diffusion for volatile assets, Normal for bonds.
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal: Advanced Risk -->
+    <div id='modalAdvancedRisk' class='modal'>
+        <div class='modal-content'>
+            <div class='modal-header'>
+                <h2>📉 Advanced Risk Metrics</h2>
+                <span class='close-modal' onclick='closeModal("modalAdvancedRisk")'>&times;</span>
+            </div>
+            <div class='modal-body'>
+                <h3>Professional Risk Measures</h3>
+                
+                <h4>1⃣ CVaR (Conditional Value at Risk)</h4>
+                <p>Also called <strong>Expected Shortfall</strong>. Average loss in the worst 5% of cases.</p>
+                <div class='formula-box'>
+                    CVaR = E[Loss | Loss > VaR]
+                </div>
+                <p>More conservative than VaR (used by Basel III banking regulations).</p>
+                
+                <h4>2⃣ Maximum Drawdown</h4>
+                <p>Largest peak-to-trough decline during the investment period.</p>
+                <div class='formula-box'>
+                    MDD = (Trough Value - Peak Value) / Peak Value
+                </div>
+                <p>Shows the worst loss you'd experience before recovery.</p>
+                
+                <h4>3⃣ Sortino Ratio</h4>
+                <p>Like Sharpe Ratio but only penalizes <strong>downside volatility</strong>.</p>
+                <div class='formula-box'>
+                    Sortino = (Return - Risk-Free Rate) / Downside Deviation
+                </div>
+                
+                <h4>4⃣ Calmar Ratio</h4>
+                <p>Annual return divided by maximum drawdown.</p>
+                <div class='formula-box'>
+                    Calmar = Annual Return / |Max Drawdown|
+                </div>
+                <p>Higher = better risk-adjusted returns.</p>
+                
+                <h4>5⃣ Skewness & Kurtosis</h4>
+                <ul>
+                    <li><strong>Skewness:</strong> Asymmetry (negative = more left-tail risk)</li>
+                    <li><strong>Kurtosis:</strong> Tail thickness (>3 = fat tails, more extreme events)</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal: Tornado Diagram -->
+    <div id='modalTornado' class='modal'>
+        <div class='modal-content'>
+            <div class='modal-header'>
+                <h2>🌪 Tornado Diagram (Sensitivity Analysis)</h2>
+                <span class='close-modal' onclick='closeModal("modalTornado")'>&times;</span>
+            </div>
+            <div class='modal-body'>
+                <h3>What Is It?</h3>
+                <p>A <strong>tornado diagram</strong> shows which input parameters have the <strong>biggest impact</strong> on your final portfolio value.</p>
+                
+                <h3>How to Read It</h3>
+                <ul>
+                    <li>Each bar shows the effect of ±10% change in that parameter</li>
+                    <li>Longer bars = more sensitive (higher impact)</li>
+                    <li>Bars are sorted by impact (largest first)</li>
+                </ul>
+                
+                <div class='example-box'>
+                    <strong>Example:</strong><br>
+                    If <strong>Volatility</strong> has the longest bar, reducing volatility will have the biggest positive effect on your outcomes.
+                </div>
+                
+                <h3>Why It's Useful</h3>
+                <ul>
+                    <li>Identify <strong>key drivers</strong> of portfolio success</li>
+                    <li>Focus optimization efforts on high-impact parameters</li>
+                    <li>Understand which assumptions matter most</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal: Heat Map -->
+    <div id='modalHeatMap' class='modal'>
+        <div class='modal-content'>
+            <div class='modal-header'>
+                <h2>🌡 2D Parameter Heat Map</h2>
+                <span class='close-modal' onclick='closeModal("modalHeatMap")'>&times;</span>
+            </div>
+            <div class='modal-body'>
+                <h3>What Is It?</h3>
+                <p>A <strong>heat map</strong> visualizes portfolio outcomes across different combinations of <strong>Expected Return</strong> (X-axis) and <strong>Volatility</strong> (Y-axis).</p>
+                
+                <h3>Color Legend</h3>
+                <ul>
+                    <li>🟦 <strong>Blue (Cold):</strong> Low portfolio values</li>
+                    <li>🟨 <strong>Yellow:</strong> Moderate values</li>
+                    <li>🟩 <strong>Green:</strong> Good values</li>
+                    <li>🟥 <strong>Red (Hot):</strong> Excellent values</li>
+                </ul>
+                
+                <h3>How to Use It</h3>
+                <ul>
+                    <li>Find your current parameters on the map</li>
+                    <li>Explore "what-if" scenarios by moving to different cells</li>
+                    <li>Identify the <strong>optimal risk/return balance</strong></li>
+                </ul>
+                
+                <div class='tip-box'>
+                    💡 <strong>Insight:</strong> The heat map often shows diminishing returns at very high volatility levels.
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal: Drawdown -->
+    <div id='modalDrawdown' class='modal'>
+        <div class='modal-content'>
+            <div class='modal-header'>
+                <h2>📉 Maximum Drawdown Explained</h2>
+                <span class='close-modal' onclick='closeModal("modalDrawdown")'>&times;</span>
+            </div>
+            <div class='modal-body'>
+                <h3>Definition</h3>
+                <p><strong>Maximum Drawdown (MDD)</strong> is the largest percentage drop from a peak to a trough in your portfolio value.</p>
+                
+                <div class='formula-box'>
+                    MDD = (Trough Value - Peak Value) / Peak Value × 100%
+                </div>
+                
+                <h3>Why It Matters</h3>
+                <ul>
+                    <li><strong>Psychological Test:</strong> Can you stomach a -30% drop?</li>
+                    <li><strong>Recovery Time:</strong> How long to get back to break-even?</li>
+                    <li><strong>Strategy Viability:</strong> Too deep = strategy may fail</li>
+                </ul>
+                
+                <h3>Example</h3>
+                <div class='example-box'>
+                    Your portfolio peaks at 100,000 EUR, then drops to 70,000 EUR.<br>
+                    <strong>MDD = -30%</strong><br><br>
+                    To recover, you need a <strong>+42.9% gain</strong> (not +30%)!
+                </div>
+                
+                <h3>Recovery Time</h3>
+                <p>The simulation calculates the <strong>average time</strong> to recover from the maximum drawdown.</p>
+                
+                <div class='warning-box'>
+                    ⚠ <strong>Rule of Thumb:</strong> Most investors panic-sell after 20-30% drawdowns. Plan accordingly!
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal: Scenarios -->
+    <div id='modalScenarios' class='modal'>
+        <div class='modal-content'>
+            <div class='modal-header'>
+                <h2>💾 Scenario Manager</h2>
+                <span class='close-modal' onclick='closeModal("modalScenarios")'>&times;</span>
+            </div>
+            <div class='modal-body'>
+                <h3>Save & Compare Simulations</h3>
+                <p>The Scenario Manager lets you:</p>
+                
+                <ul>
+                    <li><strong>Save</strong> up to 5 different simulation scenarios</li>
+                    <li><strong>Compare</strong> them side-by-side in overlay charts</li>
+                    <li><strong>Name</strong> each scenario for easy reference</li>
+                    <li><strong>Delete</strong> unwanted scenarios</li>
+                </ul>
+                
+                <h3>Use Cases</h3>
+                <div class='example-box'>
+                    <strong>Example 1:</strong> Compare "Conservative 2025" vs "Aggressive 2025"<br>
+                    <strong>Example 2:</strong> Test different retirement withdrawal rates<br>
+                    <strong>Example 3:</strong> Bull market vs Bear market assumptions
+                </div>
+                
+                <h3>How to Use</h3>
+                <ol>
+                    <li>Run a simulation with your desired parameters</li>
+                    <li>Click <strong>"Save Current Scenario"</strong></li>
+                    <li>Enter a descriptive name</li>
+                    <li>Repeat for other scenarios</li>
+                    <li>Click <strong>"Compare Scenarios"</strong> to see overlay chart</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modals existants (copier depuis l'original) -->
     <div id='modalMCInvest' class='modal'>
         <div class='modal-content'>
             <div class='modal-header'>
@@ -487,7 +1014,7 @@
             </div>
             <div class='modal-body'>
                 <h3>📐 Definition</h3>
-                <p>The <span class='key-term'>Expected Yield</span> is the average return you anticipate <strong>per month</strong>. It's the central tendency around which random returns fluctuate.</p>
+                <p>The <span class='key-term'>Expected Yield</span> is the average return you anticipate <strong>per month</strong>.</p>
                 
                 <div class='formula-box'>
                     <strong>Conversion Formula:</strong><br>
@@ -507,7 +1034,7 @@
             </div>
             <div class='modal-body'>
                 <h3>📊 Definition</h3>
-                <p><span class='key-term'>Volatility</span> measures how much returns fluctuate around the average. High volatility = big swings up and down. Low volatility = stable returns.</p>
+                <p><span class='key-term'>Volatility</span> measures how much returns fluctuate around the average.</p>
                 
                 <h3>📈 Typical Values (Annual)</h3>
                 <ul>
@@ -528,14 +1055,14 @@
             </div>
             <div class='modal-body'>
                 <h3>🎯 Why Multiple Simulations?</h3>
-                <p>Each simulation is one possible future. Running many simulations creates a <strong>probability distribution</strong> of outcomes, giving you confidence intervals.</p>
+                <p>Each simulation is one possible future. Running many simulations creates a <strong>probability distribution</strong>.</p>
                 
                 <h3>📊 How Many Do You Need?</h3>
                 <ul>
-                    <li><strong>100-500:</strong> Quick test, rough estimate (±5% accuracy)</li>
+                    <li><strong>100-500:</strong> Quick test (±5% accuracy)</li>
                     <li><strong>1,000:</strong> Standard (±2% accuracy) → Recommended</li>
                     <li><strong>5,000:</strong> High precision (±1% accuracy)</li>
-                    <li><strong>10,000+:</strong> Academic/professional use (±0.5% accuracy)</li>
+                    <li><strong>10,000:</strong> Academic use (±0.5% accuracy)</li>
                 </ul>
             </div>
         </div>
@@ -550,15 +1077,14 @@
             <div class='modal-body'>
                 <h3>📈 Key Metrics Explained</h3>
                 
-                <h4>1️⃣ Median (50th Percentile)</h4>
-                <p>The <span class='key-term'>middle value</span> when all outcomes are sorted. <strong>50% of simulations are above</strong> this, 50% below.</p>
-                <div class='tip-box'>💡 <strong>Use this</strong> as your most likely outcome.</div>
+                <h4>1⃣ Median (50th Percentile)</h4>
+                <p>The <span class='key-term'>middle value</span>. <strong>50% of simulations are above</strong> this.</p>
                 
-                <h4>2️⃣ 10th Percentile (Pessimistic)</h4>
-                <p>Only <strong>10% of scenarios are worse</strong> than this. Think of it as a "bad luck" scenario.</p>
+                <h4>2⃣ 10th Percentile (Pessimistic)</h4>
+                <p>Only <strong>10% of scenarios are worse</strong> than this.</p>
                 
-                <h4>3️⃣ 90th Percentile (Optimistic)</h4>
-                <p>Only <strong>10% of scenarios are better</strong> than this. Think of it as a "good luck" scenario.</p>
+                <h4>3⃣ 90th Percentile (Optimistic)</h4>
+                <p>Only <strong>10% of scenarios are better</strong> than this.</p>
             </div>
         </div>
     </div>
@@ -566,35 +1092,29 @@
     <div id='modalMCRisk' class='modal'>
         <div class='modal-content'>
             <div class='modal-header'>
-                <h2>⚠️ Risk Metrics Explained</h2>
+                <h2>⚠ Risk Metrics Explained</h2>
                 <span class='close-modal' onclick='closeModal("modalMCRisk")'>&times;</span>
             </div>
             <div class='modal-body'>
                 <h3>📊 Key Risk Indicators</h3>
                 
-                <h4>1️⃣ Value at Risk (VaR) 5%</h4>
-                <p><span class='key-term'>VaR 5%</span> = The 5th percentile outcome. <strong>95% of scenarios are better</strong> than this.</p>
+                <h4>1⃣ Value at Risk (VaR) 5%</h4>
+                <p><span class='key-term'>VaR 5%</span> = The 5th percentile outcome. <strong>95% of scenarios are better</strong>.</p>
                 
-                <h4>2️⃣ Loss Probability</h4>
-                <p>% of simulations where you <strong>end up with less than you invested</strong> (no gains, or losses).</p>
+                <h4>2⃣ Loss Probability</h4>
+                <p>% of simulations where you <strong>end up with less than you invested</strong>.</p>
             </div>
         </div>
     </div>
     
     <!-- Scripts -->
-    <script src='assets/js/dark-mode.js'></script>  <!-- ✅ NOUVEAU -->
+    <script src='assets/js/dark-mode.js'></script>
     <script src='assets/js/common.js'></script>
     <script src='assets/js/sidebar.js'></script>
     <script src='assets/js/monte-carlo.js'></script>
 
-    <!-- ========================================
-         CHATBOT IA FINANCIER
-         ======================================== -->
-    
-    <!-- Chart.js (requis pour les graphiques du chatbot) -->
+    <!-- Chatbot Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-
-    <!-- Scripts du chatbot (ORDRE IMPORTANT) -->
     <script src="assets/js/chatbot-config.js"></script>
     <script src="assets/js/chatbot-gemini.js"></script>
     <script src="assets/js/chatbot-analytics.js"></script>
@@ -605,80 +1125,27 @@
     <script src="assets/js/chatbot-ui.js"></script>
     <script src="assets/js/chatbot-particles.js"></script>
 
-    <!-- ✅ INITIALISATION DU CHATBOT AVEC VÉRIFICATION D'ACCÈS -->
+    <!-- Chatbot Initialization -->
     <script>
     document.addEventListener('DOMContentLoaded', function() {
-        console.log('🤖 Vérification des accès avant initialisation du chatbot...');
-        
-        // ✅ ATTENDRE QUE LE SYSTÈME D'ACCESS CONTROL SOIT PRÊT
         const initChatbotWhenReady = () => {
-            // Vérifier si l'accès a été refusé
             const accessDenied = sessionStorage.getItem('accessDenied') === 'true';
+            if (accessDenied) return;
             
-            if (accessDenied) {
-                console.log('⛔ Accès refusé - Le chatbot ne sera pas initialisé');
+            if (typeof ChatbotConfig === 'undefined' || typeof ChatbotUI === 'undefined') {
+                console.error('Chatbot dependencies not loaded');
                 return;
             }
             
-            // Vérifier que ChatbotConfig est chargé
-            if (typeof ChatbotConfig === 'undefined') {
-                console.error('❌ ChatbotConfig non défini !');
-                console.error('📁 Vérifiez que le fichier assets/js/chatbot-config.js existe');
-                return;
-            }
-            
-            console.log('✅ ChatbotConfig chargé');
-            
-            // Vérifier que ChatbotUI est disponible
-            if (typeof ChatbotUI === 'undefined') {
-                console.error('❌ ChatbotUI non défini !');
-                console.error('📁 Vérifiez que le fichier assets/js/chatbot-ui.js existe');
-                return;
-            }
-            
-            console.log('✅ ChatbotUI chargé');
-            
-            // Initialisation du chatbot
             try {
                 window.financialChatbot = new ChatbotUI(ChatbotConfig);
-                console.log('🎉 Chatbot FinanceGPT initialisé avec succès !');
-                console.log('💼 Cliquez sur le bouton flottant pour ouvrir le chatbot');
+                console.log('🎉 Chatbot initialized');
             } catch (error) {
-                console.error('❌ Erreur lors de l\'initialisation du chatbot:', error);
-                console.error('📋 Détails:', error.message);
+                console.error('Chatbot init error:', error);
             }
         };
         
-        // Attendre un peu pour laisser access-control.js faire son travail
         setTimeout(initChatbotWhenReady, 500);
-    });
-    </script>
-
-    <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        setTimeout(() => {
-            console.log('🔍 BACKGROUND DIAGNOSIS:');
-            
-            const elements = [
-                'body',
-                '.layout-wrapper',
-                '.main-content',
-                '.container',
-                '.section'
-            ];
-            
-            elements.forEach(selector => {
-                const el = document.querySelector(selector);
-                if (el) {
-                    const bg = window.getComputedStyle(el).background;
-                    console.log(`📦 ${selector}:`, bg.substring(0, 100) + '...');
-                }
-            });
-            
-            console.log('---');
-            console.log('🎨 Canvas background:', 
-                window.getComputedStyle(document.getElementById('particles-canvas')).background);
-        }, 1000);
     });
     </script>
 
