@@ -1,6 +1,7 @@
 /* ==============================================
-   TREND-PREDICTION.JS - ML STOCK PREDICTION
-   Version avec Twelve Data API + Rate Limiting + Cache Optimisé
+   📈 TREND-PREDICTION.JS - ML STOCK PREDICTION
+   Version ULTRA-ENRICHIE avec Advanced Analytics
+   Twelve Data API + Rate Limiting + Cache Optimisé
    ============================================== */
 
 // ========== RATE LIMITER (IDENTIQUE À MARKET DATA) ==========
@@ -90,10 +91,10 @@ class RateLimiter {
     }
 }
 
-// ========== CACHE OPTIMISÉ (IDENTIQUE À MARKET DATA) ==========
+// ========== CACHE OPTIMISÉ ==========
 class OptimizedCache {
     constructor() {
-        this.prefix = 'tp_cache_'; // trend prediction cache
+        this.prefix = 'tp_cache_';
         this.staticTTL = 24 * 60 * 60 * 1000; // 24h
         this.dynamicTTL = 5 * 60 * 1000; // 5min
     }
@@ -201,7 +202,7 @@ const TrendPrediction = {
     
     async init() {
         try {
-            console.log('🤖 Initializing ML Trend Prediction with Rate Limiting...');
+            console.log('🤖 Initializing ML Trend Prediction with Advanced Analytics...');
             
             // Initialiser le rate limiter (8 req/min)
             this.rateLimiter = new RateLimiter(8, 60000);
@@ -234,7 +235,7 @@ const TrendPrediction = {
                 this.loadSymbol(this.currentSymbol);
             }, 500);
             
-            console.log('✅ ML Trend Prediction initialized with rate limiting');
+            console.log('✅ ML Trend Prediction initialized with advanced analytics');
             
         } catch (error) {
             console.error('Initialization error:', error);
@@ -245,7 +246,7 @@ const TrendPrediction = {
     async waitForAuth() {
         return new Promise((resolve) => {
             if (!firebase || !firebase.auth) {
-                console.warn('⚠️ Firebase not available');
+                console.warn('⚠ Firebase not available');
                 resolve();
                 return;
             }
@@ -616,6 +617,11 @@ const TrendPrediction = {
             await this.trainAllModels();
             this.displayResults();
             
+            // ✨ NOUVEAU : Générer les analytics avancées
+            if (window.AdvancedAnalytics) {
+                await window.AdvancedAnalytics.generateAnalytics(symbol);
+            }
+            
             this.showLoading(false);
             
             console.log('✅ Stock data loaded and models trained');
@@ -686,9 +692,10 @@ const TrendPrediction = {
         if (this.currentSymbol) {
             this.loadSymbol(this.currentSymbol);
         }
-    },
-    
-    // ============================================
+    }
+};
+
+// ============================================
     // TRAIN ALL MODELS
     // ============================================
     
@@ -739,16 +746,11 @@ const TrendPrediction = {
     
     sleep(ms) {
         return new Promise(resolve => setTimeout(resolve, ms));
-    }
-};
-
-// ========== CONTINUATION DE TREND-PREDICTION.JS ==========
-
-// ============================================
-// LINEAR REGRESSION
-// ============================================
-
-Object.assign(TrendPrediction, {
+    },
+    
+    // ============================================
+    // LINEAR REGRESSION
+    // ============================================
     
     async trainLinearRegression(prices) {
         const n = prices.length;
@@ -1222,10 +1224,10 @@ Object.assign(TrendPrediction, {
         }
         return Math.sqrt(sum / actual.length);
     }
-    
-});
 
-// ========== CONTINUATION ET FIN DE TREND-PREDICTION.JS ==========
+    };
+
+// ========== CONTINUATION DE TREND-PREDICTION.JS ==========
 
 // ============================================
 // DISPLAY FUNCTIONS
@@ -1846,11 +1848,16 @@ Object.assign(TrendPrediction, {
             arima: this.colors.lightBlue
         };
         return colors[modelName] || this.colors.primary;
-    },
-    
-    // ============================================
-    // UTILITY FUNCTIONS
-    // ============================================
+    }
+});
+
+// ========== CONTINUATION ET FIN DE TREND-PREDICTION.JS ==========
+
+// ============================================
+// UTILITY FUNCTIONS
+// ============================================
+
+Object.assign(TrendPrediction, {
     
     escapeHtml(text) {
         if (!text) return '';
@@ -1909,19 +1916,85 @@ Object.assign(TrendPrediction, {
             window.FinanceDashboard.showNotification(message, type);
         } else {
             console.log(`[${type.toUpperCase()}]`, message);
+            
+            // Créer une notification simple si FinanceDashboard n'est pas disponible
+            const notification = document.createElement('div');
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                padding: 16px 24px;
+                background: ${type === 'success' ? 'linear-gradient(135deg, #43e97b, #38f9d7)' : 
+                             type === 'error' ? 'linear-gradient(135deg, #f5576c, #fd7e14)' : 
+                             type === 'warning' ? 'linear-gradient(135deg, #f6d365, #fda085)' : 
+                             'linear-gradient(135deg, #667eea, #764ba2)'};
+                color: white;
+                border-radius: 12px;
+                box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+                z-index: 10001;
+                font-weight: 600;
+                animation: slideInRight 0.3s ease;
+                max-width: 400px;
+            `;
+            
+            const icon = type === 'success' ? '✓' : 
+                        type === 'error' ? '✕' : 
+                        type === 'warning' ? '⚠' : 'ℹ';
+            
+            notification.innerHTML = `<i class='fas fa-${icon === '✓' ? 'check' : icon === '✕' ? 'times' : icon === '⚠' ? 'exclamation-triangle' : 'info'}-circle'></i> ${message}`;
+            
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.style.animation = 'slideOutRight 0.3s ease';
+                setTimeout(() => notification.remove(), 300);
+            }, 3000);
         }
     }
     
 });
 
-// ========== INITIALIZE WHEN DOM IS LOADED ==========
+// ========== EXPOSITION GLOBALE ==========
+window.TrendPrediction = TrendPrediction;
 
+// ========== INITIALIZE WHEN DOM IS LOADED ==========
 document.addEventListener('DOMContentLoaded', () => {
     console.log('🤖 ML Trend Prediction - Starting initialization...');
     TrendPrediction.init();
 });
 
-// ========== EXPOSITION GLOBALE ==========
-window.TrendPrediction = TrendPrediction;
+// ========== STYLES POUR LES ANIMATIONS DE NOTIFICATION ==========
+if (!document.getElementById('notificationStyles')) {
+    const style = document.createElement('style');
+    style.id = 'notificationStyles';
+    style.textContent = `
+        @keyframes slideInRight {
+            from {
+                opacity: 0;
+                transform: translateX(100px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        
+        @keyframes slideOutRight {
+            from {
+                opacity: 1;
+                transform: translateX(0);
+            }
+            to {
+                opacity: 0;
+                transform: translateX(100px);
+            }
+        }
+    `;
+    document.head.appendChild(style);
+}
 
-console.log('✅ ML Trend Prediction script loaded - COMPLETE VERSION with Twelve Data API + Rate Limiting + Cache');
+console.log('✅ ML Trend Prediction script loaded - COMPLETE VERSION with Advanced Analytics');
+
+/* ==============================================
+   📊 FIN DU FICHIER TREND-PREDICTION.JS
+   ============================================== */
