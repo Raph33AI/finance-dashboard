@@ -467,7 +467,7 @@ const MonteCarlo = (function() {
                 height: 500
             },
             title: { 
-                text: '📊 Scenario Comparison - Median Results',
+                text: 'Scenario Comparison - Median Results',
                 style: { 
                     color: '#667eea', 
                     fontWeight: 'bold',
@@ -1111,7 +1111,7 @@ const MonteCarlo = (function() {
             
             Highcharts.chart('chartStrategyComparison', {
                 chart: { type: 'line', backgroundColor: 'transparent' },
-                title: { text: '💰 DCA vs Lump Sum', style: { color: '#667eea', fontWeight: 'bold' } },
+                title: { text: 'DCA vs Lump Sum', style: { color: '#667eea', fontWeight: 'bold' } },
                 xAxis: { title: { text: 'Months' } },
                 yAxis: { title: { text: 'Portfolio (EUR)' } },
                 series: [
@@ -1187,7 +1187,7 @@ const MonteCarlo = (function() {
             
             Highcharts.chart('chartWithdrawal', {
                 chart: { type: 'area', backgroundColor: 'transparent' },
-                title: { text: '🏖 Retirement Plan', style: { color: '#764ba2', fontWeight: 'bold' } },
+                title: { text: 'Retirement Plan', style: { color: '#764ba2', fontWeight: 'bold' } },
                 xAxis: { 
                     title: { text: 'Months' },
                     plotLines: [{
@@ -1370,7 +1370,7 @@ const MonteCarlo = (function() {
         
         Highcharts.chart('chart1', {
             chart: { type: 'line', backgroundColor: 'transparent' },
-            title: { text: '📊 Portfolio Evolution', style: { color: '#667eea', fontWeight: 'bold' } },
+            title: { text: 'Portfolio Evolution', style: { color: '#667eea', fontWeight: 'bold' } },
             xAxis: { title: { text: 'Months' } },
             yAxis: { title: { text: 'Value (EUR)' } },
             series: series,
@@ -1401,7 +1401,7 @@ const MonteCarlo = (function() {
         
         Highcharts.chart('chart2', {
             chart: { type: 'column', backgroundColor: 'transparent' },
-            title: { text: '📈 Return Distribution', style: { color: '#667eea', fontWeight: 'bold' } },
+            title: { text: 'Return Distribution', style: { color: '#667eea', fontWeight: 'bold' } },
             xAxis: { 
                 title: { text: 'Final Value (EUR)' },
                 labels: { formatter: function() { return window.FinanceDashboard.formatNumber(this.value, 0); } }
@@ -1421,7 +1421,7 @@ const MonteCarlo = (function() {
         
         Highcharts.chart('chart3', {
             chart: { type: 'pie', backgroundColor: 'transparent' },
-            title: { text: `🎯 Success: ${successRate}%`, style: { color: '#667eea', fontWeight: 'bold' } },
+            title: { text: `Success: ${successRate}%`, style: { color: '#667eea', fontWeight: 'bold' } },
             plotOptions: { 
                 pie: { 
                     innerSize: '65%',
@@ -1480,7 +1480,7 @@ const MonteCarlo = (function() {
         
         Highcharts.chart('chartDrawdown', {
             chart: { type: 'column', backgroundColor: 'transparent' },
-            title: { text: '📉 Drawdown Distribution', style: { color: '#f5576c', fontWeight: 'bold' } },
+            title: { text: 'Drawdown Distribution', style: { color: '#f5576c', fontWeight: 'bold' } },
             xAxis: { 
                 title: { text: 'MDD (%)' },
                 labels: { formatter: function() { return this.value.toFixed(1) + '%'; } }
@@ -1555,7 +1555,7 @@ const MonteCarlo = (function() {
         
         Highcharts.chart('chart4', {
             chart: { type: 'column', backgroundColor: 'transparent' },
-            title: { text: '⚡ Stress Testing', style: { color: '#667eea', fontWeight: 'bold' } },
+            title: { text: 'Stress Testing', style: { color: '#667eea', fontWeight: 'bold' } },
             xAxis: { categories: categories },
             yAxis: { title: { text: 'Median (EUR)' } },
             series: [{ 
@@ -1668,7 +1668,7 @@ const MonteCarlo = (function() {
         
         Highcharts.chart('chartTornado', {
             chart: { type: 'bar', backgroundColor: 'transparent' },
-            title: { text: '🌪 Sensitivity Analysis', style: { color: '#667eea', fontWeight: 'bold' } },
+            title: { text: 'Sensitivity Analysis', style: { color: '#667eea', fontWeight: 'bold' } },
             xAxis: [{ categories: categories, reversed: false }, { opposite: true, reversed: false, categories: categories, linkedTo: 0 }],
             yAxis: { title: { text: 'Impact (EUR)' } },
             plotOptions: { series: { stacking: 'normal', borderRadius: 5 } },
@@ -1703,7 +1703,7 @@ const MonteCarlo = (function() {
         
         Highcharts.chart('chartHeatMap', {
             chart: { type: 'heatmap', backgroundColor: 'transparent' },
-            title: { text: '🌡 Parameter Heat Map', style: { color: '#667eea', fontWeight: 'bold' } },
+            title: { text: 'Parameter Heat Map', style: { color: '#667eea', fontWeight: 'bold' } },
             xAxis: {
                 categories: yields.map(y => (y * 12).toFixed(1) + '%'),
                 title: { text: 'Annual Return' }
@@ -1782,7 +1782,7 @@ const MonteCarlo = (function() {
         
         Highcharts.chart('chartCorrelation', {
             chart: { type: 'heatmap', backgroundColor: 'transparent' },
-            title: { text: '📊 Correlation Matrix', style: { color: '#667eea', fontWeight: 'bold' } },
+            title: { text: 'Correlation Matrix', style: { color: '#667eea', fontWeight: 'bold' } },
             xAxis: { categories: metrics },
             yAxis: { categories: metrics },
             colorAxis: {
@@ -1830,7 +1830,7 @@ const MonteCarlo = (function() {
         
         Highcharts.chart('chartFrontier', {
             chart: { type: 'scatter', backgroundColor: 'transparent' },
-            title: { text: '📈 Risk-Return Frontier', style: { color: '#667eea', fontWeight: 'bold' } },
+            title: { text: 'Risk-Return Frontier', style: { color: '#667eea', fontWeight: 'bold' } },
             xAxis: { title: { text: 'Volatility (%)' } },
             yAxis: { title: { text: 'Annual Return (%)' } },
             series: [{
@@ -1878,7 +1878,7 @@ const MonteCarlo = (function() {
         
         Highcharts.chart('chartRollingSharpe', {
             chart: { type: 'line', backgroundColor: 'transparent' },
-            title: { text: '📈 Rolling Sharpe', style: { color: '#667eea', fontWeight: 'bold' } },
+            title: { text: 'Rolling Sharpe', style: { color: '#667eea', fontWeight: 'bold' } },
             xAxis: { title: { text: 'Month' }, categories: months },
             yAxis: { title: { text: 'Sharpe Ratio' } },
             series: [{ name: 'Median Sharpe', data: medianSharpes, color: '#667eea', lineWidth: 2 }],
