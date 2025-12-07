@@ -5964,34 +5964,59 @@ const AdvancedAnalysis = {
     // ============================================
 
     displayAIRecommendation(aiScore, signals) {
+        console.log('📊 Displaying AI Recommendation:', aiScore);
+        
         // AI Score Value
-        document.getElementById('aiScoreValue').textContent = aiScore.score.toFixed(0) + '/100';
+        const scoreValueEl = document.getElementById('aiScoreValue');
+        if (scoreValueEl) {
+            scoreValueEl.textContent = aiScore.score.toFixed(0) + '/100';
+        }
         
         // AI Score Rating
         const ratingEl = document.getElementById('aiScoreRating');
-        ratingEl.textContent = aiScore.rating;
-        
-        // Apply color class
-        let scoreClass = '';
-        if (aiScore.score >= 70) scoreClass = 'very-bullish';
-        else if (aiScore.score >= 60) scoreClass = 'bullish';
-        else if (aiScore.score >= 55) scoreClass = 'moderately-bullish';
-        else if (aiScore.score >= 45) scoreClass = 'neutral';
-        else if (aiScore.score >= 40) scoreClass = 'moderately-bearish';
-        else if (aiScore.score >= 30) scoreClass = 'bearish';
-        else scoreClass = 'very-bearish';
-        
-        ratingEl.className = `ai-score-rating ${scoreClass}`;
-        
-        // AI Score Fill Bar
-        const fillEl = document.getElementById('aiScoreFill');
-        fillEl.style.width = aiScore.score + '%';
-        fillEl.className = `ai-score-fill ${scoreClass}`;
+        if (ratingEl) {
+            ratingEl.textContent = aiScore.rating;
+            
+            // Apply color class
+            let scoreClass = '';
+            if (aiScore.score >= 70) scoreClass = 'very-bullish';
+            else if (aiScore.score >= 60) scoreClass = 'bullish';
+            else if (aiScore.score >= 55) scoreClass = 'moderately-bullish';
+            else if (aiScore.score >= 45) scoreClass = 'neutral';
+            else if (aiScore.score >= 40) scoreClass = 'moderately-bearish';
+            else if (aiScore.score >= 30) scoreClass = 'bearish';
+            else scoreClass = 'very-bearish';
+            
+            ratingEl.className = `ai-score-rating ${scoreClass}`;
+            
+            // ✅ CORRECTION - AI Score Fill Bar (comme les confidence bars)
+            const fillBarContainer = document.getElementById('aiScoreFill');
+            if (fillBarContainer) {
+                let fillEl = fillBarContainer.querySelector('.ai-score-fill');
+                
+                if (!fillEl) {
+                    fillBarContainer.innerHTML = `<div class="ai-score-fill"></div>`;
+                    fillEl = fillBarContainer.querySelector('.ai-score-fill');
+                }
+                
+                if (fillEl) {
+                    fillEl.style.width = aiScore.score + '%';
+                    fillEl.className = `ai-score-fill ${scoreClass}`;
+                    console.log(`✅ AI Score fill: ${aiScore.score}% (class: ${scoreClass})`);
+                }
+            }
+        }
         
         // Signal Counts
-        document.getElementById('bullishSignals').textContent = aiScore.bullishSignals;
-        document.getElementById('neutralSignals').textContent = aiScore.neutralSignals;
-        document.getElementById('bearishSignals').textContent = aiScore.bearishSignals;
+        const bullishEl = document.getElementById('bullishSignals');
+        const neutralEl = document.getElementById('neutralSignals');
+        const bearishEl = document.getElementById('bearishSignals');
+        
+        if (bullishEl) bullishEl.textContent = aiScore.bullishSignals;
+        if (neutralEl) neutralEl.textContent = aiScore.neutralSignals;
+        if (bearishEl) bearishEl.textContent = aiScore.bearishSignals;
+        
+        console.log('✅ AI Recommendation displayed successfully');
     },
 
     displayHorizonRecommendations(horizons, currentPrice) {
