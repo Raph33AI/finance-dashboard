@@ -1190,15 +1190,24 @@ Object.assign(TrendPrediction, {
                 };
                 
                 Object.keys(models).forEach(modelName => {
-                    const model = models[modelName];
-                    const predicted = model.finalPrediction;
-                    const actual = actualFuture[actualFuture.length - 1];
-                    const error = Math.abs((predicted - actual) / actual) * 100;
-                    
-                    backtestResults[modelName].predictions.push(predicted);
-                    backtestResults[modelName].actuals.push(actual);
-                    backtestResults[modelName].errors.push(error);
-                });
+                const model = models[modelName];
+                const predicted = model.finalPrediction;
+                const actual = actualFuture[actualFuture.length - 1];
+                
+                // ✅ CORRECTION : Vérifier que predicted et actual sont valides
+                if (!predicted || !actual || actual === 0) {
+                    console.warn(`Invalid data for ${modelName}: predicted=${predicted}, actual=${actual}`);
+                    return;
+                }
+                
+                const error = Math.abs((predicted - actual) / actual) * 100;
+                
+                backtestResults[modelName].predictions.push(predicted);
+                backtestResults[modelName].actuals.push(actual);
+                backtestResults[modelName].errors.push(error);
+                
+                console.log(`✅ ${modelName} - Error: ${error.toFixed(2)}%`);
+            });
             } catch (e) {
                 console.warn('Backtest period failed:', e);
             }
@@ -1779,45 +1788,130 @@ Object.assign(TrendPrediction, {
             credits: { enabled: false }
         });
         
-        // 3. Error Evolution Chart
+        // 3. Error Evolution Chart (CORRIGÉ)
         const errorSeries = Object.keys(this.backtestResults).map(modelName => {
             const result = this.backtestResults[modelName];
+            
+            // ✅ CORRECTION : S'assurer que les données existent
+            if (!result.errors || result.errors.length === 0) {
+                console.warn(`No error data for model: ${modelName}`);
+                return {
+                    name: this.models[modelName].name,
+                    data: [],
+                    color: this.getModelColor(modelName),
+                    lineWidth: 2
+                };
+            }
+            
+            // ✅ Créer un tableau de données avec index
+            const errorData = result.errors.map((error, index) => ({
+                x: index + 1,
+                y: error
+            }));
+            
             return {
                 name: this.models[modelName].name,
-                data: result.errors || [],
+                data: errorData,
                 color: this.getModelColor(modelName),
-                lineWidth: 2
+                lineWidth: 2,
+                marker: {
+                    enabled: true,
+                    radius: 4
+                }
             };
         });
-        
+
+        // ✅ Vérification : Au moins un modèle a des données
+        const hasData = errorSeries.some(s => s.data && s.data.length > 0);
+
+        if (!hasData) {
+            console.error('❌ No error evolution data available');
+            document.getElementById('backtestErrorChart').innerHTML = 
+                '<div style="padding:60px;text-align:center;color:#64748b;">' +
+                '<i class="fas fa-exclamation-triangle" style="font-size:3rem;margin-bottom:20px;display:block;"></i>' +
+                '<strong>No Error Data Available</strong><br>' +
+                'Backtesting needs more historical data to generate error evolution.' +
+                '</div>';
+            return;
+        }
+
         Highcharts.chart('backtestErrorChart', {
             chart: {
                 height: 450,
-                borderRadius: 15
+                borderRadius: 15,
+                backgroundColor: 'transparent'
             },
             title: {
                 text: 'Prediction Error Evolution',
-                style: { color: this.colors.primary, fontWeight: 'bold' }
+                style: { 
+                    color: this.colors.primary, 
+                    fontWeight: 'bold',
+                    fontSize: '1.25rem'
+                }
             },
             subtitle: {
-                text: 'MAPE (Mean Absolute Percentage Error) over time',
-                style: { color: '#64748b' }
+                text: 'MAPE (Mean Absolute Percentage Error) over backtesting periods',
+                style: { color: '#64748b', fontSize: '0.95rem' }
             },
             xAxis: {
-                title: { text: 'Backtest Period' }
+                title: { 
+                    text: 'Backtest Period',
+                    style: { color: '#475569', fontWeight: '600' }
+                },
+                labels: {
+                    style: { color: '#64748b', fontWeight: '500' }
+                },
+                gridLineColor: 'rgba(148, 163, 184, 0.1)'
             },
             yAxis: {
-                title: { text: 'Error (%)' },
-                min: 0
+                title: { 
+                    text: 'Prediction Error (%)',
+                    style: { color: '#475569', fontWeight: '600' }
+                },
+                min: 0,
+                labels: {
+                    format: '{value}%',
+                    style: { color: '#64748b', fontWeight: '500' }
+                },
+                gridLineColor: 'rgba(148, 163, 184, 0.1)'
             },
             tooltip: {
+                shared: true,
+                crosshairs: true,
+                borderRadius: 12,
                 valueSuffix: '%',
-                borderRadius: 10
+                valueDecimals: 2,
+                backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                borderColor: '#e2e8f0',
+                style: {
+                    color: '#1e293b',
+                    fontSize: '13px',
+                    fontWeight: '600'
+                }
             },
             legend: {
                 enabled: true,
                 align: 'center',
-                verticalAlign: 'bottom'
+                verticalAlign: 'bottom',
+                itemStyle: {
+                    color: '#475569',
+                    fontWeight: '600'
+                }
+            },
+            plotOptions: {
+                series: {
+                    marker: {
+                        enabled: true,
+                        radius: 5,
+                        symbol: 'circle'
+                    },
+                    lineWidth: 3,
+                    states: {
+                        hover: {
+                            lineWidth: 4
+                        }
+                    }
+                }
             },
             series: errorSeries,
             credits: { enabled: false }
@@ -1998,10 +2092,15 @@ Object.assign(TrendPrediction, {
                 min: 0,
                 max: 1,
                 stops: [
-                    [0, '#f8fafc'],
-                    [0.5, '#93c5fd'],
-                    [1, '#1e40af']
-                ]
+                    [0, '#ef4444'],      // Rouge (faible corrélation)
+                    [0.3, '#f59e0b'],    // Orange
+                    [0.5, '#fbbf24'],    // Jaune
+                    [0.7, '#a3e635'],    // Jaune-vert
+                    [1, '#22c55e']       // Vert (forte corrélation)
+                ],
+                labels: {
+                    format: '{value:.0%}'
+                }
             },
             legend: {
                 align: 'right',
@@ -2041,24 +2140,29 @@ Object.assign(TrendPrediction, {
         
         const consensusScore = avgCorrelation * 100;
         
-        // Créer une jauge pour le consensus
+        // Créer une jauge pour le consensus (VERSION PREMIUM)
         Highcharts.chart('consensusGauge', {
             chart: {
                 type: 'solidgauge',
-                height: 250
+                height: 280,
+                backgroundColor: 'transparent'
             },
             title: null,
             pane: {
-                center: ['50%', '85%'],
-                size: '140%',
+                center: ['50%', '75%'],
+                size: '110%',
                 startAngle: -90,
                 endAngle: 90,
-                background: {
-                    backgroundColor: '#f1f5f9',
+                background: [{
+                    backgroundColor: 'rgba(241, 245, 249, 0.3)',
                     innerRadius: '60%',
                     outerRadius: '100%',
-                    shape: 'arc'
-                }
+                    shape: 'arc',
+                    borderWidth: 0
+                }]
+            },
+            exporting: {
+                enabled: false
             },
             tooltip: {
                 enabled: false
@@ -2067,30 +2171,35 @@ Object.assign(TrendPrediction, {
                 min: 0,
                 max: 100,
                 stops: [
-                    [0.3, '#ef4444'],
-                    [0.6, '#f59e0b'],
-                    [0.9, '#10b981']
+                    [0.1, '#ef4444'],   // Rouge
+                    [0.3, '#f59e0b'],   // Orange
+                    [0.5, '#fbbf24'],   // Jaune
+                    [0.7, '#84cc16'],   // Vert clair
+                    [0.9, '#22c55e']    // Vert
                 ],
                 lineWidth: 0,
                 tickWidth: 0,
                 minorTickInterval: null,
                 tickAmount: 2,
-                title: {
-                    y: -70,
-                    text: consensusScore.toFixed(0) + '%',
-                    style: {
-                        fontSize: '2rem',
-                        fontWeight: 'bold'
-                    }
-                },
                 labels: {
-                    y: 16
+                    y: 20,
+                    style: {
+                        fontSize: '14px',
+                        fontWeight: '600',
+                        color: '#64748b'
+                    }
                 }
             },
             plotOptions: {
                 solidgauge: {
                     dataLabels: {
-                        enabled: false
+                        y: -30,
+                        borderWidth: 0,
+                        useHTML: true,
+                        format: '<div style="text-align:center">' +
+                            '<span style="font-size:2.5rem;font-weight:800;background:linear-gradient(135deg, #667eea, #764ba2);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">{y:.0f}%</span><br/>' +
+                            '<span style="font-size:0.9rem;color:#64748b;font-weight:600;margin-top:8px;display:block;">Model Consensus</span>' +
+                            '</div>'
                     },
                     linecap: 'round',
                     stickyTracking: false,
@@ -2100,12 +2209,8 @@ Object.assign(TrendPrediction, {
             series: [{
                 name: 'Consensus',
                 data: [consensusScore],
-                dataLabels: {
-                    format: '<div style="text-align:center">' +
-                        '<span style="font-size:1.5rem;font-weight:bold">{y:.0f}%</span><br/>' +
-                        '<span style="font-size:0.8rem;opacity:0.6">Consensus</span>' +
-                        '</div>'
-                }
+                innerRadius: '60%',
+                radius: '100%'
             }],
             credits: { enabled: false }
         });
@@ -2587,6 +2692,441 @@ Object.assign(TrendPrediction, {
         }
     }
     
+});
+
+// ============================================
+// ✨ NOUVEAU : MULTI-STOCK COMPARISON
+// ============================================
+
+Object.assign(TrendPrediction, {
+    
+    comparisonStocks: [],
+    comparisonParameters: {
+        volatility: 25,
+        correlation: 0.5,
+        riskFree: 4.5,
+        horizon: 30
+    },
+    
+    addStockToComparison() {
+        const input = document.getElementById('multiStockInput');
+        const symbol = input.value.trim().toUpperCase();
+        
+        if (!symbol) {
+            this.showNotification('Please enter a stock symbol', 'warning');
+            return;
+        }
+        
+        if (this.comparisonStocks.includes(symbol)) {
+            this.showNotification(`${symbol} is already added`, 'warning');
+            return;
+        }
+        
+        if (this.comparisonStocks.length >= 10) {
+            this.showNotification('Maximum 10 stocks allowed', 'warning');
+            return;
+        }
+        
+        this.comparisonStocks.push(symbol);
+        this.renderComparisonStocks();
+        input.value = '';
+        
+        this.showNotification(`${symbol} added to comparison`, 'success');
+    },
+    
+    removeStockFromComparison(symbol) {
+        this.comparisonStocks = this.comparisonStocks.filter(s => s !== symbol);
+        this.renderComparisonStocks();
+        this.showNotification(`${symbol} removed`, 'info');
+    },
+    
+    renderComparisonStocks() {
+        const container = document.getElementById('selectedStocks');
+        
+        if (this.comparisonStocks.length === 0) {
+            container.innerHTML = '<div style="color:#64748b;font-style:italic;padding:10px;">No stocks selected yet. Add stocks to compare.</div>';
+            return;
+        }
+        
+        container.innerHTML = this.comparisonStocks.map(symbol => `
+            <div class="stock-chip">
+                <i class="fas fa-chart-line"></i>
+                <span>${symbol}</span>
+                <button class="remove-stock" onclick="TrendPrediction.removeStockFromComparison('${symbol}')" title="Remove">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+        `).join('');
+    },
+    
+    updateParameter(param, value) {
+        this.comparisonParameters[param] = parseFloat(value);
+        
+        const valueEl = document.getElementById(`${param}Value`);
+        if (valueEl) {
+            if (param === 'correlation') {
+                valueEl.textContent = value;
+            } else if (param === 'horizon') {
+                valueEl.textContent = `${value} days`;
+            } else {
+                valueEl.textContent = `${value}%`;
+            }
+        }
+    },
+    
+    async runMultiStockAnalysis() {
+        if (this.comparisonStocks.length < 2) {
+            this.showNotification('Please add at least 2 stocks to compare', 'warning');
+            return;
+        }
+        
+        this.showLoading(true, 'Analyzing multiple stocks...');
+        
+        try {
+            // Fetch data for all stocks
+            const stocksData = await Promise.all(
+                this.comparisonStocks.map(symbol => this.fetchStockForComparison(symbol))
+            );
+            
+            // Filter out failed requests
+            const validStocks = stocksData.filter(d => d !== null);
+            
+            if (validStocks.length < 2) {
+                throw new Error('Not enough valid stock data. Please check symbols.');
+            }
+            
+            // Create comparison charts
+            this.createMultiStockPredictionChart(validStocks);
+            this.createRiskReturnScatter(validStocks);
+            this.createStockCorrelationMatrix(validStocks);
+            this.createSharpeRatioChart(validStocks);
+            this.createComparisonTable(validStocks);
+            
+            // Show charts
+            document.getElementById('comparisonChartsGrid').style.display = 'grid';
+            document.getElementById('comparisonTable').style.display = 'block';
+            
+            this.showLoading(false);
+            this.showNotification('Multi-stock analysis complete!', 'success');
+            
+        } catch (error) {
+            console.error('Multi-stock analysis error:', error);
+            this.showNotification(error.message, 'error');
+            this.showLoading(false);
+        }
+    },
+    
+    async fetchStockForComparison(symbol) {
+        try {
+            const [quote, timeSeries] = await Promise.all([
+                this.apiRequest(() => this.apiClient.getQuote(symbol), 'normal'),
+                this.apiRequest(() => this.getTimeSeriesForPeriod(symbol, '6M'), 'normal')
+            ]);
+            
+            if (!quote || !timeSeries) {
+                throw new Error(`Failed to load ${symbol}`);
+            }
+            
+            const prices = timeSeries.data.map(p => p.close);
+            
+            // Calculate volatility
+            const returns = [];
+            for (let i = 1; i < prices.length; i++) {
+                returns.push((prices[i] - prices[i-1]) / prices[i-1]);
+            }
+            const volatility = Math.sqrt(returns.reduce((sum, r) => sum + r*r, 0) / returns.length) * Math.sqrt(252) * 100;
+            
+            // Run ensemble prediction
+            const tempSymbol = this.currentSymbol;
+            const tempData = this.stockData;
+            const tempHorizon = this.predictionHorizon;
+            
+            this.currentSymbol = symbol;
+            this.stockData = { symbol, prices: timeSeries.data, quote, currency: 'USD' };
+            this.predictionHorizon = this.comparisonParameters.horizon;
+            
+            await this.trainAllModels();
+            
+            const models = Object.values(this.models).filter(m => m !== null);
+            let sumWeightedPrediction = 0;
+            let sumWeights = 0;
+            
+            models.forEach(model => {
+                const weight = Math.max(0, model.r2);
+                sumWeightedPrediction += model.finalPrediction * weight;
+                sumWeights += weight;
+            });
+            
+            const prediction = sumWeightedPrediction / sumWeights;
+            const currentPrice = quote.price;
+            const expectedReturn = ((prediction - currentPrice) / currentPrice) * 100;
+            const sharpeRatio = (expectedReturn - this.comparisonParameters.riskFree) / volatility;
+            
+            // Restore
+            this.currentSymbol = tempSymbol;
+            this.stockData = tempData;
+            this.predictionHorizon = tempHorizon;
+            
+            return {
+                symbol,
+                name: quote.name || symbol,
+                currentPrice,
+                prediction,
+                expectedReturn,
+                volatility,
+                sharpeRatio,
+                prices
+            };
+            
+        } catch (error) {
+            console.error(`Error fetching ${symbol}:`, error);
+            return null;
+        }
+    },
+    
+    createMultiStockPredictionChart(stocks) {
+        const categories = stocks.map(s => s.symbol);
+        const currentPrices = stocks.map(s => s.currentPrice);
+        const predictions = stocks.map(s => s.prediction);
+        
+        Highcharts.chart('multiStockPredictionChart', {
+            chart: {
+                type: 'column',
+                height: 450,
+                borderRadius: 15
+            },
+            title: {
+                text: `Stock Price Predictions (${this.comparisonParameters.horizon} days)`,
+                style: { color: this.colors.primary, fontWeight: 'bold' }
+            },
+            xAxis: {
+                categories: categories
+            },
+            yAxis: {
+                title: { text: 'Price (USD)' }
+            },
+            tooltip: {
+                shared: true,
+                valuePrefix: '$',
+                valueDecimals: 2
+            },
+            plotOptions: {
+                column: {
+                    borderRadius: '25%',
+                    dataLabels: {
+                        enabled: true,
+                        format: '${point.y:.2f}'
+                    }
+                }
+            },
+            series: [{
+                name: 'Current Price',
+                data: currentPrices,
+                color: '#6c757d'
+            }, {
+                name: 'Predicted Price',
+                data: predictions,
+                color: this.colors.primary
+            }],
+            credits: { enabled: false }
+        });
+    },
+    
+    createRiskReturnScatter(stocks) {
+        const data = stocks.map(s => ({
+            x: s.volatility,
+            y: s.expectedReturn,
+            name: s.symbol,
+            marker: {
+                radius: 8
+            }
+        }));
+        
+        Highcharts.chart('riskReturnScatter', {
+            chart: {
+                type: 'scatter',
+                height: 450,
+                borderRadius: 15
+            },
+            title: {
+                text: 'Risk vs Expected Return',
+                style: { color: this.colors.primary, fontWeight: 'bold' }
+            },
+            xAxis: {
+                title: { text: 'Volatility (%)' }
+            },
+            yAxis: {
+                title: { text: 'Expected Return (%)' },
+                plotLines: [{
+                    value: 0,
+                    color: '#dc3545',
+                    width: 2,
+                    dashStyle: 'Dash'
+                }]
+            },
+            tooltip: {
+                pointFormat: '<b>{point.name}</b><br>Volatility: {point.x:.2f}%<br>Return: {point.y:.2f}%'
+            },
+            series: [{
+                name: 'Stocks',
+                data: data,
+                dataLabels: {
+                    enabled: true,
+                    format: '{point.name}'
+                }
+            }],
+            credits: { enabled: false }
+        });
+    },
+    
+    createStockCorrelationMatrix(stocks) {
+        const n = stocks.length;
+        const correlationData = [];
+        
+        for (let i = 0; i < n; i++) {
+            for (let j = 0; j < n; j++) {
+                const corr = i === j ? 1 : this.calculateCorrelation(stocks[i].prices, stocks[j].prices);
+                correlationData.push([j, i, corr]);
+            }
+        }
+        
+        Highcharts.chart('stockCorrelationMatrix', {
+            chart: {
+                type: 'heatmap',
+                height: 450,
+                borderRadius: 15
+            },
+            title: {
+                text: 'Stock Correlation Matrix',
+                style: { color: this.colors.primary, fontWeight: 'bold' }
+            },
+            xAxis: {
+                categories: stocks.map(s => s.symbol)
+            },
+            yAxis: {
+                categories: stocks.map(s => s.symbol),
+                title: null,
+                reversed: true
+            },
+            colorAxis: {
+                min: -1,
+                max: 1,
+                stops: [
+                    [0, '#ef4444'],
+                    [0.5, '#fbbf24'],
+                    [1, '#22c55e']
+                ]
+            },
+            tooltip: {
+                formatter: function() {
+                    return `<b>${this.series.xAxis.categories[this.point.x]}</b> vs <b>${this.series.yAxis.categories[this.point.y]}</b><br>Correlation: <b>${(this.point.value * 100).toFixed(1)}%</b>`;
+                }
+            },
+            series: [{
+                data: correlationData,
+                dataLabels: {
+                    enabled: true,
+                    format: '{point.value:.2f}'
+                }
+            }],
+            credits: { enabled: false }
+        });
+    },
+    
+    createSharpeRatioChart(stocks) {
+        const data = stocks.map(s => ({
+            name: s.symbol,
+            y: s.sharpeRatio,
+            color: s.sharpeRatio > 1 ? this.colors.success : s.sharpeRatio > 0 ? this.colors.warning : this.colors.danger
+        }));
+        
+        Highcharts.chart('sharpeRatioChart', {
+            chart: {
+                type: 'bar',
+                height: 450,
+                borderRadius: 15
+            },
+            title: {
+                text: 'Sharpe Ratio Comparison',
+                style: { color: this.colors.primary, fontWeight: 'bold' }
+            },
+            subtitle: {
+                text: `Risk-Free Rate: ${this.comparisonParameters.riskFree}%`
+            },
+            xAxis: {
+                type: 'category'
+            },
+            yAxis: {
+                title: { text: 'Sharpe Ratio' },
+                plotLines: [{
+                    value: 1,
+                    color: this.colors.success,
+                    width: 2,
+                    dashStyle: 'Dash',
+                    label: { text: 'Good (>1)', align: 'right' }
+                }, {
+                    value: 0,
+                    color: this.colors.danger,
+                    width: 2,
+                    dashStyle: 'Dash'
+                }]
+            },
+            tooltip: {
+                pointFormat: '<b>{point.y:.3f}</b>'
+            },
+            plotOptions: {
+                bar: {
+                    borderRadius: '25%',
+                    dataLabels: {
+                        enabled: true,
+                        format: '{point.y:.3f}'
+                    }
+                }
+            },
+            series: [{
+                name: 'Sharpe Ratio',
+                data: data,
+                colorByPoint: true
+            }],
+            credits: { enabled: false }
+        });
+    },
+    
+    createComparisonTable(stocks) {
+        const sorted = [...stocks].sort((a, b) => b.sharpeRatio - a.sharpeRatio);
+        
+        const html = `
+            <h4 style="margin-bottom:20px;"><i class="fas fa-table"></i> Detailed Comparison Table</h4>
+            <table style="width:100%;border-collapse:separate;border-spacing:0;border-radius:16px;overflow:hidden;box-shadow:0 8px 24px rgba(0,0,0,0.1);">
+                <thead>
+                    <tr style="background:linear-gradient(135deg, var(--ml-primary), var(--ml-secondary));">
+                        <th style="padding:18px;text-align:left;color:white;">Rank</th>
+                        <th style="padding:18px;text-align:left;color:white;">Symbol</th>
+                        <th style="padding:18px;text-align:left;color:white;">Current Price</th>
+                        <th style="padding:18px;text-align:left;color:white;">Prediction</th>
+                        <th style="padding:18px;text-align:left;color:white;">Expected Return</th>
+                        <th style="padding:18px;text-align:left;color:white;">Volatility</th>
+                        <th style="padding:18px;text-align:left;color:white;">Sharpe Ratio</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${sorted.map((stock, index) => `
+                        <tr style="background:rgba(255,255,255,0.02);border-bottom:1px solid var(--glass-border);transition:var(--transition-smooth);" onmouseover="this.style.background='rgba(102,126,234,0.08)'" onmouseout="this.style.background='rgba(255,255,255,0.02)'">
+                            <td style="padding:18px;font-weight:800;font-size:1.2rem;background:linear-gradient(135deg, var(--ml-primary), var(--ml-secondary));-webkit-background-clip:text;-webkit-text-fill-color:transparent;">#${index + 1}</td>
+                            <td style="padding:18px;font-weight:700;">${stock.symbol}</td>
+                            <td style="padding:18px;">${this.formatCurrency(stock.currentPrice)}</td>
+                            <td style="padding:18px;">${this.formatCurrency(stock.prediction)}</td>
+                            <td style="padding:18px;color:${stock.expectedReturn >= 0 ? this.colors.success : this.colors.danger};font-weight:700;">${stock.expectedReturn >= 0 ? '+' : ''}${stock.expectedReturn.toFixed(2)}%</td>
+                            <td style="padding:18px;">${stock.volatility.toFixed(2)}%</td>
+                            <td style="padding:18px;font-weight:700;color:${stock.sharpeRatio > 1 ? this.colors.success : stock.sharpeRatio > 0 ? this.colors.warning : this.colors.danger};">${stock.sharpeRatio.toFixed(3)}</td>
+                        </tr>
+                    `).join('')}
+                </tbody>
+            </table>
+        `;
+        
+        document.getElementById('comparisonTable').innerHTML = html;
+    }
 });
 
 // ========== INITIALIZE WHEN DOM IS LOADED ==========

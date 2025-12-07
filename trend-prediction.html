@@ -748,6 +748,195 @@
                                 </div>
                             </div>
                         </section>
+
+                        <!-- ============================================
+                            ✨ NOUVELLE SECTION : MULTI-STOCK COMPARISON
+                            ============================================ -->
+                        <section class='multi-stock-comparison card' aria-labelledby='multi-stock-title'>
+                            <div class='card-header'>
+                                <h3 class='card-title' id='multi-stock-title'>
+                                    <i class='fas fa-layer-group' aria-hidden='true'></i> Multi-Stock Comparison & Scenario Analysis
+                                </h3>
+                                <button class='help-icon' onclick='openModal("modalMultiStock")' aria-label='Help about multi-stock comparison'>?</button>
+                            </div>
+                            <div class='card-body'>
+                                <!-- Stock Selection -->
+                                <div class='multi-stock-selector'>
+                                    <label for='multiStockInput'><i class='fas fa-search'></i> Add Stocks to Compare:</label>
+                                    <div class='multi-stock-input-group'>
+                                        <input type='text' 
+                                            id='multiStockInput' 
+                                            class='form-input'
+                                            placeholder='Enter stock symbol (e.g., AAPL, MSFT, GOOGL)...'
+                                            autocomplete='off'>
+                                        <button class='btn btn-primary' onclick='TrendPrediction.addStockToComparison()'>
+                                            <i class='fas fa-plus'></i> Add Stock
+                                        </button>
+                                    </div>
+                                    
+                                    <!-- Selected Stocks -->
+                                    <div class='selected-stocks' id='selectedStocks'>
+                                        <!-- Les stocks sélectionnés apparaîtront ici -->
+                                    </div>
+                                </div>
+                                
+                                <!-- Parameters Sliders -->
+                                <div class='comparison-parameters'>
+                                    <h4><i class='fas fa-sliders-h'></i> Analysis Parameters</h4>
+                                    
+                                    <div class='parameter-grid'>
+                                        <!-- Volatility Threshold -->
+                                        <div class='parameter-item'>
+                                            <label for='volatilitySlider'>
+                                                <i class='fas fa-chart-line'></i> Volatility Threshold
+                                                <span class='parameter-value' id='volatilityValue'>25%</span>
+                                            </label>
+                                            <input type='range' 
+                                                id='volatilitySlider' 
+                                                class='parameter-slider'
+                                                min='0' 
+                                                max='100' 
+                                                value='25'
+                                                oninput='TrendPrediction.updateParameter("volatility", this.value)'>
+                                            <div class='parameter-labels'>
+                                                <span>0%</span>
+                                                <span>50%</span>
+                                                <span>100%</span>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Correlation Filter -->
+                                        <div class='parameter-item'>
+                                            <label for='correlationSlider'>
+                                                <i class='fas fa-project-diagram'></i> Correlation Filter
+                                                <span class='parameter-value' id='correlationValue'>0.5</span>
+                                            </label>
+                                            <input type='range' 
+                                                id='correlationSlider' 
+                                                class='parameter-slider'
+                                                min='0' 
+                                                max='1' 
+                                                step='0.1' 
+                                                value='0.5'
+                                                oninput='TrendPrediction.updateParameter("correlation", this.value)'>
+                                            <div class='parameter-labels'>
+                                                <span>-1.0</span>
+                                                <span>0.0</span>
+                                                <span>1.0</span>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Risk-Free Rate -->
+                                        <div class='parameter-item'>
+                                            <label for='riskFreeSlider'>
+                                                <i class='fas fa-percent'></i> Risk-Free Rate
+                                                <span class='parameter-value' id='riskFreeValue'>4.5%</span>
+                                            </label>
+                                            <input type='range' 
+                                                id='riskFreeSlider' 
+                                                class='parameter-slider'
+                                                min='0' 
+                                                max='10' 
+                                                step='0.5' 
+                                                value='4.5'
+                                                oninput='TrendPrediction.updateParameter("riskFree", this.value)'>
+                                            <div class='parameter-labels'>
+                                                <span>0%</span>
+                                                <span>5%</span>
+                                                <span>10%</span>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Prediction Horizon -->
+                                        <div class='parameter-item'>
+                                            <label for='horizonSlider'>
+                                                <i class='fas fa-calendar-alt'></i> Prediction Horizon
+                                                <span class='parameter-value' id='horizonValue'>30 days</span>
+                                            </label>
+                                            <input type='range' 
+                                                id='horizonSlider' 
+                                                class='parameter-slider'
+                                                min='7' 
+                                                max='90' 
+                                                step='1' 
+                                                value='30'
+                                                oninput='TrendPrediction.updateParameter("horizon", this.value)'>
+                                            <div class='parameter-labels'>
+                                                <span>7d</span>
+                                                <span>30d</span>
+                                                <span>90d</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <button class='btn btn-primary btn-analyze-comparison' onclick='TrendPrediction.runMultiStockAnalysis()'>
+                                        <i class='fas fa-rocket'></i> Run Multi-Stock Analysis
+                                    </button>
+                                </div>
+                                
+                                <!-- Comparison Charts -->
+                                <div class='comparison-charts-grid' id='comparisonChartsGrid' style='display: none;'>
+                                    <div class='comparison-chart-container'>
+                                        <h4><i class='fas fa-chart-line'></i> Prediction Comparison</h4>
+                                        <div id='multiStockPredictionChart' class='chart chart-large'></div>
+                                    </div>
+                                    
+                                    <div class='comparison-chart-container'>
+                                        <h4><i class='fas fa-chart-scatter'></i> Risk-Return Analysis</h4>
+                                        <div id='riskReturnScatter' class='chart chart-medium'></div>
+                                    </div>
+                                    
+                                    <div class='comparison-chart-container'>
+                                        <h4><i class='fas fa-th'></i> Stock Correlation Matrix</h4>
+                                        <div id='stockCorrelationMatrix' class='chart chart-medium'></div>
+                                    </div>
+                                    
+                                    <div class='comparison-chart-container'>
+                                        <h4><i class='fas fa-trophy'></i> Sharpe Ratio Comparison</h4>
+                                        <div id='sharpeRatioChart' class='chart chart-medium'></div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Comparison Table -->
+                                <div id='comparisonTable' style='display: none; margin-top: 30px;'></div>
+                            </div>
+                        </section>
+
+                        <!-- Modal Multi-Stock -->
+                        <div id='modalMultiStock' class='modal' role='dialog' aria-labelledby='multi-stock-modal-title' aria-modal='true'>
+                            <div class='modal-content'>
+                                <div class='modal-header'>
+                                    <h2 id='multi-stock-modal-title'>📊 Multi-Stock Comparison</h2>
+                                    <button class='close-modal' onclick='closeModal("modalMultiStock")' aria-label='Close dialog'>
+                                        <i class='fas fa-times'></i>
+                                    </button>
+                                </div>
+                                <div class='modal-body'>
+                                    <h3>What is Multi-Stock Comparison?</h3>
+                                    <p>This feature allows you to compare predictions and risk metrics for multiple stocks simultaneously using advanced ML ensemble models.</p>
+                                    
+                                    <h3>Key Features</h3>
+                                    <ul>
+                                        <li><strong>Prediction Comparison:</strong> Side-by-side predictions across different horizons</li>
+                                        <li><strong>Risk-Return Scatter:</strong> Visualize risk vs. expected return for each stock</li>
+                                        <li><strong>Correlation Matrix:</strong> Identify diversification opportunities</li>
+                                        <li><strong>Sharpe Ratio:</strong> Compare risk-adjusted returns</li>
+                                    </ul>
+                                    
+                                    <h3>How to Use</h3>
+                                    <ol>
+                                        <li>Add 2-10 stocks using the input field</li>
+                                        <li>Adjust analysis parameters (volatility, correlation, risk-free rate, horizon)</li>
+                                        <li>Click "Run Multi-Stock Analysis"</li>
+                                        <li>Review comparative charts and metrics</li>
+                                    </ol>
+                                    
+                                    <div class='tip-box'>
+                                        💡 <strong>Pro Tip:</strong> Use this to build a diversified portfolio by selecting stocks with low correlation and high Sharpe ratios.
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                         
                         <!-- ============================================
                              RECOMMENDATION
