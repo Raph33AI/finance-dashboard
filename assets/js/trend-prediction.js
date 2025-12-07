@@ -1190,24 +1190,15 @@ Object.assign(TrendPrediction, {
                 };
                 
                 Object.keys(models).forEach(modelName => {
-                const model = models[modelName];
-                const predicted = model.finalPrediction;
-                const actual = actualFuture[actualFuture.length - 1];
-                
-                // ✅ CORRECTION : Vérifier que predicted et actual sont valides
-                if (!predicted || !actual || actual === 0) {
-                    console.warn(`Invalid data for ${modelName}: predicted=${predicted}, actual=${actual}`);
-                    return;
-                }
-                
-                const error = Math.abs((predicted - actual) / actual) * 100;
-                
-                backtestResults[modelName].predictions.push(predicted);
-                backtestResults[modelName].actuals.push(actual);
-                backtestResults[modelName].errors.push(error);
-                
-                console.log(`✅ ${modelName} - Error: ${error.toFixed(2)}%`);
-            });
+                    const model = models[modelName];
+                    const predicted = model.finalPrediction;
+                    const actual = actualFuture[actualFuture.length - 1];
+                    const error = Math.abs((predicted - actual) / actual) * 100;
+                    
+                    backtestResults[modelName].predictions.push(predicted);
+                    backtestResults[modelName].actuals.push(actual);
+                    backtestResults[modelName].errors.push(error);
+                });
             } catch (e) {
                 console.warn('Backtest period failed:', e);
             }
@@ -1788,130 +1779,45 @@ Object.assign(TrendPrediction, {
             credits: { enabled: false }
         });
         
-        // 3. Error Evolution Chart (CORRIGÉ)
+        // 3. Error Evolution Chart
         const errorSeries = Object.keys(this.backtestResults).map(modelName => {
             const result = this.backtestResults[modelName];
-            
-            // ✅ CORRECTION : S'assurer que les données existent
-            if (!result.errors || result.errors.length === 0) {
-                console.warn(`No error data for model: ${modelName}`);
-                return {
-                    name: this.models[modelName].name,
-                    data: [],
-                    color: this.getModelColor(modelName),
-                    lineWidth: 2
-                };
-            }
-            
-            // ✅ Créer un tableau de données avec index
-            const errorData = result.errors.map((error, index) => ({
-                x: index + 1,
-                y: error
-            }));
-            
             return {
                 name: this.models[modelName].name,
-                data: errorData,
+                data: result.errors || [],
                 color: this.getModelColor(modelName),
-                lineWidth: 2,
-                marker: {
-                    enabled: true,
-                    radius: 4
-                }
+                lineWidth: 2
             };
         });
-
-        // ✅ Vérification : Au moins un modèle a des données
-        const hasData = errorSeries.some(s => s.data && s.data.length > 0);
-
-        if (!hasData) {
-            console.error('❌ No error evolution data available');
-            document.getElementById('backtestErrorChart').innerHTML = 
-                '<div style="padding:60px;text-align:center;color:#64748b;">' +
-                '<i class="fas fa-exclamation-triangle" style="font-size:3rem;margin-bottom:20px;display:block;"></i>' +
-                '<strong>No Error Data Available</strong><br>' +
-                'Backtesting needs more historical data to generate error evolution.' +
-                '</div>';
-            return;
-        }
-
+        
         Highcharts.chart('backtestErrorChart', {
             chart: {
                 height: 450,
-                borderRadius: 15,
-                backgroundColor: 'transparent'
+                borderRadius: 15
             },
             title: {
                 text: 'Prediction Error Evolution',
-                style: { 
-                    color: this.colors.primary, 
-                    fontWeight: 'bold',
-                    fontSize: '1.25rem'
-                }
+                style: { color: this.colors.primary, fontWeight: 'bold' }
             },
             subtitle: {
-                text: 'MAPE (Mean Absolute Percentage Error) over backtesting periods',
-                style: { color: '#64748b', fontSize: '0.95rem' }
+                text: 'MAPE (Mean Absolute Percentage Error) over time',
+                style: { color: '#64748b' }
             },
             xAxis: {
-                title: { 
-                    text: 'Backtest Period',
-                    style: { color: '#475569', fontWeight: '600' }
-                },
-                labels: {
-                    style: { color: '#64748b', fontWeight: '500' }
-                },
-                gridLineColor: 'rgba(148, 163, 184, 0.1)'
+                title: { text: 'Backtest Period' }
             },
             yAxis: {
-                title: { 
-                    text: 'Prediction Error (%)',
-                    style: { color: '#475569', fontWeight: '600' }
-                },
-                min: 0,
-                labels: {
-                    format: '{value}%',
-                    style: { color: '#64748b', fontWeight: '500' }
-                },
-                gridLineColor: 'rgba(148, 163, 184, 0.1)'
+                title: { text: 'Error (%)' },
+                min: 0
             },
             tooltip: {
-                shared: true,
-                crosshairs: true,
-                borderRadius: 12,
                 valueSuffix: '%',
-                valueDecimals: 2,
-                backgroundColor: 'rgba(255, 255, 255, 0.95)',
-                borderColor: '#e2e8f0',
-                style: {
-                    color: '#1e293b',
-                    fontSize: '13px',
-                    fontWeight: '600'
-                }
+                borderRadius: 10
             },
             legend: {
                 enabled: true,
                 align: 'center',
-                verticalAlign: 'bottom',
-                itemStyle: {
-                    color: '#475569',
-                    fontWeight: '600'
-                }
-            },
-            plotOptions: {
-                series: {
-                    marker: {
-                        enabled: true,
-                        radius: 5,
-                        symbol: 'circle'
-                    },
-                    lineWidth: 3,
-                    states: {
-                        hover: {
-                            lineWidth: 4
-                        }
-                    }
-                }
+                verticalAlign: 'bottom'
             },
             series: errorSeries,
             credits: { enabled: false }
@@ -2092,15 +1998,10 @@ Object.assign(TrendPrediction, {
                 min: 0,
                 max: 1,
                 stops: [
-                    [0, '#ef4444'],      // Rouge (faible corrélation)
-                    [0.3, '#f59e0b'],    // Orange
-                    [0.5, '#fbbf24'],    // Jaune
-                    [0.7, '#a3e635'],    // Jaune-vert
-                    [1, '#22c55e']       // Vert (forte corrélation)
-                ],
-                labels: {
-                    format: '{value:.0%}'
-                }
+                    [0, '#f8fafc'],
+                    [0.5, '#93c5fd'],
+                    [1, '#1e40af']
+                ]
             },
             legend: {
                 align: 'right',
@@ -2140,29 +2041,24 @@ Object.assign(TrendPrediction, {
         
         const consensusScore = avgCorrelation * 100;
         
-        // Créer une jauge pour le consensus (VERSION PREMIUM)
+        // Créer une jauge pour le consensus
         Highcharts.chart('consensusGauge', {
             chart: {
                 type: 'solidgauge',
-                height: 280,
-                backgroundColor: 'transparent'
+                height: 250
             },
             title: null,
             pane: {
-                center: ['50%', '75%'],
-                size: '110%',
+                center: ['50%', '85%'],
+                size: '140%',
                 startAngle: -90,
                 endAngle: 90,
-                background: [{
-                    backgroundColor: 'rgba(241, 245, 249, 0.3)',
+                background: {
+                    backgroundColor: '#f1f5f9',
                     innerRadius: '60%',
                     outerRadius: '100%',
-                    shape: 'arc',
-                    borderWidth: 0
-                }]
-            },
-            exporting: {
-                enabled: false
+                    shape: 'arc'
+                }
             },
             tooltip: {
                 enabled: false
@@ -2171,35 +2067,30 @@ Object.assign(TrendPrediction, {
                 min: 0,
                 max: 100,
                 stops: [
-                    [0.1, '#ef4444'],   // Rouge
-                    [0.3, '#f59e0b'],   // Orange
-                    [0.5, '#fbbf24'],   // Jaune
-                    [0.7, '#84cc16'],   // Vert clair
-                    [0.9, '#22c55e']    // Vert
+                    [0.3, '#ef4444'],
+                    [0.6, '#f59e0b'],
+                    [0.9, '#10b981']
                 ],
                 lineWidth: 0,
                 tickWidth: 0,
                 minorTickInterval: null,
                 tickAmount: 2,
-                labels: {
-                    y: 20,
+                title: {
+                    y: -70,
+                    text: consensusScore.toFixed(0) + '%',
                     style: {
-                        fontSize: '14px',
-                        fontWeight: '600',
-                        color: '#64748b'
+                        fontSize: '2rem',
+                        fontWeight: 'bold'
                     }
+                },
+                labels: {
+                    y: 16
                 }
             },
             plotOptions: {
                 solidgauge: {
                     dataLabels: {
-                        y: -30,
-                        borderWidth: 0,
-                        useHTML: true,
-                        format: '<div style="text-align:center">' +
-                            '<span style="font-size:2.5rem;font-weight:800;background:linear-gradient(135deg, #667eea, #764ba2);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">{y:.0f}%</span><br/>' +
-                            '<span style="font-size:0.9rem;color:#64748b;font-weight:600;margin-top:8px;display:block;">Model Consensus</span>' +
-                            '</div>'
+                        enabled: false
                     },
                     linecap: 'round',
                     stickyTracking: false,
@@ -2209,8 +2100,12 @@ Object.assign(TrendPrediction, {
             series: [{
                 name: 'Consensus',
                 data: [consensusScore],
-                innerRadius: '60%',
-                radius: '100%'
+                dataLabels: {
+                    format: '<div style="text-align:center">' +
+                        '<span style="font-size:1.5rem;font-weight:bold">{y:.0f}%</span><br/>' +
+                        '<span style="font-size:0.8rem;opacity:0.6">Consensus</span>' +
+                        '</div>'
+                }
             }],
             credits: { enabled: false }
         });
