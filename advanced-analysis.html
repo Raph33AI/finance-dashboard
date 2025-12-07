@@ -773,34 +773,6 @@
                                 <strong>Disclaimer:</strong> This AI-powered analysis is for informational purposes only and should not be considered as financial advice. Alphy AI aggregates technical indicators to provide data-driven insights. Always conduct your own research and consult with a licensed financial advisor before making investment decisions. Past performance does not guarantee future results.
                             </div>
                         </div>
-
-                        <!-- DEBUG SCRIPT - À SUPPRIMER APRÈS CORRECTION -->
-                        <script>
-                        document.addEventListener('DOMContentLoaded', () => {
-                            setTimeout(() => {
-                                console.log('🔍 DEBUG - Confidence Bars Check:');
-                                
-                                ['1y', '2y', '5y', '10y'].forEach(horizon => {
-                                    const container = document.getElementById(`confidence${horizon}`);
-                                    const fill = container?.querySelector('.ai-confidence-fill');
-                                    
-                                    console.log(`${horizon}:`, {
-                                        containerExists: !!container,
-                                        fillExists: !!fill,
-                                        width: fill?.style.width,
-                                        className: fill?.className
-                                    });
-                                    
-                                    // Force update si vide
-                                    if (fill && (!fill.style.width || fill.style.width === '0%')) {
-                                        console.warn(`⚠ ${horizon} confidence bar is empty - forcing 85%`);
-                                        fill.style.width = '85%';
-                                        fill.className = 'ai-confidence-fill strong-buy';
-                                    }
-                                });
-                            }, 2000);
-                        });
-                        </script>
                         
                         <!-- ============================================
                              📈 SECTION 1: MOMENTUM OSCILLATORS
