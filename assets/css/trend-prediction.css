@@ -2236,3 +2236,696 @@ body.dark-mode .consensus-gauge {
         flex-direction: column;
     }
 }
+
+/* ==============================================
+   🎭 MODALS - ULTRA PROFESSIONAL GLASSMORPHISM
+   Dégradé Bleu/Violet • Zero Lag • GPU Optimized
+   ============================================== */
+
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(15, 23, 42, 0.75);
+    backdrop-filter: blur(12px) saturate(150%);
+    -webkit-backdrop-filter: blur(12px) saturate(150%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10000;
+    padding: 20px;
+    
+    /* ✅ OPTIMIZATION: GPU Acceleration */
+    will-change: opacity;
+    transform: translateZ(0);
+    backface-visibility: hidden;
+    perspective: 1000px;
+    
+    /* ✅ INITIAL STATE: Hidden */
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.modal.active {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+/* ============================================
+   📦 MODAL CONTENT - GLASSMORPHISM PREMIUM
+   ============================================ */
+.modal-content {
+    background: linear-gradient(
+        135deg,
+        rgba(255, 255, 255, 0.95) 0%,
+        rgba(255, 255, 255, 0.92) 100%
+    );
+    backdrop-filter: blur(40px) saturate(180%);
+    -webkit-backdrop-filter: blur(40px) saturate(180%);
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 28px;
+    max-width: 800px;
+    width: 100%;
+    max-height: 85vh;
+    overflow: hidden;
+    position: relative;
+    
+    /* ✅ PREMIUM SHADOWS */
+    box-shadow: 
+        0 30px 90px rgba(102, 126, 234, 0.25),
+        0 10px 40px rgba(118, 75, 162, 0.15),
+        inset 0 1px 0 rgba(255, 255, 255, 0.6);
+    
+    /* ✅ GPU OPTIMIZATION */
+    will-change: transform, opacity;
+    transform: translateZ(0) scale(1);
+    backface-visibility: hidden;
+    
+    /* ✅ ANIMATION: Entrance */
+    animation: modalEnter 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+@keyframes modalEnter {
+    0% {
+        opacity: 0;
+        transform: translateZ(0) scale(0.9) translateY(-30px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateZ(0) scale(1) translateY(0);
+    }
+}
+
+.modal:not(.active) .modal-content {
+    animation: modalExit 0.25s cubic-bezier(0.4, 0, 1, 1) forwards;
+}
+
+@keyframes modalExit {
+    0% {
+        opacity: 1;
+        transform: translateZ(0) scale(1) translateY(0);
+    }
+    100% {
+        opacity: 0;
+        transform: translateZ(0) scale(0.95) translateY(-20px);
+    }
+}
+
+/* ============================================
+   🌙 DARK MODE - MODAL CONTENT
+   ============================================ */
+body.dark-mode .modal-content {
+    background: linear-gradient(
+        135deg,
+        rgba(15, 23, 42, 0.98) 0%,
+        rgba(30, 41, 59, 0.95) 100%
+    );
+    border: 2px solid rgba(148, 163, 184, 0.2);
+    box-shadow: 
+        0 30px 90px rgba(102, 126, 234, 0.3),
+        0 10px 40px rgba(118, 75, 162, 0.2),
+        inset 0 1px 0 rgba(148, 163, 184, 0.1);
+}
+
+/* ============================================
+   🎨 MODAL HEADER - GRADIENT PREMIUM
+   ============================================ */
+.modal-header {
+    background: linear-gradient(
+        135deg,
+        #667eea 0%,
+        #764ba2 50%,
+        #f093fb 100%
+    );
+    background-size: 200% 200%;
+    padding: 35px 40px;
+    border-radius: 26px 26px 0 0;
+    position: relative;
+    overflow: hidden;
+    
+    /* ✅ ANIMATED GRADIENT */
+    animation: gradientFlow 8s ease infinite;
+}
+
+@keyframes gradientFlow {
+    0%, 100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+}
+
+/* Stripes Overlay Effect */
+.modal-header::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: repeating-linear-gradient(
+        45deg,
+        transparent,
+        transparent 10px,
+        rgba(255, 255, 255, 0.05) 10px,
+        rgba(255, 255, 255, 0.05) 20px
+    );
+    animation: moveStripes 20s linear infinite;
+    pointer-events: none;
+}
+
+@keyframes moveStripes {
+    0% { transform: translate(0, 0); }
+    100% { transform: translate(50px, 50px); }
+}
+
+/* Shine Effect */
+.modal-header::after {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -100%;
+    width: 50%;
+    height: 200%;
+    background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(255, 255, 255, 0.3),
+        transparent
+    );
+    transform: rotate(30deg);
+    animation: shine 4s ease-in-out infinite;
+}
+
+@keyframes shine {
+    0%, 100% { left: -100%; }
+    50% { left: 150%; }
+}
+
+.modal-header h2 {
+    margin: 0;
+    font-size: 2rem;
+    font-weight: 900;
+    color: white;
+    position: relative;
+    z-index: 2;
+    text-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    letter-spacing: -0.5px;
+}
+
+.modal-header h2::before {
+    content: '';
+    width: 6px;
+    height: 40px;
+    background: white;
+    border-radius: 3px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+}
+
+/* ============================================
+   ❌ CLOSE BUTTON - FLOATING PREMIUM
+   ============================================ */
+.close-modal {
+    position: absolute;
+    top: 25px;
+    right: 25px;
+    background: rgba(255, 255, 255, 0.25);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 2px solid rgba(255, 255, 255, 0.4);
+    color: white;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.4rem;
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    z-index: 10;
+    
+    /* ✅ GPU OPTIMIZATION */
+    will-change: transform;
+    transform: translateZ(0);
+    
+    box-shadow: 
+        0 4px 20px rgba(0, 0, 0, 0.15),
+        inset 0 1px 0 rgba(255, 255, 255, 0.3);
+}
+
+.close-modal:hover {
+    background: rgba(255, 255, 255, 0.4);
+    transform: translateZ(0) scale(1.15) rotate(90deg);
+    box-shadow: 
+        0 8px 30px rgba(0, 0, 0, 0.25),
+        0 0 30px rgba(255, 255, 255, 0.5);
+}
+
+.close-modal:active {
+    transform: translateZ(0) scale(1.05) rotate(90deg);
+}
+
+.close-modal i {
+    pointer-events: none;
+    font-weight: 900;
+}
+
+/* ============================================
+   📄 MODAL BODY - CONTENT AREA
+   ============================================ */
+.modal-body {
+    padding: 40px 45px;
+    overflow-y: auto;
+    max-height: calc(85vh - 150px);
+    position: relative;
+    
+    /* ✅ SMOOTH SCROLLING */
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+}
+
+/* Custom Scrollbar */
+.modal-body::-webkit-scrollbar {
+    width: 10px;
+}
+
+.modal-body::-webkit-scrollbar-track {
+    background: rgba(241, 245, 249, 0.5);
+    border-radius: 10px;
+    margin: 10px 0;
+}
+
+.modal-body::-webkit-scrollbar-thumb {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    border-radius: 10px;
+    box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.2);
+}
+
+.modal-body::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(135deg, #764ba2, #f093fb);
+}
+
+body.dark-mode .modal-body::-webkit-scrollbar-track {
+    background: rgba(30, 41, 59, 0.5);
+}
+
+/* ============================================
+   📝 MODAL TYPOGRAPHY
+   ============================================ */
+.modal-body h3 {
+    margin-top: 30px;
+    margin-bottom: 18px;
+    font-size: 1.4rem;
+    font-weight: 800;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.modal-body h3:first-child {
+    margin-top: 0;
+}
+
+.modal-body h3::before {
+    content: '';
+    width: 5px;
+    height: 28px;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    border-radius: 3px;
+    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+}
+
+.modal-body p {
+    font-size: 1.05rem;
+    line-height: 1.8;
+    color: var(--text-primary);
+    margin-bottom: 18px;
+    font-weight: 500;
+}
+
+.modal-body strong {
+    font-weight: 700;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.modal-body ul,
+.modal-body ol {
+    margin: 20px 0;
+    padding-left: 0;
+    list-style: none;
+}
+
+.modal-body li {
+    padding: 14px 20px;
+    margin-bottom: 12px;
+    background: linear-gradient(
+        90deg,
+        rgba(102, 126, 234, 0.08) 0%,
+        rgba(118, 75, 162, 0.04) 100%
+    );
+    border-left: 4px solid #667eea;
+    border-radius: 12px;
+    font-size: 1.02rem;
+    font-weight: 500;
+    color: var(--text-primary);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    
+    /* ✅ GPU OPTIMIZATION */
+    will-change: transform;
+    transform: translateZ(0);
+}
+
+.modal-body li:hover {
+    background: linear-gradient(
+        90deg,
+        rgba(102, 126, 234, 0.15) 0%,
+        rgba(118, 75, 162, 0.08) 100%
+    );
+    transform: translateZ(0) translateX(8px);
+    box-shadow: 0 4px 16px rgba(102, 126, 234, 0.2);
+}
+
+.modal-body ol {
+    counter-reset: modal-list;
+}
+
+.modal-body ol li {
+    counter-increment: modal-list;
+    padding-left: 50px;
+}
+
+.modal-body ol li::before {
+    content: counter(modal-list);
+    position: absolute;
+    left: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 28px;
+    height: 28px;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    font-size: 0.9rem;
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+/* ============================================
+   🎁 SPECIAL BOXES - TIP, WARNING, FORMULA
+   ============================================ */
+.key-term {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    font-weight: 800;
+    font-style: normal;
+}
+
+.tip-box,
+.warning-box,
+.formula-box {
+    padding: 24px 28px;
+    border-radius: 16px;
+    margin: 25px 0;
+    position: relative;
+    overflow: hidden;
+    backdrop-filter: blur(10px);
+    border: 2px solid;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+    font-weight: 600;
+    line-height: 1.7;
+}
+
+.tip-box::before,
+.warning-box::before,
+.formula-box::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 6px;
+    height: 100%;
+    border-radius: 3px 0 0 3px;
+}
+
+/* Tip Box - Blue/Purple Gradient */
+.tip-box {
+    background: linear-gradient(
+        135deg,
+        rgba(102, 126, 234, 0.12) 0%,
+        rgba(118, 75, 162, 0.08) 100%
+    );
+    border-color: rgba(102, 126, 234, 0.3);
+    color: var(--text-primary);
+}
+
+.tip-box::before {
+    background: linear-gradient(180deg, #667eea, #764ba2);
+    box-shadow: 0 0 20px rgba(102, 126, 234, 0.5);
+}
+
+/* Warning Box - Orange/Red */
+.warning-box {
+    background: linear-gradient(
+        135deg,
+        rgba(255, 193, 7, 0.15) 0%,
+        rgba(255, 152, 0, 0.1) 100%
+    );
+    border-color: rgba(255, 193, 7, 0.3);
+    color: var(--text-primary);
+}
+
+.warning-box::before {
+    background: linear-gradient(180deg, #ffc107, #ff9800);
+    box-shadow: 0 0 20px rgba(255, 193, 7, 0.5);
+}
+
+/* Formula Box - Purple/Pink */
+.formula-box {
+    background: linear-gradient(
+        135deg,
+        rgba(118, 75, 162, 0.12) 0%,
+        rgba(240, 147, 251, 0.08) 100%
+    );
+    border-color: rgba(118, 75, 162, 0.3);
+    color: var(--text-primary);
+    font-family: 'Courier New', monospace;
+    font-size: 1.05rem;
+}
+
+.formula-box::before {
+    background: linear-gradient(180deg, #764ba2, #f093fb);
+    box-shadow: 0 0 20px rgba(118, 75, 162, 0.5);
+}
+
+/* ============================================
+   📱 RESPONSIVE DESIGN
+   ============================================ */
+@media (max-width: 768px) {
+    .modal {
+        padding: 15px;
+    }
+    
+    .modal-content {
+        max-width: 100%;
+        max-height: 90vh;
+        border-radius: 20px;
+    }
+    
+    .modal-header {
+        padding: 25px 20px;
+        border-radius: 18px 18px 0 0;
+    }
+    
+    .modal-header h2 {
+        font-size: 1.5rem;
+    }
+    
+    .modal-header h2::before {
+        width: 4px;
+        height: 30px;
+    }
+    
+    .close-modal {
+        width: 38px;
+        height: 38px;
+        top: 20px;
+        right: 20px;
+        font-size: 1.2rem;
+    }
+    
+    .modal-body {
+        padding: 25px 20px;
+        max-height: calc(90vh - 120px);
+    }
+    
+    .modal-body h3 {
+        font-size: 1.2rem;
+    }
+    
+    .modal-body p,
+    .modal-body li {
+        font-size: 0.95rem;
+    }
+    
+    .tip-box,
+    .warning-box,
+    .formula-box {
+        padding: 18px 20px;
+        font-size: 0.9rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .modal-header h2 {
+        font-size: 1.3rem;
+        gap: 10px;
+    }
+    
+    .modal-body {
+        padding: 20px 15px;
+    }
+    
+    .modal-body h3 {
+        font-size: 1.1rem;
+    }
+    
+    .modal-body li {
+        padding: 12px 16px;
+    }
+    
+    .modal-body ol li {
+        padding-left: 45px;
+    }
+    
+    .modal-body ol li::before {
+        width: 24px;
+        height: 24px;
+        font-size: 0.8rem;
+        left: 12px;
+    }
+}
+
+/* ============================================
+   ⚡ PERFORMANCE OPTIMIZATIONS
+   ============================================ */
+
+/* Reduce motion for accessibility */
+@media (prefers-reduced-motion: reduce) {
+    .modal,
+    .modal-content,
+    .close-modal,
+    .modal-body li {
+        animation: none !important;
+        transition-duration: 0.01ms !important;
+    }
+    
+    .modal-header::before,
+    .modal-header::after {
+        animation: none !important;
+    }
+}
+
+/* Force GPU acceleration on all animations */
+.modal,
+.modal-content,
+.modal-header,
+.close-modal {
+    -webkit-transform: translateZ(0);
+    -moz-transform: translateZ(0);
+    -ms-transform: translateZ(0);
+    -o-transform: translateZ(0);
+    transform: translateZ(0);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* Prevent layout shift */
+.modal-body * {
+    box-sizing: border-box;
+}
+
+/* ============================================
+   🎬 ADDITIONAL ANIMATIONS
+   ============================================ */
+
+/* Fade in content sequentially */
+.modal.active .modal-body > * {
+    animation: fadeInContent 0.5s ease-out backwards;
+}
+
+.modal.active .modal-body > *:nth-child(1) { animation-delay: 0.05s; }
+.modal.active .modal-body > *:nth-child(2) { animation-delay: 0.1s; }
+.modal.active .modal-body > *:nth-child(3) { animation-delay: 0.15s; }
+.modal.active .modal-body > *:nth-child(4) { animation-delay: 0.2s; }
+.modal.active .modal-body > *:nth-child(5) { animation-delay: 0.25s; }
+.modal.active .modal-body > *:nth-child(6) { animation-delay: 0.3s; }
+
+@keyframes fadeInContent {
+    0% {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Pulse on open (subtle) */
+@keyframes modalPulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.02); }
+}
+
+/* ============================================
+   🎨 DARK MODE ADJUSTMENTS
+   ============================================ */
+body.dark-mode .modal-body p,
+body.dark-mode .modal-body li {
+    color: #e2e8f0;
+}
+
+body.dark-mode .tip-box,
+body.dark-mode .warning-box,
+body.dark-mode .formula-box {
+    backdrop-filter: blur(15px);
+}
+
+body.dark-mode .tip-box {
+    background: linear-gradient(
+        135deg,
+        rgba(102, 126, 234, 0.15) 0%,
+        rgba(118, 75, 162, 0.1) 100%
+    );
+}
+
+body.dark-mode .warning-box {
+    background: linear-gradient(
+        135deg,
+        rgba(255, 193, 7, 0.12) 0%,
+        rgba(255, 152, 0, 0.08) 100%
+    );
+}
+
+body.dark-mode .formula-box {
+    background: linear-gradient(
+        135deg,
+        rgba(118, 75, 162, 0.15) 0%,
+        rgba(240, 147, 251, 0.1) 100%
+    );
+}
