@@ -4,6 +4,7 @@
    ✅ 6 distributions
    ✅ 4 stratégies
    ✅ Nouveaux graphiques (Tornado, HeatMap, Correlation, Frontier)
+   ✅ COMPARAISON DE SCÉNARIOS
    ============================================== */
 
 const MonteCarlo = (function() {
@@ -11,6 +12,7 @@ const MonteCarlo = (function() {
     
     let simulationResults = null;
     let currentUser = null;
+    let savedScenariosData = []; // Stockage local des scénarios
     
     // ========== TEMPLATES ==========
     const TEMPLATES = {
@@ -212,7 +214,7 @@ const MonteCarlo = (function() {
                 .doc(currentUser.uid)
                 .collection('monteCarloScenarios')
                 .orderBy('createdAt', 'desc')
-                .limit(5)
+                .limit(10)
                 .get();
             
             const scenarios = [];
@@ -220,6 +222,7 @@ const MonteCarlo = (function() {
                 scenarios.push({ id: doc.id, ...doc.data() });
             });
             
+            savedScenariosData = scenarios; // Stockage local
             updateSavedScenariosList(scenarios);
         } catch (error) {
             console.error('Load scenarios error:', error);
@@ -301,9 +304,15 @@ const MonteCarlo = (function() {
         
         container.innerHTML = scenarios.map(s => `
             <div class="saved-scenario-card">
+                <div class="scenario-checkbox">
+                    <input type="checkbox" id="scenario-${s.id}" value="${s.id}" class="scenario-select-checkbox">
+                </div>
                 <div class="scenario-info">
                     <h4>${s.name}</h4>
                     <p>${s.date || 'No date'}</p>
+                    <p style="font-size: 0.85rem; color: var(--ml-primary); font-weight: 600;">
+                        Median: ${window.FinanceDashboard.formatNumber(s.medianResult || 0, 0)} EUR
+                    </p>
                 </div>
                 <div class="scenario-actions">
                     <button onclick="MonteCarlo.deleteScenario('${s.id}')" title="Delete">
@@ -312,6 +321,234 @@ const MonteCarlo = (function() {
                 </div>
             </div>
         `).join('');
+    }
+    
+    // ========== SCENARIO COMPARISON ==========
+    
+    function compareScenarios() {
+        const checkboxes = document.querySelectorAll('.scenario-select-checkbox:checked');
+        const selectedIds = Array.from(checkboxes).map(cb => cb.value);
+        
+        if (selectedIds.length < 2) {
+            window.FinanceDashboard.showNotification('Please select at least 2 scenarios to compare', 'warning');
+            return;
+        }
+        
+        if (selectedIds.length > 5) {
+            window.FinanceDashboard.showNotification('Maximum 5 scenarios can be compared', 'warning');
+            return;
+        }
+        
+        // Récupérer les données des scénarios sélectionnés
+        const selectedScenarios = savedScenariosData.filter(s => selectedIds.includes(s.id));
+        
+        if (selectedScenarios.length === 0) {
+            window.FinanceDashboard.showNotification('No scenario data found', 'error');
+            return;
+        }
+        
+        // Ouvrir le modal et créer la comparaison
+        openModal('modalCompareScenarios');
+        createComparisonChart(selectedScenarios);
+        createComparisonStats(selectedScenarios);
+    }
+    
+    function createComparisonChart(scenarios) {
+        const container = document.getElementById('comparisonChartContainer');
+        if (!container) return;
+        
+        // Couleurs pour chaque scénario
+        const colors = ['#667eea', '#f5576c', '#43e97b', '#f6d365', '#764ba2'];
+        
+        // Créer des séries pour le graphique
+        const series = scenarios.map((scenario, index) => {
+            return {
+                name: scenario.name,
+                data: [scenario.medianResult || 0],
+                color: colors[index % colors.length]
+            };
+        });
+        
+        // Créer le graphique de comparaison
+        Highcharts.chart('comparisonChartContainer', {
+            chart: { 
+                type: 'column',
+                backgroundColor: 'transparent',
+                height: 500
+            },
+            title: { 
+                text: '📊 Scenario Comparison - Median Results',
+                style: { 
+                    color: '#667eea', 
+                    fontWeight: 'bold',
+                    fontSize: '1.5rem'
+                }
+            },
+            xAxis: {
+                categories: scenarios.map(s => s.name),
+                title: { text: 'Scenarios' }
+            },
+            yAxis: {
+                title: { text: 'Median Portfolio Value (EUR)' },
+                labels: {
+                    formatter: function() {
+                        return window.FinanceDashboard.formatNumber(this.value, 0);
+                    }
+                }
+            },
+            tooltip: {
+                formatter: function() {
+                    return '<b>' + this.x + '</b><br/>' +
+                           'Median: <b>' + window.FinanceDashboard.formatNumber(this.y, 0) + ' EUR</b>';
+                }
+            },
+            plotOptions: {
+                column: {
+                    borderRadius: 8,
+                    dataLabels: {
+                        enabled: true,
+                        formatter: function() {
+                            return window.FinanceDashboard.formatNumber(this.y / 1000, 0) + 'k';
+                        },
+                        style: {
+                            fontWeight: 'bold',
+                            fontSize: '0.9rem'
+                        }
+                    }
+                }
+            },
+            series: [{
+                name: 'Median Value',
+                data: scenarios.map((s, i) => ({
+                    y: s.medianResult || 0,
+                    color: colors[i % colors.length]
+                }))
+            }],
+            legend: { enabled: false },
+            credits: { enabled: false }
+        });
+    }
+    
+    function createComparisonStats(scenarios) {
+        const container = document.getElementById('comparisonStatsContainer');
+        if (!container) return;
+        
+        const colors = ['#667eea', '#f5576c', '#43e97b', '#f6d365', '#764ba2'];
+        
+        container.innerHTML = scenarios.map((scenario, index) => {
+            const params = scenario.params || {};
+            const medianResult = scenario.medianResult || 0;
+            const totalInvested = params.strategy === 'lumpsum' 
+                ? (params.lumpSumAmount || 0)
+                : (params.monthlyInvestment || 0) * (params.years || 1) * 12;
+            const totalReturn = totalInvested > 0 
+                ? ((medianResult - totalInvested) / totalInvested * 100).toFixed(1)
+                : 0;
+            
+            return `
+                <div class="comparison-stat-box" style="border-left: 5px solid ${colors[index % colors.length]};">
+                    <h4 style="color: ${colors[index % colors.length]};">${scenario.name}</h4>
+                    <div class="comparison-values">
+                        <div class="comparison-value-item" style="border-left-color: ${colors[index % colors.length]};">
+                            <span class="comparison-value-name">Strategy:</span>
+                            <span class="comparison-value-number">${params.strategy || 'N/A'}</span>
+                        </div>
+                        <div class="comparison-value-item" style="border-left-color: ${colors[index % colors.length]};">
+                            <span class="comparison-value-name">Distribution:</span>
+                            <span class="comparison-value-number">${params.distribution || 'N/A'}</span>
+                        </div>
+                        <div class="comparison-value-item" style="border-left-color: ${colors[index % colors.length]};">
+                            <span class="comparison-value-name">Monthly Yield:</span>
+                            <span class="comparison-value-number">${(params.monthlyYield || 0).toFixed(2)}%</span>
+                        </div>
+                        <div class="comparison-value-item" style="border-left-color: ${colors[index % colors.length]};">
+                            <span class="comparison-value-name">Volatility:</span>
+                            <span class="comparison-value-number">${(params.volatility || 0).toFixed(1)}%</span>
+                        </div>
+                        <div class="comparison-value-item" style="border-left-color: ${colors[index % colors.length]};">
+                            <span class="comparison-value-name">Time Horizon:</span>
+                            <span class="comparison-value-number">${params.years || 0} years</span>
+                        </div>
+                        <div class="comparison-value-item" style="border-left-color: ${colors[index % colors.length]};">
+                            <span class="comparison-value-name">Invested:</span>
+                            <span class="comparison-value-number">${window.FinanceDashboard.formatNumber(totalInvested, 0)} EUR</span>
+                        </div>
+                        <div class="comparison-value-item" style="border-left-color: ${colors[index % colors.length]};">
+                            <span class="comparison-value-name">Median Result:</span>
+                            <span class="comparison-value-number">${window.FinanceDashboard.formatNumber(medianResult, 0)} EUR</span>
+                        </div>
+                        <div class="comparison-value-item" style="border-left-color: ${colors[index % colors.length]};">
+                            <span class="comparison-value-name">Total Return:</span>
+                            <span class="comparison-value-number" style="color: ${parseFloat(totalReturn) >= 0 ? '#43e97b' : '#f5576c'};">${totalReturn}%</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }).join('');
+    }
+    
+    function exportComparisonPDF() {
+        window.FinanceDashboard.showNotification('Generating comparison PDF...', 'info');
+        
+        setTimeout(() => {
+            try {
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF('p', 'mm', 'a4');
+                
+                // Page de garde
+                doc.setFillColor(102, 126, 234);
+                doc.rect(0, 0, 210, 297, 'F');
+                doc.setTextColor(255, 255, 255);
+                doc.setFontSize(28);
+                doc.text('Scenario Comparison Report', 105, 100, { align: 'center' });
+                doc.setFontSize(12);
+                doc.text(new Date().toLocaleDateString(), 105, 120, { align: 'center' });
+                
+                // Nouvelle page pour les détails
+                doc.addPage();
+                doc.setTextColor(0, 0, 0);
+                doc.setFontSize(16);
+                doc.text('Comparison Summary', 20, 20);
+                
+                doc.setFontSize(10);
+                let y = 35;
+                
+                const checkboxes = document.querySelectorAll('.scenario-select-checkbox:checked');
+                const selectedIds = Array.from(checkboxes).map(cb => cb.value);
+                const selectedScenarios = savedScenariosData.filter(s => selectedIds.includes(s.id));
+                
+                selectedScenarios.forEach((scenario, index) => {
+                    if (y > 250) {
+                        doc.addPage();
+                        y = 20;
+                    }
+                    
+                    doc.setFontSize(12);
+                    doc.setTextColor(102, 126, 234);
+                    doc.text(`${index + 1}. ${scenario.name}`, 20, y);
+                    y += 7;
+                    
+                    doc.setFontSize(10);
+                    doc.setTextColor(0, 0, 0);
+                    doc.text(`Median Result: ${window.FinanceDashboard.formatNumber(scenario.medianResult || 0, 0)} EUR`, 25, y);
+                    y += 7;
+                    
+                    const params = scenario.params || {};
+                    doc.text(`Strategy: ${params.strategy || 'N/A'}`, 25, y);
+                    y += 5;
+                    doc.text(`Distribution: ${params.distribution || 'N/A'}`, 25, y);
+                    y += 5;
+                    doc.text(`Volatility: ${(params.volatility || 0).toFixed(1)}%`, 25, y);
+                    y += 10;
+                });
+                
+                doc.save('MonteCarloComparison_' + new Date().toISOString().split('T')[0] + '.pdf');
+                window.FinanceDashboard.showNotification('Comparison PDF ready!', 'success');
+            } catch (error) {
+                console.error('PDF error:', error);
+                window.FinanceDashboard.showNotification('PDF export failed', 'error');
+            }
+        }, 300);
     }
     
     // ========== TEMPLATE LOADING ==========
@@ -1650,7 +1887,7 @@ const MonteCarlo = (function() {
         updateDistributionFields();
         initFirebase();
         
-        console.log('✅ Monte Carlo Ultra initialized');
+        console.log('✅ Monte Carlo Ultra initialized with Scenario Comparison');
     }
     
     if (document.readyState === 'loading') {
@@ -1666,8 +1903,10 @@ const MonteCarlo = (function() {
         saveCurrentScenario,
         deleteScenario,
         clearScenarios,
+        compareScenarios,
         exportPDF,
-        exportExcel
+        exportExcel,
+        exportComparisonPDF
     };
 })();
 
@@ -1705,4 +1944,4 @@ document.addEventListener('keydown', function(event) {
     }
 });
 
-console.log('✅ Monte Carlo Ultra-Complete loaded!');
+console.log('✅ Monte Carlo Ultra-Complete with Scenario Comparison loaded!');

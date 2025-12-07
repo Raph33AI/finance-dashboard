@@ -1232,5 +1232,147 @@ body.dark-mode .modal-content {
 }
 
 /* ============================================
+   ✅ SCENARIO COMPARISON - CHECKBOXES
+   ============================================ */
+.scenario-checkbox {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 10px;
+}
+
+.scenario-checkbox input[type='checkbox'] {
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+    accent-color: var(--ml-primary);
+    transition: var(--transition-smooth);
+}
+
+.scenario-checkbox input[type='checkbox']:hover {
+    transform: scale(1.15);
+}
+
+.scenario-checkbox label {
+    cursor: pointer;
+    font-weight: 600;
+    color: var(--text-primary);
+    user-select: none;
+}
+
+.scenario-selection-container {
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.08) 0%, rgba(118, 75, 162, 0.04) 100%);
+    border: 2px solid var(--glass-border);
+    border-radius: 16px;
+    padding: 20px;
+    margin-bottom: 20px;
+}
+
+body.dark-mode .scenario-selection-container {
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(15, 23, 42, 0.5) 100%);
+}
+
+/* ============================================
+   ✅ MODAL LARGE (pour comparaison)
+   ============================================ */
+.modal-large .modal-content {
+    max-width: 90%;
+    width: 1200px;
+}
+
+.comparison-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    margin-top: 20px;
+    justify-content: center;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    background: rgba(255, 255, 255, 0.8);
+    border-radius: 20px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+body.dark-mode .legend-item {
+    background: rgba(15, 23, 42, 0.8);
+}
+
+.legend-color {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+}
+
+.legend-label {
+    font-weight: 700;
+    font-size: 0.95rem;
+    color: var(--text-primary);
+}
+
+.comparison-stat-box {
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.05) 100%);
+    backdrop-filter: blur(20px);
+    padding: 20px;
+    border-radius: 16px;
+    border: 2px solid var(--glass-border);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+    transition: var(--transition-smooth);
+}
+
+.comparison-stat-box:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 32px rgba(102, 126, 234, 0.2);
+}
+
+.comparison-stat-box h4 {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--text-secondary);
+    margin-bottom: 12px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.comparison-values {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.comparison-value-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 12px;
+    background: rgba(255, 255, 255, 0.5);
+    border-radius: 8px;
+    border-left: 4px solid;
+}
+
+body.dark-mode .comparison-value-item {
+    background: rgba(15, 23, 42, 0.5);
+}
+
+.comparison-value-name {
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+.comparison-value-number {
+    font-weight: 800;
+    font-size: 1.1rem;
+    background: linear-gradient(135deg, var(--ml-primary), var(--ml-secondary));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+/* ============================================
    🎯 FIN DU FICHIER CSS
    ============================================ */

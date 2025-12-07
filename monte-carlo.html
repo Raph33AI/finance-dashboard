@@ -297,6 +297,9 @@
                             <button class='btn-scenario' onclick='MonteCarlo.saveCurrentScenario()'>
                                 <i class="fas fa-save"></i> Save Scenario
                             </button>
+                            <button class='btn-scenario' onclick='MonteCarlo.compareScenarios()'>
+                                <i class="fas fa-code-compare"></i> Compare Scenarios
+                            </button>
                             <button class='btn-scenario' onclick='MonteCarlo.clearScenarios()'>
                                 <i class="fas fa-trash"></i> Clear All
                             </button>
@@ -616,15 +619,534 @@
         
     </div>
     
-    <!-- MODALS -->
+    <!-- ============================================
+         TOUS LES MODALS
+         ============================================ -->
+    
+    <!-- Modal: Introduction Monte Carlo -->
     <div id='modalMCIntro' class='modal'>
         <div class='modal-content'>
             <div class='modal-header'>
-                <h2>🎲 Monte Carlo Simulation</h2>
+                <h2>🎲 Advanced Monte Carlo Simulation</h2>
                 <span class='close-modal' onclick='closeModal("modalMCIntro")'>&times;</span>
             </div>
             <div class='modal-body'>
-                <p>Advanced stochastic simulation using random sampling to model investment uncertainty across thousands of scenarios.</p>
+                <h3>📊 What's This?</h3>
+                <p>This <strong>ultra-advanced</strong> Monte Carlo simulation includes professional-grade features:</p>
+                
+                <ul>
+                    <li><strong>6 Distribution Models:</strong> Normal, Student-t, Log-Normal, Jump Diffusion, Regime Switching, GARCH</li>
+                    <li><strong>4 Strategies:</strong> DCA, Lump Sum, Comparison, Retirement Withdrawal</li>
+                    <li><strong>Advanced Metrics:</strong> CVaR, Maximum Drawdown, Sharpe, Sortino, Calmar Ratios</li>
+                    <li><strong>Professional Charts:</strong> Tornado Diagram, Heat Maps, Correlation Matrix, Efficient Frontier</li>
+                    <li><strong>Up to 50,000 simulations</strong> for maximum accuracy</li>
+                </ul>
+                
+                <div class='tip-box' style='background: linear-gradient(135deg, #4A74F3 0%, #6C8BE0 100%); color: white; padding: 20px; border-radius: 14px; margin: 20px 0;'>
+                    💡 <strong>Pro Tip:</strong> Start with a Quick Template, then customize parameters for your specific needs!
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal: Templates -->
+    <div id='modalTemplates' class='modal'>
+        <div class='modal-content'>
+            <div class='modal-header'>
+                <h2>🚀 Quick Start Templates</h2>
+                <span class='close-modal' onclick='closeModal("modalTemplates")'>&times;</span>
+            </div>
+            <div class='modal-body'>
+                <h3>Available Templates</h3>
+                
+                <h4>🛡 Conservative</h4>
+                <ul>
+                    <li>Monthly Investment: 500 EUR</li>
+                    <li>Expected Yield: 0.4% monthly (≈5% annual)</li>
+                    <li>Volatility: 8% (low risk)</li>
+                    <li>Ideal for: Risk-averse investors, near retirement</li>
+                </ul>
+                
+                <h4>⚖ Balanced</h4>
+                <ul>
+                    <li>Monthly Investment: 300 EUR</li>
+                    <li>Expected Yield: 0.58% monthly (≈7% annual)</li>
+                    <li>Volatility: 12% (moderate risk)</li>
+                    <li>Ideal for: Diversified 60/40 portfolio</li>
+                </ul>
+                
+                <h4>📈 Aggressive</h4>
+                <ul>
+                    <li>Monthly Investment: 200 EUR</li>
+                    <li>Expected Yield: 0.83% monthly (≈10% annual)</li>
+                    <li>Volatility: 18% (high risk)</li>
+                    <li>Ideal for: Long-term growth, young investors</li>
+                </ul>
+                
+                <h4>🏖 Retirement</h4>
+                <ul>
+                    <li>Accumulation: 15 years @ 400 EUR/month</li>
+                    <li>Withdrawal: 4% annual rule</li>
+                    <li>Volatility: 10%</li>
+                    <li>Ideal for: Retirement planning</li>
+                </ul>
+                
+                <h4>₿ Crypto</h4>
+                <ul>
+                    <li>Monthly Investment: 100 EUR</li>
+                    <li>Expected Yield: 1.5% monthly (≈20% annual)</li>
+                    <li>Volatility: 60% (extreme risk)</li>
+                    <li>Distribution: Jump Diffusion (captures crashes)</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal: Distribution Models -->
+    <div id='modalDistribution' class='modal'>
+        <div class='modal-content'>
+            <div class='modal-header'>
+                <h2>📊 Distribution Models Explained</h2>
+                <span class='close-modal' onclick='closeModal("modalDistribution")'>&times;</span>
+            </div>
+            <div class='modal-body'>
+                <h3>Why Different Distributions?</h3>
+                <p>Real markets don't follow perfect bell curves. Advanced models capture <strong>fat tails</strong> (crashes), <strong>jumps</strong> (sudden shocks), and <strong>regime changes</strong> (bull/bear cycles).</p>
+                
+                <h4>1⃣ Normal (Gaussian)</h4>
+                <p>Classic assumption: returns are symmetrically distributed around the mean.</p>
+                <ul>
+                    <li>✅ Simple, widely used</li>
+                    <li>❌ Underestimates extreme events (2008 crash, COVID)</li>
+                </ul>
+                
+                <h4>2⃣ Student-t</h4>
+                <p>Heavier tails → captures rare but severe crashes.</p>
+                <ul>
+                    <li>Parameter: Degrees of freedom (df). Lower df = fatter tails.</li>
+                    <li>✅ More realistic for equities</li>
+                    <li>Recommended df: 5-10</li>
+                </ul>
+                
+                <h4>3⃣ Log-Normal</h4>
+                <p>Returns are skewed to the right. Common in finance since prices can't go below zero.</p>
+                <ul>
+                    <li>✅ Realistic for stock prices</li>
+                    <li>✅ Prevents negative values</li>
+                </ul>
+                
+                <h4>4⃣ Jump Diffusion (Merton Model)</h4>
+                <p>Combines smooth drift + sudden jumps (e.g., market crashes).</p>
+                <ul>
+                    <li>Parameters: Jump intensity (λ), jump magnitude</li>
+                    <li>✅ Models flash crashes, circuit breakers</li>
+                </ul>
+                
+                <h4>5⃣ Regime Switching</h4>
+                <p>Markets alternate between <strong>bull</strong> (high return, low vol) and <strong>bear</strong> (low/negative return, high vol).</p>
+                <ul>
+                    <li>✅ Captures economic cycles</li>
+                    <li>Uses Markov chain for state transitions</li>
+                </ul>
+                
+                <h4>6⃣ GARCH</h4>
+                <p>Volatility changes over time (volatility clustering).</p>
+                <ul>
+                    <li>✅ Captures periods of high/low volatility</li>
+                    <li>✅ More realistic than constant volatility</li>
+                </ul>
+                
+                <div class='tip-box' style='background: linear-gradient(135deg, #4A74F3 0%, #6C8BE0 100%); color: white; padding: 20px; border-radius: 14px; margin: 20px 0;'>
+                    💡 <strong>Recommendation:</strong> Use Student-t for stocks, Jump Diffusion for volatile assets, Normal for bonds.
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal: Scenarios -->
+    <div id='modalScenarios' class='modal'>
+        <div class='modal-content'>
+            <div class='modal-header'>
+                <h2>💾 Scenario Manager</h2>
+                <span class='close-modal' onclick='closeModal("modalScenarios")'>&times;</span>
+            </div>
+            <div class='modal-body'>
+                <h3>Save & Compare Simulations</h3>
+                <p>The Scenario Manager lets you:</p>
+                
+                <ul>
+                    <li><strong>Save</strong> up to 5 different simulation scenarios in Firebase</li>
+                    <li><strong>Compare</strong> them side-by-side in interactive charts</li>
+                    <li><strong>Name</strong> each scenario for easy reference</li>
+                    <li><strong>Delete</strong> unwanted scenarios</li>
+                </ul>
+                
+                <h3>How to Compare Scenarios</h3>
+                <ol>
+                    <li>Run 2-5 different simulations (e.g., Conservative vs Aggressive)</li>
+                    <li>Click <strong>"Save Scenario"</strong> for each one</li>
+                    <li>Check the boxes next to scenarios you want to compare</li>
+                    <li>Click <strong>"Compare Scenarios"</strong></li>
+                    <li>A detailed comparison modal will open with charts and statistics</li>
+                </ol>
+                
+                <div class='example-box' style='background: linear-gradient(135deg, rgba(118, 75, 162, 0.12) 0%, rgba(102, 126, 234, 0.08) 100%); padding: 20px; border-radius: 16px; margin: 20px 0;'>
+                    <strong>Example Use Case:</strong><br>
+                    Compare "Conservative 2025" vs "Aggressive 2025" to see which strategy gives you the best risk-adjusted returns.
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal: Monthly Investment -->
+    <div id='modalMCInvest' class='modal'>
+        <div class='modal-content'>
+            <div class='modal-header'>
+                <h2>💰 Monthly Investment Strategy</h2>
+                <span class='close-modal' onclick='closeModal("modalMCInvest")'>&times;</span>
+            </div>
+            <div class='modal-body'>
+                <h3>📈 What Is Dollar-Cost Averaging (DCA)?</h3>
+                <p>Investing a <strong>fixed amount regularly</strong> (e.g., 200 EUR/month) regardless of market conditions.</p>
+                
+                <h3>✅ Advantages</h3>
+                <ul>
+                    <li><strong>Reduces timing risk:</strong> You buy more when prices are low, less when high</li>
+                    <li><strong>Discipline:</strong> Automates investing, removes emotions</li>
+                    <li><strong>Accessible:</strong> No need for large lump sum</li>
+                    <li><strong>Compound growth:</strong> Early investments grow the longest</li>
+                </ul>
+                
+                <h3>📊 Example</h3>
+                <p>Investing 200 EUR/month for 25 years at 8% annual return:</p>
+                <ul>
+                    <li>Total Invested: 60,000 EUR</li>
+                    <li>Expected Value: ~200,000 EUR</li>
+                    <li>Gain: ~140,000 EUR (233% return)</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal: Monthly Yield -->
+    <div id='modalMCYield' class='modal'>
+        <div class='modal-content'>
+            <div class='modal-header'>
+                <h2>📊 Expected Monthly Yield</h2>
+                <span class='close-modal' onclick='closeModal("modalMCYield")'>&times;</span>
+            </div>
+            <div class='modal-body'>
+                <h3>📐 Definition</h3>
+                <p>The <span class='key-term' style='background: linear-gradient(135deg, #667eea, #4A74F3); color: white; padding: 4px 12px; border-radius: 6px;'>Expected Yield</span> is the average return you anticipate <strong>per month</strong>. It's the central tendency around which random returns fluctuate.</p>
+                
+                <div class='formula-box' style='background: linear-gradient(135deg, rgba(102, 126, 234, 0.15) 0%, rgba(118, 75, 162, 0.1) 100%); padding: 28px; border-radius: 16px; margin: 25px 0; border-left: 6px solid #764ba2; font-family: monospace; font-size: 1.15rem;'>
+                    <strong>Conversion Formula:</strong><br>
+                    Monthly Yield = (1 + Annual Return)<sup>1/12</sup> - 1<br><br>
+                    <strong>Approximation:</strong><br>
+                    Monthly Yield ≈ Annual Return / 12
+                </div>
+                
+                <h3>📈 Common Values</h3>
+                <ul>
+                    <li><strong>0.4%/month</strong> ≈ 5% annual (Conservative)</li>
+                    <li><strong>0.58%/month</strong> ≈ 7% annual (Balanced)</li>
+                    <li><strong>0.67%/month</strong> ≈ 8% annual (S&P 500 historical)</li>
+                    <li><strong>0.83%/month</strong> ≈ 10% annual (Aggressive)</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal: Volatility -->
+    <div id='modalMCVol' class='modal'>
+        <div class='modal-content'>
+            <div class='modal-header'>
+                <h2>📉 Understanding Volatility</h2>
+                <span class='close-modal' onclick='closeModal("modalMCVol")'>&times;</span>
+            </div>
+            <div class='modal-body'>
+                <h3>📊 Definition</h3>
+                <p><span class='key-term' style='background: linear-gradient(135deg, #667eea, #4A74F3); color: white; padding: 4px 12px; border-radius: 6px;'>Volatility</span> measures how much returns fluctuate around the average. High volatility = big swings up and down. Low volatility = stable returns.</p>
+                
+                <h3>📈 Typical Values (Annual)</h3>
+                <ul>
+                    <li><strong>Cash/Bonds:</strong> 2-6%</li>
+                    <li><strong>Balanced Portfolio (60/40):</strong> 10-12%</li>
+                    <li><strong>Global Stocks (S&P 500):</strong> 15-20%</li>
+                    <li><strong>Emerging Markets:</strong> 25-35%</li>
+                    <li><strong>Cryptocurrencies:</strong> 60-100%+</li>
+                </ul>
+                
+                <h3>⚠ Impact on Results</h3>
+                <p>Higher volatility means:</p>
+                <ul>
+                    <li>Wider range of possible outcomes</li>
+                    <li>Higher chance of extreme losses (and gains)</li>
+                    <li>Lower probability of hitting specific targets</li>
+                    <li>Higher risk-adjusted returns needed (Sharpe Ratio)</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal: Number of Simulations -->
+    <div id='modalMCSim' class='modal'>
+        <div class='modal-content'>
+            <div class='modal-header'>
+                <h2>🔢 Number of Simulations</h2>
+                <span class='close-modal' onclick='closeModal("modalMCSim")'>&times;</span>
+            </div>
+            <div class='modal-body'>
+                <h3>🎯 Why Multiple Simulations?</h3>
+                <p>Each simulation is one possible future. Running many simulations creates a <strong>probability distribution</strong> of outcomes, giving you confidence intervals.</p>
+                
+                <h3>📊 How Many Do You Need?</h3>
+                <ul>
+                    <li><strong>100-500:</strong> Quick test, rough estimate (±5% accuracy)</li>
+                    <li><strong>1,000:</strong> Standard (±2% accuracy) → <strong>Recommended</strong></li>
+                    <li><strong>5,000:</strong> High precision (±1% accuracy)</li>
+                    <li><strong>10,000:</strong> Professional use (±0.5% accuracy)</li>
+                    <li><strong>50,000:</strong> Academic/research (±0.2% accuracy)</li>
+                </ul>
+                
+                <h3>⚡ Performance Impact</h3>
+                <p>Higher simulation counts take longer to compute:</p>
+                <ul>
+                    <li>1,000 sims: ~1-2 seconds</li>
+                    <li>10,000 sims: ~5-10 seconds</li>
+                    <li>50,000 sims: ~30-60 seconds</li>
+                </ul>
+                
+                <div class='tip-box' style='background: linear-gradient(135deg, #4A74F3 0%, #6C8BE0 100%); color: white; padding: 20px; border-radius: 14px; margin: 20px 0;'>
+                    💡 <strong>Sweet Spot:</strong> 1,000-2,000 simulations offers the best balance between accuracy and speed for most use cases.
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal: Results Interpretation -->
+    <div id='modalMCResults' class='modal'>
+        <div class='modal-content'>
+            <div class='modal-header'>
+                <h2>📊 How to Read Your Results</h2>
+                <span class='close-modal' onclick='closeModal("modalMCResults")'>&times;</span>
+            </div>
+            <div class='modal-body'>
+                <h3>📈 Key Metrics Explained</h3>
+                
+                <h4>1⃣ Median (50th Percentile)</h4>
+                <p>The <span class='key-term' style='background: linear-gradient(135deg, #667eea, #4A74F3); color: white; padding: 4px 12px; border-radius: 6px;'>middle value</span> when all outcomes are sorted. <strong>50% of simulations are above</strong> this, 50% below.</p>
+                <div class='tip-box' style='background: linear-gradient(135deg, #4A74F3 0%, #6C8BE0 100%); color: white; padding: 15px; border-radius: 12px; margin: 15px 0;'>💡 <strong>Use this</strong> as your most likely outcome.</div>
+                
+                <h4>2⃣ 10th Percentile (Pessimistic)</h4>
+                <p>Only <strong>10% of scenarios are worse</strong> than this. Think of it as a "bad luck" scenario.</p>
+                
+                <h4>3⃣ 90th Percentile (Optimistic)</h4>
+                <p>Only <strong>10% of scenarios are better</strong> than this. Think of it as a "good luck" scenario.</p>
+                
+                <h4>4⃣ Average</h4>
+                <p>The arithmetic mean of all outcomes. Can be skewed by extreme values.</p>
+                
+                <h4>5⃣ Best/Worst Case</h4>
+                <p>The extreme outcomes. Useful for understanding the full range of possibilities.</p>
+                
+                <h3>📊 Interpreting the Range</h3>
+                <p>The difference between P10 and P90 shows your <strong>uncertainty</strong>:</p>
+                <ul>
+                    <li>Narrow range (P90/P10 &lt; 2x): Predictable outcome</li>
+                    <li>Wide range (P90/P10 &gt; 3x): High uncertainty</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal: Risk Metrics -->
+    <div id='modalMCRisk' class='modal'>
+        <div class='modal-content'>
+            <div class='modal-header'>
+                <h2>⚠ Risk Metrics Explained</h2>
+                <span class='close-modal' onclick='closeModal("modalMCRisk")'>&times;</span>
+            </div>
+            <div class='modal-body'>
+                <h3>📊 Key Risk Indicators</h3>
+                
+                <h4>1⃣ Value at Risk (VaR) 5%</h4>
+                <p><span class='key-term' style='background: linear-gradient(135deg, #667eea, #4A74F3); color: white; padding: 4px 12px; border-radius: 6px;'>VaR 5%</span> = The 5th percentile outcome. <strong>95% of scenarios are better</strong> than this.</p>
+                <p>Example: VaR 5% = 50,000 EUR means there's only a 5% chance you'll end up with less than 50,000 EUR.</p>
+                
+                <h4>2⃣ Loss Probability</h4>
+                <p>% of simulations where you <strong>end up with less than you invested</strong> (no gains, or losses).</p>
+                <p>Lower is better. Ideally &lt;5%.</p>
+                
+                <h4>3⃣ Average/Median Return</h4>
+                <p>Your expected return as a percentage of total invested capital.</p>
+                
+                <div class='warning-box' style='background: linear-gradient(135deg, #9D5CE6 0%, #C39BD3 100%); color: white; padding: 20px; border-radius: 14px; margin: 20px 0;'>
+                    ⚠ <strong>Important:</strong> These metrics assume historical patterns continue. Past performance does not guarantee future results.
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal: Advanced Risk Metrics -->
+    <div id='modalAdvancedRisk' class='modal'>
+        <div class='modal-content'>
+            <div class='modal-header'>
+                <h2>📉 Advanced Risk Metrics</h2>
+                <span class='close-modal' onclick='closeModal("modalAdvancedRisk")'>&times;</span>
+            </div>
+            <div class='modal-body'>
+                <h3>Professional Risk Measures</h3>
+                
+                <h4>1⃣ CVaR (Conditional Value at Risk)</h4>
+                <p>Also called <strong>Expected Shortfall</strong>. Average loss in the worst 5% of cases.</p>
+                <div class='formula-box' style='background: linear-gradient(135deg, rgba(102, 126, 234, 0.15) 0%, rgba(118, 75, 162, 0.1) 100%); padding: 20px; border-radius: 12px; margin: 15px 0; font-family: monospace;'>
+                    CVaR = E[Loss | Loss &gt; VaR]
+                </div>
+                <p>More conservative than VaR (used by Basel III banking regulations).</p>
+                
+                <h4>2⃣ Maximum Drawdown</h4>
+                <p>Largest peak-to-trough decline during the investment period.</p>
+                <p>Shows the worst loss you'd experience before recovery.</p>
+                
+                <h4>3⃣ Sharpe Ratio</h4>
+                <p>Risk-adjusted return. Higher is better (&gt;1 is good, &gt;2 is excellent).</p>
+                
+                <h4>4⃣ Sortino Ratio</h4>
+                <p>Like Sharpe Ratio but only penalizes <strong>downside volatility</strong>.</p>
+                
+                <h4>5⃣ Calmar Ratio</h4>
+                <p>Annual return divided by maximum drawdown. Higher is better.</p>
+                
+                <h4>6⃣ Skewness & Kurtosis</h4>
+                <ul>
+                    <li><strong>Skewness:</strong> Asymmetry (negative = more left-tail risk)</li>
+                    <li><strong>Kurtosis:</strong> Tail thickness (&gt;3 = fat tails, more extreme events)</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal: Maximum Drawdown -->
+    <div id='modalDrawdown' class='modal'>
+        <div class='modal-content'>
+            <div class='modal-header'>
+                <h2>📉 Maximum Drawdown Explained</h2>
+                <span class='close-modal' onclick='closeModal("modalDrawdown")'>&times;</span>
+            </div>
+            <div class='modal-body'>
+                <h3>Definition</h3>
+                <p><strong>Maximum Drawdown (MDD)</strong> is the largest percentage drop from a peak to a trough in your portfolio value.</p>
+                
+                <div class='formula-box' style='background: linear-gradient(135deg, rgba(102, 126, 234, 0.15) 0%, rgba(118, 75, 162, 0.1) 100%); padding: 20px; border-radius: 12px; margin: 15px 0; font-family: monospace;'>
+                    MDD = (Trough Value - Peak Value) / Peak Value × 100%
+                </div>
+                
+                <h3>Why It Matters</h3>
+                <ul>
+                    <li><strong>Psychological Test:</strong> Can you stomach a -30% drop?</li>
+                    <li><strong>Recovery Time:</strong> How long to get back to break-even?</li>
+                    <li><strong>Strategy Viability:</strong> Too deep = strategy may fail</li>
+                </ul>
+                
+                <h3>Example</h3>
+                <div class='example-box' style='background: linear-gradient(135deg, rgba(118, 75, 162, 0.12) 0%, rgba(102, 126, 234, 0.08) 100%); padding: 20px; border-radius: 12px; margin: 15px 0;'>
+                    Your portfolio peaks at 100,000 EUR, then drops to 70,000 EUR.<br>
+                    <strong>MDD = -30%</strong><br><br>
+                    To recover, you need a <strong>+42.9% gain</strong> (not +30%)!
+                </div>
+                
+                <div class='warning-box' style='background: linear-gradient(135deg, #9D5CE6 0%, #C39BD3 100%); color: white; padding: 20px; border-radius: 14px; margin: 20px 0;'>
+                    ⚠ <strong>Rule of Thumb:</strong> Most investors panic-sell after 20-30% drawdowns. Plan accordingly!
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal: Tornado Diagram -->
+    <div id='modalTornado' class='modal'>
+        <div class='modal-content'>
+            <div class='modal-header'>
+                <h2>🌪 Tornado Diagram (Sensitivity Analysis)</h2>
+                <span class='close-modal' onclick='closeModal("modalTornado")'>&times;</span>
+            </div>
+            <div class='modal-body'>
+                <h3>What Is It?</h3>
+                <p>A <strong>tornado diagram</strong> shows which input parameters have the <strong>biggest impact</strong> on your final portfolio value.</p>
+                
+                <h3>How to Read It</h3>
+                <ul>
+                    <li>Each bar shows the effect of ±10% change in that parameter</li>
+                    <li>Longer bars = more sensitive (higher impact)</li>
+                    <li>Bars are sorted by impact (largest first)</li>
+                    <li>Red = decrease (-10%), Green = increase (+10%)</li>
+                </ul>
+                
+                <div class='example-box' style='background: linear-gradient(135deg, rgba(118, 75, 162, 0.12) 0%, rgba(102, 126, 234, 0.08) 100%); padding: 20px; border-radius: 12px; margin: 15px 0;'>
+                    <strong>Example:</strong><br>
+                    If <strong>Volatility</strong> has the longest bar, reducing volatility will have the biggest positive effect on your outcomes.
+                </div>
+                
+                <h3>Why It's Useful</h3>
+                <ul>
+                    <li>Identify <strong>key drivers</strong> of portfolio success</li>
+                    <li>Focus optimization efforts on high-impact parameters</li>
+                    <li>Understand which assumptions matter most</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal: Heat Map -->
+    <div id='modalHeatMap' class='modal'>
+        <div class='modal-content'>
+            <div class='modal-header'>
+                <h2>🌡 2D Parameter Heat Map</h2>
+                <span class='close-modal' onclick='closeModal("modalHeatMap")'>&times;</span>
+            </div>
+            <div class='modal-body'>
+                <h3>What Is It?</h3>
+                <p>A <strong>heat map</strong> visualizes portfolio outcomes across different combinations of <strong>Expected Return</strong> (X-axis) and <strong>Volatility</strong> (Y-axis).</p>
+                
+                <h3>Color Legend</h3>
+                <ul>
+                    <li>🔴 <strong>Red:</strong> Low portfolio values (worse outcomes)</li>
+                    <li>🟡 <strong>Yellow:</strong> Moderate values</li>
+                    <li>🟢 <strong>Green:</strong> High portfolio values (better outcomes)</li>
+                </ul>
+                
+                <h3>How to Use It</h3>
+                <ul>
+                    <li>Find your current parameters on the map</li>
+                    <li>Explore "what-if" scenarios by moving to different cells</li>
+                    <li>Identify the <strong>optimal risk/return balance</strong></li>
+                </ul>
+                
+                <div class='tip-box' style='background: linear-gradient(135deg, #4A74F3 0%, #6C8BE0 100%); color: white; padding: 20px; border-radius: 14px; margin: 20px 0;'>
+                    💡 <strong>Insight:</strong> The heat map often shows diminishing returns at very high volatility levels. There's a sweet spot!
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal: Scenario Comparison (NOUVEAU) -->
+    <div id='modalCompareScenarios' class='modal modal-large'>
+        <div class='modal-content'>
+            <div class='modal-header'>
+                <h2>📊 Compare Scenarios</h2>
+                <span class='close-modal' onclick='closeModal("modalCompareScenarios")'>&times;</span>
+            </div>
+            <div class='modal-body'>
+                <div id='comparisonChartContainer' class='chart' style='min-height: 500px;'></div>
+                
+                <h3 style='margin-top: 30px;'>Comparative Statistics</h3>
+                <div id='comparisonStatsContainer' class='stats-grid'></div>
+                
+                <div style='margin-top: 30px; text-align: center;'>
+                    <button class='btn-export' onclick='MonteCarlo.exportComparisonPDF()'>
+                        <i class="fas fa-file-pdf"></i> Export Comparison PDF
+                    </button>
+                </div>
             </div>
         </div>
     </div>
