@@ -825,56 +825,61 @@ body.dark-mode .last-update {
  */
 
 /* ============================================
-   BOUTON HAMBURGER - DISCRET (Mobile)
+   BOUTON HAMBURGER - ÉLÉGANT ET DISCRET
    ============================================ */
 
 @media (max-width: 768px) {
     
-    /* ✅ Hamburger discret avec traits fins */
+    /* ✅ Hamburger élégant avec style premium */
     .mobile-toggle {
         display: flex !important;
         align-items: center;
         justify-content: center;
         width: 44px;
         height: 44px;
-        border-radius: 12px;
-        background: transparent; /* ✅ Fond transparent */
-        border: 1px solid rgba(30, 41, 59, 0.1); /* ✅ Bordure très légère */
+        border-radius: 10px;
+        background: #ffffff; /* Fond blanc */
+        border: 1px solid rgba(226, 232, 240, 0.8); /* Bordure subtile */
         cursor: pointer;
-        transition: all 0.2s ease;
-        box-shadow: none; /* ✅ Pas d'ombre */
+        transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08); /* Ombre légère */
         position: relative;
         z-index: 10;
     }
     
     .mobile-toggle i {
-        color: #475569; /* ✅ Gris discret */
-        font-size: 1.1em; /* ✅ Taille réduite */
-        font-weight: 400; /* ✅ Traits fins */
+        color: #334155; /* Gris foncé élégant */
+        font-size: 1.15em;
+        font-weight: 500; /* Équilibre entre fin et épais */
     }
     
     .mobile-toggle:hover {
-        background: rgba(248, 250, 252, 0.8);
-        border-color: rgba(203, 213, 225, 0.3);
+        background: #f8fafc;
+        border-color: #cbd5e1;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+        transform: translateY(-1px);
     }
     
     .mobile-toggle:active {
-        transform: scale(0.95);
+        transform: translateY(0) scale(0.97);
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
     }
     
     /* Dark mode */
     body.dark-mode .mobile-toggle {
-        background: transparent;
-        border-color: rgba(255, 255, 255, 0.1);
+        background: rgba(30, 41, 59, 0.95);
+        border-color: rgba(71, 85, 105, 0.5);
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
     }
     
     body.dark-mode .mobile-toggle i {
-        color: #cbd5e1; /* Gris clair en dark mode */
+        color: #e2e8f0;
     }
     
     body.dark-mode .mobile-toggle:hover {
-        background: rgba(51, 65, 85, 0.3);
-        border-color: rgba(255, 255, 255, 0.15);
+        background: #334155;
+        border-color: #475569;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
     }
     
     /* ============================================
