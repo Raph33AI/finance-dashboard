@@ -1207,29 +1207,68 @@ const MonteCarlo = (function() {
                 credits: { enabled: false }
             });
             
-            const portfolioAtWithdrawal = percentile(allSimulations.map(sim => sim[withdrawalStartMonth]), 50);
+            // ✅ CORRECTION: Gérer le cas où withdrawalStartMonth > totalMonths
+            const effectiveWithdrawalMonth = Math.min(withdrawalStartMonth, totalMonths - 1);
+
+            console.log(`🔍 Withdrawal month: ${withdrawalStartMonth}, Total months: ${totalMonths}, Effective: ${effectiveWithdrawalMonth}`);
+
+            // Extraire les valeurs du portfolio au moment du retrait
+            const portfolioValues = allSimulations
+                .map(sim => sim[effectiveWithdrawalMonth])
+                .filter(v => v !== undefined && v !== null && v > 0);
+
+            console.log(`📊 Valid portfolio values at withdrawal: ${portfolioValues.length}/${allSimulations.length}`);
+
+            // Calculer la médiane (ou 0 si pas de données)
+            const portfolioAtWithdrawal = portfolioValues.length > 0 
+                ? percentile(portfolioValues, 50) 
+                : 0;
+
             const monthlyWithdrawal = (portfolioAtWithdrawal * params.withdrawalRate) / 12;
+
+            console.log(`💰 Portfolio at withdrawal: ${portfolioAtWithdrawal.toFixed(0)} EUR, Monthly withdrawal: ${monthlyWithdrawal.toFixed(0)} EUR`);
             
+            // ✅ NOUVEAU CODE avec gestion des erreurs
             const statsContainer = document.getElementById('withdrawalStats');
             if (statsContainer) {
-                statsContainer.innerHTML = `
-                    <div class="stat-box">
-                        <div class="label">Accumulation Period</div>
-                        <div class="value">${params.withdrawalStartYear} years</div>
-                    </div>
-                    <div class="stat-box">
-                        <div class="label">Portfolio at Retirement</div>
-                        <div class="value">${window.FinanceDashboard.formatNumber(portfolioAtWithdrawal, 0)} EUR</div>
-                    </div>
-                    <div class="stat-box">
-                        <div class="label">Monthly Withdrawal</div>
-                        <div class="value">${window.FinanceDashboard.formatNumber(monthlyWithdrawal, 0)} EUR</div>
-                    </div>
-                    <div class="stat-box">
-                        <div class="label">Depletion Risk</div>
-                        <div class="value" style="color: ${parseFloat(depletionRate) > 10 ? '#f5576c' : '#43e97b'}">${depletionRate}%</div>
-                    </div>
-                `;
+                // Vérifier si la configuration est cohérente
+                const isConfigValid = params.withdrawalStartYear <= params.years;
+                
+                if (!isConfigValid) {
+                    statsContainer.innerHTML = `
+                        <div class="stat-box" style="grid-column: 1 / -1; background: rgba(245, 87, 108, 0.1); border-left: 4px solid #f5576c;">
+                            <div class="label" style="color: #f5576c;">⚠ CONFIGURATION ERROR</div>
+                            <div class="value" style="font-size: 1rem; color: #f5576c;">
+                                Withdrawal Start Year (${params.withdrawalStartYear}) > Time Horizon (${params.years} years)
+                                <br><br>
+                                <small style="font-weight: normal;">Please adjust parameters: Withdrawal Start Year must be ≤ ${params.years} years</small>
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    statsContainer.innerHTML = `
+                        <div class="stat-box">
+                            <div class="label">Accumulation Period</div>
+                            <div class="value">${params.withdrawalStartYear} years</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="label">Portfolio at Retirement</div>
+                            <div class="value">${window.FinanceDashboard.formatNumber(portfolioAtWithdrawal, 0)} EUR</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="label">Monthly Withdrawal</div>
+                            <div class="value">${window.FinanceDashboard.formatNumber(monthlyWithdrawal, 0)} EUR</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="label">Depletion Risk</div>
+                            <div class="value" style="color: ${parseFloat(depletionRate) > 10 ? '#f5576c' : '#43e97b'}">${depletionRate}%</div>
+                        </div>
+                    `;
+                }
+                
+                console.log(`✅ Withdrawal stats displayed successfully`);
+            } else {
+                console.error('❌ Element #withdrawalStats not found!');
             }
         }
         
