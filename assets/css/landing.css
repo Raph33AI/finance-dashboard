@@ -6662,11 +6662,16 @@ body.dark-mode .pricing-card.platinum {
 @media (max-width: 768px) {
     
     /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-       🍔 MENU HAMBURGER (SIDEBAR) - FOND BLANC PLEIN ÉCRAN
+       🍔 MENU HAMBURGER (SIDEBAR) - FOND BLANC PUR
        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
     
     .nav-container {
         padding: 0.875rem 1rem !important;
+    }
+    
+    /* ✅ FORCER LE FOND BLANC SUR LE BODY (empêche héritage gris) */
+    body:not(.dark-mode) {
+        background-color: #ffffff !important;
     }
     
     /* Menu principal - Plein écran depuis la gauche */
@@ -6680,8 +6685,10 @@ body.dark-mode .pricing-card.platinum {
         max-width: 100% !important;
         height: calc(100vh - 65px) !important;
         
-        /* ✅ FOND BLANC PUR (PAS GRIS) */
+        /* ✅ FOND BLANC ABSOLU - TRIPLE FORCE */
         background: #ffffff !important;
+        background-color: #ffffff !important;
+        background-image: none !important;
         
         /* Layout */
         padding: 1.5rem 1rem !important;
@@ -6703,9 +6710,20 @@ body.dark-mode .pricing-card.platinum {
         box-shadow: 2px 0 20px rgba(0, 0, 0, 0.1) !important;
     }
     
+    /* ✅ SUPPRIMER TOUT PSEUDO-ÉLÉMENT AVANT/APRÈS QUI POURRAIT CRÉER DU GRIS */
+    .nav-menu::before {
+        display: none !important;
+    }
+    
+    .nav-menu::after {
+        display: none !important;
+    }
+    
     /* Dark mode - Fond sombre */
     body.dark-mode .nav-menu {
         background: #1e293b !important;
+        background-color: #1e293b !important;
+        background-image: none !important;
         border-right: 1px solid rgba(255, 255, 255, 0.1) !important;
     }
     
@@ -6714,8 +6732,8 @@ body.dark-mode .pricing-card.platinum {
         transform: translateX(0) !important;
     }
     
-    /* Overlay sombre derrière le menu */
-    .nav-menu.active::before {
+    /* ✅ OVERLAY SOMBRE - DERRIÈRE LE MENU (ne doit pas affecter le fond du menu) */
+    body.menu-open::before {
         content: '';
         position: fixed;
         top: 65px;
@@ -6723,8 +6741,9 @@ body.dark-mode .pricing-card.platinum {
         right: 0;
         bottom: 0;
         background: rgba(0, 0, 0, 0.5);
-        z-index: -1;
+        z-index: 9997; /* Juste en dessous du menu */
         animation: fadeInOverlay 0.3s ease;
+        pointer-events: auto;
     }
     
     /* Liens du menu - Grande taille lisible */
@@ -6784,7 +6803,12 @@ body.dark-mode .pricing-card.platinum {
         left: 0 !important;
         right: 0 !important;
         width: 100% !important;
+        
+        /* ✅ FOND BLANC ABSOLU */
         background: #ffffff !important;
+        background-color: #ffffff !important;
+        background-image: none !important;
+        
         padding: 1.25rem 1rem !important;
         border-top: 1px solid rgba(0, 0, 0, 0.08) !important;
         display: flex !important;
@@ -6792,12 +6816,14 @@ body.dark-mode .pricing-card.platinum {
         gap: 0.875rem !important;
         transform: translateY(100%) !important;
         transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
-        z-index: 9997 !important;
+        z-index: 9999 !important; /* Au-dessus du menu */
         box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.1) !important;
     }
     
     body.dark-mode .nav-cta {
         background: #1e293b !important;
+        background-color: #1e293b !important;
+        background-image: none !important;
         border-top: 1px solid rgba(255, 255, 255, 0.1) !important;
     }
     
@@ -6813,6 +6839,13 @@ body.dark-mode .pricing-card.platinum {
         padding: 1rem 1.5rem !important;
         font-size: 1rem !important;
     }
+    
+    /* Animation fade in pour overlays */
+    @keyframes fadeInOverlay {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+}
     
     /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
        👤 MENU PROFIL USER - BOTTOM SHEET DEPUIS LE BAS

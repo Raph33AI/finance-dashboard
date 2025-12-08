@@ -767,11 +767,11 @@ class MobileMenuManager {
         }
     }
 
-   openMenu() {
+    openMenu() {
         this.mobileMenuBtn.classList.add('active');
         this.navMenu.classList.add('active');
         
-        // ✅ AJOUT : Bloquer le scroll du body
+        // ✅ AJOUT : Bloquer le scroll + ajouter classe menu-open au body
         document.body.classList.add('menu-open');
         document.body.style.overflow = 'hidden';
         document.body.style.position = 'fixed';
@@ -784,7 +784,7 @@ class MobileMenuManager {
         this.mobileMenuBtn.classList.remove('active');
         this.navMenu.classList.remove('active');
         
-        // ✅ AJOUT : Réactiver le scroll
+        // ✅ AJOUT : Réactiver le scroll + retirer classe menu-open
         document.body.classList.remove('menu-open');
         document.body.style.overflow = '';
         document.body.style.position = '';
