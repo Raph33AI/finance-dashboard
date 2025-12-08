@@ -825,12 +825,12 @@ body.dark-mode .last-update {
  */
 
 /* ============================================
-   BOUTON HAMBURGER - BARRES NOIRES (Mobile)
+   BOUTON HAMBURGER - DISCRET (Mobile)
    ============================================ */
 
 @media (max-width: 768px) {
     
-    /* ✅ Hamburger avec barres noires */
+    /* ✅ Hamburger discret avec traits fins */
     .mobile-toggle {
         display: flex !important;
         align-items: center;
@@ -838,25 +838,24 @@ body.dark-mode .last-update {
         width: 44px;
         height: 44px;
         border-radius: 12px;
-        background: #ffffff; /* Fond blanc */
-        border: 2px solid #e2e8f0; /* Bordure grise légère */
+        background: transparent; /* ✅ Fond transparent */
+        border: 1px solid rgba(30, 41, 59, 0.1); /* ✅ Bordure très légère */
         cursor: pointer;
         transition: all 0.2s ease;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        box-shadow: none; /* ✅ Pas d'ombre */
         position: relative;
         z-index: 10;
     }
     
     .mobile-toggle i {
-        color: #1e293b; /* ✅ BARRES NOIRES */
-        font-size: 1.3em;
-        font-weight: 600;
+        color: #475569; /* ✅ Gris discret */
+        font-size: 1.1em; /* ✅ Taille réduite */
+        font-weight: 400; /* ✅ Traits fins */
     }
     
     .mobile-toggle:hover {
-        background: #f8fafc;
-        border-color: #cbd5e1;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        background: rgba(248, 250, 252, 0.8);
+        border-color: rgba(203, 213, 225, 0.3);
     }
     
     .mobile-toggle:active {
@@ -865,25 +864,25 @@ body.dark-mode .last-update {
     
     /* Dark mode */
     body.dark-mode .mobile-toggle {
-        background: #1e293b;
-        border-color: #334155;
+        background: transparent;
+        border-color: rgba(255, 255, 255, 0.1);
     }
     
     body.dark-mode .mobile-toggle i {
-        color: #ffffff; /* Barres blanches en dark mode */
+        color: #cbd5e1; /* Gris clair en dark mode */
     }
     
     body.dark-mode .mobile-toggle:hover {
-        background: #334155;
-        border-color: #475569;
+        background: rgba(51, 65, 85, 0.3);
+        border-color: rgba(255, 255, 255, 0.15);
     }
     
     /* ============================================
-       BOUTON FERMETURE SIDEBAR (Flèche en haut à droite)
+       BOUTON FERMETURE SIDEBAR (Flèche)
        ============================================ */
     
     .sidebar-close-mobile {
-        display: none; /* Masqué par défaut */
+        display: none; /* ✅ Masqué par défaut */
         position: absolute;
         top: 18px;
         right: 16px;
@@ -902,7 +901,7 @@ body.dark-mode .last-update {
         justify-content: center;
     }
     
-    /* ✅ Afficher uniquement quand sidebar ouverte */
+    /* ✅ Affiché uniquement quand sidebar ouverte (géré par JS) */
     .sidebar.mobile-open .sidebar-close-mobile {
         display: flex !important;
     }
@@ -1069,6 +1068,17 @@ body.dark-mode .last-update {
     .sidebar::-webkit-scrollbar-thumb {
         background: rgba(255, 255, 255, 0.3);
         border-radius: 2px;
+    }
+}
+
+/* ============================================
+   DESKTOP - Masquer bouton fermeture
+   ============================================ */
+
+@media (min-width: 769px) {
+    /* ✅ Masquer complètement le bouton de fermeture sur desktop */
+    .sidebar-close-mobile {
+        display: none !important;
     }
 }
 
