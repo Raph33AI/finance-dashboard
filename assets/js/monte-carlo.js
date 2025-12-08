@@ -1169,6 +1169,12 @@ const MonteCarlo = (function() {
         createChart2(finalValues, params, totalMonths);
         createChart3(finalValues, params.targetValue);
         createDrawdownAnalysis(maxDrawdowns, allSimulations);
+        // ✅ AJOUT DES GRAPHIQUES AVANCÉS POUR LE RETIREMENT PLAN
+        createTornadoDiagram(params, totalMonths);
+        createHeatMap(params, totalMonths);
+        createCorrelationMatrix(results.allReturns, finalValues, maxDrawdowns);
+        createChart4(allSimulations, totalMonths, params); // Stress Testing (CRUCIAL)
+        createRollingSharpe(results.allReturns);
         
         const withdrawalSection = document.getElementById('withdrawalAnalysisSection');
         if (withdrawalSection) {
