@@ -6681,10 +6681,7 @@ body.dark-mode .pricing-card.platinum {
         height: calc(100vh - 65px) !important;
         
         /* ✅ FOND BLANC PUR (PAS GRIS) */
-        /* background: #ffffff !important; */
-        background: rgba(255, 255, 255, 0.95) !important;
-        backdrop-filter: blur(20px) saturate(180%) !important;
-        -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
+        background: #ffffff !important;
         
         /* Layout */
         padding: 1.5rem 1rem !important;
@@ -6708,11 +6705,7 @@ body.dark-mode .pricing-card.platinum {
     
     /* Dark mode - Fond sombre */
     body.dark-mode .nav-menu {
-        /* background: #1e293b !important;
-        border-right: 1px solid rgba(255, 255, 255, 0.1) !important; */
-        background: rgba(30, 41, 59, 0.95) !important;
-        backdrop-filter: blur(20px) saturate(180%) !important;
-        -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
+        background: #1e293b !important;
         border-right: 1px solid rgba(255, 255, 255, 0.1) !important;
     }
     
