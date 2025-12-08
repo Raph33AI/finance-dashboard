@@ -678,25 +678,28 @@ class NavigationManager {
 }
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-// 📱 MOBILE MENU MANAGER - AVEC PROFIL INTÉGRÉ
+// 📱 MOBILE MENU MANAGER - PROFIL EN BAS DU MENU
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 class MobileMenuManager {
     constructor() {
-        console.log('📱 Mobile Menu Manager - Initialisation AVEC profil');
+        console.log('📱 Mobile Menu Manager - Initialisation AVEC profil EN BAS');
         
         this.mobileMenuBtn = document.getElementById('mobileMenuBtn');
         this.navMenu = document.querySelector('.nav-menu');
         this.navLinks = document.querySelectorAll('.nav-link');
         
-        // ✅ NOUVEAU : Éléments du profil utilisateur
+        // ✅ Éléments du profil utilisateur
         this.profileButton = document.getElementById('userProfileButton');
+        this.navCtaLoggedIn = document.getElementById('navCtaLoggedIn');
+        this.navCtaLoggedOut = document.getElementById('navCtaLoggedOut');
         this.mobileUserSection = null;
         
         console.log('  ├─ Bouton hamburger:', this.mobileMenuBtn ? '✅' : '❌');
         console.log('  ├─ Menu navigation:', this.navMenu ? '✅' : '❌');
         console.log('  ├─ Liens navigation:', this.navLinks.length);
-        console.log('  └─ Bouton profil:', this.profileButton ? '✅' : '❌');
+        console.log('  ├─ Bouton profil:', this.profileButton ? '✅' : '❌');
+        console.log('  └─ Nav CTA Logged In:', this.navCtaLoggedIn ? '✅' : '❌');
         
         this.init();
     }
@@ -709,7 +712,10 @@ class MobileMenuManager {
 
         console.log('✅ Initialisation des listeners...');
 
-        // ✅ CRÉER LA SECTION PROFIL MOBILE DANS LE MENU
+        // ✅ MASQUER LE BOUTON PROFIL SUR MOBILE DÈS LE DÉPART
+        this.hideMobileProfileButton();
+
+        // ✅ CRÉER LA SECTION PROFIL MOBILE (EN BAS DU MENU)
         this.createMobileUserSection();
 
         // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -746,7 +752,7 @@ class MobileMenuManager {
         });
 
         // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-        // 📏 FERMER AU RESIZE (passage desktop)
+        // 📏 ADAPTER AU RESIZE
         // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
         let resizeTimer;
         window.addEventListener('resize', () => {
@@ -757,8 +763,8 @@ class MobileMenuManager {
                     this.closeMenu();
                 }
                 
-                // ✅ MISE À JOUR DE LA SECTION PROFIL
-                this.updateMobileUserSection();
+                // ✅ MISE À JOUR DE LA VISIBILITÉ
+                this.updateVisibility();
             }, 250);
         });
 
@@ -766,16 +772,47 @@ class MobileMenuManager {
     }
 
     // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-    // 👤 CRÉER LA SECTION PROFIL MOBILE
+    // 👁 MASQUER LE BOUTON PROFIL SUR MOBILE
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    hideMobileProfileButton() {
+        if (window.innerWidth <= 768) {
+            if (this.navCtaLoggedIn) {
+                this.navCtaLoggedIn.style.display = 'none';
+                console.log('📱 Bouton profil masqué (mobile)');
+            }
+        } else {
+            if (this.navCtaLoggedIn) {
+                this.navCtaLoggedIn.style.display = 'flex';
+                console.log('🖥 Bouton profil affiché (desktop)');
+            }
+        }
+    }
+
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    // 🔄 MISE À JOUR DE LA VISIBILITÉ
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    updateVisibility() {
+        this.hideMobileProfileButton();
+        this.updateMobileUserSection();
+    }
+
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    // 👤 CRÉER LA SECTION PROFIL MOBILE (EN BAS DU MENU)
     // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
     createMobileUserSection() {
         // Vérifier si l'utilisateur est connecté
-        const isLoggedIn = document.getElementById('navCtaLoggedIn') && 
-                          document.getElementById('navCtaLoggedIn').style.display !== 'none';
+        const isLoggedIn = this.navCtaLoggedIn && 
+                          window.getComputedStyle(this.navCtaLoggedIn).display !== 'none';
         
         if (!isLoggedIn) {
             console.log('ℹ Utilisateur non connecté - Pas de section profil mobile');
             return;
+        }
+
+        // Supprimer l'ancienne section si elle existe
+        const existingSection = document.getElementById('mobileUserSection');
+        if (existingSection) {
+            existingSection.remove();
         }
 
         // Créer la section profil mobile
@@ -783,18 +820,23 @@ class MobileMenuManager {
         this.mobileUserSection.className = 'mobile-user-section';
         this.mobileUserSection.id = 'mobileUserSection';
         
-        // Récupérer les infos utilisateur depuis le bouton profil desktop
-        const userName = document.getElementById('userDisplayName')?.textContent || 'User';
+        // Récupérer les infos utilisateur
+        const userName = document.getElementById('userDisplayName')?.textContent || 
+                        document.getElementById('dropdownUserName')?.textContent || 
+                        'User';
         const userEmail = document.getElementById('dropdownUserEmail')?.textContent || '';
         const userAvatar = document.getElementById('userAvatarImg')?.src || 
+                          document.getElementById('dropdownAvatarImg')?.src ||
                           `https://ui-avatars.com/api/?name=${encodeURIComponent(userName)}&background=3B82F6&color=fff&bold=true&size=96`;
         
         this.mobileUserSection.innerHTML = `
+            <div class="mobile-user-divider-top"></div>
+            
             <div class="mobile-user-header">
                 <img src="${userAvatar}" alt="Avatar" class="mobile-user-avatar">
                 <div class="mobile-user-info">
                     <h3 class="mobile-user-name">${userName}</h3>
-                    <p class="mobile-user-email">${userEmail}</p>
+                    ${userEmail ? `<p class="mobile-user-email">${userEmail}</p>` : ''}
                 </div>
             </div>
             
@@ -823,8 +865,10 @@ class MobileMenuManager {
             </button>
         `;
         
-        // Insérer en haut du menu (avant les liens de navigation)
-        this.navMenu.insertBefore(this.mobileUserSection, this.navMenu.firstChild);
+        // ✅ INSÉRER À LA FIN DU MENU (APRÈS TOUS LES LIENS)
+        this.navMenu.appendChild(this.mobileUserSection);
+        
+        console.log('✅ Section profil mobile créée EN BAS du menu');
         
         // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
         // 🔓 GESTION DE LA DÉCONNEXION
@@ -848,20 +892,20 @@ class MobileMenuManager {
                 this.closeMenu();
             });
         });
-        
-        console.log('✅ Section profil mobile créée');
     }
 
     // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
     // 🔄 METTRE À JOUR LA SECTION PROFIL MOBILE
     // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
     updateMobileUserSection() {
-        const isLoggedIn = document.getElementById('navCtaLoggedIn') && 
-                          document.getElementById('navCtaLoggedIn').style.display !== 'none';
+        const isLoggedIn = this.navCtaLoggedIn && 
+                          window.getComputedStyle(this.navCtaLoggedIn).display !== 'none';
         
-        if (isLoggedIn && !this.mobileUserSection) {
+        const isMobile = window.innerWidth <= 768;
+        
+        if (isLoggedIn && isMobile && !this.mobileUserSection) {
             this.createMobileUserSection();
-        } else if (!isLoggedIn && this.mobileUserSection) {
+        } else if ((!isLoggedIn || !isMobile) && this.mobileUserSection) {
             this.mobileUserSection.remove();
             this.mobileUserSection = null;
         }
@@ -1115,6 +1159,79 @@ class UserMenuManager {
         } else {
             window.location.href = 'index.html';
         }
+    }
+}
+
+class AuthStateManager {
+    constructor() {
+        this.navCtaLoggedOut = document.getElementById('navCtaLoggedOut');
+        this.navCtaLoggedIn = document.getElementById('navCtaLoggedIn');
+        this.init();
+    }
+
+    init() {
+        if (typeof firebase !== 'undefined' && firebase.auth) {
+            firebase.auth().onAuthStateChanged((user) => {
+                this.updateUIForUser(user);
+            });
+        } else {
+            this.showLoggedOutState();
+        }
+    }
+
+    updateUIForUser(user) {
+        if (user) {
+            this.showLoggedInState(user);
+        } else {
+            this.showLoggedOutState();
+        }
+        
+        // ✅ FORCER LA MISE À JOUR DE LA VISIBILITÉ MOBILE
+        if (window.innerWidth <= 768 && this.navCtaLoggedIn) {
+            this.navCtaLoggedIn.style.display = 'none';
+        }
+    }
+
+    showLoggedInState(user) {
+        if (this.navCtaLoggedOut) this.navCtaLoggedOut.style.display = 'none';
+        if (this.navCtaLoggedIn) {
+            // ✅ Afficher seulement sur desktop
+            if (window.innerWidth > 768) {
+                this.navCtaLoggedIn.style.display = 'flex';
+            } else {
+                this.navCtaLoggedIn.style.display = 'none';
+            }
+        }
+
+        const displayName = user.displayName || user.email?.split('@')[0] || 'User';
+        const userDisplayNameElements = document.querySelectorAll('#userDisplayName, #dropdownUserName');
+        userDisplayNameElements.forEach(el => {
+            if (el) el.textContent = displayName;
+        });
+
+        const userEmailElements = document.querySelectorAll('#dropdownUserEmail');
+        userEmailElements.forEach(el => {
+            if (el) el.textContent = user.email || '';
+        });
+
+        const avatarUrl = user.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(displayName)}&background=3B82F6&color=fff&bold=true&size=96`;
+        const avatarElements = document.querySelectorAll('#userAvatarImg, #dropdownAvatarImg');
+        avatarElements.forEach(el => {
+            if (el) el.src = avatarUrl;
+        });
+        
+        // ✅ DÉCLENCHER LA CRÉATION DE LA SECTION MOBILE
+        setTimeout(() => {
+            const mobileMenuManager = window.financeLandingApp?.managers?.mobileMenu;
+            if (mobileMenuManager) {
+                mobileMenuManager.updateMobileUserSection();
+            }
+        }, 100);
+    }
+
+    showLoggedOutState() {
+        if (this.navCtaLoggedOut) this.navCtaLoggedOut.style.display = 'flex';
+        if (this.navCtaLoggedIn) this.navCtaLoggedIn.style.display = 'none';
     }
 }
 
@@ -1460,62 +1577,62 @@ class UserMenuManager {
 //     }
 // }
 
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-// 🔐 AUTH STATE MANAGER
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// // 🔐 AUTH STATE MANAGER
+// // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-class AuthStateManager {
-    constructor() {
-        this.navCtaLoggedOut = document.getElementById('navCtaLoggedOut');
-        this.navCtaLoggedIn = document.getElementById('navCtaLoggedIn');
-        this.init();
-    }
+// class AuthStateManager {
+//     constructor() {
+//         this.navCtaLoggedOut = document.getElementById('navCtaLoggedOut');
+//         this.navCtaLoggedIn = document.getElementById('navCtaLoggedIn');
+//         this.init();
+//     }
 
-    init() {
-        if (typeof firebase !== 'undefined' && firebase.auth) {
-            firebase.auth().onAuthStateChanged((user) => {
-                this.updateUIForUser(user);
-            });
-        } else {
-            this.showLoggedOutState();
-        }
-    }
+//     init() {
+//         if (typeof firebase !== 'undefined' && firebase.auth) {
+//             firebase.auth().onAuthStateChanged((user) => {
+//                 this.updateUIForUser(user);
+//             });
+//         } else {
+//             this.showLoggedOutState();
+//         }
+//     }
 
-    updateUIForUser(user) {
-        if (user) {
-            this.showLoggedInState(user);
-        } else {
-            this.showLoggedOutState();
-        }
-    }
+//     updateUIForUser(user) {
+//         if (user) {
+//             this.showLoggedInState(user);
+//         } else {
+//             this.showLoggedOutState();
+//         }
+//     }
 
-    showLoggedInState(user) {
-        if (this.navCtaLoggedOut) this.navCtaLoggedOut.style.display = 'none';
-        if (this.navCtaLoggedIn) this.navCtaLoggedIn.style.display = 'flex';
+//     showLoggedInState(user) {
+//         if (this.navCtaLoggedOut) this.navCtaLoggedOut.style.display = 'none';
+//         if (this.navCtaLoggedIn) this.navCtaLoggedIn.style.display = 'flex';
 
-        const displayName = user.displayName || user.email?.split('@')[0] || 'User';
-        const userDisplayNameElements = document.querySelectorAll('#userDisplayName, #dropdownUserName');
-        userDisplayNameElements.forEach(el => {
-            if (el) el.textContent = displayName;
-        });
+//         const displayName = user.displayName || user.email?.split('@')[0] || 'User';
+//         const userDisplayNameElements = document.querySelectorAll('#userDisplayName, #dropdownUserName');
+//         userDisplayNameElements.forEach(el => {
+//             if (el) el.textContent = displayName;
+//         });
 
-        const userEmailElements = document.querySelectorAll('#dropdownUserEmail');
-        userEmailElements.forEach(el => {
-            if (el) el.textContent = user.email || '';
-        });
+//         const userEmailElements = document.querySelectorAll('#dropdownUserEmail');
+//         userEmailElements.forEach(el => {
+//             if (el) el.textContent = user.email || '';
+//         });
 
-        const avatarUrl = user.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(displayName)}&background=3B82F6&color=fff&bold=true&size=96`;
-        const avatarElements = document.querySelectorAll('#userAvatarImg, #dropdownAvatarImg');
-        avatarElements.forEach(el => {
-            if (el) el.src = avatarUrl;
-        });
-    }
+//         const avatarUrl = user.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(displayName)}&background=3B82F6&color=fff&bold=true&size=96`;
+//         const avatarElements = document.querySelectorAll('#userAvatarImg, #dropdownAvatarImg');
+//         avatarElements.forEach(el => {
+//             if (el) el.src = avatarUrl;
+//         });
+//     }
 
-    showLoggedOutState() {
-        if (this.navCtaLoggedOut) this.navCtaLoggedOut.style.display = 'flex';
-        if (this.navCtaLoggedIn) this.navCtaLoggedIn.style.display = 'none';
-    }
-}
+//     showLoggedOutState() {
+//         if (this.navCtaLoggedOut) this.navCtaLoggedOut.style.display = 'flex';
+//         if (this.navCtaLoggedIn) this.navCtaLoggedIn.style.display = 'none';
+//     }
+// }
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 // 📊 GRAPHIQUE BOURSIER - VERSION SIMPLIFIÉE
