@@ -7852,3 +7852,114 @@ body.dark-mode .tech-points li {
 /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
    ✅ FIN DES CORRECTIONS MOBILE DÉFINITIVES
    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+
+   /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   📱 PROFIL UTILISATEUR - ADAPTATION MOBILE (SANS HTML)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+
+/* 📱 Mobile : Masquer le profil dans la navbar */
+@media (max-width: 768px) {
+    #navCtaLoggedIn {
+        display: none !important;
+    }
+}
+
+/* 🎨 Section profil dans le menu hamburger (injectée dynamiquement) */
+.nav-menu-mobile-profile {
+    display: none; /* Caché par défaut (desktop) */
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 16px;
+    padding: 20px;
+    margin-top: 20px;
+    backdrop-filter: blur(10px);
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+@media (max-width: 768px) {
+    .nav-menu-mobile-profile {
+        display: block !important;
+    }
+}
+
+.mobile-profile-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.mobile-profile-avatar {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid rgba(59, 130, 246, 0.5);
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}
+
+.mobile-profile-info {
+    flex: 1;
+}
+
+.mobile-profile-info h4 {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 700;
+    color: #ffffff;
+}
+
+.mobile-profile-info p {
+    margin: 4px 0 0 0;
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.7);
+}
+
+.mobile-profile-links {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.mobile-profile-link {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
+    color: #ffffff;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    border: none;
+    width: 100%;
+    text-align: left;
+}
+
+.mobile-profile-link:hover {
+    background: rgba(59, 130, 246, 0.2);
+    transform: translateX(4px);
+}
+
+.mobile-profile-link i {
+    width: 20px;
+    text-align: center;
+    color: #3B82F6;
+}
+
+.mobile-profile-link.logout {
+    background: rgba(239, 68, 68, 0.1);
+    color: #ef4444;
+}
+
+.mobile-profile-link.logout:hover {
+    background: rgba(239, 68, 68, 0.2);
+}
+
+.mobile-profile-link.logout i {
+    color: #ef4444;
+}

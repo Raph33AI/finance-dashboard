@@ -1575,6 +1575,160 @@ class PerformanceMonitor {
 }
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// 📱 MOBILE PROFILE MANAGER - INJECTION DYNAMIQUE
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+class MobileProfileManager {
+    constructor() {
+        console.log('%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'color: #8B5CF6; font-weight: bold;');
+        console.log('%c📱 Mobile Profile Manager - Initialisation', 'color: #8B5CF6; font-weight: bold;');
+        console.log('%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'color: #8B5CF6; font-weight: bold;');
+        
+        this.navMenu = document.querySelector('.nav-menu');
+        this.profileSection = null;
+        
+        this.init();
+    }
+
+    init() {
+        if (!this.navMenu) {
+            console.warn('⚠ Menu navigation non trouvé');
+            return;
+        }
+
+        console.log('✅ Menu navigation trouvé');
+
+        // Créer la section profil mobile
+        this.createMobileProfileSection();
+
+        // Écouter les changements d'authentification
+        if (typeof firebase !== 'undefined' && firebase.auth) {
+            firebase.auth().onAuthStateChanged((user) => {
+                this.updateMobileProfile(user);
+            });
+        }
+
+        console.log('✅ Mobile Profile Manager prêt !\n');
+    }
+
+    createMobileProfileSection() {
+        console.log('🔨 Création de la section profil mobile...');
+
+        // Créer le conteneur principal
+        this.profileSection = document.createElement('div');
+        this.profileSection.className = 'nav-menu-mobile-profile';
+        this.profileSection.id = 'navMenuMobileProfile';
+        this.profileSection.style.display = 'none'; // Caché par défaut (utilisateur non connecté)
+
+        // HTML de la section profil
+        this.profileSection.innerHTML = `
+            <div class="mobile-profile-header">
+                <img src="https://ui-avatars.com/api/?name=User&background=3B82F6&color=fff&bold=true&size=96" 
+                     alt="Avatar" 
+                     class="mobile-profile-avatar" 
+                     id="mobileProfileAvatar">
+                <div class="mobile-profile-info">
+                    <h4 id="mobileProfileName">Loading...</h4>
+                    <p id="mobileProfileEmail">Loading...</p>
+                </div>
+            </div>
+            
+            <div class="mobile-profile-links">
+                <a href="dashboard-financier.html" class="mobile-profile-link">
+                    <i class="fas fa-th-large"></i>
+                    Dashboard
+                </a>
+                <a href="settings.html" class="mobile-profile-link">
+                    <i class="fas fa-cog"></i>
+                    Settings
+                </a>
+                <a href="my-account.html" class="mobile-profile-link">
+                    <i class="fas fa-user"></i>
+                    My Account
+                </a>
+                <button class="mobile-profile-link logout" id="mobileLogoutBtn">
+                    <i class="fas fa-sign-out-alt"></i>
+                    Logout
+                </button>
+            </div>
+        `;
+
+        // Injecter dans .nav-menu (après les liens existants)
+        this.navMenu.appendChild(this.profileSection);
+
+        console.log('✅ Section profil injectée dans le DOM');
+
+        // Ajouter listener sur bouton logout
+        const logoutBtn = document.getElementById('mobileLogoutBtn');
+        if (logoutBtn) {
+            logoutBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                this.handleLogout();
+            });
+            console.log('✅ Listener logout ajouté');
+        }
+    }
+
+    updateMobileProfile(user) {
+        if (!this.profileSection) return;
+
+        if (!user) {
+            // Cacher la section si non connecté
+            this.profileSection.style.display = 'none';
+            console.log('👤 Utilisateur non connecté - Section profil masquée');
+            return;
+        }
+
+        console.log('👤 Utilisateur connecté:', user.email);
+
+        // Afficher la section
+        this.profileSection.style.display = 'block';
+
+        // Mettre à jour les infos
+        const displayName = user.displayName || user.email?.split('@')[0] || 'User';
+        const avatarUrl = user.photoURL || 
+            `https://ui-avatars.com/api/?name=${encodeURIComponent(displayName)}&background=3B82F6&color=fff&bold=true&size=96`;
+
+        // Nom
+        const nameElement = document.getElementById('mobileProfileName');
+        if (nameElement) {
+            nameElement.textContent = displayName;
+        }
+
+        // Email
+        const emailElement = document.getElementById('mobileProfileEmail');
+        if (emailElement) {
+            emailElement.textContent = user.email || '';
+        }
+
+        // Avatar
+        const avatarElement = document.getElementById('mobileProfileAvatar');
+        if (avatarElement) {
+            avatarElement.src = avatarUrl;
+        }
+
+        console.log('✅ Profil mobile mis à jour');
+    }
+
+    handleLogout() {
+        console.log('🔓 Déconnexion mobile...');
+        
+        if (typeof firebase !== 'undefined' && firebase.auth) {
+            firebase.auth().signOut()
+                .then(() => {
+                    console.log('✅ Déconnexion réussie');
+                    window.location.href = 'index.html';
+                })
+                .catch((error) => {
+                    console.error('❌ Erreur déconnexion:', error);
+                });
+        } else {
+            window.location.href = 'index.html';
+        }
+    }
+}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 // 🚀 APPLICATION INITIALIZATION
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
@@ -1601,6 +1755,8 @@ class LandingApp {
             this.managers.mobileMenu = new MobileMenuManager();
             this.managers.userMenu = new UserMenuManager();
             this.managers.authState = new AuthStateManager();
+            // ✅ NOUVEAU : Manager profil mobile
+            this.managers.mobileProfile = new MobileProfileManager();
             this.managers.heroChart = new HeroChartManager();
             this.managers.pricing = new PricingManager();
             this.managers.demoSearch = new DemoSearchManager();
