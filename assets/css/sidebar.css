@@ -820,229 +820,267 @@ body.dark-mode .last-update {
 /**
  * ========================================
  * SIDEBAR - ADAPTATIONS MOBILE PREMIUM
+ * AlphaVault AI - Mobile Only
  * ========================================
  */
 
-/* 📱 MOBILE (max-width: 768px) */
+/* ============================================
+   BOUTON HAMBURGER - BARRES NOIRES (Mobile)
+   ============================================ */
+
 @media (max-width: 768px) {
     
-    /* ✅ Sidebar en mode mobile */
-    .sidebar.mobile-mode {
-        /* Position fixe hors écran par défaut */
-        position: fixed;
-        left: -100%;
-        top: 0;
-        height: 100vh;
-        width: 280px; /* Largeur réduite pour mobile */
-        max-width: 85vw; /* Maximum 85% de l'écran */
-        z-index: 9999;
-        transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        overflow-y: auto;
-        overflow-x: hidden;
-        
-        /* Scroll fluide iOS */
-        -webkit-overflow-scrolling: touch;
-        
-        /* Shadow plus prononcée */
-        box-shadow: 4px 0 24px rgba(0, 0, 0, 0.3);
-    }
-    
-    /* ✅ Sidebar ouverte */
-    .sidebar.mobile-open {
-        left: 0 !important;
-    }
-    
-    /* ✅ Header sidebar plus compact */
-    .sidebar.mobile-mode .sidebar-header {
-        padding: 16px 12px;
-        flex-direction: row;
-        justify-content: space-between;
-        align-items: center;
-    }
-    
-    /* ✅ Logo plus petit */
-    .sidebar.mobile-mode .logo-3d {
-        width: 36px;
-        height: 36px;
-    }
-    
-    .sidebar.mobile-mode .brand-text {
-        font-size: 0.9em;
-    }
-    
-    .sidebar.mobile-mode .brand-name {
-        font-size: 1.1em;
-    }
-    
-    .sidebar.mobile-mode .brand-tagline {
-        font-size: 0.75em;
-    }
-    
-    /* ✅ Masquer le bouton collapse desktop */
-    .sidebar.mobile-mode .sidebar-toggle {
-        display: none;
-    }
-    
-    /* ✅ Navigation plus compacte */
-    .sidebar.mobile-mode .sidebar-nav {
-        padding: 8px;
-    }
-    
-    .sidebar.mobile-mode .nav-section {
-        margin-bottom: 6px;
-    }
-    
-    .sidebar.mobile-mode .nav-folder {
-        padding: 12px 14px;
-        font-size: 0.95em;
-    }
-    
-    .sidebar.mobile-mode .nav-link {
-        padding: 10px 14px 10px 36px;
-        font-size: 0.9em;
-    }
-    
-    /* ✅ Footer plus compact */
-    .sidebar.mobile-mode .sidebar-footer {
-        padding: 12px;
-    }
-    
-    .sidebar.mobile-mode .sidebar-user-trigger {
-        padding: 10px;
-    }
-    
-    .sidebar.mobile-mode .sidebar-user-avatar {
-        width: 36px;
-        height: 36px;
-    }
-    
-    /* ✅ Overlay plus visible */
-    .sidebar-overlay.active {
-        opacity: 1;
-        pointer-events: auto;
-        backdrop-filter: blur(4px);
-    }
-    
-    /* ✅ Main content - Pleine largeur sur mobile */
-    .main-content {
-        margin-left: 0 !important;
-        width: 100% !important;
-    }
-    
-    /* ✅ Header mobile */
-    .top-header {
-        padding: 12px 16px;
-    }
-    
+    /* ✅ Hamburger avec barres noires */
     .mobile-toggle {
-        display: flex !important; /* Toujours visible sur mobile */
+        display: flex !important;
         align-items: center;
         justify-content: center;
         width: 44px;
         height: 44px;
         border-radius: 12px;
-        background: var(--primary-gradient);
-        color: white;
-        border: none;
-        font-size: 1.2em;
+        background: #ffffff; /* Fond blanc */
+        border: 2px solid #e2e8f0; /* Bordure grise légère */
         cursor: pointer;
-        transition: transform 0.2s ease, box-shadow 0.2s ease;
-        box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+        transition: all 0.2s ease;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        position: relative;
+        z-index: 10;
+    }
+    
+    .mobile-toggle i {
+        color: #1e293b; /* ✅ BARRES NOIRES */
+        font-size: 1.3em;
+        font-weight: 600;
+    }
+    
+    .mobile-toggle:hover {
+        background: #f8fafc;
+        border-color: #cbd5e1;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
     }
     
     .mobile-toggle:active {
         transform: scale(0.95);
     }
     
-    /* ✅ Animation d'entrée */
+    /* Dark mode */
+    body.dark-mode .mobile-toggle {
+        background: #1e293b;
+        border-color: #334155;
+    }
+    
+    body.dark-mode .mobile-toggle i {
+        color: #ffffff; /* Barres blanches en dark mode */
+    }
+    
+    body.dark-mode .mobile-toggle:hover {
+        background: #334155;
+        border-color: #475569;
+    }
+    
+    /* ============================================
+       BOUTON FERMETURE SIDEBAR (Flèche en haut à droite)
+       ============================================ */
+    
+    .sidebar-close-mobile {
+        display: none; /* Masqué par défaut */
+        position: absolute;
+        top: 18px;
+        right: 16px;
+        width: 38px;
+        height: 38px;
+        border-radius: 10px;
+        background: rgba(255, 255, 255, 0.15);
+        border: 1.5px solid rgba(255, 255, 255, 0.25);
+        color: #ffffff;
+        font-size: 1.2em;
+        cursor: pointer;
+        transition: all 0.25s ease;
+        z-index: 1000;
+        backdrop-filter: blur(10px);
+        align-items: center;
+        justify-content: center;
+    }
+    
+    /* ✅ Afficher uniquement quand sidebar ouverte */
+    .sidebar.mobile-open .sidebar-close-mobile {
+        display: flex !important;
+    }
+    
+    .sidebar-close-mobile:hover {
+        background: rgba(255, 255, 255, 0.25);
+        border-color: rgba(255, 255, 255, 0.35);
+        transform: rotate(90deg);
+    }
+    
+    .sidebar-close-mobile:active {
+        transform: scale(0.9) rotate(90deg);
+    }
+    
+    /* Dark mode */
+    body.dark-mode .sidebar-close-mobile {
+        background: rgba(255, 255, 255, 0.1);
+        border-color: rgba(255, 255, 255, 0.2);
+    }
+    
+    body.dark-mode .sidebar-close-mobile:hover {
+        background: rgba(255, 255, 255, 0.18);
+    }
+    
+    /* ============================================
+       SIDEBAR MOBILE
+       ============================================ */
+    
+    .sidebar {
+        position: fixed;
+        left: -100%;
+        top: 0;
+        height: 100vh;
+        width: 280px;
+        max-width: 85vw;
+        z-index: 9999;
+        transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        overflow-y: auto;
+        overflow-x: hidden;
+        -webkit-overflow-scrolling: touch;
+        box-shadow: 4px 0 24px rgba(0, 0, 0, 0.3);
+    }
+    
+    .sidebar.mobile-open {
+        left: 0 !important;
+    }
+    
+    /* ✅ Header plus compact + espace pour bouton fermeture */
+    .sidebar .sidebar-header {
+        padding: 16px 12px;
+        padding-right: 60px; /* Espace pour bouton fermeture */
+    }
+    
+    .sidebar .logo-3d {
+        width: 36px;
+        height: 36px;
+    }
+    
+    .sidebar .brand-text {
+        font-size: 0.9em;
+    }
+    
+    .sidebar .brand-name {
+        font-size: 1.1em;
+    }
+    
+    .sidebar .brand-tagline {
+        font-size: 0.75em;
+    }
+    
+    /* Masquer toggle desktop */
+    .sidebar .sidebar-toggle {
+        display: none;
+    }
+    
+    /* Navigation compacte */
+    .sidebar .sidebar-nav {
+        padding: 8px;
+    }
+    
+    .sidebar .nav-section {
+        margin-bottom: 6px;
+    }
+    
+    .sidebar .nav-folder {
+        padding: 12px 14px;
+        font-size: 0.95em;
+    }
+    
+    .sidebar .nav-link {
+        padding: 10px 14px 10px 36px;
+        font-size: 0.9em;
+    }
+    
+    /* Footer compact */
+    .sidebar .sidebar-footer {
+        padding: 12px;
+    }
+    
+    .sidebar .sidebar-user-trigger {
+        padding: 10px;
+    }
+    
+    .sidebar .sidebar-user-avatar {
+        width: 36px;
+        height: 36px;
+    }
+    
+    /* ============================================
+       OVERLAY
+       ============================================ */
+    
+    .sidebar-overlay.active {
+        opacity: 1;
+        pointer-events: auto;
+        backdrop-filter: blur(4px);
+    }
+    
+    /* ============================================
+       MAIN CONTENT
+       ============================================ */
+    
+    .main-content {
+        margin-left: 0 !important;
+        width: 100% !important;
+    }
+    
+    .top-header {
+        padding: 12px 16px;
+    }
+    
+    /* ============================================
+       ANIMATIONS
+       ============================================ */
+    
     @keyframes slideInFromLeft {
         from {
             left: -100%;
+            opacity: 0.8;
         }
         to {
             left: 0;
+            opacity: 1;
         }
     }
     
     .sidebar.mobile-open {
         animation: slideInFromLeft 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }
-}
-
-/* 📱 TABLETTE (769px - 1024px) */
-@media (min-width: 769px) and (max-width: 1024px) {
     
-    /* Sidebar légèrement réduite sur tablette */
+    /* ============================================
+       SCROLLBAR MOBILE
+       ============================================ */
+    
     .sidebar {
-        width: 240px;
+        scrollbar-width: thin;
+        scrollbar-color: rgba(255, 255, 255, 0.3) transparent;
     }
     
-    .sidebar.collapsed {
-        width: 70px;
+    .sidebar::-webkit-scrollbar {
+        width: 4px;
     }
     
-    .main-content {
-        margin-left: 240px;
-    }
-    
-    .sidebar.collapsed ~ .main-content {
-        margin-left: 70px;
+    .sidebar::-webkit-scrollbar-thumb {
+        background: rgba(255, 255, 255, 0.3);
+        border-radius: 2px;
     }
 }
 
-/* 💻 DESKTOP (min-width: 1025px) */
-@media (min-width: 1025px) {
-    
-    /* Masquer le bouton hamburger sur desktop */
-    .mobile-toggle {
-        display: none !important;
-    }
-    
-    /* Sidebar classique */
-    .sidebar {
-        position: fixed;
-        left: 0;
-        width: 280px;
-    }
-    
-    .main-content {
-        margin-left: 280px;
-    }
-    
-    .sidebar.collapsed {
-        width: 80px;
-    }
-    
-    .sidebar.collapsed ~ .main-content {
-        margin-left: 80px;
-    }
-}
+/* ============================================
+   OPTIMISATIONS PERFORMANCE
+   ============================================ */
 
-/* ✅ OPTIMISATIONS PERFORMANCE */
 .sidebar,
 .sidebar-overlay,
-.mobile-toggle {
+.mobile-toggle,
+.sidebar-close-mobile {
     will-change: transform, opacity;
     -webkit-backface-visibility: hidden;
     backface-visibility: hidden;
-}
-
-/* ✅ Scroll fluide sidebar mobile */
-.sidebar.mobile-mode {
-    scrollbar-width: thin;
-    scrollbar-color: rgba(255, 255, 255, 0.3) transparent;
-}
-
-.sidebar.mobile-mode::-webkit-scrollbar {
-    width: 4px;
-}
-
-.sidebar.mobile-mode::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.3);
-    border-radius: 2px;
-}
-
-/* ✅ Dark mode */
-body.dark-mode .mobile-toggle {
-    background: linear-gradient(135deg, #3b82f6, #8b5cf6);
 }
