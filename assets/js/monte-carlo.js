@@ -1173,6 +1173,7 @@ const MonteCarlo = (function() {
         createTornadoDiagram(params, totalMonths);
         createHeatMap(params, totalMonths);
         createCorrelationMatrix(results.allReturns, finalValues, maxDrawdowns);
+        createEfficientFrontier(params, totalMonths);
         createChart4(allSimulations, totalMonths, params); // Stress Testing (CRUCIAL)
         createRollingSharpe(results.allReturns);
         
