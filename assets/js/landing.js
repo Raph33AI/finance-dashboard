@@ -678,31 +678,39 @@ class NavigationManager {
 }
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-// 📱 MOBILE MENU MANAGER - VERSION COMPLÈTE MOBILE
+// 📱 MOBILE MENU MANAGER - AVEC PROFIL INTÉGRÉ
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 class MobileMenuManager {
     constructor() {
-        console.log('📱 Mobile Menu Manager - Initialisation');
+        console.log('📱 Mobile Menu Manager - Initialisation AVEC profil');
         
         this.mobileMenuBtn = document.getElementById('mobileMenuBtn');
         this.navMenu = document.querySelector('.nav-menu');
         this.navLinks = document.querySelectorAll('.nav-link');
         
+        // ✅ NOUVEAU : Éléments du profil utilisateur
+        this.profileButton = document.getElementById('userProfileButton');
+        this.mobileUserSection = null;
+        
         console.log('  ├─ Bouton hamburger:', this.mobileMenuBtn ? '✅' : '❌');
         console.log('  ├─ Menu navigation:', this.navMenu ? '✅' : '❌');
-        console.log('  └─ Liens navigation:', this.navLinks.length);
+        console.log('  ├─ Liens navigation:', this.navLinks.length);
+        console.log('  └─ Bouton profil:', this.profileButton ? '✅' : '❌');
         
         this.init();
     }
 
     init() {
         if (!this.mobileMenuBtn || !this.navMenu) {
-            console.warn('⚠️ Menu mobile non trouvé');
+            console.warn('⚠ Menu mobile non trouvé');
             return;
         }
 
         console.log('✅ Initialisation des listeners...');
+
+        // ✅ CRÉER LA SECTION PROFIL MOBILE DANS LE MENU
+        this.createMobileUserSection();
 
         // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
         // 🍔 TOGGLE MENU AU CLIC SUR HAMBURGER
@@ -745,13 +753,137 @@ class MobileMenuManager {
             clearTimeout(resizeTimer);
             resizeTimer = setTimeout(() => {
                 if (window.innerWidth > 768 && this.navMenu.classList.contains('active')) {
-                    console.log('🖥️ Passage en mode desktop - Fermeture menu');
+                    console.log('🖥 Passage en mode desktop - Fermeture menu');
                     this.closeMenu();
                 }
+                
+                // ✅ MISE À JOUR DE LA SECTION PROFIL
+                this.updateMobileUserSection();
             }, 250);
         });
 
         console.log('✅ Mobile Menu Manager prêt');
+    }
+
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    // 👤 CRÉER LA SECTION PROFIL MOBILE
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    createMobileUserSection() {
+        // Vérifier si l'utilisateur est connecté
+        const isLoggedIn = document.getElementById('navCtaLoggedIn') && 
+                          document.getElementById('navCtaLoggedIn').style.display !== 'none';
+        
+        if (!isLoggedIn) {
+            console.log('ℹ Utilisateur non connecté - Pas de section profil mobile');
+            return;
+        }
+
+        // Créer la section profil mobile
+        this.mobileUserSection = document.createElement('div');
+        this.mobileUserSection.className = 'mobile-user-section';
+        this.mobileUserSection.id = 'mobileUserSection';
+        
+        // Récupérer les infos utilisateur depuis le bouton profil desktop
+        const userName = document.getElementById('userDisplayName')?.textContent || 'User';
+        const userEmail = document.getElementById('dropdownUserEmail')?.textContent || '';
+        const userAvatar = document.getElementById('userAvatarImg')?.src || 
+                          `https://ui-avatars.com/api/?name=${encodeURIComponent(userName)}&background=3B82F6&color=fff&bold=true&size=96`;
+        
+        this.mobileUserSection.innerHTML = `
+            <div class="mobile-user-header">
+                <img src="${userAvatar}" alt="Avatar" class="mobile-user-avatar">
+                <div class="mobile-user-info">
+                    <h3 class="mobile-user-name">${userName}</h3>
+                    <p class="mobile-user-email">${userEmail}</p>
+                </div>
+            </div>
+            
+            <div class="mobile-user-divider"></div>
+            
+            <nav class="mobile-user-links">
+                <a href="user-profile.html" class="mobile-user-link">
+                    <i class="fas fa-user"></i>
+                    <span>My Profile</span>
+                </a>
+                <a href="settings.html" class="mobile-user-link">
+                    <i class="fas fa-cog"></i>
+                    <span>Settings</span>
+                </a>
+                <a href="#" class="mobile-user-link">
+                    <i class="fas fa-question-circle"></i>
+                    <span>Help</span>
+                </a>
+            </nav>
+            
+            <div class="mobile-user-divider"></div>
+            
+            <button class="mobile-logout-btn" id="mobileLogoutBtn">
+                <i class="fas fa-sign-out-alt"></i>
+                <span>Disconnect</span>
+            </button>
+        `;
+        
+        // Insérer en haut du menu (avant les liens de navigation)
+        this.navMenu.insertBefore(this.mobileUserSection, this.navMenu.firstChild);
+        
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        // 🔓 GESTION DE LA DÉCONNEXION
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        const logoutBtn = document.getElementById('mobileLogoutBtn');
+        if (logoutBtn) {
+            logoutBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                console.log('🔓 Déconnexion depuis menu mobile');
+                this.handleLogout();
+            });
+        }
+        
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        // 🔗 FERMER LE MENU AU CLIC SUR UN LIEN
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        const userLinks = this.mobileUserSection.querySelectorAll('.mobile-user-link');
+        userLinks.forEach(link => {
+            link.addEventListener('click', () => {
+                console.log('🔗 Clic sur lien profil mobile - Fermeture menu');
+                this.closeMenu();
+            });
+        });
+        
+        console.log('✅ Section profil mobile créée');
+    }
+
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    // 🔄 METTRE À JOUR LA SECTION PROFIL MOBILE
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    updateMobileUserSection() {
+        const isLoggedIn = document.getElementById('navCtaLoggedIn') && 
+                          document.getElementById('navCtaLoggedIn').style.display !== 'none';
+        
+        if (isLoggedIn && !this.mobileUserSection) {
+            this.createMobileUserSection();
+        } else if (!isLoggedIn && this.mobileUserSection) {
+            this.mobileUserSection.remove();
+            this.mobileUserSection = null;
+        }
+    }
+
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    // 🔓 GÉRER LA DÉCONNEXION
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    handleLogout() {
+        if (typeof firebase !== 'undefined' && firebase.auth) {
+            firebase.auth().signOut()
+                .then(() => {
+                    console.log('✅ Déconnexion Firebase réussie');
+                    window.location.href = 'index.html';
+                })
+                .catch((error) => {
+                    console.error('❌ Erreur Firebase:', error);
+                });
+        } else {
+            console.log('⚠ Firebase non disponible - Redirection directe');
+            window.location.href = 'index.html';
+        }
     }
 
     toggleMenu() {
@@ -767,11 +899,11 @@ class MobileMenuManager {
         }
     }
 
-   openMenu() {
+    openMenu() {
         this.mobileMenuBtn.classList.add('active');
         this.navMenu.classList.add('active');
         
-        // ✅ AJOUT : Bloquer le scroll du body
+        // Bloquer le scroll
         document.body.classList.add('menu-open');
         document.body.style.overflow = 'hidden';
         document.body.style.position = 'fixed';
@@ -784,7 +916,7 @@ class MobileMenuManager {
         this.mobileMenuBtn.classList.remove('active');
         this.navMenu.classList.remove('active');
         
-        // ✅ AJOUT : Réactiver le scroll
+        // Réactiver le scroll
         document.body.classList.remove('menu-open');
         document.body.style.overflow = '';
         document.body.style.position = '';
@@ -795,133 +927,111 @@ class MobileMenuManager {
 }
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-// 👤 USER MENU MANAGER - VERSION COMPLÈTE MOBILE + DEBUG
+// 👤 USER MENU MANAGER - ADAPTÉ POUR MOBILE
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 class UserMenuManager {
     constructor() {
         console.log('%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'color: #3B82F6; font-weight: bold;');
-        console.log('%c🔍 UserMenuManager - Initialisation', 'color: #3B82F6; font-weight: bold;');
+        console.log('%c🔍 UserMenuManager - Mode Desktop uniquement', 'color: #3B82F6; font-weight: bold;');
         console.log('%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'color: #3B82F6; font-weight: bold;');
         
         this.profileButton = document.getElementById('userProfileButton');
         this.dropdownMenu = document.getElementById('userDropdownMenu');
         this.logoutButton = document.getElementById('logoutButton');
         this.settingsLink = document.getElementById('settingsLink');
+        this.navCtaLoggedIn = document.getElementById('navCtaLoggedIn');
+        
+        this.isMobile = window.innerWidth <= 768;
         
         console.log('📦 Éléments trouvés:');
         console.log('  ├─ Profile Button:', this.profileButton ? '✅' : '❌');
         console.log('  ├─ Dropdown Menu:', this.dropdownMenu ? '✅' : '❌');
-        console.log('  ├─ Logout Button:', this.logoutButton ? '✅' : '❌');
-        console.log('  └─ Settings Link:', this.settingsLink ? '✅' : '❌');
+        console.log('  └─ Mode:', this.isMobile ? '📱 MOBILE (masqué)' : '🖥 DESKTOP (actif)');
         
         this.init();
     }
 
     init() {
-        if (!this.profileButton || !this.dropdownMenu) {
+        if (!this.profileButton || !this.dropdownMenu || !this.navCtaLoggedIn) {
             console.error('❌ Éléments manquants - UserMenu désactivé');
             return;
         }
 
-        console.log('✅ Configuration des événements...');
+        // ✅ MASQUER SUR MOBILE, AFFICHER SUR DESKTOP
+        this.updateVisibility();
 
         // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-        // 🎯 MÉTHODE 1 : Click direct avec useCapture
+        // 🔘 CLICK SUR BOUTON PROFIL (DESKTOP UNIQUEMENT)
         // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-        console.log('🎯 Listener MÉTHODE 1 (direct + capture)');
         this.profileButton.addEventListener('click', (e) => {
-            console.log('%c🔴 CLIC DÉTECTÉ - MÉTHODE 1', 'background: #ef4444; color: white; padding: 5px; font-weight: bold;');
+            if (this.isMobile) return; // Ignorer sur mobile
+            
+            console.log('%c🔴 CLIC PROFIL DESKTOP', 'background: #ef4444; color: white; padding: 5px; font-weight: bold;');
             e.preventDefault();
             e.stopPropagation();
             this.toggleDropdown();
-        }, true);
+        });
 
         // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-        // 🎯 MÉTHODE 2 : Délégation sur document
+        // 🎯 FERMER SI CLIC EN DEHORS (DESKTOP UNIQUEMENT)
         // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-        console.log('🎯 Listener MÉTHODE 2 (délégation)');
         document.addEventListener('click', (e) => {
-            const target = e.target;
+            if (this.isMobile) return;
             
-            // Si clic sur le bouton ou ses enfants
-            if (this.profileButton.contains(target)) {
-                console.log('%c🟢 CLIC - MÉTHODE 2', 'background: #10b981; color: white; padding: 5px; font-weight: bold;');
-                e.preventDefault();
-                e.stopPropagation();
-                this.toggleDropdown();
-                return;
-            }
-            
-            // Si clic en dehors, fermer
-            if (!this.dropdownMenu.contains(target)) {
-                if (this.dropdownMenu.classList.contains('active')) {
-                    console.log('🔒 Clic en dehors - Fermeture dropdown');
+            if (this.dropdownMenu.classList.contains('active')) {
+                if (!this.dropdownMenu.contains(e.target) && !this.profileButton.contains(e.target)) {
+                    console.log('🔒 Clic en dehors - Fermeture (desktop)');
                     this.closeDropdown();
                 }
             }
         });
 
         // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-        // 🎯 MÉTHODE 3 : Listener sur enfants
-        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-        console.log('🎯 Listener MÉTHODE 3 (enfants)');
-        const children = this.profileButton.querySelectorAll('*');
-        console.log(`  └─ ${children.length} enfants détectés`);
-        
-        children.forEach((child, index) => {
-            child.addEventListener('click', (e) => {
-                console.log(`%c🟡 CLIC - MÉTHODE 3 (enfant ${index})`, 'background: #f59e0b; color: white; padding: 5px; font-weight: bold;');
-                e.preventDefault();
-                e.stopPropagation();
-                this.toggleDropdown();
-            });
-        });
-
-        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-        // 🔓 BOUTON DÉCONNEXION
+        // 🔓 BOUTON DÉCONNEXION (DESKTOP)
         // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
         if (this.logoutButton) {
-            console.log('✅ Listener déconnexion ajouté');
             this.logoutButton.addEventListener('click', (e) => {
                 e.preventDefault();
-                console.log('🔓 Déconnexion demandée');
+                e.stopPropagation();
+                console.log('🔓 Déconnexion desktop');
                 this.handleLogout();
             });
         }
 
         // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-        // ⚙️ LIEN PARAMÈTRES
+        // ⚙ LIEN PARAMÈTRES (DESKTOP)
         // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
         if (this.settingsLink) {
-            console.log('✅ Listener paramètres ajouté');
             this.settingsLink.addEventListener('click', (e) => {
                 e.preventDefault();
-                console.log('⚙️ Redirection paramètres...');
                 window.location.href = 'settings.html';
             });
         }
 
         // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-        // 🔗 FERMER DROPDOWN AU CLIC SUR LIEN INTERNE
+        // 🔗 FERMER DROPDOWN AU CLIC SUR LIEN
         // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
         const dropdownLinks = this.dropdownMenu.querySelectorAll('.dropdown-link');
         dropdownLinks.forEach(link => {
             link.addEventListener('click', () => {
-                console.log('🔗 Clic sur lien dropdown - Fermeture');
                 this.closeDropdown();
             });
         });
 
         // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-        // 📏 FERMER AU RESIZE (passage desktop)
+        // 📏 ADAPTER AU RESIZE
         // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
         let resizeTimer;
         window.addEventListener('resize', () => {
             clearTimeout(resizeTimer);
             resizeTimer = setTimeout(() => {
-                if (window.innerWidth > 768 && this.dropdownMenu.classList.contains('active')) {
-                    console.log('🖥️ Passage desktop - Fermeture dropdown');
+                const wasMobile = this.isMobile;
+                this.isMobile = window.innerWidth <= 768;
+                
+                if (wasMobile !== this.isMobile) {
+                    console.log('📐 Changement de mode:', this.isMobile ? 'MOBILE' : 'DESKTOP');
+                    this.updateVisibility();
                     this.closeDropdown();
                 }
             }, 250);
@@ -931,78 +1041,68 @@ class UserMenuManager {
         console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n');
     }
 
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    // 👁 METTRE À JOUR LA VISIBILITÉ SELON LE MODE
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    updateVisibility() {
+        if (this.isMobile) {
+            // ❌ MASQUER SUR MOBILE
+            this.navCtaLoggedIn.style.display = 'none';
+            console.log('📱 Bouton profil masqué (mobile)');
+        } else {
+            // ✅ AFFICHER SUR DESKTOP
+            this.navCtaLoggedIn.style.display = 'flex';
+            console.log('🖥 Bouton profil affiché (desktop)');
+        }
+    }
+
     toggleDropdown() {
-        console.log('%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'color: #8b5cf6; font-weight: bold;');
-        console.log('%c🔵 toggleDropdown() APPELÉE', 'color: #8b5cf6; font-weight: bold; font-size: 14px;');
+        if (this.isMobile) return;
         
         const isExpanded = this.profileButton.getAttribute('aria-expanded') === 'true';
         const newState = !isExpanded;
         
-        console.log('📊 État actuel:', isExpanded ? '✅ OUVERT' : '❌ FERMÉ');
-        console.log('🎯 Nouvel état:', newState ? '✅ OUVERT' : '❌ FERMÉ');
-        
-        // Mettre à jour aria-expanded
-        this.profileButton.setAttribute('aria-expanded', newState);
-        
-        // Toggle classe active
         if (newState) {
-            this.dropdownMenu.classList.add('active');
-            
-            // ✅ BLOQUER LE SCROLL SUR MOBILE
-            if (window.innerWidth <= 768) {
-                document.body.style.overflow = 'hidden';
-                document.body.style.position = 'fixed';
-                document.body.style.width = '100%';
-                console.log('🔒 Scroll bloqué (mobile)');
-            }
+            this.openDropdown();
         } else {
-            this.dropdownMenu.classList.remove('active');
-            
-            // ✅ RÉACTIVER LE SCROLL
-            document.body.style.overflow = '';
-            document.body.style.position = '';
-            document.body.style.width = '';
-            console.log('🔓 Scroll réactivé');
+            this.closeDropdown();
         }
+    }
+
+    openDropdown() {
+        if (this.isMobile) return;
         
-        // Animer chevron
+        this.profileButton.setAttribute('aria-expanded', 'true');
+        this.dropdownMenu.classList.add('active');
+        this.dropdownMenu.style.visibility = 'visible';
+        this.dropdownMenu.style.opacity = '1';
+        this.dropdownMenu.style.transform = 'translateY(0)';
+        
         const chevron = this.profileButton.querySelector('.user-dropdown-icon');
         if (chevron) {
-            chevron.style.transform = newState ? 'rotate(180deg)' : 'rotate(0deg)';
+            chevron.style.transform = 'rotate(180deg)';
         }
-        
-        console.log('%c🎉 RÉSULTAT:', 'font-weight: bold;', 
-                    this.dropdownMenu.classList.contains('active') ? '✅ OUVERT' : '❌ FERMÉ');
-        console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n');
     }
 
     closeDropdown() {
-        if (!this.dropdownMenu.classList.contains('active')) {
-            console.log('ℹ️ Dropdown déjà fermé');
-            return;
-        }
-        
-        console.log('🔒 Fermeture du dropdown...');
-        
         this.profileButton.setAttribute('aria-expanded', 'false');
         this.dropdownMenu.classList.remove('active');
+        this.dropdownMenu.style.opacity = '0';
+        this.dropdownMenu.style.transform = 'translateY(-10px)';
         
-        // ✅ RÉACTIVER LE SCROLL
-        document.body.style.overflow = '';
-        document.body.style.position = '';
-        document.body.style.width = '';
+        setTimeout(() => {
+            if (!this.dropdownMenu.classList.contains('active')) {
+                this.dropdownMenu.style.visibility = 'hidden';
+            }
+        }, 300);
         
         const chevron = this.profileButton.querySelector('.user-dropdown-icon');
         if (chevron) {
             chevron.style.transform = 'rotate(0deg)';
         }
-        
-        console.log('✅ Dropdown fermé + scroll réactivé');
     }
 
     handleLogout() {
-        console.log('🔓 Déconnexion en cours...');
-        
         if (typeof firebase !== 'undefined' && firebase.auth) {
             firebase.auth().signOut()
                 .then(() => {
@@ -1013,11 +1113,352 @@ class UserMenuManager {
                     console.error('❌ Erreur Firebase:', error);
                 });
         } else {
-            console.log('⚠️ Firebase non disponible - Redirection directe');
             window.location.href = 'index.html';
         }
     }
 }
+
+// // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// // 📱 MOBILE MENU MANAGER - VERSION COMPLÈTE MOBILE
+// // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+// class MobileMenuManager {
+//     constructor() {
+//         console.log('📱 Mobile Menu Manager - Initialisation');
+        
+//         this.mobileMenuBtn = document.getElementById('mobileMenuBtn');
+//         this.navMenu = document.querySelector('.nav-menu');
+//         this.navLinks = document.querySelectorAll('.nav-link');
+        
+//         console.log('  ├─ Bouton hamburger:', this.mobileMenuBtn ? '✅' : '❌');
+//         console.log('  ├─ Menu navigation:', this.navMenu ? '✅' : '❌');
+//         console.log('  └─ Liens navigation:', this.navLinks.length);
+        
+//         this.init();
+//     }
+
+//     init() {
+//         if (!this.mobileMenuBtn || !this.navMenu) {
+//             console.warn('⚠️ Menu mobile non trouvé');
+//             return;
+//         }
+
+//         console.log('✅ Initialisation des listeners...');
+
+//         // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+//         // 🍔 TOGGLE MENU AU CLIC SUR HAMBURGER
+//         // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+//         this.mobileMenuBtn.addEventListener('click', (e) => {
+//             e.stopPropagation();
+//             console.log('🔘 Hamburger cliqué');
+//             this.toggleMenu();
+//         });
+
+//         // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+//         // 🔗 FERMER LE MENU AU CLIC SUR UN LIEN
+//         // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+//         this.navLinks.forEach(link => {
+//             link.addEventListener('click', () => {
+//                 if (window.innerWidth <= 768) {
+//                     console.log('🔗 Clic sur lien navigation - Fermeture menu');
+//                     this.closeMenu();
+//                 }
+//             });
+//         });
+
+//         // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+//         // 🎯 FERMER SI CLIC EN DEHORS
+//         // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+//         document.addEventListener('click', (e) => {
+//             if (this.navMenu.classList.contains('active')) {
+//                 if (!this.navMenu.contains(e.target) && !this.mobileMenuBtn.contains(e.target)) {
+//                     console.log('🔒 Clic en dehors - Fermeture menu');
+//                     this.closeMenu();
+//                 }
+//             }
+//         });
+
+//         // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+//         // 📏 FERMER AU RESIZE (passage desktop)
+//         // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+//         let resizeTimer;
+//         window.addEventListener('resize', () => {
+//             clearTimeout(resizeTimer);
+//             resizeTimer = setTimeout(() => {
+//                 if (window.innerWidth > 768 && this.navMenu.classList.contains('active')) {
+//                     console.log('🖥️ Passage en mode desktop - Fermeture menu');
+//                     this.closeMenu();
+//                 }
+//             }, 250);
+//         });
+
+//         console.log('✅ Mobile Menu Manager prêt');
+//     }
+
+//     toggleMenu() {
+//         const isActive = this.navMenu.classList.contains('active');
+        
+//         console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+//         console.log(isActive ? '❌ Fermeture du menu' : '✅ Ouverture du menu');
+        
+//         if (isActive) {
+//             this.closeMenu();
+//         } else {
+//             this.openMenu();
+//         }
+//     }
+
+//    openMenu() {
+//         this.mobileMenuBtn.classList.add('active');
+//         this.navMenu.classList.add('active');
+        
+//         // ✅ AJOUT : Bloquer le scroll du body
+//         document.body.classList.add('menu-open');
+//         document.body.style.overflow = 'hidden';
+//         document.body.style.position = 'fixed';
+//         document.body.style.width = '100%';
+        
+//         console.log('✅ Menu ouvert + scroll bloqué');
+//     }
+
+//     closeMenu() {
+//         this.mobileMenuBtn.classList.remove('active');
+//         this.navMenu.classList.remove('active');
+        
+//         // ✅ AJOUT : Réactiver le scroll
+//         document.body.classList.remove('menu-open');
+//         document.body.style.overflow = '';
+//         document.body.style.position = '';
+//         document.body.style.width = '';
+        
+//         console.log('❌ Menu fermé + scroll réactivé');
+//     }
+// }
+
+// // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// // 👤 USER MENU MANAGER - VERSION COMPLÈTE MOBILE + DEBUG
+// // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+// class UserMenuManager {
+//     constructor() {
+//         console.log('%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'color: #3B82F6; font-weight: bold;');
+//         console.log('%c🔍 UserMenuManager - Initialisation', 'color: #3B82F6; font-weight: bold;');
+//         console.log('%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'color: #3B82F6; font-weight: bold;');
+        
+//         this.profileButton = document.getElementById('userProfileButton');
+//         this.dropdownMenu = document.getElementById('userDropdownMenu');
+//         this.logoutButton = document.getElementById('logoutButton');
+//         this.settingsLink = document.getElementById('settingsLink');
+        
+//         console.log('📦 Éléments trouvés:');
+//         console.log('  ├─ Profile Button:', this.profileButton ? '✅' : '❌');
+//         console.log('  ├─ Dropdown Menu:', this.dropdownMenu ? '✅' : '❌');
+//         console.log('  ├─ Logout Button:', this.logoutButton ? '✅' : '❌');
+//         console.log('  └─ Settings Link:', this.settingsLink ? '✅' : '❌');
+        
+//         this.init();
+//     }
+
+//     init() {
+//         if (!this.profileButton || !this.dropdownMenu) {
+//             console.error('❌ Éléments manquants - UserMenu désactivé');
+//             return;
+//         }
+
+//         console.log('✅ Configuration des événements...');
+
+//         // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+//         // 🎯 MÉTHODE 1 : Click direct avec useCapture
+//         // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+//         console.log('🎯 Listener MÉTHODE 1 (direct + capture)');
+//         this.profileButton.addEventListener('click', (e) => {
+//             console.log('%c🔴 CLIC DÉTECTÉ - MÉTHODE 1', 'background: #ef4444; color: white; padding: 5px; font-weight: bold;');
+//             e.preventDefault();
+//             e.stopPropagation();
+//             this.toggleDropdown();
+//         }, true);
+
+//         // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+//         // 🎯 MÉTHODE 2 : Délégation sur document
+//         // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+//         console.log('🎯 Listener MÉTHODE 2 (délégation)');
+//         document.addEventListener('click', (e) => {
+//             const target = e.target;
+            
+//             // Si clic sur le bouton ou ses enfants
+//             if (this.profileButton.contains(target)) {
+//                 console.log('%c🟢 CLIC - MÉTHODE 2', 'background: #10b981; color: white; padding: 5px; font-weight: bold;');
+//                 e.preventDefault();
+//                 e.stopPropagation();
+//                 this.toggleDropdown();
+//                 return;
+//             }
+            
+//             // Si clic en dehors, fermer
+//             if (!this.dropdownMenu.contains(target)) {
+//                 if (this.dropdownMenu.classList.contains('active')) {
+//                     console.log('🔒 Clic en dehors - Fermeture dropdown');
+//                     this.closeDropdown();
+//                 }
+//             }
+//         });
+
+//         // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+//         // 🎯 MÉTHODE 3 : Listener sur enfants
+//         // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+//         console.log('🎯 Listener MÉTHODE 3 (enfants)');
+//         const children = this.profileButton.querySelectorAll('*');
+//         console.log(`  └─ ${children.length} enfants détectés`);
+        
+//         children.forEach((child, index) => {
+//             child.addEventListener('click', (e) => {
+//                 console.log(`%c🟡 CLIC - MÉTHODE 3 (enfant ${index})`, 'background: #f59e0b; color: white; padding: 5px; font-weight: bold;');
+//                 e.preventDefault();
+//                 e.stopPropagation();
+//                 this.toggleDropdown();
+//             });
+//         });
+
+//         // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+//         // 🔓 BOUTON DÉCONNEXION
+//         // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+//         if (this.logoutButton) {
+//             console.log('✅ Listener déconnexion ajouté');
+//             this.logoutButton.addEventListener('click', (e) => {
+//                 e.preventDefault();
+//                 console.log('🔓 Déconnexion demandée');
+//                 this.handleLogout();
+//             });
+//         }
+
+//         // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+//         // ⚙️ LIEN PARAMÈTRES
+//         // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+//         if (this.settingsLink) {
+//             console.log('✅ Listener paramètres ajouté');
+//             this.settingsLink.addEventListener('click', (e) => {
+//                 e.preventDefault();
+//                 console.log('⚙️ Redirection paramètres...');
+//                 window.location.href = 'settings.html';
+//             });
+//         }
+
+//         // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+//         // 🔗 FERMER DROPDOWN AU CLIC SUR LIEN INTERNE
+//         // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+//         const dropdownLinks = this.dropdownMenu.querySelectorAll('.dropdown-link');
+//         dropdownLinks.forEach(link => {
+//             link.addEventListener('click', () => {
+//                 console.log('🔗 Clic sur lien dropdown - Fermeture');
+//                 this.closeDropdown();
+//             });
+//         });
+
+//         // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+//         // 📏 FERMER AU RESIZE (passage desktop)
+//         // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+//         let resizeTimer;
+//         window.addEventListener('resize', () => {
+//             clearTimeout(resizeTimer);
+//             resizeTimer = setTimeout(() => {
+//                 if (window.innerWidth > 768 && this.dropdownMenu.classList.contains('active')) {
+//                     console.log('🖥️ Passage desktop - Fermeture dropdown');
+//                     this.closeDropdown();
+//                 }
+//             }, 250);
+//         });
+
+//         console.log('%c✅ UserMenuManager prêt !', 'color: #10b981; font-weight: bold;');
+//         console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n');
+//     }
+
+//     toggleDropdown() {
+//         console.log('%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'color: #8b5cf6; font-weight: bold;');
+//         console.log('%c🔵 toggleDropdown() APPELÉE', 'color: #8b5cf6; font-weight: bold; font-size: 14px;');
+        
+//         const isExpanded = this.profileButton.getAttribute('aria-expanded') === 'true';
+//         const newState = !isExpanded;
+        
+//         console.log('📊 État actuel:', isExpanded ? '✅ OUVERT' : '❌ FERMÉ');
+//         console.log('🎯 Nouvel état:', newState ? '✅ OUVERT' : '❌ FERMÉ');
+        
+//         // Mettre à jour aria-expanded
+//         this.profileButton.setAttribute('aria-expanded', newState);
+        
+//         // Toggle classe active
+//         if (newState) {
+//             this.dropdownMenu.classList.add('active');
+            
+//             // ✅ BLOQUER LE SCROLL SUR MOBILE
+//             if (window.innerWidth <= 768) {
+//                 document.body.style.overflow = 'hidden';
+//                 document.body.style.position = 'fixed';
+//                 document.body.style.width = '100%';
+//                 console.log('🔒 Scroll bloqué (mobile)');
+//             }
+//         } else {
+//             this.dropdownMenu.classList.remove('active');
+            
+//             // ✅ RÉACTIVER LE SCROLL
+//             document.body.style.overflow = '';
+//             document.body.style.position = '';
+//             document.body.style.width = '';
+//             console.log('🔓 Scroll réactivé');
+//         }
+        
+//         // Animer chevron
+//         const chevron = this.profileButton.querySelector('.user-dropdown-icon');
+//         if (chevron) {
+//             chevron.style.transform = newState ? 'rotate(180deg)' : 'rotate(0deg)';
+//         }
+        
+//         console.log('%c🎉 RÉSULTAT:', 'font-weight: bold;', 
+//                     this.dropdownMenu.classList.contains('active') ? '✅ OUVERT' : '❌ FERMÉ');
+//         console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n');
+//     }
+
+//     closeDropdown() {
+//         if (!this.dropdownMenu.classList.contains('active')) {
+//             console.log('ℹ️ Dropdown déjà fermé');
+//             return;
+//         }
+        
+//         console.log('🔒 Fermeture du dropdown...');
+        
+//         this.profileButton.setAttribute('aria-expanded', 'false');
+//         this.dropdownMenu.classList.remove('active');
+        
+//         // ✅ RÉACTIVER LE SCROLL
+//         document.body.style.overflow = '';
+//         document.body.style.position = '';
+//         document.body.style.width = '';
+        
+//         const chevron = this.profileButton.querySelector('.user-dropdown-icon');
+//         if (chevron) {
+//             chevron.style.transform = 'rotate(0deg)';
+//         }
+        
+//         console.log('✅ Dropdown fermé + scroll réactivé');
+//     }
+
+//     handleLogout() {
+//         console.log('🔓 Déconnexion en cours...');
+        
+//         if (typeof firebase !== 'undefined' && firebase.auth) {
+//             firebase.auth().signOut()
+//                 .then(() => {
+//                     console.log('✅ Déconnexion Firebase réussie');
+//                     window.location.href = 'index.html';
+//                 })
+//                 .catch((error) => {
+//                     console.error('❌ Erreur Firebase:', error);
+//                 });
+//         } else {
+//             console.log('⚠️ Firebase non disponible - Redirection directe');
+//             window.location.href = 'index.html';
+//         }
+//     }
+// }
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 // 🔐 AUTH STATE MANAGER

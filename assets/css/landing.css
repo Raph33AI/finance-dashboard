@@ -7852,3 +7852,141 @@ body.dark-mode .tech-points li {
 /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
    ✅ FIN DES CORRECTIONS MOBILE DÉFINITIVES
    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   SECTION PROFIL MOBILE DANS LE MENU HAMBURGER
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+
+.mobile-user-section {
+    display: none;
+    padding: 0;
+    margin: 0;
+}
+
+@media (max-width: 768px) {
+    .mobile-user-section {
+        display: block;
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 16px;
+        padding: 20px;
+        margin-bottom: 24px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    /* Header du profil mobile */
+    .mobile-user-header {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        margin-bottom: 16px;
+    }
+    
+    .mobile-user-avatar {
+        width: 56px;
+        height: 56px;
+        border-radius: 50%;
+        border: 3px solid rgba(59, 130, 246, 0.3);
+        object-fit: cover;
+    }
+    
+    .mobile-user-info {
+        flex: 1;
+    }
+    
+    .mobile-user-name {
+        margin: 0 0 4px 0;
+        font-size: 18px;
+        font-weight: 700;
+        color: #ffffff;
+    }
+    
+    .mobile-user-email {
+        margin: 0;
+        font-size: 13px;
+        color: rgba(255, 255, 255, 0.6);
+    }
+    
+    /* Divider */
+    .mobile-user-divider {
+        height: 1px;
+        background: rgba(255, 255, 255, 0.1);
+        margin: 16px 0;
+    }
+    
+    /* Liens du profil mobile */
+    .mobile-user-links {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+    }
+    
+    .mobile-user-link {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 12px 16px;
+        border-radius: 12px;
+        color: rgba(255, 255, 255, 0.9);
+        text-decoration: none;
+        font-size: 15px;
+        font-weight: 500;
+        transition: all 0.3s ease;
+    }
+    
+    .mobile-user-link:hover {
+        background: rgba(255, 255, 255, 0.1);
+        color: #ffffff;
+    }
+    
+    .mobile-user-link i {
+        width: 20px;
+        text-align: center;
+        color: rgba(59, 130, 246, 0.8);
+    }
+    
+    /* Bouton déconnexion mobile */
+    .mobile-logout-btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        width: 100%;
+        padding: 12px 24px;
+        background: linear-gradient(135deg, #ef4444, #dc2626);
+        color: #ffffff;
+        border: none;
+        border-radius: 12px;
+        font-size: 15px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    
+    .mobile-logout-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 16px rgba(239, 68, 68, 0.3);
+    }
+    
+    .mobile-logout-btn:active {
+        transform: translateY(0);
+    }
+    
+    /* ✅ MASQUER LE BOUTON PROFIL DESKTOP SUR MOBILE */
+    #navCtaLoggedIn {
+        display: none !important;
+    }
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   AFFICHER LE BOUTON PROFIL SUR DESKTOP
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+
+@media (min-width: 769px) {
+    .mobile-user-section {
+        display: none !important;
+    }
+    
+    #navCtaLoggedIn {
+        display: flex !important;
+    }
+}
