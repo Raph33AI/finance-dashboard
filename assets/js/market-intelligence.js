@@ -1,8 +1,6 @@
 // ============================================
 // MARKET INTELLIGENCE - PREMIUM VERSION
-// ✅ Section stats supprimée
-// ✅ Tri earnings par date croissante
-// ✅ Tableau responsive sur mobile
+// Graphiques avec textes en noir
 // ============================================
 
 const MarketIntelligence = {
@@ -76,11 +74,23 @@ const MarketIntelligence = {
     renderNews() {
         const container = document.getElementById('marketNewsContainer');
         const newsToDisplay = this.allNews.slice(0, this.displayedNewsCount);
+        
+        let positiveCount = 0;
+        let negativeCount = 0;
+        let neutralCount = 0;
 
         container.innerHTML = newsToDisplay.map((item, index) => {
             const sentiment = this.analyzeSentiment(item.headline + ' ' + (item.summary || ''));
+            if (sentiment === 'positive') positiveCount++;
+            else if (sentiment === 'negative') negativeCount++;
+            else neutralCount++;
+
             return this.renderNewsCard(item, sentiment, index);
         }).join('');
+
+        document.getElementById('totalNewsCount').textContent = this.allNews.length;
+        document.getElementById('positiveNewsCount').textContent = positiveCount;
+        document.getElementById('negativeNewsCount').textContent = negativeCount;
 
         const loadMoreContainer = document.getElementById('loadMoreContainer');
         if (this.displayedNewsCount < this.allNews.length) {
@@ -127,7 +137,7 @@ const MarketIntelligence = {
                     
                     <div class='news-footer'>
                         <span class='sentiment-badge sentiment-${sentiment}'>
-                            ${sentiment === 'positive' ? '📈 ' : sentiment === 'negative' ? '📉 ' : '➡ '}
+                            ${sentiment === 'positive' ? '📈 ' : sentiment === 'negative' ? '📉 ' : '➡️ '}
                             ${sentiment.toUpperCase()}
                         </span>
                         <a href='${item.url}' target='_blank' class='news-link' onclick='event.stopPropagation();'>
@@ -262,22 +272,15 @@ const MarketIntelligence = {
                         <p class='empty-text'>No upcoming earnings in the next ${days} days</p>
                     </div>
                 `;
+                document.getElementById('upcomingEarningsCount').textContent = '0';
                 return;
             }
 
-            let earnings = calendar.earningsCalendar.slice(0, 100);
+            const earnings = calendar.earningsCalendar.slice(0, 100);
 
-            // ✅ TRI PAR DATE CROISSANTE
-            earnings.sort((a, b) => {
-                const dateA = new Date(a.date);
-                const dateB = new Date(b.date);
-                return dateA - dateB;
-            });
-
-            // ✅ TABLEAU RESPONSIVE AVEC SCROLL HORIZONTAL
             container.innerHTML = `
-                <div class='earnings-table' style='overflow-x: auto; -webkit-overflow-scrolling: touch;'>
-                    <table style='min-width: 800px; width: 100%;'>
+                <div class='earnings-table'>
+                    <table>
                         <thead>
                             <tr>
                                 <th><i class='fas fa-calendar'></i> Date</th>
@@ -307,7 +310,7 @@ const MarketIntelligence = {
                                     <td>${item.revenueEstimate ? '<strong>$' + (item.revenueEstimate / 1e9).toFixed(2) + 'B</strong>' : '<span style="color: var(--text-secondary);">N/A</span>'}</td>
                                     <td>
                                         <button class='btn-primary' onclick='MarketIntelligence.openCompanyInsights("${item.symbol}")' 
-                                                style='padding: 8px 16px; font-size: 0.85em; white-space: nowrap;'>
+                                                style='padding: 8px 16px; font-size: 0.85em;'>
                                             <i class='fas fa-search'></i> View
                                         </button>
                                     </td>
@@ -316,10 +319,9 @@ const MarketIntelligence = {
                         </tbody>
                     </table>
                 </div>
-                <p style='text-align: center; margin-top: 16px; color: var(--text-secondary); font-size: 0.9em;'>
-                    <i class='fas fa-arrows-alt-h'></i> Scroll horizontally to view all columns on mobile
-                </p>
             `;
+
+            document.getElementById('upcomingEarningsCount').textContent = calendar.earningsCalendar.length;
 
         } catch (error) {
             console.error('Error loading earnings calendar:', error);

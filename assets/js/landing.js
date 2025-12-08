@@ -795,13 +795,13 @@ class MobileMenuManager {
 }
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-// 👤 USER MENU MANAGER - VERSION MOBILE-FIRST COMPLÈTE
+// 👤 USER MENU MANAGER - VERSION COMPLÈTE MOBILE + DEBUG
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 class UserMenuManager {
     constructor() {
         console.log('%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'color: #3B82F6; font-weight: bold;');
-        console.log('%c🔍 UserMenuManager - Initialisation MOBILE-FIRST', 'color: #3B82F6; font-weight: bold;');
+        console.log('%c🔍 UserMenuManager - Initialisation', 'color: #3B82F6; font-weight: bold;');
         console.log('%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'color: #3B82F6; font-weight: bold;');
         
         this.profileButton = document.getElementById('userProfileButton');
@@ -809,16 +809,11 @@ class UserMenuManager {
         this.logoutButton = document.getElementById('logoutButton');
         this.settingsLink = document.getElementById('settingsLink');
         
-        // ✅ NOUVEAU : Créer un overlay pour mobile
-        this.overlay = null;
-        this.isMobile = window.innerWidth <= 768;
-        
         console.log('📦 Éléments trouvés:');
         console.log('  ├─ Profile Button:', this.profileButton ? '✅' : '❌');
         console.log('  ├─ Dropdown Menu:', this.dropdownMenu ? '✅' : '❌');
         console.log('  ├─ Logout Button:', this.logoutButton ? '✅' : '❌');
-        console.log('  ├─ Settings Link:', this.settingsLink ? '✅' : '❌');
-        console.log('  └─ Mode:', this.isMobile ? '📱 MOBILE' : '🖥 DESKTOP');
+        console.log('  └─ Settings Link:', this.settingsLink ? '✅' : '❌');
         
         this.init();
     }
@@ -832,45 +827,55 @@ class UserMenuManager {
         console.log('✅ Configuration des événements...');
 
         // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-        // 🎨 CRÉER L'OVERLAY POUR MOBILE
+        // 🎯 MÉTHODE 1 : Click direct avec useCapture
         // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-        this.createOverlay();
-
-        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-        // 🎯 ADAPTER LE DROPDOWN POUR MOBILE
-        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-        this.adaptDropdownForMobile();
-
-        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-        // 🔘 CLICK SUR BOUTON PROFIL
-        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        console.log('🎯 Listener MÉTHODE 1 (direct + capture)');
         this.profileButton.addEventListener('click', (e) => {
-            console.log('%c🔴 CLIC PROFIL DÉTECTÉ', 'background: #ef4444; color: white; padding: 5px; font-weight: bold;');
+            console.log('%c🔴 CLIC DÉTECTÉ - MÉTHODE 1', 'background: #ef4444; color: white; padding: 5px; font-weight: bold;');
             e.preventDefault();
             e.stopPropagation();
             this.toggleDropdown();
+        }, true);
+
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        // 🎯 MÉTHODE 2 : Délégation sur document
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        console.log('🎯 Listener MÉTHODE 2 (délégation)');
+        document.addEventListener('click', (e) => {
+            const target = e.target;
+            
+            // Si clic sur le bouton ou ses enfants
+            if (this.profileButton.contains(target)) {
+                console.log('%c🟢 CLIC - MÉTHODE 2', 'background: #10b981; color: white; padding: 5px; font-weight: bold;');
+                e.preventDefault();
+                e.stopPropagation();
+                this.toggleDropdown();
+                return;
+            }
+            
+            // Si clic en dehors, fermer
+            if (!this.dropdownMenu.contains(target)) {
+                if (this.dropdownMenu.classList.contains('active')) {
+                    console.log('🔒 Clic en dehors - Fermeture dropdown');
+                    this.closeDropdown();
+                }
+            }
         });
 
-        // Listener sur les enfants du bouton (pour éviter les problèmes de propagation)
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        // 🎯 MÉTHODE 3 : Listener sur enfants
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        console.log('🎯 Listener MÉTHODE 3 (enfants)');
         const children = this.profileButton.querySelectorAll('*');
-        children.forEach((child) => {
+        console.log(`  └─ ${children.length} enfants détectés`);
+        
+        children.forEach((child, index) => {
             child.addEventListener('click', (e) => {
+                console.log(`%c🟡 CLIC - MÉTHODE 3 (enfant ${index})`, 'background: #f59e0b; color: white; padding: 5px; font-weight: bold;');
                 e.preventDefault();
                 e.stopPropagation();
                 this.toggleDropdown();
             });
-        });
-
-        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-        // 🎯 FERMER SI CLIC EN DEHORS
-        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-        document.addEventListener('click', (e) => {
-            if (this.dropdownMenu.classList.contains('active')) {
-                if (!this.dropdownMenu.contains(e.target) && !this.profileButton.contains(e.target)) {
-                    console.log('🔒 Clic en dehors - Fermeture');
-                    this.closeDropdown();
-                }
-            }
         });
 
         // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -880,20 +885,19 @@ class UserMenuManager {
             console.log('✅ Listener déconnexion ajouté');
             this.logoutButton.addEventListener('click', (e) => {
                 e.preventDefault();
-                e.stopPropagation();
                 console.log('🔓 Déconnexion demandée');
                 this.handleLogout();
             });
         }
 
         // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-        // ⚙ LIEN PARAMÈTRES
+        // ⚙️ LIEN PARAMÈTRES
         // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
         if (this.settingsLink) {
             console.log('✅ Listener paramètres ajouté');
             this.settingsLink.addEventListener('click', (e) => {
                 e.preventDefault();
-                console.log('⚙ Redirection paramètres...');
+                console.log('⚙️ Redirection paramètres...');
                 window.location.href = 'settings.html';
             });
         }
@@ -903,30 +907,23 @@ class UserMenuManager {
         // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
         const dropdownLinks = this.dropdownMenu.querySelectorAll('.dropdown-link');
         dropdownLinks.forEach(link => {
-            link.addEventListener('click', (e) => {
+            link.addEventListener('click', () => {
                 console.log('🔗 Clic sur lien dropdown - Fermeture');
                 this.closeDropdown();
             });
         });
 
         // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-        // 📏 ADAPTER AU RESIZE
+        // 📏 FERMER AU RESIZE (passage desktop)
         // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
         let resizeTimer;
         window.addEventListener('resize', () => {
             clearTimeout(resizeTimer);
             resizeTimer = setTimeout(() => {
-                const wasMobile = this.isMobile;
-                this.isMobile = window.innerWidth <= 768;
-                
-                // Si changement de mode, fermer le dropdown
-                if (wasMobile !== this.isMobile && this.dropdownMenu.classList.contains('active')) {
-                    console.log('📐 Changement de mode - Fermeture dropdown');
+                if (window.innerWidth > 768 && this.dropdownMenu.classList.contains('active')) {
+                    console.log('🖥️ Passage desktop - Fermeture dropdown');
                     this.closeDropdown();
                 }
-                
-                // Réadapter le dropdown
-                this.adaptDropdownForMobile();
             }, 250);
         });
 
@@ -934,92 +931,6 @@ class UserMenuManager {
         console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n');
     }
 
-    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-    // 🎨 CRÉER L'OVERLAY POUR MOBILE
-    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-    createOverlay() {
-        // Créer l'overlay s'il n'existe pas
-        this.overlay = document.createElement('div');
-        this.overlay.className = 'user-menu-overlay';
-        this.overlay.style.cssText = `
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.5);
-            backdrop-filter: blur(4px);
-            opacity: 0;
-            visibility: hidden;
-            transition: all 0.3s ease;
-            z-index: 998;
-        `;
-        
-        document.body.appendChild(this.overlay);
-        
-        // Fermer au clic sur overlay
-        this.overlay.addEventListener('click', () => {
-            console.log('🔒 Clic sur overlay - Fermeture');
-            this.closeDropdown();
-        });
-        
-        console.log('✅ Overlay créé');
-    }
-
-    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-    // 📱 ADAPTER LE DROPDOWN POUR MOBILE
-    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-    adaptDropdownForMobile() {
-        if (this.isMobile) {
-            console.log('📱 Adaptation pour MOBILE');
-            
-            // ✅ MODE MOBILE : Fullscreen modal
-            this.dropdownMenu.style.cssText = `
-                position: fixed;
-                top: auto;
-                bottom: 0;
-                left: 0;
-                right: 0;
-                width: 100%;
-                max-width: 100%;
-                margin: 0;
-                border-radius: 24px 24px 0 0;
-                box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.2);
-                transform: translateY(100%);
-                transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-                z-index: 999;
-                max-height: 70vh;
-                overflow-y: auto;
-            `;
-            
-            // Ajouter un padding en bas pour l'iPhone
-            this.dropdownMenu.style.paddingBottom = 'env(safe-area-inset-bottom, 20px)';
-            
-        } else {
-            console.log('🖥 Adaptation pour DESKTOP');
-            
-            // ✅ MODE DESKTOP : Dropdown classique
-            this.dropdownMenu.style.cssText = `
-                position: absolute;
-                top: calc(100% + 12px);
-                right: 0;
-                width: 280px;
-                max-width: none;
-                margin: 0;
-                border-radius: 16px;
-                box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
-                transform: translateY(-10px);
-                opacity: 0;
-                visibility: hidden;
-                transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-                z-index: 999;
-            `;
-        }
-    }
-
-    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-    // 🔄 TOGGLE DROPDOWN
-    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
     toggleDropdown() {
         console.log('%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'color: #8b5cf6; font-weight: bold;');
         console.log('%c🔵 toggleDropdown() APPELÉE', 'color: #8b5cf6; font-weight: bold; font-size: 14px;');
@@ -1029,147 +940,66 @@ class UserMenuManager {
         
         console.log('📊 État actuel:', isExpanded ? '✅ OUVERT' : '❌ FERMÉ');
         console.log('🎯 Nouvel état:', newState ? '✅ OUVERT' : '❌ FERMÉ');
-        console.log('📱 Mode:', this.isMobile ? 'MOBILE' : 'DESKTOP');
         
+        // Mettre à jour aria-expanded
+        this.profileButton.setAttribute('aria-expanded', newState);
+        
+        // Toggle classe active
         if (newState) {
-            this.openDropdown();
+            this.dropdownMenu.classList.add('active');
+            
+            // ✅ BLOQUER LE SCROLL SUR MOBILE
+            if (window.innerWidth <= 768) {
+                document.body.style.overflow = 'hidden';
+                document.body.style.position = 'fixed';
+                document.body.style.width = '100%';
+                console.log('🔒 Scroll bloqué (mobile)');
+            }
         } else {
-            this.closeDropdown();
+            this.dropdownMenu.classList.remove('active');
+            
+            // ✅ RÉACTIVER LE SCROLL
+            document.body.style.overflow = '';
+            document.body.style.position = '';
+            document.body.style.width = '';
+            console.log('🔓 Scroll réactivé');
         }
         
+        // Animer chevron
+        const chevron = this.profileButton.querySelector('.user-dropdown-icon');
+        if (chevron) {
+            chevron.style.transform = newState ? 'rotate(180deg)' : 'rotate(0deg)';
+        }
+        
+        console.log('%c🎉 RÉSULTAT:', 'font-weight: bold;', 
+                    this.dropdownMenu.classList.contains('active') ? '✅ OUVERT' : '❌ FERMÉ');
         console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n');
     }
 
-    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-    // ✅ OUVRIR LE DROPDOWN
-    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-    openDropdown() {
-        console.log('✅ Ouverture du dropdown...');
-        
-        // Mettre à jour aria-expanded
-        this.profileButton.setAttribute('aria-expanded', 'true');
-        this.dropdownMenu.classList.add('active');
-        
-        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-        // 📱 MODE MOBILE
-        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-        if (this.isMobile) {
-            console.log('📱 Ouverture en mode MOBILE');
-            
-            // Afficher l'overlay
-            this.overlay.style.opacity = '1';
-            this.overlay.style.visibility = 'visible';
-            
-            // Animer le dropdown depuis le bas
-            this.dropdownMenu.style.visibility = 'visible';
-            this.dropdownMenu.style.transform = 'translateY(0)';
-            
-            // Bloquer le scroll
-            document.body.style.overflow = 'hidden';
-            document.body.style.position = 'fixed';
-            document.body.style.width = '100%';
-            document.body.style.top = `-${window.scrollY}px`;
-            
-            console.log('🔒 Scroll bloqué + Overlay visible');
-        } 
-        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-        // 🖥 MODE DESKTOP
-        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-        else {
-            console.log('🖥 Ouverture en mode DESKTOP');
-            
-            this.dropdownMenu.style.visibility = 'visible';
-            this.dropdownMenu.style.opacity = '1';
-            this.dropdownMenu.style.transform = 'translateY(0)';
-        }
-        
-        // Animer le chevron
-        const chevron = this.profileButton.querySelector('.user-dropdown-icon');
-        if (chevron) {
-            chevron.style.transform = 'rotate(180deg)';
-            chevron.style.transition = 'transform 0.3s ease';
-        }
-        
-        console.log('✅ Dropdown ouvert');
-    }
-
-    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-    // ❌ FERMER LE DROPDOWN
-    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
     closeDropdown() {
         if (!this.dropdownMenu.classList.contains('active')) {
-            console.log('ℹ Dropdown déjà fermé');
+            console.log('ℹ️ Dropdown déjà fermé');
             return;
         }
         
         console.log('🔒 Fermeture du dropdown...');
         
-        // Mettre à jour aria-expanded
         this.profileButton.setAttribute('aria-expanded', 'false');
         this.dropdownMenu.classList.remove('active');
         
-        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-        // 📱 MODE MOBILE
-        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-        if (this.isMobile) {
-            console.log('📱 Fermeture en mode MOBILE');
-            
-            // Masquer l'overlay
-            this.overlay.style.opacity = '0';
-            this.overlay.style.visibility = 'hidden';
-            
-            // Animer le dropdown vers le bas
-            this.dropdownMenu.style.transform = 'translateY(100%)';
-            
-            // Réactiver le scroll
-            const scrollY = document.body.style.top;
-            document.body.style.overflow = '';
-            document.body.style.position = '';
-            document.body.style.width = '';
-            document.body.style.top = '';
-            
-            // Restaurer la position de scroll
-            if (scrollY) {
-                window.scrollTo(0, parseInt(scrollY || '0') * -1);
-            }
-            
-            console.log('🔓 Scroll réactivé + Overlay masqué');
-            
-            // Masquer complètement après animation
-            setTimeout(() => {
-                if (!this.dropdownMenu.classList.contains('active')) {
-                    this.dropdownMenu.style.visibility = 'hidden';
-                }
-            }, 300);
-        } 
-        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-        // 🖥 MODE DESKTOP
-        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-        else {
-            console.log('🖥 Fermeture en mode DESKTOP');
-            
-            this.dropdownMenu.style.opacity = '0';
-            this.dropdownMenu.style.transform = 'translateY(-10px)';
-            
-            setTimeout(() => {
-                if (!this.dropdownMenu.classList.contains('active')) {
-                    this.dropdownMenu.style.visibility = 'hidden';
-                }
-            }, 300);
-        }
+        // ✅ RÉACTIVER LE SCROLL
+        document.body.style.overflow = '';
+        document.body.style.position = '';
+        document.body.style.width = '';
         
-        // Réinitialiser le chevron
         const chevron = this.profileButton.querySelector('.user-dropdown-icon');
         if (chevron) {
             chevron.style.transform = 'rotate(0deg)';
         }
         
-        console.log('✅ Dropdown fermé');
+        console.log('✅ Dropdown fermé + scroll réactivé');
     }
 
-    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-    // 🔓 DÉCONNEXION
-    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
     handleLogout() {
         console.log('🔓 Déconnexion en cours...');
         
@@ -1183,7 +1013,7 @@ class UserMenuManager {
                     console.error('❌ Erreur Firebase:', error);
                 });
         } else {
-            console.log('⚠ Firebase non disponible - Redirection directe');
+            console.log('⚠️ Firebase non disponible - Redirection directe');
             window.location.href = 'index.html';
         }
     }
