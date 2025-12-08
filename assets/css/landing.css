@@ -6681,7 +6681,10 @@ body.dark-mode .pricing-card.platinum {
         height: calc(100vh - 65px) !important;
         
         /* ✅ FOND BLANC PUR (PAS GRIS) */
-        background: #ffffff !important;
+        /* background: #ffffff !important; */
+        background: rgba(255, 255, 255, 0.95) !important;
+        backdrop-filter: blur(20px) saturate(180%) !important;
+        -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
         
         /* Layout */
         padding: 1.5rem 1rem !important;
