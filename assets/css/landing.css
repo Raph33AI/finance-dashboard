@@ -7971,3 +7971,9 @@ body.dark-mode .tech-points li {
 .mobile-profile-link.logout i {
     color: #ef4444;
 }
+
+@media (max-width: 768px) {
+    .nav-menu {
+        background: transparent !important;
+    }
+}
