@@ -1575,7 +1575,7 @@ class PerformanceMonitor {
 }
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-// 📱 MOBILE PROFILE MANAGER - INJECTION DYNAMIQUE
+// 📱 MOBILE PROFILE MANAGER - VERSION CORRIGÉE
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 class MobileProfileManager {
@@ -1618,7 +1618,7 @@ class MobileProfileManager {
         this.profileSection = document.createElement('div');
         this.profileSection.className = 'nav-menu-mobile-profile';
         this.profileSection.id = 'navMenuMobileProfile';
-        this.profileSection.style.display = 'none'; // Caché par défaut (utilisateur non connecté)
+        // ✅ NE PLUS UTILISER .style.display - utiliser des classes CSS
 
         // HTML de la section profil
         this.profileSection.innerHTML = `
@@ -1673,16 +1673,16 @@ class MobileProfileManager {
         if (!this.profileSection) return;
 
         if (!user) {
-            // Cacher la section si non connecté
-            this.profileSection.style.display = 'none';
+            // ✅ Retirer la classe .logged-in (caché via CSS)
+            this.profileSection.classList.remove('logged-in');
             console.log('👤 Utilisateur non connecté - Section profil masquée');
             return;
         }
 
         console.log('👤 Utilisateur connecté:', user.email);
 
-        // Afficher la section
-        this.profileSection.style.display = 'block';
+        // ✅ Ajouter la classe .logged-in (visible sur mobile uniquement via CSS)
+        this.profileSection.classList.add('logged-in');
 
         // Mettre à jour les infos
         const displayName = user.displayName || user.email?.split('@')[0] || 'User';
@@ -1707,7 +1707,7 @@ class MobileProfileManager {
             avatarElement.src = avatarUrl;
         }
 
-        console.log('✅ Profil mobile mis à jour');
+        console.log('✅ Profil mobile mis à jour (classe .logged-in ajoutée)');
     }
 
     handleLogout() {

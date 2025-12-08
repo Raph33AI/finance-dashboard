@@ -7853,31 +7853,39 @@ body.dark-mode .tech-points li {
    ✅ FIN DES CORRECTIONS MOBILE DÉFINITIVES
    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
-   /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-   📱 PROFIL UTILISATEUR - ADAPTATION MOBILE (SANS HTML)
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   📱 PROFIL UTILISATEUR - ADAPTATION MOBILE (VERSION CORRIGÉE)
    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
-/* 📱 Mobile : Masquer le profil dans la navbar */
+/* ✅ Desktop : Masquer le profil dans la navbar si mobile-profile est actif */
 @media (max-width: 768px) {
     #navCtaLoggedIn {
         display: none !important;
     }
 }
 
-/* 🎨 Section profil dans le menu hamburger (injectée dynamiquement) */
+/* 🎨 Section profil dans le menu hamburger */
 .nav-menu-mobile-profile {
-    display: none; /* Caché par défaut (desktop) */
-    background: rgba(255, 255, 255, 0.05);
-    border-radius: 16px;
-    padding: 20px;
-    margin-top: 20px;
-    backdrop-filter: blur(10px);
-    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    display: none; /* Caché par défaut */
 }
 
+/* ✅ MOBILE : Afficher la section profil uniquement si .logged-in */
 @media (max-width: 768px) {
-    .nav-menu-mobile-profile {
+    .nav-menu-mobile-profile.logged-in {
         display: block !important;
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 16px;
+        padding: 20px;
+        margin-top: 20px;
+        backdrop-filter: blur(10px);
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+    }
+}
+
+/* ✅ DESKTOP : Toujours cacher */
+@media (min-width: 769px) {
+    .nav-menu-mobile-profile {
+        display: none !important;
     }
 }
 
