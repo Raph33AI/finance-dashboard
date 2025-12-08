@@ -10,6 +10,33 @@
    ✅ AVEC EXCEPTION POUR FONT AWESOME
    ============================================ */
 
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   🔧 FIX URGENT - FOND BLANC MOBILE
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+
+@media (max-width: 768px) {
+    /* Force le fond blanc sur TOUS les éléments potentiellement gris */
+    body:not(.dark-mode),
+    html:not(.dark-mode),
+    .landing-page:not(.dark-mode) {
+        background: #ffffff !important;
+    }
+    
+    /* Force le fond blanc sur le conteneur de navigation */
+    .nav-container,
+    .landing-nav {
+        background: transparent !important;
+    }
+    
+    /* Supprime toutes les images de fond qui pourraient créer du gris */
+    .nav-menu,
+    .nav-cta,
+    .nav-menu *,
+    .nav-cta * {
+        background-image: none !important;
+    }
+}
+
 body.landing-page,
 .landing-page * {
     font-family: 'Satoshi', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
