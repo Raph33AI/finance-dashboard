@@ -1,6 +1,6 @@
 /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
    LANDING.JS - AlphaVault AI Landing Page
-   Version Sans 3D - Navigation Responsive
+   ✅ VERSION CORRIGÉE - MENU UTILISATEUR MOBILE
    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -124,7 +124,7 @@ class MobileMenuManager {
 
         console.log('✅ Initialisation des listeners...');
 
-        // ✅ CORRECTION : Créer la section CTA uniquement sur mobile
+        // ✅ Créer la section CTA uniquement sur mobile
         this.createMobileCTASection();
 
         // Toggle menu au clic sur hamburger
@@ -195,7 +195,7 @@ class MobileMenuManager {
                     this.closeMenu();
                 }
                 
-                // ✅ CORRECTION : Recréer ou détruire la section CTA selon la taille d'écran
+                // ✅ Recréer ou détruire la section CTA selon la taille d'écran
                 this.handleResponsiveCTA();
             }, 250);
         });
@@ -203,7 +203,7 @@ class MobileMenuManager {
         console.log('✅ Mobile Menu Manager prêt');
     }
 
-    // ✅ CORRECTION : Gérer l'affichage de la CTA selon la taille d'écran
+    // ✅ Gérer l'affichage de la CTA selon la taille d'écran
     handleResponsiveCTA() {
         const mobileCTA = document.querySelector('.nav-menu-mobile-cta');
         
@@ -222,7 +222,7 @@ class MobileMenuManager {
     }
 
     createMobileCTASection() {
-        // ✅ CORRECTION : Ne créer que sur mobile
+        // ✅ Ne créer que sur mobile
         if (window.innerWidth > 768) {
             console.log('🖥 Desktop détecté - Pas de section CTA mobile');
             return;
@@ -238,8 +238,7 @@ class MobileMenuManager {
         mobileCTA = document.createElement('div');
         mobileCTA.className = 'nav-menu-mobile-cta';
 
-        // ✅ CORRECTION : Insérer DIRECTEMENT dans le body (pas après nav-menu)
-        // Cela garantit qu'elle sera en position fixed au bas de l'écran
+        // ✅ Insérer DIRECTEMENT dans le body (position fixed)
         document.body.appendChild(mobileCTA);
 
         // Cloner les boutons CTA appropriés
@@ -277,16 +276,15 @@ class MobileMenuManager {
                     userInfoText.style.display = 'flex';
                 }
 
-                // Ajouter le listener pour ouvrir le dropdown
+                // ✅ CORRECTION : Ajouter le listener pour ouvrir le dropdown
                 mobileUserBtn.addEventListener('click', (e) => {
                     e.preventDefault();
                     e.stopPropagation();
                     console.log('🔵 Clic sur profil utilisateur mobile');
                     
-                    // Déclencher l'ouverture du dropdown via le UserMenuManager
-                    const userProfileButton = document.getElementById('userProfileButton');
-                    if (userProfileButton) {
-                        userProfileButton.click();
+                    // ✅ Déclencher toggleDropdown via UserMenuManager
+                    if (window.FinanceLandingApp && window.FinanceLandingApp.managers.userMenu) {
+                        window.FinanceLandingApp.managers.userMenu.toggleDropdown();
                     }
                 });
 
@@ -346,7 +344,7 @@ class MobileMenuManager {
 }
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-// 👤 USER MENU MANAGER - CORRIGÉ
+// 👤 USER MENU MANAGER - ✅ CORRIGÉ POUR MOBILE
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 class UserMenuManager {
@@ -358,7 +356,7 @@ class UserMenuManager {
         this.profileButton = document.getElementById('userProfileButton');
         this.dropdownMenu = document.getElementById('userDropdownMenu');
         this.logoutButton = document.getElementById('logoutButton');
-        this.isDropdownOpen = false; // ✅ CORRECTION : État interne
+        this.isDropdownOpen = false; // ✅ État interne
         
         console.log('📦 Éléments trouvés:');
         console.log('  ├─ Profile Button:', this.profileButton ? '✅' : '❌');
@@ -374,16 +372,16 @@ class UserMenuManager {
             return;
         }
 
-        // ✅ CORRECTION : Initialiser aria-expanded
+        // ✅ Initialiser aria-expanded
         this.profileButton.setAttribute('aria-expanded', 'false');
 
         console.log('✅ Configuration des événements...');
 
-        // Click sur le bouton profil
+        // ✅ Click sur le bouton profil DESKTOP
         this.profileButton.addEventListener('click', (e) => {
             e.preventDefault();
             e.stopPropagation();
-            console.log('%c🔵 Clic sur profil utilisateur', 'color: #3B82F6; font-weight: bold;');
+            console.log('%c🔵 Clic sur profil utilisateur DESKTOP', 'color: #3B82F6; font-weight: bold;');
             this.toggleDropdown();
         });
 
@@ -393,21 +391,25 @@ class UserMenuManager {
                 const isClickInsideDropdown = this.dropdownMenu.contains(e.target);
                 const isClickOnButton = this.profileButton.contains(e.target);
                 
-                if (!isClickInsideDropdown && !isClickOnButton) {
+                // ✅ Vérifier aussi le bouton mobile
+                const mobileUserBtn = document.getElementById('mobileUserProfileButton');
+                const isClickOnMobileButton = mobileUserBtn && mobileUserBtn.contains(e.target);
+                
+                if (!isClickInsideDropdown && !isClickOnButton && !isClickOnMobileButton) {
                     console.log('🔒 Clic en dehors - Fermeture dropdown');
                     this.closeDropdown();
                 }
             }
         });
 
-        // ✅ CORRECTION : Fermer au scroll (mobile)
+        // ✅ Fermer au scroll (mobile)
         window.addEventListener('scroll', () => {
             if (this.isDropdownOpen && window.innerWidth <= 768) {
                 this.closeDropdown();
             }
         }, { passive: true });
 
-        // ✅ CORRECTION : Fermer au resize
+        // ✅ Fermer au resize
         window.addEventListener('resize', () => {
             if (this.isDropdownOpen) {
                 this.closeDropdown();
@@ -419,7 +421,7 @@ class UserMenuManager {
             console.log('✅ Listener déconnexion ajouté');
             this.logoutButton.addEventListener('click', (e) => {
                 e.preventDefault();
-                e.stopPropagation(); // ✅ CORRECTION
+                e.stopPropagation();
                 console.log('🔓 Déconnexion demandée');
                 this.handleLogout();
             });
@@ -438,11 +440,12 @@ class UserMenuManager {
         console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n');
     }
 
+    // ✅ MÉTHODE PUBLIQUE - Accessible depuis le bouton mobile
     toggleDropdown() {
         console.log('%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'color: #8b5cf6; font-weight: bold;');
         console.log('%c🔵 toggleDropdown() APPELÉE', 'color: #8b5cf6; font-weight: bold; font-size: 14px;');
         
-        // ✅ CORRECTION : Utiliser l'état interne
+        // ✅ Utiliser l'état interne
         this.isDropdownOpen = !this.isDropdownOpen;
         
         console.log('📊 État actuel:', this.isDropdownOpen ? '✅ OUVERT' : '❌ FERMÉ');
@@ -455,7 +458,7 @@ class UserMenuManager {
             this.dropdownMenu.classList.add('active');
             console.log('✅ Classe "active" ajoutée au dropdown');
             
-            // ✅ CORRECTION : Bloquer le scroll sur mobile
+            // ✅ Bloquer le scroll sur mobile
             if (window.innerWidth <= 768) {
                 document.body.style.overflow = 'hidden';
             }
@@ -463,7 +466,7 @@ class UserMenuManager {
             this.dropdownMenu.classList.remove('active');
             console.log('❌ Classe "active" retirée du dropdown');
             
-            // ✅ CORRECTION : Réactiver le scroll
+            // ✅ Réactiver le scroll
             if (window.innerWidth <= 768) {
                 document.body.style.overflow = '';
             }
@@ -493,7 +496,7 @@ class UserMenuManager {
         this.profileButton.setAttribute('aria-expanded', 'false');
         this.dropdownMenu.classList.remove('active');
         
-        // ✅ CORRECTION : Réactiver le scroll
+        // ✅ Réactiver le scroll
         if (window.innerWidth <= 768) {
             document.body.style.overflow = '';
         }
@@ -1059,7 +1062,7 @@ class LandingApp {
         try {
             this.managers.navigation = new NavigationManager();
             this.managers.mobileMenu = new MobileMenuManager();
-            this.managers.userMenu = new UserMenuManager();
+            this.managers.userMenu = new UserMenuManager(); // ✅ Doit être initialisé AVANT authState
             this.managers.authState = new AuthStateManager();
             this.managers.heroChart = new HeroChartManager();
             this.managers.pricing = new PricingManager();
