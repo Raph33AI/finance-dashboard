@@ -2839,7 +2839,7 @@ body {
     .demo-wrapper,
     .footer-grid {
         grid-template-columns: 1fr !important;
-        gap: 1rem !important;
+        gap: 0.5rem !important;
     }
     
     /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -2881,7 +2881,7 @@ body {
     .pricing-card,
     .tech-card {
         max-width: 100% !important;
-        margin: 0 auto 1.25rem auto !important; /* Augmenté l'espacement entre cartes */
+        margin: 0 auto 0.75rem auto !important; /* Augmenté l'espacement entre cartes */
         padding: 2rem 1.5rem !important; /* Augmenté le padding interne */
         min-height: auto !important; /* Hauteur automatique basée sur le contenu */
         height: auto !important;
@@ -2940,7 +2940,7 @@ body {
     }
     
     .pricing-card {
-        margin-bottom: 1.5rem !important; /* Plus d'espace entre les cartes pricing */
+        margin-bottom: 1rem !important; /* Plus d'espace entre les cartes pricing */
     }
     
     /* ✅ FOOTER */
@@ -3016,7 +3016,7 @@ body {
     
     /* ✅ TECH SECTION */
     .tech-grid {
-        gap: 1.25rem !important; /* Plus d'espace entre cards tech */
+        gap: 1rem !important; /* Plus d'espace entre cards tech */
         padding: 0 0.5rem;
     }
     
