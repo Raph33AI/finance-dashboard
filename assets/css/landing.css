@@ -8033,6 +8033,6 @@ body.dark-mode .tech-points li {
 
 @media (max-width: 768px) {
     .nav-menu {
-        background: transparent !important;
+        background: white !important;
     }
 }
