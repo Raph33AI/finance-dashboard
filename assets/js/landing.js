@@ -1,6 +1,6 @@
 /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-   LANDING.JS - FinancePro Landing Page Premium 3D
-   Version COMPLÈTE avec Three.js Integration + DEBUG
+   LANDING.JS - FinancePro Landing Page (Sans 3D)
+   Version Mobile-Responsive
    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -60,590 +60,6 @@ function animateValue(element, start, end, duration) {
 }
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-// 🎨 THREE.JS - OBJETS 3D VOLUMÉTRIQUES
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-class Landing3DObjects {
-    constructor() {
-        this.scenes = [];
-        this.isThreeJsAvailable = typeof THREE !== 'undefined';
-        
-        if (!this.isThreeJsAvailable) {
-            console.warn('⚠️ Three.js non disponible - Objets 3D désactivés');
-            return;
-        }
-        
-        this.init();
-    }
-
-    init() {
-        console.log('🎨 Initialisation des objets 3D...');
-        
-        // Créer des objets 3D pour chaque icône de feature-card
-        this.createFeatureIcons3D();
-        
-        // Créer un graphique 3D dans le hero
-        this.createHeroChart3D();
-        
-        // Créer des pièces de monnaie 3D
-        this.createCoins3D();
-        
-        // Animer tous les objets
-        this.animate();
-        
-        console.log('✅ Objets 3D créés:', this.scenes.length);
-    }
-
-    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-    // 🎯 CRÉER DES ICÔNES 3D POUR LES FEATURE CARDS
-    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-    createFeatureIcons3D() {
-        const featureIcons = document.querySelectorAll('.feature-icon');
-        
-        featureIcons.forEach((iconContainer, index) => {
-            // Cacher l'icône Font Awesome
-            const faIcon = iconContainer.querySelector('i');
-            if (faIcon) faIcon.style.display = 'none';
-            
-            // Créer un canvas pour Three.js
-            const canvas = document.createElement('canvas');
-            canvas.style.width = '100%';
-            canvas.style.height = '100%';
-            iconContainer.appendChild(canvas);
-            
-            // Setup Three.js
-            const scene = new THREE.Scene();
-            const camera = new THREE.PerspectiveCamera(50, 1, 0.1, 1000);
-            const renderer = new THREE.WebGLRenderer({ 
-                canvas, 
-                alpha: true, 
-                antialias: true 
-            });
-            
-            renderer.setSize(56, 56);
-            renderer.setPixelRatio(window.devicePixelRatio);
-            camera.position.z = 3;
-            
-            // Créer différents objets 3D selon l'index
-            let object;
-            
-            switch(index % 8) {
-                case 0: // Cerveau (Brain)
-                    object = this.createBrain();
-                    break;
-                case 1: // Base de données (Database)
-                    object = this.createDatabase();
-                    break;
-                case 2: // Graphique circulaire (Pie Chart)
-                    object = this.createPieChart();
-                    break;
-                case 3: // Balance (Scale)
-                    object = this.createScale();
-                    break;
-                case 4: // Dé (Dice)
-                    object = this.createDice();
-                    break;
-                case 5: // Graphique en barres (Bar Chart)
-                    object = this.createBarChart();
-                    break;
-                case 6: // Graphique de ligne
-                    object = this.createLineChart();
-                    break;
-                case 7: // Dashboard
-                    object = this.createDashboard();
-                    break;
-                default:
-                    object = this.createCube();
-            }
-            
-            scene.add(object);
-            
-            // Lumières
-            const light1 = new THREE.PointLight(0x4c8aff, 1, 100);
-            light1.position.set(5, 5, 5);
-            scene.add(light1);
-            
-            const light2 = new THREE.PointLight(0x8b5cf6, 0.8, 100);
-            light2.position.set(-5, -5, 5);
-            scene.add(light2);
-            
-            const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
-            scene.add(ambientLight);
-            
-            // Stocker pour animation
-            this.scenes.push({
-                scene,
-                camera,
-                renderer,
-                object,
-                canvas,
-                iconContainer,
-                rotationSpeed: 0.01 + Math.random() * 0.01
-            });
-            
-            // Interaction hover
-            iconContainer.addEventListener('mouseenter', () => {
-                object.userData.hovered = true;
-            });
-            
-            iconContainer.addEventListener('mouseleave', () => {
-                object.userData.hovered = false;
-            });
-        });
-    }
-
-    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-    // 🧠 CRÉER UN CERVEAU 3D
-    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-    createBrain() {
-        const group = new THREE.Group();
-        
-        // Sphère principale
-        const sphereGeometry = new THREE.SphereGeometry(0.8, 32, 32);
-        const sphereMaterial = new THREE.MeshPhongMaterial({
-            color: 0x4c8aff,
-            shininess: 100,
-            specular: 0x8b5cf6
-        });
-        const sphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
-        group.add(sphere);
-        
-        // Ajouter des "lobes" pour faire un cerveau
-        for (let i = 0; i < 8; i++) {
-            const lobeGeometry = new THREE.SphereGeometry(0.3, 16, 16);
-            const lobe = new THREE.Mesh(lobeGeometry, sphereMaterial);
-            const angle = (i / 8) * Math.PI * 2;
-            lobe.position.x = Math.cos(angle) * 0.6;
-            lobe.position.y = Math.sin(angle) * 0.6;
-            lobe.position.z = Math.random() * 0.3;
-            group.add(lobe);
-        }
-        
-        return group;
-    }
-
-    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-    // 💾 CRÉER UNE BASE DE DONNÉES 3D
-    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-    createDatabase() {
-        const group = new THREE.Group();
-        
-        const cylinderGeometry = new THREE.CylinderGeometry(0.6, 0.6, 0.3, 32);
-        const material = new THREE.MeshPhongMaterial({
-            color: 0x4c8aff,
-            shininess: 100
-        });
-        
-        // Empiler 3 cylindres
-        for (let i = 0; i < 3; i++) {
-            const cylinder = new THREE.Mesh(cylinderGeometry, material);
-            cylinder.position.y = i * 0.4 - 0.4;
-            group.add(cylinder);
-        }
-        
-        return group;
-    }
-
-    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-    // 📊 CRÉER UN GRAPHIQUE CIRCULAIRE 3D
-    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-    createPieChart() {
-        const group = new THREE.Group();
-        
-        const colors = [0x4c8aff, 0x8b5cf6, 0x10b981, 0xf59e0b];
-        const segments = 4;
-        
-        for (let i = 0; i < segments; i++) {
-            const geometry = new THREE.CylinderGeometry(
-                0.7, 0.7, 0.3, 32, 1, false,
-                (i / segments) * Math.PI * 2,
-                (Math.PI * 2) / segments
-            );
-            
-            const material = new THREE.MeshPhongMaterial({
-                color: colors[i],
-                shininess: 100
-            });
-            
-            const segment = new THREE.Mesh(geometry, material);
-            const angle = ((i + 0.5) / segments) * Math.PI * 2;
-            segment.position.x = Math.cos(angle) * 0.1;
-            segment.position.z = Math.sin(angle) * 0.1;
-            
-            group.add(segment);
-        }
-        
-        return group;
-    }
-
-    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-    // ⚖️ CRÉER UNE BALANCE 3D
-    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-    createScale() {
-        const group = new THREE.Group();
-        
-        const material = new THREE.MeshPhongMaterial({
-            color: 0x4c8aff,
-            shininess: 100
-        });
-        
-        // Base
-        const baseGeometry = new THREE.CylinderGeometry(0.3, 0.4, 0.2, 32);
-        const base = new THREE.Mesh(baseGeometry, material);
-        base.position.y = -0.6;
-        group.add(base);
-        
-        // Tige
-        const poleGeometry = new THREE.CylinderGeometry(0.05, 0.05, 1, 16);
-        const pole = new THREE.Mesh(poleGeometry, material);
-        pole.position.y = -0.1;
-        group.add(pole);
-        
-        // Plateaux
-        const plateGeometry = new THREE.CylinderGeometry(0.3, 0.3, 0.05, 32);
-        const plate1 = new THREE.Mesh(plateGeometry, material);
-        plate1.position.set(-0.5, 0.4, 0);
-        group.add(plate1);
-        
-        const plate2 = new THREE.Mesh(plateGeometry, material);
-        plate2.position.set(0.5, 0.4, 0);
-        group.add(plate2);
-        
-        return group;
-    }
-
-    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-    // 🎲 CRÉER UN DÉ 3D
-    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-    createDice() {
-        const geometry = new THREE.BoxGeometry(0.8, 0.8, 0.8);
-        const material = new THREE.MeshPhongMaterial({
-            color: 0x4c8aff,
-            shininess: 100
-        });
-        
-        const dice = new THREE.Mesh(geometry, material);
-        
-        // Arrondir les bords
-        const edges = new THREE.EdgesGeometry(geometry);
-        const lineMaterial = new THREE.LineBasicMaterial({ 
-            color: 0x8b5cf6, 
-            linewidth: 2 
-        });
-        const wireframe = new THREE.LineSegments(edges, lineMaterial);
-        dice.add(wireframe);
-        
-        return dice;
-    }
-
-    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-    // 📊 CRÉER UN GRAPHIQUE EN BARRES 3D
-    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-    createBarChart() {
-        const group = new THREE.Group();
-        
-        const material = new THREE.MeshPhongMaterial({
-            color: 0x4c8aff,
-            shininess: 100
-        });
-        
-        const heights = [0.4, 0.7, 0.5, 0.9, 0.6];
-        
-        for (let i = 0; i < heights.length; i++) {
-            const geometry = new THREE.BoxGeometry(0.15, heights[i], 0.15);
-            const bar = new THREE.Mesh(geometry, material);
-            bar.position.x = (i - 2) * 0.25;
-            bar.position.y = heights[i] / 2 - 0.5;
-            group.add(bar);
-        }
-        
-        return group;
-    }
-
-    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-    // 📈 CRÉER UN GRAPHIQUE DE LIGNE 3D
-    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-    createLineChart() {
-        const group = new THREE.Group();
-        
-        const material = new THREE.MeshPhongMaterial({
-            color: 0x4c8aff,
-            shininess: 100
-        });
-        
-        // Points du graphique
-        const points = [
-            new THREE.Vector3(-0.6, -0.3, 0),
-            new THREE.Vector3(-0.3, 0.1, 0),
-            new THREE.Vector3(0, -0.1, 0),
-            new THREE.Vector3(0.3, 0.4, 0),
-            new THREE.Vector3(0.6, 0.2, 0)
-        ];
-        
-        // Créer une ligne
-        const curve = new THREE.CatmullRomCurve3(points);
-        const tubeGeometry = new THREE.TubeGeometry(curve, 20, 0.05, 8, false);
-        const line = new THREE.Mesh(tubeGeometry, material);
-        group.add(line);
-        
-        // Ajouter des sphères aux points
-        points.forEach(point => {
-            const sphereGeometry = new THREE.SphereGeometry(0.08, 16, 16);
-            const sphere = new THREE.Mesh(sphereGeometry, material);
-            sphere.position.copy(point);
-            group.add(sphere);
-        });
-        
-        return group;
-    }
-
-    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-    // 🖥️ CRÉER UN DASHBOARD 3D
-    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-    createDashboard() {
-        const group = new THREE.Group();
-        
-        const material = new THREE.MeshPhongMaterial({
-            color: 0x4c8aff,
-            shininess: 100
-        });
-        
-        // Écran
-        const screenGeometry = new THREE.BoxGeometry(1, 0.6, 0.05);
-        const screen = new THREE.Mesh(screenGeometry, material);
-        group.add(screen);
-        
-        // Base
-        const baseGeometry = new THREE.CylinderGeometry(0.15, 0.15, 0.1, 32);
-        const base = new THREE.Mesh(baseGeometry, material);
-        base.position.y = -0.35;
-        group.add(base);
-        
-        // Support
-        const supportGeometry = new THREE.CylinderGeometry(0.03, 0.03, 0.15, 16);
-        const support = new THREE.Mesh(supportGeometry, material);
-        support.position.y = -0.275;
-        group.add(support);
-        
-        return group;
-    }
-
-    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-    // 📦 CRÉER UN CUBE GÉNÉRIQUE
-    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-    createCube() {
-        const geometry = new THREE.BoxGeometry(0.8, 0.8, 0.8);
-        const material = new THREE.MeshPhongMaterial({
-            color: 0x4c8aff,
-            shininess: 100
-        });
-        
-        return new THREE.Mesh(geometry, material);
-    }
-
-    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-    // 📈 CRÉER UN GRAPHIQUE 3D DANS LE HERO
-    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-    createHeroChart3D() {
-        const chartArea = document.querySelector('.mockup-chart-area');
-        if (!chartArea) return;
-        
-        // Ne pas cacher le canvas Chart.js, créer un conteneur séparé
-        const threeDContainer = document.createElement('div');
-        threeDContainer.style.cssText = `
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            opacity: 0.3;
-        `;
-        chartArea.style.position = 'relative';
-        chartArea.appendChild(threeDContainer);
-        
-        // Créer nouveau canvas
-        const canvas = document.createElement('canvas');
-        threeDContainer.appendChild(canvas);
-        
-        const scene = new THREE.Scene();
-        const camera = new THREE.PerspectiveCamera(
-            50, 
-            chartArea.offsetWidth / chartArea.offsetHeight, 
-            0.1, 
-            1000
-        );
-        
-        const renderer = new THREE.WebGLRenderer({ 
-            canvas, 
-            alpha: true, 
-            antialias: true 
-        });
-        
-        renderer.setSize(chartArea.offsetWidth, chartArea.offsetHeight);
-        renderer.setPixelRatio(window.devicePixelRatio);
-        camera.position.set(5, 3, 5);
-        camera.lookAt(0, 0, 0);
-        
-        // Créer un graphique 3D volumétrique
-        const group = new THREE.Group();
-        
-        const data = [2.4, 2.52, 2.68, 2.75, 2.82, 2.847];
-        const material = new THREE.MeshPhongMaterial({
-            color: 0x4c8aff,
-            shininess: 100,
-            transparent: true,
-            opacity: 0.8
-        });
-        
-        for (let i = 0; i < data.length; i++) {
-            const height = data[i];
-            const geometry = new THREE.BoxGeometry(0.3, height, 0.3);
-            const bar = new THREE.Mesh(geometry, material);
-            bar.position.x = (i - 2.5) * 0.5;
-            bar.position.y = height / 2;
-            group.add(bar);
-        }
-        
-        scene.add(group);
-        
-        // Lumières
-        const light1 = new THREE.DirectionalLight(0xffffff, 1);
-        light1.position.set(5, 5, 5);
-        scene.add(light1);
-        
-        const light2 = new THREE.DirectionalLight(0x8b5cf6, 0.5);
-        light2.position.set(-5, 3, -5);
-        scene.add(light2);
-        
-        const ambientLight = new THREE.AmbientLight(0xffffff, 0.4);
-        scene.add(ambientLight);
-        
-        this.scenes.push({
-            scene,
-            camera,
-            renderer,
-            object: group,
-            canvas,
-            isChart: true,
-            rotationSpeed: 0.005
-        });
-    }
-
-    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-    // 💰 CRÉER DES PIÈCES DE MONNAIE 3D
-    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-    createCoins3D() {
-        const hero = document.querySelector('.hero-bg');
-        if (!hero) return;
-        
-        // Créer un conteneur pour les pièces
-        const coinsContainer = document.createElement('div');
-        coinsContainer.style.cssText = `
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            z-index: 1;
-        `;
-        hero.appendChild(coinsContainer);
-        
-        // Créer 5 pièces flottantes
-        for (let i = 0; i < 5; i++) {
-            const coinCanvas = document.createElement('canvas');
-            coinCanvas.style.cssText = `
-                position: absolute;
-                width: 80px;
-                height: 80px;
-                left: ${20 + i * 15}%;
-                top: ${30 + (i % 2) * 20}%;
-            `;
-            coinsContainer.appendChild(coinCanvas);
-            
-            const scene = new THREE.Scene();
-            const camera = new THREE.PerspectiveCamera(50, 1, 0.1, 1000);
-            const renderer = new THREE.WebGLRenderer({ 
-                canvas: coinCanvas, 
-                alpha: true, 
-                antialias: true 
-            });
-            
-            renderer.setSize(80, 80);
-            renderer.setPixelRatio(window.devicePixelRatio);
-            camera.position.z = 3;
-            
-            // Créer une pièce (cylindre)
-            const coinGeometry = new THREE.CylinderGeometry(0.6, 0.6, 0.1, 32);
-            const coinMaterial = new THREE.MeshPhongMaterial({
-                color: 0xf59e0b,
-                shininess: 100,
-                specular: 0xfbbf24
-            });
-            
-            const coin = new THREE.Mesh(coinGeometry, coinMaterial);
-            coin.rotation.x = Math.PI / 2;
-            scene.add(coin);
-            
-            // Lumières
-            const light = new THREE.PointLight(0xffffff, 1, 100);
-            light.position.set(2, 2, 2);
-            scene.add(light);
-            
-            const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
-            scene.add(ambientLight);
-            
-            this.scenes.push({
-                scene,
-                camera,
-                renderer,
-                object: coin,
-                canvas: coinCanvas,
-                isCoin: true,
-                speed: 0.01 + Math.random() * 0.02
-            });
-        }
-    }
-
-    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-    // 🎬 ANIMATION LOOP
-    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-    animate() {
-        requestAnimationFrame(() => this.animate());
-        
-        this.scenes.forEach(({ scene, camera, renderer, object, isCoin, isChart, speed, rotationSpeed }) => {
-            if (object) {
-                if (isCoin) {
-                    // Rotation continue pour les pièces
-                    object.rotation.y += speed;
-                    object.rotation.z += speed * 0.5;
-                } else if (isChart) {
-                    // Rotation lente pour le graphique
-                    object.rotation.y += rotationSpeed || 0.005;
-                } else {
-                    // Rotation normale pour les icônes
-                    const baseSpeed = rotationSpeed || 0.01;
-                    object.rotation.x += baseSpeed;
-                    object.rotation.y += baseSpeed;
-                    
-                    // Animation hover
-                    if (object.userData.hovered) {
-                        object.rotation.x += baseSpeed * 2;
-                        object.rotation.y += baseSpeed * 2;
-                        object.scale.lerp(new THREE.Vector3(1.2, 1.2, 1.2), 0.1);
-                    } else {
-                        object.scale.lerp(new THREE.Vector3(1, 1, 1), 0.1);
-                    }
-                }
-            }
-            
-            renderer.render(scene, camera);
-        });
-    }
-}
-
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 // 🧭 NAVIGATION MANAGER
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
@@ -678,7 +94,7 @@ class NavigationManager {
 }
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-// 📱 MOBILE MENU MANAGER - VERSION CORRIGÉE
+// 📱 MOBILE MENU MANAGER - VERSION RESPONSIVE
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 class MobileMenuManager {
@@ -687,12 +103,14 @@ class MobileMenuManager {
         
         this.mobileMenuBtn = document.getElementById('mobileMenuBtn');
         this.navMenu = document.querySelector('.nav-menu');
-        this.navCta = document.querySelector('.nav-cta');
+        this.navCtaLoggedOut = document.getElementById('navCtaLoggedOut');
+        this.navCtaLoggedIn = document.getElementById('navCtaLoggedIn');
         this.navLinks = document.querySelectorAll('.nav-link');
         
         console.log('  ├─ Bouton hamburger:', this.mobileMenuBtn ? '✅' : '❌');
         console.log('  ├─ Menu navigation:', this.navMenu ? '✅' : '❌');
-        console.log('  ├─ Nav CTA:', this.navCta ? '✅' : '❌');
+        console.log('  ├─ Nav CTA (logged out):', this.navCtaLoggedOut ? '✅' : '❌');
+        console.log('  ├─ Nav CTA (logged in):', this.navCtaLoggedIn ? '✅' : '❌');
         console.log('  └─ Liens navigation:', this.navLinks.length);
         
         this.init();
@@ -706,18 +124,14 @@ class MobileMenuManager {
 
         console.log('✅ Initialisation des listeners...');
 
-        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-        // 🍔 TOGGLE MENU AU CLIC SUR HAMBURGER
-        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        // Toggle menu au clic sur hamburger
         this.mobileMenuBtn.addEventListener('click', (e) => {
             e.stopPropagation();
             console.log('🔘 Hamburger cliqué');
             this.toggleMenu();
         });
 
-        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-        // 🔗 FERMER LE MENU AU CLIC SUR UN LIEN (SANS BLOQUER LA NAVIGATION)
-        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        // Fermer le menu au clic sur un lien
         this.navLinks.forEach(link => {
             link.addEventListener('click', (e) => {
                 if (window.innerWidth <= 768) {
@@ -725,7 +139,6 @@ class MobileMenuManager {
                     
                     console.log('🔗 Clic sur lien:', href);
                     
-                    // ✅ Si lien interne (#features), faire smooth scroll
                     if (href && href.startsWith('#') && href.length > 1) {
                         e.preventDefault();
                         
@@ -734,11 +147,8 @@ class MobileMenuManager {
                         
                         if (targetElement) {
                             console.log('📍 Scroll vers:', targetId);
-                            
-                            // Fermer le menu
                             this.closeMenu();
                             
-                            // Attendre la fermeture du menu puis scroller
                             setTimeout(() => {
                                 window.scrollTo({
                                     top: targetElement.offsetTop - 80,
@@ -749,25 +159,21 @@ class MobileMenuManager {
                             console.warn('⚠ Élément cible non trouvé:', targetId);
                             this.closeMenu();
                         }
-                    } 
-                    // ✅ Sinon (lien externe), laisser la navigation se faire
-                    else {
+                    } else {
                         console.log('🌐 Navigation externe - Fermeture menu');
                         this.closeMenu();
-                        // Ne pas faire preventDefault() - laisser le navigateur gérer
                     }
                 }
             });
         });
 
-        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-        // 🎯 FERMER SI CLIC EN DEHORS
-        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        // Fermer si clic en dehors
         document.addEventListener('click', (e) => {
             if (this.navMenu.classList.contains('active')) {
                 const isClickInsideMenu = this.navMenu.contains(e.target);
                 const isClickOnButton = this.mobileMenuBtn.contains(e.target);
-                const isClickOnCTA = this.navCta && this.navCta.contains(e.target);
+                const isClickOnCTA = (this.navCtaLoggedOut && this.navCtaLoggedOut.contains(e.target)) ||
+                                     (this.navCtaLoggedIn && this.navCtaLoggedIn.contains(e.target));
                 
                 if (!isClickInsideMenu && !isClickOnButton && !isClickOnCTA) {
                     console.log('🔒 Clic en dehors - Fermeture menu');
@@ -776,9 +182,7 @@ class MobileMenuManager {
             }
         });
 
-        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-        // 📏 FERMER AU RESIZE (passage desktop)
-        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        // Fermer au resize (passage desktop)
         let resizeTimer;
         window.addEventListener('resize', () => {
             clearTimeout(resizeTimer);
@@ -810,11 +214,6 @@ class MobileMenuManager {
         this.mobileMenuBtn.classList.add('active');
         this.navMenu.classList.add('active');
         
-        // ✅ Afficher aussi les boutons CTA
-        if (this.navCta) {
-            this.navCta.style.display = 'flex';
-        }
-        
         // Bloquer le scroll
         document.body.classList.add('menu-open');
         document.body.style.overflow = 'hidden';
@@ -839,7 +238,7 @@ class MobileMenuManager {
 }
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-// 👤 USER MENU MANAGER - VERSION COMPLÈTE MOBILE + DEBUG
+// 👤 USER MENU MANAGER
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 class UserMenuManager {
@@ -851,13 +250,11 @@ class UserMenuManager {
         this.profileButton = document.getElementById('userProfileButton');
         this.dropdownMenu = document.getElementById('userDropdownMenu');
         this.logoutButton = document.getElementById('logoutButton');
-        this.settingsLink = document.getElementById('settingsLink');
         
         console.log('📦 Éléments trouvés:');
         console.log('  ├─ Profile Button:', this.profileButton ? '✅' : '❌');
         console.log('  ├─ Dropdown Menu:', this.dropdownMenu ? '✅' : '❌');
-        console.log('  ├─ Logout Button:', this.logoutButton ? '✅' : '❌');
-        console.log('  └─ Settings Link:', this.settingsLink ? '✅' : '❌');
+        console.log('  └─ Logout Button:', this.logoutButton ? '✅' : '❌');
         
         this.init();
     }
@@ -870,35 +267,17 @@ class UserMenuManager {
 
         console.log('✅ Configuration des événements...');
 
-        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-        // 🎯 MÉTHODE 1 : Click direct avec useCapture
-        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-        console.log('🎯 Listener MÉTHODE 1 (direct + capture)');
+        // Click sur le bouton profil
         this.profileButton.addEventListener('click', (e) => {
-            console.log('%c🔴 CLIC DÉTECTÉ - MÉTHODE 1', 'background: #ef4444; color: white; padding: 5px; font-weight: bold;');
             e.preventDefault();
             e.stopPropagation();
+            console.log('🔵 Clic sur profil utilisateur');
             this.toggleDropdown();
-        }, true);
+        });
 
-        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-        // 🎯 MÉTHODE 2 : Délégation sur document
-        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-        console.log('🎯 Listener MÉTHODE 2 (délégation)');
+        // Fermer si clic en dehors
         document.addEventListener('click', (e) => {
-            const target = e.target;
-            
-            // Si clic sur le bouton ou ses enfants
-            if (this.profileButton.contains(target)) {
-                console.log('%c🟢 CLIC - MÉTHODE 2', 'background: #10b981; color: white; padding: 5px; font-weight: bold;');
-                e.preventDefault();
-                e.stopPropagation();
-                this.toggleDropdown();
-                return;
-            }
-            
-            // Si clic en dehors, fermer
-            if (!this.dropdownMenu.contains(target)) {
+            if (!this.profileButton.contains(e.target) && !this.dropdownMenu.contains(e.target)) {
                 if (this.dropdownMenu.classList.contains('active')) {
                     console.log('🔒 Clic en dehors - Fermeture dropdown');
                     this.closeDropdown();
@@ -906,25 +285,7 @@ class UserMenuManager {
             }
         });
 
-        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-        // 🎯 MÉTHODE 3 : Listener sur enfants
-        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-        console.log('🎯 Listener MÉTHODE 3 (enfants)');
-        const children = this.profileButton.querySelectorAll('*');
-        console.log(`  └─ ${children.length} enfants détectés`);
-        
-        children.forEach((child, index) => {
-            child.addEventListener('click', (e) => {
-                console.log(`%c🟡 CLIC - MÉTHODE 3 (enfant ${index})`, 'background: #f59e0b; color: white; padding: 5px; font-weight: bold;');
-                e.preventDefault();
-                e.stopPropagation();
-                this.toggleDropdown();
-            });
-        });
-
-        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-        // 🔓 BOUTON DÉCONNEXION
-        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        // Bouton déconnexion
         if (this.logoutButton) {
             console.log('✅ Listener déconnexion ajouté');
             this.logoutButton.addEventListener('click', (e) => {
@@ -934,21 +295,7 @@ class UserMenuManager {
             });
         }
 
-        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-        // ⚙️ LIEN PARAMÈTRES
-        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-        if (this.settingsLink) {
-            console.log('✅ Listener paramètres ajouté');
-            this.settingsLink.addEventListener('click', (e) => {
-                e.preventDefault();
-                console.log('⚙️ Redirection paramètres...');
-                window.location.href = 'settings.html';
-            });
-        }
-
-        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-        // 🔗 FERMER DROPDOWN AU CLIC SUR LIEN INTERNE
-        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        // Fermer dropdown au clic sur lien interne
         const dropdownLinks = this.dropdownMenu.querySelectorAll('.dropdown-link');
         dropdownLinks.forEach(link => {
             link.addEventListener('click', () => {
@@ -957,56 +304,22 @@ class UserMenuManager {
             });
         });
 
-        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-        // 📏 FERMER AU RESIZE (passage desktop)
-        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-        let resizeTimer;
-        window.addEventListener('resize', () => {
-            clearTimeout(resizeTimer);
-            resizeTimer = setTimeout(() => {
-                if (window.innerWidth > 768 && this.dropdownMenu.classList.contains('active')) {
-                    console.log('🖥️ Passage desktop - Fermeture dropdown');
-                    this.closeDropdown();
-                }
-            }, 250);
-        });
-
         console.log('%c✅ UserMenuManager prêt !', 'color: #10b981; font-weight: bold;');
         console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n');
     }
 
     toggleDropdown() {
-        console.log('%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'color: #8b5cf6; font-weight: bold;');
-        console.log('%c🔵 toggleDropdown() APPELÉE', 'color: #8b5cf6; font-weight: bold; font-size: 14px;');
-        
         const isExpanded = this.profileButton.getAttribute('aria-expanded') === 'true';
         const newState = !isExpanded;
         
-        console.log('📊 État actuel:', isExpanded ? '✅ OUVERT' : '❌ FERMÉ');
-        console.log('🎯 Nouvel état:', newState ? '✅ OUVERT' : '❌ FERMÉ');
+        console.log('📊 Toggle dropdown:', newState ? 'OUVRIR' : 'FERMER');
         
-        // Mettre à jour aria-expanded
         this.profileButton.setAttribute('aria-expanded', newState);
         
-        // Toggle classe active
         if (newState) {
             this.dropdownMenu.classList.add('active');
-            
-            // ✅ BLOQUER LE SCROLL SUR MOBILE
-            if (window.innerWidth <= 768) {
-                document.body.style.overflow = 'hidden';
-                document.body.style.position = 'fixed';
-                document.body.style.width = '100%';
-                console.log('🔒 Scroll bloqué (mobile)');
-            }
         } else {
             this.dropdownMenu.classList.remove('active');
-            
-            // ✅ RÉACTIVER LE SCROLL
-            document.body.style.overflow = '';
-            document.body.style.position = '';
-            document.body.style.width = '';
-            console.log('🔓 Scroll réactivé');
         }
         
         // Animer chevron
@@ -1014,34 +327,22 @@ class UserMenuManager {
         if (chevron) {
             chevron.style.transform = newState ? 'rotate(180deg)' : 'rotate(0deg)';
         }
-        
-        console.log('%c🎉 RÉSULTAT:', 'font-weight: bold;', 
-                    this.dropdownMenu.classList.contains('active') ? '✅ OUVERT' : '❌ FERMÉ');
-        console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n');
     }
 
     closeDropdown() {
-        if (!this.dropdownMenu.classList.contains('active')) {
-            console.log('ℹ️ Dropdown déjà fermé');
-            return;
-        }
+        if (!this.dropdownMenu.classList.contains('active')) return;
         
         console.log('🔒 Fermeture du dropdown...');
         
         this.profileButton.setAttribute('aria-expanded', 'false');
         this.dropdownMenu.classList.remove('active');
         
-        // ✅ RÉACTIVER LE SCROLL
-        document.body.style.overflow = '';
-        document.body.style.position = '';
-        document.body.style.width = '';
-        
         const chevron = this.profileButton.querySelector('.user-dropdown-icon');
         if (chevron) {
             chevron.style.transform = 'rotate(0deg)';
         }
         
-        console.log('✅ Dropdown fermé + scroll réactivé');
+        console.log('✅ Dropdown fermé');
     }
 
     handleLogout() {
@@ -1057,7 +358,7 @@ class UserMenuManager {
                     console.error('❌ Erreur Firebase:', error);
                 });
         } else {
-            console.log('⚠️ Firebase non disponible - Redirection directe');
+            console.log('⚠ Firebase non disponible - Redirection directe');
             window.location.href = 'index.html';
         }
     }
@@ -1102,8 +403,6 @@ class AuthStateManager {
         if (this.navCtaLoggedIn) {
             this.navCtaLoggedIn.style.display = 'flex';
             console.log('✅ Menu profil affiché');
-        } else {
-            console.warn('⚠ navCtaLoggedIn introuvable');
         }
 
         const displayName = user.displayName || user.email?.split('@')[0] || 'User';
@@ -1130,8 +429,6 @@ class AuthStateManager {
         if (this.navCtaLoggedOut) {
             this.navCtaLoggedOut.style.display = 'flex';
             console.log('✅ Boutons CTA (logged out) affichés');
-        } else {
-            console.warn('⚠ navCtaLoggedOut introuvable');
         }
         
         if (this.navCtaLoggedIn) {
@@ -1141,7 +438,7 @@ class AuthStateManager {
 }
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-// 📊 GRAPHIQUE BOURSIER - VERSION SIMPLIFIÉE
+// 📊 GRAPHIQUE BOURSIER
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 class HeroChartManager {
@@ -1173,8 +470,6 @@ class HeroChartManager {
 
     createChart() {
         const ctx = this.canvas.getContext('2d');
-        
-        // Générer des données réalistes
         const data = this.generateStockData(30);
         
         this.chart = new Chart(ctx, {
@@ -1207,9 +502,7 @@ class HeroChartManager {
                 responsive: true,
                 maintainAspectRatio: false,
                 plugins: {
-                    legend: {
-                        display: false
-                    },
+                    legend: { display: false },
                     tooltip: {
                         enabled: true,
                         mode: 'index',
@@ -1234,16 +527,10 @@ class HeroChartManager {
                 },
                 scales: {
                     x: {
-                        grid: {
-                            display: false,
-                            drawBorder: false
-                        },
+                        grid: { display: false, drawBorder: false },
                         ticks: {
                             color: '#94a3b8',
-                            font: {
-                                size: 11,
-                                weight: '500'
-                            },
+                            font: { size: 11, weight: '500' },
                             maxRotation: 0,
                             autoSkip: true,
                             maxTicksLimit: 6
@@ -1251,16 +538,10 @@ class HeroChartManager {
                     },
                     y: {
                         position: 'right',
-                        grid: {
-                            color: 'rgba(148, 163, 184, 0.1)',
-                            drawBorder: false
-                        },
+                        grid: { color: 'rgba(148, 163, 184, 0.1)', drawBorder: false },
                         ticks: {
                             color: '#94a3b8',
-                            font: {
-                                size: 11,
-                                weight: '500'
-                            },
+                            font: { size: 11, weight: '500' },
                             callback: function(value) {
                                 return '$' + value.toFixed(0);
                             },
@@ -1289,12 +570,10 @@ class HeroChartManager {
             const date = new Date(today);
             date.setDate(date.getDate() - i);
             
-            // Format de date
             const month = date.toLocaleDateString('en-US', { month: 'short' });
             const day = date.getDate();
             labels.push(`${month} ${day}`);
             
-            // Générer prix avec tendance haussière
             const change = (Math.random() - 0.4) * 4;
             basePrice += change;
             prices.push(parseFloat(basePrice.toFixed(2)));
@@ -1308,13 +587,9 @@ class HeroChartManager {
         
         buttons.forEach(btn => {
             btn.addEventListener('click', () => {
-                // Retirer active de tous
                 buttons.forEach(b => b.classList.remove('active'));
-                
-                // Ajouter active au bouton cliqué
                 btn.classList.add('active');
                 
-                // Récupérer la période
                 const period = btn.getAttribute('data-period');
                 this.updateChartData(period);
             });
@@ -1326,20 +601,11 @@ class HeroChartManager {
 
         let days;
         switch(period) {
-            case '1d':
-                days = 24; // 24 heures
-                break;
-            case '1w':
-                days = 7;
-                break;
-            case '1m':
-                days = 30;
-                break;
-            case '1y':
-                days = 365;
-                break;
-            default:
-                days = 30;
+            case '1d': days = 24; break;
+            case '1w': days = 7; break;
+            case '1m': days = 30; break;
+            case '1y': days = 365; break;
+            default: days = 30;
         }
 
         console.log(`📊 Mise à jour du graphique : ${period} (${days} points)`);
@@ -1452,10 +718,6 @@ class ScrollRevealManager {
             if (elementTop < window.innerHeight - 150) {
                 element.classList.add('aos-animate');
                 this.animatedElements.add(element);
-                
-                setTimeout(() => {
-                    element.classList.add('levitate');
-                }, 800);
             }
         });
     }
@@ -1504,39 +766,6 @@ class NumberCounterManager {
 }
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-// 🎨 TILT EFFECT MANAGER
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-class TiltEffectManager {
-    constructor() {
-        this.cards = document.querySelectorAll('.feature-card, .solution-card, .pricing-card');
-        this.init();
-    }
-
-    init() {
-        this.cards.forEach(card => {
-            card.addEventListener('mousemove', (e) => this.handleTilt(card, e));
-            card.addEventListener('mouseleave', () => this.resetTilt(card));
-        });
-    }
-
-    handleTilt(card, e) {
-        const rect = card.getBoundingClientRect();
-        const x = e.clientX - rect.left;
-        const y = e.clientY - rect.top;
-        const centerX = rect.width / 2;
-        const centerY = rect.height / 2;
-        const rotateX = (y - centerY) / 15;
-        const rotateY = (centerX - x) / 15;
-        card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) translateZ(10px) scale(1.02)`;
-    }
-
-    resetTilt(card) {
-        card.style.transform = '';
-    }
-}
-
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 // 🔗 SMOOTH SCROLL MANAGER
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
@@ -1574,10 +803,9 @@ class CTAManager {
             loginBtn: document.getElementById('loginBtn'),
             signupBtn: document.getElementById('signupBtn'),
             heroGetStarted: document.getElementById('heroGetStarted'),
-            heroWatchDemo: document.getElementById('heroWatchDemo'),
             tryDemoBtn: document.getElementById('tryDemoBtn'),
             finalCTABtn: document.getElementById('finalCTABtn'),
-            contactSalesBtn: document.getElementById('contactSalesBtn')
+            openAlphyChat: document.getElementById('openAlphyChat')
         };
         this.init();
     }
@@ -1597,24 +825,20 @@ class CTAManager {
             }
         });
 
-        [this.buttons.heroWatchDemo, this.buttons.tryDemoBtn].forEach(btn => {
-            if (btn) {
-                btn.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    window.location.href = 'interactive-demo.html';
-                });
-            }
-        });
-
-        if (this.buttons.contactSalesBtn) {
-            this.buttons.contactSalesBtn.addEventListener('click', () => {
-                window.location.href = 'contact.html';
+        if (this.buttons.tryDemoBtn) {
+            this.buttons.tryDemoBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                window.location.href = 'interactive-demo.html';
             });
         }
 
-        document.querySelectorAll('[data-action="demo"]').forEach(btn => {
-            btn.addEventListener('click', () => window.location.href = 'interactive-demo.html');
-        });
+        if (this.buttons.openAlphyChat) {
+            this.buttons.openAlphyChat.addEventListener('click', (e) => {
+                e.preventDefault();
+                console.log('🚀 Redirection vers chatbot fullpage...');
+                window.location.href = 'chatbot-fullpage.html';
+            });
+        }
     }
 }
 
@@ -1639,160 +863,6 @@ class PerformanceMonitor {
 }
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-// 📱 MOBILE PROFILE MANAGER - VERSION CORRIGÉE
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-class MobileProfileManager {
-    constructor() {
-        console.log('%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'color: #8B5CF6; font-weight: bold;');
-        console.log('%c📱 Mobile Profile Manager - Initialisation', 'color: #8B5CF6; font-weight: bold;');
-        console.log('%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'color: #8B5CF6; font-weight: bold;');
-        
-        this.navMenu = document.querySelector('.nav-menu');
-        this.profileSection = null;
-        
-        this.init();
-    }
-
-    init() {
-        if (!this.navMenu) {
-            console.warn('⚠ Menu navigation non trouvé');
-            return;
-        }
-
-        console.log('✅ Menu navigation trouvé');
-
-        // Créer la section profil mobile
-        this.createMobileProfileSection();
-
-        // Écouter les changements d'authentification
-        if (typeof firebase !== 'undefined' && firebase.auth) {
-            firebase.auth().onAuthStateChanged((user) => {
-                this.updateMobileProfile(user);
-            });
-        }
-
-        console.log('✅ Mobile Profile Manager prêt !\n');
-    }
-
-    createMobileProfileSection() {
-        console.log('🔨 Création de la section profil mobile...');
-
-        // Créer le conteneur principal
-        this.profileSection = document.createElement('div');
-        this.profileSection.className = 'nav-menu-mobile-profile';
-        this.profileSection.id = 'navMenuMobileProfile';
-        // ✅ NE PLUS UTILISER .style.display - utiliser des classes CSS
-
-        // HTML de la section profil
-        this.profileSection.innerHTML = `
-            <div class="mobile-profile-header">
-                <img src="https://ui-avatars.com/api/?name=User&background=3B82F6&color=fff&bold=true&size=96" 
-                     alt="Avatar" 
-                     class="mobile-profile-avatar" 
-                     id="mobileProfileAvatar">
-                <div class="mobile-profile-info">
-                    <h4 id="mobileProfileName">Loading...</h4>
-                    <p id="mobileProfileEmail">Loading...</p>
-                </div>
-            </div>
-            
-            <div class="mobile-profile-links">
-                <a href="dashboard-financier.html" class="mobile-profile-link">
-                    <i class="fas fa-th-large"></i>
-                    Dashboard
-                </a>
-                <a href="settings.html" class="mobile-profile-link">
-                    <i class="fas fa-cog"></i>
-                    Settings
-                </a>
-                <a href="my-account.html" class="mobile-profile-link">
-                    <i class="fas fa-user"></i>
-                    My Account
-                </a>
-                <button class="mobile-profile-link logout" id="mobileLogoutBtn">
-                    <i class="fas fa-sign-out-alt"></i>
-                    Logout
-                </button>
-            </div>
-        `;
-
-        // Injecter dans .nav-menu (après les liens existants)
-        this.navMenu.appendChild(this.profileSection);
-
-        console.log('✅ Section profil injectée dans le DOM');
-
-        // Ajouter listener sur bouton logout
-        const logoutBtn = document.getElementById('mobileLogoutBtn');
-        if (logoutBtn) {
-            logoutBtn.addEventListener('click', (e) => {
-                e.preventDefault();
-                this.handleLogout();
-            });
-            console.log('✅ Listener logout ajouté');
-        }
-    }
-
-    updateMobileProfile(user) {
-        if (!this.profileSection) return;
-
-        if (!user) {
-            // ✅ Retirer la classe .logged-in (caché via CSS)
-            this.profileSection.classList.remove('logged-in');
-            console.log('👤 Utilisateur non connecté - Section profil masquée');
-            return;
-        }
-
-        console.log('👤 Utilisateur connecté:', user.email);
-
-        // ✅ Ajouter la classe .logged-in (visible sur mobile uniquement via CSS)
-        this.profileSection.classList.add('logged-in');
-
-        // Mettre à jour les infos
-        const displayName = user.displayName || user.email?.split('@')[0] || 'User';
-        const avatarUrl = user.photoURL || 
-            `https://ui-avatars.com/api/?name=${encodeURIComponent(displayName)}&background=3B82F6&color=fff&bold=true&size=96`;
-
-        // Nom
-        const nameElement = document.getElementById('mobileProfileName');
-        if (nameElement) {
-            nameElement.textContent = displayName;
-        }
-
-        // Email
-        const emailElement = document.getElementById('mobileProfileEmail');
-        if (emailElement) {
-            emailElement.textContent = user.email || '';
-        }
-
-        // Avatar
-        const avatarElement = document.getElementById('mobileProfileAvatar');
-        if (avatarElement) {
-            avatarElement.src = avatarUrl;
-        }
-
-        console.log('✅ Profil mobile mis à jour (classe .logged-in ajoutée)');
-    }
-
-    handleLogout() {
-        console.log('🔓 Déconnexion mobile...');
-        
-        if (typeof firebase !== 'undefined' && firebase.auth) {
-            firebase.auth().signOut()
-                .then(() => {
-                    console.log('✅ Déconnexion réussie');
-                    window.location.href = 'index.html';
-                })
-                .catch((error) => {
-                    console.error('❌ Erreur déconnexion:', error);
-                });
-        } else {
-            window.location.href = 'index.html';
-        }
-    }
-}
-
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 // 🚀 APPLICATION INITIALIZATION
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
@@ -1811,28 +881,23 @@ class LandingApp {
     }
 
     initializeManagers() {
-        console.log('%c🚀 FinancePro Landing - Initialisation...', 'color: #3B82F6; font-size: 14px; font-weight: bold;');
+        console.log('%c🚀 AlphaVault AI Landing - Initialisation...', 'color: #3B82F6; font-size: 14px; font-weight: bold;');
 
         try {
-            // Initialiser tous les managers
             this.managers.navigation = new NavigationManager();
             this.managers.mobileMenu = new MobileMenuManager();
             this.managers.userMenu = new UserMenuManager();
             this.managers.authState = new AuthStateManager();
-            // ✅ NOUVEAU : Manager profil mobile
-            this.managers.mobileProfile = new MobileProfileManager();
             this.managers.heroChart = new HeroChartManager();
             this.managers.pricing = new PricingManager();
             this.managers.demoSearch = new DemoSearchManager();
             this.managers.scrollReveal = new ScrollRevealManager();
             this.managers.numberCounter = new NumberCounterManager();
-            this.managers.tiltEffect = new TiltEffectManager();
             this.managers.smoothScroll = new SmoothScrollManager();
             this.managers.cta = new CTAManager();
             this.managers.performance = new PerformanceMonitor();
 
             console.log('%c✅ Tous les modules chargés avec succès!', 'color: #10B981; font-size: 14px; font-weight: bold;');
-            console.log('%c💎 Animations prêtes', 'color: #F59E0B; font-size: 12px;');
 
         } catch (error) {
             console.error('❌ Erreur lors de l\'initialisation:', error);
