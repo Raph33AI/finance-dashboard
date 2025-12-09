@@ -358,6 +358,7 @@ class UserMenuManager {
         this.profileButton = document.getElementById('userProfileButton');
         this.dropdownMenu = document.getElementById('userDropdownMenu');
         this.logoutButton = document.getElementById('logoutButton');
+        this.isDropdownOpen = false; // ✅ CORRECTION : État interne
         
         console.log('📦 Éléments trouvés:');
         console.log('  ├─ Profile Button:', this.profileButton ? '✅' : '❌');
@@ -373,6 +374,9 @@ class UserMenuManager {
             return;
         }
 
+        // ✅ CORRECTION : Initialiser aria-expanded
+        this.profileButton.setAttribute('aria-expanded', 'false');
+
         console.log('✅ Configuration des événements...');
 
         // Click sur le bouton profil
@@ -385,7 +389,7 @@ class UserMenuManager {
 
         // Fermer si clic en dehors
         document.addEventListener('click', (e) => {
-            if (this.dropdownMenu.classList.contains('active')) {
+            if (this.isDropdownOpen) {
                 const isClickInsideDropdown = this.dropdownMenu.contains(e.target);
                 const isClickOnButton = this.profileButton.contains(e.target);
                 
@@ -396,11 +400,26 @@ class UserMenuManager {
             }
         });
 
+        // ✅ CORRECTION : Fermer au scroll (mobile)
+        window.addEventListener('scroll', () => {
+            if (this.isDropdownOpen && window.innerWidth <= 768) {
+                this.closeDropdown();
+            }
+        }, { passive: true });
+
+        // ✅ CORRECTION : Fermer au resize
+        window.addEventListener('resize', () => {
+            if (this.isDropdownOpen) {
+                this.closeDropdown();
+            }
+        });
+
         // Bouton déconnexion
         if (this.logoutButton) {
             console.log('✅ Listener déconnexion ajouté');
             this.logoutButton.addEventListener('click', (e) => {
                 e.preventDefault();
+                e.stopPropagation(); // ✅ CORRECTION
                 console.log('🔓 Déconnexion demandée');
                 this.handleLogout();
             });
@@ -409,7 +428,7 @@ class UserMenuManager {
         // Fermer dropdown au clic sur lien interne
         const dropdownLinks = this.dropdownMenu.querySelectorAll('.dropdown-link:not(#logoutButton)');
         dropdownLinks.forEach(link => {
-            link.addEventListener('click', () => {
+            link.addEventListener('click', (e) => {
                 console.log('🔗 Clic sur lien dropdown - Fermeture');
                 this.closeDropdown();
             });
@@ -423,29 +442,38 @@ class UserMenuManager {
         console.log('%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'color: #8b5cf6; font-weight: bold;');
         console.log('%c🔵 toggleDropdown() APPELÉE', 'color: #8b5cf6; font-weight: bold; font-size: 14px;');
         
-        const isExpanded = this.profileButton.getAttribute('aria-expanded') === 'true';
-        const newState = !isExpanded;
+        // ✅ CORRECTION : Utiliser l'état interne
+        this.isDropdownOpen = !this.isDropdownOpen;
         
-        console.log('📊 État actuel:', isExpanded ? '✅ OUVERT' : '❌ FERMÉ');
-        console.log('🎯 Nouvel état:', newState ? '✅ OUVERT' : '❌ FERMÉ');
+        console.log('📊 État actuel:', this.isDropdownOpen ? '✅ OUVERT' : '❌ FERMÉ');
         
         // Mettre à jour aria-expanded
-        this.profileButton.setAttribute('aria-expanded', newState);
+        this.profileButton.setAttribute('aria-expanded', this.isDropdownOpen.toString());
         
         // Toggle classe active
-        if (newState) {
+        if (this.isDropdownOpen) {
             this.dropdownMenu.classList.add('active');
             console.log('✅ Classe "active" ajoutée au dropdown');
+            
+            // ✅ CORRECTION : Bloquer le scroll sur mobile
+            if (window.innerWidth <= 768) {
+                document.body.style.overflow = 'hidden';
+            }
         } else {
             this.dropdownMenu.classList.remove('active');
             console.log('❌ Classe "active" retirée du dropdown');
+            
+            // ✅ CORRECTION : Réactiver le scroll
+            if (window.innerWidth <= 768) {
+                document.body.style.overflow = '';
+            }
         }
         
         // Animer chevron
         const chevron = this.profileButton.querySelector('.user-dropdown-icon');
         if (chevron) {
-            chevron.style.transform = newState ? 'rotate(180deg)' : 'rotate(0deg)';
-            console.log('↻ Chevron animé:', newState ? '180deg' : '0deg');
+            chevron.style.transform = this.isDropdownOpen ? 'rotate(180deg)' : 'rotate(0deg)';
+            console.log('↻ Chevron animé:', this.isDropdownOpen ? '180deg' : '0deg');
         }
         
         console.log('%c🎉 RÉSULTAT:', 'font-weight: bold;', 
@@ -454,15 +482,21 @@ class UserMenuManager {
     }
 
     closeDropdown() {
-        if (!this.dropdownMenu.classList.contains('active')) {
+        if (!this.isDropdownOpen) {
             console.log('ℹ Dropdown déjà fermé');
             return;
         }
         
         console.log('🔒 Fermeture du dropdown...');
         
+        this.isDropdownOpen = false;
         this.profileButton.setAttribute('aria-expanded', 'false');
         this.dropdownMenu.classList.remove('active');
+        
+        // ✅ CORRECTION : Réactiver le scroll
+        if (window.innerWidth <= 768) {
+            document.body.style.overflow = '';
+        }
         
         const chevron = this.profileButton.querySelector('.user-dropdown-icon');
         if (chevron) {
@@ -475,6 +509,9 @@ class UserMenuManager {
     handleLogout() {
         console.log('🔓 Déconnexion en cours...');
         
+        // Fermer le dropdown avant de se déconnecter
+        this.closeDropdown();
+        
         if (typeof firebase !== 'undefined' && firebase.auth) {
             firebase.auth().signOut()
                 .then(() => {
@@ -483,6 +520,8 @@ class UserMenuManager {
                 })
                 .catch((error) => {
                     console.error('❌ Erreur Firebase:', error);
+                    // Rediriger quand même en cas d'erreur
+                    window.location.href = 'index.html';
                 });
         } else {
             console.log('⚠ Firebase non disponible - Redirection directe');
