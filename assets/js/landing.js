@@ -94,7 +94,7 @@ class NavigationManager {
 }
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-// 📱 MOBILE MENU MANAGER
+// 📱 MOBILE MENU MANAGER - VERSION CORRIGÉE
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 class MobileMenuManager {
@@ -124,7 +124,7 @@ class MobileMenuManager {
 
         console.log('✅ Initialisation des listeners...');
 
-        // Créer la section CTA mobile
+        // ✅ CORRECTION : Créer la section CTA uniquement sur mobile
         this.createMobileCTASection();
 
         // Toggle menu au clic sur hamburger
@@ -194,13 +194,40 @@ class MobileMenuManager {
                     console.log('🖥 Passage en mode desktop - Fermeture menu');
                     this.closeMenu();
                 }
+                
+                // ✅ CORRECTION : Recréer ou détruire la section CTA selon la taille d'écran
+                this.handleResponsiveCTA();
             }, 250);
         });
 
         console.log('✅ Mobile Menu Manager prêt');
     }
 
+    // ✅ CORRECTION : Gérer l'affichage de la CTA selon la taille d'écran
+    handleResponsiveCTA() {
+        const mobileCTA = document.querySelector('.nav-menu-mobile-cta');
+        
+        if (window.innerWidth <= 768) {
+            // Sur mobile, créer la section si elle n'existe pas
+            if (!mobileCTA) {
+                this.createMobileCTASection();
+            }
+        } else {
+            // Sur desktop, supprimer la section si elle existe
+            if (mobileCTA) {
+                mobileCTA.remove();
+                console.log('🖥 Desktop mode : Section CTA mobile supprimée');
+            }
+        }
+    }
+
     createMobileCTASection() {
+        // ✅ CORRECTION : Ne créer que sur mobile
+        if (window.innerWidth > 768) {
+            console.log('🖥 Desktop détecté - Pas de section CTA mobile');
+            return;
+        }
+
         // Vérifier si la section existe déjà
         let mobileCTA = document.querySelector('.nav-menu-mobile-cta');
         if (mobileCTA) {
@@ -210,6 +237,10 @@ class MobileMenuManager {
         // Créer la section CTA mobile
         mobileCTA = document.createElement('div');
         mobileCTA.className = 'nav-menu-mobile-cta';
+
+        // ✅ CORRECTION : Insérer DIRECTEMENT dans le body (pas après nav-menu)
+        // Cela garantit qu'elle sera en position fixed au bas de l'écran
+        document.body.appendChild(mobileCTA);
 
         // Cloner les boutons CTA appropriés
         if (this.navCtaLoggedOut && this.navCtaLoggedOut.style.display !== 'none') {
@@ -263,10 +294,11 @@ class MobileMenuManager {
             }
         }
 
-        // Insérer après le nav-menu
-        if (this.navMenu && mobileCTA.children.length > 0) {
-            this.navMenu.parentNode.insertBefore(mobileCTA, this.navMenu.nextSibling);
-            console.log('✅ Section CTA mobile créée avec', mobileCTA.children.length, 'bouton(s)');
+        if (mobileCTA.children.length > 0) {
+            console.log('✅ Section CTA mobile créée en BAS de l\'écran avec', mobileCTA.children.length, 'bouton(s)');
+        } else {
+            console.warn('⚠ Section CTA mobile vide - suppression');
+            mobileCTA.remove();
         }
     }
 
