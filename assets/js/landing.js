@@ -276,16 +276,37 @@ class MobileMenuManager {
                     userInfoText.style.display = 'flex';
                 }
 
-                // ✅ CORRECTION : Ajouter le listener pour ouvrir le dropdown
+                // ✅ CORRECTION : Référence directe au dropdown au lieu de passer par window
+                const dropdownMenu = document.getElementById('userDropdownMenu');
+                
                 mobileUserBtn.addEventListener('click', (e) => {
                     e.preventDefault();
                     e.stopPropagation();
                     console.log('🔵 Clic sur profil utilisateur mobile');
                     
-                    // ✅ Déclencher toggleDropdown via UserMenuManager
-                    if (window.FinanceLandingApp && window.FinanceLandingApp.managers.userMenu) {
-                        window.FinanceLandingApp.managers.userMenu.toggleDropdown();
+                    // ✅ SOLUTION 1 : Déclencher directement via le DOM
+                    if (dropdownMenu) {
+                        const isActive = dropdownMenu.classList.contains('active');
+                        console.log('📊 État dropdown:', isActive ? 'OUVERT' : 'FERMÉ');
+                        
+                        if (isActive) {
+                            dropdownMenu.classList.remove('active');
+                            document.body.style.overflow = '';
+                            console.log('❌ Dropdown fermé');
+                        } else {
+                            dropdownMenu.classList.add('active');
+                            document.body.style.overflow = 'hidden';
+                            console.log('✅ Dropdown ouvert');
+                        }
                     }
+                    
+                    // ✅ SOLUTION 2 (backup) : Via window avec délai
+                    setTimeout(() => {
+                        if (window.FinanceLandingApp?.managers?.userMenu) {
+                            console.log('🔄 Tentative via UserMenuManager');
+                            window.FinanceLandingApp.managers.userMenu.toggleDropdown();
+                        }
+                    }, 50);
                 });
 
                 mobileCTA.appendChild(mobileUserBtn);

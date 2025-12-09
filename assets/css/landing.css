@@ -2971,7 +2971,8 @@ body {
     
     /* ✅ SEARCH INTERFACE */
     .search-interface {
-        margin-top: 2rem;
+        /* margin-top: 2rem; */
+        display: none !important;
     }
     
     .company-metrics {
