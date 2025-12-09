@@ -678,7 +678,7 @@ class NavigationManager {
 }
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-// 📱 MOBILE MENU MANAGER - VERSION COMPLÈTE MOBILE
+// 📱 MOBILE MENU MANAGER - VERSION CORRIGÉE
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 class MobileMenuManager {
@@ -687,10 +687,12 @@ class MobileMenuManager {
         
         this.mobileMenuBtn = document.getElementById('mobileMenuBtn');
         this.navMenu = document.querySelector('.nav-menu');
+        this.navCta = document.querySelector('.nav-cta');
         this.navLinks = document.querySelectorAll('.nav-link');
         
         console.log('  ├─ Bouton hamburger:', this.mobileMenuBtn ? '✅' : '❌');
         console.log('  ├─ Menu navigation:', this.navMenu ? '✅' : '❌');
+        console.log('  ├─ Nav CTA:', this.navCta ? '✅' : '❌');
         console.log('  └─ Liens navigation:', this.navLinks.length);
         
         this.init();
@@ -698,7 +700,7 @@ class MobileMenuManager {
 
     init() {
         if (!this.mobileMenuBtn || !this.navMenu) {
-            console.warn('⚠️ Menu mobile non trouvé');
+            console.warn('⚠ Menu mobile non trouvé');
             return;
         }
 
@@ -714,13 +716,46 @@ class MobileMenuManager {
         });
 
         // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-        // 🔗 FERMER LE MENU AU CLIC SUR UN LIEN
+        // 🔗 FERMER LE MENU AU CLIC SUR UN LIEN (SANS BLOQUER LA NAVIGATION)
         // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
         this.navLinks.forEach(link => {
-            link.addEventListener('click', () => {
+            link.addEventListener('click', (e) => {
                 if (window.innerWidth <= 768) {
-                    console.log('🔗 Clic sur lien navigation - Fermeture menu');
-                    this.closeMenu();
+                    const href = link.getAttribute('href');
+                    
+                    console.log('🔗 Clic sur lien:', href);
+                    
+                    // ✅ Si lien interne (#features), faire smooth scroll
+                    if (href && href.startsWith('#') && href.length > 1) {
+                        e.preventDefault();
+                        
+                        const targetId = href.substring(1);
+                        const targetElement = document.getElementById(targetId);
+                        
+                        if (targetElement) {
+                            console.log('📍 Scroll vers:', targetId);
+                            
+                            // Fermer le menu
+                            this.closeMenu();
+                            
+                            // Attendre la fermeture du menu puis scroller
+                            setTimeout(() => {
+                                window.scrollTo({
+                                    top: targetElement.offsetTop - 80,
+                                    behavior: 'smooth'
+                                });
+                            }, 300);
+                        } else {
+                            console.warn('⚠ Élément cible non trouvé:', targetId);
+                            this.closeMenu();
+                        }
+                    } 
+                    // ✅ Sinon (lien externe), laisser la navigation se faire
+                    else {
+                        console.log('🌐 Navigation externe - Fermeture menu');
+                        this.closeMenu();
+                        // Ne pas faire preventDefault() - laisser le navigateur gérer
+                    }
                 }
             });
         });
@@ -730,7 +765,11 @@ class MobileMenuManager {
         // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
         document.addEventListener('click', (e) => {
             if (this.navMenu.classList.contains('active')) {
-                if (!this.navMenu.contains(e.target) && !this.mobileMenuBtn.contains(e.target)) {
+                const isClickInsideMenu = this.navMenu.contains(e.target);
+                const isClickOnButton = this.mobileMenuBtn.contains(e.target);
+                const isClickOnCTA = this.navCta && this.navCta.contains(e.target);
+                
+                if (!isClickInsideMenu && !isClickOnButton && !isClickOnCTA) {
                     console.log('🔒 Clic en dehors - Fermeture menu');
                     this.closeMenu();
                 }
@@ -745,7 +784,7 @@ class MobileMenuManager {
             clearTimeout(resizeTimer);
             resizeTimer = setTimeout(() => {
                 if (window.innerWidth > 768 && this.navMenu.classList.contains('active')) {
-                    console.log('🖥️ Passage en mode desktop - Fermeture menu');
+                    console.log('🖥 Passage en mode desktop - Fermeture menu');
                     this.closeMenu();
                 }
             }, 250);
@@ -771,7 +810,12 @@ class MobileMenuManager {
         this.mobileMenuBtn.classList.add('active');
         this.navMenu.classList.add('active');
         
-        // ✅ AJOUT : Bloquer le scroll + ajouter classe menu-open au body
+        // ✅ Afficher aussi les boutons CTA
+        if (this.navCta) {
+            this.navCta.style.display = 'flex';
+        }
+        
+        // Bloquer le scroll
         document.body.classList.add('menu-open');
         document.body.style.overflow = 'hidden';
         document.body.style.position = 'fixed';
@@ -784,7 +828,7 @@ class MobileMenuManager {
         this.mobileMenuBtn.classList.remove('active');
         this.navMenu.classList.remove('active');
         
-        // ✅ AJOUT : Réactiver le scroll + retirer classe menu-open
+        // Réactiver le scroll
         document.body.classList.remove('menu-open');
         document.body.style.overflow = '';
         document.body.style.position = '';
@@ -1049,8 +1093,18 @@ class AuthStateManager {
     }
 
     showLoggedInState(user) {
-        if (this.navCtaLoggedOut) this.navCtaLoggedOut.style.display = 'none';
-        if (this.navCtaLoggedIn) this.navCtaLoggedIn.style.display = 'flex';
+        console.log('👤 État : Connecté -', user.email);
+        
+        if (this.navCtaLoggedOut) {
+            this.navCtaLoggedOut.style.display = 'none';
+        }
+        
+        if (this.navCtaLoggedIn) {
+            this.navCtaLoggedIn.style.display = 'flex';
+            console.log('✅ Menu profil affiché');
+        } else {
+            console.warn('⚠ navCtaLoggedIn introuvable');
+        }
 
         const displayName = user.displayName || user.email?.split('@')[0] || 'User';
         const userDisplayNameElements = document.querySelectorAll('#userDisplayName, #dropdownUserName');
@@ -1071,8 +1125,18 @@ class AuthStateManager {
     }
 
     showLoggedOutState() {
-        if (this.navCtaLoggedOut) this.navCtaLoggedOut.style.display = 'flex';
-        if (this.navCtaLoggedIn) this.navCtaLoggedIn.style.display = 'none';
+        console.log('👤 État : Non connecté');
+        
+        if (this.navCtaLoggedOut) {
+            this.navCtaLoggedOut.style.display = 'flex';
+            console.log('✅ Boutons CTA (logged out) affichés');
+        } else {
+            console.warn('⚠ navCtaLoggedOut introuvable');
+        }
+        
+        if (this.navCtaLoggedIn) {
+            this.navCtaLoggedIn.style.display = 'none';
+        }
     }
 }
 

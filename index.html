@@ -79,79 +79,78 @@
                 <a href="#pricing" class="nav-link">Pricing</a>
             </div>
             
-            <!-- CTA Navigation -->
-            <div class="nav-cta">
-                <div class="nav-cta-logged-out" id="navCtaLoggedOut">
-                    <button class="btn-text" id="loginBtn">Log in</button>
-                    <button class="btn-primary-nav" id="signupBtn">
-                        Start Free
-                        <i class="fas fa-arrow-right"></i>
+            <!-- ✅ CTA Navigation - NON CONNECTÉ -->
+            <div class="nav-cta" id="navCtaLoggedOut" style="display: flex;">
+                <button class="btn-text" id="loginBtn">Log in</button>
+                <button class="btn-primary-nav" id="signupBtn">
+                    Start Free
+                    <i class="fas fa-arrow-right"></i>
+                </button>
+            </div>
+
+            <!-- ✅ CTA Navigation - CONNECTÉ -->
+            <div class="nav-cta" id="navCtaLoggedIn" style="display: none;">
+                <div class="user-profile-menu">
+                    <button class="user-profile-button" id="userProfileButton" aria-expanded="false" aria-haspopup="true">
+                        <div class="user-avatar-wrapper">
+                            <img src="https://ui-avatars.com/api/?name=User&background=3B82F6&color=fff&bold=true&size=96" 
+                                alt="User Profile" 
+                                class="user-avatar"
+                                data-user-photo
+                                id="userAvatarImg">
+                            <span class="user-status-dot"></span>
+                        </div>
+                        <div class="user-info-text">
+                            <span class="user-display-name" data-user-name id="userDisplayName">User</span>
+                            <span class="user-plan-badge" data-user-plan id="userPlanBadge">Free</span>
+                        </div>
+                        <i class="fas fa-chevron-down user-dropdown-icon"></i>
                     </button>
-                </div>
 
-                <div class="nav-cta-logged-in" id="navCtaLoggedIn" style="display: none;">
-                    <div class="user-profile-menu">
-                        <button class="user-profile-button" id="userProfileButton" aria-expanded="false" aria-haspopup="true">
-                            <div class="user-avatar-wrapper">
+                    <!-- Dropdown Menu -->
+                    <div class="user-dropdown-menu" id="userDropdownMenu" role="menu">
+                        <div class="dropdown-header">
+                            <div class="dropdown-user-card">
                                 <img src="https://ui-avatars.com/api/?name=User&background=3B82F6&color=fff&bold=true&size=96" 
-                                     alt="User Profile" 
-                                     class="user-avatar"
-                                     data-user-photo
-                                     id="userAvatarImg">
-                                <span class="user-status-dot"></span>
-                            </div>
-                            <div class="user-info-text">
-                                <span class="user-display-name" data-user-name id="userDisplayName">User</span>
-                                <span class="user-plan-badge" data-user-plan id="userPlanBadge">Free</span>
-                            </div>
-                            <i class="fas fa-chevron-down user-dropdown-icon"></i>
-                        </button>
-
-                        <!-- Dropdown Menu -->
-                        <div class="user-dropdown-menu" id="userDropdownMenu" role="menu">
-                            <div class="dropdown-header">
-                                <div class="dropdown-user-card">
-                                    <img src="https://ui-avatars.com/api/?name=User&background=3B82F6&color=fff&bold=true&size=96" 
-                                         alt="User Profile"
-                                         data-user-photo
-                                         id="dropdownAvatarImg">
-                                    <div class="dropdown-user-text">
-                                        <h4 data-user-name id="dropdownUserName">User</h4>
-                                        <p data-user-email id="dropdownUserEmail">user@alphavault.ai</p>
-                                    </div>
-                                </div>
-                                <div class="dropdown-plan-info">
-                                    <i class="fas fa-crown"></i>
-                                    <span data-user-plan id="dropdownUserPlan">Free</span>
+                                    alt="User Profile"
+                                    data-user-photo
+                                    id="dropdownAvatarImg">
+                                <div class="dropdown-user-text">
+                                    <h4 data-user-name id="dropdownUserName">User</h4>
+                                    <p data-user-email id="dropdownUserEmail">user@alphavault.ai</p>
                                 </div>
                             </div>
-
-                            <div class="dropdown-divider"></div>
-
-                            <div class="dropdown-section">
-                                <a href="dashboard-financier.html" class="dropdown-link" role="menuitem">
-                                    <div class="dropdown-link-icon">
-                                        <i class="fas fa-tachometer-alt"></i>
-                                    </div>
-                                    <div class="dropdown-link-text">
-                                        <span class="dropdown-link-title">My Portfolio</span>
-                                        <span class="dropdown-link-desc">Manage investments</span>
-                                    </div>
-                                </a>
+                            <div class="dropdown-plan-info">
+                                <i class="fas fa-crown"></i>
+                                <span data-user-plan id="dropdownUserPlan">Free</span>
                             </div>
+                        </div>
 
-                            <div class="dropdown-divider"></div>
+                        <div class="dropdown-divider"></div>
 
-                            <div class="dropdown-section">
-                                <button class="dropdown-link dropdown-link-danger" role="menuitem" id="logoutButton">
-                                    <div class="dropdown-link-icon">
-                                        <i class="fas fa-sign-out-alt"></i>
-                                    </div>
-                                    <div class="dropdown-link-text">
-                                        <span class="dropdown-link-title">Log Out</span>
-                                    </div>
-                                </button>
-                            </div>
+                        <div class="dropdown-section">
+                            <a href="dashboard-financier.html" class="dropdown-link" role="menuitem">
+                                <div class="dropdown-link-icon">
+                                    <i class="fas fa-tachometer-alt"></i>
+                                </div>
+                                <div class="dropdown-link-text">
+                                    <span class="dropdown-link-title">My Portfolio</span>
+                                    <span class="dropdown-link-desc">Manage investments</span>
+                                </div>
+                            </a>
+                        </div>
+
+                        <div class="dropdown-divider"></div>
+
+                        <div class="dropdown-section">
+                            <button class="dropdown-link dropdown-link-danger" role="menuitem" id="logoutButton">
+                                <div class="dropdown-link-icon">
+                                    <i class="fas fa-sign-out-alt"></i>
+                                </div>
+                                <div class="dropdown-link-text">
+                                    <span class="dropdown-link-title">Log Out</span>
+                                </div>
+                            </button>
                         </div>
                     </div>
                 </div>
