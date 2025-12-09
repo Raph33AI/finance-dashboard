@@ -149,6 +149,11 @@ body.dark-mode .landing-nav.scrolled {
     background-clip: text;
 }
 
+.brand-logo svg {
+    width: 32px;
+    height: 32px;
+}
+
 /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
    📍 NAV MENU - DESKTOP
    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
@@ -346,9 +351,13 @@ body.dark-mode .landing-nav.scrolled {
     transition: transform var(--anim-medium);
 }
 
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   📋 USER DROPDOWN MENU - DESKTOP
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+
 .user-dropdown-menu {
     position: absolute;
-    top: calc(100% + 0.5rem);
+    top: calc(100% + 0.75rem);
     right: 0;
     min-width: 320px;
     background: var(--background-primary, #ffffff);
@@ -359,24 +368,30 @@ body.dark-mode .landing-nav.scrolled {
     z-index: 1000;
     opacity: 0;
     visibility: hidden;
-    transform: translateY(-10px);
+    transform: translateY(-10px) scale(0.95);
+    transform-origin: top right;
     transition: all var(--anim-medium);
 }
 
 .user-dropdown-menu.active {
     opacity: 1;
     visibility: visible;
-    transform: translateY(0);
+    transform: translateY(0) scale(1);
 }
 
 body.dark-mode .user-dropdown-menu {
     background: var(--background-secondary, #1e293b);
+    border-color: rgba(255, 255, 255, 0.1);
 }
 
 .dropdown-header {
     padding: 1rem;
     border-bottom: 1px solid var(--border-color, #e2e8f0);
     margin-bottom: 0.5rem;
+}
+
+body.dark-mode .dropdown-header {
+    border-bottom-color: rgba(255, 255, 255, 0.1);
 }
 
 .dropdown-user-card {
@@ -397,7 +412,11 @@ body.dark-mode .user-dropdown-menu {
     font-size: 1rem;
     font-weight: 600;
     color: var(--text-primary, #1e293b);
-    margin: 0;
+    margin: 0 0 0.25rem 0;
+}
+
+body.dark-mode .dropdown-user-text h4 {
+    color: #f1f5f9;
 }
 
 .dropdown-user-text p {
@@ -424,6 +443,10 @@ body.dark-mode .user-dropdown-menu {
     margin: 0.5rem 0;
 }
 
+body.dark-mode .dropdown-divider {
+    background: rgba(255, 255, 255, 0.1);
+}
+
 .dropdown-section {
     padding: 0.25rem 0;
 }
@@ -442,6 +465,12 @@ body.dark-mode .user-dropdown-menu {
     background: transparent;
     width: 100%;
     text-align: left;
+    font-family: inherit;
+    font-size: 0.9375rem;
+}
+
+body.dark-mode .dropdown-link {
+    color: #f1f5f9;
 }
 
 .dropdown-link:hover {
@@ -457,6 +486,7 @@ body.dark-mode .user-dropdown-menu {
     align-items: center;
     justify-content: center;
     color: #2563eb;
+    flex-shrink: 0;
 }
 
 .dropdown-link:hover .dropdown-link-icon {
@@ -473,11 +503,17 @@ body.dark-mode .user-dropdown-menu {
     font-weight: 600;
     color: var(--text-primary, #1e293b);
     margin-bottom: 0.125rem;
+    display: block;
+}
+
+body.dark-mode .dropdown-link-title {
+    color: #f1f5f9;
 }
 
 .dropdown-link-desc {
     font-size: 0.8125rem;
     color: var(--text-secondary, #64748b);
+    display: block;
 }
 
 .dropdown-link-danger {
@@ -492,6 +528,10 @@ body.dark-mode .user-dropdown-menu {
 .dropdown-link-danger:hover .dropdown-link-icon {
     background: #ef4444;
     color: white;
+}
+
+.dropdown-link-danger .dropdown-link-title {
+    color: #ef4444;
 }
 
 /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -615,6 +655,10 @@ body.dark-mode .user-dropdown-menu {
 
 .badge-icon {
     font-size: 1rem;
+}
+
+.badge-text {
+    font-size: 0.875rem;
 }
 
 .hero-headline {
@@ -754,6 +798,10 @@ body.dark-mode .user-dropdown-menu {
 .chrome-title {
     font-size: 0.875rem;
     font-weight: 600;
+    color: var(--text-secondary, #64748b);
+}
+
+.chrome-actions {
     color: var(--text-secondary, #64748b);
 }
 
@@ -2424,47 +2472,6 @@ body.dark-mode .user-dropdown-menu {
 }
 
 /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-   📱 RESPONSIVE - TABLET (1024px et moins)
-   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
-
-@media (max-width: 1024px) {
-    .hero-container,
-    .demo-wrapper,
-    .alphy-wrapper {
-        grid-template-columns: 1fr;
-        gap: 3rem;
-    }
-    
-    .hero-visual {
-        order: -1;
-    }
-    
-    .footer-grid {
-        grid-template-columns: repeat(2, 1fr);
-    }
-    
-    .footer-brand-col {
-        grid-column: 1 / -1;
-        max-width: 100%;
-    }
-    
-    .features-grid,
-    .solutions-grid,
-    .tools-grid-advanced {
-        grid-template-columns: repeat(2, 1fr);
-    }
-    
-    .pricing-grid-three {
-        grid-template-columns: 1fr;
-        max-width: 500px;
-    }
-    
-    .tech-grid {
-        grid-template-columns: repeat(2, 1fr);
-    }
-}
-
-/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
    📱 RESPONSIVE - MOBILE (768px et moins)
    ✅ NAVIGATION ADAPTATIVE
    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
@@ -2479,7 +2486,13 @@ body.dark-mode .user-dropdown-menu {
         padding: 0.875rem 1rem;
     }
     
-    /* Masquer menu desktop */
+    /* ✅ MASQUER LES CTA DE LA NAV PRINCIPALE SUR MOBILE */
+    #navCtaLoggedOut,
+    #navCtaLoggedIn {
+        display: none !important;
+    }
+    
+    /* Menu principal - SIDEBAR */
     .nav-menu {
         position: fixed;
         top: 65px;
@@ -2533,6 +2546,10 @@ body.dark-mode .user-dropdown-menu {
         border-top: 1px solid rgba(0, 0, 0, 0.06);
     }
     
+    body.dark-mode .nav-menu .nav-link:first-child {
+        border-top: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    
     .nav-menu .nav-link:hover {
         background: rgba(37, 99, 235, 0.08);
         color: #2563eb;
@@ -2548,39 +2565,67 @@ body.dark-mode .user-dropdown-menu {
         display: flex;
     }
     
-    /* CTA - Masqués sur desktop, visibles dans menu hamburger */
-    .nav-cta {
+    /* ✅ SECTION CTA MOBILE DANS LE HAMBURGER */
+    .nav-menu-mobile-cta {
         position: fixed;
         bottom: 0;
         left: 0;
         right: 0;
-        width: 100%;
         background: #ffffff;
         padding: 1.25rem 1rem;
         border-top: 1px solid rgba(0, 0, 0, 0.08);
-        display: none;
+        display: flex;
         flex-direction: column;
         gap: 0.875rem;
         z-index: 9999;
         box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.1);
+        opacity: 0;
+        visibility: hidden;
+        transform: translateY(100%);
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }
     
-    body.dark-mode .nav-cta {
+    body.dark-mode .nav-menu-mobile-cta {
         background: #1e293b;
         border-top: 1px solid rgba(255, 255, 255, 0.1);
     }
     
-    /* CTA visible quand menu actif */
-    .nav-menu.active ~ .nav-cta {
-        display: flex;
+    /* Afficher quand le menu est actif */
+    body.menu-open .nav-menu-mobile-cta {
+        opacity: 1;
+        visibility: visible;
+        transform: translateY(0);
     }
     
-    .nav-cta .btn-text,
-    .nav-cta .btn-primary-nav {
+    /* Boutons dans la section mobile */
+    .nav-menu-mobile-cta .btn-text,
+    .nav-menu-mobile-cta .btn-primary-nav,
+    .nav-menu-mobile-cta .user-profile-button {
         width: 100%;
         justify-content: center;
         padding: 1rem 1.5rem;
         font-size: 1rem;
+    }
+    
+    /* User profile button dans mobile menu */
+    .nav-menu-mobile-cta .user-profile-button {
+        display: flex !important;
+        align-items: center;
+        justify-content: center;
+        gap: 0.75rem;
+        background: var(--background-primary, #ffffff);
+        border: 2px solid #2563eb;
+        border-radius: 12px;
+    }
+    
+    body.dark-mode .nav-menu-mobile-cta .user-profile-button {
+        background: var(--background-secondary, #1e293b);
+        border-color: #60a5fa;
+    }
+    
+    /* Afficher le nom user sur mobile dans le menu */
+    .nav-menu-mobile-cta .user-info-text {
+        display: flex !important;
     }
     
     /* Overlay */
@@ -2613,18 +2658,6 @@ body.dark-mode .user-dropdown-menu {
        👤 USER MENU - BOTTOM SHEET
        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
     
-    /* Masquer texte user */
-    .user-info-text {
-        display: none;
-    }
-    
-    /* Bouton compact */
-    .user-profile-button {
-        padding: 0.5rem;
-        min-height: 48px;
-        min-width: 48px;
-    }
-    
     /* Dropdown - Bottom sheet */
     .user-dropdown-menu {
         position: fixed;
@@ -2653,6 +2686,8 @@ body.dark-mode .user-dropdown-menu {
     }
     
     .user-dropdown-menu.active {
+        opacity: 1;
+        visibility: visible;
         transform: translateY(0);
     }
     
@@ -2696,6 +2731,11 @@ body.dark-mode .user-dropdown-menu {
         min-height: 64px;
     }
     
+    .dropdown-link-icon {
+        width: 44px;
+        height: 44px;
+    }
+    
     /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
        📊 SECTIONS GÉNÉRALES
        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
@@ -2736,148 +2776,6 @@ body.dark-mode .user-dropdown-menu {
     .proof-divider {
         display: none;
     }
-    
-    .features-section,
-    .solutions-section,
-    .tools-section,
-    .pricing-section,
-    .alphy-ai-section,
-    .demo-interactive,
-    .cta-final,
-    .tech-infra-lux {
-        padding: 4rem 1rem;
-    }
-    
-    .features-grid,
-    .solutions-grid,
-    .tools-grid-advanced,
-    .pricing-grid-three,
-    .tech-grid {
-        grid-template-columns: 1fr;
-        gap: 1.5rem;
-    }
-    
-    .feature-card,
-    .solution-card,
-    .tool-card-advanced,
-    .tech-card {
-        padding: 1.5rem;
-    }
-    
-    .pricing-card {
-        padding: 2rem 1.5rem;
-    }
-    
-    .demo-wrapper,
-    .alphy-wrapper {
-        grid-template-columns: 1fr;
-        gap: 2.5rem;
-    }
-    
-    .alphy-chat-container {
-        height: 500px;
-    }
-    
-    .footer-grid {
-        grid-template-columns: 1fr;
-        gap: 2rem;
-    }
-    
-    .footer-bottom {
-        flex-direction: column;
-        gap: 1rem;
-        text-align: center;
-    }
-    
-    .footer-bottom-links {
-        flex-direction: column;
-        gap: 0.75rem;
-    }
-    
-    .company-metrics {
-        grid-template-columns: repeat(2, 1fr);
-        gap: 0.75rem;
-    }
-}
-
-/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-   📱 PETIT MOBILE (480px et moins)
-   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
-
-@media (max-width: 480px) {
-    .hero {
-        padding: 4.5rem 0.875rem 2.5rem;
-    }
-    
-    .hero-headline {
-        font-size: 1.75rem;
-    }
-    
-    .section-title {
-        font-size: 1.625rem;
-    }
-    
-    .nav-menu .nav-link {
-        font-size: 1rem;
-        padding: 1rem 0.875rem;
-    }
-    
-    .dropdown-header {
-        padding: 1.75rem 1rem 0.875rem;
-    }
-    
-    .dropdown-link {
-        padding: 0.875rem 0.75rem;
-        min-height: 60px;
-    }
-    
-    .feature-card,
-    .solution-card,
-    .tool-card-advanced,
-    .tech-card {
-        padding: 1.25rem;
-    }
-    
-    .pricing-card {
-        padding: 1.75rem 1.25rem;
-    }
-    
-    .features-section,
-    .solutions-section,
-    .tools-section,
-    .pricing-section,
-    .demo-interactive,
-    .alphy-ai-section,
-    .cta-final,
-    .tech-infra-lux {
-        padding: 3rem 0.875rem;
-    }
-    
-    .company-metrics {
-        grid-template-columns: 1fr;
-    }
-    
-    .amount {
-        font-size: 3rem;
-    }
-}
-
-/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-   🎨 DARK MODE
-   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
-
-body.dark-mode {
-    background: #0f172a;
-    color: #f1f5f9;
-}
-
-body.dark-mode .orb-1,
-body.dark-mode .orb-2 {
-    opacity: 0.2;
-}
-
-body.dark-mode .grid-pattern {
-    opacity: 0.15;
 }
 
 /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -2899,7 +2797,3 @@ body.dark-mode .grid-pattern {
         scroll-behavior: auto !important;
     }
 }
-
-/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-   ✅ FIN DU CSS - VERSION SANS 3D
-   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */

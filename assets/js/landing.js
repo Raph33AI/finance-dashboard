@@ -1,11 +1,11 @@
-/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-   LANDING.JS - FinancePro Landing Page (Sans 3D)
-   Version Mobile-Responsive
-   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   LANDING.JS - AlphaVault AI Landing Page
+   Version Sans 3D - Navigation Responsive
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 // 🎯 CONFIGURATION GLOBALE
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 const APP_CONFIG = {
     navScrollThreshold: 50,
@@ -16,9 +16,9 @@ const APP_CONFIG = {
     debounceDelay: 300
 };
 
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 // 🔧 UTILITY FUNCTIONS
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 function debounce(func, wait) {
     let timeout;
@@ -59,9 +59,9 @@ function animateValue(element, start, end, duration) {
     window.requestAnimationFrame(step);
 }
 
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 // 🧭 NAVIGATION MANAGER
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 class NavigationManager {
     constructor() {
@@ -93,9 +93,9 @@ class NavigationManager {
     }
 }
 
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-// 📱 MOBILE MENU MANAGER - VERSION RESPONSIVE
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// 📱 MOBILE MENU MANAGER
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 class MobileMenuManager {
     constructor() {
@@ -123,6 +123,9 @@ class MobileMenuManager {
         }
 
         console.log('✅ Initialisation des listeners...');
+
+        // Créer la section CTA mobile
+        this.createMobileCTASection();
 
         // Toggle menu au clic sur hamburger
         this.mobileMenuBtn.addEventListener('click', (e) => {
@@ -172,8 +175,8 @@ class MobileMenuManager {
             if (this.navMenu.classList.contains('active')) {
                 const isClickInsideMenu = this.navMenu.contains(e.target);
                 const isClickOnButton = this.mobileMenuBtn.contains(e.target);
-                const isClickOnCTA = (this.navCtaLoggedOut && this.navCtaLoggedOut.contains(e.target)) ||
-                                     (this.navCtaLoggedIn && this.navCtaLoggedIn.contains(e.target));
+                const mobileCTA = document.querySelector('.nav-menu-mobile-cta');
+                const isClickOnCTA = mobileCTA && mobileCTA.contains(e.target);
                 
                 if (!isClickInsideMenu && !isClickOnButton && !isClickOnCTA) {
                     console.log('🔒 Clic en dehors - Fermeture menu');
@@ -197,6 +200,76 @@ class MobileMenuManager {
         console.log('✅ Mobile Menu Manager prêt');
     }
 
+    createMobileCTASection() {
+        // Vérifier si la section existe déjà
+        let mobileCTA = document.querySelector('.nav-menu-mobile-cta');
+        if (mobileCTA) {
+            mobileCTA.remove();
+        }
+
+        // Créer la section CTA mobile
+        mobileCTA = document.createElement('div');
+        mobileCTA.className = 'nav-menu-mobile-cta';
+
+        // Cloner les boutons CTA appropriés
+        if (this.navCtaLoggedOut && this.navCtaLoggedOut.style.display !== 'none') {
+            const loginBtn = this.navCtaLoggedOut.querySelector('#loginBtn');
+            const signupBtn = this.navCtaLoggedOut.querySelector('#signupBtn');
+
+            if (loginBtn) {
+                const mobileLoginBtn = loginBtn.cloneNode(true);
+                mobileLoginBtn.id = 'mobileLoginBtn';
+                mobileLoginBtn.addEventListener('click', () => {
+                    window.location.href = 'auth.html';
+                });
+                mobileCTA.appendChild(mobileLoginBtn);
+            }
+
+            if (signupBtn) {
+                const mobileSignupBtn = signupBtn.cloneNode(true);
+                mobileSignupBtn.id = 'mobileSignupBtn';
+                mobileSignupBtn.addEventListener('click', () => {
+                    window.location.href = 'auth.html#signup';
+                });
+                mobileCTA.appendChild(mobileSignupBtn);
+            }
+        } else if (this.navCtaLoggedIn && this.navCtaLoggedIn.style.display !== 'none') {
+            const userProfileBtn = this.navCtaLoggedIn.querySelector('#userProfileButton');
+
+            if (userProfileBtn) {
+                const mobileUserBtn = userProfileBtn.cloneNode(true);
+                mobileUserBtn.id = 'mobileUserProfileButton';
+                
+                // Réactiver l'affichage du texte user sur mobile
+                const userInfoText = mobileUserBtn.querySelector('.user-info-text');
+                if (userInfoText) {
+                    userInfoText.style.display = 'flex';
+                }
+
+                // Ajouter le listener pour ouvrir le dropdown
+                mobileUserBtn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    console.log('🔵 Clic sur profil utilisateur mobile');
+                    
+                    // Déclencher l'ouverture du dropdown via le UserMenuManager
+                    const userProfileButton = document.getElementById('userProfileButton');
+                    if (userProfileButton) {
+                        userProfileButton.click();
+                    }
+                });
+
+                mobileCTA.appendChild(mobileUserBtn);
+            }
+        }
+
+        // Insérer après le nav-menu
+        if (this.navMenu && mobileCTA.children.length > 0) {
+            this.navMenu.parentNode.insertBefore(mobileCTA, this.navMenu.nextSibling);
+            console.log('✅ Section CTA mobile créée avec', mobileCTA.children.length, 'bouton(s)');
+        }
+    }
+
     toggleMenu() {
         const isActive = this.navMenu.classList.contains('active');
         
@@ -213,6 +286,9 @@ class MobileMenuManager {
     openMenu() {
         this.mobileMenuBtn.classList.add('active');
         this.navMenu.classList.add('active');
+        
+        // Recréer la section CTA au cas où l'état auth a changé
+        this.createMobileCTASection();
         
         // Bloquer le scroll
         document.body.classList.add('menu-open');
@@ -237,9 +313,9 @@ class MobileMenuManager {
     }
 }
 
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-// 👤 USER MENU MANAGER
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// 👤 USER MENU MANAGER - CORRIGÉ
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 class UserMenuManager {
     constructor() {
@@ -271,14 +347,17 @@ class UserMenuManager {
         this.profileButton.addEventListener('click', (e) => {
             e.preventDefault();
             e.stopPropagation();
-            console.log('🔵 Clic sur profil utilisateur');
+            console.log('%c🔵 Clic sur profil utilisateur', 'color: #3B82F6; font-weight: bold;');
             this.toggleDropdown();
         });
 
         // Fermer si clic en dehors
         document.addEventListener('click', (e) => {
-            if (!this.profileButton.contains(e.target) && !this.dropdownMenu.contains(e.target)) {
-                if (this.dropdownMenu.classList.contains('active')) {
+            if (this.dropdownMenu.classList.contains('active')) {
+                const isClickInsideDropdown = this.dropdownMenu.contains(e.target);
+                const isClickOnButton = this.profileButton.contains(e.target);
+                
+                if (!isClickInsideDropdown && !isClickOnButton) {
                     console.log('🔒 Clic en dehors - Fermeture dropdown');
                     this.closeDropdown();
                 }
@@ -296,7 +375,7 @@ class UserMenuManager {
         }
 
         // Fermer dropdown au clic sur lien interne
-        const dropdownLinks = this.dropdownMenu.querySelectorAll('.dropdown-link');
+        const dropdownLinks = this.dropdownMenu.querySelectorAll('.dropdown-link:not(#logoutButton)');
         dropdownLinks.forEach(link => {
             link.addEventListener('click', () => {
                 console.log('🔗 Clic sur lien dropdown - Fermeture');
@@ -309,28 +388,44 @@ class UserMenuManager {
     }
 
     toggleDropdown() {
+        console.log('%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'color: #8b5cf6; font-weight: bold;');
+        console.log('%c🔵 toggleDropdown() APPELÉE', 'color: #8b5cf6; font-weight: bold; font-size: 14px;');
+        
         const isExpanded = this.profileButton.getAttribute('aria-expanded') === 'true';
         const newState = !isExpanded;
         
-        console.log('📊 Toggle dropdown:', newState ? 'OUVRIR' : 'FERMER');
+        console.log('📊 État actuel:', isExpanded ? '✅ OUVERT' : '❌ FERMÉ');
+        console.log('🎯 Nouvel état:', newState ? '✅ OUVERT' : '❌ FERMÉ');
         
+        // Mettre à jour aria-expanded
         this.profileButton.setAttribute('aria-expanded', newState);
         
+        // Toggle classe active
         if (newState) {
             this.dropdownMenu.classList.add('active');
+            console.log('✅ Classe "active" ajoutée au dropdown');
         } else {
             this.dropdownMenu.classList.remove('active');
+            console.log('❌ Classe "active" retirée du dropdown');
         }
         
         // Animer chevron
         const chevron = this.profileButton.querySelector('.user-dropdown-icon');
         if (chevron) {
             chevron.style.transform = newState ? 'rotate(180deg)' : 'rotate(0deg)';
+            console.log('↻ Chevron animé:', newState ? '180deg' : '0deg');
         }
+        
+        console.log('%c🎉 RÉSULTAT:', 'font-weight: bold;', 
+                    this.dropdownMenu.classList.contains('active') ? '✅ OUVERT' : '❌ FERMÉ');
+        console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n');
     }
 
     closeDropdown() {
-        if (!this.dropdownMenu.classList.contains('active')) return;
+        if (!this.dropdownMenu.classList.contains('active')) {
+            console.log('ℹ Dropdown déjà fermé');
+            return;
+        }
         
         console.log('🔒 Fermeture du dropdown...');
         
@@ -364,9 +459,9 @@ class UserMenuManager {
     }
 }
 
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 // 🔐 AUTH STATE MANAGER
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 class AuthStateManager {
     constructor() {
@@ -390,6 +485,13 @@ class AuthStateManager {
             this.showLoggedInState(user);
         } else {
             this.showLoggedOutState();
+        }
+
+        // Recréer les CTA mobiles après changement d'état
+        if (window.FinanceLandingApp && window.FinanceLandingApp.managers.mobileMenu) {
+            setTimeout(() => {
+                window.FinanceLandingApp.managers.mobileMenu.createMobileCTASection();
+            }, 100);
         }
     }
 
@@ -437,9 +539,9 @@ class AuthStateManager {
     }
 }
 
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-// 📊 GRAPHIQUE BOURSIER
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// 📊 HERO CHART MANAGER
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 class HeroChartManager {
     constructor() {
@@ -617,9 +719,9 @@ class HeroChartManager {
     }
 }
 
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 // 💰 PRICING MANAGER
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 class PricingManager {
     constructor() {
@@ -651,9 +753,9 @@ class PricingManager {
     }
 }
 
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 // 🔍 DEMO SEARCH MANAGER
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 class DemoSearchManager {
     constructor() {
@@ -694,9 +796,9 @@ class DemoSearchManager {
     }
 }
 
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 // 🎬 SCROLL REVEAL MANAGER
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 class ScrollRevealManager {
     constructor() {
@@ -723,9 +825,9 @@ class ScrollRevealManager {
     }
 }
 
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 // 🔢 NUMBER COUNTER MANAGER
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 class NumberCounterManager {
     constructor() {
@@ -765,9 +867,9 @@ class NumberCounterManager {
     }
 }
 
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 // 🔗 SMOOTH SCROLL MANAGER
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 class SmoothScrollManager {
     constructor() {
@@ -793,9 +895,9 @@ class SmoothScrollManager {
     }
 }
 
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 // 🎯 CTA MANAGER
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 class CTAManager {
     constructor() {
@@ -842,9 +944,9 @@ class CTAManager {
     }
 }
 
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 // 📊 PERFORMANCE MONITOR
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 class PerformanceMonitor {
     constructor() {
@@ -862,9 +964,9 @@ class PerformanceMonitor {
     }
 }
 
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 // 🚀 APPLICATION INITIALIZATION
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 class LandingApp {
     constructor() {
@@ -905,9 +1007,9 @@ class LandingApp {
     }
 }
 
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 // 🎬 LANCEMENT DE L'APPLICATION
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 const financeLandingApp = new LandingApp();
 window.FinanceLandingApp = financeLandingApp;
