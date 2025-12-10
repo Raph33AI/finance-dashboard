@@ -1,11 +1,11 @@
 /* ============================================
-   LANDING.CSS - VERSION MOBILE CORRIGÉE ✅
+   LANDING.CSS - VERSION FINALE CORRIGÉE ✅
    AlphaVault AI - Landing Page Responsive
    ✅ CORRECTIONS APPLIQUÉES :
-   1. ✨ NOUVEAU : Badge "New Alphy AI" descendu
-   2. ✨ NOUVEAU : Textes Alphy AI centrés
-   3. ✨ NOUVEAU : Plus de détails Quantitative Tools
-   4. ✨ NOUVEAU : Bouton CTA final réduit et centré
+   1-4. Corrections mobiles précédentes
+   5. Footer mobile : uniquement Features + Company en 2 colonnes
+   6. Solutions : "Built for Everyone" centré + cartes centrées (PC + Mobile)
+   7. Pricing : "Simple, Transparent Pricing" centré (PC + Mobile)
    ============================================ */
 
 /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -1056,6 +1056,34 @@ body.dark-mode .dropdown-link-title {
 }
 
 /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   ✅ CORRECTION 6: SOLUTIONS SECTION - CENTRAGE (PC + MOBILE)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+
+/* ✅ Titre "Built for Everyone" centré */
+.solutions-section .section-header {
+    text-align: center !important;
+}
+
+.solutions-section .section-tag,
+.solutions-section .section-title,
+.solutions-section .section-description {
+    text-align: center !important;
+}
+
+/* ✅ CORRECTION 7: PRICING SECTION - CENTRAGE (PC + MOBILE) */
+
+/* ✅ Titre "Simple, Transparent Pricing" centré */
+.pricing-section .section-header {
+    text-align: center !important;
+}
+
+.pricing-section .section-tag,
+.pricing-section .section-title,
+.pricing-section .section-description {
+    text-align: center !important;
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
    📦 CARDS GÉNÉRIQUES (SANS 3D)
    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
@@ -1131,6 +1159,7 @@ body.dark-mode .dropdown-link-title {
     color: white;
 }
 
+/* ✅ CORRECTION 6: Solutions - Icônes centrées */
 .solution-icon-wrapper {
     display: flex;
     justify-content: center;
@@ -1152,6 +1181,16 @@ body.dark-mode .dropdown-link-title {
     font-weight: 700;
     margin-bottom: 0.75rem;
     color: var(--text-primary, #1e293b);
+}
+
+/* ✅ CORRECTION 6: Solutions - Titres et descriptions centrés */
+.solution-card {
+    text-align: center !important;
+}
+
+.solution-card h3,
+.solution-card p {
+    text-align: center !important;
 }
 
 .feature-description,
@@ -1941,7 +1980,7 @@ body.dark-mode .dropdown-link-title {
 }
 
 /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-   🎨 DEMO SECTION (SANS 3D) - ✅ CORRECTION TITRE VISIBLE
+   🎨 DEMO SECTION (SANS 3D)
    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
 .demo-interactive {
@@ -1960,7 +1999,6 @@ body.dark-mode .dropdown-link-title {
     align-items: center;
 }
 
-/* ✅ CORRECTION : TITRE VISIBLE EN BLANC */
 .demo-title {
     font-size: clamp(2rem, 5vw, 3rem);
     font-weight: 800;
@@ -2041,7 +2079,6 @@ body.dark-mode .dropdown-link-title {
     box-shadow: 0 16px 40px rgba(0, 0, 0, 0.4);
 }
 
-/* ✅ SEARCH INTERFACE - DESKTOP */
 .search-interface {
     background: var(--background-primary, #ffffff);
     border-radius: 24px;
@@ -2481,56 +2518,46 @@ body.dark-mode .dropdown-link-title {
    ✅ CORRECTIONS GLOBALES - MOBILE
    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
-/* Éviter le débordement horizontal */
 html,
 body {
     max-width: 100vw;
     overflow-x: hidden;
 }
 
-/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-   ✅ CORRECTION : MASQUER CTA MOBILE SUR DESKTOP
-   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
-
-/* Par défaut, masquer la section CTA mobile sur DESKTOP */
 .nav-menu-mobile-cta {
     display: none !important;
 }
 
 /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
    📱 RESPONSIVE - MOBILE (768px et moins)
-   ✅ CORRECTIONS COMPLÈTES + 4 NOUVELLES CORRECTIONS
+   ✅ TOUTES LES CORRECTIONS APPLIQUÉES
    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
 @media (max-width: 768px) {
     
     /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-       🍔 NAVIGATION MOBILE - ✅ Z-INDEX CORRIGÉS
+       🍔 NAVIGATION MOBILE
        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
     
     .nav-container {
         padding: 0.875rem 1rem;
     }
     
-    /* ✅ NAVBAR PRINCIPALE - Z-INDEX AJUSTÉ */
     .landing-nav {
         z-index: 10002 !important;
     }
     
-    /* ✅ BOUTON HAMBURGER - Z-INDEX ÉLEVÉ */
     .mobile-menu-btn {
         display: flex;
         position: relative;
         z-index: 10003 !important;
     }
     
-    /* ✅ MASQUER LES CTA DESKTOP */
     #navCtaLoggedOut,
     #navCtaLoggedIn {
         display: none !important;
     }
     
-    /* ✅ MENU PRINCIPAL - Z-INDEX CORRECT */
     .nav-menu {
         position: fixed;
         top: 65px;
@@ -2564,7 +2591,6 @@ body {
         transform: translateX(0);
     }
     
-    /* ✅ LIENS MENU - FOND BLANC VISIBLE */
     .nav-menu .nav-link {
         display: block;
         width: 100%;
@@ -2606,7 +2632,6 @@ body {
         display: none;
     }
     
-    /* ✅ OVERLAY - Z-INDEX SOUS LE MENU */
     body.menu-open::before {
         content: '';
         position: fixed;
@@ -2625,7 +2650,6 @@ body {
         to { opacity: 1; }
     }
     
-    /* ✅ BLOQUER SCROLL BODY */
     body.menu-open {
         overflow: hidden;
         position: fixed;
@@ -2635,7 +2659,7 @@ body {
     }
     
     /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-       ✅ SECTION CTA MOBILE EN BAS - BOUTON DASHBOARD
+       ✅ SECTION CTA MOBILE EN BAS
        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
     
     .nav-menu-mobile-cta {
@@ -2664,7 +2688,6 @@ body {
         border-top: 1px solid rgba(255, 255, 255, 0.1);
     }
     
-    /* ✅ Afficher quand le menu est actif */
     body.menu-open .nav-menu-mobile-cta {
         display: flex !important;
         opacity: 1;
@@ -2672,7 +2695,6 @@ body {
         transform: translateY(0);
     }
     
-    /* ✅ NOUVEAU : BOUTON DASHBOARD MOBILE */
     .mobile-dashboard-btn {
         width: 100% !important;
         max-width: 100% !important;
@@ -2700,7 +2722,6 @@ body {
         font-size: 1.125rem !important;
     }
     
-    /* Boutons login/signup dans la section mobile */
     .nav-menu-mobile-cta .btn-text,
     .nav-menu-mobile-cta .btn-primary-nav {
         width: 100%;
@@ -2711,12 +2732,10 @@ body {
     }
     
     /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-       👤 USER DROPDOWN - BOTTOM SHEET ✅ FORCÉ
+       👤 USER DROPDOWN - BOTTOM SHEET
        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
     
-    /* ✅ DROPDOWN - ÉTAT FERMÉ (par défaut) */
     .user-dropdown-menu {
-        /* Position */
         position: fixed !important;
         top: auto !important;
         bottom: 0 !important;
@@ -2727,46 +2746,30 @@ body {
         min-width: auto !important;
         max-height: 85vh !important;
         margin: 0 !important;
-        
-        /* Apparence */
         background: #ffffff !important;
         border-radius: 20px 20px 0 0 !important;
         border: none !important;
-        
-        /* Scroll */
         overflow-y: auto !important;
         overflow-x: hidden !important;
-        
-        /* État FERMÉ - Important ! */
         transform: translateY(100%) !important;
         opacity: 0 !important;
         visibility: hidden !important;
         pointer-events: none !important;
         display: none !important;
-        
-        /* Transition */
         transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1),
                     opacity 0.4s ease,
                     visibility 0.4s ease !important;
-        
-        /* Z-index */
         z-index: 10005 !important;
-        
-        /* Ombres */
         box-shadow: 
             0 -10px 40px rgba(0, 0, 0, 0.3),
             0 -5px 20px rgba(0, 0, 0, 0.2) !important;
-        
-        /* Origine de transformation */
         transform-origin: center bottom !important;
     }
     
-    /* Dark mode */
     body.dark-mode .user-dropdown-menu {
         background: #1e293b !important;
     }
     
-    /* ✅ ÉTAT OUVERT - FORCER L'APPARITION */
     .user-dropdown-menu.active {
         transform: translateY(0) !important;
         opacity: 1 !important;
@@ -2775,7 +2778,6 @@ body {
         display: block !important;
     }
     
-    /* ✅ OVERLAY - État de base (invisible) */
     .user-dropdown-menu::before {
         content: '';
         position: fixed;
@@ -2791,7 +2793,6 @@ body {
         visibility: hidden;
     }
     
-    /* ✅ OVERLAY - État ouvert (visible) */
     .user-dropdown-menu.active::before {
         background: rgba(0, 0, 0, 0.6) !important;
         opacity: 1 !important;
@@ -2799,7 +2800,6 @@ body {
         pointer-events: auto !important;
     }
     
-    /* ✅ POIGNÉE (Handle) */
     .user-dropdown-menu::after {
         content: '' !important;
         position: absolute !important;
@@ -2818,7 +2818,6 @@ body {
         background: rgba(255, 255, 255, 0.3) !important;
     }
     
-    /* ✅ CONTENU DU DROPDOWN */
     .dropdown-header {
         padding: 2rem 1rem 1rem !important;
         position: relative;
@@ -2837,13 +2836,12 @@ body {
         height: 44px !important;
     }
     
-    /* ✅ FORCER AU-DESSUS DU MENU si les deux sont ouverts */
     body.menu-open .user-dropdown-menu.active {
         z-index: 10006 !important;
     }
     
     /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-       📊 HERO SECTION - ✅ CORRECTION 1: BADGE PLUS BAS
+       📊 HERO SECTION - BADGE DESCENDU
        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
     
     .hero {
@@ -2853,7 +2851,6 @@ body {
         overflow: hidden;
     }
     
-    /* ✅ CORRECTION 1: Badge "New Alphy AI" descendu */
     .announcement-badge {
         margin-top: 2.5rem !important;
         margin-bottom: 2rem !important;
@@ -2899,7 +2896,7 @@ body {
     }
     
     /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-       🤖 ALPHY AI SECTION - ✅ CORRECTION 2: TEXTES CENTRÉS
+       🤖 ALPHY AI - TEXTES CENTRÉS
        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
     
     .alphy-ai-section {
@@ -2910,7 +2907,6 @@ body {
         grid-template-columns: 1fr !important;
     }
     
-    /* ✅ CORRECTION 2: Textes des cartes Alphy AI centrés */
     .capability-item {
         flex-direction: column;
         text-align: center !important;
@@ -2941,47 +2937,46 @@ body {
     }
     
     /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-       🔧 QUANTITATIVE TOOLS - ✅ CORRECTION 3: PLUS DE DÉTAILS
+       🔧 QUANTITATIVE TOOLS - PLUS DE DÉTAILS
        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
     
     .tools-section {
         padding: 4rem 1rem !important;
     }
     
-    /* ✅ CORRECTION 3: Plus de détails sur les cartes tools */
     .tool-card-advanced {
         flex: 0 0 85vw !important;
         min-width: 85vw !important;
         max-width: 85vw !important;
-        min-height: 500px !important; /* ✅ Augmenté de 420px à 500px */
-        padding: 2.5rem 1.75rem !important; /* ✅ Padding augmenté */
+        min-height: 500px !important;
+        padding: 2.5rem 1.75rem !important;
     }
     
     .tool-card-advanced p {
-        margin-bottom: 2.5rem !important; /* ✅ Plus d'espace pour les descriptions */
-        line-height: 1.8 !important; /* ✅ Meilleure lisibilité */
-        font-size: 1.0625rem !important; /* ✅ Texte légèrement plus grand */
+        margin-bottom: 2.5rem !important;
+        line-height: 1.8 !important;
+        font-size: 1.0625rem !important;
     }
     
     .tool-card-advanced h4 {
-        margin-bottom: 1.25rem !important; /* ✅ Plus d'espace après le titre */
-        font-size: 1.625rem !important; /* ✅ Titre plus grand */
+        margin-bottom: 1.25rem !important;
+        font-size: 1.625rem !important;
     }
     
     .tool-icon-advanced {
-        width: 64px !important; /* ✅ Icône plus grande */
+        width: 64px !important;
         height: 64px !important;
         font-size: 1.75rem !important;
         margin-bottom: 1.75rem !important;
     }
     
     /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-       🚀 CTA FINAL - ✅ CORRECTION 4: BOUTON RÉDUIT ET CENTRÉ
+       🚀 CTA FINAL - BOUTON RÉDUIT ET CENTRÉ
        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
     
     .cta-final {
         padding: 4rem 1rem !important;
-        text-align: center !important; /* ✅ Centrage forcé */
+        text-align: center !important;
     }
     
     .cta-content-wrapper {
@@ -2992,7 +2987,6 @@ body {
         text-align: center !important;
     }
     
-    /* ✅ CORRECTION 4: Titre et sous-titre centrés */
     .cta-title {
         text-align: center !important;
         font-size: clamp(1.5rem, 6vw, 2rem);
@@ -3005,7 +2999,6 @@ body {
         line-height: 1.8 !important;
     }
     
-    /* ✅ CORRECTION 4: Boutons centrés et réduits */
     .cta-buttons {
         width: 100% !important;
         justify-content: center !important;
@@ -3015,11 +3008,11 @@ body {
     }
     
     .btn-cta-primary {
-        width: auto !important; /* ✅ Largeur automatique (pas full-width) */
-        max-width: 280px !important; /* ✅ Largeur maximale réduite */
-        padding: 0.875rem 1.75rem !important; /* ✅ Padding réduit */
-        font-size: 0.9375rem !important; /* ✅ Taille de texte réduite */
-        margin: 0 auto !important; /* ✅ Centrage horizontal */
+        width: auto !important;
+        max-width: 280px !important;
+        padding: 0.875rem 1.75rem !important;
+        font-size: 0.9375rem !important;
+        margin: 0 auto !important;
     }
     
     .cta-note {
@@ -3029,7 +3022,6 @@ body {
     
     /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
        ✨ SLIDERS HORIZONTAUX MOBILE
-       Platform Features, Solutions
        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
     
     .features-grid,
@@ -3055,7 +3047,6 @@ body {
         cursor: grabbing;
     }
     
-    /* Masquer la scrollbar */
     .features-grid::-webkit-scrollbar,
     .tools-grid-advanced::-webkit-scrollbar,
     .solutions-grid::-webkit-scrollbar {
@@ -3069,7 +3060,6 @@ body {
         scrollbar-width: none;
     }
     
-    /* ✅ CARTES EN MODE SLIDER */
     .feature-card,
     .solution-card {
         flex: 0 0 85vw !important;
@@ -3095,7 +3085,7 @@ body {
     }
     
     /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-       💰 PRICING SECTION - ✅ CORRECTION ULTRA-RENFORCÉE
+       💰 PRICING SECTION
        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
     
     .pricing-section,
@@ -3250,7 +3240,7 @@ body {
     }
     
     /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-       🎨 DEMO SECTION - ✅ CORRECTION GRAPHIQUES MOBILE
+       🎨 DEMO SECTION
        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
     
     .demo-interactive {
@@ -3356,7 +3346,67 @@ body {
         font-size: 0.8125rem !important;
     }
     
-    /* ✅ INDICATEURS DE SCROLL */
+    /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+       ✅ CORRECTION 5: FOOTER - 2 COLONNES MOBILE (Product + Company)
+       ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+    
+    /* ✅ Footer en 2 colonnes sur mobile */
+    .footer-grid {
+        grid-template-columns: 1fr 1fr !important;
+        gap: 2rem !important;
+        align-items: start !important;
+    }
+    
+    /* ✅ Masquer Brand Col sur mobile */
+    .footer-brand-col {
+        display: none !important;
+    }
+    
+    /* ✅ Masquer la section Tools (2e colonne) */
+    .footer-col:nth-child(3) {
+        display: none !important;
+    }
+    
+    /* ✅ Afficher uniquement Product (2e col) et Company (4e col) */
+    .footer-col:nth-child(2),
+    .footer-col:nth-child(4) {
+        display: block !important;
+    }
+    
+    /* ✅ Titres centrés */
+    .footer-col h4 {
+        text-align: center !important;
+        margin-bottom: 1.25rem !important;
+    }
+    
+    /* ✅ Liens centrés */
+    .footer-col ul {
+        text-align: center !important;
+    }
+    
+    .footer-col ul li {
+        margin-bottom: 1rem !important;
+    }
+    
+    .footer-col ul li a {
+        font-size: 0.9375rem !important;
+    }
+    
+    .footer-bottom {
+        flex-direction: column;
+        gap: 1rem;
+        text-align: center;
+    }
+    
+    .footer-bottom-links {
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+    
+    /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+       ✅ INDICATEURS & AUTRES SECTIONS
+       ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+    
     .features-section::after,
     .tools-section::after,
     .pricing-section::after,
@@ -3421,10 +3471,6 @@ body {
         color: rgba(255, 255, 255, 0.7) !important;
     }
     
-    /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-       ✅ SECTIONS - AGRANDISSEMENT GÉNÉRAL
-       ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
-    
     .features-section,
     .solutions-section {
         padding: 4rem 1rem !important;
@@ -3445,7 +3491,6 @@ body {
         line-height: 1.7 !important;
     }
     
-    /* ✅ TICKER MOBILE */
     .ticker-item {
         padding: 0.5rem 1rem;
         font-size: 0.8125rem;
@@ -3465,28 +3510,6 @@ body {
         padding: 0.2rem 0.5rem;
     }
     
-    /* ✅ FOOTER */
-    .footer-grid {
-        grid-template-columns: 1fr !important;
-        gap: 2rem;
-    }
-    
-    .footer-brand-col {
-        max-width: 100%;
-    }
-    
-    .footer-bottom {
-        flex-direction: column;
-        gap: 1rem;
-        text-align: center;
-    }
-    
-    .footer-bottom-links {
-        flex-direction: column;
-        gap: 0.75rem;
-    }
-    
-    /* ✅ TECH SECTION */
     .tech-grid {
         grid-template-columns: 1fr !important;
         gap: 1rem !important;
@@ -3502,7 +3525,6 @@ body {
         line-height: 1.7 !important;
     }
     
-    /* ✅ CONTAINERS GLOBAUX */
     .container,
     .container-fluid,
     .nav-container,
@@ -3582,7 +3604,6 @@ body {
         padding: 4rem 0.75rem 2rem;
     }
     
-    /* ✅ Badge encore plus descendu sur très petits écrans */
     .announcement-badge {
         margin-top: 3rem !important;
     }
@@ -3608,7 +3629,6 @@ body {
         max-width: 90vw !important;
     }
     
-    /* ✅ Tools cards encore plus d'espace */
     .tool-card-advanced {
         flex: 0 0 90vw !important;
         min-width: 90vw !important;
@@ -3625,7 +3645,6 @@ body {
         font-size: 1.5rem;
     }
     
-    /* ✅ CTA bouton encore plus petit */
     .btn-cta-primary {
         max-width: 240px !important;
         padding: 0.75rem 1.5rem !important;
@@ -3676,6 +3695,6 @@ body {
 }
 
 /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-   ✅ FIN DU FICHIER CSS - VERSION CORRIGÉE
-   4 NOUVELLES CORRECTIONS MOBILES APPLIQUÉES
+   ✅ FIN DU FICHIER CSS - VERSION FINALE
+   TOUTES LES CORRECTIONS APPLIQUÉES
    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
