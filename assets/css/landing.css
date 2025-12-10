@@ -2,13 +2,10 @@
    LANDING.CSS - VERSION MOBILE CORRIGÉE ✅
    AlphaVault AI - Landing Page Responsive
    ✅ CORRECTIONS APPLIQUÉES :
-   1. Menu utilisateur fonctionne sur mobile
-   2. Image "comparable companies" masquée sur mobile
-   3. Sections Features/Tools/Pricing agrandies sur mobile
-   4. ✨ NOUVEAU : Sliders horizontaux sur mobile
-   5. ✅ CORRECTION FINALE : Scroll interne pricing supprimé
-   6. ✅ CORRECTION UTILISATEURS CONNECTÉS : Scroll supprimé pour tous les états
-   7. ✅ CORRECTION DEMO : Titre visible + Graphiques mobile adaptés
+   1. ✨ NOUVEAU : Badge "New Alphy AI" descendu
+   2. ✨ NOUVEAU : Textes Alphy AI centrés
+   3. ✨ NOUVEAU : Plus de détails Quantitative Tools
+   4. ✨ NOUVEAU : Bouton CTA final réduit et centré
    ============================================ */
 
 /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -1970,7 +1967,7 @@ body.dark-mode .dropdown-link-title {
     line-height: 1.2;
     margin-bottom: 1.5rem;
     letter-spacing: -0.02em;
-    color: white !important; /* ✅ FORCÉ EN BLANC */
+    color: white !important;
 }
 
 .highlight-gradient {
@@ -2502,7 +2499,7 @@ body {
 
 /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
    📱 RESPONSIVE - MOBILE (768px et moins)
-   ✅ CORRECTIONS COMPLÈTES + GRAPHIQUES DEMO MOBILE
+   ✅ CORRECTIONS COMPLÈTES + 4 NOUVELLES CORRECTIONS
    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
 @media (max-width: 768px) {
@@ -2846,15 +2843,20 @@ body {
     }
     
     /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-       📊 SECTIONS GÉNÉRALES - ✅ CORRECTION LARGEUR & HAUTEUR
+       📊 HERO SECTION - ✅ CORRECTION 1: BADGE PLUS BAS
        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
     
-    /* ✅ HERO SECTION */
     .hero {
         padding: 5rem 1rem 3rem;
         min-height: auto;
         max-width: 100vw;
         overflow: hidden;
+    }
+    
+    /* ✅ CORRECTION 1: Badge "New Alphy AI" descendu */
+    .announcement-badge {
+        margin-top: 2.5rem !important;
+        margin-bottom: 2rem !important;
     }
     
     .hero-visual,
@@ -2897,14 +2899,142 @@ body {
     }
     
     /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-       ✨ NOUVEAU : SLIDERS HORIZONTAUX MOBILE
-       Platform Features, Tools, Solutions
+       🤖 ALPHY AI SECTION - ✅ CORRECTION 2: TEXTES CENTRÉS
        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
     
-    /* ✅ GRIDS TRANSFORMÉES EN SLIDERS HORIZONTAUX */
+    .alphy-ai-section {
+        padding: 4rem 1rem !important;
+    }
+    
+    .alphy-wrapper {
+        grid-template-columns: 1fr !important;
+    }
+    
+    /* ✅ CORRECTION 2: Textes des cartes Alphy AI centrés */
+    .capability-item {
+        flex-direction: column;
+        text-align: center !important;
+        padding: 1.75rem 1.5rem !important;
+        align-items: center !important;
+    }
+    
+    .capability-icon {
+        margin: 0 auto 1rem auto !important;
+    }
+    
+    .capability-text {
+        text-align: center !important;
+    }
+    
+    .capability-text h4 {
+        text-align: center !important;
+        margin-bottom: 0.5rem !important;
+    }
+    
+    .capability-text p {
+        text-align: center !important;
+        line-height: 1.7 !important;
+    }
+    
+    .alphy-chat-container {
+        height: 500px;
+    }
+    
+    /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+       🔧 QUANTITATIVE TOOLS - ✅ CORRECTION 3: PLUS DE DÉTAILS
+       ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+    
+    .tools-section {
+        padding: 4rem 1rem !important;
+    }
+    
+    /* ✅ CORRECTION 3: Plus de détails sur les cartes tools */
+    .tool-card-advanced {
+        flex: 0 0 85vw !important;
+        min-width: 85vw !important;
+        max-width: 85vw !important;
+        min-height: 500px !important; /* ✅ Augmenté de 420px à 500px */
+        padding: 2.5rem 1.75rem !important; /* ✅ Padding augmenté */
+    }
+    
+    .tool-card-advanced p {
+        margin-bottom: 2.5rem !important; /* ✅ Plus d'espace pour les descriptions */
+        line-height: 1.8 !important; /* ✅ Meilleure lisibilité */
+        font-size: 1.0625rem !important; /* ✅ Texte légèrement plus grand */
+    }
+    
+    .tool-card-advanced h4 {
+        margin-bottom: 1.25rem !important; /* ✅ Plus d'espace après le titre */
+        font-size: 1.625rem !important; /* ✅ Titre plus grand */
+    }
+    
+    .tool-icon-advanced {
+        width: 64px !important; /* ✅ Icône plus grande */
+        height: 64px !important;
+        font-size: 1.75rem !important;
+        margin-bottom: 1.75rem !important;
+    }
+    
+    /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+       🚀 CTA FINAL - ✅ CORRECTION 4: BOUTON RÉDUIT ET CENTRÉ
+       ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+    
+    .cta-final {
+        padding: 4rem 1rem !important;
+        text-align: center !important; /* ✅ Centrage forcé */
+    }
+    
+    .cta-content-wrapper {
+        text-align: center !important;
+    }
+    
+    .cta-content {
+        text-align: center !important;
+    }
+    
+    /* ✅ CORRECTION 4: Titre et sous-titre centrés */
+    .cta-title {
+        text-align: center !important;
+        font-size: clamp(1.5rem, 6vw, 2rem);
+        margin-bottom: 1.5rem !important;
+    }
+    
+    .cta-subtitle {
+        text-align: center !important;
+        margin-bottom: 2.5rem !important;
+        line-height: 1.8 !important;
+    }
+    
+    /* ✅ CORRECTION 4: Boutons centrés et réduits */
+    .cta-buttons {
+        width: 100% !important;
+        justify-content: center !important;
+        align-items: center !important;
+        flex-direction: column !important;
+        gap: 0.75rem !important;
+    }
+    
+    .btn-cta-primary {
+        width: auto !important; /* ✅ Largeur automatique (pas full-width) */
+        max-width: 280px !important; /* ✅ Largeur maximale réduite */
+        padding: 0.875rem 1.75rem !important; /* ✅ Padding réduit */
+        font-size: 0.9375rem !important; /* ✅ Taille de texte réduite */
+        margin: 0 auto !important; /* ✅ Centrage horizontal */
+    }
+    
+    .cta-note {
+        text-align: center !important;
+        margin-top: 1rem !important;
+    }
+    
+    /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+       ✨ SLIDERS HORIZONTAUX MOBILE
+       Platform Features, Solutions
+       ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+    
     .features-grid,
-    .tools-grid-advanced,
-    .solutions-grid {
+    .solutions-grid,
+    .tools-grid-advanced {
         display: flex !important;
         flex-direction: row !important;
         gap: 1rem !important;
@@ -2925,7 +3055,7 @@ body {
         cursor: grabbing;
     }
     
-    /* Masquer la scrollbar tout en gardant la fonctionnalité */
+    /* Masquer la scrollbar */
     .features-grid::-webkit-scrollbar,
     .tools-grid-advanced::-webkit-scrollbar,
     .solutions-grid::-webkit-scrollbar {
@@ -2941,7 +3071,6 @@ body {
     
     /* ✅ CARTES EN MODE SLIDER */
     .feature-card,
-    .tool-card-advanced,
     .solution-card {
         flex: 0 0 85vw !important;
         min-width: 85vw !important;
@@ -2953,14 +3082,12 @@ body {
         min-height: 420px !important;
     }
     
-    /* Première carte : margin-left pour centrage */
     .feature-card:first-child,
     .tool-card-advanced:first-child,
     .solution-card:first-child {
         margin-left: 0.5rem !important;
     }
     
-    /* Dernière carte : margin-right pour espacement final */
     .feature-card:last-child,
     .tool-card-advanced:last-child,
     .solution-card:last-child {
@@ -2969,10 +3096,8 @@ body {
     
     /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
        💰 PRICING SECTION - ✅ CORRECTION ULTRA-RENFORCÉE
-       ✅ SUPPRESSION SCROLL POUR TOUS LES ÉTATS (CONNECTÉ/NON-CONNECTÉ)
        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
     
-    /* ✅ SECTION PRICING - TOUS LES ÉTATS */
     .pricing-section,
     body.logged-in .pricing-section,
     body.user-authenticated .pricing-section,
@@ -2987,7 +3112,6 @@ body {
         max-height: none !important;
     }
     
-    /* ✅ GRID PRICING - TOUS LES ÉTATS */
     .pricing-grid-three,
     body.logged-in .pricing-grid-three,
     body.user-authenticated .pricing-grid-three,
@@ -2995,26 +3119,18 @@ body {
         display: flex !important;
         flex-direction: row !important;
         gap: 1rem !important;
-        
-        /* Scroll horizontal UNIQUEMENT */
         overflow-x: auto !important;
         overflow-y: visible !important;
-        
         scroll-snap-type: x mandatory !important;
         scroll-behavior: smooth !important;
         -webkit-overflow-scrolling: touch !important;
-        
-        /* Dimensions */
         padding: 1rem 1rem 2rem 1rem !important;
         margin: 0 -1rem !important;
         max-width: 100vw !important;
         width: 100vw !important;
-        
-        /* Hauteur automatique */
         height: auto !important;
         min-height: auto !important;
         max-height: none !important;
-        
         cursor: grab;
     }
     
@@ -3024,7 +3140,6 @@ body {
         cursor: grabbing;
     }
     
-    /* ✅ Masquer scrollbar (horizontal) */
     .pricing-grid-three::-webkit-scrollbar,
     body.logged-in .pricing-grid-three::-webkit-scrollbar,
     body.user-authenticated .pricing-grid-three::-webkit-scrollbar {
@@ -3038,54 +3153,39 @@ body {
         scrollbar-width: none !important;
     }
     
-    /* ✅ PRICING CARDS - HAUTEUR AUTOMATIQUE - TOUS LES ÉTATS */
     .pricing-card,
     body.logged-in .pricing-card,
     body.user-authenticated .pricing-card,
     body[data-user-logged="true"] .pricing-card,
     .pricing-grid-three .pricing-card {
-        /* Dimensions horizontales */
         flex: 0 0 85vw !important;
         min-width: 85vw !important;
         max-width: 85vw !important;
-        
-        /* Snap */
         scroll-snap-align: center !important;
-        
-        /* Espacement */
         margin: 0 !important;
         padding: 2.5rem 1.5rem !important;
-        
-        /* ✅ HAUTEUR AUTOMATIQUE - CLEF */
         height: auto !important;
         min-height: auto !important;
         max-height: none !important;
-        
-        /* ✅ PAS DE SCROLL INTERNE */
         overflow: visible !important;
         overflow-x: visible !important;
         overflow-y: visible !important;
-        
-        /* Flexbox */
         display: flex !important;
         flex-direction: column !important;
     }
     
-    /* Première carte */
     .pricing-card:first-child,
     body.logged-in .pricing-card:first-child,
     body.user-authenticated .pricing-card:first-child {
         margin-left: 0.5rem !important;
     }
     
-    /* Dernière carte */
     .pricing-card:last-child,
     body.logged-in .pricing-card:last-child,
     body.user-authenticated .pricing-card:last-child {
         margin-right: 0.5rem !important;
     }
     
-    /* ✅ PRICING HEADER - TOUS LES ÉTATS */
     .pricing-header,
     body.logged-in .pricing-header,
     body.user-authenticated .pricing-header,
@@ -3094,7 +3194,6 @@ body {
         margin-bottom: 2rem !important;
     }
     
-    /* ✅ PRICING PRICE - TOUS LES ÉTATS */
     .pricing-price,
     body.logged-in .pricing-price,
     body.user-authenticated .pricing-price,
@@ -3108,7 +3207,6 @@ body {
         font-size: 3rem !important;
     }
     
-    /* ✅ PRICING FEATURES - HAUTEUR AUTOMATIQUE - TOUS LES ÉTATS */
     .pricing-features,
     body.logged-in .pricing-features,
     body.user-authenticated .pricing-features,
@@ -3116,17 +3214,11 @@ body {
     .pricing-card .pricing-features {
         margin: 0 0 2rem 0 !important;
         padding: 0 !important;
-        
-        /* ✅ PAS DE HAUTEUR FIXE */
         height: auto !important;
         min-height: auto !important;
         max-height: none !important;
-        
-        /* ✅ PAS DE SCROLL */
         overflow: visible !important;
         overflow-y: visible !important;
-        
-        /* Flex grow */
         flex-grow: 1 !important;
     }
     
@@ -3140,7 +3232,6 @@ body {
         line-height: 1.6 !important;
     }
     
-    /* ✅ PRICING CTA - TOUS LES ÉTATS */
     .pricing-cta-wrapper,
     body.logged-in .pricing-cta-wrapper,
     body.user-authenticated .pricing-cta-wrapper,
@@ -3171,7 +3262,6 @@ body {
         gap: 2.5rem !important;
     }
     
-    /* ✅ TITRE DEMO - BLANC FORCÉ */
     .demo-title {
         font-size: clamp(1.5rem, 6vw, 2rem) !important;
         margin-bottom: 1.5rem !important;
@@ -3183,7 +3273,6 @@ body {
         line-height: 1.8 !important;
     }
     
-    /* ✅ SEARCH INTERFACE - ADAPTATION MOBILE */
     .search-interface {
         max-width: 100% !important;
         overflow: hidden !important;
@@ -3201,7 +3290,6 @@ body {
         font-size: 0.9375rem !important;
     }
     
-    /* ✅ RÉSULTATS DE RECHERCHE - MASQUER SUR MOBILE (SAUF 1er) */
     .search-results {
         padding: 1rem !important;
         display: block !important;
@@ -3211,7 +3299,6 @@ body {
         display: none !important;
     }
     
-    /* ✅ PREMIÈRE CARTE - FULL WIDTH MOBILE */
     .company-result-card:first-child {
         display: flex !important;
         flex-direction: column !important;
@@ -3224,7 +3311,6 @@ body {
         gap: 0.75rem !important;
     }
     
-    /* ✅ METRICS - 2 COLONNES AU LIEU DE 4 */
     .company-metrics {
         grid-template-columns: repeat(2, 1fr) !important;
         gap: 0.75rem !important;
@@ -3246,7 +3332,6 @@ body {
         font-size: 0.875rem !important;
     }
     
-    /* ✅ DEMO STATS */
     .demo-stats-grid {
         gap: 1.25rem !important;
     }
@@ -3271,7 +3356,7 @@ body {
         font-size: 0.8125rem !important;
     }
     
-    /* ✅ INDICATEURS DE SCROLL (barre bleue) */
+    /* ✅ INDICATEURS DE SCROLL */
     .features-section::after,
     .tools-section::after,
     .pricing-section::after,
@@ -3289,7 +3374,6 @@ body {
         position: relative;
     }
     
-    /* ✅ AFFORDANCE VISUELLE (ombre sur les bords) */
     .features-grid,
     .tools-grid-advanced,
     .pricing-grid-three,
@@ -3323,7 +3407,6 @@ body {
             rgba(30, 41, 59, 0) 100%);
     }
     
-    /* ✅ TEXTE D'AIDE SWIPE */
     .section-header::after {
         content: '← Swipe for more →';
         display: block;
@@ -3334,7 +3417,6 @@ body {
         letter-spacing: 0.02em;
     }
     
-    /* ✅ DEMO SECTION - TEXTE SWIPE BLANC */
     .demo-interactive .section-header::after {
         color: rgba(255, 255, 255, 0.7) !important;
     }
@@ -3344,11 +3426,7 @@ body {
        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
     
     .features-section,
-    .solutions-section,
-    .tools-section,
-    .alphy-ai-section,
-    .tech-infra-lux,
-    .cta-final {
+    .solutions-section {
         padding: 4rem 1rem !important;
         max-width: 100vw;
         overflow-x: hidden;
@@ -3362,7 +3440,6 @@ body {
         line-height: 1.6 !important;
     }
     
-    .tool-card-advanced p,
     .feature-description {
         margin-bottom: 2rem !important;
         line-height: 1.7 !important;
@@ -3409,39 +3486,6 @@ body {
         gap: 0.75rem;
     }
     
-    /* ✅ ALPHY CHAT */
-    .alphy-chat-container {
-        height: 500px;
-    }
-    
-    .alphy-wrapper {
-        grid-template-columns: 1fr !important;
-    }
-    
-    /* ✅ CAPABILITY ITEMS */
-    .capability-item {
-        flex-direction: column;
-        text-align: center;
-        padding: 1.5rem !important;
-    }
-    
-    .capability-icon {
-        margin: 0 auto;
-    }
-    
-    /* ✅ CTA BUTTONS */
-    .cta-buttons {
-        width: 100%;
-    }
-    
-    .btn-cta-primary,
-    .btn-demo-cta,
-    .btn-alphy-cta {
-        width: 100%;
-        max-width: 100%;
-        padding: 1.125rem 2rem !important;
-    }
-    
     /* ✅ TECH SECTION */
     .tech-grid {
         grid-template-columns: 1fr !important;
@@ -3468,24 +3512,20 @@ body {
         overflow-x: hidden;
     }
     
-    /* ✅ MOCKUP STATS ROW */
     .mockup-stats-row {
         grid-template-columns: 1fr !important;
     }
     
-    /* ✅ ANNOUNCEMENT BADGE */
     .announcement-badge {
         font-size: 0.75rem;
         padding: 0.4rem 0.8rem;
     }
     
-    /* ✅ HERO HEADLINE */
     .hero-headline {
         font-size: clamp(1.75rem, 8vw, 2.5rem);
         margin-bottom: 2rem !important;
     }
     
-    /* ✅ SECTION TITLE */
     .section-title {
         font-size: clamp(1.5rem, 6vw, 2rem);
         margin-bottom: 1rem !important;
@@ -3497,7 +3537,6 @@ body {
         line-height: 1.8 !important;
     }
     
-    /* ✅ STAT CARDS */
     .stat-card {
         padding: 1.125rem !important;
         min-height: 120px !important;
@@ -3508,7 +3547,6 @@ body {
         margin-bottom: 0.75rem !important;
     }
     
-    /* ✅ TECH TITLE */
     .tech-title {
         font-size: 2rem;
         margin-bottom: 1.5rem !important;
@@ -3516,17 +3554,6 @@ body {
     
     .tech-subtitle {
         font-size: 1.0625rem !important;
-        margin-bottom: 3rem !important;
-        line-height: 1.8 !important;
-    }
-    
-    /* ✅ CTA TITLE */
-    .cta-title {
-        font-size: clamp(1.5rem, 6vw, 2rem);
-        margin-bottom: 1.5rem !important;
-    }
-    
-    .cta-subtitle {
         margin-bottom: 3rem !important;
         line-height: 1.8 !important;
     }
@@ -3555,6 +3582,11 @@ body {
         padding: 4rem 0.75rem 2rem;
     }
     
+    /* ✅ Badge encore plus descendu sur très petits écrans */
+    .announcement-badge {
+        margin-top: 3rem !important;
+    }
+    
     .features-section,
     .solutions-section,
     .tools-section,
@@ -3568,7 +3600,6 @@ body {
     
     .feature-card,
     .solution-card,
-    .tool-card-advanced,
     .pricing-card,
     .tech-card {
         padding: 1.5rem 1.125rem !important;
@@ -3577,12 +3608,28 @@ body {
         max-width: 90vw !important;
     }
     
+    /* ✅ Tools cards encore plus d'espace */
+    .tool-card-advanced {
+        flex: 0 0 90vw !important;
+        min-width: 90vw !important;
+        max-width: 90vw !important;
+        min-height: 520px !important;
+        padding: 2.5rem 1.5rem !important;
+    }
+    
     .hero-headline {
         font-size: 1.75rem;
     }
     
     .section-title {
         font-size: 1.5rem;
+    }
+    
+    /* ✅ CTA bouton encore plus petit */
+    .btn-cta-primary {
+        max-width: 240px !important;
+        padding: 0.75rem 1.5rem !important;
+        font-size: 0.875rem !important;
     }
     
     .company-metrics {
@@ -3629,6 +3676,6 @@ body {
 }
 
 /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-   ✅ FIN DU FICHIER CSS CORRIGÉ
-   VERSION TITRE DEMO + GRAPHIQUES MOBILE
+   ✅ FIN DU FICHIER CSS - VERSION CORRIGÉE
+   4 NOUVELLES CORRECTIONS MOBILES APPLIQUÉES
    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
