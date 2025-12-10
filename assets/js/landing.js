@@ -1,6 +1,6 @@
 /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
    LANDING.JS - AlphaVault AI Landing Page
-   ✅ VERSION CORRIGÉE - MENU UTILISATEUR MOBILE
+   ✅ VERSION CORRIGÉE - MENU UTILISATEUR MOBILE + SLIDERS
    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -1040,6 +1040,140 @@ class CTAManager {
 }
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// 📱 MOBILE SLIDER MANAGER (NOUVEAU ✨)
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+class MobileSliderManager {
+    constructor() {
+        this.sliders = document.querySelectorAll('.features-grid, .tools-grid-advanced, .pricing-grid-three, .solutions-grid');
+        this.init();
+    }
+
+    init() {
+        if (window.innerWidth > 768) {
+            console.log('🖥 Mode desktop - Sliders désactivés');
+            return;
+        }
+
+        console.log('📱 Mobile Slider Manager - Initialisation');
+        console.log(`  └─ ${this.sliders.length} slider(s) détecté(s)`);
+
+        this.sliders.forEach((slider, index) => {
+            this.setupSlider(slider, index);
+        });
+
+        // Réinitialiser au resize
+        let resizeTimer;
+        window.addEventListener('resize', () => {
+            clearTimeout(resizeTimer);
+            resizeTimer = setTimeout(() => {
+                if (window.innerWidth <= 768) {
+                    this.sliders.forEach((slider, index) => this.setupSlider(slider, index));
+                }
+            }, 250);
+        });
+
+        console.log('✅ Mobile Sliders activés');
+    }
+
+    setupSlider(slider, index) {
+        // Touch feedback amélioré
+        let isDown = false;
+        let startX;
+        let scrollLeft;
+
+        slider.addEventListener('mousedown', (e) => {
+            isDown = true;
+            slider.style.cursor = 'grabbing';
+            startX = e.pageX - slider.offsetLeft;
+            scrollLeft = slider.scrollLeft;
+        });
+
+        slider.addEventListener('mouseleave', () => {
+            isDown = false;
+            slider.style.cursor = 'grab';
+        });
+
+        slider.addEventListener('mouseup', () => {
+            isDown = false;
+            slider.style.cursor = 'grab';
+        });
+
+        slider.addEventListener('mousemove', (e) => {
+            if (!isDown) return;
+            e.preventDefault();
+            const x = e.pageX - slider.offsetLeft;
+            const walk = (x - startX) * 2;
+            slider.scrollLeft = scrollLeft - walk;
+        });
+
+        // Snap au centre après scroll
+        let scrollTimer;
+        slider.addEventListener('scroll', () => {
+            clearTimeout(scrollTimer);
+            scrollTimer = setTimeout(() => {
+                this.snapToCenter(slider);
+            }, 150);
+        }, { passive: true });
+
+        // Accessibilité keyboard
+        slider.setAttribute('tabindex', '0');
+        slider.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowLeft') {
+                e.preventDefault();
+                this.scrollPrevious(slider);
+            } else if (e.key === 'ArrowRight') {
+                e.preventDefault();
+                this.scrollNext(slider);
+            }
+        });
+
+        console.log(`  ✓ Slider #${index + 1} configuré`);
+    }
+
+    snapToCenter(slider) {
+        const cards = slider.children;
+        if (cards.length === 0) return;
+
+        const sliderCenter = slider.scrollLeft + slider.offsetWidth / 2;
+        let closestCard = cards[0];
+        let minDistance = Math.abs(cards[0].offsetLeft + cards[0].offsetWidth / 2 - sliderCenter);
+
+        for (let i = 1; i < cards.length; i++) {
+            const cardCenter = cards[i].offsetLeft + cards[i].offsetWidth / 2;
+            const distance = Math.abs(cardCenter - sliderCenter);
+            
+            if (distance < minDistance) {
+                minDistance = distance;
+                closestCard = cards[i];
+            }
+        }
+
+        const targetScroll = closestCard.offsetLeft - (slider.offsetWidth - closestCard.offsetWidth) / 2;
+        slider.scrollTo({
+            left: targetScroll,
+            behavior: 'smooth'
+        });
+    }
+
+    scrollNext(slider) {
+        const cardWidth = slider.children[0]?.offsetWidth || 300;
+        slider.scrollBy({
+            left: cardWidth + 16, // card width + gap
+            behavior: 'smooth'
+        });
+    }
+
+    scrollPrevious(slider) {
+        const cardWidth = slider.children[0]?.offsetWidth || 300;
+        slider.scrollBy({
+            left: -(cardWidth + 16),
+            behavior: 'smooth'
+        });
+    }
+}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 // 📊 PERFORMANCE MONITOR
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
@@ -1092,6 +1226,7 @@ class LandingApp {
             this.managers.numberCounter = new NumberCounterManager();
             this.managers.smoothScroll = new SmoothScrollManager();
             this.managers.cta = new CTAManager();
+            this.managers.mobileSlider = new MobileSliderManager(); // ✅ NOUVEAU
             this.managers.performance = new PerformanceMonitor();
 
             console.log('%c✅ Tous les modules chargés avec succès!', 'color: #10B981; font-size: 14px; font-weight: bold;');
