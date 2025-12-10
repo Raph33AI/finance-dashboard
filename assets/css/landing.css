@@ -2502,20 +2502,32 @@ body {
 @media (max-width: 768px) {
     
     /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-       🍔 NAVIGATION MOBILE
+       🍔 NAVIGATION MOBILE - ✅ Z-INDEX CORRIGÉS
        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
     
     .nav-container {
         padding: 0.875rem 1rem;
     }
     
-    /* ✅ CORRECTION : MASQUER LES CTA DE LA NAV PRINCIPALE SUR MOBILE */
+    /* ✅ NAVBAR PRINCIPALE - Z-INDEX AJUSTÉ */
+    .landing-nav {
+        z-index: 10002 !important; /* Au-dessus du menu */
+    }
+    
+    /* ✅ BOUTON HAMBURGER - Z-INDEX ÉLEVÉ */
+    .mobile-menu-btn {
+        display: flex;
+        position: relative;
+        z-index: 10003 !important; /* Au-dessus de tout */
+    }
+    
+    /* ✅ MASQUER LES CTA DESKTOP */
     #navCtaLoggedOut,
     #navCtaLoggedIn {
         display: none !important;
     }
     
-    /* Menu principal - SIDEBAR PLEINE HAUTEUR */
+    /* ✅ MENU PRINCIPAL - Z-INDEX CORRECT */
     .nav-menu {
         position: fixed;
         top: 65px;
@@ -2525,7 +2537,7 @@ body {
         width: 100%;
         max-width: 100vw;
         height: calc(100vh - 65px);
-        background: #ffffff;
+        background: #ffffff !important; /* ✅ Force le fond blanc */
         padding: 1.5rem 1rem 180px 1rem;
         display: flex;
         flex-direction: column;
@@ -2533,7 +2545,7 @@ body {
         gap: 0;
         transform: translateX(-100%);
         transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        z-index: 9998;
+        z-index: 10001 !important; /* ✅ SOUS la navbar mais AU-DESSUS de l'overlay */
         overflow-y: auto;
         overflow-x: hidden;
         border-right: 1px solid rgba(0, 0, 0, 0.08);
@@ -2541,7 +2553,7 @@ body {
     }
     
     body.dark-mode .nav-menu {
-        background: #1e293b;
+        background: #1e293b !important; /* ✅ Force le fond dark */
         border-right: 1px solid rgba(255, 255, 255, 0.1);
     }
     
@@ -2549,7 +2561,7 @@ body {
         transform: translateX(0);
     }
     
-    /* Liens menu mobile */
+    /* ✅ LIENS MENU - FOND BLANC VISIBLE */
     .nav-menu .nav-link {
         display: block;
         width: 100%;
@@ -2557,17 +2569,19 @@ body {
         padding: 1.25rem 1rem;
         font-size: 1.125rem;
         font-weight: 500;
-        color: #1e293b;
+        color: #1e293b !important; /* ✅ Texte foncé sur fond blanc */
         background: transparent;
         border-bottom: 1px solid rgba(0, 0, 0, 0.06);
         transition: all 0.2s ease;
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
+        position: relative;
+        z-index: 1; /* ✅ Au-dessus du fond */
     }
     
     body.dark-mode .nav-menu .nav-link {
-        color: #f8fafc;
+        color: #f8fafc !important; /* ✅ Texte clair en dark mode */
         border-bottom: 1px solid rgba(255, 255, 255, 0.08);
     }
     
@@ -2581,7 +2595,7 @@ body {
     
     .nav-menu .nav-link:hover {
         background: rgba(37, 99, 235, 0.08);
-        color: #2563eb;
+        color: #2563eb !important;
         padding-left: 1.5rem;
     }
     
@@ -2589,14 +2603,36 @@ body {
         display: none;
     }
     
-    /* Bouton hamburger */
-    .mobile-menu-btn {
-        display: flex;
+    /* ✅ OVERLAY - Z-INDEX SOUS LE MENU */
+    body.menu-open::before {
+        content: '';
+        position: fixed;
+        top: 0; /* ✅ Commence en haut (pas à 65px) */
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 10000 !important; /* ✅ SOUS le menu (10001) */
+        animation: fadeIn 0.3s ease;
+        pointer-events: auto; /* ✅ Permet de cliquer pour fermer */
+    }
+    
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+    
+    /* ✅ BLOQUER SCROLL BODY */
+    body.menu-open {
+        overflow: hidden;
+        position: fixed;
+        width: 100%;
+        max-width: 100vw;
+        height: 100vh;
     }
     
     /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-       ✅ SECTION CTA MOBILE EN BAS
-       Position FIXED au bas de l'écran
+       ✅ SECTION CTA MOBILE EN BAS - Z-INDEX CORRECT
        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
     
     .nav-menu-mobile-cta {
@@ -2607,12 +2643,12 @@ body {
         right: 0;
         width: 100%;
         max-width: 100vw;
-        background: #ffffff;
+        background: #ffffff !important; /* ✅ Force le fond blanc */
         padding: 1.25rem 1rem;
         border-top: 1px solid rgba(0, 0, 0, 0.08);
         flex-direction: column;
         gap: 0.875rem;
-        z-index: 10000;
+        z-index: 10002 !important; /* ✅ AU-DESSUS du menu mais SOUS la navbar */
         box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.1);
         opacity: 0;
         visibility: hidden;
@@ -2621,7 +2657,7 @@ body {
     }
     
     body.dark-mode .nav-menu-mobile-cta {
-        background: #1e293b;
+        background: #1e293b !important;
         border-top: 1px solid rgba(255, 255, 255, 0.1);
     }
     
@@ -2693,9 +2729,9 @@ body {
     }
     
     /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-       👤 USER MENU - BOTTOM SHEET
-       ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
-    
+    👤 USER MENU - BOTTOM SHEET - ✅ Z-INDEX CORRECT
+    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+
     /* Dropdown - Bottom sheet */
     .user-dropdown-menu {
         position: fixed;
@@ -2708,29 +2744,29 @@ body {
         min-width: auto;
         max-height: 85vh;
         margin: 0;
-        background: #ffffff;
+        background: #ffffff !important;
         border-radius: 20px 20px 0 0;
         overflow-y: auto;
         overflow-x: hidden;
         transform: translateY(100%);
         transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-        z-index: 10001;
+        z-index: 10004 !important; /* ✅ AU-DESSUS DE TOUT (même de la navbar) */
         box-shadow: 
             0 -10px 40px rgba(0, 0, 0, 0.3),
             0 -5px 20px rgba(0, 0, 0, 0.2);
     }
-    
+
     body.dark-mode .user-dropdown-menu {
-        background: #1e293b;
+        background: #1e293b !important;
     }
-    
+
     .user-dropdown-menu.active {
         opacity: 1;
         visibility: visible;
         transform: translateY(0);
     }
-    
-    /* Overlay */
+
+    /* ✅ OVERLAY DU DROPDOWN - Z-INDEX SOUS LE DROPDOWN */
     .user-dropdown-menu.active::before {
         content: '';
         position: fixed;
@@ -2739,10 +2775,10 @@ body {
         right: 0;
         bottom: 0;
         background: rgba(0, 0, 0, 0.6);
-        z-index: -1;
+        z-index: -1; /* ✅ RELATIF au dropdown (10004), donc = 10003 */
         animation: fadeIn 0.3s ease;
     }
-    
+
     /* Poignée */
     .user-dropdown-menu::after {
         content: '';
@@ -2756,7 +2792,7 @@ body {
         border-radius: 9999px;
         z-index: 2;
     }
-    
+
     body.dark-mode .user-dropdown-menu::after {
         background: rgba(255, 255, 255, 0.3);
     }
