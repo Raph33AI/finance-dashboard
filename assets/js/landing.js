@@ -1,6 +1,6 @@
 /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
    LANDING.JS - AlphaVault AI Landing Page
-   ✅ VERSION CORRIGÉE - MENU UTILISATEUR MOBILE + SLIDERS
+   ✅ VERSION CORRIGÉE - BOUTON DASHBOARD MOBILE + PRICING FIX
    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -94,7 +94,7 @@ class NavigationManager {
 }
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-// 📱 MOBILE MENU MANAGER - VERSION CORRIGÉE
+// 📱 MOBILE MENU MANAGER - ✅ VERSION CORRIGÉE DASHBOARD
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 class MobileMenuManager {
@@ -264,53 +264,30 @@ class MobileMenuManager {
                 mobileCTA.appendChild(mobileSignupBtn);
             }
         } else if (this.navCtaLoggedIn && this.navCtaLoggedIn.style.display !== 'none') {
-            const userProfileBtn = this.navCtaLoggedIn.querySelector('#userProfileButton');
-
-            if (userProfileBtn) {
-                const mobileUserBtn = userProfileBtn.cloneNode(true);
-                mobileUserBtn.id = 'mobileUserProfileButton';
-                
-                // Réactiver l'affichage du texte user sur mobile
-                const userInfoText = mobileUserBtn.querySelector('.user-info-text');
-                if (userInfoText) {
-                    userInfoText.style.display = 'flex';
-                }
-
-                // ✅ CORRECTION : Référence directe au dropdown au lieu de passer par window
-                const dropdownMenu = document.getElementById('userDropdownMenu');
-                
-                mobileUserBtn.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    console.log('🔵 Clic sur profil utilisateur mobile');
-                    
-                    // ✅ SOLUTION 1 : Déclencher directement via le DOM
-                    if (dropdownMenu) {
-                        const isActive = dropdownMenu.classList.contains('active');
-                        console.log('📊 État dropdown:', isActive ? 'OUVERT' : 'FERMÉ');
-                        
-                        if (isActive) {
-                            dropdownMenu.classList.remove('active');
-                            document.body.style.overflow = '';
-                            console.log('❌ Dropdown fermé');
-                        } else {
-                            dropdownMenu.classList.add('active');
-                            document.body.style.overflow = 'hidden';
-                            console.log('✅ Dropdown ouvert');
-                        }
-                    }
-                    
-                    // ✅ SOLUTION 2 (backup) : Via window avec délai
-                    setTimeout(() => {
-                        if (window.FinanceLandingApp?.managers?.userMenu) {
-                            console.log('🔄 Tentative via UserMenuManager');
-                            window.FinanceLandingApp.managers.userMenu.toggleDropdown();
-                        }
-                    }, 50);
-                });
-
-                mobileCTA.appendChild(mobileUserBtn);
-            }
+            // ✅ CORRECTION : BOUTON DASHBOARD AU LIEU DU PROFIL UTILISATEUR
+            
+            console.log('👤 Utilisateur connecté détecté - Création bouton Dashboard');
+            
+            // Créer un bouton "Access Dashboard" stylisé
+            const dashboardBtn = document.createElement('button');
+            dashboardBtn.id = 'mobileDashboardBtn';
+            dashboardBtn.className = 'btn-primary-nav mobile-dashboard-btn';
+            
+            // Icône + Texte
+            dashboardBtn.innerHTML = `
+                <i class="fas fa-chart-line"></i>
+                <span>Access Dashboard</span>
+            `;
+            
+            // Redirection vers le dashboard
+            dashboardBtn.addEventListener('click', () => {
+                console.log('🚀 Redirection vers dashboard-financier.html');
+                window.location.href = 'dashboard-financier.html';
+            });
+            
+            mobileCTA.appendChild(dashboardBtn);
+            
+            console.log('✅ Bouton Dashboard créé avec succès');
         }
 
         if (mobileCTA.children.length > 0) {
@@ -377,7 +354,7 @@ class UserMenuManager {
         this.profileButton = document.getElementById('userProfileButton');
         this.dropdownMenu = document.getElementById('userDropdownMenu');
         this.logoutButton = document.getElementById('logoutButton');
-        this.isDropdownOpen = false; // ✅ État interne
+        this.isDropdownOpen = false;
         
         console.log('📦 Éléments trouvés:');
         console.log('  ├─ Profile Button:', this.profileButton ? '✅' : '❌');
@@ -412,11 +389,7 @@ class UserMenuManager {
                 const isClickInsideDropdown = this.dropdownMenu.contains(e.target);
                 const isClickOnButton = this.profileButton.contains(e.target);
                 
-                // ✅ Vérifier aussi le bouton mobile
-                const mobileUserBtn = document.getElementById('mobileUserProfileButton');
-                const isClickOnMobileButton = mobileUserBtn && mobileUserBtn.contains(e.target);
-                
-                if (!isClickInsideDropdown && !isClickOnButton && !isClickOnMobileButton) {
+                if (!isClickInsideDropdown && !isClickOnButton) {
                     console.log('🔒 Clic en dehors - Fermeture dropdown');
                     this.closeDropdown();
                 }
@@ -1092,7 +1065,7 @@ class CTAManager {
 }
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-// 📱 MOBILE SLIDER MANAGER (NOUVEAU ✨)
+// 📱 MOBILE SLIDER MANAGER
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 class MobileSliderManager {
@@ -1211,7 +1184,7 @@ class MobileSliderManager {
     scrollNext(slider) {
         const cardWidth = slider.children[0]?.offsetWidth || 300;
         slider.scrollBy({
-            left: cardWidth + 16, // card width + gap
+            left: cardWidth + 16,
             behavior: 'smooth'
         });
     }
@@ -1269,7 +1242,7 @@ class LandingApp {
         try {
             this.managers.navigation = new NavigationManager();
             this.managers.mobileMenu = new MobileMenuManager();
-            this.managers.userMenu = new UserMenuManager(); // ✅ Doit être initialisé AVANT authState
+            this.managers.userMenu = new UserMenuManager();
             this.managers.authState = new AuthStateManager();
             this.managers.heroChart = new HeroChartManager();
             this.managers.pricing = new PricingManager();
@@ -1278,7 +1251,7 @@ class LandingApp {
             this.managers.numberCounter = new NumberCounterManager();
             this.managers.smoothScroll = new SmoothScrollManager();
             this.managers.cta = new CTAManager();
-            this.managers.mobileSlider = new MobileSliderManager(); // ✅ NOUVEAU
+            this.managers.mobileSlider = new MobileSliderManager();
             this.managers.performance = new PerformanceMonitor();
 
             console.log('%c✅ Tous les modules chargés avec succès!', 'color: #10B981; font-size: 14px; font-weight: bold;');

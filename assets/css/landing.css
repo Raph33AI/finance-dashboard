@@ -2511,14 +2511,14 @@ body {
     
     /* ✅ NAVBAR PRINCIPALE - Z-INDEX AJUSTÉ */
     .landing-nav {
-        z-index: 10002 !important; /* Au-dessus du menu */
+        z-index: 10002 !important;
     }
     
     /* ✅ BOUTON HAMBURGER - Z-INDEX ÉLEVÉ */
     .mobile-menu-btn {
         display: flex;
         position: relative;
-        z-index: 10003 !important; /* Au-dessus de tout */
+        z-index: 10003 !important;
     }
     
     /* ✅ MASQUER LES CTA DESKTOP */
@@ -2537,7 +2537,7 @@ body {
         width: 100%;
         max-width: 100vw;
         height: calc(100vh - 65px);
-        background: #ffffff !important; /* ✅ Force le fond blanc */
+        background: #ffffff !important;
         padding: 1.5rem 1rem 180px 1rem;
         display: flex;
         flex-direction: column;
@@ -2545,7 +2545,7 @@ body {
         gap: 0;
         transform: translateX(-100%);
         transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        z-index: 10001 !important; /* ✅ SOUS la navbar mais AU-DESSUS de l'overlay */
+        z-index: 10001 !important;
         overflow-y: auto;
         overflow-x: hidden;
         border-right: 1px solid rgba(0, 0, 0, 0.08);
@@ -2553,7 +2553,7 @@ body {
     }
     
     body.dark-mode .nav-menu {
-        background: #1e293b !important; /* ✅ Force le fond dark */
+        background: #1e293b !important;
         border-right: 1px solid rgba(255, 255, 255, 0.1);
     }
     
@@ -2569,7 +2569,7 @@ body {
         padding: 1.25rem 1rem;
         font-size: 1.125rem;
         font-weight: 500;
-        color: #1e293b !important; /* ✅ Texte foncé sur fond blanc */
+        color: #1e293b !important;
         background: transparent;
         border-bottom: 1px solid rgba(0, 0, 0, 0.06);
         transition: all 0.2s ease;
@@ -2577,11 +2577,11 @@ body {
         overflow: hidden;
         text-overflow: ellipsis;
         position: relative;
-        z-index: 1; /* ✅ Au-dessus du fond */
+        z-index: 1;
     }
     
     body.dark-mode .nav-menu .nav-link {
-        color: #f8fafc !important; /* ✅ Texte clair en dark mode */
+        color: #f8fafc !important;
         border-bottom: 1px solid rgba(255, 255, 255, 0.08);
     }
     
@@ -2607,14 +2607,14 @@ body {
     body.menu-open::before {
         content: '';
         position: fixed;
-        top: 0; /* ✅ Commence en haut (pas à 65px) */
+        top: 0;
         left: 0;
         right: 0;
         bottom: 0;
         background: rgba(0, 0, 0, 0.5);
-        z-index: 10000 !important; /* ✅ SOUS le menu (10001) */
+        z-index: 10000 !important;
         animation: fadeIn 0.3s ease;
-        pointer-events: auto; /* ✅ Permet de cliquer pour fermer */
+        pointer-events: auto;
     }
     
     @keyframes fadeIn {
@@ -2632,7 +2632,7 @@ body {
     }
     
     /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-       ✅ SECTION CTA MOBILE EN BAS - Z-INDEX CORRECT
+       ✅ SECTION CTA MOBILE EN BAS - BOUTON DASHBOARD
        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
     
     .nav-menu-mobile-cta {
@@ -2643,12 +2643,12 @@ body {
         right: 0;
         width: 100%;
         max-width: 100vw;
-        background: #ffffff !important; /* ✅ Force le fond blanc */
+        background: #ffffff !important;
         padding: 1.25rem 1rem;
         border-top: 1px solid rgba(0, 0, 0, 0.08);
         flex-direction: column;
         gap: 0.875rem;
-        z-index: 10002 !important; /* ✅ AU-DESSUS du menu mais SOUS la navbar */
+        z-index: 10002 !important;
         box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.1);
         opacity: 0;
         visibility: hidden;
@@ -2669,36 +2669,42 @@ body {
         transform: translateY(0);
     }
     
-    /* Boutons dans la section mobile */
+    /* ✅ NOUVEAU : BOUTON DASHBOARD MOBILE */
+    .mobile-dashboard-btn {
+        width: 100% !important;
+        max-width: 100% !important;
+        justify-content: center !important;
+        padding: 1.125rem 1.5rem !important;
+        font-size: 1.0625rem !important;
+        font-weight: 700 !important;
+        display: flex !important;
+        align-items: center !important;
+        gap: 0.75rem !important;
+        background: linear-gradient(135deg, #2563eb 0%, #8b5cf6 100%) !important;
+        color: white !important;
+        border: none !important;
+        border-radius: 12px !important;
+        box-shadow: 0 8px 20px rgba(37, 99, 235, 0.4) !important;
+        transition: all 0.3s ease !important;
+        cursor: pointer !important;
+    }
+    
+    .mobile-dashboard-btn:active {
+        transform: scale(0.97) !important;
+    }
+    
+    .mobile-dashboard-btn i {
+        font-size: 1.125rem !important;
+    }
+    
+    /* Boutons login/signup dans la section mobile */
     .nav-menu-mobile-cta .btn-text,
-    .nav-menu-mobile-cta .btn-primary-nav,
-    .nav-menu-mobile-cta .user-profile-button {
+    .nav-menu-mobile-cta .btn-primary-nav {
         width: 100%;
         max-width: 100%;
         justify-content: center;
         padding: 1rem 1.5rem;
         font-size: 1rem;
-    }
-    
-    /* User profile button dans mobile menu */
-    .nav-menu-mobile-cta .user-profile-button {
-        display: flex !important;
-        align-items: center;
-        justify-content: center;
-        gap: 0.75rem;
-        background: var(--background-primary, #ffffff);
-        border: 2px solid #2563eb;
-        border-radius: 12px;
-    }
-    
-    body.dark-mode .nav-menu-mobile-cta .user-profile-button {
-        background: var(--background-secondary, #1e293b);
-        border-color: #60a5fa;
-    }
-    
-    /* Afficher le nom user sur mobile dans le menu */
-    .nav-menu-mobile-cta .user-info-text {
-        display: flex !important;
     }
     
     /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -2733,7 +2739,7 @@ body {
         opacity: 0 !important;
         visibility: hidden !important;
         pointer-events: none !important;
-        display: none !important; /* ✅ Caché par défaut */
+        display: none !important;
         
         /* Transition */
         transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1),
@@ -2741,7 +2747,7 @@ body {
                     visibility 0.4s ease !important;
         
         /* Z-index */
-        z-index: 10005 !important; /* ✅ AU-DESSUS DE TOUT */
+        z-index: 10005 !important;
         
         /* Ombres */
         box-shadow: 
@@ -2763,7 +2769,7 @@ body {
         opacity: 1 !important;
         visibility: visible !important;
         pointer-events: auto !important;
-        display: block !important; /* ✅ Force l'affichage */
+        display: block !important;
     }
     
     /* ✅ OVERLAY - État de base (invisible) */
@@ -2774,10 +2780,10 @@ body {
         left: 0;
         right: 0;
         bottom: 0;
-        background: rgba(0, 0, 0, 0); /* ✅ Transparent par défaut */
-        z-index: -1; /* ✅ Derrière le dropdown */
+        background: rgba(0, 0, 0, 0);
+        z-index: -1;
         transition: background 0.3s ease;
-        pointer-events: none; /* ✅ Pas de clic quand fermé */
+        pointer-events: none;
         opacity: 0;
         visibility: hidden;
     }
@@ -2787,7 +2793,7 @@ body {
         background: rgba(0, 0, 0, 0.6) !important;
         opacity: 1 !important;
         visibility: visible !important;
-        pointer-events: auto !important; /* ✅ Permet de cliquer pour fermer */
+        pointer-events: auto !important;
     }
     
     /* ✅ POIGNÉE (Handle) */
@@ -2886,7 +2892,7 @@ body {
     
     /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
        ✨ NOUVEAU : SLIDERS HORIZONTAUX MOBILE
-       Platform Features, Tools, Pricing
+       Platform Features, Tools, Pricing, Solutions
        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
     
     /* ✅ GRIDS TRANSFORMÉES EN SLIDERS HORIZONTAUX */
@@ -2903,7 +2909,7 @@ body {
         scroll-behavior: smooth !important;
         -webkit-overflow-scrolling: touch !important;
         padding: 0.5rem 1rem 1.5rem 1rem !important;
-        margin: 0 -1rem !important; /* Compense le padding de la section */
+        margin: 0 -1rem !important;
         max-width: 100vw !important;
         cursor: grab;
     }
@@ -2931,19 +2937,32 @@ body {
         scrollbar-width: none;
     }
     
-    /* ✅ CARTES EN MODE SLIDER */
+    /* ✅ CARTES EN MODE SLIDER - HAUTEUR PAR DÉFAUT */
     .feature-card,
     .tool-card-advanced,
-    .pricing-card,
     .solution-card {
-        flex: 0 0 85vw !important; /* Largeur fixe 85% de la viewport */
+        flex: 0 0 85vw !important;
         min-width: 85vw !important;
         max-width: 85vw !important;
         scroll-snap-align: center !important;
         margin: 0 !important;
         padding: 2rem 1.5rem !important;
         height: auto !important;
-        min-height: 420px !important; /* Hauteur minimale pour cohérence visuelle */
+        min-height: 420px !important;
+    }
+    
+    /* ✅ CORRECTION 2 : PRICING CARDS AGRANDIES */
+    .pricing-card {
+        flex: 0 0 85vw !important;
+        min-width: 85vw !important;
+        max-width: 85vw !important;
+        scroll-snap-align: center !important;
+        margin: 0 !important;
+        padding: 2rem 1.5rem !important;
+        height: auto !important;
+        min-height: 600px !important; /* ✅ 600px au lieu de 420px */
+        max-height: none !important; /* ✅ Pas de limite de hauteur */
+        overflow: visible !important; /* ✅ Pas de scroll interne */
     }
     
     /* Première carte : margin-left pour centrage */
@@ -2960,6 +2979,45 @@ body {
     .pricing-card:last-child,
     .solution-card:last-child {
         margin-right: 0.5rem !important;
+    }
+    
+    /* ✅ PRICING - CONTENU AGRANDI */
+    .pricing-features {
+        margin: 0 0 2.5rem 0 !important;
+        max-height: none !important;
+        overflow: visible !important;
+    }
+    
+    .pricing-features li {
+        padding: 0.875rem 0 !important;
+        min-height: 48px !important;
+        font-size: 0.9375rem !important;
+        line-height: 1.6 !important;
+    }
+    
+    .pricing-price {
+        margin-bottom: 2.5rem !important;
+    }
+    
+    .pricing-price .amount {
+        font-size: 3.25rem !important;
+        margin-bottom: 1rem !important;
+    }
+    
+    .pricing-header {
+        padding-top: 30px !important;
+        margin-bottom: 2.5rem !important;
+    }
+    
+    .pricing-cta-wrapper {
+        margin-top: auto !important;
+        padding-top: 2rem !important;
+    }
+    
+    .btn-pricing {
+        min-height: 60px !important;
+        padding: 1.125rem 2rem !important;
+        font-size: 1.0625rem !important;
     }
     
     /* ✅ INDICATEURS DE SCROLL (barre bleue) */
@@ -3014,7 +3072,7 @@ body {
             rgba(30, 41, 59, 0) 100%);
     }
     
-    /* ✅ TEXTE D'AIDE SWIPE (Optionnel) */
+    /* ✅ TEXTE D'AIDE SWIPE */
     .section-header::after {
         content: '← Swipe pour plus →';
         display: block;
@@ -3029,21 +3087,18 @@ body {
        ✅ CORRECTION 1 : MASQUER IMAGE DEMO "3 COMPANIES"
        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
     
-    /* Masquer les cartes de résultats "comparable companies" sur mobile */
     .company-result-card:nth-child(n+2) {
         display: none !important;
     }
     
-    /* Optionnel : Ou masquer toute la section results si besoin */
     .search-results {
         display: none !important;
     }
     
     /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-       ✅ CORRECTION 2 : AGRANDIR SECTIONS FEATURES/TOOLS/PRICING
+       ✅ SECTIONS - AGRANDISSEMENT GÉNÉRAL
        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
     
-    /* Augmenter padding des sections */
     .features-section,
     .solutions-section,
     .tools-section,
@@ -3057,7 +3112,6 @@ body {
         overflow-x: hidden;
     }
     
-    /* Augmenter taille des features lists */
     .feature-benefits li,
     .pricing-features li {
         padding: 0.875rem 0 !important;
@@ -3066,17 +3120,6 @@ body {
         line-height: 1.6 !important;
     }
     
-    /* Pricing cards - Retirer hauteur maximale */
-    .pricing-card {
-        max-height: none !important;
-        overflow: visible !important;
-    }
-    
-    .pricing-features {
-        margin: 0 0 2.5rem 0 !important;
-    }
-    
-    /* Tool cards - Plus d'espace pour le contenu */
     .tool-card-advanced p,
     .feature-description {
         margin-bottom: 2rem !important;
@@ -3103,14 +3146,10 @@ body {
         padding: 0.2rem 0.5rem;
     }
     
-    /* ✅ PRICING CARDS */
+    /* ✅ PRICING GRID */
     .pricing-grid-three {
         max-width: 100%;
         padding: 0.5rem 1rem 1.5rem 1rem !important;
-    }
-    
-    .pricing-card {
-        margin-bottom: 0 !important;
     }
     
     /* ✅ FOOTER */
@@ -3255,17 +3294,6 @@ body {
     .stat-value {
         font-size: 1.75rem !important;
         margin-bottom: 0.75rem !important;
-    }
-    
-    /* ✅ PRICING HEADER */
-    .pricing-header {
-        padding-top: 30px !important;
-        margin-bottom: 2.5rem !important;
-    }
-    
-    .pricing-price .amount {
-        font-size: 3.25rem !important;
-        margin-bottom: 1rem !important;
     }
     
     /* ✅ TECH TITLE */
