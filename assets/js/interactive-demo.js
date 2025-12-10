@@ -1,13 +1,9 @@
 /* ============================================
-   INTERACTIVE-DEMO.JS - VERSION MOBILE-OPTIMIZED
-   Main JavaScript pour la page de démo interactive
-   🚀 AVEC GRAPHIQUES ADDITIONNELS ET RESPONSIVE
+   INTERACTIVE-DEMO.JS - VERSION FINALE
+   ✅ GRAPHIQUES SCROLLABLES SUR MOBILE
    ============================================ */
 
-// ============================================
-// DEBUG MODE
-// ============================================
-console.log('🔍 Loading interactive-demo.js MOBILE-OPTIMIZED...');
+console.log('🔍 Loading interactive-demo.js FINAL VERSION...');
 
 // Check dependencies
 if (typeof APP_CONFIG === 'undefined') {
@@ -70,12 +66,33 @@ const DemoApp = {
         aiPredictionChart: null
     },
     
-    // ✅ NOUVEAU : Détection mobile
+    // ✅ Détection mobile
     isMobile: function() {
         return window.innerWidth <= 768;
     },
     
-    // ✅ NOUVEAU : Configuration Highcharts responsive
+    // ✅ NOUVEAU : Wrapper les graphiques dans un container scrollable
+    wrapChartInScrollContainer: function(chartId) {
+        const chartElement = document.getElementById(chartId);
+        if (!chartElement || chartElement.parentElement.classList.contains('chart-scroll-wrapper')) {
+            return; // Déjà wrappé ou n'existe pas
+        }
+        
+        const wrapper = document.createElement('div');
+        wrapper.className = 'chart-scroll-wrapper';
+        
+        const container = document.createElement('div');
+        container.className = 'chart-scroll-container';
+        container.id = chartId + '-container';
+        
+        chartElement.parentNode.insertBefore(wrapper, chartElement);
+        wrapper.appendChild(container);
+        container.appendChild(chartElement);
+        
+        console.log(`📱 Wrapped chart ${chartId} in scroll container`);
+    },
+    
+    // ✅ Configuration Highcharts responsive avec largeur minimale sur mobile
     getResponsiveChartConfig: function() {
         const isMobile = this.isMobile();
         
@@ -83,6 +100,8 @@ const DemoApp = {
             chart: {
                 backgroundColor: 'transparent',
                 height: isMobile ? 250 : 400,
+                // ✅ Sur mobile, définir une largeur minimale
+                width: isMobile ? 600 : null,
                 style: {
                     fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif"
                 }
@@ -96,7 +115,7 @@ const DemoApp = {
             },
             credits: { enabled: false },
             legend: {
-                enabled: !isMobile,
+                enabled: true,
                 itemStyle: {
                     color: getComputedStyle(document.documentElement).getPropertyValue('--text-primary'),
                     fontSize: isMobile ? '0.75rem' : '0.875rem'
@@ -144,27 +163,6 @@ const DemoApp = {
             },
             scrollbar: {
                 enabled: !isMobile
-            },
-            responsive: {
-                rules: [{
-                    condition: {
-                        maxWidth: 768
-                    },
-                    chartOptions: {
-                        legend: {
-                            enabled: false
-                        },
-                        rangeSelector: {
-                            enabled: false
-                        },
-                        navigator: {
-                            enabled: false
-                        },
-                        scrollbar: {
-                            enabled: false
-                        }
-                    }
-                }]
             }
         };
     },
@@ -174,7 +172,7 @@ const DemoApp = {
     // ============================================
     init: function() {
         try {
-            console.log('🚀 Initializing Interactive Demo MOBILE-OPTIMIZED...');
+            console.log('🚀 Initializing Interactive Demo FINAL VERSION...');
             
             // Initialize API Client
             this.apiClient = new FinanceAPIClient({
@@ -195,10 +193,10 @@ const DemoApp = {
             // Initialize first tool
             this.switchTool('company-search');
             
-            // ✅ NOUVEAU : Listener de redimensionnement
+            // Setup resize listener
             this.setupResizeListener();
             
-            console.log('✅ Interactive Demo MOBILE-OPTIMIZED initialized successfully!');
+            console.log('✅ Interactive Demo FINAL VERSION initialized successfully!');
             
         } catch (error) {
             console.error('❌ Initialization error:', error);
@@ -206,7 +204,6 @@ const DemoApp = {
         }
     },
     
-    // ✅ NOUVEAU : Écouter le redimensionnement
     setupResizeListener: function() {
         let resizeTimeout;
         window.addEventListener('resize', () => {
@@ -218,7 +215,6 @@ const DemoApp = {
         });
     },
     
-    // ✅ NOUVEAU : Mettre à jour tous les graphiques
     reflowAllCharts: function() {
         Object.keys(this.charts).forEach(key => {
             if (this.charts[key] && this.charts[key].reflow) {
@@ -293,7 +289,7 @@ const DemoApp = {
     },
     
     // ============================================
-    // COMPANY SEARCH - AMÉLIORÉ AVEC GRAPHIQUES
+    // COMPANY SEARCH
     // ============================================
     setupCompanySearchListeners: function() {
         const input = document.getElementById('companySearchInput');
@@ -600,8 +596,6 @@ const DemoApp = {
             
             if (quoteData && quoteData.symbol) {
                 this.displayCompanyResults(quoteData);
-                
-                // Charger les graphiques additionnels
                 await this.loadCompanyExtraCharts(trimmedSymbol);
             } else {
                 throw new Error('No data found');
@@ -676,7 +670,6 @@ const DemoApp = {
         this.showNotification(`✅ Loaded data for ${quoteData.symbol}`, 'success');
     },
     
-    // Graphiques additionnels pour Company Search
     loadCompanyExtraCharts: async function(symbol) {
         console.log('📊 Loading extra charts for:', symbol);
         
@@ -689,6 +682,10 @@ const DemoApp = {
             const timeSeriesData = await this.apiClient.getTimeSeries(symbol, '1day', '90');
             
             if (timeSeriesData && timeSeriesData.data && timeSeriesData.data.length > 0) {
+                // ✅ Wrapper les graphiques AVANT de les rendre
+                this.wrapChartInScrollContainer('companyPerformanceChart');
+                this.wrapChartInScrollContainer('companyRatingsChart');
+                
                 this.renderCompanyPerformanceChart(symbol, timeSeriesData.data);
                 this.renderCompanyRatingsChart(symbol);
             }
@@ -717,7 +714,6 @@ const DemoApp = {
             y: (Math.random() - 0.5) * 10 + i * 0.1
         }));
         
-        // ✅ Configuration responsive
         const baseConfig = this.getResponsiveChartConfig();
         
         this.charts.companyPerformance = Highcharts.chart('companyPerformanceChart', Object.assign({}, baseConfig, {
@@ -755,7 +751,7 @@ const DemoApp = {
                 color: '#3B82F6',
                 lineWidth: this.isMobile() ? 2 : 3
             }, {
-                name: 'S&P 500 (simulated)',
+                name: 'S&P 500',
                 data: sp500Performance,
                 color: '#94A3B8',
                 lineWidth: this.isMobile() ? 1.5 : 2,
@@ -793,7 +789,7 @@ const DemoApp = {
             yAxis: Object.assign({}, baseConfig.yAxis, {
                 min: 0,
                 title: {
-                    text: 'Number of Analysts',
+                    text: 'Analysts',
                     style: baseConfig.yAxis.title.style
                 }
             }),
@@ -870,6 +866,11 @@ const DemoApp = {
             
             if (quoteData && quoteData.symbol) {
                 this.displayLiveQuote(quoteData);
+                
+                // ✅ Wrapper AVANT de charger le graphique
+                this.wrapChartInScrollContainer('liveQuoteChart');
+                this.wrapChartInScrollContainer('sentimentGauge');
+                
                 await this.loadQuoteChart(trimmedSymbol);
                 this.renderMarketSentiment(trimmedSymbol, quoteData);
             } else {
@@ -1150,6 +1151,10 @@ const DemoApp = {
                 this.updatePortfolioDisplay();
                 
                 if (this.portfolio.length >= 2) {
+                    // ✅ Wrapper AVANT de charger
+                    this.wrapChartInScrollContainer('correlationHeatmap');
+                    this.wrapChartInScrollContainer('portfolioPerformanceChart');
+                    
                     this.loadPortfolioAdvancedCharts();
                 }
                 
@@ -1266,6 +1271,8 @@ const DemoApp = {
             `;
         }
         
+        // ✅ Wrapper AVANT de mettre à jour le graphique
+        this.wrapChartInScrollContainer('portfolioAllocationChart');
         this.updatePortfolioChart();
     },
     
@@ -1292,7 +1299,8 @@ const DemoApp = {
                 type: 'pie'
             }),
             title: {
-                text: null
+                text: 'Portfolio Allocation',
+                style: baseConfig.title.style
             },
             tooltip: {
                 pointFormat: '<b>${point.y:,.2f}</b> ({point.percentage}%)'
@@ -1370,7 +1378,8 @@ const DemoApp = {
                 height: isMobile ? 250 : 400
             }),
             title: {
-                text: null
+                text: 'Portfolio Correlation Matrix',
+                style: baseConfig.title.style
             },
             xAxis: Object.assign({}, baseConfig.xAxis, {
                 categories: symbols
@@ -1453,7 +1462,8 @@ const DemoApp = {
         
         this.charts.portfolioPerformance = Highcharts.stockChart('portfolioPerformanceChart', Object.assign({}, baseConfig, {
             title: {
-                text: null
+                text: 'Portfolio Performance',
+                style: baseConfig.title.style
             },
             xAxis: Object.assign({}, baseConfig.xAxis, {
                 type: 'datetime'
@@ -1484,7 +1494,7 @@ const DemoApp = {
     },
 
     // ============================================
-    // TECHNICAL ANALYSIS TOOL - COMPLET
+    // TECHNICAL ANALYSIS TOOL
     // ============================================
     setupTechnicalListeners: function() {
         const btnAnalyze = document.getElementById('btnAnalyze');
@@ -1551,6 +1561,10 @@ const DemoApp = {
             
             if (dataArray && dataArray.length > 0) {
                 console.log('✅ Using data array with', dataArray.length, 'items');
+                
+                // ✅ Wrapper AVANT de rendre
+                this.wrapChartInScrollContainer('technicalChart');
+                
                 this.renderTechnicalChart(dataArray, symbol);
                 this.generateTechnicalSignals(symbol, dataArray);
             } else {
@@ -1564,7 +1578,7 @@ const DemoApp = {
     },
     
     renderTechnicalChart: function(data, symbol) {
-        console.log('📊 === TECHNICAL CHART RENDERING (MOBILE-OPTIMIZED) ===');
+        console.log('📊 === TECHNICAL CHART RENDERING (SCROLLABLE) ===');
         
         if (this.charts.technical) {
             this.charts.technical.destroy();
@@ -1705,10 +1719,6 @@ const DemoApp = {
             }
         }
     },
-    
-    // ============================================
-    // TECHNICAL INDICATORS
-    // ============================================
     
     toggleIndicator: function(indicatorId, isEnabled) {
         console.log('🔄 Toggle indicator:', indicatorId, isEnabled);
@@ -2327,6 +2337,9 @@ const DemoApp = {
             beta
         });
         
+        // ✅ Wrapper AVANT de simuler
+        this.wrapChartInScrollContainer('monteCarloChart');
+        
         this.runMonteCarloSimulation({
             portfolioValue,
             expectedReturn,
@@ -2418,7 +2431,7 @@ const DemoApp = {
         
         const { portfolioValue, expectedReturn, volatility, timeHorizon } = params;
         
-        const numSimulations = this.isMobile() ? 50 : 100; // Moins de simulations sur mobile
+        const numSimulations = this.isMobile() ? 50 : 100;
         const dailyReturn = expectedReturn / 252 / 100;
         const dailyVol = volatility / Math.sqrt(252) / 100;
         
@@ -2734,6 +2747,9 @@ const DemoApp = {
         `;
         
         if (timeSeriesData && timeSeriesData.data) {
+            // ✅ Wrapper AVANT de rendre
+            this.wrapChartInScrollContainer('predictionChartContainer');
+            
             this.renderAIPredictionChart(symbol, timeSeriesData.data, {
                 currentPrice,
                 prediction7d,
@@ -2993,7 +3009,7 @@ const DemoApp = {
         console.log('⌨ Keyboard shortcuts enabled!');
     }
     
-}; // ⚠ FIN de l'objet DemoApp
+};
 
 // ============================================
 // INITIALIZE ON DOM READY
@@ -3018,61 +3034,38 @@ window.DemoApp = DemoApp;
 // ============================================
 console.log('%c╔══════════════════════════════════════════════════════════╗', 'color: #667eea; font-weight: bold;');
 console.log('%c║                                                          ║', 'color: #667eea; font-weight: bold;');
-console.log('%c║  🚀 FinancePro Interactive Demo - MOBILE-OPTIMIZED  ║', 'color: #667eea; font-weight: bold;');
+console.log('%c║     🚀 FinancePro Demo - SCROLLABLE CHARTS v1.0         ║', 'color: #667eea; font-weight: bold;');
 console.log('%c║                                                          ║', 'color: #667eea; font-weight: bold;');
 console.log('%c╚══════════════════════════════════════════════════════════╝', 'color: #667eea; font-weight: bold;');
 console.log('');
-console.log('%c✨ FEATURES LOADED:', 'color: #8b5cf6; font-size: 14px; font-weight: bold;');
-console.log('%c  📱 Fully Responsive Design', 'color: #10b981; font-size: 12px;');
-console.log('%c  📊 Adaptive Charts for Mobile & Desktop', 'color: #10b981; font-size: 12px;');
-console.log('%c  ⚡ Performance Optimized for Smartphones', 'color: #10b981; font-size: 12px;');
+console.log('%c✨ FEATURES:', 'color: #8b5cf6; font-size: 14px; font-weight: bold;');
+console.log('%c  📱 Scrollable charts on mobile (600px min-width)', 'color: #10b981; font-size: 12px;');
+console.log('%c  🎨 Responsive design (100% adaptive)', 'color: #10b981; font-size: 12px;');
+console.log('%c  ⚡ Auto-wrap charts in scroll containers', 'color: #10b981; font-size: 12px;');
 console.log('');
-console.log('%c📱 MOBILE FEATURES:', 'color: #f59e0b; font-size: 14px; font-weight: bold;');
-console.log('%c  ✅ Touch-friendly interfaces', 'color: #64748b; font-size: 12px;');
-console.log('%c  ✅ Reduced chart complexity on small screens', 'color: #64748b; font-size: 12px;');
-console.log('%c  ✅ Optimized font sizes & spacing', 'color: #64748b; font-size: 12px;');
-console.log('%c  ✅ Auto-reflow on screen rotation', 'color: #64748b; font-size: 12px;');
-console.log('');
-console.log('%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'color: #667eea;');
-console.log('%cBuilt with ❤ by FinancePro Team | Mobile-First Approach', 'color: #8b5cf6; font-size: 12px; font-style: italic;');
 console.log('%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'color: #667eea;');
 
-// ============================================
-// PERFORMANCE MONITORING
-// ============================================
 if (window.performance && window.performance.now) {
     const loadTime = window.performance.now();
-    console.log(`⚡ Page fully loaded in ${loadTime.toFixed(2)}ms`);
+    console.log(`⚡ Loaded in ${loadTime.toFixed(2)}ms`);
 }
 
-// ============================================
-// ERROR HANDLING GLOBAL
-// ============================================
 window.addEventListener('error', (event) => {
-    console.error('Global error caught:', event.error);
-    
+    console.error('Global error:', event.error);
     if (DemoApp && DemoApp.showNotification) {
-        DemoApp.showNotification('An unexpected error occurred. Please refresh the page.', 'error');
+        DemoApp.showNotification('An error occurred. Please refresh.', 'error');
     }
 });
 
-// ============================================
-// UNHANDLED PROMISE REJECTION
-// ============================================
 window.addEventListener('unhandledrejection', (event) => {
-    console.error('Unhandled promise rejection:', event.reason);
-    
+    console.error('Unhandled rejection:', event.reason);
     if (DemoApp && DemoApp.showNotification) {
-        DemoApp.showNotification('A network error occurred. Please check your connection.', 'warning');
+        DemoApp.showNotification('Network error. Check connection.', 'warning');
     }
 });
 
-// ============================================
-// CLEANUP ON PAGE UNLOAD
-// ============================================
 window.addEventListener('beforeunload', () => {
     console.log('👋 Cleaning up...');
-    
     if (DemoApp && DemoApp.charts) {
         Object.keys(DemoApp.charts).forEach(key => {
             if (DemoApp.charts[key] && DemoApp.charts[key].destroy) {
@@ -3082,7 +3075,4 @@ window.addEventListener('beforeunload', () => {
     }
 });
 
-// ============================================
-// FIN DU FICHIER
-// ============================================
-console.log('%c✅ interactive-demo.js (MOBILE-OPTIMIZED) loaded successfully!', 'color: #10b981; font-size: 16px; font-weight: bold;');
+console.log('%c✅ interactive-demo.js (SCROLLABLE VERSION) loaded!', 'color: #10b981; font-size: 16px; font-weight: bold;');

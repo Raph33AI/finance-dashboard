@@ -1,7 +1,6 @@
 /* ============================================
    INTERACTIVE-DEMO.CSS
-   Styles pour la page de démo interactive
-   ✅ VERSION MOBILE-OPTIMIZED
+   ✅ VERSION FINALE - GRAPHIQUES SCROLLABLES MOBILE
    ============================================ */
 
 /* ============================================
@@ -395,6 +394,149 @@ body.dark-mode .tool-icon {
 .tool-header .highlight-text {
     color: var(--demo-text-light);
     font-weight: 600;
+}
+
+/* ============================================
+   ✅ NOUVEAU : WRAPPER SCROLLABLE POUR GRAPHIQUES
+   ============================================ */
+.chart-scroll-wrapper {
+    width: 100%;
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+    margin: 1.5rem 0;
+    position: relative;
+}
+
+/* Indicateur visuel de scroll */
+.chart-scroll-wrapper::after {
+    content: '← Swipe to see more →';
+    position: absolute;
+    bottom: 0.5rem;
+    right: 1rem;
+    font-size: 0.75rem;
+    color: var(--text-tertiary);
+    background: var(--background-primary);
+    padding: 0.25rem 0.75rem;
+    border-radius: var(--radius-sm);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+}
+
+@media (max-width: 768px) {
+    .chart-scroll-wrapper::after {
+        opacity: 1;
+    }
+}
+
+.chart-scroll-container {
+    min-width: 100%;
+    width: auto;
+}
+
+/* Sur mobile, définir une largeur minimale pour les graphiques */
+@media (max-width: 768px) {
+    .chart-scroll-container {
+        min-width: 600px; /* Largeur minimale pour rester lisible */
+    }
+}
+
+@media (max-width: 480px) {
+    .chart-scroll-container {
+        min-width: 500px;
+    }
+}
+
+/* Customisation de la scrollbar */
+.chart-scroll-wrapper::-webkit-scrollbar {
+    height: 8px;
+}
+
+.chart-scroll-wrapper::-webkit-scrollbar-track {
+    background: var(--background-tertiary);
+    border-radius: var(--radius-sm);
+}
+
+.chart-scroll-wrapper::-webkit-scrollbar-thumb {
+    background: var(--primary-color);
+    border-radius: var(--radius-sm);
+}
+
+.chart-scroll-wrapper::-webkit-scrollbar-thumb:hover {
+    background: var(--primary-dark);
+}
+
+/* ============================================
+   CONTAINERS GRAPHIQUES - CORRECTION COMPLÈTE
+   ============================================ */
+#companyExtraCharts,
+#portfolioCorrelation,
+#portfolioPerformance,
+#monteCarloSection,
+#marketSentiment,
+#aiPredictionChart {
+    margin: 2rem 0;
+}
+
+/* Tous les containers de graphiques */
+#companyPerformanceChart,
+#companyRatingsChart,
+#sentimentGauge,
+#correlationHeatmap,
+#portfolioPerformanceChart,
+#monteCarloChart,
+#predictionChartContainer,
+#liveQuoteChart,
+#technicalChart,
+#portfolioAllocationChart {
+    width: 100%;
+    height: auto;
+    min-height: 300px;
+}
+
+/* Sur desktop, hauteur fixe */
+@media (min-width: 769px) {
+    #companyPerformanceChart,
+    #companyRatingsChart,
+    #correlationHeatmap,
+    #portfolioPerformanceChart,
+    #monteCarloChart,
+    #predictionChartContainer,
+    #liveQuoteChart,
+    #technicalChart {
+        min-height: 400px;
+    }
+    
+    #sentimentGauge {
+        min-height: 250px;
+    }
+    
+    #portfolioAllocationChart {
+        min-height: 400px;
+    }
+}
+
+/* Sur mobile, hauteur réduite */
+@media (max-width: 768px) {
+    #companyPerformanceChart,
+    #companyRatingsChart,
+    #correlationHeatmap,
+    #portfolioPerformanceChart,
+    #monteCarloChart,
+    #predictionChartContainer,
+    #liveQuoteChart,
+    #technicalChart {
+        min-height: 250px;
+    }
+    
+    #sentimentGauge {
+        min-height: 200px;
+    }
+    
+    #portfolioAllocationChart {
+        min-height: 250px;
+    }
 }
 
 /* ============================================
@@ -827,35 +969,6 @@ body.dark-mode .company-result-card.highlight {
     color: var(--text-primary);
 }
 
-/* ✅ NOUVEAUX CONTAINERS GRAPHIQUES - CORRECTION MOBILE */
-#companyExtraCharts,
-#portfolioCorrelation,
-#portfolioPerformance,
-#monteCarloSection,
-#marketSentiment,
-#aiPredictionChart {
-    max-width: 100%;
-    overflow-x: hidden;
-    margin: 2rem 0;
-}
-
-#companyPerformanceChart,
-#companyRatingsChart,
-#sentimentGauge,
-#correlationHeatmap,
-#portfolioPerformanceChart,
-#monteCarloChart,
-#predictionChartContainer,
-#liveQuoteChart,
-#technicalChart,
-#portfolioAllocationChart {
-    max-width: 100%;
-    width: 100%;
-    height: auto;
-    min-height: 300px;
-    overflow-x: hidden;
-}
-
 /* ============================================
    LIVE QUOTES INTERFACE
    ============================================ */
@@ -973,8 +1086,6 @@ body.dark-mode .company-result-card.highlight {
     border: 1px solid var(--border-color);
     border-radius: var(--radius-lg);
     padding: 1rem;
-    max-width: 100%;
-    overflow-x: hidden;
 }
 
 /* ============================================
@@ -1778,19 +1889,6 @@ body.dark-mode .demo-footer {
     .tools-grid {
         grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
     }
-    
-    /* Graphiques - Réduction hauteur */
-    #companyPerformanceChart,
-    #companyRatingsChart,
-    #sentimentGauge,
-    #correlationHeatmap,
-    #portfolioPerformanceChart,
-    #monteCarloChart,
-    #predictionChartContainer,
-    #liveQuoteChart,
-    #technicalChart {
-        min-height: 250px;
-    }
 }
 
 /* ✅ SMARTPHONES (768px et moins) */
@@ -1896,31 +1994,6 @@ body.dark-mode .demo-footer {
         flex-direction: column;
         gap: 0.75rem;
     }
-    
-    /* ✅ GRAPHIQUES MOBILE - ADAPTATION COMPLÈTE */
-    #companyPerformanceChart,
-    #companyRatingsChart,
-    #sentimentGauge,
-    #correlationHeatmap,
-    #portfolioPerformanceChart,
-    #monteCarloChart,
-    #predictionChartContainer,
-    #liveQuoteChart,
-    #technicalChart,
-    #portfolioAllocationChart {
-        min-height: 250px;
-        max-height: 350px;
-    }
-    
-    .chart-area {
-        padding: 0.5rem;
-        min-height: 250px;
-    }
-    
-    /* Grilles responsive */
-    .ai-insight-content > div[style*="grid"] {
-        grid-template-columns: 1fr !important;
-    }
 }
 
 /* ✅ PETITS SMARTPHONES (480px et moins) */
@@ -1983,21 +2056,6 @@ body.dark-mode .demo-footer {
         max-width: calc(100% - 40px);
         right: 20px;
         left: 20px;
-    }
-    
-    /* ✅ GRAPHIQUES PETITS ÉCRANS */
-    #companyPerformanceChart,
-    #companyRatingsChart,
-    #sentimentGauge,
-    #correlationHeatmap,
-    #portfolioPerformanceChart,
-    #monteCarloChart,
-    #predictionChartContainer,
-    #liveQuoteChart,
-    #technicalChart,
-    #portfolioAllocationChart {
-        min-height: 200px;
-        max-height: 300px;
     }
 }
 
@@ -2273,6 +2331,14 @@ body.dark-mode ::-webkit-scrollbar-thumb {
     background: var(--background-tertiary);
 }
 
+body.dark-mode .chart-scroll-wrapper::-webkit-scrollbar-track {
+    background: var(--background-tertiary);
+}
+
+body.dark-mode .chart-scroll-wrapper::-webkit-scrollbar-thumb {
+    background: var(--primary-color);
+}
+
 body.dark-mode ::-webkit-scrollbar-thumb:hover {
     background: #475569;
 }
@@ -2317,6 +2383,10 @@ body.dark-mode .quote-price {
     
     body {
         background: white;
+    }
+    
+    .chart-scroll-wrapper::after {
+        display: none;
     }
 }
 
