@@ -3238,6 +3238,38 @@ body {
         padding: 1rem 2rem !important;
         font-size: 1rem !important;
     }
+
+    /* ✅ Réduire l'espace APRÈS les cartes pricing */
+    .pricing-grid-three,
+    body.logged-in .pricing-grid-three,
+    body.user-authenticated .pricing-grid-three {
+        margin-bottom: 1.5rem !important;
+        padding-bottom: 1rem !important;
+    }
+    
+    /* ✅ Réduire l'espace du tableau comparatif (si présent) */
+    .pricing-comparison-table,
+    .comparison-table,
+    .features-comparison,
+    .pricing-features-table {
+        margin-top: 1rem !important;
+        margin-bottom: 1rem !important;
+        padding-top: 0.5rem !important;
+        padding-bottom: 0.5rem !important;
+    }
+    
+    /* ✅ Réduire le padding de la section pricing */
+    .pricing-section,
+    body.logged-in .pricing-section,
+    body.user-authenticated .pricing-section {
+        padding-bottom: 2rem !important; /* Au lieu de 4rem */
+    }
+    
+    /* ✅ Réduire l'espace du CTA "Ready to transform" */
+    .cta-final {
+        padding-top: 2rem !important; /* Au lieu de 4rem */
+        margin-top: 0 !important;
+    }
     
     /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
        🎨 DEMO SECTION
