@@ -6,6 +6,7 @@
    2. Image "comparable companies" masquée sur mobile
    3. Sections Features/Tools/Pricing agrandies sur mobile
    4. ✨ NOUVEAU : Sliders horizontaux sur mobile
+   5. ✅ CORRECTION FINALE : Scroll interne pricing supprimé
    ============================================ */
 
 /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -1477,256 +1478,6 @@ body.dark-mode .dropdown-link-title {
 }
 
 /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-   📱 RESPONSIVE PRICING - MOBILE (768px et moins)
-   ✅ CORRECTIONS : SLIDER + HAUTEUR AGRANDIE
-   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
-
-@media (max-width: 768px) {
-    
-    /* ✅ Section pricing - Retirer toutes les contraintes de hauteur */
-    .pricing-section {
-        padding: 5rem 1rem !important; /* ✅ Augmenté pour plus d'espace */
-        max-width: 100vw;
-        overflow-x: hidden;
-        overflow-y: visible !important; /* ✅ Pas de scroll vertical */
-        min-height: auto !important;
-        max-height: none !important;
-        height: auto !important;
-    }
-    
-    /* ✅ Container de la grille pricing - Mode slider horizontal */
-    .pricing-grid-three {
-        max-width: 100%;
-        display: flex !important;
-        flex-direction: row !important;
-        gap: 1rem !important;
-        grid-template-columns: none !important; /* ✅ Désactiver la grille */
-        overflow-x: auto !important;
-        overflow-y: visible !important; /* ✅ Pas de scroll vertical */
-        scroll-snap-type: x mandatory !important;
-        scroll-behavior: smooth !important;
-        -webkit-overflow-scrolling: touch !important;
-        padding: 0.5rem 1rem 2rem 1rem !important;
-        margin: 0 -1rem !important;
-        min-height: auto !important;
-        max-height: none !important;
-        height: auto !important;
-        cursor: grab;
-    }
-    
-    .pricing-grid-three:active {
-        cursor: grabbing;
-    }
-    
-    /* Masquer la scrollbar tout en gardant la fonctionnalité */
-    .pricing-grid-three::-webkit-scrollbar {
-        display: none;
-    }
-    
-    .pricing-grid-three {
-        -ms-overflow-style: none;
-        scrollbar-width: none;
-    }
-    
-    /* ✅ Cartes pricing - Hauteur augmentée à 700px */
-    .pricing-card {
-        flex: 0 0 85vw !important;
-        min-width: 85vw !important;
-        max-width: 85vw !important;
-        scroll-snap-align: center !important;
-        margin: 0 !important;
-        padding: 2.5rem 1.75rem !important;
-        height: auto !important;
-        min-height: 700px !important; /* ✅ 700px au lieu de 600px */
-        max-height: none !important;
-        overflow: visible !important;
-        display: flex !important;
-        flex-direction: column !important;
-    }
-    
-    /* Première carte : margin-left pour centrage */
-    .pricing-card:first-child {
-        margin-left: 0.5rem !important;
-    }
-    
-    /* Dernière carte : margin-right pour espacement final */
-    .pricing-card:last-child {
-        margin-right: 0.5rem !important;
-    }
-    
-    /* ✅ Header pricing - Plus d'espace */
-    .pricing-header {
-        padding-top: 40px !important; /* ✅ 40px au lieu de 30px */
-        margin-bottom: 2.5rem !important;
-        flex-shrink: 0 !important; /* ✅ Ne pas compresser */
-    }
-    
-    .pricing-header h3 {
-        font-size: 1.375rem !important;
-    }
-    
-    .pricing-header p {
-        font-size: 0.9375rem !important;
-    }
-    
-    /* ✅ Prix - Plus d'espace */
-    .pricing-price {
-        margin-bottom: 3rem !important; /* ✅ 3rem au lieu de 2rem */
-        flex-shrink: 0 !important;
-    }
-    
-    .pricing-price .currency {
-        font-size: 1.75rem !important;
-    }
-    
-    .pricing-price .amount {
-        font-size: 3.5rem !important; /* ✅ Légèrement plus grand */
-        margin-bottom: 1.25rem !important;
-    }
-    
-    .pricing-price .period {
-        font-size: 1rem !important;
-    }
-    
-    /* ✅ Liste des features - Hauteur libre et espacement augmenté */
-    .pricing-features {
-        margin: 0 0 3rem 0 !important; /* ✅ 3rem au lieu de 2rem */
-        max-height: none !important;
-        overflow: visible !important;
-        flex-grow: 1 !important; /* ✅ Prend l'espace disponible */
-        display: flex !important;
-        flex-direction: column !important;
-        gap: 0 !important;
-    }
-    
-    .pricing-features li {
-        padding: 1rem 0 !important; /* ✅ 1rem au lieu de 0.75rem */
-        min-height: 52px !important; /* ✅ 52px au lieu de 44px */
-        font-size: 0.9375rem !important;
-        line-height: 1.65 !important; /* ✅ Ligne plus aérée */
-        display: flex !important;
-        align-items: center !important;
-    }
-    
-    .pricing-features i {
-        font-size: 1.0625rem !important;
-    }
-    
-    /* ✅ Sections dividers - Plus visibles */
-    .pricing-section-divider {
-        padding: 14px 0 !important; /* ✅ Plus de padding */
-        margin: 20px 0 12px 0 !important; /* ✅ Plus d'espace */
-        font-size: 0.8125rem !important;
-    }
-    
-    .pricing-section-divider i {
-        font-size: 0.9375rem !important;
-    }
-    
-    /* ✅ CTA wrapper - Plus d'espace et fixé en bas */
-    .pricing-cta-wrapper {
-        margin-top: auto !important;
-        padding-top: 2.5rem !important; /* ✅ 2.5rem au lieu de 1.5rem */
-        flex-shrink: 0 !important;
-    }
-    
-    .btn-pricing {
-        min-height: 64px !important; /* ✅ 64px au lieu de 56px */
-        padding: 1.25rem 2rem !important;
-        font-size: 1.0625rem !important;
-        font-weight: 700 !important;
-    }
-    
-    /* ✅ Note en bas - Plus d'espace */
-    .pricing-note {
-        margin-top: 1rem !important;
-        padding-top: 0.75rem !important;
-        font-size: 0.8125rem !important;
-    }
-    
-    /* ✅ Badges (Popular/Platinum) - Espacement corrigé */
-    .popular-badge,
-    .platinum-badge {
-        top: -16px !important; /* ✅ Un peu plus haut */
-        padding: 0.625rem 1.75rem !important;
-        font-size: 0.8125rem !important;
-    }
-    
-    /* ✅ Indicateur de scroll (barre bleue) */
-    .pricing-section::after {
-        content: '';
-        display: block;
-        width: 60px;
-        height: 4px;
-        background: linear-gradient(90deg, 
-            rgba(37, 99, 235, 0.3) 0%, 
-            rgba(37, 99, 235, 0.8) 50%, 
-            rgba(37, 99, 235, 0.3) 100%);
-        margin: 1.5rem auto 0 auto;
-        border-radius: 2px;
-        position: relative;
-    }
-    
-    /* ✅ Affordance visuelle (ombre sur le bord droit) */
-    .pricing-grid-three {
-        position: relative;
-    }
-    
-    .pricing-grid-three::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        right: 0;
-        width: 40px;
-        height: 100%;
-        background: linear-gradient(270deg, 
-            var(--background-primary, #ffffff) 0%, 
-            rgba(255, 255, 255, 0) 100%);
-        pointer-events: none;
-        z-index: 2;
-    }
-    
-    body.dark-mode .pricing-grid-three::before {
-        background: linear-gradient(270deg, 
-            var(--background-secondary, #1e293b) 0%, 
-            rgba(30, 41, 59, 0) 100%);
-    }
-}
-
-/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-   📱 RESPONSIVE PRICING - TRÈS PETITS ÉCRANS (480px)
-   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
-
-@media (max-width: 480px) {
-    
-    .pricing-section {
-        padding: 4rem 0.75rem !important;
-    }
-    
-    .pricing-grid-three {
-        padding: 0.5rem 0.75rem 2rem 0.75rem !important;
-        margin: 0 -0.75rem !important;
-    }
-    
-    .pricing-card {
-        flex: 0 0 90vw !important;
-        min-width: 90vw !important;
-        max-width: 90vw !important;
-        padding: 2rem 1.25rem !important;
-        min-height: 720px !important; /* ✅ Encore plus grand sur petits écrans */
-    }
-    
-    .pricing-price .amount {
-        font-size: 3.25rem !important;
-    }
-    
-    .pricing-features li {
-        font-size: 0.875rem !important;
-        min-height: 50px !important;
-    }
-}
-
-/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
    🤖 ALPHY AI SECTION (SANS 3D)
    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
@@ -2747,6 +2498,7 @@ body {
 /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
    📱 RESPONSIVE - MOBILE (768px et moins)
    ✅ CORRECTIONS COMPLÈTES + SLIDERS HORIZONTAUX
+   ✅ PRICING SCROLL INTERNE SUPPRIMÉ
    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
 @media (max-width: 768px) {
@@ -3142,13 +2894,12 @@ body {
     
     /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
        ✨ NOUVEAU : SLIDERS HORIZONTAUX MOBILE
-       Platform Features, Tools, Pricing, Solutions
+       Platform Features, Tools, Solutions
        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
     
     /* ✅ GRIDS TRANSFORMÉES EN SLIDERS HORIZONTAUX */
     .features-grid,
     .tools-grid-advanced,
-    .pricing-grid-three,
     .solutions-grid {
         display: flex !important;
         flex-direction: row !important;
@@ -3166,7 +2917,6 @@ body {
     
     .features-grid:active,
     .tools-grid-advanced:active,
-    .pricing-grid-three:active,
     .solutions-grid:active {
         cursor: grabbing;
     }
@@ -3174,20 +2924,18 @@ body {
     /* Masquer la scrollbar tout en gardant la fonctionnalité */
     .features-grid::-webkit-scrollbar,
     .tools-grid-advanced::-webkit-scrollbar,
-    .pricing-grid-three::-webkit-scrollbar,
     .solutions-grid::-webkit-scrollbar {
         display: none;
     }
     
     .features-grid,
     .tools-grid-advanced,
-    .pricing-grid-three,
     .solutions-grid {
         -ms-overflow-style: none;
         scrollbar-width: none;
     }
     
-    /* ✅ CARTES EN MODE SLIDER - HAUTEUR PAR DÉFAUT */
+    /* ✅ CARTES EN MODE SLIDER */
     .feature-card,
     .tool-card-advanced,
     .solution-card {
@@ -3201,24 +2949,9 @@ body {
         min-height: 420px !important;
     }
     
-    /* ✅ CORRECTION 2 : PRICING CARDS AGRANDIES */
-    .pricing-card {
-        flex: 0 0 85vw !important;
-        min-width: 85vw !important;
-        max-width: 85vw !important;
-        scroll-snap-align: center !important;
-        margin: 0 !important;
-        padding: 2rem 1.5rem !important;
-        height: auto !important;
-        min-height: 600px !important; /* ✅ 600px au lieu de 420px */
-        max-height: none !important; /* ✅ Pas de limite de hauteur */
-        overflow: visible !important; /* ✅ Pas de scroll interne */
-    }
-    
     /* Première carte : margin-left pour centrage */
     .feature-card:first-child,
     .tool-card-advanced:first-child,
-    .pricing-card:first-child,
     .solution-card:first-child {
         margin-left: 0.5rem !important;
     }
@@ -3226,48 +2959,156 @@ body {
     /* Dernière carte : margin-right pour espacement final */
     .feature-card:last-child,
     .tool-card-advanced:last-child,
-    .pricing-card:last-child,
     .solution-card:last-child {
         margin-right: 0.5rem !important;
     }
     
-    /* ✅ PRICING - CONTENU AGRANDI */
-    .pricing-features {
-        margin: 0 0 2.5rem 0 !important;
+    /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+       💰 PRICING SECTION - ✅ CORRECTION SCROLL VERTICAL SUPPRIMÉ
+       ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+    
+    /* ✅ SECTION PRICING - PAS DE HAUTEUR FIXE */
+    .pricing-section {
+        padding: 4rem 0 !important;
+        max-width: 100vw;
+        overflow-x: hidden;
+        overflow-y: visible !important; /* ✅ Pas de scroll vertical */
+        height: auto !important;
+        min-height: auto !important;
         max-height: none !important;
+    }
+    
+    /* ✅ GRID PRICING - SLIDER HORIZONTAL UNIQUEMENT */
+    .pricing-grid-three {
+        display: flex !important;
+        flex-direction: row !important;
+        gap: 1rem !important;
+        
+        /* Scroll horizontal UNIQUEMENT */
+        overflow-x: auto !important;
+        overflow-y: visible !important; /* ✅ IMPORTANT : Pas de scroll vertical */
+        
+        scroll-snap-type: x mandatory !important;
+        scroll-behavior: smooth !important;
+        -webkit-overflow-scrolling: touch !important;
+        
+        /* Dimensions */
+        padding: 1rem 1rem 2rem 1rem !important;
+        margin: 0 -1rem !important;
+        max-width: 100vw !important;
+        width: 100vw !important;
+        
+        /* Hauteur automatique */
+        height: auto !important;
+        min-height: auto !important;
+        max-height: none !important;
+        
+        cursor: grab;
+    }
+    
+    .pricing-grid-three:active {
+        cursor: grabbing;
+    }
+    
+    /* ✅ Masquer scrollbar (horizontal) tout en gardant la fonctionnalité */
+    .pricing-grid-three::-webkit-scrollbar {
+        display: none;
+    }
+    
+    .pricing-grid-three {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+    }
+    
+    /* ✅ PRICING CARDS - HAUTEUR AUTOMATIQUE */
+    .pricing-card {
+        /* Dimensions horizontales */
+        flex: 0 0 85vw !important;
+        min-width: 85vw !important;
+        max-width: 85vw !important;
+        
+        /* Snap */
+        scroll-snap-align: center !important;
+        
+        /* Espacement */
+        margin: 0 !important;
+        padding: 2.5rem 1.5rem !important;
+        
+        /* ✅ HAUTEUR AUTOMATIQUE - CLEF DE LA CORRECTION */
+        height: auto !important;
+        min-height: auto !important;
+        max-height: none !important;
+        
+        /* ✅ PAS DE SCROLL INTERNE */
         overflow: visible !important;
+        overflow-x: visible !important;
+        overflow-y: visible !important;
+        
+        /* Flexbox pour bien organiser le contenu */
+        display: flex !important;
+        flex-direction: column !important;
+    }
+    
+    /* Première carte : espacement à gauche */
+    .pricing-card:first-child {
+        margin-left: 0.5rem !important;
+    }
+    
+    /* Dernière carte : espacement à droite */
+    .pricing-card:last-child {
+        margin-right: 0.5rem !important;
+    }
+    
+    /* ✅ PRICING HEADER - ESPACEMENT AJUSTÉ */
+    .pricing-header {
+        padding-top: 30px !important;
+        margin-bottom: 2rem !important;
+    }
+    
+    /* ✅ PRICING PRICE - ESPACEMENT */
+    .pricing-price {
+        margin-bottom: 2rem !important;
+    }
+    
+    .pricing-price .amount {
+        font-size: 3rem !important;
+    }
+    
+    /* ✅ PRICING FEATURES - HAUTEUR AUTOMATIQUE */
+    .pricing-features {
+        margin: 0 0 2rem 0 !important;
+        padding: 0 !important;
+        
+        /* ✅ PAS DE HAUTEUR FIXE */
+        height: auto !important;
+        min-height: auto !important;
+        max-height: none !important;
+        
+        /* ✅ PAS DE SCROLL */
+        overflow: visible !important;
+        
+        /* Flex grow pour remplir l'espace */
+        flex-grow: 1 !important;
     }
     
     .pricing-features li {
-        padding: 0.875rem 0 !important;
-        min-height: 48px !important;
+        padding: 0.75rem 0 !important;
+        min-height: 44px !important;
         font-size: 0.9375rem !important;
         line-height: 1.6 !important;
     }
     
-    .pricing-price {
-        margin-bottom: 2.5rem !important;
-    }
-    
-    .pricing-price .amount {
-        font-size: 3.25rem !important;
-        margin-bottom: 1rem !important;
-    }
-    
-    .pricing-header {
-        padding-top: 30px !important;
-        margin-bottom: 2.5rem !important;
-    }
-    
+    /* ✅ PRICING CTA - EN BAS DE CARTE */
     .pricing-cta-wrapper {
         margin-top: auto !important;
-        padding-top: 2rem !important;
+        padding-top: 1.5rem !important;
+        flex-shrink: 0 !important;
     }
     
     .btn-pricing {
-        min-height: 60px !important;
-        padding: 1.125rem 2rem !important;
-        font-size: 1.0625rem !important;
+        min-height: 56px !important;
+        padding: 1rem 2rem !important;
+        font-size: 1rem !important;
     }
     
     /* ✅ INDICATEURS DE SCROLL (barre bleue) */
@@ -3352,7 +3193,6 @@ body {
     .features-section,
     .solutions-section,
     .tools-section,
-    .pricing-section,
     .alphy-ai-section,
     .demo-interactive,
     .tech-infra-lux,
@@ -3394,12 +3234,6 @@ body {
     .ticker-change {
         font-size: 0.75rem;
         padding: 0.2rem 0.5rem;
-    }
-    
-    /* ✅ PRICING GRID */
-    .pricing-grid-three {
-        max-width: 100%;
-        padding: 0.5rem 1rem 1.5rem 1rem !important;
     }
     
     /* ✅ FOOTER */
