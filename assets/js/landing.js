@@ -183,7 +183,7 @@ class MobileMenuManager {
                     this.closeMenu();
                 }
             }
-        });
+        }, true);
 
         // Fermer au resize (passage desktop)
         let resizeTimer;
