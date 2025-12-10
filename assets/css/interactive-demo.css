@@ -421,21 +421,9 @@ body.dark-mode .tool-icon {
     contain: layout style;
 }
 
-/* Indicateur visuel de scroll */
+/* ✅ Indicateur de scroll DÉSACTIVÉ */
 .chart-scroll-wrapper::after {
-    content: '← Swipe to see more →';
-    position: absolute;
-    bottom: 0.5rem;
-    right: 1rem;
-    font-size: 0.75rem;
-    color: var(--text-tertiary);
-    background: var(--background-primary);
-    padding: 0.25rem 0.75rem;
-    border-radius: var(--radius-sm);
-    opacity: 0;
-    transition: opacity 0.3s ease;
-    pointer-events: none;
-    z-index: 10;
+    display: none;
 }
 
 @media (max-width: 768px) {
@@ -468,23 +456,23 @@ body.dark-mode .tool-icon {
     }
 }
 
-/* Customisation de la scrollbar */
+/* ✅ Scrollbar grise discrète */
 .chart-scroll-wrapper::-webkit-scrollbar {
     height: 8px;
 }
 
 .chart-scroll-wrapper::-webkit-scrollbar-track {
-    background: var(--background-tertiary);
+    background: rgba(0, 0, 0, 0.05);  /* Gris très clair */
     border-radius: var(--radius-sm);
 }
 
 .chart-scroll-wrapper::-webkit-scrollbar-thumb {
-    background: var(--primary-color);
+    background: #cbd5e1;  /* ✅ Gris clair */
     border-radius: var(--radius-sm);
 }
 
 .chart-scroll-wrapper::-webkit-scrollbar-thumb:hover {
-    background: var(--primary-dark);
+    background: #94a3b8;  /* ✅ Gris moyen au survol */
 }
 
 /* ============================================
@@ -2374,16 +2362,17 @@ body.dark-mode ::-webkit-scrollbar-thumb {
     background: var(--background-tertiary);
 }
 
+/* Dark mode */
 body.dark-mode .chart-scroll-wrapper::-webkit-scrollbar-track {
-    background: var(--background-tertiary);
+    background: rgba(255, 255, 255, 0.05);
 }
 
 body.dark-mode .chart-scroll-wrapper::-webkit-scrollbar-thumb {
-    background: var(--primary-color);
+    background: #475569;  /* Gris foncé en dark mode */
 }
 
-body.dark-mode ::-webkit-scrollbar-thumb:hover {
-    background: #475569;
+body.dark-mode .chart-scroll-wrapper::-webkit-scrollbar-thumb:hover {
+    background: #64748b;  /* Gris moyen en dark mode */
 }
 
 /* HEADINGS */
