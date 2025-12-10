@@ -2244,7 +2244,7 @@ body.dark-mode .dropdown-link-title {
 }
 
 /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-   📊 MARKET TICKER (SANS 3D)
+   📊 MARKET TICKER - ✅ ANIMATION CORRIGÉE
    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
 .market-ticker {
@@ -2254,11 +2254,13 @@ body.dark-mode .dropdown-link-title {
     padding: 1rem 0;
     overflow: hidden;
     position: relative;
+    width: 100%; /* ✅ AJOUTÉ */
 }
 
 .ticker-wrapper {
     width: 100%;
     overflow: hidden;
+    position: relative; /* ✅ AJOUTÉ */
 }
 
 .ticker-content {
@@ -2266,11 +2268,17 @@ body.dark-mode .dropdown-link-title {
     gap: 3rem;
     animation: tickerScroll 40s linear infinite;
     white-space: nowrap;
+    will-change: transform; /* ✅ AJOUTÉ pour performance */
 }
 
+/* ✅ ANIMATION CORRIGÉE */
 @keyframes tickerScroll {
-    0% { transform: translateX(0); }
-    100% { transform: translateX(-50%); }
+    0% { 
+        transform: translateX(0);
+    }
+    100% { 
+        transform: translateX(-50%);
+    }
 }
 
 .ticker-item {
@@ -2282,6 +2290,7 @@ body.dark-mode .dropdown-link-title {
     border-radius: 12px;
     transition: all var(--anim-fast);
     border: 1px solid var(--border-color, #e2e8f0);
+    flex-shrink: 0; /* ✅ AJOUTÉ */
 }
 
 .ticker-item:hover {
@@ -2326,6 +2335,36 @@ body.dark-mode .dropdown-link-title {
 
 .ticker-change.negative::before {
     content: '▼ ';
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   📱 TICKER MOBILE - ✅ OPTIMISATION
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+
+@media (max-width: 768px) {
+    .ticker-content {
+        animation: tickerScroll 30s linear infinite; /* ✅ Plus rapide sur mobile */
+    }
+    
+    .ticker-item {
+        padding: 0.5rem 1rem;
+        font-size: 0.8125rem;
+        gap: 0.75rem;
+    }
+    
+    .ticker-symbol {
+        min-width: 40px;
+        font-size: 0.75rem;
+    }
+    
+    .ticker-price {
+        font-size: 0.875rem;
+    }
+    
+    .ticker-change {
+        font-size: 0.75rem;
+        padding: 0.2rem 0.5rem;
+    }
 }
 
 /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
