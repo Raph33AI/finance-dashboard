@@ -3426,9 +3426,9 @@ body {
             text-align: center;
         }
         
+        /* ✅ Masquer uniquement les liens Privacy/Terms/Security */
         .footer-bottom-links {
-            flex-direction: column;
-            gap: 0.75rem;
+            display: none !important;
         }
     }
     
