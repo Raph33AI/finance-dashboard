@@ -1,6 +1,7 @@
 /* ============================================
    INTERACTIVE-DEMO.CSS
    Styles pour la page de démo interactive
+   ✅ VERSION MOBILE-OPTIMIZED
    ============================================ */
 
 /* ============================================
@@ -12,7 +13,7 @@
     --demo-gradient-3: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
     --demo-accent: #667eea;
     --demo-accent-dark: #5568d3;
-    --demo-text-light: #f0f2f5; /* ✅ AJOUT : Blanc cassé pour textes sur fond coloré */
+    --demo-text-light: #f0f2f5;
 }
 
 /* ============================================
@@ -175,7 +176,6 @@ body.dark-mode .demo-nav {
     font-size: 0.875rem;
     font-weight: 600;
     margin-bottom: 1.5rem;
-    /* ✅ CORRIGÉ : Texte en blanc cassé */
     color: var(--demo-text-light);
 }
 
@@ -185,7 +185,6 @@ body.dark-mode .demo-nav {
     line-height: 1.2;
     margin-bottom: 1.5rem;
     letter-spacing: -0.02em;
-    /* ✅ CORRIGÉ : Texte en blanc cassé */
     color: var(--demo-text-light);
 }
 
@@ -200,7 +199,6 @@ body.dark-mode .demo-nav {
 .demo-hero-description {
     font-size: clamp(1rem, 2vw, 1.25rem);
     line-height: 1.7;
-    /* ✅ CORRIGÉ : Texte en blanc cassé au lieu de rgba */
     color: var(--demo-text-light);
     margin-bottom: 2.5rem;
 }
@@ -219,7 +217,6 @@ body.dark-mode .demo-nav {
     gap: 0.75rem;
     font-size: 1rem;
     font-weight: 500;
-    /* ✅ CORRIGÉ : Texte en blanc cassé */
     color: var(--demo-text-light);
 }
 
@@ -390,13 +387,11 @@ body.dark-mode .tool-icon {
 
 .tool-header p {
     font-size: 1.125rem;
-    /* ✅ CORRIGÉ : S'assurer que le texte "Find comparable companies" soit visible */
     color: var(--text-secondary);
     max-width: 700px;
     margin: 0 auto;
 }
 
-/* ✅ NOUVEAU : Style spécifique pour les descriptions importantes */
 .tool-header .highlight-text {
     color: var(--demo-text-light);
     font-weight: 600;
@@ -659,7 +654,6 @@ body.dark-mode .search-box:focus-within {
 .results-placeholder p {
     font-size: 1rem;
     margin-bottom: 2rem;
-    /* ✅ CORRIGÉ : Texte visible */
     color: var(--text-secondary);
 }
 
@@ -833,6 +827,35 @@ body.dark-mode .company-result-card.highlight {
     color: var(--text-primary);
 }
 
+/* ✅ NOUVEAUX CONTAINERS GRAPHIQUES - CORRECTION MOBILE */
+#companyExtraCharts,
+#portfolioCorrelation,
+#portfolioPerformance,
+#monteCarloSection,
+#marketSentiment,
+#aiPredictionChart {
+    max-width: 100%;
+    overflow-x: hidden;
+    margin: 2rem 0;
+}
+
+#companyPerformanceChart,
+#companyRatingsChart,
+#sentimentGauge,
+#correlationHeatmap,
+#portfolioPerformanceChart,
+#monteCarloChart,
+#predictionChartContainer,
+#liveQuoteChart,
+#technicalChart,
+#portfolioAllocationChart {
+    max-width: 100%;
+    width: 100%;
+    height: auto;
+    min-height: 300px;
+    overflow-x: hidden;
+}
+
 /* ============================================
    LIVE QUOTES INTERFACE
    ============================================ */
@@ -950,6 +973,8 @@ body.dark-mode .company-result-card.highlight {
     border: 1px solid var(--border-color);
     border-radius: var(--radius-lg);
     padding: 1rem;
+    max-width: 100%;
+    overflow-x: hidden;
 }
 
 /* ============================================
@@ -1496,14 +1521,12 @@ body.dark-mode .company-result-card.highlight {
     font-size: clamp(1.75rem, 4vw, 2.5rem);
     font-weight: 800;
     margin-bottom: 1rem;
-    /* ✅ CORRIGÉ : Texte en blanc cassé */
     color: var(--demo-text-light);
 }
 
 .demo-cta p {
     font-size: 1.125rem;
     margin-bottom: 2rem;
-    /* ✅ CORRIGÉ : Texte en blanc cassé */
     color: var(--demo-text-light);
 }
 
@@ -1666,8 +1689,87 @@ body.dark-mode .demo-footer {
 }
 
 /* ============================================
-   RESPONSIVE DESIGN
+   NOTIFICATIONS TOAST
    ============================================ */
+.notification-toast {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: var(--background-primary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    padding: 1rem 1.5rem;
+    box-shadow: var(--shadow-xl);
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    z-index: 10000;
+    transform: translateX(400px);
+    opacity: 0;
+    transition: all 0.3s ease-in-out;
+    max-width: 400px;
+}
+
+.notification-toast.show {
+    transform: translateX(0);
+    opacity: 1;
+}
+
+.notification-toast i {
+    font-size: 1.25rem;
+}
+
+.notification-toast.notification-success {
+    border-color: var(--success-color);
+}
+
+.notification-toast.notification-success i {
+    color: var(--success-color);
+}
+
+.notification-toast.notification-error {
+    border-color: var(--danger-color);
+}
+
+.notification-toast.notification-error i {
+    color: var(--danger-color);
+}
+
+.notification-toast.notification-warning {
+    border-color: var(--warning-color);
+}
+
+.notification-toast.notification-warning i {
+    color: var(--warning-color);
+}
+
+.notification-toast.notification-info {
+    border-color: var(--primary-color);
+}
+
+.notification-toast.notification-info i {
+    color: var(--primary-color);
+}
+
+.notification-close {
+    background: transparent;
+    border: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+    padding: 0;
+    margin-left: auto;
+    font-size: 1rem;
+}
+
+.notification-close:hover {
+    color: var(--text-primary);
+}
+
+/* ============================================
+   RESPONSIVE DESIGN - MOBILE FIRST
+   ============================================ */
+
+/* ✅ TABLETTES (768px - 1024px) */
 @media (max-width: 1024px) {
     .risk-interface {
         grid-template-columns: 1fr;
@@ -1676,8 +1778,22 @@ body.dark-mode .demo-footer {
     .tools-grid {
         grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
     }
+    
+    /* Graphiques - Réduction hauteur */
+    #companyPerformanceChart,
+    #companyRatingsChart,
+    #sentimentGauge,
+    #correlationHeatmap,
+    #portfolioPerformanceChart,
+    #monteCarloChart,
+    #predictionChartContainer,
+    #liveQuoteChart,
+    #technicalChart {
+        min-height: 250px;
+    }
 }
 
+/* ✅ SMARTPHONES (768px et moins) */
 @media (max-width: 768px) {
     .demo-nav-container {
         padding: 1rem 1.5rem;
@@ -1722,6 +1838,7 @@ body.dark-mode .demo-footer {
     .technical-interface,
     .ai-interface {
         padding: 1.5rem;
+        border-radius: var(--radius-lg);
     }
     
     .quote-search,
@@ -1779,8 +1896,34 @@ body.dark-mode .demo-footer {
         flex-direction: column;
         gap: 0.75rem;
     }
+    
+    /* ✅ GRAPHIQUES MOBILE - ADAPTATION COMPLÈTE */
+    #companyPerformanceChart,
+    #companyRatingsChart,
+    #sentimentGauge,
+    #correlationHeatmap,
+    #portfolioPerformanceChart,
+    #monteCarloChart,
+    #predictionChartContainer,
+    #liveQuoteChart,
+    #technicalChart,
+    #portfolioAllocationChart {
+        min-height: 250px;
+        max-height: 350px;
+    }
+    
+    .chart-area {
+        padding: 0.5rem;
+        min-height: 250px;
+    }
+    
+    /* Grilles responsive */
+    .ai-insight-content > div[style*="grid"] {
+        grid-template-columns: 1fr !important;
+    }
 }
 
+/* ✅ PETITS SMARTPHONES (480px et moins) */
 @media (max-width: 480px) {
     .demo-hero-title {
         font-size: 1.75rem;
@@ -1817,6 +1960,44 @@ body.dark-mode .demo-footer {
     .popular-tag {
         width: 100%;
         text-align: center;
+    }
+    
+    .quote-price {
+        font-size: 2.5rem;
+    }
+    
+    .value-large {
+        font-size: 1.75rem;
+    }
+    
+    .ai-insight-header {
+        flex-wrap: wrap;
+    }
+    
+    .ai-confidence {
+        width: 100%;
+        justify-content: center;
+    }
+    
+    .notification-toast {
+        max-width: calc(100% - 40px);
+        right: 20px;
+        left: 20px;
+    }
+    
+    /* ✅ GRAPHIQUES PETITS ÉCRANS */
+    #companyPerformanceChart,
+    #companyRatingsChart,
+    #sentimentGauge,
+    #correlationHeatmap,
+    #portfolioPerformanceChart,
+    #monteCarloChart,
+    #predictionChartContainer,
+    #liveQuoteChart,
+    #technicalChart,
+    #portfolioAllocationChart {
+        min-height: 200px;
+        max-height: 300px;
     }
 }
 

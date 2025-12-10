@@ -1,13 +1,13 @@
 /* ============================================
-   INTERACTIVE-DEMO.JS - VERSION PREMIUM
+   INTERACTIVE-DEMO.JS - VERSION MOBILE-OPTIMIZED
    Main JavaScript pour la page de démo interactive
-   🚀 AVEC GRAPHIQUES ADDITIONNELS ET FONCTIONNALITÉS AVANCÉES
+   🚀 AVEC GRAPHIQUES ADDITIONNELS ET RESPONSIVE
    ============================================ */
 
 // ============================================
 // DEBUG MODE
 // ============================================
-console.log('🔍 Loading interactive-demo.js PREMIUM...');
+console.log('🔍 Loading interactive-demo.js MOBILE-OPTIMIZED...');
 
 // Check dependencies
 if (typeof APP_CONFIG === 'undefined') {
@@ -70,12 +70,111 @@ const DemoApp = {
         aiPredictionChart: null
     },
     
+    // ✅ NOUVEAU : Détection mobile
+    isMobile: function() {
+        return window.innerWidth <= 768;
+    },
+    
+    // ✅ NOUVEAU : Configuration Highcharts responsive
+    getResponsiveChartConfig: function() {
+        const isMobile = this.isMobile();
+        
+        return {
+            chart: {
+                backgroundColor: 'transparent',
+                height: isMobile ? 250 : 400,
+                style: {
+                    fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif"
+                }
+            },
+            title: {
+                style: {
+                    color: getComputedStyle(document.documentElement).getPropertyValue('--text-primary'),
+                    fontSize: isMobile ? '0.875rem' : '1.125rem',
+                    fontWeight: '700'
+                }
+            },
+            credits: { enabled: false },
+            legend: {
+                enabled: !isMobile,
+                itemStyle: {
+                    color: getComputedStyle(document.documentElement).getPropertyValue('--text-primary'),
+                    fontSize: isMobile ? '0.75rem' : '0.875rem'
+                }
+            },
+            xAxis: {
+                labels: {
+                    style: {
+                        color: getComputedStyle(document.documentElement).getPropertyValue('--text-primary'),
+                        fontSize: isMobile ? '0.625rem' : '0.75rem'
+                    }
+                }
+            },
+            yAxis: {
+                labels: {
+                    style: {
+                        color: getComputedStyle(document.documentElement).getPropertyValue('--text-primary'),
+                        fontSize: isMobile ? '0.625rem' : '0.75rem'
+                    }
+                },
+                title: {
+                    style: {
+                        color: getComputedStyle(document.documentElement).getPropertyValue('--text-primary'),
+                        fontSize: isMobile ? '0.75rem' : '0.875rem'
+                    }
+                }
+            },
+            tooltip: {
+                backgroundColor: getComputedStyle(document.documentElement).getPropertyValue('--background-primary'),
+                style: {
+                    color: getComputedStyle(document.documentElement).getPropertyValue('--text-primary'),
+                    fontSize: isMobile ? '0.75rem' : '0.875rem'
+                }
+            },
+            rangeSelector: {
+                enabled: !isMobile,
+                buttonTheme: {
+                    style: {
+                        fontSize: isMobile ? '0.625rem' : '0.75rem'
+                    }
+                }
+            },
+            navigator: {
+                enabled: !isMobile
+            },
+            scrollbar: {
+                enabled: !isMobile
+            },
+            responsive: {
+                rules: [{
+                    condition: {
+                        maxWidth: 768
+                    },
+                    chartOptions: {
+                        legend: {
+                            enabled: false
+                        },
+                        rangeSelector: {
+                            enabled: false
+                        },
+                        navigator: {
+                            enabled: false
+                        },
+                        scrollbar: {
+                            enabled: false
+                        }
+                    }
+                }]
+            }
+        };
+    },
+    
     // ============================================
     // INITIALIZATION
     // ============================================
     init: function() {
         try {
-            console.log('🚀 Initializing Interactive Demo PREMIUM...');
+            console.log('🚀 Initializing Interactive Demo MOBILE-OPTIMIZED...');
             
             // Initialize API Client
             this.apiClient = new FinanceAPIClient({
@@ -96,12 +195,36 @@ const DemoApp = {
             // Initialize first tool
             this.switchTool('company-search');
             
-            console.log('✅ Interactive Demo PREMIUM initialized successfully!');
+            // ✅ NOUVEAU : Listener de redimensionnement
+            this.setupResizeListener();
+            
+            console.log('✅ Interactive Demo MOBILE-OPTIMIZED initialized successfully!');
             
         } catch (error) {
             console.error('❌ Initialization error:', error);
             this.showNotification('Failed to initialize demo. Please refresh the page.', 'error');
         }
+    },
+    
+    // ✅ NOUVEAU : Écouter le redimensionnement
+    setupResizeListener: function() {
+        let resizeTimeout;
+        window.addEventListener('resize', () => {
+            clearTimeout(resizeTimeout);
+            resizeTimeout = setTimeout(() => {
+                console.log('📱 Window resized, updating charts...');
+                this.reflowAllCharts();
+            }, 250);
+        });
+    },
+    
+    // ✅ NOUVEAU : Mettre à jour tous les graphiques
+    reflowAllCharts: function() {
+        Object.keys(this.charts).forEach(key => {
+            if (this.charts[key] && this.charts[key].reflow) {
+                this.charts[key].reflow();
+            }
+        });
     },
     
     // ============================================
@@ -478,7 +601,7 @@ const DemoApp = {
             if (quoteData && quoteData.symbol) {
                 this.displayCompanyResults(quoteData);
                 
-                // NOUVEAU : Charger les graphiques additionnels
+                // Charger les graphiques additionnels
                 await this.loadCompanyExtraCharts(trimmedSymbol);
             } else {
                 throw new Error('No data found');
@@ -553,7 +676,7 @@ const DemoApp = {
         this.showNotification(`✅ Loaded data for ${quoteData.symbol}`, 'success');
     },
     
-    // NOUVEAU : Graphiques additionnels pour Company Search
+    // Graphiques additionnels pour Company Search
     loadCompanyExtraCharts: async function(symbol) {
         console.log('📊 Loading extra charts for:', symbol);
         
@@ -561,17 +684,12 @@ const DemoApp = {
         if (!chartsContainer) return;
         
         try {
-            // Afficher le container
             chartsContainer.style.display = 'block';
             
-            // Charger les données
             const timeSeriesData = await this.apiClient.getTimeSeries(symbol, '1day', '90');
             
             if (timeSeriesData && timeSeriesData.data && timeSeriesData.data.length > 0) {
-                // Graphique 1 : Performance vs Market
                 this.renderCompanyPerformanceChart(symbol, timeSeriesData.data);
-                
-                // Graphique 2 : Analyst Ratings (simulé)
                 this.renderCompanyRatingsChart(symbol);
             }
             
@@ -588,47 +706,36 @@ const DemoApp = {
         
         const sortedData = [...data].sort((a, b) => new Date(a.datetime) - new Date(b.datetime));
         
-        // Calculer la performance relative (base 100)
         const firstPrice = parseFloat(sortedData[0].close);
         const stockPerformance = sortedData.map(d => ({
             x: new Date(d.datetime).getTime(),
             y: (parseFloat(d.close) / firstPrice - 1) * 100
         }));
         
-        // Simuler le S&P 500 (pour l'exemple)
         const sp500Performance = sortedData.map((d, i) => ({
             x: new Date(d.datetime).getTime(),
-            y: (Math.random() - 0.5) * 10 + i * 0.1 // Tendance légèrement haussière
+            y: (Math.random() - 0.5) * 10 + i * 0.1
         }));
         
-        this.charts.companyPerformance = Highcharts.chart('companyPerformanceChart', {
-            chart: {
-                backgroundColor: 'transparent',
-                type: 'line'
-            },
+        // ✅ Configuration responsive
+        const baseConfig = this.getResponsiveChartConfig();
+        
+        this.charts.companyPerformance = Highcharts.chart('companyPerformanceChart', Object.assign({}, baseConfig, {
             title: {
-                text: null
+                text: `${symbol} vs Market Performance`,
+                style: baseConfig.title.style
             },
-            xAxis: {
-                type: 'datetime',
-                labels: {
-                    style: {
-                        color: getComputedStyle(document.documentElement).getPropertyValue('--text-primary')
-                    }
-                }
-            },
-            yAxis: {
+            xAxis: Object.assign({}, baseConfig.xAxis, {
+                type: 'datetime'
+            }),
+            yAxis: Object.assign({}, baseConfig.yAxis, {
                 title: {
                     text: 'Performance (%)',
-                    style: {
-                        color: getComputedStyle(document.documentElement).getPropertyValue('--text-primary')
-                    }
+                    style: baseConfig.yAxis.title.style
                 },
                 labels: {
                     format: '{value}%',
-                    style: {
-                        color: getComputedStyle(document.documentElement).getPropertyValue('--text-primary')
-                    }
+                    style: baseConfig.yAxis.labels.style
                 },
                 plotLines: [{
                     value: 0,
@@ -636,7 +743,7 @@ const DemoApp = {
                     width: 1,
                     dashStyle: 'Dash'
                 }]
-            },
+            }),
             tooltip: {
                 shared: true,
                 valueDecimals: 2,
@@ -646,22 +753,15 @@ const DemoApp = {
                 name: symbol,
                 data: stockPerformance,
                 color: '#3B82F6',
-                lineWidth: 3
+                lineWidth: this.isMobile() ? 2 : 3
             }, {
                 name: 'S&P 500 (simulated)',
                 data: sp500Performance,
                 color: '#94A3B8',
-                lineWidth: 2,
+                lineWidth: this.isMobile() ? 1.5 : 2,
                 dashStyle: 'Dash'
-            }],
-            credits: { enabled: false },
-            legend: {
-                enabled: true,
-                itemStyle: {
-                    color: getComputedStyle(document.documentElement).getPropertyValue('--text-primary')
-                }
-            }
-        });
+            }]
+        }));
     },
     
     renderCompanyRatingsChart: function(symbol) {
@@ -669,7 +769,6 @@ const DemoApp = {
             this.charts.companyRatings.destroy();
         }
         
-        // Simuler des ratings d'analystes
         const ratings = [
             { name: 'Strong Buy', y: 12, color: '#10B981' },
             { name: 'Buy', y: 8, color: '#34D399' },
@@ -678,36 +777,26 @@ const DemoApp = {
             { name: 'Strong Sell', y: 1, color: '#EF4444' }
         ];
         
-        this.charts.companyRatings = Highcharts.chart('companyRatingsChart', {
-            chart: {
-                type: 'bar',
-                backgroundColor: 'transparent'
-            },
+        const baseConfig = this.getResponsiveChartConfig();
+        
+        this.charts.companyRatings = Highcharts.chart('companyRatingsChart', Object.assign({}, baseConfig, {
+            chart: Object.assign({}, baseConfig.chart, {
+                type: 'bar'
+            }),
             title: {
-                text: null
+                text: `${symbol} Analyst Ratings`,
+                style: baseConfig.title.style
             },
-            xAxis: {
-                categories: ratings.map(r => r.name),
-                labels: {
-                    style: {
-                        color: getComputedStyle(document.documentElement).getPropertyValue('--text-primary')
-                    }
-                }
-            },
-            yAxis: {
+            xAxis: Object.assign({}, baseConfig.xAxis, {
+                categories: ratings.map(r => r.name)
+            }),
+            yAxis: Object.assign({}, baseConfig.yAxis, {
                 min: 0,
                 title: {
                     text: 'Number of Analysts',
-                    style: {
-                        color: getComputedStyle(document.documentElement).getPropertyValue('--text-primary')
-                    }
-                },
-                labels: {
-                    style: {
-                        color: getComputedStyle(document.documentElement).getPropertyValue('--text-primary')
-                    }
+                    style: baseConfig.yAxis.title.style
                 }
-            },
+            }),
             legend: {
                 enabled: false
             },
@@ -717,10 +806,11 @@ const DemoApp = {
             plotOptions: {
                 bar: {
                     dataLabels: {
-                        enabled: true,
+                        enabled: !this.isMobile(),
                         style: {
                             color: '#fff',
-                            textOutline: 'none'
+                            textOutline: 'none',
+                            fontSize: this.isMobile() ? '0.625rem' : '0.75rem'
                         }
                     }
                 }
@@ -729,13 +819,12 @@ const DemoApp = {
                 name: 'Analysts',
                 data: ratings,
                 colorByPoint: true
-            }],
-            credits: { enabled: false }
-        });
+            }]
+        }));
     },
 
-// ============================================
-    // LIVE QUOTES TOOL - AMÉLIORÉ
+    // ============================================
+    // LIVE QUOTES TOOL
     // ============================================
     setupLiveQuotesListeners: function() {
         const input = document.getElementById('quoteSymbolInput');
@@ -782,8 +871,6 @@ const DemoApp = {
             if (quoteData && quoteData.symbol) {
                 this.displayLiveQuote(quoteData);
                 await this.loadQuoteChart(trimmedSymbol);
-                
-                // NOUVEAU : Market Sentiment Gauge
                 this.renderMarketSentiment(trimmedSymbol, quoteData);
             } else {
                 throw new Error('No data available');
@@ -864,24 +951,18 @@ const DemoApp = {
         const dates = data.map(d => new Date(d.datetime).getTime()).reverse();
         const prices = data.map(d => parseFloat(d.close)).reverse();
         
-        this.charts.liveQuote = Highcharts.stockChart('liveQuoteChart', {
-            chart: {
-                backgroundColor: 'transparent',
-                height: 400
-            },
+        const baseConfig = this.getResponsiveChartConfig();
+        
+        this.charts.liveQuote = Highcharts.stockChart('liveQuoteChart', Object.assign({}, baseConfig, {
             title: {
                 text: `${symbol} - 3 Month Price History`,
-                style: {
-                    color: getComputedStyle(document.documentElement).getPropertyValue('--text-primary'),
-                    fontSize: '1.125rem',
-                    fontWeight: '700'
-                }
+                style: baseConfig.title.style
             },
             series: [{
                 name: 'Price',
                 data: dates.map((date, i) => [date, prices[i]]),
                 color: '#3B82F6',
-                lineWidth: 2,
+                lineWidth: this.isMobile() ? 2 : 2,
                 fillColor: {
                     linearGradient: { x1: 0, y1: 0, x2: 0, y2: 1 },
                     stops: [
@@ -889,19 +970,10 @@ const DemoApp = {
                         [1, 'rgba(59, 130, 246, 0.05)']
                     ]
                 }
-            }],
-            credits: { enabled: false },
-            rangeSelector: {
-                enabled: true,
-                selected: 1
-            },
-            navigator: {
-                enabled: true
-            }
-        });
+            }]
+        }));
     },
     
-    // NOUVEAU : Market Sentiment Gauge
     renderMarketSentiment: function(symbol, quoteData) {
         const container = document.getElementById('marketSentiment');
         if (!container) return;
@@ -912,12 +984,9 @@ const DemoApp = {
             this.charts.sentimentGauge.destroy();
         }
         
-        // Calculer un sentiment basé sur le changement de prix
         const percentChange = quoteData.percent_change || quoteData.percentChange || 0;
-        
-        // Score de sentiment (0-100, 50 = neutre)
-        let sentimentScore = 50 + (percentChange * 5); // Amplifier pour rendre visible
-        sentimentScore = Math.max(0, Math.min(100, sentimentScore)); // Clamp entre 0-100
+        let sentimentScore = 50 + (percentChange * 5);
+        sentimentScore = Math.max(0, Math.min(100, sentimentScore));
         
         let sentimentLabel = 'Neutral';
         let sentimentColor = '#FCD34D';
@@ -939,18 +1008,17 @@ const DemoApp = {
             sentimentColor = '#EF4444';
         }
         
-        this.charts.sentimentGauge = Highcharts.chart('sentimentGauge', {
-            chart: {
+        const baseConfig = this.getResponsiveChartConfig();
+        const isMobile = this.isMobile();
+        
+        this.charts.sentimentGauge = Highcharts.chart('sentimentGauge', Object.assign({}, baseConfig, {
+            chart: Object.assign({}, baseConfig.chart, {
                 type: 'solidgauge',
-                backgroundColor: 'transparent'
-            },
+                height: isMobile ? 200 : 250
+            }),
             title: {
                 text: `${symbol} Market Sentiment`,
-                style: {
-                    color: getComputedStyle(document.documentElement).getPropertyValue('--text-primary'),
-                    fontSize: '1rem',
-                    fontWeight: '700'
-                }
+                style: baseConfig.title.style
             },
             pane: {
                 center: ['50%', '85%'],
@@ -971,9 +1039,9 @@ const DemoApp = {
                 min: 0,
                 max: 100,
                 stops: [
-                    [0.3, '#EF4444'], // Bearish
-                    [0.5, '#FCD34D'], // Neutral
-                    [0.7, '#10B981']  // Bullish
+                    [0.3, '#EF4444'],
+                    [0.5, '#FCD34D'],
+                    [0.7, '#10B981']
                 ],
                 lineWidth: 0,
                 tickWidth: 0,
@@ -981,21 +1049,15 @@ const DemoApp = {
                 tickAmount: 2,
                 labels: {
                     y: 16,
-                    style: {
-                        color: getComputedStyle(document.documentElement).getPropertyValue('--text-primary')
-                    }
+                    style: baseConfig.yAxis.labels.style
                 }
             },
             plotOptions: {
                 solidgauge: {
                     dataLabels: {
-                        y: -25,
+                        y: isMobile ? -15 : -25,
                         borderWidth: 0,
-                        useHTML: true,
-                        format: `<div style="text-align:center">
-                            <span style="font-size:2rem;font-weight:bold;color:${sentimentColor}">{y}</span><br/>
-                            <span style="font-size:0.875rem;color:var(--text-secondary)">${sentimentLabel}</span>
-                        </div>`
+                        useHTML: true
                     }
                 }
             },
@@ -1004,17 +1066,16 @@ const DemoApp = {
                 data: [Math.round(sentimentScore)],
                 dataLabels: {
                     format: `<div style="text-align:center">
-                        <span style="font-size:2rem;font-weight:bold;color:${sentimentColor}">{y}</span><br/>
-                        <span style="font-size:0.875rem;color:var(--text-secondary)">${sentimentLabel}</span>
+                        <span style="font-size:${isMobile ? '1.5rem' : '2rem'};font-weight:bold;color:${sentimentColor}">{y}</span><br/>
+                        <span style="font-size:${isMobile ? '0.75rem' : '0.875rem'};color:var(--text-secondary)">${sentimentLabel}</span>
                     </div>`
                 }
-            }],
-            credits: { enabled: false }
-        });
+            }]
+        }));
     },
     
     // ============================================
-    // PORTFOLIO BUILDER TOOL - AMÉLIORÉ
+    // PORTFOLIO BUILDER TOOL
     // ============================================
     setupPortfolioListeners: function() {
         const btnAdd = document.getElementById('btnAddToPortfolio');
@@ -1088,7 +1149,6 @@ const DemoApp = {
                 
                 this.updatePortfolioDisplay();
                 
-                // NOUVEAU : Charger les graphiques avancés si portfolio >= 2 stocks
                 if (this.portfolio.length >= 2) {
                     this.loadPortfolioAdvancedCharts();
                 }
@@ -1111,7 +1171,6 @@ const DemoApp = {
         if (this.portfolio.length >= 2) {
             this.loadPortfolioAdvancedCharts();
         } else {
-            // Cacher les graphiques avancés
             const corrContainer = document.getElementById('portfolioCorrelation');
             const perfContainer = document.getElementById('portfolioPerformance');
             if (corrContainer) corrContainer.style.display = 'none';
@@ -1181,7 +1240,6 @@ const DemoApp = {
         
         tableBody.innerHTML = html;
         
-        // Calcul du score de diversification
         let diversificationScore = 'Low';
         if (this.portfolio.length >= 5) {
             diversificationScore = 'Excellent';
@@ -1226,11 +1284,13 @@ const DemoApp = {
             percentage: (holding.value / totalValue * 100).toFixed(2)
         }));
         
-        this.charts.portfolioAllocation = Highcharts.chart('portfolioAllocationChart', {
-            chart: {
-                type: 'pie',
-                backgroundColor: 'transparent'
-            },
+        const baseConfig = this.getResponsiveChartConfig();
+        const isMobile = this.isMobile();
+        
+        this.charts.portfolioAllocation = Highcharts.chart('portfolioAllocationChart', Object.assign({}, baseConfig, {
+            chart: Object.assign({}, baseConfig.chart, {
+                type: 'pie'
+            }),
             title: {
                 text: null
             },
@@ -1242,45 +1302,32 @@ const DemoApp = {
                     allowPointSelect: true,
                     cursor: 'pointer',
                     dataLabels: {
-                        enabled: true,
+                        enabled: !isMobile,
                         format: '<b>{point.name}</b>: {point.percentage}%',
-                        style: {
-                            color: getComputedStyle(document.documentElement).getPropertyValue('--text-primary')
-                        }
+                        style: baseConfig.xAxis.labels.style
                     },
-                    showInLegend: true
+                    showInLegend: !isMobile
                 }
             },
             series: [{
                 name: 'Value',
                 colorByPoint: true,
                 data: data
-            }],
-            credits: { enabled: false },
-            legend: {
-                itemStyle: {
-                    color: getComputedStyle(document.documentElement).getPropertyValue('--text-primary')
-                }
-            }
-        });
+            }]
+        }));
     },
     
-    // NOUVEAU : Graphiques avancés du portfolio
     loadPortfolioAdvancedCharts: async function() {
         console.log('📊 Loading advanced portfolio charts...');
         
         try {
-            // Charger les données historiques pour chaque stock
             const promises = this.portfolio.map(holding => 
                 this.apiClient.getTimeSeries(holding.symbol, '1day', '30')
             );
             
             const results = await Promise.all(promises);
             
-            // Correlation Matrix
             this.renderPortfolioCorrelation(results);
-            
-            // Performance Chart
             this.renderPortfolioPerformance(results);
             
         } catch (error) {
@@ -1298,7 +1345,6 @@ const DemoApp = {
             this.charts.correlationHeatmap.destroy();
         }
         
-        // Calculer la matrice de corrélation (simplifié - corrélations simulées)
         const symbols = this.portfolio.map(p => p.symbol);
         const correlationData = [];
         
@@ -1306,41 +1352,33 @@ const DemoApp = {
             symbols.forEach((symbol2, j) => {
                 let correlation;
                 if (i === j) {
-                    correlation = 1; // Corrélation avec soi-même = 1
+                    correlation = 1;
                 } else {
-                    // Simuler une corrélation (dans la vraie vie, calculer à partir des prix)
-                    correlation = (Math.random() * 1.6 - 0.8).toFixed(2); // Entre -0.8 et 0.8
+                    correlation = (Math.random() * 1.6 - 0.8).toFixed(2);
                 }
                 
                 correlationData.push([j, i, parseFloat(correlation)]);
             });
         });
         
-        this.charts.correlationHeatmap = Highcharts.chart('correlationHeatmap', {
-            chart: {
+        const baseConfig = this.getResponsiveChartConfig();
+        const isMobile = this.isMobile();
+        
+        this.charts.correlationHeatmap = Highcharts.chart('correlationHeatmap', Object.assign({}, baseConfig, {
+            chart: Object.assign({}, baseConfig.chart, {
                 type: 'heatmap',
-                backgroundColor: 'transparent'
-            },
+                height: isMobile ? 250 : 400
+            }),
             title: {
                 text: null
             },
-            xAxis: {
+            xAxis: Object.assign({}, baseConfig.xAxis, {
+                categories: symbols
+            }),
+            yAxis: Object.assign({}, baseConfig.yAxis, {
                 categories: symbols,
-                labels: {
-                    style: {
-                        color: getComputedStyle(document.documentElement).getPropertyValue('--text-primary')
-                    }
-                }
-            },
-            yAxis: {
-                categories: symbols,
-                title: null,
-                labels: {
-                    style: {
-                        color: getComputedStyle(document.documentElement).getPropertyValue('--text-primary')
-                    }
-                }
-            },
+                title: null
+            }),
             colorAxis: {
                 min: -1,
                 max: 1,
@@ -1356,10 +1394,8 @@ const DemoApp = {
                 margin: 0,
                 verticalAlign: 'top',
                 y: 25,
-                symbolHeight: 200,
-                itemStyle: {
-                    color: getComputedStyle(document.documentElement).getPropertyValue('--text-primary')
-                }
+                symbolHeight: isMobile ? 100 : 200,
+                itemStyle: baseConfig.legend.itemStyle
             },
             tooltip: {
                 formatter: function() {
@@ -1372,13 +1408,15 @@ const DemoApp = {
                 borderWidth: 1,
                 data: correlationData,
                 dataLabels: {
-                    enabled: true,
+                    enabled: !isMobile,
                     color: '#000000',
-                    format: '{point.value:.2f}'
+                    format: '{point.value:.2f}',
+                    style: {
+                        fontSize: isMobile ? '0.625rem' : '0.75rem'
+                    }
                 }
-            }],
-            credits: { enabled: false }
-        });
+            }]
+        }));
     },
     
     renderPortfolioPerformance: function(timeSeriesResults) {
@@ -1391,7 +1429,6 @@ const DemoApp = {
             this.charts.portfolioPerformance.destroy();
         }
         
-        // Créer des séries pour chaque stock
         const series = [];
         
         timeSeriesResults.forEach((result, index) => {
@@ -1399,7 +1436,6 @@ const DemoApp = {
                 const holding = this.portfolio[index];
                 const sortedData = [...result.data].sort((a, b) => new Date(a.datetime) - new Date(b.datetime));
                 
-                // Performance relative (base 100)
                 const firstPrice = parseFloat(sortedData[0].close);
                 const performanceData = sortedData.map(d => ({
                     x: new Date(d.datetime).getTime(),
@@ -1413,33 +1449,23 @@ const DemoApp = {
             }
         });
         
-        this.charts.portfolioPerformance = Highcharts.stockChart('portfolioPerformanceChart', {
-            chart: {
-                backgroundColor: 'transparent'
-            },
+        const baseConfig = this.getResponsiveChartConfig();
+        
+        this.charts.portfolioPerformance = Highcharts.stockChart('portfolioPerformanceChart', Object.assign({}, baseConfig, {
             title: {
                 text: null
             },
-            xAxis: {
-                type: 'datetime',
-                labels: {
-                    style: {
-                        color: getComputedStyle(document.documentElement).getPropertyValue('--text-primary')
-                    }
-                }
-            },
-            yAxis: {
+            xAxis: Object.assign({}, baseConfig.xAxis, {
+                type: 'datetime'
+            }),
+            yAxis: Object.assign({}, baseConfig.yAxis, {
                 title: {
                     text: 'Performance (%)',
-                    style: {
-                        color: getComputedStyle(document.documentElement).getPropertyValue('--text-primary')
-                    }
+                    style: baseConfig.yAxis.title.style
                 },
                 labels: {
                     format: '{value}%',
-                    style: {
-                        color: getComputedStyle(document.documentElement).getPropertyValue('--text-primary')
-                    }
+                    style: baseConfig.yAxis.labels.style
                 },
                 plotLines: [{
                     value: 0,
@@ -1447,30 +1473,17 @@ const DemoApp = {
                     width: 1,
                     dashStyle: 'Dash'
                 }]
-            },
+            }),
             tooltip: {
                 shared: true,
                 valueDecimals: 2,
                 valueSuffix: '%'
             },
-            series: series,
-            credits: { enabled: false },
-            rangeSelector: {
-                enabled: false
-            },
-            navigator: {
-                enabled: false
-            },
-            legend: {
-                enabled: true,
-                itemStyle: {
-                    color: getComputedStyle(document.documentElement).getPropertyValue('--text-primary')
-                }
-            }
-        });
+            series: series
+        }));
     },
 
-// ============================================
+    // ============================================
     // TECHNICAL ANALYSIS TOOL - COMPLET
     // ============================================
     setupTechnicalListeners: function() {
@@ -1492,7 +1505,6 @@ const DemoApp = {
             });
         }
         
-        // Event listeners pour les indicateurs
         const indicatorCheckboxes = [
             'indicatorSMA',
             'indicatorEMA',
@@ -1552,7 +1564,7 @@ const DemoApp = {
     },
     
     renderTechnicalChart: function(data, symbol) {
-        console.log('📊 === TECHNICAL CHART RENDERING ===');
+        console.log('📊 === TECHNICAL CHART RENDERING (MOBILE-OPTIMIZED) ===');
         
         if (this.charts.technical) {
             this.charts.technical.destroy();
@@ -1593,57 +1605,27 @@ const DemoApp = {
                 return [timestamp, parseFloat(d.volume || 0)];
             });
             
+            const baseConfig = this.getResponsiveChartConfig();
+            const isMobile = this.isMobile();
+            
             try {
-                this.charts.technical = Highcharts.stockChart('technicalChart', {
-                    chart: {
-                        backgroundColor: 'transparent',
-                        height: 500
-                    },
+                this.charts.technical = Highcharts.stockChart('technicalChart', Object.assign({}, baseConfig, {
+                    chart: Object.assign({}, baseConfig.chart, {
+                        height: isMobile ? 350 : 500
+                    }),
                     title: {
                         text: `${symbol} - Technical Analysis`,
-                        style: {
-                            color: getComputedStyle(document.documentElement).getPropertyValue('--text-primary') || '#1e293b',
-                            fontSize: '1.125rem',
-                            fontWeight: '700'
-                        }
-                    },
-                    rangeSelector: {
-                        selected: 1,
-                        buttons: [{
-                            type: 'month',
-                            count: 1,
-                            text: '1m'
-                        }, {
-                            type: 'month',
-                            count: 3,
-                            text: '3m'
-                        }, {
-                            type: 'month',
-                            count: 6,
-                            text: '6m'
-                        }, {
-                            type: 'all',
-                            text: 'All'
-                        }],
-                        buttonTheme: {
-                            style: {
-                                color: getComputedStyle(document.documentElement).getPropertyValue('--text-primary') || '#1e293b'
-                            }
-                        }
+                        style: baseConfig.title.style
                     },
                     yAxis: [{
                         labels: {
                             align: 'right',
                             x: -3,
-                            style: {
-                                color: getComputedStyle(document.documentElement).getPropertyValue('--text-primary') || '#1e293b'
-                            }
+                            style: baseConfig.yAxis.labels.style
                         },
                         title: {
                             text: 'Price (USD)',
-                            style: {
-                                color: getComputedStyle(document.documentElement).getPropertyValue('--text-primary') || '#1e293b'
-                            }
+                            style: baseConfig.yAxis.title.style
                         },
                         height: '70%',
                         lineWidth: 2,
@@ -1654,34 +1636,26 @@ const DemoApp = {
                         labels: {
                             align: 'right',
                             x: -3,
-                            style: {
-                                color: getComputedStyle(document.documentElement).getPropertyValue('--text-primary') || '#1e293b'
-                            }
+                            style: baseConfig.yAxis.labels.style
                         },
                         title: {
                             text: 'Volume',
-                            style: {
-                                color: getComputedStyle(document.documentElement).getPropertyValue('--text-primary') || '#1e293b'
-                            }
+                            style: baseConfig.yAxis.title.style
                         },
                         top: '75%',
                         height: '25%',
                         offset: 0,
                         lineWidth: 2
                     }],
-                    xAxis: {
-                        type: 'datetime',
-                        labels: {
-                            style: {
-                                color: getComputedStyle(document.documentElement).getPropertyValue('--text-primary') || '#1e293b'
-                            }
-                        }
-                    },
+                    xAxis: Object.assign({}, baseConfig.xAxis, {
+                        type: 'datetime'
+                    }),
                     tooltip: {
                         split: true,
-                        backgroundColor: getComputedStyle(document.documentElement).getPropertyValue('--background-primary') || '#ffffff',
+                        backgroundColor: getComputedStyle(document.documentElement).getPropertyValue('--background-primary'),
                         style: {
-                            color: getComputedStyle(document.documentElement).getPropertyValue('--text-primary') || '#1e293b'
+                            color: getComputedStyle(document.documentElement).getPropertyValue('--text-primary'),
+                            fontSize: isMobile ? '0.75rem' : '0.875rem'
                         }
                     },
                     series: [{
@@ -1704,27 +1678,11 @@ const DemoApp = {
                         yAxis: 1,
                         color: '#3B82F6',
                         opacity: 0.5
-                    }],
-                    credits: { 
-                        enabled: false 
-                    },
-                    navigator: {
-                        enabled: true,
-                        series: {
-                            color: '#3B82F6'
-                        }
-                    },
-                    scrollbar: {
-                        enabled: true
-                    },
-                    legend: {
-                        enabled: false
-                    }
-                });
+                    }]
+                }));
                 
                 console.log('✅ Technical chart created successfully!');
                 
-                // Activer les indicateurs cochés par défaut
                 setTimeout(() => {
                     const indicators = [
                         { id: 'indicatorSMA', checkbox: document.getElementById('indicatorSMA') },
@@ -1756,13 +1714,13 @@ const DemoApp = {
         console.log('🔄 Toggle indicator:', indicatorId, isEnabled);
         
         if (!this.charts.technical || !this.currentTechnicalSymbol) {
-            console.log('⚠️ No chart or symbol available');
+            console.log('⚠ No chart or symbol available');
             return;
         }
         
         const mainSeries = this.charts.technical.series.find(s => s.options.id === 'main-series');
         if (!mainSeries || !mainSeries.options.data) {
-            console.log('⚠️ No data in chart');
+            console.log('⚠ No data in chart');
             return;
         }
         
@@ -1802,7 +1760,6 @@ const DemoApp = {
                     this.addRSI(data);
                 } else {
                     this.removeIndicator('RSI');
-                    // Supprimer l'axe RSI
                     const rsiAxis = this.charts.technical.get('rsi-axis');
                     if (rsiAxis) rsiAxis.remove();
                 }
@@ -1815,7 +1772,6 @@ const DemoApp = {
                     this.removeIndicator('MACD');
                     this.removeIndicator('Signal');
                     this.removeIndicator('Histogram');
-                    // Supprimer l'axe MACD
                     const macdAxis = this.charts.technical.get('macd-axis');
                     if (macdAxis) macdAxis.remove();
                 }
@@ -1831,11 +1787,10 @@ const DemoApp = {
         
         if (seriesToRemove) {
             seriesToRemove.remove();
-            console.log('🗑️ Removed indicator:', name);
+            console.log('🗑 Removed indicator:', name);
         }
     },
     
-    // SMA - Simple Moving Average
     addSMA: function(ohlcData) {
         console.log('📊 Adding SMA indicators');
         
@@ -1848,12 +1803,14 @@ const DemoApp = {
         const sma20Data = timestamps.map((t, i) => [t, sma20[i]]).filter(d => d[1] !== null);
         const sma50Data = timestamps.map((t, i) => [t, sma50[i]]).filter(d => d[1] !== null);
         
+        const isMobile = this.isMobile();
+        
         this.charts.technical.addSeries({
             name: 'SMA 20',
             type: 'line',
             data: sma20Data,
             color: '#F59E0B',
-            lineWidth: 2,
+            lineWidth: isMobile ? 1.5 : 2,
             yAxis: 0,
             marker: { enabled: false }
         });
@@ -1863,7 +1820,7 @@ const DemoApp = {
             type: 'line',
             data: sma50Data,
             color: '#8B5CF6',
-            lineWidth: 2,
+            lineWidth: isMobile ? 1.5 : 2,
             yAxis: 0,
             marker: { enabled: false }
         });
@@ -1887,7 +1844,6 @@ const DemoApp = {
         return result;
     },
     
-    // EMA - Exponential Moving Average
     addEMA: function(ohlcData) {
         console.log('📊 Adding EMA indicators');
         
@@ -1900,12 +1856,14 @@ const DemoApp = {
         const ema12Data = timestamps.map((t, i) => [t, ema12[i]]).filter(d => d[1] !== null);
         const ema26Data = timestamps.map((t, i) => [t, ema26[i]]).filter(d => d[1] !== null);
         
+        const isMobile = this.isMobile();
+        
         this.charts.technical.addSeries({
             name: 'EMA 12',
             type: 'line',
             data: ema12Data,
             color: '#06B6D4',
-            lineWidth: 2,
+            lineWidth: isMobile ? 1.5 : 2,
             dashStyle: 'Dash',
             yAxis: 0,
             marker: { enabled: false }
@@ -1916,7 +1874,7 @@ const DemoApp = {
             type: 'line',
             data: ema26Data,
             color: '#EC4899',
-            lineWidth: 2,
+            lineWidth: isMobile ? 1.5 : 2,
             dashStyle: 'Dash',
             yAxis: 0,
             marker: { enabled: false }
@@ -1949,7 +1907,6 @@ const DemoApp = {
         return result;
     },
     
-    // Bollinger Bands
     addBollingerBands: function(ohlcData) {
         console.log('📊 Adding Bollinger Bands');
         
@@ -2020,7 +1977,6 @@ const DemoApp = {
         });
     },
     
-    // RSI - Relative Strength Index
     addRSI: function(ohlcData) {
         console.log('📊 Adding RSI');
         
@@ -2031,20 +1987,18 @@ const DemoApp = {
         const rsi = this.calculateRSI(closePrices, period);
         const rsiData = timestamps.map((t, i) => [t, rsi[i]]).filter(d => d[1] !== null);
         
+        const baseConfig = this.getResponsiveChartConfig();
+        
         this.charts.technical.addAxis({
             id: 'rsi-axis',
             labels: {
                 align: 'right',
                 x: -3,
-                style: {
-                    color: getComputedStyle(document.documentElement).getPropertyValue('--text-primary')
-                }
+                style: baseConfig.yAxis.labels.style
             },
             title: {
                 text: 'RSI',
-                style: {
-                    color: getComputedStyle(document.documentElement).getPropertyValue('--text-primary')
-                }
+                style: baseConfig.yAxis.title.style
             },
             top: '80%',
             height: '20%',
@@ -2057,9 +2011,7 @@ const DemoApp = {
                 width: 1,
                 label: { 
                     text: '70',
-                    style: {
-                        color: getComputedStyle(document.documentElement).getPropertyValue('--text-primary')
-                    }
+                    style: baseConfig.yAxis.labels.style
                 }
             }, {
                 value: 30,
@@ -2068,9 +2020,7 @@ const DemoApp = {
                 width: 1,
                 label: { 
                     text: '30',
-                    style: {
-                        color: getComputedStyle(document.documentElement).getPropertyValue('--text-primary')
-                    }
+                    style: baseConfig.yAxis.labels.style
                 }
             }]
         });
@@ -2080,7 +2030,7 @@ const DemoApp = {
             type: 'line',
             data: rsiData,
             color: '#8B5CF6',
-            lineWidth: 2,
+            lineWidth: this.isMobile() ? 1.5 : 2,
             yAxis: 'rsi-axis',
             marker: { enabled: false }
         });
@@ -2122,7 +2072,6 @@ const DemoApp = {
         return result;
     },
     
-    // MACD
     addMACD: function(ohlcData) {
         console.log('📊 Adding MACD');
         
@@ -2162,20 +2111,18 @@ const DemoApp = {
         const signalData = timestamps.map((t, i) => [t, fullSignalLine[i]]).filter(d => d[1] !== null);
         const histogramData = timestamps.map((t, i) => [t, histogram[i]]).filter(d => d[1] !== null);
         
+        const baseConfig = this.getResponsiveChartConfig();
+        
         this.charts.technical.addAxis({
             id: 'macd-axis',
             labels: {
                 align: 'right',
                 x: -3,
-                style: {
-                    color: getComputedStyle(document.documentElement).getPropertyValue('--text-primary')
-                }
+                style: baseConfig.yAxis.labels.style
             },
             title: {
                 text: 'MACD',
-                style: {
-                    color: getComputedStyle(document.documentElement).getPropertyValue('--text-primary')
-                }
+                style: baseConfig.yAxis.title.style
             },
             top: '80%',
             height: '20%',
@@ -2183,12 +2130,14 @@ const DemoApp = {
             lineWidth: 2
         });
         
+        const isMobile = this.isMobile();
+        
         this.charts.technical.addSeries({
             name: 'MACD',
             type: 'line',
             data: macdData,
             color: '#3B82F6',
-            lineWidth: 2,
+            lineWidth: isMobile ? 1.5 : 2,
             yAxis: 'macd-axis',
             marker: { enabled: false }
         });
@@ -2198,7 +2147,7 @@ const DemoApp = {
             type: 'line',
             data: signalData,
             color: '#EF4444',
-            lineWidth: 2,
+            lineWidth: isMobile ? 1.5 : 2,
             yAxis: 'macd-axis',
             marker: { enabled: false }
         });
@@ -2245,7 +2194,6 @@ const DemoApp = {
             }
         }
         
-        // Calcul RSI simple
         const rsi = this.calculateRSI(prices, 14);
         const currentRSI = rsi[rsi.length - 1];
         
@@ -2312,8 +2260,8 @@ const DemoApp = {
         `;
     },
 
-// ============================================
-    // RISK CALCULATOR TOOL - AMÉLIORÉ AVEC MONTE CARLO
+    // ============================================
+    // RISK CALCULATOR TOOL
     // ============================================
     setupRiskCalculatorListeners: function() {
         const btnCalculate = document.getElementById('btnCalculateRisk');
@@ -2324,7 +2272,6 @@ const DemoApp = {
             });
         }
         
-        // Auto-calculate on input change
         ['riskPortfolioValue', 'riskConfidence', 'riskVolatility', 'riskReturn', 'riskHorizon'].forEach(id => {
             const input = document.getElementById(id);
             if (input) {
@@ -2347,7 +2294,6 @@ const DemoApp = {
         
         console.log('📊 Calculating risk metrics...');
         
-        // Z-scores pour différents niveaux de confiance
         const zScoreMap = {
             90: 1.282,
             95: 1.645,
@@ -2355,23 +2301,18 @@ const DemoApp = {
         };
         const zScore = zScoreMap[confidence] || 1.645;
         
-        // VaR calculé
         const dailyVolatility = volatility / Math.sqrt(252);
         const horizonVolatility = dailyVolatility * Math.sqrt(timeHorizon);
         const varDaily = portfolioValue * horizonVolatility * zScore / 100;
         
-        // CVaR (Expected Shortfall)
         const cvar = varDaily * 1.3;
         
-        // Sharpe Ratio
         const riskFreeRate = 2;
         const sharpeRatio = (expectedReturn - riskFreeRate) / volatility;
         
-        // Maximum Drawdown (simulé)
         const maxDrawdown = (volatility / 100) * portfolioValue * 1.5;
         
-        // Beta (simulé - vs market)
-        const beta = 0.8 + (Math.random() * 0.6); // Entre 0.8 et 1.4
+        const beta = 0.8 + (Math.random() * 0.6);
         
         this.displayRiskResults({
             portfolioValue,
@@ -2386,12 +2327,11 @@ const DemoApp = {
             beta
         });
         
-        // NOUVEAU : Monte Carlo Simulation
         this.runMonteCarloSimulation({
             portfolioValue,
             expectedReturn,
             volatility,
-            timeHorizon: 252 // 1 an de trading
+            timeHorizon: 252
         });
     },
     
@@ -2464,7 +2404,6 @@ const DemoApp = {
         `;
     },
     
-    // NOUVEAU : Monte Carlo Simulation
     runMonteCarloSimulation: function(params) {
         console.log('🎲 Running Monte Carlo simulation...');
         
@@ -2479,11 +2418,10 @@ const DemoApp = {
         
         const { portfolioValue, expectedReturn, volatility, timeHorizon } = params;
         
-        const numSimulations = 100; // 100 simulations pour performance
+        const numSimulations = this.isMobile() ? 50 : 100; // Moins de simulations sur mobile
         const dailyReturn = expectedReturn / 252 / 100;
         const dailyVol = volatility / Math.sqrt(252) / 100;
         
-        // Générer les simulations
         const simulations = [];
         
         for (let sim = 0; sim < numSimulations; sim++) {
@@ -2491,7 +2429,6 @@ const DemoApp = {
             let currentValue = portfolioValue;
             
             for (let day = 1; day <= timeHorizon; day++) {
-                // Générer un rendement aléatoire (distribution normale)
                 const randomReturn = this.randomNormal(dailyReturn, dailyVol);
                 currentValue = currentValue * (1 + randomReturn);
                 path.push(currentValue);
@@ -2500,18 +2437,16 @@ const DemoApp = {
             simulations.push(path);
         }
         
-        // Convertir en séries Highcharts
         const series = simulations.map((path, index) => ({
             name: `Simulation ${index + 1}`,
             data: path,
-            lineWidth: 1,
+            lineWidth: this.isMobile() ? 0.5 : 1,
             opacity: 0.3,
             marker: { enabled: false },
             enableMouseTracking: false,
             showInLegend: false
         }));
         
-        // Calculer la moyenne
         const avgPath = [];
         for (let day = 0; day <= timeHorizon; day++) {
             const dayValues = simulations.map(sim => sim[day]);
@@ -2519,17 +2454,15 @@ const DemoApp = {
             avgPath.push(avg);
         }
         
-        // Ajouter la série moyenne
         series.push({
             name: 'Average Path',
             data: avgPath,
-            lineWidth: 3,
+            lineWidth: this.isMobile() ? 2 : 3,
             color: '#3B82F6',
             marker: { enabled: false },
             zIndex: 10
         });
         
-        // Calculer les percentiles
         const percentile5 = [];
         const percentile95 = [];
         
@@ -2542,7 +2475,7 @@ const DemoApp = {
         series.push({
             name: '5th Percentile',
             data: percentile5,
-            lineWidth: 2,
+            lineWidth: this.isMobile() ? 1.5 : 2,
             color: '#EF4444',
             dashStyle: 'Dash',
             marker: { enabled: false }
@@ -2551,72 +2484,47 @@ const DemoApp = {
         series.push({
             name: '95th Percentile',
             data: percentile95,
-            lineWidth: 2,
+            lineWidth: this.isMobile() ? 1.5 : 2,
             color: '#10B981',
             dashStyle: 'Dash',
             marker: { enabled: false }
         });
         
-        this.charts.monteCarlo = Highcharts.chart('monteCarloChart', {
-            chart: {
-                backgroundColor: 'transparent'
-            },
+        const baseConfig = this.getResponsiveChartConfig();
+        
+        this.charts.monteCarlo = Highcharts.chart('monteCarloChart', Object.assign({}, baseConfig, {
             title: {
                 text: 'Portfolio Value Projections',
-                style: {
-                    color: getComputedStyle(document.documentElement).getPropertyValue('--text-primary'),
-                    fontSize: '1rem',
-                    fontWeight: '700'
-                }
+                style: baseConfig.title.style
             },
-            xAxis: {
+            xAxis: Object.assign({}, baseConfig.xAxis, {
                 title: {
                     text: 'Trading Days',
-                    style: {
-                        color: getComputedStyle(document.documentElement).getPropertyValue('--text-primary')
-                    }
-                },
-                labels: {
-                    style: {
-                        color: getComputedStyle(document.documentElement).getPropertyValue('--text-primary')
-                    }
+                    style: baseConfig.xAxis.labels.style
                 }
-            },
-            yAxis: {
+            }),
+            yAxis: Object.assign({}, baseConfig.yAxis, {
                 title: {
                     text: 'Portfolio Value ($)',
-                    style: {
-                        color: getComputedStyle(document.documentElement).getPropertyValue('--text-primary')
-                    }
+                    style: baseConfig.yAxis.title.style
                 },
                 labels: {
                     formatter: function() {
                         return '$' + (this.value / 1000).toFixed(0) + 'k';
                     },
-                    style: {
-                        color: getComputedStyle(document.documentElement).getPropertyValue('--text-primary')
-                    }
+                    style: baseConfig.yAxis.labels.style
                 }
-            },
+            }),
             tooltip: {
                 shared: false,
                 valueDecimals: 0,
                 valuePrefix: '$'
             },
-            series: series,
-            credits: { enabled: false },
-            legend: {
-                enabled: true,
-                itemStyle: {
-                    color: getComputedStyle(document.documentElement).getPropertyValue('--text-primary')
-                }
-            }
-        });
+            series: series
+        }));
     },
     
-    // Fonction pour générer nombres aléatoires avec distribution normale
     randomNormal: function(mean, stdDev) {
-        // Box-Muller transform
         let u = 0, v = 0;
         while(u === 0) u = Math.random();
         while(v === 0) v = Math.random();
@@ -2625,7 +2533,7 @@ const DemoApp = {
     },
     
     // ============================================
-    // AI INSIGHTS TOOL - AMÉLIORÉ AVEC GRAPHIQUES
+    // AI INSIGHTS TOOL
     // ============================================
     setupAIInsightsListeners: function() {
         const btnAnalyze = document.getElementById('btnAIAnalyze');
@@ -2667,7 +2575,7 @@ const DemoApp = {
                     <h3>AI Analysis in Progress</h3>
                     <p>Analyzing ${symbol} with machine learning models...</p>
                     <div style="margin-top: 1rem; color: var(--text-secondary);">
-                        <p>⚙️ Loading LSTM neural network...</p>
+                        <p>⚙ Loading LSTM neural network...</p>
                         <p>📊 Processing 5 years of historical data...</p>
                         <p>🧠 Calculating sentiment scores...</p>
                     </div>
@@ -2676,7 +2584,6 @@ const DemoApp = {
             
             await new Promise(resolve => setTimeout(resolve, 2000));
             
-            // Charger les données
             const quoteData = await this.apiClient.getQuote(symbol);
             const timeSeriesData = await this.apiClient.getTimeSeries(symbol, '1day', '90');
             
@@ -2701,7 +2608,6 @@ const DemoApp = {
         
         const currentPrice = quoteData.close || quoteData.price || 0;
         
-        // Générer des prédictions réalistes
         const prediction7d = currentPrice * (1 + (Math.random() - 0.45) * 0.15);
         const prediction30d = currentPrice * (1 + (Math.random() - 0.45) * 0.25);
         const prediction90d = currentPrice * (1 + (Math.random() - 0.45) * 0.35);
@@ -2710,7 +2616,6 @@ const DemoApp = {
         const change30d = ((prediction30d - currentPrice) / currentPrice * 100).toFixed(2);
         const change90d = ((prediction90d - currentPrice) / currentPrice * 100).toFixed(2);
         
-        // Score de sentiment (0-100)
         const sentimentScore = 50 + (parseFloat(change30d) * 2);
         const clampedSentiment = Math.max(0, Math.min(100, sentimentScore));
         
@@ -2740,8 +2645,7 @@ const DemoApp = {
             sentimentIcon = 'angry';
         }
         
-        // Calcul du score de confiance
-        const confidence = 75 + Math.random() * 15; // Entre 75% et 90%
+        const confidence = 75 + Math.random() * 15;
         
         container.innerHTML = `
             <div class="ai-insight-card">
@@ -2829,7 +2733,6 @@ const DemoApp = {
             </div>
         `;
         
-        // NOUVEAU : Charger le graphique de prédiction
         if (timeSeriesData && timeSeriesData.data) {
             this.renderAIPredictionChart(symbol, timeSeriesData.data, {
                 currentPrice,
@@ -2840,7 +2743,6 @@ const DemoApp = {
         }
     },
     
-    // NOUVEAU : Graphique de prédiction AI
     renderAIPredictionChart: function(symbol, historicalData, predictions) {
         const container = document.getElementById('aiPredictionChart');
         if (!container) return;
@@ -2851,17 +2753,14 @@ const DemoApp = {
             this.charts.aiPredictionChart.destroy();
         }
         
-        // Données historiques
         const sortedData = [...historicalData].sort((a, b) => new Date(a.datetime) - new Date(b.datetime));
         const historical = sortedData.map(d => ({
             x: new Date(d.datetime).getTime(),
             y: parseFloat(d.close)
         }));
         
-        // Dernière date
         const lastDate = new Date(sortedData[sortedData.length - 1].datetime);
         
-        // Points de prédiction
         const predictionPoints = [
             {
                 x: lastDate.getTime(),
@@ -2881,7 +2780,6 @@ const DemoApp = {
             }
         ];
         
-        // Intervalles de confiance (±10%)
         const upperBound = predictionPoints.map(p => ({
             x: p.x,
             y: p.y * 1.1
@@ -2892,25 +2790,16 @@ const DemoApp = {
             y: p.y * 0.9
         }));
         
-        this.charts.aiPredictionChart = Highcharts.chart('predictionChartContainer', {
-            chart: {
-                backgroundColor: 'transparent'
-            },
+        const baseConfig = this.getResponsiveChartConfig();
+        const isMobile = this.isMobile();
+        
+        this.charts.aiPredictionChart = Highcharts.chart('predictionChartContainer', Object.assign({}, baseConfig, {
             title: {
                 text: `${symbol} - AI Price Forecast`,
-                style: {
-                    color: getComputedStyle(document.documentElement).getPropertyValue('--text-primary'),
-                    fontSize: '1rem',
-                    fontWeight: '700'
-                }
+                style: baseConfig.title.style
             },
-            xAxis: {
+            xAxis: Object.assign({}, baseConfig.xAxis, {
                 type: 'datetime',
-                labels: {
-                    style: {
-                        color: getComputedStyle(document.documentElement).getPropertyValue('--text-primary')
-                    }
-                },
                 plotLines: [{
                     value: lastDate.getTime(),
                     color: '#64748b',
@@ -2918,26 +2807,20 @@ const DemoApp = {
                     dashStyle: 'Dash',
                     label: {
                         text: 'Today',
-                        style: {
-                            color: getComputedStyle(document.documentElement).getPropertyValue('--text-primary')
-                        }
+                        style: baseConfig.xAxis.labels.style
                     }
                 }]
-            },
-            yAxis: {
+            }),
+            yAxis: Object.assign({}, baseConfig.yAxis, {
                 title: {
                     text: 'Price (USD)',
-                    style: {
-                        color: getComputedStyle(document.documentElement).getPropertyValue('--text-primary')
-                    }
+                    style: baseConfig.yAxis.title.style
                 },
                 labels: {
                     format: '${value}',
-                    style: {
-                        color: getComputedStyle(document.documentElement).getPropertyValue('--text-primary')
-                    }
+                    style: baseConfig.yAxis.labels.style
                 }
-            },
+            }),
             tooltip: {
                 shared: true,
                 valueDecimals: 2,
@@ -2947,17 +2830,17 @@ const DemoApp = {
                 name: 'Historical Price',
                 data: historical,
                 color: '#3B82F6',
-                lineWidth: 2,
+                lineWidth: isMobile ? 1.5 : 2,
                 marker: { enabled: false }
             }, {
                 name: 'AI Prediction',
                 data: predictionPoints,
                 color: '#8B5CF6',
-                lineWidth: 3,
+                lineWidth: isMobile ? 2 : 3,
                 dashStyle: 'Dash',
                 marker: { 
                     enabled: true,
-                    radius: 5
+                    radius: isMobile ? 3 : 5
                 }
             }, {
                 name: 'Confidence Range',
@@ -2968,18 +2851,11 @@ const DemoApp = {
                 lineWidth: 0,
                 marker: { enabled: false },
                 enableMouseTracking: false
-            }],
-            credits: { enabled: false },
-            legend: {
-                enabled: true,
-                itemStyle: {
-                    color: getComputedStyle(document.documentElement).getPropertyValue('--text-primary')
-                }
-            }
-        });
+            }]
+        }));
     },
 
-// ============================================
+    // ============================================
     // UTILITY FUNCTIONS
     // ============================================
     
@@ -3006,7 +2882,6 @@ const DemoApp = {
     showLoading: function(show) {
         console.log(show ? '⏳ Loading...' : '✅ Loaded');
         
-        // OPTIONNEL : Afficher un indicateur de chargement global
         let loader = document.getElementById('globalLoader');
         
         if (show) {
@@ -3026,7 +2901,6 @@ const DemoApp = {
                 `;
                 document.body.appendChild(loader);
                 
-                // Ajouter l'animation CSS si elle n'existe pas
                 if (!document.getElementById('loadingBarStyle')) {
                     const style = document.createElement('style');
                     style.id = 'loadingBarStyle';
@@ -3049,11 +2923,9 @@ const DemoApp = {
     showNotification: function(message, type = 'info') {
         console.log(`[${type.toUpperCase()}] ${message}`);
         
-        // Remove existing notifications
         const existing = document.querySelectorAll('.notification-toast');
         existing.forEach(n => n.remove());
         
-        // Create notification
         const notification = document.createElement('div');
         notification.className = `notification-toast notification-${type}`;
         
@@ -3074,12 +2946,10 @@ const DemoApp = {
         
         document.body.appendChild(notification);
         
-        // Trigger animation
         setTimeout(() => {
             notification.classList.add('show');
         }, 10);
         
-        // Auto-remove after 5 seconds
         setTimeout(() => {
             notification.classList.remove('show');
             setTimeout(() => {
@@ -3088,157 +2958,8 @@ const DemoApp = {
         }, 5000);
     },
     
-    // ============================================
-    // DEMO HELPERS - Fonctions d'exemple
-    // ============================================
-    
-    // Fonction pour simuler un chargement progressif
-    simulateProgress: function(callback, steps = 5) {
-        let currentStep = 0;
-        const interval = setInterval(() => {
-            currentStep++;
-            if (currentStep >= steps) {
-                clearInterval(interval);
-                if (callback) callback();
-            }
-        }, 300);
-    },
-    
-    // Fonction pour générer des données de démonstration
-    generateDemoData: function(points = 30) {
-        const data = [];
-        let value = 100;
-        
-        for (let i = 0; i < points; i++) {
-            value += (Math.random() - 0.5) * 5;
-            data.push({
-                x: Date.now() - (points - i) * 24 * 60 * 60 * 1000,
-                y: value
-            });
-        }
-        
-        return data;
-    },
-    
-    // Fonction pour formater une date
-    formatDate: function(date, format = 'short') {
-        const d = new Date(date);
-        
-        if (format === 'short') {
-            return d.toLocaleDateString();
-        } else if (format === 'long') {
-            return d.toLocaleDateString('en-US', { 
-                weekday: 'long', 
-                year: 'numeric', 
-                month: 'long', 
-                day: 'numeric' 
-            });
-        } else if (format === 'time') {
-            return d.toLocaleTimeString();
-        }
-        
-        return d.toString();
-    },
-    
-    // Fonction pour calculer la performance
-    calculatePerformance: function(startPrice, endPrice) {
-        const change = endPrice - startPrice;
-        const percentChange = (change / startPrice) * 100;
-        
-        return {
-            change: change,
-            percentChange: percentChange,
-            isPositive: change >= 0
-        };
-    },
-    
-    // Fonction pour obtenir la couleur d'un graphique basée sur le thème
-    getChartColor: function(index) {
-        const colors = [
-            '#3B82F6', // Blue
-            '#10B981', // Green
-            '#F59E0B', // Amber
-            '#EF4444', // Red
-            '#8B5CF6', // Purple
-            '#EC4899', // Pink
-            '#06B6D4', // Cyan
-            '#84CC16'  // Lime
-        ];
-        
-        return colors[index % colors.length];
-    },
-    
-    // Fonction pour détecter le mode sombre
-    isDarkMode: function() {
-        return document.body.classList.contains('dark-mode');
-    },
-    
-    // Fonction pour obtenir les couleurs du thème actuel
-    getThemeColors: function() {
-        const root = document.documentElement;
-        const style = getComputedStyle(root);
-        
-        return {
-            primary: style.getPropertyValue('--text-primary').trim() || '#1e293b',
-            secondary: style.getPropertyValue('--text-secondary').trim() || '#64748b',
-            background: style.getPropertyValue('--background-primary').trim() || '#ffffff',
-            success: style.getPropertyValue('--success-color').trim() || '#10B981',
-            danger: style.getPropertyValue('--danger-color').trim() || '#EF4444',
-            warning: style.getPropertyValue('--warning-color').trim() || '#F59E0B'
-        };
-    },
-    
-    // ============================================
-    // EXPORT / SHARE FUNCTIONS (Bonus)
-    // ============================================
-    
-    exportChartAsImage: function(chartId) {
-        const chart = this.charts[chartId];
-        if (!chart) {
-            this.showNotification('Chart not found', 'error');
-            return;
-        }
-        
-        // Highcharts a une fonction d'export intégrée
-        if (chart.exportChart) {
-            chart.exportChart({
-                type: 'image/png',
-                filename: `${chartId}_${Date.now()}`
-            });
-            this.showNotification('Chart exported successfully!', 'success');
-        }
-    },
-    
-    shareResults: function(symbol, data) {
-        const shareText = `Check out my analysis of ${symbol} on FinancePro!`;
-        const shareUrl = window.location.href;
-        
-        if (navigator.share) {
-            navigator.share({
-                title: 'FinancePro Analysis',
-                text: shareText,
-                url: shareUrl
-            }).then(() => {
-                this.showNotification('Shared successfully!', 'success');
-            }).catch((error) => {
-                console.error('Error sharing:', error);
-            });
-        } else {
-            // Fallback: copier dans le presse-papier
-            const textToCopy = `${shareText}\n${shareUrl}`;
-            navigator.clipboard.writeText(textToCopy).then(() => {
-                this.showNotification('Link copied to clipboard!', 'success');
-            });
-        }
-    },
-    
-    // ============================================
-    // KEYBOARD SHORTCUTS (Bonus)
-    // ============================================
-    
     setupKeyboardShortcuts: function() {
         document.addEventListener('keydown', (e) => {
-            // Ctrl/Cmd + K : Focus sur la recherche
             if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
                 e.preventDefault();
                 const searchInput = document.getElementById('companySearchInput');
@@ -3248,12 +2969,10 @@ const DemoApp = {
                 }
             }
             
-            // Escape : Fermer les suggestions
             if (e.key === 'Escape') {
                 this.hideSuggestions();
             }
             
-            // Ctrl/Cmd + 1-6 : Changer d'outil
             if ((e.ctrlKey || e.metaKey) && e.key >= '1' && e.key <= '6') {
                 e.preventDefault();
                 const tools = [
@@ -3271,29 +2990,10 @@ const DemoApp = {
             }
         });
         
-        console.log('⌨️ Keyboard shortcuts enabled!');
-        console.log('   Ctrl+K: Focus search');
-        console.log('   Ctrl+1-6: Switch tools');
-        console.log('   Esc: Close suggestions');
-    },
-    
-    // ============================================
-    // ANALYTICS (Optionnel)
-    // ============================================
-    
-    trackEvent: function(category, action, label) {
-        console.log(`📊 Analytics: ${category} - ${action} - ${label}`);
-        
-        // Ici tu peux intégrer Google Analytics ou autre
-        if (typeof gtag !== 'undefined') {
-            gtag('event', action, {
-                'event_category': category,
-                'event_label': label
-            });
-        }
+        console.log('⌨ Keyboard shortcuts enabled!');
     }
     
-}; // ⚠️ FIN de l'objet DemoApp
+}; // ⚠ FIN de l'objet DemoApp
 
 // ============================================
 // INITIALIZE ON DOM READY
@@ -3301,7 +3001,7 @@ const DemoApp = {
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', () => {
         DemoApp.init();
-        DemoApp.setupKeyboardShortcuts(); // Activer les raccourcis clavier
+        DemoApp.setupKeyboardShortcuts();
     });
 } else {
     DemoApp.init();
@@ -3318,52 +3018,24 @@ window.DemoApp = DemoApp;
 // ============================================
 console.log('%c╔══════════════════════════════════════════════════════════╗', 'color: #667eea; font-weight: bold;');
 console.log('%c║                                                          ║', 'color: #667eea; font-weight: bold;');
-console.log('%c║     🚀 FinancePro Interactive Demo - PREMIUM EDITION    ║', 'color: #667eea; font-weight: bold;');
+console.log('%c║  🚀 FinancePro Interactive Demo - MOBILE-OPTIMIZED  ║', 'color: #667eea; font-weight: bold;');
 console.log('%c║                                                          ║', 'color: #667eea; font-weight: bold;');
 console.log('%c╚══════════════════════════════════════════════════════════╝', 'color: #667eea; font-weight: bold;');
 console.log('');
 console.log('%c✨ FEATURES LOADED:', 'color: #8b5cf6; font-size: 14px; font-weight: bold;');
-console.log('%c  📊 Company Search with Performance Charts', 'color: #10b981; font-size: 12px;');
-console.log('%c  📈 Live Quotes with Sentiment Analysis', 'color: #10b981; font-size: 12px;');
-console.log('%c  💼 Portfolio Builder with Correlation Matrix', 'color: #10b981; font-size: 12px;');
-console.log('%c  📉 Advanced Technical Analysis (SMA, EMA, BB, RSI, MACD)', 'color: #10b981; font-size: 12px;');
-console.log('%c  🎲 Risk Calculator with Monte Carlo Simulation', 'color: #10b981; font-size: 12px;');
-console.log('%c  🤖 AI-Powered Predictions with ML Models', 'color: #10b981; font-size: 12px;');
+console.log('%c  📱 Fully Responsive Design', 'color: #10b981; font-size: 12px;');
+console.log('%c  📊 Adaptive Charts for Mobile & Desktop', 'color: #10b981; font-size: 12px;');
+console.log('%c  ⚡ Performance Optimized for Smartphones', 'color: #10b981; font-size: 12px;');
 console.log('');
-console.log('%c⌨️  KEYBOARD SHORTCUTS:', 'color: #f59e0b; font-size: 14px; font-weight: bold;');
-console.log('%c  Ctrl+K         Focus Search', 'color: #64748b; font-size: 12px;');
-console.log('%c  Ctrl+1-6       Switch Tools', 'color: #64748b; font-size: 12px;');
-console.log('%c  Esc            Close Suggestions', 'color: #64748b; font-size: 12px;');
-console.log('');
-console.log('%c💡 TRY THESE COMMANDS:', 'color: #3b82f6; font-size: 14px; font-weight: bold;');
-console.log('%c  DemoApp.searchCompany("AAPL")', 'color: #64748b; font-size: 12px;');
-console.log('%c  DemoApp.loadLiveQuote("TSLA")', 'color: #64748b; font-size: 12px;');
-console.log('%c  DemoApp.generateAIInsights()', 'color: #64748b; font-size: 12px;');
-console.log('');
-console.log('%c🎯 DEMO SYMBOLS TO TRY:', 'color: #ec4899; font-size: 14px; font-weight: bold;');
-console.log('%c  Apple (AAPL) • Microsoft (MSFT) • Tesla (TSLA)', 'color: #64748b; font-size: 12px;');
-console.log('%c  Amazon (AMZN) • Google (GOOGL) • NVIDIA (NVDA)', 'color: #64748b; font-size: 12px;');
+console.log('%c📱 MOBILE FEATURES:', 'color: #f59e0b; font-size: 14px; font-weight: bold;');
+console.log('%c  ✅ Touch-friendly interfaces', 'color: #64748b; font-size: 12px;');
+console.log('%c  ✅ Reduced chart complexity on small screens', 'color: #64748b; font-size: 12px;');
+console.log('%c  ✅ Optimized font sizes & spacing', 'color: #64748b; font-size: 12px;');
+console.log('%c  ✅ Auto-reflow on screen rotation', 'color: #64748b; font-size: 12px;');
 console.log('');
 console.log('%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'color: #667eea;');
-console.log('%cBuilt with ❤️ by FinancePro Team', 'color: #8b5cf6; font-size: 12px; font-style: italic;');
+console.log('%cBuilt with ❤ by FinancePro Team | Mobile-First Approach', 'color: #8b5cf6; font-size: 12px; font-style: italic;');
 console.log('%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'color: #667eea;');
-
-// ============================================
-// AUTO-DEMO MODE (Optionnel - décommenter pour activer)
-// ============================================
-/*
-setTimeout(() => {
-    console.log('%c🎬 Starting Auto-Demo...', 'color: #f59e0b; font-size: 14px; font-weight: bold;');
-    
-    // Démo automatique
-    setTimeout(() => DemoApp.searchCompany('AAPL'), 2000);
-    setTimeout(() => DemoApp.switchTool('live-quotes'), 8000);
-    setTimeout(() => DemoApp.loadLiveQuote('TSLA'), 10000);
-    setTimeout(() => DemoApp.switchTool('ai-insights'), 16000);
-    setTimeout(() => DemoApp.generateAIInsights(), 18000);
-    
-}, 3000);
-*/
 
 // ============================================
 // PERFORMANCE MONITORING
@@ -3379,7 +3051,6 @@ if (window.performance && window.performance.now) {
 window.addEventListener('error', (event) => {
     console.error('Global error caught:', event.error);
     
-    // Afficher une notification à l'utilisateur
     if (DemoApp && DemoApp.showNotification) {
         DemoApp.showNotification('An unexpected error occurred. Please refresh the page.', 'error');
     }
@@ -3402,7 +3073,6 @@ window.addEventListener('unhandledrejection', (event) => {
 window.addEventListener('beforeunload', () => {
     console.log('👋 Cleaning up...');
     
-    // Détruire tous les graphiques pour libérer la mémoire
     if (DemoApp && DemoApp.charts) {
         Object.keys(DemoApp.charts).forEach(key => {
             if (DemoApp.charts[key] && DemoApp.charts[key].destroy) {
@@ -3415,4 +3085,4 @@ window.addEventListener('beforeunload', () => {
 // ============================================
 // FIN DU FICHIER
 // ============================================
-console.log('%c✅ interactive-demo.js loaded successfully!', 'color: #10b981; font-size: 16px; font-weight: bold;');
+console.log('%c✅ interactive-demo.js (MOBILE-OPTIMIZED) loaded successfully!', 'color: #10b981; font-size: 16px; font-weight: bold;');
