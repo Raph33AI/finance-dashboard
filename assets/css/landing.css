@@ -2536,15 +2536,18 @@ body {
 @media (max-width: 768px) {
     
     /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-       🍔 NAVIGATION MOBILE
+       🍔 NAVIGATION MOBILE - ✅ SANS ESPACE
        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+    
+    /* ✅ CORRECTION : Hauteur exacte du header */
+    .landing-nav {
+        z-index: 10002 !important;
+        height: 64px !important; /* ✅ AJOUTÉ */
+    }
     
     .nav-container {
         padding: 0.875rem 1rem;
-    }
-    
-    .landing-nav {
-        z-index: 10002 !important;
+        height: 64px; /* ✅ AJOUTÉ */
     }
     
     .mobile-menu-btn {
@@ -2558,15 +2561,16 @@ body {
         display: none !important;
     }
     
+    /* ✅ CORRECTION : top et height ajustés */
     .nav-menu {
         position: fixed;
-        top: 65px;
+        top: 64px !important; /* ✅ CHANGÉ de 65px à 64px */
         left: 0;
         right: 0;
         bottom: 0;
         width: 100%;
         max-width: 100vw;
-        height: calc(100vh - 65px);
+        height: calc(100vh - 64px) !important; /* ✅ CHANGÉ de 65px à 64px */
         background: #ffffff !important;
         padding: 1.5rem 1rem 180px 1rem;
         display: flex;
