@@ -8,6 +8,7 @@
    4. ✨ NOUVEAU : Sliders horizontaux sur mobile
    5. ✅ CORRECTION FINALE : Scroll interne pricing supprimé
    6. ✅ CORRECTION UTILISATEURS CONNECTÉS : Scroll supprimé pour tous les états
+   7. ✅ CORRECTION DEMO : Titre visible + Graphiques mobile adaptés
    ============================================ */
 
 /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -1943,7 +1944,7 @@ body.dark-mode .dropdown-link-title {
 }
 
 /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-   🎨 DEMO SECTION (SANS 3D)
+   🎨 DEMO SECTION (SANS 3D) - ✅ CORRECTION TITRE VISIBLE
    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
 .demo-interactive {
@@ -1962,12 +1963,14 @@ body.dark-mode .dropdown-link-title {
     align-items: center;
 }
 
+/* ✅ CORRECTION : TITRE VISIBLE EN BLANC */
 .demo-title {
     font-size: clamp(2rem, 5vw, 3rem);
     font-weight: 800;
     line-height: 1.2;
     margin-bottom: 1.5rem;
     letter-spacing: -0.02em;
+    color: white !important; /* ✅ FORCÉ EN BLANC */
 }
 
 .highlight-gradient {
@@ -2041,6 +2044,7 @@ body.dark-mode .dropdown-link-title {
     box-shadow: 0 16px 40px rgba(0, 0, 0, 0.4);
 }
 
+/* ✅ SEARCH INTERFACE - DESKTOP */
 .search-interface {
     background: var(--background-primary, #ffffff);
     border-radius: 24px;
@@ -2498,8 +2502,7 @@ body {
 
 /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
    📱 RESPONSIVE - MOBILE (768px et moins)
-   ✅ CORRECTIONS COMPLÈTES + SLIDERS HORIZONTAUX
-   ✅ PRICING SCROLL INTERNE SUPPRIMÉ (TOUS ÉTATS)
+   ✅ CORRECTIONS COMPLÈTES + GRAPHIQUES DEMO MOBILE
    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
 @media (max-width: 768px) {
@@ -3155,6 +3158,119 @@ body {
         font-size: 1rem !important;
     }
     
+    /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+       🎨 DEMO SECTION - ✅ CORRECTION GRAPHIQUES MOBILE
+       ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+    
+    .demo-interactive {
+        padding: 4rem 1rem !important;
+    }
+    
+    .demo-wrapper {
+        grid-template-columns: 1fr !important;
+        gap: 2.5rem !important;
+    }
+    
+    /* ✅ TITRE DEMO - BLANC FORCÉ */
+    .demo-title {
+        font-size: clamp(1.5rem, 6vw, 2rem) !important;
+        margin-bottom: 1.5rem !important;
+        color: white !important;
+    }
+    
+    .demo-description {
+        margin-bottom: 2rem !important;
+        line-height: 1.8 !important;
+    }
+    
+    /* ✅ SEARCH INTERFACE - ADAPTATION MOBILE */
+    .search-interface {
+        max-width: 100% !important;
+        overflow: hidden !important;
+    }
+    
+    .search-box-wrapper {
+        padding: 1rem !important;
+    }
+    
+    .search-box {
+        padding: 0.875rem 1rem !important;
+    }
+    
+    .search-box input {
+        font-size: 0.9375rem !important;
+    }
+    
+    /* ✅ RÉSULTATS DE RECHERCHE - MASQUER SUR MOBILE (SAUF 1er) */
+    .search-results {
+        padding: 1rem !important;
+        display: block !important;
+    }
+    
+    .company-result-card:nth-child(n+2) {
+        display: none !important;
+    }
+    
+    /* ✅ PREMIÈRE CARTE - FULL WIDTH MOBILE */
+    .company-result-card:first-child {
+        display: flex !important;
+        flex-direction: column !important;
+        padding: 1rem !important;
+    }
+    
+    .company-result-header {
+        flex-direction: column !important;
+        align-items: flex-start !important;
+        gap: 0.75rem !important;
+    }
+    
+    /* ✅ METRICS - 2 COLONNES AU LIEU DE 4 */
+    .company-metrics {
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 0.75rem !important;
+        margin-top: 1rem !important;
+    }
+    
+    .metric-item {
+        padding: 0.75rem !important;
+        background: rgba(37, 99, 235, 0.05) !important;
+        border-radius: 8px !important;
+    }
+    
+    .metric-label {
+        font-size: 0.6875rem !important;
+        margin-bottom: 0.375rem !important;
+    }
+    
+    .metric-value {
+        font-size: 0.875rem !important;
+    }
+    
+    /* ✅ DEMO STATS */
+    .demo-stats-grid {
+        gap: 1.25rem !important;
+    }
+    
+    .demo-stat {
+        padding: 1rem !important;
+        background: rgba(255, 255, 255, 0.05) !important;
+        border-radius: 12px !important;
+    }
+    
+    .demo-stat-icon {
+        width: 40px !important;
+        height: 40px !important;
+        font-size: 1rem !important;
+    }
+    
+    .demo-stat-content h4 {
+        font-size: 1rem !important;
+    }
+    
+    .demo-stat-content p {
+        font-size: 0.8125rem !important;
+    }
+    
     /* ✅ INDICATEURS DE SCROLL (barre bleue) */
     .features-section::after,
     .tools-section::after,
@@ -3218,16 +3334,9 @@ body {
         letter-spacing: 0.02em;
     }
     
-    /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-       ✅ CORRECTION 1 : MASQUER IMAGE DEMO "3 COMPANIES"
-       ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
-    
-    .company-result-card:nth-child(n+2) {
-        display: none !important;
-    }
-    
-    .search-results {
-        display: none !important;
+    /* ✅ DEMO SECTION - TEXTE SWIPE BLANC */
+    .demo-interactive .section-header::after {
+        color: rgba(255, 255, 255, 0.7) !important;
     }
     
     /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -3238,7 +3347,6 @@ body {
     .solutions-section,
     .tools-section,
     .alphy-ai-section,
-    .demo-interactive,
     .tech-infra-lux,
     .cta-final {
         padding: 4rem 1rem !important;
@@ -3310,15 +3418,6 @@ body {
         grid-template-columns: 1fr !important;
     }
     
-    /* ✅ SEARCH INTERFACE */
-    .search-interface {
-        display: none !important;
-    }
-    
-    .company-metrics {
-        grid-template-columns: repeat(2, 1fr) !important;
-    }
-    
     /* ✅ CAPABILITY ITEMS */
     .capability-item {
         flex-direction: column;
@@ -3328,21 +3427,6 @@ body {
     
     .capability-icon {
         margin: 0 auto;
-    }
-    
-    /* ✅ DEMO STATS */
-    .demo-stats-grid {
-        gap: 1.5rem !important;
-    }
-    
-    .demo-stat {
-        padding: 1rem !important;
-        background: rgba(255, 255, 255, 0.05);
-        border-radius: 12px;
-    }
-    
-    .demo-wrapper {
-        grid-template-columns: 1fr !important;
     }
     
     /* ✅ CTA BUTTONS */
@@ -3432,17 +3516,6 @@ body {
     
     .tech-subtitle {
         font-size: 1.0625rem !important;
-        margin-bottom: 3rem !important;
-        line-height: 1.8 !important;
-    }
-    
-    /* ✅ DEMO TITLE */
-    .demo-title {
-        font-size: clamp(1.5rem, 6vw, 2rem);
-        margin-bottom: 2rem !important;
-    }
-    
-    .demo-description {
         margin-bottom: 3rem !important;
         line-height: 1.8 !important;
     }
@@ -3557,5 +3630,5 @@ body {
 
 /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
    ✅ FIN DU FICHIER CSS CORRIGÉ
-   VERSION UTILISATEURS CONNECTÉS
+   VERSION TITRE DEMO + GRAPHIQUES MOBILE
    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
