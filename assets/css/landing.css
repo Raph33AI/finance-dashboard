@@ -428,7 +428,7 @@ body.dark-mode .dropdown-user-text h4 {
     margin: 0;
 }
 
-.dropdown-plan-info {
+/* .dropdown-plan-info {
     display: flex;
     align-items: center;
     gap: 0.5rem;
@@ -438,6 +438,75 @@ body.dark-mode .dropdown-user-text h4 {
     font-size: 0.875rem;
     font-weight: 600;
     color: #2563eb;
+} */
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   👤 DROPDOWN PLAN INFO - STYLE AMÉLIORÉ
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+
+.dropdown-plan-info {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1rem;
+    
+    /* ✅ Dégradé bleu clair → violet clair */
+    background: linear-gradient(135deg, 
+        rgba(147, 197, 253, 0.2) 0%,    /* Bleu clair (#93c5fd) */
+        rgba(196, 181, 253, 0.2) 100%   /* Violet clair (#c4b5fd) */
+    );
+    
+    /* ✅ Bordure subtile */
+    border: 1px solid rgba(147, 197, 253, 0.3);
+    
+    /* ✅ Coins arrondis */
+    border-radius: 12px;
+    
+    /* Texte */
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #3b82f6; /* Bleu légèrement plus clair */
+    
+    /* Transition */
+    transition: all 0.3s ease;
+    
+    /* Ombre subtile */
+    box-shadow: 0 2px 8px rgba(147, 197, 253, 0.1);
+}
+
+/* ✅ Effet hover */
+.dropdown-plan-info:hover {
+    background: linear-gradient(135deg, 
+        rgba(147, 197, 253, 0.3) 0%, 
+        rgba(196, 181, 253, 0.3) 100%
+    );
+    border-color: rgba(147, 197, 253, 0.5);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(147, 197, 253, 0.2);
+}
+
+/* ✅ Icône dans le badge */
+.dropdown-plan-info i {
+    color: #60a5fa; /* Bleu clair */
+    font-size: 1rem;
+}
+
+/* ✅ Dark mode */
+body.dark-mode .dropdown-plan-info {
+    background: linear-gradient(135deg, 
+        rgba(59, 130, 246, 0.15) 0%, 
+        rgba(139, 92, 246, 0.15) 100%
+    );
+    border-color: rgba(59, 130, 246, 0.3);
+    color: #93c5fd;
+}
+
+body.dark-mode .dropdown-plan-info:hover {
+    background: linear-gradient(135deg, 
+        rgba(59, 130, 246, 0.25) 0%, 
+        rgba(139, 92, 246, 0.25) 100%
+    );
+    border-color: rgba(59, 130, 246, 0.5);
 }
 
 .dropdown-divider {
