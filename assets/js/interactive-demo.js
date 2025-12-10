@@ -92,7 +92,7 @@ const DemoApp = {
         console.log(`📱 Wrapped chart ${chartId} in scroll container`);
     },
     
-    // ✅ Configuration Highcharts responsive avec largeur minimale sur mobile
+    // ✅ Configuration Highcharts responsive SANS largeur fixe
     getResponsiveChartConfig: function() {
         const isMobile = this.isMobile();
         
@@ -100,8 +100,8 @@ const DemoApp = {
             chart: {
                 backgroundColor: 'transparent',
                 height: isMobile ? 250 : 400,
-                // ✅ Sur mobile, définir une largeur minimale
-                width: isMobile ? 600 : null,
+                // ✅ PAS de width fixe - le graphique prend 100% de son container
+                width: null,
                 style: {
                     fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif"
                 }

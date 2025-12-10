@@ -1,6 +1,6 @@
 /* ============================================
    INTERACTIVE-DEMO.CSS
-   ✅ VERSION FINALE - GRAPHIQUES SCROLLABLES MOBILE
+   ✅ VERSION FINALE - GRAPHIQUES CONTENUS ET SCROLLABLES
    ============================================ */
 
 /* ============================================
@@ -16,6 +16,13 @@
 }
 
 /* ============================================
+   ✅ RÈGLE GLOBALE - BOX SIZING
+   ============================================ */
+* {
+    box-sizing: border-box;
+}
+
+/* ============================================
    LAYOUT DEMO PAGE
    ============================================ */
 .demo-page {
@@ -23,6 +30,7 @@
     min-height: 100vh;
     display: flex;
     flex-direction: column;
+    overflow-x: hidden;
 }
 
 /* ============================================
@@ -130,6 +138,7 @@ body.dark-mode .demo-nav {
 .demo-main {
     flex: 1;
     padding-bottom: 4rem;
+    overflow-x: hidden;
 }
 
 /* ============================================
@@ -340,6 +349,7 @@ body.dark-mode .tool-icon {
 .demo-content {
     padding: 3rem 2rem;
     background: var(--background-secondary);
+    overflow-x: hidden;
 }
 
 .demo-tool {
@@ -347,6 +357,7 @@ body.dark-mode .tool-icon {
     max-width: 1400px;
     margin: 0 auto;
     animation: fadeIn 0.4s ease-in-out;
+    overflow-x: hidden;
 }
 
 .demo-tool.active {
@@ -397,15 +408,17 @@ body.dark-mode .tool-icon {
 }
 
 /* ============================================
-   ✅ NOUVEAU : WRAPPER SCROLLABLE POUR GRAPHIQUES
+   ✅ WRAPPER SCROLLABLE POUR GRAPHIQUES - CORRIGÉ
    ============================================ */
 .chart-scroll-wrapper {
     width: 100%;
+    max-width: 100%;
     overflow-x: auto;
     overflow-y: hidden;
     -webkit-overflow-scrolling: touch;
     margin: 1.5rem 0;
     position: relative;
+    contain: layout style;
 }
 
 /* Indicateur visuel de scroll */
@@ -422,6 +435,7 @@ body.dark-mode .tool-icon {
     opacity: 0;
     transition: opacity 0.3s ease;
     pointer-events: none;
+    z-index: 10;
 }
 
 @media (max-width: 768px) {
@@ -438,7 +452,13 @@ body.dark-mode .tool-icon {
 /* Sur mobile, définir une largeur minimale pour les graphiques */
 @media (max-width: 768px) {
     .chart-scroll-container {
-        min-width: 600px; /* Largeur minimale pour rester lisible */
+        min-width: 600px;
+        width: max-content;
+    }
+    
+    /* Les graphiques prennent 100% de leur container */
+    .chart-scroll-container > div {
+        width: 100%;
     }
 }
 
@@ -468,7 +488,7 @@ body.dark-mode .tool-icon {
 }
 
 /* ============================================
-   CONTAINERS GRAPHIQUES - CORRECTION COMPLÈTE
+   ✅ CONTAINERS GRAPHIQUES - CONTAINMENT STRICT
    ============================================ */
 #companyExtraCharts,
 #portfolioCorrelation,
@@ -477,6 +497,7 @@ body.dark-mode .tool-icon {
 #marketSentiment,
 #aiPredictionChart {
     margin: 2rem 0;
+    overflow: hidden;
 }
 
 /* Tous les containers de graphiques */
@@ -547,6 +568,7 @@ body.dark-mode .tool-icon {
     border-radius: var(--radius-2xl);
     padding: 2rem;
     box-shadow: var(--shadow-lg);
+    overflow: hidden;
 }
 
 .search-box-wrapper {
@@ -773,6 +795,7 @@ body.dark-mode .search-box:focus-within {
    ============================================ */
 .search-results-container {
     min-height: 400px;
+    overflow: hidden;
 }
 
 .results-placeholder {
@@ -841,6 +864,7 @@ body.dark-mode .search-box:focus-within {
     margin-bottom: 1rem;
     transition: all var(--transition-base);
     cursor: pointer;
+    overflow: hidden;
 }
 
 .company-result-card:hover {
@@ -977,6 +1001,7 @@ body.dark-mode .company-result-card.highlight {
     border-radius: var(--radius-2xl);
     padding: 2rem;
     box-shadow: var(--shadow-lg);
+    overflow: hidden;
 }
 
 .quote-search {
@@ -994,6 +1019,7 @@ body.dark-mode .company-result-card.highlight {
     border-radius: var(--radius-lg);
     padding: 2rem;
     margin-bottom: 2rem;
+    overflow: hidden;
 }
 
 .quote-placeholder {
@@ -1078,6 +1104,7 @@ body.dark-mode .company-result-card.highlight {
 
 .quote-chart-container {
     margin-top: 2rem;
+    overflow: hidden;
 }
 
 .chart-area {
@@ -1086,6 +1113,7 @@ body.dark-mode .company-result-card.highlight {
     border: 1px solid var(--border-color);
     border-radius: var(--radius-lg);
     padding: 1rem;
+    overflow: hidden;
 }
 
 /* ============================================
@@ -1096,6 +1124,7 @@ body.dark-mode .company-result-card.highlight {
     border-radius: var(--radius-2xl);
     padding: 2rem;
     box-shadow: var(--shadow-lg);
+    overflow: hidden;
 }
 
 .portfolio-add {
@@ -1115,6 +1144,7 @@ body.dark-mode .company-result-card.highlight {
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
     gap: 1.5rem;
     margin-bottom: 2rem;
+    overflow: hidden;
 }
 
 .summary-card {
@@ -1123,6 +1153,7 @@ body.dark-mode .company-result-card.highlight {
     border-radius: var(--radius-lg);
     padding: 1.5rem;
     text-align: center;
+    overflow: hidden;
 }
 
 .summary-card h4 {
@@ -1209,6 +1240,7 @@ body.dark-mode .company-result-card.highlight {
 
 .portfolio-chart {
     min-height: 400px;
+    overflow: hidden;
 }
 
 /* ============================================
@@ -1219,6 +1251,7 @@ body.dark-mode .company-result-card.highlight {
     border-radius: var(--radius-2xl);
     padding: 2rem;
     box-shadow: var(--shadow-lg);
+    overflow: hidden;
 }
 
 .technical-controls {
@@ -1281,6 +1314,7 @@ body.dark-mode .company-result-card.highlight {
 
 .technical-chart-container {
     margin-bottom: 2rem;
+    overflow: hidden;
 }
 
 .technical-signals {
@@ -1323,6 +1357,7 @@ body.dark-mode .company-result-card.highlight {
     display: flex;
     align-items: center;
     gap: 1rem;
+    overflow: hidden;
 }
 
 .signal-icon {
@@ -1375,6 +1410,7 @@ body.dark-mode .company-result-card.highlight {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 2rem;
+    overflow: hidden;
 }
 
 .risk-inputs {
@@ -1382,6 +1418,7 @@ body.dark-mode .company-result-card.highlight {
     border: 1px solid var(--border-color);
     border-radius: var(--radius-lg);
     padding: 1.5rem;
+    overflow: hidden;
 }
 
 .risk-results {
@@ -1389,6 +1426,7 @@ body.dark-mode .company-result-card.highlight {
     border: 1px solid var(--border-color);
     border-radius: var(--radius-lg);
     padding: 1.5rem;
+    overflow: hidden;
 }
 
 .results-placeholder {
@@ -1409,6 +1447,7 @@ body.dark-mode .company-result-card.highlight {
     border-radius: var(--radius-md);
     padding: 1.25rem;
     margin-bottom: 1rem;
+    overflow: hidden;
 }
 
 .risk-metric-card h5 {
@@ -1445,6 +1484,7 @@ body.dark-mode .company-result-card.highlight {
     border-radius: var(--radius-2xl);
     padding: 2rem;
     box-shadow: var(--shadow-lg);
+    overflow: hidden;
 }
 
 .ai-search {
@@ -1469,6 +1509,7 @@ body.dark-mode .company-result-card.highlight {
 
 .ai-results {
     min-height: 400px;
+    overflow: hidden;
 }
 
 .ai-placeholder {
@@ -1536,6 +1577,7 @@ body.dark-mode .company-result-card.highlight {
     border-radius: var(--radius-lg);
     padding: 1.5rem;
     margin-bottom: 1.5rem;
+    overflow: hidden;
 }
 
 .ai-insight-header {
@@ -1594,6 +1636,7 @@ body.dark-mode .company-result-card.highlight {
 .ai-prediction-chart {
     margin-top: 1.5rem;
     min-height: 300px;
+    overflow: hidden;
 }
 
 /* ============================================
