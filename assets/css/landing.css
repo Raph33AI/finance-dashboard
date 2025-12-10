@@ -3347,60 +3347,89 @@ body {
     }
     
     /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-       ✅ CORRECTION 5: FOOTER - 2 COLONNES MOBILE (Product + Company)
-       ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
-    
-    /* ✅ Footer en 2 colonnes sur mobile */
-    .footer-grid {
-        grid-template-columns: 1fr 1fr !important;
-        gap: 2rem !important;
-        align-items: start !important;
-    }
-    
-    /* ✅ Masquer Brand Col sur mobile */
-    .footer-brand-col {
-        display: none !important;
-    }
-    
-    /* ✅ Masquer la section Tools (2e colonne) */
-    .footer-col:nth-child(3) {
-        display: none !important;
-    }
-    
-    /* ✅ Afficher uniquement Product (2e col) et Company (4e col) */
-    .footer-col:nth-child(2),
-    .footer-col:nth-child(4) {
-        display: block !important;
-    }
-    
-    /* ✅ Titres centrés */
-    .footer-col h4 {
-        text-align: center !important;
-        margin-bottom: 1.25rem !important;
-    }
-    
-    /* ✅ Liens centrés */
-    .footer-col ul {
-        text-align: center !important;
-    }
-    
-    .footer-col ul li {
-        margin-bottom: 1rem !important;
-    }
-    
-    .footer-col ul li a {
-        font-size: 0.9375rem !important;
-    }
-    
-    .footer-bottom {
-        flex-direction: column;
-        gap: 1rem;
-        text-align: center;
-    }
-    
-    .footer-bottom-links {
-        flex-direction: column;
-        gap: 0.75rem;
+    ✅ CORRECTION 5: FOOTER MOBILE - VERSION CORRIGÉE
+    Logo + Réseaux sociaux EN HAUT
+    Product | Company en 2 colonnes EN BAS
+    Masquer uniquement "Tools"
+    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+
+    @media (max-width: 768px) {
+        
+        /* ✅ Footer en 2 colonnes */
+        .footer-grid {
+            display: grid !important;
+            grid-template-columns: 1fr 1fr !important;
+            gap: 2rem !important;
+            align-items: start !important;
+        }
+        
+        /* ✅ Brand Col (Logo + Description + Réseaux sociaux) - PLEINE LARGEUR */
+        .footer-brand-col {
+            grid-column: 1 / -1 !important; /* Prend toute la largeur */
+            display: block !important;
+            max-width: 100% !important;
+            text-align: center !important;
+            margin: 0 auto 2rem auto !important;
+        }
+        
+        /* ✅ Logo centré */
+        .footer-brand {
+            justify-content: center !important;
+            margin-bottom: 1rem !important;
+        }
+        
+        /* ✅ Description centrée */
+        .footer-description {
+            text-align: center !important;
+            max-width: 100% !important;
+        }
+        
+        /* ✅ Réseaux sociaux centrés */
+        .footer-social {
+            justify-content: center !important;
+        }
+        
+        /* ✅ Masquer uniquement la section Tools (3e colonne) */
+        .footer-col:nth-child(3) {
+            display: none !important;
+        }
+        
+        /* ✅ Afficher Product et Company */
+        .footer-col:nth-child(2), /* Product */
+        .footer-col:nth-child(4) { /* Company */
+            display: block !important;
+        }
+        
+        /* ✅ Titres des colonnes centrés */
+        .footer-col h4 {
+            text-align: center !important;
+            margin-bottom: 1.25rem !important;
+        }
+        
+        /* ✅ Liens centrés */
+        .footer-col ul {
+            text-align: center !important;
+        }
+        
+        .footer-col ul li {
+            margin-bottom: 1rem !important;
+        }
+        
+        .footer-col ul li a {
+            font-size: 0.9375rem !important;
+        }
+        
+        /* ✅ Footer Bottom */
+        .footer-bottom {
+            flex-direction: column;
+            gap: 1rem;
+            text-align: center;
+        }
+        
+        .footer-bottom-links {
+            flex-direction: column;
+            gap: 0.75rem;
+        }
     }
     
     /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
