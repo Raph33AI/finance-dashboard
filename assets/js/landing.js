@@ -461,47 +461,94 @@ class UserMenuManager {
         console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n');
     }
 
-    // ✅ MÉTHODE PUBLIQUE - Accessible depuis le bouton mobile
+    // ✅ MÉTHODE PUBLIQUE - VERSION FORCÉE POUR LE NOUVEAU CSS
     toggleDropdown() {
         console.log('%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'color: #8b5cf6; font-weight: bold;');
         console.log('%c🔵 toggleDropdown() APPELÉE', 'color: #8b5cf6; font-weight: bold; font-size: 14px;');
         
-        // ✅ Utiliser l'état interne
+        // Toggle état
         this.isDropdownOpen = !this.isDropdownOpen;
         
-        console.log('📊 État actuel:', this.isDropdownOpen ? '✅ OUVERT' : '❌ FERMÉ');
+        console.log('📊 État demandé:', this.isDropdownOpen ? '✅ OUVERT' : '❌ FERMÉ');
         
-        // Mettre à jour aria-expanded
-        this.profileButton.setAttribute('aria-expanded', this.isDropdownOpen.toString());
-        
-        // Toggle classe active
         if (this.isDropdownOpen) {
+            // ✅ OUVERTURE - FORCER TOUS LES STYLES
+            console.log('🔓 Ouverture du dropdown...');
+            
+            // 1. Ajouter la classe active
             this.dropdownMenu.classList.add('active');
-            console.log('✅ Classe "active" ajoutée au dropdown');
             
-            // ✅ Bloquer le scroll sur mobile
+            // 2. ✅ FORCER les styles inline (obligatoire avec display: none !important)
+            this.dropdownMenu.style.transform = 'translateY(0)';
+            this.dropdownMenu.style.opacity = '1';
+            this.dropdownMenu.style.visibility = 'visible';
+            this.dropdownMenu.style.pointerEvents = 'auto';
+            this.dropdownMenu.style.display = 'block'; // ✅ CRITIQUE pour le nouveau CSS
+            
+            console.log('✅ Classe "active" ajoutée + styles inline forcés');
+            
+            // 3. Bloquer le scroll
+            document.body.style.overflow = 'hidden';
+            
+            // 4. Fermer le menu mobile si ouvert
             if (window.innerWidth <= 768) {
-                document.body.style.overflow = 'hidden';
+                const mobileMenu = document.querySelector('.nav-menu');
+                const mobileMenuBtn = document.querySelector('.mobile-menu-btn');
+                
+                if (mobileMenu && mobileMenu.classList.contains('active')) {
+                    console.log('📱 Fermeture du menu mobile');
+                    mobileMenu.classList.remove('active');
+                    if (mobileMenuBtn) {
+                        mobileMenuBtn.classList.remove('active');
+                    }
+                    document.body.classList.remove('menu-open');
+                }
             }
+            
+            // 5. Mettre à jour aria-expanded
+            if (this.profileButton) {
+                this.profileButton.setAttribute('aria-expanded', 'true');
+            }
+            
+            // 6. Animer chevron
+            const chevron = this.profileButton?.querySelector('.user-dropdown-icon');
+            if (chevron) {
+                chevron.style.transform = 'rotate(180deg)';
+            }
+            
         } else {
-            this.dropdownMenu.classList.remove('active');
-            console.log('❌ Classe "active" retirée du dropdown');
+            // ✅ FERMETURE
+            console.log('🔒 Fermeture du dropdown...');
             
-            // ✅ Réactiver le scroll
-            if (window.innerWidth <= 768) {
-                document.body.style.overflow = '';
+            // 1. Retirer la classe active
+            this.dropdownMenu.classList.remove('active');
+            
+            // 2. ✅ RÉINITIALISER les styles inline
+            this.dropdownMenu.style.transform = '';
+            this.dropdownMenu.style.opacity = '';
+            this.dropdownMenu.style.visibility = '';
+            this.dropdownMenu.style.pointerEvents = '';
+            this.dropdownMenu.style.display = ''; // ✅ Retour à display: none du CSS
+            
+            // 3. Réactiver le scroll
+            document.body.style.overflow = '';
+            
+            // 4. Mettre à jour aria-expanded
+            if (this.profileButton) {
+                this.profileButton.setAttribute('aria-expanded', 'false');
             }
-        }
-        
-        // Animer chevron
-        const chevron = this.profileButton.querySelector('.user-dropdown-icon');
-        if (chevron) {
-            chevron.style.transform = this.isDropdownOpen ? 'rotate(180deg)' : 'rotate(0deg)';
-            console.log('↻ Chevron animé:', this.isDropdownOpen ? '180deg' : '0deg');
+            
+            // 5. Réinitialiser chevron
+            const chevron = this.profileButton?.querySelector('.user-dropdown-icon');
+            if (chevron) {
+                chevron.style.transform = 'rotate(0deg)';
+            }
+            
+            console.log('✅ Dropdown fermé');
         }
         
         console.log('%c🎉 RÉSULTAT:', 'font-weight: bold;', 
-                    this.dropdownMenu.classList.contains('active') ? '✅ OUVERT' : '❌ FERMÉ');
+                    this.isDropdownOpen ? '✅ OUVERT' : '❌ FERMÉ');
         console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n');
     }
 
@@ -517,12 +564,17 @@ class UserMenuManager {
         this.profileButton.setAttribute('aria-expanded', 'false');
         this.dropdownMenu.classList.remove('active');
         
-        // ✅ Réactiver le scroll
-        if (window.innerWidth <= 768) {
-            document.body.style.overflow = '';
-        }
+        // ✅ RÉINITIALISER LES STYLES INLINE
+        this.dropdownMenu.style.transform = '';
+        this.dropdownMenu.style.opacity = '';
+        this.dropdownMenu.style.visibility = '';
+        this.dropdownMenu.style.pointerEvents = '';
+        this.dropdownMenu.style.display = ''; // ✅ IMPORTANT
         
-        const chevron = this.profileButton.querySelector('.user-dropdown-icon');
+        // Réactiver le scroll
+        document.body.style.overflow = '';
+        
+        const chevron = this.profileButton?.querySelector('.user-dropdown-icon');
         if (chevron) {
             chevron.style.transform = 'rotate(0deg)';
         }
