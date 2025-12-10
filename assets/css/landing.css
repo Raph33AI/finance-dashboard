@@ -7,6 +7,7 @@
    3. Sections Features/Tools/Pricing agrandies sur mobile
    4. ✨ NOUVEAU : Sliders horizontaux sur mobile
    5. ✅ CORRECTION FINALE : Scroll interne pricing supprimé
+   6. ✅ CORRECTION UTILISATEURS CONNECTÉS : Scroll supprimé pour tous les états
    ============================================ */
 
 /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -2498,7 +2499,7 @@ body {
 /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
    📱 RESPONSIVE - MOBILE (768px et moins)
    ✅ CORRECTIONS COMPLÈTES + SLIDERS HORIZONTAUX
-   ✅ PRICING SCROLL INTERNE SUPPRIMÉ
+   ✅ PRICING SCROLL INTERNE SUPPRIMÉ (TOUS ÉTATS)
    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
 @media (max-width: 768px) {
@@ -2964,29 +2965,37 @@ body {
     }
     
     /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-       💰 PRICING SECTION - ✅ CORRECTION SCROLL VERTICAL SUPPRIMÉ
+       💰 PRICING SECTION - ✅ CORRECTION ULTRA-RENFORCÉE
+       ✅ SUPPRESSION SCROLL POUR TOUS LES ÉTATS (CONNECTÉ/NON-CONNECTÉ)
        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
     
-    /* ✅ SECTION PRICING - PAS DE HAUTEUR FIXE */
-    .pricing-section {
+    /* ✅ SECTION PRICING - TOUS LES ÉTATS */
+    .pricing-section,
+    body.logged-in .pricing-section,
+    body.user-authenticated .pricing-section,
+    body[data-user-logged="true"] .pricing-section {
         padding: 4rem 0 !important;
-        max-width: 100vw;
-        overflow-x: hidden;
-        overflow-y: visible !important; /* ✅ Pas de scroll vertical */
+        max-width: 100vw !important;
+        width: 100vw !important;
+        overflow-x: hidden !important;
+        overflow-y: visible !important;
         height: auto !important;
         min-height: auto !important;
         max-height: none !important;
     }
     
-    /* ✅ GRID PRICING - SLIDER HORIZONTAL UNIQUEMENT */
-    .pricing-grid-three {
+    /* ✅ GRID PRICING - TOUS LES ÉTATS */
+    .pricing-grid-three,
+    body.logged-in .pricing-grid-three,
+    body.user-authenticated .pricing-grid-three,
+    body[data-user-logged="true"] .pricing-grid-three {
         display: flex !important;
         flex-direction: row !important;
         gap: 1rem !important;
         
         /* Scroll horizontal UNIQUEMENT */
         overflow-x: auto !important;
-        overflow-y: visible !important; /* ✅ IMPORTANT : Pas de scroll vertical */
+        overflow-y: visible !important;
         
         scroll-snap-type: x mandatory !important;
         scroll-behavior: smooth !important;
@@ -3006,22 +3015,32 @@ body {
         cursor: grab;
     }
     
-    .pricing-grid-three:active {
+    .pricing-grid-three:active,
+    body.logged-in .pricing-grid-three:active,
+    body.user-authenticated .pricing-grid-three:active {
         cursor: grabbing;
     }
     
-    /* ✅ Masquer scrollbar (horizontal) tout en gardant la fonctionnalité */
-    .pricing-grid-three::-webkit-scrollbar {
-        display: none;
+    /* ✅ Masquer scrollbar (horizontal) */
+    .pricing-grid-three::-webkit-scrollbar,
+    body.logged-in .pricing-grid-three::-webkit-scrollbar,
+    body.user-authenticated .pricing-grid-three::-webkit-scrollbar {
+        display: none !important;
     }
     
-    .pricing-grid-three {
-        -ms-overflow-style: none;
-        scrollbar-width: none;
+    .pricing-grid-three,
+    body.logged-in .pricing-grid-three,
+    body.user-authenticated .pricing-grid-three {
+        -ms-overflow-style: none !important;
+        scrollbar-width: none !important;
     }
     
-    /* ✅ PRICING CARDS - HAUTEUR AUTOMATIQUE */
-    .pricing-card {
+    /* ✅ PRICING CARDS - HAUTEUR AUTOMATIQUE - TOUS LES ÉTATS */
+    .pricing-card,
+    body.logged-in .pricing-card,
+    body.user-authenticated .pricing-card,
+    body[data-user-logged="true"] .pricing-card,
+    .pricing-grid-three .pricing-card {
         /* Dimensions horizontales */
         flex: 0 0 85vw !important;
         min-width: 85vw !important;
@@ -3034,7 +3053,7 @@ body {
         margin: 0 !important;
         padding: 2.5rem 1.5rem !important;
         
-        /* ✅ HAUTEUR AUTOMATIQUE - CLEF DE LA CORRECTION */
+        /* ✅ HAUTEUR AUTOMATIQUE - CLEF */
         height: auto !important;
         min-height: auto !important;
         max-height: none !important;
@@ -3044,38 +3063,54 @@ body {
         overflow-x: visible !important;
         overflow-y: visible !important;
         
-        /* Flexbox pour bien organiser le contenu */
+        /* Flexbox */
         display: flex !important;
         flex-direction: column !important;
     }
     
-    /* Première carte : espacement à gauche */
-    .pricing-card:first-child {
+    /* Première carte */
+    .pricing-card:first-child,
+    body.logged-in .pricing-card:first-child,
+    body.user-authenticated .pricing-card:first-child {
         margin-left: 0.5rem !important;
     }
     
-    /* Dernière carte : espacement à droite */
-    .pricing-card:last-child {
+    /* Dernière carte */
+    .pricing-card:last-child,
+    body.logged-in .pricing-card:last-child,
+    body.user-authenticated .pricing-card:last-child {
         margin-right: 0.5rem !important;
     }
     
-    /* ✅ PRICING HEADER - ESPACEMENT AJUSTÉ */
-    .pricing-header {
+    /* ✅ PRICING HEADER - TOUS LES ÉTATS */
+    .pricing-header,
+    body.logged-in .pricing-header,
+    body.user-authenticated .pricing-header,
+    .pricing-card .pricing-header {
         padding-top: 30px !important;
         margin-bottom: 2rem !important;
     }
     
-    /* ✅ PRICING PRICE - ESPACEMENT */
-    .pricing-price {
+    /* ✅ PRICING PRICE - TOUS LES ÉTATS */
+    .pricing-price,
+    body.logged-in .pricing-price,
+    body.user-authenticated .pricing-price,
+    .pricing-card .pricing-price {
         margin-bottom: 2rem !important;
     }
     
-    .pricing-price .amount {
+    .pricing-price .amount,
+    body.logged-in .pricing-price .amount,
+    body.user-authenticated .pricing-price .amount {
         font-size: 3rem !important;
     }
     
-    /* ✅ PRICING FEATURES - HAUTEUR AUTOMATIQUE */
-    .pricing-features {
+    /* ✅ PRICING FEATURES - HAUTEUR AUTOMATIQUE - TOUS LES ÉTATS */
+    .pricing-features,
+    body.logged-in .pricing-features,
+    body.user-authenticated .pricing-features,
+    body[data-user-logged="true"] .pricing-features,
+    .pricing-card .pricing-features {
         margin: 0 0 2rem 0 !important;
         padding: 0 !important;
         
@@ -3086,26 +3121,35 @@ body {
         
         /* ✅ PAS DE SCROLL */
         overflow: visible !important;
+        overflow-y: visible !important;
         
-        /* Flex grow pour remplir l'espace */
+        /* Flex grow */
         flex-grow: 1 !important;
     }
     
-    .pricing-features li {
+    .pricing-features li,
+    body.logged-in .pricing-features li,
+    body.user-authenticated .pricing-features li,
+    .pricing-card .pricing-features li {
         padding: 0.75rem 0 !important;
         min-height: 44px !important;
         font-size: 0.9375rem !important;
         line-height: 1.6 !important;
     }
     
-    /* ✅ PRICING CTA - EN BAS DE CARTE */
-    .pricing-cta-wrapper {
+    /* ✅ PRICING CTA - TOUS LES ÉTATS */
+    .pricing-cta-wrapper,
+    body.logged-in .pricing-cta-wrapper,
+    body.user-authenticated .pricing-cta-wrapper,
+    .pricing-card .pricing-cta-wrapper {
         margin-top: auto !important;
         padding-top: 1.5rem !important;
         flex-shrink: 0 !important;
     }
     
-    .btn-pricing {
+    .btn-pricing,
+    body.logged-in .btn-pricing,
+    body.user-authenticated .btn-pricing {
         min-height: 56px !important;
         padding: 1rem 2rem !important;
         font-size: 1rem !important;
@@ -3513,4 +3557,5 @@ body {
 
 /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
    ✅ FIN DU FICHIER CSS CORRIGÉ
+   VERSION UTILISATEURS CONNECTÉS
    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
