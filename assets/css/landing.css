@@ -2958,7 +2958,7 @@ body {
     
     /* ✅ TEXTE D'AIDE SWIPE (Optionnel) */
     .section-header::after {
-        content: '← Swipe pour plus →';
+        content: '← Swipe for more →';
         display: block;
         font-size: 0.8125rem;
         color: #64748b;
