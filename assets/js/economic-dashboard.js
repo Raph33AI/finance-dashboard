@@ -1,15 +1,8 @@
 /**
  * ====================================================================
- * ALPHAVAULT AI - ECONOMIC DASHBOARD (US vs EU)
+ * ALPHAVAULT AI - ECONOMIC DASHBOARD (US vs EU) - FIXED VERSION
  * ====================================================================
- * Script principal pour le tableau de bord économique
- * Utilise economic-data-client.js pour récupérer les données FRED/ECB
- * 
- * Fonctionnalités:
- * - Indicateurs en temps réel (US & EU)
- * - Comparaisons directes
- * - Graphiques historiques (GDP, Unemployment, Inflation, Rates)
- * - Auto-refresh toutes les 5 minutes
+ * Correction: Parsing correct des données + Séries appropriées
  */
 
 class EconomicDashboard {
@@ -47,7 +40,7 @@ class EconomicDashboard {
 
     /**
      * ========================================
-     * SECTION 1: DASHBOARD CARDS
+     * SECTION 1: DASHBOARD CARDS - CORRIGÉ
      * ========================================
      */
     async loadDashboardData() {
@@ -57,122 +50,142 @@ class EconomicDashboard {
         grid.innerHTML = '<div class="eco-loading"><div class="eco-spinner"></div><p>Loading economic data...</p></div>';
 
         try {
-            // Récupérer les dashboards US et EU en parallèle
-            const [usDashboard, euDashboard] = await Promise.all([
-                economicDataClient.getDashboard(),
-                economicDataClient.getECBDashboard()
+            // ✅ CORRECTION: Récupérer les séries individuellement avec les BONNES séries
+            const [
+                usGDP,           // Niveau GDP
+                usGDPGrowth,     // ✅ NOUVEAU: Croissance GDP
+                usUnemployment,
+                usInflation,
+                usFedRate,
+                euGDP,
+                euUnemployment,
+                euInflation,
+                euMainRate
+            ] = await Promise.all([
+                economicDataClient.getSeries('GDP', { limit: 1 }),
+                economicDataClient.getSeries('A191RL1Q225SBEA', { limit: 1 }), // ✅ Real GDP Growth Rate
+                economicDataClient.getSeries('UNRATE', { limit: 1 }),
+                economicDataClient.getSeries('CPIAUCSL', { limit: 12 }), // Pour calculer YoY
+                economicDataClient.getSeries('DFF', { limit: 1 }),
+                economicDataClient.getECBGDP(),
+                economicDataClient.getECBUnemployment(),
+                economicDataClient.getECBInflation(),
+                economicDataClient.getECBMainRate()
             ]);
 
-            console.log('🇺🇸 US Dashboard:', usDashboard);
-            console.log('🇪🇺 EU Dashboard:', euDashboard);
+            console.log('🔍 Raw data received:');
+            console.log('US GDP Growth:', usGDPGrowth);
+            console.log('US Unemployment:', usUnemployment);
+            console.log('US Inflation:', usInflation);
+            console.log('EU Inflation:', euInflation);
 
-            // Parser les données US (FRED)
+            // ✅ Parser les données US (FRED) - CORRIGÉ
             const usData = {
-                gdp: this.parseFREDLatest(usDashboard.series?.GDP),
-                unemployment: this.parseFREDLatest(usDashboard.series?.UNRATE),
-                inflation: this.parseFREDLatest(usDashboard.series?.CPIAUCSL),
-                fedRate: this.parseFREDLatest(usDashboard.series?.DFF),
-                manufacturing: this.parseFREDLatest(usDashboard.series?.INDPRO),
-                retailSales: this.parseFREDLatest(usDashboard.series?.RSAFS)
+                gdp: this.parseFREDSingle(usGDP),                    // Niveau GDP en trillions
+                gdpGrowth: this.parseFREDSingle(usGDPGrowth),       // ✅ Taux de croissance
+                unemployment: this.parseFREDSingle(usUnemployment),
+                inflation: this.calculateYoYInflation(usInflation), // ✅ Calcul YoY
+                fedRate: this.parseFREDSingle(usFedRate)
             };
 
-            // Parser les données EU (ECB)
+            // ✅ Parser les données EU (ECB) - CORRIGÉ
             const euData = {
-                inflation: this.parseECBLatest(euDashboard.data?.inflation),
-                unemployment: this.parseECBLatest(euDashboard.data?.unemployment),
-                mainRate: this.parseECBLatest(euDashboard.data?.mainRate),
-                gdp: this.parseECBLatest(euDashboard.data?.gdp),
-                m3: this.parseECBLatest(euDashboard.data?.m3)
+                gdp: this.parseECBSingle(euGDP),
+                unemployment: this.parseECBSingle(euUnemployment),
+                inflation: this.parseECBSingle(euInflation),
+                mainRate: this.parseECBSingle(euMainRate)
             };
 
-            // Calculer les changements (simplifié - peut être amélioré avec données historiques)
-            const usGDPChange = this.calculateChange(usDashboard.series?.GDP);
-            const usUnempChange = this.calculateChange(usDashboard.series?.UNRATE);
-            const usInflationChange = this.calculateChange(usDashboard.series?.CPIAUCSL);
+            console.log('📊 Parsed US Data:', usData);
+            console.log('📊 Parsed EU Data:', euData);
+
+            // Calculer les changements
+            const usGDPChange = this.calculateChangeFromSeries(usGDPGrowth);
+            const usUnempChange = this.calculateChangeFromSeries(usUnemployment);
 
             // Générer les cartes
             grid.innerHTML = `
                 ${this.createEcoCard({
                     title: 'US GDP',
-                    value: this.formatLargeNumber(usData.gdp.value, 'T'),
+                    value: this.formatGDP(usData.gdp),
                     unit: 'Trillion USD',
                     flag: '🇺🇸',
                     cssClass: 'us-card',
-                    change: usGDPChange.value,
-                    changeType: usGDPChange.type,
-                    lastUpdate: usData.gdp.date
+                    change: usData.gdpGrowth !== 'N/A' ? parseFloat(usData.gdpGrowth) : null,
+                    changeType: parseFloat(usData.gdpGrowth) > 0 ? 'positive' : 'negative',
+                    lastUpdate: usGDPGrowth[0]?.date || null
                 })}
                 
                 ${this.createEcoCard({
                     title: 'EU GDP',
-                    value: euData.gdp.value !== 'N/A' ? this.formatLargeNumber(euData.gdp.value, 'T') : 'N/A',
+                    value: euData.gdp !== 'N/A' ? this.formatGDP(euData.gdp) : 'N/A',
                     unit: 'Trillion EUR',
                     flag: '🇪🇺',
                     cssClass: 'eu-card',
                     change: null,
-                    lastUpdate: euData.gdp.date
+                    lastUpdate: null
                 })}
                 
                 ${this.createEcoCard({
                     title: 'US Unemployment',
-                    value: usData.unemployment.value + '%',
+                    value: usData.unemployment + '%',
                     unit: 'Jobless Rate',
                     flag: '🇺🇸',
                     cssClass: 'us-card',
                     change: usUnempChange.value,
-                    changeType: usUnempChange.type === 'positive' ? 'negative' : 'positive', // Inversé car baisse = bon
-                    lastUpdate: usData.unemployment.date
+                    changeType: usUnempChange.type === 'positive' ? 'negative' : 'positive',
+                    lastUpdate: usUnemployment[0]?.date || null
                 })}
                 
                 ${this.createEcoCard({
                     title: 'EU Unemployment',
-                    value: euData.unemployment.value + '%',
+                    value: euData.unemployment + '%',
                     unit: 'Jobless Rate',
                     flag: '🇪🇺',
                     cssClass: 'eu-card',
                     change: null,
-                    lastUpdate: euData.unemployment.date
+                    lastUpdate: null
                 })}
                 
                 ${this.createEcoCard({
                     title: 'US Inflation',
-                    value: usInflationChange.value + '%',
+                    value: usData.inflation + '%',
                     unit: 'YoY CPI Change',
                     flag: '🇺🇸',
                     cssClass: 'us-card',
-                    change: usInflationChange.value,
-                    changeType: usInflationChange.type,
-                    lastUpdate: usData.inflation.date
+                    change: parseFloat(usData.inflation),
+                    changeType: parseFloat(usData.inflation) > 2 ? 'negative' : 'positive',
+                    lastUpdate: usInflation[0]?.date || null
                 })}
                 
                 ${this.createEcoCard({
                     title: 'EU Inflation',
-                    value: euData.inflation.value + '%',
+                    value: euData.inflation + '%',
                     unit: 'YoY HICP',
                     flag: '🇪🇺',
                     cssClass: 'eu-card',
                     change: null,
-                    lastUpdate: euData.inflation.date
+                    lastUpdate: null
                 })}
                 
                 ${this.createEcoCard({
                     title: 'Fed Funds Rate',
-                    value: usData.fedRate.value + '%',
+                    value: usData.fedRate + '%',
                     unit: 'Target Rate',
                     flag: '🇺🇸',
                     cssClass: 'us-card',
                     change: null,
-                    lastUpdate: usData.fedRate.date
+                    lastUpdate: usFedRate[0]?.date || null
                 })}
                 
                 ${this.createEcoCard({
                     title: 'ECB Main Rate',
-                    value: euData.mainRate.value + '%',
+                    value: euData.mainRate + '%',
                     unit: 'Main Refinancing',
                     flag: '🇪🇺',
                     cssClass: 'eu-card',
                     change: null,
-                    lastUpdate: euData.mainRate.date
+                    lastUpdate: null
                 })}
             `;
 
@@ -183,7 +196,7 @@ class EconomicDashboard {
             grid.innerHTML = `
                 <div class="eco-error">
                     <i class="fas fa-exclamation-triangle"></i>
-                    <p>Error loading economic data</p>
+                    <p>Error loading economic data: ${error.message}</p>
                     <button class="btn-primary" onclick="economicDashboard.loadDashboardData()">
                         <i class="fas fa-redo"></i> Retry
                     </button>
@@ -193,13 +206,106 @@ class EconomicDashboard {
     }
 
     /**
+     * ✅ NOUVEAU: Parser une série FRED individuelle
+     */
+    parseFREDSingle(series) {
+        console.log('🔍 Parsing FRED series:', series);
+        
+        if (!series || !Array.isArray(series) || series.length === 0) {
+            console.warn('⚠ No data in series');
+            return 'N/A';
+        }
+
+        // Chercher la dernière valeur valide
+        for (let i = series.length - 1; i >= 0; i--) {
+            if (series[i].value && series[i].value !== '.') {
+                const value = parseFloat(series[i].value);
+                console.log('✅ Found value:', value, 'at index', i);
+                return value.toFixed(2);
+            }
+        }
+
+        console.warn('⚠ No valid value found in series');
+        return 'N/A';
+    }
+
+    /**
+     * ✅ NOUVEAU: Parser une série ECB
+     */
+    parseECBSingle(data) {
+        console.log('🔍 Parsing ECB data:', data);
+        
+        if (!data || !data.success || !data.data) {
+            console.warn('⚠ ECB data not successful');
+            return 'N/A';
+        }
+
+        try {
+            const observations = economicDataClient.extractECBObservations(data.data);
+            if (!observations || observations.length === 0) {
+                console.warn('⚠ No ECB observations found');
+                return 'N/A';
+            }
+
+            const latest = observations[observations.length - 1];
+            console.log('✅ ECB latest value:', latest.value);
+            return latest.value.toFixed(2);
+        } catch (error) {
+            console.error('❌ Error parsing ECB data:', error);
+            return 'N/A';
+        }
+    }
+
+    /**
+     * ✅ NOUVEAU: Calculer l'inflation YoY
+     */
+    calculateYoYInflation(series) {
+        if (!series || series.length < 13) {
+            console.warn('⚠ Not enough data for YoY calculation');
+            return 'N/A';
+        }
+
+        const validValues = series.filter(s => s.value !== '.').map(s => parseFloat(s.value));
+        if (validValues.length < 13) {
+            console.warn('⚠ Not enough valid values for YoY');
+            return 'N/A';
+        }
+
+        const latest = validValues[validValues.length - 1];
+        const yearAgo = validValues[validValues.length - 13];
+
+        if (!latest || !yearAgo || yearAgo === 0) {
+            return 'N/A';
+        }
+
+        const yoyChange = ((latest - yearAgo) / yearAgo) * 100;
+        console.log('✅ YoY Inflation calculated:', yoyChange.toFixed(2) + '%');
+        return yoyChange.toFixed(2);
+    }
+
+    /**
+     * Formater le GDP en trillions
+     */
+    formatGDP(value) {
+        if (value === 'N/A' || isNaN(parseFloat(value))) return 'N/A';
+        const num = parseFloat(value);
+        
+        // Si c'est déjà en milliards, convertir en trillions
+        if (num > 1000) {
+            return (num / 1000).toFixed(2);
+        }
+        
+        return num.toFixed(2);
+    }
+
+    /**
      * Créer une carte économique
      */
     createEcoCard(options) {
         const { title, value, unit, flag, cssClass, change, changeType, lastUpdate } = options;
         
         let changeHTML = '';
-        if (change !== null && change !== undefined) {
+        if (change !== null && change !== undefined && !isNaN(change)) {
             const icon = changeType === 'positive' ? 'fa-arrow-up' : 'fa-arrow-down';
             const changeClass = changeType === 'positive' ? 'positive' : 'negative';
             changeHTML = `
@@ -234,18 +340,20 @@ class EconomicDashboard {
         if (!container) return;
 
         try {
-            // Récupérer les dernières valeurs pour comparaison
-            const usGDPGrowth = await economicDataClient.getSeries('A191RL1Q225SBEA', { limit: 1 }); // US GDP Growth
-            const euGDPGrowth = await economicDataClient.getECBGDPGrowth();
+            // ✅ Utiliser la bonne série pour la croissance GDP
+            const [usGDPGrowth, euGDPGrowth] = await Promise.all([
+                economicDataClient.getSeries('A191RL1Q225SBEA', { limit: 1 }), // ✅ US Real GDP Growth
+                economicDataClient.getECBGDPGrowth()
+            ]);
 
-            const usGrowth = this.parseFREDLatest(usGDPGrowth);
-            const euGrowth = this.parseECBLatest(euGDPGrowth);
+            const usGrowth = this.parseFREDSingle(usGDPGrowth);
+            const euGrowth = this.parseECBSingle(euGDPGrowth);
 
             container.innerHTML = `
                 <div class='comparison-grid'>
                     <div class='comparison-card us'>
                         <h4>🇺🇸 United States</h4>
-                        <div class='eco-value' style='font-size: 2.5rem; margin: 20px 0;'>${usGrowth.value}%</div>
+                        <div class='eco-value' style='font-size: 2.5rem; margin: 20px 0;'>${usGrowth}%</div>
                         <div class='eco-sublabel'>GDP Growth Rate (Annual)</div>
                     </div>
                     
@@ -253,52 +361,40 @@ class EconomicDashboard {
                     
                     <div class='comparison-card eu'>
                         <h4>🇪🇺 European Union</h4>
-                        <div class='eco-value' style='font-size: 2.5rem; margin: 20px 0;'>${euGrowth.value}%</div>
+                        <div class='eco-value' style='font-size: 2.5rem; margin: 20px 0;'>${euGrowth}%</div>
                         <div class='eco-sublabel'>GDP Growth Rate (Annual)</div>
                     </div>
                 </div>
                 
                 <div style='text-align: center; margin-top: 20px; padding: 16px; background: rgba(102, 126, 234, 0.08); border-radius: 12px;'>
                     <p style='font-weight: 700; color: var(--text-secondary);'>
-                        ${parseFloat(usGrowth.value) > parseFloat(euGrowth.value) 
+                        ${parseFloat(usGrowth) > parseFloat(euGrowth) 
                             ? '🇺🇸 US economy is growing faster' 
                             : '🇪🇺 EU economy is growing faster'}
                     </p>
                     <p style='font-size: 0.85rem; color: var(--text-secondary); margin-top: 8px;'>
-                        Difference: ${Math.abs(parseFloat(usGrowth.value) - parseFloat(euGrowth.value)).toFixed(2)} percentage points
+                        Difference: ${Math.abs(parseFloat(usGrowth) - parseFloat(euGrowth)).toFixed(2)} percentage points
                     </p>
                 </div>
             `;
 
         } catch (error) {
             console.error('❌ Error loading comparison:', error);
-            container.innerHTML = `
-                <div class='eco-error'>
-                    <p>Error loading comparison data</p>
-                </div>
-            `;
+            container.innerHTML = `<div class='eco-error'><p>Error loading comparison data</p></div>`;
         }
     }
 
     /**
      * ========================================
-     * SECTION 3: HISTORICAL CHARTS
+     * SECTION 3: HISTORICAL CHARTS - CORRIGÉ
      * ========================================
      */
     async loadCharts() {
         try {
-            // Chart 1: GDP Growth
             await this.loadGDPChart();
-
-            // Chart 2: Unemployment
             await this.loadUnemploymentChart();
-
-            // Chart 3: Inflation
             await this.loadInflationChart();
-
-            // Chart 4: Interest Rates
             await this.loadInterestRateChart();
-
         } catch (error) {
             console.error('❌ Error loading charts:', error);
         }
@@ -306,11 +402,14 @@ class EconomicDashboard {
 
     async loadGDPChart() {
         try {
-            const usGDP = await economicDataClient.getSeries('A191RL1Q225SBEA', { limit: 40 }); // US GDP Growth
+            // ✅ Utiliser la série de croissance GDP (dernières 10 ans = 40 trimestres)
+            const usGDP = await economicDataClient.getSeries('A191RL1Q225SBEA', { limit: 40 });
             
             const chartData = usGDP
                 .filter(d => d.value !== '.')
                 .map(d => [new Date(d.date).getTime(), parseFloat(d.value)]);
+
+            console.log('📊 GDP Chart data points:', chartData.length);
 
             Highcharts.chart('gdpChart', {
                 chart: { 
@@ -359,6 +458,7 @@ class EconomicDashboard {
 
     async loadUnemploymentChart() {
         try {
+            // Dernières 10 ans = 120 mois
             const [usUnemp, euUnemp] = await Promise.all([
                 economicDataClient.getSeries('UNRATE', { limit: 120 }),
                 economicDataClient.getECBUnemployment()
@@ -368,8 +468,10 @@ class EconomicDashboard {
                 .filter(d => d.value !== '.')
                 .map(d => [new Date(d.date).getTime(), parseFloat(d.value)]);
 
-            // Extraire données EU (simplifié)
             const euData = this.extractECBTimeSeries(euUnemp);
+
+            console.log('📊 Unemployment US data points:', usData.length);
+            console.log('📊 Unemployment EU data points:', euData.length);
 
             Highcharts.chart('unemploymentChart', {
                 chart: { 
@@ -423,9 +525,11 @@ class EconomicDashboard {
                 economicDataClient.getECBInflation()
             ]);
 
-            // Calculer YoY pour US
-            const usData = this.calculateYoYChange(usInflation);
+            const usData = this.calculateYoYTimeSeries(usInflation);
             const euData = this.extractECBTimeSeries(euInflation);
+
+            console.log('📊 Inflation US data points:', usData.length);
+            console.log('📊 Inflation EU data points:', euData.length);
 
             Highcharts.chart('inflationChart', {
                 chart: { 
@@ -492,6 +596,9 @@ class EconomicDashboard {
 
             const euData = this.extractECBTimeSeries(ecbMainRate);
 
+            console.log('📊 Interest Rate US data points:', usData.length);
+            console.log('📊 Interest Rate EU data points:', euData.length);
+
             Highcharts.chart('interestRateChart', {
                 chart: { 
                     type: 'area', 
@@ -548,54 +655,7 @@ class EconomicDashboard {
      * ========================================
      */
 
-    /**
-     * Parser la dernière valeur d'une série FRED
-     */
-    parseFREDLatest(series) {
-        if (!series || !Array.isArray(series) || series.length === 0) {
-            return { value: 'N/A', date: null };
-        }
-
-        // Trouver la dernière valeur valide
-        for (let i = series.length - 1; i >= 0; i--) {
-            if (series[i].value !== '.') {
-                return {
-                    value: parseFloat(series[i].value).toFixed(2),
-                    date: series[i].date
-                };
-            }
-        }
-
-        return { value: 'N/A', date: null };
-    }
-
-    /**
-     * Parser la dernière valeur ECB (format SDMX)
-     */
-    parseECBLatest(data) {
-        if (!data || !data.success || !data.data) {
-            return { value: 'N/A', date: null };
-        }
-
-        try {
-            const observations = economicDataClient.extractECBObservations(data.data);
-            if (observations.length === 0) return { value: 'N/A', date: null };
-
-            const latest = observations[observations.length - 1];
-            return {
-                value: latest.value.toFixed(2),
-                date: latest.date
-            };
-        } catch (error) {
-            console.error('Error parsing ECB data:', error);
-            return { value: 'N/A', date: null };
-        }
-    }
-
-    /**
-     * Calculer le changement entre les 2 dernières valeurs
-     */
-    calculateChange(series) {
+    calculateChangeFromSeries(series) {
         if (!series || !Array.isArray(series) || series.length < 2) {
             return { value: null, type: null };
         }
@@ -614,10 +674,7 @@ class EconomicDashboard {
         };
     }
 
-    /**
-     * Calculer le changement YoY (année sur année)
-     */
-    calculateYoYChange(series) {
+    calculateYoYTimeSeries(series) {
         const data = [];
         const values = series.filter(s => s.value !== '.');
 
@@ -635,9 +692,6 @@ class EconomicDashboard {
         return data;
     }
 
-    /**
-     * Extraire une série temporelle ECB
-     */
     extractECBTimeSeries(data) {
         if (!data || !data.success) return [];
 
@@ -650,32 +704,6 @@ class EconomicDashboard {
         }
     }
 
-    /**
-     * Formater les grands nombres
-     */
-    formatLargeNumber(value, unit = '') {
-        if (value === 'N/A' || isNaN(parseFloat(value))) return 'N/A';
-        
-        const num = parseFloat(value);
-        
-        if (unit === 'T') {
-            return (num / 1000).toFixed(2);
-        }
-        
-        if (num >= 1e12) {
-            return (num / 1e12).toFixed(2) + 'T';
-        } else if (num >= 1e9) {
-            return (num / 1e9).toFixed(2) + 'B';
-        } else if (num >= 1e6) {
-            return (num / 1e6).toFixed(2) + 'M';
-        }
-        
-        return num.toFixed(2);
-    }
-
-    /**
-     * Afficher une erreur globale
-     */
     showError(message) {
         const container = document.querySelector('.container');
         if (container) {
@@ -697,7 +725,6 @@ class EconomicDashboard {
      * ========================================
      */
     startAutoRefresh() {
-        // Rafraîchir toutes les 5 minutes
         this.refreshInterval = setInterval(() => {
             console.log('🔄 Auto-refreshing dashboard...');
             this.loadDashboardData();
@@ -723,7 +750,6 @@ document.addEventListener('DOMContentLoaded', () => {
     economicDashboard.init();
 });
 
-// Cleanup au déchargement de la page
 window.addEventListener('beforeunload', () => {
     if (economicDashboard) {
         economicDashboard.stopAutoRefresh();
