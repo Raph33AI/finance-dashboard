@@ -1,6 +1,6 @@
 // ═══════════════════════════════════════════════════════════════
 // 📁 PORTFOLIO MANAGER - Multi-portfolios avec Cloud Sync
-// Version améliorée avec gestion UI complète (comme Simulation Manager)
+// Version simplifiée - Affichage du NOM UNIQUEMENT
 // ═══════════════════════════════════════════════════════════════
 
 const PortfolioManager = (function() {
@@ -45,7 +45,7 @@ const PortfolioManager = (function() {
                 
                 if (elapsed > FIREBASE_TIMEOUT) {
                     clearInterval(checkAuth);
-                    console.warn('⚠️ Firebase Auth timeout after 15s, continuing with local mode');
+                    console.warn('⚠ Firebase Auth timeout after 15s, continuing with local mode');
                     resolve(false);
                 }
             }, 100);
@@ -174,7 +174,7 @@ const PortfolioManager = (function() {
         await waitForFirebase();
         
         if (!firebaseReady) {
-            console.warn('⚠️ Running in LOCAL MODE (Firebase not available)');
+            console.warn('⚠ Running in LOCAL MODE (Firebase not available)');
         } else {
             await ensureUserDocument();
             await ensureDefaultPortfolio();
@@ -308,7 +308,7 @@ const PortfolioManager = (function() {
                 
                 return data;
             } else {
-                console.log('⚠️ Portfolio not found in cloud, checking local...');
+                console.log('⚠ Portfolio not found in cloud, checking local...');
                 return loadFromLocal(portfolioName);
             }
             
@@ -344,7 +344,7 @@ const PortfolioManager = (function() {
         console.log(`💾 Saving portfolio "${portfolioName}" to cloud...`);
         
         if (!firebaseReady || !currentUser) {
-            console.warn('⚠️ Firebase not ready, saving locally only');
+            console.warn('⚠ Firebase not ready, saving locally only');
             localStorage.setItem(`portfolio_${portfolioName}`, JSON.stringify(data));
             return false;
         }
@@ -395,11 +395,11 @@ const PortfolioManager = (function() {
     }
 
     /**
-     * 🗑️ Supprimer un portfolio
+     * 🗑 Supprimer un portfolio
      */
     async function deletePortfolio(portfolioName) {
         if (portfolioName === 'default') {
-            console.warn('⚠️ Cannot delete default portfolio');
+            console.warn('⚠ Cannot delete default portfolio');
             showNotification('Cannot delete default portfolio', 'error');
             return false;
         }
@@ -408,7 +408,7 @@ const PortfolioManager = (function() {
             return false;
         }
         
-        console.log(`🗑️ Deleting portfolio "${portfolioName}"...`);
+        console.log(`🗑 Deleting portfolio "${portfolioName}"...`);
         
         if (firebaseReady && currentUser) {
             try {
@@ -595,7 +595,8 @@ const PortfolioManager = (function() {
     }
 
     /**
-     * 🖼️ Mettre à jour l'affichage de la liste des portfolios
+     * 🖼 Mettre à jour l'affichage de la liste des portfolios
+     * ✅ VERSION SIMPLIFIÉE - NOM UNIQUEMENT
      */
     function updatePortfoliosListUI(portfolios) {
         const container = document.getElementById('portfoliosListContainer');
@@ -618,29 +619,12 @@ const PortfolioManager = (function() {
             const item = document.createElement('div');
             item.className = `simulation-item ${portfolio.name === currentPortfolio ? 'active' : ''}`;
             
-            const updatedDate = portfolio.updatedAt 
-                ? (portfolio.updatedAt.toDate ? portfolio.updatedAt.toDate() : new Date(portfolio.updatedAt))
-                : new Date(portfolio.createdAt);
-            
+            // ✅ AFFICHAGE SIMPLIFIÉ - NOM UNIQUEMENT
             item.innerHTML = `
-                <div class="simulation-info" onclick="loadAndClosePortfolio('${portfolio.name}')">
-                    <span class="simulation-name">
-                        <i class='fas fa-briefcase'></i> ${portfolio.name}
-                        ${portfolio.name === currentPortfolio ? '<i class="fas fa-check-circle" style="color: #10b981; margin-left: 8px;"></i>' : ''}
+                <div class="simulation-info" onclick="PortfolioManager.loadAndClosePortfolio('${portfolio.name}')" style="cursor: pointer; padding: 1rem; width: 100%;">
+                    <span class="simulation-name" style="font-size: 1rem; font-weight: 600; color: var(--text-primary);">
+                        ${portfolio.name}
                     </span>
-                    <span class="simulation-date">
-                        <i class='fas fa-clock'></i> ${formatDate(updatedDate)}
-                    </span>
-                </div>
-                <div class="simulation-actions" onclick="event.stopPropagation()">
-                    <button onclick="renamePortfolioAndRefresh('${portfolio.name}')" 
-                            class="btn-icon" title="Rename">
-                        <i class='fas fa-edit'></i>
-                    </button>
-                    <button onclick="deletePortfolioAndRefresh('${portfolio.name}')" 
-                            class="btn-icon btn-danger" title="Delete">
-                        <i class='fas fa-trash'></i>
-                    </button>
                 </div>
             `;
             
@@ -698,7 +682,7 @@ const PortfolioManager = (function() {
     }
 
     /**
-     * 🗑️ Supprime et rafraîchit la liste
+     * 🗑 Supprime et rafraîchit la liste
      */
     async function deletePortfolioAndRefresh(portfolioName) {
         const success = await deletePortfolio(portfolioName);
@@ -784,7 +768,7 @@ const PortfolioManager = (function() {
         getCurrentPortfolio,
         fetchPortfoliosList,
         
-        // ✅ NOUVEAU : Méthodes pour l'UI
+        // ✅ Méthodes pour l'UI
         loadAndClosePortfolio,
         renamePortfolioAndRefresh,
         deletePortfolioAndRefresh,
@@ -804,4 +788,4 @@ const PortfolioManager = (function() {
 // Exposer globalement
 window.PortfolioManager = PortfolioManager;
 
-console.log('✅ Portfolio Manager loaded successfully');
+console.log('✅ Portfolio Manager loaded successfully (Simplified UI - Name Only)');
