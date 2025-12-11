@@ -1,14 +1,14 @@
 /**
  * ====================================================================
- * ALPHAVAULT AI - US ECONOMIC DASHBOARD v4.0 - US ONLY + ULTRA CLEAN
+ * ALPHAVAULT AI - US ECONOMIC DASHBOARD v5.0 - FINAL PERFECT VERSION
  * ====================================================================
  * Features:
  * - US data only (FRED API)
- * - Zero ECB calls
- * - Premium UI/UX
- * - Advanced metrics
+ * - Interactive modals for charts
+ * - Trends analysis
  * - Export functionality
- * - Interactive modals
+ * - No refresh buttons
+ * - Gradient titles everywhere
  */
 
 class EconomicDashboard {
@@ -20,7 +20,7 @@ class EconomicDashboard {
     }
 
     async init() {
-        console.log('📊 US Economic Dashboard v4.0 - Initializing...');
+        console.log('📊 US Economic Dashboard v5.0 - Initializing...');
         
         try {
             // Initialize UI
@@ -32,7 +32,7 @@ class EconomicDashboard {
             // Setup event listeners
             this.setupEventListeners();
             
-            console.log('✅ Dashboard v4.0 loaded successfully');
+            console.log('✅ Dashboard v5.0 loaded successfully');
             this.startAutoRefresh();
             
         } catch (error) {
@@ -47,22 +47,23 @@ class EconomicDashboard {
      * ========================================
      */
     initializeUI() {
-        this.updateLastUpdateTime();
         this.initializeModals();
     }
 
     initializeModals() {
-        const modals = ['indicatorModal', 'exportModal'];
+        const modals = ['indicatorModal', 'exportModal', 'chartInfoModal', 'trendsModal'];
         
         modals.forEach(modalId => {
             const modal = document.getElementById(modalId);
             if (!modal) return;
             
-            const closeBtn = modal.querySelector('.modal-close');
-            if (closeBtn) {
-                closeBtn.addEventListener('click', () => this.closeModal(modalId));
-            }
+            // Close buttons
+            const closeBtns = modal.querySelectorAll('.modal-close');
+            closeBtns.forEach(btn => {
+                btn.addEventListener('click', () => this.closeModal(modalId));
+            });
             
+            // Click outside to close
             modal.addEventListener('click', (e) => {
                 if (e.target === modal) {
                     this.closeModal(modalId);
@@ -216,7 +217,6 @@ class EconomicDashboard {
             this.attachCardClickHandlers();
 
             this.lastUpdate = new Date();
-            this.updateLastUpdateTime();
             console.log('✅ Dashboard cards rendered');
 
         } catch (error) {
@@ -226,8 +226,8 @@ class EconomicDashboard {
                     <i class="fas fa-exclamation-triangle"></i>
                     <h3>Error loading data</h3>
                     <p>${error.message}</p>
-                    <button class="dashboard-btn" onclick="economicDashboard.loadDashboardData()">
-                        <i class="fas fa-redo"></i> Retry
+                    <button class="dashboard-btn" onclick="location.reload()">
+                        <i class="fas fa-redo"></i> Reload Page
                     </button>
                 </div>
             `;
@@ -280,9 +280,8 @@ class EconomicDashboard {
     }
 
     calculateEconomicHealth(data) {
-        let score = 50; // Base score
+        let score = 50;
         
-        // GDP growth contribution (0-30 points)
         const gdpGrowth = parseFloat(data.gdpGrowth);
         if (!isNaN(gdpGrowth)) {
             if (gdpGrowth > 3) score += 30;
@@ -291,7 +290,6 @@ class EconomicDashboard {
             else if (gdpGrowth < 0) score -= 20;
         }
         
-        // Unemployment contribution (0-30 points)
         const unemployment = parseFloat(data.unemployment);
         if (!isNaN(unemployment)) {
             if (unemployment < 4) score += 30;
@@ -300,7 +298,6 @@ class EconomicDashboard {
             else if (unemployment > 8) score -= 20;
         }
         
-        // Inflation contribution (-20 to +20 points)
         const inflation = parseFloat(data.inflation);
         if (!isNaN(inflation)) {
             if (inflation >= 1.5 && inflation <= 2.5) score += 20;
@@ -718,23 +715,27 @@ class EconomicDashboard {
      * ========================================
      */
     setupEventListeners() {
-        // Refresh button
-        const refreshBtn = document.getElementById('refreshDashboard');
-        if (refreshBtn) {
-            refreshBtn.addEventListener('click', () => this.handleRefresh());
-        }
-
-        // Refresh indicators button
-        const refreshIndicatorsBtn = document.getElementById('refreshIndicators');
-        if (refreshIndicatorsBtn) {
-            refreshIndicatorsBtn.addEventListener('click', () => this.loadDashboardData());
-        }
-
         // Export button
         const exportBtn = document.getElementById('exportData');
         if (exportBtn) {
             exportBtn.addEventListener('click', () => this.handleExport());
         }
+
+        // View Trends button
+        const trendsBtn = document.getElementById('viewTrends');
+        if (trendsBtn) {
+            trendsBtn.addEventListener('click', () => this.showTrendsModal());
+        }
+
+        // Chart info buttons
+        const infoBtns = document.querySelectorAll('.chart-btn-info');
+        infoBtns.forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const infoType = btn.dataset.info;
+                this.showChartInfoModal(infoType);
+            });
+        });
 
         // Fullscreen buttons
         const fullscreenBtns = document.querySelectorAll('.chart-btn-fullscreen');
@@ -754,20 +755,6 @@ class EconomicDashboard {
                 this.exportData(format);
             });
         });
-    }
-
-    handleRefresh() {
-        console.log('🔄 Manual refresh triggered');
-        
-        // Add rotation animation to refresh button
-        const refreshBtn = document.getElementById('refreshDashboard');
-        if (refreshBtn) {
-            const icon = refreshBtn.querySelector('i');
-            icon.style.animation = 'spin 1s linear';
-            setTimeout(() => { icon.style.animation = ''; }, 1000);
-        }
-        
-        this.loadAllData();
     }
 
     handleExport() {
@@ -844,6 +831,11 @@ class EconomicDashboard {
         }
     }
 
+    /**
+     * ========================================
+     * MODALS
+     * ========================================
+     */
     showIndicatorModal(indicator) {
         const modalTitle = document.getElementById('modalTitle');
         const modalBody = document.getElementById('modalBody');
@@ -886,18 +878,212 @@ class EconomicDashboard {
         this.openModal('indicatorModal');
     }
 
-    updateLastUpdateTime() {
-        const timeElement = document.getElementById('lastUpdateTime');
-        if (timeElement && this.lastUpdate) {
-            const formatted = this.lastUpdate.toLocaleTimeString('en-US', {
-                hour: '2-digit',
-                minute: '2-digit',
-                second: '2-digit'
-            });
-            timeElement.textContent = formatted;
-        } else if (timeElement) {
-            timeElement.textContent = 'Loading...';
+    showChartInfoModal(infoType) {
+        const modalTitle = document.getElementById('chartInfoTitle');
+        const modalBody = document.getElementById('chartInfoBody');
+        
+        const chartInfo = {
+            'gdp': {
+                title: '📈 GDP Growth Rate Chart',
+                description: 'This chart displays the quarterly GDP growth rate for the United States over the past 10 years (40 quarters).',
+                keyPoints: [
+                    'Shows economic expansion (positive values) or contraction (negative values)',
+                    'Red line at 0% marks the recession threshold',
+                    'Data is annualized for comparison across periods',
+                    'Sourced from the Federal Reserve Economic Data (FRED)'
+                ],
+                interpretation: 'Positive growth indicates economic expansion, while negative growth (recession) shows economic contraction. Growth above 3% is considered strong, while growth below 1% may signal economic weakness.'
+            },
+            'unemployment': {
+                title: '👥 Unemployment Rate Chart',
+                description: 'This chart tracks the US unemployment rate over the past 10 years.',
+                keyPoints: [
+                    'Shows percentage of labor force actively seeking work',
+                    'Lower values indicate a stronger labor market',
+                    'Natural rate of unemployment is around 4-5%',
+                    'Spikes often correlate with economic recessions'
+                ],
+                interpretation: 'Unemployment below 4% indicates a tight labor market. Rates above 6% suggest labor market slack. Rapid increases may signal economic distress.'
+            },
+            'inflation': {
+                title: '🔥 Inflation Rate Chart',
+                description: 'This chart displays the year-over-year Consumer Price Index (CPI) inflation rate.',
+                keyPoints: [
+                    'Measures purchasing power changes over time',
+                    'Fed target is 2% (shown as orange dashed line)',
+                    'Calculated as 12-month percentage change',
+                    'Reflects cost of living changes for consumers'
+                ],
+                interpretation: 'Inflation near 2% is considered healthy. Below 1% may indicate deflation risk. Above 4% suggests overheating economy and potential Fed intervention.'
+            },
+            'fedrate': {
+                title: '🏦 Federal Funds Rate Chart',
+                description: 'This chart shows the target Federal Funds Rate set by the Federal Reserve.',
+                keyPoints: [
+                    'Primary tool for Federal Reserve monetary policy',
+                    'Influences all other interest rates in economy',
+                    'Raised to combat inflation, lowered to stimulate growth',
+                    'Zero or near-zero rates indicate crisis response'
+                ],
+                interpretation: 'Rising rates indicate Fed tightening policy to control inflation. Falling rates suggest economic stimulus. Rate changes impact mortgages, loans, and savings.'
+            }
+        };
+        
+        const info = chartInfo[infoType];
+        
+        if (!info) {
+            modalBody.innerHTML = '<p>No information available for this chart.</p>';
+            return;
         }
+        
+        modalTitle.textContent = info.title;
+        
+        modalBody.innerHTML = `
+            <div style='margin-bottom: 24px;'>
+                <p style='color: var(--text-primary); line-height: 1.8; font-size: 1.05rem;'>
+                    ${info.description}
+                </p>
+            </div>
+            
+            <div style='background: var(--eco-gradient-soft); padding: 20px; border-radius: 12px; margin-bottom: 24px;'>
+                <h4 style='margin-bottom: 12px; font-weight: 700; color: var(--text-primary);'>
+                    <i class='fas fa-lightbulb' style='color: var(--eco-warning);'></i> Key Points
+                </h4>
+                <ul style='margin: 0; padding-left: 20px; color: var(--text-secondary); line-height: 1.8;'>
+                    ${info.keyPoints.map(point => `<li>${point}</li>`).join('')}
+                </ul>
+            </div>
+            
+            <div style='background: rgba(59, 130, 246, 0.1); padding: 20px; border-radius: 12px; border-left: 4px solid var(--eco-primary);'>
+                <h4 style='margin-bottom: 12px; font-weight: 700; color: var(--text-primary);'>
+                    <i class='fas fa-book-open' style='color: var(--eco-primary);'></i> Interpretation
+                </h4>
+                <p style='color: var(--text-secondary); line-height: 1.7; margin: 0;'>
+                    ${info.interpretation}
+                </p>
+            </div>
+        `;
+        
+        this.openModal('chartInfoModal');
+    }
+
+    showTrendsModal() {
+        const modalBody = document.getElementById('trendsContent');
+        
+        if (!this.cachedData.usData) {
+            modalBody.innerHTML = '<p style="text-align: center; color: var(--text-tertiary);">No data available for trends analysis</p>';
+            this.openModal('trendsModal');
+            return;
+        }
+        
+        const { usData } = this.cachedData;
+        
+        // Analyze trends
+        const trends = this.analyzeTrends(usData);
+        
+        modalBody.innerHTML = `
+            <div class='trend-item'>
+                <h3><i class='fas fa-chart-line'></i> GDP Growth Trend</h3>
+                <p>${trends.gdp}</p>
+            </div>
+            
+            <div class='trend-item'>
+                <h3><i class='fas fa-users'></i> Labor Market Trend</h3>
+                <p>${trends.unemployment}</p>
+            </div>
+            
+            <div class='trend-item'>
+                <h3><i class='fas fa-fire'></i> Inflation Trend</h3>
+                <p>${trends.inflation}</p>
+            </div>
+            
+            <div class='trend-item'>
+                <h3><i class='fas fa-university'></i> Monetary Policy Trend</h3>
+                <p>${trends.fedRate}</p>
+            </div>
+            
+            <div class='trend-item' style='background: linear-gradient(135deg, rgba(102, 126, 234, 0.15) 0%, rgba(118, 75, 162, 0.15) 100%); border-left-color: #8b5cf6;'>
+                <h3><i class='fas fa-crystal-ball'></i> Overall Economic Outlook</h3>
+                <p>${trends.outlook}</p>
+            </div>
+        `;
+        
+        this.openModal('trendsModal');
+    }
+
+    analyzeTrends(data) {
+        const gdpGrowth = parseFloat(data.gdpGrowth);
+        const unemployment = parseFloat(data.unemployment);
+        const inflation = parseFloat(data.inflation);
+        const fedRate = parseFloat(data.fedRate);
+        
+        let trends = {};
+        
+        // GDP Trend
+        if (isNaN(gdpGrowth)) {
+            trends.gdp = 'Insufficient data to determine GDP growth trend.';
+        } else if (gdpGrowth > 3) {
+            trends.gdp = `Strong GDP growth at ${gdpGrowth}% indicates robust economic expansion. This suggests healthy business investment, consumer spending, and overall economic vitality.`;
+        } else if (gdpGrowth > 2) {
+            trends.gdp = `Moderate GDP growth at ${gdpGrowth}% reflects steady economic expansion. The economy is growing at a sustainable pace without overheating.`;
+        } else if (gdpGrowth > 0) {
+            trends.gdp = `Slow GDP growth at ${gdpGrowth}% suggests modest economic expansion. While positive, this indicates the economy may be facing headwinds.`;
+        } else {
+            trends.gdp = `Negative GDP growth at ${gdpGrowth}% signals economic contraction. This may indicate a recession or significant economic challenges.`;
+        }
+        
+        // Unemployment Trend
+        if (isNaN(unemployment)) {
+            trends.unemployment = 'Insufficient data to determine labor market trend.';
+        } else if (unemployment < 4) {
+            trends.unemployment = `Very low unemployment at ${unemployment}% indicates an exceptionally tight labor market. This suggests strong job creation and may lead to wage pressures.`;
+        } else if (unemployment < 5) {
+            trends.unemployment = `Unemployment at ${unemployment}% is near full employment levels. The labor market is healthy with most job seekers finding employment.`;
+        } else if (unemployment < 6.5) {
+            trends.unemployment = `Unemployment at ${unemployment}% suggests some slack in the labor market. There is room for improvement in job creation and economic activity.`;
+        } else {
+            trends.unemployment = `Elevated unemployment at ${unemployment}% indicates significant labor market challenges. Job creation is weak and economic activity may be sluggish.`;
+        }
+        
+        // Inflation Trend
+        if (isNaN(inflation)) {
+            trends.inflation = 'Insufficient data to determine inflation trend.';
+        } else if (inflation < 1) {
+            trends.inflation = `Low inflation at ${inflation}% is below the Federal Reserve's target. This may indicate weak demand and potential deflation risks.`;
+        } else if (inflation >= 1 && inflation <= 2.5) {
+            trends.inflation = `Inflation at ${inflation}% is near the Fed's 2% target, indicating price stability. This is considered ideal for a healthy economy.`;
+        } else if (inflation > 2.5 && inflation <= 4) {
+            trends.inflation = `Elevated inflation at ${inflation}% is above the Fed's target. This may prompt the Fed to tighten monetary policy to control rising prices.`;
+        } else {
+            trends.inflation = `High inflation at ${inflation}% significantly exceeds the Fed's target. This creates pressure on the Fed to aggressively raise interest rates.`;
+        }
+        
+        // Fed Rate Trend
+        if (isNaN(fedRate)) {
+            trends.fedRate = 'Insufficient data to determine monetary policy trend.';
+        } else if (fedRate < 1) {
+            trends.fedRate = `Near-zero rates at ${fedRate}% indicate an accommodative monetary policy. The Fed is supporting economic growth and employment.`;
+        } else if (fedRate < 3) {
+            trends.fedRate = `Moderate rates at ${fedRate}% suggest a balanced monetary policy approach. The Fed is maintaining flexibility to respond to economic conditions.`;
+        } else if (fedRate < 5) {
+            trends.fedRate = `Elevated rates at ${fedRate}% indicate restrictive monetary policy. The Fed is actively working to control inflation and cool the economy.`;
+        } else {
+            trends.fedRate = `High rates at ${fedRate}% signal aggressive monetary tightening. The Fed is prioritizing inflation control over economic growth.`;
+        }
+        
+        // Overall Outlook
+        const healthScore = this.calculateEconomicHealth(data).score;
+        if (healthScore >= 80) {
+            trends.outlook = 'The US economy is in strong shape with robust growth, low unemployment, and controlled inflation. The outlook remains positive for continued expansion.';
+        } else if (healthScore >= 60) {
+            trends.outlook = 'The US economy is performing well overall, though some indicators suggest room for improvement. The outlook is cautiously optimistic.';
+        } else if (healthScore >= 40) {
+            trends.outlook = 'The US economy shows mixed signals with both strengths and weaknesses. Careful monitoring of key indicators is warranted.';
+        } else {
+            trends.outlook = 'The US economy faces significant challenges with weak performance across multiple indicators. Risks of recession or prolonged slowdown are elevated.';
+        }
+        
+        return trends;
     }
 
     showError(message) {

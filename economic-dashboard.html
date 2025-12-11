@@ -190,13 +190,9 @@
                     <button class='mobile-toggle' id='mobileToggle'>
                         <i class='fas fa-bars'></i>
                     </button>
-                    <h1><i class="fas fa-flag-usa"></i> US Economic Dashboard</h1>
+                    <h1 class='page-title'><i class="fas fa-flag-usa"></i> US Economic Dashboard</h1>
                 </div>
                 <div class='header-right'>
-                    <button class='dashboard-btn dashboard-btn-refresh' id='refreshDashboard' title='Refresh Data'>
-                        <i class='fas fa-sync-alt'></i>
-                        <span class='btn-text'>Refresh</span>
-                    </button>
                     <button class='dashboard-btn dashboard-btn-export' id='exportData' title='Export Data'>
                         <i class='fas fa-download'></i>
                         <span class='btn-text'>Export</span>
@@ -209,9 +205,9 @@
                 <!-- Toolbar -->
                 <div class='dashboard-toolbar'>
                     <div class='toolbar-left'>
-                        <span class='last-update'>
-                            <i class='fas fa-clock'></i>
-                            Last update: <span id='lastUpdateTime'>Loading...</span>
+                        <span class='dashboard-subtitle'>
+                            <i class='fas fa-chart-line'></i>
+                            Real-time US economic indicators from FRED
                         </span>
                     </div>
                     <div class='toolbar-right'>
@@ -224,14 +220,9 @@
 
                 <!-- Real-Time Indicators -->
                 <div class='section'>
-                    <div class='section-header'>
-                        <h2 class='section-title'>
-                            <i class='fas fa-tachometer-alt'></i> Real-Time Economic Indicators
-                        </h2>
-                        <button class='dashboard-btn-icon' id='refreshIndicators' title='Refresh'>
-                            <i class='fas fa-sync-alt'></i>
-                        </button>
-                    </div>
+                    <h2 class='section-title gradient-title'>
+                        <i class='fas fa-tachometer-alt'></i> Real-Time Economic Indicators
+                    </h2>
                     
                     <div class='eco-dashboard-grid' id='dashboardGrid'>
                         <div class='eco-loading'>
@@ -243,7 +234,7 @@
 
                 <!-- Key Metrics Summary -->
                 <div class='section'>
-                    <h2 class='section-title'>
+                    <h2 class='section-title gradient-title'>
                         <i class='fas fa-chart-bar'></i> Key Metrics Summary
                     </h2>
                     
@@ -257,47 +248,67 @@
 
                 <!-- Historical Trends Charts -->
                 <div class='section'>
-                    <h2 class='section-title'>
+                    <h2 class='section-title gradient-title'>
                         <i class='fas fa-chart-line'></i> Historical Trends
                     </h2>
                     
                     <div class='charts-grid'>
                         <div class='chart-card'>
                             <div class='chart-header'>
-                                <h3><i class='fas fa-chart-area'></i> GDP Growth Rate</h3>
-                                <button class='chart-btn-fullscreen' data-chart='gdpChart'>
-                                    <i class='fas fa-expand'></i>
-                                </button>
+                                <h3 class='chart-title'><i class='fas fa-chart-area'></i> GDP Growth Rate</h3>
+                                <div class='chart-actions'>
+                                    <button class='chart-btn-info' data-info='gdp' title='Information'>
+                                        <i class='fas fa-info-circle'></i>
+                                    </button>
+                                    <button class='chart-btn-fullscreen' data-chart='gdpChart' title='Fullscreen'>
+                                        <i class='fas fa-expand'></i>
+                                    </button>
+                                </div>
                             </div>
                             <div id='gdpChart' class='chart'></div>
                         </div>
                         
                         <div class='chart-card'>
                             <div class='chart-header'>
-                                <h3><i class='fas fa-users'></i> Unemployment Rate</h3>
-                                <button class='chart-btn-fullscreen' data-chart='unemploymentChart'>
-                                    <i class='fas fa-expand'></i>
-                                </button>
+                                <h3 class='chart-title'><i class='fas fa-users'></i> Unemployment Rate</h3>
+                                <div class='chart-actions'>
+                                    <button class='chart-btn-info' data-info='unemployment' title='Information'>
+                                        <i class='fas fa-info-circle'></i>
+                                    </button>
+                                    <button class='chart-btn-fullscreen' data-chart='unemploymentChart' title='Fullscreen'>
+                                        <i class='fas fa-expand'></i>
+                                    </button>
+                                </div>
                             </div>
                             <div id='unemploymentChart' class='chart'></div>
                         </div>
                         
                         <div class='chart-card'>
                             <div class='chart-header'>
-                                <h3><i class='fas fa-fire'></i> Inflation Rate (YoY)</h3>
-                                <button class='chart-btn-fullscreen' data-chart='inflationChart'>
-                                    <i class='fas fa-expand'></i>
-                                </button>
+                                <h3 class='chart-title'><i class='fas fa-fire'></i> Inflation Rate (YoY)</h3>
+                                <div class='chart-actions'>
+                                    <button class='chart-btn-info' data-info='inflation' title='Information'>
+                                        <i class='fas fa-info-circle'></i>
+                                    </button>
+                                    <button class='chart-btn-fullscreen' data-chart='inflationChart' title='Fullscreen'>
+                                        <i class='fas fa-expand'></i>
+                                    </button>
+                                </div>
                             </div>
                             <div id='inflationChart' class='chart'></div>
                         </div>
                         
                         <div class='chart-card'>
                             <div class='chart-header'>
-                                <h3><i class='fas fa-percentage'></i> Federal Funds Rate</h3>
-                                <button class='chart-btn-fullscreen' data-chart='interestRateChart'>
-                                    <i class='fas fa-expand'></i>
-                                </button>
+                                <h3 class='chart-title'><i class='fas fa-percentage'></i> Federal Funds Rate</h3>
+                                <div class='chart-actions'>
+                                    <button class='chart-btn-info' data-info='fedrate' title='Information'>
+                                        <i class='fas fa-info-circle'></i>
+                                    </button>
+                                    <button class='chart-btn-fullscreen' data-chart='interestRateChart' title='Fullscreen'>
+                                        <i class='fas fa-expand'></i>
+                                    </button>
+                                </div>
                             </div>
                             <div id='interestRateChart' class='chart'></div>
                         </div>
@@ -319,10 +330,25 @@
     <div id='indicatorModal' class='modal'>
         <div class='modal-content'>
             <div class='modal-header'>
-                <h2 id='modalTitle'>Indicator Details</h2>
+                <h2 id='modalTitle' class='gradient-title'>Indicator Details</h2>
                 <button class='modal-close'>&times;</button>
             </div>
             <div class='modal-body' id='modalBody'>
+                <div class='eco-loading'>
+                    <div class='eco-spinner'></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Chart Info Modal -->
+    <div id='chartInfoModal' class='modal'>
+        <div class='modal-content'>
+            <div class='modal-header'>
+                <h2 id='chartInfoTitle' class='gradient-title'>Chart Information</h2>
+                <button class='modal-close' data-modal='chartInfoModal'>&times;</button>
+            </div>
+            <div class='modal-body' id='chartInfoBody'>
                 <div class='eco-loading'>
                     <div class='eco-spinner'></div>
                 </div>
@@ -334,23 +360,47 @@
     <div id='exportModal' class='modal'>
         <div class='modal-content'>
             <div class='modal-header'>
-                <h2><i class='fas fa-download'></i> Export Data</h2>
-                <button class='modal-close'>&times;</button>
+                <h2 class='gradient-title'><i class='fas fa-download'></i> Export Data</h2>
+                <button class='modal-close' data-modal='exportModal'>&times;</button>
             </div>
             <div class='modal-body'>
+                <p style='margin-bottom: 24px; color: var(--text-secondary); line-height: 1.6;'>
+                    Choose your preferred export format for the US economic data
+                </p>
                 <div class='export-options'>
                     <button class='export-btn' data-format='csv'>
                         <i class='fas fa-file-csv'></i>
                         <span>CSV Format</span>
+                        <small>Spreadsheet compatible</small>
                     </button>
                     <button class='export-btn' data-format='json'>
                         <i class='fas fa-file-code'></i>
                         <span>JSON Format</span>
+                        <small>Developer friendly</small>
                     </button>
                     <button class='export-btn' data-format='print'>
                         <i class='fas fa-print'></i>
                         <span>Print Report</span>
+                        <small>PDF or physical copy</small>
                     </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Trends Modal -->
+    <div id='trendsModal' class='modal'>
+        <div class='modal-content modal-large'>
+            <div class='modal-header'>
+                <h2 class='gradient-title'><i class='fas fa-chart-line'></i> Economic Trends Analysis</h2>
+                <button class='modal-close' data-modal='trendsModal'>&times;</button>
+            </div>
+            <div class='modal-body'>
+                <div class='trends-content' id='trendsContent'>
+                    <div class='eco-loading'>
+                        <div class='eco-spinner'></div>
+                        <p>Loading trends analysis...</p>
+                    </div>
                 </div>
             </div>
         </div>
