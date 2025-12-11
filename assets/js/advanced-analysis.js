@@ -6392,10 +6392,9 @@
 // console.log('✅ Advanced Analysis - Wall Street Edition - Script Loaded (40+ Indicators)');
 
 /* ==============================================
-   ADVANCED-ANALYSIS.JS - WALL STREET EDITION
-   ✅ 40+ Technical Indicators (PROPRIETARY)
-   ❌ NO RAW PRICE/VOLUME/OHLC DISPLAY
-   ✅ AlphaVault Scores & Relative Positions Only
+   ADVANCED-ANALYSIS.JS - LEGAL COMPLIANT VERSION
+   ✅ INDICATEURS TECHNIQUES PURS UNIQUEMENT
+   ❌ AUCUN GRAPHIQUE DE PRIX (Conforme ToS)
    ============================================== */
 
 // ========== RATE LIMITER ==========
@@ -6564,29 +6563,19 @@ const AdvancedAnalysis = {
     searchTimeout: null,
     
     charts: {
-        ichimoku: null,
         stochastic: null,
         williams: null,
         adx: null,
-        sar: null,
         obv: null,
         atr: null,
-        fibonacci: null,
-        vwap: null,
         rsi: null,
         macd: null,
-        bollinger: null,
         mfi: null,
         cci: null,
         roc: null,
         aroon: null,
-        keltner: null,
-        donchian: null,
         cmf: null,
-        elderRay: null,
-        volumeProfile: null,
-        movingAverages: null,
-        linearRegression: null
+        elderRay: null
     },
     
     colors: {
@@ -6605,49 +6594,13 @@ const AdvancedAnalysis = {
         indigo: '#6610f2',
         pink: '#d63384'
     },
-
-    // ✅ NOUVELLE FONCTION - NORMALISATION DES PRIX
-    normalizePriceData(data, baseValue = null) {
-        if (!data || data.length === 0) return data;
-        
-        // Si data est un tableau de [timestamp, price]
-        if (Array.isArray(data[0]) && data[0].length === 2) {
-            const firstPrice = baseValue || data[0][1];
-            return data.map(([timestamp, price]) => [
-                timestamp,
-                (price / firstPrice) * 100
-            ]);
-        }
-        
-        // Si data est un tableau de {timestamp, close, ...}
-        if (data[0].timestamp !== undefined) {
-            const firstPrice = baseValue || data[0].close;
-            return data.map(item => ({
-                ...item,
-                open: (item.open / firstPrice) * 100,
-                high: (item.high / firstPrice) * 100,
-                low: (item.low / firstPrice) * 100,
-                close: (item.close / firstPrice) * 100
-            }));
-        }
-        
-        return data;
-    },
-    
-    // ✅ NOUVELLE FONCTION - Obtenir le prix de base pour normalisation
-    getBasePrice() {
-        if (!this.stockData || !this.stockData.prices || this.stockData.prices.length === 0) {
-            return 100;
-        }
-        return this.stockData.prices[0].close;
-    },
     
     // ============================================
     // ✅ INITIALIZATION
     // ============================================
     
     async init() {
-        console.log('🚀 Advanced Analysis - Wall Street Edition - Initializing...');
+        console.log('🚀 Advanced Analysis - Legal Compliant Version - Initializing...');
         
         this.rateLimiter = new RateLimiter(8, 60000);
         this.optimizedCache = new OptimizedCache();
@@ -6674,7 +6627,7 @@ const AdvancedAnalysis = {
             this.loadSymbol(this.currentSymbol);
         }, 500);
         
-        console.log('✅ Advanced Analysis - Wall Street Edition - Ready!');
+        console.log('✅ Advanced Analysis - Legal Compliant Version - Ready!');
     },
     
     async waitForAuth() {
@@ -6763,7 +6716,7 @@ const AdvancedAnalysis = {
     },
     
     // ============================================
-    // SEARCH FUNCTIONALITY (CONSERVÉ)
+    // SEARCH FUNCTIONALITY
     // ============================================
     
     handleSearch(query) {
@@ -6964,7 +6917,7 @@ const AdvancedAnalysis = {
     },
 
     // ============================================
-    // LOAD SYMBOL (DONNÉES CONSERVÉES, AFFICHAGE MASQUÉ)
+    // LOAD SYMBOL
     // ============================================
     
     analyzeStock() {
@@ -7047,7 +7000,7 @@ const AdvancedAnalysis = {
         }
     },
     
-    // ✅ CORRECTION MAJEURE - MASQUER TOUS LES PRIX
+    // ✅ AFFICHAGE HEADER (SANS PRIX)
     displayStockHeader() {
         const quote = this.stockData.quote;
         
@@ -7068,15 +7021,15 @@ const AdvancedAnalysis = {
         
         const displayQuote = this.stockData.quote;
         
-        // ✅ Afficher uniquement le symbole et le nom (SANS PRIX)
+        // ✅ Afficher uniquement le symbole et le nom
         document.getElementById('stockSymbol').textContent = displayQuote.symbol || this.currentSymbol;
         document.getElementById('stockName').textContent = displayQuote.name || this.currentSymbol;
         
-        // ✅ MASQUER LE PRIX ACTUEL - Remplacer par AlphaVault Score
+        // ✅ Remplacer le prix par AlphaVault Score
         const alphaVaultScore = this.calculateAlphaVaultScore();
         document.getElementById('currentPrice').textContent = `AlphaVault Score: ${alphaVaultScore}/100`;
         
-        // ✅ MASQUER LE CHANGE - Remplacer par Market Strength
+        // ✅ Remplacer le change par Market Strength
         const changeEl = document.getElementById('priceChange');
         const marketStrength = this.calculateMarketStrength();
         
@@ -7106,14 +7059,14 @@ const AdvancedAnalysis = {
         document.getElementById('stockHeader').classList.remove('hidden');
     },
     
-    // ✅ NOUVEAU - Calcul du AlphaVault Score (basé sur indicateurs techniques)
+    // ✅ AlphaVault Score (basé sur indicateurs techniques uniquement)
     calculateAlphaVaultScore() {
         if (!this.stockData || !this.stockData.prices || this.stockData.prices.length < 50) {
-            return 50; // Score neutre par défaut
+            return 50;
         }
         
         const prices = this.stockData.prices;
-        let score = 50; // Base neutre
+        let score = 50;
         
         // RSI
         const rsi = this.calculateRSI(prices);
@@ -7133,17 +7086,6 @@ const AdvancedAnalysis = {
             else score -= 5;
         }
         
-        // Moving Averages
-        const mas = this.calculateMultipleMovingAverages(prices);
-        if (mas.sma20.length > 0 && mas.sma50.length > 0) {
-            const lastPrice = prices[prices.length - 1].close;
-            const lastSMA20 = mas.sma20[mas.sma20.length - 1][1];
-            const lastSMA50 = mas.sma50[mas.sma50.length - 1][1];
-            
-            if (lastPrice > lastSMA20 && lastSMA20 > lastSMA50) score += 10;
-            else if (lastPrice < lastSMA20 && lastSMA20 < lastSMA50) score -= 10;
-        }
-        
         // ADX
         const adx = this.calculateADX(prices);
         if (adx.adx.length > 0) {
@@ -7157,7 +7099,7 @@ const AdvancedAnalysis = {
             }
         }
         
-        // Volume (OBV)
+        // OBV
         const obv = this.calculateOBV(prices);
         if (obv.length >= 20) {
             const recentOBV = obv.slice(-20);
@@ -7166,11 +7108,18 @@ const AdvancedAnalysis = {
             else score -= 5;
         }
         
-        // Limiter entre 0 et 100
+        // Stochastic
+        const stochastic = this.calculateStochastic(prices);
+        if (stochastic.k.length > 0) {
+            const lastK = stochastic.k[stochastic.k.length - 1][1];
+            if (lastK < 20) score += 5;
+            else if (lastK > 80) score -= 5;
+        }
+        
         return Math.max(0, Math.min(100, Math.round(score)));
     },
     
-    // ✅ NOUVEAU - Calcul de la Market Strength (0-100)
+    // ✅ Market Strength (basé sur variation % récente)
     calculateMarketStrength() {
         if (!this.stockData || !this.stockData.prices || this.stockData.prices.length < 20) {
             return 50;
@@ -7182,7 +7131,6 @@ const AdvancedAnalysis = {
         
         let strength = 50;
         
-        // Tendance récente (20 jours)
         const firstPrice = recentPrices[0].close;
         const priceChange = ((lastPrice - firstPrice) / firstPrice) * 100;
         
@@ -7193,7 +7141,6 @@ const AdvancedAnalysis = {
         else if (priceChange < -5) strength -= 15;
         else if (priceChange < 0) strength -= 5;
         
-        // Volume récent
         const avgVolume = recentPrices.reduce((sum, p) => sum + p.volume, 0) / 20;
         const lastVolume = prices[prices.length - 1].volume;
         
@@ -7204,58 +7151,42 @@ const AdvancedAnalysis = {
     },
 
     // ============================================
-    // ✅ UPDATE ALL INDICATORS (ÉTENDU)
+    // UPDATE ALL INDICATORS (UNIQUEMENT OSCILLATEURS)
     // ============================================
     
     updateAllIndicators() {
-        console.log('📊 Updating all indicators (Wall Street Edition)...');
+        console.log('📊 Updating indicators (Legal Compliant)...');
         
         const resultsPanel = document.getElementById('resultsPanel');
         if (resultsPanel.classList.contains('hidden')) {
             resultsPanel.classList.remove('hidden');
         }
         
-        // Indicateurs originaux
-        this.updateIchimokuChart();
+        // ✅ UNIQUEMENT LES OSCILLATEURS PURS
+        this.updateRSIChart();
+        this.updateMACDChart();
         this.updateStochasticChart();
         this.updateWilliamsChart();
         this.updateADXChart();
-        this.updateSARChart();
         this.updateOBVChart();
         this.updateATRChart();
-        this.updateFibonacciChart();
-        this.createPivotPoints();
-        this.updateVWAPChart();
-        
-        // Nouveaux indicateurs
-        this.updateRSIChart();
-        this.updateMACDChart();
-        this.updateBollingerChart();
         this.updateMFIChart();
         this.updateCCIChart();
         this.updateUltimateOscillatorChart();
         this.updateROCChart();
         this.updateAroonChart();
-        this.updateKeltnerChart();
-        this.updateDonchianChart();
         this.updateCMFChart();
         this.updateElderRayChart();
-        this.updateVolumeProfileChart();
-        this.updateMovingAveragesChart();
-        this.updateLinearRegressionChart();
-        this.detectCandlestickPatterns();
-        this.detectSupportResistance();
-        this.detectDivergences();
         
-        // Signaux consolidés
+        // ✅ Signaux consolidés et recommandation IA
         this.generateConsolidatedSignals();
         this.generateAIRecommendation();
         
-        console.log('✅ All indicators updated (40+ indicators)');
+        console.log('✅ All indicators updated (Legal Compliant)');
     },
 
     // ============================================
-    // ✅ RSI (Relative Strength Index) - CONSERVÉ
+    // ✅ RSI (Relative Strength Index)
     // ============================================
     
     updateRSIChart() {
@@ -7408,7 +7339,7 @@ const AdvancedAnalysis = {
     },
     
     // ============================================
-    // ✅ MACD (Moving Average Convergence Divergence)
+    // ✅ MACD
     // ============================================
     
     updateMACDChart() {
@@ -7567,2273 +7498,9 @@ const AdvancedAnalysis = {
     },
     
     // ============================================
-    // ✅ BOLLINGER BANDS - SANS CANDLESTICKS
-    // ============================================
-    
-    updateBollingerChart() {
-        const prices = this.stockData.prices;
-        const bollinger = this.calculateBollingerBands(prices);
-        
-        // ✅ NORMALISER
-        const basePrice = this.getBasePrice();
-        const normalizedPrices = this.normalizePriceData(
-            prices.map(p => [p.timestamp, p.close]),
-            basePrice
-        );
-        const normalizedUpper = this.normalizePriceData(bollinger.upper, basePrice);
-        const normalizedMiddle = this.normalizePriceData(bollinger.middle, basePrice);
-        const normalizedLower = this.normalizePriceData(bollinger.lower, basePrice);
-        
-        if (this.charts.bollinger) {
-            this.charts.bollinger.series[0].setData(normalizedPrices, false);
-            this.charts.bollinger.series[1].setData(normalizedUpper, false);
-            this.charts.bollinger.series[2].setData(normalizedMiddle, false);
-            this.charts.bollinger.series[3].setData(normalizedLower, false);
-            this.charts.bollinger.redraw();
-        } else {
-            this.charts.bollinger = Highcharts.stockChart('bollingerChart', {
-                chart: { borderRadius: 15, height: 600 },
-                title: {
-                    text: 'Bollinger Bands (Normalized Index)',
-                    style: { color: this.colors.primary, fontWeight: 'bold' }
-                },
-                rangeSelector: { enabled: false },
-                navigator: { enabled: true },
-                xAxis: { type: 'datetime', crosshair: true },
-                yAxis: { 
-                    title: { text: 'Relative Index (Base 100)' },
-                    labels: {
-                        formatter: function() {
-                            return this.value.toFixed(0);
-                        }
-                    }
-                },
-                tooltip: { 
-                    borderRadius: 10, 
-                    shared: true,
-                    valueDecimals: 2,
-                    valueSuffix: ''
-                },
-                series: [
-                    {
-                        type: 'line',
-                        name: this.currentSymbol,
-                        data: normalizedPrices,
-                        color: this.colors.primary,
-                        lineWidth: 2,
-                        zIndex: 2
-                    },
-                    {
-                        type: 'line',
-                        name: 'Upper Band',
-                        data: normalizedUpper,
-                        color: this.colors.danger,
-                        lineWidth: 2,
-                        dashStyle: 'Dash',
-                        zIndex: 1
-                    },
-                    {
-                        type: 'line',
-                        name: 'Middle Band (SMA)',
-                        data: normalizedMiddle,
-                        color: this.colors.primary,
-                        lineWidth: 2,
-                        zIndex: 1
-                    },
-                    {
-                        type: 'line',
-                        name: 'Lower Band',
-                        data: normalizedLower,
-                        color: this.colors.success,
-                        lineWidth: 2,
-                        dashStyle: 'Dash',
-                        zIndex: 1
-                    }
-                ],
-                credits: { enabled: false }
-            });
-        }
-        
-        this.displayBollingerSignal(bollinger, prices);
-    },
-    
-    calculateBollingerBands(prices, period = 20, stdDevMultiplier = 2) {
-        const closes = prices.map(p => p.close);
-        const upper = [];
-        const middle = [];
-        const lower = [];
-        
-        for (let i = period - 1; i < closes.length; i++) {
-            const slice = closes.slice(i - period + 1, i + 1);
-            const sma = slice.reduce((a, b) => a + b, 0) / period;
-            
-            const variance = slice.reduce((sum, val) => sum + Math.pow(val - sma, 2), 0) / period;
-            const stdDev = Math.sqrt(variance);
-            
-            const timestamp = prices[i].timestamp;
-            
-            upper.push([timestamp, sma + stdDevMultiplier * stdDev]);
-            middle.push([timestamp, sma]);
-            lower.push([timestamp, sma - stdDevMultiplier * stdDev]);
-        }
-        
-        return { upper, middle, lower };
-    },
-    
-    // ✅ CORRECTION - Afficher position relative, pas prix
-    displayBollingerSignal(bollinger, prices) {
-        if (!bollinger.upper.length) {
-            document.getElementById('bollingerSignal').textContent = 'Not enough data';
-            return;
-        }
-        
-        const lastPrice = prices[prices.length - 1].close;
-        const lastUpper = bollinger.upper[bollinger.upper.length - 1][1];
-        const lastMiddle = bollinger.middle[bollinger.middle.length - 1][1];
-        const lastLower = bollinger.lower[bollinger.lower.length - 1][1];
-        
-        const bandwidth = ((lastUpper - lastLower) / lastMiddle) * 100;
-        
-        // ✅ Calculer la position relative (%)
-        const positionFromMiddle = ((lastPrice - lastMiddle) / lastMiddle) * 100;
-        
-        let signal = 'neutral';
-        let text = `Position: ${positionFromMiddle >= 0 ? '+' : ''}${positionFromMiddle.toFixed(2)}% from Middle - `;
-        
-        if (lastPrice > lastUpper) {
-            signal = 'bearish';
-            text += 'ABOVE UPPER BAND - Overbought, Potential Reversal';
-        } else if (lastPrice < lastLower) {
-            signal = 'bullish';
-            text += 'BELOW LOWER BAND - Oversold, Potential Reversal';
-        } else if (lastPrice > lastMiddle) {
-            signal = 'bullish';
-            text += 'Above Middle Band - Bullish Territory';
-        } else if (lastPrice < lastMiddle) {
-            signal = 'bearish';
-            text += 'Below Middle Band - Bearish Territory';
-        } else {
-            text += 'At Middle Band - Neutral';
-        }
-        
-        text += ` | Bandwidth: ${bandwidth.toFixed(2)}%`;
-        
-        if (bandwidth < 5) {
-            text += ' (Squeeze - Breakout Coming)';
-        } else if (bandwidth > 20) {
-            text += ' (High Volatility)';
-        }
-        
-        const signalBox = document.getElementById('bollingerSignal');
-        signalBox.className = `signal-box ${signal}`;
-        signalBox.textContent = text;
-    },
-    
-    // ============================================
-    // ✅ MFI, CCI, ULTIMATE OSCILLATOR, ROC, AROON
-    // (Code identique à celui fourni, conservé tel quel)
-    // ============================================
-    
-    updateMFIChart() {
-        const prices = this.stockData.prices;
-        const mfi = this.calculateMFI(prices);
-        
-        if (this.charts.mfi) {
-            this.charts.mfi.series[0].setData(mfi, true);
-        } else {
-            this.charts.mfi = Highcharts.chart('mfiChart', {
-                chart: { borderRadius: 15, height: 400 },
-                title: {
-                    text: 'MFI - Money Flow Index',
-                    style: { color: this.colors.primary, fontWeight: 'bold' }
-                },
-                xAxis: { type: 'datetime', crosshair: true },
-                yAxis: {
-                    title: { text: 'MFI' },
-                    plotLines: [
-                        {
-                            value: 80,
-                            color: this.colors.danger,
-                            dashStyle: 'ShortDash',
-                            width: 2,
-                            label: { text: 'Overbought (80)', align: 'right', style: { color: this.colors.danger } }
-                        },
-                        {
-                            value: 20,
-                            color: this.colors.success,
-                            dashStyle: 'ShortDash',
-                            width: 2,
-                            label: { text: 'Oversold (20)', align: 'right', style: { color: this.colors.success } }
-                        }
-                    ],
-                    min: 0,
-                    max: 100
-                },
-                tooltip: { borderRadius: 10, valueDecimals: 2 },
-                series: [
-                    {
-                        type: 'area',
-                        name: 'MFI',
-                        data: mfi,
-                        color: this.colors.teal,
-                        fillOpacity: 0.3,
-                        lineWidth: 2
-                    }
-                ],
-                credits: { enabled: false }
-            });
-        }
-        
-        this.displayMFISignal(mfi);
-    },
-    
-    calculateMFI(prices, period = 14) {
-        const mfi = [];
-        const typicalPrices = [];
-        const moneyFlow = [];
-        
-        for (let i = 0; i < prices.length; i++) {
-            const typical = (prices[i].high + prices[i].low + prices[i].close) / 3;
-            typicalPrices.push(typical);
-            moneyFlow.push(typical * prices[i].volume);
-        }
-        
-        for (let i = period; i < prices.length; i++) {
-            let positiveFlow = 0;
-            let negativeFlow = 0;
-            
-            for (let j = i - period + 1; j <= i; j++) {
-                if (typicalPrices[j] > typicalPrices[j - 1]) {
-                    positiveFlow += moneyFlow[j];
-                } else if (typicalPrices[j] < typicalPrices[j - 1]) {
-                    negativeFlow += moneyFlow[j];
-                }
-            }
-            
-            const moneyFlowRatio = negativeFlow === 0 ? 100 : positiveFlow / negativeFlow;
-            const mfiValue = 100 - (100 / (1 + moneyFlowRatio));
-            
-            mfi.push([prices[i].timestamp, mfiValue]);
-        }
-        
-        return mfi;
-    },
-    
-    displayMFISignal(mfi) {
-        if (!mfi.length) {
-            document.getElementById('mfiSignal').textContent = 'Not enough data';
-            return;
-        }
-        
-        const lastMFI = mfi[mfi.length - 1][1];
-        
-        let signal = 'neutral';
-        let text = `MFI: ${lastMFI.toFixed(2)} - `;
-        
-        if (lastMFI > 80) {
-            signal = 'bearish';
-            text += 'OVERBOUGHT - Strong Money Outflow Expected';
-        } else if (lastMFI < 20) {
-            signal = 'bullish';
-            text += 'OVERSOLD - Strong Money Inflow Expected';
-        } else if (lastMFI > 50) {
-            signal = 'bullish';
-            text += 'Positive Money Flow - Buyers in Control';
-        } else {
-            signal = 'bearish';
-            text += 'Negative Money Flow - Sellers in Control';
-        }
-        
-        const signalBox = document.getElementById('mfiSignal');
-        signalBox.className = `signal-box ${signal}`;
-        signalBox.textContent = text;
-    },
-    
-    updateCCIChart() {
-        const prices = this.stockData.prices;
-        const cci = this.calculateCCI(prices);
-        
-        if (this.charts.cci) {
-            this.charts.cci.series[0].setData(cci, true);
-        } else {
-            this.charts.cci = Highcharts.chart('cciChart', {
-                chart: { borderRadius: 15, height: 400 },
-                title: {
-                    text: 'CCI - Commodity Channel Index',
-                    style: { color: this.colors.primary, fontWeight: 'bold' }
-                },
-                xAxis: { type: 'datetime', crosshair: true },
-                yAxis: {
-                    title: { text: 'CCI' },
-                    plotLines: [
-                        {
-                            value: 100,
-                            color: this.colors.danger,
-                            dashStyle: 'ShortDash',
-                            width: 2,
-                            label: { text: 'Overbought (+100)', align: 'right', style: { color: this.colors.danger } }
-                        },
-                        {
-                            value: 0,
-                            color: '#999',
-                            dashStyle: 'Dot',
-                            width: 1
-                        },
-                        {
-                            value: -100,
-                            color: this.colors.success,
-                            dashStyle: 'ShortDash',
-                            width: 2,
-                            label: { text: 'Oversold (-100)', align: 'right', style: { color: this.colors.success } }
-                        }
-                    ]
-                },
-                tooltip: { borderRadius: 10, valueDecimals: 2 },
-                series: [
-                    {
-                        type: 'line',
-                        name: 'CCI',
-                        data: cci,
-                        color: this.colors.indigo,
-                        lineWidth: 2
-                    }
-                ],
-                credits: { enabled: false }
-            });
-        }
-        
-        this.displayCCISignal(cci);
-    },
-    
-    calculateCCI(prices, period = 20) {
-        const cci = [];
-        const typicalPrices = prices.map(p => (p.high + p.low + p.close) / 3);
-        
-        for (let i = period - 1; i < prices.length; i++) {
-            const slice = typicalPrices.slice(i - period + 1, i + 1);
-            const sma = slice.reduce((a, b) => a + b, 0) / period;
-            
-            const meanDeviation = slice.reduce((sum, val) => sum + Math.abs(val - sma), 0) / period;
-            
-            const cciValue = (typicalPrices[i] - sma) / (0.015 * meanDeviation);
-            
-            cci.push([prices[i].timestamp, cciValue]);
-        }
-        
-        return cci;
-    },
-    
-    displayCCISignal(cci) {
-        if (!cci.length) {
-            document.getElementById('cciSignal').textContent = 'Not enough data';
-            return;
-        }
-        
-        const lastCCI = cci[cci.length - 1][1];
-        
-        let signal = 'neutral';
-        let text = `CCI: ${lastCCI.toFixed(2)} - `;
-        
-        if (lastCCI > 100) {
-            signal = 'bearish';
-            text += 'OVERBOUGHT - Strong Reversal Signal';
-        } else if (lastCCI < -100) {
-            signal = 'bullish';
-            text += 'OVERSOLD - Strong Reversal Signal';
-        } else if (lastCCI > 0) {
-            signal = 'bullish';
-            text += 'Bullish Territory';
-        } else {
-            signal = 'bearish';
-            text += 'Bearish Territory';
-        }
-        
-        const signalBox = document.getElementById('cciSignal');
-        signalBox.className = `signal-box ${signal}`;
-        signalBox.textContent = text;
-    },
-    
-    updateUltimateOscillatorChart() {
-        const prices = this.stockData.prices;
-        const ultimate = this.calculateUltimateOscillator(prices);
-        
-        if (this.charts.ultimate) {
-            this.charts.ultimate.series[0].setData(ultimate, true);
-        } else {
-            this.charts.ultimate = Highcharts.chart('ultimateChart', {
-                chart: { borderRadius: 15, height: 400 },
-                title: {
-                    text: 'Ultimate Oscillator',
-                    style: { color: this.colors.primary, fontWeight: 'bold' }
-                },
-                xAxis: { type: 'datetime', crosshair: true },
-                yAxis: {
-                    title: { text: 'Ultimate Oscillator' },
-                    plotLines: [
-                        {
-                            value: 70,
-                            color: this.colors.danger,
-                            dashStyle: 'ShortDash',
-                            width: 2,
-                            label: { text: 'Overbought (70)', align: 'right', style: { color: this.colors.danger } }
-                        },
-                        {
-                            value: 30,
-                            color: this.colors.success,
-                            dashStyle: 'ShortDash',
-                            width: 2,
-                            label: { text: 'Oversold (30)', align: 'right', style: { color: this.colors.success } }
-                        }
-                    ],
-                    min: 0,
-                    max: 100
-                },
-                tooltip: { borderRadius: 10, valueDecimals: 2 },
-                series: [
-                    {
-                        type: 'area',
-                        name: 'Ultimate Oscillator',
-                        data: ultimate,
-                        color: this.colors.pink,
-                        fillOpacity: 0.3,
-                        lineWidth: 2
-                    }
-                ],
-                credits: { enabled: false }
-            });
-        }
-        
-        this.displayUltimateSignal(ultimate);
-    },
-    
-    calculateUltimateOscillator(prices, period1 = 7, period2 = 14, period3 = 28) {
-        const ultimate = [];
-        const buyingPressure = [];
-        const trueRange = [];
-        
-        for (let i = 1; i < prices.length; i++) {
-            const trueLow = Math.min(prices[i].low, prices[i - 1].close);
-            const bp = prices[i].close - trueLow;
-            const tr = Math.max(prices[i].high, prices[i - 1].close) - trueLow;
-            
-            buyingPressure.push(bp);
-            trueRange.push(tr);
-        }
-        
-        const maxPeriod = Math.max(period1, period2, period3);
-        
-        for (let i = maxPeriod - 1; i < buyingPressure.length; i++) {
-            const avg1 = this.sumArray(buyingPressure, i - period1 + 1, i + 1) / this.sumArray(trueRange, i - period1 + 1, i + 1);
-            const avg2 = this.sumArray(buyingPressure, i - period2 + 1, i + 1) / this.sumArray(trueRange, i - period2 + 1, i + 1);
-            const avg3 = this.sumArray(buyingPressure, i - period3 + 1, i + 1) / this.sumArray(trueRange, i - period3 + 1, i + 1);
-            
-            const uo = 100 * ((4 * avg1 + 2 * avg2 + avg3) / 7);
-            
-            ultimate.push([prices[i + 1].timestamp, uo]);
-        }
-        
-        return ultimate;
-    },
-    
-    sumArray(arr, start, end) {
-        let sum = 0;
-        for (let i = start; i < end && i < arr.length; i++) {
-            sum += arr[i];
-        }
-        return sum || 1;
-    },
-    
-    displayUltimateSignal(ultimate) {
-        if (!ultimate.length) {
-            document.getElementById('ultimateSignal').textContent = 'Not enough data';
-            return;
-        }
-        
-        const lastUO = ultimate[ultimate.length - 1][1];
-        
-        let signal = 'neutral';
-        let text = `Ultimate Oscillator: ${lastUO.toFixed(2)} - `;
-        
-        if (lastUO > 70) {
-            signal = 'bearish';
-            text += 'OVERBOUGHT - Sell Signal';
-        } else if (lastUO < 30) {
-            signal = 'bullish';
-            text += 'OVERSOLD - Buy Signal';
-        } else {
-            text += 'Neutral Zone';
-        }
-        
-        const signalBox = document.getElementById('ultimateSignal');
-        signalBox.className = `signal-box ${signal}`;
-        signalBox.textContent = text;
-    },
-    
-    updateROCChart() {
-        const prices = this.stockData.prices;
-        const roc = this.calculateROC(prices);
-        
-        if (this.charts.roc) {
-            this.charts.roc.series[0].setData(roc, true);
-        } else {
-            this.charts.roc = Highcharts.chart('rocChart', {
-                chart: { borderRadius: 15, height: 400 },
-                title: {
-                    text: 'ROC - Rate of Change',
-                    style: { color: this.colors.primary, fontWeight: 'bold' }
-                },
-                xAxis: { type: 'datetime', crosshair: true },
-                yAxis: {
-                    title: { text: 'ROC (%)' },
-                    plotLines: [{
-                        value: 0,
-                        color: '#999',
-                        dashStyle: 'Dash',
-                        width: 2
-                    }]
-                },
-                tooltip: { borderRadius: 10, valueDecimals: 2, valueSuffix: '%' },
-                series: [
-                    {
-                        type: 'area',
-                        name: 'ROC',
-                        data: roc,
-                        color: this.colors.orange,
-                        negativeColor: this.colors.danger,
-                        fillOpacity: 0.3,
-                        lineWidth: 2
-                    }
-                ],
-                credits: { enabled: false }
-            });
-        }
-        
-        this.displayROCSignal(roc);
-    },
-    
-    calculateROC(prices, period = 12) {
-        const roc = [];
-        
-        for (let i = period; i < prices.length; i++) {
-            const currentClose = prices[i].close;
-            const pastClose = prices[i - period].close;
-            const rocValue = ((currentClose - pastClose) / pastClose) * 100;
-            
-            roc.push([prices[i].timestamp, rocValue]);
-        }
-        
-        return roc;
-    },
-    
-    displayROCSignal(roc) {
-        if (!roc.length) {
-            document.getElementById('rocSignal').textContent = 'Not enough data';
-            return;
-        }
-        
-        const lastROC = roc[roc.length - 1][1];
-        const prevROC = roc[roc.length - 2]?.[1] || 0;
-        
-        let signal = 'neutral';
-        let text = `ROC: ${lastROC.toFixed(2)}% - `;
-        
-        if (lastROC > 0 && prevROC <= 0) {
-            signal = 'bullish';
-            text += 'BULLISH CROSSOVER - Momentum Shift Up';
-        } else if (lastROC < 0 && prevROC >= 0) {
-            signal = 'bearish';
-            text += 'BEARISH CROSSOVER - Momentum Shift Down';
-        } else if (lastROC > 5) {
-            signal = 'bullish';
-            text += 'Strong Positive Momentum';
-        } else if (lastROC < -5) {
-            signal = 'bearish';
-            text += 'Strong Negative Momentum';
-        } else {
-            text += 'Weak Momentum';
-        }
-        
-        const signalBox = document.getElementById('rocSignal');
-        signalBox.className = `signal-box ${signal}`;
-        signalBox.textContent = text;
-    },
-    
-    updateAroonChart() {
-        const prices = this.stockData.prices;
-        const aroon = this.calculateAroon(prices);
-        
-        if (this.charts.aroon) {
-            this.charts.aroon.series[0].setData(aroon.up, false);
-            this.charts.aroon.series[1].setData(aroon.down, false);
-            this.charts.aroon.redraw();
-        } else {
-            this.charts.aroon = Highcharts.chart('aroonChart', {
-                chart: { borderRadius: 15, height: 400 },
-                title: {
-                    text: 'Aroon Indicator',
-                    style: { color: this.colors.primary, fontWeight: 'bold' }
-                },
-                xAxis: { type: 'datetime', crosshair: true },
-                yAxis: {
-                    title: { text: 'Aroon' },
-                    plotLines: [{
-                        value: 50,
-                        color: '#999',
-                        dashStyle: 'Dot',
-                        width: 1
-                    }],
-                    min: 0,
-                    max: 100
-                },
-                tooltip: { borderRadius: 10, shared: true, valueDecimals: 2 },
-                series: [
-                    {
-                        type: 'line',
-                        name: 'Aroon Up',
-                        data: aroon.up,
-                        color: this.colors.success,
-                        lineWidth: 2
-                    },
-                    {
-                        type: 'line',
-                        name: 'Aroon Down',
-                        data: aroon.down,
-                        color: this.colors.danger,
-                        lineWidth: 2
-                    }
-                ],
-                credits: { enabled: false }
-            });
-        }
-        
-        this.displayAroonSignal(aroon);
-    },
-    
-    calculateAroon(prices, period = 25) {
-        const up = [];
-        const down = [];
-        
-        for (let i = period; i < prices.length; i++) {
-            const slice = prices.slice(i - period, i + 1);
-            
-            let highestIndex = 0;
-            let lowestIndex = 0;
-            let highest = slice[0].high;
-            let lowest = slice[0].low;
-            
-            for (let j = 1; j < slice.length; j++) {
-                if (slice[j].high > highest) {
-                    highest = slice[j].high;
-                    highestIndex = j;
-                }
-                if (slice[j].low < lowest) {
-                    lowest = slice[j].low;
-                    lowestIndex = j;
-                }
-            }
-            
-            const daysSinceHigh = period - highestIndex;
-            const daysSinceLow = period - lowestIndex;
-            
-            const aroonUp = ((period - daysSinceHigh) / period) * 100;
-            const aroonDown = ((period - daysSinceLow) / period) * 100;
-            
-            up.push([prices[i].timestamp, aroonUp]);
-            down.push([prices[i].timestamp, aroonDown]);
-        }
-        
-        return { up, down };
-    },
-    
-    displayAroonSignal(aroon) {
-        if (!aroon.up.length || !aroon.down.length) {
-            document.getElementById('aroonSignal').textContent = 'Not enough data';
-            return;
-        }
-        
-        const lastUp = aroon.up[aroon.up.length - 1][1];
-        const lastDown = aroon.down[aroon.down.length - 1][1];
-        
-        let signal = 'neutral';
-        let text = `Up: ${lastUp.toFixed(0)}, Down: ${lastDown.toFixed(0)} - `;
-        
-        if (lastUp > 70 && lastDown < 30) {
-            signal = 'bullish';
-            text += 'STRONG UPTREND - Bulls in Control';
-        } else if (lastDown > 70 && lastUp < 30) {
-            signal = 'bearish';
-            text += 'STRONG DOWNTREND - Bears in Control';
-        } else if (lastUp > lastDown) {
-            signal = 'bullish';
-            text += 'Bullish Bias';
-        } else if (lastDown > lastUp) {
-            signal = 'bearish';
-            text += 'Bearish Bias';
-        } else {
-            text += 'Consolidation';
-        }
-        
-        const signalBox = document.getElementById('aroonSignal');
-        signalBox.className = `signal-box ${signal}`;
-        signalBox.textContent = text;
-    },
-
-    // ============================================
-    // ✅ KELTNER CHANNELS - SANS CANDLESTICKS
-    // ============================================
-    
-    updateKeltnerChart() {
-        const prices = this.stockData.prices;
-        const keltner = this.calculateKeltnerChannels(prices);
-        
-        // ✅ NORMALISER
-        const basePrice = this.getBasePrice();
-        const normalizedPrices = this.normalizePriceData(
-            prices.map(p => [p.timestamp, p.close]),
-            basePrice
-        );
-        const normalizedUpper = this.normalizePriceData(keltner.upper, basePrice);
-        const normalizedMiddle = this.normalizePriceData(keltner.middle, basePrice);
-        const normalizedLower = this.normalizePriceData(keltner.lower, basePrice);
-        
-        if (this.charts.keltner) {
-            this.charts.keltner.series[0].setData(normalizedPrices, false);
-            this.charts.keltner.series[1].setData(normalizedUpper, false);
-            this.charts.keltner.series[2].setData(normalizedMiddle, false);
-            this.charts.keltner.series[3].setData(normalizedLower, false);
-            this.charts.keltner.redraw();
-        } else {
-            this.charts.keltner = Highcharts.stockChart('keltnerChart', {
-                chart: { borderRadius: 15, height: 600 },
-                title: {
-                    text: 'Keltner Channels (Normalized Index)',
-                    style: { color: this.colors.primary, fontWeight: 'bold' }
-                },
-                rangeSelector: { enabled: false },
-                navigator: { enabled: true },
-                xAxis: { type: 'datetime', crosshair: true },
-                yAxis: { 
-                    title: { text: 'Relative Index (Base 100)' },
-                    labels: {
-                        formatter: function() {
-                            return this.value.toFixed(0);
-                        }
-                    }
-                },
-                tooltip: { borderRadius: 10, shared: true, valueDecimals: 2, valueSuffix: '' },
-                series: [
-                    {
-                        type: 'line',
-                        name: this.currentSymbol,
-                        data: normalizedPrices,
-                        color: this.colors.primary,
-                        lineWidth: 2,
-                        zIndex: 2
-                    },
-                    {
-                        type: 'line',
-                        name: 'Upper Channel',
-                        data: normalizedUpper,
-                        color: this.colors.danger,
-                        lineWidth: 2,
-                        dashStyle: 'Dash',
-                        zIndex: 1
-                    },
-                    {
-                        type: 'line',
-                        name: 'Middle Line (EMA)',
-                        data: normalizedMiddle,
-                        color: this.colors.primary,
-                        lineWidth: 2,
-                        zIndex: 1
-                    },
-                    {
-                        type: 'line',
-                        name: 'Lower Channel',
-                        data: normalizedLower,
-                        color: this.colors.success,
-                        lineWidth: 2,
-                        dashStyle: 'Dash',
-                        zIndex: 1
-                    }
-                ],
-                credits: { enabled: false }
-            });
-        }
-        
-        this.displayKeltnerSignal(keltner, prices);
-    },
-    
-    calculateKeltnerChannels(prices, period = 20, atrMultiplier = 2) {
-        const closes = prices.map(p => p.close);
-        const ema = this.calculateEMA(closes, period);
-        const atr = this.calculateATR(prices, period);
-        
-        const upper = [];
-        const middle = [];
-        const lower = [];
-        
-        const offset = prices.length - ema.length;
-        const atrOffset = prices.length - atr.length;
-        
-        for (let i = 0; i < ema.length; i++) {
-            const atrIndex = i - (offset - atrOffset);
-            
-            if (atrIndex >= 0 && atrIndex < atr.length) {
-                const timestamp = prices[offset + i].timestamp;
-                const emaValue = ema[i];
-                const atrValue = atr[atrIndex][1];
-                
-                upper.push([timestamp, emaValue + atrMultiplier * atrValue]);
-                middle.push([timestamp, emaValue]);
-                lower.push([timestamp, emaValue - atrMultiplier * atrValue]);
-            }
-        }
-        
-        return { upper, middle, lower };
-    },
-    
-    // ✅ CORRECTION - Position relative seulement
-    displayKeltnerSignal(keltner, prices) {
-        if (!keltner.upper.length) {
-            document.getElementById('keltnerSignal').textContent = 'Not enough data';
-            return;
-        }
-        
-        const lastPrice = prices[prices.length - 1].close;
-        const lastUpper = keltner.upper[keltner.upper.length - 1][1];
-        const lastMiddle = keltner.middle[keltner.middle.length - 1][1];
-        const lastLower = keltner.lower[keltner.lower.length - 1][1];
-        
-        const positionFromMiddle = ((lastPrice - lastMiddle) / lastMiddle) * 100;
-        
-        let signal = 'neutral';
-        let text = `Position: ${positionFromMiddle >= 0 ? '+' : ''}${positionFromMiddle.toFixed(2)}% - `;
-        
-        if (lastPrice > lastUpper) {
-            signal = 'bearish';
-            text += 'ABOVE UPPER CHANNEL - Overbought, Strong Uptrend';
-        } else if (lastPrice < lastLower) {
-            signal = 'bullish';
-            text += 'BELOW LOWER CHANNEL - Oversold, Strong Downtrend';
-        } else if (lastPrice > lastMiddle) {
-            signal = 'bullish';
-            text += 'Above Middle Line - Bullish Bias';
-        } else {
-            signal = 'bearish';
-            text += 'Below Middle Line - Bearish Bias';
-        }
-        
-        const signalBox = document.getElementById('keltnerSignal');
-        signalBox.className = `signal-box ${signal}`;
-        signalBox.textContent = text;
-    },
-    
-    // ============================================
-    // ✅ DONCHIAN CHANNELS - SANS CANDLESTICKS
-    // ============================================
-    
-    updateDonchianChart() {
-        const prices = this.stockData.prices;
-        const donchian = this.calculateDonchianChannels(prices);
-        
-        // ✅ NORMALISER
-        const basePrice = this.getBasePrice();
-        const normalizedPrices = this.normalizePriceData(
-            prices.map(p => [p.timestamp, p.close]),
-            basePrice
-        );
-        const normalizedUpper = this.normalizePriceData(donchian.upper, basePrice);
-        const normalizedMiddle = this.normalizePriceData(donchian.middle, basePrice);
-        const normalizedLower = this.normalizePriceData(donchian.lower, basePrice);
-        
-        if (this.charts.donchian) {
-            this.charts.donchian.series[0].setData(normalizedPrices, false);
-            this.charts.donchian.series[1].setData(normalizedUpper, false);
-            this.charts.donchian.series[2].setData(normalizedMiddle, false);
-            this.charts.donchian.series[3].setData(normalizedLower, false);
-            this.charts.donchian.redraw();
-        } else {
-            this.charts.donchian = Highcharts.stockChart('donchianChart', {
-                chart: { borderRadius: 15, height: 600 },
-                title: {
-                    text: 'Donchian Channels (Normalized Index)',
-                    style: { color: this.colors.primary, fontWeight: 'bold' }
-                },
-                rangeSelector: { enabled: false },
-                navigator: { enabled: true },
-                xAxis: { type: 'datetime', crosshair: true },
-                yAxis: { 
-                    title: { text: 'Relative Index (Base 100)' },
-                    labels: {
-                        formatter: function() {
-                            return this.value.toFixed(0);
-                        }
-                    }
-                },
-                tooltip: { borderRadius: 10, shared: true, valueDecimals: 2, valueSuffix: '' },
-                series: [
-                    {
-                        type: 'line',
-                        name: this.currentSymbol,
-                        data: normalizedPrices,
-                        color: this.colors.primary,
-                        lineWidth: 2,
-                        zIndex: 2
-                    },
-                    {
-                        type: 'line',
-                        name: 'Upper Channel (Highest High)',
-                        data: normalizedUpper,
-                        color: this.colors.danger,
-                        lineWidth: 2,
-                        dashStyle: 'Dash',
-                        zIndex: 1
-                    },
-                    {
-                        type: 'line',
-                        name: 'Middle Line',
-                        data: normalizedMiddle,
-                        color: this.colors.primary,
-                        lineWidth: 2,
-                        dashStyle: 'Dot',
-                        zIndex: 1
-                    },
-                    {
-                        type: 'line',
-                        name: 'Lower Channel (Lowest Low)',
-                        data: normalizedLower,
-                        color: this.colors.success,
-                        lineWidth: 2,
-                        dashStyle: 'Dash',
-                        zIndex: 1
-                    }
-                ],
-                credits: { enabled: false }
-            });
-        }
-        
-        this.displayDonchianSignal(donchian, prices);
-    },
-    
-    calculateDonchianChannels(prices, period = 20) {
-        const upper = [];
-        const middle = [];
-        const lower = [];
-        
-        for (let i = period - 1; i < prices.length; i++) {
-            const slice = prices.slice(i - period + 1, i + 1);
-            
-            const highest = Math.max(...slice.map(p => p.high));
-            const lowest = Math.min(...slice.map(p => p.low));
-            const mid = (highest + lowest) / 2;
-            
-            const timestamp = prices[i].timestamp;
-            
-            upper.push([timestamp, highest]);
-            middle.push([timestamp, mid]);
-            lower.push([timestamp, lowest]);
-        }
-        
-        return { upper, middle, lower };
-    },
-    
-    // ✅ CORRECTION - Position relative seulement
-    displayDonchianSignal(donchian, prices) {
-        if (!donchian.upper.length) {
-            document.getElementById('donchianSignal').textContent = 'Not enough data';
-            return;
-        }
-        
-        const lastPrice = prices[prices.length - 1].close;
-        const lastUpper = donchian.upper[donchian.upper.length - 1][1];
-        const lastMiddle = donchian.middle[donchian.middle.length - 1][1];
-        const lastLower = donchian.lower[donchian.lower.length - 1][1];
-        
-        const positionFromMiddle = ((lastPrice - lastMiddle) / lastMiddle) * 100;
-        
-        let signal = 'neutral';
-        let text = `Position: ${positionFromMiddle >= 0 ? '+' : ''}${positionFromMiddle.toFixed(2)}% - `;
-        
-        if (lastPrice >= lastUpper) {
-            signal = 'bullish';
-            text += 'BREAKOUT ABOVE - New 20-Period High (Strong Buy)';
-        } else if (lastPrice <= lastLower) {
-            signal = 'bearish';
-            text += 'BREAKDOWN BELOW - New 20-Period Low (Strong Sell)';
-        } else if (lastPrice > lastMiddle) {
-            signal = 'bullish';
-            text += 'Above Midpoint - Bullish Zone';
-        } else {
-            signal = 'bearish';
-            text += 'Below Midpoint - Bearish Zone';
-        }
-        
-        const signalBox = document.getElementById('donchianSignal');
-        signalBox.className = `signal-box ${signal}`;
-        signalBox.textContent = text;
-    },
-    
-    // ============================================
-    // ✅ CMF (Chaikin Money Flow)
-    // ============================================
-    
-    updateCMFChart() {
-        const prices = this.stockData.prices;
-        const cmf = this.calculateCMF(prices);
-        
-        if (this.charts.cmf) {
-            this.charts.cmf.series[0].setData(cmf, true);
-        } else {
-            this.charts.cmf = Highcharts.chart('cmfChart', {
-                chart: { borderRadius: 15, height: 400 },
-                title: {
-                    text: 'CMF - Chaikin Money Flow',
-                    style: { color: this.colors.primary, fontWeight: 'bold' }
-                },
-                xAxis: { type: 'datetime', crosshair: true },
-                yAxis: {
-                    title: { text: 'CMF' },
-                    plotLines: [
-                        {
-                            value: 0,
-                            color: '#999',
-                            dashStyle: 'Dash',
-                            width: 2
-                        },
-                        {
-                            value: 0.05,
-                            color: this.colors.success,
-                            dashStyle: 'Dot',
-                            width: 1,
-                            label: { text: 'Bullish (+0.05)', align: 'right' }
-                        },
-                        {
-                            value: -0.05,
-                            color: this.colors.danger,
-                            dashStyle: 'Dot',
-                            width: 1,
-                            label: { text: 'Bearish (-0.05)', align: 'right' }
-                        }
-                    ]
-                },
-                tooltip: { borderRadius: 10, valueDecimals: 4 },
-                series: [
-                    {
-                        type: 'area',
-                        name: 'CMF',
-                        data: cmf,
-                        color: this.colors.cyan,
-                        negativeColor: this.colors.danger,
-                        fillOpacity: 0.3,
-                        lineWidth: 2
-                    }
-                ],
-                credits: { enabled: false }
-            });
-        }
-        
-        this.displayCMFSignal(cmf);
-    },
-    
-    calculateCMF(prices, period = 20) {
-        const cmf = [];
-        const moneyFlowMultiplier = [];
-        const moneyFlowVolume = [];
-        
-        for (let i = 0; i < prices.length; i++) {
-            const high = prices[i].high;
-            const low = prices[i].low;
-            const close = prices[i].close;
-            const volume = prices[i].volume;
-            
-            const mfm = high === low ? 0 : ((close - low) - (high - close)) / (high - low);
-            const mfv = mfm * volume;
-            
-            moneyFlowMultiplier.push(mfm);
-            moneyFlowVolume.push(mfv);
-        }
-        
-        for (let i = period - 1; i < prices.length; i++) {
-            const sumMFV = this.sumArray(moneyFlowVolume, i - period + 1, i + 1);
-            const sumVolume = prices.slice(i - period + 1, i + 1).reduce((sum, p) => sum + p.volume, 0);
-            
-            const cmfValue = sumVolume === 0 ? 0 : sumMFV / sumVolume;
-            
-            cmf.push([prices[i].timestamp, cmfValue]);
-        }
-        
-        return cmf;
-    },
-    
-    displayCMFSignal(cmf) {
-        if (!cmf.length) {
-            document.getElementById('cmfSignal').textContent = 'Not enough data';
-            return;
-        }
-        
-        const lastCMF = cmf[cmf.length - 1][1];
-        
-        let signal = 'neutral';
-        let text = `CMF: ${lastCMF.toFixed(4)} - `;
-        
-        if (lastCMF > 0.05) {
-            signal = 'bullish';
-            text += 'STRONG BUYING PRESSURE - Accumulation Phase';
-        } else if (lastCMF < -0.05) {
-            signal = 'bearish';
-            text += 'STRONG SELLING PRESSURE - Distribution Phase';
-        } else if (lastCMF > 0) {
-            signal = 'bullish';
-            text += 'Weak Buying Pressure';
-        } else if (lastCMF < 0) {
-            signal = 'bearish';
-            text += 'Weak Selling Pressure';
-        } else {
-            text += 'Neutral Money Flow';
-        }
-        
-        const signalBox = document.getElementById('cmfSignal');
-        signalBox.className = `signal-box ${signal}`;
-        signalBox.textContent = text;
-    },
-    
-    // ============================================
-    // ✅ ELDER RAY INDEX (Bull Power / Bear Power)
-    // ============================================
-    
-    updateElderRayChart() {
-        const prices = this.stockData.prices;
-        const elderRay = this.calculateElderRay(prices);
-        
-        if (this.charts.elderRay) {
-            this.charts.elderRay.series[0].setData(elderRay.bullPower, false);
-            this.charts.elderRay.series[1].setData(elderRay.bearPower, false);
-            this.charts.elderRay.redraw();
-        } else {
-            this.charts.elderRay = Highcharts.chart('elderRayChart', {
-                chart: { borderRadius: 15, height: 400 },
-                title: {
-                    text: 'Elder Ray Index - Bull & Bear Power',
-                    style: { color: this.colors.primary, fontWeight: 'bold' }
-                },
-                xAxis: { type: 'datetime', crosshair: true },
-                yAxis: {
-                    title: { text: 'Power' },
-                    plotLines: [{
-                        value: 0,
-                        color: '#999',
-                        dashStyle: 'Dash',
-                        width: 2
-                    }]
-                },
-                tooltip: { borderRadius: 10, shared: true, valueDecimals: 2 },
-                series: [
-                    {
-                        type: 'column',
-                        name: 'Bull Power',
-                        data: elderRay.bullPower,
-                        color: this.colors.success,
-                        zIndex: 1
-                    },
-                    {
-                        type: 'column',
-                        name: 'Bear Power',
-                        data: elderRay.bearPower,
-                        color: this.colors.danger,
-                        zIndex: 1
-                    }
-                ],
-                credits: { enabled: false }
-            });
-        }
-        
-        this.displayElderRaySignal(elderRay);
-    },
-    
-    calculateElderRay(prices, period = 13) {
-        const closes = prices.map(p => p.close);
-        const ema = this.calculateEMA(closes, period);
-        
-        const bullPower = [];
-        const bearPower = [];
-        
-        const offset = prices.length - ema.length;
-        
-        for (let i = 0; i < ema.length; i++) {
-            const priceIndex = offset + i;
-            const timestamp = prices[priceIndex].timestamp;
-            const high = prices[priceIndex].high;
-            const low = prices[priceIndex].low;
-            const emaValue = ema[i];
-            
-            bullPower.push([timestamp, high - emaValue]);
-            bearPower.push([timestamp, low - emaValue]);
-        }
-        
-        return { bullPower, bearPower };
-    },
-    
-    displayElderRaySignal(elderRay) {
-        if (!elderRay.bullPower.length || !elderRay.bearPower.length) {
-            document.getElementById('elderRaySignal').textContent = 'Not enough data';
-            return;
-        }
-        
-        const lastBull = elderRay.bullPower[elderRay.bullPower.length - 1][1];
-        const lastBear = elderRay.bearPower[elderRay.bearPower.length - 1][1];
-        
-        let signal = 'neutral';
-        let text = `Bull: ${lastBull.toFixed(2)}, Bear: ${lastBear.toFixed(2)} - `;
-        
-        if (lastBull > 0 && lastBear > 0) {
-            signal = 'bullish';
-            text += 'STRONG BULLS - Both Powers Positive (Buy)';
-        } else if (lastBull < 0 && lastBear < 0) {
-            signal = 'bearish';
-            text += 'STRONG BEARS - Both Powers Negative (Sell)';
-        } else if (lastBull > 0 && lastBear < 0) {
-            signal = 'neutral';
-            text += 'Consolidation - Mixed Signals';
-        } else if (lastBull > lastBear) {
-            signal = 'bullish';
-            text += 'Bulls Gaining Strength';
-        } else {
-            signal = 'bearish';
-            text += 'Bears Gaining Strength';
-        }
-        
-        const signalBox = document.getElementById('elderRaySignal');
-        signalBox.className = `signal-box ${signal}`;
-        signalBox.textContent = text;
-    },
-    
-    // ============================================
-    // ✅ VOLUME PROFILE - CORRECTION CRITIQUE
-    // ============================================
-    
-    updateVolumeProfileChart() {
-        const prices = this.stockData.prices;
-        const volumeProfile = this.calculateVolumeProfile(prices);
-        
-        // ✅ NORMALISER LES NIVEAUX DE PRIX
-        const basePrice = this.getBasePrice();
-        const normalizedProfile = volumeProfile.profile.map(([volume, price]) => [
-            volume,
-            (price / basePrice) * 100
-        ]);
-        const normalizedPOCLevel = (volumeProfile.poc / basePrice) * 100;
-        
-        if (this.charts.volumeProfile) {
-            this.charts.volumeProfile.series[0].setData(normalizedProfile, true);
-            
-            // Mettre à jour la ligne POC
-            this.charts.volumeProfile.yAxis[0].update({
-                plotLines: [{
-                    value: normalizedPOCLevel,
-                    color: this.colors.danger,
-                    dashStyle: 'Dash',
-                    width: 3,
-                    label: { 
-                        text: `POC Level`,
-                        style: { color: this.colors.danger, fontWeight: 'bold' }
-                    },
-                    zIndex: 5
-                }]
-            }, true);
-        } else {
-            this.charts.volumeProfile = Highcharts.chart('volumeProfileChart', {
-                chart: { 
-                    borderRadius: 15, 
-                    height: 500,
-                    type: 'bar'
-                },
-                title: {
-                    text: 'Volume Profile - Price Distribution (Normalized)',
-                    style: { color: this.colors.primary, fontWeight: 'bold' }
-                },
-                xAxis: {
-                    title: { text: 'Volume' },
-                    reversed: false
-                },
-                yAxis: {
-                    title: { text: 'Relative Price Level (Base 100)' },
-                    labels: {
-                        formatter: function() {
-                            return this.value.toFixed(0);
-                        }
-                    },
-                    plotLines: [{
-                        value: normalizedPOCLevel,
-                        color: this.colors.danger,
-                        dashStyle: 'Dash',
-                        width: 3,
-                        label: { 
-                            text: `POC Level`,
-                            style: { color: this.colors.danger, fontWeight: 'bold' }
-                        },
-                        zIndex: 5
-                    }]
-                },
-                tooltip: { 
-                    borderRadius: 10,
-                    formatter: function() {
-                        return `<b>Price Level: ${this.y.toFixed(2)}</b><br>` +
-                            `Volume: ${this.x.toLocaleString()}`;
-                    }
-                },
-                legend: { enabled: false },
-                series: [{
-                    name: 'Volume Profile',
-                    data: normalizedProfile,
-                    color: {
-                        linearGradient: { x1: 0, y1: 0, x2: 1, y2: 0 },
-                        stops: [
-                            [0, this.colors.secondary],
-                            [1, this.colors.purple]
-                        ]
-                    }
-                }],
-                credits: { enabled: false }
-            });
-        }
-        
-        this.displayVolumeProfileSignal(volumeProfile, prices);
-    },
-    
-    calculateVolumeProfile(prices, bins = 30) {
-        const priceRange = Math.max(...prices.map(p => p.high)) - Math.min(...prices.map(p => p.low));
-        const binSize = priceRange / bins;
-        const minPrice = Math.min(...prices.map(p => p.low));
-        
-        const volumeByPrice = new Array(bins).fill(0);
-        const priceLevels = [];
-        
-        for (let i = 0; i < bins; i++) {
-            priceLevels.push(minPrice + (i + 0.5) * binSize);
-        }
-        
-        prices.forEach(p => {
-            const typical = (p.high + p.low + p.close) / 3;
-            const binIndex = Math.min(Math.floor((typical - minPrice) / binSize), bins - 1);
-            if (binIndex >= 0 && binIndex < bins) {
-                volumeByPrice[binIndex] += p.volume;
-            }
-        });
-        
-        const profile = priceLevels.map((price, i) => [volumeByPrice[i], price]);
-        
-        const maxVolumeIndex = volumeByPrice.indexOf(Math.max(...volumeByPrice));
-        const poc = priceLevels[maxVolumeIndex];
-        
-        const totalVolume = volumeByPrice.reduce((a, b) => a + b, 0);
-        let cumulativeVolume = 0;
-        let valueAreaHigh = poc;
-        let valueAreaLow = poc;
-        
-        const sortedIndices = volumeByPrice
-            .map((vol, idx) => ({ vol, idx }))
-            .sort((a, b) => b.vol - a.vol);
-        
-        for (let i = 0; i < sortedIndices.length && cumulativeVolume < totalVolume * 0.7; i++) {
-            const idx = sortedIndices[i].idx;
-            cumulativeVolume += sortedIndices[i].vol;
-            valueAreaHigh = Math.max(valueAreaHigh, priceLevels[idx]);
-            valueAreaLow = Math.min(valueAreaLow, priceLevels[idx]);
-        }
-        
-        return { profile, poc, valueAreaHigh, valueAreaLow, pocLevel: maxVolumeIndex };
-    },
-    
-    // ✅ CORRECTION MAJEURE - Masquer POC price, afficher distance relative
-    displayVolumeProfileSignal(volumeProfile, prices) {
-        const lastPrice = prices[prices.length - 1].close;
-        const poc = volumeProfile.poc;
-        const vah = volumeProfile.valueAreaHigh;
-        const val = volumeProfile.valueAreaLow;
-        
-        // Calculer les distances relatives en %
-        const distanceToPOC = ((lastPrice - poc) / poc) * 100;
-        const distanceToVAH = ((vah - lastPrice) / lastPrice) * 100;
-        const distanceToVAL = ((lastPrice - val) / lastPrice) * 100;
-        
-        let signal = 'neutral';
-        let text = `Distance to POC: ${distanceToPOC >= 0 ? '+' : ''}${distanceToPOC.toFixed(2)}% | `;
-        
-        if (lastPrice > vah) {
-            signal = 'bullish';
-            text += 'ABOVE Value Area - Strong Bullish';
-        } else if (lastPrice < val) {
-            signal = 'bearish';
-            text += 'BELOW Value Area - Strong Bearish';
-        } else if (Math.abs(distanceToPOC) < 1) {
-            signal = 'neutral';
-            text += 'AT POC - High Liquidity Zone';
-        } else if (lastPrice > poc) {
-            signal = 'bullish';
-            text += 'In Upper Value Area - Bullish';
-        } else {
-            signal = 'bearish';
-            text += 'In Lower Value Area - Bearish';
-        }
-        
-        const signalBox = document.getElementById('volumeProfileSignal');
-        signalBox.className = `signal-box ${signal}`;
-        signalBox.textContent = text;
-    },
-    
-    // ============================================
-    // ✅ MOVING AVERAGES - SANS CANDLESTICKS
-    // ============================================
-    
-    updateMovingAveragesChart() {
-        const prices = this.stockData.prices;
-        const mas = this.calculateMultipleMovingAverages(prices);
-        
-        // ✅ NORMALISER TOUTES LES DONNÉES
-        const basePrice = this.getBasePrice();
-        const normalizedPrices = this.normalizePriceData(
-            prices.map(p => [p.timestamp, p.close]),
-            basePrice
-        );
-        const normalizedSMA20 = this.normalizePriceData(mas.sma20, basePrice);
-        const normalizedSMA50 = this.normalizePriceData(mas.sma50, basePrice);
-        const normalizedSMA200 = this.normalizePriceData(mas.sma200, basePrice);
-        const normalizedEMA9 = this.normalizePriceData(mas.ema9, basePrice);
-        const normalizedEMA21 = this.normalizePriceData(mas.ema21, basePrice);
-        
-        if (this.charts.movingAverages) {
-            this.charts.movingAverages.series[0].setData(normalizedPrices, false);
-            this.charts.movingAverages.series[1].setData(normalizedSMA20, false);
-            this.charts.movingAverages.series[2].setData(normalizedSMA50, false);
-            this.charts.movingAverages.series[3].setData(normalizedSMA200, false);
-            this.charts.movingAverages.series[4].setData(normalizedEMA9, false);
-            this.charts.movingAverages.series[5].setData(normalizedEMA21, false);
-            this.charts.movingAverages.redraw();
-        } else {
-            this.charts.movingAverages = Highcharts.stockChart('movingAveragesChart', {
-                chart: { borderRadius: 15, height: 600 },
-                title: {
-                    text: 'Moving Averages - Multiple Timeframes (Normalized)',
-                    style: { color: this.colors.primary, fontWeight: 'bold' }
-                },
-                rangeSelector: { enabled: false },
-                navigator: { enabled: true },
-                xAxis: { type: 'datetime', crosshair: true },
-                yAxis: { 
-                    title: { text: 'Relative Index (Base 100)' },
-                    labels: {
-                        formatter: function() {
-                            return this.value.toFixed(0);
-                        }
-                    }
-                },
-                tooltip: { 
-                    borderRadius: 10, 
-                    shared: true,
-                    valueDecimals: 2,
-                    valueSuffix: ''
-                },
-                series: [
-                    {
-                        type: 'line',
-                        name: this.currentSymbol,
-                        data: normalizedPrices,
-                        color: this.colors.primary,
-                        lineWidth: 2,
-                        zIndex: 2
-                    },
-                    {
-                        type: 'line',
-                        name: 'SMA 20',
-                        data: normalizedSMA20,
-                        color: this.colors.secondary,
-                        lineWidth: 2,
-                        zIndex: 1
-                    },
-                    {
-                        type: 'line',
-                        name: 'SMA 50',
-                        data: normalizedSMA50,
-                        color: this.colors.orange,
-                        lineWidth: 2,
-                        zIndex: 1
-                    },
-                    {
-                        type: 'line',
-                        name: 'SMA 200',
-                        data: normalizedSMA200,
-                        color: this.colors.danger,
-                        lineWidth: 3,
-                        dashStyle: 'Dash',
-                        zIndex: 1
-                    },
-                    {
-                        type: 'line',
-                        name: 'EMA 9',
-                        data: normalizedEMA9,
-                        color: this.colors.cyan,
-                        lineWidth: 1,
-                        dashStyle: 'Dot',
-                        zIndex: 1
-                    },
-                    {
-                        type: 'line',
-                        name: 'EMA 21',
-                        data: normalizedEMA21,
-                        color: this.colors.teal,
-                        lineWidth: 2,
-                        dashStyle: 'Dot',
-                        zIndex: 1
-                    }
-                ],
-                credits: { enabled: false }
-            });
-        }
-        
-        this.displayMovingAveragesSignal(mas, prices);
-    },
-    
-    calculateMultipleMovingAverages(prices) {
-        const closes = prices.map(p => p.close);
-        
-        const sma20Data = this.calculateSMA(closes, 20);
-        const sma50Data = this.calculateSMA(closes, 50);
-        const sma200Data = this.calculateSMA(closes, 200);
-        const ema9Data = this.calculateEMA(closes, 9);
-        const ema21Data = this.calculateEMA(closes, 21);
-        
-        const sma20 = sma20Data.map((val, i) => [prices[i + 19].timestamp, val]);
-        const sma50 = sma50Data.map((val, i) => [prices[i + 49].timestamp, val]);
-        const sma200 = sma200Data.map((val, i) => [prices[i + 199].timestamp, val]);
-        
-        const ema9Offset = prices.length - ema9Data.length;
-        const ema21Offset = prices.length - ema21Data.length;
-        
-        const ema9 = ema9Data.map((val, i) => [prices[ema9Offset + i].timestamp, val]);
-        const ema21 = ema21Data.map((val, i) => [prices[ema21Offset + i].timestamp, val]);
-        
-        return { sma20, sma50, sma200, ema9, ema21 };
-    },
-    
-    calculateSMA(data, period) {
-        const sma = [];
-        
-        for (let i = period - 1; i < data.length; i++) {
-            const slice = data.slice(i - period + 1, i + 1);
-            const avg = slice.reduce((a, b) => a + b, 0) / period;
-            sma.push(avg);
-        }
-        
-        return sma;
-    },
-    
-    displayMovingAveragesSignal(mas, prices) {
-        if (!mas.sma20.length || !mas.sma50.length) {
-            document.getElementById('movingAveragesSignal').textContent = 'Not enough data';
-            return;
-        }
-        
-        const lastPrice = prices[prices.length - 1].close;
-        const lastSMA20 = mas.sma20[mas.sma20.length - 1][1];
-        const lastSMA50 = mas.sma50[mas.sma50.length - 1][1];
-        const lastSMA200 = mas.sma200.length > 0 ? mas.sma200[mas.sma200.length - 1][1] : null;
-        
-        let signal = 'neutral';
-        let text = '';
-        
-        const goldenCross = lastSMA200 && lastSMA50 > lastSMA200 && mas.sma50[mas.sma50.length - 2][1] <= (mas.sma200[mas.sma200.length - 2]?.[1] || Infinity);
-        const deathCross = lastSMA200 && lastSMA50 < lastSMA200 && mas.sma50[mas.sma50.length - 2][1] >= (mas.sma200[mas.sma200.length - 2]?.[1] || 0);
-        
-        if (goldenCross) {
-            signal = 'bullish';
-            text = '🌟 GOLDEN CROSS - SMA50 crossed above SMA200 (Major Buy Signal)';
-        } else if (deathCross) {
-            signal = 'bearish';
-            text = '☠ DEATH CROSS - SMA50 crossed below SMA200 (Major Sell Signal)';
-        } else if (lastPrice > lastSMA20 && lastPrice > lastSMA50 && lastSMA20 > lastSMA50) {
-            signal = 'bullish';
-            text = 'STRONG UPTREND - Price above all MAs, aligned bullish';
-        } else if (lastPrice < lastSMA20 && lastPrice < lastSMA50 && lastSMA20 < lastSMA50) {
-            signal = 'bearish';
-            text = 'STRONG DOWNTREND - Price below all MAs, aligned bearish';
-        } else if (lastPrice > lastSMA20) {
-            signal = 'bullish';
-            text = 'Short-term bullish - Price above SMA20';
-        } else {
-            signal = 'bearish';
-            text = 'Short-term bearish - Price below SMA20';
-        }
-        
-        const signalBox = document.getElementById('movingAveragesSignal');
-        signalBox.className = `signal-box ${signal}`;
-        signalBox.textContent = text;
-    },
-    
-    // ============================================
-    // ✅ LINEAR REGRESSION CHANNEL - SANS CANDLESTICKS
-    // ============================================
-    
-    updateLinearRegressionChart() {
-        const prices = this.stockData.prices;
-        const regression = this.calculateLinearRegression(prices);
-        
-        // ✅ NORMALISER TOUTES LES DONNÉES
-        const basePrice = this.getBasePrice();
-        const normalizedPrices = this.normalizePriceData(
-            prices.map(p => [p.timestamp, p.close]),
-            basePrice
-        );
-        const normalizedUpper = this.normalizePriceData(regression.upper, basePrice);
-        const normalizedMiddle = this.normalizePriceData(regression.middle, basePrice);
-        const normalizedLower = this.normalizePriceData(regression.lower, basePrice);
-        
-        if (this.charts.linearRegression) {
-            this.charts.linearRegression.series[0].setData(normalizedPrices, false);
-            this.charts.linearRegression.series[1].setData(normalizedUpper, false);
-            this.charts.linearRegression.series[2].setData(normalizedMiddle, false);
-            this.charts.linearRegression.series[3].setData(normalizedLower, false);
-            this.charts.linearRegression.redraw();
-        } else {
-            this.charts.linearRegression = Highcharts.stockChart('linearRegressionChart', {
-                chart: { borderRadius: 15, height: 600 },
-                title: {
-                    text: 'Linear Regression Channel (Normalized)',
-                    style: { color: this.colors.primary, fontWeight: 'bold' }
-                },
-                rangeSelector: { enabled: false },
-                navigator: { enabled: true },
-                xAxis: { type: 'datetime', crosshair: true },
-                yAxis: { 
-                    title: { text: 'Relative Index (Base 100)' },
-                    labels: {
-                        formatter: function() {
-                            return this.value.toFixed(0);
-                        }
-                    }
-                },
-                tooltip: { 
-                    borderRadius: 10, 
-                    shared: true,
-                    valueDecimals: 2,
-                    valueSuffix: ''
-                },
-                series: [
-                    {
-                        type: 'line',
-                        name: this.currentSymbol,
-                        data: normalizedPrices,
-                        color: this.colors.primary,
-                        lineWidth: 2,
-                        zIndex: 2
-                    },
-                    {
-                        type: 'line',
-                        name: 'Upper Channel',
-                        data: normalizedUpper,
-                        color: this.colors.danger,
-                        lineWidth: 2,
-                        dashStyle: 'Dash',
-                        zIndex: 1
-                    },
-                    {
-                        type: 'line',
-                        name: 'Regression Line',
-                        data: normalizedMiddle,
-                        color: this.colors.primary,
-                        lineWidth: 3,
-                        zIndex: 1
-                    },
-                    {
-                        type: 'line',
-                        name: 'Lower Channel',
-                        data: normalizedLower,
-                        color: this.colors.success,
-                        lineWidth: 2,
-                        dashStyle: 'Dash',
-                        zIndex: 1
-                    }
-                ],
-                credits: { enabled: false }
-            });
-        }
-        
-        this.displayLinearRegressionSignal(regression, prices);
-    },
-    
-    calculateLinearRegression(prices, period = 100) {
-        const closes = prices.map(p => p.close);
-        const n = Math.min(period, closes.length);
-        const recentPrices = closes.slice(-n);
-        
-        let sumX = 0, sumY = 0, sumXY = 0, sumX2 = 0;
-        
-        for (let i = 0; i < n; i++) {
-            sumX += i;
-            sumY += recentPrices[i];
-            sumXY += i * recentPrices[i];
-            sumX2 += i * i;
-        }
-        
-        const slope = (n * sumXY - sumX * sumY) / (n * sumX2 - sumX * sumX);
-        const intercept = (sumY - slope * sumX) / n;
-        
-        const regressionLine = [];
-        const deviations = [];
-        
-        for (let i = 0; i < n; i++) {
-            const regValue = slope * i + intercept;
-            regressionLine.push(regValue);
-            deviations.push(Math.abs(recentPrices[i] - regValue));
-        }
-        
-        const avgDeviation = deviations.reduce((a, b) => a + b, 0) / n;
-        const stdDev = Math.sqrt(deviations.reduce((sum, dev) => sum + Math.pow(dev - avgDeviation, 2), 0) / n);
-        
-        const upper = [];
-        const middle = [];
-        const lower = [];
-        
-        const startIndex = prices.length - n;
-        
-        for (let i = 0; i < n; i++) {
-            const timestamp = prices[startIndex + i].timestamp;
-            const regValue = regressionLine[i];
-            
-            upper.push([timestamp, regValue + 2 * stdDev]);
-            middle.push([timestamp, regValue]);
-            lower.push([timestamp, regValue - 2 * stdDev]);
-        }
-        
-        return { upper, middle, lower, slope };
-    },
-    
-    displayLinearRegressionSignal(regression, prices) {
-        if (!regression.middle.length) {
-            document.getElementById('linearRegressionSignal').textContent = 'Not enough data';
-            return;
-        }
-        
-        const lastPrice = prices[prices.length - 1].close;
-        const lastMiddle = regression.middle[regression.middle.length - 1][1];
-        const lastUpper = regression.upper[regression.upper.length - 1][1];
-        const lastLower = regression.lower[regression.lower.length - 1][1];
-        const slope = regression.slope;
-        
-        const positionFromMiddle = ((lastPrice - lastMiddle) / lastMiddle) * 100;
-        
-        let signal = 'neutral';
-        let text = '';
-        
-        const trendText = slope > 0 ? 'UPTREND' : slope < 0 ? 'DOWNTREND' : 'SIDEWAYS';
-        const trendStrength = Math.abs(slope) > 1 ? 'Strong' : Math.abs(slope) > 0.3 ? 'Moderate' : 'Weak';
-        
-        text = `${trendStrength} ${trendText} (Slope: ${slope.toFixed(4)}) | Position: ${positionFromMiddle >= 0 ? '+' : ''}${positionFromMiddle.toFixed(2)}% - `;
-        
-        if (lastPrice > lastUpper) {
-            signal = slope > 0 ? 'bullish' : 'bearish';
-            text += 'ABOVE Upper Channel - Overbought';
-        } else if (lastPrice < lastLower) {
-            signal = slope > 0 ? 'bullish' : 'bearish';
-            text += 'BELOW Lower Channel - Oversold';
-        } else if (lastPrice > lastMiddle) {
-            signal = 'bullish';
-            text += 'Above Regression Line - Bullish Bias';
-        } else {
-            signal = 'bearish';
-            text += 'Below Regression Line - Bearish Bias';
-        }
-        
-        const signalBox = document.getElementById('linearRegressionSignal');
-        signalBox.className = `signal-box ${signal}`;
-        signalBox.textContent = text;
-    },
-    
-    // ============================================
-    // ✅ CANDLESTICK PATTERN DETECTION
-    // ============================================
-    
-    detectCandlestickPatterns() {
-        const prices = this.stockData.prices;
-        const patterns = this.findCandlestickPatterns(prices);
-        
-        this.displayCandlestickPatterns(patterns);
-    },
-    
-    findCandlestickPatterns(prices) {
-        const detected = [];
-        
-        for (let i = 2; i < prices.length; i++) {
-            const current = prices[i];
-            const prev = prices[i - 1];
-            const prev2 = prices[i - 2];
-            
-            const currentBody = Math.abs(current.close - current.open);
-            const prevBody = Math.abs(prev.close - prev.open);
-            
-            const currentRange = current.high - current.low;
-            const prevRange = prev.high - prev.low;
-            
-            // Doji
-            if (currentBody / currentRange < 0.1) {
-                detected.push({ pattern: 'Doji', signal: 'neutral', strength: 'medium', index: i });
-            }
-            
-            // Hammer / Hanging Man
-            const lowerShadow = Math.min(current.open, current.close) - current.low;
-            const upperShadow = current.high - Math.max(current.open, current.close);
-            
-            if (lowerShadow > currentBody * 2 && upperShadow < currentBody * 0.5) {
-                if (prev.close < prev.open) {
-                    detected.push({ pattern: 'Hammer', signal: 'bullish', strength: 'strong', index: i });
-                } else {
-                    detected.push({ pattern: 'Hanging Man', signal: 'bearish', strength: 'medium', index: i });
-                }
-            }
-            
-            // Inverted Hammer / Shooting Star
-            if (upperShadow > currentBody * 2 && lowerShadow < currentBody * 0.5) {
-                if (prev.close < prev.open) {
-                    detected.push({ pattern: 'Inverted Hammer', signal: 'bullish', strength: 'medium', index: i });
-                } else {
-                    detected.push({ pattern: 'Shooting Star', signal: 'bearish', strength: 'strong', index: i });
-                }
-            }
-            
-            // Engulfing
-            if (current.close > current.open && prev.close < prev.open &&
-                current.open < prev.close && current.close > prev.open) {
-                detected.push({ pattern: 'Bullish Engulfing', signal: 'bullish', strength: 'strong', index: i });
-            }
-            
-            if (current.close < current.open && prev.close > prev.open &&
-                current.open > prev.close && current.close < prev.open) {
-                detected.push({ pattern: 'Bearish Engulfing', signal: 'bearish', strength: 'strong', index: i });
-            }
-            
-            // Morning Star / Evening Star
-            if (i >= 2) {
-                const isMorningStar = prev2.close < prev2.open && 
-                                      prevBody < currentBody * 0.5 && 
-                                      current.close > current.open &&
-                                      current.close > (prev2.open + prev2.close) / 2;
-                
-                if (isMorningStar) {
-                    detected.push({ pattern: 'Morning Star', signal: 'bullish', strength: 'very strong', index: i });
-                }
-                
-                const isEveningStar = prev2.close > prev2.open && 
-                                      prevBody < currentBody * 0.5 && 
-                                      current.close < current.open &&
-                                      current.close < (prev2.open + prev2.close) / 2;
-                
-                if (isEveningStar) {
-                    detected.push({ pattern: 'Evening Star', signal: 'bearish', strength: 'very strong', index: i });
-                }
-            }
-            
-            // Piercing Line / Dark Cloud Cover
-            if (current.close > current.open && prev.close < prev.open &&
-                current.open < prev.low && current.close > (prev.open + prev.close) / 2 &&
-                current.close < prev.open) {
-                detected.push({ pattern: 'Piercing Line', signal: 'bullish', strength: 'strong', index: i });
-            }
-            
-            if (current.close < current.open && prev.close > prev.open &&
-                current.open > prev.high && current.close < (prev.open + prev.close) / 2 &&
-                current.close > prev.open) {
-                detected.push({ pattern: 'Dark Cloud Cover', signal: 'bearish', strength: 'strong', index: i });
-            }
-        }
-        
-        return detected.slice(-10);
-    },
-    
-    displayCandlestickPatterns(patterns) {
-        const container = document.getElementById('candlestickPatterns');
-        
-        if (!patterns.length) {
-            container.innerHTML = '<p style="text-align: center; color: #999;">No significant patterns detected recently</p>';
-            return;
-        }
-        
-        let html = '<table><thead><tr><th>Pattern</th><th>Signal</th><th>Strength</th><th>When</th></tr></thead><tbody>';
-        
-        patterns.forEach(p => {
-            const signalClass = p.signal === 'bullish' ? 'bullish' : p.signal === 'bearish' ? 'bearish' : 'neutral';
-            const strengthBadge = `<span class="strength-badge ${p.strength.replace(' ', '-')}">${p.strength.toUpperCase()}</span>`;
-            const daysAgo = this.stockData.prices.length - 1 - p.index;
-            const when = daysAgo === 0 ? 'Today' : `${daysAgo} day${daysAgo > 1 ? 's' : ''} ago`;
-            
-            html += `
-                <tr>
-                    <td><strong>${p.pattern}</strong></td>
-                    <td><span class="signal-badge ${signalClass}">${p.signal.toUpperCase()}</span></td>
-                    <td>${strengthBadge}</td>
-                    <td>${when}</td>
-                </tr>
-            `;
-        });
-        
-        html += '</tbody></table>';
-        container.innerHTML = html;
-    },
-    
-    // ============================================
-    // ✅ SUPPORT/RESISTANCE - CORRECTION CRITIQUE
-    // ============================================
-    
-    detectSupportResistance() {
-        const prices = this.stockData.prices;
-        const levels = this.findSupportResistanceLevels(prices);
-        
-        this.displaySupportResistance(levels);
-    },
-    
-    findSupportResistanceLevels(prices, sensitivity = 0.02) {
-        const highs = [];
-        const lows = [];
-        
-        for (let i = 2; i < prices.length - 2; i++) {
-            if (prices[i].high > prices[i-1].high && prices[i].high > prices[i-2].high &&
-                prices[i].high > prices[i+1].high && prices[i].high > prices[i+2].high) {
-                highs.push(prices[i].high);
-            }
-            
-            if (prices[i].low < prices[i-1].low && prices[i].low < prices[i-2].low &&
-                prices[i].low < prices[i+1].low && prices[i].low < prices[i+2].low) {
-                lows.push(prices[i].low);
-            }
-        }
-        
-        const clusterLevels = (levels) => {
-            if (levels.length === 0) return [];
-            
-            levels.sort((a, b) => a - b);
-            const clusters = [];
-            let currentCluster = [levels[0]];
-            
-            for (let i = 1; i < levels.length; i++) {
-                if (Math.abs(levels[i] - currentCluster[0]) / currentCluster[0] < sensitivity) {
-                    currentCluster.push(levels[i]);
-                } else {
-                    clusters.push(currentCluster.reduce((a, b) => a + b, 0) / currentCluster.length);
-                    currentCluster = [levels[i]];
-                }
-            }
-            
-            clusters.push(currentCluster.reduce((a, b) => a + b, 0) / currentCluster.length);
-            return clusters;
-        };
-        
-        const resistance = clusterLevels(highs).slice(-5);
-        const support = clusterLevels(lows).slice(-5);
-        
-        return { resistance, support };
-    },
-    
-    // ✅ CORRECTION MAJEURE - Afficher distances relatives, pas prix
-    displaySupportResistance(levels) {
-        const container = document.getElementById('supportResistance');
-        const currentPrice = this.stockData.prices[this.stockData.prices.length - 1].close;
-        
-        let html = '<div class="sr-grid">';
-        
-        html += '<div class="sr-column"><h4>🔴 Resistance Levels</h4><ul>';
-        levels.resistance.sort((a, b) => b - a).forEach(level => {
-            const distance = ((level - currentPrice) / currentPrice) * 100;
-            html += `<li>Level ${levels.resistance.indexOf(level) + 1} <span class="distance">(+${distance.toFixed(2)}%)</span></li>`;
-        });
-        html += '</ul></div>';
-        
-        html += '<div class="sr-column"><h4>🟢 Support Levels</h4><ul>';
-        levels.support.sort((a, b) => b - a).forEach(level => {
-            const distance = ((currentPrice - level) / currentPrice) * 100;
-            html += `<li>Level ${levels.support.indexOf(level) + 1} <span class="distance">(-${distance.toFixed(2)}%)</span></li>`;
-        });
-        html += '</ul></div>';
-        
-        html += '</div>';
-        
-        container.innerHTML = html;
-    },
-    
-    // ============================================
-    // ✅ DIVERGENCE DETECTION
-    // ============================================
-    
-    detectDivergences() {
-        const prices = this.stockData.prices;
-        const rsi = this.calculateRSI(prices);
-        const macd = this.calculateMACD(prices);
-        
-        const divergences = this.findDivergences(prices, rsi, macd);
-        
-        this.displayDivergences(divergences);
-    },
-    
-    findDivergences(prices, rsi, macd) {
-        const divergences = [];
-        const lookback = 20;
-        
-        if (prices.length < lookback || rsi.length < lookback) return divergences;
-        
-        const recentPrices = prices.slice(-lookback);
-        const recentRSI = rsi.slice(-lookback);
-        
-        for (let i = 5; i < lookback - 5; i++) {
-            const priceHigh1 = recentPrices[i].high;
-            const priceHigh2 = Math.max(...recentPrices.slice(i + 1, i + 6).map(p => p.high));
-            
-            const rsiVal1 = recentRSI[i][1];
-            const rsiVal2 = Math.max(...recentRSI.slice(i + 1, i + 6).map(r => r[1]));
-            
-            if (priceHigh2 > priceHigh1 && rsiVal2 < rsiVal1) {
-                divergences.push({
-                    type: 'Bearish Divergence (RSI)',
-                    signal: 'bearish',
-                    description: 'Price making higher highs, RSI making lower highs'
-                });
-                break;
-            }
-            
-            const priceLow1 = recentPrices[i].low;
-            const priceLow2 = Math.min(...recentPrices.slice(i + 1, i + 6).map(p => p.low));
-            
-            if (priceLow2 < priceLow1 && rsiVal2 > rsiVal1) {
-                divergences.push({
-                    type: 'Bullish Divergence (RSI)',
-                    signal: 'bullish',
-                    description: 'Price making lower lows, RSI making higher lows'
-                });
-                break;
-            }
-        }
-        
-        return divergences;
-    },
-    
-    displayDivergences(divergences) {
-        const container = document.getElementById('divergences');
-        
-        if (!divergences.length) {
-            container.innerHTML = '<p style="text-align: center; color: #999;">No divergences detected recently</p>';
-            return;
-        }
-        
-        let html = '<ul>';
-        divergences.forEach(div => {
-            const signalClass = div.signal === 'bullish' ? 'bullish' : 'bearish';
-            html += `
-                <li class="divergence-item ${signalClass}">
-                    <strong>${div.type}</strong>
-                    <p>${div.description}</p>
-                </li>
-            `;
-        });
-        html += '</ul>';
-        
-        container.innerHTML = html;
-    },
-
-    // ============================================
-    // INDICATEURS ORIGINAUX - CONSERVÉS AVEC CORRECTIONS
-    // ============================================
-    
-    updateIchimokuChart() {
-        const prices = this.stockData.prices;
-        const ichimoku = this.calculateIchimoku(prices);
-        
-        // ✅ NORMALISER TOUTES LES DONNÉES
-        const basePrice = this.getBasePrice();
-        const normalizedPrices = this.normalizePriceData(
-            prices.map(p => [p.timestamp, p.close]),
-            basePrice
-        );
-        const normalizedTenkan = this.normalizePriceData(ichimoku.tenkan, basePrice);
-        const normalizedKijun = this.normalizePriceData(ichimoku.kijun, basePrice);
-        const normalizedSpanA = this.normalizePriceData(ichimoku.spanA, basePrice);
-        const normalizedSpanB = this.normalizePriceData(ichimoku.spanB, basePrice);
-        const normalizedChikou = this.normalizePriceData(ichimoku.chikou, basePrice);
-        
-        // Normaliser le cloud (3 valeurs par point)
-        const normalizedCloud = ichimoku.cloud.map(([timestamp, low, high]) => [
-            timestamp,
-            (low / basePrice) * 100,
-            (high / basePrice) * 100
-        ]);
-        
-        if (this.charts.ichimoku) {
-            this.charts.ichimoku.series[0].setData(normalizedPrices, false);
-            this.charts.ichimoku.series[1].setData(normalizedTenkan, false);
-            this.charts.ichimoku.series[2].setData(normalizedKijun, false);
-            this.charts.ichimoku.series[3].setData(normalizedSpanA, false);
-            this.charts.ichimoku.series[4].setData(normalizedSpanB, false);
-            this.charts.ichimoku.series[5].setData(normalizedCloud, false);
-            this.charts.ichimoku.series[6].setData(normalizedChikou, false);
-            this.charts.ichimoku.redraw();
-        } else {
-            this.charts.ichimoku = Highcharts.stockChart('ichimokuChart', {
-                chart: { height: 600, borderRadius: 15 },
-                title: {
-                    text: `${this.currentSymbol} - Ichimoku Cloud (Normalized)`,
-                    style: { color: this.colors.primary, fontWeight: 'bold' }
-                },
-                rangeSelector: { enabled: false },
-                navigator: { enabled: true },
-                xAxis: { type: 'datetime', crosshair: true },
-                yAxis: { 
-                    title: { text: 'Relative Index (Base 100)' }, 
-                    opposite: true,
-                    labels: {
-                        formatter: function() {
-                            return this.value.toFixed(0);
-                        }
-                    }
-                },
-                tooltip: { 
-                    split: false, 
-                    shared: true, 
-                    borderRadius: 10,
-                    valueDecimals: 2,
-                    valueSuffix: ''
-                },
-                plotOptions: { series: { marker: { enabled: false } } },
-                series: [
-                    {
-                        type: 'line',
-                        name: this.currentSymbol,
-                        data: normalizedPrices,
-                        color: this.colors.primary,
-                        lineWidth: 2,
-                        zIndex: 3
-                    },
-                    {
-                        type: 'line',
-                        name: 'Tenkan-sen',
-                        data: normalizedTenkan,
-                        color: this.colors.danger,
-                        lineWidth: 2,
-                        zIndex: 2
-                    },
-                    {
-                        type: 'line',
-                        name: 'Kijun-sen',
-                        data: normalizedKijun,
-                        color: this.colors.primary,
-                        lineWidth: 2,
-                        zIndex: 2
-                    },
-                    {
-                        type: 'line',
-                        name: 'Senkou Span A',
-                        data: normalizedSpanA,
-                        color: this.colors.success,
-                        lineWidth: 1,
-                        zIndex: 1
-                    },
-                    {
-                        type: 'line',
-                        name: 'Senkou Span B',
-                        data: normalizedSpanB,
-                        color: this.colors.danger,
-                        lineWidth: 1,
-                        zIndex: 1
-                    },
-                    {
-                        type: 'arearange',
-                        name: 'Kumo (Cloud)',
-                        data: normalizedCloud,
-                        fillOpacity: 0.3,
-                        lineWidth: 0,
-                        color: this.colors.success,
-                        negativeColor: this.colors.danger,
-                        zIndex: 0
-                    },
-                    {
-                        type: 'line',
-                        name: 'Chikou Span',
-                        data: normalizedChikou,
-                        color: this.colors.purple,
-                        lineWidth: 1,
-                        dashStyle: 'Dot',
-                        zIndex: 2
-                    }
-                ],
-                credits: { enabled: false }
-            });
-        }
-    },
-    
-    calculateIchimoku(prices) {
-        const tenkanPeriod = 9;
-        const kijunPeriod = 26;
-        const senkouPeriod = 52;
-        const displacement = 26;
-        
-        const tenkan = [];
-        const kijun = [];
-        const spanA = [];
-        const spanB = [];
-        const chikou = [];
-        const cloud = [];
-        
-        for (let i = tenkanPeriod - 1; i < prices.length; i++) {
-            const slice = prices.slice(i - tenkanPeriod + 1, i + 1);
-            const high = Math.max(...slice.map(p => p.high));
-            const low = Math.min(...slice.map(p => p.low));
-            tenkan.push([prices[i].timestamp, (high + low) / 2]);
-        }
-        
-        for (let i = kijunPeriod - 1; i < prices.length; i++) {
-            const slice = prices.slice(i - kijunPeriod + 1, i + 1);
-            const high = Math.max(...slice.map(p => p.high));
-            const low = Math.min(...slice.map(p => p.low));
-            kijun.push([prices[i].timestamp, (high + low) / 2]);
-        }
-        
-        for (let i = 0; i < prices.length; i++) {
-            if (i < tenkanPeriod - 1 || i < kijunPeriod - 1) continue;
-            
-            const tenkanValue = tenkan[i - tenkanPeriod + 1]?.[1];
-            const kijunValue = kijun[i - kijunPeriod + 1]?.[1];
-            
-            if (tenkanValue && kijunValue) {
-                const futureIndex = i + displacement;
-                if (futureIndex < prices.length) {
-                    spanA.push([prices[futureIndex].timestamp, (tenkanValue + kijunValue) / 2]);
-                }
-            }
-        }
-        
-        for (let i = senkouPeriod - 1; i < prices.length; i++) {
-            const slice = prices.slice(i - senkouPeriod + 1, i + 1);
-            const high = Math.max(...slice.map(p => p.high));
-            const low = Math.min(...slice.map(p => p.low));
-            
-            const futureIndex = i + displacement;
-            if (futureIndex < prices.length) {
-                spanB.push([prices[futureIndex].timestamp, (high + low) / 2]);
-            }
-        }
-        
-        for (let i = displacement; i < prices.length; i++) {
-            chikou.push([prices[i - displacement].timestamp, prices[i].close]);
-        }
-        
-        const minLength = Math.min(spanA.length, spanB.length);
-        for (let i = 0; i < minLength; i++) {
-            cloud.push([
-                spanA[i][0],
-                Math.min(spanA[i][1], spanB[i][1]),
-                Math.max(spanA[i][1], spanB[i][1])
-            ]);
-        }
-        
-        return { tenkan, kijun, spanA, spanB, chikou, cloud };
-    },
-    
     // ✅ STOCHASTIC OSCILLATOR
+    // ============================================
+    
     updateStochasticChart() {
         const prices = this.stockData.prices;
         const stochastic = this.calculateStochastic(prices);
@@ -9951,7 +7618,10 @@ const AdvancedAnalysis = {
         signalBox.textContent = text;
     },
     
+    // ============================================
     // ✅ WILLIAMS %R
+    // ============================================
+    
     updateWilliamsChart() {
         const prices = this.stockData.prices;
         const williams = this.calculateWilliams(prices);
@@ -10047,7 +7717,10 @@ const AdvancedAnalysis = {
         signalBox.textContent = text;
     },
     
+    // ============================================
     // ✅ ADX
+    // ============================================
+    
     updateADXChart() {
         const prices = this.stockData.prices;
         const adxData = this.calculateADX(prices);
@@ -10254,136 +7927,10 @@ const AdvancedAnalysis = {
         signalBox.textContent = text;
     },
     
-    // ✅ PARABOLIC SAR - CORRECTION CRITIQUE
-        updateSARChart() {
-        const prices = this.stockData.prices;
-        const sar = this.calculateSAR(prices);
-        
-        // ✅ NORMALISER TOUTES LES DONNÉES
-        const basePrice = this.getBasePrice();
-        const normalizedPrices = this.normalizePriceData(
-            prices.map(p => [p.timestamp, p.close]),
-            basePrice
-        );
-        const normalizedSAR = this.normalizePriceData(sar, basePrice);
-        
-        if (this.charts.sar) {
-            this.charts.sar.series[0].setData(normalizedPrices, false);
-            this.charts.sar.series[1].setData(normalizedSAR, false);
-            this.charts.sar.redraw();
-        } else {
-            this.charts.sar = Highcharts.stockChart('sarChart', {
-                chart: { borderRadius: 15, height: 400 },
-                title: {
-                    text: 'Parabolic SAR (Normalized)',
-                    style: { color: this.colors.primary, fontWeight: 'bold' }
-                },
-                rangeSelector: { enabled: false },
-                navigator: { enabled: false },
-                xAxis: { type: 'datetime', crosshair: true },
-                yAxis: { 
-                    title: { text: 'Relative Index (Base 100)' },
-                    labels: {
-                        formatter: function() {
-                            return this.value.toFixed(0);
-                        }
-                    }
-                },
-                tooltip: { 
-                    borderRadius: 10, 
-                    shared: true,
-                    valueDecimals: 2,
-                    valueSuffix: ''
-                },
-                series: [
-                    {
-                        type: 'line',
-                        name: this.currentSymbol,
-                        data: normalizedPrices,
-                        color: this.colors.primary,
-                        lineWidth: 2
-                    },
-                    {
-                        type: 'scatter',
-                        name: 'Parabolic SAR',
-                        data: normalizedSAR,
-                        color: this.colors.purple,
-                        marker: { radius: 3, symbol: 'circle' }
-                    }
-                ],
-                credits: { enabled: false }
-            });
-        }
-        
-        this.displaySARSignal(sar, prices);
-    },
-    
-    calculateSAR(prices, af = 0.02, maxAF = 0.2) {
-        const sar = [];
-        let isUptrend = true;
-        let currentSAR = prices[0].low;
-        let ep = prices[0].high;
-        let currentAF = af;
-        
-        for (let i = 1; i < prices.length; i++) {
-            const price = prices[i];
-            currentSAR = currentSAR + currentAF * (ep - currentSAR);
-            
-            if (isUptrend) {
-                if (price.low < currentSAR) {
-                    isUptrend = false;
-                    currentSAR = ep;
-                    ep = price.low;
-                    currentAF = af;
-                } else {
-                    if (price.high > ep) {
-                        ep = price.high;
-                        currentAF = Math.min(currentAF + af, maxAF);
-                    }
-                }
-            } else {
-                if (price.high > currentSAR) {
-                    isUptrend = true;
-                    currentSAR = ep;
-                    ep = price.high;
-                    currentAF = af;
-                } else {
-                    if (price.low < ep) {
-                        ep = price.low;
-                        currentAF = Math.min(currentAF + af, maxAF);
-                    }
-                }
-            }
-            
-            sar.push([price.timestamp, currentSAR]);
-        }
-        
-        return sar;
-    },
-    
-    // ✅ CORRECTION - Masquer prix SAR
-    displaySARSignal(sar, prices) {
-        if (!sar.length) {
-            document.getElementById('sarSignal').textContent = 'Not enough data';
-            return;
-        }
-        
-        const lastPrice = prices[prices.length - 1].close;
-        const lastSAR = sar[sar.length - 1][1];
-        
-        const positionFromSAR = ((lastPrice - lastSAR) / lastSAR) * 100;
-        
-        const signal = lastPrice > lastSAR ? 'bullish' : 'bearish';
-        const text = lastPrice > lastSAR 
-            ? `Price above SAR (+${positionFromSAR.toFixed(2)}%) - Uptrend (Hold Long)` 
-            : `Price below SAR (${positionFromSAR.toFixed(2)}%) - Downtrend (Hold Short)`;
-        
-        const signalBox = document.getElementById('sarSignal');
-        signalBox.className = `signal-box ${signal}`;
-        signalBox.textContent = text;
-    },
-    
+    // ============================================
     // ✅ OBV
+    // ============================================
+    
     updateOBVChart() {
         const prices = this.stockData.prices;
         const obv = this.calculateOBV(prices);
@@ -10472,7 +8019,10 @@ const AdvancedAnalysis = {
         signalBox.textContent = text;
     },
     
+    // ============================================
     // ✅ ATR
+    // ============================================
+    
     updateATRChart() {
         const prices = this.stockData.prices;
         const atr = this.calculateATR(prices);
@@ -10573,485 +8123,801 @@ const AdvancedAnalysis = {
         signalBox.className = `signal-box ${signal}`;
         signalBox.textContent = text;
     },
-    
+
     // ============================================
-    // ✅ FIBONACCI RETRACEMENTS - CORRECTION CRITIQUE
+    // ✅ MFI (Money Flow Index)
     // ============================================
     
-    updateFibonacciChart() {
+    updateMFIChart() {
         const prices = this.stockData.prices;
-        const fibonacci = this.calculateFibonacci(prices);
+        const mfi = this.calculateMFI(prices);
         
-        // ✅ NORMALISER LES PRIX ET LES NIVEAUX FIBONACCI
-        const basePrice = this.getBasePrice();
-        const normalizedPrices = this.normalizePriceData(
-            prices.map(p => [p.timestamp, p.close]),
-            basePrice
-        );
-        
-        // Normaliser les niveaux Fibonacci
-        const normalizedLevels = fibonacci.levels.map(level => ({
-            ...level,
-            price: (level.price / basePrice) * 100
-        }));
-        
-        if (this.charts.fibonacci) {
-            this.charts.fibonacci.series[0].setData(normalizedPrices, false);
-            this.charts.fibonacci.yAxis[0].update({
-                plotLines: normalizedLevels.map(level => ({
-                    value: level.price,
-                    color: this.getColorForFibLevel(level.ratio),
-                    dashStyle: 'Dash',
-                    width: 2,
-                    label: {
-                        text: `${level.name}`,
-                        align: 'right',
-                        style: {
-                            color: this.getColorForFibLevel(level.ratio),
-                            fontWeight: level.ratio === 0.618 ? 'bold' : 'normal'
-                        }
-                    },
-                    zIndex: 5
-                }))
-            }, false);
-            this.charts.fibonacci.redraw();
+        if (this.charts.mfi) {
+            this.charts.mfi.series[0].setData(mfi, true);
         } else {
-            this.charts.fibonacci = Highcharts.stockChart('fibonacciChart', {
-                chart: { borderRadius: 15, height: 600 },
+            this.charts.mfi = Highcharts.chart('mfiChart', {
+                chart: { borderRadius: 15, height: 400 },
                 title: {
-                    text: 'Fibonacci Retracements (Normalized)',
+                    text: 'MFI - Money Flow Index',
                     style: { color: this.colors.primary, fontWeight: 'bold' }
                 },
-                rangeSelector: { enabled: false },
-                navigator: { enabled: false },
                 xAxis: { type: 'datetime', crosshair: true },
                 yAxis: {
-                    title: { text: 'Relative Index (Base 100)' },
-                    labels: {
-                        formatter: function() {
-                            return this.value.toFixed(0);
-                        }
-                    },
-                    plotLines: normalizedLevels.map(level => ({
-                        value: level.price,
-                        color: this.getColorForFibLevel(level.ratio),
-                        dashStyle: 'Dash',
-                        width: 2,
-                        label: {
-                            text: `${level.name}`,
-                            align: 'right',
-                            style: {
-                                color: this.getColorForFibLevel(level.ratio),
-                                fontWeight: level.ratio === 0.618 ? 'bold' : 'normal'
-                            }
+                    title: { text: 'MFI' },
+                    plotLines: [
+                        {
+                            value: 80,
+                            color: this.colors.danger,
+                            dashStyle: 'ShortDash',
+                            width: 2,
+                            label: { text: 'Overbought (80)', align: 'right', style: { color: this.colors.danger } }
                         },
-                        zIndex: 5
-                    }))
-                },
-                tooltip: { 
-                    borderRadius: 10, 
-                    shared: true,
-                    valueDecimals: 2,
-                    valueSuffix: ''
-                },
-                series: [
-                    {
-                        type: 'line',
-                        name: this.currentSymbol,
-                        data: normalizedPrices,
-                        color: this.colors.primary,
-                        lineWidth: 2,
-                        zIndex: 2
-                    }
-                ],
-                credits: { enabled: false }
-            });
-        }
-        
-        // ✅ MISE À JOUR - Afficher les niveaux normalisés (pas les prix réels)
-        this.displayFibonacciLevels(fibonacci, normalizedLevels);
-    },
-
-    // ✅ CORRECTION - Afficher distances relatives uniquement
-    displayFibonacciLevels(fibonacci, normalizedLevels) {
-        const prices = this.stockData.prices;
-        const basePrice = this.getBasePrice();
-        const currentPrice = prices[prices.length - 1].close;
-        const currentNormalized = (currentPrice / basePrice) * 100;
-        
-        const tableHTML = `
-            <table>
-                <thead>
-                    <tr>
-                        <th>Level</th>
-                        <th>Distance from Current</th>
-                        <th>Type</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    ${normalizedLevels.map(level => {
-                        const distance = ((level.price - currentNormalized) / currentNormalized) * 100;
-                        const distanceText = `${distance >= 0 ? '+' : ''}${distance.toFixed(2)}%`;
-                        const type = level.price > currentNormalized ? 'Resistance' : 'Support';
-                        
-                        return `
-                            <tr>
-                                <td class='level-name'>${level.name}</td>
-                                <td style='color: ${distance >= 0 ? this.colors.danger : this.colors.success}'>${distanceText}</td>
-                                <td style='color: ${type === 'Resistance' ? this.colors.danger : this.colors.success}'>${type}</td>
-                            </tr>
-                        `;
-                    }).join('')}
-                </tbody>
-            </table>
-        `;
-        
-        document.getElementById('fibonacciLevels').innerHTML = tableHTML;
-    },
-    
-    calculateFibonacci(prices) {
-        const high = Math.max(...prices.map(p => p.high));
-        const low = Math.min(...prices.map(p => p.low));
-        const diff = high - low;
-        
-        const ratios = [
-            { ratio: 0, name: '0% (High)' },
-            { ratio: 0.236, name: '23.6%' },
-            { ratio: 0.382, name: '38.2%' },
-            { ratio: 0.5, name: '50%' },
-            { ratio: 0.618, name: '61.8% (Golden)' },
-            { ratio: 0.786, name: '78.6%' },
-            { ratio: 1, name: '100% (Low)' }
-        ];
-        
-        const levels = ratios.map(r => ({
-            ratio: r.ratio,
-            name: r.name,
-            price: high - (diff * r.ratio)
-        }));
-        
-        return { high, low, levels };
-    },
-    
-    getColorForFibLevel(ratio) {
-        if (ratio === 0.618) return this.colors.danger;
-        if (ratio === 0 || ratio === 1) return this.colors.primary;
-        return this.colors.lightBlue;
-    },
-    
-    // ✅ CORRECTION MAJEURE - Afficher distances relatives, pas prix
-    displayFibonacciLevels(fibonacci) {
-        const currentPrice = this.stockData.prices[this.stockData.prices.length - 1].close;
-        
-        const tableHTML = `
-            <table>
-                <thead>
-                    <tr>
-                        <th>Level</th>
-                        <th>Distance from Current</th>
-                        <th>Type</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    ${fibonacci.levels.map(level => {
-                        const distance = ((level.price - currentPrice) / currentPrice) * 100;
-                        const distanceText = `${distance >= 0 ? '+' : ''}${distance.toFixed(2)}%`;
-                        const type = level.price > currentPrice ? 'Resistance' : 'Support';
-                        
-                        return `
-                            <tr>
-                                <td class='level-name'>${level.name}</td>
-                                <td style='color: ${distance >= 0 ? this.colors.danger : this.colors.success}'>${distanceText}</td>
-                                <td style='color: ${type === 'Resistance' ? this.colors.danger : this.colors.success}'>${type}</td>
-                            </tr>
-                        `;
-                    }).join('')}
-                </tbody>
-            </table>
-        `;
-        
-        document.getElementById('fibonacciLevels').innerHTML = tableHTML;
-    },
-    
-    // ============================================
-    // ✅ PIVOT POINTS - CORRECTION CRITIQUE
-    // ============================================
-    
-    createPivotPoints() {
-        const prices = this.stockData.prices;
-        const lastPrice = prices[prices.length - 1];
-        const prevPrice = prices[prices.length - 2];
-        
-        const high = prevPrice.high;
-        const low = prevPrice.low;
-        const close = prevPrice.close;
-        
-        const standard = this.calculateStandardPivots(high, low, close);
-        this.displayPivotCard('pivotStandard', standard, lastPrice.close);
-        
-        const fibonacci = this.calculateFibonacciPivots(high, low, close);
-        this.displayPivotCard('pivotFibonacci', fibonacci, lastPrice.close);
-        
-        const camarilla = this.calculateCamarillaPivots(high, low, close);
-        this.displayPivotCard('pivotCamarilla', camarilla, lastPrice.close);
-    },
-    
-    calculateStandardPivots(high, low, close) {
-        const pivot = (high + low + close) / 3;
-        
-        return {
-            R3: high + 2 * (pivot - low),
-            R2: pivot + (high - low),
-            R1: 2 * pivot - low,
-            P: pivot,
-            S1: 2 * pivot - high,
-            S2: pivot - (high - low),
-            S3: low - 2 * (high - pivot)
-        };
-    },
-    
-    calculateFibonacciPivots(high, low, close) {
-        const pivot = (high + low + close) / 3;
-        const range = high - low;
-        
-        return {
-            R3: pivot + range * 1.000,
-            R2: pivot + range * 0.618,
-            R1: pivot + range * 0.382,
-            P: pivot,
-            S1: pivot - range * 0.382,
-            S2: pivot - range * 0.618,
-            S3: pivot - range * 1.000
-        };
-    },
-    
-    calculateCamarillaPivots(high, low, close) {
-        const range = high - low;
-        
-        return {
-            R4: close + range * 1.1 / 2,
-            R3: close + range * 1.1 / 4,
-            R2: close + range * 1.1 / 6,
-            R1: close + range * 1.1 / 12,
-            P: close,
-            S1: close - range * 1.1 / 12,
-            S2: close - range * 1.1 / 6,
-            S3: close - range * 1.1 / 4,
-            S4: close - range * 1.1 / 2
-        };
-    },
-    
-    // ✅ CORRECTION MAJEURE - Afficher distances relatives, pas prix
-    displayPivotCard(elementId, pivots, currentPrice) {
-        const container = document.getElementById(elementId);
-        if (!container) return;
-        
-        const valuesContainer = container.querySelector('.pivot-values');
-        if (!valuesContainer) return;
-        
-        const entries = Object.entries(pivots).sort((a, b) => b[1] - a[1]);
-        
-        const html = entries.map(([label, value]) => {
-            let className = 'pivot-level';
-            if (label.startsWith('R')) className += ' resistance';
-            else if (label.startsWith('S')) className += ' support';
-            else className += ' pivot';
-            
-            const distance = ((value - currentPrice) / currentPrice) * 100;
-            const distanceText = `${distance >= 0 ? '+' : ''}${distance.toFixed(2)}%`;
-            
-            return `
-                <div class='${className}'>
-                    <span class='pivot-label'>${label}</span>
-                    <span class='pivot-value'><strong>${distanceText}</strong></span>
-                </div>
-            `;
-        }).join('');
-        
-        valuesContainer.innerHTML = html;
-    },
-    
-    // ============================================
-    // ✅ VWAP - CORRECTION CRITIQUE
-    // ============================================
-    
-    updateVWAPChart() {
-        const prices = this.stockData.prices;
-        const vwap = this.calculateVWAP(prices);
-        
-        // ✅ NORMALISER TOUTES LES DONNÉES
-        const basePrice = this.getBasePrice();
-        const normalizedPrices = this.normalizePriceData(
-            prices.map(p => [p.timestamp, p.close]),
-            basePrice
-        );
-        const normalizedVWAP = this.normalizePriceData(vwap.vwap, basePrice);
-        const normalizedUpperBand1 = this.normalizePriceData(vwap.upperBand1, basePrice);
-        const normalizedUpperBand2 = this.normalizePriceData(vwap.upperBand2, basePrice);
-        const normalizedLowerBand1 = this.normalizePriceData(vwap.lowerBand1, basePrice);
-        const normalizedLowerBand2 = this.normalizePriceData(vwap.lowerBand2, basePrice);
-        
-        if (this.charts.vwap) {
-            this.charts.vwap.series[0].setData(normalizedPrices, false);
-            this.charts.vwap.series[1].setData(normalizedVWAP, false);
-            this.charts.vwap.series[2].setData(normalizedUpperBand1, false);
-            this.charts.vwap.series[3].setData(normalizedUpperBand2, false);
-            this.charts.vwap.series[4].setData(normalizedLowerBand1, false);
-            this.charts.vwap.series[5].setData(normalizedLowerBand2, false);
-            this.charts.vwap.redraw();
-        } else {
-            this.charts.vwap = Highcharts.stockChart('vwapChart', {
-                chart: { borderRadius: 15, height: 600 },
-                title: {
-                    text: 'VWAP with Standard Deviation Bands (Normalized)',
-                    style: { color: this.colors.primary, fontWeight: 'bold' }
-                },
-                rangeSelector: { enabled: false },
-                navigator: { enabled: true },
-                xAxis: { type: 'datetime', crosshair: true },
-                yAxis: { 
-                    title: { text: 'Relative Index (Base 100)' },
-                    labels: {
-                        formatter: function() {
-                            return this.value.toFixed(0);
+                        {
+                            value: 20,
+                            color: this.colors.success,
+                            dashStyle: 'ShortDash',
+                            width: 2,
+                            label: { text: 'Oversold (20)', align: 'right', style: { color: this.colors.success } }
                         }
-                    }
+                    ],
+                    min: 0,
+                    max: 100
                 },
-                tooltip: { 
-                    borderRadius: 10, 
-                    shared: true,
-                    valueDecimals: 2,
-                    valueSuffix: ''
-                },
+                tooltip: { borderRadius: 10, valueDecimals: 2 },
                 series: [
                     {
-                        type: 'line',
-                        name: this.currentSymbol,
-                        data: normalizedPrices,
-                        color: this.colors.primary,
-                        lineWidth: 2,
-                        zIndex: 2
-                    },
-                    {
-                        type: 'line',
-                        name: 'VWAP',
-                        data: normalizedVWAP,
-                        color: this.colors.secondary,
-                        lineWidth: 3,
-                        zIndex: 3
-                    },
-                    {
-                        type: 'line',
-                        name: 'Upper Band (+1 SD)',
-                        data: normalizedUpperBand1,
-                        color: this.colors.danger,
-                        lineWidth: 1,
-                        dashStyle: 'Dash',
-                        zIndex: 1
-                    },
-                    {
-                        type: 'line',
-                        name: 'Upper Band (+2 SD)',
-                        data: normalizedUpperBand2,
-                        color: this.colors.danger,
-                        lineWidth: 1,
-                        dashStyle: 'Dot',
-                        zIndex: 1
-                    },
-                    {
-                        type: 'line',
-                        name: 'Lower Band (-1 SD)',
-                        data: normalizedLowerBand1,
-                        color: this.colors.success,
-                        lineWidth: 1,
-                        dashStyle: 'Dash',
-                        zIndex: 1
-                    },
-                    {
-                        type: 'line',
-                        name: 'Lower Band (-2 SD)',
-                        data: normalizedLowerBand2,
-                        color: this.colors.success,
-                        lineWidth: 1,
-                        dashStyle: 'Dot',
-                        zIndex: 1
+                        type: 'area',
+                        name: 'MFI',
+                        data: mfi,
+                        color: this.colors.teal,
+                        fillOpacity: 0.3,
+                        lineWidth: 2
                     }
                 ],
                 credits: { enabled: false }
             });
         }
         
-        this.displayVWAPSignal(vwap, prices);
+        this.displayMFISignal(mfi);
     },
     
-    calculateVWAP(prices) {
-        const vwapArray = [];
-        const upperBand1 = [];
-        const upperBand2 = [];
-        const lowerBand1 = [];
-        const lowerBand2 = [];
-        
-        let cumulativeTPV = 0;
-        let cumulativeVolume = 0;
-        const squaredDiffs = [];
+    calculateMFI(prices, period = 14) {
+        const mfi = [];
+        const typicalPrices = [];
+        const moneyFlow = [];
         
         for (let i = 0; i < prices.length; i++) {
             const typical = (prices[i].high + prices[i].low + prices[i].close) / 3;
-            const tpv = typical * prices[i].volume;
-            
-            cumulativeTPV += tpv;
-            cumulativeVolume += prices[i].volume;
-            
-            const vwapValue = cumulativeTPV / cumulativeVolume;
-            vwapArray.push([prices[i].timestamp, vwapValue]);
-            
-            squaredDiffs.push(Math.pow(typical - vwapValue, 2) * prices[i].volume);
-            const variance = squaredDiffs.reduce((a, b) => a + b, 0) / cumulativeVolume;
-            const stdDev = Math.sqrt(variance);
-            
-            upperBand1.push([prices[i].timestamp, vwapValue + stdDev]);
-            upperBand2.push([prices[i].timestamp, vwapValue + 2 * stdDev]);
-            lowerBand1.push([prices[i].timestamp, vwapValue - stdDev]);
-            lowerBand2.push([prices[i].timestamp, vwapValue - 2 * stdDev]);
+            typicalPrices.push(typical);
+            moneyFlow.push(typical * prices[i].volume);
         }
         
-        return { vwap: vwapArray, upperBand1, upperBand2, lowerBand1, lowerBand2 };
+        for (let i = period; i < prices.length; i++) {
+            let positiveFlow = 0;
+            let negativeFlow = 0;
+            
+            for (let j = i - period + 1; j <= i; j++) {
+                if (typicalPrices[j] > typicalPrices[j - 1]) {
+                    positiveFlow += moneyFlow[j];
+                } else if (typicalPrices[j] < typicalPrices[j - 1]) {
+                    negativeFlow += moneyFlow[j];
+                }
+            }
+            
+            const moneyFlowRatio = negativeFlow === 0 ? 100 : positiveFlow / negativeFlow;
+            const mfiValue = 100 - (100 / (1 + moneyFlowRatio));
+            
+            mfi.push([prices[i].timestamp, mfiValue]);
+        }
+        
+        return mfi;
     },
     
-    // ✅ CORRECTION MAJEURE - Masquer prix VWAP, afficher position relative
-    displayVWAPSignal(vwap, prices) {
-        if (!vwap.vwap.length) {
-            document.getElementById('vwapSignal').textContent = 'Not enough data';
+    displayMFISignal(mfi) {
+        if (!mfi.length) {
+            document.getElementById('mfiSignal').textContent = 'Not enough data';
             return;
         }
         
-        const lastPrice = prices[prices.length - 1].close;
-        const lastVWAP = vwap.vwap[vwap.vwap.length - 1][1];
-        const lastUpper1 = vwap.upperBand1[vwap.upperBand1.length - 1][1];
-        const lastLower1 = vwap.lowerBand1[vwap.lowerBand1.length - 1][1];
-        
-        const positionFromVWAP = ((lastPrice - lastVWAP) / lastVWAP) * 100;
+        const lastMFI = mfi[mfi.length - 1][1];
         
         let signal = 'neutral';
-        let text = `Position: ${positionFromVWAP >= 0 ? '+' : ''}${positionFromVWAP.toFixed(2)}% from VWAP - `;
+        let text = `MFI: ${lastMFI.toFixed(2)} - `;
         
-        if (lastPrice > lastVWAP) {
-            signal = 'bullish';
-            text += 'Above VWAP - Bullish (Institutional Support)';
-        } else if (lastPrice < lastVWAP) {
+        if (lastMFI > 80) {
             signal = 'bearish';
-            text += 'Below VWAP - Bearish (Institutional Resistance)';
+            text += 'OVERBOUGHT - Strong Money Outflow Expected';
+        } else if (lastMFI < 20) {
+            signal = 'bullish';
+            text += 'OVERSOLD - Strong Money Inflow Expected';
+        } else if (lastMFI > 50) {
+            signal = 'bullish';
+            text += 'Positive Money Flow - Buyers in Control';
         } else {
-            text += 'At VWAP - Fair Value';
+            signal = 'bearish';
+            text += 'Negative Money Flow - Sellers in Control';
         }
         
-        if (lastPrice > lastUpper1) {
-            text += ' | Overbought (Above +1 SD)';
-        } else if (lastPrice < lastLower1) {
-            text += ' | Oversold (Below -1 SD)';
+        const signalBox = document.getElementById('mfiSignal');
+        signalBox.className = `signal-box ${signal}`;
+        signalBox.textContent = text;
+    },
+    
+    // ============================================
+    // ✅ CCI (Commodity Channel Index)
+    // ============================================
+    
+    updateCCIChart() {
+        const prices = this.stockData.prices;
+        const cci = this.calculateCCI(prices);
+        
+        if (this.charts.cci) {
+            this.charts.cci.series[0].setData(cci, true);
+        } else {
+            this.charts.cci = Highcharts.chart('cciChart', {
+                chart: { borderRadius: 15, height: 400 },
+                title: {
+                    text: 'CCI - Commodity Channel Index',
+                    style: { color: this.colors.primary, fontWeight: 'bold' }
+                },
+                xAxis: { type: 'datetime', crosshair: true },
+                yAxis: {
+                    title: { text: 'CCI' },
+                    plotLines: [
+                        {
+                            value: 100,
+                            color: this.colors.danger,
+                            dashStyle: 'ShortDash',
+                            width: 2,
+                            label: { text: 'Overbought (+100)', align: 'right', style: { color: this.colors.danger } }
+                        },
+                        {
+                            value: 0,
+                            color: '#999',
+                            dashStyle: 'Dot',
+                            width: 1
+                        },
+                        {
+                            value: -100,
+                            color: this.colors.success,
+                            dashStyle: 'ShortDash',
+                            width: 2,
+                            label: { text: 'Oversold (-100)', align: 'right', style: { color: this.colors.success } }
+                        }
+                    ]
+                },
+                tooltip: { borderRadius: 10, valueDecimals: 2 },
+                series: [
+                    {
+                        type: 'line',
+                        name: 'CCI',
+                        data: cci,
+                        color: this.colors.indigo,
+                        lineWidth: 2
+                    }
+                ],
+                credits: { enabled: false }
+            });
         }
         
-        const signalBox = document.getElementById('vwapSignal');
+        this.displayCCISignal(cci);
+    },
+    
+    calculateCCI(prices, period = 20) {
+        const cci = [];
+        const typicalPrices = prices.map(p => (p.high + p.low + p.close) / 3);
+        
+        for (let i = period - 1; i < prices.length; i++) {
+            const slice = typicalPrices.slice(i - period + 1, i + 1);
+            const sma = slice.reduce((a, b) => a + b, 0) / period;
+            
+            const meanDeviation = slice.reduce((sum, val) => sum + Math.abs(val - sma), 0) / period;
+            
+            const cciValue = (typicalPrices[i] - sma) / (0.015 * meanDeviation);
+            
+            cci.push([prices[i].timestamp, cciValue]);
+        }
+        
+        return cci;
+    },
+    
+    displayCCISignal(cci) {
+        if (!cci.length) {
+            document.getElementById('cciSignal').textContent = 'Not enough data';
+            return;
+        }
+        
+        const lastCCI = cci[cci.length - 1][1];
+        
+        let signal = 'neutral';
+        let text = `CCI: ${lastCCI.toFixed(2)} - `;
+        
+        if (lastCCI > 100) {
+            signal = 'bearish';
+            text += 'OVERBOUGHT - Strong Reversal Signal';
+        } else if (lastCCI < -100) {
+            signal = 'bullish';
+            text += 'OVERSOLD - Strong Reversal Signal';
+        } else if (lastCCI > 0) {
+            signal = 'bullish';
+            text += 'Bullish Territory';
+        } else {
+            signal = 'bearish';
+            text += 'Bearish Territory';
+        }
+        
+        const signalBox = document.getElementById('cciSignal');
+        signalBox.className = `signal-box ${signal}`;
+        signalBox.textContent = text;
+    },
+    
+    // ============================================
+    // ✅ ULTIMATE OSCILLATOR
+    // ============================================
+    
+    updateUltimateOscillatorChart() {
+        const prices = this.stockData.prices;
+        const ultimate = this.calculateUltimateOscillator(prices);
+        
+        if (this.charts.ultimate) {
+            this.charts.ultimate.series[0].setData(ultimate, true);
+        } else {
+            this.charts.ultimate = Highcharts.chart('ultimateChart', {
+                chart: { borderRadius: 15, height: 400 },
+                title: {
+                    text: 'Ultimate Oscillator',
+                    style: { color: this.colors.primary, fontWeight: 'bold' }
+                },
+                xAxis: { type: 'datetime', crosshair: true },
+                yAxis: {
+                    title: { text: 'Ultimate Oscillator' },
+                    plotLines: [
+                        {
+                            value: 70,
+                            color: this.colors.danger,
+                            dashStyle: 'ShortDash',
+                            width: 2,
+                            label: { text: 'Overbought (70)', align: 'right', style: { color: this.colors.danger } }
+                        },
+                        {
+                            value: 30,
+                            color: this.colors.success,
+                            dashStyle: 'ShortDash',
+                            width: 2,
+                            label: { text: 'Oversold (30)', align: 'right', style: { color: this.colors.success } }
+                        }
+                    ],
+                    min: 0,
+                    max: 100
+                },
+                tooltip: { borderRadius: 10, valueDecimals: 2 },
+                series: [
+                    {
+                        type: 'area',
+                        name: 'Ultimate Oscillator',
+                        data: ultimate,
+                        color: this.colors.pink,
+                        fillOpacity: 0.3,
+                        lineWidth: 2
+                    }
+                ],
+                credits: { enabled: false }
+            });
+        }
+        
+        this.displayUltimateSignal(ultimate);
+    },
+    
+    calculateUltimateOscillator(prices, period1 = 7, period2 = 14, period3 = 28) {
+        const ultimate = [];
+        const buyingPressure = [];
+        const trueRange = [];
+        
+        for (let i = 1; i < prices.length; i++) {
+            const trueLow = Math.min(prices[i].low, prices[i - 1].close);
+            const bp = prices[i].close - trueLow;
+            const tr = Math.max(prices[i].high, prices[i - 1].close) - trueLow;
+            
+            buyingPressure.push(bp);
+            trueRange.push(tr);
+        }
+        
+        const maxPeriod = Math.max(period1, period2, period3);
+        
+        for (let i = maxPeriod - 1; i < buyingPressure.length; i++) {
+            const avg1 = this.sumArray(buyingPressure, i - period1 + 1, i + 1) / this.sumArray(trueRange, i - period1 + 1, i + 1);
+            const avg2 = this.sumArray(buyingPressure, i - period2 + 1, i + 1) / this.sumArray(trueRange, i - period2 + 1, i + 1);
+            const avg3 = this.sumArray(buyingPressure, i - period3 + 1, i + 1) / this.sumArray(trueRange, i - period3 + 1, i + 1);
+            
+            const uo = 100 * ((4 * avg1 + 2 * avg2 + avg3) / 7);
+            
+            ultimate.push([prices[i + 1].timestamp, uo]);
+        }
+        
+        return ultimate;
+    },
+    
+    sumArray(arr, start, end) {
+        let sum = 0;
+        for (let i = start; i < end && i < arr.length; i++) {
+            sum += arr[i];
+        }
+        return sum || 1;
+    },
+    
+    displayUltimateSignal(ultimate) {
+        if (!ultimate.length) {
+            document.getElementById('ultimateSignal').textContent = 'Not enough data';
+            return;
+        }
+        
+        const lastUO = ultimate[ultimate.length - 1][1];
+        
+        let signal = 'neutral';
+        let text = `Ultimate Oscillator: ${lastUO.toFixed(2)} - `;
+        
+        if (lastUO > 70) {
+            signal = 'bearish';
+            text += 'OVERBOUGHT - Sell Signal';
+        } else if (lastUO < 30) {
+            signal = 'bullish';
+            text += 'OVERSOLD - Buy Signal';
+        } else {
+            text += 'Neutral Zone';
+        }
+        
+        const signalBox = document.getElementById('ultimateSignal');
+        signalBox.className = `signal-box ${signal}`;
+        signalBox.textContent = text;
+    },
+    
+    // ============================================
+    // ✅ ROC (Rate of Change)
+    // ============================================
+    
+    updateROCChart() {
+        const prices = this.stockData.prices;
+        const roc = this.calculateROC(prices);
+        
+        if (this.charts.roc) {
+            this.charts.roc.series[0].setData(roc, true);
+        } else {
+            this.charts.roc = Highcharts.chart('rocChart', {
+                chart: { borderRadius: 15, height: 400 },
+                title: {
+                    text: 'ROC - Rate of Change',
+                    style: { color: this.colors.primary, fontWeight: 'bold' }
+                },
+                xAxis: { type: 'datetime', crosshair: true },
+                yAxis: {
+                    title: { text: 'ROC (%)' },
+                    plotLines: [{
+                        value: 0,
+                        color: '#999',
+                        dashStyle: 'Dash',
+                        width: 2
+                    }]
+                },
+                tooltip: { borderRadius: 10, valueDecimals: 2, valueSuffix: '%' },
+                series: [
+                    {
+                        type: 'area',
+                        name: 'ROC',
+                        data: roc,
+                        color: this.colors.orange,
+                        negativeColor: this.colors.danger,
+                        fillOpacity: 0.3,
+                        lineWidth: 2
+                    }
+                ],
+                credits: { enabled: false }
+            });
+        }
+        
+        this.displayROCSignal(roc);
+    },
+    
+    calculateROC(prices, period = 12) {
+        const roc = [];
+        
+        for (let i = period; i < prices.length; i++) {
+            const currentClose = prices[i].close;
+            const pastClose = prices[i - period].close;
+            const rocValue = ((currentClose - pastClose) / pastClose) * 100;
+            
+            roc.push([prices[i].timestamp, rocValue]);
+        }
+        
+        return roc;
+    },
+    
+    displayROCSignal(roc) {
+        if (!roc.length) {
+            document.getElementById('rocSignal').textContent = 'Not enough data';
+            return;
+        }
+        
+        const lastROC = roc[roc.length - 1][1];
+        const prevROC = roc[roc.length - 2]?.[1] || 0;
+        
+        let signal = 'neutral';
+        let text = `ROC: ${lastROC.toFixed(2)}% - `;
+        
+        if (lastROC > 0 && prevROC <= 0) {
+            signal = 'bullish';
+            text += 'BULLISH CROSSOVER - Momentum Shift Up';
+        } else if (lastROC < 0 && prevROC >= 0) {
+            signal = 'bearish';
+            text += 'BEARISH CROSSOVER - Momentum Shift Down';
+        } else if (lastROC > 5) {
+            signal = 'bullish';
+            text += 'Strong Positive Momentum';
+        } else if (lastROC < -5) {
+            signal = 'bearish';
+            text += 'Strong Negative Momentum';
+        } else {
+            text += 'Weak Momentum';
+        }
+        
+        const signalBox = document.getElementById('rocSignal');
+        signalBox.className = `signal-box ${signal}`;
+        signalBox.textContent = text;
+    },
+    
+    // ============================================
+    // ✅ AROON INDICATOR
+    // ============================================
+    
+    updateAroonChart() {
+        const prices = this.stockData.prices;
+        const aroon = this.calculateAroon(prices);
+        
+        if (this.charts.aroon) {
+            this.charts.aroon.series[0].setData(aroon.up, false);
+            this.charts.aroon.series[1].setData(aroon.down, false);
+            this.charts.aroon.redraw();
+        } else {
+            this.charts.aroon = Highcharts.chart('aroonChart', {
+                chart: { borderRadius: 15, height: 400 },
+                title: {
+                    text: 'Aroon Indicator',
+                    style: { color: this.colors.primary, fontWeight: 'bold' }
+                },
+                xAxis: { type: 'datetime', crosshair: true },
+                yAxis: {
+                    title: { text: 'Aroon' },
+                    plotLines: [{
+                        value: 50,
+                        color: '#999',
+                        dashStyle: 'Dot',
+                        width: 1
+                    }],
+                    min: 0,
+                    max: 100
+                },
+                tooltip: { borderRadius: 10, shared: true, valueDecimals: 2 },
+                series: [
+                    {
+                        type: 'line',
+                        name: 'Aroon Up',
+                        data: aroon.up,
+                        color: this.colors.success,
+                        lineWidth: 2
+                    },
+                    {
+                        type: 'line',
+                        name: 'Aroon Down',
+                        data: aroon.down,
+                        color: this.colors.danger,
+                        lineWidth: 2
+                    }
+                ],
+                credits: { enabled: false }
+            });
+        }
+        
+        this.displayAroonSignal(aroon);
+    },
+    
+    calculateAroon(prices, period = 25) {
+        const up = [];
+        const down = [];
+        
+        for (let i = period; i < prices.length; i++) {
+            const slice = prices.slice(i - period, i + 1);
+            
+            let highestIndex = 0;
+            let lowestIndex = 0;
+            let highest = slice[0].high;
+            let lowest = slice[0].low;
+            
+            for (let j = 1; j < slice.length; j++) {
+                if (slice[j].high > highest) {
+                    highest = slice[j].high;
+                    highestIndex = j;
+                }
+                if (slice[j].low < lowest) {
+                    lowest = slice[j].low;
+                    lowestIndex = j;
+                }
+            }
+            
+            const daysSinceHigh = period - highestIndex;
+            const daysSinceLow = period - lowestIndex;
+            
+            const aroonUp = ((period - daysSinceHigh) / period) * 100;
+            const aroonDown = ((period - daysSinceLow) / period) * 100;
+            
+            up.push([prices[i].timestamp, aroonUp]);
+            down.push([prices[i].timestamp, aroonDown]);
+        }
+        
+        return { up, down };
+    },
+    
+    displayAroonSignal(aroon) {
+        if (!aroon.up.length || !aroon.down.length) {
+            document.getElementById('aroonSignal').textContent = 'Not enough data';
+            return;
+        }
+        
+        const lastUp = aroon.up[aroon.up.length - 1][1];
+        const lastDown = aroon.down[aroon.down.length - 1][1];
+        
+        let signal = 'neutral';
+        let text = `Up: ${lastUp.toFixed(0)}, Down: ${lastDown.toFixed(0)} - `;
+        
+        if (lastUp > 70 && lastDown < 30) {
+            signal = 'bullish';
+            text += 'STRONG UPTREND - Bulls in Control';
+        } else if (lastDown > 70 && lastUp < 30) {
+            signal = 'bearish';
+            text += 'STRONG DOWNTREND - Bears in Control';
+        } else if (lastUp > lastDown) {
+            signal = 'bullish';
+            text += 'Bullish Bias';
+        } else if (lastDown > lastUp) {
+            signal = 'bearish';
+            text += 'Bearish Bias';
+        } else {
+            text += 'Consolidation';
+        }
+        
+        const signalBox = document.getElementById('aroonSignal');
+        signalBox.className = `signal-box ${signal}`;
+        signalBox.textContent = text;
+    },
+    
+    // ============================================
+    // ✅ CMF (Chaikin Money Flow)
+    // ============================================
+    
+    updateCMFChart() {
+        const prices = this.stockData.prices;
+        const cmf = this.calculateCMF(prices);
+        
+        if (this.charts.cmf) {
+            this.charts.cmf.series[0].setData(cmf, true);
+        } else {
+            this.charts.cmf = Highcharts.chart('cmfChart', {
+                chart: { borderRadius: 15, height: 400 },
+                title: {
+                    text: 'CMF - Chaikin Money Flow',
+                    style: { color: this.colors.primary, fontWeight: 'bold' }
+                },
+                xAxis: { type: 'datetime', crosshair: true },
+                yAxis: {
+                    title: { text: 'CMF' },
+                    plotLines: [
+                        {
+                            value: 0,
+                            color: '#999',
+                            dashStyle: 'Dash',
+                            width: 2
+                        },
+                        {
+                            value: 0.05,
+                            color: this.colors.success,
+                            dashStyle: 'Dot',
+                            width: 1,
+                            label: { text: 'Bullish (+0.05)', align: 'right' }
+                        },
+                        {
+                            value: -0.05,
+                            color: this.colors.danger,
+                            dashStyle: 'Dot',
+                            width: 1,
+                            label: { text: 'Bearish (-0.05)', align: 'right' }
+                        }
+                    ]
+                },
+                tooltip: { borderRadius: 10, valueDecimals: 4 },
+                series: [
+                    {
+                        type: 'area',
+                        name: 'CMF',
+                        data: cmf,
+                        color: this.colors.cyan,
+                        negativeColor: this.colors.danger,
+                        fillOpacity: 0.3,
+                        lineWidth: 2
+                    }
+                ],
+                credits: { enabled: false }
+            });
+        }
+        
+        this.displayCMFSignal(cmf);
+    },
+    
+    calculateCMF(prices, period = 20) {
+        const cmf = [];
+        const moneyFlowMultiplier = [];
+        const moneyFlowVolume = [];
+        
+        for (let i = 0; i < prices.length; i++) {
+            const high = prices[i].high;
+            const low = prices[i].low;
+            const close = prices[i].close;
+            const volume = prices[i].volume;
+            
+            const mfm = high === low ? 0 : ((close - low) - (high - close)) / (high - low);
+            const mfv = mfm * volume;
+            
+            moneyFlowMultiplier.push(mfm);
+            moneyFlowVolume.push(mfv);
+        }
+        
+        for (let i = period - 1; i < prices.length; i++) {
+            const sumMFV = this.sumArray(moneyFlowVolume, i - period + 1, i + 1);
+            const sumVolume = prices.slice(i - period + 1, i + 1).reduce((sum, p) => sum + p.volume, 0);
+            
+            const cmfValue = sumVolume === 0 ? 0 : sumMFV / sumVolume;
+            
+            cmf.push([prices[i].timestamp, cmfValue]);
+        }
+        
+        return cmf;
+    },
+    
+    displayCMFSignal(cmf) {
+        if (!cmf.length) {
+            document.getElementById('cmfSignal').textContent = 'Not enough data';
+            return;
+        }
+        
+        const lastCMF = cmf[cmf.length - 1][1];
+        
+        let signal = 'neutral';
+        let text = `CMF: ${lastCMF.toFixed(4)} - `;
+        
+        if (lastCMF > 0.05) {
+            signal = 'bullish';
+            text += 'STRONG BUYING PRESSURE - Accumulation Phase';
+        } else if (lastCMF < -0.05) {
+            signal = 'bearish';
+            text += 'STRONG SELLING PRESSURE - Distribution Phase';
+        } else if (lastCMF > 0) {
+            signal = 'bullish';
+            text += 'Weak Buying Pressure';
+        } else if (lastCMF < 0) {
+            signal = 'bearish';
+            text += 'Weak Selling Pressure';
+        } else {
+            text += 'Neutral Money Flow';
+        }
+        
+        const signalBox = document.getElementById('cmfSignal');
+        signalBox.className = `signal-box ${signal}`;
+        signalBox.textContent = text;
+    },
+    
+    // ============================================
+    // ✅ ELDER RAY INDEX
+    // ============================================
+    
+    updateElderRayChart() {
+        const prices = this.stockData.prices;
+        const elderRay = this.calculateElderRay(prices);
+        
+        if (this.charts.elderRay) {
+            this.charts.elderRay.series[0].setData(elderRay.bullPower, false);
+            this.charts.elderRay.series[1].setData(elderRay.bearPower, false);
+            this.charts.elderRay.redraw();
+        } else {
+            this.charts.elderRay = Highcharts.chart('elderRayChart', {
+                chart: { borderRadius: 15, height: 400 },
+                title: {
+                    text: 'Elder Ray Index - Bull & Bear Power',
+                    style: { color: this.colors.primary, fontWeight: 'bold' }
+                },
+                xAxis: { type: 'datetime', crosshair: true },
+                yAxis: {
+                    title: { text: 'Power' },
+                    plotLines: [{
+                        value: 0,
+                        color: '#999',
+                        dashStyle: 'Dash',
+                        width: 2
+                    }]
+                },
+                tooltip: { borderRadius: 10, shared: true, valueDecimals: 2 },
+                series: [
+                    {
+                        type: 'column',
+                        name: 'Bull Power',
+                        data: elderRay.bullPower,
+                        color: this.colors.success,
+                        zIndex: 1
+                    },
+                    {
+                        type: 'column',
+                        name: 'Bear Power',
+                        data: elderRay.bearPower,
+                        color: this.colors.danger,
+                        zIndex: 1
+                    }
+                ],
+                credits: { enabled: false }
+            });
+        }
+        
+        this.displayElderRaySignal(elderRay);
+    },
+    
+    calculateElderRay(prices, period = 13) {
+        const closes = prices.map(p => p.close);
+        const ema = this.calculateEMA(closes, period);
+        
+        const bullPower = [];
+        const bearPower = [];
+        
+        const offset = prices.length - ema.length;
+        
+        for (let i = 0; i < ema.length; i++) {
+            const priceIndex = offset + i;
+            const timestamp = prices[priceIndex].timestamp;
+            const high = prices[priceIndex].high;
+            const low = prices[priceIndex].low;
+            const emaValue = ema[i];
+            
+            bullPower.push([timestamp, high - emaValue]);
+            bearPower.push([timestamp, low - emaValue]);
+        }
+        
+        return { bullPower, bearPower };
+    },
+    
+    displayElderRaySignal(elderRay) {
+        if (!elderRay.bullPower.length || !elderRay.bearPower.length) {
+            document.getElementById('elderRaySignal').textContent = 'Not enough data';
+            return;
+        }
+        
+        const lastBull = elderRay.bullPower[elderRay.bullPower.length - 1][1];
+        const lastBear = elderRay.bearPower[elderRay.bearPower.length - 1][1];
+        
+        let signal = 'neutral';
+        let text = `Bull: ${lastBull.toFixed(2)}, Bear: ${lastBear.toFixed(2)} - `;
+        
+        if (lastBull > 0 && lastBear > 0) {
+            signal = 'bullish';
+            text += 'STRONG BULLS - Both Powers Positive (Buy)';
+        } else if (lastBull < 0 && lastBear < 0) {
+            signal = 'bearish';
+            text += 'STRONG BEARS - Both Powers Negative (Sell)';
+        } else if (lastBull > 0 && lastBear < 0) {
+            signal = 'neutral';
+            text += 'Consolidation - Mixed Signals';
+        } else if (lastBull > lastBear) {
+            signal = 'bullish';
+            text += 'Bulls Gaining Strength';
+        } else {
+            signal = 'bearish';
+            text += 'Bears Gaining Strength';
+        }
+        
+        const signalBox = document.getElementById('elderRaySignal');
         signalBox.className = `signal-box ${signal}`;
         signalBox.textContent = text;
     },
@@ -11064,29 +8930,8 @@ const AdvancedAnalysis = {
         const prices = this.stockData.prices;
         const signals = [];
         
-        // Tous les indicateurs (code identique à la PARTIE 2, conservé tel quel)
-        const stochastic = this.calculateStochastic(prices);
-        const williams = this.calculateWilliams(prices);
-        const adxData = this.calculateADX(prices);
-        const sar = this.calculateSAR(prices);
-        const obv = this.calculateOBV(prices);
-        const vwap = this.calculateVWAP(prices);
-        const ichimoku = this.calculateIchimoku(prices);
-        const rsi = this.calculateRSI(prices);
-        const macd = this.calculateMACD(prices);
-        const bollinger = this.calculateBollingerBands(prices);
-        const mfi = this.calculateMFI(prices);
-        const cci = this.calculateCCI(prices);
-        const ultimate = this.calculateUltimateOscillator(prices);
-        const roc = this.calculateROC(prices);
-        const aroon = this.calculateAroon(prices);
-        const keltner = this.calculateKeltnerChannels(prices);
-        const donchian = this.calculateDonchianChannels(prices);
-        const cmf = this.calculateCMF(prices);
-        const elderRay = this.calculateElderRay(prices);
-        const mas = this.calculateMultipleMovingAverages(prices);
-        
         // RSI
+        const rsi = this.calculateRSI(prices);
         if (rsi.length > 0) {
             const lastRSI = rsi[rsi.length - 1][1];
             let rsiSignal = 0;
@@ -11096,94 +8941,15 @@ const AdvancedAnalysis = {
         }
         
         // MACD
+        const macd = this.calculateMACD(prices);
         if (macd.histogram.length > 0) {
             const lastHist = macd.histogram[macd.histogram.length - 1][1];
             const macdSignal = lastHist > 0 ? 1 : lastHist < 0 ? -1 : 0;
             signals.push({ name: 'MACD', value: lastHist.toFixed(4), signal: macdSignal });
         }
         
-        // Bollinger Bands
-        if (bollinger.upper.length > 0) {
-            const lastPrice = prices[prices.length - 1].close;
-            const lastUpper = bollinger.upper[bollinger.upper.length - 1][1];
-            const lastLower = bollinger.lower[bollinger.lower.length - 1][1];
-            let bbSignal = 0;
-            if (lastPrice < lastLower) bbSignal = 1;
-            else if (lastPrice > lastUpper) bbSignal = -1;
-            signals.push({ name: 'Bollinger', value: 'N/A', signal: bbSignal });
-        }
-        
-        // MFI
-        if (mfi.length > 0) {
-            const lastMFI = mfi[mfi.length - 1][1];
-            let mfiSignal = 0;
-            if (lastMFI < 20) mfiSignal = 1;
-            else if (lastMFI > 80) mfiSignal = -1;
-            signals.push({ name: 'MFI', value: lastMFI.toFixed(2), signal: mfiSignal });
-        }
-        
-        // CCI
-        if (cci.length > 0) {
-            const lastCCI = cci[cci.length - 1][1];
-            let cciSignal = 0;
-            if (lastCCI < -100) cciSignal = 1;
-            else if (lastCCI > 100) cciSignal = -1;
-            signals.push({ name: 'CCI', value: lastCCI.toFixed(2), signal: cciSignal });
-        }
-        
-        // Ultimate Oscillator
-        if (ultimate.length > 0) {
-            const lastUO = ultimate[ultimate.length - 1][1];
-            let uoSignal = 0;
-            if (lastUO < 30) uoSignal = 1;
-            else if (lastUO > 70) uoSignal = -1;
-            signals.push({ name: 'Ultimate Osc', value: lastUO.toFixed(2), signal: uoSignal });
-        }
-        
-        // ROC
-        if (roc.length > 0) {
-            const lastROC = roc[roc.length - 1][1];
-            const rocSignal = lastROC > 0 ? 1 : lastROC < 0 ? -1 : 0;
-            signals.push({ name: 'ROC', value: lastROC.toFixed(2) + '%', signal: rocSignal });
-        }
-        
-        // Aroon
-        if (aroon.up.length > 0 && aroon.down.length > 0) {
-            const lastUp = aroon.up[aroon.up.length - 1][1];
-            const lastDown = aroon.down[aroon.down.length - 1][1];
-            const aroonSignal = lastUp > lastDown ? 1 : -1;
-            signals.push({ name: 'Aroon', value: 'N/A', signal: aroonSignal });
-        }
-        
-        // CMF
-        if (cmf.length > 0) {
-            const lastCMF = cmf[cmf.length - 1][1];
-            const cmfSignal = lastCMF > 0 ? 1 : lastCMF < 0 ? -1 : 0;
-            signals.push({ name: 'CMF', value: lastCMF.toFixed(4), signal: cmfSignal });
-        }
-        
-        // Elder Ray
-        if (elderRay.bullPower.length > 0 && elderRay.bearPower.length > 0) {
-            const lastBull = elderRay.bullPower[elderRay.bullPower.length - 1][1];
-            const lastBear = elderRay.bearPower[elderRay.bearPower.length - 1][1];
-            let elderSignal = 0;
-            if (lastBull > 0 && lastBear > 0) elderSignal = 1;
-            else if (lastBull < 0 && lastBear < 0) elderSignal = -1;
-            signals.push({ name: 'Elder Ray', value: 'N/A', signal: elderSignal });
-        }
-        
-        // Moving Averages
-        if (mas.sma20.length > 0 && mas.sma50.length > 0) {
-            const lastPrice = prices[prices.length - 1].close;
-            const lastSMA20 = mas.sma20[mas.sma20.length - 1][1];
-            const lastSMA50 = mas.sma50[mas.sma50.length - 1][1];
-            let maSignal = 0;
-            if (lastPrice > lastSMA20 && lastSMA20 > lastSMA50) maSignal = 1;
-            else if (lastPrice < lastSMA20 && lastSMA20 < lastSMA50) maSignal = -1;
-            signals.push({ name: 'Moving Averages', value: 'N/A', signal: maSignal });
-        }
-        
         // Stochastic
+        const stochastic = this.calculateStochastic(prices);
         if (stochastic.k.length > 0) {
             const lastK = stochastic.k[stochastic.k.length - 1][1];
             let stochasticSignal = 0;
@@ -11193,6 +8959,7 @@ const AdvancedAnalysis = {
         }
         
         // Williams %R
+        const williams = this.calculateWilliams(prices);
         if (williams.length > 0) {
             const lastWilliams = williams[williams.length - 1][1];
             let williamsSignal = 0;
@@ -11202,6 +8969,7 @@ const AdvancedAnalysis = {
         }
         
         // ADX
+        const adxData = this.calculateADX(prices);
         let adxSignal = 0;
         let adxValue = 'N/A';
         if (adxData.adx.length > 0 && adxData.plusDI.length > 0 && adxData.minusDI.length > 0) {
@@ -11216,16 +8984,8 @@ const AdvancedAnalysis = {
         }
         signals.push({ name: 'ADX', value: adxValue, signal: adxSignal });
         
-        // Parabolic SAR
-        if (sar.length > 0) {
-            const lastPrice = prices[prices.length - 1].close;
-            const lastSAR = sar[sar.length - 1][1];
-            const sarSignal = lastPrice > lastSAR ? 1 : -1;
-            const sarDistance = ((lastPrice - lastSAR) / lastSAR * 100).toFixed(2);
-            signals.push({ name: 'Parabolic SAR', value: sarDistance + '%', signal: sarSignal });
-        }
-        
         // OBV
+        const obv = this.calculateOBV(prices);
         if (obv.length >= 20) {
             const recentOBV = obv.slice(-20);
             const obvTrend = recentOBV[recentOBV.length - 1][1] - recentOBV[0][1];
@@ -11233,39 +8993,70 @@ const AdvancedAnalysis = {
             signals.push({ name: 'OBV', value: obvTrend > 0 ? 'Rising' : obvTrend < 0 ? 'Falling' : 'Flat', signal: obvSignal });
         }
         
-        // VWAP
-        if (vwap.vwap.length > 0) {
-            const lastPrice = prices[prices.length - 1].close;
-            const lastVWAP = vwap.vwap[vwap.vwap.length - 1][1];
-            const vwapSignal = lastPrice > lastVWAP ? 1 : lastPrice < lastVWAP ? -1 : 0;
-            const vwapDistance = ((lastPrice - lastVWAP) / lastVWAP * 100).toFixed(2);
-            signals.push({ name: 'VWAP', value: vwapDistance + '%', signal: vwapSignal });
+        // MFI
+        const mfi = this.calculateMFI(prices);
+        if (mfi.length > 0) {
+            const lastMFI = mfi[mfi.length - 1][1];
+            let mfiSignal = 0;
+            if (lastMFI < 20) mfiSignal = 1;
+            else if (lastMFI > 80) mfiSignal = -1;
+            signals.push({ name: 'MFI', value: lastMFI.toFixed(2), signal: mfiSignal });
         }
         
-        // Ichimoku Cloud
-        if (ichimoku.spanA.length > 0 && ichimoku.spanB.length > 0) {
-            const lastPrice = prices[prices.length - 1].close;
-            const lastCloudTop = Math.max(
-                ichimoku.spanA[ichimoku.spanA.length - 1]?.[1] || 0,
-                ichimoku.spanB[ichimoku.spanB.length - 1]?.[1] || 0
-            );
-            const lastCloudBottom = Math.min(
-                ichimoku.spanA[ichimoku.spanA.length - 1]?.[1] || Infinity,
-                ichimoku.spanB[ichimoku.spanB.length - 1]?.[1] || Infinity
-            );
-            
-            let ichimokuSignal = 0;
-            let ichimokuValue = 'In Cloud';
-            
-            if (lastPrice > lastCloudTop) {
-                ichimokuSignal = 1;
-                ichimokuValue = 'Above Cloud';
-            } else if (lastPrice < lastCloudBottom) {
-                ichimokuSignal = -1;
-                ichimokuValue = 'Below Cloud';
-            }
-            
-            signals.push({ name: 'Ichimoku Cloud', value: ichimokuValue, signal: ichimokuSignal });
+        // CCI
+        const cci = this.calculateCCI(prices);
+        if (cci.length > 0) {
+            const lastCCI = cci[cci.length - 1][1];
+            let cciSignal = 0;
+            if (lastCCI < -100) cciSignal = 1;
+            else if (lastCCI > 100) cciSignal = -1;
+            signals.push({ name: 'CCI', value: lastCCI.toFixed(2), signal: cciSignal });
+        }
+        
+        // Ultimate Oscillator
+        const ultimate = this.calculateUltimateOscillator(prices);
+        if (ultimate.length > 0) {
+            const lastUO = ultimate[ultimate.length - 1][1];
+            let uoSignal = 0;
+            if (lastUO < 30) uoSignal = 1;
+            else if (lastUO > 70) uoSignal = -1;
+            signals.push({ name: 'Ultimate Osc', value: lastUO.toFixed(2), signal: uoSignal });
+        }
+        
+        // ROC
+        const roc = this.calculateROC(prices);
+        if (roc.length > 0) {
+            const lastROC = roc[roc.length - 1][1];
+            const rocSignal = lastROC > 0 ? 1 : lastROC < 0 ? -1 : 0;
+            signals.push({ name: 'ROC', value: lastROC.toFixed(2) + '%', signal: rocSignal });
+        }
+        
+        // Aroon
+        const aroon = this.calculateAroon(prices);
+        if (aroon.up.length > 0 && aroon.down.length > 0) {
+            const lastUp = aroon.up[aroon.up.length - 1][1];
+            const lastDown = aroon.down[aroon.down.length - 1][1];
+            const aroonSignal = lastUp > lastDown ? 1 : -1;
+            signals.push({ name: 'Aroon', value: 'N/A', signal: aroonSignal });
+        }
+        
+        // CMF
+        const cmf = this.calculateCMF(prices);
+        if (cmf.length > 0) {
+            const lastCMF = cmf[cmf.length - 1][1];
+            const cmfSignal = lastCMF > 0 ? 1 : lastCMF < 0 ? -1 : 0;
+            signals.push({ name: 'CMF', value: lastCMF.toFixed(4), signal: cmfSignal });
+        }
+        
+        // Elder Ray
+        const elderRay = this.calculateElderRay(prices);
+        if (elderRay.bullPower.length > 0 && elderRay.bearPower.length > 0) {
+            const lastBull = elderRay.bullPower[elderRay.bullPower.length - 1][1];
+            const lastBear = elderRay.bearPower[elderRay.bearPower.length - 1][1];
+            let elderSignal = 0;
+            if (lastBull > 0 && lastBear > 0) elderSignal = 1;
+            else if (lastBull < 0 && lastBear < 0) elderSignal = -1;
+            signals.push({ name: 'Elder Ray', value: 'N/A', signal: elderSignal });
         }
         
         // Calculate consolidated signal
@@ -11330,62 +9121,36 @@ const AdvancedAnalysis = {
     },
     
     // ============================================
-    // 🤖 ALPHY AI RECOMMENDATION ENGINE
-    // Wall Street Grade Multi-Horizon Analysis
+    // 🤖 AI RECOMMENDATION (SANS PRIX - LEGAL COMPLIANT)
     // ============================================
 
     generateAIRecommendation() {
-        console.log('🤖 Alphy AI - Generating institutional-grade recommendation...');
+        console.log('🤖 Alphy AI - Generating recommendation (Legal Compliant)...');
         
         const prices = this.stockData.prices;
-        const currentPrice = prices[prices.length - 1].close;
         
-        // ✅ ÉTAPE 1 : Collecter tous les signaux techniques
+        // ✅ ÉTAPE 1 : Collecter signaux techniques uniquement
         const technicalSignals = this.collectAllTechnicalSignals(prices);
         
-        // ✅ ÉTAPE 2 : Calculer l'AI Confidence Score global
+        // ✅ ÉTAPE 2 : Calculer AI Confidence Score
         const aiScore = this.calculateAIConfidenceScore(technicalSignals);
         
-        // ✅ ÉTAPE 3 : Générer les recommandations multi-horizons
-        const horizonRecommendations = this.generateHorizonRecommendations(
-            prices, 
-            currentPrice, 
-            technicalSignals, 
-            aiScore
-        );
+        // ✅ ÉTAPE 3 : Générer recommandations multi-horizons
+        const horizonRecommendations = this.generateHorizonRecommendations(aiScore);
         
-        // ✅ ÉTAPE 4 : Analyser le Risk/Reward
-        const riskReward = this.analyzeRiskReward(prices, technicalSignals);
-        
-        // ✅ ÉTAPE 5 : Générer le rapport professionnel
-        const professionalSummary = this.generateProfessionalSummary(
-            aiScore,
-            horizonRecommendations,
-            riskReward,
-            technicalSignals
-        );
-        
-        // ✅ ÉTAPE 6 : Afficher tous les résultats
+        // ✅ ÉTAPE 4 : Afficher résultats
         this.displayAIRecommendation(aiScore, technicalSignals);
-        this.displayHorizonRecommendations(horizonRecommendations, currentPrice);
-        this.displayRiskReward(riskReward);
-        this.displayProfessionalSummary(professionalSummary);
+        this.displayHorizonRecommendations(horizonRecommendations);
         
-        console.log('✅ Alphy AI Recommendation generated successfully');
+        console.log('✅ Alphy AI Recommendation generated (Legal Compliant)');
     },
-
-    // ============================================
-    // 📊 COLLECTE DE TOUS LES SIGNAUX TECHNIQUES
-    // ============================================
 
     collectAllTechnicalSignals(prices) {
         const signals = {
             momentum: [],
             trend: [],
             volatility: [],
-            volume: [],
-            price: [],
-            patterns: []
+            volume: []
         };
         
         // RSI
@@ -11402,8 +9167,7 @@ const AdvancedAnalysis = {
                 name: 'RSI',
                 value: lastRSI,
                 signal: strength,
-                weight: 1.2,
-                timeframe: 'short'
+                weight: 1.2
             });
         }
         
@@ -11423,42 +9187,7 @@ const AdvancedAnalysis = {
                 name: 'MACD',
                 value: lastHist,
                 signal: strength,
-                weight: 1.5,
-                timeframe: 'medium'
-            });
-        }
-        
-        // Moving Averages
-        const mas = this.calculateMultipleMovingAverages(prices);
-        if (mas.sma20.length > 0 && mas.sma50.length > 0) {
-            const currentPrice = prices[prices.length - 1].close;
-            const lastSMA20 = mas.sma20[mas.sma20.length - 1][1];
-            const lastSMA50 = mas.sma50[mas.sma50.length - 1][1];
-            const lastSMA200 = mas.sma200.length > 0 ? mas.sma200[mas.sma200.length - 1][1] : null;
-            
-            let strength = 0;
-            
-            const prevSMA50 = mas.sma50[mas.sma50.length - 2]?.[1];
-            const prevSMA200 = mas.sma200.length > 1 ? mas.sma200[mas.sma200.length - 2][1] : null;
-            
-            if (lastSMA200 && prevSMA200) {
-                if (lastSMA50 > lastSMA200 && prevSMA50 <= prevSMA200) strength = 3;
-                else if (lastSMA50 < lastSMA200 && prevSMA50 >= prevSMA200) strength = -3;
-            }
-            
-            if (strength === 0) {
-                if (currentPrice > lastSMA20 && lastSMA20 > lastSMA50) strength = 2;
-                else if (currentPrice < lastSMA20 && lastSMA20 < lastSMA50) strength = -2;
-                else if (currentPrice > lastSMA20) strength = 1;
-                else strength = -1;
-            }
-            
-            signals.trend.push({
-                name: 'Moving Averages',
-                value: currentPrice - lastSMA20,
-                signal: strength,
-                weight: 1.4,
-                timeframe: 'long'
+                weight: 1.5
             });
         }
         
@@ -11479,17 +9208,42 @@ const AdvancedAnalysis = {
                 name: 'ADX',
                 value: lastADX,
                 signal: strength,
-                weight: 1.3,
-                timeframe: 'medium'
+                weight: 1.3
+            });
+        }
+        
+        // Stochastic
+        const stochastic = this.calculateStochastic(prices);
+        if (stochastic.k.length > 0) {
+            const lastK = stochastic.k[stochastic.k.length - 1][1];
+            let strength = 0;
+            if (lastK < 20) strength = 1;
+            else if (lastK > 80) strength = -1;
+            
+            signals.momentum.push({
+                name: 'Stochastic',
+                value: lastK,
+                signal: strength,
+                weight: 1.0
+            });
+        }
+        
+        // OBV
+        const obv = this.calculateOBV(prices);
+        if (obv.length >= 20) {
+            const recentOBV = obv.slice(-20);
+            const obvTrend = recentOBV[recentOBV.length - 1][1] - recentOBV[0][1];
+            
+            signals.volume.push({
+                name: 'OBV',
+                value: obvTrend,
+                signal: obvTrend > 0 ? 1 : obvTrend < 0 ? -1 : 0,
+                weight: 1.1
             });
         }
         
         return signals;
     },
-
-    // ============================================
-    // 🎯 AI CONFIDENCE SCORE CALCULATION
-    // ============================================
 
     calculateAIConfidenceScore(signals) {
         let totalScore = 0;
@@ -11535,22 +9289,18 @@ const AdvancedAnalysis = {
         };
     },
 
-    // ============================================
-    // 📈 MULTI-HORIZON RECOMMENDATIONS
-    // ============================================
-
-    generateHorizonRecommendations(prices, currentPrice, signals, aiScore) {
+    generateHorizonRecommendations(aiScore) {
+        const score = aiScore.score;
+        
         return {
-            '1y': this.generateSingleHorizon(prices, currentPrice, signals, 'short', 1, aiScore),
-            '2y': this.generateSingleHorizon(prices, currentPrice, signals, 'medium', 2, aiScore),
-            '5y': this.generateSingleHorizon(prices, currentPrice, signals, 'long', 5, aiScore),
-            '10y': this.generateSingleHorizon(prices, currentPrice, signals, 'strategic', 10, aiScore)
+            '1y': this.generateSingleHorizon(score, 1),
+            '2y': this.generateSingleHorizon(score, 2),
+            '5y': this.generateSingleHorizon(score, 5),
+            '10y': this.generateSingleHorizon(score, 10)
         };
     },
 
-    generateSingleHorizon(prices, currentPrice, signals, timeframe, years, aiScore) {
-        const score = aiScore.score;
-        
+    generateSingleHorizon(score, years) {
         let recommendation = '';
         let confidence = 0;
         
@@ -11577,86 +9327,23 @@ const AdvancedAnalysis = {
             confidence = Math.min(95, 60 + (30 - score) * 0.8);
         }
         
-        const targetPrice = currentPrice * (1 + (score - 50) / 100 * years);
-        const upside = ((targetPrice - currentPrice) / currentPrice) * 100;
+        const potentialMove = (score - 50) * 0.5 * years;
         
         const drivers = [
             score > 60 ? 'Strong technical momentum' : 'Weak technical setup',
-            `${aiScore.bullishSignals} bullish indicators detected`,
-            timeframe === 'long' ? 'Multi-year trend analysis' : 'Short-term momentum analysis'
+            `Multi-indicator consensus: ${score.toFixed(0)}/100`,
+            `${years}-year technical outlook`
         ];
         
         return {
             recommendation,
             confidence: Math.round(confidence),
-            targetPrice,
-            upside,
-            drivers,
-            score
+            potentialMove: potentialMove.toFixed(1),
+            drivers
         };
     },
-
-    // ============================================
-    // ⚖ RISK/REWARD ANALYSIS
-    // ============================================
-
-    analyzeRiskReward(prices, signals) {
-        const riskScore = 50;
-        const rewardScore = 50;
-        
-        return {
-            risk: {
-                level: 'MODERATE',
-                score: riskScore,
-                factors: [
-                    { factor: 'Market Volatility', description: 'Normal volatility levels', severity: 'medium', impact: 10 }
-                ]
-            },
-            reward: {
-                level: 'MODERATE',
-                score: rewardScore,
-                factors: [
-                    { factor: 'Technical Setup', description: 'Constructive technical pattern', potential: 'medium', impact: 15 }
-                ]
-            },
-            rrRatio: (rewardScore / Math.max(riskScore, 1)).toFixed(2)
-        };
-    },
-
-    // ============================================
-    // 📋 PROFESSIONAL SUMMARY
-    // ============================================
-
-    generateProfessionalSummary(aiScore, horizons, riskReward, signals) {
-        const symbol = this.currentSymbol;
-        const rating = aiScore.rating;
-        
-        return `
-    **ALPHY AI INSTITUTIONAL RESEARCH**
-    **${symbol} - Technical Analysis Report**
-
-    **AI Confidence Score:** ${aiScore.score.toFixed(0)}/100 (${rating})
-
-    **EXECUTIVE SUMMARY**
-    Based on ${aiScore.totalIndicators} technical indicators, we maintain a ${rating} outlook on ${symbol}.
-
-    **RECOMMENDATIONS**
-    • 1-Year: ${horizons['1y'].recommendation} (${horizons['1y'].confidence}% conviction)
-    • 2-Year: ${horizons['2y'].recommendation} (${horizons['2y'].confidence}% conviction)
-    • 5-Year: ${horizons['5y'].recommendation} (${horizons['5y'].confidence}% conviction)
-    • 10-Year: ${horizons['10y'].recommendation} (${horizons['10y'].confidence}% conviction)
-
-    **RISK/REWARD RATIO:** ${riskReward.rrRatio}x
-        `.trim();
-    },
-
-    // ============================================
-    // 🎨 UI DISPLAY FUNCTIONS
-    // ============================================
 
     displayAIRecommendation(aiScore, signals) {
-        console.log('📊 Displaying AI Recommendation:', aiScore);
-        
         const scoreValueEl = document.getElementById('aiScoreValue');
         if (scoreValueEl) {
             scoreValueEl.textContent = aiScore.score.toFixed(0) + '/100';
@@ -11690,20 +9377,16 @@ const AdvancedAnalysis = {
         if (bullishEl) bullishEl.textContent = aiScore.bullishSignals;
         if (neutralEl) neutralEl.textContent = aiScore.neutralSignals;
         if (bearishEl) bearishEl.textContent = aiScore.bearishSignals;
-        
-        console.log('✅ AI Recommendation displayed successfully');
     },
 
-    displayHorizonRecommendations(horizons, currentPrice) {
-        this.displaySingleHorizon('1y', horizons['1y'], currentPrice);
-        this.displaySingleHorizon('2y', horizons['2y'], currentPrice);
-        this.displaySingleHorizon('5y', horizons['5y'], currentPrice);
-        this.displaySingleHorizon('10y', horizons['10y'], currentPrice);
+    displayHorizonRecommendations(horizons) {
+        this.displaySingleHorizon('1y', horizons['1y']);
+        this.displaySingleHorizon('2y', horizons['2y']);
+        this.displaySingleHorizon('5y', horizons['5y']);
+        this.displaySingleHorizon('10y', horizons['10y']);
     },
 
-    displaySingleHorizon(horizon, data, currentPrice) {
-        console.log(`📊 Displaying ${horizon} horizon:`, data);
-        
+    displaySingleHorizon(horizon, data) {
         const recEl = document.getElementById(`recommendation${horizon}`);
         if (recEl) {
             const recClass = this.getRecommendationClass(data.recommendation);
@@ -11712,14 +9395,7 @@ const AdvancedAnalysis = {
         
         const targetEl = document.getElementById(`target${horizon}`);
         if (targetEl) {
-            targetEl.textContent = `${data.upside >= 0 ? '+' : ''}${data.upside.toFixed(1)}% Potential`;
-        }
-        
-        const upsideEl = document.getElementById(`upside${horizon}`);
-        if (upsideEl) {
-            const upsideText = `${data.upside >= 0 ? '+' : ''}${data.upside.toFixed(1)}%`;
-            const upsideColor = data.upside >= 0 ? '#10b981' : '#ef4444';
-            upsideEl.innerHTML = `<span style="color: ${upsideColor}; font-weight: 700;">${upsideText}</span>`;
+            targetEl.textContent = `${data.potentialMove >= 0 ? '+' : ''}${data.potentialMove}% Potential`;
         }
         
         const confBarContainer = document.getElementById(`confidence${horizon}`);
@@ -11734,8 +9410,6 @@ const AdvancedAnalysis = {
                 `<div class='ai-driver-item'><i class='fas fa-check-circle'></i> ${driver}</div>`
             ).join('');
         }
-        
-        console.log(`✅ ${horizon} horizon displayed successfully`);
     },
 
     getRecommendationClass(recommendation) {
@@ -11749,60 +9423,6 @@ const AdvancedAnalysis = {
             'STRONG SELL': 'strong-sell'
         };
         return map[recommendation] || 'neutral';
-    },
-
-    displayRiskReward(riskReward) {
-        const riskEl = document.getElementById('aiRiskLevel');
-        if (riskEl) {
-            riskEl.innerHTML = `<div class='ai-risk-badge moderate-risk'>${riskReward.risk.level} (${riskReward.risk.score}/100)</div>`;
-        }
-        
-        const riskFactorsEl = document.getElementById('aiRiskFactors');
-        if (riskFactorsEl) {
-            riskFactorsEl.innerHTML = riskReward.risk.factors.map(risk => `
-                <div class='ai-factor-item ${risk.severity}'>
-                    <i class='fas fa-exclamation-circle'></i> <strong>${risk.factor}:</strong> ${risk.description}
-                </div>
-            `).join('');
-        }
-        
-        const rewardEl = document.getElementById('aiRewardLevel');
-        if (rewardEl) {
-            rewardEl.innerHTML = `<div class='ai-reward-badge moderate-reward'>${riskReward.reward.level} (${riskReward.reward.score}/100)</div>`;
-        }
-        
-        const rewardFactorsEl = document.getElementById('aiRewardFactors');
-        if (rewardFactorsEl) {
-            rewardFactorsEl.innerHTML = riskReward.reward.factors.map(reward => `
-                <div class='ai-factor-item ${reward.potential}'>
-                    <i class='fas fa-arrow-up'></i> <strong>${reward.factor}:</strong> ${reward.description}
-                </div>
-            `).join('');
-        }
-    },
-
-    displayProfessionalSummary(summary) {
-        const summaryEl = document.getElementById('aiSummaryContent');
-        const dateEl = document.getElementById('aiSummaryDate');
-        
-        if (dateEl) {
-            dateEl.textContent = new Date().toLocaleDateString('en-US', {
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric'
-            });
-        }
-        
-        if (summaryEl) {
-            let htmlSummary = summary
-                .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
-                .replace(/\n\n/g, '</p><p>')
-                .replace(/\n/g, '<br>')
-                .replace(/^(.+)$/gm, '<p>$1</p>')
-                .replace(/<p><\/p>/g, '');
-            
-            summaryEl.innerHTML = htmlSummary;
-        }
     },
     
     // ============================================
@@ -11844,16 +9464,6 @@ const AdvancedAnalysis = {
         };
     },
     
-    formatCurrency(value) {
-        if (!value && value !== 0) return 'N/A';
-        return new Intl.NumberFormat('en-US', {
-            style: 'currency',
-            currency: this.stockData?.currency || 'USD',
-            minimumFractionDigits: 2,
-            maximumFractionDigits: 2
-        }).format(value);
-    },
-    
     showLoading(show) {
         const loader = document.getElementById('loadingIndicator');
         if (loader) {
@@ -11891,7 +9501,7 @@ const AdvancedAnalysis = {
 // ============================================
 
 document.addEventListener('DOMContentLoaded', () => {
-    console.log('🚀 Advanced Analysis - Wall Street Edition - Initializing...');
+    console.log('🚀 Advanced Analysis - Legal Compliant Version - Initializing...');
     AdvancedAnalysis.init();
 });
 
@@ -11925,4 +9535,4 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
-console.log('✅ Advanced Analysis - Wall Street Edition - Script Loaded (40+ Indicators) - NO RAW PRICES DISPLAYED');
+console.log('✅ Advanced Analysis - Legal Compliant Version - Script Loaded (Pure Oscillators Only)');
