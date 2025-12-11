@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang='en'>
+<head>
+    <meta charset='UTF-8'>
+    <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+    <title>Mortgage Calculator | AlphaVault AI</title>
+    
+    <link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css'>
+    <script src='https://code.highcharts.com/highcharts.js'></script>
+    
+    <link rel='stylesheet' href='assets/css/common.css'>
+    <link rel='stylesheet' href='assets/css/sidebar.css'>
+    <link rel="stylesheet" href="assets/css/user-menu.css">
+    <link rel='stylesheet' href='assets/css/economic-pages.css'>
+    
+    <script src="assets/js/favicon-dynamic.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    
+    <script src="assets/js/config.js"></script>
+    <script src="assets/js/firebase-config.js"></script>
+    <script src="assets/js/auth-guard.js"></script>
+    <script src="assets/js/access-control.js"></script>
+</head>
+<body>
+
+    <script src="assets/js/theme.js"></script>
+    <script src="assets/js/theme-charts.js"></script>
+    <canvas id="particles-canvas" class="particles-background"></canvas>
+
+    <div class='layout-wrapper'>
+        <!-- Sidebar (identique) -->
+        <aside class='sidebar' id='sidebar'>
+            <div class="sidebar-header">
+                <div class="logo-container">
+                    <div class="logo-3d">
+                        <svg class="logo-svg" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                            <defs>
+                                <linearGradient id="logoGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                                    <stop offset="0%" class="logo-gradient-1" />
+                                    <stop offset="100%" class="logo-gradient-2" />
+                                </linearGradient>
+                            </defs>
+                            <path d="M 20 80 L 30 70 L 40 75 L 50 60 L 60 65 L 70 45 L 80 50 L 90 30" 
+                                  stroke="url(#logoGradient)" stroke-width="4" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+                            <circle cx="30" cy="70" r="4" fill="url(#logoGradient)"/>
+                            <circle cx="50" cy="60" r="4" fill="url(#logoGradient)"/>
+                            <circle cx="70" cy="45" r="4" fill="url(#logoGradient)"/>
+                            <circle cx="90" cy="30" r="5" fill="url(#logoGradient)"/>
+                            <path d="M 85 35 L 90 30 L 85 25" stroke="url(#logoGradient)" stroke-width="3" fill="none" stroke-linecap="round"/>
+                        </svg>
+                    </div>
+                    <div class="brand-text">
+                        <h2 class="brand-name">AlphaVault AI</h2>
+                        <span class="brand-tagline">Investments</span>
+                    </div>
+                </div>
+                <button class="sidebar-toggle" aria-label="Toggle Sidebar">
+                    <i class="fas fa-angle-left"></i>
+                </button>
+            </div>
+            
+            <nav class="sidebar-nav">
+                <div class="nav-section">
+                    <button class="nav-folder">
+                        <i class="fas fa-home"></i>
+                        <span>Home</span>
+                        <i class="fas fa-chevron-down arrow"></i>
+                    </button>
+                    <div class="nav-submenu">
+                        <a href="index.html" class="nav-link">
+                            <i class="fas fa-home"></i>
+                            <span>Overview</span>
+                        </a>
+                    </div>
+                </div>
+                
+                <div class='nav-section'>
+                    <button class='nav-folder'>
+                        <i class='fas fa-globe-americas'></i>
+                        <span>Economic Data</span>
+                        <i class='fas fa-chevron-down arrow'></i>
+                    </button>
+                    <div class='nav-submenu' style='display: block;'>
+                        <a href='economic-dashboard.html' class='nav-link'>
+                            <i class='fas fa-tachometer-alt'></i>
+                            <span>Dashboard US vs EU</span>
+                        </a>
+                        <a href='inflation-calculator.html' class='nav-link'>
+                            <i class='fas fa-calculator'></i>
+                            <span>Inflation Calculator</span>
+                        </a>
+                        <a href='interest-rate-tracker.html' class='nav-link'>
+                            <i class='fas fa-percent'></i>
+                            <span>Interest Rates</span>
+                        </a>
+                        <a href='recession-indicator.html' class='nav-link'>
+                            <i class='fas fa-exclamation-triangle'></i>
+                            <span>Recession Indicators</span>
+                        </a>
+                        <a href='mortgage-calculator.html' class='nav-link active'>
+                            <i class='fas fa-home'></i>
+                            <span>Mortgage Calculator</span>
+                        </a>
+                        <a href='forex-converter.html' class='nav-link'>
+                            <i class='fas fa-exchange-alt'></i>
+                            <span>Forex Converter</span>
+                        </a>
+                        <a href='macro-comparison-tool.html' class='nav-link'>
+                            <i class='fas fa-balance-scale'></i>
+                            <span>Macro Comparison</span>
+                        </a>
+                        <a href='economic-calendar.html' class='nav-link'>
+                            <i class='fas fa-calendar-alt'></i>
+                            <span>Economic Calendar</span>
+                        </a>
+                    </div>
+                </div>
+            </nav>
+            
+            <div class="sidebar-footer">
+                <div class="sidebar-user-menu">
+                    <div class="sidebar-user-trigger" id="sidebarUserTrigger">
+                        <img data-user-photo src="https://ui-avatars.com/api/?name=User&background=2563eb&color=fff" alt="Avatar" class="sidebar-user-avatar">
+                        <div class="sidebar-user-info">
+                            <span data-user-name class="sidebar-user-name">User</span>
+                            <span data-user-plan class="sidebar-user-plan">Free Plan</span>
+                        </div>
+                        <i class="fas fa-chevron-up sidebar-user-arrow"></i>
+                    </div>
+                    <div class="sidebar-user-dropdown" id="sidebarUserDropdown">
+                        <div class="user-dropdown-header">
+                            <img data-user-photo src="https://ui-avatars.com/api/?name=User&background=2563eb&color=fff" alt="Avatar" class="user-dropdown-avatar">
+                            <div class="user-dropdown-details">
+                                <h4 data-user-name class="user-dropdown-name">User</h4>
+                                <p data-user-email class="user-dropdown-email">email@example.com</p>
+                            </div>
+                        </div>
+                        <div class="user-dropdown-divider"></div>
+                        <nav class="user-dropdown-links">
+                            <a href="user-profile.html" class="user-dropdown-link">
+                                <i class="fas fa-user"></i>
+                                <span>My profile</span>
+                            </a>
+                            <a href="settings.html" class="user-dropdown-link">
+                                <i class="fas fa-cog"></i>
+                                <span>Settings</span>
+                            </a>
+                        </nav>
+                        <div class="user-dropdown-divider"></div>
+                        <button onclick="logout()" class="user-dropdown-logout">
+                            <i class="fas fa-sign-out-alt"></i>
+                            <span>Disconnect</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </aside>
+        
+        <div class='sidebar-overlay' id='sidebarOverlay'></div>
+
+        <div class='main-content'>
+            <header class='top-header'>
+                <div class='header-left'>
+                    <button class='mobile-toggle' id='mobileToggle'>
+                        <i class='fas fa-bars'></i>
+                    </button>
+                    <h1><i class="fas fa-home"></i> Mortgage Calculator</h1>
+                </div>
+            </header>
+            
+            <div class='container'>
+                
+                <!-- Current Mortgage Rates -->
+                <div class='section'>
+                    <h2 class='section-title'>
+                        <i class='fas fa-percent'></i> Current US Mortgage Rates
+                    </h2>
+                    
+                    <div class='eco-dashboard-grid' id='currentRatesGrid'>
+                        <div class='eco-loading'>
+                            <div class='eco-spinner'></div>
+                            <p>Loading current rates...</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Calculator -->
+                <div class='section'>
+                    <h2 class='section-title'>
+                        <i class='fas fa-calculator'></i> Mortgage Payment Calculator
+                    </h2>
+                    
+                    <div class='inflation-calculator-container'>
+                        <div class='mortgage-inputs'>
+                            <div class='mortgage-input-group'>
+                                <label><i class='fas fa-dollar-sign'></i> Home Price</label>
+                                <input type='number' id='homePrice' value='300000' min='0' step='1000'>
+                            </div>
+                            
+                            <div class='mortgage-input-group'>
+                                <label><i class='fas fa-hand-holding-usd'></i> Down Payment (%)</label>
+                                <input type='number' id='downPayment' value='20' min='0' max='100' step='1'>
+                            </div>
+                            
+                            <div class='mortgage-input-group'>
+                                <label><i class='fas fa-calendar-alt'></i> Loan Term (Years)</label>
+                                <select id='loanTerm'>
+                                    <option value='15'>15 Years</option>
+                                    <option value='20'>20 Years</option>
+                                    <option value='30' selected>30 Years</option>
+                                </select>
+                            </div>
+                            
+                            <div class='mortgage-input-group'>
+                                <label><i class='fas fa-percent'></i> Interest Rate (%)</label>
+                                <input type='number' id='interestRate' value='6.5' min='0' max='20' step='0.01'>
+                            </div>
+                            
+                            <div class='mortgage-input-group'>
+                                <label><i class='fas fa-building'></i> Property Tax ($/year)</label>
+                                <input type='number' id='propertyTax' value='3000' min='0' step='100'>
+                            </div>
+                            
+                            <div class='mortgage-input-group'>
+                                <label><i class='fas fa-shield-alt'></i> Home Insurance ($/year)</label>
+                                <input type='number' id='homeInsurance' value='1200' min='0' step='100'>
+                            </div>
+                        </div>
+                        
+                        <button class='btn-primary' onclick='mortgageCalculator.calculate()' style='width: 100%; padding: 16px; font-size: 1.1rem; margin-top: 20px;'>
+                            <i class='fas fa-calculator'></i> Calculate Monthly Payment
+                        </button>
+                        
+                        <div id='mortgageResults' style='display: none;'>
+                            <div class='mortgage-results'>
+                                <div class='mortgage-result-item'>
+                                    <span class='mortgage-result-label'>Monthly Payment (P&I)</span>
+                                    <span class='mortgage-result-value' id='monthlyPayment'>$0</span>
+                                </div>
+                                <div class='mortgage-result-item'>
+                                    <span class='mortgage-result-label'>Total Monthly Payment (w/ taxes & insurance)</span>
+                                    <span class='mortgage-result-value' id='totalMonthly'>$0</span>
+                                </div>
+                                <div class='mortgage-result-item'>
+                                    <span class='mortgage-result-label'>Total Loan Amount</span>
+                                    <span class='mortgage-result-value' id='loanAmount'>$0</span>
+                                </div>
+                                <div class='mortgage-result-item'>
+                                    <span class='mortgage-result-label'>Down Payment</span>
+                                    <span class='mortgage-result-value' id='downPaymentAmount'>$0</span>
+                                </div>
+                                <div class='mortgage-result-item'>
+                                    <span class='mortgage-result-label'>Total Interest Paid</span>
+                                    <span class='mortgage-result-value' id='totalInterest'>$0</span>
+                                </div>
+                                <div class='mortgage-result-item'>
+                                    <span class='mortgage-result-label'>Total Amount Paid</span>
+                                    <span class='mortgage-result-value' id='totalPaid'>$0</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Amortization Chart -->
+                <div class='section' id='amortizationSection' style='display: none;'>
+                    <h2 class='section-title'>
+                        <i class='fas fa-chart-area'></i> Amortization Schedule
+                    </h2>
+                    
+                    <div class='chart-wrapper'>
+                        <div id='amortizationChart' class='chart' style='height: 450px;'></div>
+                    </div>
+                </div>
+
+                <!-- Historical Rates Chart -->
+                <div class='section'>
+                    <h2 class='section-title'>
+                        <i class='fas fa-chart-line'></i> Historical Mortgage Rates
+                    </h2>
+                    
+                    <div class='chart-wrapper'>
+                        <div id='historicalRatesChart' class='chart' style='height: 450px;'></div>
+                    </div>
+                </div>
+
+                <footer>
+                    <p>
+                        <i class='fas fa-info-circle'></i> Mortgage Calculator - Data from FRED (Freddie Mac)
+                    </p>
+                </footer>
+            </div>
+        </div>
+    </div>
+
+    <script src='assets/js/common.js'></script>
+    <script src='assets/js/sidebar.js'></script>
+    <script src='assets/js/economic-data-client.js'></script>
+    <script src='assets/js/mortgage-calculator.js'></script>
+
+    <!-- Chatbot -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script src="assets/js/chatbot-config.js"></script>
+    <script src="assets/js/chatbot-gemini.js"></script>
+    <script src="assets/js/chatbot-analytics.js"></script>
+    <script src="assets/js/chatbot-charts.js"></script>
+    <script src="assets/js/chatbot-ipo-analyzer.js"></script>
+    <script src="assets/js/chatbot-suggestions.js"></script>
+    <script src="assets/js/chatbot-ai-engine.js"></script>
+    <script src="assets/js/chatbot-ui.js"></script>
+    <script src="assets/js/chatbot-particles.js"></script>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const initChatbotWhenReady = () => {
+            if (sessionStorage.getItem('accessDenied') === 'true') return;
+            if (typeof ChatbotUI !== 'undefined') {
+                window.financialChatbot = new ChatbotUI(ChatbotConfig);
+            }
+        };
+        setTimeout(initChatbotWhenReady, 500);
+    });
+    </script>
+
+</body>
+</html>
