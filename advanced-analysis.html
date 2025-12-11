@@ -2255,8 +2255,57 @@
 </div>
 
 <!-- ============================================
-     SCRIPTS - CHARGÉS UNE SEULE FOIS
+     SCRIPTS - ORDRE CRITIQUE POUR PORTFOLIO
      ============================================ -->
+
+<!-- Theme & Core (chargés en premier) -->
+<script src="assets/js/favicon-dynamic.js"></script>
+<script src="assets/js/theme.js"></script>
+<script src="assets/js/theme-charts.js"></script>
+
+<!-- Configuration & API (avant portfolio) -->
+<script src="assets/js/config.js"></script>
+<script src="assets/js/api-client.js"></script>
+
+<!-- UI Components -->
+<script src="assets/js/dark-mode.js"></script>
+<script src="assets/js/common.js"></script>
+<script src="assets/js/sidebar.js"></script>
+<script src="assets/js/chatbot-particles.js"></script>
+
+<!-- ✅ PORTFOLIO & WATCHLIST (ORDRE CRITIQUE) -->
+<script src='assets/js/portfolio-manager.js'></script>
+
+<!-- ⚠ OPTION 1: Si watchlist-manager.js EXISTE, décommentez cette ligne -->
+<!-- <script src='assets/js/watchlist-manager.js'></script> -->
+
+<!-- ⚠ OPTION 2: Si watchlist-manager.js N'EXISTE PAS, utilisez ce stub -->
+<script>
+// Stub WatchlistManager si le fichier n'existe pas
+if (typeof WatchlistManager === 'undefined') {
+    console.warn('⚠ WatchlistManager not found - creating stub');
+    window.WatchlistManager = {
+        init: function() { console.log('📋 WatchlistManager stub initialized'); },
+        addFromInput: function() { console.log('📋 WatchlistManager stub - addFromInput'); },
+        filterWatchlist: function() { console.log('📋 WatchlistManager stub - filterWatchlist'); },
+        loadWatchlist: function() { console.log('📋 WatchlistManager stub - loadWatchlist'); }
+    };
+}
+</script>
+
+<!-- Advanced Analysis (dépend de portfolio-manager) -->
+<script src='assets/js/advanced-analysis.js'></script>
+
+<!-- Chatbot Scripts -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script src='assets/js/chatbot-config.js'></script>
+<script src='assets/js/chatbot-gemini.js'></script>
+<script src='assets/js/chatbot-analytics.js'></script>
+<script src='assets/js/chatbot-charts.js'></script>
+<script src='assets/js/chatbot-ipo-analyzer.js'></script>
+<script src='assets/js/chatbot-suggestions.js'></script>
+<script src='assets/js/chatbot-ai-engine.js'></script>
+<script src='assets/js/chatbot-ui.js'></script>
 
 <!-- Modal Functions -->
 <script>
@@ -2266,6 +2315,7 @@ function openModal(modalId) {
     if (modal) {
         modal.classList.add('active');
         document.body.style.overflow = 'hidden';
+        console.log('✅ Modal opened:', modalId);
     }
 }
 
@@ -2274,6 +2324,7 @@ function closeModal(modalId) {
     if (modal) {
         modal.classList.remove('active');
         document.body.style.overflow = 'auto';
+        console.log('✅ Modal closed:', modalId);
     }
 }
 
@@ -2301,24 +2352,29 @@ function openPortfolioHelp() {
 }
 
 function openWatchlistHelp() {
-    alert('WATCHLIST HELP\n\nTrack multiple stocks in real-time.\nSee live price changes and percentage moves.\nFilter by gainers/losers.\nOne-click analysis.');
+    alert('WATCHLIST HELP\n\nTrack multiple stocks in real-time.\nSee live price changes.\nFilter by gainers/losers.');
 }
 
 function openAlertsHelp() {
-    alert('PRICE ALERTS HELP\n\nGet notified when stocks reach your target prices.\nSet "above" or "below" conditions.\nToggle alerts on/off without deleting.');
+    alert('PRICE ALERTS HELP\n\nGet notified when stocks reach target prices.\nSet "above" or "below" conditions.');
 }
 </script>
 
 <!-- User Menu Initialization -->
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    console.log('🔧 Initializing user menu...');
+    
     const trigger = document.getElementById('sidebarUserTrigger');
     const dropdown = document.getElementById('sidebarUserDropdown');
     
     if (trigger && dropdown) {
+        console.log('✅ User menu elements found');
+        
         trigger.addEventListener('click', function(e) {
             e.preventDefault();
             e.stopPropagation();
+            console.log('👆 User menu clicked');
             dropdown.classList.toggle('active');
         });
         
@@ -2327,6 +2383,10 @@ document.addEventListener('DOMContentLoaded', function() {
                 dropdown.classList.remove('active');
             }
         });
+        
+        console.log('✅ User menu initialized');
+    } else {
+        console.error('❌ User menu elements not found');
     }
 });
 </script>
@@ -2335,31 +2395,109 @@ document.addEventListener('DOMContentLoaded', function() {
 <script>
 function logout() {
     if (confirm('Are you sure you want to disconnect?')) {
+        console.log('🔓 Logout requested...');
         if (typeof firebase !== 'undefined' && firebase.auth) {
             firebase.auth().signOut().then(() => {
+                console.log('✅ Logout successful');
                 window.location.href = 'login.html';
             }).catch((error) => {
-                console.error('Logout error:', error);
+                console.error('❌ Logout error:', error);
                 alert('Error during logout. Please try again.');
             });
         } else {
+            console.log('⚠ Firebase not available, redirecting...');
             window.location.href = 'login.html';
         }
     }
 }
 </script>
 
+<!-- ✅ VÉRIFICATION PORTFOLIO MANAGER -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('🔍 Checking Portfolio Manager...');
+    
+    // Vérifier que PortfolioManager est chargé
+    if (typeof PortfolioManager !== 'undefined') {
+        console.log('✅ PortfolioManager is loaded');
+        console.log('📋 Available methods:', Object.keys(PortfolioManager));
+        
+        // Vérifier Firebase
+        if (typeof firebase !== 'undefined' && firebase.auth && firebase.auth().currentUser) {
+            console.log('✅ Firebase user authenticated');
+            console.log('👤 User:', firebase.auth().currentUser.email);
+            
+            // Initialiser le portfolio si la méthode existe
+            if (typeof PortfolioManager.init === 'function') {
+                console.log('🚀 Initializing PortfolioManager...');
+                try {
+                    PortfolioManager.init();
+                    console.log('✅ PortfolioManager initialized successfully');
+                } catch (error) {
+                    console.error('❌ PortfolioManager initialization error:', error);
+                }
+            } else if (typeof PortfolioManager.loadPortfolios === 'function') {
+                console.log('🚀 Loading portfolios...');
+                try {
+                    PortfolioManager.loadPortfolios();
+                    console.log('✅ Portfolios loaded successfully');
+                } catch (error) {
+                    console.error('❌ Portfolio loading error:', error);
+                }
+            }
+        } else {
+            console.warn('⚠ Firebase user not yet authenticated, waiting...');
+            
+            // Attendre l'authentification Firebase
+            const checkAuth = setInterval(() => {
+                if (firebase.auth && firebase.auth().currentUser) {
+                    console.log('✅ Firebase user now authenticated');
+                    clearInterval(checkAuth);
+                    
+                    if (typeof PortfolioManager.init === 'function') {
+                        PortfolioManager.init();
+                    } else if (typeof PortfolioManager.loadPortfolios === 'function') {
+                        PortfolioManager.loadPortfolios();
+                    }
+                }
+            }, 500);
+            
+            // Timeout après 10 secondes
+            setTimeout(() => {
+                clearInterval(checkAuth);
+                if (!firebase.auth().currentUser) {
+                    console.error('❌ Firebase authentication timeout');
+                }
+            }, 10000);
+        }
+    } else {
+        console.error('❌ PortfolioManager NOT loaded!');
+        console.error('📁 Verify that assets/js/portfolio-manager.js exists');
+        console.error('🔍 Available global objects:', Object.keys(window).filter(k => k.includes('Portfolio') || k.includes('Watchlist')));
+    }
+});
+</script>
+
 <!-- Chatbot Initialization -->
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     setTimeout(() => {
-        if (typeof ChatbotConfig === 'undefined' || typeof ChatbotUI === 'undefined') return;
+        const accessDenied = sessionStorage.getItem('accessDenied') === 'true';
+        if (accessDenied) {
+            console.log('⚠ Access denied - chatbot skipped');
+            return;
+        }
+        
+        if (typeof ChatbotConfig === 'undefined' || typeof ChatbotUI === 'undefined') {
+            console.log('⏳ Chatbot dependencies not ready...');
+            return;
+        }
         
         try {
             window.financialChatbot = new ChatbotUI(ChatbotConfig);
-            console.log('Chatbot initialized successfully');
+            console.log('🎉 Chatbot initialized successfully');
         } catch (error) {
-            console.error('Chatbot initialization error:', error);
+            console.error('❌ Chatbot initialization error:', error);
         }
     }, 500);
 });
