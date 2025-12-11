@@ -1,14 +1,13 @@
 /**
  * ====================================================================
- * ALPHAVAULT AI - US ECONOMIC DASHBOARD v5.0 - FINAL PERFECT VERSION
+ * ALPHAVAULT AI - US ECONOMIC DASHBOARD v6.0 - PROFESSIONAL VERSION
  * ====================================================================
  * Features:
- * - US data only (FRED API)
- * - Interactive modals for charts
- * - Trends analysis
- * - Export functionality
- * - No refresh buttons
- * - Gradient titles everywhere
+ * - 20-30 years historical data
+ * - User-selectable time ranges (1Y, 5Y, 10Y, 20Y, 30Y, MAX)
+ * - Modal info buttons on all cards
+ * - No emojis (professional design)
+ * - Interactive charts with fullscreen support
  */
 
 class EconomicDashboard {
@@ -17,10 +16,12 @@ class EconomicDashboard {
         this.lastUpdate = null;
         this.cachedData = {};
         this.charts = {};
+        this.currentTimeRange = 20; // Default: 20 years
+        this.rawChartData = {}; // Store full datasets
     }
 
     async init() {
-        console.log('📊 US Economic Dashboard v5.0 - Initializing...');
+        console.log('📊 US Economic Dashboard v6.0 - Initializing...');
         
         try {
             // Initialize UI
@@ -32,7 +33,7 @@ class EconomicDashboard {
             // Setup event listeners
             this.setupEventListeners();
             
-            console.log('✅ Dashboard v5.0 loaded successfully');
+            console.log('✅ Dashboard v6.0 loaded successfully');
             this.startAutoRefresh();
             
         } catch (error) {
@@ -48,6 +49,7 @@ class EconomicDashboard {
      */
     initializeUI() {
         this.initializeModals();
+        this.initializeTimeRangeSelector();
     }
 
     initializeModals() {
@@ -68,6 +70,28 @@ class EconomicDashboard {
                 if (e.target === modal) {
                     this.closeModal(modalId);
                 }
+            });
+        });
+    }
+
+    initializeTimeRangeSelector() {
+        const selector = document.getElementById('timeRangeSelector');
+        if (!selector) return;
+
+        const buttons = selector.querySelectorAll('.time-btn');
+        buttons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                // Remove active from all
+                buttons.forEach(b => b.classList.remove('active'));
+                // Add active to clicked
+                btn.classList.add('active');
+                
+                // Get range
+                const range = btn.dataset.range;
+                this.currentTimeRange = range === 'max' ? 'max' : parseInt(range);
+                
+                // Reload charts with new range
+                this.updateChartsWithTimeRange();
             });
         });
     }
@@ -113,7 +137,7 @@ class EconomicDashboard {
 
     /**
      * ========================================
-     * DASHBOARD CARDS (US ONLY)
+     * DASHBOARD CARDS (US ONLY - NO EMOJIS)
      * ========================================
      */
     async loadDashboardData() {
@@ -158,7 +182,7 @@ class EconomicDashboard {
                     title: 'US GDP',
                     value: this.formatGDP(usData.gdp),
                     unit: 'Trillion USD',
-                    flag: '🇺🇸',
+                    icon: 'fa-chart-line',
                     cssClass: 'us-card',
                     change: parseFloat(usData.gdpGrowth),
                     changeType: parseFloat(usData.gdpGrowth) > 0 ? 'positive' : 'negative',
@@ -170,7 +194,7 @@ class EconomicDashboard {
                     title: 'GDP Growth',
                     value: usData.gdpGrowth + '%',
                     unit: 'Annual Rate',
-                    flag: '📈',
+                    icon: 'fa-arrow-trend-up',
                     cssClass: 'us-card',
                     change: parseFloat(usData.gdpGrowth),
                     changeType: parseFloat(usData.gdpGrowth) > 0 ? 'positive' : 'negative',
@@ -182,7 +206,7 @@ class EconomicDashboard {
                     title: 'Unemployment',
                     value: usData.unemployment + '%',
                     unit: 'Labor Force',
-                    flag: '👥',
+                    icon: 'fa-users',
                     cssClass: 'us-card',
                     change: null,
                     lastUpdate: usUnemployment?.[0]?.date,
@@ -193,7 +217,7 @@ class EconomicDashboard {
                     title: 'Inflation (CPI)',
                     value: usData.inflation + '%',
                     unit: 'YoY Change',
-                    flag: '🔥',
+                    icon: 'fa-fire-flame-curved',
                     cssClass: 'us-card',
                     change: parseFloat(usData.inflation),
                     changeType: parseFloat(usData.inflation) > 2 ? 'negative' : 'positive',
@@ -205,7 +229,7 @@ class EconomicDashboard {
                     title: 'Fed Funds Rate',
                     value: usData.fedRate + '%',
                     unit: 'Target Rate',
-                    flag: '🏦',
+                    icon: 'fa-landmark',
                     cssClass: 'us-card',
                     change: null,
                     lastUpdate: usFedRate?.[0]?.date,
@@ -213,8 +237,8 @@ class EconomicDashboard {
                 })}
             `;
 
-            // Attach click handlers
-            this.attachCardClickHandlers();
+            // Attach click handlers for info buttons
+            this.attachCardInfoHandlers();
 
             this.lastUpdate = new Date();
             console.log('✅ Dashboard cards rendered');
@@ -398,15 +422,15 @@ class EconomicDashboard {
     }
 
     createEcoCard(options) {
-        const { title, value, unit, flag, cssClass, change, changeType, lastUpdate, indicator } = options;
+        const { title, value, unit, icon, cssClass, change, changeType, lastUpdate, indicator } = options;
         
         let changeHTML = '';
         if (change !== null && change !== undefined && !isNaN(change)) {
-            const icon = changeType === 'positive' ? 'fa-arrow-up' : 'fa-arrow-down';
+            const iconClass = changeType === 'positive' ? 'fa-arrow-up' : 'fa-arrow-down';
             const changeClass = changeType === 'positive' ? 'positive' : 'negative';
             changeHTML = `
                 <div class='eco-change ${changeClass}'>
-                    <i class='fas ${icon}'></i>
+                    <i class='fas ${iconClass}'></i>
                     <span>${Math.abs(change).toFixed(2)}%</span>
                 </div>
             `;
@@ -415,8 +439,13 @@ class EconomicDashboard {
         return `
             <div class='eco-card ${cssClass}' data-indicator='${indicator}'>
                 <div class='eco-card-header'>
-                    <h3 class='eco-card-title'>${title}</h3>
-                    <span class='eco-flag'>${flag}</span>
+                    <div class='eco-card-title-wrapper'>
+                        <i class='fas ${icon} eco-card-icon'></i>
+                        <h3 class='eco-card-title'>${title}</h3>
+                    </div>
+                    <button class='eco-card-btn-info' data-indicator='${indicator}' title='More information'>
+                        <i class='fas fa-info-circle'></i>
+                    </button>
                 </div>
                 <div class='eco-value'>${value}</div>
                 <div class='eco-sublabel'>${unit}</div>
@@ -426,11 +455,12 @@ class EconomicDashboard {
         `;
     }
 
-    attachCardClickHandlers() {
-        const cards = document.querySelectorAll('.eco-card');
-        cards.forEach(card => {
-            card.addEventListener('click', () => {
-                const indicator = card.dataset.indicator;
+    attachCardInfoHandlers() {
+        const infoBtns = document.querySelectorAll('.eco-card-btn-info');
+        infoBtns.forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const indicator = btn.dataset.indicator;
                 this.showIndicatorModal(indicator);
             });
         });
@@ -438,11 +468,11 @@ class EconomicDashboard {
 
     /**
      * ========================================
-     * CHARTS
+     * CHARTS (20-30 YEARS DATA)
      * ========================================
      */
     async loadCharts() {
-        console.log('📊 Loading charts...');
+        console.log('📊 Loading charts with 20-30 years data...');
         
         const chartPromises = [
             this.loadGDPChart(),
@@ -462,53 +492,24 @@ class EconomicDashboard {
 
     async loadGDPChart() {
         try {
-            const usGDP = await economicDataClient.getSeries('A191RL1Q225SBEA', { limit: 40, sort_order: 'desc' });
+            // Fetch 30 years of quarterly data (120 quarters)
+            const usGDP = await economicDataClient.getSeries('A191RL1Q225SBEA', { limit: 120, sort_order: 'desc' });
 
             if (!usGDP || usGDP.length === 0) {
                 this.renderEmptyChart('gdpChart', 'No GDP data available');
                 return;
             }
 
-            const chartData = usGDP
+            const fullData = usGDP
                 .filter(d => d.value !== '.')
                 .reverse()
                 .map(d => [new Date(d.date).getTime(), parseFloat(d.value)]);
 
-            this.charts.gdpChart = Highcharts.chart('gdpChart', {
-                chart: { 
-                    type: 'line', 
-                    backgroundColor: 'transparent', 
-                    height: 400
-                },
-                title: { text: null },
-                xAxis: { 
-                    type: 'datetime',
-                    labels: { style: { color: 'var(--text-secondary)' } }
-                },
-                yAxis: { 
-                    title: { text: 'Growth Rate (%)', style: { color: 'var(--text-secondary)' } },
-                    labels: { style: { color: 'var(--text-secondary)' } },
-                    gridLineColor: 'var(--border-color)',
-                    plotLines: [{ value: 0, color: '#ef4444', width: 2, zIndex: 4 }]
-                },
-                tooltip: { 
-                    valueDecimals: 2, 
-                    valueSuffix: '%',
-                    backgroundColor: 'var(--glass-bg)',
-                    borderColor: 'var(--glass-border)',
-                    style: { color: 'var(--text-primary)' }
-                },
-                series: [{
-                    name: 'US GDP Growth',
-                    data: chartData,
-                    color: '#3b82f6',
-                    marker: { enabled: false },
-                    lineWidth: 3
-                }],
-                credits: { enabled: false },
-                legend: { enabled: true, itemStyle: { color: 'var(--text-primary)' } },
-                exporting: { enabled: true }
-            });
+            // Store full dataset
+            this.rawChartData.gdp = fullData;
+
+            // Render with current time range
+            this.renderGDPChart();
 
             console.log('✅ GDP chart rendered');
 
@@ -518,47 +519,64 @@ class EconomicDashboard {
         }
     }
 
+    renderGDPChart() {
+        const data = this.filterDataByTimeRange(this.rawChartData.gdp);
+
+        this.charts.gdpChart = Highcharts.chart('gdpChart', {
+            chart: { 
+                type: 'line', 
+                backgroundColor: 'transparent', 
+                height: 400
+            },
+            title: { text: null },
+            xAxis: { 
+                type: 'datetime',
+                labels: { style: { color: 'var(--text-secondary)' } }
+            },
+            yAxis: { 
+                title: { text: 'Growth Rate (%)', style: { color: 'var(--text-secondary)' } },
+                labels: { style: { color: 'var(--text-secondary)' } },
+                gridLineColor: 'var(--border-color)',
+                plotLines: [{ value: 0, color: '#ef4444', width: 2, zIndex: 4 }]
+            },
+            tooltip: { 
+                valueDecimals: 2, 
+                valueSuffix: '%',
+                backgroundColor: 'var(--glass-bg)',
+                borderColor: 'var(--glass-border)',
+                style: { color: 'var(--text-primary)' }
+            },
+            series: [{
+                name: 'US GDP Growth',
+                data: data,
+                color: '#3b82f6',
+                marker: { enabled: false },
+                lineWidth: 3
+            }],
+            credits: { enabled: false },
+            legend: { enabled: true, itemStyle: { color: 'var(--text-primary)' } },
+            exporting: { enabled: true }
+        });
+    }
+
     async loadUnemploymentChart() {
         try {
-            const usUnemp = await economicDataClient.getSeries('UNRATE', { limit: 120, sort_order: 'desc' });
+            // Fetch 30 years of monthly data (360 months)
+            const usUnemp = await economicDataClient.getSeries('UNRATE', { limit: 360, sort_order: 'desc' });
 
             if (!usUnemp || usUnemp.length === 0) {
                 this.renderEmptyChart('unemploymentChart', 'No unemployment data available');
                 return;
             }
 
-            const usData = usUnemp
+            const fullData = usUnemp
                 .filter(d => d.value !== '.')
                 .reverse()
                 .map(d => [new Date(d.date).getTime(), parseFloat(d.value)]);
 
-            this.charts.unemploymentChart = Highcharts.chart('unemploymentChart', {
-                chart: { type: 'line', backgroundColor: 'transparent', height: 400 },
-                title: { text: null },
-                xAxis: { type: 'datetime', labels: { style: { color: 'var(--text-secondary)' } } },
-                yAxis: { 
-                    title: { text: 'Unemployment Rate (%)', style: { color: 'var(--text-secondary)' } },
-                    labels: { style: { color: 'var(--text-secondary)' } },
-                    gridLineColor: 'var(--border-color)'
-                },
-                tooltip: { 
-                    valueDecimals: 1, 
-                    valueSuffix: '%',
-                    backgroundColor: 'var(--glass-bg)',
-                    borderColor: 'var(--glass-border)',
-                    style: { color: 'var(--text-primary)' }
-                },
-                series: [{
-                    name: 'US Unemployment',
-                    data: usData,
-                    color: '#3b82f6',
-                    marker: { enabled: false },
-                    lineWidth: 3
-                }],
-                credits: { enabled: false },
-                legend: { enabled: true, itemStyle: { color: 'var(--text-primary)' } },
-                exporting: { enabled: true }
-            });
+            this.rawChartData.unemployment = fullData;
+
+            this.renderUnemploymentChart();
 
             console.log('✅ Unemployment chart rendered');
 
@@ -568,48 +586,53 @@ class EconomicDashboard {
         }
     }
 
+    renderUnemploymentChart() {
+        const data = this.filterDataByTimeRange(this.rawChartData.unemployment);
+
+        this.charts.unemploymentChart = Highcharts.chart('unemploymentChart', {
+            chart: { type: 'line', backgroundColor: 'transparent', height: 400 },
+            title: { text: null },
+            xAxis: { type: 'datetime', labels: { style: { color: 'var(--text-secondary)' } } },
+            yAxis: { 
+                title: { text: 'Unemployment Rate (%)', style: { color: 'var(--text-secondary)' } },
+                labels: { style: { color: 'var(--text-secondary)' } },
+                gridLineColor: 'var(--border-color)'
+            },
+            tooltip: { 
+                valueDecimals: 1, 
+                valueSuffix: '%',
+                backgroundColor: 'var(--glass-bg)',
+                borderColor: 'var(--glass-border)',
+                style: { color: 'var(--text-primary)' }
+            },
+            series: [{
+                name: 'US Unemployment',
+                data: data,
+                color: '#3b82f6',
+                marker: { enabled: false },
+                lineWidth: 3
+            }],
+            credits: { enabled: false },
+            legend: { enabled: true, itemStyle: { color: 'var(--text-primary)' } },
+            exporting: { enabled: true }
+        });
+    }
+
     async loadInflationChart() {
         try {
-            const usInflation = await economicDataClient.getSeries('CPIAUCSL', { limit: 120, sort_order: 'desc' });
+            // Fetch 30 years + 1 year for YoY calculation (372 months)
+            const usInflation = await economicDataClient.getSeries('CPIAUCSL', { limit: 372, sort_order: 'desc' });
 
             if (!usInflation || usInflation.length < 13) {
                 this.renderEmptyChart('inflationChart', 'No inflation data available');
                 return;
             }
 
-            const usData = this.calculateYoYTimeSeriesFromDesc(usInflation);
+            const fullData = this.calculateYoYTimeSeriesFromDesc(usInflation);
 
-            this.charts.inflationChart = Highcharts.chart('inflationChart', {
-                chart: { type: 'line', backgroundColor: 'transparent', height: 400 },
-                title: { text: null },
-                xAxis: { type: 'datetime', labels: { style: { color: 'var(--text-secondary)' } } },
-                yAxis: { 
-                    title: { text: 'Inflation Rate (YoY %)', style: { color: 'var(--text-secondary)' } },
-                    labels: { style: { color: 'var(--text-secondary)' } },
-                    gridLineColor: 'var(--border-color)',
-                    plotLines: [{
-                        value: 2, color: '#f59e0b', width: 2, dashStyle: 'Dash',
-                        label: { text: 'Fed Target 2%', style: { color: '#f59e0b' } }
-                    }]
-                },
-                tooltip: { 
-                    valueDecimals: 2, 
-                    valueSuffix: '%',
-                    backgroundColor: 'var(--glass-bg)',
-                    borderColor: 'var(--glass-border)',
-                    style: { color: 'var(--text-primary)' }
-                },
-                series: [{
-                    name: 'US Inflation (CPI)',
-                    data: usData,
-                    color: '#f59e0b',
-                    marker: { enabled: false },
-                    lineWidth: 3
-                }],
-                credits: { enabled: false },
-                legend: { enabled: true, itemStyle: { color: 'var(--text-primary)' } },
-                exporting: { enabled: true }
-            });
+            this.rawChartData.inflation = fullData;
+
+            this.renderInflationChart();
 
             console.log('✅ Inflation chart rendered');
 
@@ -619,48 +642,61 @@ class EconomicDashboard {
         }
     }
 
+    renderInflationChart() {
+        const data = this.filterDataByTimeRange(this.rawChartData.inflation);
+
+        this.charts.inflationChart = Highcharts.chart('inflationChart', {
+            chart: { type: 'line', backgroundColor: 'transparent', height: 400 },
+            title: { text: null },
+            xAxis: { type: 'datetime', labels: { style: { color: 'var(--text-secondary)' } } },
+            yAxis: { 
+                title: { text: 'Inflation Rate (YoY %)', style: { color: 'var(--text-secondary)' } },
+                labels: { style: { color: 'var(--text-secondary)' } },
+                gridLineColor: 'var(--border-color)',
+                plotLines: [{
+                    value: 2, color: '#f59e0b', width: 2, dashStyle: 'Dash',
+                    label: { text: 'Fed Target 2%', style: { color: '#f59e0b' } }
+                }]
+            },
+            tooltip: { 
+                valueDecimals: 2, 
+                valueSuffix: '%',
+                backgroundColor: 'var(--glass-bg)',
+                borderColor: 'var(--glass-border)',
+                style: { color: 'var(--text-primary)' }
+            },
+            series: [{
+                name: 'US Inflation (CPI)',
+                data: data,
+                color: '#f59e0b',
+                marker: { enabled: false },
+                lineWidth: 3
+            }],
+            credits: { enabled: false },
+            legend: { enabled: true, itemStyle: { color: 'var(--text-primary)' } },
+            exporting: { enabled: true }
+        });
+    }
+
     async loadInterestRateChart() {
         try {
-            const usFedRate = await economicDataClient.getSeries('DFF', { limit: 120, sort_order: 'desc' });
+            // Fetch 30 years of daily data (limited to 1000 for performance, approx 4 years)
+            // For 30 years, use DFF with monthly aggregation or lower frequency
+            const usFedRate = await economicDataClient.getSeries('DFF', { limit: 1000, sort_order: 'desc' });
 
             if (!usFedRate || usFedRate.length === 0) {
                 this.renderEmptyChart('interestRateChart', 'No interest rate data available');
                 return;
             }
 
-            const usData = usFedRate
+            const fullData = usFedRate
                 .filter(d => d.value !== '.')
                 .reverse()
                 .map(d => [new Date(d.date).getTime(), parseFloat(d.value)]);
 
-            this.charts.interestRateChart = Highcharts.chart('interestRateChart', {
-                chart: { type: 'area', backgroundColor: 'transparent', height: 400 },
-                title: { text: null },
-                xAxis: { type: 'datetime', labels: { style: { color: 'var(--text-secondary)' } } },
-                yAxis: { 
-                    title: { text: 'Interest Rate (%)', style: { color: 'var(--text-secondary)' } },
-                    labels: { style: { color: 'var(--text-secondary)' } },
-                    gridLineColor: 'var(--border-color)'
-                },
-                tooltip: { 
-                    valueDecimals: 2, 
-                    valueSuffix: '%',
-                    backgroundColor: 'var(--glass-bg)',
-                    borderColor: 'var(--glass-border)',
-                    style: { color: 'var(--text-primary)' }
-                },
-                plotOptions: { area: { fillOpacity: 0.2 } },
-                series: [{
-                    name: 'Fed Funds Rate',
-                    data: usData,
-                    color: '#3b82f6',
-                    marker: { enabled: false },
-                    lineWidth: 3
-                }],
-                credits: { enabled: false },
-                legend: { enabled: true, itemStyle: { color: 'var(--text-primary)' } },
-                exporting: { enabled: true }
-            });
+            this.rawChartData.interestRate = fullData;
+
+            this.renderInterestRateChart();
 
             console.log('✅ Interest rate chart rendered');
 
@@ -668,6 +704,66 @@ class EconomicDashboard {
             console.error('❌ Error loading interest rate chart:', error);
             this.renderEmptyChart('interestRateChart', 'Error loading chart');
         }
+    }
+
+    renderInterestRateChart() {
+        const data = this.filterDataByTimeRange(this.rawChartData.interestRate);
+
+        this.charts.interestRateChart = Highcharts.chart('interestRateChart', {
+            chart: { type: 'area', backgroundColor: 'transparent', height: 400 },
+            title: { text: null },
+            xAxis: { type: 'datetime', labels: { style: { color: 'var(--text-secondary)' } } },
+            yAxis: { 
+                title: { text: 'Interest Rate (%)', style: { color: 'var(--text-secondary)' } },
+                labels: { style: { color: 'var(--text-secondary)' } },
+                gridLineColor: 'var(--border-color)'
+            },
+            tooltip: { 
+                valueDecimals: 2, 
+                valueSuffix: '%',
+                backgroundColor: 'var(--glass-bg)',
+                borderColor: 'var(--glass-border)',
+                style: { color: 'var(--text-primary)' }
+            },
+            plotOptions: { area: { fillOpacity: 0.2 } },
+            series: [{
+                name: 'Fed Funds Rate',
+                data: data,
+                color: '#3b82f6',
+                marker: { enabled: false },
+                lineWidth: 3
+            }],
+            credits: { enabled: false },
+            legend: { enabled: true, itemStyle: { color: 'var(--text-primary)' } },
+            exporting: { enabled: true }
+        });
+    }
+
+    /**
+     * ========================================
+     * TIME RANGE FILTERING
+     * ========================================
+     */
+    filterDataByTimeRange(data) {
+        if (!data || data.length === 0) return [];
+        
+        if (this.currentTimeRange === 'max') {
+            return data;
+        }
+
+        const years = parseInt(this.currentTimeRange);
+        const cutoffDate = Date.now() - (years * 365.25 * 24 * 60 * 60 * 1000);
+        
+        return data.filter(point => point[0] >= cutoffDate);
+    }
+
+    updateChartsWithTimeRange() {
+        console.log(`📊 Updating charts with time range: ${this.currentTimeRange} years`);
+        
+        if (this.rawChartData.gdp) this.renderGDPChart();
+        if (this.rawChartData.unemployment) this.renderUnemploymentChart();
+        if (this.rawChartData.inflation) this.renderInflationChart();
+        if (this.rawChartData.interestRate) this.renderInterestRateChart();
     }
 
     renderEmptyChart(containerId, message) {
@@ -841,11 +937,11 @@ class EconomicDashboard {
         const modalBody = document.getElementById('modalBody');
         
         const titles = {
-            'us-gdp': '🇺🇸 US Gross Domestic Product',
-            'us-gdp-growth': '📈 US GDP Growth Rate',
-            'us-unemployment': '👥 US Unemployment Rate',
-            'us-inflation': '🔥 US Inflation (CPI)',
-            'us-fed-rate': '🏦 Federal Funds Rate'
+            'us-gdp': 'US Gross Domestic Product',
+            'us-gdp-growth': 'US GDP Growth Rate',
+            'us-unemployment': 'US Unemployment Rate',
+            'us-inflation': 'US Inflation (CPI)',
+            'us-fed-rate': 'Federal Funds Rate'
         };
         
         const descriptions = {
@@ -884,8 +980,8 @@ class EconomicDashboard {
         
         const chartInfo = {
             'gdp': {
-                title: '📈 GDP Growth Rate Chart',
-                description: 'This chart displays the quarterly GDP growth rate for the United States over the past 10 years (40 quarters).',
+                title: 'GDP Growth Rate Chart',
+                description: 'This chart displays the quarterly GDP growth rate for the United States over your selected time period.',
                 keyPoints: [
                     'Shows economic expansion (positive values) or contraction (negative values)',
                     'Red line at 0% marks the recession threshold',
@@ -895,8 +991,8 @@ class EconomicDashboard {
                 interpretation: 'Positive growth indicates economic expansion, while negative growth (recession) shows economic contraction. Growth above 3% is considered strong, while growth below 1% may signal economic weakness.'
             },
             'unemployment': {
-                title: '👥 Unemployment Rate Chart',
-                description: 'This chart tracks the US unemployment rate over the past 10 years.',
+                title: 'Unemployment Rate Chart',
+                description: 'This chart tracks the US unemployment rate over your selected time period.',
                 keyPoints: [
                     'Shows percentage of labor force actively seeking work',
                     'Lower values indicate a stronger labor market',
@@ -906,7 +1002,7 @@ class EconomicDashboard {
                 interpretation: 'Unemployment below 4% indicates a tight labor market. Rates above 6% suggest labor market slack. Rapid increases may signal economic distress.'
             },
             'inflation': {
-                title: '🔥 Inflation Rate Chart',
+                title: 'Inflation Rate Chart',
                 description: 'This chart displays the year-over-year Consumer Price Index (CPI) inflation rate.',
                 keyPoints: [
                     'Measures purchasing power changes over time',
@@ -917,7 +1013,7 @@ class EconomicDashboard {
                 interpretation: 'Inflation near 2% is considered healthy. Below 1% may indicate deflation risk. Above 4% suggests overheating economy and potential Fed intervention.'
             },
             'fedrate': {
-                title: '🏦 Federal Funds Rate Chart',
+                title: 'Federal Funds Rate Chart',
                 description: 'This chart shows the target Federal Funds Rate set by the Federal Reserve.',
                 keyPoints: [
                     'Primary tool for Federal Reserve monetary policy',

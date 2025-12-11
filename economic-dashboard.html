@@ -248,9 +248,19 @@
 
                 <!-- Historical Trends Charts -->
                 <div class='section'>
-                    <h2 class='section-title gradient-title'>
-                        <i class='fas fa-chart-line'></i> Historical Trends
-                    </h2>
+                    <div class='section-header-with-controls'>
+                        <h2 class='section-title gradient-title'>
+                            <i class='fas fa-chart-line'></i> Historical Trends
+                        </h2>
+                        <div class='time-range-selector' id='timeRangeSelector'>
+                            <button class='time-btn' data-range='1'>1Y</button>
+                            <button class='time-btn' data-range='5'>5Y</button>
+                            <button class='time-btn' data-range='10'>10Y</button>
+                            <button class='time-btn active' data-range='20'>20Y</button>
+                            <button class='time-btn' data-range='30'>30Y</button>
+                            <button class='time-btn' data-range='max'>MAX</button>
+                        </div>
+                    </div>
                     
                     <div class='charts-grid'>
                         <div class='chart-card'>
