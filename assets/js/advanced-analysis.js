@@ -6605,6 +6605,42 @@ const AdvancedAnalysis = {
         indigo: '#6610f2',
         pink: '#d63384'
     },
+
+    // ✅ NOUVELLE FONCTION - NORMALISATION DES PRIX
+    normalizePriceData(data, baseValue = null) {
+        if (!data || data.length === 0) return data;
+        
+        // Si data est un tableau de [timestamp, price]
+        if (Array.isArray(data[0]) && data[0].length === 2) {
+            const firstPrice = baseValue || data[0][1];
+            return data.map(([timestamp, price]) => [
+                timestamp,
+                (price / firstPrice) * 100
+            ]);
+        }
+        
+        // Si data est un tableau de {timestamp, close, ...}
+        if (data[0].timestamp !== undefined) {
+            const firstPrice = baseValue || data[0].close;
+            return data.map(item => ({
+                ...item,
+                open: (item.open / firstPrice) * 100,
+                high: (item.high / firstPrice) * 100,
+                low: (item.low / firstPrice) * 100,
+                close: (item.close / firstPrice) * 100
+            }));
+        }
+        
+        return data;
+    },
+    
+    // ✅ NOUVELLE FONCTION - Obtenir le prix de base pour normalisation
+    getBasePrice() {
+        if (!this.stockData || !this.stockData.prices || this.stockData.prices.length === 0) {
+            return 100;
+        }
+        return this.stockData.prices[0].close;
+    },
     
     // ============================================
     // ✅ INITIALIZATION
@@ -7538,35 +7574,51 @@ const AdvancedAnalysis = {
         const prices = this.stockData.prices;
         const bollinger = this.calculateBollingerBands(prices);
         
-        // ❌ SUPPRESSION DES CANDLESTICKS OHLC
-        // const ohlc = prices.map(p => [p.timestamp, p.open, p.high, p.low, p.close]);
-        
-        // ✅ Utiliser une simple ligne de closing prices au lieu des candlesticks
-        const closePrices = prices.map(p => [p.timestamp, p.close]);
+        // ✅ NORMALISER
+        const basePrice = this.getBasePrice();
+        const normalizedPrices = this.normalizePriceData(
+            prices.map(p => [p.timestamp, p.close]),
+            basePrice
+        );
+        const normalizedUpper = this.normalizePriceData(bollinger.upper, basePrice);
+        const normalizedMiddle = this.normalizePriceData(bollinger.middle, basePrice);
+        const normalizedLower = this.normalizePriceData(bollinger.lower, basePrice);
         
         if (this.charts.bollinger) {
-            this.charts.bollinger.series[0].setData(closePrices, false);
-            this.charts.bollinger.series[1].setData(bollinger.upper, false);
-            this.charts.bollinger.series[2].setData(bollinger.middle, false);
-            this.charts.bollinger.series[3].setData(bollinger.lower, false);
+            this.charts.bollinger.series[0].setData(normalizedPrices, false);
+            this.charts.bollinger.series[1].setData(normalizedUpper, false);
+            this.charts.bollinger.series[2].setData(normalizedMiddle, false);
+            this.charts.bollinger.series[3].setData(normalizedLower, false);
             this.charts.bollinger.redraw();
         } else {
             this.charts.bollinger = Highcharts.stockChart('bollingerChart', {
                 chart: { borderRadius: 15, height: 600 },
                 title: {
-                    text: 'Bollinger Bands (20, 2)',
+                    text: 'Bollinger Bands (Normalized Index)',
                     style: { color: this.colors.primary, fontWeight: 'bold' }
                 },
                 rangeSelector: { enabled: false },
                 navigator: { enabled: true },
                 xAxis: { type: 'datetime', crosshair: true },
-                yAxis: { title: { text: 'Position' } },
-                tooltip: { borderRadius: 10, shared: true },
+                yAxis: { 
+                    title: { text: 'Relative Index (Base 100)' },
+                    labels: {
+                        formatter: function() {
+                            return this.value.toFixed(0);
+                        }
+                    }
+                },
+                tooltip: { 
+                    borderRadius: 10, 
+                    shared: true,
+                    valueDecimals: 2,
+                    valueSuffix: ''
+                },
                 series: [
                     {
                         type: 'line',
                         name: this.currentSymbol,
-                        data: closePrices,
+                        data: normalizedPrices,
                         color: this.colors.primary,
                         lineWidth: 2,
                         zIndex: 2
@@ -7574,7 +7626,7 @@ const AdvancedAnalysis = {
                     {
                         type: 'line',
                         name: 'Upper Band',
-                        data: bollinger.upper,
+                        data: normalizedUpper,
                         color: this.colors.danger,
                         lineWidth: 2,
                         dashStyle: 'Dash',
@@ -7583,7 +7635,7 @@ const AdvancedAnalysis = {
                     {
                         type: 'line',
                         name: 'Middle Band (SMA)',
-                        data: bollinger.middle,
+                        data: normalizedMiddle,
                         color: this.colors.primary,
                         lineWidth: 2,
                         zIndex: 1
@@ -7591,7 +7643,7 @@ const AdvancedAnalysis = {
                     {
                         type: 'line',
                         name: 'Lower Band',
-                        data: bollinger.lower,
+                        data: normalizedLower,
                         color: this.colors.success,
                         lineWidth: 2,
                         dashStyle: 'Dash',
@@ -8234,32 +8286,46 @@ const AdvancedAnalysis = {
         const prices = this.stockData.prices;
         const keltner = this.calculateKeltnerChannels(prices);
         
-        // ❌ SUPPRESSION DES CANDLESTICKS
-        const closePrices = prices.map(p => [p.timestamp, p.close]);
+        // ✅ NORMALISER
+        const basePrice = this.getBasePrice();
+        const normalizedPrices = this.normalizePriceData(
+            prices.map(p => [p.timestamp, p.close]),
+            basePrice
+        );
+        const normalizedUpper = this.normalizePriceData(keltner.upper, basePrice);
+        const normalizedMiddle = this.normalizePriceData(keltner.middle, basePrice);
+        const normalizedLower = this.normalizePriceData(keltner.lower, basePrice);
         
         if (this.charts.keltner) {
-            this.charts.keltner.series[0].setData(closePrices, false);
-            this.charts.keltner.series[1].setData(keltner.upper, false);
-            this.charts.keltner.series[2].setData(keltner.middle, false);
-            this.charts.keltner.series[3].setData(keltner.lower, false);
+            this.charts.keltner.series[0].setData(normalizedPrices, false);
+            this.charts.keltner.series[1].setData(normalizedUpper, false);
+            this.charts.keltner.series[2].setData(normalizedMiddle, false);
+            this.charts.keltner.series[3].setData(normalizedLower, false);
             this.charts.keltner.redraw();
         } else {
             this.charts.keltner = Highcharts.stockChart('keltnerChart', {
                 chart: { borderRadius: 15, height: 600 },
                 title: {
-                    text: 'Keltner Channels (20, 2x ATR)',
+                    text: 'Keltner Channels (Normalized Index)',
                     style: { color: this.colors.primary, fontWeight: 'bold' }
                 },
                 rangeSelector: { enabled: false },
                 navigator: { enabled: true },
                 xAxis: { type: 'datetime', crosshair: true },
-                yAxis: { title: { text: 'Position' } },
-                tooltip: { borderRadius: 10, shared: true },
+                yAxis: { 
+                    title: { text: 'Relative Index (Base 100)' },
+                    labels: {
+                        formatter: function() {
+                            return this.value.toFixed(0);
+                        }
+                    }
+                },
+                tooltip: { borderRadius: 10, shared: true, valueDecimals: 2, valueSuffix: '' },
                 series: [
                     {
                         type: 'line',
                         name: this.currentSymbol,
-                        data: closePrices,
+                        data: normalizedPrices,
                         color: this.colors.primary,
                         lineWidth: 2,
                         zIndex: 2
@@ -8267,7 +8333,7 @@ const AdvancedAnalysis = {
                     {
                         type: 'line',
                         name: 'Upper Channel',
-                        data: keltner.upper,
+                        data: normalizedUpper,
                         color: this.colors.danger,
                         lineWidth: 2,
                         dashStyle: 'Dash',
@@ -8276,7 +8342,7 @@ const AdvancedAnalysis = {
                     {
                         type: 'line',
                         name: 'Middle Line (EMA)',
-                        data: keltner.middle,
+                        data: normalizedMiddle,
                         color: this.colors.primary,
                         lineWidth: 2,
                         zIndex: 1
@@ -8284,7 +8350,7 @@ const AdvancedAnalysis = {
                     {
                         type: 'line',
                         name: 'Lower Channel',
-                        data: keltner.lower,
+                        data: normalizedLower,
                         color: this.colors.success,
                         lineWidth: 2,
                         dashStyle: 'Dash',
@@ -8370,31 +8436,47 @@ const AdvancedAnalysis = {
     updateDonchianChart() {
         const prices = this.stockData.prices;
         const donchian = this.calculateDonchianChannels(prices);
-        const closePrices = prices.map(p => [p.timestamp, p.close]);
+        
+        // ✅ NORMALISER
+        const basePrice = this.getBasePrice();
+        const normalizedPrices = this.normalizePriceData(
+            prices.map(p => [p.timestamp, p.close]),
+            basePrice
+        );
+        const normalizedUpper = this.normalizePriceData(donchian.upper, basePrice);
+        const normalizedMiddle = this.normalizePriceData(donchian.middle, basePrice);
+        const normalizedLower = this.normalizePriceData(donchian.lower, basePrice);
         
         if (this.charts.donchian) {
-            this.charts.donchian.series[0].setData(closePrices, false);
-            this.charts.donchian.series[1].setData(donchian.upper, false);
-            this.charts.donchian.series[2].setData(donchian.middle, false);
-            this.charts.donchian.series[3].setData(donchian.lower, false);
+            this.charts.donchian.series[0].setData(normalizedPrices, false);
+            this.charts.donchian.series[1].setData(normalizedUpper, false);
+            this.charts.donchian.series[2].setData(normalizedMiddle, false);
+            this.charts.donchian.series[3].setData(normalizedLower, false);
             this.charts.donchian.redraw();
         } else {
             this.charts.donchian = Highcharts.stockChart('donchianChart', {
                 chart: { borderRadius: 15, height: 600 },
                 title: {
-                    text: 'Donchian Channels (20 periods)',
+                    text: 'Donchian Channels (Normalized Index)',
                     style: { color: this.colors.primary, fontWeight: 'bold' }
                 },
                 rangeSelector: { enabled: false },
                 navigator: { enabled: true },
                 xAxis: { type: 'datetime', crosshair: true },
-                yAxis: { title: { text: 'Position' } },
-                tooltip: { borderRadius: 10, shared: true },
+                yAxis: { 
+                    title: { text: 'Relative Index (Base 100)' },
+                    labels: {
+                        formatter: function() {
+                            return this.value.toFixed(0);
+                        }
+                    }
+                },
+                tooltip: { borderRadius: 10, shared: true, valueDecimals: 2, valueSuffix: '' },
                 series: [
                     {
                         type: 'line',
                         name: this.currentSymbol,
-                        data: closePrices,
+                        data: normalizedPrices,
                         color: this.colors.primary,
                         lineWidth: 2,
                         zIndex: 2
@@ -8402,7 +8484,7 @@ const AdvancedAnalysis = {
                     {
                         type: 'line',
                         name: 'Upper Channel (Highest High)',
-                        data: donchian.upper,
+                        data: normalizedUpper,
                         color: this.colors.danger,
                         lineWidth: 2,
                         dashStyle: 'Dash',
@@ -8411,7 +8493,7 @@ const AdvancedAnalysis = {
                     {
                         type: 'line',
                         name: 'Middle Line',
-                        data: donchian.middle,
+                        data: normalizedMiddle,
                         color: this.colors.primary,
                         lineWidth: 2,
                         dashStyle: 'Dot',
@@ -8420,7 +8502,7 @@ const AdvancedAnalysis = {
                     {
                         type: 'line',
                         name: 'Lower Channel (Lowest Low)',
-                        data: donchian.lower,
+                        data: normalizedLower,
                         color: this.colors.success,
                         lineWidth: 2,
                         dashStyle: 'Dash',
@@ -8734,8 +8816,31 @@ const AdvancedAnalysis = {
         const prices = this.stockData.prices;
         const volumeProfile = this.calculateVolumeProfile(prices);
         
+        // ✅ NORMALISER LES NIVEAUX DE PRIX
+        const basePrice = this.getBasePrice();
+        const normalizedProfile = volumeProfile.profile.map(([volume, price]) => [
+            volume,
+            (price / basePrice) * 100
+        ]);
+        const normalizedPOCLevel = (volumeProfile.poc / basePrice) * 100;
+        
         if (this.charts.volumeProfile) {
-            this.charts.volumeProfile.series[0].setData(volumeProfile.profile, true);
+            this.charts.volumeProfile.series[0].setData(normalizedProfile, true);
+            
+            // Mettre à jour la ligne POC
+            this.charts.volumeProfile.yAxis[0].update({
+                plotLines: [{
+                    value: normalizedPOCLevel,
+                    color: this.colors.danger,
+                    dashStyle: 'Dash',
+                    width: 3,
+                    label: { 
+                        text: `POC Level`,
+                        style: { color: this.colors.danger, fontWeight: 'bold' }
+                    },
+                    zIndex: 5
+                }]
+            }, true);
         } else {
             this.charts.volumeProfile = Highcharts.chart('volumeProfileChart', {
                 chart: { 
@@ -8744,7 +8849,7 @@ const AdvancedAnalysis = {
                     type: 'bar'
                 },
                 title: {
-                    text: 'Volume Profile - Price Distribution',
+                    text: 'Volume Profile - Price Distribution (Normalized)',
                     style: { color: this.colors.primary, fontWeight: 'bold' }
                 },
                 xAxis: {
@@ -8752,9 +8857,14 @@ const AdvancedAnalysis = {
                     reversed: false
                 },
                 yAxis: {
-                    title: { text: 'Price Level (Normalized)' },
+                    title: { text: 'Relative Price Level (Base 100)' },
+                    labels: {
+                        formatter: function() {
+                            return this.value.toFixed(0);
+                        }
+                    },
                     plotLines: [{
-                        value: volumeProfile.pocLevel,
+                        value: normalizedPOCLevel,
                         color: this.colors.danger,
                         dashStyle: 'Dash',
                         width: 3,
@@ -8769,13 +8879,13 @@ const AdvancedAnalysis = {
                     borderRadius: 10,
                     formatter: function() {
                         return `<b>Price Level: ${this.y.toFixed(2)}</b><br>` +
-                               `Volume: ${this.x.toLocaleString()}`;
+                            `Volume: ${this.x.toLocaleString()}`;
                     }
                 },
                 legend: { enabled: false },
                 series: [{
                     name: 'Volume Profile',
-                    data: volumeProfile.profile,
+                    data: normalizedProfile,
                     color: {
                         linearGradient: { x1: 0, y1: 0, x2: 1, y2: 0 },
                         stops: [
@@ -8879,33 +8989,56 @@ const AdvancedAnalysis = {
     updateMovingAveragesChart() {
         const prices = this.stockData.prices;
         const mas = this.calculateMultipleMovingAverages(prices);
-        const closePrices = prices.map(p => [p.timestamp, p.close]);
+        
+        // ✅ NORMALISER TOUTES LES DONNÉES
+        const basePrice = this.getBasePrice();
+        const normalizedPrices = this.normalizePriceData(
+            prices.map(p => [p.timestamp, p.close]),
+            basePrice
+        );
+        const normalizedSMA20 = this.normalizePriceData(mas.sma20, basePrice);
+        const normalizedSMA50 = this.normalizePriceData(mas.sma50, basePrice);
+        const normalizedSMA200 = this.normalizePriceData(mas.sma200, basePrice);
+        const normalizedEMA9 = this.normalizePriceData(mas.ema9, basePrice);
+        const normalizedEMA21 = this.normalizePriceData(mas.ema21, basePrice);
         
         if (this.charts.movingAverages) {
-            this.charts.movingAverages.series[0].setData(closePrices, false);
-            this.charts.movingAverages.series[1].setData(mas.sma20, false);
-            this.charts.movingAverages.series[2].setData(mas.sma50, false);
-            this.charts.movingAverages.series[3].setData(mas.sma200, false);
-            this.charts.movingAverages.series[4].setData(mas.ema9, false);
-            this.charts.movingAverages.series[5].setData(mas.ema21, false);
+            this.charts.movingAverages.series[0].setData(normalizedPrices, false);
+            this.charts.movingAverages.series[1].setData(normalizedSMA20, false);
+            this.charts.movingAverages.series[2].setData(normalizedSMA50, false);
+            this.charts.movingAverages.series[3].setData(normalizedSMA200, false);
+            this.charts.movingAverages.series[4].setData(normalizedEMA9, false);
+            this.charts.movingAverages.series[5].setData(normalizedEMA21, false);
             this.charts.movingAverages.redraw();
         } else {
             this.charts.movingAverages = Highcharts.stockChart('movingAveragesChart', {
                 chart: { borderRadius: 15, height: 600 },
                 title: {
-                    text: 'Moving Averages - Multiple Timeframes',
+                    text: 'Moving Averages - Multiple Timeframes (Normalized)',
                     style: { color: this.colors.primary, fontWeight: 'bold' }
                 },
                 rangeSelector: { enabled: false },
                 navigator: { enabled: true },
                 xAxis: { type: 'datetime', crosshair: true },
-                yAxis: { title: { text: 'Position' } },
-                tooltip: { borderRadius: 10, shared: true },
+                yAxis: { 
+                    title: { text: 'Relative Index (Base 100)' },
+                    labels: {
+                        formatter: function() {
+                            return this.value.toFixed(0);
+                        }
+                    }
+                },
+                tooltip: { 
+                    borderRadius: 10, 
+                    shared: true,
+                    valueDecimals: 2,
+                    valueSuffix: ''
+                },
                 series: [
                     {
                         type: 'line',
                         name: this.currentSymbol,
-                        data: closePrices,
+                        data: normalizedPrices,
                         color: this.colors.primary,
                         lineWidth: 2,
                         zIndex: 2
@@ -8913,15 +9046,15 @@ const AdvancedAnalysis = {
                     {
                         type: 'line',
                         name: 'SMA 20',
-                        data: mas.sma20,
-                        color: this.colors.primary,
+                        data: normalizedSMA20,
+                        color: this.colors.secondary,
                         lineWidth: 2,
                         zIndex: 1
                     },
                     {
                         type: 'line',
                         name: 'SMA 50',
-                        data: mas.sma50,
+                        data: normalizedSMA50,
                         color: this.colors.orange,
                         lineWidth: 2,
                         zIndex: 1
@@ -8929,7 +9062,7 @@ const AdvancedAnalysis = {
                     {
                         type: 'line',
                         name: 'SMA 200',
-                        data: mas.sma200,
+                        data: normalizedSMA200,
                         color: this.colors.danger,
                         lineWidth: 3,
                         dashStyle: 'Dash',
@@ -8938,7 +9071,7 @@ const AdvancedAnalysis = {
                     {
                         type: 'line',
                         name: 'EMA 9',
-                        data: mas.ema9,
+                        data: normalizedEMA9,
                         color: this.colors.cyan,
                         lineWidth: 1,
                         dashStyle: 'Dot',
@@ -8947,7 +9080,7 @@ const AdvancedAnalysis = {
                     {
                         type: 'line',
                         name: 'EMA 21',
-                        data: mas.ema21,
+                        data: normalizedEMA21,
                         color: this.colors.teal,
                         lineWidth: 2,
                         dashStyle: 'Dot',
@@ -9044,31 +9177,52 @@ const AdvancedAnalysis = {
     updateLinearRegressionChart() {
         const prices = this.stockData.prices;
         const regression = this.calculateLinearRegression(prices);
-        const closePrices = prices.map(p => [p.timestamp, p.close]);
+        
+        // ✅ NORMALISER TOUTES LES DONNÉES
+        const basePrice = this.getBasePrice();
+        const normalizedPrices = this.normalizePriceData(
+            prices.map(p => [p.timestamp, p.close]),
+            basePrice
+        );
+        const normalizedUpper = this.normalizePriceData(regression.upper, basePrice);
+        const normalizedMiddle = this.normalizePriceData(regression.middle, basePrice);
+        const normalizedLower = this.normalizePriceData(regression.lower, basePrice);
         
         if (this.charts.linearRegression) {
-            this.charts.linearRegression.series[0].setData(closePrices, false);
-            this.charts.linearRegression.series[1].setData(regression.upper, false);
-            this.charts.linearRegression.series[2].setData(regression.middle, false);
-            this.charts.linearRegression.series[3].setData(regression.lower, false);
+            this.charts.linearRegression.series[0].setData(normalizedPrices, false);
+            this.charts.linearRegression.series[1].setData(normalizedUpper, false);
+            this.charts.linearRegression.series[2].setData(normalizedMiddle, false);
+            this.charts.linearRegression.series[3].setData(normalizedLower, false);
             this.charts.linearRegression.redraw();
         } else {
             this.charts.linearRegression = Highcharts.stockChart('linearRegressionChart', {
                 chart: { borderRadius: 15, height: 600 },
                 title: {
-                    text: 'Linear Regression Channel',
+                    text: 'Linear Regression Channel (Normalized)',
                     style: { color: this.colors.primary, fontWeight: 'bold' }
                 },
                 rangeSelector: { enabled: false },
                 navigator: { enabled: true },
                 xAxis: { type: 'datetime', crosshair: true },
-                yAxis: { title: { text: 'Position' } },
-                tooltip: { borderRadius: 10, shared: true },
+                yAxis: { 
+                    title: { text: 'Relative Index (Base 100)' },
+                    labels: {
+                        formatter: function() {
+                            return this.value.toFixed(0);
+                        }
+                    }
+                },
+                tooltip: { 
+                    borderRadius: 10, 
+                    shared: true,
+                    valueDecimals: 2,
+                    valueSuffix: ''
+                },
                 series: [
                     {
                         type: 'line',
                         name: this.currentSymbol,
-                        data: closePrices,
+                        data: normalizedPrices,
                         color: this.colors.primary,
                         lineWidth: 2,
                         zIndex: 2
@@ -9076,7 +9230,7 @@ const AdvancedAnalysis = {
                     {
                         type: 'line',
                         name: 'Upper Channel',
-                        data: regression.upper,
+                        data: normalizedUpper,
                         color: this.colors.danger,
                         lineWidth: 2,
                         dashStyle: 'Dash',
@@ -9085,7 +9239,7 @@ const AdvancedAnalysis = {
                     {
                         type: 'line',
                         name: 'Regression Line',
-                        data: regression.middle,
+                        data: normalizedMiddle,
                         color: this.colors.primary,
                         lineWidth: 3,
                         zIndex: 1
@@ -9093,7 +9247,7 @@ const AdvancedAnalysis = {
                     {
                         type: 'line',
                         name: 'Lower Channel',
-                        data: regression.lower,
+                        data: normalizedLower,
                         color: this.colors.success,
                         lineWidth: 2,
                         dashStyle: 'Dash',
@@ -9486,40 +9640,70 @@ const AdvancedAnalysis = {
     // INDICATEURS ORIGINAUX - CONSERVÉS AVEC CORRECTIONS
     // ============================================
     
-    // ✅ ICHIMOKU CLOUD - SANS CANDLESTICKS
     updateIchimokuChart() {
         const prices = this.stockData.prices;
         const ichimoku = this.calculateIchimoku(prices);
-        const closePrices = prices.map(p => [p.timestamp, p.close]);
+        
+        // ✅ NORMALISER TOUTES LES DONNÉES
+        const basePrice = this.getBasePrice();
+        const normalizedPrices = this.normalizePriceData(
+            prices.map(p => [p.timestamp, p.close]),
+            basePrice
+        );
+        const normalizedTenkan = this.normalizePriceData(ichimoku.tenkan, basePrice);
+        const normalizedKijun = this.normalizePriceData(ichimoku.kijun, basePrice);
+        const normalizedSpanA = this.normalizePriceData(ichimoku.spanA, basePrice);
+        const normalizedSpanB = this.normalizePriceData(ichimoku.spanB, basePrice);
+        const normalizedChikou = this.normalizePriceData(ichimoku.chikou, basePrice);
+        
+        // Normaliser le cloud (3 valeurs par point)
+        const normalizedCloud = ichimoku.cloud.map(([timestamp, low, high]) => [
+            timestamp,
+            (low / basePrice) * 100,
+            (high / basePrice) * 100
+        ]);
         
         if (this.charts.ichimoku) {
-            this.charts.ichimoku.series[0].setData(closePrices, false);
-            this.charts.ichimoku.series[1].setData(ichimoku.tenkan, false);
-            this.charts.ichimoku.series[2].setData(ichimoku.kijun, false);
-            this.charts.ichimoku.series[3].setData(ichimoku.spanA, false);
-            this.charts.ichimoku.series[4].setData(ichimoku.spanB, false);
-            this.charts.ichimoku.series[5].setData(ichimoku.cloud, false);
-            this.charts.ichimoku.series[6].setData(ichimoku.chikou, false);
-            this.charts.ichimoku.setTitle({ text: `${this.currentSymbol} - Ichimoku Cloud` });
+            this.charts.ichimoku.series[0].setData(normalizedPrices, false);
+            this.charts.ichimoku.series[1].setData(normalizedTenkan, false);
+            this.charts.ichimoku.series[2].setData(normalizedKijun, false);
+            this.charts.ichimoku.series[3].setData(normalizedSpanA, false);
+            this.charts.ichimoku.series[4].setData(normalizedSpanB, false);
+            this.charts.ichimoku.series[5].setData(normalizedCloud, false);
+            this.charts.ichimoku.series[6].setData(normalizedChikou, false);
             this.charts.ichimoku.redraw();
         } else {
             this.charts.ichimoku = Highcharts.stockChart('ichimokuChart', {
                 chart: { height: 600, borderRadius: 15 },
                 title: {
-                    text: `${this.currentSymbol} - Ichimoku Cloud`,
+                    text: `${this.currentSymbol} - Ichimoku Cloud (Normalized)`,
                     style: { color: this.colors.primary, fontWeight: 'bold' }
                 },
                 rangeSelector: { enabled: false },
                 navigator: { enabled: true },
                 xAxis: { type: 'datetime', crosshair: true },
-                yAxis: { title: { text: 'Position' }, opposite: true },
-                tooltip: { split: false, shared: true, borderRadius: 10 },
+                yAxis: { 
+                    title: { text: 'Relative Index (Base 100)' }, 
+                    opposite: true,
+                    labels: {
+                        formatter: function() {
+                            return this.value.toFixed(0);
+                        }
+                    }
+                },
+                tooltip: { 
+                    split: false, 
+                    shared: true, 
+                    borderRadius: 10,
+                    valueDecimals: 2,
+                    valueSuffix: ''
+                },
                 plotOptions: { series: { marker: { enabled: false } } },
                 series: [
                     {
                         type: 'line',
                         name: this.currentSymbol,
-                        data: closePrices,
+                        data: normalizedPrices,
                         color: this.colors.primary,
                         lineWidth: 2,
                         zIndex: 3
@@ -9527,7 +9711,7 @@ const AdvancedAnalysis = {
                     {
                         type: 'line',
                         name: 'Tenkan-sen',
-                        data: ichimoku.tenkan,
+                        data: normalizedTenkan,
                         color: this.colors.danger,
                         lineWidth: 2,
                         zIndex: 2
@@ -9535,7 +9719,7 @@ const AdvancedAnalysis = {
                     {
                         type: 'line',
                         name: 'Kijun-sen',
-                        data: ichimoku.kijun,
+                        data: normalizedKijun,
                         color: this.colors.primary,
                         lineWidth: 2,
                         zIndex: 2
@@ -9543,7 +9727,7 @@ const AdvancedAnalysis = {
                     {
                         type: 'line',
                         name: 'Senkou Span A',
-                        data: ichimoku.spanA,
+                        data: normalizedSpanA,
                         color: this.colors.success,
                         lineWidth: 1,
                         zIndex: 1
@@ -9551,7 +9735,7 @@ const AdvancedAnalysis = {
                     {
                         type: 'line',
                         name: 'Senkou Span B',
-                        data: ichimoku.spanB,
+                        data: normalizedSpanB,
                         color: this.colors.danger,
                         lineWidth: 1,
                         zIndex: 1
@@ -9559,7 +9743,7 @@ const AdvancedAnalysis = {
                     {
                         type: 'arearange',
                         name: 'Kumo (Cloud)',
-                        data: ichimoku.cloud,
+                        data: normalizedCloud,
                         fillOpacity: 0.3,
                         lineWidth: 0,
                         color: this.colors.success,
@@ -9569,7 +9753,7 @@ const AdvancedAnalysis = {
                     {
                         type: 'line',
                         name: 'Chikou Span',
-                        data: ichimoku.chikou,
+                        data: normalizedChikou,
                         color: this.colors.purple,
                         lineWidth: 1,
                         dashStyle: 'Dot',
@@ -10071,39 +10255,58 @@ const AdvancedAnalysis = {
     },
     
     // ✅ PARABOLIC SAR - CORRECTION CRITIQUE
-    updateSARChart() {
+        updateSARChart() {
         const prices = this.stockData.prices;
         const sar = this.calculateSAR(prices);
-        const closePrices = prices.map(p => [p.timestamp, p.close]);
+        
+        // ✅ NORMALISER TOUTES LES DONNÉES
+        const basePrice = this.getBasePrice();
+        const normalizedPrices = this.normalizePriceData(
+            prices.map(p => [p.timestamp, p.close]),
+            basePrice
+        );
+        const normalizedSAR = this.normalizePriceData(sar, basePrice);
         
         if (this.charts.sar) {
-            this.charts.sar.series[0].setData(closePrices, false);
-            this.charts.sar.series[1].setData(sar, false);
+            this.charts.sar.series[0].setData(normalizedPrices, false);
+            this.charts.sar.series[1].setData(normalizedSAR, false);
             this.charts.sar.redraw();
         } else {
             this.charts.sar = Highcharts.stockChart('sarChart', {
                 chart: { borderRadius: 15, height: 400 },
                 title: {
-                    text: 'Parabolic SAR',
+                    text: 'Parabolic SAR (Normalized)',
                     style: { color: this.colors.primary, fontWeight: 'bold' }
                 },
                 rangeSelector: { enabled: false },
                 navigator: { enabled: false },
                 xAxis: { type: 'datetime', crosshair: true },
-                yAxis: { title: { text: 'Position' } },
-                tooltip: { borderRadius: 10, shared: true },
+                yAxis: { 
+                    title: { text: 'Relative Index (Base 100)' },
+                    labels: {
+                        formatter: function() {
+                            return this.value.toFixed(0);
+                        }
+                    }
+                },
+                tooltip: { 
+                    borderRadius: 10, 
+                    shared: true,
+                    valueDecimals: 2,
+                    valueSuffix: ''
+                },
                 series: [
                     {
                         type: 'line',
                         name: this.currentSymbol,
-                        data: closePrices,
+                        data: normalizedPrices,
                         color: this.colors.primary,
                         lineWidth: 2
                     },
                     {
                         type: 'scatter',
                         name: 'Parabolic SAR',
-                        data: sar,
+                        data: normalizedSAR,
                         color: this.colors.purple,
                         marker: { radius: 3, symbol: 'circle' }
                     }
@@ -10378,12 +10581,24 @@ const AdvancedAnalysis = {
     updateFibonacciChart() {
         const prices = this.stockData.prices;
         const fibonacci = this.calculateFibonacci(prices);
-        const closePrices = prices.map(p => [p.timestamp, p.close]);
+        
+        // ✅ NORMALISER LES PRIX ET LES NIVEAUX FIBONACCI
+        const basePrice = this.getBasePrice();
+        const normalizedPrices = this.normalizePriceData(
+            prices.map(p => [p.timestamp, p.close]),
+            basePrice
+        );
+        
+        // Normaliser les niveaux Fibonacci
+        const normalizedLevels = fibonacci.levels.map(level => ({
+            ...level,
+            price: (level.price / basePrice) * 100
+        }));
         
         if (this.charts.fibonacci) {
-            this.charts.fibonacci.series[0].setData(closePrices, false);
+            this.charts.fibonacci.series[0].setData(normalizedPrices, false);
             this.charts.fibonacci.yAxis[0].update({
-                plotLines: fibonacci.levels.map(level => ({
+                plotLines: normalizedLevels.map(level => ({
                     value: level.price,
                     color: this.getColorForFibLevel(level.ratio),
                     dashStyle: 'Dash',
@@ -10404,15 +10619,20 @@ const AdvancedAnalysis = {
             this.charts.fibonacci = Highcharts.stockChart('fibonacciChart', {
                 chart: { borderRadius: 15, height: 600 },
                 title: {
-                    text: 'Fibonacci Retracements',
+                    text: 'Fibonacci Retracements (Normalized)',
                     style: { color: this.colors.primary, fontWeight: 'bold' }
                 },
                 rangeSelector: { enabled: false },
                 navigator: { enabled: false },
                 xAxis: { type: 'datetime', crosshair: true },
                 yAxis: {
-                    title: { text: 'Position' },
-                    plotLines: fibonacci.levels.map(level => ({
+                    title: { text: 'Relative Index (Base 100)' },
+                    labels: {
+                        formatter: function() {
+                            return this.value.toFixed(0);
+                        }
+                    },
+                    plotLines: normalizedLevels.map(level => ({
                         value: level.price,
                         color: this.getColorForFibLevel(level.ratio),
                         dashStyle: 'Dash',
@@ -10428,12 +10648,17 @@ const AdvancedAnalysis = {
                         zIndex: 5
                     }))
                 },
-                tooltip: { borderRadius: 10, shared: true },
+                tooltip: { 
+                    borderRadius: 10, 
+                    shared: true,
+                    valueDecimals: 2,
+                    valueSuffix: ''
+                },
                 series: [
                     {
                         type: 'line',
                         name: this.currentSymbol,
-                        data: closePrices,
+                        data: normalizedPrices,
                         color: this.colors.primary,
                         lineWidth: 2,
                         zIndex: 2
@@ -10443,7 +10668,45 @@ const AdvancedAnalysis = {
             });
         }
         
-        this.displayFibonacciLevels(fibonacci);
+        // ✅ MISE À JOUR - Afficher les niveaux normalisés (pas les prix réels)
+        this.displayFibonacciLevels(fibonacci, normalizedLevels);
+    },
+
+    // ✅ CORRECTION - Afficher distances relatives uniquement
+    displayFibonacciLevels(fibonacci, normalizedLevels) {
+        const prices = this.stockData.prices;
+        const basePrice = this.getBasePrice();
+        const currentPrice = prices[prices.length - 1].close;
+        const currentNormalized = (currentPrice / basePrice) * 100;
+        
+        const tableHTML = `
+            <table>
+                <thead>
+                    <tr>
+                        <th>Level</th>
+                        <th>Distance from Current</th>
+                        <th>Type</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${normalizedLevels.map(level => {
+                        const distance = ((level.price - currentNormalized) / currentNormalized) * 100;
+                        const distanceText = `${distance >= 0 ? '+' : ''}${distance.toFixed(2)}%`;
+                        const type = level.price > currentNormalized ? 'Resistance' : 'Support';
+                        
+                        return `
+                            <tr>
+                                <td class='level-name'>${level.name}</td>
+                                <td style='color: ${distance >= 0 ? this.colors.danger : this.colors.success}'>${distanceText}</td>
+                                <td style='color: ${type === 'Resistance' ? this.colors.danger : this.colors.success}'>${type}</td>
+                            </tr>
+                        `;
+                    }).join('')}
+                </tbody>
+            </table>
+        `;
+        
+        document.getElementById('fibonacciLevels').innerHTML = tableHTML;
     },
     
     calculateFibonacci(prices) {
@@ -10615,33 +10878,56 @@ const AdvancedAnalysis = {
     updateVWAPChart() {
         const prices = this.stockData.prices;
         const vwap = this.calculateVWAP(prices);
-        const closePrices = prices.map(p => [p.timestamp, p.close]);
+        
+        // ✅ NORMALISER TOUTES LES DONNÉES
+        const basePrice = this.getBasePrice();
+        const normalizedPrices = this.normalizePriceData(
+            prices.map(p => [p.timestamp, p.close]),
+            basePrice
+        );
+        const normalizedVWAP = this.normalizePriceData(vwap.vwap, basePrice);
+        const normalizedUpperBand1 = this.normalizePriceData(vwap.upperBand1, basePrice);
+        const normalizedUpperBand2 = this.normalizePriceData(vwap.upperBand2, basePrice);
+        const normalizedLowerBand1 = this.normalizePriceData(vwap.lowerBand1, basePrice);
+        const normalizedLowerBand2 = this.normalizePriceData(vwap.lowerBand2, basePrice);
         
         if (this.charts.vwap) {
-            this.charts.vwap.series[0].setData(closePrices, false);
-            this.charts.vwap.series[1].setData(vwap.vwap, false);
-            this.charts.vwap.series[2].setData(vwap.upperBand1, false);
-            this.charts.vwap.series[3].setData(vwap.upperBand2, false);
-            this.charts.vwap.series[4].setData(vwap.lowerBand1, false);
-            this.charts.vwap.series[5].setData(vwap.lowerBand2, false);
+            this.charts.vwap.series[0].setData(normalizedPrices, false);
+            this.charts.vwap.series[1].setData(normalizedVWAP, false);
+            this.charts.vwap.series[2].setData(normalizedUpperBand1, false);
+            this.charts.vwap.series[3].setData(normalizedUpperBand2, false);
+            this.charts.vwap.series[4].setData(normalizedLowerBand1, false);
+            this.charts.vwap.series[5].setData(normalizedLowerBand2, false);
             this.charts.vwap.redraw();
         } else {
             this.charts.vwap = Highcharts.stockChart('vwapChart', {
                 chart: { borderRadius: 15, height: 600 },
                 title: {
-                    text: 'VWAP with Standard Deviation Bands',
+                    text: 'VWAP with Standard Deviation Bands (Normalized)',
                     style: { color: this.colors.primary, fontWeight: 'bold' }
                 },
                 rangeSelector: { enabled: false },
                 navigator: { enabled: true },
                 xAxis: { type: 'datetime', crosshair: true },
-                yAxis: { title: { text: 'Position' } },
-                tooltip: { borderRadius: 10, shared: true },
+                yAxis: { 
+                    title: { text: 'Relative Index (Base 100)' },
+                    labels: {
+                        formatter: function() {
+                            return this.value.toFixed(0);
+                        }
+                    }
+                },
+                tooltip: { 
+                    borderRadius: 10, 
+                    shared: true,
+                    valueDecimals: 2,
+                    valueSuffix: ''
+                },
                 series: [
                     {
                         type: 'line',
                         name: this.currentSymbol,
-                        data: closePrices,
+                        data: normalizedPrices,
                         color: this.colors.primary,
                         lineWidth: 2,
                         zIndex: 2
@@ -10649,15 +10935,15 @@ const AdvancedAnalysis = {
                     {
                         type: 'line',
                         name: 'VWAP',
-                        data: vwap.vwap,
-                        color: this.colors.primary,
+                        data: normalizedVWAP,
+                        color: this.colors.secondary,
                         lineWidth: 3,
                         zIndex: 3
                     },
                     {
                         type: 'line',
                         name: 'Upper Band (+1 SD)',
-                        data: vwap.upperBand1,
+                        data: normalizedUpperBand1,
                         color: this.colors.danger,
                         lineWidth: 1,
                         dashStyle: 'Dash',
@@ -10666,7 +10952,7 @@ const AdvancedAnalysis = {
                     {
                         type: 'line',
                         name: 'Upper Band (+2 SD)',
-                        data: vwap.upperBand2,
+                        data: normalizedUpperBand2,
                         color: this.colors.danger,
                         lineWidth: 1,
                         dashStyle: 'Dot',
@@ -10675,7 +10961,7 @@ const AdvancedAnalysis = {
                     {
                         type: 'line',
                         name: 'Lower Band (-1 SD)',
-                        data: vwap.lowerBand1,
+                        data: normalizedLowerBand1,
                         color: this.colors.success,
                         lineWidth: 1,
                         dashStyle: 'Dash',
@@ -10684,7 +10970,7 @@ const AdvancedAnalysis = {
                     {
                         type: 'line',
                         name: 'Lower Band (-2 SD)',
-                        data: vwap.lowerBand2,
+                        data: normalizedLowerBand2,
                         color: this.colors.success,
                         lineWidth: 1,
                         dashStyle: 'Dot',
