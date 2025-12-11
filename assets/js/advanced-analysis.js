@@ -9123,12 +9123,19 @@ const AdvancedAnalysis = {
     // ============================================
     // 🤖 AI RECOMMENDATION ENGINE (LEGAL COMPLIANT)
     // Basé sur 14 indicateurs techniques professionnels
+    // VERSION COMPLÈTE ET CORRIGÉE
     // ============================================
 
     generateAIRecommendation() {
         console.log('🤖 Alphy AI - Generating professional multi-horizon recommendation...');
         
         const prices = this.stockData.prices;
+        
+        if (!prices || prices.length < 30) {
+            console.warn('⚠ Insufficient data for AI recommendation (minimum 30 days required)');
+            this.displayAIError('Insufficient historical data');
+            return;
+        }
         
         // ✅ ÉTAPE 1 : Collecter les 14 indicateurs techniques
         const technicalSignals = this.collectAllTechnicalSignals(prices);
@@ -9148,9 +9155,9 @@ const AdvancedAnalysis = {
         
         console.log('✅ Alphy AI Recommendation generated successfully');
         console.log('📊 Horizon Scores:', {
-            '1y': `${horizonRecommendations['1y'].recommendation} (${horizonRecommendations['1y'].confidence}%)`,
-            '2y': `${horizonRecommendations['2y'].recommendation} (${horizonRecommendations['2y'].confidence}%)`,
-            '5y': `${horizonRecommendations['5y'].recommendation} (${horizonRecommendations['5y'].confidence}%)`
+            '1y': `${horizonRecommendations['1y'].recommendation} (${horizonRecommendations['1y'].confidence}%) - Potential: ${horizonRecommendations['1y'].potentialMove}%`,
+            '2y': `${horizonRecommendations['2y'].recommendation} (${horizonRecommendations['2y'].confidence}%) - Potential: ${horizonRecommendations['2y'].potentialMove}%`,
+            '5y': `${horizonRecommendations['5y'].recommendation} (${horizonRecommendations['5y'].confidence}%) - Potential: ${horizonRecommendations['5y'].potentialMove}%`
         });
     },
 
@@ -9772,7 +9779,7 @@ const AdvancedAnalysis = {
         return signals;
     },
 
-    // 📈 Analyse des tendances par horizon temporel
+    // 📈 Analyse des tendances par horizon temporel - VERSION CORRIGÉE
     analyzeTrendsByHorizon(prices) {
         const analysis = {
             short: { period: 30, trend: 0, strength: 0, volatility: 0 },    // ~1 mois
@@ -9786,9 +9793,9 @@ const AdvancedAnalysis = {
             const shortChange = ((shortPrices[shortPrices.length - 1][1] - shortPrices[0][1]) / shortPrices[0][1]) * 100;
             const shortVolatility = this.calculateVolatility(shortPrices);
             
-            analysis.short.trend = shortChange;
-            analysis.short.strength = Math.abs(shortChange) > 15 ? 2.5 : Math.abs(shortChange) > 8 ? 1.8 : Math.abs(shortChange) > 3 ? 1.0 : 0.5;
-            analysis.short.volatility = shortVolatility;
+            analysis.short.trend = isNaN(shortChange) ? 0 : shortChange;
+            analysis.short.strength = Math.abs(analysis.short.trend) > 15 ? 2.5 : Math.abs(analysis.short.trend) > 8 ? 1.8 : Math.abs(analysis.short.trend) > 3 ? 1.0 : 0.5;
+            analysis.short.volatility = isNaN(shortVolatility) ? 0 : shortVolatility;
         }
         
         // Analyse moyen terme (90 jours)
@@ -9797,9 +9804,9 @@ const AdvancedAnalysis = {
             const mediumChange = ((mediumPrices[mediumPrices.length - 1][1] - mediumPrices[0][1]) / mediumPrices[0][1]) * 100;
             const mediumVolatility = this.calculateVolatility(mediumPrices);
             
-            analysis.medium.trend = mediumChange;
-            analysis.medium.strength = Math.abs(mediumChange) > 30 ? 2.5 : Math.abs(mediumChange) > 15 ? 1.8 : Math.abs(mediumChange) > 5 ? 1.0 : 0.5;
-            analysis.medium.volatility = mediumVolatility;
+            analysis.medium.trend = isNaN(mediumChange) ? 0 : mediumChange;
+            analysis.medium.strength = Math.abs(analysis.medium.trend) > 30 ? 2.5 : Math.abs(analysis.medium.trend) > 15 ? 1.8 : Math.abs(analysis.medium.trend) > 5 ? 1.0 : 0.5;
+            analysis.medium.volatility = isNaN(mediumVolatility) ? 0 : mediumVolatility;
         }
         
         // Analyse long terme (250 jours)
@@ -9808,9 +9815,9 @@ const AdvancedAnalysis = {
             const longChange = ((longPrices[longPrices.length - 1][1] - longPrices[0][1]) / longPrices[0][1]) * 100;
             const longVolatility = this.calculateVolatility(longPrices);
             
-            analysis.long.trend = longChange;
-            analysis.long.strength = Math.abs(longChange) > 60 ? 2.5 : Math.abs(longChange) > 30 ? 1.8 : Math.abs(longChange) > 10 ? 1.0 : 0.5;
-            analysis.long.volatility = longVolatility;
+            analysis.long.trend = isNaN(longChange) ? 0 : longChange;
+            analysis.long.strength = Math.abs(analysis.long.trend) > 60 ? 2.5 : Math.abs(analysis.long.trend) > 30 ? 1.8 : Math.abs(analysis.long.trend) > 10 ? 1.0 : 0.5;
+            analysis.long.volatility = isNaN(longVolatility) ? 0 : longVolatility;
         }
         
         console.log('📈 Trend Analysis:', {
@@ -9822,18 +9829,29 @@ const AdvancedAnalysis = {
         return analysis;
     },
 
-    // Helper: Calculer la volatilité d'une série de prix
+    // Helper: Calculer la volatilité d'une série de prix - VERSION CORRIGÉE
     calculateVolatility(prices) {
+        if (!prices || prices.length < 2) return 0;
+        
         const returns = [];
         for (let i = 1; i < prices.length; i++) {
-            returns.push((prices[i][1] - prices[i-1][1]) / prices[i-1][1]);
+            const prevPrice = prices[i-1][1];
+            const currPrice = prices[i][1];
+            
+            if (prevPrice && prevPrice > 0 && currPrice) {
+                returns.push((currPrice - prevPrice) / prevPrice);
+            }
         }
+        
+        if (returns.length === 0) return 0;
         
         const mean = returns.reduce((sum, r) => sum + r, 0) / returns.length;
         const variance = returns.reduce((sum, r) => sum + Math.pow(r - mean, 2), 0) / returns.length;
         const stdDev = Math.sqrt(variance);
         
-        return stdDev * Math.sqrt(252) * 100; // Annualized volatility in %
+        const annualizedVol = stdDev * Math.sqrt(252) * 100;
+        
+        return isNaN(annualizedVol) ? 0 : annualizedVol;
     },
 
     // 🎯 Calculer le score de confiance IA global
@@ -9850,17 +9868,34 @@ const AdvancedAnalysis = {
         // Calculer le score pondéré
         Object.values(signals).forEach(category => {
             category.forEach(indicator => {
-                const weightedSignal = indicator.signal * indicator.weight;
+                const signal = indicator.signal || 0;
+                const weight = indicator.weight || 1;
+                
+                const weightedSignal = signal * weight;
                 totalScore += weightedSignal;
-                totalWeight += indicator.weight;
+                totalWeight += weight;
                 
                 allSignals.push(indicator);
                 
-                if (indicator.signal > 0.5) bullishSignals++;
-                else if (indicator.signal < -0.5) bearishSignals++;
+                if (signal > 0.5) bullishSignals++;
+                else if (signal < -0.5) bearishSignals++;
                 else neutralSignals++;
             });
         });
+        
+        // ✅ FIX: Vérifier division par zéro
+        if (totalWeight === 0) {
+            console.warn('⚠ Total weight is zero, returning neutral score (50)');
+            return {
+                score: 50,
+                rating: 'NEUTRAL',
+                bullishSignals: 0,
+                neutralSignals: 0,
+                bearishSignals: 0,
+                totalIndicators: 0,
+                allSignals: []
+            };
+        }
         
         // Normaliser le score sur 100
         // Le signal max possible par indicateur est ±2.5
@@ -9870,6 +9905,25 @@ const AdvancedAnalysis = {
         // Normaliser entre 0 et 100
         const normalizedScore = ((totalScore - minPossibleScore) / (maxPossibleScore - minPossibleScore)) * 100;
         const finalScore = Math.max(0, Math.min(100, normalizedScore));
+        
+        // ✅ FIX: Vérifier que le résultat est un nombre valide
+        if (isNaN(finalScore)) {
+            console.error('❌ Final score calculation returned NaN', {
+                totalScore,
+                totalWeight,
+                maxPossibleScore,
+                minPossibleScore
+            });
+            return {
+                score: 50,
+                rating: 'NEUTRAL',
+                bullishSignals,
+                neutralSignals,
+                bearishSignals,
+                totalIndicators: bullishSignals + neutralSignals + bearishSignals,
+                allSignals
+            };
+        }
         
         // Déterminer le rating
         let rating = '';
@@ -9906,9 +9960,54 @@ const AdvancedAnalysis = {
         };
     },
 
-    // 📊 Générer une recommandation pour un horizon spécifique
+    // 📊 Calculer le score d'une catégorie d'indicateurs - VERSION CORRIGÉE
+    calculateCategoryScore(categorySignals) {
+        if (!categorySignals || categorySignals.length === 0) {
+            console.warn('⚠ Empty category signals, returning neutral score (50)');
+            return 50;
+        }
+        
+        let totalScore = 0;
+        let totalWeight = 0;
+        
+        categorySignals.forEach(indicator => {
+            const signal = indicator.signal || 0;
+            const weight = indicator.weight || 1;
+            
+            totalScore += signal * weight;
+            totalWeight += weight;
+        });
+        
+        // ✅ FIX: Vérifier division par zéro
+        if (totalWeight === 0) {
+            console.warn('⚠ Total weight is zero, returning neutral score (50)');
+            return 50;
+        }
+        
+        const maxPossible = totalWeight * 2.5;
+        const minPossible = totalWeight * -2.5;
+        
+        const normalized = ((totalScore - minPossible) / (maxPossible - minPossible)) * 100;
+        const finalScore = Math.max(0, Math.min(100, normalized));
+        
+        // ✅ FIX: Vérifier que le résultat est un nombre valide
+        if (isNaN(finalScore)) {
+            console.error('❌ Category score calculation returned NaN', {
+                totalScore,
+                totalWeight,
+                maxPossible,
+                minPossible,
+                categorySignals
+            });
+            return 50;
+        }
+        
+        return finalScore;
+    },
+
+    // 📊 Générer une recommandation pour un horizon spécifique - VERSION CORRIGÉE
     generateSingleHorizon(aiScore, signals, trendAnalysis, years, trendType) {
-        const baseScore = aiScore.score;
+        const baseScore = aiScore.score || 50;
         let adjustedScore = baseScore;
         
         // ✅ PONDÉRATION DIFFÉRENTE SELON L'HORIZON
@@ -9924,13 +10023,15 @@ const AdvancedAnalysis = {
             adjustedScore = (baseScore * 0.5) + (momentumScore * 0.3) + (volumeScore * 0.2);
             
             // Bonus/Malus tendance court terme
-            if (trendAnalysis.short.trend > 8) adjustedScore += 6;
-            else if (trendAnalysis.short.trend > 3) adjustedScore += 3;
-            else if (trendAnalysis.short.trend < -8) adjustedScore -= 6;
-            else if (trendAnalysis.short.trend < -3) adjustedScore -= 3;
+            const shortTrend = trendAnalysis.short.trend || 0;
+            if (shortTrend > 8) adjustedScore += 6;
+            else if (shortTrend > 3) adjustedScore += 3;
+            else if (shortTrend < -8) adjustedScore -= 6;
+            else if (shortTrend < -3) adjustedScore -= 3;
             
             // Pénalité si haute volatilité court terme
-            if (trendAnalysis.short.volatility > 40) adjustedScore -= 4;
+            const shortVol = trendAnalysis.short.volatility || 0;
+            if (shortVol > 40) adjustedScore -= 4;
             
         } else if (years === 2) {
             // MOYEN TERME (2 ans) : Équilibre TREND + MOMENTUM + COMPOSITE
@@ -9946,13 +10047,15 @@ const AdvancedAnalysis = {
             adjustedScore = (baseScore * 0.4) + (trendScore * 0.3) + (momentumScore * 0.2) + (compositeScore * 0.1);
             
             // Bonus/Malus tendance moyen terme
-            if (trendAnalysis.medium.trend > 15) adjustedScore += 10;
-            else if (trendAnalysis.medium.trend > 5) adjustedScore += 5;
-            else if (trendAnalysis.medium.trend < -15) adjustedScore -= 10;
-            else if (trendAnalysis.medium.trend < -5) adjustedScore -= 5;
+            const mediumTrend = trendAnalysis.medium.trend || 0;
+            if (mediumTrend > 15) adjustedScore += 10;
+            else if (mediumTrend > 5) adjustedScore += 5;
+            else if (mediumTrend < -15) adjustedScore -= 10;
+            else if (mediumTrend < -5) adjustedScore -= 5;
             
             // Légère pénalité si volatilité élevée
-            if (trendAnalysis.medium.volatility > 35) adjustedScore -= 2;
+            const mediumVol = trendAnalysis.medium.volatility || 0;
+            if (mediumVol > 35) adjustedScore -= 2;
             
         } else {
             // LONG TERME (5 ans) : Priorité TREND + COMPOSITE
@@ -9966,13 +10069,21 @@ const AdvancedAnalysis = {
             adjustedScore = (baseScore * 0.4) + (trendScore * 0.4) + (compositeScore * 0.2);
             
             // Bonus/Malus tendance long terme
-            if (trendAnalysis.long.trend > 30) adjustedScore += 15;
-            else if (trendAnalysis.long.trend > 10) adjustedScore += 8;
-            else if (trendAnalysis.long.trend < -30) adjustedScore -= 15;
-            else if (trendAnalysis.long.trend < -10) adjustedScore -= 8;
+            const longTrend = trendAnalysis.long.trend || 0;
+            if (longTrend > 30) adjustedScore += 15;
+            else if (longTrend > 10) adjustedScore += 8;
+            else if (longTrend < -30) adjustedScore -= 15;
+            else if (longTrend < -10) adjustedScore -= 8;
             
             // La volatilité a moins d'impact sur le long terme
-            if (trendAnalysis.long.volatility < 20) adjustedScore += 3; // Récompense la stabilité
+            const longVol = trendAnalysis.long.volatility || 0;
+            if (longVol < 20) adjustedScore += 3;
+        }
+        
+        // ✅ FIX: Vérifier que adjustedScore est valide
+        if (isNaN(adjustedScore)) {
+            console.error('❌ Adjusted score is NaN, defaulting to base score', { baseScore, years });
+            adjustedScore = baseScore;
         }
         
         // Limiter entre 0 et 100
@@ -10005,21 +10116,30 @@ const AdvancedAnalysis = {
             confidence = Math.min(95, 60 + (30 - adjustedScore) * 0.8);
         }
         
-        // ✅ CALCUL POTENTIEL (basé sur la tendance ET le score)
+        // ✅ CALCUL POTENTIEL (basé sur la tendance ET le score) - VERSION CORRIGÉE
         let potentialMove = 0;
         
         if (years === 1) {
-            potentialMove = (adjustedScore - 50) * 0.4 + (trendAnalysis.short.trend * 0.3);
+            const shortTrend = trendAnalysis.short.trend || 0;
+            potentialMove = (adjustedScore - 50) * 0.4 + (shortTrend * 0.3);
         } else if (years === 2) {
-            potentialMove = (adjustedScore - 50) * 0.8 + (trendAnalysis.medium.trend * 0.5);
+            const mediumTrend = trendAnalysis.medium.trend || 0;
+            potentialMove = (adjustedScore - 50) * 0.8 + (mediumTrend * 0.5);
         } else {
-            potentialMove = (adjustedScore - 50) * 1.5 + (trendAnalysis.long.trend * 0.8);
+            const longTrend = trendAnalysis.long.trend || 0;
+            potentialMove = (adjustedScore - 50) * 1.5 + (longTrend * 0.8);
+        }
+        
+        // ✅ FIX: Vérifier que potentialMove est valide
+        if (isNaN(potentialMove)) {
+            console.error('❌ Potential move is NaN, defaulting to 0', { adjustedScore, years });
+            potentialMove = 0;
         }
         
         // ✅ KEY DRIVERS DYNAMIQUES (basés sur les MEILLEURS indicateurs)
         const drivers = this.generateKeyDrivers(signals, trendAnalysis, years, adjustedScore);
         
-        console.log(`📊 ${years}Y Horizon: ${recommendation} (${Math.round(confidence)}%) | Potential: ${potentialMove.toFixed(1)}%`);
+        console.log(`📊 ${years}Y Horizon: ${recommendation} (${Math.round(confidence)}%) | Potential: ${potentialMove.toFixed(1)}% | Adjusted Score: ${adjustedScore.toFixed(1)}`);
         
         return {
             recommendation,
@@ -10030,34 +10150,17 @@ const AdvancedAnalysis = {
         };
     },
 
-    // 📊 Calculer le score d'une catégorie d'indicateurs
-    calculateCategoryScore(categorySignals) {
-        if (!categorySignals || categorySignals.length === 0) return 50;
-        
-        let totalScore = 0;
-        let totalWeight = 0;
-        
-        categorySignals.forEach(indicator => {
-            totalScore += indicator.signal * indicator.weight;
-            totalWeight += indicator.weight;
-        });
-        
-        const maxPossible = totalWeight * 2.5;
-        const minPossible = totalWeight * -2.5;
-        
-        const normalized = ((totalScore - minPossible) / (maxPossible - minPossible)) * 100;
-        return Math.max(0, Math.min(100, normalized));
-    },
-
-    // 🔑 Générer les key drivers dynamiques
+    // 🔑 Générer les key drivers dynamiques - VERSION AMÉLIORÉE
     generateKeyDrivers(signals, trendAnalysis, years, adjustedScore) {
         const allSignals = [];
         
         // Collecter tous les signaux
         Object.values(signals).forEach(category => {
-            category.forEach(indicator => {
-                allSignals.push(indicator);
-            });
+            if (Array.isArray(category)) {
+                category.forEach(indicator => {
+                    allSignals.push(indicator);
+                });
+            }
         });
         
         // Trier par force du signal (absolute value)
@@ -10065,43 +10168,73 @@ const AdvancedAnalysis = {
         
         const drivers = [];
         
-        // ✅ DRIVER 1 : Multi-indicator consensus
+        // ✅ DRIVER 1 : Multi-indicator consensus (toujours différent selon l'horizon)
         drivers.push(`Multi-indicator consensus: ${adjustedScore.toFixed(0)}/100`);
         
-        // ✅ DRIVER 2 : Top 2-3 indicateurs les plus forts
-        const topIndicators = allSignals.slice(0, 3);
-        topIndicators.forEach(indicator => {
-            if (Math.abs(indicator.signal) > 1.0) {
-                drivers.push(indicator.description);
+        // ✅ DRIVER 2 : Tendance SPÉCIFIQUE à l'horizon
+        if (years === 1 && trendAnalysis.short) {
+            const trend = trendAnalysis.short.trend || 0;
+            if (Math.abs(trend) > 2) {
+                const direction = trend > 0 ? 'uptrend' : 'downtrend';
+                drivers.push(`Short-term ${direction} (${Math.abs(trend).toFixed(1)}%)`);
             }
-        });
-        
-        // ✅ DRIVER 3 : Tendance selon l'horizon
-        if (years === 1 && trendAnalysis.short.trend !== 0) {
-            const trendDirection = trendAnalysis.short.trend > 0 ? 'uptrend' : 'downtrend';
-            drivers.push(`Short-term ${trendDirection} (${Math.abs(trendAnalysis.short.trend).toFixed(1)}%)`);
-        } else if (years === 2 && trendAnalysis.medium.trend !== 0) {
-            const trendDirection = trendAnalysis.medium.trend > 0 ? 'uptrend' : 'downtrend';
-            drivers.push(`Medium-term ${trendDirection} (${Math.abs(trendAnalysis.medium.trend).toFixed(1)}%)`);
-        } else if (years === 5 && trendAnalysis.long.trend !== 0) {
-            const trendDirection = trendAnalysis.long.trend > 0 ? 'uptrend' : 'downtrend';
-            drivers.push(`Long-term ${trendDirection} (${Math.abs(trendAnalysis.long.trend).toFixed(1)}%)`);
+        } else if (years === 2 && trendAnalysis.medium) {
+            const trend = trendAnalysis.medium.trend || 0;
+            if (Math.abs(trend) > 3) {
+                const direction = trend > 0 ? 'uptrend' : 'downtrend';
+                drivers.push(`Medium-term ${direction} (${Math.abs(trend).toFixed(1)}%)`);
+            }
+        } else if (years === 5 && trendAnalysis.long) {
+            const trend = trendAnalysis.long.trend || 0;
+            if (Math.abs(trend) > 5) {
+                const direction = trend > 0 ? 'uptrend' : 'downtrend';
+                drivers.push(`Long-term ${direction} (${Math.abs(trend).toFixed(1)}%)`);
+            }
         }
         
-        // ✅ DRIVER 4 : Catégorie dominante
-        const categoryScores = {
-            momentum: this.calculateCategoryScore(signals.momentum || []),
-            trend: this.calculateCategoryScore(signals.trend || []),
-            volume: this.calculateCategoryScore(signals.volume || []),
-            composite: this.calculateCategoryScore(signals.composite || [])
-        };
+        // ✅ DRIVER 3 : Top indicateur le plus fort
+        if (allSignals.length > 0) {
+            const topIndicator = allSignals[0];
+            if (topIndicator && Math.abs(topIndicator.signal) > 1.0) {
+                drivers.push(topIndicator.description);
+            }
+        }
         
-        const dominantCategory = Object.entries(categoryScores)
-            .sort((a, b) => Math.abs(b[1] - 50) - Math.abs(a[1] - 50))[0];
+        // ✅ DRIVER 4 : Catégorie dominante SELON L'HORIZON
+        let dominantCategory = '';
         
-        if (Math.abs(dominantCategory[1] - 50) > 15) {
-            const direction = dominantCategory[1] > 50 ? 'positive' : 'negative';
-            drivers.push(`${dominantCategory[0].charAt(0).toUpperCase() + dominantCategory[0].slice(1)} indicators ${direction}`);
+        if (years === 1) {
+            // Court terme : focus momentum
+            const momentumScore = this.calculateCategoryScore(signals.momentum || []);
+            if (Math.abs(momentumScore - 50) > 15) {
+                dominantCategory = momentumScore > 50 ? 'Positive momentum indicators' : 'Negative momentum indicators';
+            }
+        } else if (years === 2) {
+            // Moyen terme : focus trend
+            const trendScore = this.calculateCategoryScore(signals.trend || []);
+            if (Math.abs(trendScore - 50) > 15) {
+                dominantCategory = trendScore > 50 ? 'Positive trend indicators' : 'Negative trend indicators';
+            }
+        } else {
+            // Long terme : focus composite
+            const compositeScore = this.calculateCategoryScore(signals.composite || []);
+            if (Math.abs(compositeScore - 50) > 15) {
+                dominantCategory = compositeScore > 50 ? 'Positive composite indicators' : 'Negative composite indicators';
+            }
+        }
+        
+        if (dominantCategory && drivers.length < 3) {
+            drivers.push(dominantCategory);
+        }
+        
+        // Assurer au moins 3 drivers
+        while (drivers.length < 3 && allSignals.length > drivers.length - 1) {
+            const nextIndicator = allSignals[drivers.length - 1];
+            if (nextIndicator && nextIndicator.description) {
+                drivers.push(nextIndicator.description);
+            } else {
+                break;
+            }
         }
         
         // Limiter à 3 drivers maximum
@@ -10191,6 +10324,44 @@ const AdvancedAnalysis = {
             'STRONG SELL': 'strong-sell'
         };
         return map[recommendation] || 'neutral';
+    },
+
+    // 🖼 Afficher erreur si données insuffisantes
+    displayAIError(message) {
+        const scoreValueEl = document.getElementById('aiScoreValue');
+        if (scoreValueEl) scoreValueEl.textContent = 'N/A';
+        
+        const ratingEl = document.getElementById('aiScoreRating');
+        if (ratingEl) {
+            ratingEl.textContent = message;
+            ratingEl.className = 'ai-score-rating neutral';
+        }
+        
+        const bullishEl = document.getElementById('bullishSignals');
+        const neutralEl = document.getElementById('neutralSignals');
+        const bearishEl = document.getElementById('bearishSignals');
+        
+        if (bullishEl) bullishEl.textContent = '0';
+        if (neutralEl) neutralEl.textContent = '0';
+        if (bearishEl) bearishEl.textContent = '0';
+        
+        ['1y', '2y', '5y'].forEach(horizon => {
+            const recEl = document.getElementById(`recommendation${horizon}`);
+            if (recEl) recEl.innerHTML = `<div class='ai-rec-badge hold'>DATA ERROR</div>`;
+            
+            const targetEl = document.getElementById(`target${horizon}`);
+            if (targetEl) targetEl.textContent = 'N/A';
+            
+            const confBarContainer = document.getElementById(`confidence${horizon}`);
+            if (confBarContainer) {
+                confBarContainer.innerHTML = `<div class="ai-confidence-fill neutral" style="width: 0%"></div>`;
+            }
+            
+            const driversEl = document.getElementById(`drivers${horizon}`);
+            if (driversEl) {
+                driversEl.innerHTML = `<div class='ai-driver-item'><i class='fas fa-exclamation-triangle'></i> ${message}</div>`;
+            }
+        });
     },
     
     // ============================================
