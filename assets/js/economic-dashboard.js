@@ -1,8 +1,8 @@
 /**
  * ====================================================================
- * ALPHAVAULT AI - ECONOMIC DASHBOARD v2.0 - ULTRA FIXED
+ * ALPHAVAULT AI - ECONOMIC DASHBOARD v2.1 - ULTRA FIXED + ECB IMPROVED
  * ====================================================================
- * Fix: Force les données récentes + Logs détaillés
+ * Fix: Force les données récentes + Logs détaillés + ECB extraction améliorée
  */
 
 class EconomicDashboard {
@@ -12,7 +12,7 @@ class EconomicDashboard {
     }
 
     async init() {
-        console.log('📊 Economic Dashboard v2.0 - Initializing...');
+        console.log('📊 Economic Dashboard v2.1 - Initializing...');
         
         try {
             await Promise.all([
@@ -21,7 +21,7 @@ class EconomicDashboard {
                 this.loadCharts()
             ]);
             
-            console.log('✅ Dashboard v2.0 loaded successfully');
+            console.log('✅ Dashboard v2.1 loaded successfully');
             this.startAutoRefresh();
             
         } catch (error) {
@@ -42,7 +42,7 @@ class EconomicDashboard {
             return;
         }
 
-        grid.innerHTML = '<div class="eco-loading"><div class="eco-spinner"></div><p>Loading economic data v2.0...</p></div>';
+        grid.innerHTML = '<div class="eco-loading"><div class="eco-spinner"></div><p>Loading economic data v2.1...</p></div>';
 
         try {
             console.log('🔄 Fetching economic data...');
@@ -606,7 +606,7 @@ class EconomicDashboard {
 
     /**
      * ========================================
-     * HELPERS
+     * HELPERS - ✅ AMÉLIORATION ECB EXTRACTION
      * ========================================
      */
     calculateYoYTimeSeriesFromDesc(series) {
@@ -626,13 +626,53 @@ class EconomicDashboard {
         return data.reverse(); // Inverser pour avoir chronologique
     }
 
+    /**
+     * ✅ AMÉLIORATION: Extraction ECB avec logs détaillés et filtrage
+     */
     extractECBTimeSeries(data) {
-        if (!data || !data.success) return [];
+        console.log('🔍 Extracting ECB time series, success:', data?.success);
+        
+        if (!data || !data.success) {
+            console.warn('⚠ ECB data not successful');
+            return [];
+        }
+        
         try {
             const observations = economicDataClient.extractECBObservations(data.data);
-            return observations.map(obs => [obs.timestamp, obs.value]);
+            console.log(`  📊 ECB raw observations extracted: ${observations.length}`);
+            
+            if (observations.length === 0) {
+                console.warn('  ⚠ No observations extracted from ECB data');
+                return [];
+            }
+            
+            // ✅ IMPORTANT: Filtrer les valeurs invalides
+            const validObservations = observations
+                .map(obs => {
+                    // Vérifier si le timestamp est valide
+                    if (!obs.timestamp || obs.timestamp === 0) {
+                        console.warn('  ⚠ Invalid timestamp for observation:', obs);
+                        return null;
+                    }
+                    // Vérifier si la valeur est un nombre valide
+                    if (isNaN(obs.value)) {
+                        console.warn('  ⚠ Invalid value for observation:', obs);
+                        return null;
+                    }
+                    return [obs.timestamp, obs.value];
+                })
+                .filter(item => item !== null); // Supprimer les valeurs null
+            
+            console.log(`  ✅ ECB valid time series: ${validObservations.length} points`);
+            
+            if (validObservations.length > 0) {
+                console.log(`  📅 Date range: ${new Date(validObservations[0][0]).toISOString()} to ${new Date(validObservations[validObservations.length-1][0]).toISOString()}`);
+            }
+            
+            return validObservations;
+            
         } catch (error) {
-            console.error('Error extracting ECB time series:', error);
+            console.error('❌ Error extracting ECB time series:', error);
             return [];
         }
     }

@@ -504,27 +504,51 @@ class EconomicDataClient {
      */
     extractECBObservations(ecbData) {
         try {
-            if (!ecbData.dataSets || !ecbData.dataSets[0]) {
+            if (!ecbData || !ecbData.dataSets || !ecbData.dataSets[0]) {
+                console.warn('⚠ ECB: No dataSets found');
                 return [];
             }
 
             const series = ecbData.dataSets[0].series;
-            if (!series) return [];
+            if (!series) {
+                console.warn('⚠ ECB: No series found');
+                return [];
+            }
 
-            const seriesKey = Object.keys(series)[0];
-            if (!seriesKey) return [];
+            // ✅ CORRECTION: Trouver la première série disponible (pas toujours '0:0:0:0:0')
+            const seriesKeys = Object.keys(series);
+            if (seriesKeys.length === 0) {
+                console.warn('⚠ ECB: No series keys found');
+                return [];
+            }
+
+            const seriesKey = seriesKeys[0]; // Prendre la première série disponible
+            console.log('📊 ECB series key:', seriesKey);
 
             const observations = series[seriesKey].observations;
+            if (!observations) {
+                console.warn('⚠ ECB: No observations found for key', seriesKey);
+                return [];
+            }
+
             const dates = ecbData.structure?.dimensions?.observation?.[0]?.values || [];
 
-            return Object.entries(observations).map(([index, values]) => ({
-                date: dates[parseInt(index)]?.id || '',
-                value: parseFloat(values[0]),
-                timestamp: new Date(dates[parseInt(index)]?.id).getTime()
-            }));
+            const result = Object.entries(observations).map(([index, values]) => {
+                const dateInfo = dates[parseInt(index)] || {};
+                const dateStr = dateInfo.id || dateInfo.name || '';
+                
+                return {
+                    date: dateStr,
+                    value: parseFloat(values[0]),
+                    timestamp: dateStr ? new Date(dateStr).getTime() : 0
+                };
+            });
+
+            console.log(`✅ ECB: Extracted ${result.length} observations`);
+            return result;
 
         } catch (error) {
-            console.error('Error extracting ECB observations:', error);
+            console.error('❌ Error extracting ECB observations:', error);
             return [];
         }
     }
