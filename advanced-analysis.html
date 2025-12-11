@@ -1,1591 +1,1188 @@
 <!DOCTYPE html>
-<html lang='fr'>
-<head>
-    <meta charset='UTF-8'>
-    <meta name='viewport' content='width=device-width, initial-scale=1.0'>
-    <title>Advanced Analysis</title>
-    
-    <!-- Highcharts -->
-    <script src='https://code.highcharts.com/stock/highstock.js'></script>
-    <script src='https://code.highcharts.com/highcharts-more.js'></script>
-    <script src='https://code.highcharts.com/modules/exporting.js'></script>
-    
-    <!-- Font Awesome -->
-    <link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css'>
-    
-    <!-- Styles -->
-    <link rel='stylesheet' href='assets/css/common.css'>
-    <link rel='stylesheet' href='assets/css/sidebar.css'>
-    <link rel="stylesheet" href="assets/css/user-menu.css">
-    <link rel="stylesheet" href="assets/css/chatbot-styles.css">
-    <link rel='stylesheet' href='assets/css/advanced-analysis.css'>
-    
-    <!-- ✅ FAVICON DYNAMIQUE -->
-    <script src="assets/js/favicon-dynamic.js"></script>
-
-    <!-- Firebase SDK -->
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
-    
-    <!-- Configuration Firebase -->
-    <script src="assets/js/firebase-config.js"></script>
-    
-    <!-- Protection de la page (AUTH GUARD) -->
-    <script src="assets/js/auth-guard.js"></script>
-
-    <!-- ✅ ACCESS CONTROL -->
-    <script src="assets/js/access-control.js"></script>
-    
-    <!-- ✅ STYLES PERSONNALISÉS POUR MODALS PREMIUM -->
-    <style>
-        /* ============================================
-           🎨 PREMIUM MODAL STYLES - BLUE VIOLET GRADIENT
-           ============================================ */
+    <html lang='fr'>
+    <head>
+        <meta charset='UTF-8'>
+        <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+        <title>Advanced Analysis - Legal Compliant</title>
         
-        /* Modal Overlay */
-        .modal {
-            display: none;
-            position: fixed;
-            z-index: 10000;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(15, 23, 42, 0.85);
-            backdrop-filter: blur(12px);
-            animation: fadeIn 0.3s ease;
-            overflow-y: auto;
-            padding: 2rem;
-        }
-
-        .modal.active {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-
-        /* Modal Content */
-        .modal-content {
-            background: linear-gradient(145deg, #ffffff 0%, #f8fafc 100%);
-            border-radius: 24px;
-            max-width: 900px;
-            width: 100%;
-            max-height: 90vh;
-            overflow-y: auto;
-            box-shadow: 
-                0 25px 50px -12px rgba(59, 130, 246, 0.4),
-                0 0 0 1px rgba(99, 102, 241, 0.1),
-                0 0 100px rgba(139, 92, 246, 0.3);
-            animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-            position: relative;
-            border: 2px solid transparent;
-            background-clip: padding-box;
-        }
-
-        .modal-content::before {
-            content: '';
-            position: absolute;
-            inset: 0;
-            border-radius: 24px;
-            padding: 2px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
-            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-            -webkit-mask-composite: xor;
-            mask-composite: exclude;
-            opacity: 0.6;
-            animation: borderGlow 3s ease infinite;
-        }
-
-        @keyframes borderGlow {
-            0%, 100% { opacity: 0.6; }
-            50% { opacity: 1; }
-        }
-
-        body.dark-mode .modal-content {
-            background: linear-gradient(145deg, #1e293b 0%, #0f172a 100%);
-        }
-
-        @keyframes slideUp {
-            from {
-                opacity: 0;
-                transform: translateY(30px) scale(0.95);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0) scale(1);
-            }
-        }
-
-        /* Modal Header - Premium Gradient */
-        .modal-header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
-            background-size: 200% 200%;
-            animation: gradientShift 8s ease infinite;
-            padding: 2rem 2.5rem;
-            border-radius: 22px 22px 0 0;
-            position: relative;
-            overflow: hidden;
-        }
-
-        @keyframes gradientShift {
-            0%, 100% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-        }
-
-        .modal-header::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: repeating-linear-gradient(
-                45deg,
-                transparent,
-                transparent 10px,
-                rgba(255, 255, 255, 0.03) 10px,
-                rgba(255, 255, 255, 0.03) 20px
-            );
-            animation: moveStripes 20s linear infinite;
-        }
-
-        @keyframes moveStripes {
-            0% { transform: translate(0, 0); }
-            100% { transform: translate(50px, 50px); }
-        }
-
-        .modal-header h2 {
-            margin: 0;
-            font-size: 1.75rem;
-            font-weight: 800;
-            color: white;
-            text-shadow: 
-                0 2px 8px rgba(0, 0, 0, 0.3),
-                0 0 30px rgba(255, 255, 255, 0.3);
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            position: relative;
-            z-index: 1;
-            letter-spacing: -0.5px;
-        }
-
-        /* Close Button */
-        .close-modal {
-            position: absolute;
-            right: 2rem;
-            top: 50%;
-            transform: translateY(-50%);
-            font-size: 2rem;
-            font-weight: 300;
-            color: white;
-            cursor: pointer;
-            width: 40px;
-            height: 40px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 12px;
-            background: rgba(255, 255, 255, 0.15);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            z-index: 2;
-            line-height: 1;
-        }
-
-        .close-modal:hover {
-            background: rgba(255, 255, 255, 0.25);
-            transform: translateY(-50%) rotate(90deg) scale(1.1);
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
-        }
-
-        /* Modal Body */
-        .modal-body {
-            padding: 2.5rem;
-            position: relative;
-        }
-
-        .modal-body h3 {
-            font-size: 1.4rem;
-            font-weight: 800;
-            color: var(--text-primary);
-            margin: 2rem 0 1rem 0;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-
-        .modal-body h4 {
-            font-size: 1.1rem;
-            font-weight: 700;
-            color: var(--text-primary);
-            margin: 1.5rem 0 0.75rem 0;
-        }
-
-        .modal-body ul {
-            margin: 1rem 0;
-            padding-left: 1.5rem;
-        }
-
-        .modal-body li {
-            margin-bottom: 0.75rem;
-            line-height: 1.7;
-            color: var(--text-secondary);
-        }
-
-        .modal-body p {
-            line-height: 1.8;
-            color: var(--text-secondary);
-            margin-bottom: 1rem;
-        }
-
-        /* Small Modal Variant */
-        .modal-small .modal-content {
-            max-width: 500px;
-        }
-
-        /* Scrollbar Styling */
-        .modal-content::-webkit-scrollbar {
-            width: 10px;
-        }
-
-        .modal-content::-webkit-scrollbar-track {
-            background: rgba(148, 163, 184, 0.1);
-            border-radius: 10px;
-        }
-
-        .modal-content::-webkit-scrollbar-thumb {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border-radius: 10px;
-        }
-
-        .modal-content::-webkit-scrollbar-thumb:hover {
-            background: linear-gradient(135deg, #764ba2 0%, #f093fb 100%);
-        }
-
-        /* ============================================
-           ❓ HELP ICON BUTTON - WHITE "?"
-           ============================================ */
+        <!-- Highcharts -->
+        <script src='https://code.highcharts.com/stock/highstock.js'></script>
+        <script src='https://code.highcharts.com/highcharts-more.js'></script>
+        <script src='https://code.highcharts.com/modules/exporting.js'></script>
         
-        .help-icon {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            width: 28px;
-            height: 28px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white !important;
-            font-size: 0.9rem;
-            font-weight: 700;
-            cursor: pointer;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            margin-left: 0.5rem;
-            border: 2px solid rgba(255, 255, 255, 0.3);
-            box-shadow: 
-                0 4px 12px rgba(102, 126, 234, 0.3),
-                0 0 20px rgba(118, 75, 162, 0.2);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .help-icon::before {
-            content: '?';
-            position: relative;
-            z-index: 1;
-            color: white;
-            font-weight: 800;
-        }
-
-        .help-icon::after {
-            content: '';
-            position: absolute;
-            inset: 0;
-            background: linear-gradient(135deg, #764ba2 0%, #f093fb 100%);
-            opacity: 0;
-            transition: opacity 0.3s ease;
-        }
-
-        .help-icon:hover {
-            transform: scale(1.15) rotate(15deg);
-            box-shadow: 
-                0 8px 24px rgba(102, 126, 234, 0.5),
-                0 0 40px rgba(240, 147, 251, 0.4);
-            border-color: rgba(255, 255, 255, 0.6);
-        }
-
-        .help-icon:hover::after {
-            opacity: 1;
-        }
-
-        .help-icon:active {
-            transform: scale(1.05) rotate(15deg);
-        }
-
-        /* ============================================
-           📋 ENHANCED FORMULA & INFO BOXES
-           ============================================ */
+        <!-- Font Awesome -->
+        <link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css'>
         
-        .formula-box {
-            background: linear-gradient(135deg, #f6f8fb 0%, #e9ecef 100%);
-            border-left: 4px solid;
-            border-image: linear-gradient(135deg, #667eea 0%, #764ba2 100%) 1;
-            padding: 1.5rem;
-            margin: 1rem 0;
-            border-radius: 8px;
-            font-family: 'Courier New', monospace;
-            font-size: 0.95rem;
-            line-height: 1.8;
-            overflow-x: auto;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-        }
+        <!-- Styles -->
+        <link rel='stylesheet' href='assets/css/common.css'>
+        <link rel='stylesheet' href='assets/css/sidebar.css'>
+        <link rel="stylesheet" href="assets/css/user-menu.css">
+        <link rel="stylesheet" href="assets/css/chatbot-styles.css">
+        <link rel='stylesheet' href='assets/css/advanced-analysis.css'>
+        
+        <!-- ✅ FAVICON DYNAMIQUE -->
+        <script src="assets/js/favicon-dynamic.js"></script>
 
-        body.dark-mode .formula-box {
-            background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
-            color: #e2e8f0;
-        }
+        <!-- Firebase SDK -->
+        <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+        <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+        <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+        
+        <!-- Configuration Firebase -->
+        <script src="assets/js/firebase-config.js"></script>
+        
+        <!-- Protection de la page (AUTH GUARD) -->
+        <script src="assets/js/auth-guard.js"></script>
 
-        .formula-box strong {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            display: block;
-            margin-bottom: 0.5rem;
-            font-size: 1.05rem;
-        }
-
-        .key-term {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            font-weight: 700;
-            padding: 0 4px;
-            position: relative;
-        }
-
-        .key-term::after {
-            content: '';
-            position: absolute;
-            bottom: -2px;
-            left: 0;
-            right: 0;
-            height: 2px;
-            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
-            opacity: 0.3;
-        }
-
-        /* Tip Box */
-        .tip-box {
-            background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
-            border-left: 4px solid #10b981;
-            padding: 1rem 1.5rem;
-            margin: 1.5rem 0;
-            border-radius: 8px;
-            font-size: 0.95rem;
-            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.15);
-        }
-
-        body.dark-mode .tip-box {
-            background: linear-gradient(135deg, #064e3b 0%, #065f46 100%);
-            color: #d1fae5;
-        }
-
-        /* Warning Box */
-        .warning-box {
-            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
-            border-left: 4px solid #f59e0b;
-            padding: 1rem 1.5rem;
-            margin: 1.5rem 0;
-            border-radius: 8px;
-            font-size: 0.95rem;
-            box-shadow: 0 4px 12px rgba(245, 158, 11, 0.15);
-        }
-
-        body.dark-mode .warning-box {
-            background: linear-gradient(135deg, #78350f 0%, #92400e 100%);
-            color: #fef3c7;
-        }
-
-        /* Category Title Styling */
-        .category-title {
-            font-size: 1.5rem;
-            font-weight: 800;
-            color: white;
-            margin: 3rem 0 1.5rem 0;
-            padding: 1rem 1.5rem;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
-            background-size: 200% 200%;
-            animation: gradientShift 8s ease infinite;
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            box-shadow: 
-                0 4px 24px rgba(102, 126, 234, 0.3),
-                0 0 60px rgba(118, 75, 162, 0.2);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .category-title::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-            animation: shimmer 3s infinite;
-        }
-
-        @keyframes shimmer {
-            0% { left: -100%; }
-            100% { left: 100%; }
-        }
-
-        .category-title i {
-            font-size: 1.8rem;
-            filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.3));
-        }
-
-        /* Responsive Modal */
-        @media (max-width: 768px) {
+        <!-- ✅ ACCESS CONTROL -->
+        <script src="assets/js/access-control.js"></script>
+        
+        <!-- ✅ STYLES SIMPLIFIÉS POUR MODALS (ULTRA LÉGERS) -->
+        <style>
+            /* ============================================
+            🎨 MODAL STYLES - MINIMALISTES
+            ============================================ */
+            
+            /* Modal Overlay */
             .modal {
-                padding: 1rem;
+                display: none;
+                position: fixed;
+                z-index: 10000;
+                left: 0;
+                top: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0, 0, 0, 0.5);
+                overflow-y: auto;
+                padding: 2rem;
             }
 
+            .modal.active {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+            /* Modal Content */
             .modal-content {
-                max-height: 95vh;
-                border-radius: 16px;
+                background: #ffffff;
+                border-radius: 8px;
+                max-width: 800px;
+                width: 100%;
+                max-height: 90vh;
+                overflow-y: auto;
+                box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+                position: relative;
             }
 
+            body.dark-mode .modal-content {
+                background: #1e293b;
+                color: #e2e8f0;
+            }
+
+            /* Modal Header */
             .modal-header {
-                padding: 1.5rem;
-                border-radius: 14px 14px 0 0;
+                background: #f8fafc;
+                padding: 1.5rem 2rem;
+                border-bottom: 1px solid #e2e8f0;
+                border-radius: 8px 8px 0 0;
+                position: relative;
+            }
+
+            body.dark-mode .modal-header {
+                background: #0f172a;
+                border-bottom-color: #334155;
             }
 
             .modal-header h2 {
-                font-size: 1.3rem;
-            }
-
-            .modal-body {
-                padding: 1.5rem;
-            }
-
-            .close-modal {
-                right: 1rem;
-                width: 36px;
-                height: 36px;
+                margin: 0;
                 font-size: 1.5rem;
+                font-weight: 700;
+                color: #1e293b;
+                display: flex;
+                align-items: center;
+                gap: 0.75rem;
             }
 
+            body.dark-mode .modal-header h2 {
+                color: #f1f5f9;
+            }
+
+            /* Close Button */
+            .close-modal {
+                position: absolute;
+                right: 1.5rem;
+                top: 50%;
+                transform: translateY(-50%);
+                font-size: 1.5rem;
+                color: #64748b;
+                cursor: pointer;
+                width: 32px;
+                height: 32px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                border-radius: 6px;
+                background: transparent;
+                transition: background 0.2s;
+                line-height: 1;
+            }
+
+            .close-modal:hover {
+                background: #f1f5f9;
+                color: #1e293b;
+            }
+
+            body.dark-mode .close-modal:hover {
+                background: #334155;
+                color: #f1f5f9;
+            }
+
+            /* Modal Body */
+            .modal-body {
+                padding: 2rem;
+            }
+
+            .modal-body h3 {
+                font-size: 1.25rem;
+                font-weight: 700;
+                color: #1e293b;
+                margin: 1.5rem 0 1rem 0;
+            }
+
+            body.dark-mode .modal-body h3 {
+                color: #f1f5f9;
+            }
+
+            .modal-body h4 {
+                font-size: 1.1rem;
+                font-weight: 600;
+                color: #334155;
+                margin: 1.25rem 0 0.75rem 0;
+            }
+
+            body.dark-mode .modal-body h4 {
+                color: #cbd5e1;
+            }
+
+            .modal-body ul {
+                margin: 1rem 0;
+                padding-left: 1.5rem;
+            }
+
+            .modal-body li {
+                margin-bottom: 0.5rem;
+                line-height: 1.6;
+                color: #475569;
+            }
+
+            body.dark-mode .modal-body li {
+                color: #94a3b8;
+            }
+
+            .modal-body p {
+                line-height: 1.6;
+                color: #475569;
+                margin-bottom: 1rem;
+            }
+
+            body.dark-mode .modal-body p {
+                color: #94a3b8;
+            }
+
+            /* Small Modal Variant */
+            .modal-small .modal-content {
+                max-width: 500px;
+            }
+
+            /* Scrollbar Styling */
+            .modal-content::-webkit-scrollbar {
+                width: 8px;
+            }
+
+            .modal-content::-webkit-scrollbar-track {
+                background: #f1f5f9;
+            }
+
+            .modal-content::-webkit-scrollbar-thumb {
+                background: #cbd5e1;
+                border-radius: 4px;
+            }
+
+            .modal-content::-webkit-scrollbar-thumb:hover {
+                background: #94a3b8;
+            }
+
+            /* ============================================
+            ❓ HELP ICON BUTTON
+            ============================================ */
+            
             .help-icon {
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
                 width: 24px;
                 height: 24px;
-                font-size: 0.8rem;
+                border-radius: 50%;
+                background: #3b82f6;
+                color: white !important;
+                font-size: 0.85rem;
+                font-weight: 700;
+                cursor: pointer;
+                transition: all 0.2s;
+                margin-left: 0.5rem;
+                border: none;
             }
-        }
-    </style>
-</head>
-<body>
 
-    <!-- ⚡ THEME SCRIPT -->
-    <script src="assets/js/theme.js"></script>
+            .help-icon::before {
+                content: '?';
+            }
 
-    <!-- Particles Background -->
-    <canvas id="particles-canvas" class="particles-background"></canvas>
+            .help-icon:hover {
+                background: #2563eb;
+                transform: scale(1.1);
+            }
 
-    <!-- 🎨 THEME CHARTS -->
-    <script src="assets/js/theme-charts.js"></script>
-
-    <div class='layout-wrapper'>
-        
-        <!-- ============================================
-             SIDEBAR NAVIGATION
-             ============================================ -->
-        <aside class='sidebar' id='sidebar'>
-            <!-- Header avec Logo 3D -->
-            <div class="sidebar-header">
-                <div class="logo-container">
-                    <div class="logo-3d">
-                        <svg class="logo-svg" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-                            <defs>
-                                <linearGradient id="logoGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                                    <stop offset="0%" class="logo-gradient-1" />
-                                    <stop offset="100%" class="logo-gradient-2" />
-                                </linearGradient>
-                            </defs>
-                            <path d="M 20 80 L 30 70 L 40 75 L 50 60 L 60 65 L 70 45 L 80 50 L 90 30" 
-                                  stroke="url(#logoGradient)" 
-                                  stroke-width="4" 
-                                  fill="none" 
-                                  stroke-linecap="round" 
-                                  stroke-linejoin="round"/>
-                            <circle cx="30" cy="70" r="4" fill="url(#logoGradient)"/>
-                            <circle cx="50" cy="60" r="4" fill="url(#logoGradient)"/>
-                            <circle cx="70" cy="45" r="4" fill="url(#logoGradient)"/>
-                            <circle cx="90" cy="30" r="5" fill="url(#logoGradient)"/>
-                            <path d="M 85 35 L 90 30 L 85 25" 
-                                  stroke="url(#logoGradient)" 
-                                  stroke-width="3" 
-                                  fill="none" 
-                                  stroke-linecap="round"/>
-                        </svg>
-                    </div>
-                    <div class="brand-text">
-                        <h2 class="brand-name">AlphaVault AI</h2>
-                        <span class="brand-tagline">Investments</span>
-                    </div>
-                </div>
-                <button class="sidebar-toggle" aria-label="Toggle Sidebar">
-                    <i class="fas fa-angle-left"></i>
-                </button>
-            </div>
+            /* ============================================
+            📋 FORMULA & INFO BOXES
+            ============================================ */
             
-            <!-- Navigation -->
-            <nav class="sidebar-nav">
-                <div class="nav-section">
-                    <button class="nav-folder" data-tooltip="Home">
-                        <i class="fas fa-home"></i>
-                        <span>Home</span>
-                        <i class="fas fa-chevron-down arrow"></i>
-                    </button>
-                    <div class="nav-submenu">
-                        <a href="index.html" class="nav-link">
-                            <i class="fas fa-home"></i>
-                            <span>Overview</span>
-                        </a>
-                    </div>
-                </div>
-                
-                <div class='nav-section'>
-                    <button class='nav-folder'>
-                        <i class='fas fa-wallet'></i>
-                        <span>Budget</span>
-                        <i class='fas fa-chevron-down arrow'></i>
-                    </button>
-                    <div class='nav-submenu'>
-                        <a href='dashboard-financier.html' class='nav-link'>
-                            <i class='fas fa-home'></i>
-                            <span>Dashboard Budget</span>
-                        </a>
-                        <a href='investment-analytics.html' class='nav-link'>
-                            <i class='fas fa-chart-bar'></i>
-                            <span>Investment Analytics</span>
-                        </a>
-                    </div>
-                </div>
-                
-                <div class='nav-section'>
-                    <button class='nav-folder'>
-                        <i class='fas fa-calculator'></i>
-                        <span>Simulation</span>
-                        <i class='fas fa-chevron-down arrow'></i>
-                    </button>
-                    <div class='nav-submenu'>
-                        <a href='monte-carlo.html' class='nav-link'>
-                            <i class='fas fa-dice'></i>
-                            <span>Monte Carlo</span>
-                        </a>
-                        <a href='portfolio-optimizer.html' class='nav-link'>
-                            <i class='fas fa-chart-pie'></i>
-                            <span>Markowitz</span>
-                        </a>
-                        <a href='risk-parity.html' class='nav-link'>
-                            <i class='fas fa-balance-scale'></i>
-                            <span>Risk Parity</span>
-                        </a>
-                        <a href='scenario-analysis.html' class='nav-link'>
-                            <i class='fas fa-flask'></i>
-                            <span>Scenarios</span>
-                        </a>
-                    </div>
-                </div>
-                
-                <div class='nav-section'>
-                    <button class="nav-folder" data-tooltip="Stocks">
-                        <i class="fas fa-chart-line"></i>
-                        <span>Stocks</span>
-                        <i class="fas fa-chevron-down arrow"></i>
-                    </button>
-                    <div class='nav-submenu' style='display: block;'>
-                        <!-- <a href='market-data.html' class='nav-link'>
-                            <i class='fas fa-database'></i>
-                            <span>Market Data</span>
-                        </a> -->
-                        <a href='advanced-analysis.html' class='nav-link active'>
-                            <i class='fas fa-brain'></i>
-                            <span>Advanced Analysis</span>
-                        </a>
-                        <a href='trend-prediction.html' class='nav-link'>
-                            <i class='fas fa-chart-line'></i>
-                            <span>Trend Prediction</span>
-                        </a>
-                        <a href='market-intelligence.html' class='nav-link'>
-                            <i class='fas fa-globe'></i>
-                            <span>Market Intelligence</span>
-                        </a>
-                        <a href='company-insights.html' class='nav-link'>
-                            <i class='fas fa-building'></i>
-                            <span>Company Insights</span>
-                        </a>
-                        <a href='analyst-coverage.html' class='nav-link'>
-                            <i class='fas fa-users'></i>
-                            <span>Analyst Coverage</span>
-                        </a>
-                        <a href='earnings-estimates.html' class='nav-link'>
-                            <i class='fas fa-coins'></i>
-                            <span>Earnings & Estimates</span>
-                        </a>
-                    </div>
-                </div>
+            .formula-box {
+                background: #f8fafc;
+                border-left: 3px solid #3b82f6;
+                padding: 1rem;
+                margin: 1rem 0;
+                border-radius: 4px;
+                font-family: 'Courier New', monospace;
+                font-size: 0.9rem;
+                line-height: 1.6;
+            }
 
-                <div class='nav-section'>
-                    <button class="nav-folder" data-tooltip="AI Assistant">
-                        <i class="fas fa-robot"></i>
-                        <span>AI Assistant</span>
-                        <i class="fas fa-chevron-down arrow"></i>
-                    </button>
-                    <div class='nav-submenu' style='display: block;'>
-                        <a href='chatbot-fullpage.html' class='nav-link'>
-                            <i class='fas fa-comments'></i>
-                            <span>Alphy AI Chat</span>
-                        </a>
-                    </div>
-                </div>
-            </nav>
+            body.dark-mode .formula-box {
+                background: #1e293b;
+                color: #e2e8f0;
+            }
+
+            .formula-box strong {
+                color: #1e293b;
+                display: block;
+                margin-bottom: 0.5rem;
+            }
+
+            body.dark-mode .formula-box strong {
+                color: #f1f5f9;
+            }
+
+            .key-term {
+                color: #3b82f6;
+                font-weight: 600;
+            }
+
+            .tip-box {
+                background: #ecfdf5;
+                border-left: 3px solid #10b981;
+                padding: 1rem;
+                margin: 1rem 0;
+                border-radius: 4px;
+                font-size: 0.9rem;
+            }
+
+            body.dark-mode .tip-box {
+                background: #064e3b;
+                color: #d1fae5;
+            }
+
+            .warning-box {
+                background: #fef3c7;
+                border-left: 3px solid #f59e0b;
+                padding: 1rem;
+                margin: 1rem 0;
+                border-radius: 4px;
+                font-size: 0.9rem;
+            }
+
+            body.dark-mode .warning-box {
+                background: #78350f;
+                color: #fef3c7;
+            }
+
+            /* Responsive Modal */
+            @media (max-width: 768px) {
+                .modal {
+                    padding: 1rem;
+                }
+
+                .modal-content {
+                    max-height: 95vh;
+                }
+
+                .modal-header {
+                    padding: 1.25rem 1.5rem;
+                }
+
+                .modal-header h2 {
+                    font-size: 1.25rem;
+                }
+
+                .modal-body {
+                    padding: 1.5rem;
+                }
+
+                .close-modal {
+                    right: 1rem;
+                    width: 28px;
+                    height: 28px;
+                    font-size: 1.25rem;
+                }
+
+                .help-icon {
+                    width: 20px;
+                    height: 20px;
+                    font-size: 0.75rem;
+                }
+            }
+        </style>
+    </head>
+    <body>
+
+        <!-- ⚡ THEME SCRIPT -->
+        <script src="assets/js/theme.js"></script>
+
+        <!-- Particles Background -->
+        <canvas id="particles-canvas" class="particles-background"></canvas>
+
+        <!-- 🎨 THEME CHARTS -->
+        <script src="assets/js/theme-charts.js"></script>
+
+        <div class='layout-wrapper'>
             
-            <!-- SIDEBAR FOOTER -->
-            <div class="sidebar-footer">
-                <div class="sidebar-user-menu">
-                    <div class="sidebar-user-trigger" id="sidebarUserTrigger">
-                        <img data-user-photo 
-                            src="https://ui-avatars.com/api/?name=User&background=2563eb&color=fff" 
-                            alt="Avatar" 
-                            class="sidebar-user-avatar">
-                        <div class="sidebar-user-info">
-                            <span data-user-name class="sidebar-user-name">User</span>
-                            <span data-user-plan class="sidebar-user-plan">Free Plan</span>
+            <!-- ============================================
+                SIDEBAR NAVIGATION
+                ============================================ -->
+            <aside class='sidebar' id='sidebar'>
+                <!-- Header avec Logo 3D -->
+                <div class="sidebar-header">
+                    <div class="logo-container">
+                        <div class="logo-3d">
+                            <svg class="logo-svg" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                                <defs>
+                                    <linearGradient id="logoGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                                        <stop offset="0%" class="logo-gradient-1" />
+                                        <stop offset="100%" class="logo-gradient-2" />
+                                    </linearGradient>
+                                </defs>
+                                <path d="M 20 80 L 30 70 L 40 75 L 50 60 L 60 65 L 70 45 L 80 50 L 90 30" 
+                                    stroke="url(#logoGradient)" 
+                                    stroke-width="4" 
+                                    fill="none" 
+                                    stroke-linecap="round" 
+                                    stroke-linejoin="round"/>
+                                <circle cx="30" cy="70" r="4" fill="url(#logoGradient)"/>
+                                <circle cx="50" cy="60" r="4" fill="url(#logoGradient)"/>
+                                <circle cx="70" cy="45" r="4" fill="url(#logoGradient)"/>
+                                <circle cx="90" cy="30" r="5" fill="url(#logoGradient)"/>
+                                <path d="M 85 35 L 90 30 L 85 25" 
+                                    stroke="url(#logoGradient)" 
+                                    stroke-width="3" 
+                                    fill="none" 
+                                    stroke-linecap="round"/>
+                            </svg>
                         </div>
-                        <i class="fas fa-chevron-up sidebar-user-arrow"></i>
+                        <div class="brand-text">
+                            <h2 class="brand-name">AlphaVault AI</h2>
+                            <span class="brand-tagline">Investments</span>
+                        </div>
+                    </div>
+                    <button class="sidebar-toggle" aria-label="Toggle Sidebar">
+                        <i class="fas fa-angle-left"></i>
+                    </button>
+                </div>
+                
+                <!-- Navigation -->
+                <nav class="sidebar-nav">
+                    <div class="nav-section">
+                        <button class="nav-folder" data-tooltip="Home">
+                            <i class="fas fa-home"></i>
+                            <span>Home</span>
+                            <i class="fas fa-chevron-down arrow"></i>
+                        </button>
+                        <div class="nav-submenu">
+                            <a href="index.html" class="nav-link">
+                                <i class="fas fa-home"></i>
+                                <span>Overview</span>
+                            </a>
+                        </div>
                     </div>
                     
-                    <div class="sidebar-user-dropdown" id="sidebarUserDropdown">
-                        <div class="user-dropdown-header">
+                    <div class='nav-section'>
+                        <button class='nav-folder'>
+                            <i class='fas fa-wallet'></i>
+                            <span>Budget</span>
+                            <i class='fas fa-chevron-down arrow'></i>
+                        </button>
+                        <div class='nav-submenu'>
+                            <a href='dashboard-financier.html' class='nav-link'>
+                                <i class='fas fa-home'></i>
+                                <span>Dashboard Budget</span>
+                            </a>
+                            <a href='investment-analytics.html' class='nav-link'>
+                                <i class='fas fa-chart-bar'></i>
+                                <span>Investment Analytics</span>
+                            </a>
+                        </div>
+                    </div>
+                    
+                    <div class='nav-section'>
+                        <button class='nav-folder'>
+                            <i class='fas fa-calculator'></i>
+                            <span>Simulation</span>
+                            <i class='fas fa-chevron-down arrow'></i>
+                        </button>
+                        <div class='nav-submenu'>
+                            <a href='monte-carlo.html' class='nav-link'>
+                                <i class='fas fa-dice'></i>
+                                <span>Monte Carlo</span>
+                            </a>
+                            <a href='portfolio-optimizer.html' class='nav-link'>
+                                <i class='fas fa-chart-pie'></i>
+                                <span>Markowitz</span>
+                            </a>
+                            <a href='risk-parity.html' class='nav-link'>
+                                <i class='fas fa-balance-scale'></i>
+                                <span>Risk Parity</span>
+                            </a>
+                            <a href='scenario-analysis.html' class='nav-link'>
+                                <i class='fas fa-flask'></i>
+                                <span>Scenarios</span>
+                            </a>
+                        </div>
+                    </div>
+                    
+                    <div class='nav-section'>
+                        <button class="nav-folder" data-tooltip="Stocks">
+                            <i class="fas fa-chart-line"></i>
+                            <span>Stocks</span>
+                            <i class="fas fa-chevron-down arrow"></i>
+                        </button>
+                        <div class='nav-submenu' style='display: block;'>
+                            <a href='advanced-analysis.html' class='nav-link active'>
+                                <i class='fas fa-brain'></i>
+                                <span>Advanced Analysis</span>
+                            </a>
+                            <a href='trend-prediction.html' class='nav-link'>
+                                <i class='fas fa-chart-line'></i>
+                                <span>Trend Prediction</span>
+                            </a>
+                            <a href='market-intelligence.html' class='nav-link'>
+                                <i class='fas fa-globe'></i>
+                                <span>Market Intelligence</span>
+                            </a>
+                            <a href='company-insights.html' class='nav-link'>
+                                <i class='fas fa-building'></i>
+                                <span>Company Insights</span>
+                            </a>
+                            <a href='analyst-coverage.html' class='nav-link'>
+                                <i class='fas fa-users'></i>
+                                <span>Analyst Coverage</span>
+                            </a>
+                            <a href='earnings-estimates.html' class='nav-link'>
+                                <i class='fas fa-coins'></i>
+                                <span>Earnings & Estimates</span>
+                            </a>
+                        </div>
+                    </div>
+
+                    <div class='nav-section'>
+                        <button class="nav-folder" data-tooltip="AI Assistant">
+                            <i class="fas fa-robot"></i>
+                            <span>AI Assistant</span>
+                            <i class="fas fa-chevron-down arrow"></i>
+                        </button>
+                        <div class='nav-submenu' style='display: block;'>
+                            <a href='chatbot-fullpage.html' class='nav-link'>
+                                <i class='fas fa-comments'></i>
+                                <span>Alphy AI Chat</span>
+                            </a>
+                        </div>
+                    </div>
+                </nav>
+                
+                <!-- SIDEBAR FOOTER -->
+                <div class="sidebar-footer">
+                    <div class="sidebar-user-menu">
+                        <div class="sidebar-user-trigger" id="sidebarUserTrigger">
                             <img data-user-photo 
                                 src="https://ui-avatars.com/api/?name=User&background=2563eb&color=fff" 
                                 alt="Avatar" 
-                                class="user-dropdown-avatar">
-                            <div class="user-dropdown-details">
-                                <h4 data-user-name class="user-dropdown-name">User</h4>
-                                <p data-user-email class="user-dropdown-email">email@example.com</p>
+                                class="sidebar-user-avatar">
+                            <div class="sidebar-user-info">
+                                <span data-user-name class="sidebar-user-name">User</span>
+                                <span data-user-plan class="sidebar-user-plan">Free Plan</span>
                             </div>
+                            <i class="fas fa-chevron-up sidebar-user-arrow"></i>
                         </div>
                         
-                        <div class="user-dropdown-divider"></div>
-                        
-                        <nav class="user-dropdown-links">
-                            <a href="user-profile.html" class="user-dropdown-link">
-                                <i class="fas fa-user"></i>
-                                <span>My profile</span>
-                            </a>
-                            <a href="settings.html" class="user-dropdown-link">
-                                <i class="fas fa-cog"></i>
-                                <span>Settings</span>
-                            </a>
-                            <a href="#" class="user-dropdown-link">
-                                <i class="fas fa-question-circle"></i>
-                                <span>Help</span>
-                            </a>
-                        </nav>
-                        
-                        <div class="user-dropdown-divider"></div>
-                        
-                        <button onclick="logout()" class="user-dropdown-logout">
-                            <i class="fas fa-sign-out-alt"></i>
-                            <span>Disconnect</span>
-                        </button>
+                        <div class="sidebar-user-dropdown" id="sidebarUserDropdown">
+                            <div class="user-dropdown-header">
+                                <img data-user-photo 
+                                    src="https://ui-avatars.com/api/?name=User&background=2563eb&color=fff" 
+                                    alt="Avatar" 
+                                    class="user-dropdown-avatar">
+                                <div class="user-dropdown-details">
+                                    <h4 data-user-name class="user-dropdown-name">User</h4>
+                                    <p data-user-email class="user-dropdown-email">email@example.com</p>
+                                </div>
+                            </div>
+                            
+                            <div class="user-dropdown-divider"></div>
+                            
+                            <nav class="user-dropdown-links">
+                                <a href="user-profile.html" class="user-dropdown-link">
+                                    <i class="fas fa-user"></i>
+                                    <span>My profile</span>
+                                </a>
+                                <a href="settings.html" class="user-dropdown-link">
+                                    <i class="fas fa-cog"></i>
+                                    <span>Settings</span>
+                                </a>
+                                <a href="#" class="user-dropdown-link">
+                                    <i class="fas fa-question-circle"></i>
+                                    <span>Help</span>
+                                </a>
+                            </nav>
+                            
+                            <div class="user-dropdown-divider"></div>
+                            
+                            <button onclick="logout()" class="user-dropdown-logout">
+                                <i class="fas fa-sign-out-alt"></i>
+                                <span>Disconnect</span>
+                            </button>
+                        </div>
                     </div>
                 </div>
-            </div>
-        </aside>
-        
-        <div class='sidebar-overlay' id='sidebarOverlay' aria-hidden='true'></div>
-
-        <!-- ============================================
-             MAIN CONTENT AREA
-             ============================================ -->
-        <div class='main-content'>
-            <!-- Top Header -->
-            <header class='top-header'>
-                <div class="header-content-wrapper">
-                    <div class='header-left'>
-                        <button class='mobile-toggle' id='mobileToggle'>
-                            <i class='fas fa-bars'></i>
-                        </button>
-                        <h1> Advanced Technical Analysis</h1>
-                    </div>
-                </div>
-            </header>
+            </aside>
             
-            <!-- Container -->
-            <div class='container'>
-                <div class='content'>
-                    
-                    <!-- ============================================
-                         🆕 PORTFOLIO MANAGEMENT SECTION
-                         ============================================ -->
-                    <div class='portfolio-management-section'>
-                        <h2 class='section-title'>
-                            <i class='fas fa-briefcase'></i> Portfolio Management
-                            <span class='help-icon' onclick='openPortfolioHelp()'></span>
-                        </h2>
-                        
-                        <div class='portfolio-toolbar'>
-                            <div class='portfolio-selector'>
-                                <label>
-                                    <i class='fas fa-folder-open'></i> Active Portfolio:
-                                </label>
-                                <select id='portfolioSelect' class='portfolio-dropdown'>
-                                    <option value=''>Loading portfolios...</option>
-                                </select>
-                            </div>
-                            
-                            <div class='portfolio-actions'>
-                                <button class='btn-portfolio-action' onclick='PortfolioManager.openCreateModal()'>
-                                    <i class='fas fa-plus'></i> New Portfolio
-                                </button>
-                                <button class='btn-portfolio-action' onclick='PortfolioManager.openManageModal()'>
-                                    <i class='fas fa-cog'></i> Manage
-                                </button>
-                            </div>
+            <div class='sidebar-overlay' id='sidebarOverlay' aria-hidden='true'></div>
+
+            <!-- ============================================
+                MAIN CONTENT AREA
+                ============================================ -->
+            <div class='main-content'>
+                <!-- Top Header -->
+                <header class='top-header'>
+                    <div class="header-content-wrapper">
+                        <div class='header-left'>
+                            <button class='mobile-toggle' id='mobileToggle'>
+                                <i class='fas fa-bars'></i>
+                            </button>
+                            <h1>Advanced Technical Analysis (Legal Compliant)</h1>
                         </div>
                     </div>
-                    
-                    <!-- ============================================
-                         🆕 WATCHLIST SECTION
-                         ============================================ -->
-                    <div class='watchlist-section'>
-                        <h2 class='section-title'>
-                            <i class='fas fa-star'></i> Watchlist
-                            <span class='help-icon' onclick='openWatchlistHelp()'></span>
-                        </h2>
-                        
-                        <div class='watchlist-toolbar'>
-                            <div class='watchlist-search'>
-                                <input type='text' 
-                                       id='watchlistSearchInput' 
-                                       placeholder='Add stock to watchlist (e.g., AAPL)...'
-                                       autocomplete='off'>
-                                <button class='btn-add-watchlist' onclick='WatchlistManager.addFromInput()'>
-                                    <i class='fas fa-plus'></i> Add
-                                </button>
-                            </div>
-                            
-                            <div class='watchlist-filters'>
-                                <button class='filter-btn active' data-filter='all' onclick='WatchlistManager.filterWatchlist("all")'>
-                                    All
-                                </button>
-                                <button class='filter-btn' data-filter='gainers' onclick='WatchlistManager.filterWatchlist("gainers")'>
-                                    <i class='fas fa-arrow-up'></i> Gainers
-                                </button>
-                                <button class='filter-btn' data-filter='losers' onclick='WatchlistManager.filterWatchlist("losers")'>
-                                    <i class='fas fa-arrow-down'></i> Losers
-                                </button>
-                            </div>
-                        </div>
-                        
-                        <div id='watchlistContainer' class='watchlist-container'>
-                            <div class='watchlist-empty'>
-                                <i class='fas fa-star'></i>
-                                <p>No stocks in watchlist</p>
-                                <small>Add stocks to track them in real-time</small>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- ============================================
-                         SEARCH PANEL
-                         ============================================ -->
-                    <div class='search-panel'>
-                        <h2 class='panel-title'>
-                            <i class='fas fa-search'></i> Select Stock for Advanced Analysis (40+ Professional Indicators)
-                            <span class='help-icon' onclick='openModal("modalIntro")'></span>
-                        </h2>
-                        
-                        <div class='search-container'>
-                            <div class='search-input-wrapper'>
-                                <input type='text' 
-                                       id='symbolInput' 
-                                       placeholder='Search by symbol or company name (e.g., AAPL, Apple, Tesla)...'
-                                       autocomplete='off'
-                                       value='AAPL'>
-                                <button class='btn-analyze' onclick='AdvancedAnalysis.analyzeStock()'>
-                                    <i class='fas fa-chart-area'></i> Analyze Stock
-                                </button>
-                                <div class='search-suggestions' id='searchSuggestions'></div>
-                            </div>
-                            
-                            <div class='popular-stocks'>
-                                <span class='quick-label'>Popular Stocks:</span>
-                                <button class='symbol-chip' onclick='AdvancedAnalysis.loadSymbol("AAPL")'>
-                                    <i class='fab fa-apple'></i> AAPL
-                                </button>
-                                <button class='symbol-chip' onclick='AdvancedAnalysis.loadSymbol("MSFT")'>
-                                    <i class='fab fa-microsoft'></i> MSFT
-                                </button>
-                                <button class='symbol-chip' onclick='AdvancedAnalysis.loadSymbol("GOOGL")'>
-                                    <i class='fab fa-google'></i> GOOGL
-                                </button>
-                                <button class='symbol-chip' onclick='AdvancedAnalysis.loadSymbol("AMZN")'>
-                                    <i class='fab fa-amazon'></i> AMZN
-                                </button>
-                                <button class='symbol-chip' onclick='AdvancedAnalysis.loadSymbol("TSLA")'>
-                                    <i class='fas fa-car'></i> TSLA
-                                </button>
-                                <button class='symbol-chip' onclick='AdvancedAnalysis.loadSymbol("NVDA")'>
-                                    <i class='fas fa-microchip'></i> NVDA
-                                </button>
-                                <button class='symbol-chip' onclick='AdvancedAnalysis.loadSymbol("META")'>
-                                    <i class='fab fa-meta'></i> META
-                                </button>
-                                <button class='symbol-chip' onclick='AdvancedAnalysis.loadSymbol("NFLX")'>
-                                    <i class='fas fa-film'></i> NFLX
-                                </button>
-                            </div>
-                            
-                            <div class='prediction-settings'>
-                                <div class='setting-group'>
-                                    <label>Analysis Period:</label>
-                                    <button class='horizon-btn' data-period='1M' onclick='AdvancedAnalysis.changePeriod("1M")'>1M</button>
-                                    <button class='horizon-btn' data-period='3M' onclick='AdvancedAnalysis.changePeriod("3M")'>3M</button>
-                                    <button class='horizon-btn active' data-period='6M' onclick='AdvancedAnalysis.changePeriod("6M")'>6M</button>
-                                    <button class='horizon-btn' data-period='1Y' onclick='AdvancedAnalysis.changePeriod("1Y")'>1Y</button>
-                                    <button class='horizon-btn' data-period='5Y' onclick='AdvancedAnalysis.changePeriod("5Y")'>5Y</button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Loading Indicator -->
-                    <div id='loadingIndicator' class='loading-indicator hidden'>
-                        <i class='fas fa-spinner fa-spin'></i> 
-                        <span id='loadingText'>Loading data and calculating 40+ professional indicators...</span>
-                    </div>
-                    
-                    <!-- Stock Header -->
-                    <div id='stockHeader' class='stock-header hidden'>
-                        <div class='header-content'>
-                            <div class='stock-info'>
-                                <h2 id='stockSymbol'>-</h2>
-                                <span id='stockName' class='stock-name'>-</span>
-                            </div>
-                            <div class='stock-price'>
-                                <div id='currentPrice' class='price'>-</div>
-                                <div id='priceChange' class='change'>-</div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Results Panel -->
-                    <div id='resultsPanel' class='results-panel hidden'>
-                        
-                        <!-- ============================================
-                             📊 CONSOLIDATED SIGNALS
-                             ============================================ -->
-                        <div class='signals-section'>
-                            <h3 class='section-title'>
-                                <i class='fas fa-signal'></i> Consolidated Trading Signals (Based on All Indicators)
-                                <span class='help-icon' onclick='openModal("modalSignals")'></span>
-                            </h3>
-                            
-                            <div class='signal-gauge'>
-                                <div class='gauge-header'>
-                                    <h4>Overall Market Signal</h4>
-                                </div>
-                                <div class='gauge-container'>
-                                    <div class='gauge-bar'>
-                                        <div class='gauge-fill' id='gaugeFill' style='width: 50%'></div>
-                                    </div>
-                                    <div class='gauge-value' id='gaugeValue'>NEUTRAL</div>
-                                </div>
-                            </div>
-                            
-                            <div class='signals-breakdown' id='signalsBreakdown'>
-                                <!-- Rempli dynamiquement -->
-                            </div>
-                        </div>
-
-                        <!-- ============================================
-                            🤖 ALPHY AI INVESTMENT RECOMMENDATION
-                            Wall Street Grade Multi-Horizon Analysis
-                            ============================================ -->
-                        <div class='ai-recommendation-section' id='aiRecommendationSection'>
-                            <div class='ai-header'>
-                                <div class='ai-logo-container'>
-                                    <div class='ai-logo-ring'>
-                                        <div class='ai-logo-core'>
-                                            <i class='fas fa-brain'></i>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class='ai-header-text'>
-                                    <h2 class='ai-title'>
-                                        <span class='ai-badge'>POWERED BY</span>
-                                        ALPHY AI RECOMMENDATION ENGINE
-                                    </h2>
-                                    <p class='ai-subtitle'>
-                                        Institutional-Grade Multi-Horizon Investment Analysis
-                                        <span class='ai-indicators-count'>• Analyzing 40+ Technical Indicators</span>
-                                    </p>
-                                </div>
-                            </div>
-
-                            <!-- AI Score Global -->
-                            <div class='ai-score-container'>
-                                <div class='ai-score-card'>
-                                    <div class='ai-score-label'>AI CONFIDENCE SCORE</div>
-                                    <div class='ai-score-value' id='aiScoreValue'>--</div>
-                                    <div class='ai-score-bar' id='aiScoreFill'>
-                                        <div class='ai-score-fill' style='width: 0%'></div>
-                                    </div>
-                                    <div class='ai-score-rating' id='aiScoreRating'>Analyzing...</div>
-                                </div>
-
-                                <div class='ai-quick-stats'>
-                                    <div class='ai-stat-item'>
-                                        <div class='ai-stat-icon bullish'>
-                                            <i class='fas fa-arrow-up'></i>
-                                        </div>
-                                        <div class='ai-stat-content'>
-                                            <div class='ai-stat-value' id='bullishSignals'>--</div>
-                                            <div class='ai-stat-label'>Bullish Signals</div>
-                                        </div>
-                                    </div>
-                                    <div class='ai-stat-item'>
-                                        <div class='ai-stat-icon neutral'>
-                                            <i class='fas fa-minus'></i>
-                                        </div>
-                                        <div class='ai-stat-content'>
-                                            <div class='ai-stat-value' id='neutralSignals'>--</div>
-                                            <div class='ai-stat-label'>Neutral Signals</div>
-                                        </div>
-                                    </div>
-                                    <div class='ai-stat-item'>
-                                        <div class='ai-stat-icon bearish'>
-                                            <i class='fas fa-arrow-down'></i>
-                                        </div>
-                                        <div class='ai-stat-content'>
-                                            <div class='ai-stat-value' id='bearishSignals'>--</div>
-                                            <div class='ai-stat-label'>Bearish Signals</div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- ✅ CORRECTION - Multi-Horizon Recommendations (SANS "Target Price") -->
-                            <div class='ai-horizons-grid'>
-                                <!-- 1 Year Horizon -->
-                                <div class='ai-horizon-card' data-horizon='1y'>
-                                    <div class='ai-horizon-header'>
-                                        <div class='ai-horizon-icon'>
-                                            <i class='fas fa-calendar-alt'></i>
-                                        </div>
-                                        <div class='ai-horizon-title'>
-                                            <h3>1 Year Outlook</h3>
-                                            <p>Short-Term Investment</p>
-                                        </div>
-                                    </div>
-                                    <div class='ai-horizon-recommendation' id='recommendation1y'>
-                                        <div class='ai-rec-badge'>ANALYZING...</div>
-                                    </div>
-                                    <div class='ai-horizon-details'>
-                                        <div class='ai-detail-row'>
-                                            <span class='ai-detail-label'>Potential:</span>
-                                            <span class='ai-detail-value' id='target1y'>--</span>
-                                        </div>
-                                        <div class='ai-detail-row'>
-                                            <span class='ai-detail-label'>Upside/Downside:</span>
-                                            <span class='ai-detail-value' id='upside1y'>--</span>
-                                        </div>
-                                        <div class='ai-detail-row'>
-                                            <span class='ai-detail-label'>Confidence:</span>
-                                            <div class='ai-confidence-bar' id='confidence1y'>
-                                                <div class='ai-confidence-fill' style='width: 0%'></div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class='ai-horizon-drivers'>
-                                        <div class='ai-drivers-label'>Key Drivers:</div>
-                                        <div class='ai-drivers-list' id='drivers1y'></div>
-                                    </div>
-                                </div>
-
-                                <!-- 2 Years Horizon -->
-                                <div class='ai-horizon-card' data-horizon='2y'>
-                                    <div class='ai-horizon-header'>
-                                        <div class='ai-horizon-icon'>
-                                            <i class='fas fa-chart-line'></i>
-                                        </div>
-                                        <div class='ai-horizon-title'>
-                                            <h3>2 Years Outlook</h3>
-                                            <p>Medium-Term Investment</p>
-                                        </div>
-                                    </div>
-                                    <div class='ai-horizon-recommendation' id='recommendation2y'>
-                                        <div class='ai-rec-badge'>ANALYZING...</div>
-                                    </div>
-                                    <div class='ai-horizon-details'>
-                                        <div class='ai-detail-row'>
-                                            <span class='ai-detail-label'>Potential:</span>
-                                            <span class='ai-detail-value' id='target2y'>--</span>
-                                        </div>
-                                        <div class='ai-detail-row'>
-                                            <span class='ai-detail-label'>Upside/Downside:</span>
-                                            <span class='ai-detail-value' id='upside2y'>--</span>
-                                        </div>
-                                        <div class='ai-detail-row'>
-                                            <span class='ai-detail-label'>Confidence:</span>
-                                            <div class='ai-confidence-bar' id='confidence2y'>
-                                                <div class='ai-confidence-fill' style='width: 0%'></div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class='ai-horizon-drivers'>
-                                        <div class='ai-drivers-label'>Key Drivers:</div>
-                                        <div class='ai-drivers-list' id='drivers2y'></div>
-                                    </div>
-                                </div>
-
-                                <!-- 5 Years Horizon -->
-                                <div class='ai-horizon-card' data-horizon='5y'>
-                                    <div class='ai-horizon-header'>
-                                        <div class='ai-horizon-icon'>
-                                            <i class='fas fa-rocket'></i>
-                                        </div>
-                                        <div class='ai-horizon-title'>
-                                            <h3>5 Years Outlook</h3>
-                                            <p>Long-Term Investment</p>
-                                        </div>
-                                    </div>
-                                    <div class='ai-horizon-recommendation' id='recommendation5y'>
-                                        <div class='ai-rec-badge'>ANALYZING...</div>
-                                    </div>
-                                    <div class='ai-horizon-details'>
-                                        <div class='ai-detail-row'>
-                                            <span class='ai-detail-label'>Potential:</span>
-                                            <span class='ai-detail-value' id='target5y'>--</span>
-                                        </div>
-                                        <div class='ai-detail-row'>
-                                            <span class='ai-detail-label'>Upside/Downside:</span>
-                                            <span class='ai-detail-value' id='upside5y'>--</span>
-                                        </div>
-                                        <div class='ai-detail-row'>
-                                            <span class='ai-detail-label'>Confidence:</span>
-                                            <div class='ai-confidence-bar' id='confidence5y'>
-                                                <div class='ai-confidence-fill' style='width: 0%'></div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class='ai-horizon-drivers'>
-                                        <div class='ai-drivers-label'>Key Drivers:</div>
-                                        <div class='ai-drivers-list' id='drivers5y'></div>
-                                    </div>
-                                </div>
-
-                                <!-- 10 Years Horizon -->
-                                <div class='ai-horizon-card' data-horizon='10y'>
-                                    <div class='ai-horizon-header'>
-                                        <div class='ai-horizon-icon'>
-                                            <i class='fas fa-gem'></i>
-                                        </div>
-                                        <div class='ai-horizon-title'>
-                                            <h3>10 Years Outlook</h3>
-                                            <p>Strategic Investment</p>
-                                        </div>
-                                    </div>
-                                    <div class='ai-horizon-recommendation' id='recommendation10y'>
-                                        <div class='ai-rec-badge'>ANALYZING...</div>
-                                    </div>
-                                    <div class='ai-horizon-details'>
-                                        <div class='ai-detail-row'>
-                                            <span class='ai-detail-label'>Potential:</span>
-                                            <span class='ai-detail-value' id='target10y'>--</span>
-                                        </div>
-                                        <div class='ai-detail-row'>
-                                            <span class='ai-detail-label'>Upside/Downside:</span>
-                                            <span class='ai-detail-value' id='upside10y'>--</span>
-                                        </div>
-                                        <div class='ai-detail-row'>
-                                            <span class='ai-detail-label'>Confidence:</span>
-                                            <div class='ai-confidence-bar' id='confidence10y'>
-                                                <div class='ai-confidence-fill' style='width: 0%'></div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class='ai-horizon-drivers'>
-                                        <div class='ai-drivers-label'>Key Drivers:</div>
-                                        <div class='ai-drivers-list' id='drivers10y'></div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Risk/Reward Analysis -->
-                            <div class='ai-risk-reward-section'>
-                                <div class='ai-risk-card'>
-                                    <div class='ai-risk-header'>
-                                        <i class='fas fa-shield-alt'></i>
-                                        <h3>Risk Assessment</h3>
-                                    </div>
-                                    <div class='ai-risk-level' id='aiRiskLevel'>
-                                        <div class='ai-risk-badge'>ANALYZING...</div>
-                                    </div>
-                                    <div class='ai-risk-factors' id='aiRiskFactors'>
-                                        <div class='ai-factor-item loading'>
-                                            <i class='fas fa-spinner fa-spin'></i> Analyzing risk factors...
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class='ai-reward-card'>
-                                    <div class='ai-reward-header'>
-                                        <i class='fas fa-trophy'></i>
-                                        <h3>Opportunity Analysis</h3>
-                                    </div>
-                                    <div class='ai-reward-level' id='aiRewardLevel'>
-                                        <div class='ai-reward-badge'>ANALYZING...</div>
-                                    </div>
-                                    <div class='ai-reward-factors' id='aiRewardFactors'>
-                                        <div class='ai-factor-item loading'>
-                                            <i class='fas fa-spinner fa-spin'></i> Analyzing opportunities...
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Professional Summary -->
-                            <div class='ai-professional-summary'>
-                                <div class='ai-summary-header'>
-                                    <i class='fas fa-file-alt'></i>
-                                    <h3>Analyst Summary</h3>
-                                    <div class='ai-summary-meta'>
-                                        <span class='ai-summary-date' id='aiSummaryDate'>--</span>
-                                        <span class='ai-summary-badge'>INSTITUTIONAL GRADE</span>
-                                    </div>
-                                </div>
-                                <div class='ai-summary-content' id='aiSummaryContent'>
-                                    <div class='ai-summary-loading'>
-                                        <i class='fas fa-brain fa-spin'></i>
-                                        <p>Alphy AI is analyzing 40+ technical indicators to generate a comprehensive investment recommendation...</p>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Disclaimer -->
-                            <div class='ai-disclaimer'>
-                                <i class='fas fa-info-circle'></i>
-                                <strong>Disclaimer:</strong> This AI-powered analysis is for informational purposes only and should not be considered as financial advice. Alphy AI aggregates technical indicators to provide data-driven insights. Always conduct your own research and consult with a licensed financial advisor before making investment decisions. Past performance does not guarantee future results.
-                            </div>
-                        </div>
-                        
-                        <!-- ============================================
-                             📈 SECTION 1: MOMENTUM OSCILLATORS
-                             ============================================ -->
-                        <div class='chart-section'>
-                            <h2 class='category-title'>
-                                <i class='fas fa-tachometer-alt'></i> Momentum Oscillators
-                            </h2>
-                        </div>
-                        
-                        <!-- RSI & MACD Grid -->
-                        <div class='oscillators-grid'>
-                            
-                            <!-- RSI -->
-                            <div class='oscillator-card'>
-                                <h3 class='section-title'>
-                                    <i class='fas fa-chart-line'></i> RSI - Relative Strength Index
-                                    <span class='help-icon' onclick='openModal("modalRSI")'></span>
-                                </h3>
-                                <div id='rsiChart' class='chart'></div>
-                                <div class='signal-box' id='rsiSignal'>Calculating...</div>
-                            </div>
-                            
-                            <!-- MACD -->
-                            <div class='oscillator-card'>
-                                <h3 class='section-title'>
-                                    <i class='fas fa-wave-square'></i> MACD - Moving Average Convergence Divergence
-                                    <span class='help-icon' onclick='openModal("modalMACD")'></span>
-                                </h3>
-                                <div id='macdChart' class='chart'></div>
-                                <div class='signal-box' id='macdSignal'>Calculating...</div>
-                            </div>
-                            
-                        </div>
-                        
-                        <!-- Stochastic & Williams Grid -->
-                        <div class='oscillators-grid'>
-                            
-                            <!-- Stochastic -->
-                            <div class='oscillator-card'>
-                                <h3 class='section-title'>
-                                    <i class='fas fa-wave-square'></i> Stochastic Oscillator
-                                    <span class='help-icon' onclick='openModal("modalStochastic")'></span>
-                                </h3>
-                                <div id='stochasticChart' class='chart'></div>
-                                <div class='signal-box' id='stochasticSignal'>Calculating...</div>
-                            </div>
-                            
-                            <!-- Williams %R -->
-                            <div class='oscillator-card'>
-                                <h3 class='section-title'>
-                                    <i class='fas fa-chart-line'></i> Williams %R
-                                    <span class='help-icon' onclick='openModal("modalWilliams")'></span>
-                                </h3>
-                                <div id='williamsChart' class='chart'></div>
-                                <div class='signal-box' id='williamsSignal'>Calculating...</div>
-                            </div>
-                            
-                        </div>
-                        
-                        <!-- MFI, CCI, Ultimate Grid -->
-                        <div class='oscillators-grid'>
-                            
-                            <!-- MFI -->
-                            <div class='oscillator-card'>
-                                <h3 class='section-title'>
-                                    <i class='fas fa-coins'></i> MFI - Money Flow Index
-                                    <span class='help-icon' onclick='openModal("modalMFI")'></span>
-                                </h3>
-                                <div id='mfiChart' class='chart'></div>
-                                <div class='signal-box' id='mfiSignal'>Calculating...</div>
-                            </div>
-                            
-                            <!-- CCI -->
-                            <div class='oscillator-card'>
-                                <h3 class='section-title'>
-                                    <i class='fas fa-chart-area'></i> CCI - Commodity Channel Index
-                                    <span class='help-icon' onclick='openModal("modalCCI")'></span>
-                                </h3>
-                                <div id='cciChart' class='chart'></div>
-                                <div class='signal-box' id='cciSignal'>Calculating...</div>
-                            </div>
-                            
-                        </div>
-                        
-                        <!-- Ultimate & ROC Grid -->
-                        <div class='oscillators-grid'>
-                            
-                            <!-- Ultimate Oscillator -->
-                            <div class='oscillator-card'>
-                                <h3 class='section-title'>
-                                    <i class='fas fa-layer-group'></i> Ultimate Oscillator
-                                    <span class='help-icon' onclick='openModal("modalUltimate")'></span>
-                                </h3>
-                                <div id='ultimateChart' class='chart'></div>
-                                <div class='signal-box' id='ultimateSignal'>Calculating...</div>
-                            </div>
-                            
-                            <!-- ROC -->
-                            <div class='oscillator-card'>
-                                <h3 class='section-title'>
-                                    <i class='fas fa-percentage'></i> ROC - Rate of Change
-                                    <span class='help-icon' onclick='openModal("modalROC")'></span>
-                                </h3>
-                                <div id='rocChart' class='chart'></div>
-                                <div class='signal-box' id='rocSignal'>Calculating...</div>
-                            </div>
-                            
-                        </div>
-                        
-                        <!-- ============================================
-                             📊 SECTION 2: TREND INDICATORS
-                             ============================================ -->
-                        <div class='chart-section'>
-                            <h2 class='category-title'>
-                                <i class='fas fa-chart-line'></i> Trend Indicators
-                            </h2>
-                        </div>
-                        
-                        <!-- Ichimoku Cloud -->
-                        <div class='chart-section'>
-                            <h3 class='section-title'>
-                                <i class='fas fa-cloud'></i> Ichimoku Cloud
-                                <span class='help-icon' onclick='openModal("modalIchimoku")'></span>
-                            </h3>
-                            <div id='ichimokuChart' class='chart'></div>
-                        </div>
-                        
-                        <!-- ADX & SAR Grid -->
-                        <div class='oscillators-grid'>
-                            
-                            <!-- ADX -->
-                            <div class='oscillator-card'>
-                                <h3 class='section-title'>
-                                    <i class='fas fa-chart-area'></i> ADX - Trend Strength
-                                    <span class='help-icon' onclick='openModal("modalADX")'></span>
-                                </h3>
-                                <div id='adxChart' class='chart'></div>
-                                <div class='signal-box' id='adxSignal'>Calculating...</div>
-                            </div>
-                            
-                            <!-- Parabolic SAR -->
-                            <div class='oscillator-card'>
-                                <h3 class='section-title'>
-                                    <i class='fas fa-dot-circle'></i> Parabolic SAR
-                                    <span class='help-icon' onclick='openModal("modalSAR")'></span>
-                                </h3>
-                                <div id='sarChart' class='chart'></div>
-                                <div class='signal-box' id='sarSignal'>Calculating...</div>
-                            </div>
-                            
-                        </div>
-                        
-                        <!-- Aroon Indicator -->
-                        <div class='chart-section'>
-                            <h3 class='section-title'>
-                                <i class='fas fa-arrows-alt-h'></i> Aroon Indicator
-                                <span class='help-icon' onclick='openModal("modalAroon")'></span>
-                            </h3>
-                            <div id='aroonChart' class='chart'></div>
-                            <div class='signal-box' id='aroonSignal'>Calculating...</div>
-                        </div>
-                        
-                        <!-- Moving Averages -->
-                        <div class='chart-section'>
-                            <h3 class='section-title'>
-                                <i class='fas fa-bezier-curve'></i> Moving Averages (Multiple Timeframes)
-                                <span class='help-icon' onclick='openModal("modalMovingAverages")'></span>
-                            </h3>
-                            <div id='movingAveragesChart' class='chart'></div>
-                            <div class='signal-box' id='movingAveragesSignal'>Calculating...</div>
-                        </div>
-                        
-                        <!-- Linear Regression -->
-                        <div class='chart-section'>
-                            <h3 class='section-title'>
-                                <i class='fas fa-chart-line'></i> Linear Regression Channel
-                                <span class='help-icon' onclick='openModal("modalLinearRegression")'></span>
-                            </h3>
-                            <div id='linearRegressionChart' class='chart'></div>
-                            <div class='signal-box' id='linearRegressionSignal'>Calculating...</div>
-                        </div>
-                        
-                        <!-- ============================================
-                             🎯 SECTION 3: VOLATILITY & CHANNELS
-                             ============================================ -->
-                        <div class='chart-section'>
-                            <h2 class='category-title'>
-                                <i class='fas fa-arrows-alt-v'></i> Volatility & Channels
-                            </h2>
-                        </div>
-                        
-                        <!-- Bollinger Bands -->
-                        <div class='chart-section'>
-                            <h3 class='section-title'>
-                                <i class='fas fa-compress-arrows-alt'></i> Bollinger Bands
-                                <span class='help-icon' onclick='openModal("modalBollinger")'></span>
-                            </h3>
-                            <div id='bollingerChart' class='chart'></div>
-                            <div class='signal-box' id='bollingerSignal'>Calculating...</div>
-                        </div>
-                        
-                        <!-- Keltner & Donchian Grid -->
-                        <div class='oscillators-grid'>
-                            
-                            <!-- Keltner Channels -->
-                            <div class='oscillator-card'>
-                                <h3 class='section-title'>
-                                    <i class='fas fa-stream'></i> Keltner Channels
-                                    <span class='help-icon' onclick='openModal("modalKeltner")'></span>
-                                </h3>
-                                <div id='keltnerChart' class='chart'></div>
-                                <div class='signal-box' id='keltnerSignal'>Calculating...</div>
-                            </div>
-                            
-                            <!-- Donchian Channels -->
-                            <div class='oscillator-card'>
-                                <h3 class='section-title'>
-                                    <i class='fas fa-grip-lines'></i> Donchian Channels
-                                    <span class='help-icon' onclick='openModal("modalDonchian")'></span>
-                                </h3>
-                                <div id='donchianChart' class='chart'></div>
-                                <div class='signal-box' id='donchianSignal'>Calculating...</div>
-                            </div>
-                            
-                        </div>
-                        
-                        <!-- ATR -->
-                        <div class='chart-section'>
-                            <h3 class='section-title'>
-                                <i class='fas fa-arrows-alt-v'></i> Average True Range (ATR)
-                                <span class='help-icon' onclick='openModal("modalATR")'></span>
-                            </h3>
-                            <div id='atrChart' class='chart'></div>
-                            <div class='signal-box' id='atrSignal'>Calculating...</div>
-                        </div>
-                        
-                        <!-- ============================================
-                             📊 SECTION 4: VOLUME ANALYSIS
-                             ============================================ -->
-                        <div class='chart-section'>
-                            <h2 class='category-title'>
-                                <i class='fas fa-chart-bar'></i> Volume Analysis
-                            </h2>
-                        </div>
-                        
-                        <!-- OBV & CMF Grid -->
-                        <div class='oscillators-grid'>
-                            
-                            <!-- OBV -->
-                            <div class='oscillator-card'>
-                                <h3 class='section-title'>
-                                    <i class='fas fa-chart-bar'></i> On-Balance Volume
-                                    <span class='help-icon' onclick='openModal("modalOBV")'></span>
-                                </h3>
-                                <div id='obvChart' class='chart'></div>
-                                <div class='signal-box' id='obvSignal'>Calculating...</div>
-                            </div>
-                            
-                            <!-- CMF -->
-                            <div class='oscillator-card'>
-                                <h3 class='section-title'>
-                                    <i class='fas fa-water'></i> CMF - Chaikin Money Flow
-                                    <span class='help-icon' onclick='openModal("modalCMF")'></span>
-                                </h3>
-                                <div id='cmfChart' class='chart'></div>
-                                <div class='signal-box' id='cmfSignal'>Calculating...</div>
-                            </div>
-                            
-                        </div>
-                        
-                        <!-- VWAP -->
-                        <div class='chart-section'>
-                            <h3 class='section-title'>
-                                <i class='fas fa-balance-scale-right'></i> VWAP with Standard Deviation Bands
-                                <span class='help-icon' onclick='openModal("modalVWAP")'></span>
-                            </h3>
-                            <div id='vwapChart' class='chart'></div>
-                            <div class='signal-box' id='vwapSignal'>Calculating...</div>
-                        </div>
-                        
-                        <!-- Volume Profile -->
-                        <div class='chart-section'>
-                            <h3 class='section-title'>
-                                <i class='fas fa-layer-group'></i> Volume Profile - Price Distribution
-                                <span class='help-icon' onclick='openModal("modalVolumeProfile")'></span>
-                            </h3>
-                            <div id='volumeProfileChart' class='chart'></div>
-                            <div class='signal-box' id='volumeProfileSignal'>Calculating...</div>
-                        </div>
-                        
-                        <!-- Elder Ray -->
-                        <div class='chart-section'>
-                            <h3 class='section-title'>
-                                <i class='fas fa-balance-scale'></i> Elder Ray Index - Bull & Bear Power
-                                <span class='help-icon' onclick='openModal("modalElderRay")'></span>
-                            </h3>
-                            <div id='elderRayChart' class='chart'></div>
-                            <div class='signal-box' id='elderRaySignal'>Calculating...</div>
-                        </div>
-                        
-                        <!-- ============================================
-                             🎯 SECTION 5: SUPPORT/RESISTANCE & PATTERNS
-                             ============================================ -->
-                        <div class='chart-section'>
-                            <h2 class='category-title'>
-                                <i class='fas fa-crosshairs'></i> Support/Resistance & Patterns
-                            </h2>
-                        </div>
-                        
-                        <!-- Fibonacci Retracements -->
-                        <div class='chart-section'>
-                            <h3 class='section-title'>
-                                <i class='fas fa-ruler-combined'></i> Fibonacci Retracements
-                                <span class='help-icon' onclick='openModal("modalFibonacci")'></span>
-                            </h3>
-                            <div id='fibonacciChart' class='chart'></div>
-                            <div id='fibonacciLevels' class='fibonacci-table'></div>
-                        </div>
-                        
-                        <!-- Pivot Points -->
-                        <div class='pivot-section'>
-                            <h3 class='section-title'>
-                                <i class='fas fa-crosshairs'></i> Pivot Points
-                                <span class='help-icon' onclick='openModal("modalPivots")'></span>
-                            </h3>
-                            
-                            <div class='pivot-grid'>
-                                <div class='pivot-card' id='pivotStandard'>
-                                    <h4>Standard Pivots</h4>
-                                    <div class='pivot-values'></div>
-                                </div>
-                                
-                                <div class='pivot-card' id='pivotFibonacci'>
-                                    <h4>Fibonacci Pivots</h4>
-                                    <div class='pivot-values'></div>
-                                </div>
-                                
-                                <div class='pivot-card' id='pivotCamarilla'>
-                                    <h4>Camarilla Pivots</h4>
-                                    <div class='pivot-values'></div>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <!-- Support/Resistance Detection -->
-                        <div class='chart-section'>
-                            <h3 class='section-title'>
-                                <i class='fas fa-layer-group'></i> Automatic Support & Resistance Detection
-                                <span class='help-icon' onclick='openModal("modalSupportResistance")'></span>
-                            </h3>
-                            <div id='supportResistance' class='sr-container'>
-                                <!-- Rempli dynamiquement -->
-                            </div>
-                        </div>
-                        
-                        <!-- Candlestick Patterns -->
-                        <div class='chart-section'>
-                            <h3 class='section-title'>
-                                <i class='fas fa-bars'></i> Candlestick Pattern Detection
-                                <span class='help-icon' onclick='openModal("modalCandlestickPatterns")'></span>
-                            </h3>
-                            <div id='candlestickPatterns' class='patterns-container'>
-                                <!-- Rempli dynamiquement -->
-                            </div>
-                        </div>
-                        
-                        <!-- Divergences -->
-                        <div class='chart-section'>
-                            <h3 class='section-title'>
-                                <i class='fas fa-exchange-alt'></i> Divergence Detection
-                                <span class='help-icon' onclick='openModal("modalDivergences")'></span>
-                            </h3>
-                            <div id='divergences' class='divergences-container'>
-                                <!-- Rempli dynamiquement -->
-                            </div>
-                        </div>
-                        
-                    </div>
-                </div>
+                </header>
                 
-                <!-- Footer -->
-                <footer>
-                    <p>Advanced Technical Analysis | 40+ Professional Indicators</p>
-                </footer>
+                <!-- Container -->
+                <div class='container'>
+                    <div class='content'>
+                        
+                        <!-- ============================================
+                            🆕 PORTFOLIO MANAGEMENT SECTION
+                            ============================================ -->
+                        <div class='portfolio-management-section'>
+                            <h2 class='section-title'>
+                                <i class='fas fa-briefcase'></i> Portfolio Management
+                                <span class='help-icon' onclick='openPortfolioHelp()'></span>
+                            </h2>
+                            
+                            <div class='portfolio-toolbar'>
+                                <div class='portfolio-selector'>
+                                    <label>
+                                        <i class='fas fa-folder-open'></i> Active Portfolio:
+                                    </label>
+                                    <select id='portfolioSelect' class='portfolio-dropdown'>
+                                        <option value=''>Loading portfolios...</option>
+                                    </select>
+                                </div>
+                                
+                                <div class='portfolio-actions'>
+                                    <button class='btn-portfolio-action' onclick='PortfolioManager.openCreateModal()'>
+                                        <i class='fas fa-plus'></i> New Portfolio
+                                    </button>
+                                    <button class='btn-portfolio-action' onclick='PortfolioManager.openManageModal()'>
+                                        <i class='fas fa-cog'></i> Manage
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- ============================================
+                            🆕 WATCHLIST SECTION
+                            ============================================ -->
+                        <div class='watchlist-section'>
+                            <h2 class='section-title'>
+                                <i class='fas fa-star'></i> Watchlist
+                                <span class='help-icon' onclick='openWatchlistHelp()'></span>
+                            </h2>
+                            
+                            <div class='watchlist-toolbar'>
+                                <div class='watchlist-search'>
+                                    <input type='text' 
+                                        id='watchlistSearchInput' 
+                                        placeholder='Add stock to watchlist (e.g., AAPL)...'
+                                        autocomplete='off'>
+                                    <button class='btn-add-watchlist' onclick='WatchlistManager.addFromInput()'>
+                                        <i class='fas fa-plus'></i> Add
+                                    </button>
+                                </div>
+                                
+                                <div class='watchlist-filters'>
+                                    <button class='filter-btn active' data-filter='all' onclick='WatchlistManager.filterWatchlist("all")'>
+                                        All
+                                    </button>
+                                    <button class='filter-btn' data-filter='gainers' onclick='WatchlistManager.filterWatchlist("gainers")'>
+                                        <i class='fas fa-arrow-up'></i> Gainers
+                                    </button>
+                                    <button class='filter-btn' data-filter='losers' onclick='WatchlistManager.filterWatchlist("losers")'>
+                                        <i class='fas fa-arrow-down'></i> Losers
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <div id='watchlistContainer' class='watchlist-container'>
+                                <div class='watchlist-empty'>
+                                    <i class='fas fa-star'></i>
+                                    <p>No stocks in watchlist</p>
+                                    <small>Add stocks to track them in real-time</small>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- ============================================
+                            SEARCH PANEL
+                            ============================================ -->
+                        <div class='search-panel'>
+                            <h2 class='panel-title'>
+                                <i class='fas fa-search'></i> Select Stock for Advanced Analysis (Technical Indicators Only)
+                                <span class='help-icon' onclick='openModal("modalIntro")'></span>
+                            </h2>
+                            
+                            <div class='search-container'>
+                                <div class='search-input-wrapper'>
+                                    <input type='text' 
+                                        id='symbolInput' 
+                                        placeholder='Search by symbol or company name (e.g., AAPL, Apple, Tesla)...'
+                                        autocomplete='off'
+                                        value='AAPL'>
+                                    <button class='btn-analyze' onclick='AdvancedAnalysis.analyzeStock()'>
+                                        <i class='fas fa-chart-area'></i> Analyze Stock
+                                    </button>
+                                    <div class='search-suggestions' id='searchSuggestions'></div>
+                                </div>
+                                
+                                <div class='popular-stocks'>
+                                    <span class='quick-label'>Popular Stocks:</span>
+                                    <button class='symbol-chip' onclick='AdvancedAnalysis.loadSymbol("AAPL")'>
+                                        <i class='fab fa-apple'></i> AAPL
+                                    </button>
+                                    <button class='symbol-chip' onclick='AdvancedAnalysis.loadSymbol("MSFT")'>
+                                        <i class='fab fa-microsoft'></i> MSFT
+                                    </button>
+                                    <button class='symbol-chip' onclick='AdvancedAnalysis.loadSymbol("GOOGL")'>
+                                        <i class='fab fa-google'></i> GOOGL
+                                    </button>
+                                    <button class='symbol-chip' onclick='AdvancedAnalysis.loadSymbol("AMZN")'>
+                                        <i class='fab fa-amazon'></i> AMZN
+                                    </button>
+                                    <button class='symbol-chip' onclick='AdvancedAnalysis.loadSymbol("TSLA")'>
+                                        <i class='fas fa-car'></i> TSLA
+                                    </button>
+                                    <button class='symbol-chip' onclick='AdvancedAnalysis.loadSymbol("NVDA")'>
+                                        <i class='fas fa-microchip'></i> NVDA
+                                    </button>
+                                    <button class='symbol-chip' onclick='AdvancedAnalysis.loadSymbol("META")'>
+                                        <i class='fab fa-meta'></i> META
+                                    </button>
+                                    <button class='symbol-chip' onclick='AdvancedAnalysis.loadSymbol("NFLX")'>
+                                        <i class='fas fa-film'></i> NFLX
+                                    </button>
+                                </div>
+                                
+                                <div class='prediction-settings'>
+                                    <div class='setting-group'>
+                                        <label>Analysis Period:</label>
+                                        <button class='horizon-btn' data-period='1M' onclick='AdvancedAnalysis.changePeriod("1M")'>1M</button>
+                                        <button class='horizon-btn' data-period='3M' onclick='AdvancedAnalysis.changePeriod("3M")'>3M</button>
+                                        <button class='horizon-btn active' data-period='6M' onclick='AdvancedAnalysis.changePeriod("6M")'>6M</button>
+                                        <button class='horizon-btn' data-period='1Y' onclick='AdvancedAnalysis.changePeriod("1Y")'>1Y</button>
+                                        <button class='horizon-btn' data-period='5Y' onclick='AdvancedAnalysis.changePeriod("5Y")'>5Y</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Loading Indicator -->
+                        <div id='loadingIndicator' class='loading-indicator hidden'>
+                            <i class='fas fa-spinner fa-spin'></i> 
+                            <span id='loadingText'>Loading data and calculating technical indicators...</span>
+                        </div>
+                        
+                        <!-- Stock Header (SANS PRIX) -->
+                        <div id='stockHeader' class='stock-header hidden'>
+                            <div class='header-content'>
+                                <div class='stock-info'>
+                                    <h2 id='stockSymbol'>-</h2>
+                                    <span id='stockName' class='stock-name'>-</span>
+                                </div>
+                                <div class='stock-price'>
+                                    <div id='currentPrice' class='price'>AlphaVault Score: --</div>
+                                    <div id='priceChange' class='change'>Market Strength: --</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Results Panel -->
+                        <div id='resultsPanel' class='results-panel hidden'>
+                            
+                            <!-- ============================================
+                                📊 CONSOLIDATED SIGNALS
+                                ============================================ -->
+                            <div class='signals-section'>
+                                <h3 class='section-title'>
+                                    <i class='fas fa-signal'></i> Consolidated Trading Signals (Based on All Indicators)
+                                    <span class='help-icon' onclick='openModal("modalSignals")'></span>
+                                </h3>
+                                
+                                <div class='signal-gauge'>
+                                    <div class='gauge-header'>
+                                        <h4>Overall Market Signal</h4>
+                                    </div>
+                                    <div class='gauge-container'>
+                                        <div class='gauge-bar'>
+                                            <div class='gauge-fill' id='gaugeFill' style='width: 50%'></div>
+                                        </div>
+                                        <div class='gauge-value' id='gaugeValue'>NEUTRAL</div>
+                                    </div>
+                                </div>
+                                
+                                <div class='signals-breakdown' id='signalsBreakdown'>
+                                    <!-- Rempli dynamiquement -->
+                                </div>
+                            </div>
+
+                            <!-- ============================================
+                                🤖 ALPHY AI INVESTMENT RECOMMENDATION
+                                ============================================ -->
+                            <div class='ai-recommendation-section' id='aiRecommendationSection'>
+                                <div class='ai-header'>
+                                    <div class='ai-logo-container'>
+                                        <div class='ai-logo-ring'>
+                                            <div class='ai-logo-core'>
+                                                <i class='fas fa-brain'></i>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class='ai-header-text'>
+                                        <h2 class='ai-title'>
+                                            <span class='ai-badge'>POWERED BY</span>
+                                            ALPHY AI RECOMMENDATION ENGINE
+                                        </h2>
+                                        <p class='ai-subtitle'>
+                                            Technical Analysis Based Multi-Horizon Investment Analysis
+                                            <span class='ai-indicators-count'>• Analyzing Technical Indicators Only</span>
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <!-- AI Score Global -->
+                                <div class='ai-score-container'>
+                                    <div class='ai-score-card'>
+                                        <div class='ai-score-label'>AI CONFIDENCE SCORE</div>
+                                        <div class='ai-score-value' id='aiScoreValue'>--</div>
+                                        <div class='ai-score-bar' id='aiScoreFill'>
+                                            <div class='ai-score-fill' style='width: 0%'></div>
+                                        </div>
+                                        <div class='ai-score-rating' id='aiScoreRating'>Analyzing...</div>
+                                    </div>
+
+                                    <div class='ai-quick-stats'>
+                                        <div class='ai-stat-item'>
+                                            <div class='ai-stat-icon bullish'>
+                                                <i class='fas fa-arrow-up'></i>
+                                            </div>
+                                            <div class='ai-stat-content'>
+                                                <div class='ai-stat-value' id='bullishSignals'>--</div>
+                                                <div class='ai-stat-label'>Bullish Signals</div>
+                                            </div>
+                                        </div>
+                                        <div class='ai-stat-item'>
+                                            <div class='ai-stat-icon neutral'>
+                                                <i class='fas fa-minus'></i>
+                                            </div>
+                                            <div class='ai-stat-content'>
+                                                <div class='ai-stat-value' id='neutralSignals'>--</div>
+                                                <div class='ai-stat-label'>Neutral Signals</div>
+                                            </div>
+                                        </div>
+                                        <div class='ai-stat-item'>
+                                            <div class='ai-stat-icon bearish'>
+                                                <i class='fas fa-arrow-down'></i>
+                                            </div>
+                                            <div class='ai-stat-content'>
+                                                <div class='ai-stat-value' id='bearishSignals'>--</div>
+                                                <div class='ai-stat-label'>Bearish Signals</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Multi-Horizon Recommendations -->
+                                <div class='ai-horizons-grid'>
+                                    <!-- 1 Year Horizon -->
+                                    <div class='ai-horizon-card' data-horizon='1y'>
+                                        <div class='ai-horizon-header'>
+                                            <div class='ai-horizon-icon'>
+                                                <i class='fas fa-calendar-alt'></i>
+                                            </div>
+                                            <div class='ai-horizon-title'>
+                                                <h3>1 Year Outlook</h3>
+                                                <p>Short-Term Investment</p>
+                                            </div>
+                                        </div>
+                                        <div class='ai-horizon-recommendation' id='recommendation1y'>
+                                            <div class='ai-rec-badge'>ANALYZING...</div>
+                                        </div>
+                                        <div class='ai-horizon-details'>
+                                            <div class='ai-detail-row'>
+                                                <span class='ai-detail-label'>Potential:</span>
+                                                <span class='ai-detail-value' id='target1y'>--</span>
+                                            </div>
+                                            <div class='ai-detail-row'>
+                                                <span class='ai-detail-label'>Confidence:</span>
+                                                <div class='ai-confidence-bar' id='confidence1y'>
+                                                    <div class='ai-confidence-fill' style='width: 0%'></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class='ai-horizon-drivers'>
+                                            <div class='ai-drivers-label'>Key Drivers:</div>
+                                            <div class='ai-drivers-list' id='drivers1y'></div>
+                                        </div>
+                                    </div>
+
+                                    <!-- 2 Years Horizon -->
+                                    <div class='ai-horizon-card' data-horizon='2y'>
+                                        <div class='ai-horizon-header'>
+                                            <div class='ai-horizon-icon'>
+                                                <i class='fas fa-chart-line'></i>
+                                            </div>
+                                            <div class='ai-horizon-title'>
+                                                <h3>2 Years Outlook</h3>
+                                                <p>Medium-Term Investment</p>
+                                            </div>
+                                        </div>
+                                        <div class='ai-horizon-recommendation' id='recommendation2y'>
+                                            <div class='ai-rec-badge'>ANALYZING...</div>
+                                        </div>
+                                        <div class='ai-horizon-details'>
+                                            <div class='ai-detail-row'>
+                                                <span class='ai-detail-label'>Potential:</span>
+                                                <span class='ai-detail-value' id='target2y'>--</span>
+                                            </div>
+                                            <div class='ai-detail-row'>
+                                                <span class='ai-detail-label'>Confidence:</span>
+                                                <div class='ai-confidence-bar' id='confidence2y'>
+                                                    <div class='ai-confidence-fill' style='width: 0%'></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class='ai-horizon-drivers'>
+                                            <div class='ai-drivers-label'>Key Drivers:</div>
+                                            <div class='ai-drivers-list' id='drivers2y'></div>
+                                        </div>
+                                    </div>
+
+                                    <!-- 5 Years Horizon -->
+                                    <div class='ai-horizon-card' data-horizon='5y'>
+                                        <div class='ai-horizon-header'>
+                                            <div class='ai-horizon-icon'>
+                                                <i class='fas fa-rocket'></i>
+                                            </div>
+                                            <div class='ai-horizon-title'>
+                                                <h3>5 Years Outlook</h3>
+                                                <p>Long-Term Investment</p>
+                                            </div>
+                                        </div>
+                                        <div class='ai-horizon-recommendation' id='recommendation5y'>
+                                            <div class='ai-rec-badge'>ANALYZING...</div>
+                                        </div>
+                                        <div class='ai-horizon-details'>
+                                            <div class='ai-detail-row'>
+                                                <span class='ai-detail-label'>Potential:</span>
+                                                <span class='ai-detail-value' id='target5y'>--</span>
+                                            </div>
+                                            <div class='ai-detail-row'>
+                                                <span class='ai-detail-label'>Confidence:</span>
+                                                <div class='ai-confidence-bar' id='confidence5y'>
+                                                    <div class='ai-confidence-fill' style='width: 0%'></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class='ai-horizon-drivers'>
+                                            <div class='ai-drivers-label'>Key Drivers:</div>
+                                            <div class='ai-drivers-list' id='drivers5y'></div>
+                                        </div>
+                                    </div>
+
+                                    <!-- 10 Years Horizon -->
+                                    <div class='ai-horizon-card' data-horizon='10y'>
+                                        <div class='ai-horizon-header'>
+                                            <div class='ai-horizon-icon'>
+                                                <i class='fas fa-gem'></i>
+                                            </div>
+                                            <div class='ai-horizon-title'>
+                                                <h3>10 Years Outlook</h3>
+                                                <p>Strategic Investment</p>
+                                            </div>
+                                        </div>
+                                        <div class='ai-horizon-recommendation' id='recommendation10y'>
+                                            <div class='ai-rec-badge'>ANALYZING...</div>
+                                        </div>
+                                        <div class='ai-horizon-details'>
+                                            <div class='ai-detail-row'>
+                                                <span class='ai-detail-label'>Potential:</span>
+                                                <span class='ai-detail-value' id='target10y'>--</span>
+                                            </div>
+                                            <div class='ai-detail-row'>
+                                                <span class='ai-detail-label'>Confidence:</span>
+                                                <div class='ai-confidence-bar' id='confidence10y'>
+                                                    <div class='ai-confidence-fill' style='width: 0%'></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class='ai-horizon-drivers'>
+                                            <div class='ai-drivers-label'>Key Drivers:</div>
+                                            <div class='ai-drivers-list' id='drivers10y'></div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Disclaimer -->
+                                <div class='ai-disclaimer'>
+                                    <i class='fas fa-info-circle'></i>
+                                    <strong>Disclaimer:</strong> This AI-powered analysis is for informational purposes only and should not be considered as financial advice. Alphy AI aggregates technical indicators to provide data-driven insights. Always conduct your own research and consult with a licensed financial advisor before making investment decisions. Past performance does not guarantee future results.
+                                </div>
+                            </div>
+                            
+                            <!-- ============================================
+                                📈 SECTION 1: MOMENTUM OSCILLATORS
+                                ============================================ -->
+                            <div class='oscillators-grid'>
+                                
+                                <!-- RSI -->
+                                <div class='oscillator-card'>
+                                    <h3 class='section-title'>
+                                        <i class='fas fa-chart-line'></i> RSI - Relative Strength Index
+                                        <span class='help-icon' onclick='openModal("modalRSI")'></span>
+                                    </h3>
+                                    <div id='rsiChart' class='chart'></div>
+                                    <div class='signal-box' id='rsiSignal'>Calculating...</div>
+                                </div>
+                                
+                                <!-- MACD -->
+                                <div class='oscillator-card'>
+                                    <h3 class='section-title'>
+                                        <i class='fas fa-wave-square'></i> MACD
+                                        <span class='help-icon' onclick='openModal("modalMACD")'></span>
+                                    </h3>
+                                    <div id='macdChart' class='chart'></div>
+                                    <div class='signal-box' id='macdSignal'>Calculating...</div>
+                                </div>
+                                
+                            </div>
+                            
+                            <!-- Stochastic & Williams Grid -->
+                            <div class='oscillators-grid'>
+                                
+                                <!-- Stochastic -->
+                                <div class='oscillator-card'>
+                                    <h3 class='section-title'>
+                                        <i class='fas fa-wave-square'></i> Stochastic Oscillator
+                                        <span class='help-icon' onclick='openModal("modalStochastic")'></span>
+                                    </h3>
+                                    <div id='stochasticChart' class='chart'></div>
+                                    <div class='signal-box' id='stochasticSignal'>Calculating...</div>
+                                </div>
+                                
+                                <!-- Williams %R -->
+                                <div class='oscillator-card'>
+                                    <h3 class='section-title'>
+                                        <i class='fas fa-chart-line'></i> Williams %R
+                                        <span class='help-icon' onclick='openModal("modalWilliams")'></span>
+                                    </h3>
+                                    <div id='williamsChart' class='chart'></div>
+                                    <div class='signal-box' id='williamsSignal'>Calculating...</div>
+                                </div>
+                                
+                            </div>
+                            
+                            <!-- MFI, CCI, Ultimate Grid -->
+                            <div class='oscillators-grid'>
+                                
+                                <!-- MFI -->
+                                <div class='oscillator-card'>
+                                    <h3 class='section-title'>
+                                        <i class='fas fa-coins'></i> MFI - Money Flow Index
+                                        <span class='help-icon' onclick='openModal("modalMFI")'></span>
+                                    </h3>
+                                    <div id='mfiChart' class='chart'></div>
+                                    <div class='signal-box' id='mfiSignal'>Calculating...</div>
+                                </div>
+                                
+                                <!-- CCI -->
+                                <div class='oscillator-card'>
+                                    <h3 class='section-title'>
+                                        <i class='fas fa-chart-area'></i> CCI - Commodity Channel Index
+                                        <span class='help-icon' onclick='openModal("modalCCI")'></span>
+                                    </h3>
+                                    <div id='cciChart' class='chart'></div>
+                                    <div class='signal-box' id='cciSignal'>Calculating...</div>
+                                </div>
+                                
+                            </div>
+                            
+                            <!-- Ultimate & ROC Grid -->
+                            <div class='oscillators-grid'>
+                                
+                                <!-- Ultimate Oscillator -->
+                                <div class='oscillator-card'>
+                                    <h3 class='section-title'>
+                                        <i class='fas fa-layer-group'></i> Ultimate Oscillator
+                                        <span class='help-icon' onclick='openModal("modalUltimate")'></span>
+                                    </h3>
+                                    <div id='ultimateChart' class='chart'></div>
+                                    <div class='signal-box' id='ultimateSignal'>Calculating...</div>
+                                </div>
+                                
+                                <!-- ROC -->
+                                <div class='oscillator-card'>
+                                    <h3 class='section-title'>
+                                        <i class='fas fa-percentage'></i> ROC - Rate of Change
+                                        <span class='help-icon' onclick='openModal("modalROC")'></span>
+                                    </h3>
+                                    <div id='rocChart' class='chart'></div>
+                                    <div class='signal-box' id='rocSignal'>Calculating...</div>
+                                </div>
+                                
+                            </div>
+                            
+                            <!-- ============================================
+                                📊 SECTION 2: TREND INDICATORS
+                                ============================================ -->
+                            
+                            <!-- ADX & Aroon Grid -->
+                            <div class='oscillators-grid'>
+                                
+                                <!-- ADX -->
+                                <div class='oscillator-card'>
+                                    <h3 class='section-title'>
+                                        <i class='fas fa-chart-area'></i> ADX - Trend Strength
+                                        <span class='help-icon' onclick='openModal("modalADX")'></span>
+                                    </h3>
+                                    <div id='adxChart' class='chart'></div>
+                                    <div class='signal-box' id='adxSignal'>Calculating...</div>
+                                </div>
+                                
+                                <!-- Aroon Indicator -->
+                                <div class='oscillator-card'>
+                                    <h3 class='section-title'>
+                                        <i class='fas fa-arrows-alt-h'></i> Aroon Indicator
+                                        <span class='help-icon' onclick='openModal("modalAroon")'></span>
+                                    </h3>
+                                    <div id='aroonChart' class='chart'></div>
+                                    <div class='signal-box' id='aroonSignal'>Calculating...</div>
+                                </div>
+                                
+                            </div>
+                            
+                            <!-- ============================================
+                                🎯 SECTION 3: VOLATILITY
+                                ============================================ -->
+                            
+                            <!-- ATR -->
+                            <div class='chart-section'>
+                                <h3 class='section-title'>
+                                    <i class='fas fa-arrows-alt-v'></i> Average True Range (ATR)
+                                    <span class='help-icon' onclick='openModal("modalATR")'></span>
+                                </h3>
+                                <div id='atrChart' class='chart'></div>
+                                <div class='signal-box' id='atrSignal'>Calculating...</div>
+                            </div>
+                            
+                            <!-- ============================================
+                                📊 SECTION 4: VOLUME ANALYSIS
+                                ============================================ -->
+                            
+                            <!-- OBV & CMF Grid -->
+                            <div class='oscillators-grid'>
+                                
+                                <!-- OBV -->
+                                <div class='oscillator-card'>
+                                    <h3 class='section-title'>
+                                        <i class='fas fa-chart-bar'></i> On-Balance Volume
+                                        <span class='help-icon' onclick='openModal("modalOBV")'></span>
+                                    </h3>
+                                    <div id='obvChart' class='chart'></div>
+                                    <div class='signal-box' id='obvSignal'>Calculating...</div>
+                                </div>
+                                
+                                <!-- CMF -->
+                                <div class='oscillator-card'>
+                                    <h3 class='section-title'>
+                                        <i class='fas fa-water'></i> CMF - Chaikin Money Flow
+                                        <span class='help-icon' onclick='openModal("modalCMF")'></span>
+                                    </h3>
+                                    <div id='cmfChart' class='chart'></div>
+                                    <div class='signal-box' id='cmfSignal'>Calculating...</div>
+                                </div>
+                                
+                            </div>
+                            
+                            <!-- Elder Ray -->
+                            <div class='chart-section'>
+                                <h3 class='section-title'>
+                                    <i class='fas fa-balance-scale'></i> Elder Ray Index - Bull & Bear Power
+                                    <span class='help-icon' onclick='openModal("modalElderRay")'></span>
+                                </h3>
+                                <div id='elderRayChart' class='chart'></div>
+                                <div class='signal-box' id='elderRaySignal'>Calculating...</div>
+                            </div>
+                            
+                        </div>
+                    </div>
+                    
+                    <!-- Footer -->
+                    <footer>
+                        <p>Advanced Technical Analysis | Legal Compliant Version (Technical Indicators Only)</p>
+                    </footer>
+                </div>
             </div>
+            
         </div>
-        
-    </div>
+
+        <!-- Core Scripts -->
+        <script src='assets/js/config.js'></script>
+        <script src='assets/js/api-client.js'></script>
+        <script src='assets/js/dark-mode.js'></script>
+        <script src='assets/js/common.js'></script>
+        <script src='assets/js/sidebar.js'></script>
+        <script src="assets/js/chatbot-particles.js"></script>
+        <script src='assets/js/advanced-analysis.js'></script>
+        <script src='assets/js/portfolio-manager.js'></script>
+        <script src='assets/js/watchlist-manager.js'></script>
+        <script src='assets/js/chatbot-config.js'></script>
+        <script src='assets/js/chatbot-ui.js'></script>
+
+    </body>
+    </html>
 
     <!-- ============================================
          🆕 MODALS - PORTFOLIO, WATCHLIST & ALERTS
