@@ -2255,15 +2255,15 @@
 </div>
 
 <!-- ============================================
-     SCRIPTS - ORDRE CRITIQUE POUR PORTFOLIO
+     SCRIPTS - ORDRE CRITIQUE
      ============================================ -->
 
-<!-- Theme & Core (chargés en premier) -->
+<!-- Theme & Core Scripts -->
 <script src="assets/js/favicon-dynamic.js"></script>
 <script src="assets/js/theme.js"></script>
 <script src="assets/js/theme-charts.js"></script>
 
-<!-- Configuration & API (avant portfolio) -->
+<!-- Configuration & API -->
 <script src="assets/js/config.js"></script>
 <script src="assets/js/api-client.js"></script>
 
@@ -2274,26 +2274,16 @@
 <script src="assets/js/chatbot-particles.js"></script>
 
 <!-- ✅ PORTFOLIO & WATCHLIST (ORDRE CRITIQUE) -->
+<!-- 1. Portfolio Manager DOIT être chargé EN PREMIER -->
 <script src='assets/js/portfolio-manager.js'></script>
 
-<!-- ⚠ OPTION 1: Si watchlist-manager.js EXISTE, décommentez cette ligne -->
-<!-- <script src='assets/js/watchlist-manager.js'></script> -->
+<!-- 2. Watchlist Manager APRÈS (dépend de Portfolio Manager) -->
+<script src='assets/js/watchlist-manager.js'></script>
 
-<!-- ⚠ OPTION 2: Si watchlist-manager.js N'EXISTE PAS, utilisez ce stub -->
-<script>
-// Stub WatchlistManager si le fichier n'existe pas
-if (typeof WatchlistManager === 'undefined') {
-    console.warn('⚠ WatchlistManager not found - creating stub');
-    window.WatchlistManager = {
-        init: function() { console.log('📋 WatchlistManager stub initialized'); },
-        addFromInput: function() { console.log('📋 WatchlistManager stub - addFromInput'); },
-        filterWatchlist: function() { console.log('📋 WatchlistManager stub - filterWatchlist'); },
-        loadWatchlist: function() { console.log('📋 WatchlistManager stub - loadWatchlist'); }
-    };
-}
-</script>
+<!-- ❌ NE PAS CHARGER portfolio-watchlist-alerts.js (conflit) -->
+<!-- <script src='assets/js/portfolio-watchlist-alerts.js'></script> -->
 
-<!-- Advanced Analysis (dépend de portfolio-manager) -->
+<!-- Advanced Analysis (dépend de Portfolio Manager) -->
 <script src='assets/js/advanced-analysis.js'></script>
 
 <!-- Chatbot Scripts -->
@@ -2307,15 +2297,19 @@ if (typeof WatchlistManager === 'undefined') {
 <script src='assets/js/chatbot-ai-engine.js'></script>
 <script src='assets/js/chatbot-ui.js'></script>
 
-<!-- Modal Functions -->
+<!-- ============================================
+     MODAL MANAGEMENT
+     ============================================ -->
 <script>
-// Modal Management
+// Modal Functions
 function openModal(modalId) {
     const modal = document.getElementById(modalId);
     if (modal) {
         modal.classList.add('active');
         document.body.style.overflow = 'hidden';
         console.log('✅ Modal opened:', modalId);
+    } else {
+        console.error('❌ Modal not found:', modalId);
     }
 }
 
@@ -2348,19 +2342,88 @@ document.addEventListener('keydown', (event) => {
 
 // Helper Functions
 function openPortfolioHelp() {
-    alert('PORTFOLIO MANAGEMENT HELP\n\nCreate multiple portfolios to organize your stocks.\nEach portfolio can track different strategies.\nAll data is automatically saved to Firebase.');
+    const helpText = `
+PORTFOLIO MANAGEMENT HELP
+
+Features:
+• Create multiple portfolios to organize your stocks
+• Each portfolio can track different strategies
+• Switch between portfolios using the dropdown
+• All data is automatically saved to Firebase in real-time
+
+How to Use:
+1. Click "New Portfolio" to create a portfolio
+2. Give it a meaningful name
+3. Select it from the dropdown to make it active
+4. Add stocks to your watchlist - they'll be saved to this portfolio
+
+Data Sync:
+• All portfolios sync across devices
+• Automatic backup to Firebase
+• Never lose your tracking data
+
+Management:
+• Click "Manage" to rename or delete portfolios
+• You can have unlimited portfolios
+• Default portfolio is created automatically
+    `;
+    alert(helpText);
 }
 
 function openWatchlistHelp() {
-    alert('WATCHLIST HELP\n\nTrack multiple stocks in real-time.\nSee live price changes.\nFilter by gainers/losers.');
+    const helpText = `
+WATCHLIST HELP
+
+Features:
+• Track multiple stocks in real-time
+• See live price changes and percentage moves
+• Filter by gainers/losers
+• One-click analysis of any stock
+
+How to Use:
+1. Type a stock symbol (e.g., AAPL) in the search box
+2. Click "Add" or press Enter
+3. Stock appears in your watchlist with live data
+4. Click on a stock card to analyze it with all 40+ indicators
+5. Remove stocks by clicking the trash icon
+
+Features:
+• Real-time price updates
+• Color-coded gains (green) and losses (red)
+• Quick filters: All / Gainers / Losers
+• Automatic sync to Firebase
+• Portfolio-specific (each portfolio has its own watchlist)
+
+Pro Tips:
+• Add stocks BEFORE market opens to track opening moves
+• Use "Gainers" filter to spot momentum stocks
+• Watchlist persists across sessions
+• Maximum 50 stocks per watchlist (performance)
+    `;
+    alert(helpText);
 }
 
 function openAlertsHelp() {
-    alert('PRICE ALERTS HELP\n\nGet notified when stocks reach target prices.\nSet "above" or "below" conditions.');
+    const helpText = `
+PRICE ALERTS HELP
+
+Note: Price alerts are coming soon!
+
+Features:
+• Get notified when stocks reach your target prices
+• Set "above" or "below" conditions
+• Toggle alerts on/off without deleting
+• Alerts check automatically every 60 seconds
+
+This feature will be available in a future update.
+    `;
+    alert(helpText);
 }
 </script>
 
-<!-- User Menu Initialization -->
+<!-- ============================================
+     USER MENU INITIALIZATION
+     ============================================ -->
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     console.log('🔧 Initializing user menu...');
@@ -2371,17 +2434,39 @@ document.addEventListener('DOMContentLoaded', function() {
     if (trigger && dropdown) {
         console.log('✅ User menu elements found');
         
-        trigger.addEventListener('click', function(e) {
+        // Supprimer les anciens event listeners en clonant
+        const newTrigger = trigger.cloneNode(true);
+        trigger.parentNode.replaceChild(newTrigger, trigger);
+        
+        const freshTrigger = document.getElementById('sidebarUserTrigger');
+        const freshDropdown = document.getElementById('sidebarUserDropdown');
+        
+        freshTrigger.addEventListener('click', function(e) {
             e.preventDefault();
             e.stopPropagation();
             console.log('👆 User menu clicked');
-            dropdown.classList.toggle('active');
+            freshDropdown.classList.toggle('active');
+            
+            const arrow = freshTrigger.querySelector('.sidebar-user-arrow');
+            if (arrow) {
+                const isActive = freshDropdown.classList.contains('active');
+                arrow.style.transform = isActive ? 'rotate(180deg)' : 'rotate(0deg)';
+                arrow.style.transition = 'transform 0.3s ease';
+            }
         });
         
         document.addEventListener('click', function(e) {
-            if (!trigger.contains(e.target) && !dropdown.contains(e.target)) {
-                dropdown.classList.remove('active');
+            if (!freshTrigger.contains(e.target) && !freshDropdown.contains(e.target)) {
+                freshDropdown.classList.remove('active');
+                const arrow = freshTrigger.querySelector('.sidebar-user-arrow');
+                if (arrow) {
+                    arrow.style.transform = 'rotate(0deg)';
+                }
             }
+        });
+        
+        freshDropdown.addEventListener('click', function(e) {
+            e.stopPropagation();
         });
         
         console.log('✅ User menu initialized');
@@ -2391,7 +2476,9 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 
-<!-- Logout Function -->
+<!-- ============================================
+     LOGOUT FUNCTION
+     ============================================ -->
 <script>
 function logout() {
     if (confirm('Are you sure you want to disconnect?')) {
@@ -2412,73 +2499,61 @@ function logout() {
 }
 </script>
 
-<!-- ✅ VÉRIFICATION PORTFOLIO MANAGER -->
+<!-- ============================================
+     PORTFOLIO & WATCHLIST VERIFICATION
+     ============================================ -->
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('🔍 Checking Portfolio Manager...');
+    console.log('🔍 Verifying Portfolio & Watchlist Manager...');
     
     // Vérifier que PortfolioManager est chargé
     if (typeof PortfolioManager !== 'undefined') {
         console.log('✅ PortfolioManager is loaded');
-        console.log('📋 Available methods:', Object.keys(PortfolioManager));
-        
-        // Vérifier Firebase
-        if (typeof firebase !== 'undefined' && firebase.auth && firebase.auth().currentUser) {
-            console.log('✅ Firebase user authenticated');
-            console.log('👤 User:', firebase.auth().currentUser.email);
-            
-            // Initialiser le portfolio si la méthode existe
-            if (typeof PortfolioManager.init === 'function') {
-                console.log('🚀 Initializing PortfolioManager...');
-                try {
-                    PortfolioManager.init();
-                    console.log('✅ PortfolioManager initialized successfully');
-                } catch (error) {
-                    console.error('❌ PortfolioManager initialization error:', error);
-                }
-            } else if (typeof PortfolioManager.loadPortfolios === 'function') {
-                console.log('🚀 Loading portfolios...');
-                try {
-                    PortfolioManager.loadPortfolios();
-                    console.log('✅ Portfolios loaded successfully');
-                } catch (error) {
-                    console.error('❌ Portfolio loading error:', error);
-                }
-            }
-        } else {
-            console.warn('⚠ Firebase user not yet authenticated, waiting...');
-            
-            // Attendre l'authentification Firebase
-            const checkAuth = setInterval(() => {
-                if (firebase.auth && firebase.auth().currentUser) {
-                    console.log('✅ Firebase user now authenticated');
-                    clearInterval(checkAuth);
-                    
-                    if (typeof PortfolioManager.init === 'function') {
-                        PortfolioManager.init();
-                    } else if (typeof PortfolioManager.loadPortfolios === 'function') {
-                        PortfolioManager.loadPortfolios();
-                    }
-                }
-            }, 500);
-            
-            // Timeout après 10 secondes
-            setTimeout(() => {
-                clearInterval(checkAuth);
-                if (!firebase.auth().currentUser) {
-                    console.error('❌ Firebase authentication timeout');
-                }
-            }, 10000);
-        }
+        console.log('📋 Available methods:', Object.keys(PortfolioManager).join(', '));
     } else {
         console.error('❌ PortfolioManager NOT loaded!');
         console.error('📁 Verify that assets/js/portfolio-manager.js exists');
-        console.error('🔍 Available global objects:', Object.keys(window).filter(k => k.includes('Portfolio') || k.includes('Watchlist')));
+    }
+    
+    // Vérifier que WatchlistManager est chargé
+    if (typeof WatchlistManager !== 'undefined') {
+        console.log('✅ WatchlistManager is loaded');
+        console.log('📋 Available methods:', Object.keys(WatchlistManager).join(', '));
+    } else {
+        console.error('❌ WatchlistManager NOT loaded!');
+        console.error('📁 Verify that assets/js/watchlist-manager.js exists');
+    }
+    
+    // Vérifier Firebase Auth
+    if (typeof firebase !== 'undefined' && firebase.auth) {
+        const checkAuth = setInterval(() => {
+            const user = firebase.auth().currentUser;
+            if (user) {
+                console.log('✅ Firebase user authenticated:', user.email);
+                clearInterval(checkAuth);
+                
+                // Les managers s'initialisent automatiquement
+                // Portfolio Manager s'initialise dans son IIFE
+                // Watchlist Manager attend que Portfolio Manager soit prêt
+            }
+        }, 500);
+        
+        // Timeout après 10 secondes
+        setTimeout(() => {
+            clearInterval(checkAuth);
+            if (!firebase.auth().currentUser) {
+                console.warn('⚠ Firebase authentication timeout');
+            }
+        }, 10000);
+    } else {
+        console.warn('⚠ Firebase not available');
     }
 });
 </script>
 
-<!-- Chatbot Initialization -->
+<!-- ============================================
+     CHATBOT INITIALIZATION
+     ============================================ -->
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     setTimeout(() => {
@@ -2502,6 +2577,294 @@ document.addEventListener('DOMContentLoaded', function() {
     }, 500);
 });
 </script>
+
+<!-- ============================================
+     PORTFOLIO DROPDOWN AUTO-POPULATION
+     ============================================ -->
+<script>
+/**
+ * Peupler automatiquement le dropdown des portfolios
+ * après l'initialisation de PortfolioManager
+ */
+document.addEventListener('DOMContentLoaded', function() {
+    setTimeout(async () => {
+        if (typeof PortfolioManager === 'undefined') {
+            console.warn('⚠ PortfolioManager not loaded for dropdown population');
+            return;
+        }
+        
+        try {
+            // Attendre que Firebase soit prêt
+            let attempts = 0;
+            const waitForFirebase = setInterval(async () => {
+                if (PortfolioManager.isFirebaseReady && PortfolioManager.isFirebaseReady()) {
+                    clearInterval(waitForFirebase);
+                    
+                    console.log('🔄 Populating portfolios dropdown...');
+                    
+                    // Récupérer la liste des portfolios
+                    const portfolios = await PortfolioManager.listPortfolios();
+                    const dropdown = document.getElementById('portfolioSelect');
+                    
+                    if (dropdown && portfolios && portfolios.length > 0) {
+                        dropdown.innerHTML = '';
+                        
+                        portfolios.forEach(portfolio => {
+                            const option = document.createElement('option');
+                            option.value = portfolio.name;
+                            option.textContent = portfolio.name;
+                            dropdown.appendChild(option);
+                        });
+                        
+                        // Sélectionner le portfolio actif
+                        const currentPortfolio = PortfolioManager.getCurrentPortfolio();
+                        if (currentPortfolio) {
+                            dropdown.value = currentPortfolio;
+                        }
+                        
+                        console.log('✅ Portfolios dropdown populated with', portfolios.length, 'portfolios');
+                        
+                        // Event listener pour changer de portfolio
+                        dropdown.addEventListener('change', async (e) => {
+                            const newPortfolio = e.target.value;
+                            if (newPortfolio) {
+                                console.log('🔄 Switching to portfolio:', newPortfolio);
+                                await PortfolioManager.switchPortfolio(newPortfolio);
+                            }
+                        });
+                    }
+                }
+                
+                attempts++;
+                if (attempts > 30) { // 3 secondes max
+                    clearInterval(waitForFirebase);
+                    console.warn('⚠ Timeout waiting for Firebase, using local portfolios');
+                }
+            }, 100);
+            
+        } catch (error) {
+            console.error('❌ Error populating portfolios dropdown:', error);
+        }
+    }, 1500); // Attendre 1.5s après le chargement de la page
+});
+</script>
+
+<!-- ============================================
+     STYLES ADDITIONNELS
+     ============================================ -->
+<style>
+/* Watchlist Cards */
+.watchlist-card {
+    background: var(--card-background);
+    border-radius: 12px;
+    padding: 1rem;
+    margin-bottom: 0.75rem;
+    border: 2px solid var(--border-color);
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.watchlist-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    border-color: #667eea;
+}
+
+.watchlist-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+}
+
+.watchlist-symbol {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.watchlist-remove {
+    background: transparent;
+    border: none;
+    color: #dc3545;
+    cursor: pointer;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    transition: all 0.3s;
+}
+
+.watchlist-remove:hover {
+    background: rgba(220, 53, 69, 0.1);
+    transform: scale(1.1);
+}
+
+.watchlist-price {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 0.25rem;
+}
+
+.watchlist-change {
+    font-size: 0.95rem;
+    font-weight: 600;
+}
+
+.watchlist-change.positive {
+    color: #10b981;
+}
+
+.watchlist-change.negative {
+    color: #dc3545;
+}
+
+.watchlist-loading {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    font-style: italic;
+}
+
+.watchlist-empty {
+    text-align: center;
+    padding: 3rem 1.5rem;
+    color: var(--text-secondary);
+}
+
+.watchlist-empty i {
+    font-size: 3rem;
+    opacity: 0.3;
+    margin-bottom: 1rem;
+    display: block;
+}
+
+.watchlist-empty p {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+.watchlist-empty small {
+    opacity: 0.7;
+}
+
+/* Portfolio Dropdown */
+.portfolio-dropdown {
+    padding: 0.75rem 1rem;
+    border: 2px solid var(--border-color);
+    border-radius: 8px;
+    background: var(--card-background);
+    color: var(--text-primary);
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+    min-width: 200px;
+}
+
+.portfolio-dropdown:hover {
+    border-color: #667eea;
+}
+
+.portfolio-dropdown:focus {
+    outline: none;
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+body.dark-mode .portfolio-dropdown {
+    background: #1e293b;
+    border-color: #334155;
+    color: #e2e8f0;
+}
+
+body.dark-mode .portfolio-dropdown:hover,
+body.dark-mode .portfolio-dropdown:focus {
+    border-color: #818cf8;
+}
+
+/* Portfolio Actions Buttons */
+.btn-portfolio-action {
+    padding: 0.75rem 1.25rem;
+    border-radius: 8px;
+    border: none;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.btn-portfolio-action:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+.btn-portfolio-action:active {
+    transform: translateY(0);
+}
+
+/* Watchlist Filters */
+.filter-btn {
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    border: 2px solid var(--border-color);
+    background: transparent;
+    color: var(--text-primary);
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+    margin-right: 0.5rem;
+}
+
+.filter-btn:hover {
+    border-color: #667eea;
+    background: rgba(102, 126, 234, 0.1);
+}
+
+.filter-btn.active {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-color: transparent;
+}
+
+/* Watchlist Search */
+.btn-add-watchlist {
+    padding: 0.75rem 1.25rem;
+    border-radius: 8px;
+    border: none;
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: white;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.btn-add-watchlist:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .watchlist-card {
+        padding: 0.75rem;
+    }
+    
+    .watchlist-symbol {
+        font-size: 1rem;
+    }
+    
+    .watchlist-price {
+        font-size: 1.1rem;
+    }
+}
+</style>
 
 </body>
 </html>
