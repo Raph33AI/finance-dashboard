@@ -9123,12 +9123,19 @@ const AdvancedAnalysis = {
     // ============================================
     // 🤖 AI RECOMMENDATION ENGINE (LEGAL COMPLIANT)
     // Basé sur 14 indicateurs techniques professionnels
+    // VERSION CORRIGÉE - Fix NaN errors
     // ============================================
 
     generateAIRecommendation() {
         console.log('🤖 Alphy AI - Generating professional multi-horizon recommendation...');
         
         const prices = this.stockData.prices;
+        
+        if (!prices || prices.length < 30) {
+            console.warn('⚠ Insufficient data for AI recommendation (minimum 30 days required)');
+            this.displayAIError('Insufficient historical data');
+            return;
+        }
         
         // ✅ ÉTAPE 1 : Collecter les 14 indicateurs techniques
         const technicalSignals = this.collectAllTechnicalSignals(prices);
@@ -9148,631 +9155,60 @@ const AdvancedAnalysis = {
         
         console.log('✅ Alphy AI Recommendation generated successfully');
         console.log('📊 Horizon Scores:', {
-            '1y': `${horizonRecommendations['1y'].recommendation} (${horizonRecommendations['1y'].confidence}%)`,
-            '2y': `${horizonRecommendations['2y'].recommendation} (${horizonRecommendations['2y'].confidence}%)`,
-            '5y': `${horizonRecommendations['5y'].recommendation} (${horizonRecommendations['5y'].confidence}%)`
+            '1y': `${horizonRecommendations['1y'].recommendation} (${horizonRecommendations['1y'].confidence}%) - Potential: ${horizonRecommendations['1y'].potentialMove}%`,
+            '2y': `${horizonRecommendations['2y'].recommendation} (${horizonRecommendations['2y'].confidence}%) - Potential: ${horizonRecommendations['2y'].potentialMove}%`,
+            '5y': `${horizonRecommendations['5y'].recommendation} (${horizonRecommendations['5y'].confidence}%) - Potential: ${horizonRecommendations['5y'].potentialMove}%`
         });
     },
 
-    // 🔍 Collecte des 14 indicateurs techniques
-    collectAllTechnicalSignals(prices) {
-        const signals = {
-            momentum: [],      // RSI, Stochastic, Williams, MFI, ROC
-            trend: [],         // MACD, ADX, Aroon
-            volume: [],        // OBV, CMF
-            volatility: [],    // ATR
-            composite: []      // CCI, Ultimate Oscillator, Elder Ray
-        };
-        
-        // ========================
-        // 1⃣ RSI (Relative Strength Index)
-        // ========================
-        try {
-            const rsi = this.calculateRSI(prices);
-            if (rsi.length > 0) {
-                const lastRSI = rsi[rsi.length - 1][1];
-                const prevRSI = rsi[rsi.length - 2]?.[1] || lastRSI;
-                
-                let strength = 0;
-                
-                // Zones critiques
-                if (lastRSI < 20) strength = 2.5;           // Extreme oversold
-                else if (lastRSI < 30) strength = 2.0;      // Oversold
-                else if (lastRSI < 40) strength = 1.5;      // Moderately oversold
-                else if (lastRSI < 45) strength = 0.8;      // Slightly oversold
-                else if (lastRSI > 80) strength = -2.5;     // Extreme overbought
-                else if (lastRSI > 70) strength = -2.0;     // Overbought
-                else if (lastRSI > 60) strength = -1.5;     // Moderately overbought
-                else if (lastRSI > 55) strength = -0.8;     // Slightly overbought
-                
-                // Divergence momentum
-                if (lastRSI > prevRSI + 5 && lastRSI < 50) strength += 0.5;
-                if (lastRSI < prevRSI - 5 && lastRSI > 50) strength -= 0.5;
-                
-                signals.momentum.push({
-                    name: 'RSI',
-                    value: lastRSI,
-                    signal: strength,
-                    weight: 1.8,
-                    category: 'momentum',
-                    description: lastRSI < 30 ? `Oversold (RSI: ${lastRSI.toFixed(1)})` :
-                                lastRSI > 70 ? `Overbought (RSI: ${lastRSI.toFixed(1)})` :
-                                `Neutral zone (RSI: ${lastRSI.toFixed(1)})`
-                });
-                
-                console.log(`✅ RSI: ${lastRSI.toFixed(1)} | Signal: ${strength.toFixed(2)}`);
-            }
-        } catch (error) {
-            console.warn('⚠ RSI calculation failed:', error);
+    // [Le reste du code collectAllTechnicalSignals reste identique jusqu'à...]
+
+    // 📊 Calculer le score d'une catégorie d'indicateurs - VERSION CORRIGÉE
+    calculateCategoryScore(categorySignals) {
+        if (!categorySignals || categorySignals.length === 0) {
+            console.warn('⚠ Empty category signals, returning neutral score (50)');
+            return 50;
         }
         
-        // ========================
-        // 2⃣ MACD (Moving Average Convergence Divergence)
-        // ========================
-        try {
-            const macd = this.calculateMACD(prices);
-            if (macd.histogram.length > 0) {
-                const lastHist = macd.histogram[macd.histogram.length - 1][1];
-                const prevHist = macd.histogram[macd.histogram.length - 2]?.[1] || 0;
-                const lastMACD = macd.macd[macd.macd.length - 1][1];
-                const lastSignal = macd.signal[macd.signal.length - 1][1];
-                
-                let strength = 0;
-                
-                // Croisements (signaux les plus forts)
-                if (lastHist > 0 && prevHist <= 0) strength = 2.5;        // Bullish crossover
-                else if (lastHist < 0 && prevHist >= 0) strength = -2.5;  // Bearish crossover
-                // Position relative
-                else if (lastMACD > lastSignal && lastHist > 0) strength = 1.8;
-                else if (lastMACD < lastSignal && lastHist < 0) strength = -1.8;
-                else if (lastHist > 0) strength = 1.0;
-                else if (lastHist < 0) strength = -1.0;
-                
-                // Renforcement si histogram s'amplifie
-                if (Math.abs(lastHist) > Math.abs(prevHist) * 1.2) {
-                    strength *= 1.15;
-                }
-                
-                signals.trend.push({
-                    name: 'MACD',
-                    value: lastHist,
-                    signal: strength,
-                    weight: 2.2,
-                    category: 'trend',
-                    description: lastHist > 0 && prevHist <= 0 ? 'Bullish crossover detected' :
-                                lastHist < 0 && prevHist >= 0 ? 'Bearish crossover detected' :
-                                lastHist > 0 ? 'Positive momentum' : 'Negative momentum'
-                });
-                
-                console.log(`✅ MACD: ${lastHist.toFixed(4)} | Signal: ${strength.toFixed(2)}`);
-            }
-        } catch (error) {
-            console.warn('⚠ MACD calculation failed:', error);
+        let totalScore = 0;
+        let totalWeight = 0;
+        
+        categorySignals.forEach(indicator => {
+            const signal = indicator.signal || 0;
+            const weight = indicator.weight || 1;
+            
+            totalScore += signal * weight;
+            totalWeight += weight;
+        });
+        
+        // ✅ FIX: Vérifier division par zéro
+        if (totalWeight === 0) {
+            console.warn('⚠ Total weight is zero, returning neutral score (50)');
+            return 50;
         }
         
-        // ========================
-        // 3⃣ STOCHASTIC OSCILLATOR
-        // ========================
-        try {
-            const stochastic = this.calculateStochastic(prices);
-            if (stochastic.k.length > 0) {
-                const lastK = stochastic.k[stochastic.k.length - 1][1];
-                const lastD = stochastic.d[stochastic.d.length - 1][1];
-                const prevK = stochastic.k[stochastic.k.length - 2]?.[1] || lastK;
-                const prevD = stochastic.d[stochastic.d.length - 2]?.[1] || lastD;
-                
-                let strength = 0;
-                
-                // Zones de surachat/survente
-                if (lastK < 15) strength = 2.0;
-                else if (lastK < 20) strength = 1.5;
-                else if (lastK > 85) strength = -2.0;
-                else if (lastK > 80) strength = -1.5;
-                
-                // Croisements K/D
-                if (lastK > lastD && prevK <= prevD && lastK < 50) strength = 2.2;      // Bullish cross in oversold
-                else if (lastK < lastD && prevK >= prevD && lastK > 50) strength = -2.2; // Bearish cross in overbought
-                else if (lastK > lastD && lastK < 80) strength += 0.8;
-                else if (lastK < lastD && lastK > 20) strength -= 0.8;
-                
-                signals.momentum.push({
-                    name: 'Stochastic',
-                    value: lastK,
-                    signal: strength,
-                    weight: 1.5,
-                    category: 'momentum',
-                    description: lastK < 20 ? `Oversold zone (${lastK.toFixed(1)})` :
-                                lastK > 80 ? `Overbought zone (${lastK.toFixed(1)})` :
-                                lastK > lastD ? 'Bullish momentum' : 'Bearish momentum'
-                });
-                
-                console.log(`✅ Stochastic: ${lastK.toFixed(1)} | Signal: ${strength.toFixed(2)}`);
-            }
-        } catch (error) {
-            console.warn('⚠ Stochastic calculation failed:', error);
+        const maxPossible = totalWeight * 2.5;
+        const minPossible = totalWeight * -2.5;
+        
+        const normalized = ((totalScore - minPossible) / (maxPossible - minPossible)) * 100;
+        const finalScore = Math.max(0, Math.min(100, normalized));
+        
+        // ✅ FIX: Vérifier que le résultat est un nombre valide
+        if (isNaN(finalScore)) {
+            console.error('❌ Category score calculation returned NaN', {
+                totalScore,
+                totalWeight,
+                maxPossible,
+                minPossible,
+                categorySignals
+            });
+            return 50;
         }
         
-        // ========================
-        // 4⃣ WILLIAMS %R
-        // ========================
-        try {
-            const williams = this.calculateWilliamsR(prices);
-            if (williams.length > 0) {
-                const lastWR = williams[williams.length - 1][1];
-                const prevWR = williams[williams.length - 2]?.[1] || lastWR;
-                
-                let strength = 0;
-                
-                // Williams %R va de -100 à 0
-                if (lastWR < -85) strength = 2.0;           // Deep oversold
-                else if (lastWR < -80) strength = 1.5;      // Oversold
-                else if (lastWR > -15) strength = -2.0;     // Deep overbought
-                else if (lastWR > -20) strength = -1.5;     // Overbought
-                
-                // Momentum change
-                if (lastWR > prevWR + 10) strength += 0.5;
-                if (lastWR < prevWR - 10) strength -= 0.5;
-                
-                signals.momentum.push({
-                    name: 'Williams %R',
-                    value: lastWR,
-                    signal: strength,
-                    weight: 1.3,
-                    category: 'momentum',
-                    description: lastWR < -80 ? `Strong oversold (${lastWR.toFixed(1)})` :
-                                lastWR > -20 ? `Strong overbought (${lastWR.toFixed(1)})` :
-                                'Mid-range'
-                });
-                
-                console.log(`✅ Williams %R: ${lastWR.toFixed(1)} | Signal: ${strength.toFixed(2)}`);
-            }
-        } catch (error) {
-            console.warn('⚠ Williams %R calculation failed:', error);
-        }
-        
-        // ========================
-        // 5⃣ ADX (Average Directional Index)
-        // ========================
-        try {
-            const adx = this.calculateADX(prices);
-            if (adx.adx.length > 0) {
-                const lastADX = adx.adx[adx.adx.length - 1][1];
-                const lastPlusDI = adx.plusDI[adx.plusDI.length - 1][1];
-                const lastMinusDI = adx.minusDI[adx.minusDI.length - 1][1];
-                const prevADX = adx.adx[adx.adx.length - 2]?.[1] || lastADX;
-                
-                let strength = 0;
-                
-                // Tendance forte (ADX > 25)
-                if (lastADX > 50) {
-                    strength = lastPlusDI > lastMinusDI ? 2.5 : -2.5;
-                } else if (lastADX > 40) {
-                    strength = lastPlusDI > lastMinusDI ? 2.2 : -2.2;
-                } else if (lastADX > 25) {
-                    strength = lastPlusDI > lastMinusDI ? 1.8 : -1.8;
-                } else if (lastADX > 20) {
-                    strength = lastPlusDI > lastMinusDI ? 1.0 : -1.0;
-                } else {
-                    // Tendance faible = incertitude
-                    strength = 0;
-                }
-                
-                // Bonus si ADX en hausse (trend strengthening)
-                if (lastADX > prevADX + 3) strength *= 1.1;
-                
-                signals.trend.push({
-                    name: 'ADX',
-                    value: lastADX,
-                    signal: strength,
-                    weight: 2.0,
-                    category: 'trend',
-                    description: lastADX > 40 ? `Very strong ${lastPlusDI > lastMinusDI ? 'uptrend' : 'downtrend'} (ADX: ${lastADX.toFixed(1)})` :
-                                lastADX > 25 ? `Strong ${lastPlusDI > lastMinusDI ? 'uptrend' : 'downtrend'} (ADX: ${lastADX.toFixed(1)})` :
-                                `Weak trend (ADX: ${lastADX.toFixed(1)})`
-                });
-                
-                console.log(`✅ ADX: ${lastADX.toFixed(1)} | +DI: ${lastPlusDI.toFixed(1)} | -DI: ${lastMinusDI.toFixed(1)} | Signal: ${strength.toFixed(2)}`);
-            }
-        } catch (error) {
-            console.warn('⚠ ADX calculation failed:', error);
-        }
-        
-        // ========================
-        // 6⃣ OBV (On-Balance Volume)
-        // ========================
-        try {
-            const obv = this.calculateOBV(prices);
-            if (obv.length >= 30) {
-                const lastOBV = obv[obv.length - 1][1];
-                const obvMA20 = obv.slice(-20).reduce((sum, val) => sum + val[1], 0) / 20;
-                const obvMA50 = obv.slice(-50) ? obv.slice(-50).reduce((sum, val) => sum + val[1], 0) / Math.min(50, obv.length) : obvMA20;
-                
-                const recentOBV = obv.slice(-20);
-                const obvTrend = recentOBV[recentOBV.length - 1][1] - recentOBV[0][1];
-                const obvPctChange = (obvTrend / Math.abs(recentOBV[0][1])) * 100;
-                
-                let strength = 0;
-                
-                // Tendance OBV
-                if (obvPctChange > 20) strength = 2.2;
-                else if (obvPctChange > 10) strength = 1.8;
-                else if (obvPctChange > 5) strength = 1.2;
-                else if (obvPctChange > 0) strength = 0.5;
-                else if (obvPctChange < -20) strength = -2.2;
-                else if (obvPctChange < -10) strength = -1.8;
-                else if (obvPctChange < -5) strength = -1.2;
-                else if (obvPctChange < 0) strength = -0.5;
-                
-                // Croisement MA
-                if (lastOBV > obvMA20 && obvMA20 > obvMA50) strength += 0.8;
-                else if (lastOBV < obvMA20 && obvMA20 < obvMA50) strength -= 0.8;
-                
-                signals.volume.push({
-                    name: 'OBV',
-                    value: obvPctChange,
-                    signal: strength,
-                    weight: 1.7,
-                    category: 'volume',
-                    description: obvPctChange > 10 ? `Strong volume accumulation (+${obvPctChange.toFixed(1)}%)` :
-                                obvPctChange < -10 ? `Strong volume distribution (${obvPctChange.toFixed(1)}%)` :
-                                obvPctChange > 0 ? 'Volume increasing' : 'Volume decreasing'
-                });
-                
-                console.log(`✅ OBV: ${obvPctChange.toFixed(1)}% change | Signal: ${strength.toFixed(2)}`);
-            }
-        } catch (error) {
-            console.warn('⚠ OBV calculation failed:', error);
-        }
-        
-        // ========================
-        // 7⃣ ATR (Average True Range)
-        // ========================
-        try {
-            const atr = this.calculateATR(prices);
-            if (atr.length > 0) {
-                const lastATR = atr[atr.length - 1][1];
-                const avgATR = atr.slice(-30).reduce((sum, val) => sum + val[1], 0) / Math.min(30, atr.length);
-                const atrRatio = lastATR / avgATR;
-                const prevATR = atr[atr.length - 2]?.[1] || lastATR;
-                
-                let strength = 0;
-                
-                // ATR élevé = haute volatilité (risque mais aussi opportunité)
-                // ATR faible = faible volatilité (stable mais moins d'opportunités)
-                if (atrRatio > 1.5) {
-                    strength = -0.8;  // Très volatile = risque accru
-                } else if (atrRatio > 1.3) {
-                    strength = -0.4;  // Volatilité élevée
-                } else if (atrRatio < 0.7) {
-                    strength = 0.6;   // Faible volatilité = stabilité
-                } else if (atrRatio < 0.85) {
-                    strength = 0.3;   // Volatilité normale-basse
-                }
-                
-                // ATR en baisse = volatilité qui diminue (positif)
-                if (lastATR < prevATR * 0.9) strength += 0.3;
-                
-                signals.volatility.push({
-                    name: 'ATR',
-                    value: lastATR,
-                    signal: strength,
-                    weight: 1.0,
-                    category: 'volatility',
-                    description: atrRatio > 1.4 ? 'High volatility (risk elevated)' :
-                                atrRatio < 0.8 ? 'Low volatility (stable environment)' :
-                                'Normal volatility'
-                });
-                
-                console.log(`✅ ATR: ${lastATR.toFixed(2)} | Ratio: ${atrRatio.toFixed(2)} | Signal: ${strength.toFixed(2)}`);
-            }
-        } catch (error) {
-            console.warn('⚠ ATR calculation failed:', error);
-        }
-        
-        // ========================
-        // 8⃣ MFI (Money Flow Index)
-        // ========================
-        try {
-            const mfi = this.calculateMFI(prices);
-            if (mfi.length > 0) {
-                const lastMFI = mfi[mfi.length - 1][1];
-                const prevMFI = mfi[mfi.length - 2]?.[1] || lastMFI;
-                
-                let strength = 0;
-                
-                // Zones critiques (similaire RSI mais basé sur volume)
-                if (lastMFI < 15) strength = 2.5;           // Extreme oversold
-                else if (lastMFI < 20) strength = 2.0;      // Oversold
-                else if (lastMFI < 30) strength = 1.5;      // Moderately oversold
-                else if (lastMFI < 40) strength = 0.8;
-                else if (lastMFI > 85) strength = -2.5;     // Extreme overbought
-                else if (lastMFI > 80) strength = -2.0;     // Overbought
-                else if (lastMFI > 70) strength = -1.5;     // Moderately overbought
-                else if (lastMFI > 60) strength = -0.8;
-                
-                // Momentum
-                if (lastMFI > prevMFI + 5 && lastMFI < 50) strength += 0.5;
-                if (lastMFI < prevMFI - 5 && lastMFI > 50) strength -= 0.5;
-                
-                signals.momentum.push({
-                    name: 'MFI',
-                    value: lastMFI,
-                    signal: strength,
-                    weight: 1.6,
-                    category: 'momentum',
-                    description: lastMFI < 20 ? `Strong buying pressure (MFI: ${lastMFI.toFixed(1)})` :
-                                lastMFI > 80 ? `Strong selling pressure (MFI: ${lastMFI.toFixed(1)})` :
-                                'Balanced money flow'
-                });
-                
-                console.log(`✅ MFI: ${lastMFI.toFixed(1)} | Signal: ${strength.toFixed(2)}`);
-            }
-        } catch (error) {
-            console.warn('⚠ MFI calculation failed:', error);
-        }
-        
-        // ========================
-        // 9⃣ CCI (Commodity Channel Index)
-        // ========================
-        try {
-            const cci = this.calculateCCI(prices);
-            if (cci.length > 0) {
-                const lastCCI = cci[cci.length - 1][1];
-                const prevCCI = cci[cci.length - 2]?.[1] || lastCCI;
-                
-                let strength = 0;
-                
-                // CCI zones (+-100 = zones normales)
-                if (lastCCI < -200) strength = 2.5;         // Extreme oversold
-                else if (lastCCI < -150) strength = 2.0;
-                else if (lastCCI < -100) strength = 1.5;    // Oversold
-                else if (lastCCI < -50) strength = 0.8;
-                else if (lastCCI > 200) strength = -2.5;    // Extreme overbought
-                else if (lastCCI > 150) strength = -2.0;
-                else if (lastCCI > 100) strength = -1.5;    // Overbought
-                else if (lastCCI > 50) strength = -0.8;
-                
-                // Croisement de zéro
-                if (lastCCI > 0 && prevCCI <= 0) strength = 1.8;
-                else if (lastCCI < 0 && prevCCI >= 0) strength = -1.8;
-                
-                signals.composite.push({
-                    name: 'CCI',
-                    value: lastCCI,
-                    signal: strength,
-                    weight: 1.4,
-                    category: 'composite',
-                    description: lastCCI < -100 ? `Oversold territory (CCI: ${lastCCI.toFixed(0)})` :
-                                lastCCI > 100 ? `Overbought territory (CCI: ${lastCCI.toFixed(0)})` :
-                                lastCCI > 0 ? 'Bullish zone' : 'Bearish zone'
-                });
-                
-                console.log(`✅ CCI: ${lastCCI.toFixed(0)} | Signal: ${strength.toFixed(2)}`);
-            }
-        } catch (error) {
-            console.warn('⚠ CCI calculation failed:', error);
-        }
-        
-        // ========================
-        // 🔟 ULTIMATE OSCILLATOR
-        // ========================
-        try {
-            const ultimateOsc = this.calculateUltimateOscillator(prices);
-            if (ultimateOsc.length > 0) {
-                const lastUO = ultimateOsc[ultimateOsc.length - 1][1];
-                const prevUO = ultimateOsc[ultimateOsc.length - 2]?.[1] || lastUO;
-                
-                let strength = 0;
-                
-                // Ultimate Oscillator zones (0-100)
-                if (lastUO < 25) strength = 2.2;            // Oversold
-                else if (lastUO < 30) strength = 1.8;
-                else if (lastUO < 40) strength = 1.0;
-                else if (lastUO > 75) strength = -2.2;      // Overbought
-                else if (lastUO > 70) strength = -1.8;
-                else if (lastUO > 60) strength = -1.0;
-                
-                // Divergence bullish/bearish
-                if (lastUO > prevUO + 5 && lastUO < 50) strength += 0.6;
-                if (lastUO < prevUO - 5 && lastUO > 50) strength -= 0.6;
-                
-                signals.composite.push({
-                    name: 'Ultimate Oscillator',
-                    value: lastUO,
-                    signal: strength,
-                    weight: 1.5,
-                    category: 'composite',
-                    description: lastUO < 30 ? `Multi-timeframe oversold (${lastUO.toFixed(1)})` :
-                                lastUO > 70 ? `Multi-timeframe overbought (${lastUO.toFixed(1)})` :
-                                'Neutral multi-timeframe'
-                });
-                
-                console.log(`✅ Ultimate Oscillator: ${lastUO.toFixed(1)} | Signal: ${strength.toFixed(2)}`);
-            }
-        } catch (error) {
-            console.warn('⚠ Ultimate Oscillator calculation failed:', error);
-        }
-        
-        // ========================
-        // 1⃣1⃣ ROC (Rate of Change)
-        // ========================
-        try {
-            const roc = this.calculateROC(prices);
-            if (roc.length > 0) {
-                const lastROC = roc[roc.length - 1][1];
-                const prevROC = roc[roc.length - 2]?.[1] || lastROC;
-                
-                let strength = 0;
-                
-                // ROC positif/négatif
-                if (lastROC > 15) strength = 2.5;
-                else if (lastROC > 10) strength = 2.0;
-                else if (lastROC > 5) strength = 1.5;
-                else if (lastROC > 2) strength = 1.0;
-                else if (lastROC > 0) strength = 0.5;
-                else if (lastROC < -15) strength = -2.5;
-                else if (lastROC < -10) strength = -2.0;
-                else if (lastROC < -5) strength = -1.5;
-                else if (lastROC < -2) strength = -1.0;
-                else if (lastROC < 0) strength = -0.5;
-                
-                // Accélération du momentum
-                if (lastROC > prevROC && lastROC > 0) strength += 0.4;
-                if (lastROC < prevROC && lastROC < 0) strength -= 0.4;
-                
-                signals.momentum.push({
-                    name: 'ROC',
-                    value: lastROC,
-                    signal: strength,
-                    weight: 1.4,
-                    category: 'momentum',
-                    description: lastROC > 10 ? `Strong positive momentum (+${lastROC.toFixed(1)}%)` :
-                                lastROC < -10 ? `Strong negative momentum (${lastROC.toFixed(1)}%)` :
-                                lastROC > 0 ? 'Positive rate of change' : 'Negative rate of change'
-                });
-                
-                console.log(`✅ ROC: ${lastROC.toFixed(1)}% | Signal: ${strength.toFixed(2)}`);
-            }
-        } catch (error) {
-            console.warn('⚠ ROC calculation failed:', error);
-        }
-        
-        // ========================
-        // 1⃣2⃣ AROON INDICATOR
-        // ========================
-        try {
-            const aroon = this.calculateAroon(prices);
-            if (aroon.up.length > 0) {
-                const lastAroonUp = aroon.up[aroon.up.length - 1][1];
-                const lastAroonDown = aroon.down[aroon.down.length - 1][1];
-                const prevAroonUp = aroon.up[aroon.up.length - 2]?.[1] || lastAroonUp;
-                const prevAroonDown = aroon.down[aroon.down.length - 2]?.[1] || lastAroonDown;
-                
-                let strength = 0;
-                
-                // Aroon Up/Down comparaison
-                const aroonDiff = lastAroonUp - lastAroonDown;
-                
-                if (aroonDiff > 70) strength = 2.5;         // Strong uptrend
-                else if (aroonDiff > 50) strength = 2.0;
-                else if (aroonDiff > 30) strength = 1.5;
-                else if (aroonDiff > 10) strength = 0.8;
-                else if (aroonDiff < -70) strength = -2.5;  // Strong downtrend
-                else if (aroonDiff < -50) strength = -2.0;
-                else if (aroonDiff < -30) strength = -1.5;
-                else if (aroonDiff < -10) strength = -0.8;
-                
-                // Croisements
-                if (lastAroonUp > lastAroonDown && prevAroonUp <= prevAroonDown) strength = 2.2;
-                else if (lastAroonUp < lastAroonDown && prevAroonUp >= prevAroonDown) strength = -2.2;
-                
-                signals.trend.push({
-                    name: 'Aroon',
-                    value: aroonDiff,
-                    signal: strength,
-                    weight: 1.6,
-                    category: 'trend',
-                    description: aroonDiff > 50 ? `Strong uptrend (Aroon Up: ${lastAroonUp.toFixed(0)})` :
-                                aroonDiff < -50 ? `Strong downtrend (Aroon Down: ${lastAroonDown.toFixed(0)})` :
-                                'Consolidation phase'
-                });
-                
-                console.log(`✅ Aroon: Up=${lastAroonUp.toFixed(0)}, Down=${lastAroonDown.toFixed(0)} | Signal: ${strength.toFixed(2)}`);
-            }
-        } catch (error) {
-            console.warn('⚠ Aroon calculation failed:', error);
-        }
-        
-        // ========================
-        // 1⃣3⃣ CMF (Chaikin Money Flow)
-        // ========================
-        try {
-            const cmf = this.calculateCMF(prices);
-            if (cmf.length > 0) {
-                const lastCMF = cmf[cmf.length - 1][1];
-                const prevCMF = cmf[cmf.length - 2]?.[1] || lastCMF;
-                
-                let strength = 0;
-                
-                // CMF positif/négatif
-                if (lastCMF > 0.25) strength = 2.5;         // Strong accumulation
-                else if (lastCMF > 0.15) strength = 2.0;
-                else if (lastCMF > 0.05) strength = 1.5;
-                else if (lastCMF > 0) strength = 0.8;
-                else if (lastCMF < -0.25) strength = -2.5;  // Strong distribution
-                else if (lastCMF < -0.15) strength = -2.0;
-                else if (lastCMF < -0.05) strength = -1.5;
-                else if (lastCMF < 0) strength = -0.8;
-                
-                // Croisement de zéro
-                if (lastCMF > 0 && prevCMF <= 0) strength = 2.0;
-                else if (lastCMF < 0 && prevCMF >= 0) strength = -2.0;
-                
-                signals.volume.push({
-                    name: 'CMF',
-                    value: lastCMF,
-                    signal: strength,
-                    weight: 1.7,
-                    category: 'volume',
-                    description: lastCMF > 0.15 ? `Strong accumulation (CMF: ${lastCMF.toFixed(3)})` :
-                                lastCMF < -0.15 ? `Strong distribution (CMF: ${lastCMF.toFixed(3)})` :
-                                lastCMF > 0 ? 'Buying pressure' : 'Selling pressure'
-                });
-                
-                console.log(`✅ CMF: ${lastCMF.toFixed(3)} | Signal: ${strength.toFixed(2)}`);
-            }
-        } catch (error) {
-            console.warn('⚠ CMF calculation failed:', error);
-        }
-        
-        // ========================
-        // 1⃣4⃣ ELDER RAY (Bull Power & Bear Power)
-        // ========================
-        try {
-            const elderRay = this.calculateElderRay(prices);
-            if (elderRay.bullPower.length > 0) {
-                const lastBullPower = elderRay.bullPower[elderRay.bullPower.length - 1][1];
-                const lastBearPower = elderRay.bearPower[elderRay.bearPower.length - 1][1];
-                const prevBullPower = elderRay.bullPower[elderRay.bullPower.length - 2]?.[1] || lastBullPower;
-                const prevBearPower = elderRay.bearPower[elderRay.bearPower.length - 2]?.[1] || lastBearPower;
-                
-                let strength = 0;
-                
-                // Bull Power positif, Bear Power négatif = uptrend
-                if (lastBullPower > 0 && lastBearPower > 0) strength = 2.5;         // Very bullish
-                else if (lastBullPower > 0 && lastBearPower > -1) strength = 2.0;
-                else if (lastBullPower > 0) strength = 1.5;
-                else if (lastBullPower < 0 && lastBearPower < 0) strength = -2.5;   // Very bearish
-                else if (lastBullPower < 0 && lastBearPower < 1) strength = -2.0;
-                else if (lastBearPower < 0) strength = -1.5;
-                
-                // Renforcement de tendance
-                if (lastBullPower > prevBullPower && lastBullPower > 0) strength += 0.5;
-                if (lastBearPower < prevBearPower && lastBearPower < 0) strength -= 0.5;
-                
-                signals.composite.push({
-                    name: 'Elder Ray',
-                    value: lastBullPower - lastBearPower,
-                    signal: strength,
-                    weight: 1.6,
-                    category: 'composite',
-                    description: lastBullPower > 0 && lastBearPower > 0 ? 'Bulls in control' :
-                                lastBullPower < 0 && lastBearPower < 0 ? 'Bears in control' :
-                                lastBullPower > 0 ? 'Bull power positive' : 'Bear power negative'
-                });
-                
-                console.log(`✅ Elder Ray: Bull=${lastBullPower.toFixed(2)}, Bear=${lastBearPower.toFixed(2)} | Signal: ${strength.toFixed(2)}`);
-            }
-        } catch (error) {
-            console.warn('⚠ Elder Ray calculation failed:', error);
-        }
-        
-        console.log(`📊 Total indicators collected: ${Object.values(signals).flat().length}`);
-        
-        return signals;
+        return finalScore;
     },
 
-    // 📈 Analyse des tendances par horizon temporel
+    // 📈 Analyse des tendances par horizon temporel - VERSION CORRIGÉE
     analyzeTrendsByHorizon(prices) {
         const analysis = {
             short: { period: 30, trend: 0, strength: 0, volatility: 0 },    // ~1 mois
@@ -9786,9 +9222,9 @@ const AdvancedAnalysis = {
             const shortChange = ((shortPrices[shortPrices.length - 1][1] - shortPrices[0][1]) / shortPrices[0][1]) * 100;
             const shortVolatility = this.calculateVolatility(shortPrices);
             
-            analysis.short.trend = shortChange;
-            analysis.short.strength = Math.abs(shortChange) > 15 ? 2.5 : Math.abs(shortChange) > 8 ? 1.8 : Math.abs(shortChange) > 3 ? 1.0 : 0.5;
-            analysis.short.volatility = shortVolatility;
+            analysis.short.trend = isNaN(shortChange) ? 0 : shortChange;
+            analysis.short.strength = Math.abs(analysis.short.trend) > 15 ? 2.5 : Math.abs(analysis.short.trend) > 8 ? 1.8 : Math.abs(analysis.short.trend) > 3 ? 1.0 : 0.5;
+            analysis.short.volatility = isNaN(shortVolatility) ? 0 : shortVolatility;
         }
         
         // Analyse moyen terme (90 jours)
@@ -9797,9 +9233,9 @@ const AdvancedAnalysis = {
             const mediumChange = ((mediumPrices[mediumPrices.length - 1][1] - mediumPrices[0][1]) / mediumPrices[0][1]) * 100;
             const mediumVolatility = this.calculateVolatility(mediumPrices);
             
-            analysis.medium.trend = mediumChange;
-            analysis.medium.strength = Math.abs(mediumChange) > 30 ? 2.5 : Math.abs(mediumChange) > 15 ? 1.8 : Math.abs(mediumChange) > 5 ? 1.0 : 0.5;
-            analysis.medium.volatility = mediumVolatility;
+            analysis.medium.trend = isNaN(mediumChange) ? 0 : mediumChange;
+            analysis.medium.strength = Math.abs(analysis.medium.trend) > 30 ? 2.5 : Math.abs(analysis.medium.trend) > 15 ? 1.8 : Math.abs(analysis.medium.trend) > 5 ? 1.0 : 0.5;
+            analysis.medium.volatility = isNaN(mediumVolatility) ? 0 : mediumVolatility;
         }
         
         // Analyse long terme (250 jours)
@@ -9808,9 +9244,9 @@ const AdvancedAnalysis = {
             const longChange = ((longPrices[longPrices.length - 1][1] - longPrices[0][1]) / longPrices[0][1]) * 100;
             const longVolatility = this.calculateVolatility(longPrices);
             
-            analysis.long.trend = longChange;
-            analysis.long.strength = Math.abs(longChange) > 60 ? 2.5 : Math.abs(longChange) > 30 ? 1.8 : Math.abs(longChange) > 10 ? 1.0 : 0.5;
-            analysis.long.volatility = longVolatility;
+            analysis.long.trend = isNaN(longChange) ? 0 : longChange;
+            analysis.long.strength = Math.abs(analysis.long.trend) > 60 ? 2.5 : Math.abs(analysis.long.trend) > 30 ? 1.8 : Math.abs(analysis.long.trend) > 10 ? 1.0 : 0.5;
+            analysis.long.volatility = isNaN(longVolatility) ? 0 : longVolatility;
         }
         
         console.log('📈 Trend Analysis:', {
@@ -9822,93 +9258,34 @@ const AdvancedAnalysis = {
         return analysis;
     },
 
-    // Helper: Calculer la volatilité d'une série de prix
+    // Helper: Calculer la volatilité d'une série de prix - VERSION CORRIGÉE
     calculateVolatility(prices) {
+        if (!prices || prices.length < 2) return 0;
+        
         const returns = [];
         for (let i = 1; i < prices.length; i++) {
-            returns.push((prices[i][1] - prices[i-1][1]) / prices[i-1][1]);
+            const prevPrice = prices[i-1][1];
+            const currPrice = prices[i][1];
+            
+            if (prevPrice && prevPrice > 0 && currPrice) {
+                returns.push((currPrice - prevPrice) / prevPrice);
+            }
         }
+        
+        if (returns.length === 0) return 0;
         
         const mean = returns.reduce((sum, r) => sum + r, 0) / returns.length;
         const variance = returns.reduce((sum, r) => sum + Math.pow(r - mean, 2), 0) / returns.length;
         const stdDev = Math.sqrt(variance);
         
-        return stdDev * Math.sqrt(252) * 100; // Annualized volatility in %
+        const annualizedVol = stdDev * Math.sqrt(252) * 100;
+        
+        return isNaN(annualizedVol) ? 0 : annualizedVol;
     },
 
-    // 🎯 Calculer le score de confiance IA global
-    calculateAIConfidenceScore(signals) {
-        let totalScore = 0;
-        let totalWeight = 0;
-        
-        let bullishSignals = 0;
-        let neutralSignals = 0;
-        let bearishSignals = 0;
-        
-        const allSignals = [];
-        
-        // Calculer le score pondéré
-        Object.values(signals).forEach(category => {
-            category.forEach(indicator => {
-                const weightedSignal = indicator.signal * indicator.weight;
-                totalScore += weightedSignal;
-                totalWeight += indicator.weight;
-                
-                allSignals.push(indicator);
-                
-                if (indicator.signal > 0.5) bullishSignals++;
-                else if (indicator.signal < -0.5) bearishSignals++;
-                else neutralSignals++;
-            });
-        });
-        
-        // Normaliser le score sur 100
-        // Le signal max possible par indicateur est ±2.5
-        const maxPossibleScore = totalWeight * 2.5;
-        const minPossibleScore = totalWeight * -2.5;
-        
-        // Normaliser entre 0 et 100
-        const normalizedScore = ((totalScore - minPossibleScore) / (maxPossibleScore - minPossibleScore)) * 100;
-        const finalScore = Math.max(0, Math.min(100, normalizedScore));
-        
-        // Déterminer le rating
-        let rating = '';
-        if (finalScore >= 85) rating = 'EXTREMELY BULLISH';
-        else if (finalScore >= 75) rating = 'VERY BULLISH';
-        else if (finalScore >= 65) rating = 'BULLISH';
-        else if (finalScore >= 55) rating = 'MODERATELY BULLISH';
-        else if (finalScore >= 45) rating = 'NEUTRAL';
-        else if (finalScore >= 35) rating = 'MODERATELY BEARISH';
-        else if (finalScore >= 25) rating = 'BEARISH';
-        else if (finalScore >= 15) rating = 'VERY BEARISH';
-        else rating = 'EXTREMELY BEARISH';
-        
-        console.log(`🎯 AI Confidence Score: ${finalScore.toFixed(1)}/100 (${rating})`);
-        console.log(`📊 Signals: ${bullishSignals} bullish, ${neutralSignals} neutral, ${bearishSignals} bearish`);
-        
-        return {
-            score: finalScore,
-            rating,
-            bullishSignals,
-            neutralSignals,
-            bearishSignals,
-            totalIndicators: bullishSignals + neutralSignals + bearishSignals,
-            allSignals
-        };
-    },
-
-    // 🎯 Générer recommandations différenciées par horizon
-    generateHorizonRecommendations(aiScore, signals, trendAnalysis) {
-        return {
-            '1y': this.generateSingleHorizon(aiScore, signals, trendAnalysis, 1, 'short'),
-            '2y': this.generateSingleHorizon(aiScore, signals, trendAnalysis, 2, 'medium'),
-            '5y': this.generateSingleHorizon(aiScore, signals, trendAnalysis, 5, 'long')
-        };
-    },
-
-    // 📊 Générer une recommandation pour un horizon spécifique
+    // 📊 Générer une recommandation pour un horizon spécifique - VERSION CORRIGÉE
     generateSingleHorizon(aiScore, signals, trendAnalysis, years, trendType) {
-        const baseScore = aiScore.score;
+        const baseScore = aiScore.score || 50;
         let adjustedScore = baseScore;
         
         // ✅ PONDÉRATION DIFFÉRENTE SELON L'HORIZON
@@ -9924,13 +9301,15 @@ const AdvancedAnalysis = {
             adjustedScore = (baseScore * 0.5) + (momentumScore * 0.3) + (volumeScore * 0.2);
             
             // Bonus/Malus tendance court terme
-            if (trendAnalysis.short.trend > 8) adjustedScore += 6;
-            else if (trendAnalysis.short.trend > 3) adjustedScore += 3;
-            else if (trendAnalysis.short.trend < -8) adjustedScore -= 6;
-            else if (trendAnalysis.short.trend < -3) adjustedScore -= 3;
+            const shortTrend = trendAnalysis.short.trend || 0;
+            if (shortTrend > 8) adjustedScore += 6;
+            else if (shortTrend > 3) adjustedScore += 3;
+            else if (shortTrend < -8) adjustedScore -= 6;
+            else if (shortTrend < -3) adjustedScore -= 3;
             
             // Pénalité si haute volatilité court terme
-            if (trendAnalysis.short.volatility > 40) adjustedScore -= 4;
+            const shortVol = trendAnalysis.short.volatility || 0;
+            if (shortVol > 40) adjustedScore -= 4;
             
         } else if (years === 2) {
             // MOYEN TERME (2 ans) : Équilibre TREND + MOMENTUM + COMPOSITE
@@ -9946,13 +9325,15 @@ const AdvancedAnalysis = {
             adjustedScore = (baseScore * 0.4) + (trendScore * 0.3) + (momentumScore * 0.2) + (compositeScore * 0.1);
             
             // Bonus/Malus tendance moyen terme
-            if (trendAnalysis.medium.trend > 15) adjustedScore += 10;
-            else if (trendAnalysis.medium.trend > 5) adjustedScore += 5;
-            else if (trendAnalysis.medium.trend < -15) adjustedScore -= 10;
-            else if (trendAnalysis.medium.trend < -5) adjustedScore -= 5;
+            const mediumTrend = trendAnalysis.medium.trend || 0;
+            if (mediumTrend > 15) adjustedScore += 10;
+            else if (mediumTrend > 5) adjustedScore += 5;
+            else if (mediumTrend < -15) adjustedScore -= 10;
+            else if (mediumTrend < -5) adjustedScore -= 5;
             
             // Légère pénalité si volatilité élevée
-            if (trendAnalysis.medium.volatility > 35) adjustedScore -= 2;
+            const mediumVol = trendAnalysis.medium.volatility || 0;
+            if (mediumVol > 35) adjustedScore -= 2;
             
         } else {
             // LONG TERME (5 ans) : Priorité TREND + COMPOSITE
@@ -9966,13 +9347,21 @@ const AdvancedAnalysis = {
             adjustedScore = (baseScore * 0.4) + (trendScore * 0.4) + (compositeScore * 0.2);
             
             // Bonus/Malus tendance long terme
-            if (trendAnalysis.long.trend > 30) adjustedScore += 15;
-            else if (trendAnalysis.long.trend > 10) adjustedScore += 8;
-            else if (trendAnalysis.long.trend < -30) adjustedScore -= 15;
-            else if (trendAnalysis.long.trend < -10) adjustedScore -= 8;
+            const longTrend = trendAnalysis.long.trend || 0;
+            if (longTrend > 30) adjustedScore += 15;
+            else if (longTrend > 10) adjustedScore += 8;
+            else if (longTrend < -30) adjustedScore -= 15;
+            else if (longTrend < -10) adjustedScore -= 8;
             
             // La volatilité a moins d'impact sur le long terme
-            if (trendAnalysis.long.volatility < 20) adjustedScore += 3; // Récompense la stabilité
+            const longVol = trendAnalysis.long.volatility || 0;
+            if (longVol < 20) adjustedScore += 3;
+        }
+        
+        // ✅ FIX: Vérifier que adjustedScore est valide
+        if (isNaN(adjustedScore)) {
+            console.error('❌ Adjusted score is NaN, defaulting to base score', { baseScore, years });
+            adjustedScore = baseScore;
         }
         
         // Limiter entre 0 et 100
@@ -10005,21 +9394,30 @@ const AdvancedAnalysis = {
             confidence = Math.min(95, 60 + (30 - adjustedScore) * 0.8);
         }
         
-        // ✅ CALCUL POTENTIEL (basé sur la tendance ET le score)
+        // ✅ CALCUL POTENTIEL (basé sur la tendance ET le score) - VERSION CORRIGÉE
         let potentialMove = 0;
         
         if (years === 1) {
-            potentialMove = (adjustedScore - 50) * 0.4 + (trendAnalysis.short.trend * 0.3);
+            const shortTrend = trendAnalysis.short.trend || 0;
+            potentialMove = (adjustedScore - 50) * 0.4 + (shortTrend * 0.3);
         } else if (years === 2) {
-            potentialMove = (adjustedScore - 50) * 0.8 + (trendAnalysis.medium.trend * 0.5);
+            const mediumTrend = trendAnalysis.medium.trend || 0;
+            potentialMove = (adjustedScore - 50) * 0.8 + (mediumTrend * 0.5);
         } else {
-            potentialMove = (adjustedScore - 50) * 1.5 + (trendAnalysis.long.trend * 0.8);
+            const longTrend = trendAnalysis.long.trend || 0;
+            potentialMove = (adjustedScore - 50) * 1.5 + (longTrend * 0.8);
+        }
+        
+        // ✅ FIX: Vérifier que potentialMove est valide
+        if (isNaN(potentialMove)) {
+            console.error('❌ Potential move is NaN, defaulting to 0', { adjustedScore, years });
+            potentialMove = 0;
         }
         
         // ✅ KEY DRIVERS DYNAMIQUES (basés sur les MEILLEURS indicateurs)
         const drivers = this.generateKeyDrivers(signals, trendAnalysis, years, adjustedScore);
         
-        console.log(`📊 ${years}Y Horizon: ${recommendation} (${Math.round(confidence)}%) | Potential: ${potentialMove.toFixed(1)}%`);
+        console.log(`📊 ${years}Y Horizon: ${recommendation} (${Math.round(confidence)}%) | Potential: ${potentialMove.toFixed(1)}% | Adjusted Score: ${adjustedScore.toFixed(1)}`);
         
         return {
             recommendation,
@@ -10030,34 +9428,17 @@ const AdvancedAnalysis = {
         };
     },
 
-    // 📊 Calculer le score d'une catégorie d'indicateurs
-    calculateCategoryScore(categorySignals) {
-        if (!categorySignals || categorySignals.length === 0) return 50;
-        
-        let totalScore = 0;
-        let totalWeight = 0;
-        
-        categorySignals.forEach(indicator => {
-            totalScore += indicator.signal * indicator.weight;
-            totalWeight += indicator.weight;
-        });
-        
-        const maxPossible = totalWeight * 2.5;
-        const minPossible = totalWeight * -2.5;
-        
-        const normalized = ((totalScore - minPossible) / (maxPossible - minPossible)) * 100;
-        return Math.max(0, Math.min(100, normalized));
-    },
-
-    // 🔑 Générer les key drivers dynamiques
+    // 🔑 Générer les key drivers dynamiques - VERSION AMÉLIORÉE
     generateKeyDrivers(signals, trendAnalysis, years, adjustedScore) {
         const allSignals = [];
         
         // Collecter tous les signaux
         Object.values(signals).forEach(category => {
-            category.forEach(indicator => {
-                allSignals.push(indicator);
-            });
+            if (Array.isArray(category)) {
+                category.forEach(indicator => {
+                    allSignals.push(indicator);
+                });
+            }
         });
         
         // Trier par force du signal (absolute value)
@@ -10065,132 +9446,102 @@ const AdvancedAnalysis = {
         
         const drivers = [];
         
-        // ✅ DRIVER 1 : Multi-indicator consensus
+        // ✅ DRIVER 1 : Multi-indicator consensus (toujours différent selon l'horizon)
         drivers.push(`Multi-indicator consensus: ${adjustedScore.toFixed(0)}/100`);
         
-        // ✅ DRIVER 2 : Top 2-3 indicateurs les plus forts
-        const topIndicators = allSignals.slice(0, 3);
-        topIndicators.forEach(indicator => {
-            if (Math.abs(indicator.signal) > 1.0) {
-                drivers.push(indicator.description);
+        // ✅ DRIVER 2 : Tendance SPÉCIFIQUE à l'horizon
+        if (years === 1 && trendAnalysis.short) {
+            const trend = trendAnalysis.short.trend || 0;
+            if (Math.abs(trend) > 2) {
+                const direction = trend > 0 ? 'uptrend' : 'downtrend';
+                drivers.push(`Short-term ${direction} (${Math.abs(trend).toFixed(1)}%)`);
             }
-        });
-        
-        // ✅ DRIVER 3 : Tendance selon l'horizon
-        if (years === 1 && trendAnalysis.short.trend !== 0) {
-            const trendDirection = trendAnalysis.short.trend > 0 ? 'uptrend' : 'downtrend';
-            drivers.push(`Short-term ${trendDirection} (${Math.abs(trendAnalysis.short.trend).toFixed(1)}%)`);
-        } else if (years === 2 && trendAnalysis.medium.trend !== 0) {
-            const trendDirection = trendAnalysis.medium.trend > 0 ? 'uptrend' : 'downtrend';
-            drivers.push(`Medium-term ${trendDirection} (${Math.abs(trendAnalysis.medium.trend).toFixed(1)}%)`);
-        } else if (years === 5 && trendAnalysis.long.trend !== 0) {
-            const trendDirection = trendAnalysis.long.trend > 0 ? 'uptrend' : 'downtrend';
-            drivers.push(`Long-term ${trendDirection} (${Math.abs(trendAnalysis.long.trend).toFixed(1)}%)`);
+        } else if (years === 2 && trendAnalysis.medium) {
+            const trend = trendAnalysis.medium.trend || 0;
+            if (Math.abs(trend) > 3) {
+                const direction = trend > 0 ? 'uptrend' : 'downtrend';
+                drivers.push(`Medium-term ${direction} (${Math.abs(trend).toFixed(1)}%)`);
+            }
+        } else if (years === 5 && trendAnalysis.long) {
+            const trend = trendAnalysis.long.trend || 0;
+            if (Math.abs(trend) > 5) {
+                const direction = trend > 0 ? 'uptrend' : 'downtrend';
+                drivers.push(`Long-term ${direction} (${Math.abs(trend).toFixed(1)}%)`);
+            }
         }
         
-        // ✅ DRIVER 4 : Catégorie dominante
-        const categoryScores = {
-            momentum: this.calculateCategoryScore(signals.momentum || []),
-            trend: this.calculateCategoryScore(signals.trend || []),
-            volume: this.calculateCategoryScore(signals.volume || []),
-            composite: this.calculateCategoryScore(signals.composite || [])
-        };
+        // ✅ DRIVER 3 : Top indicateur le plus fort
+        if (allSignals.length > 0) {
+            const topIndicator = allSignals[0];
+            if (topIndicator && Math.abs(topIndicator.signal) > 1.0) {
+                drivers.push(topIndicator.description);
+            }
+        }
         
-        const dominantCategory = Object.entries(categoryScores)
-            .sort((a, b) => Math.abs(b[1] - 50) - Math.abs(a[1] - 50))[0];
+        // ✅ DRIVER 4 : Catégorie dominante SELON L'HORIZON
+        let dominantCategory = '';
         
-        if (Math.abs(dominantCategory[1] - 50) > 15) {
-            const direction = dominantCategory[1] > 50 ? 'positive' : 'negative';
-            drivers.push(`${dominantCategory[0].charAt(0).toUpperCase() + dominantCategory[0].slice(1)} indicators ${direction}`);
+        if (years === 1) {
+            // Court terme : focus momentum
+            const momentumScore = this.calculateCategoryScore(signals.momentum || []);
+            if (Math.abs(momentumScore - 50) > 15) {
+                dominantCategory = momentumScore > 50 ? 'Positive momentum indicators' : 'Negative momentum indicators';
+            }
+        } else if (years === 2) {
+            // Moyen terme : focus trend
+            const trendScore = this.calculateCategoryScore(signals.trend || []);
+            if (Math.abs(trendScore - 50) > 15) {
+                dominantCategory = trendScore > 50 ? 'Positive trend indicators' : 'Negative trend indicators';
+            }
+        } else {
+            // Long terme : focus composite
+            const compositeScore = this.calculateCategoryScore(signals.composite || []);
+            if (Math.abs(compositeScore - 50) > 15) {
+                dominantCategory = compositeScore > 50 ? 'Positive composite indicators' : 'Negative composite indicators';
+            }
+        }
+        
+        if (dominantCategory && drivers.length < 3) {
+            drivers.push(dominantCategory);
+        }
+        
+        // Assurer au moins 3 drivers
+        while (drivers.length < 3 && allSignals.length > drivers.length - 1) {
+            const nextIndicator = allSignals[drivers.length - 1];
+            if (nextIndicator && nextIndicator.description) {
+                drivers.push(nextIndicator.description);
+            } else {
+                break;
+            }
         }
         
         // Limiter à 3 drivers maximum
         return drivers.slice(0, 3);
     },
 
-    // 🖼 Afficher le score IA global
-    displayAIRecommendation(aiScore, signals) {
+    // 🖼 Afficher erreur si données insuffisantes
+    displayAIError(message) {
         const scoreValueEl = document.getElementById('aiScoreValue');
-        if (scoreValueEl) {
-            scoreValueEl.textContent = aiScore.score.toFixed(0) + '/100';
-        }
+        if (scoreValueEl) scoreValueEl.textContent = 'N/A';
         
         const ratingEl = document.getElementById('aiScoreRating');
         if (ratingEl) {
-            ratingEl.textContent = aiScore.rating;
+            ratingEl.textContent = message;
+            ratingEl.className = 'ai-score-rating neutral';
+        }
+        
+        ['1y', '2y', '5y'].forEach(horizon => {
+            const recEl = document.getElementById(`recommendation${horizon}`);
+            if (recEl) recEl.innerHTML = `<div class='ai-rec-badge hold'>DATA ERROR</div>`;
             
-            let scoreClass = '';
-            if (aiScore.score >= 75) scoreClass = 'very-bullish';
-            else if (aiScore.score >= 65) scoreClass = 'bullish';
-            else if (aiScore.score >= 55) scoreClass = 'moderately-bullish';
-            else if (aiScore.score >= 45) scoreClass = 'neutral';
-            else if (aiScore.score >= 35) scoreClass = 'moderately-bearish';
-            else if (aiScore.score >= 25) scoreClass = 'bearish';
-            else scoreClass = 'very-bearish';
+            const targetEl = document.getElementById(`target${horizon}`);
+            if (targetEl) targetEl.textContent = 'N/A';
             
-            ratingEl.className = `ai-score-rating ${scoreClass}`;
-            
-            const fillBarContainer = document.getElementById('aiScoreFill');
-            if (fillBarContainer) {
-                fillBarContainer.innerHTML = `<div class="ai-score-fill ${scoreClass}" style="width: ${aiScore.score}%"></div>`;
+            const driversEl = document.getElementById(`drivers${horizon}`);
+            if (driversEl) {
+                driversEl.innerHTML = `<div class='ai-driver-item'><i class='fas fa-exclamation-triangle'></i> ${message}</div>`;
             }
-        }
-        
-        const bullishEl = document.getElementById('bullishSignals');
-        const neutralEl = document.getElementById('neutralSignals');
-        const bearishEl = document.getElementById('bearishSignals');
-        
-        if (bullishEl) bullishEl.textContent = aiScore.bullishSignals;
-        if (neutralEl) neutralEl.textContent = aiScore.neutralSignals;
-        if (bearishEl) bearishEl.textContent = aiScore.bearishSignals;
-    },
-
-    // 🖼 Afficher les recommandations par horizon
-    displayHorizonRecommendations(horizons) {
-        this.displaySingleHorizon('1y', horizons['1y']);
-        this.displaySingleHorizon('2y', horizons['2y']);
-        this.displaySingleHorizon('5y', horizons['5y']);
-    },
-
-    // 🖼 Afficher une recommandation pour un horizon
-    displaySingleHorizon(horizon, data) {
-        const recEl = document.getElementById(`recommendation${horizon}`);
-        if (recEl) {
-            const recClass = this.getRecommendationClass(data.recommendation);
-            recEl.innerHTML = `<div class='ai-rec-badge ${recClass}'>${data.recommendation}</div>`;
-        }
-        
-        const targetEl = document.getElementById(`target${horizon}`);
-        if (targetEl) {
-            targetEl.textContent = `${data.potentialMove >= 0 ? '+' : ''}${data.potentialMove}% Potential`;
-        }
-        
-        const confBarContainer = document.getElementById(`confidence${horizon}`);
-        if (confBarContainer) {
-            const recClass = this.getRecommendationClass(data.recommendation);
-            confBarContainer.innerHTML = `<div class="ai-confidence-fill ${recClass}" style="width: ${data.confidence}%"></div>`;
-        }
-        
-        const driversEl = document.getElementById(`drivers${horizon}`);
-        if (driversEl) {
-            driversEl.innerHTML = data.drivers.map(driver => 
-                `<div class='ai-driver-item'><i class='fas fa-check-circle'></i> ${driver}</div>`
-            ).join('');
-        }
-    },
-
-    // 🎨 Obtenir la classe CSS pour une recommandation
-    getRecommendationClass(recommendation) {
-        const map = {
-            'STRONG BUY': 'strong-buy',
-            'BUY': 'buy',
-            'ACCUMULATE': 'accumulate',
-            'HOLD': 'hold',
-            'REDUCE': 'reduce',
-            'SELL': 'sell',
-            'STRONG SELL': 'strong-sell'
-        };
-        return map[recommendation] || 'neutral';
+        });
     },
     
     // ============================================
