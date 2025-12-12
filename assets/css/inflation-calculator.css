@@ -1,0 +1,616 @@
+/**
+ * ====================================================================
+ * ALPHAVAULT AI - INFLATION CALCULATOR - PROFESSIONAL STYLES
+ * ====================================================================
+ * Design: Glassmorphism + Gradient Titles + Ultra Premium
+ */
+
+/* ========================================
+   VARIABLES
+   ======================================== */
+:root {
+    --eco-primary: #3b82f6;
+    --eco-secondary: #8b5cf6;
+    --eco-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    --eco-gradient-soft: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+    --eco-success: #10b981;
+    --eco-danger: #ef4444;
+    --eco-warning: #f59e0b;
+    --eco-info: #3b82f6;
+    
+    --glass-bg: rgba(255, 255, 255, 0.95);
+    --glass-border: rgba(255, 255, 255, 0.3);
+    --glass-shadow: 0 8px 32px rgba(102, 126, 234, 0.15);
+    
+    --transition-smooth: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    --border-radius: 16px;
+    --border-radius-lg: 24px;
+}
+
+body.dark-mode {
+    --glass-bg: rgba(15, 23, 42, 0.95);
+    --glass-border: rgba(100, 116, 139, 0.3);
+    --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+}
+
+/* ========================================
+   GRADIENT TITLES
+   ======================================== */
+.gradient-title {
+    background: var(--eco-gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    font-weight: 800;
+}
+
+.section-title {
+    font-size: 1.5rem;
+    margin-bottom: 24px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-weight: 800;
+}
+
+.section-title i {
+    background: var(--eco-gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+/* ========================================
+   INFLATION CALCULATOR CONTAINER
+   ======================================== */
+.inflation-calculator-container {
+    background: var(--glass-bg);
+    backdrop-filter: blur(20px) saturate(180%);
+    border-radius: var(--border-radius-lg);
+    padding: 40px;
+    border: 1px solid var(--glass-border);
+    box-shadow: var(--glass-shadow);
+    transition: var(--transition-smooth);
+}
+
+.inflation-calculator-container:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 16px 64px rgba(102, 126, 234, 0.25);
+}
+
+.inflation-inputs {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 24px;
+    margin-bottom: 32px;
+}
+
+.mortgage-input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.mortgage-input-group label {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.mortgage-input-group label i {
+    color: var(--eco-primary);
+}
+
+.mortgage-input-group input,
+.mortgage-input-group select {
+    padding: 14px 18px;
+    border: 2px solid var(--glass-border);
+    border-radius: 12px;
+    background: var(--glass-bg);
+    backdrop-filter: blur(10px);
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    transition: var(--transition-smooth);
+}
+
+.mortgage-input-group input:focus,
+.mortgage-input-group select:focus {
+    outline: none;
+    border-color: var(--eco-primary);
+    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+    transform: translateY(-2px);
+}
+
+.mortgage-input-group input:hover,
+.mortgage-input-group select:hover {
+    border-color: var(--eco-secondary);
+}
+
+/* ========================================
+   BUTTON PRIMARY
+   ======================================== */
+.btn-primary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    padding: 18px 36px;
+    background: var(--eco-gradient);
+    color: white;
+    border: none;
+    border-radius: 14px;
+    font-size: 1.1rem;
+    font-weight: 800;
+    cursor: pointer;
+    transition: var(--transition-smooth);
+    box-shadow: 0 8px 24px rgba(102, 126, 234, 0.4);
+    position: relative;
+    overflow: hidden;
+}
+
+.btn-primary::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+    transition: left 0.6s ease;
+}
+
+.btn-primary:hover::before {
+    left: 100%;
+}
+
+.btn-primary:hover {
+    transform: translateY(-4px) scale(1.02);
+    box-shadow: 0 16px 48px rgba(102, 126, 234, 0.6);
+}
+
+.btn-primary:active {
+    transform: translateY(-2px) scale(0.98);
+    box-shadow: 0 8px 24px rgba(102, 126, 234, 0.5);
+}
+
+/* ========================================
+   INFLATION RESULT DISPLAY
+   ======================================== */
+.inflation-result-display {
+    background: var(--eco-gradient-soft);
+    border: 2px solid var(--eco-primary);
+    border-radius: var(--border-radius-lg);
+    padding: 40px;
+    margin-top: 32px;
+    position: relative;
+    overflow: hidden;
+    animation: slideIn 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.inflation-result-display::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(102, 126, 234, 0.1) 0%, transparent 70%);
+    animation: rotate 15s linear infinite;
+}
+
+@keyframes rotate {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+.inflation-result-title {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 12px;
+    position: relative;
+    z-index: 1;
+}
+
+.inflation-result-value {
+    font-size: 3.5rem;
+    font-weight: 900;
+    background: var(--eco-gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 16px;
+    line-height: 1.2;
+    position: relative;
+    z-index: 1;
+}
+
+.inflation-result-explanation {
+    font-size: 1.05rem;
+    color: var(--text-secondary);
+    line-height: 1.8;
+    font-weight: 500;
+    position: relative;
+    z-index: 1;
+}
+
+.inflation-result-explanation strong {
+    font-weight: 800;
+    background: var(--eco-gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+/* ========================================
+   STAT CARDS
+   ======================================== */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+    margin-top: 32px;
+}
+
+.stat-card {
+    background: var(--glass-bg);
+    backdrop-filter: blur(20px) saturate(180%);
+    border: 2px solid var(--glass-border);
+    border-radius: var(--border-radius);
+    padding: 24px;
+    text-align: center;
+    transition: var(--transition-smooth);
+    position: relative;
+    overflow: hidden;
+}
+
+.stat-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 4px;
+    background: var(--eco-gradient);
+    transform: scaleX(0);
+    transition: var(--transition-smooth);
+}
+
+.stat-card:hover::before {
+    transform: scaleX(1);
+}
+
+.stat-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 12px 36px rgba(102, 126, 234, 0.3);
+    border-color: var(--eco-primary);
+}
+
+.stat-label {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    margin-bottom: 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-weight: 700;
+}
+
+.stat-value {
+    font-size: 2rem;
+    font-weight: 900;
+    background: var(--eco-gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 6px;
+}
+
+.stat-sublabel {
+    font-size: 0.85rem;
+    color: var(--text-tertiary);
+    font-weight: 600;
+}
+
+/* ========================================
+   CHART WRAPPER
+   ======================================== */
+.chart-wrapper {
+    background: var(--glass-bg);
+    backdrop-filter: blur(20px) saturate(180%);
+    border-radius: var(--border-radius-lg);
+    border: 1px solid var(--glass-border);
+    box-shadow: var(--glass-shadow);
+    padding: 32px;
+    transition: var(--transition-smooth);
+}
+
+.chart-wrapper:hover {
+    box-shadow: 0 16px 48px rgba(102, 126, 234, 0.25);
+}
+
+.chart {
+    border-radius: 12px;
+}
+
+/* ========================================
+   DECADE TABLE
+   ======================================== */
+.decade-table-container {
+    background: var(--glass-bg);
+    backdrop-filter: blur(20px) saturate(180%);
+    border-radius: var(--border-radius-lg);
+    border: 1px solid var(--glass-border);
+    box-shadow: var(--glass-shadow);
+    padding: 32px;
+    overflow-x: auto;
+}
+
+.decade-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+}
+
+.decade-table thead th {
+    background: var(--eco-gradient-soft);
+    color: var(--text-primary);
+    font-weight: 800;
+    padding: 16px;
+    text-align: left;
+    font-size: 0.95rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border-bottom: 3px solid var(--eco-primary);
+}
+
+.decade-table tbody tr {
+    transition: var(--transition-smooth);
+}
+
+.decade-table tbody tr:hover {
+    background: var(--eco-gradient-soft);
+    transform: scale(1.02);
+}
+
+.decade-table tbody td {
+    padding: 16px;
+    border-bottom: 1px solid var(--glass-border);
+    font-size: 0.95rem;
+    font-weight: 600;
+}
+
+.decade-table tbody td:first-child {
+    font-weight: 800;
+    background: var(--eco-gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.decade-rate {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-weight: 700;
+}
+
+.decade-rate.low {
+    background: rgba(16, 185, 129, 0.1);
+    color: var(--eco-success);
+}
+
+.decade-rate.medium {
+    background: rgba(245, 158, 11, 0.1);
+    color: var(--eco-warning);
+}
+
+.decade-rate.high {
+    background: rgba(239, 68, 68, 0.1);
+    color: var(--eco-danger);
+}
+
+/* ========================================
+   FUN FACTS
+   ======================================== */
+.fun-facts-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 24px;
+}
+
+.fun-fact-card {
+    background: var(--glass-bg);
+    backdrop-filter: blur(20px) saturate(180%);
+    border-radius: var(--border-radius-lg);
+    padding: 32px;
+    border: 2px solid var(--glass-border);
+    box-shadow: var(--glass-shadow);
+    transition: var(--transition-smooth);
+    position: relative;
+    overflow: hidden;
+}
+
+.fun-fact-card::before {
+    content: '';
+    position: absolute;
+    top: -2px;
+    left: -2px;
+    right: -2px;
+    bottom: -2px;
+    background: var(--eco-gradient);
+    border-radius: var(--border-radius-lg);
+    opacity: 0;
+    transition: var(--transition-smooth);
+    z-index: -1;
+}
+
+.fun-fact-card:hover::before {
+    opacity: 0.2;
+}
+
+.fun-fact-card:hover {
+    transform: translateY(-8px) scale(1.02);
+    box-shadow: 0 20px 60px rgba(102, 126, 234, 0.3);
+    border-color: var(--eco-primary);
+}
+
+.fun-fact-icon {
+    font-size: 3rem;
+    margin-bottom: 16px;
+    background: var(--eco-gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.fun-fact-title {
+    font-size: 1.2rem;
+    font-weight: 800;
+    margin-bottom: 12px;
+    background: var(--eco-gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.fun-fact-description {
+    font-size: 0.95rem;
+    color: var(--text-secondary);
+    line-height: 1.7;
+    font-weight: 500;
+}
+
+/* ========================================
+   CPI EVOLUTION CHART
+   ======================================== */
+.cpi-chart-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
+    gap: 24px;
+}
+
+/* ========================================
+   FOOTER
+   ======================================== */
+footer {
+    margin-top: 60px;
+    padding: 32px;
+    background: var(--eco-gradient-soft);
+    border-radius: var(--border-radius);
+    border: 1px solid var(--glass-border);
+    text-align: center;
+}
+
+footer p {
+    color: var(--text-secondary);
+    font-weight: 600;
+    font-size: 0.95rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+footer i {
+    color: var(--eco-primary);
+}
+
+/* ========================================
+   RESPONSIVE
+   ======================================== */
+@media (max-width: 1024px) {
+    .cpi-chart-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 768px) {
+    .inflation-calculator-container {
+        padding: 24px;
+    }
+    
+    .inflation-inputs {
+        grid-template-columns: 1fr;
+    }
+    
+    .inflation-result-value {
+        font-size: 2.5rem;
+    }
+    
+    .stats-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .fun-facts-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .cpi-chart-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .decade-table-container {
+        padding: 16px;
+    }
+    
+    .decade-table thead th,
+    .decade-table tbody td {
+        padding: 12px 8px;
+        font-size: 0.85rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .section-title {
+        font-size: 1.2rem;
+    }
+    
+    .btn-primary {
+        padding: 14px 24px;
+        font-size: 1rem;
+    }
+    
+    .inflation-result-display {
+        padding: 24px;
+    }
+    
+    .inflation-result-value {
+        font-size: 2rem;
+    }
+    
+    .fun-fact-card {
+        padding: 20px;
+    }
+}
+
+/* ========================================
+   ACCESSIBILITY
+   ======================================== */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
