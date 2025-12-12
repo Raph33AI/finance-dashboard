@@ -11,7 +11,7 @@
     <link rel='stylesheet' href='assets/css/common.css'>
     <link rel='stylesheet' href='assets/css/sidebar.css'>
     <link rel="stylesheet" href="assets/css/user-menu.css">
-    <link rel='stylesheet' href='assets/css/economic-pages.css'>
+    <link rel='stylesheet' href='assets/css/recession-indicators.css'>
     
     <script src="assets/js/favicon-dynamic.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
@@ -30,7 +30,9 @@
     <canvas id="particles-canvas" class="particles-background"></canvas>
 
     <div class='layout-wrapper'>
-        <!-- Sidebar (identique) -->
+        <!-- ========================================
+             SIDEBAR (Identique à ton HTML)
+             ======================================== -->
         <aside class='sidebar' id='sidebar'>
             <div class="sidebar-header">
                 <div class="logo-container">
@@ -126,32 +128,12 @@
                         <span>Stocks</span>
                         <i class="fas fa-chevron-down arrow"></i>
                     </button>
-                    <div class='nav-submenu' style='display: block;'>
+                    <div class='nav-submenu'>
                         <a href='advanced-analysis.html' class='nav-link'>
                             <i class='fas fa-brain'></i>
                             <span>Advanced Analysis</span>
                         </a>
-                        <!-- <a href='trend-prediction.html' class='nav-link'>
-                            <i class='fas fa-chart-line'></i>
-                            <span>Trend Prediction</span>
-                        </a>
-                        <a href='market-intelligence.html' class='nav-link'>
-                            <i class='fas fa-globe'></i>
-                            <span>Market Intelligence</span>
-                        </a>
-                        <a href='company-insights.html' class='nav-link'>
-                            <i class='fas fa-building'></i>
-                            <span>Company Insights</span>
-                        </a>
-                        <a href='analyst-coverage.html' class='nav-link active'>
-                            <i class='fas fa-users'></i>
-                            <span>Analyst Coverage</span>
-                        </a>
-                        <a href='earnings-estimates.html' class='nav-link'>
-                            <i class='fas fa-coins'></i>
-                            <span>Earnings & Estimates</span>
-                        </a>
-                    </div> -->
+                    </div>
                 </div>
 
                 <div class='nav-section'>
@@ -160,7 +142,7 @@
                         <span>AI Assistant</span>
                         <i class="fas fa-chevron-down arrow"></i>
                     </button>
-                    <div class='nav-submenu' style='display: block;'>
+                    <div class='nav-submenu'>
                         <a href='chatbot-fullpage.html' class='nav-link'>
                             <i class='fas fa-comments'></i>
                             <span>Alphy AI Chat</span>
@@ -177,7 +159,7 @@
                     <div class='nav-submenu' style='display: block;'>
                         <a href='economic-dashboard.html' class='nav-link'>
                             <i class='fas fa-tachometer-alt'></i>
-                            <span>Macro Economic Dasboard</span>
+                            <span>Macro Economic Dashboard</span>
                         </a>
                         <a href='inflation-calculator.html' class='nav-link'>
                             <i class='fas fa-calculator'></i>
@@ -252,19 +234,47 @@
         
         <div class='sidebar-overlay' id='sidebarOverlay'></div>
 
+        <!-- ========================================
+             MAIN CONTENT
+             ======================================== -->
         <div class='main-content'>
             <header class='top-header'>
                 <div class='header-left'>
                     <button class='mobile-toggle' id='mobileToggle'>
                         <i class='fas fa-bars'></i>
                     </button>
-                    <h1><i class="fas fa-exclamation-triangle"></i> Recession Indicators</h1>
+                    <h1 class='page-title'>
+                        <i class="fas fa-exclamation-triangle"></i> Recession Indicators
+                    </h1>
+                </div>
+                <div class='header-right'>
+                    <button class='dashboard-btn dashboard-btn-export'>
+                        <i class='fas fa-download'></i>
+                        <span class='btn-text'>Export Report</span>
+                    </button>
                 </div>
             </header>
             
             <div class='container'>
                 
-                <!-- Indicators Grid -->
+                <!-- ========================================
+                     AI RECESSION PROBABILITY SCORE
+                     ======================================== -->
+                <div id='recessionScoreCard'>
+                    <div class='eco-loading'>
+                        <div class='eco-spinner'></div>
+                        <p>Calculating AI recession probability...</p>
+                    </div>
+                </div>
+
+                <!-- ========================================
+                     AI RECOMMENDATIONS
+                     ======================================== -->
+                <div id='aiRecommendations'></div>
+
+                <!-- ========================================
+                     KEY INDICATORS GRID
+                     ======================================== -->
                 <div class='section'>
                     <h2 class='section-title'>
                         <i class='fas fa-exclamation-circle'></i> Key Recession Indicators
@@ -278,37 +288,145 @@
                     </div>
                 </div>
 
-                <!-- Yield Curve Inversion Chart -->
+                <!-- ========================================
+                     YIELD CURVE CHART
+                     ======================================== -->
                 <div class='section'>
-                    <h2 class='section-title'>
-                        <i class='fas fa-chart-area'></i> Yield Curve (10Y - 2Y Spread)
-                    </h2>
+                    <div class='section-header-with-controls'>
+                        <h2 class='section-title'>
+                            <i class='fas fa-chart-area'></i> Yield Curve (10Y - 2Y Spread)
+                        </h2>
+                        <div class='time-range-selector'>
+                            <button class='time-btn' data-range='2y'>2Y</button>
+                            <button class='time-btn active' data-range='5y'>5Y</button>
+                            <button class='time-btn' data-range='10y'>10Y</button>
+                            <button class='time-btn' data-range='all'>ALL</button>
+                        </div>
+                    </div>
                     
                     <div class='chart-wrapper'>
-                        <div id='yieldSpreadChart' class='chart' style='height: 450px;'></div>
+                        <div class='chart-header'>
+                            <h3 class='chart-title'>
+                                <i class='fas fa-chart-line'></i> 10-Year vs. 2-Year Treasury Spread
+                            </h3>
+                            <div class='chart-actions'>
+                                <button class='chart-btn-info' data-modal='yieldCurveModal' aria-label='Info'>
+                                    <i class='fas fa-info-circle'></i>
+                                </button>
+                                <button class='chart-btn-export' aria-label='Export Chart'>
+                                    <i class='fas fa-download'></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div id='yieldSpreadChart' class='chart'></div>
                     </div>
                 </div>
 
-                <!-- Sahm Rule Chart -->
+                <!-- ========================================
+                     SAHM RULE CHART
+                     ======================================== -->
                 <div class='section'>
                     <h2 class='section-title'>
                         <i class='fas fa-heartbeat'></i> Sahm Rule Recession Indicator
                     </h2>
                     
                     <div class='chart-wrapper'>
-                        <div id='sahmRuleChart' class='chart' style='height: 450px;'></div>
+                        <div class='chart-header'>
+                            <h3 class='chart-title'>
+                                <i class='fas fa-chart-line'></i> Sahm Rule Real-Time Indicator
+                            </h3>
+                            <div class='chart-actions'>
+                                <button class='chart-btn-info' data-modal='unemploymentModal' aria-label='Info'>
+                                    <i class='fas fa-info-circle'></i>
+                                </button>
+                                <button class='chart-btn-export' aria-label='Export Chart'>
+                                    <i class='fas fa-download'></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div id='sahmRuleChart' class='chart'></div>
                     </div>
                 </div>
 
-                <footer>
+                <!-- ========================================
+                     UNEMPLOYMENT RATE CHART
+                     ======================================== -->
+                <div class='section'>
+                    <h2 class='section-title'>
+                        <i class='fas fa-users'></i> Unemployment Rate
+                    </h2>
+                    
+                    <div class='chart-wrapper'>
+                        <div class='chart-header'>
+                            <h3 class='chart-title'>
+                                <i class='fas fa-chart-line'></i> US Unemployment Rate
+                            </h3>
+                            <div class='chart-actions'>
+                                <button class='chart-btn-info' data-modal='unemploymentModal' aria-label='Info'>
+                                    <i class='fas fa-info-circle'></i>
+                                </button>
+                                <button class='chart-btn-export' aria-label='Export Chart'>
+                                    <i class='fas fa-download'></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div id='unemploymentChart' class='chart'></div>
+                    </div>
+                </div>
+
+                <!-- ========================================
+                     PMI MANUFACTURING CHART
+                     ======================================== -->
+                <div class='section'>
+                    <h2 class='section-title'>
+                        <i class='fas fa-industry'></i> PMI Manufacturing
+                    </h2>
+                    
+                    <div class='chart-wrapper'>
+                        <div class='chart-header'>
+                            <h3 class='chart-title'>
+                                <i class='fas fa-chart-line'></i> ISM Manufacturing PMI
+                            </h3>
+                            <div class='chart-actions'>
+                                <button class='chart-btn-info' data-modal='pmiModal' aria-label='Info'>
+                                    <i class='fas fa-info-circle'></i>
+                                </button>
+                                <button class='chart-btn-export' aria-label='Export Chart'>
+                                    <i class='fas fa-download'></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div id='pmiChart' class='chart'></div>
+                    </div>
+                </div>
+
+                <!-- ========================================
+                     HISTORICAL RECESSIONS TIMELINE
+                     ======================================== -->
+                <div class='section'>
+                    <h2 class='section-title'>
+                        <i class='fas fa-history'></i> Historical US Recessions
+                    </h2>
+                    
+                    <div id='historicalTimeline'></div>
+                </div>
+
+                <footer style='text-align: center; padding: 32px 0; color: var(--text-tertiary); font-size: 0.9rem;'>
                     <p>
-                        <i class='fas fa-info-circle'></i> Recession Indicators - Data from FRED
+                        <i class='fas fa-info-circle'></i> 
+                        Recession Indicators - Data from FRED API - Updated Daily
+                    </p>
+                    <p style='margin-top: 8px;'>
+                        AI-powered analysis for educational purposes only. Not financial advice.
                     </p>
                 </footer>
             </div>
         </div>
     </div>
 
+    <!-- ========================================
+         SCRIPTS
+         ======================================== -->
     <script src='assets/js/common.js'></script>
     <script src='assets/js/sidebar.js'></script>
     <script src='assets/js/economic-data-client.js'></script>
@@ -326,13 +444,8 @@
     <script src="assets/js/chatbot-ui.js"></script>
     <script src="assets/js/chatbot-particles.js"></script>
 
-    <!-- ============================================
-    ✅ FIX MENU UTILISATEUR - Force l'initialisation
-    ============================================ -->
+    <!-- User Menu Fix -->
     <script>
-        /**
-         * Force l'initialisation du menu utilisateur
-         */
         (function forceUserMenuInit() {
             console.log('🔧 Force initializing user menu...');
             
@@ -345,29 +458,22 @@
                     return;
                 }
                 
-                // Supprimer tous les anciens event listeners
                 const newTrigger = trigger.cloneNode(true);
                 trigger.parentNode.replaceChild(newTrigger, trigger);
                 
                 const freshTrigger = document.getElementById('sidebarUserTrigger');
                 const freshDropdown = document.getElementById('sidebarUserDropdown');
                 
-                console.log('✅ Adding click event to trigger...');
-                
                 freshTrigger.addEventListener('click', function(e) {
                     e.preventDefault();
                     e.stopPropagation();
-                    
-                    console.log('👆 User menu trigger clicked!');
                     
                     const isActive = freshDropdown.classList.contains('active');
                     
                     if (isActive) {
                         freshDropdown.classList.remove('active');
-                        console.log('🔽 Closing dropdown');
                     } else {
                         freshDropdown.classList.add('active');
-                        console.log('🔼 Opening dropdown');
                     }
                     
                     const arrow = freshTrigger.querySelector('.sidebar-user-arrow');
@@ -377,7 +483,6 @@
                     }
                 });
                 
-                // Fermer si on clique ailleurs
                 document.addEventListener('click', function(e) {
                     if (!freshTrigger.contains(e.target) && !freshDropdown.contains(e.target)) {
                         freshDropdown.classList.remove('active');
@@ -388,7 +493,6 @@
                     }
                 });
                 
-                // Empêcher la fermeture si on clique dans le dropdown
                 freshDropdown.addEventListener('click', function(e) {
                     e.stopPropagation();
                 });
