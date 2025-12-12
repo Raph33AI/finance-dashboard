@@ -534,6 +534,13 @@ body.dark-mode {
 
 .scenario-icon {
     font-size: 2.5rem;
+    width: 50px;
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 12px;
+    background: var(--eco-gradient-soft);
 }
 
 .scenario-title {
@@ -688,6 +695,11 @@ body.dark-mode {
 .price-icon {
     font-size: 3.5rem;
     margin-bottom: 16px;
+    background: var(--eco-gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    font-weight: 900;
 }
 
 .price-title {
@@ -783,6 +795,11 @@ body.dark-mode {
 .asset-icon {
     font-size: 3rem;
     margin-bottom: 16px;
+    background: var(--eco-gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    font-weight: 900;
 }
 
 .asset-name {

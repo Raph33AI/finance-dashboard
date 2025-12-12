@@ -5,7 +5,7 @@
  * Calcul du pouvoir d'achat ajusté à l'inflation (1950-2024)
  * Support US CPI uniquement
  * 
- * NOUVELLES FONCTIONNALITÉS :
+ * FONCTIONNALITÉS :
  * - Projections d'inflation (3 scénarios)
  * - Simulateur d'impact sur salaire
  * - Prix iconiques (Big Mac, essence, loyer)
@@ -23,18 +23,17 @@ class InflationCalculator {
         
         // Données historiques pour les prix iconiques (estimations basées sur CPI et recherche historique)
         this.iconicPrices = {
-            bigMac: { 1980: 1.60, 2024: 5.69, icon: '🍔', name: 'Big Mac' },
-            gasoline: { 1980: 1.19, 2024: 3.50, icon: '⛽', name: 'Gallon of Gas' },
-            rent: { 1980: 243, 2024: 1700, icon: '🏠', name: 'Average Rent (1BR)' },
-            movieTicket: { 1980: 2.69, 2024: 11.00, icon: '🎬', name: 'Movie Ticket' },
-            newCar: { 1980: 7200, 2024: 48000, icon: '🚗', name: 'New Car' },
-            stamp: { 1980: 0.15, 2024: 0.68, icon: '✉', name: 'First-Class Stamp' }
+            bigMac: { 1980: 1.60, 2024: 5.69, name: 'Big Mac' },
+            gasoline: { 1980: 1.19, 2024: 3.50, name: 'Gallon of Gas' },
+            rent: { 1980: 243, 2024: 1700, name: 'Average Rent (1BR)' },
+            movieTicket: { 1980: 2.69, 2024: 11.00, name: 'Movie Ticket' },
+            newCar: { 1980: 7200, 2024: 48000, name: 'New Car' },
+            stamp: { 1980: 0.15, 2024: 0.68, name: 'First-Class Stamp' }
         };
         
         // Assets de protection contre l'inflation
         this.protectionAssets = [
             {
-                icon: '📜',
                 name: 'TIPS',
                 description: 'Treasury Inflation-Protected Securities adjust principal based on CPI changes, providing direct inflation protection.',
                 historicalReturn: '2.5%',
@@ -42,7 +41,6 @@ class InflationCalculator {
                 liquidity: 'High'
             },
             {
-                icon: '🥇',
                 name: 'Gold',
                 description: 'Precious metal historically used as inflation hedge and safe haven during economic uncertainty.',
                 historicalReturn: '7.8%',
@@ -50,7 +48,6 @@ class InflationCalculator {
                 liquidity: 'High'
             },
             {
-                icon: '🏘',
                 name: 'Real Estate',
                 description: 'Physical property or REITs that benefit from rising rents and property values during inflation.',
                 historicalReturn: '10.6%',
@@ -58,7 +55,6 @@ class InflationCalculator {
                 liquidity: 'Low'
             },
             {
-                icon: '🛢',
                 name: 'Commodities',
                 description: 'Raw materials (oil, wheat, metals) that often rise in price when inflation increases.',
                 historicalReturn: '5.2%',
@@ -66,7 +62,6 @@ class InflationCalculator {
                 liquidity: 'Medium'
             },
             {
-                icon: '📈',
                 name: 'Stocks',
                 description: 'Companies can pass inflation costs to consumers through price increases, protecting margins.',
                 historicalReturn: '10.2%',
@@ -74,7 +69,6 @@ class InflationCalculator {
                 liquidity: 'High'
             },
             {
-                icon: '₿',
                 name: 'Bitcoin',
                 description: 'Digital asset with fixed supply cap, viewed by some as inflation hedge (highly speculative).',
                 historicalReturn: '230%*',
@@ -283,7 +277,7 @@ class InflationCalculator {
     }
 
     /**
-     * ✅ NEW: Générer les projections d'inflation (3 scénarios)
+     * Générer les projections d'inflation (3 scénarios)
      */
     generateProjections() {
         if (!this.cpiData || this.cpiData.length === 0) return;
@@ -306,22 +300,19 @@ class InflationCalculator {
         const scenarios = [
             {
                 name: 'Optimistic',
-                rate: Math.max(1.5, percentile25), // Minimum 1.5%
-                icon: '📉',
+                rate: Math.max(1.5, percentile25),
                 class: 'optimistic',
                 description: 'Low inflation environment with stable growth and effective monetary policy.'
             },
             {
                 name: 'Base',
-                rate: Math.max(2.0, Math.min(2.5, avgRate)), // Entre 2% et 2.5%
-                icon: '📊',
+                rate: Math.max(2.0, Math.min(2.5, avgRate)),
                 class: 'base',
                 description: 'Moderate inflation aligned with Federal Reserve\'s 2% target.'
             },
             {
                 name: 'Pessimistic',
-                rate: Math.max(3.5, percentile75), // Minimum 3.5%
-                icon: '📈',
+                rate: Math.max(3.5, percentile75),
                 class: 'pessimistic',
                 description: 'Elevated inflation due to supply shocks or policy challenges.'
             }
@@ -338,7 +329,7 @@ class InflationCalculator {
             const card = `
                 <div class='scenario-card ${scenario.class}'>
                     <div class='scenario-header'>
-                        <div class='scenario-icon'>${scenario.icon}</div>
+                        <div class='scenario-icon'><i class="fas fa-chart-line"></i></div>
                         <div class='scenario-title'>${scenario.name}</div>
                     </div>
                     <div class='scenario-rate'>${scenario.rate.toFixed(2)}%</div>
@@ -363,7 +354,7 @@ class InflationCalculator {
     }
 
     /**
-     * ✅ NEW: Charger le graphique de projections
+     * Charger le graphique de projections
      */
     async loadProjectionChart(scenarios) {
         try {
@@ -440,7 +431,7 @@ class InflationCalculator {
     }
 
     /**
-     * ✅ NEW: Calculer l'impact sur le salaire
+     * Calculer l'impact sur le salaire
      */
     calculateSalaryImpact() {
         const currentSalary = parseFloat(document.getElementById('currentSalary').value);
@@ -759,7 +750,7 @@ class InflationCalculator {
     }
 
     /**
-     * ✅ NEW: Charger le graphique d'inflation sectorielle
+     * Charger le graphique d'inflation sectorielle
      */
     async loadSectoralInflationChart() {
         try {
@@ -904,7 +895,7 @@ class InflationCalculator {
     }
 
     /**
-     * ✅ NEW: Générer la heatmap d'inflation par décennie
+     * Générer la heatmap d'inflation par décennie
      */
     generateInflationHeatmap() {
         if (!this.cpiData || this.cpiData.length === 0) return;
@@ -960,7 +951,7 @@ class InflationCalculator {
     }
 
     /**
-     * ✅ NEW: Peupler les prix iconiques
+     * Peupler les prix iconiques
      */
     populateIconicPrices() {
         const container = document.getElementById('iconicPricesGrid');
@@ -971,7 +962,7 @@ class InflationCalculator {
             
             const card = `
                 <div class='price-card'>
-                    <div class='price-icon'>${item.icon}</div>
+                    <div class='price-icon'>${item.name.substring(0, 1)}</div>
                     <div class='price-title'>${item.name}</div>
                     <div class='price-comparison'>
                         <div class='price-year'>
@@ -994,7 +985,7 @@ class InflationCalculator {
     }
 
     /**
-     * ✅ NEW: Peupler les assets de protection
+     * Peupler les assets de protection
      */
     populateProtectionAssets() {
         const container = document.getElementById('protectionAssetsGrid');
@@ -1003,7 +994,7 @@ class InflationCalculator {
         this.protectionAssets.forEach(asset => {
             const card = `
                 <div class='asset-card'>
-                    <div class='asset-icon'>${asset.icon}</div>
+                    <div class='asset-icon'>${asset.name.substring(0, 1)}</div>
                     <div class='asset-name'>${asset.name}</div>
                     <div class='asset-description'>${asset.description}</div>
                     <div class='asset-metrics'>
