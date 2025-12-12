@@ -3,6 +3,7 @@
  * ALPHAVAULT AI - RECESSION INDICATORS - ULTRA PREMIUM STYLES
  * ====================================================================
  * Design: Glassmorphism + Gradient Titles + Modals + Animations
+ * NO EMOJIS - FontAwesome Icons Only
  */
 
 /* ========================================
@@ -34,33 +35,44 @@ body.dark-mode {
 }
 
 /* ========================================
-   GRADIENT TITLES
+   GRADIENT TITLES (ALL TITLES)
    ======================================== */
-.gradient-title {
-    background: var(--eco-gradient);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+.gradient-title,
+.page-title,
+.section-title,
+.chart-title,
+.modal-header h2,
+.recession-score-label,
+.ai-recommendations h3,
+.timeline-container h3,
+.indicator-title,
+h1, h2, h3 {
+    background: var(--eco-gradient) !important;
+    -webkit-background-clip: text !important;
+    -webkit-text-fill-color: transparent !important;
+    background-clip: text !important;
     font-weight: 800;
 }
 
-.page-title {
+/* Icons in gradient titles */
+.page-title i,
+.section-title i,
+.chart-title i,
+.modal-header h2 i,
+.ai-recommendations h3 i,
+.timeline-container h3 i {
     background: var(--eco-gradient);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
-    font-weight: 800;
+}
+
+.page-title {
     font-size: 1.5rem;
     display: flex;
     align-items: center;
     gap: 12px;
-}
-
-.page-title i {
-    background: var(--eco-gradient);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+    margin: 0;
 }
 
 .section-title {
@@ -71,30 +83,12 @@ body.dark-mode {
     gap: 12px;
 }
 
-.section-title i {
-    background: var(--eco-gradient);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-}
-
 .chart-title {
-    background: var(--eco-gradient);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    font-weight: 700;
     font-size: 1.1rem;
     display: flex;
     align-items: center;
     gap: 10px;
-}
-
-.chart-title i {
-    background: var(--eco-gradient);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+    margin: 0;
 }
 
 /* ========================================
@@ -164,74 +158,7 @@ body.dark-mode {
 }
 
 /* ========================================
-   TOOLBAR
-   ======================================== */
-.dashboard-toolbar {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 16px 24px;
-    background: var(--glass-bg);
-    backdrop-filter: blur(20px) saturate(180%);
-    border-radius: var(--border-radius);
-    border: 1px solid var(--glass-border);
-    box-shadow: var(--glass-shadow);
-    margin-bottom: 24px;
-    transition: var(--transition-smooth);
-}
-
-.dashboard-toolbar:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 12px 48px rgba(102, 126, 234, 0.25);
-}
-
-.toolbar-left,
-.toolbar-right {
-    display: flex;
-    align-items: center;
-    gap: 16px;
-}
-
-.dashboard-subtitle {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 0.95rem;
-    font-weight: 600;
-    color: var(--text-secondary);
-}
-
-.dashboard-subtitle i {
-    color: var(--eco-primary);
-}
-
-.dashboard-btn-sm {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    padding: 8px 16px;
-    background: var(--glass-bg);
-    backdrop-filter: blur(20px) saturate(180%);
-    color: var(--text-primary);
-    border: 2px solid var(--glass-border);
-    border-radius: 10px;
-    font-size: 0.9rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: var(--transition-smooth);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-}
-
-.dashboard-btn-sm:hover {
-    background: var(--eco-gradient);
-    color: white;
-    border-color: transparent;
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
-}
-
-/* ========================================
-   RECESSION PROBABILITY SCORE (NEW)
+   RECESSION PROBABILITY SCORE
    ======================================== */
 .recession-score-card {
     background: var(--glass-bg);
@@ -266,10 +193,13 @@ body.dark-mode {
 .recession-score-label {
     font-size: 1.1rem;
     font-weight: 700;
-    color: var(--text-secondary);
     text-transform: uppercase;
     letter-spacing: 1px;
     margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
 }
 
 .recession-score-value {
@@ -318,7 +248,7 @@ body.dark-mode {
 }
 
 /* ========================================
-   AI RECOMMENDATIONS (NEW)
+   AI RECOMMENDATIONS
    ======================================== */
 .ai-recommendations {
     background: var(--eco-gradient-soft);
@@ -335,10 +265,6 @@ body.dark-mode {
     display: flex;
     align-items: center;
     gap: 12px;
-}
-
-.ai-recommendations h3 i {
-    color: var(--eco-primary);
 }
 
 .recommendation-grid {
@@ -368,6 +294,7 @@ body.dark-mode {
     display: flex;
     align-items: center;
     gap: 8px;
+    color: var(--text-primary);
 }
 
 .recommendation-item h4 i {
@@ -448,7 +375,6 @@ body.dark-mode {
 .indicator-title {
     font-size: 1rem;
     font-weight: 700;
-    color: var(--text-secondary);
     text-transform: uppercase;
     letter-spacing: 0.5px;
 }
@@ -667,7 +593,7 @@ body.dark-mode {
 }
 
 /* ========================================
-   HISTORICAL RECESSIONS TIMELINE (NEW)
+   HISTORICAL RECESSIONS TIMELINE
    ======================================== */
 .timeline-container {
     background: var(--glass-bg);
@@ -677,6 +603,15 @@ body.dark-mode {
     box-shadow: var(--glass-shadow);
     padding: 32px;
     margin-bottom: 32px;
+}
+
+.timeline-container h3 {
+    font-size: 1.5rem;
+    font-weight: 800;
+    margin-bottom: 32px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
 }
 
 .timeline-item {
@@ -729,6 +664,7 @@ body.dark-mode {
     font-size: 1.1rem;
     font-weight: 800;
     margin-bottom: 8px;
+    color: var(--text-primary);
 }
 
 .timeline-stats {
@@ -765,7 +701,7 @@ body.dark-mode {
 }
 
 .modal.active {
-    display: flex;
+    display: flex !important;
     align-items: center;
     justify-content: center;
 }
@@ -849,6 +785,7 @@ body.dark-mode {
     font-weight: 800;
     margin-bottom: 16px;
     margin-top: 24px;
+    color: var(--text-primary);
 }
 
 .modal-body h3:first-child {
@@ -875,11 +812,12 @@ body.dark-mode {
 }
 
 .modal-body ul li::before {
-    content: '✓';
+    content: '\f00c';
+    font-family: 'Font Awesome 6 Free';
+    font-weight: 900;
     position: absolute;
     left: 0;
     color: var(--eco-success);
-    font-weight: 900;
     font-size: 1.1rem;
 }
 
@@ -975,17 +913,6 @@ body.dark-mode {
 }
 
 @media (max-width: 768px) {
-    .dashboard-toolbar {
-        flex-direction: column;
-        gap: 16px;
-        align-items: flex-start;
-    }
-    
-    .toolbar-left,
-    .toolbar-right {
-        width: 100%;
-    }
-    
     .indicator-grid {
         grid-template-columns: 1fr;
     }

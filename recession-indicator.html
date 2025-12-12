@@ -30,9 +30,7 @@
     <canvas id="particles-canvas" class="particles-background"></canvas>
 
     <div class='layout-wrapper'>
-        <!-- ========================================
-             SIDEBAR (Identique à ton HTML)
-             ======================================== -->
+        <!-- SIDEBAR (Ton code existant) -->
         <aside class='sidebar' id='sidebar'>
             <div class="sidebar-header">
                 <div class="logo-container">
@@ -234,9 +232,7 @@
         
         <div class='sidebar-overlay' id='sidebarOverlay'></div>
 
-        <!-- ========================================
-             MAIN CONTENT
-             ======================================== -->
+        <!-- MAIN CONTENT -->
         <div class='main-content'>
             <header class='top-header'>
                 <div class='header-left'>
@@ -257,9 +253,7 @@
             
             <div class='container'>
                 
-                <!-- ========================================
-                     AI RECESSION PROBABILITY SCORE
-                     ======================================== -->
+                <!-- AI RECESSION PROBABILITY SCORE -->
                 <div id='recessionScoreCard'>
                     <div class='eco-loading'>
                         <div class='eco-spinner'></div>
@@ -267,14 +261,10 @@
                     </div>
                 </div>
 
-                <!-- ========================================
-                     AI RECOMMENDATIONS
-                     ======================================== -->
+                <!-- AI RECOMMENDATIONS -->
                 <div id='aiRecommendations'></div>
 
-                <!-- ========================================
-                     KEY INDICATORS GRID
-                     ======================================== -->
+                <!-- KEY INDICATORS GRID -->
                 <div class='section'>
                     <h2 class='section-title'>
                         <i class='fas fa-exclamation-circle'></i> Key Recession Indicators
@@ -288,9 +278,7 @@
                     </div>
                 </div>
 
-                <!-- ========================================
-                     YIELD CURVE CHART
-                     ======================================== -->
+                <!-- YIELD CURVE CHART -->
                 <div class='section'>
                     <div class='section-header-with-controls'>
                         <h2 class='section-title'>
@@ -307,7 +295,7 @@
                     <div class='chart-wrapper'>
                         <div class='chart-header'>
                             <h3 class='chart-title'>
-                                <i class='fas fa-chart-line'></i> 10-Year vs. 2-Year Treasury Spread
+                                <i class='fas fa-chart-line'></i> 10-Year vs 2-Year Treasury Spread
                             </h3>
                             <div class='chart-actions'>
                                 <button class='chart-btn-info' data-modal='yieldCurveModal' aria-label='Info'>
@@ -322,9 +310,7 @@
                     </div>
                 </div>
 
-                <!-- ========================================
-                     SAHM RULE CHART
-                     ======================================== -->
+                <!-- SAHM RULE CHART -->
                 <div class='section'>
                     <h2 class='section-title'>
                         <i class='fas fa-heartbeat'></i> Sahm Rule Recession Indicator
@@ -348,9 +334,7 @@
                     </div>
                 </div>
 
-                <!-- ========================================
-                     UNEMPLOYMENT RATE CHART
-                     ======================================== -->
+                <!-- UNEMPLOYMENT RATE CHART -->
                 <div class='section'>
                     <h2 class='section-title'>
                         <i class='fas fa-users'></i> Unemployment Rate
@@ -374,9 +358,7 @@
                     </div>
                 </div>
 
-                <!-- ========================================
-                     PMI MANUFACTURING CHART
-                     ======================================== -->
+                <!-- PMI MANUFACTURING CHART -->
                 <div class='section'>
                     <h2 class='section-title'>
                         <i class='fas fa-industry'></i> PMI Manufacturing
@@ -400,9 +382,7 @@
                     </div>
                 </div>
 
-                <!-- ========================================
-                     HISTORICAL RECESSIONS TIMELINE
-                     ======================================== -->
+                <!-- HISTORICAL RECESSIONS TIMELINE -->
                 <div class='section'>
                     <h2 class='section-title'>
                         <i class='fas fa-history'></i> Historical US Recessions
@@ -424,9 +404,7 @@
         </div>
     </div>
 
-    <!-- ========================================
-         SCRIPTS
-         ======================================== -->
+    <!-- SCRIPTS -->
     <script src='assets/js/common.js'></script>
     <script src='assets/js/sidebar.js'></script>
     <script src='assets/js/economic-data-client.js'></script>
@@ -447,16 +425,11 @@
     <!-- User Menu Fix -->
     <script>
         (function forceUserMenuInit() {
-            console.log('🔧 Force initializing user menu...');
-            
             const initMenu = () => {
                 const trigger = document.getElementById('sidebarUserTrigger');
                 const dropdown = document.getElementById('sidebarUserDropdown');
                 
-                if (!trigger || !dropdown) {
-                    console.error('❌ User menu elements not found');
-                    return;
-                }
+                if (!trigger || !dropdown) return;
                 
                 const newTrigger = trigger.cloneNode(true);
                 trigger.parentNode.replaceChild(newTrigger, trigger);
@@ -496,8 +469,6 @@
                 freshDropdown.addEventListener('click', function(e) {
                     e.stopPropagation();
                 });
-                
-                console.log('✅ User menu initialized successfully!');
             };
             
             if (document.readyState === 'loading') {

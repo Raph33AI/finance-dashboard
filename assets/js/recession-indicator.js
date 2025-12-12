@@ -3,19 +3,19 @@
  * ALPHAVAULT AI - RECESSION INDICATORS (ULTRA-COMPLETE VERSION)
  * ====================================================================
  * Features:
- * - 10+ Key Indicators
  * - AI Recession Probability Score
- * - Personalized Recommendations
+ * - 6 Key Indicators
+ * - 4 Advanced Charts with RECENT DATA
  * - Historical Recessions Timeline
  * - Time Range Selection (2Y, 5Y, 10Y, ALL)
- * - Educational Modals on all charts
- * - Real-time data updates
+ * - Educational Modals (FIXED)
+ * - NO EMOJIS - FontAwesome Icons Only
  */
 
 class RecessionIndicator {
     constructor() {
         this.indicators = {};
-        this.currentTimeRange = '5y'; // Default: 5 years
+        this.currentTimeRange = '5y';
         this.recessionProbability = 0;
         this.modals = {};
     }
@@ -24,6 +24,9 @@ class RecessionIndicator {
         console.log('⚠ Initializing Ultra-Complete Recession Indicators...');
         
         try {
+            // Setup modals FIRST (before any buttons are created)
+            this.setupModals();
+            
             // Initialize all components
             await Promise.all([
                 this.loadRecessionScore(),
@@ -38,7 +41,7 @@ class RecessionIndicator {
             
             // Setup event listeners
             this.setupTimeRangeSelector();
-            this.setupModals();
+            this.setupChartModalButtons();
             
             console.log('✅ Ultra-Complete Recession Indicators loaded successfully');
             
@@ -57,13 +60,13 @@ class RecessionIndicator {
         const container = document.getElementById('recessionScoreCard');
         
         try {
-            // Fetch all key indicators
+            // Fetch all key indicators with RECENT DATA (limit 50 to get latest non-null values)
             const [yieldSpread, unemployment, pmi, leadingIndex, consumerSentiment] = await Promise.all([
-                economicDataClient.getSeries('T10Y2Y', { limit: 1 }),
-                economicDataClient.getSeries('UNRATE', { limit: 1 }),
-                economicDataClient.getSeries('MANEMP', { limit: 1 }), // Manufacturing Employment Proxy
-                economicDataClient.getSeries('USSLIND', { limit: 1 }),
-                economicDataClient.getSeries('UMCSENT', { limit: 1 })
+                economicDataClient.getSeries('T10Y2Y', { limit: 50 }),
+                economicDataClient.getSeries('UNRATE', { limit: 50 }),
+                economicDataClient.getSeries('MANEMP', { limit: 50 }),
+                economicDataClient.getSeries('USSLIND', { limit: 50 }),
+                economicDataClient.getSeries('UMCSENT', { limit: 50 })
             ]);
 
             // Parse values
@@ -72,6 +75,8 @@ class RecessionIndicator {
             const pmiValue = parseFloat(this.parseLatest(pmi));
             const leading = parseFloat(this.parseLatest(leadingIndex));
             const sentiment = parseFloat(this.parseLatest(consumerSentiment));
+
+            console.log('📊 Latest Economic Data:', { spread, unemp, pmiValue, leading, sentiment });
 
             // AI Scoring Logic (weighted average)
             let score = 0;
@@ -106,15 +111,15 @@ class RecessionIndicator {
             if (score >= 70) {
                 status = 'high';
                 statusLabel = 'HIGH RISK';
-                statusIcon = '🔴';
+                statusIcon = '<i class="fas fa-exclamation-triangle"></i>';
             } else if (score >= 40) {
                 status = 'medium';
                 statusLabel = 'MODERATE RISK';
-                statusIcon = '🟡';
+                statusIcon = '<i class="fas fa-exclamation-circle"></i>';
             } else {
                 status = 'low';
                 statusLabel = 'LOW RISK';
-                statusIcon = '🟢';
+                statusIcon = '<i class="fas fa-check-circle"></i>';
             }
 
             container.innerHTML = `
@@ -134,7 +139,7 @@ class RecessionIndicator {
 
         } catch (error) {
             console.error('❌ Error loading recession score:', error);
-            container.innerHTML = '<div class="eco-error">Error loading AI recession score</div>';
+            container.innerHTML = '<div class="eco-error"><i class="fas fa-exclamation-triangle"></i><p>Error loading AI recession score</p></div>';
         }
     }
 
@@ -260,14 +265,14 @@ class RecessionIndicator {
         const grid = document.getElementById('indicatorsGrid');
         
         try {
-            // Fetch all indicators
+            // Fetch all indicators with RECENT DATA (limit 50)
             const [yieldSpread, unemployment, pmi, leadingIndex, consumerSentiment, retailSales] = await Promise.all([
-                economicDataClient.getSeries('T10Y2Y', { limit: 1 }),
-                economicDataClient.getSeries('UNRATE', { limit: 1 }),
-                economicDataClient.getSeries('MANEMP', { limit: 1 }),
-                economicDataClient.getSeries('USSLIND', { limit: 1 }),
-                economicDataClient.getSeries('UMCSENT', { limit: 1 }),
-                economicDataClient.getSeries('RSXFS', { limit: 1 })
+                economicDataClient.getSeries('T10Y2Y', { limit: 50 }),
+                economicDataClient.getSeries('UNRATE', { limit: 50 }),
+                economicDataClient.getSeries('MANEMP', { limit: 50 }),
+                economicDataClient.getSeries('USSLIND', { limit: 50 }),
+                economicDataClient.getSeries('UMCSENT', { limit: 50 }),
+                economicDataClient.getSeries('RSXFS', { limit: 50 })
             ]);
 
             const spread = this.parseLatest(yieldSpread);
@@ -283,7 +288,7 @@ class RecessionIndicator {
                     title: 'Yield Curve (10Y-2Y)',
                     value: spread + '%',
                     status: parseFloat(spread) < 0 ? 'danger' : parseFloat(spread) < 0.5 ? 'warning' : 'safe',
-                    statusLabel: parseFloat(spread) < 0 ? '⚠ INVERTED' : parseFloat(spread) < 0.5 ? '🟡 FLATTENING' : '✅ NORMAL',
+                    statusLabel: parseFloat(spread) < 0 ? '<i class="fas fa-exclamation-triangle"></i> INVERTED' : parseFloat(spread) < 0.5 ? '<i class="fas fa-exclamation-circle"></i> FLATTENING' : '<i class="fas fa-check-circle"></i> NORMAL',
                     description: 'Inverted yield curves have preceded every US recession since 1955. A negative spread indicates investors expect lower rates in the future.',
                     modalId: 'yieldCurveModal'
                 },
@@ -291,7 +296,7 @@ class RecessionIndicator {
                     title: 'Unemployment Rate',
                     value: unemp + '%',
                     status: parseFloat(unemp) > 5 ? 'danger' : parseFloat(unemp) > 4 ? 'warning' : 'safe',
-                    statusLabel: parseFloat(unemp) > 5 ? '⚠ ELEVATED' : parseFloat(unemp) > 4 ? '🟡 RISING' : '✅ LOW',
+                    statusLabel: parseFloat(unemp) > 5 ? '<i class="fas fa-exclamation-triangle"></i> ELEVATED' : parseFloat(unemp) > 4 ? '<i class="fas fa-exclamation-circle"></i> RISING' : '<i class="fas fa-check-circle"></i> LOW',
                     description: 'Rising unemployment is a classic recession signal. The Sahm Rule triggers when the 3-month average rises 0.5% above its 12-month low.',
                     modalId: 'unemploymentModal'
                 },
@@ -299,7 +304,7 @@ class RecessionIndicator {
                     title: 'Leading Economic Index',
                     value: leading,
                     status: parseFloat(leading) < 95 ? 'danger' : parseFloat(leading) < 98 ? 'warning' : 'safe',
-                    statusLabel: parseFloat(leading) < 95 ? '⚠ DECLINING' : parseFloat(leading) < 98 ? '🟡 WEAKENING' : '✅ RISING',
+                    statusLabel: parseFloat(leading) < 95 ? '<i class="fas fa-exclamation-triangle"></i> DECLINING' : parseFloat(leading) < 98 ? '<i class="fas fa-exclamation-circle"></i> WEAKENING' : '<i class="fas fa-check-circle"></i> RISING',
                     description: 'The LEI aggregates 10 economic components. Consecutive declines for 3+ months often signal recession within 6-12 months.',
                     modalId: 'leiModal'
                 },
@@ -307,7 +312,7 @@ class RecessionIndicator {
                     title: 'Consumer Sentiment',
                     value: sentiment,
                     status: parseFloat(sentiment) < 60 ? 'danger' : parseFloat(sentiment) < 70 ? 'warning' : 'safe',
-                    statusLabel: parseFloat(sentiment) < 60 ? '⚠ PESSIMISTIC' : parseFloat(sentiment) < 70 ? '🟡 CAUTIOUS' : '✅ OPTIMISTIC',
+                    statusLabel: parseFloat(sentiment) < 60 ? '<i class="fas fa-exclamation-triangle"></i> PESSIMISTIC' : parseFloat(sentiment) < 70 ? '<i class="fas fa-exclamation-circle"></i> CAUTIOUS' : '<i class="fas fa-check-circle"></i> OPTIMISTIC',
                     description: 'University of Michigan Consumer Sentiment Index. Low sentiment often precedes reduced consumer spending.',
                     modalId: 'sentimentModal'
                 },
@@ -315,7 +320,7 @@ class RecessionIndicator {
                     title: 'PMI Manufacturing',
                     value: pmiValue,
                     status: parseFloat(pmiValue) < 48 ? 'danger' : parseFloat(pmiValue) < 50 ? 'warning' : 'safe',
-                    statusLabel: parseFloat(pmiValue) < 48 ? '⚠ CONTRACTING' : parseFloat(pmiValue) < 50 ? '🟡 SLOWING' : '✅ EXPANDING',
+                    statusLabel: parseFloat(pmiValue) < 48 ? '<i class="fas fa-exclamation-triangle"></i> CONTRACTING' : parseFloat(pmiValue) < 50 ? '<i class="fas fa-exclamation-circle"></i> SLOWING' : '<i class="fas fa-check-circle"></i> EXPANDING',
                     description: 'ISM Manufacturing PMI. Values below 50 indicate contraction in the manufacturing sector.',
                     modalId: 'pmiModal'
                 },
@@ -323,7 +328,7 @@ class RecessionIndicator {
                     title: 'Retail Sales',
                     value: '$' + retail + 'M',
                     status: parseFloat(retail) < 400000 ? 'danger' : parseFloat(retail) < 500000 ? 'warning' : 'safe',
-                    statusLabel: parseFloat(retail) < 400000 ? '⚠ WEAK' : parseFloat(retail) < 500000 ? '🟡 MODERATE' : '✅ STRONG',
+                    statusLabel: parseFloat(retail) < 400000 ? '<i class="fas fa-exclamation-triangle"></i> WEAK' : parseFloat(retail) < 500000 ? '<i class="fas fa-exclamation-circle"></i> MODERATE' : '<i class="fas fa-check-circle"></i> STRONG',
                     description: 'Retail sales excluding food services. Strong indicator of consumer spending health.',
                     modalId: 'retailModal'
                 }
@@ -331,13 +336,19 @@ class RecessionIndicator {
 
             grid.innerHTML = indicators.map(ind => this.createIndicatorCard(ind)).join('');
 
-            // Add click listeners to info buttons
-            indicators.forEach(ind => {
-                const btn = document.querySelector(`[data-modal="${ind.modalId}"]`);
-                if (btn) {
-                    btn.addEventListener('click', () => this.openModal(ind.modalId));
-                }
-            });
+            // Add click listeners to info buttons AFTER HTML is rendered
+            setTimeout(() => {
+                indicators.forEach(ind => {
+                    const btn = document.querySelector(`[data-indicator-modal="${ind.modalId}"]`);
+                    if (btn) {
+                        btn.addEventListener('click', (e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            this.openModal(ind.modalId);
+                        });
+                    }
+                });
+            }, 100);
 
         } catch (error) {
             console.error('❌ Error loading indicators:', error);
@@ -352,7 +363,7 @@ class RecessionIndicator {
             <div class='indicator-card ${status}'>
                 <div class='indicator-header'>
                     <h3 class='indicator-title'>${title}</h3>
-                    <button class='indicator-btn-info' data-modal='${modalId}' aria-label='Info'>
+                    <button class='indicator-btn-info' data-indicator-modal='${modalId}' aria-label='Info'>
                         <i class='fas fa-info'></i>
                     </button>
                 </div>
@@ -365,7 +376,7 @@ class RecessionIndicator {
 
     /**
      * ========================================
-     * YIELD CURVE SPREAD CHART
+     * YIELD CURVE SPREAD CHART (RECENT DATA)
      * ========================================
      */
     async loadYieldSpreadChart() {
@@ -375,7 +386,11 @@ class RecessionIndicator {
 
             const chartData = spreadData
                 .filter(d => d.value !== '.')
-                .map(d => [new Date(d.date).getTime(), parseFloat(d.value)]);
+                .map(d => [new Date(d.date).getTime(), parseFloat(d.value)])
+                .sort((a, b) => a[0] - b[0]); // Sort by date ascending
+
+            console.log('📈 Yield Spread Chart - Data points:', chartData.length);
+            console.log('📅 Latest date:', new Date(chartData[chartData.length - 1][0]).toLocaleDateString());
 
             this.renderChart('yieldSpreadChart', {
                 chart: { 
@@ -383,12 +398,7 @@ class RecessionIndicator {
                     backgroundColor: 'transparent'
                 },
                 title: { 
-                    text: '10-Year Treasury Minus 2-Year Treasury Spread',
-                    style: { color: 'var(--text-primary)', fontWeight: '800' }
-                },
-                subtitle: {
-                    text: 'Negative values (inversion) often precede recessions',
-                    style: { color: 'var(--text-secondary)' }
+                    text: null
                 },
                 xAxis: { 
                     type: 'datetime',
@@ -446,12 +456,13 @@ class RecessionIndicator {
 
         } catch (error) {
             console.error('❌ Error loading yield spread chart:', error);
+            document.getElementById('yieldSpreadChart').innerHTML = '<div class="eco-error"><i class="fas fa-exclamation-triangle"></i><p>Error loading chart</p></div>';
         }
     }
 
     /**
      * ========================================
-     * SAHM RULE CHART
+     * SAHM RULE CHART (RECENT DATA)
      * ========================================
      */
     async loadSahmRuleChart() {
@@ -461,7 +472,10 @@ class RecessionIndicator {
 
             const chartData = sahmData
                 .filter(d => d.value !== '.')
-                .map(d => [new Date(d.date).getTime(), parseFloat(d.value)]);
+                .map(d => [new Date(d.date).getTime(), parseFloat(d.value)])
+                .sort((a, b) => a[0] - b[0]);
+
+            console.log('📈 Sahm Rule Chart - Data points:', chartData.length);
 
             this.renderChart('sahmRuleChart', {
                 chart: { 
@@ -469,12 +483,7 @@ class RecessionIndicator {
                     backgroundColor: 'transparent'
                 },
                 title: { 
-                    text: 'Sahm Rule Recession Indicator',
-                    style: { color: 'var(--text-primary)', fontWeight: '800' }
-                },
-                subtitle: {
-                    text: 'Real-time indicator based on unemployment rate changes',
-                    style: { color: 'var(--text-secondary)' }
+                    text: null
                 },
                 xAxis: { 
                     type: 'datetime',
@@ -525,12 +534,13 @@ class RecessionIndicator {
 
         } catch (error) {
             console.error('❌ Error loading Sahm Rule chart:', error);
+            document.getElementById('sahmRuleChart').innerHTML = '<div class="eco-error"><i class="fas fa-exclamation-triangle"></i><p>Error loading chart</p></div>';
         }
     }
 
     /**
      * ========================================
-     * UNEMPLOYMENT RATE CHART (NEW)
+     * UNEMPLOYMENT RATE CHART (RECENT DATA)
      * ========================================
      */
     async loadUnemploymentChart() {
@@ -540,7 +550,10 @@ class RecessionIndicator {
 
             const chartData = unempData
                 .filter(d => d.value !== '.')
-                .map(d => [new Date(d.date).getTime(), parseFloat(d.value)]);
+                .map(d => [new Date(d.date).getTime(), parseFloat(d.value)])
+                .sort((a, b) => a[0] - b[0]);
+
+            console.log('📈 Unemployment Chart - Data points:', chartData.length);
 
             this.renderChart('unemploymentChart', {
                 chart: { 
@@ -548,12 +561,7 @@ class RecessionIndicator {
                     backgroundColor: 'transparent'
                 },
                 title: { 
-                    text: 'US Unemployment Rate',
-                    style: { color: 'var(--text-primary)', fontWeight: '800' }
-                },
-                subtitle: {
-                    text: 'Monthly data - Seasonally adjusted',
-                    style: { color: 'var(--text-secondary)' }
+                    text: null
                 },
                 xAxis: { 
                     type: 'datetime',
@@ -594,12 +602,13 @@ class RecessionIndicator {
 
         } catch (error) {
             console.error('❌ Error loading unemployment chart:', error);
+            document.getElementById('unemploymentChart').innerHTML = '<div class="eco-error"><i class="fas fa-exclamation-triangle"></i><p>Error loading chart</p></div>';
         }
     }
 
     /**
      * ========================================
-     * PMI MANUFACTURING CHART (NEW)
+     * PMI MANUFACTURING CHART (RECENT DATA)
      * ========================================
      */
     async loadPMIChart() {
@@ -609,7 +618,10 @@ class RecessionIndicator {
 
             const chartData = pmiData
                 .filter(d => d.value !== '.')
-                .map(d => [new Date(d.date).getTime(), parseFloat(d.value)]);
+                .map(d => [new Date(d.date).getTime(), parseFloat(d.value)])
+                .sort((a, b) => a[0] - b[0]);
+
+            console.log('📈 PMI Chart - Data points:', chartData.length);
 
             this.renderChart('pmiChart', {
                 chart: { 
@@ -617,12 +629,7 @@ class RecessionIndicator {
                     backgroundColor: 'transparent'
                 },
                 title: { 
-                    text: 'ISM Manufacturing PMI',
-                    style: { color: 'var(--text-primary)', fontWeight: '800' }
-                },
-                subtitle: {
-                    text: 'Below 50 indicates contraction',
-                    style: { color: 'var(--text-secondary)' }
+                    text: null
                 },
                 xAxis: { 
                     type: 'datetime',
@@ -669,12 +676,13 @@ class RecessionIndicator {
 
         } catch (error) {
             console.error('❌ Error loading PMI chart:', error);
+            document.getElementById('pmiChart').innerHTML = '<div class="eco-error"><i class="fas fa-exclamation-triangle"></i><p>Error loading chart</p></div>';
         }
     }
 
     /**
      * ========================================
-     * HISTORICAL RECESSIONS TIMELINE (NEW)
+     * HISTORICAL RECESSIONS TIMELINE
      * ========================================
      */
     async loadHistoricalTimeline() {
@@ -739,8 +747,8 @@ class RecessionIndicator {
 
         container.innerHTML = `
             <div class='timeline-container'>
-                <h3 style='font-size: 1.5rem; font-weight: 800; margin-bottom: 32px;'>
-                    <i class='fas fa-history' style='background: var(--eco-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent;'></i>
+                <h3>
+                    <i class='fas fa-history'></i>
                     Historical US Recessions (1970-Present)
                 </h3>
                 ${recessions.map(rec => `
@@ -771,16 +779,9 @@ class RecessionIndicator {
         
         buttons.forEach(btn => {
             btn.addEventListener('click', (e) => {
-                // Remove active class from all
                 buttons.forEach(b => b.classList.remove('active'));
-                
-                // Add active to clicked
                 e.target.classList.add('active');
-                
-                // Update current range
                 this.currentTimeRange = e.target.dataset.range;
-                
-                // Reload charts
                 this.reloadCharts();
             });
         });
@@ -789,7 +790,6 @@ class RecessionIndicator {
     async reloadCharts() {
         console.log(`🔄 Reloading charts with time range: ${this.currentTimeRange}`);
         
-        // Show loading state
         const charts = ['yieldSpreadChart', 'sahmRuleChart', 'unemploymentChart', 'pmiChart'];
         charts.forEach(chartId => {
             const container = document.getElementById(chartId);
@@ -798,7 +798,6 @@ class RecessionIndicator {
             }
         });
         
-        // Reload all charts
         await Promise.all([
             this.loadYieldSpreadChart(),
             this.loadSahmRuleChart(),
@@ -809,37 +808,38 @@ class RecessionIndicator {
 
     getOutputSize() {
         const ranges = {
-            '2y': 24,
-            '5y': 60,
-            '10y': 120,
-            'all': 600
+            '2y': 730,   // 2 years of daily data
+            '5y': 1825,  // 5 years
+            '10y': 3650, // 10 years
+            'all': 10000 // All available
         };
-        return ranges[this.currentTimeRange] || 60;
+        return ranges[this.currentTimeRange] || 1825;
     }
 
     /**
      * ========================================
-     * MODALS SYSTEM
+     * MODALS SYSTEM (FIXED)
      * ========================================
      */
     setupModals() {
-        // Create modal definitions
+        console.log('🔧 Setting up modals...');
+        
         this.modals = {
             yieldCurveModal: {
                 title: '<i class="fas fa-chart-line"></i> Yield Curve Explained',
                 content: `
-                    <h3>📖 What is the Yield Curve?</h3>
+                    <h3>What is the Yield Curve?</h3>
                     <p>The yield curve shows the relationship between interest rates (yields) and bonds of different maturities (2-year, 10-year, etc.).</p>
                     
-                    <h3>🎯 Why It Matters</h3>
+                    <h3>Why It Matters</h3>
                     <p>An inverted yield curve (when short-term rates exceed long-term rates) has preceded <strong>EVERY US recession since 1955</strong>.</p>
                     
                     <div class='modal-highlight'>
                         <strong>Normal Curve:</strong> 2Y = 2.0%, 10Y = 3.5% → Positive spread (+1.5%)<br>
-                        <strong>Inverted Curve:</strong> 2Y = 4.0%, 10Y = 3.5% → Negative spread (-0.5%) ⚠
+                        <strong>Inverted Curve:</strong> 2Y = 4.0%, 10Y = 3.5% → Negative spread (-0.5%)
                     </div>
                     
-                    <h3>📊 Historical Accuracy</h3>
+                    <h3>Historical Accuracy</h3>
                     <div class='modal-stat-grid'>
                         <div class='modal-stat-item'>
                             <div class='modal-stat-value'>8/8</div>
@@ -851,11 +851,11 @@ class RecessionIndicator {
                         </div>
                         <div class='modal-stat-item'>
                             <div class='modal-stat-value'>2</div>
-                            <div class='modal-stat-label'>False Signals (1966, 1998)</div>
+                            <div class='modal-stat-label'>False Signals</div>
                         </div>
                     </div>
                     
-                    <h3>💡 What To Do</h3>
+                    <h3>What To Do</h3>
                     <ul>
                         <li>Monitor the duration of inversion (not just a single day)</li>
                         <li>Don't panic immediately - there's typically a 12-18 month lag</li>
@@ -867,10 +867,10 @@ class RecessionIndicator {
             unemploymentModal: {
                 title: '<i class="fas fa-users"></i> Unemployment Rate Explained',
                 content: `
-                    <h3>📖 What is the Unemployment Rate?</h3>
+                    <h3>What is the Unemployment Rate?</h3>
                     <p>The percentage of the labor force that is unemployed and actively seeking employment.</p>
                     
-                    <h3>🎯 Why It Matters</h3>
+                    <h3>Why It Matters</h3>
                     <p>Rising unemployment is one of the clearest signs of economic weakness and recession.</p>
                     
                     <div class='modal-highlight'>
@@ -879,7 +879,7 @@ class RecessionIndicator {
                         <strong>Recession Territory:</strong> >6.0% (clear economic distress)
                     </div>
                     
-                    <h3>📊 Sahm Rule Recession Indicator</h3>
+                    <h3>Sahm Rule Recession Indicator</h3>
                     <p>The Sahm Rule triggers when the 3-month moving average of unemployment rises <strong>0.5 percentage points</strong> above its 12-month low.</p>
                     
                     <div class='modal-stat-grid'>
@@ -893,9 +893,9 @@ class RecessionIndicator {
                         </div>
                     </div>
                     
-                    <h3>💡 Investment Implications</h3>
+                    <h3>Investment Implications</h3>
                     <ul>
-                        <li>Rising unemployment → Reduced consumer spending → Lower corporate profits</li>
+                        <li>Rising unemployment leads to reduced consumer spending and lower corporate profits</li>
                         <li>Favor defensive sectors (healthcare, utilities, consumer staples)</li>
                         <li>Avoid cyclical sectors (retail, travel, luxury goods)</li>
                     </ul>
@@ -904,29 +904,27 @@ class RecessionIndicator {
             leiModal: {
                 title: '<i class="fas fa-chart-bar"></i> Leading Economic Index Explained',
                 content: `
-                    <h3>📖 What is the Leading Economic Index (LEI)?</h3>
+                    <h3>What is the Leading Economic Index?</h3>
                     <p>The LEI is a composite index that aggregates 10 economic indicators designed to predict future economic activity.</p>
                     
-                    <h3>🎯 10 Components</h3>
+                    <h3>10 Components</h3>
                     <ul>
                         <li>Average weekly hours (manufacturing)</li>
-                        <li>Average weekly initial claims for unemployment insurance</li>
-                        <li>Manufacturers' new orders (consumer goods and materials)</li>
-                        <li>ISM® Index of New Orders</li>
-                        <li>Manufacturers' new orders (nondefense capital goods)</li>
-                        <li>Building permits (new private housing units)</li>
-                        <li>Stock prices (S&P 500®)</li>
-                        <li>Leading Credit Index™</li>
-                        <li>Interest rate spread (10-year Treasury vs. Federal Funds)</li>
-                        <li>Average consumer expectations (consumer sentiment)</li>
+                        <li>Initial claims for unemployment insurance</li>
+                        <li>Manufacturers' new orders (consumer goods)</li>
+                        <li>ISM Index of New Orders</li>
+                        <li>Building permits (new housing units)</li>
+                        <li>Stock prices (S&P 500)</li>
+                        <li>Interest rate spread (10Y vs Fed Funds)</li>
+                        <li>Average consumer expectations</li>
                     </ul>
                     
                     <div class='modal-highlight'>
                         <strong>Recession Signal:</strong> LEI declines for <strong>3+ consecutive months</strong><br>
-                        <strong>Lead Time:</strong> Typically signals recession 6-12 months in advance
+                        <strong>Lead Time:</strong> Typically 6-12 months in advance
                     </div>
                     
-                    <h3>📊 Interpretation</h3>
+                    <h3>Interpretation</h3>
                     <div class='modal-stat-grid'>
                         <div class='modal-stat-item'>
                             <div class='modal-stat-value'>100+</div>
@@ -946,11 +944,11 @@ class RecessionIndicator {
             sentimentModal: {
                 title: '<i class="fas fa-smile"></i> Consumer Sentiment Explained',
                 content: `
-                    <h3>📖 What is Consumer Sentiment?</h3>
+                    <h3>What is Consumer Sentiment?</h3>
                     <p>The University of Michigan Consumer Sentiment Index measures consumer confidence and expectations about the economy.</p>
                     
-                    <h3>🎯 Why It Matters</h3>
-                    <p>Consumer spending accounts for ~70% of US GDP. Low sentiment → Reduced spending → Economic slowdown.</p>
+                    <h3>Why It Matters</h3>
+                    <p>Consumer spending accounts for ~70% of US GDP. Low sentiment leads to reduced spending and economic slowdown.</p>
                     
                     <div class='modal-highlight'>
                         <strong>Strong Sentiment:</strong> >80 (consumers optimistic, likely to spend)<br>
@@ -958,7 +956,7 @@ class RecessionIndicator {
                         <strong>Weak Sentiment:</strong> <70 (consumers pessimistic, likely to save)
                     </div>
                     
-                    <h3>📊 What Influences Sentiment?</h3>
+                    <h3>What Influences Sentiment?</h3>
                     <ul>
                         <li>Inflation levels (high inflation = negative sentiment)</li>
                         <li>Employment conditions</li>
@@ -966,28 +964,22 @@ class RecessionIndicator {
                         <li>Gas prices</li>
                         <li>Political environment</li>
                     </ul>
-                    
-                    <h3>💡 Investment Strategy</h3>
-                    <ul>
-                        <li><strong>High Sentiment (>80):</strong> Favor consumer discretionary stocks</li>
-                        <li><strong>Low Sentiment (<70):</strong> Shift to consumer staples, defensive sectors</li>
-                    </ul>
                 `
             },
             pmiModal: {
                 title: '<i class="fas fa-industry"></i> PMI Manufacturing Explained',
                 content: `
-                    <h3>📖 What is PMI?</h3>
-                    <p>The Purchasing Managers' Index (PMI) measures the health of the manufacturing sector based on five indicators: new orders, inventory levels, production, supplier deliveries, and employment.</p>
+                    <h3>What is PMI?</h3>
+                    <p>The Purchasing Managers' Index measures the health of the manufacturing sector based on new orders, inventory, production, supplier deliveries, and employment.</p>
                     
-                    <h3>🎯 Interpretation</h3>
+                    <h3>Interpretation</h3>
                     <div class='modal-highlight'>
                         <strong>PMI >50:</strong> Manufacturing sector is expanding<br>
                         <strong>PMI = 50:</strong> No change from previous month<br>
-                        <strong>PMI <50:</strong> Manufacturing sector is contracting ⚠
+                        <strong>PMI <50:</strong> Manufacturing sector is contracting
                     </div>
                     
-                    <h3>📊 Recession Signal</h3>
+                    <h3>Recession Signal</h3>
                     <p>PMI below 48 for <strong>3+ consecutive months</strong> is a strong recession signal.</p>
                     
                     <div class='modal-stat-grid'>
@@ -1004,37 +996,28 @@ class RecessionIndicator {
                             <div class='modal-stat-label'>Contraction Risk</div>
                         </div>
                     </div>
-                    
-                    <h3>💡 Investment Implications</h3>
-                    <ul>
-                        <li><strong>High PMI (>52):</strong> Buy industrial stocks, materials</li>
-                        <li><strong>Low PMI (<48):</strong> Reduce cyclical exposure, increase defensives</li>
-                    </ul>
                 `
             },
             retailModal: {
                 title: '<i class="fas fa-shopping-cart"></i> Retail Sales Explained',
                 content: `
-                    <h3>📖 What are Retail Sales?</h3>
+                    <h3>What are Retail Sales?</h3>
                     <p>Total receipts at stores that sell merchandise and related services to final consumers. Excludes food services.</p>
                     
-                    <h3>🎯 Why It Matters</h3>
+                    <h3>Why It Matters</h3>
                     <p>Retail sales are a direct measure of consumer spending, which drives 70% of US economic activity.</p>
                     
                     <div class='modal-highlight'>
                         <strong>Strong Growth:</strong> +0.5% or higher month-over-month<br>
                         <strong>Moderate:</strong> 0% to +0.5% MoM<br>
-                        <strong>Weak/Declining:</strong> Negative MoM growth ⚠
+                        <strong>Weak/Declining:</strong> Negative MoM growth
                     </div>
                     
-                    <h3>📊 Recession Signal</h3>
-                    <p>Declining retail sales for <strong>3+ consecutive months</strong> is a strong recession indicator.</p>
-                    
-                    <h3>💡 Investment Strategy</h3>
+                    <h3>Investment Strategy</h3>
                     <ul>
-                        <li><strong>Strong Sales:</strong> Buy retail stocks, consumer discretionary</li>
-                        <li><strong>Weak Sales:</strong> Shift to consumer staples (groceries, household items)</li>
-                        <li>Monitor online vs. brick-and-mortar trends</li>
+                        <li>Strong Sales: Buy retail stocks, consumer discretionary</li>
+                        <li>Weak Sales: Shift to consumer staples</li>
+                        <li>Monitor online vs brick-and-mortar trends</li>
                     </ul>
                 `
             }
@@ -1043,6 +1026,12 @@ class RecessionIndicator {
         // Create modal HTML elements
         Object.keys(this.modals).forEach(modalId => {
             const modalData = this.modals[modalId];
+            
+            // Remove existing modal if it exists
+            const existingModal = document.getElementById(modalId);
+            if (existingModal) {
+                existingModal.remove();
+            }
             
             const modalHTML = `
                 <div id='${modalId}' class='modal'>
@@ -1077,12 +1066,39 @@ class RecessionIndicator {
                 }
             });
         });
+        
+        console.log('✅ Modals setup complete');
+    }
+
+    setupChartModalButtons() {
+        console.log('🔧 Setting up chart modal buttons...');
+        
+        // Wait a bit for charts to render
+        setTimeout(() => {
+            const chartInfoButtons = document.querySelectorAll('.chart-btn-info');
+            
+            chartInfoButtons.forEach(btn => {
+                const modalId = btn.dataset.modal;
+                if (modalId) {
+                    btn.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        this.openModal(modalId);
+                    });
+                }
+            });
+            
+            console.log(`✅ ${chartInfoButtons.length} chart modal buttons initialized`);
+        }, 500);
     }
 
     openModal(modalId) {
+        console.log('📖 Opening modal:', modalId);
         const modal = document.getElementById(modalId);
         if (modal) {
             modal.classList.add('active');
+        } else {
+            console.error('❌ Modal not found:', modalId);
         }
     }
 
@@ -1096,7 +1112,6 @@ class RecessionIndicator {
     openRecessionModal(recession) {
         const modalId = 'recessionDetailModal';
         
-        // Remove existing modal if it exists
         const existingModal = document.getElementById(modalId);
         if (existingModal) {
             existingModal.remove();
@@ -1110,10 +1125,10 @@ class RecessionIndicator {
                         <button class='modal-close' onclick="recessionIndicator.closeModal('${modalId}')">×</button>
                     </div>
                     <div class='modal-body'>
-                        <h3>📅 Timeline</h3>
+                        <h3>Timeline</h3>
                         <p><strong>${recession.date}</strong> (${recession.duration})</p>
                         
-                        <h3>📊 Impact</h3>
+                        <h3>Impact</h3>
                         <div class='modal-stat-grid'>
                             <div class='modal-stat-item'>
                                 <div class='modal-stat-value'>${recession.gdpDrop}</div>
@@ -1129,15 +1144,15 @@ class RecessionIndicator {
                             </div>
                         </div>
                         
-                        <h3>🔍 Cause</h3>
+                        <h3>Cause</h3>
                         <p>${recession.cause}</p>
                         
-                        <h3>🚨 Leading Indicators</h3>
+                        <h3>Leading Indicators</h3>
                         <div class='modal-highlight'>
                             ${recession.leadingIndicators}
                         </div>
                         
-                        <h3>💡 Lessons Learned</h3>
+                        <h3>Lessons Learned</h3>
                         <ul>
                             <li>Early warning signals were visible 12-18 months before recession onset</li>
                             <li>Diversified portfolios with defensive allocations performed better</li>
@@ -1158,10 +1173,14 @@ class RecessionIndicator {
      */
     parseLatest(series) {
         if (!series || !Array.isArray(series) || series.length === 0) return 'N/A';
+        
+        // Start from the end (most recent) and find first non-null value
         for (let i = series.length - 1; i >= 0; i--) {
             if (series[i].value !== '.') {
                 const value = parseFloat(series[i].value);
-                return isNaN(value) ? 'N/A' : value.toFixed(2);
+                if (!isNaN(value)) {
+                    return value.toFixed(2);
+                }
             }
         }
         return 'N/A';
@@ -1179,7 +1198,6 @@ class RecessionIndicator {
 
     showError(message) {
         console.error(message);
-        // Could display a toast notification here
     }
 }
 
