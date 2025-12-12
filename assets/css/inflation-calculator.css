@@ -1,8 +1,8 @@
 /**
  * ====================================================================
- * ALPHAVAULT AI - INFLATION CALCULATOR - PROFESSIONAL STYLES
+ * ALPHAVAULT AI - INFLATION CALCULATOR - ULTRA PREMIUM STYLES
  * ====================================================================
- * Design: Glassmorphism + Gradient Titles + Ultra Premium
+ * Design: Glassmorphism + Gradient Titles + Ultra Premium + Advanced Components
  */
 
 /* ========================================
@@ -58,6 +58,40 @@ body.dark-mode {
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
+}
+
+/* ========================================
+   SECTION HEADER WITH INFO BUTTON
+   ======================================== */
+.section-header-with-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+}
+
+.info-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    background: transparent;
+    border: 2px solid var(--glass-border);
+    color: var(--text-secondary);
+    border-radius: 50%;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: var(--transition-smooth);
+    flex-shrink: 0;
+}
+
+.info-btn:hover {
+    background: linear-gradient(135deg, #3b82f6, #2563eb);
+    color: white;
+    border-color: transparent;
+    transform: scale(1.15) rotate(15deg);
+    box-shadow: 0 8px 24px rgba(59, 130, 246, 0.4);
 }
 
 /* ========================================
@@ -350,6 +384,15 @@ body.dark-mode {
 }
 
 /* ========================================
+   CPI CHART GRID
+   ======================================== */
+.cpi-chart-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
+    gap: 24px;
+}
+
+/* ========================================
    DECADE TABLE
    ======================================== */
 .decade-table-container {
@@ -429,15 +472,282 @@ body.dark-mode {
 }
 
 /* ========================================
-   FUN FACTS
+   PROJECTION SCENARIOS
    ======================================== */
-.fun-facts-grid {
+.projection-scenarios {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 24px;
+    margin-bottom: 32px;
+}
+
+.scenario-card {
+    background: var(--glass-bg);
+    backdrop-filter: blur(20px) saturate(180%);
+    border-radius: var(--border-radius-lg);
+    padding: 28px;
+    border: 2px solid var(--glass-border);
+    box-shadow: var(--glass-shadow);
+    transition: var(--transition-smooth);
+    position: relative;
+    overflow: hidden;
+}
+
+.scenario-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 4px;
+    transform: scaleX(0);
+    transition: var(--transition-smooth);
+}
+
+.scenario-card.optimistic::before {
+    background: linear-gradient(90deg, #10b981, #059669);
+}
+
+.scenario-card.base::before {
+    background: var(--eco-gradient);
+}
+
+.scenario-card.pessimistic::before {
+    background: linear-gradient(90deg, #ef4444, #dc2626);
+}
+
+.scenario-card:hover::before {
+    transform: scaleX(1);
+}
+
+.scenario-card:hover {
+    transform: translateY(-8px) scale(1.02);
+    box-shadow: 0 20px 60px rgba(102, 126, 234, 0.3);
+}
+
+.scenario-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+.scenario-icon {
+    font-size: 2.5rem;
+}
+
+.scenario-title {
+    font-size: 1.2rem;
+    font-weight: 800;
+    background: var(--eco-gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.scenario-rate {
+    font-size: 2.5rem;
+    font-weight: 900;
+    margin-bottom: 12px;
+}
+
+.scenario-card.optimistic .scenario-rate {
+    color: var(--eco-success);
+}
+
+.scenario-card.base .scenario-rate {
+    background: var(--eco-gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.scenario-card.pessimistic .scenario-rate {
+    color: var(--eco-danger);
+}
+
+.scenario-description {
+    font-size: 0.95rem;
+    color: var(--text-secondary);
+    line-height: 1.7;
+    font-weight: 500;
+}
+
+.scenario-impact {
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px solid var(--glass-border);
+}
+
+.scenario-impact-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+    font-size: 0.9rem;
+}
+
+.scenario-impact-label {
+    color: var(--text-secondary);
+    font-weight: 600;
+}
+
+.scenario-impact-value {
+    font-weight: 800;
+    color: var(--text-primary);
+}
+
+/* ========================================
+   SALARY SIMULATOR
+   ======================================== */
+.salary-simulator-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 32px;
+}
+
+.salary-inputs-section {
+    background: var(--eco-gradient-soft);
+    border-radius: var(--border-radius-lg);
+    padding: 32px;
+    border: 2px solid var(--glass-border);
+}
+
+.salary-result-section {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.salary-impact-card {
+    background: var(--glass-bg);
+    backdrop-filter: blur(20px) saturate(180%);
+    border-radius: var(--border-radius);
+    padding: 24px;
+    border: 2px solid var(--glass-border);
+    box-shadow: var(--glass-shadow);
+    transition: var(--transition-smooth);
+}
+
+.salary-impact-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 36px rgba(102, 126, 234, 0.25);
+}
+
+.salary-impact-label {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    margin-bottom: 8px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.salary-impact-value {
+    font-size: 2rem;
+    font-weight: 900;
+    background: var(--eco-gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.salary-impact-subtext {
+    font-size: 0.85rem;
+    color: var(--text-tertiary);
+    margin-top: 6px;
+    font-weight: 600;
+}
+
+/* ========================================
+   ICONIC PRICES GRID
+   ======================================== */
+.iconic-prices-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 24px;
+}
+
+.price-card {
+    background: var(--glass-bg);
+    backdrop-filter: blur(20px) saturate(180%);
+    border-radius: var(--border-radius-lg);
+    padding: 28px;
+    border: 2px solid var(--glass-border);
+    box-shadow: var(--glass-shadow);
+    transition: var(--transition-smooth);
+    text-align: center;
+}
+
+.price-card:hover {
+    transform: translateY(-8px) scale(1.03);
+    box-shadow: 0 16px 48px rgba(102, 126, 234, 0.3);
+    border-color: var(--eco-primary);
+}
+
+.price-icon {
+    font-size: 3.5rem;
+    margin-bottom: 16px;
+}
+
+.price-title {
+    font-size: 1.1rem;
+    font-weight: 800;
+    margin-bottom: 20px;
+    background: var(--eco-gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.price-comparison {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+}
+
+.price-year {
+    background: var(--eco-gradient-soft);
+    border-radius: 12px;
+    padding: 16px;
+}
+
+.price-year-label {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    margin-bottom: 6px;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.price-year-value {
+    font-size: 1.5rem;
+    font-weight: 900;
+    color: var(--text-primary);
+}
+
+.price-change {
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px solid var(--glass-border);
+    font-size: 0.9rem;
+    font-weight: 700;
+}
+
+.price-change.increase {
+    color: var(--eco-danger);
+}
+
+/* ========================================
+   PROTECTION ASSETS
+   ======================================== */
+.protection-assets-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
     gap: 24px;
 }
 
-.fun-fact-card {
+.asset-card {
     background: var(--glass-bg);
     backdrop-filter: blur(20px) saturate(180%);
     border-radius: var(--border-radius-lg);
@@ -449,41 +759,34 @@ body.dark-mode {
     overflow: hidden;
 }
 
-.fun-fact-card::before {
+.asset-card::before {
     content: '';
     position: absolute;
-    top: -2px;
-    left: -2px;
-    right: -2px;
-    bottom: -2px;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 4px;
     background: var(--eco-gradient);
-    border-radius: var(--border-radius-lg);
-    opacity: 0;
+    transform: scaleX(0);
     transition: var(--transition-smooth);
-    z-index: -1;
 }
 
-.fun-fact-card:hover::before {
-    opacity: 0.2;
+.asset-card:hover::before {
+    transform: scaleX(1);
 }
 
-.fun-fact-card:hover {
-    transform: translateY(-8px) scale(1.02);
+.asset-card:hover {
+    transform: translateY(-8px);
     box-shadow: 0 20px 60px rgba(102, 126, 234, 0.3);
-    border-color: var(--eco-primary);
 }
 
-.fun-fact-icon {
+.asset-icon {
     font-size: 3rem;
     margin-bottom: 16px;
-    background: var(--eco-gradient);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
 }
 
-.fun-fact-title {
-    font-size: 1.2rem;
+.asset-name {
+    font-size: 1.3rem;
     font-weight: 800;
     margin-bottom: 12px;
     background: var(--eco-gradient);
@@ -492,20 +795,286 @@ body.dark-mode {
     background-clip: text;
 }
 
-.fun-fact-description {
+.asset-description {
     font-size: 0.95rem;
     color: var(--text-secondary);
     line-height: 1.7;
+    margin-bottom: 20px;
     font-weight: 500;
 }
 
-/* ========================================
-   CPI EVOLUTION CHART
-   ======================================== */
-.cpi-chart-grid {
+.asset-metrics {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
+.asset-metric {
+    background: var(--eco-gradient-soft);
+    border-radius: 10px;
+    padding: 12px;
+    text-align: center;
+}
+
+.asset-metric-label {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    margin-bottom: 4px;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.asset-metric-value {
+    font-size: 1.2rem;
+    font-weight: 900;
+    color: var(--text-primary);
+}
+
+/* ========================================
+   HEATMAP
+   ======================================== */
+.heatmap-container {
+    background: var(--glass-bg);
+    backdrop-filter: blur(20px) saturate(180%);
+    border-radius: var(--border-radius-lg);
+    border: 1px solid var(--glass-border);
+    box-shadow: var(--glass-shadow);
+    padding: 32px;
+    overflow-x: auto;
+}
+
+.heatmap-grid {
+    display: grid;
+    grid-template-columns: auto repeat(10, 1fr);
+    gap: 4px;
+    min-width: 800px;
+}
+
+.heatmap-header {
+    font-size: 0.85rem;
+    font-weight: 800;
+    color: var(--text-secondary);
+    padding: 12px;
+    text-align: center;
+    text-transform: uppercase;
+}
+
+.heatmap-year-label {
+    font-size: 0.9rem;
+    font-weight: 800;
+    background: var(--eco-gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    padding: 12px;
+    text-align: right;
+}
+
+.heatmap-cell {
+    aspect-ratio: 1;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.85rem;
+    font-weight: 800;
+    color: white;
+    cursor: pointer;
+    transition: var(--transition-smooth);
+    position: relative;
+}
+
+.heatmap-cell:hover {
+    transform: scale(1.15);
+    z-index: 10;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+}
+
+.heatmap-cell.low {
+    background: linear-gradient(135deg, #10b981, #059669);
+}
+
+.heatmap-cell.medium {
+    background: linear-gradient(135deg, #f59e0b, #d97706);
+}
+
+.heatmap-cell.high {
+    background: linear-gradient(135deg, #ef4444, #dc2626);
+}
+
+.heatmap-cell.very-high {
+    background: linear-gradient(135deg, #7f1d1d, #450a0a);
+}
+
+.heatmap-legend {
+    display: flex;
+    align-items: center;
+    justify-content: center;
     gap: 24px;
+    margin-top: 24px;
+    flex-wrap: wrap;
+}
+
+.heatmap-legend-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.heatmap-legend-color {
+    width: 24px;
+    height: 24px;
+    border-radius: 6px;
+}
+
+/* ========================================
+   MODALS
+   ======================================== */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 10000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(10px);
+    animation: fadeIn 0.3s ease;
+}
+
+.modal.active {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.modal-content {
+    background: var(--glass-bg);
+    backdrop-filter: blur(40px) saturate(180%);
+    border-radius: var(--border-radius-lg);
+    border: 1px solid var(--glass-border);
+    box-shadow: 0 24px 80px rgba(0, 0, 0, 0.5);
+    width: 90%;
+    max-width: 700px;
+    max-height: 90vh;
+    overflow-y: auto;
+    animation: slideUp 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes slideUp {
+    from { 
+        opacity: 0;
+        transform: translateY(50px) scale(0.95);
+    }
+    to { 
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 24px 32px;
+    border-bottom: 1px solid var(--glass-border);
+    background: var(--eco-gradient-soft);
+}
+
+.modal-header h2 {
+    font-size: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-weight: 800;
+}
+
+.modal-header h2 i {
+    background: var(--eco-gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.modal-close {
+    background: transparent;
+    border: none;
+    font-size: 2rem;
+    color: var(--text-secondary);
+    cursor: pointer;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: var(--transition-smooth);
+}
+
+.modal-close:hover {
+    background: rgba(239, 68, 68, 0.1);
+    color: var(--eco-danger);
+    transform: rotate(90deg);
+}
+
+.modal-body {
+    padding: 32px;
+}
+
+.modal-body h3 {
+    font-size: 1.2rem;
+    font-weight: 800;
+    margin-bottom: 16px;
+    margin-top: 24px;
+    background: var(--eco-gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.modal-body h3:first-child {
+    margin-top: 0;
+}
+
+.modal-body p {
+    font-size: 1rem;
+    line-height: 1.8;
+    color: var(--text-secondary);
+    margin-bottom: 16px;
+}
+
+.modal-body ul {
+    margin-left: 20px;
+    margin-bottom: 16px;
+}
+
+.modal-body li {
+    font-size: 1rem;
+    line-height: 1.8;
+    color: var(--text-secondary);
+    margin-bottom: 8px;
+}
+
+.modal-body strong {
+    font-weight: 800;
+    color: var(--text-primary);
+}
+
+.modal-body code {
+    background: var(--eco-gradient-soft);
+    padding: 2px 8px;
+    border-radius: 6px;
+    font-family: 'Courier New', monospace;
+    font-size: 0.95rem;
+    font-weight: 700;
 }
 
 /* ========================================
@@ -541,6 +1110,10 @@ footer i {
     .cpi-chart-grid {
         grid-template-columns: 1fr;
     }
+    
+    .salary-simulator-grid {
+        grid-template-columns: 1fr;
+    }
 }
 
 @media (max-width: 768px) {
@@ -560,10 +1133,6 @@ footer i {
         grid-template-columns: 1fr;
     }
     
-    .fun-facts-grid {
-        grid-template-columns: 1fr;
-    }
-    
     .cpi-chart-grid {
         grid-template-columns: 1fr;
     }
@@ -576,6 +1145,40 @@ footer i {
     .decade-table tbody td {
         padding: 12px 8px;
         font-size: 0.85rem;
+    }
+    
+    .modal-content {
+        width: 95%;
+        margin: 10px;
+    }
+    
+    .modal-body {
+        padding: 20px;
+    }
+    
+    .section-header-with-info {
+        flex-wrap: wrap;
+        gap: 12px;
+    }
+    
+    .projection-scenarios {
+        grid-template-columns: 1fr;
+    }
+    
+    .salary-simulator-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .iconic-prices-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .protection-assets-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .price-comparison {
+        grid-template-columns: 1fr;
     }
 }
 
@@ -597,8 +1200,8 @@ footer i {
         font-size: 2rem;
     }
     
-    .fun-fact-card {
-        padding: 20px;
+    .heatmap-grid {
+        font-size: 0.75rem;
     }
 }
 
