@@ -1,45 +1,42 @@
 /**
  * ====================================================================
- * ALPHAVAULT AI - INTEREST RATE TRACKER (CORRECTED VERSION)
+ * ALPHAVAULT AI - INTEREST RATE TRACKER (FULLY FIXED VERSION)
  * ====================================================================
- * Corrections:
- * - Fixed modal system (proper event handling)
- * - Fixed 30-day change calculation (proper date filtering)
- * - Increased data limits to load all available historical data
- * - All charts now show complete data history
+ * Fixes:
+ * - Data loading with proper error handling
+ * - Modal system completely rebuilt
+ * - Proper data limits for API calls
  */
 
 class InterestRateTracker {
     constructor() {
         this.rates = {};
-        this.ratesSeries = {}; // Store full series for change calculation
+        this.ratesSeries = {};
         this.modals = {};
         this.charts = {};
     }
 
     async init() {
-        console.log('Interest Rate Tracker initializing...');
+        console.log('🚀 Interest Rate Tracker initializing...');
         
         try {
-            await Promise.all([
-                this.loadCurrentRates(),
-                this.loadYieldCurve(),
-                this.loadHistoricalFedRate(),
-                this.loadSpreadAnalysis()
-            ]);
+            await this.loadCurrentRates();
+            await this.loadYieldCurve();
+            await this.loadHistoricalFedRate();
+            await this.loadSpreadAnalysis();
+            await this.loadProjections();
+            await this.generateAIRecommendations();
+            await this.loadEconomicImpact();
             
-            // Load these after current rates are available
-            await Promise.all([
-                this.loadProjections(),
-                this.generateAIRecommendations(),
-                this.loadEconomicImpact()
-            ]);
+            // Setup modals AFTER all charts are loaded
+            setTimeout(() => {
+                this.setupModals();
+            }, 500);
             
-            this.setupModals();
-            console.log('Interest Rate Tracker loaded successfully');
+            console.log('✅ Interest Rate Tracker loaded successfully');
             
         } catch (error) {
-            console.error('Interest Rate Tracker error:', error);
+            console.error('❌ Interest Rate Tracker error:', error);
         }
     }
 
@@ -50,15 +47,24 @@ class InterestRateTracker {
         const grid = document.getElementById('currentRatesGrid');
         
         try {
-            // Load extensive data (last 60 trading days to ensure we have 30 calendar days)
+            console.log('📊 Loading current rates...');
+            
+            // Load with reasonable limits (100 points to ensure we have 30+ days)
             const [fedFunds, treasury10Y, treasury2Y, mortgage30Y, treasury30Y, treasury5Y] = await Promise.all([
-                economicDataClient.getSeries('DFF', { limit: 60 }),
-                economicDataClient.getSeries('DGS10', { limit: 60 }),
-                economicDataClient.getSeries('DGS2', { limit: 60 }),
-                economicDataClient.getSeries('MORTGAGE30US', { limit: 60 }),
-                economicDataClient.getSeries('DGS30', { limit: 60 }),
-                economicDataClient.getSeries('DGS5', { limit: 60 })
+                economicDataClient.getSeries('DFF', { limit: 100 }),
+                economicDataClient.getSeries('DGS10', { limit: 100 }),
+                economicDataClient.getSeries('DGS2', { limit: 100 }),
+                economicDataClient.getSeries('MORTGAGE30US', { limit: 100 }),
+                economicDataClient.getSeries('DGS30', { limit: 100 }),
+                economicDataClient.getSeries('DGS5', { limit: 100 })
             ]);
+
+            console.log('✅ Data loaded:', {
+                fedFunds: fedFunds.length,
+                treasury10Y: treasury10Y.length,
+                treasury2Y: treasury2Y.length,
+                mortgage30Y: mortgage30Y.length
+            });
 
             // Store series for change calculation
             this.ratesSeries.fed = fedFunds;
@@ -91,7 +97,7 @@ class InterestRateTracker {
             const t30yChange = this.calculateChange(treasury30Y);
             const t5yChange = this.calculateChange(treasury5Y);
 
-            console.log('30-day changes calculated:', { fedChange, t10yChange, t2yChange, mortgageChange });
+            console.log('📈 30-day changes:', { fedChange, t10yChange, t2yChange, mortgageChange });
 
             grid.innerHTML = `
                 ${this.createRateCard(
@@ -139,8 +145,8 @@ class InterestRateTracker {
             `;
 
         } catch (error) {
-            console.error('Error loading current rates:', error);
-            grid.innerHTML = '<div class="loading-skeleton"></div>';
+            console.error('❌ Error loading current rates:', error);
+            grid.innerHTML = '<div style="padding: 40px; text-align: center; color: var(--text-secondary);">Error loading rates. Please refresh the page.</div>';
         }
     }
 
@@ -168,6 +174,8 @@ class InterestRateTracker {
        ======================================== */
     async loadYieldCurve() {
         try {
+            console.log('📊 Loading yield curve...');
+            
             const [m3, m6, y1, y2, y5, y7, y10, y20, y30] = await Promise.all([
                 economicDataClient.getSeries('DGS3MO', { limit: 1 }),
                 economicDataClient.getSeries('DGS6MO', { limit: 1 }),
@@ -191,6 +199,8 @@ class InterestRateTracker {
                 { name: '20Y', value: this.parseLatest(y20) },
                 { name: '30Y', value: this.parseLatest(y30) }
             ];
+
+            console.log('✅ Yield curve data:', yieldData);
 
             this.charts.yieldCurve = Highcharts.chart('yieldCurveChart', {
                 chart: { 
@@ -246,8 +256,10 @@ class InterestRateTracker {
                 legend: { enabled: false }
             });
 
+            console.log('✅ Yield curve chart created');
+
         } catch (error) {
-            console.error('Error loading yield curve:', error);
+            console.error('❌ Error loading yield curve:', error);
         }
     }
 
@@ -256,21 +268,24 @@ class InterestRateTracker {
        ======================================== */
     async loadHistoricalFedRate() {
         try {
-            // Request maximum available data (no limit or very high limit)
-            const fedData = await economicDataClient.getSeries('DFF', { limit: 50000 });
+            console.log('📊 Loading historical Fed rate...');
+            
+            // Load with a reasonable limit (2000 observations covers ~8 years of daily data)
+            const fedData = await economicDataClient.getSeries('DFF', { limit: 5000 });
 
-            console.log(`Loaded ${fedData.length} Fed Funds Rate observations`);
+            console.log(`✅ Loaded ${fedData.length} Fed Funds Rate observations`);
 
             const fedSeries = fedData
                 .filter(d => d.value !== '.')
                 .map(d => [new Date(d.date).getTime(), parseFloat(d.value)])
                 .sort((a, b) => a[0] - b[0]);
 
-            console.log(`Processed ${fedSeries.length} valid data points for Fed Funds Rate`);
+            console.log(`✅ Processed ${fedSeries.length} valid data points`);
+            
             if (fedSeries.length > 0) {
                 const firstDate = new Date(fedSeries[0][0]).toLocaleDateString();
                 const lastDate = new Date(fedSeries[fedSeries.length - 1][0]).toLocaleDateString();
-                console.log(`Date range: ${firstDate} to ${lastDate}`);
+                console.log(`📅 Date range: ${firstDate} to ${lastDate}`);
             }
 
             this.charts.historicalFed = Highcharts.chart('historicalFedChart', {
@@ -327,8 +342,10 @@ class InterestRateTracker {
                 legend: { enabled: false }
             });
 
+            console.log('✅ Historical Fed chart created');
+
         } catch (error) {
-            console.error('Error loading historical Fed rate:', error);
+            console.error('❌ Error loading historical Fed rate:', error);
         }
     }
 
@@ -338,7 +355,7 @@ class InterestRateTracker {
     async loadProjections() {
         const container = document.getElementById('projectionsContainer');
         
-        const currentFed = parseFloat(this.rates.fed) || 5.33;
+        const currentFed = parseFloat(this.rates.fed) || 4.50;
         const currentT10Y = parseFloat(this.rates.t10y) || 4.25;
 
         const scenarios = [
@@ -415,90 +432,100 @@ class InterestRateTracker {
 
         container.innerHTML = `<div class='projection-scenarios'>${scenarioCards}</div>`;
 
-        this.loadProjectionChart();
+        await this.loadProjectionChart();
     }
 
     async loadProjectionChart() {
-        const currentDate = new Date();
-        const projectionMonths = 12;
-        
-        const currentFed = parseFloat(this.rates.fed) || 5.33;
-        
-        const optimisticData = [];
-        const baseData = [];
-        const pessimisticData = [];
-        
-        for (let i = 0; i <= projectionMonths; i++) {
-            const date = new Date(currentDate);
-            date.setMonth(date.getMonth() + i);
-            const timestamp = date.getTime();
+        try {
+            console.log('📊 Loading projection chart...');
             
-            optimisticData.push([timestamp, currentFed - (i * 0.125)]);
-            baseData.push([timestamp, currentFed - (i * 0.0625)]);
-            pessimisticData.push([timestamp, currentFed + (i * 0.042)]);
-        }
-
-        this.charts.projection = Highcharts.chart('projectionChart', {
-            chart: { 
-                type: 'line', 
-                backgroundColor: 'transparent'
-            },
-            title: { 
-                text: 'Fed Funds Rate - 12-Month Projections',
-                style: { color: 'var(--text-primary)', fontWeight: '800', fontSize: '1.3rem' }
-            },
-            subtitle: {
-                text: 'Scenario-based forecasts',
-                style: { color: 'var(--text-secondary)' }
-            },
-            xAxis: { 
-                type: 'datetime',
-                labels: { style: { color: 'var(--text-secondary)' } }
-            },
-            yAxis: { 
-                title: { text: 'Rate (%)', style: { color: 'var(--text-secondary)', fontWeight: '700' } },
-                labels: { style: { color: 'var(--text-secondary)' } },
-                gridLineColor: 'var(--glass-border)'
-            },
-            tooltip: {
-                valueSuffix: '%',
-                valueDecimals: 2,
-                shared: true,
-                backgroundColor: 'rgba(255, 255, 255, 0.95)',
-                borderRadius: 8
-            },
-            plotOptions: {
-                line: {
-                    marker: { enabled: false },
-                    lineWidth: 3
-                }
-            },
-            series: [
-                {
-                    name: 'Optimistic',
-                    data: optimisticData,
-                    color: '#10b981',
-                    dashStyle: 'Dash'
-                },
-                {
-                    name: 'Base Case',
-                    data: baseData,
-                    color: '#667eea',
-                    lineWidth: 4
-                },
-                {
-                    name: 'Pessimistic',
-                    data: pessimisticData,
-                    color: '#ef4444',
-                    dashStyle: 'Dash'
-                }
-            ],
-            credits: { enabled: false },
-            legend: { 
-                enabled: true,
-                itemStyle: { color: 'var(--text-primary)', fontWeight: '600' }
+            const currentDate = new Date();
+            const projectionMonths = 12;
+            
+            const currentFed = parseFloat(this.rates.fed) || 4.50;
+            
+            const optimisticData = [];
+            const baseData = [];
+            const pessimisticData = [];
+            
+            for (let i = 0; i <= projectionMonths; i++) {
+                const date = new Date(currentDate);
+                date.setMonth(date.getMonth() + i);
+                const timestamp = date.getTime();
+                
+                optimisticData.push([timestamp, Math.max(0, currentFed - (i * 0.125))]);
+                baseData.push([timestamp, Math.max(0, currentFed - (i * 0.0625))]);
+                pessimisticData.push([timestamp, currentFed + (i * 0.042)]);
             }
-        });
+
+            this.charts.projection = Highcharts.chart('projectionChart', {
+                chart: { 
+                    type: 'line', 
+                    backgroundColor: 'transparent'
+                },
+                title: { 
+                    text: 'Fed Funds Rate - 12-Month Projections',
+                    style: { color: 'var(--text-primary)', fontWeight: '800', fontSize: '1.3rem' }
+                },
+                subtitle: {
+                    text: 'Scenario-based forecasts',
+                    style: { color: 'var(--text-secondary)' }
+                },
+                xAxis: { 
+                    type: 'datetime',
+                    labels: { style: { color: 'var(--text-secondary)' } }
+                },
+                yAxis: { 
+                    title: { text: 'Rate (%)', style: { color: 'var(--text-secondary)', fontWeight: '700' } },
+                    labels: { style: { color: 'var(--text-secondary)' } },
+                    gridLineColor: 'var(--glass-border)',
+                    min: 0
+                },
+                tooltip: {
+                    valueSuffix: '%',
+                    valueDecimals: 2,
+                    shared: true,
+                    backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                    borderRadius: 8
+                },
+                plotOptions: {
+                    line: {
+                        marker: { enabled: false },
+                        lineWidth: 3
+                    }
+                },
+                series: [
+                    {
+                        name: 'Optimistic',
+                        data: optimisticData,
+                        color: '#10b981',
+                        dashStyle: 'Dash'
+                    },
+                    {
+                        name: 'Base Case',
+                        data: baseData,
+                        color: '#667eea',
+                        lineWidth: 4
+                    },
+                    {
+                        name: 'Pessimistic',
+                        data: pessimisticData,
+                        color: '#ef4444',
+                        dashStyle: 'Dash'
+                    }
+                ],
+                credits: { enabled: false },
+                legend: { 
+                    enabled: true,
+                    itemStyle: { color: 'var(--text-primary)', fontWeight: '600' }
+                }
+            });
+
+            console.log('✅ Projection chart created');
+            
+        } catch (error) {
+            console.error('❌ Error loading projection chart:', error);
+        }
     }
 
     /* ========================================
@@ -514,7 +541,7 @@ class InterestRateTracker {
             day: 'numeric' 
         });
 
-        const fedRate = parseFloat(this.rates.fed) || 5.33;
+        const fedRate = parseFloat(this.rates.fed) || 4.50;
         const t10y = parseFloat(this.rates.t10y) || 4.25;
         const t2y = parseFloat(this.rates.t2y) || 4.55;
         const spread = (t10y - t2y).toFixed(2);
@@ -643,8 +670,8 @@ class InterestRateTracker {
     async loadEconomicImpact() {
         const container = document.getElementById('economicImpact');
         
-        const fedRate = parseFloat(this.rates.fed) || 5.33;
-        const mortgage = parseFloat(this.rates.mortgage) || 7.2;
+        const fedRate = parseFloat(this.rates.fed) || 4.50;
+        const mortgage = parseFloat(this.rates.mortgage) || 7.0;
 
         const impacts = [
             {
@@ -707,43 +734,34 @@ class InterestRateTracker {
     }
 
     /* ========================================
-       MODALS - FIXED
+       MODALS - COMPLETELY REBUILT
        ======================================== */
     setupModals() {
-        console.log('Setting up modals...');
+        console.log('🔧 Setting up modals...');
         
-        // Get all chart wrappers
         const chartWrappers = document.querySelectorAll('.chart-wrapper');
         console.log(`Found ${chartWrappers.length} chart wrappers`);
         
         chartWrappers.forEach((wrapper) => {
             const chart = wrapper.querySelector('.chart');
-            if (!chart) {
-                console.warn('Chart element not found in wrapper');
-                return;
-            }
+            if (!chart) return;
             
             const chartId = chart.id;
-            console.log(`Setting up click handler for chart: ${chartId}`);
+            console.log(`Adding click handler to: ${chartId}`);
             
-            // Remove any existing listeners
-            const newWrapper = wrapper.cloneNode(true);
-            wrapper.parentNode.replaceChild(newWrapper, wrapper);
+            wrapper.style.cursor = 'pointer';
             
-            // Add click listener to new wrapper
-            newWrapper.addEventListener('click', (e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                console.log(`Chart clicked: ${chartId}`);
+            wrapper.addEventListener('click', () => {
+                console.log(`Chart wrapper clicked: ${chartId}`);
                 this.openChartModal(chartId);
             });
         });
         
-        console.log('Modal setup complete');
+        console.log('✅ Modals setup complete');
     }
 
     openChartModal(chartId) {
-        console.log(`Opening modal for: ${chartId}`);
+        console.log(`🔓 Opening modal for: ${chartId}`);
         
         const modalId = chartId + 'Modal';
         let modal = document.getElementById(modalId);
@@ -755,12 +773,10 @@ class InterestRateTracker {
         }
         
         modal.classList.add('active');
-        console.log(`Modal activated: ${modalId}`);
+        document.body.style.overflow = 'hidden';
         
-        // Redraw chart in modal after a short delay
         setTimeout(() => {
-            const modalChartId = chartId + 'ModalChart';
-            this.renderModalChart(chartId, modalChartId);
+            this.renderModalChart(chartId);
         }, 200);
     }
 
@@ -785,7 +801,7 @@ class InterestRateTracker {
             <div class='modal-content'>
                 <div class='modal-header'>
                     <h2><i class='fas fa-chart-area'></i> ${titles[chartId] || 'Chart Details'}</h2>
-                    <button class='modal-close' data-modal-id='${chartId}Modal'>
+                    <button class='modal-close'>
                         <i class='fas fa-times'></i>
                     </button>
                 </div>
@@ -799,12 +815,11 @@ class InterestRateTracker {
             </div>
         `;
         
-        // Add close button listener
+        // Close button
         const closeBtn = modal.querySelector('.modal-close');
         closeBtn.addEventListener('click', (e) => {
             e.stopPropagation();
-            const modalIdToClose = closeBtn.getAttribute('data-modal-id');
-            this.closeModal(modalIdToClose);
+            this.closeModal(modal.id);
         });
         
         // Close on background click
@@ -814,12 +829,17 @@ class InterestRateTracker {
             }
         });
         
+        // Prevent modal content clicks from closing
+        const modalContent = modal.querySelector('.modal-content');
+        modalContent.addEventListener('click', (e) => {
+            e.stopPropagation();
+        });
+        
         return modal;
     }
 
-    renderModalChart(sourceChartId, targetChartId) {
-        console.log(`Rendering modal chart: ${sourceChartId} -> ${targetChartId}`);
-        
+    renderModalChart(sourceChartId) {
+        const modalChartId = sourceChartId + 'ModalChart';
         const chartKey = sourceChartId.replace('Chart', '');
         const sourceChart = this.charts[chartKey];
         
@@ -831,21 +851,21 @@ class InterestRateTracker {
         try {
             const options = JSON.parse(JSON.stringify(sourceChart.userOptions));
             options.chart = options.chart || {};
-            options.chart.renderTo = targetChartId;
             options.chart.height = 600;
 
-            Highcharts.chart(targetChartId, options);
-            console.log(`Modal chart rendered successfully: ${targetChartId}`);
+            Highcharts.chart(modalChartId, options);
+            console.log(`✅ Modal chart rendered: ${modalChartId}`);
         } catch (error) {
-            console.error('Error rendering modal chart:', error);
+            console.error('❌ Error rendering modal chart:', error);
         }
     }
 
     closeModal(modalId) {
-        console.log(`Closing modal: ${modalId}`);
+        console.log(`🔒 Closing modal: ${modalId}`);
         const modal = document.getElementById(modalId);
         if (modal) {
             modal.classList.remove('active');
+            document.body.style.overflow = '';
         }
     }
 
@@ -853,12 +873,20 @@ class InterestRateTracker {
        HELPERS
        ======================================== */
     parseLatest(series) {
-        if (!series || !Array.isArray(series) || series.length === 0) return 'N/A';
+        if (!series || !Array.isArray(series) || series.length === 0) {
+            console.warn('No data in series');
+            return 'N/A';
+        }
+        
         for (let i = series.length - 1; i >= 0; i--) {
-            if (series[i].value !== '.') {
-                return parseFloat(series[i].value).toFixed(2);
+            if (series[i].value !== '.' && series[i].value !== null && series[i].value !== undefined) {
+                const value = parseFloat(series[i].value).toFixed(2);
+                console.log(`Latest value: ${value} (${series[i].date})`);
+                return value;
             }
         }
+        
+        console.warn('No valid data found in series');
         return 'N/A';
     }
 
@@ -868,23 +896,19 @@ class InterestRateTracker {
             return 0;
         }
         
-        // Filter valid data
-        const validData = series.filter(d => d.value !== '.');
+        const validData = series.filter(d => d.value !== '.' && d.value !== null && d.value !== undefined);
         
         if (validData.length < 2) {
-            console.warn('Not enough valid data points for change calculation');
+            console.warn('Not enough valid data points');
             return 0;
         }
         
-        // Get latest value
         const latest = parseFloat(validData[validData.length - 1].value);
         const latestDate = new Date(validData[validData.length - 1].date);
         
-        // Calculate date 30 days ago
         const thirtyDaysAgo = new Date(latestDate);
         thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
         
-        // Find closest data point to 30 days ago
         let closestPoint = validData[0];
         let closestDiff = Math.abs(new Date(closestPoint.date).getTime() - thirtyDaysAgo.getTime());
         
@@ -900,8 +924,6 @@ class InterestRateTracker {
         
         const previous = parseFloat(closestPoint.value);
         const change = latest - previous;
-        
-        console.log(`Change calculation: ${latest} (${latestDate.toLocaleDateString()}) - ${previous} (${new Date(closestPoint.date).toLocaleDateString()}) = ${change.toFixed(2)}`);
         
         return change;
     }
