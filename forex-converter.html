@@ -3,15 +3,17 @@
 <head>
     <meta charset='UTF-8'>
     <meta name='viewport' content='width=device-width, initial-scale=1.0'>
-    <title>Forex Converter | AlphaVault AI</title>
+    <title>Forex Converter Pro | AlphaVault AI</title>
     
     <link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css'>
     <script src='https://code.highcharts.com/highcharts.js'></script>
+    <script src='https://code.highcharts.com/modules/heatmap.js'></script>
+    <script src='https://code.highcharts.com/highcharts-more.js'></script>
     
     <link rel='stylesheet' href='assets/css/common.css'>
     <link rel='stylesheet' href='assets/css/sidebar.css'>
     <link rel="stylesheet" href="assets/css/user-menu.css">
-    <link rel='stylesheet' href='assets/css/economic-pages.css'>
+    <link rel='stylesheet' href='assets/css/forex-converter.css'>
     
     <script src="assets/js/favicon-dynamic.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
@@ -30,7 +32,7 @@
     <canvas id="particles-canvas" class="particles-background"></canvas>
 
     <div class='layout-wrapper'>
-        <!-- Sidebar (identique) -->
+        <!-- Sidebar -->
         <aside class='sidebar' id='sidebar'>
             <div class="sidebar-header">
                 <div class="logo-container">
@@ -126,32 +128,12 @@
                         <span>Stocks</span>
                         <i class="fas fa-chevron-down arrow"></i>
                     </button>
-                    <div class='nav-submenu' style='display: block;'>
+                    <div class='nav-submenu'>
                         <a href='advanced-analysis.html' class='nav-link'>
                             <i class='fas fa-brain'></i>
                             <span>Advanced Analysis</span>
                         </a>
-                        <!-- <a href='trend-prediction.html' class='nav-link'>
-                            <i class='fas fa-chart-line'></i>
-                            <span>Trend Prediction</span>
-                        </a>
-                        <a href='market-intelligence.html' class='nav-link'>
-                            <i class='fas fa-globe'></i>
-                            <span>Market Intelligence</span>
-                        </a>
-                        <a href='company-insights.html' class='nav-link'>
-                            <i class='fas fa-building'></i>
-                            <span>Company Insights</span>
-                        </a>
-                        <a href='analyst-coverage.html' class='nav-link active'>
-                            <i class='fas fa-users'></i>
-                            <span>Analyst Coverage</span>
-                        </a>
-                        <a href='earnings-estimates.html' class='nav-link'>
-                            <i class='fas fa-coins'></i>
-                            <span>Earnings & Estimates</span>
-                        </a>
-                    </div> -->
+                    </div>
                 </div>
 
                 <div class='nav-section'>
@@ -160,7 +142,7 @@
                         <span>AI Assistant</span>
                         <i class="fas fa-chevron-down arrow"></i>
                     </button>
-                    <div class='nav-submenu' style='display: block;'>
+                    <div class='nav-submenu'>
                         <a href='chatbot-fullpage.html' class='nav-link'>
                             <i class='fas fa-comments'></i>
                             <span>Alphy AI Chat</span>
@@ -174,10 +156,10 @@
                         <span>Economic Data</span>
                         <i class='fas fa-chevron-down arrow'></i>
                     </button>
-                    <div class='nav-submenu' style='display: block;'>
+                    <div class='nav-submenu'>
                         <a href='economic-dashboard.html' class='nav-link'>
                             <i class='fas fa-tachometer-alt'></i>
-                            <span>Macro Economic Dasboard</span>
+                            <span>Macro Economic Dashboard</span>
                         </a>
                         <a href='inflation-calculator.html' class='nav-link'>
                             <i class='fas fa-calculator'></i>
@@ -254,16 +236,57 @@
                     <button class='mobile-toggle' id='mobileToggle'>
                         <i class='fas fa-bars'></i>
                     </button>
-                    <h1><i class="fas fa-exchange-alt"></i> Forex Converter (38 Currencies)</h1>
+                    <h1 class='page-title'>
+                        <i class="fas fa-exchange-alt"></i> Forex Converter Pro
+                    </h1>
+                </div>
+                <div class='header-right'>
+                    <button class='dashboard-btn dashboard-btn-export' onclick='forexConverter.exportAllData()'>
+                        <i class='fas fa-download'></i>
+                        <span class='btn-text'>Export</span>
+                    </button>
                 </div>
             </header>
             
             <div class='container'>
                 
-                <!-- Converter -->
+                <!-- ========================================
+                     LIVE RATES OVERVIEW (TOP SECTION)
+                     ======================================== -->
+                <div class='section'>
+                    <h2 class='section-title'>
+                        <i class='fas fa-chart-line'></i> Live Exchange Rates
+                        <button class='info-btn' onclick='forexConverter.openModal("liveRatesInfo")'>
+                            <i class='fas fa-info-circle'></i>
+                        </button>
+                    </h2>
+                    
+                    <div id='majorPairsGrid' class='major-pairs-grid'></div>
+                </div>
+
+                <!-- ========================================
+                     AI RECOMMENDATIONS
+                     ======================================== -->
+                <div class='section'>
+                    <h2 class='section-title'>
+                        <i class='fas fa-robot'></i> AI Recommendations
+                        <button class='info-btn' onclick='forexConverter.openModal("aiRecommendationsInfo")'>
+                            <i class='fas fa-info-circle'></i>
+                        </button>
+                    </h2>
+                    
+                    <div id='aiRecommendations' class='ai-recommendations-grid'></div>
+                </div>
+
+                <!-- ========================================
+                     CURRENCY CONVERTER
+                     ======================================== -->
                 <div class='section'>
                     <h2 class='section-title'>
                         <i class='fas fa-coins'></i> Currency Converter
+                        <button class='info-btn' onclick='forexConverter.openModal("converterInfo")'>
+                            <i class='fas fa-info-circle'></i>
+                        </button>
                     </h2>
                     
                     <div class='converter-container'>
@@ -272,7 +295,7 @@
                             <div class='currency-input-wrapper'>
                                 <input type='number' id='fromAmount' value='1000' min='0' step='0.01'>
                                 <select id='fromCurrency'>
-                                    <option value='EUR' selected>EUR</option>
+                                    <option value='EUR' selected>EUR - Euro</option>
                                 </select>
                             </div>
                         </div>
@@ -286,7 +309,7 @@
                             <div class='currency-input-wrapper'>
                                 <input type='number' id='toAmount' value='0' readonly>
                                 <select id='toCurrency'>
-                                    <option value='USD'>USD</option>
+                                    <option value='USD'>USD - US Dollar</option>
                                 </select>
                             </div>
                         </div>
@@ -294,38 +317,772 @@
                     
                     <div class='conversion-result' id='conversionResult' style='display: none;'>
                         <div class='conversion-rate' id='conversionRate'></div>
+                        <div class='conversion-details' id='conversionDetails'></div>
+                    </div>
+
+                    <!-- Multi-Currency Converter -->
+                    <div class='multi-converter-section'>
+                        <button class='dashboard-btn' onclick='forexConverter.toggleMultiConverter()'>
+                            <i class='fas fa-layer-group'></i>
+                            <span>Multi-Currency Converter</span>
+                        </button>
+                        <div id='multiConverterGrid' class='multi-converter-grid' style='display: none;'></div>
                     </div>
                 </div>
 
-                <!-- Live Rates -->
+                <!-- ========================================
+                     CURRENCY STRENGTH METER
+                     ======================================== -->
                 <div class='section'>
                     <h2 class='section-title'>
-                        <i class='fas fa-list'></i> Live Exchange Rates (Base: EUR)
+                        <i class='fas fa-tachometer-alt'></i> Currency Strength Meter
+                        <button class='info-btn' onclick='forexConverter.openModal("currencyStrengthInfo")'>
+                            <i class='fas fa-info-circle'></i>
+                        </button>
                     </h2>
+                    
+                    <div class='chart-wrapper' onclick='forexConverter.openModal("currencyStrengthChart")'>
+                        <div id='currencyStrengthChart' class='chart' style='height: 450px;'></div>
+                    </div>
+                </div>
+
+                <!-- ========================================
+                     TECHNICAL ANALYSIS
+                     ======================================== -->
+                <div class='section'>
+                    <div class='section-header-with-controls'>
+                        <h2 class='section-title'>
+                            <i class='fas fa-chart-area'></i> Technical Analysis
+                            <button class='info-btn' onclick='forexConverter.openModal("technicalAnalysisInfo")'>
+                                <i class='fas fa-info-circle'></i>
+                            </button>
+                        </h2>
+                        
+                        <div class='tech-analysis-controls'>
+                            <select id='technicalPairSelector' onchange='forexConverter.updateTechnicalAnalysis()'>
+                                <option value='USD'>EUR/USD</option>
+                                <option value='GBP'>EUR/GBP</option>
+                                <option value='JPY'>EUR/JPY</option>
+                                <option value='CHF'>EUR/CHF</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div id='technicalIndicators' class='technical-indicators-grid'></div>
+                </div>
+
+                <!-- ========================================
+                     HISTORICAL CHART WITH INDICATORS
+                     ======================================== -->
+                <div class='section'>
+                    <div class='section-header-with-controls'>
+                        <h2 class='section-title'>
+                            <i class='fas fa-chart-line'></i> Historical Exchange Rate
+                            <button class='info-btn' onclick='forexConverter.openModal("historicalChartInfo")'>
+                                <i class='fas fa-info-circle'></i>
+                            </button>
+                        </h2>
+                        
+                        <div class='time-range-selector'>
+                            <button class='time-btn' data-period='1M' onclick='forexConverter.changeTimeRange("1M")'>1M</button>
+                            <button class='time-btn' data-period='3M' onclick='forexConverter.changeTimeRange("3M")'>3M</button>
+                            <button class='time-btn' data-period='6M' onclick='forexConverter.changeTimeRange("6M")'>6M</button>
+                            <button class='time-btn' data-period='1Y' onclick='forexConverter.changeTimeRange("1Y")'>1Y</button>
+                            <button class='time-btn active' data-period='5Y' onclick='forexConverter.changeTimeRange("5Y")'>5Y</button>
+                            <button class='time-btn' data-period='MAX' onclick='forexConverter.changeTimeRange("MAX")'>MAX</button>
+                        </div>
+                    </div>
+                    
+                    <div class='chart-wrapper' onclick='forexConverter.openModal("historicalChartModal")'>
+                        <div id='historicalForexChart' class='chart' style='height: 500px;'></div>
+                    </div>
+                </div>
+
+                <!-- ========================================
+                     CORRELATION HEATMAP
+                     ======================================== -->
+                <div class='section'>
+                    <h2 class='section-title'>
+                        <i class='fas fa-fire'></i> Currency Correlation Heatmap
+                        <button class='info-btn' onclick='forexConverter.openModal("correlationInfo")'>
+                            <i class='fas fa-info-circle'></i>
+                        </button>
+                    </h2>
+                    
+                    <div class='chart-wrapper' onclick='forexConverter.openModal("correlationChartModal")'>
+                        <div id='correlationHeatmap' class='chart' style='height: 500px;'></div>
+                    </div>
+                </div>
+
+                <!-- ========================================
+                     VOLATILITY ANALYSIS
+                     ======================================== -->
+                <div class='section'>
+                    <h2 class='section-title'>
+                        <i class='fas fa-wave-square'></i> Volatility Analysis
+                        <button class='info-btn' onclick='forexConverter.openModal("volatilityInfo")'>
+                            <i class='fas fa-info-circle'></i>
+                        </button>
+                    </h2>
+                    
+                    <div id='volatilityMetrics' class='volatility-metrics-grid'></div>
+                    
+                    <div class='chart-wrapper' onclick='forexConverter.openModal("volatilityChartModal")'>
+                        <div id='volatilityChart' class='chart' style='height: 400px;'></div>
+                    </div>
+                </div>
+
+                <!-- ========================================
+                     ECONOMIC INDICATORS
+                     ======================================== -->
+                <div class='section'>
+                    <h2 class='section-title'>
+                        <i class='fas fa-globe'></i> Economic Indicators
+                        <button class='info-btn' onclick='forexConverter.openModal("economicIndicatorsInfo")'>
+                            <i class='fas fa-info-circle'></i>
+                        </button>
+                    </h2>
+                    
+                    <div id='economicIndicators' class='economic-indicators-grid'></div>
+                </div>
+
+                <!-- ========================================
+                     ALL EXCHANGE RATES
+                     ======================================== -->
+                <div class='section'>
+                    <h2 class='section-title'>
+                        <i class='fas fa-list'></i> All Exchange Rates (Base: EUR)
+                    </h2>
+                    
+                    <div class='search-filter'>
+                        <input type='text' id='currencySearch' placeholder='Search currency...' onkeyup='forexConverter.filterCurrencies()'>
+                        <i class='fas fa-search'></i>
+                    </div>
                     
                     <div id='liveRatesGrid'></div>
                 </div>
 
-                <!-- Historical Chart -->
+                <!-- ========================================
+                     FOREX TOOLS
+                     ======================================== -->
                 <div class='section'>
                     <h2 class='section-title'>
-                        <i class='fas fa-chart-line'></i> Historical Exchange Rate
+                        <i class='fas fa-tools'></i> Forex Tools
                     </h2>
                     
-                    <div class='chart-wrapper'>
-                        <div id='historicalForexChart' class='chart' style='height: 450px;'></div>
+                    <div class='tools-grid'>
+                        <div class='tool-card' onclick='forexConverter.openModal("feeCalculator")'>
+                            <div class='tool-icon'>
+                                <i class='fas fa-calculator'></i>
+                            </div>
+                            <h3>Fee Calculator</h3>
+                            <p>Compare fees across platforms</p>
+                        </div>
+                        
+                        <div class='tool-card' onclick='forexConverter.openModal("profitLossCalculator")'>
+                            <div class='tool-icon'>
+                                <i class='fas fa-chart-pie'></i>
+                            </div>
+                            <h3>P&L Calculator</h3>
+                            <p>Calculate profit/loss for trades</p>
+                        </div>
+                        
+                        <div class='tool-card' onclick='forexConverter.openModal("travelBudget")'>
+                            <div class='tool-icon'>
+                                <i class='fas fa-plane'></i>
+                            </div>
+                            <h3>Travel Budget</h3>
+                            <p>Plan your travel expenses</p>
+                        </div>
+                        
+                        <div class='tool-card' onclick='forexConverter.openModal("forexGlossary")'>
+                            <div class='tool-icon'>
+                                <i class='fas fa-book'></i>
+                            </div>
+                            <h3>Forex Glossary</h3>
+                            <p>Learn forex terminology</p>
+                        </div>
                     </div>
                 </div>
 
                 <footer>
                     <p>
-                        <i class='fas fa-info-circle'></i> Forex Converter - Official ECB Exchange Rates
+                        <i class='fas fa-info-circle'></i> Forex Converter Pro - Real-time ECB Exchange Rates with AI Analysis
                     </p>
                 </footer>
             </div>
         </div>
     </div>
 
+    <!-- ========================================
+         MODALS
+         ======================================== -->
+    
+    <!-- Live Rates Info Modal -->
+    <div id='liveRatesInfo' class='modal'>
+        <div class='modal-content'>
+            <div class='modal-header'>
+                <h2><i class='fas fa-chart-line'></i> Live Exchange Rates</h2>
+                <button class='modal-close' onclick='forexConverter.closeModal("liveRatesInfo")'>&times;</button>
+            </div>
+            <div class='modal-body'>
+                <p><strong>What are Live Exchange Rates?</strong></p>
+                <p>Live exchange rates show the current value of one currency relative to another. These rates are updated in real-time based on the European Central Bank (ECB) official rates.</p>
+                
+                <p><strong>Key Components:</strong></p>
+                <ul>
+                    <li><strong>Current Rate:</strong> The latest exchange rate (e.g., 1 EUR = 1.0850 USD)</li>
+                    <li><strong>24h Change:</strong> Percentage change in the last 24 hours</li>
+                    <li><strong>Bid/Ask Spread:</strong> The difference between buying and selling prices</li>
+                    <li><strong>Volatility:</strong> Measure of price fluctuation (ATR - Average True Range)</li>
+                </ul>
+                
+                <p><strong>Color Indicators:</strong></p>
+                <ul>
+                    <li><span style='color: #10b981;'>● Green:</span> Currency has strengthened (positive change)</li>
+                    <li><span style='color: #ef4444;'>● Red:</span> Currency has weakened (negative change)</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- AI Recommendations Info Modal -->
+    <div id='aiRecommendationsInfo' class='modal'>
+        <div class='modal-content'>
+            <div class='modal-header'>
+                <h2><i class='fas fa-robot'></i> AI Recommendations</h2>
+                <button class='modal-close' onclick='forexConverter.closeModal("aiRecommendationsInfo")'>&times;</button>
+            </div>
+            <div class='modal-body'>
+                <p><strong>How AI Recommendations Work:</strong></p>
+                <p>Our AI analyzes multiple factors to provide trading recommendations:</p>
+                
+                <ul>
+                    <li><strong>Technical Analysis:</strong> RSI, MACD, Moving Averages, Support/Resistance levels</li>
+                    <li><strong>Trend Detection:</strong> Identifies bullish, bearish, or neutral trends</li>
+                    <li><strong>Volatility Assessment:</strong> Measures market risk (Low/Medium/High)</li>
+                    <li><strong>Sentiment Analysis:</strong> Aggregates news sentiment from major sources</li>
+                    <li><strong>Currency Strength:</strong> Compares relative strength across major currencies</li>
+                </ul>
+                
+                <p><strong>Confidence Score:</strong></p>
+                <p>Each recommendation includes a confidence score (0-100%) based on the alignment of multiple indicators.</p>
+                
+                <p class='warning-box'>
+                    <i class='fas fa-exclamation-triangle'></i> <strong>Disclaimer:</strong> AI recommendations are for informational purposes only. Always conduct your own research before making trading decisions.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Currency Converter Info Modal -->
+    <div id='converterInfo' class='modal'>
+        <div class='modal-content'>
+            <div class='modal-header'>
+                <h2><i class='fas fa-coins'></i> Currency Converter</h2>
+                <button class='modal-close' onclick='forexConverter.closeModal("converterInfo")'>&times;</button>
+            </div>
+            <div class='modal-body'>
+                <p><strong>How to Use the Converter:</strong></p>
+                <ol>
+                    <li>Enter the amount you want to convert</li>
+                    <li>Select the source currency (From)</li>
+                    <li>Select the target currency (To)</li>
+                    <li>The conversion is calculated automatically using real-time ECB rates</li>
+                </ol>
+                
+                <p><strong>Features:</strong></p>
+                <ul>
+                    <li><strong>Swap Button:</strong> Quickly reverse the conversion direction</li>
+                    <li><strong>Real-time Rates:</strong> Uses official ECB exchange rates</li>
+                    <li><strong>Multi-Currency:</strong> Convert to 38+ currencies simultaneously</li>
+                    <li><strong>Conversion Details:</strong> View mid-market rate and potential fees</li>
+                </ul>
+                
+                <p><strong>Base Currency:</strong></p>
+                <p>All conversions use EUR (Euro) as the base currency, as per ECB standards. Cross-currency conversions (e.g., USD to JPY) are calculated by converting through EUR.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Currency Strength Info Modal -->
+    <div id='currencyStrengthInfo' class='modal'>
+        <div class='modal-content'>
+            <div class='modal-header'>
+                <h2><i class='fas fa-tachometer-alt'></i> Currency Strength Meter</h2>
+                <button class='modal-close' onclick='forexConverter.closeModal("currencyStrengthInfo")'>&times;</button>
+            </div>
+            <div class='modal-body'>
+                <p><strong>What is Currency Strength?</strong></p>
+                <p>Currency strength measures the relative performance of one currency against a basket of other major currencies. A higher strength value indicates a stronger currency.</p>
+                
+                <p><strong>How It's Calculated:</strong></p>
+                <ul>
+                    <li>Analyzes performance against 7 other major currencies (EUR, USD, GBP, JPY, CHF, CAD, AUD)</li>
+                    <li>Considers multiple timeframes (24h, 7d, 30d)</li>
+                    <li>Weighted by trading volume and liquidity</li>
+                    <li>Normalized to a 0-100 scale</li>
+                </ul>
+                
+                <p><strong>Interpretation:</strong></p>
+                <ul>
+                    <li><strong>80-100:</strong> Very Strong - Potential overbought</li>
+                    <li><strong>60-80:</strong> Strong - Bullish trend</li>
+                    <li><strong>40-60:</strong> Neutral - Range-bound</li>
+                    <li><strong>20-40:</strong> Weak - Bearish trend</li>
+                    <li><strong>0-20:</strong> Very Weak - Potential oversold</li>
+                </ul>
+                
+                <p><strong>Trading Application:</strong></p>
+                <p>Currency strength helps identify the strongest and weakest currencies. A common strategy is to buy the strongest currency against the weakest for optimal trade setup.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Technical Analysis Info Modal -->
+    <div id='technicalAnalysisInfo' class='modal'>
+        <div class='modal-content'>
+            <div class='modal-header'>
+                <h2><i class='fas fa-chart-area'></i> Technical Analysis</h2>
+                <button class='modal-close' onclick='forexConverter.closeModal("technicalAnalysisInfo")'>&times;</button>
+            </div>
+            <div class='modal-body'>
+                <p><strong>Technical Indicators Explained:</strong></p>
+                
+                <h4><i class='fas fa-chart-line'></i> RSI (Relative Strength Index)</h4>
+                <ul>
+                    <li>Measures momentum on a 0-100 scale</li>
+                    <li><strong>Above 70:</strong> Overbought (potential reversal down)</li>
+                    <li><strong>Below 30:</strong> Oversold (potential reversal up)</li>
+                    <li><strong>50:</strong> Neutral zone</li>
+                </ul>
+                
+                <h4><i class='fas fa-wave-square'></i> MACD (Moving Average Convergence Divergence)</h4>
+                <ul>
+                    <li>Trend-following momentum indicator</li>
+                    <li><strong>MACD above Signal:</strong> Bullish signal</li>
+                    <li><strong>MACD below Signal:</strong> Bearish signal</li>
+                    <li><strong>Histogram:</strong> Strength of the trend</li>
+                </ul>
+                
+                <h4><i class='fas fa-chart-area'></i> Bollinger Bands</h4>
+                <ul>
+                    <li>Volatility indicator with 3 lines (Upper, Middle, Lower)</li>
+                    <li><strong>Price near Upper Band:</strong> Potentially overbought</li>
+                    <li><strong>Price near Lower Band:</strong> Potentially oversold</li>
+                    <li><strong>Band Squeeze:</strong> Low volatility, potential breakout coming</li>
+                    <li><strong>Band Expansion:</strong> High volatility period</li>
+                </ul>
+                
+                <h4><i class='fas fa-layer-group'></i> Moving Averages</h4>
+                <ul>
+                    <li><strong>SMA 50:</strong> Short-term trend</li>
+                    <li><strong>SMA 200:</strong> Long-term trend</li>
+                    <li><strong>Golden Cross:</strong> SMA 50 crosses above SMA 200 (bullish)</li>
+                    <li><strong>Death Cross:</strong> SMA 50 crosses below SMA 200 (bearish)</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Correlation Info Modal -->
+    <div id='correlationInfo' class='modal'>
+        <div class='modal-content'>
+            <div class='modal-header'>
+                <h2><i class='fas fa-fire'></i> Currency Correlation</h2>
+                <button class='modal-close' onclick='forexConverter.closeModal("correlationInfo")'>&times;</button>
+            </div>
+            <div class='modal-body'>
+                <p><strong>What is Currency Correlation?</strong></p>
+                <p>Currency correlation measures the relationship between two currency pairs. It shows how much they move together or in opposite directions.</p>
+                
+                <p><strong>Correlation Coefficient:</strong></p>
+                <ul>
+                    <li><strong>+1.0:</strong> Perfect positive correlation (pairs move together 100%)</li>
+                    <li><strong>+0.8 to +1.0:</strong> Strong positive correlation</li>
+                    <li><strong>+0.5 to +0.8:</strong> Moderate positive correlation</li>
+                    <li><strong>-0.5 to +0.5:</strong> Weak or no correlation</li>
+                    <li><strong>-0.5 to -0.8:</strong> Moderate negative correlation</li>
+                    <li><strong>-0.8 to -1.0:</strong> Strong negative correlation</li>
+                    <li><strong>-1.0:</strong> Perfect negative correlation (pairs move in opposite directions)</li>
+                </ul>
+                
+                <p><strong>How to Use:</strong></p>
+                <ul>
+                    <li><strong>Portfolio Diversification:</strong> Avoid trading highly correlated pairs to reduce risk</li>
+                    <li><strong>Hedging:</strong> Use negatively correlated pairs to hedge positions</li>
+                    <li><strong>Confirmation:</strong> Correlated pairs can confirm trade signals</li>
+                </ul>
+                
+                <p><strong>Heatmap Colors:</strong></p>
+                <ul>
+                    <li><span style='color: #ef4444;'>● Dark Red:</strong> Strong positive correlation</li>
+                    <li><span style='color: #f59e0b;'>● Orange:</strong> Moderate positive correlation</li>
+                    <li><span style='color: #6b7280;'>● Gray:</strong> No correlation</li>
+                    <li><span style='color: #3b82f6;'>● Blue:</strong> Moderate negative correlation</li>
+                    <li><span style='color: #1e3a8a;'>● Dark Blue:</strong> Strong negative correlation</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Volatility Info Modal -->
+    <div id='volatilityInfo' class='modal'>
+        <div class='modal-content'>
+            <div class='modal-header'>
+                <h2><i class='fas fa-wave-square'></i> Volatility Analysis</h2>
+                <button class='modal-close' onclick='forexConverter.closeModal("volatilityInfo")'>&times;</button>
+            </div>
+            <div class='modal-body'>
+                <p><strong>What is Volatility?</strong></p>
+                <p>Volatility measures the magnitude of price movements. Higher volatility means larger price swings and potentially higher risk/reward.</p>
+                
+                <p><strong>Volatility Metrics:</strong></p>
+                
+                <h4><i class='fas fa-chart-bar'></i> ATR (Average True Range)</h4>
+                <ul>
+                    <li>Measures average price movement over a period (typically 14 days)</li>
+                    <li>Higher ATR = Higher volatility</li>
+                    <li>Used for stop-loss placement and position sizing</li>
+                </ul>
+                
+                <h4><i class='fas fa-percentage'></i> Standard Deviation</h4>
+                <ul>
+                    <li>Statistical measure of price dispersion</li>
+                    <li>Shows how much prices deviate from the average</li>
+                    <li>68% of price movements fall within 1 standard deviation</li>
+                </ul>
+                
+                <h4><i class='fas fa-arrow-down'></i> Maximum Drawdown</h4>
+                <ul>
+                    <li>Largest peak-to-trough decline in the period</li>
+                    <li>Indicates worst-case scenario loss</li>
+                    <li>Important for risk management</li>
+                </ul>
+                
+                <p><strong>Volatility Levels:</strong></p>
+                <ul>
+                    <li><strong>Low:</strong> ATR < 0.5% of price - Calm market, tight ranges</li>
+                    <li><strong>Medium:</strong> ATR 0.5-1.0% - Normal conditions</li>
+                    <li><strong>High:</strong> ATR > 1.0% - Elevated risk, potential opportunities</li>
+                </ul>
+                
+                <p class='warning-box'>
+                    <i class='fas fa-exclamation-triangle'></i> <strong>Risk Note:</strong> High volatility can lead to rapid losses. Adjust position sizes accordingly.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Economic Indicators Info Modal -->
+    <div id='economicIndicatorsInfo' class='modal'>
+        <div class='modal-content'>
+            <div class='modal-header'>
+                <h2><i class='fas fa-globe'></i> Economic Indicators</h2>
+                <button class='modal-close' onclick='forexConverter.closeModal("economicIndicatorsInfo")'>&times;</button>
+            </div>
+            <div class='modal-body'>
+                <p><strong>Key Economic Indicators Affecting Forex:</strong></p>
+                
+                <h4><i class='fas fa-percentage'></i> Interest Rates</h4>
+                <ul>
+                    <li>Central bank policy rates (Fed, ECB, BoE, BoJ, etc.)</li>
+                    <li><strong>Higher rates:</strong> Attract foreign capital, strengthen currency</li>
+                    <li><strong>Lower rates:</strong> Reduce currency attractiveness, weaken currency</li>
+                    <li><strong>Rate differentials:</strong> Key driver of exchange rates</li>
+                </ul>
+                
+                <h4><i class='fas fa-fire'></i> Inflation (CPI/PPI)</h4>
+                <ul>
+                    <li><strong>CPI (Consumer Price Index):</strong> Measures consumer goods inflation</li>
+                    <li><strong>PPI (Producer Price Index):</strong> Measures wholesale inflation</li>
+                    <li>High inflation often leads to rate hikes (currency strength)</li>
+                    <li>Low inflation may trigger rate cuts (currency weakness)</li>
+                </ul>
+                
+                <h4><i class='fas fa-chart-line'></i> GDP (Gross Domestic Product)</h4>
+                <ul>
+                    <li>Measures economic growth</li>
+                    <li>Strong GDP growth = Strong currency</li>
+                    <li>Weak GDP growth = Weak currency</li>
+                    <li>Released quarterly</li>
+                </ul>
+                
+                <h4><i class='fas fa-briefcase'></i> Employment Data</h4>
+                <ul>
+                    <li><strong>US:</strong> Non-Farm Payrolls (NFP), Unemployment Rate</li>
+                    <li><strong>EU:</strong> Eurozone Unemployment Rate</li>
+                    <li>Strong employment = Economic strength = Currency strength</li>
+                </ul>
+                
+                <h4><i class='fas fa-balance-scale'></i> Trade Balance</h4>
+                <ul>
+                    <li>Difference between exports and imports</li>
+                    <li><strong>Surplus:</strong> Positive for currency</li>
+                    <li><strong>Deficit:</strong> Negative for currency</li>
+                </ul>
+                
+                <p><strong>How to Use:</strong></p>
+                <p>Monitor economic indicators to anticipate central bank policy changes and currency movements. Combine with technical analysis for optimal timing.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Fee Calculator Modal -->
+    <div id='feeCalculator' class='modal'>
+        <div class='modal-content modal-large'>
+            <div class='modal-header'>
+                <h2><i class='fas fa-calculator'></i> Fee Calculator</h2>
+                <button class='modal-close' onclick='forexConverter.closeModal("feeCalculator")'>&times;</button>
+            </div>
+            <div class='modal-body'>
+                <p><strong>Compare currency exchange fees across platforms:</strong></p>
+                
+                <div class='calculator-form'>
+                    <div class='form-group'>
+                        <label>Amount</label>
+                        <input type='number' id='feeCalcAmount' value='1000' min='0'>
+                    </div>
+                    
+                    <div class='form-group'>
+                        <label>From Currency</label>
+                        <select id='feeCalcFrom'>
+                            <option value='EUR'>EUR</option>
+                            <option value='USD'>USD</option>
+                            <option value='GBP'>GBP</option>
+                        </select>
+                    </div>
+                    
+                    <div class='form-group'>
+                        <label>To Currency</label>
+                        <select id='feeCalcTo'>
+                            <option value='USD'>USD</option>
+                            <option value='EUR'>EUR</option>
+                            <option value='GBP'>GBP</option>
+                        </select>
+                    </div>
+                    
+                    <button class='dashboard-btn' onclick='forexConverter.calculateFees()'>
+                        <i class='fas fa-calculator'></i> Calculate Fees
+                    </button>
+                </div>
+                
+                <div id='feeResults' class='fee-results' style='display: none;'>
+                    <h3>Comparison Results</h3>
+                    <div class='fee-comparison-grid'></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- P&L Calculator Modal -->
+    <div id='profitLossCalculator' class='modal'>
+        <div class='modal-content modal-large'>
+            <div class='modal-header'>
+                <h2><i class='fas fa-chart-pie'></i> Profit & Loss Calculator</h2>
+                <button class='modal-close' onclick='forexConverter.closeModal("profitLossCalculator")'>&times;</button>
+            </div>
+            <div class='modal-body'>
+                <p><strong>Calculate profit/loss for forex trades:</strong></p>
+                
+                <div class='calculator-form'>
+                    <div class='form-row'>
+                        <div class='form-group'>
+                            <label>Currency Pair</label>
+                            <select id='plPair'>
+                                <option value='EUR/USD'>EUR/USD</option>
+                                <option value='GBP/USD'>GBP/USD</option>
+                                <option value='USD/JPY'>USD/JPY</option>
+                            </select>
+                        </div>
+                        
+                        <div class='form-group'>
+                            <label>Position Type</label>
+                            <select id='plType'>
+                                <option value='buy'>Buy (Long)</option>
+                                <option value='sell'>Sell (Short)</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class='form-row'>
+                        <div class='form-group'>
+                            <label>Entry Price</label>
+                            <input type='number' id='plEntry' step='0.0001' value='1.0850'>
+                        </div>
+                        
+                        <div class='form-group'>
+                            <label>Exit Price</label>
+                            <input type='number' id='plExit' step='0.0001' value='1.0950'>
+                        </div>
+                    </div>
+                    
+                    <div class='form-row'>
+                        <div class='form-group'>
+                            <label>Position Size (lots)</label>
+                            <input type='number' id='plSize' step='0.01' value='1'>
+                        </div>
+                        
+                        <div class='form-group'>
+                            <label>Leverage</label>
+                            <select id='plLeverage'>
+                                <option value='1'>1:1 (No leverage)</option>
+                                <option value='10'>1:10</option>
+                                <option value='20'>1:20</option>
+                                <option value='50'>1:50</option>
+                                <option value='100' selected>1:100</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <button class='dashboard-btn' onclick='forexConverter.calculatePL()'>
+                        <i class='fas fa-calculator'></i> Calculate P&L
+                    </button>
+                </div>
+                
+                <div id='plResults' class='pl-results' style='display: none;'></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Travel Budget Modal -->
+    <div id='travelBudget' class='modal'>
+        <div class='modal-content modal-large'>
+            <div class='modal-header'>
+                <h2><i class='fas fa-plane'></i> Travel Budget Calculator</h2>
+                <button class='modal-close' onclick='forexConverter.closeModal("travelBudget")'>&times;</button>
+            </div>
+            <div class='modal-body'>
+                <p><strong>Plan your travel expenses with automatic currency conversion:</strong></p>
+                
+                <div class='calculator-form'>
+                    <div class='form-group'>
+                        <label>Your Currency</label>
+                        <select id='travelHomeCurrency'>
+                            <option value='EUR'>EUR</option>
+                            <option value='USD'>USD</option>
+                            <option value='GBP'>GBP</option>
+                        </select>
+                    </div>
+                    
+                    <div class='form-group'>
+                        <label>Destination Currency</label>
+                        <select id='travelDestCurrency'>
+                            <option value='USD'>USD</option>
+                            <option value='EUR'>EUR</option>
+                            <option value='JPY'>JPY</option>
+                        </select>
+                    </div>
+                    
+                    <h4>Estimated Expenses (in destination currency)</h4>
+                    
+                    <div class='form-row'>
+                        <div class='form-group'>
+                            <label>Accommodation/day</label>
+                            <input type='number' id='travelAccommodation' value='100'>
+                        </div>
+                        
+                        <div class='form-group'>
+                            <label>Food/day</label>
+                            <input type='number' id='travelFood' value='50'>
+                        </div>
+                    </div>
+                    
+                    <div class='form-row'>
+                        <div class='form-group'>
+                            <label>Transportation/day</label>
+                            <input type='number' id='travelTransport' value='30'>
+                        </div>
+                        
+                        <div class='form-group'>
+                            <label>Activities/day</label>
+                            <input type='number' id='travelActivities' value='40'>
+                        </div>
+                    </div>
+                    
+                    <div class='form-group'>
+                        <label>Number of Days</label>
+                        <input type='number' id='travelDays' value='7' min='1'>
+                    </div>
+                    
+                    <button class='dashboard-btn' onclick='forexConverter.calculateTravelBudget()'>
+                        <i class='fas fa-calculator'></i> Calculate Budget
+                    </button>
+                </div>
+                
+                <div id='travelResults' class='travel-results' style='display: none;'></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Forex Glossary Modal -->
+    <div id='forexGlossary' class='modal'>
+        <div class='modal-content modal-large'>
+            <div class='modal-header'>
+                <h2><i class='fas fa-book'></i> Forex Glossary</h2>
+                <button class='modal-close' onclick='forexConverter.closeModal("forexGlossary")'>&times;</button>
+            </div>
+            <div class='modal-body'>
+                <div class='glossary-search'>
+                    <input type='text' id='glossarySearch' placeholder='Search terms...' onkeyup='forexConverter.filterGlossary()'>
+                    <i class='fas fa-search'></i>
+                </div>
+                
+                <div id='glossaryContent' class='glossary-content'></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Chart Fullscreen Modals -->
+    <div id='currencyStrengthChart' class='modal'>
+        <div class='modal-content modal-large'>
+            <div class='modal-header'>
+                <h2><i class='fas fa-tachometer-alt'></i> Currency Strength Meter - Detailed View</h2>
+                <button class='modal-close' onclick='forexConverter.closeModal("currencyStrengthChart")'>&times;</button>
+            </div>
+            <div class='modal-body'>
+                <div id='currencyStrengthChartFull' class='chart' style='height: 600px;'></div>
+            </div>
+        </div>
+    </div>
+
+    <div id='historicalChartModal' class='modal'>
+        <div class='modal-content modal-large'>
+            <div class='modal-header'>
+                <h2><i class='fas fa-chart-line'></i> Historical Chart - Detailed View</h2>
+                <button class='modal-close' onclick='forexConverter.closeModal("historicalChartModal")'>&times;</button>
+            </div>
+            <div class='modal-body'>
+                <div id='historicalChartFull' class='chart' style='height: 600px;'></div>
+            </div>
+        </div>
+    </div>
+
+    <div id='correlationChartModal' class='modal'>
+        <div class='modal-content modal-large'>
+            <div class='modal-header'>
+                <h2><i class='fas fa-fire'></i> Correlation Heatmap - Detailed View</h2>
+                <button class='modal-close' onclick='forexConverter.closeModal("correlationChartModal")'>&times;</button>
+            </div>
+            <div class='modal-body'>
+                <div id='correlationHeatmapFull' class='chart' style='height: 600px;'></div>
+            </div>
+        </div>
+    </div>
+
+    <div id='volatilityChartModal' class='modal'>
+        <div class='modal-content modal-large'>
+            <div class='modal-header'>
+                <h2><i class='fas fa-wave-square'></i> Volatility Chart - Detailed View</h2>
+                <button class='modal-close' onclick='forexConverter.closeModal("volatilityChartModal")'>&times;</button>
+            </div>
+            <div class='modal-body'>
+                <div id='volatilityChartFull' class='chart' style='height: 600px;'></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
     <script src='assets/js/common.js'></script>
     <script src='assets/js/sidebar.js'></script>
     <script src='assets/js/economic-data-client.js'></script>
@@ -343,13 +1100,8 @@
     <script src="assets/js/chatbot-ui.js"></script>
     <script src="assets/js/chatbot-particles.js"></script>
 
-    <!-- ============================================
-    ✅ FIX MENU UTILISATEUR - Force l'initialisation
-    ============================================ -->
+    <!-- User Menu Init -->
     <script>
-        /**
-         * Force l'initialisation du menu utilisateur
-         */
         (function forceUserMenuInit() {
             console.log('🔧 Force initializing user menu...');
             
@@ -362,7 +1114,6 @@
                     return;
                 }
                 
-                // Supprimer tous les anciens event listeners
                 const newTrigger = trigger.cloneNode(true);
                 trigger.parentNode.replaceChild(newTrigger, trigger);
                 
@@ -394,7 +1145,6 @@
                     }
                 });
                 
-                // Fermer si on clique ailleurs
                 document.addEventListener('click', function(e) {
                     if (!freshTrigger.contains(e.target) && !freshDropdown.contains(e.target)) {
                         freshDropdown.classList.remove('active');
@@ -405,7 +1155,6 @@
                     }
                 });
                 
-                // Empêcher la fermeture si on clique dans le dropdown
                 freshDropdown.addEventListener('click', function(e) {
                     e.stopPropagation();
                 });
