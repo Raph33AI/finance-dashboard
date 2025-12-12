@@ -2,14 +2,13 @@
  * ====================================================================
  * ALPHAVAULT AI - ECONOMIC DATA API CLIENT
  * ====================================================================
- * Client JavaScript pour le Cloudflare Worker (FRED + ECB)
- * Version: 3.0 - Dual Region Edition
+ * Client JavaScript pour le Cloudflare Worker (FRED ONLY - US DATA)
+ * Version: 4.0 - US Exclusive Edition
  * 
  * Worker URL: https://economic-data-worker.raphnardone.workers.dev
  * 
  * Supporte:
  * - 34 endpoints FRED (US)
- * - 18 endpoints ECB (EU)
  * - Cache intelligent
  * - Gestion d'erreurs
  * - Formatage de données pour Chart.js
@@ -108,7 +107,7 @@ class EconomicDataClient {
 
     /**
      * ========================================
-     * FRED API METHODS (34 endpoints)
+     * FRED API METHODS (34 endpoints - US DATA)
      * ========================================
      */
 
@@ -286,147 +285,6 @@ class EconomicDataClient {
 
     /**
      * ========================================
-     * ECB API METHODS (18 endpoints)
-     * ========================================
-     */
-
-    // EXCHANGE RATES
-
-    async getECBExchangeRate(currency = 'USD') {
-        const response = await this.call('/ecb/exchange-rate', { currency });
-        return response.data;
-    }
-
-    async getECBAllExchangeRates() {
-        const response = await this.call('/ecb/exchange-rates');
-        return response.rates || {};
-    }
-
-    async getECBHistoricalExchangeRate(currency, startPeriod, endPeriod) {
-        const response = await this.call('/ecb/exchange-rate/historical', {
-            currency,
-            start_period: startPeriod,
-            end_period: endPeriod
-        });
-        return response.data;
-    }
-
-    async getECBCrossRate(currency1, currency2) {
-        const response = await this.call('/ecb/cross-rate', {
-            currency1,
-            currency2
-        });
-        return response.data;
-    }
-
-    // INTEREST RATES
-
-    async getECBMainRate() {
-        const response = await this.call('/ecb/main-rate');
-        return response.data;
-    }
-
-    async getECBDepositRate() {
-        const response = await this.call('/ecb/deposit-rate');
-        return response.data;
-    }
-
-    async getECBMarginalLendingRate() {
-        const response = await this.call('/ecb/marginal-lending-rate');
-        return response.data;
-    }
-
-    async getECBEuribor(maturity = '12M') {
-        const response = await this.call('/ecb/euribor', { maturity });
-        return response.data;
-    }
-
-    async getECBEuroShortTermRate() {
-        const response = await this.call('/ecb/euro-short-term-rate');
-        return response.data;
-    }
-
-    // INFLATION
-
-    async getECBInflation(country = 'U2') {
-        const response = await this.call('/ecb/inflation', { country });
-        return response.data;
-    }
-
-    async getECBCoreInflation() {
-        const response = await this.call('/ecb/core-inflation');
-        return response.data;
-    }
-
-    async getECBInflationByCategory(category = 'CP00') {
-        const response = await this.call('/ecb/inflation/category', { category });
-        return response.data;
-    }
-
-    // GDP
-
-    async getECBGDP() {
-        const response = await this.call('/ecb/gdp');
-        return response.data;
-    }
-
-    async getECBGDPGrowth() {
-        const response = await this.call('/ecb/gdp-growth');
-        return response.data;
-    }
-
-    // LABOR MARKET
-
-    async getECBUnemployment(area = 'I8') {
-        const response = await this.call('/ecb/unemployment', { area });
-        return response.data;
-    }
-
-    // MONETARY AGGREGATES
-
-    async getECBM1() {
-        const response = await this.call('/ecb/m1');
-        return response.data;
-    }
-
-    async getECBM2() {
-        const response = await this.call('/ecb/m2');
-        return response.data;
-    }
-
-    async getECBM3() {
-        const response = await this.call('/ecb/m3');
-        return response.data;
-    }
-
-    // YIELD CURVE
-
-    async getECBYieldCurve(maturity = '10Y') {
-        const response = await this.call('/ecb/yield-curve', { maturity });
-        return response.data;
-    }
-
-    // TRADE
-
-    async getECBCurrentAccount() {
-        const response = await this.call('/ecb/current-account');
-        return response.data;
-    }
-
-    async getECBTradeBalance() {
-        const response = await this.call('/ecb/trade-balance');
-        return response.data;
-    }
-
-    // DASHBOARD EU
-
-    async getECBDashboard() {
-        const response = await this.call('/ecb/dashboard', {}, { cacheTTL: 300000 });
-        return response.data || {};
-    }
-
-    /**
-     * ========================================
      * MÉTHODES UTILITAIRES
      * ========================================
      */
@@ -500,98 +358,6 @@ class EconomicDataClient {
     }
 
     /**
-     * Extrait les observations ECB (format SDMX JSON)
-     */
-    extractECBObservations(ecbData) {
-        try {
-            if (!ecbData || !ecbData.dataSets || !ecbData.dataSets[0]) {
-                console.warn('⚠ ECB: No dataSets found');
-                return [];
-            }
-
-            const series = ecbData.dataSets[0].series;
-            if (!series) {
-                console.warn('⚠ ECB: No series found');
-                return [];
-            }
-
-            // ✅ CORRECTION: Trouver la première série disponible (pas toujours '0:0:0:0:0')
-            const seriesKeys = Object.keys(series);
-            if (seriesKeys.length === 0) {
-                console.warn('⚠ ECB: No series keys found');
-                return [];
-            }
-
-            const seriesKey = seriesKeys[0]; // Prendre la première série disponible
-            console.log('📊 ECB series key:', seriesKey);
-
-            const observations = series[seriesKey].observations;
-            if (!observations) {
-                console.warn('⚠ ECB: No observations found for key', seriesKey);
-                return [];
-            }
-
-            const dates = ecbData.structure?.dimensions?.observation?.[0]?.values || [];
-
-            const result = Object.entries(observations).map(([index, values]) => {
-                const dateInfo = dates[parseInt(index)] || {};
-                const dateStr = dateInfo.id || dateInfo.name || '';
-                
-                return {
-                    date: dateStr,
-                    value: parseFloat(values[0]),
-                    timestamp: dateStr ? new Date(dateStr).getTime() : 0
-                };
-            });
-
-            console.log(`✅ ECB: Extracted ${result.length} observations`);
-            return result;
-
-        } catch (error) {
-            console.error('❌ Error extracting ECB observations:', error);
-            return [];
-        }
-    }
-
-    /**
-     * Transforme les données ECB en format Chart.js
-     */
-    prepareECBChartData(ecbData, label = 'Value') {
-        const observations = this.extractECBObservations(ecbData);
-        
-        return {
-            labels: observations.map(obs => obs.date),
-            datasets: [{
-                label: label,
-                data: observations.map(obs => obs.value),
-                borderColor: '#f093fb',
-                backgroundColor: 'rgba(240, 147, 251, 0.1)',
-                borderWidth: 2,
-                tension: 0.4,
-                fill: true,
-                pointRadius: 0,
-                pointHoverRadius: 6
-            }]
-        };
-    }
-
-    /**
-     * Compare US vs EU (pour dashboards comparatifs)
-     */
-    async getComparativeDashboard() {
-        const [usDashboard, euDashboard] = await Promise.all([
-            this.getDashboard(),
-            this.getECBDashboard()
-        ]);
-
-        return {
-            us: usDashboard,
-            eu: euDashboard,
-            timestamp: new Date().toISOString()
-        };
-    }
-
-    /**
      * Calcule une statistique simple (moyenne, min, max)
      */
     calculateStats(observations) {
@@ -627,7 +393,7 @@ class EconomicDataClient {
 }
 
 // ========================================
-// SÉRIES FRED PRÉDÉFINIES
+// SÉRIES FRED PRÉDÉFINIES (US DATA)
 // ========================================
 
 const FRED_SERIES = {
@@ -705,52 +471,18 @@ const FRED_CATEGORIES = {
 };
 
 // ========================================
-// CODES PAYS ECB
-// ========================================
-
-const ECB_COUNTRIES = {
-    EURO_AREA: 'U2',
-    EURO_AREA_19: 'I8',
-    GERMANY: 'DE',
-    FRANCE: 'FR',
-    ITALY: 'IT',
-    SPAIN: 'ES',
-    NETHERLANDS: 'NL',
-    BELGIUM: 'BE',
-    AUSTRIA: 'AT',
-    PORTUGAL: 'PT',
-    GREECE: 'GR',
-    IRELAND: 'IE',
-    FINLAND: 'FI'
-};
-
-// ========================================
-// DEVISES DISPONIBLES ECB
-// ========================================
-
-const ECB_CURRENCIES = [
-    'USD', 'GBP', 'JPY', 'CHF', 'CNY', 'AUD', 'CAD', 'SEK', 'NOK', 'DKK',
-    'PLN', 'CZK', 'HUF', 'RON', 'BGN', 'HRK', 'TRY', 'RUB', 'BRL', 'INR',
-    'ZAR', 'KRW', 'MXN', 'IDR', 'MYR', 'PHP', 'THB', 'SGD', 'HKD', 'NZD',
-    'ISK', 'ILS', 'CLP', 'ARS', 'PEN', 'COP', 'UAH', 'EGP'
-];
-
-// ========================================
 // INITIALISATION GLOBALE
 // ========================================
 
 window.economicDataClient = new EconomicDataClient();
 window.FRED = FRED_SERIES;
 window.FRED_CATS = FRED_CATEGORIES;
-window.ECB_COUNTRIES = ECB_COUNTRIES;
-window.ECB_CURRENCIES = ECB_CURRENCIES;
 
 // Test de connexion au chargement
 if (typeof console !== 'undefined') {
-    console.log('📊 Economic Data Client loaded (FRED + ECB)');
+    console.log('📊 Economic Data Client loaded (FRED - US Only)');
     console.log('🔗 Worker URL:', window.economicDataClient.baseUrl);
-    console.log('🇺🇸 FRED Series:', Object.keys(FRED_SERIES).length);
-    console.log('🇪🇺 ECB Currencies:', ECB_CURRENCIES.length);
+    console.log('🇺🇸 FRED Series available:', Object.keys(FRED_SERIES).length);
 }
 
 // Export pour modules ES6
@@ -758,8 +490,6 @@ if (typeof module !== 'undefined' && module.exports) {
     module.exports = {
         EconomicDataClient,
         FRED_SERIES,
-        FRED_CATEGORIES,
-        ECB_COUNTRIES,
-        ECB_CURRENCIES
+        FRED_CATEGORIES
     };
 }
