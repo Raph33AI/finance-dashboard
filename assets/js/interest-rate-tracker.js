@@ -1,11 +1,10 @@
 /**
  * ====================================================================
- * ALPHAVAULT AI - INTEREST RATE TRACKER (FULLY FIXED VERSION)
+ * ALPHAVAULT AI - INTEREST RATE TRACKER (EMERGENCY FIX)
  * ====================================================================
  * Fixes:
- * - Data loading with proper error handling
- * - Modal system completely rebuilt
- * - Proper data limits for API calls
+ * - Load recent data only (last 20 years)
+ * - Global modal function for HTML onclick
  */
 
 class InterestRateTracker {
@@ -14,6 +13,9 @@ class InterestRateTracker {
         this.ratesSeries = {};
         this.modals = {};
         this.charts = {};
+        
+        // Make instance globally accessible for onclick
+        window.rateTracker = this;
     }
 
     async init() {
@@ -27,11 +29,6 @@ class InterestRateTracker {
             await this.loadProjections();
             await this.generateAIRecommendations();
             await this.loadEconomicImpact();
-            
-            // Setup modals AFTER all charts are loaded
-            setTimeout(() => {
-                this.setupModals();
-            }, 500);
             
             console.log('✅ Interest Rate Tracker loaded successfully');
             
@@ -49,24 +46,30 @@ class InterestRateTracker {
         try {
             console.log('📊 Loading current rates...');
             
-            // Load with reasonable limits (100 points to ensure we have 30+ days)
+            // Calculate date 60 days ago
+            const endDate = new Date();
+            const startDate = new Date();
+            startDate.setDate(startDate.getDate() - 60);
+            
+            const dateParams = {
+                observation_start: startDate.toISOString().split('T')[0],
+                observation_end: endDate.toISOString().split('T')[0]
+            };
+            
             const [fedFunds, treasury10Y, treasury2Y, mortgage30Y, treasury30Y, treasury5Y] = await Promise.all([
-                economicDataClient.getSeries('DFF', { limit: 100 }),
-                economicDataClient.getSeries('DGS10', { limit: 100 }),
-                economicDataClient.getSeries('DGS2', { limit: 100 }),
-                economicDataClient.getSeries('MORTGAGE30US', { limit: 100 }),
-                economicDataClient.getSeries('DGS30', { limit: 100 }),
-                economicDataClient.getSeries('DGS5', { limit: 100 })
+                economicDataClient.getSeries('DFF', dateParams),
+                economicDataClient.getSeries('DGS10', dateParams),
+                economicDataClient.getSeries('DGS2', dateParams),
+                economicDataClient.getSeries('MORTGAGE30US', dateParams),
+                economicDataClient.getSeries('DGS30', dateParams),
+                economicDataClient.getSeries('DGS5', dateParams)
             ]);
 
             console.log('✅ Data loaded:', {
                 fedFunds: fedFunds.length,
-                treasury10Y: treasury10Y.length,
-                treasury2Y: treasury2Y.length,
-                mortgage30Y: mortgage30Y.length
+                treasury10Y: treasury10Y.length
             });
 
-            // Store series for change calculation
             this.ratesSeries.fed = fedFunds;
             this.ratesSeries.t10y = treasury10Y;
             this.ratesSeries.t2y = treasury2Y;
@@ -81,7 +84,6 @@ class InterestRateTracker {
             const t30Y = this.parseLatest(treasury30Y);
             const t5Y = this.parseLatest(treasury5Y);
 
-            // Store for later use
             this.rates.fed = fedRate;
             this.rates.t10y = t10Y;
             this.rates.t2y = t2Y;
@@ -89,7 +91,6 @@ class InterestRateTracker {
             this.rates.t30y = t30Y;
             this.rates.t5y = t5Y;
 
-            // Calculate 30-day changes
             const fedChange = this.calculateChange(fedFunds);
             const t10yChange = this.calculateChange(treasury10Y);
             const t2yChange = this.calculateChange(treasury2Y);
@@ -97,56 +98,20 @@ class InterestRateTracker {
             const t30yChange = this.calculateChange(treasury30Y);
             const t5yChange = this.calculateChange(treasury5Y);
 
-            console.log('📈 30-day changes:', { fedChange, t10yChange, t2yChange, mortgageChange });
+            console.log('📈 30-day changes:', { fedChange, t10yChange, t2yChange });
 
             grid.innerHTML = `
-                ${this.createRateCard(
-                    'Federal Funds Rate',
-                    fedRate + '%',
-                    'Federal Reserve Target Rate',
-                    '<i class="fas fa-landmark"></i>',
-                    fedChange
-                )}
-                ${this.createRateCard(
-                    'US Treasury 10Y',
-                    t10Y + '%',
-                    'Long-term Government Yield',
-                    '<i class="fas fa-chart-line"></i>',
-                    t10yChange
-                )}
-                ${this.createRateCard(
-                    'US Treasury 2Y',
-                    t2Y + '%',
-                    'Short-term Government Yield',
-                    '<i class="fas fa-chart-area"></i>',
-                    t2yChange
-                )}
-                ${this.createRateCard(
-                    'US Mortgage 30Y',
-                    mortgage + '%',
-                    'Average Fixed Mortgage Rate',
-                    '<i class="fas fa-home"></i>',
-                    mortgageChange
-                )}
-                ${this.createRateCard(
-                    'US Treasury 5Y',
-                    t5Y + '%',
-                    'Medium-term Government Yield',
-                    '<i class="fas fa-signal"></i>',
-                    t5yChange
-                )}
-                ${this.createRateCard(
-                    'US Treasury 30Y',
-                    t30Y + '%',
-                    'Ultra-long Government Yield',
-                    '<i class="fas fa-trophy"></i>',
-                    t30yChange
-                )}
+                ${this.createRateCard('Federal Funds Rate', fedRate + '%', 'Federal Reserve Target Rate', '<i class="fas fa-landmark"></i>', fedChange)}
+                ${this.createRateCard('US Treasury 10Y', t10Y + '%', 'Long-term Government Yield', '<i class="fas fa-chart-line"></i>', t10yChange)}
+                ${this.createRateCard('US Treasury 2Y', t2Y + '%', 'Short-term Government Yield', '<i class="fas fa-chart-area"></i>', t2yChange)}
+                ${this.createRateCard('US Mortgage 30Y', mortgage + '%', 'Average Fixed Mortgage Rate', '<i class="fas fa-home"></i>', mortgageChange)}
+                ${this.createRateCard('US Treasury 5Y', t5Y + '%', 'Medium-term Government Yield', '<i class="fas fa-signal"></i>', t5yChange)}
+                ${this.createRateCard('US Treasury 30Y', t30Y + '%', 'Ultra-long Government Yield', '<i class="fas fa-trophy"></i>', t30yChange)}
             `;
 
         } catch (error) {
             console.error('❌ Error loading current rates:', error);
-            grid.innerHTML = '<div style="padding: 40px; text-align: center; color: var(--text-secondary);">Error loading rates. Please refresh the page.</div>';
+            grid.innerHTML = '<div style="padding: 40px; text-align: center; color: var(--text-secondary);">Error loading rates. Please refresh.</div>';
         }
     }
 
@@ -200,21 +165,13 @@ class InterestRateTracker {
                 { name: '30Y', value: this.parseLatest(y30) }
             ];
 
-            console.log('✅ Yield curve data:', yieldData);
-
             this.charts.yieldCurve = Highcharts.chart('yieldCurveChart', {
-                chart: { 
-                    type: 'spline', 
-                    backgroundColor: 'transparent'
-                },
+                chart: { type: 'spline', backgroundColor: 'transparent' },
                 title: { 
                     text: 'US Treasury Yield Curve',
                     style: { color: 'var(--text-primary)', fontWeight: '800', fontSize: '1.3rem' }
                 },
-                subtitle: {
-                    text: 'Current market snapshot',
-                    style: { color: 'var(--text-secondary)' }
-                },
+                subtitle: { text: 'Current market snapshot', style: { color: 'var(--text-secondary)' } },
                 xAxis: { 
                     categories: yieldData.map(d => d.name),
                     labels: { style: { color: 'var(--text-secondary)', fontWeight: '600' } }
@@ -225,26 +182,14 @@ class InterestRateTracker {
                     gridLineColor: 'var(--glass-border)'
                 },
                 tooltip: {
-                    valueSuffix: '%',
-                    valueDecimals: 2,
+                    valueSuffix: '%', valueDecimals: 2,
                     backgroundColor: 'rgba(255, 255, 255, 0.95)',
-                    borderColor: '#667eea',
-                    borderRadius: 8,
-                    style: { fontWeight: '600' }
+                    borderColor: '#667eea', borderRadius: 8
                 },
                 plotOptions: {
                     spline: {
-                        marker: {
-                            enabled: true,
-                            radius: 6,
-                            fillColor: '#667eea'
-                        },
-                        lineWidth: 4,
-                        states: {
-                            hover: {
-                                lineWidth: 5
-                            }
-                        }
+                        marker: { enabled: true, radius: 6, fillColor: '#667eea' },
+                        lineWidth: 4
                     }
                 },
                 series: [{
@@ -264,14 +209,21 @@ class InterestRateTracker {
     }
 
     /* ========================================
-       HISTORICAL FED RATE
+       HISTORICAL FED RATE (LAST 20 YEARS)
        ======================================== */
     async loadHistoricalFedRate() {
         try {
-            console.log('📊 Loading historical Fed rate...');
+            console.log('📊 Loading historical Fed rate (last 20 years)...');
             
-            // Load with a reasonable limit (2000 observations covers ~8 years of daily data)
-            const fedData = await economicDataClient.getSeries('DFF', { limit: 5000 });
+            // Get data from last 20 years
+            const endDate = new Date();
+            const startDate = new Date();
+            startDate.setFullYear(startDate.getFullYear() - 20);
+            
+            const fedData = await economicDataClient.getSeries('DFF', {
+                observation_start: startDate.toISOString().split('T')[0],
+                observation_end: endDate.toISOString().split('T')[0]
+            });
 
             console.log(`✅ Loaded ${fedData.length} Fed Funds Rate observations`);
 
@@ -289,44 +241,28 @@ class InterestRateTracker {
             }
 
             this.charts.historicalFed = Highcharts.chart('historicalFedChart', {
-                chart: { 
-                    type: 'area', 
-                    backgroundColor: 'transparent',
-                    zoomType: 'x'
-                },
+                chart: { type: 'area', backgroundColor: 'transparent', zoomType: 'x' },
                 title: { 
                     text: 'Federal Funds Rate - Historical Evolution',
                     style: { color: 'var(--text-primary)', fontWeight: '800', fontSize: '1.3rem' }
                 },
-                subtitle: {
-                    text: 'Click and drag to zoom',
-                    style: { color: 'var(--text-secondary)' }
-                },
-                xAxis: { 
-                    type: 'datetime',
-                    labels: { style: { color: 'var(--text-secondary)' } }
-                },
+                subtitle: { text: 'Click and drag to zoom', style: { color: 'var(--text-secondary)' } },
+                xAxis: { type: 'datetime', labels: { style: { color: 'var(--text-secondary)' } } },
                 yAxis: { 
                     title: { text: 'Rate (%)', style: { color: 'var(--text-secondary)', fontWeight: '700' } },
                     labels: { style: { color: 'var(--text-secondary)' } },
                     gridLineColor: 'var(--glass-border)'
                 },
                 tooltip: {
-                    valueSuffix: '%',
-                    valueDecimals: 2,
-                    shared: true,
+                    valueSuffix: '%', valueDecimals: 2, shared: true,
                     backgroundColor: 'rgba(255, 255, 255, 0.95)',
-                    borderColor: '#3b82f6',
-                    borderRadius: 8
+                    borderColor: '#3b82f6', borderRadius: 8
                 },
                 plotOptions: {
                     area: {
                         fillColor: {
                             linearGradient: { x1: 0, y1: 0, x2: 0, y2: 1 },
-                            stops: [
-                                [0, 'rgba(59, 130, 246, 0.5)'],
-                                [1, 'rgba(59, 130, 246, 0.05)']
-                            ]
+                            stops: [[0, 'rgba(59, 130, 246, 0.5)'], [1, 'rgba(59, 130, 246, 0.05)']]
                         },
                         marker: { enabled: false },
                         lineWidth: 3,
@@ -334,10 +270,7 @@ class InterestRateTracker {
                         threshold: null
                     }
                 },
-                series: [{
-                    name: 'Fed Funds Rate',
-                    data: fedSeries
-                }],
+                series: [{ name: 'Fed Funds Rate', data: fedSeries }],
                 credits: { enabled: false },
                 legend: { enabled: false }
             });
@@ -350,21 +283,18 @@ class InterestRateTracker {
     }
 
     /* ========================================
-       RATE PROJECTIONS
+       PROJECTIONS
        ======================================== */
     async loadProjections() {
         const container = document.getElementById('projectionsContainer');
         
         const currentFed = parseFloat(this.rates.fed) || 4.50;
-        const currentT10Y = parseFloat(this.rates.t10y) || 4.25;
 
         const scenarios = [
             {
-                name: 'Optimistic',
-                class: 'optimistic',
+                name: 'Optimistic', class: 'optimistic',
                 icon: '<i class="fas fa-arrow-trend-down"></i>',
                 fedRate: (currentFed - 1.5).toFixed(2),
-                t10yRate: (currentT10Y - 0.75).toFixed(2),
                 description: 'Inflation under control, Fed pivots to rate cuts to support growth.',
                 probability: '35%',
                 impacts: [
@@ -374,11 +304,9 @@ class InterestRateTracker {
                 ]
             },
             {
-                name: 'Base Case',
-                class: 'base',
+                name: 'Base Case', class: 'base',
                 icon: '<i class="fas fa-equals"></i>',
                 fedRate: (currentFed - 0.75).toFixed(2),
-                t10yRate: (currentT10Y - 0.25).toFixed(2),
                 description: 'Gradual policy normalization, economy achieves soft landing.',
                 probability: '50%',
                 impacts: [
@@ -388,11 +316,9 @@ class InterestRateTracker {
                 ]
             },
             {
-                name: 'Pessimistic',
-                class: 'pessimistic',
+                name: 'Pessimistic', class: 'pessimistic',
                 icon: '<i class="fas fa-arrow-trend-up"></i>',
                 fedRate: (currentFed + 0.5).toFixed(2),
-                t10yRate: (currentT10Y + 0.5).toFixed(2),
                 description: 'Persistent inflation forces Fed to maintain restrictive policy longer.',
                 probability: '15%',
                 impacts: [
@@ -414,10 +340,8 @@ class InterestRateTracker {
                         </div>
                     </div>
                 </div>
-                
                 <div class='scenario-rate'>${scenario.fedRate}%</div>
                 <div class='scenario-description'>${scenario.description}</div>
-                
                 <div class='scenario-impact'>
                     <div class='scenario-impact-title'>12-Month Outlook</div>
                     ${scenario.impacts.map(impact => `
@@ -437,18 +361,14 @@ class InterestRateTracker {
 
     async loadProjectionChart() {
         try {
-            console.log('📊 Loading projection chart...');
-            
             const currentDate = new Date();
-            const projectionMonths = 12;
-            
             const currentFed = parseFloat(this.rates.fed) || 4.50;
             
             const optimisticData = [];
             const baseData = [];
             const pessimisticData = [];
             
-            for (let i = 0; i <= projectionMonths; i++) {
+            for (let i = 0; i <= 12; i++) {
                 const date = new Date(currentDate);
                 date.setMonth(date.getMonth() + i);
                 const timestamp = date.getTime();
@@ -459,69 +379,28 @@ class InterestRateTracker {
             }
 
             this.charts.projection = Highcharts.chart('projectionChart', {
-                chart: { 
-                    type: 'line', 
-                    backgroundColor: 'transparent'
-                },
+                chart: { type: 'line', backgroundColor: 'transparent' },
                 title: { 
                     text: 'Fed Funds Rate - 12-Month Projections',
                     style: { color: 'var(--text-primary)', fontWeight: '800', fontSize: '1.3rem' }
                 },
-                subtitle: {
-                    text: 'Scenario-based forecasts',
-                    style: { color: 'var(--text-secondary)' }
-                },
-                xAxis: { 
-                    type: 'datetime',
-                    labels: { style: { color: 'var(--text-secondary)' } }
-                },
+                subtitle: { text: 'Scenario-based forecasts', style: { color: 'var(--text-secondary)' } },
+                xAxis: { type: 'datetime', labels: { style: { color: 'var(--text-secondary)' } } },
                 yAxis: { 
                     title: { text: 'Rate (%)', style: { color: 'var(--text-secondary)', fontWeight: '700' } },
                     labels: { style: { color: 'var(--text-secondary)' } },
-                    gridLineColor: 'var(--glass-border)',
-                    min: 0
+                    gridLineColor: 'var(--glass-border)', min: 0
                 },
-                tooltip: {
-                    valueSuffix: '%',
-                    valueDecimals: 2,
-                    shared: true,
-                    backgroundColor: 'rgba(255, 255, 255, 0.95)',
-                    borderRadius: 8
-                },
-                plotOptions: {
-                    line: {
-                        marker: { enabled: false },
-                        lineWidth: 3
-                    }
-                },
+                tooltip: { valueSuffix: '%', valueDecimals: 2, shared: true, backgroundColor: 'rgba(255, 255, 255, 0.95)', borderRadius: 8 },
+                plotOptions: { line: { marker: { enabled: false }, lineWidth: 3 } },
                 series: [
-                    {
-                        name: 'Optimistic',
-                        data: optimisticData,
-                        color: '#10b981',
-                        dashStyle: 'Dash'
-                    },
-                    {
-                        name: 'Base Case',
-                        data: baseData,
-                        color: '#667eea',
-                        lineWidth: 4
-                    },
-                    {
-                        name: 'Pessimistic',
-                        data: pessimisticData,
-                        color: '#ef4444',
-                        dashStyle: 'Dash'
-                    }
+                    { name: 'Optimistic', data: optimisticData, color: '#10b981', dashStyle: 'Dash' },
+                    { name: 'Base Case', data: baseData, color: '#667eea', lineWidth: 4 },
+                    { name: 'Pessimistic', data: pessimisticData, color: '#ef4444', dashStyle: 'Dash' }
                 ],
                 credits: { enabled: false },
-                legend: { 
-                    enabled: true,
-                    itemStyle: { color: 'var(--text-primary)', fontWeight: '600' }
-                }
+                legend: { enabled: true, itemStyle: { color: 'var(--text-primary)', fontWeight: '600' } }
             });
-
-            console.log('✅ Projection chart created');
             
         } catch (error) {
             console.error('❌ Error loading projection chart:', error);
@@ -533,13 +412,7 @@ class InterestRateTracker {
        ======================================== */
     async generateAIRecommendations() {
         const container = document.getElementById('aiRecommendations');
-        
-        const today = new Date().toLocaleDateString('en-US', { 
-            weekday: 'long', 
-            year: 'numeric', 
-            month: 'long', 
-            day: 'numeric' 
-        });
+        const today = new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
 
         const fedRate = parseFloat(this.rates.fed) || 4.50;
         const t10y = parseFloat(this.rates.t10y) || 4.25;
@@ -552,34 +425,27 @@ class InterestRateTracker {
                 icon: spread < 0 ? 'bearish' : spread < 0.5 ? 'neutral' : 'bullish',
                 sentiment: spread < 0 ? 'bearish' : spread < 0.5 ? 'neutral' : 'bullish',
                 content: spread < 0 
-                    ? `The yield curve is <strong>inverted</strong> (10Y-2Y spread: ${spread}%), historically a recession indicator. Consider defensive positioning in your portfolio.`
+                    ? `The yield curve is <strong>inverted</strong> (10Y-2Y spread: ${spread}%), historically a recession indicator.`
                     : spread < 0.5
-                    ? `The yield curve is <strong>flattening</strong> (10Y-2Y spread: ${spread}%). Monitor Fed policy closely for directional shifts.`
+                    ? `The yield curve is <strong>flattening</strong> (10Y-2Y spread: ${spread}%). Monitor Fed policy closely.`
                     : `The yield curve is <strong>normal</strong> (10Y-2Y spread: ${spread}%), indicating healthy economic expectations.`
             },
             {
                 title: 'Fed Policy Stance',
                 icon: fedRate > 5 ? 'bearish' : fedRate > 4 ? 'neutral' : 'bullish',
                 sentiment: fedRate > 5 ? 'bearish' : fedRate > 4 ? 'neutral' : 'bullish',
-                content: fedRate > 5
-                    ? `Federal Funds Rate at <strong>${fedRate}%</strong> indicates restrictive monetary policy. Growth stocks may face headwinds. Focus on quality dividend payers.`
-                    : fedRate > 4
-                    ? `Fed Funds Rate at <strong>${fedRate}%</strong> suggests policy normalization. Balanced portfolio allocation recommended.`
-                    : `Fed Funds Rate at <strong>${fedRate}%</strong> indicates accommodative policy. Risk assets likely to benefit.`
+                content: `Fed Funds Rate at <strong>${fedRate}%</strong> suggests ${fedRate > 5 ? 'restrictive' : fedRate > 4 ? 'neutral' : 'accommodative'} monetary policy.`
             },
             {
                 title: 'Fixed Income Opportunity',
-                icon: 'bullish',
-                sentiment: 'bullish',
-                content: `With 10-Year Treasury at <strong>${t10y}%</strong>, fixed income offers attractive real yields. Consider laddering Treasury maturities to lock in current rates.`
+                icon: 'bullish', sentiment: 'bullish',
+                content: `With 10-Year Treasury at <strong>${t10y}%</strong>, fixed income offers attractive real yields.`
             },
             {
                 title: 'Mortgage Market',
-                icon: this.rates.mortgage > 7 ? 'bearish' : this.rates.mortgage > 6 ? 'neutral' : 'bullish',
-                sentiment: this.rates.mortgage > 7 ? 'bearish' : this.rates.mortgage > 6 ? 'neutral' : 'bullish',
-                content: this.rates.mortgage > 7
-                    ? `30-Year Mortgage at <strong>${this.rates.mortgage}%</strong> is pressuring housing affordability. Real estate sector may see reduced activity.`
-                    : `30-Year Mortgage at <strong>${this.rates.mortgage}%</strong> remains elevated but manageable. Monitor refinancing opportunities as rates stabilize.`
+                icon: this.rates.mortgage > 7 ? 'bearish' : 'neutral',
+                sentiment: this.rates.mortgage > 7 ? 'bearish' : 'neutral',
+                content: `30-Year Mortgage at <strong>${this.rates.mortgage}%</strong> ${this.rates.mortgage > 7 ? 'is pressuring housing affordability' : 'remains elevated but manageable'}.`
             }
         ];
 
@@ -602,17 +468,13 @@ class InterestRateTracker {
         container.innerHTML = `
             <div class='ai-recommendations-section'>
                 <div class='ai-header'>
-                    <div class='ai-icon'>
-                        <i class='fas fa-brain'></i>
-                    </div>
+                    <div class='ai-icon'><i class='fas fa-brain'></i></div>
                     <div class='ai-title-section'>
                         <h2>AI Market Intelligence</h2>
                         <div class='ai-date'>Updated: ${today}</div>
                     </div>
                 </div>
-                <div class='ai-insights-grid'>
-                    ${insightsHTML}
-                </div>
+                <div class='ai-insights-grid'>${insightsHTML}</div>
             </div>
         `;
     }
@@ -628,40 +490,36 @@ class InterestRateTracker {
         const t30y = parseFloat(this.rates.t30y) || 4.45;
         const t5y = parseFloat(this.rates.t5y) || 4.15;
         
-        const spread10y2y = (t10y - t2y).toFixed(2);
-        const spread30y10y = (t30y - t10y).toFixed(2);
-        const spread5y2y = (t5y - t2y).toFixed(2);
-
         const spreads = [
             {
                 title: '10Y - 2Y Spread',
-                value: spread10y2y,
-                interpretation: spread10y2y < -0.2 ? 'Deeply Inverted' : spread10y2y < 0 ? 'Inverted' : spread10y2y < 0.5 ? 'Flattening' : 'Normal',
-                class: spread10y2y < 0 ? 'inverted' : spread10y2y < 0.5 ? 'flat' : 'normal'
+                value: (t10y - t2y).toFixed(2),
+                interpretation: (t10y - t2y) < -0.2 ? 'Deeply Inverted' : (t10y - t2y) < 0 ? 'Inverted' : (t10y - t2y) < 0.5 ? 'Flattening' : 'Normal',
+                class: (t10y - t2y) < 0 ? 'inverted' : (t10y - t2y) < 0.5 ? 'flat' : 'normal'
             },
             {
                 title: '30Y - 10Y Spread',
-                value: spread30y10y,
-                interpretation: spread30y10y < 0.3 ? 'Compressed' : spread30y10y < 0.7 ? 'Moderate' : 'Steep',
-                class: spread30y10y < 0.3 ? 'flat' : 'normal'
+                value: (t30y - t10y).toFixed(2),
+                interpretation: (t30y - t10y) < 0.3 ? 'Compressed' : (t30y - t10y) < 0.7 ? 'Moderate' : 'Steep',
+                class: (t30y - t10y) < 0.3 ? 'flat' : 'normal'
             },
             {
                 title: '5Y - 2Y Spread',
-                value: spread5y2y,
-                interpretation: spread5y2y < -0.1 ? 'Inverted' : spread5y2y < 0.3 ? 'Flat' : 'Normal',
-                class: spread5y2y < 0 ? 'inverted' : spread5y2y < 0.3 ? 'flat' : 'normal'
+                value: (t5y - t2y).toFixed(2),
+                interpretation: (t5y - t2y) < -0.1 ? 'Inverted' : (t5y - t2y) < 0.3 ? 'Flat' : 'Normal',
+                class: (t5y - t2y) < 0 ? 'inverted' : (t5y - t2y) < 0.3 ? 'flat' : 'normal'
             }
         ];
 
-        const spreadCards = spreads.map(spread => `
-            <div class='spread-card'>
-                <h3 class='spread-title'>${spread.title}</h3>
-                <div class='spread-value'>${spread.value}%</div>
-                <div class='spread-interpretation ${spread.class}'>${spread.interpretation}</div>
-            </div>
-        `).join('');
-
-        container.innerHTML = `<div class='spread-analysis-grid'>${spreadCards}</div>`;
+        container.innerHTML = `<div class='spread-analysis-grid'>
+            ${spreads.map(s => `
+                <div class='spread-card'>
+                    <h3 class='spread-title'>${s.title}</h3>
+                    <div class='spread-value'>${s.value}%</div>
+                    <div class='spread-interpretation ${s.class}'>${s.interpretation}</div>
+                </div>
+            `).join('')}
+        </div>`;
     }
 
     /* ========================================
@@ -670,104 +528,64 @@ class InterestRateTracker {
     async loadEconomicImpact() {
         const container = document.getElementById('economicImpact');
         
-        const fedRate = parseFloat(this.rates.fed) || 4.50;
-        const mortgage = parseFloat(this.rates.mortgage) || 7.0;
-
         const impacts = [
             {
                 icon: '<i class="fas fa-home"></i>',
                 title: 'Housing Market',
-                description: `With mortgage rates at ${mortgage}%, housing affordability has declined significantly. Expect reduced home sales volume and potential price corrections in overheated markets.`,
-                metrics: [
-                    { label: 'Affordability', value: 'Low' },
-                    { label: 'Sales Trend', value: 'Declining' }
-                ]
+                description: `With mortgage rates at ${this.rates.mortgage}%, housing affordability has declined significantly.`,
+                metrics: [{ label: 'Affordability', value: 'Low' }, { label: 'Sales Trend', value: 'Declining' }]
             },
             {
                 icon: '<i class="fas fa-building"></i>',
                 title: 'Corporate Debt',
-                description: `Elevated interest rates increase borrowing costs for businesses. Companies with high leverage may face margin pressure and reduced capital expenditure.`,
-                metrics: [
-                    { label: 'Refinancing', value: 'Costly' },
-                    { label: 'CapEx', value: 'Reduced' }
-                ]
+                description: `Elevated interest rates increase borrowing costs for businesses.`,
+                metrics: [{ label: 'Refinancing', value: 'Costly' }, { label: 'CapEx', value: 'Reduced' }]
             },
             {
                 icon: '<i class="fas fa-piggy-bank"></i>',
                 title: 'Consumer Spending',
-                description: `Higher rates incentivize saving over spending. Credit card and auto loan rates have risen, reducing discretionary spending power.`,
-                metrics: [
-                    { label: 'Savings Rate', value: 'Rising' },
-                    { label: 'Credit Use', value: 'Declining' }
-                ]
+                description: `Higher rates incentivize saving over spending.`,
+                metrics: [{ label: 'Savings Rate', value: 'Rising' }, { label: 'Credit Use', value: 'Declining' }]
             },
             {
                 icon: '<i class="fas fa-chart-line"></i>',
                 title: 'Equity Markets',
-                description: `Restrictive monetary policy typically pressures equity valuations, especially growth stocks. Value and dividend-paying stocks may outperform.`,
-                metrics: [
-                    { label: 'P/E Multiple', value: 'Compressed' },
-                    { label: 'Preference', value: 'Value' }
-                ]
+                description: `Restrictive monetary policy typically pressures equity valuations.`,
+                metrics: [{ label: 'P/E Multiple', value: 'Compressed' }, { label: 'Preference', value: 'Value' }]
             }
         ];
 
-        const impactCards = impacts.map(impact => `
-            <div class='impact-card'>
-                <div class='impact-header'>
-                    <div class='impact-icon'>${impact.icon}</div>
-                    <h3 class='impact-title'>${impact.title}</h3>
+        container.innerHTML = `<div class='economic-impact-grid'>
+            ${impacts.map(i => `
+                <div class='impact-card'>
+                    <div class='impact-header'>
+                        <div class='impact-icon'>${i.icon}</div>
+                        <h3 class='impact-title'>${i.title}</h3>
+                    </div>
+                    <p class='impact-description'>${i.description}</p>
+                    <div class='impact-metrics'>
+                        ${i.metrics.map(m => `
+                            <div class='impact-metric'>
+                                <div class='impact-metric-label'>${m.label}</div>
+                                <div class='impact-metric-value'>${m.value}</div>
+                            </div>
+                        `).join('')}
+                    </div>
                 </div>
-                <p class='impact-description'>${impact.description}</p>
-                <div class='impact-metrics'>
-                    ${impact.metrics.map(metric => `
-                        <div class='impact-metric'>
-                            <div class='impact-metric-label'>${metric.label}</div>
-                            <div class='impact-metric-value'>${metric.value}</div>
-                        </div>
-                    `).join('')}
-                </div>
-            </div>
-        `).join('');
-
-        container.innerHTML = `<div class='economic-impact-grid'>${impactCards}</div>`;
+            `).join('')}
+        </div>`;
     }
 
     /* ========================================
-       MODALS - COMPLETELY REBUILT
+       MODALS - GLOBAL FUNCTION
        ======================================== */
-    setupModals() {
-        console.log('🔧 Setting up modals...');
-        
-        const chartWrappers = document.querySelectorAll('.chart-wrapper');
-        console.log(`Found ${chartWrappers.length} chart wrappers`);
-        
-        chartWrappers.forEach((wrapper) => {
-            const chart = wrapper.querySelector('.chart');
-            if (!chart) return;
-            
-            const chartId = chart.id;
-            console.log(`Adding click handler to: ${chartId}`);
-            
-            wrapper.style.cursor = 'pointer';
-            
-            wrapper.addEventListener('click', () => {
-                console.log(`Chart wrapper clicked: ${chartId}`);
-                this.openChartModal(chartId);
-            });
-        });
-        
-        console.log('✅ Modals setup complete');
-    }
-
-    openChartModal(chartId) {
-        console.log(`🔓 Opening modal for: ${chartId}`);
+    openModal(chartId) {
+        console.log(`🔓 Opening modal: ${chartId}`);
         
         const modalId = chartId + 'Modal';
         let modal = document.getElementById(modalId);
         
         if (!modal) {
-            console.log(`Creating new modal: ${modalId}`);
             modal = this.createModal(chartId);
             document.body.appendChild(modal);
         }
@@ -775,9 +593,7 @@ class InterestRateTracker {
         modal.classList.add('active');
         document.body.style.overflow = 'hidden';
         
-        setTimeout(() => {
-            this.renderModalChart(chartId);
-        }, 200);
+        setTimeout(() => this.renderModalChart(chartId), 200);
     }
 
     createModal(chartId) {
@@ -786,22 +602,22 @@ class InterestRateTracker {
         modal.className = 'modal';
         
         const titles = {
-            yieldCurveChart: 'US Treasury Yield Curve - Detailed View',
-            historicalFedChart: 'Federal Funds Rate - Historical Analysis',
-            projectionChart: 'Interest Rate Projections - Scenario Analysis'
+            yieldCurveChart: 'US Treasury Yield Curve',
+            historicalFedChart: 'Federal Funds Rate - Historical',
+            projectionChart: 'Rate Projections - 12 Months'
         };
 
         const descriptions = {
-            yieldCurveChart: 'The yield curve represents the relationship between bond yields and time to maturity. An inverted curve (short-term yields exceeding long-term) has historically preceded recessions.',
-            historicalFedChart: 'The Federal Funds Rate is the target rate set by the Federal Reserve for overnight lending between banks. It is the primary tool for monetary policy implementation.',
-            projectionChart: 'These projections are scenario-based forecasts derived from current economic conditions, Fed communications, and market expectations. Actual rates may vary significantly.'
+            yieldCurveChart: 'The yield curve represents bond yields across maturities. Inversion historically precedes recessions.',
+            historicalFedChart: 'The Federal Funds Rate is the Fed\'s primary monetary policy tool.',
+            projectionChart: 'Scenario-based forecasts from current economic conditions and Fed communications.'
         };
 
         modal.innerHTML = `
             <div class='modal-content'>
                 <div class='modal-header'>
-                    <h2><i class='fas fa-chart-area'></i> ${titles[chartId] || 'Chart Details'}</h2>
-                    <button class='modal-close'>
+                    <h2><i class='fas fa-chart-area'></i> ${titles[chartId]}</h2>
+                    <button class='modal-close' onclick="window.rateTracker.closeModal('${chartId}Modal')">
                         <i class='fas fa-times'></i>
                     </button>
                 </div>
@@ -809,30 +625,14 @@ class InterestRateTracker {
                     <div id='${chartId}ModalChart' class='modal-chart'></div>
                     <div class='modal-info'>
                         <h3><i class='fas fa-info-circle'></i> About This Chart</h3>
-                        <p>${descriptions[chartId] || 'Detailed chart information.'}</p>
+                        <p>${descriptions[chartId]}</p>
                     </div>
                 </div>
             </div>
         `;
         
-        // Close button
-        const closeBtn = modal.querySelector('.modal-close');
-        closeBtn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            this.closeModal(modal.id);
-        });
-        
-        // Close on background click
         modal.addEventListener('click', (e) => {
-            if (e.target === modal) {
-                this.closeModal(modal.id);
-            }
-        });
-        
-        // Prevent modal content clicks from closing
-        const modalContent = modal.querySelector('.modal-content');
-        modalContent.addEventListener('click', (e) => {
-            e.stopPropagation();
+            if (e.target === modal) this.closeModal(modal.id);
         });
         
         return modal;
@@ -844,7 +644,7 @@ class InterestRateTracker {
         const sourceChart = this.charts[chartKey];
         
         if (!sourceChart) {
-            console.error(`Source chart not found: ${chartKey}`);
+            console.error(`Chart not found: ${chartKey}`);
             return;
         }
 
@@ -852,16 +652,13 @@ class InterestRateTracker {
             const options = JSON.parse(JSON.stringify(sourceChart.userOptions));
             options.chart = options.chart || {};
             options.chart.height = 600;
-
             Highcharts.chart(modalChartId, options);
-            console.log(`✅ Modal chart rendered: ${modalChartId}`);
         } catch (error) {
-            console.error('❌ Error rendering modal chart:', error);
+            console.error('Error rendering modal chart:', error);
         }
     }
 
     closeModal(modalId) {
-        console.log(`🔒 Closing modal: ${modalId}`);
         const modal = document.getElementById(modalId);
         if (modal) {
             modal.classList.remove('active');
@@ -873,39 +670,23 @@ class InterestRateTracker {
        HELPERS
        ======================================== */
     parseLatest(series) {
-        if (!series || !Array.isArray(series) || series.length === 0) {
-            console.warn('No data in series');
-            return 'N/A';
-        }
-        
+        if (!series || !Array.isArray(series) || series.length === 0) return 'N/A';
         for (let i = series.length - 1; i >= 0; i--) {
-            if (series[i].value !== '.' && series[i].value !== null && series[i].value !== undefined) {
-                const value = parseFloat(series[i].value).toFixed(2);
-                console.log(`Latest value: ${value} (${series[i].date})`);
-                return value;
+            if (series[i].value !== '.' && series[i].value !== null) {
+                return parseFloat(series[i].value).toFixed(2);
             }
         }
-        
-        console.warn('No valid data found in series');
         return 'N/A';
     }
 
     calculateChange(series) {
-        if (!series || !Array.isArray(series) || series.length < 2) {
-            console.warn('Insufficient data for change calculation');
-            return 0;
-        }
+        if (!series || !Array.isArray(series) || series.length < 2) return 0;
         
-        const validData = series.filter(d => d.value !== '.' && d.value !== null && d.value !== undefined);
-        
-        if (validData.length < 2) {
-            console.warn('Not enough valid data points');
-            return 0;
-        }
+        const validData = series.filter(d => d.value !== '.' && d.value !== null);
+        if (validData.length < 2) return 0;
         
         const latest = parseFloat(validData[validData.length - 1].value);
         const latestDate = new Date(validData[validData.length - 1].date);
-        
         const thirtyDaysAgo = new Date(latestDate);
         thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
         
@@ -913,27 +694,18 @@ class InterestRateTracker {
         let closestDiff = Math.abs(new Date(closestPoint.date).getTime() - thirtyDaysAgo.getTime());
         
         for (let i = 1; i < validData.length - 1; i++) {
-            const pointDate = new Date(validData[i].date);
-            const diff = Math.abs(pointDate.getTime() - thirtyDaysAgo.getTime());
-            
+            const diff = Math.abs(new Date(validData[i].date).getTime() - thirtyDaysAgo.getTime());
             if (diff < closestDiff) {
                 closestDiff = diff;
                 closestPoint = validData[i];
             }
         }
         
-        const previous = parseFloat(closestPoint.value);
-        const change = latest - previous;
-        
-        return change;
+        return latest - parseFloat(closestPoint.value);
     }
 }
 
-/* ========================================
-   INITIALIZATION
-   ======================================== */
 let interestRateTracker;
-
 document.addEventListener('DOMContentLoaded', () => {
     interestRateTracker = new InterestRateTracker();
     interestRateTracker.init();
