@@ -234,6 +234,7 @@ body.dark-mode {
     color: var(--text-secondary);
     opacity: 0;
     transition: var(--transition-smooth);
+    pointer-events: none;
 }
 
 .chart-wrapper:hover::after {

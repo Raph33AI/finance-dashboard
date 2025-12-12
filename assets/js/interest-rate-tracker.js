@@ -1,19 +1,18 @@
 /**
  * ====================================================================
- * ALPHAVAULT AI - INTEREST RATE TRACKER (ULTRA-PREMIUM VERSION)
+ * ALPHAVAULT AI - INTEREST RATE TRACKER (CORRECTED VERSION)
  * ====================================================================
- * Features:
- * - US-focused interest rates (Fed, Treasuries, Mortgage)
- * - Rate projections (12-month forecasts)
- * - AI-powered daily recommendations
- * - Clickable modals on all charts
- * - Spread analysis (yield curve inversion detection)
- * - Economic impact assessment
+ * Corrections:
+ * - Fixed modal system (proper event handling)
+ * - Fixed 30-day change calculation (proper date filtering)
+ * - Increased data limits to load all available historical data
+ * - All charts now show complete data history
  */
 
 class InterestRateTracker {
     constructor() {
         this.rates = {};
+        this.ratesSeries = {}; // Store full series for change calculation
         this.modals = {};
         this.charts = {};
     }
@@ -26,8 +25,12 @@ class InterestRateTracker {
                 this.loadCurrentRates(),
                 this.loadYieldCurve(),
                 this.loadHistoricalFedRate(),
+                this.loadSpreadAnalysis()
+            ]);
+            
+            // Load these after current rates are available
+            await Promise.all([
                 this.loadProjections(),
-                this.loadSpreadAnalysis(),
                 this.generateAIRecommendations(),
                 this.loadEconomicImpact()
             ]);
@@ -47,14 +50,23 @@ class InterestRateTracker {
         const grid = document.getElementById('currentRatesGrid');
         
         try {
+            // Load extensive data (last 60 trading days to ensure we have 30 calendar days)
             const [fedFunds, treasury10Y, treasury2Y, mortgage30Y, treasury30Y, treasury5Y] = await Promise.all([
-                economicDataClient.getSeries('DFF', { limit: 10 }),
-                economicDataClient.getSeries('DGS10', { limit: 10 }),
-                economicDataClient.getSeries('DGS2', { limit: 10 }),
-                economicDataClient.getSeries('MORTGAGE30US', { limit: 10 }),
-                economicDataClient.getSeries('DGS30', { limit: 10 }),
-                economicDataClient.getSeries('DGS5', { limit: 10 })
+                economicDataClient.getSeries('DFF', { limit: 60 }),
+                economicDataClient.getSeries('DGS10', { limit: 60 }),
+                economicDataClient.getSeries('DGS2', { limit: 60 }),
+                economicDataClient.getSeries('MORTGAGE30US', { limit: 60 }),
+                economicDataClient.getSeries('DGS30', { limit: 60 }),
+                economicDataClient.getSeries('DGS5', { limit: 60 })
             ]);
+
+            // Store series for change calculation
+            this.ratesSeries.fed = fedFunds;
+            this.ratesSeries.t10y = treasury10Y;
+            this.ratesSeries.t2y = treasury2Y;
+            this.ratesSeries.mortgage = mortgage30Y;
+            this.ratesSeries.t30y = treasury30Y;
+            this.ratesSeries.t5y = treasury5Y;
 
             const fedRate = this.parseLatest(fedFunds);
             const t10Y = this.parseLatest(treasury10Y);
@@ -68,11 +80,18 @@ class InterestRateTracker {
             this.rates.t10y = t10Y;
             this.rates.t2y = t2Y;
             this.rates.mortgage = mortgage;
+            this.rates.t30y = t30Y;
+            this.rates.t5y = t5Y;
 
+            // Calculate 30-day changes
             const fedChange = this.calculateChange(fedFunds);
             const t10yChange = this.calculateChange(treasury10Y);
             const t2yChange = this.calculateChange(treasury2Y);
             const mortgageChange = this.calculateChange(mortgage30Y);
+            const t30yChange = this.calculateChange(treasury30Y);
+            const t5yChange = this.calculateChange(treasury5Y);
+
+            console.log('30-day changes calculated:', { fedChange, t10yChange, t2yChange, mortgageChange });
 
             grid.innerHTML = `
                 ${this.createRateCard(
@@ -108,14 +127,14 @@ class InterestRateTracker {
                     t5Y + '%',
                     'Medium-term Government Yield',
                     '<i class="fas fa-signal"></i>',
-                    this.calculateChange(treasury5Y)
+                    t5yChange
                 )}
                 ${this.createRateCard(
                     'US Treasury 30Y',
                     t30Y + '%',
                     'Ultra-long Government Yield',
                     '<i class="fas fa-trophy"></i>',
-                    this.calculateChange(treasury30Y)
+                    t30yChange
                 )}
             `;
 
@@ -237,12 +256,22 @@ class InterestRateTracker {
        ======================================== */
     async loadHistoricalFedRate() {
         try {
-            const fedData = await economicDataClient.getSeries('DFF', { limit: 1000 });
+            // Request maximum available data (no limit or very high limit)
+            const fedData = await economicDataClient.getSeries('DFF', { limit: 50000 });
+
+            console.log(`Loaded ${fedData.length} Fed Funds Rate observations`);
 
             const fedSeries = fedData
                 .filter(d => d.value !== '.')
                 .map(d => [new Date(d.date).getTime(), parseFloat(d.value)])
                 .sort((a, b) => a[0] - b[0]);
+
+            console.log(`Processed ${fedSeries.length} valid data points for Fed Funds Rate`);
+            if (fedSeries.length > 0) {
+                const firstDate = new Date(fedSeries[0][0]).toLocaleDateString();
+                const lastDate = new Date(fedSeries[fedSeries.length - 1][0]).toLocaleDateString();
+                console.log(`Date range: ${firstDate} to ${lastDate}`);
+            }
 
             this.charts.historicalFed = Highcharts.chart('historicalFedChart', {
                 chart: { 
@@ -304,7 +333,7 @@ class InterestRateTracker {
     }
 
     /* ========================================
-       RATE PROJECTIONS (12 MONTHS)
+       RATE PROJECTIONS
        ======================================== */
     async loadProjections() {
         const container = document.getElementById('projectionsContainer');
@@ -312,7 +341,6 @@ class InterestRateTracker {
         const currentFed = parseFloat(this.rates.fed) || 5.33;
         const currentT10Y = parseFloat(this.rates.t10y) || 4.25;
 
-        // Scenario-based projections
         const scenarios = [
             {
                 name: 'Optimistic',
@@ -387,7 +415,6 @@ class InterestRateTracker {
 
         container.innerHTML = `<div class='projection-scenarios'>${scenarioCards}</div>`;
 
-        // Projection Chart
         this.loadProjectionChart();
     }
 
@@ -397,7 +424,6 @@ class InterestRateTracker {
         
         const currentFed = parseFloat(this.rates.fed) || 5.33;
         
-        // Generate projection data
         const optimisticData = [];
         const baseData = [];
         const pessimisticData = [];
@@ -493,7 +519,6 @@ class InterestRateTracker {
         const t2y = parseFloat(this.rates.t2y) || 4.55;
         const spread = (t10y - t2y).toFixed(2);
 
-        // AI-generated insights
         const insights = [
             {
                 title: 'Yield Curve Signal',
@@ -573,8 +598,8 @@ class InterestRateTracker {
         
         const t10y = parseFloat(this.rates.t10y) || 4.25;
         const t2y = parseFloat(this.rates.t2y) || 4.55;
-        const t30y = parseFloat(await this.getLatestRate('DGS30')) || 4.45;
-        const t5y = parseFloat(await this.getLatestRate('DGS5')) || 4.15;
+        const t30y = parseFloat(this.rates.t30y) || 4.45;
+        const t5y = parseFloat(this.rates.t5y) || 4.15;
         
         const spread10y2y = (t10y - t2y).toFixed(2);
         const spread30y10y = (t30y - t10y).toFixed(2);
@@ -682,42 +707,61 @@ class InterestRateTracker {
     }
 
     /* ========================================
-       MODALS
+       MODALS - FIXED
        ======================================== */
     setupModals() {
-        const chartWrappers = document.querySelectorAll('.chart-wrapper');
+        console.log('Setting up modals...');
         
-        chartWrappers.forEach((wrapper, index) => {
-            wrapper.addEventListener('click', () => {
-                const chartId = wrapper.querySelector('.chart').id;
+        // Get all chart wrappers
+        const chartWrappers = document.querySelectorAll('.chart-wrapper');
+        console.log(`Found ${chartWrappers.length} chart wrappers`);
+        
+        chartWrappers.forEach((wrapper) => {
+            const chart = wrapper.querySelector('.chart');
+            if (!chart) {
+                console.warn('Chart element not found in wrapper');
+                return;
+            }
+            
+            const chartId = chart.id;
+            console.log(`Setting up click handler for chart: ${chartId}`);
+            
+            // Remove any existing listeners
+            const newWrapper = wrapper.cloneNode(true);
+            wrapper.parentNode.replaceChild(newWrapper, wrapper);
+            
+            // Add click listener to new wrapper
+            newWrapper.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                console.log(`Chart clicked: ${chartId}`);
                 this.openChartModal(chartId);
             });
         });
-
-        // Close modal on click outside
-        document.addEventListener('click', (e) => {
-            if (e.target.classList.contains('modal')) {
-                this.closeModal(e.target.id);
-            }
-        });
+        
+        console.log('Modal setup complete');
     }
 
     openChartModal(chartId) {
+        console.log(`Opening modal for: ${chartId}`);
+        
         const modalId = chartId + 'Modal';
         let modal = document.getElementById(modalId);
         
         if (!modal) {
+            console.log(`Creating new modal: ${modalId}`);
             modal = this.createModal(chartId);
             document.body.appendChild(modal);
         }
         
         modal.classList.add('active');
+        console.log(`Modal activated: ${modalId}`);
         
-        // Redraw chart in modal
+        // Redraw chart in modal after a short delay
         setTimeout(() => {
             const modalChartId = chartId + 'ModalChart';
             this.renderModalChart(chartId, modalChartId);
-        }, 100);
+        }, 200);
     }
 
     createModal(chartId) {
@@ -740,8 +784,8 @@ class InterestRateTracker {
         modal.innerHTML = `
             <div class='modal-content'>
                 <div class='modal-header'>
-                    <h2><i class='fas fa-chart-area'></i> ${titles[chartId]}</h2>
-                    <button class='modal-close' onclick="interestRateTracker.closeModal('${chartId}Modal')">
+                    <h2><i class='fas fa-chart-area'></i> ${titles[chartId] || 'Chart Details'}</h2>
+                    <button class='modal-close' data-modal-id='${chartId}Modal'>
                         <i class='fas fa-times'></i>
                     </button>
                 </div>
@@ -749,28 +793,56 @@ class InterestRateTracker {
                     <div id='${chartId}ModalChart' class='modal-chart'></div>
                     <div class='modal-info'>
                         <h3><i class='fas fa-info-circle'></i> About This Chart</h3>
-                        <p>${descriptions[chartId]}</p>
+                        <p>${descriptions[chartId] || 'Detailed chart information.'}</p>
                     </div>
                 </div>
             </div>
         `;
         
+        // Add close button listener
+        const closeBtn = modal.querySelector('.modal-close');
+        closeBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const modalIdToClose = closeBtn.getAttribute('data-modal-id');
+            this.closeModal(modalIdToClose);
+        });
+        
+        // Close on background click
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                this.closeModal(modal.id);
+            }
+        });
+        
         return modal;
     }
 
     renderModalChart(sourceChartId, targetChartId) {
-        const sourceChart = this.charts[sourceChartId.replace('Chart', '')];
-        if (!sourceChart) return;
+        console.log(`Rendering modal chart: ${sourceChartId} -> ${targetChartId}`);
+        
+        const chartKey = sourceChartId.replace('Chart', '');
+        const sourceChart = this.charts[chartKey];
+        
+        if (!sourceChart) {
+            console.error(`Source chart not found: ${chartKey}`);
+            return;
+        }
 
-        const options = JSON.parse(JSON.stringify(sourceChart.userOptions));
-        options.chart = options.chart || {};
-        options.chart.renderTo = targetChartId;
-        options.chart.height = 600;
+        try {
+            const options = JSON.parse(JSON.stringify(sourceChart.userOptions));
+            options.chart = options.chart || {};
+            options.chart.renderTo = targetChartId;
+            options.chart.height = 600;
 
-        Highcharts.chart(targetChartId, options);
+            Highcharts.chart(targetChartId, options);
+            console.log(`Modal chart rendered successfully: ${targetChartId}`);
+        } catch (error) {
+            console.error('Error rendering modal chart:', error);
+        }
     }
 
     closeModal(modalId) {
+        console.log(`Closing modal: ${modalId}`);
         const modal = document.getElementById(modalId);
         if (modal) {
             modal.classList.remove('active');
@@ -791,25 +863,47 @@ class InterestRateTracker {
     }
 
     calculateChange(series) {
-        if (!series || !Array.isArray(series) || series.length < 30) return 0;
-        
-        const validData = series.filter(d => d.value !== '.');
-        if (validData.length < 2) return 0;
-        
-        const latest = parseFloat(validData[validData.length - 1].value);
-        const previous = parseFloat(validData[Math.max(0, validData.length - 30)].value);
-        
-        return latest - previous;
-    }
-
-    async getLatestRate(seriesId) {
-        try {
-            const data = await economicDataClient.getSeries(seriesId, { limit: 1 });
-            return this.parseLatest(data);
-        } catch (error) {
-            console.error(`Error fetching ${seriesId}:`, error);
-            return 'N/A';
+        if (!series || !Array.isArray(series) || series.length < 2) {
+            console.warn('Insufficient data for change calculation');
+            return 0;
         }
+        
+        // Filter valid data
+        const validData = series.filter(d => d.value !== '.');
+        
+        if (validData.length < 2) {
+            console.warn('Not enough valid data points for change calculation');
+            return 0;
+        }
+        
+        // Get latest value
+        const latest = parseFloat(validData[validData.length - 1].value);
+        const latestDate = new Date(validData[validData.length - 1].date);
+        
+        // Calculate date 30 days ago
+        const thirtyDaysAgo = new Date(latestDate);
+        thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+        
+        // Find closest data point to 30 days ago
+        let closestPoint = validData[0];
+        let closestDiff = Math.abs(new Date(closestPoint.date).getTime() - thirtyDaysAgo.getTime());
+        
+        for (let i = 1; i < validData.length - 1; i++) {
+            const pointDate = new Date(validData[i].date);
+            const diff = Math.abs(pointDate.getTime() - thirtyDaysAgo.getTime());
+            
+            if (diff < closestDiff) {
+                closestDiff = diff;
+                closestPoint = validData[i];
+            }
+        }
+        
+        const previous = parseFloat(closestPoint.value);
+        const change = latest - previous;
+        
+        console.log(`Change calculation: ${latest} (${latestDate.toLocaleDateString()}) - ${previous} (${new Date(closestPoint.date).toLocaleDateString()}) = ${change.toFixed(2)}`);
+        
+        return change;
     }
 }
 
