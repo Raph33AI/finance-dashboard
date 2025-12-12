@@ -276,7 +276,7 @@
                     
                     <div id='projectionsContainer'></div>
                     
-                    <div class='chart-wrapper' style='margin-top: 32px;'>
+                    <div class='chart-wrapper' onclick="window.rateTracker.openModal('projectionChart')" style="cursor: pointer; margin-top: 32px;">
                         <div id='projectionChart' class='chart' style='height: 450px;'></div>
                     </div>
                 </div>
@@ -313,9 +313,18 @@
                     </div>
                 </div>
 
-                <!-- Projections -->
-                <div class='chart-wrapper' onclick="window.rateTracker.openModal('projectionChart')" style="cursor: pointer; margin-top: 32px;">
-                    <div id='projectionChart' class='chart' style='height: 450px;'></div>
+                <!-- Spread Analysis -->
+                <div class='section'>
+                    <div class='section-header-with-info'>
+                        <h2 class='section-title'>
+                            <i class='fas fa-exchange-alt'></i> Yield Curve Spread Analysis
+                        </h2>
+                        <button class='info-btn' title='Information'>
+                            <i class='fas fa-info'></i>
+                        </button>
+                    </div>
+                    
+                    <div id='spreadAnalysis'></div>
                 </div>
 
                 <!-- Economic Impact -->
