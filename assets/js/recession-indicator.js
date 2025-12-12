@@ -1,14 +1,14 @@
 /**
  * ====================================================================
- * ALPHAVAULT AI - RECESSION INDICATORS (ULTRA-COMPLETE VERSION)
+ * ALPHAVAULT AI - RECESSION INDICATORS (FINAL VERSION)
  * ====================================================================
  * Features:
  * - AI Recession Probability Score
  * - 6 Key Indicators
- * - 4 Advanced Charts with RECENT DATA
+ * - 4 Advanced Charts with MOST RECENT DATA (automated)
  * - Historical Recessions Timeline
  * - Time Range Selection (2Y, 5Y, 10Y, ALL)
- * - Educational Modals (FIXED)
+ * - Educational Modals
  * - NO EMOJIS - FontAwesome Icons Only
  */
 
@@ -24,7 +24,7 @@ class RecessionIndicator {
         console.log('⚠ Initializing Ultra-Complete Recession Indicators...');
         
         try {
-            // Setup modals FIRST (before any buttons are created)
+            // Setup modals FIRST
             this.setupModals();
             
             // Initialize all components
@@ -53,6 +53,51 @@ class RecessionIndicator {
 
     /**
      * ========================================
+     * GET MOST RECENT DATA (AUTOMATED)
+     * ========================================
+     */
+    async getMostRecentData(seriesId, requestedPoints = 100) {
+        try {
+            // Request MUCH more data than needed to ensure we get recent data
+            const rawData = await economicDataClient.getSeries(seriesId, { limit: 10000 });
+            
+            if (!rawData || rawData.length === 0) {
+                console.warn(`⚠ No data returned for ${seriesId}`);
+                return [];
+            }
+            
+            // Filter out null/invalid values
+            const validData = rawData
+                .filter(d => d.value !== '.' && d.value !== null && !isNaN(parseFloat(d.value)))
+                .map(d => ({
+                    date: d.date,
+                    timestamp: new Date(d.date).getTime(),
+                    value: parseFloat(d.value)
+                }))
+                .sort((a, b) => b.timestamp - a.timestamp); // Sort descending (most recent first)
+            
+            // Take only the requested number of most recent points
+            const recentData = validData.slice(0, requestedPoints);
+            
+            // Sort ascending for chart (oldest to newest)
+            const chartData = recentData.reverse();
+            
+            if (chartData.length > 0) {
+                const oldestDate = new Date(chartData[0].timestamp).toLocaleDateString();
+                const newestDate = new Date(chartData[chartData.length - 1].timestamp).toLocaleDateString();
+                console.log(`📊 ${seriesId}: ${chartData.length} points from ${oldestDate} to ${newestDate}`);
+            }
+            
+            return chartData;
+            
+        } catch (error) {
+            console.error(`❌ Error fetching ${seriesId}:`, error);
+            return [];
+        }
+    }
+
+    /**
+     * ========================================
      * RECESSION PROBABILITY SCORE (AI)
      * ========================================
      */
@@ -60,53 +105,46 @@ class RecessionIndicator {
         const container = document.getElementById('recessionScoreCard');
         
         try {
-            // Fetch all key indicators with RECENT DATA (limit 50 to get latest non-null values)
-            const [yieldSpread, unemployment, pmi, leadingIndex, consumerSentiment] = await Promise.all([
-                economicDataClient.getSeries('T10Y2Y', { limit: 50 }),
-                economicDataClient.getSeries('UNRATE', { limit: 50 }),
-                economicDataClient.getSeries('MANEMP', { limit: 50 }),
-                economicDataClient.getSeries('USSLIND', { limit: 50 }),
-                economicDataClient.getSeries('UMCSENT', { limit: 50 })
+            // Fetch most recent values
+            const [yieldData, unempData, pmiData, leadingData, sentimentData] = await Promise.all([
+                this.getMostRecentData('T10Y2Y', 1),
+                this.getMostRecentData('UNRATE', 1),
+                this.getMostRecentData('MANEMP', 1),
+                this.getMostRecentData('USSLIND', 1),
+                this.getMostRecentData('UMCSENT', 1)
             ]);
 
-            // Parse values
-            const spread = parseFloat(this.parseLatest(yieldSpread));
-            const unemp = parseFloat(this.parseLatest(unemployment));
-            const pmiValue = parseFloat(this.parseLatest(pmi));
-            const leading = parseFloat(this.parseLatest(leadingIndex));
-            const sentiment = parseFloat(this.parseLatest(consumerSentiment));
+            const spread = yieldData[0]?.value || 0;
+            const unemp = unempData[0]?.value || 0;
+            const pmiValue = pmiData[0]?.value || 0;
+            const leading = leadingData[0]?.value || 0;
+            const sentiment = sentimentData[0]?.value || 0;
 
             console.log('📊 Latest Economic Data:', { spread, unemp, pmiValue, leading, sentiment });
 
-            // AI Scoring Logic (weighted average)
+            // AI Scoring Logic
             let score = 0;
 
-            // Yield Curve (30% weight)
             if (spread < -0.5) score += 30;
             else if (spread < 0) score += 20;
             else if (spread < 0.5) score += 10;
 
-            // Unemployment (25% weight)
             if (unemp > 6) score += 25;
             else if (unemp > 5) score += 15;
             else if (unemp > 4) score += 8;
 
-            // PMI/Manufacturing (20% weight)
             if (pmiValue < 45) score += 20;
             else if (pmiValue < 48) score += 12;
             else if (pmiValue < 50) score += 6;
 
-            // Leading Index (15% weight)
             if (leading < 95) score += 15;
             else if (leading < 98) score += 8;
 
-            // Consumer Sentiment (10% weight)
             if (sentiment < 60) score += 10;
             else if (sentiment < 70) score += 5;
 
             this.recessionProbability = Math.min(score, 100);
 
-            // Determine status
             let status, statusLabel, statusIcon;
             if (score >= 70) {
                 status = 'high';
@@ -132,7 +170,7 @@ class RecessionIndicator {
                         ${statusIcon} ${statusLabel}
                     </div>
                     <div class='recession-score-description'>
-                        Based on analysis of 10+ key economic indicators including yield curve, unemployment, PMI, consumer sentiment, and leading economic index. Updated daily.
+                        Based on analysis of 10+ key economic indicators including yield curve, unemployment, PMI, consumer sentiment, and leading economic index. Updated daily with the most recent available data.
                     </div>
                 </div>
             `;
@@ -156,7 +194,6 @@ class RecessionIndicator {
         let recommendations = [];
 
         if (riskLevel >= 70) {
-            // HIGH RISK
             recommendations = [
                 {
                     type: 'reduce',
@@ -184,7 +221,6 @@ class RecessionIndicator {
                 }
             ];
         } else if (riskLevel >= 40) {
-            // MODERATE RISK
             recommendations = [
                 {
                     type: 'hold',
@@ -212,7 +248,6 @@ class RecessionIndicator {
                 }
             ];
         } else {
-            // LOW RISK
             recommendations = [
                 {
                     type: 'increase',
@@ -265,24 +300,22 @@ class RecessionIndicator {
         const grid = document.getElementById('indicatorsGrid');
         
         try {
-            // Fetch all indicators with RECENT DATA (limit 50)
-            const [yieldSpread, unemployment, pmi, leadingIndex, consumerSentiment, retailSales] = await Promise.all([
-                economicDataClient.getSeries('T10Y2Y', { limit: 50 }),
-                economicDataClient.getSeries('UNRATE', { limit: 50 }),
-                economicDataClient.getSeries('MANEMP', { limit: 50 }),
-                economicDataClient.getSeries('USSLIND', { limit: 50 }),
-                economicDataClient.getSeries('UMCSENT', { limit: 50 }),
-                economicDataClient.getSeries('RSXFS', { limit: 50 })
+            const [yieldData, unempData, pmiData, leadingData, sentimentData, retailData] = await Promise.all([
+                this.getMostRecentData('T10Y2Y', 1),
+                this.getMostRecentData('UNRATE', 1),
+                this.getMostRecentData('MANEMP', 1),
+                this.getMostRecentData('USSLIND', 1),
+                this.getMostRecentData('UMCSENT', 1),
+                this.getMostRecentData('RSXFS', 1)
             ]);
 
-            const spread = this.parseLatest(yieldSpread);
-            const unemp = this.parseLatest(unemployment);
-            const pmiValue = this.parseLatest(pmi);
-            const leading = this.parseLatest(leadingIndex);
-            const sentiment = this.parseLatest(consumerSentiment);
-            const retail = this.parseLatest(retailSales);
+            const spread = yieldData[0]?.value.toFixed(2) || 'N/A';
+            const unemp = unempData[0]?.value.toFixed(2) || 'N/A';
+            const pmiValue = pmiData[0]?.value.toFixed(2) || 'N/A';
+            const leading = leadingData[0]?.value.toFixed(2) || 'N/A';
+            const sentiment = sentimentData[0]?.value.toFixed(2) || 'N/A';
+            const retail = retailData[0]?.value.toFixed(0) || 'N/A';
 
-            // Determine statuses
             const indicators = [
                 {
                     title: 'Yield Curve (10Y-2Y)',
@@ -336,7 +369,6 @@ class RecessionIndicator {
 
             grid.innerHTML = indicators.map(ind => this.createIndicatorCard(ind)).join('');
 
-            // Add click listeners to info buttons AFTER HTML is rendered
             setTimeout(() => {
                 indicators.forEach(ind => {
                     const btn = document.querySelector(`[data-indicator-modal="${ind.modalId}"]`);
@@ -376,30 +408,26 @@ class RecessionIndicator {
 
     /**
      * ========================================
-     * YIELD CURVE SPREAD CHART (RECENT DATA)
+     * YIELD CURVE SPREAD CHART (MOST RECENT DATA)
      * ========================================
      */
     async loadYieldSpreadChart() {
         try {
-            const outputsize = this.getOutputSize();
-            const spreadData = await economicDataClient.getSeries('T10Y2Y', { limit: outputsize });
+            const requestedPoints = this.getRequestedPoints();
+            const spreadData = await this.getMostRecentData('T10Y2Y', requestedPoints);
 
-            const chartData = spreadData
-                .filter(d => d.value !== '.')
-                .map(d => [new Date(d.date).getTime(), parseFloat(d.value)])
-                .sort((a, b) => a[0] - b[0]); // Sort by date ascending
+            if (spreadData.length === 0) {
+                throw new Error('No yield spread data available');
+            }
 
-            console.log('📈 Yield Spread Chart - Data points:', chartData.length);
-            console.log('📅 Latest date:', new Date(chartData[chartData.length - 1][0]).toLocaleDateString());
+            const chartData = spreadData.map(d => [d.timestamp, d.value]);
 
             this.renderChart('yieldSpreadChart', {
                 chart: { 
                     type: 'area', 
                     backgroundColor: 'transparent'
                 },
-                title: { 
-                    text: null
-                },
+                title: { text: null },
                 xAxis: { 
                     type: 'datetime',
                     labels: { style: { color: 'var(--text-secondary)' } }
@@ -462,29 +490,26 @@ class RecessionIndicator {
 
     /**
      * ========================================
-     * SAHM RULE CHART (RECENT DATA)
+     * SAHM RULE CHART (MOST RECENT DATA)
      * ========================================
      */
     async loadSahmRuleChart() {
         try {
-            const outputsize = this.getOutputSize();
-            const sahmData = await economicDataClient.getSeries('SAHMREALTIME', { limit: outputsize });
+            const requestedPoints = this.getRequestedPoints();
+            const sahmData = await this.getMostRecentData('SAHMREALTIME', requestedPoints);
 
-            const chartData = sahmData
-                .filter(d => d.value !== '.')
-                .map(d => [new Date(d.date).getTime(), parseFloat(d.value)])
-                .sort((a, b) => a[0] - b[0]);
+            if (sahmData.length === 0) {
+                throw new Error('No Sahm Rule data available');
+            }
 
-            console.log('📈 Sahm Rule Chart - Data points:', chartData.length);
+            const chartData = sahmData.map(d => [d.timestamp, d.value]);
 
             this.renderChart('sahmRuleChart', {
                 chart: { 
                     type: 'line', 
                     backgroundColor: 'transparent'
                 },
-                title: { 
-                    text: null
-                },
+                title: { text: null },
                 xAxis: { 
                     type: 'datetime',
                     labels: { style: { color: 'var(--text-secondary)' } }
@@ -540,29 +565,26 @@ class RecessionIndicator {
 
     /**
      * ========================================
-     * UNEMPLOYMENT RATE CHART (RECENT DATA)
+     * UNEMPLOYMENT RATE CHART (MOST RECENT DATA)
      * ========================================
      */
     async loadUnemploymentChart() {
         try {
-            const outputsize = this.getOutputSize();
-            const unempData = await economicDataClient.getSeries('UNRATE', { limit: outputsize });
+            const requestedPoints = this.getRequestedPoints();
+            const unempData = await this.getMostRecentData('UNRATE', requestedPoints);
 
-            const chartData = unempData
-                .filter(d => d.value !== '.')
-                .map(d => [new Date(d.date).getTime(), parseFloat(d.value)])
-                .sort((a, b) => a[0] - b[0]);
+            if (unempData.length === 0) {
+                throw new Error('No unemployment data available');
+            }
 
-            console.log('📈 Unemployment Chart - Data points:', chartData.length);
+            const chartData = unempData.map(d => [d.timestamp, d.value]);
 
             this.renderChart('unemploymentChart', {
                 chart: { 
                     type: 'line', 
                     backgroundColor: 'transparent'
                 },
-                title: { 
-                    text: null
-                },
+                title: { text: null },
                 xAxis: { 
                     type: 'datetime',
                     labels: { style: { color: 'var(--text-secondary)' } }
@@ -608,29 +630,26 @@ class RecessionIndicator {
 
     /**
      * ========================================
-     * PMI MANUFACTURING CHART (RECENT DATA)
+     * PMI MANUFACTURING CHART (MOST RECENT DATA)
      * ========================================
      */
     async loadPMIChart() {
         try {
-            const outputsize = this.getOutputSize();
-            const pmiData = await economicDataClient.getSeries('MANEMP', { limit: outputsize });
+            const requestedPoints = this.getRequestedPoints();
+            const pmiData = await this.getMostRecentData('MANEMP', requestedPoints);
 
-            const chartData = pmiData
-                .filter(d => d.value !== '.')
-                .map(d => [new Date(d.date).getTime(), parseFloat(d.value)])
-                .sort((a, b) => a[0] - b[0]);
+            if (pmiData.length === 0) {
+                throw new Error('No PMI data available');
+            }
 
-            console.log('📈 PMI Chart - Data points:', chartData.length);
+            const chartData = pmiData.map(d => [d.timestamp, d.value]);
 
             this.renderChart('pmiChart', {
                 chart: { 
                     type: 'line', 
                     backgroundColor: 'transparent'
                 },
-                title: { 
-                    text: null
-                },
+                title: { text: null },
                 xAxis: { 
                     type: 'datetime',
                     labels: { style: { color: 'var(--text-secondary)' } }
@@ -806,19 +825,19 @@ class RecessionIndicator {
         ]);
     }
 
-    getOutputSize() {
+    getRequestedPoints() {
         const ranges = {
-            '2y': 730,   // 2 years of daily data
-            '5y': 1825,  // 5 years
-            '10y': 3650, // 10 years
-            'all': 10000 // All available
+            '2y': 24,    // 2 years monthly
+            '5y': 60,    // 5 years monthly
+            '10y': 120,  // 10 years monthly
+            'all': 600   // ~50 years monthly
         };
-        return ranges[this.currentTimeRange] || 1825;
+        return ranges[this.currentTimeRange] || 60;
     }
 
     /**
      * ========================================
-     * MODALS SYSTEM (FIXED)
+     * MODALS SYSTEM
      * ========================================
      */
     setupModals() {
@@ -1023,11 +1042,9 @@ class RecessionIndicator {
             }
         };
 
-        // Create modal HTML elements
         Object.keys(this.modals).forEach(modalId => {
             const modalData = this.modals[modalId];
             
-            // Remove existing modal if it exists
             const existingModal = document.getElementById(modalId);
             if (existingModal) {
                 existingModal.remove();
@@ -1050,7 +1067,6 @@ class RecessionIndicator {
             document.body.insertAdjacentHTML('beforeend', modalHTML);
         });
 
-        // Add event listeners to close buttons
         document.querySelectorAll('.modal-close').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 const modalId = e.target.dataset.close;
@@ -1058,7 +1074,6 @@ class RecessionIndicator {
             });
         });
 
-        // Close modal when clicking outside
         document.querySelectorAll('.modal').forEach(modal => {
             modal.addEventListener('click', (e) => {
                 if (e.target === modal) {
@@ -1073,7 +1088,6 @@ class RecessionIndicator {
     setupChartModalButtons() {
         console.log('🔧 Setting up chart modal buttons...');
         
-        // Wait a bit for charts to render
         setTimeout(() => {
             const chartInfoButtons = document.querySelectorAll('.chart-btn-info');
             
@@ -1171,21 +1185,6 @@ class RecessionIndicator {
      * HELPERS
      * ========================================
      */
-    parseLatest(series) {
-        if (!series || !Array.isArray(series) || series.length === 0) return 'N/A';
-        
-        // Start from the end (most recent) and find first non-null value
-        for (let i = series.length - 1; i >= 0; i--) {
-            if (series[i].value !== '.') {
-                const value = parseFloat(series[i].value);
-                if (!isNaN(value)) {
-                    return value.toFixed(2);
-                }
-            }
-        }
-        return 'N/A';
-    }
-
     renderChart(containerId, options) {
         const container = document.getElementById(containerId);
         if (!container) {
