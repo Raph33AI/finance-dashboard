@@ -236,12 +236,6 @@
                         <i class="fas fa-exchange-alt"></i> Forex Converter Pro
                     </h1>
                 </div>
-                <div class='header-right'>
-                    <button class='dashboard-btn dashboard-btn-export' onclick='forexConverter.exportAllData()'>
-                        <i class='fas fa-download'></i>
-                        <span class='btn-text'>Export</span>
-                    </button>
-                </div>
             </header>
             
             <div class='container'>
@@ -257,7 +251,9 @@
                         </button>
                     </h2>
                     
-                    <div id='majorPairsGrid' class='major-pairs-grid'></div>
+                    <div class='swipeable-container'>
+                        <div id='majorPairsGrid' class='major-pairs-grid swipeable-grid'></div>
+                    </div>
                 </div>
 
                 <!-- ========================================
@@ -271,7 +267,9 @@
                         </button>
                     </h2>
                     
-                    <div id='aiRecommendations' class='ai-recommendations-grid'></div>
+                    <div class='swipeable-container'>
+                        <div id='aiRecommendations' class='ai-recommendations-grid swipeable-grid'></div>
+                    </div>
                 </div>
 
                 <!-- ========================================
@@ -343,7 +341,7 @@
                 </div>
 
                 <!-- ========================================
-                     TECHNICAL ANALYSIS
+                     TECHNICAL ANALYSIS - ENHANCED
                      ======================================== -->
                 <div class='section'>
                     <div class='section-header-with-controls'>
@@ -364,7 +362,29 @@
                         </div>
                     </div>
                     
-                    <div id='technicalIndicators' class='technical-indicators-grid'></div>
+                    <div class='swipeable-container'>
+                        <div id='technicalIndicators' class='technical-indicators-grid swipeable-grid'></div>
+                    </div>
+                    
+                    <!-- RSI Chart -->
+                    <div class='chart-wrapper'>
+                        <div id='rsiChart' class='chart' style='height: 300px;'></div>
+                    </div>
+                    
+                    <!-- MACD Chart -->
+                    <div class='chart-wrapper'>
+                        <div id='macdChart' class='chart' style='height: 300px;'></div>
+                    </div>
+                    
+                    <!-- Bollinger Bands Chart -->
+                    <div class='chart-wrapper'>
+                        <div id='bollingerChart' class='chart' style='height: 350px;'></div>
+                    </div>
+                    
+                    <!-- Moving Averages Chart -->
+                    <div class='chart-wrapper'>
+                        <div id='movingAveragesChart' class='chart' style='height: 350px;'></div>
+                    </div>
                 </div>
 
                 <!-- ========================================
@@ -421,7 +441,9 @@
                         </button>
                     </h2>
                     
-                    <div id='volatilityMetrics' class='volatility-metrics-grid'></div>
+                    <div class='swipeable-container'>
+                        <div id='volatilityMetrics' class='volatility-metrics-grid swipeable-grid'></div>
+                    </div>
                     
                     <div class='chart-wrapper' onclick='forexConverter.openModal("volatilityChartModal")'>
                         <div id='volatilityChart' class='chart' style='height: 400px;'></div>
@@ -439,7 +461,9 @@
                         </button>
                     </h2>
                     
-                    <div id='economicIndicators' class='economic-indicators-grid'></div>
+                    <div class='swipeable-container'>
+                        <div id='economicIndicators' class='economic-indicators-grid swipeable-grid'></div>
+                    </div>
                 </div>
 
                 <!-- ========================================
@@ -456,49 +480,6 @@
                     </div>
                     
                     <div id='liveRatesGrid'></div>
-                </div>
-
-                <!-- ========================================
-                     FOREX TOOLS
-                     ======================================== -->
-                <div class='section'>
-                    <h2 class='section-title'>
-                        <i class='fas fa-tools'></i> Forex Tools
-                    </h2>
-                    
-                    <div class='tools-grid'>
-                        <div class='tool-card' onclick='forexConverter.openModal("feeCalculator")'>
-                            <div class='tool-icon'>
-                                <i class='fas fa-calculator'></i>
-                            </div>
-                            <h3>Fee Calculator</h3>
-                            <p>Compare fees across platforms</p>
-                        </div>
-                        
-                        <div class='tool-card' onclick='forexConverter.openModal("profitLossCalculator")'>
-                            <div class='tool-icon'>
-                                <i class='fas fa-chart-pie'></i>
-                            </div>
-                            <h3>P&L Calculator</h3>
-                            <p>Calculate profit/loss for trades</p>
-                        </div>
-                        
-                        <div class='tool-card' onclick='forexConverter.openModal("travelBudget")'>
-                            <div class='tool-icon'>
-                                <i class='fas fa-plane'></i>
-                            </div>
-                            <h3>Travel Budget</h3>
-                            <p>Plan your travel expenses</p>
-                        </div>
-                        
-                        <div class='tool-card' onclick='forexConverter.openModal("forexGlossary")'>
-                            <div class='tool-icon'>
-                                <i class='fas fa-book'></i>
-                            </div>
-                            <h3>Forex Glossary</h3>
-                            <p>Learn forex terminology</p>
-                        </div>
-                    </div>
                 </div>
 
                 <footer>
@@ -712,11 +693,11 @@
                 
                 <p><strong>Heatmap Colors:</strong></p>
                 <ul>
-                    <li><span style='color: #ef4444;'>● Dark Red:</strong> Strong positive correlation</li>
-                    <li><span style='color: #f59e0b;'>● Orange:</strong> Moderate positive correlation</li>
-                    <li><span style='color: #6b7280;'>● Gray:</strong> No correlation</li>
-                    <li><span style='color: #3b82f6;'>● Blue:</strong> Moderate negative correlation</li>
-                    <li><span style='color: #1e3a8a;'>● Dark Blue:</strong> Strong negative correlation</li>
+                    <li><span style='color: #ef4444;'>● Dark Red:</span> Strong positive correlation</li>
+                    <li><span style='color: #f59e0b;'>● Orange:</span> Moderate positive correlation</li>
+                    <li><span style='color: #6b7280;'>● Gray:</span> No correlation</li>
+                    <li><span style='color: #3b82f6;'>● Blue:</span> Moderate negative correlation</li>
+                    <li><span style='color: #1e3a8a;'>● Dark Blue:</span> Strong negative correlation</li>
                 </ul>
             </div>
         </div>
@@ -820,211 +801,6 @@
                 
                 <p><strong>How to Use:</strong></p>
                 <p>Monitor economic indicators to anticipate central bank policy changes and currency movements. Combine with technical analysis for optimal timing.</p>
-            </div>
-        </div>
-    </div>
-
-    <!-- Fee Calculator Modal -->
-    <div id='feeCalculator' class='modal'>
-        <div class='modal-content modal-large'>
-            <div class='modal-header'>
-                <h2><i class='fas fa-calculator'></i> Fee Calculator</h2>
-                <button class='modal-close' onclick='forexConverter.closeModal("feeCalculator")'>&times;</button>
-            </div>
-            <div class='modal-body'>
-                <p><strong>Compare currency exchange fees across platforms:</strong></p>
-                
-                <div class='calculator-form'>
-                    <div class='form-group'>
-                        <label>Amount</label>
-                        <input type='number' id='feeCalcAmount' value='1000' min='0'>
-                    </div>
-                    
-                    <div class='form-group'>
-                        <label>From Currency</label>
-                        <select id='feeCalcFrom'>
-                            <option value='EUR'>EUR</option>
-                            <option value='USD'>USD</option>
-                            <option value='GBP'>GBP</option>
-                        </select>
-                    </div>
-                    
-                    <div class='form-group'>
-                        <label>To Currency</label>
-                        <select id='feeCalcTo'>
-                            <option value='USD'>USD</option>
-                            <option value='EUR'>EUR</option>
-                            <option value='GBP'>GBP</option>
-                        </select>
-                    </div>
-                    
-                    <button class='dashboard-btn' onclick='forexConverter.calculateFees()'>
-                        <i class='fas fa-calculator'></i> Calculate Fees
-                    </button>
-                </div>
-                
-                <div id='feeResults' class='fee-results' style='display: none;'>
-                    <h3>Comparison Results</h3>
-                    <div class='fee-comparison-grid'></div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- P&L Calculator Modal -->
-    <div id='profitLossCalculator' class='modal'>
-        <div class='modal-content modal-large'>
-            <div class='modal-header'>
-                <h2><i class='fas fa-chart-pie'></i> Profit & Loss Calculator</h2>
-                <button class='modal-close' onclick='forexConverter.closeModal("profitLossCalculator")'>&times;</button>
-            </div>
-            <div class='modal-body'>
-                <p><strong>Calculate profit/loss for forex trades:</strong></p>
-                
-                <div class='calculator-form'>
-                    <div class='form-row'>
-                        <div class='form-group'>
-                            <label>Currency Pair</label>
-                            <select id='plPair'>
-                                <option value='EUR/USD'>EUR/USD</option>
-                                <option value='GBP/USD'>GBP/USD</option>
-                                <option value='USD/JPY'>USD/JPY</option>
-                            </select>
-                        </div>
-                        
-                        <div class='form-group'>
-                            <label>Position Type</label>
-                            <select id='plType'>
-                                <option value='buy'>Buy (Long)</option>
-                                <option value='sell'>Sell (Short)</option>
-                            </select>
-                        </div>
-                    </div>
-                    
-                    <div class='form-row'>
-                        <div class='form-group'>
-                            <label>Entry Price</label>
-                            <input type='number' id='plEntry' step='0.0001' value='1.0850'>
-                        </div>
-                        
-                        <div class='form-group'>
-                            <label>Exit Price</label>
-                            <input type='number' id='plExit' step='0.0001' value='1.0950'>
-                        </div>
-                    </div>
-                    
-                    <div class='form-row'>
-                        <div class='form-group'>
-                            <label>Position Size (lots)</label>
-                            <input type='number' id='plSize' step='0.01' value='1'>
-                        </div>
-                        
-                        <div class='form-group'>
-                            <label>Leverage</label>
-                            <select id='plLeverage'>
-                                <option value='1'>1:1 (No leverage)</option>
-                                <option value='10'>1:10</option>
-                                <option value='20'>1:20</option>
-                                <option value='50'>1:50</option>
-                                <option value='100' selected>1:100</option>
-                            </select>
-                        </div>
-                    </div>
-                    
-                    <button class='dashboard-btn' onclick='forexConverter.calculatePL()'>
-                        <i class='fas fa-calculator'></i> Calculate P&L
-                    </button>
-                </div>
-                
-                <div id='plResults' class='pl-results' style='display: none;'></div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Travel Budget Modal -->
-    <div id='travelBudget' class='modal'>
-        <div class='modal-content modal-large'>
-            <div class='modal-header'>
-                <h2><i class='fas fa-plane'></i> Travel Budget Calculator</h2>
-                <button class='modal-close' onclick='forexConverter.closeModal("travelBudget")'>&times;</button>
-            </div>
-            <div class='modal-body'>
-                <p><strong>Plan your travel expenses with automatic currency conversion:</strong></p>
-                
-                <div class='calculator-form'>
-                    <div class='form-group'>
-                        <label>Your Currency</label>
-                        <select id='travelHomeCurrency'>
-                            <option value='EUR'>EUR</option>
-                            <option value='USD'>USD</option>
-                            <option value='GBP'>GBP</option>
-                        </select>
-                    </div>
-                    
-                    <div class='form-group'>
-                        <label>Destination Currency</label>
-                        <select id='travelDestCurrency'>
-                            <option value='USD'>USD</option>
-                            <option value='EUR'>EUR</option>
-                            <option value='JPY'>JPY</option>
-                        </select>
-                    </div>
-                    
-                    <h4>Estimated Expenses (in destination currency)</h4>
-                    
-                    <div class='form-row'>
-                        <div class='form-group'>
-                            <label>Accommodation/day</label>
-                            <input type='number' id='travelAccommodation' value='100'>
-                        </div>
-                        
-                        <div class='form-group'>
-                            <label>Food/day</label>
-                            <input type='number' id='travelFood' value='50'>
-                        </div>
-                    </div>
-                    
-                    <div class='form-row'>
-                        <div class='form-group'>
-                            <label>Transportation/day</label>
-                            <input type='number' id='travelTransport' value='30'>
-                        </div>
-                        
-                        <div class='form-group'>
-                            <label>Activities/day</label>
-                            <input type='number' id='travelActivities' value='40'>
-                        </div>
-                    </div>
-                    
-                    <div class='form-group'>
-                        <label>Number of Days</label>
-                        <input type='number' id='travelDays' value='7' min='1'>
-                    </div>
-                    
-                    <button class='dashboard-btn' onclick='forexConverter.calculateTravelBudget()'>
-                        <i class='fas fa-calculator'></i> Calculate Budget
-                    </button>
-                </div>
-                
-                <div id='travelResults' class='travel-results' style='display: none;'></div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Forex Glossary Modal -->
-    <div id='forexGlossary' class='modal'>
-        <div class='modal-content modal-large'>
-            <div class='modal-header'>
-                <h2><i class='fas fa-book'></i> Forex Glossary</h2>
-                <button class='modal-close' onclick='forexConverter.closeModal("forexGlossary")'>&times;</button>
-            </div>
-            <div class='modal-body'>
-                <div class='glossary-search'>
-                    <input type='text' id='glossarySearch' placeholder='Search terms...' onkeyup='forexConverter.filterGlossary()'>
-                    <i class='fas fa-search'></i>
-                </div>
-                
-                <div id='glossaryContent' class='glossary-content'></div>
             </div>
         </div>
     </div>

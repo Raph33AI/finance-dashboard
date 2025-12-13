@@ -2,7 +2,7 @@
  * ====================================================================
  * ALPHAVAULT AI - FOREX CONVERTER PRO
  * ====================================================================
- * Convertisseur 38+ devises avec IA, analyses techniques, et outils avancés
+ * Convertisseur 38+ devises avec IA, analyses techniques avancées
  */
 
 // ========================================
@@ -18,29 +18,6 @@ const ECB_CURRENCIES = [
 
 const MAJOR_PAIRS = ['USD', 'GBP', 'JPY', 'CHF', 'CAD', 'AUD', 'NZD', 'CNY'];
 
-const GLOSSARY_TERMS = {
-    'Pip': 'Smallest price move in forex (typically 0.0001 for most pairs)',
-    'Spread': 'Difference between bid and ask price',
-    'Leverage': 'Borrowed capital to increase position size (e.g., 1:100)',
-    'Margin': 'Required deposit to open leveraged position',
-    'Lot': 'Standard unit size (1 lot = 100,000 units)',
-    'Long': 'Buy position (profit when price rises)',
-    'Short': 'Sell position (profit when price falls)',
-    'Stop Loss': 'Order to limit losses at predetermined price',
-    'Take Profit': 'Order to close position at profit target',
-    'Bid': 'Price at which market will buy from you',
-    'Ask': 'Price at which market will sell to you',
-    'Base Currency': 'First currency in pair (e.g., EUR in EUR/USD)',
-    'Quote Currency': 'Second currency in pair (e.g., USD in EUR/USD)',
-    'Cross Rate': 'Exchange rate between two currencies (not involving USD)',
-    'Volatility': 'Measure of price fluctuation',
-    'Liquidity': 'Ease of buying/selling without affecting price',
-    'Carry Trade': 'Borrow low-rate currency, invest in high-rate currency',
-    'Rollover': 'Interest paid/earned for holding position overnight',
-    'Slippage': 'Difference between expected and actual execution price',
-    'Scalping': 'Short-term trading strategy (seconds to minutes)'
-};
-
 // ========================================
 // CLASSE PRINCIPALE
 // ========================================
@@ -51,6 +28,7 @@ class ForexConverter {
         this.currencies = ECB_CURRENCIES;
         this.historicalData = {};
         this.currentTimeRange = '5Y';
+        this.currentTechnicalPair = 'USD';
         this.charts = {};
     }
 
@@ -84,13 +62,16 @@ class ForexConverter {
             this.displayAIRecommendations(),
             this.loadCurrencyStrengthChart(),
             this.displayTechnicalIndicators(),
+            this.loadRSIChart(),
+            this.loadMACDChart(),
+            this.loadBollingerBandsChart(),
+            this.loadMovingAveragesChart(),
             this.loadHistoricalChart(),
             this.loadCorrelationHeatmap(),
             this.displayVolatilityMetrics(),
             this.loadVolatilityChart(),
             this.displayEconomicIndicators(),
-            this.displayLiveRates(),
-            this.initializeGlossary()
+            this.displayLiveRates()
         ]);
     }
 
@@ -110,7 +91,6 @@ class ForexConverter {
             
         } catch (error) {
             console.error('❌ Error loading exchange rates:', error);
-            // Fallback to mock data
             this.loadMockRates();
         }
     }
@@ -152,7 +132,7 @@ class ForexConverter {
             const data = this.rates[currency];
             if (!data) return '';
 
-            const change24h = (Math.random() - 0.5) * 2; // Mock data
+            const change24h = (Math.random() - 0.5) * 2;
             const changeClass = change24h >= 0 ? 'positive' : 'negative';
             const changeIcon = change24h >= 0 ? 'fa-arrow-up' : 'fa-arrow-down';
             const volatility = (Math.random() * 0.8 + 0.2).toFixed(2);
@@ -200,7 +180,6 @@ class ForexConverter {
         document.getElementById('toCurrency').value = currency;
         this.convert();
         
-        // Scroll to converter
         document.querySelector('.converter-container').scrollIntoView({ 
             behavior: 'smooth', 
             block: 'center' 
@@ -311,7 +290,6 @@ class ForexConverter {
         fromSelect.innerHTML = '';
         toSelect.innerHTML = '';
 
-        // EUR first
         const eurOption1 = document.createElement('option');
         eurOption1.value = 'EUR';
         eurOption1.textContent = 'EUR - Euro';
@@ -322,7 +300,6 @@ class ForexConverter {
         eurOption2.textContent = 'EUR - Euro';
         toSelect.appendChild(eurOption2);
 
-        // Others
         this.currencies.forEach(currency => {
             const option1 = document.createElement('option');
             option1.value = currency;
@@ -385,7 +362,7 @@ class ForexConverter {
         resultDiv.style.display = 'block';
         rateDiv.textContent = `1 ${fromCurrency} = ${exchangeRate.toFixed(4)} ${toCurrency}`;
 
-        const fee = toAmount * 0.01; // 1% example fee
+        const fee = toAmount * 0.01;
         const netAmount = toAmount - fee;
 
         detailsDiv.innerHTML = `
@@ -471,7 +448,7 @@ class ForexConverter {
         const currencies = ['EUR', 'USD', 'GBP', 'JPY', 'CHF', 'CAD', 'AUD', 'NZD'];
         const strengthData = currencies.map(curr => Math.random() * 50 + 25);
 
-        Highcharts.chart('currencyStrengthChart', {
+        this.charts.currencyStrength = Highcharts.chart('currencyStrengthChart', {
             chart: {
                 polar: true,
                 type: 'line',
@@ -588,15 +565,40 @@ class ForexConverter {
                 <div class='indicator-value ${indicators.ma.signal}'>${indicators.ma.value}</div>
                 <div class='indicator-label'>${indicators.ma.interpretation}</div>
             </div>
+
+            <div class='tech-indicator-card'>
+                <div class='indicator-header'>
+                    <i class='fas fa-chart-bar'></i>
+                    <h4>Stochastic</h4>
+                    <button class='info-btn' onclick='forexConverter.showIndicatorInfo("Stochastic")'>
+                        <i class='fas fa-question-circle'></i>
+                    </button>
+                </div>
+                <div class='indicator-value ${indicators.stochastic.signal}'>${indicators.stochastic.value}%</div>
+                <div class='indicator-label'>${indicators.stochastic.interpretation}</div>
+            </div>
+
+            <div class='tech-indicator-card'>
+                <div class='indicator-header'>
+                    <i class='fas fa-signal'></i>
+                    <h4>ATR (14)</h4>
+                    <button class='info-btn' onclick='forexConverter.showIndicatorInfo("ATR")'>
+                        <i class='fas fa-question-circle'></i>
+                    </button>
+                </div>
+                <div class='indicator-value neutral'>${indicators.atr.value}</div>
+                <div class='indicator-label'>${indicators.atr.interpretation}</div>
+            </div>
         `;
 
         container.innerHTML = html;
     }
 
     calculateTechnicalIndicators() {
-        // Mock calculations
         const rsi = Math.floor(Math.random() * 100);
         const macdValue = (Math.random() - 0.5) * 0.002;
+        const stochastic = Math.floor(Math.random() * 100);
+        const atr = (Math.random() * 0.01).toFixed(4);
 
         return {
             rsi: {
@@ -618,6 +620,15 @@ class ForexConverter {
                 value: 'Golden Cross',
                 signal: 'bullish',
                 interpretation: 'SMA 50 above SMA 200'
+            },
+            stochastic: {
+                value: stochastic,
+                signal: stochastic > 80 ? 'overbought' : stochastic < 20 ? 'oversold' : 'neutral',
+                interpretation: stochastic > 80 ? 'Overbought' : stochastic < 20 ? 'Oversold' : 'Neutral'
+            },
+            atr: {
+                value: atr,
+                interpretation: 'Average volatility'
             }
         };
     }
@@ -633,7 +644,405 @@ class ForexConverter {
     }
 
     updateTechnicalAnalysis() {
+        const pair = document.getElementById('technicalPairSelector').value;
+        this.currentTechnicalPair = pair;
+        
         this.displayTechnicalIndicators();
+        this.loadRSIChart();
+        this.loadMACDChart();
+        this.loadBollingerBandsChart();
+        this.loadMovingAveragesChart();
+    }
+
+    /**
+     * ========================================
+     * RSI CHART
+     * ========================================
+     */
+    async loadRSIChart() {
+        const data = this.generateTimeSeriesData(90, 30, 70);
+        
+        this.charts.rsi = Highcharts.chart('rsiChart', {
+            chart: {
+                type: 'line',
+                backgroundColor: 'transparent'
+            },
+            title: {
+                text: `EUR/${this.currentTechnicalPair} - RSI (14 periods)`,
+                style: { color: 'var(--text-primary)', fontWeight: '800', fontSize: '1.1rem' }
+            },
+            xAxis: {
+                type: 'datetime',
+                labels: { style: { color: 'var(--text-secondary)' } }
+            },
+            yAxis: {
+                title: { text: 'RSI', style: { color: 'var(--text-secondary)' } },
+                labels: { style: { color: 'var(--text-secondary)' } },
+                min: 0,
+                max: 100,
+                plotBands: [
+                    {
+                        from: 70,
+                        to: 100,
+                        color: 'rgba(239, 68, 68, 0.1)',
+                        label: {
+                            text: 'Overbought',
+                            style: { color: '#ef4444', fontWeight: '700' }
+                        }
+                    },
+                    {
+                        from: 0,
+                        to: 30,
+                        color: 'rgba(16, 185, 129, 0.1)',
+                        label: {
+                            text: 'Oversold',
+                            style: { color: '#10b981', fontWeight: '700' }
+                        }
+                    }
+                ],
+                plotLines: [
+                    {
+                        value: 70,
+                        color: '#ef4444',
+                        width: 2,
+                        dashStyle: 'Dash'
+                    },
+                    {
+                        value: 50,
+                        color: '#6b7280',
+                        width: 1,
+                        dashStyle: 'Dot'
+                    },
+                    {
+                        value: 30,
+                        color: '#10b981',
+                        width: 2,
+                        dashStyle: 'Dash'
+                    }
+                ]
+            },
+            tooltip: {
+                valueDecimals: 2,
+                valueSuffix: '',
+                xDateFormat: '%Y-%m-%d'
+            },
+            plotOptions: {
+                line: {
+                    marker: { enabled: false },
+                    lineWidth: 3,
+                    color: '#8b5cf6'
+                }
+            },
+            series: [{
+                name: 'RSI',
+                data: data
+            }],
+            credits: { enabled: false },
+            legend: { enabled: false }
+        });
+    }
+
+    /**
+     * ========================================
+     * MACD CHART
+     * ========================================
+     */
+    async loadMACDChart() {
+        const macdData = this.generateTimeSeriesData(90, -0.005, 0.005);
+        const signalData = this.generateTimeSeriesData(90, -0.004, 0.004);
+        const histogramData = macdData.map((point, i) => [
+            point[0],
+            point[1] - signalData[i][1]
+        ]);
+
+        this.charts.macd = Highcharts.chart('macdChart', {
+            chart: {
+                type: 'line',
+                backgroundColor: 'transparent'
+            },
+            title: {
+                text: `EUR/${this.currentTechnicalPair} - MACD (12, 26, 9)`,
+                style: { color: 'var(--text-primary)', fontWeight: '800', fontSize: '1.1rem' }
+            },
+            xAxis: {
+                type: 'datetime',
+                labels: { style: { color: 'var(--text-secondary)' } }
+            },
+            yAxis: {
+                title: { text: 'MACD', style: { color: 'var(--text-secondary)' } },
+                labels: { style: { color: 'var(--text-secondary)' } },
+                plotLines: [{
+                    value: 0,
+                    color: '#6b7280',
+                    width: 2,
+                    dashStyle: 'Solid'
+                }]
+            },
+            tooltip: {
+                shared: true,
+                valueDecimals: 5,
+                xDateFormat: '%Y-%m-%d'
+            },
+            plotOptions: {
+                line: {
+                    marker: { enabled: false },
+                    lineWidth: 2
+                },
+                column: {
+                    borderWidth: 0
+                }
+            },
+            series: [
+                {
+                    type: 'column',
+                    name: 'Histogram',
+                    data: histogramData,
+                    color: '#8b5cf6',
+                    negativeColor: '#ef4444'
+                },
+                {
+                    type: 'line',
+                    name: 'MACD',
+                    data: macdData,
+                    color: '#3b82f6',
+                    lineWidth: 3
+                },
+                {
+                    type: 'line',
+                    name: 'Signal',
+                    data: signalData,
+                    color: '#f59e0b',
+                    lineWidth: 2,
+                    dashStyle: 'Dash'
+                }
+            ],
+            credits: { enabled: false }
+        });
+    }
+
+    /**
+     * ========================================
+     * BOLLINGER BANDS CHART
+     * ========================================
+     */
+    async loadBollingerBandsChart() {
+        const basePrice = this.rates[this.currentTechnicalPair]?.rate || 1.0850;
+        const priceData = this.generatePriceData(90, basePrice, 0.02);
+        
+        const sma = this.calculateSMA(priceData, 20);
+        const stdDev = this.calculateStdDev(priceData, 20);
+        
+        const upperBand = sma.map((point, i) => [point[0], point[1] + 2 * stdDev[i][1]]);
+        const lowerBand = sma.map((point, i) => [point[0], point[1] - 2 * stdDev[i][1]]);
+
+        this.charts.bollinger = Highcharts.chart('bollingerChart', {
+            chart: {
+                type: 'line',
+                backgroundColor: 'transparent'
+            },
+            title: {
+                text: `EUR/${this.currentTechnicalPair} - Bollinger Bands (20, 2)`,
+                style: { color: 'var(--text-primary)', fontWeight: '800', fontSize: '1.1rem' }
+            },
+            xAxis: {
+                type: 'datetime',
+                labels: { style: { color: 'var(--text-secondary)' } }
+            },
+            yAxis: {
+                title: { text: 'Price', style: { color: 'var(--text-secondary)' } },
+                labels: { style: { color: 'var(--text-secondary)' } }
+            },
+            tooltip: {
+                shared: true,
+                valueDecimals: 4,
+                xDateFormat: '%Y-%m-%d'
+            },
+            plotOptions: {
+                line: {
+                    marker: { enabled: false },
+                    lineWidth: 2
+                },
+                arearange: {
+                    fillOpacity: 0.15,
+                    lineWidth: 0,
+                    marker: { enabled: false }
+                }
+            },
+            series: [
+                {
+                    type: 'arearange',
+                    name: 'Bollinger Bands',
+                    data: upperBand.map((point, i) => [point[0], lowerBand[i][1], point[1]]),
+                    color: '#8b5cf6',
+                    fillColor: 'rgba(139, 92, 246, 0.15)'
+                },
+                {
+                    type: 'line',
+                    name: 'Upper Band',
+                    data: upperBand,
+                    color: '#ef4444',
+                    lineWidth: 1,
+                    dashStyle: 'Dash'
+                },
+                {
+                    type: 'line',
+                    name: 'SMA (20)',
+                    data: sma,
+                    color: '#3b82f6',
+                    lineWidth: 2
+                },
+                {
+                    type: 'line',
+                    name: 'Lower Band',
+                    data: lowerBand,
+                    color: '#10b981',
+                    lineWidth: 1,
+                    dashStyle: 'Dash'
+                },
+                {
+                    type: 'line',
+                    name: 'Price',
+                    data: priceData,
+                    color: '#6b7280',
+                    lineWidth: 3
+                }
+            ],
+            credits: { enabled: false }
+        });
+    }
+
+    /**
+     * ========================================
+     * MOVING AVERAGES CHART
+     * ========================================
+     */
+    async loadMovingAveragesChart() {
+        const basePrice = this.rates[this.currentTechnicalPair]?.rate || 1.0850;
+        const priceData = this.generatePriceData(200, basePrice, 0.03);
+        
+        const sma50 = this.calculateSMA(priceData, 50);
+        const sma200 = this.calculateSMA(priceData, 200);
+
+        this.charts.movingAverages = Highcharts.chart('movingAveragesChart', {
+            chart: {
+                type: 'line',
+                backgroundColor: 'transparent'
+            },
+            title: {
+                text: `EUR/${this.currentTechnicalPair} - Moving Averages`,
+                style: { color: 'var(--text-primary)', fontWeight: '800', fontSize: '1.1rem' }
+            },
+            xAxis: {
+                type: 'datetime',
+                labels: { style: { color: 'var(--text-secondary)' } }
+            },
+            yAxis: {
+                title: { text: 'Price', style: { color: 'var(--text-secondary)' } },
+                labels: { style: { color: 'var(--text-secondary)' } }
+            },
+            tooltip: {
+                shared: true,
+                valueDecimals: 4,
+                xDateFormat: '%Y-%m-%d'
+            },
+            plotOptions: {
+                line: {
+                    marker: { enabled: false },
+                    lineWidth: 2
+                }
+            },
+            series: [
+                {
+                    name: 'Price',
+                    data: priceData,
+                    color: '#6b7280',
+                    lineWidth: 3
+                },
+                {
+                    name: 'SMA 50',
+                    data: sma50,
+                    color: '#3b82f6',
+                    lineWidth: 2
+                },
+                {
+                    name: 'SMA 200',
+                    data: sma200,
+                    color: '#f59e0b',
+                    lineWidth: 3,
+                    dashStyle: 'Dash'
+                }
+            ],
+            credits: { enabled: false }
+        });
+    }
+
+    /**
+     * ========================================
+     * HELPER FUNCTIONS FOR TECHNICAL ANALYSIS
+     * ========================================
+     */
+    generateTimeSeriesData(days, min, max) {
+        const data = [];
+        const now = Date.now();
+        
+        for (let i = days - 1; i >= 0; i--) {
+            const timestamp = now - i * 24 * 60 * 60 * 1000;
+            const value = min + Math.random() * (max - min);
+            data.push([timestamp, value]);
+        }
+        
+        return data;
+    }
+
+    generatePriceData(days, basePrice, volatility) {
+        const data = [];
+        const now = Date.now();
+        let price = basePrice;
+        
+        for (let i = days - 1; i >= 0; i--) {
+            const timestamp = now - i * 24 * 60 * 60 * 1000;
+            const change = (Math.random() - 0.5) * volatility * basePrice;
+            price = Math.max(basePrice * 0.95, Math.min(basePrice * 1.05, price + change));
+            data.push([timestamp, price]);
+        }
+        
+        return data;
+    }
+
+    calculateSMA(data, period) {
+        const sma = [];
+        
+        for (let i = period - 1; i < data.length; i++) {
+            let sum = 0;
+            for (let j = 0; j < period; j++) {
+                sum += data[i - j][1];
+            }
+            sma.push([data[i][0], sum / period]);
+        }
+        
+        return sma;
+    }
+
+    calculateStdDev(data, period) {
+        const stdDev = [];
+        
+        for (let i = period - 1; i < data.length; i++) {
+            let sum = 0;
+            let mean = 0;
+            
+            for (let j = 0; j < period; j++) {
+                mean += data[i - j][1];
+            }
+            mean /= period;
+            
+            for (let j = 0; j < period; j++) {
+                sum += Math.pow(data[i - j][1] - mean, 2);
+            }
+            
+            stdDev.push([data[i][0], Math.sqrt(sum / period)]);
+        }
+        
+        return stdDev;
     }
 
     /**
@@ -665,7 +1074,7 @@ class ForexConverter {
     }
 
     renderHistoricalChart(containerId, data, title) {
-        Highcharts.chart(containerId, {
+        this.charts.historical = Highcharts.chart(containerId, {
             chart: { 
                 type: 'line', 
                 backgroundColor: 'transparent',
@@ -733,7 +1142,6 @@ class ForexConverter {
         document.querySelector(`.time-btn[data-period="${period}"]`).classList.add('active');
         
         console.log(`📅 Changed time range to: ${period}`);
-        // Reload chart with new period
         this.loadHistoricalChart();
     }
 
@@ -753,7 +1161,7 @@ class ForexConverter {
             }
         }
 
-        Highcharts.chart('correlationHeatmap', {
+        this.charts.correlation = Highcharts.chart('correlationHeatmap', {
             chart: {
                 type: 'heatmap',
                 backgroundColor: 'transparent'
@@ -892,7 +1300,7 @@ class ForexConverter {
             data.push([date.getTime(), volatility]);
         }
 
-        Highcharts.chart('volatilityChart', {
+        this.charts.volatility = Highcharts.chart('volatilityChart', {
             chart: {
                 type: 'area',
                 backgroundColor: 'transparent'
@@ -1078,247 +1486,6 @@ class ForexConverter {
 
     /**
      * ========================================
-     * TOOLS - FEE CALCULATOR
-     * ========================================
-     */
-    calculateFees() {
-        const amount = parseFloat(document.getElementById('feeCalcAmount').value);
-        const fromCurr = document.getElementById('feeCalcFrom').value;
-        const toCurr = document.getElementById('feeCalcTo').value;
-
-        const platforms = [
-            { name: 'Wise', fee: 0.41, rate: 1.0850, logo: '🌐' },
-            { name: 'Revolut', fee: 0.50, rate: 1.0845, logo: '💳' },
-            { name: 'PayPal', fee: 3.50, rate: 1.0780, logo: '💰' },
-            { name: 'Bank Transfer', fee: 2.00, rate: 1.0795, logo: '🏦' },
-            { name: 'Currency Exchange', fee: 1.50, rate: 1.0820, logo: '💱' }
-        ];
-
-        const results = platforms.map(p => {
-            const feeAmount = (amount * p.fee) / 100;
-            const convertedAmount = (amount - feeAmount) * p.rate;
-            return { ...p, feeAmount, convertedAmount };
-        }).sort((a, b) => b.convertedAmount - a.convertedAmount);
-
-        const html = results.map((r, i) => `
-            <div class='fee-result-card ${i === 0 ? 'best-rate' : ''}'>
-                ${i === 0 ? '<div class="best-badge"><i class="fas fa-crown"></i> Best Rate</div>' : ''}
-                <div class='fee-result-header'>
-                    <span class='platform-logo'>${r.logo}</span>
-                    <h4>${r.name}</h4>
-                </div>
-                <div class='fee-result-row'>
-                    <span>Exchange Rate:</span>
-                    <strong>${r.rate.toFixed(4)}</strong>
-                </div>
-                <div class='fee-result-row'>
-                    <span>Fee (${r.fee}%):</span>
-                    <strong class='text-danger'>-${r.feeAmount.toFixed(2)} ${fromCurr}</strong>
-                </div>
-                <div class='fee-result-row total'>
-                    <span><strong>You Get:</strong></span>
-                    <strong class='text-success'>${r.convertedAmount.toFixed(2)} ${toCurr}</strong>
-                </div>
-            </div>
-        `).join('');
-
-        document.querySelector('.fee-comparison-grid').innerHTML = html;
-        document.getElementById('feeResults').style.display = 'block';
-    }
-
-    /**
-     * ========================================
-     * TOOLS - P&L CALCULATOR
-     * ========================================
-     */
-    calculatePL() {
-        const pair = document.getElementById('plPair').value;
-        const type = document.getElementById('plType').value;
-        const entry = parseFloat(document.getElementById('plEntry').value);
-        const exit = parseFloat(document.getElementById('plExit').value);
-        const size = parseFloat(document.getElementById('plSize').value);
-        const leverage = parseFloat(document.getElementById('plLeverage').value);
-
-        const lotSize = 100000;
-        const pips = type === 'buy' ? (exit - entry) * 10000 : (entry - exit) * 10000;
-        const pl = pips * 10 * size; // $10 per pip per lot
-        const plPercent = (pl / (lotSize * size / leverage)) * 100;
-
-        const resultClass = pl >= 0 ? 'profit' : 'loss';
-        const resultIcon = pl >= 0 ? 'fa-arrow-up' : 'fa-arrow-down';
-
-        const html = `
-            <div class='pl-result ${resultClass}'>
-                <div class='pl-result-header'>
-                    <i class='fas ${resultIcon}'></i>
-                    <h3>${pl >= 0 ? 'Profit' : 'Loss'}</h3>
-                </div>
-                <div class='pl-result-amount'>$${Math.abs(pl).toFixed(2)}</div>
-                <div class='pl-result-percent'>${plPercent >= 0 ? '+' : ''}${plPercent.toFixed(2)}%</div>
-                
-                <div class='pl-details'>
-                    <div class='pl-detail-row'>
-                        <span>Position Type:</span>
-                        <strong>${type.toUpperCase()}</strong>
-                    </div>
-                    <div class='pl-detail-row'>
-                        <span>Entry Price:</span>
-                        <strong>${entry.toFixed(4)}</strong>
-                    </div>
-                    <div class='pl-detail-row'>
-                        <span>Exit Price:</span>
-                        <strong>${exit.toFixed(4)}</strong>
-                    </div>
-                    <div class='pl-detail-row'>
-                        <span>Pips:</span>
-                        <strong class='${pips >= 0 ? 'text-success' : 'text-danger'}'>${pips >= 0 ? '+' : ''}${pips.toFixed(1)}</strong>
-                    </div>
-                    <div class='pl-detail-row'>
-                        <span>Position Size:</span>
-                        <strong>${size} lots</strong>
-                    </div>
-                    <div class='pl-detail-row'>
-                        <span>Leverage:</span>
-                        <strong>1:${leverage}</strong>
-                    </div>
-                    <div class='pl-detail-row'>
-                        <span>Required Margin:</span>
-                        <strong>$${(lotSize * size / leverage).toFixed(2)}</strong>
-                    </div>
-                </div>
-            </div>
-        `;
-
-        document.getElementById('plResults').innerHTML = html;
-        document.getElementById('plResults').style.display = 'block';
-    }
-
-    /**
-     * ========================================
-     * TOOLS - TRAVEL BUDGET
-     * ========================================
-     */
-    calculateTravelBudget() {
-        const homeCurr = document.getElementById('travelHomeCurrency').value;
-        const destCurr = document.getElementById('travelDestCurrency').value;
-        const accommodation = parseFloat(document.getElementById('travelAccommodation').value);
-        const food = parseFloat(document.getElementById('travelFood').value);
-        const transport = parseFloat(document.getElementById('travelTransport').value);
-        const activities = parseFloat(document.getElementById('travelActivities').value);
-        const days = parseInt(document.getElementById('travelDays').value);
-
-        const dailyTotal = accommodation + food + transport + activities;
-        const tripTotal = dailyTotal * days;
-
-        // Convert to home currency
-        let convertedTotal;
-        if (destCurr === 'EUR' && homeCurr !== 'EUR') {
-            convertedTotal = tripTotal * (this.rates[homeCurr]?.rate || 1);
-        } else if (destCurr !== 'EUR' && homeCurr === 'EUR') {
-            convertedTotal = tripTotal / (this.rates[destCurr]?.rate || 1);
-        } else {
-            const destRate = this.rates[destCurr]?.rate || 1;
-            const homeRate = this.rates[homeCurr]?.rate || 1;
-            convertedTotal = (tripTotal / destRate) * homeRate;
-        }
-
-        const html = `
-            <div class='travel-budget-result'>
-                <h3>Your Travel Budget</h3>
-                
-                <div class='budget-breakdown'>
-                    <h4>Daily Expenses (in ${destCurr})</h4>
-                    <div class='budget-item'>
-                        <i class='fas fa-bed'></i>
-                        <span>Accommodation</span>
-                        <strong>${accommodation.toFixed(2)} ${destCurr}</strong>
-                    </div>
-                    <div class='budget-item'>
-                        <i class='fas fa-utensils'></i>
-                        <span>Food & Drinks</span>
-                        <strong>${food.toFixed(2)} ${destCurr}</strong>
-                    </div>
-                    <div class='budget-item'>
-                        <i class='fas fa-bus'></i>
-                        <span>Transportation</span>
-                        <strong>${transport.toFixed(2)} ${destCurr}</strong>
-                    </div>
-                    <div class='budget-item'>
-                        <i class='fas fa-camera'></i>
-                        <span>Activities</span>
-                        <strong>${activities.toFixed(2)} ${destCurr}</strong>
-                    </div>
-                    <div class='budget-item total'>
-                        <span><strong>Daily Total</strong></span>
-                        <strong>${dailyTotal.toFixed(2)} ${destCurr}</strong>
-                    </div>
-                </div>
-                
-                <div class='budget-summary'>
-                    <div class='summary-item'>
-                        <span>Trip Duration</span>
-                        <strong>${days} days</strong>
-                    </div>
-                    <div class='summary-item'>
-                        <span>Total in ${destCurr}</span>
-                        <strong>${tripTotal.toFixed(2)} ${destCurr}</strong>
-                    </div>
-                    <div class='summary-item highlight'>
-                        <span>Total in ${homeCurr}</span>
-                        <strong>${convertedTotal.toFixed(2)} ${homeCurr}</strong>
-                    </div>
-                </div>
-                
-                <div class='budget-tip'>
-                    <i class='fas fa-lightbulb'></i>
-                    <p><strong>Tip:</strong> Add 10-20% buffer for unexpected expenses!</p>
-                </div>
-            </div>
-        `;
-
-        document.getElementById('travelResults').innerHTML = html;
-        document.getElementById('travelResults').style.display = 'block';
-    }
-
-    /**
-     * ========================================
-     * GLOSSARY
-     * ========================================
-     */
-    initializeGlossary() {
-        const container = document.getElementById('glossaryContent');
-        if (!container) return;
-
-        const html = Object.entries(GLOSSARY_TERMS)
-            .sort((a, b) => a[0].localeCompare(b[0]))
-            .map(([term, definition]) => `
-                <div class='glossary-item'>
-                    <h4 class='glossary-term'>${term}</h4>
-                    <p class='glossary-definition'>${definition}</p>
-                </div>
-            `).join('');
-
-        container.innerHTML = html;
-    }
-
-    filterGlossary() {
-        const search = document.getElementById('glossarySearch').value.toLowerCase();
-        const items = document.querySelectorAll('.glossary-item');
-
-        items.forEach(item => {
-            const term = item.querySelector('.glossary-term').textContent.toLowerCase();
-            const definition = item.querySelector('.glossary-definition').textContent.toLowerCase();
-            
-            if (term.includes(search) || definition.includes(search)) {
-                item.style.display = 'block';
-            } else {
-                item.style.display = 'none';
-            }
-        });
-    }
-
-    /**
-     * ========================================
      * MODALS
      * ========================================
      */
@@ -1336,15 +1503,6 @@ class ForexConverter {
             modal.classList.remove('active');
             document.body.style.overflow = '';
         }
-    }
-
-    /**
-     * ========================================
-     * EXPORT
-     * ========================================
-     */
-    exportAllData() {
-        alert('Export functionality\n\nWill export all forex data to:\n- CSV\n- Excel\n- PDF');
     }
 
     /**
