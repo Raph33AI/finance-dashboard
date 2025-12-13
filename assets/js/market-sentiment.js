@@ -1,6 +1,6 @@
 /**
  * ════════════════════════════════════════════════════════════════
- * MARKET SENTIMENT DASHBOARD - Interface principale
+ * MARKET SENTIMENT DASHBOARD - Interface principale (CORRIGÉ)
  * ════════════════════════════════════════════════════════════════
  */
 
@@ -21,7 +21,21 @@ class MarketSentimentDashboard {
     async init() {
         console.log('🎯 Initializing Market Sentiment Dashboard...');
         
+        // ✅ CORRECTION : Attendre que le DOM soit complètement chargé
+        if (document.readyState === 'loading') {
+            await new Promise(resolve => {
+                document.addEventListener('DOMContentLoaded', resolve);
+            });
+        }
+        
+        // ✅ Afficher un état de chargement SANS écraser le HTML
+        this.showLoadingState();
+        
         await this.loadAndAnalyze();
+        
+        // ✅ Masquer l'état de chargement
+        this.hideLoadingState();
+        
         this.renderDashboard();
     }
 
@@ -33,8 +47,6 @@ class MarketSentimentDashboard {
     
     async loadAndAnalyze() {
         try {
-            this.showLoading();
-            
             console.log('📡 Loading articles from RSS...');
             const data = await this.rssClient.getAllArticles();
             this.allArticles = data.articles;
@@ -50,7 +62,60 @@ class MarketSentimentDashboard {
         } catch (error) {
             console.error('❌ Error loading data:', error);
             this.showError();
+            throw error;
         }
+    }
+
+    /**
+     * ═══════════════════════════════════════════════════════════
+     * ÉTATS DE CHARGEMENT (SANS ÉCRASER LE HTML)
+     * ═══════════════════════════════════════════════════════════
+     */
+    
+    showLoadingState() {
+        // Ajouter une classe de chargement sur chaque section
+        const sections = document.querySelectorAll('.section');
+        sections.forEach(section => {
+            section.style.opacity = '0.5';
+            section.style.pointerEvents = 'none';
+        });
+        
+        // Afficher un spinner global
+        const loadingOverlay = document.createElement('div');
+        loadingOverlay.id = 'loadingOverlay';
+        loadingOverlay.style.cssText = `
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: var(--card-bg);
+            padding: 40px 60px;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            z-index: 9999;
+            text-align: center;
+            border: 2px solid var(--glass-border);
+        `;
+        loadingOverlay.innerHTML = `
+            <i class='fas fa-spinner fa-spin' style='font-size: 3rem; background: linear-gradient(135deg, #667eea, #764ba2); -webkit-background-clip: text; -webkit-text-fill-color: transparent;'></i>
+            <p style='margin-top: 20px; font-size: 1.1rem; font-weight: 600; color: var(--text-secondary);'>Analyzing market sentiment...</p>
+        `;
+        document.body.appendChild(loadingOverlay);
+    }
+    
+    hideLoadingState() {
+        // Retirer l'overlay
+        const overlay = document.getElementById('loadingOverlay');
+        if (overlay) {
+            overlay.remove();
+        }
+        
+        // Réactiver les sections
+        const sections = document.querySelectorAll('.section');
+        sections.forEach(section => {
+            section.style.opacity = '1';
+            section.style.pointerEvents = 'auto';
+        });
     }
 
     /**
@@ -60,12 +125,40 @@ class MarketSentimentDashboard {
      */
     
     renderDashboard() {
+        console.log('🎨 Rendering dashboard...');
+        
+        // ✅ Vérifier que tous les éléments existent
+        const requiredElements = [
+            'globalSentimentValue',
+            'globalSentimentLabel',
+            'positiveCount',
+            'neutralCount',
+            'negativeCount',
+            'totalAnalyzed',
+            'sectorSentimentGrid',
+            'topBullishTickers',
+            'topBearishTickers',
+            'sentimentHeatmap',
+            'sentimentTimeline',
+            'sentimentArticles'
+        ];
+        
+        const missingElements = requiredElements.filter(id => !document.getElementById(id));
+        
+        if (missingElements.length > 0) {
+            console.error('❌ Missing HTML elements:', missingElements);
+            alert(`Erreur: Éléments HTML manquants (${missingElements.join(', ')}). Rechargez la page.`);
+            return;
+        }
+        
         this.renderGlobalSentiment();
         this.renderSectorSentiment();
         this.renderTopTickers();
         this.renderHeatmap();
         this.renderTimeline();
         this.renderArticles('all');
+        
+        console.log('✅ Dashboard rendered successfully!');
     }
 
     /**
@@ -92,6 +185,11 @@ class MarketSentimentDashboard {
 
     createGaugeChart(score) {
         const canvas = document.getElementById('sentimentGauge');
+        if (!canvas) {
+            console.error('❌ Canvas sentimentGauge not found!');
+            return;
+        }
+        
         const ctx = canvas.getContext('2d');
         
         // Détruire l'ancien chart si existe
@@ -287,10 +385,9 @@ class MarketSentimentDashboard {
             a.tickers.includes(ticker)
         );
         
-        alert(`${ticker}\n\nSentiment Score: ${data.score}\nArticles: ${data.count}\n\nClick OK to see related articles in News Terminal.`);
+        const msg = `${ticker}\n\nSentiment Score: ${data.score > 0 ? '+' : ''}${data.score}\nArticles: ${data.count}\n\n${data.count} article(s) found mentioning ${ticker}.`;
         
-        // Option : rediriger vers News Terminal avec filtre
-        // window.location.href = `news-terminal.html?ticker=${ticker}`;
+        alert(msg);
     }
 
     /**
@@ -393,6 +490,11 @@ class MarketSentimentDashboard {
 
     createTimelineChart(labels, data) {
         const canvas = document.getElementById('sentimentTimeline');
+        if (!canvas) {
+            console.error('❌ Canvas sentimentTimeline not found!');
+            return;
+        }
+        
         const ctx = canvas.getContext('2d');
         
         if (this.charts.timeline) {
@@ -560,30 +662,30 @@ class MarketSentimentDashboard {
     
     async refreshData() {
         console.log('🔄 Refreshing sentiment data...');
+        
+        this.showLoadingState();
+        
         this.rssClient.clearCache();
         await this.loadAndAnalyze();
+        
+        this.hideLoadingState();
+        
         this.renderDashboard();
         this.showNotification('Sentiment data refreshed!', 'success');
     }
 
-    showLoading() {
-        const container = document.querySelector('.container');
-        container.innerHTML = `
-            <div class='section' style='text-align: center; padding: 100px 20px;'>
-                <i class='fas fa-spinner fa-spin' style='font-size: 4rem; background: linear-gradient(135deg, #667eea, #764ba2); -webkit-background-clip: text; -webkit-text-fill-color: transparent;'></i>
-                <p style='margin-top: 24px; font-size: 1.2rem; font-weight: 600; color: var(--text-secondary);'>Analyzing market sentiment...</p>
-            </div>
-        `;
-    }
-
     showError() {
+        this.hideLoadingState();
+        
         const container = document.querySelector('.container');
+        if (!container) return;
+        
         container.innerHTML = `
             <div class='section' style='text-align: center; padding: 100px 20px;'>
                 <i class='fas fa-exclamation-triangle' style='font-size: 4rem; background: linear-gradient(135deg, #ef4444, #dc2626); -webkit-background-clip: text; -webkit-text-fill-color: transparent;'></i>
                 <p style='margin-top: 24px; font-size: 1.2rem; font-weight: 600; color: var(--text-secondary);'>Error loading data. Please try again.</p>
-                <button class='dashboard-btn' onclick='sentimentDashboard.refreshData()' style='margin-top: 24px; padding: 14px 32px; background: linear-gradient(135deg, #667eea, #764ba2); color: white; border: none; border-radius: 12px; font-weight: 700; cursor: pointer;'>
-                    <i class='fas fa-sync-alt'></i> Retry
+                <button class='dashboard-btn' onclick='location.reload()' style='margin-top: 24px; padding: 14px 32px; background: linear-gradient(135deg, #667eea, #764ba2); color: white; border: none; border-radius: 12px; font-weight: 700; cursor: pointer;'>
+                    <i class='fas fa-sync-alt'></i> Reload Page
                 </button>
             </div>
         `;
@@ -615,7 +717,21 @@ class MarketSentimentDashboard {
     }
 }
 
-// Initialiser au chargement
+// Animations CSS
+const style = document.createElement('style');
+style.textContent = `
+    @keyframes slideIn {
+        from { transform: translateX(400px); opacity: 0; }
+        to { transform: translateX(0); opacity: 1; }
+    }
+    @keyframes slideOut {
+        from { transform: translateX(0); opacity: 1; }
+        to { transform: translateX(400px); opacity: 0; }
+    }
+`;
+document.head.appendChild(style);
+
+// ✅ Initialiser au chargement
 let sentimentDashboard;
 document.addEventListener('DOMContentLoaded', () => {
     sentimentDashboard = new MarketSentimentDashboard();
