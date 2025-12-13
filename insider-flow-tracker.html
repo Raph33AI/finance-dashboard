@@ -1,0 +1,910 @@
+<!DOCTYPE html>
+<html lang='en'>
+<head>
+    <meta charset='UTF-8'>
+    <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+    <title>Insider Flow Tracker | AlphaVault AI</title>
+    
+    <!-- Font Awesome -->
+    <link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css'>
+    
+    <!-- Highcharts -->
+    <script src='https://code.highcharts.com/highcharts.js'></script>
+    <script src='https://code.highcharts.com/modules/exporting.js'></script>
+    <script src='https://code.highcharts.com/modules/export-data.js'></script>
+    <script src='https://code.highcharts.com/highcharts-more.js'></script>
+    <script src='https://code.highcharts.com/modules/heatmap.js'></script>
+    <script src='https://code.highcharts.com/modules/networkgraph.js'></script>
+    <script src='https://code.highcharts.com/modules/sankey.js'></script>
+    <script src='https://code.highcharts.com/modules/timeline.js'></script>
+    
+    <!-- Styles -->
+    <link rel='stylesheet' href='assets/css/common.css'>
+    <link rel='stylesheet' href='assets/css/sidebar.css'>
+    <link rel="stylesheet" href="assets/css/user-menu.css">
+    <link rel='stylesheet' href='assets/css/economic-pages.css'>
+    <link rel='stylesheet' href='assets/css/ipo-intelligence.css'>
+    <link rel='stylesheet' href='assets/css/insider-flow-tracker.css'>
+    
+    <!-- Favicon Dynamique -->
+    <script src="assets/js/favicon-dynamic.js"></script>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    
+    <!-- Configuration -->
+    <script src="assets/js/config.js"></script>
+    <script src="assets/js/firebase-config.js"></script>
+    
+    <!-- Protection de la page -->
+    <script src="assets/js/auth-guard.js"></script>
+    <script src="assets/js/access-control.js"></script>
+</head>
+<body>
+
+    <!-- Theme Script -->
+    <script src="assets/js/theme.js"></script>
+    <script src="assets/js/theme-charts.js"></script>
+
+    <!-- Particles Background -->
+    <canvas id="particles-canvas" class="particles-background"></canvas>
+
+    <div class='layout-wrapper'>
+        <!-- Sidebar (IDENTIQUE À TON CODE) -->
+        <aside class='sidebar' id='sidebar'>
+            <div class="sidebar-header">
+                <div class="logo-container">
+                    <div class="logo-3d">
+                        <svg class="logo-svg" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                            <defs>
+                                <linearGradient id="logoGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                                    <stop offset="0%" class="logo-gradient-1" />
+                                    <stop offset="100%" class="logo-gradient-2" />
+                                </linearGradient>
+                            </defs>
+                            <path d="M 20 80 L 30 70 L 40 75 L 50 60 L 60 65 L 70 45 L 80 50 L 90 30" 
+                                  stroke="url(#logoGradient)" stroke-width="4" fill="none" 
+                                  stroke-linecap="round" stroke-linejoin="round"/>
+                            <circle cx="30" cy="70" r="4" fill="url(#logoGradient)"/>
+                            <circle cx="50" cy="60" r="4" fill="url(#logoGradient)"/>
+                            <circle cx="70" cy="45" r="4" fill="url(#logoGradient)"/>
+                            <circle cx="90" cy="30" r="5" fill="url(#logoGradient)"/>
+                            <path d="M 85 35 L 90 30 L 85 25" 
+                                  stroke="url(#logoGradient)" stroke-width="3" fill="none" stroke-linecap="round"/>
+                        </svg>
+                    </div>
+                    <div class="brand-text">
+                        <h2 class="brand-name">AlphaVault AI</h2>
+                        <span class="brand-tagline">Investments</span>
+                    </div>
+                </div>
+                <button class="sidebar-toggle" aria-label="Toggle Sidebar">
+                    <i class="fas fa-angle-left"></i>
+                </button>
+            </div>
+            
+            <nav class="sidebar-nav">
+                <div class="nav-section">
+                    <button class="nav-folder" data-tooltip="Home">
+                        <i class="fas fa-home"></i>
+                        <span>Home</span>
+                        <i class="fas fa-chevron-down arrow"></i>
+                    </button>
+                    <div class="nav-submenu">
+                        <a href="index.html" class="nav-link">
+                            <i class="fas fa-home"></i>
+                            <span>Overview</span>
+                        </a>
+                    </div>
+                </div>
+                
+                <div class='nav-section'>
+                    <button class='nav-folder' data-tooltip="Budget">
+                        <i class='fas fa-wallet'></i>
+                        <span>Budget</span>
+                        <i class='fas fa-chevron-down arrow'></i>
+                    </button>
+                    <div class='nav-submenu'>
+                        <a href='dashboard-financier.html' class='nav-link'>
+                            <i class='fas fa-home'></i>
+                            <span>Dashboard Budget</span>
+                        </a>
+                        <a href='investment-analytics.html' class='nav-link'>
+                            <i class='fas fa-chart-bar'></i>
+                            <span>Investment Analytics</span>
+                        </a>
+                    </div>
+                </div>
+                
+                <div class='nav-section'>
+                    <button class='nav-folder' data-tooltip="Simulation">
+                        <i class='fas fa-calculator'></i>
+                        <span>Simulation</span>
+                        <i class='fas fa-chevron-down arrow'></i>
+                    </button>
+                    <div class='nav-submenu'>
+                        <a href='monte-carlo.html' class='nav-link'>
+                            <i class='fas fa-dice'></i>
+                            <span>Monte Carlo</span>
+                        </a>
+                        <a href='portfolio-optimizer.html' class='nav-link'>
+                            <i class='fas fa-chart-pie'></i>
+                            <span>Markowitz</span>
+                        </a>
+                        <a href='risk-parity.html' class='nav-link'>
+                            <i class='fas fa-balance-scale'></i>
+                            <span>Risk Parity</span>
+                        </a>
+                        <a href='scenario-analysis.html' class='nav-link'>
+                            <i class='fas fa-flask'></i>
+                            <span>Scenarios</span>
+                        </a>
+                    </div>
+                </div>
+                
+                <div class='nav-section'>
+                    <button class="nav-folder" data-tooltip="Stocks">
+                        <i class="fas fa-chart-line"></i>
+                        <span>Stocks</span>
+                        <i class="fas fa-chevron-down arrow"></i>
+                    </button>
+                    <div class='nav-submenu'>
+                        <a href='advanced-analysis.html' class='nav-link'>
+                            <i class='fas fa-brain'></i>
+                            <span>Advanced Analysis</span>
+                        </a>
+                        <a href='forex-converter.html' class='nav-link'>
+                            <i class='fas fa-exchange-alt'></i>
+                            <span>Forex Converter</span>
+                        </a>
+                        <a href='ipo-intelligence.html' class='nav-link'>
+                            <i class='fas fa-rocket'></i>
+                            <span>IPO Intelligence</span>
+                        </a>
+                        <a href='insider-flow-tracker.html' class='nav-link active'>
+                            <i class='fas fa-user-secret'></i>
+                            <span>Insider Flow Tracker</span>
+                        </a>
+                    </div>
+                </div>
+
+                <div class='nav-section'>
+                    <button class="nav-folder" data-tooltip="AI Assistant">
+                        <i class="fas fa-robot"></i>
+                        <span>AI Assistant</span>
+                        <i class="fas fa-chevron-down arrow"></i>
+                    </button>
+                    <div class='nav-submenu'>
+                        <a href='chatbot-fullpage.html' class='nav-link'>
+                            <i class='fas fa-comments'></i>
+                            <span>Alphy AI Chat</span>
+                        </a>
+                    </div>
+                </div>
+
+                <div class='nav-section'>
+                    <button class='nav-folder'>
+                        <i class='fas fa-globe-americas'></i>
+                        <span>Economic Data</span>
+                        <i class='fas fa-chevron-down arrow'></i>
+                    </button>
+                    <div class='nav-submenu'>
+                        <a href='economic-dashboard.html' class='nav-link'>
+                            <i class='fas fa-tachometer-alt'></i>
+                            <span>Macro Economic Dashboard</span>
+                        </a>
+                        <a href='inflation-calculator.html' class='nav-link'>
+                            <i class='fas fa-calculator'></i>
+                            <span>Inflation Calculator</span>
+                        </a>
+                        <a href='interest-rate-tracker.html' class='nav-link'>
+                            <i class='fas fa-percent'></i>
+                            <span>Interest Rates</span>
+                        </a>
+                        <a href='recession-indicator.html' class='nav-link'>
+                            <i class='fas fa-exclamation-triangle'></i>
+                            <span>Recession Indicators</span>
+                        </a>
+                    </div>
+                </div>
+
+                <div class='nav-section'>
+                    <button class="nav-folder" data-tooltip="News & Analysis">
+                        <i class="fas fa-newspaper"></i>
+                        <span>News & Analysis</span>
+                        <i class="fas fa-chevron-down arrow"></i>
+                    </button>
+                    <div class='nav-submenu'>
+                        <a href='news-terminal.html' class='nav-link'>
+                            <i class='fas fa-desktop'></i>
+                            <span>News Terminal</span>
+                        </a>
+                        <a href='market-sentiment.html' class='nav-link'>
+                            <i class='fas fa-chart-pie'></i>
+                            <span>Market Sentiment</span>
+                        </a>
+                        <a href='trending-topics.html' class='nav-link'>
+                            <i class='fas fa-fire'></i>
+                            <span>Trending Topics</span>
+                        </a>
+                    </div>
+                </div>
+            </nav>
+            
+            <div class="sidebar-footer">
+                <div class="sidebar-user-menu">
+                    <div class="sidebar-user-trigger" id="sidebarUserTrigger">
+                        <img data-user-photo 
+                            src="https://ui-avatars.com/api/?name=User&background=2563eb&color=fff" 
+                            alt="Avatar" class="sidebar-user-avatar">
+                        <div class="sidebar-user-info">
+                            <span data-user-name class="sidebar-user-name">User</span>
+                            <span data-user-plan class="sidebar-user-plan">Free Plan</span>
+                        </div>
+                        <i class="fas fa-chevron-up sidebar-user-arrow"></i>
+                    </div>
+                    <div class="sidebar-user-dropdown" id="sidebarUserDropdown">
+                        <div class="user-dropdown-header">
+                            <img data-user-photo 
+                                src="https://ui-avatars.com/api/?name=User&background=2563eb&color=fff" 
+                                alt="Avatar" class="user-dropdown-avatar">
+                            <div class="user-dropdown-details">
+                                <h4 data-user-name class="user-dropdown-name">User</h4>
+                                <p data-user-email class="user-dropdown-email">email@example.com</p>
+                            </div>
+                        </div>
+                        <div class="user-dropdown-divider"></div>
+                        <nav class="user-dropdown-links">
+                            <a href="user-profile.html" class="user-dropdown-link">
+                                <i class="fas fa-user"></i>
+                                <span>My profile</span>
+                            </a>
+                            <a href="settings.html" class="user-dropdown-link">
+                                <i class="fas fa-cog"></i>
+                                <span>Settings</span>
+                            </a>
+                        </nav>
+                        <div class="user-dropdown-divider"></div>
+                        <button onclick="logout()" class="user-dropdown-logout">
+                            <i class="fas fa-sign-out-alt"></i>
+                            <span>Disconnect</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </aside>
+        
+        <div class='sidebar-overlay' id='sidebarOverlay'></div>
+
+        <!-- Main Content -->
+        <div class='main-content'>
+            <header class='top-header'>
+                <div class='header-left'>
+                    <button class='mobile-toggle' id='mobileToggle'>
+                        <i class='fas fa-bars'></i>
+                    </button>
+                    <h1 class='page-title'><i class="fas fa-user-secret"></i> Insider Flow Tracker</h1>
+                </div>
+                <div class='header-right'>
+                    <button class='dashboard-btn' id='configureAlerts' title='Configure Alerts'>
+                        <i class='fas fa-bell'></i>
+                        <span class='btn-text'>Alerts</span>
+                    </button>
+                    <button class='dashboard-btn' id='refreshData' title='Refresh Data'>
+                        <i class='fas fa-sync-alt'></i>
+                        <span class='btn-text'>Refresh</span>
+                    </button>
+                </div>
+            </header>
+            
+            <div class='container'>
+                
+                <!-- Toolbar -->
+                <div class='dashboard-toolbar'>
+                    <div class='toolbar-left'>
+                        <span class='dashboard-subtitle'>
+                            <i class='fas fa-database'></i>
+                            Real-time insider trading data from SEC Form 4 filings
+                        </span>
+                    </div>
+                    <div class='toolbar-right'>
+                        <div class='filter-group-inline'>
+                            <label><i class='fas fa-building'></i> Company:</label>
+                            <select id='companyFilter' class='dashboard-select'>
+                                <option value='all'>All Companies</option>
+                            </select>
+                        </div>
+                        <div class='filter-group-inline'>
+                            <label><i class='fas fa-calendar'></i> Period:</label>
+                            <select id='periodFilter' class='dashboard-select'>
+                                <option value='7'>Last 7 Days</option>
+                                <option value='30' selected>Last 30 Days</option>
+                                <option value='90'>Last 90 Days</option>
+                                <option value='180'>Last 6 Months</option>
+                                <option value='365'>Last Year</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Smart Alerts Banner -->
+                <div class='smart-alerts-banner' id='smartAlertsBanner' style='display: none;'>
+                    <div class='alert-banner-content'>
+                        <div class='alert-banner-icon'>
+                            <i class='fas fa-exclamation-triangle'></i>
+                        </div>
+                        <div class='alert-banner-text'>
+                            <h3>🚨 Smart Alert Triggered</h3>
+                            <p id='alertBannerMessage'>Significant insider activity detected</p>
+                        </div>
+                        <button class='alert-banner-close' onclick='this.parentElement.parentElement.style.display="none"'>
+                            <i class='fas fa-times'></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Insider Activity Overview Cards -->
+                <div class='section'>
+                    <h2 class='section-title gradient-title'>
+                        <i class='fas fa-chart-bar'></i> Insider Activity Overview
+                        <button class='info-btn' onclick='insiderApp.showInfoModal("overview")'>
+                            <i class='fas fa-info-circle'></i>
+                        </button>
+                    </h2>
+                    
+                    <div class='insider-overview-grid' id='overviewCards'>
+                        <div class='eco-loading'>
+                            <div class='eco-spinner'></div>
+                            <p>Loading insider data...</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Insider Sentiment Score -->
+                <div class='section'>
+                    <h2 class='section-title gradient-title'>
+                        <i class='fas fa-tachometer-alt'></i> Insider Sentiment Score
+                        <button class='info-btn' onclick='insiderApp.showInfoModal("sentiment")'>
+                            <i class='fas fa-info-circle'></i>
+                        </button>
+                    </h2>
+                    
+                    <div class='sentiment-grid'>
+                        <div class='chart-card sentiment-gauge-card'>
+                            <div id='sentimentGaugeChart' class='chart'></div>
+                            <div class='sentiment-interpretation'>
+                                <h4>Current Signal: <span id='sentimentSignal' class='sentiment-signal-text'>Loading...</span></h4>
+                                <p id='sentimentInterpretation'>Analyzing insider transactions...</p>
+                            </div>
+                        </div>
+                        
+                        <div class='chart-card'>
+                            <div class='chart-header'>
+                                <h3 class='chart-title'><i class='fas fa-chart-line'></i> Sentiment Trend (30 Days)</h3>
+                            </div>
+                            <div id='sentimentTrendChart' class='chart'></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Pattern Recognition Dashboard -->
+                <div class='section'>
+                    <h2 class='section-title gradient-title'>
+                        <i class='fas fa-brain'></i> Pattern Recognition Dashboard
+                        <button class='info-btn' onclick='insiderApp.showInfoModal("patterns")'>
+                            <i class='fas fa-info-circle'></i>
+                        </button>
+                    </h2>
+                    
+                    <div class='pattern-grid'>
+                        <div class='pattern-card' id='clusterBuyingCard'>
+                            <div class='pattern-icon cluster-buying'>
+                                <i class='fas fa-users'></i>
+                            </div>
+                            <div class='pattern-content'>
+                                <h3>Cluster Buying Detected</h3>
+                                <p class='pattern-count' id='clusterCount'>0 companies</p>
+                                <p class='pattern-description'>Multiple insiders buying simultaneously</p>
+                                <button class='pattern-btn' onclick='insiderApp.viewPattern("cluster")'>
+                                    <i class='fas fa-search'></i> View Details
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class='pattern-card' id='preEarningsCard'>
+                            <div class='pattern-icon pre-earnings'>
+                                <i class='fas fa-calendar-check'></i>
+                            </div>
+                            <div class='pattern-content'>
+                                <h3>Pre-Earnings Activity</h3>
+                                <p class='pattern-count' id='preEarningsCount'>0 transactions</p>
+                                <p class='pattern-description'>Insider trades 30 days before earnings</p>
+                                <button class='pattern-btn' onclick='insiderApp.viewPattern("preearnings")'>
+                                    <i class='fas fa-search'></i> View Details
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class='pattern-card' id='divergenceCard'>
+                            <div class='pattern-icon divergence'>
+                                <i class='fas fa-exclamation-triangle'></i>
+                            </div>
+                            <div class='pattern-content'>
+                                <h3>CEO/CFO Divergence</h3>
+                                <p class='pattern-count' id='divergenceCount'>0 companies</p>
+                                <p class='pattern-description'>Conflicting signals from top executives</p>
+                                <button class='pattern-btn' onclick='insiderApp.viewPattern("divergence")'>
+                                    <i class='fas fa-search'></i> View Details
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class='pattern-card' id='unusualVolumeCard'>
+                            <div class='pattern-icon unusual-volume'>
+                                <i class='fas fa-chart-area'></i>
+                            </div>
+                            <div class='pattern-content'>
+                                <h3>Unusual Volume Spike</h3>
+                                <p class='pattern-count' id='unusualVolumeCount'>0 transactions</p>
+                                <p class='pattern-description'>Trading volume >3x average</p>
+                                <button class='pattern-btn' onclick='insiderApp.viewPattern("volume")'>
+                                    <i class='fas fa-search'></i> View Details
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent Insider Transactions -->
+                <div class='section'>
+                    <h2 class='section-title gradient-title'>
+                        <i class='fas fa-exchange-alt'></i> Recent Insider Transactions
+                        <button class='info-btn' onclick='insiderApp.showInfoModal("transactions")'>
+                            <i class='fas fa-info-circle'></i>
+                        </button>
+                    </h2>
+                    
+                    <div class='transactions-controls'>
+                        <div class='transaction-filters'>
+                            <button class='filter-chip active' data-type='all' onclick='insiderApp.filterTransactions(this)'>
+                                <i class='fas fa-th'></i> All
+                            </button>
+                            <button class='filter-chip' data-type='buy' onclick='insiderApp.filterTransactions(this)'>
+                                <i class='fas fa-arrow-up'></i> Purchases
+                            </button>
+                            <button class='filter-chip' data-type='sell' onclick='insiderApp.filterTransactions(this)'>
+                                <i class='fas fa-arrow-down'></i> Sales
+                            </button>
+                            <button class='filter-chip' data-type='option' onclick='insiderApp.filterTransactions(this)'>
+                                <i class='fas fa-certificate'></i> Options
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class='insider-table-wrapper'>
+                        <table class='insider-table' id='transactionsTable'>
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Company</th>
+                                    <th>Insider</th>
+                                    <th>Position</th>
+                                    <th>Type</th>
+                                    <th>Shares</th>
+                                    <th>Value</th>
+                                    <th>Conviction Score</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td colspan="9" class='text-center'>
+                                        <div class='eco-loading'>
+                                            <div class='eco-spinner'></div>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Conviction Score Analysis -->
+                <div class='section'>
+                    <h2 class='section-title gradient-title'>
+                        <i class='fas fa-star'></i> Conviction Score Analysis
+                        <button class='info-btn' onclick='insiderApp.showInfoModal("conviction")'>
+                            <i class='fas fa-info-circle'></i>
+                        </button>
+                    </h2>
+                    
+                    <div class='analytics-charts-grid'>
+                        <div class='chart-card'>
+                            <div class='chart-header'>
+                                <h3 class='chart-title'><i class='fas fa-trophy'></i> Top Conviction Trades</h3>
+                            </div>
+                            <div id='convictionScoreChart' class='chart'></div>
+                        </div>
+                        
+                        <div class='chart-card'>
+                            <div class='chart-header'>
+                                <h3 class='chart-title'><i class='fas fa-layer-group'></i> Transaction Size Distribution</h3>
+                            </div>
+                            <div id='transactionSizeChart' class='chart'></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Timing Analysis -->
+                <div class='section'>
+                    <h2 class='section-title gradient-title'>
+                        <i class='fas fa-clock'></i> Timing Analysis
+                        <button class='info-btn' onclick='insiderApp.showInfoModal("timing")'>
+                            <i class='fas fa-info-circle'></i>
+                        </button>
+                    </h2>
+                    
+                    <div class='analytics-charts-grid'>
+                        <div class='chart-card'>
+                            <div class='chart-header'>
+                                <h3 class='chart-title'><i class='fas fa-calendar-alt'></i> Days to Earnings Events</h3>
+                            </div>
+                            <div id='timingEarningsChart' class='chart'></div>
+                        </div>
+                        
+                        <div class='chart-card'>
+                            <div class='chart-header'>
+                                <h3 class='chart-title'><i class='fas fa-bullhorn'></i> Days to Major Announcements</h3>
+                            </div>
+                            <div id='timingAnnouncementsChart' class='chart'></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Historical Correlation -->
+                <div class='section'>
+                    <h2 class='section-title gradient-title'>
+                        <i class='fas fa-chart-line'></i> Historical Correlation & Backtesting
+                        <button class='info-btn' onclick='insiderApp.showInfoModal("correlation")'>
+                            <i class='fas fa-info-circle'></i>
+                        </button>
+                    </h2>
+                    
+                    <div class='chart-card'>
+                        <div class='chart-header'>
+                            <h3 class='chart-title'><i class='fas fa-percentage'></i> Stock Price Impact After Insider Trades</h3>
+                            <div class='chart-controls'>
+                                <button class='chart-control-btn active' data-days='7' onclick='insiderApp.updateCorrelation(this)'>7D</button>
+                                <button class='chart-control-btn' data-days='30' onclick='insiderApp.updateCorrelation(this)'>30D</button>
+                                <button class='chart-control-btn' data-days='90' onclick='insiderApp.updateCorrelation(this)'>90D</button>
+                            </div>
+                        </div>
+                        <div id='correlationChart' class='chart'></div>
+                    </div>
+                    
+                    <div class='backtesting-stats'>
+                        <div class='stat-card'>
+                            <div class='stat-icon' style='background: linear-gradient(135deg, #10b981, #059669);'>
+                                <i class='fas fa-arrow-up'></i>
+                            </div>
+                            <div class='stat-content'>
+                                <p class='stat-label'>Buy Success Rate</p>
+                                <p class='stat-value' id='buySuccessRate'>--</p>
+                                <p class='stat-sublabel'>Positive return after 30 days</p>
+                            </div>
+                        </div>
+                        
+                        <div class='stat-card'>
+                            <div class='stat-icon' style='background: linear-gradient(135deg, #ef4444, #dc2626);'>
+                                <i class='fas fa-arrow-down'></i>
+                            </div>
+                            <div class='stat-content'>
+                                <p class='stat-label'>Sell Accuracy</p>
+                                <p class='stat-value' id='sellAccuracy'>--</p>
+                                <p class='stat-sublabel'>Stock declined after sale</p>
+                            </div>
+                        </div>
+                        
+                        <div class='stat-card'>
+                            <div class='stat-icon' style='background: linear-gradient(135deg, #3b82f6, #2563eb);'>
+                                <i class='fas fa-percentage'></i>
+                            </div>
+                            <div class='stat-content'>
+                                <p class='stat-label'>Average Impact</p>
+                                <p class='stat-value' id='averageImpact'>--</p>
+                                <p class='stat-sublabel'>30-day price change</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Network Analysis -->
+                <div class='section'>
+                    <h2 class='section-title gradient-title'>
+                        <i class='fas fa-project-diagram'></i> Insider Network Analysis
+                        <button class='info-btn' onclick='insiderApp.showInfoModal("network")'>
+                            <i class='fas fa-info-circle'></i>
+                        </button>
+                    </h2>
+                    
+                    <div class='network-grid'>
+                        <div class='chart-card network-chart-card'>
+                            <div class='chart-header'>
+                                <h3 class='chart-title'><i class='fas fa-sitemap'></i> Board Interlocks & Relationships</h3>
+                                <div class='network-legend'>
+                                    <span class='legend-item'><span class='legend-color' style='background: #667eea;'></span> Company</span>
+                                    <span class='legend-item'><span class='legend-color' style='background: #10b981;'></span> Insider</span>
+                                    <span class='legend-item'><span class='legend-color' style='background: #f59e0b;'></span> Multiple Boards</span>
+                                </div>
+                            </div>
+                            <div id='networkChart' class='chart network-chart'></div>
+                        </div>
+                        
+                        <div class='network-insights'>
+                            <h3><i class='fas fa-lightbulb'></i> Key Insights</h3>
+                            <div id='networkInsights'>
+                                <div class='insight-item'>
+                                    <i class='fas fa-spinner fa-spin'></i>
+                                    <span>Analyzing network connections...</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Insider vs Analyst Sentiment -->
+                <div class='section'>
+                    <h2 class='section-title gradient-title'>
+                        <i class='fas fa-balance-scale-right'></i> Insider vs Analyst Sentiment
+                        <button class='info-btn' onclick='insiderApp.showInfoModal("comparison")'>
+                            <i class='fas fa-info-circle'></i>
+                        </button>
+                    </h2>
+                    
+                    <div class='analytics-charts-grid'>
+                        <div class='chart-card'>
+                            <div class='chart-header'>
+                                <h3 class='chart-title'><i class='fas fa-arrows-alt-h'></i> Sentiment Comparison by Stock</h3>
+                            </div>
+                            <div id='comparisonChart' class='chart'></div>
+                        </div>
+                        
+                        <div class='chart-card'>
+                            <div class='chart-header'>
+                                <h3 class='chart-title'><i class='fas fa-exclamation-circle'></i> Divergence Alerts</h3>
+                            </div>
+                            <div id='divergenceAlertsChart' class='chart'></div>
+                        </div>
+                    </div>
+                    
+                    <div class='comparison-table-wrapper'>
+                        <table class='comparison-table'>
+                            <thead>
+                                <tr>
+                                    <th>Company</th>
+                                    <th>Insider Signal</th>
+                                    <th>Analyst Consensus</th>
+                                    <th>Divergence</th>
+                                    <th>Historical Accuracy</th>
+                                </tr>
+                            </thead>
+                            <tbody id='comparisonTableBody'>
+                                <tr>
+                                    <td colspan="5" class='text-center'>
+                                        <div class='eco-loading'>
+                                            <div class='eco-spinner'></div>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Insider Activity Heatmap -->
+                <div class='section'>
+                    <h2 class='section-title gradient-title'>
+                        <i class='fas fa-fire'></i> Insider Activity Heatmap
+                        <button class='info-btn' onclick='insiderApp.showInfoModal("heatmap")'>
+                            <i class='fas fa-info-circle'></i>
+                        </button>
+                    </h2>
+                    
+                    <div class='chart-card'>
+                        <div id='activityHeatmap' class='chart'></div>
+                    </div>
+                </div>
+
+                <footer>
+                    <p>
+                        <i class='fas fa-shield-alt'></i> Insider Flow Tracker - Data from SEC Form 4 Filings (U.S. Securities and Exchange Commission)
+                    </p>
+                </footer>
+            </div>
+        </div>
+    </div>
+
+    <!-- Transaction Detail Modal -->
+    <div id='transactionDetailModal' class='modal'>
+        <div class='modal-content modal-large'>
+            <div class='modal-header'>
+                <h2 id='transactionModalTitle' class='gradient-title'>Transaction Details</h2>
+                <button class='modal-close'>&times;</button>
+            </div>
+            <div class='modal-body' id='transactionModalBody'>
+                <div class='eco-loading'>
+                    <div class='eco-spinner'></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pattern Detail Modal -->
+    <div id='patternDetailModal' class='modal'>
+        <div class='modal-content modal-large'>
+            <div class='modal-header'>
+                <h2 id='patternModalTitle' class='gradient-title'>Pattern Analysis</h2>
+                <button class='modal-close'>&times;</button>
+            </div>
+            <div class='modal-body' id='patternModalBody'>
+                <div class='eco-loading'>
+                    <div class='eco-spinner'></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Alerts Configuration Modal -->
+    <div id='alertsConfigModal' class='modal'>
+        <div class='modal-content'>
+            <div class='modal-header'>
+                <h2 class='gradient-title'><i class='fas fa-bell'></i> Configure Smart Alerts</h2>
+                <button class='modal-close'>&times;</button>
+            </div>
+            <div class='modal-body'>
+                <div class='alerts-config-content'>
+                    <div class='alert-config-group'>
+                        <h4><i class='fas fa-users'></i> Cluster Buying Alerts</h4>
+                        <label class='switch-label'>
+                            <input type='checkbox' id='alertClusterBuying' checked>
+                            <span class='switch-slider'></span>
+                            <span class='switch-text'>Alert when 3+ insiders buy within 7 days</span>
+                        </label>
+                    </div>
+                    
+                    <div class='alert-config-group'>
+                        <h4><i class='fas fa-dollar-sign'></i> High Value Transactions</h4>
+                        <label class='switch-label'>
+                            <input type='checkbox' id='alertHighValue' checked>
+                            <span class='switch-slider'></span>
+                            <span class='switch-text'>Alert for transactions > $1M</span>
+                        </label>
+                        <div class='input-group'>
+                            <label>Threshold (USD):</label>
+                            <input type='number' id='highValueThreshold' value='1000000' step='100000'>
+                        </div>
+                    </div>
+                    
+                    <div class='alert-config-group'>
+                        <h4><i class='fas fa-exclamation-triangle'></i> CEO/CFO Divergence</h4>
+                        <label class='switch-label'>
+                            <input type='checkbox' id='alertDivergence' checked>
+                            <span class='switch-slider'></span>
+                            <span class='switch-text'>Alert when CEO and CFO have conflicting signals</span>
+                        </label>
+                    </div>
+                    
+                    <div class='alert-config-group'>
+                        <h4><i class='fas fa-calendar'></i> Pre-Earnings Activity</h4>
+                        <label class='switch-label'>
+                            <input type='checkbox' id='alertPreEarnings' checked>
+                            <span class='switch-slider'></span>
+                            <span class='switch-text'>Alert for unusual activity before earnings</span>
+                        </label>
+                    </div>
+                    
+                    <div class='alert-config-group'>
+                        <h4><i class='fas fa-chart-area'></i> Unusual Volume</h4>
+                        <label class='switch-label'>
+                            <input type='checkbox' id='alertUnusualVolume' checked>
+                            <span class='switch-slider'></span>
+                            <span class='switch-text'>Alert when volume > 3x average</span>
+                        </label>
+                    </div>
+                    
+                    <div class='alert-actions'>
+                        <button class='filter-apply-btn' onclick='insiderApp.saveAlertConfig()'>
+                            <i class='fas fa-save'></i> Save Configuration
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Info Modal -->
+    <div id='infoModal' class='modal'>
+        <div class='modal-content'>
+            <div class='modal-header'>
+                <h2 id='infoModalTitle' class='gradient-title'>Information</h2>
+                <button class='modal-close'>&times;</button>
+            </div>
+            <div class='modal-body' id='infoModalBody' style='line-height: 1.8;'>
+                <div class='eco-loading'>
+                    <div class='eco-spinner'></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src='assets/js/common.js'></script>
+    <script src='assets/js/sidebar.js'></script>
+    <script src='assets/js/sec-api-client.js'></script>
+    <script src='assets/js/insider-flow-tracker.js'></script>
+
+    <!-- Chatbot Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script src="assets/js/chatbot-config.js"></script>
+    <script src="assets/js/chatbot-gemini.js"></script>
+    <script src="assets/js/chatbot-analytics.js"></script>
+    <script src="assets/js/chatbot-charts.js"></script>
+    <script src="assets/js/chatbot-ipo-analyzer.js"></script>
+    <script src="assets/js/chatbot-suggestions.js"></script>
+    <script src="assets/js/chatbot-ai-engine.js"></script>
+    <script src="assets/js/chatbot-ui.js"></script>
+    <script src="assets/js/chatbot-particles.js"></script>
+
+    <!-- User Menu Init -->
+    <script>
+        (function forceUserMenuInit() {
+            console.log('🔧 Force initializing user menu...');
+            
+            const initMenu = () => {
+                const trigger = document.getElementById('sidebarUserTrigger');
+                const dropdown = document.getElementById('sidebarUserDropdown');
+                
+                if (!trigger || !dropdown) return;
+                
+                const newTrigger = trigger.cloneNode(true);
+                trigger.parentNode.replaceChild(newTrigger, trigger);
+                
+                const freshTrigger = document.getElementById('sidebarUserTrigger');
+                const freshDropdown = document.getElementById('sidebarUserDropdown');
+                
+                freshTrigger.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    
+                    const isActive = freshDropdown.classList.contains('active');
+                    freshDropdown.classList.toggle('active');
+                    
+                    const arrow = freshTrigger.querySelector('.sidebar-user-arrow');
+                    if (arrow) {
+                        arrow.style.transform = isActive ? 'rotate(0deg)' : 'rotate(180deg)';
+                    }
+                });
+                
+                document.addEventListener('click', function(e) {
+                    if (!freshTrigger.contains(e.target) && !freshDropdown.contains(e.target)) {
+                        freshDropdown.classList.remove('active');
+                        const arrow = freshTrigger.querySelector('.sidebar-user-arrow');
+                        if (arrow) arrow.style.transform = 'rotate(0deg)';
+                    }
+                });
+                
+                freshDropdown.addEventListener('click', e => e.stopPropagation());
+            };
+            
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', initMenu);
+            } else {
+                setTimeout(initMenu, 100);
+            }
+        })();
+    </script>
+
+</body>
+</html>
