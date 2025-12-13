@@ -1158,26 +1158,63 @@ class InsiderFlowTracker {
             else if (txn.daysToEarnings <= 60) ranges[3].count++;
             else ranges[4].count++;
         });
+        
+        const totalCount = ranges.reduce((sum, r) => sum + r.count, 0);
+        
+        if (totalCount === 0) {
+            const chartEl = document.getElementById('timingEarningsChart');
+            if (chartEl) {
+                chartEl.innerHTML = `
+                    <div style='display: flex; align-items: center; justify-content: center; height: 350px; color: var(--text-secondary);'>
+                        <div style='text-align: center;'>
+                            <i class='fas fa-clock' style='font-size: 4rem; margin-bottom: 20px; opacity: 0.3;'></i>
+                            <p style='font-size: 1.1rem; font-weight: 600;'>No Earnings Timing Data</p>
+                            <p style='font-size: 0.9rem;'>Adjust filters to see earnings proximity analysis</p>
+                        </div>
+                    </div>
+                `;
+            }
+            return;
+        }
 
         Highcharts.chart('timingEarningsChart', {
             chart: {
                 type: 'pie',
                 backgroundColor: 'transparent'
             },
-            title: { text: null },
+            title: { 
+                text: `Transactions by Days to Earnings (${totalCount} total)`,
+                style: { fontSize: '12px', color: '#6b7280' }
+            },
+            tooltip: {
+                pointFormat: '<b>{point.y}</b> transactions<br/>{point.percentage:.1f}%'
+            },
             plotOptions: {
                 pie: {
                     innerSize: '60%',
+                    allowPointSelect: true,
+                    cursor: 'pointer',
                     dataLabels: {
                         enabled: true,
-                        format: '<b>{point.name}</b><br>{point.percentage:.1f}%'
+                        format: '<b>{point.name}</b><br>{point.y} ({point.percentage:.1f}%)',
+                        style: {
+                            fontSize: '11px',
+                            fontWeight: '600'
+                        },
+                        connectorColor: '#667eea'
                     }
                 }
             },
             series: [{
                 name: 'Transactions',
-                data: ranges.map(r => ({ name: r.name, y: r.count })),
-                colors: ['#ef4444', '#f59e0b', '#f59e0b', '#3b82f6', '#10b981']
+                data: ranges.map(r => ({ 
+                    name: r.name, 
+                    y: r.count,
+                    color: r.name === '0-7 days' ? '#ef4444' : 
+                        r.name === '8-14 days' ? '#f59e0b' :
+                        r.name === '15-30 days' ? '#f59e0b' :
+                        r.name === '31-60 days' ? '#3b82f6' : '#10b981'
+                }))
             }],
             credits: { enabled: false },
             exporting: { enabled: true }
@@ -1185,35 +1222,109 @@ class InsiderFlowTracker {
     }
 
     renderTimingAnnouncementsChart() {
-        const data = [
-            { name: 'Product Launch', before: 12, after: 8 },
-            { name: 'M&A Activity', before: 18, after: 5 },
-            { name: 'Regulatory Filing', before: 7, after: 15 },
-            { name: 'Leadership Change', before: 9, after: 11 },
-            { name: 'Strategic Partnership', before: 14, after: 6 }
-        ];
+        // Analyser les vraies transactions par proximité d'événements
+        const eventProximityData = {
+            'Close to Earnings': { before: 0, after: 0 },
+            'Far from Earnings': { before: 0, after: 0 },
+            'High Conviction': { before: 0, after: 0 },
+            'Low Conviction': { before: 0, after: 0 }
+        };
+        
+        this.filteredData.forEach(txn => {
+            // Analyser par proximité aux earnings
+            if (txn.daysToEarnings <= 30) {
+                if (txn.type === 'P') {
+                    eventProximityData['Close to Earnings'].before++;
+                } else if (txn.type === 'S') {
+                    eventProximityData['Close to Earnings'].after++;
+                }
+            } else {
+                if (txn.type === 'P') {
+                    eventProximityData['Far from Earnings'].before++;
+                } else if (txn.type === 'S') {
+                    eventProximityData['Far from Earnings'].after++;
+                }
+            }
+            
+            // Analyser par niveau de conviction
+            if (txn.convictionScore.score >= 70) {
+                if (txn.type === 'P') {
+                    eventProximityData['High Conviction'].before++;
+                }
+            } else if (txn.convictionScore.score < 50) {
+                if (txn.type === 'S') {
+                    eventProximityData['Low Conviction'].after++;
+                }
+            }
+        });
+        
+        const categories = Object.keys(eventProximityData);
+        const beforeData = categories.map(cat => eventProximityData[cat].before);
+        const afterData = categories.map(cat => eventProximityData[cat].after);
+        
+        // Vérifier si on a des données
+        const totalTransactions = beforeData.reduce((a, b) => a + b, 0) + afterData.reduce((a, b) => a + b, 0);
+        
+        if (totalTransactions === 0) {
+            const chartEl = document.getElementById('timingAnnouncementsChart');
+            if (chartEl) {
+                chartEl.innerHTML = `
+                    <div style='display: flex; align-items: center; justify-content: center; height: 350px; color: var(--text-secondary);'>
+                        <div style='text-align: center;'>
+                            <i class='fas fa-calendar-alt' style='font-size: 4rem; margin-bottom: 20px; opacity: 0.3;'></i>
+                            <p style='font-size: 1.1rem; font-weight: 600;'>No Event Timing Data Available</p>
+                            <p style='font-size: 0.9rem;'>Adjust filters to see transaction timing analysis</p>
+                        </div>
+                    </div>
+                `;
+            }
+            return;
+        }
 
         Highcharts.chart('timingAnnouncementsChart', {
             chart: {
                 type: 'bar',
                 backgroundColor: 'transparent'
             },
-            title: { text: null },
+            title: { 
+                text: `Transaction Timing Analysis (${totalTransactions} transactions)`,
+                style: { fontSize: '12px', color: '#6b7280' }
+            },
             xAxis: {
-                categories: data.map(d => d.name)
+                categories: categories
             },
             yAxis: {
+                min: 0,
                 title: { text: 'Number of Transactions' }
             },
+            tooltip: {
+                formatter: function() {
+                    return `<b>${this.x}</b><br/>` +
+                        `${this.series.name}: <b>${this.y}</b> transactions`;
+                }
+            },
+            plotOptions: {
+                bar: {
+                    dataLabels: {
+                        enabled: true,
+                        format: '{y}'
+                    }
+                }
+            },
             series: [{
-                name: 'Before Announcement',
-                data: data.map(d => d.before),
-                color: '#667eea'
-            }, {
-                name: 'After Announcement',
-                data: data.map(d => d.after),
+                name: 'Purchases',
+                data: beforeData,
                 color: '#10b981'
+            }, {
+                name: 'Sales',
+                data: afterData,
+                color: '#ef4444'
             }],
+            legend: { 
+                enabled: true,
+                align: 'center',
+                verticalAlign: 'bottom'
+            },
             credits: { enabled: false },
             exporting: { enabled: true }
         });
@@ -1222,20 +1333,46 @@ class InsiderFlowTracker {
     renderCorrelationChart() {
         const categories = ['7 Days', '14 Days', '30 Days', '60 Days', '90 Days'];
         
-        let buyImpact, sellImpact;
+        // Calculer les impacts moyens RÉELS à partir des vraies transactions
+        const purchases = this.filteredData.filter(t => t.type === 'P');
+        const sales = this.filteredData.filter(t => t.type === 'S');
         
-        if (this.correlationPeriod === 7) {
-            buyImpact = [3.2, 5.8, 8.4, 12.1, 15.7];
-            sellImpact = [-2.1, -4.5, -6.8, -9.2, -11.5];
-        } else if (this.correlationPeriod === 30) {
-            buyImpact = [2.8, 5.2, 8.4, 11.5, 14.8];
-            sellImpact = [-1.8, -4.2, -6.8, -8.9, -11.2];
-        } else if (this.correlationPeriod === 90) {
-            buyImpact = [2.5, 4.8, 8.4, 11.2, 14.2];
-            sellImpact = [-1.5, -3.8, -6.8, -8.5, -10.8];
-        } else {
-            buyImpact = [3.2, 5.8, 8.4, 12.1, 15.7];
-            sellImpact = [-2.1, -4.5, -6.8, -9.2, -11.5];
+        let buyImpact = [0, 0, 0, 0, 0];
+        let sellImpact = [0, 0, 0, 0, 0];
+        
+        if (purchases.length > 0) {
+            // Calculer les moyennes pour les achats
+            buyImpact[0] = purchases.reduce((sum, t) => sum + t.priceImpact7d, 0) / purchases.length;
+            buyImpact[1] = buyImpact[0] * 1.8; // Estimation 14 jours
+            buyImpact[2] = purchases.reduce((sum, t) => sum + t.priceImpact30d, 0) / purchases.length;
+            buyImpact[3] = buyImpact[2] * 1.4; // Estimation 60 jours
+            buyImpact[4] = purchases.reduce((sum, t) => sum + t.priceImpact90d, 0) / purchases.length;
+        }
+        
+        if (sales.length > 0) {
+            // Calculer les moyennes pour les ventes
+            sellImpact[0] = sales.reduce((sum, t) => sum + t.priceImpact7d, 0) / sales.length;
+            sellImpact[1] = sellImpact[0] * 1.8; // Estimation 14 jours
+            sellImpact[2] = sales.reduce((sum, t) => sum + t.priceImpact30d, 0) / sales.length;
+            sellImpact[3] = sellImpact[2] * 1.4; // Estimation 60 jours
+            sellImpact[4] = sales.reduce((sum, t) => sum + t.priceImpact90d, 0) / sales.length;
+        }
+        
+        // Afficher un message si pas assez de données
+        if (purchases.length === 0 && sales.length === 0) {
+            const chartEl = document.getElementById('correlationChart');
+            if (chartEl) {
+                chartEl.innerHTML = `
+                    <div style='display: flex; align-items: center; justify-content: center; height: 400px; color: var(--text-secondary);'>
+                        <div style='text-align: center;'>
+                            <i class='fas fa-chart-line' style='font-size: 4rem; margin-bottom: 20px; opacity: 0.3;'></i>
+                            <p style='font-size: 1.1rem; font-weight: 600;'>No Correlation Data Available</p>
+                            <p style='font-size: 0.9rem;'>Need insider transactions to calculate price impact correlation</p>
+                        </div>
+                    </div>
+                `;
+            }
+            return;
         }
 
         Highcharts.chart('correlationChart', {
@@ -1244,7 +1381,10 @@ class InsiderFlowTracker {
                 backgroundColor: 'transparent',
                 height: 400
             },
-            title: { text: null },
+            title: { 
+                text: `Based on ${purchases.length} purchases and ${sales.length} sales`,
+                style: { fontSize: '12px', color: '#6b7280' }
+            },
             xAxis: {
                 categories: categories,
                 title: { text: 'Time After Transaction' }
@@ -1254,8 +1394,21 @@ class InsiderFlowTracker {
                 plotLines: [{
                     value: 0,
                     color: '#6b7280',
-                    width: 2
+                    width: 2,
+                    label: {
+                        text: 'No Change',
+                        align: 'right',
+                        style: { color: '#6b7280' }
+                    }
                 }]
+            },
+            tooltip: {
+                formatter: function() {
+                    const value = this.y.toFixed(2);
+                    const sign = value >= 0 ? '+' : '';
+                    return `<b>${this.series.name}</b><br/>` +
+                        `${this.x}: <b>${sign}${value}%</b>`;
+                }
             },
             series: [{
                 name: 'After Insider Purchase',
@@ -1264,7 +1417,8 @@ class InsiderFlowTracker {
                 marker: {
                     symbol: 'circle',
                     radius: 6
-                }
+                },
+                lineWidth: 3
             }, {
                 name: 'After Insider Sale',
                 data: sellImpact,
@@ -1272,8 +1426,14 @@ class InsiderFlowTracker {
                 marker: {
                     symbol: 'circle',
                     radius: 6
-                }
+                },
+                lineWidth: 3
             }],
+            legend: { 
+                enabled: true,
+                align: 'center',
+                verticalAlign: 'bottom'
+            },
             credits: { enabled: false },
             exporting: { enabled: true }
         });
@@ -1282,14 +1442,64 @@ class InsiderFlowTracker {
     renderBacktestingStats() {
         const purchases = this.filteredData.filter(t => t.type === 'P');
         const sales = this.filteredData.filter(t => t.type === 'S');
+        
+        if (purchases.length === 0 && sales.length === 0) {
+            document.getElementById('buySuccessRate').textContent = 'N/A';
+            document.getElementById('sellAccuracy').textContent = 'N/A';
+            document.getElementById('averageImpact').textContent = 'N/A';
+            return;
+        }
 
-        const buySuccessRate = purchases.filter(t => t.priceImpact30d > 0).length / purchases.length * 100 || 0;
-        const sellAccuracy = sales.filter(t => t.priceImpact30d < 0).length / sales.length * 100 || 0;
-        const avgImpact = this.filteredData.reduce((sum, t) => sum + t.priceImpact30d, 0) / this.filteredData.length || 0;
-
-        document.getElementById('buySuccessRate').textContent = `${buySuccessRate.toFixed(1)}%`;
-        document.getElementById('sellAccuracy').textContent = `${sellAccuracy.toFixed(1)}%`;
-        document.getElementById('averageImpact').textContent = `${avgImpact >= 0 ? '+' : ''}${avgImpact.toFixed(1)}%`;
+        // Taux de succès des achats (impact positif après 30 jours)
+        const buySuccessRate = purchases.length > 0 
+            ? (purchases.filter(t => t.priceImpact30d > 0).length / purchases.length * 100) 
+            : 0;
+        
+        // Précision des ventes (impact négatif après 30 jours = bonne décision de vendre)
+        const sellAccuracy = sales.length > 0 
+            ? (sales.filter(t => t.priceImpact30d < 0).length / sales.length * 100) 
+            : 0;
+        
+        // Impact moyen pondéré par conviction
+        let totalWeightedImpact = 0;
+        let totalWeight = 0;
+        
+        this.filteredData.forEach(t => {
+            const weight = t.convictionScore.score / 100;
+            totalWeightedImpact += t.priceImpact30d * weight;
+            totalWeight += weight;
+        });
+        
+        const avgImpact = totalWeight > 0 ? (totalWeightedImpact / totalWeight) : 0;
+        
+        // Mettre à jour l'affichage
+        const buyElement = document.getElementById('buySuccessRate');
+        const sellElement = document.getElementById('sellAccuracy');
+        const impactElement = document.getElementById('averageImpact');
+        
+        if (buyElement) {
+            buyElement.textContent = `${buySuccessRate.toFixed(1)}%`;
+            buyElement.style.color = buySuccessRate >= 60 ? '#10b981' : buySuccessRate >= 50 ? '#f59e0b' : '#ef4444';
+        }
+        
+        if (sellElement) {
+            sellElement.textContent = `${sellAccuracy.toFixed(1)}%`;
+            sellElement.style.color = sellAccuracy >= 60 ? '#10b981' : sellAccuracy >= 50 ? '#f59e0b' : '#ef4444';
+        }
+        
+        if (impactElement) {
+            impactElement.textContent = `${avgImpact >= 0 ? '+' : ''}${avgImpact.toFixed(2)}%`;
+            impactElement.style.color = avgImpact >= 3 ? '#10b981' : avgImpact >= 0 ? '#f59e0b' : '#ef4444';
+        }
+        
+        // Ajouter des tooltips ou infos supplémentaires
+        console.log('📊 Backtesting Stats:', {
+            purchases: purchases.length,
+            sales: sales.length,
+            buySuccessRate: buySuccessRate.toFixed(1) + '%',
+            sellAccuracy: sellAccuracy.toFixed(1) + '%',
+            avgImpact: avgImpact.toFixed(2) + '%'
+        });
     }
 
     renderNetworkChart() {
@@ -1719,45 +1929,144 @@ class InsiderFlowTracker {
     }
 
     renderActivityHeatmap() {
-        const companies = ['NVDA', 'TSLA', 'AAPL', 'MSFT', 'GOOGL', 'META', 'AMZN'];
-        const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'];
-
-        const data = [];
-        companies.forEach((company, x) => {
+        // Extraire les compagnies les plus actives
+        const companyCounts = {};
+        this.filteredData.forEach(t => {
+            companyCounts[t.company.symbol] = (companyCounts[t.company.symbol] || 0) + 1;
+        });
+        
+        const topCompanies = Object.entries(companyCounts)
+            .sort((a, b) => b[1] - a[1])
+            .slice(0, 10)
+            .map(([symbol]) => symbol);
+        
+        if (topCompanies.length === 0) {
+            const chartEl = document.getElementById('activityHeatmap');
+            if (chartEl) {
+                chartEl.innerHTML = `
+                    <div style='display: flex; align-items: center; justify-content: center; height: 400px; color: var(--text-secondary);'>
+                        <div style='text-align: center;'>
+                            <i class='fas fa-th' style='font-size: 4rem; margin-bottom: 20px; opacity: 0.3;'></i>
+                            <p style='font-size: 1.1rem; font-weight: 600;'>No Activity Data Available</p>
+                            <p style='font-size: 0.9rem;'>Need insider transactions to generate heatmap</p>
+                        </div>
+                    </div>
+                `;
+            }
+            return;
+        }
+        
+        const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
+        
+        // Créer une matrice de comptage réel
+        const activityMatrix = {};
+        topCompanies.forEach(company => {
+            activityMatrix[company] = { 0: 0, 1: 0, 2: 0, 3: 0, 4: 0 }; // Mon-Fri
+        });
+        
+        // Remplir la matrice avec les vraies transactions
+        this.filteredData.forEach(txn => {
+            if (topCompanies.includes(txn.company.symbol)) {
+                const dayOfWeek = txn.date.getDay(); // 0=Sunday, 1=Monday, ..., 6=Saturday
+                
+                // Convertir en index 0-4 (Lun-Ven), ignorer weekend
+                let dayIndex = -1;
+                if (dayOfWeek === 1) dayIndex = 0; // Lundi
+                else if (dayOfWeek === 2) dayIndex = 1; // Mardi
+                else if (dayOfWeek === 3) dayIndex = 2; // Mercredi
+                else if (dayOfWeek === 4) dayIndex = 3; // Jeudi
+                else if (dayOfWeek === 5) dayIndex = 4; // Vendredi
+                
+                if (dayIndex >= 0) {
+                    activityMatrix[txn.company.symbol][dayIndex]++;
+                }
+            }
+        });
+        
+        // Convertir en format Highcharts
+        const heatmapData = [];
+        topCompanies.forEach((company, x) => {
             days.forEach((day, y) => {
-                data.push([x, y, Math.floor(Math.random() * 15)]);
+                const count = activityMatrix[company][y];
+                heatmapData.push([x, y, count]);
             });
         });
+        
+        // Trouver le max pour la légende
+        const maxCount = Math.max(...heatmapData.map(d => d[2]));
 
         Highcharts.chart('activityHeatmap', {
             chart: {
                 type: 'heatmap',
                 backgroundColor: 'transparent',
-                height: 400
+                height: 450
             },
-            title: { text: null },
+            title: { 
+                text: `Real Insider Activity Distribution (${this.filteredData.length} transactions)`,
+                style: { fontSize: '13px', color: '#1e293b', fontWeight: '700' }
+            },
             xAxis: {
-                categories: companies
+                categories: topCompanies,
+                title: { text: 'Company Symbol' },
+                labels: {
+                    style: { fontSize: '11px', fontWeight: '600' }
+                }
             },
             yAxis: {
                 categories: days,
-                title: null
+                title: { text: 'Day of Week' },
+                reversed: false,
+                labels: {
+                    style: { fontSize: '11px', fontWeight: '600' }
+                }
             },
             colorAxis: {
                 min: 0,
+                max: maxCount > 0 ? maxCount : 10,
                 stops: [
-                    [0, '#10b981'],
-                    [0.5, '#f59e0b'],
-                    [1, '#ef4444']
-                ]
+                    [0, '#f0fdf4'],
+                    [0.3, '#86efac'],
+                    [0.6, '#22c55e'],
+                    [1, '#15803d']
+                ],
+                labels: {
+                    format: '{value}'
+                }
+            },
+            legend: {
+                align: 'right',
+                layout: 'vertical',
+                margin: 0,
+                verticalAlign: 'middle',
+                symbolHeight: 280,
+                title: {
+                    text: 'Transactions',
+                    style: { fontSize: '11px', fontWeight: '600' }
+                }
+            },
+            tooltip: {
+                formatter: function() {
+                    return `<b>${topCompanies[this.point.x]}</b><br/>` +
+                        `${days[this.point.y]}<br/>` +
+                        `<b>${this.point.value}</b> transaction${this.point.value !== 1 ? 's' : ''}`;
+                }
             },
             series: [{
                 name: 'Transaction Count',
                 borderWidth: 1,
-                data: data,
+                borderColor: '#ffffff',
+                data: heatmapData,
                 dataLabels: {
                     enabled: true,
-                    color: '#000000'
+                    color: '#000000',
+                    style: {
+                        fontSize: '11px',
+                        fontWeight: 'bold',
+                        textOutline: 'none'
+                    },
+                    formatter: function() {
+                        return this.point.value > 0 ? this.point.value : '';
+                    }
                 }
             }],
             credits: { enabled: false },
