@@ -1,6 +1,6 @@
 /**
  * ════════════════════════════════════════════════════════════════
- * RSS CLIENT - Appelle le Worker Cloudflare
+ * RSS CLIENT - Appelle le Worker Cloudflare (Version Améliorée)
  * ════════════════════════════════════════════════════════════════
  */
 
@@ -37,6 +37,11 @@ class RSSClient {
             }
 
             const data = await response.json();
+            
+            // Log des sources reçues
+            const sources = [...new Set(data.articles.map(a => a.source))];
+            console.log('📊 Sources reçues:', sources);
+            console.log('🖼 Articles avec images:', data.articles.filter(a => a.image).length);
             
             // Mettre en cache
             this.cache.set(cacheKey, {
@@ -124,6 +129,14 @@ class RSSClient {
     // ──────────────────────────────────────────────────────────
     sortByDate(articles) {
         return articles.sort((a, b) => b.timestamp - a.timestamp);
+    }
+
+    // ──────────────────────────────────────────────────────────
+    // Clear cache (utile pour le refresh)
+    // ──────────────────────────────────────────────────────────
+    clearCache() {
+        this.cache.clear();
+        console.log('🗑 Cache cleared');
     }
 }
 

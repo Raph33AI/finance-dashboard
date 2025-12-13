@@ -1,6 +1,6 @@
 /**
  * ════════════════════════════════════════════════════════════════
- * NEWS TERMINAL - STYLES (Corrigé avec dégradés et images)
+ * NEWS TERMINAL - STYLES (Avec contours filtres + bouton refresh)
  * ════════════════════════════════════════════════════════════════
  */
 
@@ -24,7 +24,7 @@
 }
 
 /* ════════════════════════════════════════════════════════════════
-   FILTERS SECTION
+   FILTERS SECTION (Avec contours bleu/violet)
    ════════════════════════════════════════════════════════════════ */
 
 .filters-section {
@@ -41,6 +41,22 @@
     display: flex;
     flex-direction: column;
     gap: 8px;
+    padding: 16px;
+    background: var(--glass-bg);
+    backdrop-filter: blur(20px) saturate(180%);
+    border-radius: 12px;
+    border: 2px solid transparent;
+    background-image: 
+        linear-gradient(var(--glass-bg), var(--glass-bg)),
+        linear-gradient(135deg, #667eea, #764ba2);
+    background-origin: border-box;
+    background-clip: padding-box, border-box;
+    transition: var(--transition-smooth);
+}
+
+.filter-group:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(102, 126, 234, 0.2);
 }
 
 .filter-group label {
@@ -219,6 +235,17 @@
     grid-template-columns: 1fr;
 }
 
+.articles-grid.list-view .article-card {
+    display: flex;
+    flex-direction: row;
+}
+
+.articles-grid.list-view .article-image {
+    width: 280px;
+    height: 180px;
+    flex-shrink: 0;
+}
+
 .article-card {
     background: var(--glass-bg);
     backdrop-filter: blur(20px) saturate(180%);
@@ -258,6 +285,7 @@
     height: 200px;
     object-fit: cover;
     background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1));
+    display: block;
 }
 
 .article-content {
@@ -455,12 +483,25 @@
         grid-template-columns: 1fr;
     }
 
+    .filter-group {
+        padding: 12px;
+    }
+
     .stats-grid {
         grid-template-columns: repeat(2, 1fr);
     }
 
     .articles-grid {
         grid-template-columns: 1fr;
+    }
+
+    .articles-grid.list-view .article-card {
+        flex-direction: column;
+    }
+
+    .articles-grid.list-view .article-image {
+        width: 100%;
+        height: 200px;
     }
 
     .stat-icon {

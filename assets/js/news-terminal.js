@@ -336,8 +336,8 @@ class NewsTerminal {
             </div>
         `;
         
-        // Clear cache in RSSClient
-        this.rssClient.cache.clear();
+        // ✨ Clear cache in RSSClient
+        this.rssClient.clearCache();
         
         await this.loadArticles();
         this.showNotification('Articles refreshed!', 'success');
