@@ -1,6 +1,6 @@
 /**
  * ════════════════════════════════════════════════════════════════
- * MARKET SENTIMENT DASHBOARD - Interface Simplifiée & Optimisée
+ * MARKET SENTIMENT DASHBOARD - Interface Ultra-Stylisée
  * ════════════════════════════════════════════════════════════════
  */
 
@@ -74,7 +74,7 @@ class MarketSentimentDashboard {
     
     showLoadingState() {
         // Ajouter une classe de chargement sur chaque section
-        const sections = document.querySelectorAll('.section');
+        const sections = document.querySelectorAll('.section, .global-sentiment-wrapper');
         sections.forEach(section => {
             section.style.opacity = '0.5';
             section.style.pointerEvents = 'none';
@@ -94,7 +94,7 @@ class MarketSentimentDashboard {
             box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
             z-index: 9999;
             text-align: center;
-            border: 2px solid var(--glass-border);
+            border: 2px solid rgba(102, 126, 234, 0.3);
         `;
         loadingOverlay.innerHTML = `
             <i class='fas fa-spinner fa-spin' style='font-size: 3rem; background: linear-gradient(135deg, #667eea, #764ba2); -webkit-background-clip: text; -webkit-text-fill-color: transparent;'></i>
@@ -111,7 +111,7 @@ class MarketSentimentDashboard {
         }
         
         // Réactiver les sections
-        const sections = document.querySelectorAll('.section');
+        const sections = document.querySelectorAll('.section, .global-sentiment-wrapper');
         sections.forEach(section => {
             section.style.opacity = '1';
             section.style.pointerEvents = 'auto';
@@ -135,6 +135,10 @@ class MarketSentimentDashboard {
             'neutralCount',
             'negativeCount',
             'totalAnalyzed',
+            'totalAnalyzedHeader',
+            'positiveBar',
+            'neutralBar',
+            'negativeBar',
             'sentimentInsight',
             'insightText',
             'sectorSentimentGrid',
@@ -173,6 +177,20 @@ class MarketSentimentDashboard {
         document.getElementById('neutralCount').textContent = neutralCount;
         document.getElementById('negativeCount').textContent = negativeCount;
         document.getElementById('totalAnalyzed').textContent = totalAnalyzed;
+        document.getElementById('totalAnalyzedHeader').textContent = totalAnalyzed;
+        
+        // Calculer les pourcentages pour les barres
+        const total = positiveCount + neutralCount + negativeCount;
+        const positivePercent = total > 0 ? (positiveCount / total) * 100 : 0;
+        const neutralPercent = total > 0 ? (neutralCount / total) * 100 : 0;
+        const negativePercent = total > 0 ? (negativeCount / total) * 100 : 0;
+        
+        // Animer les barres de progression
+        setTimeout(() => {
+            document.getElementById('positiveBar').style.width = `${positivePercent}%`;
+            document.getElementById('neutralBar').style.width = `${neutralPercent}%`;
+            document.getElementById('negativeBar').style.width = `${negativePercent}%`;
+        }, 100);
         
         // Créer le gauge chart
         this.createGaugeChart(globalScore);

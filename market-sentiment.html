@@ -273,75 +273,88 @@
             <div class='container'>
                 
                 <!-- ═══════════════════════════════════════════════════════════ -->
-                <!-- SCORE GLOBAL -->
+                <!-- GLOBAL MARKET SENTIMENT (STYLISÉ COMME ALPHY RECOMMENDATION) -->
                 <!-- ═══════════════════════════════════════════════════════════ -->
                 
-                <div class='section'>
-                    <h2 class='section-title gradient-title'>
-                        <i class='fas fa-tachometer-alt'></i> Global Market Sentiment
-                    </h2>
+                <div class='global-sentiment-wrapper'>
+                    <div class='global-sentiment-header'>
+                        <div class='header-badge'>
+                            <i class='fas fa-robot'></i>
+                            <span>Alphy AI Analysis</span>
+                        </div>
+                        <h2 class='global-title gradient-title'>
+                            <i class='fas fa-brain'></i> Global Market Sentiment
+                        </h2>
+                        <p class='global-subtitle'>Real-time AI-powered sentiment analysis from <span id='totalAnalyzedHeader'>0</span> financial news sources</p>
+                    </div>
                     
-                    <div class='sentiment-hero'>
-                        <div class='gauge-container'>
-                            <canvas id='sentimentGauge'></canvas>
-                            <div class='gauge-center'>
-                                <div class='gauge-value' id='globalSentimentValue'>0</div>
-                                <div class='gauge-label' id='globalSentimentLabel'>Neutral</div>
+                    <div class='sentiment-main-card'>
+                        <div class='sentiment-visual'>
+                            <div class='gauge-wrapper'>
+                                <canvas id='sentimentGauge'></canvas>
+                                <div class='gauge-center'>
+                                    <div class='gauge-value' id='globalSentimentValue'>0</div>
+                                    <div class='gauge-label' id='globalSentimentLabel'>Neutral</div>
+                                </div>
                             </div>
                         </div>
                         
-                        <div class='sentiment-stats'>
-                            <div class='sentiment-stat'>
-                                <div class='stat-icon positive'>
-                                    <i class='fas fa-arrow-up'></i>
+                        <div class='sentiment-breakdown'>
+                            <div class='breakdown-title'>Sentiment Distribution</div>
+                            
+                            <div class='breakdown-item positive'>
+                                <div class='breakdown-header'>
+                                    <div class='breakdown-icon'>
+                                        <i class='fas fa-arrow-up'></i>
+                                    </div>
+                                    <div class='breakdown-label'>Bullish</div>
+                                    <div class='breakdown-value' id='positiveCount'>0</div>
                                 </div>
-                                <div class='stat-details'>
-                                    <div class='stat-value' id='positiveCount'>0</div>
-                                    <div class='stat-label'>Positive News</div>
+                                <div class='breakdown-bar'>
+                                    <div class='breakdown-bar-fill positive' id='positiveBar' style='width: 0%'></div>
                                 </div>
                             </div>
                             
-                            <div class='sentiment-stat'>
-                                <div class='stat-icon neutral'>
-                                    <i class='fas fa-minus'></i>
+                            <div class='breakdown-item neutral'>
+                                <div class='breakdown-header'>
+                                    <div class='breakdown-icon'>
+                                        <i class='fas fa-minus'></i>
+                                    </div>
+                                    <div class='breakdown-label'>Neutral</div>
+                                    <div class='breakdown-value' id='neutralCount'>0</div>
                                 </div>
-                                <div class='stat-details'>
-                                    <div class='stat-value' id='neutralCount'>0</div>
-                                    <div class='stat-label'>Neutral News</div>
-                                </div>
-                            </div>
-                            
-                            <div class='sentiment-stat'>
-                                <div class='stat-icon negative'>
-                                    <i class='fas fa-arrow-down'></i>
-                                </div>
-                                <div class='stat-details'>
-                                    <div class='stat-value' id='negativeCount'>0</div>
-                                    <div class='stat-label'>Negative News</div>
+                                <div class='breakdown-bar'>
+                                    <div class='breakdown-bar-fill neutral' id='neutralBar' style='width: 0%'></div>
                                 </div>
                             </div>
                             
-                            <div class='sentiment-stat'>
-                                <div class='stat-icon info'>
-                                    <i class='fas fa-newspaper'></i>
+                            <div class='breakdown-item negative'>
+                                <div class='breakdown-header'>
+                                    <div class='breakdown-icon'>
+                                        <i class='fas fa-arrow-down'></i>
+                                    </div>
+                                    <div class='breakdown-label'>Bearish</div>
+                                    <div class='breakdown-value' id='negativeCount'>0</div>
                                 </div>
-                                <div class='stat-details'>
-                                    <div class='stat-value' id='totalAnalyzed'>0</div>
-                                    <div class='stat-label'>Articles Analyzed</div>
+                                <div class='breakdown-bar'>
+                                    <div class='breakdown-bar-fill negative' id='negativeBar' style='width: 0%'></div>
                                 </div>
+                            </div>
+                            
+                            <div class='total-analyzed'>
+                                <i class='fas fa-newspaper'></i>
+                                <span id='totalAnalyzed'>0</span> articles analyzed
                             </div>
                         </div>
                     </div>
                     
-                    <!-- Insight Card -->
-                    <div class='sentiment-insight' id='sentimentInsight'>
-                        <div class='insight-icon'>
+                    <!-- AI Insight Card -->
+                    <div class='ai-insight-card' id='sentimentInsight'>
+                        <div class='insight-badge'>
                             <i class='fas fa-lightbulb'></i>
+                            <span>AI Insight</span>
                         </div>
-                        <div class='insight-content'>
-                            <div class='insight-title'>Market Insight</div>
-                            <div class='insight-text' id='insightText'>Analyzing market sentiment...</div>
-                        </div>
+                        <div class='insight-content' id='insightText'>Analyzing market sentiment...</div>
                     </div>
                 </div>
 
@@ -395,10 +408,10 @@
                 <footer style='text-align: center; padding: 32px 20px; margin-top: 40px; border-top: 1px solid var(--glass-border);'>
                     <p style='color: var(--text-secondary); font-size: 0.95rem;'>
                         <i class='fas fa-info-circle'></i> 
-                        Market Sentiment Analysis - Powered by AI Natural Language Processing
+                        Market Sentiment Analysis - Powered by Alphy AI Natural Language Processing
                     </p>
                     <p style='color: var(--text-tertiary); font-size: 0.85rem; margin-top: 8px;'>
-                        Sentiment scores are calculated based on linguistic analysis of news articles
+                        Sentiment scores are calculated based on advanced linguistic analysis of financial news articles
                     </p>
                 </footer>
 
