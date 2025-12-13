@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang='en'>
+<head>
+    <meta charset='UTF-8'>
+    <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+    <title>Market Sentiment Dashboard | AlphaVault AI</title>
+    
+    <link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css'>
+    <script src='https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js'></script>
+    
+    <link rel='stylesheet' href='assets/css/common.css'>
+    <link rel='stylesheet' href='assets/css/sidebar.css'>
+    <link rel="stylesheet" href="assets/css/user-menu.css">
+    <link rel='stylesheet' href='assets/css/market-sentiment.css'>
+    
+    <script src="assets/js/favicon-dynamic.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    
+    <script src="assets/js/config.js"></script>
+    <script src="assets/js/firebase-config.js"></script>
+    <script src="assets/js/auth-guard.js"></script>
+</head>
+<body>
+
+    <script src="assets/js/theme.js"></script>
+    <canvas id="particles-canvas" class="particles-background"></canvas>
+
+    <div class='layout-wrapper'>
+        
+        <!-- SIDEBAR (copie celle de news-terminal.html) -->
+        <aside class='sidebar' id='sidebar'>
+            <div class="sidebar-header">
+                <div class="logo-container">
+                    <div class="logo-3d">
+                        <svg class="logo-svg" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                            <defs>
+                                <linearGradient id="logoGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                                    <stop offset="0%" class="logo-gradient-1" />
+                                    <stop offset="100%" class="logo-gradient-2" />
+                                </linearGradient>
+                            </defs>
+                            <path d="M 20 80 L 30 70 L 40 75 L 50 60 L 60 65 L 70 45 L 80 50 L 90 30" 
+                                  stroke="url(#logoGradient)" stroke-width="4" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+                            <circle cx="30" cy="70" r="4" fill="url(#logoGradient)"/>
+                            <circle cx="50" cy="60" r="4" fill="url(#logoGradient)"/>
+                            <circle cx="70" cy="45" r="4" fill="url(#logoGradient)"/>
+                            <circle cx="90" cy="30" r="5" fill="url(#logoGradient)"/>
+                            <path d="M 85 35 L 90 30 L 85 25" stroke="url(#logoGradient)" stroke-width="3" fill="none" stroke-linecap="round"/>
+                        </svg>
+                    </div>
+                    <div class="brand-text">
+                        <h2 class="brand-name">AlphaVault AI</h2>
+                        <span class="brand-tagline">Investments</span>
+                    </div>
+                </div>
+                <button class="sidebar-toggle" aria-label="Toggle Sidebar">
+                    <i class="fas fa-angle-left"></i>
+                </button>
+            </div>
+            
+            <nav class="sidebar-nav">
+                <div class="nav-section">
+                    <button class="nav-folder" data-tooltip="Home">
+                        <i class="fas fa-home"></i>
+                        <span>Home</span>
+                        <i class="fas fa-chevron-down arrow"></i>
+                    </button>
+                    <div class="nav-submenu">
+                        <a href="index.html" class="nav-link">
+                            <i class="fas fa-home"></i>
+                            <span>Overview</span>
+                        </a>
+                    </div>
+                </div>
+                
+                <div class='nav-section'>
+                    <button class='nav-folder' data-tooltip="Budget">
+                        <i class='fas fa-wallet'></i>
+                        <span>Budget</span>
+                        <i class='fas fa-chevron-down arrow'></i>
+                    </button>
+                    <div class='nav-submenu'>
+                        <a href='dashboard-financier.html' class='nav-link'>
+                            <i class='fas fa-home'></i>
+                            <span>Dashboard Budget</span>
+                        </a>
+                        <a href='investment-analytics.html' class='nav-link'>
+                            <i class='fas fa-chart-bar'></i>
+                            <span>Investment Analytics</span>
+                        </a>
+                    </div>
+                </div>
+                
+                <div class='nav-section'>
+                    <button class='nav-folder' data-tooltip="Simulation">
+                        <i class='fas fa-calculator'></i>
+                        <span>Simulation</span>
+                        <i class='fas fa-chevron-down arrow'></i>
+                    </button>
+                    <div class='nav-submenu'>
+                        <a href='monte-carlo.html' class='nav-link'>
+                            <i class='fas fa-dice'></i>
+                            <span>Monte Carlo</span>
+                        </a>
+                        <a href='portfolio-optimizer.html' class='nav-link'>
+                            <i class='fas fa-chart-pie'></i>
+                            <span>Markowitz</span>
+                        </a>
+                        <a href='risk-parity.html' class='nav-link'>
+                            <i class='fas fa-balance-scale'></i>
+                            <span>Risk Parity</span>
+                        </a>
+                        <a href='scenario-analysis.html' class='nav-link'>
+                            <i class='fas fa-flask'></i>
+                            <span>Scenarios</span>
+                        </a>
+                    </div>
+                </div>
+                
+                <div class='nav-section'>
+                    <button class="nav-folder" data-tooltip="Stocks">
+                        <i class="fas fa-chart-line"></i>
+                        <span>Stocks</span>
+                        <i class="fas fa-chevron-down arrow"></i>
+                    </button>
+                    <div class='nav-submenu'>
+                        <a href='advanced-analysis.html' class='nav-link'>
+                            <i class='fas fa-brain'></i>
+                            <span>Advanced Analysis</span>
+                        </a>
+                        <a href='forex-converter.html' class='nav-link'>
+                            <i class='fas fa-exchange-alt'></i>
+                            <span>Forex Converter</span>
+                        </a>
+                    </div>
+                </div>
+
+                <div class='nav-section'>
+                    <button class="nav-folder" data-tooltip="AI Assistant">
+                        <i class="fas fa-robot"></i>
+                        <span>AI Assistant</span>
+                        <i class="fas fa-chevron-down arrow"></i>
+                    </button>
+                    <div class='nav-submenu'>
+                        <a href='chatbot-fullpage.html' class='nav-link'>
+                            <i class='fas fa-comments'></i>
+                            <span>Alphy AI Chat</span>
+                        </a>
+                    </div>
+                </div>
+
+                <div class='nav-section'>
+                    <button class='nav-folder'>
+                        <i class='fas fa-globe-americas'></i>
+                        <span>Economic Data</span>
+                        <i class='fas fa-chevron-down arrow'></i>
+                    </button>
+                    <div class='nav-submenu'>
+                        <a href='economic-dashboard.html' class='nav-link'>
+                            <i class='fas fa-tachometer-alt'></i>
+                            <span>Macro Economic Dashboard</span>
+                        </a>
+                        <a href='inflation-calculator.html' class='nav-link'>
+                            <i class='fas fa-calculator'></i>
+                            <span>Inflation Calculator</span>
+                        </a>
+                        <a href='interest-rate-tracker.html' class='nav-link'>
+                            <i class='fas fa-percent'></i>
+                            <span>Interest Rates</span>
+                        </a>
+                        <a href='recession-indicator.html' class='nav-link'>
+                            <i class='fas fa-exclamation-triangle'></i>
+                            <span>Recession Indicators</span>
+                        </a>
+                    </div>
+                </div>
+
+                <div class='nav-section'>
+                    <button class="nav-folder" data-tooltip="News & Analysis">
+                        <i class="fas fa-newspaper"></i>
+                        <span>News & Analysis</span>
+                        <i class="fas fa-chevron-down arrow"></i>
+                    </button>
+                    <div class='nav-submenu'>
+                        <a href='news-terminal.html' class='nav-link'>
+                            <i class='fas fa-desktop'></i>
+                            <span>News Terminal</span>
+                        </a>
+                        <a href='market-sentiment.html' class='nav-link active'>
+                            <i class='fas fa-chart-pie'></i>
+                            <span>Market Sentiment</span>
+                        </a>
+                        <a href='company-intelligence.html' class='nav-link'>
+                            <i class='fas fa-building'></i>
+                            <span>Company Intelligence</span>
+                        </a>
+                        <a href='trending-topics.html' class='nav-link'>
+                            <i class='fas fa-fire'></i>
+                            <span>Trending Topics</span>
+                        </a>
+                        <a href='market-fear-index.html' class='nav-link'>
+                            <i class='fas fa-heartbeat'></i>
+                            <span>Fear & Greed Index</span>
+                        </a>
+                        <a href='news-watchlist.html' class='nav-link'>
+                            <i class='fas fa-star'></i>
+                            <span>My Watchlist</span>
+                        </a>
+                    </div>
+                </div>
+            </nav>
+            
+            <div class="sidebar-footer">
+                <div class="sidebar-user-menu">
+                    <div class="sidebar-user-trigger" id="sidebarUserTrigger">
+                        <img data-user-photo src="https://ui-avatars.com/api/?name=User&background=2563eb&color=fff" alt="Avatar" class="sidebar-user-avatar">
+                        <div class="sidebar-user-info">
+                            <span data-user-name class="sidebar-user-name">User</span>
+                            <span data-user-plan class="sidebar-user-plan">Free Plan</span>
+                        </div>
+                        <i class="fas fa-chevron-up sidebar-user-arrow"></i>
+                    </div>
+                    <div class="sidebar-user-dropdown" id="sidebarUserDropdown">
+                        <div class="user-dropdown-header">
+                            <img data-user-photo src="https://ui-avatars.com/api/?name=User&background=2563eb&color=fff" alt="Avatar" class="user-dropdown-avatar">
+                            <div class="user-dropdown-details">
+                                <h4 data-user-name class="user-dropdown-name">User</h4>
+                                <p data-user-email class="user-dropdown-email">email@example.com</p>
+                            </div>
+                        </div>
+                        <div class="user-dropdown-divider"></div>
+                        <nav class="user-dropdown-links">
+                            <a href="user-profile.html" class="user-dropdown-link">
+                                <i class="fas fa-user"></i>
+                                <span>My profile</span>
+                            </a>
+                            <a href="settings.html" class="user-dropdown-link">
+                                <i class="fas fa-cog"></i>
+                                <span>Settings</span>
+                            </a>
+                        </nav>
+                        <div class="user-dropdown-divider"></div>
+                        <button onclick="logout()" class="user-dropdown-logout">
+                            <i class="fas fa-sign-out-alt"></i>
+                            <span>Disconnect</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </aside>
+        
+        <div class='sidebar-overlay' id='sidebarOverlay'></div>
+
+        <div class='main-content'>
+            <header class='top-header'>
+                <div class='header-left'>
+                    <button class='mobile-toggle' id='mobileToggle'>
+                        <i class='fas fa-bars'></i>
+                    </button>
+                    <h1 class='page-title gradient-title'>
+                        <i class="fas fa-chart-pie"></i> Market Sentiment
+                    </h1>
+                </div>
+                <div class='header-right'>
+                    <button class='refresh-btn' onclick='sentimentDashboard.refreshData()'>
+                        <i class='fas fa-sync-alt'></i>
+                        <span class='btn-text'>Refresh</span>
+                    </button>
+                </div>
+            </header>
+            
+            <div class='container'>
+                
+                <!-- ═══════════════════════════════════════════════════════════ -->
+                <!-- SCORE GLOBAL -->
+                <!-- ═══════════════════════════════════════════════════════════ -->
+                
+                <div class='section'>
+                    <h2 class='section-title gradient-title'>
+                        <i class='fas fa-tachometer-alt'></i> Global Sentiment Score
+                    </h2>
+                    
+                    <div class='sentiment-hero'>
+                        <div class='gauge-container'>
+                            <canvas id='sentimentGauge'></canvas>
+                            <div class='gauge-center'>
+                                <div class='gauge-value' id='globalSentimentValue'>0</div>
+                                <div class='gauge-label' id='globalSentimentLabel'>Neutral</div>
+                            </div>
+                        </div>
+                        
+                        <div class='sentiment-stats'>
+                            <div class='sentiment-stat'>
+                                <div class='stat-icon positive'>
+                                    <i class='fas fa-arrow-up'></i>
+                                </div>
+                                <div class='stat-details'>
+                                    <div class='stat-value' id='positiveCount'>0</div>
+                                    <div class='stat-label'>Positive News</div>
+                                </div>
+                            </div>
+                            
+                            <div class='sentiment-stat'>
+                                <div class='stat-icon neutral'>
+                                    <i class='fas fa-minus'></i>
+                                </div>
+                                <div class='stat-details'>
+                                    <div class='stat-value' id='neutralCount'>0</div>
+                                    <div class='stat-label'>Neutral News</div>
+                                </div>
+                            </div>
+                            
+                            <div class='sentiment-stat'>
+                                <div class='stat-icon negative'>
+                                    <i class='fas fa-arrow-down'></i>
+                                </div>
+                                <div class='stat-details'>
+                                    <div class='stat-value' id='negativeCount'>0</div>
+                                    <div class='stat-label'>Negative News</div>
+                                </div>
+                            </div>
+                            
+                            <div class='sentiment-stat'>
+                                <div class='stat-icon info'>
+                                    <i class='fas fa-newspaper'></i>
+                                </div>
+                                <div class='stat-details'>
+                                    <div class='stat-value' id='totalAnalyzed'>0</div>
+                                    <div class='stat-label'>Articles Analyzed</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ═══════════════════════════════════════════════════════════ -->
+                <!-- SENTIMENT PAR SECTEUR -->
+                <!-- ═══════════════════════════════════════════════════════════ -->
+                
+                <div class='section'>
+                    <h2 class='section-title gradient-title'>
+                        <i class='fas fa-industry'></i> Sentiment by Sector
+                    </h2>
+                    
+                    <div class='sector-sentiment-grid' id='sectorSentimentGrid'>
+                        <!-- Rempli dynamiquement -->
+                    </div>
+                </div>
+
+                <!-- ═══════════════════════════════════════════════════════════ -->
+                <!-- TOP TICKERS -->
+                <!-- ═══════════════════════════════════════════════════════════ -->
+                
+                <div class='section'>
+                    <div class='split-section'>
+                        <div class='split-half'>
+                            <h3 class='subsection-title positive'>
+                                <i class='fas fa-fire'></i> Most Bullish Stocks
+                            </h3>
+                            <div id='topBullishTickers' class='ticker-list'>
+                                <!-- Rempli dynamiquement -->
+                            </div>
+                        </div>
+                        
+                        <div class='split-half'>
+                            <h3 class='subsection-title negative'>
+                                <i class='fas fa-snowflake'></i> Most Bearish Stocks
+                            </h3>
+                            <div id='topBearishTickers' class='ticker-list'>
+                                <!-- Rempli dynamiquement -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ═══════════════════════════════════════════════════════════ -->
+                <!-- HEATMAP -->
+                <!-- ═══════════════════════════════════════════════════════════ -->
+                
+                <div class='section'>
+                    <h2 class='section-title gradient-title'>
+                        <i class='fas fa-th'></i> Sentiment Heatmap
+                    </h2>
+                    
+                    <div id='sentimentHeatmap' class='heatmap-container'>
+                        <!-- Rempli dynamiquement -->
+                    </div>
+                </div>
+
+                <!-- ═══════════════════════════════════════════════════════════ -->
+                <!-- TIMELINE -->
+                <!-- ═══════════════════════════════════════════════════════════ -->
+                
+                <div class='section'>
+                    <h2 class='section-title gradient-title'>
+                        <i class='fas fa-chart-line'></i> Sentiment Timeline (24h)
+                    </h2>
+                    
+                    <div class='chart-container'>
+                        <canvas id='sentimentTimeline'></canvas>
+                    </div>
+                </div>
+
+                <!-- ═══════════════════════════════════════════════════════════ -->
+                <!-- RECENT ARTICLES PAR SENTIMENT -->
+                <!-- ═══════════════════════════════════════════════════════════ -->
+                
+                <div class='section'>
+                    <h2 class='section-title gradient-title'>
+                        <i class='fas fa-list'></i> Recent Articles by Sentiment
+                    </h2>
+                    
+                    <div class='sentiment-tabs'>
+                        <button class='sentiment-tab active' data-sentiment='all' onclick='sentimentDashboard.filterArticles("all")'>
+                            All (<span id='tabAllCount'>0</span>)
+                        </button>
+                        <button class='sentiment-tab' data-sentiment='positive' onclick='sentimentDashboard.filterArticles("positive")'>
+                            Positive (<span id='tabPositiveCount'>0</span>)
+                        </button>
+                        <button class='sentiment-tab' data-sentiment='neutral' onclick='sentimentDashboard.filterArticles("neutral")'>
+                            Neutral (<span id='tabNeutralCount'>0</span>)
+                        </button>
+                        <button class='sentiment-tab' data-sentiment='negative' onclick='sentimentDashboard.filterArticles("negative")'>
+                            Negative (<span id='tabNegativeCount'>0</span>)
+                        </button>
+                    </div>
+                    
+                    <div id='sentimentArticles' class='sentiment-articles-grid'>
+                        <!-- Rempli dynamiquement -->
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <script src='assets/js/common.js'></script>
+    <script src='assets/js/sidebar.js'></script>
+    <script src='assets/js/rss-client.js'></script>
+    <script src='assets/js/sentiment-analyzer.js'></script>
+    <script src='assets/js/market-sentiment.js'></script>
+    <script src="assets/js/chatbot-particles.js"></script>
+
+    <script>
+        (function forceUserMenuInit() {
+            console.log('🔧 Force initializing user menu...');
+            const initMenu = () => {
+                const trigger = document.getElementById('sidebarUserTrigger');
+                const dropdown = document.getElementById('sidebarUserDropdown');
+                if (!trigger || !dropdown) { console.error('❌ User menu elements not found'); return; }
+                const newTrigger = trigger.cloneNode(true);
+                trigger.parentNode.replaceChild(newTrigger, trigger);
+                const freshTrigger = document.getElementById('sidebarUserTrigger');
+                const freshDropdown = document.getElementById('sidebarUserDropdown');
+                console.log('✅ Adding click event to trigger...');
+                freshTrigger.addEventListener('click', function(e) {
+                    e.preventDefault(); e.stopPropagation();
+                    console.log('👆 User menu trigger clicked!');
+                    const isActive = freshDropdown.classList.contains('active');
+                    if (isActive) { freshDropdown.classList.remove('active'); console.log('🔽 Closing dropdown'); }
+                    else { freshDropdown.classList.add('active'); console.log('🔼 Opening dropdown'); }
+                    const arrow = freshTrigger.querySelector('.sidebar-user-arrow');
+                    if (arrow) { arrow.style.transform = isActive ? 'rotate(0deg)' : 'rotate(180deg)'; arrow.style.transition = 'transform 0.3s ease'; }
+                });
+                document.addEventListener('click', function(e) {
+                    if (!freshTrigger.contains(e.target) && !freshDropdown.contains(e.target)) {
+                        freshDropdown.classList.remove('active');
+                        const arrow = freshTrigger.querySelector('.sidebar-user-arrow');
+                        if (arrow) { arrow.style.transform = 'rotate(0deg)'; }
+                    }
+                });
+                freshDropdown.addEventListener('click', function(e) { e.stopPropagation(); });
+                console.log('✅ User menu initialized successfully!');
+            };
+            if (document.readyState === 'loading') { document.addEventListener('DOMContentLoaded', initMenu); }
+            else { setTimeout(initMenu, 100); }
+        })();
+    </script>
+
+</body>
+</html>

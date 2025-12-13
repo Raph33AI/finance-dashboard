@@ -1,0 +1,513 @@
+/**
+ * ════════════════════════════════════════════════════════════════
+ * MARKET SENTIMENT DASHBOARD - STYLES
+ * ════════════════════════════════════════════════════════════════
+ */
+
+/* ═══════════════════════════════════════════════════════════════
+   SENTIMENT HERO (Score Global)
+   ═══════════════════════════════════════════════════════════════ */
+
+.sentiment-hero {
+    display: grid;
+    grid-template-columns: 400px 1fr;
+    gap: 40px;
+    align-items: center;
+}
+
+.gauge-container {
+    position: relative;
+    width: 300px;
+    height: 300px;
+    margin: 0 auto;
+}
+
+.gauge-center {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    z-index: 10;
+}
+
+.gauge-value {
+    font-size: 4rem;
+    font-weight: 900;
+    background: linear-gradient(135deg, var(--ml-primary), var(--ml-secondary));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    line-height: 1;
+    margin-bottom: 8px;
+}
+
+.gauge-label {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.sentiment-stats {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 24px;
+}
+
+.sentiment-stat {
+    background: var(--card-bg);
+    padding: 24px;
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    border: 1px solid var(--glass-border);
+    transition: var(--transition-smooth);
+}
+
+.sentiment-stat:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 36px rgba(0, 0, 0, 0.15);
+}
+
+.stat-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.8rem;
+    color: white;
+    flex-shrink: 0;
+}
+
+.stat-icon.positive {
+    background: linear-gradient(135deg, #10b981, #059669);
+}
+
+.stat-icon.neutral {
+    background: linear-gradient(135deg, #6b7280, #4b5563);
+}
+
+.stat-icon.negative {
+    background: linear-gradient(135deg, #ef4444, #dc2626);
+}
+
+.stat-icon.info {
+    background: linear-gradient(135deg, #3b82f6, #2563eb);
+}
+
+.stat-details {
+    flex: 1;
+}
+
+.stat-value {
+    font-size: 2.5rem;
+    font-weight: 900;
+    color: var(--text-primary);
+    line-height: 1;
+    margin-bottom: 8px;
+}
+
+.stat-label {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   SENTIMENT PAR SECTEUR
+   ═══════════════════════════════════════════════════════════════ */
+
+.sector-sentiment-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 24px;
+}
+
+.sector-card {
+    background: var(--card-bg);
+    padding: 28px;
+    border-radius: 20px;
+    border: 2px solid var(--glass-border);
+    transition: var(--transition-smooth);
+    position: relative;
+    overflow: hidden;
+}
+
+.sector-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: var(--sector-gradient);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.sector-card:hover::before {
+    opacity: 1;
+}
+
+.sector-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 16px 48px rgba(0, 0, 0, 0.2);
+    border-color: var(--sector-color);
+}
+
+.sector-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+}
+
+.sector-name {
+    font-size: 1.2rem;
+    font-weight: 800;
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.sector-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    background: var(--sector-gradient);
+    color: white;
+}
+
+.sector-score {
+    font-size: 2rem;
+    font-weight: 900;
+    color: var(--sector-color);
+}
+
+.sector-bar {
+    height: 12px;
+    background: var(--glass-bg);
+    border-radius: 8px;
+    overflow: hidden;
+    margin-bottom: 12px;
+}
+
+.sector-bar-fill {
+    height: 100%;
+    background: var(--sector-gradient);
+    border-radius: 8px;
+    transition: width 1s ease;
+}
+
+.sector-label {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   TOP TICKERS
+   ═══════════════════════════════════════════════════════════════ */
+
+.split-section {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 32px;
+}
+
+.split-half {
+    background: var(--card-bg);
+    padding: 28px;
+    border-radius: 20px;
+    border: 1px solid var(--glass-border);
+}
+
+.subsection-title {
+    font-size: 1.3rem;
+    font-weight: 800;
+    margin-bottom: 24px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.subsection-title.positive {
+    color: #10b981;
+}
+
+.subsection-title.negative {
+    color: #ef4444;
+}
+
+.ticker-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.ticker-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 20px;
+    background: var(--glass-bg);
+    border-radius: 12px;
+    border: 1px solid var(--glass-border);
+    transition: var(--transition-smooth);
+    cursor: pointer;
+}
+
+.ticker-item:hover {
+    transform: translateX(8px);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+    border-color: var(--ticker-color);
+}
+
+.ticker-info {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.ticker-rank {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 900;
+    font-size: 0.9rem;
+    background: var(--ticker-gradient);
+    color: white;
+}
+
+.ticker-symbol {
+    font-size: 1.1rem;
+    font-weight: 800;
+    color: var(--text-primary);
+}
+
+.ticker-score {
+    font-size: 1.5rem;
+    font-weight: 900;
+    color: var(--ticker-color);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   HEATMAP
+   ═══════════════════════════════════════════════════════════════ */
+
+.heatmap-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 12px;
+}
+
+.heatmap-cell {
+    aspect-ratio: 1;
+    border-radius: 12px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: 700;
+    cursor: pointer;
+    transition: var(--transition-smooth);
+    position: relative;
+    overflow: hidden;
+}
+
+.heatmap-cell::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: rgba(255, 255, 255, 0.1);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.heatmap-cell:hover::before {
+    opacity: 1;
+}
+
+.heatmap-cell:hover {
+    transform: scale(1.05);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+}
+
+.heatmap-symbol {
+    font-size: 1rem;
+    font-weight: 900;
+    margin-bottom: 4px;
+}
+
+.heatmap-value {
+    font-size: 1.3rem;
+    font-weight: 900;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   SENTIMENT TABS
+   ═══════════════════════════════════════════════════════════════ */
+
+.sentiment-tabs {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 28px;
+    border-bottom: 2px solid var(--glass-border);
+    padding-bottom: 4px;
+}
+
+.sentiment-tab {
+    padding: 12px 24px;
+    background: transparent;
+    border: none;
+    border-bottom: 3px solid transparent;
+    font-weight: 700;
+    font-size: 1rem;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: var(--transition-smooth);
+    position: relative;
+}
+
+.sentiment-tab:hover {
+    color: var(--text-primary);
+}
+
+.sentiment-tab.active {
+    color: var(--ml-primary);
+    border-bottom-color: var(--ml-primary);
+}
+
+.sentiment-articles-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 20px;
+}
+
+.sentiment-article-card {
+    background: var(--card-bg);
+    padding: 20px;
+    border-radius: 16px;
+    border-left: 4px solid var(--sentiment-color);
+    transition: var(--transition-smooth);
+    cursor: pointer;
+}
+
+.sentiment-article-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 36px rgba(0, 0, 0, 0.15);
+}
+
+.article-sentiment-badge {
+    display: inline-block;
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: white;
+    background: var(--sentiment-gradient);
+    margin-bottom: 12px;
+}
+
+.article-title-small {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 8px;
+    line-height: 1.4;
+}
+
+.article-meta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 0.85rem;
+    color: var(--text-tertiary);
+}
+
+.article-source-small {
+    font-weight: 600;
+}
+
+.article-time-small {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   CHART CONTAINER
+   ═══════════════════════════════════════════════════════════════ */
+
+.chart-container {
+    background: var(--card-bg);
+    padding: 32px;
+    border-radius: 20px;
+    border: 1px solid var(--glass-border);
+    height: 400px;
+}
+
+.chart-container canvas {
+    max-height: 100%;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   RESPONSIVE
+   ═══════════════════════════════════════════════════════════════ */
+
+@media (max-width: 1024px) {
+    .sentiment-hero {
+        grid-template-columns: 1fr;
+        gap: 32px;
+    }
+    
+    .split-section {
+        grid-template-columns: 1fr;
+    }
+    
+    .sentiment-stats {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 768px) {
+    .gauge-container {
+        width: 250px;
+        height: 250px;
+    }
+    
+    .gauge-value {
+        font-size: 3rem;
+    }
+    
+    .sector-sentiment-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .heatmap-container {
+        grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+    }
+    
+    .sentiment-tabs {
+        flex-wrap: wrap;
+    }
+    
+    .sentiment-articles-grid {
+        grid-template-columns: 1fr;
+    }
+}
