@@ -52,7 +52,7 @@
     <canvas id="particles-canvas" class="particles-background"></canvas>
 
     <div class='layout-wrapper'>
-        <!-- Sidebar (IDENTIQUE À TON CODE) -->
+        <!-- Sidebar -->
         <aside class='sidebar' id='sidebar'>
             <div class="sidebar-header">
                 <div class="logo-container">
@@ -336,12 +336,20 @@
                             <i class='fas fa-exclamation-triangle'></i>
                         </div>
                         <div class='alert-banner-text'>
-                            <h3>🚨 Smart Alert Triggered</h3>
+                            <h3>Smart Alert Triggered</h3>
                             <p id='alertBannerMessage'>Significant insider activity detected</p>
                         </div>
                         <button class='alert-banner-close' onclick='this.parentElement.parentElement.style.display="none"'>
                             <i class='fas fa-times'></i>
                         </button>
+                    </div>
+                </div>
+
+                <!-- Alphy AI Recommendation -->
+                <div class='alphy-recommendation' id='alphyRecommendation'>
+                    <div class='eco-loading'>
+                        <div class='eco-spinner'></div>
+                        <p style='color: white;'>Analyzing insider activity patterns...</p>
                     </div>
                 </div>
 
