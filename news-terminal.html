@@ -340,7 +340,6 @@
                                 <option value='newest'>Newest First</option>
                                 <option value='oldest'>Oldest First</option>
                                 <option value='importance'>Importance</option>
-                                <option value='sentiment'>Sentiment</option>
                             </select>
                         </div>
                     </div>
@@ -367,39 +366,6 @@
                         </div>
 
                         <div class='stat-card'>
-                            <div class='stat-icon' style='background: linear-gradient(135deg, #10b981, #059669);'>
-                                <i class='fas fa-smile'></i>
-                            </div>
-                            <div class='stat-content'>
-                                <div class='stat-label'>Positive</div>
-                                <div class='stat-value' id='positiveCount'>0</div>
-                                <div class='stat-sublabel' id='positivePercent'>0%</div>
-                            </div>
-                        </div>
-
-                        <div class='stat-card'>
-                            <div class='stat-icon' style='background: linear-gradient(135deg, #6b7280, #4b5563);'>
-                                <i class='fas fa-meh'></i>
-                            </div>
-                            <div class='stat-content'>
-                                <div class='stat-label'>Neutral</div>
-                                <div class='stat-value' id='neutralCount'>0</div>
-                                <div class='stat-sublabel' id='neutralPercent'>0%</div>
-                            </div>
-                        </div>
-
-                        <div class='stat-card'>
-                            <div class='stat-icon' style='background: linear-gradient(135deg, #ef4444, #dc2626);'>
-                                <i class='fas fa-frown'></i>
-                            </div>
-                            <div class='stat-content'>
-                                <div class='stat-label'>Negative</div>
-                                <div class='stat-value' id='negativeCount'>0</div>
-                                <div class='stat-sublabel' id='negativePercent'>0%</div>
-                            </div>
-                        </div>
-
-                        <div class='stat-card'>
                             <div class='stat-icon' style='background: linear-gradient(135deg, #8b5cf6, #7c3aed);'>
                                 <i class='fas fa-fire'></i>
                             </div>
@@ -407,6 +373,28 @@
                                 <div class='stat-label'>Hot Topics</div>
                                 <div class='stat-value' id='hotTopicsCount'>0</div>
                                 <div class='stat-sublabel'>Trending now</div>
+                            </div>
+                        </div>
+
+                        <div class='stat-card'>
+                            <div class='stat-icon' style='background: linear-gradient(135deg, #10b981, #059669);'>
+                                <i class='fas fa-rss'></i>
+                            </div>
+                            <div class='stat-content'>
+                                <div class='stat-label'>Sources</div>
+                                <div class='stat-value' id='sourcesCount'>0</div>
+                                <div class='stat-sublabel'>Active feeds</div>
+                            </div>
+                        </div>
+
+                        <div class='stat-card'>
+                            <div class='stat-icon' style='background: linear-gradient(135deg, #f59e0b, #d97706);'>
+                                <i class='fas fa-chart-line'></i>
+                            </div>
+                            <div class='stat-content'>
+                                <div class='stat-label'>Tickers Mentioned</div>
+                                <div class='stat-value' id='tickersCount'>0</div>
+                                <div class='stat-sublabel'>Companies tracked</div>
                             </div>
                         </div>
                     </div>
@@ -473,7 +461,6 @@
     <!-- RSS & Firestore -->
     <script src='assets/js/rss-client.js'></script>
     <script src='assets/js/firestore-rss-manager.js'></script>
-    <script src='assets/js/sentiment-analyzer.js'></script>
     
     <!-- News Terminal -->
     <script src='assets/js/news-terminal.js'></script>
@@ -568,14 +555,14 @@
         console.log('🤖 Initialisation du chatbot FinanceGPT...');
         
         if (typeof ChatbotConfig === 'undefined') {
-            console.error('❌ ChatbotConfig non défini !');
+            console.warn('⚠ ChatbotConfig non défini - chatbot désactivé');
             return;
         }
         
         console.log('✅ ChatbotConfig chargé');
         
         if (typeof ChatbotUI === 'undefined') {
-            console.error('❌ ChatbotUI non défini !');
+            console.warn('⚠ ChatbotUI non défini - chatbot désactivé');
             return;
         }
         

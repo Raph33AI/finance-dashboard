@@ -1,6 +1,6 @@
 /**
  * ════════════════════════════════════════════════════════════════
- * NEWS TERMINAL - MAIN SCRIPT
+ * NEWS TERMINAL - MAIN SCRIPT (Sans Sentiment Analyzer)
  * ════════════════════════════════════════════════════════════════
  */
 
@@ -8,7 +8,6 @@ class NewsTerminal {
     constructor() {
         this.rssClient = new RSSClient();
         this.firestoreManager = new FirestoreRSSManager();
-        this.sentimentAnalyzer = new SentimentAnalyzer(); // À créer ensuite
         
         this.allArticles = [];
         this.filteredArticles = [];
@@ -41,11 +40,11 @@ class NewsTerminal {
 
     async loadArticles() {
         try {
+            console.log('📡 Loading articles from RSS Worker...');
             const data = await this.rssClient.getAllArticles();
             this.allArticles = data.articles;
             
-            // Analyser le sentiment pour chaque article
-            await this.analyzeSentiments();
+            console.log(`✅ Loaded ${this.allArticles.length} articles`);
             
             // Appliquer les filtres et afficher
             this.applyFilters();
@@ -54,32 +53,6 @@ class NewsTerminal {
         } catch (error) {
             console.error('❌ Error loading articles:', error);
             this.showError();
-        }
-    }
-
-    async analyzeSentiments() {
-        console.log('🧠 Analyzing sentiments...');
-        
-        for (const article of this.allArticles) {
-            // Vérifier si déjà analysé dans Firestore
-            const cached = await this.firestoreManager.getSentimentAnalysis(article.id);
-            
-            if (cached) {
-                article.sentiment = cached.sentiment;
-                article.sentimentScore = cached.score;
-            } else {
-                // Analyser avec Gemini
-                const sentiment = await this.sentimentAnalyzer.analyze(article.title, article.description);
-                article.sentiment = sentiment.sentiment;
-                article.sentimentScore = sentiment.score;
-                
-                // Sauvegarder dans Firestore
-                await this.firestoreManager.saveSentimentAnalysis(article.id, {
-                    sentiment: sentiment.sentiment,
-                    score: sentiment.score,
-                    tickers: article.tickers
-                });
-            }
         }
     }
 
@@ -100,10 +73,10 @@ class NewsTerminal {
             // Source
             const matchesSource = sourceFilter === 'all' || article.source === sourceFilter;
 
-            // Sector (à implémenter avec détection de mots-clés)
+            // Sector
             const matchesSector = sectorFilter === 'all' || this.detectSector(article) === sectorFilter;
 
-            // Region (à implémenter avec détection de mots-clés)
+            // Region
             const matchesRegion = regionFilter === 'all' || this.detectRegion(article) === regionFilter;
 
             return matchesSearch && matchesSource && matchesSector && matchesRegion;
@@ -129,9 +102,6 @@ class NewsTerminal {
                 // Score basé sur: source, tickers présents, longueur titre
                 this.filteredArticles.sort((a, b) => this.calculateImportance(b) - this.calculateImportance(a));
                 break;
-            case 'sentiment':
-                this.filteredArticles.sort((a, b) => (b.sentimentScore || 0) - (a.sentimentScore || 0));
-                break;
         }
     }
 
@@ -141,8 +111,9 @@ class NewsTerminal {
         // Source priority
         if (article.source.includes('reuters')) score += 10;
         if (article.source.includes('cnbc-earnings')) score += 8;
+        if (article.source.includes('marketwatch-realtime')) score += 7;
         
-        // Tickers detected
+        // Tickers detected (plus de tickers = plus important)
         score += article.tickers.length * 5;
         
         // Title length (longer = more detailed)
@@ -154,11 +125,11 @@ class NewsTerminal {
     detectSector(article) {
         const text = (article.title + ' ' + article.description).toLowerCase();
         
-        if (text.match(/\b(tech|software|ai|semiconductor|apple|microsoft|google|nvidia)\b/i)) return 'tech';
-        if (text.match(/\b(bank|finance|fed|interest|wall street|trading)\b/i)) return 'finance';
-        if (text.match(/\b(oil|energy|gas|renewable|electric|exxon|chevron)\b/i)) return 'energy';
-        if (text.match(/\b(healthcare|pharma|drug|vaccine|pfizer|moderna)\b/i)) return 'healthcare';
-        if (text.match(/\b(consumer|retail|amazon|walmart|target)\b/i)) return 'consumer';
+        if (text.match(/\b(tech|software|ai|semiconductor|apple|microsoft|google|nvidia|meta|amazon)\b/i)) return 'tech';
+        if (text.match(/\b(bank|finance|fed|interest|wall street|trading|goldman|jpmorgan)\b/i)) return 'finance';
+        if (text.match(/\b(oil|energy|gas|renewable|electric|exxon|chevron|shell)\b/i)) return 'energy';
+        if (text.match(/\b(healthcare|pharma|drug|vaccine|pfizer|moderna|johnson)\b/i)) return 'healthcare';
+        if (text.match(/\b(consumer|retail|walmart|target|costco|starbucks)\b/i)) return 'consumer';
         
         return 'all';
     }
@@ -166,9 +137,9 @@ class NewsTerminal {
     detectRegion(article) {
         const text = (article.title + ' ' + article.description).toLowerCase();
         
-        if (text.match(/\b(us|united states|america|wall street|nyse|nasdaq)\b/i)) return 'us';
-        if (text.match(/\b(europe|eu|euro|ecb|germany|france|uk)\b/i)) return 'eu';
-        if (text.match(/\b(asia|china|japan|korea|india)\b/i)) return 'asia';
+        if (text.match(/\b(us|united states|america|wall street|nyse|nasdaq|federal reserve|fed)\b/i)) return 'us';
+        if (text.match(/\b(europe|eu|euro|ecb|germany|france|uk|britain|london)\b/i)) return 'eu';
+        if (text.match(/\b(asia|china|japan|korea|india|tokyo|beijing|shanghai)\b/i)) return 'asia';
         
         return 'all';
     }
@@ -199,26 +170,20 @@ class NewsTerminal {
     }
 
     renderArticleCard(article) {
-        const sentimentIcon = {
-            'positive': 'fa-smile',
-            'neutral': 'fa-meh',
-            'negative': 'fa-frown'
-        };
-
         const timeAgo = this.getTimeAgo(article.timestamp);
 
         return `
-            <div class='article-card' onclick='newsTerminal.openArticle("${article.link}")'>
+            <div class='article-card' onclick='newsTerminal.openArticle("${article.id}", "${article.link}")'>
                 <div class='article-header'>
                     <div class='article-source'>
                         <i class='fas fa-rss'></i>
                         ${article.sourceName}
                     </div>
                     <div class='article-actions'>
-                        <button class='article-action-btn' onclick='event.stopPropagation(); newsTerminal.toggleWatchlist("${article.tickers[0] || ''}", "${article.title}")' title='Add to watchlist'>
+                        <button class='article-action-btn' onclick='event.stopPropagation(); newsTerminal.toggleWatchlist("${article.tickers[0] || ''}", "${article.title.replace(/'/g, "\\'")}");' title='Add to watchlist'>
                             <i class='fas fa-star'></i>
                         </button>
-                        <button class='article-action-btn' onclick='event.stopPropagation(); newsTerminal.shareArticle("${article.link}")' title='Share'>
+                        <button class='article-action-btn' onclick='event.stopPropagation(); newsTerminal.shareArticle("${article.link}");' title='Share'>
                             <i class='fas fa-share-alt'></i>
                         </button>
                     </div>
@@ -230,18 +195,10 @@ class NewsTerminal {
                 ${article.tickers.length > 0 ? `
                     <div class='article-tickers'>
                         ${article.tickers.map(ticker => `
-                            <span class='ticker-badge' onclick='event.stopPropagation(); newsTerminal.filterByTicker("${ticker}")'>
+                            <span class='ticker-badge' onclick='event.stopPropagation(); newsTerminal.filterByTicker("${ticker}");'>
                                 ${ticker}
                             </span>
                         `).join('')}
-                    </div>
-                ` : ''}
-
-                ${article.sentiment ? `
-                    <div class='article-sentiment ${article.sentiment}'>
-                        <i class='fas ${sentimentIcon[article.sentiment]}'></i>
-                        ${article.sentiment.charAt(0).toUpperCase() + article.sentiment.slice(1)}
-                        ${article.sentimentScore ? `(${(article.sentimentScore * 100).toFixed(0)}%)` : ''}
                     </div>
                 ` : ''}
 
@@ -250,7 +207,7 @@ class NewsTerminal {
                         <i class='fas fa-clock'></i>
                         ${timeAgo}
                     </div>
-                    <a href='${article.link}' target='_blank' class='article-link' onclick='event.stopPropagation(); newsTerminal.recordView(this.article)'>
+                    <a href='${article.link}' target='_blank' class='article-link' onclick='event.stopPropagation();'>
                         Read more <i class='fas fa-external-link-alt'></i>
                     </a>
                 </div>
@@ -258,9 +215,9 @@ class NewsTerminal {
         `;
     }
 
-    async openArticle(link) {
-        // Enregistrer dans l'historique
-        const article = this.allArticles.find(a => a.link === link);
+    async openArticle(articleId, link) {
+        // Enregistrer dans l'historique Firestore
+        const article = this.allArticles.find(a => a.id === articleId);
         if (article) {
             await this.firestoreManager.recordArticleView(article);
         }
@@ -269,7 +226,10 @@ class NewsTerminal {
     }
 
     async toggleWatchlist(ticker, companyName) {
-        if (!ticker) return;
+        if (!ticker) {
+            this.showNotification('No ticker detected in this article', 'warning');
+            return;
+        }
         
         const isInWatchlist = await this.firestoreManager.isInWatchlist(ticker);
         
@@ -279,6 +239,19 @@ class NewsTerminal {
         } else {
             await this.firestoreManager.addToWatchlist(ticker, companyName);
             this.showNotification(`${ticker} added to watchlist`, 'success');
+        }
+    }
+
+    shareArticle(link) {
+        if (navigator.share) {
+            navigator.share({
+                title: 'Financial News',
+                url: link
+            }).catch(err => console.log('Share cancelled'));
+        } else {
+            // Fallback: copy to clipboard
+            navigator.clipboard.writeText(link);
+            this.showNotification('Link copied to clipboard!', 'success');
         }
     }
 
@@ -306,18 +279,8 @@ class NewsTerminal {
 
     updateStats() {
         const total = this.allArticles.length;
-        const positive = this.allArticles.filter(a => a.sentiment === 'positive').length;
-        const neutral = this.allArticles.filter(a => a.sentiment === 'neutral').length;
-        const negative = this.allArticles.filter(a => a.sentiment === 'negative').length;
 
         document.getElementById('totalArticles').textContent = total;
-        document.getElementById('positiveCount').textContent = positive;
-        document.getElementById('neutralCount').textContent = neutral;
-        document.getElementById('negativeCount').textContent = negative;
-
-        document.getElementById('positivePercent').textContent = `${((positive / total) * 100).toFixed(1)}%`;
-        document.getElementById('neutralPercent').textContent = `${((neutral / total) * 100).toFixed(1)}%`;
-        document.getElementById('negativePercent').textContent = `${((negative / total) * 100).toFixed(1)}%`;
 
         // Hot topics (tickers les plus mentionnés)
         const tickerCount = {};
@@ -328,6 +291,14 @@ class NewsTerminal {
         });
         
         document.getElementById('hotTopicsCount').textContent = Object.keys(tickerCount).length;
+
+        // Sources count
+        const sources = new Set(this.allArticles.map(a => a.source));
+        document.getElementById('sourcesCount').textContent = sources.size;
+
+        // Total unique tickers
+        const uniqueTickers = new Set(this.allArticles.flatMap(a => a.tickers));
+        document.getElementById('tickersCount').textContent = uniqueTickers.size;
     }
 
     loadMore() {
@@ -348,17 +319,17 @@ class NewsTerminal {
         `;
         
         await this.loadArticles();
+        this.showNotification('Articles refreshed!', 'success');
     }
 
     exportToCSV() {
         // Créer le CSV
-        const headers = ['Title', 'Source', 'Date', 'Tickers', 'Sentiment', 'Link'];
+        const headers = ['Title', 'Source', 'Date', 'Tickers', 'Link'];
         const rows = this.filteredArticles.map(article => [
             `"${article.title.replace(/"/g, '""')}"`,
             article.sourceName,
             new Date(article.timestamp).toISOString(),
             article.tickers.join(';'),
-            article.sentiment || 'N/A',
             article.link
         ]);
 
@@ -372,6 +343,8 @@ class NewsTerminal {
         a.download = `news-terminal-${new Date().toISOString().split('T')[0]}.csv`;
         a.click();
         URL.revokeObjectURL(url);
+        
+        this.showNotification('CSV exported successfully!', 'success');
     }
 
     getTimeAgo(timestamp) {
@@ -384,8 +357,29 @@ class NewsTerminal {
     }
 
     showNotification(message, type = 'info') {
-        // Utiliser ton système de notifications existant
-        console.log(`${type.toUpperCase()}: ${message}`);
+        // Créer une notification simple
+        const notification = document.createElement('div');
+        notification.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: ${type === 'success' ? 'linear-gradient(135deg, #10b981, #059669)' : 'linear-gradient(135deg, #3b82f6, #2563eb)'};
+            color: white;
+            padding: 16px 24px;
+            border-radius: 12px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+            z-index: 10000;
+            font-weight: 600;
+            animation: slideIn 0.3s ease;
+        `;
+        notification.textContent = message;
+        
+        document.body.appendChild(notification);
+        
+        setTimeout(() => {
+            notification.style.animation = 'slideOut 0.3s ease';
+            setTimeout(() => notification.remove(), 300);
+        }, 3000);
     }
 
     showError() {
@@ -393,6 +387,9 @@ class NewsTerminal {
             <div class='loading-state'>
                 <i class='fas fa-exclamation-triangle' style='color: var(--forex-danger);'></i>
                 <p>Error loading articles. Please try again.</p>
+                <button class='dashboard-btn' onclick='newsTerminal.refreshAll()' style='margin-top: 20px;'>
+                    <i class='fas fa-sync-alt'></i> Retry
+                </button>
             </div>
         `;
     }
