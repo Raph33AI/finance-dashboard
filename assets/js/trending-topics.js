@@ -1,6 +1,6 @@
 /**
  * ════════════════════════════════════════════════════════════════
- * TRENDING TOPICS DASHBOARD - Interface Ultra-Stylisée
+ * TRENDING TOPICS DASHBOARD - Interface Ultra-Stylisée (CORRIGÉE)
  * ════════════════════════════════════════════════════════════════
  */
 
@@ -84,16 +84,16 @@ class TrendingTopicsDashboard {
         
         // Mots clés à tracker
         const keywords = {
-            'AI': { icon: 'fa-robot', variations: ['ai', 'artificial intelligence', 'chatgpt', 'openai', 'machine learning'] },
-            'Rate Cuts': { icon: 'fa-percent', variations: ['rate cut', 'interest rate', 'fed', 'federal reserve', 'monetary policy'] },
-            'Earnings': { icon: 'fa-chart-line', variations: ['earnings', 'revenue', 'profit', 'quarterly results', 'eps'] },
-            'China': { icon: 'fa-flag', variations: ['china', 'chinese', 'beijing', 'yuan'] },
-            'Oil': { icon: 'fa-oil-can', variations: ['oil', 'crude', 'petroleum', 'opec', 'energy prices'] },
-            'Crypto': { icon: 'fa-bitcoin', variations: ['bitcoin', 'crypto', 'cryptocurrency', 'ethereum', 'blockchain'] },
-            'Tech': { icon: 'fa-microchip', variations: ['tech', 'technology', 'semiconductor', 'chip', 'nvidia', 'apple'] },
-            'Banking': { icon: 'fa-university', variations: ['bank', 'banking', 'financial institution', 'jpmorgan', 'goldman'] },
-            'Inflation': { icon: 'fa-fire', variations: ['inflation', 'cpi', 'pce', 'price increase'] },
-            'Recession': { icon: 'fa-exclamation-triangle', variations: ['recession', 'economic slowdown', 'gdp decline'] }
+            'AI': { icon: 'fa-robot', variations: ['ai', 'artificial intelligence', 'chatgpt', 'openai', 'machine learning', 'generative'] },
+            'Rate Cuts': { icon: 'fa-percent', variations: ['rate cut', 'interest rate', 'fed', 'federal reserve', 'monetary policy', 'powell'] },
+            'Earnings': { icon: 'fa-chart-line', variations: ['earnings', 'revenue', 'profit', 'quarterly results', 'eps', 'beats estimates'] },
+            'China': { icon: 'fa-flag', variations: ['china', 'chinese', 'beijing', 'yuan', 'xi jinping'] },
+            'Oil': { icon: 'fa-oil-can', variations: ['oil', 'crude', 'petroleum', 'opec', 'energy prices', 'brent'] },
+            'Crypto': { icon: 'fa-bitcoin', variations: ['bitcoin', 'crypto', 'cryptocurrency', 'ethereum', 'blockchain', 'btc'] },
+            'Tech': { icon: 'fa-microchip', variations: ['tech', 'technology', 'semiconductor', 'chip', 'nvidia', 'apple', 'microsoft'] },
+            'Banking': { icon: 'fa-university', variations: ['bank', 'banking', 'financial institution', 'jpmorgan', 'goldman', 'wells fargo'] },
+            'Inflation': { icon: 'fa-fire', variations: ['inflation', 'cpi', 'pce', 'price increase', 'consumer prices'] },
+            'Recession': { icon: 'fa-exclamation-triangle', variations: ['recession', 'economic slowdown', 'gdp decline', 'downturn'] }
         };
         
         const topicStats = {};
@@ -151,6 +151,9 @@ class TrendingTopicsDashboard {
                     
                     if (change > 10) trend = 'up';
                     else if (change < -10) trend = 'down';
+                } else if (recent7Days > 0) {
+                    trend = 'up';
+                    change = 100;
                 }
                 
                 // Créer les données pour le sparkline
@@ -173,46 +176,65 @@ class TrendingTopicsDashboard {
 
     /**
      * ═══════════════════════════════════════════════════════════
-     * ANALYSE RISQUES & OPPORTUNITÉS
+     * ANALYSE RISQUES & OPPORTUNITÉS (AMÉLIORÉE)
      * ═══════════════════════════════════════════════════════════
      */
     
     analyzeRisksOpportunities(articles) {
         console.log('⚖ Analyzing risks & opportunities...');
         
-        // Analyser le sentiment
-        const analyzed = this.sentimentAnalyzer.analyzeBatch(articles);
+        // ✅ CORRECTION: Liste étendue d'entreprises
+        const companies = {
+            // Tech Giants
+            'Apple': 'AAPL',
+            'Microsoft': 'MSFT',
+            'Google': 'GOOGL',
+            'Alphabet': 'GOOGL',
+            'Amazon': 'AMZN',
+            'Tesla': 'TSLA',
+            'NVIDIA': 'NVDA',
+            'Nvidia': 'NVDA',
+            'Meta': 'META',
+            'Facebook': 'META',
+            'Netflix': 'NFLX',
+            'AMD': 'AMD',
+            'Intel': 'INTC',
+            
+            // Banking
+            'JPMorgan': 'JPM',
+            'Bank of America': 'BAC',
+            'Goldman Sachs': 'GS',
+            'Morgan Stanley': 'MS',
+            'Wells Fargo': 'WFC',
+            'Citigroup': 'C',
+            
+            // Other
+            'Bitcoin': 'BTC',
+            'Ethereum': 'ETH',
+            'Walmart': 'WMT',
+            'Disney': 'DIS',
+            'Coca-Cola': 'KO',
+            'Pfizer': 'PFE',
+            'Johnson': 'JNJ',
+            'ExxonMobil': 'XOM',
+            'Exxon': 'XOM'
+        };
         
-        // Grouper par entreprise/ticker
         const companyMentions = {};
         
         articles.forEach(article => {
+            const titleLower = article.title.toLowerCase();
             const titleUpper = article.title.toUpperCase();
             
-            // Regex pour détecter les tickers (mots en majuscules de 2-5 lettres)
+            // Détecter les tickers (mots en majuscules de 2-5 lettres)
             const tickerMatches = titleUpper.match(/\b[A-Z]{2,5}\b/g) || [];
             
-            // Mots clés d'entreprises connues
-            const companies = {
-                'Apple': 'AAPL',
-                'Microsoft': 'MSFT',
-                'Google': 'GOOGL',
-                'Amazon': 'AMZN',
-                'Tesla': 'TSLA',
-                'NVIDIA': 'NVDA',
-                'Meta': 'META',
-                'Netflix': 'NFLX',
-                'AMD': 'AMD',
-                'Intel': 'INTC',
-                'JPMorgan': 'JPM',
-                'Bank of America': 'BAC',
-                'Goldman Sachs': 'GS',
-                'Bitcoin': 'BTC',
-                'Ethereum': 'ETH'
-            };
-            
+            // Vérifier chaque entreprise
             Object.entries(companies).forEach(([name, ticker]) => {
-                if (article.title.includes(name) || tickerMatches.includes(ticker)) {
+                const nameLower = name.toLowerCase();
+                const found = titleLower.includes(nameLower) || tickerMatches.includes(ticker);
+                
+                if (found) {
                     if (!companyMentions[ticker]) {
                         companyMentions[ticker] = {
                             name: name,
@@ -220,6 +242,7 @@ class TrendingTopicsDashboard {
                             articles: [],
                             positiveCount: 0,
                             negativeCount: 0,
+                            neutralCount: 0,
                             totalSentiment: 0
                         };
                     }
@@ -234,43 +257,49 @@ class TrendingTopicsDashboard {
                         companyMentions[ticker].positiveCount += 1;
                     } else if (sentiment.sentiment === 'negative') {
                         companyMentions[ticker].negativeCount += 1;
+                    } else {
+                        companyMentions[ticker].neutralCount += 1;
                     }
                 }
             });
         });
         
-        // Identifier les opportunités (sentiment positif + mentions croissantes)
+        console.log('📊 Company mentions detected:', Object.keys(companyMentions).length);
+        
+        // ✅ CORRECTION: Seuil réduit à 1 article minimum (au lieu de 3)
         const opportunities = Object.values(companyMentions)
-            .filter(company => company.articles.length >= 3)
-            .filter(company => company.totalSentiment > 0)
+            .filter(company => company.articles.length >= 1) // ✅ Au moins 1 article
+            .filter(company => company.positiveCount > company.negativeCount) // ✅ Plus de positif que négatif
             .sort((a, b) => b.totalSentiment - a.totalSentiment)
             .slice(0, 5)
             .map(company => ({
                 ...company,
                 avgSentiment: Math.round(company.totalSentiment / company.articles.length),
-                level: company.totalSentiment > 50 ? 'High' : 'Medium'
+                level: company.totalSentiment > 30 ? 'High' : 'Medium' // ✅ Seuil réduit de 50 à 30
             }));
         
-        // Identifier les risques (sentiment négatif + explosion de news)
         const risks = Object.values(companyMentions)
-            .filter(company => company.articles.length >= 3)
-            .filter(company => company.totalSentiment < 0)
+            .filter(company => company.articles.length >= 1) // ✅ Au moins 1 article
+            .filter(company => company.negativeCount > company.positiveCount) // ✅ Plus de négatif que positif
             .sort((a, b) => a.totalSentiment - b.totalSentiment)
             .slice(0, 5)
             .map(company => ({
                 ...company,
                 avgSentiment: Math.round(company.totalSentiment / company.articles.length),
-                level: company.totalSentiment < -50 ? 'High' : 'Medium'
+                level: company.totalSentiment < -30 ? 'High' : 'Medium' // ✅ Seuil réduit de -50 à -30
             }));
         
-        console.log('✅ Risks & Opportunities analyzed:', { opportunities, risks });
+        console.log('✅ Risks & Opportunities analyzed:', { 
+            opportunities: opportunities.length, 
+            risks: risks.length 
+        });
         
         return { opportunities, risks };
     }
 
     /**
      * ═══════════════════════════════════════════════════════════
-     * WATCHLIST (FIREBASE INTEGRATION)
+     * WATCHLIST (FIREBASE INTEGRATION - CORRIGÉE)
      * ═══════════════════════════════════════════════════════════
      */
     
@@ -278,19 +307,29 @@ class TrendingTopicsDashboard {
         console.log('📌 Loading watchlist from Firebase...');
         
         try {
-            // Vérifier si Firebase est disponible
-            if (typeof firebase === 'undefined' || !firebase.auth().currentUser) {
-                console.log('⚠ Firebase not available or user not logged in');
+            // ✅ CORRECTION: Vérifier si Firebase est disponible
+            if (typeof firebase === 'undefined') {
+                console.log('⚠ Firebase not available');
                 this.watchlistArticles = [];
                 return;
             }
             
-            const userId = firebase.auth().currentUser.uid;
+            const currentUser = firebase.auth().currentUser;
+            
+            if (!currentUser) {
+                console.log('⚠ User not logged in');
+                this.watchlistArticles = [];
+                return;
+            }
+            
+            const userId = currentUser.uid;
             const db = firebase.firestore();
             
-            const snapshot = await db.collection('watchlist')
+            console.log('📥 Fetching watchlist for user:', userId);
+            
+            // ✅ CORRECTION: Requête simplifiée sans orderBy pour éviter les erreurs d'index
+            const snapshot = await db.collection('savedNews')
                 .where('userId', '==', userId)
-                .orderBy('timestamp', 'desc')
                 .limit(50)
                 .get();
             
@@ -299,10 +338,14 @@ class TrendingTopicsDashboard {
                 ...doc.data()
             }));
             
+            // Trier localement par timestamp
+            this.watchlistArticles.sort((a, b) => (b.savedAt || b.timestamp || 0) - (a.savedAt || a.timestamp || 0));
+            
             console.log(`✅ Loaded ${this.watchlistArticles.length} watchlist items`);
             
         } catch (error) {
             console.error('❌ Error loading watchlist:', error);
+            console.error('Error details:', error.message);
             this.watchlistArticles = [];
         }
     }
@@ -315,7 +358,7 @@ class TrendingTopicsDashboard {
             }
             
             const db = firebase.firestore();
-            await db.collection('watchlist').doc(articleId).delete();
+            await db.collection('savedNews').doc(articleId).delete();
             
             console.log('✅ Article removed from watchlist');
             
@@ -417,7 +460,6 @@ class TrendingTopicsDashboard {
         
         card.onclick = () => {
             console.log(`🔥 Clicked on topic: ${topic.name}`);
-            // Afficher les articles liés (optionnel)
         };
         
         return card;
@@ -524,7 +566,7 @@ class TrendingTopicsDashboard {
             options: {
                 responsive: true,
                 maintainAspectRatio: true,
-                cutout: '80%',
+                cutout: '75%', // ✅ CORRIGÉ: Réduit de 80% à 75% pour laisser plus d'espace
                 plugins: {
                     legend: { display: false },
                     tooltip: { enabled: false }
@@ -681,12 +723,12 @@ class TrendingTopicsDashboard {
                     </div>
                 </div>
                 <div class='item-description'>
-                    Positive sentiment detected across ${opportunity.articles.length} recent articles with an average sentiment score of +${opportunity.avgSentiment}.
+                    Positive sentiment detected across ${opportunity.articles.length} recent article${opportunity.articles.length > 1 ? 's' : ''} with an average sentiment score of +${opportunity.avgSentiment}.
                 </div>
                 <div class='item-metrics'>
                     <div class='metric'>
                         <i class='fas fa-newspaper'></i>
-                        <strong>${opportunity.articles.length}</strong> mentions
+                        <strong>${opportunity.articles.length}</strong> mention${opportunity.articles.length > 1 ? 's' : ''}
                     </div>
                     <div class='metric'>
                         <i class='fas fa-arrow-up'></i>
@@ -738,12 +780,12 @@ class TrendingTopicsDashboard {
                     </div>
                 </div>
                 <div class='item-description'>
-                    Negative sentiment detected across ${risk.articles.length} recent articles with an average sentiment score of ${risk.avgSentiment}.
+                    Negative sentiment detected across ${risk.articles.length} recent article${risk.articles.length > 1 ? 's' : ''} with an average sentiment score of ${risk.avgSentiment}.
                 </div>
                 <div class='item-metrics'>
                     <div class='metric'>
                         <i class='fas fa-newspaper'></i>
-                        <strong>${risk.articles.length}</strong> mentions
+                        <strong>${risk.articles.length}</strong> mention${risk.articles.length > 1 ? 's' : ''}
                     </div>
                     <div class='metric'>
                         <i class='fas fa-arrow-down'></i>
@@ -788,11 +830,6 @@ class TrendingTopicsDashboard {
         container.innerHTML = '';
         
         let filteredArticles = this.watchlistArticles;
-        
-        // Appliquer le filtre si nécessaire
-        if (this.currentWatchlistFilter !== 'all') {
-            // Ici vous pouvez ajouter des filtres par catégorie/sentiment si stockés dans Firebase
-        }
         
         if (filteredArticles.length === 0) {
             container.innerHTML = `
