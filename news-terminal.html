@@ -29,9 +29,6 @@
 
     <div class='layout-wrapper'>
         
-        <!-- ════════════════════════════════════════════════════════════════
-             SIDEBAR COMPLÈTE
-             ════════════════════════════════════════════════════════════════ -->
         <aside class='sidebar' id='sidebar'>
             <div class="sidebar-header">
                 <div class="logo-container">
@@ -179,7 +176,6 @@
                     </div>
                 </div>
 
-                <!-- ✨ NOUVELLE SECTION NEWS -->
                 <div class='nav-section'>
                     <button class="nav-folder" data-tooltip="News & Analysis">
                         <i class="fas fa-newspaper"></i>
@@ -256,9 +252,6 @@
         
         <div class='sidebar-overlay' id='sidebarOverlay'></div>
 
-        <!-- ════════════════════════════════════════════════════════════════
-             CONTENU PRINCIPAL - NEWS TERMINAL
-             ════════════════════════════════════════════════════════════════ -->
         <div class='main-content'>
             <header class='top-header'>
                 <div class='header-left'>
@@ -270,7 +263,7 @@
                     </h1>
                 </div>
                 <div class='header-right'>
-                    <button class='dashboard-btn' onclick='newsTerminal.refreshAll()' style='background: linear-gradient(135deg, #667eea, #764ba2); box-shadow: 0 8px 24px rgba(102, 126, 234, 0.4);'>
+                    <button class='refresh-btn' onclick='newsTerminal.refreshAll()'>
                         <i class='fas fa-sync-alt'></i>
                         <span class='btn-text'>Refresh</span>
                     </button>
@@ -279,18 +272,13 @@
             
             <div class='container'>
                 
-                <!-- ════════════════════════════════════════════════════
-                     FILTRES & RECHERCHE
-                     ════════════════════════════════════════════════════ -->
                 <div class='section filters-section'>
                     <div class='filters-grid'>
-                        <!-- Recherche -->
                         <div class='filter-group'>
                             <label><i class='fas fa-search'></i> Search</label>
                             <input type='text' id='searchInput' placeholder='Search by keyword or ticker...' class='search-input'>
                         </div>
 
-                        <!-- Source -->
                         <div class='filter-group'>
                             <label><i class='fas fa-rss'></i> Source</label>
                             <select id='sourceFilter' onchange='newsTerminal.applyFilters()' class='filter-select'>
@@ -305,7 +293,6 @@
                             </select>
                         </div>
 
-                        <!-- Secteur -->
                         <div class='filter-group'>
                             <label><i class='fas fa-industry'></i> Sector</label>
                             <select id='sectorFilter' onchange='newsTerminal.applyFilters()' class='filter-select'>
@@ -318,7 +305,6 @@
                             </select>
                         </div>
 
-                        <!-- Géographie -->
                         <div class='filter-group'>
                             <label><i class='fas fa-globe'></i> Region</label>
                             <select id='regionFilter' onchange='newsTerminal.applyFilters()' class='filter-select'>
@@ -329,7 +315,6 @@
                             </select>
                         </div>
 
-                        <!-- Tri -->
                         <div class='filter-group'>
                             <label><i class='fas fa-sort'></i> Sort By</label>
                             <select id='sortFilter' onchange='newsTerminal.applyFilters()' class='filter-select'>
@@ -341,9 +326,6 @@
                     </div>
                 </div>
 
-                <!-- ════════════════════════════════════════════════════
-                     STATISTIQUES EN TEMPS RÉEL
-                     ════════════════════════════════════════════════════ -->
                 <div class='section'>
                     <h2 class='section-title gradient-title'>
                         <i class='fas fa-chart-bar'></i> Real-Time Statistics
@@ -396,9 +378,6 @@
                     </div>
                 </div>
 
-                <!-- ════════════════════════════════════════════════════
-                     LISTE DES ARTICLES
-                     ════════════════════════════════════════════════════ -->
                 <div class='section'>
                     <div class='section-header-with-controls'>
                         <h2 class='section-title gradient-title'>
@@ -422,16 +401,13 @@
                     </div>
 
                     <div class='load-more-container' style='display: none;'>
-                        <button class='dashboard-btn load-more-btn' onclick='newsTerminal.loadMore()'>
+                        <button class='load-more-btn' onclick='newsTerminal.loadMore()'>
                             <i class='fas fa-chevron-down'></i>
                             <span>Load More Articles</span>
                         </button>
                     </div>
                 </div>
 
-                <!-- ════════════════════════════════════════════════════
-                     FOOTER
-                     ════════════════════════════════════════════════════ -->
                 <footer style='text-align: center; padding: 32px 20px; margin-top: 40px; border-top: 1px solid var(--glass-border);'>
                     <p style='color: var(--text-secondary); font-size: 0.95rem;'>
                         <i class='fas fa-info-circle'></i> 
@@ -446,25 +422,12 @@
         </div>
     </div>
 
-    <!-- ════════════════════════════════════════════════════════════════
-         SCRIPTS
-         ════════════════════════════════════════════════════════════════ -->
-    
-    <!-- Core Scripts -->
     <script src='assets/js/common.js'></script>
     <script src='assets/js/sidebar.js'></script>
-    
-    <!-- RSS & Firestore -->
     <script src='assets/js/rss-client.js'></script>
     <script src='assets/js/firestore-rss-manager.js'></script>
-    
-    <!-- News Terminal -->
     <script src='assets/js/news-terminal.js'></script>
-    
-    <!-- Particles Background -->
     <script src="assets/js/chatbot-particles.js"></script>
-
-    <!-- Chatbot (optionnel) -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <script src="assets/js/chatbot-config.js"></script>
     <script src="assets/js/chatbot-gemini.js"></script>
@@ -475,101 +438,51 @@
     <script src="assets/js/chatbot-ai-engine.js"></script>
     <script src="assets/js/chatbot-ui.js"></script>
 
-    <!-- User Menu Init -->
     <script>
         (function forceUserMenuInit() {
             console.log('🔧 Force initializing user menu...');
-            
             const initMenu = () => {
                 const trigger = document.getElementById('sidebarUserTrigger');
                 const dropdown = document.getElementById('sidebarUserDropdown');
-                
-                if (!trigger || !dropdown) {
-                    console.error('❌ User menu elements not found');
-                    return;
-                }
-                
+                if (!trigger || !dropdown) { console.error('❌ User menu elements not found'); return; }
                 const newTrigger = trigger.cloneNode(true);
                 trigger.parentNode.replaceChild(newTrigger, trigger);
-                
                 const freshTrigger = document.getElementById('sidebarUserTrigger');
                 const freshDropdown = document.getElementById('sidebarUserDropdown');
-                
                 console.log('✅ Adding click event to trigger...');
-                
                 freshTrigger.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    
+                    e.preventDefault(); e.stopPropagation();
                     console.log('👆 User menu trigger clicked!');
-                    
                     const isActive = freshDropdown.classList.contains('active');
-                    
-                    if (isActive) {
-                        freshDropdown.classList.remove('active');
-                        console.log('🔽 Closing dropdown');
-                    } else {
-                        freshDropdown.classList.add('active');
-                        console.log('🔼 Opening dropdown');
-                    }
-                    
+                    if (isActive) { freshDropdown.classList.remove('active'); console.log('🔽 Closing dropdown'); }
+                    else { freshDropdown.classList.add('active'); console.log('🔼 Opening dropdown'); }
                     const arrow = freshTrigger.querySelector('.sidebar-user-arrow');
-                    if (arrow) {
-                        arrow.style.transform = isActive ? 'rotate(0deg)' : 'rotate(180deg)';
-                        arrow.style.transition = 'transform 0.3s ease';
-                    }
+                    if (arrow) { arrow.style.transform = isActive ? 'rotate(0deg)' : 'rotate(180deg)'; arrow.style.transition = 'transform 0.3s ease'; }
                 });
-                
                 document.addEventListener('click', function(e) {
                     if (!freshTrigger.contains(e.target) && !freshDropdown.contains(e.target)) {
                         freshDropdown.classList.remove('active');
                         const arrow = freshTrigger.querySelector('.sidebar-user-arrow');
-                        if (arrow) {
-                            arrow.style.transform = 'rotate(0deg)';
-                        }
+                        if (arrow) { arrow.style.transform = 'rotate(0deg)'; }
                     }
                 });
-                
-                freshDropdown.addEventListener('click', function(e) {
-                    e.stopPropagation();
-                });
-                
+                freshDropdown.addEventListener('click', function(e) { e.stopPropagation(); });
                 console.log('✅ User menu initialized successfully!');
             };
-            
-            if (document.readyState === 'loading') {
-                document.addEventListener('DOMContentLoaded', initMenu);
-            } else {
-                setTimeout(initMenu, 100);
-            }
+            if (document.readyState === 'loading') { document.addEventListener('DOMContentLoaded', initMenu); }
+            else { setTimeout(initMenu, 100); }
         })();
     </script>
 
-    <!-- Chatbot Init -->
     <script>
     document.addEventListener('DOMContentLoaded', function() {
         console.log('🤖 Initialisation du chatbot FinanceGPT...');
-        
-        if (typeof ChatbotConfig === 'undefined') {
-            console.warn('⚠ ChatbotConfig non défini - chatbot désactivé');
-            return;
-        }
-        
+        if (typeof ChatbotConfig === 'undefined') { console.warn('⚠ ChatbotConfig non défini - chatbot désactivé'); return; }
         console.log('✅ ChatbotConfig chargé');
-        
-        if (typeof ChatbotUI === 'undefined') {
-            console.warn('⚠ ChatbotUI non défini - chatbot désactivé');
-            return;
-        }
-        
+        if (typeof ChatbotUI === 'undefined') { console.warn('⚠ ChatbotUI non défini - chatbot désactivé'); return; }
         console.log('✅ ChatbotUI chargé');
-        
-        try {
-            window.financialChatbot = new ChatbotUI(ChatbotConfig);
-            console.log('🎉 Chatbot FinanceGPT initialisé avec succès !');
-        } catch (error) {
-            console.error('❌ Erreur lors de l\'initialisation du chatbot:', error);
-        }
+        try { window.financialChatbot = new ChatbotUI(ChatbotConfig); console.log('🎉 Chatbot FinanceGPT initialisé avec succès !'); }
+        catch (error) { console.error('❌ Erreur lors de l\'initialisation du chatbot:', error); }
     });
     </script>
 

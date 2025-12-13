@@ -1,24 +1,19 @@
 /**
  * ════════════════════════════════════════════════════════════════
- * RSS CLIENT - Appelle le Worker Cloudflare (Version Améliorée)
+ * RSS CLIENT - Version Complète
  * ════════════════════════════════════════════════════════════════
  */
 
 class RSSClient {
     constructor() {
-        // ⚠ REMPLACE PAR TON URL WORKER
         this.workerUrl = 'https://rss-api.raphnardone.workers.dev';
         this.cache = new Map();
         this.cacheTimeout = 5 * 60 * 1000; // 5 minutes
     }
 
-    // ──────────────────────────────────────────────────────────
-    // Récupérer TOUS les articles
-    // ──────────────────────────────────────────────────────────
     async getAllArticles() {
         const cacheKey = 'all_articles';
         
-        // Vérifier le cache
         if (this.cache.has(cacheKey)) {
             const cached = this.cache.get(cacheKey);
             if (Date.now() - cached.timestamp < this.cacheTimeout) {
@@ -38,12 +33,16 @@ class RSSClient {
 
             const data = await response.json();
             
-            // Log des sources reçues
             const sources = [...new Set(data.articles.map(a => a.source))];
             console.log('📊 Sources reçues:', sources);
-            console.log('🖼 Articles avec images:', data.articles.filter(a => a.image).length);
+            console.log('🖼 Articles avec images:', data.articles.filter(a => a.image).length, '/', data.totalArticles);
             
-            // Mettre en cache
+            const reutersArticles = data.articles.filter(a => a.source.includes('reuters'));
+            console.log('📰 Reuters articles:', reutersArticles.length);
+            
+            const cnbcWithImages = data.articles.filter(a => a.source.includes('cnbc') && a.image);
+            console.log('🖼 CNBC avec images:', cnbcWithImages.length);
+            
             this.cache.set(cacheKey, {
                 data: data,
                 timestamp: Date.now()
@@ -58,87 +57,50 @@ class RSSClient {
         }
     }
 
-    // ──────────────────────────────────────────────────────────
-    // Récupérer UN flux spécifique (ex: 'cnbc-top')
-    // ──────────────────────────────────────────────────────────
     async getFeed(feedName) {
         try {
             console.log(`📡 Fetching ${feedName} feed...`);
-            
             const response = await fetch(`${this.workerUrl}/feed/${feedName}`);
-            
-            if (!response.ok) {
-                throw new Error(`HTTP ${response.status}`);
-            }
-
+            if (!response.ok) { throw new Error(`HTTP ${response.status}`); }
             const articles = await response.json();
-            
             console.log(`✅ Received ${articles.length} articles from ${feedName}`);
             return articles;
-
         } catch (error) {
             console.error(`❌ Error fetching ${feedName}:`, error);
             throw error;
         }
     }
 
-    // ──────────────────────────────────────────────────────────
-    // Rechercher des articles (ex: 'AAPL')
-    // ──────────────────────────────────────────────────────────
     async searchArticles(query) {
         try {
             console.log(`🔍 Searching for "${query}"...`);
-            
             const response = await fetch(`${this.workerUrl}/search?q=${encodeURIComponent(query)}`);
-            
-            if (!response.ok) {
-                throw new Error(`HTTP ${response.status}`);
-            }
-
+            if (!response.ok) { throw new Error(`HTTP ${response.status}`); }
             const data = await response.json();
-            
             console.log(`✅ Found ${data.totalResults} results`);
             return data;
-
         } catch (error) {
             console.error('❌ Search error:', error);
             throw error;
         }
     }
 
-    // ──────────────────────────────────────────────────────────
-    // Filtrer par ticker (côté client)
-    // ──────────────────────────────────────────────────────────
     filterByTicker(articles, ticker) {
-        return articles.filter(article => 
-            article.tickers.includes(ticker.toUpperCase())
-        );
+        return articles.filter(article => article.tickers.includes(ticker.toUpperCase()));
     }
 
-    // ──────────────────────────────────────────────────────────
-    // Filtrer par source (côté client)
-    // ──────────────────────────────────────────────────────────
     filterBySource(articles, sourceName) {
-        return articles.filter(article => 
-            article.source === sourceName
-        );
+        return articles.filter(article => article.source === sourceName);
     }
 
-    // ──────────────────────────────────────────────────────────
-    // Trier par date (plus récent en premier)
-    // ──────────────────────────────────────────────────────────
     sortByDate(articles) {
         return articles.sort((a, b) => b.timestamp - a.timestamp);
     }
 
-    // ──────────────────────────────────────────────────────────
-    // Clear cache (utile pour le refresh)
-    // ──────────────────────────────────────────────────────────
     clearCache() {
         this.cache.clear();
         console.log('🗑 Cache cleared');
     }
 }
 
-// Export global
 window.RSSClient = RSSClient;
