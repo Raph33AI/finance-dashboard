@@ -81,20 +81,42 @@ class InsiderFlowTracker {
             this.showLoading();
             
             // Fetch Form 4 filings from SEC
-            const form4Data = await this.secClient.getFeed('form4', 200, forceRefresh);
+            const form4Response = await this.secClient.getFeed('form4', 200, forceRefresh);
             
-            console.log(`✅ Fetched ${form4Data.count} Form 4 filings from SEC`);
-            console.log('📋 Sample filing structure:', form4Data.filings?.[0]);
+            console.log('📋 Full SEC API Response:', form4Response);
+            console.log('📋 Response keys:', Object.keys(form4Response));
+            
+            // Adapt to actual API structure
+            let filings = [];
+            
+            if (form4Response.filings && Array.isArray(form4Response.filings)) {
+                filings = form4Response.filings;
+            } else if (form4Response.data && Array.isArray(form4Response.data)) {
+                filings = form4Response.data;
+            } else if (form4Response.entries && Array.isArray(form4Response.entries)) {
+                filings = form4Response.entries;
+            } else if (Array.isArray(form4Response)) {
+                filings = form4Response;
+            }
+            
+            console.log(`✅ Fetched ${filings.length} Form 4 filings from SEC`);
+            
+            if (filings.length > 0) {
+                console.log('📋 Sample filing structure:', filings[0]);
+                console.log('📋 Sample filing keys:', Object.keys(filings[0]));
+            } else {
+                console.warn('⚠ No filings found in response');
+            }
             
             // Parse Form 4 filings into insider transactions
-            this.insiderData = await this.parseForm4Filings(form4Data.filings || []);
+            this.insiderData = await this.parseForm4Filings(filings);
             
             console.log(`✅ Parsed ${this.insiderData.length} insider transactions`);
             
             // If no transactions parsed, use intelligent fallback
             if (this.insiderData.length === 0) {
                 console.warn('⚠ No transactions parsed from SEC data, using intelligent fallback');
-                this.insiderData = this.generateIntelligentFallback(form4Data.filings || []);
+                this.insiderData = this.generateIntelligentFallback(filings);
             }
             
             this.applyFilters();
@@ -114,20 +136,27 @@ class InsiderFlowTracker {
         
         console.log(`🔄 Parsing ${filings.length} Form 4 filings...`);
         
-        for (let i = 0; i < filings.length; i++) {
+        for (let i = 0; i < Math.min(filings.length, 200); i++) {
             const filing = filings[i];
             
             try {
                 const txn = this.extractTransactionFromFiling(filing);
                 if (txn) {
                     transactions.push(txn);
+                } else {
+                    if (i < 3) { // Log first 3 failures for debugging
+                        console.warn(`⚠ Failed to extract transaction from filing ${i}:`, filing);
+                    }
                 }
             } catch (error) {
-                console.warn(`⚠ Error parsing filing ${i}:`, error.message);
+                if (i < 3) {
+                    console.warn(`⚠ Error parsing filing ${i}:`, error.message, filing);
+                }
             }
         }
         
         transactions.sort((a, b) => b.date - a.date);
+        console.log(`✅ Successfully parsed ${transactions.length} transactions from ${filings.length} filings`);
         return transactions;
     }
 
@@ -137,20 +166,55 @@ class InsiderFlowTracker {
             return null;
         }
 
-        // Extract basic information with fallbacks
-        const companyName = filing.companyName || filing.issuerName || 'Unknown Company';
-        const filingDate = filing.filedDate ? new Date(filing.filedDate) : new Date();
-        const cik = filing.cik || filing.issuerCik || '';
+        // Extract basic information with multiple fallback strategies
+        const companyName = filing.companyName || 
+                        filing.issuerName || 
+                        filing.company || 
+                        filing.name ||
+                        filing.issuer ||
+                        'Unknown Company';
+        
+        // Try multiple date formats
+        let filingDate;
+        if (filing.filedDate) {
+            filingDate = new Date(filing.filedDate);
+        } else if (filing.filingDate) {
+            filingDate = new Date(filing.filingDate);
+        } else if (filing.date) {
+            filingDate = new Date(filing.date);
+        } else if (filing.acceptedDate) {
+            filingDate = new Date(filing.acceptedDate);
+        } else {
+            filingDate = new Date();
+        }
+        
+        // Validate date
+        if (isNaN(filingDate.getTime())) {
+            filingDate = new Date();
+        }
+        
+        const cik = filing.cik || 
+                filing.issuerCik || 
+                filing.CIK || 
+                filing.companyCik ||
+                '';
         
         // Extract ticker symbol
         const ticker = this.extractTickerFromCompanyName(companyName);
         
-        // Extract insider information
-        const insiderName = this.extractInsiderName(filing.reportingOwner || filing.description || '');
-        const insiderPosition = this.extractInsiderPosition(filing.description || filing.reportingOwner || '');
+        // Extract insider information from various possible fields
+        const insiderSource = filing.reportingOwner || 
+                            filing.insider || 
+                            filing.description || 
+                            filing.ownerName ||
+                            '';
         
-        // Determine transaction type
-        const transactionType = this.extractTransactionType(filing.description || filing.formType || '');
+        const insiderName = this.extractInsiderName(insiderSource);
+        const insiderPosition = this.extractInsiderPosition(insiderSource + ' ' + (filing.description || ''));
+        
+        // Determine transaction type from description or form type
+        const transactionSource = (filing.description || '') + ' ' + (filing.formType || '');
+        const transactionType = this.extractTransactionType(transactionSource);
         
         // Generate realistic transaction data
         const shares = this.estimateShares();
@@ -162,9 +226,17 @@ class InsiderFlowTracker {
         
         // Simulate price impact based on transaction type
         const impactMultiplier = transactionType === 'P' ? 1 : -1;
-        const priceImpact7d = (Math.random() * 10 + 2) * impactMultiplier;
-        const priceImpact30d = (Math.random() * 20 + 5) * impactMultiplier;
-        const priceImpact90d = (Math.random() * 30 + 10) * impactMultiplier;
+        const baseImpact = Math.random() * 5 + 1;
+        const priceImpact7d = baseImpact * impactMultiplier;
+        const priceImpact30d = (baseImpact * 2.5) * impactMultiplier;
+        const priceImpact90d = (baseImpact * 4) * impactMultiplier;
+        
+        // Try to get URL from various possible fields
+        const formUrl = filing.url || 
+                    filing.link || 
+                    filing.filingUrl ||
+                    filing.edgarUrl ||
+                    `https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=${cik}`;
         
         return {
             id: `TXN-${cik}-${filingDate.getTime()}-${Math.random().toString(36).substr(2, 9)}`,
@@ -189,8 +261,8 @@ class InsiderFlowTracker {
             priceImpact7d: priceImpact7d,
             priceImpact30d: priceImpact30d,
             priceImpact90d: priceImpact90d,
-            formUrl: filing.url || `https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=${cik}`,
-            filingType: filing.formType || 'Form 4'
+            formUrl: formUrl,
+            filingType: filing.formType || filing.type || 'Form 4'
         };
     }
 
