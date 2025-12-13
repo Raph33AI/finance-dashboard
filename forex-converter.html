@@ -251,9 +251,7 @@
                         </button>
                     </h2>
                     
-                    <div class='swipeable-container'>
-                        <div id='majorPairsGrid' class='major-pairs-grid swipeable-grid'></div>
-                    </div>
+                    <div id='majorPairsGrid' class='major-pairs-grid'></div>
                 </div>
 
                 <!-- ========================================
@@ -267,9 +265,7 @@
                         </button>
                     </h2>
                     
-                    <div class='swipeable-container'>
-                        <div id='aiRecommendations' class='ai-recommendations-grid swipeable-grid'></div>
-                    </div>
+                    <div id='aiRecommendations' class='ai-recommendations-grid'></div>
                 </div>
 
                 <!-- ========================================
@@ -341,49 +337,83 @@
                 </div>
 
                 <!-- ========================================
-                     TECHNICAL ANALYSIS - ENHANCED
+                     TECHNICAL ANALYSIS - ULTRA ENHANCED
                      ======================================== -->
                 <div class='section'>
                     <div class='section-header-with-controls'>
                         <h2 class='section-title'>
-                            <i class='fas fa-chart-area'></i> Technical Analysis
+                            <i class='fas fa-chart-area'></i> Technical Analysis - Advanced Indicators
                             <button class='info-btn' onclick='forexConverter.openModal("technicalAnalysisInfo")'>
                                 <i class='fas fa-info-circle'></i>
                             </button>
                         </h2>
                         
                         <div class='tech-analysis-controls'>
-                            <select id='technicalPairSelector' onchange='forexConverter.updateTechnicalAnalysis()'>
+                            <select id='technicalPairSelector' onchange='forexConverter.updateTechnicalCharts()'>
                                 <option value='USD'>EUR/USD</option>
                                 <option value='GBP'>EUR/GBP</option>
                                 <option value='JPY'>EUR/JPY</option>
                                 <option value='CHF'>EUR/CHF</option>
+                                <option value='CAD'>EUR/CAD</option>
+                                <option value='AUD'>EUR/AUD</option>
+                                <option value='NZD'>EUR/NZD</option>
+                                <option value='CNY'>EUR/CNY</option>
+                            </select>
+                            
+                            <select id='technicalTimeframeSelector' onchange='forexConverter.updateTechnicalCharts()'>
+                                <option value='1D'>1 Day</option>
+                                <option value='1W'>1 Week</option>
+                                <option value='1M' selected>1 Month</option>
+                                <option value='3M'>3 Months</option>
+                                <option value='6M'>6 Months</option>
+                                <option value='1Y'>1 Year</option>
+                                <option value='5Y'>5 Years</option>
                             </select>
                         </div>
                     </div>
                     
-                    <div class='swipeable-container'>
-                        <div id='technicalIndicators' class='technical-indicators-grid swipeable-grid'></div>
-                    </div>
-                    
                     <!-- RSI Chart -->
-                    <div class='chart-wrapper'>
-                        <div id='rsiChart' class='chart' style='height: 300px;'></div>
+                    <div class='technical-chart-section'>
+                        <h3 class='technical-chart-title'>
+                            <i class='fas fa-chart-line'></i> RSI - Relative Strength Index (14)
+                            <span class='chart-subtitle'>Momentum oscillator measuring overbought/oversold conditions</span>
+                        </h3>
+                        <div class='chart-wrapper'>
+                            <div id='rsiChart' class='chart' style='height: 350px;'></div>
+                        </div>
                     </div>
                     
                     <!-- MACD Chart -->
-                    <div class='chart-wrapper'>
-                        <div id='macdChart' class='chart' style='height: 300px;'></div>
+                    <div class='technical-chart-section'>
+                        <h3 class='technical-chart-title'>
+                            <i class='fas fa-wave-square'></i> MACD - Moving Average Convergence Divergence
+                            <span class='chart-subtitle'>Trend-following momentum indicator showing relationship between two moving averages</span>
+                        </h3>
+                        <div class='chart-wrapper'>
+                            <div id='macdChart' class='chart' style='height: 350px;'></div>
+                        </div>
                     </div>
                     
                     <!-- Bollinger Bands Chart -->
-                    <div class='chart-wrapper'>
-                        <div id='bollingerChart' class='chart' style='height: 350px;'></div>
+                    <div class='technical-chart-section'>
+                        <h3 class='technical-chart-title'>
+                            <i class='fas fa-chart-area'></i> Bollinger Bands (20, 2)
+                            <span class='chart-subtitle'>Volatility bands placed above and below a moving average</span>
+                        </h3>
+                        <div class='chart-wrapper'>
+                            <div id='bollingerChart' class='chart' style='height: 400px;'></div>
+                        </div>
                     </div>
                     
                     <!-- Moving Averages Chart -->
-                    <div class='chart-wrapper'>
-                        <div id='movingAveragesChart' class='chart' style='height: 350px;'></div>
+                    <div class='technical-chart-section'>
+                        <h3 class='technical-chart-title'>
+                            <i class='fas fa-layer-group'></i> Moving Averages (SMA 50, 100, 200 & EMA 20, 50)
+                            <span class='chart-subtitle'>Trend identification and support/resistance levels</span>
+                        </h3>
+                        <div class='chart-wrapper'>
+                            <div id='movingAveragesChart' class='chart' style='height: 450px;'></div>
+                        </div>
                     </div>
                 </div>
 
@@ -441,9 +471,7 @@
                         </button>
                     </h2>
                     
-                    <div class='swipeable-container'>
-                        <div id='volatilityMetrics' class='volatility-metrics-grid swipeable-grid'></div>
-                    </div>
+                    <div id='volatilityMetrics' class='volatility-metrics-grid'></div>
                     
                     <div class='chart-wrapper' onclick='forexConverter.openModal("volatilityChartModal")'>
                         <div id='volatilityChart' class='chart' style='height: 400px;'></div>
@@ -461,9 +489,7 @@
                         </button>
                     </h2>
                     
-                    <div class='swipeable-container'>
-                        <div id='economicIndicators' class='economic-indicators-grid swipeable-grid'></div>
-                    </div>
+                    <div id='economicIndicators' class='economic-indicators-grid'></div>
                 </div>
 
                 <!-- ========================================

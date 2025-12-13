@@ -29,6 +29,7 @@ class ForexConverter {
         this.historicalData = {};
         this.currentTimeRange = '5Y';
         this.currentTechnicalPair = 'USD';
+        this.currentTechnicalTimeframe = '1M';
         this.charts = {};
     }
 
@@ -61,11 +62,6 @@ class ForexConverter {
             this.displayMajorPairs(),
             this.displayAIRecommendations(),
             this.loadCurrencyStrengthChart(),
-            this.displayTechnicalIndicators(),
-            this.loadRSIChart(),
-            this.loadMACDChart(),
-            this.loadBollingerBandsChart(),
-            this.loadMovingAveragesChart(),
             this.loadHistoricalChart(),
             this.loadCorrelationHeatmap(),
             this.displayVolatilityMetrics(),
@@ -73,6 +69,9 @@ class ForexConverter {
             this.displayEconomicIndicators(),
             this.displayLiveRates()
         ]);
+
+        // Load technical analysis charts
+        await this.updateTechnicalCharts();
     }
 
     /**
@@ -91,6 +90,7 @@ class ForexConverter {
             
         } catch (error) {
             console.error('❌ Error loading exchange rates:', error);
+            // Fallback to mock data
             this.loadMockRates();
         }
     }
@@ -132,7 +132,7 @@ class ForexConverter {
             const data = this.rates[currency];
             if (!data) return '';
 
-            const change24h = (Math.random() - 0.5) * 2;
+            const change24h = (Math.random() - 0.5) * 2; // Mock data
             const changeClass = change24h >= 0 ? 'positive' : 'negative';
             const changeIcon = change24h >= 0 ? 'fa-arrow-up' : 'fa-arrow-down';
             const volatility = (Math.random() * 0.8 + 0.2).toFixed(2);
@@ -180,6 +180,7 @@ class ForexConverter {
         document.getElementById('toCurrency').value = currency;
         this.convert();
         
+        // Scroll to converter
         document.querySelector('.converter-container').scrollIntoView({ 
             behavior: 'smooth', 
             block: 'center' 
@@ -290,6 +291,7 @@ class ForexConverter {
         fromSelect.innerHTML = '';
         toSelect.innerHTML = '';
 
+        // EUR first
         const eurOption1 = document.createElement('option');
         eurOption1.value = 'EUR';
         eurOption1.textContent = 'EUR - Euro';
@@ -300,6 +302,7 @@ class ForexConverter {
         eurOption2.textContent = 'EUR - Euro';
         toSelect.appendChild(eurOption2);
 
+        // Others
         this.currencies.forEach(currency => {
             const option1 = document.createElement('option');
             option1.value = currency;
@@ -362,7 +365,7 @@ class ForexConverter {
         resultDiv.style.display = 'block';
         rateDiv.textContent = `1 ${fromCurrency} = ${exchangeRate.toFixed(4)} ${toCurrency}`;
 
-        const fee = toAmount * 0.01;
+        const fee = toAmount * 0.01; // 1% example fee
         const netAmount = toAmount - fee;
 
         detailsDiv.innerHTML = `
@@ -448,7 +451,7 @@ class ForexConverter {
         const currencies = ['EUR', 'USD', 'GBP', 'JPY', 'CHF', 'CAD', 'AUD', 'NZD'];
         const strengthData = currencies.map(curr => Math.random() * 50 + 25);
 
-        this.charts.currencyStrength = Highcharts.chart('currencyStrengthChart', {
+        Highcharts.chart('currencyStrengthChart', {
             chart: {
                 polar: true,
                 type: 'line',
@@ -505,171 +508,38 @@ class ForexConverter {
 
     /**
      * ========================================
-     * TECHNICAL INDICATORS
+     * TECHNICAL ANALYSIS - ULTRA ENHANCED
      * ========================================
      */
-    displayTechnicalIndicators() {
-        const container = document.getElementById('technicalIndicators');
-        if (!container) return;
+    async updateTechnicalCharts() {
+        this.currentTechnicalPair = document.getElementById('technicalPairSelector').value;
+        this.currentTechnicalTimeframe = document.getElementById('technicalTimeframeSelector').value;
 
-        const indicators = this.calculateTechnicalIndicators();
+        console.log(`📊 Updating technical charts for EUR/${this.currentTechnicalPair} - ${this.currentTechnicalTimeframe}`);
 
-        const html = `
-            <div class='tech-indicator-card'>
-                <div class='indicator-header'>
-                    <i class='fas fa-chart-line'></i>
-                    <h4>RSI (14)</h4>
-                    <button class='info-btn' onclick='forexConverter.showIndicatorInfo("RSI")'>
-                        <i class='fas fa-question-circle'></i>
-                    </button>
-                </div>
-                <div class='indicator-value ${indicators.rsi.signal}'>${indicators.rsi.value}</div>
-                <div class='indicator-label'>${indicators.rsi.interpretation}</div>
-                <div class='indicator-bar'>
-                    <div class='indicator-bar-fill' style='width: ${indicators.rsi.value}%; background: ${this.getRSIColor(indicators.rsi.value)};'></div>
-                </div>
-            </div>
-
-            <div class='tech-indicator-card'>
-                <div class='indicator-header'>
-                    <i class='fas fa-wave-square'></i>
-                    <h4>MACD</h4>
-                    <button class='info-btn' onclick='forexConverter.showIndicatorInfo("MACD")'>
-                        <i class='fas fa-question-circle'></i>
-                    </button>
-                </div>
-                <div class='indicator-value ${indicators.macd.signal}'>${indicators.macd.value}</div>
-                <div class='indicator-label'>${indicators.macd.interpretation}</div>
-            </div>
-
-            <div class='tech-indicator-card'>
-                <div class='indicator-header'>
-                    <i class='fas fa-chart-area'></i>
-                    <h4>Bollinger Bands</h4>
-                    <button class='info-btn' onclick='forexConverter.showIndicatorInfo("Bollinger")'>
-                        <i class='fas fa-question-circle'></i>
-                    </button>
-                </div>
-                <div class='indicator-value ${indicators.bollinger.signal}'>${indicators.bollinger.value}</div>
-                <div class='indicator-label'>${indicators.bollinger.interpretation}</div>
-            </div>
-
-            <div class='tech-indicator-card'>
-                <div class='indicator-header'>
-                    <i class='fas fa-layer-group'></i>
-                    <h4>Moving Averages</h4>
-                    <button class='info-btn' onclick='forexConverter.showIndicatorInfo("MA")'>
-                        <i class='fas fa-question-circle'></i>
-                    </button>
-                </div>
-                <div class='indicator-value ${indicators.ma.signal}'>${indicators.ma.value}</div>
-                <div class='indicator-label'>${indicators.ma.interpretation}</div>
-            </div>
-
-            <div class='tech-indicator-card'>
-                <div class='indicator-header'>
-                    <i class='fas fa-chart-bar'></i>
-                    <h4>Stochastic</h4>
-                    <button class='info-btn' onclick='forexConverter.showIndicatorInfo("Stochastic")'>
-                        <i class='fas fa-question-circle'></i>
-                    </button>
-                </div>
-                <div class='indicator-value ${indicators.stochastic.signal}'>${indicators.stochastic.value}%</div>
-                <div class='indicator-label'>${indicators.stochastic.interpretation}</div>
-            </div>
-
-            <div class='tech-indicator-card'>
-                <div class='indicator-header'>
-                    <i class='fas fa-signal'></i>
-                    <h4>ATR (14)</h4>
-                    <button class='info-btn' onclick='forexConverter.showIndicatorInfo("ATR")'>
-                        <i class='fas fa-question-circle'></i>
-                    </button>
-                </div>
-                <div class='indicator-value neutral'>${indicators.atr.value}</div>
-                <div class='indicator-label'>${indicators.atr.interpretation}</div>
-            </div>
-        `;
-
-        container.innerHTML = html;
-    }
-
-    calculateTechnicalIndicators() {
-        const rsi = Math.floor(Math.random() * 100);
-        const macdValue = (Math.random() - 0.5) * 0.002;
-        const stochastic = Math.floor(Math.random() * 100);
-        const atr = (Math.random() * 0.01).toFixed(4);
-
-        return {
-            rsi: {
-                value: rsi,
-                signal: rsi > 70 ? 'overbought' : rsi < 30 ? 'oversold' : 'neutral',
-                interpretation: rsi > 70 ? 'Overbought' : rsi < 30 ? 'Oversold' : 'Neutral'
-            },
-            macd: {
-                value: macdValue.toFixed(4),
-                signal: macdValue > 0 ? 'bullish' : 'bearish',
-                interpretation: macdValue > 0 ? 'Bullish Cross' : 'Bearish Cross'
-            },
-            bollinger: {
-                value: 'Normal',
-                signal: 'neutral',
-                interpretation: 'Price within bands'
-            },
-            ma: {
-                value: 'Golden Cross',
-                signal: 'bullish',
-                interpretation: 'SMA 50 above SMA 200'
-            },
-            stochastic: {
-                value: stochastic,
-                signal: stochastic > 80 ? 'overbought' : stochastic < 20 ? 'oversold' : 'neutral',
-                interpretation: stochastic > 80 ? 'Overbought' : stochastic < 20 ? 'Oversold' : 'Neutral'
-            },
-            atr: {
-                value: atr,
-                interpretation: 'Average volatility'
-            }
-        };
-    }
-
-    getRSIColor(value) {
-        if (value > 70) return '#ef4444';
-        if (value < 30) return '#10b981';
-        return '#6b7280';
-    }
-
-    showIndicatorInfo(indicator) {
-        alert(`${indicator} Information\n\nThis feature will show detailed information about ${indicator}.`);
-    }
-
-    updateTechnicalAnalysis() {
-        const pair = document.getElementById('technicalPairSelector').value;
-        this.currentTechnicalPair = pair;
-        
-        this.displayTechnicalIndicators();
-        this.loadRSIChart();
-        this.loadMACDChart();
-        this.loadBollingerBandsChart();
-        this.loadMovingAveragesChart();
+        await Promise.all([
+            this.loadRSIChart(),
+            this.loadMACDChart(),
+            this.loadBollingerChart(),
+            this.loadMovingAveragesChart()
+        ]);
     }
 
     /**
-     * ========================================
      * RSI CHART
-     * ========================================
      */
     async loadRSIChart() {
-        const data = this.generateTimeSeriesData(90, 30, 70);
-        
-        this.charts.rsi = Highcharts.chart('rsiChart', {
+        const data = this.generateMockTimeSeriesData(this.currentTechnicalTimeframe);
+        const rsiData = this.calculateRSI(data, 14);
+
+        Highcharts.chart('rsiChart', {
             chart: {
                 type: 'line',
                 backgroundColor: 'transparent'
             },
             title: {
-                text: `EUR/${this.currentTechnicalPair} - RSI (14 periods)`,
-                style: { color: 'var(--text-primary)', fontWeight: '800', fontSize: '1.1rem' }
+                text: `EUR/${this.currentTechnicalPair} - RSI (14) - ${this.currentTechnicalTimeframe}`,
+                style: { color: 'var(--text-primary)', fontWeight: '700', fontSize: '16px' }
             },
             xAxis: {
                 type: 'datetime',
@@ -678,110 +548,113 @@ class ForexConverter {
             yAxis: {
                 title: { text: 'RSI', style: { color: 'var(--text-secondary)' } },
                 labels: { style: { color: 'var(--text-secondary)' } },
+                gridLineColor: 'var(--border-color)',
                 min: 0,
                 max: 100,
-                plotBands: [
-                    {
-                        from: 70,
-                        to: 100,
-                        color: 'rgba(239, 68, 68, 0.1)',
-                        label: {
-                            text: 'Overbought',
-                            style: { color: '#ef4444', fontWeight: '700' }
-                        }
-                    },
-                    {
-                        from: 0,
-                        to: 30,
-                        color: 'rgba(16, 185, 129, 0.1)',
-                        label: {
-                            text: 'Oversold',
-                            style: { color: '#10b981', fontWeight: '700' }
-                        }
-                    }
-                ],
                 plotLines: [
                     {
                         value: 70,
                         color: '#ef4444',
                         width: 2,
-                        dashStyle: 'Dash'
-                    },
-                    {
-                        value: 50,
-                        color: '#6b7280',
-                        width: 1,
-                        dashStyle: 'Dot'
+                        dashStyle: 'Dash',
+                        label: {
+                            text: 'Overbought (70)',
+                            align: 'right',
+                            style: { color: '#ef4444', fontWeight: '700' }
+                        }
                     },
                     {
                         value: 30,
                         color: '#10b981',
                         width: 2,
-                        dashStyle: 'Dash'
+                        dashStyle: 'Dash',
+                        label: {
+                            text: 'Oversold (30)',
+                            align: 'right',
+                            style: { color: '#10b981', fontWeight: '700' }
+                        }
+                    },
+                    {
+                        value: 50,
+                        color: '#6b7280',
+                        width: 1,
+                        dashStyle: 'Dot',
+                        label: {
+                            text: 'Neutral (50)',
+                            align: 'right',
+                            style: { color: '#6b7280' }
+                        }
                     }
                 ]
             },
             tooltip: {
                 valueDecimals: 2,
-                valueSuffix: '',
-                xDateFormat: '%Y-%m-%d'
+                xDateFormat: '%Y-%m-%d',
+                shared: true
             },
             plotOptions: {
                 line: {
                     marker: { enabled: false },
-                    lineWidth: 3,
-                    color: '#8b5cf6'
+                    lineWidth: 3
+                },
+                area: {
+                    fillOpacity: 0.3
                 }
             },
-            series: [{
-                name: 'RSI',
-                data: data
-            }],
+            series: [
+                {
+                    name: 'RSI',
+                    data: rsiData,
+                    color: '#8b5cf6',
+                    type: 'area',
+                    fillColor: {
+                        linearGradient: { x1: 0, y1: 0, x2: 0, y2: 1 },
+                        stops: [
+                            [0, 'rgba(139, 92, 246, 0.4)'],
+                            [1, 'rgba(139, 92, 246, 0.05)']
+                        ]
+                    }
+                }
+            ],
             credits: { enabled: false },
             legend: { enabled: false }
         });
     }
 
     /**
-     * ========================================
      * MACD CHART
-     * ========================================
      */
     async loadMACDChart() {
-        const macdData = this.generateTimeSeriesData(90, -0.005, 0.005);
-        const signalData = this.generateTimeSeriesData(90, -0.004, 0.004);
-        const histogramData = macdData.map((point, i) => [
-            point[0],
-            point[1] - signalData[i][1]
-        ]);
+        const data = this.generateMockTimeSeriesData(this.currentTechnicalTimeframe);
+        const macdData = this.calculateMACD(data);
 
-        this.charts.macd = Highcharts.chart('macdChart', {
+        Highcharts.chart('macdChart', {
             chart: {
-                type: 'line',
                 backgroundColor: 'transparent'
             },
             title: {
-                text: `EUR/${this.currentTechnicalPair} - MACD (12, 26, 9)`,
-                style: { color: 'var(--text-primary)', fontWeight: '800', fontSize: '1.1rem' }
+                text: `EUR/${this.currentTechnicalPair} - MACD (12, 26, 9) - ${this.currentTechnicalTimeframe}`,
+                style: { color: 'var(--text-primary)', fontWeight: '700', fontSize: '16px' }
             },
             xAxis: {
                 type: 'datetime',
                 labels: { style: { color: 'var(--text-secondary)' } }
             },
             yAxis: {
-                title: { text: 'MACD', style: { color: 'var(--text-secondary)' } },
+                title: { text: 'MACD Value', style: { color: 'var(--text-secondary)' } },
                 labels: { style: { color: 'var(--text-secondary)' } },
+                gridLineColor: 'var(--border-color)',
                 plotLines: [{
                     value: 0,
                     color: '#6b7280',
                     width: 2,
-                    dashStyle: 'Solid'
+                    zIndex: 2
                 }]
             },
             tooltip: {
-                shared: true,
-                valueDecimals: 5,
-                xDateFormat: '%Y-%m-%d'
+                valueDecimals: 4,
+                xDateFormat: '%Y-%m-%d',
+                shared: true
             },
             plotOptions: {
                 line: {
@@ -789,73 +662,70 @@ class ForexConverter {
                     lineWidth: 2
                 },
                 column: {
+                    pointPadding: 0.1,
+                    groupPadding: 0,
                     borderWidth: 0
                 }
             },
             series: [
                 {
-                    type: 'column',
-                    name: 'Histogram',
-                    data: histogramData,
-                    color: '#8b5cf6',
-                    negativeColor: '#ef4444'
-                },
-                {
-                    type: 'line',
-                    name: 'MACD',
-                    data: macdData,
+                    name: 'MACD Line',
+                    data: macdData.macd,
                     color: '#3b82f6',
+                    type: 'line',
                     lineWidth: 3
                 },
                 {
-                    type: 'line',
-                    name: 'Signal',
-                    data: signalData,
+                    name: 'Signal Line',
+                    data: macdData.signal,
                     color: '#f59e0b',
-                    lineWidth: 2,
-                    dashStyle: 'Dash'
+                    type: 'line',
+                    lineWidth: 2
+                },
+                {
+                    name: 'Histogram',
+                    data: macdData.histogram,
+                    type: 'column',
+                    color: '#8b5cf6',
+                    negativeColor: '#ef4444'
                 }
             ],
-            credits: { enabled: false }
+            credits: { enabled: false },
+            legend: {
+                enabled: true,
+                itemStyle: { color: 'var(--text-secondary)' }
+            }
         });
     }
 
     /**
-     * ========================================
      * BOLLINGER BANDS CHART
-     * ========================================
      */
-    async loadBollingerBandsChart() {
-        const basePrice = this.rates[this.currentTechnicalPair]?.rate || 1.0850;
-        const priceData = this.generatePriceData(90, basePrice, 0.02);
-        
-        const sma = this.calculateSMA(priceData, 20);
-        const stdDev = this.calculateStdDev(priceData, 20);
-        
-        const upperBand = sma.map((point, i) => [point[0], point[1] + 2 * stdDev[i][1]]);
-        const lowerBand = sma.map((point, i) => [point[0], point[1] - 2 * stdDev[i][1]]);
+    async loadBollingerChart() {
+        const data = this.generateMockTimeSeriesData(this.currentTechnicalTimeframe);
+        const bollingerData = this.calculateBollingerBands(data, 20, 2);
 
-        this.charts.bollinger = Highcharts.chart('bollingerChart', {
+        Highcharts.chart('bollingerChart', {
             chart: {
-                type: 'line',
                 backgroundColor: 'transparent'
             },
             title: {
-                text: `EUR/${this.currentTechnicalPair} - Bollinger Bands (20, 2)`,
-                style: { color: 'var(--text-primary)', fontWeight: '800', fontSize: '1.1rem' }
+                text: `EUR/${this.currentTechnicalPair} - Bollinger Bands (20, 2) - ${this.currentTechnicalTimeframe}`,
+                style: { color: 'var(--text-primary)', fontWeight: '700', fontSize: '16px' }
             },
             xAxis: {
                 type: 'datetime',
                 labels: { style: { color: 'var(--text-secondary)' } }
             },
             yAxis: {
-                title: { text: 'Price', style: { color: 'var(--text-secondary)' } },
-                labels: { style: { color: 'var(--text-secondary)' } }
+                title: { text: 'Exchange Rate', style: { color: 'var(--text-secondary)' } },
+                labels: { style: { color: 'var(--text-secondary)' } },
+                gridLineColor: 'var(--border-color)'
             },
             tooltip: {
-                shared: true,
                 valueDecimals: 4,
-                xDateFormat: '%Y-%m-%d'
+                xDateFormat: '%Y-%m-%d',
+                shared: true
             },
             plotOptions: {
                 line: {
@@ -870,80 +740,89 @@ class ForexConverter {
             },
             series: [
                 {
-                    type: 'arearange',
-                    name: 'Bollinger Bands',
-                    data: upperBand.map((point, i) => [point[0], lowerBand[i][1], point[1]]),
-                    color: '#8b5cf6',
-                    fillColor: 'rgba(139, 92, 246, 0.15)'
-                },
-                {
-                    type: 'line',
-                    name: 'Upper Band',
-                    data: upperBand,
-                    color: '#ef4444',
-                    lineWidth: 1,
-                    dashStyle: 'Dash'
-                },
-                {
-                    type: 'line',
-                    name: 'SMA (20)',
-                    data: sma,
-                    color: '#3b82f6',
-                    lineWidth: 2
-                },
-                {
-                    type: 'line',
-                    name: 'Lower Band',
-                    data: lowerBand,
-                    color: '#10b981',
-                    lineWidth: 1,
-                    dashStyle: 'Dash'
-                },
-                {
-                    type: 'line',
                     name: 'Price',
-                    data: priceData,
-                    color: '#6b7280',
-                    lineWidth: 3
+                    data: data,
+                    color: '#1e293b',
+                    type: 'line',
+                    lineWidth: 3,
+                    zIndex: 3
+                },
+                {
+                    name: 'Bollinger Bands',
+                    data: bollingerData.bands,
+                    type: 'arearange',
+                    color: '#8b5cf6',
+                    fillOpacity: 0.2,
+                    zIndex: 1
+                },
+                {
+                    name: 'Upper Band',
+                    data: bollingerData.upper,
+                    color: '#ef4444',
+                    type: 'line',
+                    lineWidth: 1,
+                    dashStyle: 'Dash',
+                    zIndex: 2
+                },
+                {
+                    name: 'Middle Band (SMA 20)',
+                    data: bollingerData.middle,
+                    color: '#3b82f6',
+                    type: 'line',
+                    lineWidth: 2,
+                    zIndex: 2
+                },
+                {
+                    name: 'Lower Band',
+                    data: bollingerData.lower,
+                    color: '#10b981',
+                    type: 'line',
+                    lineWidth: 1,
+                    dashStyle: 'Dash',
+                    zIndex: 2
                 }
             ],
-            credits: { enabled: false }
+            credits: { enabled: false },
+            legend: {
+                enabled: true,
+                itemStyle: { color: 'var(--text-secondary)' }
+            }
         });
     }
 
     /**
-     * ========================================
      * MOVING AVERAGES CHART
-     * ========================================
      */
     async loadMovingAveragesChart() {
-        const basePrice = this.rates[this.currentTechnicalPair]?.rate || 1.0850;
-        const priceData = this.generatePriceData(200, basePrice, 0.03);
-        
-        const sma50 = this.calculateSMA(priceData, 50);
-        const sma200 = this.calculateSMA(priceData, 200);
+        const data = this.generateMockTimeSeriesData(this.currentTechnicalTimeframe);
+        const sma20 = this.calculateSMA(data, 20);
+        const sma50 = this.calculateSMA(data, 50);
+        const sma100 = this.calculateSMA(data, 100);
+        const sma200 = this.calculateSMA(data, 200);
+        const ema20 = this.calculateEMA(data, 20);
+        const ema50 = this.calculateEMA(data, 50);
 
-        this.charts.movingAverages = Highcharts.chart('movingAveragesChart', {
+        Highcharts.chart('movingAveragesChart', {
             chart: {
-                type: 'line',
                 backgroundColor: 'transparent'
             },
             title: {
-                text: `EUR/${this.currentTechnicalPair} - Moving Averages`,
-                style: { color: 'var(--text-primary)', fontWeight: '800', fontSize: '1.1rem' }
+                text: `EUR/${this.currentTechnicalPair} - Moving Averages - ${this.currentTechnicalTimeframe}`,
+                style: { color: 'var(--text-primary)', fontWeight: '700', fontSize: '16px' }
             },
             xAxis: {
                 type: 'datetime',
                 labels: { style: { color: 'var(--text-secondary)' } }
             },
             yAxis: {
-                title: { text: 'Price', style: { color: 'var(--text-secondary)' } },
-                labels: { style: { color: 'var(--text-secondary)' } }
+                title: { text: 'Exchange Rate', style: { color: 'var(--text-secondary)' } },
+                labels: { style: { color: 'var(--text-secondary)' } },
+                gridLineColor: 'var(--border-color)'
             },
             tooltip: {
-                shared: true,
                 valueDecimals: 4,
-                xDateFormat: '%Y-%m-%d'
+                xDateFormat: '%Y-%m-%d',
+                shared: true
             },
             plotOptions: {
                 line: {
@@ -954,95 +833,238 @@ class ForexConverter {
             series: [
                 {
                     name: 'Price',
-                    data: priceData,
-                    color: '#6b7280',
-                    lineWidth: 3
+                    data: data,
+                    color: '#1e293b',
+                    lineWidth: 3,
+                    zIndex: 6
+                },
+                {
+                    name: 'EMA 20',
+                    data: ema20,
+                    color: '#10b981',
+                    dashStyle: 'ShortDot',
+                    lineWidth: 2,
+                    zIndex: 5
+                },
+                {
+                    name: 'SMA 20',
+                    data: sma20,
+                    color: '#3b82f6',
+                    lineWidth: 2,
+                    zIndex: 4
+                },
+                {
+                    name: 'EMA 50',
+                    data: ema50,
+                    color: '#f59e0b',
+                    dashStyle: 'ShortDot',
+                    lineWidth: 2,
+                    zIndex: 3
                 },
                 {
                     name: 'SMA 50',
                     data: sma50,
-                    color: '#3b82f6',
-                    lineWidth: 2
+                    color: '#8b5cf6',
+                    lineWidth: 2,
+                    zIndex: 2
+                },
+                {
+                    name: 'SMA 100',
+                    data: sma100,
+                    color: '#ec4899',
+                    lineWidth: 2,
+                    dashStyle: 'Dash',
+                    zIndex: 1
                 },
                 {
                     name: 'SMA 200',
                     data: sma200,
-                    color: '#f59e0b',
+                    color: '#ef4444',
                     lineWidth: 3,
-                    dashStyle: 'Dash'
+                    dashStyle: 'LongDash',
+                    zIndex: 0
                 }
             ],
-            credits: { enabled: false }
+            credits: { enabled: false },
+            legend: {
+                enabled: true,
+                itemStyle: { color: 'var(--text-secondary)' },
+                layout: 'horizontal',
+                align: 'center',
+                verticalAlign: 'bottom'
+            }
         });
     }
 
     /**
      * ========================================
-     * HELPER FUNCTIONS FOR TECHNICAL ANALYSIS
+     * TECHNICAL INDICATORS CALCULATIONS
      * ========================================
      */
-    generateTimeSeriesData(days, min, max) {
+    
+    generateMockTimeSeriesData(timeframe) {
+        const periods = {
+            '1D': 24,
+            '1W': 7,
+            '1M': 30,
+            '3M': 90,
+            '6M': 180,
+            '1Y': 365,
+            '5Y': 365 * 5
+        };
+
+        const points = periods[timeframe] || 30;
         const data = [];
-        const now = Date.now();
-        
-        for (let i = days - 1; i >= 0; i--) {
-            const timestamp = now - i * 24 * 60 * 60 * 1000;
-            const value = min + Math.random() * (max - min);
-            data.push([timestamp, value]);
+        const startDate = new Date();
+        startDate.setDate(startDate.getDate() - points);
+
+        let baseRate = this.rates[this.currentTechnicalPair]?.rate || 1.0850;
+        let currentPrice = baseRate;
+
+        for (let i = 0; i < points; i++) {
+            const date = new Date(startDate.getTime() + i * 24 * 60 * 60 * 1000);
+            const change = (Math.random() - 0.5) * 0.02;
+            currentPrice = currentPrice * (1 + change);
+            data.push([date.getTime(), parseFloat(currentPrice.toFixed(4))]);
         }
-        
+
         return data;
     }
 
-    generatePriceData(days, basePrice, volatility) {
-        const data = [];
-        const now = Date.now();
-        let price = basePrice;
-        
-        for (let i = days - 1; i >= 0; i--) {
-            const timestamp = now - i * 24 * 60 * 60 * 1000;
-            const change = (Math.random() - 0.5) * volatility * basePrice;
-            price = Math.max(basePrice * 0.95, Math.min(basePrice * 1.05, price + change));
-            data.push([timestamp, price]);
+    calculateRSI(data, period = 14) {
+        const rsi = [];
+        let gains = 0;
+        let losses = 0;
+
+        for (let i = 1; i < data.length; i++) {
+            const change = data[i][1] - data[i - 1][1];
+            
+            if (i < period) {
+                if (change > 0) gains += change;
+                else losses -= change;
+            }
+
+            if (i === period) {
+                const avgGain = gains / period;
+                const avgLoss = losses / period;
+                const rs = avgGain / avgLoss;
+                const rsiValue = 100 - (100 / (1 + rs));
+                rsi.push([data[i][0], parseFloat(rsiValue.toFixed(2))]);
+            } else if (i > period) {
+                const change = data[i][1] - data[i - 1][1];
+                const currentGain = change > 0 ? change : 0;
+                const currentLoss = change < 0 ? -change : 0;
+                
+                const avgGain = (gains * (period - 1) + currentGain) / period;
+                const avgLoss = (losses * (period - 1) + currentLoss) / period;
+                
+                gains = avgGain;
+                losses = avgLoss;
+                
+                const rs = avgGain / avgLoss;
+                const rsiValue = 100 - (100 / (1 + rs));
+                rsi.push([data[i][0], parseFloat(rsiValue.toFixed(2))]);
+            }
         }
+
+        return rsi;
+    }
+
+    calculateMACD(data) {
+        const ema12 = this.calculateEMAValues(data, 12);
+        const ema26 = this.calculateEMAValues(data, 26);
         
-        return data;
+        const macd = [];
+        const signal = [];
+        const histogram = [];
+
+        for (let i = 0; i < ema12.length; i++) {
+            if (ema26[i]) {
+                const macdValue = ema12[i][1] - ema26[i][1];
+                macd.push([ema12[i][0], parseFloat(macdValue.toFixed(4))]);
+            }
+        }
+
+        const signalLine = this.calculateEMAValues(macd, 9);
+        
+        for (let i = 0; i < macd.length; i++) {
+            if (signalLine[i]) {
+                signal.push(signalLine[i]);
+                const histValue = macd[i][1] - signalLine[i][1];
+                histogram.push([macd[i][0], parseFloat(histValue.toFixed(4))]);
+            }
+        }
+
+        return { macd, signal, histogram };
+    }
+
+    calculateBollingerBands(data, period = 20, stdDev = 2) {
+        const sma = this.calculateSMAValues(data, period);
+        const upper = [];
+        const middle = [];
+        const lower = [];
+        const bands = [];
+
+        for (let i = 0; i < sma.length; i++) {
+            const slice = data.slice(i, i + period);
+            const mean = sma[i][1];
+            
+            const variance = slice.reduce((sum, point) => {
+                return sum + Math.pow(point[1] - mean, 2);
+            }, 0) / period;
+            
+            const sd = Math.sqrt(variance);
+            
+            const upperBand = mean + (sd * stdDev);
+            const lowerBand = mean - (sd * stdDev);
+            
+            upper.push([sma[i][0], parseFloat(upperBand.toFixed(4))]);
+            middle.push([sma[i][0], parseFloat(mean.toFixed(4))]);
+            lower.push([sma[i][0], parseFloat(lowerBand.toFixed(4))]);
+            bands.push([sma[i][0], parseFloat(lowerBand.toFixed(4)), parseFloat(upperBand.toFixed(4))]);
+        }
+
+        return { upper, middle, lower, bands };
     }
 
     calculateSMA(data, period) {
+        return this.calculateSMAValues(data, period);
+    }
+
+    calculateSMAValues(data, period) {
         const sma = [];
         
         for (let i = period - 1; i < data.length; i++) {
-            let sum = 0;
-            for (let j = 0; j < period; j++) {
-                sum += data[i - j][1];
-            }
-            sma.push([data[i][0], sum / period]);
+            const slice = data.slice(i - period + 1, i + 1);
+            const sum = slice.reduce((acc, point) => acc + point[1], 0);
+            const avg = sum / period;
+            sma.push([data[i][0], parseFloat(avg.toFixed(4))]);
         }
-        
+
         return sma;
     }
 
-    calculateStdDev(data, period) {
-        const stdDev = [];
-        
-        for (let i = period - 1; i < data.length; i++) {
-            let sum = 0;
-            let mean = 0;
-            
-            for (let j = 0; j < period; j++) {
-                mean += data[i - j][1];
-            }
-            mean /= period;
-            
-            for (let j = 0; j < period; j++) {
-                sum += Math.pow(data[i - j][1] - mean, 2);
-            }
-            
-            stdDev.push([data[i][0], Math.sqrt(sum / period)]);
+    calculateEMA(data, period) {
+        return this.calculateEMAValues(data, period);
+    }
+
+    calculateEMAValues(data, period) {
+        const ema = [];
+        const multiplier = 2 / (period + 1);
+
+        // First EMA is SMA
+        const firstSlice = data.slice(0, period);
+        const firstSum = firstSlice.reduce((acc, point) => acc + point[1], 0);
+        const firstEMA = firstSum / period;
+        ema.push([data[period - 1][0], parseFloat(firstEMA.toFixed(4))]);
+
+        // Calculate rest
+        for (let i = period; i < data.length; i++) {
+            const newEMA = (data[i][1] - ema[ema.length - 1][1]) * multiplier + ema[ema.length - 1][1];
+            ema.push([data[i][0], parseFloat(newEMA.toFixed(4))]);
         }
-        
-        return stdDev;
+
+        return ema;
     }
 
     /**
@@ -1074,7 +1096,7 @@ class ForexConverter {
     }
 
     renderHistoricalChart(containerId, data, title) {
-        this.charts.historical = Highcharts.chart(containerId, {
+        Highcharts.chart(containerId, {
             chart: { 
                 type: 'line', 
                 backgroundColor: 'transparent',
@@ -1142,6 +1164,7 @@ class ForexConverter {
         document.querySelector(`.time-btn[data-period="${period}"]`).classList.add('active');
         
         console.log(`📅 Changed time range to: ${period}`);
+        // Reload chart with new period
         this.loadHistoricalChart();
     }
 
@@ -1161,7 +1184,7 @@ class ForexConverter {
             }
         }
 
-        this.charts.correlation = Highcharts.chart('correlationHeatmap', {
+        Highcharts.chart('correlationHeatmap', {
             chart: {
                 type: 'heatmap',
                 backgroundColor: 'transparent'
@@ -1300,7 +1323,7 @@ class ForexConverter {
             data.push([date.getTime(), volatility]);
         }
 
-        this.charts.volatility = Highcharts.chart('volatilityChart', {
+        Highcharts.chart('volatilityChart', {
             chart: {
                 type: 'area',
                 backgroundColor: 'transparent'
