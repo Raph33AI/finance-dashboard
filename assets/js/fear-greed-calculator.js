@@ -38,10 +38,10 @@ class FearGreedCalculator {
 
     /**
      * ═══════════════════════════════════════════════════════════
-     * CALCUL DU FEAR & GREED INDEX
+     * CALCUL DU FEAR & GREED INDEX (CORRIGÉ - TRI CHRONOLOGIQUE)
      * ═══════════════════════════════════════════════════════════
      */
-    
+
     calculate(articles) {
         console.log(`🎯 Calculating Fear & Greed Index for ${articles.length} articles...`);
         
@@ -80,12 +80,19 @@ class FearGreedCalculator {
             fearScore += articleFear;
             greedScore += articleGreed;
             
-            // Stocker par jour
-            const date = new Date(article.timestamp).toLocaleDateString();
-            if (!dailyScores.has(date)) {
-                dailyScores.set(date, { fear: 0, greed: 0, count: 0 });
+            // ✅ CORRECTION CRITIQUE: Stocker par TIMESTAMP au lieu de date formatée
+            const articleDate = new Date(article.timestamp);
+            const dayKey = articleDate.toISOString().split('T')[0]; // ✅ Format YYYY-MM-DD (triable)
+            
+            if (!dailyScores.has(dayKey)) {
+                dailyScores.set(dayKey, { 
+                    timestamp: articleDate.setHours(0, 0, 0, 0), // ✅ Timestamp à minuit
+                    fear: 0, 
+                    greed: 0, 
+                    count: 0 
+                });
             }
-            const dayData = dailyScores.get(date);
+            const dayData = dailyScores.get(dayKey);
             dayData.fear += articleFear;
             dayData.greed += articleGreed;
             dayData.count += 1;
@@ -106,32 +113,49 @@ class FearGreedCalculator {
         // Déterminer le label
         const label = this.getIndexLabel(globalIndex);
         
-        // ✅ CORRECTION: Calculer les scores journaliers avec tri chronologique
+        // ✅ CORRECTION CRITIQUE: Trier par TIMESTAMP puis formater pour affichage
         const timeline = Array.from(dailyScores.entries())
-            .map(([date, data]) => {
+            .map(([dateKey, data]) => {
                 const dayTotal = data.fear + data.greed;
                 const dayIndex = dayTotal > 0 
                     ? Math.round(((data.greed - data.fear) / dayTotal) * 100)
                     : 0;
                 
                 return {
-                    date,
-                    dateObj: new Date(date), // ✅ Objet Date pour tri correct
+                    timestamp: data.timestamp, // ✅ Timestamp pour tri
+                    dateKey: dateKey,          // ✅ Clé YYYY-MM-DD
                     index: dayIndex,
                     fear: data.fear,
                     greed: data.greed,
                     articles: data.count
                 };
             })
-            .sort((a, b) => a.dateObj - b.dateObj) // ✅ Tri chronologique (ancien → récent)
-            .map(({ dateObj, ...rest }) => rest); // ✅ Retirer dateObj après tri
+            .sort((a, b) => a.timestamp - b.timestamp) // ✅ TRI CHRONOLOGIQUE PAR TIMESTAMP
+            .map(item => {
+                // ✅ Formater la date APRÈS le tri pour affichage
+                const displayDate = new Date(item.timestamp).toLocaleDateString('fr-FR', {
+                    day: '2-digit',
+                    month: '2-digit',
+                    year: 'numeric'
+                });
+                
+                return {
+                    date: displayDate,     // ✅ Format DD/MM/YYYY pour affichage
+                    index: item.index,
+                    fear: item.fear,
+                    greed: item.greed,
+                    articles: item.articles
+                };
+            });
         
         console.log(`✅ Fear & Greed Index calculated:`, {
             index: globalIndex,
             label,
             fearCount,
             greedCount,
-            timelineLength: timeline.length
+            timelineLength: timeline.length,
+            firstDate: timeline[0]?.date,
+            lastDate: timeline[timeline.length - 1]?.date
         });
         
         return {
