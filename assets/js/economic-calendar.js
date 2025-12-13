@@ -49,25 +49,51 @@ class EconomicCalendar {
             });
 
             console.log('📊 FRED Release dates:', releaseDates);
+            console.log('📊 Type:', typeof releaseDates);
+            console.log('📊 Is Array:', Array.isArray(releaseDates));
 
-            if (!releaseDates || !releaseDates.data || !releaseDates.data.release_dates) {
+            // ✅ CORRECTION: Gérer différentes structures de réponse
+            let releasesArray = [];
+            
+            if (Array.isArray(releaseDates)) {
+                // Si c'est directement un tableau
+                releasesArray = releaseDates;
+            } else if (releaseDates && releaseDates.data && Array.isArray(releaseDates.data.release_dates)) {
+                // Si c'est dans data.release_dates
+                releasesArray = releaseDates.data.release_dates;
+            } else if (releaseDates && Array.isArray(releaseDates.release_dates)) {
+                // Si c'est dans release_dates directement
+                releasesArray = releaseDates.release_dates;
+            } else if (releaseDates && releaseDates.data && Array.isArray(releaseDates.data)) {
+                // Si c'est dans data (tableau)
+                releasesArray = releaseDates.data;
+            }
+
+            console.log('📊 Releases array length:', releasesArray.length);
+
+            if (!releasesArray || releasesArray.length === 0) {
                 throw new Error('No release dates found');
             }
 
             // Transformer en événements
-            this.allEvents = releaseDates.data.release_dates.map(release => {
-                const category = this.determineCategory(release.release_name);
+            this.allEvents = releasesArray.map(release => {
+                const category = this.determineCategory(release.release_name || release.name);
                 this.categories.add(category);
                 
                 return {
-                    id: release.release_id,
-                    name: release.release_name || 'Economic Release',
+                    id: release.release_id || release.id,
+                    name: release.release_name || release.name || 'Economic Release',
                     date: new Date(release.date),
                     region: 'US',
-                    importance: this.determineImportance(release.release_name),
+                    importance: this.determineImportance(release.release_name || release.name),
                     category: category
                 };
             });
+
+            // Filtrer les dates invalides
+            this.allEvents = this.allEvents.filter(event => !isNaN(event.date.getTime()));
+
+            console.log('✅ Events loaded:', this.allEvents.length);
 
             // Trier par date
             this.allEvents.sort((a, b) => a.date - b.date);
@@ -77,7 +103,7 @@ class EconomicCalendar {
 
         } catch (error) {
             console.error('❌ Error loading events:', error);
-            grid.innerHTML = '<div class="eco-error"><i class="fas fa-exclamation-triangle"></i><p>Error loading economic calendar</p></div>';
+            grid.innerHTML = '<div class="eco-error"><i class="fas fa-exclamation-triangle"></i><p>Error loading economic calendar. Please check console for details.</p></div>';
         }
     }
 
@@ -85,16 +111,18 @@ class EconomicCalendar {
      * Déterminer l'importance basée sur le nom
      */
     determineImportance(name) {
+        if (!name) return 'low';
+        
         const highImpact = [
             'employment', 'gdp', 'cpi', 'fed', 'interest', 'inflation', 
-            'payroll', 'unemployment', 'fomc', 'federal funds'
+            'payroll', 'unemployment', 'fomc', 'federal funds', 'nonfarm'
         ];
         const mediumImpact = [
             'retail', 'manufacturing', 'housing', 'consumer', 'sentiment',
-            'production', 'sales', 'pmi', 'construction'
+            'production', 'sales', 'pmi', 'construction', 'durable goods'
         ];
         
-        const lowerName = (name || '').toLowerCase();
+        const lowerName = name.toLowerCase();
         
         if (highImpact.some(keyword => lowerName.includes(keyword))) {
             return 'high';
@@ -108,15 +136,17 @@ class EconomicCalendar {
      * Déterminer la catégorie
      */
     determineCategory(name) {
-        const lowerName = (name || '').toLowerCase();
+        if (!name) return 'Other';
+        
+        const lowerName = name.toLowerCase();
         
         const categories = {
-            'Employment': ['employment', 'payroll', 'unemployment', 'jobs', 'labor'],
+            'Employment': ['employment', 'payroll', 'unemployment', 'jobs', 'labor', 'nonfarm'],
             'GDP': ['gdp', 'growth', 'output', 'productivity'],
             'Inflation': ['cpi', 'inflation', 'price', 'pce', 'deflator'],
             'Monetary Policy': ['fed', 'interest', 'rate', 'fomc', 'federal funds', 'monetary'],
             'Retail': ['retail', 'sales', 'consumer spending'],
-            'Manufacturing': ['manufacturing', 'production', 'industrial', 'pmi'],
+            'Manufacturing': ['manufacturing', 'production', 'industrial', 'pmi', 'durable goods'],
             'Housing': ['housing', 'construction', 'building', 'home'],
             'Trade': ['trade', 'import', 'export', 'balance'],
             'Business': ['business', 'inventory', 'sentiment', 'confidence']
@@ -242,8 +272,11 @@ class EconomicCalendar {
             const month = event.date.toLocaleDateString('en-US', { month: 'short' });
             const time = event.date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
             
+            // Échapper les guillemets pour JSON
+            const eventJSON = JSON.stringify(event).replace(/"/g, '&quot;');
+            
             return `
-                <div class='calendar-event ${event.importance}-importance' onclick='economicCalendar.showEventDetails(${JSON.stringify(event).replace(/'/g, "\\'")})'> 
+                <div class='calendar-event ${event.importance}-importance' onclick='economicCalendar.showEventDetails(${eventJSON})'>
                     <div class='calendar-date'>
                         <div class='calendar-day'>${day}</div>
                         <div class='calendar-month'>${month}</div>
@@ -322,6 +355,9 @@ class EconomicCalendar {
                 title: { 
                     text: null
                 },
+                accessibility: {
+                    enabled: false
+                },
                 xAxis: {
                     visible: false
                 },
@@ -370,6 +406,9 @@ class EconomicCalendar {
                     backgroundColor: 'transparent'
                 },
                 title: { text: null },
+                accessibility: {
+                    enabled: false
+                },
                 tooltip: {
                     pointFormat: '<b>{point.y}</b> releases ({point.percentage:.1f}%)'
                 },
@@ -412,6 +451,9 @@ class EconomicCalendar {
                     backgroundColor: 'transparent'
                 },
                 title: { text: null },
+                accessibility: {
+                    enabled: false
+                },
                 xAxis: { 
                     categories: ['High Impact', 'Medium Impact', 'Low Impact'],
                     labels: { 
@@ -474,6 +516,9 @@ class EconomicCalendar {
                     backgroundColor: 'transparent'
                 },
                 title: { text: null },
+                accessibility: {
+                    enabled: false
+                },
                 xAxis: {
                     type: 'datetime',
                     labels: {
@@ -562,7 +607,7 @@ class EconomicCalendar {
                     
                     <div class="event-detail-item">
                         <h4><i class="fas fa-info-circle"></i> Description</h4>
-                        <p>${releaseInfo.data.releases?.[0]?.notes || 'Economic data release from the Federal Reserve Economic Data (FRED) database.'}</p>
+                        <p>${releaseInfo.data?.releases?.[0]?.notes || releaseInfo.releases?.[0]?.notes || 'Economic data release from the Federal Reserve Economic Data (FRED) database.'}</p>
                     </div>
                 </div>
                 
@@ -608,7 +653,7 @@ class EconomicCalendar {
             // Get series for this release
             const seriesResponse = await economicDataClient.getReleaseSeries(releaseId, { limit: 1 });
             
-            if (!seriesResponse.data.seriess || seriesResponse.data.seriess.length === 0) {
+            if (!seriesResponse.data?.seriess || seriesResponse.data.seriess.length === 0) {
                 document.getElementById('eventDetailChart').innerHTML = '<p style="text-align:center;color:var(--text-secondary);padding:40px;">No historical data available for this release.</p>';
                 return;
             }
@@ -621,7 +666,7 @@ class EconomicCalendar {
                 limit: 50
             });
             
-            if (!observations.data.observations || observations.data.observations.length === 0) {
+            if (!observations.data?.observations || observations.data.observations.length === 0) {
                 document.getElementById('eventDetailChart').innerHTML = '<p style="text-align:center;color:var(--text-secondary);padding:40px;">No observations available.</p>';
                 return;
             }
@@ -641,6 +686,9 @@ class EconomicCalendar {
                     backgroundColor: 'transparent'
                 },
                 title: { text: null },
+                accessibility: {
+                    enabled: false
+                },
                 xAxis: {
                     type: 'datetime',
                     labels: {
