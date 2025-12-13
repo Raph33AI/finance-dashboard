@@ -1,6 +1,6 @@
 /**
  * ════════════════════════════════════════════════════════════════
- * NEWS TERMINAL - MAIN SCRIPT (Avec images et corrections)
+ * NEWS TERMINAL - MAIN SCRIPT (Sans Reuters + Pagination Avancée)
  * ════════════════════════════════════════════════════════════════
  */
 
@@ -13,7 +13,7 @@ class NewsTerminal {
         this.filteredArticles = [];
         this.displayedArticles = [];
         this.currentView = 'grid';
-        this.articlesPerPage = 20;
+        this.articlesPerPage = 20; // Par défaut
         this.currentPage = 0;
 
         this.init();
@@ -22,10 +22,7 @@ class NewsTerminal {
     async init() {
         console.log('🚀 Initializing News Terminal...');
         
-        // Setup event listeners
         this.setupEventListeners();
-        
-        // Load articles
         await this.loadArticles();
     }
 
@@ -36,6 +33,22 @@ class NewsTerminal {
             clearTimeout(searchTimeout);
             searchTimeout = setTimeout(() => this.applyFilters(), 300);
         });
+
+        // ✨ NOUVEAU : Listener pour le sélecteur de nombre d'articles
+        const articleLimitSelect = document.getElementById('articleLimitSelect');
+        if (articleLimitSelect) {
+            articleLimitSelect.addEventListener('change', (e) => {
+                this.changeArticleLimit(parseInt(e.target.value));
+            });
+        }
+    }
+
+    // ✨ NOUVELLE MÉTHODE : Changer le nombre d'articles affichés
+    changeArticleLimit(limit) {
+        console.log(`📊 Changing article limit to: ${limit}`);
+        this.articlesPerPage = limit;
+        this.currentPage = 0;
+        this.displayArticles();
     }
 
     async loadArticles() {
@@ -46,7 +59,6 @@ class NewsTerminal {
             
             console.log(`✅ Loaded ${this.allArticles.length} articles`);
             
-            // Appliquer les filtres et afficher
             this.applyFilters();
             this.updateStats();
             
@@ -82,10 +94,7 @@ class NewsTerminal {
             return matchesSearch && matchesSource && matchesSector && matchesRegion;
         });
 
-        // Tri
         this.sortArticles(sortFilter);
-
-        // Reset pagination
         this.currentPage = 0;
         this.displayArticles();
     }
@@ -107,18 +116,13 @@ class NewsTerminal {
     calculateImportance(article) {
         let score = 0;
         
-        // Source priority
-        if (article.source.includes('reuters')) score += 10;
-        if (article.source.includes('cnbc-earnings')) score += 8;
-        if (article.source.includes('marketwatch-realtime')) score += 7;
+        // Source priority (Reuters retiré)
+        if (article.source.includes('cnbc-earnings')) score += 10;
+        if (article.source.includes('marketwatch-realtime')) score += 8;
+        if (article.source.includes('cnbc-tech')) score += 7;
         
-        // Tickers detected
         score += article.tickers.length * 5;
-        
-        // Has image
         if (article.image) score += 3;
-        
-        // Title length
         score += Math.min(article.title.length / 10, 10);
         
         return score;
@@ -169,6 +173,17 @@ class NewsTerminal {
         // Show/Hide load more button
         const loadMoreBtn = document.querySelector('.load-more-container');
         loadMoreBtn.style.display = endIndex < this.filteredArticles.length ? 'block' : 'none';
+
+        // ✨ Afficher le compteur d'articles
+        this.updateArticleCounter(endIndex, this.filteredArticles.length);
+    }
+
+    // ✨ NOUVELLE MÉTHODE : Afficher le compteur
+    updateArticleCounter(displayed, total) {
+        const counter = document.getElementById('articleCounter');
+        if (counter) {
+            counter.textContent = `Showing ${displayed} of ${total} articles`;
+        }
     }
 
     renderArticleCard(article) {
@@ -228,12 +243,10 @@ class NewsTerminal {
     }
 
     async openArticle(articleId, link) {
-        // Enregistrer dans l'historique Firestore
         const article = this.allArticles.find(a => a.id === articleId);
         if (article) {
             await this.firestoreManager.recordArticleView(article);
         }
-        
         window.open(link, '_blank');
     }
 
@@ -261,7 +274,6 @@ class NewsTerminal {
                 url: link
             }).catch(err => console.log('Share cancelled'));
         } else {
-            // Fallback: copy to clipboard
             navigator.clipboard.writeText(link);
             this.showNotification('Link copied to clipboard!', 'success');
         }
@@ -275,12 +287,10 @@ class NewsTerminal {
     changeView(view) {
         this.currentView = view;
         
-        // Update buttons
         document.querySelectorAll('.view-btn').forEach(btn => {
             btn.classList.toggle('active', btn.dataset.view === view);
         });
         
-        // Update container class
         const container = document.getElementById('articlesContainer');
         if (view === 'list') {
             container.classList.add('list-view');
@@ -294,7 +304,6 @@ class NewsTerminal {
 
         document.getElementById('totalArticles').textContent = total;
 
-        // Hot topics (tickers les plus mentionnés)
         const tickerCount = {};
         this.allArticles.forEach(article => {
             article.tickers.forEach(ticker => {
@@ -304,11 +313,9 @@ class NewsTerminal {
         
         document.getElementById('hotTopicsCount').textContent = Object.keys(tickerCount).length;
 
-        // Sources count
         const sources = new Set(this.allArticles.map(a => a.source));
         document.getElementById('sourcesCount').textContent = sources.size;
 
-        // Total unique tickers
         const uniqueTickers = new Set(this.allArticles.flatMap(a => a.tickers));
         document.getElementById('tickersCount').textContent = uniqueTickers.size;
     }
@@ -317,7 +324,6 @@ class NewsTerminal {
         this.currentPage++;
         this.displayArticles();
         
-        // Scroll to new content
         window.scrollTo({
             top: document.querySelector('.load-more-container').offsetTop - 100,
             behavior: 'smooth'
@@ -336,9 +342,7 @@ class NewsTerminal {
             </div>
         `;
         
-        // ✨ Clear cache in RSSClient
         this.rssClient.clearCache();
-        
         await this.loadArticles();
         this.showNotification('Articles refreshed!', 'success');
     }
@@ -353,7 +357,6 @@ class NewsTerminal {
     }
 
     showNotification(message, type = 'info') {
-        // Créer une notification simple
         const notification = document.createElement('div');
         notification.style.cssText = `
             position: fixed;
@@ -391,34 +394,20 @@ class NewsTerminal {
     }
 }
 
-// Animations CSS pour les notifications
+// Animations CSS
 const style = document.createElement('style');
 style.textContent = `
     @keyframes slideIn {
-        from {
-            transform: translateX(400px);
-            opacity: 0;
-        }
-        to {
-            transform: translateX(0);
-            opacity: 1;
-        }
+        from { transform: translateX(400px); opacity: 0; }
+        to { transform: translateX(0); opacity: 1; }
     }
-    
     @keyframes slideOut {
-        from {
-            transform: translateX(0);
-            opacity: 1;
-        }
-        to {
-            transform: translateX(400px);
-            opacity: 0;
-        }
+        from { transform: translateX(0); opacity: 1; }
+        to { transform: translateX(400px); opacity: 0; }
     }
 `;
 document.head.appendChild(style);
 
-// Initialiser au chargement
 let newsTerminal;
 document.addEventListener('DOMContentLoaded', () => {
     newsTerminal = new NewsTerminal();

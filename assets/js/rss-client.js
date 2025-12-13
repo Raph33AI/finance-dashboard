@@ -1,6 +1,6 @@
 /**
  * ════════════════════════════════════════════════════════════════
- * RSS CLIENT - Version Complète
+ * RSS CLIENT - Version Sans Reuters
  * ════════════════════════════════════════════════════════════════
  */
 
@@ -36,9 +36,6 @@ class RSSClient {
             const sources = [...new Set(data.articles.map(a => a.source))];
             console.log('📊 Sources reçues:', sources);
             console.log('🖼 Articles avec images:', data.articles.filter(a => a.image).length, '/', data.totalArticles);
-            
-            const reutersArticles = data.articles.filter(a => a.source.includes('reuters'));
-            console.log('📰 Reuters articles:', reutersArticles.length);
             
             const cnbcWithImages = data.articles.filter(a => a.source.includes('cnbc') && a.image);
             console.log('🖼 CNBC avec images:', cnbcWithImages.length);
