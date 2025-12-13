@@ -29,7 +29,6 @@
 
     <div class='layout-wrapper'>
         
-        <!-- SIDEBAR (copie celle de news-terminal.html) -->
         <aside class='sidebar' id='sidebar'>
             <div class="sidebar-header">
                 <div class="logo-container">
@@ -260,7 +259,7 @@
                         <i class='fas fa-bars'></i>
                     </button>
                     <h1 class='page-title gradient-title'>
-                        <i class="fas fa-chart-pie"></i> Market Sentiment
+                        <i class="fas fa-chart-pie"></i> Market Sentiment Analysis
                     </h1>
                 </div>
                 <div class='header-right'>
@@ -279,7 +278,7 @@
                 
                 <div class='section'>
                     <h2 class='section-title gradient-title'>
-                        <i class='fas fa-tachometer-alt'></i> Global Sentiment Score
+                        <i class='fas fa-tachometer-alt'></i> Global Market Sentiment
                     </h2>
                     
                     <div class='sentiment-hero'>
@@ -333,6 +332,17 @@
                             </div>
                         </div>
                     </div>
+                    
+                    <!-- Insight Card -->
+                    <div class='sentiment-insight' id='sentimentInsight'>
+                        <div class='insight-icon'>
+                            <i class='fas fa-lightbulb'></i>
+                        </div>
+                        <div class='insight-content'>
+                            <div class='insight-title'>Market Insight</div>
+                            <div class='insight-text' id='insightText'>Analyzing market sentiment...</div>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- ═══════════════════════════════════════════════════════════ -->
@@ -350,60 +360,6 @@
                 </div>
 
                 <!-- ═══════════════════════════════════════════════════════════ -->
-                <!-- TOP TICKERS -->
-                <!-- ═══════════════════════════════════════════════════════════ -->
-                
-                <div class='section'>
-                    <div class='split-section'>
-                        <div class='split-half'>
-                            <h3 class='subsection-title positive'>
-                                <i class='fas fa-fire'></i> Most Bullish Stocks
-                            </h3>
-                            <div id='topBullishTickers' class='ticker-list'>
-                                <!-- Rempli dynamiquement -->
-                            </div>
-                        </div>
-                        
-                        <div class='split-half'>
-                            <h3 class='subsection-title negative'>
-                                <i class='fas fa-snowflake'></i> Most Bearish Stocks
-                            </h3>
-                            <div id='topBearishTickers' class='ticker-list'>
-                                <!-- Rempli dynamiquement -->
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- ═══════════════════════════════════════════════════════════ -->
-                <!-- HEATMAP -->
-                <!-- ═══════════════════════════════════════════════════════════ -->
-                
-                <div class='section'>
-                    <h2 class='section-title gradient-title'>
-                        <i class='fas fa-th'></i> Sentiment Heatmap
-                    </h2>
-                    
-                    <div id='sentimentHeatmap' class='heatmap-container'>
-                        <!-- Rempli dynamiquement -->
-                    </div>
-                </div>
-
-                <!-- ═══════════════════════════════════════════════════════════ -->
-                <!-- TIMELINE -->
-                <!-- ═══════════════════════════════════════════════════════════ -->
-                
-                <div class='section'>
-                    <h2 class='section-title gradient-title'>
-                        <i class='fas fa-chart-line'></i> Sentiment Timeline (24h)
-                    </h2>
-                    
-                    <div class='chart-container'>
-                        <canvas id='sentimentTimeline'></canvas>
-                    </div>
-                </div>
-
-                <!-- ═══════════════════════════════════════════════════════════ -->
                 <!-- RECENT ARTICLES PAR SENTIMENT -->
                 <!-- ═══════════════════════════════════════════════════════════ -->
                 
@@ -414,15 +370,19 @@
                     
                     <div class='sentiment-tabs'>
                         <button class='sentiment-tab active' data-sentiment='all' onclick='sentimentDashboard.filterArticles("all")'>
+                            <i class='fas fa-globe'></i>
                             All (<span id='tabAllCount'>0</span>)
                         </button>
                         <button class='sentiment-tab' data-sentiment='positive' onclick='sentimentDashboard.filterArticles("positive")'>
+                            <i class='fas fa-arrow-up'></i>
                             Positive (<span id='tabPositiveCount'>0</span>)
                         </button>
                         <button class='sentiment-tab' data-sentiment='neutral' onclick='sentimentDashboard.filterArticles("neutral")'>
+                            <i class='fas fa-minus'></i>
                             Neutral (<span id='tabNeutralCount'>0</span>)
                         </button>
                         <button class='sentiment-tab' data-sentiment='negative' onclick='sentimentDashboard.filterArticles("negative")'>
+                            <i class='fas fa-arrow-down'></i>
                             Negative (<span id='tabNegativeCount'>0</span>)
                         </button>
                     </div>
@@ -431,6 +391,16 @@
                         <!-- Rempli dynamiquement -->
                     </div>
                 </div>
+
+                <footer style='text-align: center; padding: 32px 20px; margin-top: 40px; border-top: 1px solid var(--glass-border);'>
+                    <p style='color: var(--text-secondary); font-size: 0.95rem;'>
+                        <i class='fas fa-info-circle'></i> 
+                        Market Sentiment Analysis - Powered by AI Natural Language Processing
+                    </p>
+                    <p style='color: var(--text-tertiary); font-size: 0.85rem; margin-top: 8px;'>
+                        Sentiment scores are calculated based on linguistic analysis of news articles
+                    </p>
+                </footer>
 
             </div>
         </div>
