@@ -1,6 +1,6 @@
 /**
  * ════════════════════════════════════════════════════════════════
- * MARKET SENTIMENT DASHBOARD - STYLES ULTRA-STYLISÉS
+ * MARKET SENTIMENT DASHBOARD - STYLES ULTRA-STYLISÉS (VERSION FINALE)
  * ════════════════════════════════════════════════════════════════
  */
 
@@ -26,18 +26,51 @@
 }
 
 /* ═══════════════════════════════════════════════════════════════
-   GLOBAL MARKET SENTIMENT (STYLISÉ COMME ALPHY RECOMMENDATION)
+   BOUTON REFRESH STYLISÉ
+   ═══════════════════════════════════════════════════════════════ */
+
+.refresh-btn {
+    background: linear-gradient(135deg, #667eea, #764ba2) !important;
+    color: white !important;
+    border: none !important;
+    border-radius: 12px !important;
+    padding: 12px 24px !important;
+    font-weight: 700 !important;
+    font-size: 0.95rem !important;
+    cursor: pointer !important;
+    transition: all 0.3s ease !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4) !important;
+}
+
+.refresh-btn:hover {
+    transform: translateY(-2px) !important;
+    box-shadow: 0 8px 20px rgba(102, 126, 234, 0.6) !important;
+}
+
+.refresh-btn i {
+    font-size: 1rem !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   GLOBAL MARKET SENTIMENT (STYLISÉ AVEC GLASSMORPHISM)
    ═══════════════════════════════════════════════════════════════ */
 
 .global-sentiment-wrapper {
-    background: linear-gradient(135deg, rgba(102, 126, 234, 0.05), rgba(118, 75, 162, 0.05));
-    border: 2px solid transparent;
-    border-image: linear-gradient(135deg, #667eea, #764ba2) 1;
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.08), rgba(118, 75, 162, 0.08));
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    border: 2px solid rgba(102, 126, 234, 0.3);
     border-radius: 28px;
     padding: 40px;
     margin-bottom: 40px;
     position: relative;
     overflow: hidden;
+    box-shadow: 
+        0 8px 32px rgba(102, 126, 234, 0.15),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1);
 }
 
 .global-sentiment-wrapper::before {
@@ -47,7 +80,7 @@
     left: -50%;
     width: 200%;
     height: 200%;
-    background: radial-gradient(circle, rgba(102, 126, 234, 0.1) 0%, transparent 70%);
+    background: radial-gradient(circle, rgba(102, 126, 234, 0.12) 0%, transparent 70%);
     animation: rotateGradient 20s linear infinite;
     pointer-events: none;
 }
@@ -81,12 +114,14 @@
 .global-title {
     font-size: 2.5rem;
     margin-bottom: 12px;
+    text-align: center;
 }
 
 .global-subtitle {
     font-size: 1.1rem;
     color: var(--text-secondary);
     font-weight: 500;
+    text-align: center;
 }
 
 .global-subtitle span {
@@ -155,7 +190,7 @@
 }
 
 /* ═══════════════════════════════════════════════════════════════
-   SENTIMENT BREAKDOWN
+   SENTIMENT BREAKDOWN (ALIGNEMENT CORRIGÉ)
    ═══════════════════════════════════════════════════════════════ */
 
 .sentiment-breakdown {
@@ -171,6 +206,7 @@
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     margin-bottom: 8px;
+    text-align: left;
 }
 
 .breakdown-item {
@@ -214,6 +250,7 @@
     justify-content: center;
     font-size: 1.2rem;
     color: white;
+    flex-shrink: 0;
 }
 
 .breakdown-item.positive .breakdown-icon {
@@ -233,12 +270,14 @@
     font-size: 1.1rem;
     font-weight: 700;
     color: var(--text-primary);
+    text-align: left;
 }
 
 .breakdown-value {
     font-size: 1.8rem;
     font-weight: 900;
     color: var(--text-primary);
+    text-align: right;
 }
 
 .breakdown-bar {
@@ -288,7 +327,7 @@
 }
 
 /* ═══════════════════════════════════════════════════════════════
-   AI INSIGHT CARD
+   AI INSIGHT CARD (ALIGNEMENT CORRIGÉ)
    ═══════════════════════════════════════════════════════════════ */
 
 .ai-insight-card {
@@ -300,6 +339,7 @@
     position: relative;
     z-index: 1;
     backdrop-filter: blur(10px);
+    text-align: left;
 }
 
 .insight-badge {
@@ -320,6 +360,7 @@
     font-weight: 500;
     color: var(--text-primary);
     line-height: 1.8;
+    text-align: left;
 }
 
 .insight-content strong {
@@ -605,6 +646,11 @@
     .sentiment-articles-grid {
         grid-template-columns: 1fr;
     }
+    
+    .refresh-btn {
+        padding: 10px 20px !important;
+        font-size: 0.9rem !important;
+    }
 }
 
 @media (max-width: 480px) {
@@ -620,4 +666,39 @@
     .gauge-label {
         font-size: 1rem;
     }
+    
+    .breakdown-value {
+        font-size: 1.5rem;
+    }
+    
+    .refresh-btn {
+        padding: 8px 16px !important;
+        font-size: 0.85rem !important;
+    }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   DARK MODE ADJUSTMENTS
+   ═══════════════════════════════════════════════════════════════ */
+
+body.dark-mode .global-sentiment-wrapper {
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.12), rgba(118, 75, 162, 0.12));
+    border-color: rgba(102, 126, 234, 0.4);
+}
+
+body.dark-mode .sentiment-main-card {
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+}
+
+body.dark-mode .ai-insight-card {
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.15), rgba(118, 75, 162, 0.15));
+    border-color: rgba(102, 126, 234, 0.5);
+}
+
+body.dark-mode .breakdown-item {
+    background: rgba(255, 255, 255, 0.03);
+}
+
+body.dark-mode .breakdown-item:hover {
+    background: rgba(255, 255, 255, 0.05);
 }
