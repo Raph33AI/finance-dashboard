@@ -302,7 +302,7 @@ class TrendingTopicsDashboard {
      * WATCHLIST (FIREBASE INTEGRATION - CORRIGÉE)
      * ═══════════════════════════════════════════════════════════
      */
-    
+
     async loadWatchlist() {
         console.log('📌 Loading watchlist from Firebase...');
         
@@ -327,19 +327,28 @@ class TrendingTopicsDashboard {
             
             console.log('📥 Fetching watchlist for user:', userId);
             
-            // ✅ CORRECTION: Requête simplifiée sans orderBy pour éviter les erreurs d'index
-            const snapshot = await db.collection('savedNews')
-                .where('userId', '==', userId)
+            // ✅ CORRECTION: Utiliser la structure users/{userId}/history (sous-collection)
+            // Cette collection existe déjà dans votre firestore-rss-manager.js
+            const snapshot = await db.collection('users')
+                .doc(userId)
+                .collection('history')
                 .limit(50)
                 .get();
             
-            this.watchlistArticles = snapshot.docs.map(doc => ({
-                id: doc.id,
-                ...doc.data()
-            }));
+            this.watchlistArticles = snapshot.docs.map(doc => {
+                const data = doc.data();
+                return {
+                    id: doc.id,
+                    title: data.title || data.articleTitle,
+                    link: data.link || data.articleLink,
+                    sourceName: data.sourceName || data.source,
+                    timestamp: data.viewedAt ? data.viewedAt.toMillis() : Date.now(),
+                    savedAt: data.viewedAt ? data.viewedAt.toMillis() : Date.now()
+                };
+            });
             
-            // Trier localement par timestamp
-            this.watchlistArticles.sort((a, b) => (b.savedAt || b.timestamp || 0) - (a.savedAt || a.timestamp || 0));
+            // Trier localement par timestamp (plus récent en premier)
+            this.watchlistArticles.sort((a, b) => b.timestamp - a.timestamp);
             
             console.log(`✅ Loaded ${this.watchlistArticles.length} watchlist items`);
             
@@ -357,8 +366,15 @@ class TrendingTopicsDashboard {
                 return;
             }
             
+            const userId = firebase.auth().currentUser.uid;
             const db = firebase.firestore();
-            await db.collection('savedNews').doc(articleId).delete();
+            
+            // ✅ CORRECTION: Utiliser la structure users/{userId}/history
+            await db.collection('users')
+                .doc(userId)
+                .collection('history')
+                .doc(articleId)
+                .delete();
             
             console.log('✅ Article removed from watchlist');
             
