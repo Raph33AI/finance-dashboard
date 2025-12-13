@@ -1,6 +1,6 @@
 /**
  * ════════════════════════════════════════════════════════════════
- * FEAR & GREED INDEX CALCULATOR
+ * FEAR & GREED INDEX CALCULATOR (CORRIGÉ - Timeline)
  * ════════════════════════════════════════════════════════════════
  */
 
@@ -106,9 +106,8 @@ class FearGreedCalculator {
         // Déterminer le label
         const label = this.getIndexLabel(globalIndex);
         
-        // Calculer les scores journaliers pour le graphique
+        // ✅ CORRECTION: Calculer les scores journaliers avec tri chronologique
         const timeline = Array.from(dailyScores.entries())
-            .sort((a, b) => new Date(a[0]) - new Date(b[0]))
             .map(([date, data]) => {
                 const dayTotal = data.fear + data.greed;
                 const dayIndex = dayTotal > 0 
@@ -117,18 +116,22 @@ class FearGreedCalculator {
                 
                 return {
                     date,
+                    dateObj: new Date(date), // ✅ Objet Date pour tri correct
                     index: dayIndex,
                     fear: data.fear,
                     greed: data.greed,
                     articles: data.count
                 };
-            });
+            })
+            .sort((a, b) => a.dateObj - b.dateObj) // ✅ Tri chronologique (ancien → récent)
+            .map(({ dateObj, ...rest }) => rest); // ✅ Retirer dateObj après tri
         
         console.log(`✅ Fear & Greed Index calculated:`, {
             index: globalIndex,
             label,
             fearCount,
-            greedCount
+            greedCount,
+            timelineLength: timeline.length
         });
         
         return {

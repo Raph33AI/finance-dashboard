@@ -178,7 +178,7 @@
 }
 
 /* ═══════════════════════════════════════════════════════════════
-   FEAR & GREED INDEX (GAUGE CORRIGÉE)
+   FEAR & GREED INDEX (GAUGE ULTRA-CORRIGÉE)
    ═══════════════════════════════════════════════════════════════ */
 
 .fear-greed-wrapper {
@@ -244,35 +244,50 @@
     z-index: 1;
 }
 
+/* ✅ CORRECTION ULTRA : Conteneur gauge avec hauteur fixe */
 .fear-greed-gauge {
     position: relative;
     width: 320px;
-    height: 200px; /* ✅ CORRIGÉ: Réduit la hauteur pour éviter chevauchement */
+    height: 240px; /* ✅ Augmenté de 200px à 240px pour plus d'espace */
     margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start; /* ✅ Alignement en haut */
 }
 
+/* ✅ CORRECTION ULTRA : Canvas avec hauteur limitée */
+.fear-greed-gauge canvas {
+    width: 320px !important;
+    height: 160px !important; /* ✅ Hauteur fixe pour le demi-cercle */
+    max-height: 160px !important;
+}
+
+/* ✅ CORRECTION ULTRA : Texte positionné SOUS la gauge */
 .gauge-center-fear {
     position: absolute;
-    top: 65%; /* ✅ CORRIGÉ: Positionné plus bas pour éviter chevauchement avec la gauge */
+    top: 140px; /* ✅ Position fixe sous le demi-cercle (160px - 20px de marge) */
     left: 50%;
-    transform: translate(-50%, -50%);
+    transform: translateX(-50%); /* ✅ Centrage horizontal uniquement */
     text-align: center;
     z-index: 10;
-    pointer-events: none; /* ✅ Permet au canvas de recevoir les événements */
+    pointer-events: none;
+    width: 100%;
 }
 
 .fear-value {
-    font-size: 4rem; /* ✅ CORRIGÉ: Réduit de 5rem à 4rem */
+    font-size: 3.5rem; /* ✅ Réduit de 4rem à 3.5rem */
     font-weight: 900;
     line-height: 1;
-    margin-bottom: 8px; /* ✅ CORRIGÉ: Réduit de 12px à 8px */
+    margin-bottom: 6px; /* ✅ Réduit de 8px à 6px */
 }
 
 .fear-label {
-    font-size: 1.2rem; /* ✅ CORRIGÉ: Réduit de 1.5rem à 1.2rem */
+    font-size: 1.1rem; /* ✅ Légèrement réduit de 1.2rem */
     font-weight: 800;
     text-transform: uppercase;
-    letter-spacing: 1.5px; /* ✅ CORRIGÉ: Réduit de 2px à 1.5px */
+    letter-spacing: 1.2px;
+    white-space: nowrap; /* ✅ Empêche le retour à la ligne */
 }
 
 .fear-breakdown {
@@ -361,6 +376,47 @@
 .fear-chart-wrapper {
     height: 300px;
     position: relative;
+}
+
+/* ✅ RESPONSIVE CORRIGÉ */
+@media (max-width: 1200px) {
+    .fear-greed-main {
+        grid-template-columns: 1fr;
+        gap: 32px;
+    }
+    
+    .fear-greed-gauge {
+        margin: 0 auto;
+    }
+}
+
+@media (max-width: 768px) {
+    .fear-greed-wrapper {
+        padding: 24px;
+    }
+    
+    .fear-greed-gauge {
+        width: 280px;
+        height: 200px;
+    }
+    
+    .fear-greed-gauge canvas {
+        width: 280px !important;
+        height: 140px !important;
+        max-height: 140px !important;
+    }
+    
+    .gauge-center-fear {
+        top: 120px;
+    }
+    
+    .fear-value {
+        font-size: 2.8rem;
+    }
+    
+    .fear-label {
+        font-size: 0.95rem;
+    }
 }
 
 /* ═══════════════════════════════════════════════════════════════

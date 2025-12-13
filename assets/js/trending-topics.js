@@ -582,7 +582,8 @@ class TrendingTopicsDashboard {
             options: {
                 responsive: true,
                 maintainAspectRatio: true,
-                cutout: '75%', // ✅ CORRIGÉ: Réduit de 80% à 75% pour laisser plus d'espace
+                aspectRatio: 2, // ✅ AJOUT: Force un ratio 2:1 pour le demi-cercle
+                cutout: '70%', // ✅ CORRECTION: Réduit de 75% à 70% (plus d'espace au centre)
                 plugins: {
                     legend: { display: false },
                     tooltip: { enabled: false }
