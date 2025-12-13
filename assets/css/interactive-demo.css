@@ -2463,3 +2463,153 @@ html {
         transition-duration: 0.01ms !important;
     }
 }
+
+/* ============================================
+   LEGAL COMPLIANCE - DEMO DATA DISCLAIMERS
+   ============================================ */
+
+/* Badge DEMO inline */
+.demo-badge-inline {
+    display: inline-block;
+    padding: 0.125rem 0.5rem;
+    background: linear-gradient(135deg, #f59e0b 0%, #f97316 100%);
+    color: white;
+    font-size: 0.625rem;
+    font-weight: 800;
+    border-radius: 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-left: 0.5rem;
+    vertical-align: middle;
+}
+
+/* Watermark DEMO sur les prix */
+.demo-watermark {
+    display: inline-block;
+    font-size: 0.875rem;
+    color: #f59e0b;
+    font-weight: 700;
+    margin-left: 0.5rem;
+    opacity: 0.7;
+}
+
+/* Disclaimer global flottant */
+.global-demo-disclaimer {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%) translateY(100px);
+    background: linear-gradient(135deg, #f59e0b 0%, #f97316 100%);
+    color: white;
+    padding: 1rem 1.5rem;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-xl);
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    z-index: 10000;
+    max-width: 90%;
+    width: auto;
+    opacity: 0;
+    transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.global-demo-disclaimer.show {
+    transform: translateX(-50%) translateY(0);
+    opacity: 1;
+}
+
+.global-demo-disclaimer i {
+    font-size: 1.5rem;
+    flex-shrink: 0;
+}
+
+.global-demo-disclaimer span {
+    flex: 1;
+    font-size: 0.9375rem;
+    line-height: 1.5;
+}
+
+.global-demo-disclaimer button {
+    background: transparent;
+    border: none;
+    color: white;
+    cursor: pointer;
+    padding: 0;
+    font-size: 1.25rem;
+    opacity: 0.8;
+    transition: opacity var(--transition-base);
+}
+
+.global-demo-disclaimer button:hover {
+    opacity: 1;
+}
+
+/* Disclaimer dans les sections */
+.demo-data-disclaimer {
+    background: rgba(245, 158, 11, 0.1);
+    border: 2px solid #f59e0b;
+    border-radius: var(--radius-md);
+    padding: 1rem 1.25rem;
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    color: #f59e0b;
+    font-weight: 600;
+    font-size: 0.875rem;
+}
+
+body.dark-mode .demo-data-disclaimer {
+    background: rgba(245, 158, 11, 0.15);
+    color: #fbbf24;
+    border-color: #fbbf24;
+}
+
+.demo-data-disclaimer i {
+    font-size: 1.25rem;
+    flex-shrink: 0;
+}
+
+.demo-data-disclaimer strong {
+    color: #ea580c;
+    font-weight: 800;
+}
+
+body.dark-mode .demo-data-disclaimer strong {
+    color: #fb923c;
+}
+
+/* Badge DEMO sur les suggestions */
+.suggestion-item .demo-badge-inline {
+    padding: 0.125rem 0.375rem;
+    font-size: 0.5rem;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .global-demo-disclaimer {
+        bottom: 10px;
+        padding: 0.875rem 1rem;
+        font-size: 0.875rem;
+        max-width: 95%;
+    }
+    
+    .global-demo-disclaimer i {
+        font-size: 1.25rem;
+    }
+    
+    .demo-watermark {
+        font-size: 0.75rem;
+    }
+    
+    .demo-data-disclaimer {
+        font-size: 0.8125rem;
+        padding: 0.875rem 1rem;
+    }
+}
+
+/* Watermark sur les graphiques Highcharts */
+.highcharts-subtitle {
+    font-weight: 600 !important;
+}
