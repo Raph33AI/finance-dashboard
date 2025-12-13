@@ -9,7 +9,7 @@
 class SECApiClient {
     constructor() {
         // ⚠ REMPLACER PAR L'URL DE TON CLOUDFLARE WORKER
-        this.baseURL = 'https://sec-edgar-api.raphnardone.workers.dev.workers.dev';
+        this.baseURL = 'https://sec-edgar-api.raphnardone.workers.dev';
         this.cache = new Map();
         this.cacheDuration = 1800000; // 30 minutes
     }
