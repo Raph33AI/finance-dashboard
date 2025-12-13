@@ -265,7 +265,7 @@
                     <button class='mobile-toggle' id='mobileToggle'>
                         <i class='fas fa-bars'></i>
                     </button>
-                    <h1 class='page-title'>
+                    <h1 class='page-title gradient-title'>
                         <i class="fas fa-newspaper"></i> News Terminal
                     </h1>
                 </div>
@@ -273,10 +273,6 @@
                     <button class='dashboard-btn' onclick='newsTerminal.refreshAll()'>
                         <i class='fas fa-sync-alt'></i>
                         <span class='btn-text'>Refresh</span>
-                    </button>
-                    <button class='dashboard-btn dashboard-btn-export' onclick='newsTerminal.exportToCSV()'>
-                        <i class='fas fa-download'></i>
-                        <span class='btn-text'>Export</span>
                     </button>
                 </div>
             </header>
@@ -349,7 +345,7 @@
                      STATISTIQUES EN TEMPS RÉEL
                      ════════════════════════════════════════════════════ -->
                 <div class='section'>
-                    <h2 class='section-title'>
+                    <h2 class='section-title gradient-title'>
                         <i class='fas fa-chart-bar'></i> Real-Time Statistics
                     </h2>
                     
@@ -405,7 +401,7 @@
                      ════════════════════════════════════════════════════ -->
                 <div class='section'>
                     <div class='section-header-with-controls'>
-                        <h2 class='section-title'>
+                        <h2 class='section-title gradient-title'>
                             <i class='fas fa-list'></i> Latest News
                         </h2>
                         <div class='view-toggles'>
@@ -426,9 +422,9 @@
                     </div>
 
                     <div class='load-more-container' style='display: none;'>
-                        <button class='dashboard-btn' onclick='newsTerminal.loadMore()'>
+                        <button class='dashboard-btn load-more-btn' onclick='newsTerminal.loadMore()'>
                             <i class='fas fa-chevron-down'></i>
-                            <span>Load More</span>
+                            <span>Load More Articles</span>
                         </button>
                     </div>
                 </div>

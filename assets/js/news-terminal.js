@@ -1,6 +1,6 @@
 /**
  * ════════════════════════════════════════════════════════════════
- * NEWS TERMINAL - MAIN SCRIPT (Sans Sentiment Analyzer)
+ * NEWS TERMINAL - MAIN SCRIPT (Avec images et corrections)
  * ════════════════════════════════════════════════════════════════
  */
 
@@ -99,7 +99,6 @@ class NewsTerminal {
                 this.filteredArticles.sort((a, b) => a.timestamp - b.timestamp);
                 break;
             case 'importance':
-                // Score basé sur: source, tickers présents, longueur titre
                 this.filteredArticles.sort((a, b) => this.calculateImportance(b) - this.calculateImportance(a));
                 break;
         }
@@ -113,10 +112,13 @@ class NewsTerminal {
         if (article.source.includes('cnbc-earnings')) score += 8;
         if (article.source.includes('marketwatch-realtime')) score += 7;
         
-        // Tickers detected (plus de tickers = plus important)
+        // Tickers detected
         score += article.tickers.length * 5;
         
-        // Title length (longer = more detailed)
+        // Has image
+        if (article.image) score += 3;
+        
+        // Title length
         score += Math.min(article.title.length / 10, 10);
         
         return score;
@@ -174,45 +176,55 @@ class NewsTerminal {
 
         return `
             <div class='article-card' onclick='newsTerminal.openArticle("${article.id}", "${article.link}")'>
-                <div class='article-header'>
-                    <div class='article-source'>
-                        <i class='fas fa-rss'></i>
-                        ${article.sourceName}
-                    </div>
-                    <div class='article-actions'>
-                        <button class='article-action-btn' onclick='event.stopPropagation(); newsTerminal.toggleWatchlist("${article.tickers[0] || ''}", "${article.title.replace(/'/g, "\\'")}");' title='Add to watchlist'>
-                            <i class='fas fa-star'></i>
-                        </button>
-                        <button class='article-action-btn' onclick='event.stopPropagation(); newsTerminal.shareArticle("${article.link}");' title='Share'>
-                            <i class='fas fa-share-alt'></i>
-                        </button>
-                    </div>
-                </div>
-
-                <div class='article-title'>${article.title}</div>
-                <div class='article-description'>${article.description}</div>
-
-                ${article.tickers.length > 0 ? `
-                    <div class='article-tickers'>
-                        ${article.tickers.map(ticker => `
-                            <span class='ticker-badge' onclick='event.stopPropagation(); newsTerminal.filterByTicker("${ticker}");'>
-                                ${ticker}
-                            </span>
-                        `).join('')}
-                    </div>
+                ${article.image ? `
+                    <img src='${article.image}' alt='${article.title}' class='article-image' onerror='this.style.display="none"'>
                 ` : ''}
-
-                <div class='article-footer'>
-                    <div class='article-date'>
-                        <i class='fas fa-clock'></i>
-                        ${timeAgo}
+                
+                <div class='article-content'>
+                    <div class='article-header'>
+                        <div class='article-source'>
+                            <i class='fas fa-rss'></i>
+                            ${article.sourceName}
+                        </div>
+                        <div class='article-actions'>
+                            <button class='article-action-btn' onclick='event.stopPropagation(); newsTerminal.toggleWatchlist("${article.tickers[0] || ''}", "${this.escapeHtml(article.title)}");' title='Add to watchlist'>
+                                <i class='fas fa-star'></i>
+                            </button>
+                            <button class='article-action-btn' onclick='event.stopPropagation(); newsTerminal.shareArticle("${article.link}");' title='Share'>
+                                <i class='fas fa-share-alt'></i>
+                            </button>
+                        </div>
                     </div>
-                    <a href='${article.link}' target='_blank' class='article-link' onclick='event.stopPropagation();'>
-                        Read more <i class='fas fa-external-link-alt'></i>
-                    </a>
+
+                    <div class='article-title'>${article.title}</div>
+                    <div class='article-description'>${article.description}</div>
+
+                    ${article.tickers.length > 0 ? `
+                        <div class='article-tickers'>
+                            ${article.tickers.map(ticker => `
+                                <span class='ticker-badge' onclick='event.stopPropagation(); newsTerminal.filterByTicker("${ticker}");'>
+                                    ${ticker}
+                                </span>
+                            `).join('')}
+                        </div>
+                    ` : ''}
+
+                    <div class='article-footer'>
+                        <div class='article-date'>
+                            <i class='fas fa-clock'></i>
+                            ${timeAgo}
+                        </div>
+                        <a href='${article.link}' target='_blank' class='article-link' onclick='event.stopPropagation();'>
+                            Read more <i class='fas fa-external-link-alt'></i>
+                        </a>
+                    </div>
                 </div>
             </div>
         `;
+    }
+
+    escapeHtml(text) {
+        return text.replace(/'/g, "\\'").replace(/"/g, '\\"');
     }
 
     async openArticle(articleId, link) {
@@ -304,6 +316,12 @@ class NewsTerminal {
     loadMore() {
         this.currentPage++;
         this.displayArticles();
+        
+        // Scroll to new content
+        window.scrollTo({
+            top: document.querySelector('.load-more-container').offsetTop - 100,
+            behavior: 'smooth'
+        });
     }
 
     async refreshAll() {
@@ -318,33 +336,11 @@ class NewsTerminal {
             </div>
         `;
         
+        // Clear cache in RSSClient
+        this.rssClient.cache.clear();
+        
         await this.loadArticles();
         this.showNotification('Articles refreshed!', 'success');
-    }
-
-    exportToCSV() {
-        // Créer le CSV
-        const headers = ['Title', 'Source', 'Date', 'Tickers', 'Link'];
-        const rows = this.filteredArticles.map(article => [
-            `"${article.title.replace(/"/g, '""')}"`,
-            article.sourceName,
-            new Date(article.timestamp).toISOString(),
-            article.tickers.join(';'),
-            article.link
-        ]);
-
-        const csv = [headers, ...rows].map(row => row.join(',')).join('\n');
-        
-        // Télécharger
-        const blob = new Blob([csv], { type: 'text/csv' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `news-terminal-${new Date().toISOString().split('T')[0]}.csv`;
-        a.click();
-        URL.revokeObjectURL(url);
-        
-        this.showNotification('CSV exported successfully!', 'success');
     }
 
     getTimeAgo(timestamp) {
@@ -363,7 +359,7 @@ class NewsTerminal {
             position: fixed;
             top: 20px;
             right: 20px;
-            background: ${type === 'success' ? 'linear-gradient(135deg, #10b981, #059669)' : 'linear-gradient(135deg, #3b82f6, #2563eb)'};
+            background: ${type === 'success' ? 'linear-gradient(135deg, #10b981, #059669)' : 'linear-gradient(135deg, #667eea, #764ba2)'};
             color: white;
             padding: 16px 24px;
             border-radius: 12px;
@@ -385,7 +381,7 @@ class NewsTerminal {
     showError() {
         document.getElementById('articlesContainer').innerHTML = `
             <div class='loading-state'>
-                <i class='fas fa-exclamation-triangle' style='color: var(--forex-danger);'></i>
+                <i class='fas fa-exclamation-triangle' style='background: linear-gradient(135deg, #ef4444, #dc2626); -webkit-background-clip: text; -webkit-text-fill-color: transparent;'></i>
                 <p>Error loading articles. Please try again.</p>
                 <button class='dashboard-btn' onclick='newsTerminal.refreshAll()' style='margin-top: 20px;'>
                     <i class='fas fa-sync-alt'></i> Retry
@@ -394,6 +390,33 @@ class NewsTerminal {
         `;
     }
 }
+
+// Animations CSS pour les notifications
+const style = document.createElement('style');
+style.textContent = `
+    @keyframes slideIn {
+        from {
+            transform: translateX(400px);
+            opacity: 0;
+        }
+        to {
+            transform: translateX(0);
+            opacity: 1;
+        }
+    }
+    
+    @keyframes slideOut {
+        from {
+            transform: translateX(0);
+            opacity: 1;
+        }
+        to {
+            transform: translateX(400px);
+            opacity: 0;
+        }
+    }
+`;
+document.head.appendChild(style);
 
 // Initialiser au chargement
 let newsTerminal;
