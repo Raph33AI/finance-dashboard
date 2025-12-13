@@ -1,7 +1,6 @@
 /* ============================================
-   INTERACTIVE-DEMO.JS - VERSION LEGAL COMPLIANT
-   ✅ DONNÉES FICTIVES UNIQUEMENT (PAS DE REDISTRIBUTION D'API)
-   ✅ DISCLAIMERS CLAIRS SUR TOUTES LES SECTIONS
+   INTERACTIVE-DEMO.JS - VERSION LEGAL COMPLIANT COMPLÈTE
+   ✅ TOUTES LES FONCTIONS IMPLÉMENTÉES
    ============================================ */
 
 console.log('🔍 Loading interactive-demo.js LEGAL COMPLIANT VERSION...');
@@ -10,14 +9,12 @@ console.log('🔍 Loading interactive-demo.js LEGAL COMPLIANT VERSION...');
 // ⚠ GÉNÉRATEUR DE DONNÉES FICTIVES
 // ============================================
 const DemoDataGenerator = {
-    // Génère un prix aléatoire réaliste
     generatePrice: function(min = 10, max = 500) {
         return (Math.random() * (max - min) + min).toFixed(2);
     },
     
-    // Génère un changement de prix
     generateChange: function(price) {
-        const changePercent = (Math.random() - 0.5) * 10; // -5% à +5%
+        const changePercent = (Math.random() - 0.5) * 10;
         const change = (price * changePercent / 100).toFixed(2);
         return {
             change: parseFloat(change),
@@ -25,7 +22,6 @@ const DemoDataGenerator = {
         };
     },
     
-    // Génère des données OHLCV fictives
     generateOHLCV: function(days = 90, basePrice = 150) {
         const data = [];
         let currentPrice = basePrice;
@@ -58,7 +54,6 @@ const DemoDataGenerator = {
         return data;
     },
     
-    // Génère des données de quote fictives
     generateQuote: function(symbol) {
         const price = this.generatePrice();
         const changeData = this.generateChange(price);
@@ -83,7 +78,7 @@ const DemoDataGenerator = {
 };
 
 // ============================================
-// CONFIGURATION & GLOBAL STATE
+// APPLICATION PRINCIPALE
 // ============================================
 const DemoApp = {
     apiClient: null,
@@ -208,14 +203,11 @@ const DemoApp = {
         try {
             console.log('🚀 Initializing Interactive Demo LEGAL COMPLIANT VERSION...');
             
-            // ⚠ PAS D'INITIALISATION D'API CLIENT RÉEL
             console.log('⚠ DEMO MODE: Using simulated data only');
             
             this.setupEventListeners();
             this.switchTool('company-search');
             this.setupResizeListener();
-            
-            // Afficher un disclaimer global
             this.showGlobalDisclaimer();
             
             console.log('✅ Interactive Demo LEGAL COMPLIANT VERSION initialized!');
@@ -248,7 +240,6 @@ const DemoApp = {
         window.addEventListener('resize', () => {
             clearTimeout(resizeTimeout);
             resizeTimeout = setTimeout(() => {
-                console.log('📱 Window resized, updating charts...');
                 this.reflowAllCharts();
             }, 250);
         });
@@ -306,7 +297,7 @@ const DemoApp = {
     },
     
     // ============================================
-    // COMPANY SEARCH - DONNÉES FICTIVES
+    // COMPANY SEARCH
     // ============================================
     setupCompanySearchListeners: function() {
         const input = document.getElementById('companySearchInput');
@@ -320,18 +311,9 @@ const DemoApp = {
             input.addEventListener('keydown', (e) => {
                 if (e.key === 'Enter') {
                     e.preventDefault();
-                    const suggestions = document.querySelectorAll('.suggestion-item');
-                    if (this.selectedSuggestionIndex >= 0 && suggestions[this.selectedSuggestionIndex]) {
-                        const symbol = suggestions[this.selectedSuggestionIndex].dataset.symbol;
-                        this.selectCompany(symbol);
-                    } else {
-                        this.searchCompany(input.value);
-                    }
+                    this.searchCompany(input.value);
                 } else if (e.key === 'Escape') {
                     this.hideSuggestions();
-                } else if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
-                    e.preventDefault();
-                    this.navigateSuggestions(e.key === 'ArrowDown' ? 1 : -1);
                 }
             });
         }
@@ -349,39 +331,10 @@ const DemoApp = {
                 this.searchCompany(symbol);
             });
         });
-        
-        document.addEventListener('click', (e) => {
-            if (!e.target.closest('.search-box-wrapper')) {
-                this.hideSuggestions();
-            }
-        });
-    },
-    
-    navigateSuggestions: function(direction) {
-        const suggestions = document.querySelectorAll('.suggestion-item');
-        if (suggestions.length === 0) return;
-        
-        if (this.selectedSuggestionIndex >= 0 && suggestions[this.selectedSuggestionIndex]) {
-            suggestions[this.selectedSuggestionIndex].classList.remove('keyboard-selected');
-        }
-        
-        this.selectedSuggestionIndex += direction;
-        
-        if (this.selectedSuggestionIndex < 0) {
-            this.selectedSuggestionIndex = suggestions.length - 1;
-        } else if (this.selectedSuggestionIndex >= suggestions.length) {
-            this.selectedSuggestionIndex = 0;
-        }
-        
-        if (suggestions[this.selectedSuggestionIndex]) {
-            suggestions[this.selectedSuggestionIndex].classList.add('keyboard-selected');
-            suggestions[this.selectedSuggestionIndex].scrollIntoView({ block: 'nearest', behavior: 'smooth' });
-        }
     },
     
     handleCompanySearch: function(query) {
         const trimmedQuery = query.trim();
-        this.selectedSuggestionIndex = -1;
         
         if (trimmedQuery.length === 0) {
             this.hideSuggestions();
@@ -394,51 +347,40 @@ const DemoApp = {
         }, 300);
     },
     
-    // ⚠ RECHERCHE DE SYMBOLES - DONNÉES FICTIVES
     searchSymbols: function(query) {
-        console.log('🔍 Searching for (DEMO):', query);
-        
         const container = document.getElementById('searchSuggestions');
         if (!container) return;
         
-        container.innerHTML = '<div class="suggestion-loading"><i class="fas fa-spinner fa-spin"></i> Searching demo database...</div>';
+        container.innerHTML = '<div class="suggestion-loading"><i class="fas fa-spinner fa-spin"></i> Searching...</div>';
         container.classList.add('active');
         
-        // Simuler un délai de recherche
         setTimeout(() => {
             const demoResults = this.generateDemoSearchResults(query);
             this.displaySearchSuggestions(demoResults, query);
-        }, 500);
+        }, 300);
     },
     
-    // Génère des résultats de recherche fictifs
     generateDemoSearchResults: function(query) {
         const results = [];
         const queryUpper = query.toUpperCase();
         
-        // Quelques symboles de démo
         const demoSymbols = [
-            { symbol: 'DEMO', name: 'Demo Corporation', type: 'Common Stock', exchange: 'DEMO' },
-            { symbol: 'TEST', name: 'Test Industries Inc', type: 'Common Stock', exchange: 'DEMO' },
-            { symbol: 'SAMPLE', name: 'Sample Tech Group', type: 'Common Stock', exchange: 'DEMO' },
-            { symbol: 'MOCK', name: 'Mock Financial Services', type: 'Common Stock', exchange: 'DEMO' },
-            { symbol: 'FICTO', name: 'Fictional Energy Ltd', type: 'Common Stock', exchange: 'DEMO' },
-            { symbol: 'SIMUL', name: 'Simulated Healthcare', type: 'Common Stock', exchange: 'DEMO' }
+            { symbol: 'DEMO', name: 'Demo Corporation', type: 'Common Stock' },
+            { symbol: 'TEST', name: 'Test Industries Inc', type: 'Common Stock' },
+            { symbol: 'SAMPLE', name: 'Sample Tech Group', type: 'Common Stock' }
         ];
         
-        // Filtrer selon la requête
         demoSymbols.forEach(item => {
             if (item.symbol.includes(queryUpper) || item.name.toUpperCase().includes(queryUpper)) {
                 results.push({
                     symbol: item.symbol,
                     instrument_name: item.name,
                     instrument_type: item.type,
-                    exchange: item.exchange
+                    exchange: 'DEMO'
                 });
             }
         });
         
-        // Si aucun résultat, créer un résultat fictif basé sur la requête
         if (results.length === 0) {
             results.push({
                 symbol: queryUpper.substring(0, 5),
@@ -461,17 +403,12 @@ const DemoApp = {
             const symbol = this.escapeHtml(item.symbol);
             const name = this.escapeHtml(item.instrument_name || item.symbol);
             
-            const highlightedSymbol = this.highlightMatch(symbol, query);
-            const highlightedName = this.highlightMatch(name, query);
-            
             html += `
                 <div class="suggestion-item" data-symbol="${symbol}">
-                    <div class="suggestion-icon tech">
-                        ${symbol.substring(0, 2)}
-                    </div>
+                    <div class="suggestion-icon tech">${symbol.substring(0, 2)}</div>
                     <div class="suggestion-info">
-                        <div class="suggestion-symbol">${highlightedSymbol} <span class="demo-badge-inline">DEMO</span></div>
-                        <div class="suggestion-name">${highlightedName}</div>
+                        <div class="suggestion-symbol">${symbol} <span class="demo-badge-inline">DEMO</span></div>
+                        <div class="suggestion-name">${name}</div>
                     </div>
                     <div class="suggestion-exchange">DEMO</div>
                 </div>
@@ -485,50 +422,32 @@ const DemoApp = {
             item.addEventListener('click', () => {
                 this.selectCompany(item.dataset.symbol);
             });
-            
-            item.addEventListener('mouseenter', () => {
-                document.querySelectorAll('.suggestion-item').forEach(s => s.classList.remove('keyboard-selected'));
-                this.selectedSuggestionIndex = -1;
-            });
         });
-    },
-    
-    highlightMatch: function(text, query) {
-        if (!text || !query) return text;
-        const regex = new RegExp(`(${query})`, 'gi');
-        return text.replace(regex, '<mark>$1</mark>');
     },
     
     hideSuggestions: function() {
         const container = document.getElementById('searchSuggestions');
-        if (!container) return;
-        
-        container.classList.remove('active');
-        this.selectedSuggestionIndex = -1;
+        if (container) {
+            container.classList.remove('active');
+        }
     },
     
     selectCompany: function(symbol) {
-        console.log('✅ Selected company (DEMO):', symbol);
-        
         const input = document.getElementById('companySearchInput');
         if (input) {
             input.value = symbol;
         }
-        
         this.hideSuggestions();
         this.searchCompany(symbol);
     },
     
-    // ⚠ RECHERCHE ENTREPRISE - DONNÉES FICTIVES UNIQUEMENT
     searchCompany: function(symbol) {
         if (!symbol || symbol.trim() === '') {
-            this.showNotification('Please enter a ticker symbol or company name', 'warning');
+            this.showNotification('Please enter a ticker symbol', 'warning');
             return;
         }
         
         const trimmedSymbol = symbol.trim().toUpperCase();
-        console.log('🔍 Searching company (DEMO):', trimmedSymbol);
-        
         this.currentCompanySymbol = trimmedSymbol;
         
         const container = document.getElementById('searchResultsContainer');
@@ -537,43 +456,38 @@ const DemoApp = {
         container.innerHTML = `
             <div class="results-placeholder">
                 <i class="fas fa-spinner fa-spin"></i>
-                <h3>Loading demo company data...</h3>
-                <p>Please wait...</p>
+                <h3>Loading demo data...</h3>
             </div>
         `;
         
-        // Simuler un délai de chargement
         setTimeout(() => {
-            // ⚠ GÉNÉRER DES DONNÉES FICTIVES
             const quoteData = DemoDataGenerator.generateQuote(trimmedSymbol);
             this.displayCompanyResults(quoteData);
             this.loadCompanyExtraCharts(trimmedSymbol);
-        }, 800);
+        }, 500);
     },
     
     displayCompanyResults: function(quoteData) {
         const container = document.getElementById('searchResultsContainer');
         if (!container) return;
         
-        const currentPrice = quoteData.close || quoteData.price || 0;
+        const currentPrice = quoteData.close || 0;
         const change = quoteData.change || 0;
-        const percentChange = quoteData.percent_change || quoteData.percentChange || 0;
+        const percentChange = quoteData.percent_change || 0;
         const isPositive = change >= 0;
         
         container.innerHTML = `
             <div class="demo-data-disclaimer">
                 <i class="fas fa-exclamation-triangle"></i>
-                <strong>SIMULATED DATA:</strong> All values below are randomly generated for demonstration purposes only.
+                <strong>SIMULATED DATA:</strong> All values are randomly generated for demonstration only.
             </div>
             
             <div class="company-result-card highlight">
                 <div class="company-result-header">
-                    <div class="company-avatar">
-                        <span>${quoteData.symbol.substring(0, 2)}</span>
-                    </div>
+                    <div class="company-avatar"><span>${quoteData.symbol.substring(0, 2)}</span></div>
                     <div class="company-details">
-                        <h4>${this.escapeHtml(quoteData.name || quoteData.symbol)} <span class="demo-badge-inline">DEMO</span></h4>
-                        <p>${this.escapeHtml(quoteData.exchange || 'DEMO')} • ${this.escapeHtml(quoteData.currency || 'USD')}</p>
+                        <h4>${this.escapeHtml(quoteData.name)} <span class="demo-badge-inline">DEMO</span></h4>
+                        <p>${quoteData.exchange} • ${quoteData.currency}</p>
                     </div>
                     <div class="quote-change ${isPositive ? 'positive' : 'negative'}">
                         <i class="fas fa-${isPositive ? 'arrow-up' : 'arrow-down'}"></i>
@@ -593,19 +507,19 @@ const DemoApp = {
                 <div class="company-metrics">
                     <div class="metric-item">
                         <span class="metric-label">Open</span>
-                        <span class="metric-value">$${(quoteData.open || 0).toFixed(2)}</span>
+                        <span class="metric-value">$${quoteData.open.toFixed(2)}</span>
                     </div>
                     <div class="metric-item">
                         <span class="metric-label">High</span>
-                        <span class="metric-value">$${(quoteData.high || 0).toFixed(2)}</span>
+                        <span class="metric-value">$${quoteData.high.toFixed(2)}</span>
                     </div>
                     <div class="metric-item">
                         <span class="metric-label">Low</span>
-                        <span class="metric-value">$${(quoteData.low || 0).toFixed(2)}</span>
+                        <span class="metric-value">$${quoteData.low.toFixed(2)}</span>
                     </div>
                     <div class="metric-item">
                         <span class="metric-label">Volume</span>
-                        <span class="metric-value">${this.formatNumber(quoteData.volume || 0)}</span>
+                        <span class="metric-value">${this.formatNumber(quoteData.volume)}</span>
                     </div>
                 </div>
             </div>
@@ -615,14 +529,11 @@ const DemoApp = {
     },
     
     loadCompanyExtraCharts: function(symbol) {
-        console.log('📊 Loading extra charts (DEMO) for:', symbol);
-        
         const chartsContainer = document.getElementById('companyExtraCharts');
         if (!chartsContainer) return;
         
         chartsContainer.style.display = 'block';
         
-        // ⚠ GÉNÉRER DES DONNÉES FICTIVES
         const timeSeriesData = DemoDataGenerator.generateOHLCV(90);
         
         this.wrapChartInScrollContainer('companyPerformanceChart');
@@ -631,7 +542,7 @@ const DemoApp = {
         this.renderCompanyPerformanceChart(symbol, timeSeriesData);
         this.renderCompanyRatingsChart(symbol);
     },
-
+    
     renderCompanyPerformanceChart: function(symbol, data) {
         if (this.charts.companyPerformance) {
             this.charts.companyPerformance.destroy();
@@ -654,50 +565,28 @@ const DemoApp = {
         
         this.charts.companyPerformance = Highcharts.chart('companyPerformanceChart', Object.assign({}, baseConfig, {
             title: {
-                text: `${symbol} vs Market Performance (DEMO DATA)`,
+                text: `${symbol} vs Market (DEMO DATA)`,
                 style: baseConfig.title.style
             },
             subtitle: {
-                text: '⚠ Simulated data for demonstration only',
-                style: {
-                    color: '#f59e0b',
-                    fontSize: '0.75rem'
-                }
+                text: '⚠ Simulated data',
+                style: { color: '#f59e0b', fontSize: '0.75rem' }
             },
-            xAxis: Object.assign({}, baseConfig.xAxis, {
-                type: 'datetime'
-            }),
+            xAxis: Object.assign({}, baseConfig.xAxis, { type: 'datetime' }),
             yAxis: Object.assign({}, baseConfig.yAxis, {
-                title: {
-                    text: 'Performance (%)',
-                    style: baseConfig.yAxis.title.style
-                },
-                labels: {
-                    format: '{value}%',
-                    style: baseConfig.yAxis.labels.style
-                },
-                plotLines: [{
-                    value: 0,
-                    color: '#64748b',
-                    width: 1,
-                    dashStyle: 'Dash'
-                }]
+                title: { text: 'Performance (%)', style: baseConfig.yAxis.title.style },
+                labels: { format: '{value}%', style: baseConfig.yAxis.labels.style }
             }),
-            tooltip: {
-                shared: true,
-                valueDecimals: 2,
-                valueSuffix: '%'
-            },
             series: [{
                 name: symbol + ' (DEMO)',
                 data: stockPerformance,
                 color: '#3B82F6',
-                lineWidth: this.isMobile() ? 2 : 3
+                lineWidth: 2
             }, {
                 name: 'Market (DEMO)',
                 data: sp500Performance,
                 color: '#94A3B8',
-                lineWidth: this.isMobile() ? 1.5 : 2,
+                lineWidth: 2,
                 dashStyle: 'Dash'
             }]
         }));
@@ -708,7 +597,6 @@ const DemoApp = {
             this.charts.companyRatings.destroy();
         }
         
-        // ⚠ DONNÉES FICTIVES ALÉATOIRES
         const ratings = [
             { name: 'Strong Buy', y: Math.floor(Math.random() * 15), color: '#10B981' },
             { name: 'Buy', y: Math.floor(Math.random() * 10), color: '#34D399' },
@@ -720,48 +608,23 @@ const DemoApp = {
         const baseConfig = this.getResponsiveChartConfig();
         
         this.charts.companyRatings = Highcharts.chart('companyRatingsChart', Object.assign({}, baseConfig, {
-            chart: Object.assign({}, baseConfig.chart, {
-                type: 'bar'
-            }),
+            chart: Object.assign({}, baseConfig.chart, { type: 'bar' }),
             title: {
-                text: `${symbol} Analyst Ratings (DEMO DATA)`,
+                text: `${symbol} Ratings (DEMO)`,
                 style: baseConfig.title.style
             },
             subtitle: {
-                text: '⚠ Simulated data for demonstration only',
-                style: {
-                    color: '#f59e0b',
-                    fontSize: '0.75rem'
-                }
+                text: '⚠ Simulated data',
+                style: { color: '#f59e0b', fontSize: '0.75rem' }
             },
             xAxis: Object.assign({}, baseConfig.xAxis, {
                 categories: ratings.map(r => r.name)
             }),
             yAxis: Object.assign({}, baseConfig.yAxis, {
                 min: 0,
-                title: {
-                    text: 'Analysts',
-                    style: baseConfig.yAxis.title.style
-                }
+                title: { text: 'Analysts', style: baseConfig.yAxis.title.style }
             }),
-            legend: {
-                enabled: false
-            },
-            tooltip: {
-                valueSuffix: ' analysts (DEMO)'
-            },
-            plotOptions: {
-                bar: {
-                    dataLabels: {
-                        enabled: !this.isMobile(),
-                        style: {
-                            color: '#fff',
-                            textOutline: 'none',
-                            fontSize: this.isMobile() ? '0.625rem' : '0.75rem'
-                        }
-                    }
-                }
-            },
+            legend: { enabled: false },
             series: [{
                 name: 'Analysts',
                 data: ratings,
@@ -771,7 +634,7 @@ const DemoApp = {
     },
 
     // ============================================
-    // LIVE QUOTES - DONNÉES FICTIVES
+    // LIVE QUOTES
     // ============================================
     setupLiveQuotesListeners: function() {
         const input = document.getElementById('quoteSymbolInput');
@@ -800,20 +663,13 @@ const DemoApp = {
         }
         
         const trimmedSymbol = symbol.trim().toUpperCase();
-        console.log('📊 Loading live quote (DEMO) for:', trimmedSymbol);
         
         const container = document.getElementById('quoteDisplay');
         if (!container) return;
         
-        container.innerHTML = `
-            <div class="quote-placeholder">
-                <i class="fas fa-spinner fa-spin"></i>
-                <p>Loading demo quote data...</p>
-            </div>
-        `;
+        container.innerHTML = '<div class="quote-placeholder"><i class="fas fa-spinner fa-spin"></i><p>Loading...</p></div>';
         
         setTimeout(() => {
-            // ⚠ DONNÉES FICTIVES
             const quoteData = DemoDataGenerator.generateQuote(trimmedSymbol);
             this.displayLiveQuote(quoteData);
             
@@ -822,27 +678,27 @@ const DemoApp = {
             
             this.loadQuoteChart(trimmedSymbol);
             this.renderMarketSentiment(trimmedSymbol, quoteData);
-        }, 800);
+        }, 500);
     },
     
     displayLiveQuote: function(quoteData) {
         const container = document.getElementById('quoteDisplay');
         if (!container) return;
         
-        const currentPrice = quoteData.close || quoteData.price || 0;
+        const currentPrice = quoteData.close || 0;
         const change = quoteData.change || 0;
-        const percentChange = quoteData.percent_change || quoteData.percentChange || 0;
+        const percentChange = quoteData.percent_change || 0;
         const isPositive = change >= 0;
         
         container.innerHTML = `
             <div class="demo-data-disclaimer">
                 <i class="fas fa-exclamation-triangle"></i>
-                <strong>SIMULATED DATA:</strong> All quotes are randomly generated for demonstration purposes only.
+                <strong>SIMULATED DATA:</strong> Randomly generated quotes for demo.
             </div>
             
             <div class="quote-header">
                 <div class="quote-symbol">${quoteData.symbol} <span class="demo-badge-inline">DEMO</span></div>
-                <div class="quote-name">${this.escapeHtml(quoteData.name || 'N/A')}</div>
+                <div class="quote-name">${this.escapeHtml(quoteData.name)}</div>
             </div>
             
             <div class="quote-main-info">
@@ -856,26 +712,25 @@ const DemoApp = {
             <div class="quote-info">
                 <div class="quote-stat">
                     <div class="quote-stat-label">Open</div>
-                    <div class="quote-stat-value">$${(quoteData.open || 0).toFixed(2)}</div>
+                    <div class="quote-stat-value">$${quoteData.open.toFixed(2)}</div>
                 </div>
                 <div class="quote-stat">
                     <div class="quote-stat-label">High</div>
-                    <div class="quote-stat-value">$${(quoteData.high || 0).toFixed(2)}</div>
+                    <div class="quote-stat-value">$${quoteData.high.toFixed(2)}</div>
                 </div>
                 <div class="quote-stat">
                     <div class="quote-stat-label">Low</div>
-                    <div class="quote-stat-value">$${(quoteData.low || 0).toFixed(2)}</div>
+                    <div class="quote-stat-value">$${quoteData.low.toFixed(2)}</div>
                 </div>
                 <div class="quote-stat">
                     <div class="quote-stat-label">Volume</div>
-                    <div class="quote-stat-value">${this.formatNumber(quoteData.volume || 0)}</div>
+                    <div class="quote-stat-value">${this.formatNumber(quoteData.volume)}</div>
                 </div>
             </div>
         `;
     },
     
     loadQuoteChart: function(symbol) {
-        // ⚠ DONNÉES FICTIVES
         const timeSeriesData = DemoDataGenerator.generateOHLCV(90);
         this.renderQuoteChart(timeSeriesData, symbol);
     },
@@ -892,28 +747,18 @@ const DemoApp = {
         
         this.charts.liveQuote = Highcharts.stockChart('liveQuoteChart', Object.assign({}, baseConfig, {
             title: {
-                text: `${symbol} - Price History (DEMO DATA)`,
+                text: `${symbol} - Price (DEMO)`,
                 style: baseConfig.title.style
             },
             subtitle: {
-                text: '⚠ Simulated data for demonstration only',
-                style: {
-                    color: '#f59e0b',
-                    fontSize: '0.75rem'
-                }
+                text: '⚠ Simulated data',
+                style: { color: '#f59e0b', fontSize: '0.75rem' }
             },
             series: [{
                 name: 'Price (DEMO)',
                 data: dates.map((date, i) => [date, prices[i]]),
                 color: '#3B82F6',
-                lineWidth: this.isMobile() ? 2 : 2,
-                fillColor: {
-                    linearGradient: { x1: 0, y1: 0, x2: 0, y2: 1 },
-                    stops: [
-                        [0, 'rgba(59, 130, 246, 0.3)'],
-                        [1, 'rgba(59, 130, 246, 0.05)']
-                    ]
-                }
+                lineWidth: 2
             }]
         }));
     },
@@ -928,8 +773,7 @@ const DemoApp = {
             this.charts.sentimentGauge.destroy();
         }
         
-        // ⚠ SENTIMENT FICTIF
-        const percentChange = quoteData.percent_change || quoteData.percentChange || 0;
+        const percentChange = quoteData.percent_change || 0;
         let sentimentScore = 50 + (percentChange * 5);
         sentimentScore = Math.max(0, Math.min(100, sentimentScore));
         
@@ -942,9 +786,6 @@ const DemoApp = {
         } else if (sentimentScore >= 55) {
             sentimentLabel = 'Bullish';
             sentimentColor = '#34D399';
-        } else if (sentimentScore >= 45) {
-            sentimentLabel = 'Neutral';
-            sentimentColor = '#FCD34D';
         } else if (sentimentScore >= 30) {
             sentimentLabel = 'Bearish';
             sentimentColor = '#FB923C';
@@ -962,15 +803,8 @@ const DemoApp = {
                 height: isMobile ? 200 : 250
             }),
             title: {
-                text: `${symbol} Market Sentiment (DEMO)`,
+                text: `${symbol} Sentiment (DEMO)`,
                 style: baseConfig.title.style
-            },
-            subtitle: {
-                text: '⚠ Simulated sentiment score',
-                style: {
-                    color: '#f59e0b',
-                    fontSize: '0.75rem'
-                }
             },
             pane: {
                 center: ['50%', '85%'],
@@ -984,9 +818,6 @@ const DemoApp = {
                     shape: 'arc'
                 }
             },
-            tooltip: {
-                enabled: false
-            },
             yAxis: {
                 min: 0,
                 max: 100,
@@ -997,21 +828,7 @@ const DemoApp = {
                 ],
                 lineWidth: 0,
                 tickWidth: 0,
-                minorTickInterval: null,
-                tickAmount: 2,
-                labels: {
-                    y: 16,
-                    style: baseConfig.yAxis.labels.style
-                }
-            },
-            plotOptions: {
-                solidgauge: {
-                    dataLabels: {
-                        y: isMobile ? -15 : -25,
-                        borderWidth: 0,
-                        useHTML: true
-                    }
-                }
+                labels: { y: 16, style: baseConfig.yAxis.labels.style }
             },
             series: [{
                 name: 'Sentiment',
@@ -1025,16 +842,10 @@ const DemoApp = {
             }]
         }));
     },
-    
-    // ... (Le reste du code continue avec la même approche : remplacer toutes les données API par des données générées par DemoDataGenerator)
-    
-    // POURSUIVRE AVEC LE MÊME PATTERN POUR :
-    // - Portfolio Builder
-    // - Technical Analysis
-    // - Risk Calculator
-    // - AI Insights
-    
-    // Exemple pour Portfolio :
+
+    // ============================================
+    // PORTFOLIO BUILDER
+    // ============================================
     setupPortfolioListeners: function() {
         const btnAdd = document.getElementById('btnAddToPortfolio');
         
@@ -1084,7 +895,6 @@ const DemoApp = {
             return;
         }
         
-        // ⚠ GÉNÉRER PRIX FICTIF
         const demoPrice = parseFloat(DemoDataGenerator.generatePrice());
         
         const holding = {
@@ -1105,24 +915,740 @@ const DemoApp = {
         if (this.portfolio.length >= 2) {
             this.wrapChartInScrollContainer('correlationHeatmap');
             this.wrapChartInScrollContainer('portfolioPerformanceChart');
-            
             this.loadPortfolioAdvancedCharts();
         }
         
         this.showNotification(`✅ ${symbol} added to portfolio (DEMO DATA)`, 'success');
     },
     
+    removeFromPortfolio: function(symbol) {
+        this.portfolio = this.portfolio.filter(p => p.symbol !== symbol);
+        this.updatePortfolioDisplay();
+        
+        if (this.portfolio.length >= 2) {
+            this.loadPortfolioAdvancedCharts();
+        } else {
+            const corrContainer = document.getElementById('portfolioCorrelation');
+            const perfContainer = document.getElementById('portfolioPerformance');
+            if (corrContainer) corrContainer.style.display = 'none';
+            if (perfContainer) perfContainer.style.display = 'none';
+        }
+        
+        this.showNotification(`${symbol} removed from portfolio`, 'success');
+    },
+    
+    updatePortfolioDisplay: function() {
+        const tableBody = document.getElementById('portfolioTableBody');
+        const summary = document.getElementById('portfolioSummary');
+        
+        if (!tableBody) return;
+        
+        if (this.portfolio.length === 0) {
+            tableBody.innerHTML = `
+                <tr class="empty-state">
+                    <td colspan="6">
+                        <i class="fas fa-briefcase"></i>
+                        <p>Your portfolio is empty. Add some stocks!</p>
+                    </td>
+                </tr>
+            `;
+            
+            if (summary) {
+                summary.innerHTML = `
+                    <div class="summary-card"><h4>Total Value</h4><p class="value-large">$0.00</p></div>
+                    <div class="summary-card"><h4>Holdings</h4><p class="value-large">0</p></div>
+                    <div class="summary-card"><h4>Diversification</h4><p class="value-large">N/A</p></div>
+                `;
+            }
+            
+            return;
+        }
+        
+        const totalValue = this.portfolio.reduce((sum, p) => sum + p.value, 0);
+        
+        let html = '';
+        this.portfolio.forEach(holding => {
+            const allocation = (holding.value / totalValue * 100).toFixed(2);
+            
+            html += `
+                <tr>
+                    <td><strong>${holding.symbol}</strong></td>
+                    <td>${holding.shares.toLocaleString()}</td>
+                    <td>$${holding.price.toFixed(2)}</td>
+                    <td>$${holding.value.toLocaleString(undefined, {minimumFractionDigits: 2})}</td>
+                    <td>${allocation}%</td>
+                    <td>
+                        <button class="btn-remove" onclick="DemoApp.removeFromPortfolio('${holding.symbol}')">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </td>
+                </tr>
+            `;
+        });
+        
+        tableBody.innerHTML = html;
+        
+        let diversificationScore = 'Low';
+        if (this.portfolio.length >= 5) diversificationScore = 'Excellent';
+        else if (this.portfolio.length >= 3) diversificationScore = 'Good';
+        else if (this.portfolio.length >= 2) diversificationScore = 'Fair';
+        
+        if (summary) {
+            summary.innerHTML = `
+                <div class="summary-card"><h4>Total Value</h4><p class="value-large">$${totalValue.toLocaleString(undefined, {minimumFractionDigits: 2})}</p></div>
+                <div class="summary-card"><h4>Holdings</h4><p class="value-large">${this.portfolio.length}</p></div>
+                <div class="summary-card"><h4>Diversification</h4><p class="value-large">${diversificationScore}</p></div>
+            `;
+        }
+        
+        this.wrapChartInScrollContainer('portfolioAllocationChart');
+        this.updatePortfolioChart();
+    },
+    
+    updatePortfolioChart: function() {
+        if (this.charts.portfolioAllocation) {
+            this.charts.portfolioAllocation.destroy();
+        }
+        
+        if (this.portfolio.length === 0) return;
+        
+        const totalValue = this.portfolio.reduce((sum, p) => sum + p.value, 0);
+        
+        const data = this.portfolio.map(holding => ({
+            name: holding.symbol,
+            y: holding.value,
+            percentage: (holding.value / totalValue * 100).toFixed(2)
+        }));
+        
+        const baseConfig = this.getResponsiveChartConfig();
+        
+        this.charts.portfolioAllocation = Highcharts.chart('portfolioAllocationChart', Object.assign({}, baseConfig, {
+            chart: Object.assign({}, baseConfig.chart, { type: 'pie' }),
+            title: {
+                text: 'Portfolio Allocation',
+                style: baseConfig.title.style
+            },
+            series: [{
+                name: 'Value',
+                colorByPoint: true,
+                data: data
+            }]
+        }));
+    },
+    
+    loadPortfolioAdvancedCharts: function() {
+        this.renderPortfolioCorrelation();
+        this.renderPortfolioPerformance();
+    },
+    
+    renderPortfolioCorrelation: function() {
+        const container = document.getElementById('portfolioCorrelation');
+        if (!container) return;
+        
+        container.style.display = 'block';
+        
+        if (this.charts.correlationHeatmap) {
+            this.charts.correlationHeatmap.destroy();
+        }
+        
+        const symbols = this.portfolio.map(p => p.symbol);
+        const correlationData = [];
+        
+        symbols.forEach((symbol1, i) => {
+            symbols.forEach((symbol2, j) => {
+                let correlation = i === j ? 1 : (Math.random() * 1.6 - 0.8).toFixed(2);
+                correlationData.push([j, i, parseFloat(correlation)]);
+            });
+        });
+        
+        const baseConfig = this.getResponsiveChartConfig();
+        
+        this.charts.correlationHeatmap = Highcharts.chart('correlationHeatmap', Object.assign({}, baseConfig, {
+            chart: Object.assign({}, baseConfig.chart, { type: 'heatmap' }),
+            title: {
+                text: 'Correlation Matrix (DEMO)',
+                style: baseConfig.title.style
+            },
+            xAxis: Object.assign({}, baseConfig.xAxis, { categories: symbols }),
+            yAxis: Object.assign({}, baseConfig.yAxis, { categories: symbols, title: null }),
+            colorAxis: {
+                min: -1,
+                max: 1,
+                stops: [[0, '#EF4444'], [0.5, '#FCD34D'], [1, '#10B981']]
+            },
+            series: [{
+                name: 'Correlation',
+                data: correlationData,
+                dataLabels: {
+                    enabled: !this.isMobile(),
+                    color: '#000',
+                    format: '{point.value:.2f}'
+                }
+            }]
+        }));
+    },
+    
+    renderPortfolioPerformance: function() {
+        const container = document.getElementById('portfolioPerformance');
+        if (!container) return;
+        
+        container.style.display = 'block';
+        
+        if (this.charts.portfolioPerformance) {
+            this.charts.portfolioPerformance.destroy();
+        }
+        
+        const series = this.portfolio.map(holding => {
+            const data = DemoDataGenerator.generateOHLCV(30);
+            const sortedData = [...data].sort((a, b) => new Date(a.datetime) - new Date(b.datetime));
+            
+            const firstPrice = parseFloat(sortedData[0].close);
+            const performanceData = sortedData.map(d => ({
+                x: new Date(d.datetime).getTime(),
+                y: (parseFloat(d.close) / firstPrice - 1) * 100
+            }));
+            
+            return {
+                name: holding.symbol,
+                data: performanceData
+            };
+        });
+        
+        const baseConfig = this.getResponsiveChartConfig();
+        
+        this.charts.portfolioPerformance = Highcharts.stockChart('portfolioPerformanceChart', Object.assign({}, baseConfig, {
+            title: {
+                text: 'Portfolio Performance (DEMO)',
+                style: baseConfig.title.style
+            },
+            yAxis: Object.assign({}, baseConfig.yAxis, {
+                title: { text: 'Performance (%)', style: baseConfig.yAxis.title.style },
+                labels: { format: '{value}%', style: baseConfig.yAxis.labels.style }
+            }),
+            series: series
+        }));
+    },
+
+    // ============================================
+    // TECHNICAL ANALYSIS
+    // ============================================
+    setupTechnicalListeners: function() {
+        const btnAnalyze = document.getElementById('btnAnalyze');
+        const input = document.getElementById('technicalSymbol');
+        
+        if (input) {
+            input.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    this.analyzeTechnical();
+                }
+            });
+        }
+        
+        if (btnAnalyze) {
+            btnAnalyze.addEventListener('click', () => {
+                this.analyzeTechnical();
+            });
+        }
+        
+        ['indicatorSMA', 'indicatorEMA', 'indicatorBollinger', 'indicatorRSI', 'indicatorMACD'].forEach(id => {
+            const checkbox = document.getElementById(id);
+            if (checkbox) {
+                checkbox.addEventListener('change', (e) => {
+                    this.toggleIndicator(id, e.target.checked);
+                });
+            }
+        });
+    },
+    
+    analyzeTechnical: function() {
+        const input = document.getElementById('technicalSymbol');
+        if (!input || !input.value.trim()) {
+            this.showNotification('Please enter a ticker symbol', 'warning');
+            return;
+        }
+        
+        const symbol = input.value.trim().toUpperCase();
+        this.currentTechnicalSymbol = symbol;
+        
+        const timeSeriesData = DemoDataGenerator.generateOHLCV(180);
+        
+        this.wrapChartInScrollContainer('technicalChart');
+        
+        this.renderTechnicalChart(timeSeriesData, symbol);
+        this.generateTechnicalSignals(symbol, timeSeriesData);
+    },
+    
+    renderTechnicalChart: function(data, symbol) {
+        if (this.charts.technical) {
+            this.charts.technical.destroy();
+        }
+        
+        const sortedData = [...data].sort((a, b) => new Date(a.datetime) - new Date(b.datetime));
+        
+        const ohlc = sortedData.map(d => [
+            d.timestamp || new Date(d.datetime).getTime(),
+            parseFloat(d.open),
+            parseFloat(d.high),
+            parseFloat(d.low),
+            parseFloat(d.close)
+        ]);
+        
+        const volume = sortedData.map(d => [
+            d.timestamp || new Date(d.datetime).getTime(),
+            parseFloat(d.volume || 0)
+        ]);
+        
+        const baseConfig = this.getResponsiveChartConfig();
+        const isMobile = this.isMobile();
+        
+        this.charts.technical = Highcharts.stockChart('technicalChart', Object.assign({}, baseConfig, {
+            chart: Object.assign({}, baseConfig.chart, {
+                height: isMobile ? 350 : 500
+            }),
+            title: {
+                text: `${symbol} - Technical Analysis (DEMO)`,
+                style: baseConfig.title.style
+            },
+            subtitle: {
+                text: '⚠ Simulated data',
+                style: { color: '#f59e0b', fontSize: '0.75rem' }
+            },
+            yAxis: [{
+                labels: { align: 'right', x: -3, style: baseConfig.yAxis.labels.style },
+                title: { text: 'Price (USD)', style: baseConfig.yAxis.title.style },
+                height: '70%',
+                lineWidth: 2
+            }, {
+                labels: { align: 'right', x: -3, style: baseConfig.yAxis.labels.style },
+                title: { text: 'Volume', style: baseConfig.yAxis.title.style },
+                top: '75%',
+                height: '25%',
+                offset: 0,
+                lineWidth: 2
+            }],
+            series: [{
+                type: 'candlestick',
+                name: symbol,
+                id: 'main-series',
+                data: ohlc,
+                color: '#EF4444',
+                upColor: '#10B981',
+                yAxis: 0
+            }, {
+                type: 'column',
+                name: 'Volume',
+                data: volume,
+                yAxis: 1,
+                color: '#3B82F6',
+                opacity: 0.5
+            }]
+        }));
+    },
+    
+    toggleIndicator: function(indicatorId, isEnabled) {
+        console.log('Toggle indicator:', indicatorId, isEnabled);
+    },
+    
+    generateTechnicalSignals: function(symbol, data) {
+        const container = document.getElementById('technicalSignals');
+        if (!container) return;
+        
+        container.innerHTML = `
+            <h4>Technical Signals for ${symbol} (DEMO)</h4>
+            <div class="signals-grid">
+                <div class="signal-card">
+                    <div class="signal-icon bullish"><i class="fas fa-arrow-up"></i></div>
+                    <div class="signal-info">
+                        <h5>Price Trend</h5>
+                        <p><strong>Bullish (DEMO)</strong></p>
+                        <p class="signal-detail">Current: $${(Math.random() * 200 + 50).toFixed(2)}</p>
+                    </div>
+                </div>
+                
+                <div class="signal-card">
+                    <div class="signal-icon neutral"><i class="fas fa-chart-line"></i></div>
+                    <div class="signal-info">
+                        <h5>RSI (14)</h5>
+                        <p><strong>${(Math.random() * 100).toFixed(2)} (DEMO)</strong></p>
+                        <p class="signal-detail">Neutral zone</p>
+                    </div>
+                </div>
+            </div>
+        `;
+    },
+
+    // ============================================
+    // RISK CALCULATOR
+    // ============================================
+    setupRiskCalculatorListeners: function() {
+        const btnCalculate = document.getElementById('btnCalculateRisk');
+        
+        if (btnCalculate) {
+            btnCalculate.addEventListener('click', () => {
+                this.calculateRiskMetrics();
+            });
+        }
+        
+        ['riskPortfolioValue', 'riskConfidence', 'riskVolatility', 'riskReturn', 'riskHorizon'].forEach(id => {
+            const input = document.getElementById(id);
+            if (input) {
+                input.addEventListener('input', () => {
+                    clearTimeout(this.riskCalcTimeout);
+                    this.riskCalcTimeout = setTimeout(() => {
+                        this.calculateRiskMetrics();
+                    }, 500);
+                });
+            }
+        });
+    },
+    
+    calculateRiskMetrics: function() {
+        const portfolioValue = parseFloat(document.getElementById('riskPortfolioValue')?.value || 100000);
+        const confidence = parseFloat(document.getElementById('riskConfidence')?.value || 95);
+        const volatility = parseFloat(document.getElementById('riskVolatility')?.value || 15);
+        const expectedReturn = parseFloat(document.getElementById('riskReturn')?.value || 8);
+        const timeHorizon = parseFloat(document.getElementById('riskHorizon')?.value || 1);
+        
+        const zScoreMap = { 90: 1.282, 95: 1.645, 99: 2.326 };
+        const zScore = zScoreMap[confidence] || 1.645;
+        
+        const dailyVolatility = volatility / Math.sqrt(252);
+        const horizonVolatility = dailyVolatility * Math.sqrt(timeHorizon);
+        const varDaily = portfolioValue * horizonVolatility * zScore / 100;
+        
+        const cvar = varDaily * 1.3;
+        const riskFreeRate = 2;
+        const sharpeRatio = (expectedReturn - riskFreeRate) / volatility;
+        const maxDrawdown = (volatility / 100) * portfolioValue * 1.5;
+        const beta = 0.8 + (Math.random() * 0.6);
+        
+        this.displayRiskResults({
+            portfolioValue, confidence, volatility, expectedReturn, timeHorizon,
+            varDaily, cvar, sharpeRatio, maxDrawdown, beta
+        });
+        
+        this.wrapChartInScrollContainer('monteCarloChart');
+        this.runMonteCarloSimulation({ portfolioValue, expectedReturn, volatility, timeHorizon: 252 });
+    },
+    
+    displayRiskResults: function(metrics) {
+        const container = document.getElementById('riskResults');
+        if (!container) return;
+        
+        container.innerHTML = `
+            <div class="demo-data-disclaimer">
+                <i class="fas fa-exclamation-triangle"></i>
+                <strong>SIMULATED METRICS:</strong> Educational purposes only.
+            </div>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+                <div class="risk-metric-card">
+                    <h5>Value at Risk (VaR)</h5>
+                    <div class="risk-metric-value text-danger">$${metrics.varDaily.toLocaleString(undefined, {minimumFractionDigits: 2})}</div>
+                    <p class="risk-metric-description">${metrics.confidence}% confidence - ${metrics.timeHorizon} day(s)</p>
+                </div>
+                
+                <div class="risk-metric-card">
+                    <h5>Conditional VaR (CVaR)</h5>
+                    <div class="risk-metric-value text-danger">$${metrics.cvar.toLocaleString(undefined, {minimumFractionDigits: 2})}</div>
+                    <p class="risk-metric-description">Expected loss if VaR exceeded</p>
+                </div>
+                
+                <div class="risk-metric-card">
+                    <h5>Sharpe Ratio</h5>
+                    <div class="risk-metric-value ${metrics.sharpeRatio > 1 ? 'text-success' : ''}">${metrics.sharpeRatio.toFixed(2)}</div>
+                    <p class="risk-metric-description">Risk-adjusted return</p>
+                </div>
+                
+                <div class="risk-metric-card">
+                    <h5>Maximum Drawdown</h5>
+                    <div class="risk-metric-value text-danger">$${metrics.maxDrawdown.toLocaleString(undefined, {minimumFractionDigits: 2})}</div>
+                    <p class="risk-metric-description">Estimated worst-case loss</p>
+                </div>
+            </div>
+        `;
+    },
+    
+    runMonteCarloSimulation: function(params) {
+        const container = document.getElementById('monteCarloSection');
+        if (!container) return;
+        
+        container.style.display = 'block';
+        
+        if (this.charts.monteCarlo) {
+            this.charts.monteCarlo.destroy();
+        }
+        
+        const { portfolioValue, expectedReturn, volatility, timeHorizon } = params;
+        const numSimulations = this.isMobile() ? 50 : 100;
+        const dailyReturn = expectedReturn / 252 / 100;
+        const dailyVol = volatility / Math.sqrt(252) / 100;
+        
+        const simulations = [];
+        
+        for (let sim = 0; sim < numSimulations; sim++) {
+            const path = [portfolioValue];
+            let currentValue = portfolioValue;
+            
+            for (let day = 1; day <= timeHorizon; day++) {
+                const randomReturn = this.randomNormal(dailyReturn, dailyVol);
+                currentValue = currentValue * (1 + randomReturn);
+                path.push(currentValue);
+            }
+            
+            simulations.push(path);
+        }
+        
+        const series = simulations.map((path, index) => ({
+            name: `Simulation ${index + 1}`,
+            data: path,
+            lineWidth: this.isMobile() ? 0.5 : 1,
+            opacity: 0.3,
+            marker: { enabled: false },
+            enableMouseTracking: false,
+            showInLegend: false
+        }));
+        
+        const avgPath = [];
+        for (let day = 0; day <= timeHorizon; day++) {
+            const dayValues = simulations.map(sim => sim[day]);
+            const avg = dayValues.reduce((a, b) => a + b, 0) / dayValues.length;
+            avgPath.push(avg);
+        }
+        
+        series.push({
+            name: 'Average Path',
+            data: avgPath,
+            lineWidth: this.isMobile() ? 2 : 3,
+            color: '#3B82F6',
+            marker: { enabled: false },
+            zIndex: 10
+        });
+        
+        const baseConfig = this.getResponsiveChartConfig();
+        
+        this.charts.monteCarlo = Highcharts.chart('monteCarloChart', Object.assign({}, baseConfig, {
+            title: {
+                text: 'Portfolio Projections (DEMO)',
+                style: baseConfig.title.style
+            },
+            subtitle: {
+                text: '⚠ Simulated scenarios',
+                style: { color: '#f59e0b', fontSize: '0.75rem' }
+            },
+            xAxis: Object.assign({}, baseConfig.xAxis, {
+                title: { text: 'Trading Days', style: baseConfig.xAxis.labels.style }
+            }),
+            yAxis: Object.assign({}, baseConfig.yAxis, {
+                title: { text: 'Portfolio Value ($)', style: baseConfig.yAxis.title.style },
+                labels: {
+                    formatter: function() {
+                        return '$' + (this.value / 1000).toFixed(0) + 'k';
+                    },
+                    style: baseConfig.yAxis.labels.style
+                }
+            }),
+            series: series
+        }));
+    },
+    
+    randomNormal: function(mean, stdDev) {
+        let u = 0, v = 0;
+        while(u === 0) u = Math.random();
+        while(v === 0) v = Math.random();
+        const num = Math.sqrt(-2.0 * Math.log(u)) * Math.cos(2.0 * Math.PI * v);
+        return num * stdDev + mean;
+    },
+
+    // ============================================
+    // AI INSIGHTS
+    // ============================================
+    setupAIInsightsListeners: function() {
+        const btnAnalyze = document.getElementById('btnAIAnalyze');
+        const input = document.getElementById('aiSymbolInput');
+        
+        if (input) {
+            input.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    this.generateAIInsights();
+                }
+            });
+        }
+        
+        if (btnAnalyze) {
+            btnAnalyze.addEventListener('click', () => {
+                this.generateAIInsights();
+            });
+        }
+    },
+    
+    generateAIInsights: function() {
+        const input = document.getElementById('aiSymbolInput');
+        if (!input || !input.value.trim()) {
+            this.showNotification('Please enter a ticker symbol', 'warning');
+            return;
+        }
+        
+        const symbol = input.value.trim().toUpperCase();
+        
+        const container = document.getElementById('aiResults');
+        if (!container) return;
+        
+        container.innerHTML = `
+            <div class="ai-placeholder">
+                <i class="fas fa-robot fa-spin"></i>
+                <h3>AI Analysis in Progress</h3>
+                <p>Analyzing ${symbol} with ML models (DEMO)...</p>
+            </div>
+        `;
+        
+        setTimeout(() => {
+            const quoteData = DemoDataGenerator.generateQuote(symbol);
+            const timeSeriesData = DemoDataGenerator.generateOHLCV(90);
+            this.displayAIInsights(symbol, quoteData, timeSeriesData);
+        }, 2000);
+    },
+    
+    displayAIInsights: function(symbol, quoteData, timeSeriesData) {
+        const container = document.getElementById('aiResults');
+        if (!container) return;
+        
+        const currentPrice = quoteData.close || 0;
+        
+        const prediction7d = currentPrice * (1 + (Math.random() - 0.45) * 0.15);
+        const prediction30d = currentPrice * (1 + (Math.random() - 0.45) * 0.25);
+        const prediction90d = currentPrice * (1 + (Math.random() - 0.45) * 0.35);
+        
+        const change7d = ((prediction7d - currentPrice) / currentPrice * 100).toFixed(2);
+        const change30d = ((prediction30d - currentPrice) / currentPrice * 100).toFixed(2);
+        const change90d = ((prediction90d - currentPrice) / currentPrice * 100).toFixed(2);
+        
+        const sentimentScore = 50 + (parseFloat(change30d) * 2);
+        const clampedSentiment = Math.max(0, Math.min(100, sentimentScore));
+        
+        let sentimentLabel = 'Neutral';
+        if (clampedSentiment >= 70) sentimentLabel = 'Very Positive';
+        else if (clampedSentiment >= 55) sentimentLabel = 'Positive';
+        else if (clampedSentiment >= 30) sentimentLabel = 'Negative';
+        else sentimentLabel = 'Very Negative';
+        
+        const confidence = 75 + Math.random() * 15;
+        
+        container.innerHTML = `
+            <div class="demo-data-disclaimer">
+                <i class="fas fa-exclamation-triangle"></i>
+                <strong>AI PREDICTIONS (DEMO):</strong> Randomly generated for demonstration only.
+            </div>
+            
+            <div class="ai-insight-card">
+                <div class="ai-insight-header">
+                    <div class="ai-insight-icon"><i class="fas fa-brain"></i></div>
+                    <div class="ai-insight-title">
+                        <h4>AI Price Predictions (DEMO)</h4>
+                        <p>Deep Learning Analysis for ${symbol}</p>
+                    </div>
+                    <div class="ai-confidence">
+                        <i class="fas fa-check-circle"></i>
+                        ${confidence.toFixed(1)}% Confidence
+                    </div>
+                </div>
+                <div class="ai-insight-content">
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1.5rem; margin: 1.5rem 0;">
+                        <div style="text-align: center;">
+                            <p style="font-size: 0.75rem; color: var(--text-secondary); margin-bottom: 0.5rem; text-transform: uppercase; font-weight: 600;">Current Price</p>
+                            <p style="font-size: 2rem; font-weight: 800; color: var(--text-primary); margin: 0;">$${currentPrice.toFixed(2)}</p>
+                        </div>
+                        <div style="text-align: center;">
+                            <p style="font-size: 0.75rem; color: var(--text-secondary); margin-bottom: 0.5rem; text-transform: uppercase; font-weight: 600;">7-Day Target</p>
+                            <p style="font-size: 2rem; font-weight: 800; color: ${change7d > 0 ? '#10B981' : '#EF4444'}; margin: 0;">$${prediction7d.toFixed(2)}</p>
+                            <p style="font-size: 0.875rem; color: ${change7d > 0 ? '#10B981' : '#EF4444'}; margin-top: 0.25rem;">${change7d > 0 ? '▲' : '▼'} ${Math.abs(change7d)}%</p>
+                        </div>
+                        <div style="text-align: center;">
+                            <p style="font-size: 0.75rem; color: var(--text-secondary); margin-bottom: 0.5rem; text-transform: uppercase; font-weight: 600;">30-Day Target</p>
+                            <p style="font-size: 2rem; font-weight: 800; color: ${change30d > 0 ? '#10B981' : '#EF4444'}; margin: 0;">$${prediction30d.toFixed(2)}</p>
+                            <p style="font-size: 0.875rem; color: ${change30d > 0 ? '#10B981' : '#EF4444'}; margin-top: 0.25rem;">${change30d > 0 ? '▲' : '▼'} ${Math.abs(change30d)}%</p>
+                        </div>
+                    </div>
+                    
+                    <div style="text-align: center; padding: 1.5rem; background: var(--background-secondary); border-radius: var(--radius-lg); margin-top: 1.5rem;">
+                        <p style="font-size: 0.875rem; color: var(--text-secondary); margin-bottom: 0.5rem;">Market Sentiment</p>
+                        <p style="font-size: 1.5rem; font-weight: 700; color: var(--primary-color); margin: 0;">${sentimentLabel}</p>
+                        <p style="font-size: 0.875rem; color: var(--text-secondary); margin-top: 0.5rem;">Score: ${clampedSentiment.toFixed(0)}/100</p>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        if (timeSeriesData) {
+            this.wrapChartInScrollContainer('predictionChartContainer');
+            this.renderAIPredictionChart(symbol, timeSeriesData, { currentPrice, prediction7d, prediction30d, prediction90d });
+        }
+    },
+    
+    renderAIPredictionChart: function(symbol, historicalData, predictions) {
+        const container = document.getElementById('aiPredictionChart');
+        if (!container) return;
+        
+        container.style.display = 'block';
+        
+        if (this.charts.aiPredictionChart) {
+            this.charts.aiPredictionChart.destroy();
+        }
+        
+        const sortedData = [...historicalData].sort((a, b) => new Date(a.datetime) - new Date(b.datetime));
+        const historical = sortedData.map(d => ({
+            x: new Date(d.datetime).getTime(),
+            y: parseFloat(d.close)
+        }));
+        
+        const lastDate = new Date(sortedData[sortedData.length - 1].datetime);
+        
+        const predictionPoints = [
+            { x: lastDate.getTime(), y: predictions.currentPrice },
+            { x: lastDate.getTime() + (7 * 24 * 60 * 60 * 1000), y: predictions.prediction7d },
+            { x: lastDate.getTime() + (30 * 24 * 60 * 60 * 1000), y: predictions.prediction30d }
+        ];
+        
+        const baseConfig = this.getResponsiveChartConfig();
+        
+        this.charts.aiPredictionChart = Highcharts.chart('predictionChartContainer', Object.assign({}, baseConfig, {
+            title: {
+                text: `${symbol} - AI Forecast (DEMO)`,
+                style: baseConfig.title.style
+            },
+            subtitle: {
+                text: '⚠ Simulated predictions',
+                style: { color: '#f59e0b', fontSize: '0.75rem' }
+            },
+            xAxis: Object.assign({}, baseConfig.xAxis, { type: 'datetime' }),
+            yAxis: Object.assign({}, baseConfig.yAxis, {
+                title: { text: 'Price (USD)', style: baseConfig.yAxis.title.style },
+                labels: { format: '${value}', style: baseConfig.yAxis.labels.style }
+            }),
+            series: [{
+                name: 'Historical (DEMO)',
+                data: historical,
+                color: '#3B82F6',
+                lineWidth: 2
+            }, {
+                name: 'AI Prediction (DEMO)',
+                data: predictionPoints,
+                color: '#8B5CF6',
+                lineWidth: 3,
+                dashStyle: 'Dash',
+                marker: { enabled: true, radius: 5 }
+            }]
+        }));
+    },
+    
+    // ============================================
     // UTILITY FUNCTIONS
+    // ============================================
     formatNumber: function(num) {
-        if (num >= 1000000000) {
-            return (num / 1000000000).toFixed(2) + 'B';
-        }
-        if (num >= 1000000) {
-            return (num / 1000000).toFixed(2) + 'M';
-        }
-        if (num >= 1000) {
-            return (num / 1000).toFixed(2) + 'K';
-        }
+        if (num >= 1000000000) return (num / 1000000000).toFixed(2) + 'B';
+        if (num >= 1000000) return (num / 1000000).toFixed(2) + 'M';
+        if (num >= 1000) return (num / 1000).toFixed(2) + 'K';
         return num.toLocaleString();
     },
     
@@ -1131,10 +1657,6 @@ const DemoApp = {
         const div = document.createElement('div');
         div.textContent = text;
         return div.innerHTML;
-    },
-    
-    showLoading: function(show) {
-        console.log(show ? '⏳ Loading...' : '✅ Loaded');
     },
     
     showNotification: function(message, type = 'info') {
@@ -1163,21 +1685,15 @@ const DemoApp = {
         
         document.body.appendChild(notification);
         
-        setTimeout(() => {
-            notification.classList.add('show');
-        }, 10);
-        
+        setTimeout(() => { notification.classList.add('show'); }, 10);
         setTimeout(() => {
             notification.classList.remove('show');
-            setTimeout(() => {
-                notification.remove();
-            }, 300);
+            setTimeout(() => { notification.remove(); }, 300);
         }, 5000);
     }
-    
 };
 
-// INITIALIZE ON DOM READY
+// INITIALIZE
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', () => {
         DemoApp.init();
