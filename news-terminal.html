@@ -3,7 +3,7 @@
 <head>
     <meta charset='UTF-8'>
     <meta name='viewport' content='width=device-width, initial-scale=1.0'>
-    <title>Interest Rate Tracker | AlphaVault AI</title>
+    <title>News Terminal | AlphaVault AI</title>
     
     <link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css'>
     <script src='https://code.highcharts.com/highcharts.js'></script>
@@ -11,7 +11,7 @@
     <link rel='stylesheet' href='assets/css/common.css'>
     <link rel='stylesheet' href='assets/css/sidebar.css'>
     <link rel="stylesheet" href="assets/css/user-menu.css">
-    <link rel='stylesheet' href='assets/css/interest-rates.css'>
+    <link rel='stylesheet' href='assets/css/news-terminal.css'>
     
     <script src="assets/js/favicon-dynamic.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
@@ -21,16 +21,17 @@
     <script src="assets/js/config.js"></script>
     <script src="assets/js/firebase-config.js"></script>
     <script src="assets/js/auth-guard.js"></script>
-    <script src="assets/js/access-control.js"></script>
 </head>
 <body>
 
     <script src="assets/js/theme.js"></script>
-    <script src="assets/js/theme-charts.js"></script>
     <canvas id="particles-canvas" class="particles-background"></canvas>
 
     <div class='layout-wrapper'>
-        <!-- Sidebar -->
+        
+        <!-- ════════════════════════════════════════════════════════════════
+             SIDEBAR COMPLÈTE
+             ════════════════════════════════════════════════════════════════ -->
         <aside class='sidebar' id='sidebar'>
             <div class="sidebar-header">
                 <div class="logo-container">
@@ -126,7 +127,7 @@
                         <span>Stocks</span>
                         <i class="fas fa-chevron-down arrow"></i>
                     </button>
-                    <div class='nav-submenu' style='display: block;'>
+                    <div class='nav-submenu'>
                         <a href='advanced-analysis.html' class='nav-link'>
                             <i class='fas fa-brain'></i>
                             <span>Advanced Analysis</span>
@@ -144,7 +145,7 @@
                         <span>AI Assistant</span>
                         <i class="fas fa-chevron-down arrow"></i>
                     </button>
-                    <div class='nav-submenu' style='display: block;'>
+                    <div class='nav-submenu'>
                         <a href='chatbot-fullpage.html' class='nav-link'>
                             <i class='fas fa-comments'></i>
                             <span>Alphy AI Chat</span>
@@ -158,16 +159,16 @@
                         <span>Economic Data</span>
                         <i class='fas fa-chevron-down arrow'></i>
                     </button>
-                    <div class='nav-submenu' style='display: block;'>
+                    <div class='nav-submenu'>
                         <a href='economic-dashboard.html' class='nav-link'>
                             <i class='fas fa-tachometer-alt'></i>
-                            <span>Macro Economic Dasboard</span>
+                            <span>Macro Economic Dashboard</span>
                         </a>
                         <a href='inflation-calculator.html' class='nav-link'>
                             <i class='fas fa-calculator'></i>
                             <span>Inflation Calculator</span>
                         </a>
-                        <a href='interest-rate-tracker.html' class='nav-link active'>
+                        <a href='interest-rate-tracker.html' class='nav-link'>
                             <i class='fas fa-percent'></i>
                             <span>Interest Rates</span>
                         </a>
@@ -186,7 +187,7 @@
                         <i class="fas fa-chevron-down arrow"></i>
                     </button>
                     <div class='nav-submenu'>
-                        <a href='news-terminal.html' class='nav-link'>
+                        <a href='news-terminal.html' class='nav-link active'>
                             <i class='fas fa-desktop'></i>
                             <span>News Terminal</span>
                         </a>
@@ -255,130 +256,232 @@
         
         <div class='sidebar-overlay' id='sidebarOverlay'></div>
 
+        <!-- ════════════════════════════════════════════════════════════════
+             CONTENU PRINCIPAL - NEWS TERMINAL
+             ════════════════════════════════════════════════════════════════ -->
         <div class='main-content'>
             <header class='top-header'>
                 <div class='header-left'>
                     <button class='mobile-toggle' id='mobileToggle'>
                         <i class='fas fa-bars'></i>
                     </button>
-                    <h1><i class="fas fa-percent"></i> Interest Rate Tracker</h1>
+                    <h1 class='page-title'>
+                        <i class="fas fa-newspaper"></i> News Terminal
+                    </h1>
+                </div>
+                <div class='header-right'>
+                    <button class='dashboard-btn' onclick='newsTerminal.refreshAll()'>
+                        <i class='fas fa-sync-alt'></i>
+                        <span class='btn-text'>Refresh</span>
+                    </button>
+                    <button class='dashboard-btn dashboard-btn-export' onclick='newsTerminal.exportToCSV()'>
+                        <i class='fas fa-download'></i>
+                        <span class='btn-text'>Export</span>
+                    </button>
                 </div>
             </header>
             
             <div class='container'>
                 
-                <!-- AI Recommendations -->
-                <div id='aiRecommendations'></div>
+                <!-- ════════════════════════════════════════════════════
+                     FILTRES & RECHERCHE
+                     ════════════════════════════════════════════════════ -->
+                <div class='section filters-section'>
+                    <div class='filters-grid'>
+                        <!-- Recherche -->
+                        <div class='filter-group'>
+                            <label><i class='fas fa-search'></i> Search</label>
+                            <input type='text' id='searchInput' placeholder='Search by keyword or ticker...' class='search-input'>
+                        </div>
 
-                <!-- Current Rates -->
-                <div class='section'>
-                    <div class='section-header-with-info'>
-                        <h2 class='section-title'>
-                            <i class='fas fa-tachometer-alt'></i> Current US Interest Rates
-                        </h2>
-                        <button class='info-btn' title='Information'>
-                            <i class='fas fa-info'></i>
-                        </button>
-                    </div>
-                    
-                    <div class='rates-dashboard-grid' id='currentRatesGrid'>
-                        <div class='loading-skeleton'></div>
+                        <!-- Source -->
+                        <div class='filter-group'>
+                            <label><i class='fas fa-rss'></i> Source</label>
+                            <select id='sourceFilter' onchange='newsTerminal.applyFilters()' class='filter-select'>
+                                <option value='all'>All Sources</option>
+                                <option value='cnbc-top'>CNBC</option>
+                                <option value='cnbc-tech'>CNBC Tech</option>
+                                <option value='cnbc-earnings'>CNBC Earnings</option>
+                                <option value='marketwatch-top'>MarketWatch</option>
+                                <option value='marketwatch-realtime'>MarketWatch Live</option>
+                                <option value='reuters-business'>Reuters Business</option>
+                                <option value='reuters-markets'>Reuters Markets</option>
+                            </select>
+                        </div>
+
+                        <!-- Secteur -->
+                        <div class='filter-group'>
+                            <label><i class='fas fa-industry'></i> Sector</label>
+                            <select id='sectorFilter' onchange='newsTerminal.applyFilters()' class='filter-select'>
+                                <option value='all'>All Sectors</option>
+                                <option value='tech'>Technology</option>
+                                <option value='finance'>Finance</option>
+                                <option value='energy'>Energy</option>
+                                <option value='healthcare'>Healthcare</option>
+                                <option value='consumer'>Consumer</option>
+                            </select>
+                        </div>
+
+                        <!-- Géographie -->
+                        <div class='filter-group'>
+                            <label><i class='fas fa-globe'></i> Region</label>
+                            <select id='regionFilter' onchange='newsTerminal.applyFilters()' class='filter-select'>
+                                <option value='all'>All Regions</option>
+                                <option value='us'>United States</option>
+                                <option value='eu'>Europe</option>
+                                <option value='asia'>Asia</option>
+                            </select>
+                        </div>
+
+                        <!-- Tri -->
+                        <div class='filter-group'>
+                            <label><i class='fas fa-sort'></i> Sort By</label>
+                            <select id='sortFilter' onchange='newsTerminal.applyFilters()' class='filter-select'>
+                                <option value='newest'>Newest First</option>
+                                <option value='oldest'>Oldest First</option>
+                                <option value='importance'>Importance</option>
+                                <option value='sentiment'>Sentiment</option>
+                            </select>
+                        </div>
                     </div>
                 </div>
 
-                <!-- Rate Projections -->
+                <!-- ════════════════════════════════════════════════════
+                     STATISTIQUES EN TEMPS RÉEL
+                     ════════════════════════════════════════════════════ -->
                 <div class='section'>
-                    <div class='section-header-with-info'>
-                        <h2 class='section-title'>
-                            <i class='fas fa-crystal-ball'></i> 12-Month Rate Projections
-                        </h2>
-                        <button class='info-btn' title='Information'>
-                            <i class='fas fa-info'></i>
-                        </button>
-                    </div>
+                    <h2 class='section-title'>
+                        <i class='fas fa-chart-bar'></i> Real-Time Statistics
+                    </h2>
                     
-                    <div id='projectionsContainer'></div>
-                    
-                    <div class='chart-wrapper' onclick="window.rateTracker.openModal('projectionChart')" style="cursor: pointer; margin-top: 32px;">
-                        <div id='projectionChart' class='chart' style='height: 450px;'></div>
+                    <div class='stats-grid'>
+                        <div class='stat-card'>
+                            <div class='stat-icon' style='background: linear-gradient(135deg, #3b82f6, #2563eb);'>
+                                <i class='fas fa-newspaper'></i>
+                            </div>
+                            <div class='stat-content'>
+                                <div class='stat-label'>Total Articles</div>
+                                <div class='stat-value' id='totalArticles'>0</div>
+                                <div class='stat-sublabel'>Last 24 hours</div>
+                            </div>
+                        </div>
+
+                        <div class='stat-card'>
+                            <div class='stat-icon' style='background: linear-gradient(135deg, #10b981, #059669);'>
+                                <i class='fas fa-smile'></i>
+                            </div>
+                            <div class='stat-content'>
+                                <div class='stat-label'>Positive</div>
+                                <div class='stat-value' id='positiveCount'>0</div>
+                                <div class='stat-sublabel' id='positivePercent'>0%</div>
+                            </div>
+                        </div>
+
+                        <div class='stat-card'>
+                            <div class='stat-icon' style='background: linear-gradient(135deg, #6b7280, #4b5563);'>
+                                <i class='fas fa-meh'></i>
+                            </div>
+                            <div class='stat-content'>
+                                <div class='stat-label'>Neutral</div>
+                                <div class='stat-value' id='neutralCount'>0</div>
+                                <div class='stat-sublabel' id='neutralPercent'>0%</div>
+                            </div>
+                        </div>
+
+                        <div class='stat-card'>
+                            <div class='stat-icon' style='background: linear-gradient(135deg, #ef4444, #dc2626);'>
+                                <i class='fas fa-frown'></i>
+                            </div>
+                            <div class='stat-content'>
+                                <div class='stat-label'>Negative</div>
+                                <div class='stat-value' id='negativeCount'>0</div>
+                                <div class='stat-sublabel' id='negativePercent'>0%</div>
+                            </div>
+                        </div>
+
+                        <div class='stat-card'>
+                            <div class='stat-icon' style='background: linear-gradient(135deg, #8b5cf6, #7c3aed);'>
+                                <i class='fas fa-fire'></i>
+                            </div>
+                            <div class='stat-content'>
+                                <div class='stat-label'>Hot Topics</div>
+                                <div class='stat-value' id='hotTopicsCount'>0</div>
+                                <div class='stat-sublabel'>Trending now</div>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
-                <!-- US Treasury Yield Curve -->
+                <!-- ════════════════════════════════════════════════════
+                     LISTE DES ARTICLES
+                     ════════════════════════════════════════════════════ -->
                 <div class='section'>
-                    <div class='section-header-with-info'>
+                    <div class='section-header-with-controls'>
                         <h2 class='section-title'>
-                            <i class='fas fa-chart-area'></i> US Treasury Yield Curve
+                            <i class='fas fa-list'></i> Latest News
                         </h2>
-                        <button class='info-btn' title='Information'>
-                            <i class='fas fa-info'></i>
-                        </button>
+                        <div class='view-toggles'>
+                            <button class='view-btn active' data-view='grid' onclick='newsTerminal.changeView("grid")'>
+                                <i class='fas fa-th-large'></i>
+                            </button>
+                            <button class='view-btn' data-view='list' onclick='newsTerminal.changeView("list")'>
+                                <i class='fas fa-list'></i>
+                            </button>
+                        </div>
                     </div>
-                    
-                    <div class='chart-wrapper' onclick="window.rateTracker.openModal('yieldCurveChart')" style="cursor: pointer;">
-                        <div id='yieldCurveChart' class='chart' style='height: 450px;'></div>
+
+                    <div id='articlesContainer' class='articles-grid'>
+                        <div class='loading-state'>
+                            <i class='fas fa-spinner fa-spin'></i>
+                            <p>Loading articles...</p>
+                        </div>
+                    </div>
+
+                    <div class='load-more-container' style='display: none;'>
+                        <button class='dashboard-btn' onclick='newsTerminal.loadMore()'>
+                            <i class='fas fa-chevron-down'></i>
+                            <span>Load More</span>
+                        </button>
                     </div>
                 </div>
 
-                <!-- Historical Fed Rate -->
-                <div class='section'>
-                    <div class='section-header-with-info'>
-                        <h2 class='section-title'>
-                            <i class='fas fa-history'></i> Federal Funds Rate - Historical
-                        </h2>
-                        <button class='info-btn' title='Information'>
-                            <i class='fas fa-info'></i>
-                        </button>
-                    </div>
-                    
-                    <div class='chart-wrapper' onclick="window.rateTracker.openModal('historicalFedChart')" style="cursor: pointer;">
-                        <div id='historicalFedChart' class='chart' style='height: 450px;'></div>
-                    </div>
-                </div>
-
-                <!-- Spread Analysis -->
-                <div class='section'>
-                    <div class='section-header-with-info'>
-                        <h2 class='section-title'>
-                            <i class='fas fa-exchange-alt'></i> Yield Curve Spread Analysis
-                        </h2>
-                        <button class='info-btn' title='Information'>
-                            <i class='fas fa-info'></i>
-                        </button>
-                    </div>
-                    
-                    <div id='spreadAnalysis'></div>
-                </div>
-
-                <!-- Economic Impact -->
-                <div class='section'>
-                    <div class='section-header-with-info'>
-                        <h2 class='section-title'>
-                            <i class='fas fa-globe'></i> Economic Impact Assessment
-                        </h2>
-                        <button class='info-btn' title='Information'>
-                            <i class='fas fa-info'></i>
-                        </button>
-                    </div>
-                    
-                    <div id='economicImpact'></div>
-                </div>
-
-                <footer>
-                    <p>
-                        <i class='fas fa-info-circle'></i> Data powered by FRED (Federal Reserve Economic Data)
+                <!-- ════════════════════════════════════════════════════
+                     FOOTER
+                     ════════════════════════════════════════════════════ -->
+                <footer style='text-align: center; padding: 32px 20px; margin-top: 40px; border-top: 1px solid var(--glass-border);'>
+                    <p style='color: var(--text-secondary); font-size: 0.95rem;'>
+                        <i class='fas fa-info-circle'></i> 
+                        News Terminal - Real-time Financial News Aggregator
+                    </p>
+                    <p style='color: var(--text-tertiary); font-size: 0.85rem; margin-top: 8px;'>
+                        Sources: CNBC, Reuters, MarketWatch | Content © respective owners
                     </p>
                 </footer>
+
             </div>
         </div>
     </div>
 
+    <!-- ════════════════════════════════════════════════════════════════
+         SCRIPTS
+         ════════════════════════════════════════════════════════════════ -->
+    
+    <!-- Core Scripts -->
     <script src='assets/js/common.js'></script>
     <script src='assets/js/sidebar.js'></script>
-    <script src='assets/js/economic-data-client.js'></script>
-    <script src='assets/js/interest-rate-tracker.js'></script>
+    
+    <!-- RSS & Firestore -->
+    <script src='assets/js/rss-client.js'></script>
+    <script src='assets/js/firestore-rss-manager.js'></script>
+    <script src='assets/js/sentiment-analyzer.js'></script>
+    
+    <!-- News Terminal -->
+    <script src='assets/js/news-terminal.js'></script>
+    
+    <!-- Particles Background -->
+    <script src="assets/js/chatbot-particles.js"></script>
 
-    <!-- Chatbot -->
+    <!-- Chatbot (optionnel) -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <script src="assets/js/chatbot-config.js"></script>
     <script src="assets/js/chatbot-gemini.js"></script>
@@ -388,19 +491,18 @@
     <script src="assets/js/chatbot-suggestions.js"></script>
     <script src="assets/js/chatbot-ai-engine.js"></script>
     <script src="assets/js/chatbot-ui.js"></script>
-    <script src="assets/js/chatbot-particles.js"></script>
 
-    <!-- User Menu Fix -->
+    <!-- User Menu Init -->
     <script>
         (function forceUserMenuInit() {
-            console.log('Force initializing user menu...');
+            console.log('🔧 Force initializing user menu...');
             
             const initMenu = () => {
                 const trigger = document.getElementById('sidebarUserTrigger');
                 const dropdown = document.getElementById('sidebarUserDropdown');
                 
                 if (!trigger || !dropdown) {
-                    console.error('User menu elements not found');
+                    console.error('❌ User menu elements not found');
                     return;
                 }
                 
@@ -410,16 +512,22 @@
                 const freshTrigger = document.getElementById('sidebarUserTrigger');
                 const freshDropdown = document.getElementById('sidebarUserDropdown');
                 
+                console.log('✅ Adding click event to trigger...');
+                
                 freshTrigger.addEventListener('click', function(e) {
                     e.preventDefault();
                     e.stopPropagation();
+                    
+                    console.log('👆 User menu trigger clicked!');
                     
                     const isActive = freshDropdown.classList.contains('active');
                     
                     if (isActive) {
                         freshDropdown.classList.remove('active');
+                        console.log('🔽 Closing dropdown');
                     } else {
                         freshDropdown.classList.add('active');
+                        console.log('🔼 Opening dropdown');
                     }
                     
                     const arrow = freshTrigger.querySelector('.sidebar-user-arrow');
@@ -442,6 +550,8 @@
                 freshDropdown.addEventListener('click', function(e) {
                     e.stopPropagation();
                 });
+                
+                console.log('✅ User menu initialized successfully!');
             };
             
             if (document.readyState === 'loading') {
@@ -450,6 +560,34 @@
                 setTimeout(initMenu, 100);
             }
         })();
+    </script>
+
+    <!-- Chatbot Init -->
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log('🤖 Initialisation du chatbot FinanceGPT...');
+        
+        if (typeof ChatbotConfig === 'undefined') {
+            console.error('❌ ChatbotConfig non défini !');
+            return;
+        }
+        
+        console.log('✅ ChatbotConfig chargé');
+        
+        if (typeof ChatbotUI === 'undefined') {
+            console.error('❌ ChatbotUI non défini !');
+            return;
+        }
+        
+        console.log('✅ ChatbotUI chargé');
+        
+        try {
+            window.financialChatbot = new ChatbotUI(ChatbotConfig);
+            console.log('🎉 Chatbot FinanceGPT initialisé avec succès !');
+        } catch (error) {
+            console.error('❌ Erreur lors de l\'initialisation du chatbot:', error);
+        }
+    });
     </script>
 
 </body>
