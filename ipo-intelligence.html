@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang='en'>
+<head>
+    <meta charset='UTF-8'>
+    <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+    <title>IPO Intelligence Dashboard | AlphaVault AI</title>
+    
+    <!-- Font Awesome -->
+    <link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css'>
+    
+    <!-- Highcharts -->
+    <script src='https://code.highcharts.com/highcharts.js'></script>
+    <script src='https://code.highcharts.com/modules/exporting.js'></script>
+    <script src='https://code.highcharts.com/modules/export-data.js'></script>
+    <script src='https://code.highcharts.com/highcharts-more.js'></script>
+    <script src='https://code.highcharts.com/modules/heatmap.js'></script>
+    
+    <!-- Styles -->
+    <link rel='stylesheet' href='assets/css/common.css'>
+    <link rel='stylesheet' href='assets/css/sidebar.css'>
+    <link rel="stylesheet" href="assets/css/user-menu.css">
+    <link rel='stylesheet' href='assets/css/economic-pages.css'>
+    <link rel='stylesheet' href='assets/css/ipo-intelligence.css'>
+    
+    <!-- Favicon Dynamique -->
+    <script src="assets/js/favicon-dynamic.js"></script>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    
+    <!-- Configuration -->
+    <script src="assets/js/config.js"></script>
+    <script src="assets/js/firebase-config.js"></script>
+    
+    <!-- Protection de la page -->
+    <script src="assets/js/auth-guard.js"></script>
+    <script src="assets/js/access-control.js"></script>
+</head>
+<body>
+
+    <!-- Theme Script -->
+    <script src="assets/js/theme.js"></script>
+    <script src="assets/js/theme-charts.js"></script>
+
+    <!-- Particles Background -->
+    <canvas id="particles-canvas" class="particles-background"></canvas>
+
+    <div class='layout-wrapper'>
+        <!-- Sidebar (identique à ton exemple) -->
+        <aside class='sidebar' id='sidebar'>
+            <div class="sidebar-header">
+                <div class="logo-container">
+                    <div class="logo-3d">
+                        <svg class="logo-svg" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                            <defs>
+                                <linearGradient id="logoGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                                    <stop offset="0%" class="logo-gradient-1" />
+                                    <stop offset="100%" class="logo-gradient-2" />
+                                </linearGradient>
+                            </defs>
+                            <path d="M 20 80 L 30 70 L 40 75 L 50 60 L 60 65 L 70 45 L 80 50 L 90 30" 
+                                  stroke="url(#logoGradient)" stroke-width="4" fill="none" 
+                                  stroke-linecap="round" stroke-linejoin="round"/>
+                            <circle cx="30" cy="70" r="4" fill="url(#logoGradient)"/>
+                            <circle cx="50" cy="60" r="4" fill="url(#logoGradient)"/>
+                            <circle cx="70" cy="45" r="4" fill="url(#logoGradient)"/>
+                            <circle cx="90" cy="30" r="5" fill="url(#logoGradient)"/>
+                            <path d="M 85 35 L 90 30 L 85 25" 
+                                  stroke="url(#logoGradient)" stroke-width="3" fill="none" stroke-linecap="round"/>
+                        </svg>
+                    </div>
+                    <div class="brand-text">
+                        <h2 class="brand-name">AlphaVault AI</h2>
+                        <span class="brand-tagline">Investments</span>
+                    </div>
+                </div>
+                <button class="sidebar-toggle" aria-label="Toggle Sidebar">
+                    <i class="fas fa-angle-left"></i>
+                </button>
+            </div>
+            
+            <nav class="sidebar-nav">
+                <div class="nav-section">
+                    <button class="nav-folder" data-tooltip="Home">
+                        <i class="fas fa-home"></i>
+                        <span>Home</span>
+                        <i class="fas fa-chevron-down arrow"></i>
+                    </button>
+                    <div class="nav-submenu">
+                        <a href="index.html" class="nav-link">
+                            <i class="fas fa-home"></i>
+                            <span>Overview</span>
+                        </a>
+                    </div>
+                </div>
+                
+                <div class='nav-section'>
+                    <button class='nav-folder' data-tooltip="Markets">
+                        <i class='fas fa-chart-line'></i>
+                        <span>Markets</span>
+                        <i class='fas fa-chevron-down arrow'></i>
+                    </button>
+                    <div class='nav-submenu' style='display: block;'>
+                        <a href='ipo-intelligence.html' class='nav-link active'>
+                            <i class='fas fa-rocket'></i>
+                            <span>IPO Intelligence</span>
+                        </a>
+                        <a href='advanced-analysis.html' class='nav-link'>
+                            <i class='fas fa-brain'></i>
+                            <span>Advanced Analysis</span>
+                        </a>
+                    </div>
+                </div>
+            </nav>
+            
+            <div class="sidebar-footer">
+                <div class="sidebar-user-menu">
+                    <div class="sidebar-user-trigger" id="sidebarUserTrigger">
+                        <img data-user-photo 
+                            src="https://ui-avatars.com/api/?name=User&background=2563eb&color=fff" 
+                            alt="Avatar" class="sidebar-user-avatar">
+                        <div class="sidebar-user-info">
+                            <span data-user-name class="sidebar-user-name">User</span>
+                            <span data-user-plan class="sidebar-user-plan">Free Plan</span>
+                        </div>
+                        <i class="fas fa-chevron-up sidebar-user-arrow"></i>
+                    </div>
+                    <div class="sidebar-user-dropdown" id="sidebarUserDropdown">
+                        <div class="user-dropdown-header">
+                            <img data-user-photo 
+                                src="https://ui-avatars.com/api/?name=User&background=2563eb&color=fff" 
+                                alt="Avatar" class="user-dropdown-avatar">
+                            <div class="user-dropdown-details">
+                                <h4 data-user-name class="user-dropdown-name">User</h4>
+                                <p data-user-email class="user-dropdown-email">email@example.com</p>
+                            </div>
+                        </div>
+                        <div class="user-dropdown-divider"></div>
+                        <nav class="user-dropdown-links">
+                            <a href="user-profile.html" class="user-dropdown-link">
+                                <i class="fas fa-user"></i>
+                                <span>My profile</span>
+                            </a>
+                            <a href="settings.html" class="user-dropdown-link">
+                                <i class="fas fa-cog"></i>
+                                <span>Settings</span>
+                            </a>
+                        </nav>
+                        <div class="user-dropdown-divider"></div>
+                        <button onclick="logout()" class="user-dropdown-logout">
+                            <i class="fas fa-sign-out-alt"></i>
+                            <span>Disconnect</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </aside>
+        
+        <div class='sidebar-overlay' id='sidebarOverlay'></div>
+
+        <!-- Main Content -->
+        <div class='main-content'>
+            <header class='top-header'>
+                <div class='header-left'>
+                    <button class='mobile-toggle' id='mobileToggle'>
+                        <i class='fas fa-bars'></i>
+                    </button>
+                    <h1 class='page-title'><i class="fas fa-rocket"></i> IPO Intelligence Dashboard</h1>
+                </div>
+                <div class='header-right'>
+                    <button class='dashboard-btn' id='refreshData' title='Refresh Data'>
+                        <i class='fas fa-sync-alt'></i>
+                        <span class='btn-text'>Refresh</span>
+                    </button>
+                    <button class='dashboard-btn dashboard-btn-export' id='exportData' title='Export Data'>
+                        <i class='fas fa-download'></i>
+                        <span class='btn-text'>Export</span>
+                    </button>
+                </div>
+            </header>
+            
+            <div class='container'>
+                
+                <!-- Toolbar -->
+                <div class='dashboard-toolbar'>
+                    <div class='toolbar-left'>
+                        <span class='dashboard-subtitle'>
+                            <i class='fas fa-database'></i>
+                            Real-time IPO data from SEC EDGAR
+                        </span>
+                    </div>
+                    <div class='toolbar-right'>
+                        <button class='dashboard-btn-sm' id='viewFilters'>
+                            <i class='fas fa-filter'></i>
+                            <span>Filters</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- IPO Summary Cards -->
+                <div class='section'>
+                    <h2 class='section-title gradient-title'>
+                        <i class='fas fa-chart-bar'></i> IPO Market Overview
+                    </h2>
+                    
+                    <div class='ipo-summary-grid' id='summaryCards'>
+                        <div class='eco-loading'>
+                            <div class='eco-spinner'></div>
+                            <p>Loading IPO data...</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- IPO Heatmap -->
+                <div class='section'>
+                    <div class='section-header-with-controls'>
+                        <h2 class='section-title gradient-title'>
+                            <i class='fas fa-fire'></i> IPO Heatmap by Sector
+                        </h2>
+                        <div class='time-range-selector'>
+                            <button class='time-btn active' data-period='30'>30 Days</button>
+                            <button class='time-btn' data-period='90'>90 Days</button>
+                            <button class='time-btn' data-period='180'>6 Months</button>
+                            <button class='time-btn' data-period='365'>1 Year</button>
+                        </div>
+                    </div>
+                    
+                    <div class='chart-card'>
+                        <div id='heatmapChart' class='chart'></div>
+                    </div>
+                </div>
+
+                <!-- IPO Pipeline -->
+                <div class='section'>
+                    <h2 class='section-title gradient-title'>
+                        <i class='fas fa-stream'></i> IPO Pipeline
+                    </h2>
+                    
+                    <div class='ipo-pipeline' id='ipoPipeline'>
+                        <div class='eco-loading'>
+                            <div class='eco-spinner'></div>
+                            <p>Loading pipeline...</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Top IPOs by Success Score -->
+                <div class='section'>
+                    <h2 class='section-title gradient-title'>
+                        <i class='fas fa-trophy'></i> Top IPO Candidates
+                    </h2>
+                    
+                    <div class='ipo-table-wrapper'>
+                        <table class='ipo-table' id='topIPOsTable'>
+                            <thead>
+                                <tr>
+                                    <th>Rank</th>
+                                    <th>Company</th>
+                                    <th>Sector</th>
+                                    <th>Success Score</th>
+                                    <th>Filing Date</th>
+                                    <th>Stage</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td colspan="7" class='text-center'>
+                                        <div class='eco-loading'>
+                                            <div class='eco-spinner'></div>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Lock-Up Period Tracker -->
+                <div class='section'>
+                    <h2 class='section-title gradient-title'>
+                        <i class='fas fa-lock'></i> Lock-Up Period Tracker
+                    </h2>
+                    
+                    <div class='lockup-grid' id='lockupGrid'>
+                        <div class='eco-loading'>
+                            <div class='eco-spinner'></div>
+                            <p>Calculating lock-up periods...</p>
+                        </div>
+                    </div>
+                </div>
+
+                <footer>
+                    <p>
+                        <i class='fas fa-shield-alt'></i> IPO Intelligence Dashboard - Data from SEC EDGAR (U.S. Securities and Exchange Commission)
+                    </p>
+                </footer>
+            </div>
+        </div>
+    </div>
+
+    <!-- IPO Detail Modal -->
+    <div id='ipoDetailModal' class='modal'>
+        <div class='modal-content modal-large'>
+            <div class='modal-header'>
+                <h2 id='ipoModalTitle' class='gradient-title'>IPO Analysis</h2>
+                <button class='modal-close'>&times;</button>
+            </div>
+            <div class='modal-body' id='ipoModalBody'>
+                <div class='eco-loading'>
+                    <div class='eco-spinner'></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Export Modal -->
+    <div id='exportModal' class='modal'>
+        <div class='modal-content'>
+            <div class='modal-header'>
+                <h2 class='gradient-title'><i class='fas fa-download'></i> Export IPO Data</h2>
+                <button class='modal-close' data-modal='exportModal'>&times;</button>
+            </div>
+            <div class='modal-body'>
+                <p style='margin-bottom: 24px; color: var(--text-secondary); line-height: 1.6;'>
+                    Choose your preferred export format for IPO data
+                </p>
+                <div class='export-options'>
+                    <button class='export-btn' data-format='csv'>
+                        <i class='fas fa-file-csv'></i>
+                        <span>CSV Format</span>
+                        <small>Excel compatible</small>
+                    </button>
+                    <button class='export-btn' data-format='json'>
+                        <i class='fas fa-file-code'></i>
+                        <span>JSON Format</span>
+                        <small>Developer friendly</small>
+                    </button>
+                    <button class='export-btn' data-format='pdf'>
+                        <i class='fas fa-file-pdf'></i>
+                        <span>PDF Report</span>
+                        <small>Full analysis</small>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src='assets/js/common.js'></script>
+    <script src='assets/js/sidebar.js'></script>
+    <script src='assets/js/sec-api-client.js'></script>
+    <script src='assets/js/ipo-intelligence.js'></script>
+
+    <!-- Chatbot Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script src="assets/js/chatbot-config.js"></script>
+    <script src="assets/js/chatbot-gemini.js"></script>
+    <script src="assets/js/chatbot-analytics.js"></script>
+    <script src="assets/js/chatbot-charts.js"></script>
+    <script src="assets/js/chatbot-ipo-analyzer.js"></script>
+    <script src="assets/js/chatbot-suggestions.js"></script>
+    <script src="assets/js/chatbot-ai-engine.js"></script>
+    <script src="assets/js/chatbot-ui.js"></script>
+    <script src="assets/js/chatbot-particles.js"></script>
+
+    <!-- User Menu Init -->
+    <script>
+        (function forceUserMenuInit() {
+            console.log('🔧 Force initializing user menu...');
+            
+            const initMenu = () => {
+                const trigger = document.getElementById('sidebarUserTrigger');
+                const dropdown = document.getElementById('sidebarUserDropdown');
+                
+                if (!trigger || !dropdown) return;
+                
+                const newTrigger = trigger.cloneNode(true);
+                trigger.parentNode.replaceChild(newTrigger, trigger);
+                
+                const freshTrigger = document.getElementById('sidebarUserTrigger');
+                const freshDropdown = document.getElementById('sidebarUserDropdown');
+                
+                freshTrigger.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    
+                    const isActive = freshDropdown.classList.contains('active');
+                    freshDropdown.classList.toggle('active');
+                    
+                    const arrow = freshTrigger.querySelector('.sidebar-user-arrow');
+                    if (arrow) {
+                        arrow.style.transform = isActive ? 'rotate(0deg)' : 'rotate(180deg)';
+                    }
+                });
+                
+                document.addEventListener('click', function(e) {
+                    if (!freshTrigger.contains(e.target) && !freshDropdown.contains(e.target)) {
+                        freshDropdown.classList.remove('active');
+                        const arrow = freshTrigger.querySelector('.sidebar-user-arrow');
+                        if (arrow) arrow.style.transform = 'rotate(0deg)';
+                    }
+                });
+                
+                freshDropdown.addEventListener('click', e => e.stopPropagation());
+            };
+            
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', initMenu);
+            } else {
+                setTimeout(initMenu, 100);
+            }
+        })();
+    </script>
+
+</body>
+</html>

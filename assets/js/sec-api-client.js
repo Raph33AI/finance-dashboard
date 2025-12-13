@@ -1,159 +1,303 @@
 /**
  * ═══════════════════════════════════════════════════════════════════
- * 🏛 SEC EDGAR API CLIENT - AlphaVault AI
+ * 🏛 SEC API CLIENT - AlphaVault AI
  * ═══════════════════════════════════════════════════════════════════
- * Client pour communiquer avec le Cloudflare Worker SEC
+ * Interface avec le Cloudflare Worker pour les données SEC EDGAR
  * ═══════════════════════════════════════════════════════════════════
  */
 
 class SECApiClient {
-  constructor() {
-    // ⚠ REMPLACE PAR TON URL WORKER CLOUDFLARE
-    this.baseUrl = 'https://sec-edgar-api.raphnardone.workers.dev';
-    this.cache = new Map();
-    this.cacheDuration = 5 * 60 * 1000; // 5 minutes
-  }
-
-  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  // 🌐 REQUÊTE GÉNÉRIQUE
-  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  async request(endpoint, params = {}) {
-    const queryString = new URLSearchParams(params).toString();
-    const url = `${this.baseUrl}${endpoint}${queryString ? '?' + queryString : ''}`;
-    
-    // Cache check
-    const cacheKey = url;
-    if (this.cache.has(cacheKey)) {
-      const { data, timestamp } = this.cache.get(cacheKey);
-      if (Date.now() - timestamp < this.cacheDuration) {
-        console.log('📦 Cache hit:', endpoint);
-        return data;
-      }
+    constructor() {
+        // ⚠ REMPLACER PAR L'URL DE TON CLOUDFLARE WORKER
+        this.baseURL = 'https://sec-edgar-api.raphnardone.workers.dev.workers.dev';
+        this.cache = new Map();
+        this.cacheDuration = 1800000; // 30 minutes
     }
 
-    try {
-      console.log('🌐 Fetching:', url);
-      const response = await fetch(url);
-      
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-      }
+    /**
+     * 📊 Récupère tous les IPOs (S-1, F-1, amendments)
+     */
+    async getIPOs(options = {}) {
+        const {
+            limit = 100,
+            includeAmendments = true,
+            forceRefresh = false
+        } = options;
 
-      const data = await response.json();
-      
-      // Store in cache
-      this.cache.set(cacheKey, {
-        data,
-        timestamp: Date.now()
-      });
+        const cacheKey = `ipos-${limit}-${includeAmendments}`;
 
-      return data;
+        if (!forceRefresh && this.isCacheValid(cacheKey)) {
+            console.log('📦 Returning cached IPOs');
+            return this.cache.get(cacheKey).data;
+        }
 
-    } catch (error) {
-      console.error('❌ SEC API Error:', error);
-      throw error;
+        try {
+            console.log('🌐 Fetching IPOs from SEC...');
+            const params = new URLSearchParams({
+                limit,
+                amendments: includeAmendments
+            });
+
+            const response = await fetch(`${this.baseURL}/api/sec/ipos?${params}`);
+            
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            }
+
+            const data = await response.json();
+            
+            // Cache the result
+            this.cache.set(cacheKey, {
+                data,
+                timestamp: Date.now()
+            });
+
+            console.log(`✅ Fetched ${data.count} IPOs`);
+            return data;
+
+        } catch (error) {
+            console.error('❌ Error fetching IPOs:', error);
+            throw error;
+        }
     }
-  }
 
-  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  // 📊 MÉTHODES API
-  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    /**
+     * 📄 Récupère un feed spécifique (s1, f1, 10k, 8k, etc.)
+     */
+    async getFeed(feedType, limit = 100, forceRefresh = false) {
+        const cacheKey = `feed-${feedType}-${limit}`;
 
-  /**
-   * Récupère les infos d'une entreprise
-   * @param {string} ticker - Symbole boursier (ex: 'AAPL', 'NVDA')
-   */
-  async getCompanyInfo(ticker) {
-    return await this.request('/api/sec/company-info', { ticker });
-  }
+        if (!forceRefresh && this.isCacheValid(cacheKey)) {
+            console.log(`📦 Returning cached feed: ${feedType}`);
+            return this.cache.get(cacheKey).data;
+        }
 
-  /**
-   * Récupère les IPOs récents
-   * @param {number} limit - Nombre max de résultats
-   * @param {number} months - Nombre de mois en arrière
-   */
-  async getIPOs(limit = 20, months = 6) {
-    return await this.request('/api/sec/ipos', { limit, months });
-  }
+        try {
+            console.log(`🌐 Fetching feed: ${feedType}`);
+            const params = new URLSearchParams({ limit });
+            const response = await fetch(`${this.baseURL}/api/sec/feed/${feedType}?${params}`);
+            
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            }
 
-  /**
-   * Récupère les earnings reports
-   * @param {string} ticker - Symbole boursier
-   * @param {number} limit - Nombre max de résultats
-   */
-  async getEarnings(ticker, limit = 10) {
-    return await this.request('/api/sec/earnings', { ticker, limit });
-  }
+            const data = await response.json();
+            
+            this.cache.set(cacheKey, {
+                data,
+                timestamp: Date.now()
+            });
 
-  /**
-   * Récupère les insider transactions
-   * @param {string} ticker - Symbole boursier
-   * @param {number} limit - Nombre max de résultats
-   */
-  async getInsiderTrading(ticker, limit = 50) {
-    return await this.request('/api/sec/insider-trading', { ticker, limit });
-  }
+            console.log(`✅ Fetched ${data.count} filings for ${feedType}`);
+            return data;
 
-  /**
-   * Récupère les institutional holdings
-   * @param {string} ticker - Symbole boursier
-   * @param {number} limit - Nombre max de résultats
-   */
-  async getInstitutionalOwnership(ticker, limit = 100) {
-    return await this.request('/api/sec/institutional-ownership', { ticker, limit });
-  }
+        } catch (error) {
+            console.error(`❌ Error fetching feed ${feedType}:`, error);
+            throw error;
+        }
+    }
 
-  /**
-   * Récupère l'activité M&A
-   * @param {number} months - Période en mois
-   * @param {number} limit - Nombre max de résultats
-   */
-  async getMergersAcquisitions(months = 12, limit = 50) {
-    return await this.request('/api/sec/ma-activity', { months, limit });
-  }
+    /**
+     * 📂 Récupère tous les filings par catégorie
+     */
+    async getByCategory(category, limit = 100, forceRefresh = false) {
+        const cacheKey = `category-${category}-${limit}`;
 
-  /**
-   * Récupère les filings génériques
-   * @param {string} ticker - Symbole boursier
-   * @param {string} formType - Type de formulaire (ex: '10-K')
-   * @param {number} limit - Nombre max de résultats
-   */
-  async getFilings(ticker, formType = null, limit = 20) {
-    const params = { ticker, limit };
-    if (formType) params.form_type = formType;
-    return await this.request('/api/sec/filings', params);
-  }
+        if (!forceRefresh && this.isCacheValid(cacheKey)) {
+            console.log(`📦 Returning cached category: ${category}`);
+            return this.cache.get(cacheKey).data;
+        }
 
-  /**
-   * Récupère les risk factors
-   * @param {string} ticker - Symbole boursier
-   */
-  async getRiskFactors(ticker) {
-    return await this.request('/api/sec/risk-factors', { ticker });
-  }
+        try {
+            console.log(`🌐 Fetching category: ${category}`);
+            const params = new URLSearchParams({ limit });
+            const response = await fetch(`${this.baseURL}/api/sec/category/${encodeURIComponent(category)}?${params}`);
+            
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            }
 
-  /**
-   * Récupère les corporate events (8-K)
-   * @param {string} ticker - Symbole boursier
-   * @param {number} limit - Nombre max de résultats
-   */
-  async getCorporateEvents(ticker, limit = 50) {
-    return await this.request('/api/sec/corporate-events', { ticker, limit });
-  }
+            const data = await response.json();
+            
+            this.cache.set(cacheKey, {
+                data,
+                timestamp: Date.now()
+            });
 
-  /**
-   * Vide le cache
-   */
-  clearCache() {
-    this.cache.clear();
-    console.log('🗑 Cache cleared');
-  }
+            console.log(`✅ Fetched ${data.count} filings for category ${category}`);
+            return data;
+
+        } catch (error) {
+            console.error(`❌ Error fetching category ${category}:`, error);
+            throw error;
+        }
+    }
+
+    /**
+     * 🔄 Déclenche une synchronisation manuelle
+     */
+    async triggerSync() {
+        try {
+            console.log('🔄 Triggering manual sync...');
+            const response = await fetch(`${this.baseURL}/api/sec/sync`);
+            const data = await response.json();
+            console.log('✅ Sync initiated:', data);
+            return data;
+        } catch (error) {
+            console.error('❌ Sync error:', error);
+            throw error;
+        }
+    }
+
+    /**
+     * 🏥 Health check du service
+     */
+    async healthCheck() {
+        try {
+            const response = await fetch(`${this.baseURL}/health`);
+            return await response.json();
+        } catch (error) {
+            console.error('❌ Health check failed:', error);
+            return { status: 'error', error: error.message };
+        }
+    }
+
+    /**
+     * 🧹 Nettoie le cache
+     */
+    clearCache() {
+        this.cache.clear();
+        console.log('🧹 Cache cleared');
+    }
+
+    /**
+     * ⏰ Vérifie si une entrée de cache est valide
+     */
+    isCacheValid(key) {
+        if (!this.cache.has(key)) return false;
+        
+        const cached = this.cache.get(key);
+        const age = Date.now() - cached.timestamp;
+        
+        if (age > this.cacheDuration) {
+            this.cache.delete(key);
+            return false;
+        }
+        
+        return true;
+    }
+
+    /**
+     * 📈 Analyse un IPO spécifique (données enrichies)
+     */
+    async analyzeIPO(ipo) {
+        // Enrichissement avec données supplémentaires
+        const enriched = {
+            ...ipo,
+            // Calcul du score de réussite (algorithme simplifié)
+            successScore: this.calculateSuccessScore(ipo),
+            // Classification sectorielle
+            sector: this.classifySector(ipo.companyName),
+            // Détection de red flags
+            riskFactors: this.detectRiskFactors(ipo),
+            // Estimation de la période de lock-up (typiquement 180 jours)
+            lockUpExpiry: this.estimateLockUpExpiry(ipo.filedDate),
+            // Statut du filing
+            filingStage: this.determineFilingStage(ipo.formType)
+        };
+
+        return enriched;
+    }
+
+    /**
+     * 🎯 Calcule un score de réussite (0-100)
+     */
+    calculateSuccessScore(ipo) {
+        let score = 50; // Base score
+
+        // Facteur 1: Type de formulaire (S-1 original > amendments)
+        if (ipo.formType === 'S-1' || ipo.formType === 'F-1') {
+            score += 10;
+        }
+
+        // Facteur 2: Récence du filing (plus récent = mieux)
+        const daysSinceFiling = (Date.now() - new Date(ipo.filedDate)) / (1000 * 60 * 60 * 24);
+        if (daysSinceFiling < 30) score += 15;
+        else if (daysSinceFiling < 90) score += 10;
+        else if (daysSinceFiling < 180) score += 5;
+
+        // Facteur 3: Présence de mots-clés positifs
+        const positiveKeywords = ['technology', 'AI', 'cloud', 'software', 'biotech', 'fintech'];
+        const companyLower = ipo.companyName.toLowerCase();
+        if (positiveKeywords.some(kw => companyLower.includes(kw))) {
+            score += 15;
+        }
+
+        // Facteur 4: Longueur du summary (plus détaillé = mieux préparé)
+        if (ipo.summary && ipo.summary.length > 200) {
+            score += 10;
+        }
+
+        return Math.min(100, Math.max(0, score));
+    }
+
+    /**
+     * 🏢 Classification sectorielle basique
+     */
+    classifySector(companyName) {
+        const name = companyName.toLowerCase();
+        
+        if (name.match(/tech|software|ai|cloud|data|cyber/)) return 'Technology';
+        if (name.match(/bio|pharma|health|medical|therapeutics/)) return 'Healthcare';
+        if (name.match(/finance|capital|bank|insurance|credit/)) return 'Financial Services';
+        if (name.match(/energy|oil|gas|solar|renewable/)) return 'Energy';
+        if (name.match(/retail|consumer|ecommerce/)) return 'Consumer';
+        if (name.match(/real estate|reit|property/)) return 'Real Estate';
+        if (name.match(/industrial|manufacturing|materials/)) return 'Industrials';
+        
+        return 'Other';
+    }
+
+    /**
+     * ⚠ Détection de facteurs de risque
+     */
+    detectRiskFactors(ipo) {
+        const risks = [];
+        
+        if (ipo.formType.includes('/A')) {
+            risks.push('Multiple amendments filed');
+        }
+        
+        const daysSinceFiling = (Date.now() - new Date(ipo.filedDate)) / (1000 * 60 * 60 * 24);
+        if (daysSinceFiling > 180) {
+            risks.push('Filing older than 6 months');
+        }
+        
+        return risks;
+    }
+
+    /**
+     * 🔒 Estime la date d'expiration du lock-up
+     */
+    estimateLockUpExpiry(filedDate) {
+        const filed = new Date(filedDate);
+        // Typiquement 180 jours après l'IPO (on estime +30 jours pour l'IPO effective)
+        const lockUpDays = 210;
+        const expiry = new Date(filed);
+        expiry.setDate(expiry.getDate() + lockUpDays);
+        return expiry.toISOString();
+    }
+
+    /**
+     * 📋 Détermine le stade du filing
+     */
+    determineFilingStage(formType) {
+        if (formType === 'S-1' || formType === 'F-1') return 'Initial Filing';
+        if (formType.includes('/A')) return 'Amendment';
+        if (formType === '424B4') return 'Final Prospectus';
+        return 'Unknown';
+    }
 }
 
-// ═══════════════════════════════════════════════════════════════════
-// 🌍 EXPORT GLOBAL
-// ═══════════════════════════════════════════════════════════════════
-
-window.SECApi = new SECApiClient();
-console.log('✅ SEC API Client loaded');
+// Export global
+window.SECApiClient = SECApiClient;
