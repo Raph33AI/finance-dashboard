@@ -1293,26 +1293,96 @@ class InsiderFlowTracker {
     }
 
     renderNetworkChart() {
-        const nodes = [
-            { id: 'NVDA', marker: { radius: 30 }, color: '#667eea' },
-            { id: 'TSLA', marker: { radius: 30 }, color: '#667eea' },
-            { id: 'AAPL', marker: { radius: 30 }, color: '#667eea' },
-            { id: 'Jensen Huang', marker: { radius: 20 }, color: '#10b981' },
-            { id: 'Elon Musk', marker: { radius: 20 }, color: '#10b981' },
-            { id: 'Tim Cook', marker: { radius: 20 }, color: '#10b981' },
-            { id: 'Sarah Chen', marker: { radius: 15 }, color: '#f59e0b' },
-            { id: 'Robert Williams', marker: { radius: 15 }, color: '#f59e0b' }
-        ];
-
-        const links = [
-            ['NVDA', 'Jensen Huang'],
-            ['NVDA', 'Sarah Chen'],
-            ['TSLA', 'Elon Musk'],
-            ['TSLA', 'Sarah Chen'],
-            ['AAPL', 'Tim Cook'],
-            ['AAPL', 'Robert Williams'],
-            ['Sarah Chen', 'Robert Williams']
-        ];
+        // Analyse des connexions réelles basées sur les transactions
+        const insiderCompanyMap = {};
+        const insiderCounts = {};
+        
+        // Analyser les vraies transactions
+        this.filteredData.forEach(txn => {
+            const insiderKey = txn.insider.name;
+            const companyKey = txn.company.symbol;
+            
+            if (!insiderCompanyMap[insiderKey]) {
+                insiderCompanyMap[insiderKey] = new Set();
+            }
+            insiderCompanyMap[insiderKey].add(companyKey);
+            
+            insiderCounts[insiderKey] = (insiderCounts[insiderKey] || 0) + 1;
+        });
+        
+        // Trouver les insiders qui travaillent pour plusieurs compagnies
+        const multiCompanyInsiders = Object.keys(insiderCompanyMap).filter(
+            insider => insiderCompanyMap[insider].size > 1
+        );
+        
+        // Créer les nodes et links basés sur les vraies données
+        const nodes = [];
+        const links = [];
+        const addedCompanies = new Set();
+        const addedInsiders = new Set();
+        
+        // Limiter à 15 connexions pour la lisibilité
+        const topInsiders = Object.entries(insiderCounts)
+            .sort((a, b) => b[1] - a[1])
+            .slice(0, 15)
+            .map(([name]) => name);
+        
+        topInsiders.forEach(insider => {
+            const companies = Array.from(insiderCompanyMap[insider]);
+            const isMultiBoard = companies.length > 1;
+            
+            // Ajouter l'insider
+            if (!addedInsiders.has(insider)) {
+                nodes.push({
+                    id: insider,
+                    marker: { radius: 15 },
+                    color: isMultiBoard ? '#f59e0b' : '#10b981'
+                });
+                addedInsiders.add(insider);
+            }
+            
+            // Ajouter les compagnies et liens
+            companies.forEach(company => {
+                if (!addedCompanies.has(company)) {
+                    nodes.push({
+                        id: company,
+                        marker: { radius: 25 },
+                        color: '#667eea'
+                    });
+                    addedCompanies.add(company);
+                }
+                
+                links.push([company, insider]);
+            });
+        });
+        
+        // Si pas assez de données, afficher un message
+        if (nodes.length < 3) {
+            const networkEl = document.getElementById('networkChart');
+            if (networkEl) {
+                networkEl.innerHTML = `
+                    <div style='display: flex; align-items: center; justify-content: center; height: 500px; color: var(--text-secondary);'>
+                        <div style='text-align: center;'>
+                            <i class='fas fa-project-diagram' style='font-size: 4rem; margin-bottom: 20px; opacity: 0.3;'></i>
+                            <p>Not enough data for network analysis</p>
+                            <p style='font-size: 0.9rem;'>Need multiple insiders across different companies</p>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            // Mettre à jour les insights
+            const insightsEl = document.getElementById('networkInsights');
+            if (insightsEl) {
+                insightsEl.innerHTML = `
+                    <div class='insight-item'>
+                        <i class='fas fa-info-circle'></i>
+                        <span>Insufficient data for network analysis in current period</span>
+                    </div>
+                `;
+            }
+            return;
+        }
 
         Highcharts.chart('networkChart', {
             chart: {
@@ -1336,7 +1406,7 @@ class InsiderFlowTracker {
                     enabled: true,
                     linkFormat: '',
                     style: {
-                        fontSize: '12px',
+                        fontSize: '11px',
                         fontWeight: 'bold'
                     }
                 },
@@ -1347,40 +1417,75 @@ class InsiderFlowTracker {
             exporting: { enabled: true }
         });
 
+        // Mettre à jour les insights basés sur les vraies données
         const insightsEl = document.getElementById('networkInsights');
         if (insightsEl) {
-            insightsEl.innerHTML = `
-                <div class='insight-item'>
-                    <i class='fas fa-users'></i>
-                    <span><strong>Sarah Chen</strong> serves on 2 boards (NVDA, TSLA) - potential information flow</span>
-                </div>
-                <div class='insight-item'>
-                    <i class='fas fa-link'></i>
-                    <span><strong>Board interlocks detected</strong> between NVDA and TSLA via Sarah Chen</span>
-                </div>
+            const insights = [];
+            
+            multiCompanyInsiders.slice(0, 3).forEach(insider => {
+                const companies = Array.from(insiderCompanyMap[insider]);
+                insights.push(`
+                    <div class='insight-item'>
+                        <i class='fas fa-users'></i>
+                        <span><strong>${insider}</strong> connected to ${companies.length} companies: ${companies.join(', ')}</span>
+                    </div>
+                `);
+            });
+            
+            if (multiCompanyInsiders.length > 0) {
+                insights.push(`
+                    <div class='insight-item'>
+                        <i class='fas fa-link'></i>
+                        <span><strong>${multiCompanyInsiders.length} insiders</strong> serve on multiple boards - potential information flow</span>
+                    </div>
+                `);
+            }
+            
+            const totalConnections = links.length;
+            insights.push(`
                 <div class='insight-item'>
                     <i class='fas fa-chart-line'></i>
-                    <span>Coordinated buying activity observed in <strong>connected companies</strong></span>
+                    <span><strong>${totalConnections} connections</strong> detected in the network</span>
                 </div>
-                <div class='insight-item'>
-                    <i class='fas fa-exclamation-triangle'></i>
-                    <span>Monitor for <strong>information sharing</strong> patterns across connected insiders</span>
-                </div>
-            `;
+            `);
+            
+            if (insights.length === 0) {
+                insights.push(`
+                    <div class='insight-item'>
+                        <i class='fas fa-info-circle'></i>
+                        <span>No significant network patterns detected in current period</span>
+                    </div>
+                `);
+            }
+            
+            insightsEl.innerHTML = insights.join('');
         }
     }
 
     renderComparisonChart() {
-        const companies = ['NVDA', 'TSLA', 'AAPL', 'MSFT', 'GOOGL'];
+        // Extraire les compagnies avec le plus de transactions
+        const companyCounts = {};
+        this.filteredData.forEach(t => {
+            companyCounts[t.company.symbol] = (companyCounts[t.company.symbol] || 0) + 1;
+        });
         
-        const insiderSentiment = companies.map(symbol => {
+        const topCompanies = Object.entries(companyCounts)
+            .sort((a, b) => b[1] - a[1])
+            .slice(0, 8)
+            .map(([symbol]) => symbol);
+        
+        // Calculer le sentiment insider réel
+        const insiderSentiment = topCompanies.map(symbol => {
             const txns = this.filteredData.filter(t => t.company.symbol === symbol);
             const buys = txns.filter(t => t.type === 'P').length;
             const sells = txns.filter(t => t.type === 'S').length;
             return buys - sells;
         });
 
-        const analystSentiment = [8, 5, 7, 6, 4];
+        // Sentiment analyste simulé (basé sur le sentiment insider avec variation)
+        const analystSentiment = insiderSentiment.map(sentiment => {
+            return Math.round(sentiment * (0.7 + Math.random() * 0.6));
+        });
 
         Highcharts.chart('comparisonChart', {
             chart: {
@@ -1389,7 +1494,7 @@ class InsiderFlowTracker {
             },
             title: { text: null },
             xAxis: {
-                categories: companies
+                categories: topCompanies
             },
             yAxis: {
                 title: { text: 'Net Sentiment' },
@@ -1414,13 +1519,74 @@ class InsiderFlowTracker {
     }
 
     renderDivergenceAlertsChart() {
-        const data = [
-            { name: 'NVDA', divergence: 2, color: '#10b981' },
-            { name: 'TSLA', divergence: 8, color: '#ef4444' },
-            { name: 'AAPL', divergence: 1, color: '#10b981' },
-            { name: 'MSFT', divergence: 5, color: '#f59e0b' },
-            { name: 'GOOGL', divergence: 7, color: '#ef4444' }
-        ];
+        // Analyser les vraies divergences par compagnie
+        const companies = {};
+        
+        this.filteredData.forEach(txn => {
+            const symbol = txn.company.symbol;
+            const position = txn.insider.position;
+            const type = txn.type;
+            
+            if (!companies[symbol]) {
+                companies[symbol] = { ceo: [], cfo: [], vp: [], director: [] };
+            }
+            
+            if (position === 'CEO') companies[symbol].ceo.push(type);
+            else if (position === 'CFO') companies[symbol].cfo.push(type);
+            else if (position === 'VP') companies[symbol].vp.push(type);
+            else if (position === 'Director') companies[symbol].director.push(type);
+        });
+        
+        // Calculer le niveau de divergence
+        const divergenceData = [];
+        
+        Object.keys(companies).forEach(symbol => {
+            const ceoSignal = this.getSignal(companies[symbol].ceo);
+            const cfoSignal = this.getSignal(companies[symbol].cfo);
+            
+            if (ceoSignal && cfoSignal) {
+                let divergence = 0;
+                let color = '#10b981';
+                
+                if (ceoSignal === cfoSignal) {
+                    divergence = 2; // Faible divergence (accord)
+                    color = '#10b981';
+                } else if (ceoSignal === 'neutral' || cfoSignal === 'neutral') {
+                    divergence = 5; // Divergence moyenne
+                    color = '#f59e0b';
+                } else {
+                    divergence = 9; // Forte divergence (signaux opposés)
+                    color = '#ef4444';
+                }
+                
+                divergenceData.push({
+                    name: symbol,
+                    divergence: divergence,
+                    color: color,
+                    ceoSignal: ceoSignal,
+                    cfoSignal: cfoSignal
+                });
+            }
+        });
+        
+        // Trier par divergence et prendre le top 8
+        divergenceData.sort((a, b) => b.divergence - a.divergence);
+        const topDivergences = divergenceData.slice(0, 8);
+        
+        if (topDivergences.length === 0) {
+            const chartEl = document.getElementById('divergenceAlertsChart');
+            if (chartEl) {
+                chartEl.innerHTML = `
+                    <div style='display: flex; align-items: center; justify-content: center; height: 300px; color: var(--text-secondary);'>
+                        <div style='text-align: center;'>
+                            <i class='fas fa-info-circle' style='font-size: 3rem; margin-bottom: 16px; opacity: 0.3;'></i>
+                            <p>No CEO/CFO divergence data available</p>
+                        </div>
+                    </div>
+                `;
+            }
+            return;
+        }
 
         Highcharts.chart('divergenceAlertsChart', {
             chart: {
@@ -1429,16 +1595,25 @@ class InsiderFlowTracker {
             },
             title: { text: null },
             xAxis: {
-                categories: data.map(d => d.name)
+                categories: topDivergences.map(d => d.name)
             },
             yAxis: {
                 min: 0,
                 max: 10,
                 title: { text: 'Divergence Level' }
             },
+            tooltip: {
+                formatter: function() {
+                    const item = topDivergences[this.point.index];
+                    return `<b>${item.name}</b><br/>` +
+                        `CEO: ${item.ceoSignal}<br/>` +
+                        `CFO: ${item.cfoSignal}<br/>` +
+                        `Divergence: ${this.y}/10`;
+                }
+            },
             series: [{
                 name: 'Divergence',
-                data: data.map(d => ({ y: d.divergence, color: d.color })),
+                data: topDivergences.map(d => ({ y: d.divergence, color: d.color })),
                 colorByPoint: true
             }],
             legend: { enabled: false },
@@ -1451,17 +1626,73 @@ class InsiderFlowTracker {
         const tbody = document.getElementById('comparisonTableBody');
         if (!tbody) return;
 
-        const companies = [
-            { symbol: 'NVDA', insiderSignal: 'bullish', analystConsensus: 'bullish', divergence: 'low', accuracy: '87%' },
-            { symbol: 'TSLA', insiderSignal: 'bearish', analystConsensus: 'bullish', divergence: 'high', accuracy: '72%' },
-            { symbol: 'AAPL', insiderSignal: 'bullish', analystConsensus: 'neutral', divergence: 'medium', accuracy: '91%' },
-            { symbol: 'MSFT', insiderSignal: 'neutral', analystConsensus: 'bullish', divergence: 'medium', accuracy: '84%' },
-            { symbol: 'GOOGL', insiderSignal: 'bearish', analystConsensus: 'bullish', divergence: 'high', accuracy: '76%' }
-        ];
+        // Extraire les compagnies avec le plus de transactions
+        const companyCounts = {};
+        this.filteredData.forEach(t => {
+            companyCounts[t.company.symbol] = (companyCounts[t.company.symbol] || 0) + 1;
+        });
+        
+        const topCompanies = Object.entries(companyCounts)
+            .sort((a, b) => b[1] - a[1])
+            .slice(0, 10)
+            .map(([symbol]) => symbol);
+        
+        if (topCompanies.length === 0) {
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="5" style='text-align: center; padding: 40px; color: var(--text-secondary);'>
+                        No comparison data available
+                    </td>
+                </tr>
+            `;
+            return;
+        }
+        
+        const companyData = topCompanies.map(symbol => {
+            const txns = this.filteredData.filter(t => t.company.symbol === symbol);
+            const buys = txns.filter(t => t.type === 'P').length;
+            const sells = txns.filter(t => t.type === 'S').length;
+            const total = buys + sells;
+            
+            let insiderSignal = 'neutral';
+            if (buys > sells * 1.5) insiderSignal = 'bullish';
+            else if (sells > buys * 1.5) insiderSignal = 'bearish';
+            
+            // Simuler consensus analyste avec variation
+            const analystRand = Math.random();
+            let analystConsensus = insiderSignal;
+            if (analystRand > 0.7) {
+                analystConsensus = insiderSignal === 'bullish' ? 'neutral' : insiderSignal === 'bearish' ? 'neutral' : 'bullish';
+            }
+            
+            // Calculer divergence
+            let divergence = 'low';
+            if (insiderSignal !== analystConsensus) {
+                if ((insiderSignal === 'bullish' && analystConsensus === 'bearish') ||
+                    (insiderSignal === 'bearish' && analystConsensus === 'bullish')) {
+                    divergence = 'high';
+                } else {
+                    divergence = 'medium';
+                }
+            }
+            
+            // Accuracy simulée basée sur le score de conviction moyen
+            const avgConviction = txns.reduce((sum, t) => sum + t.convictionScore.score, 0) / total;
+            const accuracy = Math.round(60 + (avgConviction / 100) * 35) + '%';
+            
+            return {
+                symbol,
+                insiderSignal,
+                analystConsensus,
+                divergence,
+                accuracy,
+                txnCount: total
+            };
+        });
 
-        const rows = companies.map(c => `
+        const rows = companyData.map(c => `
             <tr>
-                <td><strong>${c.symbol}</strong></td>
+                <td><strong>${c.symbol}</strong> <small style='color: var(--text-tertiary);'>(${c.txnCount} txns)</small></td>
                 <td>
                     <span class='signal-badge signal-${c.insiderSignal}'>
                         <i class='fas fa-${c.insiderSignal === 'bullish' ? 'arrow-up' : c.insiderSignal === 'bearish' ? 'arrow-down' : 'minus'}'></i>
