@@ -7,11 +7,12 @@
     
     <link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css'>
     <script src='https://code.highcharts.com/highcharts.js'></script>
+    <script src='https://code.highcharts.com/modules/timeline.js'></script>
     
     <link rel='stylesheet' href='assets/css/common.css'>
     <link rel='stylesheet' href='assets/css/sidebar.css'>
     <link rel="stylesheet" href="assets/css/user-menu.css">
-    <link rel='stylesheet' href='assets/css/economic-pages.css'>
+    <link rel='stylesheet' href='assets/css/economic-calendar.css'>
     
     <script src="assets/js/favicon-dynamic.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
@@ -30,7 +31,7 @@
     <canvas id="particles-canvas" class="particles-background"></canvas>
 
     <div class='layout-wrapper'>
-        <!-- Sidebar (identique) -->
+        <!-- Sidebar -->
         <aside class='sidebar' id='sidebar'>
             <div class="sidebar-header">
                 <div class="logo-container">
@@ -126,32 +127,12 @@
                         <span>Stocks</span>
                         <i class="fas fa-chevron-down arrow"></i>
                     </button>
-                    <div class='nav-submenu' style='display: block;'>
+                    <div class='nav-submenu'>
                         <a href='advanced-analysis.html' class='nav-link'>
                             <i class='fas fa-brain'></i>
                             <span>Advanced Analysis</span>
                         </a>
-                        <!-- <a href='trend-prediction.html' class='nav-link'>
-                            <i class='fas fa-chart-line'></i>
-                            <span>Trend Prediction</span>
-                        </a>
-                        <a href='market-intelligence.html' class='nav-link'>
-                            <i class='fas fa-globe'></i>
-                            <span>Market Intelligence</span>
-                        </a>
-                        <a href='company-insights.html' class='nav-link'>
-                            <i class='fas fa-building'></i>
-                            <span>Company Insights</span>
-                        </a>
-                        <a href='analyst-coverage.html' class='nav-link active'>
-                            <i class='fas fa-users'></i>
-                            <span>Analyst Coverage</span>
-                        </a>
-                        <a href='earnings-estimates.html' class='nav-link'>
-                            <i class='fas fa-coins'></i>
-                            <span>Earnings & Estimates</span>
-                        </a>
-                    </div> -->
+                    </div>
                 </div>
 
                 <div class='nav-section'>
@@ -160,7 +141,7 @@
                         <span>AI Assistant</span>
                         <i class="fas fa-chevron-down arrow"></i>
                     </button>
-                    <div class='nav-submenu' style='display: block;'>
+                    <div class='nav-submenu'>
                         <a href='chatbot-fullpage.html' class='nav-link'>
                             <i class='fas fa-comments'></i>
                             <span>Alphy AI Chat</span>
@@ -177,7 +158,7 @@
                     <div class='nav-submenu' style='display: block;'>
                         <a href='economic-dashboard.html' class='nav-link'>
                             <i class='fas fa-tachometer-alt'></i>
-                            <span>Macro Economic Dasboard</span>
+                            <span>Macro Economic Dashboard</span>
                         </a>
                         <a href='inflation-calculator.html' class='nav-link'>
                             <i class='fas fa-calculator'></i>
@@ -250,23 +231,74 @@
                     <button class='mobile-toggle' id='mobileToggle'>
                         <i class='fas fa-bars'></i>
                     </button>
-                    <h1><i class="fas fa-calendar-alt"></i> Economic Calendar</h1>
+                    <h1 class="page-title"><i class="fas fa-calendar-alt"></i> US Economic Calendar</h1>
+                </div>
+                <div class='header-right'>
+                    <button class='dashboard-btn dashboard-btn-export' onclick='economicCalendar.exportData()'>
+                        <i class='fas fa-download'></i>
+                        <span class='btn-text'>Export</span>
+                    </button>
                 </div>
             </header>
             
             <div class='container'>
                 
+                <!-- Statistics Summary -->
+                <div class="eco-dashboard-grid">
+                    <div class="eco-card us-card">
+                        <div class="eco-card-header">
+                            <div class="eco-card-title-wrapper">
+                                <i class="fas fa-calendar-check eco-card-icon"></i>
+                                <h3 class="eco-card-title">Total Releases</h3>
+                            </div>
+                        </div>
+                        <div class="eco-value" id="totalReleasesValue">-</div>
+                        <div class="eco-sublabel">Upcoming economic events</div>
+                    </div>
+
+                    <div class="eco-card us-card">
+                        <div class="eco-card-header">
+                            <div class="eco-card-title-wrapper">
+                                <i class="fas fa-exclamation-circle eco-card-icon"></i>
+                                <h3 class="eco-card-title">High Impact</h3>
+                            </div>
+                        </div>
+                        <div class="eco-value" id="highImpactValue">-</div>
+                        <div class="eco-sublabel">Critical economic indicators</div>
+                    </div>
+
+                    <div class="eco-card us-card">
+                        <div class="eco-card-header">
+                            <div class="eco-card-title-wrapper">
+                                <i class="fas fa-layer-group eco-card-icon"></i>
+                                <h3 class="eco-card-title">Categories</h3>
+                            </div>
+                        </div>
+                        <div class="eco-value" id="categoriesValue">-</div>
+                        <div class="eco-sublabel">Unique data categories</div>
+                    </div>
+
+                    <div class="eco-card us-card">
+                        <div class="eco-card-header">
+                            <div class="eco-card-title-wrapper">
+                                <i class="fas fa-clock eco-card-icon"></i>
+                                <h3 class="eco-card-title">This Week</h3>
+                            </div>
+                        </div>
+                        <div class="eco-value" id="thisWeekValue">-</div>
+                        <div class="eco-sublabel">Releases in next 7 days</div>
+                    </div>
+                </div>
+
                 <!-- Filters -->
                 <div class='section'>
-                    <div class='toolbar'>
-                        <div class='toolbar-row'>
-                            <label><i class='fas fa-globe'></i> Region:</label>
-                            <select id='regionFilter' onchange='economicCalendar.filterEvents()'>
-                                <option value='all'>All Regions</option>
-                                <option value='US'>🇺🇸 United States</option>
-                                <option value='EU'>🇪🇺 European Union</option>
-                            </select>
-                            
+                    <div class='dashboard-toolbar'>
+                        <div class='toolbar-left'>
+                            <div class='dashboard-subtitle'>
+                                <i class='fas fa-filter'></i> Filter Options
+                            </div>
+                        </div>
+                        <div class='toolbar-right'>
                             <label><i class='fas fa-exclamation-circle'></i> Importance:</label>
                             <select id='importanceFilter' onchange='economicCalendar.filterEvents()'>
                                 <option value='all'>All Levels</option>
@@ -275,21 +307,44 @@
                                 <option value='low'>Low Impact</option>
                             </select>
                             
-                            <label><i class='fas fa-calendar'></i> Period:</label>
-                            <select id='periodFilter' onchange='economicCalendar.loadEvents()'>
-                                <option value='week'>This Week</option>
-                                <option value='month' selected>This Month</option>
-                                <option value='quarter'>This Quarter</option>
+                            <label><i class='fas fa-layer-group'></i> Category:</label>
+                            <select id='categoryFilter' onchange='economicCalendar.filterEvents()'>
+                                <option value='all'>All Categories</option>
                             </select>
+                            
+                            <button class='dashboard-btn-sm' onclick='economicCalendar.resetFilters()'>
+                                <i class='fas fa-redo'></i> Reset
+                            </button>
                         </div>
                     </div>
                 </div>
 
-                <!-- Upcoming Events -->
+                <!-- Calendar Timeline -->
                 <div class='section'>
-                    <h2 class='section-title'>
-                        <i class='fas fa-calendar-week'></i> Upcoming Economic Events
-                    </h2>
+                    <div class="section-header-with-controls">
+                        <h2 class='section-title gradient-title'>
+                            <i class='fas fa-stream'></i> Release Timeline
+                        </h2>
+                    </div>
+                    
+                    <div class='chart-card'>
+                        <div id='timelineChart' class='chart' style='height: 500px;'></div>
+                    </div>
+                </div>
+
+                <!-- Upcoming Events Grid -->
+                <div class='section'>
+                    <div class="section-header-with-controls">
+                        <h2 class='section-title gradient-title'>
+                            <i class='fas fa-calendar-week'></i> Upcoming Economic Events
+                        </h2>
+                        <div class="time-range-selector">
+                            <button class="time-btn active" data-period="week" onclick="economicCalendar.changePeriod('week')">Week</button>
+                            <button class="time-btn" data-period="month" onclick="economicCalendar.changePeriod('month')">Month</button>
+                            <button class="time-btn" data-period="quarter" onclick="economicCalendar.changePeriod('quarter')">Quarter</button>
+                            <button class="time-btn" data-period="year" onclick="economicCalendar.changePeriod('year')">Year</button>
+                        </div>
+                    </div>
                     
                     <div class='calendar-grid' id='calendarGrid'>
                         <div class='eco-loading'>
@@ -299,22 +354,112 @@
                     </div>
                 </div>
 
-                <!-- Release Dates Chart -->
+                <!-- Charts Grid -->
+                <div class="charts-grid">
+                    <!-- Category Distribution -->
+                    <div class='chart-card'>
+                        <div class='chart-header'>
+                            <h3 class='chart-title'>
+                                <i class='fas fa-chart-pie'></i> Category Distribution
+                            </h3>
+                            <div class="chart-actions">
+                                <button class="chart-btn-info" onclick="economicCalendar.showInfo('category')">
+                                    <i class="fas fa-info"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div id='categoryChart' class='chart'></div>
+                    </div>
+
+                    <!-- Importance Distribution -->
+                    <div class='chart-card'>
+                        <div class='chart-header'>
+                            <h3 class='chart-title'>
+                                <i class='fas fa-chart-bar'></i> Importance Levels
+                            </h3>
+                            <div class="chart-actions">
+                                <button class="chart-btn-info" onclick="economicCalendar.showInfo('importance')">
+                                    <i class="fas fa-info"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div id='importanceChart' class='chart'></div>
+                    </div>
+                </div>
+
+                <!-- Monthly Heatmap -->
                 <div class='section'>
-                    <h2 class='section-title'>
-                        <i class='fas fa-chart-bar'></i> Release Frequency by Category
-                    </h2>
+                    <div class="section-header-with-controls">
+                        <h2 class='section-title gradient-title'>
+                            <i class='fas fa-calendar'></i> Monthly Release Density
+                        </h2>
+                    </div>
                     
-                    <div class='chart-wrapper'>
-                        <div id='releaseFrequencyChart' class='chart' style='height: 400px;'></div>
+                    <div class='chart-card'>
+                        <div id='heatmapChart' class='chart' style='height: 400px;'></div>
                     </div>
                 </div>
 
                 <footer>
                     <p>
-                        <i class='fas fa-info-circle'></i> Economic Calendar - Release dates from FRED API
+                        <i class='fas fa-database'></i> Economic Calendar - Data from Federal Reserve Economic Data (FRED)
                     </p>
                 </footer>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Event Details -->
+    <div class="modal" id="eventModal">
+        <div class="modal-content modal-large">
+            <div class="modal-header">
+                <h2 class="gradient-title"><i class="fas fa-chart-line"></i> <span id="modalEventTitle">Event Details</span></h2>
+                <button class="modal-close" onclick="economicCalendar.closeModal('eventModal')">&times;</button>
+            </div>
+            <div class="modal-body" id="modalEventBody">
+                <!-- Content loaded dynamically -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Info -->
+    <div class="modal" id="infoModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="gradient-title"><i class="fas fa-info-circle"></i> Information</h2>
+                <button class="modal-close" onclick="economicCalendar.closeModal('infoModal')">&times;</button>
+            </div>
+            <div class="modal-body" id="infoModalBody">
+                <!-- Content loaded dynamically -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Export -->
+    <div class="modal" id="exportModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="gradient-title"><i class="fas fa-download"></i> Export Data</h2>
+                <button class="modal-close" onclick="economicCalendar.closeModal('exportModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="export-options">
+                    <button class="export-btn" onclick="economicCalendar.downloadJSON()">
+                        <i class="fas fa-file-code"></i>
+                        <span>JSON</span>
+                        <small>Raw data format</small>
+                    </button>
+                    <button class="export-btn" onclick="economicCalendar.downloadCSV()">
+                        <i class="fas fa-file-csv"></i>
+                        <span>CSV</span>
+                        <small>Excel compatible</small>
+                    </button>
+                    <button class="export-btn" onclick="economicCalendar.downloadPDF()">
+                        <i class="fas fa-file-pdf"></i>
+                        <span>PDF</span>
+                        <small>Printable report</small>
+                    </button>
+                </div>
             </div>
         </div>
     </div>
@@ -336,13 +481,7 @@
     <script src="assets/js/chatbot-ui.js"></script>
     <script src="assets/js/chatbot-particles.js"></script>
 
-    <!-- ============================================
-    ✅ FIX MENU UTILISATEUR - Force l'initialisation
-    ============================================ -->
     <script>
-        /**
-         * Force l'initialisation du menu utilisateur
-         */
         (function forceUserMenuInit() {
             console.log('🔧 Force initializing user menu...');
             
@@ -355,7 +494,6 @@
                     return;
                 }
                 
-                // Supprimer tous les anciens event listeners
                 const newTrigger = trigger.cloneNode(true);
                 trigger.parentNode.replaceChild(newTrigger, trigger);
                 
@@ -387,7 +525,6 @@
                     }
                 });
                 
-                // Fermer si on clique ailleurs
                 document.addEventListener('click', function(e) {
                     if (!freshTrigger.contains(e.target) && !freshDropdown.contains(e.target)) {
                         freshDropdown.classList.remove('active');
@@ -398,7 +535,6 @@
                     }
                 });
                 
-                // Empêcher la fermeture si on clique dans le dropdown
                 freshDropdown.addEventListener('click', function(e) {
                     e.stopPropagation();
                 });
