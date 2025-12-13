@@ -1,6 +1,6 @@
 /**
  * ═══════════════════════════════════════════════════════════════════
- * 🚀 IPO INTELLIGENCE DASHBOARD - ALPHAVAULT AI
+ * 🚀 IPO INTELLIGENCE DASHBOARD - ALPHAVAULT AI - VERSION COMPLÈTE
  * ═══════════════════════════════════════════════════════════════════
  */
 
@@ -34,11 +34,6 @@ class IPOIntelligenceDashboard {
             this.loadData(true);
         });
 
-        // Export button
-        document.getElementById('exportData')?.addEventListener('click', () => {
-            this.openModal('exportModal');
-        });
-
         // Filter button
         document.getElementById('viewFilters')?.addEventListener('click', () => {
             this.openModal('filtersModal');
@@ -51,13 +46,6 @@ class IPOIntelligenceDashboard {
                 e.target.classList.add('active');
                 this.currentPeriod = parseInt(e.target.dataset.period);
                 this.renderHeatmap();
-            });
-        });
-
-        // Export format buttons
-        document.querySelectorAll('[data-format]').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                this.exportData(e.target.closest('[data-format]').dataset.format);
             });
         });
 
@@ -122,6 +110,7 @@ class IPOIntelligenceDashboard {
     renderAll() {
         this.renderAlphyRecommendation();
         this.renderSummaryCards();
+        this.renderAnalyticsCharts();
         this.renderHeatmap();
         this.renderPipeline();
         this.renderTopIPOs();
@@ -143,7 +132,6 @@ class IPOIntelligenceDashboard {
 
         const html = `
             <div class='alphy-recommendation-header'>
-                <div class='alphy-logo'>🤖</div>
                 <h2 class='alphy-recommendation-title'>
                     <i class='fas fa-brain'></i> Alphy AI Recommendations
                 </h2>
@@ -191,8 +179,8 @@ class IPOIntelligenceDashboard {
                         <span class='metric-value'>${ipo.filingStage}</span>
                     </div>
                     <div class='metric-item'>
-                        <span class='metric-label'>Risk/Opportunity</span>
-                        <span class='metric-value'>${ipo.riskOpportunityRatio || 'N/A'}</span>
+                        <span class='metric-label'>Risk/Opp Ratio</span>
+                        <span class='metric-value'>${this.calculateRiskOpportunityRatio(ipo)}</span>
                     </div>
                     <div class='metric-item'>
                         <span class='metric-label'>Lock-Up Days</span>
@@ -334,6 +322,258 @@ class IPOIntelligenceDashboard {
         container.innerHTML = html;
     }
 
+    renderAnalyticsCharts() {
+        this.renderRiskOpportunityChart();
+        this.renderSectorValuationChart();
+        this.renderDilutionChart();
+    }
+
+    renderRiskOpportunityChart() {
+        const filteredIPOs = this.applyCurrentFilters();
+        const categories = filteredIPOs.map(ipo => ipo.companyName.substring(0, 20) + '...');
+        const data = filteredIPOs.map((ipo, index) => {
+            const ratio = parseFloat(this.calculateRiskOpportunityRatio(ipo));
+            const colorValue = ratio < 0.5 ? 0 : ratio < 1 ? 1 : 2; // Green, Yellow, Red
+            return [index, 0, colorValue];
+        });
+
+        Highcharts.chart('riskOpportunityChart', {
+            chart: {
+                type: 'heatmap',
+                backgroundColor: 'transparent',
+                height: 400
+            },
+            title: { text: null },
+            xAxis: {
+                categories: categories,
+                labels: {
+                    rotation: -45,
+                    style: { 
+                        color: getComputedStyle(document.body).getPropertyValue('--text-primary'),
+                        fontWeight: 'bold'
+                    }
+                }
+            },
+            yAxis: {
+                categories: ['Risk/Opportunity Ratio'],
+                title: null,
+                labels: {
+                    style: { 
+                        color: getComputedStyle(document.body).getPropertyValue('--text-primary'),
+                        fontWeight: 'bold'
+                    }
+                }
+            },
+            colorAxis: {
+                min: 0,
+                max: 2,
+                stops: [
+                    [0, '#10b981'],    // Green (low risk)
+                    [0.5, '#f59e0b'],  // Yellow (medium risk)
+                    [1, '#ef4444']     // Red (high risk)
+                ]
+            },
+            legend: {
+                align: 'right',
+                layout: 'vertical',
+                margin: 0,
+                verticalAlign: 'top',
+                y: 25,
+                symbolHeight: 280
+            },
+            tooltip: {
+                formatter: function () {
+                    const ipo = filteredIPOs[this.point.x];
+                    const ratio = parseFloat(ipoApp.calculateRiskOpportunityRatio(ipo));
+                    return `<b>${ipo.companyName}</b><br>Risk/Opp Ratio: <b>${ratio}</b><br>${ratio < 0.5 ? 'Low Risk ✓' : ratio < 1 ? 'Medium Risk' : 'High Risk ⚠'}`;
+                }
+            },
+            series: [{
+                name: 'Risk/Opportunity Ratio',
+                borderWidth: 2,
+                borderColor: '#ffffff',
+                data: data,
+                dataLabels: {
+                    enabled: false
+                }
+            }],
+            credits: { enabled: false }
+        });
+    }
+
+    renderSectorValuationChart() {
+        const filteredIPOs = this.applyCurrentFilters();
+        const sectorData = {};
+        
+        filteredIPOs.forEach(ipo => {
+            if (!sectorData[ipo.sector]) {
+                sectorData[ipo.sector] = { count: 0, totalScore: 0 };
+            }
+            sectorData[ipo.sector].count++;
+            sectorData[ipo.sector].totalScore += ipo.successScore;
+        });
+
+        const categories = Object.keys(sectorData);
+        const data = categories.map((sector, index) => {
+            const avgScore = sectorData[sector].totalScore / sectorData[sector].count;
+            const colorValue = avgScore < 40 ? 2 : avgScore < 65 ? 1 : 0; // Red, Yellow, Green
+            return [index, 0, colorValue];
+        });
+
+        Highcharts.chart('sectorValuationChart', {
+            chart: {
+                type: 'heatmap',
+                backgroundColor: 'transparent',
+                height: 400
+            },
+            title: { text: null },
+            xAxis: {
+                categories: categories,
+                labels: {
+                    style: { 
+                        color: getComputedStyle(document.body).getPropertyValue('--text-primary'),
+                        fontWeight: 'bold'
+                    }
+                }
+            },
+            yAxis: {
+                categories: ['Avg Success Score'],
+                title: null,
+                labels: {
+                    style: { 
+                        color: getComputedStyle(document.body).getPropertyValue('--text-primary'),
+                        fontWeight: 'bold'
+                    }
+                }
+            },
+            colorAxis: {
+                min: 0,
+                max: 2,
+                stops: [
+                    [0, '#10b981'],    // Green (high score)
+                    [0.5, '#f59e0b'],  // Yellow (medium score)
+                    [1, '#ef4444']     // Red (low score)
+                ]
+            },
+            legend: {
+                align: 'right',
+                layout: 'vertical',
+                margin: 0,
+                verticalAlign: 'top',
+                y: 25,
+                symbolHeight: 280
+            },
+            tooltip: {
+                formatter: function () {
+                    const sector = categories[this.point.x];
+                    const avgScore = (sectorData[sector].totalScore / sectorData[sector].count).toFixed(1);
+                    return `<b>${sector}</b><br>Avg Score: <b>${avgScore}/100</b><br>IPOs: ${sectorData[sector].count}`;
+                }
+            },
+            series: [{
+                name: 'Sector Valuation',
+                borderWidth: 2,
+                borderColor: '#ffffff',
+                data: data,
+                dataLabels: {
+                    enabled: true,
+                    color: '#ffffff',
+                    style: { 
+                        fontWeight: 'bold',
+                        textOutline: '2px contrast'
+                    },
+                    formatter: function() {
+                        const sector = categories[this.point.x];
+                        return (sectorData[sector].totalScore / sectorData[sector].count).toFixed(0);
+                    }
+                }
+            }],
+            credits: { enabled: false }
+        });
+    }
+
+    renderDilutionChart() {
+        const filteredIPOs = this.applyCurrentFilters();
+        const categories = filteredIPOs.slice(0, 20).map(ipo => ipo.companyName.substring(0, 20) + '...');
+        const data = filteredIPOs.slice(0, 20).map((ipo, index) => {
+            const dilution = this.estimateDilution(ipo);
+            const colorValue = dilution < 20 ? 0 : dilution < 30 ? 1 : 2; // Green, Yellow, Red
+            return [index, 0, colorValue];
+        });
+
+        Highcharts.chart('dilutionChart', {
+            chart: {
+                type: 'heatmap',
+                backgroundColor: 'transparent',
+                height: 400
+            },
+            title: { text: null },
+            xAxis: {
+                categories: categories,
+                labels: {
+                    rotation: -45,
+                    style: { 
+                        color: getComputedStyle(document.body).getPropertyValue('--text-primary'),
+                        fontWeight: 'bold'
+                    }
+                }
+            },
+            yAxis: {
+                categories: ['Expected Dilution'],
+                title: null,
+                labels: {
+                    style: { 
+                        color: getComputedStyle(document.body).getPropertyValue('--text-primary'),
+                        fontWeight: 'bold'
+                    }
+                }
+            },
+            colorAxis: {
+                min: 0,
+                max: 2,
+                stops: [
+                    [0, '#10b981'],    // Green (low dilution)
+                    [0.5, '#f59e0b'],  // Yellow (medium dilution)
+                    [1, '#ef4444']     // Red (high dilution)
+                ]
+            },
+            legend: {
+                align: 'right',
+                layout: 'vertical',
+                margin: 0,
+                verticalAlign: 'top',
+                y: 25,
+                symbolHeight: 280
+            },
+            tooltip: {
+                formatter: function () {
+                    const ipo = filteredIPOs[this.point.x];
+                    const dilution = ipoApp.estimateDilution(ipo);
+                    return `<b>${ipo.companyName}</b><br>Expected Dilution: <b>${dilution}%</b><br>${dilution < 20 ? 'Favorable ✓' : dilution < 30 ? 'Moderate' : 'High ⚠'}`;
+                }
+            },
+            series: [{
+                name: 'Shareholder Dilution',
+                borderWidth: 2,
+                borderColor: '#ffffff',
+                data: data,
+                dataLabels: {
+                    enabled: true,
+                    color: '#ffffff',
+                    style: { 
+                        fontWeight: 'bold',
+                        textOutline: '2px contrast'
+                    },
+                    formatter: function() {
+                        const ipo = filteredIPOs[this.point.x];
+                        return ipoApp.estimateDilution(ipo) + '%';
+                    }
+                }
+            }],
+            credits: { enabled: false }
+        });
+    }
+
     renderHeatmap() {
         const filteredIPOs = this.applyCurrentFilters();
         const sectors = {};
@@ -377,11 +617,9 @@ class IPOIntelligenceDashboard {
             colorAxis: {
                 min: 0,
                 stops: [
-                    [0, '#e0e7ff'],
-                    [0.25, '#a5b4fc'],
-                    [0.5, '#818cf8'],
-                    [0.75, '#6366f1'],
-                    [1, '#4f46e5']
+                    [0, '#10b981'],    // Green (low activity)
+                    [0.5, '#f59e0b'],  // Yellow (medium activity)
+                    [1, '#ef4444']     // Red (high activity)
                 ]
             },
             legend: {
@@ -681,7 +919,6 @@ class IPOIntelligenceDashboard {
     }
 
     calculateSectorValuation(ipo) {
-        // Simplified sector valuation (in real app, compare to market data)
         const sectorMultipliers = {
             'Technology': 'Premium (+20%)',
             'Healthcare': 'Above Average (+10%)',
@@ -696,8 +933,6 @@ class IPOIntelligenceDashboard {
     }
 
     estimateDilution(ipo) {
-        // Typical IPO dilution ranges from 15-25%
-        // Adjust based on filing stage
         let baseDilution = 20;
         if (ipo.filingStage === 'Amendment') baseDilution += 5;
         if (ipo.successScore < 50) baseDilution += 10;
@@ -714,17 +949,14 @@ class IPOIntelligenceDashboard {
 
     applyCurrentFilters() {
         return this.enrichedIPOs.filter(ipo => {
-            // Sector filter
             if (this.filters.sectors.length > 0 && !this.filters.sectors.includes(ipo.sector)) {
                 return false;
             }
             
-            // Score filter
             if (ipo.successScore < this.filters.scoreMin || ipo.successScore > this.filters.scoreMax) {
                 return false;
             }
             
-            // Stage filter
             if (this.filters.stages.length > 0 && !this.filters.stages.includes(ipo.filingStage)) {
                 return false;
             }
@@ -734,15 +966,12 @@ class IPOIntelligenceDashboard {
     }
 
     applyFilters() {
-        // Get selected sectors
         this.filters.sectors = Array.from(document.querySelectorAll('[data-sector].active'))
             .map(btn => btn.dataset.sector);
         
-        // Get score range
         this.filters.scoreMin = parseInt(document.getElementById('scoreMin')?.value || 0);
         this.filters.scoreMax = parseInt(document.getElementById('scoreMax')?.value || 100);
         
-        // Get selected stages
         this.filters.stages = Array.from(document.querySelectorAll('[data-stage].active'))
             .map(btn => btn.dataset.stage);
         
@@ -760,7 +989,6 @@ class IPOIntelligenceDashboard {
             stages: []
         };
         
-        // Reset UI
         document.querySelectorAll('.filter-btn.active').forEach(btn => btn.classList.remove('active'));
         if (document.getElementById('scoreMin')) document.getElementById('scoreMin').value = 0;
         if (document.getElementById('scoreMax')) document.getElementById('scoreMax').value = 100;
@@ -834,7 +1062,9 @@ class IPOIntelligenceDashboard {
                     <p>Visual representation of IPO activity across different industry sectors.</p>
                     <h4>How to read:</h4>
                     <ul>
-                        <li>Darker colors = more IPO activity</li>
+                        <li><span style="color: #10b981;">●</span> Green = Low activity (fewer IPOs)</li>
+                        <li><span style="color: #f59e0b;">●</span> Yellow = Medium activity</li>
+                        <li><span style="color: #ef4444;">●</span> Red = High activity (many IPOs)</li>
                         <li>Each cell shows the count of IPOs in that sector</li>
                         <li>Filter by time period (30, 90, 180, 365 days)</li>
                     </ul>
@@ -873,6 +1103,76 @@ class IPOIntelligenceDashboard {
                     <h4>Our estimates:</h4>
                     <p>Based on typical 180-day lock-up periods from estimated IPO date (filing date + 30 days).</p>
                 `
+            },
+            's1-f1': {
+                title: 'SEC Form Types Explained',
+                content: `
+                    <h4><strong>Form S-1 (US Companies)</strong></h4>
+                    <p>The <strong>S-1</strong> is the initial registration statement filed with the SEC by <strong>U.S.-based companies</strong> preparing for an IPO. It contains:</p>
+                    <ul>
+                        <li>Business description and strategy</li>
+                        <li>Financial statements (3+ years)</li>
+                        <li>Risk factors</li>
+                        <li>Use of proceeds</li>
+                        <li>Management and ownership structure</li>
+                    </ul>
+                    
+                    <h4 style="margin-top: 20px;"><strong>Form F-1 (Foreign Companies)</strong></h4>
+                    <p>The <strong>F-1</strong> is used by <strong>foreign companies</strong> registering securities in the U.S. Similar to S-1 but includes:</p>
+                    <ul>
+                        <li>Disclosure of foreign jurisdiction laws</li>
+                        <li>Currency exchange considerations</li>
+                        <li>International accounting standards reconciliation</li>
+                    </ul>
+                    
+                    <h4 style="margin-top: 20px;"><strong>Amendments (S-1/A, F-1/A)</strong></h4>
+                    <p>Forms ending with <strong>/A</strong> (e.g., S-1/A, F-1/A) are <strong>amendments</strong> to the original filing. Companies file amendments to:</p>
+                    <ul>
+                        <li>Update financial information</li>
+                        <li>Address SEC comments</li>
+                        <li>Revise pricing range</li>
+                        <li>Add or clarify risk factors</li>
+                    </ul>
+                    <p><strong>Multiple amendments are normal</strong> and often indicate progress toward finalizing the IPO.</p>
+                `
+            },
+            'filing-stage': {
+                title: 'Filing Stages Explained',
+                content: `
+                    <h4><strong>Initial Filing</strong></h4>
+                    <p>The company has just submitted its <strong>first S-1 or F-1 form</strong> to the SEC. This is the earliest public signal of an IPO.</p>
+                    <ul>
+                        <li><strong>Timeline:</strong> 3-6 months from IPO</li>
+                        <li><strong>Risk:</strong> Higher (may not complete)</li>
+                        <li><strong>Opportunity:</strong> Early visibility</li>
+                    </ul>
+                    
+                    <h4 style="margin-top: 20px;"><strong>Amendment</strong></h4>
+                    <p>The company has filed one or more amendments (S-1/A, F-1/A). This indicates:</p>
+                    <ul>
+                        <li>Active dialogue with SEC</li>
+                        <li>Refinement of offering details</li>
+                        <li>Progress toward approval</li>
+                    </ul>
+                    <p><strong>More amendments = closer to IPO</strong> (typically 4-7 amendments before finalization).</p>
+                    
+                    <h4 style="margin-top: 20px;"><strong>Final Prospectus (424B4)</strong></h4>
+                    <p>The <strong>424B4</strong> form is the <strong>final prospectus</strong> filed after pricing. This means:</p>
+                    <ul>
+                        <li>SEC approval obtained</li>
+                        <li>Final price and share count determined</li>
+                        <li>IPO is imminent (often within days)</li>
+                    </ul>
+                    <p><strong>This is the last step before trading begins.</strong></p>
+                    
+                    <h4 style="margin-top: 20px;"><strong>Typical IPO Timeline:</strong></h4>
+                    <p style="background: var(--eco-gradient-soft); padding: 15px; border-radius: 8px; margin-top: 12px;">
+                        <strong>Day 0:</strong> Initial S-1/F-1 filed<br>
+                        <strong>Days 30-90:</strong> Amendments filed (SEC review)<br>
+                        <strong>Days 90-120:</strong> Roadshow & pricing<br>
+                        <strong>Day 120+:</strong> 424B4 filed → IPO launch
+                    </p>
+                `
             }
         };
 
@@ -882,73 +1182,6 @@ class IPOIntelligenceDashboard {
         body.innerHTML = info.content;
         
         this.openModal('infoModal');
-    }
-
-    exportData(format) {
-        console.log(`📤 Exporting data as ${format}...`);
-        
-        if (format === 'csv') {
-            this.exportAsCSV();
-        } else if (format === 'json') {
-            this.exportAsJSON();
-        } else if (format === 'pdf') {
-            alert('PDF export will be implemented soon!');
-        }
-        
-        this.closeModal('exportModal');
-    }
-
-    exportAsCSV() {
-        const headers = ['Rank', 'Company', 'CIK', 'Sector', 'Success Score', 'Form Type', 'Filing Stage', 'Filed Date', 'Risk/Opp Ratio'];
-        const rows = this.enrichedIPOs
-            .sort((a, b) => b.successScore - a.successScore)
-            .map((ipo, index) => [
-                index + 1,
-                `"${ipo.companyName}"`,
-                ipo.cik || 'N/A',
-                ipo.sector,
-                ipo.successScore,
-                ipo.formType,
-                ipo.filingStage,
-                new Date(ipo.filedDate).toLocaleDateString(),
-                this.calculateRiskOpportunityRatio(ipo)
-            ]);
-
-        const csv = [
-            headers.join(','),
-            ...rows.map(row => row.join(','))
-        ].join('\n');
-
-        const blob = new Blob([csv], { type: 'text/csv' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `ipo-intelligence-${new Date().toISOString().split('T')[0]}.csv`;
-        a.click();
-    }
-
-    exportAsJSON() {
-        const data = {
-            exportDate: new Date().toISOString(),
-            totalIPOs: this.enrichedIPOs.length,
-            ipos: this.enrichedIPOs.map(ipo => ({
-                ...ipo,
-                analytics: {
-                    riskOpportunityRatio: this.calculateRiskOpportunityRatio(ipo),
-                    sectorValuation: this.calculateSectorValuation(ipo),
-                    dilutionEstimate: this.estimateDilution(ipo),
-                    filingMomentum: this.calculateFilingMomentum(ipo)
-                }
-            }))
-        };
-
-        const json = JSON.stringify(data, null, 2);
-        const blob = new Blob([json], { type: 'application/json' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `ipo-intelligence-${new Date().toISOString().split('T')[0]}.json`;
-        a.click();
     }
 
     openModal(modalId) {

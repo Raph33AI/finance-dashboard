@@ -1,6 +1,6 @@
 /**
  * ====================================================================
- * ALPHAVAULT AI - IPO INTELLIGENCE DASHBOARD - STYLES
+ * ALPHAVAULT AI - IPO INTELLIGENCE DASHBOARD - STYLES COMPLETS
  * ====================================================================
  */
 
@@ -254,6 +254,16 @@ body.dark-mode .recommendation-card {
 .ipo-summary-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 24px;
+    margin-bottom: 32px;
+}
+
+/* ========================================
+   ANALYTICS CHARTS SECTION
+   ======================================== */
+.analytics-charts-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
     gap: 24px;
     margin-bottom: 32px;
 }
@@ -809,6 +819,10 @@ body.dark-mode .recommendation-card {
     }
     
     .recommendation-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .analytics-charts-grid {
         grid-template-columns: 1fr;
     }
 }

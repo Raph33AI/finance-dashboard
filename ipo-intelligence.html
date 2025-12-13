@@ -48,7 +48,7 @@
     <canvas id="particles-canvas" class="particles-background"></canvas>
 
     <div class='layout-wrapper'>
-        <!-- Sidebar (identique à ton exemple) -->
+        <!-- Sidebar -->
         <aside class='sidebar' id='sidebar'>
             <div class="sidebar-header">
                 <div class="logo-container">
@@ -174,10 +174,6 @@
                         <i class='fas fa-sync-alt'></i>
                         <span class='btn-text'>Refresh</span>
                     </button>
-                    <button class='dashboard-btn dashboard-btn-export' id='exportData' title='Export Data'>
-                        <i class='fas fa-download'></i>
-                        <span class='btn-text'>Export</span>
-                    </button>
                 </div>
             </header>
             
@@ -199,9 +195,7 @@
                     </div>
                 </div>
 
-                <!-- ========================================
-                    ALPHY AI RECOMMENDATION SECTION
-                    ======================================== -->
+                <!-- Alphy AI Recommendation -->
                 <div class='alphy-recommendation' id='alphyRecommendation'>
                     <div class='eco-loading'>
                         <div class='eco-spinner'></div>
@@ -223,21 +217,53 @@
                     </div>
                 </div>
 
+                <!-- Advanced Analytics Charts -->
+                <div class='section'>
+                    <h2 class='section-title gradient-title'>
+                        <i class='fas fa-chart-pie'></i> Advanced Analytics
+                        <button class='info-btn' onclick='ipoApp.showInfoModal("s1-f1")'>
+                            <i class='fas fa-info-circle'></i>
+                        </button>
+                    </h2>
+                    
+                    <div class='analytics-charts-grid'>
+                        <div class='chart-card'>
+                            <div class='chart-header'>
+                                <h3 class='chart-title'><i class='fas fa-balance-scale'></i> Risk/Opportunity Ratio by Company</h3>
+                            </div>
+                            <div id='riskOpportunityChart' class='chart'></div>
+                        </div>
+                        
+                        <div class='chart-card'>
+                            <div class='chart-header'>
+                                <h3 class='chart-title'><i class='fas fa-trophy'></i> Sector Valuation Comparison</h3>
+                            </div>
+                            <div id='sectorValuationChart' class='chart'></div>
+                        </div>
+                        
+                        <div class='chart-card'>
+                            <div class='chart-header'>
+                                <h3 class='chart-title'><i class='fas fa-percentage'></i> Shareholder Dilution Estimates</h3>
+                            </div>
+                            <div id='dilutionChart' class='chart'></div>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- IPO Heatmap -->
                 <div class='section'>
                     <div class='section-header-with-controls'>
                         <h2 class='section-title gradient-title'>
                             <i class='fas fa-fire'></i> IPO Heatmap by Sector
+                            <button class='info-btn' onclick='ipoApp.showInfoModal("heatmap")'>
+                                <i class='fas fa-info-circle'></i>
+                            </button>
                         </h2>
-                        <button class='info-btn' onclick='ipoApp.showInfoModal("heatmap")' style='vertical-align: middle;'>
-                            <i class='fas fa-info-circle'></i>
-                        </button>
-
                         <div class='time-range-selector'>
-                            <button class='time-btn active' data-period='30'>30 Days</button>
-                            <button class='time-btn' data-period='90'>90 Days</button>
-                            <button class='time-btn' data-period='180'>6 Months</button>
-                            <button class='time-btn' data-period='365'>1 Year</button>
+                            <button class='dashboard-btn-sm active' data-period='30'>30 Days</button>
+                            <button class='dashboard-btn-sm' data-period='90'>90 Days</button>
+                            <button class='dashboard-btn-sm' data-period='180'>6 Months</button>
+                            <button class='dashboard-btn-sm' data-period='365'>1 Year</button>
                         </div>
                     </div>
                     
@@ -250,11 +276,11 @@
                 <div class='section'>
                     <h2 class='section-title gradient-title'>
                         <i class='fas fa-stream'></i> IPO Pipeline
+                        <button class='info-btn' onclick='ipoApp.showInfoModal("pipeline")'>
+                            <i class='fas fa-info-circle'></i>
+                        </button>
                     </h2>
-                    <button class='info-btn' onclick='ipoApp.showInfoModal("pipeline")' style='vertical-align: middle;'>
-                        <i class='fas fa-info-circle'></i>
-                    </button>
-
+                    
                     <div class='ipo-pipeline' id='ipoPipeline'>
                         <div class='eco-loading'>
                             <div class='eco-spinner'></div>
@@ -299,11 +325,11 @@
                 <div class='section'>
                     <h2 class='section-title gradient-title'>
                         <i class='fas fa-lock'></i> Lock-Up Period Tracker
+                        <button class='info-btn' onclick='ipoApp.showInfoModal("lockup")'>
+                            <i class='fas fa-info-circle'></i>
+                        </button>
                     </h2>
-                    <button class='info-btn' onclick='ipoApp.showInfoModal("lock-up")' style='vertical-align: middle;'>
-                        <i class='fas fa-info-circle'></i>
-                    </button>
-
+                    
                     <div class='lockup-grid' id='lockupGrid'>
                         <div class='eco-loading'>
                             <div class='eco-spinner'></div>
@@ -335,105 +361,6 @@
             </div>
         </div>
     </div>
-
-    <!-- Export Modal -->
-    <div id='exportModal' class='modal'>
-        <div class='modal-content'>
-            <div class='modal-header'>
-                <h2 class='gradient-title'><i class='fas fa-download'></i> Export IPO Data</h2>
-                <button class='modal-close' data-modal='exportModal'>&times;</button>
-            </div>
-            <div class='modal-body'>
-                <p style='margin-bottom: 24px; color: var(--text-secondary); line-height: 1.6;'>
-                    Choose your preferred export format for IPO data
-                </p>
-                <div class='export-options'>
-                    <button class='export-btn' data-format='csv'>
-                        <i class='fas fa-file-csv'></i>
-                        <span>CSV Format</span>
-                        <small>Excel compatible</small>
-                    </button>
-                    <button class='export-btn' data-format='json'>
-                        <i class='fas fa-file-code'></i>
-                        <span>JSON Format</span>
-                        <small>Developer friendly</small>
-                    </button>
-                    <button class='export-btn' data-format='pdf'>
-                        <i class='fas fa-file-pdf'></i>
-                        <span>PDF Report</span>
-                        <small>Full analysis</small>
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Scripts -->
-    <script src='assets/js/common.js'></script>
-    <script src='assets/js/sidebar.js'></script>
-    <script src='assets/js/sec-api-client.js'></script>
-    <script src='assets/js/ipo-intelligence.js'></script>
-
-    <!-- Chatbot Scripts -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-    <script src="assets/js/chatbot-config.js"></script>
-    <script src="assets/js/chatbot-gemini.js"></script>
-    <script src="assets/js/chatbot-analytics.js"></script>
-    <script src="assets/js/chatbot-charts.js"></script>
-    <script src="assets/js/chatbot-ipo-analyzer.js"></script>
-    <script src="assets/js/chatbot-suggestions.js"></script>
-    <script src="assets/js/chatbot-ai-engine.js"></script>
-    <script src="assets/js/chatbot-ui.js"></script>
-    <script src="assets/js/chatbot-particles.js"></script>
-
-    <!-- User Menu Init -->
-    <script>
-        (function forceUserMenuInit() {
-            console.log('🔧 Force initializing user menu...');
-            
-            const initMenu = () => {
-                const trigger = document.getElementById('sidebarUserTrigger');
-                const dropdown = document.getElementById('sidebarUserDropdown');
-                
-                if (!trigger || !dropdown) return;
-                
-                const newTrigger = trigger.cloneNode(true);
-                trigger.parentNode.replaceChild(newTrigger, trigger);
-                
-                const freshTrigger = document.getElementById('sidebarUserTrigger');
-                const freshDropdown = document.getElementById('sidebarUserDropdown');
-                
-                freshTrigger.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    
-                    const isActive = freshDropdown.classList.contains('active');
-                    freshDropdown.classList.toggle('active');
-                    
-                    const arrow = freshTrigger.querySelector('.sidebar-user-arrow');
-                    if (arrow) {
-                        arrow.style.transform = isActive ? 'rotate(0deg)' : 'rotate(180deg)';
-                    }
-                });
-                
-                document.addEventListener('click', function(e) {
-                    if (!freshTrigger.contains(e.target) && !freshDropdown.contains(e.target)) {
-                        freshDropdown.classList.remove('active');
-                        const arrow = freshTrigger.querySelector('.sidebar-user-arrow');
-                        if (arrow) arrow.style.transform = 'rotate(0deg)';
-                    }
-                });
-                
-                freshDropdown.addEventListener('click', e => e.stopPropagation());
-            };
-            
-            if (document.readyState === 'loading') {
-                document.addEventListener('DOMContentLoaded', initMenu);
-            } else {
-                setTimeout(initMenu, 100);
-            }
-        })();
-    </script>
 
     <!-- Filters Modal -->
     <div id='filtersModal' class='modal'>
@@ -505,6 +432,73 @@
             </div>
         </div>
     </div>
+
+    <!-- Scripts -->
+    <script src='assets/js/common.js'></script>
+    <script src='assets/js/sidebar.js'></script>
+    <script src='assets/js/sec-api-client.js'></script>
+    <script src='assets/js/ipo-intelligence.js'></script>
+
+    <!-- Chatbot Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script src="assets/js/chatbot-config.js"></script>
+    <script src="assets/js/chatbot-gemini.js"></script>
+    <script src="assets/js/chatbot-analytics.js"></script>
+    <script src="assets/js/chatbot-charts.js"></script>
+    <script src="assets/js/chatbot-ipo-analyzer.js"></script>
+    <script src="assets/js/chatbot-suggestions.js"></script>
+    <script src="assets/js/chatbot-ai-engine.js"></script>
+    <script src="assets/js/chatbot-ui.js"></script>
+    <script src="assets/js/chatbot-particles.js"></script>
+
+    <!-- User Menu Init -->
+    <script>
+        (function forceUserMenuInit() {
+            console.log('🔧 Force initializing user menu...');
+            
+            const initMenu = () => {
+                const trigger = document.getElementById('sidebarUserTrigger');
+                const dropdown = document.getElementById('sidebarUserDropdown');
+                
+                if (!trigger || !dropdown) return;
+                
+                const newTrigger = trigger.cloneNode(true);
+                trigger.parentNode.replaceChild(newTrigger, trigger);
+                
+                const freshTrigger = document.getElementById('sidebarUserTrigger');
+                const freshDropdown = document.getElementById('sidebarUserDropdown');
+                
+                freshTrigger.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    
+                    const isActive = freshDropdown.classList.contains('active');
+                    freshDropdown.classList.toggle('active');
+                    
+                    const arrow = freshTrigger.querySelector('.sidebar-user-arrow');
+                    if (arrow) {
+                        arrow.style.transform = isActive ? 'rotate(0deg)' : 'rotate(180deg)';
+                    }
+                });
+                
+                document.addEventListener('click', function(e) {
+                    if (!freshTrigger.contains(e.target) && !freshDropdown.contains(e.target)) {
+                        freshDropdown.classList.remove('active');
+                        const arrow = freshTrigger.querySelector('.sidebar-user-arrow');
+                        if (arrow) arrow.style.transform = 'rotate(0deg)';
+                    }
+                });
+                
+                freshDropdown.addEventListener('click', e => e.stopPropagation());
+            };
+            
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', initMenu);
+            } else {
+                setTimeout(initMenu, 100);
+            }
+        })();
+    </script>
 
 </body>
 </html>
