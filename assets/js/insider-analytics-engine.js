@@ -116,6 +116,7 @@ class InsiderAnalyticsEngine {
                 ticker,
                 period: history.period,
                 transactionCount: history.transactions.length,
+                transactions: history.transactions,
                 
                 // Scores principaux
                 overallScore,
