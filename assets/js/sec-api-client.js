@@ -19,7 +19,7 @@ class SECApiClient {
      */
     async getIPOs(options = {}) {
         const {
-            limit = 100,
+            limit = 5000,
             includeAmendments = true,
             forceRefresh = false
         } = options;

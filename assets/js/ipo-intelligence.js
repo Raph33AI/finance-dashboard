@@ -1,8 +1,10 @@
 /**
  * ═══════════════════════════════════════════════════════════════════
- * 🚀 IPO INTELLIGENCE DASHBOARD - ALPHAVAULT AI - VERSION DYNAMIQUE
+ * 🚀 IPO INTELLIGENCE DASHBOARD - ALPHAVAULT AI - VERSION COMPLÈTE
  * ═══════════════════════════════════════════════════════════════════
- * ✅ TOUT EST AUTOMATISÉ - AUCUNE DONNÉE HARDCODÉE
+ * ✅ RÉCUPÉRATION MASSIVE DE DONNÉES
+ * ✅ 100% DYNAMIQUE - AUCUNE DONNÉE HARDCODÉE
+ * ═══════════════════════════════════════════════════════════════════
  */
 
 class IPOIntelligenceDashboard {
@@ -10,7 +12,7 @@ class IPOIntelligenceDashboard {
         this.secClient = new SECApiClient();
         this.ipos = [];
         this.enrichedIPOs = [];
-        this.currentPeriod = 30;
+        this.currentPeriod = 365; // 365 jours par défaut (au lieu de 30)
         this.filters = {
             sectors: [],
             scoreMin: 0,
@@ -35,6 +37,14 @@ class IPOIntelligenceDashboard {
                 veryFast: 0.25,  // Bottom 25% (fastest)
                 fast: 0.50,      // Bottom 50%
                 moderate: 0.75   // Bottom 75%
+            },
+            // ✅ NOUVEAU : Configuration de chargement des données
+            dataLoading: {
+                initialLimit: 1000,        // Charge 1000 IPOs au démarrage
+                batchSize: 500,            // Taille des batches pour chargement progressif
+                maxIPOs: 5000,             // Limite maximale (sécurité)
+                autoLoadMore: true,        // Charge automatiquement plus de données si disponible
+                cacheDuration: 3600000     // Cache 1h (au lieu de 30min)
             }
         };
         
@@ -45,6 +55,9 @@ class IPOIntelligenceDashboard {
             avgDilutionBySector: {},
             avgMomentumBySector: {}
         };
+        
+        this.isLoading = false;
+        this.hasMoreData = true;
         
         this.init();
     }
@@ -95,33 +108,238 @@ class IPOIntelligenceDashboard {
         document.getElementById('resetFilters')?.addEventListener('click', () => {
             this.resetFilters();
         });
+
+        // ✅ NOUVEAU : Bouton Load More
+        document.getElementById('loadMoreIPOs')?.addEventListener('click', async () => {
+            const currentLimit = this.config.dataLoading.initialLimit;
+            this.config.dataLoading.initialLimit += this.config.dataLoading.batchSize;
+            
+            if (this.config.dataLoading.initialLimit > this.config.dataLoading.maxIPOs) {
+                alert(`Maximum limit reached (${this.config.dataLoading.maxIPOs} IPOs)`);
+                this.config.dataLoading.initialLimit = this.config.dataLoading.maxIPOs;
+                return;
+            }
+            
+            await this.loadData(true);
+            this.calculateDynamicStats();
+            this.renderAll();
+        });
     }
 
+    /**
+     * ═══════════════════════════════════════════════════════════════════
+     * 📊 CHARGEMENT MASSIF DES DONNÉES IPO
+     * ═══════════════════════════════════════════════════════════════════
+     */
     async loadData(forceRefresh = false) {
+        if (this.isLoading) {
+            console.warn('⚠ Loading already in progress...');
+            return;
+        }
+
+        this.isLoading = true;
+        this.showLoadingIndicator(true);
+
         try {
-            console.log('📊 Loading IPO data...');
+            console.log('📊 Loading IPO data (extended dataset)...');
             
+            // ✅ Charger avec limite étendue
             const response = await this.secClient.getIPOs({
-                limit: 100,
+                limit: this.config.dataLoading.initialLimit,
                 includeAmendments: true,
                 forceRefresh
             });
 
             this.ipos = response.data || [];
             
+            console.log(`📦 Received ${this.ipos.length} raw IPOs from SEC`);
+            
             // Remove duplicates based on CIK + Company Name
             this.ipos = this.removeDuplicates(this.ipos);
             
-            // Enrich IPOs with analysis
-            this.enrichedIPOs = await Promise.all(
-                this.ipos.map(ipo => this.secClient.analyzeIPO(ipo))
-            );
-
-            console.log(`✅ Loaded ${this.enrichedIPOs.length} unique IPOs`);
+            console.log(`🧹 After deduplication: ${this.ipos.length} unique IPOs`);
+            
+            // ✅ Enrichissement progressif par batches (évite le freeze UI)
+            this.enrichedIPOs = await this.enrichIPOsInBatches(this.ipos);
+            
+            console.log(`✅ Loaded and enriched ${this.enrichedIPOs.length} unique IPOs`);
+            
+            // Afficher les statistiques de période
+            this.displayDatasetStats();
+            this.updateDatasetInfoDisplay();
             
         } catch (error) {
             console.error('❌ Error loading IPO data:', error);
             this.showError('Failed to load IPO data. Please check your Worker URL in sec-api-client.js');
+        } finally {
+            this.isLoading = false;
+            this.showLoadingIndicator(false);
+        }
+    }
+
+    /**
+     * 🔄 Enrichissement par batches pour éviter de bloquer l'UI
+     */
+    async enrichIPOsInBatches(ipos) {
+        const batchSize = 50; // Traiter 50 IPOs à la fois
+        const enriched = [];
+        
+        for (let i = 0; i < ipos.length; i += batchSize) {
+            const batch = ipos.slice(i, i + batchSize);
+            
+            console.log(`⚙ Enriching batch ${Math.floor(i / batchSize) + 1}/${Math.ceil(ipos.length / batchSize)}...`);
+            
+            const enrichedBatch = await Promise.all(
+                batch.map(ipo => this.secClient.analyzeIPO(ipo))
+            );
+            
+            enriched.push(...enrichedBatch);
+            
+            // Petit délai pour laisser l'UI respirer
+            if (i + batchSize < ipos.length) {
+                await new Promise(resolve => setTimeout(resolve, 10));
+            }
+        }
+        
+        return enriched;
+    }
+
+    /**
+     * 📊 Affiche les statistiques du dataset chargé
+     */
+    displayDatasetStats() {
+        const now = Date.now();
+        const dates = this.enrichedIPOs.map(ipo => new Date(ipo.filedDate).getTime());
+        
+        if (dates.length === 0) {
+            console.warn('⚠ No IPOs to display stats');
+            return;
+        }
+        
+        const oldestDate = new Date(Math.min(...dates));
+        const newestDate = new Date(Math.max(...dates));
+        const spanDays = Math.ceil((Math.max(...dates) - Math.min(...dates)) / (1000 * 60 * 60 * 24));
+        
+        const ageDistribution = {
+            last7Days: 0,
+            last30Days: 0,
+            last90Days: 0,
+            last180Days: 0,
+            last365Days: 0,
+            older: 0
+        };
+        
+        this.enrichedIPOs.forEach(ipo => {
+            const days = (now - new Date(ipo.filedDate)) / (1000 * 60 * 60 * 24);
+            if (days <= 7) ageDistribution.last7Days++;
+            else if (days <= 30) ageDistribution.last30Days++;
+            else if (days <= 90) ageDistribution.last90Days++;
+            else if (days <= 180) ageDistribution.last180Days++;
+            else if (days <= 365) ageDistribution.last365Days++;
+            else ageDistribution.older++;
+        });
+        
+        console.log('═══════════════════════════════════════════════════════');
+        console.log('📊 DATASET STATISTICS');
+        console.log('═══════════════════════════════════════════════════════');
+        console.log(`📈 Total IPOs: ${this.enrichedIPOs.length}`);
+        console.log(`📅 Date Range: ${oldestDate.toLocaleDateString()} → ${newestDate.toLocaleDateString()}`);
+        console.log(`⏱  Time Span: ${spanDays} days (~${(spanDays / 30).toFixed(1)} months)`);
+        console.log('');
+        console.log('🕒 Age Distribution:');
+        console.log(`   Last 7 days:   ${ageDistribution.last7Days} IPOs`);
+        console.log(`   Last 30 days:  ${ageDistribution.last30Days} IPOs`);
+        console.log(`   Last 90 days:  ${ageDistribution.last90Days} IPOs`);
+        console.log(`   Last 180 days: ${ageDistribution.last180Days} IPOs`);
+        console.log(`   Last 365 days: ${ageDistribution.last365Days} IPOs`);
+        console.log(`   Older:         ${ageDistribution.older} IPOs`);
+        console.log('═══════════════════════════════════════════════════════');
+    }
+
+    /**
+     * 🔄 Mise à jour de l'affichage des infos du dataset
+     */
+    updateDatasetInfoDisplay() {
+        const infoElement = document.getElementById('datasetInfo');
+        if (!infoElement) return;
+        
+        if (this.enrichedIPOs.length === 0) {
+            infoElement.innerHTML = '<i class="fas fa-database"></i> No data loaded';
+            return;
+        }
+        
+        const now = Date.now();
+        const dates = this.enrichedIPOs.map(ipo => new Date(ipo.filedDate).getTime());
+        const spanDays = Math.ceil((Math.max(...dates) - Math.min(...dates)) / (1000 * 60 * 60 * 24));
+        
+        infoElement.innerHTML = `
+            <i class="fas fa-database"></i> 
+            <strong>${this.enrichedIPOs.length} IPOs</strong> loaded 
+            | <i class="fas fa-calendar-alt"></i> 
+            Spanning <strong>${spanDays} days</strong> 
+            (~${(spanDays / 30).toFixed(1)} months)
+        `;
+    }
+
+    /**
+     * 🔄 Indicateur de chargement
+     */
+    showLoadingIndicator(show) {
+        let indicator = document.getElementById('globalLoadingIndicator');
+        
+        if (show) {
+            if (!indicator) {
+                indicator = document.createElement('div');
+                indicator.id = 'globalLoadingIndicator';
+                indicator.innerHTML = `
+                    <div style="
+                        position: fixed;
+                        top: 0;
+                        left: 0;
+                        right: 0;
+                        bottom: 0;
+                        background: rgba(0, 0, 0, 0.7);
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        z-index: 9999;
+                        backdrop-filter: blur(5px);
+                    ">
+                        <div style="
+                            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                            padding: 40px 60px;
+                            border-radius: 20px;
+                            text-align: center;
+                            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+                        ">
+                            <div style="
+                                width: 60px;
+                                height: 60px;
+                                border: 5px solid rgba(255, 255, 255, 0.3);
+                                border-top-color: white;
+                                border-radius: 50%;
+                                animation: spin 1s linear infinite;
+                                margin: 0 auto 20px;
+                            "></div>
+                            <h3 style="color: white; margin: 0 0 10px; font-size: 1.5rem;">Loading IPO Data</h3>
+                            <p style="color: rgba(255, 255, 255, 0.9); margin: 0; font-size: 1rem;">
+                                Fetching and analyzing SEC filings...
+                            </p>
+                        </div>
+                    </div>
+                    <style>
+                        @keyframes spin {
+                            to { transform: rotate(360deg); }
+                        }
+                    </style>
+                `;
+                document.body.appendChild(indicator);
+            }
+            indicator.style.display = 'flex';
+        } else {
+            if (indicator) {
+                indicator.style.display = 'none';
+            }
         }
     }
 
@@ -290,15 +508,7 @@ class IPOIntelligenceDashboard {
             }
         });
 
-        // 🔍 DIAGNOSTIC : Afficher des infos de debug
         console.log('✅ Dynamic stats calculated:', this.stats);
-        console.log('📅 Sample filed dates:', this.enrichedIPOs.slice(0, 3).map(ipo => ({
-            company: ipo.companyName,
-            filedDate: ipo.filedDate,
-            type: typeof ipo.filedDate,
-            parsed: new Date(ipo.filedDate).toISOString(),
-            daysAgo: ((now - new Date(ipo.filedDate).getTime()) / (1000 * 60 * 60 * 24)).toFixed(1)
-        })));
     }
 
     /**
@@ -330,6 +540,8 @@ class IPOIntelligenceDashboard {
         ).sort((a, b) => a - b);
         
         const len = allDays.length;
+        if (len === 0) return { veryFast: 30, fast: 90, moderate: 180 };
+        
         return {
             veryFast: allDays[Math.floor(len * this.config.momentumThresholds.veryFast)] || 30,
             fast: allDays[Math.floor(len * this.config.momentumThresholds.fast)] || 90,
@@ -337,11 +549,7 @@ class IPOIntelligenceDashboard {
         };
     }
 
-    /**
-     * ═══════════════════════════════════════════════════════════════════
-     * 💧 ESTIMATION DE DILUTION - VERSION CORRIGÉE (sans référence circulaire)
-     * ═══════════════════════════════════════════════════════════════════
-     */
+    // ✅ Estimation de dilution basée sur les données réelles de l'IPO
     estimateDilutionFromData(ipo) {
         // Priorité 1 : Si des données réelles sont disponibles, les utiliser
         if (ipo.sharesOffered && ipo.sharesOutstanding) {
@@ -474,7 +682,7 @@ class IPOIntelligenceDashboard {
         
         // Compléter si moins de 4 insights
         while (insights.length < 4) {
-            insights.push(`CIK ${ipo.cik} - SEC registered company`);
+            insights.push(`CIK ${ipo.cik || 'N/A'} - SEC registered company`);
             if (insights.length < 4) {
                 insights.push(`Filed as ${ipo.formType} - standard registration process`);
             }
@@ -501,6 +709,13 @@ class IPOIntelligenceDashboard {
         return daysRemaining < 0 ? 0 : daysRemaining;
     }
 
+    calculateRiskOpportunityRatio(ipo) {
+        const riskCount = (ipo.riskFactors && ipo.riskFactors.length) || 1;
+        const opportunityScore = ipo.successScore;
+        const ratio = (riskCount / (opportunityScore / 10)).toFixed(2);
+        return ratio;
+    }
+
     renderAll() {
         this.renderAlphyRecommendation();
         this.renderSummaryCards();
@@ -509,6 +724,7 @@ class IPOIntelligenceDashboard {
         this.renderPipeline();
         this.renderTopIPOs();
         this.renderLockUpTracker();
+        this.updateDatasetInfoDisplay();
     }
 
     renderAlphyRecommendation() {
@@ -1271,13 +1487,6 @@ class IPOIntelligenceDashboard {
         `;
 
         this.openModal('ipoDetailModal');
-    }
-
-    calculateRiskOpportunityRatio(ipo) {
-        const riskCount = (ipo.riskFactors && ipo.riskFactors.length) || 1;
-        const opportunityScore = ipo.successScore;
-        const ratio = (riskCount / (opportunityScore / 10)).toFixed(2);
-        return ratio;
     }
 
     applyCurrentFilters() {
