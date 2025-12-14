@@ -325,14 +325,7 @@ class NewsTerminal {
                             <i class='fas fa-rss'></i>
                             ${article.sourceName}
                         </div>
-                        <div class='article-actions'>
-                            <button class='article-action-btn' onclick='event.stopPropagation(); newsTerminal.toggleWatchlist("${article.tickers[0] || ''}", "${this.escapeHtml(article.title)}");' title='Add to watchlist'>
-                                <i class='fas fa-star'></i>
-                            </button>
-                            <button class='article-action-btn' onclick='event.stopPropagation(); newsTerminal.shareArticle("${article.link}");' title='Share'>
-                                <i class='fas fa-share-alt'></i>
-                            </button>
-                        </div>
+                        <!-- ❌ Section article-actions SUPPRIMÉE -->
                     </div>
 
                     <div class='article-title'>${article.title}</div>
