@@ -147,9 +147,6 @@ class SECForm4Client {
         }
     }
 
-    /**
-     * 🔍 Recherche Form 4 par CIK (Company)
-     */
     async getForm4ByCIK(cik, options = {}) {
         const {
             limit = 100,
@@ -158,39 +155,39 @@ class SECForm4Client {
         } = options;
 
         try {
-            console.log(`🔍 Searching Form 4s for CIK: ${cik}`);
+            console.log(`🔍 Searching Form 4s for CIK: ${cik} via Worker`);
             
-            const params = new URLSearchParams({
-                action: 'getcompany',
-                CIK: cik,
-                type: '4',
-                dateb: endDate || '',
-                datea: startDate || '',
-                owner: 'include',
-                count: limit,
-                output: 'atom'
-            });
+            const response = await fetch(
+                `${this.workerURL}/api/sec/form4/feed?cik=${cik}&limit=${limit}`
+            );
 
-            const url = `${this.edgarArchiveURL}?${params}`;
-            const response = await this.queueRequest(url);
-            const xmlText = await response.text();
+            if (!response.ok) {
+                throw new Error(`Worker error: ${response.status}`);
+            }
 
-            const parser = new DOMParser();
-            const xmlDoc = parser.parseFromString(xmlText, 'text/xml');
-            const entries = xmlDoc.getElementsByTagName('entry');
+            const data = await response.json();
 
-            const filings = [];
-            for (let i = 0; i < entries.length; i++) {
-                const entry = entries[i];
-                filings.push({
-                    accessionNumber: this.extractAccessionFromLink(
-                        entry.getElementsByTagName('link')[0]?.getAttribute('href')
-                    ),
-                    filingDate: new Date(this.getXMLValue(entry, 'updated')),
-                    title: this.getXMLValue(entry, 'title'),
-                    summary: this.getXMLValue(entry, 'summary')
+            // ✅ DEBUG: Affiche les données brutes
+            console.log('🔍 Raw Worker response:', data);
+
+            let filings = data.filings || [];
+
+            // ✅ DEBUG: Affiche le premier filing
+            if (filings.length > 0) {
+                console.log('🔍 First filing from Worker:', filings[0]);
+            }
+
+            if (startDate || endDate) {
+                const start = startDate ? new Date(startDate) : new Date(0);
+                const end = endDate ? new Date(endDate) : new Date();
+
+                filings = filings.filter(f => {
+                    const date = new Date(f.updated || f.filedDate);
+                    return date >= start && date <= end;
                 });
             }
+
+            console.log(`✅ Found ${filings.length} Form 4 filings for CIK ${cik}`);
 
             return filings;
 
