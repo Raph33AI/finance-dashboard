@@ -18,7 +18,7 @@ class Form4Parser {
                 throw new Error('Invalid Form 4 XML: ownershipDocument not found');
             }
 
-            return {
+            const parsed = {
                 schemaVersion: this.getTextContent(xmlDoc, 'schemaVersion'),
                 documentType: this.getTextContent(xmlDoc, 'documentType'),
                 periodOfReport: this.getTextContent(xmlDoc, 'periodOfReport'),
@@ -49,11 +49,16 @@ class Form4Parser {
                 footnotes: this.parseFootnotes(xmlDoc),
                 
                 // Remarques
-                remarks: this.getTextContent(xmlDoc, 'remarks'),
-                
-                // Métadonnées calculées
-                metadata: this.calculateMetadata(xmlDoc)
+                remarks: this.getTextContent(xmlDoc, 'remarks')
             };
+
+            // ✅ CORRECTION : Passe les transactions déjà parsées
+            parsed.metadata = this.calculateMetadata(
+                parsed.nonDerivativeTransactions,
+                parsed.derivativeTransactions
+            );
+
+            return parsed;
 
         } catch (error) {
             console.error('❌ Form 4 parsing error:', error);
@@ -296,23 +301,17 @@ class Form4Parser {
     /**
      * 📊 Calcule les métadonnées agrégées
      */
-    static calculateMetadata(xmlDoc) {
-        const parsed = this.parse(xmlText);
-        if (!parsed) return null;
-
-        const nonDerivTxns = parsed.nonDerivativeTransactions || [];
-        const derivTxns = parsed.derivativeTransactions || [];
-
+    static calculateMetadata(nonDerivTxns, derivTxns) {
         // Calculs agrégés
-        const purchases = nonDerivTxns.filter(t => t.transactionType === 'Purchase');
-        const sales = nonDerivTxns.filter(t => t.transactionType === 'Sale');
+        const purchases = (nonDerivTxns || []).filter(t => t.transactionType === 'Purchase');
+        const sales = (nonDerivTxns || []).filter(t => t.transactionType === 'Sale');
 
-        const totalPurchaseValue = purchases.reduce((sum, t) => sum + t.totalValue, 0);
-        const totalSaleValue = sales.reduce((sum, t) => sum + t.totalValue, 0);
+        const totalPurchaseValue = purchases.reduce((sum, t) => sum + (t.totalValue || 0), 0);
+        const totalSaleValue = sales.reduce((sum, t) => sum + (t.totalValue || 0), 0);
         const netValue = totalPurchaseValue - totalSaleValue;
 
         return {
-            totalTransactions: nonDerivTxns.length + derivTxns.length,
+            totalTransactions: (nonDerivTxns || []).length + (derivTxns || []).length,
             purchaseCount: purchases.length,
             saleCount: sales.length,
             totalPurchaseValue,
