@@ -1,6 +1,6 @@
 /**
  * ════════════════════════════════════════════════════════════════
- * NEWS TERMINAL - MAIN SCRIPT (Sans Reuters + Pagination Avancée)
+ * NEWS TERMINAL - OPTIMIZED VERSION (MAX Articles Support)
  * ════════════════════════════════════════════════════════════════
  */
 
@@ -13,16 +13,21 @@ class NewsTerminal {
         this.filteredArticles = [];
         this.displayedArticles = [];
         this.currentView = 'grid';
-        this.articlesPerPage = 20; // Par défaut
+        this.articlesPerPage = 50; // ✨ Par défaut 50
         this.currentPage = 0;
+        
+        // ✨ NOUVEAU : Options de chargement
+        this.loadingInProgress = false;
+        this.autoLoadMore = false;
 
         this.init();
     }
 
     async init() {
-        console.log('🚀 Initializing News Terminal...');
+        console.log('🚀 Initializing News Terminal (Optimized Mode)...');
         
         this.setupEventListeners();
+        this.setupInfiniteScroll();
         await this.loadArticles();
     }
 
@@ -34,27 +39,71 @@ class NewsTerminal {
             searchTimeout = setTimeout(() => this.applyFilters(), 300);
         });
 
-        // ✨ NOUVEAU : Listener pour le sélecteur de nombre d'articles
+        // ✨ Sélecteur de nombre d'articles
         const articleLimitSelect = document.getElementById('articleLimitSelect');
         if (articleLimitSelect) {
             articleLimitSelect.addEventListener('change', (e) => {
-                this.changeArticleLimit(parseInt(e.target.value));
+                const value = parseInt(e.target.value);
+                this.changeArticleLimit(value);
             });
+        }
+
+        // ✨ Toggle Auto-Load
+        const autoLoadToggle = document.getElementById('autoLoadToggle');
+        if (autoLoadToggle) {
+            autoLoadToggle.addEventListener('change', (e) => {
+                this.autoLoadMore = e.target.checked;
+                console.log(`♾ Auto-load: ${this.autoLoadMore ? 'ON' : 'OFF'}`);
+            });
+        }
+
+        // ✨ Bouton "Load All"
+        const loadAllBtn = document.getElementById('loadAllBtn');
+        if (loadAllBtn) {
+            loadAllBtn.addEventListener('click', () => this.loadMaxArticles());
         }
     }
 
-    // ✨ NOUVELLE MÉTHODE : Changer le nombre d'articles affichés
+    // ✨ NOUVEAU : Infinite Scroll
+    setupInfiniteScroll() {
+        let scrollTimeout;
+        window.addEventListener('scroll', () => {
+            if (!this.autoLoadMore || this.loadingInProgress) return;
+
+            clearTimeout(scrollTimeout);
+            scrollTimeout = setTimeout(() => {
+                const scrollPosition = window.innerHeight + window.scrollY;
+                const pageHeight = document.documentElement.scrollHeight;
+                
+                // Charger plus quand on atteint 80% de la page
+                if (scrollPosition >= pageHeight * 0.8) {
+                    const hasMore = (this.currentPage + 1) * this.articlesPerPage < this.filteredArticles.length;
+                    if (hasMore) {
+                        console.log('📜 Auto-loading more articles...');
+                        this.loadMore();
+                    }
+                }
+            }, 100);
+        });
+    }
+
     changeArticleLimit(limit) {
-        console.log(`📊 Changing article limit to: ${limit}`);
-        this.articlesPerPage = limit;
+        console.log(`📊 Changing article limit to: ${limit >= 999999 ? 'ALL' : limit}`);
+        this.articlesPerPage = limit >= 999999 ? this.filteredArticles.length : limit;
         this.currentPage = 0;
         this.displayArticles();
     }
 
+    // ✨ AMÉLIORÉ : Chargement standard (100 articles par source)
     async loadArticles() {
         try {
-            console.log('📡 Loading articles from RSS Worker...');
-            const data = await this.rssClient.getAllArticles();
+            this.loadingInProgress = true;
+            console.log('📡 Loading articles (standard mode)...');
+            
+            const data = await this.rssClient.getAllArticles({
+                maxPerSource: 100 // 100 articles par source
+            });
+            
             this.allArticles = data.articles;
             
             console.log(`✅ Loaded ${this.allArticles.length} articles`);
@@ -65,6 +114,62 @@ class NewsTerminal {
         } catch (error) {
             console.error('❌ Error loading articles:', error);
             this.showError();
+        } finally {
+            this.loadingInProgress = false;
+        }
+    }
+
+    // ✨ NOUVEAU : Charger le MAXIMUM d'articles (200 par source)
+    async loadMaxArticles() {
+        if (this.loadingInProgress) {
+            this.showNotification('Loading already in progress...', 'warning');
+            return;
+        }
+
+        const confirmation = confirm(
+            `🚀 Load MAXIMUM articles?\n\n` +
+            `This will fetch up to 200 articles per source (~1000 total).\n\n` +
+            `Current: ${this.allArticles.length} articles\n\n` +
+            `Continue?`
+        );
+
+        if (!confirmation) return;
+
+        try {
+            this.loadingInProgress = true;
+            
+            // Afficher un loader
+            document.getElementById('articlesContainer').innerHTML = `
+                <div class='loading-state'>
+                    <i class='fas fa-spinner fa-spin' style='font-size: 48px; color: #667eea;'></i>
+                    <p style='font-size: 18px; font-weight: 600; margin-top: 20px;'>
+                        Loading MAXIMUM articles...
+                    </p>
+                    <p style='font-size: 14px; color: var(--text-secondary); margin-top: 8px;'>
+                        This may take 10-20 seconds...
+                    </p>
+                </div>
+            `;
+            
+            console.log('🔥 LOADING MAX ARTICLES...');
+            
+            const data = await this.rssClient.loadMaxArticles();
+            
+            this.allArticles = data.articles;
+            
+            console.log(`🎉 LOADED ${this.allArticles.length} ARTICLES!`);
+            
+            this.applyFilters();
+            this.updateStats();
+            
+            this.showNotification(`Successfully loaded ${this.allArticles.length} articles!`, 'success');
+            
+        } catch (error) {
+            console.error('❌ Error loading max articles:', error);
+            this.showNotification('Error loading articles. Please try again.', 'error');
+            this.showError();
+        } finally {
+            this.loadingInProgress = false;
         }
     }
 
@@ -76,19 +181,13 @@ class NewsTerminal {
         const sortFilter = document.getElementById('sortFilter').value;
 
         this.filteredArticles = this.allArticles.filter(article => {
-            // Search
             const matchesSearch = searchQuery === '' || 
                 article.title.toLowerCase().includes(searchQuery) ||
                 article.description.toLowerCase().includes(searchQuery) ||
                 article.tickers.some(t => t.toLowerCase().includes(searchQuery));
 
-            // Source
             const matchesSource = sourceFilter === 'all' || article.source === sourceFilter;
-
-            // Sector
             const matchesSector = sectorFilter === 'all' || this.detectSector(article) === sectorFilter;
-
-            // Region
             const matchesRegion = regionFilter === 'all' || this.detectRegion(article) === regionFilter;
 
             return matchesSearch && matchesSource && matchesSector && matchesRegion;
@@ -116,7 +215,6 @@ class NewsTerminal {
     calculateImportance(article) {
         let score = 0;
         
-        // Source priority (Reuters retiré)
         if (article.source.includes('cnbc-earnings')) score += 10;
         if (article.source.includes('marketwatch-realtime')) score += 8;
         if (article.source.includes('cnbc-tech')) score += 7;
@@ -164,7 +262,8 @@ class NewsTerminal {
                     <p>No articles found</p>
                 </div>
             `;
-            document.querySelector('.load-more-container').style.display = 'none';
+            const loadMoreContainer = document.querySelector('.load-more-container');
+            if (loadMoreContainer) loadMoreContainer.style.display = 'none';
             return;
         }
 
@@ -172,13 +271,13 @@ class NewsTerminal {
 
         // Show/Hide load more button
         const loadMoreBtn = document.querySelector('.load-more-container');
-        loadMoreBtn.style.display = endIndex < this.filteredArticles.length ? 'block' : 'none';
+        if (loadMoreBtn) {
+            loadMoreBtn.style.display = endIndex < this.filteredArticles.length ? 'block' : 'none';
+        }
 
-        // ✨ Afficher le compteur d'articles
         this.updateArticleCounter(endIndex, this.filteredArticles.length);
     }
 
-    // ✨ NOUVELLE MÉTHODE : Afficher le compteur
     updateArticleCounter(displayed, total) {
         const counter = document.getElementById('articleCounter');
         if (counter) {
@@ -324,10 +423,13 @@ class NewsTerminal {
         this.currentPage++;
         this.displayArticles();
         
-        window.scrollTo({
-            top: document.querySelector('.load-more-container').offsetTop - 100,
-            behavior: 'smooth'
-        });
+        const loadMoreContainer = document.querySelector('.load-more-container');
+        if (loadMoreContainer) {
+            window.scrollTo({
+                top: loadMoreContainer.offsetTop - 100,
+                behavior: 'smooth'
+            });
+        }
     }
 
     async refreshAll() {
@@ -357,12 +459,19 @@ class NewsTerminal {
     }
 
     showNotification(message, type = 'info') {
+        const colors = {
+            success: 'linear-gradient(135deg, #10b981, #059669)',
+            warning: 'linear-gradient(135deg, #f59e0b, #d97706)',
+            error: 'linear-gradient(135deg, #ef4444, #dc2626)',
+            info: 'linear-gradient(135deg, #667eea, #764ba2)'
+        };
+        
         const notification = document.createElement('div');
         notification.style.cssText = `
             position: fixed;
             top: 20px;
             right: 20px;
-            background: ${type === 'success' ? 'linear-gradient(135deg, #10b981, #059669)' : 'linear-gradient(135deg, #667eea, #764ba2)'};
+            background: ${colors[type] || colors.info};
             color: white;
             padding: 16px 24px;
             border-radius: 12px;

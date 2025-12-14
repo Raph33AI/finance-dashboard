@@ -1,6 +1,6 @@
 /**
  * ════════════════════════════════════════════════════════════════
- * RSS CLIENT - Version Sans Reuters
+ * RSS CLIENT - Version Optimisée (Support MAX articles)
  * ════════════════════════════════════════════════════════════════
  */
 
@@ -8,13 +8,22 @@ class RSSClient {
     constructor() {
         this.workerUrl = 'https://rss-api.raphnardone.workers.dev';
         this.cache = new Map();
-        this.cacheTimeout = 5 * 60 * 1000; // 5 minutes
+        this.cacheTimeout = 10 * 60 * 1000; // ✨ 10 minutes (augmenté de 5 à 10)
     }
 
-    async getAllArticles() {
-        const cacheKey = 'all_articles';
+    /**
+     * ✨ AMÉLIORÉ : Support des options pour récupérer plus d'articles
+     */
+    async getAllArticles(options = {}) {
+        const {
+            maxPerSource = 100, // ✨ Par défaut 100 articles par source
+            useCache = true
+        } = options;
+
+        const cacheKey = `all_articles_${maxPerSource}`;
         
-        if (this.cache.has(cacheKey)) {
+        // Vérifier le cache
+        if (useCache && this.cache.has(cacheKey)) {
             const cached = this.cache.get(cacheKey);
             if (Date.now() - cached.timestamp < this.cacheTimeout) {
                 console.log('✅ Using cached data');
@@ -23,9 +32,18 @@ class RSSClient {
         }
 
         try {
-            console.log('📡 Fetching all articles from Worker...');
+            console.log(`📡 Fetching articles from Worker (max ${maxPerSource} per source)...`);
             
-            const response = await fetch(`${this.workerUrl}/all`);
+            // ✨ NOUVEAU : Envoyer les paramètres en POST
+            const response = await fetch(`${this.workerUrl}/all`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    maxPerSource: maxPerSource
+                })
+            });
             
             if (!response.ok) {
                 throw new Error(`HTTP ${response.status}`);
@@ -34,18 +52,16 @@ class RSSClient {
             const data = await response.json();
             
             const sources = [...new Set(data.articles.map(a => a.source))];
-            console.log('📊 Sources reçues:', sources);
-            console.log('🖼 Articles avec images:', data.articles.filter(a => a.image).length, '/', data.totalArticles);
+            console.log('📊 Sources received:', sources);
+            console.log(`✅ Total: ${data.totalArticles} articles`);
+            console.log('🖼 With images:', data.articles.filter(a => a.image).length);
             
-            const cnbcWithImages = data.articles.filter(a => a.source.includes('cnbc') && a.image);
-            console.log('🖼 CNBC avec images:', cnbcWithImages.length);
-            
+            // Mettre en cache
             this.cache.set(cacheKey, {
                 data: data,
                 timestamp: Date.now()
             });
 
-            console.log(`✅ Received ${data.totalArticles} articles`);
             return data;
 
         } catch (error) {
@@ -54,10 +70,24 @@ class RSSClient {
         }
     }
 
-    async getFeed(feedName) {
+    /**
+     * ✨ NOUVEAU : Charger le MAXIMUM absolu d'articles (200 par source)
+     */
+    async loadMaxArticles() {
+        console.log('🔥 LOADING MAXIMUM ARTICLES MODE...');
+        return await this.getAllArticles({
+            maxPerSource: 200, // ✨ 200 articles par source = ~1000 total
+            useCache: false // Ne pas utiliser le cache
+        });
+    }
+
+    /**
+     * Récupérer un flux spécifique
+     */
+    async getFeed(feedName, maxArticles = 100) {
         try {
-            console.log(`📡 Fetching ${feedName} feed...`);
-            const response = await fetch(`${this.workerUrl}/feed/${feedName}`);
+            console.log(`📡 Fetching ${feedName} feed (max: ${maxArticles})...`);
+            const response = await fetch(`${this.workerUrl}/feed/${feedName}?max=${maxArticles}`);
             if (!response.ok) { throw new Error(`HTTP ${response.status}`); }
             const articles = await response.json();
             console.log(`✅ Received ${articles.length} articles from ${feedName}`);
@@ -68,6 +98,9 @@ class RSSClient {
         }
     }
 
+    /**
+     * Rechercher des articles
+     */
     async searchArticles(query) {
         try {
             console.log(`🔍 Searching for "${query}"...`);
@@ -82,6 +115,9 @@ class RSSClient {
         }
     }
 
+    /**
+     * Filtres locaux
+     */
     filterByTicker(articles, ticker) {
         return articles.filter(article => article.tickers.includes(ticker.toUpperCase()));
     }
@@ -94,6 +130,9 @@ class RSSClient {
         return articles.sort((a, b) => b.timestamp - a.timestamp);
     }
 
+    /**
+     * Vider le cache
+     */
     clearCache() {
         this.cache.clear();
         console.log('🗑 Cache cleared');
