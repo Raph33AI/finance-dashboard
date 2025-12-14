@@ -812,6 +812,24 @@
             // 5. Role Chart
             displayRoleChart(analysis.roleAnalysis);
 
+            // ✅ DEBUG TEMPORAIRE - À ajouter dans displayResults()
+            console.log('🔍 DEBUG Analysis Object:', analysis);
+            console.log('🔍 DEBUG Transactions:', analysis.transactions);
+            console.log('🔍 DEBUG Transaction Count:', analysis.transactionCount);
+            console.log('🔍 DEBUG First Transaction:', analysis.transactions?.[0]);
+
+            // Vérifie la structure des transactions
+            if (analysis.transactions && analysis.transactions.length > 0) {
+                const firstTxn = analysis.transactions[0];
+                console.log('🔍 DEBUG First Transaction Structure:', {
+                    reportingOwner: firstTxn.reportingOwner,
+                    issuer: firstTxn.issuer,
+                    nonDerivativeTransactions: firstTxn.nonDerivativeTransactions,
+                    derivativeTransactions: firstTxn.derivativeTransactions,
+                    filingDate: firstTxn.filingDate
+                });
+            }
+
             // 6. Transactions Table
             displayTransactionsTable(analysis);
 
