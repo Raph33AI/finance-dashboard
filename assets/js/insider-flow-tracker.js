@@ -310,8 +310,16 @@ class InsiderFlowTracker {
         return allTransactions;
     }
 
-    // 🔥 TÉLÉCHARGER ET PARSER LE XML FORM 4
+    // 🔥 TÉLÉCHARGER ET PARSER LE XML FORM 4 (VERSION AVEC LOGS)
     async downloadAndParseForm4XML(filing) {
+        console.log('🔍 [XML PARSING] Starting to parse filing:', {
+            filingUrl: filing.filingUrl,
+            url: filing.url,
+            accessionNo: filing.accessionNo,
+            issuerName: filing.issuerName,
+            issuerSymbol: filing.issuerTradingSymbol
+        });
+        
         // Essayer de récupérer l'URL du XML
         let xmlUrl = null;
         
@@ -330,67 +338,96 @@ class InsiderFlowTracker {
             xmlUrl = `https://www.sec.gov/cgi-bin/viewer?action=view&cik=${cik}&accession_number=${accession}&xbrl_type=v`;
         }
         
+        console.log('📍 [XML URL]:', xmlUrl || 'NO URL FOUND');
+        
         if (!xmlUrl) {
-            // Si pas d'URL XML, extraire depuis les données disponibles
+            console.warn('⚠ [NO XML URL] Using metadata extraction');
             return this.extractTransactionFromFilingMetadata(filing);
         }
         
         try {
-            // Télécharger le XML (si on a l'URL)
-            // Note: Ceci peut être bloqué par CORS - dans ce cas, on utilise les métadonnées
+            console.log('⬇ [FETCHING XML] Downloading from:', xmlUrl);
+            
+            // Note: CORS va probablement bloquer - on utilise donc les métadonnées
             const response = await fetch(xmlUrl);
             const xmlText = await response.text();
+            
+            console.log('✅ [XML DOWNLOADED] Size:', xmlText.length, 'characters');
+            console.log('📄 [XML PREVIEW]:', xmlText.substring(0, 500));
             
             // Parser le XML
             const parser = new DOMParser();
             const xmlDoc = parser.parseFromString(xmlText, 'text/xml');
             
+            console.log('📊 [XML PARSED] Root element:', xmlDoc.documentElement.tagName);
+            
             // Extraire toutes les transactions du XML
             return this.extractTransactionsFromXML(xmlDoc, filing);
             
         } catch (error) {
-            console.warn('⚠ Could not fetch XML, using metadata:', error.message);
+            console.error('❌ [XML FETCH ERROR]:', error.message);
+            console.warn('⚠ [FALLBACK] Using metadata extraction');
             // Fallback: extraire depuis les métadonnées du filing
             return this.extractTransactionFromFilingMetadata(filing);
         }
     }
 
-    // 🔥 PARSER LE XML FORM 4 COMPLET
+    // 🔥 PARSER LE XML FORM 4 COMPLET (VERSION AVEC LOGS)
     extractTransactionsFromXML(xmlDoc, filing) {
+        console.log('🔬 [EXTRACTING FROM XML] Starting extraction...');
+        
         const transactions = [];
         
+        // 🔥 STRUCTURE RÉELLE DU XML SEC FORM 4
         // Extraire les informations de l'émetteur (compagnie)
+        const issuerElement = xmlDoc.querySelector('issuer');
+        console.log('🏢 [ISSUER ELEMENT]:', issuerElement ? 'FOUND' : 'NOT FOUND');
+        
         const issuer = {
-            cik: this.getXMLValue(xmlDoc, 'issuerCik'),
-            name: this.getXMLValue(xmlDoc, 'issuerName'),
-            symbol: this.getXMLValue(xmlDoc, 'issuerTradingSymbol')
+            cik: this.getXMLValueNested(issuerElement, 'issuerCik'),
+            name: this.getXMLValueNested(issuerElement, 'issuerName'),
+            symbol: this.getXMLValueNested(issuerElement, 'issuerTradingSymbol')
         };
         
+        console.log('✅ [ISSUER DATA]:', issuer);
+        
         // Extraire les informations du reporting owner (insider)
+        const reportingOwnerElement = xmlDoc.querySelector('reportingOwner');
+        console.log('👤 [REPORTING OWNER ELEMENT]:', reportingOwnerElement ? 'FOUND' : 'NOT FOUND');
+        
+        const ownerIdElement = reportingOwnerElement ? reportingOwnerElement.querySelector('reportingOwnerId') : null;
+        const ownerRelationshipElement = reportingOwnerElement ? reportingOwnerElement.querySelector('reportingOwnerRelationship') : null;
+        const ownerAddressElement = reportingOwnerElement ? reportingOwnerElement.querySelector('reportingOwnerAddress') : null;
+        
         const reportingOwner = {
-            cik: this.getXMLValue(xmlDoc, 'rptOwnerCik'),
-            name: this.getXMLValue(xmlDoc, 'rptOwnerName'),
-            street1: this.getXMLValue(xmlDoc, 'rptOwnerStreet1'),
-            street2: this.getXMLValue(xmlDoc, 'rptOwnerStreet2'),
-            city: this.getXMLValue(xmlDoc, 'rptOwnerCity'),
-            state: this.getXMLValue(xmlDoc, 'rptOwnerState'),
-            zipCode: this.getXMLValue(xmlDoc, 'rptOwnerZipCode'),
-            isDirector: this.getXMLValue(xmlDoc, 'isDirector') === '1',
-            isOfficer: this.getXMLValue(xmlDoc, 'isOfficer') === '1',
-            isTenPercentOwner: this.getXMLValue(xmlDoc, 'isTenPercentOwner') === '1',
-            officerTitle: this.getXMLValue(xmlDoc, 'officerTitle')
+            cik: this.getXMLValueNested(ownerIdElement, 'rptOwnerCik'),
+            name: this.getXMLValueNested(ownerIdElement, 'rptOwnerName'),
+            street1: this.getXMLValueNested(ownerAddressElement, 'rptOwnerStreet1'),
+            street2: this.getXMLValueNested(ownerAddressElement, 'rptOwnerStreet2'),
+            city: this.getXMLValueNested(ownerAddressElement, 'rptOwnerCity'),
+            state: this.getXMLValueNested(ownerAddressElement, 'rptOwnerState'),
+            zipCode: this.getXMLValueNested(ownerAddressElement, 'rptOwnerZipCode'),
+            isDirector: this.getXMLValueNested(ownerRelationshipElement, 'isDirector') === '1',
+            isOfficer: this.getXMLValueNested(ownerRelationshipElement, 'isOfficer') === '1',
+            isTenPercentOwner: this.getXMLValueNested(ownerRelationshipElement, 'isTenPercentOwner') === '1',
+            officerTitle: this.getXMLValueNested(ownerRelationshipElement, 'officerTitle')
         };
+        
+        console.log('✅ [REPORTING OWNER DATA]:', reportingOwner);
         
         // Date de la période du rapport
         const periodOfReport = this.getXMLValue(xmlDoc, 'periodOfReport');
+        console.log('📅 [PERIOD OF REPORT]:', periodOfReport);
         
         // 🔥 EXTRAIRE TOUTES LES TRANSACTIONS NON-DÉRIVÉES
         const nonDerivativeTransactions = xmlDoc.querySelectorAll('nonDerivativeTransaction');
         
-        console.log(`   📊 Found ${nonDerivativeTransactions.length} transactions in Form 4`);
+        console.log(`📊 [TRANSACTIONS FOUND] ${nonDerivativeTransactions.length} non-derivative transactions`);
         
         nonDerivativeTransactions.forEach((txnElement, index) => {
             try {
+                console.log(`   🔍 [TXN ${index + 1}] Parsing transaction...`);
+                
                 const transaction = this.parseTransactionElement(
                     txnElement,
                     issuer,
@@ -400,33 +437,101 @@ class InsiderFlowTracker {
                 );
                 
                 if (transaction) {
+                    console.log(`   ✅ [TXN ${index + 1}] Parsed:`, {
+                        symbol: transaction.company.symbol,
+                        insider: transaction.insider.name,
+                        type: transaction.type,
+                        shares: transaction.shares,
+                        price: transaction.pricePerShare
+                    });
                     transactions.push(transaction);
+                } else {
+                    console.warn(`   ⚠ [TXN ${index + 1}] Transaction returned null`);
                 }
             } catch (error) {
-                console.warn(`   ⚠ Error parsing transaction ${index}:`, error.message);
+                console.error(`   ❌ [TXN ${index + 1}] Error:`, error.message);
             }
         });
+        
+        console.log(`✅ [EXTRACTION COMPLETE] ${transactions.length} transactions extracted`);
         
         return transactions;
     }
 
-    // 🔥 HELPER: Extraire une valeur depuis le XML
-    getXMLValue(xmlDoc, tagName) {
-        const element = xmlDoc.querySelector(tagName);
-        return element ? element.textContent.trim() : null;
+    // 🔥 NOUVELLE MÉTHODE: Extraire valeur depuis un élément parent
+    getXMLValueNested(parentElement, tagName) {
+        if (!parentElement) return null;
+        const element = parentElement.querySelector(tagName);
+        if (!element) return null;
+        
+        // Chercher d'abord un sous-élément <value>
+        const valueElement = element.querySelector('value');
+        if (valueElement) {
+            return valueElement.textContent.trim();
+        }
+        
+        // Sinon retourner le contenu direct
+        return element.textContent.trim();
     }
 
-    // 🔥 PARSER UN ÉLÉMENT DE TRANSACTION
+    // 🔥 HELPER: Extraire une valeur depuis le XML (VERSION AMÉLIORÉE)
+    getXMLValue(xmlDoc, tagName) {
+        const element = xmlDoc.querySelector(tagName);
+        if (!element) return null;
+        
+        // Chercher d'abord un sous-élément <value>
+        const valueElement = element.querySelector('value');
+        if (valueElement) {
+            return valueElement.textContent.trim();
+        }
+        
+        // Sinon retourner le contenu direct
+        return element.textContent.trim();
+    }
+
+    // 🔥 PARSER UN ÉLÉMENT DE TRANSACTION (VERSION AVEC LOGS)
     parseTransactionElement(txnElement, issuer, reportingOwner, periodOfReport, filing) {
-        const securityTitle = this.getXMLValue(txnElement, 'securityTitle') || 'Common Stock';
-        const transactionDate = this.getXMLValue(txnElement, 'transactionDate');
-        const transactionCode = this.getXMLValue(txnElement, 'transactionCode');
-        const shares = parseFloat(this.getXMLValue(txnElement, 'transactionShares') || 0);
-        const pricePerShare = parseFloat(this.getXMLValue(txnElement, 'transactionPricePerShare') || 0);
-        const acquiredDisposedCode = this.getXMLValue(txnElement, 'transactionAcquiredDisposedCode');
-        const sharesOwnedAfter = parseFloat(this.getXMLValue(txnElement, 'sharesOwnedFollowingTransaction') || 0);
-        const directIndirect = this.getXMLValue(txnElement, 'directOrIndirectOwnership') || 'D';
-        const ownershipNature = this.getXMLValue(txnElement, 'natureOfOwnership');
+        console.log('      🔬 [PARSING TXN ELEMENT] Starting detailed parse...');
+        
+        // Structure réelle du XML SEC
+        const securityTitleElement = txnElement.querySelector('securityTitle');
+        const transactionDateElement = txnElement.querySelector('transactionDate');
+        const transactionCodingElement = txnElement.querySelector('transactionCoding');
+        const transactionAmountsElement = txnElement.querySelector('transactionAmounts');
+        const postTransactionAmountsElement = txnElement.querySelector('postTransactionAmounts');
+        const ownershipNatureElement = txnElement.querySelector('ownershipNature');
+        
+        const securityTitle = this.getXMLValueNested(securityTitleElement, 'value') || 'Common Stock';
+        const transactionDate = this.getXMLValueNested(transactionDateElement, 'value');
+        const transactionCode = this.getXMLValueNested(transactionCodingElement, 'transactionCode');
+        
+        // Transaction amounts
+        const sharesElement = transactionAmountsElement ? transactionAmountsElement.querySelector('transactionShares') : null;
+        const priceElement = transactionAmountsElement ? transactionAmountsElement.querySelector('transactionPricePerShare') : null;
+        const acquiredDisposedElement = transactionAmountsElement ? transactionAmountsElement.querySelector('transactionAcquiredDisposedCode') : null;
+        
+        const shares = parseFloat(this.getXMLValueNested(sharesElement, 'value') || 0);
+        const pricePerShare = parseFloat(this.getXMLValueNested(priceElement, 'value') || 0);
+        const acquiredDisposedCode = this.getXMLValueNested(acquiredDisposedElement, 'value');
+        
+        // Post-transaction amounts
+        const sharesOwnedElement = postTransactionAmountsElement ? postTransactionAmountsElement.querySelector('sharesOwnedFollowingTransaction') : null;
+        const sharesOwnedAfter = parseFloat(this.getXMLValueNested(sharesOwnedElement, 'value') || 0);
+        
+        // Ownership nature
+        const directIndirectElement = ownershipNatureElement ? ownershipNatureElement.querySelector('directOrIndirectOwnership') : null;
+        const natureOfOwnershipElement = ownershipNatureElement ? ownershipNatureElement.querySelector('natureOfOwnership') : null;
+        
+        const directIndirect = this.getXMLValueNested(directIndirectElement, 'value') || 'D';
+        const ownershipNature = this.getXMLValueNested(natureOfOwnershipElement, 'value');
+        
+        console.log('      📋 [TXN DATA EXTRACTED]:', {
+            date: transactionDate,
+            code: transactionCode,
+            shares: shares,
+            price: pricePerShare,
+            ownership: directIndirect
+        });
         
         // Calculer la valeur de la transaction
         const transactionValue = (shares && pricePerShare) ? shares * pricePerShare : null;
@@ -452,6 +557,8 @@ class InsiderFlowTracker {
         
         // Résoudre le ticker
         const ticker = this.resolveTickerSymbol(issuer.name, issuer.symbol);
+        
+        console.log('      ✅ [TXN CREATED]:', ticker, reportingOwner.name, transactionCode);
         
         return {
             id: `${issuer.cik}-${reportingOwner.cik}-${transactionDate}-${Math.random().toString(36).substr(2, 9)}`,
@@ -488,12 +595,19 @@ class InsiderFlowTracker {
         };
     }
 
-    // 🔥 FALLBACK: Extraire depuis les métadonnées si XML indisponible
+    // 🔥 FALLBACK: Extraire depuis les métadonnées si XML indisponible (VERSION AVEC LOGS)
     extractTransactionFromFilingMetadata(filing) {
+        console.log('📦 [METADATA EXTRACTION] Using filing metadata:', filing);
+        
         const transactions = [];
         
         // Extraire depuis les métadonnées du filing
-        const ticker = this.resolveTickerSymbol(filing.issuerName || filing.companyName, filing.issuerTradingSymbol || filing.ticker);
+        const ticker = this.resolveTickerSymbol(
+            filing.issuerName || filing.companyName, 
+            filing.issuerTradingSymbol || filing.ticker
+        );
+        
+        console.log('🏢 [METADATA] Company:', filing.issuerName, '→ Ticker:', ticker);
         
         const transaction = {
             id: `${filing.cik || filing.accessionNo}-${Math.random().toString(36).substr(2, 9)}`,
@@ -526,6 +640,8 @@ class InsiderFlowTracker {
             formUrl: filing.filingUrl || filing.url || '#',
             secSource: 'metadata'
         };
+        
+        console.log('✅ [METADATA TXN CREATED]:', transaction.company.symbol, transaction.insider.name);
         
         transactions.push(transaction);
         return transactions;
