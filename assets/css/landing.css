@@ -2080,8 +2080,48 @@ body.dark-mode .dropdown-link-title {
 }
 
 /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-   🏗 TECHNOLOGY SECTION - ✅ VERSION 5 BLOCS
+   🏗 TECHNOLOGY SECTION - ✅ VERSION CORRIGÉE
    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+
+.tech-infra-lux {
+    background: linear-gradient(180deg, #f8fafc 0%, #ffffff 100%);
+}
+
+.tech-container.centered {
+    text-align: center;
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+.tech-section-label {
+    display: inline-block;
+    padding: 8px 20px;
+    margin-bottom: 12px;
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    color: #2563eb;
+    background: rgba(37, 99, 235, 0.12);
+    border-radius: 30px;
+    text-transform: uppercase;
+    border: 1px solid rgba(37, 99, 235, 0.22);
+}
+
+.tech-title {
+    font-size: 2.6rem;
+    line-height: 1.2;
+    font-weight: 800;
+    margin-bottom: 16px;
+    letter-spacing: -0.02em;
+}
+
+.tech-subtitle {
+    font-size: 1.15rem;
+    color: #475569;
+    max-width: 740px;
+    margin: 0 auto 50px auto;
+    line-height: 1.7;
+}
 
 /* ✅ Grid adaptative pour 5 blocs */
 .tech-grid {
@@ -2095,14 +2135,54 @@ body.dark-mode .dropdown-link-title {
     margin: 0 auto;
 }
 
-/* ✅ Icônes génériques (pour Data Layer & News) */
+.tech-card {
+    width: 100%;
+    max-width: 420px;
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 24px;
+    padding: 32px;
+    border: 1px solid var(--border-color, #e2e8f0);
+    transition: all var(--anim-slow);
+    box-shadow: var(--shadow-card);
+    position: relative;
+}
+
+.tech-card:hover {
+    transform: translateY(-8px);
+    box-shadow: var(--shadow-card-hover);
+    border-color: #2563eb;
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   ✅ LOGOS & ICÔNES - VERSION CORRIGÉE
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+
+/* ✅ Wrapper pour centrer logos et icônes */
 .tech-icon-wrapper {
     display: flex;
     justify-content: center;
     align-items: center;
     margin-bottom: 24px;
+    min-height: 100px; /* ✅ Hauteur fixe pour alignement */
 }
 
+/* ✅ LOGOS IMAGES (Gemini, Firebase, FRED) */
+.tech-logo,
+.centered-logo {
+    display: block;
+    margin: 0 auto 24px auto;
+    width: 80px;
+    height: 80px;
+    object-fit: contain; /* ✅ Respecte les proportions */
+    transition: all var(--anim-medium);
+}
+
+.tech-card:hover .tech-logo,
+.tech-card:hover .centered-logo {
+    transform: scale(1.1);
+}
+
+/* ✅ ICÔNES GÉNÉRIQUES FONT AWESOME (Data, News) */
 .tech-icon-generic {
     width: 80px;
     height: 80px;
@@ -2117,9 +2197,78 @@ body.dark-mode .dropdown-link-title {
     transition: all 0.3s ease;
 }
 
+/* ✅ Variantes pour icônes spécifiques */
+.tech-icon-generic.database {
+    background: linear-gradient(135deg, #0ea5e9 0%, #06b6d4 100%);
+    box-shadow: 0 8px 24px rgba(14, 165, 233, 0.4);
+}
+
+.tech-icon-generic.news {
+    background: linear-gradient(135deg, #f59e0b 0%, #f97316 100%);
+    box-shadow: 0 8px 24px rgba(245, 158, 11, 0.4);
+    font-size: 2.25rem; /* ✅ Légèrement plus petit pour le journal */
+}
+
+/* ✅ Animation hover pour icônes génériques */
 .tech-card:hover .tech-icon-generic {
     transform: scale(1.1) rotate(-5deg);
     box-shadow: 0 12px 32px rgba(37, 99, 235, 0.5);
+}
+
+.tech-card:hover .tech-icon-generic.database {
+    box-shadow: 0 12px 32px rgba(14, 165, 233, 0.5);
+}
+
+.tech-card:hover .tech-icon-generic.news {
+    box-shadow: 0 12px 32px rgba(245, 158, 11, 0.5);
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   ✅ TEXTES & CONTENUS
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+
+.tech-card-title {
+    font-size: 1.4rem;
+    font-weight: 700;
+    margin-bottom: 14px;
+    color: var(--text-primary, #1e293b);
+    letter-spacing: -0.01em;
+}
+
+.tech-card:hover .tech-card-title {
+    color: #2563eb;
+}
+
+.tech-card-text {
+    font-size: 1rem;
+    color: #475569;
+    margin-bottom: 20px;
+    line-height: 1.7;
+}
+
+.tech-points {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 20px 0;
+}
+
+.tech-points li {
+    margin-bottom: 12px;
+    padding-left: 24px;
+    position: relative;
+    font-size: 0.95rem;
+    text-align: left;
+    color: #1e293b;
+    line-height: 1.6;
+}
+
+.tech-points li::before {
+    content: "•";
+    position: absolute;
+    left: 0;
+    color: #2563eb;
+    font-weight: 900;
+    font-size: 1.2rem;
 }
 
 /* ✅ Mentions légales discrètes */
@@ -2206,11 +2355,29 @@ body.dark-mode .tech-disclaimer strong {
         max-width: 100%;
     }
     
-    /* ✅ Icônes génériques plus petites sur mobile */
+    /* ✅ Wrapper icônes mobile */
+    .tech-icon-wrapper {
+        min-height: 80px;
+        margin-bottom: 20px;
+    }
+    
+    /* ✅ Logos images mobile */
+    .tech-logo,
+    .centered-logo {
+        width: 64px;
+        height: 64px;
+        margin-bottom: 20px;
+    }
+    
+    /* ✅ Icônes génériques mobile */
     .tech-icon-generic {
         width: 64px;
         height: 64px;
         font-size: 2rem;
+    }
+    
+    .tech-icon-generic.news {
+        font-size: 1.875rem;
     }
     
     /* ✅ Mentions légales mobile */
@@ -2229,6 +2396,12 @@ body.dark-mode .tech-disclaimer strong {
     .tech-disclaimer p {
         font-size: 0.8125rem;
     }
+    
+    /* ✅ Points techniques mobile */
+    .tech-points li {
+        margin-bottom: 14px !important;
+        line-height: 1.7 !important;
+    }
 }
 
 @media (max-width: 480px) {
@@ -2238,10 +2411,26 @@ body.dark-mode .tech-disclaimer strong {
         padding: 1.5rem 1.125rem !important;
     }
     
+    .tech-icon-wrapper {
+        min-height: 70px;
+        margin-bottom: 16px;
+    }
+    
+    .tech-logo,
+    .centered-logo {
+        width: 56px;
+        height: 56px;
+        margin-bottom: 16px;
+    }
+    
     .tech-icon-generic {
         width: 56px;
         height: 56px;
         font-size: 1.75rem;
+    }
+    
+    .tech-icon-generic.news {
+        font-size: 1.625rem;
     }
     
     .tech-disclaimer {
@@ -2251,6 +2440,39 @@ body.dark-mode .tech-disclaimer strong {
     .tech-disclaimer p {
         font-size: 0.75rem;
     }
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   🎨 DARK MODE
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+
+body.dark-mode .tech-card {
+    background: rgba(30, 41, 59, 0.9);
+    border-color: rgba(255, 255, 255, 0.1);
+}
+
+body.dark-mode .tech-card:hover {
+    border-color: #60a5fa;
+}
+
+body.dark-mode .tech-card-title {
+    color: #f1f5f9;
+}
+
+body.dark-mode .tech-card:hover .tech-card-title {
+    color: #60a5fa;
+}
+
+body.dark-mode .tech-card-text {
+    color: #94a3b8;
+}
+
+body.dark-mode .tech-points li {
+    color: #cbd5e1;
+}
+
+body.dark-mode .tech-points li::before {
+    color: #60a5fa;
 }
 
 /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
