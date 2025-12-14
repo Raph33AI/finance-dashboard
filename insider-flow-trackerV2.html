@@ -1066,17 +1066,47 @@
         }
 
         /**
-         * 📋 AFFICHE LE TABLEAU DES TRANSACTIONS
+         * 📋 AFFICHE LE TABLEAU DES TRANSACTIONS (VERSION CORRIGÉE)
          */
         function displayTransactionsTable(analysis) {
             const container = document.getElementById('transactionsTable');
             
-            // Prend les 20 premières transactions
-            const transactions = analysis.clusterActivity.clusters
-                .flatMap(c => c.transactions)
-                .slice(0, 20);
+            // ✅ Accède directement aux transactions parsées
+            const allTransactions = analysis.transactions || [];
+            
+            if (allTransactions.length === 0) {
+                container.innerHTML = '<p style="padding: 20px; text-align: center; color: var(--text-muted);">Aucune transaction à afficher</p>';
+                return;
+            }
 
-            if (transactions.length === 0) {
+            // ✅ Transforme les transactions en format tableau
+            const tableData = [];
+            
+            allTransactions.forEach(t => {
+                const insiderName = t.reportingOwner?.name || 'Unknown';
+                const insiderRole = t.reportingOwner?.classification || 'Unknown';
+                const filingDate = new Date(t.filingDate).toLocaleDateString('fr-FR');
+                
+                // Pour chaque transaction non-dérivée
+                (t.nonDerivativeTransactions || []).forEach(nt => {
+                    tableData.push({
+                        date: filingDate,
+                        insider: insiderName,
+                        role: insiderRole,
+                        type: nt.transactionType,
+                        value: nt.totalValue || 0,
+                        signal: nt.signal
+                    });
+                });
+            });
+
+            // ✅ Trie par date (plus récent en premier)
+            tableData.sort((a, b) => new Date(b.date) - new Date(a.date));
+            
+            // ✅ Limite aux 20 premières
+            const limitedData = tableData.slice(0, 20);
+
+            if (limitedData.length === 0) {
                 container.innerHTML = '<p style="padding: 20px; text-align: center; color: var(--text-muted);">Aucune transaction à afficher</p>';
                 return;
             }
@@ -1094,23 +1124,25 @@
                         </tr>
                     </thead>
                     <tbody>
-                        ${transactions.map(t => {
-                            const netValue = (t.nonDerivativeTransactions || [])
-                                .reduce((sum, nt) => {
-                                    return sum + (nt.transactionType === 'Purchase' ? nt.totalValue : -nt.totalValue);
-                                }, 0);
+                        ${limitedData.map(t => {
+                            const badgeClass = t.type === 'Purchase' ? 'badge-buy' : 
+                                            t.type === 'Sale' ? 'badge-sell' : 'badge-neutral';
                             
-                            const type = netValue > 0 ? 'Purchase' : 'Sale';
-                            const badgeClass = netValue > 0 ? 'badge-buy' : 'badge-sell';
+                            const signalClass = t.signal?.type === 'BUY' || t.signal?.type === 'STRONG_BUY' ? 'badge-buy' :
+                                            t.signal?.type === 'SELL' || t.signal?.type === 'STRONG_SELL' ? 'badge-sell' : 
+                                            'badge-neutral';
+                            
+                            const signalText = t.signal?.type || (t.type === 'Purchase' ? 'BULLISH' : 
+                                                                t.type === 'Sale' ? 'BEARISH' : 'NEUTRAL');
                             
                             return `
                                 <tr>
-                                    <td>${new Date(t.filingDate).toLocaleDateString('fr-FR')}</td>
-                                    <td>${t.reportingOwner?.name || 'N/A'}</td>
-                                    <td>${t.reportingOwner?.classification || 'N/A'}</td>
-                                    <td><span class="badge ${badgeClass}">${type}</span></td>
-                                    <td>$${formatNumber(Math.abs(netValue))}</td>
-                                    <td><span class="badge ${badgeClass}">${netValue > 0 ? 'BULLISH' : 'BEARISH'}</span></td>
+                                    <td>${t.date}</td>
+                                    <td>${t.insider}</td>
+                                    <td>${t.role}</td>
+                                    <td><span class="badge ${badgeClass}">${t.type}</span></td>
+                                    <td>$${formatNumber(t.value)}</td>
+                                    <td><span class="badge ${signalClass}">${signalText}</span></td>
                                 </tr>
                             `;
                         }).join('')}
