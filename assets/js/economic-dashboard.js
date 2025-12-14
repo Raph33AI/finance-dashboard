@@ -372,6 +372,80 @@ class EconomicDashboard {
         }
     }
 
+    getNextUpdateDate(indicator) {
+        const now = new Date();
+        const currentMonth = now.getMonth();
+        const currentYear = now.getFullYear();
+        const currentDay = now.getDate();
+        
+        switch(indicator) {
+            case 'us-gdp':
+            case 'us-gdp-growth':
+                // GDP publié fin du mois suivant la fin du trimestre (30 janvier, 30 avril, 30 juillet, 30 octobre)
+                const gdpMonths = [0, 3, 6, 9]; // Janvier, Avril, Juillet, Octobre
+                let nextGDPMonth = gdpMonths.find(m => m > currentMonth);
+                
+                if (!nextGDPMonth) {
+                    // Si on est après octobre, prochaine mise à jour = janvier année suivante
+                    return new Date(currentYear + 1, 0, 30);
+                }
+                
+                // Si on est dans le mois de publication mais avant le 30
+                if (gdpMonths.includes(currentMonth) && currentDay < 30) {
+                    return new Date(currentYear, currentMonth, 30);
+                }
+                
+                return new Date(currentYear, nextGDPMonth, 30);
+                
+            case 'us-unemployment':
+                // Publié le 1er vendredi du mois suivant
+                let nextUnempMonth = currentMonth + 1;
+                let nextUnempYear = currentYear;
+                
+                if (nextUnempMonth > 11) {
+                    nextUnempMonth = 0;
+                    nextUnempYear++;
+                }
+                
+                // Trouver le 1er vendredi du mois prochain
+                const firstDayNextMonth = new Date(nextUnempYear, nextUnempMonth, 1);
+                const dayOfWeek = firstDayNextMonth.getDay();
+                let firstFriday = dayOfWeek <= 5 ? 6 - dayOfWeek : 13 - dayOfWeek;
+                
+                return new Date(nextUnempYear, nextUnempMonth, firstFriday);
+                
+            case 'us-inflation':
+                // Publié vers le 15 du mois suivant
+                let nextInflationMonth = currentMonth + 1;
+                let nextInflationYear = currentYear;
+                
+                if (nextInflationMonth > 11) {
+                    nextInflationMonth = 0;
+                    nextInflationYear++;
+                }
+                
+                return new Date(nextInflationYear, nextInflationMonth, 15);
+                
+            case 'us-fed-rate':
+                // Mise à jour quotidienne (jour ouvré suivant)
+                const tomorrow = new Date(now);
+                tomorrow.setDate(now.getDate() + 1);
+                
+                // Si demain est samedi (6) ou dimanche (0), passer à lundi
+                const tomorrowDay = tomorrow.getDay();
+                if (tomorrowDay === 6) {
+                    tomorrow.setDate(tomorrow.getDate() + 2); // Samedi -> Lundi
+                } else if (tomorrowDay === 0) {
+                    tomorrow.setDate(tomorrow.getDate() + 1); // Dimanche -> Lundi
+                }
+                
+                return tomorrow;
+                
+            default:
+                return null;
+        }
+    }
+
     /**
      * ========================================
      * PARSING METHODS
@@ -436,6 +510,12 @@ class EconomicDashboard {
             `;
         }
 
+        // ✅ NOUVEAU : Calculer la prochaine mise à jour
+        const nextUpdate = this.getNextUpdateDate(indicator);
+        const nextUpdateText = nextUpdate 
+            ? nextUpdate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+            : '';
+
         return `
             <div class='eco-card ${cssClass}' data-indicator='${indicator}'>
                 <div class='eco-card-header'>
@@ -451,6 +531,12 @@ class EconomicDashboard {
                 <div class='eco-sublabel'>${unit}</div>
                 ${changeHTML}
                 ${lastUpdate ? `<div class='eco-sublabel' style='margin-top: 10px; font-size: 0.75rem; opacity: 0.7;'>Updated: ${lastUpdate}</div>` : ''}
+                ${nextUpdateText ? `
+                    <div class='next-update'>
+                        <i class='fas fa-calendar-alt'></i>
+                        <span>Next update: ${nextUpdateText}</span>
+                    </div>
+                ` : ''}
             </div>
         `;
     }
