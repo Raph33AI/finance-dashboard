@@ -27,10 +27,16 @@ class RecessionIndicator {
             // Setup modals FIRST (before any buttons are created)
             this.setupModals();
             
-            // Initialize all components
+            // ✅ ÉTAPE 1 : Calculer le score de récession D'ABORD
+            await this.loadRecessionScore();
+            
+            console.log(`📊 Recession Probability calculated: ${this.recessionProbability}%`);
+            
+            // ✅ ÉTAPE 2 : Charger les recommandations IA avec le score calculé
+            await this.loadAIRecommendations();
+            
+            // ✅ ÉTAPE 3 : Charger le reste en parallèle
             await Promise.all([
-                this.loadRecessionScore(),
-                this.loadAIRecommendations(),
                 this.loadIndicators(),
                 this.loadYieldSpreadChart(),
                 this.loadSahmRuleChart(),
