@@ -2672,6 +2672,59 @@ class AdvancedInsiderFlowTracker {
         });
     }
 
+    /**
+     * 📊 BACKTESTING PERFORMANCE STATS
+     */
+    renderBacktestingStats() {
+        const buyElement = document.getElementById('buySuccessRate');
+        const sellElement = document.getElementById('sellAccuracy');
+        const impactElement = document.getElementById('averageImpact');
+        
+        if (!buyElement || !sellElement || !impactElement) {
+            console.warn('⚠ Backtesting stat elements not found');
+            return;
+        }
+
+        // Calcule les statistiques réelles basées sur les données filtrées
+        const purchases = this.filteredData.filter(t => t.type === 'P');
+        const sales = this.filteredData.filter(t => t.type === 'S');
+
+        // Taux de succès des achats (basé sur impact positif à 30 jours)
+        const successfulBuys = purchases.filter(t => (t.priceImpact30d || 0) > 0).length;
+        const buySuccessRate = purchases.length > 0 
+            ? (successfulBuys / purchases.length * 100).toFixed(1) 
+            : 0;
+
+        // Précision des ventes (basé sur impact négatif à 30 jours après vente)
+        const accurateSells = sales.filter(t => (t.priceImpact30d || 0) < 0).length;
+        const sellAccuracy = sales.length > 0 
+            ? (accurateSells / sales.length * 100).toFixed(1) 
+            : 0;
+
+        // Impact moyen à 30 jours (tous types confondus)
+        const totalImpact = this.filteredData.reduce((sum, t) => sum + (t.priceImpact30d || 0), 0);
+        const averageImpact = this.filteredData.length > 0 
+            ? (totalImpact / this.filteredData.length).toFixed(1) 
+            : 0;
+
+        // Mise à jour de l'interface
+        buyElement.textContent = `${buySuccessRate}%`;
+        sellElement.textContent = `${sellAccuracy}%`;
+        impactElement.textContent = `${averageImpact >= 0 ? '+' : ''}${averageImpact}%`;
+
+        // Ajoute des classes CSS pour le styling conditionnel
+        buyElement.className = buySuccessRate >= 60 ? 'stat-value-positive' : 'stat-value-neutral';
+        sellElement.className = sellAccuracy >= 55 ? 'stat-value-positive' : 'stat-value-neutral';
+        impactElement.className = averageImpact >= 0 ? 'stat-value-positive' : 'stat-value-negative';
+
+        console.log('📊 Backtesting stats updated:', {
+            buySuccessRate: `${buySuccessRate}%`,
+            sellAccuracy: `${sellAccuracy}%`,
+            averageImpact: `${averageImpact}%`,
+            sampleSize: this.filteredData.length
+        });
+    }
+
     populateCompanyFilter() {
         const select = document.getElementById('companyFilter');
         if (!select || !this.allCompaniesData) return;
