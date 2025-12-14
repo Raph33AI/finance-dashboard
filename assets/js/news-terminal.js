@@ -7,7 +7,7 @@
 class NewsTerminal {
     constructor() {
         this.rssClient = new RSSClient();
-        this.firestoreManager = new FirestoreRSSManager();
+        // ❌ SUPPRIMÉ : this.firestoreManager = new FirestoreRSSManager();
         
         this.allArticles = [];
         this.filteredArticles = [];
@@ -314,7 +314,7 @@ class NewsTerminal {
         const timeAgo = this.getTimeAgo(article.timestamp);
 
         return `
-            <div class='article-card' onclick='newsTerminal.openArticle("${article.id}", "${article.link}")'>
+            <div class='article-card' onclick='newsTerminal.openArticle("${article.link}")'>
                 ${article.image ? `
                     <img src='${article.image}' alt='${article.title}' class='article-image' onerror='this.style.display="none"'>
                 ` : ''}
@@ -325,7 +325,6 @@ class NewsTerminal {
                             <i class='fas fa-rss'></i>
                             ${article.sourceName}
                         </div>
-                        <!-- ❌ Section article-actions SUPPRIMÉE -->
                     </div>
 
                     <div class='article-title'>${article.title}</div>
@@ -355,34 +354,15 @@ class NewsTerminal {
         `;
     }
 
-    escapeHtml(text) {
-        return text.replace(/'/g, "\\'").replace(/"/g, '\\"');
-    }
-
-    async openArticle(articleId, link) {
-        const article = this.allArticles.find(a => a.id === articleId);
-        if (article) {
-            await this.firestoreManager.recordArticleView(article);
-        }
+    // ✅ CORRIGÉ : Suppression de articleId et de firestoreManager
+    openArticle(link) {
+        // ❌ SUPPRIMÉ : const article = this.allArticles.find(a => a.id === articleId);
+        // ❌ SUPPRIMÉ : if (article) { await this.firestoreManager.recordArticleView(article); }
         window.open(link, '_blank');
     }
 
-    async toggleWatchlist(ticker, companyName) {
-        if (!ticker) {
-            this.showNotification('No ticker detected in this article', 'warning');
-            return;
-        }
-        
-        const isInWatchlist = await this.firestoreManager.isInWatchlist(ticker);
-        
-        if (isInWatchlist) {
-            await this.firestoreManager.removeFromWatchlist(ticker);
-            this.showNotification(`${ticker} removed from watchlist`, 'success');
-        } else {
-            await this.firestoreManager.addToWatchlist(ticker, companyName);
-            this.showNotification(`${ticker} added to watchlist`, 'success');
-        }
-    }
+    // ❌ MÉTHODE COMPLÈTE SUPPRIMÉE : toggleWatchlist()
+    // (Était utilisée pour ajouter/retirer des tickers de la watchlist Firebase)
 
     shareArticle(link) {
         if (navigator.share) {
