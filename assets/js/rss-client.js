@@ -6,7 +6,7 @@
 
 class RSSClient {
     constructor() {
-        this.workerUrl = 'https://rss-api.raphnardone.workers.dev?v=2';
+        this.workerUrl = 'https://rss-api.raphnardone.workers.dev';
         this.cache = new Map();
         this.cacheTimeout = 10 * 60 * 1000; // ✨ 10 minutes (augmenté de 5 à 10)
     }

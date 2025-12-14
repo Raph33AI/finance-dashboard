@@ -518,5 +518,48 @@
     });
     </script>
 
+    <script>
+    // 🔍 SCRIPT DE DEBUG - À RETIRER APRÈS TESTS
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log('═══════════════════════════════════════');
+        console.log('🔍 DEBUG - Vérification des boutons');
+        console.log('═══════════════════════════════════════');
+        
+        setTimeout(() => {
+            const loadMaxBtn = document.getElementById('loadMaxBtn');
+            const autoLoadToggle = document.getElementById('autoLoadToggle');
+            const articleLimitSelect = document.getElementById('articleLimitSelect');
+            
+            console.log('Bouton Load MAX:', loadMaxBtn ? '✅ TROUVÉ' : '❌ INTROUVABLE');
+            console.log('Toggle Auto-Load:', autoLoadToggle ? '✅ TROUVÉ' : '❌ INTROUVABLE');
+            console.log('Select Articles:', articleLimitSelect ? '✅ TROUVÉ' : '❌ INTROUVABLE');
+            
+            if (loadMaxBtn) {
+                console.log('🧪 Test manuel du bouton Load MAX...');
+                loadMaxBtn.addEventListener('click', function() {
+                    console.log('🔥🔥🔥 BOUTON CLIQUÉ (event listener direct)!');
+                });
+            }
+            
+            // Tester le Worker directement
+            console.log('🧪 Test direct du Worker...');
+            fetch('https://rss-api.raphnardone.workers.dev/all', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ maxPerSource: 200 })
+            })
+            .then(r => r.json())
+            .then(data => {
+                console.log('✅ Worker response:', data);
+                console.log('📊 Total articles from worker:', data.totalArticles);
+            })
+            .catch(err => {
+                console.error('❌ Worker error:', err);
+            });
+            
+        }, 2000); // Attendre 2 secondes pour que tout soit chargé
+    });
+    </script>
+
 </body>
 </html>
