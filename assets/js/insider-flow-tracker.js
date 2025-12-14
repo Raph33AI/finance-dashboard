@@ -310,21 +310,18 @@ class InsiderFlowTracker {
         return allTransactions;
     }
 
-    // 🔥 TÉLÉCHARGER ET PARSER LE XML FORM 4 (VERSION CORRIGÉE ET COMPLÈTE)
+    // 🔥 TÉLÉCHARGER ET PARSER LE XML FORM 4 (VERSION AVEC PROXY FONCTIONNEL)
     async downloadAndParseForm4XML(filing) {
         // ✅ EXTRAIRE CIK ET ACCESSION NUMBER DEPUIS filingUrl
         let cik = filing.cik;
         let accessionNumber = filing.accessionNumber;
         
         // Si manquants, extraire depuis filingUrl
-        // Format: https://www.sec.gov/Archives/edgar/data/1619991/000149315225027620/0001493152-25-027620-index.htm
         if ((!cik || !accessionNumber) && filing.filingUrl) {
             const urlMatch = filing.filingUrl.match(/\/data\/(\d+)\/(\d{18})\//);
             if (urlMatch) {
-                cik = urlMatch[1]; // Ex: "1619991"
-                const accessionRaw = urlMatch[2]; // Ex: "000149315225027620"
-                
-                // Formater l'accession number avec tirets : 0001493152-25-027620
+                cik = urlMatch[1];
+                const accessionRaw = urlMatch[2];
                 accessionNumber = `${accessionRaw.slice(0, 10)}-${accessionRaw.slice(10, 12)}-${accessionRaw.slice(12)}`;
             }
         }
@@ -343,27 +340,58 @@ class InsiderFlowTracker {
         }
         
         try {
-            // 🔥 CONSTRUIRE L'URL DU XML
+            // 🔥 CONSTRUIRE L'URL DU FICHIER XML DIRECT
             const cikPadded = cik.padStart(10, '0');
             const accessionClean = accessionNumber.replace(/-/g, '');
             
-            // Format: https://www.sec.gov/cgi-bin/viewer?action=view&cik=1045810&accession_number=0001493152-25-027620&xbrl_type=v
-            const xmlUrl = `https://www.sec.gov/cgi-bin/viewer?action=view&cik=${cikPadded}&accession_number=${accessionNumber}&xbrl_type=v`;
+            // URL DIRECTE du dossier Archives (pas le viewer CGI)
+            // Format: https://www.sec.gov/Archives/edgar/data/CIK/ACCESSION/primary_doc.xml
+            // Le problème: on ne connaît pas le nom exact du fichier XML
             
-            // 🔥 TÉLÉCHARGER LE XML (via proxy CORS pour éviter les blocages)
-            const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(xmlUrl)}`;
+            // 🔥 SOLUTION: Télécharger la page index.htm et extraire le lien XML
+            const indexUrl = `https://www.sec.gov/Archives/edgar/data/${cik}/${accessionClean}/${accessionNumber}-index.htm`;
             
-            const response = await fetch(proxyUrl);
+            // Utiliser corsproxy.io (plus stable qu'allorigins)
+            const proxyUrl = `https://corsproxy.io/?${encodeURIComponent(indexUrl)}`;
             
-            if (!response.ok) {
-                throw new Error(`Failed to download XML: ${response.status}`);
+            const indexResponse = await fetch(proxyUrl);
+            
+            if (!indexResponse.ok) {
+                throw new Error(`Failed to fetch index: ${indexResponse.status}`);
             }
             
-            const xmlText = await response.text();
+            const indexHtml = await indexResponse.text();
+            
+            // Extraire le lien vers le fichier XML
+            // Chercher un lien qui finit par .xml
+            const xmlLinkMatch = indexHtml.match(/<a href="([^"]+\.xml)">/i);
+            
+            if (!xmlLinkMatch) {
+                throw new Error('No XML link found in index');
+            }
+            
+            const xmlFileName = xmlLinkMatch[1];
+            const xmlUrl = `https://www.sec.gov/Archives/edgar/data/${cik}/${accessionClean}/${xmlFileName}`;
+            
+            // Télécharger le XML via proxy
+            const xmlProxyUrl = `https://corsproxy.io/?${encodeURIComponent(xmlUrl)}`;
+            const xmlResponse = await fetch(xmlProxyUrl);
+            
+            if (!xmlResponse.ok) {
+                throw new Error(`Failed to fetch XML: ${xmlResponse.status}`);
+            }
+            
+            const xmlText = await xmlResponse.text();
             
             // Parser le XML
             const parser = new DOMParser();
             const xmlDoc = parser.parseFromString(xmlText, 'text/xml');
+            
+            // Vérifier si c'est un XML valide
+            const parserError = xmlDoc.querySelector('parsererror');
+            if (parserError) {
+                throw new Error('Invalid XML');
+            }
             
             // Extraire toutes les transactions du XML
             return this.extractTransactionsFromXML(xmlDoc, filing);
