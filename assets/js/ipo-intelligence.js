@@ -4,6 +4,7 @@
  * ═══════════════════════════════════════════════════════════════════
  * ✅ RÉCUPÉRATION MASSIVE DE DONNÉES
  * ✅ 100% DYNAMIQUE - AUCUNE DONNÉE HARDCODÉE
+ * ✅ PAGINATION COMPLÈTE
  * ═══════════════════════════════════════════════════════════════════
  */
 
@@ -12,7 +13,7 @@ class IPOIntelligenceDashboard {
         this.secClient = new SECApiClient();
         this.ipos = [];
         this.enrichedIPOs = [];
-        this.currentPeriod = 365; // 365 jours par défaut (au lieu de 30)
+        this.currentPeriod = 365;
         this.filters = {
             sectors: [],
             scoreMin: 0,
@@ -20,31 +21,38 @@ class IPOIntelligenceDashboard {
             stages: []
         };
         
-        // Configuration dynamique (peut être externalisée)
+        // ✅ NOUVEAU : Pagination
+        this.pagination = {
+            pipelineCurrentPage: 1,
+            pipelineItemsPerPage: 10,
+            tableCurrentPage: 1,
+            tableItemsPerPage: 20
+        };
+        
+        // Configuration dynamique
         this.config = {
             displayLimits: {
                 topRecommendations: 3,
-                pipelineItems: 10,
-                tableRows: 20,
+                pipelineItems: 10,        // Par page
+                tableRows: 20,            // Par page
                 lockUpCards: 12,
                 chartMaxItems: 20
             },
             percentiles: {
-                highScore: 0.75,  // Top 25%
-                mediumScore: 0.50 // Top 50%
+                highScore: 0.75,
+                mediumScore: 0.50
             },
             momentumThresholds: {
-                veryFast: 0.25,  // Bottom 25% (fastest)
-                fast: 0.50,      // Bottom 50%
-                moderate: 0.75   // Bottom 75%
+                veryFast: 0.25,
+                fast: 0.50,
+                moderate: 0.75
             },
-            // ✅ NOUVEAU : Configuration de chargement des données
             dataLoading: {
-                initialLimit: 1000,        // Charge 1000 IPOs au démarrage
-                batchSize: 500,            // Taille des batches pour chargement progressif
-                maxIPOs: 5000,             // Limite maximale (sécurité)
-                autoLoadMore: true,        // Charge automatiquement plus de données si disponible
-                cacheDuration: 3600000     // Cache 1h (au lieu de 30min)
+                initialLimit: 1000,
+                batchSize: 500,
+                maxIPOs: 5000,
+                autoLoadMore: true,
+                cacheDuration: 3600000
             }
         };
         
@@ -109,7 +117,7 @@ class IPOIntelligenceDashboard {
             this.resetFilters();
         });
 
-        // ✅ NOUVEAU : Bouton Load More
+        // Load More button
         document.getElementById('loadMoreIPOs')?.addEventListener('click', async () => {
             const currentLimit = this.config.dataLoading.initialLimit;
             this.config.dataLoading.initialLimit += this.config.dataLoading.batchSize;
@@ -143,7 +151,6 @@ class IPOIntelligenceDashboard {
         try {
             console.log('📊 Loading IPO data (extended dataset)...');
             
-            // ✅ Charger avec limite étendue
             const response = await this.secClient.getIPOs({
                 limit: this.config.dataLoading.initialLimit,
                 includeAmendments: true,
@@ -154,17 +161,14 @@ class IPOIntelligenceDashboard {
             
             console.log(`📦 Received ${this.ipos.length} raw IPOs from SEC`);
             
-            // Remove duplicates based on CIK + Company Name
             this.ipos = this.removeDuplicates(this.ipos);
             
             console.log(`🧹 After deduplication: ${this.ipos.length} unique IPOs`);
             
-            // ✅ Enrichissement progressif par batches (évite le freeze UI)
             this.enrichedIPOs = await this.enrichIPOsInBatches(this.ipos);
             
             console.log(`✅ Loaded and enriched ${this.enrichedIPOs.length} unique IPOs`);
             
-            // Afficher les statistiques de période
             this.displayDatasetStats();
             this.updateDatasetInfoDisplay();
             
@@ -177,11 +181,8 @@ class IPOIntelligenceDashboard {
         }
     }
 
-    /**
-     * 🔄 Enrichissement par batches pour éviter de bloquer l'UI
-     */
     async enrichIPOsInBatches(ipos) {
-        const batchSize = 50; // Traiter 50 IPOs à la fois
+        const batchSize = 50;
         const enriched = [];
         
         for (let i = 0; i < ipos.length; i += batchSize) {
@@ -195,7 +196,6 @@ class IPOIntelligenceDashboard {
             
             enriched.push(...enrichedBatch);
             
-            // Petit délai pour laisser l'UI respirer
             if (i + batchSize < ipos.length) {
                 await new Promise(resolve => setTimeout(resolve, 10));
             }
@@ -204,9 +204,6 @@ class IPOIntelligenceDashboard {
         return enriched;
     }
 
-    /**
-     * 📊 Affiche les statistiques du dataset chargé
-     */
     displayDatasetStats() {
         const now = Date.now();
         const dates = this.enrichedIPOs.map(ipo => new Date(ipo.filedDate).getTime());
@@ -256,9 +253,6 @@ class IPOIntelligenceDashboard {
         console.log('═══════════════════════════════════════════════════════');
     }
 
-    /**
-     * 🔄 Mise à jour de l'affichage des infos du dataset
-     */
     updateDatasetInfoDisplay() {
         const infoElement = document.getElementById('datasetInfo');
         if (!infoElement) return;
@@ -281,9 +275,6 @@ class IPOIntelligenceDashboard {
         `;
     }
 
-    /**
-     * 🔄 Indicateur de chargement
-     */
     showLoadingIndicator(show) {
         let indicator = document.getElementById('globalLoadingIndicator');
         
@@ -355,11 +346,6 @@ class IPOIntelligenceDashboard {
         });
     }
 
-    /**
-     * ═══════════════════════════════════════════════════════════════════
-     * 🧮 CALCUL DYNAMIQUE DES STATISTIQUES - VERSION CORRIGÉE
-     * ═══════════════════════════════════════════════════════════════════
-     */
     calculateDynamicStats() {
         console.log('📊 Calculating dynamic statistics...');
         
@@ -368,7 +354,6 @@ class IPOIntelligenceDashboard {
             return;
         }
 
-        // 1. Performance par secteur (basée sur success score moyen)
         const sectorScores = {};
         const sectorCounts = {};
         
@@ -381,13 +366,11 @@ class IPOIntelligenceDashboard {
             sectorCounts[ipo.sector]++;
         });
 
-        // Calculer les moyennes et classer les secteurs
         const sectorAvgs = {};
         Object.keys(sectorScores).forEach(sector => {
             sectorAvgs[sector] = sectorScores[sector] / sectorCounts[sector];
         });
 
-        // Trier les secteurs par performance
         const sortedSectors = Object.entries(sectorAvgs)
             .sort((a, b) => b[1] - a[1])
             .map(([sector, avg]) => ({ sector, avgScore: avg }));
@@ -395,7 +378,6 @@ class IPOIntelligenceDashboard {
         this.stats.sectorPerformance = sortedSectors;
         this.stats.highGrowthSectors = sortedSectors.slice(0, 3).map(s => s.sector);
 
-        // 2. Distribution des scores (pour seuils dynamiques)
         const scores = this.enrichedIPOs.map(ipo => ipo.successScore).sort((a, b) => a - b);
         const len = scores.length;
         
@@ -409,33 +391,26 @@ class IPOIntelligenceDashboard {
             mean: scores.reduce((a, b) => a + b, 0) / len
         };
 
-        // 3. 🔧 CORRECTION : Calcul de dilution SANS référence circulaire
         const dilutionBySector = {};
         
         this.enrichedIPOs.forEach(ipo => {
             let dilution;
             
-            // Essayer d'extraire les vraies données
             if (ipo.sharesOffered && ipo.sharesOutstanding) {
                 dilution = (ipo.sharesOffered / (ipo.sharesOutstanding + ipo.sharesOffered)) * 100;
-            } 
-            // Sinon, estimation basique basée sur le filing stage et le score
-            else {
-                let baseDilution = 20; // Baseline
+            } else {
+                let baseDilution = 20;
                 
-                // Ajustement par stage
                 if (ipo.filingStage && ipo.filingStage.includes('Amendment')) {
                     baseDilution += 3;
                 }
                 
-                // Ajustement par score (les scores faibles = plus de dilution)
                 if (ipo.successScore < 50) {
                     baseDilution += 8;
                 } else if (ipo.successScore < 70) {
                     baseDilution += 4;
                 }
                 
-                // Ajustement par nombre de risk factors
                 if (ipo.riskFactors && ipo.riskFactors.length > 5) {
                     baseDilution += 5;
                 }
@@ -449,21 +424,18 @@ class IPOIntelligenceDashboard {
             dilutionBySector[ipo.sector].push(dilution);
         });
 
-        // Calculer les moyennes par secteur
         Object.keys(dilutionBySector).forEach(sector => {
             const values = dilutionBySector[sector];
             const avg = values.reduce((a, b) => a + b, 0) / values.length;
             this.stats.avgDilutionBySector[sector] = parseFloat(avg.toFixed(2));
         });
 
-        // 4. 🔧 CORRECTION : Momentum avec vérification de format de date
         const momentumBySector = {};
         const now = Date.now();
         
         this.enrichedIPOs.forEach(ipo => {
             let filedDate;
             
-            // Gérer différents formats de date
             if (ipo.filedDate instanceof Date) {
                 filedDate = ipo.filedDate.getTime();
             } else if (typeof ipo.filedDate === 'string') {
@@ -472,10 +444,9 @@ class IPOIntelligenceDashboard {
                 filedDate = ipo.filedDate;
             } else {
                 console.warn(`⚠ Invalid date format for ${ipo.companyName}:`, ipo.filedDate);
-                return; // Skip cette IPO
+                return;
             }
             
-            // Vérifier que la date est valide
             if (isNaN(filedDate)) {
                 console.warn(`⚠ Invalid date value for ${ipo.companyName}:`, ipo.filedDate);
                 return;
@@ -483,13 +454,12 @@ class IPOIntelligenceDashboard {
             
             const days = (now - filedDate) / (1000 * 60 * 60 * 24);
             
-            // Vérifier que le résultat est raisonnable (pas négatif, pas trop grand)
             if (days < 0) {
                 console.warn(`⚠ Future date detected for ${ipo.companyName}: ${days} days`);
                 return;
             }
             
-            if (days > 730) { // Plus de 2 ans = probablement pas une IPO active
+            if (days > 730) {
                 console.warn(`⚠ Very old filing for ${ipo.companyName}: ${days} days`);
             }
             
@@ -499,7 +469,6 @@ class IPOIntelligenceDashboard {
             momentumBySector[ipo.sector].push(days);
         });
 
-        // Calculer les moyennes
         Object.keys(momentumBySector).forEach(sector => {
             const values = momentumBySector[sector];
             if (values.length > 0) {
@@ -511,29 +480,20 @@ class IPOIntelligenceDashboard {
         console.log('✅ Dynamic stats calculated:', this.stats);
     }
 
-    /**
-     * ═══════════════════════════════════════════════════════════════════
-     * 🎯 MÉTHODES DYNAMIQUES (PLUS DE HARDCODING)
-     * ═══════════════════════════════════════════════════════════════════
-     */
-
-    // ✅ Secteurs à forte croissance basés sur les données réelles
     getHighGrowthSectors() {
         return this.stats.highGrowthSectors || [];
     }
 
-    // ✅ Seuils de score dynamiques basés sur la distribution
     getDynamicScoreThresholds() {
         const dist = this.stats.scoreDistribution;
         return {
-            exceptional: dist.p90 || 75,  // Top 10%
-            strong: dist.q3 || 60,        // Top 25%
-            moderate: dist.median || 50,  // Médiane
-            low: dist.q1 || 40            // Bottom 25%
+            exceptional: dist.p90 || 75,
+            strong: dist.q3 || 60,
+            moderate: dist.median || 50,
+            low: dist.q1 || 40
         };
     }
 
-    // ✅ Seuils de momentum dynamiques
     getDynamicMomentumThresholds() {
         const allDays = this.enrichedIPOs.map(ipo => 
             (Date.now() - new Date(ipo.filedDate)) / (1000 * 60 * 60 * 24)
@@ -549,20 +509,16 @@ class IPOIntelligenceDashboard {
         };
     }
 
-    // ✅ Estimation de dilution basée sur les données réelles de l'IPO
     estimateDilutionFromData(ipo) {
-        // Priorité 1 : Si des données réelles sont disponibles, les utiliser
         if (ipo.sharesOffered && ipo.sharesOutstanding) {
             const dilution = (ipo.sharesOffered / (ipo.sharesOutstanding + ipo.sharesOffered)) * 100;
             return dilution.toFixed(1);
         }
         
-        // Priorité 2 : Utiliser la moyenne du secteur SI elle existe (après calculateDynamicStats)
         let baseDilution;
         if (this.stats.avgDilutionBySector && this.stats.avgDilutionBySector[ipo.sector]) {
             baseDilution = this.stats.avgDilutionBySector[ipo.sector];
         } else {
-            // Valeurs par défaut par secteur (fallback)
             const sectorDefaults = {
                 'Technology': 22,
                 'Healthcare': 24,
@@ -578,12 +534,10 @@ class IPOIntelligenceDashboard {
         
         let adjustment = 0;
         
-        // Ajustement par stage
         if (ipo.filingStage && ipo.filingStage.includes('Amendment')) {
             adjustment += 2;
         }
         
-        // Ajustement par score
         const thresholds = this.getDynamicScoreThresholds();
         if (ipo.successScore < thresholds.moderate) {
             adjustment += 5;
@@ -591,7 +545,6 @@ class IPOIntelligenceDashboard {
             adjustment += 2;
         }
         
-        // Ajustement par risk factors
         if (ipo.riskFactors && ipo.riskFactors.length > 5) {
             adjustment += 3;
         }
@@ -600,7 +553,6 @@ class IPOIntelligenceDashboard {
         return finalDilution.toFixed(1);
     }
 
-    // ✅ Valorisation de secteur dynamique
     calculateSectorValuationDynamic(ipo) {
         if (this.stats.sectorPerformance.length === 0) {
             return 'N/A';
@@ -617,7 +569,6 @@ class IPOIntelligenceDashboard {
         return 'Low Tier (Bottom 20%)';
     }
 
-    // ✅ Calcul de momentum dynamique
     calculateFilingMomentumDynamic(ipo) {
         const daysSinceFiling = (Date.now() - new Date(ipo.filedDate)) / (1000 * 60 * 60 * 24);
         const thresholds = this.getDynamicMomentumThresholds();
@@ -628,13 +579,11 @@ class IPOIntelligenceDashboard {
         return 'Slow 🐌';
     }
 
-    // ✅ Génération dynamique des insights
     generateInsights(ipo) {
         const insights = [];
         const thresholds = this.getDynamicScoreThresholds();
         const highGrowthSectors = this.getHighGrowthSectors();
         
-        // Insight basé sur le score (seuils dynamiques)
         if (ipo.successScore >= thresholds.exceptional) {
             insights.push(`Exceptional potential (top ${((1 - this.config.percentiles.highScore) * 100).toFixed(0)}% of all IPOs)`);
         } else if (ipo.successScore >= thresholds.strong) {
@@ -643,7 +592,6 @@ class IPOIntelligenceDashboard {
             insights.push(`Moderate potential (near market average)`);
         }
         
-        // Insight basé sur la récence
         const daysSinceFiling = (Date.now() - new Date(ipo.filedDate)) / (1000 * 60 * 60 * 24);
         const momentumThresholds = this.getDynamicMomentumThresholds();
         
@@ -653,34 +601,29 @@ class IPOIntelligenceDashboard {
             insights.push(`Filed ${Math.floor(daysSinceFiling)} days ago (active filing)`);
         }
         
-        // Insight basé sur le secteur (dynamique)
         if (highGrowthSectors.includes(ipo.sector)) {
             const sectorData = this.stats.sectorPerformance.find(s => s.sector === ipo.sector);
             insights.push(`Operating in top-performing ${ipo.sector} sector (avg score: ${sectorData.avgScore.toFixed(1)})`);
         }
         
-        // Insight basé sur les risques
         if (ipo.riskFactors && ipo.riskFactors.length === 0) {
             insights.push('No major red flags detected in analysis');
         } else if (ipo.riskFactors && ipo.riskFactors.length < 3) {
             insights.push(`Minimal risks identified (${ipo.riskFactors.length} factors)`);
         }
         
-        // Insight basé sur le stage
         if (ipo.filingStage && ipo.filingStage.includes('Initial')) {
             insights.push('Early-stage filing - potential for significant upside');
         } else if (ipo.filingStage && ipo.filingStage.includes('Amendment')) {
             insights.push('Active filing process - approaching finalization');
         }
         
-        // Insight basé sur la dilution
         const dilution = parseFloat(this.estimateDilutionFromData(ipo));
         const avgSectorDilution = this.stats.avgDilutionBySector[ipo.sector] || 20;
         if (dilution < avgSectorDilution * 0.8) {
             insights.push(`Low dilution risk (${dilution}% vs sector avg ${avgSectorDilution.toFixed(1)}%)`);
         }
         
-        // Compléter si moins de 4 insights
         while (insights.length < 4) {
             insights.push(`CIK ${ipo.cik || 'N/A'} - SEC registered company`);
             if (insights.length < 4) {
@@ -692,7 +635,6 @@ class IPOIntelligenceDashboard {
     }
 
     calculateLockUpDays(ipo) {
-        // Si la date d'expiration est fournie par le SEC Worker, l'utiliser
         if (ipo.lockUpExpiry) {
             const now = Date.now();
             const expiry = new Date(ipo.lockUpExpiry).getTime();
@@ -700,10 +642,9 @@ class IPOIntelligenceDashboard {
             return daysRemaining < 0 ? 0 : daysRemaining;
         }
         
-        // Sinon, estimer basé sur la date de dépôt + 180 jours standard
         const filedDate = new Date(ipo.filedDate).getTime();
-        const estimatedIPODate = filedDate + (30 * 24 * 60 * 60 * 1000); // +30 jours
-        const estimatedLockUpExpiry = estimatedIPODate + (180 * 24 * 60 * 60 * 1000); // +180 jours
+        const estimatedIPODate = filedDate + (30 * 24 * 60 * 60 * 1000);
+        const estimatedLockUpExpiry = estimatedIPODate + (180 * 24 * 60 * 60 * 1000);
         const daysRemaining = Math.ceil((estimatedLockUpExpiry - Date.now()) / (1000 * 60 * 60 * 24));
         
         return daysRemaining < 0 ? 0 : daysRemaining;
@@ -1223,21 +1164,30 @@ class IPOIntelligenceDashboard {
         });
     }
 
+    /**
+     * ═══════════════════════════════════════════════════════════════════
+     * 📄 IPO PIPELINE AVEC PAGINATION
+     * ═══════════════════════════════════════════════════════════════════
+     */
     renderPipeline() {
         const container = document.getElementById('ipoPipeline');
         if (!container) return;
 
         const filteredIPOs = this.applyCurrentFilters();
-        const topIPOs = [...filteredIPOs]
-            .sort((a, b) => b.successScore - a.successScore)
-            .slice(0, this.config.displayLimits.pipelineItems);
+        const sortedIPOs = [...filteredIPOs].sort((a, b) => b.successScore - a.successScore);
+        
+        // ✅ Pagination
+        const startIndex = (this.pagination.pipelineCurrentPage - 1) * this.pagination.pipelineItemsPerPage;
+        const endIndex = startIndex + this.pagination.pipelineItemsPerPage;
+        const paginatedIPOs = sortedIPOs.slice(startIndex, endIndex);
+        const totalPages = Math.ceil(sortedIPOs.length / this.pagination.pipelineItemsPerPage);
 
-        if (topIPOs.length === 0) {
+        if (paginatedIPOs.length === 0) {
             container.innerHTML = '<p class="text-center">No IPOs in pipeline</p>';
             return;
         }
 
-        const html = topIPOs.map(ipo => `
+        const ipoCards = paginatedIPOs.map(ipo => `
             <div class='pipeline-item'>
                 <div class='pipeline-header'>
                     <h3 class='pipeline-company'>${ipo.companyName}</h3>
@@ -1279,21 +1229,58 @@ class IPOIntelligenceDashboard {
             </div>
         `).join('');
 
-        container.innerHTML = html;
+        // ✅ Contrôles de Pagination
+        const paginationControls = `
+            <div style='display: flex; justify-content: center; align-items: center; gap: 15px; margin-top: 30px; padding: 20px; background: var(--eco-gradient-soft); border-radius: 12px;'>
+                <button 
+                    class='dashboard-btn' 
+                    onclick='ipoApp.goToPipelinePage(${this.pagination.pipelineCurrentPage - 1})'
+                    ${this.pagination.pipelineCurrentPage === 1 ? 'disabled style="opacity: 0.5; cursor: not-allowed;"' : ''}
+                >
+                    <i class='fas fa-chevron-left'></i> Previous
+                </button>
+                
+                <span style='font-weight: 600; color: var(--text-primary); font-size: 1.1rem;'>
+                    Page ${this.pagination.pipelineCurrentPage} / ${totalPages}
+                    <span style='color: var(--text-secondary); font-size: 0.9rem; margin-left: 8px;'>
+                        (${sortedIPOs.length} IPOs total)
+                    </span>
+                </span>
+                
+                <button 
+                    class='dashboard-btn' 
+                    onclick='ipoApp.goToPipelinePage(${this.pagination.pipelineCurrentPage + 1})'
+                    ${this.pagination.pipelineCurrentPage === totalPages ? 'disabled style="opacity: 0.5; cursor: not-allowed;"' : ''}
+                >
+                    Next <i class='fas fa-chevron-right'></i>
+                </button>
+            </div>
+        `;
+
+        container.innerHTML = ipoCards + paginationControls;
     }
 
+    /**
+     * ═══════════════════════════════════════════════════════════════════
+     * 📊 TOP IPOs TABLE AVEC PAGINATION
+     * ═══════════════════════════════════════════════════════════════════
+     */
     renderTopIPOs() {
         const tbody = document.querySelector('#topIPOsTable tbody');
         if (!tbody) return;
 
         const filteredIPOs = this.applyCurrentFilters();
-        const topIPOs = [...filteredIPOs]
-            .sort((a, b) => b.successScore - a.successScore)
-            .slice(0, this.config.displayLimits.tableRows);
+        const sortedIPOs = [...filteredIPOs].sort((a, b) => b.successScore - a.successScore);
+        
+        // ✅ Pagination
+        const startIndex = (this.pagination.tableCurrentPage - 1) * this.pagination.tableItemsPerPage;
+        const endIndex = startIndex + this.pagination.tableItemsPerPage;
+        const paginatedIPOs = sortedIPOs.slice(startIndex, endIndex);
+        const totalPages = Math.ceil(sortedIPOs.length / this.pagination.tableItemsPerPage);
 
-        const html = topIPOs.map((ipo, index) => `
+        const html = paginatedIPOs.map((ipo, index) => `
             <tr>
-                <td><div class='ipo-rank'>${index + 1}</div></td>
+                <td><div class='ipo-rank'>${startIndex + index + 1}</div></td>
                 <td>
                     <div class='ipo-company-cell'>
                         <span class='ipo-company-name'>${ipo.companyName}</span>
@@ -1330,6 +1317,77 @@ class IPOIntelligenceDashboard {
         `).join('');
 
         tbody.innerHTML = html || '<tr><td colspan="7" class="text-center">No data available</td></tr>';
+        
+        // ✅ Ajouter les contrôles de pagination sous le tableau
+        const tableContainer = document.querySelector('#topIPOsTable').parentElement;
+        let paginationControls = document.getElementById('tablePaginationControls');
+        
+        if (!paginationControls) {
+            paginationControls = document.createElement('div');
+            paginationControls.id = 'tablePaginationControls';
+            paginationControls.style.cssText = 'margin-top: 20px;';
+            tableContainer.appendChild(paginationControls);
+        }
+        
+        paginationControls.innerHTML = `
+            <div style='display: flex; justify-content: center; align-items: center; gap: 15px; padding: 20px; background: var(--eco-gradient-soft); border-radius: 12px;'>
+                <button 
+                    class='dashboard-btn' 
+                    onclick='ipoApp.goToTablePage(${this.pagination.tableCurrentPage - 1})'
+                    ${this.pagination.tableCurrentPage === 1 ? 'disabled style="opacity: 0.5; cursor: not-allowed;"' : ''}
+                >
+                    <i class='fas fa-chevron-left'></i> Previous
+                </button>
+                
+                <span style='font-weight: 600; color: var(--text-primary); font-size: 1.1rem;'>
+                    Page ${this.pagination.tableCurrentPage} / ${totalPages}
+                    <span style='color: var(--text-secondary); font-size: 0.9rem; margin-left: 8px;'>
+                        (${sortedIPOs.length} IPOs total)
+                    </span>
+                </span>
+                
+                <button 
+                    class='dashboard-btn' 
+                    onclick='ipoApp.goToTablePage(${this.pagination.tableCurrentPage + 1})'
+                    ${this.pagination.tableCurrentPage === totalPages ? 'disabled style="opacity: 0.5; cursor: not-allowed;"' : ''}
+                >
+                    Next <i class='fas fa-chevron-right'></i>
+                </button>
+            </div>
+        `;
+    }
+
+    /**
+     * ═══════════════════════════════════════════════════════════════════
+     * 🎯 MÉTHODES DE NAVIGATION DE PAGINATION
+     * ═══════════════════════════════════════════════════════════════════
+     */
+    goToPipelinePage(page) {
+        const filteredIPOs = this.applyCurrentFilters();
+        const sortedIPOs = [...filteredIPOs].sort((a, b) => b.successScore - a.successScore);
+        const totalPages = Math.ceil(sortedIPOs.length / this.pagination.pipelineItemsPerPage);
+        
+        if (page < 1 || page > totalPages) return;
+        
+        this.pagination.pipelineCurrentPage = page;
+        this.renderPipeline();
+        
+        // Scroll vers le haut de la section
+        document.getElementById('ipoPipeline')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    goToTablePage(page) {
+        const filteredIPOs = this.applyCurrentFilters();
+        const sortedIPOs = [...filteredIPOs].sort((a, b) => b.successScore - a.successScore);
+        const totalPages = Math.ceil(sortedIPOs.length / this.pagination.tableItemsPerPage);
+        
+        if (page < 1 || page > totalPages) return;
+        
+        this.pagination.tableCurrentPage = page;
+        this.renderTopIPOs();
+        
+        // Scroll vers le haut du tableau
+        document.querySelector('#topIPOsTable')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
 
     renderLockUpTracker() {
@@ -1345,12 +1403,10 @@ class IPOIntelligenceDashboard {
             const now = Date.now();
             const filed = new Date(ipo.filedDate).getTime();
             
-            // Utiliser lockUpExpiry si disponible, sinon estimer
             let expiry;
             if (ipo.lockUpExpiry) {
                 expiry = new Date(ipo.lockUpExpiry).getTime();
             } else {
-                // Estimation : filing + 30 jours (IPO) + 180 jours (lock-up)
                 expiry = filed + (210 * 24 * 60 * 60 * 1000);
             }
             
@@ -1519,6 +1575,10 @@ class IPOIntelligenceDashboard {
         
         console.log('🔍 Filters applied:', this.filters);
         
+        // ✅ Réinitialiser la pagination lors de l'application de filtres
+        this.pagination.pipelineCurrentPage = 1;
+        this.pagination.tableCurrentPage = 1;
+        
         this.renderAll();
         this.closeModal('filtersModal');
     }
@@ -1534,6 +1594,10 @@ class IPOIntelligenceDashboard {
         document.querySelectorAll('.filter-btn.active').forEach(btn => btn.classList.remove('active'));
         if (document.getElementById('scoreMin')) document.getElementById('scoreMin').value = 0;
         if (document.getElementById('scoreMax')) document.getElementById('scoreMax').value = 100;
+        
+        // ✅ Réinitialiser la pagination lors du reset
+        this.pagination.pipelineCurrentPage = 1;
+        this.pagination.tableCurrentPage = 1;
         
         this.renderAll();
         this.closeModal('filtersModal');
@@ -1602,6 +1666,86 @@ class IPOIntelligenceDashboard {
                     </ul>
                     <h4>Typical timeline:</h4>
                     <p>From initial S-1 filing to actual IPO typically takes 3-6 months, though it can vary significantly.</p>
+                `
+            },
+            's1-f1': {
+                title: 'SEC Form Types Explained',
+                content: `
+                    <h4><strong>Form S-1 (US Companies)</strong></h4>
+                    <p>The <strong>S-1</strong> is the initial registration statement filed with the SEC by <strong>U.S.-based companies</strong> preparing for an IPO. It contains:</p>
+                    <ul>
+                        <li>Business description and strategy</li>
+                        <li>Financial statements (3+ years)</li>
+                        <li>Risk factors</li>
+                        <li>Use of proceeds</li>
+                        <li>Management and ownership structure</li>
+                    </ul>
+                    
+                    <h4 style="margin-top: 20px;"><strong>Form F-1 (Foreign Companies)</strong></h4>
+                    <p>The <strong>F-1</strong> is used by <strong>foreign companies</strong> registering securities in the U.S. Similar to S-1 but includes:</p>
+                    <ul>
+                        <li>Disclosure of foreign jurisdiction laws</li>
+                        <li>Currency exchange considerations</li>
+                        <li>International accounting standards reconciliation</li>
+                    </ul>
+                    
+                    <h4 style="margin-top: 20px;"><strong>Amendments (S-1/A, F-1/A)</strong></h4>
+                    <p>Forms ending with <strong>/A</strong> (e.g., S-1/A, F-1/A) are <strong>amendments</strong> to the original filing. Companies file amendments to:</p>
+                    <ul>
+                        <li>Update financial information</li>
+                        <li>Address SEC comments</li>
+                        <li>Revise pricing range</li>
+                        <li>Add or clarify risk factors</li>
+                    </ul>
+                    <p><strong>Multiple amendments are normal</strong> and often indicate progress toward finalizing the IPO.</p>
+                `
+            },
+            'heatmap': {
+                title: 'IPO Heatmap by Sector',
+                content: `
+                    <p>Visual representation of IPO activity across different industry sectors.</p>
+                    <h4>How to read:</h4>
+                    <ul>
+                        <li><span style="color: #10b981;">●</span> Green = Low activity (fewer IPOs)</li>
+                        <li><span style="color: #f59e0b;">●</span> Yellow = Medium activity</li>
+                        <li><span style="color: #ef4444;">●</span> Red = High activity (many IPOs)</li>
+                        <li>Each cell shows the count of IPOs in that sector</li>
+                        <li>Filter by time period (30, 90, 180, 365 days)</li>
+                    </ul>
+                    <h4>Strategic use:</h4>
+                    <p>Identify trending sectors and potential sector rotation opportunities.</p>
+                `
+            },
+            'pipeline': {
+                title: 'IPO Pipeline',
+                content: `
+                    <p>A curated list of top IPO candidates ranked by our success score algorithm.</p>
+                    <h4>Information provided:</h4>
+                    <ul>
+                        <li>Company name and sector</li>
+                        <li>Form type and filing stage</li>
+                        <li>Filed date</li>
+                        <li>Success score</li>
+                        <li>Direct link to SEC filing</li>
+                    </ul>
+                    <h4>Use cases:</h4>
+                    <p>Track promising IPOs from filing to launch, analyze competitive landscape, identify investment opportunities early.</p>
+                `
+            },
+            'lockup': {
+                title: 'Lock-Up Period Tracker',
+                content: `
+                    <p>Tracks when IPO lock-up periods are set to expire.</p>
+                    <h4>What is a lock-up period:</h4>
+                    <p>A lock-up period (typically 180 days) prevents company insiders from selling their shares immediately after an IPO.</p>
+                    <h4>Why it matters:</h4>
+                    <ul>
+                        <li>Lock-up expiration can trigger sell-offs</li>
+                        <li>Price volatility often increases near expiration</li>
+                        <li>Strategic timing for entry/exit points</li>
+                    </ul>
+                    <h4>Our estimates:</h4>
+                    <p>Based on typical 180-day lock-up periods from estimated IPO date (filing date + 30 days).</p>
                 `
             }
         };
