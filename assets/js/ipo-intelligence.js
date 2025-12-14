@@ -139,7 +139,7 @@ class IPOIntelligenceDashboard {
 
     /**
      * ═══════════════════════════════════════════════════════════════════
-     * 🧮 NOUVEAU : CALCUL DYNAMIQUE DES STATISTIQUES
+     * 🧮 CALCUL DYNAMIQUE DES STATISTIQUES - VERSION CORRIGÉE
      * ═══════════════════════════════════════════════════════════════════
      */
     calculateDynamicStats() {
@@ -191,37 +191,114 @@ class IPOIntelligenceDashboard {
             mean: scores.reduce((a, b) => a + b, 0) / len
         };
 
-        // 3. Dilution moyenne par secteur (estimée à partir des données)
+        // 3. 🔧 CORRECTION : Calcul de dilution SANS référence circulaire
         const dilutionBySector = {};
+        
         this.enrichedIPOs.forEach(ipo => {
-            const dilution = this.estimateDilutionFromData(ipo);
+            let dilution;
+            
+            // Essayer d'extraire les vraies données
+            if (ipo.sharesOffered && ipo.sharesOutstanding) {
+                dilution = (ipo.sharesOffered / (ipo.sharesOutstanding + ipo.sharesOffered)) * 100;
+            } 
+            // Sinon, estimation basique basée sur le filing stage et le score
+            else {
+                let baseDilution = 20; // Baseline
+                
+                // Ajustement par stage
+                if (ipo.filingStage && ipo.filingStage.includes('Amendment')) {
+                    baseDilution += 3;
+                }
+                
+                // Ajustement par score (les scores faibles = plus de dilution)
+                if (ipo.successScore < 50) {
+                    baseDilution += 8;
+                } else if (ipo.successScore < 70) {
+                    baseDilution += 4;
+                }
+                
+                // Ajustement par nombre de risk factors
+                if (ipo.riskFactors && ipo.riskFactors.length > 5) {
+                    baseDilution += 5;
+                }
+                
+                dilution = Math.min(45, baseDilution);
+            }
+            
             if (!dilutionBySector[ipo.sector]) {
                 dilutionBySector[ipo.sector] = [];
             }
             dilutionBySector[ipo.sector].push(dilution);
         });
 
+        // Calculer les moyennes par secteur
         Object.keys(dilutionBySector).forEach(sector => {
-            const avg = dilutionBySector[sector].reduce((a, b) => a + b, 0) / dilutionBySector[sector].length;
-            this.stats.avgDilutionBySector[sector] = avg;
+            const values = dilutionBySector[sector];
+            const avg = values.reduce((a, b) => a + b, 0) / values.length;
+            this.stats.avgDilutionBySector[sector] = parseFloat(avg.toFixed(2));
         });
 
-        // 4. Momentum moyen par secteur
+        // 4. 🔧 CORRECTION : Momentum avec vérification de format de date
         const momentumBySector = {};
+        const now = Date.now();
+        
         this.enrichedIPOs.forEach(ipo => {
-            const days = (Date.now() - new Date(ipo.filedDate)) / (1000 * 60 * 60 * 24);
+            let filedDate;
+            
+            // Gérer différents formats de date
+            if (ipo.filedDate instanceof Date) {
+                filedDate = ipo.filedDate.getTime();
+            } else if (typeof ipo.filedDate === 'string') {
+                filedDate = new Date(ipo.filedDate).getTime();
+            } else if (typeof ipo.filedDate === 'number') {
+                filedDate = ipo.filedDate;
+            } else {
+                console.warn(`⚠ Invalid date format for ${ipo.companyName}:`, ipo.filedDate);
+                return; // Skip cette IPO
+            }
+            
+            // Vérifier que la date est valide
+            if (isNaN(filedDate)) {
+                console.warn(`⚠ Invalid date value for ${ipo.companyName}:`, ipo.filedDate);
+                return;
+            }
+            
+            const days = (now - filedDate) / (1000 * 60 * 60 * 24);
+            
+            // Vérifier que le résultat est raisonnable (pas négatif, pas trop grand)
+            if (days < 0) {
+                console.warn(`⚠ Future date detected for ${ipo.companyName}: ${days} days`);
+                return;
+            }
+            
+            if (days > 730) { // Plus de 2 ans = probablement pas une IPO active
+                console.warn(`⚠ Very old filing for ${ipo.companyName}: ${days} days`);
+            }
+            
             if (!momentumBySector[ipo.sector]) {
                 momentumBySector[ipo.sector] = [];
             }
             momentumBySector[ipo.sector].push(days);
         });
 
+        // Calculer les moyennes
         Object.keys(momentumBySector).forEach(sector => {
-            const avg = momentumBySector[sector].reduce((a, b) => a + b, 0) / momentumBySector[sector].length;
-            this.stats.avgMomentumBySector[sector] = avg;
+            const values = momentumBySector[sector];
+            if (values.length > 0) {
+                const avg = values.reduce((a, b) => a + b, 0) / values.length;
+                this.stats.avgMomentumBySector[sector] = parseFloat(avg.toFixed(2));
+            }
         });
 
+        // 🔍 DIAGNOSTIC : Afficher des infos de debug
         console.log('✅ Dynamic stats calculated:', this.stats);
+        console.log('📅 Sample filed dates:', this.enrichedIPOs.slice(0, 3).map(ipo => ({
+            company: ipo.companyName,
+            filedDate: ipo.filedDate,
+            type: typeof ipo.filedDate,
+            parsed: new Date(ipo.filedDate).toISOString(),
+            daysAgo: ((now - new Date(ipo.filedDate).getTime()) / (1000 * 60 * 60 * 24)).toFixed(1)
+        })));
     }
 
     /**
@@ -260,26 +337,59 @@ class IPOIntelligenceDashboard {
         };
     }
 
-    // ✅ Estimation de dilution basée sur les données réelles de l'IPO
+    /**
+     * ═══════════════════════════════════════════════════════════════════
+     * 💧 ESTIMATION DE DILUTION - VERSION CORRIGÉE (sans référence circulaire)
+     * ═══════════════════════════════════════════════════════════════════
+     */
     estimateDilutionFromData(ipo) {
-        // Si des données réelles sont disponibles, les utiliser
+        // Priorité 1 : Si des données réelles sont disponibles, les utiliser
         if (ipo.sharesOffered && ipo.sharesOutstanding) {
-            return ((ipo.sharesOffered / (ipo.sharesOutstanding + ipo.sharesOffered)) * 100).toFixed(1);
+            const dilution = (ipo.sharesOffered / (ipo.sharesOutstanding + ipo.sharesOffered)) * 100;
+            return dilution.toFixed(1);
         }
         
-        // Sinon, estimer basé sur le secteur et le stage
-        const sectorAvg = this.stats.avgDilutionBySector[ipo.sector] || 20;
+        // Priorité 2 : Utiliser la moyenne du secteur SI elle existe (après calculateDynamicStats)
+        let baseDilution;
+        if (this.stats.avgDilutionBySector && this.stats.avgDilutionBySector[ipo.sector]) {
+            baseDilution = this.stats.avgDilutionBySector[ipo.sector];
+        } else {
+            // Valeurs par défaut par secteur (fallback)
+            const sectorDefaults = {
+                'Technology': 22,
+                'Healthcare': 24,
+                'Financial Services': 18,
+                'Energy': 20,
+                'Consumer': 21,
+                'Real Estate': 19,
+                'Industrials': 20,
+                'Other': 20
+            };
+            baseDilution = sectorDefaults[ipo.sector] || 20;
+        }
+        
         let adjustment = 0;
         
+        // Ajustement par stage
         if (ipo.filingStage && ipo.filingStage.includes('Amendment')) {
-            adjustment += 2; // Les amendments tendent à augmenter légèrement
+            adjustment += 2;
         }
         
-        if (ipo.successScore < this.stats.scoreDistribution.median) {
-            adjustment += 5; // Scores faibles = plus de dilution
+        // Ajustement par score
+        const thresholds = this.getDynamicScoreThresholds();
+        if (ipo.successScore < thresholds.moderate) {
+            adjustment += 5;
+        } else if (ipo.successScore < thresholds.strong) {
+            adjustment += 2;
         }
         
-        return Math.min(50, sectorAvg + adjustment).toFixed(1);
+        // Ajustement par risk factors
+        if (ipo.riskFactors && ipo.riskFactors.length > 5) {
+            adjustment += 3;
+        }
+        
+        const finalDilution = Math.min(50, baseDilution + adjustment);
+        return finalDilution.toFixed(1);
     }
 
     // ✅ Valorisation de secteur dynamique
