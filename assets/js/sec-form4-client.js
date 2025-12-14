@@ -11,8 +11,6 @@ class SECForm4Client {
         // URLs de base
         this.secBaseURL = 'https://www.sec.gov';
         this.edgarArchiveURL = 'https://www.sec.gov/cgi-bin/browse-edgar';
-        // ✅ CORS PROXY (pour test uniquement)
-        this.corsProxy = 'https://api.allorigins.win/raw?url=';
         this.workerURL = 'https://sec-edgar-api.raphnardone.workers.dev'; // Ton Worker
         
         // User-Agent obligatoire pour la SEC
@@ -350,29 +348,214 @@ class SECForm4Client {
         return form4s;
     }
 
+    /**
+     * 🔧 VERSION CORRIGÉE - utilise le Cloudflare Worker
+     */
     async getCIKFromTicker(ticker) {
+        const cacheKey = `cik-${ticker}`;
+        
+        if (this.isCacheValid(cacheKey)) {
+            return this.cache.get(cacheKey).data;
+        }
+
         try {
-            const tickersURL = 'https://www.sec.gov/files/company_tickers.json';
+            console.log(`🔍 Getting CIK for ${ticker} via Worker...`);
             
-            // ✅ Utilise le CORS proxy
+            // ✅ Utilise le Worker au lieu de la SEC directement
             const response = await fetch(
-                `${this.corsProxy}${encodeURIComponent(tickersURL)}`
+                `${this.workerURL}/api/sec/ticker-to-cik?ticker=${ticker}`
             );
-            
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || `Worker error: ${response.status}`);
+            }
+
             const data = await response.json();
             
-            const company = Object.values(data).find(
-                c => c.ticker.toUpperCase() === ticker.toUpperCase()
-            );
-            
-            if (!company) {
-                throw new Error(`CIK not found for ticker: ${ticker}`);
+            if (data.error) {
+                throw new Error(data.error);
             }
-            
-            return company.cik_str.toString().padStart(10, '0');
-            
+
+            console.log(`✅ Got CIK for ${ticker}: ${data.cik}`);
+
+            // Cache le résultat
+            this.cache.set(cacheKey, {
+                data: data.cik,
+                timestamp: Date.now()
+            });
+
+            return data.cik;
+
         } catch (error) {
             console.error(`❌ Error getting CIK for ${ticker}:`, error);
+            throw new Error(`CIK not found for ticker: ${ticker}`);
+        }
+    }
+
+    /**
+     * 🔍 Recherche Form 4 par CIK (VIA WORKER)
+     */
+    async getForm4ByCIK(cik, options = {}) {
+        const {
+            limit = 100,
+            startDate = null,
+            endDate = null
+        } = options;
+
+        try {
+            console.log(`🔍 Searching Form 4s for CIK: ${cik} via Worker`);
+            
+            // ✅ Utilise le Worker
+            const response = await fetch(
+                `${this.workerURL}/api/sec/form4/feed?cik=${cik}&limit=${limit}`
+            );
+
+            if (!response.ok) {
+                throw new Error(`Worker error: ${response.status}`);
+            }
+
+            const data = await response.json();
+
+            // Filtre par date si nécessaire
+            let filings = data.filings || [];
+
+            if (startDate || endDate) {
+                const start = startDate ? new Date(startDate) : new Date(0);
+                const end = endDate ? new Date(endDate) : new Date();
+
+                filings = filings.filter(f => {
+                    const date = new Date(f.updated || f.filedDate);
+                    return date >= start && date <= end;
+                });
+            }
+
+            console.log(`✅ Found ${filings.length} Form 4 filings for CIK ${cik}`);
+
+            return filings;
+
+        } catch (error) {
+            console.error(`❌ Error fetching Form 4s for CIK ${cik}:`, error);
+            throw error;
+        }
+    }
+
+    /**
+     * 📄 Récupère le XML complet d'un Form 4 (VIA WORKER)
+     */
+    async getForm4XML(accessionNumber, cik) {
+        const cacheKey = `form4-xml-${accessionNumber}`;
+
+        if (this.isCacheValid(cacheKey)) {
+            return this.cache.get(cacheKey).data;
+        }
+
+        try {
+            console.log(`🌐 Fetching Form 4 XML via Worker: ${accessionNumber}`);
+            
+            // ✅ Utilise le Worker
+            const response = await fetch(
+                `${this.workerURL}/api/sec/form4/xml?accession=${accessionNumber}&cik=${cik}`
+            );
+
+            if (!response.ok) {
+                throw new Error(`Worker error: ${response.status}`);
+            }
+
+            const xmlText = await response.text();
+
+            this.cache.set(cacheKey, {
+                data: xmlText,
+                timestamp: Date.now()
+            });
+
+            console.log(`✅ Got Form 4 XML for ${accessionNumber}`);
+
+            return xmlText;
+
+        } catch (error) {
+            console.error(`❌ Error fetching Form 4 XML ${accessionNumber}:`, error);
+            throw error;
+        }
+    }
+
+    /**
+     * 📊 Récupère l'historique complet des insiders d'une entreprise
+     */
+    async getCompanyInsiderHistory(ticker, months = 12) {
+        try {
+            console.log(`📊 Fetching insider history for ${ticker} (${months} months)`);
+            
+            // 1. Récupère le CIK depuis le ticker (via Worker)
+            const cik = await this.getCIKFromTicker(ticker);
+            
+            // 2. Calcule les dates
+            const endDate = new Date();
+            const startDate = new Date();
+            startDate.setMonth(startDate.getMonth() - months);
+
+            // 3. Récupère tous les Form 4 (via Worker)
+            const filings = await this.getForm4ByCIK(cik, {
+                limit: 500,
+                startDate: this.formatDate(startDate),
+                endDate: this.formatDate(endDate)
+            });
+
+            console.log(`📄 Got ${filings.length} Form 4 filings for ${ticker}`);
+
+            // 4. Parse chaque Form 4 pour extraire les détails
+            const transactions = [];
+            let successCount = 0;
+            let errorCount = 0;
+
+            for (const filing of filings.slice(0, 50)) { // Limite à 50 pour éviter timeout
+                try {
+                    const xmlText = await this.getForm4XML(filing.accessionNumber, cik);
+                    
+                    if (!xmlText || xmlText.includes('error')) {
+                        console.warn(`⚠ Invalid XML for ${filing.accessionNumber}`);
+                        errorCount++;
+                        continue;
+                    }
+
+                    const parsedData = window.Form4Parser?.parse(xmlText);
+                    
+                    if (parsedData) {
+                        transactions.push({
+                            ...parsedData,
+                            filingDate: filing.updated || filing.filedDate,
+                            accessionNumber: filing.accessionNumber
+                        });
+                        successCount++;
+                    } else {
+                        errorCount++;
+                    }
+                } catch (error) {
+                    console.warn(`⚠ Error parsing Form 4 ${filing.accessionNumber}:`, error.message);
+                    errorCount++;
+                }
+
+                // Petit délai pour éviter rate limiting
+                await new Promise(resolve => setTimeout(resolve, 100));
+            }
+
+            console.log(`✅ Successfully parsed ${successCount} transactions (${errorCount} errors)`);
+
+            return {
+                ticker,
+                cik,
+                period: { start: startDate, end: endDate },
+                transactionCount: transactions.length,
+                transactions,
+                stats: {
+                    totalFilings: filings.length,
+                    parsedSuccessfully: successCount,
+                    parseErrors: errorCount
+                }
+            };
+
+        } catch (error) {
+            console.error(`❌ Error fetching insider history for ${ticker}:`, error);
             throw error;
         }
     }
