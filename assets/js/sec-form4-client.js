@@ -503,17 +503,33 @@ class SECForm4Client {
 
             console.log(`📄 Got ${filings.length} Form 4 filings for ${ticker}`);
 
+            // ✅ DEBUG: Affiche le premier filing pour vérifier la structure
+            if (filings.length > 0) {
+                console.log('🔍 First filing structure:', filings[0]);
+            }
+
             // 4. Parse chaque Form 4 pour extraire les détails
             const transactions = [];
             let successCount = 0;
             let errorCount = 0;
 
-            for (const filing of filings.slice(0, 50)) { // Limite à 50 pour éviter timeout
+            for (const filing of filings.slice(0, 50)) { // Limite à 50
                 try {
-                    const xmlText = await this.getForm4XML(filing.accessionNumber, cik);
+                    // ✅ CORRECTION: Accède à l'accessionNumber correctement
+                    const accessionNumber = filing.accessionNumber;
+                    
+                    if (!accessionNumber) {
+                        console.warn(`⚠ Missing accessionNumber for filing:`, filing);
+                        errorCount++;
+                        continue;
+                    }
+
+                    console.log(`🌐 Fetching Form 4 XML via Worker: ${accessionNumber}`);
+
+                    const xmlText = await this.getForm4XML(accessionNumber, cik);
                     
                     if (!xmlText || xmlText.includes('error')) {
-                        console.warn(`⚠ Invalid XML for ${filing.accessionNumber}`);
+                        console.warn(`⚠ Invalid XML for ${accessionNumber}`);
                         errorCount++;
                         continue;
                     }
@@ -524,7 +540,7 @@ class SECForm4Client {
                         transactions.push({
                             ...parsedData,
                             filingDate: filing.updated || filing.filedDate,
-                            accessionNumber: filing.accessionNumber
+                            accessionNumber: accessionNumber
                         });
                         successCount++;
                     } else {
