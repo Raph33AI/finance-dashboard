@@ -561,5 +561,66 @@
     });
     </script>
 
+    <script>
+// 🔍 DEBUG : Vérifier quel élément bloque les clics
+document.addEventListener('DOMContentLoaded', function() {
+    setTimeout(() => {
+        const loadMaxBtn = document.getElementById('loadMaxBtn');
+        
+        if (loadMaxBtn) {
+            console.log('═══════════════════════════════════════');
+            console.log('🔍 DEBUG - Analyse du bouton Load MAX');
+            console.log('═══════════════════════════════════════');
+            
+            const rect = loadMaxBtn.getBoundingClientRect();
+            console.log('📐 Position du bouton:', {
+                top: rect.top,
+                left: rect.left,
+                width: rect.width,
+                height: rect.height
+            });
+            
+            const computed = window.getComputedStyle(loadMaxBtn);
+            console.log('🎨 Styles du bouton:', {
+                zIndex: computed.zIndex,
+                position: computed.position,
+                pointerEvents: computed.pointerEvents,
+                cursor: computed.cursor,
+                display: computed.display,
+                visibility: computed.visibility
+            });
+            
+            // Vérifier l'élément au centre du bouton
+            const centerX = rect.left + rect.width / 2;
+            const centerY = rect.top + rect.height / 2;
+            const elementAtCenter = document.elementFromPoint(centerX, centerY);
+            
+            console.log('👆 Élément détecté au centre du bouton:', elementAtCenter);
+            
+            if (elementAtCenter && elementAtCenter !== loadMaxBtn) {
+                console.error('❌ PROBLÈME TROUVÉ !');
+                console.error('Un autre élément bloque les clics:', elementAtCenter);
+                console.error('ID:', elementAtCenter.id);
+                console.error('Class:', elementAtCenter.className);
+                
+                const blocker = window.getComputedStyle(elementAtCenter);
+                console.error('Styles de l\'élément bloquant:', {
+                    zIndex: blocker.zIndex,
+                    position: blocker.position,
+                    pointerEvents: blocker.pointerEvents
+                });
+            } else {
+                console.log('✅ Aucun élément ne bloque le bouton');
+            }
+            
+            // Test de clic manuel
+            console.log('🧪 Tentative de clic programmatique...');
+            loadMaxBtn.click();
+            
+        }
+    }, 3000); // Attendre 3 secondes
+});
+</script>
+
 </body>
 </html>

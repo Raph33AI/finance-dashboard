@@ -656,3 +656,54 @@ body.dark-mode .auto-load-container {
 body.dark-mode .auto-load-container:hover {
     background: rgba(102, 126, 234, 0.15);
 }
+
+/* ════════════════════════════════════════════════════════════
+   FIX CRITIQUE - Particles ne doivent PAS bloquer les clics
+   ════════════════════════════════════════════════════════════ */
+
+.particles-background,
+#particles-canvas {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    z-index: -1 !important; /* DERRIÈRE tout le contenu */
+    pointer-events: none !important; /* NE PAS intercepter les clics */
+    opacity: 0.6;
+}
+
+body.dark-mode .particles-background,
+body.dark-mode #particles-canvas {
+    opacity: 0.3;
+}
+
+/* Assurer que les filtres sont au-dessus */
+.filters-section,
+.filter-group,
+.filter-select,
+.load-max-btn,
+.auto-load-container {
+    position: relative !important;
+    z-index: 10 !important; /* AU-DESSUS du canvas */
+    pointer-events: auto !important; /* ACCEPTER les clics */
+}
+
+/* Forcer les boutons à être cliquables */
+button,
+input,
+select,
+.dashboard-btn,
+.load-max-btn {
+    pointer-events: auto !important;
+    cursor: pointer !important;
+    z-index: 10 !important;
+}
+
+/* Container principal au-dessus */
+.main-content,
+.container,
+.section {
+    position: relative !important;
+    z-index: 1 !important;
+}
