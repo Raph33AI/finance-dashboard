@@ -3,15 +3,13 @@
  * ALPHAVAULT AI - RECESSION INDICATORS (ULTRA-COMPLETE VERSION)
  * ====================================================================
  * Features:
- * - AI Recession Probability Score (100% Dynamic)
- * - 6 Key Indicators (Real-time data)
+ * - AI Recession Probability Score
+ * - 6 Key Indicators
  * - 4 Advanced Charts with RECENT DATA
- * - Historical Recessions Timeline (FRED API + JSON metadata)
+ * - Historical Recessions Timeline
  * - Time Range Selection (2Y, 5Y, 10Y, ALL)
- * - Educational Modals
- * - Data Freshness Validation
- * - NO HARD-CODED DATA
- * ====================================================================
+ * - Educational Modals (FIXED)
+ * - NO EMOJIS - FontAwesome Icons Only
  */
 
 class RecessionIndicator {
@@ -20,36 +18,6 @@ class RecessionIndicator {
         this.currentTimeRange = '5y';
         this.recessionProbability = 0;
         this.modals = {};
-        
-        // ✅ CONFIGURABLE THRESHOLDS (No more hard-coded values)
-        this.thresholds = {
-            yieldCurve: {
-                weights: { critical: 30, warning: 20, caution: 10 },
-                levels: { critical: -0.5, warning: 0, caution: 0.5 }
-            },
-            unemployment: {
-                weights: { critical: 25, warning: 15, caution: 8 },
-                levels: { critical: 6, warning: 5, caution: 4 }
-            },
-            pmi: {
-                weights: { critical: 20, warning: 12, caution: 6 },
-                levels: { critical: 45, warning: 48, caution: 50 }
-            },
-            leadingIndex: {
-                weights: { critical: 15, warning: 8 },
-                levels: { critical: 95, warning: 98 }
-            },
-            consumerSentiment: {
-                weights: { critical: 10, warning: 5 },
-                levels: { critical: 60, warning: 70 }
-            },
-            retailSales: {
-                levels: { critical: 400000, warning: 500000 }
-            }
-        };
-        
-        // Data freshness warning threshold (days)
-        this.dataFreshnessThreshold = 60;
     }
 
     async init() {
@@ -85,7 +53,7 @@ class RecessionIndicator {
 
     /**
      * ========================================
-     * RECESSION PROBABILITY SCORE (AI) - 100% DYNAMIC
+     * RECESSION PROBABILITY SCORE (AI)
      * ========================================
      */
     async loadRecessionScore() {
@@ -110,46 +78,33 @@ class RecessionIndicator {
 
             console.log('📊 Latest Economic Data:', { spread, unemp, pmiValue, leading, sentiment });
 
-            // ✅ DYNAMIC AI Scoring Logic with configurable thresholds
+            // AI Scoring Logic (weighted average)
             let score = 0;
-            const th = this.thresholds;
 
             // Yield Curve (30% weight)
-            if (spread < th.yieldCurve.levels.critical) score += th.yieldCurve.weights.critical;
-            else if (spread < th.yieldCurve.levels.warning) score += th.yieldCurve.weights.warning;
-            else if (spread < th.yieldCurve.levels.caution) score += th.yieldCurve.weights.caution;
+            if (spread < -0.5) score += 30;
+            else if (spread < 0) score += 20;
+            else if (spread < 0.5) score += 10;
 
             // Unemployment (25% weight)
-            if (unemp > th.unemployment.levels.critical) score += th.unemployment.weights.critical;
-            else if (unemp > th.unemployment.levels.warning) score += th.unemployment.weights.warning;
-            else if (unemp > th.unemployment.levels.caution) score += th.unemployment.weights.caution;
+            if (unemp > 6) score += 25;
+            else if (unemp > 5) score += 15;
+            else if (unemp > 4) score += 8;
 
             // PMI/Manufacturing (20% weight)
-            if (pmiValue < th.pmi.levels.critical) score += th.pmi.weights.critical;
-            else if (pmiValue < th.pmi.levels.warning) score += th.pmi.weights.warning;
-            else if (pmiValue < th.pmi.levels.caution) score += th.pmi.weights.caution;
+            if (pmiValue < 45) score += 20;
+            else if (pmiValue < 48) score += 12;
+            else if (pmiValue < 50) score += 6;
 
             // Leading Index (15% weight)
-            if (leading < th.leadingIndex.levels.critical) score += th.leadingIndex.weights.critical;
-            else if (leading < th.leadingIndex.levels.warning) score += th.leadingIndex.weights.warning;
+            if (leading < 95) score += 15;
+            else if (leading < 98) score += 8;
 
             // Consumer Sentiment (10% weight)
-            if (sentiment < th.consumerSentiment.levels.critical) score += th.consumerSentiment.weights.critical;
-            else if (sentiment < th.consumerSentiment.levels.warning) score += th.consumerSentiment.weights.warning;
+            if (sentiment < 60) score += 10;
+            else if (sentiment < 70) score += 5;
 
             this.recessionProbability = Math.min(score, 100);
-
-            // ✅ Get latest update dates
-            const latestDates = {
-                yieldCurve: this.getLatestDate(yieldSpread),
-                unemployment: this.getLatestDate(unemployment),
-                pmi: this.getLatestDate(pmi),
-                leadingIndex: this.getLatestDate(leadingIndex),
-                sentiment: this.getLatestDate(consumerSentiment)
-            };
-
-            const oldestDate = Object.values(latestDates).filter(d => d).sort()[0];
-            const daysSinceUpdate = oldestDate ? Math.floor((Date.now() - new Date(oldestDate).getTime()) / (1000 * 60 * 60 * 24)) : null;
 
             // Determine status
             let status, statusLabel, statusIcon;
@@ -167,17 +122,6 @@ class RecessionIndicator {
                 statusIcon = '<i class="fas fa-check-circle"></i>';
             }
 
-            // ✅ Data freshness warning
-            let freshnessWarning = '';
-            if (daysSinceUpdate && daysSinceUpdate > this.dataFreshnessThreshold) {
-                freshnessWarning = `
-                    <div style="margin-top: 12px; padding: 8px; background: rgba(245, 158, 11, 0.1); border-left: 3px solid #f59e0b; border-radius: 4px; font-size: 0.85em;">
-                        <i class="fas fa-exclamation-triangle" style="color: #f59e0b;"></i> 
-                        Data is ${daysSinceUpdate} days old. Some indicators may not reflect current conditions.
-                    </div>
-                `;
-            }
-
             container.innerHTML = `
                 <div class='recession-score-card'>
                     <div class='recession-score-label'>
@@ -188,13 +132,7 @@ class RecessionIndicator {
                         ${statusIcon} ${statusLabel}
                     </div>
                     <div class='recession-score-description'>
-                        Based on analysis of 10+ key economic indicators including yield curve, unemployment, PMI, consumer sentiment, and leading economic index.
-                        ${daysSinceUpdate !== null ? `
-                            <div style="margin-top: 12px; font-size: 0.85em; opacity: 0.8;">
-                                <i class="fas fa-clock"></i> Last updated: ${daysSinceUpdate === 0 ? 'Today' : `${daysSinceUpdate} day${daysSinceUpdate > 1 ? 's' : ''} ago`}
-                            </div>
-                        ` : ''}
-                        ${freshnessWarning}
+                        Based on analysis of 10+ key economic indicators including yield curve, unemployment, PMI, consumer sentiment, and leading economic index. Updated daily.
                     </div>
                 </div>
             `;
@@ -207,7 +145,7 @@ class RecessionIndicator {
 
     /**
      * ========================================
-     * AI RECOMMENDATIONS - DYNAMIC BASED ON SCORE
+     * AI RECOMMENDATIONS
      * ========================================
      */
     async loadAIRecommendations() {
@@ -320,7 +258,7 @@ class RecessionIndicator {
 
     /**
      * ========================================
-     * LOAD KEY INDICATORS - 100% DYNAMIC
+     * LOAD KEY INDICATORS
      * ========================================
      */
     async loadIndicators() {
@@ -344,89 +282,55 @@ class RecessionIndicator {
             const sentiment = this.parseLatest(consumerSentiment);
             const retail = this.parseLatest(retailSales);
 
-            // Get update dates
-            const spreadDate = this.getLatestDate(yieldSpread);
-            const unempDate = this.getLatestDate(unemployment);
-            const pmiDate = this.getLatestDate(pmi);
-            const leadingDate = this.getLatestDate(leadingIndex);
-            const sentimentDate = this.getLatestDate(consumerSentiment);
-            const retailDate = this.getLatestDate(retailSales);
-
-            // ✅ Determine statuses dynamically using thresholds
-            const th = this.thresholds;
-            
+            // Determine statuses
             const indicators = [
                 {
                     title: 'Yield Curve (10Y-2Y)',
                     value: spread + '%',
-                    status: parseFloat(spread) < th.yieldCurve.levels.critical ? 'danger' : 
-                            parseFloat(spread) < th.yieldCurve.levels.warning ? 'warning' : 'safe',
-                    statusLabel: parseFloat(spread) < th.yieldCurve.levels.critical ? '<i class="fas fa-exclamation-triangle"></i> INVERTED' : 
-                                 parseFloat(spread) < th.yieldCurve.levels.warning ? '<i class="fas fa-exclamation-circle"></i> FLATTENING' : 
-                                 '<i class="fas fa-check-circle"></i> NORMAL',
+                    status: parseFloat(spread) < 0 ? 'danger' : parseFloat(spread) < 0.5 ? 'warning' : 'safe',
+                    statusLabel: parseFloat(spread) < 0 ? '<i class="fas fa-exclamation-triangle"></i> INVERTED' : parseFloat(spread) < 0.5 ? '<i class="fas fa-exclamation-circle"></i> FLATTENING' : '<i class="fas fa-check-circle"></i> NORMAL',
                     description: 'Inverted yield curves have preceded every US recession since 1955. A negative spread indicates investors expect lower rates in the future.',
-                    modalId: 'yieldCurveModal',
-                    lastUpdate: spreadDate
+                    modalId: 'yieldCurveModal'
                 },
                 {
                     title: 'Unemployment Rate',
                     value: unemp + '%',
-                    status: parseFloat(unemp) > th.unemployment.levels.critical ? 'danger' : 
-                            parseFloat(unemp) > th.unemployment.levels.warning ? 'warning' : 'safe',
-                    statusLabel: parseFloat(unemp) > th.unemployment.levels.critical ? '<i class="fas fa-exclamation-triangle"></i> ELEVATED' : 
-                                 parseFloat(unemp) > th.unemployment.levels.warning ? '<i class="fas fa-exclamation-circle"></i> RISING' : 
-                                 '<i class="fas fa-check-circle"></i> LOW',
+                    status: parseFloat(unemp) > 5 ? 'danger' : parseFloat(unemp) > 4 ? 'warning' : 'safe',
+                    statusLabel: parseFloat(unemp) > 5 ? '<i class="fas fa-exclamation-triangle"></i> ELEVATED' : parseFloat(unemp) > 4 ? '<i class="fas fa-exclamation-circle"></i> RISING' : '<i class="fas fa-check-circle"></i> LOW',
                     description: 'Rising unemployment is a classic recession signal. The Sahm Rule triggers when the 3-month average rises 0.5% above its 12-month low.',
-                    modalId: 'unemploymentModal',
-                    lastUpdate: unempDate
+                    modalId: 'unemploymentModal'
                 },
                 {
                     title: 'Leading Economic Index',
                     value: leading,
-                    status: parseFloat(leading) < th.leadingIndex.levels.critical ? 'danger' : 
-                            parseFloat(leading) < th.leadingIndex.levels.warning ? 'warning' : 'safe',
-                    statusLabel: parseFloat(leading) < th.leadingIndex.levels.critical ? '<i class="fas fa-exclamation-triangle"></i> DECLINING' : 
-                                 parseFloat(leading) < th.leadingIndex.levels.warning ? '<i class="fas fa-exclamation-circle"></i> WEAKENING' : 
-                                 '<i class="fas fa-check-circle"></i> RISING',
+                    status: parseFloat(leading) < 95 ? 'danger' : parseFloat(leading) < 98 ? 'warning' : 'safe',
+                    statusLabel: parseFloat(leading) < 95 ? '<i class="fas fa-exclamation-triangle"></i> DECLINING' : parseFloat(leading) < 98 ? '<i class="fas fa-exclamation-circle"></i> WEAKENING' : '<i class="fas fa-check-circle"></i> RISING',
                     description: 'The LEI aggregates 10 economic components. Consecutive declines for 3+ months often signal recession within 6-12 months.',
-                    modalId: 'leiModal',
-                    lastUpdate: leadingDate
+                    modalId: 'leiModal'
                 },
                 {
                     title: 'Consumer Sentiment',
                     value: sentiment,
-                    status: parseFloat(sentiment) < th.consumerSentiment.levels.critical ? 'danger' : 
-                            parseFloat(sentiment) < th.consumerSentiment.levels.warning ? 'warning' : 'safe',
-                    statusLabel: parseFloat(sentiment) < th.consumerSentiment.levels.critical ? '<i class="fas fa-exclamation-triangle"></i> PESSIMISTIC' : 
-                                 parseFloat(sentiment) < th.consumerSentiment.levels.warning ? '<i class="fas fa-exclamation-circle"></i> CAUTIOUS' : 
-                                 '<i class="fas fa-check-circle"></i> OPTIMISTIC',
+                    status: parseFloat(sentiment) < 60 ? 'danger' : parseFloat(sentiment) < 70 ? 'warning' : 'safe',
+                    statusLabel: parseFloat(sentiment) < 60 ? '<i class="fas fa-exclamation-triangle"></i> PESSIMISTIC' : parseFloat(sentiment) < 70 ? '<i class="fas fa-exclamation-circle"></i> CAUTIOUS' : '<i class="fas fa-check-circle"></i> OPTIMISTIC',
                     description: 'University of Michigan Consumer Sentiment Index. Low sentiment often precedes reduced consumer spending.',
-                    modalId: 'sentimentModal',
-                    lastUpdate: sentimentDate
+                    modalId: 'sentimentModal'
                 },
                 {
                     title: 'PMI Manufacturing',
                     value: pmiValue,
-                    status: parseFloat(pmiValue) < th.pmi.levels.critical ? 'danger' : 
-                            parseFloat(pmiValue) < th.pmi.levels.warning ? 'warning' : 'safe',
-                    statusLabel: parseFloat(pmiValue) < th.pmi.levels.critical ? '<i class="fas fa-exclamation-triangle"></i> CONTRACTING' : 
-                                 parseFloat(pmiValue) < th.pmi.levels.warning ? '<i class="fas fa-exclamation-circle"></i> SLOWING' : 
-                                 '<i class="fas fa-check-circle"></i> EXPANDING',
+                    status: parseFloat(pmiValue) < 48 ? 'danger' : parseFloat(pmiValue) < 50 ? 'warning' : 'safe',
+                    statusLabel: parseFloat(pmiValue) < 48 ? '<i class="fas fa-exclamation-triangle"></i> CONTRACTING' : parseFloat(pmiValue) < 50 ? '<i class="fas fa-exclamation-circle"></i> SLOWING' : '<i class="fas fa-check-circle"></i> EXPANDING',
                     description: 'ISM Manufacturing PMI. Values below 50 indicate contraction in the manufacturing sector.',
-                    modalId: 'pmiModal',
-                    lastUpdate: pmiDate
+                    modalId: 'pmiModal'
                 },
                 {
                     title: 'Retail Sales',
                     value: '$' + retail + 'M',
-                    status: parseFloat(retail) < th.retailSales.levels.critical ? 'danger' : 
-                            parseFloat(retail) < th.retailSales.levels.warning ? 'warning' : 'safe',
-                    statusLabel: parseFloat(retail) < th.retailSales.levels.critical ? '<i class="fas fa-exclamation-triangle"></i> WEAK' : 
-                                 parseFloat(retail) < th.retailSales.levels.warning ? '<i class="fas fa-exclamation-circle"></i> MODERATE' : 
-                                 '<i class="fas fa-check-circle"></i> STRONG',
+                    status: parseFloat(retail) < 400000 ? 'danger' : parseFloat(retail) < 500000 ? 'warning' : 'safe',
+                    statusLabel: parseFloat(retail) < 400000 ? '<i class="fas fa-exclamation-triangle"></i> WEAK' : parseFloat(retail) < 500000 ? '<i class="fas fa-exclamation-circle"></i> MODERATE' : '<i class="fas fa-check-circle"></i> STRONG',
                     description: 'Retail sales excluding food services. Strong indicator of consumer spending health.',
-                    modalId: 'retailModal',
-                    lastUpdate: retailDate
+                    modalId: 'retailModal'
                 }
             ];
 
@@ -453,9 +357,7 @@ class RecessionIndicator {
     }
 
     createIndicatorCard(options) {
-        const { title, value, status, statusLabel, description, modalId, lastUpdate } = options;
-        
-        const updateText = lastUpdate ? `<div style="font-size: 0.75em; opacity: 0.7; margin-top: 8px;"><i class="fas fa-clock"></i> Updated: ${new Date(lastUpdate).toLocaleDateString()}</div>` : '';
+        const { title, value, status, statusLabel, description, modalId } = options;
         
         return `
             <div class='indicator-card ${status}'>
@@ -467,14 +369,14 @@ class RecessionIndicator {
                 </div>
                 <span class='indicator-status ${status}'>${statusLabel}</span>
                 <div class='indicator-value-large'>${value}</div>
-                <div class='indicator-description'>${description}${updateText}</div>
+                <div class='indicator-description'>${description}</div>
             </div>
         `;
     }
 
     /**
      * ========================================
-     * YIELD CURVE SPREAD CHART - 100% DYNAMIC
+     * YIELD CURVE SPREAD CHART (RECENT DATA)
      * ========================================
      */
     async loadYieldSpreadChart() {
@@ -488,7 +390,7 @@ class RecessionIndicator {
                 .sort((a, b) => a[0] - b[0]); // Sort by date ascending
 
             console.log('📈 Yield Spread Chart - Data points:', chartData.length);
-            console.log('📅 Date range:', new Date(chartData[0][0]).toLocaleDateString(), 'to', new Date(chartData[chartData.length - 1][0]).toLocaleDateString());
+            console.log('📅 Latest date:', new Date(chartData[chartData.length - 1][0]).toLocaleDateString());
 
             this.renderChart('yieldSpreadChart', {
                 chart: { 
@@ -560,7 +462,7 @@ class RecessionIndicator {
 
     /**
      * ========================================
-     * SAHM RULE CHART - 100% DYNAMIC
+     * SAHM RULE CHART (RECENT DATA)
      * ========================================
      */
     async loadSahmRuleChart() {
@@ -638,7 +540,7 @@ class RecessionIndicator {
 
     /**
      * ========================================
-     * UNEMPLOYMENT RATE CHART - 100% DYNAMIC
+     * UNEMPLOYMENT RATE CHART (RECENT DATA)
      * ========================================
      */
     async loadUnemploymentChart() {
@@ -670,7 +572,7 @@ class RecessionIndicator {
                     labels: { style: { color: 'var(--text-secondary)' } },
                     gridLineColor: 'var(--border-color)',
                     plotBands: [{
-                        from: this.thresholds.unemployment.levels.warning,
+                        from: 5,
                         to: 100,
                         color: 'rgba(239, 68, 68, 0.1)',
                         label: {
@@ -706,7 +608,7 @@ class RecessionIndicator {
 
     /**
      * ========================================
-     * PMI MANUFACTURING CHART - 100% DYNAMIC
+     * PMI MANUFACTURING CHART (RECENT DATA)
      * ========================================
      */
     async loadPMIChart() {
@@ -780,195 +682,13 @@ class RecessionIndicator {
 
     /**
      * ========================================
-     * HISTORICAL RECESSIONS TIMELINE - FRED API + METADATA
+     * HISTORICAL RECESSIONS TIMELINE
      * ========================================
      */
     async loadHistoricalTimeline() {
         const container = document.getElementById('historicalTimeline');
         
-        try {
-            console.log('📊 Loading recession periods from FRED API...');
-            
-            // ✅ Fetch recession indicator from FRED (USREC: 1 = recession, 0 = expansion)
-            const recessionData = await economicDataClient.getSeries('USREC', { limit: 10000 });
-            
-            // Extract recession periods
-            const recessionPeriods = this.extractRecessionPeriods(recessionData);
-            
-            console.log('✅ Found recession periods:', recessionPeriods.length);
-            
-            // Enrich with metadata
-            const enrichedRecessions = await this.enrichRecessionData(recessionPeriods);
-            
-            container.innerHTML = `
-                <div class='timeline-container'>
-                    <h3>
-                        <i class='fas fa-history'></i>
-                        Historical US Recessions (FRED Data)
-                    </h3>
-                    <div style="font-size: 0.9em; opacity: 0.8; margin-bottom: 20px;">
-                        <i class="fas fa-database"></i> Data source: Federal Reserve Economic Data (FRED)
-                    </div>
-                    ${enrichedRecessions.map(rec => `
-                        <div class='timeline-item' onclick="recessionIndicator.openRecessionModal(${JSON.stringify(rec).replace(/"/g, '&quot;')})">
-                            <div class='timeline-dot'></div>
-                            <div class='timeline-content'>
-                                <div class='timeline-date'>${rec.startDate} - ${rec.endDate}</div>
-                                <div class='timeline-title'>${rec.title}</div>
-                                <div class='timeline-stats'>
-                                    <div class='timeline-stat'>Duration: <strong>${rec.duration}</strong></div>
-                                    <div class='timeline-stat'>GDP Drop: <strong>${rec.gdpDrop}</strong></div>
-                                    <div class='timeline-stat'>Unemployment Peak: <strong>${rec.unemploymentPeak}</strong></div>
-                                </div>
-                            </div>
-                        </div>
-                    `).join('')}
-                </div>
-            `;
-            
-        } catch (error) {
-            console.error('❌ Error loading FRED recession data:', error);
-            console.log('⚠ Falling back to static recession data...');
-            this.loadStaticRecessionTimeline();
-        }
-    }
-
-    extractRecessionPeriods(usrecData) {
-        const periods = [];
-        let inRecession = false;
-        let startDate = null;
-        
-        usrecData.forEach((point, index) => {
-            const isRecession = parseFloat(point.value) === 1;
-            
-            if (isRecession && !inRecession) {
-                // Start of recession
-                startDate = point.date;
-                inRecession = true;
-            } else if (!isRecession && inRecession) {
-                // End of recession
-                const endDate = usrecData[index - 1].date;
-                periods.push({
-                    startDate: this.formatDate(startDate),
-                    endDate: this.formatDate(endDate),
-                    duration: this.calculateDuration(startDate, endDate),
-                    startDateRaw: startDate,
-                    endDateRaw: endDate
-                });
-                inRecession = false;
-            }
-        });
-        
-        // Keep only last 10 recessions, most recent first
-        return periods.reverse().slice(0, 10);
-    }
-
-    calculateDuration(start, end) {
-        const startDate = new Date(start);
-        const endDate = new Date(end);
-        const months = Math.round((endDate - startDate) / (1000 * 60 * 60 * 24 * 30));
-        return `${months} month${months !== 1 ? 's' : ''}`;
-    }
-
-    formatDate(dateStr) {
-        const date = new Date(dateStr);
-        const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-        return `${months[date.getMonth()]} ${date.getFullYear()}`;
-    }
-
-    async enrichRecessionData(periods) {
-        // ✅ Metadata for known recessions (can be moved to external JSON file)
-        const metadata = {
-            '2020-02': {
-                title: 'COVID-19 Pandemic Recession',
-                gdpDrop: '-19.2%',
-                unemploymentPeak: '14.7%',
-                cause: 'Global COVID-19 pandemic, widespread lockdowns',
-                leadingIndicators: 'Sudden economic shutdown, jobless claims spike'
-            },
-            '2007-12': {
-                title: 'Great Recession (Financial Crisis)',
-                gdpDrop: '-4.3%',
-                unemploymentPeak: '10.0%',
-                cause: 'Subprime mortgage crisis, banking sector collapse',
-                leadingIndicators: 'Yield curve inversion (2006), housing bubble burst, credit spreads widening'
-            },
-            '2001-03': {
-                title: 'Dot-com Bubble Burst',
-                gdpDrop: '-0.3%',
-                unemploymentPeak: '6.3%',
-                cause: 'Tech stock bubble collapse, 9/11 attacks',
-                leadingIndicators: 'Yield curve inversion (2000), declining corporate profits, falling tech stocks'
-            },
-            '1990-07': {
-                title: 'Gulf War Recession',
-                gdpDrop: '-1.4%',
-                unemploymentPeak: '7.8%',
-                cause: 'Oil price shock, restrictive monetary policy',
-                leadingIndicators: 'Yield curve inversion (1989), declining consumer confidence'
-            },
-            '1981-07': {
-                title: 'Double-Dip Recession (Volcker Recession)',
-                gdpDrop: '-2.7%',
-                unemploymentPeak: '10.8%',
-                cause: 'Aggressive Fed interest rate hikes to combat inflation',
-                leadingIndicators: 'Fed funds rate >20%, yield curve inversion'
-            },
-            '1980-01': {
-                title: 'Energy Crisis Recession',
-                gdpDrop: '-2.2%',
-                unemploymentPeak: '7.8%',
-                cause: 'Iran oil crisis, energy price shock',
-                leadingIndicators: 'Oil prices tripled, declining consumer spending'
-            },
-            '1973-11': {
-                title: 'Oil Crisis Recession',
-                gdpDrop: '-3.2%',
-                unemploymentPeak: '9.0%',
-                cause: 'OPEC oil embargo, energy crisis',
-                leadingIndicators: 'Oil prices quadrupled, stagflation, yield curve inversion'
-            },
-            '1969-12': {
-                title: 'Nixon Recession',
-                gdpDrop: '-0.6%',
-                unemploymentPeak: '6.1%',
-                cause: 'Restrictive monetary policy, inflation concerns',
-                leadingIndicators: 'Tight Fed policy, declining business investment'
-            }
-        };
-
-        return periods.map(period => {
-            const key = period.startDateRaw.substring(0, 7); // YYYY-MM format
-            const meta = metadata[key] || {};
-            
-            return {
-                date: `${period.startDate} - ${period.endDate}`,
-                startDate: period.startDate,
-                endDate: period.endDate,
-                duration: period.duration,
-                title: meta.title || 'Economic Recession',
-                gdpDrop: meta.gdpDrop || 'N/A',
-                unemploymentPeak: meta.unemploymentPeak || 'N/A',
-                cause: meta.cause || 'Various economic factors led to economic contraction',
-                leadingIndicators: meta.leadingIndicators || 'Standard recession indicators observed'
-            };
-        });
-    }
-
-    loadStaticRecessionTimeline() {
-        const container = document.getElementById('historicalTimeline');
-        
-        // Fallback static data
         const recessions = [
-            {
-                date: 'Feb 2020 - Apr 2020',
-                title: 'COVID-19 Pandemic Recession',
-                duration: '2 months',
-                gdpDrop: '-19.2%',
-                unemploymentPeak: '14.7%',
-                cause: 'Global COVID-19 pandemic, widespread lockdowns',
-                leadingIndicators: 'Sudden economic shutdown, jobless claims spike'
-            },
             {
                 date: 'Dec 2007 - Jun 2009',
                 title: 'Great Recession (Financial Crisis)',
@@ -1098,7 +818,7 @@ class RecessionIndicator {
 
     /**
      * ========================================
-     * MODALS SYSTEM
+     * MODALS SYSTEM (FIXED)
      * ========================================
      */
     setupModals() {
@@ -1406,7 +1126,7 @@ class RecessionIndicator {
                     </div>
                     <div class='modal-body'>
                         <h3>Timeline</h3>
-                        <p><strong>${recession.date || `${recession.startDate} - ${recession.endDate}`}</strong> (${recession.duration})</p>
+                        <p><strong>${recession.date}</strong> (${recession.duration})</p>
                         
                         <h3>Impact</h3>
                         <div class='modal-stat-grid'>
@@ -1464,18 +1184,6 @@ class RecessionIndicator {
             }
         }
         return 'N/A';
-    }
-
-    getLatestDate(series) {
-        if (!series || !Array.isArray(series) || series.length === 0) return null;
-        
-        // Start from the end (most recent) and find first non-null value
-        for (let i = series.length - 1; i >= 0; i--) {
-            if (series[i].value !== '.' && series[i].date) {
-                return series[i].date;
-            }
-        }
-        return null;
     }
 
     renderChart(containerId, options) {
