@@ -1,11 +1,7 @@
 /* ============================================
    LANDING.CSS - VERSION FINALE CORRIGÉE ✅
    AlphaVault AI - Landing Page Responsive
-   ✅ CORRECTIONS APPLIQUÉES :
-   1-4. Corrections mobiles précédentes
-   5. Footer mobile : uniquement Features + Company en 2 colonnes
-   6. Solutions : "Built for Everyone" centré + cartes centrées (PC + Mobile)
-   7. Pricing : "Simple, Transparent Pricing" centré (PC + Mobile)
+   ✅ CORRECTION : Barre supérieure des cartes
    ============================================ */
 
 /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -422,6 +418,25 @@ body.dark-mode .user-dropdown-menu {
     border-radius: 12px;
     color: #ffffff !important;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.dropdown-plan-info:hover {
+    background: rgba(255, 255, 255, 0.3);
+    border-color: rgba(255, 255, 255, 0.5);
+    transform: translateY(-1px);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+}
+
+.dropdown-plan-info i {
+    color: #ffffff;
+    font-size: 1rem;
 }
 
 body.dark-mode .dropdown-header {
@@ -457,87 +472,6 @@ body.dark-mode .dropdown-user-text h4 {
     font-size: 0.875rem;
     color: var(--text-secondary, #64748b);
     margin: 0;
-}
-
-/* .dropdown-plan-info {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.5rem;
-    background: rgba(37, 99, 235, 0.1);
-    border-radius: 8px;
-    font-size: 0.875rem;
-    font-weight: 600;
-    color: #2563eb;
-} */
-
-/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-   👤 DROPDOWN PLAN INFO - STYLE AMÉLIORÉ
-   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
-
-.dropdown-plan-info {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.75rem 1rem;
-    
-    /* ✅ Dégradé bleu clair → violet clair */
-    background: linear-gradient(135deg, 
-        rgba(147, 197, 253, 0.2) 0%,    /* Bleu clair (#93c5fd) */
-        rgba(196, 181, 253, 0.2) 100%   /* Violet clair (#c4b5fd) */
-    );
-    
-    /* ✅ Bordure subtile */
-    border: 1px solid rgba(147, 197, 253, 0.3);
-    
-    /* ✅ Coins arrondis */
-    border-radius: 12px;
-    
-    /* Texte */
-    font-size: 0.875rem;
-    font-weight: 600;
-    color: #3b82f6; /* Bleu légèrement plus clair */
-    
-    /* Transition */
-    transition: all 0.3s ease;
-    
-    /* Ombre subtile */
-    box-shadow: 0 2px 8px rgba(147, 197, 253, 0.1);
-}
-
-/* ✅ Effet hover */
-.dropdown-plan-info:hover {
-    background: linear-gradient(135deg, 
-        rgba(147, 197, 253, 0.3) 0%, 
-        rgba(196, 181, 253, 0.3) 100%
-    );
-    border-color: rgba(147, 197, 253, 0.5);
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(147, 197, 253, 0.2);
-}
-
-/* ✅ Icône dans le badge */
-.dropdown-plan-info i {
-    color: #60a5fa; /* Bleu clair */
-    font-size: 1rem;
-}
-
-/* ✅ Dark mode */
-body.dark-mode .dropdown-plan-info {
-    background: linear-gradient(135deg, 
-        rgba(59, 130, 246, 0.15) 0%, 
-        rgba(139, 92, 246, 0.15) 100%
-    );
-    border-color: rgba(59, 130, 246, 0.3);
-    color: #93c5fd;
-}
-
-body.dark-mode .dropdown-plan-info:hover {
-    background: linear-gradient(135deg, 
-        rgba(59, 130, 246, 0.25) 0%, 
-        rgba(139, 92, 246, 0.25) 100%
-    );
-    border-color: rgba(59, 130, 246, 0.5);
 }
 
 .dropdown-divider {
@@ -852,256 +786,6 @@ body.dark-mode .dropdown-link-title {
 }
 
 /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-   📊 DASHBOARD MOCKUP (SANS 3D)
-   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
-
-.hero-visual {
-    position: relative;
-    animation: fadeInUp 0.8s ease-out 0.3s both;
-}
-
-.dashboard-mockup {
-    background: var(--background-primary, #ffffff);
-    border-radius: 24px;
-    box-shadow: var(--shadow-card);
-    overflow: hidden;
-    border: 1px solid var(--border-color, #e2e8f0);
-    transition: all var(--anim-slow);
-}
-
-.dashboard-mockup:hover {
-    transform: translateY(-8px);
-    box-shadow: var(--shadow-card-hover);
-}
-
-.browser-chrome {
-    background: linear-gradient(180deg, #f1f5f9 0%, #e2e8f0 100%);
-    padding: 0.75rem 1rem;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    border-bottom: 1px solid var(--border-color, #e2e8f0);
-}
-
-.chrome-dots {
-    display: flex;
-    gap: 0.5rem;
-}
-
-.dot {
-    width: 12px;
-    height: 12px;
-    border-radius: 50%;
-}
-
-.dot.red { background: #ff5f56; }
-.dot.yellow { background: #ffbd2e; }
-.dot.green { background: #27c93f; }
-
-.chrome-title {
-    font-size: 0.875rem;
-    font-weight: 600;
-    color: var(--text-secondary, #64748b);
-}
-
-.chrome-actions {
-    color: var(--text-secondary, #64748b);
-}
-
-.mockup-content {
-    padding: 1.5rem;
-    background: linear-gradient(180deg, #f8fafc 0%, #ffffff 100%);
-}
-
-.mockup-stats-row {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 1rem;
-    margin-bottom: 1.5rem;
-}
-
-.stat-card {
-    background: var(--background-primary, #ffffff);
-    border: 1px solid var(--border-color, #e2e8f0);
-    border-radius: 12px;
-    padding: 1rem;
-    transition: all var(--anim-medium);
-}
-
-.stat-card:hover {
-    transform: translateY(-4px);
-    box-shadow: var(--shadow-card);
-}
-
-.stat-card.stat-primary {
-    background: linear-gradient(135deg, #2563eb 0%, #8b5cf6 100%);
-    color: white;
-    border: none;
-}
-
-.stat-header {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    font-size: 0.875rem;
-    margin-bottom: 0.75rem;
-    color: inherit;
-}
-
-.stat-value {
-    font-size: 1.75rem;
-    font-weight: 700;
-    margin-bottom: 0.5rem;
-    color: inherit;
-}
-
-.stat-change {
-    display: flex;
-    align-items: center;
-    gap: 0.375rem;
-    font-size: 0.875rem;
-    font-weight: 600;
-}
-
-.stat-change.positive {
-    color: #10b981;
-}
-
-.stat-badge {
-    display: inline-block;
-    padding: 0.25rem 0.625rem;
-    background: rgba(37, 99, 235, 0.1);
-    color: #2563eb;
-    font-size: 0.75rem;
-    font-weight: 600;
-    border-radius: 6px;
-}
-
-.stat-badge.moderate {
-    background: rgba(245, 158, 11, 0.1);
-    color: #f59e0b;
-}
-
-.mockup-chart-area {
-    background: white;
-    border-radius: 12px;
-    padding: 1rem;
-    margin-bottom: 1rem;
-}
-
-.chart-header-stock {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 1rem;
-}
-
-.stock-info {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-}
-
-.stock-symbol {
-    font-size: 1rem;
-    font-weight: 700;
-    color: var(--text-primary, #1e293b);
-}
-
-.stock-price {
-    font-size: 1.25rem;
-    font-weight: 600;
-    color: var(--text-primary, #1e293b);
-}
-
-.stock-change {
-    display: flex;
-    align-items: center;
-    gap: 0.25rem;
-    font-size: 0.875rem;
-    font-weight: 600;
-}
-
-.stock-change.positive {
-    color: #10b981;
-}
-
-.stock-timeframes {
-    display: flex;
-    gap: 0.5rem;
-}
-
-.tf-btn {
-    padding: 0.375rem 0.75rem;
-    background: transparent;
-    border: 1px solid var(--border-color, #e2e8f0);
-    border-radius: 6px;
-    font-size: 0.875rem;
-    font-weight: 500;
-    color: var(--text-secondary, #64748b);
-    cursor: pointer;
-    transition: all var(--anim-fast);
-}
-
-.tf-btn:hover,
-.tf-btn.active {
-    background: #2563eb;
-    color: white;
-    border-color: #2563eb;
-}
-
-.chart-canvas-wrapper {
-    height: 200px;
-    position: relative;
-}
-
-.mockup-insights {
-    background: rgba(37, 99, 235, 0.05);
-    border-radius: 12px;
-    padding: 1rem;
-}
-
-.insight-header {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    font-size: 0.9375rem;
-    font-weight: 600;
-    color: var(--text-primary, #1e293b);
-    margin-bottom: 0.75rem;
-}
-
-.insight-item {
-    display: flex;
-    align-items: flex-start;
-    gap: 0.75rem;
-    padding: 0.75rem 0;
-    font-size: 0.875rem;
-    color: var(--text-secondary, #64748b);
-}
-
-.insight-icon {
-    width: 24px;
-    height: 24px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 0.75rem;
-    flex-shrink: 0;
-}
-
-.insight-icon.success {
-    background: #10b981;
-    color: white;
-}
-
-.insight-icon.warning {
-    background: #f59e0b;
-    color: white;
-}
-
-/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
    ✨ SECTIONS COMMUNES (SANS 3D)
    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
@@ -1184,7 +868,7 @@ body.dark-mode .dropdown-link-title {
 }
 
 /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-   📦 CARDS GÉNÉRIQUES (SANS 3D)
+   📦 CARDS GÉNÉRIQUES (SANS 3D) - ✅ CORRECTION
    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
 .features-grid,
@@ -1197,6 +881,7 @@ body.dark-mode .dropdown-link-title {
     gap: 2rem;
 }
 
+/* ✅ CORRECTION PRINCIPALE : overflow: hidden pour contenir le ::before */
 .feature-card,
 .solution-card,
 .tool-card-advanced {
@@ -1206,6 +891,7 @@ body.dark-mode .dropdown-link-title {
     padding: 2rem;
     transition: all var(--anim-slow);
     position: relative;
+    overflow: hidden; /* ✅ AJOUTÉ - Empêche le débordement de la barre */
 }
 
 .feature-card::before,
@@ -1220,7 +906,7 @@ body.dark-mode .dropdown-link-title {
     background: linear-gradient(135deg, #2563eb 0%, #8b5cf6 100%);
     opacity: 0;
     transition: opacity var(--anim-fast);
-    border-radius: 24px 24px 0 0;
+    border-radius: 24px 24px 0 0; /* ✅ Reste inchangé */
 }
 
 .feature-card:hover,
@@ -1259,7 +945,7 @@ body.dark-mode .dropdown-link-title {
     color: white;
 }
 
-/* ✅ CORRECTION 6: Solutions - Icônes centrées */
+/* ✅ Solutions - Icônes centrées */
 .solution-icon-wrapper {
     display: flex;
     justify-content: center;
@@ -1283,7 +969,7 @@ body.dark-mode .dropdown-link-title {
     color: var(--text-primary, #1e293b);
 }
 
-/* ✅ CORRECTION 6: Solutions - Titres et descriptions centrés */
+/* ✅ Solutions - Titres et descriptions centrés */
 .solution-card {
     text-align: center !important;
 }
@@ -1395,6 +1081,7 @@ body.dark-mode .dropdown-link-title {
     flex-direction: column;
     height: 100%;
     position: relative;
+    overflow: hidden; /* ✅ AJOUTÉ - Empêche débordement */
 }
 
 .pricing-card:hover {
@@ -2017,6 +1704,7 @@ body.dark-mode .dropdown-link-title {
     transition: all var(--anim-slow);
     box-shadow: var(--shadow-card);
     position: relative;
+    overflow: hidden; /* ✅ AJOUTÉ - Empêche débordement */
 }
 
 .tech-card:hover {
@@ -2029,7 +1717,6 @@ body.dark-mode .dropdown-link-title {
    🖼 LOGOS & ICÔNES
    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 
-/* ✅ Wrapper pour centrage parfait */
 .tech-icon-wrapper {
     display: flex;
     justify-content: center;
@@ -2039,13 +1726,12 @@ body.dark-mode .dropdown-link-title {
     width: 100%;
 }
 
-/* ✅ LOGOS IMAGES (Gemini, Firebase, FRED) - AGRANDIS */
 .tech-logo,
 .centered-logo {
     display: block;
     margin: 0 auto 24px auto;
-    width: 100px; /* ✅ Agrandi de 80px à 100px */
-    height: 100px; /* ✅ Agrandi de 80px à 100px */
+    width: 100px;
+    height: 100px;
     object-fit: contain;
     transition: all var(--anim-medium);
 }
@@ -2055,7 +1741,6 @@ body.dark-mode .dropdown-link-title {
     transform: scale(1.1);
 }
 
-/* ✅ ICÔNES GÉNÉRIQUES FONT AWESOME - CENTRAGE PARFAIT */
 .tech-icon-generic {
     width: 80px;
     height: 80px;
@@ -2068,11 +1753,10 @@ body.dark-mode .dropdown-link-title {
     border-radius: 20px;
     box-shadow: 0 8px 24px rgba(37, 99, 235, 0.4);
     transition: all 0.3s ease;
-    flex-shrink: 0; /* ✅ Empêche le shrink */
-    position: relative; /* ✅ Pour positionnement absolu de l'icône si besoin */
+    flex-shrink: 0;
+    position: relative;
 }
 
-/* ✅ Centrage parfait de l'icône Font Awesome */
 .tech-icon-generic::before {
     display: flex;
     align-items: center;
@@ -2081,23 +1765,19 @@ body.dark-mode .dropdown-link-title {
     height: 100%;
 }
 
-/* ✅ Variante Database (bleu cyan) */
 .tech-icon-generic.database {
     background: linear-gradient(135deg, #0ea5e9 0%, #06b6d4 100%);
     box-shadow: 0 8px 24px rgba(14, 165, 233, 0.4);
 }
 
-/* ✅ Variante News (orange doré) - CENTRAGE FORCÉ */
 .tech-icon-generic.news {
     background: linear-gradient(135deg, #f59e0b 0%, #f97316 100%);
     box-shadow: 0 8px 24px rgba(245, 158, 11, 0.4);
     font-size: 2.25rem;
-    /* ✅ Centrage forcé pour Font Awesome */
     text-align: center;
-    line-height: 80px; /* ✅ Même hauteur que le conteneur */
+    line-height: 80px;
 }
 
-/* ✅ Animations hover */
 .tech-card:hover .tech-icon-generic {
     transform: scale(1.1) rotate(-5deg);
     box-shadow: 0 12px 32px rgba(37, 99, 235, 0.5);
@@ -2189,7 +1869,6 @@ body.dark-mode .tech-legal-note strong {
     color: #cbd5e1;
 }
 
-/* ✅ Global Disclaimer (en bas de section) */
 .tech-disclaimer {
     max-width: 1200px;
     margin: 40px auto 0;
@@ -2258,107 +1937,6 @@ body.dark-mode .tech-points li {
 
 body.dark-mode .tech-points li::before {
     color: #60a5fa;
-}
-
-/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-   📱 RESPONSIVE MOBILE
-   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
-
-@media (max-width: 768px) {
-    
-    .tech-grid {
-        grid-template-columns: 1fr !important;
-        gap: 1rem !important;
-        padding: 0 0.5rem;
-    }
-    
-    .tech-card {
-        padding: 2rem 1.5rem !important;
-        max-width: 100%;
-    }
-    
-    .tech-icon-wrapper {
-        min-height: 80px;
-        margin-bottom: 20px;
-    }
-    
-    /* ✅ Logos images mobile (proportionnels) */
-    .tech-logo,
-    .centered-logo {
-        width: 80px; /* ✅ Réduit proportionnellement */
-        height: 80px;
-        margin-bottom: 20px;
-    }
-    
-    /* ✅ Icônes génériques mobile */
-    .tech-icon-generic {
-        width: 64px;
-        height: 64px;
-        font-size: 2rem;
-        line-height: 64px; /* ✅ Ajusté pour mobile */
-    }
-    
-    .tech-icon-generic.news {
-        font-size: 1.875rem;
-    }
-    
-    .tech-legal-note {
-        font-size: 0.7rem;
-        margin-top: 16px;
-        padding-top: 12px;
-    }
-    
-    .tech-disclaimer {
-        margin: 30px 1rem 0;
-        padding: 20px 24px;
-    }
-    
-    .tech-disclaimer p {
-        font-size: 0.8125rem;
-    }
-    
-    .tech-points li {
-        margin-bottom: 14px !important;
-        line-height: 1.7 !important;
-    }
-}
-
-@media (max-width: 480px) {
-    
-    .tech-card {
-        padding: 1.5rem 1.125rem !important;
-    }
-    
-    .tech-icon-wrapper {
-        min-height: 70px;
-        margin-bottom: 16px;
-    }
-    
-    .tech-logo,
-    .centered-logo {
-        width: 64px;
-        height: 64px;
-        margin-bottom: 16px;
-    }
-    
-    .tech-icon-generic {
-        width: 56px;
-        height: 56px;
-        font-size: 1.75rem;
-        line-height: 56px; /* ✅ Ajusté pour très petits écrans */
-    }
-    
-    .tech-icon-generic.news {
-        font-size: 1.625rem;
-    }
-    
-    .tech-disclaimer {
-        padding: 16px 20px;
-    }
-    
-    .tech-disclaimer p {
-        font-size: 0.75rem;
-    }
 }
 
 /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -2636,13 +2214,13 @@ body.dark-mode .tech-points li::before {
     padding: 1rem 0;
     overflow: hidden;
     position: relative;
-    width: 100%; /* ✅ AJOUTÉ */
+    width: 100%;
 }
 
 .ticker-wrapper {
     width: 100%;
     overflow: hidden;
-    position: relative; /* ✅ AJOUTÉ */
+    position: relative;
 }
 
 .ticker-content {
@@ -2650,10 +2228,9 @@ body.dark-mode .tech-points li::before {
     gap: 3rem;
     animation: tickerScroll 40s linear infinite;
     white-space: nowrap;
-    will-change: transform; /* ✅ AJOUTÉ pour performance */
+    will-change: transform;
 }
 
-/* ✅ ANIMATION CORRIGÉE */
 @keyframes tickerScroll {
     0% { 
         transform: translateX(0);
@@ -2672,7 +2249,7 @@ body.dark-mode .tech-points li::before {
     border-radius: 12px;
     transition: all var(--anim-fast);
     border: 1px solid var(--border-color, #e2e8f0);
-    flex-shrink: 0; /* ✅ AJOUTÉ */
+    flex-shrink: 0;
 }
 
 .ticker-item:hover {
@@ -2717,36 +2294,6 @@ body.dark-mode .tech-points li::before {
 
 .ticker-change.negative::before {
     content: '▼ ';
-}
-
-/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-   📱 TICKER MOBILE - ✅ OPTIMISATION
-   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
-
-@media (max-width: 768px) {
-    .ticker-content {
-        animation: tickerScroll 30s linear infinite; /* ✅ Plus rapide sur mobile */
-    }
-    
-    .ticker-item {
-        padding: 0.5rem 1rem;
-        font-size: 0.8125rem;
-        gap: 0.75rem;
-    }
-    
-    .ticker-symbol {
-        min-width: 40px;
-        font-size: 0.75rem;
-    }
-    
-    .ticker-price {
-        font-size: 0.875rem;
-    }
-    
-    .ticker-change {
-        font-size: 0.75rem;
-        padding: 0.2rem 0.5rem;
-    }
 }
 
 /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -2960,15 +2507,14 @@ body {
        🍔 NAVIGATION MOBILE - ✅ SANS ESPACE
        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
     
-    /* ✅ CORRECTION : Hauteur exacte du header */
     .landing-nav {
         z-index: 10002 !important;
-        height: 64px !important; /* ✅ AJOUTÉ */
+        height: 64px !important;
     }
     
     .nav-container {
         padding: 0.875rem 1rem;
-        height: 64px; /* ✅ AJOUTÉ */
+        height: 64px;
     }
     
     .mobile-menu-btn {
@@ -2982,16 +2528,15 @@ body {
         display: none !important;
     }
     
-    /* ✅ CORRECTION : top et height ajustés */
     .nav-menu {
         position: fixed;
-        top: 64px !important; /* ✅ CHANGÉ de 65px à 64px */
+        top: 64px !important;
         left: 0;
         right: 0;
         bottom: 0;
         width: 100%;
         max-width: 100vw;
-        height: calc(100vh - 64px) !important; /* ✅ CHANGÉ de 65px à 64px */
+        height: calc(100vh - 64px) !important;
         background: #ffffff !important;
         padding: 1.5rem 1rem 180px 1rem;
         display: flex;
@@ -3517,7 +3062,7 @@ body {
     body.logged-in .pricing-section,
     body.user-authenticated .pricing-section,
     body[data-user-logged="true"] .pricing-section {
-        padding: 4rem 0 !important;
+        padding: 4rem 0 2rem !important;
         max-width: 100vw !important;
         width: 100vw !important;
         overflow-x: hidden !important;
@@ -3539,7 +3084,7 @@ body {
         scroll-snap-type: x mandatory !important;
         scroll-behavior: smooth !important;
         -webkit-overflow-scrolling: touch !important;
-        padding: 1rem 1rem 2rem 1rem !important;
+        padding: 1rem 1rem 1rem 1rem !important;
         margin: 0 -1rem !important;
         max-width: 100vw !important;
         width: 100vw !important;
@@ -3547,6 +3092,7 @@ body {
         min-height: auto !important;
         max-height: none !important;
         cursor: grab;
+        margin-bottom: 1.5rem !important;
     }
     
     .pricing-grid-three:active,
@@ -3663,38 +3209,6 @@ body {
         padding: 1rem 2rem !important;
         font-size: 1rem !important;
     }
-
-    /* ✅ Réduire l'espace APRÈS les cartes pricing */
-    .pricing-grid-three,
-    body.logged-in .pricing-grid-three,
-    body.user-authenticated .pricing-grid-three {
-        margin-bottom: 1.5rem !important;
-        padding-bottom: 1rem !important;
-    }
-    
-    /* ✅ Réduire l'espace du tableau comparatif (si présent) */
-    .pricing-comparison-table,
-    .comparison-table,
-    .features-comparison,
-    .pricing-features-table {
-        margin-top: 1rem !important;
-        margin-bottom: 1rem !important;
-        padding-top: 0.5rem !important;
-        padding-bottom: 0.5rem !important;
-    }
-    
-    /* ✅ Réduire le padding de la section pricing */
-    .pricing-section,
-    body.logged-in .pricing-section,
-    body.user-authenticated .pricing-section {
-        padding-bottom: 2rem !important; /* Au lieu de 4rem */
-    }
-    
-    /* ✅ Réduire l'espace du CTA "Ready to transform" */
-    .cta-final {
-        padding-top: 2rem !important; /* Au lieu de 4rem */
-        margin-top: 0 !important;
-    }
     
     /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
        🎨 DEMO SECTION
@@ -3809,84 +3323,70 @@ body {
     Product | Company en 2 colonnes EN BAS
     Masquer uniquement "Tools"
     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
-
-    @media (max-width: 768px) {
-        
-        /* ✅ Footer en 2 colonnes */
-        .footer-grid {
-            display: grid !important;
-            grid-template-columns: 1fr 1fr !important;
-            gap: 2rem !important;
-            align-items: start !important;
-        }
-        
-        /* ✅ Brand Col (Logo + Description + Réseaux sociaux) - PLEINE LARGEUR */
-        .footer-brand-col {
-            grid-column: 1 / -1 !important; /* Prend toute la largeur */
-            display: block !important;
-            max-width: 100% !important;
-            text-align: center !important;
-            margin: 0 auto 2rem auto !important;
-        }
-        
-        /* ✅ Logo centré */
-        .footer-brand {
-            justify-content: center !important;
-            margin-bottom: 1rem !important;
-        }
-        
-        /* ✅ Description centrée */
-        .footer-description {
-            text-align: center !important;
-            max-width: 100% !important;
-        }
-        
-        /* ✅ Réseaux sociaux centrés */
-        .footer-social {
-            justify-content: center !important;
-        }
-        
-        /* ✅ Masquer uniquement la section Tools (3e colonne) */
-        .footer-col:nth-child(3) {
-            display: none !important;
-        }
-        
-        /* ✅ Afficher Product et Company */
-        .footer-col:nth-child(2), /* Product */
-        .footer-col:nth-child(4) { /* Company */
-            display: block !important;
-        }
-        
-        /* ✅ Titres des colonnes centrés */
-        .footer-col h4 {
-            text-align: center !important;
-            margin-bottom: 1.25rem !important;
-        }
-        
-        /* ✅ Liens centrés */
-        .footer-col ul {
-            text-align: center !important;
-        }
-        
-        .footer-col ul li {
-            margin-bottom: 1rem !important;
-        }
-        
-        .footer-col ul li a {
-            font-size: 0.9375rem !important;
-        }
-        
-        /* ✅ Footer Bottom */
-        .footer-bottom {
-            flex-direction: column;
-            gap: 1rem;
-            text-align: center;
-        }
-        
-        /* ✅ Masquer uniquement les liens Privacy/Terms/Security */
-        .footer-bottom-links {
-            display: none !important;
-        }
+    
+    .footer-grid {
+        display: grid !important;
+        grid-template-columns: 1fr 1fr !important;
+        gap: 2rem !important;
+        align-items: start !important;
+    }
+    
+    .footer-brand-col {
+        grid-column: 1 / -1 !important;
+        display: block !important;
+        max-width: 100% !important;
+        text-align: center !important;
+        margin: 0 auto 2rem auto !important;
+    }
+    
+    .footer-brand {
+        justify-content: center !important;
+        margin-bottom: 1rem !important;
+    }
+    
+    .footer-description {
+        text-align: center !important;
+        max-width: 100% !important;
+    }
+    
+    .footer-social {
+        justify-content: center !important;
+    }
+    
+    .footer-col:nth-child(3) {
+        display: none !important;
+    }
+    
+    .footer-col:nth-child(2),
+    .footer-col:nth-child(4) {
+        display: block !important;
+    }
+    
+    .footer-col h4 {
+        text-align: center !important;
+        margin-bottom: 1.25rem !important;
+    }
+    
+    .footer-col ul {
+        text-align: center !important;
+    }
+    
+    .footer-col ul li {
+        margin-bottom: 1rem !important;
+    }
+    
+    .footer-col ul li a {
+        font-size: 0.9375rem !important;
+    }
+    
+    .footer-bottom {
+        flex-direction: column;
+        gap: 1rem;
+        text-align: center;
+    }
+    
+    .footer-bottom-links {
+        display: none !important;
     }
     
     /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -3977,9 +3477,14 @@ body {
         line-height: 1.7 !important;
     }
     
+    .ticker-content {
+        animation: tickerScroll 30s linear infinite;
+    }
+    
     .ticker-item {
         padding: 0.5rem 1rem;
         font-size: 0.8125rem;
+        gap: 0.75rem;
     }
     
     .ticker-symbol {
@@ -4006,9 +3511,42 @@ body {
         padding: 2rem 1.5rem !important;
     }
     
+    .tech-logo,
+    .centered-logo {
+        width: 80px;
+        height: 80px;
+        margin-bottom: 20px;
+    }
+    
+    .tech-icon-generic {
+        width: 64px;
+        height: 64px;
+        font-size: 2rem;
+        line-height: 64px;
+    }
+    
+    .tech-icon-generic.news {
+        font-size: 1.875rem;
+    }
+    
     .tech-points li {
         margin-bottom: 14px !important;
         line-height: 1.7 !important;
+    }
+    
+    .tech-legal-note {
+        font-size: 0.7rem;
+        margin-top: 16px;
+        padding-top: 12px;
+    }
+    
+    .tech-disclaimer {
+        margin: 30px 1rem 0;
+        padding: 20px 24px;
+    }
+    
+    .tech-disclaimer p {
+        font-size: 0.8125rem;
     }
     
     .container,
@@ -4158,6 +3696,32 @@ body {
     .ticker-change {
         font-size: 0.7rem;
     }
+    
+    .tech-logo,
+    .centered-logo {
+        width: 64px;
+        height: 64px;
+        margin-bottom: 16px;
+    }
+    
+    .tech-icon-generic {
+        width: 56px;
+        height: 56px;
+        font-size: 1.75rem;
+        line-height: 56px;
+    }
+    
+    .tech-icon-generic.news {
+        font-size: 1.625rem;
+    }
+    
+    .tech-disclaimer {
+        padding: 16px 20px;
+    }
+    
+    .tech-disclaimer p {
+        font-size: 0.75rem;
+    }
 }
 
 /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -4182,5 +3746,5 @@ body {
 
 /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
    ✅ FIN DU FICHIER CSS - VERSION FINALE
-   TOUTES LES CORRECTIONS APPLIQUÉES
+   CORRECTION APPLIQUÉE : overflow: hidden sur toutes les cartes
    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
