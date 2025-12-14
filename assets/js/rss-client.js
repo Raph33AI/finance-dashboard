@@ -74,11 +74,39 @@ class RSSClient {
      * ✨ NOUVEAU : Charger le MAXIMUM absolu d'articles (200 par source)
      */
     async loadMaxArticles() {
-        console.log('🔥 LOADING MAXIMUM ARTICLES MODE...');
-        return await this.getAllArticles({
-            maxPerSource: 200, // ✨ 200 articles par source = ~1000 total
-            useCache: false // Ne pas utiliser le cache
-        });
+        console.log('🔥 RSS CLIENT: Loading MAX articles...');
+        console.log('📡 Worker URL:', this.workerUrl);
+        
+        try {
+            const response = await fetch(`${this.workerUrl}/all`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    maxPerSource: 200 // ✨ 200 articles par source
+                })
+            });
+            
+            console.log('📡 Response status:', response.status);
+            
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}`);
+            }
+
+            const data = await response.json();
+            
+            console.log('✅ Data received from worker:', data);
+            console.log('📊 Total articles in response:', data.totalArticles);
+            console.log('📊 Articles array length:', data.articles.length);
+            
+            // Ne PAS mettre en cache pour forcer le refresh
+            return data;
+            
+        } catch (error) {
+            console.error('❌ RSS CLIENT ERROR:', error);
+            throw error;
+        }
     }
 
     /**
