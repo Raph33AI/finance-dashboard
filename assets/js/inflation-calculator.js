@@ -753,8 +753,7 @@ class InflationCalculator {
                 credits: { enabled: false },
                 legend: { 
                     enabled: false
-                },
-                ...this.getResponsiveChartConfig() // ✅ AJOUT
+                }
             });
             
         } catch (error) {
@@ -838,8 +837,7 @@ class InflationCalculator {
                 credits: { enabled: false },
                 legend: { 
                     enabled: false
-                },
-            ...this.getResponsiveChartConfig() // ✅ AJOUT
+                }
             });
             
         } catch (error) {
