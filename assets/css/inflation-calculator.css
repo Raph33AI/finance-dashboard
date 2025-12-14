@@ -713,29 +713,49 @@ body.dark-mode {
 }
 
 .price-comparison {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
+    display: flex;
+    align-items: center; /* ✅ AJOUT : Aligne verticalement au centre */
+    justify-content: space-between;
     gap: 16px;
+    margin: 20px 0;
 }
 
 .price-year {
+    flex: 1;
     background: var(--eco-gradient-soft);
-    border-radius: 12px;
     padding: 16px;
+    border-radius: 12px;
+    text-align: center;
+    min-height: 85px; /* ✅ AJOUT : Hauteur minimale identique */
+    display: flex; /* ✅ AJOUT */
+    flex-direction: column; /* ✅ AJOUT */
+    justify-content: center; /* ✅ AJOUT : Centre le contenu verticalement */
+}
+
+.price-arrow {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: var(--eco-primary);
+    flex-shrink: 0;
+    align-self: center; /* ✅ AJOUT : Force la flèche au centre */
 }
 
 .price-year-label {
     font-size: 0.8rem;
-    color: var(--text-secondary);
-    margin-bottom: 6px;
     font-weight: 700;
+    color: var(--text-tertiary);
     text-transform: uppercase;
+    margin-bottom: 8px;
+    letter-spacing: 0.5px;
 }
 
 .price-year-value {
-    font-size: 1.5rem;
+    font-size: 1.8rem;
     font-weight: 900;
-    color: var(--text-primary);
+    background: var(--eco-gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
 }
 
 .price-change {
