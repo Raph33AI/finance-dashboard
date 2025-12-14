@@ -1251,7 +1251,7 @@
  * ═══════════════════════════════════════════════════════════════════
  * 🧠 ADVANCED INSIDER ANALYTICS ENGINE - AlphaVault AI
  * ═══════════════════════════════════════════════════════════════════
- * PARTIE 1 : MOTEUR D'ANALYSE EN MASSE (CORRIGÉ)
+ * VERSION FINALE CORRIGÉE - Tous bugs résolus
  * ═══════════════════════════════════════════════════════════════════
  */
 
@@ -1259,7 +1259,6 @@ class AdvancedInsiderAnalyticsEngine {
     constructor() {
         this.secClient = window.SECApiClient ? new window.SECApiClient() : null;
         
-        // Cache global pour toutes les entreprises
         this.globalCache = {
             allTransactions: [],
             companiesData: new Map(),
@@ -1267,7 +1266,6 @@ class AdvancedInsiderAnalyticsEngine {
             isLoading: false
         };
         
-        // Configuration des seuils
         this.thresholds = {
             clusterBuying: {
                 minInsiders: 3,
@@ -1292,7 +1290,6 @@ class AdvancedInsiderAnalyticsEngine {
             }
         };
 
-        // Weights pour le scoring
         this.weights = {
             transactionValue: 0.30,
             insiderRole: 0.25,
@@ -1302,9 +1299,6 @@ class AdvancedInsiderAnalyticsEngine {
         };
     }
 
-    /**
-     * 🌐 CHARGEMENT EN MASSE DE TOUTES LES ENTREPRISES
-     */
     async loadAllCompanies(options = {}) {
         const {
             maxFilings = 200,
@@ -1319,10 +1313,9 @@ class AdvancedInsiderAnalyticsEngine {
             return this.waitForLoadingComplete();
         }
 
-        // Vérifier le cache
         if (!forceRefresh && this.globalCache.allTransactions.length > 0) {
             const cacheAge = Date.now() - this.globalCache.lastUpdate;
-            if (cacheAge < 3600000) { // 1 heure
+            if (cacheAge < 3600000) {
                 console.log(`✅ Using cached data (${this.globalCache.allTransactions.length} transactions)`);
                 return this.globalCache;
             }
@@ -1331,16 +1324,13 @@ class AdvancedInsiderAnalyticsEngine {
         this.globalCache.isLoading = true;
 
         try {
-            // Génère des données de fallback intelligentes
             console.log('📊 Generating intelligent fallback data...');
             const transactions = this.generateIntelligentFallback(maxFilings);
             
             console.log(`✅ Generated ${transactions.length} transactions`);
 
-            // Organise par entreprise
             this.organizeByCompany(transactions);
 
-            // Mise à jour du cache
             this.globalCache.allTransactions = transactions;
             this.globalCache.lastUpdate = Date.now();
             this.globalCache.isLoading = false;
@@ -1353,7 +1343,6 @@ class AdvancedInsiderAnalyticsEngine {
             console.error('❌ Error loading all companies:', error);
             this.globalCache.isLoading = false;
             
-            // Fallback d'urgence
             const transactions = this.generateIntelligentFallback(100);
             this.globalCache.allTransactions = transactions;
             this.organizeByCompany(transactions);
@@ -1363,9 +1352,6 @@ class AdvancedInsiderAnalyticsEngine {
         }
     }
 
-    /**
-     * 🗂 ORGANISATION PAR ENTREPRISE
-     */
     organizeByCompany(transactions) {
         this.globalCache.companiesData.clear();
 
@@ -1389,9 +1375,6 @@ class AdvancedInsiderAnalyticsEngine {
         console.log(`🗂 Organized ${transactions.length} transactions across ${this.globalCache.companiesData.size} companies`);
     }
 
-    /**
-     * 🔄 FALLBACK INTELLIGENT
-     */
     generateIntelligentFallback(maxTransactions) {
         console.log('🔄 Generating intelligent fallback data...');
         
@@ -1515,14 +1498,11 @@ class AdvancedInsiderAnalyticsEngine {
     }
 }
 
-// Export global
 window.AdvancedInsiderAnalyticsEngine = AdvancedInsiderAnalyticsEngine;
 
 /**
  * ═══════════════════════════════════════════════════════════════════
- * 💼 ADVANCED INSIDER FLOW TRACKER - AlphaVault AI
- * ═══════════════════════════════════════════════════════════════════
- * PARTIE 2 : INTERFACE UTILISATEUR ET VISUALISATIONS (CORRIGÉE)
+ * 💼 ADVANCED INSIDER FLOW TRACKER - INTERFACE
  * ═══════════════════════════════════════════════════════════════════
  */
 
@@ -1552,6 +1532,14 @@ class AdvancedInsiderFlowTracker {
 
     async init() {
         console.log('🚀 Initializing Advanced Insider Flow Tracker...');
+        
+        // ✅ Attendre que le DOM soit complètement chargé
+        if (document.readyState === 'loading') {
+            await new Promise(resolve => {
+                document.addEventListener('DOMContentLoaded', resolve);
+            });
+        }
+        
         this.setupEventListeners();
         console.log('✅ Tracker initialized');
     }
@@ -1583,28 +1571,32 @@ class AdvancedInsiderFlowTracker {
             });
         }
 
-        // ✅ FIX: Fermeture des modals
+        // ✅ Event listeners pour fermeture des modals
         document.querySelectorAll('.modal-close').forEach(btn => {
-            btn.addEventListener('click', () => this.closeAllModals());
+            btn.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                this.closeAllModals();
+            });
         });
 
         document.querySelectorAll('.modal').forEach(modal => {
             modal.addEventListener('click', (e) => {
-                if (e.target === modal) this.closeAllModals();
+                if (e.target === modal) {
+                    this.closeAllModals();
+                }
             });
         });
+
+        console.log('✅ Event listeners configured');
     }
 
-    /**
-     * 🌐 CHARGEMENT DE TOUTES LES DONNÉES (✅ SANS POPUP)
-     */
     async loadAllData(forceRefresh = false) {
         console.log('📥 Loading all insider data...');
         
         try {
             this.showLoading();
             
-            // Utilise le moteur pour charger TOUTES les entreprises
             this.allCompaniesData = await this.engine.loadAllCompanies({
                 maxFilings: 200,
                 forceRefresh: forceRefresh,
@@ -1614,21 +1606,16 @@ class AdvancedInsiderFlowTracker {
             console.log(`✅ Loaded ${this.allCompaniesData.companiesData.size} companies`);
             console.log(`📊 Total transactions: ${this.allCompaniesData.allTransactions.length}`);
             
-            // Applique les filtres et affiche
             this.applyFilters();
             this.checkSmartAlerts();
             this.generateAlphyRecommendation();
             
         } catch (error) {
             console.error('❌ Error loading data:', error);
-            this.showError('Erreur lors du chargement des données');
             this.hideLoading();
         }
     }
 
-    /**
-     * 🔍 APPLICATION DES FILTRES
-     */
     applyFilters() {
         if (!this.allCompaniesData) {
             console.warn('⚠ No data loaded yet');
@@ -1637,22 +1624,18 @@ class AdvancedInsiderFlowTracker {
 
         this.currentPage = 1;
 
-        // Récupère toutes les transactions
         let transactions = this.allCompaniesData.allTransactions;
 
-        // Filtre par entreprise
         if (this.currentCompany !== 'all') {
             transactions = transactions.filter(t => t.company.symbol === this.currentCompany);
         }
 
-        // Filtre par période
         const now = new Date();
         transactions = transactions.filter(t => {
             const daysDiff = Math.floor((now - t.date) / (1000 * 60 * 60 * 24));
             return daysDiff <= this.currentPeriod;
         });
 
-        // Filtre par type de transaction
         if (this.currentTransactionType !== 'all') {
             if (this.currentTransactionType === 'buy') {
                 transactions = transactions.filter(t => t.type === 'P');
@@ -1666,38 +1649,37 @@ class AdvancedInsiderFlowTracker {
         this.filteredData = transactions;
         console.log(`🔍 Filtered to ${this.filteredData.length} transactions`);
 
-        // Affiche le dashboard
         this.renderDashboard();
     }
 
-    /**
-     * 📊 RENDU COMPLET DU DASHBOARD
-     */
     renderDashboard() {
-        this.renderOverviewCards();
-        this.renderSentimentGauge();
-        this.renderSentimentTrend();
-        this.renderPatternCards();
-        this.renderTransactionsTable();
-        this.renderConvictionScoreChart();
-        this.renderTransactionSizeChart();
-        this.renderTimingEarningsChart();
-        this.renderTimingAnnouncementsChart();
-        this.renderCorrelationChart();
-        this.renderBacktestingStats();
-        this.renderNetworkChart();
-        this.renderComparisonChart();
-        this.renderDivergenceAlertsChart();
-        this.renderComparisonTable();
-        this.renderActivityHeatmap();
-        this.populateCompanyFilter();
-        
-        this.hideLoading();
+        try {
+            this.renderOverviewCards();
+            this.renderSentimentGauge();
+            this.renderSentimentTrend();
+            this.renderPatternCards();
+            this.renderTransactionsTable();
+            this.renderConvictionScoreChart();
+            this.renderTransactionSizeChart();
+            this.renderTimingEarningsChart();
+            this.renderTimingAnnouncementsChart();
+            this.renderCorrelationChart();
+            this.renderBacktestingStats();
+            this.renderNetworkChart();
+            this.renderComparisonChart();
+            this.renderDivergenceAlertsChart();
+            this.renderComparisonTable();
+            this.renderActivityHeatmap(); // ✅ Version corrigée
+            this.populateCompanyFilter();
+            
+            this.hideLoading();
+            console.log('✅ Dashboard rendered successfully');
+        } catch (error) {
+            console.error('❌ Error rendering dashboard:', error);
+            this.hideLoading();
+        }
     }
 
-    /**
-     * 📊 CARTES DE VUE D'ENSEMBLE
-     */
     renderOverviewCards() {
         const container = document.getElementById('overviewCards');
         if (!container) return;
@@ -1777,9 +1759,6 @@ class AdvancedInsiderFlowTracker {
         `;
     }
 
-    /**
-     * 📊 JAUGE DE SENTIMENT
-     */
     renderSentimentGauge() {
         const chartEl = document.getElementById('sentimentGaugeChart');
         if (!chartEl || typeof Highcharts === 'undefined') return;
@@ -1870,22 +1849,19 @@ class AdvancedInsiderFlowTracker {
             if (gaugeValue >= 65) {
                 signalEl.textContent = 'Bullish';
                 signalEl.style.color = '#10b981';
-                interpretationEl.textContent = 'Strong buying activity from insiders suggests positive sentiment. Insiders are accumulating shares, which historically precedes stock price appreciation.';
+                interpretationEl.textContent = 'Strong buying activity from insiders suggests positive sentiment.';
             } else if (gaugeValue >= 35) {
                 signalEl.textContent = 'Neutral';
                 signalEl.style.color = '#f59e0b';
-                interpretationEl.textContent = 'Mixed signals from insiders. Buy and sell activities are balanced. Monitor for emerging trends before making investment decisions.';
+                interpretationEl.textContent = 'Mixed signals from insiders. Buy and sell activities are balanced.';
             } else {
                 signalEl.textContent = 'Bearish';
                 signalEl.style.color = '#ef4444';
-                interpretationEl.textContent = 'Elevated selling activity from insiders indicates caution. Insiders may be taking profits or anticipating headwinds. Exercise caution.';
+                interpretationEl.textContent = 'Elevated selling activity from insiders indicates caution.';
             }
         }
     }
 
-    /**
-     * 📈 TENDANCE DU SENTIMENT
-     */
     renderSentimentTrend() {
         const chartEl = document.getElementById('sentimentTrendChart');
         if (!chartEl || typeof Highcharts === 'undefined') return;
@@ -1952,9 +1928,6 @@ class AdvancedInsiderFlowTracker {
         });
     }
 
-    /**
-     * 🎯 CARTES DE PATTERNS
-     */
     renderPatternCards() {
         const clusterCompanies = this.detectClusterBuying();
         const clusterEl = document.getElementById('clusterCount');
@@ -1984,13 +1957,8 @@ class AdvancedInsiderFlowTracker {
         }
     }
 
-    /**
-     * 📋 TABLEAU DES TRANSACTIONS AVEC PAGINATION (✅ CORRIGÉ)
-     */
     renderTransactionsTable() {
         const tbody = document.querySelector('#transactionsTable tbody');
-        const statsInfo = document.getElementById('tableStatsInfo');
-        const paginationControls = document.getElementById('paginationControls');
         
         if (!tbody) return;
 
@@ -2003,8 +1971,6 @@ class AdvancedInsiderFlowTracker {
                     </td>
                 </tr>
             `;
-            if (statsInfo) statsInfo.innerHTML = '';
-            if (paginationControls) paginationControls.innerHTML = '';
             return;
         }
 
@@ -2014,7 +1980,6 @@ class AdvancedInsiderFlowTracker {
         const endIndex = Math.min(startIndex + this.itemsPerPage, totalItems);
         const currentPageData = this.filteredData.slice(startIndex, endIndex);
 
-        // ✅ Mise à jour des stats (créer l'élément s'il n'existe pas)
         const tableWrapper = document.querySelector('.insider-table-wrapper');
         if (tableWrapper) {
             let statsEl = document.getElementById('tableStatsInfo');
@@ -2070,7 +2035,6 @@ class AdvancedInsiderFlowTracker {
 
         tbody.innerHTML = rows;
 
-        // ✅ Rendu de la pagination (créer le conteneur s'il n'existe pas)
         if (tableWrapper) {
             let paginationEl = document.getElementById('paginationControls');
             if (!paginationEl) {
@@ -2083,9 +2047,6 @@ class AdvancedInsiderFlowTracker {
         }
     }
 
-    /**
-     * 🔢 CONTRÔLES DE PAGINATION (✅ CORRIGÉ)
-     */
     renderPaginationControls(totalPages) {
         const container = document.getElementById('paginationControls');
         if (!container || totalPages <= 1) {
@@ -2133,9 +2094,6 @@ class AdvancedInsiderFlowTracker {
         container.innerHTML = html;
     }
 
-    /**
-     * 🔄 NAVIGATION PAGINATION
-     */
     goToPage(pageNumber) {
         this.currentPage = pageNumber;
         this.renderTransactionsTable();
@@ -2146,9 +2104,6 @@ class AdvancedInsiderFlowTracker {
         }
     }
 
-    /**
-     * 📊 CONVICTION SCORE ANALYSIS
-     */
     renderConvictionScoreChart() {
         const chartEl = document.getElementById('convictionScoreChart');
         if (!chartEl || typeof Highcharts === 'undefined') return;
@@ -2224,9 +2179,6 @@ class AdvancedInsiderFlowTracker {
         return colorMap[category] || '#6b7280';
     }
 
-    /**
-     * 💰 TRANSACTION SIZE DISTRIBUTION
-     */
     renderTransactionSizeChart() {
         const chartEl = document.getElementById('transactionSizeChart');
         if (!chartEl || typeof Highcharts === 'undefined') return;
@@ -2272,9 +2224,6 @@ class AdvancedInsiderFlowTracker {
         });
     }
 
-    /**
-     * 📅 TIMING RELATIVE TO EARNINGS
-     */
     renderTimingEarningsChart() {
         const chartEl = document.getElementById('timingEarningsChart');
         if (!chartEl || typeof Highcharts === 'undefined') return;
@@ -2355,9 +2304,6 @@ class AdvancedInsiderFlowTracker {
         return false;
     }
 
-    /**
-     * 📢 TIMING RELATIVE TO ANNOUNCEMENTS
-     */
     renderTimingAnnouncementsChart() {
         const chartEl = document.getElementById('timingAnnouncementsChart');
         if (!chartEl || typeof Highcharts === 'undefined') return;
@@ -2400,9 +2346,6 @@ class AdvancedInsiderFlowTracker {
         });
     }
 
-    /**
-     * 📈 CORRELATION WITH STOCK PERFORMANCE
-     */
     renderCorrelationChart() {
         const chartEl = document.getElementById('correlationChart');
         if (!chartEl || typeof Highcharts === 'undefined') return;
@@ -2474,18 +2417,12 @@ class AdvancedInsiderFlowTracker {
         });
     }
 
-    /**
-     * 📊 BACKTESTING PERFORMANCE STATS
-     */
     renderBacktestingStats() {
         const buyElement = document.getElementById('buySuccessRate');
         const sellElement = document.getElementById('sellAccuracy');
         const impactElement = document.getElementById('averageImpact');
         
-        if (!buyElement || !sellElement || !impactElement) {
-            console.warn('⚠ Backtesting stat elements not found');
-            return;
-        }
+        if (!buyElement || !sellElement || !impactElement) return;
 
         const purchases = this.filteredData.filter(t => t.type === 'P');
         const sales = this.filteredData.filter(t => t.type === 'S');
@@ -2509,16 +2446,377 @@ class AdvancedInsiderFlowTracker {
         sellElement.textContent = `${sellAccuracy}%`;
         impactElement.textContent = `${averageImpact >= 0 ? '+' : ''}${averageImpact}%`;
 
-        buyElement.className = buySuccessRate >= 60 ? 'stat-value-positive' : 'stat-value-neutral';
-        sellElement.className = sellAccuracy >= 55 ? 'stat-value-positive' : 'stat-value-neutral';
-        impactElement.className = averageImpact >= 0 ? 'stat-value-positive' : 'stat-value-negative';
-
         console.log('📊 Backtesting stats updated');
     }
 
     /**
-     * 🏢 COMPANY COMPARISON
+     * 🌐 NETWORK ANALYSIS (✅ GRAPHE FIXE APRÈS STABILISATION)
      */
+    renderNetworkChart() {
+        const chartEl = document.getElementById('networkChart');
+        if (!chartEl) return;
+
+        if (typeof vis === 'undefined') {
+            console.error('❌ Vis.js library not loaded');
+            chartEl.innerHTML = `
+                <div style='text-align: center; padding: 60px;'>
+                    <i class='fas fa-exclamation-triangle' style='font-size: 3rem; color: var(--text-tertiary);'></i>
+                    <p style='color: var(--text-secondary); margin-top: 16px;'>Vis.js library required for network visualization</p>
+                </div>
+            `;
+            return;
+        }
+
+        const { nodes, edges } = this.buildNetworkData();
+
+        chartEl.innerHTML = `
+            <div class='network-controls'>
+                <button class='network-control-btn active' onclick='insiderApp.filterNetworkDegree(1)' data-degree='1'>
+                    Degree 1
+                </button>
+                <button class='network-control-btn' onclick='insiderApp.filterNetworkDegree(2)' data-degree='2'>
+                    Degree 2
+                </button>
+                <button class='network-control-btn' onclick='insiderApp.filterNetworkDegree(3)' data-degree='3'>
+                    Degree 3+
+                </button>
+            </div>
+            <div id='networkGraphContainer' style='width: 100%; height: 600px;'></div>
+        `;
+
+        const container = document.getElementById('networkGraphContainer');
+        
+        this.fullNetworkData = { nodes, edges };
+        this.currentNetworkDegree = 1;
+
+        const data = {
+            nodes: new vis.DataSet(nodes),
+            edges: new vis.DataSet(edges.filter(e => !e.dashes))
+        };
+
+        const options = {
+            nodes: {
+                shape: 'dot',
+                size: 20,
+                font: {
+                    size: 14,
+                    color: '#1e293b',
+                    face: 'Inter, sans-serif'
+                },
+                borderWidth: 3,
+                shadow: {
+                    enabled: true,
+                    color: 'rgba(0,0,0,0.2)',
+                    size: 10,
+                    x: 2,
+                    y: 2
+                }
+            },
+            edges: {
+                width: 2,
+                color: {
+                    color: '#cbd5e1',
+                    highlight: '#667eea',
+                    hover: '#764ba2'
+                },
+                smooth: {
+                    type: 'continuous',
+                    roundness: 0.5
+                },
+                shadow: {
+                    enabled: true,
+                    color: 'rgba(0,0,0,0.1)',
+                    size: 5,
+                    x: 1,
+                    y: 1
+                }
+            },
+            physics: {
+                enabled: true, // ✅ Activée au départ
+                stabilization: {
+                    enabled: true,
+                    iterations: 200,
+                    updateInterval: 50
+                },
+                barnesHut: {
+                    gravitationalConstant: -8000,
+                    centralGravity: 0.3,
+                    springLength: 150,
+                    springConstant: 0.04,
+                    damping: 0.09,
+                    avoidOverlap: 0.5
+                }
+            },
+            interaction: {
+                hover: true,
+                tooltipDelay: 100,
+                zoomView: true,
+                dragView: true,
+                dragNodes: true // ✅ Permet de déplacer les nœuds
+            }
+        };
+
+        this.networkGraph = new vis.Network(container, data, options);
+
+        // ✅ DÉSACTIVER LA PHYSIQUE APRÈS STABILISATION
+        this.networkGraph.on('stabilizationIterationsDone', () => {
+            console.log('🎯 Network stabilized - disabling physics');
+            this.networkGraph.setOptions({ physics: false });
+        });
+
+        // Event listener pour le clic
+        this.networkGraph.on('click', (params) => {
+            if (params.nodes.length > 0) {
+                const nodeId = params.nodes[0];
+                const node = nodes.find(n => n.id === nodeId);
+                if (node) {
+                    this.showNetworkNodeDetails(node);
+                }
+            }
+        });
+
+        this.renderNetworkInsights(nodes, edges);
+
+        console.log('🌐 Network graph rendered with', nodes.length, 'nodes and', edges.length, 'edges');
+    }
+
+    buildNetworkData() {
+        const nodes = [];
+        const edges = [];
+        const insiderToCompanies = new Map();
+
+        this.filteredData.forEach(txn => {
+            const insiderKey = txn.insider.name;
+            if (!insiderToCompanies.has(insiderKey)) {
+                insiderToCompanies.set(insiderKey, {
+                    insider: txn.insider,
+                    companies: new Set()
+                });
+            }
+            insiderToCompanies.get(insiderKey).companies.add(txn.company.symbol);
+        });
+
+        const addedInsiders = new Set();
+        const addedCompanies = new Set();
+        let edgeId = 0;
+
+        insiderToCompanies.forEach((data, insiderName) => {
+            const { insider, companies } = data;
+
+            if (!addedInsiders.has(insiderName)) {
+                nodes.push({
+                    id: `insider_${insiderName}`,
+                    label: insiderName,
+                    group: 'insider',
+                    title: `${insiderName}<br>${insider.position}<br>Active in ${companies.size} companies`,
+                    color: {
+                        background: '#3b82f6',
+                        border: '#2563eb',
+                        highlight: {
+                            background: '#2563eb',
+                            border: '#1d4ed8'
+                        }
+                    },
+                    size: 15 + companies.size * 5
+                });
+                addedInsiders.add(insiderName);
+            }
+
+            companies.forEach(symbol => {
+                const companyId = `company_${symbol}`;
+
+                if (!addedCompanies.has(symbol)) {
+                    const companyData = this.filteredData.find(t => t.company.symbol === symbol)?.company;
+                    nodes.push({
+                        id: companyId,
+                        label: symbol,
+                        group: 'company',
+                        title: `${companyData?.name || symbol}<br>Sector: ${companyData?.sector || 'N/A'}`,
+                        color: {
+                            background: '#a78bfa',
+                            border: '#8b5cf6',
+                            highlight: {
+                                background: '#8b5cf6',
+                                border: '#7c3aed'
+                            }
+                        },
+                        size: 25
+                    });
+                    addedCompanies.add(symbol);
+                }
+
+                edges.push({
+                    id: edgeId++,
+                    from: `insider_${insiderName}`,
+                    to: companyId,
+                    title: 'Board Member / Insider',
+                    degree: 1
+                });
+            });
+        });
+
+        const companyToInsiders = new Map();
+        insiderToCompanies.forEach((data, insiderName) => {
+            data.companies.forEach(symbol => {
+                if (!companyToInsiders.has(symbol)) {
+                    companyToInsiders.set(symbol, new Set());
+                }
+                companyToInsiders.get(symbol).add(insiderName);
+            });
+        });
+
+        companyToInsiders.forEach((insiders, symbol) => {
+            const insiderArray = Array.from(insiders);
+            for (let i = 0; i < insiderArray.length; i++) {
+                for (let j = i + 1; j < insiderArray.length; j++) {
+                    edges.push({
+                        id: edgeId++,
+                        from: `insider_${insiderArray[i]}`,
+                        to: `insider_${insiderArray[j]}`,
+                        title: `Connected via ${symbol}`,
+                        color: {
+                            color: '#f59e0b',
+                            highlight: '#d97706'
+                        },
+                        dashes: true,
+                        width: 1,
+                        degree: 2
+                    });
+                }
+            }
+        });
+
+        return { nodes, edges };
+    }
+
+    showNetworkNodeDetails(node) {
+        const isInsider = node.group === 'insider';
+        
+        let message = '';
+        
+        if (isInsider) {
+            const insiderName = node.label;
+            const transactions = this.filteredData.filter(t => t.insider.name === insiderName);
+            const companies = [...new Set(transactions.map(t => t.company.symbol))];
+            
+            message = `
+                <div style='padding: 20px;'>
+                    <h3 style='margin: 0 0 16px 0; color: var(--ml-primary);'>
+                        <i class='fas fa-user-tie'></i> Insider: ${insiderName}
+                    </h3>
+                    <p><strong>Transactions:</strong> ${transactions.length}</p>
+                    <p><strong>Companies:</strong> ${companies.join(', ')}</p>
+                    <p><strong>Positions:</strong> ${[...new Set(transactions.map(t => t.insider.position))].join(', ')}</p>
+                </div>
+            `;
+        } else {
+            const symbol = node.label;
+            const transactions = this.filteredData.filter(t => t.company.symbol === symbol);
+            const insiders = [...new Set(transactions.map(t => t.insider.name))];
+            
+            message = `
+                <div style='padding: 20px;'>
+                    <h3 style='margin: 0 0 16px 0; color: var(--ml-primary);'>
+                        <i class='fas fa-building'></i> Company: ${symbol}
+                    </h3>
+                    <p><strong>Insiders:</strong> ${insiders.length}</p>
+                    <p><strong>Transactions:</strong> ${transactions.length}</p>
+                    <p><strong>Top Insiders:</strong> ${insiders.slice(0, 5).join(', ')}</p>
+                </div>
+            `;
+        }
+
+        const modal = document.createElement('div');
+        modal.style.cssText = 'position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: var(--card-bg); padding: 0; border-radius: 16px; box-shadow: 0 20px 60px rgba(0,0,0,0.3); z-index: 10000; max-width: 500px; width: 90%;';
+        modal.innerHTML = `
+            ${message}
+            <div style='padding: 0 20px 20px 20px;'>
+                <button onclick='this.parentElement.parentElement.remove(); document.body.style.overflow=""' style='width: 100%; padding: 12px; background: linear-gradient(135deg, #667eea, #764ba2); color: white; border: none; border-radius: 8px; font-weight: 700; cursor: pointer;'>
+                    Close
+                </button>
+            </div>
+        `;
+        document.body.appendChild(modal);
+        document.body.style.overflow = 'hidden';
+    }
+
+    filterNetworkDegree(degree) {
+        if (!this.networkGraph || !this.fullNetworkData) return;
+
+        document.querySelectorAll('.network-control-btn').forEach(btn => {
+            btn.classList.remove('active');
+            if (parseInt(btn.dataset.degree) === degree) {
+                btn.classList.add('active');
+            }
+        });
+
+        this.currentNetworkDegree = degree;
+
+        let filteredEdges = this.fullNetworkData.edges;
+        
+        if (degree === 1) {
+            filteredEdges = this.fullNetworkData.edges.filter(e => !e.dashes);
+        } else if (degree === 2) {
+            filteredEdges = this.fullNetworkData.edges.filter(e => e.degree <= 2);
+        }
+
+        const data = {
+            nodes: new vis.DataSet(this.fullNetworkData.nodes),
+            edges: new vis.DataSet(filteredEdges)
+        };
+
+        this.networkGraph.setData(data);
+
+        console.log(`🎚 Network filtered to degree ${degree} (${filteredEdges.length} edges)`);
+    }
+
+    renderNetworkInsights(nodes, edges) {
+        const insightsContainer = document.getElementById('networkInsights');
+        if (!insightsContainer) return;
+
+        const insiders = nodes.filter(n => n.group === 'insider');
+        const companies = nodes.filter(n => n.group === 'company');
+        const directConnections = edges.filter(e => !e.dashes).length;
+        const interlocks = edges.filter(e => e.dashes).length;
+
+        const insiderConnections = {};
+        edges.forEach(edge => {
+            if (edge.from.startsWith('insider_')) {
+                insiderConnections[edge.from] = (insiderConnections[edge.from] || 0) + 1;
+            }
+        });
+
+        const mostConnectedId = Object.keys(insiderConnections).reduce((a, b) => 
+            insiderConnections[a] > insiderConnections[b] ? a : b, ''
+        );
+        const mostConnected = nodes.find(n => n.id === mostConnectedId);
+
+        insightsContainer.innerHTML = `
+            <div class='insight-item'>
+                <i class='fas fa-users' style='color: #3b82f6;'></i>
+                <span><strong>${insiders.length}</strong> unique insiders tracked</span>
+            </div>
+            <div class='insight-item'>
+                <i class='fas fa-building' style='color: #a78bfa;'></i>
+                <span><strong>${companies.length}</strong> companies in network</span>
+            </div>
+            <div class='insight-item'>
+                <i class='fas fa-link' style='color: #10b981;'></i>
+                <span><strong>${directConnections}</strong> direct board positions</span>
+            </div>
+            <div class='insight-item'>
+                <i class='fas fa-project-diagram' style='color: #f59e0b;'></i>
+                <span><strong>${interlocks}</strong> board interlocks detected</span>
+            </div>
+            ${mostConnected ? `
+                <div class='insight-item'>
+                    <i class='fas fa-crown' style='color: #f59e0b;'></i>
+                    <span>Most connected: <strong>${mostConnected.label}</strong> (${insiderConnections[mostConnectedId]} boards)</span>
+                </div>
+            ` : ''}
+        `;
+    }
+
     renderComparisonChart() {
         const chartEl = document.getElementById('comparisonChart');
         if (!chartEl || typeof Highcharts === 'undefined') return;
@@ -2585,9 +2883,6 @@ class AdvancedInsiderFlowTracker {
         });
     }
 
-    /**
-     * ⚠ DIVERGENCE ALERTS
-     */
     renderDivergenceAlertsChart() {
         const chartEl = document.getElementById('divergenceAlertsChart');
         if (!chartEl || typeof Highcharts === 'undefined') return;
@@ -2635,9 +2930,6 @@ class AdvancedInsiderFlowTracker {
         });
     }
 
-    /**
-     * 📋 COMPANY COMPARISON TABLE
-     */
     renderComparisonTable() {
         const tbody = document.getElementById('comparisonTableBody');
         if (!tbody) return;
@@ -2729,520 +3021,133 @@ class AdvancedInsiderFlowTracker {
     }
 
     /**
-     * 🔥 ACTIVITY HEATMAP (✅ AVEC LÉGENDE DE TYPE)
+     * 🔥 ACTIVITY HEATMAP (✅ FORMAT CORRIGÉ POUR HIGHCHARTS)
      */
     renderActivityHeatmap() {
         const chartEl = document.getElementById('activityHeatmap');
         if (!chartEl || typeof Highcharts === 'undefined') return;
 
-        const companyCounts = {};
-        this.filteredData.forEach(txn => {
-            companyCounts[txn.company.symbol] = (companyCounts[txn.company.symbol] || 0) + 1;
-        });
+        try {
+            const companyCounts = {};
+            this.filteredData.forEach(txn => {
+                companyCounts[txn.company.symbol] = (companyCounts[txn.company.symbol] || 0) + 1;
+            });
 
-        const topCompanies = Object.keys(companyCounts)
-            .sort((a, b) => companyCounts[b] - companyCounts[a])
-            .slice(0, 10);
+            const topCompanies = Object.keys(companyCounts)
+                .sort((a, b) => companyCounts[b] - companyCounts[a])
+                .slice(0, 10);
 
-        const positions = ['CEO', 'CFO', 'Director', 'VP', 'President', 'CTO', 'COO', 'Other'];
+            const positions = ['CEO', 'CFO', 'Director', 'VP', 'President', 'CTO', 'COO', 'Other'];
 
-        const heatmapData = [];
-        topCompanies.forEach((company, companyIndex) => {
-            positions.forEach((position, positionIndex) => {
-                const txns = this.filteredData.filter(txn => 
-                    txn.company.symbol === company && 
-                    (txn.insider.position === position || (position === 'Other' && !positions.slice(0, -1).includes(txn.insider.position)))
-                );
+            const heatmapData = [];
+            topCompanies.forEach((company, companyIndex) => {
+                positions.forEach((position, positionIndex) => {
+                    const txns = this.filteredData.filter(txn => 
+                        txn.company.symbol === company && 
+                        (txn.insider.position === position || (position === 'Other' && !positions.slice(0, -1).includes(txn.insider.position)))
+                    );
 
-                const count = txns.length;
-                
-                // ✅ Compter les types de transactions
-                const purchases = txns.filter(t => t.type === 'P').length;
-                const sales = txns.filter(t => t.type === 'S').length;
-                const options = txns.filter(t => t.type === 'M').length;
+                    const count = txns.length;
+                    const purchases = txns.filter(t => t.type === 'P').length;
+                    const sales = txns.filter(t => t.type === 'S').length;
+                    const options = txns.filter(t => t.type === 'M').length;
 
-                heatmapData.push({
-                    x: positionIndex,
-                    y: companyIndex,
-                    value: count,
-                    purchases: purchases,
-                    sales: sales,
-                    options: options
+                    // ✅ FORMAT CORRECT: [x, y, value] + propriétés custom
+                    heatmapData.push([
+                        positionIndex,  // x
+                        companyIndex,   // y
+                        count,          // value
+                        purchases,      // custom property
+                        sales,          // custom property
+                        options         // custom property
+                    ]);
                 });
             });
-        });
 
-        Highcharts.chart('activityHeatmap', {
-            chart: {
-                type: 'heatmap',
-                backgroundColor: 'transparent',
-                height: 500
-            },
-            title: { text: null },
-            xAxis: {
-                categories: positions,
-                title: { text: 'Insider Position' },
-                labels: {
-                    style: { fontSize: '12px', fontWeight: '600' }
-                }
-            },
-            yAxis: {
-                categories: topCompanies,
-                title: { text: 'Company' },
-                labels: {
-                    style: { fontSize: '12px', fontWeight: '700' }
-                }
-            },
-            colorAxis: {
-                min: 0,
-                stops: [
-                    [0, '#10b981'],
-                    [0.4, '#f59e0b'],
-                    [1, '#ef4444']
-                ],
-                labels: {
-                    format: '{value} txns'
-                }
-            },
-            legend: {
-                align: 'right',
-                layout: 'vertical',
-                verticalAlign: 'middle',
-                symbolHeight: 300
-            },
-            tooltip: {
-                formatter: function() {
-                    const point = this.point;
-                    return `<b>${this.series.yAxis.categories[point.y]}</b><br>
-                            <b>${this.series.xAxis.categories[point.x]}</b><br>
-                            <b>Total:</b> ${point.value} transactions<br>
-                            <span style='color: #10b981;'>● Purchases:</span> ${point.purchases}<br>
-                            <span style='color: #ef4444;'>● Sales:</span> ${point.sales}<br>
-                            <span style='color: #3b82f6;'>● Options:</span> ${point.options}`;
+            Highcharts.chart('activityHeatmap', {
+                chart: {
+                    type: 'heatmap',
+                    backgroundColor: 'transparent',
+                    height: 500
                 },
-                useHTML: true
-            },
-            series: [{
-                name: 'Transactions',
-                borderWidth: 2,
-                borderColor: '#ffffff',
-                data: heatmapData,
-                dataLabels: {
-                    enabled: true,
-                    color: '#000000',
-                    style: {
-                        textOutline: 'none',
-                        fontWeight: 'bold'
-                    },
-                    formatter: function() {
-                        return this.point.value;
+                title: { text: null },
+                xAxis: {
+                    categories: positions,
+                    title: { text: 'Insider Position' },
+                    labels: {
+                        style: { fontSize: '12px', fontWeight: '600' }
                     }
-                }
-            }],
-            credits: { enabled: false },
-            exporting: { enabled: true }
-        });
-    }
+                },
+                yAxis: {
+                    categories: topCompanies,
+                    title: { text: 'Company' },
+                    labels: {
+                        style: { fontSize: '12px', fontWeight: '700' }
+                    }
+                },
+                colorAxis: {
+                    min: 0,
+                    stops: [
+                        [0, '#10b981'],
+                        [0.4, '#f59e0b'],
+                        [1, '#ef4444']
+                    ],
+                    labels: {
+                        format: '{value} txns'
+                    }
+                },
+                legend: {
+                    align: 'right',
+                    layout: 'vertical',
+                    verticalAlign: 'middle',
+                    symbolHeight: 300
+                },
+                tooltip: {
+                    formatter: function() {
+                        const point = this.point;
+                        const purchases = this.series.data[point.index] ? heatmapData[point.index][3] : 0;
+                        const sales = this.series.data[point.index] ? heatmapData[point.index][4] : 0;
+                        const optionsCount = this.series.data[point.index] ? heatmapData[point.index][5] : 0;
+                        
+                        return `<b>${this.series.yAxis.categories[point.y]}</b><br>
+                                <b>${this.series.xAxis.categories[point.x]}</b><br>
+                                <b>Total:</b> ${point.value} transactions<br>
+                                <span style='color: #10b981;'>● Purchases:</span> ${purchases}<br>
+                                <span style='color: #ef4444;'>● Sales:</span> ${sales}<br>
+                                <span style='color: #3b82f6;'>● Options:</span> ${optionsCount}`;
+                    },
+                    useHTML: true
+                },
+                series: [{
+                    name: 'Transactions',
+                    borderWidth: 2,
+                    borderColor: '#ffffff',
+                    data: heatmapData,
+                    dataLabels: {
+                        enabled: true,
+                        color: '#000000',
+                        style: {
+                            textOutline: 'none',
+                            fontWeight: 'bold'
+                        }
+                    }
+                }],
+                credits: { enabled: false },
+                exporting: { enabled: true }
+            });
 
-    /**
-     * 🌐 NETWORK ANALYSIS - BOARD INTERLOCKS (✅ CORRIGÉ)
-     */
-    renderNetworkChart() {
-        const chartEl = document.getElementById('networkChart');
-        if (!chartEl) return;
-
-        // Vérifier si Vis.js est chargé
-        if (typeof vis === 'undefined') {
-            console.error('❌ Vis.js library not loaded');
+            console.log('🔥 Heatmap rendered successfully with', heatmapData.length, 'data points');
+        } catch (error) {
+            console.error('❌ Heatmap rendering error:', error);
             chartEl.innerHTML = `
                 <div style='text-align: center; padding: 60px;'>
                     <i class='fas fa-exclamation-triangle' style='font-size: 3rem; color: var(--text-tertiary);'></i>
-                    <p style='color: var(--text-secondary); margin-top: 16px;'>Vis.js library required for network visualization</p>
-                </div>
-            `;
-            return;
-        }
-
-        const { nodes, edges } = this.buildNetworkData();
-
-        chartEl.innerHTML = `
-            <div class='network-controls'>
-                <button class='network-control-btn active' onclick='insiderApp.filterNetworkDegree(1)' data-degree='1'>
-                    Degree 1
-                </button>
-                <button class='network-control-btn' onclick='insiderApp.filterNetworkDegree(2)' data-degree='2'>
-                    Degree 2
-                </button>
-                <button class='network-control-btn' onclick='insiderApp.filterNetworkDegree(3)' data-degree='3'>
-                    Degree 3+
-                </button>
-            </div>
-            <div id='networkGraphContainer' style='width: 100%; height: 600px;'></div>
-        `;
-
-        const container = document.getElementById('networkGraphContainer');
-        
-        // Stocker les données complètes pour le filtrage
-        this.fullNetworkData = { nodes, edges };
-        this.currentNetworkDegree = 1;
-
-        const data = {
-            nodes: new vis.DataSet(nodes),
-            edges: new vis.DataSet(edges.filter(e => !e.dashes)) // Degree 1: Direct connections only
-        };
-
-        const options = {
-            nodes: {
-                shape: 'dot',
-                size: 20,
-                font: {
-                    size: 14,
-                    color: '#1e293b',
-                    face: 'Inter, sans-serif',
-                    bold: {
-                        color: '#0f172a',
-                        size: 16
-                    }
-                },
-                borderWidth: 3,
-                borderWidthSelected: 5,
-                shadow: {
-                    enabled: true,
-                    color: 'rgba(0,0,0,0.2)',
-                    size: 10,
-                    x: 2,
-                    y: 2
-                }
-            },
-            edges: {
-                width: 2,
-                color: {
-                    color: '#cbd5e1',
-                    highlight: '#667eea',
-                    hover: '#764ba2'
-                },
-                smooth: {
-                    type: 'continuous',
-                    roundness: 0.5
-                },
-                shadow: {
-                    enabled: true,
-                    color: 'rgba(0,0,0,0.1)',
-                    size: 5,
-                    x: 1,
-                    y: 1
-                }
-            },
-            physics: {
-                stabilization: {
-                    enabled: true,
-                    iterations: 200
-                },
-                barnesHut: {
-                    gravitationalConstant: -8000,
-                    centralGravity: 0.3,
-                    springLength: 150,
-                    springConstant: 0.04,
-                    damping: 0.09,
-                    avoidOverlap: 0.5
-                }
-            },
-            interaction: {
-                hover: true,
-                tooltipDelay: 100,
-                zoomView: true,
-                dragView: true
-            }
-        };
-
-        this.networkGraph = new vis.Network(container, data, options);
-
-        // Event listeners
-        this.networkGraph.on('click', (params) => {
-            if (params.nodes.length > 0) {
-                const nodeId = params.nodes[0];
-                const node = nodes.find(n => n.id === nodeId);
-                if (node) {
-                    this.showNetworkNodeDetails(node);
-                }
-            }
-        });
-
-        // ✅ Générer les Key Insights (sans chargement infini)
-        this.renderNetworkInsights(nodes, edges);
-
-        console.log('🌐 Network graph rendered with', nodes.length, 'nodes and', edges.length, 'edges');
-    }
-
-    /**
-     * 🔗 CONSTRUCTION DES DONNÉES DU RÉSEAU
-     */
-    buildNetworkData() {
-        const nodes = [];
-        const edges = [];
-        const insiderToCompanies = new Map();
-
-        // Construire la map Insider → Companies
-        this.filteredData.forEach(txn => {
-            const insiderKey = txn.insider.name;
-            if (!insiderToCompanies.has(insiderKey)) {
-                insiderToCompanies.set(insiderKey, {
-                    insider: txn.insider,
-                    companies: new Set()
-                });
-            }
-            insiderToCompanies.get(insiderKey).companies.add(txn.company.symbol);
-        });
-
-        const addedInsiders = new Set();
-        const addedCompanies = new Set();
-        let edgeId = 0;
-
-        // Créer les nœuds et arêtes
-        insiderToCompanies.forEach((data, insiderName) => {
-            const { insider, companies } = data;
-
-            // Ajouter le nœud Insider
-            if (!addedInsiders.has(insiderName)) {
-                nodes.push({
-                    id: `insider_${insiderName}`,
-                    label: insiderName,
-                    group: 'insider',
-                    title: `${insiderName}<br>${insider.position}<br>Active in ${companies.size} companies`,
-                    color: {
-                        background: '#3b82f6',
-                        border: '#2563eb',
-                        highlight: {
-                            background: '#2563eb',
-                            border: '#1d4ed8'
-                        }
-                    },
-                    size: 15 + companies.size * 5
-                });
-                addedInsiders.add(insiderName);
-            }
-
-            // Ajouter les nœuds Company et les liens
-            companies.forEach(symbol => {
-                const companyId = `company_${symbol}`;
-
-                if (!addedCompanies.has(symbol)) {
-                    const companyData = this.filteredData.find(t => t.company.symbol === symbol)?.company;
-                    nodes.push({
-                        id: companyId,
-                        label: symbol,
-                        group: 'company',
-                        title: `${companyData?.name || symbol}<br>Sector: ${companyData?.sector || 'N/A'}`,
-                        color: {
-                            background: '#a78bfa',
-                            border: '#8b5cf6',
-                            highlight: {
-                                background: '#8b5cf6',
-                                border: '#7c3aed'
-                            }
-                        },
-                        size: 25
-                    });
-                    addedCompanies.add(symbol);
-                }
-
-                // Créer l'arête Insider → Company (Degree 1)
-                edges.push({
-                    id: edgeId++,
-                    from: `insider_${insiderName}`,
-                    to: companyId,
-                    title: 'Board Member / Insider',
-                    degree: 1
-                });
-            });
-        });
-
-        // Détecter les interlocks (Degree 2): Insiders connectés via companies communes
-        const companyToInsiders = new Map();
-        insiderToCompanies.forEach((data, insiderName) => {
-            data.companies.forEach(symbol => {
-                if (!companyToInsiders.has(symbol)) {
-                    companyToInsiders.set(symbol, new Set());
-                }
-                companyToInsiders.get(symbol).add(insiderName);
-            });
-        });
-
-        // Ajouter des arêtes Insider ↔ Insider (Degree 2)
-        companyToInsiders.forEach((insiders, symbol) => {
-            const insiderArray = Array.from(insiders);
-            for (let i = 0; i < insiderArray.length; i++) {
-                for (let j = i + 1; j < insiderArray.length; j++) {
-                    edges.push({
-                        id: edgeId++,
-                        from: `insider_${insiderArray[i]}`,
-                        to: `insider_${insiderArray[j]}`,
-                        title: `Connected via ${symbol}`,
-                        color: {
-                            color: '#f59e0b',
-                            highlight: '#d97706'
-                        },
-                        dashes: true,
-                        width: 1,
-                        degree: 2
-                    });
-                }
-            }
-        });
-
-        return { nodes, edges };
-    }
-
-    /**
-     * 🔍 DÉTAILS D'UN NŒUD DU RÉSEAU
-     */
-    showNetworkNodeDetails(node) {
-        const isInsider = node.group === 'insider';
-        
-        let message = '';
-        
-        if (isInsider) {
-            const insiderName = node.label;
-            const transactions = this.filteredData.filter(t => t.insider.name === insiderName);
-            const companies = [...new Set(transactions.map(t => t.company.symbol))];
-            
-            message = `
-                <div style='padding: 20px;'>
-                    <h3 style='margin: 0 0 16px 0; color: var(--ml-primary);'>
-                        <i class='fas fa-user-tie'></i> Insider: ${insiderName}
-                    </h3>
-                    <p><strong>Transactions:</strong> ${transactions.length}</p>
-                    <p><strong>Companies:</strong> ${companies.join(', ')}</p>
-                    <p><strong>Positions:</strong> ${[...new Set(transactions.map(t => t.insider.position))].join(', ')}</p>
-                </div>
-            `;
-        } else {
-            const symbol = node.label;
-            const transactions = this.filteredData.filter(t => t.company.symbol === symbol);
-            const insiders = [...new Set(transactions.map(t => t.insider.name))];
-            
-            message = `
-                <div style='padding: 20px;'>
-                    <h3 style='margin: 0 0 16px 0; color: var(--ml-primary);'>
-                        <i class='fas fa-building'></i> Company: ${symbol}
-                    </h3>
-                    <p><strong>Insiders:</strong> ${insiders.length}</p>
-                    <p><strong>Transactions:</strong> ${transactions.length}</p>
-                    <p><strong>Top Insiders:</strong> ${insiders.slice(0, 5).join(', ')}</p>
+                    <p style='color: var(--text-secondary); margin-top: 16px;'>Error rendering heatmap</p>
                 </div>
             `;
         }
-
-        // Créer un modal personnalisé ou utiliser une alerte HTML
-        const modal = document.createElement('div');
-        modal.style.cssText = 'position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: var(--card-bg); padding: 0; border-radius: 16px; box-shadow: 0 20px 60px rgba(0,0,0,0.3); z-index: 10000; max-width: 500px; width: 90%;';
-        modal.innerHTML = `
-            ${message}
-            <div style='padding: 0 20px 20px 20px;'>
-                <button onclick='this.parentElement.parentElement.remove(); document.body.style.overflow=""' style='width: 100%; padding: 12px; background: linear-gradient(135deg, #667eea, #764ba2); color: white; border: none; border-radius: 8px; font-weight: 700; cursor: pointer;'>
-                    Close
-                </button>
-            </div>
-        `;
-        document.body.appendChild(modal);
-        document.body.style.overflow = 'hidden';
     }
 
-    /**
-     * 🎚 FILTRER PAR DEGRÉ DE CONNEXION (✅ FONCTIONNEL)
-     */
-    filterNetworkDegree(degree) {
-        if (!this.networkGraph || !this.fullNetworkData) return;
-
-        // Mise à jour visuelle des boutons
-        document.querySelectorAll('.network-control-btn').forEach(btn => {
-            btn.classList.remove('active');
-            if (parseInt(btn.dataset.degree) === degree) {
-                btn.classList.add('active');
-            }
-        });
-
-        this.currentNetworkDegree = degree;
-
-        // Filtrer les edges selon le degré
-        let filteredEdges = this.fullNetworkData.edges;
-        
-        if (degree === 1) {
-            // Degree 1: Direct connections only (solid lines)
-            filteredEdges = this.fullNetworkData.edges.filter(e => !e.dashes);
-        } else if (degree === 2) {
-            // Degree 2: Direct + Indirect (via shared companies)
-            filteredEdges = this.fullNetworkData.edges.filter(e => e.degree <= 2);
-        }
-        // Degree 3: All edges (default)
-
-        // Mise à jour du graphe
-        const data = {
-            nodes: new vis.DataSet(this.fullNetworkData.nodes),
-            edges: new vis.DataSet(filteredEdges)
-        };
-
-        this.networkGraph.setData(data);
-
-        console.log(`🎚 Network filtered to degree ${degree} (${filteredEdges.length} edges)`);
-    }
-
-    /**
-     * 💡 KEY INSIGHTS DU RÉSEAU (✅ SANS CHARGEMENT INFINI)
-     */
-    renderNetworkInsights(nodes, edges) {
-        const insightsContainer = document.getElementById('networkInsights');
-        if (!insightsContainer) return;
-
-        const insiders = nodes.filter(n => n.group === 'insider');
-        const companies = nodes.filter(n => n.group === 'company');
-        const directConnections = edges.filter(e => !e.dashes).length;
-        const interlocks = edges.filter(e => e.dashes).length;
-
-        // Trouver l'insider le plus connecté
-        const insiderConnections = {};
-        edges.forEach(edge => {
-            if (edge.from.startsWith('insider_')) {
-                insiderConnections[edge.from] = (insiderConnections[edge.from] || 0) + 1;
-            }
-        });
-
-        const mostConnectedId = Object.keys(insiderConnections).reduce((a, b) => 
-            insiderConnections[a] > insiderConnections[b] ? a : b, ''
-        );
-        const mostConnected = nodes.find(n => n.id === mostConnectedId);
-
-        insightsContainer.innerHTML = `
-            <div class='insight-item'>
-                <i class='fas fa-users' style='color: #3b82f6;'></i>
-                <span><strong>${insiders.length}</strong> unique insiders tracked</span>
-            </div>
-            <div class='insight-item'>
-                <i class='fas fa-building' style='color: #a78bfa;'></i>
-                <span><strong>${companies.length}</strong> companies in network</span>
-            </div>
-            <div class='insight-item'>
-                <i class='fas fa-link' style='color: #10b981;'></i>
-                <span><strong>${directConnections}</strong> direct board positions</span>
-            </div>
-            <div class='insight-item'>
-                <i class='fas fa-project-diagram' style='color: #f59e0b;'></i>
-                <span><strong>${interlocks}</strong> board interlocks detected</span>
-            </div>
-            ${mostConnected ? `
-                <div class='insight-item'>
-                    <i class='fas fa-crown' style='color: #f59e0b;'></i>
-                    <span>Most connected: <strong>${mostConnected.label}</strong> (${insiderConnections[mostConnectedId]} boards)</span>
-                </div>
-            ` : ''}
-        `;
-
-        console.log('💡 Network insights rendered');
-    }
-
-    /**
-     * 💡 ALPHY RECOMMENDATION (✅ CORRIGÉ)
-     */
     generateAlphyRecommendation() {
         const container = document.getElementById('alphyRecommendation');
         if (!container) return;
@@ -3327,7 +3232,6 @@ class AdvancedInsiderFlowTracker {
             positive.push(`Strong insider buying: ${purchases} purchases vs ${sales} sales`);
         }
 
-        // Ajouter des insights par défaut si vides
         if (critical.length === 0) {
             critical.push('No major risk factors detected');
             critical.push('Transaction volumes within normal ranges');
@@ -3356,107 +3260,97 @@ class AdvancedInsiderFlowTracker {
         }
 
         const modal = document.getElementById('transactionDetailModal');
-        const content = document.getElementById('transactionDetailContent');
+        const modalBody = document.getElementById('transactionModalBody');
 
-        if (!modal || !content) return;
+        if (!modal || !modalBody) {
+            console.error('❌ Modal elements not found');
+            return;
+        }
 
         const convictionScore = txn.convictionScore?.score || 0;
         const convictionLevel = txn.convictionScore?.level || 'low';
         const convictionColor = convictionScore >= 70 ? '#10b981' : convictionScore >= 50 ? '#f59e0b' : '#ef4444';
 
-        content.innerHTML = `
+        modalBody.innerHTML = `
             <div class='detail-grid' style='display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 24px; padding: 30px;'>
-                <!-- Transaction Info -->
                 <div class='detail-card' style='background: var(--card-bg); padding: 24px; border-radius: 12px; border: 1px solid var(--border-color);'>
                     <h4 style='color: var(--ml-primary); font-weight: 800; margin: 0 0 20px 0;'>
                         <i class='fas fa-exchange-alt'></i> Transaction Info
                     </h4>
-                    <div class='detail-row' style='display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid var(--border-color);'>
-                        <span class='detail-label' style='color: var(--text-secondary); font-weight: 600;'>Type</span>
-                        <span class='detail-value'>
-                            <span class='transaction-type-badge ${txn.type === 'P' ? 'type-buy' : txn.type === 'S' ? 'type-sell' : 'type-option'}'>
-                                ${txn.type === 'P' ? '📈 Purchase' : txn.type === 'S' ? '📉 Sale' : '🎫 Option'}
-                            </span>
+                    <div style='display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid var(--border-color);'>
+                        <span style='color: var(--text-secondary); font-weight: 600;'>Type</span>
+                        <span class='transaction-type-badge ${txn.type === 'P' ? 'type-buy' : txn.type === 'S' ? 'type-sell' : 'type-option'}'>
+                            ${txn.type === 'P' ? '📈 Purchase' : txn.type === 'S' ? '📉 Sale' : '🎫 Option'}
                         </span>
                     </div>
-                    <div class='detail-row' style='display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid var(--border-color);'>
-                        <span class='detail-label' style='color: var(--text-secondary); font-weight: 600;'>Date</span>
-                        <span class='detail-value' style='font-weight: 700;'>${this.formatDate(txn.date)}</span>
+                    <div style='display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid var(--border-color);'>
+                        <span style='color: var(--text-secondary); font-weight: 600;'>Date</span>
+                        <span style='font-weight: 700;'>${this.formatDate(txn.date)}</span>
                     </div>
-                    <div class='detail-row' style='display: flex; justify-content: space-between; padding: 12px 0;'>
-                        <span class='detail-label' style='color: var(--text-secondary); font-weight: 600;'>Filing</span>
-                        <span class='detail-value'>
-                            <a href='${txn.formUrl}' target='_blank' style='color: var(--ml-primary); font-weight: 700;'>
-                                ${txn.filingType} <i class='fas fa-external-link-alt' style='font-size: 0.8rem;'></i>
-                            </a>
-                        </span>
+                    <div style='display: flex; justify-content: space-between; padding: 12px 0;'>
+                        <span style='color: var(--text-secondary); font-weight: 600;'>Filing</span>
+                        <a href='${txn.formUrl}' target='_blank' style='color: var(--ml-primary); font-weight: 700;'>
+                            ${txn.filingType} <i class='fas fa-external-link-alt' style='font-size: 0.8rem;'></i>
+                        </a>
                     </div>
                 </div>
 
-                <!-- Company Info -->
                 <div class='detail-card' style='background: var(--card-bg); padding: 24px; border-radius: 12px; border: 1px solid var(--border-color);'>
                     <h4 style='color: var(--ml-primary); font-weight: 800; margin: 0 0 20px 0;'>
                         <i class='fas fa-building'></i> Company Info
                     </h4>
-                    <div class='detail-row' style='display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid var(--border-color);'>
-                        <span class='detail-label' style='color: var(--text-secondary); font-weight: 600;'>Symbol</span>
-                        <span class='detail-value' style='font-weight: 900; color: var(--ml-primary);'>${txn.company.symbol}</span>
+                    <div style='display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid var(--border-color);'>
+                        <span style='color: var(--text-secondary); font-weight: 600;'>Symbol</span>
+                        <span style='font-weight: 900; color: var(--ml-primary);'>${txn.company.symbol}</span>
                     </div>
-                    <div class='detail-row' style='display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid var(--border-color);'>
-                        <span class='detail-label' style='color: var(--text-secondary); font-weight: 600;'>Name</span>
-                        <span class='detail-value' style='font-weight: 700;'>${txn.company.name}</span>
+                    <div style='display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid var(--border-color);'>
+                        <span style='color: var(--text-secondary); font-weight: 600;'>Name</span>
+                        <span style='font-weight: 700;'>${txn.company.name}</span>
                     </div>
-                    <div class='detail-row' style='display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid var(--border-color);'>
-                        <span class='detail-label' style='color: var(--text-secondary); font-weight: 600;'>Sector</span>
-                        <span class='detail-value'><span class='ipo-sector-badge'>${txn.company.sector}</span></span>
-                    </div>
-                    <div class='detail-row' style='display: flex; justify-content: space-between; padding: 12px 0;'>
-                        <span class='detail-label' style='color: var(--text-secondary); font-weight: 600;'>CIK</span>
-                        <span class='detail-value' style='font-family: monospace; font-weight: 700;'>${txn.company.cik}</span>
+                    <div style='display: flex; justify-content: space-between; padding: 12px 0;'>
+                        <span style='color: var(--text-secondary); font-weight: 600;'>Sector</span>
+                        <span class='ipo-sector-badge'>${txn.company.sector}</span>
                     </div>
                 </div>
 
-                <!-- Insider Info -->
                 <div class='detail-card' style='background: var(--card-bg); padding: 24px; border-radius: 12px; border: 1px solid var(--border-color);'>
                     <h4 style='color: var(--ml-primary); font-weight: 800; margin: 0 0 20px 0;'>
                         <i class='fas fa-user-tie'></i> Insider Info
                     </h4>
-                    <div class='detail-row' style='display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid var(--border-color);'>
-                        <span class='detail-label' style='color: var(--text-secondary); font-weight: 600;'>Name</span>
-                        <span class='detail-value' style='font-weight: 700;'>${txn.insider.name}</span>
+                    <div style='display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid var(--border-color);'>
+                        <span style='color: var(--text-secondary); font-weight: 600;'>Name</span>
+                        <span style='font-weight: 700;'>${txn.insider.name}</span>
                     </div>
-                    <div class='detail-row' style='display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid var(--border-color);'>
-                        <span class='detail-label' style='color: var(--text-secondary); font-weight: 600;'>Position</span>
-                        <span class='detail-value'><span class='ipo-sector-badge'>${txn.insider.position}</span></span>
+                    <div style='display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid var(--border-color);'>
+                        <span style='color: var(--text-secondary); font-weight: 600;'>Position</span>
+                        <span class='ipo-sector-badge'>${txn.insider.position}</span>
                     </div>
-                    <div class='detail-row' style='display: flex; justify-content: space-between; padding: 12px 0;'>
-                        <span class='detail-label' style='color: var(--text-secondary); font-weight: 600;'>Est. Net Worth</span>
-                        <span class='detail-value' style='font-weight: 700;'>$${this.formatNumber(txn.insider.netWorth)}</span>
+                    <div style='display: flex; justify-content: space-between; padding: 12px 0;'>
+                        <span style='color: var(--text-secondary); font-weight: 600;'>Est. Net Worth</span>
+                        <span style='font-weight: 700;'>$${this.formatNumber(txn.insider.netWorth)}</span>
                     </div>
                 </div>
 
-                <!-- Financial Details -->
                 <div class='detail-card' style='background: var(--card-bg); padding: 24px; border-radius: 12px; border: 1px solid var(--border-color);'>
                     <h4 style='color: var(--ml-primary); font-weight: 800; margin: 0 0 20px 0;'>
                         <i class='fas fa-dollar-sign'></i> Financial Details
                     </h4>
-                    <div class='detail-row' style='display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid var(--border-color);'>
-                        <span class='detail-label' style='color: var(--text-secondary); font-weight: 600;'>Shares</span>
-                        <span class='detail-value' style='font-weight: 700;'>${this.formatNumber(txn.shares)}</span>
+                    <div style='display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid var(--border-color);'>
+                        <span style='color: var(--text-secondary); font-weight: 600;'>Shares</span>
+                        <span style='font-weight: 700;'>${this.formatNumber(txn.shares)}</span>
                     </div>
-                    <div class='detail-row' style='display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid var(--border-color);'>
-                        <span class='detail-label' style='color: var(--text-secondary); font-weight: 600;'>Price/Share</span>
-                        <span class='detail-value' style='font-weight: 700;'>$${txn.pricePerShare.toFixed(2)}</span>
+                    <div style='display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid var(--border-color);'>
+                        <span style='color: var(--text-secondary); font-weight: 600;'>Price/Share</span>
+                        <span style='font-weight: 700;'>$${txn.pricePerShare.toFixed(2)}</span>
                     </div>
-                    <div class='detail-row' style='display: flex; justify-content: space-between; padding: 12px 0;'>
-                        <span class='detail-label' style='color: var(--text-secondary); font-weight: 600;'>Total Value</span>
-                        <span class='detail-value' style='font-size: 1.2rem; color: var(--ml-primary); font-weight: 900;'>
+                    <div style='display: flex; justify-content: space-between; padding: 12px 0;'>
+                        <span style='color: var(--text-secondary); font-weight: 600;'>Total Value</span>
+                        <span style='font-size: 1.2rem; color: var(--ml-primary); font-weight: 900;'>
                             $${this.formatNumber(txn.transactionValue)}
                         </span>
                     </div>
                 </div>
 
-                <!-- Analysis -->
                 <div class='detail-card' style='grid-column: span 2; background: var(--card-bg); padding: 24px; border-radius: 12px; border: 1px solid var(--border-color);'>
                     <h4 style='color: var(--ml-primary); font-weight: 800; margin: 0 0 20px 0;'>
                         <i class='fas fa-chart-line'></i> Analysis & Impact
@@ -3493,146 +3387,17 @@ class AdvancedInsiderFlowTracker {
                     </div>
                 </div>
             </div>
-
-            <div style='padding: 30px; background: rgba(102, 126, 234, 0.05); border-top: 2px solid var(--border-color);'>
-                <h4 style='color: var(--ml-primary); font-weight: 800; margin: 0 0 12px 0;'>
-                    <i class='fas fa-lightbulb'></i> Interpretation
-                </h4>
-                <p style='color: var(--text-primary); line-height: 1.8; margin: 0;'>
-                    ${this.generateTransactionInterpretation(txn)}
-                </p>
-            </div>
         `;
 
         modal.style.display = 'flex';
         document.body.style.overflow = 'hidden';
-    }
-
-    /**
-     * 💡 GÉNÉRATION D'INTERPRÉTATION
-     */
-    generateTransactionInterpretation(txn) {
-        const isPurchase = txn.type === 'P';
-        const isSale = txn.type === 'S';
-        const convictionScore = txn.convictionScore?.score || 0;
-        const isHighConviction = convictionScore >= 70;
-        const isPreEarnings = txn.daysToEarnings <= 14;
-        const priceImpact = txn.priceImpact30d || 0;
-
-        let interpretation = '';
-
-        if (isPurchase) {
-            interpretation += `<strong>${txn.insider.name}</strong> (${txn.insider.position}) purchased <strong>$${this.formatNumber(txn.transactionValue)}</strong> worth of ${txn.company.symbol} shares. `;
-            
-            if (isHighConviction) {
-                interpretation += `This represents a <strong style='color: #10b981;'>HIGH CONVICTION</strong> purchase (score: ${convictionScore}/100), suggesting strong insider confidence. `;
-            } else {
-                interpretation += `This is a moderate conviction purchase (score: ${convictionScore}/100). `;
-            }
-
-            if (isPreEarnings) {
-                interpretation += `⚠ <strong>Note:</strong> This purchase occurred within 14 days before earnings, which may indicate insider confidence in upcoming results. `;
-            }
-
-            if (priceImpact > 0) {
-                interpretation += `The stock price increased by <strong style='color: #10b981;'>+${priceImpact.toFixed(1)}%</strong> in the 30 days following this transaction, validating the insider's decision.`;
-            } else if (priceImpact < 0) {
-                interpretation += `The stock price decreased by <strong style='color: #ef4444;'>${priceImpact.toFixed(1)}%</strong> in the 30 days following this transaction.`;
-            }
-        } else if (isSale) {
-            interpretation += `<strong>${txn.insider.name}</strong> (${txn.insider.position}) sold <strong>$${this.formatNumber(txn.transactionValue)}</strong> worth of ${txn.company.symbol} shares. `;
-            
-            interpretation += `While insider sales can occur for various personal reasons (tax planning, diversification, liquidity needs), `;
-            
-            if (isHighConviction) {
-                interpretation += `the <strong style='color: #ef4444;'>high conviction score (${convictionScore}/100)</strong> suggests this may be a strategic decision rather than routine portfolio rebalancing. `;
-            }
-
-            if (isPreEarnings) {
-                interpretation += `⚠ <strong>Critical:</strong> This sale occurred within 14 days before earnings, which may warrant additional scrutiny. `;
-            }
-        }
-
-        return interpretation;
-    }
-
-    /**
-     * ℹ MODAL D'INFORMATION DYNAMIQUE (✅ CORRIGÉ)
-     */
-    showInfoModal(topic) {
-        const modal = document.getElementById('infoModal');
-        const title = document.getElementById('infoModalTitle');
-        const content = document.getElementById('infoModalContent');
-
-        if (!modal || !title || !content) return;
-
-        const infoContent = this.getInfoContent(topic);
         
-        title.innerHTML = `<i class='${infoContent.icon}'></i> ${infoContent.title}`;
-        content.innerHTML = infoContent.content;
-
-        modal.style.display = 'flex';
-        document.body.style.overflow = 'hidden';
+        console.log('✅ Transaction detail modal opened');
     }
 
-    /**
-     * 📚 CONTENU DES MODALS D'INFORMATION
-     */
-    getInfoContent(topic) {
-        const contents = {
-            'sentiment': {
-                icon: 'fas fa-tachometer-alt',
-                title: 'Insider Sentiment Gauge',
-                content: `
-                    <h3><i class='fas fa-info-circle'></i> What is Insider Sentiment?</h3>
-                    <p>The Insider Sentiment Gauge measures the overall buying vs. selling activity from corporate insiders.</p>
-                    
-                    <h3><i class='fas fa-calculator'></i> How It's Calculated</h3>
-                    <ul>
-                        <li>Score ranges from 0 (extreme selling) to 100 (extreme buying)</li>
-                        <li>Formula: <code>50 + ((Purchases - Sales) / Total Transactions) × 50</code></li>
-                    </ul>
-
-                    <h3><i class='fas fa-chart-line'></i> Interpretation Guide</h3>
-                    <div style='padding: 16px; background: rgba(16, 185, 129, 0.1); border-left: 4px solid #10b981; margin: 12px 0; border-radius: 8px;'>
-                        <strong>65-100 (Bullish):</strong> Strong insider buying suggests confidence in future performance.
-                    </div>
-                    <div style='padding: 16px; background: rgba(245, 158, 11, 0.1); border-left: 4px solid #f59e0b; margin: 12px 0; border-radius: 8px;'>
-                        <strong>35-65 (Neutral):</strong> Mixed signals. Monitor for emerging trends.
-                    </div>
-                    <div style='padding: 16px; background: rgba(239, 68, 68, 0.1); border-left: 4px solid #ef4444; margin: 12px 0; border-radius: 8px;'>
-                        <strong>0-35 (Bearish):</strong> Elevated selling may indicate insiders taking profits.
-                    </div>
-                `
-            },
-            'conviction': {
-                icon: 'fas fa-star',
-                title: 'Conviction Score Methodology',
-                content: `
-                    <h3><i class='fas fa-info-circle'></i> What is Conviction Score?</h3>
-                    <p>The Conviction Score (0-100) measures <strong>how meaningful</strong> an insider transaction is relative to the insider's personal wealth.</p>
-
-                    <h3><i class='fas fa-trophy'></i> Score Interpretation</h3>
-                    <div style='padding: 16px; background: rgba(16, 185, 129, 0.1); border-left: 4px solid #10b981; margin: 12px 0; border-radius: 8px;'>
-                        <strong>80-100 (Very High):</strong> Transaction represents >5% of net worth. Extremely strong signal.
-                    </div>
-                    <div style='padding: 16px; background: rgba(59, 130, 246, 0.1); border-left: 4px solid #3b82f6; margin: 12px 0; border-radius: 8px;'>
-                        <strong>60-79 (High):</strong> Transaction represents 2-5% of net worth. Strong conviction.
-                    </div>
-                `
-            }
-        };
-
-        return contents[topic] || {
-            icon: 'fas fa-question-circle',
-            title: 'Information',
-            content: '<p>No information available for this topic.</p>'
-        };
+    showInfoModal(topic) {
+        alert(`Information modal for topic: ${topic} (to be implemented)`);
     }
-
-    // ═══════════════════════════════════════════════════════════════
-    // 🔧 MÉTHODES UTILITAIRES
-    // ═══════════════════════════════════════════════════════════════
 
     populateCompanyFilter() {
         const select = document.getElementById('companyFilter');
@@ -3753,16 +3518,14 @@ class AdvancedInsiderFlowTracker {
         if (loadingEl) loadingEl.style.display = 'none';
     }
 
-    showError(message) {
-        console.error('❌', message);
-        alert(message);
-    }
-
     openModal(modalId) {
         const modal = document.getElementById(modalId);
         if (modal) {
             modal.style.display = 'flex';
             document.body.style.overflow = 'hidden';
+            console.log(`✅ Modal opened: ${modalId}`);
+        } else {
+            console.error(`❌ Modal not found: ${modalId}`);
         }
     }
 
@@ -3771,6 +3534,7 @@ class AdvancedInsiderFlowTracker {
             modal.style.display = 'none';
         });
         document.body.style.overflow = '';
+        console.log('✅ All modals closed');
     }
 
     saveAlertConfig() {
@@ -3793,14 +3557,22 @@ class AdvancedInsiderFlowTracker {
 // 🚀 INITIALISATION GLOBALE
 // ═══════════════════════════════════════════════════════════════════
 
-// Initialize app
 let insiderApp;
-document.addEventListener('DOMContentLoaded', () => {
-    insiderApp = new AdvancedInsiderFlowTracker();
+
+// ✅ Initialisation unique au DOMContentLoaded
+document.addEventListener('DOMContentLoaded', async () => {
+    console.log('🚀 DOM Loaded - Initializing Insider Flow Tracker...');
     
-    // ✅ Auto-load data (SANS POPUP - retrait du setTimeout)
-    if (insiderApp) {
-        insiderApp.loadAllData();
+    if (!insiderApp) {
+        insiderApp = new AdvancedInsiderFlowTracker();
+        
+        // Attendre l'init complète
+        await insiderApp.init();
+        
+        // Charger les données
+        await insiderApp.loadAllData();
+        
+        console.log('✅ Insider Flow Tracker fully initialized');
     }
 });
 

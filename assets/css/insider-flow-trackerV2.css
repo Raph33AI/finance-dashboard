@@ -1679,3 +1679,66 @@ body.dark-mode .detail-card {
 body.dark-mode .network-control-btn {
     background: rgba(30, 41, 59, 0.95);
 }
+
+/* ✅ Force tous les modals cachés par défaut */
+.modal {
+    display: none !important;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    z-index: 9999;
+    align-items: center;
+    justify-content: center;
+    overflow-y: auto;
+}
+
+.modal[style*="display: flex"] {
+    display: flex !important;
+}
+
+/* Network controls */
+.network-controls {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    padding: 16px 0;
+}
+
+.network-control-btn {
+    padding: 10px 24px;
+    background: var(--card-bg);
+    border: 2px solid var(--border-color);
+    border-radius: 8px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.network-control-btn.active {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    border-color: transparent;
+}
+
+.network-control-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* Insight items */
+.insight-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px;
+    background: var(--card-bg);
+    border-radius: 8px;
+    margin-bottom: 8px;
+}
+
+.insight-item i {
+    font-size: 1.5rem;
+}
