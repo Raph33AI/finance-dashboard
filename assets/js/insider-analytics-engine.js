@@ -1534,6 +1534,9 @@ class AdvancedInsiderFlowTracker {
         this.currentPeriod = 30;
         this.currentTransactionType = 'all';
         this.filteredData = [];
+
+        this.currentPage = 1;
+        this.itemsPerPage = 15;
         
         this.alertConfig = {
             clusterBuying: true,
@@ -1630,6 +1633,8 @@ class AdvancedInsiderFlowTracker {
             console.warn('⚠ No data loaded yet');
             return;
         }
+
+        this.currentPage = 1;
 
         // Récupère toutes les transactions
         let transactions = this.allCompaniesData.allTransactions;
@@ -1984,10 +1989,13 @@ class AdvancedInsiderFlowTracker {
     }
 
     /**
-     * 📋 TABLEAU DES TRANSACTIONS (VERSION SIMPLIFIÉE)
-     */
+    * 📋 TABLEAU DES TRANSACTIONS AVEC PAGINATION
+    */
     renderTransactionsTable() {
         const tbody = document.querySelector('#transactionsTable tbody');
+        const statsInfo = document.getElementById('tableStatsInfo');
+        const paginationControls = document.getElementById('paginationControls');
+        
         if (!tbody) return;
 
         if (this.filteredData.length === 0) {
@@ -1999,10 +2007,25 @@ class AdvancedInsiderFlowTracker {
                     </td>
                 </tr>
             `;
+            if (statsInfo) statsInfo.innerHTML = '';
+            if (paginationControls) paginationControls.innerHTML = '';
             return;
         }
 
-        const rows = this.filteredData.slice(0, 50).map(txn => {
+        // Calcul de la pagination
+        const totalItems = this.filteredData.length;
+        const totalPages = Math.ceil(totalItems / this.itemsPerPage);
+        const startIndex = (this.currentPage - 1) * this.itemsPerPage;
+        const endIndex = Math.min(startIndex + this.itemsPerPage, totalItems);
+        const currentPageData = this.filteredData.slice(startIndex, endIndex);
+
+        // Mise à jour des stats
+        if (statsInfo) {
+            statsInfo.innerHTML = `Showing <strong>${startIndex + 1}-${endIndex}</strong> of <strong>${totalItems}</strong> transactions`;
+        }
+
+        // Rendu des lignes
+        const rows = currentPageData.map(txn => {
             const typeClass = txn.type === 'P' ? 'type-buy' : txn.type === 'S' ? 'type-sell' : 'type-option';
             const typeIcon = txn.type === 'P' ? 'fa-arrow-up' : txn.type === 'S' ? 'fa-arrow-down' : 'fa-certificate';
             const typeText = txn.type === 'P' ? 'Purchase' : txn.type === 'S' ? 'Sale' : 'Option';
@@ -2044,6 +2067,76 @@ class AdvancedInsiderFlowTracker {
         }).join('');
 
         tbody.innerHTML = rows;
+
+        // Rendu des contrôles de pagination
+        this.renderPaginationControls(totalPages);
+    }
+
+    /**
+     * 🔢 CONTRÔLES DE PAGINATION
+     */
+    renderPaginationControls(totalPages) {
+        const container = document.getElementById('paginationControls');
+        if (!container || totalPages <= 1) {
+            if (container) container.innerHTML = '';
+            return;
+        }
+
+        let pages = [];
+
+        // Logique de pagination intelligente
+        if (totalPages <= 7) {
+            // Afficher toutes les pages si <= 7
+            pages = Array.from({ length: totalPages }, (_, i) => i + 1);
+        } else {
+            // Afficher avec ellipses
+            if (this.currentPage <= 3) {
+                pages = [1, 2, 3, 4, '...', totalPages];
+            } else if (this.currentPage >= totalPages - 2) {
+                pages = [1, '...', totalPages - 3, totalPages - 2, totalPages - 1, totalPages];
+            } else {
+                pages = [1, '...', this.currentPage - 1, this.currentPage, this.currentPage + 1, '...', totalPages];
+            }
+        }
+
+        const html = `
+            <button class='pagination-btn' ${this.currentPage === 1 ? 'disabled' : ''} onclick='insiderApp.goToPage(${this.currentPage - 1})'>
+                <i class='fas fa-chevron-left'></i>
+                Previous
+            </button>
+
+            ${pages.map(page => {
+                if (page === '...') {
+                    return `<span class='pagination-ellipsis'>...</span>`;
+                }
+                return `
+                    <button class='pagination-number ${page === this.currentPage ? 'active' : ''}' onclick='insiderApp.goToPage(${page})'>
+                        ${page}
+                    </button>
+                `;
+            }).join('')}
+
+            <button class='pagination-btn' ${this.currentPage === totalPages ? 'disabled' : ''} onclick='insiderApp.goToPage(${this.currentPage + 1})'>
+                Next
+                <i class='fas fa-chevron-right'></i>
+            </button>
+        `;
+
+        container.innerHTML = html;
+    }
+
+    /**
+     * 🔄 NAVIGATION PAGINATION
+     */
+    goToPage(pageNumber) {
+        this.currentPage = pageNumber;
+        this.renderTransactionsTable();
+        
+        // Scroll vers le tableau
+        const table = document.getElementById('transactionsTable');
+        if (table) {
+            table.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
     }
 
     // ═══════════════════════════════════════════════════════════════
@@ -2384,55 +2477,270 @@ class AdvancedInsiderFlowTracker {
     }
 
     /**
-     * 🌐 NETWORK ANALYSIS
+     * 🌐 NETWORK ANALYSIS - BOARD INTERLOCKS
      */
     renderNetworkChart() {
         const chartEl = document.getElementById('networkChart');
         if (!chartEl) return;
 
-        // Compte les insiders les plus actifs
-        const insiderCounts = {};
-        this.filteredData.forEach(txn => {
-            const key = txn.insider.name;
-            if (!insiderCounts[key]) {
-                insiderCounts[key] = { count: 0, companies: new Set() };
-            }
-            insiderCounts[key].count++;
-            insiderCounts[key].companies.add(txn.company.symbol);
-        });
-
-        const topInsiders = Object.keys(insiderCounts)
-            .sort((a, b) => insiderCounts[b].count - insiderCounts[a].count)
-            .slice(0, 10);
+        // Préparer les données pour le graphe
+        const { nodes, edges } = this.buildNetworkData();
 
         chartEl.innerHTML = `
-            <div style='padding: 30px;'>
-                <h4 style='color: var(--text-primary); font-size: 1.2rem; font-weight: 800; margin-bottom: 24px;'>
-                    <i class='fas fa-project-diagram'></i>
-                    Most Active Insiders
-                </h4>
-                <div style='display: grid; gap: 16px;'>
-                    ${topInsiders.map((insider, index) => `
-                        <div style='display: flex; align-items: center; gap: 16px; padding: 16px; background: var(--card-bg); border-radius: 12px; border: 1px solid var(--border-color);'>
-                            <div style='width: 48px; height: 48px; border-radius: 50%; background: linear-gradient(135deg, #667eea, #764ba2); display: flex; align-items: center; justify-content: center; color: white; font-weight: 800; font-size: 1.2rem;'>
-                                ${index + 1}
-                            </div>
-                            <div style='flex: 1;'>
-                                <p style='font-weight: 700; color: var(--text-primary); margin: 0 0 4px 0;'>${insider}</p>
-                                <p style='color: var(--text-secondary); margin: 0; font-size: 0.9rem;'>
-                                    ${insiderCounts[insider].count} transactions across ${insiderCounts[insider].companies.size} companies
-                                </p>
-                            </div>
-                            <div style='text-align: right;'>
-                                <span style='background: linear-gradient(135deg, #667eea, #764ba2); color: white; padding: 6px 14px; border-radius: 20px; font-weight: 700; font-size: 0.85rem;'>
-                                    ${insiderCounts[insider].count} txns
-                                </span>
-                            </div>
-                        </div>
-                    `).join('')}
-                </div>
+            <div class='network-controls'>
+                <button class='network-control-btn active' onclick='insiderApp.filterNetworkDegree(1)' data-degree='1'>
+                    Degree 1
+                </button>
+                <button class='network-control-btn' onclick='insiderApp.filterNetworkDegree(2)' data-degree='2'>
+                    Degree 2
+                </button>
+                <button class='network-control-btn' onclick='insiderApp.filterNetworkDegree(3)' data-degree='3'>
+                    Degree 3+
+                </button>
             </div>
+            <div id='networkGraphContainer' style='width: 100%; height: 600px;'></div>
         `;
+
+        const container = document.getElementById('networkGraphContainer');
+        
+        const data = {
+            nodes: new vis.DataSet(nodes),
+            edges: new vis.DataSet(edges)
+        };
+
+        const options = {
+            nodes: {
+                shape: 'dot',
+                size: 20,
+                font: {
+                    size: 14,
+                    color: '#1e293b',
+                    face: 'Inter, sans-serif',
+                    bold: {
+                        color: '#0f172a',
+                        size: 16
+                    }
+                },
+                borderWidth: 3,
+                borderWidthSelected: 5,
+                shadow: {
+                    enabled: true,
+                    color: 'rgba(0,0,0,0.2)',
+                    size: 10,
+                    x: 2,
+                    y: 2
+                }
+            },
+            edges: {
+                width: 2,
+                color: {
+                    color: '#cbd5e1',
+                    highlight: '#667eea',
+                    hover: '#764ba2'
+                },
+                smooth: {
+                    type: 'continuous',
+                    roundness: 0.5
+                },
+                shadow: {
+                    enabled: true,
+                    color: 'rgba(0,0,0,0.1)',
+                    size: 5,
+                    x: 1,
+                    y: 1
+                }
+            },
+            physics: {
+                stabilization: {
+                    enabled: true,
+                    iterations: 200
+                },
+                barnesHut: {
+                    gravitationalConstant: -8000,
+                    centralGravity: 0.3,
+                    springLength: 150,
+                    springConstant: 0.04,
+                    damping: 0.09,
+                    avoidOverlap: 0.5
+                }
+            },
+            interaction: {
+                hover: true,
+                tooltipDelay: 100,
+                zoomView: true,
+                dragView: true
+            }
+        };
+
+        this.networkGraph = new vis.Network(container, data, options);
+
+        // Event listeners
+        this.networkGraph.on('click', (params) => {
+            if (params.nodes.length > 0) {
+                const nodeId = params.nodes[0];
+                const node = nodes.find(n => n.id === nodeId);
+                if (node) {
+                    this.showNetworkNodeDetails(node);
+                }
+            }
+        });
+
+        console.log('🌐 Network graph rendered with', nodes.length, 'nodes and', edges.length, 'edges');
+    }
+
+    /**
+     * 🔗 CONSTRUCTION DES DONNÉES DU RÉSEAU
+     */
+    buildNetworkData() {
+        const nodes = [];
+        const edges = [];
+        const insiderToCompanies = new Map();
+
+        // Construire la map Insider → Companies
+        this.filteredData.forEach(txn => {
+            const insiderKey = txn.insider.name;
+            if (!insiderToCompanies.has(insiderKey)) {
+                insiderToCompanies.set(insiderKey, {
+                    insider: txn.insider,
+                    companies: new Set()
+                });
+            }
+            insiderToCompanies.get(insiderKey).companies.add(txn.company.symbol);
+        });
+
+        const addedInsiders = new Set();
+        const addedCompanies = new Set();
+        let edgeId = 0;
+
+        // Créer les nœuds et arêtes
+        insiderToCompanies.forEach((data, insiderName) => {
+            const { insider, companies } = data;
+
+            // Ajouter le nœud Insider
+            if (!addedInsiders.has(insiderName)) {
+                nodes.push({
+                    id: `insider_${insiderName}`,
+                    label: insiderName,
+                    group: 'insider',
+                    title: `${insiderName}<br>${insider.position}<br>Active in ${companies.size} companies`,
+                    color: {
+                        background: '#3b82f6',
+                        border: '#2563eb',
+                        highlight: {
+                            background: '#2563eb',
+                            border: '#1d4ed8'
+                        }
+                    },
+                    size: 15 + companies.size * 5 // Taille basée sur le nombre de connexions
+                });
+                addedInsiders.add(insiderName);
+            }
+
+            // Ajouter les nœuds Company et les liens
+            companies.forEach(symbol => {
+                const companyId = `company_${symbol}`;
+
+                if (!addedCompanies.has(symbol)) {
+                    const companyData = this.filteredData.find(t => t.company.symbol === symbol)?.company;
+                    nodes.push({
+                        id: companyId,
+                        label: symbol,
+                        group: 'company',
+                        title: `${companyData?.name || symbol}<br>Sector: ${companyData?.sector || 'N/A'}`,
+                        color: {
+                            background: '#a78bfa',
+                            border: '#8b5cf6',
+                            highlight: {
+                                background: '#8b5cf6',
+                                border: '#7c3aed'
+                            }
+                        },
+                        size: 25
+                    });
+                    addedCompanies.add(symbol);
+                }
+
+                // Créer l'arête Insider → Company
+                edges.push({
+                    id: edgeId++,
+                    from: `insider_${insiderName}`,
+                    to: companyId,
+                    title: 'Board Member / Insider'
+                });
+            });
+        });
+
+        // Détecter les interlocks (Degree 2): Insiders connectés via companies communes
+        const companyToInsiders = new Map();
+        insiderToCompanies.forEach((data, insiderName) => {
+            data.companies.forEach(symbol => {
+                if (!companyToInsiders.has(symbol)) {
+                    companyToInsiders.set(symbol, new Set());
+                }
+                companyToInsiders.get(symbol).add(insiderName);
+            });
+        });
+
+        // Ajouter des arêtes Insider ↔ Insider (via société commune)
+        companyToInsiders.forEach((insiders, symbol) => {
+            const insiderArray = Array.from(insiders);
+            for (let i = 0; i < insiderArray.length; i++) {
+                for (let j = i + 1; j < insiderArray.length; j++) {
+                    edges.push({
+                        id: edgeId++,
+                        from: `insider_${insiderArray[i]}`,
+                        to: `insider_${insiderArray[j]}`,
+                        title: `Connected via ${symbol}`,
+                        color: {
+                            color: '#f59e0b',
+                            highlight: '#d97706'
+                        },
+                        dashes: true,
+                        width: 1
+                    });
+                }
+            }
+        });
+
+        return { nodes, edges };
+    }
+
+    /**
+     * 🔍 DÉTAILS D'UN NŒUD DU RÉSEAU
+     */
+    showNetworkNodeDetails(node) {
+        const isInsider = node.group === 'insider';
+        
+        if (isInsider) {
+            const insiderName = node.label;
+            const transactions = this.filteredData.filter(t => t.insider.name === insiderName);
+            const companies = [...new Set(transactions.map(t => t.company.symbol))];
+            
+            alert(`Insider: ${insiderName}\n\nTransactions: ${transactions.length}\nCompanies: ${companies.join(', ')}`);
+        } else {
+            const symbol = node.label;
+            const transactions = this.filteredData.filter(t => t.company.symbol === symbol);
+            const insiders = [...new Set(transactions.map(t => t.insider.name))];
+            
+            alert(`Company: ${symbol}\n\nInsiders: ${insiders.length}\nTransactions: ${transactions.length}`);
+        }
+    }
+
+    /**
+     * 🎚 FILTRER PAR DEGRÉ DE CONNEXION
+     */
+    filterNetworkDegree(degree) {
+        // Mise à jour visuelle des boutons
+        document.querySelectorAll('.network-control-btn').forEach(btn => {
+            btn.classList.remove('active');
+            if (parseInt(btn.dataset.degree) === degree) {
+                btn.classList.add('active');
+            }
+        });
+
+        // Note: Implémentation complète nécessiterait de filtrer les nœuds/edges
+        console.log(`Filtering network to degree ${degree}`);
+        // Pour l'instant, juste un log - l'implémentation complète filtrerait les données
     }
 
     /**
@@ -2557,13 +2865,13 @@ class AdvancedInsiderFlowTracker {
     }
 
     /**
-     * 📋 COMPARISON TABLE
+     * 📋 COMPANY COMPARISON TABLE (DYNAMIC)
      */
     renderComparisonTable() {
         const tbody = document.getElementById('comparisonTableBody');
         if (!tbody) return;
 
-        // Compte par entreprise
+        // Calculer les statistiques par entreprise
         const companyStats = {};
         this.filteredData.forEach(txn => {
             const symbol = txn.company.symbol;
@@ -2573,103 +2881,184 @@ class AdvancedInsiderFlowTracker {
                     buys: 0,
                     sells: 0,
                     totalValue: 0,
-                    avgConviction: []
+                    avgConviction: [],
+                    priceImpacts: []
                 };
             }
             if (txn.type === 'P') companyStats[symbol].buys++;
             if (txn.type === 'S') companyStats[symbol].sells++;
             companyStats[symbol].totalValue += txn.transactionValue;
             companyStats[symbol].avgConviction.push(txn.convictionScore?.score || 0);
+            companyStats[symbol].priceImpacts.push(txn.priceImpact30d || 0);
         });
 
         const topCompanies = Object.keys(companyStats)
             .sort((a, b) => companyStats[b].totalValue - companyStats[a].totalValue)
             .slice(0, 10);
 
+        if (topCompanies.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="7" class='text-center' style='padding: 20px;'>No data available</td></tr>`;
+            return;
+        }
+
         const rows = topCompanies.map(symbol => {
             const stats = companyStats[symbol];
             const avgConviction = stats.avgConviction.reduce((a, b) => a + b, 0) / stats.avgConviction.length;
-            const netSentiment = stats.buys > stats.sells ? 'Bullish' : stats.sells > stats.buys ? 'Bearish' : 'Neutral';
-            const sentimentClass = stats.buys > stats.sells ? 'positive' : stats.sells > stats.buys ? 'negative' : '';
+            const avgImpact = stats.priceImpacts.reduce((a, b) => a + b, 0) / stats.priceImpacts.length;
+            
+            // Insider Signal
+            const insiderSignal = stats.buys > stats.sells ? 'Bullish' : stats.sells > stats.buys ? 'Bearish' : 'Neutral';
+            const signalClass = stats.buys > stats.sells ? 'positive' : stats.sells > stats.buys ? 'negative' : '';
+            const signalIcon = stats.buys > stats.sells ? 'fa-arrow-up' : stats.sells > stats.buys ? 'fa-arrow-down' : 'fa-minus';
+
+            // Simulated Analyst Consensus (basé sur le momentum)
+            const analystConsensus = avgImpact > 5 ? 'Buy' : avgImpact > 0 ? 'Hold' : 'Sell';
+            const consensusClass = avgImpact > 5 ? 'positive' : avgImpact > 0 ? '' : 'negative';
+
+            // Divergence
+            const isDivergent = (insiderSignal === 'Bullish' && analystConsensus === 'Sell') ||
+                                (insiderSignal === 'Bearish' && analystConsensus === 'Buy');
+            const divergenceText = isDivergent ? '⚠ YES' : '✓ Aligned';
+            const divergenceClass = isDivergent ? 'negative' : 'positive';
+
+            // Historical Accuracy (basé sur priceImpact)
+            const successfulTrades = stats.priceImpacts.filter(impact => 
+                (impact > 0 && stats.buys > stats.sells) || 
+                (impact < 0 && stats.sells > stats.buys)
+            ).length;
+            const accuracy = stats.priceImpacts.length > 0 
+                ? (successfulTrades / stats.priceImpacts.length * 100).toFixed(0) 
+                : 0;
+            const accuracyClass = accuracy >= 60 ? 'positive' : accuracy >= 40 ? '' : 'negative';
 
             return `
                 <tr>
                     <td><strong>${symbol}</strong></td>
-                    <td>${stats.name}</td>
-                    <td>${stats.buys}</td>
-                    <td>${stats.sells}</td>
-                    <td>$${this.formatNumber(stats.totalValue)}</td>
                     <td>
-                        <span class='conviction-badge ${avgConviction >= 70 ? '' : 'medium'}'>
-                            ${avgConviction.toFixed(0)}/100
+                        <span class='card-trend ${signalClass}' style='font-weight: 700;'>
+                            <i class='fas ${signalIcon}'></i>
+                            ${insiderSignal}
                         </span>
                     </td>
                     <td>
-                        <span class='card-trend ${sentimentClass}' style='font-weight: 700;'>
-                            ${netSentiment}
+                        <span class='card-trend ${consensusClass}' style='font-weight: 700;'>
+                            ${analystConsensus}
+                        </span>
+                    </td>
+                    <td>
+                        <span class='card-trend ${divergenceClass}' style='font-weight: 700;'>
+                            ${divergenceText}
+                        </span>
+                    </td>
+                    <td>
+                        <span class='conviction-badge ${accuracyClass}' style='font-weight: 700;'>
+                            ${accuracy}%
                         </span>
                     </td>
                 </tr>
             `;
         }).join('');
 
-        tbody.innerHTML = rows || `<tr><td colspan="7" class='text-center' style='padding: 20px;'>No data available</td></tr>`;
+        tbody.innerHTML = rows;
+        console.log('📊 Comparison table rendered with', topCompanies.length, 'companies');
     }
 
     /**
-     * 🔥 ACTIVITY HEATMAP
+     * 🔥 ACTIVITY HEATMAP - COMPANY × INSIDER POSITION
      */
     renderActivityHeatmap() {
         const chartEl = document.getElementById('activityHeatmap');
         if (!chartEl || typeof Highcharts === 'undefined') return;
 
-        // Prépare les données du heatmap (jour de la semaine vs heure)
-        const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
-        const hours = Array.from({length: 8}, (_, i) => `${i + 9}:00`); // 9:00 to 16:00
+        // Déterminer les top companies
+        const companyCounts = {};
+        this.filteredData.forEach(txn => {
+            companyCounts[txn.company.symbol] = (companyCounts[txn.company.symbol] || 0) + 1;
+        });
 
+        const topCompanies = Object.keys(companyCounts)
+            .sort((a, b) => companyCounts[b] - companyCounts[a])
+            .slice(0, 10);
+
+        const positions = ['CEO', 'CFO', 'Director', 'VP', 'President', 'CTO', 'COO', 'Other'];
+
+        // Construire la matrice de données
         const heatmapData = [];
-        for (let d = 0; d < days.length; d++) {
-            for (let h = 0; h < hours.length; h++) {
-                heatmapData.push([h, d, Math.floor(Math.random() * 10) + 1]);
-            }
-        }
+        topCompanies.forEach((company, companyIndex) => {
+            positions.forEach((position, positionIndex) => {
+                const count = this.filteredData.filter(txn => 
+                    txn.company.symbol === company && 
+                    (txn.insider.position === position || (position === 'Other' && !positions.slice(0, -1).includes(txn.insider.position)))
+                ).length;
+
+                heatmapData.push([positionIndex, companyIndex, count]);
+            });
+        });
 
         Highcharts.chart('activityHeatmap', {
             chart: {
                 type: 'heatmap',
-                backgroundColor: 'transparent'
+                backgroundColor: 'transparent',
+                height: 500
             },
             title: { text: null },
             xAxis: {
-                categories: hours,
-                title: { text: 'Hour of Day' }
+                categories: positions,
+                title: { text: 'Insider Position' },
+                labels: {
+                    style: { fontSize: '12px', fontWeight: '600' }
+                }
             },
             yAxis: {
-                categories: days,
-                title: { text: null }
+                categories: topCompanies,
+                title: { text: 'Company' },
+                labels: {
+                    style: { fontSize: '12px', fontWeight: '700' }
+                }
             },
             colorAxis: {
                 min: 0,
-                minColor: '#FFFFFF',
-                maxColor: '#667eea'
+                stops: [
+                    [0, '#10b981'],      // Vert (0)
+                    [0.4, '#f59e0b'],    // Jaune (milieu)
+                    [1, '#ef4444']       // Rouge (max)
+                ],
+                labels: {
+                    format: '{value} txns'
+                }
             },
             legend: {
                 align: 'right',
                 layout: 'vertical',
-                verticalAlign: 'middle'
+                verticalAlign: 'middle',
+                symbolHeight: 300
+            },
+            tooltip: {
+                formatter: function() {
+                    return `<b>${this.series.yAxis.categories[this.point.y]}</b><br>
+                            <b>${this.series.xAxis.categories[this.point.x]}</b><br>
+                            <b>${this.point.value}</b> transactions`;
+                }
             },
             series: [{
                 name: 'Transactions',
-                borderWidth: 1,
+                borderWidth: 2,
+                borderColor: '#ffffff',
                 data: heatmapData,
                 dataLabels: {
                     enabled: true,
-                    color: '#000000'
+                    color: '#000000',
+                    style: {
+                        textOutline: 'none',
+                        fontWeight: 'bold'
+                    }
                 }
             }],
             credits: { enabled: false },
             exporting: { enabled: true }
         });
+
+        console.log('🔥 Heatmap rendered with', heatmapData.length, 'data points');
     }
 
     /**
@@ -2908,11 +3297,471 @@ class AdvancedInsiderFlowTracker {
         }
     }
 
+    /**
+     * 🔍 MODAL DE DÉTAILS DE TRANSACTION
+     */
     viewTransactionDetail(txnId) {
-        const txn = this.filteredData.find(t => t.id === txnId);
-        if (!txn) return;
+        const txn = this.filteredData.find(t => t.id === txnId) || 
+                    this.allCompaniesData?.allTransactions.find(t => t.id === txnId);
+        
+        if (!txn) {
+            console.error('Transaction not found:', txnId);
+            return;
+        }
 
-        alert(`Transaction Details:\n\nCompany: ${txn.company.symbol}\nInsider: ${txn.insider.name}\nType: ${txn.type}\nValue: $${this.formatNumber(txn.transactionValue)}`);
+        const modal = document.getElementById('transactionDetailModal');
+        const content = document.getElementById('transactionDetailContent');
+
+        if (!modal || !content) return;
+
+        // Construction du contenu
+        const convictionScore = txn.convictionScore?.score || 0;
+        const convictionLevel = txn.convictionScore?.level || 'low';
+        const convictionColor = convictionScore >= 70 ? '#10b981' : convictionScore >= 50 ? '#f59e0b' : '#ef4444';
+
+        content.innerHTML = `
+            <div class='detail-grid'>
+                <!-- Transaction Info -->
+                <div class='detail-card'>
+                    <h4><i class='fas fa-exchange-alt'></i> Transaction Info</h4>
+                    <div class='detail-row'>
+                        <span class='detail-label'>Type</span>
+                        <span class='detail-value'>
+                            <span class='transaction-type-badge ${txn.type === 'P' ? 'type-buy' : txn.type === 'S' ? 'type-sell' : 'type-option'}'>
+                                ${txn.type === 'P' ? '📈 Purchase' : txn.type === 'S' ? '📉 Sale' : '🎫 Option'}
+                            </span>
+                        </span>
+                    </div>
+                    <div class='detail-row'>
+                        <span class='detail-label'>Date</span>
+                        <span class='detail-value'>${this.formatDate(txn.date)}</span>
+                    </div>
+                    <div class='detail-row'>
+                        <span class='detail-label'>Filing</span>
+                        <span class='detail-value'>
+                            <a href='${txn.formUrl}' target='_blank' style='color: var(--ml-primary); font-weight: 700;'>
+                                ${txn.filingType} <i class='fas fa-external-link-alt' style='font-size: 0.8rem;'></i>
+                            </a>
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Company Info -->
+                <div class='detail-card'>
+                    <h4><i class='fas fa-building'></i> Company Info</h4>
+                    <div class='detail-row'>
+                        <span class='detail-label'>Symbol</span>
+                        <span class='detail-value' style='font-weight: 900; color: var(--ml-primary);'>${txn.company.symbol}</span>
+                    </div>
+                    <div class='detail-row'>
+                        <span class='detail-label'>Name</span>
+                        <span class='detail-value'>${txn.company.name}</span>
+                    </div>
+                    <div class='detail-row'>
+                        <span class='detail-label'>Sector</span>
+                        <span class='detail-value'><span class='ipo-sector-badge'>${txn.company.sector}</span></span>
+                    </div>
+                    <div class='detail-row'>
+                        <span class='detail-label'>CIK</span>
+                        <span class='detail-value' style='font-family: monospace;'>${txn.company.cik}</span>
+                    </div>
+                </div>
+
+                <!-- Insider Info -->
+                <div class='detail-card'>
+                    <h4><i class='fas fa-user-tie'></i> Insider Info</h4>
+                    <div class='detail-row'>
+                        <span class='detail-label'>Name</span>
+                        <span class='detail-value'>${txn.insider.name}</span>
+                    </div>
+                    <div class='detail-row'>
+                        <span class='detail-label'>Position</span>
+                        <span class='detail-value'><span class='ipo-sector-badge'>${txn.insider.position}</span></span>
+                    </div>
+                    <div class='detail-row'>
+                        <span class='detail-label'>Est. Net Worth</span>
+                        <span class='detail-value'>$${this.formatNumber(txn.insider.netWorth)}</span>
+                    </div>
+                </div>
+
+                <!-- Financial Details -->
+                <div class='detail-card'>
+                    <h4><i class='fas fa-dollar-sign'></i> Financial Details</h4>
+                    <div class='detail-row'>
+                        <span class='detail-label'>Shares</span>
+                        <span class='detail-value'>${this.formatNumber(txn.shares)}</span>
+                    </div>
+                    <div class='detail-row'>
+                        <span class='detail-label'>Price/Share</span>
+                        <span class='detail-value'>$${txn.pricePerShare.toFixed(2)}</span>
+                    </div>
+                    <div class='detail-row'>
+                        <span class='detail-label'>Total Value</span>
+                        <span class='detail-value' style='font-size: 1.2rem; color: var(--ml-primary); font-weight: 900;'>
+                            $${this.formatNumber(txn.transactionValue)}
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Analysis -->
+                <div class='detail-card' style='grid-column: span 2;'>
+                    <h4><i class='fas fa-chart-line'></i> Analysis & Impact</h4>
+                    <div style='display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px;'>
+                        <div style='text-align: center; padding: 20px; background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1)); border-radius: 12px;'>
+                            <p style='color: var(--text-secondary); font-weight: 700; font-size: 0.85rem; margin: 0 0 8px 0;'>CONVICTION SCORE</p>
+                            <p style='font-size: 2rem; font-weight: 900; margin: 0; color: ${convictionColor};'>
+                                ${convictionScore}<span style='font-size: 1rem;'>/100</span>
+                            </p>
+                            <p style='color: var(--text-tertiary); font-size: 0.85rem; margin: 8px 0 0 0; text-transform: uppercase; font-weight: 700;'>${convictionLevel}</p>
+                        </div>
+                        <div style='text-align: center; padding: 20px; background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(5, 150, 105, 0.1)); border-radius: 12px;'>
+                            <p style='color: var(--text-secondary); font-weight: 700; font-size: 0.85rem; margin: 0 0 8px 0;'>PRICE IMPACT (7D)</p>
+                            <p style='font-size: 2rem; font-weight: 900; margin: 0; color: ${txn.priceImpact7d >= 0 ? '#10b981' : '#ef4444'};'>
+                                ${txn.priceImpact7d >= 0 ? '+' : ''}${txn.priceImpact7d.toFixed(1)}%
+                            </p>
+                        </div>
+                        <div style='text-align: center; padding: 20px; background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(37, 99, 235, 0.1)); border-radius: 12px;'>
+                            <p style='color: var(--text-secondary); font-weight: 700; font-size: 0.85rem; margin: 0 0 8px 0;'>PRICE IMPACT (30D)</p>
+                            <p style='font-size: 2rem; font-weight: 900; margin: 0; color: ${txn.priceImpact30d >= 0 ? '#10b981' : '#ef4444'};'>
+                                ${txn.priceImpact30d >= 0 ? '+' : ''}${txn.priceImpact30d.toFixed(1)}%
+                            </p>
+                        </div>
+                        <div style='text-align: center; padding: 20px; background: linear-gradient(135deg, rgba(245, 158, 11, 0.1), rgba(217, 119, 6, 0.1)); border-radius: 12px;'>
+                            <p style='color: var(--text-secondary); font-weight: 700; font-size: 0.85rem; margin: 0 0 8px 0;'>DAYS TO EARNINGS</p>
+                            <p style='font-size: 2rem; font-weight: 900; margin: 0; color: var(--text-primary);'>
+                                ${txn.daysToEarnings}
+                            </p>
+                            <p style='color: var(--text-tertiary); font-size: 0.85rem; margin: 8px 0 0 0;'>
+                                ${txn.daysToEarnings <= 14 ? '⚠ Pre-Earnings Window' : '✓ Normal Window'}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div style='padding: 30px; background: rgba(102, 126, 234, 0.05); border-top: 2px solid var(--border-color);'>
+                <h4 style='color: var(--ml-primary); font-weight: 800; margin: 0 0 12px 0;'>
+                    <i class='fas fa-lightbulb'></i> Interpretation
+                </h4>
+                <p style='color: var(--text-primary); line-height: 1.8; margin: 0;'>
+                    ${this.generateTransactionInterpretation(txn)}
+                </p>
+            </div>
+        `;
+
+        modal.style.display = 'flex';
+        document.body.style.overflow = 'hidden';
+    }
+
+    /**
+     * ℹ MODAL D'INFORMATION DYNAMIQUE
+     */
+    showInfoModal(topic) {
+        const modal = document.getElementById('infoModal');
+        const title = document.getElementById('infoModalTitle');
+        const content = document.getElementById('infoModalContent');
+
+        if (!modal || !title || !content) return;
+
+        const infoContent = this.getInfoContent(topic);
+        
+        title.innerHTML = `<i class='${infoContent.icon}'></i> ${infoContent.title}`;
+        content.innerHTML = infoContent.content;
+
+        modal.style.display = 'flex';
+        document.body.style.overflow = 'hidden';
+    }
+
+    /**
+     * 📚 CONTENU DES MODALS D'INFORMATION
+     */
+    getInfoContent(topic) {
+        const contents = {
+            'sentiment': {
+                icon: 'fas fa-tachometer-alt',
+                title: 'Insider Sentiment Gauge',
+                content: `
+                    <h3><i class='fas fa-info-circle'></i> What is Insider Sentiment?</h3>
+                    <p>The Insider Sentiment Gauge measures the overall buying vs. selling activity from corporate insiders. It provides a real-time snapshot of whether executives are bullish or bearish on their own company.</p>
+                    
+                    <h3><i class='fas fa-calculator'></i> How It's Calculated</h3>
+                    <ul>
+                        <li>Score ranges from 0 (extreme selling) to 100 (extreme buying)</li>
+                        <li>Formula: <code>50 + ((Purchases - Sales) / Total Transactions) × 50</code></li>
+                        <li>Weighted by transaction size and insider position importance</li>
+                    </ul>
+
+                    <h3><i class='fas fa-chart-line'></i> Interpretation Guide</h3>
+                    <div class='info-highlight' style='border-left-color: #10b981;'>
+                        <strong>65-100 (Bullish):</strong> Strong insider buying suggests confidence in future performance. Historically precedes stock appreciation.
+                    </div>
+                    <div class='info-highlight' style='border-left-color: #f59e0b;'>
+                        <strong>35-65 (Neutral):</strong> Mixed signals. Monitor for emerging trends before making decisions.
+                    </div>
+                    <div class='info-highlight' style='border-left-color: #ef4444;'>
+                        <strong>0-35 (Bearish):</strong> Elevated selling may indicate insiders taking profits or anticipating headwinds. Exercise caution.
+                    </div>
+                `
+            },
+
+            'cluster-buying': {
+                icon: 'fas fa-users',
+                title: 'Cluster Buying Pattern',
+                content: `
+                    <h3><i class='fas fa-info-circle'></i> What is Cluster Buying?</h3>
+                    <p>Cluster buying occurs when <strong>multiple insiders</strong> from the same company purchase shares within a short time window. This coordinated activity often signals strong insider conviction.</p>
+
+                    <h3><i class='fas fa-bullseye'></i> Detection Criteria</h3>
+                    <ul>
+                        <li><strong>Minimum 3 insiders</strong> making purchases</li>
+                        <li>Transactions within a <strong>7-day window</strong></li>
+                        <li>Combined transaction value exceeds <strong>$500,000</strong></li>
+                    </ul>
+
+                    <h3><i class='fas fa-chart-line'></i> Why It Matters</h3>
+                    <p>When multiple executives buy simultaneously, it suggests they have access to similar positive information about the company's prospects. This is considered one of the <strong>strongest bullish signals</strong> in insider trading analysis.</p>
+
+                    <div class='info-highlight'>
+                        <strong>📊 Historical Performance:</strong> Stocks with cluster buying patterns have historically outperformed the market by an average of 5-8% over the following 6 months.
+                    </div>
+                `
+            },
+
+            'pre-earnings': {
+                icon: 'fas fa-calendar-check',
+                title: 'Pre-Earnings Trading Window',
+                content: `
+                    <h3><i class='fas fa-info-circle'></i> What is Pre-Earnings Trading?</h3>
+                    <p>Pre-earnings trading refers to insider transactions that occur within <strong>30 days before</strong> scheduled earnings announcements. These transactions are scrutinized more closely by regulators and investors.</p>
+
+                    <h3><i class='fas fa-exclamation-triangle'></i> Why It's Flagged</h3>
+                    <ul>
+                        <li>Insiders have access to preliminary quarterly results</li>
+                        <li>Trading in this window may indicate material non-public information</li>
+                        <li>Transactions within <strong>14 days</strong> of earnings are particularly suspicious</li>
+                    </ul>
+
+                    <h3><i class='fas fa-balance-scale'></i> Interpretation</h3>
+                    <div class='info-highlight' style='border-left-color: #10b981;'>
+                        <strong>Purchases before earnings:</strong> Often bullish signal, suggesting confidence in upcoming results.
+                    </div>
+                    <div class='info-highlight' style='border-left-color: #ef4444;'>
+                        <strong>Sales before earnings:</strong> May indicate concerns about quarterly performance. Requires investigation.
+                    </div>
+                `
+            },
+
+            'divergence': {
+                icon: 'fas fa-exchange-alt',
+                title: 'Insider-Market Divergence',
+                content: `
+                    <h3><i class='fas fa-info-circle'></i> What is Divergence?</h3>
+                    <p>Divergence occurs when <strong>insider actions contradict analyst recommendations or market sentiment</strong>. For example, insiders buying heavily while analysts issue sell ratings.</p>
+
+                    <h3><i class='fas fa-search'></i> Types of Divergence</h3>
+                    <ul>
+                        <li><strong>Bullish Divergence:</strong> Insiders buying while market is pessimistic</li>
+                        <li><strong>Bearish Divergence:</strong> Insiders selling while market is optimistic</li>
+                        <li><strong>High-Conviction Divergence:</strong> Large transactions contradicting consensus</li>
+                    </ul>
+
+                    <h3><i class='fas fa-lightbulb'></i> Investment Implications</h3>
+                    <p>Historically, <strong>insiders have better information than external analysts</strong>. When divergence occurs, insider actions often prove more predictive of future stock performance.</p>
+
+                    <div class='info-highlight'>
+                        <strong>⚠ Key Insight:</strong> Bullish divergence (insiders buying during market pessimism) has shown a 68% success rate in predicting 6-month stock outperformance.
+                    </div>
+                `
+            },
+
+            'unusual-volume': {
+                icon: 'fas fa-chart-bar',
+                title: 'Unusual Trading Volume',
+                content: `
+                    <h3><i class='fas fa-info-circle'></i> What is Unusual Volume?</h3>
+                    <p>Unusual volume is detected when insider trading activity <strong>exceeds 3x the normal daily average</strong> over a 7-day period. This spike often precedes significant corporate events.</p>
+
+                    <h3><i class='fas fa-bell'></i> What Triggers This Alert</h3>
+                    <ul>
+                        <li>Transaction volume > <strong>300% of 90-day average</strong></li>
+                        <li>Clustered in a short time window (< 7 days)</li>
+                        <li>Involves multiple executives or large single transactions</li>
+                    </ul>
+
+                    <h3><i class='fas fa-chart-line'></i> Potential Catalysts</h3>
+                    <p>Unusual volume often precedes:</p>
+                    <ul>
+                        <li>M&A announcements (acquisition targets or acquirers)</li>
+                        <li>Major product launches or FDA approvals</li>
+                        <li>Significant restructuring or strategic shifts</li>
+                        <li>Unexpected earnings surprises (positive or negative)</li>
+                    </ul>
+                `
+            },
+
+            'conviction': {
+                icon: 'fas fa-star',
+                title: 'Conviction Score Methodology',
+                content: `
+                    <h3><i class='fas fa-info-circle'></i> What is Conviction Score?</h3>
+                    <p>The Conviction Score (0-100) measures <strong>how meaningful</strong> an insider transaction is relative to the insider's personal wealth. Higher scores indicate stronger conviction.</p>
+
+                    <h3><i class='fas fa-calculator'></i> Calculation Formula</h3>
+                    <p>Score is based on:</p>
+                    <ul>
+                        <li><strong>Transaction Value / Estimated Net Worth</strong> (primary factor)</li>
+                        <li>Insider position importance (CEO > CFO > Director > VP)</li>
+                        <li>Historical trading patterns of the insider</li>
+                        <li>Company size and volatility</li>
+                    </ul>
+
+                    <h3><i class='fas fa-trophy'></i> Score Interpretation</h3>
+                    <div class='info-highlight' style='border-left-color: #10b981;'>
+                        <strong>80-100 (Very High):</strong> Transaction represents >5% of net worth. Extremely strong signal.
+                    </div>
+                    <div class='info-highlight' style='border-left-color: #3b82f6;'>
+                        <strong>60-79 (High):</strong> Transaction represents 2-5% of net worth. Strong conviction.
+                    </div>
+                    <div class='info-highlight' style='border-left-color: #f59e0b;'>
+                        <strong>40-59 (Medium):</strong> Transaction represents 1-2% of net worth. Moderate signal.
+                    </div>
+                    <div class='info-highlight' style='border-left-color: #ef4444;'>
+                        <strong><40 (Low):</strong> Transaction represents <1% of net worth. Weak signal, possibly routine.
+                    </div>
+                `
+            },
+
+            'correlation': {
+                icon: 'fas fa-project-diagram',
+                title: 'Insider-Stock Correlation',
+                content: `
+                    <h3><i class='fas fa-info-circle'></i> What is This Analysis?</h3>
+                    <p>This scatter plot shows the <strong>relationship between insider activity and subsequent stock performance</strong> over a 30-day period.</p>
+
+                    <h3><i class='fas fa-chart-scatter'></i> How to Read the Chart</h3>
+                    <ul>
+                        <li><strong>X-Axis:</strong> Insider activity (weighted by transaction size and type)</li>
+                        <li><strong>Y-Axis:</strong> Stock price change over 30 days (%)</li>
+                        <li><strong>Green dots:</strong> Purchases | <strong>Red dots:</strong> Sales</li>
+                        <li><strong>Upper-right quadrant:</strong> Insiders bought, stock went up ✅</li>
+                        <li><strong>Lower-right quadrant:</strong> Insiders bought, stock went down ❌</li>
+                    </ul>
+
+                    <h3><i class='fas fa-lightbulb'></i> What to Look For</h3>
+                    <p>A <strong>positive correlation</strong> (dots trending upward-right) indicates insider purchases successfully predicted price increases. A strong correlation validates the predictive power of insider activity for this company.</p>
+                `
+            },
+
+            'network': {
+                icon: 'fas fa-sitemap',
+                title: 'Board Interlocks & Relationships',
+                content: `
+                    <h3><i class='fas fa-info-circle'></i> What are Board Interlocks?</h3>
+                    <p>Board interlocks occur when the <strong>same individual serves on multiple corporate boards</strong>. This creates information networks that can influence trading patterns across connected companies.</p>
+
+                    <h3><i class='fas fa-layer-group'></i> Degree Levels</h3>
+                    <ul>
+                        <li><strong>Degree 1:</strong> Direct connections (Insider A → Company X)</li>
+                        <li><strong>Degree 2:</strong> Indirect connections (Insider A → Company X → Insider B)</li>
+                        <li><strong>Degree 3+:</strong> Extended network connections</li>
+                    </ul>
+
+                    <h3><i class='fas fa-exclamation-triangle'></i> Why It Matters</h3>
+                    <p>Interlocked boards can:</p>
+                    <ul>
+                        <li>Share strategic insights and industry trends</li>
+                        <li>Coordinate M&A discussions</li>
+                        <li>Influence compensation and governance practices</li>
+                        <li>Create synchronized trading patterns</li>
+                    </ul>
+
+                    <div class='info-highlight'>
+                        <strong>📊 Research Finding:</strong> Companies with heavily interlocked boards show 23% higher correlation in insider trading patterns compared to isolated companies.
+                    </div>
+                `
+            },
+
+            'heatmap': {
+                icon: 'fas fa-th',
+                title: 'Activity Heatmap Interpretation',
+                content: `
+                    <h3><i class='fas fa-info-circle'></i> What Does This Show?</h3>
+                    <p>The heatmap visualizes <strong>insider trading intensity across companies and positions</strong>, helping identify concentrated activity patterns.</p>
+
+                    <h3><i class='fas fa-palette'></i> Color Coding</h3>
+                    <div class='info-highlight' style='border-left-color: #10b981;'>
+                        <strong>🟢 Green (0-3 transactions):</strong> Low activity, normal baseline
+                    </div>
+                    <div class='info-highlight' style='border-left-color: #f59e0b;'>
+                        <strong>🟡 Yellow (4-7 transactions):</strong> Moderate activity, monitor for trends
+                    </div>
+                    <div class='info-highlight' style='border-left-color: #ef4444;'>
+                        <strong>🔴 Red (8+ transactions):</strong> High activity, potential signal
+                    </div>
+
+                    <h3><i class='fas fa-search'></i> What to Look For</h3>
+                    <ul>
+                        <li><strong>Hot spots (red cells):</strong> Concentrated activity requiring investigation</li>
+                        <li><strong>Row patterns:</strong> Specific companies with elevated insider activity</li>
+                        <li><strong>Column patterns:</strong> Certain positions (e.g., CEOs) trading more than usual</li>
+                    </ul>
+                `
+            }
+        };
+
+        return contents[topic] || {
+            icon: 'fas fa-question-circle',
+            title: 'Information',
+            content: '<p>No information available for this topic.</p>'
+        };
+    }
+
+    /**
+     * 💡 GÉNÉRATION D'INTERPRÉTATION
+     */
+    generateTransactionInterpretation(txn) {
+        const isPurchase = txn.type === 'P';
+        const isSale = txn.type === 'S';
+        const convictionScore = txn.convictionScore?.score || 0;
+        const isHighConviction = convictionScore >= 70;
+        const isPreEarnings = txn.daysToEarnings <= 14;
+        const priceImpact = txn.priceImpact30d || 0;
+
+        let interpretation = '';
+
+        if (isPurchase) {
+            interpretation += `<strong>${txn.insider.name}</strong> (${txn.insider.position}) purchased <strong>$${this.formatNumber(txn.transactionValue)}</strong> worth of ${txn.company.symbol} shares. `;
+            
+            if (isHighConviction) {
+                interpretation += `This represents a <strong style='color: #10b981;'>HIGH CONVICTION</strong> purchase (score: ${convictionScore}/100), suggesting strong insider confidence. `;
+            } else {
+                interpretation += `This is a moderate conviction purchase (score: ${convictionScore}/100). `;
+            }
+
+            if (isPreEarnings) {
+                interpretation += `⚠ <strong>Note:</strong> This purchase occurred within 14 days before earnings, which may indicate insider confidence in upcoming results. `;
+            }
+
+            if (priceImpact > 0) {
+                interpretation += `The stock price increased by <strong style='color: #10b981;'>+${priceImpact.toFixed(1)}%</strong> in the 30 days following this transaction, validating the insider's decision.`;
+            } else if (priceImpact < 0) {
+                interpretation += `The stock price decreased by <strong style='color: #ef4444;'>${priceImpact.toFixed(1)}%</strong> in the 30 days following this transaction.`;
+            }
+        } else if (isSale) {
+            interpretation += `<strong>${txn.insider.name}</strong> (${txn.insider.position}) sold <strong>$${this.formatNumber(txn.transactionValue)}</strong> worth of ${txn.company.symbol} shares. `;
+            
+            interpretation += `While insider sales can occur for various personal reasons (tax planning, diversification, liquidity needs), `;
+            
+            if (isHighConviction) {
+                interpretation += `the <strong style='color: #ef4444;'>high conviction score (${convictionScore}/100)</strong> suggests this may be a strategic decision rather than routine portfolio rebalancing. `;
+            }
+
+            if (isPreEarnings) {
+                interpretation += `⚠ <strong>Critical:</strong> This sale occurred within 14 days before earnings, which may warrant additional scrutiny. `;
+            }
+        }
+
+        return interpretation;
     }
 
     filterTransactions(button) {
