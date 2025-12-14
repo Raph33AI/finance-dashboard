@@ -1081,7 +1081,7 @@ body.dark-mode .dropdown-link-title {
     flex-direction: column;
     height: 100%;
     position: relative;
-    overflow: hidden; /* ✅ AJOUTÉ - Empêche débordement */
+    overflow: visible; /* ✅ CORRIGÉ - Permet aux badges de dépasser */
 }
 
 .pricing-card:hover {
@@ -3722,6 +3722,100 @@ body {
     .tech-disclaimer p {
         font-size: 0.75rem;
     }
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   📊 DASHBOARD MOCKUP - GRAPHIQUE STYLISÉ
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+
+.chart-canvas-wrapper {
+    height: 200px;
+    position: relative;
+    background: linear-gradient(180deg, 
+        rgba(37, 99, 235, 0.1) 0%, 
+        rgba(37, 99, 235, 0.02) 50%,
+        transparent 100%
+    );
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+/* ✅ Ligne de graphique animée */
+.chart-canvas-wrapper::before {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 100%;
+    background: url("data:image/svg+xml,%3Csvg width='800' height='200' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M 0 150 Q 50 140 100 130 T 200 110 T 300 90 T 400 70 T 500 55 T 600 45 T 700 40 T 800 35' stroke='%232563eb' stroke-width='3' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cpath d='M 0 150 Q 50 140 100 130 T 200 110 T 300 90 T 400 70 T 500 55 T 600 45 T 700 40 T 800 35 L 800 200 L 0 200 Z' fill='url(%23gradient)' opacity='0.3'/%3E%3Cdefs%3E%3ClinearGradient id='gradient' x1='0%25' y1='0%25' x2='0%25' y2='100%25'%3E%3Cstop offset='0%25' style='stop-color:%232563eb;stop-opacity:0.4' /%3E%3Cstop offset='100%25' style='stop-color:%232563eb;stop-opacity:0' /%3E%3C/linearGradient%3E%3C/defs%3E%3C/svg%3E") no-repeat center;
+    background-size: cover;
+    animation: chartSlideIn 1.5s ease-out;
+}
+
+@keyframes chartSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ✅ Points de données sur le graphique */
+.chart-canvas-wrapper::after {
+    content: '';
+    position: absolute;
+    top: 35px;
+    right: 20px;
+    width: 8px;
+    height: 8px;
+    background: #2563eb;
+    border-radius: 50%;
+    box-shadow: 
+        0 0 0 3px rgba(37, 99, 235, 0.3),
+        0 0 0 6px rgba(37, 99, 235, 0.15);
+    animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+    0%, 100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+    50% {
+        transform: scale(1.3);
+        opacity: 0.8;
+    }
+}
+
+/* ✅ Grille de fond subtile */
+.mockup-chart-area {
+    background: white;
+    border-radius: 12px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    position: relative;
+}
+
+.mockup-chart-area::before {
+    content: '';
+    position: absolute;
+    inset: 1rem;
+    background-image: 
+        linear-gradient(rgba(0, 0, 0, 0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0, 0, 0, 0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+    border-radius: 8px;
+    pointer-events: none;
+    z-index: 0;
+}
+
+.chart-canvas-wrapper {
+    position: relative;
+    z-index: 1;
 }
 
 /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
