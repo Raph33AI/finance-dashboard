@@ -26,7 +26,9 @@ class IPOIntelligenceDashboard {
             pipelineCurrentPage: 1,
             pipelineItemsPerPage: 10,
             tableCurrentPage: 1,
-            tableItemsPerPage: 20
+            tableItemsPerPage: 20,
+            lockUpCurrentPage: 1,
+            lockUpItemsPerPage: 12
         };
         
         // Configuration dynamique
@@ -1390,16 +1392,54 @@ class IPOIntelligenceDashboard {
         document.querySelector('#topIPOsTable')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
 
+    /**
+     * 🔒 Navigation Lock-Up Tracker
+     */
+    goToLockUpPage(page) {
+        const filteredIPOs = this.applyCurrentFilters();
+        const sortedIPOs = [...filteredIPOs].filter(ipo => ipo.lockUpExpiry || ipo.filedDate);
+        const totalPages = Math.ceil(sortedIPOs.length / this.pagination.lockUpItemsPerPage);
+        
+        if (page < 1 || page > totalPages) return;
+        
+        this.pagination.lockUpCurrentPage = page;
+        this.renderLockUpTracker();
+        
+        // Scroll vers le haut de la section
+        document.getElementById('lockupGrid')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    /**
+     * ═══════════════════════════════════════════════════════════════════
+     * 🔒 LOCK-UP TRACKER AVEC PAGINATION
+     * ═══════════════════════════════════════════════════════════════════
+     */
     renderLockUpTracker() {
         const container = document.getElementById('lockupGrid');
         if (!container) return;
 
         const filteredIPOs = this.applyCurrentFilters();
-        const lockUpIPOs = filteredIPOs
+        const sortedIPOs = [...filteredIPOs]
             .filter(ipo => ipo.lockUpExpiry || ipo.filedDate)
-            .slice(0, this.config.displayLimits.lockUpCards);
+            .sort((a, b) => {
+                // Trier par jours restants (lock-up expirant bientôt en premier)
+                const daysA = this.calculateLockUpDays(a);
+                const daysB = this.calculateLockUpDays(b);
+                return daysA - daysB;
+            });
+        
+        // ✅ Pagination
+        const startIndex = (this.pagination.lockUpCurrentPage - 1) * this.pagination.lockUpItemsPerPage;
+        const endIndex = startIndex + this.pagination.lockUpItemsPerPage;
+        const paginatedIPOs = sortedIPOs.slice(startIndex, endIndex);
+        const totalPages = Math.ceil(sortedIPOs.length / this.pagination.lockUpItemsPerPage);
 
-        const html = lockUpIPOs.map(ipo => {
+        if (paginatedIPOs.length === 0) {
+            container.innerHTML = '<p class="text-center">No lock-up data available</p>';
+            return;
+        }
+
+        const lockUpCards = paginatedIPOs.map(ipo => {
             const now = Date.now();
             const filed = new Date(ipo.filedDate).getTime();
             
@@ -1448,7 +1488,35 @@ class IPOIntelligenceDashboard {
             `;
         }).join('');
 
-        container.innerHTML = html || '<p class="text-center">No lock-up data available</p>';
+        // ✅ Contrôles de Pagination
+        const paginationControls = totalPages > 1 ? `
+            <div style='grid-column: 1 / -1; display: flex; justify-content: center; align-items: center; gap: 15px; margin-top: 20px; padding: 20px; background: var(--eco-gradient-soft); border-radius: 12px;'>
+                <button 
+                    class='dashboard-btn' 
+                    onclick='ipoApp.goToLockUpPage(${this.pagination.lockUpCurrentPage - 1})'
+                    ${this.pagination.lockUpCurrentPage === 1 ? 'disabled style="opacity: 0.5; cursor: not-allowed;"' : ''}
+                >
+                    <i class='fas fa-chevron-left'></i> Previous
+                </button>
+                
+                <span style='font-weight: 600; color: var(--text-primary); font-size: 1.1rem;'>
+                    Page ${this.pagination.lockUpCurrentPage} / ${totalPages}
+                    <span style='color: var(--text-secondary); font-size: 0.9rem; margin-left: 8px;'>
+                        (${sortedIPOs.length} IPOs total)
+                    </span>
+                </span>
+                
+                <button 
+                    class='dashboard-btn' 
+                    onclick='ipoApp.goToLockUpPage(${this.pagination.lockUpCurrentPage + 1})'
+                    ${this.pagination.lockUpCurrentPage === totalPages ? 'disabled style="opacity: 0.5; cursor: not-allowed;"' : ''}
+                >
+                    Next <i class='fas fa-chevron-right'></i>
+                </button>
+            </div>
+        ` : '';
+
+        container.innerHTML = lockUpCards + paginationControls;
     }
 
     viewIPODetail(ipo) {
@@ -1578,6 +1646,7 @@ class IPOIntelligenceDashboard {
         // ✅ Réinitialiser la pagination lors de l'application de filtres
         this.pagination.pipelineCurrentPage = 1;
         this.pagination.tableCurrentPage = 1;
+        this.pagination.lockUpCurrentPage = 1;
         
         this.renderAll();
         this.closeModal('filtersModal');
@@ -1598,6 +1667,7 @@ class IPOIntelligenceDashboard {
         // ✅ Réinitialiser la pagination lors du reset
         this.pagination.pipelineCurrentPage = 1;
         this.pagination.tableCurrentPage = 1;
+        this.pagination.lockUpCurrentPage = 1;
         
         this.renderAll();
         this.closeModal('filtersModal');
