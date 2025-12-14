@@ -1305,3 +1305,64 @@ footer i {
         transition-duration: 0.01ms !important;
     }
 }
+
+/* ========================================
+   GRAPHIQUES - RESPONSIVE MOBILE
+   ======================================== */
+
+/* Containers des graphiques */
+.chart-container,
+#inflationHistoryChart,
+#cpiEvolutionChart,
+#cumulativeInflationChart,
+#projectionChart,
+#sectoralInflationChart {
+    width: 100% !important;
+    height: auto !important;
+    min-height: 400px;
+    overflow-x: auto; /* Permet le scroll horizontal si nécessaire */
+    overflow-y: visible;
+}
+
+/* Wrapper des graphiques (si existant) */
+.chart-wrapper {
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch; /* Scroll fluide sur iOS */
+}
+
+/* Adaptation mobile pour tous les graphiques */
+@media (max-width: 768px) {
+    .chart-container,
+    #inflationHistoryChart,
+    #cpiEvolutionChart,
+    #cumulativeInflationChart,
+    #projectionChart,
+    #sectoralInflationChart {
+        min-height: 350px !important; /* Réduit la hauteur sur tablette */
+    }
+    
+    /* Grille des graphiques en 1 colonne */
+    .charts-grid {
+        grid-template-columns: 1fr !important;
+        gap: 20px;
+    }
+}
+
+@media (max-width: 480px) {
+    .chart-container,
+    #inflationHistoryChart,
+    #cpiEvolutionChart,
+    #cumulativeInflationChart,
+    #projectionChart,
+    #sectoralInflationChart {
+        min-height: 300px !important; /* Plus petit sur mobile */
+        margin: 0 -10px; /* Utilise les bords de l'écran */
+    }
+    
+    /* Ajuste le padding du container parent */
+    .section {
+        padding-left: 10px;
+        padding-right: 10px;
+    }
+}
