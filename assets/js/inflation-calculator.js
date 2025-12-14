@@ -719,22 +719,22 @@ class InflationCalculator {
     }
 
     /**
-     * ✅ CORRIGÉ : Charger l'inflation sectorielle DYNAMIQUE depuis FRED
+     * ✅ CORRIGÉ v2 : Inflation sectorielle avec codes FRED VÉRIFIÉS
      */
     async loadSectoralInflationChart() {
         try {
-            console.log('📊 Fetching sectoral inflation data from FRED...');
+            console.log('📊 Fetching sectoral inflation data from FRED (verified codes)...');
             
-            // Séries FRED pour l'inflation sectorielle (CPI par catégorie)
+            // ✅ Codes FRED vérifiés et accessibles via API
             const sectorSeries = [
-                { code: 'CUSR0000SAH1', name: 'Housing (Shelter)', color: '#ef4444' },
-                { code: 'CUUR0000SAM', name: 'Medical Care', color: '#f59e0b' },
-                { code: 'CUSR0000SAE', name: 'Education', color: '#f97316' },
-                { code: 'CUSR0000SAF1', name: 'Food & Beverages', color: '#eab308' },
-                { code: 'CUSR0000SAT', name: 'Transportation', color: '#84cc16' },
+                { code: 'CUSR0000SAH', name: 'Housing', color: '#ef4444' },
+                { code: 'CUSR0000SAM', name: 'Medical Care', color: '#f59e0b' },
+                { code: 'CUSR0000SAF', name: 'Food & Beverages', color: '#eab308' },
+                { code: 'CUSR0000SAS', name: 'Transportation', color: '#84cc16' },
                 { code: 'CUSR0000SAR', name: 'Recreation', color: '#22c55e' },
                 { code: 'CUSR0000SAA', name: 'Apparel', color: '#10b981' },
-                { code: 'CUSR0000SAE2', name: 'Communication', color: '#3b82f6' }
+                { code: 'CUSR0000SAE', name: 'Education & Communication', color: '#3b82f6' },
+                { code: 'CUSR0000SAG', name: 'Other Goods & Services', color: '#8b5cf6' }
             ];
             
             // Récupérer les 13 derniers mois pour chaque série (pour calculer YoY)
@@ -761,6 +761,7 @@ class InflationCalculator {
                     const yearAgo = parseFloat(sector.data[12].value);
                     
                     if (isNaN(latest) || isNaN(yearAgo) || yearAgo === 0) {
+                        console.warn(`⚠ Invalid data for ${sector.name}`);
                         return null;
                     }
                     
@@ -776,6 +777,20 @@ class InflationCalculator {
             
             if (sectors.length === 0) {
                 console.error('❌ No sectoral inflation data available');
+                
+                // Afficher un message d'erreur dans le container
+                const container = document.getElementById('sectoralInflationChart');
+                if (container) {
+                    container.innerHTML = `
+                        <div style='display: flex; align-items: center; justify-content: center; height: 100%; color: var(--text-tertiary);'>
+                            <div style='text-align: center; padding: 40px;'>
+                                <i class='fas fa-exclamation-triangle' style='font-size: 3rem; margin-bottom: 16px; opacity: 0.3;'></i>
+                                <p style='font-size: 1.1rem; margin-bottom: 8px;'>Unable to load sectoral inflation data</p>
+                                <p style='font-size: 0.9rem; opacity: 0.7;'>FRED API may be temporarily unavailable for some series</p>
+                            </div>
+                        </div>
+                    `;
+                }
                 return;
             }
             
@@ -789,12 +804,15 @@ class InflationCalculator {
                 overallCPIRate = ((latestCPI - yearAgoCPI) / yearAgoCPI) * 100;
             }
             
+            // Trier les secteurs par taux d'inflation (décroissant)
+            sectors.sort((a, b) => b.value - a.value);
+            
             // Générer le graphique
             Highcharts.chart('sectoralInflationChart', {
                 chart: { 
                     type: 'bar', 
                     backgroundColor: 'transparent',
-                    height: 450
+                    height: Math.max(400, sectors.length * 60) // Hauteur dynamique
                 },
                 title: { 
                     text: 'Year-over-Year Inflation by Sector (Latest Data)',
@@ -809,7 +827,12 @@ class InflationCalculator {
                 },
                 xAxis: { 
                     categories: sectors.map(s => s.name),
-                    labels: { style: { color: 'var(--text-secondary)' } }
+                    labels: { 
+                        style: { 
+                            color: 'var(--text-secondary)',
+                            fontSize: '13px'
+                        }
+                    }
                 },
                 yAxis: { 
                     title: { 
@@ -833,13 +856,22 @@ class InflationCalculator {
                         dashStyle: 'Dash',
                         label: {
                             text: `Overall CPI: ${overallCPIRate.toFixed(1)}%`,
-                            style: { color: '#10b981', fontWeight: 'bold' }
-                        }
+                            align: 'right',
+                            style: { 
+                                color: '#10b981', 
+                                fontWeight: 'bold',
+                                fontSize: '12px'
+                            }
+                        },
+                        zIndex: 3
                     }]
                 },
                 tooltip: {
-                    valueDecimals: 1,
-                    valueSuffix: '%'
+                    valueDecimals: 2,
+                    valueSuffix: '%',
+                    backgroundColor: 'var(--glass-bg)',
+                    borderColor: 'var(--glass-border)',
+                    style: { color: 'var(--text-primary)' }
                 },
                 plotOptions: {
                     bar: {
@@ -848,7 +880,9 @@ class InflationCalculator {
                             format: '{y:.1f}%',
                             style: {
                                 fontWeight: 'bold',
-                                color: 'var(--text-primary)'
+                                color: 'var(--text-primary)',
+                                fontSize: '12px',
+                                textOutline: 'none'
                             }
                         },
                         colorByPoint: true
@@ -871,9 +905,10 @@ class InflationCalculator {
             if (container) {
                 container.innerHTML = `
                     <div style='display: flex; align-items: center; justify-content: center; height: 100%; color: var(--text-tertiary);'>
-                        <div style='text-align: center;'>
+                        <div style='text-align: center; padding: 40px;'>
                             <i class='fas fa-exclamation-triangle' style='font-size: 3rem; margin-bottom: 16px; opacity: 0.3;'></i>
-                            <p>Unable to load sectoral inflation data</p>
+                            <p style='font-size: 1.1rem; margin-bottom: 8px;'>Unable to load sectoral inflation data</p>
+                            <p style='font-size: 0.9rem; opacity: 0.7;'>Error: ${error.message}</p>
                         </div>
                     </div>
                 `;
