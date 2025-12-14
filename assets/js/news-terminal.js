@@ -42,25 +42,37 @@ class NewsTerminal {
         // ✨ Sélecteur de nombre d'articles
         const articleLimitSelect = document.getElementById('articleLimitSelect');
         if (articleLimitSelect) {
+            console.log('✅ Article limit select found');
             articleLimitSelect.addEventListener('change', (e) => {
                 const value = parseInt(e.target.value);
                 this.changeArticleLimit(value);
             });
+        } else {
+            console.warn('⚠ Article limit select NOT found');
         }
 
         // ✨ Toggle Auto-Load
         const autoLoadToggle = document.getElementById('autoLoadToggle');
         if (autoLoadToggle) {
+            console.log('✅ Auto-load toggle found');
             autoLoadToggle.addEventListener('change', (e) => {
                 this.autoLoadMore = e.target.checked;
                 console.log(`♾ Auto-load: ${this.autoLoadMore ? 'ON' : 'OFF'}`);
             });
+        } else {
+            console.warn('⚠ Auto-load toggle NOT found');
         }
 
-        // ✨ Bouton "Load All"
-        const loadAllBtn = document.getElementById('loadAllBtn');
-        if (loadAllBtn) {
-            loadAllBtn.addEventListener('click', () => this.loadMaxArticles());
+        // ✨ Bouton "Load MAX" - CRITIQUE!
+        const loadMaxBtn = document.getElementById('loadMaxBtn');
+        if (loadMaxBtn) {
+            console.log('✅ Load MAX button found!');
+            loadMaxBtn.addEventListener('click', () => {
+                console.log('🔥 Load MAX button clicked!');
+                this.loadMaxArticles();
+            });
+        } else {
+            console.error('❌❌❌ Load MAX button NOT FOUND! Check HTML ID!');
         }
     }
 
@@ -121,7 +133,10 @@ class NewsTerminal {
 
     // ✨ NOUVEAU : Charger le MAXIMUM d'articles (200 par source)
     async loadMaxArticles() {
+        console.log('🔥🔥🔥 LOAD MAX ARTICLES CLICKED!');
+        
         if (this.loadingInProgress) {
+            console.warn('⚠ Loading already in progress');
             this.showNotification('Loading already in progress...', 'warning');
             return;
         }
@@ -133,10 +148,14 @@ class NewsTerminal {
             `Continue?`
         );
 
-        if (!confirmation) return;
+        if (!confirmation) {
+            console.log('❌ User cancelled MAX load');
+            return;
+        }
 
         try {
             this.loadingInProgress = true;
+            console.log('🚀 Starting MAX articles load...');
             
             // Afficher un loader
             document.getElementById('articlesContainer').innerHTML = `
@@ -146,14 +165,17 @@ class NewsTerminal {
                         Loading MAXIMUM articles...
                     </p>
                     <p style='font-size: 14px; color: var(--text-secondary); margin-top: 8px;'>
-                        This may take 10-20 seconds...
+                        Fetching up to 200 articles per source...
                     </p>
                 </div>
             `;
             
-            console.log('🔥 LOADING MAX ARTICLES...');
+            console.log('📡 Calling rssClient.loadMaxArticles()...');
             
             const data = await this.rssClient.loadMaxArticles();
+            
+            console.log('✅ Data received:', data);
+            console.log('📊 Total articles:', data.articles.length);
             
             this.allArticles = data.articles;
             
@@ -166,10 +188,13 @@ class NewsTerminal {
             
         } catch (error) {
             console.error('❌ Error loading max articles:', error);
-            this.showNotification('Error loading articles. Please try again.', 'error');
+            console.error('Error details:', error.message);
+            console.error('Error stack:', error.stack);
+            this.showNotification('Error loading articles. Check console for details.', 'error');
             this.showError();
         } finally {
             this.loadingInProgress = false;
+            console.log('🏁 Load MAX completed (success or error)');
         }
     }
 

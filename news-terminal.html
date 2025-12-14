@@ -330,22 +330,25 @@
                             </select>
                         </div>
 
-                        <!-- ✨ Bouton Load All (OPTIONNEL) -->
+                        <!-- ✨ NOUVEAU : Bouton Load MAX -->
                         <div class='filter-group'>
-                            <label><i class='fas fa-download'></i> Load Mode</label>
-                            <button id='loadAllBtn' class='dashboard-btn' style='width: 100%; background: linear-gradient(135deg, #f59e0b, #d97706); font-weight: 700;'>
-                                <i class='fas fa-bolt'></i> Load MAX Articles
+                            <label><i class='fas fa-bolt'></i> Load Mode</label>
+                            <button id='loadMaxBtn' class='load-max-btn'>
+                                <i class='fas fa-download'></i>
+                                <span>Load MAX Articles</span>
                             </button>
                         </div>
 
-                        <!-- ✨ Toggle Auto-Load (OPTIONNEL) -->
-                        <div class='filter-group' style='display: flex; align-items: center; gap: 12px;'>
-                            <label style='margin: 0;'>
-                                <input type='checkbox' id='autoLoadToggle' style='width: 20px; height: 20px; cursor: pointer;'>
-                            </label>
-                            <span style='font-size: 14px; font-weight: 600;'>
-                                <i class='fas fa-infinity'></i> Auto-load on scroll
-                            </span>
+                        <!-- ✨ NOUVEAU : Toggle Auto-Load -->
+                        <div class='filter-group'>
+                            <label><i class='fas fa-infinity'></i> Auto-Load</label>
+                            <div class='auto-load-container'>
+                                <input type='checkbox' id='autoLoadToggle'>
+                                <label for='autoLoadToggle' class='auto-load-label'>
+                                    <i class='fas fa-arrows-alt-v'></i>
+                                    <span>Auto-load on scroll</span>
+                                </label>
+                            </div>
                         </div>
                     </div>
                 </div>
