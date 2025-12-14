@@ -11,6 +11,8 @@ class SECForm4Client {
         // URLs de base
         this.secBaseURL = 'https://www.sec.gov';
         this.edgarArchiveURL = 'https://www.sec.gov/cgi-bin/browse-edgar';
+        // ✅ CORS PROXY (pour test uniquement)
+        this.corsProxy = 'https://api.allorigins.win/raw?url=';
         this.workerURL = 'https://sec-edgar-api.raphnardone.workers.dev'; // Ton Worker
         
         // User-Agent obligatoire pour la SEC
@@ -349,20 +351,30 @@ class SECForm4Client {
     }
 
     async getCIKFromTicker(ticker) {
-        // Utilise le fichier company_tickers.json de la SEC
-        const tickersURL = 'https://www.sec.gov/files/company_tickers.json';
-        const response = await this.queueRequest(tickersURL);
-        const data = await response.json();
-        
-        const company = Object.values(data).find(
-            c => c.ticker.toUpperCase() === ticker.toUpperCase()
-        );
-        
-        if (!company) {
-            throw new Error(`CIK not found for ticker: ${ticker}`);
+        try {
+            const tickersURL = 'https://www.sec.gov/files/company_tickers.json';
+            
+            // ✅ Utilise le CORS proxy
+            const response = await fetch(
+                `${this.corsProxy}${encodeURIComponent(tickersURL)}`
+            );
+            
+            const data = await response.json();
+            
+            const company = Object.values(data).find(
+                c => c.ticker.toUpperCase() === ticker.toUpperCase()
+            );
+            
+            if (!company) {
+                throw new Error(`CIK not found for ticker: ${ticker}`);
+            }
+            
+            return company.cik_str.toString().padStart(10, '0');
+            
+        } catch (error) {
+            console.error(`❌ Error getting CIK for ${ticker}:`, error);
+            throw error;
         }
-        
-        return company.cik_str.toString().padStart(10, '0');
     }
 
     formatDate(date) {
