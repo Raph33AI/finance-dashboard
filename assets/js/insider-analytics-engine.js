@@ -933,12 +933,44 @@ class InsiderAnalyticsEngine {
 
     calculateSentimentTrend(transactions) {
         // Simplifié: compare première moitié vs deuxième moitié
+        if (!transactions || transactions.length < 4) {
+            return 'INSUFFICIENT_DATA';
+        }
+
         const mid = Math.floor(transactions.length / 2);
         const firstHalf = transactions.slice(0, mid);
         const secondHalf = transactions.slice(mid);
 
-        const firstSentiment = this.calculateInsiderSentiment(firstHalf).score;
-        const secondSentiment = this.calculateInsiderSentiment(secondHalf).score;
+        // ✅ CORRECTION : Calcul direct sans appeler calculateInsiderSentiment
+        const calculateSimpleSentiment = (txns) => {
+            let purchaseValue = 0;
+            let saleValue = 0;
+            let purchaseCount = 0;
+            let saleCount = 0;
+
+            txns.forEach(t => {
+                (t.nonDerivativeTransactions || []).forEach(nt => {
+                    if (nt.transactionType === 'Purchase') {
+                        purchaseValue += nt.totalValue || 0;
+                        purchaseCount++;
+                    } else if (nt.transactionType === 'Sale') {
+                        saleValue += nt.totalValue || 0;
+                        saleCount++;
+                    }
+                });
+            });
+
+            const totalValue = purchaseValue + saleValue;
+            const valueRatio = totalValue > 0 ? (purchaseValue - saleValue) / totalValue : 0;
+            
+            const totalCount = purchaseCount + saleCount;
+            const countRatio = totalCount > 0 ? (purchaseCount - saleCount) / totalCount : 0;
+            
+            return Math.round((valueRatio * 0.7 + countRatio * 0.3) * 100);
+        };
+
+        const firstSentiment = calculateSimpleSentiment(firstHalf);
+        const secondSentiment = calculateSimpleSentiment(secondHalf);
 
         if (secondSentiment > firstSentiment + 20) return 'IMPROVING';
         if (secondSentiment < firstSentiment - 20) return 'DETERIORATING';
