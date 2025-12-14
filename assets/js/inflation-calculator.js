@@ -21,14 +21,14 @@ class InflationCalculator {
         this.cpiMonthlyData = null;
         this.currentYear = new Date().getFullYear();
         
-        // Données historiques pour les prix iconiques (estimations basées sur CPI et recherche historique)
+        // ✅ CORRECTION : Prix iconiques avec valeurs 1980 (fixes) et calcul dynamique pour année actuelle via CPI
         this.iconicPrices = {
-            bigMac: { 1980: 1.60, 2024: 5.69, name: 'Big Mac' },
-            gasoline: { 1980: 1.19, 2024: 3.50, name: 'Gallon of Gas' },
-            rent: { 1980: 243, 2024: 1700, name: 'Average Rent (1BR)' },
-            movieTicket: { 1980: 2.69, 2024: 11.00, name: 'Movie Ticket' },
-            newCar: { 1980: 7200, 2024: 48000, name: 'New Car' },
-            stamp: { 1980: 0.15, 2024: 0.68, name: 'First-Class Stamp' }
+            bigMac: { 1980: 1.60, name: 'Big Mac', icon: '🍔' },
+            gasoline: { 1980: 1.19, name: 'Gallon of Gas', icon: '⛽' },
+            rent: { 1980: 243, name: 'Average Rent (1BR)', icon: '🏠' },
+            movieTicket: { 1980: 2.69, name: 'Movie Ticket', icon: '🎬' },
+            newCar: { 1980: 7200, name: 'New Car', icon: '🚗' },
+            stamp: { 1980: 0.15, name: 'First-Class Stamp', icon: '✉' }
         };
         
         // Assets de protection contre l'inflation
@@ -87,6 +87,9 @@ class InflationCalculator {
             
             // Load CPI data (monthly for maximum data availability)
             await this.loadCPIData();
+
+            // ✅ NOUVEAU : Calculer les prix iconiques actuels via CPI
+            this.calculateCurrentPrices();
             
             // Load all charts
             await this.loadHistoricalChart();
@@ -203,6 +206,36 @@ class InflationCalculator {
     }
 
     /**
+     * ✅ NOUVEAU : Calculer les prix iconiques actuels via CPI
+     */
+    calculateCurrentPrices() {
+        if (!this.cpiData || this.cpiData.length === 0) {
+            console.error('❌ Cannot calculate current prices: CPI data not loaded');
+            return;
+        }
+        
+        // Trouver le CPI de 1980 et de l'année actuelle
+        const cpi1980 = this.cpiData.find(d => d.year === 1980);
+        const cpiCurrent = this.cpiData[this.cpiData.length - 1]; // Dernière année disponible
+        
+        if (!cpi1980 || !cpiCurrent) {
+            console.error('❌ CPI data for 1980 or current year not found');
+            return;
+        }
+        
+        const inflationMultiplier = cpiCurrent.cpi / cpi1980.cpi;
+        
+        // Calculer les prix actuels dynamiquement
+        Object.keys(this.iconicPrices).forEach(key => {
+            const price1980 = this.iconicPrices[key][1980];
+            this.iconicPrices[key].current = price1980 * inflationMultiplier;
+            this.iconicPrices[key].currentYear = cpiCurrent.year;
+        });
+        
+        console.log(`✅ Iconic prices calculated for ${cpiCurrent.year} (CPI multiplier: ${inflationMultiplier.toFixed(2)}x)`);
+    }
+
+    /**
      * Calculer le pouvoir d'achat
      */
     calculate() {
@@ -276,21 +309,17 @@ class InflationCalculator {
         resultDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     }
 
-    /**
-     * Générer les projections d'inflation (3 scénarios)
-     */
     generateProjections() {
         if (!this.cpiData || this.cpiData.length === 0) return;
         
         // Calculer les taux historiques des 10 dernières années
-        const recentData = this.cpiData.slice(-11); // 11 ans pour avoir 10 YoY
+        const recentData = this.cpiData.slice(-11);
         const recentRates = [];
         for (let i = 1; i < recentData.length; i++) {
             const rate = ((recentData[i].cpi - recentData[i-1].cpi) / recentData[i-1].cpi) * 100;
             recentRates.push(rate);
         }
         
-        // Calculer les statistiques
         const avgRate = recentRates.reduce((sum, r) => sum + r, 0) / recentRates.length;
         const sortedRates = [...recentRates].sort((a, b) => a - b);
         const percentile25 = sortedRates[Math.floor(sortedRates.length * 0.25)];
@@ -318,39 +347,8 @@ class InflationCalculator {
             }
         ];
         
-        // Peupler les cards de scénarios
-        const scenariosContainer = document.getElementById('projectionScenarios');
-        scenariosContainer.innerHTML = '';
-        
-        scenarios.forEach(scenario => {
-            const impactIn10Years = Math.pow(1 + scenario.rate / 100, 10);
-            const purchasingPowerOf100 = 100 / impactIn10Years;
-            
-            const card = `
-                <div class='scenario-card ${scenario.class}'>
-                    <div class='scenario-header'>
-                        <div class='scenario-icon'><i class="fas fa-chart-line"></i></div>
-                        <div class='scenario-title'>${scenario.name}</div>
-                    </div>
-                    <div class='scenario-rate'>${scenario.rate.toFixed(2)}%</div>
-                    <div class='scenario-description'>${scenario.description}</div>
-                    <div class='scenario-impact'>
-                        <div class='scenario-impact-item'>
-                            <span class='scenario-impact-label'>$100 in 10 years:</span>
-                            <span class='scenario-impact-value'>$${purchasingPowerOf100.toFixed(2)}</span>
-                        </div>
-                        <div class='scenario-impact-item'>
-                            <span class='scenario-impact-label'>Total erosion:</span>
-                            <span class='scenario-impact-value'>${((1 - purchasingPowerOf100 / 100) * 100).toFixed(1)}%</span>
-                        </div>
-                    </div>
-                </div>
-            `;
-            scenariosContainer.innerHTML += card;
-        });
-        
-        // Générer le graphique de projections
-        this.loadProjectionChart(scenarios);
+        // ✅ NOUVEAU : Stocker les scénarios dans la classe pour réutilisation
+        this.projectionScenarios = scenarios;
     }
 
     /**
@@ -453,46 +451,17 @@ class InflationCalculator {
             return;
         }
         
-        // Utiliser le scénario de base pour l'inflation projetée
-        const projectedInflation = 2.3; // Scénario de base moyen
-        
-        // Calculer le salaire futur (nominal)
-        const futureSalaryNominal = currentSalary * Math.pow(1 + annualRaise / 100, yearsForward);
-        
-        // Calculer le pouvoir d'achat réel
-        const inflationFactor = Math.pow(1 + projectedInflation / 100, yearsForward);
-        const realPurchasingPower = futureSalaryNominal / inflationFactor;
-        
-        // Calculer le gain/perte réel
-        const realChange = realPurchasingPower - currentSalary;
-        const realChangePercent = (realChange / currentSalary) * 100;
-        
-        // Calculer la hausse nécessaire pour égaler l'inflation
-        const neededRaise = projectedInflation;
-        
-        // Afficher les résultats
-        const resultsDiv = document.getElementById('salaryResults');
-        resultsDiv.style.display = 'flex';
-        
-        document.getElementById('futureSalaryNominal').textContent = 
-            `$${futureSalaryNominal.toLocaleString('en-US', { maximumFractionDigits: 0 })}`;
-        document.getElementById('futureSalarySubtext').textContent = 
-            `In ${yearsForward} years with ${annualRaise}% annual raises`;
-        
-        document.getElementById('realPurchasingPower').textContent = 
-            `$${realPurchasingPower.toLocaleString('en-US', { maximumFractionDigits: 0 })}`;
-        
-        const changeText = realChange >= 0 
-            ? `+$${realChange.toLocaleString('en-US', { maximumFractionDigits: 0 })} (${realChangePercent > 0 ? '+' : ''}${realChangePercent.toFixed(1)}%)`
-            : `-$${Math.abs(realChange).toLocaleString('en-US', { maximumFractionDigits: 0 })} (${realChangePercent.toFixed(1)}%)`;
-        
-        document.getElementById('purchasingPowerChange').textContent = changeText;
-        document.getElementById('purchasingPowerChange').style.color = realChange >= 0 ? 'var(--eco-success)' : 'var(--eco-danger)';
-        
-        document.getElementById('inflationGap').textContent = `${neededRaise.toFixed(2)}%`;
-        
-        // Scroll vers les résultats
-        resultsDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        // ✅ CORRIGÉ : Utiliser le scénario de base DYNAMIQUE
+        let projectedInflation = 2.3; // Valeur par défaut si scénarios pas encore calculés
+        if (this.projectionScenarios && this.projectionScenarios.length > 0) {
+            const baseScenario = this.projectionScenarios.find(s => s.name === 'Base');
+            if (baseScenario) {
+                projectedInflation = baseScenario.rate;
+                console.log(`✅ Using dynamic Base scenario inflation: ${projectedInflation.toFixed(2)}%`);
+            }
+        } else {
+            console.warn('⚠ Projection scenarios not available, using default 2.3%');
+        }
     }
 
     /**
@@ -750,22 +719,77 @@ class InflationCalculator {
     }
 
     /**
-     * Charger le graphique d'inflation sectorielle
+     * ✅ CORRIGÉ : Charger l'inflation sectorielle DYNAMIQUE depuis FRED
      */
     async loadSectoralInflationChart() {
         try {
-            // Données estimées (basées sur des moyennes historiques réelles)
-            const sectors = [
-                { name: 'Housing (Shelter)', value: 5.2, color: '#ef4444' },
-                { name: 'Medical Care', value: 4.8, color: '#f59e0b' },
-                { name: 'Education', value: 4.5, color: '#f97316' },
-                { name: 'Food & Beverages', value: 3.1, color: '#eab308' },
-                { name: 'Transportation', value: 2.9, color: '#84cc16' },
-                { name: 'Recreation', value: 2.2, color: '#22c55e' },
-                { name: 'Apparel', value: 1.1, color: '#10b981' },
-                { name: 'Communication', value: -0.5, color: '#3b82f6' }
+            console.log('📊 Fetching sectoral inflation data from FRED...');
+            
+            // Séries FRED pour l'inflation sectorielle (CPI par catégorie)
+            const sectorSeries = [
+                { code: 'CUSR0000SAH1', name: 'Housing (Shelter)', color: '#ef4444' },
+                { code: 'CUUR0000SAM', name: 'Medical Care', color: '#f59e0b' },
+                { code: 'CUSR0000SAE', name: 'Education', color: '#f97316' },
+                { code: 'CUSR0000SAF1', name: 'Food & Beverages', color: '#eab308' },
+                { code: 'CUSR0000SAT', name: 'Transportation', color: '#84cc16' },
+                { code: 'CUSR0000SAR', name: 'Recreation', color: '#22c55e' },
+                { code: 'CUSR0000SAA', name: 'Apparel', color: '#10b981' },
+                { code: 'CUSR0000SAE2', name: 'Communication', color: '#3b82f6' }
             ];
             
+            // Récupérer les 13 derniers mois pour chaque série (pour calculer YoY)
+            const sectorDataPromises = sectorSeries.map(sector =>
+                economicDataClient.getSeries(sector.code, { 
+                    limit: 13, 
+                    sort_order: 'desc' 
+                }).then(data => ({
+                    ...sector,
+                    data: data
+                })).catch(err => {
+                    console.warn(`⚠ Failed to fetch ${sector.name} (${sector.code}):`, err);
+                    return { ...sector, data: null };
+                })
+            );
+            
+            const sectorResults = await Promise.all(sectorDataPromises);
+            
+            // Calculer le taux YoY pour chaque secteur
+            const sectors = sectorResults
+                .filter(sector => sector.data && sector.data.length >= 13)
+                .map(sector => {
+                    const latest = parseFloat(sector.data[0].value);
+                    const yearAgo = parseFloat(sector.data[12].value);
+                    
+                    if (isNaN(latest) || isNaN(yearAgo) || yearAgo === 0) {
+                        return null;
+                    }
+                    
+                    const yoyRate = ((latest - yearAgo) / yearAgo) * 100;
+                    
+                    return {
+                        name: sector.name,
+                        value: yoyRate,
+                        color: sector.color
+                    };
+                })
+                .filter(s => s !== null);
+            
+            if (sectors.length === 0) {
+                console.error('❌ No sectoral inflation data available');
+                return;
+            }
+            
+            console.log(`✅ Loaded ${sectors.length} sectoral inflation rates`);
+            
+            // Calculer la moyenne globale CPI pour la ligne de référence
+            let overallCPIRate = 2.0; // Valeur par défaut
+            if (this.cpiMonthlyData && this.cpiMonthlyData.length >= 13) {
+                const latestCPI = this.cpiMonthlyData[this.cpiMonthlyData.length - 1].cpi;
+                const yearAgoCPI = this.cpiMonthlyData[this.cpiMonthlyData.length - 13].cpi;
+                overallCPIRate = ((latestCPI - yearAgoCPI) / yearAgoCPI) * 100;
+            }
+            
+            // Générer le graphique
             Highcharts.chart('sectoralInflationChart', {
                 chart: { 
                     type: 'bar', 
@@ -773,7 +797,7 @@ class InflationCalculator {
                     height: 450
                 },
                 title: { 
-                    text: 'Average Annual Inflation by Sector (Last 10 Years)',
+                    text: 'Year-over-Year Inflation by Sector (Latest Data)',
                     style: { 
                         color: 'var(--text-primary)',
                         fontWeight: '800'
@@ -789,7 +813,7 @@ class InflationCalculator {
                 },
                 yAxis: { 
                     title: { 
-                        text: 'Average Annual Inflation (%)',
+                        text: 'YoY Inflation Rate (%)',
                         style: { color: 'var(--text-secondary)' }
                     },
                     labels: { 
@@ -803,12 +827,12 @@ class InflationCalculator {
                         width: 2,
                         zIndex: 4
                     }, {
-                        value: 2,
+                        value: overallCPIRate,
                         color: '#10b981',
                         width: 2,
                         dashStyle: 'Dash',
                         label: {
-                            text: 'Overall CPI Average',
+                            text: `Overall CPI: ${overallCPIRate.toFixed(1)}%`,
                             style: { color: '#10b981', fontWeight: 'bold' }
                         }
                     }]
@@ -821,7 +845,7 @@ class InflationCalculator {
                     bar: {
                         dataLabels: {
                             enabled: true,
-                            format: '{y}%',
+                            format: '{y:.1f}%',
                             style: {
                                 fontWeight: 'bold',
                                 color: 'var(--text-primary)'
@@ -841,6 +865,19 @@ class InflationCalculator {
             
         } catch (error) {
             console.error('❌ Error loading sectoral inflation chart:', error);
+            
+            // Afficher un message d'erreur dans le container
+            const container = document.getElementById('sectoralInflationChart');
+            if (container) {
+                container.innerHTML = `
+                    <div style='display: flex; align-items: center; justify-content: center; height: 100%; color: var(--text-tertiary);'>
+                        <div style='text-align: center;'>
+                            <i class='fas fa-exclamation-triangle' style='font-size: 3rem; margin-bottom: 16px; opacity: 0.3;'></i>
+                            <p>Unable to load sectoral inflation data</p>
+                        </div>
+                    </div>
+                `;
+            }
         }
     }
 
@@ -951,27 +988,37 @@ class InflationCalculator {
     }
 
     /**
-     * Peupler les prix iconiques
+     * ✅ CORRIGÉ : Peupler les prix iconiques avec calcul dynamique
      */
     populateIconicPrices() {
         const container = document.getElementById('iconicPricesGrid');
         container.innerHTML = '';
         
         Object.values(this.iconicPrices).forEach(item => {
-            const increase = ((item[2024] - item[1980]) / item[1980]) * 100;
+            // Vérifier que le calcul dynamique a été effectué
+            if (!item.current || !item.currentYear) {
+                console.warn(`⚠ Current price not calculated for ${item.name}`);
+                return;
+            }
+            
+            const price1980 = item[1980];
+            const priceCurrent = item.current;
+            const currentYear = item.currentYear;
+            
+            const increase = ((priceCurrent - price1980) / price1980) * 100;
             
             const card = `
                 <div class='price-card'>
-                    <div class='price-icon'>${item.name.substring(0, 1)}</div>
+                    <div class='price-icon'>${item.icon || item.name.substring(0, 1)}</div>
                     <div class='price-title'>${item.name}</div>
                     <div class='price-comparison'>
                         <div class='price-year'>
                             <div class='price-year-label'>1980</div>
-                            <div class='price-year-value'>$${item[1980].toFixed(2)}</div>
+                            <div class='price-year-value'>$${price1980.toFixed(2)}</div>
                         </div>
                         <div class='price-year'>
-                            <div class='price-year-label'>2024</div>
-                            <div class='price-year-value'>$${item[2024].toFixed(2)}</div>
+                            <div class='price-year-label'>${currentYear}</div>
+                            <div class='price-year-value'>$${priceCurrent.toFixed(2)}</div>
                         </div>
                     </div>
                     <div class='price-change increase'>
