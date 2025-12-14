@@ -667,107 +667,158 @@ body.dark-mode {
 }
 
 /* ========================================
-   ICONIC PRICES GRID
+   ICONIC PRICES - GRILLE CORRIGÉE
    ======================================== */
-.iconic-prices-grid {
+
+.iconic-prices-grid,
+#iconicPricesGrid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); /* ✅ AUGMENTÉ de 280px à 320px */
     gap: 24px;
+    margin-top: 24px;
 }
 
 .price-card {
     background: var(--glass-bg);
     backdrop-filter: blur(20px) saturate(180%);
-    border-radius: var(--border-radius-lg);
-    padding: 28px;
-    border: 2px solid var(--glass-border);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--border-radius);
+    padding: 28px 24px; /* ✅ AJUSTÉ : moins de padding horizontal */
     box-shadow: var(--glass-shadow);
     transition: var(--transition-smooth);
-    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 300px; /* ✅ AJOUT : largeur minimale garantie */
 }
 
 .price-card:hover {
-    transform: translateY(-8px) scale(1.03);
-    box-shadow: 0 16px 48px rgba(102, 126, 234, 0.3);
-    border-color: var(--eco-primary);
+    transform: translateY(-4px);
+    box-shadow: 0 12px 36px rgba(102, 126, 234, 0.3);
 }
 
 .price-icon {
-    font-size: 3.5rem;
+    font-size: 3.5rem; /* ✅ RÉDUIT de 4rem à 3.5rem */
     margin-bottom: 16px;
-    background: var(--eco-gradient);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    font-weight: 900;
 }
 
 .price-title {
-    font-size: 1.1rem;
+    font-size: 1.3rem; /* ✅ RÉDUIT de 1.5rem à 1.3rem */
     font-weight: 800;
-    margin-bottom: 20px;
     background: var(--eco-gradient);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
+    margin-bottom: 8px;
+    text-align: center;
 }
 
+.price-sector {
+    font-size: 0.85rem;
+    color: var(--text-tertiary);
+    font-weight: 600;
+    margin-bottom: 20px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* ✅ CORRECTION PRINCIPALE : Alignement et espacement */
 .price-comparison {
     display: flex;
-    align-items: center; /* ✅ AJOUT : Aligne verticalement au centre */
+    align-items: center; /* Aligne verticalement */
     justify-content: space-between;
-    gap: 16px;
+    gap: 12px; /* ✅ RÉDUIT de 16px à 12px */
     margin: 20px 0;
+    width: 100%; /* ✅ AJOUT : utilise toute la largeur */
 }
 
 .price-year {
     flex: 1;
     background: var(--eco-gradient-soft);
-    padding: 16px;
+    padding: 14px 10px; /* ✅ AJUSTÉ : padding réduit horizontalement */
     border-radius: 12px;
     text-align: center;
-    min-height: 85px; /* ✅ AJOUT : Hauteur minimale identique */
-    display: flex; /* ✅ AJOUT */
-    flex-direction: column; /* ✅ AJOUT */
-    justify-content: center; /* ✅ AJOUT : Centre le contenu verticalement */
+    min-height: 90px; /* ✅ AUGMENTÉ de 85px à 90px */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
 }
 
 .price-arrow {
-    font-size: 1.5rem;
+    font-size: 1.3rem; /* ✅ RÉDUIT de 1.5rem à 1.3rem */
     font-weight: 800;
     color: var(--eco-primary);
     flex-shrink: 0;
-    align-self: center; /* ✅ AJOUT : Force la flèche au centre */
+    align-self: center;
+    margin: 0 4px; /* ✅ AJOUT : espacement latéral réduit */
 }
 
 .price-year-label {
-    font-size: 0.8rem;
+    font-size: 0.75rem; /* ✅ RÉDUIT de 0.8rem à 0.75rem */
     font-weight: 700;
     color: var(--text-tertiary);
     text-transform: uppercase;
-    margin-bottom: 8px;
+    margin-bottom: 6px; /* ✅ RÉDUIT de 8px à 6px */
     letter-spacing: 0.5px;
 }
 
 .price-year-value {
-    font-size: 1.8rem;
+    font-size: 1.6rem; /* ✅ RÉDUIT de 1.8rem à 1.6rem */
     font-weight: 900;
     background: var(--eco-gradient);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
+    line-height: 1.2;
+    word-break: break-word; /* ✅ AJOUT : évite le débordement */
 }
 
 .price-change {
-    margin-top: 16px;
-    padding-top: 16px;
-    border-top: 1px solid var(--glass-border);
-    font-size: 0.9rem;
+    font-size: 0.95rem; /* ✅ RÉDUIT de 1rem */
     font-weight: 700;
+    padding: 10px 16px;
+    border-radius: 10px;
+    text-align: center;
+    margin-top: 12px;
 }
 
 .price-change.increase {
+    background: rgba(239, 68, 68, 0.1);
     color: var(--eco-danger);
+}
+
+/* ✅ RESPONSIVE : Adapter sur mobile */
+@media (max-width: 768px) {
+    .iconic-prices-grid,
+    #iconicPricesGrid {
+        grid-template-columns: 1fr; /* 1 colonne sur mobile */
+    }
+    
+    .price-card {
+        min-width: unset; /* Pas de largeur min sur mobile */
+    }
+    
+    .price-year-value {
+        font-size: 1.4rem; /* Plus petit sur mobile */
+    }
+}
+
+@media (max-width: 480px) {
+    .price-comparison {
+        gap: 8px; /* Gap encore plus réduit sur très petit écran */
+    }
+    
+    .price-arrow {
+        font-size: 1.1rem;
+    }
+    
+    .price-year {
+        padding: 12px 8px;
+    }
+    
+    .price-year-value {
+        font-size: 1.3rem;
+    }
 }
 
 /* ========================================
