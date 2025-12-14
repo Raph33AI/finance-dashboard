@@ -14,10 +14,8 @@ class TrendingTopicsDashboard {
         this.trendingTopics = [];
         this.fearGreedData = null;
         this.risksOpportunities = null;
-        this.watchlistArticles = [];
         
         this.charts = {};
-        this.currentWatchlistFilter = 'all';
         
         this.init();
     }
@@ -34,7 +32,6 @@ class TrendingTopicsDashboard {
         this.showLoadingState();
         
         await this.loadData();
-        await this.loadWatchlist();
         
         this.hideLoadingState();
         
@@ -299,99 +296,6 @@ class TrendingTopicsDashboard {
 
     /**
      * ═══════════════════════════════════════════════════════════
-     * WATCHLIST (FIREBASE INTEGRATION - CORRIGÉE)
-     * ═══════════════════════════════════════════════════════════
-     */
-
-    async loadWatchlist() {
-        console.log('📌 Loading watchlist from Firebase...');
-        
-        try {
-            // ✅ CORRECTION: Vérifier si Firebase est disponible
-            if (typeof firebase === 'undefined') {
-                console.log('⚠ Firebase not available');
-                this.watchlistArticles = [];
-                return;
-            }
-            
-            const currentUser = firebase.auth().currentUser;
-            
-            if (!currentUser) {
-                console.log('⚠ User not logged in');
-                this.watchlistArticles = [];
-                return;
-            }
-            
-            const userId = currentUser.uid;
-            const db = firebase.firestore();
-            
-            console.log('📥 Fetching watchlist for user:', userId);
-            
-            // ✅ CORRECTION: Utiliser la structure users/{userId}/history (sous-collection)
-            // Cette collection existe déjà dans votre firestore-rss-manager.js
-            const snapshot = await db.collection('users')
-                .doc(userId)
-                .collection('history')
-                .limit(50)
-                .get();
-            
-            this.watchlistArticles = snapshot.docs.map(doc => {
-                const data = doc.data();
-                return {
-                    id: doc.id,
-                    title: data.title || data.articleTitle,
-                    link: data.link || data.articleLink,
-                    sourceName: data.sourceName || data.source,
-                    timestamp: data.viewedAt ? data.viewedAt.toMillis() : Date.now(),
-                    savedAt: data.viewedAt ? data.viewedAt.toMillis() : Date.now()
-                };
-            });
-            
-            // Trier localement par timestamp (plus récent en premier)
-            this.watchlistArticles.sort((a, b) => b.timestamp - a.timestamp);
-            
-            console.log(`✅ Loaded ${this.watchlistArticles.length} watchlist items`);
-            
-        } catch (error) {
-            console.error('❌ Error loading watchlist:', error);
-            console.error('Error details:', error.message);
-            this.watchlistArticles = [];
-        }
-    }
-
-    async removeFromWatchlist(articleId) {
-        try {
-            if (typeof firebase === 'undefined' || !firebase.auth().currentUser) {
-                alert('You must be logged in to manage watchlist');
-                return;
-            }
-            
-            const userId = firebase.auth().currentUser.uid;
-            const db = firebase.firestore();
-            
-            // ✅ CORRECTION: Utiliser la structure users/{userId}/history
-            await db.collection('users')
-                .doc(userId)
-                .collection('history')
-                .doc(articleId)
-                .delete();
-            
-            console.log('✅ Article removed from watchlist');
-            
-            // Recharger la watchlist
-            await this.loadWatchlist();
-            this.renderWatchlist();
-            
-            this.showNotification('Article removed from watchlist', 'success');
-            
-        } catch (error) {
-            console.error('❌ Error removing from watchlist:', error);
-            this.showNotification('Error removing article', 'error');
-        }
-    }
-
-    /**
-     * ═══════════════════════════════════════════════════════════
      * RENDU DU DASHBOARD
      * ═══════════════════════════════════════════════════════════
      */
@@ -402,7 +306,6 @@ class TrendingTopicsDashboard {
         this.renderTrendingTopics();
         this.renderFearGreedIndex();
         this.renderRisksOpportunities();
-        this.renderWatchlist();
         
         console.log('✅ Dashboard rendered successfully!');
     }
@@ -825,79 +728,6 @@ class TrendingTopicsDashboard {
 
     /**
      * ═══════════════════════════════════════════════════════════
-     * 4. WATCHLIST
-     * ═══════════════════════════════════════════════════════════
-     */
-    
-    filterWatchlist(filter) {
-        this.currentWatchlistFilter = filter;
-        
-        // Mettre à jour les boutons
-        document.querySelectorAll('.watchlist-filter-btn').forEach(btn => {
-            btn.classList.toggle('active', btn.dataset.filter === filter);
-        });
-        
-        this.renderWatchlist();
-    }
-
-    renderWatchlist() {
-        const container = document.getElementById('watchlistGrid');
-        if (!container) return;
-        
-        container.innerHTML = '';
-        
-        let filteredArticles = this.watchlistArticles;
-        
-        if (filteredArticles.length === 0) {
-            container.innerHTML = `
-                <div class='watchlist-empty'>
-                    <i class='fas fa-star'></i>
-                    <div class='watchlist-empty-title'>Your watchlist is empty</div>
-                    <div class='watchlist-empty-text'>Save articles from the News Terminal to track them here</div>
-                </div>
-            `;
-            return;
-        }
-        
-        filteredArticles.forEach(article => {
-            const item = this.createWatchlistItem(article);
-            container.appendChild(item);
-        });
-    }
-
-    createWatchlistItem(article) {
-        const item = document.createElement('div');
-        item.className = 'watchlist-item';
-        
-        const timeAgo = this.getTimeAgo(article.savedAt || article.timestamp);
-        
-        item.innerHTML = `
-            <div class='watchlist-item-header'>
-                <div class='watchlist-item-title'>${article.title}</div>
-                <div class='watchlist-item-actions'>
-                    <button class='watchlist-action-btn' onclick='window.open("${article.link}", "_blank")' title='Open article'>
-                        <i class='fas fa-external-link-alt'></i>
-                    </button>
-                    <button class='watchlist-action-btn' onclick='trendingDashboard.removeFromWatchlist("${article.id}")' title='Remove'>
-                        <i class='fas fa-trash'></i>
-                    </button>
-                </div>
-            </div>
-            <div class='watchlist-item-meta'>
-                <span class='watchlist-item-source'>
-                    <i class='fas fa-rss'></i> ${article.sourceName || 'Unknown'}
-                </span>
-                <span class='watchlist-item-time'>
-                    <i class='fas fa-clock'></i> ${timeAgo}
-                </span>
-            </div>
-        `;
-        
-        return item;
-    }
-
-    /**
-     * ═══════════════════════════════════════════════════════════
      * UTILITAIRES
      * ═══════════════════════════════════════════════════════════
      */
@@ -939,7 +769,6 @@ class TrendingTopicsDashboard {
         
         this.rssClient.clearCache();
         await this.loadData();
-        await this.loadWatchlist();
         
         this.hideLoadingState();
         
