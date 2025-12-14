@@ -283,6 +283,8 @@ class InsiderFlowTracker {
         const allTransactions = [];
         
         console.log(`🔄 Parsing ALL ${filings.length} Form 4 XML filings...`);
+        console.log('📦 STRUCTURE DU PREMIER FILING:', JSON.stringify(filings[0], null, 2));
+    console.log('🔑 CLÉS DISPONIBLES:', Object.keys(filings[0]));
         
         for (let i = 0; i < filings.length; i++) {
             const filing = filings[i];
